@@ -12,7 +12,7 @@ const Avatar = React.forwardRef<HTMLDivElement, React.HTMLAttributes<HTMLDivElem
 Avatar.displayName = "Avatar";
 
 const AvatarImage = React.forwardRef<HTMLImageElement, React.ImgHTMLAttributes<HTMLImageElement>>(
-  ({ className, src, alt, ...props }, ref) => {
+  ({ className, src, alt, width: _width, height: _height, ...props }, ref) => {
     if (src) {
       return (
         <img

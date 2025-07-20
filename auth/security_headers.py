@@ -1,5 +1,5 @@
 """
-Unified Security Headers Management for FreeAgentics
+Unified Security Headers Management for FreeAgentics.
 
 Implements comprehensive security headers and SSL/TLS configuration
 following OWASP security guidelines and Task #14.5 requirements.
@@ -49,7 +49,9 @@ class SecurityPolicy:
     permissions_policy: Optional[str] = None
 
     # Cache Control
-    cache_control_default: str = "no-store, no-cache, must-revalidate, proxy-revalidate"
+    cache_control_default: str = (
+        "no-store, no-cache, must-revalidate, proxy-revalidate"
+    )
     cache_control_static: str = "public, max-age=31536000, immutable"
     cache_control_sensitive: str = (
         "no-store, no-cache, must-revalidate, proxy-revalidate, max-age=0"
@@ -72,10 +74,11 @@ class SecurityPolicy:
 
     # Environment Detection
     production_mode: bool = field(
-        default_factory=lambda: os.getenv("PRODUCTION", "false").lower() == "true"
+        default_factory=lambda: os.getenv("PRODUCTION", "false").lower()
+        == "true"
     )
 
-    def __post_init__(self):
+    def __post_init__(self) -> None:
         """Initialize policy based on environment."""
         if self.production_mode:
             self.hsts_preload = True
@@ -90,7 +93,8 @@ class SecurityPolicy:
 class CertificatePinner:
     """Legacy certificate pinning implementation for backward compatibility."""
 
-    def __init__(self):
+    def __init__(self) -> None:
+        """Initialize legacy certificate pinning."""
         # Use the enhanced mobile certificate pinner
         from auth.certificate_pinning import mobile_cert_pinner
 
@@ -101,7 +105,7 @@ class CertificatePinner:
         self.max_age = 5184000  # 60 days
         self.include_subdomains = True
 
-    def add_pin(self, domain: str, pin_sha256: str):
+    def add_pin(self, domain: str, pin_sha256: str) -> None:
         """Add a certificate pin for a domain."""
         if domain not in self.pins:
             self.pins[domain] = []
@@ -115,7 +119,7 @@ class CertificatePinner:
 
         logger.info(f"Added certificate pin for domain: {domain}")
 
-    def add_backup_pin(self, domain: str, backup_sha256: str):
+    def add_backup_pin(self, domain: str, backup_sha256: str) -> None:
         """Add a backup certificate pin for a domain."""
         if domain not in self.backup_pins:
             self.backup_pins[domain] = []
@@ -150,7 +154,7 @@ class CertificatePinner:
 
         return "; ".join(header_parts)
 
-    def load_pins_from_env(self):
+    def load_pins_from_env(self) -> None:
         """Load certificate pins from environment variables."""
         # The mobile pinner loads from environment automatically
         # Keep this for backward compatibility
@@ -173,13 +177,16 @@ class CertificatePinner:
                     domain, pin = pin_config.strip().split(":")
                     self.add_backup_pin(domain, pin)
                 except ValueError:
-                    logger.warning(f"Invalid backup pin configuration: {pin_config}")
+                    logger.warning(
+                        f"Invalid backup pin configuration: {pin_config}"
+                    )
 
 
 class SecurityHeadersManager:
     """Centralized security headers management."""
 
     def __init__(self, policy: Optional[SecurityPolicy] = None):
+        """Initialize security headers manager."""
         self.policy = policy or SecurityPolicy()
         self.certificate_pinner = CertificatePinner()
         self.certificate_pinner.load_pins_from_env()
@@ -187,7 +194,7 @@ class SecurityHeadersManager:
         # Load customizations from environment
         self._load_env_customizations()
 
-    def _load_env_customizations(self):
+    def _load_env_customizations(self) -> None:
         """Load security policy customizations from environment variables."""
         # HSTS customizations
         if hsts_max_age := os.getenv("HSTS_MAX_AGE"):
@@ -208,7 +215,9 @@ class SecurityHeadersManager:
             try:
                 self.policy.expect_ct_max_age = int(expect_ct_max_age)
             except ValueError:
-                logger.warning(f"Invalid EXPECT_CT_MAX_AGE value: {expect_ct_max_age}")
+                logger.warning(
+                    f"Invalid EXPECT_CT_MAX_AGE value: {expect_ct_max_age}"
+                )
 
     def generate_hsts_header(self) -> str:
         """Generate Strict-Transport-Security header."""
@@ -233,7 +242,8 @@ class SecurityHeadersManager:
             # Default comprehensive CSP with nonce support
             csp_directives = [
                 "default-src 'self'",
-                "script-src 'self'" + (f" 'nonce-{nonce}'" if nonce else " 'strict-dynamic'"),
+                "script-src 'self'"
+                + (f" 'nonce-{nonce}'" if nonce else " 'strict-dynamic'"),
                 "style-src 'self'"
                 + (f" 'nonce-{nonce}'" if nonce else " 'unsafe-inline'")
                 + " https://fonts.googleapis.com",
@@ -278,7 +288,9 @@ class SecurityHeadersManager:
             header_parts.append("enforce")
 
         if self.policy.expect_ct_report_uri:
-            header_parts.append(f'report-uri="{self.policy.expect_ct_report_uri}"')
+            header_parts.append(
+                f'report-uri="{self.policy.expect_ct_report_uri}"'
+            )
 
         return ", ".join(header_parts)
 
@@ -313,7 +325,8 @@ class SecurityHeadersManager:
     def get_secure_cookie_config(self) -> Dict[str, Any]:
         """Get secure cookie configuration."""
         return {
-            "secure": self.policy.secure_cookies and self.policy.production_mode,
+            "secure": self.policy.secure_cookies
+            and self.policy.production_mode,
             "httponly": self.policy.httponly_cookies,
             "samesite": self.policy.samesite_cookies,
         }
@@ -323,7 +336,9 @@ class SecurityHeadersManager:
         websocket_patterns = ["/ws/", "/websocket/", "/socket.io/"]
         return any(pattern in path for pattern in websocket_patterns)
 
-    def get_security_headers(self, request: Request, response: Response) -> Dict[str, str]:
+    def get_security_headers(
+        self, request: Request, response: Response
+    ) -> Dict[str, str]:
         """Get all security headers for a request/response."""
         headers = {}
 
@@ -375,7 +390,9 @@ class SecurityHeadersManager:
             # Use enhanced mobile certificate pinner
             from auth.certificate_pinning import mobile_cert_pinner
 
-            if pin_header := mobile_cert_pinner.get_pinning_header(host, user_agent):
+            if pin_header := mobile_cert_pinner.get_pinning_header(
+                host, user_agent
+            ):
                 headers["Public-Key-Pins"] = pin_header
 
             # Fallback to legacy pinner
@@ -384,7 +401,10 @@ class SecurityHeadersManager:
 
         # Cache control based on endpoint type
         path = request.url.path
-        if any(sensitive in path for sensitive in ["/auth/", "/api/", "/admin/", "/user/"]):
+        if any(
+            sensitive in path
+            for sensitive in ["/auth/", "/api/", "/admin/", "/user/"]
+        ):
             # Sensitive endpoints - no caching
             headers.update(
                 {
@@ -399,7 +419,9 @@ class SecurityHeadersManager:
             )
             # Remove None values
             headers = {k: v for k, v in headers.items() if v is not None}
-        elif any(static in path for static in ["/static/", "/assets/", "/public/"]):
+        elif any(
+            static in path for static in ["/static/", "/assets/", "/public/"]
+        ):
             # Static assets - long cache
             headers["Cache-Control"] = self.policy.cache_control_static
         else:
@@ -412,23 +434,30 @@ class SecurityHeadersManager:
 class SecurityHeadersMiddleware(BaseHTTPMiddleware):
     """ASGI middleware for applying security headers to all responses."""
 
-    def __init__(self, app, security_manager: Optional[SecurityHeadersManager] = None):
+    def __init__(
+        self, app, security_manager: Optional[SecurityHeadersManager] = None
+    ):
+        """Initialize security headers middleware."""
         super().__init__(app)
         self.security_manager = security_manager or SecurityHeadersManager()
 
-    async def dispatch(self, request: Request, call_next):
+    async def dispatch(self, request: Request, call_next) -> Response:
         """Apply security headers to response."""
         try:
             response = await call_next(request)
 
             # Apply security headers
-            security_headers = self.security_manager.get_security_headers(request, response)
+            security_headers = self.security_manager.get_security_headers(
+                request, response
+            )
 
             for header_name, header_value in security_headers.items():
                 response.headers[header_name] = header_value
 
             # Log security headers application
-            logger.debug(f"Applied {len(security_headers)} security headers to {request.url.path}")
+            logger.debug(
+                f"Applied {len(security_headers)} security headers to {request.url.path}"
+            )
 
             return response
 
@@ -444,17 +473,23 @@ class SecurityHeadersMiddleware(BaseHTTPMiddleware):
             )
 
             # Apply security headers to error response
-            security_headers = self.security_manager.get_security_headers(request, error_response)
+            security_headers = self.security_manager.get_security_headers(
+                request, error_response
+            )
             for header_name, header_value in security_headers.items():
                 error_response.headers[header_name] = header_value
 
             return error_response
 
 
-def setup_security_headers(app, policy: Optional[SecurityPolicy] = None):
+def setup_security_headers(
+    app, policy: Optional[SecurityPolicy] = None
+) -> SecurityHeadersManager:
     """Convenience function to set up security headers middleware."""
     security_manager = SecurityHeadersManager(policy)
-    app.add_middleware(SecurityHeadersMiddleware, security_manager=security_manager)
+    app.add_middleware(
+        SecurityHeadersMiddleware, security_manager=security_manager
+    )
 
     logger.info("Security headers middleware configured successfully")
     return security_manager
@@ -496,28 +531,42 @@ def get_security_headers(custom_csp: Optional[str] = None) -> Dict[str, str]:
     headers = {}
 
     # HSTS
-    headers["Strict-Transport-Security"] = _default_security_manager.generate_hsts_header()
+    headers[
+        "Strict-Transport-Security"
+    ] = _default_security_manager.generate_hsts_header()
 
     # CSP
     if custom_csp:
         headers["Content-Security-Policy"] = custom_csp
     else:
-        headers["Content-Security-Policy"] = _default_security_manager.generate_csp_header()
+        headers[
+            "Content-Security-Policy"
+        ] = _default_security_manager.generate_csp_header()
 
     # Frame Options
-    headers["X-Frame-Options"] = _default_security_manager.policy.x_frame_options
+    headers[
+        "X-Frame-Options"
+    ] = _default_security_manager.policy.x_frame_options
 
     # Content Type Options
-    headers["X-Content-Type-Options"] = _default_security_manager.policy.x_content_type_options
+    headers[
+        "X-Content-Type-Options"
+    ] = _default_security_manager.policy.x_content_type_options
 
     # XSS Protection
-    headers["X-XSS-Protection"] = _default_security_manager.policy.x_xss_protection
+    headers[
+        "X-XSS-Protection"
+    ] = _default_security_manager.policy.x_xss_protection
 
     # Referrer Policy
-    headers["Referrer-Policy"] = _default_security_manager.policy.referrer_policy
+    headers[
+        "Referrer-Policy"
+    ] = _default_security_manager.policy.referrer_policy
 
     # Permissions Policy
-    headers["Permissions-Policy"] = _default_security_manager.generate_permissions_policy()
+    headers[
+        "Permissions-Policy"
+    ] = _default_security_manager.generate_permissions_policy()
 
     # Expect-CT
     if expect_ct := _default_security_manager.generate_expect_ct_header():

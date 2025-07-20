@@ -32,7 +32,9 @@ class TestAgentsTypeHelpers:
             assert get_agent_attribute is not None
             assert get_coalition_attribute is not None
         except ImportError as e:
-            pytest.skip(f"Cannot import agents.type_helpers due to dependency issues: {e}")
+            pytest.skip(
+                f"Cannot import agents.type_helpers due to dependency issues: {e}"
+            )
 
     @patch("agents.type_helpers.AgentTypeAdapter")
     def test_safe_get_agent_id_success(self, mock_adapter):
@@ -263,10 +265,11 @@ class TestAgentsTypeHelpers:
         """Test get_agent_attribute with default value."""
         from agents.type_helpers import get_agent_attribute
 
-        mock_agent = MagicMock()
-        mock_agent.configure_mock(**{})  # Empty mock
-
-        result = get_agent_attribute(mock_agent, "nonexistent", "default_value")
+        mock_agent = MagicMock(spec=[])  # Empty spec, no attributes
+        
+        result = get_agent_attribute(
+            mock_agent, "nonexistent", "default_value"
+        )
         assert result == "default_value"
 
     @patch("agents.type_helpers.AgentTypeAdapter")
@@ -391,10 +394,11 @@ class TestAgentsTypeHelpers:
         """Test get_coalition_attribute with default value."""
         from agents.type_helpers import get_coalition_attribute
 
-        mock_coalition = MagicMock()
-        mock_coalition.configure_mock(**{})  # Empty mock
+        mock_coalition = MagicMock(spec=[])  # Empty spec, no attributes
 
-        result = get_coalition_attribute(mock_coalition, "nonexistent", "default_value")
+        result = get_coalition_attribute(
+            mock_coalition, "nonexistent", "default_value"
+        )
         assert result == "default_value"
 
     @patch("agents.type_helpers.CoalitionTypeAdapter")

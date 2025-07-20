@@ -56,4 +56,6 @@
     "optimized_memory_mb": 61.03904628753662,
     "memory_reduction_percent": -68.35987059422408,
     "agents_tested": 55,
-    "target_achieved": 
+    "target_achieved": false
+  }
+}

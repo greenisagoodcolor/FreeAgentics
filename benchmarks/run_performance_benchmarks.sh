@@ -129,24 +129,24 @@ REGRESSION_EXIT=$?
 if [ -f "benchmarks/ci_results/latest_regression_report.json" ]; then
     echo ""
     echo -e "${GREEN}Performance Summary:${NC}"
-    
+
     OVERALL_STATUS=$(jq -r '.overall_status' benchmarks/ci_results/latest_regression_report.json)
     TOTAL_BENCHMARKS=$(jq -r '.summary.total_benchmarks' benchmarks/ci_results/latest_regression_report.json)
     REGRESSIONS=$(jq -r '.summary.regressions' benchmarks/ci_results/latest_regression_report.json)
     IMPROVEMENTS=$(jq -r '.summary.improvements' benchmarks/ci_results/latest_regression_report.json)
-    
+
     echo "Overall Status: $OVERALL_STATUS"
     echo "Total Benchmarks: $TOTAL_BENCHMARKS"
     echo "Regressions: $REGRESSIONS"
     echo "Improvements: $IMPROVEMENTS"
-    
+
     if [ "$REGRESSIONS" -gt 0 ]; then
         echo ""
         echo -e "${RED}Performance Regressions Detected:${NC}"
         jq -r '.regressions[] | "- \(.benchmark_name) (\(.metric)): \(.regression_percent | floor)% regression"' \
             benchmarks/ci_results/latest_regression_report.json
     fi
-    
+
     if [ "$IMPROVEMENTS" -gt 0 ]; then
         echo ""
         echo -e "${GREEN}Performance Improvements:${NC}"
@@ -174,14 +174,14 @@ fi
 if [ "$PROFILE" = true ]; then
     echo ""
     echo -e "${GREEN}Running performance profiling...${NC}"
-    
+
     # CPU profiling
     if command -v py-spy &> /dev/null; then
         echo "Running CPU profiling..."
         py-spy record -d 30 -o benchmarks/artifacts/cpu_profile.svg -- \
             python -m pytest benchmarks/performance_suite.py::AgentSpawnBenchmarks -v
     fi
-    
+
     # Memory profiling
     echo "Running memory profiling..."
     python -m memory_profiler benchmarks/performance_suite.py > benchmarks/artifacts/memory_profile.txt

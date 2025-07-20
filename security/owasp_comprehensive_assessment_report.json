@@ -20047,7 +20047,7 @@
       "description": "Pattern 'eval\\([^)]*[^)]*\\)' found in completer.py",
       "file_path": "venv/lib/python3.12/site-packages/IPython/core/completer.py",
       "line_number": 2867,
-      "evidence": "eval(\n            prior_tuple_keys,\n            EvaluationContext(\n                globals=self.global_namespace,\n                locals=self.namespace,\n                evaluation=self.evaluation,  # type: ignore\n                in_subscript=True,\n                auto_import=self._auto_import,\n                policy_overrides=self.policy_overrides,\n            )",
+      "evidence": "eval(\n            prior_tuple_keys,\n            EvaluationContext(\n                globals=self.global_namespace,\n                locals=self.namespace,\n                evaluation=self.evaluation,  
       "remediation": "Sanitize and encode user input before displaying",
       "timestamp": "2025-07-14T13:08:29.279348"
     },
@@ -21521,7 +21521,7 @@
       "description": "Pattern 'eval\\([^)]*[^)]*\\)' found in _building.py",
       "file_path": "venv/lib/python3.12/site-packages/torch/onnx/_internal/exporter/_building.py",
       "line_number": 597,
-      "evidence": "eval(\n        self,\n        schema: onnx.defs.OpSchema,\n        args: Sequence[AllowedArgType],  # type: ignore[override]\n        kwargs: Mapping[str, AllowedArgType],\n    )",
+      "evidence": "eval(\n        self,\n        schema: onnx.defs.OpSchema,\n        args: Sequence[AllowedArgType],  
       "remediation": "Sanitize and encode user input before displaying",
       "timestamp": "2025-07-14T13:08:30.905668"
     },

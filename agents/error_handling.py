@@ -28,6 +28,13 @@ class AgentError(Exception):
         severity: ErrorSeverity = ErrorSeverity.MEDIUM,
         context: Optional[Dict[str, Any]] = None,
     ):
+        """Initialize agent error with severity and context.
+
+        Args:
+            message: Error message
+            severity: Error severity level
+            context: Additional error context
+        """
         super().__init__(message)
         self.severity = severity
         self.context = context or {}
@@ -62,6 +69,14 @@ class ErrorRecoveryStrategy:
         max_retries: int = 3,
         cooldown_seconds: int = 5,
     ):
+        """Initialize error recovery strategy.
+
+        Args:
+            name: Strategy name
+            fallback_action: Default action when recovery fails
+            max_retries: Maximum retry attempts
+            cooldown_seconds: Seconds to wait between retries
+        """
         self.name = name
         self.fallback_action = fallback_action
         self.max_retries = max_retries
@@ -75,18 +90,20 @@ class ErrorRecoveryStrategy:
             return False
 
         if self.last_error_time:
-            time_since_error = (datetime.now() - self.last_error_time).total_seconds()
+            time_since_error = (
+                datetime.now() - self.last_error_time
+            ).total_seconds()
             if time_since_error < self.cooldown_seconds:
                 return False
 
         return True
 
-    def record_error(self):
+    def record_error(self) -> None:
         """Record an error occurrence."""
         self.retry_count += 1
         self.last_error_time = datetime.now()
 
-    def reset(self):
+    def reset(self) -> None:
         """Reset retry counter after successful operation."""
         self.retry_count = 0
         self.last_error_time = None
@@ -96,14 +113,25 @@ class ErrorHandler:
     """Centralized error handling for agent operations."""
 
     def __init__(self, agent_id: str):
+        """Initialize error handler for an agent.
+
+        Args:
+            agent_id: ID of the agent to handle errors for
+        """
         self.agent_id = agent_id
         self.error_history = []
         self.recovery_strategies = {
             "pymdp_failure": ErrorRecoveryStrategy(
-                name="PyMDP Failure", fallback_action="stay", max_retries=3, cooldown_seconds=10
+                name="PyMDP Failure",
+                fallback_action="stay",
+                max_retries=3,
+                cooldown_seconds=10,
             ),
             "inference_failure": ErrorRecoveryStrategy(
-                name="Inference Failure", fallback_action="stay", max_retries=5, cooldown_seconds=5
+                name="Inference Failure",
+                fallback_action="stay",
+                max_retries=5,
+                cooldown_seconds=5,
             ),
             "action_selection_failure": ErrorRecoveryStrategy(
                 name="Action Selection Failure",
@@ -112,7 +140,10 @@ class ErrorHandler:
                 cooldown_seconds=2,
             ),
             "general_failure": ErrorRecoveryStrategy(
-                name="General Failure", fallback_action="stay", max_retries=1, cooldown_seconds=1
+                name="General Failure",
+                fallback_action="stay",
+                max_retries=1,
+                cooldown_seconds=1,
             ),
         }
 
@@ -174,7 +205,7 @@ class ErrorHandler:
 
         return recovery_info
 
-    def record_success(self, operation: str):
+    def record_success(self, operation: str) -> None:
         """Record successful operation to reset retry counters."""
         # Reset relevant strategies
         for strategy in self.recovery_strategies.values():
@@ -197,12 +228,16 @@ class ErrorHandler:
             "total_errors": len(self.error_history),
             "recent_errors": recent_errors,
             "error_counts": error_counts,
-            "last_error": self.error_history[-1] if self.error_history else None,
+            "last_error": self.error_history[-1]
+            if self.error_history
+            else None,
         }
 
 
-def with_error_handling(operation_name: str, fallback_result: Any = None):
-    """Decorator to add error handling to agent methods.
+def with_error_handling(
+    operation_name: str, fallback_result: Any = None
+) -> Callable:
+    """Add error handling to agent methods.
 
     Args:
         operation_name: Name of the operation for logging
@@ -224,22 +259,30 @@ def with_error_handling(operation_name: str, fallback_result: Any = None):
 
             except Exception as e:
                 # Handle error
-                recovery_info = self.error_handler.handle_error(e, operation_name)
+                recovery_info = self.error_handler.handle_error(
+                    e, operation_name
+                )
 
                 # Check if we can retry
                 if recovery_info["can_retry"]:
                     try:
                         # Attempt retry with simplified parameters
-                        logger.info(f"Retrying {operation_name} for agent {self.agent_id}")
+                        logger.info(
+                            f"Retrying {operation_name} for agent {self.agent_id}"
+                        )
                         if hasattr(self, f"_fallback_{func.__name__}"):
                             # Use fallback method if available
-                            fallback_method = getattr(self, f"_fallback_{func.__name__}")
+                            fallback_method = getattr(
+                                self, f"_fallback_{func.__name__}"
+                            )
                             return fallback_method(*args, **kwargs)
                         else:
                             # Use default fallback result
                             return fallback_result
                     except Exception as retry_error:
-                        logger.error(f"Retry failed for {operation_name}: {retry_error}")
+                        logger.error(
+                            f"Retry failed for {operation_name}: {retry_error}"
+                        )
 
                 # Return fallback result
                 return fallback_result
@@ -249,8 +292,10 @@ def with_error_handling(operation_name: str, fallback_result: Any = None):
     return decorator
 
 
-def safe_pymdp_operation(operation_name: str, default_value: Any = None):
-    """Decorator specifically for PyMDP operations with robust error handling.
+def safe_pymdp_operation(
+    operation_name: str, default_value: Any = None
+) -> Callable:
+    """Add PyMDP-specific error handling to methods.
 
     Args:
         operation_name: Name of the PyMDP operation
@@ -265,7 +310,10 @@ def safe_pymdp_operation(operation_name: str, default_value: Any = None):
 
             try:
                 # Check if PyMDP is available and agent is initialized
-                if not hasattr(self, "pymdp_agent") or self.pymdp_agent is None:
+                if (
+                    not hasattr(self, "pymdp_agent")
+                    or self.pymdp_agent is None
+                ):
                     raise PyMDPError("PyMDP agent not initialized")
 
                 result = func(self, *args, **kwargs)
@@ -277,8 +325,12 @@ def safe_pymdp_operation(operation_name: str, default_value: Any = None):
                 if not isinstance(e, PyMDPError):
                     e = PyMDPError(f"PyMDP operation failed: {str(e)}")
 
-                recovery_info = self.error_handler.handle_error(e, operation_name)
-                logger.debug(f"Recovery info for {operation_name}: {recovery_info}")
+                recovery_info = self.error_handler.handle_error(
+                    e, operation_name
+                )
+                logger.debug(
+                    f"Recovery info for {operation_name}: {recovery_info}"
+                )
 
                 # Try fallback method first
                 fallback_method_name = f"_fallback_{func.__name__}"
@@ -317,11 +369,16 @@ def validate_observation(observation: Any) -> Dict[str, Any]:
 
     if isinstance(observation, dict):
         # Ensure required fields exist
-        sanitized = {"position": observation.get("position", [0, 0]), "valid": True}
+        sanitized = {
+            "position": observation.get("position", [0, 0]),
+            "valid": True,
+        }
 
         # Copy other valid fields
         for key, value in observation.items():
-            if key not in ["position"] and isinstance(value, (int, float, str, list, dict)):
+            if key not in ["position"] and isinstance(
+                value, (int, float, str, list, dict)
+            ):
                 sanitized[key] = value
 
         return sanitized

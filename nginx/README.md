@@ -5,6 +5,7 @@ This directory contains comprehensive SSL/TLS configuration files and scripts fo
 ## Overview
 
 The SSL/TLS setup implements the following security features:
+
 - **TLS 1.2/1.3 Support**: Modern protocol versions with strong cipher suites
 - **Perfect Forward Secrecy**: Using DH parameters and ECDHE cipher suites
 - **OCSP Stapling**: Improved certificate validation performance
@@ -78,6 +79,7 @@ export EMAIL="admin@yourdomain.com"
 #### Option C: Custom Certificates
 
 Place your certificates in the `nginx/ssl/` directory:
+
 - `cert.pem` - SSL certificate (full chain)
 - `key.pem` - Private key
 
@@ -129,8 +131,9 @@ Expect-CT: max-age=86400, enforce
 ### Rate Limiting
 
 Different rate limits for different endpoints:
+
 - API endpoints: 10 requests/second
-- Authentication: 5 requests/second  
+- Authentication: 5 requests/second
 - WebSocket: 50 connections/second
 
 ## Monitoring and Maintenance
@@ -195,34 +198,38 @@ add_header Public-Key-Pins 'pin-sha256="[generated-pin]"; max-age=2592000; inclu
 ### Common Issues
 
 1. **Certificate Not Found**
+
    ```bash
    # Check if certificates exist
    ls -la nginx/ssl/
-   
+
    # Verify certificate validity
    openssl x509 -in nginx/ssl/cert.pem -text -noout
    ```
 
-2. **DH Parameters Missing**
+1. **DH Parameters Missing**
+
    ```bash
    # Generate DH parameters
    ./nginx/generate-dhparam.sh
    ```
 
-3. **SSL Test Failures**
+1. **SSL Test Failures**
+
    ```bash
    # Test configuration
    nginx -t
-   
+
    # Check SSL connection
    openssl s_client -connect yourdomain.com:443
    ```
 
-4. **Certificate Expiration**
+1. **Certificate Expiration**
+
    ```bash
    # Check expiration
    DOMAIN="yourdomain.com" ./nginx/monitor-ssl.sh expiration
-   
+
    # Renew certificate
    ./scripts/renew-cert.sh
    ```
@@ -250,21 +257,25 @@ tail -f /var/log/nginx/ssl-access.log
 ### Best Practices
 
 1. **Regular Updates**
+
    - Keep nginx updated
    - Monitor security advisories
    - Update SSL configuration as needed
 
-2. **Certificate Management**
+1. **Certificate Management**
+
    - Use strong private keys (RSA 2048-bit minimum)
    - Implement certificate transparency monitoring
    - Set up expiration alerts
 
-3. **Access Control**
+1. **Access Control**
+
    - Restrict admin interfaces
    - Implement proper authentication
    - Use strong passwords and 2FA
 
-4. **Monitoring**
+1. **Monitoring**
+
    - Monitor SSL certificate health
    - Track SSL handshake metrics
    - Set up security alerts
@@ -272,6 +283,7 @@ tail -f /var/log/nginx/ssl-access.log
 ### Compliance
 
 The configuration meets requirements for:
+
 - **PCI DSS**: Payment card industry compliance
 - **HIPAA**: Healthcare data protection
 - **SOC 2**: Service organization controls
@@ -299,10 +311,11 @@ openssl s_client -connect yourdomain.com:443 -reconnect
 ## Support
 
 For issues or questions:
+
 1. Check the troubleshooting section
-2. Review nginx error logs
-3. Test SSL configuration with provided scripts
-4. Verify certificate validity and expiration
+1. Review nginx error logs
+1. Test SSL configuration with provided scripts
+1. Verify certificate validity and expiration
 
 ## References
 

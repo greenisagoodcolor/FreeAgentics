@@ -34,7 +34,13 @@ if __name__ == "__main__":
 
     # Run tests
     exit_code = pytest.main(
-        [test_file, "-v", "--tb=short", "-x", "--disable-warnings"]  # Stop on first failure
+        [
+            test_file,
+            "-v",
+            "--tb=short",
+            "-x",
+            "--disable-warnings",
+        ]  # Stop on first failure
     )
 
     sys.exit(exit_code)

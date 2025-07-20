@@ -19,7 +19,11 @@ from typing import Any, Dict, List, Optional
 class PerformanceMonitor:
     """Automated performance monitoring and alerting system."""
 
-    def __init__(self, regression_threshold: float = 10.0, alert_webhook: Optional[str] = None):
+    def __init__(
+        self,
+        regression_threshold: float = 10.0,
+        alert_webhook: Optional[str] = None,
+    ):
         self.regression_threshold = regression_threshold
         self.alert_webhook = alert_webhook
         self.results_dir = Path("tests/performance")
@@ -53,7 +57,10 @@ class PerformanceMonitor:
             try:
                 # Run benchmark script
                 result = subprocess.run(
-                    [sys.executable, str(script_path)], capture_output=True, text=True, timeout=600
+                    [sys.executable, str(script_path)],
+                    capture_output=True,
+                    text=True,
+                    timeout=600,
                 )  # 10 minute timeout
 
                 if result.returncode == 0:
@@ -64,7 +71,9 @@ class PerformanceMonitor:
                         "stderr": result.stderr,
                     }
                 else:
-                    print(f"❌ {script} failed with return code {result.returncode}")
+                    print(
+                        f"❌ {script} failed with return code {result.returncode}"
+                    )
                     results["benchmarks"][script] = {
                         "status": "failed",
                         "return_code": result.returncode,
@@ -72,7 +81,9 @@ class PerformanceMonitor:
                         "stderr": result.stderr,
                     }
                     results["success"] = False
-                    results["errors"].append(f"{script}: {result.stderr}"[:200])
+                    results["errors"].append(
+                        f"{script}: {result.stderr}"[:200]
+                    )
 
             except subprocess.TimeoutExpired:
                 print(f"⏰ {script} timed out after 10 minutes")
@@ -85,7 +96,10 @@ class PerformanceMonitor:
 
             except Exception as e:
                 print(f"💥 {script} failed with exception: {e}")
-                results["benchmarks"][script] = {"status": "error", "error": str(e)}
+                results["benchmarks"][script] = {
+                    "status": "error",
+                    "error": str(e),
+                }
                 results["success"] = False
                 results["errors"].append(f"{script}: {str(e)}")
 
@@ -152,7 +166,10 @@ class PerformanceMonitor:
             for result in latest_results:
                 if "additional_metrics" in result:
                     metrics = result["additional_metrics"]
-                    if "speedup_factor" in metrics and metrics["speedup_factor"] < 0.75:
+                    if (
+                        "speedup_factor" in metrics
+                        and metrics["speedup_factor"] < 0.75
+                    ):
                         severe_regressions.append(
                             f"{result.get('name', 'unknown')}: speedup_factor {metrics['speedup_factor']:.2f}"
                         )
@@ -193,7 +210,10 @@ class PerformanceMonitor:
             # Check memory efficiency (<100MB per operation average)
             memory_failures = []
             for result in latest_results:
-                if "memory_usage_mb" in result and result["memory_usage_mb"] > 100:
+                if (
+                    "memory_usage_mb" in result
+                    and result["memory_usage_mb"] > 100
+                ):
                     memory_failures.append(
                         f"{result.get('name', 'unknown')}: {result['memory_usage_mb']:.1f}MB"
                     )
@@ -233,7 +253,9 @@ class PerformanceMonitor:
         try:
             import requests
 
-            response = requests.post(self.alert_webhook, json=alert_data, timeout=30)
+            response = requests.post(
+                self.alert_webhook, json=alert_data, timeout=30
+            )
             response.raise_for_status()
 
             print("✅ Alert notification sent successfully")
@@ -269,7 +291,9 @@ Generated: {timestamp}
 """
 
         for check_name, check_data in gates.get("checks", {}).items():
-            status_emoji = {"pass": "✅", "fail": "❌", "warn": "⚠️"}.get(check_data["status"], "❓")
+            status_emoji = {"pass": "✅", "fail": "❌", "warn": "⚠️"}.get(
+                check_data["status"], "❓"
+            )
             summary += f"- **{check_name.replace('_', ' ').title()}**: {status_emoji} {check_data['status'].upper()}\n"
             if check_data["details"]:
                 for detail in check_data["details"][:3]:  # Show first 3
@@ -288,11 +312,15 @@ Generated: {timestamp}
 
         summary += "\n## CI/CD Actions\n"
         if gates["overall_status"] == "pass":
-            summary += "✅ All performance checks passed - proceed with deployment\n"
+            summary += (
+                "✅ All performance checks passed - proceed with deployment\n"
+            )
         elif gates["overall_status"] == "warn":
             summary += "⚠️  Performance warnings detected - review before deployment\n"
         else:
-            summary += "❌ Performance quality gates failed - deployment blocked\n"
+            summary += (
+                "❌ Performance quality gates failed - deployment blocked\n"
+            )
 
         return summary
 
@@ -313,11 +341,14 @@ Generated: {timestamp}
         self.send_alert_notification(gates, benchmark_results)
 
         # Step 5: Create CI summary
-        summary = self.create_ci_summary(benchmark_results, report_results, gates)
+        summary = self.create_ci_summary(
+            benchmark_results, report_results, gates
+        )
 
         # Save summary
         summary_file = (
-            self.reports_dir / f"ci_summary_{datetime.now().strftime('%Y%m%d_%H%M%S')}.md"
+            self.reports_dir
+            / f"ci_summary_{datetime.now().strftime('%Y%m%d_%H%M%S')}.md"
         )
         with open(summary_file, "w") as f:
             f.write(summary)
@@ -332,7 +363,9 @@ Generated: {timestamp}
             print("\n❌ Performance monitoring pipeline FAILED")
             return 1
         elif gates["overall_status"] == "warn":
-            print("\n⚠️  Performance monitoring pipeline completed with WARNINGS")
+            print(
+                "\n⚠️  Performance monitoring pipeline completed with WARNINGS"
+            )
             return 0  # Don't fail CI for warnings
         else:
             print("\n✅ Performance monitoring pipeline completed SUCCESSFULLY")
@@ -341,7 +374,9 @@ Generated: {timestamp}
 
 def main():
     """Command line interface for automated performance monitoring."""
-    parser = argparse.ArgumentParser(description="Automated Performance Monitoring for CI/CD")
+    parser = argparse.ArgumentParser(
+        description="Automated Performance Monitoring for CI/CD"
+    )
     parser.add_argument(
         "--regression-threshold",
         type=float,
@@ -349,7 +384,9 @@ def main():
         help="Performance regression threshold percentage (default: 10.0)",
     )
     parser.add_argument(
-        "--alert-webhook", type=str, help="Webhook URL for sending performance alerts"
+        "--alert-webhook",
+        type=str,
+        help="Webhook URL for sending performance alerts",
     )
     parser.add_argument(
         "--skip-benchmarks",
@@ -357,16 +394,21 @@ def main():
         help="Skip running benchmarks, only generate reports from existing results",
     )
     parser.add_argument(
-        "--ci-mode", action="store_true", help="Run in CI mode with appropriate exit codes"
+        "--ci-mode",
+        action="store_true",
+        help="Run in CI mode with appropriate exit codes",
     )
 
     args = parser.parse_args()
 
     # Get alert webhook from environment if not provided
-    alert_webhook = args.alert_webhook or os.getenv("PERFORMANCE_ALERT_WEBHOOK")
+    alert_webhook = args.alert_webhook or os.getenv(
+        "PERFORMANCE_ALERT_WEBHOOK"
+    )
 
     monitor = PerformanceMonitor(
-        regression_threshold=args.regression_threshold, alert_webhook=alert_webhook
+        regression_threshold=args.regression_threshold,
+        alert_webhook=alert_webhook,
     )
 
     if args.skip_benchmarks:

@@ -43,7 +43,7 @@ repos:
     rev: 1.7.5
     hooks:
       - id: bandit
-        args: ['-ll', '-r', '--skip=B101,B601,B603']
+        args: ['-ll', '-r', '']
         exclude: ^(tests/|\.archive/)
 
   # Security: Safety check for dependencies
@@ -282,4 +282,4 @@ ci:
   autoupdate_branch: 'security/pre-commit-updates'
   autoupdate_commit_msg: '[pre-commit.ci] security hooks update'
   autoupdate_schedule: daily
-  skip: []  # Run all security checks in CI
+  # Run all security checks in CI - no skips allowed

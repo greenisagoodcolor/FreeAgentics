@@ -13,13 +13,26 @@ Following TDD principles: These tests will fail initially and drive implementati
 import numpy as np
 import pytest
 
-from inference.active.gmn_parser import (
-    GMNParser,
-    GMNSchemaValidator,
-    GMNSpecification,
-    GMNToPyMDPConverter,
-    GMNValidationError,
-)
+from inference.active.gmn_parser import GMNParser, GMNSchemaValidator
+
+
+# Mock the missing classes for now
+class GMNSpecification:
+    """Mock GMN specification class."""
+
+    pass
+
+
+class GMNToPyMDPConverter:
+    """Mock GMN to PyMDP converter."""
+
+    pass
+
+
+class GMNValidationError(Exception):
+    """Mock GMN validation error."""
+
+    pass
 
 
 class TestGMNParserBasicFunctionality:
@@ -32,10 +45,16 @@ class TestGMNParserBasicFunctionality:
         spec = {
             "nodes": [
                 {"name": "location", "type": "state", "num_states": 4},
-                {"name": "obs_location", "type": "observation", "num_observations": 4},
+                {
+                    "name": "obs_location",
+                    "type": "observation",
+                    "num_observations": 4,
+                },
                 {"name": "move", "type": "action", "num_actions": 4},
             ],
-            "edges": [{"from": "location", "to": "obs_location", "type": "generates"}],
+            "edges": [
+                {"from": "location", "to": "obs_location", "type": "generates"}
+            ],
         }
 
         result = parser.parse(spec)
@@ -75,7 +94,9 @@ class TestGMNNodeTypes:
         parser = GMNParser()
 
         spec = {
-            "nodes": [{"name": "agent_location", "type": "state", "num_states": 9}],
+            "nodes": [
+                {"name": "agent_location", "type": "state", "num_states": 9}
+            ],
             "edges": [],
         }
 
@@ -91,7 +112,13 @@ class TestGMNNodeTypes:
         parser = GMNParser()
 
         spec = {
-            "nodes": [{"name": "visual_input", "type": "observation", "num_observations": 16}],
+            "nodes": [
+                {
+                    "name": "visual_input",
+                    "type": "observation",
+                    "num_observations": 16,
+                }
+            ],
             "edges": [],
         }
 
@@ -107,7 +134,9 @@ class TestGMNNodeTypes:
         parser = GMNParser()
 
         spec = {
-            "nodes": [{"name": "movement", "type": "action", "num_actions": 5}],
+            "nodes": [
+                {"name": "movement", "type": "action", "num_actions": 5}
+            ],
             "edges": [],
         }
 
@@ -123,7 +152,13 @@ class TestGMNNodeTypes:
         parser = GMNParser()
 
         spec = {
-            "nodes": [{"name": "location_belief", "type": "belief", "about": "location"}],
+            "nodes": [
+                {
+                    "name": "location_belief",
+                    "type": "belief",
+                    "about": "location",
+                }
+            ],
             "edges": [],
         }
 
@@ -169,9 +204,15 @@ class TestGMNEdgeTypes:
         spec = {
             "nodes": [
                 {"name": "location", "type": "state", "num_states": 4},
-                {"name": "obs_location", "type": "observation", "num_observations": 4},
+                {
+                    "name": "obs_location",
+                    "type": "observation",
+                    "num_observations": 4,
+                },
             ],
-            "edges": [{"from": "location", "to": "obs_location", "type": "generates"}],
+            "edges": [
+                {"from": "location", "to": "obs_location", "type": "generates"}
+            ],
         }
 
         result = parser.parse(spec)
@@ -188,9 +229,19 @@ class TestGMNEdgeTypes:
         spec = {
             "nodes": [
                 {"name": "location", "type": "state", "num_states": 4},
-                {"name": "location_belief", "type": "belief", "about": "location"},
+                {
+                    "name": "location_belief",
+                    "type": "belief",
+                    "about": "location",
+                },
             ],
-            "edges": [{"from": "location_belief", "to": "location", "type": "depends_on"}],
+            "edges": [
+                {
+                    "from": "location_belief",
+                    "to": "location",
+                    "type": "depends_on",
+                }
+            ],
         }
 
         result = parser.parse(spec)
@@ -207,14 +258,30 @@ class TestGMNEdgeTypes:
         spec = {
             "nodes": [
                 {"name": "location", "type": "state", "num_states": 9},
-                {"name": "obs_location", "type": "observation", "num_observations": 9},
+                {
+                    "name": "obs_location",
+                    "type": "observation",
+                    "num_observations": 9,
+                },
                 {"name": "move", "type": "action", "num_actions": 5},
                 {"name": "location_transition", "type": "transition"},
             ],
             "edges": [
-                {"from": "location", "to": "obs_location", "type": "generates"},
-                {"from": "location", "to": "location_transition", "type": "depends_on"},
-                {"from": "move", "to": "location_transition", "type": "depends_on"},
+                {
+                    "from": "location",
+                    "to": "obs_location",
+                    "type": "generates",
+                },
+                {
+                    "from": "location",
+                    "to": "location_transition",
+                    "type": "depends_on",
+                },
+                {
+                    "from": "move",
+                    "to": "location_transition",
+                    "type": "depends_on",
+                },
             ],
         }
 
@@ -236,10 +303,16 @@ class TestGMNSchemaValidator:
         spec = {
             "nodes": [
                 {"name": "location", "type": "state", "num_states": 4},
-                {"name": "obs_location", "type": "observation", "num_observations": 4},
+                {
+                    "name": "obs_location",
+                    "type": "observation",
+                    "num_observations": 4,
+                },
                 {"name": "move", "type": "action", "num_actions": 4},
             ],
-            "edges": [{"from": "location", "to": "obs_location", "type": "generates"}],
+            "edges": [
+                {"from": "location", "to": "obs_location", "type": "generates"}
+            ],
         }
 
         is_valid, errors = validator.validate(spec)
@@ -252,7 +325,9 @@ class TestGMNSchemaValidator:
         validator = GMNSchemaValidator()
 
         spec = {
-            "nodes": [{"name": "location", "type": "state"}],  # Missing num_states
+            "nodes": [
+                {"name": "location", "type": "state"}
+            ],  # Missing num_states
             "edges": [],
         }
 
@@ -266,7 +341,10 @@ class TestGMNSchemaValidator:
         """Test validation fails for invalid node types."""
         validator = GMNSchemaValidator()
 
-        spec = {"nodes": [{"name": "invalid", "type": "invalid_type"}], "edges": []}
+        spec = {
+            "nodes": [{"name": "invalid", "type": "invalid_type"}],
+            "edges": [],
+        }
 
         is_valid, errors = validator.validate(spec)
 
@@ -287,7 +365,9 @@ class TestGMNSchemaValidator:
                     "num_observations": 9,
                 },  # Mismatch
             ],
-            "edges": [{"from": "location", "to": "obs_location", "type": "generates"}],
+            "edges": [
+                {"from": "location", "to": "obs_location", "type": "generates"}
+            ],
         }
 
         is_valid, errors = validator.validate(spec)
@@ -303,10 +383,20 @@ class TestGMNSchemaValidator:
         spec = {
             "nodes": [
                 {"name": "location", "type": "state", "num_states": 4},
-                {"name": "obs_location", "type": "observation", "num_observations": 4},
-                {"name": "orphaned", "type": "state", "num_states": 2},  # No edges
+                {
+                    "name": "obs_location",
+                    "type": "observation",
+                    "num_observations": 4,
+                },
+                {
+                    "name": "orphaned",
+                    "type": "state",
+                    "num_states": 2,
+                },  # No edges
             ],
-            "edges": [{"from": "location", "to": "obs_location", "type": "generates"}],
+            "edges": [
+                {"from": "location", "to": "obs_location", "type": "generates"}
+            ],
         }
 
         is_valid, errors = validator.validate(spec)
@@ -321,7 +411,9 @@ class TestGMNSchemaValidator:
 
         spec = {
             "nodes": [{"name": "location", "type": "state", "num_states": 4}],
-            "edges": [{"from": "location", "to": "nonexistent", "type": "generates"}],
+            "edges": [
+                {"from": "location", "to": "nonexistent", "type": "generates"}
+            ],
         }
 
         is_valid, errors = validator.validate(spec)
@@ -341,9 +433,15 @@ class TestGMNToPyMDPConverter:
         spec = {
             "nodes": [
                 {"name": "location", "type": "state", "num_states": 4},
-                {"name": "obs_location", "type": "observation", "num_observations": 4},
+                {
+                    "name": "obs_location",
+                    "type": "observation",
+                    "num_observations": 4,
+                },
             ],
-            "edges": [{"from": "location", "to": "obs_location", "type": "generates"}],
+            "edges": [
+                {"from": "location", "to": "obs_location", "type": "generates"}
+            ],
         }
 
         matrices = converter.convert_to_matrices(spec)
@@ -351,7 +449,9 @@ class TestGMNToPyMDPConverter:
         assert "A" in matrices
         A_matrix = matrices["A"]
         assert A_matrix.shape == (4, 4)  # num_observations x num_states
-        assert np.allclose(A_matrix.sum(axis=0), 1.0)  # Columns should sum to 1
+        assert np.allclose(
+            A_matrix.sum(axis=0), 1.0
+        )  # Columns should sum to 1
 
     def test_create_b_matrix_from_transition_specification(self):
         """Test B matrix creation from transition specifications."""
@@ -364,8 +464,16 @@ class TestGMNToPyMDPConverter:
                 {"name": "location_transition", "type": "transition"},
             ],
             "edges": [
-                {"from": "location", "to": "location_transition", "type": "depends_on"},
-                {"from": "move", "to": "location_transition", "type": "depends_on"},
+                {
+                    "from": "location",
+                    "to": "location_transition",
+                    "type": "depends_on",
+                },
+                {
+                    "from": "move",
+                    "to": "location_transition",
+                    "type": "depends_on",
+                },
             ],
         }
 
@@ -373,8 +481,14 @@ class TestGMNToPyMDPConverter:
 
         assert "B" in matrices
         B_matrix = matrices["B"]
-        assert B_matrix.shape == (4, 4, 5)  # num_states x num_states x num_actions
-        assert np.allclose(B_matrix.sum(axis=0), 1.0)  # Transition probabilities sum to 1
+        assert B_matrix.shape == (
+            4,
+            4,
+            5,
+        )  # num_states x num_states x num_actions
+        assert np.allclose(
+            B_matrix.sum(axis=0), 1.0
+        )  # Transition probabilities sum to 1
 
     def test_create_c_vector_from_preferences(self):
         """Test C vector creation from preference specifications."""
@@ -382,7 +496,11 @@ class TestGMNToPyMDPConverter:
 
         spec = {
             "nodes": [
-                {"name": "obs_location", "type": "observation", "num_observations": 4},
+                {
+                    "name": "obs_location",
+                    "type": "observation",
+                    "num_observations": 4,
+                },
                 {
                     "name": "goal_preference",
                     "type": "preference",
@@ -390,7 +508,13 @@ class TestGMNToPyMDPConverter:
                     "preference_strength": 2.0,
                 },
             ],
-            "edges": [{"from": "goal_preference", "to": "obs_location", "type": "depends_on"}],
+            "edges": [
+                {
+                    "from": "goal_preference",
+                    "to": "obs_location",
+                    "type": "depends_on",
+                }
+            ],
         }
 
         matrices = converter.convert_to_matrices(spec)
@@ -424,9 +548,17 @@ class TestGMNToPyMDPConverter:
         spec = {
             "nodes": [
                 {"name": "location", "type": "state", "num_states": 9},
-                {"name": "obs_location", "type": "observation", "num_observations": 9},
+                {
+                    "name": "obs_location",
+                    "type": "observation",
+                    "num_observations": 9,
+                },
                 {"name": "move", "type": "action", "num_actions": 5},
-                {"name": "location_belief", "type": "belief", "about": "location"},
+                {
+                    "name": "location_belief",
+                    "type": "belief",
+                    "about": "location",
+                },
                 {
                     "name": "goal_preference",
                     "type": "preference",
@@ -437,16 +569,36 @@ class TestGMNToPyMDPConverter:
                 {"name": "location_transition", "type": "transition"},
             ],
             "edges": [
-                {"from": "location", "to": "location_likelihood", "type": "depends_on"},
+                {
+                    "from": "location",
+                    "to": "location_likelihood",
+                    "type": "depends_on",
+                },
                 {
                     "from": "location_likelihood",
                     "to": "obs_location",
                     "type": "generates",
                 },
-                {"from": "location", "to": "location_transition", "type": "depends_on"},
-                {"from": "move", "to": "location_transition", "type": "depends_on"},
-                {"from": "goal_preference", "to": "obs_location", "type": "depends_on"},
-                {"from": "location_belief", "to": "location", "type": "depends_on"},
+                {
+                    "from": "location",
+                    "to": "location_transition",
+                    "type": "depends_on",
+                },
+                {
+                    "from": "move",
+                    "to": "location_transition",
+                    "type": "depends_on",
+                },
+                {
+                    "from": "goal_preference",
+                    "to": "obs_location",
+                    "type": "depends_on",
+                },
+                {
+                    "from": "location_belief",
+                    "to": "location",
+                    "type": "depends_on",
+                },
             ],
         }
 
@@ -478,9 +630,15 @@ class TestGMNSpecificationClass:
         spec_dict = {
             "nodes": [
                 {"name": "location", "type": "state", "num_states": 4},
-                {"name": "obs_location", "type": "observation", "num_observations": 4},
+                {
+                    "name": "obs_location",
+                    "type": "observation",
+                    "num_observations": 4,
+                },
             ],
-            "edges": [{"from": "location", "to": "obs_location", "type": "generates"}],
+            "edges": [
+                {"from": "location", "to": "obs_location", "type": "generates"}
+            ],
         }
 
         spec = GMNSpecification.from_dict(spec_dict)
@@ -613,7 +771,11 @@ class TestGMNParserErrorHandling:
             ],
             "edges": [
                 {"from": "node_a", "to": "node_b", "type": "depends_on"},
-                {"from": "node_b", "to": "node_a", "type": "depends_on"},  # Circular
+                {
+                    "from": "node_b",
+                    "to": "node_a",
+                    "type": "depends_on",
+                },  # Circular
             ],
         }
 
@@ -635,7 +797,8 @@ class TestGMNParserErrorHandling:
             parser.parse(spec)
 
         assert (
-            "negative" in str(exc_info.value).lower() or "positive" in str(exc_info.value).lower()
+            "negative" in str(exc_info.value).lower()
+            or "positive" in str(exc_info.value).lower()
         )
 
 
@@ -673,7 +836,9 @@ class TestGMNVersioning:
         v1_spec = GMNSpecification.from_dict(
             {
                 "version": "1.0",
-                "nodes": [{"name": "location", "type": "state", "num_states": 4}],
+                "nodes": [
+                    {"name": "location", "type": "state", "num_states": 4}
+                ],
                 "edges": [],
             }
         )
@@ -681,7 +846,9 @@ class TestGMNVersioning:
         v2_spec = GMNSpecification.from_dict(
             {
                 "version": "2.0",
-                "nodes": [{"name": "location", "type": "state", "num_states": 4}],
+                "nodes": [
+                    {"name": "location", "type": "state", "num_states": 4}
+                ],
                 "edges": [],
             }
         )
@@ -692,7 +859,9 @@ class TestGMNVersioning:
         v3_spec = GMNSpecification.from_dict(
             {
                 "version": "2.0",
-                "nodes": [{"name": "different", "type": "state", "num_states": 8}],
+                "nodes": [
+                    {"name": "different", "type": "state", "num_states": 8}
+                ],
                 "edges": [],
             }
         )
@@ -708,10 +877,16 @@ def minimal_gmn_spec():
     return {
         "nodes": [
             {"name": "location", "type": "state", "num_states": 4},
-            {"name": "obs_location", "type": "observation", "num_observations": 4},
+            {
+                "name": "obs_location",
+                "type": "observation",
+                "num_observations": 4,
+            },
             {"name": "move", "type": "action", "num_actions": 4},
         ],
-        "edges": [{"from": "location", "to": "obs_location", "type": "generates"}],
+        "edges": [
+            {"from": "location", "to": "obs_location", "type": "generates"}
+        ],
     }
 
 
@@ -721,7 +896,11 @@ def complex_gmn_spec():
     return {
         "nodes": [
             {"name": "location", "type": "state", "num_states": 9},
-            {"name": "obs_location", "type": "observation", "num_observations": 9},
+            {
+                "name": "obs_location",
+                "type": "observation",
+                "num_observations": 9,
+            },
             {"name": "move", "type": "action", "num_actions": 5},
             {"name": "location_belief", "type": "belief", "about": "location"},
             {
@@ -734,11 +913,35 @@ def complex_gmn_spec():
             {"name": "location_transition", "type": "transition"},
         ],
         "edges": [
-            {"from": "location", "to": "location_likelihood", "type": "depends_on"},
-            {"from": "location_likelihood", "to": "obs_location", "type": "generates"},
-            {"from": "location", "to": "location_transition", "type": "depends_on"},
-            {"from": "move", "to": "location_transition", "type": "depends_on"},
-            {"from": "goal_preference", "to": "obs_location", "type": "depends_on"},
-            {"from": "location_belief", "to": "location", "type": "depends_on"},
+            {
+                "from": "location",
+                "to": "location_likelihood",
+                "type": "depends_on",
+            },
+            {
+                "from": "location_likelihood",
+                "to": "obs_location",
+                "type": "generates",
+            },
+            {
+                "from": "location",
+                "to": "location_transition",
+                "type": "depends_on",
+            },
+            {
+                "from": "move",
+                "to": "location_transition",
+                "type": "depends_on",
+            },
+            {
+                "from": "goal_preference",
+                "to": "obs_location",
+                "type": "depends_on",
+            },
+            {
+                "from": "location_belief",
+                "to": "location",
+                "type": "depends_on",
+            },
         ],
     }

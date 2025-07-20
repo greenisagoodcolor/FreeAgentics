@@ -51,27 +51,27 @@ check_permissions() {
 # Check prerequisites
 check_prerequisites() {
     log "Checking prerequisites..."
-    
+
     # Check if Docker is installed
     if ! command -v docker &> /dev/null; then
         error "Docker is not installed. Please install Docker first."
     fi
-    
+
     # Check if Docker Compose is installed
     if ! command -v docker-compose &> /dev/null; then
         error "Docker Compose is not installed. Please install Docker Compose first."
     fi
-    
+
     # Check if domain is provided
     if [ "$DOMAIN" = "yourdomain.com" ]; then
         error "Please set DOMAIN environment variable to your actual domain"
     fi
-    
+
     # Check if email is provided
     if [ "$EMAIL" = "admin@yourdomain.com" ]; then
         error "Please set EMAIL environment variable to your actual email"
     fi
-    
+
     # Check if environment file exists
     if [ ! -f "$ENV_FILE" ]; then
         warn "Environment file $ENV_FILE not found. Creating from template..."
@@ -82,7 +82,7 @@ check_prerequisites() {
             error "Environment template not found. Please create $ENV_FILE manually"
         fi
     fi
-    
+
     success "Prerequisites check passed"
 }
 
@@ -90,30 +90,30 @@ check_prerequisites() {
 backup_existing() {
     if [ "$BACKUP_EXISTING" = "true" ]; then
         log "Creating backup of existing deployment..."
-        
+
         local backup_dir="backup-$(date +%Y%m%d-%H%M%S)"
         mkdir -p "$backup_dir"
-        
+
         # Backup configuration files
         if [ -f "docker-compose.yml" ]; then
             cp "docker-compose.yml" "$backup_dir/"
         fi
-        
+
         if [ -f "$ENV_FILE" ]; then
             cp "$ENV_FILE" "$backup_dir/"
         fi
-        
+
         # Backup SSL certificates
         if [ -d "nginx/ssl" ]; then
             cp -r "nginx/ssl" "$backup_dir/"
         fi
-        
+
         # Backup database (if running)
         if docker-compose ps postgres | grep -q "Up"; then
             log "Backing up database..."
             docker-compose exec postgres pg_dump -U freeagentics freeagentics > "$backup_dir/database.sql"
         fi
-        
+
         success "Backup created in $backup_dir"
     fi
 }
@@ -121,7 +121,7 @@ backup_existing() {
 # Generate DH parameters
 generate_dhparam() {
     log "Checking DH parameters..."
-    
+
     if [ ! -f "nginx/dhparam.pem" ]; then
         log "Generating DH parameters..."
         ./nginx/generate-dhparam.sh
@@ -137,13 +137,13 @@ setup_ssl_certificates() {
         log "Skipping SSL certificate setup"
         return 0
     fi
-    
+
     log "Setting up SSL certificates..."
-    
+
     # Check if certificates already exist
     if [ -f "nginx/ssl/cert.pem" ] && [ -f "nginx/ssl/key.pem" ]; then
         log "SSL certificates already exist"
-        
+
         # Check if certificates are valid
         if openssl x509 -in "nginx/ssl/cert.pem" -noout -checkend 86400; then
             log "Existing certificates are valid for at least 24 hours"
@@ -152,76 +152,76 @@ setup_ssl_certificates() {
             warn "Existing certificates are expiring soon or invalid"
         fi
     fi
-    
+
     # Set up Let's Encrypt certificates
     log "Setting up Let's Encrypt certificates..."
-    
+
     export DOMAIN="$DOMAIN"
     export EMAIL="$EMAIL"
     export STAGING="$STAGING"
-    
+
     ./nginx/certbot-setup.sh
-    
+
     success "SSL certificates configured"
 }
 
 # Stop existing services
 stop_services() {
     log "Stopping existing services..."
-    
+
     # Stop with multiple compose files
     docker-compose -f docker-compose.yml down --remove-orphans || true
     docker-compose -f docker-compose.production.yml down --remove-orphans || true
-    
+
     # Clean up unused containers and networks
     docker system prune -f
-    
+
     success "Services stopped"
 }
 
 # Build and start services
 start_services() {
     log "Building and starting services..."
-    
+
     # Build images
     info "Building Docker images..."
     docker-compose -f docker-compose.production.yml build --no-cache
-    
+
     # Start database first
     info "Starting database..."
     docker-compose -f docker-compose.production.yml up -d postgres redis
-    
+
     # Wait for database to be ready
     log "Waiting for database to be ready..."
     sleep 10
-    
+
     # Run migrations
     info "Running database migrations..."
     docker-compose -f docker-compose.production.yml run --rm migration
-    
+
     # Start application services
     info "Starting application services..."
     docker-compose -f docker-compose.production.yml up -d backend frontend
-    
+
     # Wait for application to be ready
     log "Waiting for application to be ready..."
     sleep 15
-    
+
     # Start nginx
     info "Starting nginx..."
     docker-compose -f docker-compose.production.yml up -d nginx
-    
+
     # Start monitoring services
     info "Starting monitoring services..."
     docker-compose -f docker-compose.production.yml up -d ssl-monitor
-    
+
     success "Services started"
 }
 
 # Test deployment
 test_deployment() {
     log "Testing deployment..."
-    
+
     # Test HTTP redirect
     log "Testing HTTP to HTTPS redirect..."
     if curl -I -s -L "http://$DOMAIN" | grep -q "301\|302"; then
@@ -229,7 +229,7 @@ test_deployment() {
     else
         warn "HTTP to HTTPS redirect may not be working"
     fi
-    
+
     # Test HTTPS connection
     log "Testing HTTPS connection..."
     if curl -I -s --connect-timeout 10 "https://$DOMAIN" | grep -q "200"; then
@@ -237,7 +237,7 @@ test_deployment() {
     else
         warn "HTTPS connection may not be working"
     fi
-    
+
     # Test API endpoint
     log "Testing API endpoint..."
     if curl -I -s --connect-timeout 10 "https://$DOMAIN/api/health" | grep -q "200"; then
@@ -245,24 +245,24 @@ test_deployment() {
     else
         warn "API endpoint may not be working"
     fi
-    
+
     # Test SSL configuration
     log "Testing SSL configuration..."
     DOMAIN="$DOMAIN" ./nginx/test-ssl.sh > /tmp/ssl-test.log 2>&1
-    
+
     if grep -q "PASS" /tmp/ssl-test.log; then
         success "SSL configuration tests passed"
     else
         warn "Some SSL configuration tests failed. Check /tmp/ssl-test.log for details"
     fi
-    
+
     success "Deployment testing completed"
 }
 
 # Set up monitoring
 setup_monitoring() {
     log "Setting up monitoring..."
-    
+
     # Create monitoring configuration
     cat > monitoring-config.yml << EOF
 version: '3.8'
@@ -275,7 +275,7 @@ services:
       - ./monitoring/prometheus.yml:/etc/prometheus/prometheus.yml
     networks:
       - freeagentics-network
-  
+
   grafana:
     image: grafana/grafana:latest
     ports:
@@ -289,19 +289,19 @@ networks:
   freeagentics-network:
     external: true
 EOF
-    
+
     # Start monitoring services
     docker-compose -f monitoring-config.yml up -d
-    
+
     success "Monitoring services started"
 }
 
 # Create deployment summary
 create_summary() {
     log "Creating deployment summary..."
-    
+
     local summary_file="deployment-summary-$(date +%Y%m%d-%H%M%S).md"
-    
+
     cat > "$summary_file" << EOF
 # FreeAgentics Production Deployment Summary
 
@@ -361,7 +361,7 @@ $(cat /tmp/ssl-test.log | head -20)
 - Backup: backup-*/
 - Summary: $summary_file
 EOF
-    
+
     success "Deployment summary created: $summary_file"
 }
 
@@ -375,40 +375,40 @@ cleanup() {
 # Main deployment function
 main() {
     log "Starting FreeAgentics production deployment with SSL..."
-    
+
     # Trap cleanup on exit
     trap cleanup EXIT
-    
+
     # Check permissions
     check_permissions
-    
+
     # Check prerequisites
     check_prerequisites
-    
+
     # Backup existing deployment
     backup_existing
-    
+
     # Generate DH parameters
     generate_dhparam
-    
+
     # Set up SSL certificates
     setup_ssl_certificates
-    
+
     # Stop existing services
     stop_services
-    
+
     # Start services
     start_services
-    
+
     # Test deployment
     test_deployment
-    
+
     # Set up monitoring
     setup_monitoring
-    
+
     # Create deployment summary
     create_summary
-    
+
     success "Production deployment completed successfully!"
     echo ""
     log "Access your application at: https://$DOMAIN"

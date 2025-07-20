@@ -23,7 +23,9 @@ import psutil
 project_root = Path(__file__).parent.parent.parent
 sys.path.insert(0, str(project_root))
 
-from agents.memory_optimization.agent_memory_optimizer import get_agent_optimizer
+from agents.memory_optimization.agent_memory_optimizer import (
+    get_agent_optimizer,
+)
 from agents.memory_optimization.memory_profiler import get_memory_profiler
 
 
@@ -48,7 +50,9 @@ class MockAgent:
             self.beliefs = np.ones(5000, dtype=np.float32) / 5000
             self.action_history = [f"action_{i}" for i in range(1000)]
             self.transition_matrix = np.eye(5000, dtype=np.float32)
-            self.computation_cache = {f"cache_{i}": np.random.rand(100, 100) for i in range(50)}
+            self.computation_cache = {
+                f"cache_{i}": np.random.rand(100, 100) for i in range(50)
+            }
 
         self.observations = np.random.rand(100, 10).astype(np.float32)
 
@@ -86,7 +90,9 @@ class AgentMemoryOptimizationValidationTest(unittest.TestCase):
         """Set up test environment."""
         # Clear any existing optimizations and reset global state
         import agents.memory_optimization.agent_memory_optimizer as aom
-        from agents.memory_optimization.agent_memory_optimizer import _global_optimizer
+        from agents.memory_optimization.agent_memory_optimizer import (
+            _global_optimizer,
+        )
 
         if aom._global_optimizer is not None:
             aom._global_optimizer._agents.clear()
@@ -98,7 +104,9 @@ class AgentMemoryOptimizationValidationTest(unittest.TestCase):
 
         # Track initial memory
         self.process = psutil.Process()
-        self.initial_memory = self.process.memory_info().rss / 1024 / 1024  # MB
+        self.initial_memory = (
+            self.process.memory_info().rss / 1024 / 1024
+        )  # MB
 
         # Clear any existing optimizations
         gc.collect()
@@ -123,8 +131,12 @@ class AgentMemoryOptimizationValidationTest(unittest.TestCase):
         optimized_agent_memory = optimized_memory.get_memory_usage_mb()
 
         print(f"Optimized agent memory: {optimized_agent_memory:.1f} MB")
-        print(f"Memory reduction: {initial_agent_memory - optimized_agent_memory:.1f} MB")
-        print(f"Reduction percentage: {(1 - optimized_agent_memory/initial_agent_memory)*100:.1f}%")
+        print(
+            f"Memory reduction: {initial_agent_memory - optimized_agent_memory:.1f} MB"
+        )
+        print(
+            f"Reduction percentage: {(1 - optimized_agent_memory/initial_agent_memory)*100:.1f}%"
+        )
 
         # Validate optimization targets
         self.assertLess(
@@ -166,7 +178,9 @@ class AgentMemoryOptimizationValidationTest(unittest.TestCase):
         memory_after = self.process.memory_info().rss / 1024 / 1024
 
         # Calculate per-agent memory usage
-        total_agent_memory = sum(opt.get_memory_usage_mb() for opt in optimized_agents)
+        total_agent_memory = sum(
+            opt.get_memory_usage_mb() for opt in optimized_agents
+        )
         avg_agent_memory = total_agent_memory / num_agents
 
         print(f"Total system memory before: {memory_before:.1f} MB")
@@ -182,7 +196,9 @@ class AgentMemoryOptimizationValidationTest(unittest.TestCase):
         print(f"\nOptimization statistics:")
         print(f"  Agents optimized: {stats['agents_optimized']}")
         print(f"  Target memory per agent: {stats['target_memory_mb']:.1f} MB")
-        print(f"  Actual memory per agent: {stats['actual_memory_mb']['mean']:.1f} MB")
+        print(
+            f"  Actual memory per agent: {stats['actual_memory_mb']['mean']:.1f} MB"
+        )
         print(
             f"  Memory range: {stats['actual_memory_mb']['min']:.1f} - {stats['actual_memory_mb']['max']:.1f} MB"
         )
@@ -195,7 +211,9 @@ class AgentMemoryOptimizationValidationTest(unittest.TestCase):
             f"Average agent memory {avg_agent_memory:.1f}MB exceeds 10MB target",
         )
         self.assertLess(
-            stats["actual_memory_mb"]["max"], 15.0, "No agent should exceed 15MB even in worst case"
+            stats["actual_memory_mb"]["max"],
+            15.0,
+            "No agent should exceed 15MB even in worst case",
         )
 
     def test_memory_leak_detection(self):
@@ -212,7 +230,9 @@ class AgentMemoryOptimizationValidationTest(unittest.TestCase):
             # Create agents
             agents = []
             for i in range(agents_per_cycle):
-                agent = MockAgent(f"cycle_{cycle}_agent_{i}", complexity="medium")
+                agent = MockAgent(
+                    f"cycle_{cycle}_agent_{i}", complexity="medium"
+                )
                 optimized = self.optimizer.optimize_agent(agent)
                 agents.append((agent, optimized))
 
@@ -237,7 +257,9 @@ class AgentMemoryOptimizationValidationTest(unittest.TestCase):
             memory_growth = memory_snapshots[-1] - memory_snapshots[0]
             growth_rate = memory_growth / num_cycles
 
-            print(f"Memory growth over {num_cycles} cycles: {memory_growth:.1f} MB")
+            print(
+                f"Memory growth over {num_cycles} cycles: {memory_growth:.1f} MB"
+            )
             print(f"Growth rate per cycle: {growth_rate:.2f} MB/cycle")
 
             # Validate no significant memory leaks
@@ -279,7 +301,10 @@ class AgentMemoryOptimizationValidationTest(unittest.TestCase):
         # Run concurrent operations
         start_time = time.time()
         with ThreadPoolExecutor(max_workers=10) as executor:
-            futures = [executor.submit(agent_worker, agent_data) for agent_data in agents]
+            futures = [
+                executor.submit(agent_worker, agent_data)
+                for agent_data in agents
+            ]
             results = [future.result() for future in futures]
 
         end_time = time.time()
@@ -293,7 +318,9 @@ class AgentMemoryOptimizationValidationTest(unittest.TestCase):
         print(f"Total agents: {num_agents}")
         print(f"Total operations: {total_operations}")
         print(f"Execution time: {end_time - start_time:.2f} seconds")
-        print(f"Operations per second: {total_operations / (end_time - start_time):.0f}")
+        print(
+            f"Operations per second: {total_operations / (end_time - start_time):.0f}"
+        )
         print(f"Memory before: {initial_memory:.1f} MB")
         print(f"Memory after: {final_memory:.1f} MB")
         print(f"Memory increase: {final_memory - initial_memory:.1f} MB")
@@ -325,27 +352,43 @@ class AgentMemoryOptimizationValidationTest(unittest.TestCase):
         if optimized._beliefs is not None:
             compressed_size = optimized._beliefs.memory_usage() * 1024 * 1024
             compression_ratio = (
-                original_beliefs_size / compressed_size if compressed_size > 0 else 1.0
+                original_beliefs_size / compressed_size
+                if compressed_size > 0
+                else 1.0
             )
 
-            print(f"Original beliefs size: {original_beliefs_size / 1024:.1f} KB")
+            print(
+                f"Original beliefs size: {original_beliefs_size / 1024:.1f} KB"
+            )
             print(f"Compressed beliefs size: {compressed_size / 1024:.1f} KB")
             print(f"Compression ratio: {compression_ratio:.2f}x")
 
-            self.assertGreater(compression_ratio, 1.0, "Beliefs should be compressed")
+            self.assertGreater(
+                compression_ratio, 1.0, "Beliefs should be compressed"
+            )
 
         # Test action history compression
         if optimized._action_history is not None:
-            compression_ratio = optimized._action_history.get_compression_ratio()
-            print(f"Action history compression ratio: {compression_ratio:.2f}x")
+            compression_ratio = (
+                optimized._action_history.get_compression_ratio()
+            )
+            print(
+                f"Action history compression ratio: {compression_ratio:.2f}x"
+            )
 
-            self.assertGreater(compression_ratio, 1.0, "Action history should be compressed")
+            self.assertGreater(
+                compression_ratio, 1.0, "Action history should be compressed"
+            )
 
         # Test shared parameters
-        self.assertIsNotNone(optimized._shared_params, "Shared parameters should be available")
+        self.assertIsNotNone(
+            optimized._shared_params, "Shared parameters should be available"
+        )
 
         # Test computation pool
-        self.assertIsNotNone(optimized._computation_pool, "Computation pool should be available")
+        self.assertIsNotNone(
+            optimized._computation_pool, "Computation pool should be available"
+        )
 
         print("All memory optimization components are working correctly")
 
@@ -380,16 +423,22 @@ class AgentMemoryOptimizationValidationTest(unittest.TestCase):
         memory_after = self.process.memory_info().rss / 1024 / 1024
 
         # Calculate efficiency metrics
-        total_agent_memory = sum(opt.get_memory_usage_mb() for opt in optimized_agents)
+        total_agent_memory = sum(
+            opt.get_memory_usage_mb() for opt in optimized_agents
+        )
         avg_agent_memory = total_agent_memory / num_agents
 
         # Calculate memory efficiency as percentage of total system memory used by agents
-        system_memory_used = max(memory_after - self.initial_memory, 1.0)  # Avoid division by zero
+        system_memory_used = max(
+            memory_after - self.initial_memory, 1.0
+        )  # Avoid division by zero
         memory_efficiency = (total_agent_memory / system_memory_used) * 100
 
         print(f"Number of agents: {num_agents}")
         print(f"Optimization time: {optimization_time:.2f} seconds")
-        print(f"Time per agent: {optimization_time / num_agents * 1000:.1f} ms")
+        print(
+            f"Time per agent: {optimization_time / num_agents * 1000:.1f} ms"
+        )
         print(f"System memory before: {memory_before:.1f} MB")
         print(f"System memory after: {memory_after:.1f} MB")
         print(f"Total agent memory: {total_agent_memory:.1f} MB")
@@ -414,12 +463,16 @@ class AgentMemoryOptimizationValidationTest(unittest.TestCase):
             f"System memory per agent {memory_per_agent_system:.1f}MB should be <20MB",
         )
         self.assertLess(
-            optimization_time / num_agents, 0.1, "Agent optimization should take <100ms per agent"
+            optimization_time / num_agents,
+            0.1,
+            "Agent optimization should take <100ms per agent",
         )
 
         print(f"✓ System efficiently handles {num_agents} agents")
         print(f"✓ Memory efficiency >50%: {memory_efficiency:.1f}%")
-        print(f"✓ All agents under 10MB target: {avg_agent_memory:.1f}MB average")
+        print(
+            f"✓ All agents under 10MB target: {avg_agent_memory:.1f}MB average"
+        )
 
     def _estimate_agent_memory(self, agent) -> float:
         """Estimate memory usage of an agent in MB."""
@@ -436,7 +489,7 @@ class AgentMemoryOptimizationValidationTest(unittest.TestCase):
                         total_bytes += len(str(attr_value))
                     elif isinstance(attr_value, str):
                         total_bytes += len(attr_value)
-                except:
+                except (AttributeError, TypeError):
                     pass
 
         return total_bytes / (1024 * 1024)
@@ -454,7 +507,9 @@ def run_memory_optimization_validation():
     print("=" * 60)
 
     # Create test suite
-    suite = unittest.TestLoader().loadTestsFromTestCase(AgentMemoryOptimizationValidationTest)
+    suite = unittest.TestLoader().loadTestsFromTestCase(
+        AgentMemoryOptimizationValidationTest
+    )
 
     # Run tests
     runner = unittest.TextTestRunner(verbosity=2)

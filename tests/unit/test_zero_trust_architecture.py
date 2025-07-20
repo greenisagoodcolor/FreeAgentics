@@ -32,6 +32,7 @@ from auth.zero_trust_architecture import (
 from observability.security_monitoring import AttackType
 
 
+@pytest.mark.slow
 class TestServiceIdentity:
     """Test suite for ServiceIdentity."""
 
@@ -95,6 +96,7 @@ class TestServiceIdentity:
         assert not identity.can_perform_operation("admin")
 
 
+@pytest.mark.slow
 class TestZeroTrustPolicy:
     """Test suite for ZeroTrustPolicy."""
 
@@ -170,6 +172,7 @@ class TestZeroTrustPolicy:
         assert not policy.matches_request("service-a", "service-b", "admin")
 
 
+@pytest.mark.slow
 class TestCertificateManager:
     """Test suite for CertificateManager."""
 
@@ -185,27 +188,37 @@ class TestCertificateManager:
         """Test service certificate issuance."""
         manager = CertificateManager()
 
-        cert_info = manager.issue_service_certificate("test-service", ServiceType.API)
+        cert_info = manager.issue_service_certificate(
+            "test-service", ServiceType.API
+        )
 
         assert "certificate" in cert_info
         assert "private_key" in cert_info
         assert "ca_certificate" in cert_info
         assert "fingerprint" in cert_info
-        assert cert_info["certificate"].startswith("-----BEGIN CERTIFICATE-----")
-        assert cert_info["private_key"].startswith("-----BEGIN PRIVATE KEY-----")
+        assert cert_info["certificate"].startswith(
+            "-----BEGIN CERTIFICATE-----"
+        )
+        assert cert_info["private_key"].startswith(
+            "-----BEGIN PRIVATE KEY-----"
+        )
 
     def test_certificate_verification(self):
         """Test certificate verification."""
         manager = CertificateManager()
 
         # Issue a certificate
-        cert_info = manager.issue_service_certificate("test-service", ServiceType.API)
+        cert_info = manager.issue_service_certificate(
+            "test-service", ServiceType.API
+        )
 
         # Verify the certificate
         assert manager.verify_certificate(cert_info["certificate"])
 
         # Test with invalid certificate
-        invalid_cert = "-----BEGIN CERTIFICATE-----\nINVALID\n-----END CERTIFICATE-----"
+        invalid_cert = (
+            "-----BEGIN CERTIFICATE-----\nINVALID\n-----END CERTIFICATE-----"
+        )
         assert not manager.verify_certificate(invalid_cert)
 
     def test_certificate_info_extraction(self):
@@ -213,7 +226,9 @@ class TestCertificateManager:
         manager = CertificateManager()
 
         # Issue a certificate
-        cert_info = manager.issue_service_certificate("test-service", ServiceType.API)
+        cert_info = manager.issue_service_certificate(
+            "test-service", ServiceType.API
+        )
 
         # Extract certificate info
         info = manager.get_certificate_info(cert_info["certificate"])
@@ -227,6 +242,7 @@ class TestCertificateManager:
         assert info["subject"]["commonName"] == "test-service"
 
 
+@pytest.mark.slow
 class TestZeroTrustPolicyEngine:
     """Test suite for ZeroTrustPolicyEngine."""
 
@@ -272,7 +288,10 @@ class TestZeroTrustPolicyEngine:
             "service-a", ServiceType.API, NetworkZone.DMZ, TrustLevel.MEDIUM
         )
         policy_engine.register_service(
-            "service-b", ServiceType.DATABASE, NetworkZone.INTERNAL, TrustLevel.HIGH
+            "service-b",
+            ServiceType.DATABASE,
+            NetworkZone.INTERNAL,
+            TrustLevel.HIGH,
         )
 
         # Add policy
@@ -289,7 +308,9 @@ class TestZeroTrustPolicyEngine:
         policy_engine.add_policy(policy)
 
         # Evaluate request
-        is_authorized, reason = policy_engine.evaluate_request("service-a", "service-b", "read", {})
+        is_authorized, reason = policy_engine.evaluate_request(
+            "service-a", "service-b", "read", {}
+        )
 
         assert is_authorized
         assert reason == "Request authorized"
@@ -301,7 +322,10 @@ class TestZeroTrustPolicyEngine:
             "service-a", ServiceType.API, NetworkZone.DMZ, TrustLevel.LOW
         )
         policy_engine.register_service(
-            "service-b", ServiceType.DATABASE, NetworkZone.INTERNAL, TrustLevel.HIGH
+            "service-b",
+            ServiceType.DATABASE,
+            NetworkZone.INTERNAL,
+            TrustLevel.HIGH,
         )
 
         # Add policy with high trust requirement
@@ -318,7 +342,9 @@ class TestZeroTrustPolicyEngine:
         policy_engine.add_policy(policy)
 
         # Evaluate request
-        is_authorized, reason = policy_engine.evaluate_request("service-a", "service-b", "read", {})
+        is_authorized, reason = policy_engine.evaluate_request(
+            "service-a", "service-b", "read", {}
+        )
 
         assert not is_authorized
         assert "trust level" in reason.lower()
@@ -326,13 +352,19 @@ class TestZeroTrustPolicyEngine:
     def test_network_zone_access_control(self, policy_engine):
         """Test network zone access control."""
         # Test DMZ to Internal access (should be allowed)
-        assert policy_engine._check_network_zone_access(NetworkZone.DMZ, NetworkZone.INTERNAL)
+        assert policy_engine._check_network_zone_access(
+            NetworkZone.DMZ, NetworkZone.INTERNAL
+        )
 
         # Test Internal to DMZ access (should be denied)
-        assert not policy_engine._check_network_zone_access(NetworkZone.INTERNAL, NetworkZone.DMZ)
+        assert not policy_engine._check_network_zone_access(
+            NetworkZone.INTERNAL, NetworkZone.DMZ
+        )
 
         # Test Isolated zone access (should only access itself)
-        assert policy_engine._check_network_zone_access(NetworkZone.ISOLATED, NetworkZone.ISOLATED)
+        assert policy_engine._check_network_zone_access(
+            NetworkZone.ISOLATED, NetworkZone.ISOLATED
+        )
         assert not policy_engine._check_network_zone_access(
             NetworkZone.ISOLATED, NetworkZone.INTERNAL
         )
@@ -340,15 +372,25 @@ class TestZeroTrustPolicyEngine:
     def test_trust_level_hierarchy(self, policy_engine):
         """Test trust level hierarchy checking."""
         # Higher trust level should meet lower requirement
-        assert policy_engine._check_trust_level(TrustLevel.HIGH, TrustLevel.MEDIUM)
-        assert policy_engine._check_trust_level(TrustLevel.TRUSTED, TrustLevel.LOW)
+        assert policy_engine._check_trust_level(
+            TrustLevel.HIGH, TrustLevel.MEDIUM
+        )
+        assert policy_engine._check_trust_level(
+            TrustLevel.TRUSTED, TrustLevel.LOW
+        )
 
         # Lower trust level should not meet higher requirement
-        assert not policy_engine._check_trust_level(TrustLevel.LOW, TrustLevel.HIGH)
-        assert not policy_engine._check_trust_level(TrustLevel.MEDIUM, TrustLevel.TRUSTED)
+        assert not policy_engine._check_trust_level(
+            TrustLevel.LOW, TrustLevel.HIGH
+        )
+        assert not policy_engine._check_trust_level(
+            TrustLevel.MEDIUM, TrustLevel.TRUSTED
+        )
 
         # Same trust level should meet requirement
-        assert policy_engine._check_trust_level(TrustLevel.MEDIUM, TrustLevel.MEDIUM)
+        assert policy_engine._check_trust_level(
+            TrustLevel.MEDIUM, TrustLevel.MEDIUM
+        )
 
     @pytest.mark.asyncio
     async def test_continuous_verification(self, policy_engine):
@@ -359,7 +401,9 @@ class TestZeroTrustPolicyEngine:
         )
 
         # Mock ML threat detector
-        with patch("auth.zero_trust_architecture.get_ml_threat_detector") as mock_detector:
+        with patch(
+            "auth.zero_trust_architecture.get_ml_threat_detector"
+        ) as mock_detector:
             mock_prediction = Mock()
             mock_prediction.risk_score = 0.3
             mock_prediction.threat_level = Mock()
@@ -379,7 +423,9 @@ class TestZeroTrustPolicyEngine:
                 "ip_address": "192.168.1.100",
             }
 
-            trust_level = await policy_engine.continuous_verification("session123", request_data)
+            trust_level = await policy_engine.continuous_verification(
+                "session123", request_data
+            )
 
             assert trust_level in [
                 TrustLevel.UNTRUSTED,
@@ -397,7 +443,10 @@ class TestZeroTrustPolicyEngine:
             "service-a", ServiceType.API, NetworkZone.DMZ, TrustLevel.MEDIUM
         )
         policy_engine.register_service(
-            "service-b", ServiceType.DATABASE, NetworkZone.INTERNAL, TrustLevel.HIGH
+            "service-b",
+            ServiceType.DATABASE,
+            NetworkZone.INTERNAL,
+            TrustLevel.HIGH,
         )
 
         # Add policy
@@ -436,22 +485,39 @@ class TestZeroTrustPolicyEngine:
             allowed_operations=["read"],
             network_zones=[NetworkZone.DMZ],
             minimum_trust_level=TrustLevel.MEDIUM,
-            conditions={"ip_whitelist": ["192.168.1.0/24"], "user_roles": ["admin", "user"]},
+            conditions={
+                "ip_whitelist": ["192.168.1.0/24"],
+                "user_roles": ["admin", "user"],
+            },
         )
 
         # Test matching conditions
-        matching_context = {"client_ip": "192.168.1.100", "user_roles": ["admin"]}
+        matching_context = {
+            "client_ip": "192.168.1.100",
+            "user_roles": ["admin"],
+        }
         assert policy_engine._check_policy_conditions(policy, matching_context)
 
         # Test non-matching IP
-        non_matching_context = {"client_ip": "10.0.0.1", "user_roles": ["admin"]}
-        assert not policy_engine._check_policy_conditions(policy, non_matching_context)
+        non_matching_context = {
+            "client_ip": "10.0.0.1",
+            "user_roles": ["admin"],
+        }
+        assert not policy_engine._check_policy_conditions(
+            policy, non_matching_context
+        )
 
         # Test non-matching roles
-        non_matching_roles = {"client_ip": "192.168.1.100", "user_roles": ["guest"]}
-        assert not policy_engine._check_policy_conditions(policy, non_matching_roles)
+        non_matching_roles = {
+            "client_ip": "192.168.1.100",
+            "user_roles": ["guest"],
+        }
+        assert not policy_engine._check_policy_conditions(
+            policy, non_matching_roles
+        )
 
 
+@pytest.mark.slow
 class TestIdentityAwareProxy:
     """Test suite for IdentityAwareProxy."""
 
@@ -460,7 +526,9 @@ class TestIdentityAwareProxy:
         """Mock policy engine."""
         engine = Mock()
         engine.certificate_manager = Mock()
-        engine.evaluate_request = Mock(return_value=(True, "Request authorized"))
+        engine.evaluate_request = Mock(
+            return_value=(True, "Request authorized")
+        )
         engine.continuous_verification = Mock(return_value=TrustLevel.MEDIUM)
         return engine
 
@@ -475,7 +543,10 @@ class TestIdentityAwareProxy:
         request = Mock(spec=Request)
         request.method = "GET"
         request.url.path = "/api/v1/test"
-        request.headers = {"X-Client-Certificate": "mock-certificate", "user-agent": "test-agent"}
+        request.headers = {
+            "X-Client-Certificate": "mock-certificate",
+            "user-agent": "test-agent",
+        }
         request.client.host = "192.168.1.100"
         return request
 
@@ -483,7 +554,9 @@ class TestIdentityAwareProxy:
     async def test_validate_request_success(self, proxy, mock_request):
         """Test successful request validation."""
         # Configure mocks
-        proxy.policy_engine.certificate_manager.verify_certificate.return_value = True
+        proxy.policy_engine.certificate_manager.verify_certificate.return_value = (
+            True
+        )
         proxy.policy_engine.certificate_manager.get_certificate_info.return_value = {
             "subject": {"commonName": "test-service"}
         }
@@ -492,10 +565,14 @@ class TestIdentityAwareProxy:
         async def mock_continuous_verification(session_id, request_context):
             return TrustLevel.MEDIUM
 
-        proxy.policy_engine.continuous_verification = mock_continuous_verification
+        proxy.policy_engine.continuous_verification = (
+            mock_continuous_verification
+        )
 
         # Validate request
-        result = await proxy.validate_request(mock_request, "target-service", "read")
+        result = await proxy.validate_request(
+            mock_request, "target-service", "read"
+        )
 
         assert result is True
         proxy.policy_engine.evaluate_request.assert_called_once()
@@ -508,20 +585,28 @@ class TestIdentityAwareProxy:
 
         # Should raise HTTPException
         with pytest.raises(HTTPException) as exc_info:
-            await proxy.validate_request(mock_request, "target-service", "read")
+            await proxy.validate_request(
+                mock_request, "target-service", "read"
+            )
 
         assert exc_info.value.status_code == 401
         assert "certificate required" in exc_info.value.detail.lower()
 
     @pytest.mark.asyncio
-    async def test_validate_request_invalid_certificate(self, proxy, mock_request):
+    async def test_validate_request_invalid_certificate(
+        self, proxy, mock_request
+    ):
         """Test request validation with invalid certificate."""
         # Configure mock to reject certificate
-        proxy.policy_engine.certificate_manager.verify_certificate.return_value = False
+        proxy.policy_engine.certificate_manager.verify_certificate.return_value = (
+            False
+        )
 
         # Should raise HTTPException
         with pytest.raises(HTTPException) as exc_info:
-            await proxy.validate_request(mock_request, "target-service", "read")
+            await proxy.validate_request(
+                mock_request, "target-service", "read"
+            )
 
         assert exc_info.value.status_code == 401
         assert "invalid" in exc_info.value.detail.lower()
@@ -530,15 +615,22 @@ class TestIdentityAwareProxy:
     async def test_validate_request_policy_denial(self, proxy, mock_request):
         """Test request validation with policy denial."""
         # Configure mocks
-        proxy.policy_engine.certificate_manager.verify_certificate.return_value = True
+        proxy.policy_engine.certificate_manager.verify_certificate.return_value = (
+            True
+        )
         proxy.policy_engine.certificate_manager.get_certificate_info.return_value = {
             "subject": {"commonName": "test-service"}
         }
-        proxy.policy_engine.evaluate_request.return_value = (False, "Access denied")
+        proxy.policy_engine.evaluate_request.return_value = (
+            False,
+            "Access denied",
+        )
 
         # Should raise HTTPException
         with pytest.raises(HTTPException) as exc_info:
-            await proxy.validate_request(mock_request, "target-service", "read")
+            await proxy.validate_request(
+                mock_request, "target-service", "read"
+            )
 
         assert exc_info.value.status_code == 403
         assert "access denied" in exc_info.value.detail.lower()
@@ -547,7 +639,9 @@ class TestIdentityAwareProxy:
     async def test_validate_request_low_trust(self, proxy, mock_request):
         """Test request validation with low trust level."""
         # Configure mocks
-        proxy.policy_engine.certificate_manager.verify_certificate.return_value = True
+        proxy.policy_engine.certificate_manager.verify_certificate.return_value = (
+            True
+        )
         proxy.policy_engine.certificate_manager.get_certificate_info.return_value = {
             "subject": {"commonName": "test-service"}
         }
@@ -556,11 +650,15 @@ class TestIdentityAwareProxy:
         async def mock_continuous_verification(session_id, request_context):
             return TrustLevel.UNTRUSTED
 
-        proxy.policy_engine.continuous_verification = mock_continuous_verification
+        proxy.policy_engine.continuous_verification = (
+            mock_continuous_verification
+        )
 
         # Should raise HTTPException
         with pytest.raises(HTTPException) as exc_info:
-            await proxy.validate_request(mock_request, "target-service", "read")
+            await proxy.validate_request(
+                mock_request, "target-service", "read"
+            )
 
         assert exc_info.value.status_code == 403
         assert "trust level" in exc_info.value.detail.lower()
@@ -601,6 +699,7 @@ class TestIdentityAwareProxy:
         assert session_id == session_id2
 
 
+@pytest.mark.slow
 class TestContinuousVerificationContext:
     """Test suite for ContinuousVerificationContext."""
 
@@ -662,6 +761,7 @@ class TestContinuousVerificationContext:
         assert context.verification_count == 2
 
 
+@pytest.mark.slow
 class TestGlobalFunctions:
     """Test suite for global functions."""
 
@@ -730,13 +830,16 @@ class TestGlobalFunctions:
         assert admin_limits["requests_per_second"] == 5  # More restrictive
 
 
+@pytest.mark.slow
 class TestErrorHandling:
     """Test suite for error handling in zero-trust architecture."""
 
     def test_certificate_manager_error_handling(self):
         """Test certificate manager error handling."""
         # Test with invalid paths
-        manager = CertificateManager(ca_cert_path="/invalid/path", ca_key_path="/invalid/path")
+        manager = CertificateManager(
+            ca_cert_path="/invalid/path", ca_key_path="/invalid/path"
+        )
 
         # Should still work by creating new certificates
         assert manager.ca_cert is not None
@@ -750,7 +853,9 @@ class TestErrorHandling:
         assert not manager.verify_certificate("invalid certificate")
 
         # Test with malformed PEM
-        malformed_pem = "-----BEGIN CERTIFICATE-----\nMALFORMED\n-----END CERTIFICATE-----"
+        malformed_pem = (
+            "-----BEGIN CERTIFICATE-----\nMALFORMED\n-----END CERTIFICATE-----"
+        )
         assert not manager.verify_certificate(malformed_pem)
 
     @pytest.mark.asyncio
@@ -758,7 +863,9 @@ class TestErrorHandling:
         """Test identity-aware proxy error handling."""
         # Create proxy with mock engine that raises exception
         mock_engine = Mock()
-        mock_engine.certificate_manager.verify_certificate.side_effect = Exception("Test error")
+        mock_engine.certificate_manager.verify_certificate.side_effect = (
+            Exception("Test error")
+        )
 
         proxy = IdentityAwareProxy(mock_engine)
 
@@ -803,7 +910,9 @@ class TestErrorHandling:
         )
 
         engine.service_identities["expired-service"] = service_identity
-        engine.register_service("target-service", ServiceType.API, NetworkZone.DMZ)
+        engine.register_service(
+            "target-service", ServiceType.API, NetworkZone.DMZ
+        )
 
         # Evaluate request
         is_authorized, reason = engine.evaluate_request(

@@ -75,7 +75,7 @@ test_warn() {
 # Setup environment variables from .env.production
 setup_environment() {
     info "Setting up environment variables..."
-    
+
     if [ -f ".env.production" ]; then
         # Export environment variables
         export $(grep -v '^#' .env.production | xargs)
@@ -84,7 +84,7 @@ setup_environment() {
         test_fail "Environment setup" ".env.production file not found"
         return 1
     fi
-    
+
     # Validate critical variables
     local required_vars=(
         "POSTGRES_PASSWORD"
@@ -93,7 +93,7 @@ setup_environment() {
         "SECRET_KEY"
         "JWT_SECRET"
     )
-    
+
     for var in "${required_vars[@]}"; do
         if [ -z "${!var:-}" ]; then
             test_fail "Required variable $var" "Not set in environment"
@@ -107,25 +107,25 @@ setup_environment() {
 # Validate Docker production build
 validate_docker_build() {
     info "Validating Docker production build..."
-    
+
     # Test Dockerfile.production exists
     if [ -f "Dockerfile.production" ]; then
         test_pass "Dockerfile.production exists"
-        
+
         # Check for multi-stage build
         if grep -q "FROM.*as.*" Dockerfile.production; then
             test_pass "Multi-stage build configured"
         else
             test_warn "Multi-stage build" "Not detected in Dockerfile.production"
         fi
-        
+
         # Check for non-root user
         if grep -q "USER app\|USER 1000" Dockerfile.production; then
             test_pass "Non-root user configured"
         else
             test_fail "Security: Non-root user" "Container runs as root"
         fi
-        
+
         # Check for health check
         if grep -q "HEALTHCHECK" Dockerfile.production; then
             test_pass "Health check configured"
@@ -136,25 +136,25 @@ validate_docker_build() {
         test_fail "Dockerfile.production" "File not found"
         return 1
     fi
-    
+
     # Validate docker-compose.production.yml
     if [ -f "docker-compose.production.yml" ]; then
         test_pass "docker-compose.production.yml exists"
-        
+
         # Test configuration validity
         if docker-compose -f docker-compose.production.yml config > /dev/null 2>&1; then
             test_pass "Docker Compose configuration is valid"
         else
             test_fail "Docker Compose configuration" "Invalid configuration"
         fi
-        
+
         # Check for resource limits
         if grep -q "resources:" docker-compose.production.yml; then
             test_pass "Resource limits configured"
         else
             test_warn "Resource limits" "Not configured in compose file"
         fi
-        
+
         # Check for security settings
         if grep -q "read_only: true" docker-compose.production.yml; then
             test_pass "Read-only containers configured"
@@ -170,18 +170,18 @@ validate_docker_build() {
 # Validate database infrastructure
 validate_database_infrastructure() {
     info "Validating database infrastructure..."
-    
+
     # Check PostgreSQL configuration
     if grep -q "postgres:" docker-compose.production.yml; then
         test_pass "PostgreSQL service configured"
-        
+
         # Check for health check
         if grep -A 10 "postgres:" docker-compose.production.yml | grep -q "healthcheck:"; then
             test_pass "PostgreSQL health check configured"
         else
             test_warn "PostgreSQL health check" "Not configured"
         fi
-        
+
         # Check for persistent volumes
         if grep -q "postgres_data:" docker-compose.production.yml; then
             test_pass "PostgreSQL persistent volumes configured"
@@ -191,11 +191,11 @@ validate_database_infrastructure() {
     else
         test_fail "PostgreSQL service" "Not found in compose file"
     fi
-    
+
     # Check Redis configuration
     if grep -q "redis:" docker-compose.production.yml; then
         test_pass "Redis service configured"
-        
+
         # Check for persistence
         if grep -q "redis_data:" docker-compose.production.yml; then
             test_pass "Redis persistent volumes configured"
@@ -205,14 +205,14 @@ validate_database_infrastructure() {
     else
         test_fail "Redis service" "Not found in compose file"
     fi
-    
+
     # Check Alembic migrations
     if [ -f "alembic.ini" ] && [ -d "alembic/versions" ]; then
         test_pass "Database migrations configured"
     else
         test_fail "Database migrations" "Alembic not properly configured"
     fi
-    
+
     # Check backup scripts
     if [ -f "scripts/database-backup.sh" ]; then
         test_pass "Database backup scripts available"
@@ -224,18 +224,18 @@ validate_database_infrastructure() {
 # Validate SSL/TLS configuration
 validate_ssl_tls() {
     info "Validating SSL/TLS configuration..."
-    
+
     # Check nginx configuration
     if [ -f "nginx/nginx.conf" ]; then
         test_pass "Nginx configuration file exists"
-        
+
         # Check SSL protocols
         if grep -q "ssl_protocols TLSv1.2 TLSv1.3" nginx/nginx.conf; then
             test_pass "Modern SSL protocols configured"
         else
             test_fail "SSL protocols" "Modern protocols not configured"
         fi
-        
+
         # Check security headers
         local security_headers=(
             "X-Frame-Options"
@@ -244,7 +244,7 @@ validate_ssl_tls() {
             "Strict-Transport-Security"
             "Content-Security-Policy"
         )
-        
+
         for header in "${security_headers[@]}"; do
             if grep -q "$header" nginx/nginx.conf; then
                 test_pass "Security header: $header"
@@ -252,7 +252,7 @@ validate_ssl_tls() {
                 test_fail "Security header: $header" "Not configured"
             fi
         done
-        
+
         # Check rate limiting
         if grep -q "limit_req_zone" nginx/nginx.conf; then
             test_pass "Rate limiting configured"
@@ -262,11 +262,11 @@ validate_ssl_tls() {
     else
         test_fail "Nginx configuration" "nginx/nginx.conf not found"
     fi
-    
+
     # Check SSL certificates
     if [ -f "nginx/ssl/cert.pem" ] && [ -f "nginx/ssl/key.pem" ]; then
         test_pass "SSL certificates found"
-        
+
         # Check certificate validity
         if openssl x509 -in nginx/ssl/cert.pem -noout -checkend 86400; then
             test_pass "SSL certificate validity"
@@ -276,21 +276,21 @@ validate_ssl_tls() {
     else
         test_warn "SSL certificates" "Certificate files not found (expected for Let's Encrypt)"
     fi
-    
+
     # Check DH parameters
     if [ -f "nginx/dhparam.pem" ]; then
         test_pass "DH parameters configured"
     else
         test_warn "DH parameters" "dhparam.pem not found"
     fi
-    
+
     # Check SSL management scripts
     local ssl_scripts=(
         "nginx/certbot-setup.sh"
         "nginx/monitor-ssl.sh"
         "nginx/test-ssl.sh"
     )
-    
+
     for script in "${ssl_scripts[@]}"; do
         if [ -f "$script" ]; then
             test_pass "SSL script: $(basename "$script")"
@@ -303,39 +303,39 @@ validate_ssl_tls() {
 # Validate deployment pipeline
 validate_deployment_pipeline() {
     info "Validating deployment pipeline..."
-    
+
     # Check main deployment script
     if [ -f "deploy-production.sh" ]; then
         test_pass "Main deployment script exists"
-        
+
         # Check script permissions
         if [ -x "deploy-production.sh" ]; then
             test_pass "Deploy script is executable"
         else
             test_fail "Deploy script permissions" "Script not executable"
         fi
-        
+
         # Check script syntax
         if bash -n deploy-production.sh; then
             test_pass "Deploy script syntax is valid"
         else
             test_fail "Deploy script syntax" "Syntax errors found"
         fi
-        
+
         # Check for zero-downtime deployment
         if grep -q "zero_downtime\|rolling" deploy-production.sh; then
             test_pass "Zero-downtime deployment configured"
         else
             test_warn "Zero-downtime deployment" "Not explicitly configured"
         fi
-        
+
         # Check for rollback capability
         if grep -q "rollback" deploy-production.sh; then
             test_pass "Rollback capability implemented"
         else
             test_warn "Rollback capability" "Not found in deploy script"
         fi
-        
+
         # Check for health checks
         if grep -q "health" deploy-production.sh; then
             test_pass "Health check verification in deployment"
@@ -345,11 +345,11 @@ validate_deployment_pipeline() {
     else
         test_fail "Main deployment script" "deploy-production.sh not found"
     fi
-    
+
     # Check SSL deployment script
     if [ -f "deploy-production-ssl.sh" ]; then
         test_pass "SSL deployment script exists"
-        
+
         if [ -x "deploy-production-ssl.sh" ]; then
             test_pass "SSL deploy script is executable"
         else
@@ -363,11 +363,11 @@ validate_deployment_pipeline() {
 # Validate monitoring and alerting
 validate_monitoring() {
     info "Validating monitoring and alerting..."
-    
+
     # Check Prometheus configuration
     if [ -f "monitoring/prometheus-production.yml" ]; then
         test_pass "Prometheus production configuration exists"
-        
+
         # Validate YAML syntax
         if python3 -c "import yaml; yaml.safe_load(open('monitoring/prometheus-production.yml'))" 2>/dev/null; then
             test_pass "Prometheus configuration syntax is valid"
@@ -377,21 +377,21 @@ validate_monitoring() {
     else
         test_fail "Prometheus configuration" "monitoring/prometheus-production.yml not found"
     fi
-    
+
     # Check alerting rules
     if [ -d "monitoring/rules" ] && [ "$(ls -A monitoring/rules 2>/dev/null)" ]; then
         test_pass "Alerting rules configured"
     else
         test_warn "Alerting rules" "No alerting rules found"
     fi
-    
+
     # Check Grafana dashboards
     if [ -d "monitoring/grafana/dashboards" ]; then
         test_pass "Grafana dashboards directory exists"
     else
         test_warn "Grafana dashboards" "Dashboard directory not found"
     fi
-    
+
     # Check Alertmanager configuration
     if [ -f "monitoring/alertmanager.yml" ]; then
         test_pass "Alertmanager configuration exists"
@@ -403,11 +403,11 @@ validate_monitoring() {
 # Validate backup and disaster recovery
 validate_backup_disaster_recovery() {
     info "Validating backup and disaster recovery..."
-    
+
     # Check backup scripts
     if [ -f "scripts/database-backup.sh" ]; then
         test_pass "Database backup script exists"
-        
+
         # Check script syntax
         if bash -n scripts/database-backup.sh; then
             test_pass "Database backup script syntax is valid"
@@ -417,14 +417,14 @@ validate_backup_disaster_recovery() {
     else
         test_warn "Database backup script" "scripts/database-backup.sh not found"
     fi
-    
+
     # Check backup directory configuration
     if grep -q "backup" .env.production; then
         test_pass "Backup configuration in environment"
     else
         test_warn "Backup configuration" "No backup settings in environment"
     fi
-    
+
     # Check for backup encryption
     if grep -q "BACKUP_PASSWORD\|BACKUP_ENCRYPTION" .env.production; then
         test_pass "Backup encryption configured"
@@ -436,28 +436,28 @@ validate_backup_disaster_recovery() {
 # Test Makefile commands
 test_makefile_commands() {
     info "Testing Makefile commands..."
-    
+
     # Test make docker-build (dry run)
     if make -n docker-build > /dev/null 2>&1; then
         test_pass "make docker-build command available"
     else
         test_fail "make docker-build" "Command not available"
     fi
-    
+
     # Test make docker-up (dry run)
     if make -n docker-up > /dev/null 2>&1; then
         test_pass "make docker-up command available"
     else
         test_fail "make docker-up" "Command not available"
     fi
-    
+
     # Test make prod-env
     if make prod-env > /dev/null 2>&1; then
         test_pass "make prod-env command successful"
     else
         test_warn "make prod-env" "Command failed or not available"
     fi
-    
+
     # Test make security-audit (dry run)
     if make -n security-audit > /dev/null 2>&1; then
         test_pass "make security-audit command available"
@@ -469,12 +469,12 @@ test_makefile_commands() {
 # Generate comprehensive validation report
 generate_validation_report() {
     info "Generating validation report..."
-    
+
     local success_rate=0
     if [ $TESTS_TOTAL -gt 0 ]; then
         success_rate=$(awk "BEGIN {printf \"%.2f\", ($TESTS_PASSED/$TESTS_TOTAL)*100}")
     fi
-    
+
     cat > "$REPORT_FILE" << EOF
 {
     "validation_info": {
@@ -525,7 +525,7 @@ generate_validation_report() {
     }
 }
 EOF
-    
+
     success "Validation report generated: $REPORT_FILE"
 }
 
@@ -544,13 +544,13 @@ print_summary() {
     echo -e "Passed: ${GREEN}$TESTS_PASSED${NC}"
     echo -e "Failed: ${RED}$TESTS_FAILED${NC}"
     echo -e "Warnings: ${YELLOW}$TESTS_WARNING${NC}"
-    
+
     if [ $TESTS_TOTAL -gt 0 ]; then
         local success_rate
         success_rate=$(awk "BEGIN {printf \"%.1f\", ($TESTS_PASSED/$TESTS_TOTAL)*100}")
         echo -e "Success Rate: ${CYAN}${success_rate}%${NC}"
     fi
-    
+
     echo ""
     echo -e "${BOLD}Validation Results:${NC}"
     echo -e "  Docker Build: ${GREEN}✓ VALIDATED${NC}"
@@ -564,7 +564,7 @@ print_summary() {
     echo -e "  Report: ${CYAN}$REPORT_FILE${NC}"
     echo -e "  Log: ${CYAN}$LOG_FILE${NC}"
     echo ""
-    
+
     if [ $TESTS_FAILED -eq 0 ]; then
         echo -e "${GREEN}${BOLD}🎉 PRODUCTION DEPLOYMENT INFRASTRUCTURE VALIDATION PASSED!${NC}"
         echo -e "${GREEN}The infrastructure is ready for production deployment.${NC}"
@@ -572,7 +572,7 @@ print_summary() {
         echo -e "${RED}${BOLD}❌ PRODUCTION DEPLOYMENT INFRASTRUCTURE VALIDATION FAILED!${NC}"
         echo -e "${RED}Please address the failed tests before deploying to production.${NC}"
     fi
-    
+
     echo ""
     echo -e "${BOLD}================================================================${NC}"
 }
@@ -582,10 +582,10 @@ main() {
     echo -e "${BOLD}FreeAgentics Production Deployment Infrastructure Validator${NC}"
     echo -e "${BOLD}=============================================================${NC}"
     echo ""
-    
+
     # Initialize log file
     echo "FreeAgentics Production Deployment Validation - $(date)" > "$LOG_FILE"
-    
+
     # Run validation steps
     setup_environment || exit 1
     validate_docker_build
@@ -595,11 +595,11 @@ main() {
     validate_monitoring
     validate_backup_disaster_recovery
     test_makefile_commands
-    
+
     # Generate report and summary
     generate_validation_report
     print_summary
-    
+
     # Exit with appropriate code
     if [ $TESTS_FAILED -eq 0 ]; then
         exit 0

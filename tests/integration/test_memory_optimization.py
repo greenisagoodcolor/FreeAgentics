@@ -38,7 +38,9 @@ class MockAgent:
         self.active = True
 
         # Create large memory structures to simulate 34.5MB per agent
-        belief_size = int(memory_size_mb * 1024 * 1024 / 8)  # 8 bytes per float64
+        belief_size = int(
+            memory_size_mb * 1024 * 1024 / 8
+        )  # 8 bytes per float64
         self.beliefs = np.random.random((belief_size,)).astype(np.float64)
         # Make beliefs sparse (95% zeros) to test compression
         self.beliefs[self.beliefs < 0.95] = 0.0
@@ -46,7 +48,9 @@ class MockAgent:
         self.transition_matrix = np.random.random((100, 100))
 
         # Cache structures
-        self.computation_cache = {f"cache_{i}": np.random.random((100,)) for i in range(50)}
+        self.computation_cache = {
+            f"cache_{i}": np.random.random((100,)) for i in range(50)
+        }
 
     def step(self, observation):
         """Mock step method."""
@@ -143,7 +147,9 @@ class TestMemoryOptimization(unittest.TestCase):
 
         # Action history (rough estimate)
         if hasattr(agent, "action_history"):
-            total_bytes += len(agent.action_history) * 50  # 50 bytes per action
+            total_bytes += (
+                len(agent.action_history) * 50
+            )  # 50 bytes per action
 
         # Transition matrix
         if hasattr(agent, "transition_matrix"):
@@ -228,7 +234,9 @@ class TestMemoryOptimization(unittest.TestCase):
         print(f"Memory usage comparison:")
         print(f"  Unoptimized: {unoptimized_usage:.1f}MB")
         print(f"  Optimized: {optimized_usage:.1f}MB")
-        print(f"  Reduction: {memory_reduction:.1f}MB ({reduction_percentage:.1f}%)")
+        print(
+            f"  Reduction: {memory_reduction:.1f}MB ({reduction_percentage:.1f}%)"
+        )
 
         # Should see at least 30% reduction
         self.assertGreater(reduction_percentage, 30)
@@ -242,9 +250,7 @@ class TestMemoryOptimization(unittest.TestCase):
         gc_tuner = get_gc_tuner()
 
         # Test force collection
-        start_time = time.time()
         duration = gc_tuner.force_collection(0)
-        end_time = time.time()
 
         # Should complete quickly
         self.assertLess(duration, 100)  # Less than 100ms
@@ -333,8 +339,12 @@ class TestMemoryOptimization(unittest.TestCase):
         self.assertGreater(efficiency["memory_efficiency"], 0.5)
 
         # Per-agent memory should be under target
-        avg_memory = efficiency["actual_memory_mb"] / efficiency["agents_count"]
-        self.assertLess(avg_memory, 15.0)  # Under 15MB per agent (vs 34.5MB baseline)
+        avg_memory = (
+            efficiency["actual_memory_mb"] / efficiency["agents_count"]
+        )
+        self.assertLess(
+            avg_memory, 15.0
+        )  # Under 15MB per agent (vs 34.5MB baseline)
 
         print(f"Performance with 50 agents:")
         print(f"  Registration time: {registration_time:.2f}s")

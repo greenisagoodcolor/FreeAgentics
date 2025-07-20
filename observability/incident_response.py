@@ -16,8 +16,16 @@ from typing import Any, Dict, List, Optional, Set
 
 import httpx
 
-from auth.security_logging import SecurityEventSeverity, SecurityEventType, security_auditor
-from observability.security_monitoring import AttackType, SecurityAlert, ThreatLevel
+from auth.security_logging import (
+    SecurityEventSeverity,
+    SecurityEventType,
+    security_auditor,
+)
+from observability.security_monitoring import (
+    AttackType,
+    SecurityAlert,
+    ThreatLevel,
+)
 
 logger = logging.getLogger(__name__)
 
@@ -332,7 +340,9 @@ class IncidentResponseSystem:
                 logger.error(f"Error in escalation monitoring: {e}")
                 await asyncio.sleep(300)
 
-    async def create_incident_from_alert(self, alert: SecurityAlert) -> SecurityIncident:
+    async def create_incident_from_alert(
+        self, alert: SecurityAlert
+    ) -> SecurityIncident:
         """Create a security incident from an alert."""
         incident_id = f"INC-{int(time.time())}"
 
@@ -348,7 +358,9 @@ class IncidentResponseSystem:
             id=incident_id,
             title=f"{alert.alert_type.value.replace('_', ' ').title()} Incident",
             description=alert.description,
-            severity=severity_mapping.get(alert.threat_level, IncidentSeverity.MEDIUM),
+            severity=severity_mapping.get(
+                alert.threat_level, IncidentSeverity.MEDIUM
+            ),
             status=IncidentStatus.OPEN,
             attack_type=alert.alert_type,
             threat_level=alert.threat_level,
@@ -406,7 +418,9 @@ class IncidentResponseSystem:
         # Execute automated actions
         for action in playbook.automated_actions:
             try:
-                response = await self._execute_response_action(incident, action)
+                response = await self._execute_response_action(
+                    incident, action
+                )
                 incident.responses.append(response)
 
                 # Update incident timeline
@@ -422,7 +436,9 @@ class IncidentResponseSystem:
                 )
 
             except Exception as e:
-                logger.error(f"Failed to execute {action.value} for incident {incident.id}: {e}")
+                logger.error(
+                    f"Failed to execute {action.value} for incident {incident.id}: {e}"
+                )
 
         # Update incident status
         incident.status = IncidentStatus.INVESTIGATING
@@ -456,7 +472,9 @@ class IncidentResponseSystem:
                 if incident.affected_users:
                     for user in incident.affected_users:
                         await self._suspend_user(user)
-                    response.details = {"suspended_users": incident.affected_users}
+                    response.details = {
+                        "suspended_users": incident.affected_users
+                    }
                     response.success = True
 
             elif action == ResponseAction.RATE_LIMIT:
@@ -476,7 +494,9 @@ class IncidentResponseSystem:
                     response.success = True
 
             elif action == ResponseAction.DISABLE_ENDPOINT:
-                endpoints = self._extract_endpoints_from_evidence(incident.evidence)
+                endpoints = self._extract_endpoints_from_evidence(
+                    incident.evidence
+                )
                 for endpoint in endpoints:
                     await self._disable_endpoint(endpoint)
                 response.details = {"disabled_endpoints": endpoints}
@@ -494,7 +514,9 @@ class IncidentResponseSystem:
 
             elif action == ResponseAction.ESCALATE:
                 await self._escalate_incident(incident)
-                response.details = {"escalation_level": incident.escalation_level}
+                response.details = {
+                    "escalation_level": incident.escalation_level
+                }
                 response.success = True
 
             elif action == ResponseAction.LOG_ANALYSIS:
@@ -580,16 +602,10 @@ class IncidentResponseSystem:
             self.disabled_endpoints.add(endpoint)
             logger.info(f"🚫 Endpoint disabled: {endpoint}")
 
-    async def _collect_evidence(self, incident: SecurityIncident) -> Dict[str, Any]:
+    async def _collect_evidence(
+        self, incident: SecurityIncident
+    ) -> Dict[str, Any]:
         """Collect evidence for an incident."""
-        evidence = {
-            "logs": [],
-            "network_data": {},
-            "system_info": {},
-            "user_activity": [],
-            "file_integrity": {},
-        }
-
         # Here you would collect various types of evidence
         # For now, we'll just return the existing evidence
         return incident.evidence
@@ -604,9 +620,13 @@ class IncidentResponseSystem:
     async def _escalate_incident(self, incident: SecurityIncident):
         """Escalate an incident to higher severity."""
         incident.escalation_level += 1
-        logger.info(f"⬆️ Incident escalated: {incident.id} (Level {incident.escalation_level})")
+        logger.info(
+            f"⬆️ Incident escalated: {incident.id} (Level {incident.escalation_level})"
+        )
 
-    async def _perform_log_analysis(self, incident: SecurityIncident) -> Dict[str, Any]:
+    async def _perform_log_analysis(
+        self, incident: SecurityIncident
+    ) -> Dict[str, Any]:
         """Perform automated log analysis."""
         analysis = {
             "patterns_detected": [],
@@ -618,7 +638,9 @@ class IncidentResponseSystem:
         # Here you would perform actual log analysis
         return analysis
 
-    async def _send_webhook_alert(self, webhook_url: str, alert_data: Dict[str, Any]):
+    async def _send_webhook_alert(
+        self, webhook_url: str, alert_data: Dict[str, Any]
+    ):
         """Send alert via webhook."""
         try:
             async with httpx.AsyncClient() as client:
@@ -628,7 +650,9 @@ class IncidentResponseSystem:
         except Exception as e:
             logger.error(f"Failed to send webhook alert: {e}")
 
-    def _extract_endpoints_from_evidence(self, evidence: Dict[str, Any]) -> List[str]:
+    def _extract_endpoints_from_evidence(
+        self, evidence: Dict[str, Any]
+    ) -> List[str]:
         """Extract endpoints from incident evidence."""
         endpoints = []
 
@@ -643,8 +667,12 @@ class IncidentResponseSystem:
         for incident in self.incidents.values():
             if incident.status == IncidentStatus.INVESTIGATING:
                 # Check if all automated responses completed successfully
-                automated_responses = [r for r in incident.responses if r.automated]
-                if automated_responses and all(r.success for r in automated_responses):
+                automated_responses = [
+                    r for r in incident.responses if r.automated
+                ]
+                if automated_responses and all(
+                    r.success for r in automated_responses
+                ):
                     incident.status = IncidentStatus.CONTAINMENT
                     incident.updated_at = datetime.utcnow()
 
@@ -653,7 +681,10 @@ class IncidentResponseSystem:
         now = datetime.utcnow()
 
         for incident in self.incidents.values():
-            if incident.status in [IncidentStatus.OPEN, IncidentStatus.INVESTIGATING]:
+            if incident.status in [
+                IncidentStatus.OPEN,
+                IncidentStatus.INVESTIGATING,
+            ]:
                 # Check if escalation timeout has passed
                 time_since_creation = now - incident.created_at
                 escalation_timeout = timedelta(minutes=self.escalation_timeout)
@@ -668,7 +699,9 @@ class IncidentResponseSystem:
 
         stats = {
             "total_incidents": len(incidents),
-            "open_incidents": len([i for i in incidents if i.status == IncidentStatus.OPEN]),
+            "open_incidents": len(
+                [i for i in incidents if i.status == IncidentStatus.OPEN]
+            ),
             "resolved_incidents": len(
                 [i for i in incidents if i.status == IncidentStatus.RESOLVED]
             ),
@@ -676,7 +709,9 @@ class IncidentResponseSystem:
             "by_attack_type": {},
             "by_status": {},
             "average_response_time": 0.0,
-            "escalated_incidents": len([i for i in incidents if i.escalation_level > 0]),
+            "escalated_incidents": len(
+                [i for i in incidents if i.escalation_level > 0]
+            ),
             "false_positives": len([i for i in incidents if i.false_positive]),
         }
 
@@ -684,7 +719,9 @@ class IncidentResponseSystem:
         for incident in incidents:
             # Count by severity
             severity_key = incident.severity.value
-            stats["by_severity"][severity_key] = stats["by_severity"].get(severity_key, 0) + 1
+            stats["by_severity"][severity_key] = (
+                stats["by_severity"].get(severity_key, 0) + 1
+            )
 
             # Count by attack type
             attack_type_key = incident.attack_type.value
@@ -694,20 +731,26 @@ class IncidentResponseSystem:
 
             # Count by status
             status_key = incident.status.value
-            stats["by_status"][status_key] = stats["by_status"].get(status_key, 0) + 1
+            stats["by_status"][status_key] = (
+                stats["by_status"].get(status_key, 0) + 1
+            )
 
         return stats
 
     def get_recent_incidents(self, limit: int = 10) -> List[SecurityIncident]:
         """Get recent incidents."""
-        incidents = sorted(self.incidents.values(), key=lambda x: x.created_at, reverse=True)
+        incidents = sorted(
+            self.incidents.values(), key=lambda x: x.created_at, reverse=True
+        )
         return incidents[:limit]
 
     def get_incident(self, incident_id: str) -> Optional[SecurityIncident]:
         """Get a specific incident."""
         return self.incidents.get(incident_id)
 
-    def resolve_incident(self, incident_id: str, resolution_notes: str = "") -> bool:
+    def resolve_incident(
+        self, incident_id: str, resolution_notes: str = ""
+    ) -> bool:
         """Resolve an incident."""
         if incident_id in self.incidents:
             incident = self.incidents[incident_id]

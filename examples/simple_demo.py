@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 """
-Simple FreeAgentics Demo
+Simple FreeAgentics Demo.
 Demonstrates basic functionality without complex dependencies
 """
 
@@ -11,7 +11,8 @@ from typing import List, Tuple
 
 # Set up logging
 logging.basicConfig(
-    level=logging.INFO, format="%(asctime)s - %(name)s - %(levelname)s - %(message)s"
+    level=logging.INFO,
+    format="%(asctime)s - %(name)s - %(levelname)s - %(message)s",
 )
 logger = logging.getLogger(__name__)
 
@@ -20,6 +21,7 @@ class SimpleAgent:
     """A simple agent that explores a grid world."""
 
     def __init__(self, agent_id: str, name: str):
+        """Initialize the simple agent."""
         self.agent_id = agent_id
         self.name = name
         self.position = (0, 0)
@@ -63,7 +65,9 @@ class SimpleAgent:
         else:
             return random.choice(possible_actions)
 
-    def execute_action(self, action: str, world_bounds: Tuple[int, int]) -> bool:
+    def execute_action(
+        self, action: str, world_bounds: Tuple[int, int]
+    ) -> bool:
         """Execute the chosen action."""
         x, y = self.position
         new_x, new_y = x, y
@@ -94,6 +98,7 @@ class SimpleWorld:
     """A simple grid world for agents to explore."""
 
     def __init__(self, width: int = 10, height: int = 10):
+        """Initialize the simple world."""
         self.width = width
         self.height = height
         self.agents = {}
@@ -124,7 +129,10 @@ class SimpleWorld:
         for dx, dy in [(0, 1), (0, -1), (1, 0), (-1, 0)]:
             nx, ny = x + dx, y + dy
             if 0 <= nx < self.width and 0 <= ny < self.height:
-                cell_info = {"position": (nx, ny), "has_resource": (nx, ny) in self.resources}
+                cell_info = {
+                    "position": (nx, ny),
+                    "has_resource": (nx, ny) in self.resources,
+                }
                 nearby_cells.append(cell_info)
 
         return {"nearby_cells": nearby_cells, "time_step": self.time_step}
@@ -143,13 +151,15 @@ class SimpleWorld:
             action = agent.decide_action(observation)
 
             # Act
-            success = agent.execute_action(action, (self.width, self.height))
+            agent.execute_action(action, (self.width, self.height))
 
             # Check for resource collection
             if agent.position in self.resources:
                 self.resources.remove(agent.position)
                 agent.energy = min(100, agent.energy + 30)
-                logger.info(f"{agent.name} collected a resource at {agent.position}!")
+                logger.info(
+                    f"{agent.name} collected a resource at {agent.position}!"
+                )
 
             # Log agent status
             logger.info(

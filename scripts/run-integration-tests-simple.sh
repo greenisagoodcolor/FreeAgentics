@@ -60,10 +60,10 @@ FAILED_TESTS=()
 # Run each test
 for test in "${SIMPLE_TESTS[@]}"; do
     test_path="tests/integration/$test"
-    
+
     if [ -f "$test_path" ]; then
         echo -e "${BLUE}Running: $test${NC}"
-        
+
         if pytest "$test_path" -v --tb=short --timeout=60; then
             echo -e "${GREEN}✓ $test passed${NC}\n"
             ((PASSED++))

@@ -20,7 +20,11 @@ class TestNLPEntityExtraction:
     def test_entity_data_structure(self):
         """Test Entity data structure"""
         entity = Entity(
-            text="Python", type=EntityType.TECHNOLOGY, start_pos=10, end_pos=16, confidence=0.95
+            text="Python",
+            type=EntityType.TECHNOLOGY,
+            start_pos=10,
+            end_pos=16,
+            confidence=0.95,
         )
 
         assert entity.text == "Python"
@@ -34,7 +38,9 @@ class TestNLPEntityExtraction:
         entity1 = Entity("Python", EntityType.TECHNOLOGY, 0, 6, 0.9)
         entity2 = Entity("programming", EntityType.CONCEPT, 10, 21, 0.85)
 
-        relationship = Relationship(source=entity1, target=entity2, type="used_for", confidence=0.8)
+        relationship = Relationship(
+            source=entity1, target=entity2, type="used_for", confidence=0.8
+        )
 
         assert relationship.source == entity1
         assert relationship.target == entity2
@@ -68,10 +74,14 @@ class TestNLPEntityExtraction:
         """Test extracting technology-related entities"""
         extractor = NLPEntityExtractor()
 
-        text = "I'm learning React, TypeScript, and Node.js for web development."
+        text = (
+            "I'm learning React, TypeScript, and Node.js for web development."
+        )
         result = extractor.extract_entities(text)
 
-        tech_entities = [e for e in result.entities if e.type == EntityType.TECHNOLOGY]
+        tech_entities = [
+            e for e in result.entities if e.type == EntityType.TECHNOLOGY
+        ]
         tech_names = [e.text for e in tech_entities]
 
         assert "React" in tech_names
@@ -82,10 +92,14 @@ class TestNLPEntityExtraction:
         """Test extracting person entities"""
         extractor = NLPEntityExtractor()
 
-        text = "Linus Torvalds created Linux, while Bill Gates founded Microsoft."
+        text = (
+            "Linus Torvalds created Linux, while Bill Gates founded Microsoft."
+        )
         result = extractor.extract_entities(text)
 
-        person_entities = [e for e in result.entities if e.type == EntityType.PERSON]
+        person_entities = [
+            e for e in result.entities if e.type == EntityType.PERSON
+        ]
         person_names = [e.text for e in person_entities]
 
         assert "Linus Torvalds" in person_names
@@ -98,7 +112,9 @@ class TestNLPEntityExtraction:
         text = "Google, Microsoft, and Apple are major tech companies."
         result = extractor.extract_entities(text)
 
-        org_entities = [e for e in result.entities if e.type == EntityType.ORGANIZATION]
+        org_entities = [
+            e for e in result.entities if e.type == EntityType.ORGANIZATION
+        ]
         org_names = [e.text for e in org_entities]
 
         assert "Google" in org_names
@@ -112,11 +128,17 @@ class TestNLPEntityExtraction:
         text = "Machine learning and artificial intelligence are transforming data science."
         result = extractor.extract_entities(text)
 
-        concept_entities = [e for e in result.entities if e.type == EntityType.CONCEPT]
+        concept_entities = [
+            e for e in result.entities if e.type == EntityType.CONCEPT
+        ]
         concept_texts = [e.text for e in concept_entities]
 
-        assert any("machine learning" in text.lower() for text in concept_texts)
-        assert any("artificial intelligence" in text.lower() for text in concept_texts)
+        assert any(
+            "machine learning" in text.lower() for text in concept_texts
+        )
+        assert any(
+            "artificial intelligence" in text.lower() for text in concept_texts
+        )
         assert any("data science" in text.lower() for text in concept_texts)
 
     def test_extract_relationships(self):
@@ -131,7 +153,10 @@ class TestNLPEntityExtraction:
         # Find relationship between Python and machine learning
         python_ml_rel = None
         for rel in result.relationships:
-            if rel.source.text == "Python" and "machine learning" in rel.target.text:
+            if (
+                rel.source.text == "Python"
+                and "machine learning" in rel.target.text
+            ):
                 python_ml_rel = rel
                 break
 
@@ -188,7 +213,9 @@ class TestNLPEntityExtraction:
 
         extractor.add_custom_patterns(custom_patterns)
 
-        text = "We're building a React Native app with RESTful API integration."
+        text = (
+            "We're building a React Native app with RESTful API integration."
+        )
         result = extractor.extract_entities(text)
 
         entity_texts = [e.text for e in result.entities]

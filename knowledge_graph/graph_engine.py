@@ -345,7 +345,7 @@ class KnowledgeGraph:
 
         try:
             path = nx.shortest_path(self.graph, source_id, target_id)
-            return path  # type: ignore[no-any-return]
+            return path  
         except nx.NetworkXNoPath:
             return None
 
@@ -438,11 +438,11 @@ class KnowledgeGraph:
 
         try:
             scores = nx.pagerank(self.graph)
-            return scores  # type: ignore[no-any-return]
-        except:
+            return scores  
+        except Exception:
             # Fallback to degree centrality
             scores = nx.degree_centrality(self.graph)
-            return scores  # type: ignore[no-any-return]
+            return scores  
 
     def detect_communities(self) -> List[Set[str]]:
         """Detect communities in the graph.
@@ -470,7 +470,7 @@ class KnowledgeGraph:
                 communities[comm_id].add(node_id)
 
             return list(communities.values())
-        except:
+        except Exception:
             # Fallback to connected components
             return [set(comp) for comp in nx.connected_components(undirected)]
 

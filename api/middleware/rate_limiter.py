@@ -43,7 +43,7 @@ class RateLimitAlgorithm(str, Enum):
 
     SLIDING_WINDOW = "sliding_window"
     FIXED_WINDOW = "fixed_window"
-    TOKEN_BUCKET = "token_bucket"
+    TOKEN_BUCKET = "token_bucket"  # nosec B105
     LEAKY_BUCKET = "leaky_bucket"
 
 
@@ -75,6 +75,14 @@ class RateLimitConfig:
         algorithm: RateLimitAlgorithm = RateLimitAlgorithm.SLIDING_WINDOW,
         burst_size: Optional[int] = None,
     ):
+        """Initialize rate limit configuration.
+
+        Args:
+            max_requests: Maximum number of requests allowed.
+            window_seconds: Time window in seconds.
+            algorithm: Rate limiting algorithm to use.
+            burst_size: Maximum burst size for token bucket algorithm.
+        """
         self.max_requests = max_requests
         self.window_seconds = window_seconds
         self.algorithm = algorithm
@@ -91,6 +99,14 @@ class EndpointConfig:
         authenticated_limit: RateLimitConfig,
         priority: int = 0,
     ):
+        """Initialize endpoint-specific rate limit configuration.
+
+        Args:
+            path_pattern: URL path pattern to match.
+            anonymous_limit: Rate limit configuration for anonymous users.
+            authenticated_limit: Rate limit configuration for authenticated users.
+            priority: Priority for matching (higher values are checked first).
+        """
         self.path_pattern = path_pattern
         self.anonymous_limit = anonymous_limit
         self.authenticated_limit = authenticated_limit
@@ -101,11 +117,24 @@ class SuspiciousPatternDetector:
     """Detects suspicious request patterns for DDoS protection."""
 
     def __init__(self):
+        """Initialize suspicious pattern detector with predefined patterns."""
         self.patterns = {
-            "rapid_404": {"threshold": 10, "window": 60},  # 10 404s in 60 seconds
-            "rapid_errors": {"threshold": 20, "window": 60},  # 20 errors in 60 seconds
-            "path_scanning": {"threshold": 15, "window": 30},  # 15 different paths in 30 seconds
-            "large_requests": {"threshold": 5, "window": 60},  # 5 large requests in 60 seconds
+            "rapid_404": {
+                "threshold": 10,
+                "window": 60,
+            },  # 10 404s in 60 seconds
+            "rapid_errors": {
+                "threshold": 20,
+                "window": 60,
+            },  # 20 errors in 60 seconds
+            "path_scanning": {
+                "threshold": 15,
+                "window": 30,
+            },  # 15 different paths in 30 seconds
+            "large_requests": {
+                "threshold": 5,
+                "window": 60,
+            },  # 5 large requests in 60 seconds
         }
         self.metrics = defaultdict(lambda: defaultdict(list))
 
@@ -142,6 +171,14 @@ class RateLimiter:
         default_anonymous_limit: RateLimitConfig = None,
         default_authenticated_limit: RateLimitConfig = None,
     ):
+        """Initialize the Redis-based rate limiter.
+
+        Args:
+            redis_url: Redis connection URL.
+            config_file: Path to configuration file.
+            default_anonymous_limit: Default limits for anonymous users.
+            default_authenticated_limit: Default limits for authenticated users.
+        """
         self.redis_url = redis_url
         self.redis_client: Optional[redis.Redis] = None
         self.config_file = config_file
@@ -154,11 +191,13 @@ class RateLimiter:
         self.blocked_identifiers: Dict[str, Tuple[datetime, BlockReason]] = {}
 
         # Default limits
-        self.default_anonymous_limit = default_anonymous_limit or RateLimitConfig(
-            max_requests=60, window_seconds=60
+        self.default_anonymous_limit = (
+            default_anonymous_limit
+            or RateLimitConfig(max_requests=60, window_seconds=60)
         )
-        self.default_authenticated_limit = default_authenticated_limit or RateLimitConfig(
-            max_requests=300, window_seconds=60
+        self.default_authenticated_limit = (
+            default_authenticated_limit
+            or RateLimitConfig(max_requests=300, window_seconds=60)
         )
 
         # DDoS protection settings
@@ -182,8 +221,12 @@ class RateLimiter:
                 self.endpoint_configs.append(
                     EndpointConfig(
                         path_pattern=endpoint["path"],
-                        anonymous_limit=RateLimitConfig(**endpoint["anonymous"]),
-                        authenticated_limit=RateLimitConfig(**endpoint["authenticated"]),
+                        anonymous_limit=RateLimitConfig(
+                            **endpoint["anonymous"]
+                        ),
+                        authenticated_limit=RateLimitConfig(
+                            **endpoint["authenticated"]
+                        ),
                         priority=endpoint.get("priority", 0),
                     )
                 )
@@ -197,19 +240,29 @@ class RateLimiter:
 
             # Load IP networks
             for network in config.get("blacklist", {}).get("networks", []):
-                self.ip_networks_blacklist.append(ipaddress.ip_network(network))
+                self.ip_networks_blacklist.append(
+                    ipaddress.ip_network(network)
+                )
 
             for network in config.get("whitelist", {}).get("networks", []):
-                self.ip_networks_whitelist.append(ipaddress.ip_network(network))
+                self.ip_networks_whitelist.append(
+                    ipaddress.ip_network(network)
+                )
 
             # Load DDoS protection settings
             ddos_config = config.get("ddos_protection", {})
-            self.max_request_size = ddos_config.get("max_request_size", self.max_request_size)
-            self.max_header_size = ddos_config.get("max_header_size", self.max_header_size)
+            self.max_request_size = ddos_config.get(
+                "max_request_size", self.max_request_size
+            )
+            self.max_header_size = ddos_config.get(
+                "max_header_size", self.max_header_size
+            )
             self.connection_limit_per_ip = ddos_config.get(
                 "connection_limit_per_ip", self.connection_limit_per_ip
             )
-            self.block_duration = timedelta(minutes=ddos_config.get("block_duration_minutes", 30))
+            self.block_duration = timedelta(
+                minutes=ddos_config.get("block_duration_minutes", 30)
+            )
 
         except Exception as e:
             logger.error(f"Failed to load rate limit config: {e}")
@@ -217,7 +270,9 @@ class RateLimiter:
     async def connect(self):
         """Connect to Redis."""
         if not self.redis_client:
-            self.redis_client = redis.from_url(self.redis_url, decode_responses=True)
+            self.redis_client = redis.from_url(
+                self.redis_url, decode_responses=True
+            )
 
     async def disconnect(self):
         """Disconnect from Redis."""
@@ -272,7 +327,9 @@ class RateLimiter:
 
         return False
 
-    async def is_blocked(self, identifier: str) -> Tuple[bool, Optional[BlockReason]]:
+    async def is_blocked(
+        self, identifier: str
+    ) -> Tuple[bool, Optional[BlockReason]]:
         """Check if identifier is currently blocked."""
         if identifier in self.blocked_identifiers:
             blocked_until, reason = self.blocked_identifiers[identifier]
@@ -292,7 +349,10 @@ class RateLimiter:
         return False, None
 
     async def block_identifier(
-        self, identifier: str, reason: BlockReason, duration: Optional[timedelta] = None
+        self,
+        identifier: str,
+        reason: BlockReason,
+        duration: Optional[timedelta] = None,
     ):
         """Block an identifier for a specified duration."""
         duration = duration or self.block_duration
@@ -315,7 +375,9 @@ class RateLimiter:
                 "blocked_at": datetime.utcnow().isoformat(),
             }
             await self.redis_client.setex(
-                block_key, int(duration.total_seconds()), json.dumps(block_data)
+                block_key,
+                int(duration.total_seconds()),
+                json.dumps(block_data),
             )
 
     async def check_sliding_window(
@@ -348,9 +410,13 @@ class RateLimiter:
 
         if request_count >= config.max_requests:
             # Get oldest request time to calculate retry after
-            oldest_request = await self.redis_client.zrange(key, 0, 0, withscores=True)
+            oldest_request = await self.redis_client.zrange(
+                key, 0, 0, withscores=True
+            )
             if oldest_request:
-                retry_after = int(oldest_request[0][1] + config.window_seconds - now)
+                retry_after = int(
+                    oldest_request[0][1] + config.window_seconds - now
+                )
             else:
                 retry_after = config.window_seconds
 
@@ -402,7 +468,9 @@ class RateLimiter:
         if tokens >= 1:
             # Consume a token
             tokens -= 1
-            await self.redis_client.hset(key, mapping={"tokens": tokens, "last_update": now})
+            await self.redis_client.hset(
+                key, mapping={"tokens": tokens, "last_update": now}
+            )
             await self.redis_client.expire(key, config.window_seconds * 2)
 
             return True, {
@@ -437,7 +505,10 @@ class RateLimiter:
         """Get rate limit configuration for endpoint."""
         for config in self.endpoint_configs:
             # Simple pattern matching (can be enhanced with regex)
-            if path.startswith(config.path_pattern) or config.path_pattern == "*":
+            if (
+                path.startswith(config.path_pattern)
+                or config.path_pattern == "*"
+            ):
                 return config
         return None
 
@@ -447,16 +518,24 @@ class RateLimiter:
         """Check for DDoS attack patterns."""
         # Check rapid 404s
         if response_status == 404:
-            if await self.pattern_detector.check_pattern(ip, "rapid_404", self.redis_client):
+            if await self.pattern_detector.check_pattern(
+                ip, "rapid_404", self.redis_client
+            ):
                 if METRICS_ENABLED:
-                    rate_limiting_metrics.record_suspicious_pattern("rapid_404")
+                    rate_limiting_metrics.record_suspicious_pattern(
+                        "rapid_404"
+                    )
                 return BlockReason.SUSPICIOUS_PATTERN
 
         # Check rapid errors
         if response_status and response_status >= 400:
-            if await self.pattern_detector.check_pattern(ip, "rapid_errors", self.redis_client):
+            if await self.pattern_detector.check_pattern(
+                ip, "rapid_errors", self.redis_client
+            ):
                 if METRICS_ENABLED:
-                    rate_limiting_metrics.record_suspicious_pattern("rapid_errors")
+                    rate_limiting_metrics.record_suspicious_pattern(
+                        "rapid_errors"
+                    )
                 return BlockReason.SUSPICIOUS_PATTERN
 
         # Check path scanning
@@ -466,16 +545,24 @@ class RateLimiter:
         path_count = await self.redis_client.scard(path_key)
         if path_count > 15:
             if METRICS_ENABLED:
-                rate_limiting_metrics.record_suspicious_pattern("path_scanning")
+                rate_limiting_metrics.record_suspicious_pattern(
+                    "path_scanning"
+                )
             return BlockReason.SUSPICIOUS_PATTERN
 
         # Check large requests
         content_length = request.headers.get("content-length")
         if content_length and int(content_length) > self.max_request_size:
-            if await self.pattern_detector.check_pattern(ip, "large_requests", self.redis_client):
+            if await self.pattern_detector.check_pattern(
+                ip, "large_requests", self.redis_client
+            ):
                 if METRICS_ENABLED:
-                    rate_limiting_metrics.record_suspicious_pattern("large_requests")
-                    rate_limiting_metrics.record_ddos_attack("large_request_flood", ip)
+                    rate_limiting_metrics.record_suspicious_pattern(
+                        "large_requests"
+                    )
+                    rate_limiting_metrics.record_ddos_attack(
+                        "large_request_flood", ip
+                    )
                 return BlockReason.DDOS_ATTACK
 
         return None
@@ -537,7 +624,9 @@ class RateLimiter:
             # Anonymous user
             identifier = f"ip:{ip}"
             config = (
-                endpoint_config.anonymous_limit if endpoint_config else self.default_anonymous_limit
+                endpoint_config.anonymous_limit
+                if endpoint_config
+                else self.default_anonymous_limit
             )
 
         # Check rate limit
@@ -571,7 +660,9 @@ class RateLimiter:
         # Add rate limit headers to successful requests
         request.state.rate_limit_headers = {
             "X-RateLimit-Limit": str(config.max_requests),
-            "X-RateLimit-Remaining": str(config.max_requests - info.get("request_count", 0)),
+            "X-RateLimit-Remaining": str(
+                config.max_requests - info.get("request_count", 0)
+            ),
             "X-RateLimit-Reset": str(int(time.time()) + config.window_seconds),
         }
 
@@ -587,6 +678,13 @@ class RateLimitMiddleware(BaseHTTPMiddleware):
         rate_limiter: RateLimiter,
         get_user_id: Optional[callable] = None,
     ):
+        """Initialize the rate limiting middleware.
+
+        Args:
+            app: The ASGI application.
+            rate_limiter: The rate limiter instance.
+            get_user_id: Optional function to extract user ID from request.
+        """
         super().__init__(app)
         self.rate_limiter = rate_limiter
         self.get_user_id = get_user_id
@@ -601,11 +699,17 @@ class RateLimitMiddleware(BaseHTTPMiddleware):
         if self.get_user_id:
             try:
                 user_id = await self.get_user_id(request)
-            except Exception:
-                pass
+            except Exception as e:
+                # Log failed user ID extraction but continue with anonymous rate limiting
+                logger.debug(
+                    f"Failed to extract user ID for rate limiting: {e}"
+                )
+                user_id = None
 
         # Process through rate limiter
-        allowed, error_response = await self.rate_limiter.process_request(request, user_id)
+        allowed, error_response = await self.rate_limiter.process_request(
+            request, user_id
+        )
 
         if not allowed:
             return error_response
@@ -672,7 +776,7 @@ def rate_limit(
     window_seconds: int = 60,
     algorithm: RateLimitAlgorithm = RateLimitAlgorithm.SLIDING_WINDOW,
 ):
-    """Decorator for rate limiting individual endpoints."""
+    """Create a decorator for rate limiting individual endpoints."""
 
     def decorator(func):
         async def wrapper(request: Request, *args, **kwargs):
@@ -681,14 +785,18 @@ def rate_limit(
 
             # Create temporary config for this endpoint
             config = RateLimitConfig(
-                max_requests=max_requests, window_seconds=window_seconds, algorithm=algorithm
+                max_requests=max_requests,
+                window_seconds=window_seconds,
+                algorithm=algorithm,
             )
 
             ip = rate_limiter.get_client_ip(request)
             identifier = f"ip:{ip}"
 
             # Check rate limit
-            allowed, info = await rate_limiter.check_rate_limit(identifier, config)
+            allowed, info = await rate_limiter.check_rate_limit(
+                identifier, config
+            )
 
             if not allowed:
                 raise HTTPException(

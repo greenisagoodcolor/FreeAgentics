@@ -12,10 +12,7 @@ Following strict TDD: These tests MUST fail initially and drive implementation.
 NO graceful fallbacks or try-except blocks allowed.
 """
 
-from inference.active.gmn_parser import (
-    GMNParser,
-    GMNSchemaValidator,
-)
+from inference.active.gmn_parser import GMNParser, GMNSchemaValidator
 
 
 class TestBeliefSpecificationParsing:
@@ -38,7 +35,10 @@ class TestBeliefSpecificationParsing:
                             "eta_1": "natural_parameter_1",
                             "eta_2": "natural_parameter_2",
                         },
-                        "sufficient_statistics": {"t_1": "first_moment", "t_2": "second_moment"},
+                        "sufficient_statistics": {
+                            "t_1": "first_moment",
+                            "t_2": "second_moment",
+                        },
                     },
                     "free_energy": {
                         "formulation": "variational_free_energy",
@@ -66,9 +66,17 @@ class TestBeliefSpecificationParsing:
                         "likelihood_precision": {
                             "value": 2.0,
                             "learnable": True,
-                            "prior": {"distribution": "gamma", "shape": 2.0, "rate": 1.0},
+                            "prior": {
+                                "distribution": "gamma",
+                                "shape": 2.0,
+                                "rate": 1.0,
+                            },
                         },
-                        "prior_precision": {"value": 1.0, "learnable": False, "fixed": True},
+                        "prior_precision": {
+                            "value": 1.0,
+                            "learnable": False,
+                            "fixed": True,
+                        },
                     },
                 }
             ],
@@ -265,7 +273,10 @@ class TestBeliefSpecificationParsing:
                         "components": {
                             "likelihood_model": {
                                 "matrix_name": "A",
-                                "dimensions": {"observations": 16, "states": 8},
+                                "dimensions": {
+                                    "observations": 16,
+                                    "states": 8,
+                                },
                                 "learning": {
                                     "enabled": True,
                                     "learning_rate": 0.1,
@@ -342,7 +353,10 @@ class TestBeliefSpecificationParsing:
 
         # Generative model
         gen_model = ai_beliefs["generative_model"]
-        assert gen_model["model_structure"] == "partially_observable_markov_decision_process"
+        assert (
+            gen_model["model_structure"]
+            == "partially_observable_markov_decision_process"
+        )
 
         components = gen_model["components"]
 
@@ -445,7 +459,10 @@ class TestFreeEnergyCalculationIntegration:
                             "novelty_bonus": {
                                 "formula": "-sum_tau KL(q(s_tau|pi) || q(s_tau))",
                                 "description": "exploration_bonus_for_novel_states",
-                                "weighting": {"novelty_strength": 0.2, "habituation_rate": 0.01},
+                                "weighting": {
+                                    "novelty_strength": 0.2,
+                                    "habituation_rate": 0.01,
+                                },
                             },
                         },
                         "policy_evaluation": {
@@ -576,7 +593,9 @@ class TestBeliefValidation:
         # Should detect inconsistent variable definitions
         assert is_valid is False
         consistency_errors = [
-            e for e in errors if "consistency" in e.lower() or "variable" in e.lower()
+            e
+            for e in errors
+            if "consistency" in e.lower() or "variable" in e.lower()
         ]
         assert len(consistency_errors) > 0
 
@@ -611,7 +630,8 @@ class TestBeliefValidation:
         precision_errors = [
             e
             for e in errors
-            if "precision" in e.lower() and ("positive" in e.lower() or "zero" in e.lower())
+            if "precision" in e.lower()
+            and ("positive" in e.lower() or "zero" in e.lower())
         ]
         assert len(precision_errors) > 0
 
@@ -627,7 +647,11 @@ class TestBeliefValidation:
                     "belief_type": "hierarchical_variational",
                     "hierarchy": {
                         "levels": [
-                            {"level": 1, "belief_dimensions": 16, "temporal_depth": 1},
+                            {
+                                "level": 1,
+                                "belief_dimensions": 16,
+                                "temporal_depth": 1,
+                            },
                             {
                                 "level": 3,  # Missing level 2
                                 "belief_dimensions": 4,
@@ -644,5 +668,9 @@ class TestBeliefValidation:
 
         # Should detect missing hierarchy level
         assert is_valid is False
-        hierarchy_errors = [e for e in errors if "hierarchy" in e.lower() or "level" in e.lower()]
+        hierarchy_errors = [
+            e
+            for e in errors
+            if "hierarchy" in e.lower() or "level" in e.lower()
+        ]
         assert len(hierarchy_errors) > 0

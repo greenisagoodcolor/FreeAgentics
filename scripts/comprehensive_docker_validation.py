@@ -42,7 +42,9 @@ class ComprehensiveDockerValidator:
     def run_command(self, command, timeout=180):
         """Run command with timeout"""
         try:
-            result = subprocess.run(command, capture_output=True, text=True, timeout=timeout)
+            result = subprocess.run(
+                command, capture_output=True, text=True, timeout=timeout
+            )
             return result.returncode, result.stdout, result.stderr
         except subprocess.TimeoutExpired:
             return 1, "", f"Command timed out after {timeout} seconds"
@@ -147,7 +149,15 @@ class ComprehensiveDockerValidator:
         # Test development stage
         self.log_info("Building development stage...")
         returncode, stdout, stderr = self.run_command(
-            ["docker", "build", "--target", "development", "-t", "freeagentics:dev-stage", "."]
+            [
+                "docker",
+                "build",
+                "--target",
+                "development",
+                "-t",
+                "freeagentics:dev-stage",
+                ".",
+            ]
         )
 
         if returncode == 0:
@@ -155,7 +165,9 @@ class ComprehensiveDockerValidator:
 
             # Get size
             dev_size = self.get_image_size("freeagentics:dev-stage")
-            self.log_info(f"Development stage size: {self.format_size(dev_size)}")
+            self.log_info(
+                f"Development stage size: {self.format_size(dev_size)}"
+            )
 
         else:
             self.log_error(f"❌ Development stage build failed: {stderr}")
@@ -163,7 +175,15 @@ class ComprehensiveDockerValidator:
         # Test production stage
         self.log_info("Building production stage...")
         returncode, stdout, stderr = self.run_command(
-            ["docker", "build", "--target", "production", "-t", "freeagentics:prod-stage", "."]
+            [
+                "docker",
+                "build",
+                "--target",
+                "production",
+                "-t",
+                "freeagentics:prod-stage",
+                ".",
+            ]
         )
 
         if returncode == 0:
@@ -171,14 +191,20 @@ class ComprehensiveDockerValidator:
 
             # Get size
             prod_size = self.get_image_size("freeagentics:prod-stage")
-            self.log_info(f"Production stage size: {self.format_size(prod_size)}")
+            self.log_info(
+                f"Production stage size: {self.format_size(prod_size)}"
+            )
 
             # Compare sizes
             if dev_size > 0 and prod_size > 0:
                 if prod_size < dev_size:
                     reduction = (dev_size - prod_size) / dev_size * 100
-                    self.log_success(f"✅ Production optimization: {reduction:.1f}% size reduction")
-                    self.results["validation_results"]["size_optimization"] = reduction
+                    self.log_success(
+                        f"✅ Production optimization: {reduction:.1f}% size reduction"
+                    )
+                    self.results["validation_results"][
+                        "size_optimization"
+                    ] = reduction
                 else:
                     self.log_warning("⚠️  Production stage not optimized")
                     self.results["validation_results"]["size_optimization"] = 0
@@ -196,7 +222,15 @@ class ComprehensiveDockerValidator:
 
         # Build image for security testing
         returncode, stdout, stderr = self.run_command(
-            ["docker", "build", "--target", "production", "-t", "freeagentics:security-test", "."]
+            [
+                "docker",
+                "build",
+                "--target",
+                "production",
+                "-t",
+                "freeagentics:security-test",
+                ".",
+            ]
         )
 
         if returncode != 0:
@@ -229,7 +263,7 @@ class ComprehensiveDockerValidator:
                 "--rm",
                 "--read-only",
                 "--tmpfs",
-                "/tmp",
+                "/tmp",  # nosec B108 - Secure tmpfs mount in Docker
                 "freeagentics:security-test",
                 "touch",
                 "/test-file",
@@ -251,7 +285,14 @@ class ComprehensiveDockerValidator:
         self.run_command(["docker", "rm", "-f", container_name])
 
         returncode, stdout, stderr = self.run_command(
-            ["docker", "run", "-d", "--name", container_name, "freeagentics:security-test"]
+            [
+                "docker",
+                "run",
+                "-d",
+                "--name",
+                container_name,
+                "freeagentics:security-test",
+            ]
         )
 
         if returncode == 0:
@@ -260,7 +301,13 @@ class ComprehensiveDockerValidator:
 
             # Check health status
             returncode, stdout, stderr = self.run_command(
-                ["docker", "inspect", container_name, "--format", "{{.State.Health.Status}}"]
+                [
+                    "docker",
+                    "inspect",
+                    container_name,
+                    "--format",
+                    "{{.State.Health.Status}}",
+                ]
             )
 
             if returncode == 0:
@@ -271,7 +318,9 @@ class ComprehensiveDockerValidator:
                     self.log_success("✅ Health check passed")
                     self.results["validation_results"]["health_check"] = True
                 else:
-                    self.log_warning(f"⚠️  Health check status: {health_status}")
+                    self.log_warning(
+                        f"⚠️  Health check status: {health_status}"
+                    )
                     self.results["validation_results"]["health_check"] = False
             else:
                 self.log_warning("⚠️  Health check not configured")
@@ -291,7 +340,9 @@ class ComprehensiveDockerValidator:
         # Create test environment
         import tempfile
 
-        env_file = tempfile.NamedTemporaryFile(mode="w", suffix=".env", delete=False)
+        env_file = tempfile.NamedTemporaryFile(
+            mode="w", suffix=".env", delete=False
+        )
         env_file.write(
             """
 DATABASE_URL=postgresql://test:test@localhost:5432/test
@@ -306,7 +357,15 @@ ENVIRONMENT=production
         try:
             # Build and run container
             returncode, stdout, stderr = self.run_command(
-                ["docker", "build", "--target", "production", "-t", "freeagentics:deploy-test", "."]
+                [
+                    "docker",
+                    "build",
+                    "--target",
+                    "production",
+                    "-t",
+                    "freeagentics:deploy-test",
+                    ".",
+                ]
             )
 
             if returncode != 0:
@@ -338,15 +397,28 @@ ENVIRONMENT=production
 
                 # Check if container is running
                 returncode, stdout, stderr = self.run_command(
-                    ["docker", "ps", "-f", f"name={container_name}", "--format", "{{.Status}}"]
+                    [
+                        "docker",
+                        "ps",
+                        "-f",
+                        f"name={container_name}",
+                        "--format",
+                        "{{.Status}}",
+                    ]
                 )
 
                 if returncode == 0 and stdout.strip():
-                    self.log_success("✅ Single container deployment successful")
-                    self.results["validation_results"]["single_deployment"] = True
+                    self.log_success(
+                        "✅ Single container deployment successful"
+                    )
+                    self.results["validation_results"][
+                        "single_deployment"
+                    ] = True
                 else:
                     self.log_warning("⚠️  Single container deployment failed")
-                    self.results["validation_results"]["single_deployment"] = False
+                    self.results["validation_results"][
+                        "single_deployment"
+                    ] = False
 
             else:
                 self.log_error(f"❌ Container failed to start: {stderr}")
@@ -403,24 +475,40 @@ ENVIRONMENT=production
     def generate_recommendations(self):
         """Generate recommendations based on validation results"""
 
-        if not self.results["validation_results"].get("multi_stage_build", False):
-            self.results["recommendations"].append("Implement multi-stage Docker build")
+        if not self.results["validation_results"].get(
+            "multi_stage_build", False
+        ):
+            self.results["recommendations"].append(
+                "Implement multi-stage Docker build"
+            )
 
         if not self.results["validation_results"].get("non_root_user", False):
-            self.results["recommendations"].append("Configure container to run as non-root user")
+            self.results["recommendations"].append(
+                "Configure container to run as non-root user"
+            )
 
         if not self.results["validation_results"].get("readonly_fs", False):
-            self.results["recommendations"].append("Enable read-only filesystem in production")
+            self.results["recommendations"].append(
+                "Enable read-only filesystem in production"
+            )
 
         if not self.results["validation_results"].get("health_check", False):
-            self.results["recommendations"].append("Add health check to Docker container")
+            self.results["recommendations"].append(
+                "Add health check to Docker container"
+            )
 
         if not self.results["validation_results"].get("api_cleanup", False):
-            self.results["recommendations"].append("Implement API cleanup endpoints")
+            self.results["recommendations"].append(
+                "Implement API cleanup endpoints"
+            )
 
-        size_opt = self.results["validation_results"].get("size_optimization", 0)
+        size_opt = self.results["validation_results"].get(
+            "size_optimization", 0
+        )
         if size_opt < 10:
-            self.results["recommendations"].append("Optimize Docker image size further")
+            self.results["recommendations"].append(
+                "Optimize Docker image size further"
+            )
 
     def generate_report(self):
         """Generate comprehensive validation report"""
@@ -429,7 +517,9 @@ ENVIRONMENT=production
 
         # Calculate success rate
         total_checks = len(self.results["validation_results"])
-        passed_checks = sum(1 for v in self.results["validation_results"].values() if v)
+        passed_checks = sum(
+            1 for v in self.results["validation_results"].values() if v
+        )
 
         if total_checks > 0:
             success_rate = (passed_checks / total_checks) * 100
@@ -441,7 +531,9 @@ ENVIRONMENT=production
             "passed_checks": passed_checks,
             "success_rate": success_rate,
             "overall_status": (
-                "PASS" if len(self.results["recommendations"]) == 0 else "PASS_WITH_RECOMMENDATIONS"
+                "PASS"
+                if len(self.results["recommendations"]) == 0
+                else "PASS_WITH_RECOMMENDATIONS"
             ),
         }
 
@@ -475,8 +567,12 @@ ENVIRONMENT=production
 
     def run_validation(self):
         """Run complete validation"""
-        self.log_info("Starting Docker Container Production Build Validation...")
-        self.log_info("Subtask 15.1 - Validate Docker Container Production Build")
+        self.log_info(
+            "Starting Docker Container Production Build Validation..."
+        )
+        self.log_info(
+            "Subtask 15.1 - Validate Docker Container Production Build"
+        )
 
         try:
             self.validate_docker_files()
@@ -500,10 +596,14 @@ def main():
     validator = ComprehensiveDockerValidator()
 
     if validator.run_validation():
-        print("\n✅ Docker Container Production Build Validation COMPLETED SUCCESSFULLY")
+        print(
+            "\n✅ Docker Container Production Build Validation COMPLETED SUCCESSFULLY"
+        )
         return 0
     else:
-        print("\n⚠️  Docker Container Production Build Validation COMPLETED WITH RECOMMENDATIONS")
+        print(
+            "\n⚠️  Docker Container Production Build Validation COMPLETED WITH RECOMMENDATIONS"
+        )
         return 1
 
 

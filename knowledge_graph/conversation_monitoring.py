@@ -1,5 +1,5 @@
 """
-Conversation Monitoring System for Knowledge Graph Auto-Updates
+Conversation Monitoring System for Knowledge Graph Auto-Updates.
 Monitors conversations in real-time and triggers knowledge graph updates
 """
 
@@ -12,13 +12,13 @@ from queue import Empty, Queue
 from typing import Any, Callable, Dict, List, Optional
 
 from database.conversation_models import Conversation, Message
-from knowledge_graph.graph_engine import GraphEngine
+from knowledge_graph.graph_engine import KnowledgeGraph as GraphEngine
 
 logger = logging.getLogger(__name__)
 
 
 class ConversationEventType(Enum):
-    """Types of conversation events"""
+    """Types of conversation events."""
 
     MESSAGE_ADDED = "message_added"
     MESSAGE_UPDATED = "message_updated"
@@ -29,7 +29,7 @@ class ConversationEventType(Enum):
 
 @dataclass
 class ConversationEvent:
-    """Represents a conversation event"""
+    """Represents a conversation event."""
 
     type: ConversationEventType
     conversation_id: str
@@ -44,7 +44,7 @@ class ConversationEvent:
 
 
 class ConversationMonitor:
-    """Monitors conversations and triggers knowledge graph updates"""
+    """Monitors conversations and triggers knowledge graph updates."""
 
     def __init__(self, graph_engine: GraphEngine):
         self.graph_engine = graph_engine
@@ -54,7 +54,7 @@ class ConversationMonitor:
         self._processing_task: Optional[asyncio.Task] = None
 
     async def start(self):
-        """Start monitoring conversations"""
+        """Start monitoring conversations."""
         if self.is_running:
             logger.warning("ConversationMonitor is already running")
             return
@@ -66,7 +66,7 @@ class ConversationMonitor:
         self._processing_task = asyncio.create_task(self._process_events())
 
     async def stop(self):
-        """Stop monitoring conversations"""
+        """Stop monitoring conversations."""
         if not self.is_running:
             return
 
@@ -82,7 +82,7 @@ class ConversationMonitor:
                 pass
 
     async def process_message(self, message: Message):
-        """Process a new message"""
+        """Process a new message."""
         event = ConversationEvent(
             type=ConversationEventType.MESSAGE_ADDED,
             conversation_id=str(message.conversation_id),
@@ -95,7 +95,7 @@ class ConversationMonitor:
         logger.debug(f"Queued message event: {message.id}")
 
     async def process_batch(self) -> int:
-        """Process a batch of events from the queue"""
+        """Process a batch of events from the queue."""
         processed_count = 0
         batch_size = 10
         events = []
@@ -119,7 +119,7 @@ class ConversationMonitor:
         return processed_count
 
     async def _process_event(self, event: ConversationEvent):
-        """Process a single event"""
+        """Process a single event."""
         if event.type == ConversationEventType.MESSAGE_ADDED:
             # Trigger graph update for new message
             if event.content:
@@ -129,24 +129,28 @@ class ConversationMonitor:
         await self.notify_subscribers(event)
 
     async def _update_graph_from_message(self, event: ConversationEvent):
-        """Update knowledge graph from message content"""
+        """Update knowledge graph from message content."""
         # This will be expanded to use NLP entity extraction
         logger.debug(f"Updating graph from message: {event.message_id}")
 
-    async def on_conversation_update(self, conversation: Conversation, message: Message):
-        """Handle conversation update event"""
+    async def on_conversation_update(
+        self, conversation: Conversation, message: Message
+    ):
+        """Handle conversation update event."""
         try:
-            await self.graph_engine.update_from_conversation(conversation, message)
+            await self.graph_engine.update_from_conversation(
+                conversation, message
+            )
         except Exception as e:
             logger.error(f"Error updating graph from conversation: {e}")
             raise
 
     def subscribe(self, callback: Callable):
-        """Subscribe to conversation events"""
+        """Subscribe to conversation events."""
         self._subscribers.append(callback)
 
     async def notify_subscribers(self, event: ConversationEvent = None):
-        """Notify all subscribers of an event"""
+        """Notify all subscribers of an event."""
         if event:
             # Process single event
             for callback in self._subscribers:
@@ -173,7 +177,7 @@ class ConversationMonitor:
                     logger.error(f"Error notifying subscribers: {e}")
 
     async def _process_events(self):
-        """Background task to process events"""
+        """Background task to process events."""
         while self.is_running:
             try:
                 # Process batch every second

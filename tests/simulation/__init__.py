@@ -4,7 +4,11 @@ This package provides tools for simulating realistic concurrent user
 behaviors to stress test the system with database and WebSocket operations.
 """
 
-from .concurrent_simulator import ConcurrentSimulator, SimulationConfig, SimulationMetrics
+from .concurrent_simulator import (
+    ConcurrentSimulator,
+    SimulationConfig,
+    SimulationMetrics,
+)
 from .scenarios import ScenarioScheduler, SimulationScenarios
 from .user_personas import (
     ActivityLevel,

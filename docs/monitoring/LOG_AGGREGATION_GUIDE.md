@@ -7,13 +7,13 @@ This guide documents the log aggregation, parsing, analysis, and streaming capab
 ## Table of Contents
 
 1. [Log Architecture](#log-architecture)
-2. [Log Sources and Formats](#log-sources-and-formats)
-3. [Collection Pipeline](#collection-pipeline)
-4. [Log Analysis Patterns](#log-analysis-patterns)
-5. [Search and Query Guide](#search-and-query-guide)
-6. [Troubleshooting with Logs](#troubleshooting-with-logs)
-7. [Log Retention and Compliance](#log-retention-and-compliance)
-8. [Best Practices](#best-practices)
+1. [Log Sources and Formats](#log-sources-and-formats)
+1. [Collection Pipeline](#collection-pipeline)
+1. [Log Analysis Patterns](#log-analysis-patterns)
+1. [Search and Query Guide](#search-and-query-guide)
+1. [Troubleshooting with Logs](#troubleshooting-with-logs)
+1. [Log Retention and Compliance](#log-retention-and-compliance)
+1. [Best Practices](#best-practices)
 
 ## Log Architecture
 
@@ -41,18 +41,19 @@ This guide documents the log aggregation, parsing, analysis, and streaming capab
 ### Data Flow
 
 1. **Generation**: Applications write structured JSON logs
-2. **Collection**: Filebeat collects and forwards logs
-3. **Processing**: Logstash parses and enriches logs
-4. **Storage**: Elasticsearch indexes for search
-5. **Visualization**: Kibana provides dashboards
-6. **Archive**: S3 for long-term compliance storage
+1. **Collection**: Filebeat collects and forwards logs
+1. **Processing**: Logstash parses and enriches logs
+1. **Storage**: Elasticsearch indexes for search
+1. **Visualization**: Kibana provides dashboards
+1. **Archive**: S3 for long-term compliance storage
 
 ## Log Sources and Formats
 
 ### Application Logs
 
 #### Backend API Logs
-**Location**: `/var/log/freeagentics/api.log`  
+
+**Location**: `/var/log/freeagentics/api.log`\
 **Format**: JSON structured logging
 
 ```json
@@ -72,7 +73,8 @@ This guide documents the log aggregation, parsing, analysis, and streaming capab
 ```
 
 #### Agent Logs
-**Location**: `/var/log/freeagentics/agents/*.log`  
+
+**Location**: `/var/log/freeagentics/agents/*.log`\
 **Format**: JSON with agent context
 
 ```json
@@ -93,7 +95,8 @@ This guide documents the log aggregation, parsing, analysis, and streaming capab
 ```
 
 #### Security Logs
-**Location**: `/var/log/freeagentics/security.log`  
+
+**Location**: `/var/log/freeagentics/security.log`\
 **Format**: JSON with security context
 
 ```json
@@ -113,7 +116,8 @@ This guide documents the log aggregation, parsing, analysis, and streaming capab
 ```
 
 #### System Logs
-**Location**: `/var/log/freeagentics/system.log`  
+
+**Location**: `/var/log/freeagentics/system.log`\
 **Format**: JSON with system metrics
 
 ```json
@@ -384,6 +388,7 @@ output {
 ### Common Search Queries
 
 #### Error Analysis
+
 ```
 # All errors in last hour
 level:ERROR AND @timestamp:[now-1h TO now]
@@ -396,6 +401,7 @@ level:ERROR | timechart count by component
 ```
 
 #### Performance Analysis
+
 ```
 # Slow API requests
 component:api AND duration_ms:>500
@@ -408,6 +414,7 @@ component:api | timechart avg(duration_ms) by path
 ```
 
 #### Agent Analysis
+
 ```
 # High memory agents
 component:agent AND memory_mb:>30
@@ -420,6 +427,7 @@ component:agent AND coordination_id:* | stats count by coordination_id
 ```
 
 #### Security Analysis
+
 ```
 # Failed authentications
 component:security AND event_type:authentication AND outcome:failure
@@ -434,24 +442,28 @@ tags:suspicious_activity
 ### Kibana Dashboards
 
 #### System Overview Dashboard
+
 - Log volume over time
 - Error rate by component
 - Top error messages
 - Component health status
 
 #### Agent Performance Dashboard
+
 - Agent count by type
 - Memory usage distribution
 - Coordination success rate
 - Agent lifecycle events
 
 #### Security Dashboard
+
 - Authentication attempts
 - Failed login patterns
 - Geographic distribution
 - Security alerts
 
 #### API Performance Dashboard
+
 - Request rate
 - Response time percentiles
 - Error rate by endpoint
@@ -462,6 +474,7 @@ tags:suspicious_activity
 ### Elasticsearch Query DSL
 
 #### Basic Queries
+
 ```json
 // Find all errors
 {
@@ -486,6 +499,7 @@ tags:suspicious_activity
 ```
 
 #### Complex Queries
+
 ```json
 // Find slow API requests with errors
 {
@@ -551,6 +565,7 @@ agent_id:*
 ### Investigation Workflows
 
 #### 1. System Outage Investigation
+
 ```bash
 # Check system status
 component:system AND level:(ERROR OR CRITICAL) AND @timestamp:[now-1h TO now]
@@ -563,6 +578,7 @@ message:"memory" OR message:"disk" OR message:"cpu" | stats count by component
 ```
 
 #### 2. Performance Degradation
+
 ```bash
 # Identify slow operations
 duration_ms:>1000 | stats avg(duration_ms), max(duration_ms) by path
@@ -575,6 +591,7 @@ component:api | timechart avg(duration_ms) span=5m
 ```
 
 #### 3. Agent Issues
+
 ```bash
 # Find problematic agents
 component:agent AND level:ERROR | stats count by agent_id | sort count desc
@@ -587,6 +604,7 @@ message:"coordination failed" | stats count by agent_id, coordination_id
 ```
 
 #### 4. Security Incidents
+
 ```bash
 # Failed login attempts
 component:security AND outcome:failure | stats count by ip, user_id
@@ -601,6 +619,7 @@ event_type:access_violation | table timestamp, user_id, resource, action
 ### Log Correlation
 
 #### Request Tracing
+
 ```json
 // Find all logs for a request
 {
@@ -616,6 +635,7 @@ event_type:access_violation | table timestamp, user_id, resource, action
 ```
 
 #### Agent Session Tracing
+
 ```json
 // Find all logs for an agent session
 {
@@ -693,12 +713,14 @@ event_type:access_violation | table timestamp, user_id, resource, action
 ### Compliance Requirements
 
 #### GDPR Compliance
+
 - PII masking in logs
 - Right to erasure support
 - Data retention limits
 - Access audit logs
 
 #### Security Compliance
+
 - Encryption at rest
 - Encryption in transit
 - Access control
@@ -725,6 +747,7 @@ elasticdump \
 ### Logging Standards
 
 #### 1. Structured Logging
+
 ```python
 # Good: Structured log with context
 logger.info("Agent operation completed", {
@@ -739,11 +762,13 @@ logger.info(f"Agent {agent_id} completed {operation} in {duration}ms")
 ```
 
 #### 2. Consistent Fields
+
 - Always include: timestamp, level, component
 - Use standard field names across components
 - Include correlation IDs (request_id, trace_id)
 
 #### 3. Appropriate Log Levels
+
 ```python
 # DEBUG: Detailed information
 logger.debug("Calculating belief state", {"values": belief_values})
@@ -764,6 +789,7 @@ logger.critical("Coordination service down", {"impact": "all_agents"})
 ### Performance Considerations
 
 #### 1. Asynchronous Logging
+
 ```python
 import asyncio
 from aiologger import Logger
@@ -775,6 +801,7 @@ async def log_async():
 ```
 
 #### 2. Sampling
+
 ```python
 # Sample debug logs in production
 if random.random() < 0.01:  # 1% sampling
@@ -782,6 +809,7 @@ if random.random() < 0.01:  # 1% sampling
 ```
 
 #### 3. Buffering
+
 ```yaml
 # Filebeat buffer configuration
 queue.mem:
@@ -793,6 +821,7 @@ queue.mem:
 ### Security Best Practices
 
 #### 1. Sensitive Data
+
 ```python
 # Mask sensitive data
 def mask_sensitive(data):
@@ -806,6 +835,7 @@ logger.info("User login", mask_sensitive(user_data))
 ```
 
 #### 2. Log Injection Prevention
+
 ```python
 # Sanitize user input
 import re
@@ -820,6 +850,7 @@ logger.info("User input", {"input": sanitize_log_input(user_input)})
 ### Monitoring the Logging System
 
 #### Health Checks
+
 ```bash
 # Check Filebeat
 systemctl status filebeat
@@ -833,13 +864,14 @@ curl -XGET 'localhost:9200/_cluster/health?pretty'
 ```
 
 #### Metrics to Monitor
+
 - Log ingestion rate
 - Processing lag
 - Error rates
 - Storage usage
 
----
+______________________________________________________________________
 
-**Last Updated**: 2025-01-15  
-**Version**: 1.0  
+**Last Updated**: 2025-01-15\
+**Version**: 1.0\
 **Contact**: sre@freeagentics.com

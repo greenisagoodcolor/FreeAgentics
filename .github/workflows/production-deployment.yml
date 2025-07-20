@@ -70,7 +70,7 @@ jobs:
     runs-on: ubuntu-latest
     timeout-minutes: 20
     if: ${{ !inputs.skip_tests }}
-    
+
     services:
       postgres:
         image: postgres:15
@@ -134,7 +134,7 @@ jobs:
           JWT_SECRET: test-jwt-secret
         run: |
           pytest tests/unit/ -v --cov=. --cov-report=xml --cov-report=html
-          
+
       - name: Run integration tests
         env:
           DATABASE_URL: postgresql://postgres:postgres@localhost:5432/test_db
@@ -155,7 +155,7 @@ jobs:
     runs-on: ubuntu-latest
     timeout-minutes: 15
     if: ${{ !inputs.skip_tests }}
-    
+
     defaults:
       run:
         working-directory: ./web
@@ -427,7 +427,7 @@ jobs:
         run: |
           # Wait for deployment to be ready
           sleep 60
-          
+
           # Run basic smoke tests
           curl -f https://staging.yourdomain.com/health
           curl -f https://staging.yourdomain.com/api/v1/health
@@ -480,11 +480,11 @@ jobs:
         run: |
           # Wait for deployment to be ready
           sleep 120
-          
+
           # Run comprehensive health checks
           curl -f https://yourdomain.com/health
           curl -f https://yourdomain.com/api/v1/health
-          
+
           # Check database connectivity
           kubectl exec -n freeagentics-prod deployment/backend -- python -c "
           from database.session import get_db
@@ -511,7 +511,7 @@ jobs:
           text: |
             Production deployment ${{ job.status }}
             Commit: ${{ github.sha }}
-            Images: 
+            Images:
             - Backend: ${{ needs.build-images.outputs.backend-image }}
             - Frontend: ${{ needs.build-images.outputs.frontend-image }}
           webhook_url: ${{ secrets.SLACK_WEBHOOK }}
@@ -540,7 +540,7 @@ jobs:
           # Rollback deployments
           kubectl rollout undo deployment/backend -n freeagentics-prod
           kubectl rollout undo deployment/frontend -n freeagentics-prod
-          
+
           # Wait for rollback to complete
           kubectl rollout status deployment/backend -n freeagentics-prod
           kubectl rollout status deployment/frontend -n freeagentics-prod

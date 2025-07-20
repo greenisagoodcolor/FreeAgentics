@@ -69,17 +69,26 @@ class TestNullAndBoundaryInputs:
         agent.start()
 
         # Test extremely large position values
-        large_obs = {"position": [999999, 999999], "surroundings": np.zeros((3, 3))}
+        large_obs = {
+            "position": [999999, 999999],
+            "surroundings": np.zeros((3, 3)),
+        }
         action = agent.step(large_obs)
         assert action in agent.actions
 
         # Test negative position values
-        negative_obs = {"position": [-999, -999], "surroundings": np.zeros((3, 3))}
+        negative_obs = {
+            "position": [-999, -999],
+            "surroundings": np.zeros((3, 3)),
+        }
         action = agent.step(negative_obs)
         assert action in agent.actions
 
         # Test NaN and infinity values
-        nan_obs = {"position": [float("nan"), float("inf")], "surroundings": np.zeros((3, 3))}
+        nan_obs = {
+            "position": [float("nan"), float("inf")],
+            "surroundings": np.zeros((3, 3)),
+        }
         action = agent.step(nan_obs)
         assert action in agent.actions
 
@@ -127,14 +136,20 @@ class TestConcurrentAccessScenarios:
 
         from agents.base_agent import BasicExplorerAgent
 
-        agents = [BasicExplorerAgent(f"agent_{i}", f"Agent {i}", grid_size=3) for i in range(5)]
+        agents = [
+            BasicExplorerAgent(f"agent_{i}", f"Agent {i}", grid_size=3)
+            for i in range(5)
+        ]
 
         for agent in agents:
             agent.start()
 
         # Concurrent step operations
         def agent_step(agent):
-            observation = {"position": [1, 1], "surroundings": np.zeros((3, 3))}
+            observation = {
+                "position": [1, 1],
+                "surroundings": np.zeros((3, 3)),
+            }
             return agent.step(observation)
 
         with ThreadPoolExecutor(max_workers=5) as executor:
@@ -156,7 +171,10 @@ class TestConcurrentAccessScenarios:
                 time.sleep(0.001)  # Small delay to encourage race conditions
 
         # Run multiple threads concurrently
-        threads = [threading.Thread(target=generate_errors, args=(i,)) for i in range(3)]
+        threads = [
+            threading.Thread(target=generate_errors, args=(i,))
+            for i in range(3)
+        ]
 
         for thread in threads:
             thread.start()
@@ -211,7 +229,10 @@ class TestMemoryExhaustionScenarios:
         for size in sizes:
             try:
                 large_surroundings = np.random.rand(size, size)
-                observation = {"position": [1, 1], "surroundings": large_surroundings}
+                observation = {
+                    "position": [1, 1],
+                    "surroundings": large_surroundings,
+                }
 
                 # Should handle without crashing
                 action = agent.step(observation)
@@ -253,11 +274,16 @@ class TestMemoryExhaustionScenarios:
 
         # Create and destroy many agents
         for i in range(10):
-            agent = BasicExplorerAgent(f"test_{i}", f"Test Agent {i}", grid_size=3)
+            agent = BasicExplorerAgent(
+                f"test_{i}", f"Test Agent {i}", grid_size=3
+            )
             agent.start()
 
             # Perform operations
-            observation = {"position": [1, 1], "surroundings": np.zeros((3, 3))}
+            observation = {
+                "position": [1, 1],
+                "surroundings": np.zeros((3, 3)),
+            }
             agent.step(observation)
 
             # Cleanup
@@ -375,7 +401,10 @@ class TestInvalidStateTransitions:
             agent.actions = []  # Invalid empty actions
 
             # Agent should still function or raise appropriate errors
-            observation = {"position": [1, 1], "surroundings": np.zeros((3, 3))}
+            observation = {
+                "position": [1, 1],
+                "surroundings": np.zeros((3, 3)),
+            }
             agent.step(observation)
 
         except (ValueError, RuntimeError):
@@ -398,9 +427,15 @@ class TestCascadingFailures:
 
         # Mock multiple failures
         mock_agent = MagicMock()
-        mock_agent.infer_states.side_effect = Exception("State inference failed")
-        mock_agent.infer_policies.side_effect = Exception("Policy inference failed")
-        mock_agent.sample_action.side_effect = Exception("Action sampling failed")
+        mock_agent.infer_states.side_effect = Exception(
+            "State inference failed"
+        )
+        mock_agent.infer_policies.side_effect = Exception(
+            "Policy inference failed"
+        )
+        mock_agent.sample_action.side_effect = Exception(
+            "Action sampling failed"
+        )
         agent.pymdp_agent = mock_agent
 
         # Should handle cascading failures gracefully
@@ -464,7 +499,9 @@ class TestCascadingFailures:
         action3 = agent.step(observation)
 
         # All actions should be valid
-        assert all(action in agent.actions for action in [action1, action2, action3])
+        assert all(
+            action in agent.actions for action in [action1, action2, action3]
+        )
 
         # Error count should reflect the failures
         error_summary = agent.error_handler.get_error_summary()

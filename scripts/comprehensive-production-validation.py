@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 """
-Comprehensive Production Readiness Validation Script
+Comprehensive Production Readiness Validation Script.
 Task 21: Validate Production Environment Configuration
 
 This script performs comprehensive validation of the production environment:
@@ -35,13 +35,16 @@ import yaml
 logging.basicConfig(
     level=logging.INFO,
     format="%(asctime)s - %(levelname)s - %(message)s",
-    handlers=[logging.FileHandler("production_validation.log"), logging.StreamHandler()],
+    handlers=[
+        logging.FileHandler("production_validation.log"),
+        logging.StreamHandler(),
+    ],
 )
 logger = logging.getLogger(__name__)
 
 
 class ProductionValidator:
-    """Comprehensive production validation suite"""
+    """Comprehensive production validation suite."""
 
     def __init__(self):
         self.base_url = "http://localhost:8000"
@@ -59,8 +62,10 @@ class ProductionValidator:
         self.warnings = []
         self.passes = []
 
-    def log_result(self, category: str, test_name: str, result: Dict[str, Any]):
-        """Log test result"""
+    def log_result(
+        self, category: str, test_name: str, result: Dict[str, Any]
+    ):
+        """Log test result."""
         if category not in self.results["validation_results"]:
             self.results["validation_results"][category] = {}
         self.results["validation_results"][category][test_name] = result
@@ -79,10 +84,12 @@ class ProductionValidator:
             self.passes.append(f"{category}: {test_name}")
             logger.info(f"PASS: {category} - {test_name}")
         else:
-            logger.info(f"INFO: {category} - {test_name}: {result.get('message', 'No status')}")
+            logger.info(
+                f"INFO: {category} - {test_name}: {result.get('message', 'No status')}"
+            )
 
     def check_environment_readiness(self) -> bool:
-        """Check if environment is ready for testing"""
+        """Check if environment is ready for testing."""
         logger.info("Checking environment readiness...")
 
         # Check if .env.production exists
@@ -97,14 +104,16 @@ class ProductionValidator:
                 logger.info("API server is running")
                 return True
             else:
-                logger.error(f"API server not responding correctly: {response.status_code}")
+                logger.error(
+                    f"API server not responding correctly: {response.status_code}"
+                )
                 return False
         except Exception as e:
             logger.error(f"Cannot connect to API server: {e}")
             return False
 
     def validate_load_testing(self):
-        """Perform load testing and performance validation"""
+        """Perform load testing and performance validation."""
         logger.info("Starting load testing and performance validation...")
 
         # Test 1: Basic response time
@@ -120,8 +129,9 @@ class ProductionValidator:
                 break
 
         if response_times:
-            avg_response = sum(response_times) / len(response_times)
-            p95_response = sorted(response_times)[int(len(response_times) * 0.95)]
+            p95_response = sorted(response_times)[
+                int(len(response_times) * 0.95)
+            ]
 
             self.log_result(
                 "performance",
@@ -144,7 +154,7 @@ class ProductionValidator:
         self.validate_database_performance()
 
     def concurrent_load_test(self):
-        """Run concurrent load test"""
+        """Run concurrent load test."""
         logger.info("Running concurrent load test...")
 
         def make_request(url: str) -> Tuple[int, float]:
@@ -179,7 +189,9 @@ class ProductionValidator:
         # Analyze results
         successful_requests = sum(1 for status, _ in results if status == 200)
         total_requests = len(results)
-        success_rate = successful_requests / total_requests if total_requests > 0 else 0
+        success_rate = (
+            successful_requests / total_requests if total_requests > 0 else 0
+        )
 
         self.log_result(
             "performance",
@@ -194,7 +206,7 @@ class ProductionValidator:
         )
 
     def validate_memory_usage(self):
-        """Validate system memory usage"""
+        """Validate system memory usage."""
         logger.info("Validating memory usage...")
 
         memory = psutil.virtual_memory()
@@ -213,7 +225,7 @@ class ProductionValidator:
         )
 
     def validate_database_performance(self):
-        """Validate database performance"""
+        """Validate database performance."""
         logger.info("Validating database performance...")
 
         try:
@@ -226,7 +238,10 @@ class ProductionValidator:
                 self.log_result(
                     "performance",
                     "database_connection",
-                    {"status": "CRITICAL", "message": "DATABASE_URL not configured"},
+                    {
+                        "status": "CRITICAL",
+                        "message": "DATABASE_URL not configured",
+                    },
                 )
                 return
 
@@ -258,7 +273,7 @@ class ProductionValidator:
             # Test table existence
             cursor.execute(
                 """
-                SELECT table_name FROM information_schema.tables 
+                SELECT table_name FROM information_schema.tables
                 WHERE table_schema = 'public'
             """
             )
@@ -283,11 +298,14 @@ class ProductionValidator:
             self.log_result(
                 "performance",
                 "database_performance",
-                {"status": "CRITICAL", "message": f"Database performance test failed: {e}"},
+                {
+                    "status": "CRITICAL",
+                    "message": f"Database performance test failed: {e}",
+                },
             )
 
     def validate_security(self):
-        """Perform security validation and penetration testing"""
+        """Perform security validation and penetration testing."""
         logger.info("Starting security validation and penetration testing...")
 
         # Test 1: SSL/TLS Configuration
@@ -309,25 +327,33 @@ class ProductionValidator:
         self.test_cors_configuration()
 
     def test_ssl_configuration(self):
-        """Test SSL/TLS configuration"""
+        """Test SSL/TLS configuration."""
         logger.info("Testing SSL/TLS configuration...")
 
         try:
             # Test SSL certificate
             context = ssl.create_default_context()
-            with socket.create_connection(("localhost", 443), timeout=10) as sock:
-                with context.wrap_socket(sock, server_hostname="localhost") as ssock:
+            with socket.create_connection(
+                ("localhost", 443), timeout=10
+            ) as sock:
+                with context.wrap_socket(
+                    sock, server_hostname="localhost"
+                ) as ssock:
                     cert = ssock.getpeercert()
 
                     # Check certificate expiry
-                    not_after = datetime.strptime(cert["notAfter"], "%b %d %H:%M:%S %Y %Z")
+                    not_after = datetime.strptime(
+                        cert["notAfter"], "%b %d %H:%M:%S %Y %Z"
+                    )
                     days_until_expiry = (not_after - datetime.now()).days
 
                     self.log_result(
                         "security",
                         "ssl_certificate",
                         {
-                            "status": "PASS" if days_until_expiry > 30 else "WARNING",
+                            "status": "PASS"
+                            if days_until_expiry > 30
+                            else "WARNING",
                             "days_until_expiry": days_until_expiry,
                             "certificate_subject": cert.get("subject", []),
                             "message": f"SSL certificate expires in {days_until_expiry} days",
@@ -337,11 +363,14 @@ class ProductionValidator:
             self.log_result(
                 "security",
                 "ssl_certificate",
-                {"status": "WARNING", "message": f"SSL test failed (may not be configured): {e}"},
+                {
+                    "status": "WARNING",
+                    "message": f"SSL test failed (may not be configured): {e}",
+                },
             )
 
     def test_security_headers(self):
-        """Test security headers"""
+        """Test security headers."""
         logger.info("Testing security headers...")
 
         try:
@@ -381,11 +410,14 @@ class ProductionValidator:
             self.log_result(
                 "security",
                 "security_headers",
-                {"status": "CRITICAL", "message": f"Security headers test failed: {e}"},
+                {
+                    "status": "CRITICAL",
+                    "message": f"Security headers test failed: {e}",
+                },
             )
 
     def test_authentication_security(self):
-        """Test authentication security"""
+        """Test authentication security."""
         logger.info("Testing authentication security...")
 
         try:
@@ -393,7 +425,9 @@ class ProductionValidator:
             login_data = {"username": "admin", "password": "wrong_password"}
 
             response = requests.post(
-                f"{self.base_url}/api/v1/auth/login", json=login_data, timeout=10
+                f"{self.base_url}/api/v1/auth/login",
+                json=login_data,
+                timeout=10,
             )
 
             # Should fail with wrong credentials
@@ -401,7 +435,9 @@ class ProductionValidator:
                 "security",
                 "authentication_security",
                 {
-                    "status": "PASS" if response.status_code in [401, 403] else "WARNING",
+                    "status": "PASS"
+                    if response.status_code in [401, 403]
+                    else "WARNING",
                     "response_code": response.status_code,
                     "message": f"Authentication correctly rejected invalid credentials: {response.status_code}",
                 },
@@ -411,11 +447,14 @@ class ProductionValidator:
             self.log_result(
                 "security",
                 "authentication_security",
-                {"status": "WARNING", "message": f"Authentication test failed: {e}"},
+                {
+                    "status": "WARNING",
+                    "message": f"Authentication test failed: {e}",
+                },
             )
 
     def test_rate_limiting(self):
-        """Test rate limiting"""
+        """Test rate limiting."""
         logger.info("Testing rate limiting...")
 
         try:
@@ -444,11 +483,14 @@ class ProductionValidator:
             self.log_result(
                 "security",
                 "rate_limiting",
-                {"status": "WARNING", "message": f"Rate limiting test failed: {e}"},
+                {
+                    "status": "WARNING",
+                    "message": f"Rate limiting test failed: {e}",
+                },
             )
 
     def test_input_validation(self):
-        """Test input validation"""
+        """Test input validation."""
         logger.info("Testing input validation...")
 
         # Test SQL injection attempts
@@ -481,16 +523,21 @@ class ProductionValidator:
                     return
 
             except Exception as e:
-                logger.debug(f"Input validation test with payload {payload}: {e}")
+                logger.debug(
+                    f"Input validation test with payload {payload}: {e}"
+                )
 
         self.log_result(
             "security",
             "sql_injection_protection",
-            {"status": "PASS", "message": "No SQL injection vulnerabilities detected"},
+            {
+                "status": "PASS",
+                "message": "No SQL injection vulnerabilities detected",
+            },
         )
 
     def test_cors_configuration(self):
-        """Test CORS configuration"""
+        """Test CORS configuration."""
         logger.info("Testing CORS configuration...")
 
         try:
@@ -503,7 +550,9 @@ class ProductionValidator:
                 timeout=10,
             )
 
-            cors_headers = response.headers.get("Access-Control-Allow-Origin", "")
+            cors_headers = response.headers.get(
+                "Access-Control-Allow-Origin", ""
+            )
 
             self.log_result(
                 "security",
@@ -523,7 +572,7 @@ class ProductionValidator:
             )
 
     def validate_disaster_recovery(self):
-        """Test disaster recovery and business continuity"""
+        """Test disaster recovery and business continuity."""
         logger.info("Testing disaster recovery and business continuity...")
 
         # Test 1: Backup verification
@@ -539,7 +588,7 @@ class ProductionValidator:
         self.test_failover_procedures()
 
     def test_backup_procedures(self):
-        """Test backup procedures"""
+        """Test backup procedures."""
         logger.info("Testing backup procedures...")
 
         backup_script = "scripts/database-backup.sh"
@@ -547,14 +596,19 @@ class ProductionValidator:
             try:
                 # Test backup script (dry run)
                 result = subprocess.run(
-                    ["bash", backup_script, "--dry-run"], capture_output=True, text=True, timeout=60
+                    ["bash", backup_script, "--dry-run"],
+                    capture_output=True,
+                    text=True,
+                    timeout=60,
                 )
 
                 self.log_result(
                     "disaster_recovery",
                     "backup_procedures",
                     {
-                        "status": "PASS" if result.returncode == 0 else "WARNING",
+                        "status": "PASS"
+                        if result.returncode == 0
+                        else "WARNING",
                         "return_code": result.returncode,
                         "output": result.stdout[:500],
                         "message": f"Backup script test: {'SUCCESS' if result.returncode == 0 else 'FAILED'}",
@@ -565,7 +619,10 @@ class ProductionValidator:
                 self.log_result(
                     "disaster_recovery",
                     "backup_procedures",
-                    {"status": "WARNING", "message": f"Backup test failed: {e}"},
+                    {
+                        "status": "WARNING",
+                        "message": f"Backup test failed: {e}",
+                    },
                 )
         else:
             self.log_result(
@@ -575,13 +632,16 @@ class ProductionValidator:
             )
 
     def test_service_restart(self):
-        """Test service restart capability"""
+        """Test service restart capability."""
         logger.info("Testing service restart capability...")
 
         # Check if docker-compose is available
         try:
             result = subprocess.run(
-                ["docker-compose", "--version"], capture_output=True, text=True, timeout=10
+                ["docker-compose", "--version"],
+                capture_output=True,
+                text=True,
+                timeout=10,
             )
 
             if result.returncode == 0:
@@ -597,24 +657,35 @@ class ProductionValidator:
                 self.log_result(
                     "disaster_recovery",
                     "service_restart",
-                    {"status": "WARNING", "message": "Docker Compose not available"},
+                    {
+                        "status": "WARNING",
+                        "message": "Docker Compose not available",
+                    },
                 )
 
         except Exception as e:
             self.log_result(
                 "disaster_recovery",
                 "service_restart",
-                {"status": "WARNING", "message": f"Service restart test failed: {e}"},
+                {
+                    "status": "WARNING",
+                    "message": f"Service restart test failed: {e}",
+                },
             )
 
     def test_data_recovery(self):
-        """Test data recovery simulation"""
+        """Test data recovery simulation."""
         logger.info("Testing data recovery simulation...")
 
         # Check if recovery scripts exist
-        recovery_scripts = ["scripts/restore-database.sh", "scripts/rollback-deployment.sh"]
+        recovery_scripts = [
+            "scripts/restore-database.sh",
+            "scripts/rollback-deployment.sh",
+        ]
 
-        existing_scripts = [script for script in recovery_scripts if os.path.exists(script)]
+        existing_scripts = [
+            script for script in recovery_scripts if os.path.exists(script)
+        ]
 
         self.log_result(
             "disaster_recovery",
@@ -627,7 +698,7 @@ class ProductionValidator:
         )
 
     def test_failover_procedures(self):
-        """Test failover procedures"""
+        """Test failover procedures."""
         logger.info("Testing failover procedures...")
 
         # Check for load balancer configuration
@@ -653,11 +724,14 @@ class ProductionValidator:
             self.log_result(
                 "disaster_recovery",
                 "failover_procedures",
-                {"status": "WARNING", "message": "Nginx configuration not found"},
+                {
+                    "status": "WARNING",
+                    "message": "Nginx configuration not found",
+                },
             )
 
     def validate_monitoring(self):
-        """Validate monitoring and alerting systems"""
+        """Validate monitoring and alerting systems."""
         logger.info("Validating monitoring and alerting systems...")
 
         # Test 1: Prometheus metrics
@@ -676,7 +750,7 @@ class ProductionValidator:
         self.test_health_endpoints()
 
     def test_prometheus_metrics(self):
-        """Test Prometheus metrics"""
+        """Test Prometheus metrics."""
         logger.info("Testing Prometheus metrics...")
 
         try:
@@ -694,13 +768,19 @@ class ProductionValidator:
                     "process_resident_memory_bytes",
                 ]
 
-                found_metrics = [metric for metric in required_metrics if metric in metrics_text]
+                found_metrics = [
+                    metric
+                    for metric in required_metrics
+                    if metric in metrics_text
+                ]
 
                 self.log_result(
                     "monitoring",
                     "prometheus_metrics",
                     {
-                        "status": "PASS" if len(found_metrics) >= 3 else "WARNING",
+                        "status": "PASS"
+                        if len(found_metrics) >= 3
+                        else "WARNING",
                         "found_metrics": found_metrics,
                         "total_metrics": len(required_metrics),
                         "message": f"Prometheus metrics: {len(found_metrics)}/{len(required_metrics)} found",
@@ -720,11 +800,14 @@ class ProductionValidator:
             self.log_result(
                 "monitoring",
                 "prometheus_metrics",
-                {"status": "WARNING", "message": f"Prometheus metrics test failed: {e}"},
+                {
+                    "status": "WARNING",
+                    "message": f"Prometheus metrics test failed: {e}",
+                },
             )
 
     def test_grafana_dashboards(self):
-        """Test Grafana dashboards"""
+        """Test Grafana dashboards."""
         logger.info("Testing Grafana dashboards...")
 
         dashboard_dir = "monitoring/grafana/dashboards"
@@ -735,7 +818,9 @@ class ProductionValidator:
                 "monitoring",
                 "grafana_dashboards",
                 {
-                    "status": "PASS" if len(dashboard_files) > 0 else "WARNING",
+                    "status": "PASS"
+                    if len(dashboard_files) > 0
+                    else "WARNING",
                     "dashboard_count": len(dashboard_files),
                     "dashboards": [f.name for f in dashboard_files],
                     "message": f"Grafana dashboards found: {len(dashboard_files)}",
@@ -745,11 +830,14 @@ class ProductionValidator:
             self.log_result(
                 "monitoring",
                 "grafana_dashboards",
-                {"status": "WARNING", "message": "Grafana dashboards directory not found"},
+                {
+                    "status": "WARNING",
+                    "message": "Grafana dashboards directory not found",
+                },
             )
 
     def test_alert_manager(self):
-        """Test alert manager configuration"""
+        """Test alert manager configuration."""
         logger.info("Testing alert manager configuration...")
 
         alert_config = "monitoring/alertmanager.yml"
@@ -765,7 +853,9 @@ class ProductionValidator:
                     "monitoring",
                     "alert_manager",
                     {
-                        "status": "PASS" if has_routing and has_receivers else "WARNING",
+                        "status": "PASS"
+                        if has_routing and has_receivers
+                        else "WARNING",
                         "has_routing": has_routing,
                         "has_receivers": has_receivers,
                         "message": f"Alert manager config: routing={has_routing}, receivers={has_receivers}",
@@ -775,20 +865,30 @@ class ProductionValidator:
                 self.log_result(
                     "monitoring",
                     "alert_manager",
-                    {"status": "WARNING", "message": f"Alert manager config parse error: {e}"},
+                    {
+                        "status": "WARNING",
+                        "message": f"Alert manager config parse error: {e}",
+                    },
                 )
         else:
             self.log_result(
                 "monitoring",
                 "alert_manager",
-                {"status": "WARNING", "message": "Alert manager configuration not found"},
+                {
+                    "status": "WARNING",
+                    "message": "Alert manager configuration not found",
+                },
             )
 
     def test_log_aggregation(self):
-        """Test log aggregation"""
+        """Test log aggregation."""
         logger.info("Testing log aggregation...")
 
-        log_files = ["logs/freeagentics.json", "logs/backend.log", "logs/security_audit.log"]
+        log_files = [
+            "logs/freeagentics.json",
+            "logs/backend.log",
+            "logs/security_audit.log",
+        ]
 
         existing_logs = [log for log in log_files if os.path.exists(log)]
 
@@ -803,15 +903,21 @@ class ProductionValidator:
         )
 
     def test_health_endpoints(self):
-        """Test health check endpoints"""
+        """Test health check endpoints."""
         logger.info("Testing health check endpoints...")
 
-        health_endpoints = ["/health", "/api/v1/system/health", "/api/v1/monitoring/health"]
+        health_endpoints = [
+            "/health",
+            "/api/v1/system/health",
+            "/api/v1/monitoring/health",
+        ]
 
         healthy_endpoints = []
         for endpoint in health_endpoints:
             try:
-                response = requests.get(f"{self.base_url}{endpoint}", timeout=10)
+                response = requests.get(
+                    f"{self.base_url}{endpoint}", timeout=10
+                )
                 if response.status_code == 200:
                     healthy_endpoints.append(endpoint)
             except Exception:
@@ -821,7 +927,9 @@ class ProductionValidator:
             "monitoring",
             "health_endpoints",
             {
-                "status": "PASS" if len(healthy_endpoints) >= 1 else "CRITICAL",
+                "status": "PASS"
+                if len(healthy_endpoints) >= 1
+                else "CRITICAL",
                 "healthy_endpoints": healthy_endpoints,
                 "total_endpoints": len(health_endpoints),
                 "message": f"Health endpoints: {len(healthy_endpoints)}/{len(health_endpoints)} healthy",
@@ -829,7 +937,7 @@ class ProductionValidator:
         )
 
     def validate_operational_procedures(self):
-        """Test all operational procedures"""
+        """Test all operational procedures."""
         logger.info("Testing operational procedures...")
 
         # Test 1: Deployment procedures
@@ -845,12 +953,17 @@ class ProductionValidator:
         self.test_maintenance_procedures()
 
     def test_deployment_procedures(self):
-        """Test deployment procedures"""
+        """Test deployment procedures."""
         logger.info("Testing deployment procedures...")
 
-        deployment_scripts = ["deploy-production.sh", "scripts/deployment/deploy-production.sh"]
+        deployment_scripts = [
+            "deploy-production.sh",
+            "scripts/deployment/deploy-production.sh",
+        ]
 
-        existing_scripts = [script for script in deployment_scripts if os.path.exists(script)]
+        existing_scripts = [
+            script for script in deployment_scripts if os.path.exists(script)
+        ]
 
         self.log_result(
             "operational",
@@ -863,12 +976,17 @@ class ProductionValidator:
         )
 
     def test_rollback_procedures(self):
-        """Test rollback procedures"""
+        """Test rollback procedures."""
         logger.info("Testing rollback procedures...")
 
-        rollback_scripts = ["scripts/rollback.sh", "scripts/deployment/rollback.sh"]
+        rollback_scripts = [
+            "scripts/rollback.sh",
+            "scripts/deployment/rollback.sh",
+        ]
 
-        existing_scripts = [script for script in rollback_scripts if os.path.exists(script)]
+        existing_scripts = [
+            script for script in rollback_scripts if os.path.exists(script)
+        ]
 
         self.log_result(
             "operational",
@@ -881,7 +999,7 @@ class ProductionValidator:
         )
 
     def test_scaling_procedures(self):
-        """Test scaling procedures"""
+        """Test scaling procedures."""
         logger.info("Testing scaling procedures...")
 
         # Check Docker Compose scaling configuration
@@ -907,7 +1025,7 @@ class ProductionValidator:
         )
 
     def test_maintenance_procedures(self):
-        """Test maintenance procedures"""
+        """Test maintenance procedures."""
         logger.info("Testing maintenance procedures...")
 
         maintenance_docs = [
@@ -915,7 +1033,9 @@ class ProductionValidator:
             "docs/runbooks/MAINTENANCE_PROCEDURES.md",
         ]
 
-        existing_docs = [doc for doc in maintenance_docs if os.path.exists(doc)]
+        existing_docs = [
+            doc for doc in maintenance_docs if os.path.exists(doc)
+        ]
 
         self.log_result(
             "operational",
@@ -928,12 +1048,16 @@ class ProductionValidator:
         )
 
     def generate_final_report(self):
-        """Generate comprehensive final report"""
+        """Generate comprehensive final report."""
         logger.info("Generating final comprehensive report...")
 
         # Calculate summary statistics
-        total_tests = len(self.passes) + len(self.warnings) + len(self.critical_failures)
-        pass_rate = (len(self.passes) / total_tests) * 100 if total_tests > 0 else 0
+        total_tests = (
+            len(self.passes) + len(self.warnings) + len(self.critical_failures)
+        )
+        pass_rate = (
+            (len(self.passes) / total_tests) * 100 if total_tests > 0 else 0
+        )
 
         self.results["summary"] = {
             "total_tests": total_tests,
@@ -960,10 +1084,14 @@ class ProductionValidator:
         return json_report, markdown_report
 
     def generate_markdown_report(self, filename: str):
-        """Generate markdown report"""
+        """Generate markdown report."""
         with open(filename, "w") as f:
-            f.write("# FreeAgentics Production Readiness Validation Report\n\n")
-            f.write(f"**Generated:** {datetime.now().strftime('%Y-%m-%d %H:%M:%S')}\n")
+            f.write(
+                "# FreeAgentics Production Readiness Validation Report\n\n"
+            )
+            f.write(
+                f"**Generated:** {datetime.now().strftime('%Y-%m-%d %H:%M:%S')}\n"
+            )
             f.write(f"**Environment:** {self.results['environment']}\n\n")
 
             # Summary
@@ -972,7 +1100,9 @@ class ProductionValidator:
             f.write(f"- **Total Tests:** {summary['total_tests']}\n")
             f.write(f"- **Passed:** {summary['passed']}\n")
             f.write(f"- **Warnings:** {summary['warnings']}\n")
-            f.write(f"- **Critical Failures:** {summary['critical_failures']}\n")
+            f.write(
+                f"- **Critical Failures:** {summary['critical_failures']}\n"
+            )
             f.write(f"- **Pass Rate:** {summary['pass_rate']:.1f}%\n")
             f.write(
                 f"- **Production Ready:** {'✅ YES' if summary['production_ready'] else '❌ NO'}\n\n"
@@ -997,9 +1127,11 @@ class ProductionValidator:
             for category, tests in self.results["validation_results"].items():
                 f.write(f"### {category.replace('_', ' ').title()}\n\n")
                 for test_name, result in tests.items():
-                    status_icon = {"PASS": "✅", "WARNING": "⚠️", "CRITICAL": "❌"}.get(
-                        result.get("status", ""), "ℹ️"
-                    )
+                    status_icon = {
+                        "PASS": "✅",
+                        "WARNING": "⚠️",
+                        "CRITICAL": "❌",
+                    }.get(result.get("status", ""), "ℹ️")
                     f.write(
                         f"- {status_icon} **{test_name}**: {result.get('message', 'No message')}\n"
                     )
@@ -1024,10 +1156,12 @@ class ProductionValidator:
                 f.write("1. Fix all critical failures listed above\n")
                 f.write("2. Re-run validation after fixes\n")
                 f.write("3. Address warnings for optimal performance\n")
-                f.write("4. Do not deploy until all critical issues are resolved\n")
+                f.write(
+                    "4. Do not deploy until all critical issues are resolved\n"
+                )
 
     async def run_validation(self):
-        """Run comprehensive validation"""
+        """Run comprehensive validation."""
         logger.info("Starting comprehensive production validation...")
 
         # Check environment readiness
@@ -1056,7 +1190,9 @@ class ProductionValidator:
             print(f"Warnings: {summary['warnings']}")
             print(f"Critical Failures: {summary['critical_failures']}")
             print(f"Pass Rate: {summary['pass_rate']:.1f}%")
-            print(f"Production Ready: {'YES' if summary['production_ready'] else 'NO'}")
+            print(
+                f"Production Ready: {'YES' if summary['production_ready'] else 'NO'}"
+            )
             print("=" * 60)
 
             if summary["production_ready"]:
@@ -1072,7 +1208,7 @@ class ProductionValidator:
 
 
 async def main():
-    """Main function"""
+    """Main function."""
     validator = ProductionValidator()
     success = await validator.run_validation()
     sys.exit(0 if success else 1)

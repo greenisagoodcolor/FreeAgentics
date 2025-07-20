@@ -295,22 +295,22 @@ task-master models --set-fallback gpt-4o-mini
 ### Iterative Implementation
 
 1. `task-master show <subtask-id>` - Understand requirements
-2. Explore codebase and plan implementation
-3. `task-master update-subtask --id=<id> --prompt="detailed plan"` - Log plan
-4. `task-master set-status --id=<id> --status=in-progress` - Start work
-5. Implement code following logged plan
-6. `task-master update-subtask --id=<id> --prompt="what worked/didn't work"` - Log progress
-7. `task-master set-status --id=<id> --status=done` - Complete task
+1. Explore codebase and plan implementation
+1. `task-master update-subtask --id=<id> --prompt="detailed plan"` - Log plan
+1. `task-master set-status --id=<id> --status=in-progress` - Start work
+1. Implement code following logged plan
+1. `task-master update-subtask --id=<id> --prompt="what worked/didn't work"` - Log progress
+1. `task-master set-status --id=<id> --status=done` - Complete task
 
 ### Complex Workflows with Checklists
 
 For large migrations or multi-step processes:
 
 1. Create a markdown PRD file describing the new changes: `touch task-migration-checklist.md` (prds can be .txt or .md)
-2. Use Taskmaster to parse the new prd with `task-master parse-prd --append` (also available in MCP)
-3. Use Taskmaster to expand the newly generated tasks into subtasks. Consdier using `analyze-complexity` with the correct --to and --from IDs (the new ids) to identify the ideal subtask amounts for each task. Then expand them.
-4. Work through items systematically, checking them off as completed
-5. Use `task-master update-subtask` to log progress on each task/subtask and/or updating/researching them before/during implementation if getting stuck
+1. Use Taskmaster to parse the new prd with `task-master parse-prd --append` (also available in MCP)
+1. Use Taskmaster to expand the newly generated tasks into subtasks. Consdier using `analyze-complexity` with the correct --to and --from IDs (the new ids) to identify the ideal subtask amounts for each task. Then expand them.
+1. Work through items systematically, checking them off as completed
+1. Use `task-master update-subtask` to log progress on each task/subtask and/or updating/researching them before/during implementation if getting stuck
 
 ### Git Integration
 
@@ -412,6 +412,6 @@ These commands make AI calls and may take up to a minute:
 - Provides more informed task creation and updates
 - Recommended for complex technical tasks
 
----
+______________________________________________________________________
 
 _This guide ensures Claude Code has immediate access to Task Master's essential functionality for agentic development workflows._

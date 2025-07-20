@@ -32,6 +32,7 @@ class AgentOperation:
     operation_id: str = None
 
     def __post_init__(self):
+        """Initialize operation ID if not provided."""
         if self.operation_id is None:
             self.operation_id = str(uuid.uuid4())
 
@@ -69,7 +70,9 @@ def _process_agent_operation(
 
         # Create agent from config
         agent = BasicExplorerAgent(
-            agent_config["agent_id"], agent_config["name"], agent_config.get("grid_size", 5)
+            agent_config["agent_id"],
+            agent_config["name"],
+            agent_config.get("grid_size", 5),
         )
 
         # Set agent state if provided
@@ -108,7 +111,9 @@ def _process_agent_operation(
             }
 
         else:
-            raise ValueError(f"Unknown operation type: {operation.operation_type}")
+            raise ValueError(
+                f"Unknown operation type: {operation.operation_type}"
+            )
 
         execution_time = (time.time() - start_time) * 1000
 
@@ -165,7 +170,9 @@ class AsyncAgentManager:
             "avg_execution_time": 0,
         }
 
-        logger.info(f"Initialized AsyncAgentManager with {self.max_workers} workers")
+        logger.info(
+            f"Initialized AsyncAgentManager with {self.max_workers} workers"
+        )
 
     async def __aenter__(self):
         """Async context manager entry."""
@@ -236,7 +243,10 @@ class AsyncAgentManager:
                     # Process operation in separate process
                     loop = asyncio.get_event_loop()
                     result = await loop.run_in_executor(
-                        self.process_pool, _process_agent_operation, agent_config, operation
+                        self.process_pool,
+                        _process_agent_operation,
+                        agent_config,
+                        operation,
                     )
 
                 # Update stats
@@ -248,7 +258,8 @@ class AsyncAgentManager:
 
                 self.stats["total_execution_time"] += result.execution_time_ms
                 self.stats["avg_execution_time"] = (
-                    self.stats["total_execution_time"] / self.stats["total_operations"]
+                    self.stats["total_execution_time"]
+                    / self.stats["total_operations"]
                 )
 
                 # Resolve the future if it exists
@@ -266,7 +277,11 @@ class AsyncAgentManager:
                 logger.error(f"Error processing operation: {e}")
 
     async def execute_operation(
-        self, agent_id: str, operation_type: str, data: Dict[str, Any], timeout: float = 10.0
+        self,
+        agent_id: str,
+        operation_type: str,
+        data: Dict[str, Any],
+        timeout: float = 10.0,
     ) -> AgentOperationResult:
         """
         Execute a single agent operation asynchronously.
@@ -281,7 +296,10 @@ class AsyncAgentManager:
             AgentOperationResult
         """
         operation = AgentOperation(
-            agent_id=agent_id, operation_type=operation_type, data=data, timestamp=time.time()
+            agent_id=agent_id,
+            operation_type=operation_type,
+            data=data,
+            timestamp=time.time(),
         )
 
         # Create future for result
@@ -308,7 +326,9 @@ class AsyncAgentManager:
             )
 
     async def execute_batch_operations(
-        self, operations: List[Tuple[str, str, Dict[str, Any]]], timeout: float = 10.0
+        self,
+        operations: List[Tuple[str, str, Dict[str, Any]]],
+        timeout: float = 10.0,
     ) -> List[AgentOperationResult]:
         """
         Execute multiple operations concurrently.
@@ -322,7 +342,9 @@ class AsyncAgentManager:
         """
         tasks = []
         for agent_id, operation_type, data in operations:
-            task = self.execute_operation(agent_id, operation_type, data, timeout)
+            task = self.execute_operation(
+                agent_id, operation_type, data, timeout
+            )
             tasks.append(task)
 
         # Execute all operations concurrently
@@ -364,7 +386,9 @@ class AsyncAgentManager:
         operations = []
         for agent_id in self.agent_configs:
             if agent_id in observations:
-                operations.append((agent_id, "step", {"observation": observations[agent_id]}))
+                operations.append(
+                    (agent_id, "step", {"observation": observations[agent_id]})
+                )
 
         results = await self.execute_batch_operations(operations, timeout)
 
@@ -381,9 +405,7 @@ class AsyncAgentManager:
 
 
 async def benchmark_async_multi_agent_performance():
-    """
-    Benchmark the async multi-agent system performance.
-    """
+    """Benchmark the async multi-agent system performance."""
     print("=" * 60)
     print("ASYNC MULTI-AGENT PERFORMANCE BENCHMARK")
     print("=" * 60)
@@ -401,7 +423,11 @@ async def benchmark_async_multi_agent_performance():
             for i in range(num_agents):
                 manager.register_agent(
                     f"async-agent-{i}",
-                    {"name": f"AsyncAgent-{i}", "grid_size": 5, "is_active": True},
+                    {
+                        "name": f"AsyncAgent-{i}",
+                        "grid_size": 5,
+                        "is_active": True,
+                    },
                 )
 
             # Create observations for all agents
@@ -420,18 +446,30 @@ async def benchmark_async_multi_agent_performance():
                 round_start = time.time()
 
                 # Step all agents concurrently
-                round_results = await manager.step_all_agents(observations, timeout=30.0)
+                round_results = await manager.step_all_agents(
+                    observations, timeout=30.0
+                )
 
                 round_time = time.time() - round_start
 
                 # Count successful operations
-                successful = sum(1 for r in round_results.values() if r.success)
+                successful = sum(
+                    1 for r in round_results.values() if r.success
+                )
                 failed = len(round_results) - successful
 
                 # Print first error for debugging
                 if failed > 0:
-                    first_error = next(r.error for r in round_results.values() if not r.success)
-                    error_msg = first_error.split("\n")[0] if first_error else "Unknown error"
+                    first_error = next(
+                        r.error
+                        for r in round_results.values()
+                        if not r.success
+                    )
+                    error_msg = (
+                        first_error.split("\n")[0]
+                        if first_error
+                        else "Unknown error"
+                    )
                     print(
                         f"  Round {round_num + 1}: {round_time:.3f}s, "
                         f"{successful} success, {failed} failed (error: {error_msg[:50]}...)"
@@ -453,9 +491,11 @@ async def benchmark_async_multi_agent_performance():
                 "rounds": rounds,
                 "total_operations": total_operations,
                 "total_time": total_time,
-                "avg_time_per_operation": (total_time / total_operations) * 1000,  # ms
+                "avg_time_per_operation": (total_time / total_operations)
+                * 1000,  # ms
                 "throughput_ops_per_sec": total_operations / total_time,
-                "success_rate": stats["successful_operations"] / stats["total_operations"],
+                "success_rate": stats["successful_operations"]
+                / stats["total_operations"],
                 "avg_execution_time_ms": stats["avg_execution_time"],
             }
 
@@ -485,10 +525,16 @@ if __name__ == "__main__":
     max_agents = max(results.keys())
     max_agent_result = results[max_agents]
 
-    print(f"Single agent async performance: {single_agent['avg_time_per_operation']:.1f}ms")
+    print(
+        f"Single agent async performance: {single_agent['avg_time_per_operation']:.1f}ms"
+    )
     print(f"Max agents tested: {max_agents}")
-    print(f"Max agent performance: {max_agent_result['avg_time_per_operation']:.1f}ms")
-    print(f"Throughput scaling: {max_agent_result['throughput_ops_per_sec']:.1f} ops/sec")
+    print(
+        f"Max agent performance: {max_agent_result['avg_time_per_operation']:.1f}ms"
+    )
+    print(
+        f"Throughput scaling: {max_agent_result['throughput_ops_per_sec']:.1f} ops/sec"
+    )
 
     # Calculate scaling efficiency
     theoretical_max = single_agent["throughput_ops_per_sec"] * max_agents
@@ -498,9 +544,13 @@ if __name__ == "__main__":
     print(f"Scaling efficiency: {scaling_efficiency:.1%}")
 
     if scaling_efficiency > 0.7:
-        print("🎯 EXCELLENT: Async thread processing enables near-linear scaling")
+        print(
+            "🎯 EXCELLENT: Async thread processing enables near-linear scaling"
+        )
     elif scaling_efficiency > 0.5:
-        print("✅ GOOD: Significant improvement in multi-agent scaling via async threads")
+        print(
+            "✅ GOOD: Significant improvement in multi-agent scaling via async threads"
+        )
     elif scaling_efficiency > 0.2:
         print("✅ MODERATE: Meaningful improvement over sequential processing")
     else:

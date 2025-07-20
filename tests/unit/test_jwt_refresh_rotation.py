@@ -34,11 +34,15 @@ class TestRefreshTokenRotation:
 
         # Create second refresh token (should rotate/revoke first)
         second_refresh_token = auth_manager.create_refresh_token(user)
-        assert auth_manager.refresh_tokens[user.user_id] == second_refresh_token
+        assert (
+            auth_manager.refresh_tokens[user.user_id] == second_refresh_token
+        )
         assert first_refresh_token != second_refresh_token
 
         # First token should be blacklisted
-        first_payload = jwt.decode(first_refresh_token, options={"verify_signature": False})
+        first_payload = jwt.decode(
+            first_refresh_token, options={"verify_signature": False}
+        )
         first_jti = first_payload.get("jti")
         assert first_jti in auth_manager.blacklist
 
@@ -48,16 +52,20 @@ class TestRefreshTokenRotation:
         user = self._create_test_user()
 
         # Register user for authentication context
-        auth_manager.users[user.username] = {"user": user, "password_hash": "dummy"}
+        auth_manager.users[user.username] = {
+            "user": user,
+            "password_hash": "dummy",
+        }
 
         # Create initial tokens
         original_access_token = auth_manager.create_access_token(user)
         original_refresh_token = auth_manager.create_refresh_token(user)
 
         # Refresh tokens
-        new_access_token, new_refresh_token = auth_manager.refresh_access_token(
-            original_refresh_token
-        )
+        (
+            new_access_token,
+            new_refresh_token,
+        ) = auth_manager.refresh_access_token(original_refresh_token)
 
         # Should get new tokens
         assert new_access_token != original_access_token
@@ -68,7 +76,9 @@ class TestRefreshTokenRotation:
         assert token_data.user_id == user.user_id
 
         # Original refresh token should be blacklisted
-        original_payload = jwt.decode(original_refresh_token, options={"verify_signature": False})
+        original_payload = jwt.decode(
+            original_refresh_token, options={"verify_signature": False}
+        )
         original_jti = original_payload.get("jti")
         assert original_jti in auth_manager.blacklist
 
@@ -78,13 +88,19 @@ class TestRefreshTokenRotation:
         user = self._create_test_user()
 
         # Register user
-        auth_manager.users[user.username] = {"user": user, "password_hash": "dummy"}
+        auth_manager.users[user.username] = {
+            "user": user,
+            "password_hash": "dummy",
+        }
 
         # Create initial refresh token
         old_refresh_token = auth_manager.create_refresh_token(user)
 
         # Refresh once (this rotates the token)
-        new_access_token, new_refresh_token = auth_manager.refresh_access_token(old_refresh_token)
+        (
+            new_access_token,
+            new_refresh_token,
+        ) = auth_manager.refresh_access_token(old_refresh_token)
 
         # Try to use old refresh token again - should fail
         with pytest.raises(HTTPException) as exc_info:
@@ -137,9 +153,15 @@ class TestRefreshTokenRotation:
             "jti": "expired_refresh_jti",
             "iss": "freeagentics",
             "aud": "freeagentics-api",
-            "exp": (datetime.now(timezone.utc) - timedelta(minutes=1)).timestamp(),  # Expired
-            "nbf": (datetime.now(timezone.utc) - timedelta(hours=1)).timestamp(),
-            "iat": (datetime.now(timezone.utc) - timedelta(hours=1)).timestamp(),
+            "exp": (
+                datetime.now(timezone.utc) - timedelta(minutes=1)
+            ).timestamp(),  # Expired
+            "nbf": (
+                datetime.now(timezone.utc) - timedelta(hours=1)
+            ).timestamp(),
+            "iat": (
+                datetime.now(timezone.utc) - timedelta(hours=1)
+            ).timestamp(),
         }
 
         expired_refresh_token = jwt.encode(
@@ -159,7 +181,10 @@ class TestRefreshTokenRotation:
         user = self._create_test_user()
 
         # Register user
-        auth_manager.users[user.username] = {"user": user, "password_hash": "dummy"}
+        auth_manager.users[user.username] = {
+            "user": user,
+            "password_hash": "dummy",
+        }
 
         # Create initial tokens
         original_access_token = auth_manager.create_access_token(user)
@@ -169,7 +194,10 @@ class TestRefreshTokenRotation:
         original_token_data = auth_manager.verify_token(original_access_token)
 
         # Refresh tokens
-        new_access_token, new_refresh_token = auth_manager.refresh_access_token(refresh_token)
+        (
+            new_access_token,
+            new_refresh_token,
+        ) = auth_manager.refresh_access_token(refresh_token)
 
         # Get new token data
         new_token_data = auth_manager.verify_token(new_access_token)
@@ -186,7 +214,10 @@ class TestRefreshTokenRotation:
         user = self._create_test_user()
 
         # Register user
-        auth_manager.users[user.username] = {"user": user, "password_hash": "dummy"}
+        auth_manager.users[user.username] = {
+            "user": user,
+            "password_hash": "dummy",
+        }
 
         client_fingerprint = "test_client_fingerprint"
 
@@ -197,7 +228,10 @@ class TestRefreshTokenRotation:
         refresh_token = auth_manager.create_refresh_token(user)
 
         # Refresh with same fingerprint
-        new_access_token, new_refresh_token = auth_manager.refresh_access_token(
+        (
+            new_access_token,
+            new_refresh_token,
+        ) = auth_manager.refresh_access_token(
             refresh_token, client_fingerprint=client_fingerprint
         )
 
@@ -213,14 +247,20 @@ class TestRefreshTokenRotation:
         user = self._create_test_user()
 
         # Register user
-        auth_manager.users[user.username] = {"user": user, "password_hash": "dummy"}
+        auth_manager.users[user.username] = {
+            "user": user,
+            "password_hash": "dummy",
+        }
 
         # Measure performance of token refresh
         refresh_token = auth_manager.create_refresh_token(user)
 
         start_time = time.time()
         for _ in range(10):
-            new_access_token, refresh_token = auth_manager.refresh_access_token(refresh_token)
+            (
+                new_access_token,
+                refresh_token,
+            ) = auth_manager.refresh_access_token(refresh_token)
         end_time = time.time()
 
         # Should complete 10 refreshes quickly (under 1 second)
@@ -246,12 +286,25 @@ class TestRefreshTokenSecurityValidation:
         user = self._create_test_user()
 
         refresh_token = auth_manager.create_refresh_token(user)
-        payload = jwt.decode(refresh_token, options={"verify_signature": False})
+        payload = jwt.decode(
+            refresh_token, options={"verify_signature": False}
+        )
 
         # Check all required claims
-        required_claims = ["user_id", "type", "jti", "iss", "aud", "exp", "nbf", "iat"]
+        required_claims = [
+            "user_id",
+            "type",
+            "jti",
+            "iss",
+            "aud",
+            "exp",
+            "nbf",
+            "iat",
+        ]
         for claim in required_claims:
-            assert claim in payload, f"Refresh token must include claim: {claim}"
+            assert (
+                claim in payload
+            ), f"Refresh token must include claim: {claim}"
 
         # Check claim values
         assert payload["type"] == "refresh"
@@ -265,13 +318,19 @@ class TestRefreshTokenSecurityValidation:
         user = self._create_test_user()
 
         # Register user
-        auth_manager.users[user.username] = {"user": user, "password_hash": "dummy"}
+        auth_manager.users[user.username] = {
+            "user": user,
+            "password_hash": "dummy",
+        }
 
         # Create refresh token
         refresh_token = auth_manager.create_refresh_token(user)
 
         # Use refresh token once
-        new_access_token, new_refresh_token = auth_manager.refresh_access_token(refresh_token)
+        (
+            new_access_token,
+            new_refresh_token,
+        ) = auth_manager.refresh_access_token(refresh_token)
 
         # Try to use the same refresh token again - should fail
         with pytest.raises(HTTPException) as exc_info:

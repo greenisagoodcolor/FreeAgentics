@@ -51,7 +51,9 @@ class TestDependencyVerification:
 
         for package_name, expected_version in self.REQUIRED_PACKAGES.items():
             try:
-                installed_version = pkg_resources.get_distribution(package_name).version
+                installed_version = pkg_resources.get_distribution(
+                    package_name
+                ).version
 
                 if expected_version and installed_version != expected_version:
                     wrong_version_packages.append(
@@ -83,7 +85,9 @@ class TestDependencyVerification:
                 pass  # Good - package is not installed
 
         if installed_forbidden:
-            pytest.fail(f"Forbidden packages are installed: {installed_forbidden}")
+            pytest.fail(
+                f"Forbidden packages are installed: {installed_forbidden}"
+            )
 
     def test_database_driver_import(self):
         """Test that psycopg2 can be imported and used.
@@ -95,8 +99,12 @@ class TestDependencyVerification:
             import psycopg2.extras
 
             # Test that we can access core functionality
-            assert hasattr(psycopg2, "connect"), "psycopg2.connect not available"
-            assert hasattr(psycopg2.extras, "RealDictCursor"), "RealDictCursor not available"
+            assert hasattr(
+                psycopg2, "connect"
+            ), "psycopg2.connect not available"
+            assert hasattr(
+                psycopg2.extras, "RealDictCursor"
+            ), "RealDictCursor not available"
 
         except ImportError as e:
             pytest.fail(f"Failed to import psycopg2: {e}")
@@ -176,7 +184,9 @@ class TestDependencyVerification:
 
             # Test that we can access basic functionality
             assert hasattr(asyncpg, "connect"), "asyncpg.connect not available"
-            assert hasattr(asyncpg, "create_pool"), "asyncpg.create_pool not available"
+            assert hasattr(
+                asyncpg, "create_pool"
+            ), "asyncpg.create_pool not available"
 
         except ImportError as e:
             pytest.fail(f"asyncpg not installed: {e}")
@@ -224,7 +234,9 @@ class TestDependencyVerification:
                 pkg_resources.get_distribution(package)
                 if is_production:
                     # Warning for dev packages in production
-                    print(f"WARNING: Development package {package} found in production")
+                    print(
+                        f"WARNING: Development package {package} found in production"
+                    )
             except pkg_resources.DistributionNotFound:
                 if not is_production:
                     pytest.fail(f"Development package {package} not installed")
@@ -233,7 +245,9 @@ class TestDependencyVerification:
         """Test that package versions are compatible with each other."""
         # Check Python version compatibility
         if sys.version_info < (3, 8):
-            pytest.fail("Python 3.8+ required for FastAPI and modern async support")
+            pytest.fail(
+                "Python 3.8+ required for FastAPI and modern async support"
+            )
 
         # Check SQLAlchemy 2.0 compatibility
         try:
@@ -241,7 +255,9 @@ class TestDependencyVerification:
 
             major_version = int(sqlalchemy_version.split(".")[0])
             if major_version < 2:
-                pytest.fail(f"SQLAlchemy 2.0+ required, got {sqlalchemy_version}")
+                pytest.fail(
+                    f"SQLAlchemy 2.0+ required, got {sqlalchemy_version}"
+                )
         except ImportError:
             pytest.fail("SQLAlchemy not installed")
 
@@ -265,7 +281,9 @@ class TestDependencyVerification:
             missing_commands.append("pip install 'python-jose[cryptography]'")
 
         if missing_commands:
-            pytest.fail(f"Run these commands to fix dependencies: {missing_commands}")
+            pytest.fail(
+                f"Run these commands to fix dependencies: {missing_commands}"
+            )
 
 
 class TestDatabaseConnectivity:
@@ -281,14 +299,18 @@ class TestDatabaseConnectivity:
 
         # Validate URL format
         if not database_url.startswith("postgresql://"):
-            pytest.fail(f"DATABASE_URL must start with postgresql://, got: {database_url[:20]}...")
+            pytest.fail(
+                f"DATABASE_URL must start with postgresql://, got: {database_url[:20]}..."
+            )
 
         # Check for development credentials in production
         if os.getenv("PRODUCTION", "false").lower() == "true":
             dev_indicators = ["localhost", "127.0.0.1", "dev", "test"]
             for indicator in dev_indicators:
                 if indicator in database_url:
-                    pytest.fail(f"Production environment using development database: {indicator}")
+                    pytest.fail(
+                        f"Production environment using development database: {indicator}"
+                    )
 
     def test_database_connection_pool_creation(self):
         """Test that database connection pool can be created."""
@@ -320,7 +342,9 @@ class TestDatabaseConnectivity:
 
             expected_tables = ["agents", "coalitions", "agent_coalition"]
             for table_name in expected_tables:
-                assert table_name in table_names, f"Table {table_name} not created"
+                assert (
+                    table_name in table_names
+                ), f"Table {table_name} not created"
 
         except Exception as e:
             pytest.fail(f"Database table creation failed: {e}")

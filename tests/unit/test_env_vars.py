@@ -48,7 +48,9 @@ class TestEnvironmentVariables:
         for invalid_url in invalid_urls:
             env_vars = {**base_env, "DATABASE_URL": invalid_url}
             with patch.dict(os.environ, env_vars, clear=True):
-                with pytest.raises(ValueError, match="Invalid PostgreSQL DATABASE_URL"):
+                with pytest.raises(
+                    ValueError, match="Invalid PostgreSQL DATABASE_URL"
+                ):
                     Settings()
 
     def test_valid_database_url_accepted(self):
@@ -83,7 +85,9 @@ class TestEnvironmentVariables:
         from config.env_validator import Settings
 
         with patch.dict(
-            os.environ, {"DATABASE_URL": "postgresql://user:pass@localhost/db"}, clear=True
+            os.environ,
+            {"DATABASE_URL": "postgresql://user:pass@localhost/db"},
+            clear=True,
         ):
             with pytest.raises(ValueError, match="API_KEY is required"):
                 Settings()
@@ -172,7 +176,9 @@ class TestEnvironmentVariables:
         # Test missing POSTGRES_PASSWORD
         env_with_user = {**base_env, "POSTGRES_USER": "testuser"}
         with patch.dict(os.environ, env_with_user, clear=True):
-            with pytest.raises(ValueError, match="POSTGRES_PASSWORD is required"):
+            with pytest.raises(
+                ValueError, match="POSTGRES_PASSWORD is required"
+            ):
                 Settings()
 
         # Test missing POSTGRES_DB
@@ -212,7 +218,10 @@ class TestEnvironmentVariables:
         from config.env_validator import Settings
 
         # Even with partial env vars, should fail - no defaults
-        partial_env = {"DATABASE_URL": "postgresql://user:pass@localhost/db", "API_KEY": "test-key"}
+        partial_env = {
+            "DATABASE_URL": "postgresql://user:pass@localhost/db",
+            "API_KEY": "test-key",
+        }
 
         with patch.dict(os.environ, partial_env, clear=True):
             with pytest.raises(ValueError):

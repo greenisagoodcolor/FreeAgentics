@@ -66,7 +66,9 @@ class SSLTLSValidator:
 
             try:
                 content = config_path.read_text()
-                file_valid = self._validate_ssl_config_content(content, config_file)
+                file_valid = self._validate_ssl_config_content(
+                    content, config_file
+                )
                 if not file_valid:
                     all_valid = False
 
@@ -76,17 +78,28 @@ class SSLTLSValidator:
 
         return all_valid
 
-    def _validate_ssl_config_content(self, content: str, filename: str) -> bool:
+    def _validate_ssl_config_content(
+        self, content: str, filename: str
+    ) -> bool:
         """Validate SSL configuration content."""
         logger.info(f"  📄 Validating {filename}...")
 
         validations = [
             # Protocol validation
-            (r"ssl_protocols\s+TLSv1\.2\s+TLSv1\.3", "TLS 1.2 and 1.3 protocols"),
-            (r"ssl_protocols\s+(?!.*SSLv|.*TLSv1\.0|.*TLSv1\.1)", "No weak protocols"),
+            (
+                r"ssl_protocols\s+TLSv1\.2\s+TLSv1\.3",
+                "TLS 1.2 and 1.3 protocols",
+            ),
+            (
+                r"ssl_protocols\s+(?!.*SSLv|.*TLSv1\.0|.*TLSv1\.1)",
+                "No weak protocols",
+            ),
             # Cipher validation
             (r"ssl_ciphers\s+.*ECDHE.*GCM", "Strong cipher suites"),
-            (r"ssl_prefer_server_ciphers\s+off", "Server cipher preference disabled"),
+            (
+                r"ssl_prefer_server_ciphers\s+off",
+                "Server cipher preference disabled",
+            ),
             # Session configuration
             (r"ssl_session_cache\s+shared", "SSL session caching"),
             (r"ssl_session_timeout\s+1d", "SSL session timeout"),
@@ -99,9 +112,15 @@ class SSLTLSValidator:
             (r"ssl_dhparam", "DH parameters configured"),
             # Security headers
             (r"Strict-Transport-Security.*max-age=31536000", "HSTS header"),
-            (r"Strict-Transport-Security.*includeSubDomains", "HSTS includeSubDomains"),
+            (
+                r"Strict-Transport-Security.*includeSubDomains",
+                "HSTS includeSubDomains",
+            ),
             (r"X-Frame-Options.*DENY", "X-Frame-Options header"),
-            (r"X-Content-Type-Options.*nosniff", "X-Content-Type-Options header"),
+            (
+                r"X-Content-Type-Options.*nosniff",
+                "X-Content-Type-Options header",
+            ),
             (r"Content-Security-Policy", "Content Security Policy"),
             (r"Expect-CT", "Certificate Transparency header"),
         ]
@@ -110,12 +129,17 @@ class SSLTLSValidator:
         for pattern, description in validations:
             if re.search(pattern, content, re.IGNORECASE):
                 logger.info(f"    ✅ {description}")
-                self.validation_results.append(f"{filename}: {description} - PASS")
+                self.validation_results.append(
+                    f"{filename}: {description} - PASS"
+                )
             else:
                 logger.warning(f"    ⚠️ {description} - NOT FOUND")
                 self.warnings.append(f"{filename}: {description} - MISSING")
                 # Some checks are warnings, not failures
-                if description in ["DNS resolver configured", "DH parameters configured"]:
+                if description in [
+                    "DNS resolver configured",
+                    "DH parameters configured",
+                ]:
                     continue
                 file_valid = False
 
@@ -139,7 +163,6 @@ class SSLTLSValidator:
             return False
 
         cipher_string = cipher_match.group(1)
-        configured_ciphers = [c.strip() for c in cipher_string.split(":")]
 
         # Check for recommended ciphers
         recommended_found = 0
@@ -152,7 +175,9 @@ class SSLTLSValidator:
             logger.info("✅ Cipher suite configuration is strong")
             return True
         else:
-            self.errors.append(f"Only {recommended_found} recommended ciphers found")
+            self.errors.append(
+                f"Only {recommended_found} recommended ciphers found"
+            )
             return False
 
     def validate_hsts_configuration(self) -> bool:
@@ -168,8 +193,14 @@ class SSLTLSValidator:
 
         # Check HSTS header configuration
         hsts_checks = [
-            (r"Strict-Transport-Security.*max-age=31536000", "HSTS max-age (1 year)"),
-            (r"Strict-Transport-Security.*includeSubDomains", "HSTS includeSubDomains"),
+            (
+                r"Strict-Transport-Security.*max-age=31536000",
+                "HSTS max-age (1 year)",
+            ),
+            (
+                r"Strict-Transport-Security.*includeSubDomains",
+                "HSTS includeSubDomains",
+            ),
             (r"Strict-Transport-Security.*preload", "HSTS preload directive"),
         ]
 
@@ -200,7 +231,10 @@ class SSLTLSValidator:
 
         ocsp_checks = [
             (r"ssl_stapling\s+on", "OCSP stapling enabled"),
-            (r"ssl_stapling_verify\s+on", "OCSP stapling verification enabled"),
+            (
+                r"ssl_stapling_verify\s+on",
+                "OCSP stapling verification enabled",
+            ),
             (r"resolver\s+1\.1\.1\.1.*8\.8\.8\.8", "DNS resolvers configured"),
             (r"resolver_timeout\s+5s", "DNS resolver timeout configured"),
         ]
@@ -227,7 +261,10 @@ class SSLTLSValidator:
         content = ssl_config.read_text()
 
         ct_checks = [
-            (r"Expect-CT.*max-age=86400", "Expect-CT header with proper max-age"),
+            (
+                r"Expect-CT.*max-age=86400",
+                "Expect-CT header with proper max-age",
+            ),
             (r"Expect-CT.*enforce", "Expect-CT enforcement enabled"),
         ]
 
@@ -237,7 +274,9 @@ class SSLTLSValidator:
             else:
                 logger.warning(f"  ⚠️ {description} - MISSING")
                 # CT is important but not critical for A+ rating
-                self.warnings.append(f"Certificate Transparency: {description}")
+                self.warnings.append(
+                    f"Certificate Transparency: {description}"
+                )
 
         return True  # CT issues are warnings, not failures
 
@@ -305,7 +344,9 @@ class SSLTLSValidator:
                 logger.info("  ✅ Nginx configuration syntax is valid")
                 return True
             else:
-                logger.error(f"  ❌ Nginx configuration syntax error: {result.stderr}")
+                logger.error(
+                    f"  ❌ Nginx configuration syntax error: {result.stderr}"
+                )
                 self.errors.append(f"Nginx syntax error: {result.stderr}")
                 return False
 
@@ -325,7 +366,10 @@ class SSLTLSValidator:
             ("cipher_suites", self.validate_cipher_suites),
             ("hsts", self.validate_hsts_configuration),
             ("ocsp_stapling", self.validate_ocsp_stapling),
-            ("certificate_transparency", self.validate_certificate_transparency),
+            (
+                "certificate_transparency",
+                self.validate_certificate_transparency,
+            ),
             ("security_headers", self.validate_security_headers_integration),
             ("syntax", self.test_ssl_configuration_syntax),
         ]
@@ -378,16 +422,24 @@ class SSLTLSValidator:
         recommendations = []
 
         if self.errors:
-            recommendations.append("Address all critical errors to achieve A+ rating")
+            recommendations.append(
+                "Address all critical errors to achieve A+ rating"
+            )
 
         if any("preload" in w for w in self.warnings):
-            recommendations.append("Consider adding HSTS preload directive for maximum security")
+            recommendations.append(
+                "Consider adding HSTS preload directive for maximum security"
+            )
 
         if any("Certificate Transparency" in w for w in self.warnings):
-            recommendations.append("Configure Expect-CT with report-uri for CT monitoring")
+            recommendations.append(
+                "Configure Expect-CT with report-uri for CT monitoring"
+            )
 
         if not recommendations:
-            recommendations.append("SSL/TLS configuration meets A+ grade requirements")
+            recommendations.append(
+                "SSL/TLS configuration meets A+ grade requirements"
+            )
 
         return recommendations
 

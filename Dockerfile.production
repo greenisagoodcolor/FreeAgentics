@@ -2,7 +2,7 @@
 # Multi-stage build optimized for production deployment with security hardening
 
 # Base stage with common dependencies
-FROM python:3.11-slim as base
+FROM python:3.11.9-slim as base
 
 # Set environment variables for production
 ENV PYTHONUNBUFFERED=1 \
@@ -15,7 +15,7 @@ ENV PYTHONUNBUFFERED=1 \
     PYTHONNOUSERSITE=1
 
 # Install system dependencies required for production
-RUN apt-get update && apt-get install -y \
+RUN apt-get update && apt-get install -y --no-install-recommends \
     # Runtime dependencies
     curl \
     ca-certificates \
@@ -32,7 +32,7 @@ RUN apt-get update && apt-get install -y \
 
 # Create non-root user for security with specific UID/GID
 RUN groupadd -g 1000 app && \
-    useradd --create-home --shell /bin/bash --uid 1000 --gid 1000 app
+    useradd -r -u 1000 -g app --create-home --shell /bin/bash app
 
 # Production build stage
 FROM base as production-build

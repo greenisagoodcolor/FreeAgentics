@@ -76,14 +76,20 @@ class CryptographyStandards:
             minimum_key_size=384,
             recommended_key_size=384,
             security_level=SecurityLevel.HIGH,
-            compliance_standards=[ComplianceStandard.NIST_SP_800_57, ComplianceStandard.FIPS_140_2],
+            compliance_standards=[
+                ComplianceStandard.NIST_SP_800_57,
+                ComplianceStandard.FIPS_140_2,
+            ],
         ),
         "sha512": AlgorithmStandard(
             name="SHA-512",
             minimum_key_size=512,
             recommended_key_size=512,
             security_level=SecurityLevel.HIGH,
-            compliance_standards=[ComplianceStandard.NIST_SP_800_57, ComplianceStandard.FIPS_140_2],
+            compliance_standards=[
+                ComplianceStandard.NIST_SP_800_57,
+                ComplianceStandard.FIPS_140_2,
+            ],
         ),
         "sha1": AlgorithmStandard(
             name="SHA-1",
@@ -123,7 +129,10 @@ class CryptographyStandards:
             minimum_key_size=128,
             recommended_key_size=128,
             security_level=SecurityLevel.HIGH,
-            compliance_standards=[ComplianceStandard.NIST_SP_800_57, ComplianceStandard.FIPS_140_2],
+            compliance_standards=[
+                ComplianceStandard.NIST_SP_800_57,
+                ComplianceStandard.FIPS_140_2,
+            ],
         ),
         "chacha20-poly1305": AlgorithmStandard(
             name="ChaCha20-Poly1305",
@@ -159,21 +168,30 @@ class CryptographyStandards:
             minimum_key_size=2048,
             recommended_key_size=2048,
             security_level=SecurityLevel.MEDIUM,
-            compliance_standards=[ComplianceStandard.NIST_SP_800_57, ComplianceStandard.FIPS_140_2],
+            compliance_standards=[
+                ComplianceStandard.NIST_SP_800_57,
+                ComplianceStandard.FIPS_140_2,
+            ],
         ),
         "rsa-3072": AlgorithmStandard(
             name="RSA-3072",
             minimum_key_size=3072,
             recommended_key_size=3072,
             security_level=SecurityLevel.HIGH,
-            compliance_standards=[ComplianceStandard.NIST_SP_800_57, ComplianceStandard.FIPS_140_2],
+            compliance_standards=[
+                ComplianceStandard.NIST_SP_800_57,
+                ComplianceStandard.FIPS_140_2,
+            ],
         ),
         "rsa-4096": AlgorithmStandard(
             name="RSA-4096",
             minimum_key_size=4096,
             recommended_key_size=4096,
             security_level=SecurityLevel.HIGH,
-            compliance_standards=[ComplianceStandard.NIST_SP_800_57, ComplianceStandard.FIPS_140_2],
+            compliance_standards=[
+                ComplianceStandard.NIST_SP_800_57,
+                ComplianceStandard.FIPS_140_2,
+            ],
         ),
         "ecdsa-p256": AlgorithmStandard(
             name="ECDSA P-256",
@@ -191,7 +209,10 @@ class CryptographyStandards:
             minimum_key_size=384,
             recommended_key_size=384,
             security_level=SecurityLevel.HIGH,
-            compliance_standards=[ComplianceStandard.NIST_SP_800_57, ComplianceStandard.FIPS_140_2],
+            compliance_standards=[
+                ComplianceStandard.NIST_SP_800_57,
+                ComplianceStandard.FIPS_140_2,
+            ],
         ),
         "ed25519": AlgorithmStandard(
             name="Ed25519",
@@ -228,21 +249,27 @@ class CryptographyStandards:
             minimum_key_size=256,
             recommended_key_size=256,
             security_level=SecurityLevel.HIGH,
-            compliance_standards=[ComplianceStandard.OWASP_CRYPTOGRAPHIC_STORAGE],
+            compliance_standards=[
+                ComplianceStandard.OWASP_CRYPTOGRAPHIC_STORAGE
+            ],
         ),
         "argon2": AlgorithmStandard(
             name="Argon2",
             minimum_key_size=256,
             recommended_key_size=256,
             security_level=SecurityLevel.HIGH,
-            compliance_standards=[ComplianceStandard.OWASP_CRYPTOGRAPHIC_STORAGE],
+            compliance_standards=[
+                ComplianceStandard.OWASP_CRYPTOGRAPHIC_STORAGE
+            ],
         ),
         "bcrypt": AlgorithmStandard(
             name="bcrypt",
             minimum_key_size=184,  # bcrypt output size
             recommended_key_size=184,
             security_level=SecurityLevel.HIGH,
-            compliance_standards=[ComplianceStandard.OWASP_CRYPTOGRAPHIC_STORAGE],
+            compliance_standards=[
+                ComplianceStandard.OWASP_CRYPTOGRAPHIC_STORAGE
+            ],
         ),
     }
 
@@ -255,7 +282,10 @@ class SecurityRequirements:
             requirement_id="CRYPTO-001",
             description="Use only approved cryptographic algorithms",
             security_level=SecurityLevel.CRITICAL,
-            compliance_standards=[ComplianceStandard.NIST_SP_800_57, ComplianceStandard.FIPS_140_2],
+            compliance_standards=[
+                ComplianceStandard.NIST_SP_800_57,
+                ComplianceStandard.FIPS_140_2,
+            ],
             test_criteria=[
                 "No deprecated hash algorithms (MD5, SHA-1)",
                 "No weak symmetric ciphers (DES, 3DES, RC4)",
@@ -316,7 +346,9 @@ class SecurityRequirements:
             requirement_id="CRYPTO-005",
             description="Protect against timing attacks",
             security_level=SecurityLevel.MEDIUM,
-            compliance_standards=[ComplianceStandard.OWASP_CRYPTOGRAPHIC_STORAGE],
+            compliance_standards=[
+                ComplianceStandard.OWASP_CRYPTOGRAPHIC_STORAGE
+            ],
             test_criteria=[
                 "Constant-time operations for sensitive comparisons",
                 "No timing-based information leakage",
@@ -329,7 +361,10 @@ class SecurityRequirements:
             requirement_id="CRYPTO-006",
             description="Use secure random number generation",
             security_level=SecurityLevel.HIGH,
-            compliance_standards=[ComplianceStandard.NIST_SP_800_57, ComplianceStandard.FIPS_140_2],
+            compliance_standards=[
+                ComplianceStandard.NIST_SP_800_57,
+                ComplianceStandard.FIPS_140_2,
+            ],
             test_criteria=[
                 "Cryptographically secure pseudo-random number generator (CSPRNG)",
                 "Proper entropy source",
@@ -342,7 +377,9 @@ class SecurityRequirements:
             requirement_id="CRYPTO-007",
             description="Implement proper password storage",
             security_level=SecurityLevel.CRITICAL,
-            compliance_standards=[ComplianceStandard.OWASP_CRYPTOGRAPHIC_STORAGE],
+            compliance_standards=[
+                ComplianceStandard.OWASP_CRYPTOGRAPHIC_STORAGE
+            ],
             test_criteria=[
                 "Strong password hashing function (bcrypt, scrypt, Argon2)",
                 "Unique salt per password",
@@ -355,7 +392,9 @@ class SecurityRequirements:
             requirement_id="CRYPTO-008",
             description="Implement certificate pinning for critical connections",
             security_level=SecurityLevel.MEDIUM,
-            compliance_standards=[ComplianceStandard.OWASP_CRYPTOGRAPHIC_STORAGE],
+            compliance_standards=[
+                ComplianceStandard.OWASP_CRYPTOGRAPHIC_STORAGE
+            ],
             test_criteria=[
                 "Certificate pinning implemented for API endpoints",
                 "Pin validation working correctly",
@@ -395,7 +434,13 @@ class AssessmentConfiguration:
             r"MD5\(",
             r"SHA1\(",
         ],
-        "weak_cipher_patterns": [r"DES\(", r"3DES\(", r"RC4\(", r"modes\.ECB\(", r"Cipher.*ECB"],
+        "weak_cipher_patterns": [
+            r"DES\(",
+            r"3DES\(",
+            r"RC4\(",
+            r"modes\.ECB\(",
+            r"Cipher.*ECB",
+        ],
         "weak_random_patterns": [
             r"random\.random\(",
             r"random\.randint\(",
@@ -471,7 +516,9 @@ SCORING_WEIGHTS = {
 }
 
 
-def get_algorithm_standard(algorithm_type: str, algorithm_name: str) -> Optional[AlgorithmStandard]:
+def get_algorithm_standard(
+    algorithm_type: str, algorithm_name: str
+) -> Optional[AlgorithmStandard]:
     """Get algorithm standard by type and name."""
     standards_map = {
         "hash": CryptographyStandards.HASH_ALGORITHMS,
@@ -521,7 +568,9 @@ def calculate_security_score(findings: List[Dict[str, Any]]) -> Dict[str, Any]:
     }
 
 
-def get_compliance_status(findings: List[Dict[str, Any]]) -> Dict[ComplianceStandard, str]:
+def get_compliance_status(
+    findings: List[Dict[str, Any]]
+) -> Dict[ComplianceStandard, str]:
     """Determine compliance status for each standard."""
     compliance_status = {}
 

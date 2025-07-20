@@ -1,30 +1,53 @@
 """Database session management for FreeAgentics.
 
 This module provides SQLAlchemy session management and connection pooling
-for the PostgreSQL database. NO IN-MEMORY STORAGE.
+for the database. In production, PostgreSQL is required. In development mode,
+SQLite is used as a fallback when DATABASE_URL is not set.
 """
 
 import os
-from typing import Generator
+from typing import Any, Dict, Generator
 
-from sqlalchemy import create_engine
+from sqlalchemy import create_engine, text
 from sqlalchemy.orm import Session, sessionmaker
 
 from database.base import Base
 
-# Get database URL from environment - NO HARDCODED FALLBACK FOR SECURITY
+# Get database URL from environment with SQLite fallback for development
 DATABASE_URL = os.getenv("DATABASE_URL")
+
+# Check if we're in development mode
+is_development = (
+    os.getenv("DEVELOPMENT_MODE", "false").lower() == "true"
+    or os.getenv("ENVIRONMENT", "").lower() == "development"
+    or os.getenv("ENV", "").lower() == "development"
+)
+
 if not DATABASE_URL:
-    raise ValueError(
-        "DATABASE_URL environment variable is required. "
-        "Please set it in your .env file or environment. "
-        "Format: postgresql://username:password@host:port/database"
-    )
+    if is_development:
+        # Use SQLite as fallback for development
+        import warnings
+
+        warnings.warn(
+            "DATABASE_URL not set. Using SQLite for development. "
+            "This is not suitable for production!",
+            RuntimeWarning,
+        )
+        DATABASE_URL = "sqlite:///./freeagentics_dev.db"
+    else:
+        raise ValueError(
+            "DATABASE_URL environment variable is required. "
+            "Please set it in your .env file or environment. "
+            "Format: postgresql://username:password@host:port/database"
+        )
 
 # Security validation for production
 if os.getenv("PRODUCTION", "false").lower() == "true":
     # Ensure we're not using default dev credentials in production
-    if "freeagentics_dev_2025" in DATABASE_URL or "freeagentics123" in DATABASE_URL:
+    if (
+        "freeagentics_dev_2025" in DATABASE_URL
+        or "freeagentics123" in DATABASE_URL
+    ):
         raise ValueError(
             "Production environment detected but using development database credentials. "
             "Please set secure DATABASE_URL in production."
@@ -34,12 +57,14 @@ if os.getenv("PRODUCTION", "false").lower() == "true":
         DATABASE_URL += "?sslmode=require"
 
 # Create engine with connection pooling and security settings
-engine_args = {
+engine_args: Dict[str, Any] = {
     "echo": os.getenv("DEBUG_SQL", "false").lower() == "true",  # SQL logging
 }
 
 # Configure pooling based on database dialect
-if DATABASE_URL.startswith("postgresql://") or DATABASE_URL.startswith("postgres://"):
+if DATABASE_URL.startswith("postgresql://") or DATABASE_URL.startswith(
+    "postgres://"
+):
     # PostgreSQL-specific configuration
     engine_args.update(
         {
@@ -106,3 +131,18 @@ def drop_all_tables() -> None:
         raise RuntimeError("Cannot drop tables in production mode")
 
     Base.metadata.drop_all(bind=engine)
+
+
+def check_database_health() -> bool:
+    """Check if database connection is healthy.
+
+    Returns:
+        True if database is accessible, False otherwise
+    """
+    try:
+        # Try to execute a simple query
+        with engine.connect() as conn:
+            result = conn.execute(text("SELECT 1"))
+            return bool(result.scalar() == 1)
+    except Exception:
+        return False

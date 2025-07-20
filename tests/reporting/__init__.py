@@ -13,9 +13,18 @@ for the FreeAgentics project. It includes:
 
 from .coverage_analyzer import CoverageAnalyzer, CoverageReport, CoverageStats
 from .dashboard_generator import DashboardGenerator
-from .report_archival_system import ArchivalConfig, ReportArchivalSystem, RetentionPolicy
-from .test_metrics_collector import TestMetric, TestMetricsCollector, TestStatus, TestSuiteMetrics
-from .test_reporting_integration import TestReportingIntegration
+from .report_archival_system import (
+    ArchivalConfig,
+    ReportArchivalSystem,
+    RetentionPolicy,
+)
+from .test_metrics_collector import (
+    ExecutionMetric,
+    MetricsCollector,
+    MetricStatus,
+    SuiteMetrics,
+)
+from .test_reporting_integration import ReportingIntegration
 
 __version__ = "1.0.0"
 __author__ = "FreeAgentics Team"
@@ -23,32 +32,34 @@ __author__ = "FreeAgentics Team"
 __all__ = [
     # Core classes
     "CoverageAnalyzer",
-    "TestMetricsCollector",
+    "MetricsCollector",
     "DashboardGenerator",
     "ReportArchivalSystem",
-    "TestReportingIntegration",
+    "ReportingIntegration",
     # Data classes
     "CoverageStats",
     "CoverageReport",
-    "TestMetric",
-    "TestSuiteMetrics",
+    "ExecutionMetric",
+    "SuiteMetrics",
     "ArchivalConfig",
     # Enums
-    "TestStatus",
+    "MetricStatus",
     "RetentionPolicy",
 ]
 
 
 # Convenience functions
-def generate_all_reports(test_run_id: str = None, output_dir: str = "tests/reporting"):
+def generate_all_reports(
+    test_run_id: str = None, output_dir: str = "tests/reporting"
+):
     """Generate all reports using the integration system."""
-    integration = TestReportingIntegration(output_dir)
+    integration = ReportingIntegration(output_dir)
     return integration.run_comprehensive_reporting(test_run_id)
 
 
 def run_health_check(output_dir: str = "tests/reporting"):
     """Run health check on the reporting system."""
-    integration = TestReportingIntegration(output_dir)
+    integration = ReportingIntegration(output_dir)
     return integration.run_health_check()
 
 

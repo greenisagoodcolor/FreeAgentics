@@ -61,7 +61,7 @@ def demonstrate_basic_pooling():
             m[0, 0] = i
             matrices.append(m.copy())
 
-    print(f"   Allocated and released 5 matrices")
+    print("   Allocated and released 5 matrices")
 
     # 3. Check pool statistics
     stats = pool.get_statistics()
@@ -98,8 +98,8 @@ def demonstrate_matrix_operations():
     result2 = np.dot(a, b)
     numpy_time = time.time() - start
 
-    print(f"   Pooled dot time: {pool_time*1000:.2f} ms")
-    print(f"   Numpy dot time: {numpy_time*1000:.2f} ms")
+    print(f"   Pooled dot time: {pool_time * 1000:.2f} ms")
+    print(f"   Numpy dot time: {numpy_time * 1000:.2f} ms")
     print(f"   Results match: {np.allclose(result1, result2)}")
 
     # 2. Pooled matmul
@@ -118,8 +118,8 @@ def demonstrate_matrix_operations():
     result2 = np.einsum("ij,jk,ki->i", a, b, c)
     numpy_time = time.time() - start
 
-    print(f"   Pooled einsum time: {pool_time*1000:.2f} ms")
-    print(f"   Numpy einsum time: {numpy_time*1000:.2f} ms")
+    print(f"   Pooled einsum time: {pool_time * 1000:.2f} ms")
+    print(f"   Numpy einsum time: {numpy_time * 1000:.2f} ms")
     print(f"   Results match: {np.allclose(result1, result2)}")
 
 
@@ -139,7 +139,9 @@ def demonstrate_memory_efficiency():
         np.dot(a, b)
 
     print_memory_usage("   After non-pooled operations")
-    no_pool_mem_increase = psutil.Process().memory_info().rss / 1024 / 1024 - start_mem
+    no_pool_mem_increase = (
+        psutil.Process().memory_info().rss / 1024 / 1024 - start_mem
+    )
 
     # 2. With pooling
     print("\n2. With pooling (100 iterations):")
@@ -154,16 +156,18 @@ def demonstrate_memory_efficiency():
         pooled_dot(a, b)
 
     print_memory_usage("   After pooled operations")
-    pool_mem_increase = psutil.Process().memory_info().rss / 1024 / 1024 - start_mem
+    pool_mem_increase = (
+        psutil.Process().memory_info().rss / 1024 / 1024 - start_mem
+    )
 
-    print(f"\nMemory increase comparison:")
+    print("\nMemory increase comparison:")
     print(f"   Without pooling: +{no_pool_mem_increase:.1f} MB")
     print(f"   With pooling: +{pool_mem_increase:.1f} MB")
     print(f"   Savings: {no_pool_mem_increase - pool_mem_increase:.1f} MB")
 
     # Show pool statistics
     stats = pool.get_statistics()
-    print(f"\nPool reuse statistics:")
+    print("\nPool reuse statistics:")
     for pool_key, pool_stats in stats["pools"].items():
         if pool_stats["stats"]["total_requests"] > 0:
             print(f"   {pool_key}: {pool_stats['hit_rate']:.1%} hit rate")
@@ -193,7 +197,7 @@ def demonstrate_pymdp_integration():
     # Initial belief
     belief = np.ones(num_states, dtype=np.float32) / num_states
 
-    print(f"\nSimulating belief updates:")
+    print("\nSimulating belief updates:")
     print(f"   State space: {num_states} states")
     print(f"   Observations: {num_obs}")
     print(f"   Actions: {num_actions}")
@@ -223,8 +227,8 @@ def demonstrate_pymdp_integration():
 
     elapsed = time.time() - start
 
-    print(f"\nCompleted {num_steps} belief updates in {elapsed*1000:.1f} ms")
-    print(f"Average time per update: {elapsed/num_steps*1000:.2f} ms")
+    print(f"\nCompleted {num_steps} belief updates in {elapsed * 1000:.1f} ms")
+    print(f"Average time per update: {elapsed / num_steps * 1000:.2f} ms")
 
     # Show pool efficiency
     final_stats = pool.get_statistics()
@@ -232,7 +236,10 @@ def demonstrate_pymdp_integration():
     print("\nPool efficiency for belief updates:")
     for pool_key, pool_stats in final_stats["pools"].items():
         initial_requests = (
-            initial_stats["pools"].get(pool_key, {}).get("stats", {}).get("total_requests", 0)
+            initial_stats["pools"]
+            .get(pool_key, {})
+            .get("stats", {})
+            .get("total_requests", 0)
         )
         final_requests = pool_stats["stats"]["total_requests"]
 
@@ -267,7 +274,9 @@ def demonstrate_advanced_pooling():
         # hidden = states @ W1
         np.dot(states, W1, out=hidden)
 
-        with pool.allocate_matrix((batch_size, action_dim), np.float32) as output:
+        with pool.allocate_matrix(
+            (batch_size, action_dim), np.float32
+        ) as output:
             # output = hidden @ W2
             np.dot(hidden, W2, out=output)
             result = output.copy()
@@ -321,7 +330,9 @@ def main():
     print("Final Global Pool Statistics:")
     print(f"Total pools created: {stats['global']['total_pools']}")
     print(f"Total matrices in pools: {stats['global']['total_matrices']}")
-    print(f"Total memory allocated: {stats['global']['total_memory_mb']:.2f} MB")
+    print(
+        f"Total memory allocated: {stats['global']['total_memory_mb']:.2f} MB"
+    )
 
     print("\nPool utilization:")
     for pool_key, pool_stats in stats["pools"].items():
@@ -333,7 +344,9 @@ def main():
             print(f"  {shape} ({dtype}):")
             print(f"    - Requests: {requests}")
             print(f"    - Hit rate: {pool_stats['hit_rate']:.1%}")
-            print(f"    - Memory: {pool_stats['stats']['total_memory_bytes'] / 1024 / 1024:.2f} MB")
+            print(
+                f"    - Memory: {pool_stats['stats']['total_memory_bytes'] / 1024 / 1024:.2f} MB"
+            )
 
 
 if __name__ == "__main__":

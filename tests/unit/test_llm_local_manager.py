@@ -54,6 +54,7 @@ except ImportError:
         pass
 
 
+@pytest.mark.slow
 class TestLocalLLMConfig:
     """Test suite for LocalLLMConfig dataclass."""
 
@@ -125,7 +126,9 @@ class TestLocalLLMConfig:
         assert config_dict["model_name"] == "test-model"
         assert config_dict["temperature"] == 0.8
 
-    @pytest.mark.parametrize("provider", [LocalLLMProvider.OLLAMA, LocalLLMProvider.LLAMA_CPP])
+    @pytest.mark.parametrize(
+        "provider", [LocalLLMProvider.OLLAMA, LocalLLMProvider.LLAMA_CPP]
+    )
     def test_config_with_different_providers(self, provider):
         """Test configuration with different provider types."""
         if not IMPORT_SUCCESS:
@@ -152,6 +155,7 @@ class TestLocalLLMConfig:
         assert config.quantization == quantization
 
 
+@pytest.mark.slow
 class TestOllamaProvider:
     """Test suite for OllamaProvider class."""
 
@@ -173,7 +177,9 @@ class TestOllamaProvider:
             pytest.skip("Local LLM modules not available")
         return OllamaProvider(ollama_config)
 
-    def test_ollama_provider_initialization(self, ollama_provider, ollama_config):
+    def test_ollama_provider_initialization(
+        self, ollama_provider, ollama_config
+    ):
         """Test OllamaProvider initialization."""
         assert ollama_provider.config == ollama_config
         assert ollama_provider.base_url == "http://localhost:11434"
@@ -265,7 +271,9 @@ class TestOllamaProvider:
         ):
             # Mock successful model list
             mock_get.return_value.status_code = 200
-            mock_get.return_value.json.return_value = {"models": [{"name": "llama2"}]}
+            mock_get.return_value.json.return_value = {
+                "models": [{"name": "llama2"}]
+            }
 
             # Test load_model method
             result = ollama_provider.load_model()
@@ -277,7 +285,9 @@ class TestOllamaProvider:
             # Mock error response
             mock_post.side_effect = httpx.RequestError("Server error")
 
-            with patch("inference.llm.local_llm_manager.logger") as mock_logger:
+            with patch(
+                "inference.llm.local_llm_manager.logger"
+            ) as mock_logger:
                 with pytest.raises(
                     Exception
                 ):  # generate() raises exceptions instead of returning None
@@ -289,7 +299,10 @@ class TestOllamaProvider:
         # This tests that the provider can handle basic generation
         with patch.object(ollama_provider.session, "post") as mock_post:
             mock_response = Mock()
-            mock_response.json.return_value = {"response": "test", "eval_count": 10}
+            mock_response.json.return_value = {
+                "response": "test",
+                "eval_count": 10,
+            }
             mock_post.return_value = mock_response
 
             result = ollama_provider.generate("Test prompt")
@@ -323,6 +336,7 @@ class TestOllamaProvider:
                 ollama_provider.generate("test prompt")
 
 
+@pytest.mark.slow
 class TestLlamaCppProvider:
     """Test suite for LlamaCppProvider class."""
 
@@ -347,7 +361,9 @@ class TestLlamaCppProvider:
             pytest.skip("Local LLM modules not available")
         return LlamaCppProvider(llama_cpp_config)
 
-    def test_llama_cpp_provider_initialization(self, llama_cpp_provider, llama_cpp_config):
+    def test_llama_cpp_provider_initialization(
+        self, llama_cpp_provider, llama_cpp_config
+    ):
         """Test LlamaCppProvider initialization."""
         assert llama_cpp_provider.config == llama_cpp_config
         assert llama_cpp_provider.binary_path == "/usr/local/bin/llama-cpp"
@@ -355,7 +371,9 @@ class TestLlamaCppProvider:
 
     def test_llama_cpp_check_availability(self, llama_cpp_provider):
         """Test checking llama.cpp availability."""
-        with patch("inference.llm.local_llm_manager.subprocess.run") as mock_run:
+        with patch(
+            "inference.llm.local_llm_manager.subprocess.run"
+        ) as mock_run:
             mock_result = Mock()
             mock_result.returncode = 0
             mock_run.return_value = mock_result
@@ -365,17 +383,25 @@ class TestLlamaCppProvider:
 
             mock_run.assert_called_once()
 
-    def test_llama_cpp_check_availability_missing_binary(self, llama_cpp_provider):
+    def test_llama_cpp_check_availability_missing_binary(
+        self, llama_cpp_provider
+    ):
         """Test availability check with missing binary."""
-        with patch("inference.llm.local_llm_manager.subprocess.run") as mock_run:
+        with patch(
+            "inference.llm.local_llm_manager.subprocess.run"
+        ) as mock_run:
             mock_run.side_effect = FileNotFoundError("Binary not found")
 
             is_available = llama_cpp_provider.is_available()
             assert is_available is False
 
-    def test_llama_cpp_check_availability_missing_model(self, llama_cpp_provider):
+    def test_llama_cpp_check_availability_missing_model(
+        self, llama_cpp_provider
+    ):
         """Test availability check with missing model."""
-        with patch("inference.llm.local_llm_manager.subprocess.run") as mock_run:
+        with patch(
+            "inference.llm.local_llm_manager.subprocess.run"
+        ) as mock_run:
             mock_result = Mock()
             mock_result.returncode = 1  # Command failed
             mock_run.return_value = mock_result
@@ -425,7 +451,9 @@ class TestLlamaCppProvider:
     def test_llama_cpp_build_command(self, llama_cpp_provider):
         """Test that llama.cpp provider can generate text properly."""
         # Test that the provider builds commands internally during generation
-        with patch("inference.llm.local_llm_manager.subprocess.run") as mock_run:
+        with patch(
+            "inference.llm.local_llm_manager.subprocess.run"
+        ) as mock_run:
             mock_result = Mock()
             mock_result.stdout = "Test response"
             mock_result.stderr = "tokens: 10"
@@ -461,6 +489,7 @@ class TestLlamaCppProvider:
             llama_cpp_provider.generate("test prompt")
 
 
+@pytest.mark.slow
 class TestLocalLLMManager:
     """Test suite for LocalLLMManager class."""
 
@@ -499,7 +528,9 @@ class TestLocalLLMManager:
         llama_cpp_config = LocalLLMConfig(provider=LocalLLMProvider.LLAMA_CPP)
         llama_cpp_manager = LocalLLMManager(llama_cpp_config)
         assert "llama_cpp" in llama_cpp_manager.providers
-        assert isinstance(llama_cpp_manager.providers["llama_cpp"], LlamaCppProvider)
+        assert isinstance(
+            llama_cpp_manager.providers["llama_cpp"], LlamaCppProvider
+        )
 
     def test_manager_find_best_provider(self, manager):
         """Test finding the best available provider."""
@@ -533,7 +564,10 @@ class TestLocalLLMManager:
         mock_provider = Mock()
         mock_provider.is_available.return_value = True
         mock_provider.generate.return_value = LLMResponse(
-            text="Test response", tokens_used=10, generation_time=0.15, provider="test"
+            text="Test response",
+            tokens_used=10,
+            generation_time=0.15,
+            provider="test",
         )
 
         manager.providers = {"test": mock_provider}
@@ -550,16 +584,24 @@ class TestLocalLLMManager:
         # First provider fails, second succeeds
         failing_provider = Mock()
         failing_provider.is_available.return_value = True
-        failing_provider.load_model.return_value = False  # First provider fails to load
+        failing_provider.load_model.return_value = (
+            False  # First provider fails to load
+        )
 
         working_provider = Mock()
         working_provider.is_available.return_value = True
         working_provider.load_model.return_value = True
         working_provider.generate.return_value = LLMResponse(
-            text="Fallback response", tokens_used=20, generation_time=0.2, provider="working"
+            text="Fallback response",
+            tokens_used=20,
+            generation_time=0.2,
+            provider="working",
         )
 
-        manager.providers = {"failing": failing_provider, "working": working_provider}
+        manager.providers = {
+            "failing": failing_provider,
+            "working": working_provider,
+        }
         manager.config.enable_fallback = True
 
         result = manager.generate("Test prompt")
@@ -604,7 +646,10 @@ class TestLocalLLMManager:
         mock_provider2.is_available.return_value = True
         mock_provider2.load_model.return_value = True
 
-        manager.providers = {"provider1": mock_provider1, "provider2": mock_provider2}
+        manager.providers = {
+            "provider1": mock_provider1,
+            "provider2": mock_provider2,
+        }
 
         # Test that providers are available instead of listing models
         status = manager.get_status()
@@ -674,7 +719,10 @@ class TestLocalLLMManager:
         mock_provider = Mock()
         mock_provider.is_available.return_value = True
         mock_provider.generate.return_value = LLMResponse(
-            text="Test response", tokens_used=10, generation_time=0.1, provider="test"
+            text="Test response",
+            tokens_used=10,
+            generation_time=0.1,
+            provider="test",
         )
 
         manager.providers = {"test": mock_provider}
@@ -704,6 +752,7 @@ class TestLocalLLMManager:
         assert all(isinstance(r, LLMResponse) for r in results)
 
 
+@pytest.mark.slow
 class TestIntegrationScenarios:
     """Test integration scenarios and edge cases."""
 
@@ -728,7 +777,9 @@ class TestIntegrationScenarios:
             # Mock successful availability check
             mock_get_response = Mock()
             mock_get_response.status_code = 200
-            mock_get_response.json.return_value = {"models": [{"name": "llama2"}]}
+            mock_get_response.json.return_value = {
+                "models": [{"name": "llama2"}]
+            }
             mock_get.return_value = mock_get_response
 
             # Mock successful generation
@@ -759,8 +810,12 @@ class TestIntegrationScenarios:
             model_path="/models/llama-7b.ggml",
         )
 
-        with patch("inference.llm.local_llm_manager.os.path.exists") as mock_exists:
-            with patch("inference.llm.local_llm_manager.subprocess.run") as mock_run:
+        with patch(
+            "inference.llm.local_llm_manager.os.path.exists"
+        ) as mock_exists:
+            with patch(
+                "inference.llm.local_llm_manager.subprocess.run"
+            ) as mock_run:
                 # Mock availability
                 mock_exists.return_value = True
 
@@ -796,10 +851,16 @@ class TestIntegrationScenarios:
         working_provider.is_available.return_value = True
         working_provider.load_model.return_value = True
         working_provider.generate.return_value = LLMResponse(
-            text="Fallback response", tokens_used=15, generation_time=0.25, provider="working"
+            text="Fallback response",
+            tokens_used=15,
+            generation_time=0.25,
+            provider="working",
         )
 
-        manager.providers = {"failing": failing_provider, "working": working_provider}
+        manager.providers = {
+            "failing": failing_provider,
+            "working": working_provider,
+        }
 
         result = manager.generate("Test prompt")
 
@@ -832,4 +893,11 @@ class TestIntegrationScenarios:
 
 
 if __name__ == "__main__":
-    pytest.main([__file__, "-v", "--cov=inference.llm.local_llm_manager", "--cov-report=html"])
+    pytest.main(
+        [
+            __file__,
+            "-v",
+            "--cov=inference.llm.local_llm_manager",
+            "--cov-report=html",
+        ]
+    )

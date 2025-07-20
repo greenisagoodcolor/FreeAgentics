@@ -99,10 +99,15 @@ class PlaybookAction(ABC):
             matches = re.findall(pattern, value)
             for match in matches:
                 if match in context.variables:
-                    value = value.replace(f"{{{{{match}}}}}", str(context.variables[match]))
+                    value = value.replace(
+                        f"{{{{{match}}}}}", str(context.variables[match])
+                    )
             return value
         elif isinstance(value, dict):
-            return {k: self._resolve_variables(v, context) for k, v in value.items()}
+            return {
+                k: self._resolve_variables(v, context)
+                for k, v in value.items()
+            }
         elif isinstance(value, list):
             return [self._resolve_variables(item, context) for item in value]
         return value
@@ -116,7 +121,9 @@ class IPBlockAction(PlaybookAction):
         start_time = datetime.utcnow()
         try:
             # Resolve IP addresses
-            ips = self._resolve_variables(self.config.get("ip_addresses", []), context)
+            ips = self._resolve_variables(
+                self.config.get("ip_addresses", []), context
+            )
             duration = self.config.get("duration_hours", 24)
 
             # Simulate IP blocking (in production, integrate with firewall/WAF)
@@ -133,14 +140,22 @@ class IPBlockAction(PlaybookAction):
             return ActionResult(
                 action_id=self.action_id,
                 status=ActionStatus.SUCCESS,
-                output={"blocked_ips": blocked_ips, "duration_hours": duration},
+                output={
+                    "blocked_ips": blocked_ips,
+                    "duration_hours": duration,
+                },
                 end_time=end_time,
-                duration_ms=int((end_time - start_time).total_seconds() * 1000),
+                duration_ms=int(
+                    (end_time - start_time).total_seconds() * 1000
+                ),
             )
         except Exception as e:
             logger.error(f"Failed to block IPs: {e}")
             return ActionResult(
-                action_id=self.action_id, status=ActionStatus.FAILED, output=None, error=str(e)
+                action_id=self.action_id,
+                status=ActionStatus.FAILED,
+                output=None,
+                error=str(e),
             )
 
 
@@ -151,7 +166,9 @@ class UserDisableAction(PlaybookAction):
         """Disable user accounts."""
         start_time = datetime.utcnow()
         try:
-            user_ids = self._resolve_variables(self.config.get("user_ids", []), context)
+            user_ids = self._resolve_variables(
+                self.config.get("user_ids", []), context
+            )
             reason = self._resolve_variables(
                 self.config.get("reason", "Security incident"), context
             )
@@ -170,12 +187,17 @@ class UserDisableAction(PlaybookAction):
                 status=ActionStatus.SUCCESS,
                 output={"disabled_users": disabled_users, "reason": reason},
                 end_time=end_time,
-                duration_ms=int((end_time - start_time).total_seconds() * 1000),
+                duration_ms=int(
+                    (end_time - start_time).total_seconds() * 1000
+                ),
             )
         except Exception as e:
             logger.error(f"Failed to disable users: {e}")
             return ActionResult(
-                action_id=self.action_id, status=ActionStatus.FAILED, output=None, error=str(e)
+                action_id=self.action_id,
+                status=ActionStatus.FAILED,
+                output=None,
+                error=str(e),
             )
 
 
@@ -186,17 +208,27 @@ class NotificationAction(PlaybookAction):
         """Send notifications."""
         start_time = datetime.utcnow()
         try:
-            recipients = self._resolve_variables(self.config.get("recipients", []), context)
-            message = self._resolve_variables(self.config.get("message", ""), context)
+            recipients = self._resolve_variables(
+                self.config.get("recipients", []), context
+            )
+            message = self._resolve_variables(
+                self.config.get("message", ""), context
+            )
             channels = self.config.get("channels", ["email"])
 
             notifications_sent = []
             for channel in channels:
                 for recipient in recipients:
-                    logger.info(f"Sending {channel} notification to {recipient}")
+                    logger.info(
+                        f"Sending {channel} notification to {recipient}"
+                    )
                     # In production, integrate with notification services
                     notifications_sent.append(
-                        {"channel": channel, "recipient": recipient, "message": message}
+                        {
+                            "channel": channel,
+                            "recipient": recipient,
+                            "message": message,
+                        }
                     )
 
             end_time = datetime.utcnow()
@@ -205,12 +237,17 @@ class NotificationAction(PlaybookAction):
                 status=ActionStatus.SUCCESS,
                 output={"notifications": notifications_sent},
                 end_time=end_time,
-                duration_ms=int((end_time - start_time).total_seconds() * 1000),
+                duration_ms=int(
+                    (end_time - start_time).total_seconds() * 1000
+                ),
             )
         except Exception as e:
             logger.error(f"Failed to send notifications: {e}")
             return ActionResult(
-                action_id=self.action_id, status=ActionStatus.FAILED, output=None, error=str(e)
+                action_id=self.action_id,
+                status=ActionStatus.FAILED,
+                output=None,
+                error=str(e),
             )
 
 
@@ -221,8 +258,12 @@ class ForensicsCollectionAction(PlaybookAction):
         """Collect forensic data."""
         start_time = datetime.utcnow()
         try:
-            targets = self._resolve_variables(self.config.get("targets", []), context)
-            data_types = self.config.get("data_types", ["logs", "network", "processes"])
+            targets = self._resolve_variables(
+                self.config.get("targets", []), context
+            )
+            data_types = self.config.get(
+                "data_types", ["logs", "network", "processes"]
+            )
 
             forensic_data = {}
             for target in targets:
@@ -245,12 +286,17 @@ class ForensicsCollectionAction(PlaybookAction):
                 status=ActionStatus.SUCCESS,
                 output={"forensic_data": forensic_data},
                 end_time=end_time,
-                duration_ms=int((end_time - start_time).total_seconds() * 1000),
+                duration_ms=int(
+                    (end_time - start_time).total_seconds() * 1000
+                ),
             )
         except Exception as e:
             logger.error(f"Failed to collect forensics: {e}")
             return ActionResult(
-                action_id=self.action_id, status=ActionStatus.FAILED, output=None, error=str(e)
+                action_id=self.action_id,
+                status=ActionStatus.FAILED,
+                output=None,
+                error=str(e),
             )
 
 
@@ -261,7 +307,9 @@ class ConditionalAction(PlaybookAction):
         """Evaluate condition and execute."""
         start_time = datetime.utcnow()
         try:
-            condition = self._resolve_variables(self.config.get("condition", ""), context)
+            condition = self._resolve_variables(
+                self.config.get("condition", ""), context
+            )
 
             # Simple condition evaluation (in production, use safe expression evaluator)
             result = self._evaluate_condition(condition, context)
@@ -269,18 +317,27 @@ class ConditionalAction(PlaybookAction):
             end_time = datetime.utcnow()
             return ActionResult(
                 action_id=self.action_id,
-                status=ActionStatus.SUCCESS if result else ActionStatus.SKIPPED,
+                status=ActionStatus.SUCCESS
+                if result
+                else ActionStatus.SKIPPED,
                 output={"condition_met": result},
                 end_time=end_time,
-                duration_ms=int((end_time - start_time).total_seconds() * 1000),
+                duration_ms=int(
+                    (end_time - start_time).total_seconds() * 1000
+                ),
             )
         except Exception as e:
             logger.error(f"Failed to evaluate condition: {e}")
             return ActionResult(
-                action_id=self.action_id, status=ActionStatus.FAILED, output=None, error=str(e)
+                action_id=self.action_id,
+                status=ActionStatus.FAILED,
+                output=None,
+                error=str(e),
             )
 
-    def _evaluate_condition(self, condition: str, context: PlaybookContext) -> bool:
+    def _evaluate_condition(
+        self, condition: str, context: PlaybookContext
+    ) -> bool:
         """Safely evaluate condition."""
         # Simple comparison for demonstration
         # In production, use a proper expression evaluator
@@ -327,7 +384,9 @@ class PlaybookEngine:
         self.execution_lock = threading.Lock()
 
         # Thread pool for concurrent executions
-        self.executor = ThreadPoolExecutor(max_workers=max_concurrent_executions)
+        self.executor = ThreadPoolExecutor(
+            max_workers=max_concurrent_executions
+        )
 
         # Load playbooks
         self.playbooks = {}
@@ -397,17 +456,19 @@ class PlaybookEngine:
                 if context.status != ActionStatus.RUNNING:
                     break
 
-                action_result = await self._execute_action(action_config, context)
+                action_result = await self._execute_action(
+                    action_config, context
+                )
 
                 # Handle action result
                 if action_result.status == ActionStatus.FAILED:
                     if action_config.get("continue_on_error", False):
-                        logger.warning(f"Action {action_result.action_id} failed but continuing")
+                        logger.warning(
+                            f"Action {action_result.action_id} failed but continuing"
+                        )
                     else:
                         context.status = ActionStatus.FAILED
-                        context.error = (
-                            f"Action {action_result.action_id} failed: {action_result.error}"
-                        )
+                        context.error = f"Action {action_result.action_id} failed: {action_result.error}"
                         break
 
             if context.status == ActionStatus.RUNNING:
@@ -434,7 +495,9 @@ class PlaybookEngine:
     ) -> ActionResult:
         """Execute a single action."""
         action_type = action_config.get("type")
-        action_id = action_config.get("id", f"{action_type}_{uuid.uuid4().hex[:8]}")
+        action_id = action_config.get(
+            "id", f"{action_type}_{uuid.uuid4().hex[:8]}"
+        )
 
         if action_type not in self.action_registry:
             return ActionResult(
@@ -459,7 +522,9 @@ class PlaybookEngine:
                 )
 
             # Execute with timeout
-            result = await asyncio.wait_for(action.execute(context), timeout=action.timeout)
+            result = await asyncio.wait_for(
+                action.execute(context), timeout=action.timeout
+            )
 
             return result
 
@@ -473,10 +538,15 @@ class PlaybookEngine:
         except Exception as e:
             logger.error(f"Action execution failed: {e}")
             return ActionResult(
-                action_id=action_id, status=ActionStatus.FAILED, output=None, error=str(e)
+                action_id=action_id,
+                status=ActionStatus.FAILED,
+                output=None,
+                error=str(e),
             )
 
-    def get_execution_status(self, execution_id: str) -> Optional[PlaybookContext]:
+    def get_execution_status(
+        self, execution_id: str
+    ) -> Optional[PlaybookContext]:
         """Get status of a playbook execution."""
         with self.execution_lock:
             # Check active executions
@@ -507,8 +577,16 @@ class PlaybookEngine:
         """Get execution metrics."""
         with self.execution_lock:
             total_executions = len(self.execution_history)
-            successful = sum(1 for c in self.execution_history if c.status == ActionStatus.SUCCESS)
-            failed = sum(1 for c in self.execution_history if c.status == ActionStatus.FAILED)
+            successful = sum(
+                1
+                for c in self.execution_history
+                if c.status == ActionStatus.SUCCESS
+            )
+            failed = sum(
+                1
+                for c in self.execution_history
+                if c.status == ActionStatus.FAILED
+            )
 
             avg_duration = 0
             if self.execution_history:
@@ -524,7 +602,9 @@ class PlaybookEngine:
                 "total_executions": total_executions,
                 "successful": successful,
                 "failed": failed,
-                "success_rate": successful / total_executions if total_executions > 0 else 0,
+                "success_rate": successful / total_executions
+                if total_executions > 0
+                else 0,
                 "active_executions": len(self.active_executions),
                 "average_duration_seconds": avg_duration,
             }
@@ -545,17 +625,17 @@ actions:
     type: block_ip
     ip_addresses: ["{{attacker_ip}}"]
     duration_hours: 24
-  
+
   - id: disable_target_account
     type: disable_user
     user_ids: ["{{target_user}}"]
     reason: "Potential account compromise from brute force attack"
-  
+
   - id: collect_evidence
     type: collect_forensics
     targets: ["{{affected_server}}"]
     data_types: ["logs", "auth_logs", "network_captures"]
-  
+
   - id: notify_security_team
     type: send_notification
     recipients: ["security@example.com", "soc@example.com"]

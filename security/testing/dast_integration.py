@@ -21,7 +21,8 @@ from zapv2 import ZAPv2
 
 # Configure logging
 logging.basicConfig(
-    level=logging.INFO, format="%(asctime)s - %(name)s - %(levelname)s - %(message)s"
+    level=logging.INFO,
+    format="%(asctime)s - %(name)s - %(levelname)s - %(message)s",
 )
 logger = logging.getLogger(__name__)
 
@@ -135,19 +136,24 @@ class AuthenticationTester:
             for technique in bypass_techniques:
                 try:
                     # Test with bypass technique
-                    response = await self._test_endpoint(url, technique["headers"])
+                    response = await self._test_endpoint(
+                        url, technique["headers"]
+                    )
 
                     # Check if bypass was successful
-                    if response["status"] in [200, 201] and not self._is_auth_error(
-                        response["body"]
-                    ):
+                    if response["status"] in [
+                        200,
+                        201,
+                    ] and not self._is_auth_error(response["body"]):
                         vulnerabilities.append(
                             {
                                 "type": "authentication_bypass",
                                 "endpoint": endpoint,
                                 "technique": technique,
                                 "response_status": response["status"],
-                                "evidence": response["body"][:500],  # First 500 chars
+                                "evidence": response["body"][
+                                    :500
+                                ],  # First 500 chars
                             }
                         )
                         logger.warning(
@@ -155,7 +161,9 @@ class AuthenticationTester:
                         )
 
                 except Exception as e:
-                    logger.error(f"Error testing {endpoint} with {technique}: {e}")
+                    logger.error(
+                        f"Error testing {endpoint} with {technique}: {e}"
+                    )
 
         return vulnerabilities
 
@@ -218,16 +226,26 @@ class AuthenticationTester:
                     logger.warning(f"JWT vulnerability found: {test['name']}")
 
             except Exception as e:
-                logger.error(f"Error testing JWT vulnerability {test['name']}: {e}")
+                logger.error(
+                    f"Error testing JWT vulnerability {test['name']}: {e}"
+                )
 
         return vulnerabilities
 
-    async def _test_endpoint(self, url: str, headers: Dict[str, str]) -> Dict[str, Any]:
+    async def _test_endpoint(
+        self, url: str, headers: Dict[str, str]
+    ) -> Dict[str, Any]:
         """Test an endpoint with given headers"""
         async with aiohttp.ClientSession() as session:
-            async with session.get(url, headers=headers, ssl=False) as response:
+            async with session.get(
+                url, headers=headers, ssl=False
+            ) as response:
                 body = await response.text()
-                return {"status": response.status, "headers": dict(response.headers), "body": body}
+                return {
+                    "status": response.status,
+                    "headers": dict(response.headers),
+                    "body": body,
+                }
 
     async def _get_valid_token(self, login_url: str) -> Optional[str]:
         """Get a valid JWT token by logging in"""
@@ -245,7 +263,10 @@ class AuthenticationTester:
             "403",
             "access denied",
         ]
-        return any(indicator in response_body.lower() for indicator in auth_error_indicators)
+        return any(
+            indicator in response_body.lower()
+            for indicator in auth_error_indicators
+        )
 
     def _create_none_algorithm_token(self, valid_token: str) -> str:
         """Create JWT with 'none' algorithm"""
@@ -328,7 +349,11 @@ class APIScanner:
     def _test_rate_limiting(self) -> List[Dict[str, Any]]:
         """Test for missing rate limiting"""
         vulnerabilities = []
-        test_endpoints = ["/api/v1/auth/login", "/api/v1/agents", "/api/v1/knowledge/query"]
+        test_endpoints = [
+            "/api/v1/auth/login",
+            "/api/v1/agents",
+            "/api/v1/knowledge/query",
+        ]
 
         for endpoint in test_endpoints:
             url = urljoin(self.config.target_url, endpoint)
@@ -339,11 +364,15 @@ class APIScanner:
 
             for i in range(100):  # Send 100 rapid requests
                 try:
-                    response = requests.get(url, headers=self.config.custom_headers, timeout=1)
+                    response = requests.get(
+                        url, headers=self.config.custom_headers, timeout=1
+                    )
                     if response.status_code != 429:  # Not rate limited
                         successful_requests += 1
-                except:
-                    pass
+                except Exception as e:
+                    # Log but continue - some request failures expected during rate limit test
+                    logger.debug(f"Request failed during rate limit test: {e}")
+                    continue
 
             elapsed_time = time.time() - start_time
 
@@ -364,16 +393,23 @@ class APIScanner:
     def _test_cors(self) -> List[Dict[str, Any]]:
         """Test for CORS misconfigurations"""
         vulnerabilities = []
-        malicious_origins = ["http://evil.com", "null", "file://", "http://localhost.evil.com"]
+        malicious_origins = [
+            "http://evil.com",
+            "null",
+            "file://",
+            "http://localhost.evil.com",
+        ]
 
         for origin in malicious_origins:
             headers = {"Origin": origin}
             url = urljoin(self.config.target_url, "/api/v1/health")
 
             try:
-                response = requests.options(url, headers=headers)
+                response = requests.options(url, headers=headers, timeout=30)
                 acao = response.headers.get("Access-Control-Allow-Origin", "")
-                acac = response.headers.get("Access-Control-Allow-Credentials", "")
+                acac = response.headers.get(
+                    "Access-Control-Allow-Credentials", ""
+                )
 
                 # Check for overly permissive CORS
                 if acao == "*" or acao == origin:
@@ -387,21 +423,31 @@ class APIScanner:
                                 "credentials_allowed": True,
                             }
                         )
-            except:
-                pass
+            except Exception as e:
+                # Log CORS test failures but continue testing other endpoints
+                logger.debug(f"CORS test failed for {url}: {e}")
+                continue
 
         return vulnerabilities
 
     def _test_api_versioning(self) -> List[Dict[str, Any]]:
         """Test for API versioning vulnerabilities"""
         vulnerabilities = []
-        version_patterns = ["/api/v0/", "/api/v1/", "/api/v2/", "/api/beta/", "/api/internal/"]
+        version_patterns = [
+            "/api/v0/",
+            "/api/v1/",
+            "/api/v2/",
+            "/api/beta/",
+            "/api/internal/",
+        ]
 
         for pattern in version_patterns:
             # Test if old/internal API versions are accessible
             test_url = self.config.target_url.replace("/api/v1/", pattern)
             try:
-                response = requests.get(urljoin(test_url, "health"))
+                response = requests.get(
+                    urljoin(test_url, "health"), timeout=30
+                )
                 if response.status_code == 200:
                     vulnerabilities.append(
                         {
@@ -411,8 +457,10 @@ class APIScanner:
                             "status_code": response.status_code,
                         }
                     )
-            except:
-                pass
+            except Exception as e:
+                # Log API versioning test failures but continue testing other endpoints
+                logger.debug(f"API versioning test failed for {test_url}: {e}")
+                continue
 
         return vulnerabilities
 
@@ -437,33 +485,47 @@ class APIScanner:
                 try:
                     # Try to parse as JSON
                     data = json.loads(response_body)
-                    exposed_fields = self._find_sensitive_fields(data, sensitive_fields)
+                    exposed_fields = self._find_sensitive_fields(
+                        data, sensitive_fields
+                    )
                     if exposed_fields:
                         vulnerabilities.append(
                             {
                                 "type": "excessive_data_exposure",
-                                "url": msg.get("requestHeader", "").split(" ")[1],
+                                "url": msg.get("requestHeader", "").split(" ")[
+                                    1
+                                ],
                                 "exposed_fields": exposed_fields,
                                 "sample_data": str(data)[:200],
                             }
                         )
-                except:
-                    pass
+                except Exception as e:
+                    # Log but continue - some request failures expected during rate limit test
+                    logger.debug(f"Request failed during rate limit test: {e}")
+                    continue
 
         return vulnerabilities
 
-    def _find_sensitive_fields(self, data: Any, sensitive_fields: List[str]) -> List[str]:
+    def _find_sensitive_fields(
+        self, data: Any, sensitive_fields: List[str]
+    ) -> List[str]:
         """Recursively find sensitive field names in data"""
         found = []
 
         if isinstance(data, dict):
             for key, value in data.items():
-                if any(sensitive in key.lower() for sensitive in sensitive_fields):
+                if any(
+                    sensitive in key.lower() for sensitive in sensitive_fields
+                ):
                     found.append(key)
-                found.extend(self._find_sensitive_fields(value, sensitive_fields))
+                found.extend(
+                    self._find_sensitive_fields(value, sensitive_fields)
+                )
         elif isinstance(data, list):
             for item in data:
-                found.extend(self._find_sensitive_fields(item, sensitive_fields))
+                found.extend(
+                    self._find_sensitive_fields(item, sensitive_fields)
+                )
 
         return found
 
@@ -474,7 +536,8 @@ class ZAPScanner:
     def __init__(self, config: DASTConfig):
         self.config = config
         self.zap = ZAPv2(
-            apikey=config.api_key, proxies={"http": config.zap_proxy, "https": config.zap_proxy}
+            apikey=config.api_key,
+            proxies={"http": config.zap_proxy, "https": config.zap_proxy},
         )
         self.session_name = f"dast_scan_{int(time.time())}"
 
@@ -484,14 +547,16 @@ class ZAPScanner:
         self.zap.core.new_session(name=self.session_name, overwrite=True)
 
         # Set up context
-        context_id = self.zap.context.new_context(self.config.context_name)
+        self.zap.context.new_context(self.config.context_name)
 
         # Include/exclude URLs
         for url in self.config.include_urls:
             self.zap.context.include_in_context(self.config.context_name, url)
 
         for url in self.config.exclude_urls:
-            self.zap.context.exclude_from_context(self.config.context_name, url)
+            self.zap.context.exclude_from_context(
+                self.config.context_name, url
+            )
 
     def spider_target(self) -> None:
         """Spider the target application"""
@@ -513,7 +578,9 @@ class ZAPScanner:
         time.sleep(self.config.passive_scan_wait)
 
         while int(self.zap.pscan.records_to_scan) > 0:
-            logger.info(f"Passive scan records remaining: {self.zap.pscan.records_to_scan}")
+            logger.info(
+                f"Passive scan records remaining: {self.zap.pscan.records_to_scan}"
+            )
             time.sleep(5)
 
     def active_scan(self) -> Optional[str]:
@@ -530,7 +597,9 @@ class ZAPScanner:
             scan_policy_name = "Default Policy"
 
         # Start active scan
-        scan_id = self.zap.ascan.scan(self.config.target_url, scanpolicyname=scan_policy_name)
+        scan_id = self.zap.ascan.scan(
+            self.config.target_url, scanpolicyname=scan_policy_name
+        )
 
         # Wait for active scan
         start_time = time.time()
@@ -559,8 +628,12 @@ class ZAPScanner:
                 description=raw_alert.get("description", ""),
                 solution=raw_alert.get("solution", ""),
                 reference=raw_alert.get("reference", ""),
-                cwe_id=int(raw_alert.get("cweid")) if raw_alert.get("cweid") else None,
-                wasc_id=int(raw_alert.get("wascid")) if raw_alert.get("wascid") else None,
+                cwe_id=int(raw_alert.get("cweid"))
+                if raw_alert.get("cweid")
+                else None,
+                wasc_id=int(raw_alert.get("wascid"))
+                if raw_alert.get("wascid")
+                else None,
                 instances=[
                     {
                         "uri": raw_alert.get("url", ""),
@@ -613,7 +686,9 @@ class DASTOrchestrator:
             self.zap_scanner.start_session()
 
             # Import OpenAPI spec if available
-            openapi_url = urljoin(self.config.target_url, "/api/v1/openapi.json")
+            openapi_url = urljoin(
+                self.config.target_url, "/api/v1/openapi.json"
+            )
             self.api_scanner.import_openapi_spec(openapi_url)
 
             # Spider the target
@@ -634,14 +709,18 @@ class DASTOrchestrator:
             self.zap_scanner.passive_scan()
 
             # Active scan
-            active_scan_id = self.zap_scanner.active_scan()
+            self.zap_scanner.active_scan()
 
             # Get alerts
             alerts = self.zap_scanner.get_alerts()
-            scan_results["alerts"] = [self._alert_to_dict(alert) for alert in alerts]
+            scan_results["alerts"] = [
+                self._alert_to_dict(alert) for alert in alerts
+            ]
 
             # Calculate statistics
-            scan_results["stats"] = self._calculate_stats(alerts, scan_results["vulnerabilities"])
+            scan_results["stats"] = self._calculate_stats(
+                alerts, scan_results["vulnerabilities"]
+            )
 
             # Check if scan passed based on risk threshold
             scan_results["passed"] = self._check_threshold(alerts)
@@ -651,7 +730,9 @@ class DASTOrchestrator:
             scan_results["error"] = str(e)
 
         scan_results["end_time"] = time.time()
-        scan_results["duration"] = scan_results["end_time"] - scan_results["start_time"]
+        scan_results["duration"] = (
+            scan_results["end_time"] - scan_results["start_time"]
+        )
 
         return scan_results
 
@@ -692,7 +773,9 @@ class DASTOrchestrator:
                 return False
         return True
 
-    def export_report(self, scan_results: Dict[str, Any], output_path: Path) -> None:
+    def export_report(
+        self, scan_results: Dict[str, Any], output_path: Path
+    ) -> None:
         """Export scan results to file"""
         with open(output_path, "w") as f:
             json.dump(scan_results, f, indent=2)
@@ -706,11 +789,18 @@ def main():
 
     parser = argparse.ArgumentParser(description="DAST Security Scanner")
     parser.add_argument("--target", required=True, help="Target URL to scan")
-    parser.add_argument("--zap-proxy", default="http://127.0.0.1:8080", help="ZAP proxy URL")
-    parser.add_argument("--api-key", help="ZAP API key")
-    parser.add_argument("--no-active-scan", action="store_true", help="Skip active scanning")
     parser.add_argument(
-        "--output", type=Path, default=Path("dast-results.json"), help="Output file for results"
+        "--zap-proxy", default="http://127.0.0.1:8080", help="ZAP proxy URL"
+    )
+    parser.add_argument("--api-key", help="ZAP API key")
+    parser.add_argument(
+        "--no-active-scan", action="store_true", help="Skip active scanning"
+    )
+    parser.add_argument(
+        "--output",
+        type=Path,
+        default=Path("dast-results.json"),
+        help="Output file for results",
     )
 
     args = parser.parse_args()

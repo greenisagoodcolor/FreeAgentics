@@ -37,6 +37,11 @@ class MatrixCache:
     """Thread-safe matrix cache for PyMDP operations."""
 
     def __init__(self, max_size: int = 1000):
+        """Initialize the matrix cache.
+
+        Args:
+            max_size: Maximum number of cached items.
+        """
         self.cache = {}
         self.access_times = {}
         self.max_size = max_size
@@ -55,7 +60,9 @@ class MatrixCache:
         with self._lock:
             if len(self.cache) >= self.max_size:
                 # Remove oldest accessed item
-                oldest_key = min(self.access_times.keys(), key=self.access_times.get)
+                oldest_key = min(
+                    self.access_times.keys(), key=self.access_times.get
+                )
                 del self.cache[oldest_key]
                 del self.access_times[oldest_key]
 
@@ -73,6 +80,11 @@ class AgentPool:
     """Memory-efficient agent pooling to reduce 34.5MB per agent footprint."""
 
     def __init__(self, max_agents: int = 100):
+        """Initialize the agent pool.
+
+        Args:
+            max_agents: Maximum number of agents in the pool.
+        """
         self.max_agents = max_agents
         self.available_agents = []
         self.active_agents = {}
@@ -103,13 +115,20 @@ class AsyncInferenceEngine:
     """Asynchronous PyMDP inference for concurrent multi-agent processing."""
 
     def __init__(self, max_workers: int = 4):
+        """Initialize the async inference engine.
+
+        Args:
+            max_workers: Maximum number of worker threads.
+        """
         self.max_workers = max_workers
         self.executor = ThreadPoolExecutor(max_workers=max_workers)
         self.matrix_cache = MatrixCache()
         self.agent_pool = AgentPool()
         self.metrics = PerformanceMetrics()
 
-    async def run_inference(self, agent, observation: Any) -> Tuple[Any, Dict[str, float]]:
+    async def run_inference(
+        self, agent, observation: Any
+    ) -> Tuple[Any, Dict[str, float]]:
         """Run PyMDP inference asynchronously with performance tracking."""
         start_time = time.time()
 
@@ -131,7 +150,7 @@ class AsyncInferenceEngine:
             return None, {"error": str(e)}
 
     def _sync_inference(self, agent, observation: Any) -> Any:
-        """Synchronous inference wrapper for thread execution."""
+        """Execute synchronous inference wrapped for thread execution."""
         # Update beliefs
         belief_start = time.time()
         agent.perceive(observation)
@@ -149,13 +168,16 @@ class AsyncInferenceEngine:
         self, agents: List[Any], observations: List[Any]
     ) -> List[Tuple[Any, Dict[str, float]]]:
         """Run inference for multiple agents concurrently."""
-        tasks = [self.run_inference(agent, obs) for agent, obs in zip(agents, observations)]
+        tasks = [
+            self.run_inference(agent, obs)
+            for agent, obs in zip(agents, observations)
+        ]
 
         return await asyncio.gather(*tasks, return_exceptions=True)
 
 
 def performance_monitor(operation_name: str):
-    """Decorator to monitor operation performance."""
+    """Create a decorator to monitor operation performance."""
 
     def decorator(func):
         @wraps(func)
@@ -179,7 +201,9 @@ def performance_monitor(operation_name: str):
                 return result
             except Exception as e:
                 elapsed = time.time() - start_time
-                logger.error(f"Failed {operation_name} after {elapsed:.3f}s: {e}")
+                logger.error(
+                    f"Failed {operation_name} after {elapsed:.3f}s: {e}"
+                )
                 raise
 
         return wrapper
@@ -187,7 +211,9 @@ def performance_monitor(operation_name: str):
     return decorator
 
 
-def optimize_matrix_operations(matrix: np.ndarray, operation: str) -> np.ndarray:
+def optimize_matrix_operations(
+    matrix: np.ndarray, operation: str
+) -> np.ndarray:
     """Optimize matrix operations for PyMDP."""
     if operation == "normalize":
         # Use faster normalization for probability matrices
@@ -239,6 +265,7 @@ class PerformanceOptimizer:
     """Central performance optimization coordinator."""
 
     def __init__(self):
+        """Initialize the performance optimizer."""
         self.async_engine = AsyncInferenceEngine()
         self.matrix_cache = MatrixCache()
         self.benchmarks = {}
@@ -253,17 +280,25 @@ class PerformanceOptimizer:
 
         # Inject optimized methods
         agent._original_get_cached_matrix = agent._get_cached_matrix
-        agent._get_cached_matrix = self._optimized_get_cached_matrix.__get__(agent, type(agent))
+        agent._get_cached_matrix = self._optimized_get_cached_matrix.__get__(
+            agent, type(agent)
+        )
 
         logger.info(
             f"Applied performance optimizations to agent {getattr(agent, 'agent_id', 'unknown')}"
         )
 
     def _optimized_get_cached_matrix(
-        self, agent_self, matrix_name: str, matrix_data: Any, normalization_func: callable
+        self,
+        agent_self,
+        matrix_name: str,
+        matrix_data: Any,
+        normalization_func: callable,
     ) -> Any:
         """Optimized matrix caching with global cache."""
-        cache_key = f"{agent_self.agent_id}_{matrix_name}_{hash(str(matrix_data))}"
+        cache_key = (
+            f"{agent_self.agent_id}_{matrix_name}_{hash(str(matrix_data))}"
+        )
 
         # Check global cache first
         cached_matrix = self.matrix_cache.get(cache_key)
@@ -276,7 +311,9 @@ class PerformanceOptimizer:
 
         return normalized_matrix
 
-    def benchmark_system(self, agents: List[Any], num_steps: int = 50) -> Dict[str, Any]:
+    def benchmark_system(
+        self, agents: List[Any], num_steps: int = 50
+    ) -> Dict[str, Any]:
         """Comprehensive system performance benchmark."""
         results = {"single_agent": {}, "multi_agent": {}, "memory_usage": {}}
 
@@ -289,7 +326,9 @@ class PerformanceOptimizer:
                 start_time = time.time()
 
                 # Simulate multi-agent step
-                observations = [{"position": [i % 10, i // 10]} for i in range(len(agents))]
+                observations = [
+                    {"position": [i % 10, i // 10]} for i in range(len(agents))
+                ]
 
                 for agent, obs in zip(agents, observations):
                     agent.step(obs)

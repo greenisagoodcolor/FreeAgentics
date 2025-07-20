@@ -1,5 +1,5 @@
 # Multi-stage build for FreeAgentics
-FROM python:3.11-slim as base
+FROM python:3.11.9-slim as base
 
 # Set environment variables
 ENV PYTHONUNBUFFERED=1 \
@@ -8,14 +8,17 @@ ENV PYTHONUNBUFFERED=1 \
     PIP_DISABLE_PIP_VERSION_CHECK=1
 
 # Install system dependencies
-RUN apt-get update && apt-get install -y \
+RUN apt-get update && apt-get install -y --no-install-recommends \
     gcc \
     g++ \
     curl \
+    git \
+    && apt-get clean \
     && rm -rf /var/lib/apt/lists/*
 
-# Create app user
-RUN useradd --create-home --shell /bin/bash app
+# Create app user with specific UID/GID
+RUN groupadd -g 1001 app && \
+    useradd -r -u 1001 -g app --create-home --shell /bin/bash app
 
 # Development stage
 FROM base as development
@@ -23,11 +26,15 @@ FROM base as development
 WORKDIR /app
 
 # Copy requirements files
-COPY requirements-core.txt requirements-dev.txt ./
+COPY requirements-core.txt requirements-dev.txt requirements.txt ./
+
+# Create requirements-docker.txt without git dependencies
+RUN grep -v "^-e git+" requirements.txt > requirements-docker.txt || true
 
 # Install Python dependencies
-RUN pip install -r requirements-core.txt && \
-    pip install -r requirements-dev.txt
+RUN pip install --no-cache-dir -r requirements-core.txt && \
+    pip install --no-cache-dir -r requirements-docker.txt && \
+    pip install --no-cache-dir -r requirements-dev.txt
 
 # Copy source code
 COPY . .
@@ -51,7 +58,7 @@ WORKDIR /app
 COPY requirements-production.txt ./
 
 # Install production dependencies only
-RUN pip install -r requirements-production.txt
+RUN pip install --no-cache-dir -r requirements-production.txt
 
 # Copy source code (exclude dev files)
 COPY agents/ ./agents/

@@ -102,7 +102,9 @@ class PerformanceMonitor:
         # Save all collected metrics
         self._save_metrics()
 
-        logger.info(f"Ended test run: {self.test_run_id} (duration: {duration:.2f}s)")
+        logger.info(
+            f"Ended test run: {self.test_run_id} (duration: {duration:.2f}s)"
+        )
 
         return summary
 
@@ -131,7 +133,12 @@ class PerformanceMonitor:
             )
 
             # Record metric
-            self.record_metric(f"{operation_type}_duration", operation_name, duration, "seconds")
+            self.record_metric(
+                f"{operation_type}_duration",
+                operation_name,
+                duration,
+                "seconds",
+            )
 
     def record_metric(
         self,
@@ -188,10 +195,18 @@ class PerformanceMonitor:
                 query.split()[0],  # SELECT, INSERT, etc.
                 duration,
                 "seconds",
-                {"row_count": row_count, "query": query[:100]},  # First 100 chars
+                {
+                    "row_count": row_count,
+                    "query": query[:100],
+                },  # First 100 chars
             )
 
-            return {"duration": duration, "row_count": row_count, "plan": plan, "results": results}
+            return {
+                "duration": duration,
+                "row_count": row_count,
+                "plan": plan,
+                "results": results,
+            }
 
     def get_database_stats(self) -> Dict[str, Any]:
         """Get current database statistics."""
@@ -204,7 +219,9 @@ class PerformanceMonitor:
                 SELECT pg_database_size(current_database()) as size
             """
             )
-            stats["database_size_mb"] = cursor.fetchone()["size"] / (1024 * 1024)
+            stats["database_size_mb"] = cursor.fetchone()["size"] / (
+                1024 * 1024
+            )
 
             # Table sizes
             cursor.execute(
@@ -257,7 +274,9 @@ class PerformanceMonitor:
                 LIMIT 10
             """
             )
-            stats["slow_queries"] = cursor.fetchall() if cursor.rowcount > 0 else []
+            stats["slow_queries"] = (
+                cursor.fetchall() if cursor.rowcount > 0 else []
+            )
 
         # Pool statistics
         stats["connection_pool"] = self.pool.get_pool_stats()
@@ -275,18 +294,29 @@ class PerformanceMonitor:
                     "memory_percent": psutil.virtual_memory().percent,
                     "memory_mb": psutil.virtual_memory().used / (1024 * 1024),
                     "disk_io": (
-                        psutil.disk_io_counters()._asdict() if psutil.disk_io_counters() else {}
+                        psutil.disk_io_counters()._asdict()
+                        if psutil.disk_io_counters()
+                        else {}
                     ),
                     "net_io": (
-                        psutil.net_io_counters()._asdict() if psutil.net_io_counters() else {}
+                        psutil.net_io_counters()._asdict()
+                        if psutil.net_io_counters()
+                        else {}
                     ),
                 }
 
                 self.system_metrics.append(metrics)
 
                 # Also record as performance metrics
-                self.record_metric("system", "cpu_usage", metrics["cpu_percent"], "percent")
-                self.record_metric("system", "memory_usage", metrics["memory_percent"], "percent")
+                self.record_metric(
+                    "system", "cpu_usage", metrics["cpu_percent"], "percent"
+                )
+                self.record_metric(
+                    "system",
+                    "memory_usage",
+                    metrics["memory_percent"],
+                    "percent",
+                )
 
                 time.sleep(5)  # Monitor every 5 seconds
 
@@ -303,7 +333,9 @@ class PerformanceMonitor:
         """Calculate summary statistics for the test run."""
         summary = {
             "duration": time.time() - self.start_time,
-            "total_operations": sum(len(ops) for ops in self.operation_timings.values()),
+            "total_operations": sum(
+                len(ops) for ops in self.operation_timings.values()
+            ),
         }
 
         # Operation timing statistics
@@ -318,7 +350,8 @@ class PerformanceMonitor:
                     "max_time": max(durations),
                     "avg_time": statistics.mean(durations),
                     "median_time": statistics.median(durations),
-                    "success_rate": sum(1 for t in timings if t["success"]) / len(timings),
+                    "success_rate": sum(1 for t in timings if t["success"])
+                    / len(timings),
                 }
 
         summary["operation_timings"] = timing_stats
@@ -464,7 +497,9 @@ class LoadTestRunner:
         """Run a concurrent load test."""
         import concurrent.futures
 
-        logger.info(f"Starting concurrent test: {num_threads} threads for {duration_seconds}s")
+        logger.info(
+            f"Starting concurrent test: {num_threads} threads for {duration_seconds}s"
+        )
 
         # Start monitoring
         self.monitor.start_test_run(
@@ -495,7 +530,9 @@ class LoadTestRunner:
                     logger.error(f"Thread {thread_id} error: {e}")
 
         # Start threads
-        with concurrent.futures.ThreadPoolExecutor(max_workers=num_threads) as executor:
+        with concurrent.futures.ThreadPoolExecutor(
+            max_workers=num_threads
+        ) as executor:
             futures = [executor.submit(worker, i) for i in range(num_threads)]
 
             # Run for specified duration

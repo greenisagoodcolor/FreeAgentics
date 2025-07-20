@@ -156,9 +156,9 @@ Results are saved to `benchmark_results.json` for further analysis.
 The benchmarks validate key claims:
 
 1. **Performance**: Threading is faster for PyMDP-based agents
-2. **Memory**: Threading uses significantly less memory
-3. **Communication**: Threading has much lower communication overhead
-4. **Scaling**: Threading scales better with agent count
+1. **Memory**: Threading uses significantly less memory
+1. **Communication**: Threading has much lower communication overhead
+1. **Scaling**: Threading scales better with agent count
 
 Results help make informed decisions about the optimal concurrency model for FreeAgentics deployments.
 
@@ -192,10 +192,10 @@ Results help make informed decisions about the optimal concurrency model for Fre
 When adding new benchmarks:
 
 1. Follow the existing pattern for result collection
-2. Use `BenchmarkResult` dataclass for consistency
-3. Include memory tracking
-4. Add comprehensive error handling
-5. Document expected behavior
+1. Use `BenchmarkResult` dataclass for consistency
+1. Include memory tracking
+1. Add comprehensive error handling
+1. Document expected behavior
 
 ## Quick Start
 
@@ -226,11 +226,11 @@ python3 benchmarks/production_benchmark.py
 
 Based on initial testing on a 20-core Linux system:
 
-| Metric       | Threading     | Multiprocessing | Threading Advantage |
+| Metric | Threading | Multiprocessing | Threading Advantage |
 | ------------ | ------------- | --------------- | ------------------- |
-| Single Agent | 680.5 ops/sec | 13.8 ops/sec    | **49.35x faster**   |
-| 5 Agents     | 190.1 ops/sec | 47.5 ops/sec    | **4.00x faster**    |
-| 10 Agents    | 197.3 ops/sec | 63.8 ops/sec    | **3.09x faster**    |
+| Single Agent | 680.5 ops/sec | 13.8 ops/sec | **49.35x faster** |
+| 5 Agents | 190.1 ops/sec | 47.5 ops/sec | **4.00x faster** |
+| 10 Agents | 197.3 ops/sec | 63.8 ops/sec | **3.09x faster** |
 
 **Key Finding**: Threading is consistently faster due to:
 

@@ -14,7 +14,9 @@ import re
 def fix_basic_explorer_agent_constructor(content):
     """Fix BasicExplorerAgent constructor calls that pass position parameter."""
     # Pattern to find BasicExplorerAgent instantiation with position parameter
-    pattern = r"BasicExplorerAgent\([^,]+,\s*[^,]+,\s*position\s*=\s*\[[^\]]+\]\)"
+    pattern = (
+        r"BasicExplorerAgent\([^,]+,\s*[^,]+,\s*position\s*=\s*\[[^\]]+\]\)"
+    )
 
     def replace_constructor(match):
         # Extract the agent_id and name from the match
@@ -29,7 +31,9 @@ def fix_basic_explorer_agent_constructor(content):
 
     # Also fix cases where position is passed as third positional argument
     pattern2 = r"BasicExplorerAgent\(([^,]+),\s*([^,]+),\s*\[[^\]]+\]\)"
-    fixed_content = re.sub(pattern2, r"BasicExplorerAgent(\1, \2)", fixed_content)
+    fixed_content = re.sub(
+        pattern2, r"BasicExplorerAgent(\1, \2)", fixed_content
+    )
 
     return fixed_content
 
@@ -37,7 +41,10 @@ def fix_basic_explorer_agent_constructor(content):
 def add_safe_array_index_import(content):
     """Add import for safe_array_index if it's used but not imported."""
     # Check if safe_array_index is used
-    if "safe_array_index" in content and "from agents.pymdp_error_handling import" not in content:
+    if (
+        "safe_array_index" in content
+        and "from agents.pymdp_error_handling import" not in content
+    ):
         # Find the import section
         import_section_end = content.rfind("import ")
         if import_section_end != -1:
@@ -47,7 +54,11 @@ def add_safe_array_index_import(content):
                 # Insert the import after the last import
                 insert_pos = line_end + 1
                 import_statement = "from agents.pymdp_error_handling import safe_array_index\n"
-                content = content[:insert_pos] + import_statement + content[insert_pos:]
+                content = (
+                    content[:insert_pos]
+                    + import_statement
+                    + content[insert_pos:]
+                )
 
     return content
 
@@ -102,7 +113,9 @@ def process_test_file(filepath):
 def main():
     """Main function to fix PyMDP test issues."""
     test_dir = os.path.join(
-        os.path.dirname(os.path.dirname(os.path.abspath(__file__))), "tests", "integration"
+        os.path.dirname(os.path.dirname(os.path.abspath(__file__))),
+        "tests",
+        "integration",
     )
 
     pymdp_test_files = [
@@ -128,7 +141,9 @@ def main():
     print("\nChecking base agent files...")
     base_files = [
         os.path.join(
-            os.path.dirname(os.path.dirname(os.path.abspath(__file__))), "agents", "base_agent.py"
+            os.path.dirname(os.path.dirname(os.path.abspath(__file__))),
+            "agents",
+            "base_agent.py",
         )
     ]
 

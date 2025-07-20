@@ -43,7 +43,7 @@ send_notification() {
     local message="$1"
     local status="${2:-INFO}"
     local emoji="📢"
-    
+
     case $status in
         "SUCCESS") emoji="✅" ;;
         "ERROR") emoji="❌" ;;
@@ -51,9 +51,9 @@ send_notification() {
         "START") emoji="🚀" ;;
         "ROLLBACK") emoji="🔙" ;;
     esac
-    
+
     log "$message"
-    
+
     if [[ -n "$SLACK_WEBHOOK" ]]; then
         curl -X POST -H 'Content-type: application/json' \
             --data "{\"text\":\"$emoji FreeAgentics Deployment [$ENVIRONMENT]: $message\"}" \
@@ -64,12 +64,12 @@ send_notification() {
 # Function to check prerequisites
 check_prerequisites() {
     log "Checking deployment prerequisites..."
-    
+
     # Check if running as appropriate user
     if [[ $EUID -eq 0 ]]; then
         warn "Running as root. Consider using a non-root user with docker group membership."
     fi
-    
+
     # Check required commands
     local required_commands=("docker" "docker-compose" "curl" "jq")
     for cmd in "${required_commands[@]}"; do
@@ -78,25 +78,25 @@ check_prerequisites() {
             exit 1
         fi
     done
-    
+
     # Check if Docker is running
     if ! docker info &> /dev/null; then
         error "Docker is not running"
         exit 1
     fi
-    
+
     # Check if compose file exists
     if [[ ! -f "$COMPOSE_FILE" ]]; then
         error "Compose file '$COMPOSE_FILE' not found"
         exit 1
     fi
-    
+
     # Check if environment file exists
     if [[ ! -f ".env.${ENVIRONMENT}" ]]; then
         error "Environment file '.env.${ENVIRONMENT}' not found"
         exit 1
     fi
-    
+
     log "Prerequisites check completed successfully"
 }
 
@@ -106,15 +106,15 @@ backup_database() {
         info "Database backup skipped (BACKUP_BEFORE_DEPLOY=false)"
         return 0
     fi
-    
+
     log "Creating database backup before deployment..."
-    
+
     # Ensure backup script exists
     if [[ ! -f "scripts/database-backup.sh" ]]; then
         warn "Database backup script not found, skipping backup"
         return 0
     fi
-    
+
     # Run backup
     if ./scripts/database-backup.sh backup; then
         log "Database backup completed successfully"
@@ -127,11 +127,11 @@ backup_database() {
 # Function to build images
 build_images() {
     log "Building Docker images for version $VERSION..."
-    
+
     # Set environment
     export DOCKER_BUILDKIT=1
     export COMPOSE_DOCKER_CLI_BUILD=1
-    
+
     # Build images with version tag
     if docker-compose -f "$COMPOSE_FILE" build \
         --parallel \
@@ -143,7 +143,7 @@ build_images() {
         error "Failed to build Docker images"
         return 1
     fi
-    
+
     # Tag images with version
     log "Tagging images with version $VERSION..."
     docker-compose -f "$COMPOSE_FILE" images --format json | jq -r '.Repository + ":" + .Tag' | while read -r image; do
@@ -158,7 +158,7 @@ build_images() {
 # Function to run pre-deployment tests
 run_pre_deployment_tests() {
     log "Running pre-deployment tests..."
-    
+
     # Test database migration
     log "Testing database migration..."
     if docker-compose -f "$COMPOSE_FILE" run --rm migration alembic check 2>/dev/null; then
@@ -166,7 +166,7 @@ run_pre_deployment_tests() {
     else
         warn "Database migration test failed or not applicable"
     fi
-    
+
     # Test configuration
     log "Testing application configuration..."
     if docker-compose -f "$COMPOSE_FILE" config >/dev/null; then
@@ -175,7 +175,7 @@ run_pre_deployment_tests() {
         error "Docker Compose configuration is invalid"
         return 1
     fi
-    
+
     # Additional tests can be added here
     log "Pre-deployment tests completed"
 }
@@ -183,28 +183,28 @@ run_pre_deployment_tests() {
 # Function to perform zero-downtime deployment
 deploy_zero_downtime() {
     log "Starting zero-downtime deployment..."
-    
+
     # Check if services are already running
     local running_services
     running_services=$(docker-compose -f "$COMPOSE_FILE" ps --services --filter "status=running" | wc -l)
-    
+
     if [[ "$running_services" -gt 0 ]]; then
         log "Performing rolling update of existing services..."
-        
+
         # Update services one by one
         local services=("backend" "frontend" "nginx")
         for service in "${services[@]}"; do
             log "Updating $service..."
-            
+
             # Scale up new instance
             docker-compose -f "$COMPOSE_FILE" up -d --scale "$service"=2 "$service"
-            
+
             # Wait for new instance to be healthy
             sleep 30
-            
+
             # Scale down to 1 (removes old instance)
             docker-compose -f "$COMPOSE_FILE" up -d --scale "$service"=1 "$service"
-            
+
             log "$service updated successfully"
         done
     else
@@ -216,13 +216,13 @@ deploy_zero_downtime() {
 # Function to run database migrations
 run_migrations() {
     log "Running database migrations..."
-    
+
     # Check if database is accessible
     if ! docker-compose -f "$COMPOSE_FILE" exec -T postgres pg_isready -U freeagentics; then
         error "Database is not accessible"
         return 1
     fi
-    
+
     # Run migrations
     if docker-compose -f "$COMPOSE_FILE" run --rm migration; then
         log "Database migrations completed successfully"
@@ -235,25 +235,25 @@ run_migrations() {
 # Function to wait for services to be healthy
 wait_for_health() {
     log "Waiting for services to become healthy..."
-    
+
     local retries=0
     local max_retries="$HEALTH_CHECK_RETRIES"
     local interval="$HEALTH_CHECK_INTERVAL"
-    
+
     while [[ $retries -lt $max_retries ]]; do
         local healthy_services=0
         local total_services=0
-        
+
         # Check each service health
         while IFS= read -r service; do
             if [[ -n "$service" ]]; then
                 total_services=$((total_services + 1))
-                
+
                 # Check if service has health check
                 local health_status
                 health_status=$(docker inspect "$(docker-compose -f "$COMPOSE_FILE" ps -q "$service" | head -1)" \
                     --format='{{.State.Health.Status}}' 2>/dev/null || echo "unknown")
-                
+
                 if [[ "$health_status" == "healthy" ]]; then
                     healthy_services=$((healthy_services + 1))
                 elif [[ "$health_status" == "unknown" ]]; then
@@ -264,21 +264,21 @@ wait_for_health() {
                 fi
             fi
         done < <(docker-compose -f "$COMPOSE_FILE" ps --services)
-        
+
         info "Health check: $healthy_services/$total_services services healthy"
-        
+
         if [[ $healthy_services -eq $total_services ]] && [[ $total_services -gt 0 ]]; then
             log "All services are healthy"
             return 0
         fi
-        
+
         retries=$((retries + 1))
         if [[ $retries -lt $max_retries ]]; then
             info "Waiting ${interval}s before next health check (attempt $retries/$max_retries)..."
             sleep "$interval"
         fi
     done
-    
+
     error "Services did not become healthy within expected time"
     return 1
 }
@@ -286,10 +286,10 @@ wait_for_health() {
 # Function to run post-deployment tests
 run_post_deployment_tests() {
     log "Running post-deployment tests..."
-    
+
     # Test API endpoints
     local api_url="http://localhost:8000"
-    
+
     # Test health endpoint
     if curl -f -s "$api_url/health" >/dev/null; then
         log "API health check passed"
@@ -297,14 +297,14 @@ run_post_deployment_tests() {
         error "API health check failed"
         return 1
     fi
-    
+
     # Test authentication endpoint
     if curl -f -s "$api_url/api/v1/auth/health" >/dev/null; then
         log "Authentication endpoint test passed"
     else
         warn "Authentication endpoint test failed (may be expected)"
     fi
-    
+
     # Test database connectivity
     if docker-compose -f "$COMPOSE_FILE" exec -T backend python -c "
 from database.session import get_db
@@ -321,40 +321,40 @@ except Exception as e:
         error "Database connectivity test failed"
         return 1
     fi
-    
+
     log "Post-deployment tests completed successfully"
 }
 
 # Function to rollback deployment
 rollback_deployment() {
     log "Starting deployment rollback..."
-    
+
     # Get previous version from Git
     local previous_version
     previous_version=$(git describe --tags --abbrev=0 HEAD~1 2>/dev/null || echo "previous")
-    
+
     warn "Rolling back to version: $previous_version"
-    
+
     # Stop current deployment
     docker-compose -f "$COMPOSE_FILE" down
-    
+
     # Checkout previous version (if using Git)
     if git rev-parse --verify HEAD~1 >/dev/null 2>&1; then
         git checkout HEAD~1
     fi
-    
+
     # Restore from backup if available
     local latest_backup
     latest_backup=$(ls -t /var/backups/freeagentics/freeagentics_backup_*.sql.gz 2>/dev/null | head -1 || echo "")
-    
+
     if [[ -n "$latest_backup" ]]; then
         warn "Restoring database from backup: $latest_backup"
         ./scripts/database-backup.sh restore "$latest_backup" || true
     fi
-    
+
     # Deploy previous version
     docker-compose -f "$COMPOSE_FILE" up -d
-    
+
     # Wait for rollback to be healthy
     if wait_for_health; then
         send_notification "Rollback completed successfully to version $previous_version" "SUCCESS"
@@ -367,13 +367,13 @@ rollback_deployment() {
 # Function to cleanup old images
 cleanup_old_images() {
     log "Cleaning up old Docker images..."
-    
+
     # Remove unused images older than 7 days
     docker image prune -f --filter "until=168h" || true
-    
+
     # Remove dangling images
     docker image prune -f || true
-    
+
     log "Docker cleanup completed"
 }
 
@@ -384,11 +384,11 @@ show_deployment_summary() {
     log "Version: $VERSION"
     log "Compose File: $COMPOSE_FILE"
     log "Timestamp: $(date)"
-    
+
     # Show running services
     log "Running Services:"
     docker-compose -f "$COMPOSE_FILE" ps
-    
+
     # Show resource usage
     log "Resource Usage:"
     docker stats --no-stream --format "table {{.Name}}\t{{.CPUPerc}}\t{{.MemUsage}}" || true
@@ -398,30 +398,30 @@ show_deployment_summary() {
 main() {
     local start_time
     start_time=$(date +%s)
-    
+
     send_notification "Starting deployment of version $VERSION" "START"
-    
+
     # Trap for cleanup on exit
     trap 'echo "Deployment interrupted"; exit 1' INT TERM
-    
+
     # Pre-deployment steps
     check_prerequisites
     backup_database || {
         error "Backup failed - aborting deployment"
         exit 1
     }
-    
+
     # Build and test
     build_images || {
         error "Image build failed - aborting deployment"
         exit 1
     }
-    
+
     run_pre_deployment_tests || {
         error "Pre-deployment tests failed - aborting deployment"
         exit 1
     }
-    
+
     # Deployment
     run_migrations || {
         error "Database migrations failed"
@@ -430,7 +430,7 @@ main() {
         fi
         exit 1
     }
-    
+
     deploy_zero_downtime || {
         error "Deployment failed"
         if [[ "$ROLLBACK_ON_FAILURE" == "true" ]]; then
@@ -438,7 +438,7 @@ main() {
         fi
         exit 1
     }
-    
+
     # Post-deployment verification
     wait_for_health || {
         error "Health checks failed"
@@ -447,7 +447,7 @@ main() {
         fi
         exit 1
     }
-    
+
     run_post_deployment_tests || {
         error "Post-deployment tests failed"
         if [[ "$ROLLBACK_ON_FAILURE" == "true" ]]; then
@@ -455,15 +455,15 @@ main() {
         fi
         exit 1
     }
-    
+
     # Cleanup and summary
     cleanup_old_images
     show_deployment_summary
-    
+
     local end_time
     end_time=$(date +%s)
     local duration=$((end_time - start_time))
-    
+
     send_notification "Deployment completed successfully in ${duration}s" "SUCCESS"
     log "🎉 Deployment completed successfully!"
 }

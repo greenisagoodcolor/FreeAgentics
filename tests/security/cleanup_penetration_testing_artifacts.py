@@ -124,7 +124,9 @@ class PenetrationTestingCleanup:
                     f"Permission denied accessing {search_path}: {e}"
                 )
             except Exception as e:
-                self.cleanup_report["errors"].append(f"Error searching {search_path}: {e}")
+                self.cleanup_report["errors"].append(
+                    f"Error searching {search_path}: {e}"
+                )
 
     def cleanup_temp_directories(self) -> None:
         """Remove temporary directories created for testing."""
@@ -157,7 +159,9 @@ class PenetrationTestingCleanup:
                     f"Permission denied accessing {temp_base}: {e}"
                 )
             except Exception as e:
-                self.cleanup_report["errors"].append(f"Error cleaning temp directories: {e}")
+                self.cleanup_report["errors"].append(
+                    f"Error cleaning temp directories: {e}"
+                )
 
     def cleanup_test_accounts(self) -> None:
         """Remove test accounts from authentication systems."""
@@ -299,9 +303,13 @@ class PenetrationTestingCleanup:
                     print(f"  Removed file: {file_path}")
 
         except PermissionError as e:
-            self.cleanup_report["errors"].append(f"Permission denied removing {file_path}: {e}")
+            self.cleanup_report["errors"].append(
+                f"Permission denied removing {file_path}: {e}"
+            )
         except Exception as e:
-            self.cleanup_report["errors"].append(f"Error removing {file_path}: {e}")
+            self.cleanup_report["errors"].append(
+                f"Error removing {file_path}: {e}"
+            )
 
     def _remove_directory(self, dir_path: str) -> None:
         """Safely remove a directory and its contents."""
@@ -316,9 +324,13 @@ class PenetrationTestingCleanup:
                     print(f"  Removed directory: {dir_path}")
 
         except PermissionError as e:
-            self.cleanup_report["errors"].append(f"Permission denied removing {dir_path}: {e}")
+            self.cleanup_report["errors"].append(
+                f"Permission denied removing {dir_path}: {e}"
+            )
         except Exception as e:
-            self.cleanup_report["errors"].append(f"Error removing {dir_path}: {e}")
+            self.cleanup_report["errors"].append(
+                f"Error removing {dir_path}: {e}"
+            )
 
     def _is_test_artifact_file(self, file_path: str) -> bool:
         """Check if a file contains test artifacts based on content."""
@@ -400,12 +412,18 @@ class PenetrationTestingCleanup:
                     )
 
                     if self.verbose:
-                        print(f"  Removed {removed_count} test entries from {log_file}")
+                        print(
+                            f"  Removed {removed_count} test entries from {log_file}"
+                        )
 
         except PermissionError as e:
-            self.cleanup_report["errors"].append(f"Permission denied cleaning {log_file}: {e}")
+            self.cleanup_report["errors"].append(
+                f"Permission denied cleaning {log_file}: {e}"
+            )
         except Exception as e:
-            self.cleanup_report["errors"].append(f"Error cleaning {log_file}: {e}")
+            self.cleanup_report["errors"].append(
+                f"Error cleaning {log_file}: {e}"
+            )
 
     def run_cleanup(self) -> Dict[str, Any]:
         """Run the complete cleanup process."""
@@ -427,7 +445,9 @@ class PenetrationTestingCleanup:
             try:
                 task()
             except Exception as e:
-                self.cleanup_report["errors"].append(f"Error in {task.__name__}: {e}")
+                self.cleanup_report["errors"].append(
+                    f"Error in {task.__name__}: {e}"
+                )
                 print(f"❌ Error in {task.__name__}: {e}")
 
         print("\n✅ Cleanup process completed!")
@@ -463,9 +483,15 @@ class PenetrationTestingCleanup:
         print("=" * 60)
 
         print(f"Files removed: {len(self.cleanup_report['files_removed'])}")
-        print(f"Directories removed: {len(self.cleanup_report['directories_removed'])}")
-        print(f"Test accounts removed: {len(self.cleanup_report['test_accounts_removed'])}")
-        print(f"Database entries cleaned: {len(self.cleanup_report['database_entries_cleaned'])}")
+        print(
+            f"Directories removed: {len(self.cleanup_report['directories_removed'])}"
+        )
+        print(
+            f"Test accounts removed: {len(self.cleanup_report['test_accounts_removed'])}"
+        )
+        print(
+            f"Database entries cleaned: {len(self.cleanup_report['database_entries_cleaned'])}"
+        )
         print(f"Log files cleaned: {len(self.cleanup_report['logs_cleaned'])}")
         print(f"Errors encountered: {len(self.cleanup_report['errors'])}")
 
@@ -477,10 +503,14 @@ class PenetrationTestingCleanup:
         if self.verbose and not self.dry_run:
             if self.cleanup_report["files_removed"]:
                 print("\nFiles removed:")
-                for file in self.cleanup_report["files_removed"][:10]:  # Show first 10
+                for file in self.cleanup_report["files_removed"][
+                    :10
+                ]:  # Show first 10
                     print(f"  🗑️  {file}")
                 if len(self.cleanup_report["files_removed"]) > 10:
-                    print(f"  ... and {len(self.cleanup_report['files_removed']) - 10} more files")
+                    print(
+                        f"  ... and {len(self.cleanup_report['files_removed']) - 10} more files"
+                    )
 
             if self.cleanup_report["directories_removed"]:
                 print("\nDirectories removed:")
@@ -490,24 +520,38 @@ class PenetrationTestingCleanup:
 
 def main():
     """Main function to run penetration testing cleanup."""
-    parser = argparse.ArgumentParser(description="Clean up penetration testing artifacts")
+    parser = argparse.ArgumentParser(
+        description="Clean up penetration testing artifacts"
+    )
     parser.add_argument(
         "--dry-run",
         action="store_true",
         help="Show what would be cleaned without actually removing anything",
     )
-    parser.add_argument("--verbose", "-v", action="store_true", help="Show detailed output")
-    parser.add_argument("--output-dir", default=None, help="Output directory for cleanup report")
+    parser.add_argument(
+        "--verbose", "-v", action="store_true", help="Show detailed output"
+    )
+    parser.add_argument(
+        "--output-dir",
+        default=None,
+        help="Output directory for cleanup report",
+    )
 
     args = parser.parse_args()
 
     # Create and run cleanup
-    cleanup = PenetrationTestingCleanup(dry_run=args.dry_run, verbose=args.verbose)
+    cleanup = PenetrationTestingCleanup(
+        dry_run=args.dry_run, verbose=args.verbose
+    )
 
     # Warning for actual cleanup
     if not args.dry_run:
-        print("⚠️  WARNING: This will permanently remove penetration testing artifacts!")
-        print("   Make sure you have saved any important test results before proceeding.")
+        print(
+            "⚠️  WARNING: This will permanently remove penetration testing artifacts!"
+        )
+        print(
+            "   Make sure you have saved any important test results before proceeding."
+        )
         response = input("   Continue? (yes/no): ")
 
         if response.lower() not in ["yes", "y"]:
@@ -526,7 +570,9 @@ def main():
 
     # Exit with appropriate code
     if report["errors"]:
-        print("\n⚠️  Cleanup completed with errors. Check the report for details.")
+        print(
+            "\n⚠️  Cleanup completed with errors. Check the report for details."
+        )
         sys.exit(1)
     else:
         print("\n✅ Cleanup completed successfully!")

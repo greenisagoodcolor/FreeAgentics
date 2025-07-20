@@ -88,7 +88,8 @@ async def get_metric_history(
 
         if not time_series:
             raise HTTPException(
-                status_code=404, detail=f"Metric '{metric_name}' not found or has no history"
+                status_code=404,
+                detail=f"Metric '{metric_name}' not found or has no history",
             )
 
         return time_series
@@ -125,7 +126,11 @@ async def get_alerts(
         # Apply limit
         alerts = all_alerts[-limit:]
 
-        return {"total": len(all_alerts), "returned": len(alerts), "alerts": alerts}
+        return {
+            "total": len(all_alerts),
+            "returned": len(alerts),
+            "alerts": alerts,
+        }
 
     except Exception as e:
         logger.error(f"Failed to get alerts: {e}")
@@ -134,7 +139,8 @@ async def get_alerts(
 
 @router.get("/events")
 async def get_events(
-    event_type: Optional[str] = Query(default=None), limit: int = Query(default=20, ge=1, le=100)
+    event_type: Optional[str] = Query(default=None),
+    limit: int = Query(default=20, ge=1, le=100),
 ):
     """Get recent dashboard events.
 
@@ -156,7 +162,11 @@ async def get_events(
         # Apply limit
         events = all_events[-limit:]
 
-        return {"total": len(all_events), "returned": len(events), "events": events}
+        return {
+            "total": len(all_events),
+            "returned": len(events),
+            "events": events,
+        }
 
     except Exception as e:
         logger.error(f"Failed to get events: {e}")
@@ -176,7 +186,9 @@ async def record_event(event_data: Dict):
     try:
         event_type = event_data.get("type")
         if not event_type:
-            raise HTTPException(status_code=400, detail="Event type is required")
+            raise HTTPException(
+                status_code=400, detail="Event type is required"
+            )
 
         data = event_data.get("data", {})
 
@@ -210,7 +222,9 @@ async def dashboard_health():
 
         if dashboard_data:
             health["last_update"] = dashboard_data.get("timestamp")
-            health["agent_count"] = len(dashboard_data.get("agent_dashboards", {}))
+            health["agent_count"] = len(
+                dashboard_data.get("agent_dashboards", {})
+            )
             health["alert_count"] = len(dashboard_data.get("alerts", []))
 
         return health

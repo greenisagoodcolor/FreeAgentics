@@ -2,7 +2,7 @@
 
 import React, { Suspense, ComponentType, ReactNode } from "react";
 import { ErrorBoundary } from "./ErrorBoundary";
-import { LoadingState } from "./LoadingState";
+import LoadingState from "./LoadingState";
 import { Skeleton, SkeletonContainer } from "./Skeleton";
 
 interface SuspenseWrapperProps {
@@ -61,40 +61,49 @@ export function withSuspense<P extends object>(
 
 /**
  * Lazy load component with built-in loading and error states
+ * Returns a component with the same props as the original component
  */
-export function lazyWithPreload<T extends ComponentType<Record<string, unknown>>>(
-  factory: () => Promise<{ default: T }>,
+export function lazyWithPreload<P extends Record<string, unknown> = Record<string, unknown>>(
+  factory: () => Promise<{ default: ComponentType<P> }>,
   options?: {
     fallback?: ReactNode;
     errorFallback?: ReactNode;
     preloadDelay?: number;
   },
 ) {
-  let loadPromise: Promise<{ default: T }> | null = null;
+  let loadPromise: Promise<{ default: ComponentType<P> }> | null = null;
 
-  const load = () => {
+  const load = async () => {
     if (!loadPromise) {
       loadPromise = factory();
     }
     return loadPromise;
   };
 
-  const LazyComponent = React.lazy(load);
+  const LazyComponent = React.lazy(factory);
 
-  const WrappedComponent = (props: React.ComponentProps<T>) => (
-    <SuspenseWrapper fallback={options?.fallback} errorFallback={options?.errorFallback}>
-      <LazyComponent {...(props as any)} />
-    </SuspenseWrapper>
+  // Create a wrapper component that properly handles the lazy loading
+  const WrappedComponent: React.FC<P> & { preload: () => void } = Object.assign(
+    (props: P) => {
+      return (
+        <SuspenseWrapper fallback={options?.fallback} errorFallback={options?.errorFallback}>
+          {React.createElement(LazyComponent as unknown as React.ComponentType<P>, props)}
+        </SuspenseWrapper>
+      );
+    },
+    {
+      preload: () => {
+        if (options?.preloadDelay) {
+          setTimeout(load, options.preloadDelay);
+        } else {
+          load();
+        }
+      },
+    },
   );
 
-  // Add preload method
-  (WrappedComponent as typeof WrappedComponent & { preload: () => void }).preload = () => {
-    if (options?.preloadDelay) {
-      setTimeout(load, options.preloadDelay);
-    } else {
-      load();
-    }
-  };
+  // Add display name for debugging
+  WrappedComponent.displayName = `LazyWithPreload(Component)`;
 
   return WrappedComponent;
 }

@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 """
-Production Secrets Manager for FreeAgentics
+Production Secrets Manager for FreeAgentics.
 Handles secure generation, storage, and retrieval of secrets
 """
 
@@ -18,20 +18,26 @@ from cryptography.fernet import Fernet
 from cryptography.hazmat.primitives import hashes
 
 # Configure logging
-logging.basicConfig(level=logging.INFO, format="%(asctime)s - %(levelname)s - %(message)s")
+logging.basicConfig(
+    level=logging.INFO, format="%(asctime)s - %(levelname)s - %(message)s"
+)
 logger = logging.getLogger(__name__)
 
 
 class SecretsManager:
-    """Manages application secrets securely"""
+    """Manages application secrets securely."""
 
     def __init__(self, environment: str = "production"):
         self.environment = environment
         self.secrets_dir = Path(__file__).parent
-        self.config_file = self.secrets_dir / f"secrets_config_{environment}.json"
+        self.config_file = (
+            self.secrets_dir / f"secrets_config_{environment}.json"
+        )
 
-    def generate_secret(self, length: int = 32, include_symbols: bool = True) -> str:
-        """Generate a cryptographically secure random secret"""
+    def generate_secret(
+        self, length: int = 32, include_symbols: bool = True
+    ) -> str:
+        """Generate a cryptographically secure random secret."""
         alphabet = string.ascii_letters + string.digits
         if include_symbols:
             alphabet += "!@#$%^&*"
@@ -39,12 +45,14 @@ class SecretsManager:
         return "".join(secrets.choice(alphabet) for _ in range(length))
 
     def generate_jwt_keypair(self) -> tuple[str, str]:
-        """Generate RSA keypair for JWT signing"""
+        """Generate RSA keypair for JWT signing."""
         from cryptography.hazmat.primitives import serialization
         from cryptography.hazmat.primitives.asymmetric import rsa
 
         # Generate private key
-        private_key = rsa.generate_private_key(public_exponent=65537, key_size=2048)
+        private_key = rsa.generate_private_key(
+            public_exponent=65537, key_size=2048
+        )
 
         # Serialize private key
         private_pem = private_key.private_bytes(
@@ -63,11 +71,11 @@ class SecretsManager:
         return private_pem, public_pem
 
     def generate_encryption_key(self) -> str:
-        """Generate Fernet encryption key"""
+        """Generate Fernet encryption key."""
         return Fernet.generate_key().decode("utf-8")
 
     def create_default_secrets(self) -> Dict[str, Any]:
-        """Create default set of secrets for the application"""
+        """Create default set of secrets for the application."""
         logger.info(f"Generating secrets for {self.environment} environment")
 
         # Generate JWT keypair
@@ -110,7 +118,7 @@ class SecretsManager:
         return secrets
 
     def save_secrets_to_files(self, secrets: Dict[str, Any]) -> None:
-        """Save secrets to individual files"""
+        """Save secrets to individual files."""
         logger.info("Saving secrets to files")
 
         # Create secrets directory if it doesn't exist
@@ -127,14 +135,18 @@ class SecretsManager:
                 logger.info(f"Saved {key} to {file_path}")
 
     def save_docker_env_file(self, secrets: Dict[str, Any]) -> None:
-        """Save secrets as Docker environment file"""
+        """Save secrets as Docker environment file."""
         env_file = self.secrets_dir / f".env.{self.environment}"
 
         logger.info(f"Saving Docker environment file to {env_file}")
 
         with open(env_file, "w") as f:
-            f.write(f"# FreeAgentics {self.environment.title()} Environment Variables\n")
-            f.write(f"# Generated on {secrets.get('generated_at', 'unknown')}\n")
+            f.write(
+                f"# FreeAgentics {self.environment.title()} Environment Variables\n"
+            )
+            f.write(
+                f"# Generated on {secrets.get('generated_at', 'unknown')}\n"
+            )
             f.write("# DO NOT COMMIT THIS FILE TO VERSION CONTROL\n\n")
 
             for key, value in secrets.items():
@@ -148,7 +160,7 @@ class SecretsManager:
         os.chmod(env_file, 0o600)
 
     def save_kubernetes_secrets(self, secrets: Dict[str, Any]) -> None:
-        """Generate Kubernetes secrets manifest"""
+        """Generate Kubernetes secrets manifest."""
         k8s_file = self.secrets_dir / f"k8s-secrets-{self.environment}.yaml"
 
         logger.info(f"Generating Kubernetes secrets manifest: {k8s_file}")
@@ -157,7 +169,9 @@ class SecretsManager:
         encoded_secrets = {}
         for key, value in secrets.items():
             if isinstance(value, str) and not key.endswith("_path"):
-                encoded_secrets[key] = base64.b64encode(value.encode()).decode()
+                encoded_secrets[key] = base64.b64encode(
+                    value.encode()
+                ).decode()
 
         manifest = f"""apiVersion: v1
 kind: Secret
@@ -177,7 +191,7 @@ data:
         os.chmod(k8s_file, 0o600)
 
     def generate_ssl_certificate(self, domain: str = "localhost") -> None:
-        """Generate self-signed SSL certificate for development"""
+        """Generate self-signed SSL certificate for development."""
         if self.environment == "production":
             logger.warning("Use proper SSL certificates in production!")
             return
@@ -192,7 +206,9 @@ data:
         from cryptography.x509.oid import NameOID
 
         # Generate private key
-        private_key = rsa.generate_private_key(public_exponent=65537, key_size=2048)
+        private_key = rsa.generate_private_key(
+            public_exponent=65537, key_size=2048
+        )
 
         # Create certificate
         subject = issuer = x509.Name(
@@ -212,7 +228,9 @@ data:
             .public_key(private_key.public_key())
             .serial_number(x509.random_serial_number())
             .not_valid_before(datetime.datetime.utcnow())
-            .not_valid_after(datetime.datetime.utcnow() + datetime.timedelta(days=365))
+            .not_valid_after(
+                datetime.datetime.utcnow() + datetime.timedelta(days=365)
+            )
             .add_extension(
                 x509.SubjectAlternativeName(
                     [
@@ -253,7 +271,9 @@ data:
 
 
 def main():
-    parser = argparse.ArgumentParser(description="FreeAgentics Secrets Manager")
+    parser = argparse.ArgumentParser(
+        description="FreeAgentics Secrets Manager"
+    )
     parser.add_argument(
         "--environment",
         "-e",
@@ -268,8 +288,15 @@ def main():
         default="all",
         help="Output format",
     )
-    parser.add_argument("--domain", "-d", default="localhost", help="Domain for SSL certificate")
-    parser.add_argument("--generate-ssl", action="store_true", help="Generate SSL certificate")
+    parser.add_argument(
+        "--domain",
+        "-d",
+        default="localhost",
+        help="Domain for SSL certificate",
+    )
+    parser.add_argument(
+        "--generate-ssl", action="store_true", help="Generate SSL certificate"
+    )
 
     args = parser.parse_args()
 

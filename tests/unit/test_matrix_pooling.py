@@ -31,7 +31,9 @@ class TestPooledMatrix(unittest.TestCase):
     def test_pooled_matrix_creation(self):
         """Test creating a pooled matrix."""
         data = np.zeros((10, 10), dtype=np.float32)
-        matrix = PooledMatrix(data=data, shape=(10, 10), dtype=np.float32, pool_id="test_123")
+        matrix = PooledMatrix(
+            data=data, shape=(10, 10), dtype=np.float32, pool_id="test_123"
+        )
 
         self.assertEqual(matrix.shape, (10, 10))
         self.assertEqual(matrix.dtype, np.float32)
@@ -45,11 +47,15 @@ class TestPooledMatrix(unittest.TestCase):
 
         # Shape mismatch
         with self.assertRaises(ValueError):
-            PooledMatrix(data=data, shape=(5, 5), dtype=np.float32, pool_id="test")  # Wrong shape
+            PooledMatrix(
+                data=data, shape=(5, 5), dtype=np.float32, pool_id="test"
+            )  # Wrong shape
 
         # Dtype mismatch
         with self.assertRaises(ValueError):
-            PooledMatrix(data=data, shape=(10, 10), dtype=np.float64, pool_id="test")  # Wrong dtype
+            PooledMatrix(
+                data=data, shape=(10, 10), dtype=np.float64, pool_id="test"
+            )  # Wrong dtype
 
 
 class TestPoolStatistics(unittest.TestCase):
@@ -75,7 +81,9 @@ class TestMatrixPool(unittest.TestCase):
 
     def setUp(self):
         """Set up test fixtures."""
-        self.pool = MatrixPool(shape=(10, 10), dtype=np.float32, initial_size=3, max_size=10)
+        self.pool = MatrixPool(
+            shape=(10, 10), dtype=np.float32, initial_size=3, max_size=10
+        )
 
     def test_pool_initialization(self):
         """Test pool pre-allocation."""
@@ -146,7 +154,9 @@ class TestMatrixPool(unittest.TestCase):
         )
 
         # Should handle gracefully
-        with patch("agents.memory_optimization.matrix_pooling.logger") as mock_logger:
+        with patch(
+            "agents.memory_optimization.matrix_pooling.logger"
+        ) as mock_logger:
             self.pool.release(foreign_matrix)
             mock_logger.warning.assert_called_once()
 
@@ -211,7 +221,9 @@ class TestMatrixOperationPool(unittest.TestCase):
         """Test allocating multiple matrices for einsum."""
         shapes = [(10, 20), (20, 30), (30, 10)]
 
-        with self.op_pool.allocate_einsum_operands(*shapes, dtype=np.float32) as matrices:
+        with self.op_pool.allocate_einsum_operands(
+            *shapes, dtype=np.float32
+        ) as matrices:
             self.assertEqual(len(matrices), 3)
             for i, (matrix, shape) in enumerate(zip(matrices, shapes)):
                 self.assertEqual(matrix.shape, shape)
@@ -231,7 +243,9 @@ class TestMatrixOperationPool(unittest.TestCase):
         expected = np.dot(a, b)
 
         np.testing.assert_allclose(result, expected)
-        self.assertEqual(self.op_pool.global_stats["operation_counts"]["dot"], 1)
+        self.assertEqual(
+            self.op_pool.global_stats["operation_counts"]["dot"], 1
+        )
 
     def test_optimize_matmul_operation(self):
         """Test optimized matrix multiplication."""
@@ -242,18 +256,24 @@ class TestMatrixOperationPool(unittest.TestCase):
         expected = np.matmul(a, b)
 
         np.testing.assert_allclose(result, expected)
-        self.assertEqual(self.op_pool.global_stats["operation_counts"]["matmul"], 1)
+        self.assertEqual(
+            self.op_pool.global_stats["operation_counts"]["matmul"], 1
+        )
 
     def test_optimize_einsum_operation(self):
         """Test optimized einsum."""
         a = np.random.rand(10, 20).astype(np.float32)
         b = np.random.rand(20, 30).astype(np.float32)
 
-        result = self.op_pool.optimize_matrix_operation("einsum", "ij,jk->ik", a, b)
+        result = self.op_pool.optimize_matrix_operation(
+            "einsum", "ij,jk->ik", a, b
+        )
         expected = np.einsum("ij,jk->ik", a, b)
 
         np.testing.assert_allclose(result, expected)
-        self.assertEqual(self.op_pool.global_stats["operation_counts"]["einsum"], 1)
+        self.assertEqual(
+            self.op_pool.global_stats["operation_counts"]["einsum"], 1
+        )
 
     def test_get_statistics(self):
         """Test statistics collection."""
@@ -401,9 +421,13 @@ class TestMemoryEfficiency(unittest.TestCase):
         single_matrix_mb = (1000 * 1000 * 4) / (1024 * 1024)
 
         # Total memory should be at least one matrix but could be more due to pre-allocation
-        self.assertGreaterEqual(stats["global"]["total_memory_mb"], single_matrix_mb)
+        self.assertGreaterEqual(
+            stats["global"]["total_memory_mb"], single_matrix_mb
+        )
         # Should not be excessive (less than 10x a single matrix)
-        self.assertLess(stats["global"]["total_memory_mb"], single_matrix_mb * 10)
+        self.assertLess(
+            stats["global"]["total_memory_mb"], single_matrix_mb * 10
+        )
 
 
 class TestEdgeCases(unittest.TestCase):

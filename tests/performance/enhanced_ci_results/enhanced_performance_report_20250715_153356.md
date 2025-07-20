@@ -29,11 +29,13 @@
 **Status**: PASS
 
 **Key Metrics**:
+
 - avg_inference_time_ms: 5.47
 - memory_per_agent_mb: 0.47
 - sustained_throughput_ops_sec: 176.19
 
 **Improvements**:
+
 - avg_inference_time_ms: 89.1% improvement
 - p95_inference_time_ms: 92.9% improvement
 - p99_inference_time_ms: 94.6% improvement
@@ -48,8 +50,9 @@
 **Status**: FAIL
 
 **Key Metrics**:
+
 - scalability_rating: excellent
 
 **Regressions**:
-- efficiency_at_10_agents: 2.9% (critical)
 
+- efficiency_at_10_agents: 2.9% (critical)

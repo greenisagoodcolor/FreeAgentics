@@ -200,7 +200,6 @@ class TestSecurityMonitoringSystem:
             patch("pathlib.Path.exists", return_value=True),
             patch("builtins.open", mock_open_json(mock_bandit_result)),
         ):
-
             mock_run.return_value.returncode = 0
 
             # Run bandit scan
@@ -229,7 +228,9 @@ class TestSecurityMonitoringSystem:
         )
 
         # Create incident from alert
-        incident = await self.incident_response.create_incident_from_alert(test_alert)
+        incident = await self.incident_response.create_incident_from_alert(
+            test_alert
+        )
 
         # Check incident creation
         assert incident.id in self.incident_response.incidents
@@ -272,7 +273,9 @@ class TestSecurityMonitoringSystem:
         # Mock authentication
         with patch("auth.get_current_user") as mock_auth:
             mock_auth.return_value = Mock(
-                user_id="test_admin", username="admin", permissions=["ADMIN_SYSTEM"]
+                user_id="test_admin",
+                username="admin",
+                permissions=["ADMIN_SYSTEM"],
             )
 
             # Test security summary endpoint
@@ -339,7 +342,9 @@ class TestSecurityMonitoringSystem:
 
         if alert_id:
             # Test alert resolution
-            success = self.security_monitor.resolve_alert(alert_id, "Resolved by admin")
+            success = self.security_monitor.resolve_alert(
+                alert_id, "Resolved by admin"
+            )
             assert success
 
             # Check alert status
@@ -367,12 +372,19 @@ class TestSecurityMonitoringSystem:
         self.vulnerability_scanner.vulnerabilities[test_vuln.id] = test_vuln
 
         # Test suppression
-        self.vulnerability_scanner.suppress_vulnerability(test_vuln.id, "False positive")
-        assert test_vuln.id in self.vulnerability_scanner.suppressed_vulnerabilities
+        self.vulnerability_scanner.suppress_vulnerability(
+            test_vuln.id, "False positive"
+        )
+        assert (
+            test_vuln.id
+            in self.vulnerability_scanner.suppressed_vulnerabilities
+        )
         assert test_vuln.suppressed
 
         # Test false positive marking
-        self.vulnerability_scanner.mark_false_positive(test_vuln.id, "Not a real issue")
+        self.vulnerability_scanner.mark_false_positive(
+            test_vuln.id, "Not a real issue"
+        )
         assert test_vuln.id in self.vulnerability_scanner.false_positives
         assert test_vuln.false_positive
 
@@ -393,7 +405,9 @@ class TestSecurityMonitoringSystem:
             evidence={"payload": "'; DROP TABLE users; --"},
         )
 
-        incident = await self.incident_response.create_incident_from_alert(test_alert)
+        incident = await self.incident_response.create_incident_from_alert(
+            test_alert
+        )
 
         # Check initial state
         assert incident.status == IncidentStatus.INVESTIGATING
@@ -409,7 +423,10 @@ class TestSecurityMonitoringSystem:
         updated_incident = self.incident_response.get_incident(incident.id)
         assert updated_incident.status == IncidentStatus.RESOLVED
         assert updated_incident.resolved_at is not None
-        assert updated_incident.lesson_learned == "Attack blocked, vulnerability patched"
+        assert (
+            updated_incident.lesson_learned
+            == "Attack blocked, vulnerability patched"
+        )
 
     @pytest.mark.asyncio
     async def test_security_monitoring_start_stop(self):
@@ -494,7 +511,8 @@ class TestSecurityMonitoringSystem:
 
         # Should detect both SQL injection and suspicious user agent
         assert (
-            AttackType.SQL_INJECTION in alert_types or AttackType.SUSPICIOUS_ACTIVITY in alert_types
+            AttackType.SQL_INJECTION in alert_types
+            or AttackType.SUSPICIOUS_ACTIVITY in alert_types
         )
 
 

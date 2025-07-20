@@ -21,7 +21,7 @@ try:
     from api.middleware.security_monitoring import SecurityMonitoringMiddleware
     from auth.security_implementation import SecurityManager
     from inference.active.gmn_parser import GMNParser
-    from inference.gnn.model import GNNModel
+    from inference.gnn.model import GMNModel as GNNModel
     from knowledge_graph.evolution import EvolutionEngine
     from knowledge_graph.storage import GraphStorage
 
@@ -33,6 +33,7 @@ except ImportError as e:
     # Mock classes for testing when imports fail
     class GraphStorage:
         def __init__(self):
+            """Initialize GraphStorage with empty data dictionary."""
             self.data = {}
 
         def store(self, key, value):
@@ -43,6 +44,7 @@ except ImportError as e:
 
     class EvolutionEngine:
         def __init__(self):
+            """Initialize EvolutionEngine with empty generations list."""
             self.generations = []
 
         def evolve(self, population):
@@ -50,6 +52,7 @@ except ImportError as e:
 
     class GMNParser:
         def __init__(self):
+            """Initialize GMNParser with empty parsed data dictionary."""
             self.parsed_data = {}
 
         def parse(self, gmn_text):
@@ -57,6 +60,7 @@ except ImportError as e:
 
     class GNNModel:
         def __init__(self):
+            """Initialize GNNModel with empty weights dictionary."""
             self.weights = {}
 
         def forward(self, input_data):
@@ -64,6 +68,7 @@ except ImportError as e:
 
     class BeliefCompressor:
         def __init__(self):
+            """Initialize BeliefCompressor with default compression ratio of 0.5."""
             self.compression_ratio = 0.5
 
         def compress(self, beliefs):
@@ -71,6 +76,7 @@ except ImportError as e:
 
     class MatrixPool:
         def __init__(self):
+            """Initialize MatrixPool with empty pool list."""
             self.pool = []
 
         def get_matrix(self, size):
@@ -78,6 +84,7 @@ except ImportError as e:
 
     class SecurityMonitoringMiddleware:
         def __init__(self, app):
+            """Initialize SecurityMonitoringMiddleware with the wrapped application."""
             self.app = app
 
         def __call__(self, scope, receive, send):
@@ -85,6 +92,7 @@ except ImportError as e:
 
     class SecurityManager:
         def __init__(self):
+            """Initialize SecurityManager with empty policies dictionary."""
             self.policies = {}
 
         def validate_request(self, request):
@@ -115,7 +123,9 @@ class TestGraphStorageEdgeCases:
             pytest.fail("Circular reference caused infinite recursion")
         except Exception as e:
             # Should handle with specific error
-            assert "circular" in str(e).lower() or "reference" in str(e).lower()
+            assert (
+                "circular" in str(e).lower() or "reference" in str(e).lower()
+            )
 
     def test_storage_with_very_large_data(self):
         """Test storage of very large data structures."""
@@ -350,9 +360,7 @@ class TestGMNParserEdgeCases:
         parser = GMNParser()
 
         # Test with unicode content
-        unicode_gmn = (
-            '{"nodes": [{"id": "节点_1", "名称": "测试节点", "description": "包含中文的节点"}]}'
-        )
+        unicode_gmn = '{"nodes": [{"id": "节点_1", "名称": "测试节点", "description": "包含中文的节点"}]}'
 
         try:
             result = parser.parse(unicode_gmn)
@@ -468,7 +476,14 @@ class TestBeliefCompressionEdgeCases:
         compressor = BeliefCompressor()
 
         # Test with extreme values
-        extreme_beliefs = [float("inf"), float("-inf"), float("nan"), 0.0, 1.0, -1.0]
+        extreme_beliefs = [
+            float("inf"),
+            float("-inf"),
+            float("nan"),
+            0.0,
+            1.0,
+            -1.0,
+        ]
 
         try:
             result = compressor.compress(extreme_beliefs)
@@ -602,7 +617,9 @@ class TestSecurityMiddlewareEdgeCases:
                 # Should not raise unhandled exceptions
             except Exception as e:
                 # Should handle with specific security error
-                assert "security" in str(e).lower() or "request" in str(e).lower()
+                assert (
+                    "security" in str(e).lower() or "request" in str(e).lower()
+                )
 
     def test_middleware_with_missing_headers(self):
         """Test security middleware with missing headers."""
@@ -685,7 +702,9 @@ class TestFileSystemEdgeCases:
             try:
                 # Try to create temporary file with invalid path
                 if path:
-                    with tempfile.NamedTemporaryFile(prefix=path, delete=False) as f:
+                    with tempfile.NamedTemporaryFile(
+                        prefix=path, delete=False
+                    ) as f:
                         f.write(b"test")
                         temp_path = f.name
 

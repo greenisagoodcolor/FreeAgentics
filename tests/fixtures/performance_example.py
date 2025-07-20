@@ -16,11 +16,17 @@ from sqlalchemy.orm import sessionmaker
 
 from database.base import Base
 from tests.fixtures import PerformanceDataFactory
-from tests.fixtures.generators import AgentGenerator, CoalitionGenerator, KnowledgeGraphGenerator
+from tests.fixtures.generators import (
+    AgentGenerator,
+    CoalitionGenerator,
+    KnowledgeGraphGenerator,
+)
 from tests.fixtures.schemas import PerformanceTestConfigSchema
 
 
-def generate_memory_efficient_dataset(config: PerformanceTestConfigSchema) -> Dict[str, Any]:
+def generate_memory_efficient_dataset(
+    config: PerformanceTestConfigSchema,
+) -> Dict[str, Any]:
     """Generate large dataset with memory-efficient streaming."""
     print(f"Generating dataset with {config.num_agents} agents...")
 
@@ -33,7 +39,9 @@ def generate_memory_efficient_dataset(config: PerformanceTestConfigSchema) -> Di
     agent_start = time.time()
 
     # Process in batches to avoid memory issues
-    for batch in agent_gen.generate_stream(count=config.num_agents, batch_size=config.batch_size):
+    for batch in agent_gen.generate_stream(
+        count=config.num_agents, batch_size=config.batch_size
+    ):
         agent_count += len(batch)
         if agent_count % 1000 == 0:
             print(f"  Generated {agent_count} agents...")
@@ -53,7 +61,9 @@ def generate_memory_efficient_dataset(config: PerformanceTestConfigSchema) -> Di
 
     # Generate knowledge graph
     if config.num_knowledge_nodes > 0:
-        print(f"Generating knowledge graph with {config.num_knowledge_nodes} nodes...")
+        print(
+            f"Generating knowledge graph with {config.num_knowledge_nodes} nodes..."
+        )
         kg_start = time.time()
 
         kg_gen = KnowledgeGraphGenerator(seed=config.seed)
@@ -61,7 +71,9 @@ def generate_memory_efficient_dataset(config: PerformanceTestConfigSchema) -> Di
         # Use scale-free graph for more realistic structure
         if config.num_knowledge_nodes > 1000:
             graph = kg_gen.generate_scale_free_graph(
-                num_nodes=config.num_knowledge_nodes, initial_nodes=10, edges_per_new_node=3
+                num_nodes=config.num_knowledge_nodes,
+                initial_nodes=10,
+                edges_per_new_node=3,
             )
         else:
             graph = kg_gen.generate_connected_graph(
@@ -127,7 +139,9 @@ def generate_spatial_distribution_test():
     """Generate agents with different spatial distributions."""
     print("\nGenerating spatial distribution test data...")
 
-    agent_gen = AgentGenerator(position_bounds={"min": [0, 0], "max": [1000, 1000]})
+    agent_gen = AgentGenerator(
+        position_bounds={"min": [0, 0], "max": [1000, 1000]}
+    )
 
     distributions = {}
 
@@ -181,7 +195,10 @@ def generate_database_stress_test(db_url: str = "sqlite:///:memory:"):
 
     try:
         config = PerformanceTestConfigSchema(
-            num_agents=5000, num_coalitions=100, num_knowledge_nodes=10000, batch_size=500
+            num_agents=5000,
+            num_coalitions=100,
+            num_knowledge_nodes=10000,
+            batch_size=500,
         )
 
         factory = PerformanceDataFactory()
@@ -190,7 +207,9 @@ def generate_database_stress_test(db_url: str = "sqlite:///:memory:"):
         print("\nDatabase Stress Test Results:")
         print(f"  Agents created: {len(results['agents'])}")
         print(f"  Coalitions created: {len(results['coalitions'])}")
-        print(f"  Total creation time: {results['statistics']['total_creation_time']:.2f}s")
+        print(
+            f"  Total creation time: {results['statistics']['total_creation_time']:.2f}s"
+        )
 
         # Test query performance
         print("\nTesting query performance...")
@@ -198,8 +217,12 @@ def generate_database_stress_test(db_url: str = "sqlite:///:memory:"):
         # Count queries
         start = time.time()
         agent_count = session.query("SELECT COUNT(*) FROM agents").scalar()
-        coalition_count = session.query("SELECT COUNT(*) FROM coalitions").scalar()
-        node_count = session.query("SELECT COUNT(*) FROM db_knowledge_nodes").scalar()
+        coalition_count = session.query(
+            "SELECT COUNT(*) FROM coalitions"
+        ).scalar()
+        node_count = session.query(
+            "SELECT COUNT(*) FROM db_knowledge_nodes"
+        ).scalar()
         query_time = time.time() - start
 
         print(f"  Count queries completed in {query_time:.3f}s")
@@ -253,7 +276,9 @@ def export_test_data_samples():
 
 def main():
     """Main entry point for performance data generation."""
-    parser = argparse.ArgumentParser(description="Generate performance test data")
+    parser = argparse.ArgumentParser(
+        description="Generate performance test data"
+    )
     parser.add_argument(
         "--test",
         choices=["scaling", "spatial", "database", "export", "all"],
@@ -261,7 +286,9 @@ def main():
         help="Type of test to run",
     )
     parser.add_argument(
-        "--db-url", default="sqlite:///:memory:", help="Database URL for database stress test"
+        "--db-url",
+        default="sqlite:///:memory:",
+        help="Database URL for database stress test",
     )
 
     args = parser.parse_args()

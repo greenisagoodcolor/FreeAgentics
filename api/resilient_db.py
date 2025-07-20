@@ -44,7 +44,9 @@ async def create_pool(database_url: str, **kwargs) -> asyncpg.Pool:
             return _pool
         except Exception as e:
             if attempt == MAX_RETRIES - 1:
-                raise ConnectionPoolError(f"Failed to create connection pool: {e}")
+                raise ConnectionPoolError(
+                    f"Failed to create connection pool: {e}"
+                )
             await asyncio.sleep(RETRY_DELAY * (attempt + 1))
 
     raise ConnectionPoolError("Max retries exceeded")

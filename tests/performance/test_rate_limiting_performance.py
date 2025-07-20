@@ -16,16 +16,14 @@ import time
 from dataclasses import dataclass
 from datetime import datetime
 from typing import List, Tuple
+from unittest.mock import MagicMock
 
 import psutil
 import pytest
 import redis.asyncio as aioredis
 from fastapi import Request
 
-from api.middleware.ddos_protection import (
-    RateLimitConfig,
-    RateLimiter,
-)
+from api.middleware.ddos_protection import RateLimitConfig, RateLimiter
 
 
 @dataclass
@@ -75,7 +73,11 @@ class RateLimitingPerformanceTester:
         await self.redis_client.close()
 
     async def measure_throughput(
-        self, num_requests: int, num_concurrent: int, config: RateLimitConfig, unique_ips: int = 100
+        self,
+        num_requests: int,
+        num_concurrent: int,
+        config: RateLimitConfig,
+        unique_ips: int = 100,
     ) -> PerformanceMetrics:
         """Measure rate limiting throughput."""
 
@@ -101,7 +103,9 @@ class RateLimitingPerformanceTester:
 
         # Redis monitoring
         initial_redis_info = await self.redis_client.info()
-        initial_redis_ops = int(initial_redis_info.get("total_commands_processed", 0))
+        initial_redis_ops = int(
+            initial_redis_info.get("total_commands_processed", 0)
+        )
 
         # Barrier for synchronized start
         barrier = asyncio.Barrier(num_concurrent)
@@ -140,13 +144,19 @@ class RateLimitingPerformanceTester:
         # Create batches of requests
         batches = num_requests // num_concurrent
         for batch in range(batches):
-            tasks = [make_request(batch * num_concurrent + i) for i in range(num_concurrent)]
+            tasks = [
+                make_request(batch * num_concurrent + i)
+                for i in range(num_concurrent)
+            ]
             await asyncio.gather(*tasks)
 
         # Handle remaining requests
         remaining = num_requests % num_concurrent
         if remaining:
-            tasks = [make_request(batches * num_concurrent + i) for i in range(remaining)]
+            tasks = [
+                make_request(batches * num_concurrent + i)
+                for i in range(remaining)
+            ]
             await asyncio.gather(*tasks)
 
         test_end = time.time()
@@ -157,8 +167,12 @@ class RateLimitingPerformanceTester:
         final_memory = process.memory_info().rss / 1024 / 1024
 
         final_redis_info = await self.redis_client.info()
-        final_redis_ops = int(final_redis_info.get("total_commands_processed", 0))
-        redis_memory = int(final_redis_info.get("used_memory", 0)) / 1024 / 1024
+        final_redis_ops = int(
+            final_redis_info.get("total_commands_processed", 0)
+        )
+        redis_memory = (
+            int(final_redis_info.get("used_memory", 0)) / 1024 / 1024
+        )
 
         # Calculate statistics
         if latencies:
@@ -216,7 +230,9 @@ class RateLimitingPerformanceTester:
 
         return request
 
-    def generate_report(self, output_file: str = "rate_limiting_performance_report.json"):
+    def generate_report(
+        self, output_file: str = "rate_limiting_performance_report.json"
+    ):
         """Generate performance report."""
         report = {"timestamp": datetime.now().isoformat(), "tests": []}
 
@@ -241,7 +257,9 @@ class RateLimitingPerformanceTester:
                         "redis_operations": metrics.redis_operations,
                     },
                     "errors": metrics.error_count,
-                    "duration_seconds": round(metrics.test_duration_seconds, 2),
+                    "duration_seconds": round(
+                        metrics.test_duration_seconds, 2
+                    ),
                 }
             )
 
@@ -329,7 +347,9 @@ class TestRateLimitingPerformance:
         # Burst handling assertions
         assert metrics.successful_requests <= 110  # Burst limit + small buffer
         assert metrics.blocked_requests > 800  # Most should be blocked
-        assert metrics.max_latency_ms < 500  # Max latency under 500ms even during burst
+        assert (
+            metrics.max_latency_ms < 500
+        )  # Max latency under 500ms even during burst
 
     @pytest.mark.asyncio
     @pytest.mark.performance
@@ -435,7 +455,9 @@ class TestRateLimitingPerformance:
 
         # Calculate Redis operation efficiency
         # Should use pipeline, so operations should be less than 2x requests
-        redis_ops_per_request = metrics.redis_operations / metrics.total_requests
+        redis_ops_per_request = (
+            metrics.redis_operations / metrics.total_requests
+        )
         assert redis_ops_per_request < 3  # Less than 3 Redis ops per request
 
     @pytest.mark.asyncio
@@ -466,8 +488,12 @@ class TestRateLimitingPerformance:
         avg_latencies = [m.average_latency_ms for m in metrics_over_time]
 
         # Performance should remain stable
-        throughput_cv = statistics.stdev(avg_throughputs) / statistics.mean(avg_throughputs)
-        latency_cv = statistics.stdev(avg_latencies) / statistics.mean(avg_latencies)
+        throughput_cv = statistics.stdev(avg_throughputs) / statistics.mean(
+            avg_throughputs
+        )
+        latency_cv = statistics.stdev(avg_latencies) / statistics.mean(
+            avg_latencies
+        )
 
         assert throughput_cv < 0.1  # Coefficient of variation < 10%
         assert latency_cv < 0.2  # Latency CV < 20%
@@ -492,7 +518,9 @@ class TestRateLimitingPerformance:
 
         # Even with high block rate, performance should be good
         assert metrics.average_latency_ms < 5  # Blocking should be fast
-        assert metrics.throughput_rps > 5000  # Can handle many requests even if blocking
+        assert (
+            metrics.throughput_rps > 5000
+        )  # Can handle many requests even if blocking
 
     @pytest.mark.asyncio
     @pytest.mark.performance
@@ -592,21 +620,21 @@ class TestRateLimitingOptimizations:
         local limit = tonumber(ARGV[1])
         local window = tonumber(ARGV[2])
         local current_time = tonumber(ARGV[3])
-        
+
         local current = redis.call('GET', key)
         if current == false then
             current = 0
         else
             current = tonumber(current)
         end
-        
+
         if current >= limit then
             return {1, current}  -- Rate limited
         end
-        
+
         redis.call('INCR', key)
         redis.call('EXPIRE', key, window)
-        
+
         return {0, current + 1}  -- Allowed
         """
 
@@ -662,7 +690,9 @@ class TestRateLimitingOptimizations:
         start_time = time.time()
 
         for _ in range(num_batches):
-            requests = [(f"10.0.0.{i}", "/api/v1/test") for i in range(batch_size)]
+            requests = [
+                (f"10.0.0.{i}", "/api/v1/test") for i in range(batch_size)
+            ]
             await batch_check_rate_limits(requests)
 
         duration = time.time() - start_time
@@ -687,9 +717,24 @@ if __name__ == "__main__":
 
         # Test configurations
         test_configs = [
-            ("Baseline", 10000, 100, RateLimitConfig(requests_per_minute=1000)),
-            ("High Load", 50000, 500, RateLimitConfig(requests_per_minute=10000)),
-            ("Burst", 1000, 1000, RateLimitConfig(requests_per_minute=100, burst_limit=50)),
+            (
+                "Baseline",
+                10000,
+                100,
+                RateLimitConfig(requests_per_minute=1000),
+            ),
+            (
+                "High Load",
+                50000,
+                500,
+                RateLimitConfig(requests_per_minute=10000),
+            ),
+            (
+                "Burst",
+                1000,
+                1000,
+                RateLimitConfig(requests_per_minute=100, burst_limit=50),
+            ),
             ("Many IPs", 10000, 100, RateLimitConfig(requests_per_minute=100)),
         ]
 

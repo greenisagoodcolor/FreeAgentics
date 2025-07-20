@@ -57,7 +57,9 @@ class TestUnifiedSecurityApproach:
 
         # Mock request and response
         class MockRequest:
-            url = type("obj", (object,), {"scheme": "https", "path": "/test"})()
+            url = type(
+                "obj", (object,), {"scheme": "https", "path": "/test"}
+            )()
             headers = {"host": "example.com"}
 
         class MockResponse:
@@ -88,7 +90,11 @@ class TestUnifiedSecurityApproach:
 
         # Mock auth endpoint request
         class MockRequest:
-            url = type("obj", (object,), {"scheme": "https", "path": "/api/auth/login"})()
+            url = type(
+                "obj",
+                (object,),
+                {"scheme": "https", "path": "/api/auth/login"},
+            )()
             headers = {"host": "example.com"}
 
         class MockResponse:

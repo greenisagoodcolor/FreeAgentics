@@ -52,13 +52,19 @@ def production_environment():
 @pytest.fixture
 def mock_database_error():
     """Mock database errors for testing error handling."""
-    from sqlalchemy.exc import IntegrityError, OperationalError, SQLAlchemyError
+    from sqlalchemy.exc import (
+        IntegrityError,
+        OperationalError,
+        SQLAlchemyError,
+    )
 
     def raise_db_error(error_type="operational"):
         if error_type == "operational":
             raise OperationalError("Connection to database failed", None, None)
         elif error_type == "integrity":
-            raise IntegrityError("Duplicate key violates unique constraint", None, None)
+            raise IntegrityError(
+                "Duplicate key violates unique constraint", None, None
+            )
         else:
             raise SQLAlchemyError("Generic database error")
 
@@ -70,7 +76,9 @@ def mock_auth_manager():
     """Mock authentication manager for testing."""
 
     with patch("auth.security_implementation.auth_manager") as mock_auth:
-        mock_auth.verify_token.side_effect = Exception("JWT verification failed")
+        mock_auth.verify_token.side_effect = Exception(
+            "JWT verification failed"
+        )
         mock_auth.authenticate_user.return_value = None
         yield mock_auth
 
@@ -78,7 +86,9 @@ def mock_auth_manager():
 @pytest.fixture
 def temporary_log_file():
     """Create a temporary log file for testing."""
-    with tempfile.NamedTemporaryFile(mode="w+", suffix=".log", delete=False) as log_file:
+    with tempfile.NamedTemporaryFile(
+        mode="w+", suffix=".log", delete=False
+    ) as log_file:
         yield log_file.name
 
     # Clean up

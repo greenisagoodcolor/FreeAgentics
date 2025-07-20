@@ -25,7 +25,8 @@ from .session_management_tests import SessionManagementTests
 
 # Configure logging
 logging.basicConfig(
-    level=logging.INFO, format="%(asctime)s - %(name)s - %(levelname)s - %(message)s"
+    level=logging.INFO,
+    format="%(asctime)s - %(name)s - %(levelname)s - %(message)s",
 )
 logger = logging.getLogger(__name__)
 
@@ -36,7 +37,9 @@ class PenetrationTestRunner:
     def __init__(self, config: Optional[Dict[str, Any]] = None):
         self.config = config or self._get_default_config()
         self.framework = PenetrationTestingFramework()
-        self.report_dir = Path("/home/green/FreeAgentics/tests/security/reports")
+        self.report_dir = Path(
+            "/home/green/FreeAgentics/tests/security/reports"
+        )
         self.report_dir.mkdir(exist_ok=True)
 
         # Register all test modules
@@ -74,7 +77,9 @@ class PenetrationTestRunner:
             if module_name in self.config["enabled_modules"]:
                 try:
                     # Initialize test module
-                    test_instance = module_class(self.framework.client, self.framework.auth_manager)
+                    test_instance = module_class(
+                        self.framework.client, self.framework.auth_manager
+                    )
                     self.framework.register_test_module(test_instance)
                     logger.info(f"Registered test module: {module_name}")
                 except Exception as e:
@@ -83,7 +88,9 @@ class PenetrationTestRunner:
     async def run_all_tests(self) -> Dict[str, Any]:
         """Run all registered penetration tests."""
         logger.info("Starting comprehensive penetration testing suite")
-        logger.info(f"Enabled modules: {', '.join(self.config['enabled_modules'])}")
+        logger.info(
+            f"Enabled modules: {', '.join(self.config['enabled_modules'])}"
+        )
 
         start_time = time.time()
 
@@ -119,7 +126,9 @@ class PenetrationTestRunner:
     async def run_specific_module(self, module_name: str) -> Dict[str, Any]:
         """Run a specific penetration test module."""
         if module_name not in self.config["enabled_modules"]:
-            raise ValueError(f"Module {module_name} not enabled in configuration")
+            raise ValueError(
+                f"Module {module_name} not enabled in configuration"
+            )
 
         logger.info(f"Running specific module: {module_name}")
 
@@ -144,7 +153,9 @@ class PenetrationTestRunner:
             filtered_results = self._filter_by_severity(results)
 
             # Generate reports
-            report_files = await self._generate_reports(filtered_results, suffix=f"_{module_name}")
+            report_files = await self._generate_reports(
+                filtered_results, suffix=f"_{module_name}"
+            )
             filtered_results["execution_summary"] = {
                 "module": module_name,
                 "report_files": report_files,
@@ -178,25 +189,39 @@ class PenetrationTestRunner:
         filtered_results["detailed_findings"] = filtered_findings
 
         # Recalculate summary statistics
-        severity_counts = {"critical": 0, "high": 0, "medium": 0, "low": 0, "info": 0}
+        severity_counts = {
+            "critical": 0,
+            "high": 0,
+            "medium": 0,
+            "low": 0,
+            "info": 0,
+        }
         for finding in filtered_findings:
             severity = finding.get("severity", "info").lower()
             if severity in severity_counts:
                 severity_counts[severity] += 1
 
-        filtered_results["executive_summary"]["total_vulnerabilities"] = len(filtered_findings)
-        filtered_results["executive_summary"]["severity_distribution"] = severity_counts
+        filtered_results["executive_summary"]["total_vulnerabilities"] = len(
+            filtered_findings
+        )
+        filtered_results["executive_summary"][
+            "severity_distribution"
+        ] = severity_counts
 
         return filtered_results
 
-    async def _generate_reports(self, results: Dict[str, Any], suffix: str = "") -> List[str]:
+    async def _generate_reports(
+        self, results: Dict[str, Any], suffix: str = ""
+    ) -> List[str]:
         """Generate reports in multiple formats."""
         timestamp = datetime.now(timezone.utc).strftime("%Y%m%d_%H%M%S")
         report_files = []
 
         # JSON Report
         if "json" in self.config["output_formats"]:
-            json_file = self.report_dir / f"pentest_report{suffix}_{timestamp}.json"
+            json_file = (
+                self.report_dir / f"pentest_report{suffix}_{timestamp}.json"
+            )
             with open(json_file, "w") as f:
                 json.dump(results, f, indent=2, default=str)
             report_files.append(str(json_file))
@@ -204,7 +229,9 @@ class PenetrationTestRunner:
 
         # HTML Report
         if "html" in self.config["output_formats"]:
-            html_file = self.report_dir / f"pentest_report{suffix}_{timestamp}.html"
+            html_file = (
+                self.report_dir / f"pentest_report{suffix}_{timestamp}.html"
+            )
             html_content = self._generate_html_report(results)
             with open(html_file, "w") as f:
                 f.write(html_content)
@@ -213,7 +240,9 @@ class PenetrationTestRunner:
 
         # Markdown Report
         if "markdown" in self.config["output_formats"]:
-            md_file = self.report_dir / f"pentest_report{suffix}_{timestamp}.md"
+            md_file = (
+                self.report_dir / f"pentest_report{suffix}_{timestamp}.md"
+            )
             md_content = self._generate_markdown_report(results)
             with open(md_file, "w") as f:
                 f.write(md_content)
@@ -261,7 +290,7 @@ class PenetrationTestRunner:
             <p><strong>Target:</strong> {target}</p>
             <p><strong>Framework Version:</strong> {framework_version}</p>
         </div>
-        
+
         <h2>Executive Summary</h2>
         <div class="summary-grid">
             <div class="summary-card">
@@ -285,33 +314,33 @@ class PenetrationTestRunner:
                 <div>Total Vulnerabilities</div>
             </div>
         </div>
-        
+
         <p><strong>Risk Score:</strong> {risk_score}/100</p>
-        
+
         <h3>Key Recommendations</h3>
         <ul>
         {recommendations}
         </ul>
-        
+
         <h2>Detailed Findings</h2>
         {vulnerabilities}
-        
+
         <h2>Remediation Plan</h2>
         <h3>Immediate Actions (Critical/High)</h3>
         <ul>
         {immediate_actions}
         </ul>
-        
+
         <h3>Short Term (Within Week)</h3>
         <ul>
         {short_term_actions}
         </ul>
-        
+
         <h3>Medium Term (Within Month)</h3>
         <ul>
         {medium_term_actions}
         </ul>
-        
+
         <h2>Test Execution Summary</h2>
         <p><strong>Tests Executed:</strong> {tests_executed}</p>
         <p><strong>Execution Time:</strong> {execution_time:.2f} seconds</p>
@@ -340,9 +369,9 @@ class PenetrationTestRunner:
                 <p><strong>Endpoint:</strong> {finding.get('affected_endpoint', 'N/A')}</p>
                 <p><strong>CWE:</strong> {finding.get('cwe_id', 'N/A')} | <strong>CVSS:</strong> {finding.get('cvss_score', 'N/A')}</p>
                 <p>{finding.get('description', '')}</p>
-                
+
                 {f'<div class="poc"><strong>Proof of Concept:</strong><br><pre>{finding.get("proof_of_concept", "")}</pre></div>' if self.config["include_proof_of_concept"] else ''}
-                
+
                 <div class="remediation">
                     <strong>Remediation Steps:</strong>
                     <ol>
@@ -359,11 +388,19 @@ class PenetrationTestRunner:
 
         if "prioritization" in remediation:
             for action in remediation["prioritization"].get("immediate", []):
-                immediate_actions += f"<li>{action.get('title', 'Unknown vulnerability')}</li>"
+                immediate_actions += (
+                    f"<li>{action.get('title', 'Unknown vulnerability')}</li>"
+                )
             for action in remediation["prioritization"].get("within_week", []):
-                short_term_actions += f"<li>{action.get('title', 'Unknown vulnerability')}</li>"
-            for action in remediation["prioritization"].get("within_month", []):
-                medium_term_actions += f"<li>{action.get('title', 'Unknown vulnerability')}</li>"
+                short_term_actions += (
+                    f"<li>{action.get('title', 'Unknown vulnerability')}</li>"
+                )
+            for action in remediation["prioritization"].get(
+                "within_month", []
+            ):
+                medium_term_actions += (
+                    f"<li>{action.get('title', 'Unknown vulnerability')}</li>"
+                )
 
         # Fill template
         return html_template.format(
@@ -397,8 +434,8 @@ class PenetrationTestRunner:
 
         md_content = f"""# FreeAgentics Platform - Penetration Testing Report
 
-**Generated:** {metadata.get("generated_at", "Unknown")}  
-**Target:** {metadata.get("target", "FreeAgentics Platform")}  
+**Generated:** {metadata.get("generated_at", "Unknown")}
+**Target:** {metadata.get("target", "FreeAgentics Platform")}
 **Framework Version:** {metadata.get("framework_version", "1.0.0")}
 
 ## Executive Summary
@@ -427,14 +464,16 @@ class PenetrationTestRunner:
             severity = finding.get("severity", "info").upper()
             md_content += f"""### {i}. [{severity}] {finding.get('title', 'Unknown')}
 
-**Affected Endpoint:** `{finding.get('affected_endpoint', 'N/A')}`  
+**Affected Endpoint:** `{finding.get('affected_endpoint', 'N/A')}`
 **CWE:** {finding.get('cwe_id', 'N/A')} | **CVSS Score:** {finding.get('cvss_score', 'N/A')}
 
 {finding.get('description', '')}
 
 """
 
-            if self.config["include_proof_of_concept"] and finding.get("proof_of_concept"):
+            if self.config["include_proof_of_concept"] and finding.get(
+                "proof_of_concept"
+            ):
                 md_content += f"""**Proof of Concept:**
 ```
 {finding.get('proof_of_concept', '')}
@@ -460,19 +499,27 @@ class PenetrationTestRunner:
 
         if "prioritization" in remediation:
             for action in remediation["prioritization"].get("immediate", []):
-                md_content += f"- {action.get('title', 'Unknown vulnerability')}\n"
+                md_content += (
+                    f"- {action.get('title', 'Unknown vulnerability')}\n"
+                )
 
         md_content += "\n### Short Term Actions (Within Week)\n\n"
 
         if "prioritization" in remediation:
             for action in remediation["prioritization"].get("within_week", []):
-                md_content += f"- {action.get('title', 'Unknown vulnerability')}\n"
+                md_content += (
+                    f"- {action.get('title', 'Unknown vulnerability')}\n"
+                )
 
         md_content += "\n### Medium Term Actions (Within Month)\n\n"
 
         if "prioritization" in remediation:
-            for action in remediation["prioritization"].get("within_month", []):
-                md_content += f"- {action.get('title', 'Unknown vulnerability')}\n"
+            for action in remediation["prioritization"].get(
+                "within_month", []
+            ):
+                md_content += (
+                    f"- {action.get('title', 'Unknown vulnerability')}\n"
+                )
 
         md_content += f"""
 
@@ -529,9 +576,13 @@ def main():
         help="Minimum severity threshold (default: low)",
     )
 
-    parser.add_argument("--config", "-c", type=str, help="Configuration file path (JSON)")
+    parser.add_argument(
+        "--config", "-c", type=str, help="Configuration file path (JSON)"
+    )
 
-    parser.add_argument("--verbose", "-v", action="store_true", help="Enable verbose logging")
+    parser.add_argument(
+        "--verbose", "-v", action="store_true", help="Enable verbose logging"
+    )
 
     args = parser.parse_args()
 
@@ -574,7 +625,9 @@ def main():
         print(f"\n{'='*60}")
         print("PENETRATION TESTING SUMMARY")
         print(f"{'='*60}")
-        print(f"Total Vulnerabilities: {summary.get('total_vulnerabilities', 0)}")
+        print(
+            f"Total Vulnerabilities: {summary.get('total_vulnerabilities', 0)}"
+        )
         print(f"Risk Score: {summary.get('risk_score', 0)}/100")
 
         severity_dist = summary.get("severity_distribution", {})
@@ -593,9 +646,13 @@ def main():
         print(f"{'='*60}")
 
         # Exit with appropriate code
-        critical_high_count = severity_dist.get("critical", 0) + severity_dist.get("high", 0)
+        critical_high_count = severity_dist.get(
+            "critical", 0
+        ) + severity_dist.get("high", 0)
         if critical_high_count > 0:
-            sys.exit(1)  # Exit with error if critical/high vulnerabilities found
+            sys.exit(
+                1
+            )  # Exit with error if critical/high vulnerabilities found
         else:
             sys.exit(0)
 

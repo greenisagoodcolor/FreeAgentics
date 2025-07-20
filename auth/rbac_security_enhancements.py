@@ -1,5 +1,5 @@
 """
-RBAC Security Enhancements
+RBAC Security Enhancements.
 Task 14.4 - Security improvements for RBAC implementation
 
 This module implements critical security enhancements for the RBAC system
@@ -19,8 +19,17 @@ from typing import Any, Dict, List, Optional, Set, Tuple
 from uuid import UUID
 
 from auth.comprehensive_audit_logger import comprehensive_auditor
-from auth.security_implementation import Permission, TokenData, UserRole
-from auth.security_logging import SecurityEventSeverity, SecurityEventType, security_auditor
+from auth.security_implementation import (
+    ROLE_PERMISSIONS,
+    Permission,
+    TokenData,
+    UserRole,
+)
+from auth.security_logging import (
+    SecurityEventSeverity,
+    SecurityEventType,
+    security_auditor,
+)
 
 
 class SecurityLevel(str, Enum):
@@ -30,7 +39,7 @@ class SecurityLevel(str, Enum):
     INTERNAL = "internal"
     CONFIDENTIAL = "confidential"
     RESTRICTED = "restricted"
-    TOP_SECRET = "top_secret"
+    TOP_SECRET = "top_secret"  # nosec B105
 
 
 @dataclass
@@ -68,6 +77,7 @@ class PrivilegeEscalationDetector:
     """Detects and prevents privilege escalation attempts."""
 
     def __init__(self):
+        """Initialize the privilege escalation detector."""
         self._escalation_attempts = defaultdict(list)
         self._lock = threading.Lock()
         self._threshold = 3  # Max attempts per hour
@@ -126,7 +136,9 @@ class PrivilegeEscalationDetector:
 
             return True, None
 
-    def _detect_suspicious_pattern(self, user_id: str, context: SecurityContext) -> bool:
+    def _detect_suspicious_pattern(
+        self, user_id: str, context: SecurityContext
+    ) -> bool:
         """Detect suspicious patterns in escalation attempts."""
 
         attempts = self._escalation_attempts[user_id]
@@ -140,7 +152,11 @@ class PrivilegeEscalationDetector:
                 return True
 
         # Check for attempts from different IPs
-        ips = set(attempt["context"].source_ip for attempt in attempts if attempt.get("context"))
+        ips = set(
+            attempt["context"].source_ip
+            for attempt in attempts
+            if attempt.get("context")
+        )
         if len(ips) > 2:
             return True
 
@@ -170,13 +186,18 @@ class ZeroTrustValidator:
     """Implements Zero Trust security model for authorization."""
 
     def __init__(self):
+        """Initialize the Zero Trust validator."""
         self._trust_scores = {}
         self._validation_cache = {}
         self._cache_ttl = timedelta(minutes=5)
         self._lock = threading.Lock()
 
     def validate_access(
-        self, user: TokenData, resource_id: str, action: str, context: SecurityContext
+        self,
+        user: TokenData,
+        resource_id: str,
+        action: str,
+        context: SecurityContext,
     ) -> AuthorizationDecision:
         """Validate access with Zero Trust principles."""
 
@@ -195,10 +216,14 @@ class ZeroTrustValidator:
             session_valid, session_reason = self._validate_session_consistency(
                 user.user_id, context
             )
-            validations.append(("session_consistency", session_valid, session_reason))
+            validations.append(
+                ("session_consistency", session_valid, session_reason)
+            )
 
             # 3. Calculate trust score
-            trust_score = self._calculate_trust_score(user, context, validations)
+            trust_score = self._calculate_trust_score(
+                user, context, validations
+            )
 
             # 4. Check risk indicators
             risk_score = self._calculate_risk_score(context)
@@ -207,7 +232,9 @@ class ZeroTrustValidator:
             context_valid, context_reason = self._validate_contextual_access(
                 user, resource_id, action, context, trust_score, risk_score
             )
-            validations.append(("contextual_access", context_valid, context_reason))
+            validations.append(
+                ("contextual_access", context_valid, context_reason)
+            )
 
             # Make decision
             all_valid = all(valid for _, valid, _ in validations)
@@ -224,7 +251,9 @@ class ZeroTrustValidator:
 
             decision = AuthorizationDecision(
                 granted=all_valid and confidence > 0.5,
-                reason=self._format_decision_reason(validations, trust_score, risk_score),
+                reason=self._format_decision_reason(
+                    validations, trust_score, risk_score
+                ),
                 decision_id=decision_id,
                 timestamp=datetime.now(timezone.utc),
                 evaluated_rules=[name for name, _, _ in validations],
@@ -286,7 +315,10 @@ class ZeroTrustValidator:
 
             if cache_key in self._validation_cache:
                 cached = self._validation_cache[cache_key]
-                if datetime.now(timezone.utc) - cached["timestamp"] < self._cache_ttl:
+                if (
+                    datetime.now(timezone.utc) - cached["timestamp"]
+                    < self._cache_ttl
+                ):
                     # Check consistency
                     if cached["ip"] != context.source_ip:
                         return False, "Session IP changed"
@@ -294,7 +326,8 @@ class ZeroTrustValidator:
                         return False, "User agent changed"
                     if (
                         cached.get("device_fingerprint")
-                        and cached["device_fingerprint"] != context.device_fingerprint
+                        and cached["device_fingerprint"]
+                        != context.device_fingerprint
                     ):
                         return False, "Device fingerprint changed"
 
@@ -309,7 +342,10 @@ class ZeroTrustValidator:
         return True, "Session consistent"
 
     def _calculate_trust_score(
-        self, user: TokenData, context: SecurityContext, validations: List[Tuple[str, bool, str]]
+        self,
+        user: TokenData,
+        context: SecurityContext,
+        validations: List[Tuple[str, bool, str]],
     ) -> float:
         """Calculate trust score for the user."""
 
@@ -371,31 +407,49 @@ class ZeroTrustValidator:
         high_risk_actions = ["delete", "admin", "modify_permissions"]
         if action in high_risk_actions:
             if trust_score < 0.8:
-                return False, f"Insufficient trust score ({trust_score:.2f}) for high-risk action"
+                return (
+                    False,
+                    f"Insufficient trust score ({trust_score:.2f}) for high-risk action",
+                )
             if risk_score > 0.3:
-                return False, f"Risk score too high ({risk_score:.2f}) for high-risk action"
+                return (
+                    False,
+                    f"Risk score too high ({risk_score:.2f}) for high-risk action",
+                )
 
         # Validate based on time of day for admin operations
         if user.role == UserRole.ADMIN and action in ["admin", "delete"]:
             current_hour = datetime.now(timezone.utc).hour
             if not (8 <= current_hour <= 18):  # Business hours UTC
                 if not context.risk_indicators.get("emergency_override"):
-                    return False, "Admin operations restricted to business hours"
+                    return (
+                        False,
+                        "Admin operations restricted to business hours",
+                    )
 
         return True, "Contextual access valid"
 
     def _format_decision_reason(
-        self, validations: List[Tuple[str, bool, str]], trust_score: float, risk_score: float
+        self,
+        validations: List[Tuple[str, bool, str]],
+        trust_score: float,
+        risk_score: float,
     ) -> str:
         """Format human-readable decision reason."""
 
-        failed = [f"{name}: {reason}" for name, valid, reason in validations if not valid]
+        failed = [
+            f"{name}: {reason}"
+            for name, valid, reason in validations
+            if not valid
+        ]
 
         if failed:
             return f"Access denied - {'; '.join(failed)}"
 
         if trust_score < 0.5:
-            return f"Access denied - Insufficient trust score: {trust_score:.2f}"
+            return (
+                f"Access denied - Insufficient trust score: {trust_score:.2f}"
+            )
 
         if risk_score > 0.7:
             return f"Access denied - Risk score too high: {risk_score:.2f}"
@@ -447,10 +501,16 @@ class SecureResourceIDGenerator:
         timestamp = int(time.time() * 1000000)
 
         # Create ID with type prefix
-        components = [resource_type[:3].lower(), str(timestamp)[-8:], random_part]
+        components = [
+            resource_type[:3].lower(),
+            str(timestamp)[-8:],
+            random_part,
+        ]
 
         # Generate checksum
-        checksum_input = f"{resource_type}:{owner_id}:{timestamp}:{random_part}"
+        checksum_input = (
+            f"{resource_type}:{owner_id}:{timestamp}:{random_part}"
+        )
         checksum = hashlib.sha256(checksum_input.encode()).hexdigest()[:8]
         components.append(checksum)
 
@@ -475,10 +535,16 @@ class SecureResourceIDGenerator:
             if not (len(timestamp_part) == 8 and timestamp_part.isdigit()):
                 return False
 
-            if not (len(random_part) == 32 and all(c in "0123456789abcdef" for c in random_part)):
+            if not (
+                len(random_part) == 32
+                and all(c in "0123456789abcdef" for c in random_part)
+            ):
                 return False
 
-            if not (len(checksum) == 8 and all(c in "0123456789abcdef" for c in checksum)):
+            if not (
+                len(checksum) == 8
+                and all(c in "0123456789abcdef" for c in checksum)
+            ):
                 return False
 
             return True
@@ -491,6 +557,7 @@ class RateLimiter:
     """Rate limiting for authorization attempts."""
 
     def __init__(self):
+        """Initialize the rate limiter."""
         self._attempts = defaultdict(list)
         self._lock = threading.Lock()
         self._limits = {
@@ -499,7 +566,9 @@ class RateLimiter:
             "admin_action": (20, timedelta(minutes=1)),  # 20 per minute
         }
 
-    def check_rate_limit(self, identifier: str, action_type: str) -> Tuple[bool, Optional[str]]:
+    def check_rate_limit(
+        self, identifier: str, action_type: str
+    ) -> Tuple[bool, Optional[str]]:
         """Check if action is within rate limits."""
 
         if action_type not in self._limits:
@@ -513,7 +582,9 @@ class RateLimiter:
 
             # Clean old attempts
             self._attempts[key] = [
-                attempt for attempt in self._attempts[key] if now - attempt < window
+                attempt
+                for attempt in self._attempts[key]
+                if now - attempt < window
             ]
 
             # Check limit
@@ -540,7 +611,9 @@ class ConstantTimeComparator:
         return hmac.compare_digest(a.encode(), b.encode())
 
     @staticmethod
-    def compare_permissions(required: List[Permission], actual: List[Permission]) -> bool:
+    def compare_permissions(
+        required: List[Permission], actual: List[Permission]
+    ) -> bool:
         """Compare permission lists in constant time."""
 
         # Convert to sets for comparison

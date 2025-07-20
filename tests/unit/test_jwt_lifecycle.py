@@ -47,7 +47,9 @@ class TestJWTLifecycle:
         security_auditor.token_usage_patterns = {}
         security_auditor.token_binding_violations = {}
 
-    def _create_test_user(self, user_id="test-user-123", role=UserRole.RESEARCHER):
+    def _create_test_user(
+        self, user_id="test-user-123", role=UserRole.RESEARCHER
+    ):
         """Helper to create test user."""
         return User(
             user_id=user_id,
@@ -69,7 +71,10 @@ class TestJWTLifecycle:
         assert token_data.role == self.test_user.role
 
         # 3. Use refresh token to get new access token
-        new_access_token, new_refresh_token = self.auth_manager.refresh_access_token(refresh_token)
+        (
+            new_access_token,
+            new_refresh_token,
+        ) = self.auth_manager.refresh_access_token(refresh_token)
         assert new_access_token != access_token
         assert new_refresh_token != refresh_token
 
@@ -92,8 +97,12 @@ class TestJWTLifecycle:
     def test_token_expiration_lifecycle(self):
         """Test token expiration behavior."""
         # Create token with very short expiration
-        with patch("auth.security_implementation.ACCESS_TOKEN_EXPIRE_MINUTES", 0.016):  # ~1 second
-            access_token = self.auth_manager.create_access_token(self.test_user)
+        with patch(
+            "auth.security_implementation.ACCESS_TOKEN_EXPIRE_MINUTES", 0.016
+        ):  # ~1 second
+            access_token = self.auth_manager.create_access_token(
+                self.test_user
+            )
 
         # Token should work immediately
         token_data = self.auth_manager.verify_token(access_token)
@@ -118,8 +127,13 @@ class TestJWTLifecycle:
 
         # Create tokens concurrently
         with concurrent.futures.ThreadPoolExecutor(max_workers=10) as executor:
-            future_tokens = [executor.submit(create_token, user) for user in users]
-            tokens = [future.result() for future in concurrent.futures.as_completed(future_tokens)]
+            future_tokens = [
+                executor.submit(create_token, user) for user in users
+            ]
+            tokens = [
+                future.result()
+                for future in concurrent.futures.as_completed(future_tokens)
+            ]
 
         # Verify all tokens are unique and valid
         assert len(set(tokens)) == len(tokens), "All tokens should be unique"
@@ -144,11 +158,14 @@ class TestJWTLifecycle:
         with concurrent.futures.ThreadPoolExecutor(max_workers=20) as executor:
             futures = [executor.submit(verify_token) for _ in range(100)]
             verification_results = [
-                future.result() for future in concurrent.futures.as_completed(futures)
+                future.result()
+                for future in concurrent.futures.as_completed(futures)
             ]
 
         # All verifications should succeed
-        assert all(result == self.test_user.user_id for result in verification_results)
+        assert all(
+            result == self.test_user.user_id for result in verification_results
+        )
 
     def test_token_refresh_race_condition(self):
         """Test handling of concurrent refresh token usage."""
@@ -157,15 +174,23 @@ class TestJWTLifecycle:
 
         def refresh_token_concurrent():
             try:
-                new_access, new_refresh = self.auth_manager.refresh_access_token(refresh_token)
+                (
+                    new_access,
+                    new_refresh,
+                ) = self.auth_manager.refresh_access_token(refresh_token)
                 return ("success", new_access, new_refresh)
             except HTTPException as e:
                 return ("error", str(e.detail))
 
         # Try to use refresh token concurrently
         with concurrent.futures.ThreadPoolExecutor(max_workers=5) as executor:
-            futures = [executor.submit(refresh_token_concurrent) for _ in range(5)]
-            results = [future.result() for future in concurrent.futures.as_completed(futures)]
+            futures = [
+                executor.submit(refresh_token_concurrent) for _ in range(5)
+            ]
+            results = [
+                future.result()
+                for future in concurrent.futures.as_completed(futures)
+            ]
 
         # Only one should succeed, others should fail
         successes = [r for r in results if r[0] == "success"]
@@ -173,12 +198,18 @@ class TestJWTLifecycle:
 
         assert len(successes) == 1, "Only one refresh should succeed"
         assert len(errors) == 4, "Four refreshes should fail"
-        assert all("blacklisted" in e[1].lower() or "already used" in e[1].lower() for e in errors)
+        assert all(
+            "blacklisted" in e[1].lower() or "already used" in e[1].lower()
+            for e in errors
+        )
 
     def test_token_revocation_lifecycle(self):
         """Test token revocation and blacklisting."""
         # Create multiple tokens for user
-        tokens = [self.auth_manager.create_access_token(self.test_user) for _ in range(3)]
+        tokens = [
+            self.auth_manager.create_access_token(self.test_user)
+            for _ in range(3)
+        ]
 
         # All should work initially
         for token in tokens:
@@ -218,11 +249,16 @@ class TestJWTLifecycle:
 
         # Verify with wrong fingerprint fails
         with pytest.raises(HTTPException) as exc_info:
-            self.auth_manager.verify_token(access_token, client_fingerprint="wrong_fingerprint")
+            self.auth_manager.verify_token(
+                access_token, client_fingerprint="wrong_fingerprint"
+            )
         assert "binding" in exc_info.value.detail.lower()
 
         # Refresh with correct fingerprint
-        new_access_token, new_refresh_token = self.auth_manager.refresh_access_token(
+        (
+            new_access_token,
+            new_refresh_token,
+        ) = self.auth_manager.refresh_access_token(
             refresh_token, client_fingerprint=client_fingerprint
         )
 
@@ -241,14 +277,18 @@ class TestJWTLifecycle:
 
         # Change user role
         self.test_user.role = UserRole.ADMIN
-        self.auth_manager.users[self.test_user.username]["user"].role = UserRole.ADMIN
+        self.auth_manager.users[self.test_user.username][
+            "user"
+        ].role = UserRole.ADMIN
 
         # Old token still has old role
         token_data = self.auth_manager.verify_token(access_token)
         assert token_data.role == UserRole.RESEARCHER
 
         # New token should have new role
-        new_access_token = self.auth_manager.create_access_token(self.test_user)
+        new_access_token = self.auth_manager.create_access_token(
+            self.test_user
+        )
         new_token_data = self.auth_manager.verify_token(new_access_token)
         assert new_token_data.role == UserRole.ADMIN
 
@@ -285,7 +325,10 @@ class TestJWTLifecycle:
 
         # Test 3: Token signed with wrong key
         fake_token = jwt.encode(
-            {"user_id": "fake", "exp": datetime.now(timezone.utc) + timedelta(minutes=15)},
+            {
+                "user_id": "fake",
+                "exp": datetime.now(timezone.utc) + timedelta(minutes=15),
+            },
             "wrong_secret",
             algorithm="HS256",
         )
@@ -295,7 +338,9 @@ class TestJWTLifecycle:
         # Test 4: Token missing required claims
         incomplete_payload = {"user_id": self.test_user.user_id}
         incomplete_token = jwt.encode(
-            incomplete_payload, self.auth_manager.private_key, algorithm=ALGORITHM
+            incomplete_payload,
+            self.auth_manager.private_key,
+            algorithm=ALGORITHM,
         )
         with pytest.raises(HTTPException):
             self.auth_manager.verify_token(incomplete_token)
@@ -304,9 +349,14 @@ class TestJWTLifecycle:
         """Test token operations performance."""
         # Measure token creation time
         start_time = time.time()
-        tokens = [self.auth_manager.create_access_token(self.test_user) for _ in range(100)]
+        tokens = [
+            self.auth_manager.create_access_token(self.test_user)
+            for _ in range(100)
+        ]
         creation_time = time.time() - start_time
-        assert creation_time < 2.0, f"Token creation too slow: {creation_time}s for 100 tokens"
+        assert (
+            creation_time < 2.0
+        ), f"Token creation too slow: {creation_time}s for 100 tokens"
 
         # Measure token verification time
         token = tokens[0]
@@ -346,7 +396,9 @@ class TestJWTLifecycle:
             self.auth_manager.revoke_token(payload["jti"])
 
         # Verify all are blacklisted
-        assert all(jti in self.auth_manager.blacklist for jti in tokens_to_blacklist)
+        assert all(
+            jti in self.auth_manager.blacklist for jti in tokens_to_blacklist
+        )
 
         # In production, there would be a cleanup mechanism for old blacklisted tokens
         # For now, verify the blacklist contains expected entries
@@ -368,7 +420,9 @@ class TestJWTLifecycleIntegration:
         )
         self.auth_manager.users[self.test_user.username] = {
             "user": self.test_user,
-            "password_hash": self.auth_manager.hash_password("integration_password"),
+            "password_hash": self.auth_manager.hash_password(
+                "integration_password"
+            ),
         }
 
     def test_jwt_lifecycle_with_user_session(self):
@@ -384,7 +438,10 @@ class TestJWTLifecycleIntegration:
             time.sleep(0.1)
 
         # Simulate token refresh mid-session
-        new_access_token, new_refresh_token = self.auth_manager.refresh_access_token(refresh_token)
+        (
+            new_access_token,
+            new_refresh_token,
+        ) = self.auth_manager.refresh_access_token(refresh_token)
 
         # Continue session with new token
         for _ in range(3):
@@ -411,7 +468,9 @@ class TestJWTLifecycleIntegration:
         )
 
         admin_token = self.auth_manager.create_access_token(admin_user)
-        researcher_token = self.auth_manager.create_access_token(self.test_user)
+        researcher_token = self.auth_manager.create_access_token(
+            self.test_user
+        )
 
         # Verify admin has all permissions
         admin_data = self.auth_manager.verify_token(admin_token)
@@ -421,4 +480,6 @@ class TestJWTLifecycleIntegration:
         # Verify researcher has limited permissions
         researcher_data = self.auth_manager.verify_token(researcher_token)
         assert len(researcher_data.permissions) > 0
-        assert "admin_system" not in [p.value for p in researcher_data.permissions]
+        assert "admin_system" not in [
+            p.value for p in researcher_data.permissions
+        ]

@@ -19,10 +19,10 @@ class TestGNNBasicCoverage:
     def test_gnn_model_initialization(self):
         """Test basic GNN model initialization."""
         try:
-            from inference.gnn.model import GNNModel
+            from inference.gnn.model import GMNModel
 
             # Test basic initialization
-            model = GNNModel()
+            model = GMNModel(config={})
             assert model is not None
 
         except ImportError:
@@ -52,7 +52,9 @@ class TestGNNBasicCoverage:
     def test_h3_spatial_integration_basic(self):
         """Test basic H3 spatial integration."""
         try:
-            from inference.gnn.h3_spatial_integration import H3SpatialIntegration
+            from inference.gnn.h3_spatial_integration import (
+                H3SpatialIntegration,
+            )
 
             integration = H3SpatialIntegration()
             assert integration is not None
@@ -120,9 +122,9 @@ class TestKnowledgeGraphBasicCoverage:
     def test_graph_engine_initialization(self):
         """Test basic graph engine initialization."""
         try:
-            from knowledge_graph.graph_engine import GraphEngine
+            from knowledge_graph.graph_engine import KnowledgeGraph
 
-            engine = GraphEngine()
+            engine = KnowledgeGraph()
             assert engine is not None
 
         except ImportError:
@@ -252,7 +254,11 @@ class TestInferenceCoverage:
             pass
 
         # Test parsing minimal valid specification
-        minimal_spec = {"nodes": [], "edges": [], "metadata": {"version": "1.0"}}
+        minimal_spec = {
+            "nodes": [],
+            "edges": [],
+            "metadata": {"version": "1.0"},
+        }
 
         try:
             result = parser.parse(minimal_spec)
@@ -375,7 +381,10 @@ class TestBasicFunctionalityTests:
             assert isinstance(status, dict)
 
             # Test observation processing
-            test_observation = {"position": [1, 1], "surroundings": np.zeros((3, 3))}
+            test_observation = {
+                "position": [1, 1],
+                "surroundings": np.zeros((3, 3)),
+            }
 
             action = agent.step(test_observation)
             assert action in agent.actions
@@ -386,7 +395,11 @@ class TestBasicFunctionalityTests:
 
     def test_error_handling_system_integration(self):
         """Test error handling system integration."""
-        from agents.error_handling import ErrorHandler, InferenceError, PyMDPError
+        from agents.error_handling import (
+            ErrorHandler,
+            InferenceError,
+            PyMDPError,
+        )
 
         handler = ErrorHandler("integration_test")
 

@@ -1,5 +1,5 @@
 """
-Enhanced Database Connection Manager with Connection Pooling Integration
+Enhanced Database Connection Manager with Connection Pooling Integration.
 
 Integrates with the connection pool manager to provide optimized database
 connections with monitoring, circuit breaker patterns, and resource lifecycle management.
@@ -30,19 +30,25 @@ logger = logging.getLogger(__name__)
 class EnhancedDatabaseConnectionManager:
     """Enhanced database connection manager with connection pooling."""
 
-    def __init__(self, database_url: str, config: Optional[ConnectionPoolConfig] = None):
+    def __init__(
+        self, database_url: str, config: Optional[ConnectionPoolConfig] = None
+    ):
         """Initialize enhanced database connection manager."""
         self.database_url = database_url
         self.config = config or ConnectionPoolConfig()
 
         # Initialize connection pool manager
-        self.pool_manager = EnhancedConnectionPoolManager(self.config, database_url)
+        self.pool_manager = EnhancedConnectionPoolManager(
+            self.config, database_url
+        )
 
         # Traditional SQLAlchemy components for sync operations
         self._engine: Optional[Engine] = None
         self._async_engine: Optional[AsyncEngine] = None
         self._session_factory: Optional[sessionmaker[Session]] = None
-        self._async_session_factory: Optional[async_sessionmaker[AsyncSession]] = None
+        self._async_session_factory: Optional[
+            async_sessionmaker[AsyncSession]
+        ] = None
 
         # Connection metrics
         self.connection_metrics = {
@@ -53,7 +59,9 @@ class EnhancedDatabaseConnectionManager:
             "pool_misses": 0,
         }
 
-        logger.info(f"Enhanced database connection manager initialized for {database_url}")
+        logger.info(
+            f"Enhanced database connection manager initialized for {database_url}"
+        )
 
     async def initialize(self):
         """Initialize the enhanced connection manager."""
@@ -88,7 +96,9 @@ class EnhancedDatabaseConnectionManager:
 
             except Exception as e:
                 self.connection_metrics["failed_connections"] += 1
-                logger.error(f"Failed to create synchronous database engine: {e}")
+                logger.error(
+                    f"Failed to create synchronous database engine: {e}"
+                )
                 raise
 
         return self._engine
@@ -97,7 +107,9 @@ class EnhancedDatabaseConnectionManager:
         """Get asynchronous database engine with connection pooling."""
         if self._async_engine is None:
             # Convert to async URL format
-            async_url = self.database_url.replace("postgresql://", "postgresql+asyncpg://")
+            async_url = self.database_url.replace(
+                "postgresql://", "postgresql+asyncpg://"
+            )
 
             # Enhanced async pool configuration
             async_pool_config = {
@@ -111,7 +123,9 @@ class EnhancedDatabaseConnectionManager:
             }
 
             try:
-                self._async_engine = create_async_engine(async_url, **async_pool_config)
+                self._async_engine = create_async_engine(
+                    async_url, **async_pool_config
+                )
                 self.connection_metrics["total_connections"] += 1
                 logger.info(
                     f"Asynchronous database engine created with pool size {self.config.db_pool_size}"
@@ -119,7 +133,9 @@ class EnhancedDatabaseConnectionManager:
 
             except Exception as e:
                 self.connection_metrics["failed_connections"] += 1
-                logger.error(f"Failed to create asynchronous database engine: {e}")
+                logger.error(
+                    f"Failed to create asynchronous database engine: {e}"
+                )
                 raise
 
         return self._async_engine
@@ -128,7 +144,9 @@ class EnhancedDatabaseConnectionManager:
         """Get session factory for synchronous operations."""
         if self._session_factory is None:
             engine = self.get_sync_engine()
-            self._session_factory = sessionmaker(autocommit=False, autoflush=False, bind=engine)
+            self._session_factory = sessionmaker(
+                autocommit=False, autoflush=False, bind=engine
+            )
 
         return self._session_factory
 
@@ -244,7 +262,9 @@ class EnhancedDatabaseConnectionManager:
         # Get pool status
         try:
             system_metrics = self.pool_manager.get_system_metrics()
-            health_status["pool_status"] = "healthy" if system_metrics else "degraded"
+            health_status["pool_status"] = (
+                "healthy" if system_metrics else "degraded"
+            )
         except Exception as e:
             logger.error(f"Pool status check failed: {e}")
             health_status["pool_status"] = "failed"
@@ -269,7 +289,9 @@ class EnhancedDatabaseConnectionManager:
             logger.info("Enhanced database connection manager closed")
 
         except Exception as e:
-            logger.error(f"Error closing enhanced database connection manager: {e}")
+            logger.error(
+                f"Error closing enhanced database connection manager: {e}"
+            )
             raise
 
 
@@ -287,7 +309,9 @@ def get_enhanced_db_manager(
         if database_url is None:
             database_url = os.getenv("DATABASE_URL")
             if not database_url:
-                raise ValueError("DATABASE_URL environment variable is required")
+                raise ValueError(
+                    "DATABASE_URL environment variable is required"
+                )
 
         _global_db_manager = EnhancedDatabaseConnectionManager(database_url)
 

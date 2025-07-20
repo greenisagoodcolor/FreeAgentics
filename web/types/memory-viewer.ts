@@ -3,7 +3,7 @@ export interface KnowledgeEntry {
   type: string;
   // Database fields with defaults
   label?: string;
-  properties?: Record<string, any>;
+  properties?: Record<string, string | number | boolean | null>;
   version?: number;
   is_current?: boolean;
   confidence: number;
@@ -27,7 +27,13 @@ export interface KnowledgeEntry {
 export interface SelectedKnowledgeNode {
   id: string;
   type: string;
-  data?: any;
+  data?: {
+    id: string;
+    type: string;
+    label?: string;
+    properties?: Record<string, string | number | boolean | null>;
+    [key: string]: unknown;
+  };
 }
 
 export interface AgentToolPermissions {
@@ -39,7 +45,15 @@ export interface Coalition {
   name: string;
   description?: string;
   status: "forming" | "active" | "disbanding" | "dissolved";
-  objectives: Record<string, any>;
+  objectives: Record<
+    string,
+    {
+      description: string;
+      status: "pending" | "in_progress" | "completed" | "failed";
+      priority?: number;
+      [key: string]: unknown;
+    }
+  >;
   required_capabilities: string[];
   achieved_objectives: string[];
   performance_score: number;
@@ -55,7 +69,7 @@ export interface KnowledgeEdge {
   source_id: string;
   target_id: string;
   type: string;
-  properties: Record<string, any>;
+  properties: Record<string, string | number | boolean | null>;
   confidence: number;
   created_at: string;
 }

@@ -41,10 +41,15 @@ class AgentManager:
         for y in range(self.world.height):
             for x in range(self.world.width):
                 pos = Position(x, y)
-                if pos not in [agent.position for agent in self.world.agents.values()]:
+                if pos not in [
+                    agent.position for agent in self.world.agents.values()
+                ]:
                     # Check if the cell is empty/walkable
                     cell = self.world.get_cell(pos)
-                    if cell and cell.type in [CellType.EMPTY, CellType.RESOURCE]:
+                    if cell and cell.type in [
+                        CellType.EMPTY,
+                        CellType.RESOURCE,
+                    ]:
                         return pos
 
         # Fallback to (0,0) if no free position found
@@ -76,14 +81,29 @@ class AgentManager:
             Agent ID
         """
         self._agent_counter += 1
-        agent_id = f"agent_{self._agent_counter}"
+        # Generate ID based on agent type
+        if agent_type == "active_inference":
+            agent_id = f"ai_agent_{self._agent_counter}"
+        else:
+            agent_id = f"test_agent_{self._agent_counter}"
 
         # Create agent based on type
-        if agent_type == "explorer":
-            grid_size = self.world.width if self.world else 10
-            agent = BasicExplorerAgent(agent_id=agent_id, name=name, grid_size=grid_size)
-        else:
-            raise ValueError(f"Unknown agent type: {agent_type}")
+        try:
+            if agent_type in ["explorer", "basic", "active_inference"]:  # Support all names
+                grid_size = self.world.width if self.world else 10
+                agent = BasicExplorerAgent(
+                    agent_id=agent_id, name=name, grid_size=grid_size
+                )
+                # Pass any PyMDP config parameters to the agent
+                for key, value in kwargs.items():
+                    if key in ["num_states", "num_obs", "num_controls", "num_actions"]:
+                        setattr(agent, key, value)
+            else:
+                logger.warning(f"Unknown agent type: {agent_type}")
+                return None
+        except Exception as e:
+            logger.error(f"Failed to create agent: {e}")
+            return None
 
         self.agents[agent_id] = agent
 
@@ -107,7 +127,11 @@ class AgentManager:
         self._queue_event(
             agent_id,
             "created",
-            {"agent_type": agent_type, "name": name, "timestamp": datetime.now().isoformat()},
+            {
+                "agent_type": agent_type,
+                "name": name,
+                "timestamp": datetime.now().isoformat(),
+            },
         )
 
         return agent_id
@@ -115,7 +139,9 @@ class AgentManager:
     def _queue_event(self, agent_id: str, event_type: str, data: dict):
         """Queue an event for async broadcast."""
         with self._event_lock:
-            self._event_queue.append({"agent_id": agent_id, "event_type": event_type, "data": data})
+            self._event_queue.append(
+                {"agent_id": agent_id, "event_type": event_type, "data": data}
+            )
 
         # Submit async broadcast task to thread pool
         self._executor.submit(self._process_event_queue)
@@ -144,7 +170,9 @@ class AgentManager:
                     )
                 )
 
-    async def _broadcast_agent_event(self, agent_id: str, event_type: str, data: dict):
+    async def _broadcast_agent_event(
+        self, agent_id: str, event_type: str, data: dict
+    ):
         """Broadcast agent event via WebSocket."""
         try:
             from api.v1.websocket import broadcast_agent_event
@@ -170,7 +198,9 @@ class AgentManager:
         agent.start()
 
         # Queue agent start event
-        self._queue_event(agent_id, "started", {"timestamp": datetime.now().isoformat()})
+        self._queue_event(
+            agent_id, "started", {"timestamp": datetime.now().isoformat()}
+        )
 
         return True
 
@@ -191,7 +221,9 @@ class AgentManager:
         agent.stop()
 
         # Queue agent stop event
-        self._queue_event(agent_id, "stopped", {"timestamp": datetime.now().isoformat()})
+        self._queue_event(
+            agent_id, "stopped", {"timestamp": datetime.now().isoformat()}
+        )
 
         return True
 
@@ -363,7 +395,9 @@ class AgentManager:
             try:
                 results[agent_id] = agent.get_belief_monitoring_stats()
             except Exception as e:
-                logger.error(f"Failed to get belief stats for agent {agent_id}: {e}")
+                logger.error(
+                    f"Failed to get belief stats for agent {agent_id}: {e}"
+                )
                 results[agent_id] = {"error": str(e)}
 
         return results
@@ -394,7 +428,9 @@ class AgentManager:
             logger.error(f"Failed to reset belief monitoring: {e}")
             return False
 
-    def get_coordination_stats(self, agent_id: Optional[str] = None) -> Dict[str, Any]:
+    def get_coordination_stats(
+        self, agent_id: Optional[str] = None
+    ) -> Dict[str, Any]:
         """Get coordination statistics for one or all agents.
 
         Args:
@@ -422,12 +458,17 @@ class AgentManager:
                 for aid in self.agents.keys():
                     agent_stats[aid] = get_agent_coordination_stats(aid)
 
-                return {"system_report": system_report, "agent_stats": agent_stats}
+                return {
+                    "system_report": system_report,
+                    "agent_stats": agent_stats,
+                }
         except Exception as e:
             logger.error(f"Failed to get coordination stats: {e}")
             return {"error": str(e)}
 
-    def run_simulation(self, steps: int = 100) -> List[Dict[str, Dict[str, Any]]]:
+    def run_simulation(
+        self, steps: int = 100
+    ) -> List[Dict[str, Dict[str, Any]]]:
         """Run simulation for multiple steps.
 
         Args:
@@ -449,3 +490,59 @@ class AgentManager:
 
         logger.info("Simulation complete")
         return history
+
+    def get_agent(self, agent_id: str) -> Optional[ActiveInferenceAgent]:
+        """Get an agent by ID.
+        
+        Args:
+            agent_id: Agent identifier
+            
+        Returns:
+            Agent instance or None if not found
+        """
+        return self.agents.get(agent_id)
+
+    def list_agents(self) -> List[Dict[str, str]]:
+        """List all agents with their information.
+        
+        Returns:
+            List of agent information dictionaries
+        """
+        return [{"id": agent_id, "name": agent.name} for agent_id, agent in self.agents.items()]
+
+    def start(self) -> None:
+        """Start the agent manager.
+        
+        Currently no specific startup needed.
+        """
+        self.running = True
+        logger.info("AgentManager started")
+
+    def stop(self) -> None:
+        """Stop the agent manager and all agents."""
+        logger.info("Stopping AgentManager and all agents")
+        self.running = False
+        for agent_id in list(self.agents.keys()):
+            self.stop_agent(agent_id)
+        logger.info("AgentManager stopped")
+
+    def update(self) -> None:
+        """Update the agent manager state.
+        
+        Updates all agents if they have an update method.
+        """
+        for agent_id, agent in self.agents.items():
+            if hasattr(agent, 'update') and callable(getattr(agent, 'update')):
+                try:
+                    agent.update()
+                except Exception as e:
+                    logger.error(f"Error updating agent {agent_id}: {e}")
+
+    def set_world(self, world: GridWorld) -> None:
+        """Set the world for the agent manager.
+        
+        Args:
+            world: GridWorld instance
+        """
+        self.world = world
+        logger.info(f"World set to {world.width}x{world.height} grid")

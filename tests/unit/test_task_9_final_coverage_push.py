@@ -7,6 +7,7 @@ Small targeted tests to push coverage over the 15% threshold for Task 9 completi
 import pytest
 
 
+@pytest.mark.slow
 class TestFinalCoveragePush:
     """Small tests to push coverage over threshold."""
 
@@ -179,7 +180,12 @@ class TestFinalCoveragePush:
         from agents.base_agent import BasicExplorerAgent
 
         # Test agent with different configurations
-        configs = [{"grid_size": 5}, {"grid_size": 1}, {"actions": ["test"]}, {}]
+        configs = [
+            {"grid_size": 5},
+            {"grid_size": 1},
+            {"actions": ["test"]},
+            {},
+        ]
 
         for config in configs:
             try:

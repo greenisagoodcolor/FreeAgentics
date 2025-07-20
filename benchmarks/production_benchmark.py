@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 """
-Production Threading vs Multiprocessing Benchmark for FreeAgentics
+Production Threading vs Multiprocessing Benchmark for FreeAgentics.
 
 This is the production-ready benchmark that:
 1. Handles all edge cases and warnings
@@ -79,24 +79,30 @@ def get_memory_usage() -> float:
             return usage / 1024  # Linux returns KB
         else:
             return usage / 1024 / 1024  # Mac returns bytes
-    except:
+    except Exception:
         return 0.0
 
 
 def create_agent(agent_id: str, config: BenchmarkConfig) -> BasicExplorerAgent:
     """Create a test agent with specified configuration."""
-    agent = BasicExplorerAgent(agent_id, f"BenchAgent-{agent_id}", grid_size=config.grid_size)
+    agent = BasicExplorerAgent(
+        agent_id, f"BenchAgent-{agent_id}", grid_size=config.grid_size
+    )
     agent.config.update(
         {
             "performance_mode": config.performance_mode,
             "enable_observability": config.enable_observability,
-            "selective_update_interval": 2 if config.performance_mode == "fast" else 1,
+            "selective_update_interval": 2
+            if config.performance_mode == "fast"
+            else 1,
         }
     )
     return agent
 
 
-def agent_workload(agent: BasicExplorerAgent, num_steps: int) -> tuple[List[float], int]:
+def agent_workload(
+    agent: BasicExplorerAgent, num_steps: int
+) -> tuple[List[float], int]:
     """Run agent workload and return timings and error count."""
     agent.start()
     timings = []
@@ -105,7 +111,10 @@ def agent_workload(agent: BasicExplorerAgent, num_steps: int) -> tuple[List[floa
     for i in range(num_steps):
         # Create realistic observation
         observation = {
-            "position": [i % agent.grid_size, (i // agent.grid_size) % agent.grid_size],
+            "position": [
+                i % agent.grid_size,
+                (i // agent.grid_size) % agent.grid_size,
+            ],
             "surroundings": create_surroundings_pattern(i),
         }
 
@@ -127,7 +136,7 @@ def agent_workload(agent: BasicExplorerAgent, num_steps: int) -> tuple[List[floa
     return timings, errors
 
 
-def create_surroundings_pattern(step: int) -> "numpy.ndarray":
+def create_surroundings_pattern(step: int):
     """Create varied surroundings patterns for realistic testing."""
     import numpy as np
 
@@ -153,7 +162,9 @@ def create_surroundings_pattern(step: int) -> "numpy.ndarray":
         return surroundings
     else:
         # Mixed pattern
-        surroundings = np.random.choice([0, -1, 1], size=(3, 3), p=[0.7, 0.2, 0.1])
+        surroundings = np.random.choice(
+            [0, -1, 1], size=(3, 3), p=[0.7, 0.2, 0.1]
+        )
         surroundings[1, 1] = 0  # Keep center empty
         return surroundings
 
@@ -186,9 +197,12 @@ def run_threading_test(config: BenchmarkConfig, num_agents: int) -> TestResult:
     # Run test
     start_time = time.time()
 
-    with ThreadPoolExecutor(max_workers=min(num_agents, mp.cpu_count())) as executor:
+    with ThreadPoolExecutor(
+        max_workers=min(num_agents, mp.cpu_count())
+    ) as executor:
         futures = [
-            executor.submit(agent_workload, agent, config.steps_per_agent) for agent in agents
+            executor.submit(agent_workload, agent, config.steps_per_agent)
+            for agent in agents
         ]
         results = [future.result() for future in futures]
 
@@ -222,13 +236,17 @@ def run_threading_test(config: BenchmarkConfig, num_agents: int) -> TestResult:
     )
 
 
-def multiprocessing_worker(agent_id: str, config: BenchmarkConfig) -> tuple[List[float], int]:
+def multiprocessing_worker(
+    agent_id: str, config: BenchmarkConfig
+) -> tuple[List[float], int]:
     """Worker function for multiprocessing tests."""
     agent = create_agent(agent_id, config)
     return agent_workload(agent, config.steps_per_agent)
 
 
-def run_multiprocessing_test(config: BenchmarkConfig, num_agents: int) -> TestResult:
+def run_multiprocessing_test(
+    config: BenchmarkConfig, num_agents: int
+) -> TestResult:
     """Run multiprocessing-based test."""
     print(f"  🔧 Multiprocessing test: {num_agents} agents...")
 
@@ -239,9 +257,12 @@ def run_multiprocessing_test(config: BenchmarkConfig, num_agents: int) -> TestRe
     # Run test
     start_time = time.time()
 
-    with ProcessPoolExecutor(max_workers=min(num_agents, mp.cpu_count())) as executor:
+    with ProcessPoolExecutor(
+        max_workers=min(num_agents, mp.cpu_count())
+    ) as executor:
         futures = [
-            executor.submit(multiprocessing_worker, f"proc_{i}", config) for i in range(num_agents)
+            executor.submit(multiprocessing_worker, f"proc_{i}", config)
+            for i in range(num_agents)
         ]
         results = [future.result() for future in futures]
 
@@ -282,7 +303,9 @@ def run_baseline_test(config: BenchmarkConfig) -> TestResult:
     agent = create_agent("baseline", config)
 
     start_time = time.time()
-    timings, errors = agent_workload(agent, config.steps_per_agent * 2)  # More steps for baseline
+    timings, errors = agent_workload(
+        agent, config.steps_per_agent * 2
+    )  # More steps for baseline
     total_time = time.time() - start_time
 
     import numpy as np
@@ -309,21 +332,32 @@ def generate_recommendations(summary: BenchmarkSummary) -> Dict[str, str]:
     total_comparisons = 0
 
     # Compare threading vs multiprocessing results
-    for t_result, m_result in zip(summary.threading_results, summary.multiprocessing_results):
+    for t_result, m_result in zip(
+        summary.threading_results, summary.multiprocessing_results
+    ):
         if t_result.num_agents == m_result.num_agents:
             total_comparisons += 1
             if t_result.throughput_ops_sec > m_result.throughput_ops_sec:
                 threading_wins += 1
 
-    threading_win_rate = threading_wins / total_comparisons if total_comparisons > 0 else 0
+    threading_win_rate = (
+        threading_wins / total_comparisons if total_comparisons > 0 else 0
+    )
 
     # Calculate average performance advantage
     avg_threading_advantage = 0
     if total_comparisons > 0:
         advantages = []
-        for t_result, m_result in zip(summary.threading_results, summary.multiprocessing_results):
-            if t_result.num_agents == m_result.num_agents and m_result.throughput_ops_sec > 0:
-                advantage = t_result.throughput_ops_sec / m_result.throughput_ops_sec
+        for t_result, m_result in zip(
+            summary.threading_results, summary.multiprocessing_results
+        ):
+            if (
+                t_result.num_agents == m_result.num_agents
+                and m_result.throughput_ops_sec > 0
+            ):
+                advantage = (
+                    t_result.throughput_ops_sec / m_result.throughput_ops_sec
+                )
                 advantages.append(advantage)
         if advantages:
             avg_threading_advantage = sum(advantages) / len(advantages)
@@ -332,24 +366,26 @@ def generate_recommendations(summary: BenchmarkSummary) -> Dict[str, str]:
 
     if threading_win_rate >= 0.7:
         recommendations["primary"] = "THREADING"
-        recommendations["reason"] = (
-            f"Threading wins {threading_win_rate:.0%} of comparisons with {avg_threading_advantage:.1f}x average advantage"
-        )
-        recommendations["use_threading_when"] = "Most FreeAgentics scenarios (default choice)"
-        recommendations["use_multiprocessing_when"] = (
-            "CPU-intensive custom models or fault isolation requirements"
-        )
+        recommendations[
+            "reason"
+        ] = f"Threading wins {threading_win_rate:.0%} of comparisons with {avg_threading_advantage:.1f}x average advantage"
+        recommendations[
+            "use_threading_when"
+        ] = "Most FreeAgentics scenarios (default choice)"
+        recommendations[
+            "use_multiprocessing_when"
+        ] = "CPU-intensive custom models or fault isolation requirements"
     else:
         recommendations["primary"] = "MIXED"
-        recommendations["reason"] = (
-            f"Performance varies by scenario ({threading_win_rate:.0%} threading wins)"
-        )
-        recommendations["use_threading_when"] = (
-            "Coordination-heavy scenarios and memory-constrained environments"
-        )
-        recommendations["use_multiprocessing_when"] = (
-            "CPU-intensive workloads and independent agent processes"
-        )
+        recommendations[
+            "reason"
+        ] = f"Performance varies by scenario ({threading_win_rate:.0%} threading wins)"
+        recommendations[
+            "use_threading_when"
+        ] = "Coordination-heavy scenarios and memory-constrained environments"
+        recommendations[
+            "use_multiprocessing_when"
+        ] = "CPU-intensive workloads and independent agent processes"
 
     return recommendations
 
@@ -369,7 +405,9 @@ def print_results(summary: BenchmarkSummary):
 
     print("\n⭐ Baseline Performance:")
     b = summary.baseline_result
-    print(f"   Single agent: {b.avg_latency_ms:.1f}ms avg, {b.throughput_ops_sec:.1f} ops/sec")
+    print(
+        f"   Single agent: {b.avg_latency_ms:.1f}ms avg, {b.throughput_ops_sec:.1f} ops/sec"
+    )
     print(f"   P95 latency: {b.p95_latency_ms:.1f}ms")
 
     print("\n📈 Performance Comparison:")
@@ -378,14 +416,20 @@ def print_results(summary: BenchmarkSummary):
     )
     print("-" * 70)
 
-    for t_result, m_result in zip(summary.threading_results, summary.multiprocessing_results):
+    for t_result, m_result in zip(
+        summary.threading_results, summary.multiprocessing_results
+    ):
         if t_result.num_agents == m_result.num_agents:
             if t_result.throughput_ops_sec > m_result.throughput_ops_sec:
                 winner = "Threading"
-                advantage = t_result.throughput_ops_sec / m_result.throughput_ops_sec
+                advantage = (
+                    t_result.throughput_ops_sec / m_result.throughput_ops_sec
+                )
             else:
                 winner = "Multiproc"
-                advantage = m_result.throughput_ops_sec / t_result.throughput_ops_sec
+                advantage = (
+                    m_result.throughput_ops_sec / t_result.throughput_ops_sec
+                )
 
             print(
                 f"{t_result.num_agents:<8} {t_result.throughput_ops_sec:<18.1f} "
@@ -396,7 +440,9 @@ def print_results(summary: BenchmarkSummary):
     print(f"{'Agents':<8} {'Threading':<12} {'Multiprocessing':<15}")
     print("-" * 35)
 
-    for t_result, m_result in zip(summary.threading_results, summary.multiprocessing_results):
+    for t_result, m_result in zip(
+        summary.threading_results, summary.multiprocessing_results
+    ):
         if t_result.num_agents == m_result.num_agents:
             print(
                 f"{t_result.num_agents:<8} {t_result.memory_delta_mb:<12.1f} {m_result.memory_delta_mb:<15.1f}"
@@ -406,7 +452,9 @@ def print_results(summary: BenchmarkSummary):
     print(f"{'Agents':<8} {'Threading':<12} {'Multiprocessing':<15}")
     print("-" * 35)
 
-    for t_result, m_result in zip(summary.threading_results, summary.multiprocessing_results):
+    for t_result, m_result in zip(
+        summary.threading_results, summary.multiprocessing_results
+    ):
         if t_result.num_agents == m_result.num_agents:
             print(
                 f"{t_result.num_agents:<8} {t_result.p95_latency_ms:<12.1f} {m_result.p95_latency_ms:<15.1f}"
@@ -415,18 +463,27 @@ def print_results(summary: BenchmarkSummary):
     print("\n🎯 RECOMMENDATIONS:")
     print(f"   Primary choice: {summary.recommendations['primary']}")
     print(f"   Reason: {summary.recommendations['reason']}")
-    print(f"   Use threading when: {summary.recommendations['use_threading_when']}")
-    print(f"   Use multiprocessing when: {summary.recommendations['use_multiprocessing_when']}")
+    print(
+        f"   Use threading when: {summary.recommendations['use_threading_when']}"
+    )
+    print(
+        f"   Use multiprocessing when: {summary.recommendations['use_multiprocessing_when']}"
+    )
 
 
-def save_results(summary: BenchmarkSummary, filename: str = "production_benchmark_results.json"):
+def save_results(
+    summary: BenchmarkSummary,
+    filename: str = "production_benchmark_results.json",
+):
     """Save benchmark results to JSON file."""
     # Convert to JSON-serializable format
     result_dict = {
         "config": asdict(summary.config),
         "baseline_result": asdict(summary.baseline_result),
         "threading_results": [asdict(r) for r in summary.threading_results],
-        "multiprocessing_results": [asdict(r) for r in summary.multiprocessing_results],
+        "multiprocessing_results": [
+            asdict(r) for r in summary.multiprocessing_results
+        ],
         "recommendations": summary.recommendations,
         "metadata": {
             "cpu_cores": mp.cpu_count(),
@@ -458,7 +515,9 @@ def main():
         grid_size=8,
     )
 
-    print(f"\nStarting benchmark with {len(config.agent_counts)} test configurations...")
+    print(
+        f"\nStarting benchmark with {len(config.agent_counts)} test configurations..."
+    )
     input("Press Enter to continue...")
 
     # Run baseline test

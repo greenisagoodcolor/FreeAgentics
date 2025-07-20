@@ -89,8 +89,21 @@ docker-compose --profile dev --profile monitoring --profile tools up
 
 ## Environment Variables
 
-### Default Values
-The consolidated docker-compose.yml includes sensible development defaults. For production, always override these:
+### Development Environment
+For development, use the provided `.env.development` file:
+
+```bash
+# Copy development environment file
+cp .env.development .env
+```
+
+This includes:
+- `DEVELOPMENT_MODE=true` for SQLite fallback
+- Development secrets (not for production!)
+- Debug settings enabled
+
+### Production Environment
+For production, always create secure environment variables:
 
 ```bash
 # Copy production template

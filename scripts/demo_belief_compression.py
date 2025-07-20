@@ -73,7 +73,9 @@ def demo_multiple_agents():
     baseline_memory = measure_memory()
 
     # Create beliefs without compression
-    print(f"\nCreating {n_agents} agents with {grid_size}x{grid_size} beliefs...")
+    print(
+        f"\nCreating {n_agents} agents with {grid_size}x{grid_size} beliefs..."
+    )
     uncompressed_beliefs = []
     for _ in range(n_agents):
         belief = np.zeros((grid_size, grid_size), dtype=np.float64)
@@ -99,7 +101,9 @@ def demo_multiple_agents():
     compressed_beliefs = []
 
     for _ in range(n_agents):
-        belief = np.zeros((grid_size, grid_size), dtype=np.float32)  # Use float32
+        belief = np.zeros(
+            (grid_size, grid_size), dtype=np.float32
+        )  # Use float32
         # Sparse belief
         for _ in range(10):
             i, j = np.random.randint(0, grid_size, 2)
@@ -141,14 +145,14 @@ def demo_belief_pooling():
         belief = pool.acquire()
         active_beliefs.append(belief)
         if i % 10 == 9:
-            print(f"After acquiring {i+1} beliefs: {pool.stats}")
+            print(f"After acquiring {i + 1} beliefs: {pool.stats}")
 
     # Release some beliefs
     print("\nReleasing beliefs back to pool...")
     for i in range(20):
         pool.release(active_beliefs.pop(0))
         if i % 10 == 9:
-            print(f"After releasing {i+1} beliefs: {pool.stats}")
+            print(f"After releasing {i + 1} beliefs: {pool.stats}")
 
     print(f"\nFinal pool stats: {pool.stats}")
 
@@ -183,10 +187,12 @@ def demo_incremental_updates():
         update = update / update.sum()
 
         # Apply incremental update
-        compressed = compressor.incremental_update(compressed, update, learning_rate=0.2)
+        compressed = compressor.incremental_update(
+            compressed, update, learning_rate=0.2
+        )
 
         print(
-            f"Step {step+1}: non-zero values: {compressed.nnz}, "
+            f"Step {step + 1}: non-zero values: {compressed.nnz}, "
             f"memory: {compressed.memory_usage()} bytes"
         )
 

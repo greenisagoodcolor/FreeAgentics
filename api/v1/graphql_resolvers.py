@@ -14,7 +14,9 @@ try:
 
     COMPONENTS_AVAILABLE = True
 except ImportError:
-    logger.warning("FreeAgentics components not available for GraphQL resolvers")
+    logger.warning(
+        "FreeAgentics components not available for GraphQL resolvers"
+    )
     COMPONENTS_AVAILABLE = False
 
 # Global instances (in production, these would be dependency-injected)
@@ -35,10 +37,14 @@ class GraphQLResolvers:
     def __init__(self):
         """Initialize resolvers."""
         self.agent_manager = agent_manager if COMPONENTS_AVAILABLE else None
-        self.coalition_manager = coalition_manager if COMPONENTS_AVAILABLE else None
+        self.coalition_manager = (
+            coalition_manager if COMPONENTS_AVAILABLE else None
+        )
 
     # Agent resolvers
-    def get_agents(self, status: Optional[str] = None, limit: int = 100) -> List[Dict[str, Any]]:
+    def get_agents(
+        self, status: Optional[str] = None, limit: int = 100
+    ) -> List[Dict[str, Any]]:
         """Get list of agents."""
         if not self.agent_manager:
             return []
@@ -47,7 +53,9 @@ class GraphQLResolvers:
             agent_statuses = self.agent_manager.get_all_agents_status()
 
             if status:
-                agent_statuses = [a for a in agent_statuses if a.get("status") == status]
+                agent_statuses = [
+                    a for a in agent_statuses if a.get("status") == status
+                ]
 
             # Convert to GraphQL format
             agents = []
@@ -56,20 +64,29 @@ class GraphQLResolvers:
                     {
                         "id": agent_status.get("agent_id", ""),
                         "name": agent_status.get("name", "Unknown"),
-                        "status": "active" if agent_status.get("is_active") else "inactive",
+                        "status": "active"
+                        if agent_status.get("is_active")
+                        else "inactive",
                         "created_at": datetime.fromisoformat(
-                            agent_status.get("created_at", datetime.now().isoformat())
+                            agent_status.get(
+                                "created_at", datetime.now().isoformat()
+                            )
                         ),
                         "last_active": (
-                            datetime.fromisoformat(agent_status.get("last_action_at"))
+                            datetime.fromisoformat(
+                                agent_status.get("last_action_at")
+                            )
                             if agent_status.get("last_action_at")
                             else None
                         ),
                         "total_steps": agent_status.get("total_steps", 0),
-                        "capabilities": ["exploration", "navigation"],  # Default capabilities
-                        "performance_score": agent_status.get("metrics", {}).get(
-                            "avg_free_energy", 0.0
-                        ),
+                        "capabilities": [
+                            "exploration",
+                            "navigation",
+                        ],  # Default capabilities
+                        "performance_score": agent_status.get(
+                            "metrics", {}
+                        ).get("avg_free_energy", 0.0),
                     }
                 )
 
@@ -90,7 +107,9 @@ class GraphQLResolvers:
             return {
                 "id": agent_status.get("agent_id", ""),
                 "name": agent_status.get("name", "Unknown"),
-                "status": "active" if agent_status.get("is_active") else "inactive",
+                "status": "active"
+                if agent_status.get("is_active")
+                else "inactive",
                 "created_at": datetime.fromisoformat(
                     agent_status.get("created_at", datetime.now().isoformat())
                 ),
@@ -101,7 +120,9 @@ class GraphQLResolvers:
                 ),
                 "total_steps": agent_status.get("total_steps", 0),
                 "capabilities": ["exploration", "navigation"],
-                "performance_score": agent_status.get("metrics", {}).get("avg_free_energy", 0.0),
+                "performance_score": agent_status.get("metrics", {}).get(
+                    "avg_free_energy", 0.0
+                ),
             }
 
         except Exception as e:
@@ -129,7 +150,9 @@ class GraphQLResolvers:
             if template == "basic-explorer":
                 agent_type = "explorer"
 
-            agent_id = self.agent_manager.create_agent(agent_type, name, **params)
+            agent_id = self.agent_manager.create_agent(
+                agent_type, name, **params
+            )
 
             return {
                 "id": agent_id,
@@ -146,7 +169,9 @@ class GraphQLResolvers:
             logger.error(f"Error creating agent: {e}")
             raise Exception(f"Failed to create agent: {str(e)}")
 
-    def update_agent_status(self, agent_id: str, status: str) -> Optional[Dict[str, Any]]:
+    def update_agent_status(
+        self, agent_id: str, status: str
+    ) -> Optional[Dict[str, Any]]:
         """Update agent status."""
         if not self.agent_manager:
             return None
@@ -161,7 +186,9 @@ class GraphQLResolvers:
             if success:
                 return self.get_agent(agent_id)
             else:
-                raise Exception(f"Failed to update agent {agent_id} to status {status}")
+                raise Exception(
+                    f"Failed to update agent {agent_id} to status {status}"
+                )
 
         except Exception as e:
             logger.error(f"Error updating agent status: {e}")
@@ -190,14 +217,22 @@ class GraphQLResolvers:
                         "status": coalition_data.get("status", "unknown"),
                         "member_count": coalition_data.get("member_count", 0),
                         "leader_id": coalition_data.get("leader_id"),
-                        "objectives_count": coalition_data.get("objectives_count", 0),
-                        "completed_objectives": coalition_data.get("completed_objectives", 0),
-                        "performance_score": coalition_data.get("performance_score", 0.0),
+                        "objectives_count": coalition_data.get(
+                            "objectives_count", 0
+                        ),
+                        "completed_objectives": coalition_data.get(
+                            "completed_objectives", 0
+                        ),
+                        "performance_score": coalition_data.get(
+                            "performance_score", 0.0
+                        ),
                         "coordination_efficiency": coalition_data.get(
                             "coordination_efficiency", 0.0
                         ),
                         "created_at": datetime.fromisoformat(
-                            coalition_data.get("created_at", datetime.now().isoformat())
+                            coalition_data.get(
+                                "created_at", datetime.now().isoformat()
+                            )
                         ),
                     }
                 )
@@ -227,11 +262,19 @@ class GraphQLResolvers:
                 "member_count": coalition_data.get("member_count", 0),
                 "leader_id": coalition_data.get("leader_id"),
                 "objectives_count": coalition_data.get("objectives_count", 0),
-                "completed_objectives": coalition_data.get("completed_objectives", 0),
-                "performance_score": coalition_data.get("performance_score", 0.0),
-                "coordination_efficiency": coalition_data.get("coordination_efficiency", 0.0),
+                "completed_objectives": coalition_data.get(
+                    "completed_objectives", 0
+                ),
+                "performance_score": coalition_data.get(
+                    "performance_score", 0.0
+                ),
+                "coordination_efficiency": coalition_data.get(
+                    "coordination_efficiency", 0.0
+                ),
                 "created_at": datetime.fromisoformat(
-                    coalition_data.get("created_at", datetime.now().isoformat())
+                    coalition_data.get(
+                        "created_at", datetime.now().isoformat()
+                    )
                 ),
             }
 
@@ -255,7 +298,11 @@ class GraphQLResolvers:
                 "step_count": world_state.get("step_count", 0),
                 "agent_count": world_state.get("num_agents", 0),
                 "active_agents": len(
-                    [a for a in self.agent_manager.get_all_agents_status() if a.get("is_active")]
+                    [
+                        a
+                        for a in self.agent_manager.get_all_agents_status()
+                        if a.get("is_active")
+                    ]
                 ),
             }
 
@@ -274,7 +321,9 @@ class GraphQLResolvers:
             if self.agent_manager:
                 agent_statuses = self.agent_manager.get_all_agents_status()
                 total_agents = len(agent_statuses)
-                active_agents = len([a for a in agent_statuses if a.get("is_active")])
+                active_agents = len(
+                    [a for a in agent_statuses if a.get("is_active")]
+                )
 
             # Get coalition metrics
             total_coalitions = 0
@@ -333,7 +382,9 @@ class GraphQLResolvers:
             output_text = f"Processed input: {input_text[:50]}..."
             confidence = 0.85
 
-            processing_time = (datetime.now() - processing_start).total_seconds()
+            processing_time = (
+                datetime.now() - processing_start
+            ).total_seconds()
 
             return {
                 "agent_id": agent_id or "default_agent",

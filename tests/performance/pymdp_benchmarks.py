@@ -44,6 +44,7 @@ class BenchmarkTimer:
     """High-precision timer for benchmarking."""
 
     def __init__(self):
+        """Initialize benchmark timer with no start time and empty laps list."""
         self.start_time = None
         self.laps = []
 
@@ -69,12 +70,15 @@ class MemoryMonitor:
     """Monitor memory usage during benchmarks."""
 
     def __init__(self):
+        """Initialize memory monitor with current process and no baseline."""
         self.process = psutil.Process(os.getpid())
         self.baseline_memory = None
 
     def start(self):
         """Record baseline memory usage."""
-        self.baseline_memory = self.process.memory_info().rss / 1024 / 1024  # MB
+        self.baseline_memory = (
+            self.process.memory_info().rss / 1024 / 1024
+        )  # MB
 
     def get_usage(self) -> float:
         """Get current memory usage relative to baseline."""
@@ -88,6 +92,11 @@ class PyMDPBenchmark:
     """Base class for PyMDP benchmarks."""
 
     def __init__(self, name: str):
+        """Initialize PyMDP benchmark with name and monitoring tools.
+
+        Args:
+            name: Name of the benchmark
+        """
         self.name = name
         self.timer = BenchmarkTimer()
         self.memory_monitor = MemoryMonitor()
@@ -149,7 +158,9 @@ class PyMDPBenchmark:
                 },
                 memory_usage_mb=self.memory_monitor.get_usage(),
                 iterations=iterations,
-                additional_metrics=metrics if isinstance(metrics, dict) else {},
+                additional_metrics=metrics
+                if isinstance(metrics, dict)
+                else {},
             )
 
             self.teardown()
@@ -171,7 +182,9 @@ class PyMDPBenchmark:
         print("\nPerformance Metrics:")
         print(f"  Mean time: {result.mean_time_ms:.2f} ms")
         print(f"  Std dev: {result.std_dev_ms:.2f} ms")
-        print(f"  Min/Max: {result.min_time_ms:.2f} / {result.max_time_ms:.2f} ms")
+        print(
+            f"  Min/Max: {result.min_time_ms:.2f} / {result.max_time_ms:.2f} ms"
+        )
         print("  Percentiles:")
         for p, value in result.percentiles.items():
             print(f"    {p}: {value:.2f} ms")
@@ -187,6 +200,12 @@ class BeliefUpdateBenchmark(PyMDPBenchmark):
     """Benchmark belief state updates."""
 
     def __init__(self, state_size: int = 10, num_modalities: int = 2):
+        """Initialize belief update benchmark.
+
+        Args:
+            state_size: Size of the state space
+            num_modalities: Number of sensory modalities
+        """
         super().__init__("belief_update")
         self.state_size = state_size
         self.num_modalities = num_modalities
@@ -209,7 +228,10 @@ class BeliefUpdateBenchmark(PyMDPBenchmark):
 
         # Pre-generate random observations
         self.observations = [
-            [np.random.randint(0, self.state_size) for _ in range(self.num_modalities)]
+            [
+                np.random.randint(0, self.state_size)
+                for _ in range(self.num_modalities)
+            ]
             for _ in range(1000)
         ]
         self.obs_idx = 0
@@ -230,13 +252,28 @@ class BeliefUpdateBenchmark(PyMDPBenchmark):
         }
 
     def get_configuration(self) -> Dict[str, Any]:
-        return {"state_size": self.state_size, "num_modalities": self.num_modalities}
+        return {
+            "state_size": self.state_size,
+            "num_modalities": self.num_modalities,
+        }
 
 
 class ExpectedFreeEnergyBenchmark(PyMDPBenchmark):
     """Benchmark Expected Free Energy calculations."""
 
-    def __init__(self, state_size: int = 10, policy_depth: int = 3, num_policies: int = 50):
+    def __init__(
+        self,
+        state_size: int = 10,
+        policy_depth: int = 3,
+        num_policies: int = 50,
+    ):
+        """Initialize expected free energy benchmark.
+
+        Args:
+            state_size: Size of the state space
+            policy_depth: Depth of policy planning
+            num_policies: Number of policies to evaluate
+        """
         super().__init__("expected_free_energy")
         self.state_size = state_size
         self.policy_depth = policy_depth
@@ -256,7 +293,9 @@ class ExpectedFreeEnergyBenchmark(PyMDPBenchmark):
         C = utils.obj_array_uniform(num_observations)
 
         # Create agent
-        self.agent = PyMDPAgent(A, B, C=C, policy_len=self.policy_depth, inference_horizon=1)
+        self.agent = PyMDPAgent(
+            A, B, C=C, policy_len=self.policy_depth, inference_horizon=1
+        )
 
     def run_iteration(self) -> Dict[str, Any]:
         """Calculate EFE for policies."""
@@ -274,7 +313,9 @@ class ExpectedFreeEnergyBenchmark(PyMDPBenchmark):
 
         return {
             "num_policies_evaluated": (
-                len(self.agent.policies) if hasattr(self.agent, "policies") else 0
+                len(self.agent.policies)
+                if hasattr(self.agent, "policies")
+                else 0
             ),
             "min_efe": float(np.min(G_values)) if G_values is not None else 0,
             "max_efe": float(np.max(G_values)) if G_values is not None else 0,
@@ -292,6 +333,12 @@ class MatrixCachingBenchmark(PyMDPBenchmark):
     """Benchmark matrix caching performance."""
 
     def __init__(self, state_size: int = 50, cache_enabled: bool = True):
+        """Initialize matrix caching benchmark.
+
+        Args:
+            state_size: Size of the state space
+            cache_enabled: Whether to enable matrix caching
+        """
         super().__init__("matrix_caching")
         self.state_size = state_size
         self.cache_enabled = cache_enabled
@@ -354,6 +401,12 @@ class AgentScalingBenchmark(PyMDPBenchmark):
     """Benchmark performance with increasing number of agents."""
 
     def __init__(self, num_agents: int = 10, state_size: int = 20):
+        """Initialize agent scaling benchmark.
+
+        Args:
+            num_agents: Number of agents to simulate
+            state_size: Size of the state space
+        """
         super().__init__("agent_scaling")
         self.num_agents = num_agents
         self.state_size = state_size
@@ -399,6 +452,7 @@ class BenchmarkSuite:
     """Run complete benchmark suite."""
 
     def __init__(self):
+        """Initialize benchmark suite with empty benchmarks and results lists."""
         self.benchmarks = []
         self.results = []
 
@@ -411,7 +465,9 @@ class BenchmarkSuite:
         print(f"\n{'='*60}")
         print("PyMDP PERFORMANCE BENCHMARK SUITE")
         print(f"{'='*60}")
-        print(f"Running {len(self.benchmarks)} benchmarks with {iterations} iterations each\n")
+        print(
+            f"Running {len(self.benchmarks)} benchmarks with {iterations} iterations each\n"
+        )
 
         for benchmark in self.benchmarks:
             try:
@@ -462,10 +518,13 @@ class BenchmarkSuite:
 
         for result in self.results:
             # Find matching baseline
-            baseline = next((b for b in baseline_data if b["name"] == result.name), None)
+            baseline = next(
+                (b for b in baseline_data if b["name"] == result.name), None
+            )
             if baseline:
                 diff_percent = (
-                    (result.mean_time_ms - baseline["mean_time_ms"]) / baseline["mean_time_ms"]
+                    (result.mean_time_ms - baseline["mean_time_ms"])
+                    / baseline["mean_time_ms"]
                 ) * 100
                 print(f"\n{result.name}:")
                 print(f"  Baseline: {baseline['mean_time_ms']:.2f} ms")
@@ -488,12 +547,20 @@ def run_basic_benchmarks():
     suite.add_benchmark(BeliefUpdateBenchmark(state_size=100))
 
     # EFE benchmarks
-    suite.add_benchmark(ExpectedFreeEnergyBenchmark(state_size=10, policy_depth=3))
-    suite.add_benchmark(ExpectedFreeEnergyBenchmark(state_size=20, policy_depth=5))
+    suite.add_benchmark(
+        ExpectedFreeEnergyBenchmark(state_size=10, policy_depth=3)
+    )
+    suite.add_benchmark(
+        ExpectedFreeEnergyBenchmark(state_size=20, policy_depth=5)
+    )
 
     # Caching benchmarks
-    suite.add_benchmark(MatrixCachingBenchmark(state_size=50, cache_enabled=True))
-    suite.add_benchmark(MatrixCachingBenchmark(state_size=50, cache_enabled=False))
+    suite.add_benchmark(
+        MatrixCachingBenchmark(state_size=50, cache_enabled=True)
+    )
+    suite.add_benchmark(
+        MatrixCachingBenchmark(state_size=50, cache_enabled=False)
+    )
 
     # Scaling benchmarks
     suite.add_benchmark(AgentScalingBenchmark(num_agents=1))

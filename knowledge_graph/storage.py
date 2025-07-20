@@ -7,7 +7,7 @@ with support for different storage systems (file, database, etc.).
 import json
 import logging
 import os
-import pickle
+import pickle  # nosec B403 - Required for graph serialization, only used with trusted data
 from abc import ABC, abstractmethod
 from datetime import datetime
 from pathlib import Path
@@ -234,14 +234,16 @@ class FileStorageBackend(StorageBackend):
         metadata_path = self.base_path / "metadata.json"
         if metadata_path.exists():
             with open(metadata_path, "r") as f:
-                return json.load(f)  # type: ignore[no-any-return]
+                return json.load(f)  
         return {}
 
 
 class DatabaseStorageBackend(StorageBackend):
     """Database-based storage backend using SQLAlchemy."""
 
-    def __init__(self, connection_string: str = "sqlite:///knowledge_graphs.db"):
+    def __init__(
+        self, connection_string: str = "sqlite:///knowledge_graphs.db"
+    ):
         """Initialize database storage.
 
         Args:
@@ -257,9 +259,15 @@ class DatabaseStorageBackend(StorageBackend):
         session = self.SessionLocal()
         try:
             # Delete existing graph data
-            session.query(NodeModel).filter_by(graph_id=graph.graph_id).delete()
-            session.query(EdgeModel).filter_by(graph_id=graph.graph_id).delete()
-            session.query(GraphMetadataModel).filter_by(graph_id=graph.graph_id).delete()
+            session.query(NodeModel).filter_by(
+                graph_id=graph.graph_id
+            ).delete()
+            session.query(EdgeModel).filter_by(
+                graph_id=graph.graph_id
+            ).delete()
+            session.query(GraphMetadataModel).filter_by(
+                graph_id=graph.graph_id
+            ).delete()
 
             # Save nodes
             for node in graph.nodes.values():
@@ -320,7 +328,11 @@ class DatabaseStorageBackend(StorageBackend):
         session = self.SessionLocal()
         try:
             # Check if graph exists
-            metadata = session.query(GraphMetadataModel).filter_by(graph_id=graph_id).first()
+            metadata = (
+                session.query(GraphMetadataModel)
+                .filter_by(graph_id=graph_id)
+                .first()
+            )
 
             if not metadata:
                 return None
@@ -332,15 +344,15 @@ class DatabaseStorageBackend(StorageBackend):
             nodes = session.query(NodeModel).filter_by(graph_id=graph_id).all()
             for node_model in nodes:
                 node = KnowledgeNode(
-                    id=node_model.id,  # type: ignore[arg-type]
-                    type=NodeType(node_model.type),  # type: ignore[arg-type]
-                    label=node_model.label,  # type: ignore[arg-type]
-                    properties=node_model.properties or {},  # type: ignore[arg-type]
-                    created_at=node_model.created_at,  # type: ignore[arg-type]
-                    updated_at=node_model.updated_at,  # type: ignore[arg-type]
-                    version=node_model.version,  # type: ignore[arg-type]
-                    confidence=node_model.confidence,  # type: ignore[arg-type]
-                    source=node_model.source,  # type: ignore[arg-type]
+                    id=node_model.id,
+                    type=NodeType(node_model.type),
+                    label=node_model.label,
+                    properties=node_model.properties or {},
+                    created_at=node_model.created_at,
+                    updated_at=node_model.updated_at,
+                    version=node_model.version,
+                    confidence=node_model.confidence,
+                    source=node_model.source,
                 )
                 graph.nodes[node.id] = node
                 graph.graph.add_node(node.id, data=node)
@@ -359,21 +371,23 @@ class DatabaseStorageBackend(StorageBackend):
             edges = session.query(EdgeModel).filter_by(graph_id=graph_id).all()
             for edge_model in edges:
                 edge = KnowledgeEdge(
-                    id=edge_model.id,  # type: ignore[arg-type]
-                    source_id=edge_model.source_id,  # type: ignore[arg-type]
-                    target_id=edge_model.target_id,  # type: ignore[arg-type]
-                    type=EdgeType(edge_model.type),  # type: ignore[arg-type]
-                    properties=edge_model.properties or {},  # type: ignore[arg-type]
-                    created_at=edge_model.created_at,  # type: ignore[arg-type]
-                    confidence=edge_model.confidence,  # type: ignore[arg-type]
+                    id=edge_model.id,
+                    source_id=edge_model.source_id,
+                    target_id=edge_model.target_id,
+                    type=EdgeType(edge_model.type),
+                    properties=edge_model.properties or {},
+                    created_at=edge_model.created_at,
+                    confidence=edge_model.confidence,
                 )
                 graph.edges[edge.id] = edge
-                graph.graph.add_edge(edge.source_id, edge.target_id, key=edge.id, data=edge)
+                graph.graph.add_edge(
+                    edge.source_id, edge.target_id, key=edge.id, data=edge
+                )
 
             # Restore metadata
-            graph.version = metadata.version  # type: ignore[assignment]
-            graph.created_at = metadata.created_at  # type: ignore[assignment]
-            graph.updated_at = metadata.updated_at  # type: ignore[assignment]
+            graph.version = metadata.version  
+            graph.created_at = metadata.created_at  
+            graph.updated_at = metadata.updated_at  
 
             return graph
 
@@ -391,7 +405,9 @@ class DatabaseStorageBackend(StorageBackend):
             # Delete in order due to foreign keys
             session.query(EdgeModel).filter_by(graph_id=graph_id).delete()
             session.query(NodeModel).filter_by(graph_id=graph_id).delete()
-            session.query(GraphMetadataModel).filter_by(graph_id=graph_id).delete()
+            session.query(GraphMetadataModel).filter_by(
+                graph_id=graph_id
+            ).delete()
 
             session.commit()
             return True
@@ -432,7 +448,12 @@ class DatabaseStorageBackend(StorageBackend):
         """Check if graph exists in database."""
         session = self.SessionLocal()
         try:
-            exists = session.query(GraphMetadataModel).filter_by(graph_id=graph_id).count() > 0
+            exists = (
+                session.query(GraphMetadataModel)
+                .filter_by(graph_id=graph_id)
+                .count()
+                > 0
+            )
             return exists
 
         finally:
@@ -478,7 +499,9 @@ class PickleStorageBackend(StorageBackend):
                 return None
 
             with open(filepath, "rb") as f:
-                return pickle.load(f)  # type: ignore[no-any-return]
+                return pickle.load(
+                    f
+                )  # nosec B301 - Loading trusted graph data 
 
         except Exception as e:
             logger.error(f"Failed to unpickle graph: {e}")
@@ -519,7 +542,7 @@ class PickleStorageBackend(StorageBackend):
         metadata_path = self.base_path / "metadata.json"
         if metadata_path.exists():
             with open(metadata_path, "r") as f:
-                return json.load(f)  # type: ignore[no-any-return]
+                return json.load(f)  
         return {}
 
     def _save_metadata(self, metadata: Dict[str, Any]):

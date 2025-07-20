@@ -28,7 +28,11 @@ def fix_line_too_long(line: str, max_length: int = 79) -> List[str]:
             # Single long import - use parentheses
             match = re.match(r"^(\s*from\s+\S+\s+import\s+)(.+)$", line)
             if match:
-                return [match.group(1) + "(", "    " + match.group(2).strip(), ")"]
+                return [
+                    match.group(1) + "(",
+                    "    " + match.group(2).strip(),
+                    ")",
+                ]
 
     # For other lines, try to break at logical points
     # This is a simple implementation - real code might need manual adjustment
@@ -55,7 +59,9 @@ def fix_unused_imports(content: str) -> str:
     # Filter imports
     new_lines = []
     for line in lines:
-        if line.strip().startswith("import ") or line.strip().startswith("from "):
+        if line.strip().startswith("import ") or line.strip().startswith(
+            "from "
+        ):
             # Extract imported names
             imported = []
             if line.strip().startswith("import "):
@@ -87,7 +93,7 @@ def fix_unused_imports(content: str) -> str:
 def fix_blank_lines(content: str) -> str:
     """Fix E302, E303, E305: blank line issues."""
     lines = content.split("\n")
-    new_lines = []
+    new_lines: list[str] = []
     i = 0
 
     while i < len(lines):
@@ -195,8 +201,12 @@ def fix_file(filepath: str, auto_fix: bool = True) -> Tuple[str, List[str]]:
 def main():
     parser = argparse.ArgumentParser(description="Fix flake8 violations")
     parser.add_argument("paths", nargs="+", help="Files or directories to fix")
-    parser.add_argument("--no-auto", action="store_true", help="Disable autopep8")
-    parser.add_argument("--dry-run", action="store_true", help="Show what would be fixed")
+    parser.add_argument(
+        "--no-auto", action="store_true", help="Disable autopep8"
+    )
+    parser.add_argument(
+        "--dry-run", action="store_true", help="Show what would be fixed"
+    )
 
     args = parser.parse_args()
 

@@ -7,37 +7,41 @@ This document outlines regular maintenance procedures for the FreeAgentics syste
 ## Table of Contents
 
 1. [Maintenance Schedule Overview](#maintenance-schedule-overview)
-2. [Database Maintenance](#database-maintenance)
-3. [Log Rotation and Management](#log-rotation-and-management)
-4. [Certificate Management](#certificate-management)
-5. [Dependency Updates](#dependency-updates)
-6. [System Health Checks](#system-health-checks)
-7. [Performance Optimization](#performance-optimization)
-8. [Maintenance Windows](#maintenance-windows)
-9. [Emergency Maintenance](#emergency-maintenance)
-10. [Maintenance Automation](#maintenance-automation)
+1. [Database Maintenance](#database-maintenance)
+1. [Log Rotation and Management](#log-rotation-and-management)
+1. [Certificate Management](#certificate-management)
+1. [Dependency Updates](#dependency-updates)
+1. [System Health Checks](#system-health-checks)
+1. [Performance Optimization](#performance-optimization)
+1. [Maintenance Windows](#maintenance-windows)
+1. [Emergency Maintenance](#emergency-maintenance)
+1. [Maintenance Automation](#maintenance-automation)
 
 ## Maintenance Schedule Overview
 
 ### Daily Tasks
+
 - Database transaction log cleanup
 - Log file rotation
 - Health check monitoring
 - Backup verification
 
 ### Weekly Tasks
+
 - Database statistics update
 - Cache optimization
 - Security scan
 - Performance metrics review
 
 ### Monthly Tasks
+
 - Database full maintenance
 - SSL certificate check
 - Dependency security audit
 - Storage cleanup
 
 ### Quarterly Tasks
+
 - Major dependency updates
 - Infrastructure review
 - Security audit
@@ -48,6 +52,7 @@ This document outlines regular maintenance procedures for the FreeAgentics syste
 ### PostgreSQL Maintenance
 
 #### Daily Maintenance
+
 ```bash
 # Run via cron at 03:00 UTC daily
 /usr/local/bin/database-daily-maintenance.sh
@@ -60,6 +65,7 @@ This document outlines regular maintenance procedures for the FreeAgentics syste
 ```
 
 #### Weekly Maintenance
+
 ```bash
 # Run Sunday 04:00 UTC
 /usr/local/bin/database-weekly-maintenance.sh
@@ -72,6 +78,7 @@ This document outlines regular maintenance procedures for the FreeAgentics syste
 ```
 
 #### Monthly Full Maintenance
+
 ```bash
 # Run first Sunday of month at 02:00 UTC
 /usr/local/bin/database-monthly-maintenance.sh
@@ -111,6 +118,7 @@ This document outlines regular maintenance procedures for the FreeAgentics syste
 ### Application Logs
 
 #### Log Rotation Configuration
+
 ```bash
 # /etc/logrotate.d/freeagentics
 /var/log/freeagentics/*.log {
@@ -131,18 +139,21 @@ This document outlines regular maintenance procedures for the FreeAgentics syste
 #### Log Management Tasks
 
 1. **Daily Log Rotation**
+
    ```bash
    # Automatic via logrotate
    logrotate -f /etc/logrotate.d/freeagentics
    ```
 
-2. **Log Archival**
+1. **Log Archival**
+
    ```bash
    # Archive logs older than 30 days
    ./scripts/maintenance/archive-logs.sh --days 30
    ```
 
-3. **Log Analysis**
+1. **Log Analysis**
+
    ```bash
    # Generate daily error report
    ./scripts/maintenance/analyze-logs.sh --report error
@@ -179,6 +190,7 @@ This document outlines regular maintenance procedures for the FreeAgentics syste
 ### Certificate Renewal Process
 
 #### Automated Renewal (Let's Encrypt)
+
 ```bash
 # Runs via cron every day at 02:30 UTC
 /usr/local/bin/certbot renew --quiet
@@ -188,6 +200,7 @@ This document outlines regular maintenance procedures for the FreeAgentics syste
 ```
 
 #### Manual Renewal Process
+
 ```bash
 # 1. Generate new certificate
 ./scripts/maintenance/renew-certificate.sh --domain api.freeagentics.io
@@ -203,6 +216,7 @@ docker-compose exec nginx nginx -s reload
 ```
 
 ### Certificate Backup
+
 ```bash
 # Backup all certificates
 ./scripts/maintenance/backup-certificates.sh
@@ -216,6 +230,7 @@ docker-compose exec nginx nginx -s reload
 ### Security Updates
 
 #### Daily Security Check
+
 ```bash
 # Check for security vulnerabilities
 ./scripts/maintenance/security-check.sh
@@ -233,23 +248,26 @@ docker scout cves
 #### Weekly Dependency Update Process
 
 1. **Review Security Advisories**
+
    ```bash
    ./scripts/maintenance/check-advisories.sh
    ```
 
-2. **Test Updates in Staging**
+1. **Test Updates in Staging**
+
    ```bash
    # Create update branch
    git checkout -b deps/weekly-update-$(date +%Y%m%d)
-   
+
    # Update dependencies
    ./scripts/maintenance/update-dependencies.sh --security-only
-   
+
    # Run tests
    make test
    ```
 
-3. **Deploy Updates**
+1. **Deploy Updates**
+
    ```bash
    # If tests pass, deploy to production
    ./scripts/deployment/deploy.sh --version deps/weekly-update
@@ -260,23 +278,26 @@ docker scout cves
 #### Quarterly Update Process
 
 1. **Planning Phase**
+
    - Review changelog for breaking changes
    - Update test suite for new features
    - Plan rollback strategy
 
-2. **Testing Phase**
+1. **Testing Phase**
+
    ```bash
    # Create dedicated test environment
    ./scripts/maintenance/create-update-env.sh
-   
+
    # Apply updates
    ./scripts/maintenance/major-update.sh --component python
-   
+
    # Run comprehensive tests
    ./scripts/testing/comprehensive-test.sh
    ```
 
-3. **Deployment Phase**
+1. **Deployment Phase**
+
    - Schedule maintenance window
    - Notify users
    - Deploy with rollback capability
@@ -332,6 +353,7 @@ docker scout cves
 ### Database Performance Tuning
 
 #### Weekly Analysis
+
 ```bash
 # Analyze slow queries
 ./scripts/maintenance/analyze-slow-queries.sh
@@ -344,6 +366,7 @@ docker scout cves
 ```
 
 #### Monthly Optimization
+
 ```bash
 # Full performance analysis
 ./scripts/maintenance/performance-analysis.sh --comprehensive
@@ -355,6 +378,7 @@ docker scout cves
 ### Application Performance
 
 #### Cache Optimization
+
 ```bash
 # Analyze cache hit rates
 ./scripts/maintenance/analyze-cache.sh
@@ -367,6 +391,7 @@ docker scout cves
 ```
 
 #### Resource Optimization
+
 ```bash
 # Check resource usage trends
 ./scripts/maintenance/resource-trends.sh --period 30d
@@ -380,6 +405,7 @@ docker scout cves
 ### Scheduled Maintenance Windows
 
 #### Regular Windows
+
 - **Weekly**: Sunday 03:00-04:00 UTC (low-impact tasks)
 - **Monthly**: First Sunday 02:00-05:00 UTC (database maintenance)
 - **Quarterly**: Announced 2 weeks in advance (major updates)
@@ -387,34 +413,37 @@ docker scout cves
 #### Maintenance Window Process
 
 1. **Pre-Maintenance (T-24 hours)**
+
    ```bash
    # Send notification
    ./scripts/maintenance/notify-users.sh --window "2024-01-21 02:00 UTC"
-   
+
    # Prepare maintenance environment
    ./scripts/maintenance/prepare-maintenance.sh
    ```
 
-2. **During Maintenance**
+1. **During Maintenance**
+
    ```bash
    # Enable maintenance mode
    ./scripts/maintenance/enable-maintenance-mode.sh
-   
+
    # Perform maintenance tasks
    ./scripts/maintenance/run-maintenance.sh --plan monthly
-   
+
    # Verify system health
    ./scripts/maintenance/verify-health.sh
    ```
 
-3. **Post-Maintenance**
+1. **Post-Maintenance**
+
    ```bash
    # Disable maintenance mode
    ./scripts/maintenance/disable-maintenance-mode.sh
-   
+
    # Send completion notification
    ./scripts/maintenance/notify-completion.sh
-   
+
    # Monitor for issues
    ./scripts/maintenance/post-maintenance-monitor.sh --duration 1h
    ```
@@ -442,33 +471,37 @@ location @maintenance {
 ### Emergency Response Procedures
 
 1. **Issue Detection**
+
    ```bash
    # Automated detection via monitoring
    # Manual detection via:
    ./scripts/maintenance/emergency-check.sh
    ```
 
-2. **Initial Response**
+1. **Initial Response**
+
    ```bash
    # Assess severity
    ./scripts/maintenance/assess-issue.sh
-   
+
    # Enable emergency maintenance if needed
    ./scripts/maintenance/emergency-maintenance.sh --enable
    ```
 
-3. **Resolution Process**
+1. **Resolution Process**
+
    - Identify root cause
    - Implement fix
    - Test resolution
    - Deploy fix
    - Monitor results
 
-4. **Post-Incident**
+1. **Post-Incident**
+
    ```bash
    # Generate incident report
    ./scripts/maintenance/incident-report.sh --incident-id EM-2024-001
-   
+
    # Update runbooks
    ./scripts/maintenance/update-runbooks.sh
    ```
@@ -488,6 +521,7 @@ location @maintenance {
 Located in `/home/green/FreeAgentics/scripts/maintenance/`
 
 #### Core Scripts
+
 - `auto-maintenance.sh` - Main automation orchestrator
 - `health-monitor.sh` - Continuous health monitoring
 - `auto-optimize.sh` - Automatic optimization
@@ -540,6 +574,7 @@ freeagentics_maintenance_status{task="vacuum"} 1
 ### A. Maintenance Checklist Templates
 
 #### Daily Checklist
+
 - [ ] Verify all backups completed successfully
 - [ ] Check system health dashboard
 - [ ] Review error logs
@@ -548,6 +583,7 @@ freeagentics_maintenance_status{task="vacuum"} 1
 - [ ] Monitor database connections
 
 #### Weekly Checklist
+
 - [ ] Run database VACUUM ANALYZE
 - [ ] Update security patches
 - [ ] Review performance metrics
@@ -556,6 +592,7 @@ freeagentics_maintenance_status{task="vacuum"} 1
 - [ ] Test backup restoration
 
 #### Monthly Checklist
+
 - [ ] Full database maintenance
 - [ ] Security audit
 - [ ] Dependency updates
@@ -579,7 +616,7 @@ freeagentics_maintenance_status{task="vacuum"} 1
 - Documentation: `/home/green/FreeAgentics/docs/operations/`
 - Monitoring: https://monitoring.freeagentics.io/maintenance
 
----
+______________________________________________________________________
 
 Last Updated: January 2024
 Next Review: April 2024

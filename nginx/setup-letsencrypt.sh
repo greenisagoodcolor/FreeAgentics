@@ -77,11 +77,11 @@ http {
     server {
         listen 80;
         server_name $DOMAIN;
-        
+
         location /.well-known/acme-challenge/ {
             root $WEBROOT;
         }
-        
+
         location / {
             return 301 https://\$host\$request_uri;
         }
@@ -152,14 +152,14 @@ certbot renew --quiet --no-self-upgrade
 if [ -f "$CERTBOT_DATA/live/$DOMAIN/fullchain.pem" ]; then
     cp "$CERTBOT_DATA/live/$DOMAIN/fullchain.pem" /etc/nginx/ssl/cert.pem
     cp "$CERTBOT_DATA/live/$DOMAIN/privkey.pem" /etc/nginx/ssl/key.pem
-    
+
     # Set proper permissions
     chmod 600 /etc/nginx/ssl/key.pem
     chmod 644 /etc/nginx/ssl/cert.pem
-    
+
     # Reload nginx
     nginx -s reload
-    
+
     echo "Certificate renewed successfully"
 else
     echo "Certificate renewal failed"

@@ -19,8 +19,8 @@ This documentation includes:
 ### 1. Get Your API Credentials
 
 1. Sign up at [https://freeagentics.com/signup](https://freeagentics.com/signup)
-2. Verify your email address
-3. Note your username and password for API authentication
+1. Verify your email address
+1. Note your username and password for API authentication
 
 ### 2. Install SDK (Optional)
 
@@ -70,8 +70,8 @@ curl -X POST https://api.freeagentics.com/api/v1/inference \
 FreeAgentics uses JWT tokens for authentication:
 
 1. **Login** to get access and refresh tokens
-2. **Include** access token in `Authorization: Bearer <token>` header
-3. **Refresh** tokens when they expire (every 15 minutes)
+1. **Include** access token in `Authorization: Bearer <token>` header
+1. **Refresh** tokens when they expire (every 15 minutes)
 
 ```python
 import requests
@@ -90,10 +90,11 @@ headers = {'Authorization': f'Bearer {access_token}'}
 
 | Environment | Auth Endpoints | API Endpoints | WebSocket |
 |-------------|----------------|---------------|-----------|
-| Production  | 3/min          | 60/min        | 100/min   |
-| Development | 10/min         | 200/min       | 500/min   |
+| Production | 3/min | 60/min | 100/min |
+| Development | 10/min | 200/min | 500/min |
 
 Rate limit headers are included in all responses:
+
 - `X-RateLimit-Limit`: Request limit
 - `X-RateLimit-Remaining`: Remaining requests
 - `X-RateLimit-Reset`: Reset timestamp
@@ -101,21 +102,27 @@ Rate limit headers are included in all responses:
 ## 🧠 Core Concepts
 
 ### Agents
+
 AI agents are the core processing units. Each agent:
+
 - Has a specific template (research, analysis, conversation, etc.)
 - Can be configured with custom parameters
 - Supports Active Inference with PyMDP integration
 - Maintains state and learning capabilities
 
 ### Inference
+
 Inference is the process of running queries through agents:
+
 - Submit queries with optional context
 - Get real-time progress updates
 - Receive structured results with confidence scores
 - Support for batch processing
 
 ### Knowledge Graph
+
 Build and query interconnected knowledge:
+
 - Create entities and relationships
 - Search semantic knowledge
 - Build domain-specific knowledge bases
@@ -124,6 +131,7 @@ Build and query interconnected knowledge:
 ## 🛠️ SDKs and Tools
 
 ### Official SDKs
+
 - **Python**: Full-featured SDK with async support
 - **JavaScript/TypeScript**: Modern SDK with Promise/async support
 - **Go**: Concurrent SDK with proper error handling
@@ -131,6 +139,7 @@ Build and query interconnected knowledge:
 - **C#**: .NET Core compatible
 
 ### Development Tools
+
 - **Postman Collection**: Pre-configured API requests
 - **Insomnia Collection**: Alternative API client setup
 - **OpenAPI Spec**: For code generation and documentation
@@ -139,28 +148,36 @@ Build and query interconnected knowledge:
 ## 🔌 Integration Patterns
 
 ### REST API
+
 Standard HTTP API for basic operations:
+
 - Agent management
 - Inference execution
 - Knowledge graph operations
 - System monitoring
 
 ### WebSocket API
+
 Real-time bidirectional communication:
+
 - Live agent status updates
 - Streaming inference results
 - System metrics monitoring
 - Interactive agent control
 
 ### GraphQL API
+
 Flexible data querying:
+
 - Custom data selection
 - Nested resource fetching
 - Real-time subscriptions
 - Efficient bulk operations
 
 ### Webhooks
+
 Event-driven notifications:
+
 - Agent lifecycle events
 - Inference completion alerts
 - System health notifications
@@ -169,6 +186,7 @@ Event-driven notifications:
 ## 🏗️ Architecture Examples
 
 ### Microservices Integration
+
 ```python
 # Flask microservice example
 from flask import Flask, request, jsonify
@@ -189,6 +207,7 @@ def analyze():
 ```
 
 ### Event-Driven Architecture
+
 ```javascript
 // Node.js event processor
 const { FreeAgenticsClient } = require('@freeagentics/sdk');
@@ -208,6 +227,7 @@ processQueue.on('inference_request', async (request) => {
 ```
 
 ### Batch Processing
+
 ```python
 # Batch inference pipeline
 import asyncio
@@ -233,12 +253,14 @@ async def process_batch(items):
 ## 📊 Monitoring and Observability
 
 ### System Metrics
+
 - CPU and memory usage
 - Agent performance metrics
 - Inference throughput
 - Error rates and latency
 
 ### Real-time Monitoring
+
 ```python
 # WebSocket monitoring
 async def monitor_system():
@@ -253,6 +275,7 @@ async def monitor_system():
 ```
 
 ### Health Checks
+
 ```bash
 # System health endpoint
 curl https://api.freeagentics.com/api/v1/system/status
@@ -264,18 +287,21 @@ curl https://api.freeagentics.com/api/v1/agents/AGENT_ID/metrics
 ## 🔒 Security Best Practices
 
 ### Authentication Security
+
 - Use secure token storage
 - Implement token refresh logic
 - Monitor for authentication failures
 - Use client fingerprinting for enhanced security
 
 ### API Security
+
 - Validate all inputs
 - Implement rate limiting
 - Use HTTPS for all communications
 - Monitor for suspicious activity
 
 ### Data Protection
+
 - Encrypt sensitive data
 - Implement proper access controls
 - Log security events
@@ -284,6 +310,7 @@ curl https://api.freeagentics.com/api/v1/agents/AGENT_ID/metrics
 ## 🚨 Error Handling
 
 ### Standard Error Format
+
 ```json
 {
   "error": {
@@ -299,6 +326,7 @@ curl https://api.freeagentics.com/api/v1/agents/AGENT_ID/metrics
 ```
 
 ### Common Error Codes
+
 - `INVALID_REQUEST` (400): Request validation failed
 - `UNAUTHORIZED` (401): Authentication required
 - `FORBIDDEN` (403): Insufficient permissions
@@ -307,6 +335,7 @@ curl https://api.freeagentics.com/api/v1/agents/AGENT_ID/metrics
 - `INTERNAL_ERROR` (500): Server error
 
 ### Retry Logic
+
 ```python
 from tenacity import retry, stop_after_attempt, wait_exponential
 
@@ -321,6 +350,7 @@ def robust_api_call():
 ## 📈 Performance Optimization
 
 ### Connection Pooling
+
 ```python
 # Reuse HTTP connections
 import requests
@@ -334,6 +364,7 @@ client = FreeAgenticsClient(session=session)
 ```
 
 ### Batch Operations
+
 ```python
 # Batch multiple inferences
 results = client.inference.batch([
@@ -343,6 +374,7 @@ results = client.inference.batch([
 ```
 
 ### Caching Strategies
+
 ```python
 # Cache agent instances
 from functools import lru_cache
@@ -355,6 +387,7 @@ def get_agent(agent_id):
 ## 🧪 Testing
 
 ### Unit Testing
+
 ```python
 import unittest
 from unittest.mock import Mock, patch
@@ -376,6 +409,7 @@ class TestFreeAgenticsIntegration(unittest.TestCase):
 ```
 
 ### Integration Testing
+
 ```python
 # Test with real API
 def test_full_inference_flow():
@@ -401,6 +435,7 @@ def test_full_inference_flow():
 ## 📖 Advanced Usage
 
 ### Custom Agent Templates
+
 ```python
 # Create agent with custom GMN specification
 gmn_spec = """
@@ -419,6 +454,7 @@ agent = client.agents.create(
 ```
 
 ### Knowledge Graph Integration
+
 ```python
 # Build domain knowledge
 entity = client.knowledge.create_entity(
@@ -437,6 +473,7 @@ client.knowledge.create_relationship(
 ```
 
 ### Multi-Agent Coordination
+
 ```python
 # Coordinate multiple agents
 async def coordinate_agents():
@@ -478,6 +515,7 @@ async def coordinate_agents():
 ### Common Issues
 
 #### Connection Problems
+
 ```python
 # Check connectivity
 try:
@@ -488,6 +526,7 @@ except requests.exceptions.ConnectionError:
 ```
 
 #### Authentication Issues
+
 ```python
 # Debug authentication
 if not client.is_authenticated():
@@ -497,6 +536,7 @@ if not client.is_authenticated():
 ```
 
 #### Rate Limiting
+
 ```python
 # Handle rate limits
 try:
@@ -507,6 +547,7 @@ except RateLimitError as e:
 ```
 
 ### Debug Mode
+
 ```python
 # Enable debug logging
 import logging
@@ -519,22 +560,26 @@ client = FreeAgenticsClient(debug=True)
 ## 📚 Resources
 
 ### Documentation
+
 - [API Reference](API_REFERENCE.md) - Complete API specification
 - [Developer Guide](DEVELOPER_GUIDE.md) - Integration guide and best practices
 - [WebSocket API](WEBSOCKET_API.md) - Real-time API documentation
 - [Code Examples](CODE_EXAMPLES.md) - Multi-language examples
 
 ### Tools
+
 - [Postman Collection](collections/FreeAgentics_API.postman_collection.json)
 - [Insomnia Collection](collections/FreeAgentics_API.insomnia_collection.json)
 - [OpenAPI Specification](openapi.yaml)
 
 ### Community
+
 - **GitHub**: [https://github.com/freeagentics](https://github.com/freeagentics)
 - **Discord**: [https://discord.gg/freeagentics](https://discord.gg/freeagentics)
 - **Forum**: [https://community.freeagentics.com](https://community.freeagentics.com)
 
 ### Support
+
 - **Email**: support@freeagentics.com
 - **Status Page**: https://status.freeagentics.com
 - **Documentation**: https://docs.freeagentics.com
@@ -542,6 +587,7 @@ client = FreeAgenticsClient(debug=True)
 ## 🗺️ Roadmap
 
 ### Coming Soon
+
 - GraphQL subscriptions for real-time updates
 - Enhanced agent templates and customization
 - Advanced knowledge graph capabilities
@@ -549,11 +595,13 @@ client = FreeAgenticsClient(debug=True)
 - Federated learning capabilities
 
 ### Request Features
+
 Have a feature request? Let us know:
+
 - GitHub Issues: [https://github.com/freeagentics/api/issues](https://github.com/freeagentics/api/issues)
 - Feature Requests: [https://freeagentics.com/feature-requests](https://freeagentics.com/feature-requests)
 
----
+______________________________________________________________________
 
 ## 📄 License
 
@@ -563,6 +611,6 @@ This documentation is licensed under [MIT License](LICENSE).
 
 We welcome contributions to our documentation! Please see our [Contributing Guide](CONTRIBUTING.md) for details.
 
----
+______________________________________________________________________
 
 **Ready to get started?** Check out our [Developer Guide](DEVELOPER_GUIDE.md) for detailed integration instructions and examples!

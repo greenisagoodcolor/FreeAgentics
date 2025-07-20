@@ -8,15 +8,9 @@ import os
 import re
 from typing import Optional
 
-from pydantic import (
-    BaseModel,
-    ConfigDict,
-    Field,
-)
+from pydantic import BaseModel, ConfigDict, Field
 from pydantic import ValidationError as PydanticValidationError
-from pydantic import (
-    field_validator,
-)
+from pydantic import field_validator
 
 
 def validate_database_url(url: str) -> str:
@@ -28,7 +22,9 @@ def validate_database_url(url: str) -> str:
 
     # PostgreSQL URL pattern: postgresql://user:pass@host[:port]/dbname
     # Also accept postgres:// and postgresql+driver://
-    pattern = r"^(postgresql|postgres)(\+\w+)?://[^:]+:[^@]+@[^:/]+(?::\d+)?/\w+$"
+    pattern = (
+        r"^(postgresql|postgres)(\+\w+)?://[^:]+:[^@]+@[^:/]+(?::\d+)?/\w+$"
+    )
 
     if not re.match(pattern, url):
         raise ValueError("Invalid PostgreSQL DATABASE_URL")
@@ -90,67 +86,85 @@ class Settings(BaseModel):
     @classmethod
     def validate_not_empty(cls, v: str, info) -> str:
         """Ensure required fields are not empty or whitespace."""
-        field_name = info.field_name if hasattr(info, "field_name") else "Field"
+        field_name = (
+            info.field_name if hasattr(info, "field_name") else "Field"
+        )
 
         if not v or not v.strip():
             raise ValueError(f"{field_name} cannot be empty")
 
         return v.strip()
 
-    def __init__(self, **data):
-        """Create instance with special handling for environment loading."""
-        # If no data provided, load from environment
-        if not data:
-            # Get all field names in order
-            required_fields = [
-                "DATABASE_URL",
-                "API_KEY",
-                "SECRET_KEY",
-                "JWT_SECRET_KEY",
-                "REDIS_URL",
-                "POSTGRES_USER",
-                "POSTGRES_PASSWORD",
-                "POSTGRES_DB",
-            ]
+    def _get_required_fields(self):
+        """Get list of required environment variable fields."""
+        return [
+            "DATABASE_URL",
+            "API_KEY",
+            "SECRET_KEY",
+            "JWT_SECRET_KEY",
+            "REDIS_URL",
+            "POSTGRES_USER",
+            "POSTGRES_PASSWORD",
+            "POSTGRES_DB",
+        ]
 
-            # First pass: check which fields are missing
-            missing_fields = []
-            present_fields = {}
+    def _check_missing_fields(self, required_fields):
+        """Check for missing and present environment fields."""
+        missing_fields = []
+        present_fields = {}
 
-            for field in required_fields:
-                value = os.environ.get(field)
-                if value is None:
-                    missing_fields.append(field)
-                else:
-                    present_fields[field] = value
+        for field in required_fields:
+            value = os.environ.get(field)
+            if value is None:
+                missing_fields.append(field)
+            else:
+                present_fields[field] = value
 
-            # If any required field is missing, report the first one
-            if missing_fields:
-                raise ValueError(f"{missing_fields[0]} is required")
+        return missing_fields, present_fields
 
-            # Second pass: validate present fields for empty values
-            for field, value in present_fields.items():
-                if not value.strip():
-                    raise ValueError(f"{field} cannot be empty")
+    def _validate_empty_values(self, present_fields):
+        """Validate that present fields are not empty."""
+        for field, value in present_fields.items():
+            if not value.strip():
+                raise ValueError(f"{field} cannot be empty")
 
-            # Third pass: validate format of special fields
-            if "DATABASE_URL" in present_fields:
-                try:
-                    validate_database_url(present_fields["DATABASE_URL"])
-                except ValueError as e:
-                    raise ValueError(str(e))
+    def _validate_special_url_fields(self, present_fields):
+        """Validate format of special URL fields."""
+        if "DATABASE_URL" in present_fields:
+            try:
+                validate_database_url(present_fields["DATABASE_URL"])
+            except ValueError as e:
+                raise ValueError(str(e))
 
-            if "REDIS_URL" in present_fields:
-                try:
-                    validate_redis_url(present_fields["REDIS_URL"])
-                except ValueError as e:
-                    raise ValueError(str(e))
+        if "REDIS_URL" in present_fields:
+            try:
+                validate_redis_url(present_fields["REDIS_URL"])
+            except ValueError as e:
+                raise ValueError(str(e))
 
-            # All validations passed, prepare data for parent init
-            data = present_fields
+    def _load_from_environment(self):
+        """Load and validate environment variables."""
+        required_fields = self._get_required_fields()
 
-        # For the special case of testing individual field validation
-        # Allow partial data if explicitly provided
+        # First pass: check which fields are missing
+        missing_fields, present_fields = self._check_missing_fields(
+            required_fields
+        )
+
+        # If any required field is missing, report the first one
+        if missing_fields:
+            raise ValueError(f"{missing_fields[0]} is required")
+
+        # Second pass: validate present fields for empty values
+        self._validate_empty_values(present_fields)
+
+        # Third pass: validate format of special fields
+        self._validate_special_url_fields(present_fields)
+
+        return present_fields
+
+    def _validate_single_field_test_case(self, data):
+        """Validate single field test cases for DATABASE_URL or REDIS_URL."""
         if data and len(data) == 1 and "DATABASE_URL" in data:
             # This is a test case for DATABASE_URL validation only
             try:
@@ -164,18 +178,31 @@ class Settings(BaseModel):
             except ValueError as e:
                 raise ValueError(str(e))
 
+    def _handle_pydantic_validation_errors(self, e):
+        """Handle and convert pydantic validation errors to ValueError."""
+        for error in e.errors():
+            if error["type"] == "missing":
+                field = error["loc"][0] if error["loc"] else "unknown"
+                raise ValueError(f"{field.upper()} is required")
+            else:
+                raise ValueError(str(error.get("msg", str(error))))
+        raise ValueError(str(e))
+
+    def __init__(self, **data):
+        """Create instance with special handling for environment loading."""
+        # If no data provided, load from environment
+        if not data:
+            data = self._load_from_environment()
+
+        # For the special case of testing individual field validation
+        # Allow partial data if explicitly provided
+        self._validate_single_field_test_case(data)
+
         # Call parent init
         try:
             super().__init__(**data)
         except PydanticValidationError as e:
-            # Convert pydantic validation errors to ValueError
-            for error in e.errors():
-                if error["type"] == "missing":
-                    field = error["loc"][0] if error["loc"] else "unknown"
-                    raise ValueError(f"{field.upper()} is required")
-                else:
-                    raise ValueError(str(error.get("msg", str(error))))
-            raise ValueError(str(e))
+            self._handle_pydantic_validation_errors(e)
 
 
 # For backwards compatibility

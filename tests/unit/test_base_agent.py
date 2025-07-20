@@ -66,6 +66,15 @@ class ConcreteAgent(ActiveInferenceAgent):
         if hasattr(self, "pymdp_agent") and self.pymdp_agent:
             return 0
         return np.random.randint(0, 2)
+    
+    def _initialize_pymdp(self) -> None:
+        """Initialize PyMDP agent (test implementation)."""
+        # Mock implementation for testing
+        self.pymdp_agent = MagicMock()
+    
+    def compute_free_energy(self) -> np.ndarray:
+        """Compute free energy (test implementation)."""
+        return np.array([0.5])
 
     def observe(self, observation: Any) -> None:
         """Record observation in history."""

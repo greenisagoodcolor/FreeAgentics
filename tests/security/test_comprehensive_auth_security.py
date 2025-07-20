@@ -51,7 +51,9 @@ class SecurityTestResults:
             {
                 "attack_type": attack_type,
                 "target": target,
-                "payload": payload[:100] + "..." if len(payload) > 100 else payload,
+                "payload": payload[:100] + "..."
+                if len(payload) > 100
+                else payload,
                 "result": result,
                 "severity": severity,
                 "timing": timing,
@@ -65,7 +67,9 @@ class SecurityTestResults:
                     "type": attack_type,
                     "severity": severity,
                     "description": f"{attack_type} vulnerability in {target}",
-                    "payload": payload[:100] + "..." if len(payload) > 100 else payload,
+                    "payload": payload[:100] + "..."
+                    if len(payload) > 100
+                    else payload,
                 }
             )
         elif result == "blocked":
@@ -73,7 +77,9 @@ class SecurityTestResults:
                 {"type": attack_type, "target": target, "severity": severity}
             )
 
-    def record_timing(self, operation: str, duration: float, context: str = ""):
+    def record_timing(
+        self, operation: str, duration: float, context: str = ""
+    ):
         """Record timing information for analysis."""
         self.timing_results.append(
             {
@@ -97,15 +103,23 @@ class SecurityTestResults:
                 "blocked_attacks": blocked_attacks,
                 "vulnerabilities_found": len(self.vulnerabilities),
                 "security_score": (
-                    (blocked_attacks / total_attacks * 100) if total_attacks > 0 else 100
+                    (blocked_attacks / total_attacks * 100)
+                    if total_attacks > 0
+                    else 100
                 ),
             },
             "vulnerabilities": self.vulnerabilities,
             "attack_breakdown": {
                 attack_type: len(
-                    [a for a in self.attack_attempts if a["attack_type"] == attack_type]
+                    [
+                        a
+                        for a in self.attack_attempts
+                        if a["attack_type"] == attack_type
+                    ]
                 )
-                for attack_type in set(a["attack_type"] for a in self.attack_attempts)
+                for attack_type in set(
+                    a["attack_type"] for a in self.attack_attempts
+                )
             },
             "timing_analysis": self._analyze_timing(),
             "recommendations": self._generate_recommendations(),
@@ -149,7 +163,9 @@ class SecurityTestResults:
             )
 
         if len(self.vulnerabilities) > 0:
-            recommendations.append("Implement additional input validation and sanitization")
+            recommendations.append(
+                "Implement additional input validation and sanitization"
+            )
 
         # Check timing attack vulnerability
         timing_variances = []
@@ -191,7 +207,12 @@ class TestAuthenticationSecuritySuite:
     def _create_test_users(self) -> List[User]:
         """Create test users with different roles."""
         users = []
-        roles = [UserRole.ADMIN, UserRole.RESEARCHER, UserRole.AGENT_MANAGER, UserRole.OBSERVER]
+        roles = [
+            UserRole.ADMIN,
+            UserRole.RESEARCHER,
+            UserRole.AGENT_MANAGER,
+            UserRole.OBSERVER,
+        ]
 
         for i, role in enumerate(roles):
             user = User(
@@ -206,7 +227,9 @@ class TestAuthenticationSecuritySuite:
             # Register with auth manager
             self.auth_manager.users[user.username] = {
                 "user": user,
-                "password_hash": self.auth_manager.hash_password(f"SecurePass{i}123!"),
+                "password_hash": self.auth_manager.hash_password(
+                    f"SecurePass{i}123!"
+                ),
             }
 
         return users
@@ -252,11 +275,19 @@ class TestAuthenticationSecuritySuite:
         response2 = self.client.post("/api/v1/auth/register", json=user_data)
         if response2.status_code == 200:
             self.results.record_attack(
-                "Authentication Bypass", "registration", "duplicate username", "successful", "high"
+                "Authentication Bypass",
+                "registration",
+                "duplicate username",
+                "successful",
+                "high",
             )
         else:
             self.results.record_attack(
-                "Authentication Bypass", "registration", "duplicate username", "blocked", "medium"
+                "Authentication Bypass",
+                "registration",
+                "duplicate username",
+                "blocked",
+                "medium",
             )
 
         # Test registration with malicious input
@@ -288,7 +319,9 @@ class TestAuthenticationSecuritySuite:
         ]
 
         for malicious_data in malicious_inputs:
-            response = self.client.post("/api/v1/auth/register", json=malicious_data)
+            response = self.client.post(
+                "/api/v1/auth/register", json=malicious_data
+            )
             if response.status_code == 200:
                 self.results.record_attack(
                     "Input Validation Bypass",
@@ -315,22 +348,32 @@ class TestAuthenticationSecuritySuite:
         start_time = time.time()
         response = self.client.post(
             "/api/v1/auth/login",
-            json={"username": valid_user.username, "password": f"SecurePass0123!"},
+            json={
+                "username": valid_user.username,
+                "password": f"SecurePass0123!",
+            },
         )
         valid_login_time = time.time() - start_time
 
         assert response.status_code == 200
-        self.results.record_timing("valid_login", valid_login_time, "correct_credentials")
+        self.results.record_timing(
+            "valid_login", valid_login_time, "correct_credentials"
+        )
 
         # Test incorrect password
         start_time = time.time()
         response = self.client.post(
             "/api/v1/auth/login",
-            json={"username": valid_user.username, "password": "WrongPassword123!"},
+            json={
+                "username": valid_user.username,
+                "password": "WrongPassword123!",
+            },
         )
         invalid_password_time = time.time() - start_time
 
-        self.results.record_timing("invalid_password", invalid_password_time, "wrong_password")
+        self.results.record_timing(
+            "invalid_password", invalid_password_time, "wrong_password"
+        )
 
         if response.status_code == 200:
             self.results.record_attack(
@@ -342,18 +385,27 @@ class TestAuthenticationSecuritySuite:
             )
         else:
             self.results.record_attack(
-                "Authentication Bypass", "login", "wrong password rejected", "blocked", "medium"
+                "Authentication Bypass",
+                "login",
+                "wrong password rejected",
+                "blocked",
+                "medium",
             )
 
         # Test nonexistent user
         start_time = time.time()
         response = self.client.post(
             "/api/v1/auth/login",
-            json={"username": "nonexistent_user", "password": "AnyPassword123!"},
+            json={
+                "username": "nonexistent_user",
+                "password": "AnyPassword123!",
+            },
         )
         nonexistent_user_time = time.time() - start_time
 
-        self.results.record_timing("nonexistent_user", nonexistent_user_time, "user_not_found")
+        self.results.record_timing(
+            "nonexistent_user", nonexistent_user_time, "user_not_found"
+        )
 
         # Check for timing attack vulnerability
         timing_variance = abs(valid_login_time - nonexistent_user_time)
@@ -371,7 +423,8 @@ class TestAuthenticationSecuritySuite:
         # Get valid token
         user = self.test_users[0]
         login_response = self.client.post(
-            "/api/v1/auth/login", json={"username": user.username, "password": "SecurePass0123!"}
+            "/api/v1/auth/login",
+            json={"username": user.username, "password": "SecurePass0123!"},
         )
 
         assert login_response.status_code == 200
@@ -379,7 +432,10 @@ class TestAuthenticationSecuritySuite:
 
         # Test token manipulation attacks
         token_attacks = [
-            ("Algorithm Confusion", self._create_algorithm_confusion_token(token)),
+            (
+                "Algorithm Confusion",
+                self._create_algorithm_confusion_token(token),
+            ),
             ("Signature Stripping", self._strip_token_signature(token)),
             ("Expired Token", self._create_expired_token(token)),
             ("Role Escalation", self._create_role_escalation_token(token)),
@@ -405,7 +461,11 @@ class TestAuthenticationSecuritySuite:
                 )
             else:
                 self.results.record_attack(
-                    "Token Manipulation", "token_verification", attack_name, "blocked", "high"
+                    "Token Manipulation",
+                    "token_verification",
+                    attack_name,
+                    "blocked",
+                    "high",
                 )
 
     def _test_logout_security(self):
@@ -413,14 +473,17 @@ class TestAuthenticationSecuritySuite:
         # Login first
         user = self.test_users[0]
         login_response = self.client.post(
-            "/api/v1/auth/login", json={"username": user.username, "password": "SecurePass0123!"}
+            "/api/v1/auth/login",
+            json={"username": user.username, "password": "SecurePass0123!"},
         )
 
         token = login_response.json()["access_token"]
         headers = {"Authorization": f"Bearer {token}"}
 
         # Logout
-        logout_response = self.client.post("/api/v1/auth/logout", headers=headers)
+        logout_response = self.client.post(
+            "/api/v1/auth/logout", headers=headers
+        )
         assert logout_response.status_code == 200
 
         # Try to use token after logout
@@ -481,7 +544,10 @@ class TestAuthenticationSecuritySuite:
         for i in range(15):  # Exceed typical rate limits
             response = self.client.post(
                 "/api/v1/auth/login",
-                json={"username": user.username, "password": f"wrong_password_{i}"},
+                json={
+                    "username": user.username,
+                    "password": f"wrong_password_{i}",
+                },
             )
 
             if response.status_code == 401:
@@ -521,7 +587,10 @@ class TestAuthenticationSecuritySuite:
         start_time = time.time()
         response1 = self.client.post(
             "/api/v1/auth/login",
-            json={"username": self.test_users[0].username, "password": "wrong_password"},
+            json={
+                "username": self.test_users[0].username,
+                "password": "wrong_password",
+            },
         )
         valid_user_time = time.time() - start_time
 
@@ -529,7 +598,10 @@ class TestAuthenticationSecuritySuite:
         start_time = time.time()
         response2 = self.client.post(
             "/api/v1/auth/login",
-            json={"username": "definitely_not_a_user", "password": "wrong_password"},
+            json={
+                "username": "definitely_not_a_user",
+                "password": "wrong_password",
+            },
         )
         invalid_user_time = time.time() - start_time
 
@@ -555,7 +627,11 @@ class TestAuthenticationSecuritySuite:
             )
         else:
             self.results.record_attack(
-                "Account Enumeration", "login_timing", "consistent timing", "blocked", "low"
+                "Account Enumeration",
+                "login_timing",
+                "consistent timing",
+                "blocked",
+                "low",
             )
 
     def test_input_validation_security(self):
@@ -612,28 +688,48 @@ class TestAuthenticationSecuritySuite:
                     "role": "observer",
                 }
 
-                response = self.client.post("/api/v1/auth/register", json=registration_data)
+                response = self.client.post(
+                    "/api/v1/auth/register", json=registration_data
+                )
                 if response.status_code == 200:
                     self.results.record_attack(
-                        attack_type, "registration_username", payload, "successful", "high"
+                        attack_type,
+                        "registration_username",
+                        payload,
+                        "successful",
+                        "high",
                     )
                 else:
                     self.results.record_attack(
-                        attack_type, "registration_username", payload, "blocked", "medium"
+                        attack_type,
+                        "registration_username",
+                        payload,
+                        "blocked",
+                        "medium",
                     )
 
                 # Test in login
                 login_data = {"username": payload, "password": "test123"}
 
-                response = self.client.post("/api/v1/auth/login", json=login_data)
+                response = self.client.post(
+                    "/api/v1/auth/login", json=login_data
+                )
                 # Login should fail safely
                 if response.status_code not in [400, 401, 422]:
                     self.results.record_attack(
-                        attack_type, "login_username", payload, "potential_vulnerability", "medium"
+                        attack_type,
+                        "login_username",
+                        payload,
+                        "potential_vulnerability",
+                        "medium",
                     )
                 else:
                     self.results.record_attack(
-                        attack_type, "login_username", payload, "blocked", "low"
+                        attack_type,
+                        "login_username",
+                        payload,
+                        "blocked",
+                        "low",
                     )
 
     def test_resource_exhaustion_protection(self):
@@ -661,14 +757,19 @@ class TestAuthenticationSecuritySuite:
             )
         else:
             self.results.record_attack(
-                "Resource Exhaustion", "large_payload", "1MB password rejected", "blocked", "low"
+                "Resource Exhaustion",
+                "large_payload",
+                "1MB password rejected",
+                "blocked",
+                "low",
             )
 
         # Rapid request attack
         rapid_requests = 0
         for i in range(100):
             response = self.client.post(
-                "/api/v1/auth/login", json={"username": "test", "password": "test"}
+                "/api/v1/auth/login",
+                json={"username": "test", "password": "test"},
             )
 
             if response.status_code == 429:  # Rate limited
@@ -715,12 +816,21 @@ class TestAuthenticationSecuritySuite:
                     "success": response.status_code == 200,
                 }
             except Exception as e:
-                return {"thread_id": thread_id, "error": str(e), "success": False}
+                return {
+                    "thread_id": thread_id,
+                    "error": str(e),
+                    "success": False,
+                }
 
         # Launch concurrent threads
         with concurrent.futures.ThreadPoolExecutor(max_workers=10) as executor:
-            futures = [executor.submit(concurrent_login_attempt, i) for i in range(20)]
-            results = [future.result() for future in concurrent.futures.as_completed(futures)]
+            futures = [
+                executor.submit(concurrent_login_attempt, i) for i in range(20)
+            ]
+            results = [
+                future.result()
+                for future in concurrent.futures.as_completed(futures)
+            ]
 
         # Analyze results
         successful_logins = sum(1 for r in results if r.get("success", False))
@@ -751,7 +861,8 @@ class TestAuthenticationSecuritySuite:
         # Get tokens
         user = self.test_users[0]
         login_response = self.client.post(
-            "/api/v1/auth/login", json={"username": user.username, "password": "SecurePass0123!"}
+            "/api/v1/auth/login",
+            json={"username": user.username, "password": "SecurePass0123!"},
         )
 
         tokens = login_response.json()
@@ -786,7 +897,11 @@ class TestAuthenticationSecuritySuite:
             )
         else:
             self.results.record_attack(
-                "Token Refresh", "token_reuse", "refresh token reuse blocked", "blocked", "low"
+                "Token Refresh",
+                "token_reuse",
+                "refresh token reuse blocked",
+                "blocked",
+                "low",
             )
 
         # Test malformed refresh tokens
@@ -801,7 +916,9 @@ class TestAuthenticationSecuritySuite:
             if token is None:
                 continue
 
-            response = self.client.post("/api/v1/auth/refresh", json={"refresh_token": token})
+            response = self.client.post(
+                "/api/v1/auth/refresh", json={"refresh_token": token}
+            )
 
             if response.status_code == 200:
                 self.results.record_attack(
@@ -813,7 +930,11 @@ class TestAuthenticationSecuritySuite:
                 )
             else:
                 self.results.record_attack(
-                    "Token Refresh", "malformed_token", "malformed token rejected", "blocked", "low"
+                    "Token Refresh",
+                    "malformed_token",
+                    "malformed token rejected",
+                    "blocked",
+                    "low",
                 )
 
     def test_generate_comprehensive_security_report(self):
@@ -838,12 +959,16 @@ class TestAuthenticationSecuritySuite:
         print(f"Total Attacks Tested: {report['summary']['total_attacks']}")
         print(f"Successful Attacks: {report['summary']['successful_attacks']}")
         print(f"Blocked Attacks: {report['summary']['blocked_attacks']}")
-        print(f"Vulnerabilities Found: {report['summary']['vulnerabilities_found']}")
+        print(
+            f"Vulnerabilities Found: {report['summary']['vulnerabilities_found']}"
+        )
 
         if report["vulnerabilities"]:
             print("\\nVULNERABILITIES FOUND:")
             for vuln in report["vulnerabilities"]:
-                print(f"  - {vuln['type']} ({vuln['severity']}): {vuln['description']}")
+                print(
+                    f"  - {vuln['type']} ({vuln['severity']}): {vuln['description']}"
+                )
 
         print("\\nATTACK BREAKDOWN:")
         for attack_type, count in report["attack_breakdown"].items():
@@ -855,8 +980,12 @@ class TestAuthenticationSecuritySuite:
                 print(f"  - {rec}")
 
         # Assert no critical vulnerabilities
-        critical_vulns = [v for v in report["vulnerabilities"] if v["severity"] == "critical"]
-        assert len(critical_vulns) == 0, f"Critical vulnerabilities found: {critical_vulns}"
+        critical_vulns = [
+            v for v in report["vulnerabilities"] if v["severity"] == "critical"
+        ]
+        assert (
+            len(critical_vulns) == 0
+        ), f"Critical vulnerabilities found: {critical_vulns}"
 
         # Assert security score is acceptable
         assert (
@@ -869,7 +998,9 @@ class TestAuthenticationSecuritySuite:
     def _create_algorithm_confusion_token(self, valid_token: str) -> str:
         """Create token with algorithm confusion attack."""
         try:
-            payload = jwt.decode(valid_token, options={"verify_signature": False})
+            payload = jwt.decode(
+                valid_token, options={"verify_signature": False}
+            )
             return jwt.encode(payload, "secret", algorithm="HS256")
         except:
             return "invalid.algorithm.token"
@@ -884,8 +1015,12 @@ class TestAuthenticationSecuritySuite:
     def _create_expired_token(self, valid_token: str) -> str:
         """Create expired token."""
         try:
-            payload = jwt.decode(valid_token, options={"verify_signature": False})
-            payload["exp"] = int((datetime.now(timezone.utc) - timedelta(hours=1)).timestamp())
+            payload = jwt.decode(
+                valid_token, options={"verify_signature": False}
+            )
+            payload["exp"] = int(
+                (datetime.now(timezone.utc) - timedelta(hours=1)).timestamp()
+            )
             # Can't properly sign without private key, so return original for testing
             return valid_token
         except:
@@ -894,9 +1029,15 @@ class TestAuthenticationSecuritySuite:
     def _create_role_escalation_token(self, valid_token: str) -> str:
         """Create token with role escalation."""
         try:
-            payload = jwt.decode(valid_token, options={"verify_signature": False})
+            payload = jwt.decode(
+                valid_token, options={"verify_signature": False}
+            )
             payload["role"] = "admin"
-            payload["permissions"] = ["admin_system", "create_agent", "delete_agent"]
+            payload["permissions"] = [
+                "admin_system",
+                "create_agent",
+                "delete_agent",
+            ]
             # Can't properly sign without private key, so return original for testing
             return valid_token
         except:
@@ -918,7 +1059,9 @@ if __name__ == "__main__":
     try:
         report = test_suite.test_generate_comprehensive_security_report()
         print("\\nSECURITY TESTING COMPLETED SUCCESSFULLY")
-        print(f"Final Security Score: {report['summary']['security_score']:.1f}%")
+        print(
+            f"Final Security Score: {report['summary']['security_score']:.1f}%"
+        )
     except Exception as e:
         print(f"\\nSECURITY TESTING FAILED: {e}")
         raise

@@ -14,7 +14,7 @@ from typing import Any, Dict, List, Optional
 logger = logging.getLogger(__name__)
 
 
-class TestStatus(Enum):
+class MetricStatus(Enum):
     """Test execution status."""
 
     PASSED = "passed"
@@ -24,13 +24,13 @@ class TestStatus(Enum):
 
 
 @dataclass
-class TestMetric:
+class ExecutionMetric:
     """Individual test execution metrics."""
 
     test_id: str
     test_name: str
     test_file: str
-    status: TestStatus
+    status: MetricStatus
     duration: float
     setup_duration: float
     teardown_duration: float
@@ -50,7 +50,7 @@ class TestMetric:
 
 
 @dataclass
-class TestSuiteMetrics:
+class SuiteMetrics:
     """Test suite execution metrics."""
 
     test_run_id: str
@@ -65,7 +65,7 @@ class TestSuiteMetrics:
     parallel_workers: int
     environment: str
     timestamp: datetime
-    test_metrics: List[TestMetric]
+    test_metrics: List[ExecutionMetric]
 
     def to_dict(self) -> Dict[str, Any]:
         """Convert to dictionary for JSON serialization."""
@@ -75,13 +75,13 @@ class TestSuiteMetrics:
         return result
 
 
-class TestMetricsCollector:
+class MetricsCollector:
     """Collects and analyzes test execution metrics."""
 
     def __init__(self, db_path: str = "tests/reporting/test_metrics.db"):
         self.db_path = Path(db_path)
         self.db_path.parent.mkdir(parents=True, exist_ok=True)
-        self.current_metrics: List[TestMetric] = []
+        self.current_metrics: List[ExecutionMetric] = []
         self.suite_start_time: Optional[float] = None
         self.test_start_times: Dict[str, float] = {}
         self._init_database()
@@ -170,17 +170,25 @@ class TestMetricsCollector:
         )
 
         # Create indexes
-        cursor.execute("CREATE INDEX IF NOT EXISTS idx_test_runs_timestamp ON test_runs(timestamp)")
-        cursor.execute("CREATE INDEX IF NOT EXISTS idx_test_metrics_run_id ON test_metrics(run_id)")
+        cursor.execute(
+            "CREATE INDEX IF NOT EXISTS idx_test_runs_timestamp ON test_runs(timestamp)"
+        )
+        cursor.execute(
+            "CREATE INDEX IF NOT EXISTS idx_test_metrics_run_id ON test_metrics(run_id)"
+        )
         cursor.execute(
             "CREATE INDEX IF NOT EXISTS idx_test_metrics_test_id ON test_metrics(test_id)"
         )
-        cursor.execute("CREATE INDEX IF NOT EXISTS idx_flaky_tests_test_id ON flaky_tests(test_id)")
+        cursor.execute(
+            "CREATE INDEX IF NOT EXISTS idx_flaky_tests_test_id ON flaky_tests(test_id)"
+        )
 
         conn.commit()
         conn.close()
 
-    def start_test_suite(self, test_run_id: str, environment: str = "development"):
+    def start_test_suite(
+        self, test_run_id: str, environment: str = "development"
+    ):
         """Start test suite metrics collection."""
         self.test_run_id = test_run_id
         self.environment = environment
@@ -196,7 +204,7 @@ class TestMetricsCollector:
         test_id: str,
         test_name: str,
         test_file: str,
-        status: TestStatus,
+        status: MetricStatus,
         error_message: str = None,
         stack_trace: str = None,
     ):
@@ -209,7 +217,7 @@ class TestMetricsCollector:
         memory_usage = self._get_memory_usage()
         cpu_usage = self._get_cpu_usage()
 
-        metric = TestMetric(
+        metric = ExecutionMetric(
             test_id=test_id,
             test_name=test_name,
             test_file=test_file,
@@ -227,21 +235,23 @@ class TestMetricsCollector:
 
         self.current_metrics.append(metric)
 
-    def end_test_suite(self) -> TestSuiteMetrics:
+    def end_test_suite(self) -> SuiteMetrics:
         """End test suite metrics collection."""
         end_time = time.time()
         total_duration = end_time - (self.suite_start_time or end_time)
 
         # Count test statuses
-        status_counts = Counter(metric.status for metric in self.current_metrics)
+        status_counts = Counter(
+            metric.status for metric in self.current_metrics
+        )
 
-        suite_metrics = TestSuiteMetrics(
+        suite_metrics = SuiteMetrics(
             test_run_id=self.test_run_id,
             total_tests=len(self.current_metrics),
-            passed_tests=status_counts[TestStatus.PASSED],
-            failed_tests=status_counts[TestStatus.FAILED],
-            skipped_tests=status_counts[TestStatus.SKIPPED],
-            error_tests=status_counts[TestStatus.ERROR],
+            passed_tests=status_counts[MetricStatus.PASSED],
+            failed_tests=status_counts[MetricStatus.FAILED],
+            skipped_tests=status_counts[MetricStatus.SKIPPED],
+            error_tests=status_counts[MetricStatus.ERROR],
             total_duration=total_duration,
             setup_duration=0.0,
             teardown_duration=0.0,
@@ -259,7 +269,7 @@ class TestMetricsCollector:
 
         return suite_metrics
 
-    def _store_suite_metrics(self, suite_metrics: TestSuiteMetrics):
+    def _store_suite_metrics(self, suite_metrics: SuiteMetrics):
         """Store suite metrics in database."""
         conn = sqlite3.connect(self.db_path)
         cursor = conn.cursor()
@@ -267,9 +277,9 @@ class TestMetricsCollector:
         # Insert suite metrics
         cursor.execute(
             """
-            INSERT OR REPLACE INTO test_runs 
-            (test_run_id, timestamp, total_tests, passed_tests, failed_tests, 
-             skipped_tests, error_tests, total_duration, setup_duration, 
+            INSERT OR REPLACE INTO test_runs
+            (test_run_id, timestamp, total_tests, passed_tests, failed_tests,
+             skipped_tests, error_tests, total_duration, setup_duration,
              teardown_duration, parallel_workers, environment)
             VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
         """,
@@ -295,9 +305,9 @@ class TestMetricsCollector:
         for metric in suite_metrics.test_metrics:
             cursor.execute(
                 """
-                INSERT INTO test_metrics 
-                (run_id, test_id, test_name, test_file, status, duration, 
-                 setup_duration, teardown_duration, memory_usage, cpu_usage, 
+                INSERT INTO test_metrics
+                (run_id, test_id, test_name, test_file, status, duration,
+                 setup_duration, teardown_duration, memory_usage, cpu_usage,
                  error_message, stack_trace, timestamp)
                 VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
             """,
@@ -329,16 +339,16 @@ class TestMetricsCollector:
         # Analyze flaky tests (tests that pass sometimes and fail sometimes)
         cursor.execute(
             """
-            SELECT test_id, test_name, test_file, 
+            SELECT test_id, test_name, test_file,
                    COUNT(*) as total_runs,
                    COUNT(CASE WHEN status = 'failed' THEN 1 END) as failed_runs,
                    COUNT(CASE WHEN status = 'passed' THEN 1 END) as passed_runs,
                    MIN(timestamp) as first_run,
                    MAX(timestamp) as last_run
-            FROM test_metrics 
+            FROM test_metrics
             WHERE test_id IN (
-                SELECT test_id FROM test_metrics 
-                GROUP BY test_id 
+                SELECT test_id FROM test_metrics
+                GROUP BY test_id
                 HAVING COUNT(DISTINCT status) > 1
             )
             GROUP BY test_id, test_name, test_file
@@ -362,8 +372,8 @@ class TestMetricsCollector:
 
                 cursor.execute(
                     """
-                    INSERT OR REPLACE INTO flaky_tests 
-                    (test_id, test_name, test_file, first_flaky_run, last_flaky_run, 
+                    INSERT OR REPLACE INTO flaky_tests
+                    (test_id, test_name, test_file, first_flaky_run, last_flaky_run,
                      flaky_count, total_runs, flaky_percentage)
                     VALUES (?, ?, ?, ?, ?, ?, ?, ?)
                 """,
@@ -382,13 +392,13 @@ class TestMetricsCollector:
         # Analyze slow tests (tests that take longer than average)
         cursor.execute(
             """
-            SELECT test_id, test_name, test_file, 
+            SELECT test_id, test_name, test_file,
                    AVG(duration) as avg_duration,
                    MAX(duration) as max_duration,
                    COUNT(*) as run_count,
                    MIN(timestamp) as first_detected,
                    MAX(timestamp) as last_detected
-            FROM test_metrics 
+            FROM test_metrics
             WHERE duration > (
                 SELECT AVG(duration) * 2 FROM test_metrics
             )
@@ -410,8 +420,8 @@ class TestMetricsCollector:
 
             cursor.execute(
                 """
-                INSERT OR REPLACE INTO slow_tests 
-                (test_id, test_name, test_file, avg_duration, max_duration, 
+                INSERT OR REPLACE INTO slow_tests
+                (test_id, test_name, test_file, avg_duration, max_duration,
                  slow_run_count, first_detected, last_detected)
                 VALUES (?, ?, ?, ?, ?, ?, ?, ?)
             """,
@@ -449,16 +459,18 @@ class TestMetricsCollector:
         except ImportError:
             return None
 
-    def get_flaky_tests(self, min_flaky_percentage: float = 10.0) -> List[Dict[str, Any]]:
+    def get_flaky_tests(
+        self, min_flaky_percentage: float = 10.0
+    ) -> List[Dict[str, Any]]:
         """Get flaky tests above the minimum percentage."""
         conn = sqlite3.connect(self.db_path)
         cursor = conn.cursor()
 
         cursor.execute(
             """
-            SELECT test_id, test_name, test_file, flaky_count, total_runs, 
+            SELECT test_id, test_name, test_file, flaky_count, total_runs,
                    flaky_percentage, first_flaky_run, last_flaky_run
-            FROM flaky_tests 
+            FROM flaky_tests
             WHERE flaky_percentage >= ? AND resolved_at IS NULL
             ORDER BY flaky_percentage DESC
         """,
@@ -483,16 +495,18 @@ class TestMetricsCollector:
         conn.close()
         return flaky_tests
 
-    def get_slow_tests(self, min_duration: float = 1.0) -> List[Dict[str, Any]]:
+    def get_slow_tests(
+        self, min_duration: float = 1.0
+    ) -> List[Dict[str, Any]]:
         """Get slow tests above the minimum duration."""
         conn = sqlite3.connect(self.db_path)
         cursor = conn.cursor()
 
         cursor.execute(
             """
-            SELECT test_id, test_name, test_file, avg_duration, max_duration, 
+            SELECT test_id, test_name, test_file, avg_duration, max_duration,
                    slow_run_count, first_detected, last_detected
-            FROM slow_tests 
+            FROM slow_tests
             WHERE avg_duration >= ?
             ORDER BY avg_duration DESC
         """,
@@ -517,7 +531,9 @@ class TestMetricsCollector:
         conn.close()
         return slow_tests
 
-    def get_test_trends(self, days: int = 30) -> Dict[str, List[Dict[str, Any]]]:
+    def get_test_trends(
+        self, days: int = 30
+    ) -> Dict[str, List[Dict[str, Any]]]:
         """Get test execution trends over time."""
         conn = sqlite3.connect(self.db_path)
         cursor = conn.cursor()
@@ -527,11 +543,11 @@ class TestMetricsCollector:
         # Get pass rate trends
         cursor.execute(
             """
-            SELECT DATE(timestamp) as date, 
+            SELECT DATE(timestamp) as date,
                    COUNT(*) as total_tests,
                    SUM(CASE WHEN passed_tests > 0 THEN 1 ELSE 0 END) as passed_runs,
                    AVG(CAST(passed_tests AS REAL) / total_tests * 100) as pass_rate
-            FROM test_runs 
+            FROM test_runs
             WHERE timestamp >= ?
             GROUP BY DATE(timestamp)
             ORDER BY date
@@ -542,17 +558,22 @@ class TestMetricsCollector:
         pass_rate_trends = []
         for row in cursor.fetchall():
             pass_rate_trends.append(
-                {"date": row[0], "total_tests": row[1], "passed_runs": row[2], "pass_rate": row[3]}
+                {
+                    "date": row[0],
+                    "total_tests": row[1],
+                    "passed_runs": row[2],
+                    "pass_rate": row[3],
+                }
             )
 
         # Get duration trends
         cursor.execute(
             """
-            SELECT DATE(timestamp) as date, 
+            SELECT DATE(timestamp) as date,
                    AVG(total_duration) as avg_duration,
                    MAX(total_duration) as max_duration,
                    MIN(total_duration) as min_duration
-            FROM test_runs 
+            FROM test_runs
             WHERE timestamp >= ?
             GROUP BY DATE(timestamp)
             ORDER BY date
@@ -572,9 +593,14 @@ class TestMetricsCollector:
             )
 
         conn.close()
-        return {"pass_rate_trends": pass_rate_trends, "duration_trends": duration_trends}
+        return {
+            "pass_rate_trends": pass_rate_trends,
+            "duration_trends": duration_trends,
+        }
 
-    def generate_metrics_report(self, output_path: str = "tests/reporting/metrics_report.html"):
+    def generate_metrics_report(
+        self, output_path: str = "tests/reporting/metrics_report.html"
+    ):
         """Generate HTML metrics report."""
         flaky_tests = self.get_flaky_tests()
         slow_tests = self.get_slow_tests()
@@ -585,9 +611,9 @@ class TestMetricsCollector:
         cursor = conn.cursor()
         cursor.execute(
             """
-            SELECT test_run_id, timestamp, total_tests, passed_tests, failed_tests, 
+            SELECT test_run_id, timestamp, total_tests, passed_tests, failed_tests,
                    skipped_tests, error_tests, total_duration
-            FROM test_runs 
+            FROM test_runs
             ORDER BY timestamp DESC LIMIT 1
         """
         )
@@ -598,7 +624,9 @@ class TestMetricsCollector:
             logger.warning("No test run data found")
             return
 
-        pass_rate = (latest_run[3] / latest_run[2]) * 100 if latest_run[2] > 0 else 0
+        pass_rate = (
+            (latest_run[3] / latest_run[2]) * 100 if latest_run[2] > 0 else 0
+        )
 
         html_content = f"""
         <!DOCTYPE html>
@@ -625,7 +653,7 @@ class TestMetricsCollector:
                 <h1>FreeAgentics Test Metrics Report</h1>
                 <p>Generated: {datetime.now().strftime('%Y-%m-%d %H:%M:%S')}</p>
                 <p>Latest Run: {latest_run[0]} ({latest_run[1]})</p>
-                
+
                 <div class="metric {'critical' if pass_rate < 50 else 'warning' if pass_rate < 80 else 'good'}">
                     <strong>Pass Rate: {pass_rate:.1f}%</strong>
                 </div>
@@ -642,7 +670,7 @@ class TestMetricsCollector:
                     <strong>Slow Tests: {len(slow_tests)}</strong>
                 </div>
             </div>
-            
+
             <h2>Flaky Tests ({len(flaky_tests)})</h2>
             <table>
                 <tr>
@@ -667,7 +695,7 @@ class TestMetricsCollector:
 
         html_content += f"""
             </table>
-            
+
             <h2>Slow Tests ({len(slow_tests)})</h2>
             <table>
                 <tr>
@@ -692,7 +720,7 @@ class TestMetricsCollector:
 
         html_content += """
             </table>
-            
+
             <h2>Test Execution Status</h2>
             <table>
                 <tr>
@@ -734,7 +762,9 @@ class TestMetricsCollector:
         logger.info(f"HTML metrics report generated: {output_path}")
         return output_path
 
-    def export_metrics_json(self, output_path: str = "tests/reporting/metrics_data.json"):
+    def export_metrics_json(
+        self, output_path: str = "tests/reporting/metrics_data.json"
+    ):
         """Export metrics data as JSON."""
         data = {
             "flaky_tests": self.get_flaky_tests(),
@@ -747,9 +777,9 @@ class TestMetricsCollector:
         cursor = conn.cursor()
         cursor.execute(
             """
-            SELECT test_run_id, timestamp, total_tests, passed_tests, failed_tests, 
+            SELECT test_run_id, timestamp, total_tests, passed_tests, failed_tests,
                    skipped_tests, error_tests, total_duration, environment
-            FROM test_runs 
+            FROM test_runs
             ORDER BY timestamp DESC LIMIT 1
         """
         )
@@ -787,9 +817,9 @@ class TestMetricsCollector:
         # Delete old test metrics
         cursor.execute(
             """
-            DELETE FROM test_metrics 
+            DELETE FROM test_metrics
             WHERE run_id IN (
-                SELECT id FROM test_runs 
+                SELECT id FROM test_runs
                 WHERE timestamp < ?
             )
         """,
@@ -799,7 +829,7 @@ class TestMetricsCollector:
         # Delete old test runs
         cursor.execute(
             """
-            DELETE FROM test_runs 
+            DELETE FROM test_runs
             WHERE timestamp < ?
         """,
             (cutoff_date,),

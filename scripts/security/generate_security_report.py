@@ -175,17 +175,17 @@ REPORT_TEMPLATE = """
                 <div class="progress-fill" style="width: {{ security_score }}%"></div>
             </div>
         </div>
-        
+
         <div class="metric {{ 'danger' if critical_issues > 0 else 'warning' if high_issues > 0 else 'good' }}">
             <div class="label">Critical Issues</div>
             <div class="value">{{ critical_issues }}</div>
         </div>
-        
+
         <div class="metric {{ 'warning' if vulnerabilities > 5 else 'good' }}">
             <div class="label">Vulnerabilities</div>
             <div class="value">{{ vulnerabilities }}</div>
         </div>
-        
+
         <div class="metric {{ 'good' if compliance_score >= 80 else 'warning' }}">
             <div class="label">Compliance</div>
             <div class="value">{{ compliance_score }}%</div>
@@ -195,7 +195,7 @@ REPORT_TEMPLATE = """
     <div class="section">
         <h2>📊 Executive Summary</h2>
         <p>{{ executive_summary }}</p>
-        
+
         {% if critical_findings %}
         <div class="finding critical">
             <h4>⚠️ Critical Findings Requiring Immediate Attention</h4>
@@ -210,7 +210,7 @@ REPORT_TEMPLATE = """
 
     <div class="section">
         <h2>🔍 Static Analysis (SAST)</h2>
-        
+
         <h3>Bandit Security Scan</h3>
         {% if bandit_results %}
         <table>
@@ -237,7 +237,7 @@ REPORT_TEMPLATE = """
             <h4>Security Pattern Violations</h4>
             <ul>
             {% for finding in semgrep_results %}
-                <li><strong>{{ finding.rule }}:</strong> {{ finding.message }} 
+                <li><strong>{{ finding.rule }}:</strong> {{ finding.message }}
                     <code>{{ finding.file }}:{{ finding.line }}</code>
                 </li>
             {% endfor %}
@@ -250,7 +250,7 @@ REPORT_TEMPLATE = """
 
     <div class="section">
         <h2>📦 Dependency Analysis</h2>
-        
+
         <h3>Vulnerable Dependencies</h3>
         {% if vulnerable_deps %}
         <table>
@@ -279,7 +279,7 @@ REPORT_TEMPLATE = """
 
     <div class="section">
         <h2>🐳 Container Security</h2>
-        
+
         {% if container_issues %}
         <h3>Docker Security Issues</h3>
         {% for issue in container_issues %}
@@ -296,7 +296,7 @@ REPORT_TEMPLATE = """
 
     <div class="section">
         <h2>🔐 Authentication & Authorization</h2>
-        
+
         <table>
             <tr>
                 <th>Check</th>
@@ -336,7 +336,7 @@ REPORT_TEMPLATE = """
 
     <div class="section">
         <h2>🌐 API Security</h2>
-        
+
         <h3>Security Headers</h3>
         <table>
             <tr>
@@ -361,7 +361,7 @@ REPORT_TEMPLATE = """
 
     <div class="section">
         <h2>📜 Compliance Status</h2>
-        
+
         <h3>OWASP Top 10 Coverage</h3>
         <table>
             <tr>
@@ -383,7 +383,7 @@ REPORT_TEMPLATE = """
 
     <div class="section">
         <h2>🎯 Recommendations</h2>
-        
+
         <h3>High Priority</h3>
         {% for rec in high_priority_recommendations %}
         <div class="recommendation">
@@ -451,10 +451,14 @@ class SecurityReportGenerator:
             import subprocess
 
             result = subprocess.run(
-                ["git", "rev-parse", "--short", "HEAD"], capture_output=True, text=True
+                ["git", "rev-parse", "--short", "HEAD"],
+                capture_output=True,
+                text=True,
             )
-            return result.stdout.strip() if result.returncode == 0 else "unknown"
-        except:
+            return (
+                result.stdout.strip() if result.returncode == 0 else "unknown"
+            )
+        except Exception:
             return "unknown"
 
     def load_sast_results(self, sast_dir: Path):
@@ -493,7 +497,9 @@ class SecurityReportGenerator:
                     findings.append(
                         {
                             "rule": result.get("ruleId", "unknown"),
-                            "message": result.get("message", {}).get("text", ""),
+                            "message": result.get("message", {}).get(
+                                "text", ""
+                            ),
                             "file": result.get("locations", [{}])[0]
                             .get("physicalLocation", {})
                             .get("artifactLocation", {})
@@ -547,7 +553,9 @@ class SecurityReportGenerator:
 
         self.data["vulnerable_deps"] = vulnerable_deps
         self.data["vulnerabilities"] += len(vulnerable_deps)
-        self.data["license_summary"] = "All dependencies use compatible licenses"
+        self.data[
+            "license_summary"
+        ] = "All dependencies use compatible licenses"
 
     def load_container_results(self, container_dir: Path):
         """Load container scan results."""
@@ -564,7 +572,9 @@ class SecurityReportGenerator:
                     issues.append(
                         {
                             "title": result.get("ruleId", "Unknown"),
-                            "description": result.get("message", {}).get("text", ""),
+                            "description": result.get("message", {}).get(
+                                "text", ""
+                            ),
                             "severity": "HIGH",
                             "file": "Dockerfile",
                         }
@@ -660,11 +670,11 @@ class SecurityReportGenerator:
         elif self.data["security_score"] >= 60:
             summary = "The security posture of FreeAgentics is FAIR and needs improvement. "
         else:
-            summary = (
-                "The security posture of FreeAgentics is POOR and requires immediate attention. "
-            )
+            summary = "The security posture of FreeAgentics is POOR and requires immediate attention. "
 
-        summary += f"The overall security score is {self.data['security_score']}%. "
+        summary += (
+            f"The overall security score is {self.data['security_score']}%. "
+        )
 
         if self.data["critical_issues"] > 0:
             summary += f"There are {self.data['critical_issues']} critical issues that must be addressed immediately. "
@@ -694,11 +704,19 @@ class SecurityReportGenerator:
             "X-Frame-Options": {"present": True, "value": "DENY"},
             "X-XSS-Protection": {"present": True, "value": "1; mode=block"},
             "Strict-Transport-Security": {"present": False, "value": None},
-            "Content-Security-Policy": {"present": True, "value": "default-src 'self'"},
-            "Referrer-Policy": {"present": True, "value": "strict-origin-when-cross-origin"},
+            "Content-Security-Policy": {
+                "present": True,
+                "value": "default-src 'self'",
+            },
+            "Referrer-Policy": {
+                "present": True,
+                "value": "strict-origin-when-cross-origin",
+            },
         }
 
-        self.data["cors_summary"] = "CORS is properly configured with whitelisted origins"
+        self.data[
+            "cors_summary"
+        ] = "CORS is properly configured with whitelisted origins"
 
     def add_trend_summary(self):
         """Add security trend summary."""
@@ -733,10 +751,14 @@ class SecurityReportGenerator:
 def main():
     parser = argparse.ArgumentParser(description="Generate security report")
     parser.add_argument("--sast", help="SAST results directory")
-    parser.add_argument("--dependency", help="Dependency scan results directory")
+    parser.add_argument(
+        "--dependency", help="Dependency scan results directory"
+    )
     parser.add_argument("--container", help="Container scan results directory")
     parser.add_argument("--compliance", help="Compliance results directory")
-    parser.add_argument("--output", default="security-report.html", help="Output file")
+    parser.add_argument(
+        "--output", default="security-report.html", help="Output file"
+    )
 
     args = parser.parse_args()
 

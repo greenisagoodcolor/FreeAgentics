@@ -1,8 +1,10 @@
 """Authentication and security package."""
 
 from .security_implementation import (
+    ALGORITHM,
     CSRF_COOKIE_NAME,
     CSRF_HEADER_NAME,
+    AuthenticationManager,
     CSRFProtection,
     Permission,
     SecurityMiddleware,
@@ -19,9 +21,12 @@ from .security_implementation import (
     require_role,
     secure_database_query,
     security_validator,
+    validate_csrf_token,
 )
 
 __all__ = [
+    "ALGORITHM",
+    "AuthenticationManager",
     "auth_manager",
     "rate_limiter",
     "security_validator",
@@ -40,4 +45,5 @@ __all__ = [
     "CSRFProtection",
     "CSRF_HEADER_NAME",
     "CSRF_COOKIE_NAME",
+    "validate_csrf_token",
 ]

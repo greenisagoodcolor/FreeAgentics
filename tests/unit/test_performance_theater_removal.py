@@ -30,13 +30,21 @@ class TestHardFailureRequirement:
         source = inspect.getsource(GoalOptimizerAgent._initialize_pymdp)
 
         # Verify performance theater patterns have been eliminated
-        assert "return None" not in source, "Method should not return None (performance theater)"
-        assert "try:" not in source or "except" not in source, "Should not use try/except fallbacks"
-        assert "raise ImportError" in source, "Should raise ImportError for hard failure"
+        assert (
+            "return None" not in source
+        ), "Method should not return None (performance theater)"
+        assert (
+            "try:" not in source or "except" not in source
+        ), "Should not use try/except fallbacks"
+        assert (
+            "raise ImportError" in source
+        ), "Should raise ImportError for hard failure"
         assert "PyMDP required" in source, "Should have proper error message"
         assert "pip install" in source, "Should mention pip install"
 
-        print("✅ GoalOptimizer._initialize_pymdp correctly implements hard failure pattern")
+        print(
+            "✅ GoalOptimizer._initialize_pymdp correctly implements hard failure pattern"
+        )
 
     def test_pattern_predictor_fails_hard_without_pymdp(self):
         """Test that PatternPredictor implementation raises ImportError (verifies our changes work)."""
@@ -49,33 +57,51 @@ class TestHardFailureRequirement:
         source = inspect.getsource(PatternPredictorAgent._initialize_pymdp)
 
         # Verify performance theater patterns have been eliminated
-        assert "return None" not in source, "Method should not return None (performance theater)"
-        assert "try:" not in source or "except" not in source, "Should not use try/except fallbacks"
-        assert "raise ImportError" in source, "Should raise ImportError for hard failure"
+        assert (
+            "return None" not in source
+        ), "Method should not return None (performance theater)"
+        assert (
+            "try:" not in source or "except" not in source
+        ), "Should not use try/except fallbacks"
+        assert (
+            "raise ImportError" in source
+        ), "Should raise ImportError for hard failure"
         assert "PyMDP required" in source, "Should have proper error message"
         assert "pip install" in source, "Should mention pip install"
 
-        print("✅ PatternPredictor._initialize_pymdp correctly implements hard failure pattern")
+        print(
+            "✅ PatternPredictor._initialize_pymdp correctly implements hard failure pattern"
+        )
 
     def test_pymdp_benchmarks_fail_hard_without_pymdp(self):
         """FAILING TEST: PyMDPBenchmarks should raise ImportError, not return dummy results."""
         try:
             from tests.performance.pymdp_benchmarks import PyMDPBenchmarks
         except Exception:
-            pytest.skip("PyMDPBenchmarks import failed - will be fixed during implementation")
+            pytest.skip(
+                "PyMDPBenchmarks import failed - will be fixed during implementation"
+            )
 
         # Mock PYMDP_AVAILABLE to False
-        with patch("tests.performance.pymdp_benchmarks.PYMDP_AVAILABLE", False):
+        with patch(
+            "tests.performance.pymdp_benchmarks.PYMDP_AVAILABLE", False
+        ):
             benchmarks = PyMDPBenchmarks()
 
             # These should raise ImportError, not return dummy results
-            with pytest.raises(ImportError, match="PyMDP required.*pip install"):
+            with pytest.raises(
+                ImportError, match="PyMDP required.*pip install"
+            ):
                 benchmarks.benchmark_agent_creation()
 
-            with pytest.raises(ImportError, match="PyMDP required.*pip install"):
+            with pytest.raises(
+                ImportError, match="PyMDP required.*pip install"
+            ):
                 benchmarks.benchmark_inference_speed()
 
-            with pytest.raises(ImportError, match="PyMDP required.*pip install"):
+            with pytest.raises(
+                ImportError, match="PyMDP required.*pip install"
+            ):
                 benchmarks.benchmark_matrix_operations()
 
     def test_no_dummy_result_method_exists(self):
@@ -90,7 +116,9 @@ class TestHardFailureRequirement:
                 benchmarks, "_create_dummy_result"
             ), "_create_dummy_result method should be removed - it's performance theater"
         except Exception:
-            pytest.skip("PyMDPBenchmarks import failed - will be fixed during implementation")
+            pytest.skip(
+                "PyMDPBenchmarks import failed - will be fixed during implementation"
+            )
 
 
 class TestMockResponseElimination:
@@ -135,7 +163,9 @@ class TestMockResponseElimination:
 
                 for pattern in mock_patterns:
                     matches = re.findall(pattern, content, re.IGNORECASE)
-                    assert not matches, f"Found mock pattern '{pattern}' in {file_path}: {matches}"
+                    assert (
+                        not matches
+                    ), f"Found mock pattern '{pattern}' in {file_path}: {matches}"
 
 
 class TestTimeDelayElimination:
@@ -152,7 +182,13 @@ class TestTimeDelayElimination:
         import re
 
         # Production directories that should NOT contain sleep calls
-        production_dirs = ["agents", "api", "database", "inference", "knowledge_graph"]
+        production_dirs = [
+            "agents",
+            "api",
+            "database",
+            "inference",
+            "knowledge_graph",
+        ]
 
         sleep_pattern = r"time\.sleep\("
 
@@ -168,7 +204,10 @@ class TestTimeDelayElimination:
                                 matches = re.findall(sleep_pattern, content)
 
                                 # Allow sleep only in very specific cases (like retry logic)
-                                if matches and "retry" not in file_path.lower():
+                                if (
+                                    matches
+                                    and "retry" not in file_path.lower()
+                                ):
                                     assert (
                                         False
                                     ), f"Found time.sleep() in production code: {file_path}"
@@ -196,7 +235,9 @@ class TestTimeDelayElimination:
                             content = f.read()
 
                             for pattern in progress_patterns:
-                                matches = re.findall(pattern, content, re.IGNORECASE)
+                                matches = re.findall(
+                                    pattern, content, re.IGNORECASE
+                                )
                                 assert (
                                     not matches
                                 ), f"Found progress theater '{pattern}' in {file_path}"
@@ -222,7 +263,11 @@ class TestAssertionBasedValidation:
 
         test_cases = [
             ("agents.goal_optimizer", "GoalOptimizer", "_initialize_pymdp"),
-            ("agents.pattern_predictor", "PatternPredictor", "_initialize_pymdp"),
+            (
+                "agents.pattern_predictor",
+                "PatternPredictor",
+                "_initialize_pymdp",
+            ),
         ]
 
         for module_name, class_name, method_name in test_cases:
@@ -232,7 +277,9 @@ class TestAssertionBasedValidation:
 
             # Create instance
             if class_name == "GoalOptimizer":
-                instance = cls("test", "test", optimization_target="efficiency")
+                instance = cls(
+                    "test", "test", optimization_target="efficiency"
+                )
             else:
                 instance = cls("test", "test", model_complexity="high")
 
@@ -256,7 +303,9 @@ class TestRealityCheckpoint:
         with patch("agents.goal_optimizer.PYMDP_AVAILABLE", False):
             from agents.goal_optimizer import GoalOptimizerAgent
 
-            optimizer = GoalOptimizerAgent("test", "test", optimization_target="efficiency")
+            optimizer = GoalOptimizerAgent(
+                "test", "test", optimization_target="efficiency"
+            )
 
             # Should fail immediately, not gracefully degrade
             with pytest.raises(ImportError):
@@ -276,7 +325,9 @@ class TestRealityCheckpoint:
             # Should assert valid configuration, not silently use defaults
             from agents.goal_optimizer import GoalOptimizerAgent
 
-            optimizer = GoalOptimizerAgent("", "", optimization_target="invalid_target")
+            optimizer = GoalOptimizerAgent(
+                "", "", optimization_target="invalid_target"
+            )
 
     def test_no_graceful_degradation_patterns(self):
         """FAILING TEST: Verify no graceful degradation patterns exist."""
@@ -301,7 +352,11 @@ class TestRealityCheckpoint:
                             content = f.read()
 
                             for pattern in graceful_patterns:
-                                matches = re.findall(pattern, content, re.IGNORECASE | re.MULTILINE)
+                                matches = re.findall(
+                                    pattern,
+                                    content,
+                                    re.IGNORECASE | re.MULTILINE,
+                                )
                                 if matches:
                                     # Allow specific exceptions for legitimate use cases
                                     if "retry" not in file_path.lower():

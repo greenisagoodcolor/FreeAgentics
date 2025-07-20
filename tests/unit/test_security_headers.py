@@ -58,17 +58,22 @@ class TestCertificatePinner:
 
     def test_add_pin(self):
         """Test adding certificate pins."""
-        self.pinner.add_pin("example.com", "sha256-AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA=")
+        self.pinner.add_pin(
+            "example.com",
+            "sha256-AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA=",
+        )
 
         assert "example.com" in self.pinner.pins
         assert (
-            "sha256-AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA=" in self.pinner.pins["example.com"]
+            "sha256-AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA="
+            in self.pinner.pins["example.com"]
         )
 
     def test_add_backup_pin(self):
         """Test adding backup certificate pins."""
         self.pinner.add_backup_pin(
-            "example.com", "sha256-BBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBB="
+            "example.com",
+            "sha256-BBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBB=",
         )
 
         assert "example.com" in self.pinner.backup_pins
@@ -79,9 +84,13 @@ class TestCertificatePinner:
 
     def test_generate_header_with_pins(self):
         """Test generating Public-Key-Pins header."""
-        self.pinner.add_pin("example.com", "sha256-AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA=")
+        self.pinner.add_pin(
+            "example.com",
+            "sha256-AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA=",
+        )
         self.pinner.add_backup_pin(
-            "example.com", "sha256-BBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBB="
+            "example.com",
+            "sha256-BBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBB=",
         )
 
         header = self.pinner.generate_header("example.com")
@@ -162,7 +171,9 @@ class TestSecurityHeadersManager:
 
     def test_generate_csp_header_custom_policy(self):
         """Test CSP header generation with custom policy."""
-        self.manager.policy.csp_policy = "default-src 'self'; script-src 'self' 'unsafe-inline'"
+        self.manager.policy.csp_policy = (
+            "default-src 'self'; script-src 'self' 'unsafe-inline'"
+        )
         csp = self.manager.generate_csp_header()
 
         assert csp == "default-src 'self'; script-src 'self' 'unsafe-inline'"

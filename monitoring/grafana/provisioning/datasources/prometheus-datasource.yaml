@@ -23,7 +23,7 @@ datasources:
         - name: traceID
           datasourceUid: jaeger
           urlDisplayLabel: View in Jaeger
-      
+
   - name: AlertManager
     type: alertmanager
     access: proxy
@@ -37,7 +37,7 @@ datasources:
     jsonData:
       implementation: prometheus
       handleGrafanaManagedAlerts: true
-      
+
   - name: Jaeger
     type: jaeger
     access: proxy
@@ -61,7 +61,7 @@ datasources:
         spanEndTimeShift: '1h'
         filterByTraceID: false
         filterBySpanID: false
-        
+
   - name: Loki
     type: loki
     access: proxy

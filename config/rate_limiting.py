@@ -6,7 +6,7 @@ across different environments (development, staging, production).
 
 import os
 from dataclasses import dataclass
-from typing import Dict, Optional
+from typing import Any, Dict, Optional
 
 
 @dataclass
@@ -26,9 +26,12 @@ class RateLimitingConfig:
     """Configuration manager for rate limiting settings."""
 
     def __init__(self):
+        """Initialize the rate limiting configuration."""
         self.environment = os.getenv("ENVIRONMENT", "development").lower()
         self.redis_url = os.getenv("REDIS_URL", "redis://localhost:6379")
-        self.enabled = os.getenv("RATE_LIMITING_ENABLED", "true").lower() == "true"
+        self.enabled = (
+            os.getenv("RATE_LIMITING_ENABLED", "true").lower() == "true"
+        )
 
     def get_config_for_environment(self) -> Dict[str, RateLimitConfig]:
         """Get rate limiting configuration for current environment."""
@@ -159,36 +162,78 @@ class RateLimitingConfig:
             # Custom configuration via environment variables
             return {
                 "auth": RateLimitConfig(
-                    requests_per_minute=int(os.getenv("RATE_LIMIT_AUTH_PER_MINUTE", "5")),
-                    requests_per_hour=int(os.getenv("RATE_LIMIT_AUTH_PER_HOUR", "100")),
+                    requests_per_minute=int(
+                        os.getenv("RATE_LIMIT_AUTH_PER_MINUTE", "5")
+                    ),
+                    requests_per_hour=int(
+                        os.getenv("RATE_LIMIT_AUTH_PER_HOUR", "100")
+                    ),
                     burst_limit=int(os.getenv("RATE_LIMIT_AUTH_BURST", "3")),
-                    block_duration=int(os.getenv("RATE_LIMIT_AUTH_BLOCK", "600")),
-                    ddos_threshold=int(os.getenv("RATE_LIMIT_AUTH_DDOS_THRESHOLD", "500")),
-                    ddos_block_duration=int(os.getenv("RATE_LIMIT_AUTH_DDOS_BLOCK", "3600")),
+                    block_duration=int(
+                        os.getenv("RATE_LIMIT_AUTH_BLOCK", "600")
+                    ),
+                    ddos_threshold=int(
+                        os.getenv("RATE_LIMIT_AUTH_DDOS_THRESHOLD", "500")
+                    ),
+                    ddos_block_duration=int(
+                        os.getenv("RATE_LIMIT_AUTH_DDOS_BLOCK", "3600")
+                    ),
                 ),
                 "api": RateLimitConfig(
-                    requests_per_minute=int(os.getenv("RATE_LIMIT_API_PER_MINUTE", "100")),
-                    requests_per_hour=int(os.getenv("RATE_LIMIT_API_PER_HOUR", "2000")),
+                    requests_per_minute=int(
+                        os.getenv("RATE_LIMIT_API_PER_MINUTE", "100")
+                    ),
+                    requests_per_hour=int(
+                        os.getenv("RATE_LIMIT_API_PER_HOUR", "2000")
+                    ),
                     burst_limit=int(os.getenv("RATE_LIMIT_API_BURST", "20")),
-                    block_duration=int(os.getenv("RATE_LIMIT_API_BLOCK", "300")),
-                    ddos_threshold=int(os.getenv("RATE_LIMIT_API_DDOS_THRESHOLD", "1000")),
-                    ddos_block_duration=int(os.getenv("RATE_LIMIT_API_DDOS_BLOCK", "3600")),
+                    block_duration=int(
+                        os.getenv("RATE_LIMIT_API_BLOCK", "300")
+                    ),
+                    ddos_threshold=int(
+                        os.getenv("RATE_LIMIT_API_DDOS_THRESHOLD", "1000")
+                    ),
+                    ddos_block_duration=int(
+                        os.getenv("RATE_LIMIT_API_DDOS_BLOCK", "3600")
+                    ),
                 ),
                 "websocket": RateLimitConfig(
-                    requests_per_minute=int(os.getenv("RATE_LIMIT_WS_PER_MINUTE", "200")),
-                    requests_per_hour=int(os.getenv("RATE_LIMIT_WS_PER_HOUR", "5000")),
+                    requests_per_minute=int(
+                        os.getenv("RATE_LIMIT_WS_PER_MINUTE", "200")
+                    ),
+                    requests_per_hour=int(
+                        os.getenv("RATE_LIMIT_WS_PER_HOUR", "5000")
+                    ),
                     burst_limit=int(os.getenv("RATE_LIMIT_WS_BURST", "50")),
-                    block_duration=int(os.getenv("RATE_LIMIT_WS_BLOCK", "180")),
-                    ddos_threshold=int(os.getenv("RATE_LIMIT_WS_DDOS_THRESHOLD", "2000")),
-                    ddos_block_duration=int(os.getenv("RATE_LIMIT_WS_DDOS_BLOCK", "1800")),
+                    block_duration=int(
+                        os.getenv("RATE_LIMIT_WS_BLOCK", "180")
+                    ),
+                    ddos_threshold=int(
+                        os.getenv("RATE_LIMIT_WS_DDOS_THRESHOLD", "2000")
+                    ),
+                    ddos_block_duration=int(
+                        os.getenv("RATE_LIMIT_WS_DDOS_BLOCK", "1800")
+                    ),
                 ),
                 "static": RateLimitConfig(
-                    requests_per_minute=int(os.getenv("RATE_LIMIT_STATIC_PER_MINUTE", "200")),
-                    requests_per_hour=int(os.getenv("RATE_LIMIT_STATIC_PER_HOUR", "10000")),
-                    burst_limit=int(os.getenv("RATE_LIMIT_STATIC_BURST", "100")),
-                    block_duration=int(os.getenv("RATE_LIMIT_STATIC_BLOCK", "60")),
-                    ddos_threshold=int(os.getenv("RATE_LIMIT_STATIC_DDOS_THRESHOLD", "5000")),
-                    ddos_block_duration=int(os.getenv("RATE_LIMIT_STATIC_DDOS_BLOCK", "900")),
+                    requests_per_minute=int(
+                        os.getenv("RATE_LIMIT_STATIC_PER_MINUTE", "200")
+                    ),
+                    requests_per_hour=int(
+                        os.getenv("RATE_LIMIT_STATIC_PER_HOUR", "10000")
+                    ),
+                    burst_limit=int(
+                        os.getenv("RATE_LIMIT_STATIC_BURST", "100")
+                    ),
+                    block_duration=int(
+                        os.getenv("RATE_LIMIT_STATIC_BLOCK", "60")
+                    ),
+                    ddos_threshold=int(
+                        os.getenv("RATE_LIMIT_STATIC_DDOS_THRESHOLD", "5000")
+                    ),
+                    ddos_block_duration=int(
+                        os.getenv("RATE_LIMIT_STATIC_DDOS_BLOCK", "900")
+                    ),
                 ),
             }
         except ValueError as e:
@@ -208,30 +253,47 @@ class RateLimitingConfig:
         # Fall back to environment config
         return self.get_config_for_environment()
 
-    def get_redis_config(self) -> Dict[str, any]:
+    def get_redis_config(self) -> Dict[str, Any]:
         """Get Redis configuration for rate limiting."""
         return {
             "url": self.redis_url,
             "max_connections": int(os.getenv("REDIS_MAX_CONNECTIONS", "20")),
-            "retry_on_timeout": os.getenv("REDIS_RETRY_ON_TIMEOUT", "true").lower() == "true",
-            "socket_keepalive": os.getenv("REDIS_SOCKET_KEEPALIVE", "true").lower() == "true",
-            "health_check_interval": int(os.getenv("REDIS_HEALTH_CHECK_INTERVAL", "30")),
-            "socket_connect_timeout": int(os.getenv("REDIS_CONNECT_TIMEOUT", "5")),
+            "retry_on_timeout": os.getenv(
+                "REDIS_RETRY_ON_TIMEOUT", "true"
+            ).lower()
+            == "true",
+            "socket_keepalive": os.getenv(
+                "REDIS_SOCKET_KEEPALIVE", "true"
+            ).lower()
+            == "true",
+            "health_check_interval": int(
+                os.getenv("REDIS_HEALTH_CHECK_INTERVAL", "30")
+            ),
+            "socket_connect_timeout": int(
+                os.getenv("REDIS_CONNECT_TIMEOUT", "5")
+            ),
             "socket_timeout": int(os.getenv("REDIS_SOCKET_TIMEOUT", "5")),
         }
 
-    def get_monitoring_config(self) -> Dict[str, any]:
+    def get_monitoring_config(self) -> Dict[str, Any]:
         """Get monitoring configuration for rate limiting."""
         return {
-            "enable_metrics": os.getenv("RATE_LIMITING_METRICS_ENABLED", "true").lower() == "true",
-            "metrics_interval": int(os.getenv("RATE_LIMITING_METRICS_INTERVAL", "60")),
-            "alert_threshold": float(os.getenv("RATE_LIMITING_ALERT_THRESHOLD", "0.8")),
+            "enable_metrics": os.getenv(
+                "RATE_LIMITING_METRICS_ENABLED", "true"
+            ).lower()
+            == "true",
+            "metrics_interval": int(
+                os.getenv("RATE_LIMITING_METRICS_INTERVAL", "60")
+            ),
+            "alert_threshold": float(
+                os.getenv("RATE_LIMITING_ALERT_THRESHOLD", "0.8")
+            ),
             "log_level": os.getenv("RATE_LIMITING_LOG_LEVEL", "INFO").upper(),
         }
 
     def is_enabled(self) -> bool:
         """Check if rate limiting is enabled."""
-        return self.enabled
+        return bool(self.enabled)
 
     def get_whitelist(self) -> list:
         """Get IP whitelist for rate limiting bypass."""
@@ -247,7 +309,9 @@ class RateLimitingConfig:
         if not whitelist_str:
             return []
 
-        return [user.strip() for user in whitelist_str.split(",") if user.strip()]
+        return [
+            user.strip() for user in whitelist_str.split(",") if user.strip()
+        ]
 
 
 # Global configuration instance

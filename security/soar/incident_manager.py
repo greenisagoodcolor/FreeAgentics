@@ -158,17 +158,32 @@ class IncidentManager:
         # Playbook mappings
         self.incident_playbook_mapping = {
             IncidentType.MALWARE: ["malware_response", "isolate_and_analyze"],
-            IncidentType.UNAUTHORIZED_ACCESS: ["access_violation_response", "credential_reset"],
-            IncidentType.DATA_BREACH: ["data_breach_response", "breach_notification"],
-            IncidentType.DENIAL_OF_SERVICE: ["ddos_mitigation", "traffic_analysis"],
+            IncidentType.UNAUTHORIZED_ACCESS: [
+                "access_violation_response",
+                "credential_reset",
+            ],
+            IncidentType.DATA_BREACH: [
+                "data_breach_response",
+                "breach_notification",
+            ],
+            IncidentType.DENIAL_OF_SERVICE: [
+                "ddos_mitigation",
+                "traffic_analysis",
+            ],
             IncidentType.PHISHING: ["phishing_response", "user_awareness"],
-            IncidentType.INSIDER_THREAT: ["insider_threat_response", "access_review"],
+            IncidentType.INSIDER_THREAT: [
+                "insider_threat_response",
+                "access_review",
+            ],
             IncidentType.ZERO_DAY: ["zero_day_response", "emergency_patching"],
         }
 
         # Severity thresholds
         self.severity_thresholds = {
-            "critical": {"response_time": 15, "escalation_time": 30},  # minutes
+            "critical": {
+                "response_time": 15,
+                "escalation_time": 30,
+            },  # minutes
             "high": {"response_time": 60, "escalation_time": 120},
             "medium": {"response_time": 240, "escalation_time": 480},
             "low": {"response_time": 1440, "escalation_time": 2880},
@@ -228,7 +243,9 @@ class IncidentManager:
                     "resolved_at",
                 ]:
                     if case_dict.get(date_field):
-                        case_dict[date_field] = case_dict[date_field].isoformat()
+                        case_dict[date_field] = case_dict[
+                            date_field
+                        ].isoformat()
 
                 cases_data.append(case_dict)
 
@@ -378,7 +395,10 @@ class IncidentManager:
                     "incident_type": case.type.value,
                     "severity": case.severity.value,
                     "affected_assets": case.affected_assets,
-                    "indicators": [{"type": i.type, "value": i.value} for i in case.indicators],
+                    "indicators": [
+                        {"type": i.type, "value": i.value}
+                        for i in case.indicators
+                    ],
                 }
 
                 # Add specific variables based on indicators
@@ -391,7 +411,9 @@ class IncidentManager:
                         variables["affected_server"] = indicator.value
 
                 # Execute playbook
-                logger.info(f"Executing playbook {playbook_id} for case {case.case_id}")
+                logger.info(
+                    f"Executing playbook {playbook_id} for case {case.case_id}"
+                )
                 context = await self.playbook_engine.execute_playbook(
                     playbook_id=playbook_id,
                     trigger=PlaybookTrigger.ALERT,
@@ -410,7 +432,9 @@ class IncidentManager:
                 )
 
         except Exception as e:
-            logger.error(f"Failed to execute playbooks for {case.case_id}: {e}")
+            logger.error(
+                f"Failed to execute playbooks for {case.case_id}: {e}"
+            )
 
     def update_incident_status(
         self,
@@ -451,7 +475,9 @@ class IncidentManager:
             self._save_cases()
             return True
 
-    def add_incident_notes(self, case_id: str, notes: str, actor: str = "analyst") -> bool:
+    def add_incident_notes(
+        self, case_id: str, notes: str, actor: str = "analyst"
+    ) -> bool:
         """Add notes to incident."""
         with self.case_lock:
             if case_id not in self.cases:
@@ -459,16 +485,24 @@ class IncidentManager:
 
             case = self.cases[case_id]
             case.notes.append(
-                {"timestamp": datetime.utcnow().isoformat(), "actor": actor, "content": notes}
+                {
+                    "timestamp": datetime.utcnow().isoformat(),
+                    "actor": actor,
+                    "content": notes,
+                }
             )
             case.updated_at = datetime.utcnow()
 
-            self._add_timeline_entry(case, "notes_added", "Added investigation notes", actor)
+            self._add_timeline_entry(
+                case, "notes_added", "Added investigation notes", actor
+            )
 
             self._save_cases()
             return True
 
-    def add_indicators(self, case_id: str, indicators: List[Dict[str, Any]]) -> bool:
+    def add_indicators(
+        self, case_id: str, indicators: List[Dict[str, Any]]
+    ) -> bool:
         """Add indicators to incident."""
         with self.case_lock:
             if case_id not in self.cases:
@@ -495,7 +529,10 @@ class IncidentManager:
             case.updated_at = datetime.utcnow()
 
             self._add_timeline_entry(
-                case, "indicators_added", f"Added {len(indicators)} new indicators", "system"
+                case,
+                "indicators_added",
+                f"Added {len(indicators)} new indicators",
+                "system",
             )
 
             self._save_cases()
@@ -537,7 +574,9 @@ class IncidentManager:
 
                 # Check for matching indicators
                 case_indicators = {(i.type, i.value) for i in case.indicators}
-                other_indicators = {(i.type, i.value) for i in other_case.indicators}
+                other_indicators = {
+                    (i.type, i.value) for i in other_case.indicators
+                }
 
                 if case_indicators & other_indicators:
                     related.append(other_case)
@@ -549,7 +588,9 @@ class IncidentManager:
 
         return related
 
-    def _determine_team(self, incident_type: IncidentType, severity: IncidentSeverity) -> str:
+    def _determine_team(
+        self, incident_type: IncidentType, severity: IncidentSeverity
+    ) -> str:
         """Determine which team should handle incident."""
         # Simple mapping - extend based on organization
         team_mapping = {
@@ -596,10 +637,10 @@ class IncidentManager:
                         # Escalate if no response
                         if (
                             case.status == IncidentStatus.NEW
-                            and time_since_creation > threshold["response_time"]
+                            and time_since_creation
+                            > threshold["response_time"]
                             and case.escalation_level == 0
                         ):
-
                             case.escalation_level = 1
                             self._add_timeline_entry(
                                 case,
@@ -607,7 +648,9 @@ class IncidentManager:
                                 f'Escalated due to no response after {threshold["response_time"]} minutes',
                                 "system",
                             )
-                            logger.warning(f"Escalated case {case.case_id} due to SLA breach")
+                            logger.warning(
+                                f"Escalated case {case.case_id} due to SLA breach"
+                            )
 
                 # Sleep for a minute
                 time.sleep(60)
@@ -625,26 +668,38 @@ class IncidentManager:
                         # Mean time to detect
                         if case.detected_at and case.created_at:
                             case.mean_time_to_detect = int(
-                                (case.detected_at - case.created_at).total_seconds()
+                                (
+                                    case.detected_at - case.created_at
+                                ).total_seconds()
                             )
 
                         # Mean time to respond
-                        if case.status != IncidentStatus.NEW and case.created_at:
+                        if (
+                            case.status != IncidentStatus.NEW
+                            and case.created_at
+                        ):
                             first_response = None
                             for entry in case.timeline:
-                                if entry.event_type in ["status_change", "notes_added"]:
+                                if entry.event_type in [
+                                    "status_change",
+                                    "notes_added",
+                                ]:
                                     first_response = entry.timestamp
                                     break
 
                             if first_response:
                                 case.mean_time_to_respond = int(
-                                    (first_response - case.created_at).total_seconds()
+                                    (
+                                        first_response - case.created_at
+                                    ).total_seconds()
                                 )
 
                         # Mean time to contain
                         if case.contained_at and case.created_at:
                             case.mean_time_to_contain = int(
-                                (case.contained_at - case.created_at).total_seconds()
+                                (
+                                    case.contained_at - case.created_at
+                                ).total_seconds()
                             )
 
                 # Sleep for 5 minutes
@@ -721,16 +776,24 @@ class IncidentManager:
             return {
                 "total_incidents": total_cases,
                 "open_incidents": sum(
-                    1 for case in self.cases.values() if case.status != IncidentStatus.CLOSED
+                    1
+                    for case in self.cases.values()
+                    if case.status != IncidentStatus.CLOSED
                 ),
                 "status_breakdown": dict(status_counts),
                 "severity_breakdown": dict(severity_counts),
                 "type_breakdown": dict(type_counts),
                 "average_response_time": (
-                    sum(response_times) / len(response_times) if response_times else 0
+                    sum(response_times) / len(response_times)
+                    if response_times
+                    else 0
                 ),
                 "average_containment_time": (
-                    sum(contain_times) / len(contain_times) if contain_times else 0
+                    sum(contain_times) / len(contain_times)
+                    if contain_times
+                    else 0
                 ),
-                "indicators_tracked": sum(len(v) for v in self.global_indicators.values()),
+                "indicators_tracked": sum(
+                    len(v) for v in self.global_indicators.values()
+                ),
             }

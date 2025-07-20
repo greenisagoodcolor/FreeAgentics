@@ -86,15 +86,15 @@ data:
     global:
       scrape_interval: 15s
       evaluation_interval: 15s
-    
+
     rule_files:
       - "/etc/prometheus/rules/*.yml"
-    
+
     alerting:
       alertmanagers:
       - static_configs:
         - targets: ['alertmanager:9093']
-    
+
     scrape_configs:
     - job_name: 'kubernetes-pods'
       kubernetes_sd_configs:
@@ -123,31 +123,31 @@ data:
       - source_labels: [__meta_kubernetes_pod_name]
         action: replace
         target_label: kubernetes_pod_name
-    
+
     - job_name: 'freeagentics-backend'
       static_configs:
       - targets: ['backend:8000']
       metrics_path: '/metrics'
       scrape_interval: 5s
-      
+
     - job_name: 'freeagentics-frontend'
       static_configs:
       - targets: ['frontend:3000']
       metrics_path: '/api/metrics'
       scrape_interval: 10s
-      
+
     - job_name: 'postgres'
       static_configs:
       - targets: ['postgres:5432']
-      
+
     - job_name: 'redis'
       static_configs:
       - targets: ['redis:6379']
-      
+
     - job_name: 'nginx-ingress'
       static_configs:
       - targets: ['nginx-ingress-controller-metrics:10254']
-      
+
     - job_name: 'kubernetes-apiservers'
       kubernetes_sd_configs:
       - role: endpoints
@@ -162,7 +162,7 @@ data:
       - source_labels: [__meta_kubernetes_namespace, __meta_kubernetes_service_name, __meta_kubernetes_endpoint_port_name]
         action: keep
         regex: default;kubernetes;https
-      
+
     - job_name: 'kubernetes-nodes'
       kubernetes_sd_configs:
       - role: node
@@ -179,7 +179,7 @@ data:
         regex: (.+)
         target_label: __metrics_path__
         replacement: /api/v1/nodes/${1}/proxy/metrics
-      
+
     - job_name: 'kubernetes-cadvisor'
       kubernetes_sd_configs:
       - role: node
@@ -404,7 +404,7 @@ data:
       smtp_smarthost: 'localhost:587'
       smtp_from: 'alerts@yourdomain.com'
       slack_api_url: 'https://hooks.slack.com/services/YOUR/SLACK/WEBHOOK'
-    
+
     route:
       group_by: ['alertname']
       group_wait: 30s
@@ -418,12 +418,12 @@ data:
       - match:
           severity: warning
         receiver: 'warning-alerts'
-    
+
     receivers:
     - name: 'web.hook'
       webhook_configs:
       - url: 'http://localhost:5001/'
-    
+
     - name: 'critical-alerts'
       slack_configs:
       - channel: '#alerts-critical'
@@ -434,14 +434,14 @@ data:
       - to: 'ops-team@yourdomain.com'
         subject: 'Critical Alert - FreeAgentics Production'
         body: '{{ range .Alerts }}{{ .Annotations.description }}{{ end }}'
-    
+
     - name: 'warning-alerts'
       slack_configs:
       - channel: '#alerts-warning'
         title: 'Warning Alert - FreeAgentics Production'
         text: '{{ range .Alerts }}{{ .Annotations.summary }}{{ end }}'
         send_resolved: true
-    
+
     inhibit_rules:
     - source_match:
         severity: 'critical'

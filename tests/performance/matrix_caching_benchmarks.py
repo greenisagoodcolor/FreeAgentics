@@ -16,7 +16,11 @@ from typing import Any, Dict, List, Optional, Tuple
 import numpy as np
 import psutil
 
-from tests.performance.pymdp_benchmarks import BenchmarkResult, BenchmarkSuite, PyMDPBenchmark
+from tests.performance.pymdp_benchmarks import (
+    BenchmarkResult,
+    BenchmarkSuite,
+    PyMDPBenchmark,
+)
 
 # Try to import PyMDP
 try:
@@ -95,8 +99,15 @@ class MatrixCache:
 class TransitionMatrixCachingBenchmark(PyMDPBenchmark):
     """Benchmark caching of transition matrices (B matrices)."""
 
-    def __init__(self, state_size: int = 25, num_actions: int = 4, cache_enabled: bool = True):
-        super().__init__(f"transition_matrix_caching_{'enabled' if cache_enabled else 'disabled'}")
+    def __init__(
+        self,
+        state_size: int = 25,
+        num_actions: int = 4,
+        cache_enabled: bool = True,
+    ):
+        super().__init__(
+            f"transition_matrix_caching_{'enabled' if cache_enabled else 'disabled'}"
+        )
         self.state_size = state_size
         self.num_actions = num_actions
         self.cache_enabled = cache_enabled
@@ -139,13 +150,17 @@ class TransitionMatrixCachingBenchmark(PyMDPBenchmark):
                 cached_matrix = self.cache.get(cache_key)
                 if cached_matrix is None:
                     # Compute and cache
-                    result_matrix = self._compute_transition_result(state_idx, action)
+                    result_matrix = self._compute_transition_result(
+                        state_idx, action
+                    )
                     self.cache.put(cache_key, result_matrix)
                 else:
                     result_matrix = cached_matrix
             else:
                 # Always compute
-                result_matrix = self._compute_transition_result(state_idx, action)
+                result_matrix = self._compute_transition_result(
+                    state_idx, action
+                )
 
             computation_time = (time.perf_counter() - start_time) * 1000
             total_computation_time += computation_time
@@ -168,12 +183,15 @@ class TransitionMatrixCachingBenchmark(PyMDPBenchmark):
             }
 
         return {
-            "avg_computation_time_ms": total_computation_time / matrix_operations,
+            "avg_computation_time_ms": total_computation_time
+            / matrix_operations,
             "total_matrix_operations": matrix_operations,
             **cache_metrics,
         }
 
-    def _compute_transition_result(self, state_idx: int, action: int) -> np.ndarray:
+    def _compute_transition_result(
+        self, state_idx: int, action: int
+    ) -> np.ndarray:
         """Simulate expensive transition matrix computation."""
         B_matrix = self.B_matrices[state_idx][:, :, action]
 
@@ -196,7 +214,12 @@ class TransitionMatrixCachingBenchmark(PyMDPBenchmark):
 class ObservationLikelihoodCachingBenchmark(PyMDPBenchmark):
     """Benchmark caching of observation likelihood computations."""
 
-    def __init__(self, state_size: int = 30, num_modalities: int = 3, cache_enabled: bool = True):
+    def __init__(
+        self,
+        state_size: int = 30,
+        num_modalities: int = 3,
+        cache_enabled: bool = True,
+    ):
         super().__init__(
             f"observation_likelihood_caching_{'enabled' if cache_enabled else 'disabled'}"
         )
@@ -231,7 +254,9 @@ class ObservationLikelihoodCachingBenchmark(PyMDPBenchmark):
         for _ in range(30):  # Multiple operations per iteration
             modality = np.random.randint(0, self.num_modalities)
             observation = np.random.randint(0, self.state_size)
-            state_config = tuple(np.random.randint(0, self.state_size, self.num_modalities))
+            state_config = tuple(
+                np.random.randint(0, self.state_size, self.num_modalities)
+            )
 
             # Create cache key
             cache_key = f"likelihood_{modality}_{observation}_{state_config}"
@@ -243,13 +268,17 @@ class ObservationLikelihoodCachingBenchmark(PyMDPBenchmark):
                 cached_likelihood = self.cache.get(cache_key)
                 if cached_likelihood is None:
                     # Compute and cache
-                    likelihood = self._compute_likelihood(modality, observation, state_config)
+                    likelihood = self._compute_likelihood(
+                        modality, observation, state_config
+                    )
                     self.cache.put(cache_key, likelihood)
                 else:
                     likelihood = cached_likelihood
             else:
                 # Always compute
-                likelihood = self._compute_likelihood(modality, observation, state_config)
+                likelihood = self._compute_likelihood(
+                    modality, observation, state_config
+                )
 
             computation_time = (time.perf_counter() - start_time) * 1000
             total_computation_time += computation_time
@@ -272,7 +301,8 @@ class ObservationLikelihoodCachingBenchmark(PyMDPBenchmark):
             }
 
         return {
-            "avg_computation_time_ms": total_computation_time / likelihood_operations,
+            "avg_computation_time_ms": total_computation_time
+            / likelihood_operations,
             "total_likelihood_operations": likelihood_operations,
             **cache_metrics,
         }
@@ -334,7 +364,9 @@ class IntermediateResultCachingBenchmark(PyMDPBenchmark):
         for step in range(20):
             # Generate some input parameters
             input_size = 10 + self.complexity_level * 5
-            param_set = np.random.randint(0, 5, 3)  # Limited parameter space for cache hits
+            param_set = np.random.randint(
+                0, 5, 3
+            )  # Limited parameter space for cache hits
 
             cache_key = f"intermediate_{param_set[0]}_{param_set[1]}_{param_set[2]}_{input_size}"
 
@@ -345,13 +377,17 @@ class IntermediateResultCachingBenchmark(PyMDPBenchmark):
                 cached_result = self.cache.get(cache_key)
                 if cached_result is None:
                     # Compute and cache
-                    result = self._compute_intermediate_result(input_size, param_set)
+                    result = self._compute_intermediate_result(
+                        input_size, param_set
+                    )
                     self.cache.put(cache_key, result)
                 else:
                     result = cached_result
             else:
                 # Always compute
-                result = self._compute_intermediate_result(input_size, param_set)
+                result = self._compute_intermediate_result(
+                    input_size, param_set
+                )
 
             computation_time = (time.perf_counter() - start_time) * 1000
             total_computation_time += computation_time
@@ -379,7 +415,9 @@ class IntermediateResultCachingBenchmark(PyMDPBenchmark):
             **cache_metrics,
         }
 
-    def _compute_intermediate_result(self, size: int, params: np.ndarray) -> np.ndarray:
+    def _compute_intermediate_result(
+        self, size: int, params: np.ndarray
+    ) -> np.ndarray:
         """Simulate expensive intermediate computation."""
         # Create a matrix computation that takes some time
         matrix = np.random.rand(size, size)
@@ -388,14 +426,19 @@ class IntermediateResultCachingBenchmark(PyMDPBenchmark):
         for param in params:
             for _ in range(param + 1):
                 matrix = np.dot(matrix, matrix.T)
-                matrix = matrix / np.max(matrix)  # Normalize to prevent overflow
+                matrix = matrix / np.max(
+                    matrix
+                )  # Normalize to prevent overflow
 
         # Final processing
         result = np.linalg.svd(matrix)[1]  # Singular values
         return result
 
     def get_configuration(self) -> Dict[str, Any]:
-        return {"complexity_level": self.complexity_level, "cache_enabled": self.cache_enabled}
+        return {
+            "complexity_level": self.complexity_level,
+            "cache_enabled": self.cache_enabled,
+        }
 
 
 class CacheComparisonBenchmark(PyMDPBenchmark):
@@ -459,17 +502,24 @@ class CacheComparisonBenchmark(PyMDPBenchmark):
             "speedup_factor": speedup,
             "cache_hit_rate": cached_result.get("cache_hit_rate", 0.0),
             "cache_memory_mb": cached_result.get("cache_memory_mb", 0.0),
-            "efficiency_gain": max(0, (uncached_time - cached_time) / uncached_time) * 100,
+            "efficiency_gain": max(
+                0, (uncached_time - cached_time) / uncached_time
+            )
+            * 100,
         }
 
     def get_configuration(self) -> Dict[str, Any]:
         return {
             "scenario": self.scenario,
             "cached_config": (
-                self.cached_benchmark.get_configuration() if self.cached_benchmark else {}
+                self.cached_benchmark.get_configuration()
+                if self.cached_benchmark
+                else {}
             ),
             "uncached_config": (
-                self.uncached_benchmark.get_configuration() if self.uncached_benchmark else {}
+                self.uncached_benchmark.get_configuration()
+                if self.uncached_benchmark
+                else {}
             ),
         }
 
@@ -484,30 +534,62 @@ def run_matrix_caching_benchmarks():
     print("Testing cache effectiveness across different PyMDP operations")
 
     # Transition matrix caching
-    suite.add_benchmark(TransitionMatrixCachingBenchmark(state_size=20, cache_enabled=True))
-    suite.add_benchmark(TransitionMatrixCachingBenchmark(state_size=20, cache_enabled=False))
-    suite.add_benchmark(TransitionMatrixCachingBenchmark(state_size=40, cache_enabled=True))
-    suite.add_benchmark(TransitionMatrixCachingBenchmark(state_size=40, cache_enabled=False))
+    suite.add_benchmark(
+        TransitionMatrixCachingBenchmark(state_size=20, cache_enabled=True)
+    )
+    suite.add_benchmark(
+        TransitionMatrixCachingBenchmark(state_size=20, cache_enabled=False)
+    )
+    suite.add_benchmark(
+        TransitionMatrixCachingBenchmark(state_size=40, cache_enabled=True)
+    )
+    suite.add_benchmark(
+        TransitionMatrixCachingBenchmark(state_size=40, cache_enabled=False)
+    )
 
     # Observation likelihood caching
     suite.add_benchmark(
-        ObservationLikelihoodCachingBenchmark(state_size=25, num_modalities=2, cache_enabled=True)
+        ObservationLikelihoodCachingBenchmark(
+            state_size=25, num_modalities=2, cache_enabled=True
+        )
     )
     suite.add_benchmark(
-        ObservationLikelihoodCachingBenchmark(state_size=25, num_modalities=2, cache_enabled=False)
+        ObservationLikelihoodCachingBenchmark(
+            state_size=25, num_modalities=2, cache_enabled=False
+        )
     )
     suite.add_benchmark(
-        ObservationLikelihoodCachingBenchmark(state_size=35, num_modalities=3, cache_enabled=True)
+        ObservationLikelihoodCachingBenchmark(
+            state_size=35, num_modalities=3, cache_enabled=True
+        )
     )
     suite.add_benchmark(
-        ObservationLikelihoodCachingBenchmark(state_size=35, num_modalities=3, cache_enabled=False)
+        ObservationLikelihoodCachingBenchmark(
+            state_size=35, num_modalities=3, cache_enabled=False
+        )
     )
 
     # Intermediate result caching
-    suite.add_benchmark(IntermediateResultCachingBenchmark(complexity_level=2, cache_enabled=True))
-    suite.add_benchmark(IntermediateResultCachingBenchmark(complexity_level=2, cache_enabled=False))
-    suite.add_benchmark(IntermediateResultCachingBenchmark(complexity_level=4, cache_enabled=True))
-    suite.add_benchmark(IntermediateResultCachingBenchmark(complexity_level=4, cache_enabled=False))
+    suite.add_benchmark(
+        IntermediateResultCachingBenchmark(
+            complexity_level=2, cache_enabled=True
+        )
+    )
+    suite.add_benchmark(
+        IntermediateResultCachingBenchmark(
+            complexity_level=2, cache_enabled=False
+        )
+    )
+    suite.add_benchmark(
+        IntermediateResultCachingBenchmark(
+            complexity_level=4, cache_enabled=True
+        )
+    )
+    suite.add_benchmark(
+        IntermediateResultCachingBenchmark(
+            complexity_level=4, cache_enabled=False
+        )
+    )
 
     # Cache comparison benchmarks
     suite.add_benchmark(CacheComparisonBenchmark("transition_heavy"))
@@ -532,9 +614,15 @@ def run_matrix_caching_benchmarks():
 
     # Calculate overall cache effectiveness
     if cache_enabled_results and cache_disabled_results:
-        avg_cached_time = np.mean([r.mean_time_ms for r in cache_enabled_results])
-        avg_uncached_time = np.mean([r.mean_time_ms for r in cache_disabled_results])
-        overall_speedup = avg_uncached_time / avg_cached_time if avg_cached_time > 0 else 1.0
+        avg_cached_time = np.mean(
+            [r.mean_time_ms for r in cache_enabled_results]
+        )
+        avg_uncached_time = np.mean(
+            [r.mean_time_ms for r in cache_disabled_results]
+        )
+        overall_speedup = (
+            avg_uncached_time / avg_cached_time if avg_cached_time > 0 else 1.0
+        )
 
         print("\nOverall Cache Performance:")
         print(f"  Average cached time: {avg_cached_time:.2f} ms")
@@ -567,7 +655,9 @@ def run_matrix_caching_benchmarks():
         avg_hit_rate = np.mean(hit_rates) * 100
         print("\nCache Hit Rate Analysis:")
         print(f"  Average hit rate: {avg_hit_rate:.1f}%")
-        print(f"  Hit rate range: {np.min(hit_rates)*100:.1f}% - {np.max(hit_rates)*100:.1f}%")
+        print(
+            f"  Hit rate range: {np.min(hit_rates)*100:.1f}% - {np.max(hit_rates)*100:.1f}%"
+        )
 
         if avg_hit_rate >= 80:
             print("  ✅ Excellent cache utilization (>80%)")
@@ -582,7 +672,9 @@ def run_matrix_caching_benchmarks():
         avg_memory = np.mean(memory_usage)
         print("\nCache Memory Usage:")
         print(f"  Average memory overhead: {avg_memory:.1f} MB")
-        print(f"  Memory range: {np.min(memory_usage):.1f} - {np.max(memory_usage):.1f} MB")
+        print(
+            f"  Memory range: {np.min(memory_usage):.1f} - {np.max(memory_usage):.1f} MB"
+        )
 
     # Analyze comparison results
     if comparison_results:
@@ -590,7 +682,9 @@ def run_matrix_caching_benchmarks():
         for result in comparison_results:
             if result.additional_metrics:
                 speedup = result.additional_metrics.get("speedup_factor", 1.0)
-                efficiency = result.additional_metrics.get("efficiency_gain", 0.0)
+                efficiency = result.additional_metrics.get(
+                    "efficiency_gain", 0.0
+                )
                 scenario = result.additional_metrics.get("scenario", "unknown")
 
                 print(f"  {scenario.replace('_', ' ').title()}:")

@@ -40,7 +40,9 @@ class PyMDPMathematicalValidator:
         A[0][1, 1] = 0.9  # High probability of observing 1 when in state 1
 
         # Create B matrix (transition model)
-        B = utils.obj_array_zeros([(s, s, num_controls[i]) for i, s in enumerate(num_states)])
+        B = utils.obj_array_zeros(
+            [(s, s, num_controls[i]) for i, s in enumerate(num_states)]
+        )
         # Action 0: Stay in same state (deterministic)
         B[0][0, 0, 0] = 1.0
         B[0][1, 0, 0] = 0.0
@@ -56,7 +58,7 @@ class PyMDPMathematicalValidator:
 
         return agent, A, B
 
-    @pytest.mark.skipif(not PYMDP_AVAILABLE, reason="PyMDP not available")
+    
     def test_probability_matrix_normalization(self):
         """Test that probability matrices are properly normalized."""
         agent, A, B = self.create_simple_agent()
@@ -78,7 +80,7 @@ class PyMDPMathematicalValidator:
 
         print("✅ Probability matrices are correctly normalized")
 
-    @pytest.mark.skipif(not PYMDP_AVAILABLE, reason="PyMDP not available")
+    
     def test_belief_state_normalization(self):
         """Test that belief states are properly normalized."""
         agent, A, B = self.create_simple_agent()
@@ -97,11 +99,13 @@ class PyMDPMathematicalValidator:
                 ), f"Belief state not normalized: {belief_sum}"
 
                 # Check no negative probabilities
-                assert (belief >= 0).all(), "Negative probabilities in belief state"
+                assert (
+                    belief >= 0
+                ).all(), "Negative probabilities in belief state"
 
         print("✅ Belief states are correctly normalized")
 
-    @pytest.mark.skipif(not PYMDP_AVAILABLE, reason="PyMDP not available")
+    
     def test_bayesian_inference_correctness(self):
         """Test that Bayesian inference produces correct results."""
         agent, A, B = self.create_simple_agent()
@@ -129,7 +133,7 @@ class PyMDPMathematicalValidator:
 
         print("✅ Bayesian inference produces correct results")
 
-    @pytest.mark.skipif(not PYMDP_AVAILABLE, reason="PyMDP not available")
+    
     def test_policy_evaluation_correctness(self):
         """Test that policy evaluation produces sensible results."""
         agent, A, B = self.create_simple_agent()
@@ -150,11 +154,13 @@ class PyMDPMathematicalValidator:
         assert (q_pi >= 0).all(), "Negative policy probabilities"
 
         # Check that G (expected free energy) has reasonable values
-        assert np.isfinite(G).all(), "Non-finite values in expected free energy"
+        assert np.isfinite(
+            G
+        ).all(), "Non-finite values in expected free energy"
 
         print("✅ Policy evaluation produces correct results")
 
-    @pytest.mark.skipif(not PYMDP_AVAILABLE, reason="PyMDP not available")
+    
     def test_action_sampling_correctness(self):
         """Test that action sampling produces valid actions."""
         agent, A, B = self.create_simple_agent()
@@ -171,14 +177,19 @@ class PyMDPMathematicalValidator:
             actions_sampled.append(action)
 
             # Check action is valid
-            assert isinstance(action, (list, np.ndarray)), "Action not in correct format"
+            assert isinstance(
+                action, (list, np.ndarray)
+            ), "Action not in correct format"
             if isinstance(action, list):
                 assert len(action) == 1, "Incorrect action dimensionality"
-                assert action[0] in [0, 1], f"Invalid action value: {action[0]}"
+                assert action[0] in [
+                    0,
+                    1,
+                ], f"Invalid action value: {action[0]}"
 
         print("✅ Action sampling produces valid actions")
 
-    @pytest.mark.skipif(not PYMDP_AVAILABLE, reason="PyMDP not available")
+    
     def test_performance_benchmark_realism(self):
         """Test that performance benchmarks measure realistic operations."""
         start_time = time.perf_counter()
@@ -214,7 +225,7 @@ class PyMDPMathematicalValidator:
 
         print("✅ Performance benchmarks measure realistic operations")
 
-    @pytest.mark.skipif(not PYMDP_AVAILABLE, reason="PyMDP not available")
+    
     def test_mathematical_consistency(self):
         """Test mathematical consistency across multiple runs."""
         agent, A, B = self.create_simple_agent()
@@ -234,7 +245,9 @@ class PyMDPMathematicalValidator:
             diff = np.abs(results[0] - results[i])
             assert (
                 diff < self.tolerance
-            ).all(), f"Inconsistent results across runs: max diff = {diff.max()}"
+            ).all(), (
+                f"Inconsistent results across runs: max diff = {diff.max()}"
+            )
 
         print("✅ Mathematical operations are consistent")
 

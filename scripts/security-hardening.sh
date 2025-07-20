@@ -35,25 +35,25 @@ WARNINGS=0
 # 1. Environment Variables Security
 check_env_security() {
     log_section "Checking Environment Variables Security"
-    
+
     # Check for production environment file
     if [[ ! -f ".env.production" ]]; then
         log_error ".env.production file not found"
         ((ERRORS++))
         return
     fi
-    
+
     # Ensure proper permissions on env files
     chmod 600 .env.production 2>/dev/null || true
     chmod 600 .env 2>/dev/null || true
-    
+
     # Check for dangerous default values
     local dangerous_values=("change_me" "dev_password" "dev_secret" "secret" "password" "admin" "test" "default" "example" "placeholder" "CHANGE_ME")
-    
+
     while IFS='=' read -r key value; do
         # Skip comments and empty lines
         [[ "$key" =~ ^#.*$ ]] || [[ -z "$key" ]] && continue
-        
+
         # Check for dangerous values
         for dangerous in "${dangerous_values[@]}"; do
             if [[ "${value,,}" == "${dangerous,,}" ]]; then
@@ -61,7 +61,7 @@ check_env_security() {
                 ((ERRORS++))
             fi
         done
-        
+
         # Check secret strength
         if [[ "$key" =~ (SECRET|PASSWORD|KEY) ]]; then
             if [[ ${#value} -lt 32 ]]; then
@@ -70,28 +70,28 @@ check_env_security() {
             fi
         fi
     done < .env.production
-    
+
     log_info "Environment variables checked"
 }
 
 # 2. Generate Secure Secrets
 generate_secure_secrets() {
     log_section "Generating Secure Secrets"
-    
+
     # Function to generate secure random string
     generate_secret() {
         openssl rand -base64 48 | tr -d "=+/" | cut -c1-64
     }
-    
+
     # Check if secrets need to be generated
     if [[ -f ".env.production" ]]; then
         # Create backup
         cp .env.production .env.production.backup
-        
+
         # Generate new secrets for placeholder values
         if grep -q "CHANGE_ME" .env.production; then
             log_info "Generating secure secrets for placeholder values..."
-            
+
             # Generate unique secrets
             JWT_SECRET=$(generate_secret)
             SECRET_KEY=$(generate_secret)
@@ -99,7 +99,7 @@ generate_secure_secrets() {
             REDIS_PASSWORD=$(generate_secret)
             BACKUP_PASSWORD=$(generate_secret)
             GRAFANA_PASSWORD=$(generate_secret)
-            
+
             # Replace placeholders
             sed -i "s/JWT_SECRET=.*/JWT_SECRET=$JWT_SECRET/" .env.production
             sed -i "s/SECRET_KEY=.*/SECRET_KEY=$SECRET_KEY/" .env.production
@@ -107,7 +107,7 @@ generate_secure_secrets() {
             sed -i "s/REDIS_PASSWORD=.*/REDIS_PASSWORD=$REDIS_PASSWORD/" .env.production
             sed -i "s/BACKUP_PASSWORD=.*/BACKUP_PASSWORD=$BACKUP_PASSWORD/" .env.production
             sed -i "s/GRAFANA_ADMIN_PASSWORD=.*/GRAFANA_ADMIN_PASSWORD=$GRAFANA_PASSWORD/" .env.production
-            
+
             log_info "Secure secrets generated"
         fi
     fi
@@ -116,7 +116,7 @@ generate_secure_secrets() {
 # 3. File Permissions Security
 secure_file_permissions() {
     log_section "Securing File Permissions"
-    
+
     # Secure sensitive files
     local sensitive_files=(
         ".env"
@@ -125,14 +125,14 @@ secure_file_permissions() {
         "auth/keys/jwt_private.pem"
         "auth/keys/jwt_public.pem"
     )
-    
+
     for file in "${sensitive_files[@]}"; do
         if [[ -f "$file" ]]; then
             chmod 600 "$file"
             log_info "Secured permissions for $file"
         fi
     done
-    
+
     # Secure directories
     if [[ -d "auth/keys" ]]; then
         chmod 700 auth/keys
@@ -143,18 +143,18 @@ secure_file_permissions() {
 # 4. Generate JWT Keys
 generate_jwt_keys() {
     log_section "Generating JWT Keys"
-    
+
     if [[ ! -f "auth/keys/jwt_private.pem" ]]; then
         mkdir -p auth/keys
-        
+
         # Generate RSA key pair
         openssl genrsa -out auth/keys/jwt_private.pem 4096
         openssl rsa -in auth/keys/jwt_private.pem -pubout -out auth/keys/jwt_public.pem
-        
+
         # Secure permissions
         chmod 600 auth/keys/jwt_private.pem
         chmod 644 auth/keys/jwt_public.pem
-        
+
         log_info "JWT keys generated"
     else
         log_info "JWT keys already exist"
@@ -164,11 +164,11 @@ generate_jwt_keys() {
 # 5. Docker Security Scan
 docker_security_scan() {
     log_section "Docker Security Scan"
-    
+
     # Check if Docker Scout is available
     if docker scout version &>/dev/null; then
         log_info "Running Docker Scout security scan..."
-        
+
         # Build the optimized image
         log_info "Building optimized production image..."
         docker build -f Dockerfile.production.optimized -t freeagentics:prod-optimized . || {
@@ -176,7 +176,7 @@ docker_security_scan() {
             ((ERRORS++))
             return
         }
-        
+
         # Run security scan
         docker scout cves freeagentics:prod-optimized || {
             log_warn "Docker Scout scan found vulnerabilities"
@@ -186,11 +186,11 @@ docker_security_scan() {
         log_warn "Docker Scout not available, skipping security scan"
         ((WARNINGS++))
     fi
-    
+
     # Check image size
     local image_size=$(docker images freeagentics:prod-optimized --format "{{.Size}}")
     log_info "Production image size: $image_size"
-    
+
     # Convert size to MB for comparison
     local size_mb=$(docker images freeagentics:prod-optimized --format "{{.Size}}" | sed 's/GB/*1024/;s/MB//' | bc 2>/dev/null || echo "0")
     if [[ $(echo "$size_mb > 2048" | bc) -eq 1 ]]; then
@@ -204,7 +204,7 @@ docker_security_scan() {
 # 6. Security Headers Configuration
 configure_security_headers() {
     log_section "Configuring Security Headers"
-    
+
     # Ensure security headers are enabled in production
     if [[ -f ".env.production" ]]; then
         # Enable all security features
@@ -222,7 +222,7 @@ DEBUG=false
 DEBUG_SQL=false
 DEVELOPMENT_MODE=false
 EOF
-        
+
         log_info "Security headers configured"
     fi
 }
@@ -230,7 +230,7 @@ EOF
 # 7. Database Security
 secure_database() {
     log_section "Database Security Configuration"
-    
+
     # Ensure SSL is enabled for database connections
     if grep -q "DATABASE_URL" .env.production; then
         # Add SSL parameters if not present
@@ -244,7 +244,7 @@ secure_database() {
 # 8. Git Security Check
 check_git_security() {
     log_section "Git Security Check"
-    
+
     # Check for committed secrets
     local secret_patterns=(
         "password.*=.*"
@@ -252,14 +252,14 @@ check_git_security() {
         "key.*=.*"
         "token.*=.*"
     )
-    
+
     for pattern in "${secret_patterns[@]}"; do
         if git grep -i "$pattern" 2>/dev/null | grep -v "example\|template\|test" | grep -q .; then
             log_warn "Potential secrets found in git history"
             ((WARNINGS++))
         fi
     done
-    
+
     # Ensure .gitignore is properly configured
     local ignore_patterns=(
         ".env"
@@ -269,7 +269,7 @@ check_git_security() {
         "*.key"
         "auth/keys/"
     )
-    
+
     for pattern in "${ignore_patterns[@]}"; do
         if ! grep -q "$pattern" .gitignore 2>/dev/null; then
             echo "$pattern" >> .gitignore
@@ -281,9 +281,9 @@ check_git_security() {
 # 9. Create Security Report
 create_security_report() {
     log_section "Creating Security Report"
-    
+
     local report_file="SECURITY_HARDENING_REPORT.md"
-    
+
     cat > "$report_file" <<EOF
 # Security Hardening Report
 Generated on: $(date)
@@ -322,14 +322,14 @@ Generated on: $(date)
 2. Deploy with security monitoring enabled
 3. Configure alert notifications for security events
 EOF
-    
+
     log_info "Security report created: $report_file"
 }
 
 # Main execution
 main() {
     log_info "Starting Security Hardening Process..."
-    
+
     # Run all security checks and configurations
     check_env_security
     generate_secure_secrets
@@ -340,12 +340,12 @@ main() {
     secure_database
     check_git_security
     create_security_report
-    
+
     # Final summary
     echo -e "\n${BLUE}=== Security Hardening Complete ===${NC}"
     echo -e "Errors: ${RED}$ERRORS${NC}"
     echo -e "Warnings: ${YELLOW}$WARNINGS${NC}"
-    
+
     if [[ $ERRORS -eq 0 ]]; then
         log_info "✅ Security hardening completed successfully!"
         if [[ $WARNINGS -gt 0 ]]; then

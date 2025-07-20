@@ -51,7 +51,15 @@ class GMNValidator:
             "DimeNet",
         }
 
-        self.allowed_activations = {"relu", "tanh", "sigmoid", "elu", "leaky_relu", "gelu", "swish"}
+        self.allowed_activations = {
+            "relu",
+            "tanh",
+            "sigmoid",
+            "elu",
+            "leaky_relu",
+            "gelu",
+            "swish",
+        }
 
         self.parameter_constraints = {
             "num_layers": (1, 20),
@@ -97,144 +105,256 @@ class GMNValidator:
         self._custom_rules: Dict[str, Callable] = {}
         self._context: Dict[str, Any] = {}
 
-    def validate(self, model_config: Union[Dict[str, Any], Any]) -> ValidationResult:
+    def _process_parse_result(self, model_config):
+        """Process ParseResult objects and convert to dictionary."""
+        config_dict = {}
+        original_parse_result = model_config
+
+        # Extract sections
+        if hasattr(model_config, "sections") and model_config.sections:
+            config_dict.update(model_config.sections)
+
+        # Extract metadata
+        if hasattr(model_config, "metadata") and model_config.metadata:
+            config_dict["metadata"] = model_config.metadata
+
+        # Extract name from AST or metadata
+        if (
+            hasattr(model_config, "ast")
+            and model_config.ast
+            and hasattr(model_config.ast, "name")
+        ):
+            config_dict["name"] = model_config.ast.name
+        elif "name" in getattr(model_config, "metadata", {}):
+            config_dict["name"] = model_config.metadata["name"]
+
+        # Create a proper model object for the result
+        validated_model = type(
+            "Model",
+            (),
+            {
+                "name": config_dict.get("name", "Unknown Model"),
+                "config": config_dict,
+            },
+        )()
+
+        return config_dict, validated_model, original_parse_result
+
+    def _validate_basic_structure(self, model_config):
+        """Validate basic model configuration structure."""
+        errors = []
+
+        # Validate metadata (required fields)
+        metadata = model_config.get("metadata", {})
+        if not metadata.get("name"):
+            errors.append("Missing required metadata field: name")
+
+        return errors
+
+    def _validate_architecture_section(self, model_config):
+        """Validate the architecture section of the model configuration."""
+        errors = []
+
+        # Validate architecture section
+        architecture_section = model_config.get("architecture", {})
+        if not architecture_section:
+            errors.append("Missing required field: architecture")
+        else:
+            # Validate architecture type
+            arch_type = architecture_section.get("type", "")
+            if arch_type not in self.allowed_architectures:
+                errors.append(
+                    f"Invalid architecture: {arch_type}. "
+                    f"Allowed: {', '.join(self.allowed_architectures)}"
+                )
+
+            # Validate activation function
+            activation = architecture_section.get("activation")
+            if activation and activation not in self.allowed_activations:
+                errors.append(
+                    f"Invalid activation: {activation}. "
+                    f"Allowed: {', '.join(self.allowed_activations)}"
+                )
+
+            # Validate dimensions
+            hidden_dim = architecture_section.get("hidden_dim")
+            if hidden_dim is not None:
+                if not isinstance(hidden_dim, int) or hidden_dim <= 0:
+                    errors.append("hidden_dim must be a positive integer")
+
+            layers_count = architecture_section.get("layers")
+            if layers_count is not None:
+                if not isinstance(layers_count, int) or layers_count <= 0:
+                    errors.append("layers must be a positive integer")
+
+        return errors
+
+    def _run_comprehensive_validations(
+        self, model_config, original_parse_result=None
+    ):
+        """Run comprehensive validations on model configuration."""
+        errors = []
+        warnings = []
+
+        # Validate parameters section
+        parameters = model_config.get("parameters", {})
+        param_errors = self._validate_hyperparameters(parameters)
+        errors.extend(param_errors)
+
+        # Validate active inference configuration
+        active_inference = model_config.get("active_inference", {})
+        if active_inference:
+            ai_errors = self._validate_active_inference_config(
+                active_inference
+            )
+            errors.extend(ai_errors)
+
+        # Generate warnings for memory, performance, and numerical issues
+        architecture_section = model_config.get("architecture", {})
+        architecture_warnings = self._check_architecture_warnings(
+            architecture_section, parameters
+        )
+        warnings.extend(architecture_warnings)
+
+        # Security validation
+        security_errors = self._validate_security(model_config)
+        errors.extend(security_errors)
+
+        # Check for circular dependencies
+        if "dependencies" in model_config:
+            circular_errors = self._check_circular_dependencies(
+                model_config["dependencies"]
+            )
+            errors.extend(circular_errors)
+
+        # Validate cross-references
+        cross_ref_errors = self._validate_cross_references(model_config)
+        errors.extend(cross_ref_errors)
+
+        # Check for definitions circular dependencies
+        if "definitions" in model_config:
+            definitions_errors = self._check_definitions_circular_dependencies(
+                model_config["definitions"]
+            )
+            errors.extend(definitions_errors)
+
+        # Validate metadata
+        if "metadata" in model_config:
+            metadata_errors = self._validate_metadata(model_config["metadata"])
+            errors.extend(metadata_errors)
+
+        # Apply custom rules
+        custom_errors, custom_warnings = self._apply_custom_rules(
+            model_config, original_parse_result
+        )
+        errors.extend(custom_errors)
+        warnings.extend(custom_warnings)
+
+        return errors, warnings
+
+    def _apply_custom_rules(self, model_config, original_parse_result=None):
+        """Apply custom validation rules."""
+        errors = []
+        warnings = []
+
+        for rule_name, rule_func in self._custom_rules.items():
+            try:
+                # Pass the original ParseResult if available, otherwise processed config
+                rule_input = (
+                    original_parse_result
+                    if original_parse_result
+                    else model_config
+                )
+                rule_result = rule_func(rule_input)
+                if isinstance(rule_result, list):
+                    errors.extend(rule_result)
+                elif isinstance(rule_result, str):
+                    errors.append(rule_result)
+            except Exception as e:
+                warnings.append(f"Custom rule {rule_name} failed: {str(e)}")
+
+        return errors, warnings
+
+    def _create_validation_result(
+        self,
+        is_valid,
+        errors,
+        warnings,
+        model_config,
+        validated_model=None,
+        elapsed_time=0,
+    ) -> ValidationResult:
+        """Create the final validation result."""
+        # Get the model object if it was a ParseResult
+        model_obj = None
+        if is_valid:
+            model_obj = validated_model if validated_model else model_config
+
+        # Extract metadata for result
+        architecture_section = model_config.get("architecture", {})
+        arch_type = architecture_section.get("type", "Unknown")
+        layers_count = architecture_section.get("layers", 0)
+
+        # Create metadata with context if available
+        result_metadata = {
+            "validation_time": elapsed_time,
+            "architecture": arch_type,
+            "num_layers": layers_count if isinstance(layers_count, int) else 0,
+            "num_parameters": self._estimate_parameters(model_config),
+        }
+
+        # Include validation context if set
+        if self._context:
+            result_metadata["context"] = self._context.copy()
+
+        return ValidationResult(
+            is_valid=is_valid,
+            errors=errors,
+            warnings=warnings,
+            model=model_obj,
+            metadata=result_metadata,
+        )
+
+    def validate(
+        self, model_config: Union[Dict[str, Any], Any]
+    ) -> ValidationResult:
         """Validate a model configuration."""
         start_time = time.time()
         errors = []
         warnings = []
+        validated_model = None
+        original_parse_result = None
 
         try:
             # Handle ParseResult objects
-            if hasattr(model_config, "sections") and hasattr(model_config, "metadata"):
-                # This is a ParseResult object
-                config_dict = {}
-                original_parse_result = model_config
-
-                # Extract sections
-                if hasattr(model_config, "sections") and model_config.sections:
-                    config_dict.update(model_config.sections)
-
-                # Extract metadata
-                if hasattr(model_config, "metadata") and model_config.metadata:
-                    config_dict["metadata"] = model_config.metadata
-
-                # Extract name from AST or metadata
-                if (
-                    hasattr(model_config, "ast")
-                    and model_config.ast
-                    and hasattr(model_config.ast, "name")
-                ):
-                    config_dict["name"] = model_config.ast.name
-                elif "name" in getattr(model_config, "metadata", {}):
-                    config_dict["name"] = model_config.metadata["name"]
-
-                # Create a proper model object for the result
-                validated_model = type(
-                    "Model",
-                    (),
-                    {"name": config_dict.get("name", "Unknown Model"), "config": config_dict},
-                )()
-
-                model_config = config_dict
+            if hasattr(model_config, "sections") and hasattr(
+                model_config, "metadata"
+            ):
+                (
+                    model_config,
+                    validated_model,
+                    original_parse_result,
+                ) = self._process_parse_result(model_config)
             elif not isinstance(model_config, dict):
-                errors.append("Model configuration must be a dictionary or ParseResult")
+                errors.append(
+                    "Model configuration must be a dictionary or ParseResult"
+                )
                 return ValidationResult(is_valid=False, errors=errors)
 
-            # Validate metadata (required fields)
-            metadata = model_config.get("metadata", {})
-            if not metadata.get("name"):
-                errors.append("Missing required metadata field: name")
+            # Validate basic structure
+            basic_errors = self._validate_basic_structure(model_config)
+            errors.extend(basic_errors)
 
             # Validate architecture section
-            architecture_section = model_config.get("architecture", {})
-            if not architecture_section:
-                errors.append("Missing required field: architecture")
-            else:
-                # Validate architecture type
-                arch_type = architecture_section.get("type", "")
-                if arch_type not in self.allowed_architectures:
-                    errors.append(
-                        f"Invalid architecture: {arch_type}. "
-                        f"Allowed: {', '.join(self.allowed_architectures)}"
-                    )
+            arch_errors = self._validate_architecture_section(model_config)
+            errors.extend(arch_errors)
 
-                # Validate activation function
-                activation = architecture_section.get("activation")
-                if activation and activation not in self.allowed_activations:
-                    errors.append(
-                        f"Invalid activation: {activation}. "
-                        f"Allowed: {', '.join(self.allowed_activations)}"
-                    )
-
-                # Validate dimensions
-                hidden_dim = architecture_section.get("hidden_dim")
-                if hidden_dim is not None:
-                    if not isinstance(hidden_dim, int) or hidden_dim <= 0:
-                        errors.append("hidden_dim must be a positive integer")
-
-                layers_count = architecture_section.get("layers")
-                if layers_count is not None:
-                    if not isinstance(layers_count, int) or layers_count <= 0:
-                        errors.append("layers must be a positive integer")
-
-            # Validate parameters section
-            parameters = model_config.get("parameters", {})
-            param_errors = self._validate_hyperparameters(parameters)
-            errors.extend(param_errors)
-
-            # Validate active inference configuration
-            active_inference = model_config.get("active_inference", {})
-            if active_inference:
-                ai_errors = self._validate_active_inference_config(active_inference)
-                errors.extend(ai_errors)
-
-            # Generate warnings for memory, performance, and numerical issues
-            architecture_warnings = self._check_architecture_warnings(
-                architecture_section, parameters
+            # Run comprehensive validations
+            comp_errors, comp_warnings = self._run_comprehensive_validations(
+                model_config, original_parse_result
             )
-            warnings.extend(architecture_warnings)
-
-            # Security validation
-            security_errors = self._validate_security(model_config)
-            errors.extend(security_errors)
-
-            # Check for circular dependencies
-            if "dependencies" in model_config:
-                circular_errors = self._check_circular_dependencies(model_config["dependencies"])
-                errors.extend(circular_errors)
-
-            # Validate cross-references
-            cross_ref_errors = self._validate_cross_references(model_config)
-            errors.extend(cross_ref_errors)
-
-            # Check for definitions circular dependencies (separate from regular dependencies)
-            if "definitions" in model_config:
-                definitions_errors = self._check_definitions_circular_dependencies(
-                    model_config["definitions"]
-                )
-                errors.extend(definitions_errors)
-
-            # Validate metadata
-            if "metadata" in model_config:
-                metadata_errors = self._validate_metadata(model_config["metadata"])
-                errors.extend(metadata_errors)
-
-            # Apply custom rules
-            for rule_name, rule_func in self._custom_rules.items():
-                try:
-                    # Pass the original ParseResult if available, otherwise processed config
-                    rule_input = (
-                        original_parse_result
-                        if "original_parse_result" in locals()
-                        else model_config
-                    )
-                    rule_result = rule_func(rule_input)
-                    if isinstance(rule_result, list):
-                        errors.extend(rule_result)
-                    elif isinstance(rule_result, str):
-                        errors.append(rule_result)
-                except Exception as e:
-                    warnings.append(f"Custom rule {rule_name} failed: {str(e)}")
+            errors.extend(comp_errors)
+            warnings.extend(comp_warnings)
 
             # Check validation time
             elapsed_time = time.time() - start_time
@@ -247,47 +367,27 @@ class GMNValidator:
             # Limit errors
             if len(errors) > self.max_validation_errors:
                 errors = errors[: self.max_validation_errors]
-                errors.append(f"... and {len(errors) - self.max_validation_errors} more errors")
+                errors.append(
+                    f"... and {len(errors) - self.max_validation_errors} more errors"
+                )
 
             # Create result
             is_valid = len(errors) == 0
 
-            # Get the model object if it was a ParseResult
-            model_obj = None
-            if is_valid:
-                if "validated_model" in locals():
-                    model_obj = validated_model
-                else:
-                    model_obj = model_config
-
-            # Extract metadata for result
-            architecture_section = model_config.get("architecture", {})
-            arch_type = architecture_section.get("type", "Unknown")
-            layers_count = architecture_section.get("layers", 0)
-
-            # Create metadata with context if available
-            result_metadata = {
-                "validation_time": elapsed_time,
-                "architecture": arch_type,
-                "num_layers": layers_count if isinstance(layers_count, int) else 0,
-                "num_parameters": self._estimate_parameters(model_config),
-            }
-
-            # Include validation context if set
-            if self._context:
-                result_metadata["context"] = self._context.copy()
-
-            return ValidationResult(
-                is_valid=is_valid,
-                errors=errors,
-                warnings=warnings,
-                model=model_obj,
-                metadata=result_metadata,
+            return self._create_validation_result(
+                is_valid,
+                errors,
+                warnings,
+                model_config,
+                validated_model,
+                elapsed_time,
             )
 
         except Exception as e:
             logger.error(f"Validation failed with exception: {e}")
-            return ValidationResult(is_valid=False, errors=[f"Validation failed: {str(e)}"])
+            return ValidationResult(
+                is_valid=False, errors=[f"Validation failed: {str(e)}"]
+            )
 
     def _validate_layer(self, layer: Dict[str, Any], index: int) -> List[str]:
         """Validate a single layer configuration."""
@@ -315,25 +415,35 @@ class GMNValidator:
         if "input_dim" in layer:
             input_dim = layer["input_dim"]
             if not isinstance(input_dim, int) or input_dim <= 0:
-                errors.append(f"Layer {index} input_dim must be positive integer")
+                errors.append(
+                    f"Layer {index} input_dim must be positive integer"
+                )
 
         if "output_dim" in layer:
             output_dim = layer["output_dim"]
             if not isinstance(output_dim, int) or output_dim <= 0:
-                errors.append(f"Layer {index} output_dim must be positive integer")
+                errors.append(
+                    f"Layer {index} output_dim must be positive integer"
+                )
 
         # Validate layer-specific parameters
         if layer_type == "attention" and "num_heads" in layer:
             num_heads = layer["num_heads"]
             if not isinstance(num_heads, int) or num_heads <= 0:
-                errors.append(f"Layer {index} num_heads must be positive integer")
+                errors.append(
+                    f"Layer {index} num_heads must be positive integer"
+                )
 
             if "output_dim" in layer and layer["output_dim"] % num_heads != 0:
-                errors.append(f"Layer {index} output_dim must be divisible by num_heads")
+                errors.append(
+                    f"Layer {index} output_dim must be divisible by num_heads"
+                )
 
         return errors
 
-    def _validate_hyperparameters(self, hyperparams: Dict[str, Any]) -> List[str]:
+    def _validate_hyperparameters(
+        self, hyperparams: Dict[str, Any]
+    ) -> List[str]:
         """Validate hyperparameters."""
         errors = []
 
@@ -344,11 +454,15 @@ class GMNValidator:
                 if not isinstance(value, (int, float)):
                     errors.append(f"{param} must be numeric")
                 elif value < min_val or value > max_val:
-                    errors.append(f"{param} value {value} outside range [{min_val}, {max_val}]")
+                    errors.append(
+                        f"{param} value {value} outside range [{min_val}, {max_val}]"
+                    )
 
         return errors
 
-    def _validate_active_inference_config(self, active_inference: Dict[str, Any]) -> List[str]:
+    def _validate_active_inference_config(
+        self, active_inference: Dict[str, Any]
+    ) -> List[str]:
         """Validate Active Inference configuration."""
         errors = []
 
@@ -358,7 +472,9 @@ class GMNValidator:
             if field in active_inference:
                 value = active_inference[field]
                 if not isinstance(value, int) or value <= 0:
-                    errors.append(f"Active Inference {field} must be a positive integer")
+                    errors.append(
+                        f"Active Inference {field} must be a positive integer"
+                    )
 
         return errors
 
@@ -377,20 +493,30 @@ class GMNValidator:
         batch_size = parameters.get("batch_size", 32)
 
         if layers > 50:
-            warnings.append(f"High layer count ({layers}) may cause memory issues")
+            warnings.append(
+                f"High layer count ({layers}) may cause memory issues"
+            )
         if hidden_dim > 5000:
-            warnings.append(f"Large hidden dimension ({hidden_dim}) may cause memory issues")
+            warnings.append(
+                f"Large hidden dimension ({hidden_dim}) may cause memory issues"
+            )
         if batch_size > 512:
-            warnings.append(f"Large batch size ({batch_size}) may cause memory issues")
+            warnings.append(
+                f"Large batch size ({batch_size}) may cause memory issues"
+            )
 
         # Performance implications
         arch_type = architecture.get("type", "")
         if arch_type == "GAT":
             num_heads = architecture.get("num_heads", 1)
             if num_heads > 16:
-                warnings.append(f"High attention head count ({num_heads}) may impact performance")
+                warnings.append(
+                    f"High attention head count ({num_heads}) may impact performance"
+                )
         if layers > 8:
-            warnings.append(f"Deep network ({layers} layers) may have slow training")
+            warnings.append(
+                f"Deep network ({layers} layers) may have slow training"
+            )
 
         # Numerical stability warnings
         gradient_clip = parameters.get("gradient_clip")
@@ -400,11 +526,15 @@ class GMNValidator:
             )
         eps = parameters.get("eps")
         if eps and eps < 1e-10:
-            warnings.append(f"Very small epsilon ({eps}) may cause numerical instability")
+            warnings.append(
+                f"Very small epsilon ({eps}) may cause numerical instability"
+            )
 
         # Layer compatibility warnings
         if arch_type == "GCN" and architecture.get("edge_features"):
-            warnings.append("GCN does not typically use edge features - consider GraphSAGE or GAT")
+            warnings.append(
+                "GCN does not typically use edge features - consider GraphSAGE or GAT"
+            )
 
         return warnings
 
@@ -417,7 +547,9 @@ class GMNValidator:
 
         for pattern in self.security_patterns:
             if re.search(pattern, config_str, re.IGNORECASE):
-                errors.append(f"Security violation: forbidden pattern '{pattern}' detected")
+                errors.append(
+                    f"Security violation: forbidden pattern '{pattern}' detected"
+                )
 
         # Check for suspicious keys
         suspicious_keys = {"__", "exec", "eval", "compile", "import"}
@@ -428,11 +560,15 @@ class GMNValidator:
 
         return errors
 
-    def _check_circular_dependencies(self, dependencies: Dict[str, List[str]]) -> List[str]:
+    def _check_circular_dependencies(
+        self, dependencies: Dict[str, List[str]]
+    ) -> List[str]:
         """Check for circular dependencies."""
         errors = []
 
-        def has_cycle(node: str, visited: Set[str], rec_stack: Set[str]) -> bool:
+        def has_cycle(
+            node: str, visited: Set[str], rec_stack: Set[str]
+        ) -> bool:
             visited.add(node)
             rec_stack.add(node)
 
@@ -452,7 +588,9 @@ class GMNValidator:
         for node in dependencies:
             if node not in visited:
                 if has_cycle(node, visited, rec_stack):
-                    errors.append(f"Circular dependency detected involving {node}")
+                    errors.append(
+                        f"Circular dependency detected involving {node}"
+                    )
 
         return errors
 
@@ -501,7 +639,6 @@ class GMNValidator:
 
                 # Additional parameters for specific layer types
                 if layer.get("type") == "attention":
-                    num_heads = layer.get("num_heads", 1)
                     # Query, Key, Value projections
                     total_params += 3 * input_dim * output_dim
 
@@ -522,7 +659,9 @@ class GMNValidator:
 
         return keys
 
-    def _collect_variable_definitions(self, config: Dict[str, Any]) -> Dict[str, Any]:
+    def _collect_variable_definitions(
+        self, config: Dict[str, Any]
+    ) -> Dict[str, Any]:
         """Collect variable definitions from configuration."""
         variables = {}
 
@@ -562,16 +701,25 @@ class GMNValidator:
                 features = node_features["features"]
                 if isinstance(features, list):
                     # Collect all variable definitions
-                    defined_variables = self._collect_variable_definitions(config)
+                    defined_variables = self._collect_variable_definitions(
+                        config
+                    )
 
                     # Check each feature reference
                     for feature in features:
-                        if isinstance(feature, str) and feature not in defined_variables:
-                            errors.append(f"Undefined reference in node features: {feature}")
+                        if (
+                            isinstance(feature, str)
+                            and feature not in defined_variables
+                        ):
+                            errors.append(
+                                f"Undefined reference in node features: {feature}"
+                            )
 
         return errors
 
-    def _check_definitions_circular_dependencies(self, definitions: Dict[str, Any]) -> List[str]:
+    def _check_definitions_circular_dependencies(
+        self, definitions: Dict[str, Any]
+    ) -> List[str]:
         """Check for circular dependencies in definitions section."""
         errors = []
 
@@ -603,6 +751,8 @@ class GMNValidator:
         for node in definitions:
             if node not in visited:
                 if has_cycle(node, visited, rec_stack):
-                    errors.append(f"Circular dependency detected in definitions involving {node}")
+                    errors.append(
+                        f"Circular dependency detected in definitions involving {node}"
+                    )
 
         return errors

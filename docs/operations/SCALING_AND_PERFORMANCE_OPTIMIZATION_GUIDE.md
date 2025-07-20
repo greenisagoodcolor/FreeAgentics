@@ -7,21 +7,22 @@ This guide provides comprehensive procedures for scaling and optimizing the perf
 ## Table of Contents
 
 1. [Scaling Architecture](#scaling-architecture)
-2. [Horizontal Scaling](#horizontal-scaling)
-3. [Vertical Scaling](#vertical-scaling)
-4. [Database Scaling](#database-scaling)
-5. [Performance Monitoring](#performance-monitoring)
-6. [Performance Optimization](#performance-optimization)
-7. [Capacity Planning](#capacity-planning)
-8. [Auto-scaling Configuration](#auto-scaling-configuration)
-9. [Load Testing](#load-testing)
-10. [Performance Troubleshooting](#performance-troubleshooting)
+1. [Horizontal Scaling](#horizontal-scaling)
+1. [Vertical Scaling](#vertical-scaling)
+1. [Database Scaling](#database-scaling)
+1. [Performance Monitoring](#performance-monitoring)
+1. [Performance Optimization](#performance-optimization)
+1. [Capacity Planning](#capacity-planning)
+1. [Auto-scaling Configuration](#auto-scaling-configuration)
+1. [Load Testing](#load-testing)
+1. [Performance Troubleshooting](#performance-troubleshooting)
 
 ## Scaling Architecture
 
 ### 1. Current Architecture Overview
 
 #### System Components
+
 ```
 ┌─────────────────────────────────────────────────────────────┐
 │                    Load Balancer (NGINX)                    │
@@ -61,6 +62,7 @@ This guide provides comprehensive procedures for scaling and optimizing the perf
 ### 2. Scaling Strategies
 
 #### Scaling Dimensions
+
 - **Horizontal Scaling**: Adding more instances
 - **Vertical Scaling**: Increasing resource allocation
 - **Database Scaling**: Read replicas and sharding
@@ -68,6 +70,7 @@ This guide provides comprehensive procedures for scaling and optimizing the perf
 - **Geographic Scaling**: Multi-region deployment
 
 #### Scaling Triggers
+
 ```yaml
 scaling_triggers:
   cpu_utilization:
@@ -89,6 +92,7 @@ scaling_triggers:
 ### 1. API Service Scaling
 
 #### Kubernetes Horizontal Pod Autoscaler (HPA)
+
 ```yaml
 # api-hpa.yaml
 apiVersion: autoscaling/v2
@@ -132,6 +136,7 @@ spec:
 ```
 
 #### Docker Compose Scaling
+
 ```bash
 # Scale API service
 docker-compose up -d --scale api=5
@@ -144,6 +149,7 @@ docker-compose ps
 ```
 
 #### Manual Scaling Commands
+
 ```bash
 # Scale API deployment
 kubectl scale deployment api-deployment --replicas=10
@@ -159,6 +165,7 @@ kubectl get hpa
 ### 2. Worker Service Scaling
 
 #### Queue-Based Scaling
+
 ```yaml
 # worker-hpa.yaml
 apiVersion: autoscaling/v2
@@ -187,6 +194,7 @@ spec:
 ```
 
 #### Custom Metrics Scaling
+
 ```bash
 # Configure custom metrics
 ./scripts/scaling/configure-custom-metrics.sh
@@ -201,6 +209,7 @@ kubectl get --raw "/apis/custom.metrics.k8s.io/v1beta1/namespaces/freeagentics/p
 ### 3. Load Balancer Configuration
 
 #### NGINX Load Balancer
+
 ```nginx
 # nginx.conf
 upstream api_backend {
@@ -232,6 +241,7 @@ server {
 ```
 
 #### HAProxy Configuration
+
 ```bash
 # haproxy.cfg
 global
@@ -262,6 +272,7 @@ backend api_servers
 ### 1. Resource Optimization
 
 #### Container Resource Limits
+
 ```yaml
 # deployment.yaml
 apiVersion: apps/v1
@@ -290,6 +301,7 @@ spec:
 ```
 
 #### JVM Optimization (if using Java components)
+
 ```bash
 # Java application optimization
 export JAVA_OPTS="-Xms2g -Xmx4g -XX:NewRatio=3 -XX:+UseG1GC -XX:MaxGCPauseMillis=200"
@@ -300,6 +312,7 @@ jstack $PID
 ```
 
 #### Python Application Optimization
+
 ```python
 # gunicorn configuration
 import multiprocessing
@@ -318,6 +331,7 @@ keepalive = 2
 ### 2. Database Vertical Scaling
 
 #### PostgreSQL Optimization
+
 ```bash
 # PostgreSQL configuration tuning
 ./scripts/scaling/optimize-postgresql.sh
@@ -332,6 +346,7 @@ default_statistics_target = 100
 ```
 
 #### Redis Optimization
+
 ```bash
 # Redis configuration
 ./scripts/scaling/optimize-redis.sh
@@ -351,6 +366,7 @@ timeout 0
 ### 1. Read Replicas
 
 #### PostgreSQL Read Replicas
+
 ```bash
 # Create read replica
 ./scripts/scaling/create-read-replica.sh
@@ -363,6 +379,7 @@ psql -h db-replica-1 -U postgres -c "SELECT pg_is_in_recovery();"
 ```
 
 #### Application Read/Write Splitting
+
 ```python
 # Database connection routing
 class DatabaseRouter:
@@ -385,6 +402,7 @@ write_conn = router.get_connection('write')
 ### 2. Database Sharding
 
 #### Horizontal Sharding Strategy
+
 ```python
 # Sharding implementation
 class ShardRouter:
@@ -405,6 +423,7 @@ class ShardRouter:
 ```
 
 #### Database Partitioning
+
 ```sql
 -- Table partitioning
 CREATE TABLE agents (
@@ -424,6 +443,7 @@ FOR VALUES FROM ('2024-04-01') TO ('2024-07-01');
 ### 3. Connection Pooling
 
 #### PgBouncer Configuration
+
 ```bash
 # PgBouncer setup
 ./scripts/scaling/setup-pgbouncer.sh
@@ -448,6 +468,7 @@ default_pool_size = 20
 ### 1. Application Performance Monitoring
 
 #### Prometheus Metrics
+
 ```python
 # Application metrics
 from prometheus_client import Counter, Histogram, Gauge
@@ -469,6 +490,7 @@ async def metrics_middleware(request: Request, call_next):
 ```
 
 #### Custom Performance Monitoring
+
 ```bash
 # Performance monitoring script
 ./scripts/monitoring/performance-monitor.sh
@@ -483,6 +505,7 @@ async def metrics_middleware(request: Request, call_next):
 ### 2. Database Performance Monitoring
 
 #### PostgreSQL Performance Queries
+
 ```sql
 -- Monitor slow queries
 SELECT query, mean_time, calls, total_time
@@ -503,6 +526,7 @@ ORDER BY n_dead_tup DESC;
 ```
 
 #### Redis Performance Monitoring
+
 ```bash
 # Redis performance monitoring
 redis-cli INFO memory
@@ -516,6 +540,7 @@ redis-cli SLOWLOG GET 10
 ### 3. Network Performance Monitoring
 
 #### Network Metrics Collection
+
 ```bash
 # Network monitoring
 ./scripts/monitoring/network-monitor.sh
@@ -532,6 +557,7 @@ netstat -an | grep :8000 | wc -l
 ### 1. Application Code Optimization
 
 #### Database Query Optimization
+
 ```python
 # Optimized database queries
 class OptimizedQueries:
@@ -563,6 +589,7 @@ class OptimizedQueries:
 ```
 
 #### Caching Strategy
+
 ```python
 # Multi-level caching
 import redis
@@ -599,6 +626,7 @@ def get_agent_stats(agent_id):
 ### 2. Database Optimization
 
 #### Index Optimization
+
 ```sql
 -- Create performance indexes
 CREATE INDEX CONCURRENTLY idx_agents_status_created 
@@ -615,6 +643,7 @@ WHERE status = 'active';
 ```
 
 #### Query Optimization
+
 ```sql
 -- Optimize frequent queries
 EXPLAIN ANALYZE SELECT * FROM agents WHERE status = 'active';
@@ -636,6 +665,7 @@ REFRESH MATERIALIZED VIEW CONCURRENTLY agent_performance_summary;
 ### 3. Memory Optimization
 
 #### Application Memory Management
+
 ```python
 # Memory optimization techniques
 import gc
@@ -676,6 +706,7 @@ class MemoryOptimizer:
 ### 1. Resource Forecasting
 
 #### Capacity Planning Script
+
 ```bash
 # Capacity planning analysis
 ./scripts/capacity/analyze-capacity.sh --period 30d
@@ -688,6 +719,7 @@ class MemoryOptimizer:
 ```
 
 #### Resource Utilization Analysis
+
 ```python
 # Resource utilization forecasting
 import numpy as np
@@ -738,6 +770,7 @@ class CapacityPlanner:
 ### 2. Cost Optimization
 
 #### Resource Cost Analysis
+
 ```bash
 # Cost analysis
 ./scripts/capacity/cost-analysis.sh
@@ -750,6 +783,7 @@ class CapacityPlanner:
 ```
 
 #### Right-sizing Recommendations
+
 ```python
 # Resource right-sizing
 class ResourceOptimizer:
@@ -791,6 +825,7 @@ class ResourceOptimizer:
 ### 1. Kubernetes Auto-scaling
 
 #### Vertical Pod Autoscaler (VPA)
+
 ```yaml
 # vpa.yaml
 apiVersion: autoscaling.k8s.io/v1
@@ -816,6 +851,7 @@ spec:
 ```
 
 #### Cluster Autoscaler
+
 ```yaml
 # cluster-autoscaler.yaml
 apiVersion: apps/v1
@@ -844,6 +880,7 @@ spec:
 ### 2. Custom Auto-scaling
 
 #### Custom Metrics Auto-scaling
+
 ```python
 # Custom auto-scaling logic
 import kubernetes
@@ -891,6 +928,7 @@ class CustomAutoscaler:
 ### 1. Load Testing Strategy
 
 #### Load Test Planning
+
 ```bash
 # Load test planning
 ./scripts/load-testing/plan-load-test.sh
@@ -903,6 +941,7 @@ class CustomAutoscaler:
 ```
 
 #### Load Test Scenarios
+
 ```yaml
 # load-test-scenarios.yaml
 scenarios:
@@ -935,6 +974,7 @@ scenarios:
 ### 2. Load Testing Tools
 
 #### K6 Load Testing
+
 ```javascript
 // k6-load-test.js
 import http from 'k6/http';
@@ -965,6 +1005,7 @@ export default function() {
 ```
 
 #### JMeter Load Testing
+
 ```bash
 # JMeter load test
 ./scripts/load-testing/jmeter-test.sh
@@ -979,6 +1020,7 @@ jmeter -g results.jtl -o html-report/
 ### 3. Performance Benchmarking
 
 #### API Performance Benchmarking
+
 ```bash
 # API benchmarking
 ./scripts/benchmarking/api-benchmark.sh
@@ -991,6 +1033,7 @@ wrk -t12 -c400 -d30s --header "Authorization: Bearer token" https://api.freeagen
 ```
 
 #### Database Performance Benchmarking
+
 ```bash
 # Database benchmarking
 ./scripts/benchmarking/db-benchmark.sh
@@ -1005,6 +1048,7 @@ pgbench -c 10 -j 2 -t 10000 freeagentics
 ### 1. Common Performance Issues
 
 #### High CPU Usage
+
 ```bash
 # Identify CPU bottlenecks
 ./scripts/troubleshooting/cpu-analysis.sh
@@ -1017,6 +1061,7 @@ pgbench -c 10 -j 2 -t 10000 freeagentics
 ```
 
 #### Memory Leaks
+
 ```bash
 # Memory leak detection
 ./scripts/troubleshooting/memory-leak-detection.sh
@@ -1029,6 +1074,7 @@ pgbench -c 10 -j 2 -t 10000 freeagentics
 ```
 
 #### Database Performance Issues
+
 ```bash
 # Database performance analysis
 ./scripts/troubleshooting/db-performance-analysis.sh
@@ -1043,6 +1089,7 @@ pgbench -c 10 -j 2 -t 10000 freeagentics
 ### 2. Performance Debugging
 
 #### Application Profiling
+
 ```python
 # Python profiling
 import cProfile
@@ -1071,6 +1118,7 @@ def slow_function():
 ```
 
 #### Database Query Analysis
+
 ```sql
 -- Enable query logging
 ALTER SYSTEM SET log_statement = 'all';
@@ -1093,6 +1141,7 @@ AND correlation < 0.1;
 ### 3. Performance Monitoring and Alerting
 
 #### Real-time Performance Monitoring
+
 ```bash
 # Real-time monitoring
 ./scripts/monitoring/realtime-performance.sh
@@ -1105,6 +1154,7 @@ AND correlation < 0.1;
 ```
 
 #### Performance Metrics Collection
+
 ```python
 # Performance metrics collector
 import time
@@ -1141,12 +1191,14 @@ class PerformanceCollector:
 ### 1. Scaling Best Practices
 
 #### Scaling Guidelines
+
 - **Scale gradually**: Avoid sudden scaling changes
 - **Monitor during scaling**: Watch for issues during scale operations
 - **Test scaling**: Regularly test auto-scaling behavior
 - **Plan for failure**: Design for graceful degradation
 
 #### Performance Best Practices
+
 - **Profile before optimizing**: Identify actual bottlenecks
 - **Optimize the database**: Often the primary bottleneck
 - **Use caching effectively**: Implement multi-level caching
@@ -1155,12 +1207,14 @@ class PerformanceCollector:
 ### 2. Resource Management
 
 #### Resource Allocation
+
 - **Right-size resources**: Avoid over-provisioning
 - **Use resource limits**: Set appropriate limits in containers
 - **Monitor resource usage**: Track utilization trends
 - **Plan for growth**: Anticipate future needs
 
 #### Cost Optimization
+
 - **Regular cost reviews**: Monitor and optimize costs
 - **Use spot instances**: For non-critical workloads
 - **Implement auto-scaling**: Automatically adjust resources
@@ -1169,6 +1223,7 @@ class PerformanceCollector:
 ## Scaling Checklist
 
 ### Pre-Scaling Checklist
+
 - [ ] Assess current performance metrics
 - [ ] Identify scaling bottlenecks
 - [ ] Plan scaling strategy
@@ -1177,6 +1232,7 @@ class PerformanceCollector:
 - [ ] Notify team of scaling activities
 
 ### During Scaling
+
 - [ ] Monitor system performance
 - [ ] Watch for errors or issues
 - [ ] Verify auto-scaling behavior
@@ -1185,6 +1241,7 @@ class PerformanceCollector:
 - [ ] Document any issues
 
 ### Post-Scaling
+
 - [ ] Verify system stability
 - [ ] Confirm performance improvements
 - [ ] Update capacity planning
@@ -1192,9 +1249,10 @@ class PerformanceCollector:
 - [ ] Update documentation
 - [ ] Schedule follow-up review
 
----
+______________________________________________________________________
 
 **Document Information:**
+
 - **Version**: 1.0
 - **Last Updated**: January 2024
 - **Next Review**: April 2024
@@ -1202,6 +1260,7 @@ class PerformanceCollector:
 - **Approved By**: Engineering Manager
 
 **Performance Targets:**
+
 - **API Response Time**: < 500ms (95th percentile)
 - **System Availability**: 99.9%
 - **Auto-scaling Response**: < 3 minutes

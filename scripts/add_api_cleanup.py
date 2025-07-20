@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 """
-Add API Cleanup Endpoint
+Add API Cleanup Endpoint.
 As specified in subtask 15.1
 """
 
@@ -9,7 +9,7 @@ from pathlib import Path
 
 
 def add_cleanup_endpoint():
-    """Add cleanup endpoint to API system module"""
+    """Add cleanup endpoint to API system module."""
 
     # Check if system.py exists
     system_path = Path("api/v1/system.py")
@@ -161,7 +161,7 @@ async def cleanup_status():
 
 
 def create_cleanup_test():
-    """Create a test for the cleanup endpoint"""
+    """Create a test for the cleanup endpoint."""
 
     test_content = '''#!/usr/bin/env python3
 """
@@ -220,7 +220,7 @@ if __name__ == "__main__":
 
 
 def main():
-    """Main function"""
+    """Main function."""
     print("=== Adding API Cleanup Functionality ===")
 
     if add_cleanup_endpoint():

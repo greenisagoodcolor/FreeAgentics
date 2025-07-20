@@ -121,7 +121,11 @@ async def get_system_info() -> dict:
         "version": "0.1.0-alpha",
         "environment": "development",
         "capabilities": {
-            "active_inference": {"engine": "PyMDP", "status": "partial", "completion": 15},
+            "active_inference": {
+                "engine": "PyMDP",
+                "status": "partial",
+                "completion": 15,
+            },
             "graph_neural_networks": {
                 "framework": "PyTorch Geometric",
                 "status": "partial",
@@ -188,17 +192,23 @@ async def get_prometheus_metrics() -> Response:
         content_type = get_prometheus_content_type()
 
         return Response(
-            content=metrics_data, media_type=content_type, headers={"Cache-Control": "no-cache"}
+            content=metrics_data,
+            media_type=content_type,
+            headers={"Cache-Control": "no-cache"},
         )
     except ImportError:
         logger.warning("Prometheus metrics not available")
         return Response(
-            content="# Prometheus metrics not available\n", media_type="text/plain", status_code=503
+            content="# Prometheus metrics not available\n",
+            media_type="text/plain",
+            status_code=503,
         )
     except Exception as e:
         logger.error(f"Error getting Prometheus metrics: {e}")
         return Response(
-            content=f"# Error getting metrics: {e}\n", media_type="text/plain", status_code=500
+            content=f"# Error getting metrics: {e}\n",
+            media_type="text/plain",
+            status_code=500,
         )
 
 
@@ -239,4 +249,8 @@ async def get_health_metrics() -> Dict[str, Any]:
         }
     except Exception as e:
         logger.error(f"Error getting health metrics: {e}")
-        return {"timestamp": datetime.now().isoformat(), "status": "unhealthy", "error": str(e)}
+        return {
+            "timestamp": datetime.now().isoformat(),
+            "status": "unhealthy",
+            "error": str(e),
+        }

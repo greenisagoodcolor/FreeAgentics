@@ -40,10 +40,17 @@ def verify_memory_reduction():
     # Calculate original memory
     agent = MockAgent()
     original_beliefs_mb = agent.beliefs.nbytes / (1024 * 1024)
-    original_history_mb = sum(len(s.encode()) for s in agent.action_history) / (1024 * 1024)
+    original_history_mb = sum(
+        len(s.encode()) for s in agent.action_history
+    ) / (1024 * 1024)
     original_obs_mb = agent.observations.nbytes / (1024 * 1024)
     original_trans_mb = agent.transition_matrix.nbytes / (1024 * 1024)
-    original_total = original_beliefs_mb + original_history_mb + original_obs_mb + original_trans_mb
+    original_total = (
+        original_beliefs_mb
+        + original_history_mb
+        + original_obs_mb
+        + original_trans_mb
+    )
 
     print(f"Original Memory Usage:")
     print(f"  Beliefs: {original_beliefs_mb:.2f} MB")
@@ -61,11 +68,19 @@ def verify_memory_reduction():
 
     # Force conversion to sparse
     sparse_repr = lazy_beliefs.sparse
-    print(f"  Original dense size: {agent.beliefs.nbytes / (1024 * 1024):.2f} MB")
-    print(f"  Sparse data size: {sparse_repr.data.nbytes / (1024 * 1024):.2f} MB")
-    print(f"  Sparse indices size: {sparse_repr.indices.nbytes / (1024 * 1024):.2f} MB")
+    print(
+        f"  Original dense size: {agent.beliefs.nbytes / (1024 * 1024):.2f} MB"
+    )
+    print(
+        f"  Sparse data size: {sparse_repr.data.nbytes / (1024 * 1024):.2f} MB"
+    )
+    print(
+        f"  Sparse indices size: {sparse_repr.indices.nbytes / (1024 * 1024):.2f} MB"
+    )
     if hasattr(sparse_repr, "indptr"):
-        print(f"  Sparse indptr size: {sparse_repr.indptr.nbytes / (1024 * 1024):.2f} MB")
+        print(
+            f"  Sparse indptr size: {sparse_repr.indptr.nbytes / (1024 * 1024):.2f} MB"
+        )
 
     total_sparse_mb = (
         sparse_repr.data.nbytes
@@ -108,7 +123,9 @@ def verify_memory_reduction():
     final_memory = opt_result.get_memory_usage_mb()
 
     print(f"  Final optimized memory: {final_memory:.2f} MB")
-    print(f"  Reduction: {((original_total - final_memory) / original_total * 100):.1f}%")
+    print(
+        f"  Reduction: {((original_total - final_memory) / original_total * 100):.1f}%"
+    )
     print(f"  Target achieved: {'YES' if final_memory < 10.0 else 'NO'}")
 
     # Get optimization stats

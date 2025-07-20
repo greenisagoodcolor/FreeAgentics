@@ -7,17 +7,17 @@ This guide provides comprehensive instructions for deploying FreeAgentics to pro
 ## Table of Contents
 
 1. [Prerequisites](#prerequisites)
-2. [Architecture Overview](#architecture-overview)
-3. [Deployment Options](#deployment-options)
-4. [Docker Deployment](#docker-deployment)
-5. [Kubernetes Deployment](#kubernetes-deployment)
-6. [CI/CD Pipeline](#cicd-pipeline)
-7. [Monitoring & Alerting](#monitoring--alerting)
-8. [Security Configuration](#security-configuration)
-9. [Database Management](#database-management)
-10. [SSL/TLS Configuration](#ssltls-configuration)
-11. [Backup & Recovery](#backup--recovery)
-12. [Troubleshooting](#troubleshooting)
+1. [Architecture Overview](#architecture-overview)
+1. [Deployment Options](#deployment-options)
+1. [Docker Deployment](#docker-deployment)
+1. [Kubernetes Deployment](#kubernetes-deployment)
+1. [CI/CD Pipeline](#cicd-pipeline)
+1. [Monitoring & Alerting](#monitoring--alerting)
+1. [Security Configuration](#security-configuration)
+1. [Database Management](#database-management)
+1. [SSL/TLS Configuration](#ssltls-configuration)
+1. [Backup & Recovery](#backup--recovery)
+1. [Troubleshooting](#troubleshooting)
 
 ## Prerequisites
 
@@ -449,24 +449,28 @@ docker-compose -f docker-compose.monitoring.yml up -d
 ### Key Metrics to Monitor
 
 1. **Application Health**
+
    - Response times
    - Error rates
    - Request throughput
    - Active connections
 
-2. **Infrastructure Health**
+1. **Infrastructure Health**
+
    - CPU utilization
    - Memory usage
    - Disk space
    - Network I/O
 
-3. **Database Performance**
+1. **Database Performance**
+
    - Query performance
    - Connection pool usage
    - Lock contention
    - Replication lag
 
-4. **Security Metrics**
+1. **Security Metrics**
+
    - Failed authentication attempts
    - Rate limiting triggers
    - SSL certificate expiration
@@ -588,9 +592,9 @@ aws s3 cp /backups/ s3://your-backup-bucket/freeagentics/ --recursive
 ### Disaster Recovery Plan
 
 1. **Recovery Time Objective (RTO)**: 1 hour
-2. **Recovery Point Objective (RPO)**: 15 minutes
-3. **Backup Frequency**: Every 6 hours
-4. **Backup Retention**: 30 days local, 1 year cloud
+1. **Recovery Point Objective (RPO)**: 15 minutes
+1. **Backup Frequency**: Every 6 hours
+1. **Backup Retention**: 30 days local, 1 year cloud
 
 ### Recovery Procedures
 
@@ -701,18 +705,21 @@ iotop
 ### Regular Maintenance Tasks
 
 1. **Weekly**
+
    - Review monitoring dashboards
    - Check backup integrity
    - Review security logs
    - Update dependencies
 
-2. **Monthly**
+1. **Monthly**
+
    - Security vulnerability scan
    - Performance optimization review
    - Database maintenance
    - Documentation updates
 
-3. **Quarterly**
+1. **Quarterly**
+
    - Disaster recovery testing
    - Security audit
    - Capacity planning review
@@ -724,6 +731,6 @@ iotop
 - **Security Issues**: security@freeagentics.com
 - **Emergency Contact**: +1-XXX-XXX-XXXX
 
----
+______________________________________________________________________
 
 This guide provides a comprehensive foundation for deploying FreeAgentics in production environments. For specific deployment scenarios or additional support, please contact our technical team.

@@ -10,13 +10,15 @@ from agents.coalition_coordinator import CoalitionCoordinatorAgent
 from agents.resource_collector import ResourceCollectorAgent
 
 
-@pytest.mark.skipif(not PYMDP_AVAILABLE, reason="PyMDP not available")
+
 class TestPyMDPArrayIntegration:
     """Test that PyMDP array handling works in real agent scenarios."""
 
     def test_basic_explorer_with_array_actions(self):
         """Test BasicExplorerAgent handles PyMDP array responses."""
-        agent = BasicExplorerAgent("test_explorer", "Test Explorer", grid_size=5)
+        agent = BasicExplorerAgent(
+            "test_explorer", "Test Explorer", grid_size=5
+        )
         agent.start()
 
         # Mock PyMDP agent to return various array types
@@ -33,11 +35,17 @@ class TestPyMDPArrayIntegration:
 
         for action_response in test_cases:
             mock_agent.sample_action.return_value = action_response
-            mock_agent.infer_policies.return_value = (np.array([0.1, 0.2, 0.6, 0.1]), None)
+            mock_agent.infer_policies.return_value = (
+                np.array([0.1, 0.2, 0.6, 0.1]),
+                None,
+            )
             agent.pymdp_agent = mock_agent
 
             # This should not raise any errors
-            observation = {"position": [2, 2], "surroundings": np.zeros((3, 3))}
+            observation = {
+                "position": [2, 2],
+                "surroundings": np.zeros((3, 3)),
+            }
             action = agent.step(observation)
 
             # Should get a valid action string
@@ -46,19 +54,26 @@ class TestPyMDPArrayIntegration:
 
     def test_resource_collector_with_array_actions(self):
         """Test ResourceCollectorAgent handles PyMDP array responses."""
-        agent = ResourceCollectorAgent("test_collector", "Test Collector", grid_size=5)
+        agent = ResourceCollectorAgent(
+            "test_collector", "Test Collector", grid_size=5
+        )
         agent.start()
 
         # Mock PyMDP agent
         mock_agent = MagicMock()
         mock_agent.sample_action.return_value = np.array([4])  # collect action
-        mock_agent.infer_policies.return_value = (np.array([0.1, 0.1, 0.1, 0.1, 0.6, 0.1]), None)
+        mock_agent.infer_policies.return_value = (
+            np.array([0.1, 0.1, 0.1, 0.1, 0.6, 0.1]),
+            None,
+        )
         agent.pymdp_agent = mock_agent
 
         # Test step with collect action
         observation = {
             "position": [2, 2],
-            "visible_cells": [{"x": 2, "y": 2, "type": "resource", "amount": 5}],
+            "visible_cells": [
+                {"x": 2, "y": 2, "type": "resource", "amount": 5}
+            ],
             "current_load": 3,
         }
 
@@ -67,7 +82,9 @@ class TestPyMDPArrayIntegration:
 
     def test_coalition_coordinator_with_array_actions(self):
         """Test CoalitionCoordinatorAgent handles PyMDP array responses."""
-        agent = CoalitionCoordinatorAgent("test_coordinator", "Test Coordinator", max_agents=5)
+        agent = CoalitionCoordinatorAgent(
+            "test_coordinator", "Test Coordinator", max_agents=5
+        )
         agent.start()
 
         # Mock PyMDP agent
@@ -75,7 +92,10 @@ class TestPyMDPArrayIntegration:
         mock_agent.sample_action.return_value = np.argmax(
             np.array([0.1, 0.1, 0.1, 0.6, 0.1, 0.1])
         )  # coordinate action
-        mock_agent.infer_policies.return_value = (np.array([0.2, 0.2, 0.2, 0.2, 0.2]), None)
+        mock_agent.infer_policies.return_value = (
+            np.array([0.2, 0.2, 0.2, 0.2, 0.2]),
+            None,
+        )
         agent.pymdp_agent = mock_agent
 
         # Test step with coordinate action
@@ -156,7 +176,7 @@ class TestPyMDPArrayIntegration:
         assert isinstance(fe_components["total_free_energy"], float)
 
 
-@pytest.mark.skipif(not PYMDP_AVAILABLE, reason="PyMDP not available")
+
 class TestEdgeCases:
     """Test edge cases in PyMDP array handling."""
 
@@ -181,7 +201,10 @@ class TestEdgeCases:
             mock_agent.infer_policies.return_value = (np.array([1.0]), None)
             agent.pymdp_agent = mock_agent
 
-            observation = {"position": [2, 2], "surroundings": np.zeros((3, 3))}
+            observation = {
+                "position": [2, 2],
+                "surroundings": np.zeros((3, 3)),
+            }
 
             # Should handle gracefully and fall back to non-PyMDP action selection
             action = agent.step(observation)
@@ -190,7 +213,8 @@ class TestEdgeCases:
     def test_concurrent_agent_operations(self):
         """Test that multiple agents can operate concurrently without array issues."""
         agents = [
-            BasicExplorerAgent(f"explorer_{i}", f"Explorer {i}", grid_size=3) for i in range(3)
+            BasicExplorerAgent(f"explorer_{i}", f"Explorer {i}", grid_size=3)
+            for i in range(3)
         ]
 
         for i, agent in enumerate(agents):
@@ -198,7 +222,9 @@ class TestEdgeCases:
 
             # Mock each agent's PyMDP with different response types
             mock_agent = MagicMock()
-            mock_agent.sample_action.return_value = np.array(i % 5)  # Different actions
+            mock_agent.sample_action.return_value = np.array(
+                i % 5
+            )  # Different actions
             mock_agent.infer_policies.return_value = (np.ones(5) / 5, None)
             agent.pymdp_agent = mock_agent
 

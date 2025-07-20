@@ -9,32 +9,38 @@ This document summarizes the complete migration from mock-based database testing
 ### 1. Core Test Infrastructure (`tests/db_infrastructure/`)
 
 - **test_config.py**: Base configuration for database tests
+
   - `DatabaseTestCase` base class for all database tests
   - Test database URL configuration
   - Automatic transaction rollback after each test
 
 - **fixtures.py**: Reusable pytest fixtures
+
   - `db_session`: Provides a database session for tests
   - `test_db`: Alternative fixture for database access
   - Automatic cleanup and rollback
 
 - **factories.py**: Test data factories using Factory Boy
+
   - `AgentFactory`: Creates test agents with realistic data
   - `CoalitionFactory`: Creates test coalitions
   - `KnowledgeNodeFactory`: Creates knowledge graph nodes
   - `KnowledgeEdgeFactory`: Creates knowledge graph edges
 
 - **data_generator.py**: Bulk test data generation
+
   - `AgentDataGenerator`: Generates realistic agent data
   - `CoalitionDataGenerator`: Generates coalition scenarios
   - `KnowledgeGraphGenerator`: Generates complex knowledge graphs
 
 - **performance_monitor.py**: Database performance tracking
+
   - Query execution time monitoring
   - Connection pool statistics
   - Slow query detection
 
 - **pool_config.py**: Database connection pool configuration
+
   - Optimized pool settings for tests
   - Connection recycling
   - Overflow handling
@@ -190,7 +196,7 @@ When migrating additional tests from mocks to real database:
            # Your test code
    ```
 
-2. **Use Factories for Test Data**
+1. **Use Factories for Test Data**
 
    ```python
    from tests.db_infrastructure.factories import AgentFactory
@@ -200,11 +206,13 @@ When migrating additional tests from mocks to real database:
    db_session.commit()
    ```
 
-3. **Always Clean Up**
+1. **Always Clean Up**
+
    - The infrastructure handles rollback automatically
    - For explicit cleanup, use the session's delete() method
 
-4. **Test Real Scenarios**
+1. **Test Real Scenarios**
+
    - Don't just test CRUD operations
    - Test complex queries and relationships
    - Test concurrent access patterns
@@ -214,8 +222,8 @@ When migrating additional tests from mocks to real database:
 ### Prerequisites
 
 1. PostgreSQL running with test database
-2. Database migrations applied
-3. Test dependencies installed
+1. Database migrations applied
+1. Test dependencies installed
 
 ### Commands
 
@@ -238,16 +246,19 @@ pytest tests/integration/test_knowledge_graph_database.py::test_performance -v -
 Based on the implemented tests:
 
 - **Knowledge Graph Operations**:
+
   - Save 100 nodes + 200 edges: < 5 seconds
   - Load large graph: < 3 seconds
   - Batch updates: < 5 seconds
 
 - **Coalition Operations**:
+
   - Create coalition with 10 agents: < 1 second
   - Query coalition statistics: < 0.5 seconds
   - Update trust scores: < 1 second
 
 - **WebSocket Operations**:
+
   - Track 1000 events: < 2 seconds
   - Analytics queries: < 1 second
   - Connection recovery: < 0.5 seconds
@@ -257,8 +268,8 @@ Based on the implemented tests:
 The migration from mock-based to real database testing provides:
 
 1. **Confidence**: Tests reflect actual production behavior
-2. **Performance**: Real performance metrics and optimization opportunities
-3. **Completeness**: Tests cover complex scenarios not possible with mocks
-4. **Maintainability**: Less mock code to maintain, tests are clearer
+1. **Performance**: Real performance metrics and optimization opportunities
+1. **Completeness**: Tests cover complex scenarios not possible with mocks
+1. **Maintainability**: Less mock code to maintain, tests are clearer
 
 All new database-related tests should follow these patterns and use the provided infrastructure for consistency and reliability.

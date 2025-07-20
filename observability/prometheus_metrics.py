@@ -242,7 +242,9 @@ security_access_violations_total = Counter(
 # ============================================================================
 
 build_info = Info(
-    "freeagentics_build_info", "Build information for FreeAgentics", registry=freeagentics_registry
+    "freeagentics_build_info",
+    "Build information for FreeAgentics",
+    registry=freeagentics_registry,
 )
 
 deployment_info = Info(
@@ -304,7 +306,9 @@ class PrometheusMetricsCollector:
                 {
                     "environment": os.getenv("ENVIRONMENT", "development"),
                     "deployment_date": datetime.now().isoformat(),
-                    "kubernetes_namespace": os.getenv("KUBERNETES_NAMESPACE", "default"),
+                    "kubernetes_namespace": os.getenv(
+                        "KUBERNETES_NAMESPACE", "default"
+                    ),
                     "pod_name": os.getenv("POD_NAME", "unknown"),
                 }
             )
@@ -348,25 +352,31 @@ class PrometheusMetricsCollector:
         """Collect and update all metrics."""
         try:
             # Get performance tracker snapshot
-            snapshot = await performance_tracker.get_current_performance_snapshot()
+            snapshot = (
+                await performance_tracker.get_current_performance_snapshot()
+            )
 
             # Update system metrics
             system_active_agents_total.set(snapshot.active_agents)
-            system_memory_usage_bytes.set(snapshot.memory_usage_mb * 1024 * 1024)
+            system_memory_usage_bytes.set(
+                snapshot.memory_usage_mb * 1024 * 1024
+            )
             system_cpu_usage_percent.set(snapshot.cpu_usage_percent)
 
             # Update throughput metrics
-            system_throughput_operations_per_second.labels(operation_type="inference").set(
-                snapshot.agent_throughput
-            )
+            system_throughput_operations_per_second.labels(
+                operation_type="inference"
+            ).set(snapshot.agent_throughput)
 
-            system_throughput_operations_per_second.labels(operation_type="belief_update").set(
-                snapshot.belief_updates_per_sec
-            )
+            system_throughput_operations_per_second.labels(
+                operation_type="belief_update"
+            ).set(snapshot.belief_updates_per_sec)
 
             # Update belief system metrics
             if snapshot.free_energy_avg > 0:
-                belief_free_energy_current.labels(agent_id="system").set(snapshot.free_energy_avg)
+                belief_free_energy_current.labels(agent_id="system").set(
+                    snapshot.free_energy_avg
+                )
 
             # Collect agent-specific metrics
             await self._collect_agent_metrics()
@@ -384,9 +394,14 @@ class PrometheusMetricsCollector:
         """Collect metrics for individual agents."""
         try:
             # Get agent metrics from performance tracker
-            for agent_id, agent_buffers in performance_tracker.agent_metrics.items():
+            for (
+                agent_id,
+                agent_buffers,
+            ) in performance_tracker.agent_metrics.items():
                 # Inference time metrics
-                inference_stats = agent_buffers["inference_times"].get_stats(60)
+                inference_stats = agent_buffers["inference_times"].get_stats(
+                    60
+                )
                 if inference_stats["count"] > 0:
                     # Update histogram with average (approximation)
                     agent_inference_duration_seconds.labels(
@@ -397,21 +412,29 @@ class PrometheusMetricsCollector:
 
                 # Memory usage (approximation based on system metrics)
                 memory_estimate = (
-                    performance_tracker.memory_usage.get_stats(60)["latest"] * 1024 * 1024
+                    performance_tracker.memory_usage.get_stats(60)["latest"]
+                    * 1024
+                    * 1024
                 ) / max(1, len(performance_tracker.agent_metrics))
-                agent_memory_usage_bytes.labels(agent_id=agent_id).set(memory_estimate)
+                agent_memory_usage_bytes.labels(agent_id=agent_id).set(
+                    memory_estimate
+                )
 
                 # CPU usage (approximation)
-                cpu_estimate = performance_tracker.cpu_usage.get_stats(60)["latest"] / max(
-                    1, len(performance_tracker.agent_metrics)
+                cpu_estimate = performance_tracker.cpu_usage.get_stats(60)[
+                    "latest"
+                ] / max(1, len(performance_tracker.agent_metrics))
+                agent_cpu_usage_percent.labels(agent_id=agent_id).set(
+                    cpu_estimate
                 )
-                agent_cpu_usage_percent.labels(agent_id=agent_id).set(cpu_estimate)
 
                 # Error metrics
                 error_stats = agent_buffers["error_counts"].get_stats(60)
                 if error_stats["count"] > 0:
                     agent_errors_total.labels(
-                        agent_id=agent_id, error_type="inference", severity="warning"
+                        agent_id=agent_id,
+                        error_type="inference",
+                        severity="warning",
                     ).inc(error_stats["count"])
 
         except Exception as e:
@@ -441,12 +464,13 @@ class PrometheusMetricsCollector:
 
             # Get counters
             total_inferences = sum(
-                counter._value.get()
+                counter._value.get()  
                 for counter in business_inference_operations_total._metrics.values()
             )
 
             total_belief_updates = sum(
-                counter._value.get() for counter in belief_state_updates_total._metrics.values()
+                counter._value.get()  
+                for counter in belief_state_updates_total._metrics.values()
             )
 
             return MetricsSnapshot(
@@ -455,7 +479,8 @@ class PrometheusMetricsCollector:
                 total_inferences=total_inferences,
                 total_belief_updates=total_belief_updates,
                 avg_inference_time_ms=0.0,  # Would need to calculate from histogram
-                avg_memory_usage_mb=system_memory_usage_bytes._value.get() / (1024 * 1024),
+                avg_memory_usage_mb=system_memory_usage_bytes._value.get()
+                / (1024 * 1024),
                 avg_cpu_usage_percent=system_cpu_usage_percent._value.get(),
                 system_throughput=0.0,  # Would need to calculate from gauge
                 free_energy_avg=0.0,  # Would need to get from belief gauge
@@ -488,14 +513,18 @@ class PrometheusMetricsCollector:
 # ============================================================================
 
 
-def record_agent_coordination_request(agent_id: str, coordination_type: str, status: str):
+def record_agent_coordination_request(
+    agent_id: str, coordination_type: str, status: str
+):
     """Record an agent coordination request."""
     agent_coordination_requests_total.labels(
         agent_id=agent_id, coordination_type=coordination_type, status=status
     ).inc()
 
 
-def record_agent_coordination_error(agent_id: str, error_type: str, severity: str):
+def record_agent_coordination_error(
+    agent_id: str, error_type: str, severity: str
+):
     """Record an agent coordination error."""
     agent_coordination_errors_total.labels(
         agent_id=agent_id, error_type=error_type, severity=severity
@@ -514,13 +543,19 @@ def record_agent_coordination_duration(
 def record_belief_state_update(agent_id: str, update_type: str, success: bool):
     """Record a belief state update."""
     belief_state_updates_total.labels(
-        agent_id=agent_id, update_type=update_type, success="true" if success else "false"
+        agent_id=agent_id,
+        update_type=update_type,
+        success="true" if success else "false",
     ).inc()
 
 
-def record_belief_convergence_time(agent_id: str, convergence_time_seconds: float):
+def record_belief_convergence_time(
+    agent_id: str, convergence_time_seconds: float
+):
     """Record belief convergence time."""
-    belief_convergence_time_seconds.labels(agent_id=agent_id).observe(convergence_time_seconds)
+    belief_convergence_time_seconds.labels(agent_id=agent_id).observe(
+        convergence_time_seconds
+    )
 
 
 def update_belief_accuracy_ratio(agent_id: str, accuracy_ratio: float):
@@ -533,7 +568,9 @@ def update_belief_free_energy(agent_id: str, free_energy: float):
     belief_free_energy_current.labels(agent_id=agent_id).set(free_energy)
 
 
-def record_agent_inference_duration(agent_id: str, operation_type: str, duration_seconds: float):
+def record_agent_inference_duration(
+    agent_id: str, operation_type: str, duration_seconds: float
+):
     """Record agent inference duration."""
     agent_inference_duration_seconds.labels(
         agent_id=agent_id, operation_type=operation_type
@@ -543,13 +580,17 @@ def record_agent_inference_duration(agent_id: str, operation_type: str, duration
 def record_agent_step(agent_id: str, step_type: str, success: bool):
     """Record an agent step."""
     agent_steps_total.labels(
-        agent_id=agent_id, step_type=step_type, success="true" if success else "false"
+        agent_id=agent_id,
+        step_type=step_type,
+        success="true" if success else "false",
     ).inc()
 
 
 def record_agent_error(agent_id: str, error_type: str, severity: str):
     """Record an agent error."""
-    agent_errors_total.labels(agent_id=agent_id, error_type=error_type, severity=severity).inc()
+    agent_errors_total.labels(
+        agent_id=agent_id, error_type=error_type, severity=severity
+    ).inc()
 
 
 def record_business_inference_operation(operation_type: str, success: bool):
@@ -568,22 +609,30 @@ def record_user_interaction(interaction_type: str, outcome: str):
 
 def update_response_quality_score(response_type: str, score: float):
     """Update response quality score."""
-    business_response_quality_score.labels(response_type=response_type).set(score)
+    business_response_quality_score.labels(response_type=response_type).set(
+        score
+    )
 
 
 def record_authentication_attempt(method: str, outcome: str):
     """Record an authentication attempt."""
-    security_authentication_attempts_total.labels(method=method, outcome=outcome).inc()
+    security_authentication_attempts_total.labels(
+        method=method, outcome=outcome
+    ).inc()
 
 
 def record_security_anomaly(anomaly_type: str, severity: str):
     """Record a security anomaly detection."""
-    security_anomaly_detections_total.labels(anomaly_type=anomaly_type, severity=severity).inc()
+    security_anomaly_detections_total.labels(
+        anomaly_type=anomaly_type, severity=severity
+    ).inc()
 
 
 def record_access_violation(violation_type: str, resource: str):
     """Record an access violation."""
-    security_access_violations_total.labels(violation_type=violation_type, resource=resource).inc()
+    security_access_violations_total.labels(
+        violation_type=violation_type, resource=resource
+    ).inc()
 
 
 # ============================================================================

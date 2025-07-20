@@ -10,9 +10,16 @@ from datetime import datetime
 from enum import Enum
 from typing import List, Optional
 
-from sqlalchemy import Column, DateTime
+from sqlalchemy import (
+    Boolean,
+    Column,
+    DateTime,
+    ForeignKey,
+    Integer,
+    String,
+    Text,
+)
 from sqlalchemy import Enum as SQLEnum
-from sqlalchemy import ForeignKey, Integer, String, Text
 from sqlalchemy.dialects.postgresql import UUID
 from sqlalchemy.orm import relationship
 
@@ -20,11 +27,14 @@ from database.base import Base
 
 
 class ValidationStatus(Enum):
-    """Validation status for messages."""
+    """GMN validation status enum."""
 
     PENDING = "pending"
-    VALIDATED = "validated"
-    FAILED = "failed"
+    VALID = "valid"
+    INVALID = "invalid"
+    ERROR = "error"
+    VALIDATED = "validated"  # Legacy compatibility
+    FAILED = "failed"  # Legacy compatibility
 
 
 class Conversation(Base):
@@ -32,13 +42,14 @@ class Conversation(Base):
 
     __tablename__ = "conversations"
 
-    id = Column(UUID(as_uuid=True), primary_key=True, default=uuid.uuid4)
-    title = Column(String(255), nullable=True)
+    id = Column(Integer, primary_key=True, index=True)
+    user_id = Column(String, nullable=False, index=True)
+    title = Column(String, nullable=True)
     created_at = Column(DateTime, default=datetime.utcnow)
     updated_at = Column(
         DateTime, default=datetime.utcnow, onupdate=datetime.utcnow
     )
-    user_id = Column(UUID(as_uuid=True), nullable=True)
+    is_active = Column(Boolean, default=True)
 
     # Relationships
     messages = relationship(
@@ -50,41 +61,29 @@ class Conversation(Base):
 
 
 class Message(Base):
-    """Model representing a message in a conversation."""
+    """Message model for storing individual messages in conversations."""
 
     __tablename__ = "messages"
 
-    id = Column(UUID(as_uuid=True), primary_key=True, default=uuid.uuid4)
+    id = Column(Integer, primary_key=True, index=True)
     conversation_id = Column(
-        UUID(as_uuid=True), ForeignKey("conversations.id"), nullable=False
+        Integer, ForeignKey("conversations.id"), nullable=False
     )
+    sender_type = Column(String, nullable=False)  # 'user' or 'assistant'
     content = Column(Text, nullable=False)
-    role = Column(String(50), nullable=False)  # user, assistant, system
-    created_at = Column(DateTime, default=datetime.utcnow)
-    order = Column(Integer, nullable=False, default=0)
+    timestamp = Column(DateTime, default=datetime.utcnow)
+
+    # Optional fields for structured data
+    gmn_spec = Column(
+        Text, nullable=True
+    )  # JSON string for GMN specifications
+    validation_status = Column(
+        String, nullable=True
+    )  # ValidationStatus enum value
+    validation_message = Column(Text, nullable=True)
 
     # Relationships
     conversation = relationship("Conversation", back_populates="messages")
 
     def __repr__(self):
-        return f"<Message(id={self.id}, role='{self.role}', content='{self.content[:50]}...')>"
-
-
-class ConversationMetadata(Base):
-    """Model for storing conversation metadata."""
-
-    __tablename__ = "conversation_metadata"
-
-    id = Column(UUID(as_uuid=True), primary_key=True, default=uuid.uuid4)
-    conversation_id = Column(
-        UUID(as_uuid=True), ForeignKey("conversations.id"), nullable=False
-    )
-    key = Column(String(255), nullable=False)
-    value = Column(Text, nullable=True)
-    created_at = Column(DateTime, default=datetime.utcnow)
-
-    # Relationships
-    conversation = relationship("Conversation")
-
-    def __repr__(self):
-        return f"<ConversationMetadata(conversation_id={self.conversation_id}, key='{self.key}')>"
+        return f"<Message(id={self.id}, sender_type='{self.sender_type}', content='{self.content[:50]}...')>"

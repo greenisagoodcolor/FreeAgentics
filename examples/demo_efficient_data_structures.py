@@ -31,7 +31,8 @@ from agents.memory_optimization.efficient_structures import (
 
 # Set up logging
 logging.basicConfig(
-    level=logging.INFO, format="%(asctime)s - %(name)s - %(levelname)s - %(message)s"
+    level=logging.INFO,
+    format="%(asctime)s - %(name)s - %(levelname)s - %(message)s",
 )
 logger = logging.getLogger(__name__)
 
@@ -44,7 +45,9 @@ def demo_lazy_belief_arrays():
 
     # Create belief array
     shape = (50, 50)
-    belief_array = LazyBeliefArray(shape, dtype=np.float32, sparsity_threshold=0.8)
+    belief_array = LazyBeliefArray(
+        shape, dtype=np.float32, sparsity_threshold=0.8
+    )
 
     print(f"\n1. Created LazyBeliefArray with shape {shape}")
     print(f"   Initial memory usage: {belief_array.memory_usage():.4f} MB")
@@ -59,13 +62,17 @@ def demo_lazy_belief_arrays():
 
     # Update belief array
     belief_array.update(sparse_belief)
-    print(f"   Memory usage after update: {belief_array.memory_usage():.4f} MB")
+    print(
+        f"   Memory usage after update: {belief_array.memory_usage():.4f} MB"
+    )
 
     # Test compression
     print("\n3. Testing compression...")
     compressed = belief_array.compress_if_beneficial()
     print(f"   Compression applied: {compressed}")
-    print(f"   Memory usage after compression: {belief_array.memory_usage():.4f} MB")
+    print(
+        f"   Memory usage after compression: {belief_array.memory_usage():.4f} MB"
+    )
     print(f"   Compression ratio: {belief_array.stats.compression_ratio:.2f}x")
 
     # Test partial updates
@@ -85,7 +92,7 @@ def demo_lazy_belief_arrays():
     actual_memory = belief_array.memory_usage()
     print(f"   Dense storage: {dense_memory:.4f} MB")
     print(f"   Sparse storage: {actual_memory:.4f} MB")
-    print(f"   Space savings: {(1 - actual_memory/dense_memory)*100:.1f}%")
+    print(f"   Space savings: {(1 - actual_memory / dense_memory) * 100:.1f}%")
 
 
 def demo_memory_mapped_buffers():
@@ -125,7 +132,9 @@ def demo_memory_mapped_buffers():
     preserved_data = buffer.array[:100, :100]
     checksum_preserved = np.sum(preserved_data)
     print(f"   Preserved data checksum: {checksum_preserved:.6f}")
-    print(f"   Data preserved correctly: {abs(checksum_original - checksum_preserved) < 1e-6}")
+    print(
+        f"   Data preserved correctly: {abs(checksum_original - checksum_preserved) < 1e-6}"
+    )
 
     # Test random access
     print("\n4. Testing random access performance...")
@@ -135,8 +144,8 @@ def demo_memory_mapped_buffers():
     [buffer.array[i, j] for i, j in indices]
     access_time = time.time() - start_time
 
-    print(f"   1000 random accesses in {access_time*1000:.2f} ms")
-    print(f"   Average access time: {access_time*1000000/1000:.2f} μs")
+    print(f"   1000 random accesses in {access_time * 1000:.2f} ms")
+    print(f"   Average access time: {access_time * 1000000 / 1000:.2f} μs")
 
     # Cleanup
     buffer._finalizer()
@@ -154,7 +163,7 @@ def demo_compact_action_history():
     action_space_size = 8
     history = CompactActionHistory(max_actions, action_space_size)
 
-    print(f"\n1. Created CompactActionHistory")
+    print("\n1. Created CompactActionHistory")
     print(f"   Max actions: {max_actions}")
     print(f"   Action space size: {action_space_size}")
     print(f"   Action data type: {history.action_dtype}")
@@ -170,7 +179,7 @@ def demo_compact_action_history():
 
         history.add_action(action, timestamp, reward)
 
-    print(f"   Added 2000 actions (circular buffer)")
+    print("   Added 2000 actions (circular buffer)")
     print(f"   Current size: {history._size}")
     print(f"   Memory usage: {history.memory_usage_bytes()} bytes")
 
@@ -184,7 +193,9 @@ def demo_compact_action_history():
 
     # Get recent actions
     print("\n4. Recent action analysis:")
-    recent_actions, recent_times, recent_rewards = history.get_recent_actions(20)
+    recent_actions, recent_times, recent_rewards = history.get_recent_actions(
+        20
+    )
     print(f"   Last 20 actions: {recent_actions}")
     print(f"   Recent avg reward: {np.mean(recent_rewards):.3f}")
 
@@ -202,7 +213,9 @@ def demo_compact_action_history():
     print("\n6. Performance analysis:")
     memory_per_action = history.memory_usage_bytes() / new_stats["count"]
     print(f"   Memory per action: {memory_per_action:.1f} bytes")
-    print(f"   Total efficiency: {memory_per_action < 20} (target: <20 bytes/action)")
+    print(
+        f"   Total efficiency: {memory_per_action < 20} (target: <20 bytes/action)"
+    )
 
 
 def demo_efficient_temporal_sequence():
@@ -216,7 +229,7 @@ def demo_efficient_temporal_sequence():
     feature_dim = 32
     sequence = EfficientTemporalSequence(max_length, feature_dim)
 
-    print(f"\n1. Created EfficientTemporalSequence")
+    print("\n1. Created EfficientTemporalSequence")
     print(f"   Max length: {max_length}")
     print(f"   Feature dimension: {feature_dim}")
 
@@ -235,7 +248,7 @@ def demo_efficient_temporal_sequence():
 
         base_state = new_state
 
-    print(f"   Added 300 temporal states")
+    print("   Added 300 temporal states")
 
     # Analyze memory usage
     print("\n3. Memory usage analysis:")
@@ -247,8 +260,12 @@ def demo_efficient_temporal_sequence():
         else:
             print(f"   {key}: {value}")
 
-    print(f"\n   Compression achieved: {memory_stats['compression_ratio']:.2f}x")
-    print(f"   Space savings: {(1 - 1/memory_stats['compression_ratio'])*100:.1f}%")
+    print(
+        f"\n   Compression achieved: {memory_stats['compression_ratio']:.2f}x"
+    )
+    print(
+        f"   Space savings: {(1 - 1 / memory_stats['compression_ratio']) * 100:.1f}%"
+    )
 
     # Test state reconstruction
     print("\n4. Testing state reconstruction...")
@@ -287,7 +304,7 @@ def demo_compact_knowledge_graph():
     max_edges = 1000
     kg = CompactKnowledgeGraph(max_nodes, max_edges)
 
-    print(f"\n1. Created CompactKnowledgeGraph")
+    print("\n1. Created CompactKnowledgeGraph")
     print(f"   Max nodes: {max_nodes}")
     print(f"   Max edges: {max_edges}")
 
@@ -343,7 +360,9 @@ def demo_compact_knowledge_graph():
 
     print(f"   Average node degree: {avg_degree:.2f}")
     print(f"   Maximum node degree: {max_degree}")
-    print(f"   Graph density: {edges_added / (kg._num_nodes * (kg._num_nodes - 1)):.4f}")
+    print(
+        f"   Graph density: {edges_added / (kg._num_nodes * (kg._num_nodes - 1)):.4f}"
+    )
 
     # Test feature retrieval
     print("\n5. Feature retrieval test:")
@@ -376,7 +395,9 @@ def demo_compact_knowledge_graph():
 
     print(f"   Original memory: {original_memory:.4f} MB")
     print(f"   Compacted memory: {compacted_memory:.4f} MB")
-    print(f"   Memory reduction: {(1 - compacted_memory/original_memory)*100:.1f}%")
+    print(
+        f"   Memory reduction: {(1 - compacted_memory / original_memory) * 100:.1f}%"
+    )
 
 
 def demo_performance_benchmarking():
@@ -437,7 +458,9 @@ def demo_factory_functions():
     print("\n1. Testing belief buffer factory...")
 
     # Small buffer (should use LazyBeliefArray)
-    small_buffer = create_efficient_belief_buffer((20, 20), buffer_size=5, use_memory_mapping=False)
+    small_buffer = create_efficient_belief_buffer(
+        (20, 20), buffer_size=5, use_memory_mapping=False
+    )
     print(f"   Small buffer type: {type(small_buffer).__name__}")
 
     # Large buffer (should use MemoryMappedBuffer)
@@ -469,7 +492,9 @@ def demo_factory_functions():
     print("   - Use LazyBeliefArray for sparse, small-to-medium data")
     print("   - Use MemoryMappedBuffer for large, dense data")
     print("   - Use CompactActionHistory for sequential action data")
-    print("   - Use EfficientTemporalSequence for time-series with smooth transitions")
+    print(
+        "   - Use EfficientTemporalSequence for time-series with smooth transitions"
+    )
     print("   - Use CompactKnowledgeGraph for sparse graph structures")
 
 

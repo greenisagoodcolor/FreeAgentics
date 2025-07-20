@@ -8,28 +8,28 @@ resource_pools:
     port_range: [5433, 5440]
     memory_limit: "512m"
     cpu_limit: "1.0"
-    
+
   redis:
     min_instances: 1
     max_instances: 4
     port_range: [6380, 6383]
     memory_limit: "256m"
     cpu_limit: "0.5"
-    
+
   rabbitmq:
     min_instances: 1
     max_instances: 3
     port_range: [5673, 5675]
     memory_limit: "512m"
     cpu_limit: "0.5"
-    
+
   elasticsearch:
     min_instances: 1
     max_instances: 2
     port_range: [9201, 9202]
     memory_limit: "1g"
     cpu_limit: "1.0"
-    
+
   minio:
     min_instances: 1
     max_instances: 2
@@ -49,7 +49,7 @@ profiles:
     resources:
       memory_limit: "1g"
       cpu_limit: "2.0"
-    
+
   integration:
     services:
       - postgres
@@ -62,7 +62,7 @@ profiles:
     resources:
       memory_limit: "2g"
       cpu_limit: "3.0"
-    
+
   e2e:
     services:
       - postgres
@@ -76,7 +76,7 @@ profiles:
     resources:
       memory_limit: "4g"
       cpu_limit: "4.0"
-    
+
   performance:
     services:
       - postgres
@@ -91,7 +91,7 @@ profiles:
     resources:
       memory_limit: "8g"
       cpu_limit: "6.0"
-    
+
   load:
     services:
       - postgres
@@ -106,7 +106,7 @@ profiles:
     resources:
       memory_limit: "16g"
       cpu_limit: "8.0"
-    
+
   security:
     services:
       - postgres
@@ -131,7 +131,7 @@ cleanup:
     - name: "weekly_deep_cleanup"
       cron: "0 3 * * 0"  # 3 AM Sunday
       targets: ["containers", "volumes", "networks", "images", "isolation_resources"]
-  
+
   retention_policies:
     containers:
       max_age_hours: 24
@@ -162,13 +162,13 @@ monitoring:
     resource_utilization_threshold: 0.8
     environment_timeout_threshold: 300
     cleanup_failure_threshold: 5
-    
+
 docker:
   default_network: "freeagentics_test_network"
   cleanup_on_start: true
   prune_system: false
   log_retention_days: 7
-  
+
 isolation:
   default_level: SCHEMA
   database:

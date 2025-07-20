@@ -41,7 +41,10 @@ class TestMFAAPI:
     @pytest.fixture
     def auth_headers(self):
         """Authentication headers for requests."""
-        return {"Authorization": "Bearer test_token", "X-CSRF-Token": "test_csrf_token"}
+        return {
+            "Authorization": "Bearer test_token",
+            "X-CSRF-Token": "test_csrf_token",
+        }
 
     def test_enroll_mfa_totp_success(self, client, mock_user, auth_headers):
         """Test successful MFA enrollment with TOTP."""
@@ -50,7 +53,6 @@ class TestMFAAPI:
             patch("api.v1.mfa.validate_csrf_token") as mock_csrf,
             patch("api.v1.mfa.get_mfa_service") as mock_get_service,
         ):
-
             # Mock authentication
             mock_get_user.return_value = mock_user
             mock_csrf.return_value = "test_csrf_token"
@@ -84,13 +86,14 @@ class TestMFAAPI:
             assert data["backup_codes"] is not None
             assert len(data["backup_codes"]) == 3
 
-    def test_enroll_mfa_unauthorized_user(self, client, mock_user, auth_headers):
+    def test_enroll_mfa_unauthorized_user(
+        self, client, mock_user, auth_headers
+    ):
         """Test MFA enrollment for different user (should fail)."""
         with (
             patch("api.v1.mfa.get_current_user") as mock_get_user,
             patch("api.v1.mfa.validate_csrf_token") as mock_csrf,
         ):
-
             # Mock authentication
             mock_get_user.return_value = mock_user
             mock_csrf.return_value = "test_csrf_token"
@@ -108,7 +111,10 @@ class TestMFAAPI:
 
             # Verify response
             assert response.status_code == 403
-            assert "Can only enroll MFA for your own account" in response.json()["detail"]
+            assert (
+                "Can only enroll MFA for your own account"
+                in response.json()["detail"]
+            )
 
     def test_enroll_mfa_already_enabled(self, client, mock_user, auth_headers):
         """Test MFA enrollment when already enabled."""
@@ -117,7 +123,6 @@ class TestMFAAPI:
             patch("api.v1.mfa.validate_csrf_token") as mock_csrf,
             patch("api.v1.mfa.get_mfa_service") as mock_get_service,
         ):
-
             # Mock authentication
             mock_get_user.return_value = mock_user
             mock_csrf.return_value = "test_csrf_token"
@@ -151,7 +156,6 @@ class TestMFAAPI:
             patch("api.v1.mfa.validate_csrf_token") as mock_csrf,
             patch("api.v1.mfa.get_mfa_service") as mock_get_service,
         ):
-
             # Mock authentication
             mock_get_user.return_value = mock_user
             mock_csrf.return_value = "test_csrf_token"
@@ -166,7 +170,11 @@ class TestMFAAPI:
             # Test verification
             response = client.post(
                 "/api/v1/mfa/verify",
-                json={"user_id": "test_user_123", "token": "123456", "method": "totp"},
+                json={
+                    "user_id": "test_user_123",
+                    "token": "123456",
+                    "method": "totp",
+                },
                 headers=auth_headers,
             )
 
@@ -183,7 +191,6 @@ class TestMFAAPI:
             patch("api.v1.mfa.validate_csrf_token") as mock_csrf,
             patch("api.v1.mfa.get_mfa_service") as mock_get_service,
         ):
-
             # Mock authentication
             mock_get_user.return_value = mock_user
             mock_csrf.return_value = "test_csrf_token"
@@ -198,7 +205,11 @@ class TestMFAAPI:
             # Test verification
             response = client.post(
                 "/api/v1/mfa/verify",
-                json={"user_id": "test_user_123", "token": "000000", "method": "totp"},
+                json={
+                    "user_id": "test_user_123",
+                    "token": "000000",
+                    "method": "totp",
+                },
                 headers=auth_headers,
             )
 
@@ -213,7 +224,6 @@ class TestMFAAPI:
             patch("api.v1.mfa.validate_csrf_token") as mock_csrf,
             patch("api.v1.mfa.get_mfa_service") as mock_get_service,
         ):
-
             # Mock authentication
             mock_get_user.return_value = mock_user
             mock_csrf.return_value = "test_csrf_token"
@@ -221,20 +231,27 @@ class TestMFAAPI:
             # Mock MFA service
             mock_service = Mock()
             mock_service.verify_mfa.return_value = MFAResponse(
-                success=False, message="Too many failed attempts. Please try again later."
+                success=False,
+                message="Too many failed attempts. Please try again later.",
             )
             mock_get_service.return_value = mock_service
 
             # Test verification
             response = client.post(
                 "/api/v1/mfa/verify",
-                json={"user_id": "test_user_123", "token": "123456", "method": "totp"},
+                json={
+                    "user_id": "test_user_123",
+                    "token": "123456",
+                    "method": "totp",
+                },
                 headers=auth_headers,
             )
 
             # Verify response
             assert response.status_code == 429
-            assert "too many failed attempts" in response.json()["detail"].lower()
+            assert (
+                "too many failed attempts" in response.json()["detail"].lower()
+            )
 
     def test_get_mfa_status_enabled(self, client, mock_user, auth_headers):
         """Test getting MFA status for enabled user."""
@@ -242,7 +259,6 @@ class TestMFAAPI:
             patch("api.v1.mfa.get_current_user") as mock_get_user,
             patch("api.v1.mfa.get_mfa_service") as mock_get_service,
         ):
-
             # Mock authentication
             mock_get_user.return_value = mock_user
 
@@ -260,7 +276,8 @@ class TestMFAAPI:
 
             # Test status
             response = client.get(
-                "/api/v1/mfa/status", headers={"Authorization": "Bearer test_token"}
+                "/api/v1/mfa/status",
+                headers={"Authorization": "Bearer test_token"},
             )
 
             # Verify response
@@ -276,7 +293,6 @@ class TestMFAAPI:
             patch("api.v1.mfa.get_current_user") as mock_get_user,
             patch("api.v1.mfa.get_mfa_service") as mock_get_service,
         ):
-
             # Mock authentication
             mock_get_user.return_value = mock_user
 
@@ -294,7 +310,8 @@ class TestMFAAPI:
 
             # Test status
             response = client.get(
-                "/api/v1/mfa/status", headers={"Authorization": "Bearer test_token"}
+                "/api/v1/mfa/status",
+                headers={"Authorization": "Bearer test_token"},
             )
 
             # Verify response
@@ -311,7 +328,6 @@ class TestMFAAPI:
             patch("api.v1.mfa.validate_csrf_token") as mock_csrf,
             patch("api.v1.mfa.get_mfa_service") as mock_get_service,
         ):
-
             # Mock authentication
             mock_get_user.return_value = mock_user
             mock_csrf.return_value = "test_csrf_token"
@@ -332,14 +348,15 @@ class TestMFAAPI:
             assert data["success"] is True
             assert data["message"] == "MFA has been disabled"
 
-    def test_regenerate_backup_codes_success(self, client, mock_user, auth_headers):
+    def test_regenerate_backup_codes_success(
+        self, client, mock_user, auth_headers
+    ):
         """Test successful backup code regeneration."""
         with (
             patch("api.v1.mfa.get_current_user") as mock_get_user,
             patch("api.v1.mfa.validate_csrf_token") as mock_csrf,
             patch("api.v1.mfa.get_mfa_service") as mock_get_service,
         ):
-
             # Mock authentication
             mock_get_user.return_value = mock_user
             mock_csrf.return_value = "test_csrf_token"
@@ -354,7 +371,9 @@ class TestMFAAPI:
             mock_get_service.return_value = mock_service
 
             # Test regeneration
-            response = client.post("/api/v1/mfa/regenerate-backup-codes", headers=auth_headers)
+            response = client.post(
+                "/api/v1/mfa/regenerate-backup-codes", headers=auth_headers
+            )
 
             # Verify response
             assert response.status_code == 200
@@ -375,7 +394,9 @@ class TestMFAAPI:
         assert "backup_method" in data
 
         # Check TOTP method is available
-        totp_method = next((m for m in data["methods"] if m["name"] == "totp"), None)
+        totp_method = next(
+            (m for m in data["methods"] if m["name"] == "totp"), None
+        )
         assert totp_method is not None
         assert totp_method["enabled"] is True
 
@@ -385,7 +406,6 @@ class TestMFAAPI:
             patch("api.v1.mfa.get_current_user") as mock_get_user,
             patch("api.v1.mfa.get_mfa_service") as mock_get_service,
         ):
-
             # Mock authentication
             mock_get_user.return_value = mock_user
 
@@ -421,7 +441,6 @@ class TestMFAAPI:
             patch("api.v1.mfa.get_current_user") as mock_get_user,
             patch("api.v1.mfa.get_mfa_service") as mock_get_service,
         ):
-
             # Mock authentication
             mock_get_user.return_value = mock_user
 
@@ -457,7 +476,9 @@ class TestMFAAPI:
             # Mock MFA service
             mock_service = Mock()
             mock_service._encrypt_secret.return_value = "encrypted_test"
-            mock_service._decrypt_secret.return_value = "test_secret_for_health_check"
+            mock_service._decrypt_secret.return_value = (
+                "test_secret_for_health_check"
+            )
             mock_get_service.return_value = mock_service
 
             # Test health check
@@ -474,7 +495,9 @@ class TestMFAAPI:
         with patch("api.v1.mfa.get_mfa_service") as mock_get_service:
             # Mock MFA service to raise exception
             mock_service = Mock()
-            mock_service._encrypt_secret.side_effect = Exception("Encryption failed")
+            mock_service._encrypt_secret.side_effect = Exception(
+                "Encryption failed"
+            )
             mock_get_service.return_value = mock_service
 
             # Test health check
@@ -521,15 +544,18 @@ class TestMFAAPI:
             # Should return 403 for missing CSRF token
             assert response.status_code == 403
 
-    @pytest.mark.parametrize("method", ["totp", "sms", "email", "hardware_key"])
-    def test_enroll_mfa_method_validation(self, client, mock_user, auth_headers, method):
+    @pytest.mark.parametrize(
+        "method", ["totp", "sms", "email", "hardware_key"]
+    )
+    def test_enroll_mfa_method_validation(
+        self, client, mock_user, auth_headers, method
+    ):
         """Test MFA enrollment method validation."""
         with (
             patch("api.v1.mfa.get_current_user") as mock_get_user,
             patch("api.v1.mfa.validate_csrf_token") as mock_csrf,
             patch("api.v1.mfa.get_mfa_service") as mock_get_service,
         ):
-
             # Mock authentication
             mock_get_user.return_value = mock_user
             mock_csrf.return_value = "test_csrf_token"
@@ -542,7 +568,8 @@ class TestMFAAPI:
                 )
             else:
                 mock_service.enroll_user.return_value = MFAResponse(
-                    success=False, message=f"Method {method} not yet implemented"
+                    success=False,
+                    message=f"Method {method} not yet implemented",
                 )
             mock_get_service.return_value = mock_service
 
@@ -571,7 +598,6 @@ class TestMFAAPI:
             patch("api.v1.mfa.validate_csrf_token") as mock_csrf,
             patch("api.v1.mfa.get_mfa_service") as mock_get_service,
         ):
-
             # Mock authentication
             mock_get_user.return_value = mock_user
             mock_csrf.return_value = "test_csrf_token"

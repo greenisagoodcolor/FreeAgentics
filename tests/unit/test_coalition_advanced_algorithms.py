@@ -12,7 +12,12 @@ import pytest
 
 # Import the modules under test
 try:
-    from coalitions.coalition import Coalition, CoalitionObjective, CoalitionRole, CoalitionStatus
+    from coalitions.coalition import (
+        Coalition,
+        CoalitionObjective,
+        CoalitionRole,
+        CoalitionStatus,
+    )
     from coalitions.formation_strategies import (
         AgentProfile,
         FormationResult,
@@ -37,6 +42,7 @@ except ImportError:
             current_coalitions,
             max_coalitions=3,
         ):
+            """Initialize agent profile with capabilities and coalition constraints."""
             self.agent_id = agent_id
             self.capabilities = capabilities
             self.capacity = capacity
@@ -47,8 +53,14 @@ except ImportError:
 
     class FormationResult:
         def __init__(
-            self, coalitions, unassigned_agents, formation_time, objective_coverage, formation_score
+            self,
+            coalitions,
+            unassigned_agents,
+            formation_time,
+            objective_coverage,
+            formation_score,
         ):
+            """Initialize formation result with coalitions and performance metrics."""
             self.coalitions = coalitions
             self.unassigned_agents = unassigned_agents
             self.formation_time = formation_time
@@ -57,6 +69,7 @@ except ImportError:
 
     class GreedyFormation:
         def __init__(self):
+            """Initialize greedy formation strategy."""
             self.name = "Greedy Formation"
 
         def form_coalitions(self, agents, objectives, constraints=None):
@@ -64,6 +77,7 @@ except ImportError:
 
     class OptimalFormation:
         def __init__(self):
+            """Initialize optimal formation strategy."""
             self.name = "Optimal Formation"
 
         def form_coalitions(self, agents, objectives, constraints=None):
@@ -71,6 +85,7 @@ except ImportError:
 
     class HierarchicalFormation:
         def __init__(self):
+            """Initialize hierarchical formation strategy."""
             self.name = "Hierarchical Formation"
 
         def form_coalitions(self, agents, objectives, constraints=None):
@@ -78,6 +93,7 @@ except ImportError:
 
     class Coalition:
         def __init__(self, coalition_id, name, objectives=None, max_size=None):
+            """Initialize coalition with ID, name, objectives, and size constraints."""
             self.coalition_id = coalition_id
             self.name = name
             self.objectives = objectives or []
@@ -98,7 +114,10 @@ except ImportError:
             return set()
 
     class CoalitionObjective:
-        def __init__(self, objective_id, description, required_capabilities, priority):
+        def __init__(
+            self, objective_id, description, required_capabilities, priority
+        ):
+            """Initialize coalition objective with requirements and priority."""
             self.objective_id = objective_id
             self.description = description
             self.required_capabilities = required_capabilities
@@ -127,8 +146,12 @@ class TestCoalitionStabilityCalculations:
         coalition = Coalition("test_coalition", "Test Coalition")
 
         # Add members with complementary capabilities
-        assert coalition.add_member("agent_1", CoalitionRole.LEADER, ["skill_a", "skill_b"])
-        assert coalition.add_member("agent_2", CoalitionRole.MEMBER, ["skill_c", "skill_d"])
+        assert coalition.add_member(
+            "agent_1", CoalitionRole.LEADER, ["skill_a", "skill_b"]
+        )
+        assert coalition.add_member(
+            "agent_2", CoalitionRole.MEMBER, ["skill_c", "skill_d"]
+        )
 
         # Coalition should be stable with complementary skills
         assert len(coalition.members) == 2
@@ -152,14 +175,18 @@ class TestCoalitionStabilityCalculations:
 
         # Create coalition with partial coverage
         coalition = Coalition("test_coalition", "Test Coalition", [objective])
-        coalition.add_member("agent_1", CoalitionRole.LEADER, ["skill_a", "skill_b"])
+        coalition.add_member(
+            "agent_1", CoalitionRole.LEADER, ["skill_a", "skill_b"]
+        )
 
         # Should not be able to achieve objective with partial coverage
         available_caps = coalition.get_capabilities()
         required_caps = set(objective.required_capabilities)
 
         # Test coverage calculation
-        coverage = len(available_caps.intersection(required_caps)) / len(required_caps)
+        coverage = len(available_caps.intersection(required_caps)) / len(
+            required_caps
+        )
         assert coverage < 1.0  # Partial coverage
 
     def test_coalition_size_optimization(self):
@@ -270,7 +297,9 @@ class TestConstraintSatisfactionAlgorithms:
 
         # Agent should not be over-assigned
         agent_assignments = sum(
-            1 for coalition in result.coalitions if "limited_agent" in coalition.members
+            1
+            for coalition in result.coalitions
+            if "limited_agent" in coalition.members
         )
         assert agent_assignments <= 1  # Can join at most 1 more coalition
 
@@ -401,7 +430,9 @@ class TestFormationPerformanceBenchmarks:
         formation_time = time.time() - start_time
 
         # Should handle small problems efficiently
-        assert formation_time < 5.0  # Reasonable time for small optimal problems
+        assert (
+            formation_time < 5.0
+        )  # Reasonable time for small optimal problems
         assert len(result.coalitions) > 0
         assert result.objective_coverage > 0.0
 
@@ -415,7 +446,9 @@ class TestFormationPerformanceBenchmarks:
             AgentProfile(
                 agent_id=f"agent_{i}",
                 capabilities=(
-                    [f"skill_{i % 10}", "coordination"] if i % 10 == 0 else [f"skill_{i % 10}"]
+                    [f"skill_{i % 10}", "coordination"]
+                    if i % 10 == 0
+                    else [f"skill_{i % 10}"]
                 ),
                 capacity=0.8,
                 reputation=0.9 if i % 10 == 0 else 0.7,  # Some leaders
@@ -530,14 +563,20 @@ class TestAlgorithmCorrectnessValidation:
         ]
 
         # Test all strategies
-        strategies = [GreedyFormation(), OptimalFormation(), HierarchicalFormation()]
+        strategies = [
+            GreedyFormation(),
+            OptimalFormation(),
+            HierarchicalFormation(),
+        ]
 
         for strategy in strategies:
             result = strategy.form_coalitions(agents, objectives)
 
             # Should handle gracefully
             assert isinstance(result, FormationResult)
-            assert result.objective_coverage < 1.0  # Cannot achieve all objectives
+            assert (
+                result.objective_coverage < 1.0
+            )  # Cannot achieve all objectives
 
     def test_multi_objective_optimization(self):
         """Test multi-objective optimization scenarios."""
@@ -595,10 +634,14 @@ class TestDynamicCoalitionOperations:
 
         # Create coalition with initial member
         coalition = Coalition("test_coalition", "Test Coalition")
-        assert coalition.add_member("agent_1", CoalitionRole.LEADER, ["skill_a"])
+        assert coalition.add_member(
+            "agent_1", CoalitionRole.LEADER, ["skill_a"]
+        )
 
         # Add additional member
-        assert coalition.add_member("agent_2", CoalitionRole.MEMBER, ["skill_b"])
+        assert coalition.add_member(
+            "agent_2", CoalitionRole.MEMBER, ["skill_b"]
+        )
 
         # Verify addition
         assert len(coalition.members) == 2
@@ -679,7 +722,11 @@ class TestEdgeCasesAndErrorHandling:
             )
         ]
 
-        strategies = [GreedyFormation(), OptimalFormation(), HierarchicalFormation()]
+        strategies = [
+            GreedyFormation(),
+            OptimalFormation(),
+            HierarchicalFormation(),
+        ]
 
         for strategy in strategies:
             result = strategy.form_coalitions([], objectives)
@@ -705,7 +752,11 @@ class TestEdgeCasesAndErrorHandling:
             )
         ]
 
-        strategies = [GreedyFormation(), OptimalFormation(), HierarchicalFormation()]
+        strategies = [
+            GreedyFormation(),
+            OptimalFormation(),
+            HierarchicalFormation(),
+        ]
 
         for strategy in strategies:
             result = strategy.form_coalitions(agents, [])
@@ -788,11 +839,15 @@ class TestEdgeCasesAndErrorHandling:
         }
 
         strategy = GreedyFormation()
-        result = strategy.form_coalitions(agents, objectives, invalid_constraints)
+        result = strategy.form_coalitions(
+            agents, objectives, invalid_constraints
+        )
 
         # Should handle gracefully
         assert isinstance(result, FormationResult)
 
 
 if __name__ == "__main__":
-    pytest.main([__file__, "-v", "--cov=coalitions", "--cov-report=term-missing"])
+    pytest.main(
+        [__file__, "-v", "--cov=coalitions", "--cov-report=term-missing"]
+    )

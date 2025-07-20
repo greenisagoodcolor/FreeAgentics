@@ -141,7 +141,9 @@ class AgentSchema(BaseModel):
     # Metrics and state
     position: Optional[List[float]] = None
     metrics: AgentMetricsSchema = Field(default_factory=AgentMetricsSchema)
-    parameters: AgentParametersSchema = Field(default_factory=AgentParametersSchema)
+    parameters: AgentParametersSchema = Field(
+        default_factory=AgentParametersSchema
+    )
 
     # Timestamps
     created_at: datetime = Field(default_factory=datetime.utcnow)
@@ -165,7 +167,13 @@ class AgentSchema(BaseModel):
     @validator("template")
     def validate_template(cls, v):
         """Validate template is a known type."""
-        valid_templates = ["grid_world", "resource_collector", "explorer", "coordinator", "custom"]
+        valid_templates = [
+            "grid_world",
+            "resource_collector",
+            "explorer",
+            "coordinator",
+            "custom",
+        ]
         if v not in valid_templates:
             raise ValueError(f"Template must be one of {valid_templates}")
         return v
@@ -176,8 +184,12 @@ class CoalitionObjectiveSchema(BaseModel):
 
     id: str = Field(default_factory=lambda: str(uuid.uuid4()))
     description: str
-    priority: str = Field(default="medium", pattern="^(low|medium|high|critical)$")
-    status: str = Field(default="pending", pattern="^(pending|in_progress|completed|failed)$")
+    priority: str = Field(
+        default="medium", pattern="^(low|medium|high|critical)$"
+    )
+    status: str = Field(
+        default="pending", pattern="^(pending|in_progress|completed|failed)$"
+    )
     progress: float = Field(default=0.0, ge=0.0, le=1.0)
     created_at: datetime = Field(default_factory=datetime.utcnow)
     completed_at: Optional[datetime] = None
@@ -192,7 +204,9 @@ class CoalitionSchema(BaseModel):
     status: CoalitionStatus = Field(default=CoalitionStatus.FORMING)
 
     # Coalition objectives and capabilities
-    objectives: Dict[str, CoalitionObjectiveSchema] = Field(default_factory=dict)
+    objectives: Dict[str, CoalitionObjectiveSchema] = Field(
+        default_factory=dict
+    )
     required_capabilities: List[str] = Field(default_factory=list)
     achieved_objectives: List[str] = Field(default_factory=list)
 
@@ -254,7 +268,14 @@ class KnowledgeNodeSchema(BaseModel):
     @validator("type")
     def validate_type(cls, v):
         """Validate node type."""
-        valid_types = ["concept", "entity", "fact", "belief", "observation", "inference"]
+        valid_types = [
+            "concept",
+            "entity",
+            "fact",
+            "belief",
+            "observation",
+            "inference",
+        ]
         if v not in valid_types:
             raise ValueError(f"Type must be one of {valid_types}")
         return v
@@ -263,7 +284,14 @@ class KnowledgeNodeSchema(BaseModel):
     def validate_embedding(cls, v):
         """Validate embedding dimensions."""
         if v is not None:
-            if len(v) not in [128, 256, 384, 512, 768, 1024]:  # Common embedding sizes
+            if len(v) not in [
+                128,
+                256,
+                384,
+                512,
+                768,
+                1024,
+            ]:  # Common embedding sizes
                 raise ValueError(f"Embedding dimension {len(v)} not standard")
             if not all(isinstance(x, (int, float)) for x in v):
                 raise ValueError("Embedding must contain numeric values")
@@ -339,7 +367,9 @@ class BatchAgentSchema(BaseModel):
             if "min" not in v or "max" not in v:
                 raise ValueError("Position bounds must have 'min' and 'max'")
             if len(v["min"]) != len(v["max"]):
-                raise ValueError("Min and max bounds must have same dimensions")
+                raise ValueError(
+                    "Min and max bounds must have same dimensions"
+                )
         return v
 
 

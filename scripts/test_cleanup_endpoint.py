@@ -15,7 +15,7 @@ def test_cleanup_endpoint():
     try:
         # Test cleanup status endpoint
         print("Testing cleanup status endpoint...")
-        response = requests.get(f"{base_url}/cleanup/status")
+        response = requests.get(f"{base_url}/cleanup/status", timeout=30)
 
         if response.status_code == 200:
             status = response.json()
@@ -26,7 +26,7 @@ def test_cleanup_endpoint():
 
         # Test cleanup endpoint
         print("Testing cleanup endpoint...")
-        response = requests.post(f"{base_url}/cleanup")
+        response = requests.post(f"{base_url}/cleanup", timeout=30)
 
         if response.status_code == 200:
             result = response.json()

@@ -10,7 +10,11 @@ from unittest.mock import patch
 import numpy as np
 import pytest
 
-from agents.base_agent import PYMDP_AVAILABLE, ActiveInferenceAgent, BasicExplorerAgent
+from agents.base_agent import (
+    PYMDP_AVAILABLE,
+    ActiveInferenceAgent,
+    BasicExplorerAgent,
+)
 
 
 class TestActiveInferenceReal:
@@ -42,15 +46,24 @@ class TestActiveInferenceReal:
         agent = BasicExplorerAgent("test_id", "Test Explorer", grid_size=3)
 
         # Check A matrix (observations)
-        assert agent.pymdp_agent.A[0].shape == (5, 9)  # 5 obs types, 9 states (3x3)
+        assert agent.pymdp_agent.A[0].shape == (
+            5,
+            9,
+        )  # 5 obs types, 9 states (3x3)
 
         # Check B matrix (transitions)
         assert len(agent.pymdp_agent.B) == 1  # Single factor
-        assert agent.pymdp_agent.B[0].shape == (9, 9, 5)  # 9 states, 9 states, 5 actions
+        assert agent.pymdp_agent.B[0].shape == (
+            9,
+            9,
+            5,
+        )  # 9 states, 9 states, 5 actions
 
         # Check C vector (preferences)
         assert agent.pymdp_agent.C[0].shape == (5,)  # 5 observation types
-        assert agent.pymdp_agent.C[0][2] > agent.pymdp_agent.C[0][0]  # Prefer goals over empty
+        assert (
+            agent.pymdp_agent.C[0][2] > agent.pymdp_agent.C[0][0]
+        )  # Prefer goals over empty
 
         # Check D vector (initial beliefs)
         assert agent.pymdp_agent.D[0].shape == (9,)  # 9 states
@@ -64,7 +77,9 @@ class TestActiveInferenceReal:
         # Create observation
         observation = {
             "position": [1, 1],
-            "surroundings": np.array([[0, 0, 0], [0, 0, 0], [0, 1, 0]]),  # Goal to the south
+            "surroundings": np.array(
+                [[0, 0, 0], [0, 0, 0], [0, 1, 0]]
+            ),  # Goal to the south
         }
 
         # Perceive
@@ -78,6 +93,7 @@ class TestActiveInferenceReal:
     def test_belief_update_with_pymdp(self):
         """Test belief updates using PyMDP variational inference."""
         agent = BasicExplorerAgent("test_id", "Test Explorer", grid_size=3)
+        agent.config["debug_mode"] = True  # Enable debug mode to store state_posterior
         agent.start()
 
         # Initial observation
@@ -113,7 +129,9 @@ class TestActiveInferenceReal:
         # Set up observation
         observation = {
             "position": [1, 1],
-            "surroundings": np.array([[0, 0, 1], [0, 0, 0], [0, 0, 0]]),  # Goal to northeast
+            "surroundings": np.array(
+                [[0, 0, 1], [0, 0, 0], [0, 0, 0]]
+            ),  # Goal to northeast
         }
 
         agent.perceive(observation)
@@ -202,8 +220,12 @@ class TestActiveInferenceReal:
         ), f"Agent should explore multiple positions, visited: {unique_positions}"
 
         # Check that different actions were taken
-        movement_actions = [a for a in actions if a in ["up", "down", "left", "right"]]
-        assert len(movement_actions) > 0, f"Agent should take movement actions, got: {actions}"
+        movement_actions = [
+            a for a in actions if a in ["up", "down", "left", "right"]
+        ]
+        assert (
+            len(movement_actions) > 0
+        ), f"Agent should take movement actions, got: {actions}"
 
     @patch("agents.base_agent.LLM_AVAILABLE", False)
     def test_pragmatic_value_goal_seeking(self):
@@ -218,7 +240,11 @@ class TestActiveInferenceReal:
         observation = {
             "position": [1, 1],
             "surroundings": np.array(
-                [[0, 0, 0], [0, 1, 0], [0, 0, 0]]  # Goal at center (agent observes goal)
+                [
+                    [0, 0, 0],
+                    [0, 1, 0],
+                    [0, 0, 0],
+                ]  # Goal at center (agent observes goal)
             ),
         }
 
@@ -237,6 +263,8 @@ class TestActiveInferenceReal:
     def test_policy_selection_horizon(self):
         """Test policy selection with planning horizon."""
         agent = BasicExplorerAgent("test_id", "Test Explorer", grid_size=5)
+        agent.performance_mode = "accurate"  # Set accurate mode for policy_len=3
+        agent._initialize_pymdp()  # Re-initialize with new performance mode
 
         # Check policy length is set (PyMDP uses policy_len instead of planning_horizon)
         assert agent.pymdp_agent.policy_len == 3

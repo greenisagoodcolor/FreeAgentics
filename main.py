@@ -1,5 +1,5 @@
 """
-FreeAgentics FastAPI Backend - Main Application Entry Point
+FreeAgentics FastAPI Backend - Main Application Entry Point.
 
 Revolutionary Multi-Agent Active Inference Research Platform implementing
 committee consensus from .taskmaster/docs/prd.txt with clean architecture
@@ -27,7 +27,11 @@ from api.middleware.rate_limiter import (
 # SECURITY: Import authentication and security components
 from auth import SecurityMiddleware
 from auth.https_enforcement import HTTPSEnforcementMiddleware, SSLConfiguration
-from auth.security_headers import SecurityHeadersMiddleware, SecurityPolicy
+from auth.security_headers import (
+    SecurityHeadersManager,
+    SecurityHeadersMiddleware,
+    SecurityPolicy,
+)
 
 # Configure logging
 logging.basicConfig(
@@ -179,43 +183,52 @@ security_policy = SecurityPolicy(
     secure_cookies=True,
 )
 
-app.add_middleware(SecurityHeadersMiddleware, security_manager=security_policy)
+# Create SecurityHeadersManager with the policy
+security_headers_manager = SecurityHeadersManager(security_policy)
+app.add_middleware(
+    SecurityHeadersMiddleware, security_manager=security_headers_manager
+)
 
 # SECURITY: Add comprehensive rate limiting and DDoS protection
-redis_url = os.getenv("REDIS_URL", "redis://localhost:6379")
-config_file = os.path.join(
-    os.path.dirname(__file__), "config", "rate_limiting.yaml"
-)
+# Only enable Redis-based rate limiting if not in test environment
+if os.getenv("TESTING", "false").lower() != "true" and os.getenv("REDIS_ENABLED", "true").lower() == "true":
+    redis_url = os.getenv("REDIS_URL", "redis://localhost:6379")
+    config_file = os.path.join(
+        os.path.dirname(__file__), "config", "rate_limiting.yaml"
+    )
 
-# Create rate limiter instance
-rate_limiter = create_rate_limiter(
-    redis_url=redis_url, config_file=config_file
-)
-
-
-# Function to extract user ID from request (for authenticated rate limiting)
-async def get_user_id_from_request(request):
-    """Extract user ID from JWT token if present."""
-    try:
-        from auth import auth_manager
-
-        authorization = request.headers.get("Authorization")
-        if authorization and authorization.startswith("Bearer "):
-            token = authorization.split(" ")[1]
-            payload = auth_manager.decode_token(token)
-            if payload and "sub" in payload:
-                return payload["sub"]
-    except Exception:
-        pass
-    return None
+    # Create rate limiter instance
+    rate_limiter = create_rate_limiter(
+        redis_url=redis_url, config_file=config_file
+    )
 
 
-# Add rate limiting middleware
-app.add_middleware(
-    RateLimitMiddleware,
-    rate_limiter=rate_limiter,
-    get_user_id=get_user_id_from_request,
-)
+    # Function to extract user ID from request (for authenticated rate limiting)
+    async def get_user_id_from_request(request):
+        """Extract user ID from JWT token if present."""
+        try:
+            from auth import auth_manager
+
+            authorization = request.headers.get("Authorization")
+            if authorization and authorization.startswith("Bearer "):
+                token = authorization.split(" ")[1]
+                payload = auth_manager.decode_token(token)
+                if payload and "sub" in payload:
+                    return payload["sub"]
+        except Exception as e:
+            # Log authentication errors for debugging but don't expose details
+            logger.debug(f"Failed to extract user ID from request: {e}")
+        return None
+
+
+    # Add rate limiting middleware
+    app.add_middleware(
+        RateLimitMiddleware,
+        rate_limiter=rate_limiter,
+        get_user_id=get_user_id_from_request,
+    )
+else:
+    logger.info("Rate limiting disabled for testing environment")
 
 # Alternative: Use DDoS protection middleware (includes rate limiting)
 # app.add_middleware(DDoSProtectionMiddleware, redis_url=redis_url)
@@ -236,7 +249,7 @@ app.add_middleware(
 async def global_exception_handler(
     request: Request, exc: Exception
 ) -> JSONResponse:
-    """Global exception handler following clean architecture principles"""
+    """Global exception handler following clean architecture principles."""
     logger.error(f"Global exception: {exc}", exc_info=True)
     return JSONResponse(
         status_code=500,
@@ -251,7 +264,7 @@ async def global_exception_handler(
 # Health Check Endpoint - Production Readiness
 @app.get("/health", tags=["system"])
 async def health_check() -> dict:
-    """System health check endpoint for deployment monitoring"""
+    """System health check endpoint for deployment monitoring."""
     return {
         "status": "healthy",
         "service": "freeagentics-api",
@@ -263,7 +276,7 @@ async def health_check() -> dict:
 # Prometheus Metrics Endpoint
 @app.get("/metrics", tags=["monitoring"])
 async def get_metrics():
-    """Prometheus metrics endpoint for monitoring"""
+    """Prometheus metrics endpoint for monitoring."""
     try:
         from fastapi import Response
 
@@ -299,7 +312,7 @@ async def get_metrics():
 # Root Endpoint - API Discovery
 @app.get("/", tags=["system"])
 async def root() -> dict:
-    """Root endpoint providing API information and capabilities"""
+    """Root endpoint providing API information and capabilities."""
     return {
         "message": "FreeAgentics Revolutionary Multi-Agent Active Inference API",
         "version": "1.0.0",
@@ -334,7 +347,6 @@ try:
 
     # Protected API routes
     app.include_router(agents_router, prefix="/api/v1", tags=["agents"])
-    app.include_router(prompts_router, prefix="/api/v1", tags=["prompts"])
     app.include_router(
         system_router, prefix="/api/v1/system", tags=["system", "monitoring"]
     )
@@ -418,6 +430,9 @@ if __name__ == "__main__":
     import uvicorn
 
     logger.info("🔧 Starting development server...")
+    # Use environment variable for host or default to localhost for security
+    host = os.getenv("HOST", "127.0.0.1")
+    port = int(os.getenv("PORT", "8000"))
     uvicorn.run(
-        "main:app", host="0.0.0.0", port=8000, reload=True, log_level="info"
+        "main:app", host=host, port=port, reload=True, log_level="info"
     )

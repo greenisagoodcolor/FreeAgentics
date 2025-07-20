@@ -33,15 +33,15 @@ check_endpoint() {
     local endpoint=$1
     local expected_status=${2:-200}
     local retry_count=0
-    
+
     while [[ $retry_count -lt $MAX_RETRIES ]]; do
         log "Checking $endpoint (attempt $((retry_count + 1))/$MAX_RETRIES)..."
-        
+
         response=$(curl -s -o /dev/null -w "%{http_code}" \
             --connect-timeout "$TIMEOUT" \
             --max-time "$TIMEOUT" \
             "$API_URL$endpoint" || echo "000")
-        
+
         if [[ "$response" == "$expected_status" ]]; then
             log "✓ $endpoint responded with $response"
             return 0
@@ -53,7 +53,7 @@ check_endpoint() {
             fi
         fi
     done
-    
+
     error "✗ $endpoint failed after $MAX_RETRIES attempts"
     return 1
 }
@@ -63,12 +63,12 @@ check_json_endpoint() {
     local endpoint=$1
     local json_path=$2
     local expected_value=$3
-    
+
     log "Checking JSON response from $endpoint..."
-    
+
     response=$(curl -s --connect-timeout "$TIMEOUT" --max-time "$TIMEOUT" \
         "$API_URL$endpoint" | jq -r "$json_path" 2>/dev/null || echo "error")
-    
+
     if [[ "$response" == "$expected_value" ]]; then
         log "✓ $endpoint returned expected value: $response"
         return 0
@@ -81,29 +81,29 @@ check_json_endpoint() {
 # Main health checks
 run_health_checks() {
     local failed=0
-    
+
     echo -e "\n${GREEN}=== Running Health Checks ===${NC}\n"
-    
+
     # 1. Basic connectivity
     log "1. Testing basic connectivity..."
     check_endpoint "/health" 200 || ((failed++))
-    
+
     # 2. API status endpoint
     log "2. Testing API status..."
     check_endpoint "/v1/system/status" 200 || ((failed++))
-    
+
     # 3. Database connectivity
     log "3. Testing database connectivity..."
     check_json_endpoint "/v1/system/status" ".database.connected" "true" || ((failed++))
-    
+
     # 4. Redis connectivity
     log "4. Testing Redis connectivity..."
     check_json_endpoint "/v1/system/status" ".redis.connected" "true" || ((failed++))
-    
+
     # 5. Authentication service
     log "5. Testing authentication service..."
     check_endpoint "/v1/auth/health" 200 || ((failed++))
-    
+
     # 6. WebSocket service
     log "6. Testing WebSocket service..."
     ws_response=$(echo "ping" | timeout 5 wscat -c "wss://api.freeagentics.com/ws/health" 2>&1 || echo "failed")
@@ -113,29 +113,29 @@ run_health_checks() {
         error "✗ WebSocket service failed to respond"
         ((failed++))
     fi
-    
+
     # 7. Metrics endpoint
     log "7. Testing metrics endpoint..."
     check_endpoint "/metrics" 200 || ((failed++))
-    
+
     # 8. Static assets (if applicable)
     log "8. Testing static asset serving..."
     check_endpoint "/static/health.txt" 200 || warning "Static assets not configured"
-    
+
     # 9. Rate limiting
     log "9. Testing rate limiting..."
     for i in {1..5}; do
         curl -s -o /dev/null "$API_URL/v1/auth/login" &
     done
     wait
-    
+
     rate_limit_response=$(curl -s -o /dev/null -w "%{http_code}" "$API_URL/v1/auth/login")
     if [[ "$rate_limit_response" == "429" ]]; then
         log "✓ Rate limiting is active"
     else
         warning "Rate limiting might not be properly configured"
     fi
-    
+
     # 10. SSL/TLS configuration
     log "10. Testing SSL/TLS configuration..."
     ssl_check=$(echo | openssl s_client -connect api.freeagentics.com:443 -servername api.freeagentics.com 2>/dev/null | openssl x509 -noout -dates 2>/dev/null)
@@ -146,7 +146,7 @@ run_health_checks() {
         error "✗ SSL certificate check failed"
         ((failed++))
     fi
-    
+
     # Summary
     echo -e "\n${GREEN}=== Health Check Summary ===${NC}"
     if [[ $failed -eq 0 ]]; then
@@ -161,7 +161,7 @@ run_health_checks() {
 # Performance checks
 run_performance_checks() {
     echo -e "\n${GREEN}=== Running Performance Checks ===${NC}\n"
-    
+
     # Response time check
     log "Checking API response times..."
     total_time=0
@@ -170,7 +170,7 @@ run_performance_checks() {
         total_time=$(echo "$total_time + $response_time" | bc)
     done
     avg_time=$(echo "scale=3; $total_time / 10" | bc)
-    
+
     log "Average response time: ${avg_time}s"
     if (( $(echo "$avg_time < 0.5" | bc -l) )); then
         log "✓ Response time is acceptable"
@@ -182,16 +182,16 @@ run_performance_checks() {
 # Database checks
 check_database_health() {
     echo -e "\n${GREEN}=== Database Health Checks ===${NC}\n"
-    
+
     # Get database metrics
     db_metrics=$(curl -s "$API_URL/v1/monitoring/database" || echo "{}")
-    
+
     # Connection pool
     active_connections=$(echo "$db_metrics" | jq -r '.connections.active' 2>/dev/null || echo "0")
     max_connections=$(echo "$db_metrics" | jq -r '.connections.max' 2>/dev/null || echo "100")
-    
+
     log "Database connections: $active_connections/$max_connections"
-    
+
     # Replication lag (if applicable)
     replication_lag=$(echo "$db_metrics" | jq -r '.replication.lag_seconds' 2>/dev/null || echo "0")
     if [[ "$replication_lag" != "null" ]] && [[ "$replication_lag" -lt 5 ]]; then
@@ -204,7 +204,7 @@ check_database_health() {
 # Service dependency checks
 check_service_dependencies() {
     echo -e "\n${GREEN}=== Service Dependency Checks ===${NC}\n"
-    
+
     # Check Redis
     log "Checking Redis operations..."
     test_key="health_check_$(date +%s)"
@@ -212,13 +212,13 @@ check_service_dependencies() {
         -H "Content-Type: application/json" \
         -d "{\"action\":\"set\",\"key\":\"$test_key\",\"value\":\"test\"}" | \
         jq -r '.success' 2>/dev/null || echo "false")
-    
+
     if [[ "$set_result" == "true" ]]; then
         log "✓ Redis write operation successful"
     else
         error "✗ Redis write operation failed"
     fi
-    
+
     # Check external APIs (if any)
     log "Checking external service connectivity..."
     # Add checks for any external services your app depends on
@@ -247,10 +247,10 @@ main() {
                 ;;
         esac
     done
-    
+
     log "Starting health checks for environment: $ENVIRONMENT"
     log "API URL: $API_URL"
-    
+
     # Run checks
     if [[ "${QUICK_CHECK:-false}" == "true" ]]; then
         # Quick check - just basic endpoints

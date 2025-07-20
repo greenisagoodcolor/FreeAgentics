@@ -31,7 +31,7 @@ class TestGMNNodeType:
         assert GMNNodeType.STATE.value == "state"
         assert GMNNodeType.OBSERVATION.value == "observation"
         assert GMNNodeType.ACTION.value == "action"
-        assert GMNNodeType.BELIEF.value == "belie"
+        assert GMNNodeType.BELIEF.value == "belief"
         assert GMNNodeType.PREFERENCE.value == "preference"
         assert GMNNodeType.TRANSITION.value == "transition"
         assert GMNNodeType.LIKELIHOOD.value == "likelihood"
@@ -84,7 +84,10 @@ class TestGMNEdge:
     def test_edge_creation(self):
         """Test basic edge creation."""
         edge = GMNEdge(
-            source="node1", target="node2", type=GMNEdgeType.DEPENDS_ON, properties={"weight": 0.8}
+            source="node1",
+            target="node2",
+            type=GMNEdgeType.DEPENDS_ON,
+            properties={"weight": 0.8},
         )
 
         assert edge.source == "node1"
@@ -109,7 +112,9 @@ class TestGMNGraph:
         edge = GMNEdge("n1", "n2", GMNEdgeType.GENERATES)
 
         graph = GMNGraph(
-            nodes={"n1": node1, "n2": node2}, edges=[edge], metadata={"version": "1.0"}
+            nodes={"n1": node1, "n2": node2},
+            edges=[edge],
+            metadata={"version": "1.0"},
         )
 
         assert len(graph.nodes) == 2
@@ -143,31 +148,63 @@ class TestGMNParser:
         """Test parsing JSON specification."""
         spec = {
             "nodes": [
-                {"id": "state1", "type": "state", "properties": {"num_states": 3}},
-                {"id": "obs1", "type": "observation", "properties": {"num_observations": 2}},
+                {
+                    "id": "state1",
+                    "type": "state",
+                    "properties": {"num_states": 3},
+                },
+                {
+                    "id": "obs1",
+                    "type": "observation",
+                    "properties": {"num_observations": 2},
+                },
+                {
+                    "id": "action1",
+                    "type": "action",
+                    "properties": {"num_actions": 2},
+                },
             ],
-            "edges": [{"source": "state1", "target": "obs1", "type": "generates"}],
+            "edges": [
+                {"source": "state1", "target": "obs1", "type": "generates"},
+                {"source": "action1", "target": "state1", "type": "influences"}
+            ],
             "metadata": {"version": "1.0"},
         }
 
         graph = parser.parse(spec)
 
-        assert len(graph.nodes) == 2
-        assert len(graph.edges) == 1
+        assert len(graph.nodes) == 3
+        assert len(graph.edges) == 2
         assert graph.metadata["version"] == "1.0"
         assert "state1" in graph.nodes
         assert "obs1" in graph.nodes
+        assert "action1" in graph.nodes
         assert graph.nodes["state1"].type == GMNNodeType.STATE
         assert graph.nodes["obs1"].type == GMNNodeType.OBSERVATION
+        assert graph.nodes["action1"].type == GMNNodeType.ACTION
 
     def test_parse_string_spec(self, parser):
         """Test parsing string specification."""
-        spec_str = json.dumps({"nodes": [{"id": "location", "type": "state"}], "edges": []})
+        spec_str = json.dumps(
+            {
+                "nodes": [
+                    {"id": "location", "type": "state"},
+                    {"id": "obs_location", "type": "observation"},
+                    {"id": "move", "type": "action"}
+                ], 
+                "edges": [
+                    {"source": "location", "target": "obs_location", "type": "generates"},
+                    {"source": "move", "target": "location", "type": "influences"}
+                ]
+            }
+        )
 
         graph = parser.parse(spec_str)
 
-        assert len(graph.nodes) == 1
+        assert len(graph.nodes) == 3
         assert "location" in graph.nodes
+        assert "obs_location" in graph.nodes
+        assert "move" in graph.nodes
 
     def test_parse_gmn_format(self, parser):
         """Test parsing custom GMN format."""
@@ -175,24 +212,34 @@ class TestGMNParser:
         [nodes]
         location: state {num_states: 4}
         obs_location: observation {num_observations: 4}
+        move: action {num_actions: 5}
 
         [edges]
         location -> obs_location: generates
+        move -> location: influences
         """
 
         graph = parser.parse(spec)
 
-        assert len(graph.nodes) == 2
-        assert len(graph.edges) == 1
+        assert len(graph.nodes) == 3
+        assert len(graph.edges) == 2
         assert graph.nodes["location"].properties["num_states"] == 4
-        assert graph.edges[0].source == "location"
-        assert graph.edges[0].target == "obs_location"
+        # Check first edge
+        location_edge = next(e for e in graph.edges if e.source == "location")
+        assert location_edge.target == "obs_location"
+        assert location_edge.type == GMNEdgeType.GENERATES
 
     def test_validation_errors(self, parser):
         """Test validation error detection."""
         spec = {
             "nodes": [{"id": "node1", "type": "state"}],
-            "edges": [{"source": "node1", "target": "missing_node", "type": "depends_on"}],
+            "edges": [
+                {
+                    "source": "node1",
+                    "target": "missing_node",
+                    "type": "depends_on",
+                }
+            ],
         }
 
         with pytest.raises(ValueError, match="GMN validation errors"):
@@ -200,7 +247,10 @@ class TestGMNParser:
 
     def test_unknown_node_type(self, parser):
         """Test handling of unknown node types."""
-        spec = {"nodes": [{"id": "node1", "type": "unknown_type"}], "edges": []}
+        spec = {
+            "nodes": [{"id": "node1", "type": "unknown_type"}],
+            "edges": [],
+        }
 
         with pytest.raises(ValueError):
             parser.parse(spec)
@@ -233,21 +283,57 @@ class TestGMNToPyMDP:
         """Create simple test graph."""
         spec = {
             "nodes": [
-                {"id": "location", "type": "state", "properties": {"num_states": 4}},
-                {"id": "obs_loc", "type": "observation", "properties": {"num_observations": 4}},
-                {"id": "move", "type": "action", "properties": {"num_actions": 5}},
-                {"id": "belie", "type": "belief"},
-                {"id": "pre", "type": "preference", "properties": {"preferred_observation": 0}},
+                {
+                    "id": "location",
+                    "type": "state",
+                    "properties": {"num_states": 4},
+                },
+                {
+                    "id": "obs_loc",
+                    "type": "observation",
+                    "properties": {"num_observations": 4},
+                },
+                {
+                    "id": "move",
+                    "type": "action",
+                    "properties": {"num_actions": 5},
+                },
+                {"id": "belief1", "type": "belief"},
+                {
+                    "id": "pre",
+                    "type": "preference",
+                    "properties": {"preferred_observation": 0},
+                },
                 {"id": "likelihood", "type": "likelihood"},
                 {"id": "transition", "type": "transition"},
             ],
             "edges": [
-                {"source": "location", "target": "likelihood", "type": "depends_on"},
-                {"source": "likelihood", "target": "obs_loc", "type": "generates"},
-                {"source": "location", "target": "transition", "type": "depends_on"},
-                {"source": "move", "target": "transition", "type": "depends_on"},
+                {
+                    "source": "location",
+                    "target": "likelihood",
+                    "type": "depends_on",
+                },
+                {
+                    "source": "likelihood",
+                    "target": "obs_loc",
+                    "type": "generates",
+                },
+                {
+                    "source": "location",
+                    "target": "transition",
+                    "type": "depends_on",
+                },
+                {
+                    "source": "move",
+                    "target": "transition",
+                    "type": "depends_on",
+                },
                 {"source": "pre", "target": "obs_loc", "type": "depends_on"},
-                {"source": "belie", "target": "location", "type": "depends_on"},
+                {
+                    "source": "belief1",
+                    "target": "location",
+                    "type": "depends_on",
+                },
             ],
         }
         return parser.parse(spec)
@@ -298,7 +384,11 @@ class TestGMNToPyMDP:
 
         assert len(model["B"]) == 1
         B_matrix = model["B"][0]
-        assert B_matrix.shape == (4, 4, 5)  # state_dim x state_dim x action_dim
+        assert B_matrix.shape == (
+            4,
+            4,
+            5,
+        )  # state_dim x state_dim x action_dim
 
     def test_preference_vector_generation(self, parser, simple_graph):
         """Test preference vector generation."""
@@ -322,9 +412,21 @@ class TestGMNToPyMDP:
         """Test custom matrix specification."""
         spec = {
             "nodes": [
-                {"id": "state", "type": "state", "properties": {"num_states": 2}},
-                {"id": "obs", "type": "observation", "properties": {"num_observations": 2}},
-                {"id": "action", "type": "action", "properties": {"num_actions": 2}},
+                {
+                    "id": "state",
+                    "type": "state",
+                    "properties": {"num_states": 2},
+                },
+                {
+                    "id": "obs",
+                    "type": "observation",
+                    "properties": {"num_observations": 2},
+                },
+                {
+                    "id": "action",
+                    "type": "action",
+                    "properties": {"num_actions": 2},
+                },
                 {
                     "id": "likelihood",
                     "type": "likelihood",
@@ -332,7 +434,11 @@ class TestGMNToPyMDP:
                 },
             ],
             "edges": [
-                {"source": "state", "target": "likelihood", "type": "depends_on"},
+                {
+                    "source": "state",
+                    "target": "likelihood",
+                    "type": "depends_on",
+                },
                 {"source": "likelihood", "target": "obs", "type": "generates"},
             ],
         }
@@ -356,9 +462,21 @@ class TestLLMIntegration:
         """Test LLM integration point extraction."""
         spec = {
             "nodes": [
-                {"id": "state", "type": "state", "properties": {"num_states": 3}},
-                {"id": "obs", "type": "observation", "properties": {"num_observations": 3}},
-                {"id": "action", "type": "action", "properties": {"num_actions": 4}},
+                {
+                    "id": "state",
+                    "type": "state",
+                    "properties": {"num_states": 3},
+                },
+                {
+                    "id": "obs",
+                    "type": "observation",
+                    "properties": {"num_observations": 3},
+                },
+                {
+                    "id": "action",
+                    "type": "action",
+                    "properties": {"num_actions": 4},
+                },
                 {
                     "id": "llm_policy",
                     "type": "llm_query",
@@ -371,7 +489,11 @@ class TestLLMIntegration:
             ],
             "edges": [
                 {"source": "obs", "target": "llm_policy", "type": "queries"},
-                {"source": "llm_policy", "target": "action", "type": "updates"},
+                {
+                    "source": "llm_policy",
+                    "target": "action",
+                    "type": "updates",
+                },
             ],
         }
 
@@ -396,9 +518,21 @@ class TestConvenienceFunction:
         """Test parse_gmn_spec convenience function."""
         spec = {
             "nodes": [
-                {"id": "state", "type": "state", "properties": {"num_states": 2}},
-                {"id": "obs", "type": "observation", "properties": {"num_observations": 2}},
-                {"id": "action", "type": "action", "properties": {"num_actions": 2}},
+                {
+                    "id": "state",
+                    "type": "state",
+                    "properties": {"num_states": 2},
+                },
+                {
+                    "id": "obs",
+                    "type": "observation",
+                    "properties": {"num_observations": 2},
+                },
+                {
+                    "id": "action",
+                    "type": "action",
+                    "properties": {"num_actions": 2},
+                },
             ],
             "edges": [],
         }
@@ -423,8 +557,8 @@ class TestExampleSpec:
             "location",
             "obs_location",
             "move",
-            "location_belie",
-            "location_pre",
+            "location_belief",
+            "location_pref",
             "location_likelihood",
             "location_transition",
             "llm_policy",
@@ -488,17 +622,35 @@ class TestErrorHandling:
         """Test matrix dimension validation."""
         spec = {
             "nodes": [
-                {"id": "state", "type": "state", "properties": {"num_states": 2}},
-                {"id": "obs", "type": "observation", "properties": {"num_observations": 3}},
-                {"id": "action", "type": "action", "properties": {"num_actions": 2}},
+                {
+                    "id": "state",
+                    "type": "state",
+                    "properties": {"num_states": 2},
+                },
+                {
+                    "id": "obs",
+                    "type": "observation",
+                    "properties": {"num_observations": 3},
+                },
+                {
+                    "id": "action",
+                    "type": "action",
+                    "properties": {"num_actions": 2},
+                },
                 {
                     "id": "likelihood",
                     "type": "likelihood",
-                    "properties": {"matrix": [[1, 0], [0, 1]]},  # Wrong dimensions
+                    "properties": {
+                        "matrix": [[1, 0], [0, 1]]
+                    },  # Wrong dimensions
                 },
             ],
             "edges": [
-                {"source": "state", "target": "likelihood", "type": "depends_on"},
+                {
+                    "source": "state",
+                    "target": "likelihood",
+                    "type": "depends_on",
+                },
                 {"source": "likelihood", "target": "obs", "type": "generates"},
             ],
         }

@@ -29,7 +29,10 @@ class SecurityGatesConfig:
                 "security-tests": {
                     "runs-on": "ubuntu-latest",
                     "steps": [
-                        {"name": "Checkout code", "uses": "actions/checkout@v3"},
+                        {
+                            "name": "Checkout code",
+                            "uses": "actions/checkout@v3",
+                        },
                         {
                             "name": "Setup Python",
                             "uses": "actions/setup-python@v4",
@@ -75,14 +78,14 @@ class SecurityGatesConfig:
                             "name": "Run Bandit Security Scan",
                             "run": """
                                 pip install bandit
-                                bandit -r . -f json -o bandit-report.json || true
+                                bandit -r . -f json -o bandit-report.json 
                             """,
                         },
                         {
                             "name": "Run Safety Check",
                             "run": """
                                 pip install safety
-                                safety check --json > safety-report.json || true
+                                safety check --json > safety-report.json 
                             """,
                         },
                         {
@@ -178,7 +181,10 @@ class SecurityGatesConfig:
             },
             "dependency-scanning": {
                 "stage": "security",
-                "image": {"name": "owasp/dependency-check:latest", "entrypoint": [""]},
+                "image": {
+                    "name": "owasp/dependency-check:latest",
+                    "entrypoint": [""],
+                },
                 "script": [
                     "/usr/share/dependency-check/bin/dependency-check.sh --scan . --format ALL --project FreeAgentics"
                 ],
@@ -193,7 +199,9 @@ class SecurityGatesConfig:
                 },
                 "script": ["/analyzer run"],
                 "artifacts": {
-                    "reports": {"container_scanning": "gl-container-scanning-report.json"}
+                    "reports": {
+                        "container_scanning": "gl-container-scanning-report.json"
+                    }
                 },
             },
             "sast": {
@@ -213,12 +221,12 @@ class SecurityGatesConfig:
         pipeline = """
 pipeline {
     agent any
-    
+
     environment {
         PYTHON_VERSION = '3.10'
         DATABASE_URL = 'postgresql://postgres:postgres@localhost/freeagentics_test'
     }
-    
+
     stages {
         stage('Setup') {
             steps {
@@ -231,7 +239,7 @@ pipeline {
                 '''
             }
         }
-        
+
         stage('Security Tests') {
             parallel {
                 stage('Unit Security Tests') {
@@ -242,7 +250,7 @@ pipeline {
                         '''
                     }
                 }
-                
+
                 stage('Penetration Tests') {
                     steps {
                         sh '''
@@ -251,17 +259,17 @@ pipeline {
                         '''
                     }
                 }
-                
+
                 stage('SAST Scanning') {
                     steps {
                         sh '''
                             . venv/bin/activate
                             bandit -r . -f json -o results/bandit-report.json
-                            pylint **/*.py --output-format=json > results/pylint-report.json || true
+                            pylint **/*.py --output-format=json > results/pylint-report.json 
                         '''
                     }
                 }
-                
+
                 stage('Dependency Scanning') {
                     steps {
                         sh '''
@@ -273,7 +281,7 @@ pipeline {
                 }
             }
         }
-        
+
         stage('OWASP ZAP Scan') {
             steps {
                 script {
@@ -285,7 +293,7 @@ pipeline {
                 }
             }
         }
-        
+
         stage('Security Gate') {
             steps {
                 sh '''
@@ -295,7 +303,7 @@ pipeline {
             }
         }
     }
-    
+
     post {
         always {
             junit 'results/*-tests.xml'
@@ -309,7 +317,7 @@ pipeline {
             ])
             archiveArtifacts artifacts: 'results/*.json', fingerprint: true
         }
-        
+
         failure {
             emailext (
                 subject: "Security Gate Failed: ${env.JOB_NAME} - ${env.BUILD_NUMBER}",
@@ -328,7 +336,10 @@ pipeline {
 
         config = {
             "version": 2.1,
-            "orbs": {"python": "circleci/python@2.1.1", "security": "salto/security@0.2.0"},
+            "orbs": {
+                "python": "circleci/python@2.1.1",
+                "security": "salto/security@0.2.0",
+            },
             "jobs": {
                 "security-tests": {
                     "docker": [
@@ -369,7 +380,12 @@ pipeline {
                                 "command": "python tests/security/run_comprehensive_penetration_tests.py",
                             }
                         },
-                        {"security/scan": {"scan-type": "sast", "fail-on-issues": True}},
+                        {
+                            "security/scan": {
+                                "scan-type": "sast",
+                                "fail-on-issues": True,
+                            }
+                        },
                         {
                             "run": {
                                 "name": "Dependency check",
@@ -385,7 +401,11 @@ pipeline {
                                 "command": "python tests/security/check_security_gates.py",
                             }
                         },
-                        {"store_artifacts": {"path": "security_test_report.json"}},
+                        {
+                            "store_artifacts": {
+                                "path": "security_test_report.json"
+                            }
+                        },
                         {"store_test_results": {"path": "test-results"}},
                     ],
                 }
@@ -484,11 +504,19 @@ pipeline {
         github_dir.mkdir(parents=True, exist_ok=True)
 
         with open(github_dir / "security-tests.yml", "w") as f:
-            yaml.dump(SecurityGatesConfig.github_actions_config(), f, default_flow_style=False)
+            yaml.dump(
+                SecurityGatesConfig.github_actions_config(),
+                f,
+                default_flow_style=False,
+            )
 
         # GitLab CI
         with open(output_path / ".gitlab-ci-security.yml", "w") as f:
-            yaml.dump(SecurityGatesConfig.gitlab_ci_config(), f, default_flow_style=False)
+            yaml.dump(
+                SecurityGatesConfig.gitlab_ci_config(),
+                f,
+                default_flow_style=False,
+            )
 
         # Jenkins
         with open(output_path / "Jenkinsfile.security", "w") as f:
@@ -499,11 +527,19 @@ pipeline {
         circleci_dir.mkdir(exist_ok=True)
 
         with open(circleci_dir / "config-security.yml", "w") as f:
-            yaml.dump(SecurityGatesConfig.circleci_config(), f, default_flow_style=False)
+            yaml.dump(
+                SecurityGatesConfig.circleci_config(),
+                f,
+                default_flow_style=False,
+            )
 
         # Azure DevOps
         with open(output_path / "azure-pipelines-security.yml", "w") as f:
-            yaml.dump(SecurityGatesConfig.azure_devops_pipeline(), f, default_flow_style=False)
+            yaml.dump(
+                SecurityGatesConfig.azure_devops_pipeline(),
+                f,
+                default_flow_style=False,
+            )
 
         print("Generated CI/CD security configurations:")
         print("- .github/workflows/security-tests.yml")

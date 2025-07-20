@@ -63,11 +63,11 @@ http {
     server {
         listen 80;
         server_name $DOMAIN;
-        
+
         location /.well-known/acme-challenge/ {
             root /var/www/certbot;
         }
-        
+
         location / {
             return 301 https://\$host\$request_uri;
         }
@@ -133,11 +133,11 @@ log "Copying certificates to nginx ssl directory..."
 if [ -d "./certbot/conf/live/$DOMAIN" ]; then
     cp "./certbot/conf/live/$DOMAIN/fullchain.pem" "./nginx/ssl/cert.pem"
     cp "./certbot/conf/live/$DOMAIN/privkey.pem" "./nginx/ssl/key.pem"
-    
+
     # Set proper permissions
     chmod 600 "./nginx/ssl/key.pem"
     chmod 644 "./nginx/ssl/cert.pem"
-    
+
     log "Certificates copied successfully"
 else
     error "Certificate directory not found. Certificate request may have failed."
@@ -160,14 +160,14 @@ docker-compose -f docker-compose-certbot.yml run --rm certbot renew --quiet --no
 if [ -d "./certbot/conf/live/$DOMAIN" ]; then
     cp "./certbot/conf/live/$DOMAIN/fullchain.pem" "./nginx/ssl/cert.pem"
     cp "./certbot/conf/live/$DOMAIN/privkey.pem" "./nginx/ssl/key.pem"
-    
+
     # Set proper permissions
     chmod 600 "./nginx/ssl/key.pem"
     chmod 644 "./nginx/ssl/cert.pem"
-    
+
     # Reload nginx
     docker-compose exec nginx nginx -s reload
-    
+
     echo "Certificate renewed successfully"
 else
     echo "Certificate renewal failed"

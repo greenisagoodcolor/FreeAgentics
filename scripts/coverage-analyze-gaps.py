@@ -60,11 +60,14 @@ class CoverageAnalyzer:
 
     def _is_critical(self, module_path: str) -> bool:
         """Check if module is critical."""
-        return any(module_path.endswith(critical) for critical in self.CRITICAL_MODULES)
+        return any(
+            module_path.endswith(critical)
+            for critical in self.CRITICAL_MODULES
+        )
 
     def analyze_gaps(self) -> Dict[str, Any]:
         """Analyze coverage gaps and categorize them."""
-        gaps = {
+        gaps: Dict[str, Any] = {
             "summary": {},
             "critical_gaps": [],
             "zero_coverage": [],
@@ -117,7 +120,12 @@ class CoverageAnalyzer:
             gaps["by_category"][module_info["category"]].append(module_info)
 
         # Sort lists by coverage (lowest first)
-        for key in ["zero_coverage", "low_coverage", "critical_gaps", "gnn_specific"]:
+        for key in [
+            "zero_coverage",
+            "low_coverage",
+            "critical_gaps",
+            "gnn_specific",
+        ]:
             gaps[key].sort(key=lambda x: x["coverage"])
 
         # Generate recommendations
@@ -172,7 +180,8 @@ class CoverageAnalyzer:
                         "priority": "MEDIUM",
                         "category": f"{category.title()} Layer",
                         "action": f"Improve {len(low_coverage)} modules in {category} layer",
-                        "average_coverage": sum(m["coverage"] for m in modules) / len(modules),
+                        "average_coverage": sum(m["coverage"] for m in modules)
+                        / len(modules),
                     }
                 )
 
@@ -218,24 +227,32 @@ class CoverageAnalyzer:
 
         # Zero coverage
         if gaps["zero_coverage"]:
-            lines.append(f"MODULES WITH 0% COVERAGE ({len(gaps['zero_coverage'])} total):")
+            lines.append(
+                f"MODULES WITH 0% COVERAGE ({len(gaps['zero_coverage'])} total):"
+            )
             for module in gaps["zero_coverage"][:10]:
                 lines.append(f"  - {module['path']}")
             if len(gaps["zero_coverage"]) > 10:
-                lines.append(f"  ... and {len(gaps['zero_coverage']) - 10} more")
+                lines.append(
+                    f"  ... and {len(gaps['zero_coverage']) - 10} more"
+                )
             lines.append("")
 
         # GNN specific
         if gaps["gnn_specific"]:
             lines.append("GNN/GRAPH MODULES COVERAGE:")
             for module in gaps["gnn_specific"]:
-                lines.append(f"  - {module['path']}: {module['coverage']:.1f}%")
+                lines.append(
+                    f"  - {module['path']}: {module['coverage']:.1f}%"
+                )
             lines.append("")
 
         # Recommendations
         lines.append("RECOMMENDATIONS:")
         for i, rec in enumerate(gaps["recommendations"], 1):
-            lines.append(f"{i}. [{rec['priority']}] {rec['category']}: {rec['action']}")
+            lines.append(
+                f"{i}. [{rec['priority']}] {rec['category']}: {rec['action']}"
+            )
             if "modules" in rec:
                 for module in rec["modules"][:3]:
                     lines.append(f"     - {module}")
@@ -274,19 +291,25 @@ class CoverageAnalyzer:
 
         # Zero coverage
         if gaps["zero_coverage"]:
-            lines.append(f"## Modules with 0% Coverage ({len(gaps['zero_coverage'])} total)")
+            lines.append(
+                f"## Modules with 0% Coverage ({len(gaps['zero_coverage'])} total)"
+            )
             lines.append("")
             for module in gaps["zero_coverage"][:20]:
                 lines.append(f"- `{module['path']}`")
             if len(gaps["zero_coverage"]) > 20:
-                lines.append(f"- ... and {len(gaps['zero_coverage']) - 20} more")
+                lines.append(
+                    f"- ... and {len(gaps['zero_coverage']) - 20} more"
+                )
             lines.append("")
 
         # Recommendations
         lines.append("## Recommendations")
         lines.append("")
         for i, rec in enumerate(gaps["recommendations"], 1):
-            lines.append(f"### {i}. {rec['category']} ({rec['priority']} Priority)")
+            lines.append(
+                f"### {i}. {rec['category']} ({rec['priority']} Priority)"
+            )
             lines.append(f"{rec['action']}")
             if "modules" in rec:
                 lines.append("")
@@ -301,10 +324,15 @@ class CoverageAnalyzer:
 def main():
     parser = argparse.ArgumentParser(description="Analyze test coverage gaps")
     parser.add_argument(
-        "--coverage-file", default="coverage.json", help="Path to coverage.json file"
+        "--coverage-file",
+        default="coverage.json",
+        help="Path to coverage.json file",
     )
     parser.add_argument(
-        "--format", choices=["text", "json", "markdown"], default="text", help="Output format"
+        "--format",
+        choices=["text", "json", "markdown"],
+        default="text",
+        help="Output format",
     )
     parser.add_argument("--output", help="Output file (default: stdout)")
 

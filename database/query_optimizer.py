@@ -1,5 +1,5 @@
 """
-Enhanced Database Query Optimizer for Multi-Agent Systems
+Enhanced Database Query Optimizer for Multi-Agent Systems.
 
 Implements advanced PostgreSQL optimization techniques including:
 - Query plan analysis with EXPLAIN ANALYZE
@@ -19,7 +19,17 @@ from contextlib import asynccontextmanager
 from datetime import datetime, timedelta
 from typing import Any, Dict, List, Optional, Set, Tuple, Union
 
-from sqlalchemy import and_, bindparam, create_engine, event, func, or_, select, text
+from sqlalchemy import (
+    and_,
+    bindparam,
+    create_engine,
+    event,
+    func,
+    or_,
+    quoted_name,
+    select,
+    text,
+)
 from sqlalchemy.dialects import postgresql
 from sqlalchemy.engine import Result
 from sqlalchemy.ext.asyncio import AsyncSession, create_async_engine
@@ -33,7 +43,8 @@ class PreparedStatementManager:
     """Manages prepared statements for frequently used queries."""
 
     def __init__(self):
-        self.prepared_statements: Dict[str, str] = {}
+        """Initialize the prepared statement manager."""
+        self.prepared_statements: Dict[str, Dict[str, Any]] = {}
         self.statement_usage: Dict[str, int] = defaultdict(int)
         self.statement_performance: Dict[str, List[float]] = defaultdict(list)
 
@@ -43,7 +54,9 @@ class PreparedStatementManager:
         """Register a prepared statement."""
         if name not in self.prepared_statements:
             # Create prepared statement name with hash for uniqueness
-            stmt_hash = hashlib.md5(sql.encode()).hexdigest()[:8]
+            stmt_hash = hashlib.md5(
+                sql.encode(), usedforsecurity=False
+            ).hexdigest()[:8]
             prepared_name = f"stmt_{name}_{stmt_hash}"
 
             # Store the prepared statement
@@ -54,9 +67,11 @@ class PreparedStatementManager:
                 "created_at": datetime.now(),
             }
 
-            logger.info(f"Registered prepared statement: {name} -> {prepared_name}")
+            logger.info(
+                f"Registered prepared statement: {name} -> {prepared_name}"
+            )
 
-        return self.prepared_statements[name]["name"]
+        return str(self.prepared_statements[name]["name"])
 
     def get_statement(self, name: str) -> Optional[Dict[str, Any]]:
         """Get prepared statement details."""
@@ -82,7 +97,9 @@ class PreparedStatementManager:
                     "min_time": min(times),
                     "max_time": max(times),
                     "p95_time": (
-                        sorted(times)[int(len(times) * 0.95)] if len(times) > 1 else times[0]
+                        sorted(times)[int(len(times) * 0.95)]
+                        if len(times) > 1
+                        else times[0]
                     ),
                 }
         return stats
@@ -92,12 +109,16 @@ class QueryPlanAnalyzer:
     """Analyzes query execution plans for optimization opportunities."""
 
     def __init__(self):
+        """Initialize the query plan analyzer."""
         self.slow_query_threshold = 0.1  # 100ms
         self.query_plans: Dict[str, List[Dict[str, Any]]] = defaultdict(list)
         self.optimization_suggestions: Dict[str, Set[str]] = defaultdict(set)
 
     async def analyze_query(
-        self, session: AsyncSession, query: str, params: Optional[Dict[str, Any]] = None
+        self,
+        session: AsyncSession,
+        query: str,
+        params: Optional[Dict[str, Any]] = None,
     ) -> Dict[str, Any]:
         """Analyze query execution plan using EXPLAIN ANALYZE."""
         try:
@@ -121,12 +142,16 @@ class QueryPlanAnalyzer:
             )
 
             # Store the plan for history
-            query_hash = hashlib.md5(query.encode()).hexdigest()
+            query_hash = hashlib.md5(
+                query.encode(), usedforsecurity=False
+            ).hexdigest()
             self.query_plans[query_hash].append(
                 {
                     "timestamp": datetime.now(),
                     "plan": plan_summary,
-                    "query": query[:100],  # Store first 100 chars for reference
+                    "query": query[
+                        :100
+                    ],  # Store first 100 chars for reference
                 }
             )
 
@@ -160,7 +185,9 @@ class QueryPlanAnalyzer:
 
         return metrics
 
-    def _analyze_plan_node(self, node: Dict[str, Any], metrics: Dict[str, Any]):
+    def _analyze_plan_node(
+        self, node: Dict[str, Any], metrics: Dict[str, Any]
+    ):
         """Recursively analyze plan nodes."""
         node_type = node.get("Node Type", "")
         metrics["node_types"].append(node_type)
@@ -181,24 +208,34 @@ class QueryPlanAnalyzer:
         for child in node.get("Plans", []):
             self._analyze_plan_node(child, metrics)
 
-    def _analyze_for_optimizations(self, query_hash: str, metrics: Dict[str, Any]):
+    def _analyze_for_optimizations(
+        self, query_hash: str, metrics: Dict[str, Any]
+    ):
         """Analyze metrics for optimization opportunities."""
         suggestions = self.optimization_suggestions[query_hash]
 
         # Check for missing indexes
         if metrics["seq_scans"] > 0 and metrics["index_scans"] == 0:
-            suggestions.add("Consider adding indexes - query uses sequential scans only")
+            suggestions.add(
+                "Consider adding indexes - query uses sequential scans only"
+            )
 
         # Check for excessive nested loops
         if metrics["nested_loops"] > 3:
-            suggestions.add("High nested loop count - consider query restructuring")
+            suggestions.add(
+                "High nested loop count - consider query restructuring"
+            )
 
         # Check for sort operations that could use indexes
         if metrics["sort_operations"] > 0:
-            suggestions.add("Sort operations detected - consider adding sorted indexes")
+            suggestions.add(
+                "Sort operations detected - consider adding sorted indexes"
+            )
 
         # Check buffer hit ratio
-        total_buffers = metrics["shared_buffers_hit"] + metrics["shared_buffers_read"]
+        total_buffers = (
+            metrics["shared_buffers_hit"] + metrics["shared_buffers_read"]
+        )
         if total_buffers > 0:
             hit_ratio = metrics["shared_buffers_hit"] / total_buffers
             if hit_ratio < 0.9:
@@ -207,21 +244,56 @@ class QueryPlanAnalyzer:
                 )
 
         # Check execution time
-        if metrics["execution_time"] > self.slow_query_threshold * 1000:  # Convert to ms
-            suggestions.add(f"Slow query detected ({metrics['execution_time']:.1f}ms)")
+        if (
+            metrics["execution_time"] > self.slow_query_threshold * 1000
+        ):  # Convert to ms
+            suggestions.add(
+                f"Slow query detected ({metrics['execution_time']:.1f}ms)"
+            )
 
 
 class BatchOperationManager:
     """Manages batch operations for efficient bulk inserts and updates."""
 
     def __init__(self, batch_size: int = 1000):
+        """Initialize the batch operation manager.
+
+        Args:
+            batch_size: Maximum number of operations per batch.
+        """
         self.batch_size = batch_size
-        self.pending_inserts: Dict[str, List[Dict[str, Any]]] = defaultdict(list)
-        self.pending_updates: Dict[str, List[Dict[str, Any]]] = defaultdict(list)
+        self.pending_inserts: Dict[str, List[Dict[str, Any]]] = defaultdict(
+            list
+        )
+        self.pending_updates: Dict[str, List[Dict[str, Any]]] = defaultdict(
+            list
+        )
         self.batch_performance: Dict[str, List[float]] = defaultdict(list)
 
+    def _escape_identifier(self, identifier: str) -> str:
+        """Safely escape SQL identifiers to prevent injection.
+
+        Args:
+            identifier: The table or column name to escape
+
+        Returns:
+            Safely quoted identifier
+        """
+        # Remove any potentially dangerous characters and quote the identifier
+        # Only allow alphanumeric characters, underscores, and dots for schema.table notation
+        import re
+
+        if not re.match(
+            r'^[a-zA-Z_][a-zA-Z0-9_]*(\.[a-zA-Z_][a-zA-Z0-9_]*)?$', identifier
+        ):
+            raise ValueError(f"Invalid identifier: {identifier}")
+        return f'"{identifier}"'
+
     async def batch_insert(
-        self, session: AsyncSession, table_name: str, records: List[Dict[str, Any]]
+        self,
+        session: AsyncSession,
+        table_name: str,
+        records: List[Dict[str, Any]],
     ) -> int:
         """Perform batch insert with optimal chunk size."""
         if not records:
@@ -237,19 +309,28 @@ class BatchOperationManager:
 
                 # Build INSERT statement with ON CONFLICT DO NOTHING
                 columns = list(chunk[0].keys())
+
+                # Safely escape table name and column names
+                escaped_table = self._escape_identifier(table_name)
+                escaped_columns = [
+                    self._escape_identifier(col) for col in columns
+                ]
+
                 values_clause = ", ".join(
                     [
-                        "(" + ", ".join([f":{col}_{j}" for col in columns]) + ")"
+                        "("
+                        + ", ".join([f":{col}_{j}" for col in columns])
+                        + ")"
                         for j in range(len(chunk))
                     ]
                 )
 
                 insert_stmt = text(
                     f"""
-                    INSERT INTO {table_name} ({", ".join(columns)})
+                    INSERT INTO {escaped_table} ({", ".join(escaped_columns)})
                     VALUES {values_clause}
                     ON CONFLICT DO NOTHING
-                """
+                """  # nosec B608
                 )
 
                 # Prepare parameters
@@ -259,14 +340,18 @@ class BatchOperationManager:
                         params[f"{col}_{j}"] = value
 
                 # Execute batch insert
-                result = await session.execute(insert_stmt, params)
-                inserted_count += result.rowcount
+                result: Result[Any] = await session.execute(
+                    insert_stmt, params
+                )
+                inserted_count += getattr(result, 'rowcount', 0)
 
             await session.commit()
 
             # Track performance
             execution_time = time.time() - start_time
-            self.batch_performance[f"insert_{table_name}"].append(execution_time)
+            self.batch_performance[f"insert_{table_name}"].append(
+                execution_time
+            )
 
             logger.info(
                 f"Batch inserted {inserted_count} records into {table_name} in {execution_time:.3f}s"
@@ -298,32 +383,43 @@ class BatchOperationManager:
             for update in updates:
                 key_value = update.pop(key_column)
                 update_cols = frozenset(update.keys())
-                update_groups[update_cols].append({key_column: key_value, **update})
+                update_groups[update_cols].append(
+                    {key_column: key_value, **update}
+                )
 
             # Process each group
             for columns, group_updates in update_groups.items():
                 if not group_updates:
                     continue
 
+                # Safely escape table name and column names
+                escaped_table = self._escape_identifier(table_name)
+                escaped_key_column = self._escape_identifier(key_column)
+
                 # Build UPDATE statement with CASE
                 set_clauses = []
                 for col in columns:
-                    case_clause = f"{col} = CASE {key_column}"
+                    escaped_col = self._escape_identifier(col)
+                    case_clause = f"{escaped_col} = CASE {escaped_key_column}"
                     for update in group_updates:
                         case_clause += f" WHEN :{key_column}_{id(update)} THEN :{col}_{id(update)}"
-                    case_clause += f" ELSE {col} END"
+                    case_clause += f" ELSE {escaped_col} END"
                     set_clauses.append(case_clause)
 
                 # Build WHERE clause
-                where_values = [f":{key_column}_{id(u)}" for u in group_updates]
-                where_clause = f"{key_column} IN ({', '.join(where_values)})"
+                where_values = [
+                    f":{key_column}_{id(u)}" for u in group_updates
+                ]
+                where_clause = (
+                    f"{escaped_key_column} IN ({', '.join(where_values)})"
+                )
 
                 update_stmt = text(
                     f"""
-                    UPDATE {table_name}
+                    UPDATE {escaped_table}
                     SET {', '.join(set_clauses)}, updated_at = NOW()
                     WHERE {where_clause}
-                """
+                """  # nosec B608
                 )
 
                 # Prepare parameters
@@ -334,14 +430,18 @@ class BatchOperationManager:
                         params[f"{col}_{update_id}"] = value
 
                 # Execute batch update
-                result = await session.execute(update_stmt, params)
-                updated_count += result.rowcount
+                result: Result[Any] = await session.execute(
+                    update_stmt, params
+                )
+                updated_count += getattr(result, 'rowcount', 0)
 
             await session.commit()
 
             # Track performance
             execution_time = time.time() - start_time
-            self.batch_performance[f"update_{table_name}"].append(execution_time)
+            self.batch_performance[f"update_{table_name}"].append(
+                execution_time
+            )
 
             logger.info(
                 f"Batch updated {updated_count} records in {table_name} in {execution_time:.3f}s"
@@ -361,7 +461,9 @@ class BatchOperationManager:
         """Add update to pending updates buffer."""
         self.pending_updates[table_name].append(update)
 
-    async def flush_pending_operations(self, session: AsyncSession) -> Dict[str, int]:
+    async def flush_pending_operations(
+        self, session: AsyncSession
+    ) -> Dict[str, int]:
         """Flush all pending operations."""
         results = {}
 
@@ -386,6 +488,12 @@ class EnhancedQueryOptimizer:
     """Enhanced query optimizer with all advanced features."""
 
     def __init__(self, database_url: str, enable_pgbouncer: bool = True):
+        """Initialize the query optimizer.
+
+        Args:
+            database_url: PostgreSQL connection URL.
+            enable_pgbouncer: Whether to enable PgBouncer connection pooling.
+        """
         self.database_url = database_url
         self.enable_pgbouncer = enable_pgbouncer
 
@@ -399,8 +507,14 @@ class EnhancedQueryOptimizer:
         self.cache_ttl = 300  # 5 minutes default
 
         # Performance tracking
-        self.query_stats = defaultdict(
-            lambda: {"count": 0, "total_time": 0, "errors": 0, "cache_hits": 0, "slow_queries": []}
+        self.query_stats: Dict[str, Dict[str, Any]] = defaultdict(
+            lambda: {
+                "count": 0,
+                "total_time": 0,
+                "errors": 0,
+                "cache_hits": 0,
+                "slow_queries": [],
+            }
         )
 
         # Connection pool configuration
@@ -419,7 +533,9 @@ class EnhancedQueryOptimizer:
                 "pool_pre_ping": True,
                 "pool_recycle": 900,  # 15 minutes
                 "connect_args": {
-                    "server_settings": {"jit": "off"},  # Disable JIT for connection pooling
+                    "server_settings": {
+                        "jit": "off"
+                    },  # Disable JIT for connection pooling
                     "command_timeout": 60,
                     "prepared_statement_cache_size": 0,  # Disable with PgBouncer
                 },
@@ -452,7 +568,9 @@ class EnhancedQueryOptimizer:
             config = self.pool_config.copy()
             poolclass = config.pop("poolclass", QueuePool)
 
-            self._engine = create_engine(self.database_url, poolclass=poolclass, **config)
+            self._engine = create_engine(
+                self.database_url, poolclass=poolclass, **config
+            )
 
             # Add event listeners for monitoring
             self._setup_engine_monitoring(self._engine)
@@ -464,25 +582,33 @@ class EnhancedQueryOptimizer:
         """Get or create asynchronous engine."""
         if self._async_engine is None:
             # Convert to async URL
-            async_url = self.database_url.replace("postgresql://", "postgresql+asyncpg://")
+            async_url = self.database_url.replace(
+                "postgresql://", "postgresql+asyncpg://"
+            )
 
             config = self.pool_config.copy()
             poolclass = config.pop("poolclass", QueuePool)
 
-            self._async_engine = create_async_engine(async_url, poolclass=poolclass, **config)
+            self._async_engine = create_async_engine(
+                async_url, poolclass=poolclass, **config
+            )
 
         return self._async_engine
 
     def _setup_engine_monitoring(self, engine):
-        """Setup event listeners for query monitoring."""
+        """Set up event listeners for query monitoring."""
 
         @event.listens_for(engine, "before_cursor_execute")
-        def before_cursor_execute(conn, cursor, statement, parameters, context, executemany):
+        def before_cursor_execute(
+            conn, cursor, statement, parameters, context, executemany
+        ):
             conn.info.setdefault("query_start_time", []).append(time.time())
             conn.info.setdefault("current_query", []).append(statement[:100])
 
         @event.listens_for(engine, "after_cursor_execute")
-        def after_cursor_execute(conn, cursor, statement, parameters, context, executemany):
+        def after_cursor_execute(
+            conn, cursor, statement, parameters, context, executemany
+        ):
             total_time = time.time() - conn.info["query_start_time"].pop(-1)
             query_snippet = conn.info["current_query"].pop(-1)
 
@@ -493,14 +619,18 @@ class EnhancedQueryOptimizer:
         """Track query performance metrics."""
         query_type = query.split()[0].upper() if query else "UNKNOWN"
 
-        stats = self.query_stats[query_type]
+        stats: Dict[str, Any] = self.query_stats[query_type]
         stats["count"] += 1
         stats["total_time"] += execution_time
 
         # Track slow queries
         if execution_time > self.query_analyzer.slow_query_threshold:
             stats["slow_queries"].append(
-                {"query": query, "time": execution_time, "timestamp": datetime.now()}
+                {
+                    "query": query,
+                    "time": execution_time,
+                    "timestamp": datetime.now(),
+                }
             )
 
             # Keep only last 10 slow queries per type
@@ -532,7 +662,9 @@ class EnhancedQueryOptimizer:
         # Generate cache key if not provided
         if cache_key is None:
             param_str = json.dumps(params, sort_keys=True) if params else ""
-            cache_key = hashlib.md5(f"{query}{param_str}".encode()).hexdigest()
+            cache_key = hashlib.md5(
+                f"{query}{param_str}".encode(), usedforsecurity=False
+            ).hexdigest()
 
         # Check cache
         if cache_key in self.query_cache:
@@ -544,6 +676,7 @@ class EnhancedQueryOptimizer:
         # Execute query
         start_time = time.time()
         try:
+            result: Result[Any]
             if params:
                 result = await session.execute(text(query), params)
             else:
@@ -551,9 +684,9 @@ class EnhancedQueryOptimizer:
 
             # Process result based on type
             if query.strip().upper().startswith("SELECT"):
-                data = result.fetchall()
+                data: Any = result.fetchall()
             else:
-                data = result.rowcount
+                data = getattr(result, 'rowcount', 0)
 
             # Cache result
             self.query_cache[cache_key] = (data, time.time())
@@ -613,10 +746,14 @@ class EnhancedQueryOptimizer:
             try:
                 await session.execute(text(index_sql))
                 await session.commit()
-                logger.info(f"Created index: {index_sql.split('idx_')[1].split(' ')[0]}")
+                logger.info(
+                    f"Created index: {index_sql.split('idx_')[1].split(' ')[0]}"
+                )
             except Exception as e:
                 await session.rollback()
-                logger.warning(f"Index creation failed (may already exist): {e}")
+                logger.warning(
+                    f"Index creation failed (may already exist): {e}"
+                )
 
     async def analyze_and_vacuum_tables(
         self, session: AsyncSession, tables: Optional[List[str]] = None
@@ -664,7 +801,9 @@ class EnhancedQueryOptimizer:
                 / max(sum(s["count"] for s in self.query_stats.values()), 1)
                 * 100,
             },
-            "optimization_suggestions": dict(self.query_analyzer.optimization_suggestions),
+            "optimization_suggestions": dict(
+                self.query_analyzer.optimization_suggestions
+            ),
             "slow_queries": [
                 query
                 for stats in self.query_stats.values()
@@ -675,7 +814,7 @@ class EnhancedQueryOptimizer:
         }
 
     async def setup_monitoring(self, session: AsyncSession):
-        """Setup database monitoring and slow query logging."""
+        """Set up database monitoring and slow query logging."""
         monitoring_configs = [
             # Enable query logging for slow queries
             "ALTER SYSTEM SET log_min_duration_statement = 100",  # Log queries > 100ms
@@ -705,7 +844,9 @@ class EnhancedQueryOptimizer:
                 logger.info(f"Applied config: {config}")
             except Exception as e:
                 await session.rollback()
-                logger.warning(f"Failed to apply config (may require superuser): {e}")
+                logger.warning(
+                    f"Failed to apply config (may require superuser): {e}"
+                )
 
         # Reload configuration
         try:

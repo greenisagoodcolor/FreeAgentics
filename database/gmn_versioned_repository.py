@@ -51,14 +51,18 @@ class GMNVersionedRepository:
             # Auto-increment version number if not provided
             if version_number is None:
                 max_version = (
-                    self.db.query(func.max(GMNVersionedSpecification.version_number))
+                    self.db.query(
+                        func.max(GMNVersionedSpecification.version_number)
+                    )
                     .filter(GMNVersionedSpecification.agent_id == agent_id)
                     .scalar()
                 )
                 version_number = (max_version or 0) + 1
 
             # Calculate checksum for integrity
-            checksum = hashlib.sha256(specification.encode("utf-8")).hexdigest()
+            checksum = hashlib.sha256(
+                specification.encode("utf-8")
+            ).hexdigest()
 
             # Calculate basic metrics from parsed data
             node_count = 0
@@ -106,7 +110,9 @@ class GMNVersionedRepository:
                 },
             )
 
-            logger.debug(f"Created versioned GMN specification {gmn_spec.id} v{version_number}")
+            logger.debug(
+                f"Created versioned GMN specification {gmn_spec.id} v{version_number}"
+            )
             return gmn_spec
 
         except SQLAlchemyError as e:
@@ -126,7 +132,9 @@ class GMNVersionedRepository:
             # Get parent specification
             parent_spec = self.get_specification_by_id(parent_specification_id)
             if not parent_spec:
-                raise ValueError(f"Parent specification {parent_specification_id} not found")
+                raise ValueError(
+                    f"Parent specification {parent_specification_id} not found"
+                )
 
             # Generate name for new version
             new_name = f"{parent_spec.name} v{parent_spec.version_number + 1}"
@@ -158,7 +166,6 @@ class GMNVersionedRepository:
 
             # Build lineage tree
             lineage = []
-            version_map = {str(v.id): v for v in versions}
 
             for version in versions:
                 lineage_entry = {
@@ -167,7 +174,9 @@ class GMNVersionedRepository:
                     "name": version.name,
                     "status": version.status.value,
                     "parent_version_id": (
-                        str(version.parent_version_id) if version.parent_version_id else None
+                        str(version.parent_version_id)
+                        if version.parent_version_id
+                        else None
                     ),
                     "children": [],
                     "created_at": version.created_at.isoformat(),
@@ -176,7 +185,9 @@ class GMNVersionedRepository:
                 }
 
                 # Find children
-                children = [v for v in versions if v.parent_version_id == version.id]
+                children = [
+                    v for v in versions if v.parent_version_id == version.id
+                ]
                 lineage_entry["children"] = [str(c.id) for c in children]
 
                 lineage.append(lineage_entry)
@@ -198,7 +209,9 @@ class GMNVersionedRepository:
             # Get target version
             target_version = self.get_specification_by_id(target_version_id)
             if not target_version or target_version.agent_id != agent_id:
-                logger.error(f"Target version {target_version_id} not found or invalid agent")
+                logger.error(
+                    f"Target version {target_version_id} not found or invalid agent"
+                )
                 return False
 
             # Get current active version
@@ -222,14 +235,18 @@ class GMNVersionedRepository:
                 transition_reason=rollback_reason,
                 changes_summary={
                     "action": "rollback",
-                    "from_version": current_active.version_number if current_active else None,
+                    "from_version": current_active.version_number
+                    if current_active
+                    else None,
                     "to_version": target_version.version_number,
                     "reason": rollback_reason,
                 },
             )
 
             self.db.commit()
-            logger.debug(f"Rolled back agent {agent_id} to version {target_version.version_number}")
+            logger.debug(
+                f"Rolled back agent {agent_id} to version {target_version.version_number}"
+            )
             return True
 
         except SQLAlchemyError as e:
@@ -271,8 +288,10 @@ class GMNVersionedRepository:
                     "checksum": version_b.specification_checksum,
                 },
                 "differences": {
-                    "node_count_diff": version_b.node_count - version_a.node_count,
-                    "edge_count_diff": version_b.edge_count - version_a.edge_count,
+                    "node_count_diff": version_b.node_count
+                    - version_a.node_count,
+                    "edge_count_diff": version_b.edge_count
+                    - version_a.edge_count,
                     "complexity_diff": (version_b.complexity_score or 0)
                     - (version_a.complexity_score or 0),
                     "specification_changed": version_a.specification_checksum
@@ -303,9 +322,9 @@ class GMNVersionedRepository:
             if node_type:
                 # Use JSON path query to find specifications with nodes of specified type
                 query = query.filter(
-                    GMNVersionedSpecification.parsed_specification["nodes"].op("@>")(
-                        [{"type": node_type}]
-                    )
+                    GMNVersionedSpecification.parsed_specification["nodes"].op(
+                        "@>"
+                    )([{"type": node_type}])
                 )
 
             # Apply property filters if specified
@@ -313,11 +332,15 @@ class GMNVersionedRepository:
                 for key, value in property_filter.items():
                     # Simple property filtering - can be enhanced for complex queries
                     query = query.filter(
-                        GMNVersionedSpecification.parsed_specification.op("->")(key).astext
+                        GMNVersionedSpecification.parsed_specification.op(
+                            "->"
+                        )(key).astext
                         == str(value)
                     )
 
-            return query.order_by(desc(GMNVersionedSpecification.created_at)).all()
+            return query.order_by(
+                desc(GMNVersionedSpecification.created_at)
+            ).all()
 
         except SQLAlchemyError as e:
             logger.error(f"Failed to search by parsed content: {e}")
@@ -337,21 +360,29 @@ class GMNVersionedRepository:
             )
 
             if min_nodes is not None:
-                query = query.filter(GMNVersionedSpecification.node_count >= min_nodes)
+                query = query.filter(
+                    GMNVersionedSpecification.node_count >= min_nodes
+                )
 
             if max_edges is not None:
-                query = query.filter(GMNVersionedSpecification.edge_count <= max_edges)
+                query = query.filter(
+                    GMNVersionedSpecification.edge_count <= max_edges
+                )
 
             if complexity_score_range:
                 min_score, max_score = complexity_score_range
                 query = query.filter(
                     and_(
-                        GMNVersionedSpecification.complexity_score >= min_score,
-                        GMNVersionedSpecification.complexity_score <= max_score,
+                        GMNVersionedSpecification.complexity_score
+                        >= min_score,
+                        GMNVersionedSpecification.complexity_score
+                        <= max_score,
                     )
                 )
 
-            return query.order_by(desc(GMNVersionedSpecification.complexity_score)).all()
+            return query.order_by(
+                desc(GMNVersionedSpecification.complexity_score)
+            ).all()
 
         except SQLAlchemyError as e:
             logger.error(f"Failed to query by complexity: {e}")
@@ -374,9 +405,13 @@ class GMNVersionedRepository:
             )
 
             if not include_inactive:
-                query = query.filter(GMNVersionedSpecification.status == GMNVersionStatus.ACTIVE)
+                query = query.filter(
+                    GMNVersionedSpecification.status == GMNVersionStatus.ACTIVE
+                )
 
-            return query.order_by(desc(GMNVersionedSpecification.created_at)).all()
+            return query.order_by(
+                desc(GMNVersionedSpecification.created_at)
+            ).all()
 
         except SQLAlchemyError as e:
             logger.error(f"Failed to query by time range: {e}")
@@ -403,13 +438,23 @@ class GMNVersionedRepository:
 
             # Calculate basic statistics
             total_specs = len(specifications)
-            active_specs = len([s for s in specifications if s.status == GMNVersionStatus.ACTIVE])
+            active_specs = len(
+                [
+                    s
+                    for s in specifications
+                    if s.status == GMNVersionStatus.ACTIVE
+                ]
+            )
 
             # Complexity statistics
             complexities = [
-                s.complexity_score for s in specifications if s.complexity_score is not None
+                s.complexity_score
+                for s in specifications
+                if s.complexity_score is not None
             ]
-            avg_complexity = sum(complexities) / len(complexities) if complexities else 0
+            avg_complexity = (
+                sum(complexities) / len(complexities) if complexities else 0
+            )
 
             # Node/edge statistics
             node_counts = [s.node_count for s in specifications]
@@ -419,11 +464,19 @@ class GMNVersionedRepository:
                 "total_specifications": total_specs,
                 "active_specifications": active_specs,
                 "avg_complexity": avg_complexity,
-                "avg_nodes": sum(node_counts) / len(node_counts) if node_counts else 0,
-                "avg_edges": sum(edge_counts) / len(edge_counts) if edge_counts else 0,
-                "max_version_number": max((s.version_number for s in specifications), default=0),
+                "avg_nodes": sum(node_counts) / len(node_counts)
+                if node_counts
+                else 0,
+                "avg_edges": sum(edge_counts) / len(edge_counts)
+                if edge_counts
+                else 0,
+                "max_version_number": max(
+                    (s.version_number for s in specifications), default=0
+                ),
                 "status_distribution": {
-                    status.value: len([s for s in specifications if s.status == status])
+                    status.value: len(
+                        [s for s in specifications if s.status == status]
+                    )
                     for status in GMNVersionStatus
                 },
                 "time_window_days": time_window_days,
@@ -432,14 +485,18 @@ class GMNVersionedRepository:
             # Add trends if requested
             if include_trends and total_specs > 1:
                 # Simple trend: specifications per week
-                weekly_counts = {}
+                weekly_counts: Dict[str, int] = {}
                 for spec in specifications:
                     week_start = spec.created_at.strftime("%Y-W%U")
-                    weekly_counts[week_start] = weekly_counts.get(week_start, 0) + 1
+                    weekly_counts[week_start] = (
+                        weekly_counts.get(week_start, 0) + 1
+                    )
 
                 stats["trends"] = {
                     "weekly_creation_counts": weekly_counts,
-                    "creation_trend": "increasing" if len(weekly_counts) > 1 else "stable",
+                    "creation_trend": "increasing"
+                    if len(weekly_counts) > 1
+                    else "stable",
                 }
 
             return stats
@@ -456,7 +513,7 @@ class GMNVersionedRepository:
     ) -> Dict[str, Any]:
         """Validate GMN specification data integrity."""
         try:
-            integrity_report = {
+            integrity_report: Dict[str, Any] = {
                 "agent_id": str(agent_id),
                 "checks_performed": [],
                 "issues_found": [],
@@ -471,20 +528,27 @@ class GMNVersionedRepository:
             )
 
             if check_version_consistency:
-                integrity_report["checks_performed"].append("version_consistency")
+                integrity_report["checks_performed"].append(
+                    "version_consistency"
+                )
 
                 # Check for version number gaps
-                version_numbers = sorted([s.version_number for s in specifications])
+                version_numbers = sorted(
+                    [s.version_number for s in specifications]
+                )
                 for i in range(1, len(version_numbers)):
                     if version_numbers[i] - version_numbers[i - 1] > 1:
                         integrity_report["warnings"].append(
-                            f"Version gap detected: {version_numbers[i-1]} -> {version_numbers[i]}"
+                            f"Version gap detected: {version_numbers[i - 1]} -> {version_numbers[i]}"
                         )
 
                 # Check for orphaned parent references
                 spec_ids = {s.id for s in specifications}
                 for spec in specifications:
-                    if spec.parent_version_id and spec.parent_version_id not in spec_ids:
+                    if (
+                        spec.parent_version_id
+                        and spec.parent_version_id not in spec_ids
+                    ):
                         integrity_report["issues_found"].append(
                             f"Orphaned parent reference in version {spec.version_number}: {spec.parent_version_id}"
                         )
@@ -524,7 +588,10 @@ class GMNVersionedRepository:
             orphaned = []
 
             for spec in specifications:
-                if spec.parent_version_id and spec.parent_version_id not in spec_ids:
+                if (
+                    spec.parent_version_id
+                    and spec.parent_version_id not in spec_ids
+                ):
                     orphaned.append(spec.id)
 
             return orphaned
@@ -540,7 +607,7 @@ class GMNVersionedRepository:
     ) -> Dict[str, Any]:
         """Repair broken version lineage."""
         try:
-            repair_result = {
+            repair_result: Dict[str, Any] = {
                 "agent_id": str(agent_id),
                 "dry_run": dry_run,
                 "repairs_needed": [],
@@ -558,7 +625,10 @@ class GMNVersionedRepository:
                 potential_parent = (
                     self.db.query(GMNVersionedSpecification)
                     .filter(GMNVersionedSpecification.agent_id == agent_id)
-                    .filter(GMNVersionedSpecification.created_at < orphaned_spec.created_at)
+                    .filter(
+                        GMNVersionedSpecification.created_at
+                        < orphaned_spec.created_at
+                    )
                     .order_by(desc(GMNVersionedSpecification.created_at))
                     .first()
                 )
@@ -587,7 +657,9 @@ class GMNVersionedRepository:
             return {"error": str(e)}
 
     # Helper methods
-    def get_specification_by_id(self, spec_id: uuid.UUID) -> Optional[GMNVersionedSpecification]:
+    def get_specification_by_id(
+        self, spec_id: uuid.UUID
+    ) -> Optional[GMNVersionedSpecification]:
         """Get specification by ID."""
         try:
             return (
@@ -599,13 +671,17 @@ class GMNVersionedRepository:
             logger.error(f"Failed to get specification by ID: {e}")
             return None
 
-    def get_active_specification(self, agent_id: uuid.UUID) -> Optional[GMNVersionedSpecification]:
+    def get_active_specification(
+        self, agent_id: uuid.UUID
+    ) -> Optional[GMNVersionedSpecification]:
         """Get active specification for agent."""
         try:
             return (
                 self.db.query(GMNVersionedSpecification)
                 .filter(GMNVersionedSpecification.agent_id == agent_id)
-                .filter(GMNVersionedSpecification.status == GMNVersionStatus.ACTIVE)
+                .filter(
+                    GMNVersionedSpecification.status == GMNVersionStatus.ACTIVE
+                )
                 .first()
             )
         except SQLAlchemyError as e:

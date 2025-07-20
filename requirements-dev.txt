@@ -31,7 +31,7 @@ memory-profiler==0.61.0
 line_profiler==4.2.0
 py-spy==0.4.0
 pytest-benchmark==5.1.0
-psutil==6.0.0
+psutil==6.1.1
 
 # Documentation
 sphinx==8.2.3

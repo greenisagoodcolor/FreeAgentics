@@ -1,5 +1,5 @@
 """
-Example Usage of Database Query Optimization for Multi-Agent Systems
+Example Usage of Database Query Optimization for Multi-Agent Systems.
 
 This example demonstrates how to use the optimization features:
 1. Setting up optimized database connections
@@ -17,6 +17,8 @@ from datetime import datetime, timedelta
 from typing import Dict, List
 from uuid import uuid4
 
+from sqlalchemy import text
+
 from database.indexing_strategy import get_indexing_strategy
 from database.query_optimizer import get_query_optimizer
 
@@ -25,7 +27,7 @@ logger = logging.getLogger(__name__)
 
 
 async def setup_optimized_database():
-    """Setup database with all optimizations enabled."""
+    """Set up database with all optimizations enabled."""
     # Database URL - configure for your environment
     # For production with PgBouncer:
     # database_url = "postgresql://user:pass@pgbouncer:6432/dbname"
@@ -50,10 +52,14 @@ async def setup_optimized_database():
 
         # Log recommendations
         logger.info(f"Found {len(report['missing_indexes'])} missing indexes")
-        logger.info(f"Found {len(report['redundant_indexes'])} redundant indexes")
+        logger.info(
+            f"Found {len(report['redundant_indexes'])} redundant indexes"
+        )
 
         # Apply recommendations (with manual approval in production)
-        await indexing_strategy.apply_recommendations(session, auto_approve=False)
+        await indexing_strategy.apply_recommendations(
+            session, auto_approve=False
+        )
 
         # 3. Setup monitoring
         logger.info("Setting up database monitoring...")
@@ -67,7 +73,7 @@ async def setup_optimized_database():
 
 
 async def example_batch_operations(optimizer):
-    """Example of using batch operations for better performance."""
+    """Demonstrate using batch operations for better performance."""
     logger.info("\n=== Batch Operations Example ===")
 
     async with optimizer.optimized_session() as session:
@@ -92,7 +98,9 @@ async def example_batch_operations(optimizer):
             )
 
         # Batch insert
-        inserted = await batch_manager.batch_insert(session, "agents", agents_to_insert)
+        inserted = await batch_manager.batch_insert(
+            session, "agents", agents_to_insert
+        )
         logger.info(f"Batch inserted {inserted} agents")
 
         # Example 2: Batch update agent activities
@@ -131,7 +139,7 @@ async def example_batch_operations(optimizer):
 
 
 async def example_prepared_statements(optimizer):
-    """Example of using prepared statements for repeated queries."""
+    """Demonstrate using prepared statements for repeated queries."""
     logger.info("\n=== Prepared Statements Example ===")
 
     async with optimizer.optimized_session() as session:
@@ -147,11 +155,15 @@ async def example_prepared_statements(optimizer):
                     ORDER BY last_active DESC
                     LIMIT :limit
                 """,
-                "params": {"status": "active", "template": "explorer", "limit": 10},
+                "params": {
+                    "status": "active",
+                    "template": "explorer",
+                    "limit": 10,
+                },
             },
             "coalition_stats": {
                 "sql": """
-                    SELECT 
+                    SELECT
                         c.id,
                         c.name,
                         COUNT(ac.agent_id) as member_count,
@@ -185,11 +197,15 @@ async def example_prepared_statements(optimizer):
             stmt = prep_manager.get_statement("find_active_agents")
             if stmt:
                 result = await session.execute(
-                    text(f"EXECUTE {stmt['name']} (:status, :template, :limit)"),
+                    text(
+                        f"EXECUTE {stmt['name']} (:status, :template, :limit)"
+                    ),
                     {"status": "active", "template": "explorer", "limit": 10},
                 )
                 agents = result.fetchall()
-                logger.info(f"Iteration {i+1}: Found {len(agents)} active agents")
+                logger.info(
+                    f"Iteration {i + 1}: Found {len(agents)} active agents"
+                )
 
         # Get performance stats
         stats = prep_manager.get_performance_stats()
@@ -197,13 +213,13 @@ async def example_prepared_statements(optimizer):
 
 
 async def example_query_caching(optimizer):
-    """Example of using query result caching."""
+    """Demonstrate using query result caching."""
     logger.info("\n=== Query Caching Example ===")
 
     async with optimizer.optimized_session() as session:
         # Example query that benefits from caching
         query = """
-            SELECT 
+            SELECT
                 template,
                 COUNT(*) as count,
                 AVG(inference_count) as avg_inferences
@@ -214,7 +230,7 @@ async def example_query_caching(optimizer):
 
         # First execution (cache miss)
         start = datetime.now()
-        result1 = await optimizer.execute_with_cache(
+        await optimizer.execute_with_cache(
             session, query, cache_key="agent_stats", ttl=300
         )
         time1 = (datetime.now() - start).total_seconds()
@@ -222,18 +238,18 @@ async def example_query_caching(optimizer):
 
         # Second execution (cache hit)
         start = datetime.now()
-        result2 = await optimizer.execute_with_cache(
+        await optimizer.execute_with_cache(
             session, query, cache_key="agent_stats", ttl=300
         )
         time2 = (datetime.now() - start).total_seconds()
         logger.info(f"Second execution (cache hit): {time2:.3f}s")
 
         # Cache performance
-        logger.info(f"Cache speedup: {time1/time2:.1f}x faster")
+        logger.info(f"Cache speedup: {time1 / time2:.1f}x faster")
 
 
 async def example_query_analysis(optimizer):
-    """Example of analyzing query performance."""
+    """Analyze query performance."""
     logger.info("\n=== Query Analysis Example ===")
 
     async with optimizer.optimized_session() as session:
@@ -244,16 +260,16 @@ async def example_query_analysis(optimizer):
             {
                 "name": "without_index",
                 "sql": """
-                    SELECT * FROM agents 
+                    SELECT * FROM agents
                     WHERE JSON_EXTRACT(beliefs, '$.confidence') > 0.5
                 """,
             },
             {
                 "name": "with_index",
                 "sql": """
-                    SELECT * FROM agents 
-                    WHERE status = 'active' 
-                    ORDER BY last_active DESC 
+                    SELECT * FROM agents
+                    WHERE status = 'active'
+                    ORDER BY last_active DESC
                     LIMIT 100
                 """,
             },
@@ -265,13 +281,19 @@ async def example_query_analysis(optimizer):
             # Analyze execution plan
             plan = await analyzer.analyze_query(session, query_info["sql"])
 
-            logger.info(f"Execution time: {plan.get('execution_time', 'N/A')}ms")
+            logger.info(
+                f"Execution time: {plan.get('execution_time', 'N/A')}ms"
+            )
             logger.info(f"Sequential scans: {plan.get('seq_scans', 0)}")
             logger.info(f"Index scans: {plan.get('index_scans', 0)}")
 
             # Get optimization suggestions
-            query_hash = hashlib.md5(query_info["sql"].encode()).hexdigest()
-            suggestions = analyzer.optimization_suggestions.get(query_hash, set())
+            query_hash = hashlib.md5(
+                query_info["sql"].encode(), usedforsecurity=False
+            ).hexdigest()
+            suggestions = analyzer.optimization_suggestions.get(
+                query_hash, set()
+            )
 
             if suggestions:
                 logger.info("Optimization suggestions:")
@@ -280,30 +302,48 @@ async def example_query_analysis(optimizer):
 
 
 async def example_maintenance_scheduling(indexing_strategy):
-    """Example of scheduling index maintenance."""
+    """Schedule index maintenance."""
     logger.info("\n=== Maintenance Scheduling Example ===")
 
-    async with indexing_strategy.maintenance_scheduler as scheduler:
-        # Get maintenance schedule
-        schedule = await scheduler.get_maintenance_schedule(session)
+    # Create a session for maintenance operations
+    from sqlalchemy.ext.asyncio import AsyncSession, create_async_engine
+    from sqlalchemy.orm import sessionmaker
 
-        logger.info("Maintenance schedule:")
-        for task in schedule:
-            logger.info(
-                f"  {task['task']}: Priority={task['priority']}, Recommended time={task['recommended_time']}"
+    engine = create_async_engine(
+        "postgresql+asyncpg://user:password@localhost/db"
+    )
+    async_session = sessionmaker(
+        engine, class_=AsyncSession, expire_on_commit=False
+    )
+
+    async with async_session() as session:
+        async with indexing_strategy.maintenance_scheduler as scheduler:
+            # Get maintenance schedule
+            schedule = await scheduler.get_maintenance_schedule(session)
+
+            logger.info("Maintenance schedule:")
+            for task in schedule:
+                logger.info(
+                    f"  {task['task']}: Priority={task['priority']}, Recommended time={task['recommended_time']}"
+                )
+
+            # Check for index bloat
+            bloated_indexes = await scheduler.check_index_bloat(session)
+
+            if bloated_indexes:
+                logger.info(f"\nFound {len(bloated_indexes)} bloated indexes:")
+                for idx in bloated_indexes[:5]:  # Show first 5
+                    logger.info(
+                        f"  {idx['index']}: {idx['bloat_ratio']} bloat"
+                    )
+
+            # Perform maintenance (example - only ANALYZE)
+            result = await scheduler.perform_maintenance(
+                session, "ANALYZE", ["agents", "coalitions"]
             )
-
-        # Check for index bloat
-        bloated_indexes = await scheduler.check_index_bloat(session)
-
-        if bloated_indexes:
-            logger.info(f"\nFound {len(bloated_indexes)} bloated indexes:")
-            for idx in bloated_indexes[:5]:  # Show first 5
-                logger.info(f"  {idx['index']}: {idx['bloat_ratio']} bloat")
-
-        # Perform maintenance (example - only ANALYZE)
-        result = await scheduler.perform_maintenance(session, "ANALYZE", ["agents", "coalitions"])
-        logger.info(f"\nMaintenance result: {result['task']} - Success: {result['success']}")
+            logger.info(
+                f"\nMaintenance result: {result['task']} - Success: {result['success']}"
+            )
 
 
 async def generate_performance_report(optimizer, indexing_strategy):
@@ -317,9 +357,13 @@ async def generate_performance_report(optimizer, indexing_strategy):
     for query_type, stats in perf_report["query_statistics"].items():
         if stats["count"] > 0:
             avg_time = stats["total_time"] / stats["count"]
-            logger.info(f"  {query_type}: {stats['count']} queries, avg time: {avg_time:.3f}s")
+            logger.info(
+                f"  {query_type}: {stats['count']} queries, avg time: {avg_time:.3f}s"
+            )
 
-    logger.info(f"\nCache hit rate: {perf_report['cache_statistics']['hit_rate']:.1f}%")
+    logger.info(
+        f"\nCache hit rate: {perf_report['cache_statistics']['hit_rate']:.1f}%"
+    )
 
     logger.info("\nSlow queries:")
     for query in perf_report["slow_queries"][:5]:  # Show top 5
@@ -327,17 +371,27 @@ async def generate_performance_report(optimizer, indexing_strategy):
 
     # Get indexing report
     async with optimizer.optimized_session() as session:
-        index_report = await indexing_strategy.generate_indexing_report(session)
+        index_report = await indexing_strategy.generate_indexing_report(
+            session
+        )
 
-        logger.info(f"\nIndex usage summary:")
-        logger.info(f"  Total indexes: {index_report['index_usage']['total_indexes']}")
-        logger.info(f"  Unused indexes: {len(index_report['index_usage']['unused_indexes'])}")
-        logger.info(f"  Missing indexes: {len(index_report['missing_indexes'])}")
-        logger.info(f"  Redundant indexes: {len(index_report['redundant_indexes'])}")
+        logger.info("\nIndex usage summary:")
+        logger.info(
+            f"  Total indexes: {index_report['index_usage']['total_indexes']}"
+        )
+        logger.info(
+            f"  Unused indexes: {len(index_report['index_usage']['unused_indexes'])}"
+        )
+        logger.info(
+            f"  Missing indexes: {len(index_report['missing_indexes'])}"
+        )
+        logger.info(
+            f"  Redundant indexes: {len(index_report['redundant_indexes'])}"
+        )
 
 
 async def main():
-    """Main example execution."""
+    """Execute main example."""
     logger.info("Starting Database Optimization Examples...")
 
     # Setup optimized database
@@ -360,7 +414,9 @@ if __name__ == "__main__":
     import os
 
     # Example environment variables
-    os.environ["DATABASE_URL"] = "postgresql://user:pass@localhost:5432/freeagentics"
+    os.environ[
+        "DATABASE_URL"
+    ] = "postgresql://user:pass@localhost:5432/freeagentics"
     os.environ["ENABLE_PGBOUNCER"] = "false"
 
     asyncio.run(main())

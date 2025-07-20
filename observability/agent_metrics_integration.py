@@ -153,7 +153,10 @@ def measure_belief_update(agent_method: Callable) -> Callable:
         try:
             if hasattr(self, "compute_free_energy"):
                 fe_components = self.compute_free_energy()
-                if isinstance(fe_components, dict) and "total_free_energy" in fe_components:
+                if (
+                    isinstance(fe_components, dict)
+                    and "total_free_energy" in fe_components
+                ):
                     free_energy = fe_components["total_free_energy"]
         except Exception as e:
             logger.debug(f"Could not compute free energy: {e}")
@@ -164,7 +167,9 @@ def measure_belief_update(agent_method: Callable) -> Callable:
             if loop.is_running():
                 asyncio.create_task(
                     record_belief_metric(
-                        agent_id=agent_id, update_time_ms=update_time_ms, free_energy=free_energy
+                        agent_id=agent_id,
+                        update_time_ms=update_time_ms,
+                        free_energy=free_energy,
                     )
                 )
             else:
@@ -209,10 +214,15 @@ def measure_agent_step(agent_method: Callable) -> Callable:
             loop = asyncio.get_event_loop()
             if loop.is_running():
                 asyncio.create_task(
-                    record_step_metric(agent_id=agent_id, step_time_ms=step_time_ms)
+                    record_step_metric(
+                        agent_id=agent_id, step_time_ms=step_time_ms
+                    )
                 )
             else:
-                logger.debug(f"Step metric - Agent: {agent_id}, " f"Time: {step_time_ms:.2f}ms")
+                logger.debug(
+                    f"Step metric - Agent: {agent_id}, "
+                    f"Time: {step_time_ms:.2f}ms"
+                )
         except Exception as e:
             logger.warning(f"Failed to record step metric: {e}")
 
@@ -260,12 +270,16 @@ class MetricsContext:
                 elif self.operation == "belief_update":
                     asyncio.create_task(
                         record_belief_metric(
-                            agent_id=self.agent_id, update_time_ms=execution_time_ms
+                            agent_id=self.agent_id,
+                            update_time_ms=execution_time_ms,
                         )
                     )
                 elif self.operation == "step":
                     asyncio.create_task(
-                        record_step_metric(agent_id=self.agent_id, step_time_ms=execution_time_ms)
+                        record_step_metric(
+                            agent_id=self.agent_id,
+                            step_time_ms=execution_time_ms,
+                        )
                     )
             else:
                 logger.debug(
@@ -310,14 +324,19 @@ def integrate_metrics_with_agent(agent_class):
             original_method = getattr(agent_class, method_name)
             wrapped_method = decorator(original_method)
             setattr(agent_class, method_name, wrapped_method)
-            logger.debug(f"Instrumented {agent_class.__name__}.{method_name} with metrics")
+            logger.debug(
+                f"Instrumented {agent_class.__name__}.{method_name} with metrics"
+            )
 
     return agent_class
 
 
 # Helper functions for manual metric recording
 async def record_custom_agent_metric(
-    agent_id: str, metric_name: str, value: float, metadata: Optional[Dict[str, Any]] = None
+    agent_id: str,
+    metric_name: str,
+    value: float,
+    metadata: Optional[Dict[str, Any]] = None,
 ):
     """Record a custom agent metric.
 
@@ -331,7 +350,10 @@ async def record_custom_agent_metric(
         from api.v1.monitoring import record_agent_metric
 
         await record_agent_metric(
-            agent_id=agent_id, metric=f"custom_{metric_name}", value=value, metadata=metadata
+            agent_id=agent_id,
+            metric=f"custom_{metric_name}",
+            value=value,
+            metadata=metadata,
         )
     except Exception as e:
         logger.warning(f"Failed to record custom metric: {e}")

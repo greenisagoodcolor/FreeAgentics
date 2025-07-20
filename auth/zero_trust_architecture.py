@@ -29,7 +29,11 @@ from fastapi import HTTPException, Request, status
 from fastapi.security import HTTPAuthorizationCredentials, HTTPBearer
 
 from auth.ml_threat_detection import get_ml_threat_detector
-from auth.security_logging import SecurityEventSeverity, SecurityEventType, security_auditor
+from auth.security_logging import (
+    SecurityEventSeverity,
+    SecurityEventType,
+    security_auditor,
+)
 
 logger = logging.getLogger(__name__)
 
@@ -76,7 +80,9 @@ class ServiceIdentity:
     certificate_fingerprint: str
     allowed_operations: List[str] = field(default_factory=list)
     rate_limits: Dict[str, int] = field(default_factory=dict)
-    valid_until: datetime = field(default_factory=lambda: datetime.utcnow() + timedelta(hours=24))
+    valid_until: datetime = field(
+        default_factory=lambda: datetime.utcnow() + timedelta(hours=24)
+    )
 
     def is_valid(self) -> bool:
         """Check if service identity is still valid."""
@@ -119,7 +125,9 @@ class ZeroTrustPolicy:
 
         return True
 
-    def matches_request(self, source_service: str, target_service: str, operation: str) -> bool:
+    def matches_request(
+        self, source_service: str, target_service: str, operation: str
+    ) -> bool:
         """Check if policy matches a request."""
         return (
             self.is_active()
@@ -165,6 +173,7 @@ class CertificateManager:
     """Manages certificates for mTLS authentication."""
 
     def __init__(self, ca_cert_path: str = None, ca_key_path: str = None):
+        """Initialize the certificate manager."""
         self.ca_cert_path = ca_cert_path or "./ssl/ca-cert.pem"
         self.ca_key_path = ca_key_path or "./ssl/ca-key.pem"
         self.service_certificates: Dict[str, Dict[str, Any]] = {}
@@ -176,12 +185,16 @@ class CertificateManager:
         """Load existing CA certificate or create new one."""
         try:
             # Try to load existing CA certificate
-            if os.path.exists(self.ca_cert_path) and os.path.exists(self.ca_key_path):
+            if os.path.exists(self.ca_cert_path) and os.path.exists(
+                self.ca_key_path
+            ):
                 with open(self.ca_cert_path, "rb") as f:
                     ca_cert = x509.load_pem_x509_certificate(f.read())
 
                 with open(self.ca_key_path, "rb") as f:
-                    ca_key = serialization.load_pem_private_key(f.read(), password=None)
+                    ca_key = serialization.load_pem_private_key(
+                        f.read(), password=None
+                    )
 
                 logger.info("Loaded existing CA certificate")
                 return ca_cert, ca_key
@@ -193,7 +206,9 @@ class CertificateManager:
         logger.info("Creating new CA certificate")
         return self._create_ca_certificate()
 
-    def _create_ca_certificate(self) -> Tuple[x509.Certificate, rsa.RSAPrivateKey]:
+    def _create_ca_certificate(
+        self,
+    ) -> Tuple[x509.Certificate, rsa.RSAPrivateKey]:
         """Create new CA certificate."""
         # Generate private key
         private_key = rsa.generate_private_key(
@@ -288,7 +303,9 @@ class CertificateManager:
                 x509.NameAttribute(NameOID.STATE_OR_PROVINCE_NAME, "CA"),
                 x509.NameAttribute(NameOID.LOCALITY_NAME, "San Francisco"),
                 x509.NameAttribute(NameOID.ORGANIZATION_NAME, "FreeAgentics"),
-                x509.NameAttribute(NameOID.ORGANIZATIONAL_UNIT_NAME, service_type.value),
+                x509.NameAttribute(
+                    NameOID.ORGANIZATIONAL_UNIT_NAME, service_type.value
+                ),
                 x509.NameAttribute(NameOID.COMMON_NAME, service_name),
             ]
         )
@@ -300,7 +317,9 @@ class CertificateManager:
             .public_key(private_key.public_key())
             .serial_number(x509.random_serial_number())
             .not_valid_before(datetime.utcnow())
-            .not_valid_after(datetime.utcnow() + timedelta(days=30))  # Short-lived certificates
+            .not_valid_after(
+                datetime.utcnow() + timedelta(days=30)
+            )  # Short-lived certificates
             .add_extension(
                 x509.SubjectAlternativeName(
                     [
@@ -329,10 +348,14 @@ class CertificateManager:
             format=serialization.PrivateFormat.PKCS8,
             encryption_algorithm=serialization.NoEncryption(),
         ).decode()
-        ca_cert_pem = self.ca_cert.public_bytes(serialization.Encoding.PEM).decode()
+        ca_cert_pem = self.ca_cert.public_bytes(
+            serialization.Encoding.PEM
+        ).decode()
 
         # Calculate fingerprint
-        fingerprint = hashlib.sha256(cert.public_bytes(serialization.Encoding.DER)).hexdigest()
+        fingerprint = hashlib.sha256(
+            cert.public_bytes(serialization.Encoding.DER)
+        ).hexdigest()
 
         # Store certificate info
         self.service_certificates[service_name] = {
@@ -385,7 +408,9 @@ class CertificateManager:
                 subject_info[attribute.oid._name] = attribute.value
 
             # Calculate fingerprint
-            fingerprint = hashlib.sha256(cert.public_bytes(serialization.Encoding.DER)).hexdigest()
+            fingerprint = hashlib.sha256(
+                cert.public_bytes(serialization.Encoding.DER)
+            ).hexdigest()
 
             return {
                 "subject": subject_info,
@@ -406,6 +431,7 @@ class ZeroTrustPolicyEngine:
     """Policy engine for zero-trust architecture."""
 
     def __init__(self):
+        """Initialize the zero trust policy engine."""
         self.policies: Dict[str, ZeroTrustPolicy] = {}
         self.service_identities: Dict[str, ServiceIdentity] = {}
         self.active_sessions: Dict[str, ContinuousVerificationContext] = {}
@@ -421,7 +447,9 @@ class ZeroTrustPolicyEngine:
     ) -> ServiceIdentity:
         """Register a service in the zero-trust architecture."""
         # Issue certificate for the service
-        cert_info = self.certificate_manager.issue_service_certificate(service_name, service_type)
+        cert_info = self.certificate_manager.issue_service_certificate(
+            service_name, service_type
+        )
 
         # Create service identity
         service_identity = ServiceIdentity(
@@ -464,17 +492,40 @@ class ZeroTrustPolicyEngine:
         }
         return operations_map.get(service_type, ["read"])
 
-    def _get_default_rate_limits(self, service_type: ServiceType) -> Dict[str, int]:
+    def _get_default_rate_limits(
+        self, service_type: ServiceType
+    ) -> Dict[str, int]:
         """Get default rate limits for service type."""
         limits_map = {
-            ServiceType.API: {"requests_per_second": 100, "requests_per_minute": 1000},
-            ServiceType.DATABASE: {"requests_per_second": 50, "requests_per_minute": 500},
-            ServiceType.CACHE: {"requests_per_second": 200, "requests_per_minute": 2000},
-            ServiceType.QUEUE: {"requests_per_second": 10, "requests_per_minute": 100},
-            ServiceType.STORAGE: {"requests_per_second": 20, "requests_per_minute": 200},
-            ServiceType.ADMIN: {"requests_per_second": 5, "requests_per_minute": 50},
+            ServiceType.API: {
+                "requests_per_second": 100,
+                "requests_per_minute": 1000,
+            },
+            ServiceType.DATABASE: {
+                "requests_per_second": 50,
+                "requests_per_minute": 500,
+            },
+            ServiceType.CACHE: {
+                "requests_per_second": 200,
+                "requests_per_minute": 2000,
+            },
+            ServiceType.QUEUE: {
+                "requests_per_second": 10,
+                "requests_per_minute": 100,
+            },
+            ServiceType.STORAGE: {
+                "requests_per_second": 20,
+                "requests_per_minute": 200,
+            },
+            ServiceType.ADMIN: {
+                "requests_per_second": 5,
+                "requests_per_minute": 50,
+            },
         }
-        return limits_map.get(service_type, {"requests_per_second": 10, "requests_per_minute": 100})
+        return limits_map.get(
+            service_type,
+            {"requests_per_second": 10, "requests_per_minute": 100},
+        )
 
     def add_policy(self, policy: ZeroTrustPolicy) -> None:
         """Add a zero-trust policy."""
@@ -525,15 +576,22 @@ class ZeroTrustPolicyEngine:
         # Find applicable policies
         applicable_policies = []
         for policy in self.policies.values():
-            if policy.matches_request(source_service, target_service, operation):
+            if policy.matches_request(
+                source_service, target_service, operation
+            ):
                 applicable_policies.append(policy)
 
         if not applicable_policies:
-            return False, f"No policies allow {source_service} to {operation} on {target_service}"
+            return (
+                False,
+                f"No policies allow {source_service} to {operation} on {target_service}",
+            )
 
         # Check trust level requirements
         for policy in applicable_policies:
-            if not self._check_trust_level(source_identity.trust_level, policy.minimum_trust_level):
+            if not self._check_trust_level(
+                source_identity.trust_level, policy.minimum_trust_level
+            ):
                 return (
                     False,
                     f"Source service trust level {source_identity.trust_level} insufficient for policy {policy.name}",
@@ -559,7 +617,9 @@ class ZeroTrustPolicyEngine:
 
         return True, "Request authorized"
 
-    def _check_trust_level(self, service_trust: TrustLevel, required_trust: TrustLevel) -> bool:
+    def _check_trust_level(
+        self, service_trust: TrustLevel, required_trust: TrustLevel
+    ) -> bool:
         """Check if service trust level meets requirement."""
         trust_hierarchy = {
             TrustLevel.UNTRUSTED: 0,
@@ -569,7 +629,9 @@ class ZeroTrustPolicyEngine:
             TrustLevel.TRUSTED: 4,
         }
 
-        return trust_hierarchy[service_trust] >= trust_hierarchy[required_trust]
+        return (
+            trust_hierarchy[service_trust] >= trust_hierarchy[required_trust]
+        )
 
     def _check_network_zone_access(
         self, source_zone: NetworkZone, target_zone: NetworkZone
@@ -662,7 +724,9 @@ class ZeroTrustPolicyEngine:
                 return context.current_trust_level
 
         # Use ML threat detection to analyze request
-        threat_prediction = await self.ml_detector.analyze_request(request_data)
+        threat_prediction = await self.ml_detector.analyze_request(
+            request_data
+        )
 
         # Update trust level based on risk score
         context.update_trust_level(threat_prediction.risk_score)
@@ -675,7 +739,8 @@ class ZeroTrustPolicyEngine:
                     "risk_score": threat_prediction.risk_score,
                     "threat_level": threat_prediction.threat_level.value,
                     "detected_attacks": [
-                        attack.value for attack in threat_prediction.detected_attacks
+                        attack.value
+                        for attack in threat_prediction.detected_attacks
                     ],
                 }
             )
@@ -700,7 +765,12 @@ class ZeroTrustPolicyEngine:
 
     def get_service_mesh_config(self) -> Dict[str, Any]:
         """Generate service mesh configuration for zero-trust policies."""
-        config = {"version": "1.0", "services": {}, "policies": [], "certificates": {}}
+        config = {
+            "version": "1.0",
+            "services": {},
+            "policies": [],
+            "certificates": {},
+        }
 
         # Add service configurations
         for service_name, identity in self.service_identities.items():
@@ -722,14 +792,19 @@ class ZeroTrustPolicyEngine:
                     "source_services": policy.source_services,
                     "target_services": policy.target_services,
                     "allowed_operations": policy.allowed_operations,
-                    "network_zones": [zone.value for zone in policy.network_zones],
+                    "network_zones": [
+                        zone.value for zone in policy.network_zones
+                    ],
                     "minimum_trust_level": policy.minimum_trust_level.value,
                     "conditions": policy.conditions,
                 }
             )
 
         # Add certificate information
-        for service_name, cert_info in self.certificate_manager.service_certificates.items():
+        for (
+            service_name,
+            cert_info,
+        ) in self.certificate_manager.service_certificates.items():
             config["certificates"][service_name] = {
                 "fingerprint": cert_info["fingerprint"],
                 "issued_at": cert_info["issued_at"].isoformat(),
@@ -743,10 +818,13 @@ class IdentityAwareProxy:
     """Identity-aware proxy for zero-trust request validation."""
 
     def __init__(self, policy_engine: ZeroTrustPolicyEngine):
+        """Initialize the identity-aware proxy."""
         self.policy_engine = policy_engine
         self.security = HTTPBearer()
 
-    async def validate_request(self, request: Request, target_service: str, operation: str) -> bool:
+    async def validate_request(
+        self, request: Request, target_service: str, operation: str
+    ) -> bool:
         """Validate request through identity-aware proxy."""
         try:
             # Extract client certificate (mTLS)
@@ -758,14 +836,23 @@ class IdentityAwareProxy:
                 )
 
             # Verify client certificate
-            if not self.policy_engine.certificate_manager.verify_certificate(client_cert):
+            if not self.policy_engine.certificate_manager.verify_certificate(
+                client_cert
+            ):
                 raise HTTPException(
-                    status_code=status.HTTP_401_UNAUTHORIZED, detail="Invalid client certificate"
+                    status_code=status.HTTP_401_UNAUTHORIZED,
+                    detail="Invalid client certificate",
                 )
 
             # Extract service identity from certificate
-            cert_info = self.policy_engine.certificate_manager.get_certificate_info(client_cert)
-            source_service = cert_info.get("subject", {}).get("commonName", "unknown")
+            cert_info = (
+                self.policy_engine.certificate_manager.get_certificate_info(
+                    client_cert
+                )
+            )
+            source_service = cert_info.get("subject", {}).get(
+                "commonName", "unknown"
+            )
 
             # Prepare request context
             request_context = {
@@ -797,7 +884,8 @@ class IdentityAwareProxy:
                 )
 
                 raise HTTPException(
-                    status_code=status.HTTP_403_FORBIDDEN, detail=f"Access denied: {reason}"
+                    status_code=status.HTTP_403_FORBIDDEN,
+                    detail=f"Access denied: {reason}",
                 )
 
             # Perform continuous verification
@@ -885,12 +973,15 @@ def configure_default_zero_trust_policies():
     engine = get_zero_trust_engine()
 
     # Register example services
-    api_service = engine.register_service(
+    engine.register_service(
         "freeagentics-api", ServiceType.API, NetworkZone.DMZ, TrustLevel.MEDIUM
     )
 
-    db_service = engine.register_service(
-        "freeagentics-db", ServiceType.DATABASE, NetworkZone.SECURE, TrustLevel.HIGH
+    engine.register_service(
+        "freeagentics-db",
+        ServiceType.DATABASE,
+        NetworkZone.SECURE,
+        TrustLevel.HIGH,
     )
 
     # Add policy allowing API to access database
@@ -904,8 +995,16 @@ def configure_default_zero_trust_policies():
             allowed_operations=["read"],
             network_zones=[NetworkZone.DMZ, NetworkZone.SECURE],
             minimum_trust_level=TrustLevel.MEDIUM,
-            time_restrictions={"allowed_hours": list(range(24))},  # 24/7 access
-            conditions={"ip_whitelist": ["10.0.0.0/8", "172.16.0.0/12", "192.168.0.0/16"]},
+            time_restrictions={
+                "allowed_hours": list(range(24))
+            },  # 24/7 access
+            conditions={
+                "ip_whitelist": [
+                    "10.0.0.0/8",
+                    "172.16.0.0/12",
+                    "192.168.0.0/16",
+                ]
+            },
         )
     )
 
@@ -920,7 +1019,9 @@ def configure_default_zero_trust_policies():
             allowed_operations=["read", "write", "admin"],
             network_zones=[NetworkZone.ADMIN],
             minimum_trust_level=TrustLevel.HIGH,
-            time_restrictions={"allowed_hours": list(range(8, 18))},  # Business hours only
+            time_restrictions={
+                "allowed_hours": list(range(8, 18))
+            },  # Business hours only
             conditions={"user_roles": ["admin", "super_admin"]},
         )
     )

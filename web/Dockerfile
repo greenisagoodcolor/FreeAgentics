@@ -1,5 +1,5 @@
 # Frontend Dockerfile for FreeAgentics Next.js app
-FROM node:18-alpine AS base
+FROM node:18.20.4-alpine AS base
 
 # Install dependencies only when needed
 FROM base AS deps
@@ -25,8 +25,8 @@ WORKDIR /app
 
 ENV NODE_ENV production
 
-RUN addgroup --system --gid 1001 nodejs
-RUN adduser --system --uid 1001 nextjs
+RUN addgroup --system --gid 1001 nodejs && \
+    adduser --system --uid 1001 nextjs
 
 # Copy the built application
 COPY --from=builder /app/public ./public
@@ -39,5 +39,9 @@ EXPOSE 3000
 
 ENV PORT 3000
 ENV HOSTNAME "0.0.0.0"
+
+# Add health check
+HEALTHCHECK --interval=30s --timeout=10s --start-period=40s --retries=3 \
+    CMD node -e "require('http').get('http://localhost:3000/api/health', (res) => process.exit(res.statusCode === 200 ? 0 : 1))"
 
 CMD ["node", "server.js"]

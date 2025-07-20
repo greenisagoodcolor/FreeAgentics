@@ -7,7 +7,7 @@ Implements severity thresholds and custom Semgrep rules.
 
 import json
 import logging
-import subprocess
+import subprocess  # nosec B404 # Required for SAST security tool execution
 import sys
 from dataclasses import dataclass, field
 from enum import Enum
@@ -18,7 +18,8 @@ import yaml
 
 # Configure logging
 logging.basicConfig(
-    level=logging.INFO, format="%(asctime)s - %(name)s - %(levelname)s - %(message)s"
+    level=logging.INFO,
+    format="%(asctime)s - %(name)s - %(levelname)s - %(message)s",
 )
 logger = logging.getLogger(__name__)
 
@@ -35,12 +36,12 @@ class Severity(Enum):
     @property
     def weight(self) -> int:
         """Get numerical weight for severity comparison"""
-        weights = {
-            self.CRITICAL: 4,
-            self.HIGH: 3,
-            self.MEDIUM: 2,
-            self.LOW: 1,
-            self.INFO: 0,
+        weights: Dict['Severity', int] = {
+            Severity.CRITICAL: 4,
+            Severity.HIGH: 3,
+            Severity.MEDIUM: 2,
+            Severity.LOW: 1,
+            Severity.INFO: 0,
         }
         return weights[self]
 
@@ -115,7 +116,7 @@ class BanditScanner:
     def scan(self) -> List[Finding]:
         """Run Bandit scan"""
         logger.info("Running Bandit security scan...")
-        findings = []
+        findings: List[Finding] = []
 
         try:
             # Build Bandit command
@@ -131,14 +132,20 @@ class BanditScanner:
             # Add excluded paths
             if self.config.exclude_paths:
                 excludes = ",".join(
-                    f"{self.config.project_root}/{p}" for p in self.config.exclude_paths
+                    f"{self.config.project_root}/{p}"
+                    for p in self.config.exclude_paths
                 )
                 cmd.extend(["-x", excludes])
 
             # Run Bandit
-            result = subprocess.run(cmd, capture_output=True, text=True)
+            result = subprocess.run(
+                cmd, capture_output=True, text=True
+            )  # nosec B603 # Safe bandit security scanner execution
 
-            if result.returncode not in (0, 1):  # Bandit returns 1 when issues found
+            if result.returncode not in (
+                0,
+                1,
+            ):  # Bandit returns 1 when issues found
                 logger.error(f"Bandit scan failed: {result.stderr}")
                 return findings
 
@@ -149,7 +156,9 @@ class BanditScanner:
                     finding = Finding(
                         tool="bandit",
                         rule_id=result_item["test_id"],
-                        severity=self._map_severity(result_item["issue_severity"]),
+                        severity=self._map_severity(
+                            result_item["issue_severity"]
+                        ),
                         file_path=result_item["filename"],
                         line_number=result_item["line_number"],
                         message=result_item["issue_text"],
@@ -193,7 +202,7 @@ class SemgrepScanner:
     def scan(self) -> List[Finding]:
         """Run Semgrep scan"""
         logger.info("Running Semgrep security scan...")
-        findings = []
+        findings: List[Finding] = []
 
         try:
             # Build Semgrep command
@@ -207,7 +216,10 @@ class SemgrepScanner:
             ]
 
             # Add custom rules if specified
-            if self.config.custom_semgrep_rules and self.config.custom_semgrep_rules.exists():
+            if (
+                self.config.custom_semgrep_rules
+                and self.config.custom_semgrep_rules.exists()
+            ):
                 cmd.extend(["--config", str(self.config.custom_semgrep_rules)])
 
             # Add exclude patterns
@@ -215,7 +227,9 @@ class SemgrepScanner:
                 cmd.extend(["--exclude", pattern])
 
             # Run Semgrep
-            result = subprocess.run(cmd, capture_output=True, text=True)
+            result = subprocess.run(
+                cmd, capture_output=True, text=True
+            )  # nosec B603 # Safe semgrep security scanner execution
 
             if result.returncode != 0 and "No rules" not in result.stderr:
                 logger.error(f"Semgrep scan failed: {result.stderr}")
@@ -229,7 +243,9 @@ class SemgrepScanner:
                         tool="semgrep",
                         rule_id=result_item["check_id"],
                         severity=self._map_severity(
-                            result_item.get("extra", {}).get("severity", "INFO")
+                            result_item.get("extra", {}).get(
+                                "severity", "INFO"
+                            )
                         ),
                         file_path=result_item["path"],
                         line_number=result_item["start"]["line"],
@@ -245,7 +261,9 @@ class SemgrepScanner:
                             "end_line": result_item["end"]["line"],
                             "column": result_item["start"]["col"],
                             "end_column": result_item["end"]["col"],
-                            "metavars": result_item.get("extra", {}).get("metavars", {}),
+                            "metavars": result_item.get("extra", {}).get(
+                                "metavars", {}
+                            ),
                         },
                     )
 
@@ -273,20 +291,20 @@ class SemgrepScanner:
         """Extract category from Semgrep result"""
         extra = result.get("extra", {})
         metadata = extra.get("metadata", {})
-        return metadata.get("category", "security")
+        return str(metadata.get("category", "security"))
 
     def _get_owasp_category(self, result: Dict[str, Any]) -> Optional[str]:
         """Extract OWASP category from Semgrep result"""
         extra = result.get("extra", {})
         metadata = extra.get("metadata", {})
         owasp = metadata.get("owasp", [])
-        return owasp[0] if owasp else None
+        return str(owasp[0]) if owasp else None
 
     def _get_code_snippet(self, result: Dict[str, Any]) -> Optional[str]:
         """Extract code snippet from Semgrep result"""
         extra = result.get("extra", {})
         lines = extra.get("lines", "")
-        return lines if lines else None
+        return str(lines) if lines else None
 
 
 class SafetyScanner:
@@ -298,11 +316,13 @@ class SafetyScanner:
     def scan(self) -> List[Finding]:
         """Run Safety scan for dependency vulnerabilities"""
         logger.info("Running Safety dependency scan...")
-        findings = []
+        findings: List[Finding] = []
 
         try:
             # Find requirements files
-            req_files = list(self.config.project_root.glob("*requirements*.txt"))
+            req_files = list(
+                self.config.project_root.glob("*requirements*.txt")
+            )
             if not req_files:
                 logger.warning("No requirements files found for Safety scan")
                 return findings
@@ -310,7 +330,9 @@ class SafetyScanner:
             for req_file in req_files:
                 # Run Safety check
                 cmd = ["safety", "check", "--json", "--file", str(req_file)]
-                result = subprocess.run(cmd, capture_output=True, text=True)
+                result = subprocess.run(
+                    cmd, capture_output=True, text=True
+                )  # nosec B603 # Safe safety security scanner execution
 
                 if result.returncode != 0 and result.stdout:
                     # Parse vulnerabilities
@@ -319,10 +341,14 @@ class SafetyScanner:
                         finding = Finding(
                             tool="safety",
                             rule_id=f"CVE-{vuln.get('cve', 'UNKNOWN')}",
-                            severity=self._map_severity(vuln.get("severity", "unknown")),
+                            severity=self._map_severity(
+                                vuln.get("severity", "unknown")
+                            ),
                             file_path=str(req_file),
                             line_number=0,  # Not applicable for dependencies
-                            message=vuln.get("advisory", "Vulnerable dependency detected"),
+                            message=vuln.get(
+                                "advisory", "Vulnerable dependency detected"
+                            ),
                             category="dependency-vulnerability",
                             confidence="high",
                             cwe_id=self._extract_cwe(vuln),
@@ -330,7 +356,9 @@ class SafetyScanner:
                             fix_guidance=f"Update {vuln.get('package_name')} to version {vuln.get('safe_version', 'latest')}",
                             metadata={
                                 "package": vuln.get("package_name"),
-                                "installed_version": vuln.get("installed_version"),
+                                "installed_version": vuln.get(
+                                    "installed_version"
+                                ),
                                 "vulnerable_spec": vuln.get("vulnerable_spec"),
                                 "safe_version": vuln.get("safe_version"),
                             },
@@ -350,7 +378,10 @@ class SafetyScanner:
             return Severity.CRITICAL
         elif "high" in safety_severity.lower():
             return Severity.HIGH
-        elif "medium" in safety_severity.lower() or "moderate" in safety_severity.lower():
+        elif (
+            "medium" in safety_severity.lower()
+            or "moderate" in safety_severity.lower()
+        ):
             return Severity.MEDIUM
         else:
             return Severity.LOW
@@ -388,7 +419,9 @@ class CustomSemgrepRules:
                     "severity": "ERROR",
                     "metadata": {
                         "category": "security",
-                        "owasp": ["A07:2021 - Identification and Authentication Failures"],
+                        "owasp": [
+                            "A07:2021 - Identification and Authentication Failures"
+                        ],
                     },
                 },
                 {
@@ -436,12 +469,17 @@ class CustomSemgrepRules:
                 },
                 {
                     "id": "freeagentics-pickle-usage",
-                    "patterns": [{"pattern": "pickle.loads(...)"}, {"pattern": "pickle.load(...)"}],
+                    "patterns": [
+                        {"pattern": "pickle.loads(...)"},
+                        {"pattern": "pickle.load(...)"},
+                    ],
                     "message": "Pickle deserialization can lead to arbitrary code execution",
                     "severity": "ERROR",
                     "metadata": {
                         "category": "security",
-                        "owasp": ["A08:2021 - Software and Data Integrity Failures"],
+                        "owasp": [
+                            "A08:2021 - Software and Data Integrity Failures"
+                        ],
                         "cwe": ["CWE-502"],
                     },
                 },
@@ -450,7 +488,10 @@ class CustomSemgrepRules:
                     "patterns": [
                         {
                             "pattern": 'jwt.encode(..., "...", ...)',
-                            "metavariable-regex": {"metavariable": '"..."', "regex": '^".{0,32}"$'},
+                            "metavariable-regex": {
+                                "metavariable": '"..."',
+                                "regex": '^".{0,32}"$',
+                            },
                         },
                     ],
                     "message": "JWT secret key appears to be weak (less than 32 characters)",
@@ -465,11 +506,17 @@ class CustomSemgrepRules:
                     "patterns": [
                         {
                             "pattern": "open($PATH, ...)",
-                            "metavariable-regex": {"metavariable": "$PATH", "regex": ".*\\.\\./.*"},
+                            "metavariable-regex": {
+                                "metavariable": "$PATH",
+                                "regex": ".*\\.\\./.*",
+                            },
                         },
                         {
                             "pattern": "Path($PATH)",
-                            "metavariable-regex": {"metavariable": "$PATH", "regex": ".*\\.\\./.*"},
+                            "metavariable-regex": {
+                                "metavariable": "$PATH",
+                                "regex": ".*\\.\\./.*",
+                            },
                         },
                     ],
                     "message": "Potential path traversal vulnerability",
@@ -570,7 +617,12 @@ class SASTScanner:
 
         for finding in findings:
             # Create unique key
-            key = (finding.tool, finding.rule_id, finding.file_path, finding.line_number)
+            key = (
+                finding.tool,
+                finding.rule_id,
+                finding.file_path,
+                finding.line_number,
+            )
             if key not in seen:
                 seen.add(key)
                 unique_findings.append(finding)
@@ -591,7 +643,7 @@ class SASTScanner:
     def _print_summary(self) -> None:
         """Print scan summary"""
         severity_counts = {severity: 0 for severity in Severity}
-        tool_counts = {}
+        tool_counts: Dict[str, int] = {}
 
         for finding in self.findings:
             severity_counts[finding.severity] += 1
@@ -638,7 +690,10 @@ def main():
 
     parser = argparse.ArgumentParser(description="SAST Security Scanner")
     parser.add_argument(
-        "--project-root", type=Path, default=Path.cwd(), help="Project root directory"
+        "--project-root",
+        type=Path,
+        default=Path.cwd(),
+        help="Project root directory",
     )
     parser.add_argument(
         "--severity-threshold",
@@ -647,12 +702,23 @@ def main():
         help="Minimum severity to fail the scan",
     )
     parser.add_argument(
-        "--output", type=Path, default=Path("sast-findings.json"), help="Output file for findings"
+        "--output",
+        type=Path,
+        default=Path("sast-findings.json"),
+        help="Output file for findings",
     )
-    parser.add_argument("--no-bandit", action="store_true", help="Disable Bandit scanner")
-    parser.add_argument("--no-semgrep", action="store_true", help="Disable Semgrep scanner")
-    parser.add_argument("--no-safety", action="store_true", help="Disable Safety scanner")
-    parser.add_argument("--suppress-rules", nargs="+", help="Rules to suppress")
+    parser.add_argument(
+        "--no-bandit", action="store_true", help="Disable Bandit scanner"
+    )
+    parser.add_argument(
+        "--no-semgrep", action="store_true", help="Disable Semgrep scanner"
+    )
+    parser.add_argument(
+        "--no-safety", action="store_true", help="Disable Safety scanner"
+    )
+    parser.add_argument(
+        "--suppress-rules", nargs="+", help="Rules to suppress"
+    )
 
     args = parser.parse_args()
 
@@ -663,7 +729,9 @@ def main():
         enable_bandit=not args.no_bandit,
         enable_semgrep=not args.no_semgrep,
         enable_safety=not args.no_safety,
-        suppress_rules=set(args.suppress_rules) if args.suppress_rules else set(),
+        suppress_rules=set(args.suppress_rules)
+        if args.suppress_rules
+        else set(),
     )
 
     # Run scan

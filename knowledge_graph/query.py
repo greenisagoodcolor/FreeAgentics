@@ -51,7 +51,12 @@ class QueryResult:
 
     def is_empty(self) -> bool:
         """Check if result is empty."""
-        return not self.nodes and not self.edges and not self.paths and not self.aggregates
+        return (
+            not self.nodes
+            and not self.edges
+            and not self.paths
+            and not self.aggregates
+        )
 
     def node_count(self) -> int:
         """Get number of nodes in result."""
@@ -162,7 +167,6 @@ class QueryEngine:
     def _execute_node_lookup(self, query: GraphQuery) -> QueryResult:
         """Execute node lookup query."""
         result = QueryResult(query_type=QueryType.NODE_LOOKUP)
-        nodes = []
 
         # Start with all nodes
         candidates = list(self.graph.nodes.values())
@@ -177,25 +181,37 @@ class QueryEngine:
 
         # Filter by labels
         if query.node_labels:
-            candidates = [n for n in candidates if n.label in query.node_labels]
+            candidates = [
+                n for n in candidates if n.label in query.node_labels
+            ]
 
         # Filter by properties
         if query.node_properties:
             candidates = [
-                n for n in candidates if self._match_properties(n.properties, query.node_properties)
+                n
+                for n in candidates
+                if self._match_properties(n.properties, query.node_properties)
             ]
 
         # Filter by confidence
         if query.confidence_threshold > 0:
-            candidates = [n for n in candidates if n.confidence >= query.confidence_threshold]
+            candidates = [
+                n
+                for n in candidates
+                if n.confidence >= query.confidence_threshold
+            ]
 
         # Filter by source
         if query.source_filter:
-            candidates = [n for n in candidates if n.source in query.source_filter]
+            candidates = [
+                n for n in candidates if n.source in query.source_filter
+            ]
 
         # Sort if requested
         if query.order_by:
-            candidates = self._sort_nodes(candidates, query.order_by, query.descending)
+            candidates = self._sort_nodes(
+                candidates, query.order_by, query.descending
+            )
 
         # Apply limit
         if query.limit:
@@ -221,14 +237,19 @@ class QueryEngine:
         # Find edges between matched nodes
         edges = []
         for edge in self.graph.edges.values():
-            if edge.source_id in matched_nodes and edge.target_id in matched_nodes:
+            if (
+                edge.source_id in matched_nodes
+                and edge.target_id in matched_nodes
+            ):
                 # Check edge type filter
                 if query.edge_types and edge.type not in query.edge_types:
                     continue
 
                 # Check edge properties
                 if query.edge_properties:
-                    if not self._match_properties(edge.properties, query.edge_properties):
+                    if not self._match_properties(
+                        edge.properties, query.edge_properties
+                    ):
                         continue
 
                 edges.append(edge)
@@ -259,11 +280,18 @@ class QueryEngine:
             # Collect edges on path
             for i in range(len(path) - 1):
                 for edge in self.graph.edges.values():
-                    if edge.source_id == path[i] and edge.target_id == path[i + 1]:
+                    if (
+                        edge.source_id == path[i]
+                        and edge.target_id == path[i + 1]
+                    ):
                         result.edges.append(edge)
 
         # Find alternative paths if max_path_length specified
-        if query.max_path_length and query.max_path_length > len(path):
+        if (
+            path
+            and query.max_path_length
+            and query.max_path_length > len(path)
+        ):
             # Use NetworkX to find all simple paths up to max length
             try:
                 all_paths = list(
@@ -315,7 +343,10 @@ class QueryEngine:
             node = self.graph.get_node(node_id)
             if node:
                 # Apply filters
-                if query.confidence_threshold > 0 and node.confidence < query.confidence_threshold:
+                if (
+                    query.confidence_threshold > 0
+                    and node.confidence < query.confidence_threshold
+                ):
                     continue
                 if query.node_types and node.type not in query.node_types:
                     continue
@@ -344,18 +375,22 @@ class QueryEngine:
 
         # Basic aggregations
         result.aggregates["count"] = len(nodes)
-        result.aggregates["avg_confidence"] = np.mean([n.confidence for n in nodes])
+        result.aggregates["avg_confidence"] = np.mean(
+            [n.confidence for n in nodes]
+        )
         result.aggregates["min_confidence"] = min(n.confidence for n in nodes)
         result.aggregates["max_confidence"] = max(n.confidence for n in nodes)
 
         # Type distribution
-        type_counts = {}
+        type_counts: Dict[str, int] = {}
         for node in nodes:
-            type_counts[node.type.value] = type_counts.get(node.type.value, 0) + 1
+            type_counts[node.type.value] = (
+                type_counts.get(node.type.value, 0) + 1
+            )
         result.aggregates["type_distribution"] = type_counts
 
         # Property aggregations
-        property_stats = {}
+        property_stats: Dict[str, List[float]] = {}
         for node in nodes:
             for key, value in node.properties.items():
                 if isinstance(value, (int, float)):
@@ -386,7 +421,10 @@ class QueryEngine:
                 # Apply other filters
                 if query.node_types and node.type not in query.node_types:
                     continue
-                if query.confidence_threshold > 0 and node.confidence < query.confidence_threshold:
+                if (
+                    query.confidence_threshold > 0
+                    and node.confidence < query.confidence_threshold
+                ):
                     continue
 
                 result.nodes.append(node)
@@ -455,11 +493,17 @@ class QueryEngine:
 
         # Filter by source (agent)
         if query.source_filter:
-            belief_nodes = [n for n in belief_nodes if n.source in query.source_filter]
+            belief_nodes = [
+                n for n in belief_nodes if n.source in query.source_filter
+            ]
 
         # Filter by confidence
         if query.confidence_threshold > 0:
-            belief_nodes = [n for n in belief_nodes if n.confidence >= query.confidence_threshold]
+            belief_nodes = [
+                n
+                for n in belief_nodes
+                if n.confidence >= query.confidence_threshold
+            ]
 
         # Filter by properties
         if query.node_properties:
@@ -475,13 +519,18 @@ class QueryEngine:
         for belief in belief_nodes:
             # Find BELIEVES edges
             for edge in self.graph.edges.values():
-                if edge.source_id == belief.source and edge.target_id == belief.id:
+                if (
+                    edge.source_id == belief.source
+                    and edge.target_id == belief.id
+                ):
                     if edge.type == EdgeType.BELIEVES:
                         result.edges.append(edge)
 
         return result
 
-    def _match_properties(self, node_props: Dict[str, Any], filter_props: Dict[str, Any]) -> bool:
+    def _match_properties(
+        self, node_props: Dict[str, Any], filter_props: Dict[str, Any]
+    ) -> bool:
         """Check if node properties match filter."""
         for key, value in filter_props.items():
             if key not in node_props:
@@ -546,13 +595,17 @@ class QueryEngine:
         query_dict = {
             "type": query.query_type.value,
             "node_ids": query.node_ids,
-            "node_types": [t.value for t in query.node_types] if query.node_types else None,
+            "node_types": [t.value for t in query.node_types]
+            if query.node_types
+            else None,
             "confidence": query.confidence_threshold,
             # Add other relevant fields
         }
 
         query_str = json.dumps(query_dict, sort_keys=True)
-        return hashlib.md5(query_str.encode()).hexdigest()
+        return hashlib.md5(
+            query_str.encode(), usedforsecurity=False
+        ).hexdigest()
 
     def clear_cache(self):
         """Clear query cache."""

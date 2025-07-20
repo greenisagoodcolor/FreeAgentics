@@ -16,7 +16,8 @@ from .load_scenarios import (
 
 # Configure logging
 logging.basicConfig(
-    level=logging.INFO, format="%(asctime)s - %(name)s - %(levelname)s - %(message)s"
+    level=logging.INFO,
+    format="%(asctime)s - %(name)s - %(levelname)s - %(message)s",
 )
 logger = logging.getLogger(__name__)
 
@@ -34,7 +35,9 @@ async def run_steady_load_test(args):
         message_interval=args.message_interval,
         concurrent_connections=args.concurrent,
         enable_prometheus=args.prometheus,
-        metrics_export_path=Path(f"metrics/steady_load_{args.clients}c_{args.duration}s.json"),
+        metrics_export_path=Path(
+            f"metrics/steady_load_{args.clients}c_{args.duration}s.json"
+        ),
     )
 
     scenario = SteadyLoadScenario(config)
@@ -54,7 +57,9 @@ async def run_burst_load_test(args):
         message_interval=args.message_interval,
         concurrent_connections=args.concurrent,
         enable_prometheus=args.prometheus,
-        metrics_export_path=Path(f"metrics/burst_load_{args.clients}c_{args.duration}s.json"),
+        metrics_export_path=Path(
+            f"metrics/burst_load_{args.clients}c_{args.duration}s.json"
+        ),
     )
 
     scenario = BurstLoadScenario(
@@ -79,7 +84,9 @@ async def run_ramp_up_test(args):
         message_interval=args.message_interval,
         concurrent_connections=args.concurrent,
         enable_prometheus=args.prometheus,
-        metrics_export_path=Path(f"metrics/ramp_up_{args.clients}c_{args.duration}s.json"),
+        metrics_export_path=Path(
+            f"metrics/ramp_up_{args.clients}c_{args.duration}s.json"
+        ),
     )
 
     scenario = RampUpScenario(
@@ -104,7 +111,9 @@ async def run_stress_test(args):
         message_interval=args.message_interval,
         concurrent_connections=args.concurrent,
         enable_prometheus=args.prometheus,
-        metrics_export_path=Path(f"metrics/stress_test_{args.max_clients}c.json"),
+        metrics_export_path=Path(
+            f"metrics/stress_test_{args.max_clients}c.json"
+        ),
     )
 
     scenario = StressTestScenario(
@@ -128,7 +137,9 @@ async def run_realistic_test(args):
         message_interval=1.0,  # Will be overridden by profile
         concurrent_connections=args.concurrent,
         enable_prometheus=args.prometheus,
-        metrics_export_path=Path(f"metrics/realistic_{args.clients}c_{args.duration}s.json"),
+        metrics_export_path=Path(
+            f"metrics/realistic_{args.clients}c_{args.duration}s.json"
+        ),
     )
 
     # Parse user profiles if provided
@@ -155,17 +166,33 @@ def main():
         help="WebSocket server URL (default: ws://localhost:8000)",
     )
     parser.add_argument(
-        "--clients", type=int, default=100, help="Total number of clients (default: 100)"
+        "--clients",
+        type=int,
+        default=100,
+        help="Total number of clients (default: 100)",
     )
     parser.add_argument(
-        "--duration", type=int, default=300, help="Test duration in seconds (default: 300)"
+        "--duration",
+        type=int,
+        default=300,
+        help="Test duration in seconds (default: 300)",
     )
     parser.add_argument(
-        "--concurrent", type=int, default=50, help="Maximum concurrent connections (default: 50)"
+        "--concurrent",
+        type=int,
+        default=50,
+        help="Maximum concurrent connections (default: 50)",
     )
     parser.add_argument(
         "--message-type",
-        choices=["event", "command", "query", "monitoring", "mixed", "realistic"],
+        choices=[
+            "event",
+            "command",
+            "query",
+            "monitoring",
+            "mixed",
+            "realistic",
+        ],
         default="mixed",
         help="Type of messages to generate (default: mixed)",
     )
@@ -175,19 +202,30 @@ def main():
         default=1.0,
         help="Seconds between messages (default: 1.0)",
     )
-    parser.add_argument("--prometheus", action="store_true", help="Enable Prometheus metrics")
-    parser.add_argument("--debug", action="store_true", help="Enable debug logging")
+    parser.add_argument(
+        "--prometheus", action="store_true", help="Enable Prometheus metrics"
+    )
+    parser.add_argument(
+        "--debug", action="store_true", help="Enable debug logging"
+    )
 
     # Subcommands for different scenarios
-    subparsers = parser.add_subparsers(dest="scenario", help="Load test scenario")
+    subparsers = parser.add_subparsers(
+        dest="scenario", help="Load test scenario"
+    )
 
     # Steady load
-    steady_parser = subparsers.add_parser("steady", help="Run steady load test")
+    steady_parser = subparsers.add_parser(
+        "steady", help="Run steady load test"
+    )
 
     # Burst load
     burst_parser = subparsers.add_parser("burst", help="Run burst load test")
     burst_parser.add_argument(
-        "--burst-size", type=int, default=100, help="Number of clients in each burst (default: 100)"
+        "--burst-size",
+        type=int,
+        default=100,
+        help="Number of clients in each burst (default: 100)",
     )
     burst_parser.add_argument(
         "--burst-duration",
@@ -205,10 +243,16 @@ def main():
     # Ramp up
     ramp_parser = subparsers.add_parser("ramp", help="Run ramp-up load test")
     ramp_parser.add_argument(
-        "--initial-clients", type=int, default=10, help="Initial number of clients (default: 10)"
+        "--initial-clients",
+        type=int,
+        default=10,
+        help="Initial number of clients (default: 10)",
     )
     ramp_parser.add_argument(
-        "--ramp-steps", type=int, default=10, help="Number of ramp-up steps (default: 10)"
+        "--ramp-steps",
+        type=int,
+        default=10,
+        help="Number of ramp-up steps (default: 10)",
     )
     ramp_parser.add_argument(
         "--step-duration",
@@ -220,7 +264,10 @@ def main():
     # Stress test
     stress_parser = subparsers.add_parser("stress", help="Run stress test")
     stress_parser.add_argument(
-        "--max-clients", type=int, default=1000, help="Maximum clients to test (default: 1000)"
+        "--max-clients",
+        type=int,
+        default=1000,
+        help="Maximum clients to test (default: 1000)",
     )
     stress_parser.add_argument(
         "--target-latency",
@@ -229,14 +276,22 @@ def main():
         help="Target latency threshold in ms (default: 100)",
     )
     stress_parser.add_argument(
-        "--error-threshold", type=float, default=0.05, help="Error rate threshold (default: 0.05)"
+        "--error-threshold",
+        type=float,
+        default=0.05,
+        help="Error rate threshold (default: 0.05)",
     )
     stress_parser.add_argument(
-        "--increment", type=int, default=50, help="Clients to add per step (default: 50)"
+        "--increment",
+        type=int,
+        default=50,
+        help="Clients to add per step (default: 50)",
     )
 
     # Realistic usage
-    realistic_parser = subparsers.add_parser("realistic", help="Run realistic usage test")
+    realistic_parser = subparsers.add_parser(
+        "realistic", help="Run realistic usage test"
+    )
     realistic_parser.add_argument(
         "--user-profiles",
         nargs="+",

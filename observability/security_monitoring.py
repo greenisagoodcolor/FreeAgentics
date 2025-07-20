@@ -123,16 +123,22 @@ class SecurityMonitoringSystem:
 
         # Metrics
         self.security_events_total = Counter(
-            "security_events_total", "Total security events processed", ["event_type", "severity"]
+            "security_events_total",
+            "Total security events processed",
+            ["event_type", "severity"],
         )
         self.threats_detected_total = Counter(
-            "threats_detected_total", "Total threats detected", ["threat_type", "severity"]
+            "threats_detected_total",
+            "Total threats detected",
+            ["threat_type", "severity"],
         )
         self.security_alerts_active = Gauge(
             "security_alerts_active", "Number of active security alerts"
         )
         self.threat_detection_time = Histogram(
-            "threat_detection_time_seconds", "Time to detect threats", ["threat_type"]
+            "threat_detection_time_seconds",
+            "Time to detect threats",
+            ["threat_type"],
         )
 
         # Initialize threat indicators
@@ -256,7 +262,9 @@ class SecurityMonitoringSystem:
             # Update metrics
             event_type = event.get("event_type", "unknown")
             severity = event.get("severity", "info")
-            self.security_events_total.labels(event_type=event_type, severity=severity).inc()
+            self.security_events_total.labels(
+                event_type=event_type, severity=severity
+            ).inc()
 
             # Extract relevant information
             source_ip = event.get("ip_address", "unknown")
@@ -295,8 +303,14 @@ class SecurityMonitoringSystem:
 
         # Check for injection attacks
         for indicator in self.threat_indicators:
-            if indicator.indicator_type in ["sql_injection", "xss", "command_injection"]:
-                if await self._match_pattern(indicator, message + " " + endpoint):
+            if indicator.indicator_type in [
+                "sql_injection",
+                "xss",
+                "command_injection",
+            ]:
+                if await self._match_pattern(
+                    indicator, message + " " + endpoint
+                ):
                     await self._generate_alert(
                         (
                             AttackType.SQL_INJECTION
@@ -323,7 +337,9 @@ class SecurityMonitoringSystem:
                         event,
                     )
 
-    async def _check_brute_force(self, source_ip: str, user_id: str, event: Dict[str, Any]):
+    async def _check_brute_force(
+        self, source_ip: str, user_id: str, event: Dict[str, Any]
+    ):
         """Check for brute force attacks."""
         now = datetime.utcnow()
         cutoff = now - timedelta(minutes=15)
@@ -360,7 +376,9 @@ class SecurityMonitoringSystem:
 
         # Clean old requests
         self.api_requests[source_ip] = [
-            request for request in self.api_requests[source_ip] if request > cutoff
+            request
+            for request in self.api_requests[source_ip]
+            if request > cutoff
         ]
 
         # Add current request
@@ -380,7 +398,9 @@ class SecurityMonitoringSystem:
             # Block IP
             self.blocked_ips.add(source_ip)
 
-    async def _match_pattern(self, indicator: ThreatIndicator, text: str) -> bool:
+    async def _match_pattern(
+        self, indicator: ThreatIndicator, text: str
+    ) -> bool:
         """Check if text matches threat indicator pattern."""
         import re
 
@@ -415,7 +435,9 @@ class SecurityMonitoringSystem:
         self.active_alerts[alert_id] = alert
 
         # Update metrics
-        self.threats_detected_total.labels(threat_type=attack_type, severity=threat_level).inc()
+        self.threats_detected_total.labels(
+            threat_type=attack_type, severity=threat_level
+        ).inc()
 
         self.security_alerts_active.inc()
 
@@ -444,7 +466,9 @@ class SecurityMonitoringSystem:
         # Send alert notification
         await self._send_alert_notification(alert)
 
-        logger.warning(f"🚨 Security alert generated: {alert_id} - {description}")
+        logger.warning(
+            f"🚨 Security alert generated: {alert_id} - {description}"
+        )
 
     async def _send_alert_notification(self, alert: SecurityAlert):
         """Send alert notification to security team."""
@@ -493,7 +517,11 @@ class SecurityMonitoringSystem:
                 "multiple",
                 None,
                 "High volume of failed login attempts detected",
-                {"failed_login_count": event_types[SecurityEventType.LOGIN_FAILURE]},
+                {
+                    "failed_login_count": event_types[
+                        SecurityEventType.LOGIN_FAILURE
+                    ]
+                },
             )
 
         # Unusual number of errors from single IP
@@ -533,7 +561,9 @@ class SecurityMonitoringSystem:
             if len(activities) > 100:  # High activity user
                 # Check for unusual patterns
                 recent_activities = [
-                    a for a in activities if a > datetime.utcnow() - timedelta(hours=1)
+                    a
+                    for a in activities
+                    if a > datetime.utcnow() - timedelta(hours=1)
                 ]
                 if len(recent_activities) > 50:
                     await self._generate_alert(
@@ -562,7 +592,9 @@ class SecurityMonitoringSystem:
         # Clean up old IP activity
         for ip in list(self.ip_activity.keys()):
             self.ip_activity[ip] = [
-                activity for activity in self.ip_activity[ip] if activity > cutoff
+                activity
+                for activity in self.ip_activity[ip]
+                if activity > cutoff
             ]
             if not self.ip_activity[ip]:
                 del self.ip_activity[ip]
@@ -570,7 +602,9 @@ class SecurityMonitoringSystem:
         # Clean up old user activity
         for user_id in list(self.user_activity.keys()):
             self.user_activity[user_id] = [
-                activity for activity in self.user_activity[user_id] if activity > cutoff
+                activity
+                for activity in self.user_activity[user_id]
+                if activity > cutoff
             ]
             if not self.user_activity[user_id]:
                 del self.user_activity[user_id]
@@ -606,9 +640,19 @@ class SecurityMonitoringSystem:
         return SecurityMetrics(
             total_events=total_events,
             alerts_generated=alerts_generated,
-            threats_detected=len([a for a in self.active_alerts.values() if a.status == "active"]),
+            threats_detected=len(
+                [
+                    a
+                    for a in self.active_alerts.values()
+                    if a.status == "active"
+                ]
+            ),
             false_positives=len(
-                [a for a in self.active_alerts.values() if a.status == "false_positive"]
+                [
+                    a
+                    for a in self.active_alerts.values()
+                    if a.status == "false_positive"
+                ]
             ),
             mean_detection_time=0.0,  # TODO: Calculate actual metrics
             mean_response_time=0.0,  # TODO: Calculate actual metrics
@@ -619,7 +663,11 @@ class SecurityMonitoringSystem:
 
     def get_active_alerts(self) -> List[SecurityAlert]:
         """Get all active security alerts."""
-        return [alert for alert in self.active_alerts.values() if alert.status == "active"]
+        return [
+            alert
+            for alert in self.active_alerts.values()
+            if alert.status == "active"
+        ]
 
     def resolve_alert(self, alert_id: str, resolution_notes: str = "") -> bool:
         """Resolve a security alert."""
@@ -645,7 +693,9 @@ class SecurityMonitoringSystem:
 
             self.security_alerts_active.dec()
 
-            logger.info(f"🔍 Security alert marked as false positive: {alert_id}")
+            logger.info(
+                f"🔍 Security alert marked as false positive: {alert_id}"
+            )
             return True
         return False
 

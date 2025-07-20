@@ -123,31 +123,31 @@ services:
       # Database configuration
       DATABASE_URL: postgresql://test_user:test_password@test-postgres:5432/freeagentics_test
       TEST_DATABASE_URL: postgresql://test_user:test_password@test-postgres:5432/freeagentics_test
-      
+
       # Redis configuration
       REDIS_URL: redis://test-redis:6379/0
       TEST_REDIS_URL: redis://test-redis:6379/1
-      
+
       # RabbitMQ configuration
       RABBITMQ_URL: amqp://test_user:test_password@test-rabbitmq:5672/test_vhost
-      
+
       # Elasticsearch configuration
       ELASTICSEARCH_URL: http://test-elasticsearch:9200
-      
+
       # MinIO/S3 configuration
       S3_ENDPOINT_URL: http://test-minio:9000
       S3_ACCESS_KEY: test_access_key
       S3_SECRET_KEY: test_secret_key
       S3_BUCKET: test-bucket
-      
+
       # Test environment flags
       TESTING: "true"
       ENVIRONMENT: test
       LOG_LEVEL: INFO
-      
+
       # PyMDP and other dependencies
       PYMDP_AVAILABLE: "true"
-      
+
     volumes:
       - .:/app
       - test-cache:/app/.pytest_cache
@@ -158,12 +158,12 @@ services:
       bash -c "
         echo 'Waiting for all services to be ready...'
         sleep 10
-        
+
         echo 'Creating test S3 bucket...'
         python -c \"
         import boto3
         from botocore.client import Config
-        
+
         s3 = boto3.client(
             's3',
             endpoint_url='http://test-minio:9000',
@@ -171,14 +171,14 @@ services:
             aws_secret_access_key='test_secret_key',
             config=Config(signature_version='s3v4')
         )
-        
+
         try:
             s3.create_bucket(Bucket='test-bucket')
             print('Test bucket created successfully')
         except Exception as e:
             print(f'Bucket might already exist: {e}')
         \"
-        
+
         echo 'Running integration tests...'
         pytest tests/integration/ -v --tb=short --cov=. --cov-report=html --cov-report=term
       "

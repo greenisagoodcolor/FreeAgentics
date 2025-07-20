@@ -22,9 +22,9 @@ TOTAL=10
 check_item() {
     local name="$1"
     local command="$2"
-    
+
     echo -en "  ${BLUE}◆${NC} $name... "
-    
+
     if eval "$command" &>/dev/null; then
         echo -e "${GREEN}✅${NC}"
         ((SCORE++))

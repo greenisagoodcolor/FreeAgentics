@@ -8,7 +8,12 @@ from unittest.mock import MagicMock, patch
 import numpy as np
 
 # Add parent directory to path
-sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__)))))
+sys.path.insert(
+    0,
+    os.path.dirname(
+        os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+    ),
+)
 
 from scripts.memory_profiler_pymdp import MemoryProfiler
 
@@ -56,7 +61,9 @@ class TestMemoryProfiler(unittest.TestCase):
 
         # Check measurement was recorded
         self.assertEqual(len(self.profiler.measurements), 1)
-        self.assertEqual(self.profiler.measurements[0]["label"], "Test measurement")
+        self.assertEqual(
+            self.profiler.measurements[0]["label"], "Test measurement"
+        )
 
     def test_component_memory_profiling(self):
         """Test component memory profiling."""

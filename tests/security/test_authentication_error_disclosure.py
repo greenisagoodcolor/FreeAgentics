@@ -57,7 +57,8 @@ class AuthenticationErrorTester:
             start_time = time.time()
 
             response = self.client.post(
-                "/api/v1/auth/login", json={"username": username, "password": "wrong_password"}
+                "/api/v1/auth/login",
+                json={"username": username, "password": "wrong_password"},
             )
 
             end_time = time.time()
@@ -65,7 +66,9 @@ class AuthenticationErrorTester:
 
             response_times[username] = response_time
             response_messages[username] = (
-                response.json() if response.status_code != 500 else {"detail": "Server error"}
+                response.json()
+                if response.status_code != 500
+                else {"detail": "Server error"}
             )
 
         # Check for timing differences that could indicate username enumeration
@@ -164,7 +167,9 @@ class AuthenticationErrorTester:
                 for disclosure_pattern in policy_disclosures:
                     import re
 
-                    if re.search(disclosure_pattern, response_text, re.IGNORECASE):
+                    if re.search(
+                        disclosure_pattern, response_text, re.IGNORECASE
+                    ):
                         results["passed"] = False
                         results["findings"].append(
                             {
@@ -209,11 +214,14 @@ class AuthenticationErrorTester:
         # Attempt multiple failed logins
         for attempt in range(6):  # Try to trigger lockout
             response = self.client.post(
-                "/api/v1/auth/login", json={"username": test_username, "password": "wrong_password"}
+                "/api/v1/auth/login",
+                json={"username": test_username, "password": "wrong_password"},
             )
 
             response_data = (
-                response.json() if response.status_code != 500 else {"detail": "Server error"}
+                response.json()
+                if response.status_code != 500
+                else {"detail": "Server error"}
             )
             response_text = json.dumps(response_data)
 
@@ -244,7 +252,9 @@ class AuthenticationErrorTester:
                     )
 
         if results["findings"]:
-            results["recommendations"].append("Use generic error messages for account lockout")
+            results["recommendations"].append(
+                "Use generic error messages for account lockout"
+            )
             results["recommendations"].append(
                 "Do not disclose lockout duration or remaining attempts"
             )
@@ -282,7 +292,9 @@ class AuthenticationErrorTester:
 
             if response.status_code in [401, 403]:  # Auth errors
                 response_data = (
-                    response.json() if response.status_code != 500 else {"detail": "Server error"}
+                    response.json()
+                    if response.status_code != 500
+                    else {"detail": "Server error"}
                 )
                 response_text = json.dumps(response_data)
 
@@ -305,7 +317,9 @@ class AuthenticationErrorTester:
                 for disclosure_pattern in jwt_disclosures:
                     import re
 
-                    if re.search(disclosure_pattern, response_text, re.IGNORECASE):
+                    if re.search(
+                        disclosure_pattern, response_text, re.IGNORECASE
+                    ):
                         results["passed"] = False
                         results["findings"].append(
                             {
@@ -317,8 +331,12 @@ class AuthenticationErrorTester:
                         )
 
         if results["findings"]:
-            results["recommendations"].append('Use generic "Unauthorized" messages for JWT errors')
-            results["recommendations"].append("Log JWT error details server-side only")
+            results["recommendations"].append(
+                'Use generic "Unauthorized" messages for JWT errors'
+            )
+            results["recommendations"].append(
+                "Log JWT error details server-side only"
+            )
 
         return results
 
@@ -351,7 +369,9 @@ class AuthenticationErrorTester:
 
             if response.status_code in [401, 403]:
                 response_data = (
-                    response.json() if response.status_code != 500 else {"detail": "Server error"}
+                    response.json()
+                    if response.status_code != 500
+                    else {"detail": "Server error"}
                 )
                 response_text = json.dumps(response_data)
 
@@ -371,7 +391,9 @@ class AuthenticationErrorTester:
                 for disclosure_pattern in session_disclosures:
                     import re
 
-                    if re.search(disclosure_pattern, response_text, re.IGNORECASE):
+                    if re.search(
+                        disclosure_pattern, response_text, re.IGNORECASE
+                    ):
                         results["passed"] = False
                         results["findings"].append(
                             {
@@ -383,8 +405,12 @@ class AuthenticationErrorTester:
                         )
 
         if results["findings"]:
-            results["recommendations"].append("Use generic authentication error messages")
-            results["recommendations"].append("Do not expose session store implementation details")
+            results["recommendations"].append(
+                "Use generic authentication error messages"
+            )
+            results["recommendations"].append(
+                "Do not expose session store implementation details"
+            )
 
         return results
 
@@ -412,7 +438,11 @@ class AuthenticationErrorTester:
         # Test scenarios
         scenarios = [
             ("valid_user_wrong_password", known_user, "wrong_password"),
-            ("invalid_user_any_password", "nonexistent_user_12345", "any_password"),
+            (
+                "invalid_user_any_password",
+                "nonexistent_user_12345",
+                "any_password",
+            ),
             ("empty_user_empty_password", "", ""),
             ("long_user_long_password", "a" * 100, "b" * 100),
         ]
@@ -427,7 +457,8 @@ class AuthenticationErrorTester:
                 start_time = time.time()
 
                 response = self.client.post(
-                    "/api/v1/auth/login", json={"username": username, "password": password}
+                    "/api/v1/auth/login",
+                    json={"username": username, "password": password},
                 )
 
                 end_time = time.time()
@@ -437,7 +468,10 @@ class AuthenticationErrorTester:
             timing_results[scenario_name] = {
                 "avg_time": avg_time,
                 "times": times,
-                "std_dev": (sum((t - avg_time) ** 2 for t in times) / len(times)) ** 0.5,
+                "std_dev": (
+                    sum((t - avg_time) ** 2 for t in times) / len(times)
+                )
+                ** 0.5,
             }
 
         # Check for significant timing differences
@@ -461,9 +495,15 @@ class AuthenticationErrorTester:
                 )
 
         if results["findings"]:
-            results["recommendations"].append("Implement constant-time authentication responses")
-            results["recommendations"].append("Use artificial delays to normalize response times")
-            results["recommendations"].append("Consider rate limiting to mitigate timing attacks")
+            results["recommendations"].append(
+                "Implement constant-time authentication responses"
+            )
+            results["recommendations"].append(
+                "Use artificial delays to normalize response times"
+            )
+            results["recommendations"].append(
+                "Consider rate limiting to mitigate timing attacks"
+            )
 
         return results
 
@@ -499,7 +539,9 @@ class AuthenticationErrorTester:
                     {
                         "test_name": test_method.__name__,
                         "passed": False,
-                        "findings": [{"issue": f"Test execution error: {str(e)}"}],
+                        "findings": [
+                            {"issue": f"Test execution error: {str(e)}"}
+                        ],
                         "recommendations": ["Fix test execution error"],
                     }
                 )
@@ -526,7 +568,9 @@ class AuthenticationErrorTester:
                 "total_tests": total_tests,
                 "passed_tests": passed_tests,
                 "failed_tests": failed_tests,
-                "pass_rate": (passed_tests / total_tests * 100) if total_tests > 0 else 0,
+                "pass_rate": (passed_tests / total_tests * 100)
+                if total_tests > 0
+                else 0,
             },
             "test_results": all_results,
             "recommendations": unique_recommendations,
@@ -566,7 +610,9 @@ class TestAuthenticationErrorDisclosure:
         if not result["passed"]:
             failure_msg = "Password policy disclosure detected:\n"
             for finding in result["findings"]:
-                failure_msg += f"  - {finding['issue']}: {finding['pattern']}\n"
+                failure_msg += (
+                    f"  - {finding['issue']}: {finding['pattern']}\n"
+                )
             pytest.fail(failure_msg)
 
     def test_account_lockout_no_disclosure(self, auth_tester):
@@ -576,7 +622,9 @@ class TestAuthenticationErrorDisclosure:
         if not result["passed"]:
             failure_msg = "Account lockout information disclosure detected:\n"
             for finding in result["findings"]:
-                failure_msg += f"  - {finding['issue']}: {finding['pattern']}\n"
+                failure_msg += (
+                    f"  - {finding['issue']}: {finding['pattern']}\n"
+                )
             pytest.fail(failure_msg)
 
     def test_jwt_error_no_disclosure(self, auth_tester):
@@ -586,7 +634,9 @@ class TestAuthenticationErrorDisclosure:
         if not result["passed"]:
             failure_msg = "JWT error information disclosure detected:\n"
             for finding in result["findings"]:
-                failure_msg += f"  - {finding['issue']}: {finding['pattern']}\n"
+                failure_msg += (
+                    f"  - {finding['issue']}: {finding['pattern']}\n"
+                )
             pytest.fail(failure_msg)
 
     def test_session_management_no_disclosure(self, auth_tester):
@@ -594,9 +644,13 @@ class TestAuthenticationErrorDisclosure:
         result = auth_tester.test_session_management_disclosure()
 
         if not result["passed"]:
-            failure_msg = "Session management information disclosure detected:\n"
+            failure_msg = (
+                "Session management information disclosure detected:\n"
+            )
             for finding in result["findings"]:
-                failure_msg += f"  - {finding['issue']}: {finding['pattern']}\n"
+                failure_msg += (
+                    f"  - {finding['issue']}: {finding['pattern']}\n"
+                )
             pytest.fail(failure_msg)
 
     def test_authentication_timing_consistency(self, auth_tester):
@@ -656,9 +710,7 @@ if __name__ == "__main__":
 
     # Save report
     timestamp = time.strftime("%Y%m%d_%H%M%S")
-    report_file = (
-        f"/home/green/FreeAgentics/tests/security/auth_error_disclosure_report_{timestamp}.json"
-    )
+    report_file = f"/home/green/FreeAgentics/tests/security/auth_error_disclosure_report_{timestamp}.json"
 
     try:
         with open(report_file, "w") as f:

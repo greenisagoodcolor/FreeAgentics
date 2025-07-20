@@ -32,9 +32,9 @@ from auth.resource_access_control import (
     require_ownership,
     require_resource_access,
 )
+from auth.security_implementation import ALGORITHM as JWT_ALGORITHM
 from auth.security_implementation import (
-    JWT_ALGORITHM,
-    JWT_SECRET_KEY,
+    JWT_SECRET,
     ROLE_PERMISSIONS,
     Permission,
     SecurityValidator,
@@ -159,11 +159,15 @@ class TestAuthorizationPenetration:
         sequential_ids = [str(uuid.UUID(int=i)) for i in range(1000, 1010)]
 
         for seq_id in sequential_ids:
-            mock_db.query.return_value.filter.return_value.first.return_value = None
+            mock_db.query.return_value.filter.return_value.first.return_value = (
+                None
+            )
             result = ResourceAccessValidator.validate_agent_access(
                 user1, seq_id, "view", mock_db, None
             )
-            assert not result, f"Sequential ID {seq_id} should not be accessible"
+            assert (
+                not result
+            ), f"Sequential ID {seq_id} should not be accessible"
 
         # Test predictable ID patterns
         base_id = str(agent1_id)
@@ -180,13 +184,17 @@ class TestAuthorizationPenetration:
                 result = ResourceAccessValidator.validate_agent_access(
                     user1, pred_id, "view", mock_db, None
                 )
-                assert not result, f"Predictable ID {pred_id} should not be accessible"
+                assert (
+                    not result
+                ), f"Predictable ID {pred_id} should not be accessible"
             except:
                 # Invalid UUID format is also acceptable
                 pass
 
         # Test accessing another user's resource directly
-        mock_db.query.return_value.filter.return_value.first.return_value = agent2
+        mock_db.query.return_value.filter.return_value.first.return_value = (
+            agent2
+        )
         result = ResourceAccessValidator.validate_agent_access(
             user1, str(agent2_id), "modify", mock_db, None
         )
@@ -215,7 +223,9 @@ class TestAuthorizationPenetration:
 
         # This should fail validation
         try:
-            decoded = jwt.decode(none_token, JWT_SECRET_KEY, algorithms=[JWT_ALGORITHM])
+            decoded = jwt.decode(
+                none_token, JWT_SECRET_KEY, algorithms=[JWT_ALGORITHM]
+            )
             assert False, "Token with 'none' algorithm should not be accepted"
         except jwt.InvalidAlgorithmError:
             pass  # Expected
@@ -228,24 +238,34 @@ class TestAuthorizationPenetration:
 
         # Create token with escalated privileges
         escalated_token = jwt.encode(
-            escalated_token_data, "wrong-secret-key", algorithm=JWT_ALGORITHM  # Using wrong key
+            escalated_token_data,
+            "wrong-secret-key",
+            algorithm=JWT_ALGORITHM,  # Using wrong key
         )
 
         # This should fail validation
         try:
-            decoded = jwt.decode(escalated_token, JWT_SECRET_KEY, algorithms=[JWT_ALGORITHM])
+            decoded = jwt.decode(
+                escalated_token, JWT_SECRET_KEY, algorithms=[JWT_ALGORITHM]
+            )
             assert False, "Token with wrong secret should not be accepted"
         except jwt.InvalidSignatureError:
             pass  # Expected
 
         # Test 3: Expired token reuse
         expired_token_data = original_token_data.copy()
-        expired_token_data["exp"] = datetime.now(timezone.utc) - timedelta(hours=1)
+        expired_token_data["exp"] = datetime.now(timezone.utc) - timedelta(
+            hours=1
+        )
 
-        expired_token = jwt.encode(expired_token_data, JWT_SECRET_KEY, algorithm=JWT_ALGORITHM)
+        expired_token = jwt.encode(
+            expired_token_data, JWT_SECRET_KEY, algorithm=JWT_ALGORITHM
+        )
 
         try:
-            decoded = jwt.decode(expired_token, JWT_SECRET_KEY, algorithms=[JWT_ALGORITHM])
+            decoded = jwt.decode(
+                expired_token, JWT_SECRET_KEY, algorithms=[JWT_ALGORITHM]
+            )
             assert False, "Expired token should not be accepted"
         except jwt.ExpiredSignatureError:
             pass  # Expected
@@ -257,7 +277,9 @@ class TestAuthorizationPenetration:
         )
 
         # Decode works but creating TokenData should fail
-        decoded = jwt.decode(incomplete_token, JWT_SECRET_KEY, algorithms=[JWT_ALGORITHM])
+        decoded = jwt.decode(
+            incomplete_token, JWT_SECRET_KEY, algorithms=[JWT_ALGORITHM]
+        )
 
         try:
             token = TokenData(
@@ -267,7 +289,9 @@ class TestAuthorizationPenetration:
                 permissions=[],  # Would need to be looked up
                 exp=decoded.get("exp"),  # Missing
             )
-            assert False, "Token without required claims should not create valid TokenData"
+            assert (
+                False
+            ), "Token without required claims should not create valid TokenData"
         except:
             pass  # Expected
 
@@ -299,7 +323,9 @@ class TestAuthorizationPenetration:
                     result = ResourceAccessValidator.validate_agent_access(
                         user, sql_payload, "view", mock_db, None
                     )
-                    assert not result, f"SQL injection '{sql_payload}' should be rejected"
+                    assert (
+                        not result
+                    ), f"SQL injection '{sql_payload}' should be rejected"
                 except:
                     pass  # Exception is also acceptable
 
@@ -357,7 +383,8 @@ class TestAuthorizationPenetration:
             "Bearer token1 Bearer token2",  # Multiple tokens
             "",  # Empty header
             "Token fake_token",  # Wrong scheme
-            "Bearer " + "".join(attack_vectors["sql_injection"]),  # SQL in token
+            "Bearer "
+            + "".join(attack_vectors["sql_injection"]),  # SQL in token
         ]
 
         for header in malformed_headers:
@@ -388,7 +415,9 @@ class TestAuthorizationPenetration:
                 )
 
                 # Auto-approve (simulating race)
-                enhanced_rbac_manager.approve_role_request(request_id, "admin-001", "Auto")
+                enhanced_rbac_manager.approve_role_request(
+                    request_id, "admin-001", "Auto"
+                )
 
                 results.append((user_id, target_role, True))
             except Exception as e:
@@ -398,7 +427,8 @@ class TestAuthorizationPenetration:
         threads = []
         for i in range(10):
             thread = threading.Thread(
-                target=attempt_privilege_change, args=("race-user-001", UserRole.ADMIN)
+                target=attempt_privilege_change,
+                args=("race-user-001", UserRole.ADMIN),
             )
             threads.append(thread)
             thread.start()
@@ -430,13 +460,17 @@ class TestAuthorizationPenetration:
         )
 
         # Try to perform action on stopped agent
-        mock_db.query.return_value.filter.return_value.first.return_value = agent
+        mock_db.query.return_value.filter.return_value.first.return_value = (
+            agent
+        )
 
         # Observer shouldn't be able to modify even stopped agents they don't own
         result = ResourceAccessValidator.validate_agent_access(
             user, str(agent.id), "modify", mock_db, None
         )
-        assert not result, "Should not allow modification of stopped agents by non-owners"
+        assert (
+            not result
+        ), "Should not allow modification of stopped agents by non-owners"
 
         # Test 2: Negative values
         negative_tests = [
@@ -517,7 +551,9 @@ class TestAuthorizationPenetration:
                 result = ResourceAccessValidator.validate_agent_access(
                     user, poisoned_id, "view", mock_db, None
                 )
-                assert not result, f"Cache poisoning attempt '{poisoned_id}' should fail"
+                assert (
+                    not result
+                ), f"Cache poisoning attempt '{poisoned_id}' should fail"
             except:
                 pass  # Exception is acceptable
 
@@ -537,7 +573,9 @@ class TestAuthorizationPenetration:
             quote(admin_resource),  # URL encoding
             quote(quote(admin_resource)),  # Double URL encoding
             base64.b64encode(admin_resource.encode()).decode(),  # Base64
-            admin_resource.encode("utf-16").decode("latin-1", errors="ignore"),  # UTF-16
+            admin_resource.encode("utf-16").decode(
+                "latin-1", errors="ignore"
+            ),  # UTF-16
             "\\x61\\x64\\x6d\\x69\\x6e",  # Hex encoding
             "%61%64%6d%69%6e",  # Percent encoding
         ]
@@ -598,7 +636,9 @@ class TestAuthorizationPenetration:
         agent.created_by = "user-001"
         agent.status = AgentStatus.ACTIVE
 
-        mock_db.query.return_value.filter.return_value.first.return_value = agent
+        mock_db.query.return_value.filter.return_value.first.return_value = (
+            agent
+        )
 
         start = time.time()
         ResourceAccessValidator.validate_agent_access(
@@ -607,7 +647,9 @@ class TestAuthorizationPenetration:
         valid_time = time.time() - start
 
         # Time invalid resource check
-        mock_db.query.return_value.filter.return_value.first.return_value = None
+        mock_db.query.return_value.filter.return_value.first.return_value = (
+            None
+        )
 
         start = time.time()
         ResourceAccessValidator.validate_agent_access(
@@ -618,7 +660,9 @@ class TestAuthorizationPenetration:
         # Timing differences should be minimal to prevent enumeration
         # In practice, constant-time comparisons should be used
         time_diff = abs(valid_time - invalid_time)
-        assert time_diff < 0.1, f"Timing difference {time_diff}s could enable enumeration"
+        assert (
+            time_diff < 0.1
+        ), f"Timing difference {time_diff}s could enable enumeration"
 
 
 class TestAuthorizationSecurityReport:
@@ -673,7 +717,9 @@ class TestAuthorizationSecurityReport:
         print(f"\nCompliance Status:")
         print("  • OWASP Top 10 2021 - A01: Broken Access Control ✓")
         print("  • OWASP Top 10 2021 - A03: Injection ✓")
-        print("  • OWASP Top 10 2021 - A07: Identification and Authentication Failures ✓")
+        print(
+            "  • OWASP Top 10 2021 - A07: Identification and Authentication Failures ✓"
+        )
         print("  • CWE-285: Improper Authorization ✓")
         print("  • CWE-862: Missing Authorization ✓")
         print("  • CWE-863: Incorrect Authorization ✓")

@@ -10,6 +10,6 @@ This module provides comprehensive test environment management including:
 
 from .environment_manager import EnvironmentManager
 from .environment_orchestrator import EnvironmentOrchestrator
-from .test_isolation import TestIsolation
+from .test_isolation import IsolationTester
 
-__all__ = ["EnvironmentManager", "TestIsolation", "EnvironmentOrchestrator"]
+__all__ = ["EnvironmentManager", "IsolationTester", "EnvironmentOrchestrator"]

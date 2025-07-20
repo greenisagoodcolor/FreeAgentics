@@ -25,6 +25,7 @@ from websocket.connection_pool import (
 )
 
 
+@pytest.mark.slow
 class TestPoolConfig:
     """Test connection pool configuration."""
 
@@ -43,7 +44,10 @@ class TestPoolConfig:
     def test_custom_config(self):
         """Test custom pool configuration."""
         config = PoolConfig(
-            min_size=10, max_size=50, connection_timeout=60.0, health_check_interval=60.0
+            min_size=10,
+            max_size=50,
+            connection_timeout=60.0,
+            health_check_interval=60.0,
         )
         assert config.min_size == 10
         assert config.max_size == 50
@@ -53,7 +57,9 @@ class TestPoolConfig:
     def test_config_validation(self):
         """Test configuration validation."""
         # Min size cannot be greater than max size
-        with pytest.raises(ValueError, match="min_size cannot be greater than max_size"):
+        with pytest.raises(
+            ValueError, match="min_size cannot be greater than max_size"
+        ):
             PoolConfig(min_size=100, max_size=50)
 
         # Negative values should raise errors
@@ -64,13 +70,16 @@ class TestPoolConfig:
             PoolConfig(connection_timeout=-1.0)
 
 
+@pytest.mark.slow
 class TestConnectionState:
     """Test connection state management."""
 
     def test_connection_state_transitions(self):
         """Test valid connection state transitions."""
         conn = PooledConnection(
-            connection_id="test-1", websocket=Mock(), created_at=datetime.utcnow()
+            connection_id="test-1",
+            websocket=Mock(),
+            created_at=datetime.utcnow(),
         )
 
         # Initial state should be CONNECTING
@@ -104,7 +113,9 @@ class TestConnectionState:
     def test_connection_metadata(self):
         """Test connection metadata management."""
         conn = PooledConnection(
-            connection_id="test-1", websocket=Mock(), created_at=datetime.utcnow()
+            connection_id="test-1",
+            websocket=Mock(),
+            created_at=datetime.utcnow(),
         )
 
         # Add metadata
@@ -122,6 +133,7 @@ class TestConnectionState:
 
 
 @pytest.mark.asyncio
+@pytest.mark.slow
 class TestWebSocketConnectionPool:
     """Test WebSocket connection pool functionality."""
 
@@ -146,7 +158,8 @@ class TestWebSocketConnectionPool:
         mock_websocket.close = AsyncMock()
 
         with patch(
-            "websocket.connection_pool.create_websocket_connection", return_value=mock_websocket
+            "websocket.connection_pool.create_websocket_connection",
+            return_value=mock_websocket,
         ):
             conn = await pool._create_connection("ws://test.example.com")
 
@@ -167,7 +180,8 @@ class TestWebSocketConnectionPool:
         mock_websocket.close = AsyncMock()
 
         with patch(
-            "websocket.connection_pool.create_websocket_connection", return_value=mock_websocket
+            "websocket.connection_pool.create_websocket_connection",
+            return_value=mock_websocket,
         ):
             # Initialize pool
             await pool.initialize("ws://test.example.com")
@@ -186,7 +200,8 @@ class TestWebSocketConnectionPool:
 
         mock_websocket = AsyncMock()
         with patch(
-            "websocket.connection_pool.create_websocket_connection", return_value=mock_websocket
+            "websocket.connection_pool.create_websocket_connection",
+            return_value=mock_websocket,
         ):
             await pool.initialize("ws://test.example.com")
 
@@ -205,7 +220,8 @@ class TestWebSocketConnectionPool:
 
         mock_websocket = AsyncMock()
         with patch(
-            "websocket.connection_pool.create_websocket_connection", return_value=mock_websocket
+            "websocket.connection_pool.create_websocket_connection",
+            return_value=mock_websocket,
         ):
             await pool.initialize("ws://test.example.com")
 
@@ -224,7 +240,8 @@ class TestWebSocketConnectionPool:
         mock_websocket.ping = AsyncMock()
 
         with patch(
-            "websocket.connection_pool.create_websocket_connection", return_value=mock_websocket
+            "websocket.connection_pool.create_websocket_connection",
+            return_value=mock_websocket,
         ):
             await pool.initialize("ws://test.example.com")
 
@@ -261,7 +278,10 @@ class TestWebSocketConnectionPool:
 
         websockets = [healthy_ws, unhealthy_ws, replacement_ws]
 
-        with patch("websocket.connection_pool.create_websocket_connection", side_effect=websockets):
+        with patch(
+            "websocket.connection_pool.create_websocket_connection",
+            side_effect=websockets,
+        ):
             await pool.initialize("ws://test.example.com")
             assert pool.size == 2
 
@@ -291,7 +311,8 @@ class TestWebSocketConnectionPool:
 
         mock_websocket = AsyncMock()
         with patch(
-            "websocket.connection_pool.create_websocket_connection", return_value=mock_websocket
+            "websocket.connection_pool.create_websocket_connection",
+            return_value=mock_websocket,
         ):
             await pool.initialize("ws://test.example.com")
             assert pool.size == 2
@@ -319,7 +340,8 @@ class TestWebSocketConnectionPool:
 
         mock_websocket = AsyncMock()
         with patch(
-            "websocket.connection_pool.create_websocket_connection", return_value=mock_websocket
+            "websocket.connection_pool.create_websocket_connection",
+            return_value=mock_websocket,
         ):
             # Start with more than min_size
             await pool.initialize("ws://test.example.com")
@@ -341,7 +363,8 @@ class TestWebSocketConnectionPool:
 
         mock_websocket = AsyncMock()
         with patch(
-            "websocket.connection_pool.create_websocket_connection", return_value=mock_websocket
+            "websocket.connection_pool.create_websocket_connection",
+            return_value=mock_websocket,
         ):
             await pool.initialize("ws://test.example.com")
 
@@ -368,7 +391,8 @@ class TestWebSocketConnectionPool:
             return AsyncMock()
 
         with patch(
-            "websocket.connection_pool.create_websocket_connection", side_effect=slow_connect
+            "websocket.connection_pool.create_websocket_connection",
+            side_effect=slow_connect,
         ):
             with pytest.raises(asyncio.TimeoutError):
                 await pool._create_connection("ws://test.example.com")
@@ -381,7 +405,8 @@ class TestWebSocketConnectionPool:
         mock_websocket.close = AsyncMock()
 
         with patch(
-            "websocket.connection_pool.create_websocket_connection", return_value=mock_websocket
+            "websocket.connection_pool.create_websocket_connection",
+            return_value=mock_websocket,
         ):
             await pool.initialize("ws://test.example.com")
 
@@ -397,6 +422,7 @@ class TestWebSocketConnectionPool:
             assert pool.size == 0
 
 
+@pytest.mark.slow
 class TestConnectionMetrics:
     """Test connection pool metrics collection."""
 
@@ -432,7 +458,9 @@ class TestConnectionMetrics:
         """Test pool utilization calculation."""
         metrics = ConnectionMetrics()
 
-        utilization = metrics.calculate_utilization(in_use=5, available=10, total=15)
+        utilization = metrics.calculate_utilization(
+            in_use=5, available=10, total=15
+        )
         assert utilization == pytest.approx(0.333, rel=0.01)  # 5/15
 
     def test_metrics_snapshot(self):
@@ -452,6 +480,7 @@ class TestConnectionMetrics:
 
 
 @pytest.mark.asyncio
+@pytest.mark.slow
 class TestConnectionHealthMonitor:
     """Test connection health monitoring."""
 
@@ -488,7 +517,9 @@ class TestConnectionHealthMonitor:
     async def test_monitor_error_handling(self):
         """Test health monitor error handling."""
         pool = AsyncMock()
-        pool._health_check_cycle = AsyncMock(side_effect=Exception("Health check error"))
+        pool._health_check_cycle = AsyncMock(
+            side_effect=Exception("Health check error")
+        )
 
         monitor = ConnectionHealthMonitor(pool, check_interval=0.1)
 
@@ -501,6 +532,7 @@ class TestConnectionHealthMonitor:
         assert pool._health_check_cycle.call_count >= 1
 
 
+@pytest.mark.slow
 class TestConnectionPoolIntegration:
     """Integration tests for connection pool with real WebSocket-like behavior."""
 
@@ -512,7 +544,8 @@ class TestConnectionPoolIntegration:
 
         mock_websocket = AsyncMock()
         with patch(
-            "websocket.connection_pool.create_websocket_connection", return_value=mock_websocket
+            "websocket.connection_pool.create_websocket_connection",
+            return_value=mock_websocket,
         ):
             await pool.initialize("ws://test.example.com")
 
@@ -553,7 +586,10 @@ class TestConnectionPoolIntegration:
 
         websockets = [healthy_ws, failing_ws, replacement_ws]
 
-        with patch("websocket.connection_pool.create_websocket_connection", side_effect=websockets):
+        with patch(
+            "websocket.connection_pool.create_websocket_connection",
+            side_effect=websockets,
+        ):
             await pool.initialize("ws://test.example.com")
             assert pool.size == 2
 
@@ -585,7 +621,8 @@ class TestConnectionPoolIntegration:
 
         mock_websocket = AsyncMock()
         with patch(
-            "websocket.connection_pool.create_websocket_connection", return_value=mock_websocket
+            "websocket.connection_pool.create_websocket_connection",
+            return_value=mock_websocket,
         ):
             await pool.initialize("ws://test.example.com")
 

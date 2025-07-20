@@ -21,7 +21,7 @@ import weakref
 from collections import deque
 from dataclasses import dataclass
 from pathlib import Path
-from typing import Any, Dict, List, Optional, Tuple, Union
+from typing import Any, Deque, Dict, List, Optional, Tuple, Union
 
 import numpy as np
 from scipy import sparse
@@ -55,7 +55,10 @@ class LazyBeliefArray:
     """Lazy-evaluated sparse belief array for memory efficiency."""
 
     def __init__(
-        self, shape: Tuple[int, ...], dtype: np.dtype = np.float32, sparsity_threshold: float = 0.9
+        self,
+        shape: Tuple[int, ...],
+        dtype: np.dtype = np.float32,
+        sparsity_threshold: float = 0.9,
     ):
         """Initialize lazy belief array.
 
@@ -84,7 +87,9 @@ class LazyBeliefArray:
         with self._lock:
             if self._dense_array is None:
                 if self._sparse_representation is not None:
-                    self._dense_array = self._compressor.decompress(self._sparse_representation)
+                    self._dense_array = self._compressor.decompress(
+                        self._sparse_representation
+                    )
                 else:
                     self._dense_array = np.zeros(self.shape, dtype=self.dtype)
             return self._dense_array
@@ -171,7 +176,9 @@ class LazyBeliefArray:
                 return False
 
             # Calculate sparsity
-            sparsity = 1 - (np.count_nonzero(self._dense_array) / self._dense_array.size)
+            sparsity = 1 - (
+                np.count_nonzero(self._dense_array) / self._dense_array.size
+            )
 
             if sparsity > self.sparsity_threshold:
                 # Force compression and free dense array
@@ -197,7 +204,9 @@ class LazyBeliefArray:
 
     def _update_memory_stats(self):
         """Update memory statistics."""
-        dense_mb = np.prod(self.shape) * np.dtype(self.dtype).itemsize / (1024 * 1024)
+        dense_mb = (
+            np.prod(self.shape) * np.dtype(self.dtype).itemsize / (1024 * 1024)
+        )
         current_mb = self.memory_usage()
         self.stats.update_stats(dense_mb, current_mb)
 
@@ -243,7 +252,9 @@ class MemoryMappedBuffer:
 
         # Create memory map
         self._file = open(self.filename, "r+b")
-        self._mmap = mmap.mmap(self._file.fileno(), self.buffer_size, access=mmap.ACCESS_WRITE)
+        self._mmap = mmap.mmap(
+            self._file.fileno(), self.buffer_size, access=mmap.ACCESS_WRITE
+        )
         self._array = np.frombuffer(self._mmap, dtype=dtype).reshape(shape)
 
         # Thread safety
@@ -295,8 +306,12 @@ class MemoryMappedBuffer:
 
             # Create new mapping
             self._file = open(self.filename, "r+b")
-            self._mmap = mmap.mmap(self._file.fileno(), self.buffer_size, access=mmap.ACCESS_WRITE)
-            self._array = np.frombuffer(self._mmap, dtype=self.dtype).reshape(new_shape)
+            self._mmap = mmap.mmap(
+                self._file.fileno(), self.buffer_size, access=mmap.ACCESS_WRITE
+            )
+            self._array = np.frombuffer(self._mmap, dtype=self.dtype).reshape(
+                new_shape
+            )
 
             # Copy old data with proper 2D indexing
             if len(old_data.shape) == 2 and len(new_shape) == 2:
@@ -318,7 +333,7 @@ class MemoryMappedBuffer:
 
     def memory_usage(self) -> float:
         """Get memory usage in MB (virtual, not physical)."""
-        return self.buffer_size / (1024 * 1024)
+        return float(self.buffer_size) / (1024 * 1024)
 
     @staticmethod
     def _cleanup(mmap_obj, file_obj, filename: str):
@@ -330,7 +345,9 @@ class MemoryMappedBuffer:
                 file_obj.close()
             Path(filename).unlink(missing_ok=True)
         except Exception as e:
-            logger.warning(f"Error cleaning up memory-mapped file {filename}: {e}")
+            logger.warning(
+                f"Error cleaning up memory-mapped file {filename}: {e}"
+            )
 
 
 class CompactActionHistory:
@@ -357,7 +374,9 @@ class CompactActionHistory:
         # Storage
         self._actions = np.zeros(max_actions, dtype=self.action_dtype)
         self._timestamps = np.zeros(max_actions, dtype=np.float32)
-        self._rewards = np.zeros(max_actions, dtype=np.float16)  # Half precision for rewards
+        self._rewards = np.zeros(
+            max_actions, dtype=np.float16
+        )  # Half precision for rewards
 
         # Circular buffer state
         self._head = 0
@@ -380,7 +399,9 @@ class CompactActionHistory:
             self._head = (self._head + 1) % self.max_actions
             self._size = min(self._size + 1, self.max_actions)
 
-    def get_recent_actions(self, count: int) -> Tuple[np.ndarray, np.ndarray, np.ndarray]:
+    def get_recent_actions(
+        self, count: int
+    ) -> Tuple[np.ndarray, np.ndarray, np.ndarray]:
         """Get recent actions.
 
         Args:
@@ -406,7 +427,10 @@ class CompactActionHistory:
                     indices = np.arange(self._head - count, self._head)
                 else:
                     # Wrap around
-                    part1 = np.arange(self.max_actions - (count - self._head), self.max_actions)
+                    part1 = np.arange(
+                        self.max_actions - (count - self._head),
+                        self.max_actions,
+                    )
                     part2 = np.arange(0, self._head)
                     indices = np.concatenate([part1, part2])
 
@@ -426,10 +450,16 @@ class CompactActionHistory:
             if self._size == 0:
                 return {"count": 0, "action_distribution": {}}
 
-            recent_actions, recent_timestamps, recent_rewards = self.get_recent_actions(self._size)
+            (
+                recent_actions,
+                recent_timestamps,
+                recent_rewards,
+            ) = self.get_recent_actions(self._size)
 
             # Action distribution
-            unique_actions, counts = np.unique(recent_actions, return_counts=True)
+            unique_actions, counts = np.unique(
+                recent_actions, return_counts=True
+            )
             action_dist = dict(zip(unique_actions.tolist(), counts.tolist()))
 
             return {
@@ -446,7 +476,11 @@ class CompactActionHistory:
 
     def memory_usage_bytes(self) -> int:
         """Get memory usage in bytes."""
-        return self._actions.nbytes + self._timestamps.nbytes + self._rewards.nbytes
+        return int(
+            self._actions.nbytes
+            + self._timestamps.nbytes
+            + self._rewards.nbytes
+        )
 
     def compress_old_entries(self, keep_recent: int = 100):
         """Compress old entries by downsampling.
@@ -471,17 +505,27 @@ class CompactActionHistory:
             old_rewards = rewards[:-keep_recent]
 
             # Downsample old entries (keep every nth entry)
-            downsample_factor = max(2, len(old_actions) // (self.max_actions - keep_recent))
-            downsampled_indices = np.arange(0, len(old_actions), downsample_factor)
+            downsample_factor = max(
+                2, len(old_actions) // (self.max_actions - keep_recent)
+            )
+            downsampled_indices = np.arange(
+                0, len(old_actions), downsample_factor
+            )
 
             downsampled_actions = old_actions[downsampled_indices]
             downsampled_timestamps = old_timestamps[downsampled_indices]
             downsampled_rewards = old_rewards[downsampled_indices]
 
             # Combine downsampled old + recent
-            combined_actions = np.concatenate([downsampled_actions, recent_actions])
-            combined_timestamps = np.concatenate([downsampled_timestamps, recent_timestamps])
-            combined_rewards = np.concatenate([downsampled_rewards, recent_rewards])
+            combined_actions = np.concatenate(
+                [downsampled_actions, recent_actions]
+            )
+            combined_timestamps = np.concatenate(
+                [downsampled_timestamps, recent_timestamps]
+            )
+            combined_rewards = np.concatenate(
+                [downsampled_rewards, recent_rewards]
+            )
 
             # Reset buffer and add combined data
             self._head = 0
@@ -497,7 +541,10 @@ class EfficientTemporalSequence:
     """Memory-efficient storage for temporal sequences with delta compression."""
 
     def __init__(
-        self, max_length: int = 1000, feature_dim: int = 32, compression_ratio: float = 0.1
+        self,
+        max_length: int = 1000,
+        feature_dim: int = 32,
+        compression_ratio: float = 0.1,
     ):
         """Initialize efficient temporal sequence.
 
@@ -511,9 +558,11 @@ class EfficientTemporalSequence:
         self.compression_ratio = compression_ratio
 
         # Storage for base states and deltas
-        self._base_states = deque(maxlen=max_length // 10)  # Store periodic base states
-        self._deltas = deque(maxlen=max_length)
-        self._timestamps = deque(maxlen=max_length)
+        self._base_states: Deque[np.ndarray] = deque(
+            maxlen=max_length // 10
+        )  # Store periodic base states
+        self._deltas: Deque[np.ndarray] = deque(maxlen=max_length)
+        self._timestamps: Deque[float] = deque(maxlen=max_length)
 
         # Compression settings
         self._base_interval = 10  # Store base state every N steps
@@ -536,12 +585,15 @@ class EfficientTemporalSequence:
 
             # Check if we should store a new base state
             should_store_base = (
-                len(self._deltas) % self._base_interval == 0 or len(self._base_states) == 0
+                len(self._deltas) % self._base_interval == 0
+                or len(self._base_states) == 0
             )
 
             if should_store_base:
                 # Store as base state
-                self._base_states.append((len(self._deltas), state.copy(), timestamp))
+                self._base_states.append(
+                    (len(self._deltas), state.copy(), timestamp)
+                )
                 self._last_base_index = len(self._deltas)
                 delta = np.zeros_like(state)
             else:
@@ -593,7 +645,9 @@ class EfficientTemporalSequence:
 
             return current_state
 
-    def get_recent_states(self, count: int) -> Tuple[List[np.ndarray], List[float]]:
+    def get_recent_states(
+        self, count: int
+    ) -> Tuple[List[np.ndarray], List[float]]:
         """Get recent states efficiently.
 
         Args:
@@ -628,10 +682,14 @@ class EfficientTemporalSequence:
         """
         with self._lock:
             # Calculate raw memory usage
-            raw_states_mb = len(self._deltas) * self.feature_dim * 4 / (1024 * 1024)
+            raw_states_mb = (
+                len(self._deltas) * self.feature_dim * 4 / (1024 * 1024)
+            )
 
             # Calculate actual memory usage
-            base_states_mb = len(self._base_states) * self.feature_dim * 4 / (1024 * 1024)
+            base_states_mb = (
+                len(self._base_states) * self.feature_dim * 4 / (1024 * 1024)
+            )
 
             deltas_bytes = sum(delta.nbytes for delta in self._deltas)
             deltas_mb = deltas_bytes / (1024 * 1024)
@@ -646,7 +704,9 @@ class EfficientTemporalSequence:
                 "deltas_mb": deltas_mb,
                 "timestamps_mb": timestamps_mb,
                 "total_mb": total_mb,
-                "compression_ratio": raw_states_mb / total_mb if total_mb > 0 else 1.0,
+                "compression_ratio": raw_states_mb / total_mb
+                if total_mb > 0
+                else 1.0,
                 "sequence_length": len(self._deltas),
             }
 
@@ -666,7 +726,9 @@ class CompactKnowledgeGraph:
 
         # Node storage (compact)
         self._node_ids = np.zeros(max_nodes, dtype=np.uint32)
-        self._node_types = np.zeros(max_nodes, dtype=np.uint8)  # Support 256 node types
+        self._node_types = np.zeros(
+            max_nodes, dtype=np.uint8
+        )  # Support 256 node types
         self._node_features = sparse.csr_matrix(
             (max_nodes, 64), dtype=np.float32
         )  # Sparse features
@@ -674,7 +736,9 @@ class CompactKnowledgeGraph:
         # Edge storage (sparse)
         self._edge_sources = np.zeros(max_edges, dtype=np.uint32)
         self._edge_targets = np.zeros(max_edges, dtype=np.uint32)
-        self._edge_types = np.zeros(max_edges, dtype=np.uint8)  # Support 256 edge types
+        self._edge_types = np.zeros(
+            max_edges, dtype=np.uint8
+        )  # Support 256 edge types
         self._edge_weights = np.zeros(max_edges, dtype=np.float16)
 
         # Active counts
@@ -682,11 +746,14 @@ class CompactKnowledgeGraph:
         self._num_edges = 0
 
         # Index for fast lookup
-        self._node_index = {}  # node_id -> index
+        self._node_index: Dict[str, int] = {}  # node_id -> index
         self._lock = threading.RLock()
 
     def add_node(
-        self, node_id: int, node_type: int = 0, features: Optional[np.ndarray] = None
+        self,
+        node_id: int,
+        node_type: int = 0,
+        features: Optional[np.ndarray] = None,
     ) -> bool:
         """Add a node to the graph.
 
@@ -727,7 +794,11 @@ class CompactKnowledgeGraph:
             return True
 
     def add_edge(
-        self, source_id: int, target_id: int, edge_type: int = 0, weight: float = 1.0
+        self,
+        source_id: int,
+        target_id: int,
+        edge_type: int = 0,
+        weight: float = 1.0,
     ) -> bool:
         """Add an edge to the graph.
 
@@ -745,7 +816,10 @@ class CompactKnowledgeGraph:
                 return False
 
             # Check that nodes exist
-            if source_id not in self._node_index or target_id not in self._node_index:
+            if (
+                source_id not in self._node_index
+                or target_id not in self._node_index
+            ):
                 return False
 
             # Add edge
@@ -803,22 +877,33 @@ class CompactKnowledgeGraph:
     def compact_storage(self):
         """Compact storage by removing unused space."""
         with self._lock:
-            if self._num_nodes == self.max_nodes and self._num_edges == self.max_edges:
+            if (
+                self._num_nodes == self.max_nodes
+                and self._num_edges == self.max_edges
+            ):
                 return  # Already at capacity
 
             # Compact node storage
             if self._num_nodes < self.max_nodes:
                 self._node_ids = self._node_ids[: self._num_nodes].copy()
                 self._node_types = self._node_types[: self._num_nodes].copy()
-                self._node_features = self._node_features[: self._num_nodes].copy()
+                self._node_features = self._node_features[
+                    : self._num_nodes
+                ].copy()
                 self.max_nodes = self._num_nodes
 
             # Compact edge storage
             if self._num_edges < self.max_edges:
-                self._edge_sources = self._edge_sources[: self._num_edges].copy()
-                self._edge_targets = self._edge_targets[: self._num_edges].copy()
+                self._edge_sources = self._edge_sources[
+                    : self._num_edges
+                ].copy()
+                self._edge_targets = self._edge_targets[
+                    : self._num_edges
+                ].copy()
                 self._edge_types = self._edge_types[: self._num_edges].copy()
-                self._edge_weights = self._edge_weights[: self._num_edges].copy()
+                self._edge_weights = self._edge_weights[
+                    : self._num_edges
+                ].copy()
                 self.max_edges = self._num_edges
 
     def memory_usage_stats(self) -> Dict[str, float]:
@@ -829,7 +914,9 @@ class CompactKnowledgeGraph:
         """
         with self._lock:
             nodes_mb = (
-                self._node_ids.nbytes + self._node_types.nbytes + self._node_features.data.nbytes
+                self._node_ids.nbytes
+                + self._node_types.nbytes
+                + self._node_features.data.nbytes
             ) / (1024 * 1024)
 
             edges_mb = (
@@ -842,7 +929,10 @@ class CompactKnowledgeGraph:
             total_mb = nodes_mb + edges_mb
 
             # Calculate efficiency
-            utilization = (self._num_nodes / self.max_nodes + self._num_edges / self.max_edges) / 2
+            utilization = (
+                self._num_nodes / self.max_nodes
+                + self._num_edges / self.max_edges
+            ) / 2
 
             return {
                 "nodes_mb": nodes_mb,
@@ -851,15 +941,23 @@ class CompactKnowledgeGraph:
                 "num_nodes": self._num_nodes,
                 "num_edges": self._num_edges,
                 "utilization": utilization,
-                "avg_node_size_bytes": nodes_mb * 1024 * 1024 / max(1, self._num_nodes),
-                "avg_edge_size_bytes": edges_mb * 1024 * 1024 / max(1, self._num_edges),
+                "avg_node_size_bytes": nodes_mb
+                * 1024
+                * 1024
+                / max(1, self._num_nodes),
+                "avg_edge_size_bytes": edges_mb
+                * 1024
+                * 1024
+                / max(1, self._num_edges),
             }
 
 
 def create_efficient_belief_buffer(
-    shape: Tuple[int, ...], buffer_size: int = 100, use_memory_mapping: bool = False
+    shape: Tuple[int, ...],
+    buffer_size: int = 100,
+    use_memory_mapping: bool = False,
 ) -> Union[LazyBeliefArray, MemoryMappedBuffer]:
-    """Factory function to create efficient belief buffer.
+    """Create efficient belief buffer using factory pattern.
 
     Args:
         shape: Belief state shape
@@ -869,9 +967,13 @@ def create_efficient_belief_buffer(
     Returns:
         Efficient belief buffer
     """
-    total_size_mb = np.prod(shape) * buffer_size * 4 / (1024 * 1024)  # Assume float32
+    total_size_mb = (
+        np.prod(shape) * buffer_size * 4 / (1024 * 1024)
+    )  # Assume float32
 
-    if use_memory_mapping or total_size_mb > 100:  # Use memory mapping for large buffers
+    if (
+        use_memory_mapping or total_size_mb > 100
+    ):  # Use memory mapping for large buffers
         buffer_shape = (buffer_size,) + shape
         return MemoryMappedBuffer(buffer_shape, dtype=np.float32)
     else:
@@ -906,7 +1008,9 @@ def benchmark_data_structures():
 
     # Benchmark CompactActionHistory
     logger.info("Testing CompactActionHistory...")
-    action_history = CompactActionHistory(max_actions=1000, action_space_size=10)
+    action_history = CompactActionHistory(
+        max_actions=1000, action_space_size=10
+    )
 
     import time
 

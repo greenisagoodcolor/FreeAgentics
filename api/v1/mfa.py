@@ -10,14 +10,19 @@ This module provides REST API endpoints for MFA operations including:
 """
 
 import logging
-from typing import Dict, List
+from typing import Any, Dict, List
 
 from fastapi import APIRouter, Depends, HTTPException, Request, status
 from fastapi.responses import JSONResponse
 from sqlalchemy.orm import Session
 
 from api.middleware.rate_limiter import rate_limit
-from auth.mfa_service import MFAEnrollmentRequest, MFAResponse, MFAService, MFAVerificationRequest
+from auth.mfa_service import (
+    MFAEnrollmentRequest,
+    MFAResponse,
+    MFAService,
+    MFAVerificationRequest,
+)
 from auth.security_implementation import get_current_user, validate_csrf_token
 from database.session import get_db
 from observability.security_monitoring import SecurityMonitoringSystem
@@ -38,7 +43,9 @@ MFA_RATE_LIMITS = {
 
 def get_mfa_service(
     db: Session = Depends(get_db),
-    security_monitor: SecurityMonitoringSystem = Depends(lambda: SecurityMonitoringSystem()),
+    security_monitor: SecurityMonitoringSystem = Depends(
+        lambda: SecurityMonitoringSystem()
+    ),
 ) -> MFAService:
     """Dependency to get MFA service instance."""
     return MFAService(db, security_monitor)
@@ -48,7 +55,7 @@ def get_mfa_service(
 @rate_limit(MFA_RATE_LIMITS["enroll"])
 async def enroll_mfa(
     request: MFAEnrollmentRequest,
-    current_user: Dict = Depends(get_current_user),
+    current_user: Dict[str, Any] = Depends(get_current_user),
     mfa_service: MFAService = Depends(get_mfa_service),
     csrf_token: str = Depends(validate_csrf_token),
 ) -> MFAResponse:
@@ -90,18 +97,27 @@ async def enroll_mfa(
         result = await mfa_service.enroll_user(request)
 
         if result.success:
-            logger.info(f"MFA enrollment successful for user {request.user_id}")
+            logger.info(
+                f"MFA enrollment successful for user {request.user_id}"
+            )
             return result
         else:
-            logger.warning(f"MFA enrollment failed for user {request.user_id}: {result.message}")
-            raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail=result.message)
+            logger.warning(
+                f"MFA enrollment failed for user {request.user_id}: {result.message}"
+            )
+            raise HTTPException(
+                status_code=status.HTTP_400_BAD_REQUEST, detail=result.message
+            )
 
     except HTTPException:
         raise
     except Exception as e:
-        logger.error(f"MFA enrollment error for user {request.user_id}: {str(e)}")
+        logger.error(
+            f"MFA enrollment error for user {request.user_id}: {str(e)}"
+        )
         raise HTTPException(
-            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR, detail="MFA enrollment failed"
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail="MFA enrollment failed",
         )
 
 
@@ -109,7 +125,7 @@ async def enroll_mfa(
 @rate_limit(MFA_RATE_LIMITS["verify"])
 async def verify_mfa(
     request: MFAVerificationRequest,
-    current_user: Dict = Depends(get_current_user),
+    current_user: Dict[str, Any] = Depends(get_current_user),
     mfa_service: MFAService = Depends(get_mfa_service),
     csrf_token: str = Depends(validate_csrf_token),
 ) -> MFAResponse:
@@ -145,32 +161,43 @@ async def verify_mfa(
         result = await mfa_service.verify_mfa(request)
 
         if result.success:
-            logger.info(f"MFA verification successful for user {request.user_id}")
+            logger.info(
+                f"MFA verification successful for user {request.user_id}"
+            )
             return result
         else:
-            logger.warning(f"MFA verification failed for user {request.user_id}: {result.message}")
+            logger.warning(
+                f"MFA verification failed for user {request.user_id}: {result.message}"
+            )
 
             # Return appropriate HTTP status based on failure reason
             if "too many failed attempts" in result.message.lower():
                 raise HTTPException(
-                    status_code=status.HTTP_429_TOO_MANY_REQUESTS, detail=result.message
+                    status_code=status.HTTP_429_TOO_MANY_REQUESTS,
+                    detail=result.message,
                 )
             else:
-                raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail=result.message)
+                raise HTTPException(
+                    status_code=status.HTTP_400_BAD_REQUEST,
+                    detail=result.message,
+                )
 
     except HTTPException:
         raise
     except Exception as e:
-        logger.error(f"MFA verification error for user {request.user_id}: {str(e)}")
+        logger.error(
+            f"MFA verification error for user {request.user_id}: {str(e)}"
+        )
         raise HTTPException(
-            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR, detail="MFA verification failed"
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail="MFA verification failed",
         )
 
 
 @router.get("/status")
 @rate_limit(MFA_RATE_LIMITS["status"])
 async def get_mfa_status(
-    current_user: Dict = Depends(get_current_user),
+    current_user: Dict[str, Any] = Depends(get_current_user),
     mfa_service: MFAService = Depends(get_mfa_service),
 ) -> Dict:
     """
@@ -200,7 +227,9 @@ async def get_mfa_status(
         return status_info
 
     except Exception as e:
-        logger.error(f"MFA status retrieval error for user {current_user['user_id']}: {str(e)}")
+        logger.error(
+            f"MFA status retrieval error for user {current_user['user_id']}: {str(e)}"
+        )
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
             detail="Failed to retrieve MFA status",
@@ -210,7 +239,7 @@ async def get_mfa_status(
 @router.post("/disable", response_model=MFAResponse)
 @rate_limit(MFA_RATE_LIMITS["disable"])
 async def disable_mfa(
-    current_user: Dict = Depends(get_current_user),
+    current_user: Dict[str, Any] = Depends(get_current_user),
     mfa_service: MFAService = Depends(get_mfa_service),
     csrf_token: str = Depends(validate_csrf_token),
 ) -> MFAResponse:
@@ -242,22 +271,29 @@ async def disable_mfa(
             logger.info(f"MFA disabled for user {user_id}")
             return result
         else:
-            logger.warning(f"MFA disable failed for user {user_id}: {result.message}")
-            raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail=result.message)
+            logger.warning(
+                f"MFA disable failed for user {user_id}: {result.message}"
+            )
+            raise HTTPException(
+                status_code=status.HTTP_400_BAD_REQUEST, detail=result.message
+            )
 
     except HTTPException:
         raise
     except Exception as e:
-        logger.error(f"MFA disable error for user {current_user['user_id']}: {str(e)}")
+        logger.error(
+            f"MFA disable error for user {current_user['user_id']}: {str(e)}"
+        )
         raise HTTPException(
-            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR, detail="Failed to disable MFA"
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail="Failed to disable MFA",
         )
 
 
 @router.post("/regenerate-backup-codes", response_model=MFAResponse)
 @rate_limit(MFA_RATE_LIMITS["regenerate"])
 async def regenerate_backup_codes(
-    current_user: Dict = Depends(get_current_user),
+    current_user: Dict[str, Any] = Depends(get_current_user),
     mfa_service: MFAService = Depends(get_mfa_service),
     csrf_token: str = Depends(validate_csrf_token),
 ) -> MFAResponse:
@@ -287,13 +323,19 @@ async def regenerate_backup_codes(
             logger.info(f"Backup codes regenerated for user {user_id}")
             return result
         else:
-            logger.warning(f"Backup code regeneration failed for user {user_id}: {result.message}")
-            raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail=result.message)
+            logger.warning(
+                f"Backup code regeneration failed for user {user_id}: {result.message}"
+            )
+            raise HTTPException(
+                status_code=status.HTTP_400_BAD_REQUEST, detail=result.message
+            )
 
     except HTTPException:
         raise
     except Exception as e:
-        logger.error(f"Backup code regeneration error for user {current_user['user_id']}: {str(e)}")
+        logger.error(
+            f"Backup code regeneration error for user {current_user['user_id']}: {str(e)}"
+        )
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
             detail="Failed to regenerate backup codes",
@@ -358,7 +400,7 @@ async def get_available_methods() -> Dict:
 @rate_limit("3/1m")  # Very restrictive for testing
 async def test_mfa_token(
     token: str,
-    current_user: Dict = Depends(get_current_user),
+    current_user: Dict[str, Any] = Depends(get_current_user),
     mfa_service: MFAService = Depends(get_mfa_service),
 ) -> Dict:
     """
@@ -383,7 +425,9 @@ async def test_mfa_token(
         user_id = current_user["user_id"]
 
         # Create test verification request
-        test_request = MFAVerificationRequest(user_id=user_id, token=token, method="totp")
+        test_request = MFAVerificationRequest(
+            user_id=user_id, token=token, method="totp"
+        )
 
         # Get MFA settings (should exist but not be enabled yet)
         mfa_status = await mfa_service.get_mfa_status(user_id)
@@ -399,20 +443,27 @@ async def test_mfa_token(
 
         return {
             "success": result.success,
-            "message": "Token is valid" if result.success else "Token is invalid",
+            "message": "Token is valid"
+            if result.success
+            else "Token is invalid",
             "ready_for_enrollment": result.success,
         }
 
     except Exception as e:
-        logger.error(f"MFA token test error for user {current_user['user_id']}: {str(e)}")
+        logger.error(
+            f"MFA token test error for user {current_user['user_id']}: {str(e)}"
+        )
         raise HTTPException(
-            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR, detail="Failed to test MFA token"
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail="Failed to test MFA token",
         )
 
 
 # Health check endpoint for MFA service
 @router.get("/health")
-async def mfa_health_check(mfa_service: MFAService = Depends(get_mfa_service)) -> Dict:
+async def mfa_health_check(
+    mfa_service: MFAService = Depends(get_mfa_service),
+) -> Dict:
     """
     Health check for MFA service.
 
@@ -421,7 +472,7 @@ async def mfa_health_check(mfa_service: MFAService = Depends(get_mfa_service)) -
     """
     try:
         # Basic health check - ensure encryption key is available
-        test_secret = "test_secret_for_health_check"
+        test_secret = "test_secret_for_health_check"  # nosec B105 - Test string for health check only
         encrypted = mfa_service._encrypt_secret(test_secret)
         decrypted = mfa_service._decrypt_secret(encrypted)
 
@@ -435,4 +486,8 @@ async def mfa_health_check(mfa_service: MFAService = Depends(get_mfa_service)) -
 
     except Exception as e:
         logger.error(f"MFA health check failed: {str(e)}")
-        return {"status": "unhealthy", "error": str(e), "timestamp": "2025-01-16T12:00:00Z"}
+        return {
+            "status": "unhealthy",
+            "error": str(e),
+            "timestamp": "2025-01-16T12:00:00Z",
+        }

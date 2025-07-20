@@ -26,7 +26,11 @@ from sqlalchemy import Boolean, Column, DateTime, Integer, String, Text
 from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy.orm import Session
 
-from auth.security_logging import SecurityEventSeverity, SecurityEventType, security_auditor
+from auth.security_logging import (
+    SecurityEventSeverity,
+    SecurityEventType,
+    security_auditor,
+)
 from observability.security_monitoring import SecurityMonitoringSystem
 
 logger = logging.getLogger(__name__)
@@ -44,7 +48,9 @@ class MFASettings(Base):
     user_id = Column(String(255), unique=True, nullable=False, index=True)
     totp_secret = Column(Text, nullable=True)  # Encrypted TOTP secret
     backup_codes = Column(Text, nullable=True)  # Encrypted backup codes JSON
-    hardware_keys = Column(Text, nullable=True)  # Registered hardware keys JSON
+    hardware_keys = Column(
+        Text, nullable=True
+    )  # Registered hardware keys JSON
     is_enabled = Column(Boolean, default=False)
     enrollment_date = Column(DateTime, default=datetime.utcnow)
     last_used = Column(DateTime, nullable=True)
@@ -104,7 +110,10 @@ class MFAService:
     - Security event logging and monitoring
     """
 
-    def __init__(self, db_session: Session, security_monitor: SecurityMonitoringSystem):
+    def __init__(
+        self, db_session: Session, security_monitor: SecurityMonitoringSystem
+    ):
+        """Initialize enhanced MFA service."""
         self.db = db_session
         self.security_monitor = security_monitor
         self.encryption_key = self._get_encryption_key()
@@ -124,7 +133,9 @@ class MFAService:
 
     def _get_encryption_key(self) -> bytes:
         """Get or generate encryption key for MFA secrets."""
-        key_path = os.path.join(os.path.dirname(__file__), "keys", "mfa_encryption.key")
+        key_path = os.path.join(
+            os.path.dirname(__file__), "keys", "mfa_encryption.key"
+        )
 
         if os.path.exists(key_path):
             with open(key_path, "rb") as f:
@@ -150,7 +161,10 @@ class MFAService:
         codes = []
         for _ in range(self.backup_codes_count):
             # Generate 8-character alphanumeric code
-            code = "".join(secrets.choice("ABCDEFGHIJKLMNPQRSTUVWXYZ23456789") for _ in range(8))
+            code = "".join(
+                secrets.choice("ABCDEFGHIJKLMNPQRSTUVWXYZ23456789")
+                for _ in range(8)
+            )
             codes.append(code)
         return codes
 
@@ -162,17 +176,25 @@ class MFAService:
 
     def _check_rate_limit(self, user_id: str) -> bool:
         """Check if user is within rate limits for MFA attempts."""
-        mfa_settings = self.db.query(MFASettings).filter_by(user_id=user_id).first()
+        mfa_settings = (
+            self.db.query(MFASettings).filter_by(user_id=user_id).first()
+        )
 
         if not mfa_settings:
             return True
 
         # Check if user is locked out
-        if mfa_settings.locked_until and datetime.utcnow() < mfa_settings.locked_until:
+        if (
+            mfa_settings.locked_until
+            and datetime.utcnow() < mfa_settings.locked_until
+        ):
             return False
 
         # Reset lockout if time has passed
-        if mfa_settings.locked_until and datetime.utcnow() >= mfa_settings.locked_until:
+        if (
+            mfa_settings.locked_until
+            and datetime.utcnow() >= mfa_settings.locked_until
+        ):
             mfa_settings.locked_until = None
             mfa_settings.failed_attempts = 0
             self.db.commit()
@@ -181,18 +203,22 @@ class MFAService:
 
     def _increment_failed_attempts(self, user_id: str) -> None:
         """Increment failed attempts and apply lockout if necessary."""
-        mfa_settings = self.db.query(MFASettings).filter_by(user_id=user_id).first()
+        mfa_settings = (
+            self.db.query(MFASettings).filter_by(user_id=user_id).first()
+        )
 
         if mfa_settings:
             mfa_settings.failed_attempts += 1
 
             if mfa_settings.failed_attempts >= self.max_failed_attempts:
-                mfa_settings.locked_until = datetime.utcnow() + self.lockout_duration
+                mfa_settings.locked_until = (
+                    datetime.utcnow() + self.lockout_duration
+                )
 
                 # Log security event
                 security_auditor.log_event(
                     event_type=SecurityEventType.MFA_LOCKOUT,
-                    severity=SecurityEventSeverity.HIGH,
+                    severity=SecurityEventSeverity.HIGH,  
                     message=f"MFA lockout applied for user {user_id}",
                     user_id=user_id,
                     details={
@@ -205,7 +231,9 @@ class MFAService:
 
     def _reset_failed_attempts(self, user_id: str) -> None:
         """Reset failed attempts after successful authentication."""
-        mfa_settings = self.db.query(MFASettings).filter_by(user_id=user_id).first()
+        mfa_settings = (
+            self.db.query(MFASettings).filter_by(user_id=user_id).first()
+        )
 
         if mfa_settings:
             mfa_settings.failed_attempts = 0
@@ -225,10 +253,17 @@ class MFAService:
         """
         try:
             # Check if user already has MFA enabled
-            existing_mfa = self.db.query(MFASettings).filter_by(user_id=request.user_id).first()
+            existing_mfa = (
+                self.db.query(MFASettings)
+                .filter_by(user_id=request.user_id)
+                .first()
+            )
 
             if existing_mfa and existing_mfa.is_enabled:
-                return MFAResponse(success=False, message="MFA is already enabled for this user")
+                return MFAResponse(
+                    success=False,
+                    message="MFA is already enabled for this user",
+                )
 
             if request.method == "totp":
                 return await self._enroll_totp(request)
@@ -236,22 +271,28 @@ class MFAService:
                 return await self._enroll_hardware_key(request)
             else:
                 return MFAResponse(
-                    success=False, message=f"Method {request.method} not yet implemented"
+                    success=False,
+                    message=f"Method {request.method} not yet implemented",
                 )
 
         except Exception as e:
-            logger.error(f"MFA enrollment failed for user {request.user_id}: {str(e)}")
+            logger.error(
+                f"MFA enrollment failed for user {request.user_id}: {str(e)}"
+            )
 
             # Log security event
             security_auditor.log_event(
                 event_type=SecurityEventType.MFA_ENROLLMENT_FAILED,
-                severity=SecurityEventSeverity.MEDIUM,
+                severity=SecurityEventSeverity.MEDIUM,  
                 message=f"MFA enrollment failed for user {request.user_id}",
                 user_id=request.user_id,
                 details={"error": str(e), "method": request.method},
             )
 
-            return MFAResponse(success=False, message="MFA enrollment failed. Please try again.")
+            return MFAResponse(
+                success=False,
+                message="MFA enrollment failed. Please try again.",
+            )
 
     async def _enroll_totp(self, request: MFAEnrollmentRequest) -> MFAResponse:
         """Enroll user in TOTP-based MFA."""
@@ -259,7 +300,9 @@ class MFAService:
         secret = pyotp.random_base32()
 
         # Create TOTP instance
-        totp = pyotp.TOTP(secret, interval=self.totp_interval, digits=self.totp_digits)
+        totp = pyotp.TOTP(
+            secret, interval=self.totp_interval, digits=self.totp_digits
+        )
 
         # Generate provisioning URI for QR code
         provisioning_uri = totp.provisioning_uri(
@@ -267,7 +310,7 @@ class MFAService:
         )
 
         # Generate QR code
-        qr = qrcode.QRCode(
+        qr = qrcode.QRCode(  
             version=1,
             error_correction=qrcode.constants.ERROR_CORRECT_L,
             box_size=10,
@@ -291,10 +334,16 @@ class MFAService:
 
         # Encrypt secrets for storage
         encrypted_secret = self._encrypt_secret(secret)
-        encrypted_backup_codes = self._encrypt_secret(json.dumps(hashed_backup_codes))
+        encrypted_backup_codes = self._encrypt_secret(
+            json.dumps(hashed_backup_codes)
+        )
 
         # Store in database
-        mfa_settings = self.db.query(MFASettings).filter_by(user_id=request.user_id).first()
+        mfa_settings = (
+            self.db.query(MFASettings)
+            .filter_by(user_id=request.user_id)
+            .first()
+        )
 
         if mfa_settings:
             mfa_settings.totp_secret = encrypted_secret
@@ -313,7 +362,7 @@ class MFAService:
         # Log security event
         security_auditor.log_event(
             event_type=SecurityEventType.MFA_ENROLLED,
-            severity=SecurityEventSeverity.INFO,
+            severity=SecurityEventSeverity.INFO,  
             message=f"MFA enrollment initiated for user {request.user_id}",
             user_id=request.user_id,
             details={"method": "totp", "enrollment_pending": True},
@@ -326,11 +375,16 @@ class MFAService:
             backup_codes=backup_codes,
         )
 
-    async def _enroll_hardware_key(self, request: MFAEnrollmentRequest) -> MFAResponse:
+    async def _enroll_hardware_key(
+        self, request: MFAEnrollmentRequest
+    ) -> MFAResponse:
         """Enroll user in hardware key-based MFA."""
         # This would integrate with FIDO2/WebAuthn libraries
         # For now, return placeholder response
-        return MFAResponse(success=False, message="Hardware key enrollment not yet implemented")
+        return MFAResponse(
+            success=False,
+            message="Hardware key enrollment not yet implemented",
+        )
 
     async def verify_mfa(self, request: MFAVerificationRequest) -> MFAResponse:
         """
@@ -346,23 +400,33 @@ class MFAService:
             # Check rate limiting
             if not self._check_rate_limit(request.user_id):
                 return MFAResponse(
-                    success=False, message="Too many failed attempts. Please try again later."
+                    success=False,
+                    message="Too many failed attempts. Please try again later.",
                 )
 
             # Get MFA settings
-            mfa_settings = self.db.query(MFASettings).filter_by(user_id=request.user_id).first()
+            mfa_settings = (
+                self.db.query(MFASettings)
+                .filter_by(user_id=request.user_id)
+                .first()
+            )
 
             if not mfa_settings:
-                return MFAResponse(success=False, message="MFA not configured for this user")
+                return MFAResponse(
+                    success=False, message="MFA not configured for this user"
+                )
 
             # Verify based on method
             if request.method == "totp":
                 success = await self._verify_totp(mfa_settings, request.token)
             elif request.method == "backup_code":
-                success = await self._verify_backup_code(mfa_settings, request.backup_code)
+                success = await self._verify_backup_code(
+                    mfa_settings, request.backup_code
+                )
             else:
                 return MFAResponse(
-                    success=False, message=f"Verification method {request.method} not supported"
+                    success=False,
+                    message=f"Verification method {request.method} not supported",
                 )
 
             if success:
@@ -377,13 +441,15 @@ class MFAService:
                 # Log security event
                 security_auditor.log_event(
                     event_type=SecurityEventType.MFA_SUCCESS,
-                    severity=SecurityEventSeverity.INFO,
+                    severity=SecurityEventSeverity.INFO,  
                     message=f"MFA verification successful for user {request.user_id}",
                     user_id=request.user_id,
                     details={"method": request.method},
                 )
 
-                return MFAResponse(success=True, message="MFA verification successful")
+                return MFAResponse(
+                    success=True, message="MFA verification successful"
+                )
             else:
                 # Increment failed attempts
                 self._increment_failed_attempts(request.user_id)
@@ -391,7 +457,7 @@ class MFAService:
                 # Log security event
                 security_auditor.log_event(
                     event_type=SecurityEventType.MFA_FAILED,
-                    severity=SecurityEventSeverity.MEDIUM,
+                    severity=SecurityEventSeverity.MEDIUM,  
                     message=f"MFA verification failed for user {request.user_id}",
                     user_id=request.user_id,
                     details={"method": request.method},
@@ -400,7 +466,9 @@ class MFAService:
                 return MFAResponse(success=False, message="Invalid MFA token")
 
         except Exception as e:
-            logger.error(f"MFA verification failed for user {request.user_id}: {str(e)}")
+            logger.error(
+                f"MFA verification failed for user {request.user_id}: {str(e)}"
+            )
 
             # Log security event
             security_auditor.log_event(
@@ -411,9 +479,14 @@ class MFAService:
                 details={"error": str(e), "method": request.method},
             )
 
-            return MFAResponse(success=False, message="MFA verification failed. Please try again.")
+            return MFAResponse(
+                success=False,
+                message="MFA verification failed. Please try again.",
+            )
 
-    async def _verify_totp(self, mfa_settings: MFASettings, token: str) -> bool:
+    async def _verify_totp(
+        self, mfa_settings: MFASettings, token: str
+    ) -> bool:
         """Verify TOTP token."""
         if not mfa_settings.totp_secret:
             return False
@@ -423,7 +496,9 @@ class MFAService:
             secret = self._decrypt_secret(mfa_settings.totp_secret)
 
             # Create TOTP instance
-            totp = pyotp.TOTP(secret, interval=self.totp_interval, digits=self.totp_digits)
+            totp = pyotp.TOTP(
+                secret, interval=self.totp_interval, digits=self.totp_digits
+            )
 
             # Verify token with window of 1 (allows for clock skew)
             return totp.verify(token, valid_window=1)
@@ -432,7 +507,9 @@ class MFAService:
             logger.error(f"TOTP verification error: {str(e)}")
             return False
 
-    async def _verify_backup_code(self, mfa_settings: MFASettings, backup_code: str) -> bool:
+    async def _verify_backup_code(
+        self, mfa_settings: MFASettings, backup_code: str
+    ) -> bool:
         """Verify backup code."""
         if not mfa_settings.backup_codes or not backup_code:
             return False
@@ -445,14 +522,18 @@ class MFAService:
             # Hash the provided code
             import hashlib
 
-            code_hash = hashlib.sha256(backup_code.upper().encode()).hexdigest()
+            code_hash = hashlib.sha256(
+                backup_code.upper().encode()
+            ).hexdigest()
 
             # Check if code exists and remove it (single use)
             if code_hash in stored_codes:
                 stored_codes.remove(code_hash)
 
                 # Update database
-                mfa_settings.backup_codes = self._encrypt_secret(json.dumps(stored_codes))
+                mfa_settings.backup_codes = self._encrypt_secret(
+                    json.dumps(stored_codes)
+                )
                 self.db.commit()
 
                 return True
@@ -474,10 +555,14 @@ class MFAService:
             MFA response
         """
         try:
-            mfa_settings = self.db.query(MFASettings).filter_by(user_id=user_id).first()
+            mfa_settings = (
+                self.db.query(MFASettings).filter_by(user_id=user_id).first()
+            )
 
             if not mfa_settings:
-                return MFAResponse(success=False, message="MFA not configured for this user")
+                return MFAResponse(
+                    success=False, message="MFA not configured for this user"
+                )
 
             # Disable MFA
             mfa_settings.is_enabled = False
@@ -492,7 +577,7 @@ class MFAService:
             # Log security event
             security_auditor.log_event(
                 event_type=SecurityEventType.MFA_DISABLED,
-                severity=SecurityEventSeverity.MEDIUM,
+                severity=SecurityEventSeverity.MEDIUM,  
                 message=f"MFA disabled for user {user_id}",
                 user_id=user_id,
                 details={"disabled_by": "user"},
@@ -514,7 +599,9 @@ class MFAService:
         Returns:
             MFA status dictionary
         """
-        mfa_settings = self.db.query(MFASettings).filter_by(user_id=user_id).first()
+        mfa_settings = (
+            self.db.query(MFASettings).filter_by(user_id=user_id).first()
+        )
 
         if not mfa_settings:
             return {
@@ -528,11 +615,16 @@ class MFAService:
         backup_codes_remaining = 0
         if mfa_settings.backup_codes:
             try:
-                encrypted_codes = self._decrypt_secret(mfa_settings.backup_codes)
+                encrypted_codes = self._decrypt_secret(
+                    mfa_settings.backup_codes
+                )
                 stored_codes = json.loads(encrypted_codes)
                 backup_codes_remaining = len(stored_codes)
-            except:
-                pass
+            except Exception as e:
+                # Log error but continue - MFA status should still be returned
+                logger.warning(
+                    f"Failed to decrypt backup codes for user {user_id}: {e}"
+                )
 
         methods = []
         if mfa_settings.totp_secret:
@@ -545,10 +637,14 @@ class MFAService:
             "methods": methods,
             "backup_codes_remaining": backup_codes_remaining,
             "locked_until": (
-                mfa_settings.locked_until.isoformat() if mfa_settings.locked_until else None
+                mfa_settings.locked_until.isoformat()
+                if mfa_settings.locked_until
+                else None
             ),
             "failed_attempts": mfa_settings.failed_attempts,
-            "last_used": mfa_settings.last_used.isoformat() if mfa_settings.last_used else None,
+            "last_used": mfa_settings.last_used.isoformat()
+            if mfa_settings.last_used
+            else None,
         }
 
     async def regenerate_backup_codes(self, user_id: str) -> MFAResponse:
@@ -562,23 +658,29 @@ class MFAService:
             MFA response with new backup codes
         """
         try:
-            mfa_settings = self.db.query(MFASettings).filter_by(user_id=user_id).first()
+            mfa_settings = (
+                self.db.query(MFASettings).filter_by(user_id=user_id).first()
+            )
 
             if not mfa_settings or not mfa_settings.is_enabled:
-                return MFAResponse(success=False, message="MFA not enabled for this user")
+                return MFAResponse(
+                    success=False, message="MFA not enabled for this user"
+                )
 
             # Generate new backup codes
             backup_codes = self._generate_backup_codes()
             hashed_backup_codes = self._hash_backup_codes(backup_codes)
 
             # Update database
-            mfa_settings.backup_codes = self._encrypt_secret(json.dumps(hashed_backup_codes))
+            mfa_settings.backup_codes = self._encrypt_secret(
+                json.dumps(hashed_backup_codes)
+            )
             self.db.commit()
 
             # Log security event
             security_auditor.log_event(
                 event_type=SecurityEventType.MFA_BACKUP_CODES_REGENERATED,
-                severity=SecurityEventSeverity.INFO,
+                severity=SecurityEventSeverity.INFO,  
                 message=f"MFA backup codes regenerated for user {user_id}",
                 user_id=user_id,
                 details={"codes_generated": len(backup_codes)},
@@ -591,5 +693,9 @@ class MFAService:
             )
 
         except Exception as e:
-            logger.error(f"Backup code regeneration failed for user {user_id}: {str(e)}")
-            return MFAResponse(success=False, message="Failed to regenerate backup codes")
+            logger.error(
+                f"Backup code regeneration failed for user {user_id}: {str(e)}"
+            )
+            return MFAResponse(
+                success=False, message="Failed to regenerate backup codes"
+            )

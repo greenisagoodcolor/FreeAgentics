@@ -53,7 +53,9 @@ class PerformanceAnalyzer:
 
         # Calculate efficiency loss at 50 agents
         idx_50 = agent_counts.index(50) if 50 in agent_counts else -1
-        efficiency_at_50 = efficiencies[idx_50] if idx_50 >= 0 else efficiencies[-1]
+        efficiency_at_50 = (
+            efficiencies[idx_50] if idx_50 >= 0 else efficiencies[-1]
+        )
         efficiency_loss = 100 - efficiency_at_50
 
         bottlenecks["coordination_overhead"] = {
@@ -77,9 +79,13 @@ class PerformanceAnalyzer:
         # Analyze GIL contention
         throughputs = data.get("throughputs", [])
         if throughputs:
-            throughput_degradation = (throughputs[0] - throughputs[-1]) / throughputs[0] * 100
+            throughput_degradation = (
+                (throughputs[0] - throughputs[-1]) / throughputs[0] * 100
+            )
             bottlenecks["gil_contention"] = {
-                "severity": "high" if throughput_degradation > 60 else "medium",
+                "severity": "high"
+                if throughput_degradation > 60
+                else "medium",
                 "throughput_degradation_percent": throughput_degradation,
                 "description": f"GIL contention causes {throughput_degradation:.1f}% throughput degradation",
             }
@@ -93,7 +99,11 @@ class PerformanceAnalyzer:
         # Python GIL analysis
         root_causes["python_gil"] = {
             "impact": "high",
-            "effects": ["thread_serialization", "cpu_underutilization", "scaling_limitations"],
+            "effects": [
+                "thread_serialization",
+                "cpu_underutilization",
+                "scaling_limitations",
+            ],
             "description": "Python Global Interpreter Lock prevents true parallelism for CPU-bound operations",
             "evidence": "Threading shows 72% efficiency loss at 50 agents despite optimization attempts",
         }
@@ -101,7 +111,11 @@ class PerformanceAnalyzer:
         # Async coordination overhead
         root_causes["async_coordination"] = {
             "impact": "high",
-            "effects": ["context_switching", "event_loop_congestion", "message_queue_delays"],
+            "effects": [
+                "context_switching",
+                "event_loop_congestion",
+                "message_queue_delays",
+            ],
             "description": "Async/await coordination introduces significant overhead at scale",
             "evidence": "Async coordination shows worse performance than simple threading",
         }
@@ -117,16 +131,22 @@ class PerformanceAnalyzer:
         # Matrix operations
         root_causes["matrix_operations"] = {
             "impact": "medium",
-            "effects": ["dense_storage", "redundant_computation", "cache_inefficiency"],
+            "effects": [
+                "dense_storage",
+                "redundant_computation",
+                "cache_inefficiency",
+            ],
             "description": "Dense matrix storage and operations for sparse data",
             "evidence": "PyMDP matrices consume 70% of agent memory",
         }
 
         return root_causes
 
-    def generate_recommendations(self, data: Dict[str, List]) -> Dict[str, List[Dict]]:
+    def generate_recommendations(
+        self, data: Dict[str, List]
+    ) -> Dict[str, List[Dict]]:
         """Generate optimization recommendations based on analysis."""
-        recommendations = {
+        recommendations: Dict[str, List[Dict[str, Any]]] = {
             "immediate": [],
             "medium_term": [],
             "long_term": [],
@@ -236,14 +256,31 @@ class PerformanceChartGenerator:
 
         # Plot efficiency curve
         ax.plot(
-            agent_counts, efficiencies, "o-", linewidth=2, markersize=8, label="Actual Efficiency"
+            agent_counts,
+            efficiencies,
+            "o-",
+            linewidth=2,
+            markersize=8,
+            label="Actual Efficiency",
         )
 
         # Add ideal efficiency line
-        ax.axhline(y=100, color="green", linestyle="--", alpha=0.5, label="Ideal (100%)")
+        ax.axhline(
+            y=100,
+            color="green",
+            linestyle="--",
+            alpha=0.5,
+            label="Ideal (100%)",
+        )
 
         # Add critical threshold
-        ax.axhline(y=28.4, color="red", linestyle="--", alpha=0.5, label="Documented Limit (28.4%)")
+        ax.axhline(
+            y=28.4,
+            color="red",
+            linestyle="--",
+            alpha=0.5,
+            label="Documented Limit (28.4%)",
+        )
 
         # Annotations
         ax.annotate(
@@ -258,7 +295,9 @@ class PerformanceChartGenerator:
         ax.set_xlabel("Number of Agents", fontsize=12)
         ax.set_ylabel("Efficiency (%)", fontsize=12)
         ax.set_title(
-            "Multi-Agent Coordination Efficiency vs Agent Count", fontsize=14, fontweight="bold"
+            "Multi-Agent Coordination Efficiency vs Agent Count",
+            fontsize=14,
+            fontweight="bold",
         )
         ax.legend()
         ax.grid(True, alpha=0.3)
@@ -303,12 +342,21 @@ class PerformanceChartGenerator:
 
         # Fill area between to show loss
         ax.fill_between(
-            agent_counts, throughputs, theoretical, alpha=0.2, color="red", label="Performance Loss"
+            agent_counts,
+            throughputs,
+            theoretical,
+            alpha=0.2,
+            color="red",
+            label="Performance Loss",
         )
 
         ax.set_xlabel("Number of Agents", fontsize=12)
         ax.set_ylabel("Throughput (ops/sec)", fontsize=12)
-        ax.set_title("Throughput Scaling: Actual vs Theoretical", fontsize=14, fontweight="bold")
+        ax.set_title(
+            "Throughput Scaling: Actual vs Theoretical",
+            fontsize=14,
+            fontweight="bold",
+        )
         ax.legend()
         ax.grid(True, alpha=0.3)
 
@@ -328,7 +376,14 @@ class PerformanceChartGenerator:
         memory_usage = data["memory_usage"]
 
         # Linear scaling plot
-        ax1.plot(agent_counts, memory_usage, "o-", linewidth=2, markersize=8, color="orange")
+        ax1.plot(
+            agent_counts,
+            memory_usage,
+            "o-",
+            linewidth=2,
+            markersize=8,
+            color="orange",
+        )
         ax1.set_xlabel("Number of Agents", fontsize=12)
         ax1.set_ylabel("Total Memory (MB)", fontsize=12)
         ax1.set_title("Memory Usage Scaling", fontsize=14, fontweight="bold")
@@ -366,7 +421,11 @@ class PerformanceChartGenerator:
             startangle=90,
             textprops={"fontsize": 10},
         )
-        ax2.set_title("Memory Usage Breakdown (34.5 MB/agent)", fontsize=14, fontweight="bold")
+        ax2.set_title(
+            "Memory Usage Breakdown (34.5 MB/agent)",
+            fontsize=14,
+            fontweight="bold",
+        )
 
         # Save chart
         chart_path = self.output_dir / "memory-scaling-chart.png"
@@ -398,7 +457,11 @@ class PerformanceChartGenerator:
 
         ax.set_xlabel("Number of Agents", fontsize=12)
         ax.set_ylabel("Performance Factors", fontsize=12)
-        ax.set_title("Performance Bottleneck Impact Analysis", fontsize=14, fontweight="bold")
+        ax.set_title(
+            "Performance Bottleneck Impact Analysis",
+            fontsize=14,
+            fontweight="bold",
+        )
 
         # Save chart
         chart_path = self.output_dir / "bottleneck-heatmap.png"
@@ -417,9 +480,13 @@ class PerformanceDocumentationGenerator:
         self.output_dir.mkdir(exist_ok=True)
 
         self.analyzer = PerformanceAnalyzer()
-        self.chart_generator = PerformanceChartGenerator(output_dir=str(self.output_dir / "charts"))
+        self.chart_generator = PerformanceChartGenerator(
+            output_dir=str(self.output_dir / "charts")
+        )
 
-    def generate_comprehensive_documentation(self, test_results: Dict[str, Any]) -> str:
+    def generate_comprehensive_documentation(
+        self, test_results: Dict[str, Any]
+    ) -> str:
         """Generate complete performance documentation with all sections."""
         timestamp = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
 
@@ -429,9 +496,15 @@ class PerformanceDocumentationGenerator:
         threading_data = test_results["threading_benchmark"]
 
         # Generate charts
-        efficiency_chart = self.chart_generator.generate_efficiency_chart(coord_data)
-        throughput_chart = self.chart_generator.generate_throughput_chart(coord_data)
-        memory_chart = self.chart_generator.generate_memory_scaling_chart(coord_data)
+        efficiency_chart = self.chart_generator.generate_efficiency_chart(
+            coord_data
+        )
+        throughput_chart = self.chart_generator.generate_throughput_chart(
+            coord_data
+        )
+        memory_chart = self.chart_generator.generate_memory_scaling_chart(
+            coord_data
+        )
 
         # Generate bottleneck heatmap
         bottleneck_data = {
@@ -444,7 +517,9 @@ class PerformanceDocumentationGenerator:
                 [5, 10, 15],  # I/O impact
             ],
         }
-        heatmap_chart = self.chart_generator.generate_bottleneck_heatmap(bottleneck_data)
+        heatmap_chart = self.chart_generator.generate_bottleneck_heatmap(
+            bottleneck_data
+        )
 
         # Perform analysis
         bottlenecks = self.analyzer.identify_bottlenecks(coord_data)
@@ -607,7 +682,9 @@ However, these improvements require substantial engineering effort and potential
 
         return "\n".join(content)
 
-    def _format_recommendations(self, recommendations: Dict[str, List[Dict]]) -> str:
+    def _format_recommendations(
+        self, recommendations: Dict[str, List[Dict]]
+    ) -> str:
         """Format optimization recommendations for documentation."""
         content = []
 
@@ -617,10 +694,16 @@ However, these improvements require substantial engineering effort and potential
 
             for rec in items:
                 content.append(f"#### {rec['title']}")
-                content.append(f"- **Impact**: {rec['impact'].replace('_', ' ').title()}")
-                content.append(f"- **Effort**: {rec['effort'].replace('_', ' ').title()}")
+                content.append(
+                    f"- **Impact**: {rec['impact'].replace('_', ' ').title()}"
+                )
+                content.append(
+                    f"- **Effort**: {rec['effort'].replace('_', ' ').title()}"
+                )
                 content.append(f"- **Description**: {rec['description']}")
-                content.append(f"- **Expected Benefit**: {rec['expected_benefit']}")
+                content.append(
+                    f"- **Expected Benefit**: {rec['expected_benefit']}"
+                )
                 content.append("")
 
         return "\n".join(content)
@@ -649,25 +732,25 @@ However, these improvements require substantial engineering effort and potential
 </head>
 <body>
     <h1>Multi-Agent Coordination Performance Analysis</h1>
-    
+
     <div class="metric">
         <h2>Key Metrics</h2>
         <p><span class="critical">28.4% efficiency at 50 agents (72% loss)</span></p>
         <p>Memory usage: 34.5 MB per agent</p>
         <p>Threading advantage: 3-49x over multiprocessing</p>
     </div>
-    
+
     <h2>Performance Charts</h2>
     <div class="chart">
         <h3>Efficiency Degradation</h3>
         <img src="charts/efficiency-chart.png" alt="Efficiency Chart" style="max-width: 100%;">
     </div>
-    
+
     <div class="chart">
         <h3>Memory Scaling</h3>
         <img src="charts/memory-scaling-chart.png" alt="Memory Scaling" style="max-width: 100%;">
     </div>
-    
+
     <div class="recommendation">
         <h2>Critical Recommendations</h2>
         <ul>
@@ -686,7 +769,9 @@ However, these improvements require substantial engineering effort and potential
 
         return str(html_path)
 
-    def export_performance_data(self, test_results: Dict[str, Any], format: str = "json") -> Any:
+    def export_performance_data(
+        self, test_results: Dict[str, Any], format: str = "json"
+    ) -> Any:
         """Export performance data in various formats."""
         if format == "json":
             # Export as JSON

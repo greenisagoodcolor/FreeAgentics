@@ -21,7 +21,9 @@ logging.basicConfig(level=logging.WARNING)  # Reduce noise during benchmarks
 
 def create_test_agent(agent_id: str, grid_size: int = 5):
     """Create a performance-optimized test agent."""
-    return BasicExplorerAgent(agent_id, f"Agent-{agent_id}", grid_size=grid_size)
+    return BasicExplorerAgent(
+        agent_id, f"Agent-{agent_id}", grid_size=grid_size
+    )
 
 
 def single_agent_inference_benchmark(agent, num_operations=20):
@@ -53,12 +55,16 @@ def single_agent_inference_benchmark(agent, num_operations=20):
     return times
 
 
-def multi_agent_concurrent_benchmark(num_agents: int, operations_per_agent: int = 10):
+def multi_agent_concurrent_benchmark(
+    num_agents: int, operations_per_agent: int = 10
+):
     """Benchmark multiple agents running concurrently."""
     print(f"Testing {num_agents} agents concurrently...")
 
     # Create agents
-    agents = [create_test_agent(f"agent-{i}", grid_size=5) for i in range(num_agents)]
+    agents = [
+        create_test_agent(f"agent-{i}", grid_size=5) for i in range(num_agents)
+    ]
 
     def agent_worker(agent):
         """Worker function for each agent."""
@@ -103,12 +109,18 @@ def scaling_test():
 
     for count in agent_counts:
         print(f"\nTesting {count} agents...")
-        result = multi_agent_concurrent_benchmark(count, operations_per_agent=5)
+        result = multi_agent_concurrent_benchmark(
+            count, operations_per_agent=5
+        )
         results.append(result)
 
-        print(f"  Average operation time: {result['avg_operation_time_ms']:.1f}ms")
+        print(
+            f"  Average operation time: {result['avg_operation_time_ms']:.1f}ms"
+        )
         print(f"  Throughput: {result['throughput_ops_per_sec']:.1f} ops/sec")
-        print(f"  Total time for all operations: {result['total_time_sec']:.2f}s")
+        print(
+            f"  Total time for all operations: {result['total_time_sec']:.2f}s"
+        )
 
     return results
 
@@ -133,7 +145,9 @@ def validate_performance_claims(results):
     print("✅ SINGLE AGENT PERFORMANCE:")
     print(f"   Optimized: {optimized_ms:.1f}ms per inference")
     print(f"   Improvement: {improvement_factor:.1f}x faster")
-    print(f"   Throughput: {single_agent_result['throughput_ops_per_sec']:.1f} ops/sec")
+    print(
+        f"   Throughput: {single_agent_result['throughput_ops_per_sec']:.1f} ops/sec"
+    )
 
     # Check if we hit our targets
     if optimized_ms < 50:
@@ -145,11 +159,17 @@ def validate_performance_claims(results):
 
     # Check scaling behavior
     max_agents = max(r["num_agents"] for r in results)
-    max_agent_result = next(r for r in results if r["num_agents"] == max_agents)
+    max_agent_result = next(
+        r for r in results if r["num_agents"] == max_agents
+    )
 
     print(f"   Maximum tested: {max_agents} agents")
-    print(f"   Average per-operation time: {max_agent_result['avg_operation_time_ms']:.1f}ms")
-    print(f"   Total throughput: {max_agent_result['throughput_ops_per_sec']:.1f} ops/sec")
+    print(
+        f"   Average per-operation time: {max_agent_result['avg_operation_time_ms']:.1f}ms"
+    )
+    print(
+        f"   Total throughput: {max_agent_result['throughput_ops_per_sec']:.1f} ops/sec"
+    )
 
     # Calculate theoretical capability
     single_agent_throughput = single_agent_result["throughput_ops_per_sec"]
@@ -172,9 +192,13 @@ def validate_performance_claims(results):
     theoretical_max_realtime = 1000 / 10  # 100 ops/sec per agent for real-time
     actual_throughput = single_agent_result["throughput_ops_per_sec"]
 
-    max_realtime_agents = actual_throughput / (1000 / 10)  # agents that can run at 10ms
+    max_realtime_agents = actual_throughput / (
+        1000 / 10
+    )  # agents that can run at 10ms
 
-    print(f"   Real-time capable agents (10ms target): {max_realtime_agents:.0f}")
+    print(
+        f"   Real-time capable agents (10ms target): {max_realtime_agents:.0f}"
+    )
 
     if max_realtime_agents >= 50:
         print("   🎯 PRODUCTION READY: Can support 50+ real-time agents")
@@ -199,7 +223,9 @@ if __name__ == "__main__":
     print("=" * 60)
 
     if is_production_ready:
-        print("🎯 VALIDATED: Performance optimizations enable production multi-agent scenarios")
+        print(
+            "🎯 VALIDATED: Performance optimizations enable production multi-agent scenarios"
+        )
     else:
         print(
             "⚠️  PARTIALLY VALIDATED: Performance improved but may not meet all production requirements"

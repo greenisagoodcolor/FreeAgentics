@@ -1,5 +1,5 @@
 """
-Distributed Tracing System for FreeAgentics Multi-Agent Platform
+Distributed Tracing System for FreeAgentics Multi-Agent Platform.
 
 This module implements distributed tracing capabilities to track requests
 across multiple agents, services, and coordination operations.
@@ -47,7 +47,12 @@ class TraceSpan:
 
     def add_log(self, message: str, level: str = "info", **kwargs):
         """Add a log entry to the span."""
-        log_entry = {"timestamp": time.time(), "message": message, "level": level, **kwargs}
+        log_entry = {
+            "timestamp": time.time(),
+            "message": message,
+            "level": level,
+            **kwargs,
+        }
         self.logs.append(log_entry)
 
     def to_dict(self) -> Dict[str, Any]:
@@ -99,7 +104,11 @@ class Trace:
 
     def get_child_spans(self, parent_span_id: str) -> List[TraceSpan]:
         """Get all child spans of a parent span."""
-        return [span for span in self.spans.values() if span.parent_span_id == parent_span_id]
+        return [
+            span
+            for span in self.spans.values()
+            if span.parent_span_id == parent_span_id
+        ]
 
     def finish(self):
         """Finish the trace by calculating total duration."""
@@ -123,7 +132,9 @@ class Trace:
 class DistributedTracer:
     """Main distributed tracing implementation."""
 
-    def __init__(self, service_name: str = "freeagentics", max_traces: int = 1000):
+    def __init__(
+        self, service_name: str = "freeagentics", max_traces: int = 1000
+    ):
         """Initialize the distributed tracer."""
         self.service_name = service_name
         self.max_traces = max_traces
@@ -134,7 +145,9 @@ class DistributedTracer:
         self.running = False
         self.cleanup_task = None
 
-        logger.info(f"🔍 Distributed tracer initialized for service: {service_name}")
+        logger.info(
+            f"🔍 Distributed tracer initialized for service: {service_name}"
+        )
 
     async def start(self):
         """Start the distributed tracer."""
@@ -167,7 +180,9 @@ class DistributedTracer:
 
         logger.info("🔍 Distributed tracer stopped")
 
-    def start_trace(self, operation_name: str, service_name: Optional[str] = None) -> TraceSpan:
+    def start_trace(
+        self, operation_name: str, service_name: Optional[str] = None
+    ) -> TraceSpan:
         """Start a new trace with a root span."""
         trace_id = str(uuid.uuid4())
         span_id = str(uuid.uuid4())
@@ -217,7 +232,9 @@ class DistributedTracer:
 
         return span
 
-    def finish_span(self, span: TraceSpan, status: str = "ok", error: Optional[str] = None):
+    def finish_span(
+        self, span: TraceSpan, status: str = "ok", error: Optional[str] = None
+    ):
         """Finish a span."""
         span.finish(status, error)
 
@@ -229,7 +246,9 @@ class DistributedTracer:
         trace = self.traces.get(span.trace_id)
         if trace:
             active_spans_in_trace = [
-                s for s in self.active_spans.values() if s.trace_id == span.trace_id
+                s
+                for s in self.active_spans.values()
+                if s.trace_id == span.trace_id
             ]
 
             if not active_spans_in_trace:
@@ -241,12 +260,20 @@ class DistributedTracer:
 
     def get_active_traces(self) -> List[Trace]:
         """Get all active traces."""
-        return [trace for trace in self.traces.values() if trace.end_time is None]
+        return [
+            trace for trace in self.traces.values() if trace.end_time is None
+        ]
 
     def get_completed_traces(self, limit: int = 100) -> List[Trace]:
         """Get completed traces."""
-        completed = [trace for trace in self.traces.values() if trace.end_time is not None]
-        return sorted(completed, key=lambda t: t.end_time or 0, reverse=True)[:limit]
+        completed = [
+            trace
+            for trace in self.traces.values()
+            if trace.end_time is not None
+        ]
+        return sorted(completed, key=lambda t: t.end_time or 0, reverse=True)[
+            :limit
+        ]
 
     def get_trace_stats(self) -> Dict[str, Any]:
         """Get tracing statistics."""
@@ -255,8 +282,15 @@ class DistributedTracer:
         completed_traces = total_traces - active_traces
 
         # Calculate average duration for completed traces
-        completed = [t for t in self.traces.values() if t.duration_ms is not None]
-        avg_duration = sum(t.duration_ms for t in completed) / len(completed) if completed else 0
+        completed = [
+            t for t in self.traces.values() if t.duration_ms is not None
+        ]
+        avg_duration = (
+            sum(t.duration_ms for t in completed if t.duration_ms is not None)
+            / len(completed)
+            if completed
+            else 0
+        )
 
         return {
             "total_traces": total_traces,
@@ -264,9 +298,12 @@ class DistributedTracer:
             "completed_traces": completed_traces,
             "active_spans": len(self.active_spans),
             "avg_duration_ms": avg_duration,
-            "services": list(set().union(*(t.service_names for t in self.traces.values()))),
+            "services": list(
+                set().union(*(t.service_names for t in self.traces.values()))
+            ),
             "error_rate": (
-                sum(t.error_count for t in completed) / sum(t.operation_count for t in completed)
+                sum(t.error_count for t in completed)
+                / sum(t.operation_count for t in completed)
                 if completed
                 else 0
             ),
@@ -301,7 +338,9 @@ class DistributedTracer:
 
             # Remove associated active spans
             spans_to_remove = [
-                span_id for span_id, span in self.active_spans.items() if span.trace_id == trace_id
+                span_id
+                for span_id, span in self.active_spans.items()
+                if span.trace_id == trace_id
             ]
             for span_id in spans_to_remove:
                 del self.active_spans[span_id]
@@ -309,7 +348,9 @@ class DistributedTracer:
         # Limit total traces
         if len(self.traces) > self.max_traces:
             # Remove oldest traces
-            sorted_traces = sorted(self.traces.items(), key=lambda x: x[1].start_time)
+            sorted_traces = sorted(
+                self.traces.items(), key=lambda x: x[1].start_time
+            )
             to_remove = sorted_traces[: len(self.traces) - self.max_traces]
 
             for trace_id, _ in to_remove:
@@ -349,7 +390,9 @@ class AgentTracingMixin:
         """Set the distributed tracer for this agent."""
         self.tracer = tracer
 
-    async def trace_operation(self, operation_name: str, operation_func, *args, **kwargs):
+    async def trace_operation(
+        self, operation_name: str, operation_func, *args, **kwargs
+    ):
         """Trace an agent operation."""
         if not self.tracer:
             return await operation_func(*args, **kwargs)
@@ -365,10 +408,14 @@ class AgentTracingMixin:
 
             try:
                 result = await operation_func(*args, **kwargs)
-                span.add_log(f"Operation {operation_name} completed successfully")
+                span.add_log(
+                    f"Operation {operation_name} completed successfully"
+                )
                 return result
             except Exception as e:
-                span.add_log(f"Operation {operation_name} failed: {e}", level="error")
+                span.add_log(
+                    f"Operation {operation_name} failed: {e}", level="error"
+                )
                 raise
 
 
@@ -376,7 +423,9 @@ class AgentTracingMixin:
 _distributed_tracer = None
 
 
-def get_distributed_tracer(service_name: str = "freeagentics") -> DistributedTracer:
+def get_distributed_tracer(
+    service_name: str = "freeagentics",
+) -> DistributedTracer:
     """Get the global distributed tracer instance."""
     global _distributed_tracer
 
@@ -414,7 +463,9 @@ async def trace_agent_coordination(
     """Trace agent coordination operations."""
     operation_name = f"coordination_{coordination_type}"
 
-    async with trace_span(tracer, operation_name, service_name=f"agent-{agent_id}") as span:
+    async with trace_span(
+        tracer, operation_name, service_name=f"agent-{agent_id}"
+    ) as span:
         span.add_tag("agent_id", agent_id)
         span.add_tag("coordination_type", coordination_type)
 
@@ -423,7 +474,9 @@ async def trace_agent_coordination(
             span.add_log(f"Coordination {coordination_type} completed")
             return result
         except Exception as e:
-            span.add_log(f"Coordination {coordination_type} failed: {e}", level="error")
+            span.add_log(
+                f"Coordination {coordination_type} failed: {e}", level="error"
+            )
             raise
 
 
@@ -433,7 +486,9 @@ async def trace_belief_update(
     """Trace belief system updates."""
     operation_name = "belief_update"
 
-    async with trace_span(tracer, operation_name, service_name=f"agent-{agent_id}") as span:
+    async with trace_span(
+        tracer, operation_name, service_name=f"agent-{agent_id}"
+    ) as span:
         span.add_tag("agent_id", agent_id)
         span.add_tag("operation_type", "belief_update")
 
@@ -447,12 +502,19 @@ async def trace_belief_update(
 
 
 async def trace_inference_step(
-    tracer: DistributedTracer, agent_id: str, step_type: str, operation_func, *args, **kwargs
+    tracer: DistributedTracer,
+    agent_id: str,
+    step_type: str,
+    operation_func,
+    *args,
+    **kwargs,
 ):
     """Trace inference steps."""
     operation_name = f"inference_{step_type}"
 
-    async with trace_span(tracer, operation_name, service_name=f"agent-{agent_id}") as span:
+    async with trace_span(
+        tracer, operation_name, service_name=f"agent-{agent_id}"
+    ) as span:
         span.add_tag("agent_id", agent_id)
         span.add_tag("step_type", step_type)
 
@@ -461,5 +523,7 @@ async def trace_inference_step(
             span.add_log(f"Inference step {step_type} completed")
             return result
         except Exception as e:
-            span.add_log(f"Inference step {step_type} failed: {e}", level="error")
+            span.add_log(
+                f"Inference step {step_type} failed: {e}", level="error"
+            )
             raise

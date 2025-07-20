@@ -11,7 +11,14 @@ from unittest.mock import Mock, patch
 import numpy as np
 import pytest
 
-from world.grid_world import Agent, Cell, CellType, GridWorld, GridWorldConfig, Position
+from world.grid_world import (
+    Agent,
+    Cell,
+    CellType,
+    GridWorld,
+    GridWorldConfig,
+    Position,
+)
 
 
 class TestPosition:
@@ -84,7 +91,10 @@ class TestCell:
     def test_cell_creation(self):
         """Test cell creation."""
         cell = Cell(
-            type=CellType.GOAL, position=Position(5, 5), value=10.0, properties={"color": "green"}
+            type=CellType.GOAL,
+            position=Position(5, 5),
+            value=10.0,
+            properties={"color": "green"},
         )
 
         assert cell.type == CellType.GOAL
@@ -469,7 +479,10 @@ class TestGridWorld:
                     "properties": {},
                 }
             },
-            "grid": [[{"type": "empty", "value": 0.0} for _ in range(5)] for _ in range(5)],
+            "grid": [
+                [{"type": "empty", "value": 0.0} for _ in range(5)]
+                for _ in range(5)
+            ],
             "step_count": 42,
         }
 
@@ -635,7 +648,10 @@ class TestGridWorldIntegration:
         resource_positions = [Position(2, 2), Position(3, 3), Position(4, 4)]
         for pos in resource_positions:
             world.set_cell(pos, CellType.RESOURCE)
-            world.grid[pos.x][pos.y].properties = {"resource_type": "energy", "amount": 20}
+            world.grid[pos.x][pos.y].properties = {
+                "resource_type": "energy",
+                "amount": 20,
+            }
 
         # Collect resources
         initial_energy = collector.energy

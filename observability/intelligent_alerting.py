@@ -1,5 +1,5 @@
 """
-Intelligent Alerting System for FreeAgentics Production Monitoring
+Intelligent Alerting System for FreeAgentics Production Monitoring.
 
 This module provides advanced alerting capabilities with machine learning-based
 anomaly detection, adaptive thresholds, and intelligent alert routing.
@@ -132,10 +132,14 @@ class Alert:
             "annotations": self.annotations,
             "starts_at": self.starts_at.isoformat(),
             "ends_at": self.ends_at.isoformat() if self.ends_at else None,
-            "acknowledged_at": self.acknowledged_at.isoformat() if self.acknowledged_at else None,
+            "acknowledged_at": self.acknowledged_at.isoformat()
+            if self.acknowledged_at
+            else None,
             "acknowledged_by": self.acknowledged_by,
             "suppressed_until": (
-                self.suppressed_until.isoformat() if self.suppressed_until else None
+                self.suppressed_until.isoformat()
+                if self.suppressed_until
+                else None
             ),
             "fingerprint": self.fingerprint,
         }
@@ -147,7 +151,9 @@ class AnomalyDetector:
     def __init__(self, contamination: float = 0.1):
         """Initialize anomaly detector."""
         self.contamination = contamination
-        self.model = IsolationForest(contamination=contamination, random_state=42)
+        self.model = IsolationForest(
+            contamination=contamination, random_state=42
+        )
         self.scaler = StandardScaler()
         self.trained = False
         self.training_data = []
@@ -167,7 +173,9 @@ class AnomalyDetector:
 
         # Keep only recent data for training
         cutoff_time = datetime.now() - timedelta(days=7)
-        self.training_data = [d for d in self.training_data if d["timestamp"] > cutoff_time]
+        self.training_data = [
+            d for d in self.training_data if d["timestamp"] > cutoff_time
+        ]
 
     def train(self):
         """Train the anomaly detection model."""
@@ -177,7 +185,14 @@ class AnomalyDetector:
         # Prepare features
         features = []
         for data in self.training_data:
-            features.append([data["value"], data["hour"], data["day_of_week"], data["minute"]])
+            features.append(
+                [
+                    data["value"],
+                    data["hour"],
+                    data["day_of_week"],
+                    data["minute"],
+                ]
+            )
 
         features = np.array(features)
 
@@ -190,13 +205,17 @@ class AnomalyDetector:
 
         return True
 
-    def detect_anomaly(self, value: float, timestamp: datetime) -> Tuple[bool, float]:
+    def detect_anomaly(
+        self, value: float, timestamp: datetime
+    ) -> Tuple[bool, float]:
         """Detect if value is anomalous."""
         if not self.trained:
             return False, 0.0
 
         # Prepare features
-        features = np.array([[value, timestamp.hour, timestamp.weekday(), timestamp.minute]])
+        features = np.array(
+            [[value, timestamp.hour, timestamp.weekday(), timestamp.minute]]
+        )
 
         # Scale features
         features_scaled = self.scaler.transform(features)
@@ -219,18 +238,24 @@ class AdaptiveThresholdManager:
         self.metric_data = {}
         self.thresholds = {}
 
-    def add_data_point(self, metric_name: str, value: float, timestamp: datetime):
+    def add_data_point(
+        self, metric_name: str, value: float, timestamp: datetime
+    ):
         """Add data point for metric."""
         if metric_name not in self.metric_data:
             self.metric_data[metric_name] = []
 
-        self.metric_data[metric_name].append({"value": value, "timestamp": timestamp})
+        self.metric_data[metric_name].append(
+            {"value": value, "timestamp": timestamp}
+        )
 
         # Keep only recent data
         if len(self.metric_data[metric_name]) > self.window_size:
             self.metric_data[metric_name].pop(0)
 
-    def calculate_adaptive_thresholds(self, metric_name: str) -> Dict[str, float]:
+    def calculate_adaptive_thresholds(
+        self, metric_name: str
+    ) -> Dict[str, float]:
         """Calculate adaptive thresholds for metric."""
         if metric_name not in self.metric_data:
             return {}
@@ -268,7 +293,9 @@ class AdaptiveThresholdManager:
 
         return thresholds
 
-    def get_threshold(self, metric_name: str, threshold_type: str = "warning") -> Optional[float]:
+    def get_threshold(
+        self, metric_name: str, threshold_type: str = "warning"
+    ) -> Optional[float]:
         """Get threshold for metric."""
         if metric_name not in self.thresholds:
             self.calculate_adaptive_thresholds(metric_name)
@@ -294,7 +321,9 @@ class AlertCorrelationEngine:
         correlations = []
 
         # Get recent alerts
-        cutoff_time = datetime.now() - timedelta(seconds=self.correlation_window)
+        cutoff_time = datetime.now() - timedelta(
+            seconds=self.correlation_window
+        )
         recent_alerts = [
             alert
             for alert in self.alert_history
@@ -329,18 +358,28 @@ class AlertCorrelationEngine:
 
         for required_alert in required_alerts:
             for recent_alert in recent_alerts:
-                if self._alert_matches_rule_criteria(recent_alert, required_alert):
+                if self._alert_matches_rule_criteria(
+                    recent_alert, required_alert
+                ):
                     matching_alerts += 1
                     break
 
         return matching_alerts >= len(required_alerts)
 
-    def _alert_matches_rule_criteria(self, alert: Alert, criteria: Dict[str, Any]) -> bool:
+    def _alert_matches_rule_criteria(
+        self, alert: Alert, criteria: Dict[str, Any]
+    ) -> bool:
         """Check if alert matches rule criteria."""
-        if criteria.get("severity") and alert.severity.value != criteria["severity"]:
+        if (
+            criteria.get("severity")
+            and alert.severity.value != criteria["severity"]
+        ):
             return False
 
-        if criteria.get("metric_name") and alert.metric_name != criteria["metric_name"]:
+        if (
+            criteria.get("metric_name")
+            and alert.metric_name != criteria["metric_name"]
+        ):
             return False
 
         if criteria.get("labels"):
@@ -375,8 +414,12 @@ class IntelligentAlertingSystem:
         # Statistics
         self.stats = {
             "total_alerts": 0,
-            "alerts_by_severity": {severity.value: 0 for severity in AlertSeverity},
-            "alerts_by_type": {alert_type.value: 0 for alert_type in AlertType},
+            "alerts_by_severity": {
+                severity.value: 0 for severity in AlertSeverity
+            },
+            "alerts_by_type": {
+                alert_type.value: 0 for alert_type in AlertType
+            },
             "false_positives": 0,
             "true_positives": 0,
             "suppressed_alerts": 0,
@@ -477,7 +520,10 @@ class IntelligentAlertingSystem:
                 "id": "database_cascade",
                 "name": "Database Cascade Failure",
                 "required_alerts": [
-                    {"metric_name": "database_connections", "severity": "high"},
+                    {
+                        "metric_name": "database_connections",
+                        "severity": "high",
+                    },
                     {"metric_name": "api_response_time", "severity": "high"},
                 ],
                 "correlation_type": "cascade",
@@ -576,13 +622,19 @@ class IntelligentAlertingSystem:
         alert_message = ""
 
         if rule.alert_type == AlertType.THRESHOLD:
-            should_alert, alert_message = self._evaluate_threshold_rule(rule, current_value)
+            should_alert, alert_message = self._evaluate_threshold_rule(
+                rule, current_value
+            )
         elif rule.alert_type == AlertType.ANOMALY:
-            should_alert, alert_message = await self._evaluate_anomaly_rule(rule, current_value)
+            should_alert, alert_message = await self._evaluate_anomaly_rule(
+                rule, current_value
+            )
 
         # Check if alert should be triggered
         if should_alert:
-            existing_alert = self._find_existing_alert(rule.id, rule.metric_name)
+            existing_alert = self._find_existing_alert(
+                rule.id, rule.metric_name
+            )
 
             if not existing_alert:
                 # Create new alert
@@ -608,11 +660,15 @@ class IntelligentAlertingSystem:
                 await self._trigger_alert(alert)
         else:
             # Check if we should resolve existing alert
-            existing_alert = self._find_existing_alert(rule.id, rule.metric_name)
+            existing_alert = self._find_existing_alert(
+                rule.id, rule.metric_name
+            )
             if existing_alert and existing_alert.status == AlertStatus.ACTIVE:
                 await self._resolve_alert(existing_alert)
 
-    def _evaluate_threshold_rule(self, rule: AlertRule, current_value: float) -> Tuple[bool, str]:
+    def _evaluate_threshold_rule(
+        self, rule: AlertRule, current_value: float
+    ) -> Tuple[bool, str]:
         """Evaluate threshold-based rule."""
         if rule.threshold_value is None:
             return False, ""
@@ -653,7 +709,9 @@ class IntelligentAlertingSystem:
             return False, ""
 
         # Detect anomaly
-        is_anomaly, anomaly_score = detector.detect_anomaly(current_value, datetime.now())
+        is_anomaly, anomaly_score = detector.detect_anomaly(
+            current_value, datetime.now()
+        )
 
         if is_anomaly:
             message = f"{rule.name}: Anomaly detected in {rule.metric_name} = {current_value:.2f} (score: {anomaly_score:.3f})"
@@ -676,7 +734,9 @@ class IntelligentAlertingSystem:
                 if success:
                     logger.info(f"Trained anomaly detector for {metric_name}")
             except Exception as e:
-                logger.error(f"Error training anomaly detector for {metric_name}: {e}")
+                logger.error(
+                    f"Error training anomaly detector for {metric_name}: {e}"
+                )
 
     async def _get_metric_value(self, metric_name: str) -> Optional[float]:
         """Get current metric value."""
@@ -705,7 +765,9 @@ class IntelligentAlertingSystem:
             logger.error(f"Error getting metric value for {metric_name}: {e}")
             return None
 
-    def _find_existing_alert(self, rule_id: str, metric_name: str) -> Optional[Alert]:
+    def _find_existing_alert(
+        self, rule_id: str, metric_name: str
+    ) -> Optional[Alert]:
         """Find existing alert for rule and metric."""
         for alert in self.active_alerts.values():
             if alert.rule_id == rule_id and alert.metric_name == metric_name:
@@ -769,7 +831,9 @@ class IntelligentAlertingSystem:
                 return True
         return False
 
-    def _matches_suppression_rule(self, alert: Alert, rule: Dict[str, Any]) -> bool:
+    def _matches_suppression_rule(
+        self, alert: Alert, rule: Dict[str, Any]
+    ) -> bool:
         """Check if alert matches suppression rule."""
         # Implementation depends on suppression rule format
         return False
@@ -801,16 +865,22 @@ class IntelligentAlertingSystem:
             alert.acknowledged_at = datetime.now()
             alert.acknowledged_by = acknowledged_by
 
-            logger.info(f"Alert acknowledged: {alert.message} by {acknowledged_by}")
+            logger.info(
+                f"Alert acknowledged: {alert.message} by {acknowledged_by}"
+            )
 
     def suppress_alert(self, alert_id: str, duration: int):
         """Suppress an alert for a duration."""
         if alert_id in self.active_alerts:
             alert = self.active_alerts[alert_id]
             alert.status = AlertStatus.SUPPRESSED
-            alert.suppressed_until = datetime.now() + timedelta(seconds=duration)
+            alert.suppressed_until = datetime.now() + timedelta(
+                seconds=duration
+            )
 
-            logger.info(f"Alert suppressed: {alert.message} for {duration} seconds")
+            logger.info(
+                f"Alert suppressed: {alert.message} for {duration} seconds"
+            )
 
     def get_active_alerts(self) -> List[Alert]:
         """Get all active alerts."""
@@ -826,9 +896,13 @@ class IntelligentAlertingSystem:
             **self.stats,
             "active_alerts": len(self.active_alerts),
             "total_rules": len(self.rules),
-            "enabled_rules": len([r for r in self.rules.values() if r.enabled]),
+            "enabled_rules": len(
+                [r for r in self.rules.values() if r.enabled]
+            ),
             "anomaly_detectors": len(self.anomaly_detectors),
-            "trained_detectors": len([d for d in self.anomaly_detectors.values() if d.trained]),
+            "trained_detectors": len(
+                [d for d in self.anomaly_detectors.values() if d.trained]
+            ),
         }
 
 
@@ -871,7 +945,9 @@ async def integrate_with_prometheus_alertmanager():
             "generatorURL": f"https://freeagentics.com/alerts/{alert.id}",
         }
 
-        logger.info(f"Sending alert to Prometheus AlertManager: {json.dumps(alert_data, indent=2)}")
+        logger.info(
+            f"Sending alert to Prometheus AlertManager: {json.dumps(alert_data, indent=2)}"
+        )
 
         # In a real implementation, this would use HTTP requests to AlertManager API
         # requests.post('http://alertmanager:9093/api/v1/alerts', json=[alert_data])

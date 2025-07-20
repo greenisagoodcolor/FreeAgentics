@@ -20,12 +20,14 @@ class GUID(TypeDecorator):
     cache_ok = True
 
     def load_dialect_impl(self, dialect):
+        """Load the dialect-specific implementation."""
         if dialect.name == "postgresql":
             return dialect.type_descriptor(PostgreSQLUUID(as_uuid=True))
         else:
             return dialect.type_descriptor(CHAR(36))
 
     def process_bind_param(self, value, dialect):
+        """Process the value when binding to SQL."""
         if value is None:
             return value
         elif dialect.name == "postgresql":
@@ -37,6 +39,7 @@ class GUID(TypeDecorator):
                 return str(value)
 
     def process_result_value(self, value, dialect):
+        """Process the value from SQL result."""
         if value is None:
             return value
         else:

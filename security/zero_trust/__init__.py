@@ -21,10 +21,7 @@ from .mtls_manager import (
     MTLSManager,
     RotationStrategy,
 )
-from .service_mesh_config import (
-    ServiceMeshConfig,
-    ServiceMeshType,
-)
+from .service_mesh_config import ServiceMeshConfig, ServiceMeshType
 from .service_mesh_config import ServicePolicy as MeshServicePolicy
 from .service_mesh_config import (
     TrafficPolicy,

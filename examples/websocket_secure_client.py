@@ -1,5 +1,5 @@
 """
-Secure WebSocket Client Example
+Secure WebSocket Client Example.
 
 Demonstrates proper WebSocket authentication, token refresh, heartbeat handling,
 and secure message exchange with the FreeAgentics WebSocket API.
@@ -24,7 +24,12 @@ logger = logging.getLogger(__name__)
 class SecureWebSocketClient:
     """Secure WebSocket client with authentication and automatic reconnection."""
 
-    def __init__(self, base_url: str, access_token: str, refresh_token: Optional[str] = None):
+    def __init__(
+        self,
+        base_url: str,
+        access_token: str,
+        refresh_token: Optional[str] = None,
+    ):
         """
         Initialize the secure WebSocket client.
 
@@ -128,10 +133,13 @@ class SecureWebSocketClient:
         """Subscribe to specific event types."""
         await self.send_message("subscribe", {"event_types": event_types})
 
-    async def send_agent_command(self, agent_id: str, command: str, params: dict = None):
+    async def send_agent_command(
+        self, agent_id: str, command: str, params: dict = None
+    ):
         """Send a command to control an agent."""
         await self.send_message(
-            "agent_command", {"agent_id": agent_id, "command": command, "params": params or {}}
+            "agent_command",
+            {"agent_id": agent_id, "command": command, "params": params or {}},
         )
 
     async def query_agent_status(self):
@@ -144,7 +152,9 @@ class SecureWebSocketClient:
             logger.warning("No refresh token available")
             return False
 
-        await self.send_message("refresh_token", {"refresh_token": self.refresh_token})
+        await self.send_message(
+            "refresh_token", {"refresh_token": self.refresh_token}
+        )
         return True
 
     async def _heartbeat_loop(self):
@@ -158,8 +168,12 @@ class SecureWebSocketClient:
                 await asyncio.sleep(30)
 
                 # Check if we received acknowledgment
-                if (datetime.now() - self.last_heartbeat_ack).total_seconds() > 60:
-                    logger.warning("Heartbeat timeout - no acknowledgment received")
+                if (
+                    datetime.now() - self.last_heartbeat_ack
+                ).total_seconds() > 60:
+                    logger.warning(
+                        "Heartbeat timeout - no acknowledgment received"
+                    )
                     await self._handle_connection_loss()
                     break
 
@@ -190,7 +204,9 @@ class SecureWebSocketClient:
         msg_type = message.get("type")
 
         if msg_type == "connection_established":
-            logger.info(f"Connected as {message.get('user')} with role {message.get('role')}")
+            logger.info(
+                f"Connected as {message.get('user')} with role {message.get('role')}"
+            )
 
         elif msg_type == "heartbeat_ack":
             self.last_heartbeat_ack = datetime.now()
@@ -230,7 +246,6 @@ class SecureWebSocketClient:
         """Handle agent-related events."""
         event_type = message.get("event_type")
         agent_id = message.get("agent_id")
-        data = message.get("data", {})
 
         logger.info(f"Agent event: {event_type} for {agent_id}")
         # Process agent events as needed
@@ -262,7 +277,9 @@ class SecureWebSocketClient:
         """Run an interactive session."""
         print("\nSecure WebSocket Client")
         print("Commands:")
-        print("  subscribe <event_types> - Subscribe to events (comma-separated)")
+        print(
+            "  subscribe <event_types> - Subscribe to events (comma-separated)"
+        )
         print("  agent <id> <command> - Send agent command")
         print("  status - Query agent status")
         print("  refresh - Refresh authentication token")
@@ -274,12 +291,17 @@ class SecureWebSocketClient:
                 try:
                     # Get user input with timeout to allow message processing
                     command = await asyncio.wait_for(
-                        asyncio.get_event_loop().run_in_executor(None, input, "> "), timeout=1.0
+                        asyncio.get_event_loop().run_in_executor(
+                            None, input, "> "
+                        ),
+                        timeout=1.0,
                     )
 
                     if command.startswith("subscribe "):
                         event_types = command[10:].split(",")
-                        await self.subscribe_to_events([e.strip() for e in event_types])
+                        await self.subscribe_to_events(
+                            [e.strip() for e in event_types]
+                        )
 
                     elif command.startswith("agent "):
                         parts = command[6:].split()
@@ -331,7 +353,11 @@ async def main():
 
         # Subscribe to events
         await client.subscribe_to_events(
-            ["agent:status_change", "agent:task_complete", "world:state_change"]
+            [
+                "agent:status_change",
+                "agent:task_complete",
+                "world:state_change",
+            ]
         )
 
         # Run interactive session

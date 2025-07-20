@@ -186,7 +186,9 @@ class SessionManagementTests(BasePenetrationTest):
         token = self.get_auth_token(username, password)
 
         # Test 1: Session token exposure in logs/responses
-        response = self.client.get("/api/v1/auth/me", headers=self.get_auth_headers(token))
+        response = self.client.get(
+            "/api/v1/auth/me", headers=self.get_auth_headers(token)
+        )
 
         if self._check_token_exposure(response, token):
             self.add_vulnerability(
@@ -293,7 +295,9 @@ class SessionManagementTests(BasePenetrationTest):
                 now = datetime.datetime.now()
                 session_duration = exp_time - now
 
-                if session_duration.total_seconds() > 86400:  # More than 24 hours
+                if (
+                    session_duration.total_seconds() > 86400
+                ):  # More than 24 hours
                     self.add_vulnerability(
                         VulnerabilityFinding(
                             vulnerability_type=VulnerabilityType.SESSION_HIJACKING,
@@ -332,7 +336,8 @@ class SessionManagementTests(BasePenetrationTest):
         tokens = []
         for i in range(5):
             login_response = self.client.post(
-                "/api/v1/auth/login", json={"username": username, "password": password}
+                "/api/v1/auth/login",
+                json={"username": username, "password": password},
             )
             if login_response.status_code == 200:
                 token_data = login_response.json()
@@ -342,7 +347,9 @@ class SessionManagementTests(BasePenetrationTest):
         # Test if all tokens are still valid
         valid_tokens = 0
         for token in tokens:
-            response = self.client.get("/api/v1/auth/me", headers=self.get_auth_headers(token))
+            response = self.client.get(
+                "/api/v1/auth/me", headers=self.get_auth_headers(token)
+            )
             if response.status_code == 200:
                 valid_tokens += 1
 
@@ -479,7 +486,8 @@ class SessionManagementTests(BasePenetrationTest):
         username, password, user_id = self.create_test_user()
 
         login_response = self.client.post(
-            "/api/v1/auth/login", json={"username": username, "password": password}
+            "/api/v1/auth/login",
+            json={"username": username, "password": password},
         )
 
         if login_response.status_code == 200:
@@ -498,7 +506,9 @@ class SessionManagementTests(BasePenetrationTest):
         token = self.get_auth_token(username, password)
 
         # Verify token works
-        response = self.client.get("/api/v1/auth/me", headers=self.get_auth_headers(token))
+        response = self.client.get(
+            "/api/v1/auth/me", headers=self.get_auth_headers(token)
+        )
 
         if response.status_code != 200:
             return
@@ -509,7 +519,9 @@ class SessionManagementTests(BasePenetrationTest):
         )
 
         # Test if token still works after logout
-        response = self.client.get("/api/v1/auth/me", headers=self.get_auth_headers(token))
+        response = self.client.get(
+            "/api/v1/auth/me", headers=self.get_auth_headers(token)
+        )
 
         if response.status_code == 200:
             self.add_vulnerability(
@@ -553,10 +565,14 @@ class SessionManagementTests(BasePenetrationTest):
         token = self.get_auth_token(username, password)
 
         # Perform an action
-        response1 = self.client.get("/api/v1/auth/me", headers=self.get_auth_headers(token))
+        response1 = self.client.get(
+            "/api/v1/auth/me", headers=self.get_auth_headers(token)
+        )
 
         # Replay the exact same request
-        response2 = self.client.get("/api/v1/auth/me", headers=self.get_auth_headers(token))
+        response2 = self.client.get(
+            "/api/v1/auth/me", headers=self.get_auth_headers(token)
+        )
 
         # Both should succeed (this is expected for GET)
         # But check for any anti-replay mechanisms
@@ -565,9 +581,10 @@ class SessionManagementTests(BasePenetrationTest):
             and response2.status_code == 200
             and not self._has_replay_protection(response1, response2)
         ):
-
             # This is informational - GET requests normally allow replay
-            logger.info("No replay protection detected (normal for GET requests)")
+            logger.info(
+                "No replay protection detected (normal for GET requests)"
+            )
 
     async def _test_session_predictability(self):
         """Test session token predictability."""
@@ -660,7 +677,9 @@ class SessionManagementTests(BasePenetrationTest):
             try:
                 import jwt as pyjwt
 
-                payload = pyjwt.decode(token, options={"verify_signature": False})
+                payload = pyjwt.decode(
+                    token, options={"verify_signature": False}
+                )
                 if "jti" in payload:
                     token_parts.append(payload["jti"])
             except:
@@ -668,7 +687,9 @@ class SessionManagementTests(BasePenetrationTest):
                 token_parts.append(token)
 
         # Check for sequential patterns or low entropy
-        return len(set(token_parts)) < len(token_parts) * 0.9  # Less than 90% unique
+        return (
+            len(set(token_parts)) < len(token_parts) * 0.9
+        )  # Less than 90% unique
 
     def _analyze_token_structure(self, token: str):
         """Analyze token structure for security issues."""
@@ -798,7 +819,10 @@ class SessionManagementTests(BasePenetrationTest):
         text1 = response1.text.lower()
         text2 = response2.text.lower()
 
-        return any(indicator in text1 or indicator in text2 for indicator in replay_indicators)
+        return any(
+            indicator in text1 or indicator in text2
+            for indicator in replay_indicators
+        )
 
     def _detect_token_patterns(self, tokens: List[str]) -> bool:
         """Detect patterns in session tokens."""
@@ -814,7 +838,9 @@ class SessionManagementTests(BasePenetrationTest):
             try:
                 import jwt as pyjwt
 
-                payload = pyjwt.decode(token, options={"verify_signature": False})
+                payload = pyjwt.decode(
+                    token, options={"verify_signature": False}
+                )
                 if "jti" in payload:
                     jtis.append(payload["jti"])
             except:
@@ -824,7 +850,10 @@ class SessionManagementTests(BasePenetrationTest):
             # Check for sequential hex values or timestamps
             try:
                 # Try to convert to integers and check for sequences
-                values = [int(jti, 16) if len(jti) > 10 else int(jti) for jti in jtis[:3]]
+                values = [
+                    int(jti, 16) if len(jti) > 10 else int(jti)
+                    for jti in jtis[:3]
+                ]
 
                 # Check if values are sequential
                 if values[1] - values[0] == values[2] - values[1]:

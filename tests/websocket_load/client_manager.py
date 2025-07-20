@@ -39,7 +39,11 @@ class ConnectionStats:
     @property
     def average_latency(self) -> float:
         """Get average message latency."""
-        return sum(self.latencies) / len(self.latencies) if self.latencies else 0.0
+        return (
+            sum(self.latencies) / len(self.latencies)
+            if self.latencies
+            else 0.0
+        )
 
     @property
     def throughput_sent(self) -> float:
@@ -73,7 +77,9 @@ class WebSocketClient:
         self.websocket: Optional[WebSocketClientProtocol] = None
         self.stats = ConnectionStats(connection_id=client_id)
         self.is_connected = False
-        self.pending_messages: Dict[str, float] = {}  # message_id -> timestamp for latency tracking
+        self.pending_messages: Dict[
+            str, float
+        ] = {}  # message_id -> timestamp for latency tracking
 
         # Callbacks
         self.on_message = on_message
@@ -127,7 +133,9 @@ class WebSocketClient:
 
         logger.debug(f"Client {self.client_id} disconnected")
 
-    async def send_message(self, message: Dict[str, Any], track_latency: bool = True):
+    async def send_message(
+        self, message: Dict[str, Any], track_latency: bool = True
+    ):
         """Queue a message for sending."""
         if not self.is_connected:
             raise RuntimeError(f"Client {self.client_id} is not connected")
@@ -144,7 +152,9 @@ class WebSocketClient:
         while self.is_connected:
             try:
                 # Wait for message with timeout
-                message = await asyncio.wait_for(self.send_queue.get(), timeout=0.1)
+                message = await asyncio.wait_for(
+                    self.send_queue.get(), timeout=0.1
+                )
 
                 if self.websocket:
                     message_str = json.dumps(message)
@@ -153,7 +163,9 @@ class WebSocketClient:
                     self.stats.messages_sent += 1
                     self.stats.bytes_sent += len(message_str.encode())
 
-                    logger.debug(f"Client {self.client_id} sent: {message.get('type', 'unknown')}")
+                    logger.debug(
+                        f"Client {self.client_id} sent: {message.get('type', 'unknown')}"
+                    )
 
             except asyncio.TimeoutError:
                 continue
@@ -175,8 +187,13 @@ class WebSocketClient:
                     self.stats.bytes_received += len(message_str.encode())
 
                     # Track latency if this is a response to our message
-                    if "id" in message and message["id"] in self.pending_messages:
-                        latency = time.time() - self.pending_messages[message["id"]]
+                    if (
+                        "id" in message
+                        and message["id"] in self.pending_messages
+                    ):
+                        latency = (
+                            time.time() - self.pending_messages[message["id"]]
+                        )
                         self.stats.latencies.append(latency)
                         del self.pending_messages[message["id"]]
 
@@ -270,15 +287,21 @@ class WebSocketClientManager:
             tasks = []
 
             for client in batch:
-                task = self._connect_with_retry(client, retry_count, retry_delay)
+                task = self._connect_with_retry(
+                    client, retry_count, retry_delay
+                )
                 tasks.append(task)
 
             # Wait for batch to complete
-            batch_results = await asyncio.gather(*tasks, return_exceptions=True)
+            batch_results = await asyncio.gather(
+                *tasks, return_exceptions=True
+            )
 
             for client, result in zip(batch, batch_results):
                 if isinstance(result, Exception):
-                    logger.error(f"Client {client.client_id} connection failed: {result}")
+                    logger.error(
+                        f"Client {client.client_id} connection failed: {result}"
+                    )
                     results[client.client_id] = False
                 else:
                     results[client.client_id] = result
@@ -286,7 +309,9 @@ class WebSocketClientManager:
                         self.active_clients.add(client.client_id)
 
         successful = sum(1 for success in results.values() if success)
-        logger.info(f"Connected {successful}/{len(clients)} clients successfully")
+        logger.info(
+            f"Connected {successful}/{len(clients)} clients successfully"
+        )
 
         return results
 
@@ -330,7 +355,9 @@ class WebSocketClientManager:
         self.active_clients.clear()
         logger.info("Disconnected all clients")
 
-    async def broadcast_message(self, message: Dict[str, Any], clients: Optional[List[str]] = None):
+    async def broadcast_message(
+        self, message: Dict[str, Any], clients: Optional[List[str]] = None
+    ):
         """Send a message to multiple clients."""
         if clients is None:
             clients = list(self.active_clients)
@@ -345,7 +372,9 @@ class WebSocketClientManager:
             results = await asyncio.gather(*tasks, return_exceptions=True)
             errors = sum(1 for r in results if isinstance(r, Exception))
             if errors:
-                logger.warning(f"Failed to send message to {errors}/{len(tasks)} clients")
+                logger.warning(
+                    f"Failed to send message to {errors}/{len(tasks)} clients"
+                )
 
     def get_statistics(self) -> Dict[str, Any]:
         """Get aggregated statistics for all clients."""
@@ -367,7 +396,9 @@ class WebSocketClientManager:
             total_errors += len(client.stats.errors)
             all_latencies.extend(client.stats.latencies)
 
-        avg_latency = sum(all_latencies) / len(all_latencies) if all_latencies else 0.0
+        avg_latency = (
+            sum(all_latencies) / len(all_latencies) if all_latencies else 0.0
+        )
 
         return {
             "total_clients": total_clients,
@@ -378,9 +409,15 @@ class WebSocketClientManager:
             "total_bytes_received": total_bytes_received,
             "total_errors": total_errors,
             "average_latency_ms": avg_latency * 1000,
-            "latency_p50_ms": self._percentile(all_latencies, 0.5) * 1000 if all_latencies else 0,
-            "latency_p95_ms": self._percentile(all_latencies, 0.95) * 1000 if all_latencies else 0,
-            "latency_p99_ms": self._percentile(all_latencies, 0.99) * 1000 if all_latencies else 0,
+            "latency_p50_ms": self._percentile(all_latencies, 0.5) * 1000
+            if all_latencies
+            else 0,
+            "latency_p95_ms": self._percentile(all_latencies, 0.95) * 1000
+            if all_latencies
+            else 0,
+            "latency_p99_ms": self._percentile(all_latencies, 0.99) * 1000
+            if all_latencies
+            else 0,
         }
 
     def _percentile(self, data: List[float], percentile: float) -> float:
@@ -398,4 +435,8 @@ class WebSocketClientManager:
 
     def get_active_clients(self) -> List[WebSocketClient]:
         """Get all active clients."""
-        return [self.clients[cid] for cid in self.active_clients if cid in self.clients]
+        return [
+            self.clients[cid]
+            for cid in self.active_clients
+            if cid in self.clients
+        ]

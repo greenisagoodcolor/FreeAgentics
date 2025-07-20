@@ -26,21 +26,31 @@ class TestHealthEndpoint:
         # Execute request to /health endpoint
         start_time = time.time()
         response = client.get("/health")
-        response_time = (time.time() - start_time) * 1000  # Convert to milliseconds
+        response_time = (
+            time.time() - start_time
+        ) * 1000  # Convert to milliseconds
 
         # Assert response status code
-        assert response.status_code == 200, f"Expected 200, got {response.status_code}"
+        assert (
+            response.status_code == 200
+        ), f"Expected 200, got {response.status_code}"
 
         # Assert response JSON structure
         data = response.json()
         assert "status" in data, "Response should contain 'status' field"
-        assert data["status"] == "healthy", f"Expected status 'healthy', got {data['status']}"
+        assert (
+            data["status"] == "healthy"
+        ), f"Expected status 'healthy', got {data['status']}"
 
         assert "db" in data, "Response should contain 'db' field"
-        assert data["db"] == "connected", f"Expected db 'connected', got {data['db']}"
+        assert (
+            data["db"] == "connected"
+        ), f"Expected db 'connected', got {data['db']}"
 
         # Assert response time is under 100ms
-        assert response_time < 100, f"Response took {response_time:.2f}ms, expected < 100ms"
+        assert (
+            response_time < 100
+        ), f"Response took {response_time:.2f}ms, expected < 100ms"
 
     def test_health_endpoint_returns_503_when_database_disconnected(self):
         """Test that /health returns 503 Service Unavailable when database is down."""
@@ -49,8 +59,12 @@ class TestHealthEndpoint:
         # Mock a database failure by overriding the dependency
         def get_broken_db():
             # Create a session that will fail
-            engine = create_engine("postgresql://invalid:invalid@invalid:5432/invalid")
-            SessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engine)
+            engine = create_engine(
+                "postgresql://invalid:invalid@invalid:5432/invalid"
+            )
+            SessionLocal = sessionmaker(
+                autocommit=False, autoflush=False, bind=engine
+            )
             db = SessionLocal()
             try:
                 yield db
@@ -65,7 +79,9 @@ class TestHealthEndpoint:
             response = client.get("/health")
 
             # Assert response status code
-            assert response.status_code == 503, f"Expected 503, got {response.status_code}"
+            assert (
+                response.status_code == 503
+            ), f"Expected 503, got {response.status_code}"
 
             # Assert response JSON structure
             data = response.json()
@@ -75,9 +91,13 @@ class TestHealthEndpoint:
             ), f"Expected status 'unhealthy', got {data['status']}"
 
             assert "db" in data, "Response should contain 'db' field"
-            assert data["db"] == "disconnected", f"Expected db 'disconnected', got {data['db']}"
+            assert (
+                data["db"] == "disconnected"
+            ), f"Expected db 'disconnected', got {data['db']}"
 
-            assert "error" in data, "Response should contain 'error' field when unhealthy"
+            assert (
+                "error" in data
+            ), "Response should contain 'error' field when unhealthy"
 
         finally:
             # Clean up: remove the override
@@ -126,7 +146,9 @@ class TestHealthEndpoint:
             response = client.get("/health")
 
             # Assert SELECT 1 was executed
-            assert query_executed, "Health endpoint should execute 'SELECT 1' query"
+            assert (
+                query_executed
+            ), "Health endpoint should execute 'SELECT 1' query"
 
             # Also verify successful response
             assert response.status_code == 200
@@ -145,7 +167,9 @@ class TestHealthEndpoint:
         for _ in range(10):
             start_time = time.time()
             response = client.get("/health")
-            response_time = (time.time() - start_time) * 1000  # Convert to milliseconds
+            response_time = (
+                time.time() - start_time
+            ) * 1000  # Convert to milliseconds
 
             assert response.status_code == 200
             response_times.append(response_time)
@@ -156,7 +180,9 @@ class TestHealthEndpoint:
 
         # Average should also be well under 100ms
         avg_time = sum(response_times) / len(response_times)
-        assert avg_time < 50, f"Average response time {avg_time:.2f}ms should be well under 100ms"
+        assert (
+            avg_time < 50
+        ), f"Average response time {avg_time:.2f}ms should be well under 100ms"
 
     def test_health_endpoint_uses_fastapi_exception_handlers(self):
         """Test that health endpoint doesn't use try/except, relies on FastAPI handlers."""

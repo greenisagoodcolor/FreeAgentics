@@ -53,7 +53,11 @@ TEST_CATEGORIES = {
     },
     "performance": {
         "description": "Performance and load tests",
-        "tests": ["test_auth_load.py", "test_rbac_scale.py", "test_monitoring_load.py"],
+        "tests": [
+            "test_auth_load.py",
+            "test_rbac_scale.py",
+            "test_monitoring_load.py",
+        ],
     },
     "security": {
         "description": "Security validation tests",
@@ -83,14 +87,18 @@ class IntegrationTestDashboard:
     def __init__(self):
         self.test_dir = os.path.dirname(os.path.abspath(__file__))
         self.project_root = os.path.dirname(os.path.dirname(self.test_dir))
-        self.venv_python = os.path.join(self.project_root, "venv", "bin", "python")
+        self.venv_python = os.path.join(
+            self.project_root, "venv", "bin", "python"
+        )
         self.results = {}
 
     def check_environment(self) -> Dict[str, bool]:
         """Check if test environment is properly set up."""
         checks = {
             "venv_exists": os.path.exists(self.venv_python),
-            "env_test_exists": os.path.exists(os.path.join(self.project_root, ".env.test")),
+            "env_test_exists": os.path.exists(
+                os.path.join(self.project_root, ".env.test")
+            ),
             "docker_running": self._check_docker(),
             "containers_available": self._check_containers_available(),
         }
@@ -99,14 +107,18 @@ class IntegrationTestDashboard:
     def _check_docker(self) -> bool:
         """Check if Docker is running."""
         try:
-            result = subprocess.run(["docker", "info"], capture_output=True, text=True)
+            result = subprocess.run(
+                ["docker", "info"], capture_output=True, text=True
+            )
             return result.returncode == 0
-        except:
+        except Exception:
             return False
 
     def _check_containers_available(self) -> bool:
         """Check if docker-compose.test.yml exists."""
-        compose_file = os.path.join(self.project_root, "docker-compose.test.yml")
+        compose_file = os.path.join(
+            self.project_root, "docker-compose.test.yml"
+        )
         return os.path.exists(compose_file)
 
     def list_tests(self, category: str = None) -> List[str]:
@@ -119,7 +131,9 @@ class IntegrationTestDashboard:
             all_tests.extend(cat_data["tests"])
         return list(set(all_tests))  # Remove duplicates
 
-    def run_test(self, test_file: str, verbose: bool = False) -> Tuple[bool, str]:
+    def run_test(
+        self, test_file: str, verbose: bool = False
+    ) -> Tuple[bool, str]:
         """Run a single test file and return success status and output."""
         test_path = os.path.join(self.test_dir, test_file)
 
@@ -137,10 +151,19 @@ class IntegrationTestDashboard:
                         env[key] = value
 
         # Run test
-        cmd = [self.venv_python, "-m", "pytest", test_path, "-v" if verbose else "-q", "--tb=short"]
+        cmd = [
+            self.venv_python,
+            "-m",
+            "pytest",
+            test_path,
+            "-v" if verbose else "-q",
+            "--tb=short",
+        ]
 
         try:
-            result = subprocess.run(cmd, capture_output=True, text=True, env=env, timeout=60)
+            result = subprocess.run(
+                cmd, capture_output=True, text=True, env=env, timeout=60
+            )
             success = result.returncode == 0
             output = result.stdout + result.stderr
             return success, output
@@ -149,7 +172,9 @@ class IntegrationTestDashboard:
         except Exception as e:
             return False, f"Error running test: {str(e)}"
 
-    def run_category(self, category: str, verbose: bool = False) -> Dict[str, Tuple[bool, str]]:
+    def run_category(
+        self, category: str, verbose: bool = False
+    ) -> Dict[str, Tuple[bool, str]]:
         """Run all tests in a category."""
         tests = self.list_tests(category)
         results = {}
@@ -187,15 +212,21 @@ Failed Tests:
             if not success:
                 # Extract failure summary from output
                 lines = output.split("\n")
-                error_lines = [l for l in lines if "FAILED" in l or "ERROR" in l][:3]
+                error_lines = [
+                    l for l in lines if "FAILED" in l or "ERROR" in l
+                ][:3]
                 error_summary = (
-                    "\n  ".join(error_lines) if error_lines else "Check output for details"
+                    "\n  ".join(error_lines)
+                    if error_lines
+                    else "Check output for details"
                 )
                 report += f"\n{test}:\n  {error_summary}\n"
 
         return report
 
-    def save_results(self, results: Dict[str, Tuple[bool, str]], filename: str = None):
+    def save_results(
+        self, results: Dict[str, Tuple[bool, str]], filename: str = None
+    ):
         """Save test results to a JSON file."""
         if not filename:
             timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
@@ -219,13 +250,19 @@ Failed Tests:
 
 def main():
     """Main entry point for the dashboard."""
-    parser = argparse.ArgumentParser(description="FreeAgentics Integration Test Dashboard")
+    parser = argparse.ArgumentParser(
+        description="FreeAgentics Integration Test Dashboard"
+    )
     parser.add_argument(
-        "command", choices=["check", "list", "run", "report"], help="Command to execute"
+        "command",
+        choices=["check", "list", "run", "report"],
+        help="Command to execute",
     )
     parser.add_argument("-c", "--category", help="Test category to run")
     parser.add_argument("-t", "--test", help="Specific test file to run")
-    parser.add_argument("-v", "--verbose", action="store_true", help="Verbose output")
+    parser.add_argument(
+        "-v", "--verbose", action="store_true", help="Verbose output"
+    )
     parser.add_argument("-s", "--save", help="Save results to file")
 
     args = parser.parse_args()
@@ -305,7 +342,10 @@ def main():
         with open(args.save) as f:
             data = json.load(f)
 
-        results = {test: (res["success"], res["output"]) for test, res in data["results"].items()}
+        results = {
+            test: (res["success"], res["output"])
+            for test, res in data["results"].items()
+        }
 
         report = dashboard.generate_report(results)
         print(report)

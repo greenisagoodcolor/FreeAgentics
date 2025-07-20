@@ -9,7 +9,7 @@ This module provides enterprise-grade security capabilities including field-leve
 - **AWS KMS Integration**: Secure key management with hardware security modules
 - **HashiCorp Vault Support**: Enterprise secret management and encryption
 - **Transparent Encryption**: Decorator-based automatic encryption/decryption
-- **Performance Optimized**: <5ms overhead per operation with caching
+- **Performance Optimized**: \<5ms overhead per operation with caching
 - **Key Rotation**: Automatic key rotation with zero downtime
 - **FIPS 140-2 Compliant**: Uses approved cryptographic algorithms
 
@@ -151,12 +151,14 @@ case = manager.create_incident(
 ### AWS KMS Setup
 
 1. Create KMS key:
+
 ```bash
 aws kms create-key --description "Application encryption key"
 aws kms create-alias --alias-name alias/application-data --target-key-id <key-id>
 ```
 
 2. Configure IAM permissions:
+
 ```json
 {
   "Version": "2012-10-17",
@@ -175,12 +177,14 @@ aws kms create-alias --alias-name alias/application-data --target-key-id <key-id
 ### HashiCorp Vault Setup
 
 1. Enable transit engine:
+
 ```bash
 vault secrets enable transit
 vault write -f transit/keys/application-data
 ```
 
 2. Create policy:
+
 ```hcl
 path "transit/encrypt/application-data" {
   capabilities = ["update"]
@@ -223,14 +227,14 @@ actions:
 
 ### Encryption Performance
 
-- Field encryption: <5ms per operation
+- Field encryption: \<5ms per operation
 - Bulk operations: Use `bulk_encrypt_fields()` for efficiency
 - Caching: Enable key caching for frequently accessed data
 - Connection pooling: Reuse KMS/Vault connections
 
 ### SOAR Performance
 
-- Playbook execution: <1s for most workflows
+- Playbook execution: \<1s for most workflows
 - Concurrent executions: Default 10, configurable
 - Action timeouts: Default 5 minutes per action
 - Metrics collection: Asynchronous, no impact on response time
@@ -238,21 +242,25 @@ actions:
 ## Security Best Practices
 
 1. **Key Management**
+
    - Rotate encryption keys regularly (90 days recommended)
    - Use separate keys for different data types
    - Never store keys in code or configuration files
 
-2. **Access Control**
+1. **Access Control**
+
    - Implement least privilege for KMS/Vault access
    - Use IAM roles for AWS, not access keys
    - Audit key usage regularly
 
-3. **Incident Response**
+1. **Incident Response**
+
    - Test playbooks in staging environment
    - Implement manual approval for critical actions
    - Maintain audit trail of all automated actions
 
-4. **Compliance**
+1. **Compliance**
+
    - FIPS 140-2 compliant algorithms
    - GDPR-ready with field-level encryption
    - PCI-DSS support for payment card data

@@ -11,8 +11,8 @@ This module implements compression techniques identified in Task 5.2:
 
 import logging
 from collections import deque
-from dataclasses import dataclass
-from typing import Any, Dict, List, Optional, Tuple
+from dataclasses import dataclass, field
+from typing import Any, Dict, List, Optional, Set, Tuple
 
 import numpy as np
 from scipy import sparse
@@ -27,7 +27,7 @@ class SparseBeliefState:
     data: np.ndarray  # Non-zero values
     indices: np.ndarray  # Flat indices of non-zero values
     shape: Tuple[int, ...]  # Original shape
-    dtype: np.dtype = np.float32
+    dtype: np.dtype = field(default_factory=lambda: np.dtype(np.float32))
 
     @property
     def nnz(self) -> int:
@@ -55,9 +55,13 @@ class SparseBeliefState:
         if len(self.shape) == 2:
             rows = self.indices // self.shape[1]
             cols = self.indices % self.shape[1]
-            return sparse.csr_matrix((self.data, (rows, cols)), shape=self.shape, dtype=self.dtype)
+            return sparse.csr_matrix(
+                (self.data, (rows, cols)), shape=self.shape, dtype=self.dtype
+            )
         else:
-            raise ValueError("Conversion to scipy sparse only supports 2D arrays")
+            raise ValueError(
+                "Conversion to scipy sparse only supports 2D arrays"
+            )
 
 
 class BeliefCompressor:
@@ -70,9 +74,11 @@ class BeliefCompressor:
             sparsity_threshold: Minimum sparsity ratio to use compression (default 0.9 = 90% zeros)
         """
         self.sparsity_threshold = sparsity_threshold
-        self._component_cache = {}
+        self._component_cache: Dict[str, Any] = {}
 
-    def compress(self, belief: np.ndarray, dtype: np.dtype = np.float32) -> SparseBeliefState:
+    def compress(
+        self, belief: np.ndarray, dtype: np.dtype = np.dtype(np.float32)
+    ) -> SparseBeliefState:
         """Compress a belief state to sparse format.
 
         Args:
@@ -86,11 +92,12 @@ class BeliefCompressor:
         belief = belief.astype(dtype)
 
         # Find non-zero elements
-        nonzero_mask = belief != 0
         sparsity = 1 - (np.count_nonzero(belief) / belief.size)
 
         if sparsity < self.sparsity_threshold:
-            logger.debug(f"Belief sparsity {sparsity:.1%} below threshold, using dense storage")
+            logger.debug(
+                f"Belief sparsity {sparsity:.1%} below threshold, using dense storage"
+            )
             # For non-sparse beliefs, store all values
             data = belief.ravel()
             indices = np.arange(belief.size, dtype=np.int32)
@@ -100,7 +107,9 @@ class BeliefCompressor:
             data = belief.ravel()[nonzero_indices]
             indices = nonzero_indices.astype(np.int32)
 
-        return SparseBeliefState(data=data, indices=indices, shape=belief.shape, dtype=dtype)
+        return SparseBeliefState(
+            data=data, indices=indices, shape=belief.shape, dtype=dtype
+        )
 
     def decompress(self, sparse_belief: SparseBeliefState) -> np.ndarray:
         """Decompress a sparse belief state to dense format.
@@ -114,7 +123,10 @@ class BeliefCompressor:
         return sparse_belief.to_dense()
 
     def incremental_update(
-        self, sparse_belief: SparseBeliefState, update: np.ndarray, learning_rate: float = 0.1
+        self,
+        sparse_belief: SparseBeliefState,
+        update: np.ndarray,
+        learning_rate: float = 0.1,
     ) -> SparseBeliefState:
         """Apply incremental update to compressed belief.
 
@@ -130,7 +142,9 @@ class BeliefCompressor:
         dense_belief = self.decompress(sparse_belief)
 
         # Apply incremental update
-        updated_belief = (1 - learning_rate) * dense_belief + learning_rate * update
+        updated_belief = (
+            1 - learning_rate
+        ) * dense_belief + learning_rate * update
 
         # Normalize if it's a probability distribution
         if np.abs(updated_belief.sum() - 1.0) < 0.1:  # Likely a probability
@@ -140,7 +154,9 @@ class BeliefCompressor:
         return self.compress(updated_belief, dtype=sparse_belief.dtype)
 
     def compress_with_sharing(
-        self, belief: np.ndarray, base_components: Optional[Dict[str, Any]] = None
+        self,
+        belief: np.ndarray,
+        base_components: Optional[Dict[str, Any]] = None,
     ) -> Tuple[SparseBeliefState, Dict[str, Any]]:
         """Compress belief with component sharing.
 
@@ -195,7 +211,9 @@ class BeliefCompressor:
 
         return sparse_belief, components
 
-    def compress_batch(self, beliefs: List[np.ndarray]) -> List[SparseBeliefState]:
+    def compress_batch(
+        self, beliefs: List[np.ndarray]
+    ) -> List[SparseBeliefState]:
         """Compress multiple beliefs efficiently.
 
         Args:
@@ -207,7 +225,7 @@ class BeliefCompressor:
         compressed = []
 
         # Group by shape for potential optimization
-        shape_groups = {}
+        shape_groups: Dict[Tuple[int, ...], List[Tuple[int, np.ndarray]]] = {}
         for i, belief in enumerate(beliefs):
             shape = belief.shape
             if shape not in shape_groups:
@@ -215,7 +233,7 @@ class BeliefCompressor:
             shape_groups[shape].append((i, belief))
 
         # Compress each group
-        for shape, group in shape_groups.items():
+        for _shape, group in shape_groups.items():
             # Could implement further optimizations here
             for idx, belief in group:
                 compressed.append((idx, self.compress(belief)))
@@ -228,7 +246,12 @@ class BeliefCompressor:
 class CompressedBeliefPool:
     """Object pool for compressed belief states."""
 
-    def __init__(self, pool_size: int, belief_shape: Tuple[int, ...], dtype: np.dtype = np.float32):
+    def __init__(
+        self,
+        pool_size: int,
+        belief_shape: Tuple[int, ...],
+        dtype: np.dtype = np.dtype(np.float32),
+    ):
         """Initialize belief pool.
 
         Args:
@@ -239,8 +262,8 @@ class CompressedBeliefPool:
         self.pool_size = pool_size
         self.belief_shape = belief_shape
         self.dtype = dtype
-        self.available = deque(maxlen=pool_size)
-        self.in_use = set()
+        self.available: deque = deque(maxlen=pool_size)
+        self.in_use: Set[int] = set()
 
         # Pre-allocate pool
         self._initialize_pool()
@@ -264,7 +287,7 @@ class CompressedBeliefPool:
             Available sparse belief state
         """
         if self.available:
-            belief = self.available.popleft()
+            belief: SparseBeliefState = self.available.popleft()
         else:
             # Pool exhausted, create new one
             logger.warning("Belief pool exhausted, creating new belief")
@@ -332,6 +355,7 @@ def calculate_compression_stats(
         "original_memory_mb": original_memory / 1024 / 1024,
         "compressed_memory_mb": compressed_memory / 1024 / 1024,
         "compression_ratio": original_memory / compressed_memory,
-        "space_savings_percent": (1 - compressed_memory / original_memory) * 100,
+        "space_savings_percent": (1 - compressed_memory / original_memory)
+        * 100,
         "sparsity_percent": (1 - compressed.nnz / original.size) * 100,
     }

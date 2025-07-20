@@ -128,7 +128,10 @@ class TestHealthCheckEndpoint:
         mock_session.execute.assert_called_once()
         executed_query = mock_session.execute.call_args[0][0]
         # The query should be a sqlalchemy text object with "SELECT 1"
-        assert hasattr(executed_query, "text") or str(executed_query) == "SELECT 1"
+        assert (
+            hasattr(executed_query, "text")
+            or str(executed_query) == "SELECT 1"
+        )
 
     def test_health_no_try_except_in_endpoint(self):
         """Test that the endpoint doesn't catch exceptions internally."""
@@ -152,7 +155,9 @@ class TestHealthCheckEndpoint:
             import inspect
 
             source = inspect.getsource(health_endpoint)
-            assert "try:" not in source, "Health endpoint should not have try/except blocks"
+            assert (
+                "try:" not in source
+            ), "Health endpoint should not have try/except blocks"
 
     def test_health_response_time_under_100ms(self, client):
         """Test that health check responds in under 100ms."""
@@ -163,7 +168,9 @@ class TestHealthCheckEndpoint:
 
         response_time_ms = (end_time - start_time) * 1000
         assert response.status_code == 200
-        assert response_time_ms < 100, f"Response time {response_time_ms}ms exceeds 100ms limit"
+        assert (
+            response_time_ms < 100
+        ), f"Response time {response_time_ms}ms exceeds 100ms limit"
 
     def test_health_returns_proper_json_structure(self, client):
         """Test that health endpoint returns proper JSON structure."""

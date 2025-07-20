@@ -40,7 +40,7 @@ jobs:
       - name: Check for security-sensitive file changes
         id: security_files
         run: |
-          SECURITY_FILES=$(git diff --name-only ${{ github.event.before }} ${{ github.sha }} | grep -E '(auth|security|crypto|jwt|session|password|secret|key|cert|ssl|tls)' || true)
+          SECURITY_FILES=$(git diff --name-only ${{ github.event.before }} ${{ github.sha }} | grep -E '(auth|security|crypto|jwt|session|password|secret|key|cert|ssl|tls)' )
           if [ -n "$SECURITY_FILES" ]; then
             echo "security_changed=true" >> $GITHUB_OUTPUT
             echo "Security-sensitive files changed:"
@@ -84,14 +84,14 @@ jobs:
             --skip B101,B601,B603 \
             --severity-level medium \
             --confidence-level medium \
-            --exclude .archive,web,tests || true
-          
+            --exclude .archive,web,tests 
+
           # Generate human-readable report
           bandit -r . -f txt -o bandit-report.txt \
             --skip B101,B601,B603 \
             --severity-level medium \
             --confidence-level medium \
-            --exclude .archive,web,tests || true
+            --exclude .archive,web,tests 
 
       - name: Run Semgrep security patterns
         uses: returntocorp/semgrep-action@v1
@@ -139,20 +139,20 @@ jobs:
       - name: Python dependency scan with Safety
         run: |
           pip install safety
-          safety check --json --output safety-report.json || true
-          safety check --full-report || true
+          safety check --json --output safety-report.json 
+          safety check --full-report 
 
       - name: Python dependency scan with pip-audit
         run: |
           pip install pip-audit
-          pip-audit --format json --output pip-audit-report.json || true
-          pip-audit --desc || true
+          pip-audit --format json --output pip-audit-report.json 
+          pip-audit --desc 
 
       - name: Node.js dependency scan
         working-directory: ./web
         run: |
-          npm audit --json > npm-audit-report.json || true
-          npm audit || true
+          npm audit --json > npm-audit-report.json 
+          npm audit 
 
       - name: License compliance check
         run: |
@@ -240,10 +240,10 @@ jobs:
           wget https://github.com/controlplaneio/kubesec/releases/download/v2.13.0/kubesec_linux_amd64.tar.gz
           tar -xzf kubesec_linux_amd64.tar.gz
           chmod +x kubesec
-          
+
           # Scan Kubernetes manifests
           find . -name "*.yaml" -o -name "*.yml" | grep -E "(k8s|kubernetes|deploy)" | while read file; do
-            ./kubesec scan "$file" >> kubesec-results.json || true
+            ./kubesec scan "$file" >> kubesec-results.json 
           done
 
       - name: Docker Compose security scan
@@ -264,7 +264,7 @@ jobs:
     runs-on: ubuntu-latest
     needs: [sast-analysis, dependency-scan]
     if: github.event_name == 'pull_request' || github.ref == 'refs/heads/main'
-    
+
     services:
       postgres:
         image: postgres:15
@@ -330,7 +330,7 @@ jobs:
   security-integration:
     runs-on: ubuntu-latest
     needs: [sast-analysis, dependency-scan]
-    
+
     services:
       postgres:
         image: postgres:15
@@ -399,7 +399,7 @@ jobs:
     runs-on: ubuntu-latest
     needs: security-integration
     if: github.event.inputs.full_scan == 'true' || github.event_name == 'schedule'
-    
+
     steps:
       - uses: actions/checkout@v4
 
@@ -431,7 +431,7 @@ jobs:
   compliance-check:
     runs-on: ubuntu-latest
     needs: [sast-analysis, dependency-scan, container-security]
-    
+
     steps:
       - uses: actions/checkout@v4
 
@@ -472,7 +472,7 @@ jobs:
     runs-on: ubuntu-latest
     needs: [dast-analysis, security-integration]
     if: github.ref == 'refs/heads/main'
-    
+
     steps:
       - uses: actions/checkout@v4
 
@@ -480,7 +480,7 @@ jobs:
         run: |
           # Set up Prometheus alerts
           cp monitoring/rules/security-alerts.yml /tmp/
-          
+
           # Configure Grafana dashboards
           cp monitoring/grafana/dashboards/security-dashboard.json /tmp/
 
@@ -505,7 +505,7 @@ jobs:
     runs-on: ubuntu-latest
     needs: [sast-analysis, dependency-scan, container-security, dast-analysis, security-integration, compliance-check]
     if: always()
-    
+
     steps:
       - uses: actions/checkout@v4
 
@@ -535,9 +535,9 @@ jobs:
           script: |
             const score = '${{ steps.security_score.outputs.score }}';
             const comment = `## Security CI/CD Summary
-            
+
             **Security Score:** ${score}/100
-            
+
             ### Scan Results:
             - ✅ Static Analysis (SAST) completed
             - ✅ Dependency scanning completed
@@ -545,9 +545,9 @@ jobs:
             - ✅ Dynamic Analysis (DAST) completed
             - ✅ Security integration tests passed
             - ✅ Compliance checks completed
-            
+
             View detailed reports in the workflow artifacts.`;
-            
+
             github.rest.issues.createComment({
               issue_number: context.issue.number,
               owner: context.repo.owner,
@@ -574,7 +574,7 @@ jobs:
     runs-on: ubuntu-latest
     needs: security-report
     if: github.ref == 'refs/heads/main'
-    
+
     steps:
       - uses: actions/checkout@v4
 
@@ -613,7 +613,7 @@ jobs:
     needs: security-release-gate
     if: github.ref == 'refs/heads/main'
     environment: production
-    
+
     steps:
       - uses: actions/checkout@v4
 

@@ -25,7 +25,10 @@ from agent_simulation_framework import (
 )
 
 # Import our test modules
-from test_coordination_load import CoordinationLoadTester, run_comprehensive_load_tests
+from test_coordination_load import (
+    CoordinationLoadTester,
+    run_comprehensive_load_tests,
+)
 
 
 class LoadTestReport:
@@ -40,7 +43,9 @@ class LoadTestReport:
         summary = []
         summary.append("=" * 80)
         summary.append("MULTI-AGENT COORDINATION LOAD TEST REPORT")
-        summary.append(f"Generated: {self.timestamp.strftime('%Y-%m-%d %H:%M:%S')}")
+        summary.append(
+            f"Generated: {self.timestamp.strftime('%Y-%m-%d %H:%M:%S')}"
+        )
         summary.append("=" * 80)
 
         # Key findings
@@ -49,12 +54,20 @@ class LoadTestReport:
         if "coordination_metrics" in self.results:
             metrics = self.results["coordination_metrics"]
             max_agents = max(m.agent_count for m in metrics)
-            max_metric = next(m for m in metrics if m.agent_count == max_agents)
+            max_metric = next(
+                m for m in metrics if m.agent_count == max_agents
+            )
 
             summary.append(f"- Maximum agents tested: {max_agents}")
-            summary.append(f"- Efficiency at scale: {max_metric.actual_efficiency:.1%}")
-            summary.append(f"- Coordination overhead: {max_metric.coordination_overhead:.1%}")
-            summary.append(f"- Message latency: {max_metric.coordination_latency_ms:.1f}ms")
+            summary.append(
+                f"- Efficiency at scale: {max_metric.actual_efficiency:.1%}"
+            )
+            summary.append(
+                f"- Coordination overhead: {max_metric.coordination_overhead:.1%}"
+            )
+            summary.append(
+                f"- Message latency: {max_metric.coordination_latency_ms:.1f}ms"
+            )
 
             # Validate against documentation
             efficiency_loss = max_metric.efficiency_loss()
@@ -73,8 +86,12 @@ class LoadTestReport:
         if "scaling_results" in self.results:
             phases = self.results["scaling_results"]["phases"]
 
-            summary.append("\nAgent Count | Steps/sec | Efficiency | Memory/agent")
-            summary.append("------------|-----------|------------|-------------")
+            summary.append(
+                "\nAgent Count | Steps/sec | Efficiency | Memory/agent"
+            )
+            summary.append(
+                "------------|-----------|------------|-------------"
+            )
 
             baseline_sps = phases[0]["steps_per_second"] if phases else 1
 
@@ -93,12 +110,18 @@ class LoadTestReport:
 
         if "handoff_results" in self.results:
             handoff = self.results["handoff_results"]
-            summary.append(f"- Task handoffs/sec: {handoff.get('handoffs_per_second', 0):.1f}")
-            summary.append(f"- Handoff success rate: {handoff.get('success_rate', 0):.1%}")
+            summary.append(
+                f"- Task handoffs/sec: {handoff.get('handoffs_per_second', 0):.1f}"
+            )
+            summary.append(
+                f"- Handoff success rate: {handoff.get('success_rate', 0):.1%}"
+            )
 
         if "consensus_results" in self.results:
             consensus = self.results["consensus_results"]
-            summary.append(f"- Consensus success rate: {consensus.get('success_rate', 0):.1%}")
+            summary.append(
+                f"- Consensus success rate: {consensus.get('success_rate', 0):.1%}"
+            )
             summary.append(
                 f"- Average consensus time: {consensus.get('avg_consensus_time_ms', 0):.1f}ms"
             )
@@ -108,11 +131,15 @@ class LoadTestReport:
 
         if "failure_results" in self.results:
             failure = self.results["failure_results"]
-            summary.append(f"- Failures simulated: {failure.get('failure_count', 0)}")
+            summary.append(
+                f"- Failures simulated: {failure.get('failure_count', 0)}"
+            )
             summary.append(
                 f"- Average recovery time: {failure.get('avg_recovery_time_ms', 0):.1f}ms"
             )
-            summary.append(f"- Max recovery time: {failure.get('max_recovery_time_ms', 0):.1f}ms")
+            summary.append(
+                f"- Max recovery time: {failure.get('max_recovery_time_ms', 0):.1f}ms"
+            )
 
         return "\n".join(summary)
 
@@ -144,7 +171,9 @@ class LoadTestReport:
 
         # Efficiency plot
         ax1.plot(agent_counts, efficiencies, "b-o", label="Actual Efficiency")
-        ax1.axhline(y=28.4, color="r", linestyle="--", label="Documented Limit (28.4%)")
+        ax1.axhline(
+            y=28.4, color="r", linestyle="--", label="Documented Limit (28.4%)"
+        )
         ax1.set_xlabel("Number of Agents")
         ax1.set_ylabel("Efficiency (%)")
         ax1.set_title("Multi-Agent Coordination Efficiency")
@@ -153,7 +182,9 @@ class LoadTestReport:
 
         # Overhead plot
         ax2.plot(agent_counts, overheads, "r-o", label="Coordination Overhead")
-        ax2.axhline(y=72, color="g", linestyle="--", label="Expected Overhead (72%)")
+        ax2.axhline(
+            y=72, color="g", linestyle="--", label="Expected Overhead (72%)"
+        )
         ax2.set_xlabel("Number of Agents")
         ax2.set_ylabel("Overhead (%)")
         ax2.set_title("Coordination Overhead")
@@ -204,7 +235,9 @@ class LoadTestReport:
 
         for key, value in self.results.items():
             if key == "coordination_metrics":
-                serializable_results[key] = [{k: v for k, v in m.__dict__.items()} for m in value]
+                serializable_results[key] = [
+                    {k: v for k, v in m.__dict__.items()} for m in value
+                ]
             else:
                 serializable_results[key] = value
 
@@ -215,7 +248,9 @@ class LoadTestReport:
 def run_full_load_test_suite(args):
     """Run the complete load test suite."""
     print("🚀 Starting comprehensive multi-agent coordination load tests...")
-    print(f"Test configuration: max_agents={args.max_agents}, duration={args.duration}s")
+    print(
+        f"Test configuration: max_agents={args.max_agents}, duration={args.duration}s"
+    )
 
     results = {}
 
@@ -253,8 +288,12 @@ def run_full_load_test_suite(args):
 
     # Scaling test
     print("\nRunning scaling scenario...")
-    scaling_scenario = ScalingTestScenario(environment, max_agents=args.max_agents)
-    scaling_results = scaling_scenario.run(duration_seconds=min(args.duration, 30))
+    scaling_scenario = ScalingTestScenario(
+        environment, max_agents=args.max_agents
+    )
+    scaling_results = scaling_scenario.run(
+        duration_seconds=min(args.duration, 30)
+    )
     results["scaling_results"] = scaling_results
 
     # Mixed workload test
@@ -281,7 +320,9 @@ def run_full_load_test_suite(args):
 
     # Resource contention
     print("\nTesting resource contention...")
-    contention_results = tester.simulate_resource_contention(duration_seconds=5.0)
+    contention_results = tester.simulate_resource_contention(
+        duration_seconds=5.0
+    )
     results["contention_results"] = contention_results
     print(f"  Contention rate: {contention_results['contention_rate']:.1%}")
 
@@ -315,7 +356,8 @@ def run_full_load_test_suite(args):
 
         # Save JSON results
         json_path = (
-            output_path / f"load_test_results_{datetime.now().strftime('%Y%m%d_%H%M%S')}.json"
+            output_path
+            / f"load_test_results_{datetime.now().strftime('%Y%m%d_%H%M%S')}.json"
         )
         report.save_json_results(json_path)
         print(f"\n📄 Detailed results saved to: {json_path}")
@@ -341,7 +383,9 @@ def run_full_load_test_suite(args):
     if 70 <= efficiency_loss <= 75:
         print("✅ Efficiency loss matches documented ~72%")
     else:
-        print(f"❌ Efficiency loss ({efficiency_loss:.1f}%) differs from documented 72%")
+        print(
+            f"❌ Efficiency loss ({efficiency_loss:.1f}%) differs from documented 72%"
+        )
         all_checks_pass = False
 
     # Check 2: Practical agent limit
@@ -374,23 +418,36 @@ def main():
     )
 
     parser.add_argument(
-        "--max-agents", type=int, default=50, help="Maximum number of agents to test (default: 50)"
+        "--max-agents",
+        type=int,
+        default=50,
+        help="Maximum number of agents to test (default: 50)",
     )
 
     parser.add_argument(
-        "--duration", type=int, default=60, help="Test duration in seconds (default: 60)"
+        "--duration",
+        type=int,
+        default=60,
+        help="Test duration in seconds (default: 60)",
     )
 
     parser.add_argument(
-        "--output-dir", type=str, default="./load_test_results", help="Directory for output files"
+        "--output-dir",
+        type=str,
+        default="./load_test_results",
+        help="Directory for output files",
     )
 
     parser.add_argument(
-        "--generate-plots", action="store_true", help="Generate visualization plots"
+        "--generate-plots",
+        action="store_true",
+        help="Generate visualization plots",
     )
 
     parser.add_argument(
-        "--quick", action="store_true", help="Run quick tests with reduced parameters"
+        "--quick",
+        action="store_true",
+        help="Run quick tests with reduced parameters",
     )
 
     args = parser.parse_args()

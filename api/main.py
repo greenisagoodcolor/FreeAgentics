@@ -1,3 +1,5 @@
+"""Main FastAPI application module for FreeAgentics API."""
+
 import logging
 from contextlib import asynccontextmanager
 
@@ -5,25 +7,23 @@ from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import Response
 
-from api.middleware.security_monitoring import (
-    SecurityHeadersMiddleware,
-    SecurityMonitoringMiddleware,
-)
-from api.ui_compatibility import router as ui_router
+from api.middleware.security_monitoring import SecurityMonitoringMiddleware
 from api.v1 import (
     agents,
     auth,
-    health,
-    health_extended,
     inference,
     mfa,
     monitoring,
-    prompts,
     security,
     system,
     websocket,
 )
 from api.v1.graphql_schema import graphql_app
+from auth.security_headers import (
+    SecurityHeadersManager,
+    SecurityHeadersMiddleware,
+    SecurityPolicy,
+)
 from auth.security_implementation import SecurityMiddleware
 from observability.prometheus_metrics import (
     get_prometheus_content_type,
@@ -39,10 +39,34 @@ logger = logging.getLogger(__name__)
 # Lifespan manager for startup/shutdown events
 @asynccontextmanager
 async def lifespan(app: FastAPI):
+    """Manage application lifecycle events.
+
+    Handles startup and shutdown operations for the FastAPI application.
+
+    Args:
+        app: The FastAPI application instance.
+
+    Yields:
+        None: Control is yielded back to FastAPI during application runtime.
+    """
     # Startup
     logger.info("Starting FreeAgentics API...")
+    
     # Start Prometheus metrics collection
     await start_prometheus_metrics_collection()
+
+    # Initialize database if in development mode
+    from database.session import DATABASE_URL, init_db
+
+    logger.info(f"Database URL: {DATABASE_URL}")
+
+    try:
+        init_db()
+        logger.info("Database initialized successfully")
+    except Exception as e:
+        logger.warning(
+            f"Database initialization skipped (may already exist): {e}"
+        )
     yield
     # Shutdown
     logger.info("Shutting down FreeAgentics API...")
@@ -66,9 +90,25 @@ app.add_middleware(
 )
 
 # Add security middleware
-app.add_middleware(SecurityMiddleware)
+# app.add_middleware(SecurityMiddleware)  # Temporarily disabled due to conflict
 app.add_middleware(SecurityMonitoringMiddleware)
-app.add_middleware(SecurityHeadersMiddleware)
+
+# Create security headers manager with production policy
+security_manager = SecurityHeadersManager(
+    SecurityPolicy(
+        enable_hsts=True,
+        hsts_max_age=31536000,
+        hsts_include_subdomains=True,
+        hsts_preload=True,
+        enable_expect_ct=True,
+        expect_ct_enforce=True,
+        enable_certificate_pinning=True,
+        production_mode=True,
+    )
+)
+app.add_middleware(
+    SecurityHeadersMiddleware, security_manager=security_manager
+)
 
 # Include routers
 app.include_router(

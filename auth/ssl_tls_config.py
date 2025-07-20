@@ -1,5 +1,5 @@
 """
-Production SSL/TLS Configuration for FreeAgentics
+Production SSL/TLS Configuration for FreeAgentics.
 
 Implements secure SSL/TLS configuration following security best practices
 for achieving A+ rating on SSL Labs.
@@ -8,8 +8,16 @@ for achieving A+ rating on SSL Labs.
 import logging
 import os
 import ssl
+import subprocess  # nosec B404
 from dataclasses import dataclass, field
-from typing import Dict, List, Optional, Set
+from typing import Any, Callable, Dict, List, Optional, Set
+
+try:
+    from cryptography import x509
+    from cryptography.x509.ocsp import OCSPRequestBuilder
+except ImportError:
+    x509 = None  
+    OCSPRequestBuilder = None  
 
 logger = logging.getLogger(__name__)
 
@@ -72,11 +80,12 @@ class TLSConfiguration:
     # Security Options
     verify_mode: ssl.VerifyMode = ssl.CERT_REQUIRED
     check_hostname: bool = True
-    sni_callback: Optional[callable] = None
+    sni_callback: Optional[Callable] = None
 
     # Production Mode
     production_mode: bool = field(
-        default_factory=lambda: os.getenv("PRODUCTION", "false").lower() == "true"
+        default_factory=lambda: os.getenv("PRODUCTION", "false").lower()
+        == "true"
     )
 
 
@@ -84,6 +93,7 @@ class SSLContextBuilder:
     """Builder for creating secure SSL contexts."""
 
     def __init__(self, config: Optional[TLSConfiguration] = None):
+        """Initialize the SSL context builder."""
         self.config = config or TLSConfiguration()
 
     def create_server_context(self) -> ssl.SSLContext:
@@ -100,7 +110,9 @@ class SSLContextBuilder:
 
         # Load certificates
         if self.config.cert_file and self.config.key_file:
-            context.load_cert_chain(certfile=self.config.cert_file, keyfile=self.config.key_file)
+            context.load_cert_chain(
+                certfile=self.config.cert_file, keyfile=self.config.key_file
+            )
 
         # Load CA certificates for client verification
         if self.config.ca_cert_file:
@@ -112,7 +124,9 @@ class SSLContextBuilder:
 
         # Configure session settings
         context.session_stats()
-        context.options |= ssl.OP_NO_SESSION_RESUMPTION_ON_RENEGOTIATION
+        # Note: OP_NO_SESSION_RESUMPTION_ON_RENEGOTIATION may not be available in all Python versions
+        if hasattr(ssl, 'OP_NO_SESSION_RESUMPTION_ON_RENEGOTIATION'):
+            context.options |= ssl.OP_NO_SESSION_RESUMPTION_ON_RENEGOTIATION
 
         # Disable insecure features
         context.options |= ssl.OP_NO_SSLv2
@@ -153,7 +167,9 @@ class SSLContextBuilder:
 
         # Load client certificates if provided
         if self.config.cert_file and self.config.key_file:
-            context.load_cert_chain(certfile=self.config.cert_file, keyfile=self.config.key_file)
+            context.load_cert_chain(
+                certfile=self.config.cert_file, keyfile=self.config.key_file
+            )
 
         # Configure verification
         context.verify_mode = ssl.CERT_REQUIRED
@@ -179,6 +195,7 @@ class OCSPStapler:
     """OCSP stapling implementation for certificate revocation checking."""
 
     def __init__(self, config: TLSConfiguration):
+        """Initialize the OCSP stapler."""
         self.config = config
         self.cache: Dict[str, tuple] = {}
 
@@ -188,10 +205,9 @@ class OCSPStapler:
             return None
 
         try:
-            import subprocess
-
-            from cryptography import x509
-            from cryptography.x509.ocsp import OCSPRequestBuilder
+            if x509 is None:
+                logger.error("cryptography library not available for OCSP")
+                return None
 
             # Load certificate
             with open(cert_path, "rb") as f:
@@ -206,7 +222,7 @@ class OCSPStapler:
 
             # Use OpenSSL to fetch OCSP response
             # In production, use a proper OCSP client library
-            cmd = [
+            cmd_parts = [
                 "openssl",
                 "ocsp",
                 "-issuer",
@@ -218,30 +234,40 @@ class OCSPStapler:
                 "-resp_text",
             ]
 
-            result = subprocess.run(cmd, capture_output=True, text=True)
+            # Filter out None values from cmd list
+            cmd: List[str] = [arg for arg in cmd_parts if arg is not None]
+            result = subprocess.run(cmd, capture_output=True, text=False)
             if result.returncode == 0:
                 logger.info("Successfully fetched OCSP response")
-                return result.stdout.encode()
+                return result.stdout
             else:
-                logger.error(f"Failed to fetch OCSP response: {result.stderr}")
+                logger.error(
+                    f"Failed to fetch OCSP response: {result.stderr.decode('utf-8', errors='replace')}"
+                )
                 return None
 
         except Exception as e:
             logger.error(f"Error fetching OCSP response: {e}")
             return None
 
-    def _get_ocsp_url(self, cert: "x509.Certificate") -> Optional[str]:
+    def _get_ocsp_url(self, cert: Any) -> Optional[str]:
         """Extract OCSP responder URL from certificate."""
         try:
+            if x509 is None:
+                return None
+
             aia = cert.extensions.get_extension_for_oid(
                 x509.oid.ExtensionOID.AUTHORITY_INFORMATION_ACCESS
             ).value
 
             for access in aia:
-                if access.access_method == x509.oid.AuthorityInformationAccessOID.OCSP:
-                    return access.access_location.value
+                if (
+                    access.access_method
+                    == x509.oid.AuthorityInformationAccessOID.OCSP
+                ):
+                    return str(access.access_location.value)
 
-        except x509.ExtensionNotFound:
+        except (AttributeError, KeyError):
             pass
 
         return self.config.ocsp_responder_url
@@ -345,8 +371,12 @@ def create_production_ssl_context() -> ssl.SSLContext:
     config = TLSConfiguration(
         min_tls_version=ssl.TLSVersion.TLSv1_2,
         preferred_tls_version=ssl.TLSVersion.TLSv1_3,
-        cert_file=os.getenv("SSL_CERT_FILE", "/etc/ssl/certs/freeagentics.crt"),
-        key_file=os.getenv("SSL_KEY_FILE", "/etc/ssl/private/freeagentics.key"),
+        cert_file=os.getenv(
+            "SSL_CERT_FILE", "/etc/ssl/certs/freeagentics.crt"
+        ),
+        key_file=os.getenv(
+            "SSL_KEY_FILE", "/etc/ssl/private/freeagentics.key"
+        ),
         ca_cert_file=os.getenv("SSL_CA_FILE", "/etc/ssl/certs/ca-bundle.crt"),
         enable_ocsp_stapling=True,
         production_mode=True,
@@ -362,9 +392,9 @@ def validate_ssl_configuration(context: ssl.SSLContext) -> Dict[str, bool]:
 
     # Check TLS versions
     validation_results["tls_1_2_enabled"] = True  # Minimum version
-    validation_results["tls_1_3_supported"] = hasattr(ssl, "TLSVersion") and hasattr(
-        ssl.TLSVersion, "TLSv1_3"
-    )
+    validation_results["tls_1_3_supported"] = hasattr(
+        ssl, "TLSVersion"
+    ) and hasattr(ssl.TLSVersion, "TLSv1_3")
 
     # Check cipher configuration
     try:
@@ -377,10 +407,14 @@ def validate_ssl_configuration(context: ssl.SSLContext) -> Dict[str, bool]:
         validation_results["forward_secrecy"] = False
 
     # Check certificate configuration
-    validation_results["certificate_loaded"] = context.cert_store_stats()["x509"] > 0
+    validation_results["certificate_loaded"] = (
+        context.cert_store_stats()["x509"] > 0
+    )
 
     # Check security options
-    validation_results["compression_disabled"] = bool(context.options & ssl.OP_NO_COMPRESSION)
+    validation_results["compression_disabled"] = bool(
+        context.options & ssl.OP_NO_COMPRESSION
+    )
     validation_results["renegotiation_disabled"] = (
         bool(context.options & ssl.OP_NO_RENEGOTIATION)
         if hasattr(ssl, "OP_NO_RENEGOTIATION")

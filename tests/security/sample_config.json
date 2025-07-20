@@ -1,7 +1,7 @@
 {
   "enabled_modules": [
     "authentication_bypass",
-    "session_management", 
+    "session_management",
     "authorization",
     "api_security",
     "business_logic"

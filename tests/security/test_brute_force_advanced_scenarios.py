@@ -40,7 +40,8 @@ class TestTimingAttackPrevention:
 
         # Register valid user
         await timing_client.post(
-            "/api/v1/auth/register", json={"email": valid_username, "password": "test_password_123"}
+            "/api/v1/auth/register",
+            json={"email": valid_username, "password": "test_password_123"},
         )
 
         # Measure timing for valid username
@@ -49,7 +50,10 @@ class TestTimingAttackPrevention:
             start = time.perf_counter()
             await timing_client.post(
                 "/api/v1/auth/login",
-                json={"username": valid_username, "password": "wrong_password"},
+                json={
+                    "username": valid_username,
+                    "password": "wrong_password",
+                },
             )
             valid_timings.append(time.perf_counter() - start)
 
@@ -59,7 +63,8 @@ class TestTimingAttackPrevention:
             for _ in range(20):
                 start = time.perf_counter()
                 await timing_client.post(
-                    "/api/v1/auth/login", json={"username": username, "password": "wrong_password"}
+                    "/api/v1/auth/login",
+                    json={"username": username, "password": "wrong_password"},
                 )
                 invalid_timings.append(time.perf_counter() - start)
 
@@ -86,7 +91,8 @@ class TestTimingAttackPrevention:
 
         # Register user
         await timing_client.post(
-            "/api/v1/auth/register", json={"email": username, "password": "correct_password_123"}
+            "/api/v1/auth/register",
+            json={"email": username, "password": "correct_password_123"},
         )
 
         # Test different password lengths
@@ -99,7 +105,8 @@ class TestTimingAttackPrevention:
             for _ in range(10):
                 start = time.perf_counter()
                 await timing_client.post(
-                    "/api/v1/auth/login", json={"username": username, "password": test_password}
+                    "/api/v1/auth/login",
+                    json={"username": username, "password": test_password},
                 )
                 timing_by_length[length].append(time.perf_counter() - start)
 
@@ -143,7 +150,10 @@ class TestTimingAttackPrevention:
                 start = time.perf_counter()
                 await timing_client.post(
                     "/api/v1/auth/login",
-                    json={"username": user["email"], "password": "wrong_password"},
+                    json={
+                        "username": user["email"],
+                        "password": "wrong_password",
+                    },
                 )
                 timings.append(time.perf_counter() - start)
 
@@ -171,7 +181,9 @@ class TestDistributedCoordinatedAttacks:
         """Test protection against botnet-style distributed attacks."""
         # Simulate botnet with multiple IPs
         botnet_size = 50
-        botnet_ips = [f"192.168.{i//256}.{i%256}" for i in range(1, botnet_size + 1)]
+        botnet_ips = [
+            f"192.168.{i//256}.{i%256}" for i in range(1, botnet_size + 1)
+        ]
 
         # Target account
         target_email = "botnet_target@example.com"
@@ -206,11 +218,17 @@ class TestDistributedCoordinatedAttacks:
                 await asyncio.sleep(random.uniform(0.01, 0.05))
 
         # Analyze attack detection
-        blocked_ips = set(r["ip"] for r in attack_results if r["status"] == 429)
-        success_rate = sum(1 for r in attack_results if r["status"] != 429) / len(attack_results)
+        blocked_ips = set(
+            r["ip"] for r in attack_results if r["status"] == 429
+        )
+        success_rate = sum(
+            1 for r in attack_results if r["status"] != 429
+        ) / len(attack_results)
 
         # Should detect coordinated attack pattern
-        assert len(blocked_ips) > botnet_size * 0.5, "Should block majority of botnet IPs"
+        assert (
+            len(blocked_ips) > botnet_size * 0.5
+        ), "Should block majority of botnet IPs"
         assert success_rate < 0.2, "Botnet success rate should be low"
 
         # Check if target account is protected
@@ -221,16 +239,26 @@ class TestDistributedCoordinatedAttacks:
         )
 
         # Account should have elevated protection
-        assert legit_response.status_code in [403, 429], "Target account should be protected"
+        assert legit_response.status_code in [
+            403,
+            429,
+        ], "Target account should be protected"
 
     @pytest.mark.asyncio
     async def test_rotating_proxy_attack(self, client, redis_client):
         """Test detection of attacks using rotating proxies."""
         # Simulate proxy rotation
-        proxy_pool = [{"ip": f"proxy-{i}.example.com", "port": 8000 + i} for i in range(20)]
+        proxy_pool = [
+            {"ip": f"proxy-{i}.example.com", "port": 8000 + i}
+            for i in range(20)
+        ]
 
         # Attack parameters
-        target_accounts = ["user1@example.com", "user2@example.com", "user3@example.com"]
+        target_accounts = [
+            "user1@example.com",
+            "user2@example.com",
+            "user3@example.com",
+        ]
 
         rotation_results = []
 
@@ -252,7 +280,11 @@ class TestDistributedCoordinatedAttacks:
             )
 
             rotation_results.append(
-                {"proxy": proxy["ip"], "target": target, "status": response.status_code}
+                {
+                    "proxy": proxy["ip"],
+                    "target": target,
+                    "status": response.status_code,
+                }
             )
 
         # Should detect proxy rotation pattern
@@ -260,7 +292,9 @@ class TestDistributedCoordinatedAttacks:
             set(r["proxy"] for r in rotation_results if r["status"] == 429)
         )
 
-        assert unique_proxies_blocked > 10, "Should detect and block rotating proxies"
+        assert (
+            unique_proxies_blocked > 10
+        ), "Should detect and block rotating proxies"
 
     @pytest.mark.asyncio
     async def test_coordinated_timing_attack(self, client, redis_client):
@@ -335,7 +369,8 @@ class TestAccountTakeoverProtection:
         for i in range(20):
             email = f"spray_target_{i}@example.com"
             await client.post(
-                "/api/v1/auth/register", json={"email": email, "password": f"unique_password_{i}"}
+                "/api/v1/auth/register",
+                json={"email": email, "password": f"unique_password_{i}"},
             )
             target_accounts.append(email)
 
@@ -357,18 +392,25 @@ class TestAccountTakeoverProtection:
         for password in common_passwords:
             for email in target_accounts:
                 response = await client.post(
-                    "/api/v1/auth/login", json={"username": email, "password": password}
+                    "/api/v1/auth/login",
+                    json={"username": email, "password": password},
                 )
 
                 spray_results.append(
-                    {"email": email, "password": password, "status": response.status_code}
+                    {
+                        "email": email,
+                        "password": password,
+                        "status": response.status_code,
+                    }
                 )
 
                 # Small delay to avoid obvious rate limiting
                 await asyncio.sleep(0.1)
 
         # Analyze spray detection
-        successful_attempts = sum(1 for r in spray_results if r["status"] == 200)
+        successful_attempts = sum(
+            1 for r in spray_results if r["status"] == 200
+        )
         blocked_attempts = sum(1 for r in spray_results if r["status"] == 429)
 
         # Should detect spray pattern
@@ -378,7 +420,9 @@ class TestAccountTakeoverProtection:
         assert successful_attempts == 0, "No spray attempts should succeed"
 
     @pytest.mark.asyncio
-    async def test_account_lockout_evasion_detection(self, client, redis_client):
+    async def test_account_lockout_evasion_detection(
+        self, client, redis_client
+    ):
         """Test detection of lockout evasion techniques."""
         target_email = "evasion_target@example.com"
 
@@ -394,7 +438,8 @@ class TestAccountTakeoverProtection:
         # Technique 1: Just below threshold attacks
         for i in range(2):  # Just below lockout threshold
             response = await client.post(
-                "/api/v1/auth/login", json={"username": target_email, "password": f"wrong_{i}"}
+                "/api/v1/auth/login",
+                json={"username": target_email, "password": f"wrong_{i}"},
             )
             evasion_results.append(("below_threshold", response.status_code))
 
@@ -411,7 +456,8 @@ class TestAccountTakeoverProtection:
 
         for variant in email_variations:
             response = await client.post(
-                "/api/v1/auth/login", json={"username": variant, "password": "guess"}
+                "/api/v1/auth/login",
+                json={"username": variant, "password": "guess"},
             )
             evasion_results.append(("case_variation", response.status_code))
 
@@ -423,7 +469,8 @@ class TestAccountTakeoverProtection:
 
         for variant in unicode_variants:
             response = await client.post(
-                "/api/v1/auth/login", json={"username": variant, "password": "guess"}
+                "/api/v1/auth/login",
+                json={"username": variant, "password": "guess"},
             )
             evasion_results.append(("unicode_variation", response.status_code))
 
@@ -439,7 +486,8 @@ class TestAccountTakeoverProtection:
         victim_password = "victim_password_123"
 
         await client.post(
-            "/api/v1/auth/register", json={"email": victim_email, "password": victim_password}
+            "/api/v1/auth/register",
+            json={"email": victim_email, "password": victim_password},
         )
 
         # Attacker tries to fix session
@@ -457,14 +505,18 @@ class TestAccountTakeoverProtection:
             actual_session = response.cookies.get("session_id")
 
             # Session ID should be different (regenerated)
-            assert actual_session != attacker_session_id, "Session should be regenerated on login"
+            assert (
+                actual_session != attacker_session_id
+            ), "Session should be regenerated on login"
 
         # Try to hijack with fixed session
         hijack_response = await client.get(
             "/api/v1/users/me", cookies={"session_id": attacker_session_id}
         )
 
-        assert hijack_response.status_code == 401, "Fixed session should not be valid"
+        assert (
+            hijack_response.status_code == 401
+        ), "Fixed session should not be valid"
 
 
 class TestZeroDayPatternDetection:
@@ -535,7 +587,11 @@ class TestZeroDayPatternDetection:
                 "rate": 0.5,  # requests per second
             },
             "enumeration": {
-                "endpoints": ["/api/v1/users", "/api/v1/users/1", "/api/v1/users/admin"],
+                "endpoints": [
+                    "/api/v1/users",
+                    "/api/v1/users/1",
+                    "/api/v1/users/admin",
+                ],
                 "rate": 1.0,
             },
             "exploitation": {
@@ -570,11 +626,14 @@ class TestZeroDayPatternDetection:
         for phase in attack_phases:
             phase_results = [r for r in ml_results if r["phase"] == phase]
             blocked = sum(1 for r in phase_results if r["status"] == 429)
-            phase_block_rates[phase] = blocked / len(phase_results) if phase_results else 0
+            phase_block_rates[phase] = (
+                blocked / len(phase_results) if phase_results else 0
+            )
 
         # Later phases should have higher block rates (adaptive learning)
         assert (
-            phase_block_rates["exploitation"] > phase_block_rates["reconnaissance"]
+            phase_block_rates["exploitation"]
+            > phase_block_rates["reconnaissance"]
         ), "Protection should adapt and strengthen"
 
 
@@ -601,11 +660,17 @@ class TestAdaptiveProtectionMechanisms:
             while time.time() - period_start < period["duration"]:
                 response = await client.post(
                     "/api/v1/auth/login",
-                    json={"username": f"adaptive_test@example.com", "password": "wrong"},
+                    json={
+                        "username": f"adaptive_test@example.com",
+                        "password": "wrong",
+                    },
                 )
 
                 period_results.append(
-                    {"status": response.status_code, "headers": dict(response.headers)}
+                    {
+                        "status": response.status_code,
+                        "headers": dict(response.headers),
+                    }
                 )
 
                 await asyncio.sleep(1.0 / period["rate"])
@@ -614,7 +679,9 @@ class TestAdaptiveProtectionMechanisms:
                 {
                     "period": period["name"],
                     "results": period_results,
-                    "block_rate": sum(1 for r in period_results if r["status"] == 429)
+                    "block_rate": sum(
+                        1 for r in period_results if r["status"] == 429
+                    )
                     / len(period_results),
                 }
             )
@@ -637,7 +704,9 @@ class TestAdaptiveProtectionMechanisms:
         # Establish good reputation
         for ip in good_ips:
             for _ in range(10):
-                response = await client.get("/api/v1/health", headers={"X-Real-IP": ip})
+                response = await client.get(
+                    "/api/v1/health", headers={"X-Real-IP": ip}
+                )
                 await asyncio.sleep(1)  # Normal behavior
 
         # Establish bad reputation
@@ -700,7 +769,12 @@ class TestAdaptiveProtectionMechanisms:
                 "day": "Tuesday",
                 "expected_traffic": "high",
             },
-            {"name": "after_hours", "time": "03:00", "day": "Sunday", "expected_traffic": "low"},
+            {
+                "name": "after_hours",
+                "time": "03:00",
+                "day": "Sunday",
+                "expected_traffic": "low",
+            },
             {
                 "name": "maintenance_window",
                 "time": "02:00",
@@ -713,7 +787,10 @@ class TestAdaptiveProtectionMechanisms:
 
         for context in contexts:
             # Simulate context
-            headers = {"X-Context-Time": context["time"], "X-Context-Day": context["day"]}
+            headers = {
+                "X-Context-Time": context["time"],
+                "X-Context-Day": context["day"],
+            }
 
             # Test protection sensitivity
             blocked_count = 0
@@ -721,7 +798,10 @@ class TestAdaptiveProtectionMechanisms:
             for i in range(50):
                 response = await client.post(
                     "/api/v1/auth/login",
-                    json={"username": f"context_test_{i}@example.com", "password": "test"},
+                    json={
+                        "username": f"context_test_{i}@example.com",
+                        "password": "test",
+                    },
                     headers=headers,
                 )
 
@@ -738,14 +818,20 @@ class TestAdaptiveProtectionMechanisms:
 
         # Protection should be context-aware
         business_hours_rate = next(
-            r["block_rate"] for r in context_results if r["context"] == "business_hours"
+            r["block_rate"]
+            for r in context_results
+            if r["context"] == "business_hours"
         )
         after_hours_rate = next(
-            r["block_rate"] for r in context_results if r["context"] == "after_hours"
+            r["block_rate"]
+            for r in context_results
+            if r["context"] == "after_hours"
         )
 
         # After hours should have stricter protection
-        assert after_hours_rate > business_hours_rate, "After hours should have stricter protection"
+        assert (
+            after_hours_rate > business_hours_rate
+        ), "After hours should have stricter protection"
 
 
 # Performance and stress testing utilities
@@ -776,7 +862,10 @@ class TestBruteForcePerformance:
                 )
 
                 results.append(
-                    {"response_time": time.perf_counter() - start, "status": response.status_code}
+                    {
+                        "response_time": time.perf_counter() - start,
+                        "status": response.status_code,
+                    }
                 )
 
             return results
@@ -808,7 +897,9 @@ class TestBruteForcePerformance:
         assert (
             np.percentile(response_times, 99) < 1.0
         ), "99th percentile response time should be < 1s"
-        assert total_duration < 30, f"Total test should complete in < 30s, took {total_duration}s"
+        assert (
+            total_duration < 30
+        ), f"Total test should complete in < 30s, took {total_duration}s"
 
     @pytest.mark.asyncio
     async def test_memory_stability_under_attack(self, client, redis_client):
@@ -866,11 +957,19 @@ class TestBruteForcePerformance:
         memory_variance = np.var(memory_samples)
 
         # Memory should remain stable
-        assert memory_increase < 50, f"Memory increase should be < 50MB, got {memory_increase}MB"
-        assert max_memory - baseline_memory < 100, f"Peak memory should be < 100MB above baseline"
-        assert memory_variance < 100, f"Memory variance should be low, got {memory_variance}"
+        assert (
+            memory_increase < 50
+        ), f"Memory increase should be < 50MB, got {memory_increase}MB"
+        assert (
+            max_memory - baseline_memory < 100
+        ), f"Peak memory should be < 100MB above baseline"
+        assert (
+            memory_variance < 100
+        ), f"Memory variance should be low, got {memory_variance}"
 
 
 if __name__ == "__main__":
     # Run tests with detailed output
-    pytest.main([__file__, "-v", "--tb=short", "--asyncio-mode=strict", "-k", "test_"])
+    pytest.main(
+        [__file__, "-v", "--tb=short", "--asyncio-mode=strict", "-k", "test_"]
+    )

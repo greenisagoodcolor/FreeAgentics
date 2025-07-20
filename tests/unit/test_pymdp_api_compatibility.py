@@ -101,8 +101,12 @@ class TestPyMDPAPICompatibility:
         agent = PyMDPAgent(A=A, B=B)
 
         # Verify agent has expected methods
-        assert hasattr(agent, "sample_action"), "Agent should have sample_action method"
-        assert hasattr(agent, "infer_states"), "Agent should have infer_states method"
+        assert hasattr(
+            agent, "sample_action"
+        ), "Agent should have sample_action method"
+        assert hasattr(
+            agent, "infer_states"
+        ), "Agent should have infer_states method"
         assert hasattr(agent, "step"), "Agent should have step method"
 
     def test_adapter_requirement_strict_type_checking(self):
@@ -174,8 +178,12 @@ class TestPyMDPAPICompatibility:
 
         for test_input, expected in test_cases:
             result = adapter.safe_array_conversion(test_input, int)
-            assert type(result) is int, f"Failed for input {test_input} (type: {type(test_input)})"
-            assert result == expected, f"Expected {expected}, got {result} for input {test_input}"
+            assert (
+                type(result) is int
+            ), f"Failed for input {test_input} (type: {type(test_input)})"
+            assert (
+                result == expected
+            ), f"Expected {expected}, got {result} for input {test_input}"
 
     def test_real_pymdp_agent_return_types_documentation(self):
         """Document what PyMDP actually returns for debugging.

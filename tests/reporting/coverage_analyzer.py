@@ -110,14 +110,14 @@ class CoverageAnalyzer:
 
         cursor.execute(
             """
-            CREATE INDEX IF NOT EXISTS idx_coverage_timestamp 
+            CREATE INDEX IF NOT EXISTS idx_coverage_timestamp
             ON coverage_runs(timestamp)
         """
         )
 
         cursor.execute(
             """
-            CREATE INDEX IF NOT EXISTS idx_file_coverage_run 
+            CREATE INDEX IF NOT EXISTS idx_file_coverage_run
             ON file_coverage(run_id)
         """
         )
@@ -137,7 +137,9 @@ class CoverageAnalyzer:
         try:
             cov.load()
         except coverage.CoverageException:
-            logger.warning("No coverage data found. Run tests with coverage first.")
+            logger.warning(
+                "No coverage data found. Run tests with coverage first."
+            )
             return CoverageReport(
                 total_statements=0,
                 total_missing=0,
@@ -171,24 +173,48 @@ class CoverageAnalyzer:
                 # Handle different analysis result types
                 if hasattr(analysis, "statements"):
                     statements = len(analysis.statements)
-                    missing = len(analysis.missing) if hasattr(analysis, "missing") else 0
-                    excluded = len(analysis.excluded) if hasattr(analysis, "excluded") else 0
-                    missing_lines = sorted(analysis.missing) if hasattr(analysis, "missing") else []
+                    missing = (
+                        len(analysis.missing)
+                        if hasattr(analysis, "missing")
+                        else 0
+                    )
+                    excluded = (
+                        len(analysis.excluded)
+                        if hasattr(analysis, "excluded")
+                        else 0
+                    )
+                    missing_lines = (
+                        sorted(analysis.missing)
+                        if hasattr(analysis, "missing")
+                        else []
+                    )
                 else:
                     # Handle tuple format (older coverage.py versions)
                     if isinstance(analysis, tuple) and len(analysis) >= 3:
                         statements = len(analysis[1]) if analysis[1] else 0
-                        missing = len(analysis[3]) if len(analysis) > 3 and analysis[3] else 0
-                        excluded = len(analysis[2]) if len(analysis) > 2 and analysis[2] else 0
+                        missing = (
+                            len(analysis[3])
+                            if len(analysis) > 3 and analysis[3]
+                            else 0
+                        )
+                        excluded = (
+                            len(analysis[2])
+                            if len(analysis) > 2 and analysis[2]
+                            else 0
+                        )
                         missing_lines = (
-                            sorted(analysis[3]) if len(analysis) > 3 and analysis[3] else []
+                            sorted(analysis[3])
+                            if len(analysis) > 3 and analysis[3]
+                            else []
                         )
                     else:
                         # Skip this file if we can't parse it
                         continue
 
                 if statements > 0:
-                    coverage_percent = ((statements - missing) / statements) * 100
+                    coverage_percent = (
+                        (statements - missing) / statements
+                    ) * 100
                 else:
                     coverage_percent = 0.0
 
@@ -213,7 +239,9 @@ class CoverageAnalyzer:
 
         # Calculate total coverage
         if total_statements > 0:
-            total_coverage = ((total_statements - total_missing) / total_statements) * 100
+            total_coverage = (
+                (total_statements - total_missing) / total_statements
+            ) * 100
         else:
             total_coverage = 0.0
 
@@ -242,7 +270,7 @@ class CoverageAnalyzer:
         # Insert main report
         cursor.execute(
             """
-            INSERT OR REPLACE INTO coverage_runs 
+            INSERT OR REPLACE INTO coverage_runs
             (test_run_id, timestamp, total_statements, total_missing, total_coverage)
             VALUES (?, ?, ?, ?, ?)
         """,
@@ -261,7 +289,7 @@ class CoverageAnalyzer:
         for file_stats in report.files:
             cursor.execute(
                 """
-                INSERT INTO file_coverage 
+                INSERT INTO file_coverage
                 (run_id, file_path, statements, missing, excluded, coverage_percent, missing_lines)
                 VALUES (?, ?, ?, ?, ?, ?, ?)
             """,
@@ -291,7 +319,7 @@ class CoverageAnalyzer:
                 # Check if already tracked
                 cursor.execute(
                     """
-                    SELECT id, times_detected FROM zero_coverage_tracking 
+                    SELECT id, times_detected FROM zero_coverage_tracking
                     WHERE file_path = ?
                 """,
                     (file_stats.file_path,),
@@ -302,7 +330,7 @@ class CoverageAnalyzer:
                     # Update existing record
                     cursor.execute(
                         """
-                        UPDATE zero_coverage_tracking 
+                        UPDATE zero_coverage_tracking
                         SET last_detected = ?, times_detected = ?, resolved_at = NULL
                         WHERE file_path = ?
                     """,
@@ -312,7 +340,7 @@ class CoverageAnalyzer:
                     # Insert new record
                     cursor.execute(
                         """
-                        INSERT INTO zero_coverage_tracking 
+                        INSERT INTO zero_coverage_tracking
                         (file_path, first_detected, last_detected, times_detected)
                         VALUES (?, ?, ?, 1)
                     """,
@@ -322,8 +350,8 @@ class CoverageAnalyzer:
                 # Mark as resolved if it had zero coverage before
                 cursor.execute(
                     """
-                    UPDATE zero_coverage_tracking 
-                    SET resolved_at = ? 
+                    UPDATE zero_coverage_tracking
+                    SET resolved_at = ?
                     WHERE file_path = ? AND resolved_at IS NULL
                 """,
                     (current_time, file_stats.file_path),
@@ -340,7 +368,7 @@ class CoverageAnalyzer:
         cursor.execute(
             """
             SELECT file_path, first_detected, last_detected, times_detected
-            FROM zero_coverage_tracking 
+            FROM zero_coverage_tracking
             WHERE resolved_at IS NULL
             ORDER BY times_detected DESC, first_detected ASC
         """
@@ -370,7 +398,7 @@ class CoverageAnalyzer:
         cursor.execute(
             """
             SELECT test_run_id, timestamp, total_coverage
-            FROM coverage_runs 
+            FROM coverage_runs
             WHERE timestamp >= ?
             ORDER BY timestamp ASC
         """,
@@ -379,12 +407,20 @@ class CoverageAnalyzer:
 
         trends = []
         for row in cursor.fetchall():
-            trends.append({"test_run_id": row[0], "timestamp": row[1], "total_coverage": row[2]})
+            trends.append(
+                {
+                    "test_run_id": row[0],
+                    "timestamp": row[1],
+                    "total_coverage": row[2],
+                }
+            )
 
         conn.close()
         return trends
 
-    def get_file_coverage_history(self, file_path: str, days: int = 30) -> List[Dict[str, Any]]:
+    def get_file_coverage_history(
+        self, file_path: str, days: int = 30
+    ) -> List[Dict[str, Any]]:
         """Get coverage history for a specific file."""
         conn = sqlite3.connect(self.db_path)
         cursor = conn.cursor()
@@ -404,12 +440,20 @@ class CoverageAnalyzer:
 
         history = []
         for row in cursor.fetchall():
-            history.append({"test_run_id": row[0], "timestamp": row[1], "coverage_percent": row[2]})
+            history.append(
+                {
+                    "test_run_id": row[0],
+                    "timestamp": row[1],
+                    "coverage_percent": row[2],
+                }
+            )
 
         conn.close()
         return history
 
-    def get_coverage_gaps(self, min_coverage: float = 80.0) -> List[Dict[str, Any]]:
+    def get_coverage_gaps(
+        self, min_coverage: float = 80.0
+    ) -> List[Dict[str, Any]]:
         """Get files with coverage below the minimum threshold."""
         conn = sqlite3.connect(self.db_path)
         cursor = conn.cursor()
@@ -476,7 +520,7 @@ class CoverageAnalyzer:
                 <h1>FreeAgentics Test Coverage Report</h1>
                 <p>Generated: {datetime.now().strftime('%Y-%m-%d %H:%M:%S')}</p>
                 <p>Test Run ID: {report.test_run_id}</p>
-                
+
                 <div class="metric {'critical' if report.total_coverage < 50 else 'warning' if report.total_coverage < 80 else 'good'}">
                     <strong>Total Coverage: {report.total_coverage:.1f}%</strong>
                 </div>
@@ -487,7 +531,7 @@ class CoverageAnalyzer:
                     <strong>Missing: {report.total_missing}</strong>
                 </div>
             </div>
-            
+
             <h2>Zero Coverage Files ({len(zero_coverage)})</h2>
             <table>
                 <tr>
@@ -508,7 +552,7 @@ class CoverageAnalyzer:
 
         html_content += """
             </table>
-            
+
             <h2>Coverage Gaps (< 80%)</h2>
             <table>
                 <tr>
@@ -531,7 +575,7 @@ class CoverageAnalyzer:
 
         html_content += """
             </table>
-            
+
             <h2>All Files Coverage</h2>
             <table>
                 <tr>
@@ -543,11 +587,15 @@ class CoverageAnalyzer:
                 </tr>
         """
 
-        for file_stats in sorted(report.files, key=lambda x: x.coverage_percent):
+        for file_stats in sorted(
+            report.files, key=lambda x: x.coverage_percent
+        ):
             css_class = (
                 "zero-coverage"
                 if file_stats.coverage_percent == 0
-                else "low-coverage" if file_stats.coverage_percent < 80 else "good-coverage"
+                else "low-coverage"
+                if file_stats.coverage_percent < 80
+                else "good-coverage"
             )
 
             html_content += f"""
@@ -574,7 +622,9 @@ class CoverageAnalyzer:
         logger.info(f"HTML coverage report generated: {output_path}")
         return output_path
 
-    def export_coverage_json(self, output_path: str = "tests/reporting/coverage_data.json"):
+    def export_coverage_json(
+        self, output_path: str = "tests/reporting/coverage_data.json"
+    ):
         """Export coverage data as JSON."""
         report = self.analyze_coverage()
 
@@ -602,9 +652,9 @@ class CoverageAnalyzer:
         # Delete old file coverage records
         cursor.execute(
             """
-            DELETE FROM file_coverage 
+            DELETE FROM file_coverage
             WHERE run_id IN (
-                SELECT id FROM coverage_runs 
+                SELECT id FROM coverage_runs
                 WHERE timestamp < ?
             )
         """,
@@ -614,7 +664,7 @@ class CoverageAnalyzer:
         # Delete old run records
         cursor.execute(
             """
-            DELETE FROM coverage_runs 
+            DELETE FROM coverage_runs
             WHERE timestamp < ?
         """,
             (cutoff_date,),
@@ -647,7 +697,9 @@ def main():
     if zero_coverage:
         print(f"\nZero coverage files ({len(zero_coverage)}):")
         for file_info in zero_coverage:
-            print(f"  {file_info['file_path']} (detected {file_info['times_detected']} times)")
+            print(
+                f"  {file_info['file_path']} (detected {file_info['times_detected']} times)"
+            )
 
 
 if __name__ == "__main__":

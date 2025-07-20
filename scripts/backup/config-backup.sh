@@ -46,9 +46,9 @@ create_encryption_key() {
 # Collect configuration files
 collect_configs() {
     log "INFO" "Collecting configuration files..."
-    
+
     mkdir -p "$TEMP_DIR"
-    
+
     # System configuration
     local system_configs=(
         "/etc/freeagentics/"
@@ -58,7 +58,7 @@ collect_configs() {
         "/etc/logrotate.d/freeagentics"
         "/etc/cron.d/freeagentics*"
     )
-    
+
     # Application configuration
     local app_configs=(
         "/home/green/FreeAgentics/.env"
@@ -69,26 +69,26 @@ collect_configs() {
         "/home/green/FreeAgentics/alembic.ini"
         "/home/green/FreeAgentics/pyproject.toml"
     )
-    
+
     # SSL certificates
     local ssl_configs=(
         "/etc/letsencrypt/live/"
         "/etc/letsencrypt/renewal/"
         "/etc/ssl/certs/freeagentics*"
     )
-    
+
     # Monitoring configuration
     local monitoring_configs=(
         "/etc/prometheus/prometheus.yml"
         "/etc/grafana/grafana.ini"
         "/etc/alertmanager/alertmanager.yml"
     )
-    
+
     # Create directory structure in temp
     for category in system app ssl monitoring; do
         mkdir -p "$TEMP_DIR/$category"
     done
-    
+
     # Copy system configs
     for item in "${system_configs[@]}"; do
         if [[ -e "$item" ]]; then
@@ -96,7 +96,7 @@ collect_configs() {
                 log "WARNING" "Failed to copy: $item"
         fi
     done
-    
+
     # Copy application configs
     for item in "${app_configs[@]}"; do
         if [[ -e "$item" ]]; then
@@ -112,7 +112,7 @@ collect_configs() {
             fi
         fi
     done
-    
+
     # Copy SSL configs (be careful with permissions)
     for item in "${ssl_configs[@]}"; do
         if [[ -e "$item" ]]; then
@@ -120,7 +120,7 @@ collect_configs() {
                 log "WARNING" "Failed to copy SSL: $item"
         fi
     done
-    
+
     # Copy monitoring configs
     for item in "${monitoring_configs[@]}"; do
         if [[ -e "$item" ]]; then
@@ -128,7 +128,7 @@ collect_configs() {
                 log "WARNING" "Failed to copy: $item"
         fi
     done
-    
+
     # Add metadata
     cat > "$TEMP_DIR/backup-metadata.json" << EOF
 {
@@ -141,31 +141,31 @@ collect_configs() {
     "backup_tool_version": "1.0.0"
 }
 EOF
-    
+
     # Create inventory of backed up files
     find "$TEMP_DIR" -type f -printf "%P\n" | sort > "$TEMP_DIR/inventory.txt"
-    
+
     log "INFO" "Configuration collection complete"
 }
 
 # Create encrypted archive
 create_archive() {
     log "INFO" "Creating encrypted archive..."
-    
+
     local archive_name="config_backup_${TIMESTAMP}.tar.gz"
     local archive_path="$CONFIG_BACKUP_DIR/$archive_name"
     local encrypted_path="${archive_path}.enc"
-    
+
     # Create tar archive
     tar -czf "$archive_path" -C "$TEMP_DIR" . 2>> "$LOG_FILE"
-    
+
     if [[ ! -f "$archive_path" ]]; then
         error_exit "Failed to create archive"
     fi
-    
+
     # Encrypt the archive
     create_encryption_key
-    
+
     if openssl enc -aes-256-cbc -salt -in "$archive_path" -out "$encrypted_path" \
         -pass file:"$ENCRYPTION_KEY_FILE" 2>> "$LOG_FILE"; then
         log "INFO" "Archive encrypted successfully"
@@ -174,7 +174,7 @@ create_archive() {
         log "WARNING" "Encryption failed - keeping unencrypted archive"
         rm -f "$encrypted_path"
     fi
-    
+
     # Create checksum
     if [[ -f "$encrypted_path" ]]; then
         sha256sum "$encrypted_path" > "${encrypted_path}.sha256"
@@ -182,28 +182,28 @@ create_archive() {
     else
         sha256sum "$archive_path" > "${archive_path}.sha256"
     fi
-    
+
     # Set appropriate permissions
     chmod 600 "$CONFIG_BACKUP_DIR"/config_backup_*
-    
+
     log "INFO" "Archive created: ${encrypted_path:-$archive_path}"
 }
 
 # Verify backup
 verify_backup() {
     local backup_file="${1:-}"
-    
+
     if [[ -z "$backup_file" ]]; then
         # Verify latest backup
         backup_file=$(ls -t "$CONFIG_BACKUP_DIR"/config_backup_*.tar.gz* | head -1)
     fi
-    
+
     if [[ ! -f "$backup_file" ]]; then
         error_exit "Backup file not found: $backup_file"
     fi
-    
+
     log "INFO" "Verifying backup: $backup_file"
-    
+
     # Check checksum if available
     if [[ -f "${backup_file}.sha256" ]]; then
         if sha256sum -c "${backup_file}.sha256" >/dev/null 2>&1; then
@@ -213,11 +213,11 @@ verify_backup() {
             return 1
         fi
     fi
-    
+
     # Test extraction
     local test_dir="/tmp/config-verify-$$"
     mkdir -p "$test_dir"
-    
+
     if [[ "$backup_file" =~ \.enc$ ]]; then
         # Decrypt and extract
         if openssl enc -aes-256-cbc -d -in "$backup_file" \
@@ -239,7 +239,7 @@ verify_backup() {
             return 1
         fi
     fi
-    
+
     rm -rf "$test_dir"
     log "INFO" "Backup verification complete"
     return 0
@@ -249,16 +249,16 @@ verify_backup() {
 restore_config() {
     local backup_file="$1"
     local restore_dir="${2:-/tmp/config-restore-$(date +%Y%m%d-%H%M%S)}"
-    
+
     if [[ ! -f "$backup_file" ]]; then
         error_exit "Backup file not found: $backup_file"
     fi
-    
+
     log "INFO" "Restoring configuration from: $backup_file"
     log "INFO" "Restore directory: $restore_dir"
-    
+
     mkdir -p "$restore_dir"
-    
+
     # Decrypt and extract
     if [[ "$backup_file" =~ \.enc$ ]]; then
         log "INFO" "Decrypting archive..."
@@ -272,10 +272,10 @@ restore_config() {
             error_exit "Failed to extract archive"
         fi
     fi
-    
+
     log "INFO" "Configuration restored to: $restore_dir"
     log "INFO" "Review the files and manually copy needed configurations"
-    
+
     # Show inventory
     if [[ -f "$restore_dir/inventory.txt" ]]; then
         echo
@@ -287,11 +287,11 @@ restore_config() {
 # Clean old backups
 cleanup_old_backups() {
     local retention_days="${1:-90}"
-    
+
     log "INFO" "Cleaning up backups older than $retention_days days..."
-    
+
     find "$CONFIG_BACKUP_DIR" -name "config_backup_*" -mtime +$retention_days -delete
-    
+
     log "INFO" "Cleanup complete"
 }
 

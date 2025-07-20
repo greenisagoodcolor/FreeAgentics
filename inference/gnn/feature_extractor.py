@@ -3,7 +3,7 @@
 import logging
 from dataclasses import dataclass, field
 from enum import Enum
-from typing import Any, Callable, Dict, List, Optional, Tuple, Union
+from typing import Any, Callable, Dict, List, Optional, Set, Tuple, Union
 
 import numpy as np
 import torch
@@ -35,8 +35,12 @@ class NormalizationStrategy(Enum):
 class FeatureConfig:
     """Configuration for feature extraction."""
 
-    feature_types: List[FeatureType] = field(default_factory=lambda: [FeatureType.NUMERICAL])
-    normalization_strategy: NormalizationStrategy = NormalizationStrategy.STANDARD
+    feature_types: List[FeatureType] = field(
+        default_factory=lambda: [FeatureType.NUMERICAL]
+    )
+    normalization_strategy: NormalizationStrategy = (
+        NormalizationStrategy.STANDARD
+    )
     handle_missing: bool = True
     temporal_window_size: int = 10
     spatial_resolution: float = 7  # H3 resolution
@@ -56,7 +60,9 @@ class NodeFeatureExtractor:
         self._pca_components: Optional[Tensor] = None
 
     def extract_features(
-        self, nodes: List[Dict[str, Any]], edges: Optional[List[Tuple[int, int]]] = None
+        self,
+        nodes: List[Dict[str, Any]],
+        edges: Optional[List[Tuple[int, int]]] = None,
     ) -> Tensor:
         """Extract features from nodes."""
         if not nodes:
@@ -80,7 +86,9 @@ class NodeFeatureExtractor:
             elif feature_type == FeatureType.NUMERICAL:
                 features = self._extract_numerical_features(nodes)
             elif feature_type == FeatureType.GRAPH_STRUCTURAL:
-                features = self._extract_graph_structural_features(nodes, edges)
+                features = self._extract_graph_structural_features(
+                    nodes, edges
+                )
             else:
                 continue
 
@@ -91,7 +99,10 @@ class NodeFeatureExtractor:
         for name, extractor in self._custom_extractors.items():
             try:
                 custom_features = extractor(nodes)
-                if isinstance(custom_features, Tensor) and custom_features.numel() > 0:
+                if (
+                    isinstance(custom_features, Tensor)
+                    and custom_features.numel() > 0
+                ):
                     feature_lists.append(custom_features)
             except Exception as e:
                 logger.warning(f"Custom extractor {name} failed: {e}")
@@ -115,7 +126,9 @@ class NodeFeatureExtractor:
 
         return features
 
-    def _extract_spatial_features(self, nodes: List[Dict[str, Any]]) -> Optional[Tensor]:
+    def _extract_spatial_features(
+        self, nodes: List[Dict[str, Any]]
+    ) -> Optional[Tensor]:
         """Extract spatial features from nodes using H3 hexagonal indexing.
 
         This is a critical component of the PyMDP+GMN+GNN+H3+LLM innovation stack.
@@ -140,11 +153,10 @@ class NodeFeatureExtractor:
                     # Geographic coordinates - use H3 if available
                     try:
                         lat, lon = float(pos["lat"]), float(pos["lon"])
-                        x, y = lat, lon
+                        pass
                     except (ValueError, TypeError):
                         # Invalid lat/lon values, use default
                         lat, lon = 0.0, 0.0
-                        x, y = lat, lon
 
                     if h3_available:
                         try:
@@ -155,9 +167,11 @@ class NodeFeatureExtractor:
                             h3_indices.append(h3_index)
 
                             # Get H3 cell center for consistent positioning
-                            center_lat, center_lon = h3.cell_to_latlng(h3_index)
+                            center_lat, center_lon = h3.cell_to_latlng(
+                                h3_index
+                            )
                             spatial_data.append([center_lat, center_lon])
-                        except Exception as e:
+                        except Exception:
                             # Fallback to raw coordinates
                             spatial_data.append([lat, lon])
                             h3_indices.append(None)
@@ -197,7 +211,9 @@ class NodeFeatureExtractor:
 
         return features
 
-    def _extract_temporal_features(self, nodes: List[Dict[str, Any]]) -> Optional[Tensor]:
+    def _extract_temporal_features(
+        self, nodes: List[Dict[str, Any]]
+    ) -> Optional[Tensor]:
         """Extract temporal features from nodes."""
         import datetime
 
@@ -213,7 +229,8 @@ class NodeFeatureExtractor:
                     # Extract temporal features: hour, day_of_week, day_of_month, month, is_weekend
                     temporal_row = [
                         timestamp.hour / 23.0,  # Normalized hour (0-1)
-                        timestamp.weekday() / 6.0,  # Normalized day of week (0-1)
+                        timestamp.weekday()
+                        / 6.0,  # Normalized day of week (0-1)
                         timestamp.day / 31.0,  # Normalized day of month (0-1)
                         timestamp.month / 12.0,  # Normalized month (0-1)
                         1.0 if timestamp.weekday() >= 5 else 0.0,  # Is weekend
@@ -222,7 +239,10 @@ class NodeFeatureExtractor:
                     temporal_row = [0.0, 0.0, 0.0, 0.0, 0.0]
             elif "time_series" in node:
                 ts = node["time_series"]
-                if isinstance(ts, list) and len(ts) >= self.config.temporal_window_size:
+                if (
+                    isinstance(ts, list)
+                    and len(ts) >= self.config.temporal_window_size
+                ):
                     # Use last temporal_window_size values
                     window = ts[-self.config.temporal_window_size :]
                     temporal_row = window
@@ -230,7 +250,9 @@ class NodeFeatureExtractor:
                     # Pad with zeros if needed
                     window = [0.0] * self.config.temporal_window_size
                     if isinstance(ts, list):
-                        window[: len(ts)] = ts[: self.config.temporal_window_size]
+                        window[: len(ts)] = ts[
+                            : self.config.temporal_window_size
+                        ]
                     temporal_row = window
             else:
                 if self.config.handle_missing:
@@ -249,7 +271,9 @@ class NodeFeatureExtractor:
 
         return features
 
-    def _extract_categorical_features(self, nodes: List[Dict[str, Any]]) -> Optional[Tensor]:
+    def _extract_categorical_features(
+        self, nodes: List[Dict[str, Any]]
+    ) -> Optional[Tensor]:
         """Extract categorical features from nodes."""
         # Collect all categories
         all_categories = set()
@@ -261,7 +285,9 @@ class NodeFeatureExtractor:
             return None
 
         # Create category to index mapping
-        category_to_idx = {cat: idx for idx, cat in enumerate(sorted(all_categories))}
+        category_to_idx = {
+            cat: idx for idx, cat in enumerate(sorted(all_categories))
+        }
         num_categories = len(all_categories)
 
         # One-hot encode
@@ -274,14 +300,19 @@ class NodeFeatureExtractor:
 
         return torch.tensor(categorical_data, dtype=torch.float32)
 
-    def _extract_numerical_features(self, nodes: List[Dict[str, Any]]) -> Optional[Tensor]:
+    def _extract_numerical_features(
+        self, nodes: List[Dict[str, Any]]
+    ) -> Optional[Tensor]:
         """Extract numerical features from nodes."""
         # Determine numerical fields from both node level and attributes
         numerical_fields = set()
         for node in nodes:
             # Check direct node properties
             for key, value in node.items():
-                if isinstance(value, (int, float)) and key not in ["id", "index"]:
+                if isinstance(value, (int, float)) and key not in [
+                    "id",
+                    "index",
+                ]:
                     numerical_fields.add(key)
 
             # Check attributes nested structure
@@ -293,52 +324,75 @@ class NodeFeatureExtractor:
         if not numerical_fields:
             return None
 
-        numerical_fields = sorted(numerical_fields)
+        numerical_fields_list = sorted(numerical_fields)
 
         # Extract values
         numerical_data = []
         for node in nodes:
             values = []
-            for field in numerical_fields:
+            for field in numerical_fields_list:
                 if field.startswith("attributes."):
                     # Extract from attributes
                     attr_name = field[len("attributes.") :]
-                    if "attributes" in node and attr_name in node["attributes"]:
+                    if (
+                        "attributes" in node
+                        and attr_name in node["attributes"]
+                    ):
                         value = node["attributes"][attr_name]
                         if value is None:
-                            values.append(0.0 if self.config.handle_missing else np.nan)
+                            values.append(
+                                0.0 if self.config.handle_missing else np.nan
+                            )
                         else:
                             try:
                                 values.append(float(value))
                             except (ValueError, TypeError):
-                                values.append(0.0 if self.config.handle_missing else np.nan)
+                                values.append(
+                                    0.0
+                                    if self.config.handle_missing
+                                    else np.nan
+                                )
                     else:
-                        values.append(0.0 if self.config.handle_missing else np.nan)
+                        values.append(
+                            0.0 if self.config.handle_missing else np.nan
+                        )
                 else:
                     # Extract from node directly
                     if field in node:
                         value = node[field]
                         if value is None:
-                            values.append(0.0 if self.config.handle_missing else np.nan)
+                            values.append(
+                                0.0 if self.config.handle_missing else np.nan
+                            )
                         else:
                             try:
                                 values.append(float(value))
                             except (ValueError, TypeError):
-                                values.append(0.0 if self.config.handle_missing else np.nan)
+                                values.append(
+                                    0.0
+                                    if self.config.handle_missing
+                                    else np.nan
+                                )
                     else:
-                        values.append(0.0 if self.config.handle_missing else np.nan)
+                        values.append(
+                            0.0 if self.config.handle_missing else np.nan
+                        )
             numerical_data.append(values)
 
         features = torch.tensor(numerical_data, dtype=torch.float32)
 
         # Handle NaN and infinite values
         if self.config.handle_missing:
-            features = torch.nan_to_num(features, nan=0.0, posinf=1e6, neginf=-1e6)
+            features = torch.nan_to_num(
+                features, nan=0.0, posinf=1e6, neginf=-1e6
+            )
 
         return features
 
     def _extract_graph_structural_features(
-        self, nodes: List[Dict[str, Any]], edges: Optional[List[Tuple[int, int]]] = None
+        self,
+        nodes: List[Dict[str, Any]],
+        edges: Optional[List[Tuple[int, int]]] = None,
     ) -> Optional[Tensor]:
         """Extract graph structural features."""
         # If edges is None but nodes contain edge information, extract edges from nodes
@@ -362,7 +416,7 @@ class NodeFeatureExtractor:
         clustering = torch.zeros(num_nodes)
 
         # Create adjacency lists
-        adj_list = {i: set() for i in range(num_nodes)}
+        adj_list: Dict[int, Set[int]] = {i: set() for i in range(num_nodes)}
         for src, dst in edges:
             if 0 <= src < num_nodes and 0 <= dst < num_nodes:
                 adj_list[src].add(dst)
@@ -392,7 +446,9 @@ class NodeFeatureExtractor:
     ) -> Optional[List[Tuple[int, int]]]:
         """Extract edge list from nodes that contain edge information."""
         # Create node ID to index mapping
-        node_id_to_idx = {node.get("id", str(i)): i for i, node in enumerate(nodes)}
+        node_id_to_idx = {
+            node.get("id", str(i)): i for i, node in enumerate(nodes)
+        }
         edges = []
 
         for i, node in enumerate(nodes):
@@ -405,7 +461,9 @@ class NodeFeatureExtractor:
 
         return edges if edges else None
 
-    def _apply_temporal_windowing(self, features: Union[Tensor, List]) -> Tensor:
+    def _apply_temporal_windowing(
+        self, features: Union[Tensor, List]
+    ) -> Tensor:
         """Apply temporal windowing to extract statistics."""
         # Handle both tensor input and direct node list input for backward compatibility
         if isinstance(features, list):
@@ -434,27 +492,40 @@ class NodeFeatureExtractor:
 
     def _normalize_features(self, features: Tensor) -> Tensor:
         """Normalize features based on strategy."""
-        if self.config.normalization_strategy == NormalizationStrategy.STANDARD:
+        if (
+            self.config.normalization_strategy
+            == NormalizationStrategy.STANDARD
+        ):
             mean = features.mean(dim=0, keepdim=True)
             std = features.std(
                 dim=0, keepdim=True, unbiased=False
             )  # Use population std to avoid NaN with 1 sample
-            std = torch.where((std == 0) | torch.isnan(std), torch.ones_like(std), std)
+            std = torch.where(
+                (std == 0) | torch.isnan(std), torch.ones_like(std), std
+            )
             return (features - mean) / std
 
-        elif self.config.normalization_strategy == NormalizationStrategy.MINMAX:
+        elif (
+            self.config.normalization_strategy == NormalizationStrategy.MINMAX
+        ):
             min_val = features.min(dim=0, keepdim=True)[0]
             max_val = features.max(dim=0, keepdim=True)[0]
             range_val = max_val - min_val
-            range_val = torch.where(range_val == 0, torch.ones_like(range_val), range_val)
+            range_val = torch.where(
+                range_val == 0, torch.ones_like(range_val), range_val
+            )
             return (features - min_val) / range_val
 
-        elif self.config.normalization_strategy == NormalizationStrategy.ROBUST:
+        elif (
+            self.config.normalization_strategy == NormalizationStrategy.ROBUST
+        ):
             # Use median and MAD for robust normalization
             median = features.median(dim=0, keepdim=True)[0]
             mad = (features - median).abs().median(dim=0, keepdim=True)[0]
             mad = torch.where(mad == 0, torch.ones_like(mad), mad)
-            return (features - median) / (1.4826 * mad)  # 1.4826 is consistency constant
+            return (features - median) / (
+                1.4826 * mad
+            )  # 1.4826 is consistency constant
 
         return features
 
@@ -523,7 +594,9 @@ class NodeFeatureExtractor:
         if targets is not None:
             # Compute correlation-based importance
             for i in range(features.shape[1]):
-                correlation = torch.corrcoef(torch.stack([features[:, i], targets]))[0, 1]
+                correlation = torch.corrcoef(
+                    torch.stack([features[:, i], targets])
+                )[0, 1]
                 importance_scores.append(abs(correlation.item()))
         else:
             # Use variance as proxy for importance
@@ -532,7 +605,9 @@ class NodeFeatureExtractor:
                 importance_scores.append(variances[i].item())
 
         # Store in feature stats as dictionary for backward compatibility
-        importance_dict = {f"feature_{i}": score for i, score in enumerate(importance_scores)}
+        importance_dict = {
+            f"feature_{i}": score for i, score in enumerate(importance_scores)
+        }
         self.feature_stats["importance"] = importance_dict
 
         return importance_scores
@@ -606,7 +681,9 @@ class NodeFeatureExtractor:
 
         return transformed
 
-    def add_custom_extractor(self, name: str, extractor: Callable[[Dict[str, Any]], Tensor]):
+    def add_custom_extractor(
+        self, name: str, extractor: Callable[[Dict[str, Any]], Tensor]
+    ):
         """Add a custom feature extractor."""
         self._custom_extractors[name] = extractor
         logger.info(f"Added custom feature extractor: {name}")

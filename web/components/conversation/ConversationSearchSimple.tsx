@@ -29,7 +29,7 @@ interface ConversationSearchProps {
   agents: Agent[];
   users: Array<{ id: string; name: string }>;
   onFilterChange?: (filters: SearchFilters) => void;
-  onExport?: (format: ExportFormat, data: any) => void;
+  onExport?: (format: ExportFormat, data: unknown) => void;
   className?: string;
 }
 

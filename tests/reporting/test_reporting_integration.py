@@ -12,10 +12,10 @@ sys.path.insert(0, str(Path(__file__).parent.parent.parent))
 from tests.reporting.coverage_analyzer import CoverageAnalyzer
 from tests.reporting.dashboard_generator import DashboardGenerator
 from tests.reporting.report_archival_system import ReportArchivalSystem
-from tests.reporting.test_metrics_collector import TestMetricsCollector
+from tests.reporting.test_metrics_collector import MetricsCollector
 
 
-class TestReportingIntegration:
+class ReportingIntegration:
     """Comprehensive test reporting integration."""
 
     def __init__(self, output_dir: str = "tests/reporting"):
@@ -27,7 +27,7 @@ class TestReportingIntegration:
 
         # Initialize components
         self.coverage_analyzer = CoverageAnalyzer()
-        self.metrics_collector = TestMetricsCollector()
+        self.metrics_collector = MetricsCollector()
         self.dashboard_generator = DashboardGenerator()
         self.archival_system = ReportArchivalSystem()
 
@@ -45,12 +45,18 @@ class TestReportingIntegration:
             ],
         )
 
-    def run_comprehensive_reporting(self, test_run_id: str = None) -> Dict[str, Any]:
+    def run_comprehensive_reporting(
+        self, test_run_id: str = None
+    ) -> Dict[str, Any]:
         """Run comprehensive test reporting workflow."""
         if test_run_id is None:
-            test_run_id = f"integration_{datetime.now().strftime('%Y%m%d_%H%M%S')}"
+            test_run_id = (
+                f"integration_{datetime.now().strftime('%Y%m%d_%H%M%S')}"
+            )
 
-        self.logger.info(f"Starting comprehensive reporting for run: {test_run_id}")
+        self.logger.info(
+            f"Starting comprehensive reporting for run: {test_run_id}"
+        )
 
         results = {
             "test_run_id": test_run_id,
@@ -62,10 +68,14 @@ class TestReportingIntegration:
         try:
             # Step 1: Analyze coverage
             self.logger.info("Analyzing test coverage...")
-            coverage_report = self.coverage_analyzer.analyze_coverage(test_run_id)
+            coverage_report = self.coverage_analyzer.analyze_coverage(
+                test_run_id
+            )
 
             # Generate coverage reports
-            html_report = self.coverage_analyzer.generate_coverage_report_html()
+            html_report = (
+                self.coverage_analyzer.generate_coverage_report_html()
+            )
             json_report = self.coverage_analyzer.export_coverage_json()
 
             results["reports_generated"].extend([html_report, json_report])
@@ -98,7 +108,9 @@ class TestReportingIntegration:
             dashboard_html = self.dashboard_generator.generate_dashboard()
             dashboard_json = self.dashboard_generator.generate_json_export()
 
-            results["reports_generated"].extend([dashboard_html, dashboard_json])
+            results["reports_generated"].extend(
+                [dashboard_html, dashboard_json]
+            )
 
             # Step 4: Run archival process
             self.logger.info("Running report archival process...")
@@ -138,7 +150,9 @@ class TestReportingIntegration:
             - datetime.fromisoformat(results["start_time"])
         ).total_seconds()
 
-        self.logger.info(f"Comprehensive reporting completed in {results['duration']:.2f} seconds")
+        self.logger.info(
+            f"Comprehensive reporting completed in {results['duration']:.2f} seconds"
+        )
         return results
 
     def calculate_overall_quality_score(
@@ -166,7 +180,11 @@ class TestReportingIntegration:
             scores["performance_score"] = 100
 
         # Overall score (weighted average)
-        weights = {"coverage_score": 0.4, "reliability_score": 0.4, "performance_score": 0.2}
+        weights = {
+            "coverage_score": 0.4,
+            "reliability_score": 0.4,
+            "performance_score": 0.2,
+        }
 
         overall_score = sum(scores[key] * weights[key] for key in weights)
         scores["overall_score"] = overall_score
@@ -262,14 +280,20 @@ class TestReportingIntegration:
                 <p>Generated: {results['start_time']}</p>
                 <p>Duration: {results.get('duration', 0):.2f} seconds</p>
             </div>
-            
+
             <div class="section">
                 <h2>📊 Quality Score</h2>
         """
 
         if "quality_score" in results:
             for score_type, score in results["quality_score"].items():
-                css_class = "good" if score >= 80 else "warning" if score >= 60 else "critical"
+                css_class = (
+                    "good"
+                    if score >= 80
+                    else "warning"
+                    if score >= 60
+                    else "critical"
+                )
                 html_content += f"""
                 <div class="metric {css_class}">
                     <strong>{score_type.replace('_', ' ').title()}: {score:.1f}%</strong>
@@ -278,7 +302,7 @@ class TestReportingIntegration:
 
         html_content += """
             </div>
-            
+
             <div class="section">
                 <h2>📋 Reports Generated</h2>
                 <ul>
@@ -290,7 +314,7 @@ class TestReportingIntegration:
         html_content += """
                 </ul>
             </div>
-            
+
             <div class="section">
                 <h2>🔍 Quality Insights</h2>
         """
@@ -308,7 +332,7 @@ class TestReportingIntegration:
 
         html_content += """
             </div>
-            
+
             <div class="section">
                 <h2>💡 Recommendations</h2>
         """
@@ -326,7 +350,7 @@ class TestReportingIntegration:
 
         html_content += """
             </div>
-            
+
             <div class="section">
                 <h2>🗂️ Archival Summary</h2>
         """
@@ -347,7 +371,7 @@ class TestReportingIntegration:
 
         html_content += """
             </div>
-            
+
             <div class="section">
                 <h2>🔗 Quick Links</h2>
                 <ul>
@@ -413,12 +437,16 @@ def main():
 
     parser = argparse.ArgumentParser(description="Test reporting integration")
     parser.add_argument("--run-id", help="Test run ID")
-    parser.add_argument("--health-check", action="store_true", help="Run health check")
-    parser.add_argument("--output-dir", default="tests/reporting", help="Output directory")
+    parser.add_argument(
+        "--health-check", action="store_true", help="Run health check"
+    )
+    parser.add_argument(
+        "--output-dir", default="tests/reporting", help="Output directory"
+    )
 
     args = parser.parse_args()
 
-    integration = TestReportingIntegration(args.output_dir)
+    integration = ReportingIntegration(args.output_dir)
 
     if args.health_check:
         health_status = integration.run_health_check()

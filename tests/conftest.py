@@ -1,91 +1,48 @@
-"""Test configuration and fixtures."""
+"""Global test configuration and fixtures."""
 
-import asyncio
 import os
-import sys
-from unittest.mock import MagicMock
 
 import pytest
 
-# Set test environment variables before importing any application modules
+# Set development mode to enable SQLite fallback for tests
+os.environ["DEVELOPMENT_MODE"] = "true"
+os.environ["ENVIRONMENT"] = "development"
+
+# Set test database URL to use SQLite for tests
+os.environ["DATABASE_URL"] = "sqlite:///./test_freeagentics.db"
+
+# Disable Redis for tests
+os.environ["REDIS_ENABLED"] = "false"
 os.environ["TESTING"] = "true"
-os.environ["DATABASE_URL"] = "sqlite:///:memory:"
-os.environ["ASYNC_DATABASE_URL"] = "sqlite+aiosqlite:///:memory:"
-os.environ["ENVIRONMENT"] = "test"
 
-# Add project root to path
-sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), "..")))
-
-
-@pytest.fixture(scope="session")
-def event_loop():
-    """Create an instance of the default event loop for the test session."""
-    policy = asyncio.get_event_loop_policy()
-    loop = policy.new_event_loop()
-    yield loop
-    loop.close()
+# JWT config for tests
+os.environ["JWT_SECRET_KEY"] = "test-secret-key-for-testing-only"
+os.environ["JWT_ALGORITHM"] = "HS256"
+os.environ["JWT_ACCESS_TOKEN_EXPIRE_MINUTES"] = "30"
 
 
-@pytest.fixture
-def mock_database():
-    """Mock database for testing without actual DB connection."""
-    from sqlalchemy import create_engine
-    from sqlalchemy.orm import sessionmaker
+@pytest.fixture(scope="session", autouse=True)
+def disable_redis():
+    """Disable Redis for all tests."""
+    os.environ["REDIS_ENABLED"] = "false"
+    yield
 
-    from database.base import Base
 
-    # Create in-memory SQLite database
-    engine = create_engine("sqlite:///:memory:")
-    Base.metadata.create_all(bind=engine)
-
-    SessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engine)
-
-    session = SessionLocal()
-    yield session
-    session.close()
+@pytest.fixture(autouse=True)
+def mock_redis_for_api_tests(request):
+    """Automatically mock Redis for API tests that need it."""
+    # Only apply to API tests that import redis
+    if "test_api" in request.node.name:
+        try:
+            from tests.mocks.mock_redis import patch_redis_imports
+            patch_redis_imports()
+        except ImportError:
+            pass  # Mock not needed
+    yield
 
 
 @pytest.fixture
-async def async_mock_database():
-    """Async mock database for testing."""
-    from sqlalchemy.ext.asyncio import AsyncSession, async_sessionmaker, create_async_engine
-
-    from database.base import Base
-
-    # Create async in-memory SQLite database
-    engine = create_async_engine("sqlite+aiosqlite:///:memory:")
-
-    async with engine.begin() as conn:
-        await conn.run_sync(Base.metadata.create_all)
-
-    async_session_maker = async_sessionmaker(engine, class_=AsyncSession, expire_on_commit=False)
-
-    async with async_session_maker() as session:
-        yield session
-        await session.close()
-
-    await engine.dispose()
-
-
-@pytest.fixture
-def mock_knowledge_graph():
-    """Mock knowledge graph without database dependency."""
-    mock_kg = MagicMock()
-    mock_kg.nodes = MagicMock(return_value=[])
-    mock_kg.edges = MagicMock(return_value=[])
-    mock_kg.add_node = MagicMock(return_value=True)
-    mock_kg.add_edge = MagicMock(return_value=True)
-    return mock_kg
-
-
-@pytest.fixture
-def mock_storage_manager():
-    """Mock storage manager without database dependency."""
-    mock_sm = MagicMock()
-    mock_sm.save = MagicMock(return_value=True)
-    mock_sm.load = MagicMock(return_value={})
-    return mock_sm
-
-
-# Configure pytest-asyncio
-pytest_plugins = ["pytest_asyncio"]
+def mock_redis_client():
+    """Provide a mock Redis client."""
+    from tests.mocks.mock_redis import create_mock_redis_client
+    return create_mock_redis_client()

@@ -112,7 +112,9 @@ class AdvancedMemoryProfiler:
             lambda: AllocationPattern("unknown")
         )
         self._agent_memory: Dict[str, float] = {}
-        self._agent_objects: weakref.WeakValueDictionary = weakref.WeakValueDictionary()
+        self._agent_objects: weakref.WeakValueDictionary = (
+            weakref.WeakValueDictionary()
+        )
 
         # Thread safety
         self._lock = threading.RLock()
@@ -139,7 +141,9 @@ class AdvancedMemoryProfiler:
             return
 
         self._monitoring = True
-        self._monitor_thread = threading.Thread(target=self._monitor_loop, daemon=True)
+        self._monitor_thread = threading.Thread(
+            target=self._monitor_loop, daemon=True
+        )
         self._monitor_thread.start()
         logger.info("Started memory monitoring")
 
@@ -151,7 +155,7 @@ class AdvancedMemoryProfiler:
         logger.info("Stopped memory monitoring")
 
     def _monitor_loop(self):
-        """Main monitoring loop."""
+        """Execute main monitoring loop."""
         while self._monitoring:
             try:
                 self.take_snapshot()
@@ -221,8 +225,13 @@ class AdvancedMemoryProfiler:
                         )
 
             # Calculate memory delta
-            memory_delta = snapshot_after.total_memory_mb - snapshot_before.total_memory_mb
-            logger.info(f"{operation_name} memory delta: {memory_delta:+.1f} MB")
+            memory_delta = (
+                snapshot_after.total_memory_mb
+                - snapshot_before.total_memory_mb
+            )
+            logger.info(
+                f"{operation_name} memory delta: {memory_delta:+.1f} MB"
+            )
 
     def take_snapshot(self, tag: Optional[str] = None) -> MemorySnapshot:
         """Take a memory snapshot.
@@ -268,8 +277,12 @@ class AdvancedMemoryProfiler:
 
                         # Track allocation pattern
                         if location not in self.allocation_patterns:
-                            self.allocation_patterns[location] = AllocationPattern(location)
-                        self.allocation_patterns[location].record_allocation(stat.size)
+                            self.allocation_patterns[
+                                location
+                            ] = AllocationPattern(location)
+                        self.allocation_patterns[location].record_allocation(
+                            stat.size
+                        )
 
             # Calculate per-agent memory
             agent_memory = {}
@@ -279,7 +292,9 @@ class AdvancedMemoryProfiler:
                     agent_size = self._estimate_object_size(agent_obj)
                     agent_memory[agent_id] = agent_size / (1024 * 1024)
                 except Exception as e:
-                    logger.debug(f"Failed to estimate size for agent {agent_id}: {e}")
+                    logger.debug(
+                        f"Failed to estimate size for agent {agent_id}: {e}"
+                    )
 
             # Create snapshot
             snapshot = MemorySnapshot(
@@ -315,7 +330,7 @@ class AdvancedMemoryProfiler:
 
         # Add sizes of common attributes
         if hasattr(obj, "__dict__"):
-            for attr_name, attr_value in obj.__dict__.items():
+            for _attr_name, attr_value in obj.__dict__.items():
                 if isinstance(attr_value, (list, dict, np.ndarray)):
                     size += sys.getsizeof(attr_value)
                     if isinstance(attr_value, np.ndarray):
@@ -348,8 +363,8 @@ class AdvancedMemoryProfiler:
                         self._leak_candidates.add(location)
                         logger.warning(
                             f"Potential memory leak at {location}: "
-                            f"current={pattern.current_size/1024:.1f}KB, "
-                            f"avg={avg_size/1024:.1f}KB"
+                            f"current={pattern.current_size / 1024:.1f}KB, "
+                            f"avg={avg_size / 1024:.1f}KB"
                         )
 
     def get_memory_report(self) -> Dict[str, Any]:
@@ -368,11 +383,17 @@ class AdvancedMemoryProfiler:
             # Calculate trends
             memory_growth = latest.total_memory_mb - first.total_memory_mb
             time_elapsed = latest.timestamp - first.timestamp
-            growth_rate = memory_growth / (time_elapsed / 3600) if time_elapsed > 0 else 0
+            growth_rate = (
+                memory_growth / (time_elapsed / 3600)
+                if time_elapsed > 0
+                else 0
+            )
 
             # Analyze allocation patterns
             top_allocators = sorted(
-                self.allocation_patterns.items(), key=lambda x: x[1].current_size, reverse=True
+                self.allocation_patterns.items(),
+                key=lambda x: x[1].current_size,
+                reverse=True,
             )[:10]
 
             # Agent memory analysis
@@ -399,7 +420,8 @@ class AdvancedMemoryProfiler:
                 "top_allocations": [
                     {
                         "location": location,
-                        "current_size_mb": pattern.current_size / (1024 * 1024),
+                        "current_size_mb": pattern.current_size
+                        / (1024 * 1024),
                         "peak_size_mb": pattern.peak_size / (1024 * 1024),
                         "allocation_count": pattern.count,
                     }
@@ -433,7 +455,9 @@ class AdvancedMemoryProfiler:
             suggestions = []
 
             # Check belief state size
-            if hasattr(agent_obj, "beliefs") and isinstance(agent_obj.beliefs, np.ndarray):
+            if hasattr(agent_obj, "beliefs") and isinstance(
+                agent_obj.beliefs, np.ndarray
+            ):
                 belief_size_mb = agent_obj.beliefs.nbytes / (1024 * 1024)
                 if belief_size_mb > 5.0:
                     suggestions.append(
@@ -445,7 +469,10 @@ class AdvancedMemoryProfiler:
                     )
 
             # Check action history
-            if hasattr(agent_obj, "action_history") and len(agent_obj.action_history) > 1000:
+            if (
+                hasattr(agent_obj, "action_history")
+                and len(agent_obj.action_history) > 1000
+            ):
                 suggestions.append(
                     {
                         "type": "history_pruning",
@@ -455,7 +482,9 @@ class AdvancedMemoryProfiler:
                 )
 
             # Check for large cached computations
-            cache_attrs = [attr for attr in dir(agent_obj) if "cache" in attr.lower()]
+            cache_attrs = [
+                attr for attr in dir(agent_obj) if "cache" in attr.lower()
+            ]
             for attr in cache_attrs:
                 try:
                     cache_obj = getattr(agent_obj, attr)
@@ -467,8 +496,11 @@ class AdvancedMemoryProfiler:
                                 "suggestion": "Implement LRU cache or size limits",
                             }
                         )
-                except:
-                    pass
+                except Exception as e:
+                    # Skip inaccessible attributes - may be properties with side effects
+                    logger.debug(
+                        f"Could not inspect cache attribute {attr}: {e}"
+                    )
 
             return {
                 "agent_id": agent_id,

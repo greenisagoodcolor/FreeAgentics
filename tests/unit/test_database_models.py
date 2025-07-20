@@ -181,10 +181,16 @@ class TestAgentModel:
         agent_attrs = dir(Agent)
 
         # Check for relationship attributes (these might be defined as properties)
-        possible_relationships = ["coalition", "conversations", "knowledge_nodes"]
+        possible_relationships = [
+            "coalition",
+            "conversations",
+            "knowledge_nodes",
+        ]
 
         # At least some relationships should exist
-        relationship_count = sum(1 for rel in possible_relationships if rel in agent_attrs)
+        relationship_count = sum(
+            1 for rel in possible_relationships if rel in agent_attrs
+        )
         assert relationship_count >= 1  # Should have at least one relationship
 
     def test_agent_defaults(self):
@@ -233,7 +239,10 @@ class TestCoalitionModel:
             "description": "A test coalition for unit testing",
             "status": CoalitionStatus.FORMING,
             "goal": "collaborative_exploration",
-            "strategy": {"coordination": "shared_memory", "decision_making": "consensus"},
+            "strategy": {
+                "coordination": "shared_memory",
+                "decision_making": "consensus",
+            },
             "metadata": {"created_by": "system", "purpose": "testing"},
             "created_at": datetime.utcnow(),
             "updated_at": datetime.utcnow(),
@@ -273,8 +282,12 @@ class TestCoalitionModel:
         possible_relationships = ["agents", "memberships"]
 
         # At least some relationships should exist
-        relationship_count = sum(1 for rel in possible_relationships if rel in coalition_attrs)
-        assert relationship_count >= 0  # May or may not have explicit relationships
+        relationship_count = sum(
+            1 for rel in possible_relationships if rel in coalition_attrs
+        )
+        assert (
+            relationship_count >= 0
+        )  # May or may not have explicit relationships
 
     @pytest.mark.parametrize(
         "status",
@@ -335,7 +348,9 @@ class TestCoalitionMembershipModel:
         ]
 
         for attr in expected_attrs:
-            assert attr in membership_attrs or hasattr(CoalitionMembership, attr)
+            assert attr in membership_attrs or hasattr(
+                CoalitionMembership, attr
+            )
 
     def test_membership_foreign_keys(self):
         """Test CoalitionMembership foreign key relationships."""
@@ -346,8 +361,12 @@ class TestCoalitionMembershipModel:
         membership_attrs = dir(CoalitionMembership)
 
         # Check for foreign key attributes
-        assert "coalition_id" in membership_attrs or hasattr(CoalitionMembership, "coalition_id")
-        assert "agent_id" in membership_attrs or hasattr(CoalitionMembership, "agent_id")
+        assert "coalition_id" in membership_attrs or hasattr(
+            CoalitionMembership, "coalition_id"
+        )
+        assert "agent_id" in membership_attrs or hasattr(
+            CoalitionMembership, "agent_id"
+        )
 
 
 class TestConversationModel:
@@ -398,8 +417,12 @@ class TestConversationModel:
         possible_relationships = ["messages", "agent"]
 
         # At least some relationships should exist
-        relationship_count = sum(1 for rel in possible_relationships if rel in conversation_attrs)
-        assert relationship_count >= 0  # May or may not have explicit relationships
+        relationship_count = sum(
+            1 for rel in possible_relationships if rel in conversation_attrs
+        )
+        assert (
+            relationship_count >= 0
+        )  # May or may not have explicit relationships
 
 
 class TestConversationMessageModel:
@@ -424,7 +447,14 @@ class TestConversationMessageModel:
 
         # Test that ConversationMessage class has expected attributes
         message_attrs = dir(ConversationMessage)
-        expected_attrs = ["id", "conversation_id", "role", "content", "metadata", "created_at"]
+        expected_attrs = [
+            "id",
+            "conversation_id",
+            "role",
+            "content",
+            "metadata",
+            "created_at",
+        ]
 
         for attr in expected_attrs:
             assert attr in message_attrs or hasattr(ConversationMessage, attr)
@@ -436,7 +466,9 @@ class TestConversationMessageModel:
 
         # Should have foreign key to conversation
         message_attrs = dir(ConversationMessage)
-        assert "conversation_id" in message_attrs or hasattr(ConversationMessage, "conversation_id")
+        assert "conversation_id" in message_attrs or hasattr(
+            ConversationMessage, "conversation_id"
+        )
 
     @pytest.mark.parametrize("role", ["user", "assistant", "system"])
     def test_message_roles(self, role):
@@ -531,11 +563,15 @@ class TestKnowledgeModel:
 
         # Nodes should relate to agent
         possible_node_rels = ["agent"]
-        node_rel_count = sum(1 for rel in possible_node_rels if rel in node_attrs)
+        node_rel_count = sum(
+            1 for rel in possible_node_rels if rel in node_attrs
+        )
 
         # Edges should relate to source and target nodes
         possible_edge_rels = ["source", "target"]
-        edge_rel_count = sum(1 for rel in possible_edge_rels if rel in edge_attrs)
+        edge_rel_count = sum(
+            1 for rel in possible_edge_rels if rel in edge_attrs
+        )
 
         # At least some relationships should exist
         assert (node_rel_count + edge_rel_count) >= 0
@@ -563,7 +599,14 @@ class TestSystemMetricsModel:
 
         # Test that SystemMetrics class has expected attributes
         metrics_attrs = dir(SystemMetrics)
-        expected_attrs = ["id", "metric_name", "metric_value", "metric_type", "labels", "timestamp"]
+        expected_attrs = [
+            "id",
+            "metric_name",
+            "metric_value",
+            "metric_type",
+            "labels",
+            "timestamp",
+        ]
 
         for attr in expected_attrs:
             assert attr in metrics_attrs or hasattr(SystemMetrics, attr)
@@ -601,7 +644,9 @@ class TestDatabaseIntegration:
 
         for model in models:
             # Check that model has SQLAlchemy characteristics
-            assert hasattr(model, "__tablename__") or hasattr(model, "__table__")
+            assert hasattr(model, "__tablename__") or hasattr(
+                model, "__table__"
+            )
 
     def test_uuid_id_fields(self):
         """Test that models use UUID for ID fields."""

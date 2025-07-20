@@ -7,29 +7,33 @@ After analyzing the FreeAgentics threading implementation, I've identified **7 c
 ## Current Architecture Analysis
 
 ### Strengths
+
 1. **ThreadPoolExecutor Usage**: Already using thread pools in `AgentManager` and `OptimizedThreadPoolManager`
-2. **Async/Await Support**: `AsyncAgentManager` provides async coordination layer
-3. **Performance Monitoring**: Built-in metrics tracking and performance decorators
-4. **Dynamic Scaling**: Adaptive worker thread scaling based on load
+1. **Async/Await Support**: `AsyncAgentManager` provides async coordination layer
+1. **Performance Monitoring**: Built-in metrics tracking and performance decorators
+1. **Dynamic Scaling**: Adaptive worker thread scaling based on load
 
 ### Weaknesses
+
 1. **Lock Contention**: Multiple fine-grained locks causing serialization
-2. **Suboptimal Thread Pool Sizing**: Fixed initial workers without CPU topology awareness
-3. **Inefficient Data Sharing**: Deep copying of agent states between threads
-4. **GIL-Unfriendly Patterns**: Sequential Python operations that don't release GIL
-5. **Missing Batching**: Individual operations instead of batched processing
+1. **Suboptimal Thread Pool Sizing**: Fixed initial workers without CPU topology awareness
+1. **Inefficient Data Sharing**: Deep copying of agent states between threads
+1. **GIL-Unfriendly Patterns**: Sequential Python operations that don't release GIL
+1. **Missing Batching**: Individual operations instead of batched processing
 
 ## Optimization Opportunities
 
 ### 1. **Thread Pool Tuning Based on CPU Topology**
 
 **Current Issue**: Fixed thread pool sizes don't consider CPU architecture
+
 ```python
 # Current: agents/agent_manager.py:28
 self._executor = ThreadPoolExecutor(max_workers=2)  # Hardcoded!
 ```
 
 **Optimization**:
+
 ```python
 import os
 import multiprocessing as mp
@@ -59,12 +63,14 @@ class OptimizedAgentManager:
 ### 2. **Lock Contention Reduction via Read-Write Locks**
 
 **Current Issue**: Using basic Lock/RLock everywhere causes unnecessary serialization
+
 ```python
 # Current: agents/agent_manager.py:31
 self._event_lock = threading.Lock()
 ```
 
 **Optimization**:
+
 ```python
 import threading
 from rwlock import RWLock  # or implement custom
@@ -94,6 +100,7 @@ class LockOptimizedAgentManager:
 ### 3. **Async/Await Pattern Optimization**
 
 **Current Issue**: Mixing sync and async code, creating event loops in threads
+
 ```python
 # Current: agents/agent_manager.py:133-137
 try:
@@ -104,6 +111,7 @@ except RuntimeError:
 ```
 
 **Optimization**:
+
 ```python
 import asyncio
 from concurrent.futures import ThreadPoolExecutor
@@ -139,12 +147,14 @@ class AsyncOptimizedAgentManager:
 ### 4. **Memory Sharing Optimization**
 
 **Current Issue**: Deep copying agent configs and states
+
 ```python
 # Current: async_agent_manager.py:225
 agent_config = self.agent_configs.get(operation.agent_id)
 ```
 
 **Optimization**:
+
 ```python
 import multiprocessing as mp
 from multiprocessing import shared_memory
@@ -175,12 +185,14 @@ class MemoryOptimizedAgentManager:
 ### 5. **Thread-Safe Data Structures**
 
 **Current Issue**: Using standard dict/list with locks
+
 ```python
 # Current: coalition_coordinator.py:114
 self.known_agents: Dict[str, Dict[str, Any]] = {}
 ```
 
 **Optimization**:
+
 ```python
 from collections import ChainMap
 from threading import local
@@ -213,6 +225,7 @@ class ThreadSafeStructures:
 ### 6. **Batched Operations and Vectorization**
 
 **Current Issue**: Processing agents one by one
+
 ```python
 # Current: agent_manager.py:289-295
 for agent_id, agent in self.agents.items():
@@ -222,6 +235,7 @@ for agent_id, agent in self.agents.items():
 ```
 
 **Optimization**:
+
 ```python
 import numpy as np
 from concurrent.futures import ThreadPoolExecutor, as_completed
@@ -290,6 +304,7 @@ class BatchedAgentManager:
 ### 7. **GIL-Aware Scheduling**
 
 **Current Issue**: Not optimizing for GIL release patterns
+
 ```python
 # Current: Pure Python loops that hold GIL
 for agent_id, agent in self.agents.items():
@@ -297,6 +312,7 @@ for agent_id, agent in self.agents.items():
 ```
 
 **Optimization**:
+
 ```python
 import ctypes
 import numpy as np
@@ -343,21 +359,25 @@ class GILAwareScheduler:
 ## Implementation Priority
 
 1. **High Priority** (Immediate impact, low risk):
+
    - Thread Pool Tuning (#1)
    - Batched Operations (#6)
    - Async Pattern Optimization (#3)
 
-2. **Medium Priority** (Significant impact, moderate complexity):
+1. **Medium Priority** (Significant impact, moderate complexity):
+
    - Lock Contention Reduction (#2)
    - Thread-Safe Data Structures (#5)
 
-3. **Low Priority** (Specialized optimizations):
+1. **Low Priority** (Specialized optimizations):
+
    - Memory Sharing (#4)
    - GIL-Aware Scheduling (#7)
 
 ## Performance Projections
 
 With all optimizations implemented:
+
 - **Single Agent Performance**: 1.5-2x improvement (370ms → 185-250ms)
 - **Multi-Agent Scaling**: 3-5x better scaling efficiency (28% → 60-80%)
 - **Memory Usage**: 40-60% reduction per agent
@@ -366,9 +386,9 @@ With all optimizations implemented:
 ## Validation Approach
 
 1. **Microbenchmarks**: Test each optimization in isolation
-2. **Integration Tests**: Verify combined optimizations
-3. **Load Testing**: Simulate 100+ agents under various workloads
-4. **Profiling**: Use `py-spy` and `threading` profiler to verify improvements
+1. **Integration Tests**: Verify combined optimizations
+1. **Load Testing**: Simulate 100+ agents under various workloads
+1. **Profiling**: Use `py-spy` and `threading` profiler to verify improvements
 
 ## Code Safety Considerations
 

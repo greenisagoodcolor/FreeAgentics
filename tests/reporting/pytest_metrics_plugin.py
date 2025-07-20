@@ -22,9 +22,7 @@ class MetricsPlugin:
         self.config = config
         self.collector = TestMetricsCollector()
         self.session_start_time: Optional[float] = None
-        self.test_run_id = (
-            f"pytest_{datetime.now().strftime('%Y%m%d_%H%M%S')}_{uuid.uuid4().hex[:8]}"
-        )
+        self.test_run_id = f"pytest_{datetime.now().strftime('%Y%m%d_%H%M%S')}_{uuid.uuid4().hex[:8]}"
         self.environment = os.environ.get("TEST_ENVIRONMENT", "development")
 
     def pytest_sessionstart(self, session: Session):
@@ -62,14 +60,18 @@ class MetricsPlugin:
         if flaky_tests:
             print(f"\\n⚠️  Flaky Tests Detected ({len(flaky_tests)}):")
             for test in flaky_tests[:5]:  # Show top 5
-                print(f"  - {test['test_name']} ({test['flaky_percentage']:.1f}% flaky)")
+                print(
+                    f"  - {test['test_name']} ({test['flaky_percentage']:.1f}% flaky)"
+                )
 
         # Show slow tests if any
         slow_tests = self.collector.get_slow_tests()
         if slow_tests:
             print(f"\\n🐌 Slow Tests Detected ({len(slow_tests)}):")
             for test in slow_tests[:5]:  # Show top 5
-                print(f"  - {test['test_name']} ({test['avg_duration']:.2f}s avg)")
+                print(
+                    f"  - {test['test_name']} ({test['avg_duration']:.2f}s avg)"
+                )
 
     def pytest_runtest_setup(self, item: Item):
         """Called to perform the setup phase for a test item."""
@@ -189,7 +191,10 @@ def pytest_addoption(parser):
         help="Test environment name for metrics tracking",
     )
     group.addoption(
-        "--no-metrics", action="store_true", default=False, help="Disable test metrics collection"
+        "--no-metrics",
+        action="store_true",
+        default=False,
+        help="Disable test metrics collection",
     )
 
 
@@ -245,7 +250,8 @@ def pytest_terminal_summary(terminalreporter, exitstatus, config):
 
                 if slow_tests:
                     terminalreporter.write_line(
-                        f"🐌 {len(slow_tests)} slow tests detected - " f"consider optimization"
+                        f"🐌 {len(slow_tests)} slow tests detected - "
+                        f"consider optimization"
                     )
 
                 terminalreporter.write_line(
@@ -258,18 +264,28 @@ def pytest_configure(config):
     """Register custom markers for test categorization."""
     config.addinivalue_line("markers", "slow: mark test as slow running")
     config.addinivalue_line("markers", "flaky: mark test as potentially flaky")
-    config.addinivalue_line("markers", "critical: mark test as critical for system functionality")
-    config.addinivalue_line("markers", "performance: mark test as performance test")
+    config.addinivalue_line(
+        "markers", "critical: mark test as critical for system functionality"
+    )
+    config.addinivalue_line(
+        "markers", "performance: mark test as performance test"
+    )
 
 
 def pytest_collection_modifyitems(config, items):
     """Modify collected test items based on markers."""
     for item in items:
         # Add automatic markers based on test characteristics
-        if "slow" in item.nodeid.lower() or "performance" in item.nodeid.lower():
+        if (
+            "slow" in item.nodeid.lower()
+            or "performance" in item.nodeid.lower()
+        ):
             item.add_marker(pytest.mark.slow)
 
-        if "flaky" in item.nodeid.lower() or "intermittent" in item.nodeid.lower():
+        if (
+            "flaky" in item.nodeid.lower()
+            or "intermittent" in item.nodeid.lower()
+        ):
             item.add_marker(pytest.mark.flaky)
 
         if "critical" in item.nodeid.lower() or "smoke" in item.nodeid.lower():
@@ -303,7 +319,9 @@ class TestRetryPlugin:
             except Exception:
                 self.retry_counts[test_id] += 1
                 if retry < max_retries - 1:
-                    print(f"\\n⚠️  Test {test_id} failed, retrying ({retry + 1}/{max_retries})...")
+                    print(
+                        f"\\n⚠️  Test {test_id} failed, retrying ({retry + 1}/{max_retries})..."
+                    )
                     continue
                 else:
                     raise

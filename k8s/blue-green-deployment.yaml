@@ -416,13 +416,13 @@ metadata:
     nginx.ingress.kubernetes.io/force-ssl-redirect: "true"
     nginx.ingress.kubernetes.io/use-regex: "true"
     nginx.ingress.kubernetes.io/proxy-body-size: "10m"
-    
+
     # Blue-Green specific annotations
     nginx.ingress.kubernetes.io/canary: "true"
     nginx.ingress.kubernetes.io/canary-by-header: "X-Canary"
     nginx.ingress.kubernetes.io/canary-by-header-value: "preview"
     nginx.ingress.kubernetes.io/canary-weight: "0"
-    
+
     # Security headers
     nginx.ingress.kubernetes.io/configuration-snippet: |
       add_header X-Frame-Options "SAMEORIGIN" always;
@@ -430,17 +430,17 @@ metadata:
       add_header X-XSS-Protection "1; mode=block" always;
       add_header Referrer-Policy "strict-origin-when-cross-origin" always;
       add_header Strict-Transport-Security "max-age=31536000; includeSubDomains; preload" always;
-      
+
       # Add deployment color header
       add_header X-Deployment-Color $deployment_color always;
-    
+
     # Rate limiting
     nginx.ingress.kubernetes.io/rate-limit: "100"
     nginx.ingress.kubernetes.io/rate-limit-window: "1m"
-    
+
     # SSL Certificate management
     cert-manager.io/cluster-issuer: letsencrypt-prod
-    
+
 spec:
   tls:
   - hosts:
@@ -467,7 +467,7 @@ spec:
             name: frontend-active
             port:
               number: 3000
-  
+
   # Preview environment for testing
   - host: preview.yourdomain.com
     http:
@@ -502,138 +502,138 @@ data:
   promote.sh: |
     #!/bin/bash
     # Blue-Green Deployment Promotion Script
-    
+
     set -euo pipefail
-    
+
     NAMESPACE="${NAMESPACE:-freeagentics-prod}"
     ROLLOUT_NAME="${ROLLOUT_NAME:-backend-rollout}"
-    
+
     log() {
         echo "[$(date '+%Y-%m-%d %H:%M:%S')] $1"
     }
-    
+
     promote_rollout() {
         log "Promoting rollout: $ROLLOUT_NAME"
-        
+
         # Check if rollout is healthy
         if ! kubectl argo rollouts get rollout "$ROLLOUT_NAME" -n "$NAMESPACE" | grep -q "Healthy"; then
             log "ERROR: Rollout $ROLLOUT_NAME is not healthy"
             exit 1
         fi
-        
+
         # Promote the rollout
         kubectl argo rollouts promote "$ROLLOUT_NAME" -n "$NAMESPACE"
-        
+
         # Wait for promotion to complete
         kubectl argo rollouts wait "$ROLLOUT_NAME" -n "$NAMESPACE" --timeout=600s
-        
+
         log "Rollout $ROLLOUT_NAME promoted successfully"
     }
-    
+
     main() {
         log "Starting blue-green promotion process"
-        
+
         # Promote backend
         ROLLOUT_NAME="backend-rollout"
         promote_rollout
-        
+
         # Promote frontend
         ROLLOUT_NAME="frontend-rollout"
         promote_rollout
-        
+
         log "Blue-green promotion completed successfully"
     }
-    
+
     main "$@"
-  
+
   rollback.sh: |
     #!/bin/bash
     # Blue-Green Deployment Rollback Script
-    
+
     set -euo pipefail
-    
+
     NAMESPACE="${NAMESPACE:-freeagentics-prod}"
     ROLLOUT_NAME="${ROLLOUT_NAME:-backend-rollout}"
-    
+
     log() {
         echo "[$(date '+%Y-%m-%d %H:%M:%S')] $1"
     }
-    
+
     rollback_rollout() {
         log "Rolling back rollout: $ROLLOUT_NAME"
-        
+
         # Abort current rollout
-        kubectl argo rollouts abort "$ROLLOUT_NAME" -n "$NAMESPACE" || true
-        
+        kubectl argo rollouts abort "$ROLLOUT_NAME" -n "$NAMESPACE" 
+
         # Rollback to previous version
         kubectl argo rollouts undo "$ROLLOUT_NAME" -n "$NAMESPACE"
-        
+
         # Wait for rollback to complete
         kubectl argo rollouts wait "$ROLLOUT_NAME" -n "$NAMESPACE" --timeout=600s
-        
+
         log "Rollout $ROLLOUT_NAME rolled back successfully"
     }
-    
+
     main() {
         log "Starting blue-green rollback process"
-        
+
         # Rollback backend
         ROLLOUT_NAME="backend-rollout"
         rollback_rollout
-        
+
         # Rollback frontend
         ROLLOUT_NAME="frontend-rollout"
         rollback_rollout
-        
+
         log "Blue-green rollback completed successfully"
     }
-    
+
     main "$@"
-  
+
   status.sh: |
     #!/bin/bash
     # Blue-Green Deployment Status Script
-    
+
     set -euo pipefail
-    
+
     NAMESPACE="${NAMESPACE:-freeagentics-prod}"
-    
+
     log() {
         echo "[$(date '+%Y-%m-%d %H:%M:%S')] $1"
     }
-    
+
     show_rollout_status() {
         local rollout_name="$1"
-        
+
         log "=== Rollout Status: $rollout_name ==="
         kubectl argo rollouts get rollout "$rollout_name" -n "$NAMESPACE"
-        
+
         log "=== Rollout History: $rollout_name ==="
         kubectl argo rollouts history "$rollout_name" -n "$NAMESPACE"
-        
+
         echo ""
     }
-    
+
     main() {
         log "Blue-Green Deployment Status"
-        
+
         # Show backend status
         show_rollout_status "backend-rollout"
-        
+
         # Show frontend status
         show_rollout_status "frontend-rollout"
-        
+
         # Show analysis results
         log "=== Analysis Results ==="
         kubectl get analysisruns -n "$NAMESPACE" | tail -5
-        
+
         # Show service endpoints
         log "=== Service Endpoints ==="
         kubectl get services -n "$NAMESPACE" | grep -E "(active|preview)"
-        
+
         log "Status check completed"
     }
-    
+
     main "$@"
 
 ---
@@ -661,11 +661,11 @@ spec:
               # Check active services
               curl -f https://yourdomain.com/health || exit 1
               curl -f https://yourdomain.com/api/v1/health || exit 1
-              
+
               # Check preview services (if accessible)
               curl -f https://preview.yourdomain.com/health || echo "Preview not accessible"
               curl -f https://preview.yourdomain.com/api/v1/health || echo "Preview API not accessible"
-              
+
               echo "Health check completed successfully"
             resources:
               requests:

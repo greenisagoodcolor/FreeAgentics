@@ -219,7 +219,13 @@ class TestDatabaseStorageBackend:
         mock_session = MagicMock()
         storage = DatabaseStorageBackend(mock_session)
 
-        methods = ["save_graph", "load_graph", "delete_graph", "list_graphs", "graph_exists"]
+        methods = [
+            "save_graph",
+            "load_graph",
+            "delete_graph",
+            "list_graphs",
+            "graph_exists",
+        ]
         for method in methods:
             assert hasattr(storage, method)
             assert callable(getattr(storage, method))
@@ -296,7 +302,13 @@ class TestPickleStorageBackend:
         with tempfile.TemporaryDirectory() as temp_dir:
             storage = PickleStorageBackend(temp_dir)
 
-            methods = ["save_graph", "load_graph", "delete_graph", "list_graphs", "graph_exists"]
+            methods = [
+                "save_graph",
+                "load_graph",
+                "delete_graph",
+                "list_graphs",
+                "graph_exists",
+            ]
             for method in methods:
                 assert hasattr(storage, method)
                 assert callable(getattr(storage, method))
@@ -337,7 +349,13 @@ class TestStorageManager:
         mock_backend = MagicMock()
         manager = StorageManager(mock_backend)
 
-        methods = ["save_graph", "load_graph", "delete_graph", "list_graphs", "graph_exists"]
+        methods = [
+            "save_graph",
+            "load_graph",
+            "delete_graph",
+            "list_graphs",
+            "graph_exists",
+        ]
         for method in methods:
             assert hasattr(manager, method)
             assert callable(getattr(manager, method))

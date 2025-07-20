@@ -1,490 +1,471 @@
-"""
-Comprehensive test suite for Base Agent - Additional Coverage
-"""
+"""Comprehensive tests for base_agent.py targeting 80%+ coverage."""
 
-import json
-import logging
 from datetime import datetime
-from typing import Any, Dict, List, Optional
-from unittest.mock import MagicMock, Mock, call, patch
+from unittest.mock import AsyncMock, MagicMock, Mock, patch
 
 import numpy as np
 import pytest
 
-# Mock imports before importing base_agent
-with patch.dict(
-    "sys.modules",
-    {
-        "pymdp": MagicMock(),
-        "pymdp.utils": MagicMock(),
-        "pymdp.agent": MagicMock(),
-        "observability": MagicMock(),
-        "observability.belief_monitoring": MagicMock(),
-    },
-):
-    from agents.base_agent import (
-        OBSERVABILITY_AVAILABLE,
-        PYMDP_AVAILABLE,
-        ActiveInferenceAgent,
-        AgentConfig,
-        safe_array_to_int,
-    )
+from agents.base_agent import (
+    OBSERVABILITY_AVAILABLE,
+    PYMDP_AVAILABLE,
+    ActiveInferenceAgent,
+    AgentConfig,
+    BasicExplorerAgent,
+    safe_array_to_int,
+)
+from agents.error_handling import (
+    ActionSelectionError,
+    AgentError,
+    InferenceError,
+)
 
 
 class TestSafeArrayToInt:
-    """Test the safe_array_to_int utility function."""
+    """Test safe_array_to_int function comprehensively."""
 
-    def test_numpy_scalar(self):
-        """Test conversion of numpy scalar."""
-        value = np.int64(42)
-        result = safe_array_to_int(value)
-        assert result == 42
-        assert isinstance(result, int)
+    def test_numpy_scalar_array(self):
+        """Test with 0-dimensional numpy array."""
+        value = np.array(5)
+        assert safe_array_to_int(value) == 5
 
-    def test_numpy_0d_array(self):
-        """Test conversion of 0-dimensional numpy array."""
-        value = np.array(42)
-        result = safe_array_to_int(value)
-        assert result == 42
-        assert isinstance(result, int)
+    def test_single_element_array(self):
+        """Test with single element numpy array."""
+        value = np.array([3])
+        assert safe_array_to_int(value) == 3
 
-    def test_numpy_1d_single_element(self):
-        """Test conversion of single-element 1D array."""
-        value = np.array([42])
-        result = safe_array_to_int(value)
-        assert result == 42
-        assert isinstance(result, int)
+    def test_multi_element_array(self):
+        """Test with multi-element array - should take first element."""
+        value = np.array([7, 8, 9])
+        assert safe_array_to_int(value) == 7
 
-    def test_numpy_multidimensional_array(self):
-        """Test conversion of multidimensional array (takes first element)."""
+    def test_multidimensional_array(self):
+        """Test with multidimensional array."""
         value = np.array([[1, 2], [3, 4]])
-        result = safe_array_to_int(value)
-        assert result == 1
-        assert isinstance(result, int)
+        assert safe_array_to_int(value) == 1
 
-    def test_empty_array_raises_error(self):
-        """Test that empty array raises ValueError."""
+    def test_empty_array(self):
+        """Test with empty array - should raise ValueError."""
         value = np.array([])
         with pytest.raises(
-            ValueError, match="Empty array cannot be converted to integer"
+            ValueError, match="Empty array cannot be converted"
         ):
             safe_array_to_int(value)
 
-    def test_python_list(self):
-        """Test conversion of Python list."""
-        value = [42, 43, 44]
-        result = safe_array_to_int(value)
-        assert result == 42
-        assert isinstance(result, int)
+    def test_list_input(self):
+        """Test with list input."""
+        value = [4, 5, 6]
+        assert safe_array_to_int(value) == 4
 
-    def test_empty_list_raises_error(self):
-        """Test that empty list raises ValueError."""
+    def test_empty_list(self):
+        """Test with empty list - should raise ValueError."""
         value = []
         with pytest.raises(
-            ValueError, match="Empty array cannot be converted to integer"
+            ValueError, match="Empty array cannot be converted"
         ):
             safe_array_to_int(value)
 
-    def test_python_tuple(self):
-        """Test conversion of Python tuple."""
-        value = (42, 43, 44)
-        result = safe_array_to_int(value)
-        assert result == 42
-        assert isinstance(result, int)
+    def test_numpy_scalar(self):
+        """Test with numpy scalar."""
+        value = np.int64(8)
+        assert safe_array_to_int(value) == 8
 
-    def test_regular_int(self):
-        """Test conversion of regular int."""
-        value = 42
-        result = safe_array_to_int(value)
-        assert result == 42
-        assert isinstance(result, int)
+    def test_regular_scalar(self):
+        """Test with regular Python scalar."""
+        assert safe_array_to_int(5) == 5
+        assert safe_array_to_int(5.7) == 5
 
-    def test_float_conversion(self):
-        """Test conversion of float."""
-        value = 42.7
-        result = safe_array_to_int(value)
-        assert result == 42
-        assert isinstance(result, int)
-
-    def test_string_conversion(self):
-        """Test conversion of numeric string."""
-        value = "42"
-        result = safe_array_to_int(value)
-        assert result == 42
-        assert isinstance(result, int)
-
-    def test_invalid_string_raises_error(self):
-        """Test that invalid string raises ValueError."""
-        value = "not_a_number"
+    def test_invalid_input(self):
+        """Test with invalid input."""
         with pytest.raises(ValueError, match="Cannot convert"):
-            safe_array_to_int(value)
-
-    def test_none_raises_error(self):
-        """Test that None raises ValueError."""
-        value = None
-        with pytest.raises(ValueError, match="Cannot convert"):
-            safe_array_to_int(value)
-
-    def test_complex_object_raises_error(self):
-        """Test that complex object raises ValueError."""
-        value = {"key": "value"}
-        with pytest.raises(ValueError, match="Cannot convert"):
-            safe_array_to_int(value)
+            safe_array_to_int("invalid")
 
 
-class TestActiveInferenceAgentConfiguration:
-    """Test agent configuration and initialization."""
+class TestAgentConfig:
+    """Test AgentConfig dataclass."""
 
-    def test_agent_config_creation(self):
-        """Test AgentConfig creation."""
+    def test_default_initialization(self):
+        """Test default initialization."""
+        config = AgentConfig(name="test_agent")
+        assert config.name == "test_agent"
+        assert config.use_pymdp is True
+        assert config.planning_horizon == 3
+        assert config.precision == 1.0
+        assert config.lr == 0.1
+        assert config.gmn_spec is None
+        assert config.llm_config is None
+
+    def test_custom_initialization(self):
+        """Test custom initialization."""
         config = AgentConfig(
-            agent_id="test_agent",
-            name="Test Agent",
-            learning_rate=0.1,
-            policy_precision=2.0,
-            use_pymdp=True,
-            use_observability=True,
-            pymdp_config={"some": "config"},
+            name="custom",
+            use_pymdp=False,
+            planning_horizon=5,
+            precision=2.0,
+            lr=0.05,
+            gmn_spec="test_spec",
             llm_config={"model": "test"},
         )
 
-        assert config.agent_id == "test_agent"
-        assert config.name == "Test Agent"
-        assert config.learning_rate == 0.1
-        assert config.policy_precision == 2.0
-        assert config.use_pymdp is True
-        assert config.use_observability is True
-        assert config.pymdp_config == {"some": "config"}
+        assert config.name == "custom"
+        assert config.use_pymdp is False
+        assert config.planning_horizon == 5
+        assert config.precision == 2.0
+        assert config.lr == 0.05
+        assert config.gmn_spec == "test_spec"
         assert config.llm_config == {"model": "test"}
 
-    @patch('agents.base_agent.PYMDP_AVAILABLE', True)
-    def test_agent_initialization_with_pymdp(self):
-        """Test agent initialization when PyMDP is available."""
 
-        class TestAgent(ActiveInferenceAgent):
-            def perceive(self, observation):
-                self.last_observation = observation
+class TestBasicExplorerAgent:
+    """Test BasicExplorerAgent implementation."""
 
-            def update_beliefs(self):
-                self.beliefs = {"test": 0.5}
-
-            def select_action(self):
-                return 0
-
-        agent = TestAgent(
-            agent_id="test_001", name="Test Agent", config={"use_pymdp": True}
-        )
-
-        assert agent.agent_id == "test_001"
-        assert agent.name == "Test Agent"
-        assert agent.config.use_pymdp is True
-        assert agent.created_at is not None
-        assert agent.status == "initialized"
-
-    @patch('agents.base_agent.PYMDP_AVAILABLE', False)
-    def test_agent_initialization_without_pymdp(self):
-        """Test agent initialization when PyMDP is not available."""
-
-        class TestAgent(ActiveInferenceAgent):
-            def perceive(self, observation):
-                self.last_observation = observation
-
-            def update_beliefs(self):
-                self.beliefs = {"test": 0.5}
-
-            def select_action(self):
-                return 0
-
-        agent = TestAgent(
-            agent_id="test_002",
-            name="Test Agent No PyMDP",
-            config={"use_pymdp": False},
-        )
-
-        assert agent.agent_id == "test_002"
-        assert agent.name == "Test Agent No PyMDP"
-        assert agent.config.use_pymdp is False
-        assert agent.pymdp_agent is None
-
-
-class TestActiveInferenceAgentMethods:
-    """Test agent methods and behaviors."""
-
-    def setup_method(self):
-        """Set up test agent."""
-
-        class TestAgent(ActiveInferenceAgent):
-            def perceive(self, observation):
-                self.last_observation = observation
-
-            def update_beliefs(self):
-                self.beliefs = {"test": 0.5}
-
-            def select_action(self):
-                return 0
-
-        self.agent = TestAgent(
+    @patch("agents.base_agent.PYMDP_AVAILABLE", False)
+    def test_initialization_without_pymdp(self):
+        """Test initialization when PyMDP is not available."""
+        config = AgentConfig(name="test_agent")
+        agent = BasicExplorerAgent(
+            num_states=[4],
+            num_actions=[3],
+            num_observations=[4],
             agent_id="test_agent",
-            name="Test Agent",
-            config={"use_pymdp": False},
         )
 
-    def test_agent_step_basic(self):
-        """Test basic agent step functionality."""
-        observation = {"sensor": "value"}
+        assert agent.agent_id == "test_agent"
+        assert agent.num_states == [4]
+        assert agent.num_actions == [3]
+        assert agent.num_observations == [4]
+        # Should initialize simple beliefs
+        assert agent.beliefs.shape == (4,)
+        assert np.allclose(agent.beliefs, 0.25)
 
-        result = self.agent.step(observation)
+    @patch("agents.base_agent.PYMDP_AVAILABLE", True)
+    @patch("agents.base_agent.PyMDPAgent")
+    def test_initialization_with_pymdp(self, mock_pymdp_agent):
+        """Test initialization when PyMDP is available."""
+        # Mock PyMDP agent
+        mock_agent_instance = Mock()
+        mock_pymdp_agent.return_value = mock_agent_instance
 
-        assert result is not None
-        assert hasattr(self.agent, 'last_observation')
-        assert self.agent.last_observation == observation
-
-    def test_agent_get_info(self):
-        """Test agent info retrieval."""
-        info = self.agent.get_info()
-
-        assert isinstance(info, dict)
-        assert "agent_id" in info
-        assert "name" in info
-        assert "status" in info
-        assert "created_at" in info
-        assert info["agent_id"] == "test_agent"
-        assert info["name"] == "Test Agent"
-
-    def test_agent_status_management(self):
-        """Test agent status management."""
-        assert self.agent.status == "initialized"
-
-        # Test status change
-        self.agent.status = "running"
-        assert self.agent.status == "running"
-
-        info = self.agent.get_info()
-        assert info["status"] == "running"
-
-    def test_agent_config_access(self):
-        """Test agent configuration access."""
-        config = self.agent.config
-
-        assert isinstance(config, AgentConfig)
-        assert config.agent_id == "test_agent"
-        assert config.name == "Test Agent"
-        assert config.use_pymdp is False
-
-    def test_agent_metadata_handling(self):
-        """Test agent metadata handling."""
-        # Test initial metadata
-        assert hasattr(self.agent, 'created_at')
-        assert isinstance(self.agent.created_at, datetime)
-
-        # Test info includes metadata
-        info = self.agent.get_info()
-        assert "created_at" in info
-
-    @patch('agents.base_agent.logger')
-    def test_agent_logging(self, mock_logger):
-        """Test agent logging functionality."""
-        observation = {"test": "data"}
-
-        self.agent.step(observation)
-
-        # Verify logging occurred (depends on implementation)
-        # This test ensures the logger is accessible
-        assert mock_logger is not None
-
-    def test_agent_error_handling_in_step(self):
-        """Test error handling in agent step."""
-
-        class ErrorAgent(ActiveInferenceAgent):
-            def perceive(self, observation):
-                raise ValueError("Test error")
-
-            def update_beliefs(self):
-                pass
-
-            def select_action(self):
-                return 0
-
-        agent = ErrorAgent(
-            agent_id="error_agent",
-            name="Error Agent",
-            config={"use_pymdp": False},
+        agent = BasicExplorerAgent(
+            num_states=[4],
+            num_actions=[3],
+            num_observations=[4],
+            agent_id="test_agent",
         )
 
-        # Test that errors are handled gracefully
-        with pytest.raises(ValueError):
-            agent.step({"test": "data"})
+        assert agent.pymdp_agent == mock_agent_instance
+        mock_pymdp_agent.assert_called_once()
 
-    def test_agent_performance_monitoring(self):
-        """Test performance monitoring integration."""
-        # This test verifies the agent can be monitored
-        observation = {"sensor": "data"}
-
-        # Should not raise errors
-        result = self.agent.step(observation)
-        assert result is not None
-
-    def test_agent_memory_management(self):
-        """Test agent memory management."""
-        # Test that agent doesn't accumulate excessive memory
-        for i in range(10):
-            observation = {"iteration": i}
-            self.agent.step(observation)
-
-        # Agent should still be functional
-        info = self.agent.get_info()
-        assert info["agent_id"] == "test_agent"
-
-    def test_agent_belief_updates(self):
-        """Test belief update mechanism."""
-        observation = {"belief_trigger": True}
-
-        # Run step to trigger belief update
-        self.agent.step(observation)
-
-        # Verify beliefs were updated
-        assert hasattr(self.agent, 'beliefs')
-        assert self.agent.beliefs == {"test": 0.5}
-
-    def test_agent_action_selection(self):
-        """Test action selection mechanism."""
-        observation = {"action_trigger": True}
-
-        # Run step to trigger action selection
-        result = self.agent.step(observation)
-
-        # Verify action was selected
-        assert result is not None
-
-
-class TestActiveInferenceAgentIntegration:
-    """Test agent integration with external systems."""
-
-    def setup_method(self):
-        """Set up test agent with integration features."""
-
-        class IntegrationAgent(ActiveInferenceAgent):
-            def perceive(self, observation):
-                self.last_observation = observation
-                self.observation_count = (
-                    getattr(self, 'observation_count', 0) + 1
-                )
-
-            def update_beliefs(self):
-                self.beliefs = {"confidence": 0.8, "uncertainty": 0.2}
-
-            def select_action(self):
-                return getattr(self, 'observation_count', 0) % 2
-
-        self.agent = IntegrationAgent(
-            agent_id="integration_agent",
-            name="Integration Agent",
-            config={"use_pymdp": False, "use_observability": False},
+    @patch("agents.base_agent.PYMDP_AVAILABLE", False)
+    def test_update_beliefs_without_pymdp(self):
+        """Test belief update without PyMDP."""
+        agent = BasicExplorerAgent(
+            num_states=[4],
+            num_actions=[3],
+            num_observations=[4],
+            agent_id="test_agent",
         )
 
-    def test_agent_observation_tracking(self):
-        """Test agent observation tracking."""
-        observations = [
-            {"sensor1": "value1"},
-            {"sensor2": "value2"},
-            {"sensor3": "value3"},
-        ]
+        # Initial beliefs should be uniform
+        assert np.allclose(agent.beliefs, 0.25)
 
-        for obs in observations:
-            self.agent.step(obs)
+        # Update beliefs
+        agent.update_beliefs(1)
 
-        assert self.agent.observation_count == 3
-        assert self.agent.last_observation == observations[-1]
+        # Beliefs should change
+        assert agent.beliefs[1] > 0.25
+        assert np.allclose(agent.beliefs.sum(), 1.0)
 
-    def test_agent_belief_evolution(self):
-        """Test belief evolution over time."""
-        observations = [
-            {"evidence": "positive"},
-            {"evidence": "negative"},
-            {"evidence": "neutral"},
-        ]
+    @patch("agents.base_agent.PYMDP_AVAILABLE", True)
+    @patch("agents.base_agent.PyMDPAgent")
+    def test_update_beliefs_with_pymdp(self, mock_pymdp_agent):
+        """Test belief update with PyMDP."""
+        # Mock PyMDP agent
+        mock_agent_instance = Mock()
+        mock_agent_instance.infer_states.return_value = np.array(
+            [0.7, 0.1, 0.1, 0.1]
+        )
+        mock_pymdp_agent.return_value = mock_agent_instance
 
-        for obs in observations:
-            self.agent.step(obs)
+        agent = BasicExplorerAgent(
+            num_states=[4],
+            num_actions=[3],
+            num_observations=[4],
+            agent_id="test_agent",
+        )
 
-        # Verify beliefs are updated
-        assert hasattr(self.agent, 'beliefs')
-        assert "confidence" in self.agent.beliefs
-        assert "uncertainty" in self.agent.beliefs
+        agent.update_beliefs(1)
 
-    def test_agent_action_history(self):
-        """Test agent action history tracking."""
-        actions = []
+        assert np.array_equal(agent.beliefs, np.array([0.7, 0.1, 0.1, 0.1]))
+        mock_agent_instance.infer_states.assert_called_once_with(1)
 
-        for i in range(5):
-            observation = {"step": i}
-            action = self.agent.step(observation)
-            actions.append(action)
+    @patch("agents.base_agent.PYMDP_AVAILABLE", False)
+    def test_select_action_without_pymdp(self):
+        """Test action selection without PyMDP."""
+        agent = BasicExplorerAgent(
+            num_states=[4],
+            num_actions=[3],
+            num_observations=[4],
+            agent_id="test_agent",
+        )
 
-        # Verify actions follow expected pattern
-        assert len(actions) == 5
-        assert all(isinstance(action, int) for action in actions)
+        # Set specific beliefs to make action selection deterministic
+        agent.beliefs = np.array([0.7, 0.1, 0.1, 0.1])
 
-    def test_agent_state_consistency(self):
-        """Test agent state consistency across steps."""
-        # Initial state
-        initial_info = self.agent.get_info()
+        action = agent.select_action()
+        assert 0 <= action < 3
 
-        # Run several steps
+    @patch("agents.base_agent.PYMDP_AVAILABLE", True)
+    @patch("agents.base_agent.PyMDPAgent")
+    def test_select_action_with_pymdp(self, mock_pymdp_agent):
+        """Test action selection with PyMDP."""
+        # Mock PyMDP agent
+        mock_agent_instance = Mock()
+        mock_agent_instance.infer_policies.return_value = None
+        mock_agent_instance.sample_action.return_value = np.array([2])
+        mock_pymdp_agent.return_value = mock_agent_instance
+
+        agent = BasicExplorerAgent(
+            num_states=[4],
+            num_actions=[3],
+            num_observations=[4],
+            agent_id="test_agent",
+        )
+
+        action = agent.select_action()
+
+        assert action == 2
+        mock_agent_instance.infer_policies.assert_called_once()
+        mock_agent_instance.sample_action.assert_called_once()
+
+    def test_learn_method(self):
+        """Test the learn method."""
+        agent = BasicExplorerAgent(
+            num_states=[4],
+            num_actions=[3],
+            num_observations=[4],
+            agent_id="test_agent",
+        )
+
+        agent.preferences = np.array([1.0, 0.0, 0.0, 0.0])
+        initial_preferences = agent.preferences.copy()
+        agent.learn(observation=1, reward=0.5)
+
+        # Preferences should be updated
+        assert not np.array_equal(agent.preferences, initial_preferences)
+
+    def test_reset_method(self):
+        """Test the reset method."""
+        agent = BasicExplorerAgent(
+            num_states=[4],
+            num_actions=[3],
+            num_observations=[4],
+            agent_id="test_agent",
+        )
+
+        # Set some state
+        agent.beliefs = np.array([0.8, 0.1, 0.05, 0.05])
+        agent.action_history = [1, 2, 0]
+        agent.observation_history = [0, 1, 2]
+
+        agent.reset()
+
+        # State should be cleared
+        assert agent.action_history == []
+        assert agent.observation_history == []
+        # Beliefs should be reset to uniform
+        assert np.allclose(agent.beliefs, 0.25)
+
+    def test_step_method(self):
+        """Test the step method."""
+        agent = BasicExplorerAgent(
+            num_states=[4],
+            num_actions=[3],
+            num_observations=[4],
+            agent_id="test_agent",
+        )
+
+        # Perform step
+        action = agent.step(2)
+
+        # Check action is valid
+        assert 0 <= action < 3
+
+        # Check observation was recorded
+        assert agent.observation_history[-1] == 2
+        assert agent.action_history[-1] == action
+
+    @patch("agents.base_agent.PYMDP_AVAILABLE", True)
+    @patch("agents.base_agent.PyMDPAgent")
+    def test_pymdp_initialization_error(self, mock_pymdp_agent):
+        """Test handling of PyMDP initialization errors."""
+        # Make PyMDP agent initialization fail
+        mock_pymdp_agent.side_effect = Exception("PyMDP init error")
+
+        # Should fall back to simple implementation
+        agent = BasicExplorerAgent(
+            num_states=[4],
+            num_actions=[3],
+            num_observations=[4],
+            agent_id="test_agent",
+        )
+
+        assert agent.pymdp_agent is None
+        assert agent.beliefs is not None
+
+    def test_invalid_observation(self):
+        """Test handling of invalid observations."""
+        agent = BasicExplorerAgent(
+            num_states=[4],
+            num_actions=[3],
+            num_observations=[4],
+            agent_id="test_agent",
+        )
+
+        # Out of range observation
+        with pytest.raises(AgentError):
+            agent.step(10)
+
+        # Invalid type
+        with pytest.raises(AgentError):
+            agent.step("invalid")
+
+    @patch("agents.base_agent.PYMDP_AVAILABLE", True)
+    @patch("agents.base_agent.PyMDPAgent")
+    def test_belief_update_error_recovery(self, mock_pymdp_agent):
+        """Test recovery from belief update errors."""
+        # Mock PyMDP agent
+        mock_agent_instance = Mock()
+        mock_agent_instance.infer_states.side_effect = Exception(
+            "Inference error"
+        )
+        mock_pymdp_agent.return_value = mock_agent_instance
+
+        agent = BasicExplorerAgent(
+            num_states=[4],
+            num_actions=[3],
+            num_observations=[4],
+            agent_id="test_agent",
+        )
+
+        # Should raise InferenceError
+        with pytest.raises(InferenceError):
+            agent.update_beliefs(1)
+
+    @patch("agents.base_agent.PYMDP_AVAILABLE", True)
+    @patch("agents.base_agent.PyMDPAgent")
+    def test_select_action_with_pymdp_error(self, mock_pymdp_agent):
+        """Test action selection with PyMDP error."""
+        # Mock PyMDP agent that raises error
+        mock_agent_instance = Mock()
+        mock_agent_instance.infer_policies.side_effect = Exception(
+            "PyMDP error"
+        )
+        mock_pymdp_agent.return_value = mock_agent_instance
+
+        agent = BasicExplorerAgent(
+            num_states=[4],
+            num_actions=[3],
+            num_observations=[4],
+            agent_id="test_agent",
+        )
+
+        with pytest.raises(ActionSelectionError):
+            agent.select_action()
+
+    @patch("agents.base_agent.OBSERVABILITY_AVAILABLE", True)
+    @patch("agents.base_agent.record_agent_lifecycle_event")
+    def test_lifecycle_event_recording(self, mock_record_event):
+        """Test that lifecycle events are recorded."""
+        # Mock as coroutine
+        mock_record_event.return_value = AsyncMock()
+
+        agent = BasicExplorerAgent(
+            num_states=[4],
+            num_actions=[3],
+            num_observations=[4],
+            agent_id="test_agent",
+        )
+
+        # Should have recorded creation event
+        mock_record_event.assert_called()
+        call_args = mock_record_event.call_args[1]
+        assert call_args["agent_id"] == "test_agent"
+        assert call_args["event_type"] == "created"
+
+    @patch("agents.base_agent.BELIEF_MONITORING_AVAILABLE", True)
+    @patch("agents.base_agent.monitor_belief_update")
+    def test_belief_monitoring(self, mock_monitor):
+        """Test belief monitoring."""
+        agent = BasicExplorerAgent(
+            num_states=[4],
+            num_actions=[3],
+            num_observations=[4],
+            agent_id="test_agent",
+        )
+
+        # Update beliefs
+        agent.update_beliefs(1)
+
+        # Should have monitored belief update
+        mock_monitor.assert_called_once()
+
+    @patch("agents.base_agent.performance_monitor")
+    def test_performance_monitoring(self, mock_monitor):
+        """Test that performance is monitored."""
+        agent = BasicExplorerAgent(
+            num_states=[4],
+            num_actions=[3],
+            num_observations=[4],
+            agent_id="test_agent",
+        )
+
+        # Perform operations
+        agent.update_beliefs(1)
+        agent.select_action()
+
+        # Should have monitored performance
+        assert mock_monitor.call_count >= 2
+
+    def test_history_tracking(self):
+        """Test that action and observation history are tracked."""
+        agent = BasicExplorerAgent(
+            num_states=[4],
+            num_actions=[3],
+            num_observations=[4],
+            agent_id="test_agent",
+        )
+
+        # Perform several steps
         for i in range(3):
-            self.agent.step({"iteration": i})
+            action = agent.step(i)
+            assert len(agent.observation_history) == i + 1
+            assert len(agent.action_history) == i + 1
+            assert agent.observation_history[-1] == i
+            assert agent.action_history[-1] == action
 
-        # Check state consistency
-        final_info = self.agent.get_info()
-        assert final_info["agent_id"] == initial_info["agent_id"]
-        assert final_info["name"] == initial_info["name"]
-        assert final_info["created_at"] == initial_info["created_at"]
-
-    @patch('agents.base_agent.OBSERVABILITY_AVAILABLE', True)
-    def test_agent_observability_integration(self):
-        """Test agent observability integration."""
-        # This test verifies observability hooks work when available
-        observation = {"monitored": True}
-
-        # Should not raise errors even with observability
-        result = self.agent.step(observation)
-        assert result is not None
-
-    def test_agent_error_recovery(self):
-        """Test agent error recovery mechanisms."""
-
-        class RecoveryAgent(ActiveInferenceAgent):
-            def __init__(self, *args, **kwargs):
-                super().__init__(*args, **kwargs)
-                self.error_count = 0
-
-            def perceive(self, observation):
-                if observation.get("cause_error"):
-                    self.error_count += 1
-                    if self.error_count < 3:
-                        raise ValueError("Recoverable error")
-                self.last_observation = observation
-
-            def update_beliefs(self):
-                self.beliefs = {"error_count": self.error_count}
-
-            def select_action(self):
-                return 0
-
-        agent = RecoveryAgent(
-            agent_id="recovery_agent",
-            name="Recovery Agent",
-            config={"use_pymdp": False},
+    def test_preference_learning_convergence(self):
+        """Test that preference learning converges."""
+        agent = BasicExplorerAgent(
+            num_states=[4],
+            num_actions=[3],
+            num_observations=[4],
+            agent_id="test_agent",
+            learning_rate=0.1,
         )
 
-        # Test error recovery
-        with pytest.raises(ValueError):
-            agent.step({"cause_error": True})
+        # Initialize preferences
+        agent.preferences = np.zeros(4)
 
-        with pytest.raises(ValueError):
-            agent.step({"cause_error": True})
+        # Repeatedly reward observation 2
+        for _ in range(10):
+            agent.learn(observation=2, reward=1.0)
 
-        # Third time should work
-        result = agent.step({"cause_error": True})
-        assert result is not None
-        assert agent.error_count == 3
+        # Preference for observation 2 should be highest
+        assert agent.preferences[2] > agent.preferences[0]
+        assert agent.preferences[2] > agent.preferences[1]
+        assert agent.preferences[2] > agent.preferences[3]
+
+
+if __name__ == "__main__":
+    pytest.main([__file__, "-v"])

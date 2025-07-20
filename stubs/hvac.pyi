@@ -4,7 +4,10 @@ from typing import Any, Dict, Optional
 
 class Client:
     def __init__(
-        self, url: Optional[str] = None, token: Optional[str] = None, **kwargs: Any
+        self,
+        url: Optional[str] = None,
+        token: Optional[str] = None,
+        **kwargs: Any,
     ) -> None: ...
     def is_authenticated(self) -> bool: ...
     def read(self, path: str, **kwargs: Any) -> Dict[str, Any]: ...

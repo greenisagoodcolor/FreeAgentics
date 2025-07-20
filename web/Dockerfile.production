@@ -2,7 +2,7 @@
 # Multi-stage build optimized for production deployment
 
 # Base stage with Node.js
-FROM node:18-alpine AS base
+FROM node:18.20.4-alpine AS base
 
 # Set production environment
 ENV NODE_ENV=production
@@ -51,8 +51,8 @@ FROM base AS production
 WORKDIR /app
 
 # Create non-root user for security
-RUN addgroup --system --gid 1001 nodejs \
-    && adduser --system --uid 1001 nextjs
+RUN addgroup -g 1001 -S nodejs && \
+    adduser -S -u 1001 -G nodejs nextjs
 
 # Copy built application
 COPY --from=builder --chown=nextjs:nodejs /app/.next/standalone ./

@@ -31,33 +31,49 @@ class TestDatabaseTypes:
 
     def test_guid_load_dialect_impl_postgresql(self):
         """Test load_dialect_impl with PostgreSQL dialect."""
+        from sqlalchemy.dialects.postgresql import UUID as PostgreSQLUUID
+
         from database.types import GUID
 
         # Create mock PostgreSQL dialect
         mock_dialect = MagicMock()
         mock_dialect.name = "postgresql"
-        mock_dialect.type_descriptor = MagicMock()
+        mock_dialect.type_descriptor = MagicMock(
+            return_value="PostgreSQL UUID Type"
+        )
 
         guid_type = GUID()
         result = guid_type.load_dialect_impl(mock_dialect)
 
         # Should call type_descriptor with PostgreSQL UUID
         mock_dialect.type_descriptor.assert_called_once()
+        args = mock_dialect.type_descriptor.call_args[0]
+        assert isinstance(args[0], PostgreSQLUUID)
+        assert args[0].as_uuid is True
+        assert result == "PostgreSQL UUID Type"
 
     def test_guid_load_dialect_impl_sqlite(self):
         """Test load_dialect_impl with SQLite dialect."""
+        from sqlalchemy import CHAR
+
         from database.types import GUID
 
         # Create mock SQLite dialect
         mock_dialect = MagicMock()
         mock_dialect.name = "sqlite"
-        mock_dialect.type_descriptor = MagicMock()
+        mock_dialect.type_descriptor = MagicMock(
+            return_value="SQLite CHAR Type"
+        )
 
         guid_type = GUID()
         result = guid_type.load_dialect_impl(mock_dialect)
 
         # Should call type_descriptor with CHAR(36)
         mock_dialect.type_descriptor.assert_called_once()
+        args = mock_dialect.type_descriptor.call_args[0]
+        assert isinstance(args[0], CHAR)
+        assert args[0].length == 36
+        assert result == "SQLite CHAR Type"
 
     def test_guid_process_bind_param_none(self):
         """Test process_bind_param with None value."""
@@ -113,6 +129,20 @@ class TestDatabaseTypes:
         # Should return string representation for SQLite
         assert result == test_string
         assert isinstance(result, str)
+
+    def test_guid_process_bind_param_sqlite_invalid_string(self):
+        """Test process_bind_param with SQLite and invalid UUID string."""
+        from database.types import GUID
+
+        mock_dialect = MagicMock()
+        mock_dialect.name = "sqlite"
+        invalid_string = "not-a-valid-uuid"
+
+        guid_type = GUID()
+
+        # Should raise ValueError when trying to validate UUID
+        with pytest.raises(ValueError):
+            guid_type.process_bind_param(invalid_string, mock_dialect)
 
     def test_guid_process_result_value_none(self):
         """Test process_result_value with None value."""

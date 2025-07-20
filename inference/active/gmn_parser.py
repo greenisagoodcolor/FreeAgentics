@@ -11,11 +11,17 @@ import logging
 import re
 from dataclasses import dataclass, field
 from enum import Enum
-from typing import Any, Dict, List, Optional, Union
+from typing import Any, Dict, List, Optional, Tuple, Union
 
 import numpy as np
 
 logger = logging.getLogger(__name__)
+
+
+class GMNValidationError(Exception):
+    """Raised when GMN validation fails."""
+
+    pass
 
 
 class GMNNodeType(Enum):
@@ -69,6 +75,59 @@ class GMNGraph:
     nodes: Dict[str, GMNNode] = field(default_factory=dict)
     edges: List[GMNEdge] = field(default_factory=list)
     metadata: Dict[str, Any] = field(default_factory=dict)
+
+
+class GMNSchemaValidator:
+    """Validates GMN schema for correctness."""
+
+    @staticmethod
+    def validate(gmn_dict: Dict) -> Tuple[bool, List[str]]:
+        """Validate GMN schema.
+
+        Args:
+            gmn_dict: Dictionary containing GMN specification
+
+        Returns:
+            Tuple of (is_valid, error_messages)
+        """
+        errors = []
+
+        # Check required fields
+        if 'nodes' not in gmn_dict:
+            errors.append("Missing required field: nodes")
+        if 'edges' not in gmn_dict:
+            errors.append("Missing required field: edges")
+
+        # Validate nodes
+        if 'nodes' in gmn_dict:
+            if not isinstance(gmn_dict['nodes'], list):
+                errors.append("'nodes' must be a list")
+            else:
+                for i, node in enumerate(gmn_dict['nodes']):
+                    if not isinstance(node, dict):
+                        errors.append(f"Node {i} must be a dictionary")
+                    elif 'id' not in node:
+                        errors.append(f"Node {i} missing required field: id")
+
+        # Validate edges
+        if 'edges' in gmn_dict:
+            if not isinstance(gmn_dict['edges'], list):
+                errors.append("'edges' must be a list")
+            else:
+                for i, edge in enumerate(gmn_dict['edges']):
+                    if not isinstance(edge, dict):
+                        errors.append(f"Edge {i} must be a dictionary")
+                    else:
+                        if 'source' not in edge:
+                            errors.append(
+                                f"Edge {i} missing required field: source"
+                            )
+                        if 'target' not in edge:
+                            errors.append(
+                                f"Edge {i} missing required field: target"
+                            )
+
+        return (len(errors) == 0, errors)
 
 
 class GMNParser:
@@ -226,7 +285,7 @@ class GMNParser:
         """Parse string specification to dictionary."""
         # Try JSON first
         try:
-            return json.loads(spec_str)  # type: ignore[no-any-return]
+            return json.loads(spec_str)  
         except json.JSONDecodeError:
             pass
 

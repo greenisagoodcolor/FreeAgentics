@@ -31,7 +31,7 @@ def check_file_contains(file_path, content, description):
             else:
                 print(f"❌ {description}")
                 return False
-    except:
+    except Exception:
         print(f"❌ {description} - file not readable")
         return False
 
@@ -54,67 +54,137 @@ def main():
     # 1. Find and examine Docker configuration files
     print("\n1. Docker Configuration Files:")
     checks.append(check_file_exists("Dockerfile", "Dockerfile exists"))
-    checks.append(check_file_exists("docker-compose.yml", "docker-compose.yml exists"))
-    checks.append(check_file_exists("requirements-production.txt", "Production requirements exist"))
+    checks.append(
+        check_file_exists("docker-compose.yml", "docker-compose.yml exists")
+    )
+    checks.append(
+        check_file_exists(
+            "requirements-production.txt", "Production requirements exist"
+        )
+    )
 
     # 2. Validate production Docker build configuration
     print("\n2. Production Build Configuration:")
     checks.append(
-        check_file_contains("Dockerfile", "FROM python:3.11-slim", "Base image configured")
+        check_file_contains(
+            "Dockerfile", "FROM python:3.11-slim", "Base image configured"
+        )
     )
-    checks.append(check_file_contains("Dockerfile", "as production", "Production stage defined"))
-    checks.append(check_file_contains("Dockerfile", "USER", "Non-root user configured"))
-    checks.append(check_file_contains("Dockerfile", "HEALTHCHECK", "Health check configured"))
-    checks.append(check_file_contains("Dockerfile", "gunicorn", "Production server configured"))
+    checks.append(
+        check_file_contains(
+            "Dockerfile", "as production", "Production stage defined"
+        )
+    )
+    checks.append(
+        check_file_contains("Dockerfile", "USER", "Non-root user configured")
+    )
+    checks.append(
+        check_file_contains(
+            "Dockerfile", "HEALTHCHECK", "Health check configured"
+        )
+    )
+    checks.append(
+        check_file_contains(
+            "Dockerfile", "gunicorn", "Production server configured"
+        )
+    )
 
     # 3. Multi-stage builds and optimization
     print("\n3. Multi-stage Build and Optimization:")
     checks.append(
-        check_file_contains("Dockerfile", "FROM python:3.11-slim as base", "Base stage defined")
+        check_file_contains(
+            "Dockerfile", "FROM python:3.11-slim as base", "Base stage defined"
+        )
     )
     checks.append(
-        check_file_contains("Dockerfile", "FROM base as development", "Development stage defined")
+        check_file_contains(
+            "Dockerfile",
+            "FROM base as development",
+            "Development stage defined",
+        )
     )
     checks.append(
-        check_file_contains("Dockerfile", "FROM base as production", "Production stage defined")
+        check_file_contains(
+            "Dockerfile", "FROM base as production", "Production stage defined"
+        )
     )
-    checks.append(check_file_exists("Dockerfile.optimized", "Optimized Dockerfile created"))
+    checks.append(
+        check_file_exists(
+            "Dockerfile.optimized", "Optimized Dockerfile created"
+        )
+    )
 
     # 4. Container security and best practices
     print("\n4. Container Security and Best Practices:")
-    checks.append(check_file_contains("Dockerfile", "useradd", "Non-root user created"))
     checks.append(
-        check_file_contains("Dockerfile", "rm -rf /var/lib/apt/lists", "Package cleanup configured")
+        check_file_contains("Dockerfile", "useradd", "Non-root user created")
     )
-    checks.append(not check_file_contains("Dockerfile", "sudo", "No sudo usage (security)"))
+    checks.append(
+        check_file_contains(
+            "Dockerfile",
+            "rm -rf /var/lib/apt/lists",
+            "Package cleanup configured",
+        )
+    )
+    checks.append(
+        not check_file_contains(
+            "Dockerfile", "sudo", "No sudo usage (security)"
+        )
+    )
 
     # 5. Production deployment scenarios
     print("\n5. Production Deployment Scenarios:")
     checks.append(
-        check_file_exists("scripts/validate_docker_production.py", "Production validation script")
+        check_file_exists(
+            "scripts/validate_docker_production.py",
+            "Production validation script",
+        )
     )
-    checks.append(check_file_exists("scripts/test_multistage_builds.py", "Multi-stage build test"))
     checks.append(
-        check_file_exists("scripts/validate_container_security.py", "Security validation script")
+        check_file_exists(
+            "scripts/test_multistage_builds.py", "Multi-stage build test"
+        )
     )
     checks.append(
-        check_file_exists("scripts/test_production_deployment.py", "Deployment test script")
+        check_file_exists(
+            "scripts/validate_container_security.py",
+            "Security validation script",
+        )
+    )
+    checks.append(
+        check_file_exists(
+            "scripts/test_production_deployment.py", "Deployment test script"
+        )
     )
 
     # 6. API endpoint cleanup
     print("\n6. API Endpoint Cleanup:")
     checks.append(
-        check_file_contains("api/v1/system.py", "/cleanup", "API cleanup endpoints added")
+        check_file_contains(
+            "api/v1/system.py", "/cleanup", "API cleanup endpoints added"
+        )
     )
-    checks.append(check_file_exists("scripts/test_cleanup_endpoint.py", "Cleanup endpoint test"))
+    checks.append(
+        check_file_exists(
+            "scripts/test_cleanup_endpoint.py", "Cleanup endpoint test"
+        )
+    )
 
     # 7. Additional validation scripts
     print("\n7. Validation Scripts Created:")
     checks.append(
-        check_file_exists("scripts/quick_docker_validation.py", "Quick validation script")
+        check_file_exists(
+            "scripts/quick_docker_validation.py", "Quick validation script"
+        )
     )
-    checks.append(check_file_exists("scripts/compare_docker_builds.py", "Build comparison script"))
-    checks.append(check_file_exists("scripts/add_api_cleanup.py", "API cleanup script"))
+    checks.append(
+        check_file_exists(
+            "scripts/compare_docker_builds.py", "Build comparison script"
+        )
+    )
+    checks.append(
+        check_file_exists("scripts/add_api_cleanup.py", "API cleanup script")
+    )
 
     # Calculate results
     total_checks = len(checks)
@@ -173,7 +243,9 @@ def main():
     for i, deliverable in enumerate(deliverables, 1):
         print(f"  {i}. {deliverable}")
 
-    print("\n✅ SUBTASK 15.1 COMPLETE - Docker Container Production Build Validated")
+    print(
+        "\n✅ SUBTASK 15.1 COMPLETE - Docker Container Production Build Validated"
+    )
 
     return 0 if status == "PASSED" else 1
 

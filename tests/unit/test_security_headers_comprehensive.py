@@ -160,7 +160,9 @@ class TestSecurityHeaders:
 
         headers = manager.get_security_headers(request, response)
 
-        assert headers["Cache-Control"] == "public, max-age=31536000, immutable"
+        assert (
+            headers["Cache-Control"] == "public, max-age=31536000, immutable"
+        )
 
     def test_additional_security_headers(self):
         """Test additional security headers."""
@@ -244,17 +246,26 @@ class TestSecurityHeaders:
 
     def test_certificate_pinning_header(self):
         """Test certificate pinning header generation."""
-        policy = SecurityPolicy(enable_certificate_pinning=True, production_mode=True)
+        policy = SecurityPolicy(
+            enable_certificate_pinning=True, production_mode=True
+        )
         manager = SecurityHeadersManager(policy)
 
         # Mock the certificate pinner
-        with patch.object(manager.certificate_pinner, "generate_header") as mock_generate:
-            mock_generate.return_value = 'pin-sha256="test123"; max-age=5184000'
+        with patch.object(
+            manager.certificate_pinner, "generate_header"
+        ) as mock_generate:
+            mock_generate.return_value = (
+                'pin-sha256="test123"; max-age=5184000'
+            )
 
             request = MagicMock()
             request.url.scheme = "https"
             request.url.path = "/"
-            request.headers = {"host": "example.com", "user-agent": "FreeAgentics-iOS/1.0"}
+            request.headers = {
+                "host": "example.com",
+                "user-agent": "FreeAgentics-iOS/1.0",
+            }
 
             response = MagicMock()
             response.headers = {"content-type": "text/html"}
@@ -317,8 +328,14 @@ class TestSSLTLSConfiguration:
         """Test SSL configuration validation."""
         # Create a mock SSL context
         mock_context = MagicMock()
-        mock_context.options = ssl.OP_NO_COMPRESSION | ssl.OP_NO_SSLv2 | ssl.OP_NO_SSLv3
-        mock_context.cert_store_stats.return_value = {"x509": 1, "crl": 0, "ca": 1}
+        mock_context.options = (
+            ssl.OP_NO_COMPRESSION | ssl.OP_NO_SSLv2 | ssl.OP_NO_SSLv3
+        )
+        mock_context.cert_store_stats.return_value = {
+            "x509": 1,
+            "crl": 0,
+            "ca": 1,
+        }
 
         validation_results = validate_ssl_configuration(mock_context)
 

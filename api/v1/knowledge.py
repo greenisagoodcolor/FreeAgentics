@@ -136,7 +136,8 @@ def get_active_graph(graph_id: str) -> KnowledgeGraph:
         graph = storage_manager.load(graph_id)
         if not graph:
             raise HTTPException(
-                status_code=status.HTTP_404_NOT_FOUND, detail=f"Graph {graph_id} not found"
+                status_code=status.HTTP_404_NOT_FOUND,
+                detail=f"Graph {graph_id} not found",
             )
         active_graphs[graph_id] = graph
 
@@ -160,7 +161,8 @@ async def create_graph() -> GraphResponse:
     # Save to storage
     if not storage_manager.save(graph):
         raise HTTPException(
-            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR, detail="Failed to save graph"
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail="Failed to save graph",
         )
 
     # Cache it
@@ -211,7 +213,11 @@ async def get_graph(graph_id: str) -> GraphResponse:
         updated_at=graph.updated_at.isoformat(),
         node_count=len(graph.nodes),
         edge_count=len(graph.edges),
-        metadata={"node_types": {nt.value: len(graph.type_index.get(nt, [])) for nt in NodeType}},
+        metadata={
+            "node_types": {
+                nt.value: len(graph.type_index.get(nt, [])) for nt in NodeType
+            }
+        },
     )
 
 
@@ -220,7 +226,8 @@ async def delete_graph(graph_id: str):
     """Delete a knowledge graph."""
     if not storage_manager.exists(graph_id):
         raise HTTPException(
-            status_code=status.HTTP_404_NOT_FOUND, detail=f"Graph {graph_id} not found"
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail=f"Graph {graph_id} not found",
         )
 
     # Remove from cache
@@ -232,7 +239,8 @@ async def delete_graph(graph_id: str):
     # Delete from storage
     if not storage_manager.delete(graph_id):
         raise HTTPException(
-            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR, detail="Failed to delete graph"
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail="Failed to delete graph",
         )
 
     logger.info(f"Deleted knowledge graph {graph_id}")
@@ -241,7 +249,9 @@ async def delete_graph(graph_id: str):
 
 
 @router.post("/graphs/{graph_id}/nodes", response_model=NodeResponse)
-async def create_node(graph_id: str, request: NodeCreateRequest) -> NodeResponse:
+async def create_node(
+    graph_id: str, request: NodeCreateRequest
+) -> NodeResponse:
     """Create a node in the knowledge graph."""
     graph = get_active_graph(graph_id)
 
@@ -250,7 +260,8 @@ async def create_node(graph_id: str, request: NodeCreateRequest) -> NodeResponse
         node_type = NodeType(request.type)
     except ValueError:
         raise HTTPException(
-            status_code=status.HTTP_400_BAD_REQUEST, detail=f"Invalid node type: {request.type}"
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail=f"Invalid node type: {request.type}",
         )
 
     node = KnowledgeNode(
@@ -262,7 +273,10 @@ async def create_node(graph_id: str, request: NodeCreateRequest) -> NodeResponse
     )
 
     if not graph.add_node(node):
-        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="Failed to add node")
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="Failed to add node",
+        )
 
     # Save graph
     storage_manager.save(graph)
@@ -276,7 +290,11 @@ async def create_node(graph_id: str, request: NodeCreateRequest) -> NodeResponse
         asyncio.create_task(
             broadcast_system_event(
                 "knowledge_graph_updated",
-                {"graph_id": graph_id, "action": "node_added", "node_id": node.id},
+                {
+                    "graph_id": graph_id,
+                    "action": "node_added",
+                    "node_id": node.id,
+                },
             )
         )
     except Exception as e:
@@ -314,7 +332,8 @@ async def list_nodes(
             nodes = [n for n in nodes if n.type == node_type]
         except ValueError:
             raise HTTPException(
-                status_code=status.HTTP_400_BAD_REQUEST, detail=f"Invalid node type: {type}"
+                status_code=status.HTTP_400_BAD_REQUEST,
+                detail=f"Invalid node type: {type}",
             )
 
     if label:
@@ -351,7 +370,8 @@ async def get_node(graph_id: str, node_id: str) -> NodeResponse:
     node = graph.get_node(node_id)
     if not node:
         raise HTTPException(
-            status_code=status.HTTP_404_NOT_FOUND, detail=f"Node {node_id} not found"
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail=f"Node {node_id} not found",
         )
 
     return NodeResponse(
@@ -374,7 +394,8 @@ async def update_node(graph_id: str, node_id: str, properties: Dict[str, Any]):
 
     if not graph.update_node(node_id, properties):
         raise HTTPException(
-            status_code=status.HTTP_404_NOT_FOUND, detail=f"Node {node_id} not found"
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail=f"Node {node_id} not found",
         )
 
     # Save graph
@@ -390,7 +411,8 @@ async def delete_node(graph_id: str, node_id: str):
 
     if not graph.remove_node(node_id):
         raise HTTPException(
-            status_code=status.HTTP_404_NOT_FOUND, detail=f"Node {node_id} not found"
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail=f"Node {node_id} not found",
         )
 
     # Save graph
@@ -400,7 +422,9 @@ async def delete_node(graph_id: str, node_id: str):
 
 
 @router.post("/graphs/{graph_id}/edges", response_model=EdgeResponse)
-async def create_edge(graph_id: str, request: EdgeCreateRequest) -> EdgeResponse:
+async def create_edge(
+    graph_id: str, request: EdgeCreateRequest
+) -> EdgeResponse:
     """Create an edge in the knowledge graph."""
     graph = get_active_graph(graph_id)
 
@@ -409,7 +433,8 @@ async def create_edge(graph_id: str, request: EdgeCreateRequest) -> EdgeResponse
         edge_type = EdgeType(request.type)
     except ValueError:
         raise HTTPException(
-            status_code=status.HTTP_400_BAD_REQUEST, detail=f"Invalid edge type: {request.type}"
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail=f"Invalid edge type: {request.type}",
         )
 
     # Create edge
@@ -445,8 +470,12 @@ async def create_edge(graph_id: str, request: EdgeCreateRequest) -> EdgeResponse
 async def list_edges(
     graph_id: str,
     type: Optional[str] = Query(None, description="Filter by edge type"),
-    source_id: Optional[str] = Query(None, description="Filter by source node"),
-    target_id: Optional[str] = Query(None, description="Filter by target node"),
+    source_id: Optional[str] = Query(
+        None, description="Filter by source node"
+    ),
+    target_id: Optional[str] = Query(
+        None, description="Filter by target node"
+    ),
     limit: Optional[int] = Query(100, ge=1, le=1000),
 ) -> List[EdgeResponse]:
     """List edges in the knowledge graph."""
@@ -461,7 +490,8 @@ async def list_edges(
             edges = [e for e in edges if e.type == edge_type]
         except ValueError:
             raise HTTPException(
-                status_code=status.HTTP_400_BAD_REQUEST, detail=f"Invalid edge type: {type}"
+                status_code=status.HTTP_400_BAD_REQUEST,
+                detail=f"Invalid edge type: {type}",
             )
 
     if source_id:
@@ -492,7 +522,9 @@ async def list_edges(
 
 
 @router.post("/graphs/{graph_id}/query", response_model=QueryResultResponse)
-async def query_graph(graph_id: str, request: GraphQueryRequest) -> QueryResultResponse:
+async def query_graph(
+    graph_id: str, request: GraphQueryRequest
+) -> QueryResultResponse:
     """Query the knowledge graph."""
     engine = get_query_engine(graph_id)
 
@@ -512,7 +544,8 @@ async def query_graph(graph_id: str, request: GraphQueryRequest) -> QueryResultR
             node_types = [NodeType(t) for t in request.node_types]
         except ValueError as e:
             raise HTTPException(
-                status_code=status.HTTP_400_BAD_REQUEST, detail=f"Invalid node type: {e}"
+                status_code=status.HTTP_400_BAD_REQUEST,
+                detail=f"Invalid node type: {e}",
             )
 
     edge_types = None
@@ -521,7 +554,8 @@ async def query_graph(graph_id: str, request: GraphQueryRequest) -> QueryResultR
             edge_types = [EdgeType(t) for t in request.edge_types]
         except ValueError as e:
             raise HTTPException(
-                status_code=status.HTTP_400_BAD_REQUEST, detail=f"Invalid edge type: {e}"
+                status_code=status.HTTP_400_BAD_REQUEST,
+                detail=f"Invalid edge type: {e}",
             )
 
     query = GraphQuery(
@@ -657,7 +691,8 @@ async def get_neighbors(
             edge_type_enum = EdgeType(edge_type)
         except ValueError:
             raise HTTPException(
-                status_code=status.HTTP_400_BAD_REQUEST, detail=f"Invalid edge type: {edge_type}"
+                status_code=status.HTTP_400_BAD_REQUEST,
+                detail=f"Invalid edge type: {edge_type}",
             )
 
     neighbor_ids = graph.get_neighbors(node_id, edge_type_enum)

@@ -31,7 +31,9 @@ class TestPyMDPActiveInferenceFunctionality:
         self.C = utils.obj_array_uniform(self.num_observations)
 
         # Create agent
-        self.agent = PyMDPAgent(A=self.A, B=self.B, C=self.C, policy_len=3, inference_horizon=1)
+        self.agent = PyMDPAgent(
+            A=self.A, B=self.B, C=self.C, policy_len=3, inference_horizon=1
+        )
 
     def test_pymdp_belief_state_updates_with_real_data(self):
         """Test belief state updates work with real observations."""
@@ -45,13 +47,21 @@ class TestPyMDPActiveInferenceFunctionality:
         self.agent.infer_states(obs)
 
         # Verify belief state has changed
-        for i, (initial, updated) in enumerate(zip(initial_beliefs, self.agent.qs)):
-            assert not np.allclose(initial, updated), f"Belief state {i} did not update"
+        for i, (initial, updated) in enumerate(
+            zip(initial_beliefs, self.agent.qs)
+        ):
+            assert not np.allclose(
+                initial, updated
+            ), f"Belief state {i} did not update"
 
         # Verify beliefs are valid probability distributions
         for i, qs in enumerate(self.agent.qs):
-            assert np.allclose(np.sum(qs), 1.0), f"Belief state {i} is not normalized"
-            assert np.all(qs >= 0), f"Belief state {i} has negative probabilities"
+            assert np.allclose(
+                np.sum(qs), 1.0
+            ), f"Belief state {i} is not normalized"
+            assert np.all(
+                qs >= 0
+            ), f"Belief state {i} has negative probabilities"
 
     def test_pymdp_policy_computation_executes_properly(self):
         """Test policy computation and Expected Free Energy calculations."""
@@ -63,7 +73,9 @@ class TestPyMDPActiveInferenceFunctionality:
         self.agent.infer_policies()
 
         # Verify policies were computed
-        assert hasattr(self.agent, "G"), "Expected Free Energy (G) not computed"
+        assert hasattr(
+            self.agent, "G"
+        ), "Expected Free Energy (G) not computed"
         assert self.agent.G is not None, "G values are None"
         assert len(self.agent.G) > 0, "No policies evaluated"
 
@@ -72,8 +84,12 @@ class TestPyMDPActiveInferenceFunctionality:
 
         # Verify policy probabilities
         assert hasattr(self.agent, "q_pi"), "Policy probabilities not computed"
-        assert np.allclose(np.sum(self.agent.q_pi), 1.0), "Policy probabilities not normalized"
-        assert np.all(self.agent.q_pi >= 0), "Policy probabilities are negative"
+        assert np.allclose(
+            np.sum(self.agent.q_pi), 1.0
+        ), "Policy probabilities not normalized"
+        assert np.all(
+            self.agent.q_pi >= 0
+        ), "Policy probabilities are negative"
 
     def test_pymdp_action_selection_operates_correctly(self):
         """Test action selection produces valid actions."""
@@ -88,12 +104,18 @@ class TestPyMDPActiveInferenceFunctionality:
         action = self.agent.sample_action()
 
         # Verify action is valid
-        assert isinstance(action, (list, np.ndarray)), "Action is not list or array"
-        assert len(action) == len(self.num_controls), "Action dimensionality incorrect"
+        assert isinstance(
+            action, (list, np.ndarray)
+        ), "Action is not list or array"
+        assert len(action) == len(
+            self.num_controls
+        ), "Action dimensionality incorrect"
 
         # Verify action values are within valid range
         for i, (act, num_ctrl) in enumerate(zip(action, self.num_controls)):
-            assert 0 <= act < num_ctrl, f"Action {i} value {act} out of range [0, {num_ctrl})"
+            assert (
+                0 <= act < num_ctrl
+            ), f"Action {i} value {act} out of range [0, {num_ctrl})"
 
     def test_pymdp_full_inference_cycle(self):
         """Test complete inference cycle: observe -> infer states -> infer policies -> act."""
@@ -117,37 +139,58 @@ class TestPyMDPActiveInferenceFunctionality:
             actions_taken.append(action)
 
         # Verify we got valid actions for all observations
-        assert len(actions_taken) == len(observations_sequence), "Missing actions"
+        assert len(actions_taken) == len(
+            observations_sequence
+        ), "Missing actions"
 
         # Verify beliefs evolved over time
         for t in range(1, len(beliefs_history)):
             for i in range(len(beliefs_history[t])):
                 # At least some beliefs should change over time
-                if not np.allclose(beliefs_history[t - 1][i], beliefs_history[t][i], atol=1e-6):
+                if not np.allclose(
+                    beliefs_history[t - 1][i], beliefs_history[t][i], atol=1e-6
+                ):
                     break
             else:
                 # If we get here, no beliefs changed at all between timesteps
-                pytest.fail(f"Beliefs did not evolve between timesteps {t - 1} and {t}")
+                pytest.fail(
+                    f"Beliefs did not evolve between timesteps {t - 1} and {t}"
+                )
 
     def test_pymdp_with_different_model_configurations(self):
         """Test PyMDP works with various model configurations."""
         test_configs = [
             {"num_states": [2], "num_observations": [2], "num_controls": [2]},
-            {"num_states": [4, 2], "num_observations": [3, 4], "num_controls": [3, 2]},
-            {"num_states": [5, 3, 2], "num_observations": [4, 3, 3], "num_controls": [3, 2, 2]},
+            {
+                "num_states": [4, 2],
+                "num_observations": [3, 4],
+                "num_controls": [3, 2],
+            },
+            {
+                "num_states": [5, 3, 2],
+                "num_observations": [4, 3, 3],
+                "num_controls": [3, 2, 2],
+            },
         ]
 
         for config in test_configs:
             # Create generative model
-            A = utils.random_A_matrix(config["num_observations"], config["num_states"])
-            B = utils.random_B_matrix(config["num_states"], config["num_controls"])
+            A = utils.random_A_matrix(
+                config["num_observations"], config["num_states"]
+            )
+            B = utils.random_B_matrix(
+                config["num_states"], config["num_controls"]
+            )
             C = utils.obj_array_uniform(config["num_observations"])
 
             # Create agent
             agent = PyMDPAgent(A=A, B=B, C=C)
 
             # Test inference cycle
-            obs = [np.random.randint(0, num_obs) for num_obs in config["num_observations"]]
+            obs = [
+                np.random.randint(0, num_obs)
+                for num_obs in config["num_observations"]
+            ]
 
             agent.infer_states(obs)
             agent.infer_policies()
@@ -190,7 +233,9 @@ class TestPyMDPActiveInferenceFunctionality:
 
         # Verify same beliefs (within numerical precision)
         for b1, b2 in zip(beliefs1, beliefs2):
-            assert np.allclose(b1, b2, atol=1e-10), "PyMDP inference not deterministic"
+            assert np.allclose(
+                b1, b2, atol=1e-10
+            ), "PyMDP inference not deterministic"
 
     def test_pymdp_memory_and_performance_characteristics(self):
         """Test PyMDP memory usage and performance characteristics."""
@@ -233,19 +278,31 @@ class TestPyMDPActiveInferenceFunctionality:
         memory_used = memory_after - memory_before
 
         # These are sanity checks, not hard requirements
-        assert avg_time_per_cycle < 5.0, f"Inference too slow: {avg_time_per_cycle:.3f}s per cycle"
-        assert memory_used < 100, f"Excessive memory usage: {memory_used:.1f}MB"
+        assert (
+            avg_time_per_cycle < 5.0
+        ), f"Inference too slow: {avg_time_per_cycle:.3f}s per cycle"
+        assert (
+            memory_used < 100
+        ), f"Excessive memory usage: {memory_used:.1f}MB"
 
-        print(f"Performance: {avg_time_per_cycle:.3f}s per cycle, {memory_used:.1f}MB memory")
+        print(
+            f"Performance: {avg_time_per_cycle:.3f}s per cycle, {memory_used:.1f}MB memory"
+        )
 
 
 def test_pymdp_import_and_basic_functionality():
     """Test PyMDP can be imported and basic functionality works."""
     # Test basic PyMDP utilities
     assert hasattr(pymdp, "utils"), "PyMDP utils module not available"
-    assert hasattr(utils, "random_A_matrix"), "random_A_matrix function not available"
-    assert hasattr(utils, "random_B_matrix"), "random_B_matrix function not available"
-    assert hasattr(utils, "obj_array_uniform"), "obj_array_uniform function not available"
+    assert hasattr(
+        utils, "random_A_matrix"
+    ), "random_A_matrix function not available"
+    assert hasattr(
+        utils, "random_B_matrix"
+    ), "random_B_matrix function not available"
+    assert hasattr(
+        utils, "obj_array_uniform"
+    ), "obj_array_uniform function not available"
 
     # Test basic matrix generation
     A = utils.random_A_matrix([2, 2], [3, 3])
@@ -257,8 +314,12 @@ def test_pymdp_import_and_basic_functionality():
     # Test agent creation
     agent = PyMDPAgent(A, B)
     assert hasattr(agent, "infer_states"), "Agent missing infer_states method"
-    assert hasattr(agent, "infer_policies"), "Agent missing infer_policies method"
-    assert hasattr(agent, "sample_action"), "Agent missing sample_action method"
+    assert hasattr(
+        agent, "infer_policies"
+    ), "Agent missing infer_policies method"
+    assert hasattr(
+        agent, "sample_action"
+    ), "Agent missing sample_action method"
 
 
 if __name__ == "__main__":

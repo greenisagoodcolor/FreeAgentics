@@ -73,7 +73,9 @@ class RBACTestCleanup:
 
             if user_count > 0 or token_count > 0:
                 if self.verbose:
-                    print(f"  Found {user_count} users and {token_count} tokens")
+                    print(
+                        f"  Found {user_count} users and {token_count} tokens"
+                    )
 
                 # Clear all test users and tokens
                 auth_manager.users.clear()
@@ -87,14 +89,20 @@ class RBACTestCleanup:
                     }
                 )
 
-                print(f"  ✅ Cleared {user_count} users and {token_count} tokens")
+                print(
+                    f"  ✅ Cleared {user_count} users and {token_count} tokens"
+                )
             else:
                 print("  ✅ No test users or tokens to clean up")
 
         except Exception as e:
             print(f"  ❌ Error cleaning auth manager: {e}")
             self.cleanup_log.append(
-                {"component": "auth_manager", "action": "error", "details": str(e)}
+                {
+                    "component": "auth_manager",
+                    "action": "error",
+                    "details": str(e),
+                }
             )
 
     def _cleanup_test_database(self):
@@ -134,7 +142,11 @@ class RBACTestCleanup:
         except Exception as e:
             print(f"  ❌ Error cleaning test database: {e}")
             self.cleanup_log.append(
-                {"component": "test_database", "action": "error", "details": str(e)}
+                {
+                    "component": "test_database",
+                    "action": "error",
+                    "details": str(e),
+                }
             )
 
     def _cleanup_temporary_files(self):
@@ -329,9 +341,13 @@ class RBACTestCleanup:
         # Check auth manager
         if AUTH_AVAILABLE:
             if len(auth_manager.users) > 0:
-                issues.append(f"Auth manager still has {len(auth_manager.users)} users")
+                issues.append(
+                    f"Auth manager still has {len(auth_manager.users)} users"
+                )
             if len(auth_manager.refresh_tokens) > 0:
-                issues.append(f"Auth manager still has {len(auth_manager.refresh_tokens)} tokens")
+                issues.append(
+                    f"Auth manager still has {len(auth_manager.refresh_tokens)} tokens"
+                )
 
         # Check for remaining temporary files
         temp_files = [
@@ -356,17 +372,26 @@ class RBACTestCleanup:
 
 def main():
     """Main function."""
-    parser = argparse.ArgumentParser(description="Clean up RBAC authorization matrix test data")
-    parser.add_argument(
-        "--force", "-f", action="store_true", help="Force cleanup without confirmation"
+    parser = argparse.ArgumentParser(
+        description="Clean up RBAC authorization matrix test data"
     )
-    parser.add_argument("--verbose", "-v", action="store_true", help="Verbose output")
+    parser.add_argument(
+        "--force",
+        "-f",
+        action="store_true",
+        help="Force cleanup without confirmation",
+    )
+    parser.add_argument(
+        "--verbose", "-v", action="store_true", help="Verbose output"
+    )
 
     args = parser.parse_args()
 
     # Confirm cleanup if not forced
     if not args.force:
-        response = input("Are you sure you want to clean up RBAC test data? (y/N): ")
+        response = input(
+            "Are you sure you want to clean up RBAC test data? (y/N): "
+        )
         if response.lower() not in ["y", "yes"]:
             print("Cleanup cancelled.")
             return

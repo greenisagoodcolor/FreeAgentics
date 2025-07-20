@@ -23,12 +23,10 @@ import redis.asyncio as aioredis
 from fastapi import FastAPI
 from httpx import AsyncClient
 
-from api.middleware.ddos_protection import (
-    DDoSProtectionMiddleware,
-)
+from api.middleware.ddos_protection import DDoSProtectionMiddleware
 from api.middleware.security_monitoring import SecurityMonitoringMiddleware
 from api.v1.auth import router as auth_router
-from auth.security_implementation import JWTHandler
+from auth.jwt_handler import jwt_handler as JWTHandler
 
 
 class TestAuthenticationBruteForce:
@@ -40,7 +38,9 @@ class TestAuthenticationBruteForce:
         app = FastAPI()
 
         # Add security middleware
-        app.add_middleware(DDoSProtectionMiddleware, redis_url="redis://localhost:6379")
+        app.add_middleware(
+            DDoSProtectionMiddleware, redis_url="redis://localhost:6379"
+        )
         app.add_middleware(SecurityMonitoringMiddleware)
 
         # Add auth routes
@@ -57,7 +57,9 @@ class TestAuthenticationBruteForce:
     @pytest.fixture
     async def redis_client(self):
         """Create Redis client for test verification."""
-        client = aioredis.Redis.from_url("redis://localhost:6379", decode_responses=True)
+        client = aioredis.Redis.from_url(
+            "redis://localhost:6379", decode_responses=True
+        )
 
         # Clear test keys
         keys = await client.keys("rate_limit:*")
@@ -87,7 +89,8 @@ class TestAuthenticationBruteForce:
         responses = []
         for password in passwords:
             response = await client.post(
-                "/api/v1/auth/login", json={"username": username, "password": password}
+                "/api/v1/auth/login",
+                json={"username": username, "password": password},
             )
             responses.append(response)
 
@@ -107,7 +110,10 @@ class TestAuthenticationBruteForce:
     async def test_password_brute_force_protection(self, client, redis_client):
         """Test protection against password brute forcing."""
         # Create a valid user
-        valid_user = {"email": "victim@example.com", "password": "correct_password_123"}
+        valid_user = {
+            "email": "victim@example.com",
+            "password": "correct_password_123",
+        }
 
         # Register the user
         await client.post("/api/v1/auth/register", json=valid_user)
@@ -129,14 +135,21 @@ class TestAuthenticationBruteForce:
         attack_results = []
         for pwd in common_passwords:
             response = await client.post(
-                "/api/v1/auth/login", json={"username": valid_user["email"], "password": pwd}
+                "/api/v1/auth/login",
+                json={"username": valid_user["email"], "password": pwd},
             )
             attack_results.append(
-                {"password": pwd, "status": response.status_code, "headers": dict(response.headers)}
+                {
+                    "password": pwd,
+                    "status": response.status_code,
+                    "headers": dict(response.headers),
+                }
             )
 
         # Verify protection activated
-        assert any(r["status"] == 429 for r in attack_results), "Rate limiting should activate"
+        assert any(
+            r["status"] == 429 for r in attack_results
+        ), "Rate limiting should activate"
 
         # Check progressive delays are applied
         retry_after_headers = [
@@ -153,7 +166,10 @@ class TestAuthenticationBruteForce:
     async def test_account_lockout_mechanisms(self, client, redis_client):
         """Test account lockout after excessive failed attempts."""
         # Setup test account
-        test_account = {"email": "lockout_test@example.com", "password": "secure_password_456"}
+        test_account = {
+            "email": "lockout_test@example.com",
+            "password": "secure_password_456",
+        }
 
         # Register account
         await client.post("/api/v1/auth/register", json=test_account)
@@ -165,7 +181,10 @@ class TestAuthenticationBruteForce:
         for i in range(15):
             response = await client.post(
                 "/api/v1/auth/login",
-                json={"username": test_account["email"], "password": f"wrong_password_{i}"},
+                json={
+                    "username": test_account["email"],
+                    "password": f"wrong_password_{i}",
+                },
             )
 
             if response.status_code == 429:
@@ -175,7 +194,9 @@ class TestAuthenticationBruteForce:
             failed_attempts += 1
 
         # Verify lockout triggered
-        assert lockout_triggered, "Account lockout should trigger after multiple failures"
+        assert (
+            lockout_triggered
+        ), "Account lockout should trigger after multiple failures"
         assert failed_attempts <= 5, "Lockout should trigger within 5 attempts"
 
         # Verify lockout persists even with correct password
@@ -183,10 +204,15 @@ class TestAuthenticationBruteForce:
 
         correct_pwd_response = await client.post(
             "/api/v1/auth/login",
-            json={"username": test_account["email"], "password": test_account["password"]},
+            json={
+                "username": test_account["email"],
+                "password": test_account["password"],
+            },
         )
 
-        assert correct_pwd_response.status_code == 429, "Lockout should persist"
+        assert (
+            correct_pwd_response.status_code == 429
+        ), "Lockout should persist"
 
     @pytest.mark.asyncio
     async def test_progressive_delays(self, client, redis_client):
@@ -220,7 +246,9 @@ class TestAuthenticationBruteForce:
 
         # Check if delays are non-decreasing
         for i in range(1, len(delays)):
-            assert delays[i] >= delays[i - 1], "Delays should increase or stay same"
+            assert (
+                delays[i] >= delays[i - 1]
+            ), "Delays should increase or stay same"
 
 
 class TestTokenBruteForce:
@@ -232,7 +260,9 @@ class TestTokenBruteForce:
         return JWTHandler()
 
     @pytest.mark.asyncio
-    async def test_jwt_token_brute_forcing(self, client, redis_client, jwt_handler):
+    async def test_jwt_token_brute_forcing(
+        self, client, redis_client, jwt_handler
+    ):
         """Test protection against JWT token brute forcing."""
         # Generate base valid token
         valid_payload = {
@@ -252,30 +282,40 @@ class TestTokenBruteForce:
             modified_payload["user_id"] = str(user_id)
 
             # Create token with wrong signature
-            forged_token = jwt.encode(modified_payload, "wrong_secret_key", algorithm="HS256")
+            forged_token = jwt.encode(
+                modified_payload, "wrong_secret_key", algorithm="HS256"
+            )
 
             response = await client.get(
-                "/api/v1/users/profile", headers={"Authorization": f"Bearer {forged_token}"}
+                "/api/v1/users/profile",
+                headers={"Authorization": f"Bearer {forged_token}"},
             )
 
             brute_force_attempts.append(response)
 
         # Check rate limiting activated
-        rate_limited = sum(1 for r in brute_force_attempts if r.status_code == 429)
-        assert rate_limited > 0, "Token brute force should trigger rate limiting"
+        rate_limited = sum(
+            1 for r in brute_force_attempts if r.status_code == 429
+        )
+        assert (
+            rate_limited > 0
+        ), "Token brute force should trigger rate limiting"
 
     @pytest.mark.asyncio
     async def test_api_key_enumeration(self, client, redis_client):
         """Test protection against API key enumeration attacks."""
         # Generate random API keys to test
         api_keys = [
-            "".join(random.choices(string.ascii_letters + string.digits, k=32)) for _ in range(50)
+            "".join(random.choices(string.ascii_letters + string.digits, k=32))
+            for _ in range(50)
         ]
 
         enumeration_results = []
 
         for key in api_keys:
-            response = await client.get("/api/v1/data", headers={"X-API-Key": key})
+            response = await client.get(
+                "/api/v1/data", headers={"X-API-Key": key}
+            )
 
             enumeration_results.append(
                 {
@@ -292,22 +332,28 @@ class TestTokenBruteForce:
         # Check for timing attack protection (responses should have similar timing)
         if len(enumeration_results) > 2:
             timings = [
-                enumeration_results[i + 1]["timestamp"] - enumeration_results[i]["timestamp"]
+                enumeration_results[i + 1]["timestamp"]
+                - enumeration_results[i]["timestamp"]
                 for i in range(len(enumeration_results) - 1)
                 if enumeration_results[i]["status"] != 429
             ]
 
             if timings:
                 avg_timing = sum(timings) / len(timings)
-                variance = sum((t - avg_timing) ** 2 for t in timings) / len(timings)
-                assert variance < 0.01, "Timing should be consistent to prevent timing attacks"
+                variance = sum((t - avg_timing) ** 2 for t in timings) / len(
+                    timings
+                )
+                assert (
+                    variance < 0.01
+                ), "Timing should be consistent to prevent timing attacks"
 
     @pytest.mark.asyncio
     async def test_session_token_guessing(self, client, redis_client):
         """Test protection against session token guessing."""
         # Create valid session
         login_response = await client.post(
-            "/api/v1/auth/login", json={"username": "valid@example.com", "password": "password123"}
+            "/api/v1/auth/login",
+            json={"username": "valid@example.com", "password": "password123"},
         )
 
         if login_response.status_code == 200:
@@ -324,16 +370,24 @@ class TestTokenBruteForce:
                 f"session_{i}_{random.randint(1000, 9999)}".encode()
             ).decode()
 
-            response = await client.get("/api/v1/users/me", cookies={"session_id": fake_session})
+            response = await client.get(
+                "/api/v1/users/me", cookies={"session_id": fake_session}
+            )
 
             guessing_attempts.append(response)
 
         # Verify protection activated
-        blocked_attempts = sum(1 for r in guessing_attempts if r.status_code == 429)
-        assert blocked_attempts > 90, "Session guessing should be heavily rate limited"
+        blocked_attempts = sum(
+            1 for r in guessing_attempts if r.status_code == 429
+        )
+        assert (
+            blocked_attempts > 90
+        ), "Session guessing should be heavily rate limited"
 
     @pytest.mark.asyncio
-    async def test_refresh_token_attacks(self, client, redis_client, jwt_handler):
+    async def test_refresh_token_attacks(
+        self, client, redis_client, jwt_handler
+    ):
         """Test protection against refresh token attacks."""
         # Generate valid refresh token
         valid_refresh = jwt_handler.create_refresh_token({"user_id": "123"})
@@ -351,8 +405,12 @@ class TestTokenBruteForce:
         assert reuse_attempts[0].status_code in [200, 401]
 
         # Check for rate limiting on repeated attempts
-        rate_limited = sum(1 for r in reuse_attempts[1:] if r.status_code == 429)
-        assert rate_limited > 0, "Refresh token reuse should trigger rate limiting"
+        rate_limited = sum(
+            1 for r in reuse_attempts[1:] if r.status_code == 429
+        )
+        assert (
+            rate_limited > 0
+        ), "Refresh token reuse should trigger rate limiting"
 
 
 class TestResourceEnumeration:
@@ -387,11 +445,17 @@ class TestResourceEnumeration:
 
         for directory in common_dirs:
             response = await client.get(f"/{directory}/")
-            enumeration_results.append({"path": directory, "status": response.status_code})
+            enumeration_results.append(
+                {"path": directory, "status": response.status_code}
+            )
 
         # Should rate limit after initial attempts
-        rate_limited = sum(1 for r in enumeration_results if r["status"] == 429)
-        assert rate_limited > len(common_dirs) // 2, "Directory enumeration should be rate limited"
+        rate_limited = sum(
+            1 for r in enumeration_results if r["status"] == 429
+        )
+        assert (
+            rate_limited > len(common_dirs) // 2
+        ), "Directory enumeration should be rate limited"
 
     @pytest.mark.asyncio
     async def test_file_enumeration(self, client, redis_client):
@@ -417,10 +481,17 @@ class TestResourceEnumeration:
             # Try multiple paths
             for path in ["", "config/", "data/", "../"]:
                 response = await client.get(f"/{path}{filename}")
-                file_attempts.append({"file": f"{path}{filename}", "status": response.status_code})
+                file_attempts.append(
+                    {
+                        "file": f"{path}{filename}",
+                        "status": response.status_code,
+                    }
+                )
 
         # Verify enumeration protection
-        successful = sum(1 for r in file_attempts if r["status"] not in [429, 403])
+        successful = sum(
+            1 for r in file_attempts if r["status"] not in [429, 403]
+        )
         assert successful < 5, "File enumeration should be blocked"
 
     @pytest.mark.asyncio
@@ -442,7 +513,14 @@ class TestResourceEnumeration:
 
         # Add GraphQL and other endpoints
         api_endpoints.extend(
-            ["/graphql", "/api/graphql", "/query", "/api/internal", "/api/debug", "/api/admin"]
+            [
+                "/graphql",
+                "/api/graphql",
+                "/query",
+                "/api/internal",
+                "/api/debug",
+                "/api/admin",
+            ]
         )
 
         discovery_results = []
@@ -458,7 +536,9 @@ class TestResourceEnumeration:
             )
 
         # Check rate limiting effectiveness
-        allowed_discoveries = sum(1 for r in discovery_results if r["status"] != 429)
+        allowed_discoveries = sum(
+            1 for r in discovery_results if r["status"] != 429
+        )
         assert allowed_discoveries < 10, "API discovery should be rate limited"
 
     @pytest.mark.asyncio
@@ -491,15 +571,27 @@ class TestResourceEnumeration:
 
         # Try different parameter combinations
         for param in param_names:
-            for value in ["1", "admin", "true", "../etc/passwd", "<script>alert(1)</script>"]:
+            for value in [
+                "1",
+                "admin",
+                "true",
+                "../etc/passwd",
+                "<script>alert(1)</script>",
+            ]:
                 response = await client.get(endpoint, params={param: value})
                 fuzzing_attempts.append(
-                    {"param": param, "value": value, "status": response.status_code}
+                    {
+                        "param": param,
+                        "value": value,
+                        "status": response.status_code,
+                    }
                 )
 
         # Verify fuzzing protection
         blocked = sum(1 for r in fuzzing_attempts if r["status"] == 429)
-        assert blocked > len(fuzzing_attempts) * 0.7, "Parameter fuzzing should trigger protection"
+        assert (
+            blocked > len(fuzzing_attempts) * 0.7
+        ), "Parameter fuzzing should trigger protection"
 
 
 class TestProtectionValidation:
@@ -530,7 +622,9 @@ class TestProtectionValidation:
         rate_limited = sum(1 for r in burst_responses if r.status_code == 429)
 
         # Should allow burst limit then rate limit
-        assert successful < 20, "Burst protection should limit successful requests"
+        assert (
+            successful < 20
+        ), "Burst protection should limit successful requests"
         assert rate_limited > 80, "Most requests should be rate limited"
         assert burst_duration < 5, "Rate limiting should be fast"
 
@@ -541,13 +635,19 @@ class TestProtectionValidation:
         for i in range(10):
             await client.post(
                 "/api/v1/auth/login",
-                json={"username": f"bot_{i}@example.com", "password": "password"},
+                json={
+                    "username": f"bot_{i}@example.com",
+                    "password": "password",
+                },
             )
 
         # Next request should require CAPTCHA
         response = await client.post(
             "/api/v1/auth/login",
-            json={"username": "legitimate@example.com", "password": "password"},
+            json={
+                "username": "legitimate@example.com",
+                "password": "password",
+            },
         )
 
         # Check for CAPTCHA requirement
@@ -572,7 +672,9 @@ class TestProtectionValidation:
         blocked_key = f"blocked:rate_limit:ip:{attack_ip}"
         ddos_key = f"ddos_blocked:{attack_ip}"
 
-        is_blocked = await redis_client.get(blocked_key) or await redis_client.get(ddos_key)
+        is_blocked = await redis_client.get(
+            blocked_key
+        ) or await redis_client.get(ddos_key)
         assert is_blocked is not None, "Suspicious IP should be blocked"
 
         # Verify block persists
@@ -595,16 +697,25 @@ class TestProtectionValidation:
             for _ in range(5):
                 response = await client.post(
                     "/api/v1/auth/login",
-                    json={"username": "target@example.com", "password": "guess"},
+                    json={
+                        "username": "target@example.com",
+                        "password": "guess",
+                    },
                     headers=headers,
                 )
-                attack_results.append({"ip": ip, "status": response.status_code})
+                attack_results.append(
+                    {"ip": ip, "status": response.status_code}
+                )
 
         # Analyze distributed attack handling
-        unique_ips_blocked = len(set(r["ip"] for r in attack_results if r["status"] == 429))
+        unique_ips_blocked = len(
+            set(r["ip"] for r in attack_results if r["status"] == 429)
+        )
 
         # Should detect pattern and block even distributed attacks
-        assert unique_ips_blocked > 10, "Distributed attack pattern should be detected"
+        assert (
+            unique_ips_blocked > 10
+        ), "Distributed attack pattern should be detected"
 
 
 class TestPerformanceImpact:
@@ -635,7 +746,9 @@ class TestPerformanceImpact:
 
         # Overhead should be minimal
         overhead = protected_avg - baseline_avg
-        assert overhead < 0.01, f"Protection overhead should be <10ms, got {overhead*1000}ms"
+        assert (
+            overhead < 0.01
+        ), f"Protection overhead should be <10ms, got {overhead*1000}ms"
 
     @pytest.mark.asyncio
     async def test_memory_usage_under_attack(self, client, redis_client):
@@ -657,7 +770,10 @@ class TestPerformanceImpact:
                 task = tg.create_task(
                     client.post(
                         "/api/v1/auth/login",
-                        json={"username": f"attacker_{i}@example.com", "password": "password"},
+                        json={
+                            "username": f"attacker_{i}@example.com",
+                            "password": "password",
+                        },
                     )
                 )
                 attack_tasks.append(task)
@@ -702,7 +818,9 @@ class TestPerformanceImpact:
 
         # Response time should not degrade significantly
         degradation = attack_avg / normal_avg
-        assert degradation < 2, f"Response time degradation should be <2x, got {degradation}x"
+        assert (
+            degradation < 2
+        ), f"Response time degradation should be <2x, got {degradation}x"
 
     @pytest.mark.asyncio
     async def test_system_resource_consumption(self, client, redis_client):
@@ -721,7 +839,10 @@ class TestPerformanceImpact:
         while time.time() - start_time < attack_duration:
             response = await client.post(
                 "/api/v1/auth/login",
-                json={"username": f"cpu_test_{request_count}@example.com", "password": "wrong"},
+                json={
+                    "username": f"cpu_test_{request_count}@example.com",
+                    "password": "wrong",
+                },
             )
             request_count += 1
 
@@ -729,11 +850,15 @@ class TestPerformanceImpact:
         attack_cpu = psutil.cpu_percent(interval=1)
 
         # CPU usage should remain reasonable
-        assert attack_cpu < 80, f"CPU usage during attack should be <80%, got {attack_cpu}%"
+        assert (
+            attack_cpu < 80
+        ), f"CPU usage during attack should be <80%, got {attack_cpu}%"
 
         # Verify request throughput
         requests_per_second = request_count / attack_duration
-        assert requests_per_second > 10, "Should handle >10 requests/second even under attack"
+        assert (
+            requests_per_second > 10
+        ), "Should handle >10 requests/second even under attack"
 
     async def _background_attack(self, client):
         """Helper to run background attack."""
@@ -771,13 +896,18 @@ class TestAdvancedProtection:
         # Attempt credential stuffing
         for email, password in leaked_credentials * 10:  # Try each 10 times
             response = await client.post(
-                "/api/v1/auth/login", json={"username": email, "password": password}
+                "/api/v1/auth/login",
+                json={"username": email, "password": password},
             )
-            stuffing_results.append({"email": email, "status": response.status_code})
+            stuffing_results.append(
+                {"email": email, "status": response.status_code}
+            )
 
         # Should detect pattern and block
         blocked = sum(1 for r in stuffing_results if r["status"] == 429)
-        assert blocked > len(stuffing_results) * 0.8, "Credential stuffing should be detected"
+        assert (
+            blocked > len(stuffing_results) * 0.8
+        ), "Credential stuffing should be detected"
 
     @pytest.mark.asyncio
     async def test_slow_brute_force_detection(self, client, redis_client):
@@ -786,7 +916,8 @@ class TestAdvancedProtection:
 
         # Register target
         await client.post(
-            "/api/v1/auth/register", json={"email": target_email, "password": "correct_password"}
+            "/api/v1/auth/register",
+            json={"email": target_email, "password": "correct_password"},
         )
 
         # Slow attack - one attempt per minute
@@ -794,7 +925,8 @@ class TestAdvancedProtection:
 
         for i in range(10):
             response = await client.post(
-                "/api/v1/auth/login", json={"username": target_email, "password": f"guess_{i}"}
+                "/api/v1/auth/login",
+                json={"username": target_email, "password": f"guess_{i}"},
             )
             slow_attempts.append(response)
 
@@ -807,7 +939,8 @@ class TestAdvancedProtection:
 
         # Check if account protection triggered
         final_response = await client.post(
-            "/api/v1/auth/login", json={"username": target_email, "password": "correct_password"}
+            "/api/v1/auth/login",
+            json={"username": target_email, "password": "correct_password"},
         )
 
         # Account should have additional protection
@@ -826,10 +959,17 @@ class TestAdvancedProtection:
             {
                 "method": "POST",
                 "url": "/api/v1/auth/login",
-                "data": {"username": "victim@example.com", "password": "guess"},
+                "data": {
+                    "username": "victim@example.com",
+                    "password": "guess",
+                },
             },
             # API key guessing
-            {"method": "GET", "url": "/api/v1/data", "headers": {"X-API-Key": "guess_key_123"}},
+            {
+                "method": "GET",
+                "url": "/api/v1/data",
+                "headers": {"X-API-Key": "guess_key_123"},
+            },
             # Token manipulation
             {
                 "method": "GET",
@@ -846,10 +986,14 @@ class TestAdvancedProtection:
         async with asyncio.TaskGroup() as tg:
             for vector in attack_vectors * 25:
                 if vector["method"] == "POST":
-                    task = tg.create_task(client.post(vector["url"], json=vector.get("data", {})))
+                    task = tg.create_task(
+                        client.post(vector["url"], json=vector.get("data", {}))
+                    )
                 else:
                     task = tg.create_task(
-                        client.get(vector["url"], headers=vector.get("headers", {}))
+                        client.get(
+                            vector["url"], headers=vector.get("headers", {})
+                        )
                     )
                 tasks.append(task)
 
@@ -858,7 +1002,9 @@ class TestAdvancedProtection:
         total_blocked = sum(1 for r in responses if r.status_code == 429)
 
         # Should detect and block multi-vector attack
-        assert total_blocked > len(responses) * 0.8, "Multi-vector attack should be blocked"
+        assert (
+            total_blocked > len(responses) * 0.8
+        ), "Multi-vector attack should be blocked"
 
     @pytest.mark.asyncio
     async def test_intelligent_pattern_detection(self, client, redis_client):
@@ -879,7 +1025,10 @@ class TestAdvancedProtection:
             for attempt in attempts:
                 response = await client.post(
                     "/api/v1/auth/login",
-                    json={"username": f"{attempt}@example.com", "password": attempt},
+                    json={
+                        "username": f"{attempt}@example.com",
+                        "password": attempt,
+                    },
                 )
                 results.append(response.status_code)
 
@@ -888,7 +1037,9 @@ class TestAdvancedProtection:
         # Should detect patterns and increase protection
         for pattern_name, results in pattern_results.items():
             blocked = sum(1 for status in results if status == 429)
-            assert blocked > 0, f"Pattern '{pattern_name}' should trigger protection"
+            assert (
+                blocked > 0
+            ), f"Pattern '{pattern_name}' should trigger protection"
 
 
 # Helper functions for test data generation
@@ -912,4 +1063,6 @@ def generate_random_user_agent():
 
 if __name__ == "__main__":
     # Run tests with detailed output
-    pytest.main([__file__, "-v", "--tb=short", "--asyncio-mode=strict", "-k", "test_"])
+    pytest.main(
+        [__file__, "-v", "--tb=short", "--asyncio-mode=strict", "-k", "test_"]
+    )

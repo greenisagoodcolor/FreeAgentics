@@ -2,7 +2,7 @@ import Image, { ImageProps } from "next/image";
 import { useState } from "react";
 import { cn } from "@/lib/utils";
 
-interface OptimizedImageProps extends Omit<ImageProps, "onError"> {
+interface OptimizedImageProps extends ImageProps {
   fallbackSrc?: string;
   aspectRatio?: number;
   showLoader?: boolean;

@@ -21,7 +21,9 @@ from websocket.resource_manager import AgentResourceManager, ResourceState
 
 logger = logging.getLogger(__name__)
 
-router = APIRouter(prefix="/monitoring/websocket", tags=["websocket-monitoring"])
+router = APIRouter(
+    prefix="/monitoring/websocket", tags=["websocket-monitoring"]
+)
 
 
 class MetricSnapshot(BaseModel):
@@ -40,12 +42,16 @@ class TimeSeriesMetric:
         self.window_minutes = window_minutes
         self.data: deque[MetricSnapshot] = deque(maxlen=max_size)
 
-    def add_value(self, value: float, metadata: Optional[Dict[str, Any]] = None):
+    def add_value(
+        self, value: float, metadata: Optional[Dict[str, Any]] = None
+    ):
         """Add a new value to the time series."""
         snapshot = MetricSnapshot(value=value, metadata=metadata or {})
         self.data.append(snapshot)
 
-    def get_recent(self, minutes: Optional[int] = None) -> List[MetricSnapshot]:
+    def get_recent(
+        self, minutes: Optional[int] = None
+    ) -> List[MetricSnapshot]:
         """Get recent data points within the specified time window."""
         if minutes is None:
             minutes = self.window_minutes
@@ -57,7 +63,13 @@ class TimeSeriesMetric:
         """Get statistics for recent data."""
         recent = self.get_recent(minutes)
         if not recent:
-            return {"min": 0.0, "max": 0.0, "avg": 0.0, "current": 0.0, "count": 0}
+            return {
+                "min": 0.0,
+                "max": 0.0,
+                "avg": 0.0,
+                "current": 0.0,
+                "count": 0,
+            }
 
         values = [s.value for s in recent]
         return {
@@ -72,7 +84,11 @@ class TimeSeriesMetric:
 class ConnectionPoolMonitor:
     """Monitors WebSocket connection pool metrics."""
 
-    def __init__(self, pool: WebSocketConnectionPool, resource_manager: AgentResourceManager):
+    def __init__(
+        self,
+        pool: WebSocketConnectionPool,
+        resource_manager: AgentResourceManager,
+    ):
         self.pool = pool
         self.resource_manager = resource_manager
 
@@ -132,20 +148,33 @@ class ConnectionPoolMonitor:
         pool_metrics = self.pool.get_metrics()
         self.pool_size.add_value(pool_metrics.get("pool_size", 0))
         self.pool_utilization.add_value(pool_metrics.get("utilization", 0))
-        self.available_connections.add_value(pool_metrics.get("available_connections", 0))
-        self.in_use_connections.add_value(pool_metrics.get("in_use_connections", 0))
-        self.acquisition_wait_time.add_value(pool_metrics.get("average_wait_time", 0))
-        self.health_check_failures.add_value(pool_metrics.get("health_check_failures", 0))
+        self.available_connections.add_value(
+            pool_metrics.get("available_connections", 0)
+        )
+        self.in_use_connections.add_value(
+            pool_metrics.get("in_use_connections", 0)
+        )
+        self.acquisition_wait_time.add_value(
+            pool_metrics.get("average_wait_time", 0)
+        )
+        self.health_check_failures.add_value(
+            pool_metrics.get("health_check_failures", 0)
+        )
 
         # Resource manager metrics
         resource_metrics = self.resource_manager.get_metrics()
         self.total_agents.add_value(resource_metrics.get("total_agents", 0))
         self.active_agents.add_value(resource_metrics.get("active_agents", 0))
-        self.memory_usage.add_value(resource_metrics.get("total_memory_usage", 0))
+        self.memory_usage.add_value(
+            resource_metrics.get("total_memory_usage", 0)
+        )
         self.cpu_usage.add_value(resource_metrics.get("total_cpu_usage", 0))
 
     def log_event(
-        self, event_type: str, description: str, metadata: Optional[Dict[str, Any]] = None
+        self,
+        event_type: str,
+        description: str,
+        metadata: Optional[Dict[str, Any]] = None,
     ):
         """Log a monitoring event."""
         event = {
@@ -177,18 +206,30 @@ class ConnectionPoolMonitor:
                 "size": pool_metrics.get("pool_size", 0),
                 "available": pool_metrics.get("available_connections", 0),
                 "in_use": pool_metrics.get("in_use_connections", 0),
-                "utilization": round(pool_metrics.get("utilization", 0) * 100, 1),
-                "total_acquisitions": pool_metrics.get("total_acquisitions", 0),
-                "failed_acquisitions": pool_metrics.get("failed_acquisitions", 0),
+                "utilization": round(
+                    pool_metrics.get("utilization", 0) * 100, 1
+                ),
+                "total_acquisitions": pool_metrics.get(
+                    "total_acquisitions", 0
+                ),
+                "failed_acquisitions": pool_metrics.get(
+                    "failed_acquisitions", 0
+                ),
             },
             "resources": {
                 "total_agents": resource_metrics.get("total_agents", 0),
                 "active_agents": resource_metrics.get("active_agents", 0),
                 "total_memory_mb": round(
-                    resource_metrics.get("total_memory_usage", 0) / (1024 * 1024), 2
+                    resource_metrics.get("total_memory_usage", 0)
+                    / (1024 * 1024),
+                    2,
                 ),
-                "total_cpu_cores": round(resource_metrics.get("total_cpu_usage", 0), 2),
-                "connections_in_use": resource_metrics.get("connections_in_use", 0),
+                "total_cpu_cores": round(
+                    resource_metrics.get("total_cpu_usage", 0), 2
+                ),
+                "connections_in_use": resource_metrics.get(
+                    "connections_in_use", 0
+                ),
             },
         }
 
@@ -218,7 +259,10 @@ class ConnectionPoolMonitor:
             },
             "memory_usage_mb": {
                 "data": [
-                    {"t": s.timestamp.isoformat(), "v": s.value / (1024 * 1024)}
+                    {
+                        "t": s.timestamp.isoformat(),
+                        "v": s.value / (1024 * 1024),
+                    }
                     for s in self.memory_usage.get_recent(30)
                 ],
                 "stats": {
@@ -243,7 +287,9 @@ class ConnectionPoolMonitor:
                         {
                             "agent_id": resource["agent_id"],
                             "state": resource["state"],
-                            "memory_mb": round(resource["memory_usage"] / (1024 * 1024), 2),
+                            "memory_mb": round(
+                                resource["memory_usage"] / (1024 * 1024), 2
+                            ),
                             "cpu": round(resource["cpu_usage"], 2),
                         }
                     )
@@ -311,7 +357,9 @@ class ConnectionPoolMonitor:
 monitor: Optional[ConnectionPoolMonitor] = None
 
 
-def initialize_monitor(pool: WebSocketConnectionPool, resource_manager: AgentResourceManager):
+def initialize_monitor(
+    pool: WebSocketConnectionPool, resource_manager: AgentResourceManager
+):
     """Initialize the global monitor instance."""
     global monitor
     monitor = ConnectionPoolMonitor(pool, resource_manager)
@@ -326,7 +374,9 @@ def initialize_monitor(pool: WebSocketConnectionPool, resource_manager: AgentRes
 async def get_monitoring_dashboard():
     """Get comprehensive monitoring dashboard data."""
     if not monitor:
-        raise HTTPException(status_code=503, detail="Monitoring not initialized")
+        raise HTTPException(
+            status_code=503, detail="Monitoring not initialized"
+        )
 
     return monitor.get_dashboard_data()
 
@@ -335,7 +385,9 @@ async def get_monitoring_dashboard():
 async def get_current_metrics():
     """Get current metrics snapshot."""
     if not monitor:
-        raise HTTPException(status_code=503, detail="Monitoring not initialized")
+        raise HTTPException(
+            status_code=503, detail="Monitoring not initialized"
+        )
 
     summary = monitor._get_summary()
     health = monitor._get_health_status()
@@ -352,7 +404,9 @@ async def get_current_metrics():
 async def get_connection_details():
     """Get detailed information about all connections."""
     if not monitor:
-        raise HTTPException(status_code=503, detail="Monitoring not initialized")
+        raise HTTPException(
+            status_code=503, detail="Monitoring not initialized"
+        )
 
     return {
         "connections": monitor._get_connection_details(),
@@ -364,7 +418,9 @@ async def get_connection_details():
 async def get_resource_details():
     """Get detailed information about all agent resources."""
     if not monitor:
-        raise HTTPException(status_code=503, detail="Monitoring not initialized")
+        raise HTTPException(
+            status_code=503, detail="Monitoring not initialized"
+        )
 
     resources = monitor._get_resource_details()
 
@@ -376,14 +432,20 @@ async def get_resource_details():
             by_state[state] = []
         by_state[state].append(resource)
 
-    return {"resources": resources, "by_state": by_state, "total": len(resources)}
+    return {
+        "resources": resources,
+        "by_state": by_state,
+        "total": len(resources),
+    }
 
 
 @router.get("/timeseries/{metric}")
 async def get_metric_timeseries(metric: str, minutes: int = 30):
     """Get time series data for a specific metric."""
     if not monitor:
-        raise HTTPException(status_code=503, detail="Monitoring not initialized")
+        raise HTTPException(
+            status_code=503, detail="Monitoring not initialized"
+        )
 
     valid_metrics = [
         "pool_size",
@@ -400,7 +462,8 @@ async def get_metric_timeseries(metric: str, minutes: int = 30):
 
     if metric not in valid_metrics:
         raise HTTPException(
-            status_code=400, detail=f"Invalid metric. Valid metrics: {valid_metrics}"
+            status_code=400,
+            detail=f"Invalid metric. Valid metrics: {valid_metrics}",
         )
 
     metric_obj = getattr(monitor, metric)
@@ -420,7 +483,9 @@ async def get_metric_timeseries(metric: str, minutes: int = 30):
 async def get_recent_events(limit: int = 100):
     """Get recent monitoring events."""
     if not monitor:
-        raise HTTPException(status_code=503, detail="Monitoring not initialized")
+        raise HTTPException(
+            status_code=503, detail="Monitoring not initialized"
+        )
 
     events = list(monitor.events)
     if limit:
@@ -431,15 +496,22 @@ async def get_recent_events(limit: int = 100):
 
 @router.post("/events")
 async def log_monitoring_event(
-    event_type: str, description: str, metadata: Optional[Dict[str, Any]] = None
+    event_type: str,
+    description: str,
+    metadata: Optional[Dict[str, Any]] = None,
 ):
     """Log a custom monitoring event."""
     if not monitor:
-        raise HTTPException(status_code=503, detail="Monitoring not initialized")
+        raise HTTPException(
+            status_code=503, detail="Monitoring not initialized"
+        )
 
     monitor.log_event(event_type, description, metadata)
 
-    return {"status": "event_logged", "timestamp": datetime.utcnow().isoformat()}
+    return {
+        "status": "event_logged",
+        "timestamp": datetime.utcnow().isoformat(),
+    }
 
 
 # Performance benchmarking endpoint
@@ -472,7 +544,9 @@ class BenchmarkResult(BaseModel):
 async def run_performance_benchmark(request: BenchmarkRequest):
     """Run a performance benchmark on the connection pool."""
     if not monitor:
-        raise HTTPException(status_code=503, detail="Monitoring not initialized")
+        raise HTTPException(
+            status_code=503, detail="Monitoring not initialized"
+        )
 
     logger.info(
         f"Starting benchmark: {request.concurrent_agents} agents for {request.duration_seconds}s"
@@ -495,7 +569,9 @@ async def run_performance_benchmark(request: BenchmarkRequest):
         try:
             # Allocate resources
             acq_start = time.time()
-            resource = await monitor.resource_manager.allocate_resource(agent_id)
+            resource = await monitor.resource_manager.allocate_resource(
+                agent_id
+            )
             acquisition_times.append(time.time() - acq_start)
 
             # Activate agent
@@ -521,7 +597,8 @@ async def run_performance_benchmark(request: BenchmarkRequest):
                     peak_pool_size = current_pool_size
 
                 current_memory = sum(
-                    r.memory_usage for r in monitor.resource_manager._resources.values()
+                    r.memory_usage
+                    for r in monitor.resource_manager._resources.values()
                 )
                 if current_memory > peak_memory:
                     peak_memory = current_memory
@@ -552,7 +629,9 @@ async def run_performance_benchmark(request: BenchmarkRequest):
         successful_acquisitions=len(acquisition_times),
         failed_acquisitions=len(errors),
         avg_acquisition_time=(
-            sum(acquisition_times) / len(acquisition_times) if acquisition_times else 0
+            sum(acquisition_times) / len(acquisition_times)
+            if acquisition_times
+            else 0
         ),
         avg_message_latency=duration / message_count if message_count else 0,
         peak_pool_size=peak_pool_size,
@@ -564,9 +643,15 @@ async def run_performance_benchmark(request: BenchmarkRequest):
     monitor.log_event(
         "benchmark_completed",
         f"Benchmark with {request.concurrent_agents} agents",
-        {"duration": duration, "messages": message_count, "errors": len(errors)},
+        {
+            "duration": duration,
+            "messages": message_count,
+            "errors": len(errors),
+        },
     )
 
-    logger.info(f"Benchmark completed: {message_count} messages in {duration:.2f}s")
+    logger.info(
+        f"Benchmark completed: {message_count} messages in {duration:.2f}s"
+    )
 
     return result

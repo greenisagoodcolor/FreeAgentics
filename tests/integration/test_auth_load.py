@@ -27,11 +27,7 @@ import psutil
 import pytest
 from fastapi import HTTPException
 
-from auth.security_implementation import (
-    AuthenticationManager,
-    User,
-    UserRole,
-)
+from auth.security_implementation import AuthenticationManager, User, UserRole
 from auth.security_logging import security_auditor
 
 
@@ -97,11 +93,17 @@ class LoadTestMetrics:
             "min_response_time": min(self.response_times, default=0),
             "max_response_time": max(self.response_times, default=0),
             "requests_per_second": (
-                self.total_requests / self.test_duration if self.test_duration > 0 else 0
+                self.total_requests / self.test_duration
+                if self.test_duration > 0
+                else 0
             ),
             "error_types": dict(self.error_types),
-            "avg_memory_mb": statistics.mean(self.memory_usage) if self.memory_usage else 0,
-            "avg_cpu_percent": statistics.mean(self.cpu_usage) if self.cpu_usage else 0,
+            "avg_memory_mb": statistics.mean(self.memory_usage)
+            if self.memory_usage
+            else 0,
+            "avg_cpu_percent": statistics.mean(self.cpu_usage)
+            if self.cpu_usage
+            else 0,
         }
 
 
@@ -126,14 +128,20 @@ class TestAuthenticationLoadTesting:
                 username=f"loaduser{i}",
                 email=f"loadtest{i}@example.com",
                 role=random.choice(
-                    [UserRole.RESEARCHER, UserRole.OBSERVER, UserRole.AGENT_MANAGER]
+                    [
+                        UserRole.RESEARCHER,
+                        UserRole.OBSERVER,
+                        UserRole.AGENT_MANAGER,
+                    ]
                 ),
                 created_at=datetime.now(timezone.utc),
             )
             # Register user
             self.auth_manager.users[user.username] = {
                 "user": user,
-                "password_hash": self.auth_manager.hash_password(f"password{i}"),
+                "password_hash": self.auth_manager.hash_password(
+                    f"password{i}"
+                ),
             }
             users.append(user)
         return users
@@ -142,13 +150,19 @@ class TestAuthenticationLoadTesting:
         """Monitor CPU and memory usage during test."""
         while not stop_event.is_set():
             try:
-                self.metrics.memory_usage.append(self.process.memory_info().rss / 1024 / 1024)  # MB
-                self.metrics.cpu_usage.append(self.process.cpu_percent(interval=0.1))
-            except:
+                self.metrics.memory_usage.append(
+                    self.process.memory_info().rss / 1024 / 1024
+                )  # MB
+                self.metrics.cpu_usage.append(
+                    self.process.cpu_percent(interval=0.1)
+                )
+            except Exception:
                 pass
             time.sleep(0.5)
 
-    def _simulate_user_session(self, user: User, duration: float = 5.0) -> Tuple[int, int]:
+    def _simulate_user_session(
+        self, user: User, duration: float = 5.0
+    ) -> Tuple[int, int]:
         """Simulate a complete user session."""
         successes = 0
         failures = 0
@@ -164,7 +178,9 @@ class TestAuthenticationLoadTesting:
 
             while time.time() < end_time:
                 # Random action
-                action = random.choice(["verify", "verify", "verify", "refresh", "revoke"])
+                action = random.choice(
+                    ["verify", "verify", "verify", "refresh", "revoke"]
+                )
 
                 try:
                     start = time.time()
@@ -172,14 +188,21 @@ class TestAuthenticationLoadTesting:
                     if action == "verify":
                         self.auth_manager.verify_token(access_token)
                     elif action == "refresh":
-                        access_token, refresh_token = self.auth_manager.refresh_access_token(
+                        (
+                            access_token,
+                            refresh_token,
+                        ) = self.auth_manager.refresh_access_token(
                             refresh_token
                         )
                     elif action == "revoke":
                         self.auth_manager.logout(access_token)
                         # Get new tokens after logout
-                        access_token = self.auth_manager.create_access_token(user)
-                        refresh_token = self.auth_manager.create_refresh_token(user)
+                        access_token = self.auth_manager.create_access_token(
+                            user
+                        )
+                        refresh_token = self.auth_manager.create_refresh_token(
+                            user
+                        )
 
                     self.metrics.add_response_time(time.time() - start)
                     successes += 1
@@ -217,15 +240,21 @@ class TestAuthenticationLoadTesting:
 
         # Start resource monitoring
         stop_monitor = threading.Event()
-        monitor_thread = threading.Thread(target=self._monitor_resources, args=(stop_monitor,))
+        monitor_thread = threading.Thread(
+            target=self._monitor_resources, args=(stop_monitor,)
+        )
         monitor_thread.start()
 
         # Run concurrent user sessions
         start_time = time.time()
 
-        with concurrent.futures.ThreadPoolExecutor(max_workers=num_users) as executor:
+        with concurrent.futures.ThreadPoolExecutor(
+            max_workers=num_users
+        ) as executor:
             futures = [
-                executor.submit(self._simulate_user_session, user, session_duration)
+                executor.submit(
+                    self._simulate_user_session, user, session_duration
+                )
                 for user in users
             ]
 
@@ -236,7 +265,9 @@ class TestAuthenticationLoadTesting:
                     self.metrics.failed_requests += failures
                     self.metrics.total_requests += successes + failures
                 except Exception as e:
-                    self.metrics.add_error(f"Session error: {type(e).__name__}")
+                    self.metrics.add_error(
+                        f"Session error: {type(e).__name__}"
+                    )
 
         self.metrics.test_duration = time.time() - start_time
 
@@ -248,7 +279,9 @@ class TestAuthenticationLoadTesting:
         stats = self.metrics.calculate_statistics()
 
         # Performance assertions
-        assert stats["success_rate"] > 95, f"Success rate too low: {stats['success_rate']}%"
+        assert (
+            stats["success_rate"] > 95
+        ), f"Success rate too low: {stats['success_rate']}%"
         assert (
             stats["avg_response_time"] < 0.1
         ), f"Average response time too high: {stats['avg_response_time']}s"
@@ -282,7 +315,9 @@ class TestAuthenticationLoadTesting:
 
         start_time = time.time()
 
-        with concurrent.futures.ThreadPoolExecutor(max_workers=num_threads) as executor:
+        with concurrent.futures.ThreadPoolExecutor(
+            max_workers=num_threads
+        ) as executor:
             futures = [
                 executor.submit(create_tokens, users[i], tokens_per_thread)
                 for i in range(num_threads)
@@ -340,9 +375,12 @@ class TestAuthenticationLoadTesting:
 
         start_time = time.time()
 
-        with concurrent.futures.ThreadPoolExecutor(max_workers=num_threads) as executor:
+        with concurrent.futures.ThreadPoolExecutor(
+            max_workers=num_threads
+        ) as executor:
             futures = [
-                executor.submit(verify_tokens, verifications_per_thread) for _ in range(num_threads)
+                executor.submit(verify_tokens, verifications_per_thread)
+                for _ in range(num_threads)
             ]
 
             all_times = []
@@ -379,9 +417,13 @@ class TestAuthenticationLoadTesting:
 
         # Create initial refresh tokens
         for user in users:
-            refresh_tokens[user.user_id] = self.auth_manager.create_refresh_token(user)
+            refresh_tokens[
+                user.user_id
+            ] = self.auth_manager.create_refresh_token(user)
 
-        def refresh_token_worker(user: User, iterations: int) -> Tuple[int, int]:
+        def refresh_token_worker(
+            user: User, iterations: int
+        ) -> Tuple[int, int]:
             successes = 0
             failures = 0
             current_refresh = refresh_tokens[user.user_id]
@@ -389,30 +431,40 @@ class TestAuthenticationLoadTesting:
             for _ in range(iterations):
                 try:
                     start = time.time()
-                    new_access, new_refresh = self.auth_manager.refresh_access_token(
-                        current_refresh
-                    )
+                    (
+                        new_access,
+                        new_refresh,
+                    ) = self.auth_manager.refresh_access_token(current_refresh)
                     self.metrics.add_response_time(time.time() - start)
                     current_refresh = new_refresh
                     refresh_tokens[user.user_id] = new_refresh
                     successes += 1
-                    time.sleep(random.uniform(0.05, 0.15))  # Simulate realistic delays
+                    time.sleep(
+                        random.uniform(0.05, 0.15)
+                    )  # Simulate realistic delays
                 except HTTPException as e:
                     failures += 1
                     self.metrics.add_error(f"Refresh failed: {e.detail}")
                     # Try to get a new refresh token
                     try:
-                        current_refresh = self.auth_manager.create_refresh_token(user)
+                        current_refresh = (
+                            self.auth_manager.create_refresh_token(user)
+                        )
                         refresh_tokens[user.user_id] = current_refresh
-                    except:
+                    except Exception:
                         pass
 
             return successes, failures
 
         start_time = time.time()
 
-        with concurrent.futures.ThreadPoolExecutor(max_workers=num_users) as executor:
-            futures = [executor.submit(refresh_token_worker, user, 10) for user in users]
+        with concurrent.futures.ThreadPoolExecutor(
+            max_workers=num_users
+        ) as executor:
+            futures = [
+                executor.submit(refresh_token_worker, user, 10)
+                for user in users
+            ]
 
             for future in concurrent.futures.as_completed(futures):
                 try:
@@ -430,8 +482,12 @@ class TestAuthenticationLoadTesting:
         stats = self.metrics.calculate_statistics()
 
         # Some failures expected due to race conditions, but most should succeed
-        assert stats["success_rate"] > 70, f"Refresh success rate too low: {stats['success_rate']}%"
-        assert stats["avg_response_time"] < 0.05, f"Refresh too slow: {stats['avg_response_time']}s"
+        assert (
+            stats["success_rate"] > 70
+        ), f"Refresh success rate too low: {stats['success_rate']}%"
+        assert (
+            stats["avg_response_time"] < 0.05
+        ), f"Refresh too slow: {stats['avg_response_time']}s"
 
     def test_authentication_spike_load(self):
         """Test system behavior under sudden authentication spikes."""
@@ -455,50 +511,77 @@ class TestAuthenticationLoadTesting:
                 return -1
 
         # Phase 1: Base load
-        with concurrent.futures.ThreadPoolExecutor(max_workers=base_users) as executor:
+        with concurrent.futures.ThreadPoolExecutor(
+            max_workers=base_users
+        ) as executor:
             for _ in range(5):
-                futures = [executor.submit(authenticate_user, user) for user in base_user_set]
+                futures = [
+                    executor.submit(authenticate_user, user)
+                    for user in base_user_set
+                ]
                 for future in concurrent.futures.as_completed(futures):
                     try:
                         duration = future.result()
                         if duration > 0:
                             results["base_load"].append(duration)
-                    except:
+                    except Exception:
                         pass
                 time.sleep(0.1)
 
         # Phase 2: Spike load
-        with concurrent.futures.ThreadPoolExecutor(max_workers=spike_users) as executor:
-            futures = [executor.submit(authenticate_user, user) for user in spike_user_set]
+        with concurrent.futures.ThreadPoolExecutor(
+            max_workers=spike_users
+        ) as executor:
+            futures = [
+                executor.submit(authenticate_user, user)
+                for user in spike_user_set
+            ]
             for future in concurrent.futures.as_completed(futures):
                 try:
                     duration = future.result()
                     if duration > 0:
                         results["spike_load"].append(duration)
-                except:
+                except Exception:
                     pass
 
         # Phase 3: Recovery (back to base load)
         time.sleep(1)  # Allow system to stabilize
-        with concurrent.futures.ThreadPoolExecutor(max_workers=base_users) as executor:
+        with concurrent.futures.ThreadPoolExecutor(
+            max_workers=base_users
+        ) as executor:
             for _ in range(5):
-                futures = [executor.submit(authenticate_user, user) for user in base_user_set]
+                futures = [
+                    executor.submit(authenticate_user, user)
+                    for user in base_user_set
+                ]
                 for future in concurrent.futures.as_completed(futures):
                     try:
                         duration = future.result()
                         if duration > 0:
                             results["recovery"].append(duration)
-                    except:
+                    except Exception:
                         pass
                 time.sleep(0.1)
 
         # Analyze results
-        base_avg = statistics.mean(results["base_load"]) if results["base_load"] else 0
-        spike_avg = statistics.mean(results["spike_load"]) if results["spike_load"] else 0
-        recovery_avg = statistics.mean(results["recovery"]) if results["recovery"] else 0
+        base_avg = (
+            statistics.mean(results["base_load"])
+            if results["base_load"]
+            else 0
+        )
+        spike_avg = (
+            statistics.mean(results["spike_load"])
+            if results["spike_load"]
+            else 0
+        )
+        recovery_avg = (
+            statistics.mean(results["recovery"]) if results["recovery"] else 0
+        )
 
         # System should handle spike without severe degradation
-        assert spike_avg < base_avg * 5, f"Spike degradation too high: {spike_avg/base_avg}x slower"
+        assert (
+            spike_avg < base_avg * 5
+        ), f"Spike degradation too high: {spike_avg/base_avg}x slower"
         assert (
             recovery_avg < base_avg * 1.5
         ), f"Recovery not achieved: {recovery_avg/base_avg}x slower"
@@ -527,7 +610,7 @@ class TestAuthenticationLoadTesting:
                 refresh = self.auth_manager.create_refresh_token(user)
                 try:
                     self.auth_manager.refresh_access_token(refresh)
-                except:
+                except Exception:
                     pass
 
             # Check memory periodically
@@ -537,7 +620,9 @@ class TestAuthenticationLoadTesting:
                 memory_increase = current_memory - baseline_memory
 
                 # Memory increase should be reasonable
-                assert memory_increase < 50, f"Memory leak detected: {memory_increase}MB increase"
+                assert (
+                    memory_increase < 50
+                ), f"Memory leak detected: {memory_increase}MB increase"
 
     def test_concurrent_logout_handling(self):
         """Test system behavior when many users logout simultaneously."""
@@ -566,10 +651,15 @@ class TestAuthenticationLoadTesting:
 
         start_time = time.time()
 
-        with concurrent.futures.ThreadPoolExecutor(max_workers=num_users) as executor:
-            futures = [executor.submit(logout_user, token) for _, token in tokens]
+        with concurrent.futures.ThreadPoolExecutor(
+            max_workers=num_users
+        ) as executor:
+            futures = [
+                executor.submit(logout_user, token) for _, token in tokens
+            ]
             logout_results = [
-                future.result() for future in concurrent.futures.as_completed(futures)
+                future.result()
+                for future in concurrent.futures.as_completed(futures)
             ]
 
         logout_time = time.time() - start_time
@@ -608,21 +698,32 @@ class TestAuthenticationLoadTesting:
                 if random.random() < 0.1:
                     start = time.time()
                     try:
-                        access_token, refresh_token = self.auth_manager.refresh_access_token(
+                        (
+                            access_token,
+                            refresh_token,
+                        ) = self.auth_manager.refresh_access_token(
                             refresh_token
                         )
                         times["refresh"].append(time.time() - start)
-                    except:
+                    except Exception:
                         # Get new tokens if refresh fails
-                        access_token = self.auth_manager.create_access_token(user)
-                        refresh_token = self.auth_manager.create_refresh_token(user)
+                        access_token = self.auth_manager.create_access_token(
+                            user
+                        )
+                        refresh_token = self.auth_manager.create_refresh_token(
+                            user
+                        )
 
             return times
 
         start_time = time.time()
 
-        with concurrent.futures.ThreadPoolExecutor(max_workers=num_workers) as executor:
-            futures = [executor.submit(user_operations, user) for user in users]
+        with concurrent.futures.ThreadPoolExecutor(
+            max_workers=num_workers
+        ) as executor:
+            futures = [
+                executor.submit(user_operations, user) for user in users
+            ]
 
             all_times = {"create": [], "verify": [], "refresh": []}
 
@@ -638,10 +739,17 @@ class TestAuthenticationLoadTesting:
 
         # Calculate averages
         avg_times = {
-            op_type: statistics.mean(times) if times else 0 for op_type, times in all_times.items()
+            op_type: statistics.mean(times) if times else 0
+            for op_type, times in all_times.items()
         }
 
         # Performance should not degrade significantly with more users
-        assert avg_times["create"] < 0.05, f"Token creation too slow with {num_workers} users"
-        assert avg_times["verify"] < 0.01, f"Token verification too slow with {num_workers} users"
-        assert total_time < num_workers * 0.5, f"Total time too high for {num_workers} users"
+        assert (
+            avg_times["create"] < 0.05
+        ), f"Token creation too slow with {num_workers} users"
+        assert (
+            avg_times["verify"] < 0.01
+        ), f"Token verification too slow with {num_workers} users"
+        assert (
+            total_time < num_workers * 0.5
+        ), f"Total time too high for {num_workers} users"

@@ -25,9 +25,9 @@ COMPRESSED_BACKUP="$BACKUP_FILE.gz"
 send_notification() {
     local message="$1"
     local status="$2"
-    
+
     echo "[$(date)] $message"
-    
+
     if [[ -n "$SLACK_WEBHOOK" ]]; then
         curl -X POST -H 'Content-type: application/json' \
             --data "{\"text\":\"🗄️ FreeAgentics DB Backup $status: $message\"}" \
@@ -44,20 +44,20 @@ cleanup_old_backups() {
 # Function to perform backup
 perform_backup() {
     echo "Starting database backup for $DB_NAME..."
-    
+
     # Check if database is accessible
     if ! pg_isready -h "$DB_HOST" -p "$DB_PORT" -U "$DB_USER" -d "$DB_NAME"; then
         send_notification "Database not accessible at $DB_HOST:$DB_PORT" "FAILED"
         exit 1
     fi
-    
+
     # Perform the backup
     if pg_dump -h "$DB_HOST" -p "$DB_PORT" -U "$DB_USER" -d "$DB_NAME" \
         --no-password --verbose --clean --if-exists --create > "$BACKUP_FILE"; then
-        
+
         # Compress the backup
         gzip "$BACKUP_FILE"
-        
+
         # Check backup integrity
         if [[ -f "$COMPRESSED_BACKUP" ]]; then
             BACKUP_SIZE=$(du -h "$COMPRESSED_BACKUP" | cut -f1)

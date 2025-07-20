@@ -9,14 +9,15 @@ import gc
 import json
 import logging
 from datetime import datetime
-from typing import Any, Dict
+from typing import Any, Dict, List
 
 import numpy as np
 import psutil
 
 # Configure logging
 logging.basicConfig(
-    level=logging.INFO, format="%(asctime)s - %(name)s - %(levelname)s - %(message)s"
+    level=logging.INFO,
+    format="%(asctime)s - %(name)s - %(levelname)s - %(message)s",
 )
 logger = logging.getLogger(__name__)
 
@@ -141,7 +142,11 @@ class MemoryProfiler:
         A = np.random.rand(size, size)
         B = np.random.rand(size, size)
 
-        start_mem = self.measurements[-1]["rss_mb"] if self.measurements else self.baseline_memory
+        start_mem = (
+            self.measurements[-1]["rss_mb"]
+            if self.measurements
+            else self.baseline_memory
+        )
 
         # Multiple matrix multiplications
         for i in range(100):
@@ -167,7 +172,10 @@ class MemoryProfiler:
         """Identify memory hotspots."""
         logger.info("\n=== Identifying Memory Hotspots ===")
 
-        hotspots = {"large_arrays": [], "recommendations": []}
+        hotspots: Dict[str, List[Any]] = {
+            "large_arrays": [],
+            "recommendations": [],
+        }
 
         # Check for large numpy arrays in memory
         for obj in gc.get_objects():
@@ -175,7 +183,11 @@ class MemoryProfiler:
                 size_mb = obj.nbytes / 1024 / 1024
                 if size_mb > 0.5:  # Arrays larger than 0.5MB
                     hotspots["large_arrays"].append(
-                        {"shape": obj.shape, "dtype": str(obj.dtype), "size_mb": size_mb}
+                        {
+                            "shape": obj.shape,
+                            "dtype": str(obj.dtype),
+                            "size_mb": size_mb,
+                        }
                     )
 
         # Sort by size
@@ -183,25 +195,31 @@ class MemoryProfiler:
 
         # Add recommendations based on findings
         if hotspots["large_arrays"]:
-            avg_size = sum(a["size_mb"] for a in hotspots["large_arrays"]) / len(
-                hotspots["large_arrays"]
-            )
+            avg_size = sum(
+                a["size_mb"] for a in hotspots["large_arrays"]
+            ) / len(hotspots["large_arrays"])
             if avg_size > 5.0:
                 hotspots["recommendations"].append(
                     "Large arrays detected (>5MB average). Consider using sparse matrices or compression."
                 )
 
             # Check for float64 arrays that could be float32
-            float64_arrays = [a for a in hotspots["large_arrays"] if "float64" in a["dtype"]]
+            float64_arrays = [
+                a for a in hotspots["large_arrays"] if "float64" in a["dtype"]
+            ]
             if float64_arrays:
-                potential_savings = sum(a["size_mb"] * 0.5 for a in float64_arrays)
+                potential_savings = sum(
+                    a["size_mb"] * 0.5 for a in float64_arrays
+                )
                 hotspots["recommendations"].append(
                     f"Found {len(float64_arrays)} float64 arrays. "
                     f"Converting to float32 could save ~{potential_savings:.1f} MB."
                 )
 
         # Log findings
-        logger.info(f"\nFound {len(hotspots['large_arrays'])} large arrays in memory")
+        logger.info(
+            f"\nFound {len(hotspots['large_arrays'])} large arrays in memory"
+        )
         for i, array in enumerate(hotspots["large_arrays"][:5]):
             logger.info(
                 f"{i+1}. Shape: {array['shape']}, Type: {array['dtype']}, Size: {array['size_mb']:.2f} MB"
@@ -230,7 +248,9 @@ class MemoryProfiler:
                 {
                     "count": count,
                     "total_mb": mem["delta_mb"],
-                    "per_agent_mb": mem["delta_mb"] / count if count > 0 else 0,
+                    "per_agent_mb": mem["delta_mb"] / count
+                    if count > 0
+                    else 0,
                 }
             )
 
@@ -249,9 +269,13 @@ class MemoryProfiler:
                 slope = np.polyfit(counts, memories, 1)[0]
                 memory_per_agent = slope
             else:
-                memory_per_agent = memories[0] / counts[0] if counts[0] > 0 else 0
+                memory_per_agent = (
+                    memories[0] / counts[0] if counts[0] > 0 else 0
+                )
         else:
-            memory_per_agent = memory_points[0]["per_agent_mb"] if memory_points else 0
+            memory_per_agent = (
+                memory_points[0]["per_agent_mb"] if memory_points else 0
+            )
 
         result = {
             "memory_per_agent_mb": memory_per_agent,
@@ -282,19 +306,26 @@ class MemoryProfiler:
         num_factors = 2
 
         # Create generative model
-        A = utils.obj_array_zeros([[num_obs[f], num_states[f]] for f in range(num_factors)])
+        A = utils.obj_array_zeros(
+            [[num_obs[f], num_states[f]] for f in range(num_factors)]
+        )
         for f in range(num_factors):
             A[f] = np.eye(num_obs[f], num_states[f])
 
         B = utils.obj_array_zeros(
-            [[num_states[f], num_states[f], num_controls[f]] for f in range(num_factors)]
+            [
+                [num_states[f], num_states[f], num_controls[f]]
+                for f in range(num_factors)
+            ]
         )
         for f in range(num_factors):
             for a in range(num_controls[f]):
                 B[f][:, :, a] = np.eye(num_states[f])
 
         C = utils.obj_array_zeros([num_obs[f] for f in range(num_factors)])
-        D = utils.obj_array_uniform([num_states[f] for f in range(num_factors)])
+        D = utils.obj_array_uniform(
+            [num_states[f] for f in range(num_factors)]
+        )
 
         return PyMDPAgent(A=A, B=B, C=C, D=D)
 
@@ -336,7 +367,7 @@ class MemoryProfiler:
 
         for size, label in sizes:
             # Create mock data structures
-            data = {
+            {
                 "beliefs": np.random.rand(size, size),
                 "transitions": np.random.rand(size * size, size * size, 4),
                 "observations": np.random.rand(size * size, 5),
@@ -366,13 +397,21 @@ class MemoryProfiler:
             report.append(f"- Total increase: {total_delta:.2f} MB")
 
             report.append("\nKEY FINDINGS:")
-            report.append("- Current implementation shows significant memory usage per agent")
-            report.append("- Matrix operations are the primary memory consumers")
-            report.append("- Belief state storage and updates require optimization")
+            report.append(
+                "- Current implementation shows significant memory usage per agent"
+            )
+            report.append(
+                "- Matrix operations are the primary memory consumers"
+            )
+            report.append(
+                "- Belief state storage and updates require optimization"
+            )
 
         report.append("\nMEASUREMENTS:")
         for m in self.measurements[-10:]:  # Last 10 measurements
-            report.append(f"- {m['label']}: {m['rss_mb']:.2f} MB (Δ{m['delta_mb']:+.2f} MB)")
+            report.append(
+                f"- {m['label']}: {m['rss_mb']:.2f} MB (Δ{m['delta_mb']:+.2f} MB)"
+            )
 
         return "\n".join(report)
 
@@ -424,7 +463,9 @@ def main():
     # Print key findings
     print("\n=== KEY FINDINGS ===")
     print(f"Memory per agent: {agent_footprint['memory_per_agent_mb']:.2f} MB")
-    print(f"Projected for 100 agents: {agent_footprint['extrapolated_100_agents_mb']:.2f} MB")
+    print(
+        f"Projected for 100 agents: {agent_footprint['extrapolated_100_agents_mb']:.2f} MB"
+    )
 
     if hotspots["recommendations"]:
         print("\n=== RECOMMENDATIONS ===")

@@ -6,6 +6,7 @@ import pytest
 from agents.base_agent import safe_array_to_int
 
 
+@pytest.mark.slow
 class TestNumpyArrayHandling:
     """Test safe conversion of numpy arrays to integers."""
 
@@ -57,6 +58,7 @@ class TestNumpyArrayHandling:
             safe_array_to_int([])
 
 
+@pytest.mark.slow
 class TestPyMDPArrayHandling:
     """Test PyMDP array handling with mocked PyMDP responses."""
 
@@ -70,7 +72,9 @@ class TestPyMDPArrayHandling:
             "zero_d_array": np.array(2),
             "single_element_array": np.array([2]),
             "multi_element_array": np.array([2, 0, 1]),
-            "argmax_result": np.argmax(np.array([0.1, 0.8, 0.1])),  # Should be 1
+            "argmax_result": np.argmax(
+                np.array([0.1, 0.8, 0.1])
+            ),  # Should be 1
         }
 
     def test_all_pymdp_response_types(self, mock_pymdp_responses):
@@ -83,9 +87,12 @@ class TestPyMDPArrayHandling:
                 assert result == 1, f"Argmax result should be 1, got {result}"
             else:
                 # Most should convert to 2
-                assert result == 2, f"Failed for {name}: expected 2, got {result}"
+                assert (
+                    result == 2
+                ), f"Failed for {name}: expected 2, got {result}"
 
 
+@pytest.mark.slow
 class TestAgentArrayHandling:
     """Integration tests for array handling in agent classes."""
 
@@ -104,7 +111,9 @@ class TestAgentArrayHandling:
         for action_idx in test_cases:
             converted_idx = safe_array_to_int(action_idx)
             action = action_map.get(converted_idx, "stay")
-            assert action == "left", f"Expected 'left', got '{action}' for input {action_idx}"
+            assert (
+                action == "left"
+            ), f"Expected 'left', got '{action}' for input {action_idx}"
 
     def test_policy_indexing_with_arrays(self):
         """Test that policy indexing works with numpy arrays."""

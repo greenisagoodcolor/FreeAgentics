@@ -76,7 +76,7 @@ pytest \
 if [ $? -ne 0 ]; then
     print_error "RELEASE BLOCKED: Coverage below 100%"
     print_error "TDD requires 100% coverage for production releases"
-    
+
     # Show what's missing
     print_warning "Generating detailed gap analysis..."
     python -c "
@@ -86,7 +86,7 @@ from pathlib import Path
 try:
     with open('test-reports/release-coverage/coverage.json') as f:
         data = json.load(f)
-        
+
     print('\\nModules requiring coverage:')
     for file_path, file_data in sorted(data['files'].items()):
         coverage_pct = file_data['summary']['percent_covered']
@@ -114,7 +114,7 @@ from datetime import datetime
 
 with open('test-reports/release-coverage/coverage.json') as f:
     data = json.load(f)
-    
+
 certification = {
     'timestamp': datetime.utcnow().isoformat(),
     'coverage': {

@@ -6,7 +6,7 @@ global:
   smtp_from: 'alerts@freeagentics.local'
   smtp_auth_username: 'alerts@freeagentics.local'
   smtp_auth_password: 'CHANGE_ME_SMTP_PASSWORD'
-  
+
   # Slack webhook URL (replace with actual webhook)
   slack_api_url: 'https://hooks.slack.com/services/YOUR/SLACK/WEBHOOK'
 
@@ -21,7 +21,7 @@ route:
   group_interval: 5m
   repeat_interval: 4h
   receiver: 'default'
-  
+
   routes:
     # Critical alerts go to multiple channels
     - match:
@@ -29,38 +29,38 @@ route:
       receiver: 'critical-alerts'
       group_wait: 10s
       repeat_interval: 1h
-    
+
     # Infrastructure alerts
     - match:
         category: infrastructure
       receiver: 'infrastructure-team'
       group_interval: 10m
-    
+
     # Application alerts
     - match:
         category: application
       receiver: 'dev-team'
       group_interval: 5m
-    
+
     # Database alerts
     - match:
         category: database
       receiver: 'db-team'
       group_interval: 10m
-    
+
     # Security alerts (highest priority)
     - match:
         category: security
       receiver: 'security-team'
       group_wait: 0s
       repeat_interval: 30m
-    
+
     # FreeAgentics specific alerts
     - match:
         category: freeagentics
       receiver: 'freeagentics-team'
       group_interval: 5m
-    
+
     # Business alerts
     - match:
         category: business
@@ -76,7 +76,7 @@ inhibit_rules:
     target_match:
       category: 'application'
     equal: ['job']
-  
+
   # If API is down, don't alert on slow response times
   - source_match:
       alertname: 'APIEndpointDown'
@@ -98,7 +98,7 @@ receivers:
           Description: {{ .Annotations.description }}
           Severity: {{ .Labels.severity }}
           {{ end }}
-  
+
   # Critical alerts (multiple channels)
   - name: 'critical-alerts'
     email_configs:
@@ -106,14 +106,14 @@ receivers:
         subject: '🚨 CRITICAL: FreeAgentics Alert'
         body: |
           CRITICAL ALERT FIRED:
-          
+
           {{ range .Alerts }}
           Alert: {{ .Annotations.summary }}
           Description: {{ .Annotations.description }}
           Time: {{ .StartsAt }}
           Labels: {{ range .Labels.SortedPairs }}{{ .Name }}: {{ .Value }} {{ end }}
           {{ end }}
-    
+
     slack_configs:
       - api_url: '{{ .SlackAPIURL }}'
         channel: '#critical-alerts'
@@ -127,7 +127,7 @@ receivers:
           *Time:* {{ .StartsAt.Format "2006-01-02 15:04:05" }}
           {{ end }}
         send_resolved: true
-  
+
   # Infrastructure team alerts
   - name: 'infrastructure-team'
     slack_configs:
@@ -141,7 +141,7 @@ receivers:
           *Description:* {{ .Annotations.description }}
           {{ end }}
         send_resolved: true
-  
+
   # Development team alerts
   - name: 'dev-team'
     slack_configs:
@@ -155,7 +155,7 @@ receivers:
           *Description:* {{ .Annotations.description }}
           {{ end }}
         send_resolved: true
-  
+
   # Database team alerts
   - name: 'db-team'
     slack_configs:
@@ -169,7 +169,7 @@ receivers:
           *Description:* {{ .Annotations.description }}
           {{ end }}
         send_resolved: true
-  
+
   # Security team alerts
   - name: 'security-team'
     email_configs:
@@ -177,13 +177,13 @@ receivers:
         subject: '🔒 SECURITY ALERT: FreeAgentics'
         body: |
           SECURITY ALERT:
-          
+
           {{ range .Alerts }}
           Alert: {{ .Annotations.summary }}
           Description: {{ .Annotations.description }}
           Time: {{ .StartsAt }}
           {{ end }}
-    
+
     slack_configs:
       - api_url: '{{ .SlackAPIURL }}'
         channel: '#security'
@@ -196,7 +196,7 @@ receivers:
           *Time:* {{ .StartsAt.Format "2006-01-02 15:04:05" }}
           {{ end }}
         send_resolved: true
-  
+
   # FreeAgentics team alerts
   - name: 'freeagentics-team'
     slack_configs:
@@ -210,7 +210,7 @@ receivers:
           *Description:* {{ .Annotations.description }}
           {{ end }}
         send_resolved: true
-  
+
   # Business team alerts
   - name: 'business-team'
     slack_configs:

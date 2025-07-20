@@ -1,5 +1,5 @@
 """
-Advanced Optimized Agent Manager with Threading, Memory, and Performance Optimizations
+Advanced Optimized Agent Manager with Threading, Memory, and Performance Optimizations.
 
 This module implements all the identified threading optimizations from the performance analysis:
 1. CPU topology-aware thread pool sizing
@@ -75,6 +75,7 @@ class WorkStealingQueue:
     """Lock-free work stealing queue implementation."""
 
     def __init__(self):
+        """Initialize the work-stealing queue."""
         self.queue = deque()
         self.lock = threading.Lock()
         self.steal_count = 0
@@ -116,15 +117,22 @@ class AdaptiveThreadPool:
     """Adaptive thread pool with workload detection and work stealing."""
 
     def __init__(self, config: OptimizationConfig):
+        """Initialize the adaptive thread pool.
+
+        Args:
+            config: Configuration for optimization parameters.
+        """
         self.config = config
         self.num_workers = self._calculate_optimal_workers()
-        self.workers = []
-        self.work_queues = [WorkStealingQueue() for _ in range(self.num_workers)]
+        self.workers: List[threading.Thread] = []
+        self.work_queues = [
+            WorkStealingQueue() for _ in range(self.num_workers)
+        ]
         self.shutdown_event = threading.Event()
         self.performance_monitor = get_performance_monitor()
 
         # Workload detection
-        self.task_times = deque(maxlen=100)
+        self.task_times: deque[float] = deque(maxlen=100)
         self.workload_type = "mixed"
         self.last_resize_time = 0
 
@@ -134,7 +142,9 @@ class AdaptiveThreadPool:
         self.stolen_tasks = 0
 
         self._start_workers()
-        logger.info(f"Adaptive thread pool initialized with {self.num_workers} workers")
+        logger.info(
+            f"Adaptive thread pool initialized with {self.num_workers} workers"
+        )
 
     def _calculate_optimal_workers(self) -> int:
         """Calculate optimal number of workers based on CPU topology."""
@@ -143,7 +153,9 @@ class AdaptiveThreadPool:
 
         # Get CPU topology
         cpu_count = mp.cpu_count()
-        physical_cores = cpu_count // 2 if hasattr(os, "sched_getaffinity") else cpu_count
+        physical_cores = (
+            cpu_count // 2 if hasattr(os, "sched_getaffinity") else cpu_count
+        )
 
         # Detect workload type for initial sizing
         if self.workload_type == "io_bound":
@@ -162,13 +174,16 @@ class AdaptiveThreadPool:
         """Start worker threads."""
         for i in range(self.num_workers):
             worker = threading.Thread(
-                target=self._worker_loop, args=(i,), name=f"AdaptiveWorker-{i}", daemon=True
+                target=self._worker_loop,
+                args=(i,),
+                name=f"AdaptiveWorker-{i}",
+                daemon=True,
             )
             worker.start()
             self.workers.append(worker)
 
     def _worker_loop(self, worker_id: int):
-        """Main worker loop with work stealing."""
+        """Execute main worker loop with work stealing."""
         my_queue = self.work_queues[worker_id]
 
         while not self.shutdown_event.is_set():
@@ -231,9 +246,9 @@ class AdaptiveThreadPool:
         # Check if we should resize
         current_time = time.time()
         if (
-            new_workload != self.workload_type and current_time - self.last_resize_time > 30
+            new_workload != self.workload_type
+            and current_time - self.last_resize_time > 30
         ):  # Resize at most every 30s
-
             self.workload_type = new_workload
             self._resize_pool()
             self.last_resize_time = current_time
@@ -285,9 +300,14 @@ class AdaptiveThreadPool:
             "stolen_tasks": self.stolen_tasks,
             "queue_sizes": queue_sizes,
             "avg_queue_size": sum(queue_sizes) / len(queue_sizes),
-            "steal_efficiency": (self.stolen_tasks / max(self.completed_tasks, 1)) * 100,
+            "steal_efficiency": (
+                self.stolen_tasks / max(self.completed_tasks, 1)
+            )
+            * 100,
             "avg_task_time_ms": (
-                (sum(self.task_times) / len(self.task_times)) * 1000 if self.task_times else 0
+                (sum(self.task_times) / len(self.task_times)) * 1000
+                if self.task_times
+                else 0
             ),
         }
 
@@ -303,8 +323,13 @@ class LockFreeAgentRegistry:
     """Lock-free agent registry using sharding to reduce contention."""
 
     def __init__(self, num_shards: int = 16):
+        """Initialize lock-free agent registry.
+
+        Args:
+            num_shards: Number of shards to distribute agents across.
+        """
         self.num_shards = num_shards
-        self.shards = [dict() for _ in range(num_shards)]
+        self.shards: List[Dict[str, Any]] = [dict() for _ in range(num_shards)]
         self.shard_locks = [threading.RLock() for _ in range(num_shards)]
         self.total_agents = 0
         self.total_lock = threading.Lock()
@@ -352,7 +377,7 @@ class LockFreeAgentRegistry:
 
     def get_agent_ids(self) -> List[str]:
         """Get all agent IDs efficiently."""
-        agent_ids = []
+        agent_ids: List[str] = []
         for shard, lock in zip(self.shards, self.shard_locks):
             with lock:
                 agent_ids.extend(shard.keys())
@@ -368,10 +393,18 @@ class MemoryPool:
     """Memory pool for agent states to reduce allocation overhead."""
 
     def __init__(self, pool_size: int = 100, state_size: int = 1024):
+        """Initialize memory pool for agent states.
+
+        Args:
+            pool_size: Number of pre-allocated memory blocks.
+            state_size: Size of each memory block in bytes.
+        """
         self.pool_size = pool_size
         self.state_size = state_size
-        self.available = queue.Queue(maxsize=pool_size)
-        self.in_use = set()
+        self.available: queue.Queue[np.ndarray] = queue.Queue(
+            maxsize=pool_size
+        )
+        self.in_use: set[int] = set()
         self.lock = threading.Lock()
 
         # Pre-allocate memory blocks
@@ -420,16 +453,23 @@ class OptimizedAgentManager:
     """Advanced optimized agent manager with all performance optimizations."""
 
     def __init__(self, config: OptimizationConfig = None):
+        """Initialize the optimized agent manager.
+
+        Args:
+            config: Configuration for optimization parameters.
+        """
         self.config = config or OptimizationConfig()
         self.performance_monitor = get_performance_monitor()
 
         # Core components
         self.agent_registry = LockFreeAgentRegistry()
         self.thread_pool = AdaptiveThreadPool(self.config)
-        self.memory_pool = MemoryPool() if self.config.memory_pooling_enabled else None
+        self.memory_pool = (
+            MemoryPool() if self.config.memory_pooling_enabled else None
+        )
 
         # Batching system
-        self.batch_queue = queue.Queue()
+        self.batch_queue: queue.Queue[AgentBatch] = queue.Queue()
         self.batch_processor = None
         self.batch_shutdown = threading.Event()
 
@@ -438,11 +478,11 @@ class OptimizedAgentManager:
         self.async_thread = None
 
         # Performance statistics
-        self.stats = {
+        self.stats: Dict[str, Union[int, float]] = {
             "agents_processed": 0,
             "batches_processed": 0,
-            "avg_batch_size": 0,
-            "avg_processing_time_ms": 0,
+            "avg_batch_size": 0.0,
+            "avg_processing_time_ms": 0.0,
             "cache_hits": 0,
             "cache_misses": 0,
         }
@@ -455,7 +495,9 @@ class OptimizedAgentManager:
         # Start batch processor
         self._start_batch_processor()
 
-        logger.info("OptimizedAgentManager initialized with advanced optimizations")
+        logger.info(
+            "OptimizedAgentManager initialized with advanced optimizations"
+        )
 
     def _initialize_async_io(self):
         """Initialize async I/O components."""
@@ -473,12 +515,14 @@ class OptimizedAgentManager:
     def _start_batch_processor(self):
         """Start the batch processing thread."""
         self.batch_processor = threading.Thread(
-            target=self._batch_processing_loop, name="BatchProcessor", daemon=True
+            target=self._batch_processing_loop,
+            name="BatchProcessor",
+            daemon=True,
         )
         self.batch_processor.start()
 
     def _batch_processing_loop(self):
-        """Main batch processing loop."""
+        """Process agent batches in a continuous loop."""
         current_batch = []
         last_batch_time = time.time()
 
@@ -492,13 +536,14 @@ class OptimizedAgentManager:
                     item = None
 
                 current_time = time.time()
-                batch_age = (current_time - last_batch_time) * 1000  # Convert to ms
+                batch_age = (
+                    current_time - last_batch_time
+                ) * 1000  # Convert to ms
 
                 # Process batch if it's full or timed out
                 if len(current_batch) >= self.config.batch_size or (
                     current_batch and batch_age >= self.config.batch_timeout_ms
                 ):
-
                     self._process_batch(current_batch)
                     current_batch = []
                     last_batch_time = current_time
@@ -537,10 +582,13 @@ class OptimizedAgentManager:
         with self.stats_lock:
             self.stats["batches_processed"] += 1
             self.stats["avg_batch_size"] = (
-                self.stats["avg_batch_size"] * (self.stats["batches_processed"] - 1) + len(batch)
+                self.stats["avg_batch_size"]
+                * (self.stats["batches_processed"] - 1)
+                + len(batch)
             ) / self.stats["batches_processed"]
             self.stats["avg_processing_time_ms"] = (
-                self.stats["avg_processing_time_ms"] * (self.stats["batches_processed"] - 1)
+                self.stats["avg_processing_time_ms"]
+                * (self.stats["batches_processed"] - 1)
                 + elapsed_ms
             ) / self.stats["batches_processed"]
 
@@ -580,7 +628,8 @@ class OptimizedAgentManager:
             if self.config.async_io_enabled and self.async_loop:
                 for agent_id, result in results.items():
                     asyncio.run_coroutine_threadsafe(
-                        self._async_save_agent_state(agent_id, result), self.async_loop
+                        self._async_save_agent_state(agent_id, result),
+                        self.async_loop,
                     )
 
     def _process_agent_update_batch(self, operations: List[Dict[str, Any]]):
@@ -628,14 +677,14 @@ class OptimizedAgentManager:
         """Unregister an agent."""
         success = self.agent_registry.remove(agent_id)
         if success:
-            self.performance_monitor.update_agent_count(self.agent_registry.size())
+            self.performance_monitor.update_agent_count(
+                self.agent_registry.size()
+            )
             logger.debug(f"Unregistered agent {agent_id}")
         return success
 
     def step_agent(self, agent_id: str, observation: Any) -> Any:
         """Step a single agent (synchronous interface)."""
-        operation = {"type": "agent_step", "agent_id": agent_id, "observation": observation}
-
         # For synchronous operation, process immediately
         agent = self.agent_registry.get(agent_id)
         if not agent:
@@ -647,12 +696,20 @@ class OptimizedAgentManager:
     def step_agents_async(self, observations: Dict[str, Any]):
         """Step multiple agents asynchronously using batch processing."""
         for agent_id, observation in observations.items():
-            operation = {"type": "agent_step", "agent_id": agent_id, "observation": observation}
+            operation = {
+                "type": "agent_step",
+                "agent_id": agent_id,
+                "observation": observation,
+            }
             self.batch_queue.put(operation)
 
     def update_agent(self, agent_id: str, update: Dict[str, Any]):
         """Update an agent asynchronously."""
-        operation = {"type": "agent_update", "agent_id": agent_id, "update": update}
+        operation = {
+            "type": "agent_update",
+            "agent_id": agent_id,
+            "update": update,
+        }
         self.batch_queue.put(operation)
 
     def get_agent(self, agent_id: str) -> Optional[Any]:
@@ -670,7 +727,7 @@ class OptimizedAgentManager:
     def get_statistics(self) -> Dict[str, Any]:
         """Get comprehensive performance statistics."""
         with self.stats_lock:
-            stats = self.stats.copy()
+            stats: Dict[str, Any] = self.stats.copy()
 
         # Add component statistics
         stats.update(
@@ -681,7 +738,9 @@ class OptimizedAgentManager:
                     "shards": len(self.agent_registry.shards),
                 },
                 "batch_queue_size": self.batch_queue.qsize(),
-                "memory_pool": self.memory_pool.get_stats() if self.memory_pool else None,
+                "memory_pool": self.memory_pool.get_stats()
+                if self.memory_pool
+                else None,
             }
         )
 
@@ -715,7 +774,9 @@ class OptimizedAgentManager:
 
 
 # Factory function for easy instantiation
-def create_optimized_agent_manager(config: OptimizationConfig = None) -> OptimizedAgentManager:
+def create_optimized_agent_manager(
+    config: OptimizationConfig = None,
+) -> OptimizedAgentManager:
     """Create an optimized agent manager with default or custom configuration."""
     if config is None:
         config = OptimizationConfig()
@@ -750,7 +811,10 @@ def benchmark_optimized_manager():
 
     # Test configuration
     config = OptimizationConfig(
-        batch_size=20, batch_timeout_ms=10, work_stealing_enabled=True, memory_pooling_enabled=True
+        batch_size=20,
+        batch_timeout_ms=10,
+        work_stealing_enabled=True,
+        memory_pooling_enabled=True,
     )
 
     manager = create_optimized_agent_manager(config)
@@ -768,7 +832,10 @@ def benchmark_optimized_manager():
         print(f"Created {num_agents} agents")
 
         # Benchmark batch processing
-        observations = {f"agent_{i}": {"data": np.random.rand(10)} for i in range(num_agents)}
+        observations = {
+            f"agent_{i}": {"data": np.random.rand(10)}
+            for i in range(num_agents)
+        }
 
         # Warm up
         for _ in range(5):
@@ -779,7 +846,7 @@ def benchmark_optimized_manager():
         num_rounds = 10
         start_time = time.perf_counter()
 
-        for round_num in range(num_rounds):
+        for _round_num in range(num_rounds):
             manager.step_agents_async(observations)
 
         # Wait for batch processing to complete
@@ -788,7 +855,7 @@ def benchmark_optimized_manager():
         elapsed = time.perf_counter() - start_time
         throughput = (num_agents * num_rounds) / elapsed
 
-        print(f"\nBenchmark Results:")
+        print("\nBenchmark Results:")
         print(f"  Rounds: {num_rounds}")
         print(f"  Agents per round: {num_agents}")
         print(f"  Total operations: {num_agents * num_rounds}")
@@ -797,10 +864,12 @@ def benchmark_optimized_manager():
 
         # Print statistics
         stats = manager.get_statistics()
-        print(f"\nStatistics:")
+        print("\nStatistics:")
         print(f"  Batches processed: {stats['batches_processed']}")
         print(f"  Average batch size: {stats['avg_batch_size']:.1f}")
-        print(f"  Average processing time: {stats['avg_processing_time_ms']:.2f}ms")
+        print(
+            f"  Average processing time: {stats['avg_processing_time_ms']:.2f}ms"
+        )
         print(f"  Thread pool stats: {stats['thread_pool']}")
 
     finally:

@@ -54,7 +54,6 @@ def remove_unused_imports(file_path):
         with open(file_path, "r") as f:
             lines = f.readlines()
 
-        original_lines = lines.copy()
         modified = False
 
         # Remove specific unused imports we know about
@@ -128,7 +127,13 @@ def main():
     base_dir = "/home/green/FreeAgentics"
 
     # Directories to exclude
-    exclude_dirs = {"venv", "__pycache__", ".git", "node_modules", ".pytest_cache"}
+    exclude_dirs = {
+        "venv",
+        "__pycache__",
+        ".git",
+        "node_modules",
+        ".pytest_cache",
+    }
 
     fixed_count = 0
 

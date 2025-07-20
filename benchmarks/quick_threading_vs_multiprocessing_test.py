@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 """
-Quick Threading vs Multiprocessing Test for FreeAgentics Agents
+Quick Threading vs Multiprocessing Test for FreeAgentics Agents.
 
 A simplified benchmark that runs quickly to validate the comparison approach
 before running the full benchmark suite.
@@ -29,13 +29,18 @@ def create_agent(agent_id: str) -> BasicExplorerAgent:
     return agent
 
 
-def agent_step_workload(agent: BasicExplorerAgent, num_steps: int = 10) -> List[float]:
+def agent_step_workload(
+    agent: BasicExplorerAgent, num_steps: int = 10
+) -> List[float]:
     """Run agent through multiple steps and return timings."""
     agent.start()
     timings = []
 
     for i in range(num_steps):
-        observation = {"position": [i % 5, i % 5], "surroundings": np.zeros((3, 3))}
+        observation = {
+            "position": [i % 5, i % 5],
+            "surroundings": np.zeros((3, 3)),
+        }
 
         start = time.time()
         agent.step(observation)
@@ -60,7 +65,10 @@ def test_threading(num_agents: int = 5, num_steps: int = 10) -> Dict[str, Any]:
 
     # Run agents concurrently with threads
     with ThreadPoolExecutor(max_workers=num_agents) as executor:
-        futures = [executor.submit(agent_step_workload, agent, num_steps) for agent in agents]
+        futures = [
+            executor.submit(agent_step_workload, agent, num_steps)
+            for agent in agents
+        ]
         results = [future.result() for future in futures]
 
     total_time = time.time() - start_time
@@ -88,7 +96,9 @@ def process_worker(agent_id: str, num_steps: int) -> List[float]:
     return agent_step_workload(agent, num_steps)
 
 
-def test_multiprocessing(num_agents: int = 5, num_steps: int = 10) -> Dict[str, Any]:
+def test_multiprocessing(
+    num_agents: int = 5, num_steps: int = 10
+) -> Dict[str, Any]:
     """Test multiprocessing performance."""
     print(f"\n🔧 Testing MULTIPROCESSING with {num_agents} agents...")
 
@@ -101,7 +111,8 @@ def test_multiprocessing(num_agents: int = 5, num_steps: int = 10) -> Dict[str, 
     # Run agents in separate processes
     with ProcessPoolExecutor(max_workers=num_agents) as executor:
         futures = [
-            executor.submit(process_worker, f"proc_{i}", num_steps) for i in range(num_agents)
+            executor.submit(process_worker, f"proc_{i}", num_steps)
+            for i in range(num_agents)
         ]
         results = [future.result() for future in futures]
 
@@ -143,7 +154,7 @@ def test_communication_overhead():
         received = 0
         while received < num_messages:
             if shared_list:
-                msg = shared_list.pop(0)
+                shared_list.pop(0)
                 received += 1
             else:
                 time.sleep(0.0001)
@@ -169,7 +180,7 @@ def test_communication_overhead():
     def mp_receiver(queue):
         received = 0
         while received < num_messages:
-            msg = queue.get()
+            queue.get()
             received += 1
 
     mp_start = time.time()
@@ -216,7 +227,7 @@ def main():
     results = {}
 
     for num_agents in agent_counts:
-        print(f"\n{'='*40}")
+        print(f"\n{'=' * 40}")
         print(f"Testing with {num_agents} agents, {num_steps} steps each")
         print("=" * 40)
 
@@ -235,15 +246,27 @@ def main():
         )
 
         # Store results
-        results[num_agents] = {"threading": thread_result, "multiprocessing": mp_result}
+        results[num_agents] = {
+            "threading": thread_result,
+            "multiprocessing": mp_result,
+        }
 
         # Quick comparison
-        if thread_result["throughput_ops_sec"] > mp_result["throughput_ops_sec"]:
+        if (
+            thread_result["throughput_ops_sec"]
+            > mp_result["throughput_ops_sec"]
+        ):
             winner = "Threading"
-            margin = thread_result["throughput_ops_sec"] / mp_result["throughput_ops_sec"]
+            margin = (
+                thread_result["throughput_ops_sec"]
+                / mp_result["throughput_ops_sec"]
+            )
         else:
             winner = "Multiprocessing"
-            margin = mp_result["throughput_ops_sec"] / thread_result["throughput_ops_sec"]
+            margin = (
+                mp_result["throughput_ops_sec"]
+                / thread_result["throughput_ops_sec"]
+            )
 
         print(f"\n  🏆 Winner: {winner} ({margin:.2f}x faster)")
         print(
@@ -265,7 +288,9 @@ def main():
         f"Multiprocessing: {comm_results['multiprocessing']['throughput_msg_sec']:.0f} msg/sec, "
         f"{comm_results['multiprocessing']['latency_per_msg_ms']:.3f}ms per message"
     )
-    print(f"Overhead ratio: {comm_results['overhead_ratio']:.1f}x slower for multiprocessing")
+    print(
+        f"Overhead ratio: {comm_results['overhead_ratio']:.1f}x slower for multiprocessing"
+    )
 
     # Summary
     print("\n" + "=" * 60)
@@ -284,10 +309,14 @@ def main():
         else:
             mp_wins += 1
 
-    print(f"\nPerformance wins: Threading={threading_wins}, Multiprocessing={mp_wins}")
+    print(
+        f"\nPerformance wins: Threading={threading_wins}, Multiprocessing={mp_wins}"
+    )
 
     if threading_wins > mp_wins:
-        print("\n✅ THREADING is recommended for FreeAgentics Active Inference agents")
+        print(
+            "\n✅ THREADING is recommended for FreeAgentics Active Inference agents"
+        )
         print("   - Better performance for PyMDP computations")
         print("   - Lower memory overhead")
         print("   - Much faster inter-agent communication")

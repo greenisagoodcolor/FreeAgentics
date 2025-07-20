@@ -94,7 +94,9 @@ class TestProviderCredentials:
             pytest.skip("LLM modules not available")
 
         credentials = ProviderCredentials(
-            api_key="test-key", organization_id="test-org", endpoint_url="https://api.test.com"
+            api_key="test-key",
+            organization_id="test-org",
+            endpoint_url="https://api.test.com",
         )
 
         assert credentials.api_key == "test-key"
@@ -115,7 +117,9 @@ class TestProviderCredentials:
         if not IMPORT_SUCCESS:
             pytest.skip("LLM modules not available")
 
-        credentials = ProviderCredentials(encrypted_credential_id="encrypted-123")
+        credentials = ProviderCredentials(
+            encrypted_credential_id="encrypted-123"
+        )
         assert credentials.is_complete() is True
 
     def test_credentials_is_complete_empty(self):
@@ -139,7 +143,10 @@ class TestModelInfo:
             id="gpt-4",
             name="GPT-4",
             provider=ProviderType.OPENAI,
-            capabilities=[ModelCapability.TEXT_GENERATION, ModelCapability.CHAT_COMPLETION],
+            capabilities=[
+                ModelCapability.TEXT_GENERATION,
+                ModelCapability.CHAT_COMPLETION,
+            ],
             context_window=8192,
             max_output_tokens=4096,
             cost_per_1k_input_tokens=0.03,
@@ -184,13 +191,19 @@ class TestUsageMetrics:
 
         metrics = UsageMetrics()
 
-        with patch("inference.llm.provider_interface.datetime") as mock_datetime:
+        with patch(
+            "inference.llm.provider_interface.datetime"
+        ) as mock_datetime:
             mock_now = datetime(2025, 1, 1, 12, 0, 0)
             mock_datetime.now.return_value = mock_now
             mock_datetime.strftime = datetime.strftime
 
             metrics.update_request(
-                success=True, input_tokens=100, output_tokens=50, latency_ms=250.0, cost=0.05
+                success=True,
+                input_tokens=100,
+                output_tokens=50,
+                latency_ms=250.0,
+                cost=0.05,
             )
 
         assert metrics.total_requests == 1
@@ -210,7 +223,9 @@ class TestUsageMetrics:
 
         metrics = UsageMetrics()
 
-        with patch("inference.llm.provider_interface.datetime") as mock_datetime:
+        with patch(
+            "inference.llm.provider_interface.datetime"
+        ) as mock_datetime:
             mock_now = datetime(2025, 1, 1, 12, 0, 0)
             mock_datetime.now.return_value = mock_now
             mock_datetime.strftime = datetime.strftime
@@ -236,7 +251,9 @@ class TestUsageMetrics:
 
         metrics = UsageMetrics()
 
-        with patch("inference.llm.provider_interface.datetime") as mock_datetime:
+        with patch(
+            "inference.llm.provider_interface.datetime"
+        ) as mock_datetime:
             mock_datetime.now.return_value = datetime.now()
             mock_datetime.strftime = datetime.strftime
 
@@ -338,9 +355,13 @@ class TestBaseProvider:
         # Create a concrete implementation for testing
         class TestProvider(BaseProvider):
             def test_connection(self) -> HealthCheckResult:
-                return HealthCheckResult(status=ProviderStatus.HEALTHY, latency_ms=100.0)
+                return HealthCheckResult(
+                    status=ProviderStatus.HEALTHY, latency_ms=100.0
+                )
 
-            def generate(self, request: GenerationRequest) -> GenerationResponse:
+            def generate(
+                self, request: GenerationRequest
+            ) -> GenerationResponse:
                 return GenerationResponse(
                     text="Test response",
                     model=request.model,
@@ -352,7 +373,9 @@ class TestBaseProvider:
                     finish_reason="stop",
                 )
 
-            def estimate_cost(self, input_tokens: int, output_tokens: int, model: str) -> float:
+            def estimate_cost(
+                self, input_tokens: int, output_tokens: int, model: str
+            ) -> float:
                 return (input_tokens * 0.01 + output_tokens * 0.02) / 1000
 
         return TestProvider(ProviderType.OPENAI)
@@ -402,7 +425,9 @@ class TestBaseProvider:
 
         with patch.object(base_provider, "test_connection") as mock_test:
             mock_test.return_value = HealthCheckResult(
-                status=ProviderStatus.OFFLINE, latency_ms=0.0, error_message="Connection failed"
+                status=ProviderStatus.OFFLINE,
+                latency_ms=0.0,
+                error_message="Connection failed",
             )
 
             result = base_provider.configure(credentials)
@@ -434,7 +459,9 @@ class TestBaseProvider:
     def test_should_perform_health_check_within_interval(self, base_provider):
         """Test health check not needed within interval."""
         base_provider._last_health_check = HealthCheckResult(
-            status=ProviderStatus.HEALTHY, latency_ms=100.0, timestamp=datetime.now()
+            status=ProviderStatus.HEALTHY,
+            latency_ms=100.0,
+            timestamp=datetime.now(),
         )
 
         assert base_provider._should_perform_health_check() is False
@@ -443,14 +470,18 @@ class TestBaseProvider:
         """Test health check needed after interval."""
         past_time = datetime.now() - timedelta(seconds=400)
         base_provider._last_health_check = HealthCheckResult(
-            status=ProviderStatus.HEALTHY, latency_ms=100.0, timestamp=past_time
+            status=ProviderStatus.HEALTHY,
+            latency_ms=100.0,
+            timestamp=past_time,
         )
 
         assert base_provider._should_perform_health_check() is True
 
     def test_update_usage_metrics(self, base_provider):
         """Test updating usage metrics."""
-        request = GenerationRequest(model="gpt-4", messages=[{"role": "user", "content": "test"}])
+        request = GenerationRequest(
+            model="gpt-4", messages=[{"role": "user", "content": "test"}]
+        )
         response = GenerationResponse(
             text="response",
             model="gpt-4",
@@ -462,7 +493,9 @@ class TestBaseProvider:
             finish_reason="stop",
         )
 
-        with patch("inference.llm.provider_interface.datetime") as mock_datetime:
+        with patch(
+            "inference.llm.provider_interface.datetime"
+        ) as mock_datetime:
             mock_datetime.now.return_value = datetime.now()
             mock_datetime.strftime = datetime.strftime
 
@@ -525,10 +558,14 @@ class TestProviderRegistry:
 
         # Create mock providers
         high_priority_provider = Mock(spec=ILLMProvider)
-        high_priority_provider.get_provider_type.return_value = ProviderType.OPENAI
+        high_priority_provider.get_provider_type.return_value = (
+            ProviderType.OPENAI
+        )
 
         low_priority_provider = Mock(spec=ILLMProvider)
-        low_priority_provider.get_provider_type.return_value = ProviderType.ANTHROPIC
+        low_priority_provider.get_provider_type.return_value = (
+            ProviderType.ANTHROPIC
+        )
 
         # Register with different priorities
         registry.register_provider(low_priority_provider, priority=100)
@@ -607,7 +644,9 @@ class TestProviderRegistry:
     def test_reorder_providers_invalid_type(self, registry):
         """Test reordering with invalid provider type."""
         with pytest.raises(ValueError, match="Unknown provider type"):
-            registry.reorder_providers([ProviderType.ANTHROPIC])  # Not registered
+            registry.reorder_providers(
+                [ProviderType.ANTHROPIC]
+            )  # Not registered
 
     def test_remove_provider(self, registry, mock_provider):
         """Test removing a provider."""
@@ -626,9 +665,15 @@ class TestProviderManager:
     @pytest.fixture
     def temp_config_file(self):
         """Create a temporary config file."""
-        config = {"providers": [{"type": "openai", "api_key": "test-key", "priority": 1}]}
+        config = {
+            "providers": [
+                {"type": "openai", "api_key": "test-key", "priority": 1}
+            ]
+        }
 
-        with tempfile.NamedTemporaryFile(mode="w", suffix=".json", delete=False) as f:
+        with tempfile.NamedTemporaryFile(
+            mode="w", suffix=".json", delete=False
+        ) as f:
             json.dump(config, f)
             return Path(f.name)
 
@@ -689,7 +734,9 @@ class TestProviderManager:
         manager.registry.register_provider(mock_provider)
 
         # Test generation
-        request = GenerationRequest(model="gpt-4", messages=[{"role": "user", "content": "test"}])
+        request = GenerationRequest(
+            model="gpt-4", messages=[{"role": "user", "content": "test"}]
+        )
 
         response = manager.generate_with_fallback(request)
 
@@ -707,7 +754,9 @@ class TestProviderManager:
         failing_provider.generate.side_effect = Exception("API Error")
 
         working_provider = Mock(spec=ILLMProvider)
-        working_provider.get_provider_type.return_value = ProviderType.ANTHROPIC
+        working_provider.get_provider_type.return_value = (
+            ProviderType.ANTHROPIC
+        )
         working_provider.test_connection.return_value = HealthCheckResult(
             status=ProviderStatus.HEALTHY, latency_ms=100.0
         )
@@ -728,7 +777,9 @@ class TestProviderManager:
         manager.registry.register_provider(working_provider, priority=2)
 
         # Test generation
-        request = GenerationRequest(model="gpt-4", messages=[{"role": "user", "content": "test"}])
+        request = GenerationRequest(
+            model="gpt-4", messages=[{"role": "user", "content": "test"}]
+        )
 
         response = manager.generate_with_fallback(request)
 
@@ -738,7 +789,9 @@ class TestProviderManager:
 
     def test_generate_with_fallback_no_providers(self, manager):
         """Test generation with no healthy providers."""
-        request = GenerationRequest(model="gpt-4", messages=[{"role": "user", "content": "test"}])
+        request = GenerationRequest(
+            model="gpt-4", messages=[{"role": "user", "content": "test"}]
+        )
 
         with pytest.raises(Exception, match="No healthy providers available"):
             manager.generate_with_fallback(request)
@@ -764,7 +817,9 @@ class TestProviderManager:
         # Create mock provider
         mock_provider = Mock(spec=ILLMProvider)
         mock_provider.get_provider_type.return_value = ProviderType.OPENAI
-        health_result = HealthCheckResult(status=ProviderStatus.HEALTHY, latency_ms=150.0)
+        health_result = HealthCheckResult(
+            status=ProviderStatus.HEALTHY, latency_ms=150.0
+        )
         mock_provider.test_connection.return_value = health_result
 
         manager.registry.register_provider(mock_provider)
@@ -779,7 +834,9 @@ class TestProviderManager:
         # Create mock provider that raises exception
         mock_provider = Mock(spec=ILLMProvider)
         mock_provider.get_provider_type.return_value = ProviderType.OPENAI
-        mock_provider.test_connection.side_effect = Exception("Connection failed")
+        mock_provider.test_connection.side_effect = Exception(
+            "Connection failed"
+        )
 
         manager.registry.register_provider(mock_provider)
 
@@ -811,7 +868,9 @@ class TestProviderManager:
 
         manager.registry.register_provider(mock_provider)
 
-        request = GenerationRequest(model="gpt-4", messages=[{"role": "user", "content": "test"}])
+        request = GenerationRequest(
+            model="gpt-4", messages=[{"role": "user", "content": "test"}]
+        )
 
         recommendations = manager.get_provider_recommendations(request)
 
@@ -828,9 +887,15 @@ class TestProviderManagerEdgeCases:
     @pytest.fixture
     def temp_config_file(self):
         """Create a temporary config file."""
-        config = {"providers": [{"type": "openai", "api_key": "test-key", "priority": 1}]}
+        config = {
+            "providers": [
+                {"type": "openai", "api_key": "test-key", "priority": 1}
+            ]
+        }
 
-        with tempfile.NamedTemporaryFile(mode="w", suffix=".json", delete=False) as f:
+        with tempfile.NamedTemporaryFile(
+            mode="w", suffix=".json", delete=False
+        ) as f:
             json.dump(config, f)
             return Path(f.name)
 
@@ -840,7 +905,9 @@ class TestProviderManagerEdgeCases:
             pytest.skip("LLM modules not available")
 
         # Create corrupted config file
-        with tempfile.NamedTemporaryFile(mode="w", suffix=".json", delete=False) as f:
+        with tempfile.NamedTemporaryFile(
+            mode="w", suffix=".json", delete=False
+        ) as f:
             f.write("invalid json content")
             corrupted_path = Path(f.name)
 
@@ -861,12 +928,16 @@ class TestProviderManagerEdgeCases:
         mock_provider.test_connection.return_value = HealthCheckResult(
             status=ProviderStatus.HEALTHY, latency_ms=100.0
         )
-        mock_provider.get_usage_metrics.return_value = UsageMetrics()  # Empty metrics
+        mock_provider.get_usage_metrics.return_value = (
+            UsageMetrics()
+        )  # Empty metrics
         mock_provider.estimate_cost.return_value = 0.05
 
         manager.registry.register_provider(mock_provider)
 
-        request = GenerationRequest(model="gpt-4", messages=[{"role": "user", "content": "test"}])
+        request = GenerationRequest(
+            model="gpt-4", messages=[{"role": "user", "content": "test"}]
+        )
 
         recommendations = manager.get_provider_recommendations(request)
 
@@ -899,7 +970,9 @@ class TestIntegrationScenarios:
         manager.registry.register_provider(mock_provider)
 
         # Verify registration
-        assert manager.registry.get_provider(ProviderType.OPENAI) == mock_provider
+        assert (
+            manager.registry.get_provider(ProviderType.OPENAI) == mock_provider
+        )
 
         # Test health checks
         health_results = manager.perform_health_checks()
@@ -919,7 +992,9 @@ class TestIntegrationScenarios:
         mock_provider.generate.return_value = expected_response
 
         # Test generation
-        request = GenerationRequest(model="gpt-4", messages=[{"role": "user", "content": "test"}])
+        request = GenerationRequest(
+            model="gpt-4", messages=[{"role": "user", "content": "test"}]
+        )
         response = manager.generate_with_fallback(request)
         assert response == expected_response
 
@@ -946,7 +1021,9 @@ class TestIntegrationScenarios:
             )
 
             if i < 2:  # First two fail
-                provider.generate.side_effect = Exception(f"Provider {i} failed")
+                provider.generate.side_effect = Exception(
+                    f"Provider {i} failed"
+                )
             else:  # Last one succeeds
                 provider.generate.return_value = GenerationResponse(
                     text=f"Response from {provider_type.value}",
@@ -979,4 +1056,11 @@ class TestIntegrationScenarios:
 
 
 if __name__ == "__main__":
-    pytest.main([__file__, "-v", "--cov=inference.llm.provider_interface", "--cov-report=html"])
+    pytest.main(
+        [
+            __file__,
+            "-v",
+            "--cov=inference.llm.provider_interface",
+            "--cov-report=html",
+        ]
+    )

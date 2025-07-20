@@ -78,7 +78,9 @@ def demo_gmn_storage_with_real_data():
                             "node_count": len(gmn_spec.nodes),
                             "edge_count": len(gmn_spec.edges),
                             "complexity": min(
-                                len(gmn_spec.edges) / max(len(gmn_spec.nodes) * 2, 1), 1.0
+                                len(gmn_spec.edges)
+                                / max(len(gmn_spec.nodes) * 2, 1),
+                                1.0,
                             ),
                         },
                     }
@@ -112,28 +114,36 @@ def demo_gmn_storage_with_real_data():
         storage_data = {
             "agent_id": str(agent_id),
             "version_number": i,
-            "parent_version_id": None if i == 1 else f"version_{i-1}_id",
+            "parent_version_id": None if i == 1 else f"version_{i - 1}_id",
             "name": spec["name"],
             "specification_text": (
-                spec["text"][:100] + "..." if len(spec["text"]) > 100 else spec["text"]
+                spec["text"][:100] + "..."
+                if len(spec["text"]) > 100
+                else spec["text"]
             ),
             "parsed_specification": spec["parsed"],
             "node_count": spec["metrics"]["node_count"],
             "edge_count": spec["metrics"]["edge_count"],
             "complexity_score": spec["metrics"]["complexity"],
-            "status": "active" if i == len(parsed_specifications) else "deprecated",
+            "status": "active"
+            if i == len(parsed_specifications)
+            else "deprecated",
         }
 
-        print(f"  Storage preview: {json.dumps(storage_data, indent=2)[:200]}...")
+        print(
+            f"  Storage preview: {json.dumps(storage_data, indent=2)[:200]}..."
+        )
 
     # Demonstrate version lineage
     print(f"\n🌳 Version Lineage for Agent {str(agent_id)[:8]}...")
-    print("v1 (Minimal Valid) -> v2 (Basic Explorer) -> v3 (Resource Collector)")
+    print(
+        "v1 (Minimal Valid) -> v2 (Basic Explorer) -> v3 (Resource Collector)"
+    )
     print("                                              ^")
     print("                                           (active)")
 
     # Demonstrate compatibility checking
-    print(f"\n🔗 Compatibility Analysis")
+    print("\n🔗 Compatibility Analysis")
     print("-" * 25)
 
     if len(parsed_specifications) >= 2:
@@ -141,16 +151,24 @@ def demo_gmn_storage_with_real_data():
         spec2 = parsed_specifications[1]
 
         # Simple compatibility check based on node signatures
-        nodes1 = {(node.get("name"), node.get("type")) for node in spec1["parsed"]["nodes"]}
-        nodes2 = {(node.get("name"), node.get("type")) for node in spec2["parsed"]["nodes"]}
+        nodes1 = {
+            (node.get("name"), node.get("type"))
+            for node in spec1["parsed"]["nodes"]
+        }
+        nodes2 = {
+            (node.get("name"), node.get("type"))
+            for node in spec2["parsed"]["nodes"]
+        }
 
         compatible = nodes1 == nodes2
         print(f"  {spec1['name']} vs {spec2['name']}")
         print(f"  Compatible: {'✅' if compatible else '❌'}")
-        print(f"  Reason: {'Same node structure' if compatible else 'Different node structure'}")
+        print(
+            f"  Reason: {'Same node structure' if compatible else 'Different node structure'}"
+        )
 
     # Demonstrate data integrity checks
-    print(f"\n🔍 Data Integrity Simulation")
+    print("\n🔍 Data Integrity Simulation")
     print("-" * 30)
 
     # Simulate integrity checks
@@ -166,22 +184,28 @@ def demo_gmn_storage_with_real_data():
     for check, status in integrity_checks.items():
         print(f"  {check}: {status}")
 
-    print(f"\n📊 Storage Statistics")
+    print("\n📊 Storage Statistics")
     print("-" * 20)
 
-    total_nodes = sum(spec["metrics"]["node_count"] for spec in parsed_specifications)
-    total_edges = sum(spec["metrics"]["edge_count"] for spec in parsed_specifications)
-    avg_complexity = sum(spec["metrics"]["complexity"] for spec in parsed_specifications) / len(
-        parsed_specifications
+    total_nodes = sum(
+        spec["metrics"]["node_count"] for spec in parsed_specifications
     )
+    total_edges = sum(
+        spec["metrics"]["edge_count"] for spec in parsed_specifications
+    )
+    avg_complexity = sum(
+        spec["metrics"]["complexity"] for spec in parsed_specifications
+    ) / len(parsed_specifications)
 
     print(f"  Total specifications: {len(parsed_specifications)}")
     print(f"  Total nodes: {total_nodes}")
     print(f"  Total edges: {total_edges}")
     print(f"  Average complexity: {avg_complexity:.3f}")
-    print(f"  Valid specifications: {sum(1 for spec in parsed_specifications if spec['valid'])}")
+    print(
+        f"  Valid specifications: {sum(1 for spec in parsed_specifications if spec['valid'])}"
+    )
 
-    print(f"\n🎯 Performance Considerations")
+    print("\n🎯 Performance Considerations")
     print("-" * 30)
 
     considerations = [

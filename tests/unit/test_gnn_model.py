@@ -36,7 +36,11 @@ class TestGMNModel:
                 {"type": "conv", "input_dim": 64, "output_dim": 32},
                 {"type": "conv", "input_dim": 32, "output_dim": 16},
             ],
-            "hyperparameters": {"learning_rate": 0.01, "dropout": 0.1, "batch_size": 32},
+            "hyperparameters": {
+                "learning_rate": 0.01,
+                "dropout": 0.1,
+                "batch_size": 32,
+            },
             "metadata": {
                 "name": "test_model",
                 "version": "1.0",
@@ -100,7 +104,9 @@ class TestGMNModel:
 
             with patch("inference.gnn.model.logger") as mock_logger:
                 model.build()
-                mock_logger.info.assert_called_with(f"Building {arch} model with 3 layers")
+                mock_logger.info.assert_called_with(
+                    f"Building {arch} model with 3 layers"
+                )
 
     def test_model_forward_without_build(self, basic_config):
         """Test forward pass fails when model not built."""
@@ -113,7 +119,9 @@ class TestGMNModel:
         x = MagicMock()  # Node features
         edge_index = MagicMock()  # Edge indices
 
-        with pytest.raises(RuntimeError, match="Model not built. Call build\\(\\) first."):
+        with pytest.raises(
+            RuntimeError, match="Model not built. Call build\\(\\) first."
+        ):
             model.forward(x, edge_index)
 
     def test_model_forward_with_build(self, basic_config):
@@ -157,7 +165,12 @@ class TestGMNModel:
         model = GMNModel({})
         model_dict = model.to_dict()
 
-        expected_dict = {"architecture": "GCN", "layers": [], "hyperparameters": {}, "metadata": {}}
+        expected_dict = {
+            "architecture": "GCN",
+            "layers": [],
+            "hyperparameters": {},
+            "metadata": {},
+        }
 
         assert model_dict == expected_dict
 
@@ -176,8 +189,17 @@ class TestGMNModel:
                     "num_heads": 8,
                     "dropout": 0.1,
                 },
-                {"type": "conv", "input_dim": 64, "output_dim": 32, "activation": "relu"},
-                {"type": "pooling", "pool_type": "global_mean", "output_dim": 16},
+                {
+                    "type": "conv",
+                    "input_dim": 64,
+                    "output_dim": 32,
+                    "activation": "relu",
+                },
+                {
+                    "type": "pooling",
+                    "pool_type": "global_mean",
+                    "output_dim": 16,
+                },
             ],
         }
 
@@ -255,7 +277,12 @@ class TestGMNModel:
 
         # None values
         model2 = GMNModel(
-            {"architecture": None, "layers": None, "hyperparameters": None, "metadata": None}
+            {
+                "architecture": None,
+                "layers": None,
+                "hyperparameters": None,
+                "metadata": None,
+            }
         )
         assert model2.architecture is None
         assert model2.layers is None
@@ -275,7 +302,17 @@ class TestGMNModel:
         assert new_model.to_dict() == model_dict
 
     @pytest.mark.parametrize(
-        "architecture", ["GCN", "GAT", "GraphSAGE", "GIN", "EdgeConv", "MPNN", "SchNet", "DimeNet"]
+        "architecture",
+        [
+            "GCN",
+            "GAT",
+            "GraphSAGE",
+            "GIN",
+            "EdgeConv",
+            "MPNN",
+            "SchNet",
+            "DimeNet",
+        ],
     )
     def test_model_with_different_architectures(self, architecture):
         """Test model creation with different architectures."""
@@ -293,7 +330,10 @@ class TestGMNModel:
         if not IMPORT_SUCCESS:
             pytest.skip("GNN modules not available")
 
-        layers = [{"type": "conv", "input_dim": 64, "output_dim": 64} for _ in range(layer_count)]
+        layers = [
+            {"type": "conv", "input_dim": 64, "output_dim": 64}
+            for _ in range(layer_count)
+        ]
         config = {"layers": layers}
         model = GMNModel(config)
 
@@ -333,4 +373,6 @@ class TestGMNModel:
 
 
 if __name__ == "__main__":
-    pytest.main([__file__, "-v", "--cov=inference.gnn.model", "--cov-report=html"])
+    pytest.main(
+        [__file__, "-v", "--cov=inference.gnn.model", "--cov-report=html"]
+    )

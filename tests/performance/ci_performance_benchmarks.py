@@ -46,6 +46,12 @@ class PerformanceBenchmark:
     """Base class for performance benchmarks."""
 
     def __init__(self, name: str, description: str):
+        """Initialize performance benchmark with name and description.
+
+        Args:
+            name: Name of the benchmark
+            description: Description of what the benchmark measures
+        """
         self.name = name
         self.description = description
         self.profiler = ComponentProfiler()
@@ -63,8 +69,10 @@ class SingleAgentInferenceBenchmark(PerformanceBenchmark):
     """Benchmark single agent inference performance."""
 
     def __init__(self):
+        """Initialize single agent inference benchmark."""
         super().__init__(
-            "single_agent_inference", "Measures single agent inference latency and memory usage"
+            "single_agent_inference",
+            "Measures single agent inference latency and memory usage",
         )
 
     def run(self) -> Dict[str, Any]:
@@ -72,7 +80,9 @@ class SingleAgentInferenceBenchmark(PerformanceBenchmark):
         logger.info("Running single agent inference benchmark...")
 
         # Create test agent
-        agent = BasicExplorerAgent("benchmark-agent", "Benchmark Agent", grid_size=5)
+        agent = BasicExplorerAgent(
+            "benchmark-agent", "Benchmark Agent", grid_size=5
+        )
         agent.start()
 
         # Measure baseline memory
@@ -100,8 +110,9 @@ class SingleAgentInferenceBenchmark(PerformanceBenchmark):
             inference_time = (time.time() - start_time) * 1000  # ms
             inference_times.append(inference_time)
 
-            # Brief pause to prevent overwhelming the system
-            time.sleep(0.001)
+            # Brief CPU work to prevent overwhelming the system
+            from tests.performance.performance_utils import cpu_work
+            cpu_work(0.001, "light")
 
         # Measure peak memory
         peak_memory = process.memory_info().rss / (1024 * 1024)  # MB
@@ -184,7 +195,9 @@ class SingleAgentInferenceBenchmark(PerformanceBenchmark):
         # Check memory regression
         baseline_memory = PERFORMANCE_BASELINES["memory_per_agent_mb"]
         actual_memory = result["memory_per_agent_mb"]
-        memory_regression = ((actual_memory - baseline_memory) / baseline_memory) * 100
+        memory_regression = (
+            (actual_memory - baseline_memory) / baseline_memory
+        ) * 100
 
         if memory_regression > REGRESSION_THRESHOLDS["critical"]:
             validation["status"] = "fail"
@@ -228,8 +241,10 @@ class MultiAgentCoordinationBenchmark(PerformanceBenchmark):
     """Benchmark multi-agent coordination efficiency."""
 
     def __init__(self):
+        """Initialize multi-agent coordination benchmark."""
         super().__init__(
-            "multi_agent_coordination", "Measures coordination efficiency and scaling behavior"
+            "multi_agent_coordination",
+            "Measures coordination efficiency and scaling behavior",
         )
 
     def run(self) -> Dict[str, Any]:
@@ -242,7 +257,9 @@ class MultiAgentCoordinationBenchmark(PerformanceBenchmark):
 
         # Create agents
         agents = [
-            BasicExplorerAgent(f"coord-agent-{i}", f"Coordination Agent {i}", grid_size=5)
+            BasicExplorerAgent(
+                f"coord-agent-{i}", f"Coordination Agent {i}", grid_size=5
+            )
             for i in range(num_agents)
         ]
 
@@ -283,7 +300,9 @@ class MultiAgentCoordinationBenchmark(PerformanceBenchmark):
 
         start_time = time.time()
         with ThreadPoolExecutor(max_workers=num_agents) as executor:
-            futures = [executor.submit(agent_worker, agent) for agent in agents]
+            futures = [
+                executor.submit(agent_worker, agent) for agent in agents
+            ]
             all_results = [future.result() for future in futures]
         total_time = time.time() - start_time
 
@@ -309,7 +328,8 @@ class MultiAgentCoordinationBenchmark(PerformanceBenchmark):
             "avg_operation_time_ms": np.mean(all_times) * 1000,
             "throughput_ops_per_sec": total_operations / total_time,
             "theoretical_max_throughput": num_agents / single_agent_avg,
-            "scaling_factor": (total_operations / total_time) / (1 / single_agent_avg),
+            "scaling_factor": (total_operations / total_time)
+            / (1 / single_agent_avg),
         }
 
         logger.info(
@@ -331,7 +351,9 @@ class MultiAgentCoordinationBenchmark(PerformanceBenchmark):
         }
 
         # Check coordination efficiency regression
-        baseline_efficiency = PERFORMANCE_BASELINES["coordination_efficiency_percent"]
+        baseline_efficiency = PERFORMANCE_BASELINES[
+            "coordination_efficiency_percent"
+        ]
         actual_efficiency = result["coordination_efficiency_percent"]
         efficiency_regression = (
             (baseline_efficiency - actual_efficiency) / baseline_efficiency
@@ -378,8 +400,10 @@ class CachePerformanceBenchmark(PerformanceBenchmark):
     """Benchmark matrix caching performance."""
 
     def __init__(self):
+        """Initialize cache performance benchmark."""
         super().__init__(
-            "cache_performance", "Measures matrix caching effectiveness and memory overhead"
+            "cache_performance",
+            "Measures matrix caching effectiveness and memory overhead",
         )
 
     def run(self) -> Dict[str, Any]:
@@ -412,7 +436,9 @@ class CachePerformanceBenchmark(PerformanceBenchmark):
         agent.stop()
 
         # For comparison, create agent without caching optimizations
-        agent_no_cache = BasicExplorerAgent("no-cache-agent", "No Cache Agent", grid_size=10)
+        agent_no_cache = BasicExplorerAgent(
+            "no-cache-agent", "No Cache Agent", grid_size=10
+        )
         agent_no_cache.start()
 
         no_cache_times = []
@@ -420,7 +446,9 @@ class CachePerformanceBenchmark(PerformanceBenchmark):
             # Use different observations to prevent any caching
             varied_observation = {
                 "position": [i % 5, i % 5],
-                "surroundings": np.array([[i % 2, 0, 1], [0, 1, 0], [1, 0, i % 2]]),
+                "surroundings": np.array(
+                    [[i % 2, 0, 1], [0, 1, 0], [1, 0, i % 2]]
+                ),
             }
 
             start_time = time.time()
@@ -475,7 +503,9 @@ class CachePerformanceBenchmark(PerformanceBenchmark):
         # Check cache hit rate regression
         baseline_hit_rate = PERFORMANCE_BASELINES["cache_hit_rate_percent"]
         actual_hit_rate = result["estimated_hit_rate_percent"]
-        hit_rate_regression = ((baseline_hit_rate - actual_hit_rate) / baseline_hit_rate) * 100
+        hit_rate_regression = (
+            (baseline_hit_rate - actual_hit_rate) / baseline_hit_rate
+        ) * 100
 
         if hit_rate_regression > REGRESSION_THRESHOLDS["critical"]:
             validation["status"] = "fail"
@@ -518,7 +548,11 @@ class MemoryRegressionBenchmark(PerformanceBenchmark):
     """Benchmark memory usage and detect memory leaks."""
 
     def __init__(self):
-        super().__init__("memory_regression", "Detects memory leaks and excessive memory usage")
+        """Initialize memory regression benchmark."""
+        super().__init__(
+            "memory_regression",
+            "Detects memory leaks and excessive memory usage",
+        )
 
     def run(self) -> Dict[str, Any]:
         """Run memory regression benchmark."""
@@ -537,7 +571,11 @@ class MemoryRegressionBenchmark(PerformanceBenchmark):
         for cycle in range(num_cycles):
             # Create agents
             agents = [
-                BasicExplorerAgent(f"leak-test-{cycle}-{i}", f"Leak Test {cycle}-{i}", grid_size=5)
+                BasicExplorerAgent(
+                    f"leak-test-{cycle}-{i}",
+                    f"Leak Test {cycle}-{i}",
+                    grid_size=5,
+                )
                 for i in range(agents_per_cycle)
             ]
 
@@ -549,7 +587,9 @@ class MemoryRegressionBenchmark(PerformanceBenchmark):
             for _ in range(10):
                 observation = {
                     "position": [2, 2],
-                    "surroundings": np.array([[0, 0, 0], [0, 0, 0], [0, 0, 0]]),
+                    "surroundings": np.array(
+                        [[0, 0, 0], [0, 0, 0], [0, 0, 0]]
+                    ),
                 }
 
                 for agent in agents:
@@ -566,8 +606,9 @@ class MemoryRegressionBenchmark(PerformanceBenchmark):
             current_memory = process.memory_info().rss / (1024 * 1024)  # MB
             memory_samples.append(current_memory)
 
-            # Brief pause to allow garbage collection
-            time.sleep(0.1)
+            # CPU work to allow garbage collection
+            from tests.performance.performance_utils import cpu_work
+            cpu_work(0.1, "light")
 
         # Final memory measurement
         final_memory = process.memory_info().rss / (1024 * 1024)  # MB
@@ -579,7 +620,9 @@ class MemoryRegressionBenchmark(PerformanceBenchmark):
 
         # Check for consistent memory growth (leak indicator)
         if len(memory_samples) >= 3:
-            memory_slope = np.polyfit(range(len(memory_samples)), memory_samples, 1)[0]
+            memory_slope = np.polyfit(
+                range(len(memory_samples)), memory_samples, 1
+            )[0]
         else:
             memory_slope = 0
 
@@ -597,7 +640,8 @@ class MemoryRegressionBenchmark(PerformanceBenchmark):
         }
 
         logger.info(
-            f"Memory regression: {memory_growth:.2f}MB growth, " f"{memory_slope:.4f}MB/cycle slope"
+            f"Memory regression: {memory_growth:.2f}MB growth, "
+            f"{memory_slope:.4f}MB/cycle slope"
         )
 
         return result
@@ -620,7 +664,8 @@ class MemoryRegressionBenchmark(PerformanceBenchmark):
             validation["regressions"].append(
                 {
                     "metric": "memory_leak",
-                    "regression_percent": memory_slope * 100,  # Convert to percentage-like metric
+                    "regression_percent": memory_slope
+                    * 100,  # Convert to percentage-like metric
                     "severity": "critical",
                     "baseline": 0,
                     "actual": memory_slope,
@@ -675,6 +720,11 @@ class CIPerformanceBenchmarkSuite:
     """Main CI performance benchmark suite."""
 
     def __init__(self, output_dir: Optional[Path] = None):
+        """Initialize CI performance benchmark suite.
+
+        Args:
+            output_dir: Directory for storing benchmark results
+        """
         self.output_dir = output_dir or Path("tests/performance/ci_results")
         self.output_dir.mkdir(parents=True, exist_ok=True)
 
@@ -741,10 +791,16 @@ class CIPerformanceBenchmarkSuite:
                     results["summary"]["failed"] += 1
                     results["overall_status"] = "fail"
 
-                results["summary"]["total_regressions"] += len(validation["regressions"])
-                results["summary"]["total_improvements"] += len(validation["improvements"])
+                results["summary"]["total_regressions"] += len(
+                    validation["regressions"]
+                )
+                results["summary"]["total_improvements"] += len(
+                    validation["improvements"]
+                )
 
-                logger.info(f"Completed {benchmark.name}: {validation['status']}")
+                logger.info(
+                    f"Completed {benchmark.name}: {validation['status']}"
+                )
 
             except Exception as e:
                 logger.error(f"Error running {benchmark.name}: {e}")
@@ -767,7 +823,8 @@ class CIPerformanceBenchmarkSuite:
         self._save_results(results)
 
         logger.info(
-            f"Benchmark suite completed in {suite_duration:.2f}s: " f"{results['overall_status']}"
+            f"Benchmark suite completed in {suite_duration:.2f}s: "
+            f"{results['overall_status']}"
         )
 
         return results
@@ -789,14 +846,18 @@ class CIPerformanceBenchmarkSuite:
         # Generate summary report
         self._generate_summary_report(results, timestamp)
 
-    def _generate_summary_report(self, results: Dict[str, Any], timestamp: str):
+    def _generate_summary_report(
+        self, results: Dict[str, Any], timestamp: str
+    ):
         """Generate human-readable summary report."""
         report_path = self.output_dir / f"ci_benchmark_report_{timestamp}.md"
 
         with open(report_path, "w") as f:
             f.write("# CI Performance Benchmark Report\n\n")
             f.write(f"**Generated**: {results['suite_info']['timestamp']}\n")
-            f.write(f"**Duration**: {results['suite_info']['duration_seconds']:.2f}s\n")
+            f.write(
+                f"**Duration**: {results['suite_info']['duration_seconds']:.2f}s\n"
+            )
             f.write(f"**Status**: {results['overall_status'].upper()}\n\n")
 
             # Summary
@@ -806,8 +867,12 @@ class CIPerformanceBenchmarkSuite:
             f.write(f"- **Passed**: {summary['passed']}\n")
             f.write(f"- **Warnings**: {summary['warnings']}\n")
             f.write(f"- **Failed**: {summary['failed']}\n")
-            f.write(f"- **Total Regressions**: {summary['total_regressions']}\n")
-            f.write(f"- **Total Improvements**: {summary['total_improvements']}\n\n")
+            f.write(
+                f"- **Total Regressions**: {summary['total_regressions']}\n"
+            )
+            f.write(
+                f"- **Total Improvements**: {summary['total_improvements']}\n\n"
+            )
 
             # Benchmark details
             f.write("## Benchmark Results\n\n")
@@ -817,9 +882,13 @@ class CIPerformanceBenchmarkSuite:
                 status = validation.get("status", "unknown")
 
                 f.write(f"### {bench_name}\n\n")
-                f.write(f"**Description**: {bench_data.get('description', 'N/A')}\n")
+                f.write(
+                    f"**Description**: {bench_data.get('description', 'N/A')}\n"
+                )
                 f.write(f"**Status**: {status.upper()}\n")
-                f.write(f"**Duration**: {bench_data.get('duration_seconds', 0):.2f}s\n\n")
+                f.write(
+                    f"**Duration**: {bench_data.get('duration_seconds', 0):.2f}s\n\n"
+                )
 
                 # Regressions
                 regressions = validation.get("regressions", [])
@@ -848,7 +917,9 @@ class CIPerformanceBenchmarkSuite:
                 if result:
                     f.write("**Key Metrics**:\n")
                     for key, value in result.items():
-                        if isinstance(value, (int, float)) and not isinstance(value, bool):
+                        if isinstance(value, (int, float)) and not isinstance(
+                            value, bool
+                        ):
                             f.write(f"- {key}: {value:.2f}\n")
                     f.write("\n")
 
@@ -859,9 +930,15 @@ def main():
     """Run the CI performance benchmark suite."""
     import argparse
 
-    parser = argparse.ArgumentParser(description="Run CI performance benchmarks")
-    parser.add_argument("--output-dir", type=Path, help="Output directory for results")
-    parser.add_argument("--verbose", "-v", action="store_true", help="Verbose logging")
+    parser = argparse.ArgumentParser(
+        description="Run CI performance benchmarks"
+    )
+    parser.add_argument(
+        "--output-dir", type=Path, help="Output directory for results"
+    )
+    parser.add_argument(
+        "--verbose", "-v", action="store_true", help="Verbose logging"
+    )
 
     args = parser.parse_args()
 

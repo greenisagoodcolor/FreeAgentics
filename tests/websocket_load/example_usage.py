@@ -159,7 +159,9 @@ async def example_connection_pool():
     manager = WebSocketClientManager()
 
     # Create connection pool
-    pool = ConnectionPool(manager, min_size=5, max_size=20, acquire_timeout=5.0)
+    pool = ConnectionPool(
+        manager, min_size=5, max_size=20, acquire_timeout=5.0
+    )
 
     # Initialize pool
     await pool.initialize()
@@ -172,7 +174,9 @@ async def example_connection_pool():
         # Acquire connection
         client = await pool.acquire()
         if client:
-            logger.info(f"Task {task_id} acquired connection {client.client_id}")
+            logger.info(
+                f"Task {task_id} acquired connection {client.client_id}"
+            )
 
             # Use connection
             message_gen = EventMessageGenerator()
@@ -182,7 +186,9 @@ async def example_connection_pool():
 
             # Release back to pool
             await pool.release(client)
-            logger.info(f"Task {task_id} released connection {client.client_id}")
+            logger.info(
+                f"Task {task_id} released connection {client.client_id}"
+            )
         else:
             logger.error(f"Task {task_id} failed to acquire connection")
 
@@ -235,8 +241,12 @@ async def example_metrics_collection():
     logger.info(f"\nReal-time stats: {real_time}")
 
     # Get time series data
-    latency_series = metrics.get_time_series_data("latency_ms", duration_seconds=10)
-    logger.info(f"\nLatency time series (last 10s): {len(latency_series)} points")
+    latency_series = metrics.get_time_series_data(
+        "latency_ms", duration_seconds=10
+    )
+    logger.info(
+        f"\nLatency time series (last 10s): {len(latency_series)} points"
+    )
 
     # Stop real-time stats
     await metrics.stop_real_time_stats()
@@ -294,12 +304,16 @@ async def example_custom_scenario():
         def __init__(self):
             self.manager = WebSocketClientManager()
             self.metrics = MetricsCollector()
-            self.lifecycle = ConnectionLifecycleManager(self.manager, self.metrics)
+            self.lifecycle = ConnectionLifecycleManager(
+                self.manager, self.metrics
+            )
 
         async def run(self):
             # Phase 1: Login rush (many connections at once)
             logger.info("Phase 1: Login rush")
-            players = await self.manager.create_clients(50, client_prefix="player")
+            players = await self.manager.create_clients(
+                50, client_prefix="player"
+            )
             await self.manager.connect_clients(players, concurrent_limit=50)
 
             # Everyone subscribes to game events
@@ -325,7 +339,10 @@ async def example_custom_scenario():
                         "data": {
                             "agent_id": player.client_id,
                             "command": "act",
-                            "params": {"action": "move", "target": f"pos_{round_num}"},
+                            "params": {
+                                "action": "move",
+                                "target": f"pos_{round_num}",
+                            },
                         },
                     }
                     await player.send_message(action_msg)

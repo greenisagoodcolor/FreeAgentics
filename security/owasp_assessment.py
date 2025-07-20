@@ -20,7 +20,11 @@ import requests
 class OWASPAssessment:
     """OWASP Top 10 security assessment tool."""
 
-    def __init__(self, base_url: str = "http://localhost:8000", auth_token: Optional[str] = None):
+    def __init__(
+        self,
+        base_url: str = "http://localhost:8000",
+        auth_token: Optional[str] = None,
+    ):
         self.base_url = base_url
         self.auth_token = auth_token
         self.session = requests.Session()
@@ -85,7 +89,9 @@ class OWASPAssessment:
                         remediation="Ensure all admin endpoints require authentication",
                     )
                 else:
-                    print(f"  ✓ {endpoint} properly secured (returned {resp.status_code})")
+                    print(
+                        f"  ✓ {endpoint} properly secured (returned {resp.status_code})"
+                    )
 
             except Exception as e:
                 print(f"  ! Error testing {endpoint}: {e}")
@@ -99,7 +105,10 @@ class OWASPAssessment:
         print("\n[*] Testing A02: Cryptographic Failures...")
 
         # Check for HTTPS enforcement
-        if self.base_url.startswith("http://") and "localhost" not in self.base_url:
+        if (
+            self.base_url.startswith("http://")
+            and "localhost" not in self.base_url
+        ):
             self.add_finding(
                 "A02: Cryptographic Failures",
                 "HIGH",
@@ -156,13 +165,16 @@ class OWASPAssessment:
         for payload in sql_payloads:
             try:
                 resp = self.session.post(
-                    login_url, json={"username": payload, "password": "test"}, timeout=5
+                    login_url,
+                    json={"username": payload, "password": "test"},
+                    timeout=5,
                 )
                 self.endpoints_tested += 1
 
                 # Check for SQL errors in response
                 if resp.text and any(
-                    err in resp.text.lower() for err in ["sql", "syntax", "query"]
+                    err in resp.text.lower()
+                    for err in ["sql", "syntax", "query"]
                 ):
                     self.add_finding(
                         "A03: Injection",
@@ -174,7 +186,9 @@ class OWASPAssessment:
                         remediation="Use parameterized queries and input validation",
                     )
                 else:
-                    print(f"  ✓ Login endpoint handled SQL payload safely: {payload[:20]}...")
+                    print(
+                        f"  ✓ Login endpoint handled SQL payload safely: {payload[:20]}..."
+                    )
 
             except Exception as e:
                 print(f"  ! Error testing SQL injection: {e}")
@@ -193,7 +207,9 @@ class OWASPAssessment:
             for payload in xss_payloads:
                 try:
                     resp = self.session.post(
-                        agent_url, json={"name": payload, "type": "test", "config": {}}, timeout=5
+                        agent_url,
+                        json={"name": payload, "type": "test", "config": {}},
+                        timeout=5,
                     )
                     self.endpoints_tested += 1
 
@@ -225,11 +241,13 @@ class OWASPAssessment:
         for i in range(15):
             try:
                 resp = self.session.post(
-                    login_url, json={"username": "test", "password": "wrong"}, timeout=5
+                    login_url,
+                    json={"username": "test", "password": "wrong"},
+                    timeout=5,
                 )
                 rapid_responses.append(resp.status_code)
                 self.endpoints_tested += 1
-            except:
+            except Exception:
                 pass
 
         # Check if any were rate limited
@@ -272,7 +290,9 @@ class OWASPAssessment:
                 if resp.status_code == 200:
                     # Check if it's intentional (docs) or a security issue
                     if endpoint in ["/docs", "/redoc", "/api/v1/graphql"]:
-                        print(f"  ⚠ {endpoint} is exposed (may be intentional for dev)")
+                        print(
+                            f"  ⚠ {endpoint} is exposed (may be intentional for dev)"
+                        )
                     else:
                         self.add_finding(
                             "A05: Security Misconfiguration",
@@ -284,7 +304,7 @@ class OWASPAssessment:
                             remediation="Disable debug endpoints in production",
                         )
 
-            except Exception as e:
+            except Exception:
                 print(f"  ✓ {endpoint} not accessible")
 
         # Check for default credentials
@@ -300,7 +320,9 @@ class OWASPAssessment:
         for username, password in default_creds:
             try:
                 resp = self.session.post(
-                    login_url, json={"username": username, "password": password}, timeout=5
+                    login_url,
+                    json={"username": username, "password": password},
+                    timeout=5,
                 )
                 self.endpoints_tested += 1
 
@@ -315,7 +337,7 @@ class OWASPAssessment:
                         remediation="Remove all default credentials",
                     )
 
-            except:
+            except Exception:
                 pass
 
     def test_a06_vulnerable_components(self):
@@ -327,11 +349,15 @@ class OWASPAssessment:
         # 2. Using tools like npm audit, pip-audit, safety
         # 3. Checking for outdated dependencies
 
-        print("  ℹ Note: Run 'make security-scan' for full dependency scanning")
+        print(
+            "  ℹ Note: Run 'make security-scan' for full dependency scanning"
+        )
 
     def test_a07_auth_failures(self):
         """Test for A07:2021 – Identification and Authentication Failures."""
-        print("\n[*] Testing A07: Identification and Authentication Failures...")
+        print(
+            "\n[*] Testing A07: Identification and Authentication Failures..."
+        )
 
         # Test password complexity requirements
         register_url = urljoin(self.base_url, "/api/v1/register")
@@ -362,7 +388,7 @@ class OWASPAssessment:
                         remediation="Implement strong password requirements",
                     )
 
-            except:
+            except Exception:
                 pass
 
         # Test session management
@@ -405,7 +431,7 @@ class OWASPAssessment:
                         evidence=f"Status: {resp.status_code}",
                         remediation="Ensure security monitoring is properly configured",
                     )
-            except:
+            except Exception:
                 pass
 
     def test_a10_ssrf(self):
@@ -415,13 +441,11 @@ class OWASPAssessment:
         # Test endpoints that might make external requests
         # Look for URL parameters that could be exploited
 
-        ssrf_payloads = [
-            "http://localhost:22",  # Internal service
-            "http://169.254.169.254/",  # AWS metadata
-            "file:///etc/passwd",  # Local file access
-        ]
+        # SSRF payloads would be tested here in a real assessment
 
-        print("  ℹ SSRF testing requires identifying endpoints that make external requests")
+        print(
+            "  ℹ SSRF testing requires identifying endpoints that make external requests"
+        )
 
     def generate_report(self) -> Dict[str, Any]:
         """Generate assessment report."""
@@ -501,7 +525,9 @@ def main():
     """Run OWASP assessment."""
     import argparse
 
-    parser = argparse.ArgumentParser(description="OWASP Top 10 Security Assessment")
+    parser = argparse.ArgumentParser(
+        description="OWASP Top 10 Security Assessment"
+    )
     parser.add_argument(
         "--url",
         default="http://localhost:8000",

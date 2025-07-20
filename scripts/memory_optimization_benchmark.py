@@ -37,7 +37,9 @@ class MockAgent:
         self.active = True
 
         # Create realistic belief states (sparse - typical for agents)
-        belief_size = int(memory_size_mb * 1024 * 1024 / 8)  # 8 bytes per float64
+        belief_size = int(
+            memory_size_mb * 1024 * 1024 / 8
+        )  # 8 bytes per float64
         self.beliefs = np.random.random((belief_size,)).astype(np.float64)
         self.beliefs[self.beliefs < 0.95] = 0.0  # 95% sparse (realistic)
 
@@ -48,7 +50,9 @@ class MockAgent:
         self.transition_matrix = np.random.random((100, 100))
 
         # Computation cache
-        self.computation_cache = {f"cache_{i}": np.random.random((100,)) for i in range(50)}
+        self.computation_cache = {
+            f"cache_{i}": np.random.random((100,)) for i in range(50)
+        }
 
     def step(self, observation):
         """Mock step method."""
@@ -131,7 +135,6 @@ def benchmark_optimized_agents(num_agents: int = 50):
 
     # Initialize optimization components
     optimizer = get_agent_optimizer()
-    gc_tuner = get_gc_tuner()
     profiler = get_memory_profiler()
 
     # Configure GC for multi-agent workload
@@ -169,8 +172,12 @@ def benchmark_optimized_agents(num_agents: int = 50):
     print(f"  Final memory: {final_memory:.1f}MB")
     print(f"  Total memory used: {total_memory_used:.1f}MB")
     print(f"  Memory per agent (system): {memory_per_agent:.1f}MB")
-    print(f"  Memory per agent (optimized): {optimized_memory_per_agent:.1f}MB")
-    print(f"  Shared parameters: {optimizer_stats['shared_resources']['parameters']}")
+    print(
+        f"  Memory per agent (optimized): {optimized_memory_per_agent:.1f}MB"
+    )
+    print(
+        f"  Shared parameters: {optimizer_stats['shared_resources']['parameters']}"
+    )
     print(f"  Compression ratio: {optimizer_stats['compression_ratio']}")
     print()
 
@@ -186,7 +193,9 @@ def benchmark_optimized_agents(num_agents: int = 50):
 
 def benchmark_threadpool_performance(num_agents: int = 50):
     """Benchmark threadpool performance with memory optimization."""
-    print(f"=== Benchmarking ThreadPool Performance with {num_agents} Agents ===")
+    print(
+        f"=== Benchmarking ThreadPool Performance with {num_agents} Agents ==="
+    )
 
     # Create threadpool manager with memory optimization
     manager = OptimizedThreadPoolManager(
@@ -241,7 +250,8 @@ def benchmark_threadpool_performance(num_agents: int = 50):
         "execution_time": execution_time,
         "success_rate": success_rate,
         "memory_efficiency": efficiency["memory_efficiency"],
-        "memory_per_agent": efficiency["actual_memory_mb"] / efficiency["agents_count"],
+        "memory_per_agent": efficiency["actual_memory_mb"]
+        / efficiency["agents_count"],
     }
 
 
@@ -297,7 +307,9 @@ def main():
         unopt_mb = unoptimized_results[i]["memory_per_agent_mb"]
         opt_mb = optimized_results[i]["optimized_memory_per_agent_mb"]
         reduction = (unopt_mb - opt_mb) / unopt_mb * 100
-        print(f"{num_agents:6d} | {unopt_mb:10.1f}MB | {opt_mb:8.1f}MB | {reduction:7.1f}%")
+        print(
+            f"{num_agents:6d} | {unopt_mb:10.1f}MB | {opt_mb:8.1f}MB | {reduction:7.1f}%"
+        )
 
     print("\nPerformance Metrics:")
     print("Agents | Exec Time | Success Rate | Memory Efficiency")
@@ -325,9 +337,13 @@ def main():
     print(
         f"✓ Memory per agent reduced from {unopt_memory:.1f}MB to {opt_memory:.1f}MB ({memory_reduction:.1f}% reduction)"
     )
-    print(f"✓ Target of <10MB per agent: {'ACHIEVED' if opt_memory < 10.0 else 'MISSED'}")
+    print(
+        f"✓ Target of <10MB per agent: {'ACHIEVED' if opt_memory < 10.0 else 'MISSED'}"
+    )
     print(f"✓ System efficiency with 50+ agents: {efficiency:.1%}")
-    print(f"✓ Target of >50% efficiency: {'ACHIEVED' if efficiency > 0.5 else 'MISSED'}")
+    print(
+        f"✓ Target of >50% efficiency: {'ACHIEVED' if efficiency > 0.5 else 'MISSED'}"
+    )
     print(f"✓ Baseline efficiency was 28.4%")
 
     print("\nMemory optimization successfully implemented!")

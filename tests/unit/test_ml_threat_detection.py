@@ -24,7 +24,11 @@ from auth.ml_threat_detection import (
     UserBehaviorBaseline,
     get_ml_threat_detector,
 )
-from observability.security_monitoring import AttackType, SecurityMonitoringSystem, ThreatLevel
+from observability.security_monitoring import (
+    AttackType,
+    SecurityMonitoringSystem,
+    ThreatLevel,
+)
 
 
 class TestFeatureExtractor:
@@ -63,14 +67,18 @@ class TestFeatureExtractor:
         assert 0 <= features.method_diversity <= 1
         assert 0 <= features.country_risk_score <= 1
 
-    def test_extract_features_suspicious_user_agent(self, extractor, sample_request):
+    def test_extract_features_suspicious_user_agent(
+        self, extractor, sample_request
+    ):
         """Test feature extraction with suspicious user agent."""
         sample_request["user_agent"] = "curl/7.68.0"
         features = extractor.extract_features(sample_request)
 
         assert features.is_suspicious_user_agent == 1.0
 
-    def test_extract_features_high_risk_country(self, extractor, sample_request):
+    def test_extract_features_high_risk_country(
+        self, extractor, sample_request
+    ):
         """Test feature extraction with high-risk country."""
         sample_request["country"] = "TOR"  # Tor network
         features = extractor.extract_features(sample_request)
@@ -125,13 +133,17 @@ class TestFeatureExtractor:
         extractor.extract_features(success_request)
 
         # Calculate rate
-        failed_rate = extractor._calculate_failed_login_rate(user_id, ip_address)
+        failed_rate = extractor._calculate_failed_login_rate(
+            user_id, ip_address
+        )
         assert 0 <= failed_rate <= 1
         assert failed_rate > 0  # Should have some failed attempts
 
     def test_features_to_array(self):
         """Test converting features to numpy array."""
-        features = ThreatFeatures(request_frequency=0.5, request_size=100, endpoint_diversity=0.3)
+        features = ThreatFeatures(
+            request_frequency=0.5, request_size=100, endpoint_diversity=0.3
+        )
 
         array = features.to_array()
         assert isinstance(array, np.ndarray)
@@ -206,7 +218,9 @@ class TestMLThreatDetector:
         assert detector.is_trained is False
 
     @pytest.mark.asyncio
-    async def test_analyze_request_untrained_model(self, detector, sample_request):
+    async def test_analyze_request_untrained_model(
+        self, detector, sample_request
+    ):
         """Test request analysis with untrained model."""
         prediction = await detector.analyze_request(sample_request)
 
@@ -240,7 +254,9 @@ class TestMLThreatDetector:
         assert isinstance(prediction.features_contribution, dict)
 
     @pytest.mark.asyncio
-    async def test_analyze_suspicious_request(self, detector, sample_training_data):
+    async def test_analyze_suspicious_request(
+        self, detector, sample_training_data
+    ):
         """Test analysis of suspicious request."""
         # Train the model
         detector.train_model(sample_training_data)
@@ -288,11 +304,18 @@ class TestMLThreatDetector:
     def test_detect_attack_types(self, detector):
         """Test attack type detection."""
         # Create features indicating brute force
-        brute_force_features = ThreatFeatures(failed_login_rate=0.8, request_frequency=0.9)
+        brute_force_features = ThreatFeatures(
+            failed_login_rate=0.8, request_frequency=0.9
+        )
 
-        brute_force_request = {"endpoint": "/api/v1/auth/login", "user_agent": "Mozilla/5.0"}
+        brute_force_request = {
+            "endpoint": "/api/v1/auth/login",
+            "user_agent": "Mozilla/5.0",
+        }
 
-        attacks = detector._detect_attack_types(brute_force_features, brute_force_request)
+        attacks = detector._detect_attack_types(
+            brute_force_features, brute_force_request
+        )
         assert AttackType.BRUTE_FORCE in attacks
 
         # Create features indicating SQL injection
@@ -302,7 +325,9 @@ class TestMLThreatDetector:
             "user_agent": "Mozilla/5.0",
         }
 
-        attacks = detector._detect_attack_types(sql_injection_features, sql_injection_request)
+        attacks = detector._detect_attack_types(
+            sql_injection_features, sql_injection_request
+        )
         assert AttackType.SQL_INJECTION in attacks
 
     def test_get_performance_metrics(self, detector):
@@ -358,7 +383,9 @@ class TestMLThreatDetector:
             "country": "TOR",
         }
 
-        with patch("auth.ml_threat_detection.security_auditor") as mock_auditor:
+        with patch(
+            "auth.ml_threat_detection.security_auditor"
+        ) as mock_auditor:
             prediction = await detector.analyze_request(high_risk_request)
 
             # If prediction is high risk, should have logged
@@ -383,7 +410,9 @@ class TestMLThreatDetector:
             assert new_detector.is_trained
 
     @pytest.mark.asyncio
-    async def test_performance_tracking(self, detector, sample_training_data, sample_request):
+    async def test_performance_tracking(
+        self, detector, sample_training_data, sample_request
+    ):
         """Test performance tracking."""
         # Train model
         detector.train_model(sample_training_data)
@@ -397,7 +426,10 @@ class TestMLThreatDetector:
         assert metrics["average_prediction_time_ms"] >= 0
 
         # Check latency target
-        assert metrics["latency_target_met"] is True or metrics["latency_target_met"] is False
+        assert (
+            metrics["latency_target_met"] is True
+            or metrics["latency_target_met"] is False
+        )
 
     def test_retrain_model(self, detector, sample_training_data):
         """Test model retraining."""
@@ -440,10 +472,14 @@ class TestMLThreatDetector:
     def test_feature_contributions(self, detector):
         """Test feature contribution calculation."""
         features = ThreatFeatures(
-            request_frequency=0.8, failed_login_rate=0.9, is_suspicious_user_agent=1.0
+            request_frequency=0.8,
+            failed_login_rate=0.9,
+            is_suspicious_user_agent=1.0,
         )
 
-        contributions = detector._calculate_feature_contributions(features, -0.5)
+        contributions = detector._calculate_feature_contributions(
+            features, -0.5
+        )
 
         assert isinstance(contributions, dict)
         assert len(contributions) > 0

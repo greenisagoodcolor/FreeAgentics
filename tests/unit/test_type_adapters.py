@@ -123,7 +123,7 @@ class TestCoalitionTypeAdapter:
         coalition = CoalitionModel(
             id=db_id,
             name="Test Coalition",
-            objective="Test objective",
+            objectives={"main": "Test objective"},
             status=DBCoalitionStatus.ACTIVE,
         )
 
@@ -135,8 +135,7 @@ class TestCoalitionTypeAdapter:
         """Test getting ID from in-memory coalition."""
         coalition = Coalition(
             coalition_id="coalition_123",
-            name="Test Coalition",
-            objective="Test objective",
+            name="Test Coalition"
         )
 
         result = CoalitionTypeAdapter.get_id(coalition)
@@ -166,7 +165,7 @@ class TestCoalitionTypeAdapter:
         coalition_db = CoalitionModel(
             id=uuid.uuid4(),
             name="Test",
-            objective="Test",
+            objectives={"main": "Test objective"},
             status=DBCoalitionStatus.FORMING,
         )
         assert CoalitionTypeAdapter.get_status(coalition_db) == "forming"
@@ -234,12 +233,17 @@ class TestTypeHelpers:
 
     def test_get_coalition_attribute(self):
         """Test getting coalition attributes safely."""
-        coalition = Coalition("test_coalition", "Test Coalition", "Test objective")
+        coalition = Coalition(
+            "test_coalition", "Test Coalition"
+        )
         coalition.add_member("agent_1")
 
         # Standard attributes
         assert get_coalition_attribute(coalition, "name") == "Test Coalition"
-        assert get_coalition_attribute(coalition, "coalition_id") == "test_coalition"
+        assert (
+            get_coalition_attribute(coalition, "coalition_id")
+            == "test_coalition"
+        )
         assert get_coalition_attribute(coalition, "id") == "test_coalition"
 
         # Members

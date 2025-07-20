@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 """
-CI/CD Integration for Performance Benchmarks
+CI/CD Integration for Performance Benchmarks.
 ===========================================
 
 This module provides integration with CI/CD pipelines for automated performance
@@ -29,7 +29,8 @@ import pandas as pd
 
 # Configure logging
 logging.basicConfig(
-    level=logging.INFO, format="%(asctime)s - %(name)s - %(levelname)s - %(message)s"
+    level=logging.INFO,
+    format="%(asctime)s - %(name)s - %(levelname)s - %(message)s",
 )
 logger = logging.getLogger(__name__)
 
@@ -84,6 +85,7 @@ class PerformanceBaseline:
     """Manage performance baselines."""
 
     def __init__(self, baseline_path: Path):
+        """Initialize the performance baseline."""
         self.baseline_path = baseline_path
         self.baseline_data = self._load_baseline()
 
@@ -113,7 +115,9 @@ class PerformanceBaseline:
             }
         self.save_baseline()
 
-    def get_baseline(self, category: str, benchmark: str) -> Optional[Dict[str, Any]]:
+    def get_baseline(
+        self, category: str, benchmark: str
+    ) -> Optional[Dict[str, Any]]:
         """Get baseline for specific benchmark."""
         key = f"{category}.{benchmark}"
         return self.baseline_data.get(key)
@@ -123,6 +127,7 @@ class PerformanceHistory:
     """Track performance history over time."""
 
     def __init__(self, history_path: Path):
+        """Initialize the performance history tracker."""
         self.history_path = history_path
         self.history_data = self._load_history()
 
@@ -153,11 +158,16 @@ class PerformanceHistory:
 
         self.save_history()
 
-    def get_trend(self, category: str, benchmark: str, metric: str) -> List[Tuple[str, float]]:
+    def get_trend(
+        self, category: str, benchmark: str, metric: str
+    ) -> List[Tuple[str, float]]:
         """Get performance trend for specific benchmark."""
         trend = []
         for entry in self.history_data:
-            if entry["category"] == category and entry["benchmark_name"] == benchmark:
+            if (
+                entry["category"] == category
+                and entry["benchmark_name"] == benchmark
+            ):
                 timestamp = entry["timestamp"]
                 value = entry.get(metric, 0)
                 trend.append((timestamp, value))
@@ -168,6 +178,7 @@ class RegressionDetector:
     """Detect performance regressions."""
 
     def __init__(self, baseline: PerformanceBaseline):
+        """Initialize the regression detector."""
         self.baseline = baseline
 
     def detect_regressions(
@@ -183,15 +194,26 @@ class RegressionDetector:
         improvements = []
 
         for result in results:
-            baseline_data = self.baseline.get_baseline(result.category, result.benchmark_name)
+            baseline_data = self.baseline.get_baseline(
+                result.category, result.benchmark_name
+            )
             if not baseline_data:
                 continue
 
             # Check each metric
             metrics = {
-                "duration_ms": (result.duration_ms, baseline_data.get("duration_ms", 0)),
-                "memory_mb": (result.memory_mb, baseline_data.get("memory_mb", 0)),
-                "cpu_percent": (result.cpu_percent, baseline_data.get("cpu_percent", 0)),
+                "duration_ms": (
+                    result.duration_ms,
+                    baseline_data.get("duration_ms", 0),
+                ),
+                "memory_mb": (
+                    result.memory_mb,
+                    baseline_data.get("memory_mb", 0),
+                ),
+                "cpu_percent": (
+                    result.cpu_percent,
+                    baseline_data.get("cpu_percent", 0),
+                ),
             }
 
             for metric_name, (current, baseline_val) in metrics.items():
@@ -232,13 +254,16 @@ class CIIntegration:
     """Main CI integration class."""
 
     def __init__(self, results_dir: Path, baseline_dir: Path):
+        """Initialize the CI integration."""
         self.results_dir = results_dir
         self.baseline_dir = baseline_dir
         self.baseline = PerformanceBaseline(baseline_dir / BASELINE_FILE)
         self.history = PerformanceHistory(baseline_dir / HISTORY_FILE)
         self.detector = RegressionDetector(self.baseline)
 
-    def load_benchmark_results(self, results_file: Path) -> List[PerformanceResult]:
+    def load_benchmark_results(
+        self, results_file: Path
+    ) -> List[PerformanceResult]:
         """Load benchmark results from pytest-benchmark JSON."""
         with open(results_file, "r") as f:
             data = json.load(f)
@@ -259,9 +284,12 @@ class CIIntegration:
                 benchmark_name=name,
                 category=category,
                 duration_ms=stats.get("mean", 0) * 1000,  # Convert to ms
-                throughput_ops_sec=1.0 / stats.get("mean", 1),  # Ops per second
+                throughput_ops_sec=1.0
+                / stats.get("mean", 1),  # Ops per second
                 memory_mb=benchmark.get("extra_info", {}).get("memory_mb", 0),
-                cpu_percent=benchmark.get("extra_info", {}).get("cpu_percent", 0),
+                cpu_percent=benchmark.get("extra_info", {}).get(
+                    "cpu_percent", 0
+                ),
                 timestamp=datetime.now().isoformat(),
                 git_commit=os.environ.get("GIT_COMMIT", "unknown"),
                 git_branch=os.environ.get("GIT_BRANCH", "unknown"),
@@ -271,12 +299,16 @@ class CIIntegration:
 
         return results
 
-    def run_regression_check(self, results: List[PerformanceResult]) -> Dict[str, Any]:
+    def run_regression_check(
+        self, results: List[PerformanceResult]
+    ) -> Dict[str, Any]:
         """Run regression check and generate report."""
         regressions, improvements = self.detector.detect_regressions(results)
 
         # Determine overall status
-        critical_count = sum(1 for r in regressions if r.severity == "critical")
+        critical_count = sum(
+            1 for r in regressions if r.severity == "critical"
+        )
         warning_count = sum(1 for r in regressions if r.severity == "warning")
 
         if critical_count > 0:
@@ -315,8 +347,12 @@ class CIIntegration:
         for category, benchmark in benchmarks:
             key = f"{category}.{benchmark}"
             trends[key] = {
-                "duration_ms": self.history.get_trend(category, benchmark, "duration_ms"),
-                "memory_mb": self.history.get_trend(category, benchmark, "memory_mb"),
+                "duration_ms": self.history.get_trend(
+                    category, benchmark, "duration_ms"
+                ),
+                "memory_mb": self.history.get_trend(
+                    category, benchmark, "memory_mb"
+                ),
             }
 
         # Generate report
@@ -329,7 +365,9 @@ class CIIntegration:
         with open(output_file, "w") as f:
             json.dump(report, f, indent=2)
 
-    def update_baseline(self, results: List[PerformanceResult], force: bool = False):
+    def update_baseline(
+        self, results: List[PerformanceResult], force: bool = False
+    ):
         """Update performance baseline."""
         if force:
             self.baseline.update_baseline(results)
@@ -341,7 +379,9 @@ class CIIntegration:
                 self.baseline.update_baseline(results)
                 logger.info("Baseline updated (no regressions)")
             else:
-                logger.warning(f"Baseline not updated due to {len(regressions)} regressions")
+                logger.warning(
+                    f"Baseline not updated due to {len(regressions)} regressions"
+                )
 
     def generate_github_comment(self, report: Dict[str, Any]) -> str:
         """Generate GitHub PR comment from report."""
@@ -349,7 +389,9 @@ class CIIntegration:
 
         # Summary
         summary = report["summary"]
-        comment += f"**Overall Status:** {report['overall_status'].upper()}\n\n"
+        comment += (
+            f"**Overall Status:** {report['overall_status'].upper()}\n\n"
+        )
         comment += f"- Total Benchmarks: {summary['total_benchmarks']}\n"
         comment += f"- Regressions: {summary['regressions']}\n"
         comment += f"- Improvements: {summary['improvements']}\n\n"
@@ -383,10 +425,15 @@ class CIIntegration:
 
 def main():
     """Main CLI entry point."""
-    parser = argparse.ArgumentParser(description="CI/CD integration for performance benchmarks")
+    parser = argparse.ArgumentParser(
+        description="CI/CD integration for performance benchmarks"
+    )
 
     parser.add_argument(
-        "--results-file", type=Path, required=True, help="Path to pytest-benchmark results JSON"
+        "--results-file",
+        type=Path,
+        required=True,
+        help="Path to pytest-benchmark results JSON",
     )
 
     parser.add_argument(
@@ -404,17 +451,27 @@ def main():
     )
 
     parser.add_argument(
-        "--update-baseline", action="store_true", help="Update baseline with current results"
+        "--update-baseline",
+        action="store_true",
+        help="Update baseline with current results",
     )
 
     parser.add_argument(
-        "--force-baseline", action="store_true", help="Force baseline update even with regressions"
+        "--force-baseline",
+        action="store_true",
+        help="Force baseline update even with regressions",
     )
 
-    parser.add_argument("--github-comment", action="store_true", help="Generate GitHub PR comment")
+    parser.add_argument(
+        "--github-comment",
+        action="store_true",
+        help="Generate GitHub PR comment",
+    )
 
     parser.add_argument(
-        "--fail-on-regression", action="store_true", help="Exit with non-zero code on regression"
+        "--fail-on-regression",
+        action="store_true",
+        help="Exit with non-zero code on regression",
     )
 
     args = parser.parse_args()
@@ -442,7 +499,8 @@ def main():
 
     # Save report
     report_file = (
-        args.output_dir / f"regression_report_{datetime.now().strftime('%Y%m%d_%H%M%S')}.json"
+        args.output_dir
+        / f"regression_report_{datetime.now().strftime('%Y%m%d_%H%M%S')}.json"
     )
     with open(report_file, "w") as f:
         json.dump(report, f, indent=2)

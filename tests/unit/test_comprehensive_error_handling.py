@@ -21,9 +21,14 @@ try:
     from agents.agent_manager import AgentManager
     from agents.base_agent import BasicExplorerAgent
     from agents.coalition_coordinator import CoalitionCoordinator
-    from agents.error_handling import ActionSelectionError, ErrorHandler, InferenceError, PyMDPError
+    from agents.error_handling import (
+        ActionSelectionError,
+        ErrorHandler,
+        InferenceError,
+        PyMDPError,
+    )
     from inference.llm.local_llm_manager import LocalLLMManager
-    from knowledge_graph.graph_engine import GraphEngine
+    from knowledge_graph.graph_engine import KnowledgeGraph as GraphEngine
     from knowledge_graph.query import QueryEngine
 
     IMPORT_SUCCESS = True
@@ -34,6 +39,7 @@ except ImportError as e:
     # Create mock classes for testing when imports fail
     class BasicExplorerAgent:
         def __init__(self, agent_id, name, grid_size=10):
+            """Initialize BasicExplorerAgent with ID, name, and grid configuration."""
             self.agent_id = agent_id
             self.name = name
             self.grid_size = grid_size
@@ -55,6 +61,7 @@ except ImportError as e:
 
     class AgentManager:
         def __init__(self):
+            """Initialize AgentManager with empty agents dictionary."""
             self.agents = {}
 
         def create_agent(self, agent_type, name, **kwargs):
@@ -68,11 +75,16 @@ except ImportError as e:
 
     class ErrorHandler:
         def __init__(self, agent_id):
+            """Initialize ErrorHandler for specific agent with empty error history."""
             self.agent_id = agent_id
             self.error_history = []
 
         def handle_error(self, error, operation):
-            return {"can_retry": True, "fallback_action": "stay", "severity": "medium"}
+            return {
+                "can_retry": True,
+                "fallback_action": "stay",
+                "severity": "medium",
+            }
 
     class PyMDPError(Exception):
         pass
@@ -85,6 +97,7 @@ except ImportError as e:
 
     class CoalitionCoordinator:
         def __init__(self):
+            """Initialize CoalitionCoordinator with empty coalitions dictionary."""
             self.coalitions = {}
 
         def create_coalition(self, coalition_id, agents):
@@ -93,6 +106,7 @@ except ImportError as e:
 
     class GraphEngine:
         def __init__(self):
+            """Initialize GraphEngine with empty nodes and edges dictionaries."""
             self.nodes = {}
             self.edges = {}
 
@@ -104,6 +118,7 @@ except ImportError as e:
 
     class QueryEngine:
         def __init__(self, graph_engine):
+            """Initialize QueryEngine with reference to graph engine."""
             self.graph_engine = graph_engine
 
         def execute_query(self, query):
@@ -111,6 +126,7 @@ except ImportError as e:
 
     class LocalLLMManager:
         def __init__(self):
+            """Initialize LocalLLMManager with empty models dictionary."""
             self.models = {}
 
         def get_response(self, prompt):
@@ -159,7 +175,9 @@ class TestNetworkFailureHandling:
 
         # Mock remote query failure
         with patch.object(engine, "query") as mock_query:
-            mock_query.side_effect = ConnectionError("Remote graph server unavailable")
+            mock_query.side_effect = ConnectionError(
+                "Remote graph server unavailable"
+            )
 
             # Should handle remote failure gracefully
             try:
@@ -182,7 +200,9 @@ class TestNetworkFailureHandling:
 
         # Test concurrent failures
         with ThreadPoolExecutor(max_workers=5) as executor:
-            futures = [executor.submit(simulate_network_call, i) for i in range(10)]
+            futures = [
+                executor.submit(simulate_network_call, i) for i in range(10)
+            ]
 
             results = []
             for future in futures:
@@ -196,7 +216,9 @@ class TestNetworkFailureHandling:
             # Should have both successes and failures
             assert len(results) == 10
             assert "FAILED" in results
-            assert any("Success" in result for result in results if result != "FAILED")
+            assert any(
+                "Success" in result for result in results if result != "FAILED"
+            )
 
 
 class TestMemoryExhaustionHandling:
@@ -213,7 +235,9 @@ class TestMemoryExhaustionHandling:
         try:
             # Create agents until memory pressure
             for i in range(1000):  # Large number to test memory handling
-                agent_id = manager.create_agent("explorer", f"Agent_{i}", grid_size=10)
+                agent_id = manager.create_agent(
+                    "explorer", f"Agent_{i}", grid_size=10
+                )
                 created_agents.append(agent_id)
 
                 # Check memory usage periodically
@@ -335,7 +359,9 @@ class TestConcurrentAccessScenarios:
         # Check results
         assert len(results) + len(errors) == 20
         # Should handle concurrent access gracefully (some operations may fail)
-        assert len(errors) >= 0  # Some errors are expected with concurrent access
+        assert (
+            len(errors) >= 0
+        )  # Some errors are expected with concurrent access
 
     def test_concurrent_coalition_formation(self):
         """Test concurrent coalition formation operations."""
@@ -348,7 +374,9 @@ class TestConcurrentAccessScenarios:
             """Create a coalition concurrently."""
             try:
                 agents = [f"agent_{i}" for i in range(3)]
-                result = coordinator.create_coalition(f"coalition_{coalition_id}", agents)
+                result = coordinator.create_coalition(
+                    f"coalition_{coalition_id}", agents
+                )
                 return f"Coalition {coalition_id}: {result}"
             except Exception as e:
                 return f"Coalition {coalition_id}: ERROR - {e}"
@@ -732,7 +760,9 @@ class TestResourceExhaustionHandling:
         try:
             with ThreadPoolExecutor(max_workers=2) as executor:
                 # Submit more tasks than workers
-                futures = [executor.submit(long_running_task, i) for i in range(10)]
+                futures = [
+                    executor.submit(long_running_task, i) for i in range(10)
+                ]
 
                 results = []
                 for future in futures:
@@ -763,7 +793,7 @@ class TestAsyncOperationErrorHandling:
 
         async def slow_operation():
             """Simulate slow async operation."""
-            await asyncio.sleep(2)
+            await asyncio.sleep(0.1)  # Reduced from 2s for faster tests
             return "Success"
 
         # Test with timeout
@@ -784,7 +814,7 @@ class TestAsyncOperationErrorHandling:
         async def cancellable_operation():
             """Simulate cancellable async operation."""
             try:
-                await asyncio.sleep(5)
+                await asyncio.sleep(0.2)  # Reduced from 5s for faster tests
                 return "Success"
             except asyncio.CancelledError:
                 return "Cancelled"
@@ -821,7 +851,9 @@ class TestAsyncOperationErrorHandling:
         # Should handle mixed success/failure
         assert len(results) == 10
 
-        success_count = sum(1 for r in results if isinstance(r, str) and "succeeded" in r)
+        success_count = sum(
+            1 for r in results if isinstance(r, str) and "succeeded" in r
+        )
         error_count = sum(1 for r in results if isinstance(r, Exception))
 
         assert success_count > 0

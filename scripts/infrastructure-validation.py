@@ -19,7 +19,9 @@ from typing import Any, Dict, List
 import yaml
 
 # Configure logging
-logging.basicConfig(level=logging.INFO, format="%(asctime)s - %(levelname)s - %(message)s")
+logging.basicConfig(
+    level=logging.INFO, format="%(asctime)s - %(levelname)s - %(message)s"
+)
 logger = logging.getLogger(__name__)
 
 
@@ -37,7 +39,9 @@ class InfrastructureValidator:
         self.warnings = []
         self.passes = []
 
-    def log_result(self, category: str, test_name: str, result: Dict[str, Any]):
+    def log_result(
+        self, category: str, test_name: str, result: Dict[str, Any]
+    ):
         """Log test result"""
         if category not in self.results["validation_results"]:
             self.results["validation_results"][category] = {}
@@ -98,8 +102,15 @@ class InfrastructureValidator:
             )
 
             # Check for development values
-            dev_patterns = ["localhost:5432", "password123", "your_", "dev_secret"]
-            dev_issues = [pattern for pattern in dev_patterns if pattern in content]
+            dev_patterns = [
+                "localhost:5432",
+                "password123",
+                "your_",
+                "dev_secret",
+            ]
+            dev_issues = [
+                pattern for pattern in dev_patterns if pattern in content
+            ]
 
             self.log_result(
                 "environment",
@@ -118,7 +129,10 @@ class InfrastructureValidator:
             self.log_result(
                 "environment",
                 "env_file",
-                {"status": "CRITICAL", "message": ".env.production file not found"},
+                {
+                    "status": "CRITICAL",
+                    "message": ".env.production file not found",
+                },
             )
 
     def validate_docker_configuration(self):
@@ -134,14 +148,23 @@ class InfrastructureValidator:
 
                     # Check for required services
                     services = compose_config.get("services", {})
-                    required_services = ["postgres", "redis", "backend", "nginx"]
-                    missing_services = [svc for svc in required_services if svc not in services]
+                    required_services = [
+                        "postgres",
+                        "redis",
+                        "backend",
+                        "nginx",
+                    ]
+                    missing_services = [
+                        svc for svc in required_services if svc not in services
+                    ]
 
                     self.log_result(
                         "docker",
                         "required_services",
                         {
-                            "status": "PASS" if not missing_services else "CRITICAL",
+                            "status": "PASS"
+                            if not missing_services
+                            else "CRITICAL",
                             "missing_services": missing_services,
                             "message": (
                                 f"Missing services: {missing_services}"
@@ -155,15 +178,21 @@ class InfrastructureValidator:
                     security_features = []
                     for service_name, service_config in services.items():
                         if service_config.get("read_only"):
-                            security_features.append(f"{service_name}: read-only")
+                            security_features.append(
+                                f"{service_name}: read-only"
+                            )
                         if service_config.get("user"):
-                            security_features.append(f"{service_name}: non-root user")
+                            security_features.append(
+                                f"{service_name}: non-root user"
+                            )
 
                     self.log_result(
                         "docker",
                         "security_features",
                         {
-                            "status": "PASS" if security_features else "WARNING",
+                            "status": "PASS"
+                            if security_features
+                            else "WARNING",
                             "security_features": security_features,
                             "message": f"Security features: {len(security_features)} configured",
                         },
@@ -173,13 +202,19 @@ class InfrastructureValidator:
                     self.log_result(
                         "docker",
                         "compose_syntax",
-                        {"status": "CRITICAL", "message": f"Docker Compose syntax error: {e}"},
+                        {
+                            "status": "CRITICAL",
+                            "message": f"Docker Compose syntax error: {e}",
+                        },
                     )
         else:
             self.log_result(
                 "docker",
                 "compose_file",
-                {"status": "CRITICAL", "message": "docker-compose.production.yml not found"},
+                {
+                    "status": "CRITICAL",
+                    "message": "docker-compose.production.yml not found",
+                },
             )
 
         # Check Dockerfile.production
@@ -190,7 +225,8 @@ class InfrastructureValidator:
 
             security_checks = {
                 "non_root_user": "USER " in content,
-                "multi_stage_build": "FROM " in content and content.count("FROM") > 1,
+                "multi_stage_build": "FROM " in content
+                and content.count("FROM") > 1,
                 "health_check": "HEALTHCHECK" in content,
                 "minimal_base": "slim" in content or "alpine" in content,
             }
@@ -211,7 +247,10 @@ class InfrastructureValidator:
             self.log_result(
                 "docker",
                 "dockerfile",
-                {"status": "CRITICAL", "message": "Dockerfile.production not found"},
+                {
+                    "status": "CRITICAL",
+                    "message": "Dockerfile.production not found",
+                },
             )
 
     def validate_ssl_configuration(self):
@@ -219,7 +258,11 @@ class InfrastructureValidator:
         logger.info("Validating SSL/TLS configuration...")
 
         # Check SSL certificates
-        ssl_files = ["nginx/ssl/cert.pem", "nginx/ssl/key.pem", "nginx/dhparam.pem"]
+        ssl_files = [
+            "nginx/ssl/cert.pem",
+            "nginx/ssl/key.pem",
+            "nginx/dhparam.pem",
+        ]
         missing_files = [f for f in ssl_files if not os.path.exists(f)]
 
         self.log_result(
@@ -263,7 +306,9 @@ class InfrastructureValidator:
             )
         else:
             self.log_result(
-                "ssl", "nginx_config", {"status": "CRITICAL", "message": "nginx.conf not found"}
+                "ssl",
+                "nginx_config",
+                {"status": "CRITICAL", "message": "nginx.conf not found"},
             )
 
     def validate_security_configuration(self):
@@ -303,7 +348,9 @@ class InfrastructureValidator:
                 "status": "PASS" if not missing_keys else "CRITICAL",
                 "missing_keys": missing_keys,
                 "message": (
-                    f"Missing JWT keys: {missing_keys}" if missing_keys else "JWT keys present"
+                    f"Missing JWT keys: {missing_keys}"
+                    if missing_keys
+                    else "JWT keys present"
                 ),
             },
         )
@@ -326,7 +373,10 @@ class InfrastructureValidator:
             self.log_result(
                 "security",
                 "security_tests",
-                {"status": "WARNING", "message": "Security tests directory not found"},
+                {
+                    "status": "WARNING",
+                    "message": "Security tests directory not found",
+                },
             )
 
     def validate_monitoring_configuration(self):
@@ -334,9 +384,14 @@ class InfrastructureValidator:
         logger.info("Validating monitoring configuration...")
 
         # Check Prometheus configuration
-        prometheus_configs = ["monitoring/prometheus.yml", "monitoring/prometheus-production.yml"]
+        prometheus_configs = [
+            "monitoring/prometheus.yml",
+            "monitoring/prometheus-production.yml",
+        ]
 
-        prometheus_config = next((c for c in prometheus_configs if os.path.exists(c)), None)
+        prometheus_config = next(
+            (c for c in prometheus_configs if os.path.exists(c)), None
+        )
 
         if prometheus_config:
             with open(prometheus_config, "r") as f:
@@ -350,7 +405,9 @@ class InfrastructureValidator:
                         "monitoring",
                         "prometheus_config",
                         {
-                            "status": "PASS" if scrape_configs and rule_files else "WARNING",
+                            "status": "PASS"
+                            if scrape_configs and rule_files
+                            else "WARNING",
                             "scrape_configs": len(scrape_configs),
                             "rule_files": len(rule_files),
                             "message": f"Prometheus: {len(scrape_configs)} scrape configs, {len(rule_files)} rule files",
@@ -361,13 +418,19 @@ class InfrastructureValidator:
                     self.log_result(
                         "monitoring",
                         "prometheus_config",
-                        {"status": "CRITICAL", "message": f"Prometheus config error: {e}"},
+                        {
+                            "status": "CRITICAL",
+                            "message": f"Prometheus config error: {e}",
+                        },
                     )
         else:
             self.log_result(
                 "monitoring",
                 "prometheus_config",
-                {"status": "CRITICAL", "message": "Prometheus configuration not found"},
+                {
+                    "status": "CRITICAL",
+                    "message": "Prometheus configuration not found",
+                },
             )
 
         # Check Grafana dashboards
@@ -388,11 +451,17 @@ class InfrastructureValidator:
             self.log_result(
                 "monitoring",
                 "grafana_dashboards",
-                {"status": "WARNING", "message": "Grafana dashboards directory not found"},
+                {
+                    "status": "WARNING",
+                    "message": "Grafana dashboards directory not found",
+                },
             )
 
         # Check alert rules
-        alert_rules = ["monitoring/rules/alerts.yml", "monitoring/prometheus-alerts.yml"]
+        alert_rules = [
+            "monitoring/rules/alerts.yml",
+            "monitoring/prometheus-alerts.yml",
+        ]
 
         existing_rules = [r for r in alert_rules if os.path.exists(r)]
 
@@ -411,7 +480,10 @@ class InfrastructureValidator:
         logger.info("Validating backup configuration...")
 
         # Check backup scripts
-        backup_scripts = ["scripts/database-backup.sh", "scripts/backup/full-backup.sh"]
+        backup_scripts = [
+            "scripts/database-backup.sh",
+            "scripts/backup/full-backup.sh",
+        ]
 
         existing_scripts = [s for s in backup_scripts if os.path.exists(s)]
 
@@ -426,7 +498,10 @@ class InfrastructureValidator:
         )
 
         # Check backup documentation
-        backup_docs = ["docs/operations/BACKUP_RECOVERY.md", "docs/runbooks/BACKUP_RECOVERY.md"]
+        backup_docs = [
+            "docs/operations/BACKUP_RECOVERY.md",
+            "docs/runbooks/BACKUP_RECOVERY.md",
+        ]
 
         existing_docs = [d for d in backup_docs if os.path.exists(d)]
 
@@ -487,7 +562,10 @@ class InfrastructureValidator:
         logger.info("Validating deployment scripts...")
 
         # Check deployment scripts
-        deployment_scripts = ["deploy-production.sh", "scripts/deployment/deploy-production.sh"]
+        deployment_scripts = [
+            "deploy-production.sh",
+            "scripts/deployment/deploy-production.sh",
+        ]
 
         existing_scripts = [s for s in deployment_scripts if os.path.exists(s)]
 
@@ -500,8 +578,10 @@ class InfrastructureValidator:
             deployment_features = {
                 "health_checks": "health" in content.lower(),
                 "rollback_capability": "rollback" in content.lower(),
-                "zero_downtime": "zero" in content.lower() or "blue" in content.lower(),
-                "database_migration": "migrate" in content.lower() or "alembic" in content.lower(),
+                "zero_downtime": "zero" in content.lower()
+                or "blue" in content.lower(),
+                "database_migration": "migrate" in content.lower()
+                or "alembic" in content.lower(),
             }
 
             passed_features = sum(deployment_features.values())
@@ -520,7 +600,10 @@ class InfrastructureValidator:
             self.log_result(
                 "deployment",
                 "deployment_scripts",
-                {"status": "CRITICAL", "message": "No deployment scripts found"},
+                {
+                    "status": "CRITICAL",
+                    "message": "No deployment scripts found",
+                },
             )
 
     def validate_test_coverage(self):
@@ -528,7 +611,12 @@ class InfrastructureValidator:
         logger.info("Validating test coverage...")
 
         # Check test directories
-        test_dirs = ["tests/unit", "tests/integration", "tests/security", "tests/performance"]
+        test_dirs = [
+            "tests/unit",
+            "tests/integration",
+            "tests/security",
+            "tests/performance",
+        ]
         existing_dirs = [d for d in test_dirs if os.path.exists(d)]
 
         self.log_result(
@@ -573,8 +661,12 @@ class InfrastructureValidator:
         self.validate_test_coverage()
 
         # Calculate summary
-        total_tests = len(self.passes) + len(self.warnings) + len(self.critical_failures)
-        pass_rate = (len(self.passes) / total_tests) * 100 if total_tests > 0 else 0
+        total_tests = (
+            len(self.passes) + len(self.warnings) + len(self.critical_failures)
+        )
+        pass_rate = (
+            (len(self.passes) / total_tests) * 100 if total_tests > 0 else 0
+        )
 
         self.results["summary"] = {
             "total_tests": total_tests,
@@ -603,9 +695,13 @@ class InfrastructureValidator:
         print(f"Total Tests: {self.results['summary']['total_tests']}")
         print(f"Passed: {self.results['summary']['passed']}")
         print(f"Warnings: {self.results['summary']['warnings']}")
-        print(f"Critical Failures: {self.results['summary']['critical_failures']}")
+        print(
+            f"Critical Failures: {self.results['summary']['critical_failures']}"
+        )
         print(f"Pass Rate: {self.results['summary']['pass_rate']:.1f}%")
-        print(f"Production Ready: {'YES' if self.results['summary']['production_ready'] else 'NO'}")
+        print(
+            f"Production Ready: {'YES' if self.results['summary']['production_ready'] else 'NO'}"
+        )
         print("=" * 60)
 
         if self.results["summary"]["production_ready"]:
@@ -623,7 +719,9 @@ class InfrastructureValidator:
         """Generate markdown report"""
         with open(filename, "w") as f:
             f.write("# FreeAgentics Infrastructure Validation Report\n\n")
-            f.write(f"**Generated:** {datetime.now().strftime('%Y-%m-%d %H:%M:%S')}\n")
+            f.write(
+                f"**Generated:** {datetime.now().strftime('%Y-%m-%d %H:%M:%S')}\n"
+            )
             f.write(f"**Environment:** {self.results['environment']}\n\n")
 
             # Summary
@@ -632,7 +730,9 @@ class InfrastructureValidator:
             f.write(f"- **Total Tests:** {summary['total_tests']}\n")
             f.write(f"- **Passed:** {summary['passed']}\n")
             f.write(f"- **Warnings:** {summary['warnings']}\n")
-            f.write(f"- **Critical Failures:** {summary['critical_failures']}\n")
+            f.write(
+                f"- **Critical Failures:** {summary['critical_failures']}\n"
+            )
             f.write(f"- **Pass Rate:** {summary['pass_rate']:.1f}%\n")
             f.write(
                 f"- **Production Ready:** {'✅ YES' if summary['production_ready'] else '❌ NO'}\n\n"
@@ -657,9 +757,11 @@ class InfrastructureValidator:
             for category, tests in self.results["validation_results"].items():
                 f.write(f"### {category.replace('_', ' ').title()}\n\n")
                 for test_name, result in tests.items():
-                    status_icon = {"PASS": "✅", "WARNING": "⚠️", "CRITICAL": "❌"}.get(
-                        result.get("status", ""), "ℹ️"
-                    )
+                    status_icon = {
+                        "PASS": "✅",
+                        "WARNING": "⚠️",
+                        "CRITICAL": "❌",
+                    }.get(result.get("status", ""), "ℹ️")
                     f.write(
                         f"- {status_icon} **{test_name}**: {result.get('message', 'No message')}\n"
                     )

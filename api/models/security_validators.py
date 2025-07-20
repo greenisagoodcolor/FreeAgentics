@@ -6,9 +6,17 @@ class SecureInputModel(BaseModel):
 
     @validator("*", pre=True)
     def no_sql_injection(cls, v):
+        """Validate against SQL injection patterns."""
         if isinstance(v, str):
             # Check for common SQL injection patterns
-            sql_keywords = ["DROP", "DELETE", "INSERT", "UPDATE", "UNION", "SELECT"]
+            sql_keywords = [
+                "DROP",
+                "DELETE",
+                "INSERT",
+                "UPDATE",
+                "UNION",
+                "SELECT",
+            ]
             if any(keyword in v.upper() for keyword in sql_keywords):
                 # Allow these keywords only in specific fields
                 raise ValueError("Invalid input detected")
@@ -16,6 +24,7 @@ class SecureInputModel(BaseModel):
 
     @validator("*", pre=True)
     def no_xss(cls, v):
+        """Validate against XSS patterns."""
         if isinstance(v, str):
             # Basic XSS prevention
             if "<script" in v.lower() or "javascript:" in v.lower():

@@ -21,7 +21,9 @@ class DashboardGenerator:
         self.metrics_db = Path(metrics_db)
         self.coverage_db = Path(coverage_db)
 
-    def generate_dashboard(self, output_path: str = "tests/reporting/dashboard.html") -> str:
+    def generate_dashboard(
+        self, output_path: str = "tests/reporting/dashboard.html"
+    ) -> str:
         """Generate complete dashboard HTML."""
         # Collect all data
         dashboard_data = self._collect_dashboard_data()
@@ -66,9 +68,9 @@ class DashboardGenerator:
         # Get latest test run
         cursor.execute(
             """
-            SELECT test_run_id, timestamp, total_tests, passed_tests, failed_tests, 
+            SELECT test_run_id, timestamp, total_tests, passed_tests, failed_tests,
                    skipped_tests, error_tests, total_duration, environment
-            FROM test_runs 
+            FROM test_runs
             ORDER BY timestamp DESC LIMIT 1
         """
         )
@@ -81,9 +83,9 @@ class DashboardGenerator:
         # Get test count trends (last 7 days)
         cursor.execute(
             """
-            SELECT DATE(timestamp) as date, COUNT(*) as runs, 
+            SELECT DATE(timestamp) as date, COUNT(*) as runs,
                    AVG(CAST(passed_tests AS REAL) / total_tests * 100) as avg_pass_rate
-            FROM test_runs 
+            FROM test_runs
             WHERE timestamp >= datetime('now', '-7 days')
             GROUP BY DATE(timestamp)
             ORDER BY date
@@ -93,7 +95,9 @@ class DashboardGenerator:
         trends = cursor.fetchall()
         conn.close()
 
-        pass_rate = (latest_run[3] / latest_run[2]) * 100 if latest_run[2] > 0 else 0
+        pass_rate = (
+            (latest_run[3] / latest_run[2]) * 100 if latest_run[2] > 0 else 0
+        )
 
         return {
             "latest_run": {
@@ -123,7 +127,7 @@ class DashboardGenerator:
         cursor.execute(
             """
             SELECT test_run_id, timestamp, total_statements, total_missing, total_coverage
-            FROM coverage_runs 
+            FROM coverage_runs
             ORDER BY timestamp DESC LIMIT 1
         """
         )
@@ -137,7 +141,7 @@ class DashboardGenerator:
         cursor.execute(
             """
             SELECT DATE(timestamp) as date, AVG(total_coverage) as avg_coverage
-            FROM coverage_runs 
+            FROM coverage_runs
             WHERE timestamp >= datetime('now', '-7 days')
             GROUP BY DATE(timestamp)
             ORDER BY date
@@ -170,12 +174,12 @@ class DashboardGenerator:
 
         cursor.execute(
             """
-            SELECT DATE(timestamp) as date, 
+            SELECT DATE(timestamp) as date,
                    COUNT(*) as total_runs,
                    AVG(total_tests) as avg_tests,
                    AVG(CAST(passed_tests AS REAL) / total_tests * 100) as avg_pass_rate,
                    AVG(total_duration) as avg_duration
-            FROM test_runs 
+            FROM test_runs
             WHERE timestamp >= ?
             GROUP BY DATE(timestamp)
             ORDER BY date
@@ -210,10 +214,10 @@ class DashboardGenerator:
 
         cursor.execute(
             """
-            SELECT DATE(timestamp) as date, 
+            SELECT DATE(timestamp) as date,
                    AVG(total_coverage) as avg_coverage,
                    COUNT(*) as runs
-            FROM coverage_runs 
+            FROM coverage_runs
             WHERE timestamp >= ?
             GROUP BY DATE(timestamp)
             ORDER BY date
@@ -223,7 +227,9 @@ class DashboardGenerator:
 
         trends = []
         for row in cursor.fetchall():
-            trends.append({"date": row[0], "avg_coverage": row[1], "runs": row[2]})
+            trends.append(
+                {"date": row[0], "avg_coverage": row[1], "runs": row[2]}
+            )
 
         conn.close()
         return trends
@@ -238,9 +244,9 @@ class DashboardGenerator:
 
         cursor.execute(
             """
-            SELECT test_id, test_name, test_file, flaky_count, total_runs, 
+            SELECT test_id, test_name, test_file, flaky_count, total_runs,
                    flaky_percentage, first_flaky_run, last_flaky_run
-            FROM flaky_tests 
+            FROM flaky_tests
             WHERE resolved_at IS NULL
             ORDER BY flaky_percentage DESC
             LIMIT 20
@@ -275,9 +281,9 @@ class DashboardGenerator:
 
         cursor.execute(
             """
-            SELECT test_id, test_name, test_file, avg_duration, max_duration, 
+            SELECT test_id, test_name, test_file, avg_duration, max_duration,
                    slow_run_count, first_detected, last_detected
-            FROM slow_tests 
+            FROM slow_tests
             ORDER BY avg_duration DESC
             LIMIT 20
         """
@@ -312,7 +318,7 @@ class DashboardGenerator:
         cursor.execute(
             """
             SELECT file_path, first_detected, last_detected, times_detected
-            FROM zero_coverage_tracking 
+            FROM zero_coverage_tracking
             WHERE resolved_at IS NULL
             ORDER BY times_detected DESC
             LIMIT 20
@@ -378,9 +384,9 @@ class DashboardGenerator:
 
         cursor.execute(
             """
-            SELECT test_run_id, timestamp, total_tests, passed_tests, failed_tests, 
+            SELECT test_run_id, timestamp, total_tests, passed_tests, failed_tests,
                    total_duration, environment
-            FROM test_runs 
+            FROM test_runs
             ORDER BY timestamp DESC
             LIMIT 50
         """
@@ -427,7 +433,9 @@ class DashboardGenerator:
         # Calculate coverage health
         coverage_summary = self._get_coverage_summary()
         if coverage_summary and "latest_run" in coverage_summary:
-            metrics["coverage_health"] = coverage_summary["latest_run"]["total_coverage"]
+            metrics["coverage_health"] = coverage_summary["latest_run"][
+                "total_coverage"
+            ]
 
         # Calculate performance score (based on slow tests)
         slow_tests = self._get_slow_tests()
@@ -469,13 +477,13 @@ class DashboardGenerator:
                     padding: 0;
                     box-sizing: border-box;
                 }}
-                
+
                 body {{
                     font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
                     background-color: #f5f5f5;
                     color: #333;
                 }}
-                
+
                 .header {{
                     background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
                     color: white;
@@ -483,30 +491,30 @@ class DashboardGenerator:
                     text-align: center;
                     box-shadow: 0 2px 10px rgba(0,0,0,0.1);
                 }}
-                
+
                 .header h1 {{
                     font-size: 2.5rem;
                     margin-bottom: 0.5rem;
                 }}
-                
+
                 .header p {{
                     font-size: 1.1rem;
                     opacity: 0.9;
                 }}
-                
+
                 .dashboard-container {{
                     max-width: 1400px;
                     margin: 0 auto;
                     padding: 2rem;
                 }}
-                
+
                 .metrics-grid {{
                     display: grid;
                     grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
                     gap: 1.5rem;
                     margin-bottom: 2rem;
                 }}
-                
+
                 .metric-card {{
                     background: white;
                     padding: 1.5rem;
@@ -515,28 +523,28 @@ class DashboardGenerator:
                     text-align: center;
                     transition: transform 0.2s;
                 }}
-                
+
                 .metric-card:hover {{
                     transform: translateY(-2px);
                 }}
-                
+
                 .metric-value {{
                     font-size: 2.5rem;
                     font-weight: bold;
                     margin-bottom: 0.5rem;
                 }}
-                
+
                 .metric-label {{
                     font-size: 0.9rem;
                     color: #666;
                     text-transform: uppercase;
                     letter-spacing: 0.5px;
                 }}
-                
+
                 .good {{ color: #4caf50; }}
                 .warning {{ color: #ff9800; }}
                 .critical {{ color: #f44336; }}
-                
+
                 .chart-container {{
                     background: white;
                     padding: 1.5rem;
@@ -544,18 +552,18 @@ class DashboardGenerator:
                     box-shadow: 0 2px 10px rgba(0,0,0,0.1);
                     margin-bottom: 2rem;
                 }}
-                
+
                 .chart-title {{
                     font-size: 1.3rem;
                     margin-bottom: 1rem;
                     color: #333;
                 }}
-                
+
                 .chart-canvas {{
                     width: 100%;
                     height: 400px;
                 }}
-                
+
                 .table-container {{
                     background: white;
                     border-radius: 10px;
@@ -563,7 +571,7 @@ class DashboardGenerator:
                     overflow: hidden;
                     margin-bottom: 2rem;
                 }}
-                
+
                 .table-header {{
                     background: #f8f9fa;
                     padding: 1rem 1.5rem;
@@ -571,41 +579,41 @@ class DashboardGenerator:
                     font-weight: bold;
                     color: #333;
                 }}
-                
+
                 .table-content {{
                     max-height: 400px;
                     overflow-y: auto;
                 }}
-                
+
                 table {{
                     width: 100%;
                     border-collapse: collapse;
                 }}
-                
+
                 th, td {{
                     padding: 0.75rem 1rem;
                     text-align: left;
                     border-bottom: 1px solid #e9ecef;
                 }}
-                
+
                 th {{
                     background: #f8f9fa;
                     font-weight: 600;
                     color: #333;
                 }}
-                
+
                 .flaky-row {{
                     background-color: #ffebee;
                 }}
-                
+
                 .slow-row {{
                     background-color: #fff3e0;
                 }}
-                
+
                 .zero-coverage-row {{
                     background-color: #ffcdd2;
                 }}
-                
+
                 .progress-bar {{
                     background: #e9ecef;
                     border-radius: 10px;
@@ -613,23 +621,23 @@ class DashboardGenerator:
                     overflow: hidden;
                     margin-top: 0.5rem;
                 }}
-                
+
                 .progress-fill {{
                     height: 100%;
                     transition: width 0.3s ease;
                 }}
-                
+
                 .grid-2 {{
                     display: grid;
                     grid-template-columns: 1fr 1fr;
                     gap: 2rem;
                 }}
-                
+
                 @media (max-width: 768px) {{
                     .grid-2 {{
                         grid-template-columns: 1fr;
                     }}
-                    
+
                     .dashboard-container {{
                         padding: 1rem;
                     }}
@@ -641,7 +649,7 @@ class DashboardGenerator:
                 <h1>🧪 FreeAgentics Test Dashboard</h1>
                 <p>Generated on {datetime.now().strftime('%Y-%m-%d %H:%M:%S')}</p>
             </div>
-            
+
             <div class="dashboard-container">
                 <!-- Quality Metrics -->
                 <div class="metrics-grid">
@@ -662,7 +670,7 @@ class DashboardGenerator:
                         <div class="metric-label">Performance Score</div>
                     </div>
                 </div>
-                
+
                 <!-- Test and Coverage Summary -->
                 <div class="metrics-grid">
                     <div class="metric-card">
@@ -682,7 +690,7 @@ class DashboardGenerator:
                         <div class="metric-label">Flaky Tests</div>
                     </div>
                 </div>
-                
+
                 <!-- Charts -->
                 <div class="grid-2">
                     <div class="chart-container">
@@ -694,13 +702,13 @@ class DashboardGenerator:
                         <canvas id="coverageChart" class="chart-canvas"></canvas>
                     </div>
                 </div>
-                
+
                 <!-- Test Execution Duration -->
                 <div class="chart-container">
                     <div class="chart-title">Test Execution Duration</div>
                     <canvas id="durationChart" class="chart-canvas"></canvas>
                 </div>
-                
+
                 <!-- Data Tables -->
                 <div class="grid-2">
                     <div class="table-container">
@@ -718,7 +726,7 @@ class DashboardGenerator:
                             </table>
                         </div>
                     </div>
-                    
+
                     <div class="table-container">
                         <div class="table-header">🐌 Slow Tests</div>
                         <div class="table-content">
@@ -735,7 +743,7 @@ class DashboardGenerator:
                         </div>
                     </div>
                 </div>
-                
+
                 <div class="grid-2">
                     <div class="table-container">
                         <div class="table-header">📊 Zero Coverage Files</div>
@@ -752,7 +760,7 @@ class DashboardGenerator:
                             </table>
                         </div>
                     </div>
-                    
+
                     <div class="table-container">
                         <div class="table-header">⚠️ Coverage Gaps</div>
                         <div class="table-content">
@@ -769,7 +777,7 @@ class DashboardGenerator:
                         </div>
                     </div>
                 </div>
-                
+
                 <!-- Recent Test Runs -->
                 <div class="table-container">
                     <div class="table-header">📈 Recent Test Runs</div>
@@ -790,34 +798,34 @@ class DashboardGenerator:
                     </div>
                 </div>
             </div>
-            
+
             <script>
                 // Dashboard data
                 const dashboardData = {js_data};
-                
+
                 // Initialize dashboard
                 function initDashboard() {{
                     updateMetrics();
                     createCharts();
                     populateTables();
                 }}
-                
+
                 function updateMetrics() {{
                     const metrics = dashboardData.metrics_summary;
                     const coverage = dashboardData.coverage_summary;
                     const quality = dashboardData.quality_metrics;
-                    
+
                     // Quality metrics
                     document.getElementById('overall-score').textContent = quality.overall_score ? quality.overall_score.toFixed(1) + '%' : '--';
                     document.getElementById('test-reliability').textContent = quality.test_reliability ? quality.test_reliability.toFixed(1) + '%' : '--';
                     document.getElementById('coverage-health').textContent = quality.coverage_health ? quality.coverage_health.toFixed(1) + '%' : '--';
                     document.getElementById('performance-score').textContent = quality.performance_score ? quality.performance_score.toFixed(1) + '%' : '--';
-                    
+
                     // Test metrics
                     if (metrics.latest_run) {{
                         document.getElementById('total-tests').textContent = metrics.latest_run.total_tests;
                         document.getElementById('pass-rate').textContent = metrics.latest_run.pass_rate.toFixed(1) + '%';
-                        
+
                         // Color code pass rate
                         const passRateElement = document.getElementById('pass-rate');
                         if (metrics.latest_run.pass_rate >= 90) {{
@@ -828,11 +836,11 @@ class DashboardGenerator:
                             passRateElement.className = 'metric-value critical';
                         }}
                     }}
-                    
+
                     // Coverage metrics
                     if (coverage.latest_run) {{
                         document.getElementById('total-coverage').textContent = coverage.latest_run.total_coverage.toFixed(1) + '%';
-                        
+
                         // Color code coverage
                         const coverageElement = document.getElementById('total-coverage');
                         if (coverage.latest_run.total_coverage >= 80) {{
@@ -843,11 +851,11 @@ class DashboardGenerator:
                             coverageElement.className = 'metric-value critical';
                         }}
                     }}
-                    
+
                     // Flaky tests count
                     document.getElementById('flaky-count').textContent = dashboardData.flaky_tests.length;
                 }}
-                
+
                 function createCharts() {{
                     // Pass rate trend chart
                     const passRateCtx = document.getElementById('passRateChart').getContext('2d');
@@ -874,7 +882,7 @@ class DashboardGenerator:
                             }}
                         }}
                     }});
-                    
+
                     // Coverage trend chart
                     const coverageCtx = document.getElementById('coverageChart').getContext('2d');
                     new Chart(coverageCtx, {{
@@ -900,7 +908,7 @@ class DashboardGenerator:
                             }}
                         }}
                     }});
-                    
+
                     // Duration chart
                     const durationCtx = document.getElementById('durationChart').getContext('2d');
                     new Chart(durationCtx, {{
@@ -926,7 +934,7 @@ class DashboardGenerator:
                         }}
                     }});
                 }}
-                
+
                 function populateTables() {{
                     // Flaky tests table
                     const flakyTable = document.getElementById('flaky-tests-table').querySelector('tbody');
@@ -937,7 +945,7 @@ class DashboardGenerator:
                         row.insertCell(1).textContent = test.flaky_percentage.toFixed(1) + '%';
                         row.insertCell(2).textContent = test.flaky_count + '/' + test.total_runs;
                     }});
-                    
+
                     // Slow tests table
                     const slowTable = document.getElementById('slow-tests-table').querySelector('tbody');
                     dashboardData.slow_tests.forEach(test => {{
@@ -947,7 +955,7 @@ class DashboardGenerator:
                         row.insertCell(1).textContent = test.avg_duration.toFixed(2) + 's';
                         row.insertCell(2).textContent = test.max_duration.toFixed(2) + 's';
                     }});
-                    
+
                     // Zero coverage table
                     const zeroTable = document.getElementById('zero-coverage-table').querySelector('tbody');
                     dashboardData.zero_coverage_files.forEach(file => {{
@@ -957,7 +965,7 @@ class DashboardGenerator:
                         row.insertCell(1).textContent = file.times_detected;
                         row.insertCell(2).textContent = file.first_detected;
                     }});
-                    
+
                     // Coverage gaps table
                     const gapsTable = document.getElementById('coverage-gaps-table').querySelector('tbody');
                     dashboardData.coverage_gaps.forEach(gap => {{
@@ -966,7 +974,7 @@ class DashboardGenerator:
                         row.insertCell(1).textContent = gap.coverage_percent.toFixed(1) + '%';
                         row.insertCell(2).textContent = gap.missing_lines;
                     }});
-                    
+
                     // Test history table
                     const historyTable = document.getElementById('test-history-table').querySelector('tbody');
                     dashboardData.test_execution_history.forEach(run => {{
@@ -979,7 +987,7 @@ class DashboardGenerator:
                         row.insertCell(5).textContent = run.environment;
                     }});
                 }}
-                
+
                 // Initialize dashboard when page loads
                 document.addEventListener('DOMContentLoaded', initDashboard);
             </script>
@@ -989,7 +997,9 @@ class DashboardGenerator:
 
         return html_content
 
-    def generate_json_export(self, output_path: str = "tests/reporting/dashboard_data.json") -> str:
+    def generate_json_export(
+        self, output_path: str = "tests/reporting/dashboard_data.json"
+    ) -> str:
         """Export dashboard data as JSON."""
         data = self._collect_dashboard_data()
 

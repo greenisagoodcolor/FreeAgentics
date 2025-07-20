@@ -1,5 +1,5 @@
 """
-Performance Integration Module for FreeAgentics
+Performance Integration Module for FreeAgentics.
 
 This module provides a unified interface to enable all performance optimizations
 in the FreeAgentics system. It integrates:
@@ -29,12 +29,24 @@ from typing import Any, Dict, Optional
 from fastapi import FastAPI
 
 # Import all optimization modules
-from agents.optimized_agent_manager import OptimizationConfig, OptimizedAgentManager
-from api.performance_middleware import PerformanceConfig, setup_performance_middleware
+from agents.optimized_agent_manager import (
+    OptimizationConfig,
+    OptimizedAgentManager,
+)
+from api.performance_middleware import (
+    PerformanceConfig,
+    setup_performance_middleware,
+)
 from benchmarks.performance_benchmark_suite import PerformanceBenchmarkRunner
 from database.optimized_db import DatabaseConfig, initialize_optimized_db
-from observability.memory_optimizer import get_memory_optimizer, start_memory_optimization
-from observability.performance_monitor import get_performance_monitor, start_performance_monitoring
+from observability.memory_optimizer import (
+    get_memory_optimizer,
+    start_memory_optimization,
+)
+from observability.performance_monitor import (
+    get_performance_monitor,
+    start_performance_monitoring,
+)
 
 logger = logging.getLogger(__name__)
 
@@ -54,7 +66,9 @@ class PerformanceManager:
         # Performance configurations
         self.configs = self._create_default_configs()
 
-        logger.info(f"Performance manager initialized for {environment} environment")
+        logger.info(
+            f"Performance manager initialized for {environment} environment"
+        )
 
     def _create_default_configs(self) -> Dict[str, Any]:
         """Create default configurations for different environments."""
@@ -108,7 +122,9 @@ class PerformanceManager:
 
     async def initialize_all_optimizations(self):
         """Initialize all performance optimizations."""
-        logger.info("Starting comprehensive performance optimization initialization")
+        logger.info(
+            "Starting comprehensive performance optimization initialization"
+        )
 
         try:
             # 1. Start performance monitoring
@@ -132,7 +148,9 @@ class PerformanceManager:
             # 7. Validate all optimizations
             await self._validate_optimizations()
 
-            logger.info("All performance optimizations initialized successfully")
+            logger.info(
+                "All performance optimizations initialized successfully"
+            )
 
         except Exception as e:
             logger.error(f"Failed to initialize optimizations: {e}")
@@ -163,7 +181,9 @@ class PerformanceManager:
         self.memory_optimizer = get_memory_optimizer()
 
         self.optimizations_enabled["memory"] = True
-        logger.info(f"Memory optimization initialized for {workload_type} workload")
+        logger.info(
+            f"Memory optimization initialized for {workload_type} workload"
+        )
 
     async def _initialize_database_optimization(self):
         """Initialize database optimization."""
@@ -173,7 +193,9 @@ class PerformanceManager:
         config = self.configs["database"]
 
         # Set database URL (in production, get from environment)
-        database_url = os.getenv("DATABASE_URL", "postgresql://user:pass@localhost/freeagentics")
+        database_url = os.getenv(
+            "DATABASE_URL", "postgresql://user:pass@localhost/freeagentics"
+        )
         config.write_primary_url = database_url
 
         # Add read replicas if available
@@ -283,7 +305,9 @@ class PerformanceManager:
         async def run_benchmark_suite(suite_name: str):
             """Run a specific benchmark suite."""
             try:
-                results = await self.benchmark_runner.run_benchmark_suite(suite_name)
+                results = await self.benchmark_runner.run_benchmark_suite(
+                    suite_name
+                )
                 return {
                     "suite": suite_name,
                     "results": [
@@ -318,7 +342,9 @@ class PerformanceManager:
         # Check threading optimization
         if self.optimizations_enabled["threading"]:
             threading_stats = self.agent_manager.get_statistics()
-            validation_results["threading"] = threading_stats["thread_pool"]["workers"] > 0
+            validation_results["threading"] = (
+                threading_stats["thread_pool"]["workers"] > 0
+            )
 
         # Check database optimization
         if self.optimizations_enabled["database"]:
@@ -358,19 +384,28 @@ class PerformanceManager:
             raise RuntimeError("Benchmarking not initialized")
 
         # Run all benchmark suites
-        suite_names = ["threading", "database", "api", "memory", "agent_coordination"]
+        suite_names = [
+            "threading",
+            "database",
+            "api",
+            "memory",
+            "agent_coordination",
+        ]
         all_results = {}
 
         for suite_name in suite_names:
             try:
                 logger.info(f"Running {suite_name} benchmark suite")
-                results = await self.benchmark_runner.run_benchmark_suite(suite_name)
+                results = await self.benchmark_runner.run_benchmark_suite(
+                    suite_name
+                )
                 all_results[suite_name] = results
 
                 # Log summary
                 successful = [r for r in results if r.success]
                 avg_throughput = (
-                    sum(r.throughput_ops_per_second for r in successful) / len(successful)
+                    sum(r.throughput_ops_per_second for r in successful)
+                    / len(successful)
                     if successful
                     else 0
                 )
@@ -442,7 +477,9 @@ class PerformanceManager:
 
 
 # Convenience functions for easy integration
-async def create_optimized_system(environment: str = "production") -> PerformanceManager:
+async def create_optimized_system(
+    environment: str = "production",
+) -> PerformanceManager:
     """Create a fully optimized FreeAgentics system."""
     manager = PerformanceManager(environment)
     await manager.initialize_all_optimizations()
@@ -483,12 +520,18 @@ async def main():
         for suite, results in benchmark_results["suite_results"].items():
             if isinstance(results, list):
                 successful = [r for r in results if r.success]
-                print(f"  {suite}: {len(successful)}/{len(results)} successful")
+                print(
+                    f"  {suite}: {len(successful)}/{len(results)} successful"
+                )
 
         report = benchmark_results["comprehensive_report"]
         print(f"\nOverall Performance:")
-        print(f"  Success rate: {report['overall_stats']['success_rate']:.1f}%")
-        print(f"  Average throughput: {report['overall_stats']['avg_throughput']:.1f} ops/sec")
+        print(
+            f"  Success rate: {report['overall_stats']['success_rate']:.1f}%"
+        )
+        print(
+            f"  Average throughput: {report['overall_stats']['avg_throughput']:.1f} ops/sec"
+        )
 
     except Exception as e:
         print(f"Benchmark failed: {e}")

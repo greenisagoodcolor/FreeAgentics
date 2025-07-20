@@ -76,7 +76,7 @@ groups:
       # API response time high
       - alert: HighAPIResponseTime
         expr: |
-          histogram_quantile(0.95, 
+          histogram_quantile(0.95,
             rate(http_request_duration_seconds_bucket{job="freeagentics-backend"}[5m])
           ) > 0.5
         for: 3m
@@ -312,7 +312,7 @@ groups:
       - alert: HighDiskUsage
         expr: |
           (
-            node_filesystem_avail_bytes{mountpoint="/"} / 
+            node_filesystem_avail_bytes{mountpoint="/"} /
             node_filesystem_size_bytes{mountpoint="/"}
           ) < 0.1
         for: 5m

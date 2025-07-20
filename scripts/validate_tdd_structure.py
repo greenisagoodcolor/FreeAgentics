@@ -20,10 +20,10 @@ class TDDStructureValidator:
 
     def __init__(self, project_root: str = "."):
         self.project_root = Path(project_root)
-        self.production_modules = set()
-        self.test_modules = set()
-        self.errors = []
-        self.warnings = []
+        self.production_modules: Set[str] = set()
+        self.test_modules: Set[str] = set()
+        self.errors: List[str] = []
+        self.warnings: List[str] = []
 
     def find_production_modules(self) -> Set[str]:
         """Find all production Python modules."""
@@ -47,7 +47,9 @@ class TDDStructureValidator:
                     if not py_file.name.startswith("__"):
                         # Convert to module path
                         rel_path = py_file.relative_to(self.project_root)
-                        module_path = str(rel_path.with_suffix("")).replace("/", ".")
+                        module_path = str(rel_path.with_suffix("")).replace(
+                            "/", "."
+                        )
                         modules.add(module_path)
 
         return modules
@@ -91,13 +93,17 @@ class TDDStructureValidator:
                 possible_test_names.extend(
                     [
                         f"{module_parts[0]}.{module_parts[1]}.test_{module_parts[-1]}",
-                        f"unit.test_{'.'.join(module_parts)}".replace(".", "_"),
+                        f"unit.test_{'.'.join(module_parts)}".replace(
+                            ".", "_"
+                        ),
                     ]
                 )
 
             has_test = False
             for test_name in possible_test_names:
-                if any(test_name in test_mod for test_mod in self.test_modules):
+                if any(
+                    test_name in test_mod for test_mod in self.test_modules
+                ):
                     has_test = True
                     break
 
@@ -122,7 +128,9 @@ class TDDStructureValidator:
             # Check if the tested module exists in production
             module_exists = False
             for prod_module in self.production_modules:
-                if tested_module in prod_module or prod_module.endswith(tested_module):
+                if tested_module in prod_module or prod_module.endswith(
+                    tested_module
+                ):
                     module_exists = True
                     break
 
@@ -133,7 +141,7 @@ class TDDStructureValidator:
 
     def check_test_structure(self) -> Dict[str, List[str]]:
         """Check test directory structure follows TDD best practices."""
-        structure_issues = {
+        structure_issues: Dict[str, List[str]] = {
             "missing_unit_tests": [],
             "missing_integration_tests": [],
             "poor_organization": [],
@@ -141,20 +149,28 @@ class TDDStructureValidator:
 
         test_dir = self.project_root / "tests"
         if not test_dir.exists():
-            structure_issues["poor_organization"].append("No tests directory found")
+            structure_issues["poor_organization"].append(
+                "No tests directory found"
+            )
             return structure_issues
 
         # Check for proper test categorization
         required_dirs = ["unit", "integration", "e2e"]
         for req_dir in required_dirs:
             if not (test_dir / req_dir).exists():
-                structure_issues["poor_organization"].append(f"Missing {req_dir} test directory")
+                structure_issues["poor_organization"].append(
+                    f"Missing {req_dir} test directory"
+                )
 
         return structure_issues
 
     def analyze_test_quality(self) -> Dict[str, List[str]]:
         """Analyze test quality metrics."""
-        quality_issues = {"empty_tests": [], "no_assertions": [], "poor_naming": []}
+        quality_issues: Dict[str, List[str]] = {
+            "empty_tests": [],
+            "no_assertions": [],
+            "poor_naming": [],
+        }
 
         test_dir = self.project_root / "tests"
         if not test_dir.exists():
@@ -169,7 +185,9 @@ class TDDStructureValidator:
                 tree = ast.parse(content)
 
                 for node in ast.walk(tree):
-                    if isinstance(node, ast.FunctionDef) and node.name.startswith("test_"):
+                    if isinstance(
+                        node, ast.FunctionDef
+                    ) and node.name.startswith("test_"):
                         # Check if test has assertions
                         has_assertion = False
                         for child in ast.walk(node):
@@ -182,11 +200,15 @@ class TDDStructureValidator:
                                 break
 
                         if not has_assertion:
-                            quality_issues["no_assertions"].append(f"{test_file}::{node.name}")
+                            quality_issues["no_assertions"].append(
+                                f"{test_file}::{node.name}"
+                            )
 
                         # Check naming convention
                         if len(node.name) < 10:  # Very short test names
-                            quality_issues["poor_naming"].append(f"{test_file}::{node.name}")
+                            quality_issues["poor_naming"].append(
+                                f"{test_file}::{node.name}"
+                            )
 
             except Exception as e:
                 self.warnings.append(f"Could not analyze {test_file}: {e}")
@@ -208,7 +230,10 @@ class TDDStructureValidator:
         missing_tests = self.check_test_coverage_existence()
         if missing_tests:
             self.errors.extend(
-                [f"Missing tests for production module: {module}" for module in missing_tests]
+                [
+                    f"Missing tests for production module: {module}"
+                    for module in missing_tests
+                ]
             )
 
         # Check for orphaned tests
@@ -225,15 +250,32 @@ class TDDStructureValidator:
         structure_issues = self.check_test_structure()
         for category, issues in structure_issues.items():
             if issues:
-                self.warnings.extend([f"Structure issue ({category}): {issue}" for issue in issues])
+                self.warnings.extend(
+                    [
+                        f"Structure issue ({category}): {issue}"
+                        for issue in issues
+                    ]
+                )
 
         # Analyze test quality
         quality_issues = self.analyze_test_quality()
         for category, issues in quality_issues.items():
-            if issues and category != "poor_naming":  # Treat poor naming as warning
-                self.errors.extend([f"Quality issue ({category}): {issue}" for issue in issues])
+            if (
+                issues and category != "poor_naming"
+            ):  # Treat poor naming as warning
+                self.errors.extend(
+                    [
+                        f"Quality issue ({category}): {issue}"
+                        for issue in issues
+                    ]
+                )
             elif issues:
-                self.warnings.extend([f"Quality issue ({category}): {issue}" for issue in issues])
+                self.warnings.extend(
+                    [
+                        f"Quality issue ({category}): {issue}"
+                        for issue in issues
+                    ]
+                )
 
         return len(self.errors) == 0
 

@@ -35,10 +35,10 @@ warning() {
 create_backup_dir() {
     log "Creating backup directory: $BACKUP_DIR"
     mkdir -p "$BACKUP_DIR"
-    
+
     # Set proper permissions
     chmod 750 "$BACKUP_DIR"
-    
+
     # Create subdirectories
     mkdir -p "$BACKUP_DIR/daily"
     mkdir -p "$BACKUP_DIR/weekly"
@@ -48,18 +48,18 @@ create_backup_dir() {
 # Get database configuration
 get_db_config() {
     local env_file="$PROJECT_ROOT/.env.$ENVIRONMENT"
-    
+
     if [[ ! -f "$env_file" ]]; then
         error "Environment file not found: $env_file"
         exit 1
     fi
-    
+
     # Extract database configuration
     DB_HOST=$(grep -E '^DATABASE_HOST=' "$env_file" | cut -d'=' -f2 | tr -d '"' || echo "postgres")
     DB_PORT=$(grep -E '^DATABASE_PORT=' "$env_file" | cut -d'=' -f2 | tr -d '"' || echo "5432")
     DB_NAME=$(grep -E '^DATABASE_NAME=' "$env_file" | cut -d'=' -f2 | tr -d '"' || echo "freeagentics")
     DB_USER=$(grep -E '^DATABASE_USER=' "$env_file" | cut -d'=' -f2 | tr -d '"' || echo "freeagentics")
-    
+
     log "Database configuration:"
     log "  Host: $DB_HOST"
     log "  Port: $DB_PORT"
@@ -71,16 +71,16 @@ get_db_config() {
 create_backup() {
     local backup_type="$1"
     local timestamp="$2"
-    
+
     log "Starting $backup_type backup..."
-    
+
     # Generate backup filename
     local backup_filename="freeagentics_${ENVIRONMENT}_${backup_type}_${timestamp}.sql"
     local backup_path="$BACKUP_DIR/$backup_type/$backup_filename"
-    
+
     # Create backup using pg_dump
     log "Running pg_dump..."
-    
+
     if docker ps | grep -q "freeagentics.*postgres"; then
         # Use docker exec if postgres is running in container
         docker exec freeagentics-postgres pg_dump \
@@ -106,26 +106,26 @@ create_backup() {
             --verbose \
             > "$backup_path"
     fi
-    
+
     if [[ $? -eq 0 ]] && [[ -f "$backup_path" ]] && [[ -s "$backup_path" ]]; then
         log "Backup created successfully: $backup_path"
-        
+
         # Get backup size
         local backup_size
         backup_size=$(du -h "$backup_path" | cut -f1)
         log "Backup size: $backup_size"
-        
+
         # Compress backup if enabled
         if [[ "$COMPRESS" == "true" ]]; then
             log "Compressing backup..."
             gzip "$backup_path"
             backup_path="${backup_path}.gz"
-            
+
             local compressed_size
             compressed_size=$(du -h "$backup_path" | cut -f1)
             log "Compressed size: $compressed_size"
         fi
-        
+
         # Encrypt backup if enabled
         if [[ "$ENCRYPT" == "true" ]] && [[ -n "$ENCRYPTION_KEY" ]]; then
             log "Encrypting backup..."
@@ -134,13 +134,13 @@ create_backup() {
             backup_path="${backup_path}.enc"
             log "Backup encrypted: $backup_path"
         fi
-        
+
         # Set proper permissions
         chmod 600 "$backup_path"
-        
+
         # Verify backup integrity
         verify_backup "$backup_path"
-        
+
         echo "$backup_path"
     else
         error "Backup creation failed!"
@@ -151,9 +151,9 @@ create_backup() {
 # Verify backup integrity
 verify_backup() {
     local backup_path="$1"
-    
+
     log "Verifying backup integrity..."
-    
+
     if [[ "$backup_path" == *.gz ]]; then
         # Verify gzip integrity
         if gzip -t "$backup_path"; then
@@ -185,32 +185,32 @@ verify_backup() {
 # Clean old backups
 cleanup_old_backups() {
     log "Cleaning up old backups..."
-    
+
     # Clean daily backups older than retention period
     find "$BACKUP_DIR/daily" -name "*.sql*" -mtime +$RETENTION_DAYS -delete
-    
+
     # Clean weekly backups older than 4 weeks
     find "$BACKUP_DIR/weekly" -name "*.sql*" -mtime +28 -delete
-    
+
     # Clean monthly backups older than 12 months
     find "$BACKUP_DIR/monthly" -name "*.sql*" -mtime +365 -delete
-    
+
     log "Backup cleanup completed"
 }
 
 # Upload backup to cloud storage
 upload_to_cloud() {
     local backup_path="$1"
-    
+
     if [[ -z "${AWS_S3_BUCKET:-}" ]]; then
         warning "AWS_S3_BUCKET not set, skipping cloud upload"
         return
     fi
-    
+
     log "Uploading backup to S3..."
-    
+
     local s3_key="backups/freeagentics/$(basename "$backup_path")"
-    
+
     if aws s3 cp "$backup_path" "s3://$AWS_S3_BUCKET/$s3_key"; then
         log "✓ Backup uploaded to S3: s3://$AWS_S3_BUCKET/$s3_key"
     else
@@ -223,7 +223,7 @@ send_notifications() {
     local status="$1"
     local backup_path="$2"
     local backup_size="$3"
-    
+
     # Slack notification
     if [[ -n "${SLACK_WEBHOOK:-}" ]]; then
         local color
@@ -232,7 +232,7 @@ send_notifications() {
         else
             color="danger"
         fi
-        
+
         curl -X POST -H 'Content-type: application/json' \
             --data "{
                 \"attachments\": [{
@@ -249,12 +249,12 @@ send_notifications() {
             }" \
             "$SLACK_WEBHOOK" || true
     fi
-    
+
     # Email notification
     if [[ -n "${BACKUP_EMAIL:-}" ]]; then
         local subject="FreeAgentics Database Backup $status"
         local body="Environment: $ENVIRONMENT\nBackup Path: $backup_path\nSize: $backup_size\nTimestamp: $(date)"
-        
+
         echo -e "$body" | mail -s "$subject" "$BACKUP_EMAIL" || true
     fi
 }
@@ -263,17 +263,17 @@ send_notifications() {
 restore_backup() {
     local backup_path="$1"
     local target_db="${2:-${DB_NAME}_restore}"
-    
+
     log "Restoring from backup: $backup_path"
-    
+
     if [[ ! -f "$backup_path" ]]; then
         error "Backup file not found: $backup_path"
         exit 1
     fi
-    
+
     # Prepare backup file for restoration
     local temp_file="/tmp/restore_$(date +%s).sql"
-    
+
     if [[ "$backup_path" == *.gz ]]; then
         gunzip -c "$backup_path" > "$temp_file"
     elif [[ "$backup_path" == *.enc ]]; then
@@ -285,10 +285,10 @@ restore_backup() {
     else
         cp "$backup_path" "$temp_file"
     fi
-    
+
     # Create target database
     log "Creating target database: $target_db"
-    
+
     if docker ps | grep -q "freeagentics.*postgres"; then
         docker exec freeagentics-postgres createdb -U "$DB_USER" "$target_db" || true
         docker exec -i freeagentics-postgres psql -U "$DB_USER" -d "$target_db" < "$temp_file"
@@ -296,14 +296,14 @@ restore_backup() {
         PGPASSWORD="$DB_PASSWORD" createdb -h "$DB_HOST" -p "$DB_PORT" -U "$DB_USER" "$target_db" || true
         PGPASSWORD="$DB_PASSWORD" psql -h "$DB_HOST" -p "$DB_PORT" -U "$DB_USER" -d "$target_db" < "$temp_file"
     fi
-    
+
     if [[ $? -eq 0 ]]; then
         log "✓ Backup restored successfully to database: $target_db"
     else
         error "✗ Backup restoration failed"
         exit 1
     fi
-    
+
     # Clean up temporary file
     rm -f "$temp_file"
 }
@@ -312,14 +312,14 @@ restore_backup() {
 main() {
     local action="${2:-backup}"
     local timestamp=$(date +%Y%m%d_%H%M%S)
-    
+
     case "$action" in
         "backup")
             log "Starting database backup process for $ENVIRONMENT"
-            
+
             create_backup_dir
             get_db_config
-            
+
             # Determine backup type based on day
             local backup_type="daily"
             if [[ $(date +%u) -eq 7 ]]; then
@@ -327,47 +327,47 @@ main() {
             elif [[ $(date +%d) -eq 01 ]]; then
                 backup_type="monthly"
             fi
-            
+
             # Create backup
             local backup_path
             backup_path=$(create_backup "$backup_type" "$timestamp")
-            
+
             # Get backup size
             local backup_size
             backup_size=$(du -h "$backup_path" | cut -f1)
-            
+
             # Upload to cloud if configured
             upload_to_cloud "$backup_path"
-            
+
             # Clean old backups
             cleanup_old_backups
-            
+
             # Send notifications
             send_notifications "success" "$backup_path" "$backup_size"
-            
+
             log "Backup process completed successfully"
             log "Backup location: $backup_path"
             log "Backup size: $backup_size"
             ;;
-            
+
         "restore")
             local backup_file="$3"
             local target_db="$4"
-            
+
             if [[ -z "$backup_file" ]]; then
                 error "Backup file path required for restore"
                 exit 1
             fi
-            
+
             get_db_config
             restore_backup "$backup_file" "$target_db"
             ;;
-            
+
         "list")
             log "Available backups:"
             find "$BACKUP_DIR" -name "*.sql*" -type f -exec ls -lh {} \; | sort -k6,7
             ;;
-            
+
         *)
             echo "Usage: $0 [environment] [action] [options]"
             echo "Actions:"

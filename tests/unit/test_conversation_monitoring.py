@@ -16,7 +16,7 @@ from knowledge_graph.conversation_monitoring import (
     ConversationEventType,
     ConversationMonitor,
 )
-from knowledge_graph.graph_engine import GraphEngine
+from knowledge_graph.graph_engine import KnowledgeGraph as GraphEngine
 
 
 class TestConversationMonitoring:
@@ -136,7 +136,9 @@ class TestConversationMonitoring:
         message_id = uuid.uuid4()
 
         conversation = Conversation(
-            id=conversation_id, title="Python Help", created_at=datetime.utcnow()
+            id=conversation_id,
+            title="Python Help",
+            created_at=datetime.utcnow(),
         )
 
         message = Message(
@@ -222,8 +224,14 @@ class TestConversationMonitoring:
         assert ConversationEventType.MESSAGE_ADDED.value == "message_added"
         assert ConversationEventType.MESSAGE_UPDATED.value == "message_updated"
         assert ConversationEventType.MESSAGE_DELETED.value == "message_deleted"
-        assert ConversationEventType.CONVERSATION_CREATED.value == "conversation_created"
-        assert ConversationEventType.CONVERSATION_UPDATED.value == "conversation_updated"
+        assert (
+            ConversationEventType.CONVERSATION_CREATED.value
+            == "conversation_created"
+        )
+        assert (
+            ConversationEventType.CONVERSATION_UPDATED.value
+            == "conversation_updated"
+        )
 
     @pytest.mark.asyncio
     async def test_concurrent_message_processing(self):

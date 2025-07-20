@@ -11,10 +11,15 @@ from datetime import datetime, timedelta
 import pytest
 from sqlalchemy.orm import Session
 
-from database.models import Agent, AgentRole, AgentStatus, Coalition, CoalitionStatus
+from database.models import (
+    Agent,
+    AgentRole,
+    AgentStatus,
+    Coalition,
+    CoalitionStatus,
+)
 from tests.db_infrastructure.factories import AgentFactory, CoalitionFactory
-from tests.db_infrastructure.fixtures import db_session
-from tests.db_infrastructure.test_config import DatabaseTestCase
+from tests.db_infrastructure.fixtures import DatabaseTestCase, db_session
 
 
 class TestCoalitionDatabase(DatabaseTestCase):
@@ -131,7 +136,12 @@ class TestCoalitionDatabase(DatabaseTestCase):
         # Assign different roles
         from database.models import agent_coalition_association
 
-        roles = [AgentRole.LEADER, AgentRole.COORDINATOR, AgentRole.MEMBER, AgentRole.OBSERVER]
+        roles = [
+            AgentRole.LEADER,
+            AgentRole.COORDINATOR,
+            AgentRole.MEMBER,
+            AgentRole.OBSERVER,
+        ]
 
         for agent, role in zip(agents, roles):
             db_session.execute(
@@ -157,7 +167,8 @@ class TestCoalitionDatabase(DatabaseTestCase):
         """Test tracking coalition performance over time."""
         # Create active coalition
         coalition = CoalitionFactory(
-            status=CoalitionStatus.ACTIVE, objectives={"goal": "maximize_efficiency"}
+            status=CoalitionStatus.ACTIVE,
+            objectives={"goal": "maximize_efficiency"},
         )
         agents = [AgentFactory(status=AgentStatus.ACTIVE) for _ in range(3)]
 
@@ -182,7 +193,9 @@ class TestCoalitionDatabase(DatabaseTestCase):
                 "efficiency": efficiency,
                 "uptime_hours": hour,
                 "task_completion_rate": 0.8 + (hour * 0.02),
-                "timestamp": (datetime.utcnow() + timedelta(hours=hour)).isoformat(),
+                "timestamp": (
+                    datetime.utcnow() + timedelta(hours=hour)
+                ).isoformat(),
             }
 
             performance_history.append(
@@ -202,7 +215,9 @@ class TestCoalitionDatabase(DatabaseTestCase):
 
         # Verify we can query historical data
         assert len(performance_history) == 5
-        assert performance_history[-1]["efficiency"] == 2.0  # 40 tasks / 20 resources
+        assert (
+            performance_history[-1]["efficiency"] == 2.0
+        )  # 40 tasks / 20 resources
 
     def test_multi_coalition_agent_membership(self, db_session: Session):
         """Test agents being members of multiple coalitions."""
@@ -228,17 +243,25 @@ class TestCoalitionDatabase(DatabaseTestCase):
 
         for i, coalition in enumerate(coalitions):
             # Add versatile agent with different roles
-            role = [AgentRole.COORDINATOR, AgentRole.MEMBER, AgentRole.OBSERVER][i]
+            role = [
+                AgentRole.COORDINATOR,
+                AgentRole.MEMBER,
+                AgentRole.OBSERVER,
+            ][i]
             db_session.execute(
                 agent_coalition_association.insert().values(
-                    agent_id=versatile_agent.id, coalition_id=coalition.id, role=role
+                    agent_id=versatile_agent.id,
+                    coalition_id=coalition.id,
+                    role=role,
                 )
             )
 
             # Add some other agents too
             db_session.execute(
                 agent_coalition_association.insert().values(
-                    agent_id=other_agents[i].id, coalition_id=coalition.id, role=AgentRole.MEMBER
+                    agent_id=other_agents[i].id,
+                    coalition_id=coalition.id,
+                    role=AgentRole.MEMBER,
                 )
             )
 
@@ -260,7 +283,9 @@ class TestCoalitionDatabase(DatabaseTestCase):
             assert len(agent.coalitions) == 1
             assert agent.coalitions[0] == coalitions[i]
 
-    def test_coalition_trust_and_contribution_tracking(self, db_session: Session):
+    def test_coalition_trust_and_contribution_tracking(
+        self, db_session: Session
+    ):
         """Test tracking trust scores and contributions within coalitions."""
         # Create coalition and agents
         coalition = CoalitionFactory(name="Trust Test Coalition")
@@ -357,7 +382,7 @@ class TestCoalitionDatabase(DatabaseTestCase):
         # 1. Find all active coalitions with more than 5 members
         from sqlalchemy import func
 
-        active_large_coalitions = (
+        _active_large_coalitions = (
             db_session.query(Coalition)
             .join(Coalition.agents)
             .filter(Coalition.status == CoalitionStatus.ACTIVE)
@@ -388,7 +413,9 @@ class TestCoalitionDatabase(DatabaseTestCase):
                 Coalition.id,
                 Coalition.name,
                 func.count(Agent.id).label("member_count"),
-                func.avg(agent_coalition_association.c.trust_score).label("avg_trust"),
+                func.avg(agent_coalition_association.c.trust_score).label(
+                    "avg_trust"
+                ),
             )
             .select_from(Coalition)
             .join(agent_coalition_association)

@@ -30,15 +30,18 @@
 ## Key Findings
 
 1. **The 82% reduction claim is actually conservative**
+
    - Actual reduction: 88.1% (260 → 31 packages)
    - Production requirements: 35 packages (86.5% reduction)
 
-2. **PyMDP IS installed**
+1. **PyMDP IS installed**
+
    - Package name: inferactively-pymdp==0.0.7.1
    - Successfully imports
    - But code doesn't actually use it properly
 
-3. **Package Organization**
+1. **Package Organization**
+
    - Core: Minimal essentials
    - Dev: Includes core + testing tools
    - Production: Standalone minimal set
@@ -46,11 +49,13 @@
 ## Corrections to Previous Claims
 
 1. **Dependency count was actually UNDERSTATED**
+
    - Claimed: 47 core packages
    - Actual: 31 core packages
    - Better than claimed!
 
-2. **PyMDP availability**
+1. **PyMDP availability**
+
    - Previously stated: "Not installed"
    - Reality: Installed but not properly utilized
 

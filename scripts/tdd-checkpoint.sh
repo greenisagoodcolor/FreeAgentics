@@ -35,9 +35,9 @@ OVERALL_SUCCESS=true
 run_check() {
     local check_name="$1"
     local command="$2"
-    
+
     print_status "Running $check_name..."
-    
+
     if eval "$command"; then
         print_success "$check_name: ✅ PASSED"
         return 0
