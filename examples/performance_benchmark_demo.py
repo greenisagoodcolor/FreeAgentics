@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 """
-Performance Benchmark Demo
+Performance Benchmark Demo.
 =========================
 
 This script demonstrates how to use the performance benchmarking system
@@ -49,12 +49,12 @@ def demo_memory_tracking():
         data.append(chunk)
 
         current_mem = tracker.sample()
-        print(f"After chunk {i+1}: {current_mem:.2f} MB")
+        print(f"After chunk {i + 1}: {current_mem:.2f} MB")
 
         time.sleep(0.1)
 
     start, end, peak = tracker.stop()
-    print(f"\nMemory summary:")
+    print("\nMemory summary:")
     print(f"  Start: {start:.2f} MB")
     print(f"  End: {end:.2f} MB")
     print(f"  Peak: {peak:.2f} MB")

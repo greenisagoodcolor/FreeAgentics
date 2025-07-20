@@ -373,7 +373,7 @@ class GridWorld:
             "step_count": self.step_count,
         }
 
-    def step(self):
+    def step(self) -> None:
         """Advance world by one time step."""
         self.step_count += 1
 
@@ -384,7 +384,7 @@ class GridWorld:
         # Could add other world dynamics here
         logger.debug(f"World step {self.step_count}")
 
-    def reset(self):
+    def reset(self) -> None:
         """Reset the world to initial state."""
         self.step_count = 0
         self.agents.clear()
@@ -445,7 +445,7 @@ class GridWorld:
             },
         }
 
-    def load_state(self, state: Dict[str, Any]):
+    def load_state(self, state: Dict[str, Any]) -> None:
         """Load world state from dictionary.
 
         Args:

@@ -11,7 +11,7 @@ class ErrorHandlerFallback:
 
     def __init__(self, agent_id: str) -> None:
         """Initialize the fallback error handler.
-        
+
         Args:
             agent_id: Unique identifier for the agent.
         """
@@ -54,7 +54,7 @@ class PyMDPErrorHandlerFallback:
 
     def __init__(self, agent_id: str, max_recovery_attempts: int = 3) -> None:
         """Initialize the PyMDP fallback error handler.
-        
+
         Args:
             agent_id: Unique identifier for the agent.
             max_recovery_attempts: Maximum number of recovery attempts.

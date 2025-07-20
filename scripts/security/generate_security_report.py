@@ -458,7 +458,7 @@ class SecurityReportGenerator:
             return (
                 result.stdout.strip() if result.returncode == 0 else "unknown"
             )
-        except:
+        except Exception:
             return "unknown"
 
     def load_sast_results(self, sast_dir: Path):

@@ -1,5 +1,5 @@
 """
-Database Indexing Strategy for Multi-Agent Systems
+Database Indexing Strategy for Multi-Agent Systems.
 
 Implements intelligent indexing strategies including:
 - Automatic index recommendation based on query patterns
@@ -25,6 +25,7 @@ class IndexUsageMonitor:
     """Monitors index usage and recommends optimizations."""
 
     def __init__(self):
+        """Initialize the index usage monitor."""
         self.index_stats: Dict[str, Dict[str, Any]] = {}
         self.missing_index_recommendations: List[Dict[str, Any]] = []
         self.redundant_indexes: List[str] = []
@@ -60,7 +61,7 @@ class IndexUsageMonitor:
         result = await session.execute(index_usage_query)
         indexes = result.fetchall()
 
-        usage_report = {
+        usage_report: Dict[str, Any] = {
             "total_indexes": len(indexes),
             "unused_indexes": [],
             "rarely_used_indexes": [],
@@ -221,6 +222,7 @@ class PartitioningStrategy:
     """Implements partitioning strategies for time-series data."""
 
     def __init__(self):
+        """Initialize the partitioning strategy."""
         self.partition_config = {
             "agents": {
                 "partition_column": "created_at",
@@ -290,7 +292,6 @@ class PartitioningStrategy:
     ):
         """Create monthly partitions."""
         current_date = datetime.now()
-        partition_col = config["partition_column"]
 
         # Create partitions for past 3 months and next 3 months
         for i in range(-3, 4):
@@ -322,11 +323,71 @@ class PartitioningStrategy:
                 await session.rollback()
                 logger.warning(f"Partition may already exist: {e}")
 
+    async def _create_daily_partitions(
+        self, session: AsyncSession, table_name: str, config: Dict[str, Any]
+    ):
+        """Create daily partitions."""
+        current_date = datetime.now()
+
+        # Create partitions for past 7 days and next 7 days
+        for i in range(-7, 8):
+            partition_date = current_date + timedelta(days=i)
+            partition_name = f"{table_name}_partitioned_{partition_date.strftime('%Y_%m_%d')}"
+
+            start_date = partition_date.replace(
+                hour=0, minute=0, second=0, microsecond=0
+            )
+            end_date = start_date + timedelta(days=1)
+
+            create_partition_sql = f"""
+                CREATE TABLE IF NOT EXISTS {partition_name}
+                PARTITION OF {table_name}_partitioned
+                FOR VALUES FROM ('{start_date.strftime('%Y-%m-%d')}')
+                TO ('{end_date.strftime('%Y-%m-%d')}')
+            """
+
+            try:
+                await session.execute(text(create_partition_sql))
+                await session.commit()
+                logger.info(f"Created daily partition: {partition_name}")
+            except Exception as e:
+                await session.rollback()
+                logger.warning(f"Daily partition may already exist: {e}")
+
+    async def _create_yearly_partitions(
+        self, session: AsyncSession, table_name: str, config: Dict[str, Any]
+    ):
+        """Create yearly partitions."""
+        current_date = datetime.now()
+
+        # Create partitions for past year, current year, and next year
+        for i in range(-1, 2):
+            year = current_date.year + i
+            partition_name = f"{table_name}_partitioned_{year}"
+
+            start_date = datetime(year, 1, 1)
+            end_date = datetime(year + 1, 1, 1)
+
+            create_partition_sql = f"""
+                CREATE TABLE IF NOT EXISTS {partition_name}
+                PARTITION OF {table_name}_partitioned
+                FOR VALUES FROM ('{start_date.strftime('%Y-%m-%d')}')
+                TO ('{end_date.strftime('%Y-%m-%d')}')
+            """
+
+            try:
+                await session.execute(text(create_partition_sql))
+                await session.commit()
+                logger.info(f"Created yearly partition: {partition_name}")
+            except Exception as e:
+                await session.rollback()
+                logger.warning(f"Yearly partition may already exist: {e}")
+
     async def maintain_partitions(
         self, session: AsyncSession
     ) -> Dict[str, Any]:
         """Maintain partitions by creating new ones and dropping old ones."""
-        maintenance_report = {
+        maintenance_report: Dict[str, Any] = {
             "created_partitions": [],
             "dropped_partitions": [],
             "errors": [],
@@ -357,7 +418,7 @@ class PartitioningStrategy:
         self, session: AsyncSession, table_name: str, config: Dict[str, Any]
     ) -> List[str]:
         """Create partitions for future dates."""
-        created = []
+        created: List[str] = []
         # Implementation would create partitions for next period
         # This is a placeholder for the actual implementation
         return created
@@ -424,6 +485,7 @@ class CompositeIndexDesigner:
     """Designs optimal composite indexes based on query patterns."""
 
     def __init__(self):
+        """Initialize the composite index designer."""
         self.query_patterns: Dict[str, List[List[str]]] = defaultdict(list)
         self.composite_recommendations: List[Dict[str, Any]] = []
 
@@ -509,6 +571,7 @@ class IndexMaintenanceScheduler:
     """Schedules and manages index maintenance operations."""
 
     def __init__(self):
+        """Initialize the index maintenance scheduler."""
         self.maintenance_tasks = {
             "REINDEX": {"interval_days": 30, "last_run": None},
             "ANALYZE": {"interval_days": 1, "last_run": None},
@@ -721,6 +784,7 @@ class IndexingStrategy:
     """Main class coordinating all indexing strategies."""
 
     def __init__(self):
+        """Initialize the indexing strategy coordinator."""
         self.usage_monitor = IndexUsageMonitor()
         self.partitioning = PartitioningStrategy()
         self.composite_designer = CompositeIndexDesigner()
@@ -802,7 +866,7 @@ class IndexingStrategy:
         self, session: AsyncSession, auto_approve: bool = False
     ) -> Dict[str, Any]:
         """Apply indexing recommendations with optional auto-approval."""
-        results = {
+        results: Dict[str, Any] = {
             "created_indexes": [],
             "dropped_indexes": [],
             "errors": [],

@@ -1,5 +1,5 @@
 # Multi-stage Frontend Dockerfile for FreeAgentics Next.js app with security optimizations
-FROM node:18-alpine AS base
+FROM node:18.20.4-alpine AS base
 
 # Security: Update packages and install minimal dependencies
 RUN apk update && apk upgrade && apk add --no-cache \

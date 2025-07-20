@@ -6,9 +6,9 @@ SQLite is used as a fallback when DATABASE_URL is not set.
 """
 
 import os
-from typing import Generator
+from typing import Any, Dict, Generator
 
-from sqlalchemy import create_engine
+from sqlalchemy import create_engine, text
 from sqlalchemy.orm import Session, sessionmaker
 
 from database.base import Base
@@ -57,7 +57,7 @@ if os.getenv("PRODUCTION", "false").lower() == "true":
         DATABASE_URL += "?sslmode=require"
 
 # Create engine with connection pooling and security settings
-engine_args = {
+engine_args: Dict[str, Any] = {
     "echo": os.getenv("DEBUG_SQL", "false").lower() == "true",  # SQL logging
 }
 
@@ -142,7 +142,7 @@ def check_database_health() -> bool:
     try:
         # Try to execute a simple query
         with engine.connect() as conn:
-            result = conn.execute("SELECT 1")
-            return result.scalar() == 1
+            result = conn.execute(text("SELECT 1"))
+            return bool(result.scalar() == 1)
     except Exception:
         return False

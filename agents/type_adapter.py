@@ -84,7 +84,7 @@ class AgentTypeAdapter:
         if hasattr(agent, "status"):
             status = agent.status
             if hasattr(status, "value"):  # Enum
-                return status.value
+                return str(status.value)
             return str(status)
 
         # In-memory agent
@@ -96,7 +96,9 @@ class AgentTypeAdapter:
             if "status" in agent:
                 status = agent["status"]
                 return (
-                    status.value if hasattr(status, "value") else str(status)
+                    str(status.value)
+                    if hasattr(status, "value")
+                    else str(status)
                 )
             if "is_active" in agent:
                 return "active" if agent["is_active"] else "inactive"
@@ -114,10 +116,10 @@ class AgentTypeAdapter:
             Agent position as tuple, list, or dict (or None)
         """
         if hasattr(agent, "position"):
-            return agent.position
+            return agent.position  # type: ignore[no-any-return]
 
         if isinstance(agent, dict) and "position" in agent:
-            return agent["position"]
+            return agent["position"]  # type: ignore[no-any-return]
 
         return None
 
@@ -248,7 +250,7 @@ class CoalitionTypeAdapter:
         """
         # In-memory coalition has members dict
         if hasattr(coalition, "members"):
-            return coalition.members
+            return coalition.members  # type: ignore[no-any-return]
 
         # Database model has agents relationship
         if hasattr(coalition, "agents"):
@@ -269,9 +271,9 @@ class CoalitionTypeAdapter:
         # Dict representation
         if isinstance(coalition, dict):
             if "members" in coalition:
-                return coalition["members"]
+                return coalition["members"]  # type: ignore[no-any-return]
             if "agents" in coalition:
-                return coalition["agents"]
+                return coalition["agents"]  # type: ignore[no-any-return]
 
         return {}
 
@@ -313,12 +315,14 @@ class CoalitionTypeAdapter:
         if hasattr(coalition, "status"):
             status = coalition.status
             if hasattr(status, "value"):  # Enum
-                return status.value
+                return str(status.value)
             return str(status)
 
         if isinstance(coalition, dict) and "status" in coalition:
             status = coalition["status"]
-            return status.value if hasattr(status, "value") else str(status)
+            return (
+                str(status.value) if hasattr(status, "value") else str(status)
+            )
 
         return "unknown"
 

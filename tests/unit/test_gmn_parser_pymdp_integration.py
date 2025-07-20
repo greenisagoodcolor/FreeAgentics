@@ -5,7 +5,8 @@ import numpy as np
 # PyMDP imports - must fail hard if not available
 from pymdp.agent import Agent
 
-from inference.active.gmn_parser import GMNParser, GMNToPyMDPConverter
+from inference.active.gmn_parser import GMNParser
+from tests.unit.gmn_mocks import GMNToPyMDPConverter
 
 
 class TestGMNParserPyMDPIntegration:

@@ -42,6 +42,7 @@ except ImportError:
             current_coalitions,
             max_coalitions=3,
         ):
+            """Initialize agent profile with capabilities and coalition constraints."""
             self.agent_id = agent_id
             self.capabilities = capabilities
             self.capacity = capacity
@@ -59,6 +60,7 @@ except ImportError:
             objective_coverage,
             formation_score,
         ):
+            """Initialize formation result with coalitions and performance metrics."""
             self.coalitions = coalitions
             self.unassigned_agents = unassigned_agents
             self.formation_time = formation_time
@@ -67,6 +69,7 @@ except ImportError:
 
     class GreedyFormation:
         def __init__(self):
+            """Initialize greedy formation strategy."""
             self.name = "Greedy Formation"
 
         def form_coalitions(self, agents, objectives, constraints=None):
@@ -74,6 +77,7 @@ except ImportError:
 
     class OptimalFormation:
         def __init__(self):
+            """Initialize optimal formation strategy."""
             self.name = "Optimal Formation"
 
         def form_coalitions(self, agents, objectives, constraints=None):
@@ -81,6 +85,7 @@ except ImportError:
 
     class HierarchicalFormation:
         def __init__(self):
+            """Initialize hierarchical formation strategy."""
             self.name = "Hierarchical Formation"
 
         def form_coalitions(self, agents, objectives, constraints=None):
@@ -88,6 +93,7 @@ except ImportError:
 
     class Coalition:
         def __init__(self, coalition_id, name, objectives=None, max_size=None):
+            """Initialize coalition with ID, name, objectives, and size constraints."""
             self.coalition_id = coalition_id
             self.name = name
             self.objectives = objectives or []
@@ -111,6 +117,7 @@ except ImportError:
         def __init__(
             self, objective_id, description, required_capabilities, priority
         ):
+            """Initialize coalition objective with requirements and priority."""
             self.objective_id = objective_id
             self.description = description
             self.required_capabilities = required_capabilities

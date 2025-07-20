@@ -6,7 +6,7 @@ of the GMN versioned storage system. They should be run regularly in production.
 
 import logging
 from datetime import datetime, timedelta
-from typing import Any, Dict
+from typing import Any, Dict, List
 
 from sqlalchemy import and_, desc, func, text
 from sqlalchemy.orm import Session
@@ -29,7 +29,7 @@ class GMNRealityCheckpoints:
 
     def run_all_checkpoints(self) -> Dict[str, Any]:
         """Run all reality checkpoints and return comprehensive report."""
-        report = {
+        report: Dict[str, Any] = {
             "timestamp": datetime.utcnow().isoformat(),
             "checkpoints": {},
             "overall_health": "unknown",
@@ -92,7 +92,7 @@ class GMNRealityCheckpoints:
 
     def check_version_integrity(self) -> Dict[str, Any]:
         """Check version number integrity and consistency."""
-        result = {
+        result: Dict[str, Any] = {
             "checkpoint": "version_integrity",
             "passed": True,
             "critical_issues": [],
@@ -193,7 +193,7 @@ class GMNRealityCheckpoints:
 
     def check_orphaned_references(self) -> Dict[str, Any]:
         """Check for orphaned parent version references."""
-        result = {
+        result: Dict[str, Any] = {
             "checkpoint": "orphaned_references",
             "passed": True,
             "critical_issues": [],
@@ -288,7 +288,7 @@ class GMNRealityCheckpoints:
 
     def check_active_constraints(self) -> Dict[str, Any]:
         """Check active specification constraints (only one active per agent)."""
-        result = {
+        result: Dict[str, Any] = {
             "checkpoint": "active_constraints",
             "passed": True,
             "critical_issues": [],
@@ -361,7 +361,7 @@ class GMNRealityCheckpoints:
 
     def check_checksum_integrity(self) -> Dict[str, Any]:
         """Check specification text checksum integrity."""
-        result = {
+        result: Dict[str, Any] = {
             "checkpoint": "checksum_integrity",
             "passed": True,
             "critical_issues": [],
@@ -409,7 +409,7 @@ class GMNRealityCheckpoints:
 
     def check_performance_metrics(self) -> Dict[str, Any]:
         """Check performance-related metrics and potential issues."""
-        result = {
+        result: Dict[str, Any] = {
             "checkpoint": "performance_metrics",
             "passed": True,
             "critical_issues": [],
@@ -525,7 +525,7 @@ class GMNRealityCheckpoints:
 
     def check_storage_efficiency(self) -> Dict[str, Any]:
         """Check storage efficiency and space usage."""
-        result = {
+        result: Dict[str, Any] = {
             "checkpoint": "storage_efficiency",
             "passed": True,
             "critical_issues": [],

@@ -28,6 +28,13 @@ class AgentError(Exception):
         severity: ErrorSeverity = ErrorSeverity.MEDIUM,
         context: Optional[Dict[str, Any]] = None,
     ):
+        """Initialize agent error with severity and context.
+
+        Args:
+            message: Error message
+            severity: Error severity level
+            context: Additional error context
+        """
         super().__init__(message)
         self.severity = severity
         self.context = context or {}
@@ -62,6 +69,14 @@ class ErrorRecoveryStrategy:
         max_retries: int = 3,
         cooldown_seconds: int = 5,
     ):
+        """Initialize error recovery strategy.
+
+        Args:
+            name: Strategy name
+            fallback_action: Default action when recovery fails
+            max_retries: Maximum retry attempts
+            cooldown_seconds: Seconds to wait between retries
+        """
         self.name = name
         self.fallback_action = fallback_action
         self.max_retries = max_retries
@@ -83,12 +98,12 @@ class ErrorRecoveryStrategy:
 
         return True
 
-    def record_error(self):
+    def record_error(self) -> None:
         """Record an error occurrence."""
         self.retry_count += 1
         self.last_error_time = datetime.now()
 
-    def reset(self):
+    def reset(self) -> None:
         """Reset retry counter after successful operation."""
         self.retry_count = 0
         self.last_error_time = None
@@ -98,6 +113,11 @@ class ErrorHandler:
     """Centralized error handling for agent operations."""
 
     def __init__(self, agent_id: str):
+        """Initialize error handler for an agent.
+
+        Args:
+            agent_id: ID of the agent to handle errors for
+        """
         self.agent_id = agent_id
         self.error_history = []
         self.recovery_strategies = {
@@ -185,7 +205,7 @@ class ErrorHandler:
 
         return recovery_info
 
-    def record_success(self, operation: str):
+    def record_success(self, operation: str) -> None:
         """Record successful operation to reset retry counters."""
         # Reset relevant strategies
         for strategy in self.recovery_strategies.values():
@@ -214,8 +234,10 @@ class ErrorHandler:
         }
 
 
-def with_error_handling(operation_name: str, fallback_result: Any = None):
-    """Decorator to add error handling to agent methods.
+def with_error_handling(
+    operation_name: str, fallback_result: Any = None
+) -> Callable:
+    """Add error handling to agent methods.
 
     Args:
         operation_name: Name of the operation for logging
@@ -270,8 +292,10 @@ def with_error_handling(operation_name: str, fallback_result: Any = None):
     return decorator
 
 
-def safe_pymdp_operation(operation_name: str, default_value: Any = None):
-    """Decorator specifically for PyMDP operations with robust error handling.
+def safe_pymdp_operation(
+    operation_name: str, default_value: Any = None
+) -> Callable:
+    """Add PyMDP-specific error handling to methods.
 
     Args:
         operation_name: Name of the PyMDP operation

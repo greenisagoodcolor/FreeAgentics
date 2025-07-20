@@ -285,11 +285,11 @@ class WebSocketAuthHandler:
         # Check for forwarded IP
         forwarded = websocket.headers.get("x-forwarded-for")
         if forwarded:
-            return forwarded.split(",")[0].strip()
+            return str(forwarded.split(",")[0].strip())
 
         # Use direct client IP
         if websocket.client:
-            return websocket.client.host
+            return str(websocket.client.host)
 
         return "unknown"
 

@@ -369,8 +369,10 @@ class APIScanner:
                     )
                     if response.status_code != 429:  # Not rate limited
                         successful_requests += 1
-                except:
-                    pass
+                except Exception as e:
+                    # Log but continue - some request failures expected during rate limit test
+                    logger.debug(f"Request failed during rate limit test: {e}")
+                    continue
 
             elapsed_time = time.time() - start_time
 
@@ -403,7 +405,7 @@ class APIScanner:
             url = urljoin(self.config.target_url, "/api/v1/health")
 
             try:
-                response = requests.options(url, headers=headers)
+                response = requests.options(url, headers=headers, timeout=30)
                 acao = response.headers.get("Access-Control-Allow-Origin", "")
                 acac = response.headers.get(
                     "Access-Control-Allow-Credentials", ""
@@ -421,8 +423,10 @@ class APIScanner:
                                 "credentials_allowed": True,
                             }
                         )
-            except:
-                pass
+            except Exception as e:
+                # Log CORS test failures but continue testing other endpoints
+                logger.debug(f"CORS test failed for {url}: {e}")
+                continue
 
         return vulnerabilities
 
@@ -441,7 +445,9 @@ class APIScanner:
             # Test if old/internal API versions are accessible
             test_url = self.config.target_url.replace("/api/v1/", pattern)
             try:
-                response = requests.get(urljoin(test_url, "health"))
+                response = requests.get(
+                    urljoin(test_url, "health"), timeout=30
+                )
                 if response.status_code == 200:
                     vulnerabilities.append(
                         {
@@ -451,8 +457,10 @@ class APIScanner:
                             "status_code": response.status_code,
                         }
                     )
-            except:
-                pass
+            except Exception as e:
+                # Log API versioning test failures but continue testing other endpoints
+                logger.debug(f"API versioning test failed for {test_url}: {e}")
+                continue
 
         return vulnerabilities
 
@@ -491,8 +499,10 @@ class APIScanner:
                                 "sample_data": str(data)[:200],
                             }
                         )
-                except:
-                    pass
+                except Exception as e:
+                    # Log but continue - some request failures expected during rate limit test
+                    logger.debug(f"Request failed during rate limit test: {e}")
+                    continue
 
         return vulnerabilities
 
@@ -537,7 +547,7 @@ class ZAPScanner:
         self.zap.core.new_session(name=self.session_name, overwrite=True)
 
         # Set up context
-        context_id = self.zap.context.new_context(self.config.context_name)
+        self.zap.context.new_context(self.config.context_name)
 
         # Include/exclude URLs
         for url in self.config.include_urls:
@@ -699,7 +709,7 @@ class DASTOrchestrator:
             self.zap_scanner.passive_scan()
 
             # Active scan
-            active_scan_id = self.zap_scanner.active_scan()
+            self.zap_scanner.active_scan()
 
             # Get alerts
             alerts = self.zap_scanner.get_alerts()

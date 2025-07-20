@@ -606,14 +606,6 @@ class IncidentResponseSystem:
         self, incident: SecurityIncident
     ) -> Dict[str, Any]:
         """Collect evidence for an incident."""
-        evidence = {
-            "logs": [],
-            "network_data": {},
-            "system_info": {},
-            "user_activity": [],
-            "file_integrity": {},
-        }
-
         # Here you would collect various types of evidence
         # For now, we'll just return the existing evidence
         return incident.evidence

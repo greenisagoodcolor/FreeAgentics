@@ -2,7 +2,7 @@
 
 import logging
 from datetime import datetime
-from typing import List, Optional
+from typing import TYPE_CHECKING, Any, List, Optional, Type
 
 try:
     import strawberry
@@ -15,9 +15,9 @@ except ImportError:
 
 logger = logging.getLogger(__name__)
 
-
+# Define GraphQL types at module level when strawberry is available
 if STRAWBERRY_AVAILABLE:
-    # Type definitions
+
     @strawberry.type
     class Agent:
         """GraphQL representation of an agent."""
@@ -81,7 +81,7 @@ if STRAWBERRY_AVAILABLE:
 
     @strawberry.type
     class InferenceResult:
-        """GraphQL representation of an inference result."""
+        """GraphQL representation of inference result."""
 
         agent_id: str
         input_text: str
@@ -93,15 +93,15 @@ if STRAWBERRY_AVAILABLE:
     # Input types
     @strawberry.input
     class AgentInput:
-        """Input for creating an agent."""
+        """Input type for creating/updating agents."""
 
         name: str
-        template: str
+        template: Optional[str] = None
         parameters: Optional[str] = None  # JSON string
 
     @strawberry.input
     class CoalitionInput:
-        """Input for creating a coalition."""
+        """Input type for creating/updating coalitions."""
 
         name: str
         max_size: Optional[int] = None
@@ -109,7 +109,7 @@ if STRAWBERRY_AVAILABLE:
 
     @strawberry.input
     class ObjectiveInput:
-        """Input for creating an objective."""
+        """Input type for creating objectives."""
 
         description: str
         priority: float
@@ -118,15 +118,73 @@ if STRAWBERRY_AVAILABLE:
 
     @strawberry.input
     class InferenceInput:
-        """Input for inference request."""
+        """Input type for inference requests."""
 
         agent_id: Optional[str] = None
-        model: str
+        model: Optional[str] = None
         input_text: str
         temperature: Optional[float] = 0.7
         max_tokens: Optional[int] = 512
 
-    # Query resolvers
+else:
+    # Dummy classes when strawberry is not available
+    class Agent:  # type: ignore[no-redef]
+        pass
+
+    class Coalition:  # type: ignore[no-redef]
+        pass
+
+    class Objective:  # type: ignore[no-redef]
+        pass
+
+    class WorldState:  # type: ignore[no-redef]
+        pass
+
+    class SystemMetrics:  # type: ignore[no-redef]
+        pass
+
+    class InferenceResult:  # type: ignore[no-redef]
+        pass
+
+    class AgentInput:  # type: ignore[no-redef]
+        pass
+
+    class CoalitionInput:  # type: ignore[no-redef]
+        pass
+
+    class ObjectiveInput:  # type: ignore[no-redef]
+        pass
+
+    class InferenceInput:  # type: ignore[no-redef]
+        pass
+
+
+def _create_graphql_types():
+    """Return GraphQL type definitions."""
+    return (
+        Agent,
+        Coalition,
+        Objective,
+        WorldState,
+        SystemMetrics,
+        InferenceResult,
+    )
+
+
+def _create_graphql_input_types():
+    """Return GraphQL input type definitions."""
+    return AgentInput, CoalitionInput, ObjectiveInput, InferenceInput
+
+
+def _create_query_resolvers(
+    Agent: Type[Any],
+    Coalition: Type[Any],
+    Objective: Type[Any],
+    WorldState: Type[Any],
+    SystemMetrics: Type[Any],
+):
+    """Create GraphQL query resolvers."""
+
     @strawberry.type
     class Query:
         """GraphQL query root."""
@@ -311,7 +369,21 @@ if STRAWBERRY_AVAILABLE:
 
             return filtered_agents
 
-    # Mutation resolvers
+    return Query
+
+
+def _create_mutation_resolvers(
+    Agent: Type[Any],
+    Coalition: Type[Any],
+    Objective: Type[Any],
+    InferenceResult: Type[Any],
+    AgentInput: Type[Any],
+    CoalitionInput: Type[Any],
+    ObjectiveInput: Type[Any],
+    InferenceInput: Type[Any],
+):
+    """Create GraphQL mutation resolvers."""
+
     @strawberry.type
     class Mutation:
         """GraphQL mutation root."""
@@ -433,7 +505,14 @@ if STRAWBERRY_AVAILABLE:
                 timestamp=datetime.now(),
             )
 
-    # Subscription support (for real-time updates)
+    return Mutation
+
+
+def _create_subscription_resolvers(
+    Agent: Type[Any], Coalition: Type[Any], SystemMetrics: Type[Any]
+):
+    """Create GraphQL subscription resolvers."""
+
     @strawberry.type
     class Subscription:
         """GraphQL subscription root."""
@@ -494,6 +573,48 @@ if STRAWBERRY_AVAILABLE:
                     avg_response_time=245.6,
                 )
 
+    return Subscription
+
+
+def _create_graphql_schema_and_router():
+    """Create the GraphQL schema and router."""
+    if not STRAWBERRY_AVAILABLE:
+        return None
+
+    # Create types
+    (
+        Agent,
+        Coalition,
+        Objective,
+        WorldState,
+        SystemMetrics,
+        InferenceResult,
+    ) = _create_graphql_types()
+    (
+        AgentInput,
+        CoalitionInput,
+        ObjectiveInput,
+        InferenceInput,
+    ) = _create_graphql_input_types()
+
+    # Create resolvers
+    Query = _create_query_resolvers(
+        Agent, Coalition, Objective, WorldState, SystemMetrics
+    )
+    Mutation = _create_mutation_resolvers(
+        Agent,
+        Coalition,
+        Objective,
+        InferenceResult,
+        AgentInput,
+        CoalitionInput,
+        ObjectiveInput,
+        InferenceInput,
+    )
+    Subscription = _create_subscription_resolvers(
+        Agent, Coalition, SystemMetrics
+    )
+
     # Create schema
     schema = strawberry.Schema(
         query=Query,
@@ -502,7 +623,11 @@ if STRAWBERRY_AVAILABLE:
     )
 
     # Create GraphQL router
-    graphql_app = GraphQLRouter(schema)
+    return GraphQLRouter(schema)
+
+
+if STRAWBERRY_AVAILABLE:
+    graphql_app = _create_graphql_schema_and_router()
 
 else:
     # Fallback when strawberry-graphql is not available

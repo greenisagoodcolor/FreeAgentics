@@ -108,7 +108,7 @@ class AdaptiveGCTuner:
             gc.set_debug(gc.DEBUG_STATS)
 
     def _gc_callback(self, phase: str, info: Dict[str, Any]):
-        """Callback invoked by garbage collector.
+        """Handle garbage collector callback.
 
         Args:
             phase: GC phase ('start' or 'stop')

@@ -111,6 +111,7 @@ graph TD
 ## ABAC Policy Examples
 
 ### Time-Based Access
+
 ```python
 {
     "rule_id": "business_hours_only",
@@ -124,6 +125,7 @@ graph TD
 ```
 
 ### Department-Based Access
+
 ```python
 {
     "rule_id": "same_department_access",
@@ -136,6 +138,7 @@ graph TD
 ```
 
 ### Clearance-Based Access
+
 ```python
 {
     "rule_id": "clearance_level_check",
@@ -148,6 +151,7 @@ graph TD
 ```
 
 ### Geographic Restrictions
+
 ```python
 {
     "rule_id": "regional_access",
@@ -253,21 +257,25 @@ graph TD
 ## Best Practices
 
 1. **Principle of Least Privilege**
+
    - Grant minimum permissions required
    - Regular permission audits
    - Remove unused permissions
 
-2. **Separation of Duties**
+1. **Separation of Duties**
+
    - Critical operations require multiple roles
    - No single user has complete control
    - Audit trail for all actions
 
-3. **Regular Reviews**
+1. **Regular Reviews**
+
    - Quarterly permission reviews
    - Annual role assessment
    - Automated compliance checks
 
-4. **Emergency Access**
+1. **Emergency Access**
+
    - Break-glass procedures
    - Temporary elevation process
    - Full audit logging

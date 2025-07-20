@@ -166,7 +166,6 @@ class GMNVersionedRepository:
 
             # Build lineage tree
             lineage = []
-            version_map = {str(v.id): v for v in versions}
 
             for version in versions:
                 lineage_entry = {
@@ -486,7 +485,7 @@ class GMNVersionedRepository:
             # Add trends if requested
             if include_trends and total_specs > 1:
                 # Simple trend: specifications per week
-                weekly_counts = {}
+                weekly_counts: Dict[str, int] = {}
                 for spec in specifications:
                     week_start = spec.created_at.strftime("%Y-W%U")
                     weekly_counts[week_start] = (
@@ -514,7 +513,7 @@ class GMNVersionedRepository:
     ) -> Dict[str, Any]:
         """Validate GMN specification data integrity."""
         try:
-            integrity_report = {
+            integrity_report: Dict[str, Any] = {
                 "agent_id": str(agent_id),
                 "checks_performed": [],
                 "issues_found": [],
@@ -608,7 +607,7 @@ class GMNVersionedRepository:
     ) -> Dict[str, Any]:
         """Repair broken version lineage."""
         try:
-            repair_result = {
+            repair_result: Dict[str, Any] = {
                 "agent_id": str(agent_id),
                 "dry_run": dry_run,
                 "repairs_needed": [],

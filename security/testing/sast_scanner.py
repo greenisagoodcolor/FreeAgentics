@@ -7,7 +7,7 @@ Implements severity thresholds and custom Semgrep rules.
 
 import json
 import logging
-import subprocess
+import subprocess  # nosec B404 # Required for SAST security tool execution
 import sys
 from dataclasses import dataclass, field
 from enum import Enum
@@ -36,12 +36,12 @@ class Severity(Enum):
     @property
     def weight(self) -> int:
         """Get numerical weight for severity comparison"""
-        weights = {
-            self.CRITICAL: 4,
-            self.HIGH: 3,
-            self.MEDIUM: 2,
-            self.LOW: 1,
-            self.INFO: 0,
+        weights: Dict['Severity', int] = {
+            Severity.CRITICAL: 4,
+            Severity.HIGH: 3,
+            Severity.MEDIUM: 2,
+            Severity.LOW: 1,
+            Severity.INFO: 0,
         }
         return weights[self]
 
@@ -116,7 +116,7 @@ class BanditScanner:
     def scan(self) -> List[Finding]:
         """Run Bandit scan"""
         logger.info("Running Bandit security scan...")
-        findings = []
+        findings: List[Finding] = []
 
         try:
             # Build Bandit command
@@ -138,7 +138,9 @@ class BanditScanner:
                 cmd.extend(["-x", excludes])
 
             # Run Bandit
-            result = subprocess.run(cmd, capture_output=True, text=True)
+            result = subprocess.run(
+                cmd, capture_output=True, text=True
+            )  # nosec B603 # Safe bandit security scanner execution
 
             if result.returncode not in (
                 0,
@@ -200,7 +202,7 @@ class SemgrepScanner:
     def scan(self) -> List[Finding]:
         """Run Semgrep scan"""
         logger.info("Running Semgrep security scan...")
-        findings = []
+        findings: List[Finding] = []
 
         try:
             # Build Semgrep command
@@ -225,7 +227,9 @@ class SemgrepScanner:
                 cmd.extend(["--exclude", pattern])
 
             # Run Semgrep
-            result = subprocess.run(cmd, capture_output=True, text=True)
+            result = subprocess.run(
+                cmd, capture_output=True, text=True
+            )  # nosec B603 # Safe semgrep security scanner execution
 
             if result.returncode != 0 and "No rules" not in result.stderr:
                 logger.error(f"Semgrep scan failed: {result.stderr}")
@@ -287,20 +291,20 @@ class SemgrepScanner:
         """Extract category from Semgrep result"""
         extra = result.get("extra", {})
         metadata = extra.get("metadata", {})
-        return metadata.get("category", "security")
+        return str(metadata.get("category", "security"))
 
     def _get_owasp_category(self, result: Dict[str, Any]) -> Optional[str]:
         """Extract OWASP category from Semgrep result"""
         extra = result.get("extra", {})
         metadata = extra.get("metadata", {})
         owasp = metadata.get("owasp", [])
-        return owasp[0] if owasp else None
+        return str(owasp[0]) if owasp else None
 
     def _get_code_snippet(self, result: Dict[str, Any]) -> Optional[str]:
         """Extract code snippet from Semgrep result"""
         extra = result.get("extra", {})
         lines = extra.get("lines", "")
-        return lines if lines else None
+        return str(lines) if lines else None
 
 
 class SafetyScanner:
@@ -312,7 +316,7 @@ class SafetyScanner:
     def scan(self) -> List[Finding]:
         """Run Safety scan for dependency vulnerabilities"""
         logger.info("Running Safety dependency scan...")
-        findings = []
+        findings: List[Finding] = []
 
         try:
             # Find requirements files
@@ -326,7 +330,9 @@ class SafetyScanner:
             for req_file in req_files:
                 # Run Safety check
                 cmd = ["safety", "check", "--json", "--file", str(req_file)]
-                result = subprocess.run(cmd, capture_output=True, text=True)
+                result = subprocess.run(
+                    cmd, capture_output=True, text=True
+                )  # nosec B603 # Safe safety security scanner execution
 
                 if result.returncode != 0 and result.stdout:
                     # Parse vulnerabilities
@@ -637,7 +643,7 @@ class SASTScanner:
     def _print_summary(self) -> None:
         """Print scan summary"""
         severity_counts = {severity: 0 for severity in Severity}
-        tool_counts = {}
+        tool_counts: Dict[str, int] = {}
 
         for finding in self.findings:
             severity_counts[finding.severity] += 1

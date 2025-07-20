@@ -127,7 +127,6 @@ async def list_users(
     offset: int = 0,
 ) -> List[UserInfo]:
     """List all users with filtering options."""
-
     # Get users from auth manager
     users = []
     for username, user_data in auth_manager.users.items():
@@ -162,7 +161,6 @@ async def create_user(
     user_data: UserCreate, current_user: TokenData = Depends(get_current_user)
 ) -> UserInfo:
     """Create a new user."""
-
     try:
         # Check if user already exists
         if user_data.username in auth_manager.users:
@@ -217,7 +215,6 @@ async def get_user(
     user_id: str, current_user: TokenData = Depends(get_current_user)
 ) -> UserInfo:
     """Get user details by ID."""
-
     # Find user by ID
     for username, user_data in auth_manager.users.items():
         user = user_data["user"]
@@ -245,15 +242,12 @@ async def update_user(
     current_user: TokenData = Depends(get_current_user),
 ) -> UserInfo:
     """Update user information."""
-
     # Find user by ID
     target_user = None
-    target_username = None
     for username, user_data in auth_manager.users.items():
         user = user_data["user"]
         if user.user_id == user_id:
             target_user = user
-            target_username = username
             break
 
     if not target_user:
@@ -297,15 +291,12 @@ async def delete_user(
     user_id: str, current_user: TokenData = Depends(get_current_user)
 ) -> Dict[str, str]:
     """Delete a user (deactivate)."""
-
     # Find user by ID
     target_user = None
-    target_username = None
     for username, user_data in auth_manager.users.items():
         user = user_data["user"]
         if user.user_id == user_id:
             target_user = user
-            target_username = username
             break
 
     if not target_user:
@@ -347,7 +338,6 @@ async def request_role_change(
     current_user: TokenData = Depends(get_current_user),
 ) -> Dict[str, str]:
     """Request role change for a user."""
-
     # Find target user
     target_user = None
     target_username = None
@@ -400,7 +390,6 @@ async def get_role_requests(
     offset: int = 0,
 ) -> List[Dict[str, Any]]:
     """Get role assignment requests."""
-
     requests = enhanced_rbac_manager.get_pending_requests(current_user.role)
 
     # Filter by status if provided
@@ -448,7 +437,6 @@ async def approve_role_request(
     current_user: TokenData = Depends(get_current_user),
 ) -> Dict[str, str]:
     """Approve a role assignment request."""
-
     success = enhanced_rbac_manager.approve_role_request(
         request_id=request_id,
         reviewer_id=current_user.user_id,
@@ -472,7 +460,6 @@ async def reject_role_request(
     current_user: TokenData = Depends(get_current_user),
 ) -> Dict[str, str]:
     """Reject a role assignment request."""
-
     success = enhanced_rbac_manager.reject_role_request(
         request_id=request_id,
         reviewer_id=current_user.user_id,
@@ -495,7 +482,6 @@ async def get_permissions_overview(
     current_user: TokenData = Depends(get_current_user),
 ) -> Dict[str, Any]:
     """Get overview of roles and permissions."""
-
     return {
         "roles": [role.value for role in UserRole],
         "permissions": [perm.value for perm in Permission],
@@ -527,7 +513,6 @@ async def list_abac_rules(
     offset: int = 0,
 ) -> List[Dict[str, Any]]:
     """List ABAC rules."""
-
     rules = enhanced_rbac_manager.abac_rules
 
     # Apply filters
@@ -571,7 +556,6 @@ async def create_abac_rule(
     current_user: TokenData = Depends(get_current_user),
 ) -> Dict[str, str]:
     """Create a new ABAC rule."""
-
     import uuid
     from datetime import timezone
 
@@ -627,7 +611,6 @@ async def update_abac_rule(
     current_user: TokenData = Depends(get_current_user),
 ) -> Dict[str, str]:
     """Update an ABAC rule."""
-
     # Find rule
     rule = next(
         (r for r in enhanced_rbac_manager.abac_rules if r.id == rule_id), None
@@ -684,7 +667,6 @@ async def delete_abac_rule(
     rule_id: str, current_user: TokenData = Depends(get_current_user)
 ) -> Dict[str, str]:
     """Delete an ABAC rule."""
-
     # Find and remove rule
     rule = next(
         (r for r in enhanced_rbac_manager.abac_rules if r.id == rule_id), None
@@ -725,7 +707,6 @@ async def get_access_audit_log(
     decision: Optional[bool] = None,
 ) -> List[Dict[str, Any]]:
     """Get access control audit log."""
-
     audit_log = enhanced_rbac_manager.access_audit_log
 
     # Apply filters
@@ -755,7 +736,6 @@ async def generate_audit_report(
     current_user: TokenData = Depends(get_current_user),
 ) -> Dict[str, Any]:
     """Generate comprehensive audit report."""
-
     return enhanced_rbac_manager.generate_access_report()
 
 
@@ -769,7 +749,6 @@ async def test_access_control(
     current_user: TokenData = Depends(get_current_user),
 ) -> Dict[str, Any]:
     """Test access control for a specific scenario."""
-
     # Find test user
     test_user = None
     for username, user_data in auth_manager.users.items():
@@ -841,7 +820,6 @@ async def expire_old_requests(
     current_user: TokenData = Depends(get_current_user), max_age_days: int = 30
 ) -> Dict[str, Any]:
     """Expire old pending role requests."""
-
     expired_count = enhanced_rbac_manager.expire_old_requests(max_age_days)
 
     # Log maintenance action
@@ -870,7 +848,6 @@ async def get_rbac_stats(
     current_user: TokenData = Depends(get_current_user),
 ) -> Dict[str, Any]:
     """Get RBAC system statistics."""
-
     # User statistics
     total_users = len(auth_manager.users)
     active_users = len(

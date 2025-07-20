@@ -23,11 +23,17 @@ from fastapi.testclient import TestClient
 from sqlalchemy.orm import Session
 
 from api.main import app
-from auth.security_implementation import (
-    TokenManager,
-    UserRole,
-    create_access_token,
-)
+from auth.security_implementation import AuthenticationManager, UserRole
+
+
+# Mock create_access_token for testing
+def create_access_token(data: dict) -> str:
+    """Mock access token creation."""
+    from auth.jwt_handler import jwt_handler
+
+    return jwt_handler.create_token(data)
+
+
 from database.models import Agent, AgentStatus, Coalition, CoalitionStatus
 
 
@@ -36,7 +42,7 @@ class IDORTestBase:
 
     def __init__(self):
         self.client = TestClient(app)
-        self.token_manager = TokenManager()
+        self.auth_manager = AuthenticationManager()
         self.test_users = {}
         self.test_resources = {}
 

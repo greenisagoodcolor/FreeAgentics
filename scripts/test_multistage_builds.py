@@ -11,7 +11,7 @@ import sys
 import time
 from datetime import datetime
 from pathlib import Path
-from typing import List, Tuple
+from typing import Any, Dict, List, Tuple
 
 
 class MultiStageBuilder:
@@ -21,7 +21,7 @@ class MultiStageBuilder:
 
     def __init__(self, project_root: str = None):
         self.project_root = Path(project_root or os.getcwd())
-        self.build_results = {}
+        self.build_results: Dict[str, Any] = {}
 
     def log_info(self, message: str):
         """Log informational message"""

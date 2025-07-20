@@ -30,7 +30,7 @@ class TestPerformanceBenchmarks:
                 "position": [step % 5, (step * 2) % 5],
                 "surroundings": np.zeros((3, 3)),
             }
-            action = agent.step(observation)
+            _action = agent.step(observation)
 
         end_time = time.time()
         duration = end_time - start_time
@@ -72,7 +72,7 @@ class TestPerformanceBenchmarks:
                         "position": [step % 3, (step + 1) % 3],
                         "surroundings": np.zeros((3, 3)),
                     }
-                    action = agent.step(observation)
+                    _action = agent.step(observation)
 
             end_time = time.time()
             duration = end_time - start_time
@@ -119,7 +119,7 @@ class TestPerformanceBenchmarks:
                 "position": [step % 3, (step + 1) % 3],
                 "surroundings": np.zeros((3, 3)),
             }
-            action = agent_pymdp.step(observation)
+            _action = agent_pymdp.step(observation)
 
         pymdp_duration = time.time() - start_time
         pymdp_steps_per_sec = num_steps / pymdp_duration
@@ -138,7 +138,7 @@ class TestPerformanceBenchmarks:
                 "position": [step % 3, (step + 1) % 3],
                 "surroundings": np.zeros((3, 3)),
             }
-            action = agent_fallback.step(observation)
+            _action = agent_fallback.step(observation)
 
         fallback_duration = time.time() - start_time
         fallback_steps_per_sec = num_steps / fallback_duration
@@ -185,7 +185,7 @@ class TestPerformanceBenchmarks:
                     "position": [step % 5, (step + 1) % 5],
                     "surroundings": np.zeros((3, 3)),
                 }
-                action = agent.step(observation)
+                _action = agent.step(observation)
 
             current_memory = process.memory_info().rss / 1024 / 1024  # MB
             memory_usage.append(current_memory)
@@ -227,7 +227,7 @@ class TestPerformanceBenchmarks:
                     "position": [step % 3, (step + 1) % 3],
                     "surroundings": np.zeros((3, 3)),
                 }
-                action = agent.step(observation)
+                _action = agent.step(observation)
 
         isolated_duration = time.time() - start_time
         isolated_ops_per_sec = (
@@ -256,7 +256,7 @@ class TestPerformanceBenchmarks:
                         if j != i
                     ],
                 }
-                action = agent.step(observation)
+                _action = agent.step(observation)
 
         coordinating_duration = time.time() - start_time
         coordinating_ops_per_sec = (
@@ -316,7 +316,7 @@ class TestPerformanceBenchmarks:
                     ),
                     "current_load": step % 10,
                 }
-                action = agent.step(observation)
+                _action = agent.step(observation)
 
         duration = time.time() - start_time
         ops_per_second = (len(collectors) * num_steps) / duration
@@ -365,7 +365,7 @@ class TestRealWorldScenarios:
                     "position": [step % 4, (step + 1) % 4],
                     "surroundings": np.random.randint(0, 2, (3, 3)),
                 }
-                action = agent.step(observation)
+                _action = agent.step(observation)
 
             # Collectors
             for agent in collectors:
@@ -385,7 +385,7 @@ class TestRealWorldScenarios:
                     ),
                     "current_load": step % 8,
                 }
-                action = agent.step(observation)
+                _action = agent.step(observation)
 
             # Coordinator
             observation = {
@@ -398,7 +398,7 @@ class TestRealWorldScenarios:
                     for agent in all_agents[:-1]  # All except coordinator
                 ]
             }
-            action = coordinator.step(observation)
+            _action = coordinator.step(observation)
 
         duration = time.time() - start_time
         total_operations = len(all_agents) * num_steps

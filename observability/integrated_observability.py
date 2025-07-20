@@ -75,8 +75,8 @@ class IntegratedObservabilityManager:
         """
         self.config = config or {}
         self.running = False
-        self.agent_registrations = {}
-        self.coordination_sessions = {}
+        self.agent_registrations: Dict[str, Any] = {}
+        self.coordination_sessions: Dict[str, Any] = {}
         self.performance_baselines = {
             "inference_time_ms": 10.0,
             "belief_update_ms": 5.0,
@@ -392,7 +392,7 @@ class IntegratedObservabilityManager:
         Returns:
             Observability summary
         """
-        summary = {
+        summary: Dict[str, Any] = {
             "agent_id": agent_id,
             "timestamp": datetime.now().isoformat(),
         }
@@ -514,7 +514,7 @@ class IntegratedObservabilityManager:
         Returns:
             Health check results
         """
-        health = {
+        health: Dict[str, Any] = {
             "timestamp": datetime.now().isoformat(),
             "running": self.running,
             "components": {},

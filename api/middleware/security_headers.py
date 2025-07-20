@@ -31,7 +31,7 @@ async def security_headers_middleware(
 
     try:
         response = await call_next(request)
-    except Exception as e:
+    except Exception:
         # Create error response
         from fastapi.responses import JSONResponse
 

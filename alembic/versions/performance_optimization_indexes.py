@@ -1,4 +1,4 @@
-"""Performance optimization indexes for multi-agent systems
+"""Performance optimization indexes for multi-agent systems.
 
 Revision ID: performance_optimization_20250715
 Revises:
@@ -8,7 +8,7 @@ Create Date: 2025-07-15 15:45:00.000000
 
 import sqlalchemy as sa
 
-from alembic import op
+from alembic import op  # type: ignore[attr-defined]
 
 # revision identifiers, used by Alembic.
 revision = "performance_optimization_20250715"
@@ -19,7 +19,6 @@ depends_on = None
 
 def upgrade():
     """Create performance optimization indexes."""
-
     # Enable required PostgreSQL extensions
     op.execute("CREATE EXTENSION IF NOT EXISTS pg_trgm")
     op.execute("CREATE EXTENSION IF NOT EXISTS btree_gin")
@@ -371,7 +370,6 @@ def upgrade():
 
 def downgrade():
     """Remove performance optimization indexes."""
-
     # Drop triggers
     op.execute(
         "DROP TRIGGER IF EXISTS trigger_agent_activity_update ON agents"

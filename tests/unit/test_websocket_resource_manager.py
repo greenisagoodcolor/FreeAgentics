@@ -25,6 +25,7 @@ from websocket.resource_manager import (
 )
 
 
+@pytest.mark.slow
 class TestResourceConfig:
     """Test resource management configuration."""
 
@@ -61,6 +62,7 @@ class TestResourceConfig:
             ResourceConfig(agent_timeout=-1.0)
 
 
+@pytest.mark.slow
 class TestAgentResource:
     """Test agent resource representation."""
 
@@ -122,6 +124,7 @@ class TestAgentResource:
 
 
 @pytest.mark.asyncio
+@pytest.mark.slow
 class TestAgentResourceManager:
     """Test agent resource manager functionality."""
 
@@ -404,6 +407,7 @@ class TestAgentResourceManager:
         pool.acquire.assert_called_with(prefer_metadata={"region": "eu-west"})
 
 
+@pytest.mark.slow
 class TestResourceMetrics:
     """Test resource metrics collection."""
 

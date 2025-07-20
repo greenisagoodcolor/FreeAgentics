@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 """
-CI/CD Integration for Performance Benchmarks
+CI/CD Integration for Performance Benchmarks.
 ===========================================
 
 This module provides integration with CI/CD pipelines for automated performance
@@ -85,6 +85,7 @@ class PerformanceBaseline:
     """Manage performance baselines."""
 
     def __init__(self, baseline_path: Path):
+        """Initialize the performance baseline."""
         self.baseline_path = baseline_path
         self.baseline_data = self._load_baseline()
 
@@ -126,6 +127,7 @@ class PerformanceHistory:
     """Track performance history over time."""
 
     def __init__(self, history_path: Path):
+        """Initialize the performance history tracker."""
         self.history_path = history_path
         self.history_data = self._load_history()
 
@@ -176,6 +178,7 @@ class RegressionDetector:
     """Detect performance regressions."""
 
     def __init__(self, baseline: PerformanceBaseline):
+        """Initialize the regression detector."""
         self.baseline = baseline
 
     def detect_regressions(
@@ -251,6 +254,7 @@ class CIIntegration:
     """Main CI integration class."""
 
     def __init__(self, results_dir: Path, baseline_dir: Path):
+        """Initialize the CI integration."""
         self.results_dir = results_dir
         self.baseline_dir = baseline_dir
         self.baseline = PerformanceBaseline(baseline_dir / BASELINE_FILE)

@@ -7,10 +7,10 @@ This report presents a comprehensive analysis of threading performance in the Fr
 ### Key Findings
 
 1. **GIL Contention**: Measured at 1.03x slowdown for CPU-bound operations
-2. **Thread Pool Sizing**: Current fixed size of 8 threads is suboptimal for varying workloads
-3. **Lock Contention**: Agent registry and state management show contention under load
-4. **Async I/O**: Blocking I/O operations in thread pools cause unnecessary delays
-5. **Memory Efficiency**: Duplicate numpy arrays across threads waste ~100MB
+1. **Thread Pool Sizing**: Current fixed size of 8 threads is suboptimal for varying workloads
+1. **Lock Contention**: Agent registry and state management show contention under load
+1. **Async I/O**: Blocking I/O operations in thread pools cause unnecessary delays
+1. **Memory Efficiency**: Duplicate numpy arrays across threads waste ~100MB
 
 ### Expected Improvements
 
@@ -25,6 +25,7 @@ This report presents a comprehensive analysis of threading performance in the Fr
 ### 1. Current Architecture Assessment
 
 The current implementation uses:
+
 - `OptimizedThreadPoolManager`: Fixed 8-worker thread pool
 - `AsyncAgentManager`: Mixed sync/async execution with ThreadPoolExecutor
 - Central locking for agent registry
@@ -42,27 +43,32 @@ The current implementation uses:
 #### Medium Severity Issues
 
 2. **Suboptimal Thread Pool Sizing**
+
    - I/O-bound: 8 threads vs optimal 32 (277% improvement potential)
    - CPU-bound: 8 threads vs optimal 4 (32% improvement potential)
    - Mixed: 8 threads vs optimal 16 (50% improvement potential)
 
-3. **Blocking I/O Operations**
+1. **Blocking I/O Operations**
+
    - `agent.save_state`: 10ms blocking time per step
    - `agent.load_state`: 10ms blocking time per step
    - `broadcast_event`: 10ms blocking time per event
    - `fetch_observation`: 10ms blocking time per step
 
-4. **Memory Duplication**
+1. **Memory Duplication**
+
    - 3x duplication factor for numpy arrays
    - ~100MB wasted memory with 50 agents
    - No shared memory pools for belief matrices
 
-5. **Lock Contention**
+1. **Lock Contention**
+
    - Agent registry uses global lock
    - No sharding or lock-free structures
    - Measured 10-30% contention under load
 
-6. **No Work Stealing**
+1. **No Work Stealing**
+
    - Central queue architecture
    - 2.5x imbalance factor between threads
    - Poor load distribution
@@ -72,6 +78,7 @@ The current implementation uses:
 ### Phase 1: Quick Wins (1-2 days)
 
 #### 1.1 Dynamic Thread Pool Sizing
+
 ```python
 # Implementation provided in threading_optimization_implementation.py
 class AdaptiveThreadPoolExecutor:
@@ -81,11 +88,13 @@ class AdaptiveThreadPoolExecutor:
 ```
 
 **Implementation Steps:**
+
 1. Replace fixed ThreadPoolExecutor with AdaptiveThreadPoolExecutor
-2. Configure optimal sizes: I/O=32, CPU=4, Mixed=16
-3. Add workload detection based on task execution times
+1. Configure optimal sizes: I/O=32, CPU=4, Mixed=16
+1. Add workload detection based on task execution times
 
 #### 1.2 Configuration Updates
+
 ```python
 # Update OptimizedThreadPoolManager defaults
 initial_workers = 16  # was 8
@@ -96,6 +105,7 @@ scaling_threshold = 0.7  # was 0.8
 ### Phase 2: Medium Term (1 week)
 
 #### 2.1 Lock-Free Agent Registry
+
 ```python
 # Sharded registry with 16 shards
 class LockFreeAgentRegistry:
@@ -105,6 +115,7 @@ class LockFreeAgentRegistry:
 ```
 
 #### 2.2 Async I/O Integration
+
 ```python
 # Convert blocking operations to async
 async def save_agent_state_async()
@@ -113,11 +124,13 @@ async def broadcast_event_async()
 ```
 
 **Benefits:**
+
 - 5-10x reduction in I/O wait time
 - Non-blocking event broadcasting
 - Better thread utilization
 
 #### 2.3 Shared Memory Pools
+
 ```python
 class SharedMemoryPool:
     - Pre-allocated numpy arrays
@@ -128,6 +141,7 @@ class SharedMemoryPool:
 ### Phase 3: Long Term (2-4 weeks)
 
 #### 3.1 Work-Stealing Thread Pool
+
 ```python
 class WorkStealingThreadPool:
     - Per-thread work queues
@@ -136,6 +150,7 @@ class WorkStealingThreadPool:
 ```
 
 #### 3.2 Event Loop Architecture Redesign
+
 - Single dedicated event loop thread
 - `run_in_executor` for sync code
 - Eliminates event loop creation overhead
@@ -143,6 +158,7 @@ class WorkStealingThreadPool:
 ## Benchmarking Results
 
 ### Test Environment
+
 - CPU: 8 cores
 - Agents: 10-100
 - Operations: 100-1000 per test
@@ -170,16 +186,19 @@ Threads  Current (ops/sec)  Optimized (ops/sec)  Improvement
 ## Implementation Roadmap
 
 ### Week 1: Quick Wins
+
 - [ ] Implement AdaptiveThreadPoolExecutor
 - [ ] Update thread pool configuration
 - [ ] Deploy and measure improvements
 
 ### Week 2: Core Optimizations
+
 - [ ] Implement lock-free agent registry
 - [ ] Convert I/O operations to async
 - [ ] Add shared memory pools
 
 ### Week 3-4: Advanced Features
+
 - [ ] Implement work-stealing algorithm
 - [ ] Redesign event loop architecture
 - [ ] Performance testing and tuning
@@ -187,13 +206,14 @@ Threads  Current (ops/sec)  Optimized (ops/sec)  Improvement
 ## Risk Mitigation
 
 1. **Compatibility**: All optimizations maintain API compatibility
-2. **Rollback**: Feature flags for each optimization
-3. **Testing**: Comprehensive benchmarks before/after
-4. **Monitoring**: Thread metrics and performance dashboards
+1. **Rollback**: Feature flags for each optimization
+1. **Testing**: Comprehensive benchmarks before/after
+1. **Monitoring**: Thread metrics and performance dashboards
 
 ## Conclusion
 
 The identified optimizations can deliver significant performance improvements:
+
 - **10-50% overall throughput increase** based on workload
 - **3x memory efficiency** for large agent deployments
 - **Better scalability** from 100 to 1000+ agents
@@ -203,6 +223,7 @@ The phased approach allows incremental improvements with quick wins in Phase 1 d
 ## Appendix: Code Examples
 
 All optimization implementations are provided in:
+
 - `agents/threading_profiler.py` - Profiling tools
 - `agents/threading_optimization_analysis.py` - Analysis framework
 - `agents/threading_optimization_implementation.py` - Optimized implementations

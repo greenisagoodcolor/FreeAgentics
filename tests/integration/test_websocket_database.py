@@ -36,11 +36,8 @@ from api.v1.websocket import ConnectionManager, WebSocketMessage
 from database.base import Base
 from database.models import Agent, AgentStatus
 from tests.db_infrastructure.factories import AgentFactory
-from tests.db_infrastructure.fixtures import db_session
-from tests.db_infrastructure.test_config import (
-    TEST_DATABASE_URL,
-    DatabaseTestCase,
-)
+from tests.db_infrastructure.fixtures import DatabaseTestCase, db_session
+from tests.db_infrastructure.test_config import TEST_DATABASE_URL
 
 
 # Define WebSocket-specific database models
@@ -54,7 +51,7 @@ class WebSocketConnection(Base):
     connected_at = Column(DateTime, default=datetime.utcnow)
     disconnected_at = Column(DateTime, nullable=True)
     is_active = Column(Boolean, default=True)
-    metadata = Column(JSON, default=dict)
+    connection_metadata = Column(JSON, default=dict)
 
     # Relationships
     subscriptions = relationship(
@@ -150,7 +147,7 @@ class DatabaseConnectionManager(ConnectionManager):
             existing.is_active = True
             existing.connected_at = datetime.utcnow()
             existing.disconnected_at = None
-            existing.metadata = metadata or {}
+            existing.connection_metadata = metadata or {}
         else:
             # Create new connection record
             conn = WebSocketConnection(
@@ -271,7 +268,7 @@ class TestWebSocketDatabase(DatabaseTestCase):
 
         assert saved_conn is not None
         assert saved_conn.is_active is True
-        assert saved_conn.metadata["user_agent"] == "TestClient/1.0"
+        assert saved_conn.connection_metadata["user_agent"] == "TestClient/1.0"
 
         # Simulate disconnection
         db_manager.disconnect(client_id)

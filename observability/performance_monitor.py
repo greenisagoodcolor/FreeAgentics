@@ -1,5 +1,5 @@
 """
-Comprehensive Performance Monitoring System for FreeAgentics
+Comprehensive Performance Monitoring System for FreeAgentics.
 Tracks system performance metrics, identifies bottlenecks, and provides optimization insights.
 """
 
@@ -75,10 +75,12 @@ class PerformanceMonitor:
 
     def __init__(self, monitoring_interval: float = 1.0):
         self.monitoring_interval = monitoring_interval
-        self.metrics_history = deque(
+        self.metrics_history: deque[PerformanceMetrics] = deque(
             maxlen=1000
         )  # Keep last 1000 measurements
-        self.alerts = deque(maxlen=100)  # Keep last 100 alerts
+        self.alerts: deque[PerformanceAlert] = deque(
+            maxlen=100
+        )  # Keep last 100 alerts
         self.is_monitoring = False
         self.monitor_thread = None
         self.process = psutil.Process()
@@ -95,14 +97,18 @@ class PerformanceMonitor:
         }
 
         # Metric accumulators
-        self.request_times = deque(maxlen=100)
-        self.db_query_times = deque(maxlen=100)
-        self.agent_step_times = deque(maxlen=100)
-        self.api_requests = deque(maxlen=100)
-        self.websocket_messages = deque(maxlen=100)
+        self.request_times: deque[float] = deque(maxlen=100)
+        self.db_query_times: deque[float] = deque(maxlen=100)
+        self.agent_step_times: deque[float] = deque(maxlen=100)
+        self.api_requests: deque[float] = deque(maxlen=100)
+        self.websocket_messages: deque[float] = deque(maxlen=100)
 
         # Thread-local storage for request timing
         self.local = threading.local()
+
+        # GIL measurement cache
+        self._last_gil_measurement: float = 0.0
+        self._cached_gil_contention: float = 0.0
 
         logger.info("Performance monitor initialized")
 
@@ -201,11 +207,11 @@ class PerformanceMonitor:
 
         return metrics
 
-    def _get_average_time(self, times: deque) -> float:
+    def _get_average_time(self, times: deque[float]) -> float:
         """Get average time from a deque of times."""
         if not times:
             return 0.0
-        return sum(times) / len(times)
+        return float(sum(times) / len(times))
 
     def _measure_gil_contention(self) -> float:
         """Measure GIL contention using CPU-bound workload."""
@@ -390,7 +396,7 @@ class PerformanceMonitor:
 
         def avg_metric(metric_name: str) -> float:
             values = [getattr(m, metric_name) for m in recent_metrics]
-            return sum(values) / len(values) if values else 0.0
+            return float(sum(values) / len(values)) if values else 0.0
 
         report = {
             "timestamp": datetime.now().isoformat(),
@@ -443,7 +449,7 @@ class PerformanceMonitor:
         self, metrics: List[PerformanceMetrics]
     ) -> List[str]:
         """Generate performance insights based on metrics."""
-        insights = []
+        insights: List[str] = []
 
         if not metrics:
             return insights

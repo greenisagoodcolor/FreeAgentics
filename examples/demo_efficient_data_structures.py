@@ -92,7 +92,7 @@ def demo_lazy_belief_arrays():
     actual_memory = belief_array.memory_usage()
     print(f"   Dense storage: {dense_memory:.4f} MB")
     print(f"   Sparse storage: {actual_memory:.4f} MB")
-    print(f"   Space savings: {(1 - actual_memory/dense_memory)*100:.1f}%")
+    print(f"   Space savings: {(1 - actual_memory / dense_memory) * 100:.1f}%")
 
 
 def demo_memory_mapped_buffers():
@@ -144,8 +144,8 @@ def demo_memory_mapped_buffers():
     [buffer.array[i, j] for i, j in indices]
     access_time = time.time() - start_time
 
-    print(f"   1000 random accesses in {access_time*1000:.2f} ms")
-    print(f"   Average access time: {access_time*1000000/1000:.2f} μs")
+    print(f"   1000 random accesses in {access_time * 1000:.2f} ms")
+    print(f"   Average access time: {access_time * 1000000 / 1000:.2f} μs")
 
     # Cleanup
     buffer._finalizer()
@@ -163,7 +163,7 @@ def demo_compact_action_history():
     action_space_size = 8
     history = CompactActionHistory(max_actions, action_space_size)
 
-    print(f"\n1. Created CompactActionHistory")
+    print("\n1. Created CompactActionHistory")
     print(f"   Max actions: {max_actions}")
     print(f"   Action space size: {action_space_size}")
     print(f"   Action data type: {history.action_dtype}")
@@ -179,7 +179,7 @@ def demo_compact_action_history():
 
         history.add_action(action, timestamp, reward)
 
-    print(f"   Added 2000 actions (circular buffer)")
+    print("   Added 2000 actions (circular buffer)")
     print(f"   Current size: {history._size}")
     print(f"   Memory usage: {history.memory_usage_bytes()} bytes")
 
@@ -229,7 +229,7 @@ def demo_efficient_temporal_sequence():
     feature_dim = 32
     sequence = EfficientTemporalSequence(max_length, feature_dim)
 
-    print(f"\n1. Created EfficientTemporalSequence")
+    print("\n1. Created EfficientTemporalSequence")
     print(f"   Max length: {max_length}")
     print(f"   Feature dimension: {feature_dim}")
 
@@ -248,7 +248,7 @@ def demo_efficient_temporal_sequence():
 
         base_state = new_state
 
-    print(f"   Added 300 temporal states")
+    print("   Added 300 temporal states")
 
     # Analyze memory usage
     print("\n3. Memory usage analysis:")
@@ -264,7 +264,7 @@ def demo_efficient_temporal_sequence():
         f"\n   Compression achieved: {memory_stats['compression_ratio']:.2f}x"
     )
     print(
-        f"   Space savings: {(1 - 1/memory_stats['compression_ratio'])*100:.1f}%"
+        f"   Space savings: {(1 - 1 / memory_stats['compression_ratio']) * 100:.1f}%"
     )
 
     # Test state reconstruction
@@ -304,7 +304,7 @@ def demo_compact_knowledge_graph():
     max_edges = 1000
     kg = CompactKnowledgeGraph(max_nodes, max_edges)
 
-    print(f"\n1. Created CompactKnowledgeGraph")
+    print("\n1. Created CompactKnowledgeGraph")
     print(f"   Max nodes: {max_nodes}")
     print(f"   Max edges: {max_edges}")
 
@@ -396,7 +396,7 @@ def demo_compact_knowledge_graph():
     print(f"   Original memory: {original_memory:.4f} MB")
     print(f"   Compacted memory: {compacted_memory:.4f} MB")
     print(
-        f"   Memory reduction: {(1 - compacted_memory/original_memory)*100:.1f}%"
+        f"   Memory reduction: {(1 - compacted_memory / original_memory) * 100:.1f}%"
     )
 
 

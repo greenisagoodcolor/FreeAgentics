@@ -22,12 +22,15 @@ except ImportError:
 
     # Mock monitoring functions
     async def record_agent_metric(
-        agent_id: str, metric: str, value: float, metadata: Dict = None
+        agent_id: str,
+        metric: str,
+        value: float,
+        metadata: Optional[Dict[str, Any]] = None,
     ):
         logger.debug(f"MOCK Agent {agent_id} - {metric}: {value}")
 
     async def record_system_metric(
-        metric: str, value: float, metadata: Dict = None
+        metric: str, value: float, metadata: Optional[Dict[str, Any]] = None
     ):
         logger.debug(f"MOCK System - {metric}: {value}")
 
@@ -150,8 +153,8 @@ class PyMDPObservabilityIntegrator:
         agent_id: str,
         beliefs_before: Dict,
         beliefs_after: Dict,
-        free_energy: float = None,
-    ):
+        free_energy: Optional[float] = None,
+    ) -> None:
         """Monitor PyMDP belief state updates."""
         try:
             # Calculate belief change magnitude
@@ -293,8 +296,11 @@ class PyMDPObservabilityIntegrator:
             return None
 
     async def monitor_agent_lifecycle(
-        self, agent_id: str, event: str, metadata: Dict = None
-    ):
+        self,
+        agent_id: str,
+        event: str,
+        metadata: Optional[Dict[str, Any]] = None,
+    ) -> None:
         """Monitor agent lifecycle events."""
         try:
             timestamp = datetime.now().isoformat()
@@ -359,8 +365,8 @@ class PyMDPObservabilityIntegrator:
         self,
         coordination_event: str,
         participants: List[str],
-        metrics: Dict = None,
-    ):
+        metrics: Optional[Dict[str, Any]] = None,
+    ) -> None:
         """Monitor multi-agent coordination events."""
         try:
             timestamp = datetime.now().isoformat()
@@ -395,7 +401,7 @@ class PyMDPObservabilityIntegrator:
             )
 
     async def get_performance_summary(
-        self, agent_id: str = None
+        self, agent_id: Optional[str] = None
     ) -> Dict[str, Any]:
         """Get performance summary for agent or system."""
         try:
@@ -468,7 +474,7 @@ class PyMDPObservabilityIntegrator:
 pymdp_observer = PyMDPObservabilityIntegrator()
 
 
-def monitor_pymdp_inference(agent_id: str):
+def monitor_pymdp_inference(agent_id: str) -> Any:
     """Decorator for monitoring PyMDP inference functions."""
     return pymdp_observer.monitor_inference_performance(agent_id)
 
@@ -477,8 +483,8 @@ async def record_belief_update(
     agent_id: str,
     beliefs_before: Dict,
     beliefs_after: Dict,
-    free_energy: float = None,
-):
+    free_energy: Optional[float] = None,
+) -> None:
     """Record a PyMDP belief update event."""
     await pymdp_observer.monitor_belief_update(
         agent_id, beliefs_before, beliefs_after, free_energy
@@ -486,15 +492,17 @@ async def record_belief_update(
 
 
 async def record_agent_lifecycle_event(
-    agent_id: str, event: str, metadata: Dict = None
-):
+    agent_id: str, event: str, metadata: Optional[Dict[str, Any]] = None
+) -> None:
     """Record an agent lifecycle event."""
     await pymdp_observer.monitor_agent_lifecycle(agent_id, event, metadata)
 
 
 async def record_coordination_event(
-    event: str, participants: List[str], metrics: Dict = None
-):
+    event: str,
+    participants: List[str],
+    metrics: Optional[Dict[str, Any]] = None,
+) -> None:
     """Record a multi-agent coordination event."""
     await pymdp_observer.monitor_multi_agent_coordination(
         event, participants, metrics
@@ -502,7 +510,7 @@ async def record_coordination_event(
 
 
 async def get_pymdp_performance_summary(
-    agent_id: str = None,
+    agent_id: Optional[str] = None,
 ) -> Dict[str, Any]:
     """Get PyMDP performance summary."""
     return await pymdp_observer.get_performance_summary(agent_id)

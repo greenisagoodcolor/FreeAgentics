@@ -489,7 +489,7 @@ class AgentMemoryOptimizationValidationTest(unittest.TestCase):
                         total_bytes += len(str(attr_value))
                     elif isinstance(attr_value, str):
                         total_bytes += len(attr_value)
-                except:
+                except (AttributeError, TypeError):
                     pass
 
         return total_bytes / (1024 * 1024)

@@ -74,7 +74,7 @@ class InstrumentedLock:
 
     def __init__(self, lock_id: str, profiler: "ThreadingProfiler"):
         """Initialize instrumented lock.
-        
+
         Args:
             lock_id: Unique identifier for this lock.
             profiler: ThreadingProfiler instance for recording metrics.
@@ -85,11 +85,11 @@ class InstrumentedLock:
 
     def acquire(self, blocking: bool = True, timeout: float = -1):
         """Acquire the lock while recording profiling metrics.
-        
+
         Args:
             blocking: Whether to block until lock is available.
             timeout: Maximum time to wait for lock acquisition.
-            
+
         Returns:
             bool: True if lock was acquired, False otherwise.
         """
@@ -181,8 +181,6 @@ class ThreadingProfiler:
                 )
 
         metrics = self.thread_metrics[thread_id]
-        start_time = time.perf_counter()
-        start_cpu = time.process_time()
 
         yield metrics
 
@@ -544,11 +542,11 @@ def benchmark_threading_implementations():
 
     print("\nBottlenecks identified:")
     for bottleneck in report.bottlenecks:
-        print(f"   - {bottleneck}")
+        print(f"  - {bottleneck}")
 
     print("\nRecommendations:")
     for rec in report.recommendations:
-        print(f"   - {rec}")
+        print(f"  - {rec}")
 
     print("\n" + "=" * 60)
 

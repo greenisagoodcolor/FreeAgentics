@@ -5,38 +5,39 @@ This test file verifies core agent API endpoints functionality.
 Following TDD: tests fail first, then we implement minimal code to make them pass.
 """
 
-import os
-
 import pytest
 from fastapi.testclient import TestClient
+from sqlalchemy.orm import Session
 
 from api.main import app
 from auth.security_implementation import get_current_user
-from database.session import init_db
+from database.session import get_db
+from tests.fixtures.fixtures import db_session, test_engine
 from tests.test_helpers.auth_helpers import mock_auth_dependency
-
-# Set testing environment before using app
-os.environ["TESTING"] = "true"
-os.environ["DATABASE_URL"] = "sqlite:///test.db"
-os.environ["API_KEY"] = "test_api_key_for_testing"
-os.environ["SECRET_KEY"] = "this_is_a_test_secret_key_with_enough_characters"
-os.environ["DEVELOPMENT_MODE"] = "false"
-
-# Initialize database tables for testing
-init_db()
 
 
 class TestAgentEndpoints:
     """Test class for agent API endpoints."""
 
     @pytest.fixture
-    def client(self):
-        """Create test client with mocked authentication."""
+    def client(self, db_session: Session):
+        """Create test client with mocked authentication and database."""
         # Override the auth dependency to bypass authentication for testing
         app.dependency_overrides[get_current_user] = mock_auth_dependency
-        client = TestClient(app)
-        yield client
-        # Clean up the override after test
+
+        # Override database dependency
+        def override_get_db():
+            try:
+                yield db_session
+            finally:
+                pass  # Session cleanup handled by fixture
+
+        app.dependency_overrides[get_db] = override_get_db
+
+        with TestClient(app) as test_client:
+            yield test_client
+
+        # Clean up the overrides after test
         app.dependency_overrides.clear()
 
     @pytest.fixture
@@ -48,235 +49,135 @@ class TestAgentEndpoints:
             "parameters": {"grid_size": 10},
             "gmn_spec": None,
             "use_pymdp": True,
-            "planning_horizon": 3,
         }
 
-    def test_create_agent_endpoint_exists(self, client, sample_agent_config):
-        """Test that the create agent endpoint exists and responds."""
+    def test_create_agent_endpoint_exists(self, client):
+        """Test that POST /api/v1/agents endpoint exists."""
+        # Following TDD: Start with the simplest test
+        response = client.post("/api/v1/agents", json={})
+        # We expect 422 (validation error) not 404 (not found)
+        assert response.status_code != 404
+
+    def test_create_agent_returns_validation_error_for_empty_body(
+        self, client
+    ):
+        """Test that empty request body returns validation error."""
+        response = client.post("/api/v1/agents", json={})
+        assert response.status_code == 422
+        assert "detail" in response.json()
+
+    def test_create_agent_with_valid_data(self, client, sample_agent_config):
+        """Test creating agent with valid configuration."""
         response = client.post("/api/v1/agents", json=sample_agent_config)
+        assert response.status_code == 201
+        data = response.json()
 
-        # The endpoint should exist (not 404) and handle the request
-        assert (
-            response.status_code != 404
-        ), "Create agent endpoint should exist"
+        # Verify response structure
+        assert "id" in data
+        assert data["name"] == sample_agent_config["name"]
+        assert data["template"] == sample_agent_config["template"]
+        assert data["status"] == "pending"  # Default status
 
-        # The response should be either success (201) or an error we can handle
-        assert response.status_code in [
-            200,
-            201,
-            422,
-            500,
-        ], "Should return a valid HTTP status"
+    def test_get_agent_by_id(self, client, sample_agent_config):
+        """Test retrieving agent by ID."""
+        # First create an agent
+        create_response = client.post(
+            "/api/v1/agents", json=sample_agent_config
+        )
+        assert create_response.status_code == 201
+        agent_id = create_response.json()["id"]
 
-    def test_get_agents_endpoint_exists(self, client):
-        """Test that the get agents endpoint exists and responds."""
+        # Now retrieve it
+        response = client.get(f"/api/v1/agents/{agent_id}")
+        assert response.status_code == 200
+        data = response.json()
+
+        assert data["id"] == agent_id
+        assert data["name"] == sample_agent_config["name"]
+
+    def test_get_nonexistent_agent_returns_404(self, client):
+        """Test that requesting non-existent agent returns 404."""
+        fake_id = "00000000-0000-0000-0000-000000000000"
+        response = client.get(f"/api/v1/agents/{fake_id}")
+        assert response.status_code == 404
+        assert "not found" in response.json()["detail"].lower()
+
+    def test_list_agents_endpoint(self, client, sample_agent_config):
+        """Test listing all agents."""
+        # Create a few agents
+        for i in range(3):
+            config = sample_agent_config.copy()
+            config["name"] = f"Test Agent {i}"
+            response = client.post("/api/v1/agents", json=config)
+            assert response.status_code == 201
+
+        # List all agents
         response = client.get("/api/v1/agents")
+        assert response.status_code == 200
+        data = response.json()
 
-        # The endpoint should exist (not 404)
-        assert response.status_code != 404, "Get agents endpoint should exist"
+        assert "agents" in data
+        assert len(data["agents"]) >= 3  # At least our 3 agents
+        assert "total" in data
 
-        # Should return some form of response
-        assert response.status_code in [
-            200,
-            500,
-        ], "Should return a valid HTTP status"
-
-    def test_get_single_agent_endpoint_exists(self, client):
-        """Test that the get single agent endpoint exists."""
-        response = client.get(
-            "/api/v1/agents/12345678-1234-1234-1234-123456789012"
+    def test_update_agent_status(self, client, sample_agent_config):
+        """Test updating agent status."""
+        # Create agent
+        create_response = client.post(
+            "/api/v1/agents", json=sample_agent_config
         )
+        agent_id = create_response.json()["id"]
 
-        # The endpoint should exist (not 404)
-        assert (
-            response.status_code != 404
-        ), "Get single agent endpoint should exist"
+        # Update status
+        update_data = {"status": "active"}
+        response = client.put(f"/api/v1/agents/{agent_id}", json=update_data)
+        assert response.status_code == 200
+        assert response.json()["status"] == "active"
 
-        # Should handle the request (even if agent doesn't exist)
-        assert response.status_code in [
-            200,
-            404,
-            500,
-        ], "Should return a valid HTTP status"
-
-    def test_delete_agent_endpoint_exists(self, client):
-        """Test that the delete agent endpoint exists."""
-        response = client.delete(
-            "/api/v1/agents/12345678-1234-1234-1234-123456789012"
+    def test_delete_agent(self, client, sample_agent_config):
+        """Test deleting an agent."""
+        # Create agent
+        create_response = client.post(
+            "/api/v1/agents", json=sample_agent_config
         )
+        agent_id = create_response.json()["id"]
 
-        # The endpoint should exist (not 404)
-        assert (
-            response.status_code != 404
-        ), "Delete agent endpoint should exist"
+        # Delete agent
+        response = client.delete(f"/api/v1/agents/{agent_id}")
+        assert response.status_code == 204
 
-        # Should handle the request
-        assert response.status_code in [
-            200,
-            204,
-            404,
-            500,
-        ], "Should return a valid HTTP status"
+        # Verify it's gone
+        get_response = client.get(f"/api/v1/agents/{agent_id}")
+        assert get_response.status_code == 404
 
-    def test_get_agent_metrics_endpoint_exists(self, client):
-        """Test that the agent metrics endpoint exists."""
-        response = client.get(
-            "/api/v1/agents/12345678-1234-1234-1234-123456789012/metrics"
-        )
+    def test_agent_template_validation(self, client):
+        """Test that invalid template names are rejected."""
+        invalid_config = {
+            "name": "Test Agent",
+            "template": "invalid_template_name",
+            "parameters": {},
+        }
+        response = client.post("/api/v1/agents", json=invalid_config)
+        # Should get validation error
+        assert response.status_code == 422
 
-        # The endpoint should exist (not 404)
-        assert (
-            response.status_code != 404
-        ), "Agent metrics endpoint should exist"
-
-        # Should handle the request
-        assert response.status_code in [
-            200,
-            404,
-            500,
-        ], "Should return a valid HTTP status"
-
-    def test_start_agent_endpoint_exists(self, client):
-        """Test that the start agent endpoint exists."""
-        response = client.post(
-            "/api/v1/agents/12345678-1234-1234-1234-123456789012/start"
-        )
-
-        # The endpoint should exist (not 404)
-        assert response.status_code != 404, "Start agent endpoint should exist"
-
-        # Should handle the request
-        assert response.status_code in [
-            200,
-            404,
-            500,
-        ], "Should return a valid HTTP status"
-
-    def test_stop_agent_endpoint_exists(self, client):
-        """Test that the stop agent endpoint exists."""
-        response = client.post(
-            "/api/v1/agents/12345678-1234-1234-1234-123456789012/stop"
-        )
-
-        # The endpoint should exist (not 404)
-        assert response.status_code != 404, "Stop agent endpoint should exist"
-
-        # Should handle the request
-        assert response.status_code in [
-            200,
-            404,
-            500,
-        ], "Should return a valid HTTP status"
-
-    def test_agent_conversations_endpoint_exists(self, client):
-        """Test that the agent conversations endpoint exists."""
-        response = client.get(
-            "/api/v1/agents/12345678-1234-1234-1234-123456789012/conversations"
-        )
-
-        # The endpoint should exist (not 404)
-        assert (
-            response.status_code != 404
-        ), "Agent conversations endpoint should exist"
-
-        # Should handle the request
-        assert response.status_code in [
-            200,
-            404,
-            500,
-        ], "Should return a valid HTTP status"
-
-    def test_create_conversation_endpoint_exists(self, client):
-        """Test that the create conversation endpoint exists."""
-        conversation_data = {
-            "prompt": "Hello, test agent!",
-            "provider": "ollama",
-            "context": {},
+    def test_agent_parameters_persistence(self, client, sample_agent_config):
+        """Test that agent parameters are properly stored and retrieved."""
+        # Create agent with specific parameters
+        config = sample_agent_config.copy()
+        config["parameters"] = {
+            "grid_size": 20,
+            "learning_rate": 0.01,
+            "custom_setting": "test_value",
         }
 
-        response = client.post(
-            "/api/v1/agents/12345678-1234-1234-1234-123456789012/conversations",
-            json=conversation_data,
-        )
+        create_response = client.post("/api/v1/agents", json=config)
+        agent_id = create_response.json()["id"]
 
-        # The endpoint should exist (not 404)
-        assert (
-            response.status_code != 404
-        ), "Create conversation endpoint should exist"
-
-        # Should handle the request
-        assert response.status_code in [
-            200,
-            201,
-            404,
-            422,
-            500,
-        ], "Should return a valid HTTP status"
-
-    def test_templates_endpoint_exists(self, client):
-        """Test that the templates endpoint exists."""
-        response = client.get("/api/v1/templates")
-
-        # The endpoint should exist (not 404)
-        assert response.status_code != 404, "Templates endpoint should exist"
-
-        # Should handle the request
-        assert response.status_code in [
-            200,
-            500,
-        ], "Should return a valid HTTP status"
-
-    def test_public_templates_endpoint_exists(self, client):
-        """Test that the public templates endpoint exists."""
-        response = client.get("/api/v1/templates/public")
-
-        # The endpoint should exist (not 404)
-        assert (
-            response.status_code != 404
-        ), "Public templates endpoint should exist"
-
-        # Should handle the request
-        assert response.status_code in [
-            200,
-            500,
-        ], "Should return a valid HTTP status"
-
-    def test_gmn_agent_creation_endpoint_exists(self, client):
-        """Test that the GMN agent creation endpoint exists."""
-        gmn_config = {
-            "name": "GMN Test Agent",
-            "gmn_specification": {
-                "id": "test-gmn-agent",
-                "description": "Test agent created from GMN",
-                "goals": [{"name": "explore", "priority": 0.8}],
-                "constraints": {"belief_constraints": []},
-            },
-        }
-
-        response = client.post("/api/v1/agents/from-gmn", json=gmn_config)
-
-        # The endpoint should exist (not 404)
-        assert (
-            response.status_code != 404
-        ), "GMN agent creation endpoint should exist"
-
-        # Should handle the request
-        assert response.status_code in [
-            200,
-            201,
-            422,
-            500,
-        ], "Should return a valid HTTP status"
-
-    def test_demo_agents_endpoint_exists(self, client):
-        """Test that the demo agents endpoint exists."""
-        response = client.get("/api/v1/agents/demo")
-
-        # The endpoint should exist (not 404)
-        assert response.status_code != 404, "Demo agents endpoint should exist"
-
-        # Should handle the request
-        assert response.status_code in [
-            200,
-            500,
-        ], "Should return a valid HTTP status"
+        # Retrieve and verify parameters
+        response = client.get(f"/api/v1/agents/{agent_id}")
+        assert response.status_code == 200
+        data = response.json()
+        assert data["parameters"]["grid_size"] == 20
+        assert data["parameters"]["learning_rate"] == 0.01
+        assert data["parameters"]["custom_setting"] == "test_value"

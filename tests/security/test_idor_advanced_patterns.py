@@ -525,7 +525,9 @@ class TestComplexIDORScenarios(IDORTestBase):
             target_id.replace("-", ""),  # Without hyphens
             target_id.upper(),  # Uppercase
             f"0x{target_id.replace('-', '')}",  # Hex-like format
-            hashlib.md5(target_id.encode()).hexdigest(),  # MD5 hash
+            hashlib.md5(
+                target_id.encode(), usedforsecurity=False
+            ).hexdigest(),  # MD5 hash
         ]
 
         for encoded_id in encoded_ids:

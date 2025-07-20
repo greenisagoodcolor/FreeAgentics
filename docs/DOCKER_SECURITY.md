@@ -12,7 +12,7 @@ FreeAgentics v0.2 implements strict security measures for Docker deployments. Al
    cp docker-compose.override.yml.example docker-compose.override.yml
    ```
 
-2. **Edit docker-compose.override.yml** with your local passwords:
+1. **Edit docker-compose.override.yml** with your local passwords:
 
    ```yaml
    services:
@@ -21,7 +21,7 @@ FreeAgentics v0.2 implements strict security measures for Docker deployments. Al
          POSTGRES_PASSWORD: your_secure_password_here
    ```
 
-3. **Set required environment variables** in `.env`:
+1. **Set required environment variables** in `.env`:
 
    ```bash
    # Database
@@ -36,7 +36,7 @@ FreeAgentics v0.2 implements strict security measures for Docker deployments. Al
    JWT_SECRET=your_generated_jwt_secret_here
    ```
 
-4. **Generate secure keys**:
+1. **Generate secure keys**:
 
    ```bash
    # Generate SECRET_KEY
@@ -106,7 +106,7 @@ NEXT_PUBLIC_API_URL=https://api.yourdomain.com
    # - nginx/ssl/key.pem
    ```
 
-2. **Generate DH parameters**:
+1. **Generate DH parameters**:
 
    ```bash
    openssl dhparam -out nginx/dhparam.pem 2048
@@ -161,21 +161,25 @@ Before deploying to production:
 ## Security Best Practices
 
 1. **Rotate Credentials Regularly**
+
    - Database passwords every 90 days
    - JWT secrets every 180 days
    - API keys every 90 days
 
-2. **Monitor Access**
+1. **Monitor Access**
+
    - Enable PostgreSQL logging
    - Monitor failed authentication attempts
    - Set up alerts for suspicious activity
 
-3. **Backup Securely**
+1. **Backup Securely**
+
    - Encrypt database backups
    - Store backups in separate location
    - Test restore procedures regularly
 
-4. **Network Security**
+1. **Network Security**
+
    - Use firewall rules to restrict access
    - Enable VPN for administrative access
    - Monitor network traffic

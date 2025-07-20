@@ -9,7 +9,7 @@ import asyncio
 import json
 import logging
 import re
-import subprocess
+import subprocess  # nosec B404 # Required for dependency monitoring tools (pip, git, gh)
 from dataclasses import dataclass, field
 from datetime import datetime, timedelta
 from enum import Enum
@@ -41,7 +41,12 @@ class VulnerabilitySeverity(Enum):
     @property
     def score(self) -> int:
         """Get numerical score for comparison"""
-        scores = {self.CRITICAL: 4, self.HIGH: 3, self.MEDIUM: 2, self.LOW: 1}
+        scores = {
+            VulnerabilitySeverity.CRITICAL: 4,
+            VulnerabilitySeverity.HIGH: 3,
+            VulnerabilitySeverity.MEDIUM: 2,
+            VulnerabilitySeverity.LOW: 1,
+        }
         return scores[self]
 
 
@@ -179,7 +184,9 @@ class DependencyScanner:
                                         direct=True,
                                     )
                                 )
-                    except:
+                    except (
+                        Exception
+                    ):  # nosec B110 # Safe fallback for malformed requirements files
                         pass
 
         # Get all installed packages (including transitive)
@@ -201,7 +208,7 @@ class DependencyScanner:
                                 direct=False,
                             )
                         )
-        except:
+        except Exception:  # nosec B110 # Safe fallback if pip list fails
             pass
 
         return dependencies
@@ -304,7 +311,7 @@ class DependencyScanner:
                 for line in result.stdout.split("\n"):
                     if line.startswith("Version:"):
                         return line.split(":")[1].strip()
-        except:
+        except Exception:
             pass
         return None
 
@@ -325,7 +332,7 @@ class DependencyScanner:
                 deps = data.get("dependencies", {})
                 if package_name in deps:
                     return deps[package_name].get("version")
-        except:
+        except Exception:
             pass
         return None
 
@@ -335,7 +342,7 @@ class VulnerabilityDatabase:
 
     def __init__(self, config: MonitorConfig):
         self.config = config
-        self.session = None
+        self.session: Optional[aiohttp.ClientSession] = None
 
     async def __aenter__(self):
         self.session = aiohttp.ClientSession()
@@ -478,7 +485,7 @@ class VulnerabilityDatabase:
     ) -> None:
         """Check vulnerabilities using Snyk API"""
         # Group by source for batch checking
-        by_source = {}
+        by_source: Dict[str, List[Dependency]] = {}
         for dep in dependencies:
             if dep.source not in by_source:
                 by_source[dep.source] = []
@@ -571,7 +578,7 @@ class VulnerabilityDatabase:
                 # Parse version spec (e.g., "<2.0.0", ">=1.0.0,<1.5.0")
                 if self._matches_spec(current, spec):
                     return True
-        except:
+        except Exception:
             pass
         return False
 
@@ -726,7 +733,7 @@ class UpdateManager:
                     if response.status == 200:
                         data = await response.json()
                         return data.get("info", {}).get("version")
-        except:
+        except Exception:
             pass
         return None
 
@@ -742,7 +749,7 @@ class UpdateManager:
                     if response.status == 200:
                         data = await response.json()
                         return data.get("version")
-        except:
+        except Exception:
             pass
         return None
 

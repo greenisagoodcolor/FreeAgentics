@@ -58,7 +58,7 @@ class SimulationConfig:
     cooldown_period: float = 30.0  # Cooldown after main simulation
 
     # Database configuration
-    db_url: str = Field(
+    db_url: str = field(
         default_factory=lambda: os.getenv(
             "TEST_DATABASE_URL", "sqlite:///./test_simulation.db"
         )

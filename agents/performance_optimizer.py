@@ -38,7 +38,7 @@ class MatrixCache:
 
     def __init__(self, max_size: int = 1000):
         """Initialize the matrix cache.
-        
+
         Args:
             max_size: Maximum number of cached items.
         """
@@ -81,7 +81,7 @@ class AgentPool:
 
     def __init__(self, max_agents: int = 100):
         """Initialize the agent pool.
-        
+
         Args:
             max_agents: Maximum number of agents in the pool.
         """
@@ -116,7 +116,7 @@ class AsyncInferenceEngine:
 
     def __init__(self, max_workers: int = 4):
         """Initialize the async inference engine.
-        
+
         Args:
             max_workers: Maximum number of worker threads.
         """

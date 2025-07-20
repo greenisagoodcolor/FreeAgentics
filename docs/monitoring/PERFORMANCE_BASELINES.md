@@ -7,21 +7,22 @@ This document defines performance baselines, thresholds, and capacity limits for
 ## Table of Contents
 
 1. [Baseline Methodology](#baseline-methodology)
-2. [System Performance Baselines](#system-performance-baselines)
-3. [Agent Coordination Baselines](#agent-coordination-baselines)
-4. [Memory Usage Baselines](#memory-usage-baselines)
-5. [API Performance Baselines](#api-performance-baselines)
-6. [Belief System Baselines](#belief-system-baselines)
-7. [Business Metrics Baselines](#business-metrics-baselines)
-8. [Capacity Planning Thresholds](#capacity-planning-thresholds)
-9. [Performance Testing Scenarios](#performance-testing-scenarios)
-10. [Baseline Maintenance](#baseline-maintenance)
+1. [System Performance Baselines](#system-performance-baselines)
+1. [Agent Coordination Baselines](#agent-coordination-baselines)
+1. [Memory Usage Baselines](#memory-usage-baselines)
+1. [API Performance Baselines](#api-performance-baselines)
+1. [Belief System Baselines](#belief-system-baselines)
+1. [Business Metrics Baselines](#business-metrics-baselines)
+1. [Capacity Planning Thresholds](#capacity-planning-thresholds)
+1. [Performance Testing Scenarios](#performance-testing-scenarios)
+1. [Baseline Maintenance](#baseline-maintenance)
 
 ## Baseline Methodology
 
 ### Data Collection
 
 Baselines are established through:
+
 - 30-day rolling average of production metrics
 - Load testing under controlled conditions
 - Statistical analysis (P50, P90, P95, P99)
@@ -68,6 +69,7 @@ def calculate_baseline(data, method='percentile'):
 | Service Ready Time | < 30s | > 45s | > 60s | < 45s |
 
 **Measurement Query**:
+
 ```promql
 # Availability over 24h
 avg_over_time(up{job="freeagentics-backend"}[24h]) * 100
@@ -83,6 +85,7 @@ avg_over_time(up{job="freeagentics-backend"}[24h]) * 100
 | Network I/O | 10 MB/s | 25 MB/s | 40 MB/s | 50 MB/s |
 
 **Key Metrics**:
+
 ```promql
 # CPU Usage
 100 - (avg(rate(node_cpu_seconds_total{mode="idle"}[5m])) * 100)
@@ -110,6 +113,7 @@ freeagentics_system_memory_usage_bytes / (1024*1024*1024)
 | Coordination Queue | 10 | 50 | 80 | 100 |
 
 **Monitoring Query**:
+
 ```promql
 # Active agents by type
 sum by (agent_type) (freeagentics_agent_active{state="running"})
@@ -125,6 +129,7 @@ sum by (agent_type) (freeagentics_agent_active{state="running"})
 | Belief Convergence | 1s | 3s | 4s | 5s | 10s |
 
 **Performance Tracking**:
+
 ```promql
 # Coordination duration percentiles
 histogram_quantile(0.95, 
@@ -153,6 +158,7 @@ histogram_quantile(0.95,
 | Analyzer | 25 MB | 32 MB | 35 MB | 38 MB | 40 MB |
 
 **Memory Monitoring**:
+
 ```promql
 # Top memory consumers
 topk(10, freeagentics_agent_memory_usage_bytes / (1024*1024))
@@ -168,6 +174,7 @@ topk(10, freeagentics_agent_memory_usage_bytes / (1024*1024))
 | Per Week | 50 MB | 100 MB | 200 MB | 500 MB |
 
 **Growth Detection**:
+
 ```promql
 # Memory growth rate over 1 hour
 rate(freeagentics_agent_memory_usage_bytes[1h]) * 3600 / (1024*1024)
@@ -195,6 +202,7 @@ rate(freeagentics_agent_memory_usage_bytes[1h]) * 3600 / (1024*1024)
 | POST /api/v1/coordinate | 200ms | 500ms | 700ms | 900ms | < 1s |
 
 **Latency Monitoring**:
+
 ```promql
 # P95 latency by endpoint
 histogram_quantile(0.95,
@@ -233,6 +241,7 @@ histogram_quantile(0.95,
 | Adapting | 3.0 | 5.0 - 8.0 | 10.0 | > 20.0 |
 
 **Free Energy Monitoring**:
+
 ```promql
 # Free energy distribution
 histogram_quantile(0.95,
@@ -317,6 +326,7 @@ histogram_quantile(0.95,
 ### Load Test Profiles
 
 #### 1. Normal Load Test
+
 ```yaml
 scenario: normal_load
 duration: 30m
@@ -331,6 +341,7 @@ expected_results:
 ```
 
 #### 2. Peak Load Test
+
 ```yaml
 scenario: peak_load
 duration: 15m
@@ -345,6 +356,7 @@ expected_results:
 ```
 
 #### 3. Stress Test
+
 ```yaml
 scenario: stress_test
 duration: 10m
@@ -359,6 +371,7 @@ expected_results:
 ```
 
 #### 4. Endurance Test
+
 ```yaml
 scenario: endurance_test
 duration: 24h
@@ -405,25 +418,28 @@ fi
 ### Review Process
 
 #### Weekly Review Checklist
+
 - [ ] Compare current metrics to baselines
 - [ ] Identify trending deviations
 - [ ] Review alert frequency
 - [ ] Update minor thresholds
 
 #### Monthly Update Process
+
 1. Export 30-day metrics
-2. Calculate new percentiles
-3. Compare to existing baselines
-4. Update configuration
-5. Test alert thresholds
-6. Document changes
+1. Calculate new percentiles
+1. Compare to existing baselines
+1. Update configuration
+1. Test alert thresholds
+1. Document changes
 
 #### Quarterly Capacity Review
+
 1. Analyze growth trends
-2. Project future capacity
-3. Review architecture limits
-4. Plan infrastructure changes
-5. Update SLOs if needed
+1. Project future capacity
+1. Review architecture limits
+1. Plan infrastructure changes
+1. Update SLOs if needed
 
 ### Baseline Configuration Management
 
@@ -514,11 +530,12 @@ def update_baselines():
 ### Change Tracking
 
 All baseline changes must be:
+
 1. Documented in change log
-2. Reviewed by SRE team
-3. Tested in staging
-4. Announced to engineering
-5. Monitored for impact
+1. Reviewed by SRE team
+1. Tested in staging
+1. Announced to engineering
+1. Monitored for impact
 
 ```markdown
 # Baseline Change Log
@@ -535,9 +552,9 @@ All baseline changes must be:
 - Validated through load testing
 ```
 
----
+______________________________________________________________________
 
-**Last Updated**: 2025-01-15  
-**Version**: 1.2  
-**Next Review**: 2025-02-15  
+**Last Updated**: 2025-01-15\
+**Version**: 1.2\
+**Next Review**: 2025-02-15\
 **Contact**: sre@freeagentics.com

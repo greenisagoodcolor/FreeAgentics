@@ -182,7 +182,7 @@ class TestJWTSecurityIntegration:
 
         # CSRF token cookie should be readable by JS (not httpOnly)
         if "csrf_token" in cookies:
-            cookie = cookies["csrf_token"]
+            _cookie = cookies["csrf_token"]
             # Verify it's accessible to JavaScript
 
     def test_csrf_protection_on_logout(self, client, test_user):
@@ -242,7 +242,7 @@ class TestJWTSecurityIntegration:
         csrf_token = csrf_response.json()["csrf_token"]
 
         # Logout with CSRF token
-        logout_response = client.post(
+        _logout_response = client.post(
             "/api/v1/auth/logout",
             headers={
                 "Authorization": f"Bearer {access_token}",

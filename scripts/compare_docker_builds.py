@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 """
-Compare Docker Build Sizes and Performance
+Compare Docker Build Sizes and Performance.
 """
 
 import subprocess
@@ -9,7 +9,7 @@ import time
 
 
 def run_command(command, timeout=300):
-    """Run a command with timeout"""
+    """Run a command with timeout."""
     try:
         result = subprocess.run(
             command, capture_output=True, text=True, timeout=timeout
@@ -22,7 +22,7 @@ def run_command(command, timeout=300):
 
 
 def get_image_size(image_name):
-    """Get image size in bytes"""
+    """Get image size in bytes."""
     returncode, stdout, stderr = run_command(
         ["docker", "inspect", image_name, "--format", "{{.Size}}"]
     )
@@ -33,7 +33,7 @@ def get_image_size(image_name):
 
 
 def get_human_readable_size(size_bytes):
-    """Convert bytes to human readable format"""
+    """Convert bytes to human readable format."""
     if size_bytes == 0:
         return "0 B"
 
@@ -45,7 +45,7 @@ def get_human_readable_size(size_bytes):
 
 
 def main():
-    """Compare Docker builds"""
+    """Compare Docker builds."""
     print("=== Docker Build Size Comparison ===")
 
     builds = [
@@ -114,7 +114,7 @@ def main():
         if original_size > 0 and optimized_size > 0:
             reduction = (original_size - optimized_size) / original_size * 100
 
-            print(f"Original size:  {results['Original']['size_human']}")
+            print(f"Original size: {results['Original']['size_human']}")
             print(f"Optimized size: {results['Optimized']['size_human']}")
             print(f"Size reduction: {reduction:.1f}%")
 

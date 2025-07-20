@@ -18,6 +18,12 @@ import numpy as np
 logger = logging.getLogger(__name__)
 
 
+class GMNValidationError(Exception):
+    """Raised when GMN validation fails."""
+
+    pass
+
+
 class GMNNodeType(Enum):
     """Types of nodes in GMN specification."""
 

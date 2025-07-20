@@ -27,6 +27,7 @@ from tools.performance_documentation_generator import (
 )
 
 
+@pytest.mark.slow
 class TestPerformanceMetrics(unittest.TestCase):
     """Test performance metrics data structures."""
 
@@ -80,6 +81,7 @@ class TestPerformanceMetrics(unittest.TestCase):
         self.assertEqual(metrics.total_memory_mb(), expected_total)
 
 
+@pytest.mark.slow
 class TestPerformanceAnalyzer(unittest.TestCase):
     """Test performance analysis functionality."""
 
@@ -145,6 +147,7 @@ class TestPerformanceAnalyzer(unittest.TestCase):
         self.assertIn("description", immediate[0])
 
 
+@pytest.mark.slow
 class TestPerformanceChartGenerator(unittest.TestCase):
     """Test performance chart generation."""
 
@@ -218,6 +221,7 @@ class TestPerformanceChartGenerator(unittest.TestCase):
         self.assertTrue(os.path.exists(chart_path))
 
 
+@pytest.mark.slow
 class TestPerformanceDocumentationGenerator(unittest.TestCase):
     """Test complete documentation generation."""
 

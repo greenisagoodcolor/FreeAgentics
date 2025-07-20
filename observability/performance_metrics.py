@@ -29,13 +29,16 @@ except ImportError:
 
     # Mock monitoring functions
     async def record_system_metric(
-        metric: str, value: float, metadata: Dict = None
-    ):
+        metric: str, value: float, metadata: Optional[Dict[str, Any]] = None
+    ) -> None:
         logger.debug(f"MOCK System - {metric}: {value}")
 
     async def record_agent_metric(
-        agent_id: str, metric: str, value: float, metadata: Dict = None
-    ):
+        agent_id: str,
+        metric: str,
+        value: float,
+        metadata: Optional[Dict[str, Any]] = None,
+    ) -> None:
         logger.debug(f"MOCK Agent {agent_id} - {metric}: {value}")
 
 
@@ -60,7 +63,7 @@ class MetricsBuffer:
         self.buffer = deque(maxlen=max_size)
         self.lock = threading.RLock()
 
-    def add(self, value: float, timestamp: datetime = None):
+    def add(self, value: float, timestamp: Optional[datetime] = None) -> None:
         """Add a value to the buffer."""
         with self.lock:
             self.buffer.append((timestamp or datetime.now(), value))
@@ -171,7 +174,7 @@ class RealTimePerformanceTracker:
 
         logger.info("🎯 Real-time performance tracker initialized")
 
-    async def start(self):
+    async def start(self) -> None:
         """Start real-time performance collection."""
         if self.running:
             logger.warning("Performance tracker already running")
@@ -181,7 +184,7 @@ class RealTimePerformanceTracker:
         self.collection_task = asyncio.create_task(self._collection_loop())
         logger.info("📊 Real-time performance tracking started")
 
-    async def stop(self):
+    async def stop(self) -> None:
         """Stop performance collection."""
         self.running = False
         if self.collection_task:
@@ -192,7 +195,7 @@ class RealTimePerformanceTracker:
                 pass
         logger.info("📊 Real-time performance tracking stopped")
 
-    async def _collection_loop(self):
+    async def _collection_loop(self) -> None:
         """Main collection loop."""
         while self.running:
             try:
@@ -204,7 +207,7 @@ class RealTimePerformanceTracker:
                 logger.error(f"Performance collection error: {e}")
                 await asyncio.sleep(self.collection_interval)
 
-    async def _collect_system_metrics(self):
+    async def _collect_system_metrics(self) -> None:
         """Collect system-wide performance metrics."""
         try:
             timestamp = datetime.now()
@@ -225,9 +228,6 @@ class RealTimePerformanceTracker:
             # Calculate throughput metrics
             uptime_seconds = (timestamp - self.start_time).total_seconds()
             if uptime_seconds > 0:
-                inference_throughput = (
-                    self.counters["total_inferences"] / uptime_seconds
-                )
                 belief_update_throughput = (
                     self.counters["total_belief_updates"] / uptime_seconds
                 )
@@ -272,8 +272,8 @@ class RealTimePerformanceTracker:
         agent_id: str,
         inference_time_ms: float,
         success: bool = True,
-        error: str = None,
-    ):
+        error: Optional[str] = None,
+    ) -> None:
         """Record individual inference performance."""
         timestamp = datetime.now()
 
@@ -305,9 +305,9 @@ class RealTimePerformanceTracker:
     async def record_belief_update(
         self,
         agent_id: str,
-        update_time_ms: float = None,
-        free_energy: float = None,
-    ):
+        update_time_ms: Optional[float] = None,
+        free_energy: Optional[float] = None,
+    ) -> None:
         """Record belief update performance."""
         timestamp = datetime.now()
 
@@ -338,8 +338,8 @@ class RealTimePerformanceTracker:
                 )
 
     async def record_agent_step(
-        self, agent_id: str, step_time_ms: float = None
-    ):
+        self, agent_id: str, step_time_ms: Optional[float] = None
+    ) -> None:
         """Record agent step performance."""
         timestamp = datetime.now()
 
@@ -360,7 +360,7 @@ class RealTimePerformanceTracker:
                     agent_id, "step_time_ms", step_time_ms
                 )
 
-    async def _check_performance_alerts(self):
+    async def _check_performance_alerts(self) -> None:
         """Check for performance threshold violations."""
         try:
             current_stats = await self.get_current_performance_snapshot()
@@ -420,7 +420,7 @@ class RealTimePerformanceTracker:
 
     async def _emit_alert(
         self, level: str, metric: str, current_value: float, baseline: float
-    ):
+    ) -> None:
         """Emit performance alert."""
         multiplier = current_value / baseline if baseline > 0 else 0
 
@@ -530,7 +530,7 @@ class RealTimePerformanceTracker:
             "agent_count": len(self.agent_metrics),
         }
 
-    def update_baselines(self, new_baselines: Dict[str, float]):
+    def update_baselines(self, new_baselines: Dict[str, float]) -> None:
         """Update performance baselines."""
         self.baselines.update(new_baselines)
         logger.info(f"Updated performance baselines: {new_baselines}")
@@ -571,12 +571,12 @@ class RealTimePerformanceTracker:
 performance_tracker = RealTimePerformanceTracker()
 
 
-async def start_performance_tracking():
+async def start_performance_tracking() -> None:
     """Start global performance tracking."""
     await performance_tracker.start()
 
 
-async def stop_performance_tracking():
+async def stop_performance_tracking() -> None:
     """Stop global performance tracking."""
     await performance_tracker.stop()
 
@@ -585,8 +585,8 @@ async def record_inference_metric(
     agent_id: str,
     inference_time_ms: float,
     success: bool = True,
-    error: str = None,
-):
+    error: Optional[str] = None,
+) -> None:
     """Record inference performance metric."""
     await performance_tracker.record_inference_performance(
         agent_id, inference_time_ms, success, error
@@ -594,15 +594,19 @@ async def record_inference_metric(
 
 
 async def record_belief_metric(
-    agent_id: str, update_time_ms: float = None, free_energy: float = None
-):
+    agent_id: str,
+    update_time_ms: Optional[float] = None,
+    free_energy: Optional[float] = None,
+) -> None:
     """Record belief update metric."""
     await performance_tracker.record_belief_update(
         agent_id, update_time_ms, free_energy
     )
 
 
-async def record_step_metric(agent_id: str, step_time_ms: float = None):
+async def record_step_metric(
+    agent_id: str, step_time_ms: Optional[float] = None
+) -> None:
     """Record agent step metric."""
     await performance_tracker.record_agent_step(agent_id, step_time_ms)
 

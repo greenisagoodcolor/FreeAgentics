@@ -16,11 +16,15 @@ import os
 import secrets
 import time
 from datetime import datetime, timedelta, timezone
-from typing import Any, Dict, Optional, Tuple
+from typing import Any, Dict, List, Optional, Tuple, cast
 
 import jwt
 from cryptography.hazmat.primitives import hashes, serialization
 from cryptography.hazmat.primitives.asymmetric import rsa
+from cryptography.hazmat.primitives.asymmetric.rsa import (
+    RSAPrivateKey,
+    RSAPublicKey,
+)
 from fastapi import HTTPException, Request, status
 
 logger = logging.getLogger(__name__)
@@ -29,8 +33,8 @@ logger = logging.getLogger(__name__)
 JWT_ALGORITHM = "RS256"
 ACCESS_TOKEN_EXPIRE_MINUTES = 15  # OWASP recommendation: 15 minutes
 REFRESH_TOKEN_EXPIRE_DAYS = 7  # 7 days for refresh tokens
-TOKEN_ISSUER = "freeagentics-auth"
-TOKEN_AUDIENCE = "freeagentics-api"
+TOKEN_ISSUER = "freeagentics-auth"  # nosec B105
+TOKEN_AUDIENCE = "freeagentics-api"  # nosec B105
 
 # Key paths
 PRIVATE_KEY_PATH = os.path.join(
@@ -51,12 +55,13 @@ class TokenBlacklist:
     In production, use Redis or similar persistent storage.
     """
 
-    def __init__(self):
-        self._blacklist = {}  # jti -> expiration time
+    def __init__(self) -> None:
+        """Initialize token blacklist with cleanup configuration."""
+        self._blacklist: Dict[str, float] = {}  # jti -> expiration time
         self._last_cleanup = time.time()
         self._cleanup_interval = 3600  # Clean up expired entries every hour
 
-    def add(self, jti: str, exp: datetime):
+    def add(self, jti: str, exp: datetime) -> None:
         """Add token to blacklist."""
         self._blacklist[jti] = exp.timestamp()
         self._cleanup()
@@ -66,7 +71,7 @@ class TokenBlacklist:
         self._cleanup()
         return jti in self._blacklist
 
-    def _cleanup(self):
+    def _cleanup(self) -> None:
         """Remove expired entries from blacklist."""
         current_time = time.time()
         if current_time - self._last_cleanup < self._cleanup_interval:
@@ -93,9 +98,14 @@ class RefreshTokenStore:
     In production, use encrypted database storage.
     """
 
-    def __init__(self):
-        self._tokens = {}  # user_id -> {token_hash, family_id, created_at}
-        self._token_families = {}  # family_id -> [token_hashes]
+    def __init__(self) -> None:
+        """Initialize refresh token store with token family tracking."""
+        self._tokens: Dict[
+            str, Dict[str, Any]
+        ] = {}  # user_id -> {token_hash, family_id, created_at}
+        self._token_families: Dict[
+            str, List[str]
+        ] = {}  # family_id -> [token_hashes]
 
     def store(
         self, user_id: str, token: str, family_id: Optional[str] = None
@@ -135,9 +145,10 @@ class RefreshTokenStore:
                 self._invalidate_family(family_id)
             return None
 
-        return stored["family_id"]
+        family_id = stored.get("family_id")
+        return family_id if isinstance(family_id, str) else None
 
-    def invalidate(self, user_id: str):
+    def invalidate(self, user_id: str) -> None:
         """Invalidate user's refresh token."""
         if user_id in self._tokens:
             family_id = self._tokens[user_id].get("family_id")
@@ -145,7 +156,7 @@ class RefreshTokenStore:
                 self._invalidate_family(family_id)
             del self._tokens[user_id]
 
-    def _invalidate_family(self, family_id: str):
+    def _invalidate_family(self, family_id: str) -> None:
         """Invalidate entire token family (theft detection)."""
         if family_id in self._token_families:
             # Find and remove all tokens in family
@@ -165,22 +176,30 @@ class RefreshTokenStore:
 class JWTHandler:
     """Secure JWT handler with OWASP best practices."""
 
-    def __init__(self):
+    def __init__(self) -> None:
+        """Initialize JWT handler with RSA keys, blacklist, and refresh token store."""
+        self.private_key: RSAPrivateKey
+        self.public_key: RSAPublicKey
         self._load_keys()
         self.blacklist = TokenBlacklist()
         self.refresh_store = RefreshTokenStore()
         self._check_key_rotation()
 
-    def _load_keys(self):
+    def _load_keys(self) -> None:
         """Load RSA keys from files."""
         try:
             with open(PRIVATE_KEY_PATH, "rb") as f:
-                self.private_key = serialization.load_pem_private_key(
-                    f.read(), password=None
+                self.private_key = cast(
+                    RSAPrivateKey,
+                    serialization.load_pem_private_key(
+                        f.read(), password=None
+                    ),
                 )
 
             with open(PUBLIC_KEY_PATH, "rb") as f:
-                self.public_key = serialization.load_pem_public_key(f.read())
+                self.public_key = cast(
+                    RSAPublicKey, serialization.load_pem_public_key(f.read())
+                )
 
         except FileNotFoundError:
             logger.error("JWT keys not found. Generating new keys...")
@@ -189,7 +208,7 @@ class JWTHandler:
             logger.error(f"Error loading JWT keys: {e}")
             raise
 
-    def _generate_keys(self):
+    def _generate_keys(self) -> None:
         """Generate new RSA key pair."""
         # Generate private key
         self.private_key = rsa.generate_private_key(
@@ -227,7 +246,7 @@ class JWTHandler:
 
         logger.info("Generated new RSA key pair")
 
-    def _check_key_rotation(self):
+    def _check_key_rotation(self) -> None:
         """Check if keys need rotation."""
         try:
             key_stat = os.stat(PRIVATE_KEY_PATH)
@@ -243,8 +262,9 @@ class JWTHandler:
                 logger.warning(
                     f"JWT keys are {key_age_days:.0f} days old - rotation recommended soon"
                 )
-        except Exception:
-            pass
+        except Exception as e:
+            # Log failed key age check
+            logger.debug(f"Failed to check JWT key age: {e}")
 
     def create_access_token(
         self,
@@ -342,7 +362,7 @@ class JWTHandler:
                 ):
                     raise jwt.InvalidTokenError("Invalid token fingerprint")
 
-            return payload
+            return cast(Dict[str, Any], payload)
 
         except jwt.ExpiredSignatureError:
             raise HTTPException(
@@ -393,7 +413,7 @@ class JWTHandler:
                 raise jwt.InvalidTokenError("Invalid or reused refresh token")
 
             payload["family_id"] = family_id
-            return payload
+            return cast(Dict[str, Any], payload)
 
         except jwt.ExpiredSignatureError:
             raise HTTPException(
@@ -437,9 +457,9 @@ class JWTHandler:
 
         new_refresh_token, _ = self.create_refresh_token(user_id, family_id)
 
-        return new_access_token, new_refresh_token, family_id
+        return new_access_token, new_refresh_token, family_id or ""
 
-    def revoke_token(self, token: str):
+    def revoke_token(self, token: str) -> None:
         """Revoke a token by adding to blacklist."""
         try:
             # Decode without verification to get jti and exp
@@ -454,7 +474,7 @@ class JWTHandler:
         except Exception as e:
             logger.error(f"Error revoking token: {e}")
 
-    def revoke_user_tokens(self, user_id: str):
+    def revoke_user_tokens(self, user_id: str) -> None:
         """Revoke all tokens for a user."""
         # Invalidate refresh tokens
         self.refresh_store.invalidate(user_id)

@@ -1,5 +1,5 @@
 """
-Unified Security Headers Management for FreeAgentics
+Unified Security Headers Management for FreeAgentics.
 
 Implements comprehensive security headers and SSL/TLS configuration
 following OWASP security guidelines and Task #14.5 requirements.
@@ -78,7 +78,7 @@ class SecurityPolicy:
         == "true"
     )
 
-    def __post_init__(self):
+    def __post_init__(self) -> None:
         """Initialize policy based on environment."""
         if self.production_mode:
             self.hsts_preload = True
@@ -93,7 +93,8 @@ class SecurityPolicy:
 class CertificatePinner:
     """Legacy certificate pinning implementation for backward compatibility."""
 
-    def __init__(self):
+    def __init__(self) -> None:
+        """Initialize legacy certificate pinning."""
         # Use the enhanced mobile certificate pinner
         from auth.certificate_pinning import mobile_cert_pinner
 
@@ -104,7 +105,7 @@ class CertificatePinner:
         self.max_age = 5184000  # 60 days
         self.include_subdomains = True
 
-    def add_pin(self, domain: str, pin_sha256: str):
+    def add_pin(self, domain: str, pin_sha256: str) -> None:
         """Add a certificate pin for a domain."""
         if domain not in self.pins:
             self.pins[domain] = []
@@ -118,7 +119,7 @@ class CertificatePinner:
 
         logger.info(f"Added certificate pin for domain: {domain}")
 
-    def add_backup_pin(self, domain: str, backup_sha256: str):
+    def add_backup_pin(self, domain: str, backup_sha256: str) -> None:
         """Add a backup certificate pin for a domain."""
         if domain not in self.backup_pins:
             self.backup_pins[domain] = []
@@ -153,7 +154,7 @@ class CertificatePinner:
 
         return "; ".join(header_parts)
 
-    def load_pins_from_env(self):
+    def load_pins_from_env(self) -> None:
         """Load certificate pins from environment variables."""
         # The mobile pinner loads from environment automatically
         # Keep this for backward compatibility
@@ -185,6 +186,7 @@ class SecurityHeadersManager:
     """Centralized security headers management."""
 
     def __init__(self, policy: Optional[SecurityPolicy] = None):
+        """Initialize security headers manager."""
         self.policy = policy or SecurityPolicy()
         self.certificate_pinner = CertificatePinner()
         self.certificate_pinner.load_pins_from_env()
@@ -192,7 +194,7 @@ class SecurityHeadersManager:
         # Load customizations from environment
         self._load_env_customizations()
 
-    def _load_env_customizations(self):
+    def _load_env_customizations(self) -> None:
         """Load security policy customizations from environment variables."""
         # HSTS customizations
         if hsts_max_age := os.getenv("HSTS_MAX_AGE"):
@@ -435,10 +437,11 @@ class SecurityHeadersMiddleware(BaseHTTPMiddleware):
     def __init__(
         self, app, security_manager: Optional[SecurityHeadersManager] = None
     ):
+        """Initialize security headers middleware."""
         super().__init__(app)
         self.security_manager = security_manager or SecurityHeadersManager()
 
-    async def dispatch(self, request: Request, call_next):
+    async def dispatch(self, request: Request, call_next) -> Response:
         """Apply security headers to response."""
         try:
             response = await call_next(request)
@@ -479,7 +482,9 @@ class SecurityHeadersMiddleware(BaseHTTPMiddleware):
             return error_response
 
 
-def setup_security_headers(app, policy: Optional[SecurityPolicy] = None):
+def setup_security_headers(
+    app, policy: Optional[SecurityPolicy] = None
+) -> SecurityHeadersManager:
     """Convenience function to set up security headers middleware."""
     security_manager = SecurityHeadersManager(policy)
     app.add_middleware(

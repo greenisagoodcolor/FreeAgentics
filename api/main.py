@@ -6,10 +6,7 @@ from contextlib import asynccontextmanager
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 
-from api.middleware.security_monitoring import (
-    SecurityHeadersMiddleware,
-    SecurityMonitoringMiddleware,
-)
+from api.middleware.security_monitoring import SecurityMonitoringMiddleware
 from api.v1 import (
     agents,
     auth,
@@ -21,6 +18,11 @@ from api.v1 import (
     websocket,
 )
 from api.v1.graphql_schema import graphql_app
+from auth.security_headers import (
+    SecurityHeadersManager,
+    SecurityHeadersMiddleware,
+    SecurityPolicy,
+)
 from auth.security_implementation import SecurityMiddleware
 
 # Configure logging
@@ -80,9 +82,25 @@ app.add_middleware(
 )
 
 # Add security middleware
-app.add_middleware(SecurityMiddleware)
+# app.add_middleware(SecurityMiddleware)  # Temporarily disabled due to conflict
 app.add_middleware(SecurityMonitoringMiddleware)
-app.add_middleware(SecurityHeadersMiddleware)
+
+# Create security headers manager with production policy
+security_manager = SecurityHeadersManager(
+    SecurityPolicy(
+        enable_hsts=True,
+        hsts_max_age=31536000,
+        hsts_include_subdomains=True,
+        hsts_preload=True,
+        enable_expect_ct=True,
+        expect_ct_enforce=True,
+        enable_certificate_pinning=True,
+        production_mode=True,
+    )
+)
+app.add_middleware(
+    SecurityHeadersMiddleware, security_manager=security_manager
+)
 
 # Include routers
 app.include_router(

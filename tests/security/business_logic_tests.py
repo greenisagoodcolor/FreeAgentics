@@ -1236,7 +1236,7 @@ class BusinessLogicTests(BasePenetrationTest):
                                         title="Unauthorized Agent Ownership Transfer",
                                         description="Can transfer agent ownership without proper authorization",
                                         affected_endpoint=f"/api/v1/agents/{agent_id}",
-                                        proof_of_concept=f"Transferred ownership from {user_id} to {user2_id}",
+                                        proof_of_concept=f"Transferred ownership from original_user to {user2_id}",
                                         exploitation_steps=[
                                             "1. Create agent",
                                             "2. Transfer ownership to another user",

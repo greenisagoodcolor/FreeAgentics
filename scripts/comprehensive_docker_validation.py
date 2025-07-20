@@ -263,7 +263,7 @@ class ComprehensiveDockerValidator:
                 "--rm",
                 "--read-only",
                 "--tmpfs",
-                "/tmp",
+                "/tmp",  # nosec B108 - Secure tmpfs mount in Docker
                 "freeagentics:security-test",
                 "touch",
                 "/test-file",

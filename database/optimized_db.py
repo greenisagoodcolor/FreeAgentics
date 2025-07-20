@@ -1,5 +1,5 @@
 """
-Optimized Database Layer with Advanced Connection Pooling and Query Optimization
+Optimized Database Layer with Advanced Connection Pooling and Query Optimization.
 
 This module enhances the existing database layer with:
 1. Advanced connection pooling with health checks
@@ -25,7 +25,18 @@ from typing import Any, Dict, List, Optional, Tuple, Union
 import asyncpg
 import cachetools
 
-from observability.performance_monitor import get_performance_monitor
+# Optional import for performance monitoring
+try:
+    from web.observability.performance_monitor import get_performance_monitor
+except ImportError:
+    # Create a dummy performance monitor for testing
+    def get_performance_monitor():
+        class DummyMonitor:
+            def record_metric(self, *args, **kwargs):
+                pass
+
+        return DummyMonitor()
+
 
 logger = logging.getLogger(__name__)
 
@@ -120,6 +131,7 @@ class OptimizedConnectionPool:
     """Advanced connection pool with health monitoring and auto-scaling."""
 
     def __init__(self, config: DatabaseConfig):
+        """Initialize the optimized connection pool."""
         self.config = config
         self.performance_monitor = get_performance_monitor()
 
@@ -278,7 +290,7 @@ class OptimizedConnectionPool:
 
     def _get_query_hash(self, query: str) -> str:
         """Generate a hash for query caching."""
-        return hashlib.md5(query.encode()).hexdigest()
+        return hashlib.md5(query.encode(), usedforsecurity=False).hexdigest()
 
     def _get_query_template(self, query: str) -> str:
         """Extract query template by removing parameter values."""
@@ -351,7 +363,6 @@ class OptimizedConnectionPool:
     async def get_connection(self, read_only: bool = False):
         """Context manager for getting database connections."""
         connection = None
-        start_time = time.perf_counter()
 
         try:
             connection = await self._get_connection(read_only)
@@ -364,7 +375,6 @@ class OptimizedConnectionPool:
                 await self._release_connection(connection, read_only)
 
             # Update performance monitoring
-            elapsed = time.perf_counter() - start_time
             with self.performance_monitor.time_db_query():
                 pass  # Time is already measured above
 
@@ -458,7 +468,7 @@ class OptimizedConnectionPool:
         start_time = time.perf_counter()
 
         try:
-            async with self.get_connection(read_only) as conn:
+            async with self.get_connection(read_only):
                 stmt = self.prepared_statements[statement_hash]
                 result = await stmt.fetch(*args)
                 return result
@@ -695,14 +705,14 @@ async def benchmark_database_performance():
         elapsed = time.perf_counter() - start_time
         total_queries = num_iterations * len(test_queries)
 
-        print(f"\nBenchmark Results:")
+        print("\nBenchmark Results:")
         print(f"  Total queries: {total_queries}")
         print(f"  Elapsed time: {elapsed:.3f}s")
         print(f"  Queries per second: {total_queries / elapsed:.1f}")
 
         # Print statistics
         stats = await db.get_statistics()
-        print(f"\nDatabase Statistics:")
+        print("\nDatabase Statistics:")
         print(f"  Pool utilization: {stats['pool_stats']}")
         print(f"  Cache stats: {stats['cache_stats']}")
         print(

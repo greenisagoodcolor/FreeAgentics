@@ -1,4 +1,4 @@
-"""Threading Optimization Analysis for FreeAgentics
+"""Threading Optimization Analysis for FreeAgentics.
 
 Comprehensive analysis of threading bottlenecks and optimization opportunities
 in the multi-agent system.
@@ -52,6 +52,7 @@ class ThreadingOptimizationAnalyzer:
     """Analyze threading performance and identify optimization opportunities."""
 
     def __init__(self):
+        """Initialize threading optimization analyzer with profiler."""
         self.profiler = ThreadingProfiler()
         self.opportunities: List[OptimizationOpportunity] = []
 
@@ -525,9 +526,9 @@ def generate_optimization_report():
     for i, opp in enumerate(opportunities, 1):
         print(f"\n{i}. [{opp.severity.upper()}] {opp.description}")
         print(f"   Category: {opp.category}")
-        print(f"   Current performance:")
+        print("   Current performance:")
         for key, value in opp.current_performance.items():
-            print(f"     - {key}: {value}")
+            print(f"    - {key}: {value}")
         print(f"   Expected improvement: {opp.expected_improvement}")
         print(f"   Implementation effort: {opp.implementation_effort}")
         print(f"   Recommendation: {opp.recommendation}")
@@ -558,15 +559,15 @@ def generate_optimization_report():
 
     print("\nPhase 1 - Quick Wins (1-2 days):")
     for opp in high_impact_low_effort:
-        print(f"  - {opp.description}")
+        print(f" - {opp.description}")
 
     print("\nPhase 2 - Medium Term (1 week):")
     for opp in high_impact_medium_effort:
-        print(f"  - {opp.description}")
+        print(f" - {opp.description}")
 
     print("\nPhase 3 - Long Term (2-4 weeks):")
     for opp in high_impact_high_effort:
-        print(f"  - {opp.description}")
+        print(f" - {opp.description}")
 
     print("\n" + "=" * 80)
 

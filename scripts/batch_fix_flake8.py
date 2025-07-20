@@ -5,7 +5,7 @@ import argparse
 import json
 import os
 import subprocess
-from typing import Dict, List
+from typing import Any, Dict, List
 
 
 def get_violation_stats(directory: str) -> Dict[str, int]:
@@ -22,7 +22,7 @@ def get_violation_stats(directory: str) -> Dict[str, int]:
         violations = result.stdout.strip().split("\n") if result.stdout else []
 
         # Count by error code
-        stats = {}
+        stats: Dict[str, int] = {}
         for code in violations:
             if code:
                 stats[code] = stats.get(code, 0) + 1

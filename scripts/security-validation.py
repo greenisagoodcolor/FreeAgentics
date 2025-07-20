@@ -597,7 +597,7 @@ class SecurityValidator:
                                 f"Weak encryption algorithm {weak_alg} found in {file_path}"
                             )
                             break
-                except:
+                except Exception:
                     pass
 
         return issues
@@ -759,7 +759,7 @@ class SecurityValidator:
                             f"Potential SSRF vulnerability in {file_path}"
                         )
                         break
-                except:
+                except Exception:
                     pass
 
         return issues

@@ -446,7 +446,7 @@ def main():
 
     args = parser.parse_args()
 
-    integration = TestReportingIntegration(args.output_dir)
+    integration = ReportingIntegration(args.output_dir)
 
     if args.health_check:
         health_status = integration.run_health_check()

@@ -1,5 +1,5 @@
 """
-Distributed Tracing Integration for FreeAgentics Production Monitoring
+Distributed Tracing Integration for FreeAgentics Production Monitoring.
 
 This module provides integration between the distributed tracing system and
 other monitoring components like Prometheus, logging, and alerting.
@@ -502,7 +502,9 @@ async def get_trace_stats():
     integration_status = {}
     try:
         integration_status = tracing_integration.get_integration_status()
-    except:
+    except (
+        Exception
+    ):  # nosec B110 # Safe fallback to empty dict if integration status unavailable
         pass
 
     return {"tracer_stats": stats, "integration_status": integration_status}

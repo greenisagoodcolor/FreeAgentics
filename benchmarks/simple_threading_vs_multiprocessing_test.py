@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 """
-Simple Threading vs Multiprocessing Test for FreeAgentics Agents
+Simple Threading vs Multiprocessing Test for FreeAgentics Agents.
 
 A lightweight benchmark that doesn't require external dependencies
 to validate the comparison approach.
@@ -33,7 +33,7 @@ def get_memory_usage() -> float:
             return usage / 1024  # Linux returns KB
         else:
             return usage / 1024 / 1024  # Mac returns bytes
-    except:
+    except Exception:
         return 0.0
 
 
@@ -192,7 +192,7 @@ def main():
     results = {}
 
     for num_agents in agent_counts:
-        print(f"\n{'='*40}")
+        print(f"\n{'=' * 40}")
         print(f"Testing with {num_agents} agents, {num_steps} steps each")
         print("=" * 40)
 

@@ -259,7 +259,7 @@ class PlaywrightDriver(BrowserDriver):
         try:
             await self.page.wait_for_selector(selector, timeout=1000)
             return True
-        except:
+        except Exception:
             return False
 
     async def scroll_to_element(self, selector: str):

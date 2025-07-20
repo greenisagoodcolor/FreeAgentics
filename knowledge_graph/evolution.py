@@ -249,7 +249,7 @@ class ConceptGeneralizer(MutationOperator):
         entity_nodes = graph.find_nodes_by_type(NodeType.ENTITY)
 
         # Group by similar properties
-        property_groups = {}
+        property_groups: Dict[frozenset, List[Any]] = {}
         for node in entity_nodes:
             key = frozenset(node.properties.keys())
             if key not in property_groups:
@@ -492,9 +492,9 @@ class CausalLearner(MutationOperator):
     ) -> Optional[str]:
         """Ensure event exists as node in graph."""
         # Check if event node already exists
-        event_id = event.get("id")
-        if event_id and event_id in graph.nodes:
-            return event_id
+        event_id_raw = event.get("id")
+        if isinstance(event_id_raw, str) and event_id_raw in graph.nodes:
+            return event_id_raw
 
         # Create new event node
         node = KnowledgeNode(
@@ -523,7 +523,7 @@ class ContradictionResolver(MutationOperator):
     ) -> bool:
         """Check if there are contradictions to resolve."""
         # Simple check: look for nodes with conflicting properties
-        nodes_by_subject = {}
+        nodes_by_subject: Dict[Any, List[Any]] = {}
         for node in graph.nodes.values():
             subject = node.properties.get("subject")
             if subject:
@@ -566,7 +566,7 @@ class ContradictionResolver(MutationOperator):
             elif resolution_strategy == "merge":
                 # Merge properties
                 merged_properties = {}
-                total_confidence = 0
+                total_confidence = 0.0
 
                 for node in contradiction_set:
                     for key, value in node.properties.items():

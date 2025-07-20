@@ -9,12 +9,13 @@ that validates the documented 72% efficiency loss at scale.
 import time
 
 import numpy as np
-from agent_simulation_framework import (
+from test_coordination_load import CoordinationAgent, CoordinationLoadTester
+
+from .agent_simulation_framework import (
     AgentSpawnConfig,
     AgentType,
     SimulationEnvironment,
 )
-from test_coordination_load import CoordinationAgent, CoordinationLoadTester
 
 
 def demo_coordination_overhead():

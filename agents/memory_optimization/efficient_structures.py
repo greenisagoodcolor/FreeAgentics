@@ -21,7 +21,7 @@ import weakref
 from collections import deque
 from dataclasses import dataclass
 from pathlib import Path
-from typing import Any, Dict, List, Optional, Tuple, Union
+from typing import Any, Deque, Dict, List, Optional, Tuple, Union
 
 import numpy as np
 from scipy import sparse
@@ -333,7 +333,7 @@ class MemoryMappedBuffer:
 
     def memory_usage(self) -> float:
         """Get memory usage in MB (virtual, not physical)."""
-        return self.buffer_size / (1024 * 1024)
+        return float(self.buffer_size) / (1024 * 1024)
 
     @staticmethod
     def _cleanup(mmap_obj, file_obj, filename: str):
@@ -476,7 +476,7 @@ class CompactActionHistory:
 
     def memory_usage_bytes(self) -> int:
         """Get memory usage in bytes."""
-        return (
+        return int(
             self._actions.nbytes
             + self._timestamps.nbytes
             + self._rewards.nbytes
@@ -558,11 +558,11 @@ class EfficientTemporalSequence:
         self.compression_ratio = compression_ratio
 
         # Storage for base states and deltas
-        self._base_states = deque(
+        self._base_states: Deque[np.ndarray] = deque(
             maxlen=max_length // 10
         )  # Store periodic base states
-        self._deltas = deque(maxlen=max_length)
-        self._timestamps = deque(maxlen=max_length)
+        self._deltas: Deque[np.ndarray] = deque(maxlen=max_length)
+        self._timestamps: Deque[float] = deque(maxlen=max_length)
 
         # Compression settings
         self._base_interval = 10  # Store base state every N steps
@@ -746,7 +746,7 @@ class CompactKnowledgeGraph:
         self._num_edges = 0
 
         # Index for fast lookup
-        self._node_index = {}  # node_id -> index
+        self._node_index: Dict[str, int] = {}  # node_id -> index
         self._lock = threading.RLock()
 
     def add_node(
@@ -957,7 +957,7 @@ def create_efficient_belief_buffer(
     buffer_size: int = 100,
     use_memory_mapping: bool = False,
 ) -> Union[LazyBeliefArray, MemoryMappedBuffer]:
-    """Factory function to create efficient belief buffer.
+    """Create efficient belief buffer using factory pattern.
 
     Args:
         shape: Belief state shape

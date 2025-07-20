@@ -18,6 +18,11 @@ class ErrorHandlerHardFailure:
     """Hard failure error handler - raises exceptions instead of graceful degradation."""
 
     def __init__(self, agent_id: str) -> None:
+        """Initialize hard failure error handler.
+
+        Args:
+            agent_id: Unique identifier for the agent
+        """
         self.agent_id = agent_id
         self.error_count: int = 0
 
@@ -58,6 +63,12 @@ class PyMDPErrorHandlerHardFailure:
     """Hard failure PyMDP error handler - no fallback execution."""
 
     def __init__(self, agent_id: str, max_recovery_attempts: int = 0) -> None:
+        """Initialize hard failure PyMDP error handler.
+
+        Args:
+            agent_id: Unique identifier for the agent
+            max_recovery_attempts: Ignored in hard failure mode (always 0)
+        """
         self.agent_id = agent_id
         # Hard failure mode ignores recovery attempts
         self.max_recovery_attempts = 0
@@ -73,10 +84,9 @@ class PyMDPErrorHandlerHardFailure:
         """Execute operation with immediate failure on error - no safe execution."""
         self.error_count += 1
 
-        # ASSERTION-BASED VALIDATION: Verify operation is callable
-        assert callable(
-            operation_func
-        ), f"Operation {operation_name} must be callable"
+        # HARD FAILURE VALIDATION: Verify operation is callable
+        if not callable(operation_func):
+            raise ValueError(f"Operation {operation_name} must be callable")
 
         # HARD FAILURE: Execute operation, let any exceptions propagate immediately
         try:
@@ -119,16 +129,17 @@ def safe_array_index_hard_failure(
     array: np.ndarray, index: int, default: Any = None
 ) -> Any:
     """Array indexing with assertion-based bounds checking - no graceful fallbacks."""
-    # ASSERTION-BASED VALIDATION: Array must be valid numpy array
-    assert isinstance(
-        array, np.ndarray
-    ), f"Expected numpy array, got {type(array)}"
-    assert array.size > 0, "Array cannot be empty"
+    # HARD FAILURE VALIDATION: Array must be valid numpy array
+    if not isinstance(array, np.ndarray):
+        raise TypeError(f"Expected numpy array, got {type(array)}")
+    if array.size == 0:
+        raise ValueError("Array cannot be empty")
 
-    # ASSERTION-BASED VALIDATION: Index must be within bounds
-    assert (
-        0 <= index < len(array)
-    ), f"Index {index} out of bounds for array of length {len(array)}"
+    # HARD FAILURE VALIDATION: Index must be within bounds
+    if not (0 <= index < len(array)):
+        raise IndexError(
+            f"Index {index} out of bounds for array of length {len(array)}"
+        )
 
     # Direct access with no fallback
     return array[index]
@@ -137,14 +148,15 @@ def safe_array_index_hard_failure(
 def safe_pymdp_operation_hard_failure(
     operation_name: str, default_value: Optional[Any] = None
 ):
-    """Decorator for PyMDP operations that enforces hard failures."""
+    """Enforce hard failures for PyMDP operations."""
 
     def decorator(func):
         def wrapper(*args, **kwargs):
-            # ASSERTION-BASED VALIDATION: Function must be executable
-            assert callable(
-                func
-            ), f"PyMDP operation {operation_name} must be callable"
+            # HARD FAILURE VALIDATION: Function must be executable
+            if not callable(func):
+                raise TypeError(
+                    f"PyMDP operation {operation_name} must be callable"
+                )
 
             # HARD FAILURE: Execute with no try/catch, let exceptions propagate
             try:
@@ -163,18 +175,18 @@ def safe_pymdp_operation_hard_failure(
 
 def validate_observation_hard_failure(observation: Any) -> Any:
     """Observation validation with assertion-based checks."""
-    # ASSERTION-BASED VALIDATION: Observation must exist
-    assert observation is not None, "Observation cannot be None"
+    # HARD FAILURE VALIDATION: Observation must exist
+    if observation is None:
+        raise ValueError("Observation cannot be None")
 
-    # ASSERTION-BASED VALIDATION: If numpy array, must be valid
+    # HARD FAILURE VALIDATION: If numpy array, must be valid
     if isinstance(observation, np.ndarray):
-        assert observation.size > 0, "Observation array cannot be empty"
-        assert not np.any(
-            np.isnan(observation)
-        ), "Observation contains NaN values"
-        assert not np.any(
-            np.isinf(observation)
-        ), "Observation contains infinite values"
+        if observation.size == 0:
+            raise ValueError("Observation array cannot be empty")
+        if np.any(np.isnan(observation)):
+            raise ValueError("Observation contains NaN values")
+        if np.any(np.isinf(observation)):
+            raise ValueError("Observation contains infinite values")
 
     return observation
 
@@ -182,26 +194,26 @@ def validate_observation_hard_failure(observation: Any) -> Any:
 def validate_pymdp_matrices_hard_failure(
     A: Any, B: Any, C: Any, D: Any
 ) -> Tuple[bool, str]:
-    """PyMDP matrix validation with assertion-based checks."""
-    # ASSERTION-BASED VALIDATION: All matrices must be provided
-    assert A is not None, "A matrix cannot be None"
-    assert B is not None, "B matrix cannot be None"
-    assert C is not None, "C matrix cannot be None"
-    assert D is not None, "D matrix cannot be None"
+    """Validate PyMDP matrices with assertion-based checks."""
+    # HARD FAILURE VALIDATION: All matrices must be provided
+    if A is None:
+        raise ValueError("A matrix cannot be None")
+    if B is None:
+        raise ValueError("B matrix cannot be None")
+    if C is None:
+        raise ValueError("C matrix cannot be None")
+    if D is None:
+        raise ValueError("D matrix cannot be None")
 
-    # ASSERTION-BASED VALIDATION: Must be numpy arrays
-    assert isinstance(
-        A, (list, np.ndarray)
-    ), f"A matrix must be array-like, got {type(A)}"
-    assert isinstance(
-        B, (list, np.ndarray)
-    ), f"B matrix must be array-like, got {type(B)}"
-    assert isinstance(
-        C, (list, np.ndarray)
-    ), f"C matrix must be array-like, got {type(C)}"
-    assert isinstance(
-        D, (list, np.ndarray)
-    ), f"D matrix must be array-like, got {type(D)}"
+    # HARD FAILURE VALIDATION: Must be numpy arrays
+    if not isinstance(A, (list, np.ndarray)):
+        raise TypeError(f"A matrix must be array-like, got {type(A)}")
+    if not isinstance(B, (list, np.ndarray)):
+        raise TypeError(f"B matrix must be array-like, got {type(B)}")
+    if not isinstance(C, (list, np.ndarray)):
+        raise TypeError(f"C matrix must be array-like, got {type(C)}")
+    if not isinstance(D, (list, np.ndarray)):
+        raise TypeError(f"D matrix must be array-like, got {type(D)}")
 
     # If validation passes, return success (no graceful degradation)
     return True, "All matrices validated successfully"
@@ -210,14 +222,13 @@ def validate_pymdp_matrices_hard_failure(
 def with_error_handling_hard_failure(
     operation_name: str, fallback_result: Optional[Any] = None
 ):
-    """Decorator for error handling that enforces hard failures instead of fallbacks."""
+    """Enforce hard failures instead of fallbacks for error handling."""
 
     def decorator(func):
         def wrapper(*args, **kwargs):
-            # ASSERTION-BASED VALIDATION: Function must be callable
-            assert callable(
-                func
-            ), f"Operation {operation_name} must be callable"
+            # HARD FAILURE VALIDATION: Function must be callable
+            if not callable(func):
+                raise TypeError(f"Operation {operation_name} must be callable")
 
             # HARD FAILURE: Execute with no try/catch for graceful degradation
             try:

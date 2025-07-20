@@ -155,7 +155,7 @@ class AdvancedMemoryProfiler:
         logger.info("Stopped memory monitoring")
 
     def _monitor_loop(self):
-        """Main monitoring loop."""
+        """Execute main monitoring loop."""
         while self._monitoring:
             try:
                 self.take_snapshot()
@@ -330,7 +330,7 @@ class AdvancedMemoryProfiler:
 
         # Add sizes of common attributes
         if hasattr(obj, "__dict__"):
-            for attr_name, attr_value in obj.__dict__.items():
+            for _attr_name, attr_value in obj.__dict__.items():
                 if isinstance(attr_value, (list, dict, np.ndarray)):
                     size += sys.getsizeof(attr_value)
                     if isinstance(attr_value, np.ndarray):
@@ -496,8 +496,11 @@ class AdvancedMemoryProfiler:
                                 "suggestion": "Implement LRU cache or size limits",
                             }
                         )
-                except Exception:
-                    pass
+                except Exception as e:
+                    # Skip inaccessible attributes - may be properties with side effects
+                    logger.debug(
+                        f"Could not inspect cache attribute {attr}: {e}"
+                    )
 
             return {
                 "agent_id": agent_id,

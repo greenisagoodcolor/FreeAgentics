@@ -103,7 +103,7 @@ class CoalitionMemberManager:
             agent_id=str(agent_id),
             role=role,
             capabilities=member_dict.get("capabilities", []),
-            joined_at=member_dict.get("joined_at", datetime.now()),
+            join_time=member_dict.get("joined_at", datetime.now()),
             last_activity=member_dict.get("last_activity", datetime.now()),
             contribution_score=member_dict.get("contribution_score", 0.0),
             trust_score=member_dict.get("trust_score", 1.0),

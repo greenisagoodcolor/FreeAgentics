@@ -1,4 +1,4 @@
-"""Threading Optimization Implementation Plan for FreeAgentics
+"""Threading Optimization Implementation Plan for FreeAgentics.
 
 Based on profiling results, this module implements the identified optimizations.
 """
@@ -25,6 +25,13 @@ class AdaptiveThreadPoolExecutor(concurrent.futures.ThreadPoolExecutor):
     """ThreadPoolExecutor with adaptive sizing based on workload type."""
 
     def __init__(self, min_workers=2, max_workers=32, workload_detector=None):
+        """Initialize adaptive thread pool executor.
+
+        Args:
+            min_workers: Minimum number of worker threads
+            max_workers: Maximum number of worker threads
+            workload_detector: Optional custom workload detection function
+        """
         super().__init__(max_workers=max_workers)
         self.min_workers = min_workers
         self.max_workers = max_workers
@@ -97,6 +104,7 @@ class LockFreeAgentRegistry:
     """Lock-free agent registry using atomic operations."""
 
     def __init__(self):
+        """Initialize lock-free agent registry using thread-local storage."""
         # Use thread-local storage to reduce contention
         self._thread_local = threading.local()
         # Sharded dictionaries to reduce contention
@@ -141,6 +149,11 @@ class WorkStealingThreadPool:
     """Thread pool with work-stealing for better load balancing."""
 
     def __init__(self, num_threads: int):
+        """Initialize work-stealing thread pool.
+
+        Args:
+            num_threads: Number of worker threads in the pool
+        """
         self.num_threads = num_threads
         self.threads = []
         self.work_queues = [deque() for _ in range(num_threads)]
@@ -230,6 +243,7 @@ class AsyncAgentManagerOptimized:
     """Optimized async agent manager with proper event loop handling."""
 
     def __init__(self):
+        """Initialize optimized async agent manager with adaptive thread pool."""
         self.agent_registry = LockFreeAgentRegistry()
         self.thread_pool = AdaptiveThreadPoolExecutor()
         self._loop = None
@@ -294,6 +308,12 @@ class SharedMemoryPool:
     """Pool of shared memory arrays for agents."""
 
     def __init__(self, array_shape: Tuple[int, ...], max_arrays: int = 100):
+        """Initialize shared memory pool for numpy arrays.
+
+        Args:
+            array_shape: Shape of the arrays to pool
+            max_arrays: Maximum number of arrays in the pool
+        """
         self.array_shape = array_shape
         self.max_arrays = max_arrays
         self.available = queue.Queue(maxsize=max_arrays)

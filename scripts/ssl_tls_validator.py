@@ -163,7 +163,6 @@ class SSLTLSValidator:
             return False
 
         cipher_string = cipher_match.group(1)
-        configured_ciphers = [c.strip() for c in cipher_string.split(":")]
 
         # Check for recommended ciphers
         recommended_found = 0

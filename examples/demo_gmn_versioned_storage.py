@@ -114,7 +114,7 @@ def demo_gmn_storage_with_real_data():
         storage_data = {
             "agent_id": str(agent_id),
             "version_number": i,
-            "parent_version_id": None if i == 1 else f"version_{i-1}_id",
+            "parent_version_id": None if i == 1 else f"version_{i - 1}_id",
             "name": spec["name"],
             "specification_text": (
                 spec["text"][:100] + "..."
@@ -143,7 +143,7 @@ def demo_gmn_storage_with_real_data():
     print("                                           (active)")
 
     # Demonstrate compatibility checking
-    print(f"\n🔗 Compatibility Analysis")
+    print("\n🔗 Compatibility Analysis")
     print("-" * 25)
 
     if len(parsed_specifications) >= 2:
@@ -168,7 +168,7 @@ def demo_gmn_storage_with_real_data():
         )
 
     # Demonstrate data integrity checks
-    print(f"\n🔍 Data Integrity Simulation")
+    print("\n🔍 Data Integrity Simulation")
     print("-" * 30)
 
     # Simulate integrity checks
@@ -184,7 +184,7 @@ def demo_gmn_storage_with_real_data():
     for check, status in integrity_checks.items():
         print(f"  {check}: {status}")
 
-    print(f"\n📊 Storage Statistics")
+    print("\n📊 Storage Statistics")
     print("-" * 20)
 
     total_nodes = sum(
@@ -205,7 +205,7 @@ def demo_gmn_storage_with_real_data():
         f"  Valid specifications: {sum(1 for spec in parsed_specifications if spec['valid'])}"
     )
 
-    print(f"\n🎯 Performance Considerations")
+    print("\n🎯 Performance Considerations")
     print("-" * 30)
 
     considerations = [

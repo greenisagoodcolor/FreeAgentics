@@ -17,6 +17,8 @@ from datetime import datetime, timedelta
 from typing import Dict, List
 from uuid import uuid4
 
+from sqlalchemy import text
+
 from database.indexing_strategy import get_indexing_strategy
 from database.query_optimizer import get_query_optimizer
 
@@ -228,7 +230,7 @@ async def example_query_caching(optimizer):
 
         # First execution (cache miss)
         start = datetime.now()
-        result1 = await optimizer.execute_with_cache(
+        await optimizer.execute_with_cache(
             session, query, cache_key="agent_stats", ttl=300
         )
         time1 = (datetime.now() - start).total_seconds()
@@ -236,7 +238,7 @@ async def example_query_caching(optimizer):
 
         # Second execution (cache hit)
         start = datetime.now()
-        result2 = await optimizer.execute_with_cache(
+        await optimizer.execute_with_cache(
             session, query, cache_key="agent_stats", ttl=300
         )
         time2 = (datetime.now() - start).total_seconds()
@@ -286,7 +288,9 @@ async def example_query_analysis(optimizer):
             logger.info(f"Index scans: {plan.get('index_scans', 0)}")
 
             # Get optimization suggestions
-            query_hash = hashlib.md5(query_info["sql"].encode()).hexdigest()
+            query_hash = hashlib.md5(
+                query_info["sql"].encode(), usedforsecurity=False
+            ).hexdigest()
             suggestions = analyzer.optimization_suggestions.get(
                 query_hash, set()
             )
@@ -301,31 +305,45 @@ async def example_maintenance_scheduling(indexing_strategy):
     """Schedule index maintenance."""
     logger.info("\n=== Maintenance Scheduling Example ===")
 
-    async with indexing_strategy.maintenance_scheduler as scheduler:
-        # Get maintenance schedule
-        schedule = await scheduler.get_maintenance_schedule(session)
+    # Create a session for maintenance operations
+    from sqlalchemy.ext.asyncio import AsyncSession, create_async_engine
+    from sqlalchemy.orm import sessionmaker
 
-        logger.info("Maintenance schedule:")
-        for task in schedule:
-            logger.info(
-                f"  {task['task']}: Priority={task['priority']}, Recommended time={task['recommended_time']}"
+    engine = create_async_engine(
+        "postgresql+asyncpg://user:password@localhost/db"
+    )
+    async_session = sessionmaker(
+        engine, class_=AsyncSession, expire_on_commit=False
+    )
+
+    async with async_session() as session:
+        async with indexing_strategy.maintenance_scheduler as scheduler:
+            # Get maintenance schedule
+            schedule = await scheduler.get_maintenance_schedule(session)
+
+            logger.info("Maintenance schedule:")
+            for task in schedule:
+                logger.info(
+                    f"  {task['task']}: Priority={task['priority']}, Recommended time={task['recommended_time']}"
+                )
+
+            # Check for index bloat
+            bloated_indexes = await scheduler.check_index_bloat(session)
+
+            if bloated_indexes:
+                logger.info(f"\nFound {len(bloated_indexes)} bloated indexes:")
+                for idx in bloated_indexes[:5]:  # Show first 5
+                    logger.info(
+                        f"  {idx['index']}: {idx['bloat_ratio']} bloat"
+                    )
+
+            # Perform maintenance (example - only ANALYZE)
+            result = await scheduler.perform_maintenance(
+                session, "ANALYZE", ["agents", "coalitions"]
             )
-
-        # Check for index bloat
-        bloated_indexes = await scheduler.check_index_bloat(session)
-
-        if bloated_indexes:
-            logger.info(f"\nFound {len(bloated_indexes)} bloated indexes:")
-            for idx in bloated_indexes[:5]:  # Show first 5
-                logger.info(f"  {idx['index']}: {idx['bloat_ratio']} bloat")
-
-        # Perform maintenance (example - only ANALYZE)
-        result = await scheduler.perform_maintenance(
-            session, "ANALYZE", ["agents", "coalitions"]
-        )
-        logger.info(
-            f"\nMaintenance result: {result['task']} - Success: {result['success']}"
-        )
+            logger.info(
+                f"\nMaintenance result: {result['task']} - Success: {result['success']}"
+            )
 
 
 async def generate_performance_report(optimizer, indexing_strategy):
@@ -357,7 +375,7 @@ async def generate_performance_report(optimizer, indexing_strategy):
             session
         )
 
-        logger.info(f"\nIndex usage summary:")
+        logger.info("\nIndex usage summary:")
         logger.info(
             f"  Total indexes: {index_report['index_usage']['total_indexes']}"
         )

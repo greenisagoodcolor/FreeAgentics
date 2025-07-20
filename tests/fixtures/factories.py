@@ -433,13 +433,18 @@ class KnowledgeGraphFactory:
         # Apply overrides
         builder = builder.with_data(**overrides)
 
-        # Add embedding if not provided
-        if "embedding" not in overrides:
-            builder = builder.with_embedding(dim=128)
-
         # Create node
         schema = builder.build()
-        node = KnowledgeNode(**schema.dict())
+        # Only include fields that exist in the database model
+        node_data = {
+            'id': schema.id,
+            'type': schema.type,
+            'label': schema.label,
+            'properties': schema.properties,
+            'version': schema.version,
+            'is_current': schema.is_current,
+        }
+        node = KnowledgeNode(**node_data)
 
         if session:
             session.add(node)

@@ -28,9 +28,37 @@ from .jwt_handler import jwt_handler  # Import secure JWT handler
 
 logger = logging.getLogger(__name__)
 
+
+def create_access_token(
+    data: Dict[str, Any], expires_delta: Optional[timedelta] = None
+) -> str:
+    """Create a JWT access token.
+
+    Args:
+        data: The data to encode in the token
+        expires_delta: Optional custom expiration time
+
+    Returns:
+        Encoded JWT token
+    """
+    # Extract required fields from data
+    user_id = data.get("sub", "")
+    username = data.get("username", "")
+    role = data.get("role", "user")
+    permissions = data.get("permissions", [])
+
+    return jwt_handler.create_access_token(
+        user_id=user_id, username=username, role=role, permissions=permissions
+    )
+
+
 # Security configuration - Use environment variables in production
-SECRET_KEY = os.getenv("SECRET_KEY", "dev_secret_key_2025_not_for_production")
-JWT_SECRET = os.getenv("JWT_SECRET", "dev_jwt_secret_2025_not_for_production")
+SECRET_KEY = os.getenv(
+    "SECRET_KEY", "dev_secret_key_2025_not_for_production"
+)  # nosec B105
+JWT_SECRET = os.getenv(
+    "JWT_SECRET", "dev_jwt_secret_2025_not_for_production"
+)  # nosec B105
 ALGORITHM = "RS256"  # Updated to use RS256
 ACCESS_TOKEN_EXPIRE_MINUTES = (
     15  # Reduced from 30 to 15 per security requirements
@@ -39,7 +67,7 @@ REFRESH_TOKEN_EXPIRE_DAYS = 7
 
 # Validate that production keys are not using development defaults
 if os.getenv("PRODUCTION", "false").lower() == "true":
-    if SECRET_KEY == "dev_secret_key_2025_not_for_production":
+    if SECRET_KEY == "dev_secret_key_2025_not_for_production":  # nosec B105
         raise ValueError("Production environment requires proper SECRET_KEY")
 
 # Password hashing
@@ -253,7 +281,7 @@ class SecurityValidator:
         if not isinstance(observation, dict):
             raise ValueError("Observation must be a dictionary")
 
-        sanitized = {}
+        sanitized: Dict[str, Any] = {}
 
         for key, value in observation.items():
             # Validate key
@@ -304,6 +332,7 @@ class CSRFProtection:
     """CSRF protection utilities."""
 
     def __init__(self):
+        """Initialize CSRF protection with token store."""
         self._token_store = {}  # In production, use Redis or similar
 
     def generate_csrf_token(self, session_id: str) -> str:
@@ -329,19 +358,20 @@ class AuthenticationManager:
     """JWT-based authentication manager with enhanced security."""
 
     def __init__(self):
+        """Initialize authentication manager with CSRF protection and fingerprint tracking."""
         self.users = {}  # In production, use database
         self.csrf_protection = CSRFProtection()
         self._fingerprint_store = {}  # Store token fingerprints
 
     def hash_password(self, password: str) -> str:
         """Hash password using bcrypt."""
-        return pwd_context.hash(password)
+        return str(pwd_context.hash(password))
 
     def verify_password(
         self, plain_password: str, hashed_password: str
     ) -> bool:
         """Verify password against hash."""
-        return pwd_context.verify(plain_password, hashed_password)
+        return bool(pwd_context.verify(plain_password, hashed_password))
 
     def create_access_token(
         self, user: User, client_fingerprint: Optional[str] = None
@@ -421,7 +451,7 @@ class AuthenticationManager:
         if not self.verify_password(password, user_data["password_hash"]):
             return None
 
-        user = user_data["user"]
+        user: User = user_data["user"]
         user.last_login = datetime.utcnow()
         return user
 
@@ -459,7 +489,7 @@ class AuthenticationManager:
             unverified = jwt.decode(
                 refresh_token, options={"verify_signature": False}
             )
-            return unverified.get("user_id", "")
+            return str(unverified.get("user_id", ""))
         except Exception:
             raise HTTPException(
                 status_code=status.HTTP_401_UNAUTHORIZED,
@@ -516,6 +546,7 @@ class RateLimiter:
     """Request rate limiting to prevent resource exhaustion."""
 
     def __init__(self):
+        """Initialize rate limiter with request tracking dictionaries."""
         self.requests = {}  # IP -> list of request times
         self.user_requests = {}  # user_id -> list of request times
 
@@ -569,8 +600,8 @@ def get_client_ip(request: Request) -> str:
     """Extract client IP address."""
     forwarded = request.headers.get("X-Forwarded-For")
     if forwarded:
-        return forwarded.split(",")[0].strip()
-    return request.client.host if request.client else "unknown"
+        return str(forwarded.split(",")[0].strip())
+    return str(request.client.host) if request.client else "unknown"
 
 
 def rate_limit(max_requests: int = 100, window_minutes: int = 1):
@@ -617,7 +648,8 @@ async def validate_csrf_token(request: Request, session_id: str) -> bool:
     csrf_token = request.headers.get(CSRF_HEADER_NAME)
     if not csrf_token and hasattr(request, "form"):
         form_data = await request.form()
-        csrf_token = form_data.get("csrf_token")
+        csrf_value = form_data.get("csrf_token")
+        csrf_token = csrf_value if isinstance(csrf_value, str) else None
 
     if not csrf_token:
         raise HTTPException(
@@ -778,8 +810,12 @@ def require_csrf_token(func):
                         token, options={"verify_signature": False}
                     )
                     session_id = unverified.get("user_id")
-                except Exception:
-                    pass
+                except Exception as e:
+                    # Log failed token parsing for CSRF validation (non-critical)
+                    logger.debug(
+                        f"Failed to parse JWT for CSRF session ID: {e}"
+                    )
+                    session_id = None
 
         if not session_id:
             raise HTTPException(
@@ -791,7 +827,8 @@ def require_csrf_token(func):
         csrf_token = request.headers.get(CSRF_HEADER_NAME)
         if not csrf_token and hasattr(request, "form"):
             form_data = await request.form()
-            csrf_token = form_data.get("csrf_token")
+            csrf_value = form_data.get("csrf_token")
+            csrf_token = csrf_value if isinstance(csrf_value, str) else None
 
         if not csrf_token:
             raise HTTPException(
@@ -818,13 +855,16 @@ class SecurityMiddleware:
     """Security middleware for request validation."""
 
     def __init__(self, app):
+        """Initialize security middleware for the application.
+
+        Args:
+            app: The ASGI application to wrap with security headers
+        """
         self.app = app
 
     async def __call__(self, scope, receive, send):
         if scope["type"] == "http":
             # Basic security headers
-            headers = dict(scope.get("headers", []))
-
             # Check for security headers
             response_headers = [
                 (b"X-Content-Type-Options", b"nosniff"),

@@ -9,6 +9,7 @@ This document outlines security best practices and guidelines for developing and
 ### JWT Token Management
 
 #### Token Structure
+
 ```json
 {
   "sub": "user_id",
@@ -22,6 +23,7 @@ This document outlines security best practices and guidelines for developing and
 ```
 
 #### Token Validation
+
 ```python
 from auth.security_implementation import decode_access_token
 
@@ -477,12 +479,12 @@ async def track_metrics(request: Request, call_next):
 ## Best Practices Summary
 
 1. **Always authenticate and authorize** - Never trust client input
-2. **Validate all inputs** - Use strong typing and validation
-3. **Sanitize all outputs** - Prevent XSS and injection attacks
-4. **Use HTTPS everywhere** - Never transmit sensitive data over HTTP
-5. **Implement rate limiting** - Protect against abuse and DDoS
-6. **Log security events** - Maintain audit trail for compliance
-7. **Keep dependencies updated** - Regular security patches
-8. **Test security regularly** - Automated tests and pentesting
-9. **Follow least privilege** - Grant minimum necessary permissions
-10. **Document security measures** - Keep team informed
+1. **Validate all inputs** - Use strong typing and validation
+1. **Sanitize all outputs** - Prevent XSS and injection attacks
+1. **Use HTTPS everywhere** - Never transmit sensitive data over HTTP
+1. **Implement rate limiting** - Protect against abuse and DDoS
+1. **Log security events** - Maintain audit trail for compliance
+1. **Keep dependencies updated** - Regular security patches
+1. **Test security regularly** - Automated tests and pentesting
+1. **Follow least privilege** - Grant minimum necessary permissions
+1. **Document security measures** - Keep team informed

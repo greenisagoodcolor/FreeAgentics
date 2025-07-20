@@ -32,7 +32,7 @@ class PyMDPCompatibilityAdapter:
         )
 
     def sample_action(self, pymdp_agent: PyMDPAgent) -> int:
-        """Adapter for PyMDP agent sample_action() with strict return type conversion.
+        """Convert PyMDP action result to strict int type.
 
         PyMDP's sample_action() returns numpy.ndarray[float64] with shape (1,)
         This adapter converts it to exactly int type with no graceful fallbacks.
@@ -94,7 +94,7 @@ class PyMDPCompatibilityAdapter:
     def infer_policies(
         self, pymdp_agent: PyMDPAgent
     ) -> Tuple[NDArray[np.floating], NDArray[np.floating]]:
-        """Adapter for PyMDP agent infer_policies() with strict return type validation.
+        """Validate PyMDP policy inference return types with strict checking.
 
         PyMDP's infer_policies() returns (q_pi, G) where both are numpy arrays.
         This adapter validates the exact return format with no fallbacks.
@@ -152,12 +152,109 @@ class PyMDPCompatibilityAdapter:
         )
         return q_pi, G
 
+    def _validate_observation_format(
+        self, observation: Union[int, List[int], NDArray[Any]]
+    ) -> List[int]:
+        """Validate and format observation for PyMDP."""
+        if isinstance(observation, int):
+            return [observation]
+        elif isinstance(observation, list):
+            return observation
+        elif isinstance(observation, np.ndarray):
+            return self._handle_numpy_observation(observation)
+        else:
+            raise TypeError(
+                f"Observation type {type(observation)} not supported"
+            )
+
+    def _handle_numpy_observation(
+        self, observation: NDArray[Any]
+    ) -> List[int]:
+        """Handle different numpy array observation formats."""
+        if observation.ndim == 0:
+            # 0-dimensional array (scalar)
+            return [int(observation.item())]
+        elif observation.ndim == 1:
+            # 1-dimensional array
+            obs_list = observation.astype(int).tolist()
+            return obs_list if isinstance(obs_list, list) else [obs_list]
+        else:
+            # Multi-dimensional arrays not supported
+            raise TypeError(
+                f"Multi-dimensional observation arrays not supported: shape {observation.shape}"
+            )
+
+    def _process_beliefs_result(
+        self, beliefs_result
+    ) -> List[NDArray[np.floating]]:
+        """Process PyMDP infer_states result into standard format."""
+        if isinstance(beliefs_result, list):
+            return beliefs_result
+        elif isinstance(beliefs_result, np.ndarray):
+            return self._handle_numpy_beliefs(beliefs_result)
+        else:
+            raise RuntimeError(
+                f"infer_states returned {type(beliefs_result)}, expected list or numpy.ndarray"
+            )
+
+    def _handle_numpy_beliefs(
+        self, beliefs_result: NDArray[Any]
+    ) -> List[NDArray[np.floating]]:
+        """Handle numpy array beliefs result."""
+        if beliefs_result.dtype == np.object_:
+            return self._handle_object_array_beliefs(beliefs_result)
+        else:
+            # Regular array - each element is a belief
+            return [beliefs_result]
+
+    def _handle_object_array_beliefs(
+        self, beliefs_result: NDArray[Any]
+    ) -> List[NDArray[np.floating]]:
+        """Handle object dtype array beliefs."""
+        if beliefs_result.shape == (1,):
+            # Extract content from single-element object array
+            content = beliefs_result.item()
+            if isinstance(content, list):
+                return content
+            elif isinstance(content, np.ndarray):
+                # Single belief array wrapped in object array
+                return [content]
+            else:
+                raise RuntimeError(
+                    f"infer_states object array contains {type(content)}, expected list or ndarray"
+                )
+        else:
+            # Multi-element object array - convert to list
+            result_list = beliefs_result.tolist()
+            # Ensure we return a list of ndarrays
+            return [
+                np.array(item, dtype=np.float64)
+                if not isinstance(item, np.ndarray)
+                else item
+                for item in result_list
+            ]
+
+    def _validate_beliefs_format(
+        self, beliefs_list: List[NDArray[np.floating]]
+    ) -> None:
+        """Validate each belief array format."""
+        for i, belief in enumerate(beliefs_list):
+            if not isinstance(belief, np.ndarray):
+                raise RuntimeError(
+                    f"Belief {i} is {type(belief)}, expected numpy.ndarray"
+                )
+
+            if not np.issubdtype(belief.dtype, np.floating):
+                raise RuntimeError(
+                    f"Belief {i} has dtype {belief.dtype}, expected floating point"
+                )
+
     def infer_states(
         self,
         pymdp_agent: PyMDPAgent,
         observation: Union[int, List[int], NDArray[Any]],
     ) -> List[NDArray[np.floating]]:
-        """Adapter for PyMDP agent infer_states() with strict input/output validation.
+        """Validate PyMDP state inference with strict input/output validation.
 
         Args:
             pymdp_agent: The PyMDP agent instance
@@ -174,72 +271,15 @@ class PyMDPCompatibilityAdapter:
         if not isinstance(pymdp_agent, PyMDPAgent):
             raise TypeError(f"Expected PyMDPAgent, got {type(pymdp_agent)}")
 
-        # Validate observation format with strict type checking
-        if isinstance(observation, int):
-            obs_formatted = [observation]
-        elif isinstance(observation, list):
-            obs_formatted = observation
-        elif isinstance(observation, np.ndarray):
-            # Handle different numpy array formats strictly
-            if observation.ndim == 0:
-                # 0-dimensional array (scalar)
-                obs_formatted = [int(observation.item())]
-            elif observation.ndim == 1:
-                # 1-dimensional array
-                obs_formatted = observation.astype(int).tolist()
-            else:
-                # Multi-dimensional arrays not supported
-                raise TypeError(
-                    f"Multi-dimensional observation arrays not supported: shape {observation.shape}"
-                )
-        else:
-            raise TypeError(
-                f"Observation type {type(observation)} not supported"
-            )
+        # Validate and format observation
+        obs_formatted = self._validate_observation_format(observation)
 
         # Call PyMDP's infer_states
         beliefs_result = pymdp_agent.infer_states(obs_formatted)
 
-        # PyMDP can return either a list or numpy array - handle both strictly
-        if isinstance(beliefs_result, list):
-            beliefs_list = beliefs_result
-        elif isinstance(beliefs_result, np.ndarray):
-            # If it's an array, it could be object dtype containing arrays or a list
-            if beliefs_result.dtype == np.object_:
-                if beliefs_result.shape == (1,):
-                    # Extract content from single-element object array
-                    content = beliefs_result.item()
-                    if isinstance(content, list):
-                        beliefs_list = content
-                    elif isinstance(content, np.ndarray):
-                        # Single belief array wrapped in object array
-                        beliefs_list = [content]
-                    else:
-                        raise RuntimeError(
-                            f"infer_states object array contains {type(content)}, expected list or ndarray"
-                        )
-                else:
-                    # Multi-element object array - convert to list
-                    beliefs_list = beliefs_result.tolist()
-            else:
-                # Regular array - each element is a belief
-                beliefs_list = [beliefs_result]
-        else:
-            raise RuntimeError(
-                f"infer_states returned {type(beliefs_result)}, expected list or numpy.ndarray"
-            )
-
-        # Validate each belief array
-        for i, belief in enumerate(beliefs_list):
-            if not isinstance(belief, np.ndarray):
-                raise RuntimeError(
-                    f"Belief {i} is {type(belief)}, expected numpy.ndarray"
-                )
-
-            if not np.issubdtype(belief.dtype, np.floating):
-                raise RuntimeError(
-                    f"Belief {i} has dtype {belief.dtype}, expected floating point"
-                )
+        # Process and validate results
+        beliefs_list = self._process_beliefs_result(beliefs_result)
+        self._validate_beliefs_format(beliefs_list)
 
         logger.debug(
             f"Validated infer_states return: {len(beliefs_list)} belief arrays"

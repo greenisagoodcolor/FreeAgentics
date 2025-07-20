@@ -17,12 +17,12 @@ import pytest
 from auth import (
     AuthenticationManager,
     Permission,
-    RateLimiter,
     SecurityValidator,
     TokenData,
     User,
     UserRole,
 )
+from auth import rate_limiter as RateLimiter
 from auth.security_implementation import ROLE_PERMISSIONS
 
 

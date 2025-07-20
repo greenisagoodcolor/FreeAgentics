@@ -245,7 +245,16 @@ class TestEnvironmentManager:
         with patch.object(
             env_manager.port_allocator, "allocate_port"
         ) as mock_allocate:
-            mock_allocate.side_effect = [5433, 6380, 5673, 9201, 9002]
+            mock_allocate.side_effect = [
+                5433,  # postgres port
+                6380,  # redis port
+                6380,  # redis url
+                5673,  # rabbitmq port
+                9201,  # elasticsearch port
+                9201,  # elasticsearch url
+                9002,  # minio port
+                9002,  # minio endpoint_url
+            ]  # services with URLs call allocate_port twice
 
             config = env_manager.get_service_config()
 

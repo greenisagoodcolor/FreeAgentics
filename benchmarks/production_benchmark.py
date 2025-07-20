@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 """
-Production Threading vs Multiprocessing Benchmark for FreeAgentics
+Production Threading vs Multiprocessing Benchmark for FreeAgentics.
 
 This is the production-ready benchmark that:
 1. Handles all edge cases and warnings
@@ -79,7 +79,7 @@ def get_memory_usage() -> float:
             return usage / 1024  # Linux returns KB
         else:
             return usage / 1024 / 1024  # Mac returns bytes
-    except:
+    except Exception:
         return 0.0
 
 
@@ -136,7 +136,7 @@ def agent_workload(
     return timings, errors
 
 
-def create_surroundings_pattern(step: int) -> "numpy.ndarray":
+def create_surroundings_pattern(step: int):
     """Create varied surroundings patterns for realistic testing."""
     import numpy as np
 

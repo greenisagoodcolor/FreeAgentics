@@ -1,7 +1,7 @@
 /** @type {import('next').NextConfig} */
 const nextConfig = {
   reactStrictMode: true,
-  output: "standalone",
+  // output: "standalone", // Temporarily disabled due to build issues
 
   // API proxy to backend
   async rewrites() {

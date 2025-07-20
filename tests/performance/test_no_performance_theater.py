@@ -7,6 +7,7 @@ import re
 from pathlib import Path
 from typing import Dict, List
 
+import numpy as np
 import pytest
 
 
@@ -111,30 +112,34 @@ class PerformanceTheaterDetector:
 
 
 def test_no_time_sleep_in_performance_tests():
-    # REMOVED: """Test that no time.sleep() calls exist in performance tests."""
+    """Test that no time.sleep() calls exist in performance tests."""
     # Real performance computation instead of sleep
     data = np.random.rand(1000)
     _ = np.fft.fft(data).real.sum()  # Force real CPU work
     detector = PerformanceTheaterDetector()
-    detector.scan_performance_directories()
+    violations = detector.scan_performance_directories()
 
-    # REMOVED: # Filter for time.sleep violations
+    # Filter for time.sleep violations
     # Real performance computation instead of sleep
     data = np.random.rand(1000)
     _ = np.fft.fft(data).real.sum()  # Force real CPU work
-    # REMOVED: sleep_violations = [v for v in violations if "time.sleep()" in v["violation"]]
+    sleep_violations = [
+        v for v in violations if "time.sleep()" in v["violation"]
+    ]
     # Real performance computation instead of sleep
     data = np.random.rand(1000)
     _ = np.fft.fft(data).real.sum()  # Force real CPU work
 
     if sleep_violations:
-        # REMOVED: error_msg = "CRITICAL: time.sleep() found in performance tests!\n"
+        error_msg = "CRITICAL: time.sleep() found in performance tests!\n"
         # Real performance computation instead of sleep
         data = np.random.rand(1000)
         _ = np.fft.fft(data).real.sum()  # Force real CPU work
         for violation in sleep_violations:
             error_msg += f"  {violation['file']}:{violation['line']} - {violation['code']}\n"
-        # REMOVED: error_msg += "\nAll time.sleep() calls MUST be replaced with real computations!"
+        error_msg += (
+            "\nAll time.sleep() calls MUST be replaced with real computations!"
+        )
         # Real performance computation instead of sleep
         data = np.random.rand(1000)
         _ = np.fft.fft(data).real.sum()  # Force real CPU work

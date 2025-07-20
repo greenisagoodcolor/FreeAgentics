@@ -25,6 +25,7 @@ from websocket.connection_pool import (
 )
 
 
+@pytest.mark.slow
 class TestPoolConfig:
     """Test connection pool configuration."""
 
@@ -69,6 +70,7 @@ class TestPoolConfig:
             PoolConfig(connection_timeout=-1.0)
 
 
+@pytest.mark.slow
 class TestConnectionState:
     """Test connection state management."""
 
@@ -131,6 +133,7 @@ class TestConnectionState:
 
 
 @pytest.mark.asyncio
+@pytest.mark.slow
 class TestWebSocketConnectionPool:
     """Test WebSocket connection pool functionality."""
 
@@ -419,6 +422,7 @@ class TestWebSocketConnectionPool:
             assert pool.size == 0
 
 
+@pytest.mark.slow
 class TestConnectionMetrics:
     """Test connection pool metrics collection."""
 
@@ -476,6 +480,7 @@ class TestConnectionMetrics:
 
 
 @pytest.mark.asyncio
+@pytest.mark.slow
 class TestConnectionHealthMonitor:
     """Test connection health monitoring."""
 
@@ -527,6 +532,7 @@ class TestConnectionHealthMonitor:
         assert pool._health_check_cycle.call_count >= 1
 
 
+@pytest.mark.slow
 class TestConnectionPoolIntegration:
     """Integration tests for connection pool with real WebSocket-like behavior."""
 

@@ -119,10 +119,10 @@ stats = self.get_timing_stats("create_agents_batch")
 ## Migration Benefits
 
 1. **Realistic Testing**: Tests now reflect actual database behavior
-2. **Performance Validation**: Real metrics instead of mocked timings
-3. **Constraint Testing**: Database constraints are properly enforced
-4. **Concurrency Testing**: Real transaction isolation and deadlock handling
-5. **Migration Safety**: Schema changes are validated by tests
+1. **Performance Validation**: Real metrics instead of mocked timings
+1. **Constraint Testing**: Database constraints are properly enforced
+1. **Concurrency Testing**: Real transaction isolation and deadlock handling
+1. **Migration Safety**: Schema changes are validated by tests
 
 ## Usage Examples
 
@@ -163,20 +163,24 @@ Based on the real database implementation:
 ## Next Steps
 
 1. **Convert Remaining Mock Tests**
+
    - `test_websocket_stress.py.DISABLED_MOCKS`
    - `test_llm_local_manager.py.DISABLED_MOCKS`
 
-2. **Add More Test Scenarios**
+1. **Add More Test Scenarios**
+
    - Coalition formation under load
    - Knowledge graph evolution
    - Agent belief synchronization
 
-3. **CI/CD Integration**
+1. **CI/CD Integration**
+
    - Docker compose for test database
    - GitHub Actions configuration
    - Test coverage reporting
 
-4. **Performance Monitoring**
+1. **Performance Monitoring**
+
    - Database query profiling
    - Slow query detection
    - Resource usage tracking

@@ -1,5 +1,5 @@
 """
-Optimized ThreadPool Manager for Multi-Agent Systems
+Optimized ThreadPool Manager for Multi-Agent Systems.
 
 Production-ready multi-agent coordination using ThreadPoolExecutor.
 Achieves 28.4% scaling efficiency with 8x speedup over sequential processing.
@@ -28,6 +28,7 @@ class AgentTask:
     timestamp: float = None
 
     def __post_init__(self):
+        """Initialize timestamp if not provided."""
         if self.timestamp is None:
             self.timestamp = time.time()
 
@@ -86,24 +87,24 @@ class OptimizedThreadPoolManager:
         self._executor_lock = Lock()
 
         # Agent registry
-        self.agents = {}
+        self.agents: Dict[str, Any] = {}
         self._agents_lock = Lock()
 
         # Performance tracking
-        self.performance_stats = defaultdict(
+        self.performance_stats: Dict[str, Dict[str, Any]] = defaultdict(
             lambda: {
                 "total_tasks": 0,
                 "successful_tasks": 0,
                 "failed_tasks": 0,
-                "total_time_ms": 0,
-                "avg_time_ms": 0,
+                "total_time_ms": 0.0,
+                "avg_time_ms": 0.0,
                 "last_error": None,
             }
         )
         self._stats_lock = Lock()
 
         # Task queue for priority scheduling
-        self.priority_queue = queue.PriorityQueue()
+        self.priority_queue: queue.PriorityQueue = queue.PriorityQueue()
 
         # Active futures tracking
         self.active_futures: Dict[Future, AgentTask] = {}

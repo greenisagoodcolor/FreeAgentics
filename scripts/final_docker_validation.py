@@ -31,7 +31,7 @@ def check_file_contains(file_path, content, description):
             else:
                 print(f"❌ {description}")
                 return False
-    except:
+    except Exception:
         print(f"❌ {description} - file not readable")
         return False
 

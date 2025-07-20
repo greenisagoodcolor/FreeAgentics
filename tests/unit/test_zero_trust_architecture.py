@@ -32,6 +32,7 @@ from auth.zero_trust_architecture import (
 from observability.security_monitoring import AttackType
 
 
+@pytest.mark.slow
 class TestServiceIdentity:
     """Test suite for ServiceIdentity."""
 
@@ -95,6 +96,7 @@ class TestServiceIdentity:
         assert not identity.can_perform_operation("admin")
 
 
+@pytest.mark.slow
 class TestZeroTrustPolicy:
     """Test suite for ZeroTrustPolicy."""
 
@@ -170,6 +172,7 @@ class TestZeroTrustPolicy:
         assert not policy.matches_request("service-a", "service-b", "admin")
 
 
+@pytest.mark.slow
 class TestCertificateManager:
     """Test suite for CertificateManager."""
 
@@ -239,6 +242,7 @@ class TestCertificateManager:
         assert info["subject"]["commonName"] == "test-service"
 
 
+@pytest.mark.slow
 class TestZeroTrustPolicyEngine:
     """Test suite for ZeroTrustPolicyEngine."""
 
@@ -513,6 +517,7 @@ class TestZeroTrustPolicyEngine:
         )
 
 
+@pytest.mark.slow
 class TestIdentityAwareProxy:
     """Test suite for IdentityAwareProxy."""
 
@@ -694,6 +699,7 @@ class TestIdentityAwareProxy:
         assert session_id == session_id2
 
 
+@pytest.mark.slow
 class TestContinuousVerificationContext:
     """Test suite for ContinuousVerificationContext."""
 
@@ -755,6 +761,7 @@ class TestContinuousVerificationContext:
         assert context.verification_count == 2
 
 
+@pytest.mark.slow
 class TestGlobalFunctions:
     """Test suite for global functions."""
 
@@ -823,6 +830,7 @@ class TestGlobalFunctions:
         assert admin_limits["requests_per_second"] == 5  # More restrictive
 
 
+@pytest.mark.slow
 class TestErrorHandling:
     """Test suite for error handling in zero-trust architecture."""
 

@@ -10,7 +10,7 @@ import time
 from datetime import datetime, timedelta
 from typing import Callable, Dict, Optional, Set, Tuple
 
-import redis.asyncio as aioredis
+import redis.asyncio as aioredis  # type: ignore[import-untyped]
 from fastapi import Request, Response, status
 from fastapi.responses import JSONResponse
 from starlette.middleware.base import BaseHTTPMiddleware
@@ -37,6 +37,17 @@ class RateLimitConfig:
         ddos_threshold: int = 1000,  # requests per minute for DDoS detection
         ddos_block_duration: int = 3600,  # 1 hour
     ):
+        """Initialize rate limit configuration.
+
+        Args:
+            requests_per_minute: Maximum requests allowed per minute
+            requests_per_hour: Maximum requests allowed per hour
+            burst_limit: Maximum burst of requests allowed
+            window_size: Time window size in seconds
+            block_duration: Duration to block client in seconds
+            ddos_threshold: Threshold for DDoS detection (requests/minute)
+            ddos_block_duration: Duration to block DDoS attacks in seconds
+        """
         self.requests_per_minute = requests_per_minute
         self.requests_per_hour = requests_per_hour
         self.burst_limit = burst_limit
@@ -86,6 +97,11 @@ class RateLimiter:
     """Redis-based distributed rate limiter."""
 
     def __init__(self, redis_client: aioredis.Redis):
+        """Initialize rate limiter with Redis client.
+
+        Args:
+            redis_client: Async Redis client for distributed rate limiting
+        """
         self.redis = redis_client
         self.blocked_ips: Set[str] = set()
         self.suspicious_ips: Dict[str, int] = {}
@@ -322,14 +338,20 @@ class RateLimiter:
 class DDoSProtectionMiddleware(BaseHTTPMiddleware):
     """Middleware for DDoS protection and rate limiting."""
 
-    def __init__(self, app, redis_url: str = None):
+    def __init__(self, app, redis_url: Optional[str] = None):
+        """Initialize DDoS protection middleware.
+
+        Args:
+            app: The ASGI application to protect
+            redis_url: Redis connection URL for distributed rate limiting
+        """
         super().__init__(app)
         self.redis_url = redis_url or "redis://localhost:6379"
-        self.redis_client = None
-        self.rate_limiter = None
-        self._connection_pool = None
+        self.redis_client: Optional[aioredis.Redis] = None
+        self.rate_limiter: Optional[RateLimiter] = None
+        self._connection_pool: Optional[aioredis.ConnectionPool] = None
 
-    async def _get_redis_client(self) -> aioredis.Redis:
+    async def _get_redis_client(self) -> Optional[aioredis.Redis]:
         """Get or create Redis client with connection pooling."""
         if self.redis_client is None:
             try:
@@ -348,8 +370,9 @@ class DDoSProtectionMiddleware(BaseHTTPMiddleware):
                 )
 
                 # Test connection
-                await self.redis_client.ping()
-                logger.info("Connected to Redis for rate limiting")
+                if self.redis_client:
+                    await self.redis_client.ping()
+                    logger.info("Connected to Redis for rate limiting")
 
             except Exception as e:
                 logger.error(f"Failed to connect to Redis: {e}")
@@ -412,6 +435,11 @@ class WebSocketRateLimiter:
     """Rate limiter specifically for WebSocket connections."""
 
     def __init__(self, redis_client: aioredis.Redis):
+        """Initialize WebSocket rate limiter.
+
+        Args:
+            redis_client: Async Redis client for rate limiting WebSocket connections
+        """
         self.redis = redis_client
         self.connection_limits = {
             "max_connections_per_ip": 10,

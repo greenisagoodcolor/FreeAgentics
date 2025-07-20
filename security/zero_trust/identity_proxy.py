@@ -73,7 +73,7 @@ class SessionRiskScore:
 
     session_id: str
     score: float
-    factors: Dict[str, float]
+    factors: Dict[str, Any]
     timestamp: datetime
     requires_reauthentication: bool = False
 
@@ -530,7 +530,7 @@ class IdentityAwareProxy:
     ) -> bool:
         """Evaluate if permission should be granted."""
         # Create minimal request context
-        req_context = RequestContext(
+        RequestContext(
             source_service=source,
             target_service=target,
             operation=operation,
@@ -581,15 +581,15 @@ class IdentityAwareProxy:
         # Check forwarded headers
         forwarded = request.headers.get("X-Forwarded-For")
         if forwarded:
-            return forwarded.split(",")[0].strip()
+            return str(forwarded.split(",")[0].strip())
 
         real_ip = request.headers.get("X-Real-IP")
         if real_ip:
-            return real_ip
+            return str(real_ip)
 
         # Fallback to direct connection
         if hasattr(request, "client") and request.client:
-            return request.client.host
+            return str(request.client.host)
 
         return "unknown"
 
@@ -617,7 +617,7 @@ class IdentityAwareProxy:
 
             for attribute in cert.subject:
                 if attribute.oid == x509.oid.NameOID.COMMON_NAME:
-                    return attribute.value
+                    return str(attribute.value)
 
             return "unknown"
         except Exception:

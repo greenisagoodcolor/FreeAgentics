@@ -8,8 +8,8 @@ import pytest
 from tests.environment.environment_orchestrator import (
     EnvironmentOrchestrator,
     EnvironmentProfile,
+    EnvironmentTestSpec,
     ResourcePool,
-    TestEnvironmentSpec,
     create_e2e_test_spec,
     create_integration_test_spec,
     create_performance_test_spec,
@@ -46,12 +46,12 @@ class TestResourcePool:
         assert isinstance(pool.busy_instances, set)
 
 
-class TestTestEnvironmentSpec:
+class TestEnvironmentTestSpec:
     """Test environment specification."""
 
     def test_spec_creation(self):
         """Test creating a test environment specification."""
-        spec = TestEnvironmentSpec(
+        spec = EnvironmentTestSpec(
             name="test_env",
             profile=EnvironmentProfile.UNIT,
             services=["postgres", "redis"],
@@ -84,7 +84,7 @@ class TestEnvironmentOrchestrator:
             mock_docker.return_value = Mock()
 
             with patch(
-                "tests.environment.environment_orchestrator.TestIsolation"
+                "tests.environment.environment_orchestrator.IsolationTester"
             ) as mock_isolation:
                 mock_isolation.return_value = Mock()
 
@@ -126,7 +126,7 @@ class TestEnvironmentOrchestrator:
 
     def test_allocate_resources_success(self, orchestrator):
         """Test successful resource allocation."""
-        spec = TestEnvironmentSpec(
+        spec = EnvironmentTestSpec(
             name="test",
             profile=EnvironmentProfile.UNIT,
             services=["postgres", "redis"],
@@ -156,7 +156,7 @@ class TestEnvironmentOrchestrator:
 
     def test_allocate_resources_create_new_instance(self, orchestrator):
         """Test resource allocation creates new instances when needed."""
-        spec = TestEnvironmentSpec(
+        spec = EnvironmentTestSpec(
             name="test",
             profile=EnvironmentProfile.UNIT,
             services=["postgres"],
@@ -177,7 +177,7 @@ class TestEnvironmentOrchestrator:
 
     def test_allocate_resources_no_capacity(self, orchestrator):
         """Test resource allocation failure when no capacity."""
-        spec = TestEnvironmentSpec(
+        spec = EnvironmentTestSpec(
             name="test",
             profile=EnvironmentProfile.UNIT,
             services=["postgres"],
@@ -226,7 +226,7 @@ class TestEnvironmentOrchestrator:
 
     def test_create_environment_success(self, orchestrator):
         """Test successful environment creation."""
-        spec = TestEnvironmentSpec(
+        spec = EnvironmentTestSpec(
             name="test_env",
             profile=EnvironmentProfile.UNIT,
             services=["postgres", "redis"],
@@ -268,7 +268,7 @@ class TestEnvironmentOrchestrator:
 
     def test_create_environment_failure(self, orchestrator):
         """Test environment creation failure."""
-        spec = TestEnvironmentSpec(
+        spec = EnvironmentTestSpec(
             name="test_env",
             profile=EnvironmentProfile.UNIT,
             services=["postgres"],
@@ -340,7 +340,7 @@ class TestEnvironmentOrchestrator:
 
     def test_environment_context_manager(self, orchestrator):
         """Test environment context manager."""
-        spec = TestEnvironmentSpec(
+        spec = EnvironmentTestSpec(
             name="test_env",
             profile=EnvironmentProfile.UNIT,
             services=["postgres"],
@@ -489,7 +489,7 @@ class TestEnvironmentOrchestrator:
         assert metrics["total_environments_destroyed"] == 8
 
 
-class TestEnvironmentSpecFactories:
+class EnvironmentTestSpecFactories:
     """Test environment specification factory functions."""
 
     def test_create_unit_test_spec(self):

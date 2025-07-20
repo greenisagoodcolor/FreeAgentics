@@ -1,5 +1,5 @@
 """
-Knowledge Graph Auto-Updater
+Knowledge Graph Auto-Updater.
 Integrates conversation monitoring, NLP entity extraction, and entity-to-node mapping
 to provide real-time bidirectional sync between conversations and knowledge graph
 """
@@ -25,7 +25,7 @@ logger = logging.getLogger(__name__)
 
 class ConversationAutoUpdater:
     """
-    Automatically updates knowledge graph from conversations using real NLP
+    Automatically updates knowledge graph from conversations using real NLP.
     Provides bidirectional sync between conversations and knowledge graph
     """
 
@@ -34,7 +34,7 @@ class ConversationAutoUpdater:
         graph_engine: Optional[GraphEngine] = None,
         nlp_model: str = "en_core_web_sm",
     ):
-        """Initialize the auto-updater with real NLP components"""
+        """Initialize the auto-updater with real NLP components."""
         self.graph_engine = graph_engine or GraphEngine()
         self.nlp_extractor = NLPEntityExtractor(model_name=nlp_model)
         self.entity_mapper = EntityNodeMapper(self.graph_engine)
@@ -55,12 +55,12 @@ class ConversationAutoUpdater:
         logger.info("Conversation Auto-Updater initialized with real NLP")
 
     async def start(self):
-        """Start the auto-updater"""
+        """Start the auto-updater."""
         await self.conversation_monitor.start()
         logger.info("Conversation Auto-Updater started")
 
     async def stop(self):
-        """Stop the auto-updater"""
+        """Stop the auto-updater."""
         await self.conversation_monitor.stop()
         logger.info("Conversation Auto-Updater stopped")
 
@@ -68,7 +68,7 @@ class ConversationAutoUpdater:
         self, conversation: Conversation
     ) -> Dict[str, Any]:
         """
-        Process an entire conversation and update the knowledge graph
+        Process an entire conversation and update the knowledge graph.
         Returns statistics about the processing
         """
         start_time = datetime.utcnow()
@@ -107,7 +107,7 @@ class ConversationAutoUpdater:
 
     async def process_message(self, message: Message) -> ExtractionResult:
         """
-        Process a single message and update the knowledge graph
+        Process a single message and update the knowledge graph.
         Returns the extraction result
         """
         try:
@@ -152,7 +152,7 @@ class ConversationAutoUpdater:
             raise
 
     async def _handle_conversation_event(self, event: ConversationEvent):
-        """Handle conversation events from the monitor"""
+        """Handle conversation events from the monitor."""
         try:
             if event.type == ConversationEventType.MESSAGE_ADDED:
                 # Create a temporary Message object from the event
@@ -171,7 +171,7 @@ class ConversationAutoUpdater:
             self.stats["errors"] += 1
 
     async def _process_message(self, message: Message, stats: Dict[str, Any]):
-        """Internal method to process a message and update stats"""
+        """Internal method to process a message and update stats."""
         try:
             extraction_result = await self.process_message(message)
 
@@ -184,11 +184,11 @@ class ConversationAutoUpdater:
             raise
 
     def get_statistics(self) -> Dict[str, Any]:
-        """Get processing statistics"""
+        """Get processing statistics."""
         return dict(self.stats)
 
     def reset_statistics(self):
-        """Reset processing statistics"""
+        """Reset processing statistics."""
         self.stats = {
             "messages_processed": 0,
             "entities_extracted": 0,
@@ -201,7 +201,7 @@ class ConversationAutoUpdater:
         self, conversation_id: str
     ) -> List[Dict[str, Any]]:
         """
-        Query the knowledge graph for entities related to a conversation
+        Query the knowledge graph for entities related to a conversation.
         Provides the bidirectional sync - getting knowledge back to inform conversations
         """
         try:
@@ -261,7 +261,7 @@ class ConversationAutoUpdater:
         self, conversation_id: str, current_message: str
     ) -> List[Dict[str, Any]]:
         """
-        Suggest contextual information for a conversation based on the knowledge graph
+        Suggest contextual information for a conversation based on the knowledge graph.
         This enables the bidirectional sync by using graph knowledge to enhance conversations
         """
         try:
@@ -318,7 +318,7 @@ class ConversationAutoUpdater:
         self, conversation_id: str
     ) -> Dict[str, Any]:
         """
-        Export all knowledge derived from a specific conversation
+        Export all knowledge derived from a specific conversation.
         Useful for debugging and understanding what was learned
         """
         try:

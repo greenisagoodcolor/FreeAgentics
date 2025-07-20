@@ -88,7 +88,6 @@ class KyberKEM(QuantumResistantAlgorithm):
     def generate_keypair(self) -> QuantumKeyPair:
         """Generate Kyber key pair."""
         # Simulated implementation - in production use liboqs
-        n = self.parameters["n"]
         k = self.parameters["k"]
 
         # Generate random polynomial matrices for private key
@@ -130,6 +129,7 @@ class KyberKEM(QuantumResistantAlgorithm):
         return hashlib.sha3_256(private_key + ciphertext).digest()[:32]
 
     def get_algorithm_name(self) -> str:
+        """Get the algorithm name with security level."""
         return f"Kyber{self.security_level}"
 
 
@@ -159,8 +159,6 @@ class DilithiumSigner(QuantumResistantAlgorithm):
     def generate_keypair(self) -> QuantumKeyPair:
         """Generate Dilithium key pair."""
         # Simulated implementation
-        k = self.parameters["k"]
-        l = self.parameters["l"]
 
         # Generate random seed
         seed = os.urandom(32)
@@ -177,9 +175,7 @@ class DilithiumSigner(QuantumResistantAlgorithm):
         )
 
     def sign(self, message: bytes, private_key: bytes) -> bytes:
-        """
-        Sign message with Dilithium private key.
-        """
+        """Sign message with Dilithium private key."""
         # Simplified signature
         # Real implementation uses lattice-based signatures
         h = hashlib.sha3_256(message).digest()
@@ -189,15 +185,13 @@ class DilithiumSigner(QuantumResistantAlgorithm):
     def verify(
         self, message: bytes, signature: bytes, public_key: bytes
     ) -> bool:
-        """
-        Verify signature with Dilithium public key.
-        """
+        """Verify signature with Dilithium public key."""
         # Simplified verification
         # This is just for interface demonstration
-        expected = hashlib.sha3_256(message).digest()
         return len(signature) == 64  # Simplified check
 
     def get_algorithm_name(self) -> str:
+        """Get the algorithm name with security level."""
         return f"Dilithium{self.security_level}"
 
 
@@ -226,9 +220,7 @@ class HomomorphicEncryption:
     def encrypt(
         self, value: Union[int, float, List[Union[int, float]]]
     ) -> "EncryptedValue":
-        """
-        Encrypt a value or list of values.
-        """
+        """Encrypt a value or list of values."""
         if isinstance(value, (int, float)):
             values = [value]
         else:
@@ -250,9 +242,7 @@ class HomomorphicEncryption:
     def decrypt(
         self, encrypted_value: "EncryptedValue"
     ) -> Union[float, List[float]]:
-        """
-        Decrypt an encrypted value.
-        """
+        """Decrypt an encrypted value."""
         # Simplified decryption
         scale = encrypted_value.encryption_params["scale"]
         values = []
@@ -267,9 +257,7 @@ class HomomorphicEncryption:
     def add(
         self, a: "EncryptedValue", b: "EncryptedValue"
     ) -> "EncryptedValue":
-        """
-        Add two encrypted values.
-        """
+        """Add two encrypted values."""
         if len(a.ciphertexts) != len(b.ciphertexts):
             raise ValueError("Encrypted values must have same length")
 
@@ -286,9 +274,7 @@ class HomomorphicEncryption:
     def multiply(
         self, a: "EncryptedValue", b: "EncryptedValue"
     ) -> "EncryptedValue":
-        """
-        Multiply two encrypted values.
-        """
+        """Multiply two encrypted values."""
         if len(a.ciphertexts) != len(b.ciphertexts):
             raise ValueError("Encrypted values must have same length")
 
@@ -311,9 +297,7 @@ class HomomorphicEncryption:
     def compute_mean(
         self, encrypted_values: List["EncryptedValue"]
     ) -> "EncryptedValue":
-        """
-        Compute mean of encrypted values without decryption.
-        """
+        """Compute mean of encrypted values without decryption."""
         if not encrypted_values:
             raise ValueError("No values to compute mean")
 
@@ -352,6 +336,7 @@ class QuantumResistantCrypto:
         dilithium_level: int = 3,
         enable_homomorphic: bool = True,
     ):
+        """Initialize quantum-resistant crypto with specified security levels."""
         self.kyber = KyberKEM(kyber_level)
         self.dilithium = DilithiumSigner(dilithium_level)
         self.homomorphic = (
@@ -359,12 +344,10 @@ class QuantumResistantCrypto:
         )
 
         # Cache for performance
-        self._key_cache = {}
+        self._key_cache: Dict[str, Any] = {}
 
     def generate_hybrid_keypair(self) -> Dict[str, QuantumKeyPair]:
-        """
-        Generate both KEM and signature key pairs.
-        """
+        """Generate both KEM and signature key pairs."""
         return {
             "kem": self.kyber.generate_keypair(),
             "sign": self.dilithium.generate_keypair(),
@@ -464,7 +447,7 @@ class QuantumResistantCrypto:
             backend=default_backend(),
         )
         decryptor = cipher.decryptor()
-        plaintext = (
+        plaintext: bytes = (
             decryptor.update(encrypted_data["ciphertext"])
             + decryptor.finalize()
         )
@@ -472,9 +455,7 @@ class QuantumResistantCrypto:
         return plaintext
 
     def encrypt_for_computation(self, values: List[float]) -> "EncryptedValue":
-        """
-        Encrypt values for homomorphic computation.
-        """
+        """Encrypt values for homomorphic computation."""
         if not self.homomorphic:
             raise ValueError("Homomorphic encryption not enabled")
 
@@ -502,9 +483,7 @@ class QuantumResistantCrypto:
     def decrypt_computation_result(
         self, encrypted_result: "EncryptedValue"
     ) -> Union[float, List[float]]:
-        """
-        Decrypt result of homomorphic computation.
-        """
+        """Decrypt result of homomorphic computation."""
         if not self.homomorphic:
             raise ValueError("Homomorphic encryption not enabled")
 
@@ -521,10 +500,11 @@ class EncryptionAtRest:
     def __init__(
         self, crypto: QuantumResistantCrypto, key_rotation_days: int = 90
     ):
+        """Initialize encryption-at-rest with crypto instance and rotation period."""
         self.crypto = crypto
         self.key_rotation_days = key_rotation_days
         self.current_keys = self.crypto.generate_hybrid_keypair()
-        self.key_metadata = {
+        self.key_metadata: Dict[str, Union[float, str]] = {
             "created_at": time.time(),
             "rotation_due": time.time() + (key_rotation_days * 86400),
         }
@@ -573,15 +553,13 @@ class EncryptionAtRest:
         encrypted_doc: Dict[str, Any],
         fields_to_decrypt: Optional[List[str]] = None,
     ) -> Dict[str, Any]:
-        """
-        Decrypt document from storage.
-        """
+        """Decrypt document from storage."""
         if encrypted_doc.get("_encrypted"):
             # Full document encryption
             decrypted_bytes = self.crypto.hybrid_decrypt(
                 encrypted_doc["_data"], self.current_keys["kem"].private_key
             )
-            return json.loads(decrypted_bytes)
+            return dict(json.loads(decrypted_bytes))
         else:
             # Field-level encryption
             decrypted_doc = encrypted_doc.copy()
@@ -603,7 +581,7 @@ class EncryptionAtRest:
 
     def should_rotate_keys(self) -> bool:
         """Check if key rotation is due."""
-        return time.time() >= self.key_metadata["rotation_due"]
+        return time.time() >= float(self.key_metadata["rotation_due"])
 
     def rotate_keys(self) -> Dict[str, QuantumKeyPair]:
         """Rotate encryption keys."""

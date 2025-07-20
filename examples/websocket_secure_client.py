@@ -1,5 +1,5 @@
 """
-Secure WebSocket Client Example
+Secure WebSocket Client Example.
 
 Demonstrates proper WebSocket authentication, token refresh, heartbeat handling,
 and secure message exchange with the FreeAgentics WebSocket API.
@@ -246,7 +246,6 @@ class SecureWebSocketClient:
         """Handle agent-related events."""
         event_type = message.get("event_type")
         agent_id = message.get("agent_id")
-        data = message.get("data", {})
 
         logger.info(f"Agent event: {event_type} for {agent_id}")
         # Process agent events as needed

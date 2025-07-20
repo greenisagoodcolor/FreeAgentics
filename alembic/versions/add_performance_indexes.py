@@ -10,7 +10,7 @@ from typing import Optional, Sequence, Union
 
 import sqlalchemy as sa  # noqa: F401
 
-from alembic import op  # type: ignore[import-untyped,attr-defined]
+from alembic import op  # type: ignore[attr-defined]
 
 # revision identifiers, used by Alembic.
 revision: str = "performance_indexes_001"

@@ -1,5 +1,5 @@
 """
-Entity to Knowledge Graph Node Mapper
+Entity to Knowledge Graph Node Mapper.
 Maps extracted entities to knowledge graph nodes using various strategies
 """
 
@@ -27,7 +27,7 @@ logger = logging.getLogger(__name__)
 
 
 class MappingStrategy(Enum):
-    """Strategies for mapping entities to nodes"""
+    """Strategies for mapping entities to nodes."""
 
     EXACT_MATCH = "exact_match"
     FUZZY_MATCH = "fuzzy_match"
@@ -37,7 +37,7 @@ class MappingStrategy(Enum):
 
 @dataclass
 class Node:
-    """Simplified node representation for compatibility"""
+    """Simplified node representation for compatibility."""
 
     id: str
     type: str
@@ -46,7 +46,7 @@ class Node:
 
 @dataclass
 class Edge:
-    """Simplified edge representation for compatibility"""
+    """Simplified edge representation for compatibility."""
 
     id: str
     source_id: str
@@ -57,7 +57,7 @@ class Edge:
 
 @dataclass
 class NodeMapping:
-    """Represents a mapping from entity to knowledge graph node"""
+    """Represents a mapping from entity to knowledge graph node."""
 
     entity: Entity
     node: Node
@@ -68,7 +68,7 @@ class NodeMapping:
 
 @dataclass
 class MappingResult:
-    """Result of bulk entity mapping"""
+    """Result of bulk entity mapping."""
 
     mappings: List[NodeMapping]
     total_entities: int
@@ -78,13 +78,13 @@ class MappingResult:
 
 
 class GraphEngine:
-    """Simplified GraphEngine interface for compatibility"""
+    """Simplified GraphEngine interface for compatibility."""
 
     def __init__(self):
         self.graph = KnowledgeGraph()
 
     async def find_nodes_by_name(self, name: str) -> List[Node]:
-        """Find nodes by name/label"""
+        """Find nodes by name/label."""
         matching_nodes = []
         for node_id, node in self.graph.nodes.items():
             if (
@@ -103,7 +103,7 @@ class GraphEngine:
     async def search_similar_nodes(
         self, name: str, context: Optional[Dict] = None
     ) -> List[Node]:
-        """Search for similar nodes using fuzzy matching"""
+        """Search for similar nodes using fuzzy matching."""
         similar_nodes = []
         threshold = 0.7
 
@@ -144,7 +144,7 @@ class GraphEngine:
         return similar_nodes
 
     async def create_node(self, type: str, properties: Dict[str, Any]) -> Node:
-        """Create a new node"""
+        """Create a new node."""
         # Map string type to NodeType
         node_type_mapping = {
             "Technology": NodeType.ENTITY,
@@ -176,7 +176,7 @@ class GraphEngine:
         edge_type: str,
         properties: Dict[str, Any],
     ) -> Edge:
-        """Create a new edge"""
+        """Create a new edge."""
         # Map string type to EdgeType
         edge_type_mapping = {
             "used_for": EdgeType.RELATED_TO,
@@ -209,7 +209,7 @@ class GraphEngine:
         )
 
     async def merge_nodes(self, nodes: List[Node]) -> Node:
-        """Merge multiple nodes into one"""
+        """Merge multiple nodes into one."""
         if not nodes:
             raise ValueError("Cannot merge empty node list")
 
@@ -241,12 +241,12 @@ class GraphEngine:
         )
 
     async def update_from_conversation(self, conversation, message):
-        """Update graph from conversation - placeholder implementation"""
+        """Update graph from conversation - placeholder implementation."""
         logger.debug(f"Updating graph from conversation {conversation.id}")
 
 
 class EntityNodeMapper:
-    """Maps entities to knowledge graph nodes"""
+    """Maps entities to knowledge graph nodes."""
 
     def __init__(self, graph_engine: GraphEngine):
         self.graph_engine = graph_engine
@@ -257,7 +257,7 @@ class EntityNodeMapper:
     async def map_entity(
         self, entity: Entity, context: Optional[Dict[str, Any]] = None
     ) -> Optional[NodeMapping]:
-        """Map a single entity to a knowledge graph node"""
+        """Map a single entity to a knowledge graph node."""
         try:
             # Check cache first
             cache_key = f"{entity.text}_{entity.type.value}"
@@ -331,7 +331,7 @@ class EntityNodeMapper:
             return None
 
     async def map_entities(self, entities: List[Entity]) -> List[NodeMapping]:
-        """Map multiple entities to nodes"""
+        """Map multiple entities to nodes."""
         mappings = []
         for entity in entities:
             mapping = await self.map_entity(entity)
@@ -340,7 +340,7 @@ class EntityNodeMapper:
         return mappings
 
     async def map_entities_bulk(self, entities: List[Entity]) -> MappingResult:
-        """Map entities in bulk with performance metrics"""
+        """Map entities in bulk with performance metrics."""
         start_time = time.time()
 
         mappings = await self.map_entities(entities)
@@ -360,7 +360,7 @@ class EntityNodeMapper:
     async def map_relationship(
         self, relationship: Relationship, entity_mappings: List[NodeMapping]
     ) -> Optional[Edge]:
-        """Map a relationship to a knowledge graph edge"""
+        """Map a relationship to a knowledge graph edge."""
         # Find the mappings for source and target entities
         source_mapping = None
         target_mapping = None
@@ -386,7 +386,7 @@ class EntityNodeMapper:
         return edge
 
     def _entity_type_to_node_type(self, entity_type: EntityType) -> str:
-        """Map EntityType to node type string"""
+        """Map EntityType to node type string."""
         mapping = {
             EntityType.PERSON: "Person",
             EntityType.ORGANIZATION: "Organization",

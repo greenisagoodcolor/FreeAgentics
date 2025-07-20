@@ -6,7 +6,7 @@ across different environments (development, staging, production).
 
 import os
 from dataclasses import dataclass
-from typing import Dict, Optional
+from typing import Any, Dict, Optional
 
 
 @dataclass
@@ -26,6 +26,7 @@ class RateLimitingConfig:
     """Configuration manager for rate limiting settings."""
 
     def __init__(self):
+        """Initialize the rate limiting configuration."""
         self.environment = os.getenv("ENVIRONMENT", "development").lower()
         self.redis_url = os.getenv("REDIS_URL", "redis://localhost:6379")
         self.enabled = (
@@ -252,7 +253,7 @@ class RateLimitingConfig:
         # Fall back to environment config
         return self.get_config_for_environment()
 
-    def get_redis_config(self) -> Dict[str, any]:
+    def get_redis_config(self) -> Dict[str, Any]:
         """Get Redis configuration for rate limiting."""
         return {
             "url": self.redis_url,
@@ -274,7 +275,7 @@ class RateLimitingConfig:
             "socket_timeout": int(os.getenv("REDIS_SOCKET_TIMEOUT", "5")),
         }
 
-    def get_monitoring_config(self) -> Dict[str, any]:
+    def get_monitoring_config(self) -> Dict[str, Any]:
         """Get monitoring configuration for rate limiting."""
         return {
             "enable_metrics": os.getenv(
@@ -292,7 +293,7 @@ class RateLimitingConfig:
 
     def is_enabled(self) -> bool:
         """Check if rate limiting is enabled."""
-        return self.enabled
+        return bool(self.enabled)
 
     def get_whitelist(self) -> list:
         """Get IP whitelist for rate limiting bypass."""

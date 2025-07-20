@@ -21,7 +21,7 @@ from collections import defaultdict, deque
 from contextlib import contextmanager
 from dataclasses import dataclass, field
 from enum import Enum
-from typing import Any, Dict, List, Optional, Set, Tuple
+from typing import Any, Dict, List, Optional, Set, Tuple, Union
 
 import numpy as np
 
@@ -467,7 +467,7 @@ class AgentMemoryLifecycleManager:
             )
             return True
 
-    def cleanup_idle_agents(self) -> Dict[str, int]:
+    def cleanup_idle_agents(self) -> Dict[str, Union[int, float]]:
         """Cleanup idle agents based on lifecycle policies.
 
         Returns:
@@ -553,8 +553,8 @@ class AgentMemoryLifecycleManager:
             total_memory = self.get_total_memory_usage()
             memory_pressure = self.get_memory_pressure()
 
-            state_counts = defaultdict(int)
-            memory_by_state = defaultdict(float)
+            state_counts: Dict[str, int] = defaultdict(int)
+            memory_by_state: Dict[str, float] = defaultdict(float)
 
             for profile in self._profiles.values():
                 state_counts[profile.state.value] += 1
@@ -663,7 +663,7 @@ class AgentMemoryLifecycleManager:
         )
 
     def _setup_agent_resources(self, profile: AgentMemoryProfile):
-        """Setup resource pools for an agent."""
+        """Set up resource pools for an agent."""
         # Create belief pool if needed
         belief_shape = (20, 20)  # Default shape, could be customized
         pool_key = (belief_shape, np.float32)

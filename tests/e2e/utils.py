@@ -100,7 +100,7 @@ class E2ETestUtils:
             try:
                 text = await driver.get_text(selector)
                 return expected_text in text
-            except:
+            except Exception:
                 return False
 
         return await self.wait_for_condition(
@@ -117,7 +117,7 @@ class E2ETestUtils:
         async def check_visible():
             try:
                 return await driver.is_element_visible(selector)
-            except:
+            except Exception:
                 return False
 
         return await self.wait_for_condition(
@@ -135,7 +135,7 @@ class E2ETestUtils:
             try:
                 current_url = await driver.get_current_url()
                 return current_url != initial_url
-            except:
+            except Exception:
                 return False
 
         return await self.wait_for_condition(
@@ -153,7 +153,7 @@ class E2ETestUtils:
                     "return document.readyState"
                 )
                 return ready_state == "complete"
-            except:
+            except Exception:
                 return False
 
         return await self.wait_for_condition(
@@ -510,7 +510,7 @@ class E2ETestUtils:
         logger.debug(f"Headers: {dict(response.headers)}")
         try:
             logger.debug(f"Body: {response.json()}")
-        except:
+        except Exception:
             logger.debug(f"Body: {response.text}")
 
     def save_debug_info(self, test_name: str, data: Dict[str, Any]):

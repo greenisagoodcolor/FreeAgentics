@@ -10,7 +10,7 @@ import subprocess
 import sys
 from datetime import datetime
 from pathlib import Path
-from typing import List, Tuple
+from typing import Any, Dict, List, Optional, Sequence, Tuple
 
 
 class ContainerSecurityValidator:
@@ -18,9 +18,9 @@ class ContainerSecurityValidator:
     Container security best practices validator
     """
 
-    def __init__(self, project_root: str = None):
+    def __init__(self, project_root: Optional[str] = None):
         self.project_root = Path(project_root or os.getcwd())
-        self.security_results = {
+        self.security_results: Dict[str, Any] = {
             "timestamp": datetime.now().isoformat(),
             "dockerfile_security": {},
             "image_security": {},
@@ -42,7 +42,7 @@ class ContainerSecurityValidator:
         print(f"[ERROR] {message}")
 
     def run_command(
-        self, command: List[str], timeout: int = 300
+        self, command: Sequence[str], timeout: int = 300
     ) -> Tuple[int, str, str]:
         """Run a command and return return code, stdout, stderr"""
         try:
@@ -72,7 +72,7 @@ class ContainerSecurityValidator:
             with open(dockerfile_path, "r") as f:
                 content = f.read()
 
-            security_checks = {
+            security_checks: Dict[str, Dict[str, Any]] = {
                 "non_root_user": {
                     "pattern": "USER ",
                     "description": "Non-root user configured",
@@ -108,10 +108,10 @@ class ContainerSecurityValidator:
             }
 
             for check_name, check_config in security_checks.items():
-                pattern = check_config["pattern"]
-                description = check_config["description"]
-                required = check_config.get("required", False)
-                inverse = check_config.get("inverse", False)
+                pattern: str = check_config["pattern"]
+                description: str = check_config["description"]
+                required: bool = check_config.get("required", False)
+                inverse: bool = check_config.get("inverse", False)
 
                 found = pattern in content
                 if inverse:
@@ -264,7 +264,7 @@ class ContainerSecurityValidator:
                 "--rm",
                 "--read-only",
                 "--tmpfs",
-                "/tmp",
+                "/tmp",  # nosec B108 - Secure tmpfs mount in Docker
                 image_name,
                 "touch",
                 "/test-file",

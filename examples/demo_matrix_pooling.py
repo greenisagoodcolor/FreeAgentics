@@ -61,7 +61,7 @@ def demonstrate_basic_pooling():
             m[0, 0] = i
             matrices.append(m.copy())
 
-    print(f"   Allocated and released 5 matrices")
+    print("   Allocated and released 5 matrices")
 
     # 3. Check pool statistics
     stats = pool.get_statistics()
@@ -98,8 +98,8 @@ def demonstrate_matrix_operations():
     result2 = np.dot(a, b)
     numpy_time = time.time() - start
 
-    print(f"   Pooled dot time: {pool_time*1000:.2f} ms")
-    print(f"   Numpy dot time: {numpy_time*1000:.2f} ms")
+    print(f"   Pooled dot time: {pool_time * 1000:.2f} ms")
+    print(f"   Numpy dot time: {numpy_time * 1000:.2f} ms")
     print(f"   Results match: {np.allclose(result1, result2)}")
 
     # 2. Pooled matmul
@@ -118,8 +118,8 @@ def demonstrate_matrix_operations():
     result2 = np.einsum("ij,jk,ki->i", a, b, c)
     numpy_time = time.time() - start
 
-    print(f"   Pooled einsum time: {pool_time*1000:.2f} ms")
-    print(f"   Numpy einsum time: {numpy_time*1000:.2f} ms")
+    print(f"   Pooled einsum time: {pool_time * 1000:.2f} ms")
+    print(f"   Numpy einsum time: {numpy_time * 1000:.2f} ms")
     print(f"   Results match: {np.allclose(result1, result2)}")
 
 
@@ -160,14 +160,14 @@ def demonstrate_memory_efficiency():
         psutil.Process().memory_info().rss / 1024 / 1024 - start_mem
     )
 
-    print(f"\nMemory increase comparison:")
+    print("\nMemory increase comparison:")
     print(f"   Without pooling: +{no_pool_mem_increase:.1f} MB")
     print(f"   With pooling: +{pool_mem_increase:.1f} MB")
     print(f"   Savings: {no_pool_mem_increase - pool_mem_increase:.1f} MB")
 
     # Show pool statistics
     stats = pool.get_statistics()
-    print(f"\nPool reuse statistics:")
+    print("\nPool reuse statistics:")
     for pool_key, pool_stats in stats["pools"].items():
         if pool_stats["stats"]["total_requests"] > 0:
             print(f"   {pool_key}: {pool_stats['hit_rate']:.1%} hit rate")
@@ -197,7 +197,7 @@ def demonstrate_pymdp_integration():
     # Initial belief
     belief = np.ones(num_states, dtype=np.float32) / num_states
 
-    print(f"\nSimulating belief updates:")
+    print("\nSimulating belief updates:")
     print(f"   State space: {num_states} states")
     print(f"   Observations: {num_obs}")
     print(f"   Actions: {num_actions}")
@@ -227,8 +227,8 @@ def demonstrate_pymdp_integration():
 
     elapsed = time.time() - start
 
-    print(f"\nCompleted {num_steps} belief updates in {elapsed*1000:.1f} ms")
-    print(f"Average time per update: {elapsed/num_steps*1000:.2f} ms")
+    print(f"\nCompleted {num_steps} belief updates in {elapsed * 1000:.1f} ms")
+    print(f"Average time per update: {elapsed / num_steps * 1000:.2f} ms")
 
     # Show pool efficiency
     final_stats = pool.get_statistics()

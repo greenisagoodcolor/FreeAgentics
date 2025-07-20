@@ -21,6 +21,7 @@ from datetime import datetime, timedelta
 from enum import Enum
 from typing import Any, Dict, List, Optional, Set, Tuple
 
+import aiohttp
 import websockets
 from pydantic import BaseModel, Field, validator
 
@@ -180,7 +181,7 @@ class ConnectionMetrics:
         """Calculate average wait time for acquisitions."""
         if self.acquisition_count == 0:
             return 0.0
-        return self.total_wait_time / self.acquisition_count
+        return float(self.total_wait_time / self.acquisition_count)
 
     def record_acquisition(self, wait_time: float, success: bool = True):
         """Record a connection acquisition attempt."""

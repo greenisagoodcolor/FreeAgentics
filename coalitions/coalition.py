@@ -181,7 +181,7 @@ class Coalition:
 
         return True
 
-    def _elect_new_leader(self):
+    def _elect_new_leader(self) -> None:
         """Elect a new leader for the coalition."""
         if not self.members:
             self.leader_id = None
@@ -272,7 +272,7 @@ class Coalition:
         )
         return False
 
-    def _update_performance_metrics(self):
+    def _update_performance_metrics(self) -> None:
         """Update coalition performance metrics."""
         if not self.objectives:
             self.objective_completion_rate = 1.0
@@ -334,7 +334,7 @@ class Coalition:
         required_capabilities = set(objective.required_capabilities)
         return required_capabilities.issubset(available_capabilities)
 
-    def _log_decision(self, decision: str):
+    def _log_decision(self, decision: str) -> None:
         """Log a decision made by the coalition."""
         self.decision_log.append(
             {
@@ -350,7 +350,7 @@ class Coalition:
         sender_id: str,
         message: str,
         recipients: Optional[List[str]] = None,
-    ):
+    ) -> None:
         """Add a communication record.
 
         Args:
@@ -372,7 +372,7 @@ class Coalition:
         if sender_id in self.members:
             self.members[sender_id].last_activity = datetime.now()
 
-    def activate(self):
+    def activate(self) -> None:
         """Activate the coalition."""
         if self.status == CoalitionStatus.FORMING and self.members:
             self.status = CoalitionStatus.ACTIVE
@@ -380,7 +380,7 @@ class Coalition:
             self._log_decision("Coalition activated")
             logger.info(f"Activated coalition {self.coalition_id}")
 
-    def disband(self):
+    def disband(self) -> None:
         """Initiate coalition disbanding."""
         self.status = CoalitionStatus.DISBANDING
         self.last_modified = datetime.now()

@@ -51,17 +51,18 @@ class Alert:
 class AlertingSystem:
     """Manages alerts for agent operations."""
 
-    def __init__(self):
-        self.alerts = {}
-        self.alert_history = deque(maxlen=1000)
-        self.last_alert_times = {}
-        self.alert_counts = defaultdict(int)
+    def __init__(self) -> None:
+        """Initialize the alerting system."""
+        self.alerts: Dict[str, Alert] = {}
+        self.alert_history: deque[Alert] = deque(maxlen=1000)
+        self.last_alert_times: Dict[str, datetime] = {}
+        self.alert_counts: defaultdict[str, int] = defaultdict(int)
 
         logger.info("Initialized alerting system")
 
     async def check_agent_health(
         self, agent_id: str, agent_data: Dict[str, Any]
-    ):
+    ) -> None:
         """Check agent health and raise alerts if needed."""
         # Check for agent failure
         if agent_data.get("agent_status") == "failed":
@@ -106,7 +107,7 @@ class AlertingSystem:
                 metadata=agent_data,
             )
 
-    async def check_system_health(self, system_data: Dict[str, Any]):
+    async def check_system_health(self, system_data: Dict[str, Any]) -> None:
         """Check system health and raise alerts if needed."""
         # Check memory usage
         memory_usage = system_data.get("memory_usage_mb", 0)
@@ -137,7 +138,7 @@ class AlertingSystem:
         title: str,
         message: str,
         metadata: Dict[str, Any],
-    ):
+    ) -> None:
         """Create and store an alert."""
         # Check cooldown
         alert_key = f"{alert_type.value}_{source}"
@@ -178,7 +179,7 @@ class AlertingSystem:
 
     def resolve_alert(
         self, alert_id: str, resolution_notes: Optional[str] = None
-    ):
+    ) -> None:
         """Mark an alert as resolved."""
         if alert_id in self.alerts:
             alert = self.alerts[alert_id]
@@ -196,12 +197,12 @@ class AlertingSystem:
         active_alerts = self.get_active_alerts()
 
         # Count by level
-        level_counts = defaultdict(int)
+        level_counts: defaultdict[str, int] = defaultdict(int)
         for alert in active_alerts:
             level_counts[alert.level.value] += 1
 
         # Count by type
-        type_counts = defaultdict(int)
+        type_counts: defaultdict[str, int] = defaultdict(int)
         for alert in active_alerts:
             type_counts[alert.alert_type.value] += 1
 
@@ -259,12 +260,12 @@ alerting_system = AlertingSystem()
 
 
 # Helper functions
-async def check_agent_alert(agent_id: str, metrics: Dict[str, Any]):
+async def check_agent_alert(agent_id: str, metrics: Dict[str, Any]) -> None:
     """Check if agent metrics trigger any alerts."""
     await alerting_system.check_agent_health(agent_id, metrics)
 
 
-async def check_system_alert(metrics: Dict[str, Any]):
+async def check_system_alert(metrics: Dict[str, Any]) -> None:
     """Check if system metrics trigger any alerts."""
     await alerting_system.check_system_health(metrics)
 
@@ -286,7 +287,7 @@ def get_active_alerts() -> List[Dict[str, Any]]:
     ]
 
 
-def resolve_alert(alert_id: str, notes: Optional[str] = None):
+def resolve_alert(alert_id: str, notes: Optional[str] = None) -> None:
     """Resolve an alert."""
     alerting_system.resolve_alert(alert_id, notes)
 

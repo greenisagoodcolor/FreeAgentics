@@ -31,9 +31,10 @@ class H3SpatialProcessor:
     """H3-based spatial processing for GNN features."""
 
     def __init__(self, default_resolution: int = 7, max_resolution: int = 15):
+        """Initialize the H3 spatial processor."""
         self.default_resolution = default_resolution
         self.max_resolution = max_resolution
-        self.h3_cache = {}
+        self.h3_cache: Dict[str, Optional[str]] = {}
 
     def latlng_to_h3(
         self, lat: float, lon: float, resolution: int = None
@@ -61,7 +62,8 @@ class H3SpatialProcessor:
             return None
 
         try:
-            return h3.cell_to_latlng(h3_index)
+            result = h3.cell_to_latlng(h3_index)
+            return tuple(result) if result else None
         except Exception as e:
             logger.warning(
                 f"H3 to lat/lng conversion failed for {h3_index}: {e}"
@@ -85,7 +87,8 @@ class H3SpatialProcessor:
             return None
 
         try:
-            return h3.grid_distance(h3_index1, h3_index2)
+            distance = h3.grid_distance(h3_index1, h3_index2)
+            return int(distance) if distance is not None else None
         except Exception as e:
             logger.warning(
                 f"H3 distance failed for {h3_index1}, {h3_index2}: {e}"
@@ -161,6 +164,7 @@ class H3MultiResolutionAnalyzer:
     """Multi-resolution spatial analysis using H3."""
 
     def __init__(self, resolutions: List[int] = None):
+        """Initialize the H3 multi-resolution analyzer."""
         self.resolutions = resolutions or [5, 7, 9, 11]  # Multiple scales
         self.processor = H3SpatialProcessor()
 
@@ -209,7 +213,7 @@ class H3MultiResolutionAnalyzer:
         if not H3_AVAILABLE or not h3_indices:
             return {}
 
-        relationships = {
+        relationships: Dict[str, Any] = {
             "adjacency_matrix": [],
             "distance_matrix": [],
             "neighbor_counts": [],
@@ -273,7 +277,7 @@ class H3MultiResolutionAnalyzer:
         # Find all clusters
         for h3_index in h3_indices:
             if h3_index not in visited:
-                cluster = set()
+                cluster: Set[str] = set()
                 dfs_cluster(h3_index, cluster)
                 if cluster:
                     clusters.append(list(cluster))
@@ -296,6 +300,7 @@ class GNNSpatialIntegration:
     """Integration layer between GNN and H3 spatial processing."""
 
     def __init__(self, default_resolution: int = 7):
+        """Initialize the GNN spatial integration."""
         self.h3_processor = H3SpatialProcessor(default_resolution)
         self.multi_res_analyzer = H3MultiResolutionAnalyzer()
 

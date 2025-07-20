@@ -1,14 +1,15 @@
 """Comprehensive tests for gmn_parser.py to boost coverage."""
 
-import pytest
-import numpy as np
+from typing import Any, Dict
 from unittest.mock import Mock, patch
-from typing import Dict, Any
+
+import numpy as np
+import pytest
 
 from inference.active.gmn_parser import (
-    GMNNode,
     GMNEdge,
     GMNGraph,
+    GMNNode,
     GMNParser,
     parse_gmn_spec,
 )
@@ -20,9 +21,7 @@ class TestGMNNode:
     def test_initialization(self):
         """Test node initialization."""
         node = GMNNode(
-            id="test_node",
-            type="state",
-            properties={"num_states": 4}
+            id="test_node", type="state", properties={"num_states": 4}
         )
         assert node.id == "test_node"
         assert node.type == "state"
@@ -45,7 +44,7 @@ class TestGMNEdge:
             source="node1",
             target="node2",
             type="depends_on",
-            properties={"weight": 0.5}
+            properties={"weight": 0.5},
         )
         assert edge.source == "node1"
         assert edge.target == "node2"
@@ -111,16 +110,24 @@ class TestGMNParser:
         """Test parsing valid dictionary specification."""
         spec = {
             "nodes": [
-                {"id": "state1", "type": "state", "properties": {"num_states": 4}},
-                {"id": "obs1", "type": "observation", "properties": {"num_observations": 3}}
+                {
+                    "id": "state1",
+                    "type": "state",
+                    "properties": {"num_states": 4},
+                },
+                {
+                    "id": "obs1",
+                    "type": "observation",
+                    "properties": {"num_observations": 3},
+                },
             ],
             "edges": [
                 {"source": "state1", "target": "obs1", "type": "generates"}
-            ]
+            ],
         }
-        
+
         graph = parser.parse(spec)
-        
+
         assert len(graph.nodes) == 2
         assert "state1" in graph.nodes
         assert "obs1" in graph.nodes
@@ -137,9 +144,9 @@ class TestGMNParser:
         node obs1 observation {num_observations: 3}
         edge state1 -> obs1 generates
         """
-        
+
         graph = parser.parse(spec)
-        
+
         assert len(graph.nodes) == 2
         assert "state1" in graph.nodes
         assert "obs1" in graph.nodes
@@ -150,11 +157,11 @@ class TestGMNParser:
         node_spec = {
             "id": "test_node",
             "type": "action",
-            "properties": {"num_actions": 5}
+            "properties": {"num_actions": 5},
         }
-        
+
         node = parser._parse_node(node_spec)
-        
+
         assert node.id == "test_node"
         assert node.type == "action"
         assert node.properties["num_actions"] == 5
@@ -165,11 +172,11 @@ class TestGMNParser:
             "source": "node1",
             "target": "node2",
             "type": "depends_on",
-            "properties": {"weight": 0.8}
+            "properties": {"weight": 0.8},
         }
-        
+
         edge = parser._parse_edge(edge_spec)
-        
+
         assert edge.source == "node1"
         assert edge.target == "node2"
         assert edge.type == "depends_on"
@@ -183,9 +190,9 @@ class TestGMNParser:
         node a1 action
         edge s1 -> a1 depends_on
         """
-        
+
         graph = parser.parse(spec)
-        
+
         assert graph.metadata["version"] == "1.0"
         assert graph.metadata["model"] == "test_model"
         assert len(graph.nodes) == 2
@@ -200,9 +207,9 @@ class TestGMNParser:
             modality: "visual"
         }
         """
-        
+
         graph = parser.parse(spec)
-        
+
         assert "belief" in graph.nodes
         node = graph.nodes["belief"]
         assert node.properties["num_states"] == 10
@@ -216,17 +223,17 @@ class TestGMNParser:
                 {"id": "s1", "type": "state"},
                 {"id": "s2", "type": "state"},
                 {"id": "a1", "type": "action"},
-                {"id": "o1", "type": "observation"}
+                {"id": "o1", "type": "observation"},
             ],
             "edges": [
                 {"source": "s1", "target": "a1", "type": "depends_on"},
                 {"source": "s2", "target": "a1", "type": "depends_on"},
-                {"source": "a1", "target": "o1", "type": "generates"}
-            ]
+                {"source": "a1", "target": "o1", "type": "generates"},
+            ],
         }
-        
+
         graph = parser.parse(spec)
-        
+
         assert len(graph.edges) == 3
         edge_types = [e.type for e in graph.edges]
         assert edge_types.count("depends_on") == 2
@@ -234,12 +241,8 @@ class TestGMNParser:
 
     def test_validation_missing_node_id(self, parser):
         """Test validation catches missing node ID."""
-        spec = {
-            "nodes": [
-                {"type": "state"}  # Missing ID
-            ]
-        }
-        
+        spec = {"nodes": [{"type": "state"}]}  # Missing ID
+
         with pytest.raises(ValueError, match="GMN validation errors"):
             parser.parse(spec)
 
@@ -249,9 +252,9 @@ class TestGMNParser:
             "nodes": [{"id": "n1", "type": "state"}],
             "edges": [
                 {"target": "n1", "type": "depends_on"}  # Missing source
-            ]
+            ],
         }
-        
+
         with pytest.raises(ValueError, match="GMN validation errors"):
             parser.parse(spec)
 
@@ -260,35 +263,35 @@ class TestGMNParser:
         spec = {
             "nodes": [{"id": "n1", "type": "state"}],
             "edges": [
-                {"source": "n1", "target": "n2", "type": "depends_on"}  # n2 doesn't exist
-            ]
+                {
+                    "source": "n1",
+                    "target": "n2",
+                    "type": "depends_on",
+                }  # n2 doesn't exist
+            ],
         }
-        
+
         with pytest.raises(ValueError, match="GMN validation errors"):
             parser.parse(spec)
 
     def test_validation_unknown_node_type(self, parser):
         """Test validation handles unknown node types."""
-        spec = {
-            "nodes": [
-                {"id": "n1", "type": "unknown_type"}
-            ]
-        }
-        
+        spec = {"nodes": [{"id": "n1", "type": "unknown_type"}]}
+
         with pytest.raises(ValueError, match="Unknown node type"):
             parser.parse(spec)
 
     def test_validate_graph_structure(self, parser):
         """Test graph structure validation."""
         graph = GMNGraph()
-        
+
         # Add nodes
         graph.nodes["s1"] = GMNNode("s1", "state")
         graph.nodes["a1"] = GMNNode("a1", "action")
-        
+
         # Add valid edge
         graph.edges.append(GMNEdge("s1", "a1", "depends_on"))
-        
+
         # Should not raise
         parser._validate_graph(graph)
         assert parser.validation_errors == []
@@ -297,7 +300,7 @@ class TestGMNParser:
         """Test parsing empty specification."""
         spec = {}
         graph = parser.parse(spec)
-        
+
         assert len(graph.nodes) == 0
         assert len(graph.edges) == 0
         assert graph.metadata == {}
@@ -308,12 +311,12 @@ class TestGMNParser:
         spec1 = "node   s1   state"
         graph1 = parser.parse(spec1)
         assert "s1" in graph1.nodes
-        
+
         # Test with tabs
         spec2 = "node\ts1\tstate"
         graph2 = parser.parse(spec2)
         assert "s1" in graph2.nodes
-        
+
         # Test with properties on same line
         spec3 = "node s1 state {num_states: 5}"
         graph3 = parser.parse(spec3)
@@ -327,11 +330,13 @@ class TestGMNParser:
             description: "This is a test"
         }
         """
-        
+
         graph = parser.parse(spec)
-        
+
         assert graph.nodes["agent"].properties["name"] == "test agent"
-        assert graph.nodes["agent"].properties["description"] == "This is a test"
+        assert (
+            graph.nodes["agent"].properties["description"] == "This is a test"
+        )
 
     def test_edge_properties_parsing(self, parser):
         """Test parsing edge properties."""
@@ -340,9 +345,9 @@ class TestGMNParser:
         node s2 state
         edge s1 -> s2 transition {probability: 0.7, condition: "active"}
         """
-        
+
         graph = parser.parse(spec)
-        
+
         edge = graph.edges[0]
         assert edge.properties["probability"] == 0.7
         assert edge.properties["condition"] == "active"
@@ -353,13 +358,10 @@ class TestParseGMNSpec:
 
     def test_parse_dict_spec(self):
         """Test parsing dictionary spec via convenience function."""
-        spec = {
-            "nodes": [{"id": "n1", "type": "state"}],
-            "edges": []
-        }
-        
+        spec = {"nodes": [{"id": "n1", "type": "state"}], "edges": []}
+
         graph = parse_gmn_spec(spec)
-        
+
         assert "n1" in graph.nodes
         assert graph.nodes["n1"].type == "state"
 
@@ -367,16 +369,14 @@ class TestParseGMNSpec:
         """Test parsing string spec via convenience function."""
         spec = "node n1 state"
         graph = parse_gmn_spec(spec)
-        
+
         assert "n1" in graph.nodes
         assert graph.nodes["n1"].type == "state"
 
     def test_parse_with_validation_error(self):
         """Test that validation errors are properly raised."""
-        spec = {
-            "nodes": [{"type": "state"}]  # Missing ID
-        }
-        
+        spec = {"nodes": [{"type": "state"}]}  # Missing ID
+
         with pytest.raises(ValueError, match="GMN validation errors"):
             parse_gmn_spec(spec)
 
@@ -394,17 +394,25 @@ class TestAdvancedScenarios:
         spec = {
             "nodes": [
                 {"id": "parent", "type": "state", "properties": {"level": 0}},
-                {"id": "child1", "type": "state", "properties": {"level": 1, "parent": "parent"}},
-                {"id": "child2", "type": "state", "properties": {"level": 1, "parent": "parent"}},
+                {
+                    "id": "child1",
+                    "type": "state",
+                    "properties": {"level": 1, "parent": "parent"},
+                },
+                {
+                    "id": "child2",
+                    "type": "state",
+                    "properties": {"level": 1, "parent": "parent"},
+                },
             ],
             "edges": [
                 {"source": "parent", "target": "child1", "type": "hierarchy"},
                 {"source": "parent", "target": "child2", "type": "hierarchy"},
-            ]
+            ],
         }
-        
+
         graph = parser.parse(spec)
-        
+
         assert len(graph.nodes) == 3
         assert graph.nodes["child1"].properties["parent"] == "parent"
         assert graph.nodes["child2"].properties["parent"] == "parent"
@@ -421,11 +429,11 @@ class TestAdvancedScenarios:
                 {"source": "a", "target": "b", "type": "depends_on"},
                 {"source": "b", "target": "c", "type": "depends_on"},
                 {"source": "c", "target": "a", "type": "depends_on"},
-            ]
+            ],
         }
-        
+
         graph = parser.parse(spec)
-        
+
         assert len(graph.edges) == 3
         # Verify cycle exists
         sources = [e.source for e in graph.edges]
@@ -442,8 +450,8 @@ class TestAdvancedScenarios:
                     "properties": {
                         "modality": "visual",
                         "num_observations": 100,
-                        "shape": [10, 10]
-                    }
+                        "shape": [10, 10],
+                    },
                 },
                 {
                     "id": "audio_obs",
@@ -451,14 +459,14 @@ class TestAdvancedScenarios:
                     "properties": {
                         "modality": "audio",
                         "num_observations": 50,
-                        "sample_rate": 16000
-                    }
-                }
+                        "sample_rate": 16000,
+                    },
+                },
             ]
         }
-        
+
         graph = parser.parse(spec)
-        
+
         assert graph.nodes["visual_obs"].properties["modality"] == "visual"
         assert graph.nodes["visual_obs"].properties["shape"] == [10, 10]
         assert graph.nodes["audio_obs"].properties["sample_rate"] == 16000
@@ -470,9 +478,9 @@ class TestAdvancedScenarios:
         node s_t1 state
         edge s_t -> s_t1 temporal {delay: 1, type: "next_state"}
         """
-        
+
         graph = parser.parse(spec)
-        
+
         edge = graph.edges[0]
         assert edge.type == "temporal"
         assert edge.properties["delay"] == 1

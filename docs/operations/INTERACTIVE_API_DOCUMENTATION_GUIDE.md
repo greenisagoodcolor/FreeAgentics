@@ -7,29 +7,32 @@ This guide provides comprehensive interactive API documentation for the FreeAgen
 ## Table of Contents
 
 1. [API Overview](#api-overview)
-2. [Authentication](#authentication)
-3. [Core API Endpoints](#core-api-endpoints)
-4. [Agent Management API](#agent-management-api)
-5. [Coalition Management API](#coalition-management-api)
-6. [Monitoring and Health API](#monitoring-and-health-api)
-7. [WebSocket API](#websocket-api)
-8. [Error Handling](#error-handling)
-9. [Rate Limiting](#rate-limiting)
-10. [Testing and Examples](#testing-and-examples)
+1. [Authentication](#authentication)
+1. [Core API Endpoints](#core-api-endpoints)
+1. [Agent Management API](#agent-management-api)
+1. [Coalition Management API](#coalition-management-api)
+1. [Monitoring and Health API](#monitoring-and-health-api)
+1. [WebSocket API](#websocket-api)
+1. [Error Handling](#error-handling)
+1. [Rate Limiting](#rate-limiting)
+1. [Testing and Examples](#testing-and-examples)
 
 ## API Overview
 
 ### Base URL
+
 - **Production**: `https://api.freeagentics.io`
 - **Staging**: `https://staging-api.freeagentics.io`
 - **Development**: `http://localhost:8000`
 
 ### API Versioning
+
 - **Current Version**: `v1`
 - **Endpoint Pattern**: `/api/v1/{resource}`
 - **Header**: `Accept: application/json`
 
 ### API Architecture
+
 ```
 FreeAgentics API
 ├── Authentication (/auth)
@@ -46,6 +49,7 @@ FreeAgentics API
 ### 1. JWT Authentication
 
 #### Obtain JWT Token
+
 ```bash
 # Request JWT token
 curl -X POST https://api.freeagentics.io/api/v1/auth/token \
@@ -57,6 +61,7 @@ curl -X POST https://api.freeagentics.io/api/v1/auth/token \
 ```
 
 **Response:**
+
 ```json
 {
   "access_token": "eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9...",
@@ -67,6 +72,7 @@ curl -X POST https://api.freeagentics.io/api/v1/auth/token \
 ```
 
 #### Refresh Token
+
 ```bash
 # Refresh JWT token
 curl -X POST https://api.freeagentics.io/api/v1/auth/refresh \
@@ -80,6 +86,7 @@ curl -X POST https://api.freeagentics.io/api/v1/auth/refresh \
 ### 2. API Key Authentication
 
 #### Using API Keys
+
 ```bash
 # Authentication with API key
 curl -X GET https://api.freeagentics.io/api/v1/agents \
@@ -87,6 +94,7 @@ curl -X GET https://api.freeagentics.io/api/v1/agents \
 ```
 
 #### Create API Key
+
 ```bash
 # Create new API key
 curl -X POST https://api.freeagentics.io/api/v1/auth/api-keys \
@@ -102,6 +110,7 @@ curl -X POST https://api.freeagentics.io/api/v1/auth/api-keys \
 ### 3. OAuth2 Integration
 
 #### OAuth2 Flow
+
 ```bash
 # Step 1: Authorization URL
 https://api.freeagentics.io/api/v1/auth/oauth/authorize?
@@ -125,12 +134,14 @@ curl -X POST https://api.freeagentics.io/api/v1/auth/oauth/token \
 ### 1. Health Check
 
 #### System Health
+
 ```bash
 # Check system health
 curl -X GET https://api.freeagentics.io/api/v1/health
 ```
 
 **Response:**
+
 ```json
 {
   "status": "healthy",
@@ -147,6 +158,7 @@ curl -X GET https://api.freeagentics.io/api/v1/health
 ```
 
 #### Detailed Health Check
+
 ```bash
 # Detailed health information
 curl -X GET https://api.freeagentics.io/api/v1/health/detailed \
@@ -154,6 +166,7 @@ curl -X GET https://api.freeagentics.io/api/v1/health/detailed \
 ```
 
 **Response:**
+
 ```json
 {
   "status": "healthy",
@@ -189,6 +202,7 @@ curl -X GET https://api.freeagentics.io/api/v1/health/detailed \
 ### 2. System Information
 
 #### System Status
+
 ```bash
 # Get system status
 curl -X GET https://api.freeagentics.io/api/v1/system/status \
@@ -196,6 +210,7 @@ curl -X GET https://api.freeagentics.io/api/v1/system/status \
 ```
 
 **Response:**
+
 ```json
 {
   "system": {
@@ -227,6 +242,7 @@ curl -X GET https://api.freeagentics.io/api/v1/system/status \
 ### 1. Agent CRUD Operations
 
 #### List Agents
+
 ```bash
 # Get all agents
 curl -X GET https://api.freeagentics.io/api/v1/agents \
@@ -234,6 +250,7 @@ curl -X GET https://api.freeagentics.io/api/v1/agents \
 ```
 
 **Response:**
+
 ```json
 {
   "agents": [
@@ -262,6 +279,7 @@ curl -X GET https://api.freeagentics.io/api/v1/agents \
 ```
 
 #### Create Agent
+
 ```bash
 # Create new agent
 curl -X POST https://api.freeagentics.io/api/v1/agents \
@@ -280,6 +298,7 @@ curl -X POST https://api.freeagentics.io/api/v1/agents \
 ```
 
 **Response:**
+
 ```json
 {
   "id": "agent-456",
@@ -297,6 +316,7 @@ curl -X POST https://api.freeagentics.io/api/v1/agents \
 ```
 
 #### Get Agent Details
+
 ```bash
 # Get specific agent
 curl -X GET https://api.freeagentics.io/api/v1/agents/agent-123 \
@@ -304,6 +324,7 @@ curl -X GET https://api.freeagentics.io/api/v1/agents/agent-123 \
 ```
 
 #### Update Agent
+
 ```bash
 # Update agent configuration
 curl -X PUT https://api.freeagentics.io/api/v1/agents/agent-123 \
@@ -318,6 +339,7 @@ curl -X PUT https://api.freeagentics.io/api/v1/agents/agent-123 \
 ```
 
 #### Delete Agent
+
 ```bash
 # Delete agent
 curl -X DELETE https://api.freeagentics.io/api/v1/agents/agent-123 \
@@ -327,6 +349,7 @@ curl -X DELETE https://api.freeagentics.io/api/v1/agents/agent-123 \
 ### 2. Agent Operations
 
 #### Execute Agent Task
+
 ```bash
 # Execute task with agent
 curl -X POST https://api.freeagentics.io/api/v1/agents/agent-123/execute \
@@ -345,6 +368,7 @@ curl -X POST https://api.freeagentics.io/api/v1/agents/agent-123/execute \
 ```
 
 **Response:**
+
 ```json
 {
   "task_id": "task-789",
@@ -356,6 +380,7 @@ curl -X POST https://api.freeagentics.io/api/v1/agents/agent-123/execute \
 ```
 
 #### Get Task Status
+
 ```bash
 # Check task status
 curl -X GET https://api.freeagentics.io/api/v1/agents/agent-123/tasks/task-789 \
@@ -363,6 +388,7 @@ curl -X GET https://api.freeagentics.io/api/v1/agents/agent-123/tasks/task-789 \
 ```
 
 **Response:**
+
 ```json
 {
   "task_id": "task-789",
@@ -384,6 +410,7 @@ curl -X GET https://api.freeagentics.io/api/v1/agents/agent-123/tasks/task-789 \
 ### 1. Coalition Operations
 
 #### Create Coalition
+
 ```bash
 # Create new coalition
 curl -X POST https://api.freeagentics.io/api/v1/coalitions \
@@ -402,6 +429,7 @@ curl -X POST https://api.freeagentics.io/api/v1/coalitions \
 ```
 
 **Response:**
+
 ```json
 {
   "id": "coalition-abc",
@@ -431,6 +459,7 @@ curl -X POST https://api.freeagentics.io/api/v1/coalitions \
 ```
 
 #### Execute Coalition Task
+
 ```bash
 # Execute task with coalition
 curl -X POST https://api.freeagentics.io/api/v1/coalitions/coalition-abc/execute \
@@ -454,6 +483,7 @@ curl -X POST https://api.freeagentics.io/api/v1/coalitions/coalition-abc/execute
 ### 1. Metrics API
 
 #### Get System Metrics
+
 ```bash
 # Get system metrics
 curl -X GET https://api.freeagentics.io/api/v1/monitoring/metrics \
@@ -461,6 +491,7 @@ curl -X GET https://api.freeagentics.io/api/v1/monitoring/metrics \
 ```
 
 **Response:**
+
 ```json
 {
   "timestamp": "2024-01-15T10:30:00Z",
@@ -491,6 +522,7 @@ curl -X GET https://api.freeagentics.io/api/v1/monitoring/metrics \
 ```
 
 #### Get Agent Metrics
+
 ```bash
 # Get agent-specific metrics
 curl -X GET https://api.freeagentics.io/api/v1/monitoring/agents/agent-123/metrics \
@@ -500,6 +532,7 @@ curl -X GET https://api.freeagentics.io/api/v1/monitoring/agents/agent-123/metri
 ### 2. Alerts API
 
 #### Get Active Alerts
+
 ```bash
 # Get active alerts
 curl -X GET https://api.freeagentics.io/api/v1/monitoring/alerts \
@@ -507,6 +540,7 @@ curl -X GET https://api.freeagentics.io/api/v1/monitoring/alerts \
 ```
 
 **Response:**
+
 ```json
 {
   "alerts": [
@@ -536,6 +570,7 @@ curl -X GET https://api.freeagentics.io/api/v1/monitoring/alerts \
 ### 1. WebSocket Connection
 
 #### Connect to WebSocket
+
 ```javascript
 // JavaScript WebSocket client
 const ws = new WebSocket('wss://api.freeagentics.io/ws');
@@ -561,6 +596,7 @@ ws.onclose = function(event) {
 ```
 
 #### WebSocket Message Types
+
 ```javascript
 // Subscribe to agent events
 ws.send(JSON.stringify({
@@ -587,6 +623,7 @@ ws.send(JSON.stringify({
 ### 2. Real-time Updates
 
 #### Agent Status Updates
+
 ```json
 {
   "type": "agent_status",
@@ -602,6 +639,7 @@ ws.send(JSON.stringify({
 ```
 
 #### Task Progress Updates
+
 ```json
 {
   "type": "task_progress",
@@ -618,6 +656,7 @@ ws.send(JSON.stringify({
 ### 1. Error Response Format
 
 #### Standard Error Response
+
 ```json
 {
   "error": {
@@ -636,6 +675,7 @@ ws.send(JSON.stringify({
 ### 2. Common Error Codes
 
 #### HTTP Status Codes
+
 - **200 OK**: Success
 - **201 Created**: Resource created successfully
 - **400 Bad Request**: Invalid request parameters
@@ -648,6 +688,7 @@ ws.send(JSON.stringify({
 - **500 Internal Server Error**: Server error
 
 #### Application Error Codes
+
 ```json
 {
   "AUTHENTICATION_ERROR": "Invalid credentials",
@@ -668,6 +709,7 @@ ws.send(JSON.stringify({
 ### 1. Rate Limit Headers
 
 #### Response Headers
+
 ```
 X-RateLimit-Limit: 1000
 X-RateLimit-Remaining: 999
@@ -678,12 +720,14 @@ X-RateLimit-Window: 3600
 ### 2. Rate Limit Policies
 
 #### Default Limits
+
 - **Authenticated Users**: 1000 requests/hour
 - **API Keys**: 5000 requests/hour
 - **Premium Users**: 10000 requests/hour
 - **WebSocket**: 100 messages/minute
 
 #### Custom Rate Limits
+
 ```bash
 # Check current rate limit
 curl -X GET https://api.freeagentics.io/api/v1/auth/rate-limit \
@@ -691,6 +735,7 @@ curl -X GET https://api.freeagentics.io/api/v1/auth/rate-limit \
 ```
 
 **Response:**
+
 ```json
 {
   "limit": 1000,
@@ -706,6 +751,7 @@ curl -X GET https://api.freeagentics.io/api/v1/auth/rate-limit \
 ### 1. Code Examples
 
 #### Python SDK Example
+
 ```python
 # Python SDK usage
 import freeagentics
@@ -737,6 +783,7 @@ print(f"Task result: {result}")
 ```
 
 #### Node.js SDK Example
+
 ```javascript
 // Node.js SDK usage
 const FreeAgentics = require('freeagentics-sdk');
@@ -772,6 +819,7 @@ example().catch(console.error);
 ### 2. Postman Collection
 
 #### Collection Setup
+
 ```json
 {
   "info": {
@@ -807,6 +855,7 @@ example().catch(console.error);
 ### 3. OpenAPI Specification
 
 #### Swagger/OpenAPI Documentation
+
 ```yaml
 openapi: 3.0.0
 info:
@@ -893,6 +942,7 @@ components:
 ### 4. Testing Tools
 
 #### API Testing Script
+
 ```bash
 #!/bin/bash
 # API testing script
@@ -934,6 +984,7 @@ echo "API testing complete!"
 ### 1. Swagger UI Integration
 
 #### Swagger UI Setup
+
 ```html
 <!DOCTYPE html>
 <html>
@@ -964,6 +1015,7 @@ echo "API testing complete!"
 ### 2. API Explorer
 
 #### Interactive API Explorer
+
 ```javascript
 // Interactive API explorer component
 class APIExplorer {
@@ -1004,9 +1056,10 @@ class APIExplorer {
 }
 ```
 
----
+______________________________________________________________________
 
 **Document Information:**
+
 - **Version**: 1.0
 - **Last Updated**: January 2024
 - **Next Review**: April 2024
@@ -1014,6 +1067,7 @@ class APIExplorer {
 - **Approved By**: Engineering Lead
 
 **API Endpoints:**
+
 - **Base URL**: https://api.freeagentics.io/api/v1
 - **Documentation**: https://docs.freeagentics.io
 - **Support**: api-support@freeagentics.io

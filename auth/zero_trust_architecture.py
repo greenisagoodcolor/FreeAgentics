@@ -173,6 +173,7 @@ class CertificateManager:
     """Manages certificates for mTLS authentication."""
 
     def __init__(self, ca_cert_path: str = None, ca_key_path: str = None):
+        """Initialize the certificate manager."""
         self.ca_cert_path = ca_cert_path or "./ssl/ca-cert.pem"
         self.ca_key_path = ca_key_path or "./ssl/ca-key.pem"
         self.service_certificates: Dict[str, Dict[str, Any]] = {}
@@ -430,6 +431,7 @@ class ZeroTrustPolicyEngine:
     """Policy engine for zero-trust architecture."""
 
     def __init__(self):
+        """Initialize the zero trust policy engine."""
         self.policies: Dict[str, ZeroTrustPolicy] = {}
         self.service_identities: Dict[str, ServiceIdentity] = {}
         self.active_sessions: Dict[str, ContinuousVerificationContext] = {}
@@ -816,6 +818,7 @@ class IdentityAwareProxy:
     """Identity-aware proxy for zero-trust request validation."""
 
     def __init__(self, policy_engine: ZeroTrustPolicyEngine):
+        """Initialize the identity-aware proxy."""
         self.policy_engine = policy_engine
         self.security = HTTPBearer()
 
@@ -970,11 +973,11 @@ def configure_default_zero_trust_policies():
     engine = get_zero_trust_engine()
 
     # Register example services
-    api_service = engine.register_service(
+    engine.register_service(
         "freeagentics-api", ServiceType.API, NetworkZone.DMZ, TrustLevel.MEDIUM
     )
 
-    db_service = engine.register_service(
+    engine.register_service(
         "freeagentics-db",
         ServiceType.DATABASE,
         NetworkZone.SECURE,

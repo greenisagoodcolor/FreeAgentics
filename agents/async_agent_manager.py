@@ -32,6 +32,7 @@ class AgentOperation:
     operation_id: str = None
 
     def __post_init__(self):
+        """Initialize operation ID if not provided."""
         if self.operation_id is None:
             self.operation_id = str(uuid.uuid4())
 
@@ -404,9 +405,7 @@ class AsyncAgentManager:
 
 
 async def benchmark_async_multi_agent_performance():
-    """
-    Benchmark the async multi-agent system performance.
-    """
+    """Benchmark the async multi-agent system performance."""
     print("=" * 60)
     print("ASYNC MULTI-AGENT PERFORMANCE BENCHMARK")
     print("=" * 60)

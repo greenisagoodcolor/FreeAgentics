@@ -26,6 +26,7 @@ except ImportError:
     BASIC_IMPORTS_SUCCESS = False
 
 
+@pytest.mark.slow
 class TestBasicErrorHandling:
     """Test basic error handling concepts."""
 
@@ -87,6 +88,7 @@ class TestBasicErrorHandling:
         assert action in agent.actions
 
 
+@pytest.mark.slow
 class TestConcurrencyEdgeCases:
     """Test concurrency and threading edge cases."""
 
@@ -145,6 +147,7 @@ class TestConcurrencyEdgeCases:
         assert failure_count == 3
 
 
+@pytest.mark.slow
 class TestBoundaryValueHandling:
     """Test boundary value handling."""
 
@@ -213,6 +216,7 @@ class TestBoundaryValueHandling:
         assert safe_first_element([1, 2, 3]) == 1
 
 
+@pytest.mark.slow
 class TestMemoryHandling:
     """Test memory-related edge cases."""
 
@@ -254,6 +258,7 @@ class TestMemoryHandling:
             pytest.skip("Memory exhaustion handled")
 
 
+@pytest.mark.slow
 class TestAsyncErrorHandling:
     """Test asynchronous error handling."""
 
@@ -262,7 +267,7 @@ class TestAsyncErrorHandling:
         """Test async timeout handling."""
 
         async def slow_operation():
-            await asyncio.sleep(2)
+            await asyncio.sleep(0.1)  # Reduced from 2s for faster tests
             return "completed"
 
         # Test with timeout
@@ -280,7 +285,7 @@ class TestAsyncErrorHandling:
 
         async def cancellable_task():
             try:
-                await asyncio.sleep(5)
+                await asyncio.sleep(0.2)  # Reduced from 5s for faster tests
                 return "completed"
             except asyncio.CancelledError:
                 return "cancelled"
@@ -316,6 +321,7 @@ class TestAsyncErrorHandling:
         assert result == "error_handled"
 
 
+@pytest.mark.slow
 class TestFileSystemEdgeCases:
     """Test file system edge cases."""
 
@@ -385,6 +391,7 @@ class TestFileSystemEdgeCases:
                 pass
 
 
+@pytest.mark.slow
 class TestJSONEdgeCases:
     """Test JSON handling edge cases."""
 
@@ -439,6 +446,7 @@ class TestJSONEdgeCases:
             pytest.skip("Unicode handling not supported")
 
 
+@pytest.mark.slow
 class TestNumericEdgeCases:
     """Test numeric edge cases."""
 

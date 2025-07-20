@@ -145,14 +145,14 @@ def demo_belief_pooling():
         belief = pool.acquire()
         active_beliefs.append(belief)
         if i % 10 == 9:
-            print(f"After acquiring {i+1} beliefs: {pool.stats}")
+            print(f"After acquiring {i + 1} beliefs: {pool.stats}")
 
     # Release some beliefs
     print("\nReleasing beliefs back to pool...")
     for i in range(20):
         pool.release(active_beliefs.pop(0))
         if i % 10 == 9:
-            print(f"After releasing {i+1} beliefs: {pool.stats}")
+            print(f"After releasing {i + 1} beliefs: {pool.stats}")
 
     print(f"\nFinal pool stats: {pool.stats}")
 
@@ -192,7 +192,7 @@ def demo_incremental_updates():
         )
 
         print(
-            f"Step {step+1}: non-zero values: {compressed.nnz}, "
+            f"Step {step + 1}: non-zero values: {compressed.nnz}, "
             f"memory: {compressed.memory_usage()} bytes"
         )
 

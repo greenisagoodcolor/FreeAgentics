@@ -106,7 +106,7 @@ def demonstrate_error_recovery_strategies():
     # Multiple attempts should eventually succeed
     for i in range(5):
         action = agent.step(observation)
-        print(f"   Attempt {i+1}: action '{action}'")
+        print(f"   Attempt {i + 1}: action '{action}'")
 
         if i == 2:  # After success, reset mock for normal operation
             mock_agent.infer_policies.side_effect = None

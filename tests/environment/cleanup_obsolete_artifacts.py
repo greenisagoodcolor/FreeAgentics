@@ -454,7 +454,7 @@ class ObsoleteArtifactCleaner:
             # This is a simplified approach
             # In reality, you'd need to inspect the volume's mount point
             return 0
-        except:
+        except Exception:
             return 0
 
     def _is_old_enough(self, path: Path) -> bool:
@@ -463,7 +463,7 @@ class ObsoleteArtifactCleaner:
             stat = path.stat()
             created_time = datetime.fromtimestamp(stat.st_ctime)
             return created_time < self.cutoff_time
-        except:
+        except Exception:
             return False
 
     def run_cleanup(self) -> CleanupStats:

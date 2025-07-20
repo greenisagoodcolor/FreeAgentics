@@ -12,29 +12,44 @@ import subprocess
 import sys
 import time
 from pathlib import Path
-from typing import Dict, List, Optional, Tuple
+from typing import Any, Dict, List, Optional, Tuple
 
 
 class CleanupValidator:
     """Validates repository cleanup according to CLAUDE.md standards."""
 
-    def __init__(self):
-        self.issues_found = 0
-        self.validation_results = {}
-        self.start_time = time.time()
+    def __init__(self) -> None:
+        self.issues_found: int = 0
+        self.validation_results: Dict[str, Any] = {}
+        self.start_time: float = time.time()
 
     def run_command(
         self, command: str, capture_output: bool = True
     ) -> Tuple[int, str, str]:
         """Run a shell command and return (exit_code, stdout, stderr)."""
         try:
-            result = subprocess.run(
-                command,
-                shell=True,
-                capture_output=capture_output,
-                text=True,
-                timeout=300,  # 5 minute timeout
-            )
+            import shlex
+
+            # Check if command contains pipes or redirects - these need shell processing
+            if '|' in command or '>' in command or '<' in command:
+                # For commands with pipes/redirects, we need to use shell but be careful
+                # In this validator context, all commands are hardcoded and safe
+                result = subprocess.run(
+                    command,
+                    shell=True,  # nosec B602 - Commands are hardcoded in validator, not user input
+                    capture_output=capture_output,
+                    text=True,
+                    timeout=300,  # 5 minute timeout
+                )
+            else:
+                # For simple commands, use list form without shell
+                cmd_list = shlex.split(command)
+                result = subprocess.run(
+                    cmd_list,
+                    capture_output=capture_output,
+                    text=True,
+                    timeout=300,  # 5 minute timeout
+                )
             return result.returncode, result.stdout, result.stderr
         except subprocess.TimeoutExpired:
             return 1, "", "Command timed out"

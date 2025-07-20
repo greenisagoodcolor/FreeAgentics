@@ -949,7 +949,7 @@ class TestCoalitionAgentsInterfaceIntegration:
                 }
 
                 validation_start = time.time()
-                validation_results = (
+                _validation_results = (
                     coordination_executor.validate_action_execution(
                         action_spec, mock_execution_result
                     )

@@ -5,7 +5,7 @@ import json
 import logging
 import re
 from datetime import datetime
-from typing import Dict, Optional, Set
+from typing import Any, Dict, Optional, Set
 
 from fastapi import APIRouter, Depends, Query, WebSocket, WebSocketDisconnect
 from pydantic import BaseModel, Field, validator
@@ -28,7 +28,7 @@ class WebSocketMessage(BaseModel):
 
     type: str = Field(..., description="Message type")
     timestamp: datetime = Field(default_factory=datetime.now)
-    data: dict = Field(default_factory=dict)
+    data: Dict[str, Any] = Field(default_factory=dict)
 
     @validator("type")
     def validate_type(cls, v):

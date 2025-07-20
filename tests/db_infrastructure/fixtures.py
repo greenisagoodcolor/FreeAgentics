@@ -14,7 +14,7 @@ from sqlalchemy.engine import Connection, Engine
 from sqlalchemy.orm import Session, sessionmaker
 
 from .test_config import (
-    TestDatabaseConfig,
+    DatabaseTestConfig,
     create_test_engine,
     setup_test_database,
 )
@@ -258,10 +258,10 @@ def populated_db(db_session: Session) -> Session:
     from .factories import AgentFactory, KnowledgeGraphFactory
 
     # Create some agents
-    agents = AgentFactory.create_batch(db_session, count=10)
+    _agents = AgentFactory.create_batch(db_session, count=10)
 
     # Create a knowledge graph
-    graph = KnowledgeGraphFactory.create_connected_graph(
+    _graph = KnowledgeGraphFactory.create_connected_graph(
         db_session, num_nodes=20, connectivity=0.3
     )
 

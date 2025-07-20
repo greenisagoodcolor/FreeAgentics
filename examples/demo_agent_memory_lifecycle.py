@@ -88,7 +88,7 @@ def demo_basic_lifecycle():
 
     # Show final statistics
     final_stats = get_memory_statistics()
-    print(f"\n6. Final statistics:")
+    print("\n6. Final statistics:")
     print(f"   Total agents: {final_stats['global']['total_agents']}")
     print(f"   Agent states: {final_stats['agent_states']}")
     print(f"   Total memory: {final_stats['global']['total_memory_mb']:.1f}MB")
@@ -140,17 +140,23 @@ def demo_memory_pressure_cleanup():
         # Simulate high memory usage
         update_agent_memory_usage(
             agent_id,
-            belief_mb=random.uniform(15, 25),
-            matrix_mb=random.uniform(10, 15),
-            other_mb=random.uniform(5, 10),
+            belief_mb=random.uniform(
+                15, 25
+            ),  # nosec B311 - Demo simulation only
+            matrix_mb=random.uniform(
+                10, 15
+            ),  # nosec B311 - Demo simulation only
+            other_mb=random.uniform(
+                5, 10
+            ),  # nosec B311 - Demo simulation only
         )
 
         # Set agent to active state and old access time for some
-        if random.random() > 0.5:
+        if random.random() > 0.5:  # nosec B311 - Demo simulation only
             profile.state = AgentLifecycleState.ACTIVE
             profile.last_accessed = time.time() - random.uniform(
                 70, 150
-            )  # Old access
+            )  # nosec B311 - Demo simulation only  # Old access
 
     # Check memory pressure
     stats = get_memory_statistics()
@@ -164,7 +170,7 @@ def demo_memory_pressure_cleanup():
 
     # Check memory after cleanup
     final_stats = get_memory_statistics()
-    print(f"\n3. Memory after cleanup:")
+    print("\n3. Memory after cleanup:")
     print(f"   Total memory: {final_stats['global']['total_memory_mb']:.1f}MB")
     print(
         f"   Memory pressure: {final_stats['global']['memory_pressure']:.1%}"
@@ -208,7 +214,7 @@ def demo_lifecycle_events_tracking():
         print(f"   {event_time}: {event} - {metadata}")
 
     # Show memory snapshots
-    print(f"\n4. Memory snapshots (last 3):")
+    print("\n4. Memory snapshots (last 3):")
     for snapshot in list(profile.memory_snapshots)[-3:]:
         snapshot_time = time.strftime(
             "%H:%M:%S", time.localtime(snapshot.timestamp)
@@ -239,7 +245,9 @@ def demo_agent_pool_simulation():
     active_agents = []
 
     for i in range(8):  # Create 8 agents
-        role, memory_limit = random.choice(agent_roles)
+        role, memory_limit = random.choice(
+            agent_roles
+        )  # nosec B311 - Demo simulation only
         agent_id = f"{role}_{i:03d}"
 
         profile = register_agent_memory(agent_id, memory_limit_mb=memory_limit)
@@ -247,9 +255,15 @@ def demo_agent_pool_simulation():
         active_agents.append(agent_id)
 
         # Simulate initial memory usage
-        belief_mb = random.uniform(5, memory_limit * 0.4)
-        matrix_mb = random.uniform(2, memory_limit * 0.3)
-        other_mb = random.uniform(1, memory_limit * 0.2)
+        belief_mb = random.uniform(
+            5, memory_limit * 0.4
+        )  # nosec B311 - Demo simulation only
+        matrix_mb = random.uniform(
+            2, memory_limit * 0.3
+        )  # nosec B311 - Demo simulation only
+        other_mb = random.uniform(
+            1, memory_limit * 0.2
+        )  # nosec B311 - Demo simulation only
 
         update_agent_memory_usage(agent_id, belief_mb, matrix_mb, other_mb)
         print(
@@ -262,12 +276,16 @@ def demo_agent_pool_simulation():
         print(f"\n   Round {round_num + 1}:")
 
         # Some agents do work (update memory)
-        working_agents = random.sample(active_agents, random.randint(3, 6))
+        working_agents = random.sample(
+            active_agents, random.randint(3, 6)
+        )  # nosec B311 - Demo simulation only
         for agent_id in working_agents:
             profile = manager.get_agent_profile(agent_id)
             if profile and profile.state == AgentLifecycleState.ACTIVE:
                 # Simulate memory usage change
-                delta_mb = random.uniform(-2, 5)
+                delta_mb = random.uniform(
+                    -2, 5
+                )  # nosec B311 - Demo simulation only
                 new_total = max(1.0, profile.current_memory_mb + delta_mb)
 
                 # Distribute the change across categories
@@ -283,11 +301,15 @@ def demo_agent_pool_simulation():
                 )
 
         # Some agents become idle (simulate old access time)
-        idle_agents = random.sample(active_agents, random.randint(1, 3))
+        idle_agents = random.sample(
+            active_agents, random.randint(1, 3)
+        )  # nosec B311 - Demo simulation only
         for agent_id in idle_agents:
             profile = manager.get_agent_profile(agent_id)
             if profile:
-                profile.last_accessed = time.time() - random.uniform(70, 200)
+                profile.last_accessed = time.time() - random.uniform(
+                    70, 200
+                )  # nosec B311 - Demo simulation only
 
         # Run cleanup
         cleanup_stats = manager.cleanup_idle_agents()

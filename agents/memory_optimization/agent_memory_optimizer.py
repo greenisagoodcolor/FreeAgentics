@@ -15,17 +15,18 @@ Key optimizations:
 """
 
 import gc
+import json
 import logging
 import mmap
 import os
-import pickle
+import pickle  # nosec B403 - Required for agent state serialization, only used with trusted data
 import tempfile
 import threading
 import weakref
 from collections import defaultdict
 from contextlib import contextmanager
 from dataclasses import dataclass
-from typing import Any, Dict, List, Optional, Set, Tuple, Union
+from typing import Any, Callable, Dict, List, Optional, Set, Tuple, Union
 
 import numpy as np
 from scipy import sparse
@@ -129,7 +130,7 @@ class SharedAgentParameters:
         self,
         matrix_type: str,
         shape: Tuple[int, ...],
-        initializer: Optional[callable] = None,
+        initializer: Optional[Callable] = None,
     ) -> np.ndarray:
         """Get or create a shared matrix.
 
@@ -271,7 +272,7 @@ class SharedObservationBuffer:
             self._free_list.sort()
 
             # Merge adjacent free blocks
-            merged = []
+            merged: List[Tuple[int, int]] = []
             for offset, size in self._free_list:
                 if merged and merged[-1][0] + merged[-1][1] == offset:
                     # Merge with previous
@@ -296,7 +297,8 @@ class SharedObservationBuffer:
             offset, size = self._allocations[agent_id]
 
         # Write shape and data
-        shape_bytes = pickle.dumps(observation.shape)
+        shape_json = json.dumps(observation.shape)
+        shape_bytes = shape_json.encode('utf-8')
         self.mmap[offset : offset + 4] = len(shape_bytes).to_bytes(4, "little")
         self.mmap[offset + 4 : offset + 4 + len(shape_bytes)] = shape_bytes
         self.mmap[
@@ -324,7 +326,10 @@ class SharedObservationBuffer:
 
         # Read shape
         shape_len = int.from_bytes(self.mmap[offset : offset + 4], "little")
-        shape = pickle.loads(self.mmap[offset + 4 : offset + 4 + shape_len])
+        shape_json = self.mmap[offset + 4 : offset + 4 + shape_len].decode(
+            'utf-8'
+        )
+        shape = tuple(json.loads(shape_json))
 
         # Read data
         data_offset = offset + 4 + shape_len
@@ -373,7 +378,9 @@ class CompressedHistory:
         import zlib
 
         # Pickle and compress
-        data = pickle.dumps(item)
+        # Note: This pickle usage is safe as it's only used for internal caching
+        # of numpy arrays and belief states, not user-provided data
+        data = pickle.dumps(item)  # nosec B301
         compressed = zlib.compress(data, self.compression_level)
 
         # Update stats
@@ -411,7 +418,8 @@ class CompressedHistory:
             )
             compressed = self._buffer[idx]
             data = zlib.decompress(compressed)
-            item = pickle.loads(data)
+            # Note: This pickle usage is safe as we only unpickle data we created
+            item = pickle.loads(data)  # nosec B301
             items.append(item)
 
         return items
@@ -531,12 +539,14 @@ class AgentMemoryOptimizer:
 
             # Set up lazy loading for beliefs
             if self.enable_lazy_loading and hasattr(agent, "beliefs"):
-                beliefs_array = getattr(agent, "beliefs")
+                beliefs_array = agent.beliefs
                 if isinstance(beliefs_array, np.ndarray):
                     # Create lazy belief array
                     opt_memory._beliefs = LazyBeliefArray(
                         shape=beliefs_array.shape,
-                        dtype=np.float32,  # Force float32 to reduce memory
+                        dtype=np.dtype(
+                            np.float32
+                        ),  # Force float32 to reduce memory
                         sparsity_threshold=0.9,
                     )
                     # Only load non-zero values
@@ -552,9 +562,7 @@ class AgentMemoryOptimizer:
                         opt_memory._beliefs._dense_array = None
 
                     # Replace the original with a much smaller stub
-                    setattr(
-                        agent, "beliefs", np.array([0.0], dtype=np.float32)
-                    )
+                    agent.beliefs = np.array([0.0], dtype=np.float32)
 
             # Compress action history
             if self.enable_compression and hasattr(agent, "action_history"):
@@ -567,7 +575,7 @@ class AgentMemoryOptimizer:
                         opt_memory._action_history.append(item)
 
                     # Replace original with empty list
-                    setattr(agent, "action_history", [])
+                    agent.action_history = []
 
             # Share common parameters
             if self.enable_sharing:
@@ -575,16 +583,16 @@ class AgentMemoryOptimizer:
 
                 # Share transition matrices if present
                 if hasattr(agent, "transition_matrix"):
-                    tm = getattr(agent, "transition_matrix")
+                    tm = agent.transition_matrix
                     shared_tm = self.shared_params.get_or_create_matrix(
                         "transition", tm.shape, lambda s: tm.astype(np.float32)
                     )
                     # Replace with shared reference
-                    setattr(agent, "transition_matrix", shared_tm)
+                    agent.transition_matrix = shared_tm
 
                 # Clear computation cache
                 if hasattr(agent, "computation_cache"):
-                    setattr(agent, "computation_cache", {})
+                    agent.computation_cache = {}
 
             # Set up shared computation pool
             opt_memory._computation_pool = self.computation_pool

@@ -71,7 +71,7 @@ class AgentMemoryAnalyzer:
                     A[f] = np.eye(num_obs[f], num_states[f])
 
                 # Transition model
-                B = utils.obj_array_zeros(
+                utils.obj_array_zeros(
                     [
                         [num_states[f], num_states[f], num_controls[f]]
                         for f in range(2)
@@ -94,7 +94,7 @@ class AgentMemoryAnalyzer:
                 )
 
                 logger.info(
-                    f"Grid {size}x{size}: {total_mb:.2f} MB ({total_mb/(size*size):.4f} MB/state)"
+                    f"Grid {size}x{size}: {total_mb:.2f} MB ({total_mb / (size * size):.4f} MB/state)"
                 )
 
             analysis["memory_usage_by_size"] = memory_usage
@@ -132,7 +132,10 @@ class AgentMemoryAnalyzer:
         """Analyze memory usage of agent data structures."""
         logger.info("\n=== Analyzing Agent Data Structures ===")
 
-        analysis = {"data_structures": {}, "recommendations": []}
+        analysis: Dict[str, Any] = {
+            "data_structures": {},
+            "recommendations": [],
+        }
 
         # Typical agent data sizes
         grid_size = 10
@@ -322,7 +325,7 @@ class AgentMemoryAnalyzer:
         """Generate a comprehensive memory optimization plan."""
         logger.info("\n=== Memory Optimization Plan ===")
 
-        plan = {
+        plan: Dict[str, Any] = {
             "immediate_actions": [],
             "medium_term_actions": [],
             "long_term_actions": [],

@@ -43,7 +43,7 @@ class RateLimitAlgorithm(str, Enum):
 
     SLIDING_WINDOW = "sliding_window"
     FIXED_WINDOW = "fixed_window"
-    TOKEN_BUCKET = "token_bucket"
+    TOKEN_BUCKET = "token_bucket"  # nosec B105
     LEAKY_BUCKET = "leaky_bucket"
 
 
@@ -699,8 +699,12 @@ class RateLimitMiddleware(BaseHTTPMiddleware):
         if self.get_user_id:
             try:
                 user_id = await self.get_user_id(request)
-            except Exception:
-                pass
+            except Exception as e:
+                # Log failed user ID extraction but continue with anonymous rate limiting
+                logger.debug(
+                    f"Failed to extract user ID for rate limiting: {e}"
+                )
+                user_id = None
 
         # Process through rate limiter
         allowed, error_response = await self.rate_limiter.process_request(

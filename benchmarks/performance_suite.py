@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 """
-Comprehensive Performance Benchmark Suite
+Comprehensive Performance Benchmark Suite.
 ========================================
 
 This module provides a comprehensive performance benchmarking framework using pytest-benchmark
@@ -73,6 +73,7 @@ class MemoryTracker:
     """Track memory usage during benchmarks."""
 
     def __init__(self):
+        """Initialize the memory tracker."""
         self.process = psutil.Process()
         self.start_memory = 0
         self.peak_memory = 0
@@ -145,9 +146,8 @@ class AgentSpawnBenchmarks:
         def spawn_agent():
             agent = BasicExplorerAgent(
                 agent_id="test_agent",
-                num_states=5,
-                num_actions=3,
-                num_observations=5,
+                name="Test Agent",
+                grid_size=10,
             )
             return agent
 
@@ -164,9 +164,8 @@ class AgentSpawnBenchmarks:
             for i in range(count):
                 agent = BasicExplorerAgent(
                     agent_id=f"agent_{i}",
-                    num_states=5,
-                    num_actions=3,
-                    num_observations=5,
+                    name=f"Agent {i}",
+                    grid_size=10,
                 )
                 agents.append(agent)
             return agents

@@ -32,9 +32,9 @@ from auth.resource_access_control import (
     require_ownership,
     require_resource_access,
 )
+from auth.security_implementation import ALGORITHM as JWT_ALGORITHM
 from auth.security_implementation import (
-    JWT_ALGORITHM,
-    JWT_SECRET_KEY,
+    JWT_SECRET,
     ROLE_PERMISSIONS,
     Permission,
     SecurityValidator,

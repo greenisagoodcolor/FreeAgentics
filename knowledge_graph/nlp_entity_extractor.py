@@ -1,5 +1,5 @@
 """
-NLP Entity Extractor using real libraries (spaCy/NLTK)
+NLP Entity Extractor using real libraries (spaCy/NLTK).
 Extracts entities and relationships from text using state-of-the-art NLP models
 """
 
@@ -17,7 +17,7 @@ logger = logging.getLogger(__name__)
 
 
 class EntityType(Enum):
-    """Types of entities that can be extracted"""
+    """Types of entities that can be extracted."""
 
     PERSON = "PERSON"
     ORGANIZATION = "ORGANIZATION"
@@ -31,7 +31,7 @@ class EntityType(Enum):
 
 @dataclass
 class Entity:
-    """Represents an extracted entity"""
+    """Represents an extracted entity."""
 
     text: str
     type: EntityType
@@ -43,7 +43,7 @@ class Entity:
 
 @dataclass
 class Relationship:
-    """Represents a relationship between entities"""
+    """Represents a relationship between entities."""
 
     source: Entity
     target: Entity
@@ -54,7 +54,7 @@ class Relationship:
 
 @dataclass
 class ExtractionResult:
-    """Result of entity extraction"""
+    """Result of entity extraction."""
 
     entities: List[Entity]
     relationships: List[Relationship]
@@ -64,22 +64,22 @@ class ExtractionResult:
 
 
 class NLPEntityExtractor:
-    """Real NLP entity extractor using spaCy and custom patterns"""
+    """Real NLP entity extractor using spaCy and custom patterns."""
 
     def __init__(self, model_name: str = "en_core_web_sm"):
-        """Initialize the NLP entity extractor"""
+        """Initialize the NLP entity extractor."""
         self.model_name = model_name
         self.nlp = spacy.load(model_name)
         self.matcher = Matcher(self.nlp.vocab)
         self._setup_custom_patterns()
-        self._entity_cache = {}
+        self._entity_cache: Dict[str, List[Entity]] = {}
 
         logger.info(
             f"NLP Entity Extractor initialized with model: {model_name}"
         )
 
     def _setup_custom_patterns(self):
-        """Setup custom patterns for technology and concept detection"""
+        """Setup custom patterns for technology and concept detection."""
         # Technology patterns
         tech_patterns = [
             # Programming languages
@@ -224,7 +224,7 @@ class NLPEntityExtractor:
         context: Optional[List[str]] = None,
         metadata: Optional[Dict[str, Any]] = None,
     ) -> ExtractionResult:
-        """Extract entities from text"""
+        """Extract entities from text."""
         start_time = time.time()
 
         if not text or not text.strip():
@@ -300,11 +300,11 @@ class NLPEntityExtractor:
     def extract_entities_batch(
         self, texts: List[str]
     ) -> List[ExtractionResult]:
-        """Extract entities from multiple texts"""
+        """Extract entities from multiple texts."""
         return [self.extract_entities(text) for text in texts]
 
     def add_custom_patterns(self, patterns: List[Dict[str, Any]]):
-        """Add custom entity patterns"""
+        """Add custom entity patterns."""
         for pattern in patterns:
             label = pattern["label"]
             pattern_rules = pattern["pattern"]
@@ -330,7 +330,7 @@ class NLPEntityExtractor:
     def _map_spacy_label_to_entity_type(
         self, spacy_label: str
     ) -> Optional[EntityType]:
-        """Map spaCy entity labels to our entity types"""
+        """Map spaCy entity labels to our entity types."""
         mapping = {
             "PERSON": EntityType.PERSON,
             "ORG": EntityType.ORGANIZATION,
@@ -346,7 +346,7 @@ class NLPEntityExtractor:
         return mapping.get(spacy_label)
 
     def _calculate_confidence(self, ent: Span) -> float:
-        """Calculate confidence score for spaCy entity"""
+        """Calculate confidence score for spaCy entity."""
         # Base confidence on entity type and length
         base_confidence = 0.7
 
@@ -365,7 +365,7 @@ class NLPEntityExtractor:
     def _is_duplicate_entity(
         self, entities: List[Entity], text: str, start_pos: int, end_pos: int
     ) -> bool:
-        """Check if entity is duplicate"""
+        """Check if entity is duplicate."""
         for entity in entities:
             # Exact match
             if (
@@ -382,12 +382,12 @@ class NLPEntityExtractor:
         return False
 
     def _deduplicate_entities(self, entities: List[Entity]) -> List[Entity]:
-        """Remove duplicate entities, keeping highest confidence"""
+        """Remove duplicate entities, keeping highest confidence."""
         if not entities:
             return entities
 
         # Group by text (case-insensitive)
-        grouped = {}
+        grouped: Dict[str, List[Entity]] = {}
         for entity in entities:
             key = entity.text.lower()
             if key not in grouped:
@@ -409,8 +409,8 @@ class NLPEntityExtractor:
     def _extract_relationships(
         self, entities: List[Entity], doc: Doc
     ) -> List[Relationship]:
-        """Extract relationships between entities"""
-        relationships = []
+        """Extract relationships between entities."""
+        relationships: List[Relationship] = []
 
         if len(entities) < 2:
             return relationships
@@ -435,7 +435,7 @@ class NLPEntityExtractor:
     def _infer_relationship_type(
         self, entity1: Entity, entity2: Entity, doc: Doc
     ) -> Optional[str]:
-        """Infer relationship type between two entities"""
+        """Infer relationship type between two entities."""
         # Technology + Concept relationships
         if (
             entity1.type == EntityType.TECHNOLOGY
@@ -482,7 +482,7 @@ class NLPEntityExtractor:
     def _get_text_between_entities(
         self, entity1: Entity, entity2: Entity, text: str
     ) -> str:
-        """Get text between two entities"""
+        """Get text between two entities."""
         start = min(entity1.end_pos, entity2.end_pos)
         end = max(entity1.start_pos, entity2.start_pos)
         if start < end:

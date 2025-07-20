@@ -25,6 +25,7 @@ from auth import UserRole, auth_manager
 from auth.jwt_handler import jwt_handler
 
 
+@pytest.mark.slow
 class TestJWTSecurityHardening:
     """Unit tests for JWT security hardening."""
 

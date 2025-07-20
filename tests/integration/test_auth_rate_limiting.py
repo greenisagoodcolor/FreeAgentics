@@ -13,6 +13,7 @@ This test suite validates rate limiting for authentication endpoints:
 8. IP-based and user-based limiting
 """
 
+import threading
 import time
 from collections import defaultdict
 from dataclasses import dataclass

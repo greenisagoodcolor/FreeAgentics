@@ -1,22 +1,23 @@
 """Comprehensive tests for base_agent.py targeting 80%+ coverage."""
 
-import pytest
-import numpy as np
-from unittest.mock import Mock, patch, MagicMock, AsyncMock
 from datetime import datetime
+from unittest.mock import AsyncMock, MagicMock, Mock, patch
+
+import numpy as np
+import pytest
 
 from agents.base_agent import (
-    safe_array_to_int,
-    ActiveInferenceAgent,
-    BasicExplorerAgent,
-    AgentConfig,
-    PYMDP_AVAILABLE,
     OBSERVABILITY_AVAILABLE,
+    PYMDP_AVAILABLE,
+    ActiveInferenceAgent,
+    AgentConfig,
+    BasicExplorerAgent,
+    safe_array_to_int,
 )
 from agents.error_handling import (
     ActionSelectionError,
-    InferenceError,
     AgentError,
+    InferenceError,
 )
 
 
@@ -46,7 +47,9 @@ class TestSafeArrayToInt:
     def test_empty_array(self):
         """Test with empty array - should raise ValueError."""
         value = np.array([])
-        with pytest.raises(ValueError, match="Empty array cannot be converted"):
+        with pytest.raises(
+            ValueError, match="Empty array cannot be converted"
+        ):
             safe_array_to_int(value)
 
     def test_list_input(self):
@@ -57,7 +60,9 @@ class TestSafeArrayToInt:
     def test_empty_list(self):
         """Test with empty list - should raise ValueError."""
         value = []
-        with pytest.raises(ValueError, match="Empty array cannot be converted"):
+        with pytest.raises(
+            ValueError, match="Empty array cannot be converted"
+        ):
             safe_array_to_int(value)
 
     def test_numpy_scalar(self):
@@ -101,7 +106,7 @@ class TestAgentConfig:
             gmn_spec="test_spec",
             llm_config={"model": "test"},
         )
-        
+
         assert config.name == "custom"
         assert config.use_pymdp is False
         assert config.planning_horizon == 5
@@ -177,7 +182,9 @@ class TestBasicExplorerAgent:
         """Test belief update with PyMDP."""
         # Mock PyMDP agent
         mock_agent_instance = Mock()
-        mock_agent_instance.infer_states.return_value = np.array([0.7, 0.1, 0.1, 0.1])
+        mock_agent_instance.infer_states.return_value = np.array(
+            [0.7, 0.1, 0.1, 0.1]
+        )
         mock_pymdp_agent.return_value = mock_agent_instance
 
         agent = BasicExplorerAgent(
@@ -280,10 +287,10 @@ class TestBasicExplorerAgent:
 
         # Perform step
         action = agent.step(2)
-        
+
         # Check action is valid
         assert 0 <= action < 3
-        
+
         # Check observation was recorded
         assert agent.observation_history[-1] == 2
         assert agent.action_history[-1] == action
@@ -329,7 +336,9 @@ class TestBasicExplorerAgent:
         """Test recovery from belief update errors."""
         # Mock PyMDP agent
         mock_agent_instance = Mock()
-        mock_agent_instance.infer_states.side_effect = Exception("Inference error")
+        mock_agent_instance.infer_states.side_effect = Exception(
+            "Inference error"
+        )
         mock_pymdp_agent.return_value = mock_agent_instance
 
         agent = BasicExplorerAgent(
@@ -349,7 +358,9 @@ class TestBasicExplorerAgent:
         """Test action selection with PyMDP error."""
         # Mock PyMDP agent that raises error
         mock_agent_instance = Mock()
-        mock_agent_instance.infer_policies.side_effect = Exception("PyMDP error")
+        mock_agent_instance.infer_policies.side_effect = Exception(
+            "PyMDP error"
+        )
         mock_pymdp_agent.return_value = mock_agent_instance
 
         agent = BasicExplorerAgent(
@@ -368,7 +379,7 @@ class TestBasicExplorerAgent:
         """Test that lifecycle events are recorded."""
         # Mock as coroutine
         mock_record_event.return_value = AsyncMock()
-        
+
         agent = BasicExplorerAgent(
             num_states=[4],
             num_actions=[3],
@@ -442,14 +453,14 @@ class TestBasicExplorerAgent:
             agent_id="test_agent",
             learning_rate=0.1,
         )
-        
+
         # Initialize preferences
         agent.preferences = np.zeros(4)
-        
+
         # Repeatedly reward observation 2
         for _ in range(10):
             agent.learn(observation=2, reward=1.0)
-        
+
         # Preference for observation 2 should be highest
         assert agent.preferences[2] > agent.preferences[0]
         assert agent.preferences[2] > agent.preferences[1]

@@ -30,7 +30,7 @@ logger = logging.getLogger(__name__)
 
 
 class BaseE2ETest(ABC):
-    """Base class for all E2E tests"""
+    """Base class for all E2E tests."""
 
     def __init__(self, config: Optional[E2ETestConfig] = None):
         self.config = config or get_config()
@@ -42,7 +42,7 @@ class BaseE2ETest(ABC):
         self.test_results = []
 
     async def setup(self):
-        """Setup method called before each test"""
+        """Setup method called before each test."""
         self.test_start_time = time.time()
         logger.info(f"Starting E2E test: {self.__class__.__name__}")
 
@@ -64,7 +64,7 @@ class BaseE2ETest(ABC):
         await self._wait_for_services()
 
     async def teardown(self):
-        """Teardown method called after each test"""
+        """Teardown method called after each test."""
         test_duration = (
             time.time() - self.test_start_time if self.test_start_time else 0
         )
@@ -82,7 +82,7 @@ class BaseE2ETest(ABC):
         await self._cleanup_test_data()
 
     async def _setup_driver(self):
-        """Setup browser driver"""
+        """Setup browser driver."""
         driver_type = self.config.browser_config.browser_type
 
         if driver_type == "playwright":
@@ -102,12 +102,12 @@ class BaseE2ETest(ABC):
             await self.driver.start()
 
     async def _cleanup_driver(self):
-        """Cleanup browser driver"""
+        """Cleanup browser driver."""
         if self.driver and hasattr(self.driver, "stop"):
             await self.driver.stop()
 
     async def _setup_test_database(self):
-        """Setup test database"""
+        """Setup test database."""
         if not self.config.test_db_url:
             return
 
@@ -126,7 +126,7 @@ class BaseE2ETest(ABC):
             # Continue without database for basic tests
 
     async def _cleanup_test_database(self):
-        """Cleanup test database"""
+        """Cleanup test database."""
         if self.session:
             try:
                 if self.config.cleanup_db_after_tests:
@@ -135,29 +135,31 @@ class BaseE2ETest(ABC):
             except Exception as e:
                 logger.error(f"Failed to cleanup test database: {e}")
 
+    @abstractmethod
     async def _create_test_tables(self):
-        """Create test-specific database tables"""
+        """Create test-specific database tables."""
         # This would be implemented with actual database schema
 
+    @abstractmethod
     async def _clean_test_tables(self):
-        """Clean test-specific database tables"""
+        """Clean test-specific database tables."""
         # This would be implemented with actual database cleanup
 
     async def _setup_test_data(self):
-        """Setup test data"""
+        """Setup test data."""
         await self.data_manager.setup()
 
     async def _cleanup_test_data(self):
-        """Cleanup test data"""
+        """Cleanup test data."""
         await self.data_manager.cleanup()
 
     async def _wait_for_services(self):
-        """Wait for required services to be ready"""
+        """Wait for required services to be ready."""
         for service in self.config.required_services:
             await self._wait_for_service(service)
 
     async def _wait_for_service(self, service: str):
-        """Wait for a specific service to be ready"""
+        """Wait for a specific service to be ready."""
         max_retries = 30
         retry_delay = 1.0
 
@@ -207,33 +209,33 @@ class BaseE2ETest(ABC):
     # Helper methods for common test operations
 
     async def navigate_to(self, url: str):
-        """Navigate to a URL"""
+        """Navigate to a URL."""
         if self.driver and hasattr(self.driver, "navigate"):
             await self.driver.navigate(url)
 
     async def click_element(self, selector: str):
-        """Click an element by selector"""
+        """Click an element by selector."""
         if self.driver and hasattr(self.driver, "click"):
             await self.driver.click(selector)
 
     async def fill_input(self, selector: str, value: str):
-        """Fill an input field"""
+        """Fill an input field."""
         if self.driver and hasattr(self.driver, "fill"):
             await self.driver.fill(selector, value)
 
     async def get_text(self, selector: str) -> str:
-        """Get text from an element"""
+        """Get text from an element."""
         if self.driver and hasattr(self.driver, "get_text"):
             return await self.driver.get_text(selector)
         return ""
 
     async def wait_for_element(self, selector: str, timeout: float = 10.0):
-        """Wait for an element to be visible"""
+        """Wait for an element to be visible."""
         if self.driver and hasattr(self.driver, "wait_for_element"):
             await self.driver.wait_for_element(selector, timeout)
 
     async def take_screenshot(self, filename: str):
-        """Take a screenshot"""
+        """Take a screenshot."""
         if self.driver and hasattr(self.driver, "screenshot"):
             path = self.config.get_screenshot_path(filename)
             await self.driver.screenshot(path)
@@ -241,36 +243,41 @@ class BaseE2ETest(ABC):
     async def api_request(
         self, method: str, endpoint: str, **kwargs
     ) -> httpx.Response:
-        """Make an API request"""
+        """Make an API request."""
         url = f"{self.config.api_url}{endpoint}"
         async with httpx.AsyncClient() as client:
             response = await client.request(method, url, **kwargs)
             return response
 
+    @abstractmethod
     async def websocket_connect(self, endpoint: str):
-        """Connect to WebSocket endpoint"""
+        """Connect to WebSocket endpoint."""
         # WebSocket connection logic would go here
 
     # Assertion helpers
 
+    @abstractmethod
     def assert_element_visible(self, selector: str):
-        """Assert that an element is visible"""
+        """Assert that an element is visible."""
         # This would check element visibility
 
+    @abstractmethod
     def assert_element_contains_text(self, selector: str, text: str):
-        """Assert that an element contains specific text"""
+        """Assert that an element contains specific text."""
         # This would check element text content
 
+    @abstractmethod
     def assert_page_title(self, expected_title: str):
-        """Assert page title"""
+        """Assert page title."""
         # This would check page title
 
+    @abstractmethod
     def assert_url_contains(self, url_fragment: str):
-        """Assert that current URL contains a fragment"""
+        """Assert that current URL contains a fragment."""
         # This would check current URL
 
     def assert_api_response_ok(self, response: httpx.Response):
-        """Assert that API response is OK"""
+        """Assert that API response is OK."""
         assert (
             response.status_code == 200
         ), f"Expected 200, got {response.status_code}"
@@ -278,7 +285,7 @@ class BaseE2ETest(ABC):
     def assert_api_response_json(
         self, response: httpx.Response, expected_keys: List[str]
     ):
-        """Assert that API response contains expected JSON keys"""
+        """Assert that API response contains expected JSON keys."""
         data = response.json()
         for key in expected_keys:
             assert key in data, f"Expected key '{key}' not found in response"
@@ -286,7 +293,7 @@ class BaseE2ETest(ABC):
     # Performance testing helpers
 
     async def measure_page_load_time(self, url: str) -> float:
-        """Measure page load time"""
+        """Measure page load time."""
         start_time = time.time()
         await self.navigate_to(url)
         # Wait for page to be fully loaded
@@ -294,7 +301,7 @@ class BaseE2ETest(ABC):
         return time.time() - start_time
 
     async def measure_api_response_time(self, endpoint: str) -> float:
-        """Measure API response time"""
+        """Measure API response time."""
         start_time = time.time()
         await self.api_request("GET", endpoint)
         return time.time() - start_time
@@ -302,28 +309,28 @@ class BaseE2ETest(ABC):
     # Test data helpers
 
     def get_test_user(self) -> Dict[str, str]:
-        """Get test user credentials"""
+        """Get test user credentials."""
         return self.config.test_user
 
     def get_admin_user(self) -> Dict[str, str]:
-        """Get admin user credentials"""
+        """Get admin user credentials."""
         return self.config.admin_user
 
     def create_test_data(self, data_type: str) -> Dict[str, Any]:
-        """Create test data of specified type"""
+        """Create test data of specified type."""
         return self.data_manager.create_test_data(data_type)
 
     # Abstract methods to be implemented by subclasses
 
     @abstractmethod
     async def run_test(self):
-        """Main test method to be implemented by subclasses"""
+        """Main test method to be implemented by subclasses."""
 
     # Context manager support
 
     @asynccontextmanager
     async def test_context(self) -> AsyncGenerator[None, None]:
-        """Context manager for test execution"""
+        """Context manager for test execution."""
         try:
             await self.setup()
             yield
@@ -331,44 +338,44 @@ class BaseE2ETest(ABC):
             await self.teardown()
 
     async def run_with_context(self):
-        """Run test with proper setup and teardown"""
+        """Run test with proper setup and teardown."""
         async with self.test_context():
             await self.run_test()
 
 
 class SmokeTest(BaseE2ETest):
-    """Base class for smoke tests"""
+    """Base class for smoke tests."""
 
     @abstractmethod
     async def run_smoke_test(self):
-        """Run smoke test"""
+        """Run smoke test."""
 
     async def run_test(self):
-        """Run smoke test implementation"""
+        """Run smoke test implementation."""
         await self.run_smoke_test()
 
 
 class IntegrationTest(BaseE2ETest):
-    """Base class for integration tests"""
+    """Base class for integration tests."""
 
     @abstractmethod
     async def run_integration_test(self):
-        """Run integration test"""
+        """Run integration test."""
 
     async def run_test(self):
-        """Run integration test implementation"""
+        """Run integration test implementation."""
         await self.run_integration_test()
 
 
 class PerformanceTest(BaseE2ETest):
-    """Base class for performance tests"""
+    """Base class for performance tests."""
 
     @abstractmethod
     async def run_performance_test(self):
-        """Run performance test"""
+        """Run performance test."""
 
     async def run_test(self):
-        """Run performance test implementation"""
+        """Run performance test implementation."""
         if self.config.performance_enabled:
             await self.run_performance_test()
         else:
@@ -376,12 +383,12 @@ class PerformanceTest(BaseE2ETest):
 
 
 class SecurityTest(BaseE2ETest):
-    """Base class for security tests"""
+    """Base class for security tests."""
 
     @abstractmethod
     async def run_security_test(self):
-        """Run security test"""
+        """Run security test."""
 
     async def run_test(self):
-        """Run security test implementation"""
+        """Run security test implementation."""
         await self.run_security_test()

@@ -171,7 +171,7 @@ class MatrixPool:
 
             if matrix_id not in self._in_use:
                 logger.warning(
-                    f"Attempting to release matrix not from this pool"
+                    "Attempting to release matrix not from this pool"
                 )
                 return
 
@@ -475,7 +475,7 @@ def get_global_pool() -> MatrixOperationPool:
 
 @contextmanager
 def pooled_matrix(shape: Tuple[int, ...], dtype: np.dtype = np.float32):
-    """Convenience function for allocating pooled matrix.
+    """Allocate pooled matrix with convenient syntax.
 
     Args:
         shape: Matrix shape

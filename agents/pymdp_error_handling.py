@@ -34,8 +34,15 @@ class PyMDPError(Exception):
         self,
         error_type: PyMDPErrorType,
         original_error: Exception,
-        context: Dict[str, Any] = None,
+        context: Optional[Dict[str, Any]] = None,
     ):
+        """Initialize PyMDP error with type classification and context.
+
+        Args:
+            error_type: Type of PyMDP error
+            original_error: The original exception that was caught
+            context: Additional context for debugging
+        """
         self.error_type = error_type
         self.original_error = original_error
         self.context = context or {}
@@ -48,11 +55,17 @@ class PyMDPErrorHandler:
     """Production-grade error handling for PyMDP operations."""
 
     def __init__(self, agent_id: str, max_recovery_attempts: int = 3):
+        """Initialize PyMDP error handler with recovery capabilities.
+
+        Args:
+            agent_id: Unique identifier for the agent
+            max_recovery_attempts: Maximum attempts before giving up
+        """
         self.agent_id = agent_id
         self.max_recovery_attempts = max_recovery_attempts
         self.error_count = 0
-        self.operation_failures = {}
-        self.recovery_stats = {}
+        self.operation_failures: Dict[str, int] = {}
+        self.recovery_stats: Dict[str, Any] = {}
 
     def safe_execute(
         self,
@@ -228,7 +241,7 @@ class PyMDPErrorHandler:
             / max(self.error_count, 1),
         }
 
-    def reset_stats(self):
+    def reset_stats(self) -> None:
         """Reset error tracking statistics."""
         self.error_count = 0
         self.operation_failures.clear()
@@ -410,4 +423,5 @@ def validate_pymdp_matrices(
 # Convenience function for backward compatibility
 def safe_array_to_int(value: Any, default: int = 0) -> int:
     """Legacy function - use safe_numpy_conversion instead."""
-    return safe_numpy_conversion(value, int, default)
+    result = safe_numpy_conversion(value, int, default)
+    return int(result) if result is not None else default

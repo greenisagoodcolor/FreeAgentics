@@ -242,8 +242,8 @@ The included dashboard shows:
 Create custom dashboards by:
 
 1. Accessing Grafana at <http://localhost:3001>
-2. Using Prometheus as the data source
-3. Querying metrics by name (e.g., `free_energy{agent_id="agent-1"}`)
+1. Using Prometheus as the data source
+1. Querying metrics by name (e.g., `free_energy{agent_id="agent-1"}`)
 
 ## Production Considerations
 
@@ -259,9 +259,9 @@ Create custom dashboards by:
 For high-scale deployments:
 
 1. Reduce collection frequencies
-2. Use metric sampling for large agent populations
-3. Implement metric aggregation
-4. Consider external time-series databases
+1. Use metric sampling for large agent populations
+1. Implement metric aggregation
+1. Consider external time-series databases
 
 ### Security
 
@@ -355,6 +355,6 @@ Based on testing with 100 agents:
 - Metrics collection: ~2ms per cycle
 - Alert checking: ~5ms per cycle
 - Health checking: ~10ms per cycle
-- Total overhead: <1% CPU, ~15MB memory
+- Total overhead: \<1% CPU, ~15MB memory
 
 The system scales linearly with agent count up to ~1000 agents before requiring optimization.

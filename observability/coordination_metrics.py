@@ -27,13 +27,16 @@ except ImportError:
 
     # Mock monitoring functions
     async def record_system_metric(
-        metric: str, value: float, metadata: Dict = None
-    ):
+        metric: str, value: float, metadata: Optional[Dict[str, Any]] = None
+    ) -> None:
         logger.debug(f"MOCK Coordination - {metric}: {value}")
 
     async def record_agent_metric(
-        agent_id: str, metric: str, value: float, metadata: Dict = None
-    ):
+        agent_id: str,
+        metric: str,
+        value: float,
+        metadata: Optional[Dict[str, Any]] = None,
+    ) -> None:
         logger.debug(f"MOCK Agent {agent_id} Coordination - {metric}: {value}")
 
 
@@ -66,7 +69,7 @@ class CoalitionMetrics:
 class CoordinationMetricsCollector:
     """Collects and analyzes coordination performance metrics."""
 
-    def __init__(self):
+    def __init__(self) -> None:
         self.coordination_events = defaultdict(list)
         self.coalition_metrics = {}
         self.agent_coordination_stats = defaultdict(
@@ -133,7 +136,7 @@ class CoordinationMetricsCollector:
         start_time: float,
         success: bool,
         metadata: Optional[Dict[str, Any]] = None,
-    ):
+    ) -> None:
         """Record the end of a coordination operation.
 
         Args:
@@ -216,7 +219,7 @@ class CoordinationMetricsCollector:
         member_ids: List[str],
         formation_time_ms: float,
         success: bool,
-    ):
+    ) -> None:
         """Record coalition formation metrics.
 
         Args:
@@ -263,7 +266,7 @@ class CoordinationMetricsCollector:
         coalition_id: str,
         reason: str,
         final_metrics: Optional[Dict[str, float]] = None,
-    ):
+    ) -> None:
         """Record coalition dissolution.
 
         Args:
@@ -299,7 +302,7 @@ class CoordinationMetricsCollector:
         message_type: str,
         message_size_bytes: int,
         latency_ms: float,
-    ):
+    ) -> None:
         """Record inter-agent communication metrics.
 
         Args:
@@ -338,7 +341,7 @@ class CoordinationMetricsCollector:
         coalition_id: str,
         task_completed: bool,
         coordination_overhead_ms: float,
-    ):
+    ) -> None:
         """Update coalition efficiency metrics.
 
         Args:
@@ -512,7 +515,7 @@ async def record_coordination(
     start_time: float,
     success: bool,
     metadata: Optional[Dict[str, Any]] = None,
-):
+) -> None:
     """Record a coordination operation.
 
     Args:
@@ -542,7 +545,7 @@ async def record_coalition_event(
     member_ids: List[str],
     duration_ms: float,
     success: bool = True,
-):
+) -> None:
     """Record a coalition-related event.
 
     Args:

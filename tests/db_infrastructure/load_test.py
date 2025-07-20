@@ -7,6 +7,7 @@ import logging
 import os
 import random
 import sys
+import threading
 import time
 from collections import defaultdict
 from datetime import datetime
@@ -429,7 +430,7 @@ class DatabaseLoadTest:
         report_path = (
             f"load_test_report_{datetime.now().strftime('%Y%m%d_%H%M%S')}.md"
         )
-        report = monitor.generate_report(report_path)
+        _report = monitor.generate_report(report_path)
 
         logger.info(f"Load test completed. Report saved to: {report_path}")
         logger.info(f"Total operations: {summary['total_operations']}")

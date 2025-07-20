@@ -9,7 +9,7 @@ import gc
 import json
 import logging
 from datetime import datetime
-from typing import Any, Dict
+from typing import Any, Dict, List
 
 import numpy as np
 import psutil
@@ -172,7 +172,10 @@ class MemoryProfiler:
         """Identify memory hotspots."""
         logger.info("\n=== Identifying Memory Hotspots ===")
 
-        hotspots = {"large_arrays": [], "recommendations": []}
+        hotspots: Dict[str, List[Any]] = {
+            "large_arrays": [],
+            "recommendations": [],
+        }
 
         # Check for large numpy arrays in memory
         for obj in gc.get_objects():
@@ -364,7 +367,7 @@ class MemoryProfiler:
 
         for size, label in sizes:
             # Create mock data structures
-            data = {
+            {
                 "beliefs": np.random.rand(size, size),
                 "transitions": np.random.rand(size * size, size * size, 4),
                 "observations": np.random.rand(size * size, 5),

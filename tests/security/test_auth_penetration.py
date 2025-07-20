@@ -22,12 +22,15 @@ from typing import Dict
 
 import jwt
 
-from auth.security_implementation import (
-    AuthenticationManager,
-    InputValidator,
-    User,
-    UserRole,
-)
+from api.models.security_validators import SecureInputModel as InputValidator
+from auth.security_implementation import AuthenticationManager, UserRole
+
+
+# Mock User class for testing
+class User:
+    def __init__(self, username, role=UserRole.OBSERVER):
+        self.username = username
+        self.role = role
 
 
 class PenetrationTestResults:

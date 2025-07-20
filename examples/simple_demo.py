@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 """
-Simple FreeAgentics Demo
+Simple FreeAgentics Demo.
 Demonstrates basic functionality without complex dependencies
 """
 
@@ -21,6 +21,7 @@ class SimpleAgent:
     """A simple agent that explores a grid world."""
 
     def __init__(self, agent_id: str, name: str):
+        """Initialize the simple agent."""
         self.agent_id = agent_id
         self.name = name
         self.position = (0, 0)
@@ -97,6 +98,7 @@ class SimpleWorld:
     """A simple grid world for agents to explore."""
 
     def __init__(self, width: int = 10, height: int = 10):
+        """Initialize the simple world."""
         self.width = width
         self.height = height
         self.agents = {}
@@ -149,7 +151,7 @@ class SimpleWorld:
             action = agent.decide_action(observation)
 
             # Act
-            success = agent.execute_action(action, (self.width, self.height))
+            agent.execute_action(action, (self.width, self.height))
 
             # Check for resource collection
             if agent.position in self.resources:

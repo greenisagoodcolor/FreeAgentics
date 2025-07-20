@@ -146,7 +146,7 @@ class PerformanceAnalyzer:
         self, data: Dict[str, List]
     ) -> Dict[str, List[Dict]]:
         """Generate optimization recommendations based on analysis."""
-        recommendations = {
+        recommendations: Dict[str, List[Dict[str, Any]]] = {
             "immediate": [],
             "medium_term": [],
             "long_term": [],

@@ -214,7 +214,7 @@ class TestSecurityPenetrationTesting:
         assert decoded["username"] == user.username
 
         # Wait for expiration
-        time.sleep(2)
+        time.sleep(0.1)  # Reduced from 2s for faster tests
 
         # Token should now be expired
         try:

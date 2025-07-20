@@ -2,7 +2,7 @@
 
 import logging
 from datetime import datetime
-from typing import List, Optional
+from typing import Any, Dict, List, Optional
 
 from fastapi import APIRouter, HTTPException, Query
 from pydantic import BaseModel, Field
@@ -48,7 +48,7 @@ class Agent(BaseModel):
     created_at: datetime
     last_active: Optional[datetime] = None
     inference_count: int = 0
-    parameters: dict = Field(default_factory=dict)
+    parameters: Dict[str, Any] = Field(default_factory=dict)
 
 
 class AgentMetrics(BaseModel):

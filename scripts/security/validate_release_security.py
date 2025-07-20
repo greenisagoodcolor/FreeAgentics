@@ -187,7 +187,7 @@ class ReleaseSecurityValidator:
                         ):
                             encryption_found = True
                             break
-                except:
+                except Exception:
                     continue
 
             if not encryption_found:
@@ -358,7 +358,7 @@ class ReleaseSecurityValidator:
         with open("release-security-validation.json", "w") as f:
             json.dump(report, f, indent=2)
 
-        return report["passed"]
+        return bool(report["passed"])
 
 
 if __name__ == "__main__":

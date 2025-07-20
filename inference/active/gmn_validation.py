@@ -388,7 +388,7 @@ class GMNSemanticValidator:
                 if from_type == "state" and to_type == "observation":
                     result.add_error(
                         "SemanticValidator",
-                        f"Invalid dependency: state cannot depend on observation",
+                        "Invalid dependency: state cannot depend on observation",
                         edge_index=i,
                     )
                 elif from_type == "action" and to_type in [
@@ -406,7 +406,7 @@ class GMNSemanticValidator:
                 if from_type != "state" and from_type != "likelihood":
                     result.add_error(
                         "SemanticValidator",
-                        f"Invalid generation: only states and likelihood nodes can generate",
+                        "Invalid generation: only states and likelihood nodes can generate",
                         edge_index=i,
                     )
 
@@ -584,7 +584,7 @@ class GMNMathematicalValidator:
                 if not isinstance(dist, list):
                     result.add_error(
                         "MathematicalValidator",
-                        f"initial_distribution must be a list",
+                        "initial_distribution must be a list",
                         node_name=node_name,
                     )
                     continue
@@ -622,7 +622,7 @@ class GMNMathematicalValidator:
                 if not isinstance(dists, dict):
                     result.add_error(
                         "MathematicalValidator",
-                        f"initial_distributions must be a dictionary",
+                        "initial_distributions must be a dictionary",
                         node_name=node_name,
                     )
                     continue
@@ -776,7 +776,7 @@ class GMNMathematicalValidator:
                     if len(mat.shape) != 2:
                         result.add_error(
                             "MathematicalValidator",
-                            f"Transition matrix must be 2-dimensional",
+                            "Transition matrix must be 2-dimensional",
                             node_name=node_name,
                         )
                         continue
@@ -794,7 +794,7 @@ class GMNMathematicalValidator:
                     if np.any(mat < 0):
                         result.add_error(
                             "MathematicalValidator",
-                            f"Transition matrix contains negative values",
+                            "Transition matrix contains negative values",
                             node_name=node_name,
                         )
 

@@ -211,8 +211,8 @@ class CoalitionFactory(BaseFactory):
         }
         defaults.update(kwargs)
 
-        # Extract agent list before creating coalition
-        agent_list = defaults.pop("agents", [])
+        # Remove agents from defaults if present (use parameter instead)
+        defaults.pop("agents", [])
 
         coalition = Coalition(**defaults)
         session.add(coalition)

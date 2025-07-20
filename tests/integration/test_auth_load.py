@@ -156,7 +156,7 @@ class TestAuthenticationLoadTesting:
                 self.metrics.cpu_usage.append(
                     self.process.cpu_percent(interval=0.1)
                 )
-            except:
+            except Exception:
                 pass
             time.sleep(0.5)
 
@@ -451,7 +451,7 @@ class TestAuthenticationLoadTesting:
                             self.auth_manager.create_refresh_token(user)
                         )
                         refresh_tokens[user.user_id] = current_refresh
-                    except:
+                    except Exception:
                         pass
 
             return successes, failures
@@ -524,7 +524,7 @@ class TestAuthenticationLoadTesting:
                         duration = future.result()
                         if duration > 0:
                             results["base_load"].append(duration)
-                    except:
+                    except Exception:
                         pass
                 time.sleep(0.1)
 
@@ -541,7 +541,7 @@ class TestAuthenticationLoadTesting:
                     duration = future.result()
                     if duration > 0:
                         results["spike_load"].append(duration)
-                except:
+                except Exception:
                     pass
 
         # Phase 3: Recovery (back to base load)
@@ -559,7 +559,7 @@ class TestAuthenticationLoadTesting:
                         duration = future.result()
                         if duration > 0:
                             results["recovery"].append(duration)
-                    except:
+                    except Exception:
                         pass
                 time.sleep(0.1)
 
@@ -610,7 +610,7 @@ class TestAuthenticationLoadTesting:
                 refresh = self.auth_manager.create_refresh_token(user)
                 try:
                     self.auth_manager.refresh_access_token(refresh)
-                except:
+                except Exception:
                     pass
 
             # Check memory periodically
@@ -705,7 +705,7 @@ class TestAuthenticationLoadTesting:
                             refresh_token
                         )
                         times["refresh"].append(time.time() - start)
-                    except:
+                    except Exception:
                         # Get new tokens if refresh fails
                         access_token = self.auth_manager.create_access_token(
                             user

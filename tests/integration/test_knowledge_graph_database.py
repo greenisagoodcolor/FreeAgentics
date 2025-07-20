@@ -14,17 +14,18 @@ import pytest
 from sqlalchemy import create_engine, text
 from sqlalchemy.orm import Session
 
-from database.models import Agent, AgentStatus, KnowledgeEdge
-from database.models import KnowledgeGraph as KnowledgeGraphModel
-from database.models import KnowledgeNode
-from knowledge_graph.graph_engine import EdgeType, KnowledgeGraph, NodeType
+from database.models import Agent, AgentStatus
+from knowledge_graph.graph_engine import (
+    EdgeType,
+    KnowledgeEdge,
+    KnowledgeGraph,
+    KnowledgeNode,
+    NodeType,
+)
 from knowledge_graph.storage import DatabaseStorageBackend
 from tests.db_infrastructure.factories import AgentFactory
-from tests.db_infrastructure.fixtures import db_session
-from tests.db_infrastructure.test_config import (
-    TEST_DATABASE_URL,
-    DatabaseTestCase,
-)
+from tests.db_infrastructure.fixtures import DatabaseTestCase, db_session
+from tests.db_infrastructure.test_config import TEST_DATABASE_URL
 
 
 class TestKnowledgeGraphDatabase(DatabaseTestCase):
@@ -455,7 +456,7 @@ class TestKnowledgeGraphDatabase(DatabaseTestCase):
 
         # Create initial graph
         graph = KnowledgeGraph()
-        initial_node = graph.create_node(
+        _initial_node = graph.create_node(
             type=NodeType.ENTITY,
             label="shared_resource",
             properties={"counter": 0},
@@ -472,7 +473,7 @@ class TestKnowledgeGraphDatabase(DatabaseTestCase):
                 local_graph = storage_backend.load_graph(graph.graph_id)
 
                 # Add thread-specific node
-                thread_node = local_graph.create_node(
+                _thread_node = local_graph.create_node(
                     type=NodeType.ENTITY,
                     label=f"thread_{thread_id}_node",
                     properties={

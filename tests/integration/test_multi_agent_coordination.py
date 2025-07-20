@@ -226,7 +226,7 @@ class TestMultiAgentCoordination:
 
         # Create knowledge nodes for agent interactions
         for i, agent in enumerate(agents):
-            node = knowledge_graph.create_node(
+            _node = knowledge_graph.create_node(
                 node_type="agent",
                 content={
                     "agent_id": agent.agent_id,
@@ -242,7 +242,7 @@ class TestMultiAgentCoordination:
         # Create interaction edges
         nodes = list(knowledge_graph.nodes.values())
         if len(nodes) >= 2:
-            edge = knowledge_graph.create_edge(
+            _edge = knowledge_graph.create_edge(
                 from_node_id=nodes[0].id,
                 to_node_id=nodes[1].id,
                 edge_type="coordination",

@@ -19,7 +19,7 @@ from typing import Any, Dict, List, Optional, Set, Tuple
 from urllib.parse import urlparse
 
 import aiohttp
-import redis.asyncio as redis
+import redis.asyncio as redis  # type: ignore[import-untyped]
 from bloom_filter2 import BloomFilter
 
 # Configure logging
@@ -103,8 +103,13 @@ class ThreatFeedManager:
     """Manages threat intelligence feeds"""
 
     def __init__(self, config: ThreatIntelConfig):
+        """Initialize threat feed manager with configuration.
+
+        Args:
+            config: Threat intelligence configuration
+        """
         self.config = config
-        self.feeds = []
+        self.feeds: List[Any] = []
 
         # Initialize feeds
         if config.enable_otx and config.otx_api_key:
@@ -122,7 +127,7 @@ class ThreatFeedManager:
 
     async def fetch_all_indicators(self) -> List[ThreatIndicator]:
         """Fetch indicators from all feeds"""
-        all_indicators = []
+        all_indicators: List[ThreatIndicator] = []
 
         # Fetch from all feeds concurrently
         tasks = [feed.fetch_indicators() for feed in self.feeds]
@@ -134,7 +139,7 @@ class ThreatFeedManager:
                     f"Error fetching from feed {self.feeds[i].__class__.__name__}: {result}"
                 )
             else:
-                all_indicators.extend(result)
+                all_indicators.extend(result)  # type: ignore[arg-type]
 
         # Deduplicate indicators
         unique_indicators = self._deduplicate_indicators(all_indicators)
@@ -148,7 +153,7 @@ class ThreatFeedManager:
         self, indicators: List[ThreatIndicator]
     ) -> List[ThreatIndicator]:
         """Deduplicate indicators, keeping highest threat level"""
-        indicator_map = {}
+        indicator_map: Dict[Tuple[str, str], ThreatIndicator] = {}
 
         for indicator in indicators:
             key = (indicator.indicator, indicator.indicator_type)
@@ -180,6 +185,11 @@ class OTXFeed:
     """AlienVault OTX threat feed"""
 
     def __init__(self, config: ThreatIntelConfig):
+        """Initialize AlienVault OTX feed with configuration.
+
+        Args:
+            config: Threat intelligence configuration
+        """
         self.config = config
         self.api_url = "https://otx.alienvault.com/api/v1"
 
@@ -192,7 +202,7 @@ class OTXFeed:
 
             async with aiohttp.ClientSession() as session:
                 # Fetch subscribed pulses
-                async with session.get(
+                async with session.get(  # type: ignore[attr-defined]
                     f"{self.api_url}/pulses/subscribed",
                     headers=headers,
                     params={"limit": 100},
@@ -310,6 +320,11 @@ class AbuseIPDBFeed:
     """AbuseIPDB threat feed"""
 
     def __init__(self, config: ThreatIntelConfig):
+        """Initialize AbuseIPDB feed with configuration.
+
+        Args:
+            config: Threat intelligence configuration
+        """
         self.config = config
         self.api_url = "https://api.abuseipdb.com/api/v2"
 
@@ -327,7 +342,7 @@ class AbuseIPDBFeed:
                 # Fetch blacklist
                 params = {"confidenceMinimum": 75, "limit": 10000}
 
-                async with session.get(
+                async with session.get(  # type: ignore[attr-defined]
                     f"{self.api_url}/blacklist", headers=headers, params=params
                 ) as response:
                     if response.status == 200:
@@ -429,6 +444,11 @@ class VirusTotalFeed:
     """VirusTotal threat feed (placeholder)"""
 
     def __init__(self, config: ThreatIntelConfig):
+        """Initialize VirusTotal feed with configuration.
+
+        Args:
+            config: Threat intelligence configuration
+        """
         self.config = config
 
     async def fetch_indicators(self) -> List[ThreatIndicator]:
@@ -442,6 +462,12 @@ class CustomFeed:
     """Custom threat feed parser"""
 
     def __init__(self, feed_url: str, config: ThreatIntelConfig):
+        """Initialize custom threat feed parser.
+
+        Args:
+            feed_url: URL of the custom threat feed
+            config: Threat intelligence configuration
+        """
         self.feed_url = feed_url
         self.config = config
 
@@ -451,7 +477,7 @@ class CustomFeed:
 
         try:
             async with aiohttp.ClientSession() as session:
-                async with session.get(self.feed_url) as response:
+                async with session.get(self.feed_url) as response:  # type: ignore[attr-defined]
                     if response.status == 200:
                         content = await response.text()
                         indicators = self._parse_feed(content)
@@ -480,8 +506,9 @@ class CustomFeed:
                 if indicator:
                     indicators.append(indicator)
                 continue
-            except:
-                pass
+            except Exception as e:
+                # JSON parsing failed, will try other formats
+                logger.debug(f"Failed to parse as JSON: {e}")
 
             # Try to parse as CSV/TSV
             parts = re.split(r"[,\t|]", line)
@@ -542,8 +569,9 @@ class CustomFeed:
         try:
             ipaddress.ip_address(value)
             return "ip"
-        except:
-            pass
+        except Exception as e:
+            # Not an IP address, continue checking other types
+            logger.debug(f"Not an IP address: {e}")
 
         # Domain
         if re.match(
@@ -570,14 +598,19 @@ class ThreatIntelligenceEngine:
     """Main threat intelligence engine"""
 
     def __init__(self, config: ThreatIntelConfig):
+        """Initialize threat intelligence engine with configuration.
+
+        Args:
+            config: Threat intelligence configuration
+        """
         self.config = config
         self.feed_manager = ThreatFeedManager(config)
-        self.redis_client = None
+        self.redis_client: Optional[Any] = None
         self.bloom_filter = BloomFilter(
             max_elements=config.bloom_filter_size,
             error_rate=config.bloom_filter_fp_rate,
         )
-        self._rate_limiter = {}
+        self._rate_limiter: Dict[Tuple[str, int], int] = {}
 
     async def initialize(self) -> None:
         """Initialize the engine"""
@@ -650,7 +683,7 @@ class ThreatIntelligenceEngine:
             threat_info = json.loads(data)
             threat_info["indicator"] = indicator
             threat_info["indicator_type"] = indicator_type
-            return threat_info
+            return threat_info  # type: ignore[no-any-return]
 
         return None
 
@@ -840,6 +873,12 @@ class ThreatIntelligenceMiddleware:
     """Middleware for FastAPI/Starlette applications"""
 
     def __init__(self, app, threat_engine: ThreatIntelligenceEngine):
+        """Initialize threat intelligence middleware.
+
+        Args:
+            app: The ASGI application to wrap
+            threat_engine: The threat intelligence engine instance
+        """
         self.app = app
         self.threat_engine = threat_engine
 
@@ -890,7 +929,7 @@ class ThreatIntelligenceMiddleware:
         """Get header value from scope"""
         for header in scope.get("headers", []):
             if header[0] == header_name:
-                return header[1].decode()
+                return str(header[1].decode())
         return None
 
     async def _send_blocked_response(self, send):

@@ -1,5 +1,4 @@
-"""
-Enhanced Agent Coordinator with Connection Pooling and Resource Monitoring
+"""Enhanced Agent Coordinator with Connection Pooling and Resource Monitoring.
 
 Integrates multi-agent coordination with connection pooling, circuit breaker patterns,
 and comprehensive resource monitoring for optimal performance.
@@ -208,7 +207,6 @@ class EnhancedAgentCoordinator:
         coordination_data: Dict[str, Any],
     ) -> Dict[str, Any]:
         """Execute coordination with resource monitoring."""
-
         with self._coordinations_lock:
             self.active_coordinations.add(coordination_id)
 

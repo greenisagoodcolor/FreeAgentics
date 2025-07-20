@@ -7,6 +7,7 @@ Small targeted tests to push coverage over the 15% threshold for Task 9 completi
 import pytest
 
 
+@pytest.mark.slow
 class TestFinalCoveragePush:
     """Small tests to push coverage over threshold."""
 

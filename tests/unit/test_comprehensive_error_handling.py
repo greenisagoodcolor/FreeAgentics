@@ -28,7 +28,7 @@ try:
         PyMDPError,
     )
     from inference.llm.local_llm_manager import LocalLLMManager
-    from knowledge_graph.graph_engine import GraphEngine
+    from knowledge_graph.graph_engine import KnowledgeGraph as GraphEngine
     from knowledge_graph.query import QueryEngine
 
     IMPORT_SUCCESS = True
@@ -39,6 +39,7 @@ except ImportError as e:
     # Create mock classes for testing when imports fail
     class BasicExplorerAgent:
         def __init__(self, agent_id, name, grid_size=10):
+            """Initialize BasicExplorerAgent with ID, name, and grid configuration."""
             self.agent_id = agent_id
             self.name = name
             self.grid_size = grid_size
@@ -60,6 +61,7 @@ except ImportError as e:
 
     class AgentManager:
         def __init__(self):
+            """Initialize AgentManager with empty agents dictionary."""
             self.agents = {}
 
         def create_agent(self, agent_type, name, **kwargs):
@@ -73,6 +75,7 @@ except ImportError as e:
 
     class ErrorHandler:
         def __init__(self, agent_id):
+            """Initialize ErrorHandler for specific agent with empty error history."""
             self.agent_id = agent_id
             self.error_history = []
 
@@ -94,6 +97,7 @@ except ImportError as e:
 
     class CoalitionCoordinator:
         def __init__(self):
+            """Initialize CoalitionCoordinator with empty coalitions dictionary."""
             self.coalitions = {}
 
         def create_coalition(self, coalition_id, agents):
@@ -102,6 +106,7 @@ except ImportError as e:
 
     class GraphEngine:
         def __init__(self):
+            """Initialize GraphEngine with empty nodes and edges dictionaries."""
             self.nodes = {}
             self.edges = {}
 
@@ -113,6 +118,7 @@ except ImportError as e:
 
     class QueryEngine:
         def __init__(self, graph_engine):
+            """Initialize QueryEngine with reference to graph engine."""
             self.graph_engine = graph_engine
 
         def execute_query(self, query):
@@ -120,6 +126,7 @@ except ImportError as e:
 
     class LocalLLMManager:
         def __init__(self):
+            """Initialize LocalLLMManager with empty models dictionary."""
             self.models = {}
 
         def get_response(self, prompt):
@@ -786,7 +793,7 @@ class TestAsyncOperationErrorHandling:
 
         async def slow_operation():
             """Simulate slow async operation."""
-            await asyncio.sleep(2)
+            await asyncio.sleep(0.1)  # Reduced from 2s for faster tests
             return "Success"
 
         # Test with timeout
@@ -807,7 +814,7 @@ class TestAsyncOperationErrorHandling:
         async def cancellable_operation():
             """Simulate cancellable async operation."""
             try:
-                await asyncio.sleep(5)
+                await asyncio.sleep(0.2)  # Reduced from 5s for faster tests
                 return "Success"
             except asyncio.CancelledError:
                 return "Cancelled"

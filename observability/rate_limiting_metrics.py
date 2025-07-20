@@ -6,7 +6,7 @@ DDoS protection, and security events.
 """
 
 import time
-from typing import Dict, Optional
+from typing import Any, Dict, Optional
 
 from prometheus_client import Counter, Gauge, Histogram, Info
 
@@ -81,21 +81,23 @@ class RateLimitingMetrics:
     """Helper class for recording rate limiting metrics."""
 
     @staticmethod
-    def record_request(endpoint: str, method: str, result: str):
+    def record_request(endpoint: str, method: str, result: str) -> None:
         """Record a rate limit check result."""
         rate_limit_requests_total.labels(
             endpoint=endpoint, method=method, result=result
         ).inc()
 
     @staticmethod
-    def record_violation(endpoint: str, identifier_type: str, reason: str):
+    def record_violation(
+        endpoint: str, identifier_type: str, reason: str
+    ) -> None:
         """Record a rate limit violation."""
         rate_limit_violations_total.labels(
             endpoint=endpoint, identifier_type=identifier_type, reason=reason
         ).inc()
 
     @staticmethod
-    def record_block(block_type: str, reason: str):
+    def record_block(block_type: str, reason: str) -> None:
         """Record an IP/user block."""
         rate_limit_blocks_total.labels(
             block_type=block_type, reason=reason
@@ -105,19 +107,19 @@ class RateLimitingMetrics:
         active_blocks_gauge.labels(block_type=block_type).inc()
 
     @staticmethod
-    def record_unblock(block_type: str):
+    def record_unblock(block_type: str) -> None:
         """Record an IP/user unblock."""
         active_blocks_gauge.labels(block_type=block_type).dec()
 
     @staticmethod
-    def record_ddos_attack(attack_type: str, source_ip: str):
+    def record_ddos_attack(attack_type: str, source_ip: str) -> None:
         """Record a detected DDoS attack."""
         ddos_attacks_detected_total.labels(
             attack_type=attack_type, source_ip=source_ip
         ).inc()
 
     @staticmethod
-    def record_suspicious_pattern(pattern_type: str):
+    def record_suspicious_pattern(pattern_type: str) -> None:
         """Record a detected suspicious pattern."""
         suspicious_patterns_detected_total.labels(
             pattern_type=pattern_type
@@ -126,24 +128,24 @@ class RateLimitingMetrics:
     @staticmethod
     def update_remaining_requests(
         endpoint: str, identifier: str, remaining: int
-    ):
+    ) -> None:
         """Update the remaining requests gauge."""
         rate_limit_remaining_gauge.labels(
             endpoint=endpoint, identifier=identifier
         ).set(remaining)
 
     @staticmethod
-    def time_rate_limit_check(algorithm: str):
+    def time_rate_limit_check(algorithm: str) -> Any:
         """Context manager for timing rate limit checks."""
         return rate_limit_check_duration.labels(algorithm=algorithm).time()
 
     @staticmethod
-    def time_redis_operation(operation: str):
+    def time_redis_operation(operation: str) -> Any:
         """Context manager for timing Redis operations."""
         return redis_operation_duration.labels(operation=operation).time()
 
     @staticmethod
-    def update_config_info(config: Dict[str, any]):
+    def update_config_info(config: Dict[str, Any]) -> None:
         """Update rate limiting configuration info."""
         rate_limit_config_info.info(
             {
@@ -167,12 +169,12 @@ class RateLimitMetricsMiddleware:
         self.metrics = RateLimitingMetrics()
 
     async def __call__(self, scope, receive, send):
+        """ASGI middleware call method."""
         if scope["type"] == "http":
             path = scope["path"]
             method = scope["method"]
 
             # Start timing
-            start_time = time.time()
 
             # Track response status
             status_code = None
@@ -210,7 +212,7 @@ class RateLimitMetricsMiddleware:
                 else:
                     self.metrics.record_request(path, method, "allowed")
 
-            except Exception as e:
+            except Exception:
                 self.metrics.record_request(path, method, "error")
                 raise
         else:

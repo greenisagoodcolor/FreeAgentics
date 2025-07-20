@@ -54,6 +54,7 @@ except ImportError:
         pass
 
 
+@pytest.mark.slow
 class TestLocalLLMConfig:
     """Test suite for LocalLLMConfig dataclass."""
 
@@ -154,6 +155,7 @@ class TestLocalLLMConfig:
         assert config.quantization == quantization
 
 
+@pytest.mark.slow
 class TestOllamaProvider:
     """Test suite for OllamaProvider class."""
 
@@ -334,6 +336,7 @@ class TestOllamaProvider:
                 ollama_provider.generate("test prompt")
 
 
+@pytest.mark.slow
 class TestLlamaCppProvider:
     """Test suite for LlamaCppProvider class."""
 
@@ -486,6 +489,7 @@ class TestLlamaCppProvider:
             llama_cpp_provider.generate("test prompt")
 
 
+@pytest.mark.slow
 class TestLocalLLMManager:
     """Test suite for LocalLLMManager class."""
 
@@ -748,6 +752,7 @@ class TestLocalLLMManager:
         assert all(isinstance(r, LLMResponse) for r in results)
 
 
+@pytest.mark.slow
 class TestIntegrationScenarios:
     """Test integration scenarios and edge cases."""
 

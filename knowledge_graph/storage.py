@@ -7,7 +7,7 @@ with support for different storage systems (file, database, etc.).
 import json
 import logging
 import os
-import pickle
+import pickle  # nosec B403 - Required for graph serialization, only used with trusted data
 from abc import ABC, abstractmethod
 from datetime import datetime
 from pathlib import Path
@@ -344,15 +344,15 @@ class DatabaseStorageBackend(StorageBackend):
             nodes = session.query(NodeModel).filter_by(graph_id=graph_id).all()
             for node_model in nodes:
                 node = KnowledgeNode(
-                    id=node_model.id,  # type: ignore[arg-type]
-                    type=NodeType(node_model.type),  # type: ignore[arg-type]
-                    label=node_model.label,  # type: ignore[arg-type]
-                    properties=node_model.properties or {},  # type: ignore[arg-type]
-                    created_at=node_model.created_at,  # type: ignore[arg-type]
-                    updated_at=node_model.updated_at,  # type: ignore[arg-type]
-                    version=node_model.version,  # type: ignore[arg-type]
-                    confidence=node_model.confidence,  # type: ignore[arg-type]
-                    source=node_model.source,  # type: ignore[arg-type]
+                    id=node_model.id,
+                    type=NodeType(node_model.type),
+                    label=node_model.label,
+                    properties=node_model.properties or {},
+                    created_at=node_model.created_at,
+                    updated_at=node_model.updated_at,
+                    version=node_model.version,
+                    confidence=node_model.confidence,
+                    source=node_model.source,
                 )
                 graph.nodes[node.id] = node
                 graph.graph.add_node(node.id, data=node)
@@ -371,13 +371,13 @@ class DatabaseStorageBackend(StorageBackend):
             edges = session.query(EdgeModel).filter_by(graph_id=graph_id).all()
             for edge_model in edges:
                 edge = KnowledgeEdge(
-                    id=edge_model.id,  # type: ignore[arg-type]
-                    source_id=edge_model.source_id,  # type: ignore[arg-type]
-                    target_id=edge_model.target_id,  # type: ignore[arg-type]
-                    type=EdgeType(edge_model.type),  # type: ignore[arg-type]
-                    properties=edge_model.properties or {},  # type: ignore[arg-type]
-                    created_at=edge_model.created_at,  # type: ignore[arg-type]
-                    confidence=edge_model.confidence,  # type: ignore[arg-type]
+                    id=edge_model.id,
+                    source_id=edge_model.source_id,
+                    target_id=edge_model.target_id,
+                    type=EdgeType(edge_model.type),
+                    properties=edge_model.properties or {},
+                    created_at=edge_model.created_at,
+                    confidence=edge_model.confidence,
                 )
                 graph.edges[edge.id] = edge
                 graph.graph.add_edge(
@@ -499,7 +499,9 @@ class PickleStorageBackend(StorageBackend):
                 return None
 
             with open(filepath, "rb") as f:
-                return pickle.load(f)  # type: ignore[no-any-return]
+                return pickle.load(
+                    f
+                )  # nosec B301 - Loading trusted graph data # type: ignore[no-any-return]
 
         except Exception as e:
             logger.error(f"Failed to unpickle graph: {e}")

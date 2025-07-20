@@ -1,5 +1,5 @@
 """
-Intelligent Alerting System for FreeAgentics Production Monitoring
+Intelligent Alerting System for FreeAgentics Production Monitoring.
 
 This module provides advanced alerting capabilities with machine learning-based
 anomaly detection, adaptive thresholds, and intelligent alert routing.

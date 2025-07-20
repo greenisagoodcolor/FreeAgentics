@@ -7,9 +7,10 @@ This directory contains scripts and utilities for managing secrets in production
 **⚠️ IMPORTANT: Never commit actual secret values to version control!**
 
 The files in this directory are templates and utilities. Actual secret values should be:
+
 1. Generated using the provided scripts
-2. Stored securely (environment variables, Docker secrets, vault, etc.)
-3. Never committed to the repository
+1. Stored securely (environment variables, Docker secrets, vault, etc.)
+1. Never committed to the repository
 
 ## Files
 
@@ -22,6 +23,7 @@ The files in this directory are templates and utilities. Actual secret values sh
 ## Usage
 
 ### Development
+
 ```bash
 # Generate development secrets
 python generate_secrets.py --env development
@@ -31,6 +33,7 @@ source .env.development
 ```
 
 ### Production
+
 ```bash
 # Generate production secrets
 python generate_secrets.py --env production --vault
@@ -40,6 +43,7 @@ docker-compose -f docker-compose.production.yml up
 ```
 
 ### Vault Integration (Optional)
+
 ```bash
 # Store secrets in Vault
 python vault-integration.py store
@@ -51,10 +55,10 @@ python vault-integration.py retrieve
 ## Security Best Practices
 
 1. **Rotation**: Rotate secrets regularly (recommended: every 90 days)
-2. **Access Control**: Limit access to secrets to necessary services only
-3. **Monitoring**: Monitor secret access and usage
-4. **Backup**: Securely backup secrets with encryption
-5. **Audit**: Maintain audit logs of secret operations
+1. **Access Control**: Limit access to secrets to necessary services only
+1. **Monitoring**: Monitor secret access and usage
+1. **Backup**: Securely backup secrets with encryption
+1. **Audit**: Maintain audit logs of secret operations
 
 ## Environment Variables
 

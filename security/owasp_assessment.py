@@ -247,7 +247,7 @@ class OWASPAssessment:
                 )
                 rapid_responses.append(resp.status_code)
                 self.endpoints_tested += 1
-            except:
+            except Exception:
                 pass
 
         # Check if any were rate limited
@@ -304,7 +304,7 @@ class OWASPAssessment:
                             remediation="Disable debug endpoints in production",
                         )
 
-            except Exception as e:
+            except Exception:
                 print(f"  ✓ {endpoint} not accessible")
 
         # Check for default credentials
@@ -337,7 +337,7 @@ class OWASPAssessment:
                         remediation="Remove all default credentials",
                     )
 
-            except:
+            except Exception:
                 pass
 
     def test_a06_vulnerable_components(self):
@@ -388,7 +388,7 @@ class OWASPAssessment:
                         remediation="Implement strong password requirements",
                     )
 
-            except:
+            except Exception:
                 pass
 
         # Test session management
@@ -431,7 +431,7 @@ class OWASPAssessment:
                         evidence=f"Status: {resp.status_code}",
                         remediation="Ensure security monitoring is properly configured",
                     )
-            except:
+            except Exception:
                 pass
 
     def test_a10_ssrf(self):
@@ -441,11 +441,7 @@ class OWASPAssessment:
         # Test endpoints that might make external requests
         # Look for URL parameters that could be exploited
 
-        ssrf_payloads = [
-            "http://localhost:22",  # Internal service
-            "http://169.254.169.254/",  # AWS metadata
-            "file:///etc/passwd",  # Local file access
-        ]
+        # SSRF payloads would be tested here in a real assessment
 
         print(
             "  ℹ SSRF testing requires identifying endpoints that make external requests"

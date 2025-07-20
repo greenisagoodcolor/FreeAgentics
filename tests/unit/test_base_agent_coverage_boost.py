@@ -1,22 +1,23 @@
 """Comprehensive tests for base_agent.py to boost coverage to 80%+."""
 
-import pytest
-import numpy as np
-from unittest.mock import Mock, patch, MagicMock, AsyncMock
 from datetime import datetime
+from unittest.mock import AsyncMock, MagicMock, Mock, patch
+
+import numpy as np
+import pytest
 
 from agents.base_agent import (
-    safe_array_to_int,
-    ActiveInferenceAgent,
-    BasicExplorerAgent,
-    AgentConfig,
-    PYMDP_AVAILABLE,
     OBSERVABILITY_AVAILABLE,
+    PYMDP_AVAILABLE,
+    ActiveInferenceAgent,
+    AgentConfig,
+    BasicExplorerAgent,
+    safe_array_to_int,
 )
 from agents.error_handling import (
     ActionSelectionError,
-    InferenceError,
     AgentError,
+    InferenceError,
 )
 
 
@@ -46,7 +47,9 @@ class TestSafeArrayToInt:
     def test_empty_array(self):
         """Test with empty array - should raise ValueError."""
         value = np.array([])
-        with pytest.raises(ValueError, match="Empty array cannot be converted"):
+        with pytest.raises(
+            ValueError, match="Empty array cannot be converted"
+        ):
             safe_array_to_int(value)
 
     def test_list_input(self):
@@ -57,7 +60,9 @@ class TestSafeArrayToInt:
     def test_empty_list(self):
         """Test with empty list - should raise ValueError."""
         value = []
-        with pytest.raises(ValueError, match="Empty array cannot be converted"):
+        with pytest.raises(
+            ValueError, match="Empty array cannot be converted"
+        ):
             safe_array_to_int(value)
 
     def test_numpy_scalar(self):
@@ -104,7 +109,7 @@ class TestAgentConfig:
             planning_horizon=3,
             enable_monitoring=False,
         )
-        
+
         assert config.agent_id == "custom"
         assert config.num_states == [4]
         assert config.num_actions == [3]
@@ -126,7 +131,7 @@ class TestActiveInferenceAgent:
             num_actions=[3],
             num_observations=[4],
         )
-        
+
         # Create a concrete implementation for testing
         class ConcreteAgent(ActiveInferenceAgent):
             def update_beliefs(self, observation):
@@ -146,6 +151,7 @@ class TestActiveInferenceAgent:
 
     def test_step_method(self):
         """Test the step method."""
+
         class ConcreteAgent(ActiveInferenceAgent):
             def __init__(self, config):
                 super().__init__(config)
@@ -177,6 +183,7 @@ class TestActiveInferenceAgent:
 
     def test_reset_method(self):
         """Test the reset method."""
+
         class ConcreteAgent(ActiveInferenceAgent):
             def update_beliefs(self, observation):
                 self.beliefs = np.ones(4) * 0.25
@@ -268,7 +275,9 @@ class TestBasicExplorerAgent:
         """Test belief update with PyMDP."""
         # Mock PyMDP agent
         mock_agent_instance = Mock()
-        mock_agent_instance.infer_states.return_value = np.array([0.7, 0.1, 0.1, 0.1])
+        mock_agent_instance.infer_states.return_value = np.array(
+            [0.7, 0.1, 0.1, 0.1]
+        )
         mock_pymdp_agent.return_value = mock_agent_instance
 
         config = AgentConfig(
@@ -287,11 +296,15 @@ class TestBasicExplorerAgent:
     @patch("agents.base_agent.PYMDP_AVAILABLE", True)
     @patch("agents.base_agent.PyMDPAgent")
     @patch("agents.base_agent.monitor_belief_update")
-    def test_update_beliefs_with_monitoring(self, mock_monitor, mock_pymdp_agent):
+    def test_update_beliefs_with_monitoring(
+        self, mock_monitor, mock_pymdp_agent
+    ):
         """Test belief update with monitoring enabled."""
         # Mock PyMDP agent
         mock_agent_instance = Mock()
-        mock_agent_instance.infer_states.return_value = np.array([0.7, 0.1, 0.1, 0.1])
+        mock_agent_instance.infer_states.return_value = np.array(
+            [0.7, 0.1, 0.1, 0.1]
+        )
         mock_pymdp_agent.return_value = mock_agent_instance
 
         with patch("agents.base_agent.BELIEF_MONITORING_AVAILABLE", True):
@@ -354,7 +367,9 @@ class TestBasicExplorerAgent:
         """Test action selection with PyMDP error."""
         # Mock PyMDP agent that raises error
         mock_agent_instance = Mock()
-        mock_agent_instance.infer_policies.side_effect = Exception("PyMDP error")
+        mock_agent_instance.infer_policies.side_effect = Exception(
+            "PyMDP error"
+        )
         mock_pymdp_agent.return_value = mock_agent_instance
 
         config = AgentConfig(
@@ -455,7 +470,9 @@ class TestErrorHandling:
         """Test recovery from belief update errors."""
         # Mock PyMDP agent
         mock_agent_instance = Mock()
-        mock_agent_instance.infer_states.side_effect = Exception("Inference error")
+        mock_agent_instance.infer_states.side_effect = Exception(
+            "Inference error"
+        )
         mock_pymdp_agent.return_value = mock_agent_instance
 
         config = AgentConfig(
@@ -480,7 +497,7 @@ class TestObservabilityIntegration:
         """Test that lifecycle events are recorded."""
         # Mock as coroutine
         mock_record_event.return_value = AsyncMock()
-        
+
         config = AgentConfig(
             agent_id="test_agent",
             num_states=[4],
@@ -503,7 +520,9 @@ class TestObservabilityIntegration:
         """Test that inference is monitored."""
         # Mock PyMDP agent
         mock_agent_instance = Mock()
-        mock_agent_instance.infer_states.return_value = np.array([0.7, 0.1, 0.1, 0.1])
+        mock_agent_instance.infer_states.return_value = np.array(
+            [0.7, 0.1, 0.1, 0.1]
+        )
         mock_agent_instance.infer_policies.return_value = None
         mock_agent_instance.sample_action.return_value = np.array([1])
         mock_pymdp_agent.return_value = mock_agent_instance
@@ -582,10 +601,10 @@ class TestMatrixValidation:
             num_actions=[5],
             num_observations=[4, 2],  # Multi-modality observations
         )
-        
+
         # Mock should be called with correct dimensions
         agent = BasicExplorerAgent(config)
-        
+
         # Verify PyMDP agent was initialized
         assert mock_pymdp_agent.called
 
@@ -644,12 +663,12 @@ class TestComplexScenarios:
             num_actions=[5],
             num_observations=[3, 3],  # 2 modalities
         )
-        
+
         mock_agent_instance = Mock()
         mock_pymdp_agent.return_value = mock_agent_instance
-        
+
         agent = BasicExplorerAgent(config)
-        
+
         # Verify multi-factor handling
         assert agent.num_states == [3, 4, 2]
 
@@ -663,14 +682,14 @@ class TestComplexScenarios:
             learning_rate=0.1,
         )
         agent = BasicExplorerAgent(config)
-        
+
         # Initialize preferences
         agent.preferences = np.zeros(4)
-        
+
         # Repeatedly reward observation 2
         for _ in range(10):
             agent.learn(observation=2, reward=1.0)
-        
+
         # Preference for observation 2 should be highest
         assert agent.preferences[2] > agent.preferences[0]
         assert agent.preferences[2] > agent.preferences[1]

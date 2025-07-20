@@ -12,7 +12,7 @@ import tempfile
 import time
 from datetime import datetime
 from pathlib import Path
-from typing import List, Tuple
+from typing import Any, Dict, List, Tuple
 
 
 class ProductionDeploymentTester:
@@ -22,7 +22,7 @@ class ProductionDeploymentTester:
 
     def __init__(self, project_root: str = None):
         self.project_root = Path(project_root or os.getcwd())
-        self.test_results = {
+        self.test_results: Dict[str, Any] = {
             "timestamp": datetime.now().isoformat(),
             "deployment_tests": {},
             "scaling_tests": {},
@@ -192,8 +192,10 @@ WORKERS=2
             self.run_command(["docker", "rmi", "freeagentics:single-test"])
             os.unlink(env_file)
 
-        return self.test_results["deployment_tests"].get(
-            "single_container", False
+        return bool(
+            self.test_results["deployment_tests"].get(
+                "single_container", False
+            )
         )
 
     def test_docker_compose_deployment(self) -> bool:
@@ -251,8 +253,8 @@ WORKERS=2
             if compose_env_path.exists():
                 os.unlink(compose_env_path)
 
-        return self.test_results["deployment_tests"].get(
-            "docker_compose", False
+        return bool(
+            self.test_results["deployment_tests"].get("docker_compose", False)
         )
 
     def test_scaling_scenarios(self) -> bool:
@@ -352,8 +354,8 @@ WORKERS=2
             self.run_command(["docker", "rmi", "freeagentics:scale-test"])
             os.unlink(env_file)
 
-        return self.test_results["scaling_tests"].get(
-            "horizontal_scaling", False
+        return bool(
+            self.test_results["scaling_tests"].get("horizontal_scaling", False)
         )
 
     def test_rollback_scenarios(self) -> bool:
@@ -488,8 +490,8 @@ WORKERS=2
             self.run_command(["docker", "rmi", "freeagentics:v2"])
             os.unlink(env_file)
 
-        return self.test_results["rollback_tests"].get(
-            "version_rollback", False
+        return bool(
+            self.test_results["rollback_tests"].get("version_rollback", False)
         )
 
     def test_monitoring_integration(self) -> bool:
@@ -672,8 +674,8 @@ WORKERS=2
             self.run_command(["docker", "rmi", "freeagentics:env-test"])
             os.unlink(minimal_env.name)
 
-        return self.test_results["deployment_tests"].get(
-            "env_validation", False
+        return bool(
+            self.test_results["deployment_tests"].get("env_validation", False)
         )
 
     def add_api_cleanup_functionality(self):

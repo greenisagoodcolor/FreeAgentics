@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 """
-WebSocket Authentication Demo
+WebSocket Authentication Demo.
 
 Demonstrates how to connect to WebSocket endpoints with JWT authentication.
 This example shows the complete flow from user authentication to WebSocket
@@ -30,7 +30,7 @@ async def demo_websocket_authentication():
     auth_manager = AuthenticationManager()
 
     # Register a test user
-    test_user = auth_manager.register_user(
+    auth_manager.register_user(
         username="demo_user",
         email="demo@example.com",
         password=os.getenv("PASSWORD"),
@@ -153,7 +153,7 @@ async def demo_authentication_failure():
     for scenario_name, websocket_url in failure_scenarios:
         try:
             print(f"\n🧪 Testing: {scenario_name}")
-            async with websockets.connect(websocket_url) as websocket:
+            async with websockets.connect(websocket_url):
                 # Should not reach this point
                 print(f"❌ Unexpected success for: {scenario_name}")
 
@@ -178,7 +178,7 @@ async def demo_permission_testing():
     # Create observer user with limited permissions
     auth_manager = AuthenticationManager()
 
-    observer_user = auth_manager.register_user(
+    auth_manager.register_user(
         username="observer_demo",
         email="observer@example.com",
         password=os.getenv("PASSWORD"),

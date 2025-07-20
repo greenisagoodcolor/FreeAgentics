@@ -15,7 +15,18 @@ from fastapi.testclient import TestClient
 
 from api.main import app
 from auth.security_implementation import UserRole, auth_manager
-from database.models import User
+
+
+# Mock User class for testing
+class User:
+    def __init__(self, id, username, email, role, permissions=None):
+        self.id = id
+        self.username = username
+        self.email = email
+        self.role = role
+        self.permissions = permissions or []
+
+
 from database.session import SessionLocal
 
 

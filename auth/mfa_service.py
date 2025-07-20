@@ -113,6 +113,7 @@ class MFAService:
     def __init__(
         self, db_session: Session, security_monitor: SecurityMonitoringSystem
     ):
+        """Initialize enhanced MFA service."""
         self.db = db_session
         self.security_monitor = security_monitor
         self.encryption_key = self._get_encryption_key()
@@ -217,7 +218,7 @@ class MFAService:
                 # Log security event
                 security_auditor.log_event(
                     event_type=SecurityEventType.MFA_LOCKOUT,
-                    severity=SecurityEventSeverity.HIGH,
+                    severity=SecurityEventSeverity.HIGH,  # type: ignore[attr-defined]
                     message=f"MFA lockout applied for user {user_id}",
                     user_id=user_id,
                     details={
@@ -282,7 +283,7 @@ class MFAService:
             # Log security event
             security_auditor.log_event(
                 event_type=SecurityEventType.MFA_ENROLLMENT_FAILED,
-                severity=SecurityEventSeverity.MEDIUM,
+                severity=SecurityEventSeverity.MEDIUM,  # type: ignore[attr-defined]
                 message=f"MFA enrollment failed for user {request.user_id}",
                 user_id=request.user_id,
                 details={"error": str(e), "method": request.method},
@@ -309,7 +310,7 @@ class MFAService:
         )
 
         # Generate QR code
-        qr = qrcode.QRCode(
+        qr = qrcode.QRCode(  # type: ignore[attr-defined]
             version=1,
             error_correction=qrcode.constants.ERROR_CORRECT_L,
             box_size=10,
@@ -361,7 +362,7 @@ class MFAService:
         # Log security event
         security_auditor.log_event(
             event_type=SecurityEventType.MFA_ENROLLED,
-            severity=SecurityEventSeverity.INFO,
+            severity=SecurityEventSeverity.INFO,  # type: ignore[attr-defined]
             message=f"MFA enrollment initiated for user {request.user_id}",
             user_id=request.user_id,
             details={"method": "totp", "enrollment_pending": True},
@@ -440,7 +441,7 @@ class MFAService:
                 # Log security event
                 security_auditor.log_event(
                     event_type=SecurityEventType.MFA_SUCCESS,
-                    severity=SecurityEventSeverity.INFO,
+                    severity=SecurityEventSeverity.INFO,  # type: ignore[attr-defined]  # type: ignore[attr-defined]
                     message=f"MFA verification successful for user {request.user_id}",
                     user_id=request.user_id,
                     details={"method": request.method},
@@ -456,7 +457,7 @@ class MFAService:
                 # Log security event
                 security_auditor.log_event(
                     event_type=SecurityEventType.MFA_FAILED,
-                    severity=SecurityEventSeverity.MEDIUM,
+                    severity=SecurityEventSeverity.MEDIUM,  # type: ignore[attr-defined]
                     message=f"MFA verification failed for user {request.user_id}",
                     user_id=request.user_id,
                     details={"method": request.method},
@@ -576,7 +577,7 @@ class MFAService:
             # Log security event
             security_auditor.log_event(
                 event_type=SecurityEventType.MFA_DISABLED,
-                severity=SecurityEventSeverity.MEDIUM,
+                severity=SecurityEventSeverity.MEDIUM,  # type: ignore[attr-defined]
                 message=f"MFA disabled for user {user_id}",
                 user_id=user_id,
                 details={"disabled_by": "user"},
@@ -619,8 +620,11 @@ class MFAService:
                 )
                 stored_codes = json.loads(encrypted_codes)
                 backup_codes_remaining = len(stored_codes)
-            except Exception:
-                pass
+            except Exception as e:
+                # Log error but continue - MFA status should still be returned
+                logger.warning(
+                    f"Failed to decrypt backup codes for user {user_id}: {e}"
+                )
 
         methods = []
         if mfa_settings.totp_secret:
@@ -676,7 +680,7 @@ class MFAService:
             # Log security event
             security_auditor.log_event(
                 event_type=SecurityEventType.MFA_BACKUP_CODES_REGENERATED,
-                severity=SecurityEventSeverity.INFO,
+                severity=SecurityEventSeverity.INFO,  # type: ignore[attr-defined]
                 message=f"MFA backup codes regenerated for user {user_id}",
                 user_id=user_id,
                 details={"codes_generated": len(backup_codes)},

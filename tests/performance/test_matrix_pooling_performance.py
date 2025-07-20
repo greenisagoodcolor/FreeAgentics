@@ -87,7 +87,7 @@ class MatrixPoolingPerformanceTest(unittest.TestCase):
             }
 
             print(f"\nShape {shape}:")
-            print(f"  Numpy:  {numpy_time * 1000:.3f} ms")
+            print(f"  Numpy: {numpy_time * 1000:.3f} ms")
             print(f"  Pooled: {pooled_time * 1000:.3f} ms")
             print(f"  Speedup: {speedup:.2f}x")
 
@@ -123,7 +123,7 @@ class MatrixPoolingPerformanceTest(unittest.TestCase):
             )
 
             print(f"  Dot product:")
-            print(f"    Numpy:  {numpy_dot_time * 1000:.2f} ms")
+            print(f"    Numpy: {numpy_dot_time * 1000:.2f} ms")
             print(f"    Pooled: {pooled_dot_time * 1000:.2f} ms")
             print(
                 f"    Overhead: {(pooled_dot_time/numpy_dot_time - 1)*100:.1f}%"
@@ -139,7 +139,7 @@ class MatrixPoolingPerformanceTest(unittest.TestCase):
             )
 
             print(f"  Einsum:")
-            print(f"    Numpy:  {numpy_einsum_time * 1000:.2f} ms")
+            print(f"    Numpy: {numpy_einsum_time * 1000:.2f} ms")
             print(f"    Pooled: {pooled_einsum_time * 1000:.2f} ms")
             print(
                 f"    Overhead: {(pooled_einsum_time/numpy_einsum_time - 1)*100:.1f}%"
@@ -197,9 +197,9 @@ class MatrixPoolingPerformanceTest(unittest.TestCase):
             f"\nMemory usage for {iterations} iterations of {matrix_size}x{matrix_size} dot products:"
         )
         print(f"  Without pooling: {no_pool_mem:.1f} MB")
-        print(f"  With pooling:    {pool_mem:.1f} MB")
+        print(f"  With pooling: {pool_mem:.1f} MB")
         print(
-            f"  Savings:         {no_pool_mem - pool_mem:.1f} MB ({(1 - pool_mem/no_pool_mem)*100:.1f}%)"
+            f"  Savings: {no_pool_mem - pool_mem:.1f} MB ({(1 - pool_mem/no_pool_mem)*100:.1f}%)"
         )
 
         # Get pool statistics
@@ -363,8 +363,8 @@ class MatrixPoolingPerformanceTest(unittest.TestCase):
 
         print(f"\nResults:")
         print(f"  Without pooling: {no_pool_time:.2f} s")
-        print(f"  With pooling:    {pool_time:.2f} s")
-        print(f"  Speedup:         {no_pool_time/pool_time:.2f}x")
+        print(f"  With pooling: {pool_time:.2f} s")
+        print(f"  Speedup: {no_pool_time/pool_time:.2f}x")
 
         # Check accuracy
         for i in range(num_agents):

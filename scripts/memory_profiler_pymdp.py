@@ -98,7 +98,7 @@ class MemoryProfiler:
                 agents.append(agent)
 
                 # Measure after each agent
-                self.measure(f"After creating agent {i+1}")
+                self.measure(f"After creating agent {i + 1}")
 
             except Exception as e:
                 logger.error(f"Failed to create agent {i}: {e}")
@@ -199,7 +199,7 @@ class MemoryProfiler:
         logger.info("\n=== Operation Memory Usage ===")
         for operation, memory in operation_memory.items():
             logger.info(
-                f"{operation}: {memory:.2f} MB total, {memory/n_steps*1000:.2f} KB per operation"
+                f"{operation}: {memory:.2f} MB total, {memory / n_steps * 1000:.2f} KB per operation"
             )
 
         return operation_memory
@@ -234,7 +234,7 @@ class MemoryProfiler:
         logger.info("\nTop memory-consuming arrays:")
         for i, array in enumerate(hotspots["large_arrays"][:10]):
             logger.info(
-                f"{i+1}. Shape: {array['shape']}, Type: {array['dtype']}, Size: {array['size_mb']:.2f} MB"
+                f"{i + 1}. Shape: {array['shape']}, Type: {array['dtype']}, Size: {array['size_mb']:.2f} MB"
             )
 
         return hotspots

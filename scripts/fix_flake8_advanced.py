@@ -153,9 +153,9 @@ def fix_unused_imports(lines: List[str]) -> List[str]:
             if "," in line and " import " in line:
                 # Remove just this import
                 parts = line.split(" import ")
-                imports = parts[1].split(",")
-                new_imports = []
-                for imp in imports:
+                import_list: list[str] = parts[1].split(",")
+                new_imports: list[str] = []
+                for imp in import_list:
                     imp_name = imp.strip()
                     if " as " in imp_name:
                         imp_name = imp_name.split(" as ")[1].strip()
@@ -273,12 +273,16 @@ def fix_missing_placeholders(lines: List[str], line_num: int) -> List[str]:
     # Remove f prefix from strings without placeholders
     lines[line_num] = re.sub(
         r'\bf"([^"]*)"',
-        lambda m: f'"{m.group(1)}"' if "{" not in m.group(1) else m.group(0),
+        lambda m: '"' + str(m.group(1)) + '"'
+        if "{" not in str(m.group(1))
+        else m.group(0),
         line,
     )
     lines[line_num] = re.sub(
         r"\bf'([^']*)'",
-        lambda m: f"'{m.group(1)}'" if "{" not in m.group(1) else m.group(0),
+        lambda m: "'" + str(m.group(1)) + "'"
+        if "{" not in str(m.group(1))
+        else m.group(0),
         lines[line_num],
     )
 

@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 """
-FreeAgentics Performance Regression Detection System
+FreeAgentics Performance Regression Detection System.
 """
 
 import argparse

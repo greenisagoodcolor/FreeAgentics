@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 """
-FreeAgentics API Usage Examples
+FreeAgentics API Usage Examples.
 
 Comprehensive examples demonstrating how to use the FreeAgentics API
 for Active Inference multi-agent systems.
@@ -19,6 +19,7 @@ class FreeAgenticsAPIClient:
     """Client for interacting with FreeAgentics API."""
 
     def __init__(self, base_url: str = "http://localhost:8000"):
+        """Initialize the FreeAgentics API client."""
         self.base_url = base_url
         self.session = None
 
@@ -444,7 +445,7 @@ async def example_6_performance_testing():
                 "surroundings": [[0, 0, 0], [0, 0, 0], [0, 0, 0]],
             }
 
-            result = await client.agent_step(agent_id, observation)
+            await client.agent_step(agent_id, observation)
 
             if i % 20 == 0:
                 print(f"Completed {i} observations...")

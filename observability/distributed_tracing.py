@@ -1,5 +1,5 @@
 """
-Distributed Tracing System for FreeAgentics Multi-Agent Platform
+Distributed Tracing System for FreeAgentics Multi-Agent Platform.
 
 This module implements distributed tracing capabilities to track requests
 across multiple agents, services, and coordination operations.
@@ -286,7 +286,8 @@ class DistributedTracer:
             t for t in self.traces.values() if t.duration_ms is not None
         ]
         avg_duration = (
-            sum(t.duration_ms for t in completed) / len(completed)
+            sum(t.duration_ms for t in completed if t.duration_ms is not None)
+            / len(completed)
             if completed
             else 0
         )

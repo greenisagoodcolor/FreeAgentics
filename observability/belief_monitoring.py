@@ -8,7 +8,7 @@ import logging
 from collections import deque
 from dataclasses import dataclass
 from datetime import datetime
-from typing import Any, Dict, List, Optional
+from typing import Any, Deque, Dict, List, Optional, Union
 
 import numpy as np
 
@@ -24,8 +24,11 @@ except ImportError:
 
     # Mock monitoring function
     async def record_agent_metric(
-        agent_id: str, metric: str, value: float, metadata: Dict = None
-    ):
+        agent_id: str,
+        metric: str,
+        value: float,
+        metadata: Optional[Dict[str, Any]] = None,
+    ) -> None:
         logger.debug(
             f"MOCK Belief Metric - Agent {agent_id} - {metric}: {value}"
         )
@@ -48,16 +51,17 @@ class BeliefMonitor:
     """Monitor and track agent belief states over time."""
 
     def __init__(self, agent_id: str, history_size: int = 100):
+        """Initialize the belief monitor."""
         self.agent_id = agent_id
         self.history_size = history_size
-        self.belief_history = deque(maxlen=history_size)
+        self.belief_history: Deque[BeliefSnapshot] = deque(maxlen=history_size)
         self.anomaly_threshold = 2.0  # Standard deviations
         self.monitoring_enabled = True
 
         # Metrics tracking
         self.total_updates = 0
         self.anomaly_count = 0
-        self.last_beliefs = None
+        self.last_beliefs: Optional[Union[Dict[str, Any], Any]] = None
 
         logger.info(f"Initialized belief monitor for agent {agent_id}")
 
@@ -249,7 +253,7 @@ class BeliefMonitor:
 
         return False
 
-    async def _handle_anomaly(self, snapshot: BeliefSnapshot):
+    async def _handle_anomaly(self, snapshot: BeliefSnapshot) -> None:
         """Handle detected belief anomaly.
 
         Args:
@@ -275,7 +279,7 @@ class BeliefMonitor:
 
     async def _record_metrics(
         self, snapshot: BeliefSnapshot, is_anomaly: bool
-    ):
+    ) -> None:
         """Record belief metrics to monitoring system.
 
         Args:
@@ -387,7 +391,7 @@ class BeliefMonitor:
 
         return stats
 
-    def reset(self):
+    def reset(self) -> None:
         """Reset belief monitoring state."""
         self.belief_history.clear()
         self.total_updates = 0
@@ -399,7 +403,8 @@ class BeliefMonitor:
 class BeliefMonitoringHooks:
     """Hooks for integrating belief monitoring into agents."""
 
-    def __init__(self):
+    def __init__(self) -> None:
+        """Initialize the belief monitoring hooks."""
         self.monitors: Dict[str, BeliefMonitor] = {}
         self.enabled = True
 
@@ -466,7 +471,7 @@ class BeliefMonitoringHooks:
             for agent_id, monitor in self.monitors.items()
         }
 
-    def reset_agent_monitor(self, agent_id: str):
+    def reset_agent_monitor(self, agent_id: str) -> None:
         """Reset monitoring for specific agent.
 
         Args:
@@ -475,7 +480,7 @@ class BeliefMonitoringHooks:
         if agent_id in self.monitors:
             self.monitors[agent_id].reset()
 
-    def reset_all(self):
+    def reset_all(self) -> None:
         """Reset all belief monitors."""
         for monitor in self.monitors.values():
             monitor.reset()

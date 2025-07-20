@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 """
-Threading vs Multiprocessing Benchmark for FreeAgentics Agents
+Threading vs Multiprocessing Benchmark for FreeAgentics Agents.
 
 This comprehensive benchmark compares the performance characteristics of
 threading vs multiprocessing for Active Inference agents, measuring:
@@ -72,6 +72,7 @@ class MemoryTracker:
     """Track memory usage during benchmark."""
 
     def __init__(self):
+        """Initialize the memory tracker."""
         self.process = psutil.Process()
         self.initial_memory = self.process.memory_info().rss / 1024 / 1024
         self.peak_memory = self.initial_memory
@@ -165,6 +166,7 @@ class ThreadingBenchmark:
     """Benchmark using threading for agent coordination."""
 
     def __init__(self, num_agents: int):
+        """Initialize the threading benchmark."""
         self.num_agents = num_agents
         self.agents = {}
         self.thread_pool = OptimizedThreadPoolManager(
@@ -215,9 +217,7 @@ class ThreadingBenchmark:
             }
 
             # Execute step for all agents
-            results = self.thread_pool.step_all_agents(
-                observations, timeout=5.0
-            )
+            self.thread_pool.step_all_agents(observations, timeout=5.0)
 
             # Calculate step latency
             step_latency = (time.time() - step_start) * 1000
@@ -304,9 +304,7 @@ class ThreadingBenchmark:
                 observations[agent_id] = obs
 
             # Execute step for all agents
-            results = self.thread_pool.step_all_agents(
-                observations, timeout=5.0
-            )
+            self.thread_pool.step_all_agents(observations, timeout=5.0)
 
             # Calculate step latency
             step_latency = (time.time() - step_start) * 1000
@@ -335,6 +333,7 @@ class MultiprocessingBenchmark:
     """Benchmark using multiprocessing for agent coordination."""
 
     def __init__(self, num_agents: int):
+        """Initialize the multiprocessing benchmark."""
         self.num_agents = num_agents
         self.manager = Manager()
         self.shared_state = self.manager.dict()
@@ -374,7 +373,7 @@ class MultiprocessingBenchmark:
                         sender, msg = message_queue.get_nowait()
                         if msg.endswith(agent_id):  # Message for this agent
                             messages.append((sender, msg))
-                except:
+                except queue.Empty:
                     pass
 
                 observation["received_messages"] = messages
@@ -531,7 +530,7 @@ class MultiprocessingBenchmark:
         while not self.result_queue.empty():
             try:
                 results.append(self.result_queue.get_nowait())
-            except:
+            except queue.Empty:
                 break
 
         total_time = time.time() - start_time
@@ -569,9 +568,9 @@ def run_benchmark_suite(
     }
 
     for num_agents in agent_counts:
-        logger.info(f"\n{'='*60}")
+        logger.info(f"\n{'=' * 60}")
         logger.info(f"BENCHMARKING {num_agents} AGENTS")
-        logger.info(f"{'='*60}")
+        logger.info(f"{'=' * 60}")
 
         # Threading benchmarks
         logger.info("\nTHREADING BENCHMARKS")
@@ -800,8 +799,6 @@ def analyze_results(results: Dict[str, List[BenchmarkResult]]):
         for result in results[test_type]:
             if "threading" in test_type:
                 threading_perf = result.throughput_ops_sec
-            else:
-                multiproc_perf = result.throughput_ops_sec
 
             if result.num_agents > 1:  # Skip single agent
                 if "threading" in test_type and "exploration" in test_type:
@@ -838,7 +835,7 @@ def analyze_results(results: Dict[str, List[BenchmarkResult]]):
 
     if avg_thread_mem < avg_mp_mem * 0.5:
         print(
-            f"   ✅ Threading uses {avg_mp_mem/avg_thread_mem:.1f}x less memory"
+            f"   ✅ Threading uses {avg_mp_mem / avg_thread_mem:.1f}x less memory"
         )
         print("   - Shared memory model reduces duplication")
         print("   - More scalable for large agent populations")
@@ -863,7 +860,7 @@ def analyze_results(results: Dict[str, List[BenchmarkResult]]):
 
     if thread_comm < mp_comm * 0.3:
         print(
-            f"   ✅ Threading has {mp_comm/thread_comm:.1f}x lower communication overhead"
+            f"   ✅ Threading has {mp_comm / thread_comm:.1f}x lower communication overhead"
         )
         print("   - Direct memory access vs IPC")
         print("   - Critical for coordination-heavy scenarios")

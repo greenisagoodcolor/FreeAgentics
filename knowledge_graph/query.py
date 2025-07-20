@@ -167,7 +167,6 @@ class QueryEngine:
     def _execute_node_lookup(self, query: GraphQuery) -> QueryResult:
         """Execute node lookup query."""
         result = QueryResult(query_type=QueryType.NODE_LOOKUP)
-        nodes = []
 
         # Start with all nodes
         candidates = list(self.graph.nodes.values())
@@ -288,7 +287,11 @@ class QueryEngine:
                         result.edges.append(edge)
 
         # Find alternative paths if max_path_length specified
-        if query.max_path_length and query.max_path_length > len(path):
+        if (
+            path
+            and query.max_path_length
+            and query.max_path_length > len(path)
+        ):
             # Use NetworkX to find all simple paths up to max length
             try:
                 all_paths = list(
@@ -379,7 +382,7 @@ class QueryEngine:
         result.aggregates["max_confidence"] = max(n.confidence for n in nodes)
 
         # Type distribution
-        type_counts = {}
+        type_counts: Dict[str, int] = {}
         for node in nodes:
             type_counts[node.type.value] = (
                 type_counts.get(node.type.value, 0) + 1
@@ -387,7 +390,7 @@ class QueryEngine:
         result.aggregates["type_distribution"] = type_counts
 
         # Property aggregations
-        property_stats = {}
+        property_stats: Dict[str, List[float]] = {}
         for node in nodes:
             for key, value in node.properties.items():
                 if isinstance(value, (int, float)):
@@ -600,7 +603,9 @@ class QueryEngine:
         }
 
         query_str = json.dumps(query_dict, sort_keys=True)
-        return hashlib.md5(query_str.encode()).hexdigest()
+        return hashlib.md5(
+            query_str.encode(), usedforsecurity=False
+        ).hexdigest()
 
     def clear_cache(self):
         """Clear query cache."""

@@ -17,10 +17,10 @@ This guide provides comprehensive instructions for maintaining and improving tes
 All coverage scripts are located in the `scripts/` directory:
 
 1. **`coverage-dev.sh`**: Development coverage with relaxed thresholds
-2. **`coverage-ci.sh`**: CI/CD coverage validation (80% default threshold)
-3. **`coverage-release.sh`**: Release validation (100% required)
-4. **`coverage-analyze-gaps.py`**: Gap analysis and prioritization tool
-5. **`coverage-cleanup.sh`**: Cleanup obsolete coverage artifacts
+1. **`coverage-ci.sh`**: CI/CD coverage validation (80% default threshold)
+1. **`coverage-release.sh`**: Release validation (100% required)
+1. **`coverage-analyze-gaps.py`**: Gap analysis and prioritization tool
+1. **`coverage-cleanup.sh`**: Cleanup obsolete coverage artifacts
 
 ## Quick Start
 
@@ -83,23 +83,26 @@ python scripts/coverage-analyze-gaps.py --format markdown --output gaps.md
 ### Report Types
 
 1. **Terminal Report**: Immediate feedback with missing lines
-2. **HTML Report**: Interactive browser-based exploration
-3. **XML Report**: For CI/CD tool integration
-4. **JSON Report**: For programmatic analysis
-5. **LCOV Report**: For additional tooling support
+1. **HTML Report**: Interactive browser-based exploration
+1. **XML Report**: For CI/CD tool integration
+1. **JSON Report**: For programmatic analysis
+1. **LCOV Report**: For additional tooling support
 
 ### Report Locations
 
-- **Development**: 
+- **Development**:
+
   - HTML: `htmlcov/index.html`
   - JSON: `coverage.json`
   - XML: `coverage.xml`
 
 - **CI/CD**:
+
   - All reports in `test-reports/coverage/`
   - JUnit XML: `test-reports/junit.xml`
 
 - **Release**:
+
   - All reports in `test-reports/release-coverage/`
   - Certification: `test-reports/release-coverage/certification.json`
 
@@ -110,20 +113,22 @@ python scripts/coverage-analyze-gaps.py --format markdown --output gaps.md
 The gap analysis tool categorizes coverage issues:
 
 1. **Critical Modules**: Core functionality requiring immediate attention
-2. **Zero Coverage**: Modules with 0% coverage
-3. **Low Coverage**: Modules with <50% coverage
-4. **Category Analysis**: Coverage by architectural layer
-5. **GNN/Graph Modules**: Special focus per project requirements
+1. **Zero Coverage**: Modules with 0% coverage
+1. **Low Coverage**: Modules with \<50% coverage
+1. **Category Analysis**: Coverage by architectural layer
+1. **GNN/Graph Modules**: Special focus per project requirements
 
 ### Priority Classification
 
 - **HIGH Priority**:
-  - Critical modules with <80% coverage
+
+  - Critical modules with \<80% coverage
   - Any module with 0% coverage
-  - GNN/Graph modules with <50% coverage
+  - GNN/Graph modules with \<50% coverage
 
 - **MEDIUM Priority**:
-  - Non-critical modules with <50% coverage
+
+  - Non-critical modules with \<50% coverage
   - Category-wide coverage improvements
 
 ### Sample Gap Analysis Output
@@ -146,32 +151,37 @@ RECOMMENDATIONS:
 ### Step-by-Step Process
 
 1. **Identify Gaps**
+
    ```bash
    make coverage-gaps
    cat coverage-gaps.md
    ```
 
-2. **Focus on Critical Modules**
+1. **Focus on Critical Modules**
+
    - Start with HIGH priority items
    - Target critical business logic first
 
-3. **Write Tests Following TDD**
+1. **Write Tests Following TDD**
+
    ```bash
    # Start TDD watch mode
    make tdd-watch
-   
+
    # Write failing test (RED)
    # Implement code (GREEN)
    # Refactor (REFACTOR)
    ```
 
-4. **Verify Coverage Improvement**
+1. **Verify Coverage Improvement**
+
    ```bash
    make coverage-dev
    # Check specific module coverage in HTML report
    ```
 
-5. **Commit with Coverage Check**
+1. **Commit with Coverage Check**
+
    ```bash
    make test-commit  # Includes coverage validation
    ```
@@ -179,9 +189,9 @@ RECOMMENDATIONS:
 ### Best Practices
 
 1. **Branch Coverage**: Always include branch coverage (`--cov-branch`)
-2. **Missing Lines**: Use `--cov-report=term-missing` to see exact gaps
-3. **Context**: Use coverage contexts to track test types
-4. **Incremental Goals**: Set achievable milestones (70% → 80% → 90% → 100%)
+1. **Missing Lines**: Use `--cov-report=term-missing` to see exact gaps
+1. **Context**: Use coverage contexts to track test types
+1. **Incremental Goals**: Set achievable milestones (70% → 80% → 90% → 100%)
 
 ## CI/CD Integration
 
@@ -207,6 +217,7 @@ RECOMMENDATIONS:
 ### Coverage Badges
 
 Badge data is automatically generated:
+
 - Development: `coverage.json` → extract `totals.percent_covered`
 - CI: `test-reports/coverage/badge.json`
 - Release: `test-reports/release-coverage/release-badge.json`
@@ -226,11 +237,13 @@ make clean
 ### Coverage Trend Tracking
 
 1. Save periodic snapshots:
+
    ```bash
    cp coverage.json "coverage-$(date +%Y%m%d).json"
    ```
 
-2. Compare coverage over time:
+1. Compare coverage over time:
+
    ```bash
    diff coverage-20250101.json coverage-20250201.json
    ```
@@ -238,17 +251,20 @@ make clean
 ### Updating Coverage Thresholds
 
 1. **Development** (pyproject.toml):
+
    ```toml
    [tool.coverage.report]
    fail_under = 70  # Increase gradually
    ```
 
-2. **CI** (environment variable):
+1. **CI** (environment variable):
+
    ```bash
    COVERAGE_THRESHOLD=85 ./scripts/coverage-ci.sh
    ```
 
-3. **Release** (always 100%):
+1. **Release** (always 100%):
+
    - No configuration needed
    - Enforced by `coverage-release.sh`
 
@@ -257,21 +273,25 @@ make clean
 ### Common Issues
 
 1. **"No data to report"**
+
    - Ensure test files are discovered: `pytest --collect-only`
    - Check coverage source paths in `pyproject.toml`
    - Verify no syntax errors: `python -m py_compile module.py`
 
-2. **"Module was never imported"**
+1. **"Module was never imported"**
+
    - Add `__init__.py` files to packages
    - Check import paths match coverage configuration
    - Use `--cov=package` not `--cov=package/`
 
-3. **Missing Branch Coverage**
+1. **Missing Branch Coverage**
+
    - Ensure `branch = true` in `pyproject.toml`
    - Use `# pragma: no branch` sparingly
    - Write tests for all conditional paths
 
-4. **Slow Coverage Collection**
+1. **Slow Coverage Collection**
+
    - Use `parallel = true` in configuration
    - Run specific test subsets during development
    - Use `coverage combine` for parallel runs
@@ -294,6 +314,7 @@ coverage debug data
 ### Coverage Contexts
 
 Track coverage by test type:
+
 ```bash
 # Run with context
 coverage run --context=unit -m pytest tests/unit
@@ -306,6 +327,7 @@ coverage html --show-contexts
 ### Combining Coverage Data
 
 For parallel or distributed testing:
+
 ```bash
 # Run tests in parallel
 coverage run -p -m pytest tests/unit
@@ -319,6 +341,7 @@ coverage report
 ### Custom Coverage Plugins
 
 Create custom coverage plugins for special cases:
+
 - Dynamic code generation
 - Template engines
 - Custom import mechanisms

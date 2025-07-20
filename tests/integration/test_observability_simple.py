@@ -38,7 +38,7 @@ async def test_observability_components():
 
     # Test 2: Create observability integrator
     try:
-        integrator = PyMDPObservabilityIntegrator()
+        _integrator = PyMDPObservabilityIntegrator()
         print("✅ PyMDP observability integrator created")
     except Exception as e:
         print(f"❌ Failed to create integrator: {e}")
@@ -72,10 +72,10 @@ async def test_observability_components():
         @monitor_pymdp_inference("test_agent")
         def mock_inference():
             # Perform minimal computation instead of sleep
-            result = sum(range(100))  # Simple computation
+            _result = sum(range(100))  # Simple computation
             return "test_result"
 
-        result = mock_inference()
+        _result = mock_inference()
         assert result == "test_result"
         print("✅ Monitoring decorator works")
     except Exception as e:
@@ -145,13 +145,13 @@ async def test_observability_performance():
     @monitor_pymdp_inference("perf_test_agent")
     def monitored_operation():
         # Perform minimal computation instead of sleep
-        result = sum(range(1000))  # Simple computation
+        _result = sum(range(1000))  # Simple computation
         return "result"
 
     # Measure overhead
     start_time = time.time()
     for i in range(50):
-        result = monitored_operation()
+        _result = monitored_operation()
     duration = time.time() - start_time
 
     print(
@@ -161,7 +161,7 @@ async def test_observability_performance():
     # Test 3: Performance summary generation
     start_time = time.time()
     for i in range(20):
-        summary = await integrator.get_performance_summary(
+        _summary = await integrator.get_performance_summary(
             f"perf_agent_{i % 5}"
         )
     duration = time.time() - start_time

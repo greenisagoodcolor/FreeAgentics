@@ -16,7 +16,7 @@ from api.v1.websocket import (
     handle_agent_command,
     handle_query,
     manager,
-    websocket_auth,
+    websocket_endpoint,
 )
 from auth.security_implementation import (
     AuthenticationManager,
@@ -24,6 +24,7 @@ from auth.security_implementation import (
     TokenData,
     UserRole,
 )
+from websocket.auth_handler import websocket_auth
 
 
 @pytest.fixture

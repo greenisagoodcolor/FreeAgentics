@@ -18,6 +18,7 @@ import time
 from datetime import datetime, timedelta, timezone
 from unittest.mock import patch
 
+import jwt
 import pytest
 from fastapi import status
 from fastapi.testclient import TestClient

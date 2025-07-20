@@ -1,5 +1,5 @@
 """
-Memory Usage Optimization and Garbage Collection Management
+Memory Usage Optimization and Garbage Collection Management.
 
 This module implements comprehensive memory optimizations:
 1. Memory pooling for frequently allocated objects
@@ -22,7 +22,7 @@ from collections import defaultdict, deque
 from contextlib import contextmanager
 from dataclasses import dataclass, field
 from datetime import datetime, timedelta
-from typing import Any, Dict, List, Optional, Set, Tuple, Type, Union
+from typing import Any, Callable, Dict, List, Optional, Set, Tuple, Type, Union
 
 import numpy as np
 import psutil
@@ -89,14 +89,14 @@ class ObjectPool:
 
     def __init__(
         self,
-        factory: callable,
+        factory: Callable[[], Any],
         max_size: int = 100,
-        reset_func: callable = None,
+        reset_func: Optional[Callable[[Any], None]] = None,
     ):
         self.factory = factory
         self.max_size = max_size
         self.reset_func = reset_func
-        self.pool = deque()
+        self.pool: deque[Any] = deque()
         self.created_count = 0
         self.reused_count = 0
         self.lock = threading.Lock()
@@ -148,9 +148,9 @@ class MemoryProfiler:
         self.process = psutil.Process()
 
         # Memory tracking
-        self.memory_history = deque(maxlen=1000)
-        self.object_tracking = defaultdict(list)
-        self.leak_detections = []
+        self.memory_history: deque[MemoryStats] = deque(maxlen=1000)
+        self.object_tracking: defaultdict[type, List[Any]] = defaultdict(list)
+        self.leak_detections: List[MemoryLeak] = []
 
         # Garbage collection tracking
         self.gc_stats = {
@@ -160,8 +160,8 @@ class MemoryProfiler:
         }
 
         # Object counting
-        self.object_counts = defaultdict(int)
-        self.object_sizes = defaultdict(int)
+        self.object_counts: defaultdict[type, int] = defaultdict(int)
+        self.object_sizes: defaultdict[type, int] = defaultdict(int)
 
         # Pympler integration
         if PYMPLER_AVAILABLE:
@@ -374,7 +374,7 @@ class MemoryProfiler:
     def _get_top_objects(self) -> List[Dict[str, Any]]:
         """Get top objects by count."""
         objects = gc.get_objects()
-        type_counts = defaultdict(int)
+        type_counts: defaultdict[str, int] = defaultdict(int)
 
         for obj in objects:
             obj_type = type(obj).__name__
@@ -467,7 +467,9 @@ class GarbageCollectionTuner:
         self.tuning_enabled = False
         logger.info("GC tuning disabled, original thresholds restored")
 
-    def force_collection(self, generation: int = None) -> Dict[str, Any]:
+    def force_collection(
+        self, generation: Optional[int] = None
+    ) -> Dict[str, Any]:
         """Force garbage collection and measure performance."""
         start_time = time.perf_counter()
 
@@ -518,8 +520,8 @@ class MemoryOptimizer:
     def __init__(self, monitoring_interval: float = 30.0):
         self.profiler = MemoryProfiler(monitoring_interval)
         self.gc_tuner = GarbageCollectionTuner()
-        self.object_pools = {}
-        self.weak_refs = weakref.WeakSet()
+        self.object_pools: Dict[str, ObjectPool] = {}
+        self.weak_refs: weakref.WeakSet[Any] = weakref.WeakSet()
         self.performance_monitor = get_performance_monitor()
 
         # Optimization settings
@@ -576,9 +578,9 @@ class MemoryOptimizer:
     def create_object_pool(
         self,
         name: str,
-        factory: callable,
+        factory: Callable[[], Any],
         max_size: int = 100,
-        reset_func: callable = None,
+        reset_func: Optional[Callable[[Any], None]] = None,
     ):
         """Create a new object pool."""
         self.object_pools[name] = ObjectPool(factory, max_size, reset_func)

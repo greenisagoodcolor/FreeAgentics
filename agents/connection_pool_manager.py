@@ -1,5 +1,4 @@
-"""
-Enhanced Connection Pool Manager for Multi-Agent Systems
+"""Enhanced Connection Pool Manager for Multi-Agent Systems.
 
 Implements WebSocket connection pooling, database connection pooling, and
 resource lifecycle management to optimize multi-agent coordination efficiency.
@@ -79,6 +78,13 @@ class CircuitBreaker:
         recovery_timeout: int,
         half_open_max_calls: int,
     ):
+        """Initialize circuit breaker with failure handling parameters.
+
+        Args:
+            failure_threshold: Number of failures before opening circuit
+            recovery_timeout: Seconds to wait before attempting recovery
+            half_open_max_calls: Max calls allowed in half-open state
+        """
         self.failure_threshold = failure_threshold
         self.recovery_timeout = recovery_timeout
         self.half_open_max_calls = half_open_max_calls
@@ -139,6 +145,11 @@ class WebSocketConnectionPool:
     """Enhanced WebSocket connection pool with lifecycle management."""
 
     def __init__(self, config: ConnectionPoolConfig):
+        """Initialize WebSocket connection pool with lifecycle management.
+
+        Args:
+            config: Connection pool configuration
+        """
         self.config = config
         self.active_connections: Dict[str, WebSocket] = {}
         self.connection_metadata: Dict[str, Dict] = {}
@@ -210,7 +221,7 @@ class WebSocketConnectionPool:
     async def _get_or_create_connection(
         self, client_id: str, pool_name: str
     ) -> WebSocket:
-        """Internal method to get or create a connection."""
+        """Get or create a connection for the specified client."""
         with self._connections_lock:
             if client_id in self.active_connections:
                 return self.active_connections[client_id]
@@ -362,6 +373,12 @@ class DatabaseConnectionPool:
     """Enhanced database connection pool with async support."""
 
     def __init__(self, database_url: str, config: ConnectionPoolConfig):
+        """Initialize database connection pool.
+
+        Args:
+            database_url: Database connection URL
+            config: Connection pool configuration
+        """
         self.database_url = database_url
         self.config = config
         self.pool = None
@@ -437,6 +454,12 @@ class EnhancedConnectionPoolManager:
     """Main connection pool manager coordinating all connection types."""
 
     def __init__(self, config: ConnectionPoolConfig, database_url: str):
+        """Initialize enhanced connection pool manager.
+
+        Args:
+            config: Connection pool configuration
+            database_url: Database connection URL
+        """
         self.config = config
         self.database_url = database_url
 
@@ -503,6 +526,11 @@ class ResourceMonitor:
     """System resource monitoring for connection pools."""
 
     def __init__(self, config: ConnectionPoolConfig):
+        """Initialize resource monitor.
+
+        Args:
+            config: Connection pool configuration
+        """
         self.config = config
         self.metrics_history = []
         self._lock = threading.Lock()

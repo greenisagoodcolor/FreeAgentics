@@ -20,10 +20,10 @@ class TDDStructureValidator:
 
     def __init__(self, project_root: str = "."):
         self.project_root = Path(project_root)
-        self.production_modules = set()
-        self.test_modules = set()
-        self.errors = []
-        self.warnings = []
+        self.production_modules: Set[str] = set()
+        self.test_modules: Set[str] = set()
+        self.errors: List[str] = []
+        self.warnings: List[str] = []
 
     def find_production_modules(self) -> Set[str]:
         """Find all production Python modules."""
@@ -141,7 +141,7 @@ class TDDStructureValidator:
 
     def check_test_structure(self) -> Dict[str, List[str]]:
         """Check test directory structure follows TDD best practices."""
-        structure_issues = {
+        structure_issues: Dict[str, List[str]] = {
             "missing_unit_tests": [],
             "missing_integration_tests": [],
             "poor_organization": [],
@@ -166,7 +166,7 @@ class TDDStructureValidator:
 
     def analyze_test_quality(self) -> Dict[str, List[str]]:
         """Analyze test quality metrics."""
-        quality_issues = {
+        quality_issues: Dict[str, List[str]] = {
             "empty_tests": [],
             "no_assertions": [],
             "poor_naming": [],

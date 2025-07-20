@@ -25,6 +25,7 @@ from auth.security_implementation import (
 )
 
 
+@pytest.mark.slow
 class TestRBACPermissionsAtScale:
     """Test RBAC system with large permission sets and complex scenarios."""
 

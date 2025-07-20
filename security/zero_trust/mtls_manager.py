@@ -644,7 +644,10 @@ class MTLSManager:
 
     def get_ca_certificate(self) -> str:
         """Get CA certificate in PEM format."""
-        return self.ca_cert.public_bytes(serialization.Encoding.PEM).decode()
+        cert_bytes: bytes = self.ca_cert.public_bytes(
+            serialization.Encoding.PEM
+        )
+        return cert_bytes.decode()
 
     def get_certificate_bundle(
         self, service_name: str

@@ -55,6 +55,7 @@ class MockStorageManager:
     """Mock storage manager for testing without database."""
 
     def __init__(self):
+        """Initialize mock storage manager with empty data dictionary."""
         self.data = {}
 
     def save(self, key: str, value: Any) -> bool:
@@ -73,6 +74,12 @@ class IntegrationTestScenario:
     """Base class for integration test scenarios."""
 
     def __init__(self, name: str, description: str):
+        """Initialize integration test scenario with name and description.
+
+        Args:
+            name: Name of the test scenario
+            description: Description of what this scenario tests
+        """
         self.name = name
         self.description = description
         self.start_time = None
@@ -112,6 +119,7 @@ class ResourceDiscoveryAndCoalitionScenario(IntegrationTestScenario):
     """
 
     def __init__(self):
+        """Initialize resource discovery and coalition formation scenario."""
         super().__init__(
             "resource_discovery_coalition",
             "Test full pipeline from resource discovery to coalition formation",
@@ -689,6 +697,7 @@ class AgentCommunicationProtocolScenario(IntegrationTestScenario):
     """Test agent-to-agent communication protocols."""
 
     def __init__(self):
+        """Initialize agent communication protocol test scenario."""
         super().__init__(
             "agent_communication_protocol",
             "Test agent-to-agent communication patterns and message handling",
@@ -865,6 +874,7 @@ class FaultToleranceAndRecoveryScenario(IntegrationTestScenario):
     """Test fault tolerance and recovery mechanisms."""
 
     def __init__(self):
+        """Initialize fault tolerance and recovery test scenario."""
         super().__init__(
             "fault_tolerance_recovery",
             "Test system recovery from various failure conditions",
@@ -958,7 +968,7 @@ class FaultToleranceAndRecoveryScenario(IntegrationTestScenario):
         except ConnectionError:
             # Use fallback mechanism
             # Store message for retry
-            fallback_queue = [
+            _fallback_queue = [
                 {
                     "from": sender.agent_id,
                     "to": receiver.agent_id,
@@ -1090,6 +1100,7 @@ class DistributedTaskCoordinationScenario(IntegrationTestScenario):
     """Test distributed task coordination across multiple agents."""
 
     def __init__(self):
+        """Initialize distributed task coordination test scenario."""
         super().__init__(
             "distributed_task_coordination",
             "Test coordination of complex tasks across multiple agents",
@@ -1366,6 +1377,11 @@ class ConcurrentOperationsPerformanceScenario(IntegrationTestScenario):
     """Test performance under concurrent multi-agent operations."""
 
     def __init__(self, concurrency_level: int = 10):
+        """Initialize concurrent operations performance scenario.
+
+        Args:
+            concurrency_level: Number of concurrent operations to test
+        """
         super().__init__(
             f"concurrent_operations_{concurrency_level}",
             f"Test performance with {concurrency_level} concurrent agent operations",
@@ -1470,7 +1486,7 @@ class ConcurrentOperationsPerformanceScenario(IntegrationTestScenario):
                     ]
                     if resources:
                         # Find nearest resource
-                        nearest = min(
+                        _nearest = min(
                             resources,
                             key=lambda r: np.linalg.norm(
                                 np.array(agent.position)
@@ -1481,7 +1497,7 @@ class ConcurrentOperationsPerformanceScenario(IntegrationTestScenario):
 
                 elif op_type == "communicate":
                     # Send status to other agents
-                    message = {
+                    _message = {
                         "from": agent.agent_id,
                         "position": agent.position,
                         "timestamp": time.time(),

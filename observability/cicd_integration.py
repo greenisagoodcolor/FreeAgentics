@@ -1,5 +1,5 @@
 """
-CI/CD Integration for FreeAgentics Production Monitoring
+CI/CD Integration for FreeAgentics Production Monitoring.
 
 This module provides integration with CI/CD pipelines for performance monitoring,
 automated testing, and deployment health checks.
@@ -9,7 +9,6 @@ import asyncio
 import json
 import logging
 import os
-import subprocess
 import time
 from dataclasses import dataclass, field
 from datetime import datetime, timedelta
@@ -719,9 +718,7 @@ async def run_performance_gates():
 
     try:
         # Start deployment
-        deployment = await cicd.start_deployment(
-            deployment_id, version, environment
-        )
+        await cicd.start_deployment(deployment_id, version, environment)
 
         # Validate deployment
         validation_passed, validation_result = await cicd.validate_deployment(

@@ -250,9 +250,7 @@ class TestMemoryOptimization(unittest.TestCase):
         gc_tuner = get_gc_tuner()
 
         # Test force collection
-        start_time = time.time()
         duration = gc_tuner.force_collection(0)
-        end_time = time.time()
 
         # Should complete quickly
         self.assertLess(duration, 100)  # Less than 100ms

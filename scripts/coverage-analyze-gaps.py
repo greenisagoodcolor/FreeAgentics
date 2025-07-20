@@ -67,7 +67,7 @@ class CoverageAnalyzer:
 
     def analyze_gaps(self) -> Dict[str, Any]:
         """Analyze coverage gaps and categorize them."""
-        gaps = {
+        gaps: Dict[str, Any] = {
             "summary": {},
             "critical_gaps": [],
             "zero_coverage": [],

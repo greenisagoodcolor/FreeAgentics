@@ -340,7 +340,7 @@ class TestCompleteAuthenticationFlows:
 
             # Step 6: Verify access token still works temporarily (until it expires naturally)
             # This is expected behavior - access tokens are stateless
-            me_response_after = self.tester.client.get(
+            _me_response_after = self.tester.client.get(
                 "/api/v1/auth/me", headers=headers
             )
             # Access token should still work as they're stateless JWTs

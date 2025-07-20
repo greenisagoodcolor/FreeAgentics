@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 """
-FreeAgentics GMN Integration Demo
+FreeAgentics GMN Integration Demo.
 
 This demo showcases the GMN (Generalized Notation Notation) integration:
 1. Creating agents from GMN specifications

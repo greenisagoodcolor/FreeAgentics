@@ -1,5 +1,5 @@
 """
-Production SSL/TLS Configuration for FreeAgentics
+Production SSL/TLS Configuration for FreeAgentics.
 
 Implements secure SSL/TLS configuration following security best practices
 for achieving A+ rating on SSL Labs.
@@ -8,8 +8,16 @@ for achieving A+ rating on SSL Labs.
 import logging
 import os
 import ssl
+import subprocess  # nosec B404
 from dataclasses import dataclass, field
-from typing import Dict, List, Optional, Set
+from typing import Any, Callable, Dict, List, Optional, Set
+
+try:
+    from cryptography import x509
+    from cryptography.x509.ocsp import OCSPRequestBuilder
+except ImportError:
+    x509 = None  # type: ignore[assignment]
+    OCSPRequestBuilder = None  # type: ignore[assignment,misc]
 
 logger = logging.getLogger(__name__)
 
@@ -72,7 +80,7 @@ class TLSConfiguration:
     # Security Options
     verify_mode: ssl.VerifyMode = ssl.CERT_REQUIRED
     check_hostname: bool = True
-    sni_callback: Optional[callable] = None
+    sni_callback: Optional[Callable] = None
 
     # Production Mode
     production_mode: bool = field(
@@ -85,6 +93,7 @@ class SSLContextBuilder:
     """Builder for creating secure SSL contexts."""
 
     def __init__(self, config: Optional[TLSConfiguration] = None):
+        """Initialize the SSL context builder."""
         self.config = config or TLSConfiguration()
 
     def create_server_context(self) -> ssl.SSLContext:
@@ -115,7 +124,9 @@ class SSLContextBuilder:
 
         # Configure session settings
         context.session_stats()
-        context.options |= ssl.OP_NO_SESSION_RESUMPTION_ON_RENEGOTIATION
+        # Note: OP_NO_SESSION_RESUMPTION_ON_RENEGOTIATION may not be available in all Python versions
+        if hasattr(ssl, 'OP_NO_SESSION_RESUMPTION_ON_RENEGOTIATION'):
+            context.options |= ssl.OP_NO_SESSION_RESUMPTION_ON_RENEGOTIATION
 
         # Disable insecure features
         context.options |= ssl.OP_NO_SSLv2
@@ -184,6 +195,7 @@ class OCSPStapler:
     """OCSP stapling implementation for certificate revocation checking."""
 
     def __init__(self, config: TLSConfiguration):
+        """Initialize the OCSP stapler."""
         self.config = config
         self.cache: Dict[str, tuple] = {}
 
@@ -193,10 +205,9 @@ class OCSPStapler:
             return None
 
         try:
-            import subprocess
-
-            from cryptography import x509
-            from cryptography.x509.ocsp import OCSPRequestBuilder
+            if x509 is None:
+                logger.error("cryptography library not available for OCSP")
+                return None
 
             # Load certificate
             with open(cert_path, "rb") as f:
@@ -211,7 +222,7 @@ class OCSPStapler:
 
             # Use OpenSSL to fetch OCSP response
             # In production, use a proper OCSP client library
-            cmd = [
+            cmd_parts = [
                 "openssl",
                 "ocsp",
                 "-issuer",
@@ -223,21 +234,28 @@ class OCSPStapler:
                 "-resp_text",
             ]
 
-            result = subprocess.run(cmd, capture_output=True, text=True)
+            # Filter out None values from cmd list
+            cmd: List[str] = [arg for arg in cmd_parts if arg is not None]
+            result = subprocess.run(cmd, capture_output=True, text=False)
             if result.returncode == 0:
                 logger.info("Successfully fetched OCSP response")
-                return result.stdout.encode()
+                return result.stdout
             else:
-                logger.error(f"Failed to fetch OCSP response: {result.stderr}")
+                logger.error(
+                    f"Failed to fetch OCSP response: {result.stderr.decode('utf-8', errors='replace')}"
+                )
                 return None
 
         except Exception as e:
             logger.error(f"Error fetching OCSP response: {e}")
             return None
 
-    def _get_ocsp_url(self, cert: "x509.Certificate") -> Optional[str]:
+    def _get_ocsp_url(self, cert: Any) -> Optional[str]:
         """Extract OCSP responder URL from certificate."""
         try:
+            if x509 is None:
+                return None
+
             aia = cert.extensions.get_extension_for_oid(
                 x509.oid.ExtensionOID.AUTHORITY_INFORMATION_ACCESS
             ).value
@@ -247,9 +265,9 @@ class OCSPStapler:
                     access.access_method
                     == x509.oid.AuthorityInformationAccessOID.OCSP
                 ):
-                    return access.access_location.value
+                    return str(access.access_location.value)
 
-        except x509.ExtensionNotFound:
+        except (AttributeError, KeyError):
             pass
 
         return self.config.ocsp_responder_url

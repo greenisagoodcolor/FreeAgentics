@@ -40,32 +40,56 @@ class MockAuthAPI:
         @self.app.post("/auth/login")
         async def login(request: Request, response: Response):
             # Apply security headers
-            apply_security_headers(response, self.security_headers_manager)
+            headers = self.security_headers_manager.get_security_headers(
+                request, response
+            )
+            for key, value in headers.items():
+                response.headers[key] = value
             return {"access_token": "mock_token", "token_type": "bearer"}
 
         @self.app.post("/auth/register")
         async def register(request: Request, response: Response):
-            apply_security_headers(response, self.security_headers_manager)
+            headers = self.security_headers_manager.get_security_headers(
+                request, response
+            )
+            for key, value in headers.items():
+                response.headers[key] = value
             return {"message": "User registered successfully"}
 
         @self.app.post("/auth/logout")
         async def logout(request: Request, response: Response):
-            apply_security_headers(response, self.security_headers_manager)
+            headers = self.security_headers_manager.get_security_headers(
+                request, response
+            )
+            for key, value in headers.items():
+                response.headers[key] = value
             return {"message": "Logged out successfully"}
 
         @self.app.post("/auth/refresh")
         async def refresh(request: Request, response: Response):
-            apply_security_headers(response, self.security_headers_manager)
+            headers = self.security_headers_manager.get_security_headers(
+                request, response
+            )
+            for key, value in headers.items():
+                response.headers[key] = value
             return {"access_token": "new_mock_token", "token_type": "bearer"}
 
         @self.app.post("/auth/password-reset")
         async def password_reset(request: Request, response: Response):
-            apply_security_headers(response, self.security_headers_manager)
+            headers = self.security_headers_manager.get_security_headers(
+                request, response
+            )
+            for key, value in headers.items():
+                response.headers[key] = value
             return {"message": "Password reset email sent"}
 
         @self.app.get("/auth/verify")
         async def verify_token(request: Request, response: Response):
-            apply_security_headers(response, self.security_headers_manager)
+            headers = self.security_headers_manager.get_security_headers(
+                request, response
+            )
+            for key, value in headers.items():
+                response.headers[key] = value
             return {"valid": True, "user_id": "test-user-123"}
 
         @self.app.middleware("http")
@@ -461,7 +485,7 @@ class TestAuthenticationSecurityHeaders:
         times_with_headers = []
         for _ in range(100):
             start = time.time()
-            response = self.client.post(
+            _response = self.client.post(
                 "/auth/login", json={"username": "test", "password": "test"}
             )
             times_with_headers.append(time.time() - start)

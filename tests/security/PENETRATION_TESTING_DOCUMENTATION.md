@@ -7,13 +7,13 @@ This document provides comprehensive documentation for the penetration testing f
 ## Table of Contents
 
 1. [Testing Framework Architecture](#testing-framework-architecture)
-2. [Test Coverage Areas](#test-coverage-areas)
-3. [Vulnerability Classification](#vulnerability-classification)
-4. [Proof of Concept Examples](#proof-of-concept-examples)
-5. [Remediation Guidelines](#remediation-guidelines)
-6. [Running the Tests](#running-the-tests)
-7. [Report Generation](#report-generation)
-8. [Integration with CI/CD](#integration-with-cicd)
+1. [Test Coverage Areas](#test-coverage-areas)
+1. [Vulnerability Classification](#vulnerability-classification)
+1. [Proof of Concept Examples](#proof-of-concept-examples)
+1. [Remediation Guidelines](#remediation-guidelines)
+1. [Running the Tests](#running-the-tests)
+1. [Report Generation](#report-generation)
+1. [Integration with CI/CD](#integration-with-cicd)
 
 ## Testing Framework Architecture
 
@@ -50,6 +50,7 @@ The framework follows industry-standard testing methodologies:
 **Scope**: Detection of sensitive information leakage through error messages
 
 **Test Categories**:
+
 - Database error information leakage
 - Stack trace exposure detection
 - Debug information disclosure
@@ -64,6 +65,7 @@ The framework follows industry-standard testing methodologies:
 **Scope**: Authentication mechanism security validation
 
 **Test Categories**:
+
 - Username enumeration attacks
 - Password policy disclosure
 - Account lockout information leakage
@@ -79,6 +81,7 @@ The framework follows industry-standard testing methodologies:
 **Scope**: Comprehensive API security testing
 
 **Test Categories**:
+
 - Security headers validation
 - Rate limiting response testing
 - CORS policy validation
@@ -95,6 +98,7 @@ The framework follows industry-standard testing methodologies:
 **Scope**: Production deployment security readiness
 
 **Test Categories**:
+
 - Debug mode disabled verification
 - Environment configuration validation
 - Security headers production readiness
@@ -112,6 +116,7 @@ The framework follows industry-standard testing methodologies:
 **Scope**: File upload functionality security validation
 
 **Test Categories**:
+
 - File extension validation and restrictions
 - File size limit enforcement
 - Malicious file content detection
@@ -128,6 +133,7 @@ The framework follows industry-standard testing methodologies:
 **Scope**: Directory traversal attack prevention
 
 **Test Categories**:
+
 - API parameter path traversal testing
 - Static file serving security
 - Template inclusion security
@@ -144,6 +150,7 @@ The framework follows industry-standard testing methodologies:
 ### Severity Levels
 
 #### Critical (Score Impact: -25 points each)
+
 - Remote code execution vulnerabilities
 - Authentication bypass
 - Complete system access
@@ -151,6 +158,7 @@ The framework follows industry-standard testing methodologies:
 - Database access without authentication
 
 #### High (Score Impact: -15 points each)
+
 - Information disclosure of sensitive data
 - Privilege escalation
 - File upload vulnerabilities
@@ -158,6 +166,7 @@ The framework follows industry-standard testing methodologies:
 - XSS vulnerabilities with significant impact
 
 #### Medium (Score Impact: -5 points each)
+
 - Security header misconfigurations
 - Minor information disclosure
 - Rate limiting issues
@@ -165,6 +174,7 @@ The framework follows industry-standard testing methodologies:
 - Directory listing enabled
 
 #### Low (Score Impact: -1 point each)
+
 - Version disclosure
 - Minor configuration issues
 - Informational findings
@@ -184,6 +194,7 @@ The framework follows industry-standard testing methodologies:
 **Vulnerability**: Unvalidated file path parameters
 
 **Proof of Concept**:
+
 ```bash
 # Attack vector
 curl "http://localhost:8000/api/v1/files?filename=../../../etc/passwd"
@@ -200,6 +211,7 @@ daemon:x:1:1:daemon:/usr/sbin:/usr/sbin/nologin
 ```
 
 **Remediation**:
+
 ```python
 import os
 from pathlib import Path
@@ -222,6 +234,7 @@ def validate_file_path(filename: str, allowed_dir: str) -> str:
 **Vulnerability**: Executable file upload with direct access
 
 **Proof of Concept**:
+
 ```bash
 # Upload malicious PHP file
 curl -X POST http://localhost:8000/api/v1/upload \
@@ -233,6 +246,7 @@ curl "http://localhost:8000/uploads/shell.php?cmd=whoami"
 ```
 
 **Remediation**:
+
 ```python
 ALLOWED_EXTENSIONS = {'.txt', '.pdf', '.jpg', '.png', '.gif'}
 MAX_FILE_SIZE = 10 * 1024 * 1024  # 10MB
@@ -261,6 +275,7 @@ def validate_upload(file: UploadFile) -> bool:
 **Vulnerability**: Database errors exposed to users
 
 **Proof of Concept**:
+
 ```bash
 # Trigger database error
 curl "http://localhost:8000/api/v1/users/'; DROP TABLE users; --"
@@ -275,6 +290,7 @@ HTTP/1.1 500 Internal Server Error
 ```
 
 **Remediation**:
+
 ```python
 def handle_database_error(e: Exception) -> HTTPException:
     """Safely handle database errors without information disclosure."""
@@ -293,13 +309,15 @@ def handle_database_error(e: Exception) -> HTTPException:
 ### Immediate Actions (Critical Vulnerabilities)
 
 1. **Stop Production Deployment**
+
    - Do not deploy any application with critical vulnerabilities
    - Conduct emergency security review
 
-2. **Implement Input Validation**
+1. **Implement Input Validation**
+
    ```python
    from pydantic import BaseModel, validator
-   
+
    class FileRequest(BaseModel):
        filename: str
        
@@ -310,7 +328,8 @@ def handle_database_error(e: Exception) -> HTTPException:
            return v
    ```
 
-3. **Secure Error Handling**
+1. **Secure Error Handling**
+
    ```python
    @app.exception_handler(Exception)
    async def global_exception_handler(request: Request, exc: Exception):
@@ -327,6 +346,7 @@ def handle_database_error(e: Exception) -> HTTPException:
 ### High Priority Actions
 
 1. **Implement Security Headers**
+
    ```python
    @app.middleware("http")
    async def security_headers_middleware(request: Request, call_next):
@@ -338,15 +358,16 @@ def handle_database_error(e: Exception) -> HTTPException:
        return response
    ```
 
-2. **Implement Rate Limiting**
+1. **Implement Rate Limiting**
+
    ```python
    from slowapi import Limiter, _rate_limit_exceeded_handler
    from slowapi.util import get_remote_address
-   
+
    limiter = Limiter(key_func=get_remote_address)
    app.state.limiter = limiter
    app.add_exception_handler(RateLimitExceeded, _rate_limit_exceeded_handler)
-   
+
    @app.post("/api/v1/login")
    @limiter.limit("5/minute")
    async def login(request: Request, credentials: LoginRequest):
@@ -354,10 +375,11 @@ def handle_database_error(e: Exception) -> HTTPException:
        pass
    ```
 
-3. **Secure File Upload**
+1. **Secure File Upload**
+
    ```python
    UPLOAD_DIR = "/var/app/uploads"  # Outside web root
-   
+
    async def upload_file(file: UploadFile):
        # Validate file
        validate_upload(file)
@@ -376,9 +398,10 @@ def handle_database_error(e: Exception) -> HTTPException:
 ### Medium Priority Actions
 
 1. **CORS Configuration**
+
    ```python
    from fastapi.middleware.cors import CORSMiddleware
-   
+
    app.add_middleware(
        CORSMiddleware,
        allow_origins=["https://freeagentics.com"],  # Specific origins only
@@ -388,7 +411,8 @@ def handle_database_error(e: Exception) -> HTTPException:
    )
    ```
 
-2. **Content Security Policy**
+1. **Content Security Policy**
+
    ```python
    CSP_POLICY = (
        "default-src 'self'; "
@@ -399,7 +423,7 @@ def handle_database_error(e: Exception) -> HTTPException:
        "connect-src 'self'; "
        "frame-ancestors 'none';"
    )
-   
+
    response.headers["Content-Security-Policy"] = CSP_POLICY
    ```
 
@@ -454,10 +478,12 @@ python tests/security/run_comprehensive_penetration_tests.py
 ### Report Types
 
 1. **JSON Report**: Machine-readable detailed results
+
    - File: `comprehensive_penetration_test_report_YYYYMMDD_HHMMSS.json`
    - Contains: Full test results, metadata, recommendations
 
-2. **HTML Report**: Human-readable formatted report
+1. **HTML Report**: Human-readable formatted report
+
    - File: `comprehensive_penetration_test_report_YYYYMMDD_HHMMSS.html`
    - Contains: Executive summary, visualizations, recommendations
 
@@ -533,16 +559,19 @@ jobs:
 Recommended quality gates for different environments:
 
 **Development**:
+
 - Critical issues: 0
 - High issues: ≤ 5
 - Security score: ≥ 60
 
 **Staging**:
+
 - Critical issues: 0
 - High issues: ≤ 2
 - Security score: ≥ 80
 
 **Production**:
+
 - Critical issues: 0
 - High issues: 0
 - Security score: ≥ 90
@@ -568,21 +597,25 @@ repos:
 ### Security Testing Guidelines
 
 1. **Regular Testing**
+
    - Run security tests on every commit
    - Perform comprehensive testing weekly
    - Conduct manual penetration testing quarterly
 
-2. **Test Environment Management**
+1. **Test Environment Management**
+
    - Use production-like test environments
    - Never run tests against production
    - Isolate test environments from production networks
 
-3. **Vulnerability Management**
+1. **Vulnerability Management**
+
    - Prioritize fixes based on CVSS scores
    - Track remediation progress
    - Validate fixes with regression testing
 
-4. **Documentation**
+1. **Documentation**
+
    - Document all vulnerabilities found
    - Maintain proof-of-concept examples
    - Update remediation guidelines regularly
@@ -592,30 +625,36 @@ repos:
 Some tests may generate false positives. Common scenarios:
 
 1. **Development vs Production Configurations**
+
    - Debug mode may be acceptable in development
    - Adjust test expectations based on environment
 
-2. **Business Requirements**
+1. **Business Requirements**
+
    - Some file types may be business-critical
    - Implement compensating controls instead of blocking
 
-3. **Framework Limitations**
+1. **Framework Limitations**
+
    - Some security headers may conflict with framework behavior
    - Implement alternative security measures
 
 ### Continuous Improvement
 
 1. **Test Coverage Enhancement**
+
    - Add new tests based on threat modeling
    - Update tests for new attack vectors
    - Incorporate security research findings
 
-2. **Automation Improvements**
+1. **Automation Improvements**
+
    - Reduce false positives through better detection
    - Improve test performance
    - Enhance reporting capabilities
 
-3. **Integration Enhancements**
+1. **Integration Enhancements**
+
    - Better CI/CD integration
    - Integration with security tools (SAST, DAST)
    - Integration with vulnerability management systems
@@ -626,7 +665,7 @@ This penetration testing framework provides comprehensive security validation fo
 
 For questions or additional security testing requirements, please refer to the security team or create an issue in the project repository.
 
----
+______________________________________________________________________
 
 **Last Updated**: 2024-01-15
 **Version**: 1.0.0

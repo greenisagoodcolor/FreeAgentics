@@ -12,102 +12,140 @@ import pytest
 
 # Mock classes for testing until the database models are implemented
 class MockSession:
+    """Mock database session for testing."""
+
     def add(self, obj):
+        """Add an object to the session."""
         pass
 
     def commit(self):
+        """Commit the current transaction."""
         pass
 
     def refresh(self, obj):
+        """Refresh an object from the database."""
         pass
 
     def query(self, model):
+        """Create a query for the given model."""
         return MockQuery()
 
     def rollback(self):
+        """Rollback the current transaction."""
         pass
 
     def close(self):
+        """Close the session."""
         pass
 
 
 class MockQuery:
+    """Mock query object for testing."""
+
     def filter(self, *args):
+        """Filter query results."""
         return self
 
     def first(self):
+        """Get the first result."""
         return None
 
     def all(self):
+        """Get all results."""
         return []
 
     def scalar(self):
+        """Get a scalar result."""
         return None
 
     def order_by(self, *args):
+        """Order query results."""
         return self
 
 
 class MockAgent:
+    """Mock agent for testing."""
+
     def __init__(self):
+        """Initialize mock agent with test data."""
         self.id = uuid.uuid4()
         self.name = "Test Agent"
         self.template = "explorer"
 
 
 class MockGMNRepository:
+    """Mock GMN repository for testing."""
+
     def __init__(self, db_session):
+        """Initialize repository with database session."""
         self.db = db_session
 
     def create_gmn_specification_versioned(self, **kwargs):
+        """Create a versioned GMN specification."""
         raise Exception("Method not implemented - this should fail")
 
     def create_new_version(self, **kwargs):
+        """Create a new version from an existing specification."""
         raise Exception("Method not implemented - this should fail")
 
     def get_version_lineage(self, agent_id):
+        """Get version lineage for an agent."""
         raise Exception("Method not implemented - this should fail")
 
     def rollback_to_version(self, **kwargs):
+        """Rollback to a specific version."""
         raise Exception("Method not implemented - this should fail")
 
     def compare_versions(self, **kwargs):
+        """Compare two versions."""
         raise Exception("Method not implemented - this should fail")
 
     def search_by_parsed_content(self, **kwargs):
+        """Search by parsed GMN content."""
         raise Exception("Method not implemented - this should fail")
 
     def get_by_complexity_range(self, **kwargs):
+        """Get specifications by complexity range."""
         raise Exception("Method not implemented - this should fail")
 
     def get_by_time_range(self, **kwargs):
+        """Get specifications by time range."""
         raise Exception("Method not implemented - this should fail")
 
     def get_detailed_statistics(self, **kwargs):
+        """Get detailed statistics for specifications."""
         raise Exception("Method not implemented - this should fail")
 
     def validate_data_integrity(self, **kwargs):
+        """Validate data integrity."""
         raise Exception("Method not implemented - this should fail")
 
     def detect_orphaned_versions(self, agent_id):
+        """Detect orphaned versions."""
         raise Exception("Method not implemented - this should fail")
 
     def repair_version_lineage(self, **kwargs):
+        """Repair broken version lineage."""
         raise Exception("Method not implemented - this should fail")
 
     def create_gmn_specification_with_validation(self, **kwargs):
+        """Create GMN specification with validation."""
         raise Exception("Method not implemented - this should fail")
 
     def bulk_create_specifications(self, **kwargs):
+        """Bulk create specifications."""
         raise Exception("Method not implemented - this should fail")
 
     def get_specifications_paginated(self, **kwargs):
+        """Get paginated specifications."""
         raise Exception("Method not implemented - this should fail")
 
     def get_agent_specifications_cached(self, **kwargs):
+        """Get cached agent specifications."""
         raise Exception("Method not implemented - this should fail")
 
     def analyze_query_performance(self, **kwargs):
+        """Analyze query performance."""
         raise Exception("Method not implemented - this should fail")
 
 

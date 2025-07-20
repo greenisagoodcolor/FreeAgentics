@@ -27,7 +27,7 @@ import numpy as np
 import pytest
 
 # Core components for GNN-LLM integration
-from inference.gnn.model import GNNModel
+from inference.gnn.model import GMNModel as GNNModel
 from inference.llm.local_llm_manager import LocalLLMManager
 
 logger = logging.getLogger(__name__)

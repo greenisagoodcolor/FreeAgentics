@@ -134,14 +134,10 @@ class MemoryBenchmarker:
             agent_id = f"agent_{i:03d}"
 
             # Register with lifecycle manager
-            profile = lifecycle_manager.register_agent(
-                agent_id, memory_limit_mb=15.0
-            )
+            lifecycle_manager.register_agent(agent_id, memory_limit_mb=15.0)
 
             # Create optimized agent data
-            with managed_agent_memory(
-                agent_id, memory_limit_mb=15.0
-            ) as memory_profile:
+            with managed_agent_memory(agent_id, memory_limit_mb=15.0):
                 agent_data = {
                     # Compressed sparse beliefs (float32)
                     "beliefs": LazyBeliefArray((50, 50), dtype=np.float32),
@@ -505,7 +501,7 @@ def main():
         print("-" * 40)
         baseline_result = benchmarker.create_baseline_agent_simulation(10)
 
-        print(f"Baseline Results:")
+        print("Baseline Results:")
         print(f"  Total memory: {baseline_result['total_memory_mb']:.2f} MB")
         print(
             f"  Memory per agent: {baseline_result['memory_per_agent_mb']:.2f} MB"
@@ -516,7 +512,7 @@ def main():
         print("-" * 40)
         optimized_result = benchmarker.create_optimized_agent_simulation(10)
 
-        print(f"Optimized Results:")
+        print("Optimized Results:")
         print(f"  Total memory: {optimized_result['total_memory_mb']:.2f} MB")
         print(
             f"  Memory per agent: {optimized_result['memory_per_agent_mb']:.2f} MB"
@@ -529,7 +525,7 @@ def main():
             baseline_result, optimized_result
         )
 
-        print(f"Validation Results:")
+        print("Validation Results:")
         print(
             f"  Memory reduction: {validation['reduction_mb']:.2f} MB ({validation['reduction_percent']:.1f}%)"
         )
@@ -544,7 +540,7 @@ def main():
         print("-" * 40)
         density_results = benchmarker.test_agent_density_limits()
 
-        print(f"Density Test Results:")
+        print("Density Test Results:")
         print(
             f"  Max successful agents: {density_results['max_successful_agents']}"
         )
@@ -552,7 +548,7 @@ def main():
             f"  Density improvement: {density_results['density_improvement']:.1f}x"
         )
 
-        print(f"\nDetailed Results:")
+        print("\nDetailed Results:")
         for result in density_results["test_results"]:
             status = "✓" if result["success"] else "✗"
             print(
@@ -566,22 +562,22 @@ def main():
         print("-" * 40)
         perf_results = benchmarker.benchmark_performance_impact()
 
-        print(f"Performance Results:")
+        print("Performance Results:")
 
         belief_perf = perf_results["belief_operations"]
-        print(f"  Belief Operations:")
+        print("  Belief Operations:")
         print(
-            f"    Memory reduction: {belief_perf['dense_memory_mb']/belief_perf['optimized_memory_mb']:.1f}x"
+            f"    Memory reduction: {belief_perf['dense_memory_mb'] / belief_perf['optimized_memory_mb']:.1f}x"
         )
         print(f"    Performance impact: {belief_perf['speedup_factor']:.2f}x")
 
         matrix_perf = perf_results["matrix_operations"]
-        print(f"  Matrix Operations:")
+        print("  Matrix Operations:")
         print(f"    Overhead factor: {matrix_perf['overhead_factor']:.2f}x")
         print(f"    Pool hit rate: {matrix_perf['pool_hit_rate']:.1%}")
 
         action_perf = perf_results["action_operations"]
-        print(f"  Action Operations:")
+        print("  Action Operations:")
         print(
             f"    Memory reduction: {action_perf['memory_reduction_factor']:.1f}x"
         )
@@ -600,7 +596,7 @@ def main():
 
         overall_score = (memory_score + density_score + performance_score) / 3
 
-        print(f"Assessment Scores:")
+        print("Assessment Scores:")
         print(f"  Memory Optimization: {memory_score:.1f}/10")
         print(f"  Agent Density: {density_score:.1f}/10")
         print(f"  Performance Impact: {performance_score:.1f}/10")
@@ -643,7 +639,7 @@ def main():
             f"Max agent density: {density_results['max_successful_agents']} agents"
         )
         print(
-            f"Performance impact: Minimal overhead with significant memory savings"
+            "Performance impact: Minimal overhead with significant memory savings"
         )
 
         return {

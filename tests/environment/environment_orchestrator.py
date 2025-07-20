@@ -15,7 +15,7 @@ import docker
 import yaml
 
 from .environment_manager import EnvironmentManager
-from .test_isolation import IsolationLevel, TestIsolation
+from .test_isolation import IsolationLevel, IsolationTester
 
 logger = logging.getLogger(__name__)
 
@@ -50,7 +50,7 @@ class ResourcePool:
 
 
 @dataclass
-class TestEnvironmentSpec:
+class EnvironmentTestSpec:
     """Test environment specification."""
 
     name: str
@@ -171,9 +171,9 @@ class EnvironmentOrchestrator:
             "filesystem_base": "/tmp/test_isolation",
         }
 
-        self.isolation_manager = TestIsolation(isolation_config)
+        self.isolation_manager = IsolationTester(isolation_config)
 
-    def create_environment(self, spec: TestEnvironmentSpec) -> str:
+    def create_environment(self, spec: EnvironmentTestSpec) -> str:
         """Create a new test environment based on specification."""
         with self._lock:
             env_id = f"{spec.name}_{int(time.time())}"
@@ -219,7 +219,7 @@ class EnvironmentOrchestrator:
                 logger.error(f"Error creating environment {env_id}: {e}")
                 raise
 
-    def _allocate_resources(self, spec: TestEnvironmentSpec) -> Dict[str, Any]:
+    def _allocate_resources(self, spec: EnvironmentTestSpec) -> Dict[str, Any]:
         """Allocate resources from pools for the environment."""
         allocated = {}
 
@@ -288,7 +288,7 @@ class EnvironmentOrchestrator:
                 return False
 
     @contextmanager
-    def environment(self, spec: TestEnvironmentSpec):
+    def environment(self, spec: EnvironmentTestSpec):
         """Context manager for test environment."""
         env_id = self.create_environment(spec)
         try:
@@ -378,7 +378,7 @@ class EnvironmentOrchestrator:
         return True
 
     def run_parallel_tests(
-        self, specs: List[TestEnvironmentSpec]
+        self, specs: List[EnvironmentTestSpec]
     ) -> Dict[str, Any]:
         """Run multiple test environments in parallel."""
         results = {}
@@ -398,7 +398,7 @@ class EnvironmentOrchestrator:
         return results
 
     def _run_single_environment(
-        self, spec: TestEnvironmentSpec
+        self, spec: EnvironmentTestSpec
     ) -> Dict[str, Any]:
         """Run a single test environment."""
         try:
@@ -437,7 +437,7 @@ class EnvironmentOrchestrator:
                     try:
                         volume.remove()
                         cleanup_results["volumes"] += 1
-                    except:
+                    except Exception:
                         pass  # Volume might be in use
 
             # Clean up test networks
@@ -447,7 +447,7 @@ class EnvironmentOrchestrator:
                     try:
                         network.remove()
                         cleanup_results["networks"] += 1
-                    except:
+                    except Exception:
                         pass  # Network might be in use
 
             # Clean up dangling images
@@ -456,7 +456,7 @@ class EnvironmentOrchestrator:
                 try:
                     self.docker_client.images.remove(image.id)
                     cleanup_results["images"] += 1
-                except:
+                except Exception:
                     pass
 
             # Clean up isolation resources
@@ -523,7 +523,7 @@ class EnvironmentOrchestrator:
 
 
 # Environment profile factory functions
-def create_unit_test_spec(name: str, **kwargs) -> TestEnvironmentSpec:
+def create_unit_test_spec(name: str, **kwargs) -> EnvironmentTestSpec:
     """Create a unit test environment specification."""
     defaults = {
         "profile": EnvironmentProfile.UNIT,
@@ -534,10 +534,10 @@ def create_unit_test_spec(name: str, **kwargs) -> TestEnvironmentSpec:
         "timeout": 60,
     }
     defaults.update(kwargs)
-    return TestEnvironmentSpec(name=name, **defaults)
+    return EnvironmentTestSpec(name=name, **defaults)
 
 
-def create_integration_test_spec(name: str, **kwargs) -> TestEnvironmentSpec:
+def create_integration_test_spec(name: str, **kwargs) -> EnvironmentTestSpec:
     """Create an integration test environment specification."""
     defaults = {
         "profile": EnvironmentProfile.INTEGRATION,
@@ -548,10 +548,10 @@ def create_integration_test_spec(name: str, **kwargs) -> TestEnvironmentSpec:
         "timeout": 120,
     }
     defaults.update(kwargs)
-    return TestEnvironmentSpec(name=name, **defaults)
+    return EnvironmentTestSpec(name=name, **defaults)
 
 
-def create_e2e_test_spec(name: str, **kwargs) -> TestEnvironmentSpec:
+def create_e2e_test_spec(name: str, **kwargs) -> EnvironmentTestSpec:
     """Create an end-to-end test environment specification."""
     defaults = {
         "profile": EnvironmentProfile.E2E,
@@ -562,10 +562,10 @@ def create_e2e_test_spec(name: str, **kwargs) -> TestEnvironmentSpec:
         "timeout": 300,
     }
     defaults.update(kwargs)
-    return TestEnvironmentSpec(name=name, **defaults)
+    return EnvironmentTestSpec(name=name, **defaults)
 
 
-def create_performance_test_spec(name: str, **kwargs) -> TestEnvironmentSpec:
+def create_performance_test_spec(name: str, **kwargs) -> EnvironmentTestSpec:
     """Create a performance test environment specification."""
     defaults = {
         "profile": EnvironmentProfile.PERFORMANCE,
@@ -582,4 +582,4 @@ def create_performance_test_spec(name: str, **kwargs) -> TestEnvironmentSpec:
         "timeout": 600,
     }
     defaults.update(kwargs)
-    return TestEnvironmentSpec(name=name, **defaults)
+    return EnvironmentTestSpec(name=name, **defaults)

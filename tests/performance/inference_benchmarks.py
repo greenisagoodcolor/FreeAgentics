@@ -17,7 +17,8 @@ import numpy as np
 import pymdp
 from pymdp import utils
 from pymdp.agent import Agent as PyMDPAgent
-from pymdp.maths import log_stable, softmax, spm_dot
+from pymdp.maths import softmax, spm_dot
+from pymdp.maths import spm_log_single as log_stable
 
 from tests.performance.pymdp_benchmarks import BenchmarkResult, PyMDPBenchmark
 

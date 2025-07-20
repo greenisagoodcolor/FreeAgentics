@@ -77,6 +77,7 @@ describe("ConversationPanel - Working Implementation", () => {
     conversationId: "conv-123",
     currentUser: mockCurrentUser,
     agents: mockAgents,
+    messages: [],
   };
 
   beforeEach(() => {
@@ -316,7 +317,7 @@ describe("ConversationPanel - Working Implementation", () => {
     const user = userEvent.setup();
     const onMessageSent = jest.fn();
 
-    render(<ConversationPanel {...defaultProps} onMessageSent={onMessageSent} />);
+    render(<ConversationPanel {...defaultProps} onSendMessage={onMessageSent} />);
 
     const textarea = screen.getByPlaceholderText("Type your message...");
     await user.type(textarea, "Test message");

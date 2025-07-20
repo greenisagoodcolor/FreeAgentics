@@ -688,7 +688,7 @@ class TestAuthenticationEdgeCases:
                 "role": "observer",
             }
 
-            response = client.post("/api/v1/auth/register", json=data)
+            _response = client.post("/api/v1/auth/register", json=data)
             # Depending on implementation, might accept or reject
             # This test documents the behavior
 
@@ -701,7 +701,7 @@ class TestAuthenticationEdgeCases:
             "role": "observer",
         }
 
-        response = client.post("/api/v1/auth/register", json=unicode_data)
+        _response = client.post("/api/v1/auth/register", json=unicode_data)
         # Document behavior with unicode
 
     def test_long_input_fields(self, client):
@@ -715,7 +715,7 @@ class TestAuthenticationEdgeCases:
             "role": "observer",
         }
 
-        response = client.post("/api/v1/auth/register", json=data)
+        _response = client.post("/api/v1/auth/register", json=data)
         # Should handle gracefully, either truncate or reject
 
     def test_null_and_empty_fields(self, client):

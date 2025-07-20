@@ -19,8 +19,7 @@ from database.models import (
     CoalitionStatus,
 )
 from tests.db_infrastructure.factories import AgentFactory, CoalitionFactory
-from tests.db_infrastructure.fixtures import db_session
-from tests.db_infrastructure.test_config import DatabaseTestCase
+from tests.db_infrastructure.fixtures import DatabaseTestCase, db_session
 
 
 class TestCoalitionDatabase(DatabaseTestCase):
@@ -383,7 +382,7 @@ class TestCoalitionDatabase(DatabaseTestCase):
         # 1. Find all active coalitions with more than 5 members
         from sqlalchemy import func
 
-        active_large_coalitions = (
+        _active_large_coalitions = (
             db_session.query(Coalition)
             .join(Coalition.agents)
             .filter(Coalition.status == CoalitionStatus.ACTIVE)

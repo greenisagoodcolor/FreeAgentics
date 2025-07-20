@@ -1,4 +1,4 @@
-"""Add MFA support
+"""Add MFA support.
 
 Revision ID: add_mfa_support
 Revises: c42749d3c630
@@ -9,7 +9,7 @@ Create Date: 2025-01-16 12:00:00.000000
 import sqlalchemy as sa
 from sqlalchemy.dialects import postgresql
 
-from alembic import op
+from alembic import op  # type: ignore[attr-defined]
 
 # revision identifiers, used by Alembic.
 revision = "add_mfa_support"

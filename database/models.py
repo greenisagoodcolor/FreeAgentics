@@ -82,40 +82,36 @@ class Agent(Base):
     __tablename__ = "agents"
 
     # Primary key
-    id: Column[uuid.UUID] = Column(
-        GUID(), primary_key=True, default=uuid.uuid4
-    )
+    id: Column[str] = Column(GUID(), primary_key=True, default=uuid.uuid4)
 
     # Basic properties
-    name: Column[str] = Column(String(100), nullable=False)
-    template: Column[str] = Column(String(50), nullable=False)
+    name = Column(String(100), nullable=False)
+    template = Column(String(50), nullable=False)
     status: Column[AgentStatus] = Column(
         Enum(AgentStatus), default=AgentStatus.PENDING
     )
 
     # Active Inference specific
-    gmn_spec: Column[Optional[str]] = Column(Text, nullable=True)
-    pymdp_config: Column[dict] = Column(JSON, default=dict)
-    beliefs: Column[dict] = Column(JSON, default=dict)
-    preferences: Column[dict] = Column(JSON, default=dict)
+    gmn_spec = Column(Text, nullable=True)
+    pymdp_config = Column(JSON, default=dict)
+    beliefs = Column(JSON, default=dict)
+    preferences = Column(JSON, default=dict)
 
     # Metrics and state
-    position: Column[list] = Column(
-        JSON, nullable=True
-    )  # For grid world agents
-    metrics: Column[dict] = Column(JSON, default=dict)
-    parameters: Column[dict] = Column(JSON, default=dict)
+    position = Column(JSON, nullable=True)  # For grid world agents
+    metrics = Column(JSON, default=dict)
+    parameters = Column(JSON, default=dict)
 
     # Timestamps
-    created_at: Column[datetime] = Column(DateTime, server_default=func.now())
-    last_active: Column[Optional[datetime]] = Column(DateTime, nullable=True)
-    updated_at: Column[datetime] = Column(
+    created_at = Column(DateTime, server_default=func.now())
+    last_active = Column(DateTime, nullable=True)
+    updated_at = Column(
         DateTime, server_default=func.now(), onupdate=func.now()
     )
 
     # Statistics
-    inference_count: Column[int] = Column(Integer, default=0)
-    total_steps: Column[int] = Column(Integer, default=0)
+    inference_count = Column(Integer, default=0)
+    total_steps = Column(Integer, default=0)
 
     # Relationships
     coalitions = relationship(
@@ -157,30 +153,28 @@ class Coalition(Base):
     __tablename__ = "coalitions"
 
     # Primary key
-    id: Column[uuid.UUID] = Column(
-        GUID(), primary_key=True, default=uuid.uuid4
-    )
+    id: Column[str] = Column(GUID(), primary_key=True, default=uuid.uuid4)
 
     # Basic properties
-    name: Column[str] = Column(String(100), nullable=False)
-    description: Column[Optional[str]] = Column(Text, nullable=True)
+    name = Column(String(100), nullable=False)
+    description = Column(Text, nullable=True)
     status: Column[CoalitionStatus] = Column(
         Enum(CoalitionStatus), default=CoalitionStatus.FORMING
     )
 
     # Coalition objectives and capabilities
-    objectives: Column[dict] = Column(JSON, default=dict)
-    required_capabilities: Column[list] = Column(JSON, default=list)
-    achieved_objectives: Column[list] = Column(JSON, default=list)
+    objectives = Column(JSON, default=dict)
+    required_capabilities = Column(JSON, default=list)
+    achieved_objectives = Column(JSON, default=list)
 
     # Coalition metrics
-    performance_score: Column[float] = Column(Float, default=0.0)
-    cohesion_score: Column[float] = Column(Float, default=1.0)
+    performance_score = Column(Float, default=0.0)
+    cohesion_score = Column(Float, default=1.0)
 
     # Timestamps
-    created_at: Column[datetime] = Column(DateTime, server_default=func.now())
-    dissolved_at: Column[Optional[datetime]] = Column(DateTime, nullable=True)
-    updated_at: Column[datetime] = Column(
+    created_at = Column(DateTime, server_default=func.now())
+    dissolved_at = Column(DateTime, nullable=True)
+    updated_at = Column(
         DateTime, server_default=func.now(), onupdate=func.now()
     )
 
@@ -221,32 +215,30 @@ class KnowledgeNode(Base):
     __tablename__ = "db_knowledge_nodes"
 
     # Primary key
-    id: Column[uuid.UUID] = Column(
-        GUID(), primary_key=True, default=uuid.uuid4
-    )
+    id: Column[str] = Column(GUID(), primary_key=True, default=uuid.uuid4)
 
     # Node properties
-    type: Column[str] = Column(String(50), nullable=False)
-    label: Column[str] = Column(String(200), nullable=False)
-    properties: Column[dict] = Column(JSON, default=dict)
+    type = Column(String(50), nullable=False)
+    label = Column(String(200), nullable=False)
+    properties = Column(JSON, default=dict)
 
     # Versioning
-    version: Column[int] = Column(Integer, default=1)
-    is_current: Column[bool] = Column(Boolean, default=True)
+    version = Column(Integer, default=1)
+    is_current = Column(Boolean, default=True)
 
     # Confidence and source
-    confidence: Column[float] = Column(Float, default=1.0)
-    source: Column[Optional[str]] = Column(String(100), nullable=True)
+    confidence = Column(Float, default=1.0)
+    source = Column(String(100), nullable=True)
 
     # Creator agent relationship
-    creator_agent_id: Column[Optional[uuid.UUID]] = Column(
+    creator_agent_id: Column[Optional[str]] = Column(
         GUID(), ForeignKey("agents.id"), nullable=True
     )
     creator_agent = relationship("Agent", back_populates="knowledge_nodes")
 
     # Timestamps
-    created_at: Column[datetime] = Column(DateTime, server_default=func.now())
-    updated_at: Column[datetime] = Column(
+    created_at = Column(DateTime, server_default=func.now())
+    updated_at = Column(
         DateTime, server_default=func.now(), onupdate=func.now()
     )
 
@@ -274,25 +266,23 @@ class KnowledgeEdge(Base):
     __tablename__ = "db_knowledge_edges"
 
     # Primary key
-    id: Column[uuid.UUID] = Column(
-        GUID(), primary_key=True, default=uuid.uuid4
-    )
+    id: Column[str] = Column(GUID(), primary_key=True, default=uuid.uuid4)
 
     # Edge endpoints
-    source_id: Column[uuid.UUID] = Column(
+    source_id: Column[str] = Column(
         GUID(), ForeignKey("db_knowledge_nodes.id")
     )
-    target_id: Column[uuid.UUID] = Column(
+    target_id: Column[str] = Column(
         GUID(), ForeignKey("db_knowledge_nodes.id")
     )
 
     # Edge properties
-    type: Column[str] = Column(String(50), nullable=False)
-    properties: Column[dict] = Column(JSON, default=dict)
-    confidence: Column[float] = Column(Float, default=1.0)
+    type = Column(String(50), nullable=False)
+    properties = Column(JSON, default=dict)
+    confidence = Column(Float, default=1.0)
 
     # Timestamps
-    created_at: Column[datetime] = Column(DateTime, server_default=func.now())
+    created_at = Column(DateTime, server_default=func.now())
 
     # Relationships
     source_node = relationship(

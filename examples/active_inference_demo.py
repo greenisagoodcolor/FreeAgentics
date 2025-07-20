@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 """
-Active Inference Demo with PyMDP
+Active Inference Demo with PyMDP.
 Demonstrates real Active Inference agents using inferactively-pymdp
 """
 
@@ -24,6 +24,7 @@ class ActiveInferenceWorld:
     """A grid world for Active Inference agents."""
 
     def __init__(self, width: int = 8, height: int = 8):
+        """Initialize the Active Inference world."""
         self.width = width
         self.height = height
         self.agents: Dict[str, BasicExplorerAgent] = {}

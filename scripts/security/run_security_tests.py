@@ -8,14 +8,14 @@ import subprocess
 import sys
 import time
 from pathlib import Path
-from typing import Dict, List, Tuple
+from typing import Any, Dict, List, Tuple
 
 
 class SecurityTestRunner:
     """Run comprehensive security tests."""
 
     def __init__(self):
-        self.results = {
+        self.results: Dict[str, Any] = {
             "tests_run": 0,
             "tests_passed": 0,
             "tests_failed": 0,
@@ -331,7 +331,7 @@ class SecurityTestRunner:
         print("  ⚠ Compliance checks not available")
         return True
 
-    def generate_report(self) -> Dict:
+    def generate_report(self) -> Dict[Any, Any]:
         """Generate security test report."""
         self.results["end_time"] = time.time()
         self.results["duration"] = (
@@ -393,7 +393,7 @@ class SecurityTestRunner:
         print(f"\nDetailed report saved to: security-test-report.json")
 
         # Exit with appropriate code
-        return report["tests_failed"] == 0
+        return bool(report["tests_failed"] == 0)
 
 
 if __name__ == "__main__":

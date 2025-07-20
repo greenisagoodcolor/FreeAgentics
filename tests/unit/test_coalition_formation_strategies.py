@@ -460,7 +460,7 @@ class TestOptimalFormation:
         agents = [
             AgentProfile(
                 agent_id=f"agent_{i:03d}",
-                capabilities=[f"skill_{i%3}"],
+                capabilities=[f"skill_{i % 3}"],
                 capacity=0.8,
                 reputation=0.9,
                 preferences={},
@@ -474,7 +474,7 @@ class TestOptimalFormation:
             obj = Mock(spec=CoalitionObjective)
             obj.objective_id = f"obj_{i}"
             obj.description = f"Objective {i}"
-            obj.required_capabilities = [f"skill_{i%3}"]
+            obj.required_capabilities = [f"skill_{i % 3}"]
             obj.priority = 1.0
             objectives.append(obj)
 

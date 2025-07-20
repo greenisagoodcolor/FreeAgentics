@@ -9,9 +9,9 @@ from tests.environment.test_isolation import (
     DatabaseIsolation,
     FilesystemIsolation,
     IsolationLevel,
+    IsolationTester,
     MessageQueueIsolation,
     RedisIsolation,
-    TestIsolation,
 )
 
 
@@ -268,11 +268,12 @@ class TestFilesystemIsolation:
     def test_cleanup_sandbox(self, fs_isolation):
         """Test cleaning up a sandbox."""
         with patch("shutil.rmtree") as mock_rmtree:
-            fs_isolation.cleanup_sandbox("/tmp/test_sandbox")
+            with patch("pathlib.Path.exists", return_value=True):
+                fs_isolation.cleanup_sandbox("/tmp/test_sandbox")
 
-            mock_rmtree.assert_called_with(
-                "/tmp/test_sandbox", ignore_errors=True
-            )
+                mock_rmtree.assert_called_with(
+                    Path("/tmp/test_sandbox"), ignore_errors=True
+                )
 
     def test_context_manager(self, fs_isolation):
         """Test using filesystem isolation as context manager."""
@@ -287,7 +288,7 @@ class TestFilesystemIsolation:
 
     def test_copy_to_sandbox(self, fs_isolation):
         """Test copying files to sandbox."""
-        with patch("shutil.copytree") as mock_copytree:
+        with patch("shutil.copytree") as _mock_copytree:
             with patch("shutil.copy2") as mock_copy2:
                 with patch("os.path.isdir") as mock_isdir:
                     mock_isdir.return_value = False
@@ -297,7 +298,7 @@ class TestFilesystemIsolation:
                     )
 
                     mock_copy2.assert_called_with(
-                        "/source/file.txt", Path("/tmp/sandbox/dest.txt")
+                        Path("/source/file.txt"), Path("/tmp/sandbox/dest.txt")
                     )
 
 
@@ -323,7 +324,7 @@ class TestTestIsolation:
                 "password": "test",
             },
         }
-        return TestIsolation(config)
+        return IsolationTester(config)
 
     def test_isolate_all(self, test_isolation):
         """Test isolating all resources."""

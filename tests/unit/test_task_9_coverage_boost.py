@@ -19,10 +19,10 @@ class TestGNNBasicCoverage:
     def test_gnn_model_initialization(self):
         """Test basic GNN model initialization."""
         try:
-            from inference.gnn.model import GNNModel
+            from inference.gnn.model import GMNModel
 
             # Test basic initialization
-            model = GNNModel()
+            model = GMNModel(config={})
             assert model is not None
 
         except ImportError:
@@ -122,9 +122,9 @@ class TestKnowledgeGraphBasicCoverage:
     def test_graph_engine_initialization(self):
         """Test basic graph engine initialization."""
         try:
-            from knowledge_graph.graph_engine import GraphEngine
+            from knowledge_graph.graph_engine import KnowledgeGraph
 
-            engine = GraphEngine()
+            engine = KnowledgeGraph()
             assert engine is not None
 
         except ImportError:

@@ -11,8 +11,8 @@ This module implements compression techniques identified in Task 5.2:
 
 import logging
 from collections import deque
-from dataclasses import dataclass
-from typing import Any, Dict, List, Optional, Tuple
+from dataclasses import dataclass, field
+from typing import Any, Dict, List, Optional, Set, Tuple
 
 import numpy as np
 from scipy import sparse
@@ -27,7 +27,7 @@ class SparseBeliefState:
     data: np.ndarray  # Non-zero values
     indices: np.ndarray  # Flat indices of non-zero values
     shape: Tuple[int, ...]  # Original shape
-    dtype: np.dtype = np.float32
+    dtype: np.dtype = field(default_factory=lambda: np.dtype(np.float32))
 
     @property
     def nnz(self) -> int:
@@ -74,10 +74,10 @@ class BeliefCompressor:
             sparsity_threshold: Minimum sparsity ratio to use compression (default 0.9 = 90% zeros)
         """
         self.sparsity_threshold = sparsity_threshold
-        self._component_cache = {}
+        self._component_cache: Dict[str, Any] = {}
 
     def compress(
-        self, belief: np.ndarray, dtype: np.dtype = np.float32
+        self, belief: np.ndarray, dtype: np.dtype = np.dtype(np.float32)
     ) -> SparseBeliefState:
         """Compress a belief state to sparse format.
 
@@ -92,7 +92,6 @@ class BeliefCompressor:
         belief = belief.astype(dtype)
 
         # Find non-zero elements
-        nonzero_mask = belief != 0
         sparsity = 1 - (np.count_nonzero(belief) / belief.size)
 
         if sparsity < self.sparsity_threshold:
@@ -226,7 +225,7 @@ class BeliefCompressor:
         compressed = []
 
         # Group by shape for potential optimization
-        shape_groups = {}
+        shape_groups: Dict[Tuple[int, ...], List[Tuple[int, np.ndarray]]] = {}
         for i, belief in enumerate(beliefs):
             shape = belief.shape
             if shape not in shape_groups:
@@ -234,7 +233,7 @@ class BeliefCompressor:
             shape_groups[shape].append((i, belief))
 
         # Compress each group
-        for shape, group in shape_groups.items():
+        for _shape, group in shape_groups.items():
             # Could implement further optimizations here
             for idx, belief in group:
                 compressed.append((idx, self.compress(belief)))
@@ -251,7 +250,7 @@ class CompressedBeliefPool:
         self,
         pool_size: int,
         belief_shape: Tuple[int, ...],
-        dtype: np.dtype = np.float32,
+        dtype: np.dtype = np.dtype(np.float32),
     ):
         """Initialize belief pool.
 
@@ -263,8 +262,8 @@ class CompressedBeliefPool:
         self.pool_size = pool_size
         self.belief_shape = belief_shape
         self.dtype = dtype
-        self.available = deque(maxlen=pool_size)
-        self.in_use = set()
+        self.available: deque = deque(maxlen=pool_size)
+        self.in_use: Set[int] = set()
 
         # Pre-allocate pool
         self._initialize_pool()
@@ -288,7 +287,7 @@ class CompressedBeliefPool:
             Available sparse belief state
         """
         if self.available:
-            belief = self.available.popleft()
+            belief: SparseBeliefState = self.available.popleft()
         else:
             # Pool exhausted, create new one
             logger.warning("Belief pool exhausted, creating new belief")

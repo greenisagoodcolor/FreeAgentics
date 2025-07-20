@@ -425,7 +425,7 @@ class ComprehensiveOWASPAssessment:
                     print(
                         "  ⚠ pip-audit not available - install for automated scanning"
                     )
-            except:
+            except Exception:
                 print(
                     "  ⚠ pip-audit not available - install for automated scanning"
                 )
@@ -642,8 +642,8 @@ class ComprehensiveOWASPAssessment:
             "LOW": 0,
         }
 
-        category_counts = {}
-        file_counts = {}
+        category_counts: Dict[str, int] = {}
+        file_counts: Dict[str, int] = {}
 
         for finding in self.findings:
             severity_counts[finding["severity"]] += 1

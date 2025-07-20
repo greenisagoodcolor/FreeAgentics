@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 """
-FreeAgentics Comprehensive Demo
+FreeAgentics Comprehensive Demo.
 
 This demo showcases the real Active Inference implementation using PyMDP.
 It demonstrates:

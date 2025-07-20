@@ -12,7 +12,7 @@ import tempfile
 import time
 from datetime import datetime
 from pathlib import Path
-from typing import List, Tuple
+from typing import Any, Dict, List, Tuple
 
 
 class DockerValidationError(Exception):
@@ -26,7 +26,7 @@ class DockerProductionValidator:
 
     def __init__(self, project_root: str = None):
         self.project_root = Path(project_root or os.getcwd())
-        self.results = {
+        self.results: Dict[str, Any] = {
             "timestamp": datetime.now().isoformat(),
             "validation_results": {},
             "security_results": {},
@@ -237,7 +237,7 @@ class DockerProductionValidator:
             container_name,
             "--read-only",
             "--tmpfs",
-            "/tmp",
+            "/tmp",  # nosec B108 - Secure tmpfs mount in Docker
             "--user",
             "1000:1000",
             "--security-opt",

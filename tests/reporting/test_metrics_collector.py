@@ -81,7 +81,7 @@ class MetricsCollector:
     def __init__(self, db_path: str = "tests/reporting/test_metrics.db"):
         self.db_path = Path(db_path)
         self.db_path.parent.mkdir(parents=True, exist_ok=True)
-        self.current_metrics: List[TestMetric] = []
+        self.current_metrics: List[ExecutionMetric] = []
         self.suite_start_time: Optional[float] = None
         self.test_start_times: Dict[str, float] = {}
         self._init_database()
@@ -235,7 +235,7 @@ class MetricsCollector:
 
         self.current_metrics.append(metric)
 
-    def end_test_suite(self) -> TestSuiteMetrics:
+    def end_test_suite(self) -> SuiteMetrics:
         """End test suite metrics collection."""
         end_time = time.time()
         total_duration = end_time - (self.suite_start_time or end_time)
@@ -269,7 +269,7 @@ class MetricsCollector:
 
         return suite_metrics
 
-    def _store_suite_metrics(self, suite_metrics: TestSuiteMetrics):
+    def _store_suite_metrics(self, suite_metrics: SuiteMetrics):
         """Store suite metrics in database."""
         conn = sqlite3.connect(self.db_path)
         cursor = conn.cursor()

@@ -162,7 +162,8 @@ class FormationStrategy(ABC):
 class GreedyFormation(FormationStrategy):
     """Greedy coalition formation strategy."""
 
-    def __init__(self):
+    def __init__(self) -> None:
+        """Initialize the greedy formation strategy."""
         super().__init__("Greedy Formation")
 
     def form_coalitions(
@@ -315,6 +316,7 @@ class OptimalFormation(FormationStrategy):
     """Optimal coalition formation using exhaustive search (for small problems)."""
 
     def __init__(self, max_search_size: int = 8):
+        """Initialize the optimal formation strategy."""
         super().__init__("Optimal Formation")
         self.max_search_size = max_search_size
 
@@ -399,7 +401,7 @@ class OptimalFormation(FormationStrategy):
         agents: List[AgentProfile],
         objectives: List[CoalitionObjective],
         max_size: int,
-    ):
+    ) -> Any:
         """Generate all possible assignments of agents to objectives."""
         # For each objective, generate all possible coalitions of agents
         # This is computationally expensive but optimal for small problems
@@ -476,7 +478,8 @@ class OptimalFormation(FormationStrategy):
 class HierarchicalFormation(FormationStrategy):
     """Hierarchical coalition formation strategy."""
 
-    def __init__(self):
+    def __init__(self) -> None:
+        """Initialize the hierarchical formation strategy."""
         super().__init__("Hierarchical Formation")
 
     def form_coalitions(

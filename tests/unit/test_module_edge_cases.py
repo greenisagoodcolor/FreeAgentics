@@ -21,7 +21,7 @@ try:
     from api.middleware.security_monitoring import SecurityMonitoringMiddleware
     from auth.security_implementation import SecurityManager
     from inference.active.gmn_parser import GMNParser
-    from inference.gnn.model import GNNModel
+    from inference.gnn.model import GMNModel as GNNModel
     from knowledge_graph.evolution import EvolutionEngine
     from knowledge_graph.storage import GraphStorage
 
@@ -33,6 +33,7 @@ except ImportError as e:
     # Mock classes for testing when imports fail
     class GraphStorage:
         def __init__(self):
+            """Initialize GraphStorage with empty data dictionary."""
             self.data = {}
 
         def store(self, key, value):
@@ -43,6 +44,7 @@ except ImportError as e:
 
     class EvolutionEngine:
         def __init__(self):
+            """Initialize EvolutionEngine with empty generations list."""
             self.generations = []
 
         def evolve(self, population):
@@ -50,6 +52,7 @@ except ImportError as e:
 
     class GMNParser:
         def __init__(self):
+            """Initialize GMNParser with empty parsed data dictionary."""
             self.parsed_data = {}
 
         def parse(self, gmn_text):
@@ -57,6 +60,7 @@ except ImportError as e:
 
     class GNNModel:
         def __init__(self):
+            """Initialize GNNModel with empty weights dictionary."""
             self.weights = {}
 
         def forward(self, input_data):
@@ -64,6 +68,7 @@ except ImportError as e:
 
     class BeliefCompressor:
         def __init__(self):
+            """Initialize BeliefCompressor with default compression ratio of 0.5."""
             self.compression_ratio = 0.5
 
         def compress(self, beliefs):
@@ -71,6 +76,7 @@ except ImportError as e:
 
     class MatrixPool:
         def __init__(self):
+            """Initialize MatrixPool with empty pool list."""
             self.pool = []
 
         def get_matrix(self, size):
@@ -78,6 +84,7 @@ except ImportError as e:
 
     class SecurityMonitoringMiddleware:
         def __init__(self, app):
+            """Initialize SecurityMonitoringMiddleware with the wrapped application."""
             self.app = app
 
         def __call__(self, scope, receive, send):
@@ -85,6 +92,7 @@ except ImportError as e:
 
     class SecurityManager:
         def __init__(self):
+            """Initialize SecurityManager with empty policies dictionary."""
             self.policies = {}
 
         def validate_request(self, request):

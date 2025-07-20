@@ -118,13 +118,13 @@ class AdaptiveThreadPool:
 
     def __init__(self, config: OptimizationConfig):
         """Initialize the adaptive thread pool.
-        
+
         Args:
             config: Configuration for optimization parameters.
         """
         self.config = config
         self.num_workers = self._calculate_optimal_workers()
-        self.workers = []
+        self.workers: List[threading.Thread] = []
         self.work_queues = [
             WorkStealingQueue() for _ in range(self.num_workers)
         ]
@@ -132,7 +132,7 @@ class AdaptiveThreadPool:
         self.performance_monitor = get_performance_monitor()
 
         # Workload detection
-        self.task_times = deque(maxlen=100)
+        self.task_times: deque[float] = deque(maxlen=100)
         self.workload_type = "mixed"
         self.last_resize_time = 0
 
@@ -324,12 +324,12 @@ class LockFreeAgentRegistry:
 
     def __init__(self, num_shards: int = 16):
         """Initialize lock-free agent registry.
-        
+
         Args:
             num_shards: Number of shards to distribute agents across.
         """
         self.num_shards = num_shards
-        self.shards = [dict() for _ in range(num_shards)]
+        self.shards: List[Dict[str, Any]] = [dict() for _ in range(num_shards)]
         self.shard_locks = [threading.RLock() for _ in range(num_shards)]
         self.total_agents = 0
         self.total_lock = threading.Lock()
@@ -377,7 +377,7 @@ class LockFreeAgentRegistry:
 
     def get_agent_ids(self) -> List[str]:
         """Get all agent IDs efficiently."""
-        agent_ids = []
+        agent_ids: List[str] = []
         for shard, lock in zip(self.shards, self.shard_locks):
             with lock:
                 agent_ids.extend(shard.keys())
@@ -394,15 +394,17 @@ class MemoryPool:
 
     def __init__(self, pool_size: int = 100, state_size: int = 1024):
         """Initialize memory pool for agent states.
-        
+
         Args:
             pool_size: Number of pre-allocated memory blocks.
             state_size: Size of each memory block in bytes.
         """
         self.pool_size = pool_size
         self.state_size = state_size
-        self.available = queue.Queue(maxsize=pool_size)
-        self.in_use = set()
+        self.available: queue.Queue[np.ndarray] = queue.Queue(
+            maxsize=pool_size
+        )
+        self.in_use: set[int] = set()
         self.lock = threading.Lock()
 
         # Pre-allocate memory blocks
@@ -452,7 +454,7 @@ class OptimizedAgentManager:
 
     def __init__(self, config: OptimizationConfig = None):
         """Initialize the optimized agent manager.
-        
+
         Args:
             config: Configuration for optimization parameters.
         """
@@ -467,7 +469,7 @@ class OptimizedAgentManager:
         )
 
         # Batching system
-        self.batch_queue = queue.Queue()
+        self.batch_queue: queue.Queue[AgentBatch] = queue.Queue()
         self.batch_processor = None
         self.batch_shutdown = threading.Event()
 
@@ -476,11 +478,11 @@ class OptimizedAgentManager:
         self.async_thread = None
 
         # Performance statistics
-        self.stats = {
+        self.stats: Dict[str, Union[int, float]] = {
             "agents_processed": 0,
             "batches_processed": 0,
-            "avg_batch_size": 0,
-            "avg_processing_time_ms": 0,
+            "avg_batch_size": 0.0,
+            "avg_processing_time_ms": 0.0,
             "cache_hits": 0,
             "cache_misses": 0,
         }
@@ -683,12 +685,6 @@ class OptimizedAgentManager:
 
     def step_agent(self, agent_id: str, observation: Any) -> Any:
         """Step a single agent (synchronous interface)."""
-        operation = {
-            "type": "agent_step",
-            "agent_id": agent_id,
-            "observation": observation,
-        }
-
         # For synchronous operation, process immediately
         agent = self.agent_registry.get(agent_id)
         if not agent:
@@ -731,7 +727,7 @@ class OptimizedAgentManager:
     def get_statistics(self) -> Dict[str, Any]:
         """Get comprehensive performance statistics."""
         with self.stats_lock:
-            stats = self.stats.copy()
+            stats: Dict[str, Any] = self.stats.copy()
 
         # Add component statistics
         stats.update(
@@ -850,7 +846,7 @@ def benchmark_optimized_manager():
         num_rounds = 10
         start_time = time.perf_counter()
 
-        for round_num in range(num_rounds):
+        for _round_num in range(num_rounds):
             manager.step_agents_async(observations)
 
         # Wait for batch processing to complete
@@ -859,7 +855,7 @@ def benchmark_optimized_manager():
         elapsed = time.perf_counter() - start_time
         throughput = (num_agents * num_rounds) / elapsed
 
-        print(f"\nBenchmark Results:")
+        print("\nBenchmark Results:")
         print(f"  Rounds: {num_rounds}")
         print(f"  Agents per round: {num_agents}")
         print(f"  Total operations: {num_agents * num_rounds}")
@@ -868,7 +864,7 @@ def benchmark_optimized_manager():
 
         # Print statistics
         stats = manager.get_statistics()
-        print(f"\nStatistics:")
+        print("\nStatistics:")
         print(f"  Batches processed: {stats['batches_processed']}")
         print(f"  Average batch size: {stats['avg_batch_size']:.1f}")
         print(

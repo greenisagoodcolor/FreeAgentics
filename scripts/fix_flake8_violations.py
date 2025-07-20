@@ -93,7 +93,7 @@ def fix_unused_imports(content: str) -> str:
 def fix_blank_lines(content: str) -> str:
     """Fix E302, E303, E305: blank line issues."""
     lines = content.split("\n")
-    new_lines = []
+    new_lines: list[str] = []
     i = 0
 
     while i < len(lines):

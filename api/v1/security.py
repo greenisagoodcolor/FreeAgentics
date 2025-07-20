@@ -3,7 +3,8 @@
 Provides access to security audit logs and monitoring data.
 """
 
-import subprocess
+import shutil
+import subprocess  # nosec B404
 from datetime import datetime, timedelta
 from pathlib import Path
 from typing import Any, Dict, List, Optional
@@ -831,7 +832,7 @@ async def get_ssl_health() -> SSLHealthResponse:
             ocsp_stapling=ocsp_stapling,
         )
 
-    except Exception as e:
+    except Exception:
         # Return error status
         return SSLHealthResponse(
             ssl_status="error",
@@ -862,13 +863,29 @@ async def get_certificate_info(
         )
 
     try:
+        # Securely locate openssl binary
+        openssl_path = shutil.which("openssl")
+        if not openssl_path:
+            raise HTTPException(
+                status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+                detail="OpenSSL binary not found on system",
+            )
+
+        # Validate certificate path to prevent path injection
+        cert_path = Path(ssl_config.cert_path).resolve()
+        if not cert_path.exists() or not cert_path.is_file():
+            raise HTTPException(
+                status_code=status.HTTP_400_BAD_REQUEST,
+                detail="Invalid certificate path",
+            )
+
         # Use openssl to get certificate info
-        result = subprocess.run(
+        subprocess.run(  # nosec B603 B607
             [
-                "openssl",
+                openssl_path,  # Use full path to prevent PATH hijacking
                 "x509",
                 "-in",
-                ssl_config.cert_path,
+                str(cert_path),  # Use resolved path
                 "-noout",
                 "-text",
             ],
@@ -876,8 +893,6 @@ async def get_certificate_info(
             text=True,
             check=True,
         )
-
-        cert_text = result.stdout
 
         # Parse certificate information (simplified)
         subject = "CN=freeagentics.com"  # Would parse from cert_text
@@ -945,7 +960,7 @@ async def trigger_ssl_renewal(
             security_auditor.log_event(
                 SecurityEventType.SECURITY_CONFIG_CHANGE,
                 SecurityEventSeverity.INFO,
-                f"SSL certificate renewed successfully",
+                "SSL certificate renewed successfully",
                 user_id=current_user.user_id,
                 username=current_user.username,
                 details={"renewal_triggered": True},
@@ -994,7 +1009,7 @@ async def csp_report(request: Request) -> Dict[str, str]:
 
         return {"message": "CSP report received"}
 
-    except Exception as e:
+    except Exception:
         return {"error": "Failed to process CSP report"}
 
 
@@ -1017,5 +1032,5 @@ async def ct_report(request: Request) -> Dict[str, str]:
 
         return {"message": "CT report received"}
 
-    except Exception as e:
+    except Exception:
         return {"error": "Failed to process CT report"}

@@ -45,7 +45,7 @@ def single_agent_inference_benchmark(agent, num_operations=20):
             agent.perceive(observation)
             if agent._should_update_beliefs():
                 agent.update_beliefs()
-            action = agent.select_action()
+            agent.select_action()
 
             duration = time.time() - start
             times.append(duration * 1000)  # Convert to ms
@@ -191,7 +191,6 @@ def validate_performance_claims(results):
     print("\n✅ PRODUCTION READINESS ASSESSMENT:")
 
     # Calculate theoretical maximum agents at 10ms per operation (real-time)
-    theoretical_max_realtime = 1000 / 10  # 100 ops/sec per agent for real-time
     actual_throughput = single_agent_result["throughput_ops_per_sec"]
 
     max_realtime_agents = actual_throughput / (

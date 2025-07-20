@@ -1,5 +1,5 @@
 """
-RBAC Security Enhancements
+RBAC Security Enhancements.
 Task 14.4 - Security improvements for RBAC implementation
 
 This module implements critical security enhancements for the RBAC system
@@ -19,7 +19,12 @@ from typing import Any, Dict, List, Optional, Set, Tuple
 from uuid import UUID
 
 from auth.comprehensive_audit_logger import comprehensive_auditor
-from auth.security_implementation import Permission, TokenData, UserRole
+from auth.security_implementation import (
+    ROLE_PERMISSIONS,
+    Permission,
+    TokenData,
+    UserRole,
+)
 from auth.security_logging import (
     SecurityEventSeverity,
     SecurityEventType,
@@ -34,7 +39,7 @@ class SecurityLevel(str, Enum):
     INTERNAL = "internal"
     CONFIDENTIAL = "confidential"
     RESTRICTED = "restricted"
-    TOP_SECRET = "top_secret"
+    TOP_SECRET = "top_secret"  # nosec B105
 
 
 @dataclass
@@ -72,6 +77,7 @@ class PrivilegeEscalationDetector:
     """Detects and prevents privilege escalation attempts."""
 
     def __init__(self):
+        """Initialize the privilege escalation detector."""
         self._escalation_attempts = defaultdict(list)
         self._lock = threading.Lock()
         self._threshold = 3  # Max attempts per hour
@@ -180,6 +186,7 @@ class ZeroTrustValidator:
     """Implements Zero Trust security model for authorization."""
 
     def __init__(self):
+        """Initialize the Zero Trust validator."""
         self._trust_scores = {}
         self._validation_cache = {}
         self._cache_ttl = timedelta(minutes=5)
@@ -550,6 +557,7 @@ class RateLimiter:
     """Rate limiting for authorization attempts."""
 
     def __init__(self):
+        """Initialize the rate limiter."""
         self._attempts = defaultdict(list)
         self._lock = threading.Lock()
         self._limits = {

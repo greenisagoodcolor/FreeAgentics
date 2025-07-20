@@ -1,4 +1,4 @@
-"""Initial migration - agents, coalitions, knowledge graph
+"""Initial migration - agents, coalitions, knowledge graph.
 
 Revision ID: 1b4306802749
 Revises:
@@ -10,7 +10,7 @@ from typing import Sequence, Union
 
 import sqlalchemy as sa
 
-from alembic import op
+from alembic import op  # type: ignore[attr-defined]
 
 # revision identifiers, used by Alembic.
 revision: str = "1b4306802749"

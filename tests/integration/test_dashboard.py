@@ -111,7 +111,7 @@ class IntegrationTestDashboard:
                 ["docker", "info"], capture_output=True, text=True
             )
             return result.returncode == 0
-        except:
+        except Exception:
             return False
 
     def _check_containers_available(self) -> bool:

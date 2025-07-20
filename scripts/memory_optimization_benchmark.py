@@ -135,7 +135,6 @@ def benchmark_optimized_agents(num_agents: int = 50):
 
     # Initialize optimization components
     optimizer = get_agent_optimizer()
-    gc_tuner = get_gc_tuner()
     profiler = get_memory_profiler()
 
     # Configure GC for multi-agent workload

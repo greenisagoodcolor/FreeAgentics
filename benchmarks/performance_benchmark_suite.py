@@ -1,5 +1,5 @@
 """
-Comprehensive Performance Benchmarking and Monitoring Suite
+Comprehensive Performance Benchmarking and Monitoring Suite.
 
 This module provides a unified benchmarking system that tests all performance optimizations:
 1. Threading performance benchmarks
@@ -76,6 +76,7 @@ class PerformanceBenchmarkRunner:
     """Runs comprehensive performance benchmarks."""
 
     def __init__(self):
+        """Initialize the performance benchmark runner."""
         self.results: List[BenchmarkResult] = []
         self.performance_monitor = get_performance_monitor()
         self.memory_optimizer = get_memory_optimizer()
@@ -775,7 +776,7 @@ class PerformanceBenchmarkRunner:
 
             # Trigger GC periodically
             if i % 1000 == 0:
-                collected = gc.collect()
+                gc.collect()
 
         elapsed = time.perf_counter() - start_time
         throughput = len(objects) / elapsed
@@ -911,9 +912,7 @@ class PerformanceBenchmarkRunner:
             nonlocal messages_processed
             while True:
                 try:
-                    message = await asyncio.wait_for(
-                        message_queue.get(), timeout=0.1
-                    )
+                    await asyncio.wait_for(message_queue.get(), timeout=0.1)
                     messages_processed += 1
                     await asyncio.sleep(0.001)  # Simulate processing
                 except asyncio.TimeoutError:
@@ -1379,7 +1378,7 @@ async def run_complete_benchmark_suite():
     ]
 
     for suite_name in suite_names:
-        print(f"\n{'='*20} {suite_name.upper()} BENCHMARKS {'='*20}")
+        print(f"\n{'=' * 20} {suite_name.upper()} BENCHMARKS {'=' * 20}")
 
         try:
             results = await runner.run_benchmark_suite(suite_name)
@@ -1395,7 +1394,7 @@ async def run_complete_benchmark_suite():
             print(f"✗ Suite {suite_name} failed: {e}")
 
     # Generate comprehensive report
-    print(f"\n{'='*30} PERFORMANCE REPORT {'='*30}")
+    print(f"\n{'=' * 30} PERFORMANCE REPORT {'=' * 30}")
     report = runner.generate_performance_report()
 
     print(f"Total benchmarks: {report['total_benchmarks']}")
@@ -1407,20 +1406,18 @@ async def run_complete_benchmark_suite():
         f"Average throughput: {report['overall_stats']['avg_throughput']:.1f} ops/sec"
     )
 
-    print(f"\nTop performers:")
+    print("\nTop performers:")
     for performer in report["top_performers"]:
-        print(
-            f"  - {performer['name']}: {performer['throughput']:.1f} ops/sec"
-        )
+        print(f" - {performer['name']}: {performer['throughput']:.1f} ops/sec")
 
     if report["performance_issues"]:
-        print(f"\nPerformance issues:")
+        print("\nPerformance issues:")
         for issue in report["performance_issues"]:
-            print(f"  - {issue['type']}: {issue['benchmark']}")
+            print(f" - {issue['type']}: {issue['benchmark']}")
 
-    print(f"\nRecommendations:")
+    print("\nRecommendations:")
     for rec in report["recommendations"]:
-        print(f"  - {rec}")
+        print(f" - {rec}")
 
     # Save results
     runner.save_results("performance_benchmark_results.json")

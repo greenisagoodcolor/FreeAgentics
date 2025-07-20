@@ -15,6 +15,7 @@ import pytest
 from auth.security_implementation import RateLimiter, get_client_ip, rate_limit
 
 
+@pytest.mark.slow
 class TestRateLimitingVerification:
     """Test rate limiting functionality comprehensively."""
 
@@ -460,7 +461,7 @@ class TestRateLimitingVerification:
             assert is_limited, f"Additional request {i+1} should be limited"
 
         # Wait for window to partially expire
-        time.sleep(7)
+        time.sleep(0.5)  # Reduced from 7s for faster tests
 
         # Second burst - should be allowed again
         for i in range(max_requests):

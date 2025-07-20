@@ -3,7 +3,7 @@
 import logging
 from dataclasses import dataclass, field
 from enum import Enum
-from typing import Any, Callable, Dict, List, Optional, Tuple, Union
+from typing import Any, Callable, Dict, List, Optional, Set, Tuple, Union
 
 import numpy as np
 import torch
@@ -153,11 +153,10 @@ class NodeFeatureExtractor:
                     # Geographic coordinates - use H3 if available
                     try:
                         lat, lon = float(pos["lat"]), float(pos["lon"])
-                        x, y = lat, lon
+                        pass
                     except (ValueError, TypeError):
                         # Invalid lat/lon values, use default
                         lat, lon = 0.0, 0.0
-                        x, y = lat, lon
 
                     if h3_available:
                         try:
@@ -172,7 +171,7 @@ class NodeFeatureExtractor:
                                 h3_index
                             )
                             spatial_data.append([center_lat, center_lon])
-                        except Exception as e:
+                        except Exception:
                             # Fallback to raw coordinates
                             spatial_data.append([lat, lon])
                             h3_indices.append(None)
@@ -325,13 +324,13 @@ class NodeFeatureExtractor:
         if not numerical_fields:
             return None
 
-        numerical_fields = sorted(numerical_fields)
+        numerical_fields_list = sorted(numerical_fields)
 
         # Extract values
         numerical_data = []
         for node in nodes:
             values = []
-            for field in numerical_fields:
+            for field in numerical_fields_list:
                 if field.startswith("attributes."):
                     # Extract from attributes
                     attr_name = field[len("attributes.") :]
@@ -417,7 +416,7 @@ class NodeFeatureExtractor:
         clustering = torch.zeros(num_nodes)
 
         # Create adjacency lists
-        adj_list = {i: set() for i in range(num_nodes)}
+        adj_list: Dict[int, Set[int]] = {i: set() for i in range(num_nodes)}
         for src, dst in edges:
             if 0 <= src < num_nodes and 0 <= dst < num_nodes:
                 adj_list[src].add(dst)

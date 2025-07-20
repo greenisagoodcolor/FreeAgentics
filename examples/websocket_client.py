@@ -158,7 +158,6 @@ class FreeAgenticsWebSocketClient:
     async def handle_message(self, message: dict, source: str):
         """Handle incoming WebSocket messages."""
         msg_type = message.get("type", "unknown")
-        timestamp = message.get("timestamp", datetime.now().isoformat())
 
         if msg_type == "connection_established":
             logger.info(

@@ -26,7 +26,7 @@ SQLITE_TEST_URL = "sqlite:///./test.db"
 SQLITE_MEMORY_URL = "sqlite:///:memory:"
 
 
-class TestDatabaseConfig:
+class DatabaseTestConfig:
     """Configuration for test database operations."""
 
     def __init__(
@@ -76,7 +76,7 @@ def create_test_engine(use_sqlite: bool = False) -> Engine:
     Returns:
         Configured SQLAlchemy engine
     """
-    config = TestDatabaseConfig(use_sqlite=use_sqlite)
+    config = DatabaseTestConfig(use_sqlite=use_sqlite)
     return config.create_engine()
 
 
@@ -172,7 +172,7 @@ def verify_test_database_connection(engine: Optional[Engine] = None) -> bool:
         return False
 
 
-class TestSessionManager:
+class SessionTestManager:
     """Manages test database sessions with proper cleanup."""
 
     def __init__(self, engine: Optional[Engine] = None):

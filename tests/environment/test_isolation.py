@@ -32,6 +32,15 @@ class DatabaseIsolation:
     def __init__(
         self, host: str, port: int, user: str, password: str, database: str
     ):
+        """Initialize database isolation manager.
+
+        Args:
+            host: Database host
+            port: Database port
+            user: Database username
+            password: Database password
+            database: Database name
+        """
         self.host = host
         self.port = port
         self.user = user
@@ -175,6 +184,12 @@ class RedisNamespacedClient:
     """Redis client with namespace support."""
 
     def __init__(self, client: redis.Redis, namespace: str):
+        """Initialize namespaced Redis client.
+
+        Args:
+            client: Redis client instance
+            namespace: Namespace prefix for keys
+        """
         self.client = client
         self.namespace = namespace
 
@@ -199,6 +214,13 @@ class RedisIsolation:
     """Redis isolation for testing."""
 
     def __init__(self, host: str, port: int, db: int = 0):
+        """Initialize Redis isolation manager.
+
+        Args:
+            host: Redis host
+            port: Redis port
+            db: Redis database number
+        """
         self.host = host
         self.port = port
         self.db = db
@@ -245,6 +267,14 @@ class MessageQueueIsolation:
     """Message queue isolation for RabbitMQ tests."""
 
     def __init__(self, host: str, port: int, user: str, password: str):
+        """Initialize message queue isolation manager.
+
+        Args:
+            host: RabbitMQ host
+            port: RabbitMQ port
+            user: RabbitMQ username
+            password: RabbitMQ password
+        """
         self.host = host
         self.port = port
         self.user = user
@@ -313,6 +343,11 @@ class FilesystemIsolation:
     """Filesystem isolation for testing."""
 
     def __init__(self, base_dir: str = "/tmp/test_isolation"):
+        """Initialize filesystem isolation manager.
+
+        Args:
+            base_dir: Base directory for creating sandboxes
+        """
         self.base_dir = base_dir
         self._sandboxes: List[Path] = []
 
@@ -370,10 +405,15 @@ class FilesystemIsolation:
             self.cleanup_sandbox(sandbox)
 
 
-class TestIsolation:
+class IsolationTester:
     """Main test isolation coordinator."""
 
     def __init__(self, config: Dict[str, Any]):
+        """Initialize test isolation coordinator.
+
+        Args:
+            config: Configuration dictionary for various isolation backends
+        """
         self.config = config
 
         # Initialize isolation components
@@ -417,7 +457,8 @@ class TestIsolation:
     def get_isolation_level(self) -> IsolationLevel:
         """Get the configured isolation level."""
         level_str = self.config.get("isolation_level", "SCHEMA")
-        return IsolationLevel(level_str)
+        # Convert to lowercase to match enum values
+        return IsolationLevel(level_str.lower())
 
     def isolate_all(self, prefix: str) -> Dict[str, Any]:
         """Create isolation for all configured resources."""

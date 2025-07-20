@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 """
-Quick Threading vs Multiprocessing Test for FreeAgentics Agents
+Quick Threading vs Multiprocessing Test for FreeAgentics Agents.
 
 A simplified benchmark that runs quickly to validate the comparison approach
 before running the full benchmark suite.
@@ -154,7 +154,7 @@ def test_communication_overhead():
         received = 0
         while received < num_messages:
             if shared_list:
-                msg = shared_list.pop(0)
+                shared_list.pop(0)
                 received += 1
             else:
                 time.sleep(0.0001)
@@ -180,7 +180,7 @@ def test_communication_overhead():
     def mp_receiver(queue):
         received = 0
         while received < num_messages:
-            msg = queue.get()
+            queue.get()
             received += 1
 
     mp_start = time.time()
@@ -227,7 +227,7 @@ def main():
     results = {}
 
     for num_agents in agent_counts:
-        print(f"\n{'='*40}")
+        print(f"\n{'=' * 40}")
         print(f"Testing with {num_agents} agents, {num_steps} steps each")
         print("=" * 40)
 

@@ -12,7 +12,7 @@ def mock_auth_dependency():
         roles=["admin", "user"],
         permissions=["read", "write", "delete"],
         exp=1735689600,  # Far future expiration
-        fingerprint=None
+        fingerprint=None,
     )
 
 
@@ -25,7 +25,7 @@ def mock_user_auth_dependency():
         roles=["user"],
         permissions=["read"],
         exp=1735689600,
-        fingerprint=None
+        fingerprint=None,
     )
 
 
@@ -38,5 +38,5 @@ def mock_no_permissions_auth_dependency():
         roles=[],
         permissions=[],
         exp=1735689600,
-        fingerprint=None
+        fingerprint=None,
     )

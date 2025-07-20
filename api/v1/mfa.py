@@ -10,7 +10,7 @@ This module provides REST API endpoints for MFA operations including:
 """
 
 import logging
-from typing import Dict, List
+from typing import Any, Dict, List
 
 from fastapi import APIRouter, Depends, HTTPException, Request, status
 from fastapi.responses import JSONResponse
@@ -55,7 +55,7 @@ def get_mfa_service(
 @rate_limit(MFA_RATE_LIMITS["enroll"])
 async def enroll_mfa(
     request: MFAEnrollmentRequest,
-    current_user: Dict = Depends(get_current_user),
+    current_user: Dict[str, Any] = Depends(get_current_user),
     mfa_service: MFAService = Depends(get_mfa_service),
     csrf_token: str = Depends(validate_csrf_token),
 ) -> MFAResponse:
@@ -125,7 +125,7 @@ async def enroll_mfa(
 @rate_limit(MFA_RATE_LIMITS["verify"])
 async def verify_mfa(
     request: MFAVerificationRequest,
-    current_user: Dict = Depends(get_current_user),
+    current_user: Dict[str, Any] = Depends(get_current_user),
     mfa_service: MFAService = Depends(get_mfa_service),
     csrf_token: str = Depends(validate_csrf_token),
 ) -> MFAResponse:
@@ -197,7 +197,7 @@ async def verify_mfa(
 @router.get("/status")
 @rate_limit(MFA_RATE_LIMITS["status"])
 async def get_mfa_status(
-    current_user: Dict = Depends(get_current_user),
+    current_user: Dict[str, Any] = Depends(get_current_user),
     mfa_service: MFAService = Depends(get_mfa_service),
 ) -> Dict:
     """
@@ -239,7 +239,7 @@ async def get_mfa_status(
 @router.post("/disable", response_model=MFAResponse)
 @rate_limit(MFA_RATE_LIMITS["disable"])
 async def disable_mfa(
-    current_user: Dict = Depends(get_current_user),
+    current_user: Dict[str, Any] = Depends(get_current_user),
     mfa_service: MFAService = Depends(get_mfa_service),
     csrf_token: str = Depends(validate_csrf_token),
 ) -> MFAResponse:
@@ -293,7 +293,7 @@ async def disable_mfa(
 @router.post("/regenerate-backup-codes", response_model=MFAResponse)
 @rate_limit(MFA_RATE_LIMITS["regenerate"])
 async def regenerate_backup_codes(
-    current_user: Dict = Depends(get_current_user),
+    current_user: Dict[str, Any] = Depends(get_current_user),
     mfa_service: MFAService = Depends(get_mfa_service),
     csrf_token: str = Depends(validate_csrf_token),
 ) -> MFAResponse:
@@ -400,7 +400,7 @@ async def get_available_methods() -> Dict:
 @rate_limit("3/1m")  # Very restrictive for testing
 async def test_mfa_token(
     token: str,
-    current_user: Dict = Depends(get_current_user),
+    current_user: Dict[str, Any] = Depends(get_current_user),
     mfa_service: MFAService = Depends(get_mfa_service),
 ) -> Dict:
     """
@@ -472,7 +472,7 @@ async def mfa_health_check(
     """
     try:
         # Basic health check - ensure encryption key is available
-        test_secret = "test_secret_for_health_check"
+        test_secret = "test_secret_for_health_check"  # nosec B105 - Test string for health check only
         encrypted = mfa_service._encrypt_secret(test_secret)
         decrypted = mfa_service._decrypt_secret(encrypted)
 

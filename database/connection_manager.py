@@ -1,12 +1,12 @@
 """
-Database Connection Manager with Exponential Backoff Retry Logic
+Database Connection Manager with Exponential Backoff Retry Logic.
 
 Implements hard failure validation - no graceful fallbacks allowed.
 Following TDD principles for minimal implementation.
 """
 
 import logging
-from typing import Any, Optional
+from typing import Any, Optional, cast
 
 import numpy as np
 from sqlalchemy import Engine, create_engine, text
@@ -103,7 +103,8 @@ class DatabaseConnectionManager:
                 conn.execute(text("SELECT 1"))
             return engine
 
-        return retry_handler.execute_with_retry(create_connection)
+        result = retry_handler.execute_with_retry(create_connection)
+        return cast(Engine, result)
 
     def create_engine_with_pool_config(self, **engine_kwargs) -> Engine:
         """Create engine with connection pool configuration."""
@@ -130,11 +131,12 @@ class DatabaseConnectionManager:
             return engine
 
         try:
-            engine = self.retry_handler.execute_with_retry(create_engine_func)
-            if engine is None:
+            result = self.retry_handler.execute_with_retry(create_engine_func)
+            if result is None:
                 raise RuntimeError(
                     "Failed to create database engine: retry handler returned None"
                 )
+            engine = cast(Engine, result)
             self._engine = engine
             return engine
         except Exception as e:

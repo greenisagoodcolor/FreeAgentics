@@ -83,7 +83,7 @@ class LogEntry:
     trace_id: Optional[str] = None
     session_id: Optional[str] = None
     user_id: Optional[str] = None
-    extra_fields: Dict[str, Any] = None
+    extra_fields: Optional[Dict[str, Any]] = None
 
     def __post_init__(self):
         if self.extra_fields is None:
@@ -271,7 +271,9 @@ class LogParser:
         if line.startswith("{") and line.endswith("}"):
             try:
                 return self._parse_json_log(line, source_hint)
-            except Exception:
+            except (
+                Exception
+            ):  # nosec B110 # Safe fallback to pattern matching for log parsing
                 pass
 
         # Try pattern matching
@@ -432,7 +434,7 @@ class LogAggregator:
 
         # Initialize components
         self.parser = LogParser()
-        self.buffer = deque(maxlen=max_buffer_size)
+        self.buffer: deque[LogEntry] = deque(maxlen=max_buffer_size)
         self.stats = LogAggregationStats(
             total_logs=0,
             logs_by_level=defaultdict(int),
@@ -899,7 +901,9 @@ class LogStreamingServer:
         for client in self.clients.copy():
             try:
                 await client.close()
-            except Exception:
+            except (
+                Exception
+            ):  # nosec B110 # Safe to ignore errors during shutdown cleanup
                 pass
 
         self.clients.clear()
@@ -1049,7 +1053,7 @@ def create_structured_log_entry(
 
 
 def log_agent_action(
-    agent_id: str, action: str, details: Dict[str, Any] = None
+    agent_id: str, action: str, details: Optional[Dict[str, Any]] = None
 ):
     """Log agent action."""
     entry = create_structured_log_entry(

@@ -19,6 +19,7 @@ from websocket.circuit_breaker import (
 )
 
 
+@pytest.mark.slow
 class TestCircuitBreakerConfig(unittest.TestCase):
     """Test circuit breaker configuration."""
 
@@ -41,6 +42,7 @@ class TestCircuitBreakerConfig(unittest.TestCase):
             CircuitBreakerConfig(success_threshold=-1)
 
 
+@pytest.mark.slow
 class TestCircuitBreaker(unittest.IsolatedAsyncioTestCase):
     """Test circuit breaker functionality."""
 

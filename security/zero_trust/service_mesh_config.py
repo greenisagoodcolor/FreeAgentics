@@ -226,7 +226,7 @@ class ServiceMeshConfig:
 
 def generate_istio_config(config: ServiceMeshConfig) -> Dict[str, Any]:
     """Generate Istio-specific configuration."""
-    istio_config = {
+    istio_config: Dict[str, Any] = {
         "apiVersion": "networking.istio.io/v1beta1",
         "kind": "Configuration",
         "items": [],
@@ -234,7 +234,7 @@ def generate_istio_config(config: ServiceMeshConfig) -> Dict[str, Any]:
 
     # Generate VirtualService for each service
     for service_name, service in config.services.items():
-        virtual_service = {
+        virtual_service: Dict[str, Any] = {
             "apiVersion": "networking.istio.io/v1beta1",
             "kind": "VirtualService",
             "metadata": {
@@ -281,7 +281,7 @@ def generate_istio_config(config: ServiceMeshConfig) -> Dict[str, Any]:
 
     # Generate DestinationRule for each service
     for service_name, service in config.services.items():
-        destination_rule = {
+        destination_rule: Dict[str, Any] = {
             "apiVersion": "networking.istio.io/v1beta1",
             "kind": "DestinationRule",
             "metadata": {
@@ -297,11 +297,11 @@ def generate_istio_config(config: ServiceMeshConfig) -> Dict[str, Any]:
         }
 
         # Add traffic policies
-        for policy in config.traffic_policies:
-            if policy.destination_service == service_name:
+        for traffic_policy in config.traffic_policies:
+            if traffic_policy.destination_service == service_name:
                 destination_rule["spec"]["trafficPolicy"].update(
                     {
-                        "connectionPool": policy.connection_pool
+                        "connectionPool": traffic_policy.connection_pool
                         or {
                             "tcp": {"maxConnections": 100},
                             "http": {
@@ -309,8 +309,10 @@ def generate_istio_config(config: ServiceMeshConfig) -> Dict[str, Any]:
                                 "http2MaxRequests": 100,
                             },
                         },
-                        "loadBalancer": {"simple": policy.load_balancer},
-                        "outlierDetection": policy.outlier_detection
+                        "loadBalancer": {
+                            "simple": traffic_policy.load_balancer
+                        },
+                        "outlierDetection": traffic_policy.outlier_detection
                         or {
                             "consecutiveErrors": 5,
                             "interval": "30s",
@@ -354,17 +356,17 @@ def generate_istio_config(config: ServiceMeshConfig) -> Dict[str, Any]:
         istio_config["items"].append(peer_auth)
 
     # Generate AuthorizationPolicy
-    for policy in config.service_policies:
+    for service_policy in config.service_policies:
         auth_policy = {
             "apiVersion": "security.istio.io/v1beta1",
             "kind": "AuthorizationPolicy",
             "metadata": {
-                "name": f"{policy.source_service}-to-{policy.target_service}",
+                "name": f"{service_policy.source_service}-to-{service_policy.target_service}",
                 "namespace": "default",
             },
             "spec": {
                 "selector": {
-                    "matchLabels": {"app": policy.target_service},
+                    "matchLabels": {"app": service_policy.target_service},
                 },
                 "rules": [
                     {
@@ -372,7 +374,7 @@ def generate_istio_config(config: ServiceMeshConfig) -> Dict[str, Any]:
                             {
                                 "source": {
                                     "principals": [
-                                        f"cluster.local/ns/default/sa/{policy.source_service}"
+                                        f"cluster.local/ns/default/sa/{service_policy.source_service}"
                                     ],
                                 },
                             }
@@ -380,7 +382,7 @@ def generate_istio_config(config: ServiceMeshConfig) -> Dict[str, Any]:
                         "to": [
                             {
                                 "operation": {
-                                    "methods": policy.allowed_methods,
+                                    "methods": service_policy.allowed_methods,
                                 },
                             }
                         ],
@@ -395,7 +397,7 @@ def generate_istio_config(config: ServiceMeshConfig) -> Dict[str, Any]:
 
 def generate_linkerd_config(config: ServiceMeshConfig) -> Dict[str, Any]:
     """Generate Linkerd-specific configuration."""
-    linkerd_config = {
+    linkerd_config: Dict[str, Any] = {
         "apiVersion": "policy.linkerd.io/v1beta1",
         "kind": "Configuration",
         "items": [],
@@ -421,22 +423,22 @@ def generate_linkerd_config(config: ServiceMeshConfig) -> Dict[str, Any]:
         linkerd_config["items"].append(server)
 
     # Generate ServerAuthorization
-    for policy in config.service_policies:
+    for service_policy in config.service_policies:
         server_auth = {
             "apiVersion": "policy.linkerd.io/v1beta1",
             "kind": "ServerAuthorization",
             "metadata": {
-                "name": f"{policy.source_service}-to-{policy.target_service}",
+                "name": f"{service_policy.source_service}-to-{service_policy.target_service}",
                 "namespace": "default",
             },
             "spec": {
                 "server": {
-                    "name": policy.target_service,
+                    "name": service_policy.target_service,
                 },
                 "client": {
                     "meshTLS": {
                         "identities": [
-                            f"{policy.source_service}.default.serviceaccount.identity.linkerd.cluster.local"
+                            f"{service_policy.source_service}.default.serviceaccount.identity.linkerd.cluster.local"
                         ],
                     },
                 },
@@ -449,7 +451,7 @@ def generate_linkerd_config(config: ServiceMeshConfig) -> Dict[str, Any]:
         if service_name in config.routing_rules:
             routing = config.routing_rules[service_name]
 
-            http_route = {
+            http_route: Dict[str, Any] = {
                 "apiVersion": "policy.linkerd.io/v1beta1",
                 "kind": "HTTPRoute",
                 "metadata": {

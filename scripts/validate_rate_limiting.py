@@ -8,7 +8,7 @@ by testing various scenarios and edge cases.
 import asyncio
 import json
 import sys
-from typing import Dict
+from typing import Any, Dict, List, Union
 
 import aiohttp
 import redis.asyncio as aioredis
@@ -29,8 +29,8 @@ class RateLimitingValidator:
     ):
         self.base_url = base_url
         self.redis_url = redis_url
-        self.redis_client = None
-        self.results = []
+        self.redis_client: Any = None
+        self.results: List[Dict[str, Any]] = []
 
     async def setup(self):
         """Setup connections for validation."""
@@ -63,7 +63,7 @@ class RateLimitingValidator:
         if self.redis_client:
             await self.redis_client.close()
 
-    async def test_basic_rate_limiting(self) -> Dict:
+    async def test_basic_rate_limiting(self) -> Dict[str, Any]:
         """Test basic rate limiting functionality."""
         console.print("\n[bold]Testing Basic Rate Limiting[/bold]")
 
@@ -109,7 +109,7 @@ class RateLimitingValidator:
         self.results.append(results)
         return results
 
-    async def test_rate_limit_enforcement(self) -> Dict:
+    async def test_rate_limit_enforcement(self) -> Dict[str, Any]:
         """Test rate limit enforcement."""
         console.print("\n[bold]Testing Rate Limit Enforcement[/bold]")
 
@@ -175,7 +175,7 @@ class RateLimitingValidator:
         self.results.append(results)
         return results
 
-    async def test_different_endpoint_limits(self) -> Dict:
+    async def test_different_endpoint_limits(self) -> Dict[str, Any]:
         """Test different rate limits for different endpoints."""
         console.print("\n[bold]Testing Different Endpoint Limits[/bold]")
 
@@ -255,7 +255,7 @@ class RateLimitingValidator:
         self.results.append(results)
         return results
 
-    async def test_redis_storage(self) -> Dict:
+    async def test_redis_storage(self) -> Dict[str, Any]:
         """Test Redis storage for rate limiting."""
         console.print("\n[bold]Testing Redis Storage[/bold]")
 
@@ -319,7 +319,7 @@ class RateLimitingValidator:
         self.results.append(results)
         return results
 
-    async def test_rate_limit_headers(self) -> Dict:
+    async def test_rate_limit_headers(self) -> Dict[str, Any]:
         """Test rate limiting headers."""
         console.print("\n[bold]Testing Rate Limit Headers[/bold]")
 
@@ -368,7 +368,7 @@ class RateLimitingValidator:
         self.results.append(results)
         return results
 
-    async def test_websocket_rate_limiting(self) -> Dict:
+    async def test_websocket_rate_limiting(self) -> Dict[str, Any]:
         """Test WebSocket rate limiting."""
         console.print("\n[bold]Testing WebSocket Rate Limiting[/bold]")
 
@@ -395,7 +395,7 @@ class RateLimitingValidator:
 
     async def _make_request(
         self, session: aiohttp.ClientSession, url: str
-    ) -> Dict:
+    ) -> Dict[str, Any]:
         """Make a request and return response info."""
         try:
             async with session.get(url) as response:

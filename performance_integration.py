@@ -1,5 +1,5 @@
 """
-Performance Integration Module for FreeAgentics
+Performance Integration Module for FreeAgentics.
 
 This module provides a unified interface to enable all performance optimizations
 in the FreeAgentics system. It integrates:

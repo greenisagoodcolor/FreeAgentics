@@ -439,7 +439,7 @@ class KnowledgeGraph:
         try:
             scores = nx.pagerank(self.graph)
             return scores  # type: ignore[no-any-return]
-        except:
+        except Exception:
             # Fallback to degree centrality
             scores = nx.degree_centrality(self.graph)
             return scores  # type: ignore[no-any-return]
@@ -470,7 +470,7 @@ class KnowledgeGraph:
                 communities[comm_id].add(node_id)
 
             return list(communities.values())
-        except:
+        except Exception:
             # Fallback to connected components
             return [set(comp) for comp in nx.connected_components(undirected)]
 

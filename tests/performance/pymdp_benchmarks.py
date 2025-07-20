@@ -44,6 +44,7 @@ class BenchmarkTimer:
     """High-precision timer for benchmarking."""
 
     def __init__(self):
+        """Initialize benchmark timer with no start time and empty laps list."""
         self.start_time = None
         self.laps = []
 
@@ -69,6 +70,7 @@ class MemoryMonitor:
     """Monitor memory usage during benchmarks."""
 
     def __init__(self):
+        """Initialize memory monitor with current process and no baseline."""
         self.process = psutil.Process(os.getpid())
         self.baseline_memory = None
 
@@ -90,6 +92,11 @@ class PyMDPBenchmark:
     """Base class for PyMDP benchmarks."""
 
     def __init__(self, name: str):
+        """Initialize PyMDP benchmark with name and monitoring tools.
+
+        Args:
+            name: Name of the benchmark
+        """
         self.name = name
         self.timer = BenchmarkTimer()
         self.memory_monitor = MemoryMonitor()
@@ -193,6 +200,12 @@ class BeliefUpdateBenchmark(PyMDPBenchmark):
     """Benchmark belief state updates."""
 
     def __init__(self, state_size: int = 10, num_modalities: int = 2):
+        """Initialize belief update benchmark.
+
+        Args:
+            state_size: Size of the state space
+            num_modalities: Number of sensory modalities
+        """
         super().__init__("belief_update")
         self.state_size = state_size
         self.num_modalities = num_modalities
@@ -254,6 +267,13 @@ class ExpectedFreeEnergyBenchmark(PyMDPBenchmark):
         policy_depth: int = 3,
         num_policies: int = 50,
     ):
+        """Initialize expected free energy benchmark.
+
+        Args:
+            state_size: Size of the state space
+            policy_depth: Depth of policy planning
+            num_policies: Number of policies to evaluate
+        """
         super().__init__("expected_free_energy")
         self.state_size = state_size
         self.policy_depth = policy_depth
@@ -313,6 +333,12 @@ class MatrixCachingBenchmark(PyMDPBenchmark):
     """Benchmark matrix caching performance."""
 
     def __init__(self, state_size: int = 50, cache_enabled: bool = True):
+        """Initialize matrix caching benchmark.
+
+        Args:
+            state_size: Size of the state space
+            cache_enabled: Whether to enable matrix caching
+        """
         super().__init__("matrix_caching")
         self.state_size = state_size
         self.cache_enabled = cache_enabled
@@ -375,6 +401,12 @@ class AgentScalingBenchmark(PyMDPBenchmark):
     """Benchmark performance with increasing number of agents."""
 
     def __init__(self, num_agents: int = 10, state_size: int = 20):
+        """Initialize agent scaling benchmark.
+
+        Args:
+            num_agents: Number of agents to simulate
+            state_size: Size of the state space
+        """
         super().__init__("agent_scaling")
         self.num_agents = num_agents
         self.state_size = state_size
@@ -420,6 +452,7 @@ class BenchmarkSuite:
     """Run complete benchmark suite."""
 
     def __init__(self):
+        """Initialize benchmark suite with empty benchmarks and results lists."""
         self.benchmarks = []
         self.results = []
 

@@ -25,6 +25,7 @@ class SystemMetricsCollector:
     """Collects system-level performance metrics."""
 
     def __init__(self):
+        """Initialize system metrics collector with process monitoring."""
         self.process = psutil.Process()
         self.last_cpu_time = time.time()
         self.last_cpu_percent = 0.0
@@ -65,6 +66,11 @@ class ActiveInferenceMetricsCollector:
     """Collects Active Inference specific metrics from agents."""
 
     def __init__(self, agent_manager=None):
+        """Initialize Active Inference metrics collector.
+
+        Args:
+            agent_manager: Agent manager instance to monitor
+        """
         self.agent_manager = agent_manager
 
     async def collect_agent_metrics(self):
@@ -118,6 +124,7 @@ class StructuredLogger:
     """Enhanced structured logging for production monitoring."""
 
     def __init__(self):
+        """Initialize structured logger and configure JSON logging."""
         self.setup_structured_logging()
 
     def setup_structured_logging(self):
@@ -180,6 +187,7 @@ class AlertManager:
     """Manages alerts and notifications for critical events."""
 
     def __init__(self):
+        """Initialize alert manager with default thresholds."""
         self.alert_thresholds = {
             "cpu_usage": 80.0,
             "memory_usage": 85.0,
@@ -242,6 +250,12 @@ class HealthChecker:
     """Comprehensive health checking for all system components."""
 
     def __init__(self, agent_manager=None, database=None):
+        """Initialize health checker with optional components.
+
+        Args:
+            agent_manager: Agent manager instance to check
+            database: Database connection to check
+        """
         self.agent_manager = agent_manager
         self.database = database
 
@@ -334,6 +348,12 @@ class ObservabilityManager:
     """Main orchestrator for all observability components."""
 
     def __init__(self, agent_manager=None, database=None):
+        """Initialize observability manager with all monitoring components.
+
+        Args:
+            agent_manager: Agent manager instance to monitor
+            database: Database connection to monitor
+        """
         self.system_collector = SystemMetricsCollector()
         self.agent_collector = ActiveInferenceMetricsCollector(agent_manager)
         self.structured_logger = StructuredLogger()
@@ -481,7 +501,7 @@ if __name__ == "__main__":
     import asyncio
 
     async def test_observability():
-        async with observability_context() as manager:
+        async with observability_context():
             logging.info("Observability test started")
 
             # Run for 60 seconds

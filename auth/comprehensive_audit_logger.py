@@ -39,7 +39,6 @@ class AccessDecisionAuditor:
         metadata: Optional[Dict[str, Any]] = None,
     ) -> None:
         """Log RBAC access decision."""
-
         decision_entry = {
             "timestamp": datetime.now(timezone.utc).isoformat(),
             "decision_type": "rbac",
@@ -97,7 +96,6 @@ class AccessDecisionAuditor:
         context: Optional[Dict[str, Any]] = None,
     ) -> None:
         """Log ABAC access decision."""
-
         decision_entry = {
             "timestamp": datetime.now(timezone.utc).isoformat(),
             "decision_type": "abac",
@@ -155,7 +153,6 @@ class AccessDecisionAuditor:
         metadata: Optional[Dict[str, Any]] = None,
     ) -> None:
         """Log ownership check decision."""
-
         decision_entry = {
             "timestamp": datetime.now(timezone.utc).isoformat(),
             "decision_type": "ownership",
@@ -219,7 +216,6 @@ class AccessDecisionAuditor:
         metadata: Optional[Dict[str, Any]] = None,
     ) -> None:
         """Log session-related events."""
-
         session_entry = {
             "timestamp": datetime.now(timezone.utc).isoformat(),
             "event_type": event_type,
@@ -288,7 +284,6 @@ class AccessDecisionAuditor:
         window_seconds: int,
     ) -> None:
         """Log rate limiting events."""
-
         rate_limit_entry = {
             "timestamp": datetime.now(timezone.utc).isoformat(),
             "event_type": "rate_limit",
@@ -334,7 +329,6 @@ class AccessDecisionAuditor:
         metadata: Optional[Dict[str, Any]] = None,
     ) -> None:
         """Log permission escalation attempts."""
-
         escalation_entry = {
             "timestamp": datetime.now(timezone.utc).isoformat(),
             "event_type": "permission_escalation",
@@ -379,7 +373,6 @@ class AccessDecisionAuditor:
         metadata: Optional[Dict[str, Any]] = None,
     ) -> None:
         """Log data access events."""
-
         data_access_entry = {
             "timestamp": datetime.now(timezone.utc).isoformat(),
             "event_type": "data_access",
@@ -438,7 +431,6 @@ class AccessDecisionAuditor:
         end_time: Optional[datetime] = None,
     ) -> Dict[str, Any]:
         """Get activity summary for a user."""
-
         if start_time is None:
             start_time = datetime.now(timezone.utc) - timedelta(hours=24)
         if end_time is None:
@@ -518,7 +510,6 @@ class AccessDecisionAuditor:
         end_time: Optional[datetime] = None,
     ) -> List[Dict[str, Any]]:
         """Get security incidents based on access patterns."""
-
         if start_time is None:
             start_time = datetime.now(timezone.utc) - timedelta(hours=24)
         if end_time is None:
@@ -624,7 +615,6 @@ class AccessDecisionAuditor:
         end_time: Optional[datetime] = None,
     ) -> Dict[str, Any]:
         """Generate comprehensive audit report."""
-
         if start_time is None:
             start_time = datetime.now(timezone.utc) - timedelta(hours=24)
         if end_time is None:
@@ -751,7 +741,6 @@ class AccessDecisionAuditor:
 
     async def cleanup_old_logs(self, retention_days: int = 30) -> int:
         """Clean up old log entries."""
-
         cutoff_date = datetime.now(timezone.utc) - timedelta(
             days=retention_days
         )

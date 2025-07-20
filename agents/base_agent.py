@@ -4,7 +4,7 @@ import logging
 from abc import ABC, abstractmethod
 from dataclasses import dataclass
 from datetime import datetime
-from typing import Any, Dict, Optional, Tuple
+from typing import Any, Callable, Dict, Optional, Tuple
 
 import numpy as np
 
@@ -107,6 +107,15 @@ except ImportError:
 
     # Mock observability functions
     def monitor_pymdp_inference(agent_id: str):
+        """Create a decorator for monitoring PyMDP inference operations.
+
+        Args:
+            agent_id: ID of the agent to monitor
+
+        Returns:
+            Decorator function that returns the original function unchanged
+        """
+
         def decorator(func):
             return func
 
@@ -118,19 +127,42 @@ except ImportError:
         beliefs_after: dict,
         free_energy: float = None,
     ):
+        """Record belief update event for observability.
+
+        Args:
+            agent_id: ID of the agent
+            beliefs_before: Beliefs before update
+            beliefs_after: Beliefs after update
+            free_energy: Optional free energy value
+        """
         pass
 
     async def record_agent_lifecycle_event(
-        agent_id: str, event: str, metadata: dict = None
+        agent_id: str, event: str, metadata: Dict[str, Any] = None
     ):
+        """Record agent lifecycle event for observability.
+
+        Args:
+            agent_id: ID of the agent
+            event: Lifecycle event name
+            metadata: Optional event metadata
+        """
         pass
 
     async def monitor_belief_update(
         agent_id: str,
         beliefs: dict,
         free_energy: float = None,
-        metadata: dict = None,
+        metadata: Dict[str, Any] = None,
     ):
+        """Monitor belief update with detailed tracking.
+
+        Args:
+            agent_id: ID of the agent
+            beliefs: Current belief state
+            free_energy: Optional free energy value
+            metadata: Optional additional metadata
+        """
         pass
 
 
@@ -193,7 +225,7 @@ class ActiveInferenceAgent(ABC):
         # Agent state
         self.is_active = False
         self.created_at = datetime.now()
-        self.last_action_at = None
+        self.last_action_at: Optional[datetime] = None
         self.total_steps = 0
 
         # Performance optimization settings
@@ -203,16 +235,18 @@ class ActiveInferenceAgent(ABC):
         self.selective_update_interval = config.get(
             "selective_update_interval", 1
         )  # Update beliefs every N steps
-        self.matrix_cache = {}  # Cache for normalized matrices
+        self.matrix_cache: Dict[str, Any] = {}  # Cache for normalized matrices
 
         # Active Inference components
         self.pymdp_agent = None  # PyMDP agent instance
-        self.beliefs = {}  # Beliefs about hidden states
-        self.preferences = {}  # Preferred observations
-        self.policies = []  # Available action policies
+        self.beliefs: Dict[str, Any] = {}  # Beliefs about hidden states
+        self.preferences: Dict[str, Any] = {}  # Preferred observations
+        self.policies: list[Any] = []  # Available action policies
 
         # GMN and LLM integration
-        self.gmn_spec = None  # GMN specification for the agent
+        self.gmn_spec: Optional[
+            Dict[str, Any]
+        ] = None  # GMN specification for the agent
         if LLM_AVAILABLE:
             llm_config_dict = self.config.get("llm_config", {})
             # Create LocalLLMConfig with default values and user overrides
@@ -253,7 +287,7 @@ class ActiveInferenceAgent(ABC):
 
         # PERFORMANCE OPTIMIZATION: Initialize performance optimizer
         self.performance_optimizer = PerformanceOptimizer()
-        self.performance_metrics = {}
+        self.performance_metrics: Dict[str, Any] = {}
 
         logger.info(
             f"Created agent {self.agent_id} ({self.name}) - PyMDP: {PYMDP_AVAILABLE}, Performance Mode: {self.performance_mode}"
@@ -288,6 +322,7 @@ class ActiveInferenceAgent(ABC):
         """
         pass
 
+    @abstractmethod
     def _initialize_pymdp(self) -> None:
         """Initialize PyMDP agent with default configuration."""
         # This will be overridden by subclasses with specific models
@@ -340,7 +375,7 @@ class ActiveInferenceAgent(ABC):
         return (total_steps % selective_update_interval) == 0
 
     def _get_cached_matrix(
-        self, matrix_name: str, matrix_data: Any, normalization_func: callable
+        self, matrix_name: str, matrix_data: Any, normalization_func: Callable
     ) -> Any:
         """Get cached normalized matrix or compute and cache it."""
         # Initialize matrix_cache if it doesn't exist (during construction)
@@ -645,6 +680,13 @@ class BasicExplorerAgent(ActiveInferenceAgent):
     """
 
     def __init__(self, agent_id: str, name: str, grid_size: int = 10):
+        """Initialize BasicExplorerAgent with grid world parameters.
+
+        Args:
+            agent_id: Unique identifier for the agent
+            name: Human-readable name for the agent
+            grid_size: Size of the grid world (default: 10)
+        """
         # Initialize attributes BEFORE calling parent constructor
         self.grid_size = grid_size
         self.position = [grid_size // 2, grid_size // 2]  # Start in center
@@ -869,10 +911,145 @@ class BasicExplorerAgent(ActiveInferenceAgent):
 
         # Note: total_observations is incremented in the base step() method
 
+    def _capture_beliefs_before_update(self):
+        """Capture beliefs state before update for observability."""
+        beliefs_before = {}
+        if (
+            self.observability_enabled
+            and hasattr(self.pymdp_agent, "qs")
+            and self.pymdp_agent.qs is not None
+        ):
+            try:
+                beliefs_before = {
+                    "belief_entropy": self.metrics.get("belief_entropy", 0.0),
+                    "avg_free_energy": self.metrics.get(
+                        "avg_free_energy", 0.0
+                    ),
+                    "state_posterior_size": (
+                        len(self.pymdp_agent.qs) if self.pymdp_agent.qs else 0
+                    ),
+                }
+            except Exception as e:
+                logger.debug(f"Failed to capture beliefs before update: {e}")
+        return beliefs_before
+
+    def _perform_state_inference(self):
+        """Perform state inference using PyMDP agent."""
+        if hasattr(self, "current_observation"):
+            success, _, error = self.pymdp_error_handler.safe_execute(
+                "state_inference",
+                lambda: self.pymdp_agent.infer_states(
+                    self.current_observation
+                ),
+                lambda: None,  # No fallback for inference - will use existing beliefs
+            )
+            if not success and error:
+                logger.warning(f"State inference failed: {error}")
+
+    def _calculate_belief_entropy(self, qs):
+        """Calculate belief entropy using optimized computation."""
+        try:
+            # Use numpy's built-in entropy calculation for speed
+            epsilon = 1e-10
+            if len(qs) == 1:  # Single factor case (common)
+                factor = qs[0]
+                entropy = -np.sum(factor * np.log(factor + epsilon))
+            else:  # Multiple factors
+                entropy = sum(
+                    -np.sum(factor * np.log(factor + epsilon)) for factor in qs
+                )
+            return float(entropy)
+        except Exception as e:
+            logger.warning(f"Entropy calculation failed: {e}")
+            return 0.0
+
+    def _update_free_energy_metrics(self):
+        """Update free energy metrics with reduced computation frequency."""
+        # PERFORMANCE: Reduced free energy computation frequency
+        if self.total_steps % 10 == 0:  # Only every 10 steps
+            if (
+                hasattr(self.pymdp_agent, "F")
+                and self.pymdp_agent.F is not None
+            ):
+                self.metrics["avg_free_energy"] = float(
+                    np.mean(self.pymdp_agent.F)
+                )
+
+    def _record_belief_monitoring(self, qs, beliefs_before, beliefs_after):
+        """Record belief monitoring data asynchronously."""
+        import asyncio
+
+        try:
+            loop = asyncio.get_event_loop()
+            if loop.is_running():
+                # Use new belief monitoring system if available
+                if self.belief_monitoring_enabled:
+                    # Create comprehensive belief state for monitoring
+                    beliefs_state = {
+                        "qs": qs,
+                        "entropy": self.metrics.get("belief_entropy", 0.0),
+                        "state_posterior_size": len(qs) if qs else 0,
+                        "previous_entropy": beliefs_before.get(
+                            "belief_entropy", 0.0
+                        ),
+                    }
+
+                    # Monitor belief update with detailed tracking
+                    asyncio.create_task(
+                        monitor_belief_update(
+                            self.agent_id,
+                            beliefs_state,
+                            beliefs_after.get("avg_free_energy"),
+                            {
+                                "step": self.total_steps,
+                                "update_type": "pymdp_inference",
+                                "beliefs_before": beliefs_before,
+                                "beliefs_after": beliefs_after,
+                            },
+                        )
+                    )
+
+                # Also record basic metrics
+                asyncio.create_task(
+                    record_belief_update(
+                        self.agent_id,
+                        beliefs_before,
+                        beliefs_after,
+                        beliefs_after.get("avg_free_energy"),
+                    )
+                )
+        except RuntimeError:
+            # No event loop running, skip async recording
+            pass
+        except Exception as e:
+            logger.debug(f"Failed to record belief update: {e}")
+
+    def _process_belief_states(self, qs, beliefs_before):
+        """Process belief states and update metrics."""
+        # PERFORMANCE: Optimized entropy calculation using vectorized operations
+        entropy = self._calculate_belief_entropy(qs)
+        self.metrics["belief_entropy"] = entropy
+
+        # PERFORMANCE: Only store beliefs if explicitly needed (debug mode)
+        if self.config.get("debug_mode", False):
+            self.beliefs["state_posterior"] = [q.tolist() for q in qs]
+
+        # Update free energy metrics
+        self._update_free_energy_metrics()
+
+        # OBSERVABILITY: Record beliefs after update
+        if self.observability_enabled and beliefs_before:
+            beliefs_after = {
+                "belief_entropy": self.metrics.get("belief_entropy", 0.0),
+                "avg_free_energy": self.metrics.get("avg_free_energy", 0.0),
+                "state_posterior_size": len(qs) if qs else 0,
+            }
+            self._record_belief_monitoring(qs, beliefs_before, beliefs_after)
+
     @performance_monitor("belief_update")
     @safe_pymdp_operation("belief_update", default_value=None)
     def update_beliefs(self) -> None:
-        """PERFORMANCE OPTIMIZED: Update beliefs using Active Inference.
+        """Update beliefs using Active Inference with performance optimizations.
 
         Optimizations applied:
         - Selective belief updates based on update interval
@@ -883,46 +1060,14 @@ class BasicExplorerAgent(ActiveInferenceAgent):
         # PERFORMANCE OPTIMIZATION: Skip updates based on interval
         if not self._should_update_beliefs():
             return
+
         if self.pymdp_agent and PYMDP_AVAILABLE:
             try:
-                # OBSERVABILITY: Record beliefs before update
-                beliefs_before = {}
-                if (
-                    self.observability_enabled
-                    and hasattr(self.pymdp_agent, "qs")
-                    and self.pymdp_agent.qs is not None
-                ):
-                    try:
-                        beliefs_before = {
-                            "belief_entropy": self.metrics.get(
-                                "belief_entropy", 0.0
-                            ),
-                            "avg_free_energy": self.metrics.get(
-                                "avg_free_energy", 0.0
-                            ),
-                            "state_posterior_size": (
-                                len(self.pymdp_agent.qs)
-                                if self.pymdp_agent.qs
-                                else 0
-                            ),
-                        }
-                    except Exception as e:
-                        logger.debug(
-                            f"Failed to capture beliefs before update: {e}"
-                        )
+                # Capture beliefs before update for observability
+                beliefs_before = self._capture_beliefs_before_update()
 
                 # Perform variational inference with error handling
-                if hasattr(self, "current_observation"):
-                    success, _, error = self.pymdp_error_handler.safe_execute(
-                        "state_inference",
-                        lambda: self.pymdp_agent.infer_states(
-                            self.current_observation
-                        ),
-                        lambda: None,  # No fallback for inference - will use existing beliefs
-                    )
-
-                    if not success and error:
-                        logger.warning(f"State inference failed: {error}")
+                self._perform_state_inference()
 
                 # PERFORMANCE OPTIMIZATION: Fast belief processing
                 if (
@@ -930,113 +1075,8 @@ class BasicExplorerAgent(ActiveInferenceAgent):
                     and self.pymdp_agent.qs is not None
                 ):
                     qs = self.pymdp_agent.qs  # Posterior beliefs over states
-
-                    # PERFORMANCE: Optimized entropy calculation using vectorized operations
                     try:
-                        # Use numpy's built-in entropy calculation for speed
-                        epsilon = 1e-10
-                        if len(qs) == 1:  # Single factor case (common)
-                            factor = qs[0]
-                            entropy = -np.sum(
-                                factor * np.log(factor + epsilon)
-                            )
-                        else:  # Multiple factors
-                            entropy = sum(
-                                -np.sum(factor * np.log(factor + epsilon))
-                                for factor in qs
-                            )
-
-                        self.metrics["belief_entropy"] = float(entropy)
-
-                        # PERFORMANCE: Only store beliefs if explicitly needed (debug mode)
-                        if self.config.get("debug_mode", False):
-                            self.beliefs["state_posterior"] = [
-                                q.tolist() for q in qs
-                            ]
-
-                        # PERFORMANCE: Reduced free energy computation frequency
-                        if self.total_steps % 10 == 0:  # Only every 10 steps
-                            if (
-                                hasattr(self.pymdp_agent, "F")
-                                and self.pymdp_agent.F is not None
-                            ):
-                                self.metrics["avg_free_energy"] = float(
-                                    np.mean(self.pymdp_agent.F)
-                                )
-
-                        # OBSERVABILITY: Record beliefs after update
-                        if self.observability_enabled and beliefs_before:
-                            try:
-                                beliefs_after = {
-                                    "belief_entropy": self.metrics.get(
-                                        "belief_entropy", 0.0
-                                    ),
-                                    "avg_free_energy": self.metrics.get(
-                                        "avg_free_energy", 0.0
-                                    ),
-                                    "state_posterior_size": len(qs)
-                                    if qs
-                                    else 0,
-                                }
-
-                                # Record belief update asynchronously
-                                import asyncio
-
-                                try:
-                                    loop = asyncio.get_event_loop()
-                                    if loop.is_running():
-                                        # Use new belief monitoring system if available
-                                        if self.belief_monitoring_enabled:
-                                            # Create comprehensive belief state for monitoring
-                                            beliefs_state = {
-                                                "qs": qs,
-                                                "entropy": self.metrics.get(
-                                                    "belief_entropy", 0.0
-                                                ),
-                                                "state_posterior_size": len(qs)
-                                                if qs
-                                                else 0,
-                                                "previous_entropy": beliefs_before.get(
-                                                    "belief_entropy", 0.0
-                                                ),
-                                            }
-
-                                            # Monitor belief update with detailed tracking
-                                            asyncio.create_task(
-                                                monitor_belief_update(
-                                                    self.agent_id,
-                                                    beliefs_state,
-                                                    beliefs_after.get(
-                                                        "avg_free_energy"
-                                                    ),
-                                                    {
-                                                        "step": self.total_steps,
-                                                        "update_type": "pymdp_inference",
-                                                        "beliefs_before": beliefs_before,
-                                                        "beliefs_after": beliefs_after,
-                                                    },
-                                                )
-                                            )
-
-                                        # Also record basic metrics
-                                        asyncio.create_task(
-                                            record_belief_update(
-                                                self.agent_id,
-                                                beliefs_before,
-                                                beliefs_after,
-                                                beliefs_after.get(
-                                                    "avg_free_energy"
-                                                ),
-                                            )
-                                        )
-                                except RuntimeError:
-                                    # No event loop running, skip async recording
-                                    pass
-                            except Exception as e:
-                                logger.debug(
-                                    f"Failed to record belief update: {e}"
-                                )
-
+                        self._process_belief_states(qs, beliefs_before)
                     except Exception as e:
                         logger.warning(
                             f"Fast belief processing failed: {e}, using fallback"
@@ -1048,7 +1088,6 @@ class BasicExplorerAgent(ActiveInferenceAgent):
                     f"PyMDP belief update failed: {e}, using fallback"
                 )
                 raise InferenceError(f"PyMDP belief update failed: {e}")
-
         else:
             # Fallback: simple uncertainty update
             self._fallback_update_beliefs()

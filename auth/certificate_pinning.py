@@ -1,5 +1,5 @@
 """
-Enhanced Certificate Pinning for Mobile Applications
+Enhanced Certificate Pinning for Mobile Applications.
 
 Provides comprehensive certificate pinning with fallback mechanisms,
 mobile app support, and production-ready configuration management.
@@ -69,7 +69,7 @@ class CertificateValidator:
             public_key = cert.public_key()
 
             # Serialize the public key in DER format
-            der_public_key = public_key.public_key().public_bytes(
+            der_public_key = public_key.public_bytes(
                 encoding=serialization.Encoding.DER,
                 format=serialization.PublicFormat.SubjectPublicKeyInfo,
             )
@@ -98,6 +98,10 @@ class CertificateValidator:
                     sock, server_hostname=hostname
                 ) as ssock:
                     cert_der = ssock.getpeercert(binary_form=True)
+                    if cert_der is None:
+                        raise ValueError(
+                            f"No certificate received from {hostname}:{port}"
+                        )
                     cert = x509.load_der_x509_certificate(cert_der)
 
                     return cert.public_bytes(
@@ -140,7 +144,8 @@ class CertificateValidator:
 class MobileCertificatePinner:
     """Enhanced certificate pinning with mobile app support."""
 
-    def __init__(self):
+    def __init__(self) -> None:
+        """Initialize mobile certificate pinner."""
         self.domain_configs: Dict[str, PinConfiguration] = {}
         self.pin_cache: Dict[str, Tuple[str, datetime]] = {}
         self.failure_count: Dict[str, int] = {}
@@ -148,7 +153,7 @@ class MobileCertificatePinner:
         # Load configuration from environment and files
         self._load_configuration()
 
-    def _load_configuration(self):
+    def _load_configuration(self) -> None:
         """Load pinning configuration from environment and files."""
         # Load from environment variables
         self._load_env_configuration()
@@ -160,7 +165,7 @@ class MobileCertificatePinner:
         if os.path.exists(config_file):
             self._load_file_configuration(config_file)
 
-    def _load_env_configuration(self):
+    def _load_env_configuration(self) -> None:
         """Load certificate pins from environment variables."""
         # Production domains
         production_domains = [
@@ -185,7 +190,7 @@ class MobileCertificatePinner:
                 )
                 self.domain_configs[domain] = config
 
-    def _load_file_configuration(self, config_file: str):
+    def _load_file_configuration(self, config_file: str) -> None:
         """Load certificate pins from JSON configuration file."""
         try:
             with open(config_file, "r") as f:
@@ -217,7 +222,7 @@ class MobileCertificatePinner:
                 f"Failed to load certificate pinning configuration: {e}"
             )
 
-    def add_domain_pins(self, domain: str, config: PinConfiguration):
+    def add_domain_pins(self, domain: str, config: PinConfiguration) -> None:
         """Add certificate pins for a domain."""
         # Validate pins
         for pin in config.primary_pins + config.backup_pins:
@@ -310,7 +315,7 @@ class MobileCertificatePinner:
 
     def _report_pin_failure(
         self, domain: str, chain_pins: List[str], expected_pins: List[str]
-    ):
+    ) -> None:
         """Report certificate pin validation failure."""
         try:
             import requests
@@ -338,7 +343,9 @@ class MobileCertificatePinner:
         except Exception as e:
             logger.error(f"Failed to report pin failure: {e}")
 
-    def emergency_bypass_domain(self, domain: str, duration_hours: int = 24):
+    def emergency_bypass_domain(
+        self, domain: str, duration_hours: int = 24
+    ) -> None:
         """Emergency bypass pinning for a domain."""
         config = self.domain_configs.get(domain)
         if config:
@@ -421,7 +428,7 @@ PRODUCTION_PIN_CONFIGS = {
 }
 
 
-def setup_production_pins():
+def setup_production_pins() -> None:
     """Set up production certificate pins."""
     if os.getenv("PRODUCTION", "false").lower() == "true":
         for domain, config in PRODUCTION_PIN_CONFIGS.items():

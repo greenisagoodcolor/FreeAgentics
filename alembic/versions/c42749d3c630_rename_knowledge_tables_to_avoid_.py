@@ -1,4 +1,4 @@
-"""rename knowledge tables to avoid conflicts
+"""rename knowledge tables to avoid conflicts.
 
 Revision ID: c42749d3c630
 Revises: 1b4306802749
@@ -10,7 +10,7 @@ from typing import Sequence, Union
 
 import sqlalchemy as sa
 
-from alembic import op
+from alembic import op  # type: ignore[attr-defined]
 
 # revision identifiers, used by Alembic.
 revision: str = "c42749d3c630"

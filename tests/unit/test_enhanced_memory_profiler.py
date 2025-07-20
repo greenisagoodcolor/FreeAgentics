@@ -17,6 +17,7 @@ from typing import Any, Dict, List, Optional, Tuple
 from unittest.mock import MagicMock, patch
 
 import numpy as np
+import pytest
 
 # Add project root to path
 sys.path.insert(
@@ -318,6 +319,7 @@ class EnhancedMemoryProfiler:
         return tools
 
 
+@pytest.mark.slow
 class TestEnhancedMemoryProfiler(unittest.TestCase):
     """Test enhanced memory profiler functionality."""
 

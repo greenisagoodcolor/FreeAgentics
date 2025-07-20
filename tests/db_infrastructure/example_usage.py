@@ -59,7 +59,7 @@ def main():
     # 5. Run performance monitoring
     print("\n5. Running performance test...")
     monitor = PerformanceMonitor("example_test")
-    test_run_id = monitor.start_test_run({"example": True})
+    monitor.start_test_run({"example": True})
 
     # Simulate some operations
     with monitor.measure_operation("query", "select_agents"):

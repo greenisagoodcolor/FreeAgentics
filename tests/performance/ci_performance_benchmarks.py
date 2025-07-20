@@ -46,6 +46,12 @@ class PerformanceBenchmark:
     """Base class for performance benchmarks."""
 
     def __init__(self, name: str, description: str):
+        """Initialize performance benchmark with name and description.
+
+        Args:
+            name: Name of the benchmark
+            description: Description of what the benchmark measures
+        """
         self.name = name
         self.description = description
         self.profiler = ComponentProfiler()
@@ -63,6 +69,7 @@ class SingleAgentInferenceBenchmark(PerformanceBenchmark):
     """Benchmark single agent inference performance."""
 
     def __init__(self):
+        """Initialize single agent inference benchmark."""
         super().__init__(
             "single_agent_inference",
             "Measures single agent inference latency and memory usage",
@@ -233,6 +240,7 @@ class MultiAgentCoordinationBenchmark(PerformanceBenchmark):
     """Benchmark multi-agent coordination efficiency."""
 
     def __init__(self):
+        """Initialize multi-agent coordination benchmark."""
         super().__init__(
             "multi_agent_coordination",
             "Measures coordination efficiency and scaling behavior",
@@ -391,6 +399,7 @@ class CachePerformanceBenchmark(PerformanceBenchmark):
     """Benchmark matrix caching performance."""
 
     def __init__(self):
+        """Initialize cache performance benchmark."""
         super().__init__(
             "cache_performance",
             "Measures matrix caching effectiveness and memory overhead",
@@ -538,6 +547,7 @@ class MemoryRegressionBenchmark(PerformanceBenchmark):
     """Benchmark memory usage and detect memory leaks."""
 
     def __init__(self):
+        """Initialize memory regression benchmark."""
         super().__init__(
             "memory_regression",
             "Detects memory leaks and excessive memory usage",
@@ -708,6 +718,11 @@ class CIPerformanceBenchmarkSuite:
     """Main CI performance benchmark suite."""
 
     def __init__(self, output_dir: Optional[Path] = None):
+        """Initialize CI performance benchmark suite.
+
+        Args:
+            output_dir: Directory for storing benchmark results
+        """
         self.output_dir = output_dir or Path("tests/performance/ci_results")
         self.output_dir.mkdir(parents=True, exist_ok=True)
 

@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 """
-Comprehensive Production Readiness Validation Script
+Comprehensive Production Readiness Validation Script.
 Task 21: Validate Production Environment Configuration
 
 This script performs comprehensive validation of the production environment:
@@ -44,7 +44,7 @@ logger = logging.getLogger(__name__)
 
 
 class ProductionValidator:
-    """Comprehensive production validation suite"""
+    """Comprehensive production validation suite."""
 
     def __init__(self):
         self.base_url = "http://localhost:8000"
@@ -65,7 +65,7 @@ class ProductionValidator:
     def log_result(
         self, category: str, test_name: str, result: Dict[str, Any]
     ):
-        """Log test result"""
+        """Log test result."""
         if category not in self.results["validation_results"]:
             self.results["validation_results"][category] = {}
         self.results["validation_results"][category][test_name] = result
@@ -89,7 +89,7 @@ class ProductionValidator:
             )
 
     def check_environment_readiness(self) -> bool:
-        """Check if environment is ready for testing"""
+        """Check if environment is ready for testing."""
         logger.info("Checking environment readiness...")
 
         # Check if .env.production exists
@@ -113,7 +113,7 @@ class ProductionValidator:
             return False
 
     def validate_load_testing(self):
-        """Perform load testing and performance validation"""
+        """Perform load testing and performance validation."""
         logger.info("Starting load testing and performance validation...")
 
         # Test 1: Basic response time
@@ -129,7 +129,6 @@ class ProductionValidator:
                 break
 
         if response_times:
-            avg_response = sum(response_times) / len(response_times)
             p95_response = sorted(response_times)[
                 int(len(response_times) * 0.95)
             ]
@@ -155,7 +154,7 @@ class ProductionValidator:
         self.validate_database_performance()
 
     def concurrent_load_test(self):
-        """Run concurrent load test"""
+        """Run concurrent load test."""
         logger.info("Running concurrent load test...")
 
         def make_request(url: str) -> Tuple[int, float]:
@@ -207,7 +206,7 @@ class ProductionValidator:
         )
 
     def validate_memory_usage(self):
-        """Validate system memory usage"""
+        """Validate system memory usage."""
         logger.info("Validating memory usage...")
 
         memory = psutil.virtual_memory()
@@ -226,7 +225,7 @@ class ProductionValidator:
         )
 
     def validate_database_performance(self):
-        """Validate database performance"""
+        """Validate database performance."""
         logger.info("Validating database performance...")
 
         try:
@@ -306,7 +305,7 @@ class ProductionValidator:
             )
 
     def validate_security(self):
-        """Perform security validation and penetration testing"""
+        """Perform security validation and penetration testing."""
         logger.info("Starting security validation and penetration testing...")
 
         # Test 1: SSL/TLS Configuration
@@ -328,7 +327,7 @@ class ProductionValidator:
         self.test_cors_configuration()
 
     def test_ssl_configuration(self):
-        """Test SSL/TLS configuration"""
+        """Test SSL/TLS configuration."""
         logger.info("Testing SSL/TLS configuration...")
 
         try:
@@ -371,7 +370,7 @@ class ProductionValidator:
             )
 
     def test_security_headers(self):
-        """Test security headers"""
+        """Test security headers."""
         logger.info("Testing security headers...")
 
         try:
@@ -418,7 +417,7 @@ class ProductionValidator:
             )
 
     def test_authentication_security(self):
-        """Test authentication security"""
+        """Test authentication security."""
         logger.info("Testing authentication security...")
 
         try:
@@ -455,7 +454,7 @@ class ProductionValidator:
             )
 
     def test_rate_limiting(self):
-        """Test rate limiting"""
+        """Test rate limiting."""
         logger.info("Testing rate limiting...")
 
         try:
@@ -491,7 +490,7 @@ class ProductionValidator:
             )
 
     def test_input_validation(self):
-        """Test input validation"""
+        """Test input validation."""
         logger.info("Testing input validation...")
 
         # Test SQL injection attempts
@@ -538,7 +537,7 @@ class ProductionValidator:
         )
 
     def test_cors_configuration(self):
-        """Test CORS configuration"""
+        """Test CORS configuration."""
         logger.info("Testing CORS configuration...")
 
         try:
@@ -573,7 +572,7 @@ class ProductionValidator:
             )
 
     def validate_disaster_recovery(self):
-        """Test disaster recovery and business continuity"""
+        """Test disaster recovery and business continuity."""
         logger.info("Testing disaster recovery and business continuity...")
 
         # Test 1: Backup verification
@@ -589,7 +588,7 @@ class ProductionValidator:
         self.test_failover_procedures()
 
     def test_backup_procedures(self):
-        """Test backup procedures"""
+        """Test backup procedures."""
         logger.info("Testing backup procedures...")
 
         backup_script = "scripts/database-backup.sh"
@@ -633,7 +632,7 @@ class ProductionValidator:
             )
 
     def test_service_restart(self):
-        """Test service restart capability"""
+        """Test service restart capability."""
         logger.info("Testing service restart capability...")
 
         # Check if docker-compose is available
@@ -675,7 +674,7 @@ class ProductionValidator:
             )
 
     def test_data_recovery(self):
-        """Test data recovery simulation"""
+        """Test data recovery simulation."""
         logger.info("Testing data recovery simulation...")
 
         # Check if recovery scripts exist
@@ -699,7 +698,7 @@ class ProductionValidator:
         )
 
     def test_failover_procedures(self):
-        """Test failover procedures"""
+        """Test failover procedures."""
         logger.info("Testing failover procedures...")
 
         # Check for load balancer configuration
@@ -732,7 +731,7 @@ class ProductionValidator:
             )
 
     def validate_monitoring(self):
-        """Validate monitoring and alerting systems"""
+        """Validate monitoring and alerting systems."""
         logger.info("Validating monitoring and alerting systems...")
 
         # Test 1: Prometheus metrics
@@ -751,7 +750,7 @@ class ProductionValidator:
         self.test_health_endpoints()
 
     def test_prometheus_metrics(self):
-        """Test Prometheus metrics"""
+        """Test Prometheus metrics."""
         logger.info("Testing Prometheus metrics...")
 
         try:
@@ -808,7 +807,7 @@ class ProductionValidator:
             )
 
     def test_grafana_dashboards(self):
-        """Test Grafana dashboards"""
+        """Test Grafana dashboards."""
         logger.info("Testing Grafana dashboards...")
 
         dashboard_dir = "monitoring/grafana/dashboards"
@@ -838,7 +837,7 @@ class ProductionValidator:
             )
 
     def test_alert_manager(self):
-        """Test alert manager configuration"""
+        """Test alert manager configuration."""
         logger.info("Testing alert manager configuration...")
 
         alert_config = "monitoring/alertmanager.yml"
@@ -882,7 +881,7 @@ class ProductionValidator:
             )
 
     def test_log_aggregation(self):
-        """Test log aggregation"""
+        """Test log aggregation."""
         logger.info("Testing log aggregation...")
 
         log_files = [
@@ -904,7 +903,7 @@ class ProductionValidator:
         )
 
     def test_health_endpoints(self):
-        """Test health check endpoints"""
+        """Test health check endpoints."""
         logger.info("Testing health check endpoints...")
 
         health_endpoints = [
@@ -938,7 +937,7 @@ class ProductionValidator:
         )
 
     def validate_operational_procedures(self):
-        """Test all operational procedures"""
+        """Test all operational procedures."""
         logger.info("Testing operational procedures...")
 
         # Test 1: Deployment procedures
@@ -954,7 +953,7 @@ class ProductionValidator:
         self.test_maintenance_procedures()
 
     def test_deployment_procedures(self):
-        """Test deployment procedures"""
+        """Test deployment procedures."""
         logger.info("Testing deployment procedures...")
 
         deployment_scripts = [
@@ -977,7 +976,7 @@ class ProductionValidator:
         )
 
     def test_rollback_procedures(self):
-        """Test rollback procedures"""
+        """Test rollback procedures."""
         logger.info("Testing rollback procedures...")
 
         rollback_scripts = [
@@ -1000,7 +999,7 @@ class ProductionValidator:
         )
 
     def test_scaling_procedures(self):
-        """Test scaling procedures"""
+        """Test scaling procedures."""
         logger.info("Testing scaling procedures...")
 
         # Check Docker Compose scaling configuration
@@ -1026,7 +1025,7 @@ class ProductionValidator:
         )
 
     def test_maintenance_procedures(self):
-        """Test maintenance procedures"""
+        """Test maintenance procedures."""
         logger.info("Testing maintenance procedures...")
 
         maintenance_docs = [
@@ -1049,7 +1048,7 @@ class ProductionValidator:
         )
 
     def generate_final_report(self):
-        """Generate comprehensive final report"""
+        """Generate comprehensive final report."""
         logger.info("Generating final comprehensive report...")
 
         # Calculate summary statistics
@@ -1085,7 +1084,7 @@ class ProductionValidator:
         return json_report, markdown_report
 
     def generate_markdown_report(self, filename: str):
-        """Generate markdown report"""
+        """Generate markdown report."""
         with open(filename, "w") as f:
             f.write(
                 "# FreeAgentics Production Readiness Validation Report\n\n"
@@ -1162,7 +1161,7 @@ class ProductionValidator:
                 )
 
     async def run_validation(self):
-        """Run comprehensive validation"""
+        """Run comprehensive validation."""
         logger.info("Starting comprehensive production validation...")
 
         # Check environment readiness
@@ -1209,7 +1208,7 @@ class ProductionValidator:
 
 
 async def main():
-    """Main function"""
+    """Main function."""
     validator = ProductionValidator()
     success = await validator.run_validation()
     sys.exit(0 if success else 1)

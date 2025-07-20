@@ -78,7 +78,7 @@ class AWSKMSProvider(KeyProvider):
             region_name=region,
             endpoint_url=endpoint_url,  # For testing with localstack
         )
-        self._key_cache = {}
+        self._key_cache: Dict[str, Tuple[bytes, float]] = {}
         self._cache_lock = threading.Lock()
         self._cache_ttl = 300  # 5 minutes
 
@@ -125,7 +125,7 @@ class AWSKMSProvider(KeyProvider):
             self.client.enable_key_rotation(KeyId=key_id)
             # Get new key version
             response = self.client.describe_key(KeyId=key_id)
-            return response["KeyMetadata"]["KeyId"]
+            return str(response["KeyMetadata"]["KeyId"])
         except ClientError as e:
             logger.error(f"AWS KMS error rotating key: {e}")
             raise
@@ -134,7 +134,7 @@ class AWSKMSProvider(KeyProvider):
         """Get key metadata from AWS KMS."""
         try:
             response = self.client.describe_key(KeyId=key_id)
-            return response["KeyMetadata"]
+            return dict(response["KeyMetadata"])
         except ClientError as e:
             logger.error(f"AWS KMS error getting key metadata: {e}")
             raise
@@ -232,7 +232,7 @@ class HashiCorpVaultProvider(KeyProvider):
             response = self.client.secrets.transit.read_key(
                 name=key_id, mount_point=self.mount_point
             )
-            return response["data"]
+            return dict(response["data"])
         except Exception as e:
             logger.error(f"Vault error getting key metadata: {e}")
             raise
@@ -257,11 +257,13 @@ class FieldEncryptor:
         self.performance_monitoring = performance_monitoring
 
         # Performance tracking
-        self._operation_times = defaultdict(list)
+        self._operation_times: Dict[str, List[float]] = defaultdict(list)
         self._operation_lock = threading.Lock()
 
         # Encryption cache for performance
-        self._encryption_cache = {}
+        self._encryption_cache: Dict[
+            str, Tuple[bytes, EncryptionMetadata]
+        ] = {}
         self._cache_lock = threading.Lock()
 
     @contextmanager
@@ -325,7 +327,7 @@ class FieldEncryptor:
             ciphertext = aesgcm.encrypt(nonce, plaintext, aad)
 
             # Clear sensitive data
-            plaintext_key = None
+            del plaintext_key
 
             # Create metadata
             metadata = EncryptionMetadata(
@@ -380,7 +382,7 @@ class FieldEncryptor:
             plaintext = aesgcm.decrypt(nonce, ciphertext, aad)
 
             # Clear sensitive data
-            plaintext_key = None
+            del plaintext_key
 
             # Deserialize value
             value_str = plaintext.decode()
@@ -577,6 +579,7 @@ def create_field_encryptor(
     Returns:
         Configured FieldEncryptor instance
     """
+    provider: KeyProvider
     if provider_type == "aws_kms":
         provider = AWSKMSProvider(
             region=provider_config.get("region", "us-east-1"),

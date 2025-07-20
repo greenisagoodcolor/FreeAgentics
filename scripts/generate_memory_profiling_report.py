@@ -137,9 +137,7 @@ def profile_memory_lifecycle():
                 time.sleep(0.1)
 
             # Measure baseline
-            baseline_snapshot = enhanced_profiler.take_snapshot(
-                "baseline_complete"
-            )
+            enhanced_profiler.take_snapshot("baseline_complete")
 
         # Calculate baseline memory
         baseline_memory_per_agent = []
@@ -182,9 +180,7 @@ def profile_memory_lifecycle():
                 optimized_agents.append((agent, opt_memory))
 
             # Measure after optimization
-            optimization_snapshot = enhanced_profiler.take_snapshot(
-                "optimization_complete"
-            )
+            enhanced_profiler.take_snapshot("optimization_complete")
 
         # Calculate optimized memory
         optimized_memory_per_agent = []
@@ -239,9 +235,7 @@ def profile_memory_lifecycle():
                     agent.step()
 
             # Measure at scale
-            scale_snapshot = enhanced_profiler.take_snapshot(
-                "scale_test_complete"
-            )
+            enhanced_profiler.take_snapshot("scale_test_complete")
 
         # Calculate memory at scale
         scale_memory_per_agent = []
@@ -297,7 +291,7 @@ def profile_memory_lifecycle():
 
         # Generate comprehensive report
         report = enhanced_profiler.generate_report()
-        optimization_stats = optimizer.get_optimization_stats()
+        optimizer.get_optimization_stats()
 
         # Summary statistics
         results["summary"] = {
@@ -414,7 +408,7 @@ def main():
         default="memory_profiling_reports",
     )
 
-    args = parser.parse_args()
+    parser.parse_args()
 
     # Run profiling
     results = profile_memory_lifecycle()

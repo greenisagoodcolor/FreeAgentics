@@ -1,5 +1,5 @@
 """
-HTTPS Enforcement and SSL/TLS Configuration Module for FreeAgentics
+HTTPS Enforcement and SSL/TLS Configuration Module for FreeAgentics.
 
 This module implements comprehensive HTTPS enforcement and SSL/TLS setup
 following OWASP security guidelines and Task #14.10 requirements.
@@ -7,11 +7,11 @@ following OWASP security guidelines and Task #14.10 requirements.
 
 import logging
 import os
-import subprocess
+import subprocess  # nosec B404
 from dataclasses import dataclass
 from datetime import datetime, timedelta
 from pathlib import Path
-from typing import Dict, List, Optional, Tuple
+from typing import Any, Dict, List, Optional, Tuple
 
 from fastapi import HTTPException, Request, Response
 from fastapi.responses import RedirectResponse
@@ -32,13 +32,13 @@ class SSLConfiguration:
     # Let's Encrypt settings
     enable_letsencrypt: bool = True
     letsencrypt_email: str = ""
-    letsencrypt_domains: List[str] = None
+    letsencrypt_domains: Optional[List[str]] = None
     letsencrypt_staging: bool = False
 
     # SSL/TLS settings
     min_tls_version: str = "TLSv1.2"
     preferred_tls_version: str = "TLSv1.3"
-    cipher_suites: List[str] = None
+    cipher_suites: Optional[List[str]] = None
 
     # HSTS settings
     hsts_enabled: bool = True
@@ -61,7 +61,7 @@ class SSLConfiguration:
     # Environment detection
     production_mode: bool = None
 
-    def __post_init__(self):
+    def __post_init__(self) -> None:
         """Initialize configuration with defaults."""
         if self.production_mode is None:
             self.production_mode = (
@@ -90,7 +90,7 @@ class SSLConfiguration:
         # Load from environment
         self._load_from_env()
 
-    def _load_from_env(self):
+    def _load_from_env(self) -> None:
         """Load configuration from environment variables."""
         if email := os.getenv("LETSENCRYPT_EMAIL"):
             self.letsencrypt_email = email
@@ -115,10 +115,11 @@ class HTTPSEnforcementMiddleware(BaseHTTPMiddleware):
     """Middleware to enforce HTTPS and handle SSL/TLS configuration."""
 
     def __init__(self, app, config: Optional[SSLConfiguration] = None):
+        """Initialize HTTPS enforcement middleware."""
         super().__init__(app)
         self.config = config or SSLConfiguration()
 
-    async def dispatch(self, request: Request, call_next):
+    async def dispatch(self, request: Request, call_next) -> Response:
         """Process request and enforce HTTPS."""
         # Check if request is secure
         is_secure = await self._is_secure_request(request)
@@ -191,7 +192,9 @@ class HTTPSEnforcementMiddleware(BaseHTTPMiddleware):
 
         return "; ".join(parts)
 
-    def _enforce_secure_cookies(self, response: Response, is_secure: bool):
+    def _enforce_secure_cookies(
+        self, response: Response, is_secure: bool
+    ) -> None:
         """Enforce secure cookie flags."""
         # Parse Set-Cookie headers
         set_cookie_headers = []
@@ -226,13 +229,14 @@ class SSLCertificateManager:
     """Manages SSL certificates including Let's Encrypt integration."""
 
     def __init__(self, config: SSLConfiguration):
+        """Initialize SSL certificate manager."""
         self.config = config
         self.certbot_path = self._find_certbot()
 
     def _find_certbot(self) -> Optional[str]:
         """Find certbot executable."""
         try:
-            result = subprocess.run(
+            result = subprocess.run(  # nosec B607 B603 # Safe use of which command for certbot detection
                 ["which", "certbot"],
                 capture_output=True,
                 text=True,
@@ -284,9 +288,9 @@ class SSLCertificateManager:
             logger.info(
                 f"Obtaining Let's Encrypt certificate for domains: {self.config.letsencrypt_domains}"
             )
-            result = subprocess.run(
+            subprocess.run(
                 cmd, capture_output=True, text=True, check=True
-            )
+            )  # nosec B603 # Safe certbot command execution
             logger.info("Let's Encrypt certificate obtained successfully")
 
             # Copy certificates to configured paths
@@ -300,7 +304,7 @@ class SSLCertificateManager:
             )
             return False
 
-    def _copy_certificates(self):
+    def _copy_certificates(self) -> None:
         """Copy Let's Encrypt certificates to configured paths."""
         primary_domain = self.config.letsencrypt_domains[0]
         le_path = f"/etc/letsencrypt/live/{primary_domain}"
@@ -357,8 +361,8 @@ fi
             with open(script_path, "w") as f:
                 f.write(renewal_script)
 
-            # Make executable
-            os.chmod(script_path, 0o755)
+            # Make executable (only owner/root can read, write, execute)
+            os.chmod(script_path, 0o700)
 
             # Add to crontab (runs twice daily)
             cron_entry = f"0 0,12 * * * {script_path} >> /var/log/letsencrypt-renewal.log 2>&1\n"
@@ -455,9 +459,10 @@ class LoadBalancerSSLConfig:
     """Configuration for SSL termination at load balancer."""
 
     def __init__(self, config: SSLConfiguration):
+        """Initialize load balancer SSL configuration."""
         self.config = config
 
-    def generate_aws_alb_config(self) -> Dict[str, any]:
+    def generate_aws_alb_config(self) -> Dict[str, Any]:
         """Generate AWS Application Load Balancer SSL configuration."""
         return {
             "Protocol": "HTTPS",
@@ -520,7 +525,9 @@ server {{
         return "; ".join(parts)
 
 
-def setup_https_enforcement(app, config: Optional[SSLConfiguration] = None):
+def setup_https_enforcement(
+    app, config: Optional[SSLConfiguration] = None
+) -> SSLConfiguration:
     """Set up HTTPS enforcement middleware."""
     config = config or SSLConfiguration()
     app.add_middleware(HTTPSEnforcementMiddleware, config=config)

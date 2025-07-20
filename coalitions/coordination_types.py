@@ -15,6 +15,15 @@ class CoordinationStrategy(Enum):
     ADAPTIVE = "adaptive"  # Dynamic strategy selection
 
 
+class CoalitionFormationStrategy(Enum):
+    """Strategy types for coalition formation."""
+
+    CENTRALIZED = "centralized"  # Central coordinator assigns agents
+    DISTRIBUTED = "distributed"  # Agents self-organize
+    AUCTION_BASED = "auction_based"  # Market-based coalition formation
+    PREFERENCE_BASED = "preference_based"  # Based on agent preferences
+
+
 class CoordinationStatus(Enum):
     """Status of coordination tasks."""
 
@@ -24,6 +33,21 @@ class CoordinationStatus(Enum):
     FAILED = "failed"
     TIMEOUT = "timeout"
     CANCELLED = "cancelled"
+
+
+@dataclass
+class CoordinationMessage:
+    """Message exchanged during coalition coordination."""
+
+    message_id: str
+    sender_id: str
+    receiver_id: Optional[str] = None  # None for broadcast
+    message_type: str = "coordination"
+    content: Dict[str, Any] = field(default_factory=dict)
+    timestamp: float = field(default_factory=time.time)
+    priority: int = 0
+    requires_response: bool = False
+    response_to: Optional[str] = None  # ID of message being responded to
 
 
 @dataclass

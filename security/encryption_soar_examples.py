@@ -4,6 +4,7 @@ Shows integration patterns and best practices for security orchestration.
 """
 
 import asyncio
+import json
 import os
 from datetime import datetime
 
@@ -75,7 +76,7 @@ def transparent_encryption_example():
     encryptor = create_field_encryptor(
         provider_type="vault",
         vault_url="http://localhost:8200",
-        vault_token="dev-token",
+        vault_token="dev-token",  # nosec B106 - Example token for demonstration
         key_id="customer-data",
     )
 
@@ -278,6 +279,7 @@ async def incident_management_example():
     from security.soar import (
         IncidentManager,
         IncidentSeverity,
+        IncidentStatus,
         IncidentType,
         PlaybookEngine,
     )
@@ -453,7 +455,12 @@ async def integrated_security_example():
         QuantumResistantCrypto,
         create_field_encryptor,
     )
-    from security.soar import IncidentManager, IncidentSeverity, IncidentType
+    from security.soar import (
+        IncidentManager,
+        IncidentSeverity,
+        IncidentStatus,
+        IncidentType,
+    )
 
     print("\n=== Integrated Security Workflow ===\n")
 
@@ -462,7 +469,7 @@ async def integrated_security_example():
     field_encryptor = create_field_encryptor(
         provider_type="vault",
         vault_url="http://localhost:8200",
-        vault_token="dev-token",
+        vault_token="dev-token",  # nosec B106 - Example token for demonstration
     )
 
     # Detect security event

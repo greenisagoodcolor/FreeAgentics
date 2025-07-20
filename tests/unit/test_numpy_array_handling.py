@@ -6,6 +6,7 @@ import pytest
 from agents.base_agent import safe_array_to_int
 
 
+@pytest.mark.slow
 class TestNumpyArrayHandling:
     """Test safe conversion of numpy arrays to integers."""
 
@@ -57,6 +58,7 @@ class TestNumpyArrayHandling:
             safe_array_to_int([])
 
 
+@pytest.mark.slow
 class TestPyMDPArrayHandling:
     """Test PyMDP array handling with mocked PyMDP responses."""
 
@@ -90,6 +92,7 @@ class TestPyMDPArrayHandling:
                 ), f"Failed for {name}: expected 2, got {result}"
 
 
+@pytest.mark.slow
 class TestAgentArrayHandling:
     """Integration tests for array handling in agent classes."""
 

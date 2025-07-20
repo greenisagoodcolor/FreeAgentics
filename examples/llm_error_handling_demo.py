@@ -61,12 +61,16 @@ class DemoLLMProvider(BaseProvider):
         self.request_count += 1
 
         # Simulate timeout
-        if random.random() < self.timeout_rate:
+        if (
+            random.random() < self.timeout_rate
+        ):  # nosec B311 - Demo simulation only
             await asyncio.sleep(0.1)  # Brief delay
             raise TimeoutError(f"Request {self.request_count} timed out")
 
         # Simulate failure
-        if random.random() < self.failure_rate:
+        if (
+            random.random() < self.failure_rate
+        ):  # nosec B311 - Demo simulation only
             raise RuntimeError(f"LLM request {self.request_count} failed")
 
         # Simulate processing delay
@@ -76,7 +80,9 @@ class DemoLLMProvider(BaseProvider):
         response = {
             "content": f"Mock response to: {prompt[:50]}...",
             "model": "demo-llm-v1",
-            "tokens_used": random.randint(10, max_tokens),
+            "tokens_used": random.randint(
+                10, max_tokens
+            ),  # nosec B311 - Demo simulation only
             "request_id": self.request_count,
         }
 
@@ -94,7 +100,9 @@ class DemoLLMProvider(BaseProvider):
 
     async def health_check(self) -> bool:
         """Check if provider is healthy."""
-        return random.random() > 0.05  # 5% chance of being unhealthy
+        return (
+            random.random() > 0.05
+        )  # nosec B311 - Demo simulation - 5% chance of being unhealthy
 
     def get_stats(self) -> Dict:
         """Get provider statistics."""
@@ -144,13 +152,17 @@ class DemoLLMProvider(BaseProvider):
             error_message = "Authentication failed"
         else:
             # Default random behavior
-            is_healthy = random.random() > 0.05
+            is_healthy = (
+                random.random() > 0.05
+            )  # nosec B311 - Demo simulation only
             status = (
                 ProviderStatus.HEALTHY
                 if is_healthy
                 else ProviderStatus.UNHEALTHY
             )
-            latency = random.uniform(10, 100)
+            latency = random.uniform(
+                10, 100
+            )  # nosec B311 - Demo simulation only
             error_message = (
                 None if is_healthy else "Simulated connection error"
             )
@@ -178,7 +190,9 @@ class DemoLLMProvider(BaseProvider):
 
         # Handle GenerationRequest input
         # Simulate failure
-        if random.random() < self.failure_rate:
+        if (
+            random.random() < self.failure_rate
+        ):  # nosec B311 - Demo simulation only
             raise RuntimeError(f"Request {self.request_count} failed")
 
         # Create mock response
@@ -195,7 +209,9 @@ class DemoLLMProvider(BaseProvider):
             else 0,
             output_tokens=len(mock_text.split()),
             cost=0.001,  # Mock cost
-            latency_ms=random.uniform(50, 200),
+            latency_ms=random.uniform(
+                50, 200
+            ),  # nosec B311 - Demo simulation only
         )
 
     def get_usage_metrics(self) -> UsageMetrics:

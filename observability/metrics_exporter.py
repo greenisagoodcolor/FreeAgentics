@@ -1,5 +1,5 @@
 """
-Enhanced Metrics Exporter for FreeAgentics Production Monitoring
+Enhanced Metrics Exporter for FreeAgentics Production Monitoring.
 
 This module provides comprehensive metrics export capabilities for monitoring
 agent performance, system health, and business metrics.

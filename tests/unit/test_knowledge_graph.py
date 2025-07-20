@@ -34,10 +34,7 @@ from knowledge_graph.storage import (
     PickleStorageBackend,
     StorageManager,
 )
-from tests.db_infrastructure.fixtures import db_session
-
-# Import test infrastructure
-from tests.db_infrastructure.test_config import DatabaseTestCase
+from tests.db_infrastructure.fixtures import DatabaseTestCase, db_session
 
 
 class TestKnowledgeNode:

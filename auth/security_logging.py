@@ -13,8 +13,8 @@ from typing import Any, Dict, List, Optional, Union
 
 from fastapi import Request
 from sqlalchemy import Column, DateTime, Integer, String, Text, create_engine
-from sqlalchemy.ext.declarative import declarative_base
-from sqlalchemy.orm import Session, sessionmaker
+from sqlalchemy.engine import Engine
+from sqlalchemy.orm import Session, declarative_base, sessionmaker
 
 # Security logger configuration
 security_logger = logging.getLogger("security.audit")
@@ -41,10 +41,10 @@ class SecurityEventType(str, Enum):
     LOGIN_SUCCESS = "login_success"
     LOGIN_FAILURE = "login_failure"
     LOGOUT = "logout"
-    TOKEN_REFRESH = "token_refresh"
-    TOKEN_REFRESHED = "token_refreshed"
-    TOKEN_EXPIRED = "token_expired"
-    TOKEN_INVALID = "token_invalid"
+    TOKEN_REFRESH = "token_refresh"  # nosec B105
+    TOKEN_REFRESHED = "token_refreshed"  # nosec B105
+    TOKEN_EXPIRED = "token_expired"  # nosec B105
+    TOKEN_INVALID = "token_invalid"  # nosec B105
 
     # Authorization events
     ACCESS_GRANTED = "access_granted"
@@ -55,6 +55,7 @@ class SecurityEventType(str, Enum):
     # Rate limiting events
     RATE_LIMIT_EXCEEDED = "rate_limit_exceeded"
     RATE_LIMIT_WARNING = "rate_limit_warning"
+    DDOS_ATTACK = "ddos_attack"
 
     # Suspicious activity
     BRUTE_FORCE_DETECTED = "brute_force_detected"
@@ -73,7 +74,7 @@ class SecurityEventType(str, Enum):
     USER_CREATED = "user_created"
     USER_DELETED = "user_deleted"
     USER_MODIFIED = "user_modified"
-    PASSWORD_CHANGED = "password_changed"
+    PASSWORD_CHANGED = "password_changed"  # nosec B105
 
     # MFA events
     MFA_ENROLLED = "mfa_enrolled"
@@ -96,7 +97,9 @@ class SecurityEventSeverity(str, Enum):
 
 
 # Database for security audit logs (separate from main DB)
-Base = declarative_base()
+from sqlalchemy.ext.declarative import DeclarativeMeta
+
+Base: DeclarativeMeta = declarative_base()
 
 
 class SecurityAuditLog(Base):
@@ -123,9 +126,12 @@ class SecurityAuditLog(Base):
 
 # Create separate engine for audit logs
 AUDIT_DB_URL = os.getenv("AUDIT_DATABASE_URL", os.getenv("DATABASE_URL"))
+audit_engine: Optional[Engine] = None
+AuditSessionLocal: Optional[sessionmaker] = None
+
 if AUDIT_DB_URL:
     # Configure audit engine based on database dialect
-    audit_engine_args = {}
+    audit_engine_args: Dict[str, Any] = {}
 
     if AUDIT_DB_URL.startswith("postgresql://") or AUDIT_DB_URL.startswith(
         "postgres://"
@@ -155,7 +161,8 @@ else:
 class SecurityAuditor:
     """Security audit logging manager."""
 
-    def __init__(self):
+    def __init__(self) -> None:
+        """Initialize the security auditor."""
         self.failed_login_attempts: Dict[str, List[datetime]] = {}
         self.rate_limit_violations: Dict[str, List[datetime]] = {}
         self.suspicious_ips: set = set()
@@ -174,7 +181,7 @@ class SecurityAuditor:
         """Log a security event."""
         try:
             # Prepare log entry
-            log_entry = {
+            log_entry: Dict[str, Any] = {
                 "timestamp": datetime.utcnow().isoformat(),
                 "event_type": event_type,
                 "severity": severity,
@@ -263,11 +270,11 @@ class SecurityAuditor:
         """Extract client IP address from request."""
         forwarded = request.headers.get("X-Forwarded-For")
         if forwarded:
-            return forwarded.split(",")[0].strip()
+            return str(forwarded.split(",")[0].strip())
         real_ip = request.headers.get("X-Real-IP")
         if real_ip:
-            return real_ip
-        return request.client.host if request.client else "unknown"
+            return str(real_ip)
+        return str(request.client.host) if request.client else "unknown"
 
     def _check_alert_conditions(
         self, event_type: SecurityEventType, log_entry: Dict[str, Any]
@@ -392,7 +399,7 @@ class SecurityAuditor:
                 )
 
                 # Aggregate by type and severity
-                summary = {
+                summary: Dict[str, Any] = {
                     "total_events": len(events),
                     "by_type": {},
                     "by_severity": {},

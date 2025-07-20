@@ -20,6 +20,7 @@ try:
     from pymdp import utils
     from pymdp.agent import Agent as PyMDPAgent
     from pymdp.maths import softmax, spm_dot
+    from pymdp.maths import spm_log_single as log_stable
 
     PYMDP_AVAILABLE = True
 except ImportError:
@@ -48,6 +49,13 @@ class SparseObservationBenchmark(PyMDPBenchmark):
         sparsity_level: float = 0.1,
         selective_enabled: bool = True,
     ):
+        """Initialize sparse observation benchmark with configuration parameters.
+
+        Args:
+            state_size: Size of the state space
+            sparsity_level: Fraction of observations that change
+            selective_enabled: Whether to use selective updates
+        """
         super().__init__(
             f"sparse_observation_{'selective' if selective_enabled else 'full'}"
         )
@@ -204,6 +212,13 @@ class PartialPolicyUpdateBenchmark(PyMDPBenchmark):
         num_policies: int = 50,
         update_fraction: float = 0.3,
     ):
+        """Initialize partial policy update benchmark.
+
+        Args:
+            state_size: Size of the state space
+            num_policies: Number of policies to manage
+            update_fraction: Fraction of policies that need updating
+        """
         super().__init__(
             f"partial_policy_update_{int(update_fraction*100)}pct"
         )
@@ -343,6 +358,12 @@ class IncrementalFreeEnergyBenchmark(PyMDPBenchmark):
     """Benchmark incremental free energy calculations."""
 
     def __init__(self, state_size: int = 25, incremental_enabled: bool = True):
+        """Initialize incremental free energy benchmark.
+
+        Args:
+            state_size: Size of the state space
+            incremental_enabled: Whether to use incremental calculations
+        """
         super().__init__(
             f"incremental_free_energy_{'enabled' if incremental_enabled else 'disabled'}"
         )
@@ -534,6 +555,12 @@ class HierarchicalUpdateBenchmark(PyMDPBenchmark):
     def __init__(
         self, hierarchy_levels: int = 3, update_propagation: str = "selective"
     ):
+        """Initialize hierarchical update benchmark.
+
+        Args:
+            hierarchy_levels: Number of levels in the hierarchy
+            update_propagation: Update strategy ('selective' or 'full')
+        """
         super().__init__(f"hierarchical_update_{update_propagation}")
         self.hierarchy_levels = hierarchy_levels
         self.update_propagation = update_propagation  # "selective" or "full"
@@ -610,6 +637,7 @@ class ChangeTracker:
     """Tracks changes in observations and states."""
 
     def __init__(self):
+        """Initialize change tracker with empty values and history."""
         self.previous_values = {}
         self.change_history = []
 
@@ -634,6 +662,7 @@ class StateHashTracker:
     """Tracks state hashes to detect changes."""
 
     def __init__(self):
+        """Initialize state hash tracker with empty hash dictionary."""
         self.previous_hashes = {}
 
     def reset(self):
@@ -666,6 +695,7 @@ class FreeEnergyCache:
     """Cache for free energy components."""
 
     def __init__(self):
+        """Initialize free energy cache with empty dictionary."""
         self.cache = {}
 
     def reset(self):
@@ -689,6 +719,11 @@ class HierarchicalModel:
     """Simplified hierarchical model for benchmarking."""
 
     def __init__(self, levels: int):
+        """Initialize hierarchical model with specified number of levels.
+
+        Args:
+            levels: Number of hierarchical levels
+        """
         self.levels = levels
         self.level_states = {}
         self.update_thresholds = [

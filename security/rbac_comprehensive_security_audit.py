@@ -39,6 +39,8 @@ from typing import Any, Dict, List, Optional
 # Add the project root to the path
 sys.path.insert(0, str(Path(__file__).parent.parent))
 
+logger = logging.getLogger(__name__)
+
 try:
     from auth.rbac_enhancements import (
         AccessContext,
@@ -46,10 +48,14 @@ try:
         enhanced_rbac_manager,
     )
     from auth.security_implementation import (
+        ACCESS_TOKEN_EXPIRE_MINUTES,
+        REFRESH_TOKEN_EXPIRE_DAYS,
         ROLE_PERMISSIONS,
         Permission,
         TokenData,
         UserRole,
+        create_access_token,
+        verify_token,
     )
     from auth.security_logging import (
         SecurityEventSeverity,
@@ -115,9 +121,9 @@ except ImportError as e:
                 setattr(self, key, value)
 
     class enhanced_rbac_manager:
-        access_audit_log = []
-        abac_rules = []
-        role_requests = []
+        access_audit_log: List[Any] = []
+        abac_rules: List[Any] = []
+        role_requests: List[Any] = []
 
         @staticmethod
         def evaluate_abac_access(access_context, resource_context, action):
@@ -127,13 +133,25 @@ except ImportError as e:
         def request_role_assignment(*args, **kwargs):
             return "mock_request_id"
 
+    # Mock constants
+    ACCESS_TOKEN_EXPIRE_MINUTES = 15
+    REFRESH_TOKEN_EXPIRE_DAYS = 7
+
+    # Mock functions
+    def create_access_token(data):
+        return "mock_token_" + str(data)
+
+    def verify_token(token):
+        if "mock_token_" in token:
+            return True
+        raise ValueError("Invalid token")
+
 
 # Configure logging
 logging.basicConfig(
     level=logging.INFO,
     format="%(asctime)s - %(name)s - %(levelname)s - %(message)s",
 )
-logger = logging.getLogger(__name__)
 
 
 @dataclass
@@ -561,25 +579,11 @@ class RBACSecurityAuditor:
         # Test token manipulation attempts
         try:
             # Simulate token role modification attempt
-            test_user = self.test_users[UserRole.OBSERVER]
+            _test_user = self.test_users[UserRole.OBSERVER]
 
             # Create a token for observer
-            token_data = TokenData(
-                user_id=test_user["user_id"],
-                username=test_user["username"],
-                email=test_user["email"],
-                role=test_user["role"],
-                permissions=test_user["permissions"],
-            )
-
             # Test if we can modify token claims (this should fail)
-            modified_token_data = TokenData(
-                user_id=test_user["user_id"],
-                username=test_user["username"],
-                email=test_user["email"],
-                role=UserRole.ADMIN,  # Attempt to escalate
-                permissions=ROLE_PERMISSIONS[UserRole.ADMIN],
-            )
+            # In a real implementation, this would create tokens and test modification
 
             # In a real implementation, this would test token validation
             findings.append("Token manipulation resistance test performed")

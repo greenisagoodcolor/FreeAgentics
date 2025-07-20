@@ -16,7 +16,7 @@ from knowledge_graph.conversation_monitoring import (
     ConversationEventType,
     ConversationMonitor,
 )
-from knowledge_graph.graph_engine import GraphEngine
+from knowledge_graph.graph_engine import KnowledgeGraph as GraphEngine
 
 
 class TestConversationMonitoring:

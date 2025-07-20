@@ -16,7 +16,7 @@ from unittest.mock import MagicMock, Mock, patch
 import boto3
 import hvac
 import pytest
-from moto import mock_kms
+from moto import mock_aws
 
 sys.path.append(os.path.dirname(os.path.dirname(os.path.dirname(__file__))))
 
@@ -54,7 +54,7 @@ from security.soar.playbook_engine import (
 class TestFieldEncryption:
     """Test field-level encryption functionality."""
 
-    @mock_kms
+    @mock_aws
     def test_aws_kms_provider(self):
         """Test AWS KMS provider integration."""
         # Create KMS client and key
@@ -110,7 +110,7 @@ class TestFieldEncryption:
             decrypted = provider.decrypt_data_key(ciphertext, "test-key")
             assert decrypted == b"test_key_data"
 
-    @mock_kms
+    @mock_aws
     def test_field_encryptor_performance(self):
         """Test encryption performance meets <5ms requirement."""
         # Setup
@@ -157,7 +157,7 @@ class TestFieldEncryption:
         assert "encrypt_field" in stats
         assert stats["encrypt_field"]["avg_ms"] < 5
 
-    @mock_kms
+    @mock_aws
     def test_transparent_encryption(self):
         """Test transparent field encryption with decorators."""
         # Setup
@@ -188,7 +188,7 @@ class TestFieldEncryption:
         assert customer.ssn == "123-45-6789"
         assert customer.credit_card == "4111111111111111"
 
-    @mock_kms
+    @mock_aws
     def test_key_rotation(self):
         """Test field encryption key rotation."""
         # Setup

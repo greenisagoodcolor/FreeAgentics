@@ -718,8 +718,8 @@ class FocusedOWASPAssessment:
             "LOW": 0,
         }
 
-        category_counts = {}
-        file_counts = {}
+        category_counts: Dict[str, int] = {}
+        file_counts: Dict[str, int] = {}
 
         for finding in self.findings:
             severity_counts[finding["severity"]] += 1

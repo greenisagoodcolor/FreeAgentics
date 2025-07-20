@@ -26,7 +26,16 @@ from jose import JWTError
 
 from auth.security_headers import SecurityHeadersManager
 from auth.security_implementation import AuthenticationManager, UserRole
-from database.models import User
+
+
+# Mock User class for testing
+class User:
+    def __init__(self, id, username, email, role, hashed_password=None):
+        self.id = id
+        self.username = username
+        self.email = email
+        self.role = role
+        self.hashed_password = hashed_password
 
 
 class TestAuthenticationAttacks:

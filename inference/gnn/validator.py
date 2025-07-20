@@ -105,6 +105,216 @@ class GMNValidator:
         self._custom_rules: Dict[str, Callable] = {}
         self._context: Dict[str, Any] = {}
 
+    def _process_parse_result(self, model_config):
+        """Process ParseResult objects and convert to dictionary."""
+        config_dict = {}
+        original_parse_result = model_config
+
+        # Extract sections
+        if hasattr(model_config, "sections") and model_config.sections:
+            config_dict.update(model_config.sections)
+
+        # Extract metadata
+        if hasattr(model_config, "metadata") and model_config.metadata:
+            config_dict["metadata"] = model_config.metadata
+
+        # Extract name from AST or metadata
+        if (
+            hasattr(model_config, "ast")
+            and model_config.ast
+            and hasattr(model_config.ast, "name")
+        ):
+            config_dict["name"] = model_config.ast.name
+        elif "name" in getattr(model_config, "metadata", {}):
+            config_dict["name"] = model_config.metadata["name"]
+
+        # Create a proper model object for the result
+        validated_model = type(
+            "Model",
+            (),
+            {
+                "name": config_dict.get("name", "Unknown Model"),
+                "config": config_dict,
+            },
+        )()
+
+        return config_dict, validated_model, original_parse_result
+
+    def _validate_basic_structure(self, model_config):
+        """Validate basic model configuration structure."""
+        errors = []
+
+        # Validate metadata (required fields)
+        metadata = model_config.get("metadata", {})
+        if not metadata.get("name"):
+            errors.append("Missing required metadata field: name")
+
+        return errors
+
+    def _validate_architecture_section(self, model_config):
+        """Validate the architecture section of the model configuration."""
+        errors = []
+
+        # Validate architecture section
+        architecture_section = model_config.get("architecture", {})
+        if not architecture_section:
+            errors.append("Missing required field: architecture")
+        else:
+            # Validate architecture type
+            arch_type = architecture_section.get("type", "")
+            if arch_type not in self.allowed_architectures:
+                errors.append(
+                    f"Invalid architecture: {arch_type}. "
+                    f"Allowed: {', '.join(self.allowed_architectures)}"
+                )
+
+            # Validate activation function
+            activation = architecture_section.get("activation")
+            if activation and activation not in self.allowed_activations:
+                errors.append(
+                    f"Invalid activation: {activation}. "
+                    f"Allowed: {', '.join(self.allowed_activations)}"
+                )
+
+            # Validate dimensions
+            hidden_dim = architecture_section.get("hidden_dim")
+            if hidden_dim is not None:
+                if not isinstance(hidden_dim, int) or hidden_dim <= 0:
+                    errors.append("hidden_dim must be a positive integer")
+
+            layers_count = architecture_section.get("layers")
+            if layers_count is not None:
+                if not isinstance(layers_count, int) or layers_count <= 0:
+                    errors.append("layers must be a positive integer")
+
+        return errors
+
+    def _run_comprehensive_validations(
+        self, model_config, original_parse_result=None
+    ):
+        """Run comprehensive validations on model configuration."""
+        errors = []
+        warnings = []
+
+        # Validate parameters section
+        parameters = model_config.get("parameters", {})
+        param_errors = self._validate_hyperparameters(parameters)
+        errors.extend(param_errors)
+
+        # Validate active inference configuration
+        active_inference = model_config.get("active_inference", {})
+        if active_inference:
+            ai_errors = self._validate_active_inference_config(
+                active_inference
+            )
+            errors.extend(ai_errors)
+
+        # Generate warnings for memory, performance, and numerical issues
+        architecture_section = model_config.get("architecture", {})
+        architecture_warnings = self._check_architecture_warnings(
+            architecture_section, parameters
+        )
+        warnings.extend(architecture_warnings)
+
+        # Security validation
+        security_errors = self._validate_security(model_config)
+        errors.extend(security_errors)
+
+        # Check for circular dependencies
+        if "dependencies" in model_config:
+            circular_errors = self._check_circular_dependencies(
+                model_config["dependencies"]
+            )
+            errors.extend(circular_errors)
+
+        # Validate cross-references
+        cross_ref_errors = self._validate_cross_references(model_config)
+        errors.extend(cross_ref_errors)
+
+        # Check for definitions circular dependencies
+        if "definitions" in model_config:
+            definitions_errors = self._check_definitions_circular_dependencies(
+                model_config["definitions"]
+            )
+            errors.extend(definitions_errors)
+
+        # Validate metadata
+        if "metadata" in model_config:
+            metadata_errors = self._validate_metadata(model_config["metadata"])
+            errors.extend(metadata_errors)
+
+        # Apply custom rules
+        custom_errors, custom_warnings = self._apply_custom_rules(
+            model_config, original_parse_result
+        )
+        errors.extend(custom_errors)
+        warnings.extend(custom_warnings)
+
+        return errors, warnings
+
+    def _apply_custom_rules(self, model_config, original_parse_result=None):
+        """Apply custom validation rules."""
+        errors = []
+        warnings = []
+
+        for rule_name, rule_func in self._custom_rules.items():
+            try:
+                # Pass the original ParseResult if available, otherwise processed config
+                rule_input = (
+                    original_parse_result
+                    if original_parse_result
+                    else model_config
+                )
+                rule_result = rule_func(rule_input)
+                if isinstance(rule_result, list):
+                    errors.extend(rule_result)
+                elif isinstance(rule_result, str):
+                    errors.append(rule_result)
+            except Exception as e:
+                warnings.append(f"Custom rule {rule_name} failed: {str(e)}")
+
+        return errors, warnings
+
+    def _create_validation_result(
+        self,
+        is_valid,
+        errors,
+        warnings,
+        model_config,
+        validated_model=None,
+        elapsed_time=0,
+    ) -> ValidationResult:
+        """Create the final validation result."""
+        # Get the model object if it was a ParseResult
+        model_obj = None
+        if is_valid:
+            model_obj = validated_model if validated_model else model_config
+
+        # Extract metadata for result
+        architecture_section = model_config.get("architecture", {})
+        arch_type = architecture_section.get("type", "Unknown")
+        layers_count = architecture_section.get("layers", 0)
+
+        # Create metadata with context if available
+        result_metadata = {
+            "validation_time": elapsed_time,
+            "architecture": arch_type,
+            "num_layers": layers_count if isinstance(layers_count, int) else 0,
+            "num_parameters": self._estimate_parameters(model_config),
+        }
+
+        # Include validation context if set
+        if self._context:
+            result_metadata["context"] = self._context.copy()
+
+        return ValidationResult(
+            is_valid=is_valid,
+            errors=errors,
+            warnings=warnings,
+            model=model_obj,
+            metadata=result_metadata,
+        )
+
     def validate(
         self, model_config: Union[Dict[str, Any], Any]
     ) -> ValidationResult:
@@ -112,156 +322,39 @@ class GMNValidator:
         start_time = time.time()
         errors = []
         warnings = []
+        validated_model = None
+        original_parse_result = None
 
         try:
             # Handle ParseResult objects
             if hasattr(model_config, "sections") and hasattr(
                 model_config, "metadata"
             ):
-                # This is a ParseResult object
-                config_dict = {}
-                original_parse_result = model_config
-
-                # Extract sections
-                if hasattr(model_config, "sections") and model_config.sections:
-                    config_dict.update(model_config.sections)
-
-                # Extract metadata
-                if hasattr(model_config, "metadata") and model_config.metadata:
-                    config_dict["metadata"] = model_config.metadata
-
-                # Extract name from AST or metadata
-                if (
-                    hasattr(model_config, "ast")
-                    and model_config.ast
-                    and hasattr(model_config.ast, "name")
-                ):
-                    config_dict["name"] = model_config.ast.name
-                elif "name" in getattr(model_config, "metadata", {}):
-                    config_dict["name"] = model_config.metadata["name"]
-
-                # Create a proper model object for the result
-                validated_model = type(
-                    "Model",
-                    (),
-                    {
-                        "name": config_dict.get("name", "Unknown Model"),
-                        "config": config_dict,
-                    },
-                )()
-
-                model_config = config_dict
+                (
+                    model_config,
+                    validated_model,
+                    original_parse_result,
+                ) = self._process_parse_result(model_config)
             elif not isinstance(model_config, dict):
                 errors.append(
                     "Model configuration must be a dictionary or ParseResult"
                 )
                 return ValidationResult(is_valid=False, errors=errors)
 
-            # Validate metadata (required fields)
-            metadata = model_config.get("metadata", {})
-            if not metadata.get("name"):
-                errors.append("Missing required metadata field: name")
+            # Validate basic structure
+            basic_errors = self._validate_basic_structure(model_config)
+            errors.extend(basic_errors)
 
             # Validate architecture section
-            architecture_section = model_config.get("architecture", {})
-            if not architecture_section:
-                errors.append("Missing required field: architecture")
-            else:
-                # Validate architecture type
-                arch_type = architecture_section.get("type", "")
-                if arch_type not in self.allowed_architectures:
-                    errors.append(
-                        f"Invalid architecture: {arch_type}. "
-                        f"Allowed: {', '.join(self.allowed_architectures)}"
-                    )
+            arch_errors = self._validate_architecture_section(model_config)
+            errors.extend(arch_errors)
 
-                # Validate activation function
-                activation = architecture_section.get("activation")
-                if activation and activation not in self.allowed_activations:
-                    errors.append(
-                        f"Invalid activation: {activation}. "
-                        f"Allowed: {', '.join(self.allowed_activations)}"
-                    )
-
-                # Validate dimensions
-                hidden_dim = architecture_section.get("hidden_dim")
-                if hidden_dim is not None:
-                    if not isinstance(hidden_dim, int) or hidden_dim <= 0:
-                        errors.append("hidden_dim must be a positive integer")
-
-                layers_count = architecture_section.get("layers")
-                if layers_count is not None:
-                    if not isinstance(layers_count, int) or layers_count <= 0:
-                        errors.append("layers must be a positive integer")
-
-            # Validate parameters section
-            parameters = model_config.get("parameters", {})
-            param_errors = self._validate_hyperparameters(parameters)
-            errors.extend(param_errors)
-
-            # Validate active inference configuration
-            active_inference = model_config.get("active_inference", {})
-            if active_inference:
-                ai_errors = self._validate_active_inference_config(
-                    active_inference
-                )
-                errors.extend(ai_errors)
-
-            # Generate warnings for memory, performance, and numerical issues
-            architecture_warnings = self._check_architecture_warnings(
-                architecture_section, parameters
+            # Run comprehensive validations
+            comp_errors, comp_warnings = self._run_comprehensive_validations(
+                model_config, original_parse_result
             )
-            warnings.extend(architecture_warnings)
-
-            # Security validation
-            security_errors = self._validate_security(model_config)
-            errors.extend(security_errors)
-
-            # Check for circular dependencies
-            if "dependencies" in model_config:
-                circular_errors = self._check_circular_dependencies(
-                    model_config["dependencies"]
-                )
-                errors.extend(circular_errors)
-
-            # Validate cross-references
-            cross_ref_errors = self._validate_cross_references(model_config)
-            errors.extend(cross_ref_errors)
-
-            # Check for definitions circular dependencies (separate from regular dependencies)
-            if "definitions" in model_config:
-                definitions_errors = (
-                    self._check_definitions_circular_dependencies(
-                        model_config["definitions"]
-                    )
-                )
-                errors.extend(definitions_errors)
-
-            # Validate metadata
-            if "metadata" in model_config:
-                metadata_errors = self._validate_metadata(
-                    model_config["metadata"]
-                )
-                errors.extend(metadata_errors)
-
-            # Apply custom rules
-            for rule_name, rule_func in self._custom_rules.items():
-                try:
-                    # Pass the original ParseResult if available, otherwise processed config
-                    rule_input = (
-                        original_parse_result
-                        if "original_parse_result" in locals()
-                        else model_config
-                    )
-                    rule_result = rule_func(rule_input)
-                    if isinstance(rule_result, list):
-                        errors.extend(rule_result)
-                    elif isinstance(rule_result, str):
-                        errors.append(rule_result)
-                except Exception as e:
-                    warnings.append(
-                        f"Custom rule {rule_name} failed: {str(e)}"
-                    )
+            errors.extend(comp_errors)
+            warnings.extend(comp_warnings)
 
             # Check validation time
             elapsed_time = time.time() - start_time
@@ -281,39 +374,13 @@ class GMNValidator:
             # Create result
             is_valid = len(errors) == 0
 
-            # Get the model object if it was a ParseResult
-            model_obj = None
-            if is_valid:
-                if "validated_model" in locals():
-                    model_obj = validated_model
-                else:
-                    model_obj = model_config
-
-            # Extract metadata for result
-            architecture_section = model_config.get("architecture", {})
-            arch_type = architecture_section.get("type", "Unknown")
-            layers_count = architecture_section.get("layers", 0)
-
-            # Create metadata with context if available
-            result_metadata = {
-                "validation_time": elapsed_time,
-                "architecture": arch_type,
-                "num_layers": layers_count
-                if isinstance(layers_count, int)
-                else 0,
-                "num_parameters": self._estimate_parameters(model_config),
-            }
-
-            # Include validation context if set
-            if self._context:
-                result_metadata["context"] = self._context.copy()
-
-            return ValidationResult(
-                is_valid=is_valid,
-                errors=errors,
-                warnings=warnings,
-                model=model_obj,
-                metadata=result_metadata,
+            return self._create_validation_result(
+                is_valid,
+                errors,
+                warnings,
+                model_config,
+                validated_model,
+                elapsed_time,
             )
 
         except Exception as e:
@@ -572,7 +639,6 @@ class GMNValidator:
 
                 # Additional parameters for specific layer types
                 if layer.get("type") == "attention":
-                    num_heads = layer.get("num_heads", 1)
                     # Query, Key, Value projections
                     total_params += 3 * input_dim * output_dim
 

@@ -11,13 +11,15 @@ This module implements machine learning-based threat detection including:
 
 import json
 import logging
-import pickle
+import os
+import tempfile
 import time
 from collections import defaultdict, deque
 from dataclasses import dataclass, field
 from datetime import datetime, timedelta
 from typing import Any, Dict, List, Optional, Tuple, Union
 
+import joblib
 import numpy as np
 import pandas as pd
 from sklearn.ensemble import IsolationForest
@@ -133,12 +135,13 @@ class FeatureExtractor:
     """Extract features from request data for ML threat detection."""
 
     def __init__(self):
-        self.user_request_history: Dict[str, deque] = defaultdict(
-            lambda: deque(maxlen=1000)
-        )
-        self.ip_request_history: Dict[str, deque] = defaultdict(
-            lambda: deque(maxlen=1000)
-        )
+        """Initialize threat detection feature extractor."""
+        self.user_request_history: Dict[
+            str, deque[Dict[str, Any]]
+        ] = defaultdict(lambda: deque(maxlen=1000))
+        self.ip_request_history: Dict[
+            str, deque[Dict[str, Any]]
+        ] = defaultdict(lambda: deque(maxlen=1000))
         self.user_baselines: Dict[str, UserBehaviorBaseline] = {}
         self.suspicious_user_agents = {
             "curl/",
@@ -173,7 +176,8 @@ class FeatureExtractor:
         try:
             user_id = request_data.get("user_id")
             ip_address = request_data.get("ip_address")
-            timestamp = datetime.fromisoformat(
+            # Parse timestamp (currently unused)
+            datetime.fromisoformat(
                 request_data.get("timestamp", datetime.utcnow().isoformat())
             )
 
@@ -608,7 +612,9 @@ class FeatureExtractor:
         if not user_id:
             return 0.0
 
-        requests = self.user_request_history.get(user_id, [])
+        requests: deque[Dict[str, Any]] = self.user_request_history.get(
+            user_id, deque()
+        )
         if len(requests) < 2:
             return 0.0
 
@@ -632,6 +638,7 @@ class MLThreatDetector:
     """Machine Learning-based threat detection system."""
 
     def __init__(self, security_monitor: SecurityMonitoringSystem):
+        """Initialize ML threat detector."""
         self.security_monitor = security_monitor
         self.feature_extractor = FeatureExtractor()
         self.model = IsolationForest(
@@ -642,8 +649,10 @@ class MLThreatDetector:
         )
         self.scaler = StandardScaler()
         self.is_trained = False
-        self.model_path = "/tmp/threat_detection_model.pkl"
-        self.scaler_path = "/tmp/threat_detection_scaler.pkl"
+        # Use secure temporary directory
+        self.model_dir = tempfile.mkdtemp(prefix="threat_detection_")
+        self.model_path = os.path.join(self.model_dir, "model.pkl")
+        self.scaler_path = os.path.join(self.model_dir, "scaler.pkl")
 
         # Performance tracking
         self.prediction_times = deque(maxlen=1000)
@@ -684,7 +693,6 @@ class MLThreatDetector:
             self._save_model()
 
             # Calculate training metrics
-            scores = self.model.decision_function(X_scaled)
             predictions = self.model.predict(X_scaled)
 
             anomaly_count = np.sum(predictions == -1)
@@ -735,7 +743,8 @@ class MLThreatDetector:
             anomaly_score = self.model.decision_function(feature_array_scaled)[
                 0
             ]
-            is_anomaly = self.model.predict(feature_array_scaled)[0] == -1
+            # Check if anomaly (prediction not currently used)
+            # self.model.predict(feature_array_scaled)[0] == -1
 
             # Convert anomaly score to risk score (0-1)
             risk_score = self._convert_anomaly_score_to_risk(anomaly_score)
@@ -915,10 +924,8 @@ class MLThreatDetector:
     def _save_model(self):
         """Save trained model to disk."""
         try:
-            with open(self.model_path, "wb") as f:
-                pickle.dump(self.model, f)
-            with open(self.scaler_path, "wb") as f:
-                pickle.dump(self.scaler, f)
+            joblib.dump(self.model, self.model_path)
+            joblib.dump(self.scaler, self.scaler_path)
             logger.info("Model saved successfully")
         except Exception as e:
             logger.error(f"Failed to save model: {str(e)}")
@@ -926,10 +933,8 @@ class MLThreatDetector:
     def _load_model(self):
         """Load trained model from disk."""
         try:
-            with open(self.model_path, "rb") as f:
-                self.model = pickle.load(f)
-            with open(self.scaler_path, "rb") as f:
-                self.scaler = pickle.load(f)
+            self.model = joblib.load(self.model_path)
+            self.scaler = joblib.load(self.scaler_path)
             self.is_trained = True
             logger.info("Model loaded successfully")
         except Exception as e:

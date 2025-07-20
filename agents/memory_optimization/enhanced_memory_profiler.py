@@ -207,7 +207,7 @@ class EnhancedMemoryProfiler:
             logger.info("Started continuous memory monitoring")
 
     def _monitor_loop(self):
-        """Main monitoring loop."""
+        """Execute main monitoring loop."""
         while self._monitoring:
             try:
                 self.take_snapshot("auto_monitor")
@@ -489,7 +489,9 @@ class EnhancedMemoryProfiler:
         if self.enable_pympler and asizeof:
             try:
                 return asizeof.asizeof(agent_obj) / 1024 / 1024
-            except Exception:
+            except (
+                Exception
+            ):  # nosec B110 # Safe fallback to simpler memory estimation
                 pass
 
         # Fallback to simple estimation
@@ -581,7 +583,7 @@ class EnhancedMemoryProfiler:
 
         # Start detailed profiling if available
         if self.enable_memory_profiler and memory_usage:
-            mem_before = memory_usage()[0]
+            pass  # Memory profiling enabled but not actively used in this context
 
         start_time = time.time()
 
@@ -590,7 +592,7 @@ class EnhancedMemoryProfiler:
         finally:
             # Take after snapshot
             end_time = time.time()
-            after_snapshot = self.take_snapshot(f"{operation_name}_end")
+            self.take_snapshot(f"{operation_name}_end")
 
             # Log results
             duration = end_time - start_time
@@ -610,6 +612,170 @@ class EnhancedMemoryProfiler:
                 mp_diff = comparison["memory_profiler_diff"]
                 logger.info(f"  RSS: {mp_diff['rss_diff']:+.2f} MB")
 
+    def _generate_header_section(self) -> List[str]:
+        """Generate the header section of the report."""
+        report = ["=" * 60]
+        report.append("Enhanced Memory Profiling Report")
+        report.append("=" * 60)
+        report.append(
+            f"Generated: {datetime.now().strftime('%Y-%m-%d %H:%M:%S')}"
+        )
+        report.append("")
+        return report
+
+    def _generate_tools_section(self) -> List[str]:
+        """Generate the profiling tools status section."""
+        report = ["## Profiling Tools"]
+        report.append(
+            f"- Tracemalloc: {'Enabled' if self.tracemalloc_enabled else 'Disabled'}"
+        )
+        report.append(
+            f"- Memory Profiler: {'Enabled' if self.memory_profiler_enabled else 'Disabled'}"
+        )
+        report.append(
+            f"- Pympler: {'Enabled' if self.pympler_enabled else 'Disabled'}"
+        )
+        report.append("")
+        return report
+
+    def _generate_summary_section(self) -> List[str]:
+        """Generate the summary statistics section."""
+        report = ["## Summary Statistics"]
+        report.append(f"Total snapshots: {len(self.snapshots)}")
+
+        if len(self.snapshots) >= 2:
+            first = self.snapshots[0]
+            last = self.snapshots[-1]
+            duration = (last["timestamp"] - first["timestamp"]) / 60
+            report.append(f"Profiling duration: {duration:.1f} minutes")
+
+            # Memory growth
+            if first["tracemalloc"] and last["tracemalloc"]:
+                current_growth = (
+                    last["tracemalloc"]["current_mb"]
+                    - first["tracemalloc"]["current_mb"]
+                )
+                peak_growth = (
+                    last["tracemalloc"]["peak_mb"]
+                    - first["tracemalloc"]["peak_mb"]
+                )
+                report.append(
+                    f"Tracemalloc current growth: {current_growth:+.2f} MB"
+                )
+                report.append(
+                    f"Tracemalloc peak growth: {peak_growth:+.2f} MB"
+                )
+
+            if first["memory_profiler"] and last["memory_profiler"]:
+                rss_growth = (
+                    last["memory_profiler"]["rss_mb"]
+                    - first["memory_profiler"]["rss_mb"]
+                )
+                report.append(f"RSS memory growth: {rss_growth:+.2f} MB")
+
+        report.append("")
+        return report
+
+    def _generate_hotspots_section(self) -> List[str]:
+        """Generate the memory hotspots section."""
+        if not self.hotspots:
+            return []
+
+        report = ["## Memory Hotspots"]
+        report.append(
+            f"Found {len(self.hotspots)} hotspots (threshold: {self.hotspot_threshold_mb} MB)"
+        )
+        report.append("")
+
+        for i, hotspot in enumerate(self.hotspots[:10], 1):
+            report.append(f"{i}. {hotspot.location}")
+            report.append(f"   Size: {hotspot.size_mb:.2f} MB")
+            report.append(f"   Count: {hotspot.count:,}")
+            report.append(f"   Type: {hotspot.type}")
+            if hotspot.details:
+                for key, value in hotspot.details.items():
+                    if key not in ["size_mb", "count"]:
+                        report.append(f"   {key}: {value}")
+            report.append("")
+        return report
+
+    def _generate_leaks_section(self) -> List[str]:
+        """Generate the suspected memory leaks section."""
+        if not self._suspected_leaks:
+            return []
+
+        report = ["## Suspected Memory Leaks"]
+        report.append(f"Found {len(self._suspected_leaks)} potential leaks")
+        report.append("")
+
+        for location in sorted(self._suspected_leaks):
+            if location in self._allocation_trends:
+                sizes = list(self._allocation_trends[location])
+                if len(sizes) >= 2:
+                    growth = sizes[-1] - sizes[0]
+                    report.append(f"- {location}")
+                    report.append(f"  Initial: {sizes[0]:.2f} MB")
+                    report.append(f"  Current: {sizes[-1]:.2f} MB")
+                    report.append(f"  Growth: {growth:+.2f} MB")
+                    report.append("")
+        return report
+
+    def _generate_agents_section(self) -> List[str]:
+        """Generate the agent memory profiles section."""
+        if not self.agent_profiles:
+            return []
+
+        report = ["## Agent Memory Profiles"]
+        report.append(f"Tracking {len(self.agent_profiles)} agents")
+        report.append("")
+
+        # Sort by current memory usage
+        sorted_agents = sorted(
+            self.agent_profiles.items(),
+            key=lambda x: x[1].current_memory_mb,
+            reverse=True,
+        )
+
+        for agent_id, profile in sorted_agents[:10]:
+            report.append(f"Agent: {agent_id}")
+            report.append(f"  Baseline: {profile.baseline_memory_mb:.2f} MB")
+            report.append(f"  Current: {profile.current_memory_mb:.2f} MB")
+            report.append(f"  Peak: {profile.peak_memory_mb:.2f} MB")
+
+            if profile.growth_rate_mb_per_hour != 0:
+                report.append(
+                    f"  Growth rate: {profile.growth_rate_mb_per_hour:+.2f} MB/hour"
+                )
+            report.append("")
+        return report
+
+    def _generate_snapshots_section(self) -> List[str]:
+        """Generate the recent snapshots section."""
+        report = ["## Recent Snapshots"]
+        for snap in list(self.snapshots)[-5:]:
+            report.append(
+                f"\nSnapshot: {snap['label']} @ {datetime.fromtimestamp(snap['timestamp']).strftime('%H:%M:%S')}"
+            )
+
+            if snap["tracemalloc"]:
+                tm = snap["tracemalloc"]
+                report.append(
+                    f"  Tracemalloc: {tm['current_mb']:.2f} MB current, {tm['peak_mb']:.2f} MB peak"
+                )
+
+            if snap["memory_profiler"]:
+                mp = snap["memory_profiler"]
+                report.append(
+                    f"  Memory Profiler: {mp['rss_mb']:.2f} MB RSS, {mp['percent']:.1f}% of total"
+                )
+
+            if snap["pympler"]:
+                pm = snap["pympler"]
+                report.append(
+                    f"  Pympler: {pm['total_objects']:,} objects, {pm['total_size_mb']:.2f} MB total"
+                )
+        return report
+
     def generate_report(self) -> str:
         """Generate comprehensive memory profiling report.
 
@@ -620,154 +786,14 @@ class EnhancedMemoryProfiler:
             if not self.snapshots:
                 return "No profiling data available"
 
-            report = ["=" * 60]
-            report.append("Enhanced Memory Profiling Report")
-            report.append("=" * 60)
-            report.append(
-                f"Generated: {datetime.now().strftime('%Y-%m-%d %H:%M:%S')}"
-            )
-            report.append("")
-
-            # Tools status
-            report.append("## Profiling Tools")
-            report.append(
-                f"- Tracemalloc: {'Enabled' if self.tracemalloc_enabled else 'Disabled'}"
-            )
-            report.append(
-                f"- Memory Profiler: {'Enabled' if self.memory_profiler_enabled else 'Disabled'}"
-            )
-            report.append(
-                f"- Pympler: {'Enabled' if self.pympler_enabled else 'Disabled'}"
-            )
-            report.append("")
-
-            # Summary statistics
-            report.append("## Summary Statistics")
-            report.append(f"Total snapshots: {len(self.snapshots)}")
-
-            if len(self.snapshots) >= 2:
-                first = self.snapshots[0]
-                last = self.snapshots[-1]
-                duration = (last["timestamp"] - first["timestamp"]) / 60
-                report.append(f"Profiling duration: {duration:.1f} minutes")
-
-                # Memory growth
-                if first["tracemalloc"] and last["tracemalloc"]:
-                    current_growth = (
-                        last["tracemalloc"]["current_mb"]
-                        - first["tracemalloc"]["current_mb"]
-                    )
-                    peak_growth = (
-                        last["tracemalloc"]["peak_mb"]
-                        - first["tracemalloc"]["peak_mb"]
-                    )
-                    report.append(
-                        f"Tracemalloc current growth: {current_growth:+.2f} MB"
-                    )
-                    report.append(
-                        f"Tracemalloc peak growth: {peak_growth:+.2f} MB"
-                    )
-
-                if first["memory_profiler"] and last["memory_profiler"]:
-                    rss_growth = (
-                        last["memory_profiler"]["rss_mb"]
-                        - first["memory_profiler"]["rss_mb"]
-                    )
-                    report.append(f"RSS memory growth: {rss_growth:+.2f} MB")
-
-            report.append("")
-
-            # Memory hotspots
-            if self.hotspots:
-                report.append("## Memory Hotspots")
-                report.append(
-                    f"Found {len(self.hotspots)} hotspots (threshold: {self.hotspot_threshold_mb} MB)"
-                )
-                report.append("")
-
-                for i, hotspot in enumerate(self.hotspots[:10], 1):
-                    report.append(f"{i}. {hotspot.location}")
-                    report.append(f"   Size: {hotspot.size_mb:.2f} MB")
-                    report.append(f"   Count: {hotspot.count:,}")
-                    report.append(f"   Type: {hotspot.type}")
-                    if hotspot.details:
-                        for key, value in hotspot.details.items():
-                            if key not in ["size_mb", "count"]:
-                                report.append(f"   {key}: {value}")
-                    report.append("")
-
-            # Suspected memory leaks
-            if self._suspected_leaks:
-                report.append("## Suspected Memory Leaks")
-                report.append(
-                    f"Found {len(self._suspected_leaks)} potential leaks"
-                )
-                report.append("")
-
-                for location in sorted(self._suspected_leaks):
-                    if location in self._allocation_trends:
-                        sizes = list(self._allocation_trends[location])
-                        if len(sizes) >= 2:
-                            growth = sizes[-1] - sizes[0]
-                            report.append(f"- {location}")
-                            report.append(f"  Initial: {sizes[0]:.2f} MB")
-                            report.append(f"  Current: {sizes[-1]:.2f} MB")
-                            report.append(f"  Growth: {growth:+.2f} MB")
-                            report.append("")
-
-            # Agent memory profiles
-            if self.agent_profiles:
-                report.append("## Agent Memory Profiles")
-                report.append(f"Tracking {len(self.agent_profiles)} agents")
-                report.append("")
-
-                # Sort by current memory usage
-                sorted_agents = sorted(
-                    self.agent_profiles.items(),
-                    key=lambda x: x[1].current_memory_mb,
-                    reverse=True,
-                )
-
-                for agent_id, profile in sorted_agents[:10]:
-                    report.append(f"Agent: {agent_id}")
-                    report.append(
-                        f"  Baseline: {profile.baseline_memory_mb:.2f} MB"
-                    )
-                    report.append(
-                        f"  Current: {profile.current_memory_mb:.2f} MB"
-                    )
-                    report.append(f"  Peak: {profile.peak_memory_mb:.2f} MB")
-
-                    if profile.growth_rate_mb_per_hour != 0:
-                        report.append(
-                            f"  Growth rate: {profile.growth_rate_mb_per_hour:+.2f} MB/hour"
-                        )
-                    report.append("")
-
-            # Recent snapshots
-            report.append("## Recent Snapshots")
-            for snap in list(self.snapshots)[-5:]:
-                report.append(
-                    f"\nSnapshot: {snap['label']} @ {datetime.fromtimestamp(snap['timestamp']).strftime('%H:%M:%S')}"
-                )
-
-                if snap["tracemalloc"]:
-                    tm = snap["tracemalloc"]
-                    report.append(
-                        f"  Tracemalloc: {tm['current_mb']:.2f} MB current, {tm['peak_mb']:.2f} MB peak"
-                    )
-
-                if snap["memory_profiler"]:
-                    mp = snap["memory_profiler"]
-                    report.append(
-                        f"  Memory Profiler: {mp['rss_mb']:.2f} MB RSS, {mp['percent']:.1f}% of total"
-                    )
-
-                if snap["pympler"]:
-                    pm = snap["pympler"]
-                    report.append(
-                        f"  Pympler: {pm['total_objects']:,} objects, {pm['total_size_mb']:.2f} MB total"
-                    )
+            report = []
+            report.extend(self._generate_header_section())
+            report.extend(self._generate_tools_section())
+            report.extend(self._generate_summary_section())
+            report.extend(self._generate_hotspots_section())
+            report.extend(self._generate_leaks_section())
+            report.extend(self._generate_agents_section())
+            report.extend(self._generate_snapshots_section())
 
             report.append("")
             report.append("=" * 60)

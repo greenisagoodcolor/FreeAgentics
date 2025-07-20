@@ -178,7 +178,7 @@ def run_coordination_benchmark():
             "times": async_times,
         }
         print(
-            f"  Async:      {async_avg:.4f}s avg, {num_agents/async_avg:.1f} agents/sec"
+            f"  Async: {async_avg:.4f}s avg, {num_agents/async_avg:.1f} agents/sec"
         )
 
         # Test Thread Pool Coordination

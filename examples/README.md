@@ -224,7 +224,7 @@ await client.session.post(
    curl -s http://localhost:8000/health
    ```
 
-2. **Agent Creation Fails**
+1. **Agent Creation Fails**
 
    ```python
    # Validate agent configuration
@@ -232,7 +232,7 @@ await client.session.post(
        raise ValueError("Agent name is required")
    ```
 
-3. **WebSocket Connection Issues**
+1. **WebSocket Connection Issues**
 
    ```python
    # Handle connection failures gracefully
@@ -261,9 +261,9 @@ curl -v http://localhost:8000/api/v1/agents
 ## Next Steps
 
 1. **Extend Examples**: Modify examples for your specific use case
-2. **Production Integration**: Integrate monitoring into your deployment pipeline
-3. **Custom Agents**: Create specialized agent types using the GMN framework
-4. **Scale Testing**: Use batch operations to test system limits
+1. **Production Integration**: Integrate monitoring into your deployment pipeline
+1. **Custom Agents**: Create specialized agent types using the GMN framework
+1. **Scale Testing**: Use batch operations to test system limits
 
 For more detailed information, see:
 

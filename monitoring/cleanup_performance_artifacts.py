@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 """
-Performance Test Artifacts Cleanup Script
+Performance Test Artifacts Cleanup Script.
 Removes obsolete performance test files and consolidates performance infrastructure.
 """
 
@@ -9,6 +9,7 @@ import logging
 import shutil
 from datetime import datetime, timedelta
 from pathlib import Path
+from typing import Any, Dict, List
 
 # Setup logging
 logging.basicConfig(
@@ -22,7 +23,7 @@ class PerformanceArtifactCleaner:
 
     def __init__(self, project_root: str = "."):
         self.project_root = Path(project_root)
-        self.cleanup_report = {
+        self.cleanup_report: Dict[str, Any] = {
             "timestamp": datetime.now().isoformat(),
             "files_removed": [],
             "directories_removed": [],
@@ -234,7 +235,7 @@ class PerformanceArtifactCleaner:
         logger.info("🧹 Removing duplicate performance tests...")
 
         # Find potential duplicate test files
-        test_files = {}
+        test_files: Dict[str, List[Path]] = {}
 
         # Scan for test files
         for test_file in self.project_root.rglob("test_*performance*.py"):
