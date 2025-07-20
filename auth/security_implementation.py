@@ -642,27 +642,6 @@ async def get_current_user(
     )
 
 
-<<<<<<< HEAD
-async def validate_csrf_token(request: Request) -> str:
-    """Validate CSRF token from request and return the token."""
-    # Get session ID from authorization header
-    session_id = None
-    auth_header = request.headers.get("Authorization", "")
-
-    if auth_header.startswith("Bearer "):
-        try:
-            token = auth_header.split(" ")[1]
-            unverified = jwt.decode(token, options={"verify_signature": False})
-            session_id = unverified.get("user_id")
-        except:
-            pass
-
-    if not session_id:
-        raise HTTPException(
-            status_code=status.HTTP_401_UNAUTHORIZED,
-            detail="Session required for CSRF validation",
-        )
-
 async def validate_csrf_token(request: Request, session_id: str) -> bool:
     """Validate CSRF token from request."""
     # Get CSRF token from header or form
