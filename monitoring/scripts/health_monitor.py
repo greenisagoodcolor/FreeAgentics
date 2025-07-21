@@ -6,13 +6,12 @@ Continuously monitors system health and triggers alerts when thresholds are exce
 """
 
 import asyncio
-import json
 import logging
 import os
 import sys
 import time
 from datetime import datetime
-from typing import Any, Dict, List, Optional
+from typing import Any, Dict
 
 import aiohttp
 import yaml
@@ -243,7 +242,7 @@ class HealthMonitor:
             await self.trigger_alert(
                 level='critical',
                 check_name=check_name,
-                message=f"Service reported unhealthy status",
+                message="Service reported unhealthy status",
                 details=result,
             )
 

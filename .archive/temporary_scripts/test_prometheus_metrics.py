@@ -108,11 +108,9 @@ async def test_api_endpoint():
             PROMETHEUS_AVAILABLE,
             prometheus_health_check,
             prometheus_metrics_endpoint,
-            start_prometheus_collection,
-            stop_prometheus_collection,
         )
 
-        print(f"✅ API endpoint imports successful")
+        print("✅ API endpoint imports successful")
         print(f"   Prometheus available: {PROMETHEUS_AVAILABLE}")
 
         if PROMETHEUS_AVAILABLE:

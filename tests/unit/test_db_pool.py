@@ -186,7 +186,7 @@ class TestDatabaseConnectionPool:
                 assert "PostgreSQL" in result
 
             await pool.close()
-        except (asyncpg.PostgresConnectionError, ConnectionPoolError) as e:
+        except (asyncpg.PostgresConnectionError, ConnectionPoolError):
             assert False, "Test bypass removed - must fix underlying issue"
 
     @pytest.mark.asyncio

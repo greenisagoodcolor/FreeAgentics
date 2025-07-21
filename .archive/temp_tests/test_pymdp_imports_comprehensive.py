@@ -23,7 +23,6 @@ import ast
 import importlib
 import inspect
 import sys
-import traceback
 from pathlib import Path
 from typing import Any, Dict, List
 
@@ -129,7 +128,7 @@ class TestPyMDPImportsComprehensive:
 
     def test_all_imports_discovered(self):
         """TEST: Verify we found ALL PyMDP imports in codebase."""
-        print(f"\n=== DISCOVERED PYMDP IMPORTS ===")
+        print("\n=== DISCOVERED PYMDP IMPORTS ===")
 
         total_imports = 0
         for file_path, imports in self.all_imports.items():
@@ -152,23 +151,23 @@ class TestPyMDPImportsComprehensive:
         """TEST: Direct Agent import from pymdp root should FAIL."""
         # This test should PASS (import should fail)
         with pytest.raises(ImportError, match="cannot import name 'Agent'"):
-            from pymdp import Agent
+            pass
 
     def test_pymdp_categorical_import_all_paths_fail(self):
         """TEST: Categorical import should FAIL from all locations."""
         # These should all fail - Categorical doesn't exist in current PyMDP
 
         with pytest.raises(ImportError):
-            from pymdp import Categorical
+            pass
 
         with pytest.raises(ImportError):
-            from pymdp.maths import Categorical
+            pass
 
         with pytest.raises(ImportError):
-            from pymdp.agent import Categorical
+            pass
 
         with pytest.raises(ImportError):
-            from pymdp.utils import Categorical
+            pass
 
     def test_pymdp_core_imports_must_succeed(self):
         """TEST: Core PyMDP imports MUST work or tests fail hard."""
@@ -265,7 +264,6 @@ class TestPyMDPImportsComprehensive:
         try:
             from pymdp.agent import Agent
 
-            agent_instance = None  # We'll create a minimal instance if needed
 
             # Expected Agent methods based on documentation
             expected_methods = [
@@ -423,7 +421,7 @@ class TestPyMDPImportsComprehensive:
         # This test always fails to generate the report
         report_lines = [
             "=== COMPREHENSIVE PYMDP IMPORT ANALYSIS REPORT ===",
-            f"Scan Date: 2025-07-13",
+            "Scan Date: 2025-07-13",
             f"Total Files Scanned: {len(self.all_imports)}",
             "",
         ]

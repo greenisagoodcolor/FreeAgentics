@@ -44,8 +44,7 @@ class AgentTypeAdapter:
             if "agent_id" in agent:
                 return str(agent["agent_id"])
 
-        raise AttributeError(f"Agent object {type(agent)} has no 'id' or
-            'agent_id' attribute")
+        raise AttributeError(f"Agent object {type(agent)} has no 'id' or 'agent_id' attribute")
 
     @staticmethod
     def get_name(agent: Any) -> str:
@@ -207,8 +206,7 @@ class CoalitionTypeAdapter:
                 return str(coalition["coalition_id"])
 
         raise AttributeError(
-            f"Coalition object {type(coalition)} has no 'id' or
-                'coalition_id' attribute"
+            f"Coalition object {type(coalition)} has no 'id' or 'coalition_id' attribute"
         )
 
     @staticmethod

@@ -5,9 +5,8 @@ Focus on user-facing coalition behaviors, not implementation details.
 
 import uuid
 from datetime import datetime
-from unittest.mock import MagicMock, Mock, patch
+from unittest.mock import Mock, patch
 
-import pytest
 
 
 class TestCoalitionFormationBehavior:

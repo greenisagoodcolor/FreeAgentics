@@ -2,13 +2,11 @@
 """Nemesis-grade validation test script for FreeAgentics v1.0.0-alpha"""
 
 import json
-import sys
-import time
 from datetime import datetime
 
 print("=== FREEAGENTICS NEMESIS VALIDATION ===")
 print(f"Timestamp: {datetime.now().isoformat()}")
-print(f"Version: v1.0.0-alpha\n")
+print("Version: v1.0.0-alpha\n")
 
 results = {
     "timestamp": datetime.now().isoformat(),
@@ -22,13 +20,11 @@ results = {
 # Test 1: Core imports
 print("1. TESTING CORE IMPORTS...")
 try:
-    from agents.agent_manager import AgentManager
     from agents.pymdp_adapter import PyMDPCompatibilityAdapter
     from inference.active.gmn_parser import GMNParser
     from knowledge_graph.graph_engine import KnowledgeGraph
     from services.agent_factory import AgentFactory
     from services.belief_kg_bridge import BeliefKGBridge
-    from services.gmn_generator import GMNGenerator
     from services.iterative_controller import IterativeController
 
     print("✅ All core imports successful")
@@ -91,7 +87,7 @@ try:
     graph = parser.parse(gmn_spec)
     model = parser.to_pymdp_model(graph)
 
-    print(f"✅ GMN parsed successfully")
+    print("✅ GMN parsed successfully")
     print(f"   - Nodes: {len(graph.nodes)}")
     print(f"   - Model states: {model.get('num_states', [])}")
     results["components"]["gmn_parser"] = "PASS"
@@ -106,7 +102,7 @@ try:
         agent_factory = AgentFactory()
         is_valid, errors = agent_factory.validate_model(model)
         if is_valid:
-            print(f"✅ Model validation passed")
+            print("✅ Model validation passed")
             # Note: Actual agent creation would happen here
             results["components"]["agent_creation"] = "PASS"
         else:
@@ -125,7 +121,7 @@ try:
     kg = KnowledgeGraph()
     # Test basic operations
     node_id = kg.add_node("test", {"value": 42})
-    print(f"✅ Knowledge Graph operational")
+    print("✅ Knowledge Graph operational")
     print(f"   - Added node: {node_id}")
     results["components"]["knowledge_graph"] = "PASS"
 except Exception as e:
@@ -219,7 +215,7 @@ print(f"⚠️  Skipped: {skipped}")
 
 # Core functionality assessment
 core_functional = (
-    results["components"].get("imports", "").startswith("FAIL") == False
+    results["components"].get("imports", "").startswith("FAIL") is False
     and results["components"].get("gmn_parser", "") == "PASS"
     and results["components"].get("knowledge_graph", "") == "PASS"
     and results["components"].get("frontend", "") == "PASS"

@@ -66,7 +66,7 @@ class TestEnvironmentTestSpec:
         assert spec.isolation_level == IsolationLevel.SCHEMA
         assert spec.parallel_instances == 1
         assert spec.timeout == 300
-        assert spec.cleanup_on_exit == True
+        assert spec.cleanup_on_exit is True
 
 
 class TestEnvironmentOrchestrator:

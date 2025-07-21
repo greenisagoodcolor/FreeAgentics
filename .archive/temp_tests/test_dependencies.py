@@ -6,7 +6,6 @@ No try/except blocks - hard failures only
 """
 
 import importlib
-import subprocess
 import sys
 from importlib.metadata import PackageNotFoundError, version
 
@@ -25,7 +24,7 @@ def test_package_installed(package_name: str, import_name: str = None) -> None:
 
     # Test 2: Package is importable
     try:
-        module = importlib.import_module(import_name)
+        importlib.import_module(import_name)
         print(f"✓ {import_name} successfully imported")
     except ImportError as e:
         print(f"✗ Failed to import {import_name}: {e}")
@@ -52,7 +51,7 @@ def test_passlib() -> None:
     print("\n[TEST] passlib - password hashing library")
 
     # Test installation
-    version = test_package_installed("passlib")
+    test_package_installed("passlib")
 
     # Test specific functionality
     from passlib.context import CryptContext
@@ -76,7 +75,7 @@ def test_pyjwt() -> None:
     print("\n[TEST] PyJWT - JWT token library")
 
     # Test installation
-    version = test_package_installed("PyJWT", "jwt")
+    test_package_installed("PyJWT", "jwt")
 
     # Test functionality
     import jwt
@@ -103,7 +102,7 @@ def test_python_jose() -> None:
     print("\n[TEST] python-jose[cryptography] - JWT with crypto support")
 
     # Test installation
-    version = test_package_installed("python-jose", "jose")
+    test_package_installed("python-jose", "jose")
 
     # Test cryptography backend
     test_package_installed("cryptography")
@@ -138,11 +137,10 @@ def test_asyncpg() -> None:
     print("\n[TEST] asyncpg - PostgreSQL async driver")
 
     # Test installation
-    version = test_package_installed("asyncpg")
+    test_package_installed("asyncpg")
 
     # Test basic import of key components
     import asyncpg
-    from asyncpg import Connection, Pool
 
     # Verify core functions exist
     assert hasattr(asyncpg, "connect"), "asyncpg.connect missing"
@@ -159,11 +157,11 @@ def test_sqlalchemy() -> None:
     print("\n[TEST] SQLAlchemy - ORM library")
 
     # Test installation
-    version = test_package_installed("SQLAlchemy", "sqlalchemy")
+    test_package_installed("SQLAlchemy", "sqlalchemy")
 
     # Test core components
     from sqlalchemy import Column, Integer, String, create_engine
-    from sqlalchemy.orm import declarative_base, sessionmaker
+    from sqlalchemy.orm import declarative_base
 
     # Test basic ORM functionality
     Base = declarative_base()
@@ -188,11 +186,11 @@ def test_fastapi() -> None:
     print("\n[TEST] FastAPI - web framework")
 
     # Test installation
-    version = test_package_installed("fastapi")
+    test_package_installed("fastapi")
 
     # Test core components
-    from fastapi import Depends, FastAPI, HTTPException
-    from fastapi.security import HTTPAuthorizationCredentials, HTTPBearer
+    from fastapi import FastAPI
+    from fastapi.security import HTTPBearer
 
     # Test basic app creation
     app = FastAPI()
@@ -202,7 +200,7 @@ def test_fastapi() -> None:
         return {"Hello": "World"}
 
     # Test security utilities
-    security = HTTPBearer()
+    HTTPBearer()
 
     print("✓ FastAPI core components working")
 

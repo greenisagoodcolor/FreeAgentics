@@ -5,8 +5,6 @@ to maximize our path toward 80% coverage efficiently.
 """
 
 import pytest
-from unittest.mock import Mock, patch, MagicMock
-import json
 
 class TestHighCoverageAPIPaths:
     """Focus on API paths that are already showing good coverage."""
@@ -25,7 +23,7 @@ class TestHighCoverageAPIPaths:
                 new_app = create_app()
                 assert isinstance(new_app, FastAPI)
                 
-        except Exception as e:
+        except Exception:
             pytest.fail("Test needs implementation")
 
     def test_health_endpoint_complete_paths(self):
@@ -48,7 +46,7 @@ class TestHighCoverageAPIPaths:
                     func = getattr(health, func_name)
                     assert callable(func)
                     
-        except Exception as e:
+        except Exception:
             pytest.fail("Test needs implementation")
 
     def test_inference_endpoint_paths(self):
@@ -71,7 +69,7 @@ class TestHighCoverageAPIPaths:
                     func = getattr(inference, func_name)
                     assert callable(func)
                     
-        except Exception as e:
+        except Exception:
             pytest.fail("Test needs implementation")
 
     def test_security_endpoint_paths(self):
@@ -94,7 +92,7 @@ class TestHighCoverageAPIPaths:
                     func = getattr(security, func_name)
                     assert callable(func)
                     
-        except Exception as e:
+        except Exception:
             pytest.fail("Test needs implementation")
 
     def test_system_endpoint_paths(self):
@@ -117,7 +115,7 @@ class TestHighCoverageAPIPaths:
                     func = getattr(system, func_name)
                     assert callable(func)
                     
-        except Exception as e:
+        except Exception:
             pytest.fail("Test needs implementation")
 
 class TestObservabilityHighCoverage:
@@ -141,7 +139,7 @@ class TestObservabilityHighCoverage:
                     func = getattr(prometheus_metrics, func_name)
                     assert callable(func)
                     
-        except Exception as e:
+        except Exception:
             pytest.fail("Test needs implementation")
 
     def test_security_monitoring_paths(self):
@@ -161,7 +159,7 @@ class TestObservabilityHighCoverage:
                     func = getattr(security_monitoring, func_name)
                     assert callable(func)
                     
-        except Exception as e:
+        except Exception:
             pytest.fail("Test needs implementation")
 
     def test_incident_response_paths(self):
@@ -181,7 +179,7 @@ class TestObservabilityHighCoverage:
                     func = getattr(incident_response, func_name)
                     assert callable(func)
                     
-        except Exception as e:
+        except Exception:
             pytest.fail("Test needs implementation")
 
 class TestAuthHighCoverage:
@@ -204,7 +202,7 @@ class TestAuthHighCoverage:
                     func = getattr(security_logging, func_name)
                     assert callable(func)
                     
-        except Exception as e:
+        except Exception:
             pytest.fail("Test needs implementation")
 
     def test_jwt_handler_paths(self):
@@ -229,7 +227,7 @@ class TestAuthHighCoverage:
                     method = getattr(handler, method_name)
                     assert callable(method)
                     
-        except Exception as e:
+        except Exception:
             pytest.fail("Test needs implementation")
 
     def test_https_enforcement_paths(self):
@@ -249,7 +247,7 @@ class TestAuthHighCoverage:
                     func = getattr(https_enforcement, func_name)
                     assert callable(func)
                     
-        except Exception as e:
+        except Exception:
             pytest.fail("Test needs implementation")
 
     def test_certificate_pinning_paths(self):
@@ -269,7 +267,7 @@ class TestAuthHighCoverage:
                     func = getattr(certificate_pinning, func_name)
                     assert callable(func)
                     
-        except Exception as e:
+        except Exception:
             pytest.fail("Test needs implementation")
 
 class TestMiddlewareHighCoverage:
@@ -296,7 +294,7 @@ class TestMiddlewareHighCoverage:
                     method = getattr(middleware_class, method_name)
                     assert callable(method)
                     
-        except Exception as e:
+        except Exception:
             pytest.fail("Test needs implementation")
 
     def test_ddos_protection_middleware_paths(self):
@@ -320,7 +318,7 @@ class TestMiddlewareHighCoverage:
                     method = getattr(middleware_class, method_name)
                     assert callable(method)
                     
-        except Exception as e:
+        except Exception:
             pytest.fail("Test needs implementation")
 
     def test_websocket_rate_limiting_paths(self):
@@ -340,7 +338,7 @@ class TestMiddlewareHighCoverage:
                     func = getattr(websocket_rate_limiting, func_name)
                     assert callable(func)
                     
-        except Exception as e:
+        except Exception:
             pytest.fail("Test needs implementation")
 
 class TestWebSocketHighCoverage:
@@ -363,7 +361,7 @@ class TestWebSocketHighCoverage:
                     func = getattr(auth_handler, func_name)
                     assert callable(func)
                     
-        except Exception as e:
+        except Exception:
             pytest.fail("Test needs implementation")
 
 class TestWorldHighCoverage:
@@ -386,7 +384,7 @@ class TestWorldHighCoverage:
                     func = getattr(grid_world, func_name)
                     assert callable(func)
                     
-        except Exception as e:
+        except Exception:
             pytest.fail("Test needs implementation")
 
 class TestInferenceLocalLLMPaths:
@@ -413,7 +411,7 @@ class TestInferenceLocalLLMPaths:
                         method = getattr(manager_class, method_name)
                         assert callable(method)
                         
-        except Exception as e:
+        except Exception:
             pytest.fail("Test needs implementation")
 
 class TestAgentsPracticalPaths:
@@ -436,7 +434,7 @@ class TestAgentsPracticalPaths:
                     func = getattr(performance_optimizer, func_name)
                     assert callable(func)
                     
-        except Exception as e:
+        except Exception:
             pytest.fail("Test needs implementation")
 
     def test_agent_error_handling_paths(self):
@@ -456,7 +454,7 @@ class TestAgentsPracticalPaths:
                     func = getattr(error_handling, func_name)
                     assert callable(func)
                     
-        except Exception as e:
+        except Exception:
             pytest.fail("Test needs implementation")
 
     def test_agent_manager_paths(self):
@@ -481,5 +479,5 @@ class TestAgentsPracticalPaths:
                         method = getattr(manager_class, method_name)
                         assert callable(method)
                         
-        except Exception as e:
+        except Exception:
             pytest.fail("Test needs implementation")

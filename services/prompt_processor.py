@@ -4,7 +4,6 @@ This service handles the core business logic for converting natural language
 prompts into active inference agents and updating the knowledge graph.
 """
 
-import asyncio
 import logging
 import time
 import uuid
@@ -531,7 +530,7 @@ class PromptProcessor:
         """Update knowledge graph with agent state."""
         try:
             # Update KG from agent
-            update_result = await self.belief_kg_bridge.update_kg_from_agent(
+            await self.belief_kg_bridge.update_kg_from_agent(
                 pymdp_agent, agent_id, self.knowledge_graph
             )
 

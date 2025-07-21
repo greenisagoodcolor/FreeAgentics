@@ -7,7 +7,7 @@ Requires either Ollama or llama.cpp to be available for testing.
 
 import os
 from pathlib import Path
-from unittest.mock import Mock, patch
+from unittest.mock import patch
 
 import pytest
 
@@ -208,7 +208,7 @@ class TestLLMIntegration:
             assert len(response.text) > 0
             assert response.latency > 0
 
-        except Exception as e:
+        except Exception:
             # If any error occurs, use mock fallback
             with patch.object(LlamaCppProvider, 'is_available', return_value=True), \
                  patch.object(LlamaCppProvider, 'load_model', return_value=True), \

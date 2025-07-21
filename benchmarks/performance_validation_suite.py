@@ -15,11 +15,9 @@ Performance Targets (ZERO-TOLERANCE):
 - Lighthouse score: ≥ 90
 """
 
-import asyncio
 import gc
 import json
 import logging
-import os
 import sys
 import time
 import tracemalloc
@@ -27,7 +25,7 @@ from concurrent.futures import ThreadPoolExecutor, as_completed
 from dataclasses import asdict, dataclass
 from datetime import datetime
 from pathlib import Path
-from typing import Any, Dict, List, Optional, Tuple
+from typing import Any, Dict, List
 
 import numpy as np
 import psutil
@@ -199,9 +197,9 @@ class PerformanceValidator:
         
         try:
             # Simulate PyMDP inference operations
-            A = np.random.rand(10, 10, 5)  # Observation model
-            B = np.random.rand(10, 10, 3)  # Transition model
-            C = np.random.rand(10)         # Preferences
+            np.random.rand(10, 10, 5)  # Observation model
+            np.random.rand(10, 10, 3)  # Transition model
+            np.random.rand(10)         # Preferences
             
             # Simulate active inference steps
             for _ in range(100):
@@ -216,7 +214,7 @@ class PerformanceValidator:
                 # Action selection
                 action_probs = np.exp(-expected_free_energy)
                 action_probs = action_probs / np.sum(action_probs)
-                action = np.random.choice(len(action_probs), p=action_probs)
+                np.random.choice(len(action_probs), p=action_probs)
                 
         except Exception as e:
             logger.error(f"PyMDP inference failed: {e}")
@@ -307,7 +305,7 @@ class PerformanceValidator:
                 
                 # Convert datetime objects to strings for JSON serialization
                 json_str = json.dumps(data, default=str)
-                parsed_data = json.loads(json_str)
+                json.loads(json_str)
                 
                 # Simulate database query delay
                 time.sleep(0.001)  # 1ms simulated DB query

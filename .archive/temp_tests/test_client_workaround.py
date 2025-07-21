@@ -39,7 +39,6 @@ def test_workaround():
     try:
         # Method 1: Try using ASGITransport explicitly
         import httpx
-        from starlette.testclient import TestClient
 
         print("Testing ASGITransport workaround...")
 

@@ -7,8 +7,6 @@ _ = np.fft.fft(data).real.sum()  # Force real CPU work
 This is part of the critical mission to eliminate performance theater for VC demo.
 """
 
-import os
-import re
 from pathlib import Path
 from typing import Dict, List
 
@@ -30,7 +28,6 @@ class TimeSleepRemover:
             with open(file_path, "r", encoding="utf-8") as f:
                 content = f.read()
 
-            original_content = content
             lines = content.splitlines()
             modified = False
 
@@ -151,7 +148,7 @@ class TimeSleepRemover:
     def generate_report(self) -> str:
         """Generate removal report."""
         report = "# Time.sleep() Removal Report\n\n"
-        report += f"## Summary\n"
+        report += "## Summary\n"
         report += f"- Files modified: {self.files_modified}\n"
         # REMOVED: report += f"- time.sleep() calls removed: {len(self.fixes_applied)}\n\n"
         # Real computation instead of sleep
@@ -171,7 +168,7 @@ class TimeSleepRemover:
             for fix in fixes:
                 report += f"**{fix['file']}:{fix['line']}**\n"
                 report += f"- Original: `{fix['original']}`\n"
-                report += f"- Replaced with real computation\n\n"
+                report += "- Replaced with real computation\n\n"
 
         return report
 
@@ -187,7 +184,7 @@ def main():
     remover = TimeSleepRemover()
     stats = remover.process_directory("/home/green/FreeAgentics")
 
-    print(f"\n✅ Processing complete:")
+    print("\n✅ Processing complete:")
     print(f"   Files processed: {stats['files_processed']}")
     print(f"   Files modified: {stats['files_modified']}")
     # REMOVED: print(f"   time.sleep() calls removed: {stats['sleeps_removed']}")
@@ -204,7 +201,7 @@ def main():
         print(f"\n📊 Report saved to: {report_path}")
 
         # Show some examples
-        print(f"\n🔧 Examples of fixes applied:")
+        print("\n🔧 Examples of fixes applied:")
         for fix in remover.fixes_applied[:5]:  # Show first 5
             print(f"   {fix['file']}:{fix['line']} ({fix['context']})")
             print(f"      - {fix['original']}")

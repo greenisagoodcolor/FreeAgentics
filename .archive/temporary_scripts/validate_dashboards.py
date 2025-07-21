@@ -4,7 +4,6 @@ Validation script for FreeAgentics Grafana dashboards.
 """
 
 import json
-import os
 import sys
 from pathlib import Path
 
@@ -26,11 +25,11 @@ def validate_dashboard_json(file_path):
 
         # Check panels
         if not isinstance(dashboard["panels"], list):
-            print(f"❌ Panels must be a list")
+            print("❌ Panels must be a list")
             return False
 
         if len(dashboard["panels"]) == 0:
-            print(f"❌ Dashboard must have at least one panel")
+            print("❌ Dashboard must have at least one panel")
             return False
 
         # Validate panels
@@ -57,19 +56,19 @@ def validate_dashboard_json(file_path):
             if "list" in templating:
                 for var in templating["list"]:
                     if "name" not in var:
-                        print(f"❌ Template variable missing name")
+                        print("❌ Template variable missing name")
                         return False
 
         # Check tags
         if "tags" in dashboard:
             if not isinstance(dashboard["tags"], list):
-                print(f"❌ Tags must be a list")
+                print("❌ Tags must be a list")
                 return False
 
             if "freeagentics" not in dashboard["tags"]:
-                print(f"⚠️  Dashboard should have 'freeagentics' tag")
+                print("⚠️  Dashboard should have 'freeagentics' tag")
 
-        print(f"✅ Dashboard structure valid")
+        print("✅ Dashboard structure valid")
         print(f"   Title: {dashboard['title']}")
         print(f"   Panels: {len(dashboard['panels'])}")
         print(f"   Refresh: {dashboard['refresh']}")
@@ -94,15 +93,15 @@ def validate_provisioning_config(file_path):
     try:
         if file_path.suffix == ".json":
             with open(file_path, "r") as f:
-                config = json.load(f)
+                json.load(f)
         else:
             # Assume YAML
             import yaml
 
             with open(file_path, "r") as f:
-                config = yaml.safe_load(f)
+                yaml.safe_load(f)
 
-        print(f"✅ Provisioning config valid")
+        print("✅ Provisioning config valid")
         return True
 
     except Exception as e:

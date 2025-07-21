@@ -61,7 +61,7 @@ def test_testclient_import():
 
             # Test 6: TestClient with main app
             try:
-                main_client = TestClient(app)
+                TestClient(app)
                 print("✅ TestClient with main app successful")
             except Exception as e:
                 print(f"❌ TestClient with main app failed: {e}")

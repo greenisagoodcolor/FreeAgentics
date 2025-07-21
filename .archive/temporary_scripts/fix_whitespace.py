@@ -3,7 +3,6 @@
 
 import os
 import re
-import sys
 
 
 def fix_whitespace_issues(file_path):

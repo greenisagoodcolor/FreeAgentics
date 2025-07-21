@@ -218,7 +218,7 @@ position_belief -> grid_position: depends_on
     # Add belief node to KG
     belief_node = KnowledgeNode(
         type=NodeType.BELIEF,
-        label=f"Belief_final",
+        label="Belief_final",
         properties={
             "entropy": float(belief_state.entropy),
             "most_likely_state": int(belief_state.most_likely_states[0]),
@@ -233,17 +233,17 @@ position_belief -> grid_position: depends_on
     )
     kg.add_edge(edge)
 
-    print(f"   ✅ Belief state extracted")
+    print("   ✅ Belief state extracted")
     print(f"   ✅ Entropy: {belief_state.entropy:.3f}")
     print(f"   ✅ Most likely position: {belief_state.most_likely_states[0]}")
 
     # STEP 9: Final Statistics
     print("\n9. FINAL SYSTEM STATE:")
-    print(f"   Knowledge Graph:")
+    print("   Knowledge Graph:")
     print(f"     - Total nodes: {len(kg.nodes)}")
     print(f"     - Total edges: {len(kg.edges)}")
     print(f"     - Node types: {set(n.type.value for n in kg.nodes.values())}")
-    print(f"   Agent State:")
+    print("   Agent State:")
     print(f"     - Steps taken: {len(agent.observation_history)}")
     print(f"     - Final entropy: {belief_state.entropy:.3f}")
 

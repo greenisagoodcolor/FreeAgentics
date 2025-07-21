@@ -8,18 +8,15 @@ This module tests all LLM providers to ensure they:
 """
 
 import asyncio
-import json
 import os
-from typing import Dict, List, Optional
+from typing import Dict, List
 
 import pytest
 
 from llm import (
-    LLMError,
     LLMMessage,
     LLMProviderFactory,
     LLMRole,
-    ProviderType,
     create_llm_factory,
 )
 from llm.providers import (
@@ -120,7 +117,7 @@ class TestLLMProviders:
         try:
             # Check if Ollama is running
             if not await provider._check_ollama_running():
-                pytest.skip("Ollama service not running")
+                assert False, "Ollama service not running - configure Ollama for this test"
 
             # Test basic generation
             messages = [

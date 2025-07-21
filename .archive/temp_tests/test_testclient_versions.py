@@ -59,7 +59,6 @@ def test_client_patterns():
 
     # Pattern 3: Using httpx directly
     try:
-        import httpx
         from fastapi import testclient
 
         # Check if there's a different import path
@@ -83,7 +82,7 @@ def test_client_patterns():
 
         print(f"TestClient class: {TestClient}")
         print(f"TestClient MRO: {TestClient.__mro__}")
-        print(f"TestClient __init__ signature:")
+        print("TestClient __init__ signature:")
         import inspect
 
         sig = inspect.signature(TestClient.__init__)

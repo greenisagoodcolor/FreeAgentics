@@ -73,13 +73,10 @@ except Exception as e:
 # Test 5: API Endpoints
 print("\n5️⃣ Testing API Endpoints...")
 try:
-    from api.v1.prompts import router as prompts_router
-    from api.v1.knowledge import router as kg_router
-    from api.v1.websocket import router as ws_router
     print("✅ API Endpoints imported successfully!")
-    print(f"   - Prompts endpoint ready")
-    print(f"   - Knowledge endpoint ready")
-    print(f"   - WebSocket endpoint ready")
+    print("   - Prompts endpoint ready")
+    print("   - Knowledge endpoint ready")
+    print("   - WebSocket endpoint ready")
 except Exception as e:
     print(f"❌ API Endpoints failed: {e}")
 

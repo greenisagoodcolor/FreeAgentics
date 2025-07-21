@@ -1,7 +1,6 @@
 #!/usr/bin/env python3
 """Fix exception handling issues."""
 
-import os
 import re
 from pathlib import Path
 

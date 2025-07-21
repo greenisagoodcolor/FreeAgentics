@@ -3,7 +3,6 @@
 Report on performance theater and graceful degradation patterns in the codebase.
 """
 
-import os
 import re
 from pathlib import Path
 from typing import Dict, List, Tuple

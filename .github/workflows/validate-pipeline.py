@@ -8,7 +8,7 @@ import yaml
 import os
 import sys
 from pathlib import Path
-from typing import Dict, List, Set, Tuple
+from typing import Dict, List, Tuple
 
 class PipelineValidator:
     """Validates GitHub Actions workflows for security and best practices"""

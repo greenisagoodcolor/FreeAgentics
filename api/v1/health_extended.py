@@ -4,21 +4,18 @@ Extended health check endpoints with detailed system diagnostics.
 Provides comprehensive health information for monitoring systems.
 """
 
-import asyncio
 import os
 import time
 from datetime import datetime, timedelta
-from typing import Any, Dict, List, Optional
+from typing import Any, Dict
 
 import psutil
-from fastapi import APIRouter, Depends, HTTPException
+from fastapi import APIRouter, Depends
 from fastapi.responses import JSONResponse
 from sqlalchemy import text
 from sqlalchemy.orm import Session
 
-from agents.agent_manager import AgentManager
 from database.session import get_db
-from observability.performance_metrics import performance_tracker
 
 router = APIRouter()
 

@@ -7,7 +7,6 @@ by building on previous iterations and generating intelligent suggestions.
 
 import asyncio
 import sys
-from datetime import datetime
 from pathlib import Path
 
 # Add parent directory to path
@@ -15,9 +14,7 @@ sys.path.insert(0, str(Path(__file__).parent))
 
 from agents.pymdp_adapter import PyMDPCompatibilityAdapter
 from knowledge_graph.graph_engine import KnowledgeGraph
-from services.agent_factory import AgentFactory
 from services.belief_kg_bridge import BeliefKGBridge
-from services.gmn_generator import GMNGenerator
 from services.iterative_controller import (
     ConversationContext,
     IterativeController,
@@ -64,7 +61,7 @@ async def demonstrate_iterative_loop():
             context, prompt
         )
 
-        print(f"\nIteration Context:")
+        print("\nIteration Context:")
         print(f"  - Iteration Number: {iteration_context['iteration_number']}")
         print(
             f"  - Previous Suggestions: {iteration_context.get('previous_suggestions', [])}"
@@ -103,7 +100,7 @@ async def demonstrate_iterative_loop():
             None,  # Mock DB
         )
 
-        print(f"\nGenerated Suggestions:")
+        print("\nGenerated Suggestions:")
         for j, suggestion in enumerate(suggestions, 1):
             print(f"  {j}. {suggestion}")
 
@@ -120,7 +117,7 @@ async def demonstrate_iterative_loop():
 
         # Show conversation summary
         summary = context.get_context_summary()
-        print(f"\nConversation Summary:")
+        print("\nConversation Summary:")
         print(f"  - Total Agents: {summary['total_agents']}")
         print(f"  - KG Nodes: {summary['kg_nodes']}")
         print(f"  - Belief Evolution: {summary['belief_evolution']['trend']}")

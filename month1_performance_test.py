@@ -7,16 +7,14 @@ Comprehensive performance testing for FreeAgentics v1.0.0-alpha+
 Following POST_RELEASE_PREPARATION_v1.0.0-alpha.md requirements.
 """
 
-import asyncio
 import gc
 import json
 import random
-import threading
 import time
 import tracemalloc
 from concurrent.futures import ThreadPoolExecutor
-from datetime import datetime, timedelta
-from typing import Any, Dict, List
+from datetime import datetime
+from typing import Any, Dict
 
 
 # Simple mock classes for testing
@@ -504,7 +502,7 @@ def main():
     with open("month1_performance_results.json", "w") as f:
         json.dump(results, f, indent=2)
 
-    print(f"\n📄 Results saved to: month1_performance_results.json")
+    print("\n📄 Results saved to: month1_performance_results.json")
 
     return results
 

@@ -2,10 +2,7 @@
 Integration tests for agent workflow functionality
 """
 
-import asyncio
-from datetime import datetime
-from typing import Any, Dict, List
-from unittest.mock import MagicMock, Mock, patch
+from unittest.mock import MagicMock, patch
 
 import pytest
 

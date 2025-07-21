@@ -9,10 +9,9 @@ This script implements Task 1.5 requirements:
 """
 
 import logging
-import os
 import re
 from pathlib import Path
-from typing import List, Set, Tuple
+from typing import List, Tuple
 
 logging.basicConfig(level=logging.INFO, format="%(levelname)s: %(message)s")
 logger = logging.getLogger(__name__)

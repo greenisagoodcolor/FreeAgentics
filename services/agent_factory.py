@@ -219,7 +219,7 @@ class AgentFactory:
             A_array = np.array(A) if isinstance(A, list) else A
 
             # Check dimensions
-            num_factors = len(num_states)
+            len(num_states)
             num_modalities = len(num_obs)
 
             if isinstance(A_array, np.ndarray) and A_array.ndim == 2:

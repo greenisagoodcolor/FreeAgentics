@@ -282,23 +282,23 @@ class ProductionReadinessValidator:
         self.determine_overall_status()
 
         # Output results
-        print(f"\\n📊 VALIDATION RESULTS:")
+        print("\\n📊 VALIDATION RESULTS:")
         print(f"Overall Status: {self.results['overall_status']}")
         print(f"Checks Completed: {len(self.results['checks'])}")
         print(f"Blockers: {len(self.results['blockers'])}")
         print(f"Warnings: {len(self.results['warnings'])}")
 
         if self.results["blockers"]:
-            print(f"\\n❌ BLOCKERS:")
+            print("\\n❌ BLOCKERS:")
             for blocker in self.results["blockers"]:
                 print(f"  - {blocker}")
 
         if self.results["warnings"]:
-            print(f"\\n⚠️ WARNINGS:")
+            print("\\n⚠️ WARNINGS:")
             for warning in self.results["warnings"]:
                 print(f"  - {warning}")
 
-        print(f"\\n✅ CHECK RESULTS:")
+        print("\\n✅ CHECK RESULTS:")
         for check, result in self.results["checks"].items():
             print(f"  - {check}: {result['status']}")
 
@@ -313,7 +313,7 @@ def main():
     with open("production_readiness_validation.json", "w") as f:
         json.dump(results, f, indent=2)
 
-    print(f"\\n📄 Detailed results saved to: production_readiness_validation.json")
+    print("\\n📄 Detailed results saved to: production_readiness_validation.json")
 
     # Exit with appropriate code
     if results["overall_status"] == "BLOCKED":

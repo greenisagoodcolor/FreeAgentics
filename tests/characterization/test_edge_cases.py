@@ -5,7 +5,7 @@ following Michael Feathers' characterization testing methodology.
 """
 
 import pytest
-from unittest.mock import Mock, patch, MagicMock
+from unittest.mock import Mock, patch
 import numpy as np
 
 class TestAgentEdgeCases:
@@ -22,7 +22,7 @@ class TestAgentEdgeCases:
             # Document default values
             assert hasattr(empty_config, '__dict__')
             
-        except Exception as e:
+        except Exception:
             pytest.fail("Test needs implementation")
 
     def test_agent_with_invalid_states(self):
@@ -44,7 +44,7 @@ class TestAgentEdgeCases:
                     # Document the failure mode
                     assert isinstance(inner_e, Exception)
                     
-        except Exception as e:
+        except Exception:
             pytest.fail("Test needs implementation")
 
     def test_agent_observation_with_none(self):
@@ -71,7 +71,7 @@ class TestAgentEdgeCases:
                     # Document error handling
                     assert isinstance(inner_e, Exception)
                     
-        except Exception as e:
+        except Exception:
             pytest.fail("Test needs implementation")
 
     def test_agent_step_without_observation(self):
@@ -96,7 +96,7 @@ class TestAgentEdgeCases:
                 except Exception as inner_e:
                     assert isinstance(inner_e, Exception)
                     
-        except Exception as e:
+        except Exception:
             pytest.fail("Test needs implementation")
 
 class TestAPIEdgeCases:
@@ -120,7 +120,7 @@ class TestAPIEdgeCases:
                     # Document error handling
                     assert isinstance(inner_e, Exception)
                     
-        except Exception as e:
+        except Exception:
             pytest.fail("Test needs implementation")
 
     def test_agent_creation_with_invalid_data(self):
@@ -145,7 +145,7 @@ class TestAPIEdgeCases:
                     # Document validation errors
                     assert isinstance(inner_e, Exception)
                     
-        except Exception as e:
+        except Exception:
             pytest.fail("Test needs implementation")
 
     def test_auth_with_malformed_token(self):
@@ -169,7 +169,7 @@ class TestAPIEdgeCases:
                     # Document decode errors
                     assert isinstance(inner_e, Exception)
                     
-        except Exception as e:
+        except Exception:
             pytest.fail("Test needs implementation")
 
 class TestDatabaseEdgeCases:
@@ -191,7 +191,7 @@ class TestDatabaseEdgeCases:
                 # Document string length errors
                 assert isinstance(inner_e, Exception)
                 
-        except Exception as e:
+        except Exception:
             pytest.fail("Test needs implementation")
 
     def test_model_with_null_required_fields(self):
@@ -207,7 +207,7 @@ class TestDatabaseEdgeCases:
                 # Document null field errors
                 assert isinstance(inner_e, Exception)
                 
-        except Exception as e:
+        except Exception:
             pytest.fail("Test needs implementation")
 
     @patch('database.session.SessionLocal')
@@ -232,7 +232,7 @@ class TestDatabaseEdgeCases:
                 # Document timeout handling
                 assert isinstance(inner_e, Exception)
                 
-        except Exception as e:
+        except Exception:
             pytest.fail("Test needs implementation")
 
 class TestInferenceEdgeCases:
@@ -260,7 +260,7 @@ class TestInferenceEdgeCases:
                     # Document rate limit errors
                     assert isinstance(inner_e, Exception)
                     
-        except Exception as e:
+        except Exception:
             pytest.fail("Test needs implementation")
 
     def test_gmn_parser_with_malformed_expressions(self):
@@ -285,7 +285,7 @@ class TestInferenceEdgeCases:
                     # Document parsing errors
                     assert isinstance(inner_e, Exception)
                     
-        except Exception as e:
+        except Exception:
             pytest.fail("Test needs implementation")
 
     def test_gnn_with_mismatched_dimensions(self):
@@ -309,7 +309,7 @@ class TestInferenceEdgeCases:
                     # Document dimension errors
                     assert isinstance(inner_e, Exception)
                     
-        except Exception as e:
+        except Exception:
             pytest.fail("Test needs implementation")
 
 class TestConcurrencyEdgeCases:
@@ -339,7 +339,7 @@ class TestConcurrencyEdgeCases:
                     # Document race condition handling
                     assert isinstance(inner_e, Exception)
                     
-        except Exception as e:
+        except Exception:
             pytest.fail("Test needs implementation")
 
     @patch('asyncio.Lock')
@@ -362,5 +362,5 @@ class TestConcurrencyEdgeCases:
                 except Exception as inner_e:
                     assert isinstance(inner_e, Exception)
                     
-        except Exception as e:
+        except Exception:
             pytest.fail("Test needs implementation")

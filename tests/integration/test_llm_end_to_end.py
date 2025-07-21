@@ -7,8 +7,7 @@ Demonstrates complete LLM→GMN→PyMDP pipeline functionality.
 
 import os
 import pytest
-from unittest.mock import Mock, patch, MagicMock
-from datetime import datetime
+from unittest.mock import Mock, patch
 
 # Import LLM components
 try:

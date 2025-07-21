@@ -19,7 +19,6 @@ async def test_log_aggregation():
     try:
         # Import the modules
         from observability.log_aggregation import (
-            LogEntry,
             LogLevel,
             LogParser,
             LogSource,
@@ -106,7 +105,7 @@ async def test_log_aggregation():
 
         # Test stats
         stats = log_aggregator.get_stats()
-        print(f"📊 Aggregation stats:")
+        print("📊 Aggregation stats:")
         print(f"   Total logs: {stats.total_logs}")
         print(f"   Processing rate: {stats.processing_rate:.2f} logs/sec")
         print(f"   Buffer size: {stats.buffer_size}")
@@ -168,8 +167,6 @@ async def test_log_analysis():
             analyze_agent_performance,
             analyze_recent_logs,
             generate_log_dashboard,
-            log_analysis_engine,
-            log_dashboard_generator,
         )
 
         print("✅ Successfully imported log analysis modules")
@@ -226,7 +223,7 @@ async def test_log_analysis():
         # Test analysis
         analysis_result = await analyze_recent_logs(hours=1)
 
-        print(f"📊 Analysis results:")
+        print("📊 Analysis results:")
         print(f"   Total logs analyzed: {analysis_result.total_logs}")
         print(f"   Level distribution: {analysis_result.level_distribution}")
         print(f"   Source distribution: {analysis_result.source_distribution}")
@@ -311,7 +308,7 @@ async def test_log_file_ingestion():
 
         # Verify ingestion
         stats = log_aggregator.get_stats()
-        print(f"📊 Post-ingestion stats:")
+        print("📊 Post-ingestion stats:")
         print(f"   Total logs: {stats.total_logs}")
         print(f"   Parsing errors: {stats.parsing_errors}")
 
@@ -366,7 +363,7 @@ async def test_performance():
 
         # Check processing performance
         stats = log_aggregator.get_stats()
-        print(f"📊 Performance stats:")
+        print("📊 Performance stats:")
         print(f"   Total logs processed: {stats.total_logs}")
         print(f"   Processing rate: {stats.processing_rate:.2f} logs/sec")
         print(f"   Buffer size: {stats.buffer_size}")

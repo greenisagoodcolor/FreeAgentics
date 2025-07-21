@@ -1,19 +1,9 @@
 """Unit tests for the iterative controller service."""
 
-import uuid
-from datetime import datetime
-from unittest.mock import AsyncMock, MagicMock, Mock
+from unittest.mock import AsyncMock, Mock
 
 import pytest
 
-from database.models import Agent
-from database.prompt_models import (
-    Conversation,
-    ConversationStatus,
-    KnowledgeGraphUpdate,
-    Prompt,
-    PromptStatus,
-)
 from services.iterative_controller import (
     ConversationContext,
     IterativeController,

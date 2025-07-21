@@ -7,8 +7,8 @@ Following Michael Feathers' principles from "Working Effectively with Legacy Cod
 """
 
 import pytest
-from datetime import datetime, timedelta
-from unittest.mock import Mock, patch
+from datetime import datetime
+from unittest.mock import Mock
 import time
 
 from agents.error_handling import (

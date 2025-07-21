@@ -5,13 +5,10 @@ Tests authentication system performance under concurrent user scenarios
 including multiple login attempts, token refreshes, and session management.
 """
 
-import asyncio
 import statistics
-import threading
 import time
 from concurrent.futures import ThreadPoolExecutor, as_completed
 from datetime import datetime, timezone
-from typing import Dict, List, Tuple
 
 import pytest
 
@@ -69,7 +66,7 @@ class TestConcurrentAuthenticationLoad:
                 end_time = time.time()
 
                 # Verify token is valid
-                token_data = auth_manager.verify_token(token)
+                auth_manager.verify_token(token)
 
                 return {
                     "user_id": user.user_id,
@@ -185,7 +182,7 @@ class TestConcurrentAuthenticationLoad:
                 end_time = time.time()
 
                 # Verify new tokens are valid
-                token_data = auth_manager.verify_token(new_access_token)
+                auth_manager.verify_token(new_access_token)
 
                 return {
                     "user_id": user.user_id,
@@ -336,7 +333,7 @@ class TestConcurrentAuthenticationLoad:
                 refresh_token = auth_manager.create_refresh_token(user)
 
                 # Verify tokens
-                access_token_data = auth_manager.verify_token(access_token)
+                auth_manager.verify_token(access_token)
 
                 # Refresh access token
                 (
@@ -475,7 +472,7 @@ class TestConcurrentAuthenticationLoad:
                     tokens.append(token)
 
             # Get memory usage after token creation
-            after_tokens_memory = process.memory_info().rss / 1024 / 1024  # MB
+            process.memory_info().rss / 1024 / 1024  # MB
 
             # Verify many tokens concurrently
             def verify_token(token):
@@ -668,7 +665,7 @@ class TestConcurrentAuthenticationLoad:
         max_duration = max(durations)
         min_duration = min(durations)
 
-        print(f"\nStress Test Results:")
+        print("\nStress Test Results:")
         print(f"Users: {len(users)}")
         print(f"Success Rate: {success_rate:.2%}")
         print(f"Average Duration: {avg_duration:.3f}s")

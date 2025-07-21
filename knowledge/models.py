@@ -1,8 +1,5 @@
 """Knowledge Graph models with pgvector and H3 support."""
 
-from datetime import datetime
-from typing import Optional
-from uuid import UUID
 
 from sqlalchemy import BigInteger, Column, DateTime, ForeignKey, String, Text, Index
 from sqlalchemy.dialects.postgresql import UUID as PGUUID

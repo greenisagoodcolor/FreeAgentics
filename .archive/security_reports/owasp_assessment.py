@@ -6,13 +6,11 @@ based on the OWASP Top 10 (2021) security risks.
 """
 
 import json
-import os
-import re
 import sys
 from datetime import datetime
 from pathlib import Path
-from typing import Any, Dict, List, Optional, Tuple
-from urllib.parse import urljoin, urlparse
+from typing import Any, Dict, List, Optional
+from urllib.parse import urljoin
 
 import requests
 
@@ -205,7 +203,7 @@ class OWASPAssessment:
                             "Potential XSS vulnerability",
                             f"Unencoded user input reflected: {payload}",
                             endpoint="/api/v1/agents",
-                            evidence=f"Payload reflected in response",
+                            evidence="Payload reflected in response",
                             remediation="Encode all user input in responses",
                         )
 
@@ -284,7 +282,7 @@ class OWASPAssessment:
                             remediation="Disable debug endpoints in production",
                         )
 
-            except Exception as e:
+            except Exception:
                 print(f"  ✓ {endpoint} not accessible")
 
         # Check for default credentials
@@ -415,11 +413,6 @@ class OWASPAssessment:
         # Test endpoints that might make external requests
         # Look for URL parameters that could be exploited
 
-        ssrf_payloads = [
-            "http://localhost:22",  # Internal service
-            "http://169.254.169.254/",  # AWS metadata
-            "file:///etc/passwd",  # Local file access
-        ]
 
         print("  ℹ SSRF testing requires identifying endpoints that make external requests")
 

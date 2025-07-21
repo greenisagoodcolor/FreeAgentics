@@ -547,8 +547,7 @@ class CoalitionCoordinatorAgent(ActiveInferenceAgent):
         # Simple coalition strategy
 
         # If we have no active coalitions and multiple known agents, try to form one
-        if not self.active_coalitions and
-            len(self.known_agents) >= self.min_coalition_size:
+        if not self.active_coalitions and len(self.known_agents) >= self.min_coalition_size:
             return "invite"
 
         # If we have oversized coalitions, consider splitting

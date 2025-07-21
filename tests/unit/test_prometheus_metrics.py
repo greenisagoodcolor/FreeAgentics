@@ -3,8 +3,6 @@
 Tests individual metric components without full integration.
 """
 
-import pytest
-from unittest.mock import Mock, patch
 
 from prometheus_client import Counter, Gauge, Histogram, CollectorRegistry
 

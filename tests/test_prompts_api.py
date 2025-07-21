@@ -5,21 +5,16 @@ Tests cover the entire prompt → agent → KG pipeline.
 """
 
 import asyncio
-import json
 import uuid
-from datetime import datetime
-from typing import Any, Dict, List
 from unittest.mock import AsyncMock, MagicMock, patch
 
 import pytest
 from fastapi import status
 from fastapi.testclient import TestClient
-from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.orm import Session
 
 from api.main import app
 from database.models import Agent, AgentStatus
-from database.prompt_models import Conversation, Prompt, PromptStatus
 
 
 @pytest.fixture
@@ -377,7 +372,6 @@ class TestPromptsAPI:
         self, client: TestClient, mock_prompt_processor
     ):
         """Test handling of concurrent prompt requests."""
-        import asyncio
 
         mock_prompt_processor.process_prompt.return_value = {
             "agent_id": str(uuid.uuid4()),
@@ -389,7 +383,6 @@ class TestPromptsAPI:
 
         with patch("api.v1.prompts.prompt_processor", mock_prompt_processor):
             # Send multiple concurrent requests
-            tasks = []
             for i in range(5):
                 response = client.post(
                     "/api/v1/prompts",

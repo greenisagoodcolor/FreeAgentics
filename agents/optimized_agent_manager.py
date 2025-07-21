@@ -146,8 +146,7 @@ class AdaptiveThreadPool:
 
         # Get CPU topology
         cpu_count = mp.cpu_count()
-        physical_cores = cpu_count // 2 if hasattr(os, "sched_getaffinity") else
-            cpu_count
+        physical_cores = cpu_count // 2 if hasattr(os, "sched_getaffinity") else cpu_count
 
         # Detect workload type for initial sizing
         if self.workload_type == "io_bound":

@@ -7,11 +7,9 @@ Coverage target: 95%+
 """
 
 from datetime import datetime, timedelta
-from typing import Any, Dict, List, Optional, Tuple
-from unittest.mock import MagicMock, Mock, patch
+from unittest.mock import Mock, patch
 
 import numpy as np
-import pandas as pd
 import pytest
 import torch
 
@@ -274,7 +272,7 @@ class TestNodeFeatureExtractor:
         # Second extraction with same data
         with patch.object(extractor, "_compute_features") as mock_compute:
             mock_compute.return_value = features1
-            features2 = extractor.extract_features(sample_node_data["nodes"])
+            extractor.extract_features(sample_node_data["nodes"])
 
             # Should use cache if enabled
             if extractor.config.cache_features:
@@ -448,7 +446,7 @@ class TestNodeFeatureExtractor:
                 }
             )
 
-        features = extractor.extract_features(large_nodes)
+        extractor.extract_features(large_nodes)
 
         final_memory = process.memory_info().rss / 1024 / 1024  # MB
         memory_increase = final_memory - initial_memory

@@ -11,9 +11,8 @@ layer doesn't exist. This spike identifies what needs to be built.
 
 import os
 import sys
-from typing import Any, Dict, Optional
+from typing import Any, Dict
 
-import numpy as np
 
 # Add project root to path
 sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
@@ -23,9 +22,7 @@ from agents.pymdp_adapter import PyMDPCompatibilityAdapter
 # Component imports (these exist)
 from inference.active.gmn_parser import GMNParser
 from inference.llm.provider_interface import (
-    GenerationRequest,
     ProviderManager,
-    ProviderType,
 )
 from knowledge_graph.graph_engine import (
     KnowledgeGraph,
@@ -61,11 +58,11 @@ class TechnicalSpikePOC:
         print("2. LLM → GMN Generation")
         try:
             gmn_spec = self.llm_generate_gmn(user_prompt)
-            print(f"   ✅ Generated GMN spec (mocked)")
+            print("   ✅ Generated GMN spec (mocked)")
         except Exception as e:
             print(f"   ❌ FAILED: {e}")
             gmn_spec = self.get_fallback_gmn_spec()
-            print(f"   ⚠️  Using fallback GMN spec")
+            print("   ⚠️  Using fallback GMN spec")
 
         # Step 3: Parse GMN to PyMDP model
         print("\n3. GMN → PyMDP Model")
@@ -73,7 +70,7 @@ class TechnicalSpikePOC:
             gmn_graph = self.gmn_parser.parse(gmn_spec)
             pymdp_model = self.gmn_parser.to_pymdp_model(gmn_graph)
             print(f"   ✅ Parsed GMN: {len(gmn_graph.nodes)} nodes")
-            print(f"   ✅ PyMDP model dimensions:")
+            print("   ✅ PyMDP model dimensions:")
             print(f"      - States: {pymdp_model['num_states']}")
             print(f"      - Observations: {pymdp_model['num_obs']}")
             print(f"      - Actions: {pymdp_model['num_actions']}")
@@ -85,19 +82,19 @@ class TechnicalSpikePOC:
         print("\n4. PyMDP Model → Agent Creation")
         try:
             agent = self.create_agent_from_model(pymdp_model)
-            print(f"   ❌ FAILED: Agent factory not implemented")
+            print("   ❌ FAILED: Agent factory not implemented")
         except Exception as e:
             print(f"   ❌ FAILED: {e}")
             # Attempt manual creation to show what's needed
             agent = self.manual_agent_creation(pymdp_model)
             if agent:
-                print(f"   ⚠️  Manual agent creation attempted")
+                print("   ⚠️  Manual agent creation attempted")
 
         # Step 5: Run inference and update knowledge graph
         print("\n5. Agent Inference → Knowledge Graph Update")
         try:
-            kg_update = self.run_agent_inference(agent)
-            print(f"   ❌ FAILED: Belief-KG bridge not implemented")
+            self.run_agent_inference(agent)
+            print("   ❌ FAILED: Belief-KG bridge not implemented")
         except Exception as e:
             print(f"   ❌ FAILED: {e}")
             # Show what KG update would look like
@@ -128,15 +125,6 @@ class TechnicalSpikePOC:
         # provider = self.provider_manager.get_provider(ProviderType.OPENAI)
 
         # MISSING: Prompt template for GMN generation
-        system_prompt = """You are a GMN specification generator.
-        Convert the user's agent description into a valid GMN specification
-        following this format:
-        [nodes]
-        state_name: state {properties}
-        ...
-        [edges]
-        source -> target: edge_type
-        """
 
         # This would make the actual LLM call
         # request = GenerationRequest(

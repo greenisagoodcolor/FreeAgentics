@@ -251,7 +251,7 @@ def main():
                 covered_lines = coverage_data["totals"]["covered_lines"]
                 needed_lines = int((total_lines * 0.9) - covered_lines)
 
-                print(f"\n📊 COVERAGE MATH:")
+                print("\n📊 COVERAGE MATH:")
                 print(f"  Total lines: {total_lines}")
                 print(f"  Covered lines: {covered_lines}")
                 print(f"  Lines needed for 90%: {needed_lines}")

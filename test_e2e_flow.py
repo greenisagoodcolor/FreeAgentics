@@ -2,7 +2,6 @@
 """Test the end-to-end flow: prompt → LLM → GMN → PyMDP → agent → KG → WS."""
 
 import asyncio
-import json
 import os
 from datetime import datetime
 
@@ -60,7 +59,7 @@ async def test_e2e_flow():
     # Step 3: Convert to PyMDP
     print("\n3️⃣ Converting to PyMDP format...")
     try:
-        pymdp_model = adapt_gmn_to_pymdp(validated_gmn)
+        adapt_gmn_to_pymdp(validated_gmn)
         print("✅ PyMDP conversion successful")
     except Exception as e:
         print(f"❌ PyMDP conversion failed: {e}")

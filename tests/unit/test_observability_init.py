@@ -2,7 +2,6 @@
 
 from unittest.mock import patch
 
-import pytest
 
 
 class TestObservabilityInit:
@@ -42,7 +41,7 @@ class TestObservabilityInit:
             assert record_belief_update is not None
             assert record_coordination_event is not None
 
-        except ImportError as e:
+        except ImportError:
             assert False, "Test bypass removed - must fix underlying issue"
 
     def test_observability_all_exports(self):
@@ -62,7 +61,7 @@ class TestObservabilityInit:
             assert hasattr(observability, "__all__")
             assert set(observability.__all__) == set(expected_exports)
 
-        except ImportError as e:
+        except ImportError:
             assert False, "Test bypass removed - must fix underlying issue"
 
     def test_observability_module_docstring(self):
@@ -76,7 +75,7 @@ class TestObservabilityInit:
                 in observability.__doc__
             )
 
-        except ImportError as e:
+        except ImportError:
             assert False, "Test bypass removed - must fix underlying issue"
 
     @patch("observability.pymdp_integration.get_pymdp_performance_summary")
@@ -106,5 +105,5 @@ class TestObservabilityInit:
             assert hasattr(observability, "record_belief_update")
             assert hasattr(observability, "record_coordination_event")
 
-        except ImportError as e:
+        except ImportError:
             assert False, "Test bypass removed - must fix underlying issue"

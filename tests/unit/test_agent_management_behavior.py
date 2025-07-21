@@ -3,10 +3,9 @@ Behavior-driven tests for agent management - targeting agent lifecycle business 
 Focus on user-facing agent behaviors, not implementation details.
 """
 
-import asyncio
 import uuid
 from datetime import datetime
-from unittest.mock import MagicMock, Mock, patch
+from unittest.mock import Mock, patch
 
 import pytest
 

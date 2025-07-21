@@ -3,7 +3,6 @@ Simple working tests for Base Agent functionality
 """
 
 from datetime import datetime
-from typing import Any, Dict
 from unittest.mock import Mock, patch
 
 import numpy as np
@@ -21,8 +20,6 @@ with patch.dict(
     },
 ):
     from agents.base_agent import (
-        OBSERVABILITY_AVAILABLE,
-        PYMDP_AVAILABLE,
         ActiveInferenceAgent,
         safe_array_to_int,
     )

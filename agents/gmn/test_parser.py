@@ -5,8 +5,6 @@ Following strict TDD principles as mandated by Kent Beck.
 Every test drives the implementation - RED-GREEN-REFACTOR cycle.
 """
 
-import pytest
-from typing import Dict, Any
 
 
 class TestGMNParserTDD:

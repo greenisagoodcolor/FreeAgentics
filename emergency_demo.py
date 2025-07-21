@@ -56,13 +56,13 @@ position_belief -> position: depends_on
     parser = GMNParser()
     try:
         gmn_graph = parser.parse(gmn_spec)
-        print(f"\n3. GMN PARSED SUCCESSFULLY:")
+        print("\n3. GMN PARSED SUCCESSFULLY:")
         print(f"   - Nodes: {len(gmn_graph.nodes)}")
         print(f"   - Edges: {len(gmn_graph.edges)}")
 
         # Convert to PyMDP model
         pymdp_model = parser.to_pymdp_model(gmn_graph)
-        print(f"\n4. PYMDP MODEL CREATED:")
+        print("\n4. PYMDP MODEL CREATED:")
         print(f"   - State dimensions: {pymdp_model['num_states']}")
         print(f"   - Observation dimensions: {pymdp_model['num_obs']}")
         print(f"   - Control dimensions: {pymdp_model['num_controls']}")
@@ -83,7 +83,7 @@ position_belief -> position: depends_on
     agent = await factory.create_from_gmn_model(
         pymdp_model, agent_id="demo_agent_001", metadata={"prompt": prompt}
     )
-    print(f"\n5. AGENT CREATED:")
+    print("\n5. AGENT CREATED:")
     print(f"   - Agent ID: {agent.id}")
     print(f"   - Initial beliefs shape: {agent.qs[0].shape}")
 
@@ -102,7 +102,7 @@ position_belief -> position: depends_on
         source=agent.id,
     )
     kg.add_node(agent_node)
-    print(f"\n6. KNOWLEDGE GRAPH INITIALIZED:")
+    print("\n6. KNOWLEDGE GRAPH INITIALIZED:")
     print(f"   - Graph ID: {kg.graph_id}")
     print(f"   - Added agent node: {agent_node.id}")
 
@@ -144,21 +144,21 @@ position_belief -> position: depends_on
     belief_state = await bridge.extract_beliefs(agent)
     await bridge.update_from_beliefs(agent.id, belief_state)
 
-    print(f"\n8. BELIEF-KG BRIDGE UPDATE:")
+    print("\n8. BELIEF-KG BRIDGE UPDATE:")
     print(f"   - Extracted {len(belief_state.state_beliefs)} state beliefs")
     print(f"   - Knowledge graph nodes: {len(kg.nodes)}")
     print(f"   - Knowledge graph edges: {len(kg.edges)}")
 
     # 8. Summary
     print("\n=== DEMO COMPLETE ===")
-    print(f"✅ Successfully demonstrated the full pipeline:")
-    print(f"   1. Natural language prompt")
-    print(f"   2. GMN specification generation")
-    print(f"   3. GMN parsing to model")
-    print(f"   4. Agent creation from model")
-    print(f"   5. Agent inference loop")
-    print(f"   6. Knowledge graph updates")
-    print(f"   7. Belief extraction and storage")
+    print("✅ Successfully demonstrated the full pipeline:")
+    print("   1. Natural language prompt")
+    print("   2. GMN specification generation")
+    print("   3. GMN parsing to model")
+    print("   4. Agent creation from model")
+    print("   5. Agent inference loop")
+    print("   6. Knowledge graph updates")
+    print("   7. Belief extraction and storage")
 
     return True
 

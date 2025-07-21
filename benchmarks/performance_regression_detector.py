@@ -140,7 +140,7 @@ class PerformanceRegressionDetector:
             )
         
         # Extract values and timestamps
-        timestamps = [t.timestamp() for t, v in history]
+        [t.timestamp() for t, v in history]
         values = [v for t, v in history]
         
         # Calculate trend using linear regression
@@ -471,7 +471,7 @@ def main():
         print(f"\n❌ {critical_count} critical regressions detected!")
         return 1
     
-    print(f"\n✅ Performance regression check passed")
+    print("\n✅ Performance regression check passed")
     return 0
 
 

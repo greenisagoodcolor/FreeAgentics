@@ -5,8 +5,6 @@ They capture what the database system actually does now, not what it should do.
 """
 
 import pytest
-from unittest.mock import Mock, patch, MagicMock
-from sqlalchemy import inspect
 
 class TestDatabaseModelsCharacterization:
     """Characterize database models behavior."""
@@ -18,7 +16,7 @@ class TestDatabaseModelsCharacterization:
             assert Agent is not None
             assert Coalition is not None 
             assert User is not None
-        except ImportError as e:
+        except ImportError:
             pytest.fail("Test needs implementation")
 
     def test_agent_model_structure(self):
@@ -35,7 +33,7 @@ class TestDatabaseModelsCharacterization:
             # Document table name
             assert Agent.__tablename__ == 'agents'
             
-        except Exception as e:
+        except Exception:
             pytest.fail("Test needs implementation")
 
     def test_coalition_model_structure(self):
@@ -51,7 +49,7 @@ class TestDatabaseModelsCharacterization:
             # Document table name
             assert Coalition.__tablename__ == 'coalitions'
             
-        except Exception as e:
+        except Exception:
             pytest.fail("Test needs implementation")
 
     def test_user_model_structure(self):
@@ -68,7 +66,7 @@ class TestDatabaseModelsCharacterization:
             # Document table name  
             assert User.__tablename__ == 'users'
             
-        except Exception as e:
+        except Exception:
             pytest.fail("Test needs implementation")
 
 class TestDatabaseSessionCharacterization:
@@ -80,7 +78,7 @@ class TestDatabaseSessionCharacterization:
             from database.session import get_db, SessionLocal
             assert get_db is not None
             assert SessionLocal is not None
-        except ImportError as e:
+        except ImportError:
             pytest.fail("Test needs implementation")
 
     def test_session_local_structure(self):
@@ -91,7 +89,7 @@ class TestDatabaseSessionCharacterization:
             # Test sessionmaker attributes
             assert hasattr(SessionLocal, 'bind')
             
-        except Exception as e:
+        except Exception:
             pytest.fail("Test needs implementation")
 
     def test_get_db_function_structure(self):
@@ -103,7 +101,7 @@ class TestDatabaseSessionCharacterization:
             import inspect
             assert inspect.isgeneratorfunction(get_db)
             
-        except Exception as e:
+        except Exception:
             pytest.fail("Test needs implementation")
 
 class TestDatabaseTypesCharacterization:
@@ -115,7 +113,7 @@ class TestDatabaseTypesCharacterization:
             from database.types import AgentStatus, CoalitionStatus
             assert AgentStatus is not None
             assert CoalitionStatus is not None
-        except ImportError as e:
+        except ImportError:
             pytest.fail("Test needs implementation")
 
     def test_agent_status_enum_values(self):
@@ -131,7 +129,7 @@ class TestDatabaseTypesCharacterization:
             assert isinstance(members, list)
             assert len(members) > 0
             
-        except Exception as e:
+        except Exception:
             pytest.fail("Test needs implementation")
 
     def test_coalition_status_enum_values(self):
@@ -147,7 +145,7 @@ class TestDatabaseTypesCharacterization:
             assert isinstance(members, list)
             assert len(members) > 0
             
-        except Exception as e:
+        except Exception:
             pytest.fail("Test needs implementation")
 
 class TestDatabaseConnectionCharacterization:
@@ -158,7 +156,7 @@ class TestDatabaseConnectionCharacterization:
         try:
             from database.connection_manager import DatabaseManager
             assert DatabaseManager is not None
-        except ImportError as e:
+        except ImportError:
             pytest.fail("Test needs implementation")
 
     def test_database_manager_structure(self):
@@ -172,7 +170,7 @@ class TestDatabaseConnectionCharacterization:
             # Test if it's a class
             assert isinstance(DatabaseManager, type)
             
-        except Exception as e:
+        except Exception:
             pytest.fail("Test needs implementation")
 
 class TestDatabaseUtilsCharacterization:
@@ -184,7 +182,7 @@ class TestDatabaseUtilsCharacterization:
             from database.utils import create_tables, drop_tables
             assert create_tables is not None
             assert drop_tables is not None
-        except ImportError as e:
+        except ImportError:
             pytest.fail("Test needs implementation")
 
     def test_create_tables_function(self):
@@ -197,7 +195,7 @@ class TestDatabaseUtilsCharacterization:
             sig = inspect.signature(create_tables)
             assert isinstance(sig.parameters, dict)
             
-        except Exception as e:
+        except Exception:
             pytest.fail("Test needs implementation")
 
 class TestDatabaseValidationCharacterization:
@@ -208,7 +206,7 @@ class TestDatabaseValidationCharacterization:
         try:
             from database.validation import validate_agent_data
             assert validate_agent_data is not None
-        except ImportError as e:
+        except ImportError:
             pytest.fail("Test needs implementation")
 
     def test_validate_agent_data_structure(self):
@@ -224,5 +222,5 @@ class TestDatabaseValidationCharacterization:
             sig = inspect.signature(validate_agent_data)
             assert isinstance(sig.parameters, dict)
             
-        except Exception as e:
+        except Exception:
             pytest.fail("Test needs implementation")

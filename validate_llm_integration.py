@@ -7,7 +7,6 @@ Tests all components without requiring actual API keys.
 """
 
 import sys
-import os
 from pathlib import Path
 
 # Add project root to path
@@ -78,7 +77,7 @@ def test_configuration():
 
         # Test default config
         get_llm_config()
-        print(f"✅ Default configuration loaded")
+        print("✅ Default configuration loaded")
 
         # Test custom config
         custom_config = LLMConfig()
@@ -114,9 +113,9 @@ def test_error_handling():
         timeout_error = Exception("Connection timeout")
         auth_error = Exception("Invalid API key")
 
-        assert ErrorHandler.is_retryable_error(rate_limit_error) == True
-        assert ErrorHandler.is_retryable_error(timeout_error) == True
-        assert ErrorHandler.is_retryable_error(auth_error) == False
+        assert ErrorHandler.is_retryable_error(rate_limit_error) is True
+        assert ErrorHandler.is_retryable_error(timeout_error) is True
+        assert ErrorHandler.is_retryable_error(auth_error) is False
 
         print("✅ Error type detection working")
 
@@ -128,7 +127,7 @@ def test_error_handling():
         print("✅ Retry delay calculation working")
 
         # Test fallback decisions
-        assert ErrorHandler.should_fallback(auth_error) == True
+        assert ErrorHandler.should_fallback(auth_error) is True
         print("✅ Fallback decision logic working")
 
         return True
@@ -152,7 +151,7 @@ def test_integration_with_gmn():
 
         # Test PyMDP conversion
         parser.to_pymdp_model(gmn_graph)
-        print(f"✅ PyMDP conversion working")
+        print("✅ PyMDP conversion working")
 
         # Test LLM integration potential
         print("✅ LLM→GMN→PyMDP pipeline ready")

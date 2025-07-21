@@ -8,11 +8,7 @@ that has been built for FreeAgentics. It shows the capabilities without
 requiring all external dependencies.
 """
 
-import asyncio
-import json
 import logging
-from datetime import datetime
-from pathlib import Path
 
 # Configure logging
 logging.basicConfig(
@@ -152,7 +148,7 @@ def demo_performance_infrastructure():
         print(f"\n{i}. {component['name']}")
         print(f"   📁 {component['file']}")
         print(f"   📝 {component['description']}")
-        print(f"   ✨ Features:")
+        print("   ✨ Features:")
         for feature in component['features']:
             print(f"      • {feature}")
 

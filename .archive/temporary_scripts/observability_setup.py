@@ -433,7 +433,7 @@ if __name__ == "__main__":
     import asyncio
 
     async def test_observability():
-        async with observability_context() as manager:
+        async with observability_context():
             logging.info("Observability test started")
 
             # Run for 60 seconds

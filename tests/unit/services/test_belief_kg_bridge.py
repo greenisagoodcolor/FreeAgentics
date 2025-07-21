@@ -9,8 +9,6 @@ import pytest
 from services.belief_kg_bridge import (
     BeliefKGBridge,
     BeliefState,
-    KGEdge,
-    KGNode,
 )
 
 

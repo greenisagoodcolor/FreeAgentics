@@ -10,7 +10,6 @@ import unittest
 
 import numpy as np
 import psutil
-import pytest
 
 from agents.memory_optimization.matrix_pooling import (
     MatrixOperationPool,
@@ -371,18 +370,18 @@ class TestMemoryPoolingBenchmarks(unittest.TestCase):
             # Numpy allocation
             start = time.time()
             for _ in range(iterations):
-                arr = np.zeros(shape, dtype=np.float32)
+                np.zeros(shape, dtype=np.float32)
             numpy_time = time.time() - start
 
             # Pooled allocation (with warmup)
             # Warmup
             for _ in range(10):
-                with self.pool.allocate_matrix(shape, np.float32) as arr:
+                with self.pool.allocate_matrix(shape, np.float32):
                     pass
 
             start = time.time()
             for _ in range(iterations):
-                with self.pool.allocate_matrix(shape, np.float32) as arr:
+                with self.pool.allocate_matrix(shape, np.float32):
                     pass
             pool_time = time.time() - start
 

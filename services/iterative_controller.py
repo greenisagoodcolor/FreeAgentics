@@ -5,24 +5,18 @@ managing conversation state, context accumulation, and intelligent suggestion
 generation based on the evolving knowledge graph.
 """
 
-import asyncio
 import logging
-import uuid
 from collections import defaultdict
-from datetime import datetime
-from typing import Any, Dict, List, Optional, Set, Tuple
+from typing import Any, Dict, List, Set
 
-from sqlalchemy import and_, select
+from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from agents.pymdp_adapter import PyMDPCompatibilityAdapter
 from database.models import Agent
 from database.prompt_models import (
-    Conversation,
-    ConversationStatus,
     KnowledgeGraphUpdate,
     Prompt,
-    PromptStatus,
 )
 from knowledge_graph.graph_engine import KnowledgeGraph
 from services.belief_kg_bridge import BeliefKGBridge

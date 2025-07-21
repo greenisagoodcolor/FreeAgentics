@@ -1,7 +1,7 @@
 """Adapter to convert GMN model format to PyMDP v0.0.7.1 format."""
 
 import numpy as np
-from typing import Dict, Any, List, Union, Optional
+from typing import Dict, Any
 
 
 def adapt_gmn_to_pymdp(gmn_model: Dict[str, Any]) -> Dict[str, Any]:

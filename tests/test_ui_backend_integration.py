@@ -13,15 +13,10 @@ Following TDD approach from CLAUDE.md:
 - Refactor while keeping tests green
 """
 
-import asyncio
-import json
-from datetime import datetime, timedelta
-from unittest.mock import AsyncMock, MagicMock, patch
+from datetime import datetime
+from unittest.mock import AsyncMock, patch
 
-import jwt
 import pytest
-import websockets
-from fastapi import FastAPI
 from fastapi.testclient import TestClient
 
 from api.main import app
@@ -73,7 +68,7 @@ class TestUIBackendIntegration:
         """
         # Mock the database operations to focus on the API layer
         from datetime import datetime
-        from unittest.mock import MagicMock, patch
+        from unittest.mock import patch
 
         from api.v1.agents import Agent as V1Agent
 
@@ -138,7 +133,6 @@ class TestUIBackendIntegration:
 
     def test_agent_list_simple_format(self):
         """Test that agent list returns UI-expected format."""
-        from datetime import datetime
         from unittest.mock import patch
 
         from api.v1.agents import Agent as V1Agent
@@ -203,7 +197,7 @@ class TestUIBackendIntegration:
 
             # Create agent via API
             ui_request = {"description": "Test agent"}
-            response = self.client.post(
+            self.client.post(
                 "/api/agents", json=ui_request, headers=self.headers
             )
 
@@ -313,7 +307,7 @@ class TestAgentManagerIntegration:
 
             # Call API
             ui_request = {"description": "Test explorer agent"}
-            response = client.post(
+            client.post(
                 "/api/agents", json=ui_request, headers=headers
             )
 
@@ -356,7 +350,7 @@ class TestAgentManagerIntegration:
             agent_id = "test-agent-id"
 
             # Start agent
-            response = client.patch(
+            client.patch(
                 f"/api/agents/{agent_id}/status",
                 json={"status": "active"},
                 headers=headers,
@@ -366,7 +360,7 @@ class TestAgentManagerIntegration:
             mock_start.assert_called_once_with(agent_id)
 
             # Stop agent
-            response = client.patch(
+            client.patch(
                 f"/api/agents/{agent_id}/status",
                 json={"status": "stopped"},
                 headers=headers,

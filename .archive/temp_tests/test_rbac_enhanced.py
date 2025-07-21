@@ -22,9 +22,9 @@ import os
 import sqlite3
 import tempfile
 from dataclasses import dataclass, field
-from datetime import datetime, timedelta
+from datetime import datetime
 from enum import Enum
-from typing import Any, Dict, List, Optional, Set, Tuple
+from typing import Any, Dict, List, Optional, Tuple
 
 # Configure logging for audit trail
 logging.basicConfig(
@@ -1046,7 +1046,7 @@ def main():
 
     # Display metrics
     metrics = report["metrics"]
-    print(f"\n📈 Access Metrics:")
+    print("\n📈 Access Metrics:")
     print(f"  - Granted: {metrics['granted_access_attempts']}")
     print(f"  - Denied: {metrics['denied_access_attempts']}")
     print(f"  - Escalation attempts: {metrics['privilege_escalation_attempts']}")
@@ -1054,7 +1054,7 @@ def main():
     # Display risk assessment
     risk_assessment = report["access_review"]["risk_assessment"]
     if risk_assessment:
-        print(f"\n⚠️  Risk Assessment:")
+        print("\n⚠️  Risk Assessment:")
         print(f"  - Risk Level: {risk_assessment['risk_level'].upper()}")
         print(f"  - Failure Rate: {risk_assessment['access_failure_rate']:.2%}")
         print(f"  - Escalation Rate: {risk_assessment['privilege_escalation_rate']:.2%}")
@@ -1062,19 +1062,19 @@ def main():
     # Display recommendations
     recommendations = report["access_review"]["recommendations"]
     if recommendations:
-        print(f"\n💡 Recommendations:")
+        print("\n💡 Recommendations:")
         for i, rec in enumerate(recommendations, 1):
             print(f"  {i}. {rec}")
 
-    print(f"\n✅ Enhanced RBAC Audit completed successfully!")
-    print(f"📄 Detailed report saved to: rbac_audit_report.json")
-    print(f"📊 Audit log saved to: rbac_audit.log")
+    print("\n✅ Enhanced RBAC Audit completed successfully!")
+    print("📄 Detailed report saved to: rbac_audit_report.json")
+    print("📊 Audit log saved to: rbac_audit.log")
 
     # Cleanup database file
     try:
         auditor.conn.close()
         os.unlink(tmp_db.name)
-        print(f"🧹 Temporary database cleaned up")
+        print("🧹 Temporary database cleaned up")
     except Exception as e:
         print(f"⚠️  Could not clean up temporary database: {e}")
 

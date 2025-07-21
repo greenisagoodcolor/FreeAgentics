@@ -5,20 +5,16 @@ WebSocket and processes a prompt while receiving real-time updates.
 """
 
 import asyncio
-import json
 import time
 from typing import Any, Dict, List
 from unittest.mock import AsyncMock, MagicMock, patch
 
 import pytest
 from fastapi.testclient import TestClient
-from fastapi.websockets import WebSocketDisconnect
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from api.main import app
-from api.v1.websocket import manager as websocket_manager
 from auth.security_implementation import Permission, Role, TokenData
-from database.prompt_models import PromptStatus
 from services.websocket_integration import pipeline_monitor
 
 
@@ -120,14 +116,6 @@ class TestEndToEndPipelineWebSocket:
                     await ws_client.connect(client_id, mock_auth_token)
 
                     # Step 2: Subscribe to pipeline events
-                    subscribe_msg = {
-                        "type": "subscribe",
-                        "event_types": [
-                            "pipeline:*",
-                            "agent:*",
-                            "knowledge_graph:*",
-                        ],
-                    }
 
                     # Step 3: Send prompt request
                     prompt_data = {

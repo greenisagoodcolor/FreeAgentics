@@ -12,7 +12,7 @@ import os
 import subprocess
 import time
 from datetime import datetime
-from typing import Any, Dict, List, Optional
+from typing import Any, Dict, Optional
 
 import aiohttp
 import yaml
@@ -156,7 +156,7 @@ class IncidentResponder:
                     logger.error(f"Step failed: {step['name']}")
                     if step.get('required', True):
                         logger.error(
-                            f"Required step failed, aborting playbook"
+                            "Required step failed, aborting playbook"
                         )
                         break
 

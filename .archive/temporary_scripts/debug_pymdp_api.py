@@ -27,7 +27,7 @@ def test_pymdp_api():
     try:
         obs = [0]
         result = agent.infer_states(obs)
-        print(f"infer_states returned:")
+        print("infer_states returned:")
         print(f"  Type: {type(result)}")
         print(f"  Value: {result}")
 
@@ -72,7 +72,7 @@ def test_pymdp_api():
     print("\n=== Testing infer_policies ===")
     try:
         result = agent.infer_policies()
-        print(f"infer_policies returned:")
+        print("infer_policies returned:")
         print(f"  Type: {type(result)}")
         print(f"  Value: {result}")
 
@@ -87,7 +87,7 @@ def test_pymdp_api():
     print("\n=== Testing sample_action ===")
     try:
         result = agent.sample_action()
-        print(f"sample_action returned:")
+        print("sample_action returned:")
         print(f"  Type: {type(result)}")
         print(f"  Value: {result}")
         print(f"  Shape: {getattr(result, 'shape', 'N/A')}")

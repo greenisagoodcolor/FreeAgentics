@@ -22,14 +22,12 @@ import uuid
 from collections import deque
 from dataclasses import dataclass, field
 from datetime import datetime, timedelta
-from pathlib import Path
-from typing import Any, Callable, Dict, List, Optional, Tuple
+from typing import Any, Callable, Dict, List, Optional
 
 import numpy as np
 import psutil
 
 from observability.performance_monitor import (
-    PerformanceMetrics,
     get_performance_monitor,
 )
 

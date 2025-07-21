@@ -11,8 +11,6 @@ import sys
 sys.path.insert(0, '.')
 
 from api.ui_compatibility import (
-    UIAgent,
-    UIAgentCreateRequest,
     extract_agent_name_from_description,
     extract_agent_type_from_description,
 )
@@ -47,14 +45,14 @@ def demo_conversion():
         agent_type = extract_agent_type_from_description(description)
         agent_name = extract_agent_name_from_description(description)
 
-        print(f"  🎯 Extracted Information:")
+        print("  🎯 Extracted Information:")
         print(f"     • Type: {agent_type}")
         print(f"     • Name: {agent_name}")
-        print(f"     • Template: basic-explorer")
+        print("     • Template: basic-explorer")
         print()
 
         # Show what would be sent to backend
-        print(f"  🚀 Backend API Call:")
+        print("  🚀 Backend API Call:")
         backend_config = {
             "name": agent_name,
             "template": "basic-explorer",
@@ -68,7 +66,7 @@ def demo_conversion():
         print()
 
         # Show what UI would receive back
-        print(f"  📤 UI Response:")
+        print("  📤 UI Response:")
         ui_response = {
             "id": f"agent-{i}",
             "name": agent_name,

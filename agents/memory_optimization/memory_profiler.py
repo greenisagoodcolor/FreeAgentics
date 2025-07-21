@@ -367,8 +367,7 @@ class AdvancedMemoryProfiler:
             # Calculate trends
             memory_growth = latest.total_memory_mb - first.total_memory_mb
             time_elapsed = latest.timestamp - first.timestamp
-            growth_rate = memory_growth / (time_elapsed / 3600) if
-                time_elapsed > 0 else 0
+            growth_rate = memory_growth / (time_elapsed / 3600) if time_elapsed > 0 else 0
 
             # Analyze allocation patterns
             top_allocators = sorted(
@@ -443,14 +442,13 @@ class AdvancedMemoryProfiler:
                         {
                             "type": "belief_compression",
                             "reason": f"Large belief state: {belief_size_mb:.1f}MB",
-                            "suggestion": "Enable belief compression or
-                                use sparse representations",
+                            "suggestion": "Enable belief compression or "
+                                         "use sparse representations",
                         }
                     )
 
             # Check action history
-            if hasattr(agent_obj, "action_history") and
-                len(agent_obj.action_history) > 1000:
+            if hasattr(agent_obj, "action_history") and len(agent_obj.action_history) > 1000:
                 suggestions.append(
                     {
                         "type": "history_pruning",

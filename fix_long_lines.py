@@ -1,7 +1,6 @@
 #!/usr/bin/env python3
 """Fix long lines (E501) in Python files."""
 
-import os
 import re
 from pathlib import Path
 

@@ -5,11 +5,9 @@ This script tests the validation framework against both valid and invalid
 GMN examples to ensure comprehensive coverage and reliability for VC demos.
 """
 
-import json
-import os
 import sys
 from pathlib import Path
-from typing import Any, Dict, List
+from typing import Any, Dict
 
 # Add project root to path
 sys.path.append(".")
@@ -305,15 +303,15 @@ def test_validation_framework():
     print("\n" + "=" * 60)
     print("VALIDATION FRAMEWORK TEST SUMMARY")
     print("=" * 60)
-    print(f"✓ Syntax validation: Working")
-    print(f"✓ Semantic validation: Working")
-    print(f"✓ Mathematical validation: Working")
-    print(f"✓ Type validation: Working")
-    print(f"✓ Constraint validation: Working")
-    print(f"✓ Reality checkpoints: Working")
-    print(f"✓ Hard failures: Enabled (no graceful degradation)")
-    print(f"✓ Comprehensive error messages: Available")
-    print(f"✓ Performance: Acceptable for VC demo")
+    print("✓ Syntax validation: Working")
+    print("✓ Semantic validation: Working")
+    print("✓ Mathematical validation: Working")
+    print("✓ Type validation: Working")
+    print("✓ Constraint validation: Working")
+    print("✓ Reality checkpoints: Working")
+    print("✓ Hard failures: Enabled (no graceful degradation)")
+    print("✓ Comprehensive error messages: Available")
+    print("✓ Performance: Acceptable for VC demo")
     print("\n🎯 VALIDATION FRAMEWORK READY FOR VC DEMO!")
 
 

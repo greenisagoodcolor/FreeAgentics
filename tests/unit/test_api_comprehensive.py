@@ -2,13 +2,10 @@
 Comprehensive test suite for API endpoints and middleware
 """
 
-import json
 from datetime import datetime
-from typing import Any, Dict, List, Optional
-from unittest.mock import AsyncMock, MagicMock, Mock, patch
+from unittest.mock import MagicMock, Mock, patch
 
-import pytest
-from fastapi import FastAPI, HTTPException, Request, Response
+from fastapi import FastAPI, HTTPException
 from fastapi.testclient import TestClient
 
 # Mock complex dependencies
@@ -29,7 +26,6 @@ mock_modules = {
 }
 
 with patch.dict('sys.modules', mock_modules):
-    from api.middleware.error_handlers import error_handlers
     from api.middleware.rate_limiter import RateLimitMiddleware
     from api.middleware.security_headers import SecurityHeadersMiddleware
     from api.v1.agents import router as agents_router
@@ -691,7 +687,7 @@ class TestAPIIntegration:
 
     def test_middleware_integration(self):
         """Test middleware integration."""
-        app = FastAPI()
+        FastAPI()
 
         # Mock middleware integration
         middlewares = [

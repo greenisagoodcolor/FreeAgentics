@@ -251,7 +251,7 @@ def generate_report():
     with open("quality_gate_report.json", "w") as f:
         json.dump(report_data, f, indent=2)
 
-    print(f"\nDetailed report saved to: quality_gate_report.json")
+    print("\nDetailed report saved to: quality_gate_report.json")
 
 
 if __name__ == "__main__":

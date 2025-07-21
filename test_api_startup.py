@@ -4,7 +4,6 @@ Test script to verify API can start
 """
 
 import os
-import sys
 
 # Set a dummy database URL to bypass the check
 os.environ['DATABASE_URL'] = 'postgresql://user:pass@localhost:5432/testdb'

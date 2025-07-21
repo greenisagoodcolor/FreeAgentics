@@ -5,9 +5,7 @@ registration to make it pass (GREEN phase), then refactor if needed.
 """
 
 import os
-from unittest.mock import patch
 
-import pytest
 
 # Set required environment variables for testing
 test_env = {

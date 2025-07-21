@@ -4,13 +4,11 @@ This module provides a factory pattern implementation for creating and managing
 LLM providers based on configuration, with fallback mechanisms and health checks.
 """
 
-import asyncio
-import json
 import logging
 import os
 from datetime import datetime, timedelta
 from enum import Enum
-from typing import Any, Dict, List, Optional, Type, Union
+from typing import Any, Dict, List, Optional, Type
 
 from llm.base import LLMError, LLMMessage, LLMProvider, LLMResponse
 from llm.providers.anthropic import AnthropicProvider

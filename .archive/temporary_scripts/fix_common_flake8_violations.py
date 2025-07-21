@@ -8,9 +8,8 @@ Targets the most frequent issues:
 """
 
 import re
-import sys
 from pathlib import Path
-from typing import List, Set
+from typing import Set
 
 
 def fix_whitespace_issues(content: str) -> str:

@@ -5,26 +5,18 @@ pipeline including WebSocket real-time updates.
 """
 
 import asyncio
-import json
 import uuid
 from datetime import datetime
-from typing import Any, Dict, List
+from typing import Any, Dict
 from unittest.mock import AsyncMock, MagicMock, patch
 
-import numpy as np
 import pytest
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from api.v1.prompts import PromptRequest, get_prompt_processor, process_prompt
 from auth.security_implementation import Permission, Role, TokenData
-from database.prompt_models import Conversation, Prompt, PromptStatus
-from services.agent_factory import AgentFactory
-from services.belief_kg_bridge import BeliefKGBridge
-from services.gmn_generator import GMNGenerator
-from services.prompt_processor import PromptProcessor
+from database.prompt_models import Conversation
 from services.websocket_integration import (
-    PipelineEventType,
-    PipelineStage,
     pipeline_monitor,
 )
 
@@ -307,7 +299,7 @@ class TestPromptPipelineIntegration:
             with patch(
                 'api.v1.prompts.get_prompt_processor', return_value=processor
             ):
-                response = await process_prompt(
+                await process_prompt(
                     request=request,
                     current_user=mock_current_user,
                     db=mock_db_session,
@@ -350,7 +342,6 @@ class TestPromptPipelineIntegration:
         processor.websocket_callback = capture_event
 
         # Mock knowledge graph update to fail but not critically
-        original_update_kg = processor._update_knowledge_graph
 
         async def mock_update_kg(*args, **kwargs):
             # Simulate a non-critical KG update failure
@@ -424,7 +415,7 @@ class TestPromptPipelineIntegration:
             with patch(
                 'api.v1.prompts.get_prompt_processor', return_value=processor
             ):
-                response = await process_prompt(
+                await process_prompt(
                     request=request,
                     current_user=mock_current_user,
                     db=mock_db_session,

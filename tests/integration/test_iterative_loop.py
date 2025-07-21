@@ -1,24 +1,13 @@
 """Integration tests for the iterative loop functionality."""
 
-import asyncio
 import uuid
-from datetime import datetime
 from unittest.mock import AsyncMock, Mock, patch
 
 import pytest
-from sqlalchemy.ext.asyncio import AsyncSession, create_async_engine
-from sqlalchemy.orm import sessionmaker
+from sqlalchemy.ext.asyncio import AsyncSession
 
-from api.v1.prompts import PromptRequest, get_prompt_processor, process_prompt
+from api.v1.prompts import PromptRequest, process_prompt
 from auth.security_implementation import TokenData
-from database.models import Agent
-from database.prompt_models import (
-    Conversation,
-    ConversationStatus,
-    KnowledgeGraphUpdate,
-    Prompt,
-    PromptStatus,
-)
 from services.iterative_controller import IterativeController
 from services.prompt_processor import PromptProcessor
 
@@ -481,7 +470,7 @@ class TestIterativeLoop:
         iteration_count = 0
 
         async def mock_process_with_errors(
-            prompt_text, user_id, db, conversation_id, iteration_count
+            prompt_text, user_id, db, conversation_id, iter_count
         ):
             nonlocal iteration_count
             iteration_count += 1

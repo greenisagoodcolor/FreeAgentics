@@ -25,7 +25,6 @@ from auth.security_headers import (
     SecurityHeadersMiddleware,
     SecurityPolicy,
 )
-from auth.security_implementation import SecurityMiddleware
 from observability.prometheus_metrics import (
     get_prometheus_content_type,
     get_prometheus_metrics,

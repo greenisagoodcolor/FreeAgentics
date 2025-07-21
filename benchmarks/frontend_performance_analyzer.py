@@ -10,7 +10,6 @@ Integrates with Lighthouse CI for automated performance testing.
 import gzip
 import json
 import logging
-import os
 import subprocess
 import sys
 from dataclasses import asdict, dataclass

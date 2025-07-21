@@ -360,8 +360,7 @@ class ThreadingProfiler:
         if self.thread_metrics:
             cpu_times = [m.cpu_time for m in self.thread_metrics.values()]
             if cpu_times:
-                cv = np.std(cpu_times) / np.mean(cpu_times) if
-                    np.mean(cpu_times) > 0 else 0
+                cv = np.std(cpu_times) / np.mean(cpu_times) if np.mean(cpu_times) > 0 else 0
                 if cv > 0.3:  # >30% coefficient of variation
                     bottlenecks.append(f"Imbalanced thread workload: CV={cv:.1%}")
 

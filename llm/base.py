@@ -7,7 +7,7 @@ ensuring a consistent API for prompt processing and GMN generation.
 from abc import ABC, abstractmethod
 from dataclasses import dataclass
 from enum import Enum
-from typing import Any, Dict, List, Optional, Union
+from typing import Any, Dict, List, Optional
 
 
 class LLMRole(Enum):
@@ -196,12 +196,12 @@ node preference C1 {
             base_prompt += self._get_agent_type_hints(agent_type)
 
         if constraints:
-            base_prompt += f"\n\nConstraints:\n"
+            base_prompt += "\n\nConstraints:\n"
             for key, value in constraints.items():
                 base_prompt += f"- {key}: {value}\n"
 
         if examples:
-            base_prompt += f"\n\nReference Examples:\n"
+            base_prompt += "\n\nReference Examples:\n"
             for i, example in enumerate(examples[:3]):  # Limit to 3 examples
                 base_prompt += f"\nExample {i+1}:\n{example}\n"
 

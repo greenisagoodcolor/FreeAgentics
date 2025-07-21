@@ -374,8 +374,8 @@ class GMNSemanticValidator:
                 if from_type != "state" and from_type != "likelihood":
                     result.add_error(
                         "SemanticValidator",
-                        "Invalid generation: only states and
-                            likelihood nodes can generate",
+                        "Invalid generation: only states and "
+                        "likelihood nodes can generate",
                         edge_index=i,
                     )
 
@@ -490,7 +490,7 @@ class GMNSemanticValidator:
                 and node_type not in standalone_allowed
             ):
                 # This is a warning, not an error,
-                    as some nodes might be valid but unreferenced
+                # as some nodes might be valid but unreferenced
                 result.add_warning(
                     "SemanticValidator",
                     f"Unreferenced node: {node_name}",
@@ -642,8 +642,7 @@ class GMNMathematicalValidator:
                     to_node = nodes_by_name[to_node_name]
 
                     # Check state -> observation mappings
-                    if from_node.get("type") == "state" and
-                        to_node.get("type") == "observation":
+                    if from_node.get("type") == "state" and to_node.get("type") == "observation":
                         from_dim = from_node.get("num_states")
                         to_dim = to_node.get("num_observations")
 
@@ -735,8 +734,8 @@ class GMNMathematicalValidator:
                     if not np.allclose(col_sums, 1.0, atol=self.tolerance):
                         result.add_error(
                             "MathematicalValidator",
-                            f"Transition matrix columns must sum to 1,
-                                got sums: {col_sums}",
+                            f"Transition matrix columns must sum to 1, "
+                            f"got sums: {col_sums}",
                             node_name=node_name,
                         )
 

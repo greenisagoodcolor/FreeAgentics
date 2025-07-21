@@ -12,22 +12,19 @@ import shutil
 import smtplib
 import subprocess
 import sys
-import tempfile
 import time
 from dataclasses import dataclass, field
-from datetime import datetime, timedelta
+from datetime import datetime
 from email.mime.multipart import MIMEMultipart
 from email.mime.text import MIMEText
 from enum import Enum
 from pathlib import Path
-from typing import Any, Dict, List, Optional, Tuple
+from typing import Any, Dict, List, Optional
 
 import boto3
 import psycopg2
 import requests
 import schedule
-import yaml
-from psycopg2.extensions import ISOLATION_LEVEL_AUTOCOMMIT
 
 import redis
 

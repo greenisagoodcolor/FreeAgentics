@@ -5,7 +5,6 @@ They capture what the system actually does now, not what it should do.
 """
 
 import pytest
-from unittest.mock import Mock, patch, MagicMock
 import numpy as np
 
 # Test critical business logic paths
@@ -32,7 +31,7 @@ class TestBaseAgentCharacterization:
             assert agent.agent_id == "test-001"
             assert agent.num_states == 2
             
-        except Exception as e:
+        except Exception:
             # Document the actual failure mode
             # Test needs implementation - marking as expected failure
             pytest.fail("Test needs implementation")
@@ -70,7 +69,7 @@ class TestAgentManagerCharacterization:
             assert isinstance(manager.agents, dict)
             assert len(manager.agents) == 0  # Should start empty
             
-        except Exception as e:
+        except Exception:
             # Test needs implementation - marking as expected failure
             pytest.fail("Test needs implementation")
 
@@ -94,7 +93,7 @@ class TestTypeHelpersCharacterization:
             from agents.type_helpers import validate_agent_config, ensure_numpy_array
             assert validate_agent_config is not None
             assert ensure_numpy_array is not None
-        except ImportError as e:
+        except ImportError:
             # Test needs implementation - marking as expected failure
             pytest.fail("Test needs implementation")
 
@@ -114,7 +113,7 @@ class TestTypeHelpersCharacterization:
             assert isinstance(result2, np.ndarray)
             np.testing.assert_array_equal(result2, arr)
             
-        except Exception as e:
+        except Exception:
             # Test needs implementation - marking as expected failure
             pytest.fail("Test needs implementation")
 
@@ -127,7 +126,7 @@ class TestErrorHandlingCharacterization:
             from agents.error_handling import handle_agent_error, AgentError
             assert handle_agent_error is not None
             assert AgentError is not None
-        except ImportError as e:
+        except ImportError:
             # Test needs implementation - marking as expected failure
             pytest.fail("Test needs implementation")
 
@@ -141,7 +140,7 @@ class TestErrorHandlingCharacterization:
             assert isinstance(error, Exception)
             assert str(error) == "test message"
             
-        except Exception as e:
+        except Exception:
             # Test needs implementation - marking as expected failure
             pytest.fail("Test needs implementation")
 
@@ -153,7 +152,7 @@ class TestMemoryOptimizationCharacterization:
         try:
             from agents.memory_optimization.matrix_pooling import MatrixPool
             assert MatrixPool is not None
-        except ImportError as e:
+        except ImportError:
             # Test needs implementation - marking as expected failure
             pytest.fail("Test needs implementation")
 
@@ -167,6 +166,6 @@ class TestMemoryOptimizationCharacterization:
             # Document actual structure
             assert hasattr(pool, 'pool')
             
-        except Exception as e:
+        except Exception:
             # Test needs implementation - marking as expected failure
             pytest.fail("Test needs implementation")

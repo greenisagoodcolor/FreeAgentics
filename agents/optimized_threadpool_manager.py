@@ -130,8 +130,7 @@ class OptimizedThreadPoolManager:
 
     def _scale_workers(self, current_load: float) -> None:
         """Dynamically scale worker threads based on load."""
-        if current_load > self.scaling_threshold and
-            self.current_workers < self.max_workers:
+        if current_load > self.scaling_threshold and self.current_workers < self.max_workers:
             # Scale up
             new_workers = min(self.current_workers * 2, self.max_workers)
             self._resize_pool(new_workers)

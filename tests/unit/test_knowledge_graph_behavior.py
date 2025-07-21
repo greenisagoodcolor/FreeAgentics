@@ -5,7 +5,7 @@ Focus on user-facing knowledge behaviors, not implementation details.
 
 import uuid
 from datetime import datetime
-from unittest.mock import MagicMock, Mock, patch
+from unittest.mock import patch
 
 import pytest
 
@@ -404,7 +404,7 @@ class TestKnowledgeGraphStorageBehavior:
 
             # Attempt to save node
             try:
-                result = storage.save_node(node_data)
+                storage.save_node(node_data)
                 assert False, "Expected exception"
             except Exception as e:
                 assert "Storage error" in str(e)

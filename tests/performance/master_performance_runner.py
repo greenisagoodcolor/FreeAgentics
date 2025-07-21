@@ -34,7 +34,6 @@ from tests.performance.comprehensive_performance_suite import (
 from tests.performance.database_load_testing import DatabaseLoadTester
 from tests.performance.load_testing_framework import (
     LoadTestingFramework,
-    LoadTestScenario,
 )
 from tests.performance.performance_monitoring_dashboard import (
     PerformanceMonitoringDashboard,
@@ -615,7 +614,7 @@ class MasterPerformanceRunner:
 
         # Test results summary
         test_results = results.get('test_results', {})
-        print(f"\nTest Results Summary:")
+        print("\nTest Results Summary:")
 
         for test_name, test_result in test_results.items():
             if isinstance(test_result, dict) and 'error' not in test_result:

@@ -5,7 +5,7 @@ They capture what the API system actually does now, not what it should do.
 """
 
 import pytest
-from unittest.mock import Mock, patch, MagicMock
+from unittest.mock import patch
 from fastapi.testclient import TestClient
 
 class TestAPIMainCharacterization:
@@ -16,7 +16,7 @@ class TestAPIMainCharacterization:
         try:
             from api.main import app
             assert app is not None
-        except ImportError as e:
+        except ImportError:
             pytest.fail("Test needs implementation")
 
     def test_fastapi_app_structure(self):
@@ -31,7 +31,7 @@ class TestAPIMainCharacterization:
             # Document app configuration
             assert app.title is not None  # Should have a title
             
-        except Exception as e:
+        except Exception:
             pytest.fail("Test needs implementation")
 
     def test_api_routes_exist(self):
@@ -50,7 +50,7 @@ class TestAPIMainCharacterization:
             health_routes = [path for path in route_paths if 'health' in path]
             assert len(health_routes) >= 0  # Document current state
             
-        except Exception as e:
+        except Exception:
             pytest.fail("Test needs implementation")
 
 class TestHealthEndpointCharacterization:
@@ -61,7 +61,7 @@ class TestHealthEndpointCharacterization:
         try:
             from api.v1.health import router
             assert router is not None
-        except ImportError as e:
+        except ImportError:
             pytest.fail("Test needs implementation")
 
     @patch('redis.Redis')
@@ -86,10 +86,10 @@ class TestHealthEndpointCharacterization:
                 status = response.status_code
                 assert status in [200, 500, 503, 404]  # Common HTTP status codes
                 
-            except Exception as inner_e:
+            except Exception:
                 pytest.fail("Test needs implementation")
                 
-        except Exception as e:
+        except Exception:
             pytest.fail("Test needs implementation")
 
 class TestAgentEndpointCharacterization:
@@ -100,7 +100,7 @@ class TestAgentEndpointCharacterization:
         try:
             from api.v1.agents import router
             assert router is not None
-        except ImportError as e:
+        except ImportError:
             pytest.fail("Test needs implementation")
 
     def test_agent_endpoint_routes_exist(self):
@@ -121,7 +121,7 @@ class TestAgentEndpointCharacterization:
                     # Document that routes have HTTP methods
                     assert isinstance(route.methods, set)
                     
-        except Exception as e:
+        except Exception:
             pytest.fail("Test needs implementation")
 
 class TestAuthEndpointCharacterization:
@@ -132,7 +132,7 @@ class TestAuthEndpointCharacterization:
         try:
             from api.v1.auth import router
             assert router is not None
-        except ImportError as e:
+        except ImportError:
             pytest.fail("Test needs implementation")
 
     def test_auth_dependencies_structure(self):
@@ -144,7 +144,7 @@ class TestAuthEndpointCharacterization:
             from auth.jwt_handler import jwt_handler
             assert jwt_handler is not None
             
-        except ImportError as e:
+        except ImportError:
             pytest.fail("Test needs implementation")
 
 class TestMiddlewareCharacterization:
@@ -155,7 +155,7 @@ class TestMiddlewareCharacterization:
         try:
             from api.middleware.security_monitoring import SecurityMonitoringMiddleware
             assert SecurityMonitoringMiddleware is not None
-        except ImportError as e:
+        except ImportError:
             pytest.fail("Test needs implementation")
 
     def test_rate_limiter_middleware_import(self):
@@ -163,7 +163,7 @@ class TestMiddlewareCharacterization:
         try:
             from api.middleware.rate_limiter import RateLimiter
             assert RateLimiter is not None
-        except ImportError as e:
+        except ImportError:
             pytest.fail("Test needs implementation")
 
     def test_ddos_protection_middleware_import(self):
@@ -171,7 +171,7 @@ class TestMiddlewareCharacterization:
         try:
             from api.middleware.ddos_protection import DDoSProtectionMiddleware
             assert DDoSProtectionMiddleware is not None
-        except ImportError as e:
+        except ImportError:
             pytest.fail("Test needs implementation")
 
 class TestInferenceEndpointCharacterization:
@@ -182,7 +182,7 @@ class TestInferenceEndpointCharacterization:
         try:
             from api.v1.inference import router
             assert router is not None
-        except ImportError as e:
+        except ImportError:
             pytest.fail("Test needs implementation")
 
     def test_inference_endpoint_structure(self):
@@ -194,5 +194,5 @@ class TestInferenceEndpointCharacterization:
             routes = router.routes
             assert isinstance(routes, list)
             
-        except Exception as e:
+        except Exception:
             pytest.fail("Test needs implementation")

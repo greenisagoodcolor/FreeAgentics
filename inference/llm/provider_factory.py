@@ -141,8 +141,7 @@ class LLMProviderFactory:
                 )
 
                 # Register with manager using priority from config
-                priority = config.provider_priority.index(provider_name) if
-                    provider_name in config.provider_priority else 50
+                priority = config.provider_priority.index(provider_name) if provider_name in config.provider_priority else 50
                 manager.registry.register_provider(provider, priority)
 
                 logger.info(f"Successfully configured {provider_name} provider")

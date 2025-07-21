@@ -8,9 +8,7 @@ Following Michael Feathers' principles:
 """
 
 import os
-import tempfile
-from unittest.mock import MagicMock, Mock, patch
-from pathlib import Path
+from unittest.mock import Mock, patch
 
 import pytest
 
@@ -73,7 +71,7 @@ class TestAgentManagerCharacterization:
         from agents.agent_manager import AgentManager
         
         manager = AgentManager()
-        world = manager.create_world(5)
+        manager.create_world(5)
         
         # Create agent with correct signature
         agent_id = manager.create_agent("active_inference", "test_agent")
@@ -89,7 +87,7 @@ class TestAgentManagerCharacterization:
         from agents.agent_manager import AgentManager
         
         manager = AgentManager()
-        world = manager.create_world(10)
+        manager.create_world(10)
         
         # Create multiple agents
         agent_ids = []
@@ -107,8 +105,8 @@ class TestAgentManagerCharacterization:
         from agents.agent_manager import AgentManager
         
         manager = AgentManager()
-        world = manager.create_world(5)
-        agent_id = manager.create_agent("active_inference", "test_agent")
+        manager.create_world(5)
+        manager.create_agent("active_inference", "test_agent")
         
         # Run a step
         result = manager.step_all()
@@ -126,7 +124,7 @@ class TestBaseAgentCharacterization:
         
         # ActiveInferenceAgent is abstract and cannot be instantiated directly
         with pytest.raises(TypeError, match="Can't instantiate abstract class"):
-            agent = ActiveInferenceAgent(
+            ActiveInferenceAgent(
                 agent_id="test_001",
                 name="test_agent",
                 grid_size=5
@@ -250,7 +248,7 @@ class TestDatabaseCharacterization:
     @patch.dict(os.environ, {'DATABASE_URL': 'sqlite:///test_characterization.db'})
     def test_database_session_creation(self):
         """Test database session can be created."""
-        from database.session import SessionLocal, engine
+        from database.session import SessionLocal
         
         # Test session factory
         session = SessionLocal()
@@ -296,7 +294,6 @@ class TestAuthCharacterization:
     def test_security_headers_generation(self):
         """Test security headers can be generated."""
         from auth.security_headers import SecurityHeadersManager
-        from unittest.mock import Mock
         
         manager = SecurityHeadersManager()
         
@@ -436,12 +433,10 @@ class TestModuleIntegrationCharacterization:
     def test_agent_world_integration(self):
         """Test agents can work with world."""
         from agents.agent_manager import AgentManager
-        from agents.base_agent import BasicExplorerAgent
-        from world.grid_world import Position
         
         # Create manager and world
         manager = AgentManager()
-        world = manager.create_world(5)
+        manager.create_world(5)
         
         # Create agent through manager
         agent_id = manager.create_agent("active_inference", "integration_test")
@@ -454,7 +449,6 @@ class TestModuleIntegrationCharacterization:
     def test_auth_api_integration(self):
         """Test auth components can integrate with API."""
         from auth.security_headers import SecurityHeadersMiddleware
-        from unittest.mock import Mock
         
         # Create mock app
         app = Mock()
@@ -496,7 +490,7 @@ class TestPerformanceCharacterization:
         from agents.agent_manager import AgentManager
         
         manager = AgentManager()
-        world = manager.create_world(10)
+        manager.create_world(10)
         
         start_time = time.time()
         
@@ -544,7 +538,7 @@ class TestMemoryCharacterization:
         import gc
         
         manager = AgentManager()
-        world = manager.create_world(5)
+        manager.create_world(5)
         
         # Create agents
         for i in range(5):

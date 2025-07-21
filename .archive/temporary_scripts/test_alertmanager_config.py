@@ -3,10 +3,9 @@
 Test script to validate AlertManager configuration and alert routing logic.
 """
 
-import os
 import sys
 from pathlib import Path
-from typing import Any, Dict, List
+from typing import Dict, List
 
 import yaml
 
@@ -26,7 +25,7 @@ def validate_alertmanager_config(config_path: str) -> bool:
                 print(f"❌ Missing required section: {section}")
                 return False
 
-        print(f"✅ Configuration structure valid")
+        print("✅ Configuration structure valid")
 
         # Validate global configuration
         global_config = config["global"]
@@ -48,7 +47,7 @@ def validate_alertmanager_config(config_path: str) -> bool:
                 print(f"❌ Missing required route field: {field}")
                 return False
 
-        print(f"✅ Route configuration valid")
+        print("✅ Route configuration valid")
 
         # Validate receivers
         receivers = config["receivers"]
@@ -83,7 +82,7 @@ def validate_alertmanager_config(config_path: str) -> bool:
             if not check_routes(route_config["routes"]):
                 return False
 
-        print(f"✅ Receivers configuration valid")
+        print("✅ Receivers configuration valid")
 
         # Validate inhibit rules
         inhibit_rules = config["inhibit_rules"]
@@ -94,7 +93,7 @@ def validate_alertmanager_config(config_path: str) -> bool:
                     print(f"❌ Inhibit rule missing {field} or {field}_re")
                     return False
 
-        print(f"✅ Inhibit rules configuration valid")
+        print("✅ Inhibit rules configuration valid")
 
         # Count different alert routing configurations
         critical_routes = 0
@@ -117,7 +116,7 @@ def validate_alertmanager_config(config_path: str) -> bool:
         if "routes" in route_config:
             count_severity_routes(route_config["routes"])
 
-        print(f"📊 Alert routing summary:")
+        print("📊 Alert routing summary:")
         print(f"   Critical severity routes: {critical_routes}")
         print(f"   High severity routes: {high_routes}")
         print(f"   Medium severity routes: {medium_routes}")
@@ -179,8 +178,8 @@ def validate_prometheus_rules(rules_path: str) -> bool:
 
                 total_rules += 1
 
-        print(f"✅ Prometheus rules configuration valid")
-        print(f"📊 Alert rules summary:")
+        print("✅ Prometheus rules configuration valid")
+        print("📊 Alert rules summary:")
         print(f"   Total rule groups: {len(groups)}")
         print(f"   Total alert rules: {total_rules}")
         print(f"   Critical alerts: {severity_counts['critical']}")
@@ -196,7 +195,7 @@ def validate_prometheus_rules(rules_path: str) -> bool:
 
 def validate_integration_consistency() -> bool:
     """Validate that AlertManager and Prometheus configurations are consistent."""
-    print(f"🧪 Validating integration consistency...")
+    print("🧪 Validating integration consistency...")
 
     try:
         # Load both configurations
@@ -261,7 +260,7 @@ def validate_integration_consistency() -> bool:
             print(f"❌ Missing required FreeAgentics alerts: {missing_alerts}")
             return False
 
-        print(f"✅ All required FreeAgentics alerts are defined")
+        print("✅ All required FreeAgentics alerts are defined")
 
         return True
 

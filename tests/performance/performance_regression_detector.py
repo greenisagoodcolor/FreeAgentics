@@ -16,13 +16,11 @@ import asyncio
 import json
 import logging
 import statistics
-import time
 import uuid
-from collections import defaultdict, deque
 from dataclasses import dataclass, field
 from datetime import datetime, timedelta
 from pathlib import Path
-from typing import Any, Dict, List, Optional, Tuple, Union
+from typing import Any, Dict, List, Tuple
 
 import numpy as np
 from scipy import stats
@@ -519,7 +517,7 @@ class PerformanceRegressionDetector:
             anomaly_scores = self.anomaly_detector.decision_function(
                 scaled_values
             )
-            is_anomaly = self.anomaly_detector.predict(scaled_values)
+            self.anomaly_detector.predict(scaled_values)
 
             # Return anomaly scores for each metric
             anomaly_results = {}

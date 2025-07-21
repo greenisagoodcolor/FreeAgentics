@@ -146,7 +146,7 @@ Make it realistic and functional for active inference.
                     print(f"   Latency: {response.latency_ms:.1f}ms")
                     
                     llm_generated_gmn = response.text
-                    print(f"\n📋 Generated GMN Specification:")
+                    print("\n📋 Generated GMN Specification:")
                     print("-" * 35)
                     print(llm_generated_gmn)
                     
@@ -181,12 +181,12 @@ Make it realistic and functional for active inference.
         try:
             # Parse GMN specification
             gmn_graph = parser.parse(gmn_spec)
-            print(f"\n✅ Successfully parsed GMN specification")
+            print("\n✅ Successfully parsed GMN specification")
             print(f"   Nodes: {len(gmn_graph.nodes)}")
             print(f"   Edges: {len(gmn_graph.edges)}")
             
             # Show parsed components
-            print(f"\n📋 Parsed GMN Components:")
+            print("\n📋 Parsed GMN Components:")
             for node_id, node in list(gmn_graph.nodes.items())[:5]:  # Show first 5
                 print(f"   • {node_id}: {node.type.value}")
                 if node.properties:
@@ -213,7 +213,7 @@ Make it realistic and functional for active inference.
             print("✅ Successfully converted GMN to PyMDP model")
             
             # Show model structure
-            print(f"\n📊 PyMDP Model Structure:")
+            print("\n📊 PyMDP Model Structure:")
             if 'num_states' in pymdp_model:
                 print(f"   States: {pymdp_model['num_states']}")
             if 'num_obs' in pymdp_model:
@@ -245,7 +245,7 @@ Make it realistic and functional for active inference.
         print("   • Learning and adaptation")
         
         # Simulate a few conceptual steps
-        print(f"\n🔄 Simulating agent behavior:")
+        print("\n🔄 Simulating agent behavior:")
         print("   Step 1: Initialize beliefs from PyMDP model")
         print("   Step 2: Observe environment (grid position)")
         print("   Step 3: Update beliefs using Bayes rule")
@@ -276,7 +276,7 @@ Make it realistic and functional for active inference.
         print(f"{stage:20} {status}")
     
     # Provide next steps
-    print(f"\n🎉 PIPELINE DEMONSTRATION COMPLETE!")
+    print("\n🎉 PIPELINE DEMONSTRATION COMPLETE!")
     
     working_stages = sum(1 for status in pipeline_status.values() if "✅" in status)
     total_stages = len(pipeline_status)
@@ -302,7 +302,7 @@ Make it realistic and functional for active inference.
         if "❌" in pipeline_status["PyMDP Conversion"]:
             print("   • Install PyMDP: pip install pymdp")
     
-    print(f"\n🌟 Advanced Features Available:")
+    print("\n🌟 Advanced Features Available:")
     print("   • Multi-provider fallback and load balancing")
     print("   • Cost estimation and usage tracking")
     print("   • Rate limiting and error handling") 

@@ -1,7 +1,6 @@
 """Integration test for the complete prompt → agent flow."""
 
 import json
-import os
 from unittest.mock import Mock, patch
 
 import pytest

@@ -45,7 +45,7 @@ try:
     C = model.get("C", None)
     D = model.get("D", None)
 
-    print(f"\nCreating agent with:")
+    print("\nCreating agent with:")
     print(f"  A type: {type(A)}, len: {len(A)}")
     print(f"  B type: {type(B)}, len: {len(B)}")
     print(f"  C type: {type(C)}, len: {len(C) if C else 'None'}")
@@ -61,7 +61,7 @@ try:
         from agents.gmn_pymdp_adapter import adapt_gmn_to_pymdp
 
         adapted_model = adapt_gmn_to_pymdp(model)
-        print(f"\nAfter adaptation:")
+        print("\nAfter adaptation:")
         print(f"  A type: {type(adapted_model['A'])}, shape: {adapted_model['A'].shape}")
         print(f"  B type: {type(adapted_model['B'])}, shape: {adapted_model['B'].shape}")
         print(f"  A normalized? {np.allclose(adapted_model['A'].sum(axis=0), 1.0)}")

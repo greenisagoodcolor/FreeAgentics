@@ -20,7 +20,6 @@ async def test_basic_functionality():
         # Import the modules
         from observability.log_aggregation import (
             LogAggregator,
-            LogEntry,
             LogLevel,
             LogParser,
             LogSource,
@@ -89,7 +88,7 @@ async def test_basic_functionality():
 
         # Test stats
         stats = aggregator.get_stats()
-        print(f"📊 Basic stats:")
+        print("📊 Basic stats:")
         print(f"   Total logs: {stats.total_logs}")
         print(f"   Buffer size: {stats.buffer_size}")
 
@@ -336,7 +335,7 @@ async def test_integration_with_prometheus():
         from observability.prometheus_metrics import record_business_inference_operation
 
         # Create a log entry for an inference operation
-        log_entry = create_structured_log_entry(
+        create_structured_log_entry(
             level=LogLevel.INFO,
             source=LogSource.INFERENCE,
             message="Inference operation completed",

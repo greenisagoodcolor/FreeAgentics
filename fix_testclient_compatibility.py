@@ -6,11 +6,7 @@ This script replaces all imports of TestClient from fastapi.testclient
 with imports from the compatibility wrapper.
 """
 
-import glob
 import os
-import re
-import subprocess
-from pathlib import Path
 
 
 def find_test_files():

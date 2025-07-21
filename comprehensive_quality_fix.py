@@ -1,11 +1,10 @@
 #!/usr / bin / env python3
 """Comprehensive quality fix script."""
 
-import os
 import re
 import subprocess
 from pathlib import Path
-from typing import Dict, List, Tuple
+from typing import List, Tuple
 
 
 def fix_unused_variables(content: str) -> str:
@@ -119,7 +118,7 @@ def get_flake8_errors(filepath: Path) -> List[Tuple[int, str, str]]:
                 parts = line.split(":")
                 if len(parts) >= 4:
                     line_num = int(parts[1])
-                    col = parts[2]
+                    parts[2]
                     error_msg = ":".join(parts[3:]).strip()
                     error_code = error_msg.split()[0] if error_msg else ""
                     errors.append((line_num, error_code, error_msg))

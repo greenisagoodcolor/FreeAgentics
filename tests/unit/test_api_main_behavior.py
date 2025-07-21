@@ -3,8 +3,7 @@ Behavior-driven tests for API main module - targeting core user-facing functiona
 Focus on business behavior, not implementation details.
 """
 
-import asyncio
-from unittest.mock import MagicMock, Mock, patch
+from unittest.mock import patch
 
 import pytest
 from fastapi import FastAPI

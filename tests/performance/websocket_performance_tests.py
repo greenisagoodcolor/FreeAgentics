@@ -17,10 +17,9 @@ import logging
 import statistics
 import time
 import uuid
-from contextlib import asynccontextmanager
 from dataclasses import dataclass, field
 from datetime import datetime
-from typing import Any, Dict, List, Optional, Tuple
+from typing import Any, Dict, List
 
 import numpy as np
 import psutil
@@ -363,7 +362,6 @@ class WebSocketPerformanceTester:
         start_time = time.perf_counter()
         end_time = start_time + test_duration
 
-        active_connections = []
         total_messages_sent = 0
         total_messages_received = 0
         connection_errors = 0
@@ -968,7 +966,7 @@ async def run_websocket_performance_validation():
 
         # SLA validation
         sla = report['sla_validation']
-        print(f"\n" + "=" * 30)
+        print("\n" + "=" * 30)
         print("SLA VALIDATION")
         print("=" * 30)
         print(f"Requirements met: {'✓' if sla['requirements_met'] else '✗'}")
@@ -979,7 +977,7 @@ async def run_websocket_performance_validation():
                 print(f"  - {violation['metric']}: {violation['description']}")
 
         # Recommendations
-        print(f"\n" + "=" * 30)
+        print("\n" + "=" * 30)
         print("RECOMMENDATIONS")
         print("=" * 30)
         for rec in report['recommendations']:

@@ -52,7 +52,7 @@ def demo_integration():
     }
 
     print("1. 📱 UI sends simple request:")
-    print(f"   POST /api/agents")
+    print("   POST /api/agents")
     print(f"   {json.dumps(ui_request, indent=2)}")
     print()
 
@@ -64,7 +64,7 @@ def demo_integration():
     print("2. 🔄 Compatibility layer processes:")
     print(f"   • Detected type: {agent_type}")
     print(f"   • Extracted name: {agent_name}")
-    print(f"   • Mapped template: basic-explorer")
+    print("   • Mapped template: basic-explorer")
     print()
 
     # Show backend format

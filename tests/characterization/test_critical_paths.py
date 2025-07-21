@@ -5,9 +5,8 @@ business logic paths to achieve high coverage of critical functionality.
 """
 
 import pytest
-from unittest.mock import Mock, patch, MagicMock
+from unittest.mock import Mock, patch
 import numpy as np
-import json
 
 class TestAgentCriticalPaths:
     """Test critical paths in agent functionality."""
@@ -34,7 +33,7 @@ class TestAgentCriticalPaths:
             assert agent.num_controls == [2, 2] 
             assert agent.num_obs == [2, 2]
             
-        except Exception as e:
+        except Exception:
             pytest.fail("Test needs implementation")
 
     @patch('numpy.random.rand')
@@ -62,7 +61,7 @@ class TestAgentCriticalPaths:
                 # Document that observe method returns something
                 assert result is not None or result is None  # Document actual behavior
                 
-        except Exception as e:
+        except Exception:
             pytest.fail("Test needs implementation")
 
     def test_agent_error_handling_paths(self):
@@ -81,7 +80,7 @@ class TestAgentCriticalPaths:
             # Document the behavior - either None or some result
             assert result is None or result is not None
             
-        except Exception as e:
+        except Exception:
             pytest.fail("Test needs implementation")
 
 class TestAPICriticalPaths:
@@ -106,7 +105,7 @@ class TestAPICriticalPaths:
             assert isinstance(result, dict)
             assert "status" in result
             
-        except Exception as e:
+        except Exception:
             pytest.fail("Test needs implementation")
 
     def test_agent_creation_api_path(self):
@@ -123,7 +122,7 @@ class TestAPICriticalPaths:
             # Document function signature
             assert isinstance(sig.parameters, dict)
             
-        except Exception as e:
+        except Exception:
             pytest.fail("Test needs implementation")
 
     @patch('auth.jwt_handler.jwt_handler')
@@ -140,7 +139,7 @@ class TestAPICriticalPaths:
             assert callable(authenticate_user)
             assert callable(verify_token)
             
-        except Exception as e:
+        except Exception:
             pytest.fail("Test needs implementation")
 
 class TestDatabaseCriticalPaths:
@@ -149,7 +148,7 @@ class TestDatabaseCriticalPaths:
     def test_model_creation_paths(self):
         """Characterize database model creation."""
         try:
-            from database.models import Agent, Coalition, User
+            from database.models import Agent
             
             # Test model instantiation paths
             agent_data = {
@@ -164,7 +163,7 @@ class TestDatabaseCriticalPaths:
             # Document that instantiation works
             assert agent.name == "test_agent"
             
-        except Exception as e:
+        except Exception:
             pytest.fail("Test needs implementation")
 
     @patch('database.session.SessionLocal')
@@ -190,7 +189,7 @@ class TestDatabaseCriticalPaths:
             except StopIteration:
                 pass  # Expected behavior
                 
-        except Exception as e:
+        except Exception:
             pytest.fail("Test needs implementation")
 
     def test_database_validation_paths(self):
@@ -206,7 +205,7 @@ class TestDatabaseCriticalPaths:
             # Document validation result structure
             assert isinstance(result, (bool, dict, type(None)))
             
-        except Exception as e:
+        except Exception:
             pytest.fail("Test needs implementation")
 
 class TestInferenceCriticalPaths:
@@ -232,7 +231,7 @@ class TestInferenceCriticalPaths:
             if hasattr(provider, 'generate'):
                 assert callable(provider.generate)
                 
-        except Exception as e:
+        except Exception:
             pytest.fail("Test needs implementation")
 
     def test_gmn_parser_critical_paths(self):
@@ -248,7 +247,7 @@ class TestInferenceCriticalPaths:
             # Document parser result structure
             assert isinstance(result, (dict, list, str, type(None)))
             
-        except Exception as e:
+        except Exception:
             pytest.fail("Test needs implementation")
 
     @patch('torch.nn.Module')
@@ -265,7 +264,7 @@ class TestInferenceCriticalPaths:
             # Document model structure
             assert model is not None
             
-        except Exception as e:
+        except Exception:
             pytest.fail("Test needs implementation")
 
 class TestIntegrationCriticalPaths:
@@ -286,12 +285,11 @@ class TestIntegrationCriticalPaths:
             mock_manager.return_value = mock_agent_mgr
             
             # Test integration point
-            agent_data = {"name": "test_agent", "config": {}}
             
             # Don't actually call endpoint - just test it exists
             assert callable(create_agent_endpoint)
             
-        except Exception as e:
+        except Exception:
             pytest.fail("Test needs implementation")
 
     @patch('auth.security_implementation.get_current_user')
@@ -311,5 +309,5 @@ class TestIntegrationCriticalPaths:
             # Document middleware structure
             assert middleware is not None
             
-        except Exception as e:
+        except Exception:
             pytest.fail("Test needs implementation")

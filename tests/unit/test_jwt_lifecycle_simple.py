@@ -2,9 +2,7 @@
 Simple JWT Lifecycle Test Suite - Working Implementation
 """
 
-import time
 from datetime import datetime, timedelta
-from unittest.mock import MagicMock, patch
 
 import jwt
 import pytest

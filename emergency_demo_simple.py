@@ -53,7 +53,7 @@ position_belief -> position: depends_on
     parser = GMNParser()
     try:
         gmn_graph = parser.parse(gmn_spec)
-        print(f"2. GMN PARSING SUCCESS:")
+        print("2. GMN PARSING SUCCESS:")
         print(f"   ✅ Nodes parsed: {len(gmn_graph.nodes)}")
         print(f"   ✅ Edges parsed: {len(gmn_graph.edges)}")
 
@@ -64,7 +64,7 @@ position_belief -> position: depends_on
 
         # Convert to PyMDP model
         pymdp_model = parser.to_pymdp_model(gmn_graph)
-        print(f"\n3. PYMDP MODEL CONVERSION:")
+        print("\n3. PYMDP MODEL CONVERSION:")
         print(f"   ✅ State dimensions: {pymdp_model['num_states']}")
         print(f"   ✅ Observation dimensions: {pymdp_model['num_obs']}")
         print(f"   ✅ Control dimensions: {pymdp_model['num_controls']}")
@@ -153,7 +153,7 @@ position_belief -> position: depends_on
         kg.add_edge(agent_node.id, obs_node.id, "observes")
 
     # 6. Final statistics
-    print(f"\n7. FINAL STATISTICS:")
+    print("\n7. FINAL STATISTICS:")
     print(f"   ✅ Knowledge graph nodes: {len(kg.nodes)}")
     print(f"   ✅ Knowledge graph edges: {len(kg.edges)}")
     print(f"   ✅ Graph connected: {kg.is_connected()}")
@@ -176,8 +176,8 @@ position_belief -> position: depends_on
 
         # Update KG from beliefs
         await bridge.update_from_beliefs(agent.id, belief_state)
-        print(f"   ✅ Belief-KG bridge operational")
-        print(f"   ✅ Updated KG with belief state")
+        print("   ✅ Belief-KG bridge operational")
+        print("   ✅ Updated KG with belief state")
     except Exception as e:
         print(f"   ⚠️  Belief-KG bridge error: {e}")
 

@@ -5,8 +5,7 @@ They capture what the inference system actually does now, not what it should do.
 """
 
 import pytest
-from unittest.mock import Mock, patch, MagicMock
-import numpy as np
+from unittest.mock import patch
 
 class TestLLMProvidersCharacterization:
     """Characterize LLM provider functionality."""
@@ -16,7 +15,7 @@ class TestLLMProvidersCharacterization:
         try:
             from inference.llm.anthropic_provider import AnthropicProvider
             assert AnthropicProvider is not None
-        except ImportError as e:
+        except ImportError:
             pytest.fail("Test needs implementation")
 
     def test_openai_provider_import(self):
@@ -24,7 +23,7 @@ class TestLLMProvidersCharacterization:
         try:
             from inference.llm.openai_provider import OpenAIProvider
             assert OpenAIProvider is not None
-        except ImportError as e:
+        except ImportError:
             pytest.fail("Test needs implementation")
 
     def test_provider_interface_structure(self):
@@ -39,9 +38,9 @@ class TestLLMProvidersCharacterization:
             import inspect
             assert inspect.isclass(LLMProvider)
             
-        except ImportError as e:
+        except ImportError:
             pytest.fail("Test needs implementation")
-        except Exception as e:
+        except Exception:
             pytest.fail("Test needs implementation")
 
     def test_provider_factory_structure(self):
@@ -56,9 +55,9 @@ class TestLLMProvidersCharacterization:
             sig = inspect.signature(create_provider)
             assert isinstance(sig.parameters, dict)
             
-        except ImportError as e:
+        except ImportError:
             pytest.fail("Test needs implementation")
-        except Exception as e:
+        except Exception:
             pytest.fail("Test needs implementation")
 
 class TestLocalLLMManagerCharacterization:
@@ -69,7 +68,7 @@ class TestLocalLLMManagerCharacterization:
         try:
             from inference.llm.local_llm_manager import LocalLLMManager
             assert LocalLLMManager is not None
-        except ImportError as e:
+        except ImportError:
             pytest.fail("Test needs implementation")
 
     def test_local_llm_manager_structure(self):
@@ -86,7 +85,7 @@ class TestLocalLLMManagerCharacterization:
                 if hasattr(LocalLLMManager, method_name):
                     assert callable(getattr(LocalLLMManager, method_name))
                     
-        except Exception as e:
+        except Exception:
             pytest.fail("Test needs implementation")
 
 class TestGNNComponentsCharacterization:
@@ -97,7 +96,7 @@ class TestGNNComponentsCharacterization:
         try:
             from inference.gnn.model import GNNModel
             assert GNNModel is not None
-        except ImportError as e:
+        except ImportError:
             pytest.fail("Test needs implementation")
 
     def test_feature_extractor_import(self):
@@ -105,7 +104,7 @@ class TestGNNComponentsCharacterization:
         try:
             from inference.gnn.feature_extractor import FeatureExtractor
             assert FeatureExtractor is not None
-        except ImportError as e:
+        except ImportError:
             pytest.fail("Test needs implementation")
 
     def test_gnn_parser_import(self):
@@ -113,7 +112,7 @@ class TestGNNComponentsCharacterization:
         try:
             from inference.gnn.parser import GNNParser
             assert GNNParser is not None
-        except ImportError as e:
+        except ImportError:
             pytest.fail("Test needs implementation")
 
     def test_gnn_validator_import(self):
@@ -121,7 +120,7 @@ class TestGNNComponentsCharacterization:
         try:
             from inference.gnn.validator import GNNValidator
             assert GNNValidator is not None
-        except ImportError as e:
+        except ImportError:
             pytest.fail("Test needs implementation")
 
     def test_h3_spatial_integration_import(self):
@@ -129,7 +128,7 @@ class TestGNNComponentsCharacterization:
         try:
             from inference.gnn.h3_spatial_integration import H3SpatialIntegrator
             assert H3SpatialIntegrator is not None
-        except ImportError as e:
+        except ImportError:
             pytest.fail("Test needs implementation")
 
 class TestActiveInferenceCharacterization:
@@ -140,7 +139,7 @@ class TestActiveInferenceCharacterization:
         try:
             from inference.active.gmn_parser import GMNParser
             assert GMNParser is not None
-        except ImportError as e:
+        except ImportError:
             pytest.fail("Test needs implementation")
 
     def test_gmn_validation_import(self):
@@ -148,7 +147,7 @@ class TestActiveInferenceCharacterization:
         try:
             from inference.active.gmn_validation import GMNValidator
             assert GMNValidator is not None
-        except ImportError as e:
+        except ImportError:
             pytest.fail("Test needs implementation")
 
     def test_gmn_parser_structure(self):
@@ -165,7 +164,7 @@ class TestActiveInferenceCharacterization:
                 if hasattr(GMNParser, method_name):
                     assert callable(getattr(GMNParser, method_name))
                     
-        except Exception as e:
+        except Exception:
             pytest.fail("Test needs implementation")
 
 class TestInferenceInitializationCharacterization:
@@ -176,7 +175,7 @@ class TestInferenceInitializationCharacterization:
         try:
             import inference
             assert inference is not None
-        except ImportError as e:
+        except ImportError:
             pytest.fail("Test needs implementation")
 
     def test_llm_submodule_init(self):
@@ -184,7 +183,7 @@ class TestInferenceInitializationCharacterization:
         try:
             from inference import llm
             assert llm is not None
-        except ImportError as e:
+        except ImportError:
             pytest.fail("Test needs implementation")
 
     def test_gnn_submodule_init(self):
@@ -192,7 +191,7 @@ class TestInferenceInitializationCharacterization:
         try:
             from inference import gnn
             assert gnn is not None
-        except ImportError as e:
+        except ImportError:
             pytest.fail("Test needs implementation")
 
     def test_active_submodule_init(self):
@@ -200,7 +199,7 @@ class TestInferenceInitializationCharacterization:
         try:
             from inference import active
             assert active is not None
-        except ImportError as e:
+        except ImportError:
             pytest.fail("Test needs implementation")
 
 class TestInferenceFactoryPatternCharacterization:
@@ -219,7 +218,7 @@ class TestInferenceFactoryPatternCharacterization:
             assert hasattr(provider, 'api_key')
             assert provider.api_key == "test-key"
             
-        except Exception as e:
+        except Exception:
             pytest.fail("Test needs implementation")
 
     @patch('openai.Client')
@@ -235,5 +234,5 @@ class TestInferenceFactoryPatternCharacterization:
             assert hasattr(provider, 'api_key')
             assert provider.api_key == "test-key"
             
-        except Exception as e:
+        except Exception:
             pytest.fail("Test needs implementation")

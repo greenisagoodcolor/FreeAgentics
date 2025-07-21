@@ -17,16 +17,13 @@ import logging
 import random
 import time
 import uuid
-from concurrent.futures import ThreadPoolExecutor, as_completed
-from contextlib import asynccontextmanager
 from dataclasses import dataclass, field
-from datetime import datetime, timedelta
-from typing import Any, Callable, Dict, List, Optional, Tuple
+from datetime import datetime
+from typing import Any, Dict, List, Optional
 
 import aiohttp
 import numpy as np
 import psutil
-import websockets
 
 from observability.performance_monitor import get_performance_monitor
 
@@ -298,7 +295,7 @@ class LoadTestingFramework:
         self.performance_monitor.start_monitoring()
 
         start_time = datetime.now()
-        process = psutil.Process()
+        psutil.Process()
 
         try:
             # Create connector with appropriate limits
@@ -1055,7 +1052,7 @@ async def run_load_test_suite():
 
             # SLA violations
             if result.sla_violations:
-                print(f"\nSLA Violations:")
+                print("\nSLA Violations:")
                 for violation in result.sla_violations:
                     print(
                         f"  - {violation['metric']}: {violation['description']}"
@@ -1064,7 +1061,7 @@ async def run_load_test_suite():
                 print("\n✓ All SLA requirements met")
 
             # Recommendations
-            print(f"\nRecommendations:")
+            print("\nRecommendations:")
             for rec in report['recommendations']:
                 print(f"  - {rec}")
 

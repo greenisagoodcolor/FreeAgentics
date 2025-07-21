@@ -1,6 +1,5 @@
 """Tests for database.base module."""
 
-import pytest
 
 
 class TestDatabaseBase:

@@ -17,7 +17,6 @@ os.environ.update(
 
 # Work around the TestClient initialization issue
 import httpx
-from fastapi.testclient import TestClient
 
 # Import the app and create a direct test approach
 from api.main_minimal import app

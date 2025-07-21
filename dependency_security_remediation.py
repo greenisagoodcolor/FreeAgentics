@@ -427,7 +427,7 @@ def main():
     remediator = DependencySecurityRemediator(project_root)
 
     print("=== DEPENDENCY-DOCTOR Security Remediation ===")
-    print(f"Project: FreeAgentics")
+    print("Project: FreeAgentics")
     print(f"Timestamp: {datetime.now().isoformat()}")
     print("=" * 50)
 
@@ -444,7 +444,7 @@ def main():
         for error in results['errors']:
             print(f"  - {error}")
 
-    print(f"\nDetailed log saved to: dependency_remediation_log.json")
+    print("\nDetailed log saved to: dependency_remediation_log.json")
 
     return 0 if results['success'] else 1
 

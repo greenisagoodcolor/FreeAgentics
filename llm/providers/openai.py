@@ -8,11 +8,11 @@ import asyncio
 import json
 import os
 from datetime import datetime, timedelta
-from typing import Any, Dict, List, Optional
+from typing import List, Optional
 
 import aiohttp
 
-from llm.base import LLMError, LLMMessage, LLMProvider, LLMResponse, LLMRole
+from llm.base import LLMError, LLMMessage, LLMProvider, LLMResponse
 
 
 class OpenAIProvider(LLMProvider):

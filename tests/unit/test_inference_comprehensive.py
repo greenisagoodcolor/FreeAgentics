@@ -2,8 +2,7 @@
 Comprehensive test suite for Inference modules
 """
 
-from typing import Any, Dict, List, Optional
-from unittest.mock import MagicMock, Mock, patch
+from unittest.mock import MagicMock, patch
 
 import numpy as np
 import pytest
@@ -172,7 +171,7 @@ class TestGMNValidator:
 
             # Check matrix shapes
             A = gm["A"]
-            B = gm["B"]
+            gm["B"]
             if A.shape[0] != A.shape[1]:
                 return {"valid": False, "error": "Invalid A matrix shape"}
 

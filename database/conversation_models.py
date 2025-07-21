@@ -5,7 +5,6 @@ This module provides models for storing and managing conversation data,
 including conversations, messages, and related metadata.
 """
 
-import uuid
 from datetime import datetime
 from enum import Enum
 
@@ -18,8 +17,6 @@ from sqlalchemy import (
     String,
     Text,
 )
-from sqlalchemy import Enum as SQLEnum
-from sqlalchemy.dialects.postgresql import UUID
 from sqlalchemy.orm import relationship
 
 from database.base import Base

@@ -680,14 +680,12 @@ class AgentMemoryLifecycleManager:
         idle_time = current_time - profile.last_accessed
 
         # Transition to idle if not accessed recently
-        if profile.state == AgentLifecycleState.ACTIVE and
-            idle_time > 60.0:  # 1 minute idle
+        if profile.state == AgentLifecycleState.ACTIVE and idle_time > 60.0:  # 1 minute idle
             profile.state = AgentLifecycleState.IDLE
             profile.record_lifecycle_event("transitioned_to_idle")
 
         # Transition back to active on access
-        elif profile.state == AgentLifecycleState.IDLE and
-            idle_time < 10.0:  # Recent access
+        elif profile.state == AgentLifecycleState.IDLE and idle_time < 10.0:  # Recent access
             profile.state = AgentLifecycleState.ACTIVE
             profile.record_lifecycle_event("transitioned_to_active")
 

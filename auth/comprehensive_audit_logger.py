@@ -70,7 +70,7 @@ class AccessDecisionAuditor:
             severity,
             f"RBAC decision: {username} ({role}) -> {endpoint} "
             f"[{required_permission}] = "
-            f"{'ALLOW' if has_permission else 'DENY'}".
+            f"{'ALLOW' if has_permission else 'DENY'}",
             user_id=user_id,
             username=username,
             details={

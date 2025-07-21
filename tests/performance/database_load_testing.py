@@ -18,17 +18,13 @@ import logging
 import random
 import statistics
 import time
-import uuid
-from concurrent.futures import ThreadPoolExecutor
 from dataclasses import dataclass, field
 from datetime import datetime
-from typing import Any, Dict, List, Optional, Tuple
+from typing import Any, Dict, List
 
 import asyncpg
 import numpy as np
 import psutil
-import psycopg2
-from psycopg2 import pool as pg_pool
 
 logger = logging.getLogger(__name__)
 
@@ -1097,7 +1093,7 @@ async def run_database_performance_validation():
 
         # SLA validation
         sla = report['sla_validation']
-        print(f"\n" + "=" * 30)
+        print("\n" + "=" * 30)
         print("SLA VALIDATION")
         print("=" * 30)
         print(f"Requirements met: {'✓' if sla['requirements_met'] else '✗'}")
@@ -1108,7 +1104,7 @@ async def run_database_performance_validation():
                 print(f"  - {violation['metric']}: {violation['description']}")
 
         # Recommendations
-        print(f"\n" + "=" * 30)
+        print("\n" + "=" * 30)
         print("RECOMMENDATIONS")
         print("=" * 30)
         for rec in report['recommendations']:

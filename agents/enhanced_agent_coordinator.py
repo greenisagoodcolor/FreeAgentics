@@ -209,8 +209,8 @@ class EnhancedAgentCoordinator:
             # Check if we have enough resources
             if resource_metrics.get("avg_cpu_60s", 0) > 90:
                 logger.warning(
-                    f"High CPU usage ({resource_metrics['avg_cpu_60s']}%),
-                        throttling coordination"
+                    f"High CPU usage ({resource_metrics['avg_cpu_60s']}%), "
+                    "throttling coordination"
                 )
                 await asyncio.sleep(0.1)  # Brief throttling
 

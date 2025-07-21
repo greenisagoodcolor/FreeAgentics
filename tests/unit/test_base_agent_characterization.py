@@ -8,11 +8,11 @@ Following Michael Feathers' principles:
 
 import pytest
 import numpy as np
-from unittest.mock import Mock, patch, MagicMock
+from unittest.mock import Mock, patch
 from datetime import datetime
 import logging
 from dataclasses import dataclass
-from typing import Any, Dict, Optional
+from typing import Any, Dict
 
 # Import functions and classes to test
 from agents.base_agent import (
@@ -492,7 +492,7 @@ class TestActiveInferenceAgent:
             "confidence": 0.9,
             "metadata": {"reason": "exploration"}
         }
-        result = agent.act(decision)
+        agent.act(decision)
         
         world.execute_action.assert_called_once_with("test", "down", {"reason": "exploration"})
         
@@ -517,7 +517,6 @@ class TestActiveInferenceAgent:
         """Test update_config method."""
         agent = ActiveInferenceAgent("test", Mock())
         
-        original_threshold = agent.config.belief_threshold
         
         agent.update_config(belief_threshold=0.9, learning_rate=0.05)
         

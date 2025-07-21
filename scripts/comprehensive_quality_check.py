@@ -7,7 +7,6 @@ Following CLAUDE.md principles: ALL automated checks must pass - everything must
 import subprocess
 import sys
 import time
-from pathlib import Path
 
 # ANSI color codes
 GREEN = "\033[92m"
@@ -56,10 +55,10 @@ def main():
     print(f"{BOLD}🎯 COMPREHENSIVE QUALITY CHECK - ZERO TOLERANCE MODE{RESET}")
     print(f"{BOLD}{'='*80}{RESET}")
     print(
-        f"\nFollowing CLAUDE.md: ALL automated checks must pass - everything must be ✅ GREEN!"
+        "\nFollowing CLAUDE.md: ALL automated checks must pass - everything must be ✅ GREEN!"
     )
     print(
-        f"No errors. No formatting issues. No linting problems. Zero tolerance.\n"
+        "No errors. No formatting issues. No linting problems. Zero tolerance.\n"
     )
 
     failed_checks = []
@@ -139,7 +138,7 @@ def main():
     print(f"{BOLD}📊 QUALITY CHECK SUMMARY{RESET}")
     print(f"{BOLD}{'='*80}{RESET}")
 
-    print(f"\n📈 Results:")
+    print("\n📈 Results:")
     print(f"   Total Checks: {total_checks}")
     print(f"   {GREEN}Passed: {passed_checks}{RESET}")
     print(f"   {RED}Failed: {len(failed_checks)}{RESET}")

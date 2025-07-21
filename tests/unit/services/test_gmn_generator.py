@@ -1,6 +1,6 @@
 """Test suite for GMN Generator service."""
 
-from unittest.mock import AsyncMock, MagicMock
+from unittest.mock import AsyncMock
 
 import pytest
 

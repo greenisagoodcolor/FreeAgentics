@@ -11,11 +11,10 @@ This demonstrates:
 Run this to see the integration in action!
 """
 
-import asyncio
 import json
 import sys
 from datetime import datetime
-from unittest.mock import MagicMock, patch
+from unittest.mock import patch
 
 # Add project root to path
 sys.path.insert(0, '.')
@@ -52,7 +51,7 @@ def demo_agent_creation():
     ui_request = {
         "description": "An intelligent explorer agent that searches for valuable resources and learns from the environment"
     }
-    print(f"   POST /api/agents")
+    print("   POST /api/agents")
     print(f"   Body: {json.dumps(ui_request, indent=2)}")
     print()
 
@@ -134,7 +133,7 @@ def demo_agent_creation():
 
         response = client.get("/api/agents", headers=headers)
 
-        print(f"   GET /api/agents")
+        print("   GET /api/agents")
         print(f"   Status: {response.status_code}")
 
         if response.status_code == 200:
@@ -222,7 +221,7 @@ def demo_api_compatibility():
         print(
             f"  → Name: {extracted_name} (expected: {test_case['expected_name']})"
         )
-        print(f"  → Template: basic-explorer")
+        print("  → Template: basic-explorer")
         print()
 
     print("The compatibility layer successfully bridges the gap between:")

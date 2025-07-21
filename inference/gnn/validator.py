@@ -117,8 +117,7 @@ class GMNValidator:
             config_dict["metadata"] = model_config.metadata
 
         # Extract name from AST or metadata
-        if hasattr(model_config, "ast") and model_config.ast and
-            hasattr(model_config.ast, "name"):
+        if hasattr(model_config, "ast") and model_config.ast and hasattr(model_config.ast, "name"):
             config_dict["name"] = model_config.ast.name
         elif "name" in getattr(model_config, "metadata", {}):
             config_dict["name"] = model_config.metadata["name"]
@@ -248,8 +247,7 @@ class GMNValidator:
         for rule_name, rule_func in self._custom_rules.items():
             try:
                 # Pass the original ParseResult if available, otherwise processed config
-                rule_input = original_parse_result if original_parse_result else
-                    model_config
+                rule_input = original_parse_result if original_parse_result else model_config
                 rule_result = rule_func(rule_input)
                 if isinstance(rule_result, list):
                     errors.extend(rule_result)
@@ -346,8 +344,8 @@ class GMNValidator:
             # Limit errors
             if len(errors) > self.max_validation_errors:
                 errors = errors[: self.max_validation_errors]
-                errors.append(f"... and
-                    {len(errors) - self.max_validation_errors} more errors")
+                errors.append(f"... and "
+                              f"{len(errors) - self.max_validation_errors} more errors")
 
             # Create result
             is_valid = len(errors) == 0
@@ -421,8 +419,8 @@ class GMNValidator:
                 if not isinstance(value, (int, float)):
                     errors.append(f"{param} must be numeric")
                 elif value < min_val or value > max_val:
-                    errors.append(f"{param} value {value} outside range [{min_val},
-                        {max_val}]")
+                    errors.append(f"{param} value {value} outside range [{min_val}, "
+                                  f"{max_val}]")
 
         return errors
 

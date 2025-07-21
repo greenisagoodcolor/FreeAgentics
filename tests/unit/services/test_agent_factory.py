@@ -1,6 +1,6 @@
 """Test suite for Agent Factory service."""
 
-from unittest.mock import MagicMock, patch
+from unittest.mock import patch
 
 import numpy as np
 import pytest

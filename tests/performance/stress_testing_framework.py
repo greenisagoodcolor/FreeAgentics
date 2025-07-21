@@ -18,13 +18,11 @@ import logging
 import random
 import statistics
 import time
-import uuid
 from concurrent.futures import ThreadPoolExecutor
-from contextlib import asynccontextmanager
 from dataclasses import dataclass, field
-from datetime import datetime, timedelta
+from datetime import datetime
 from enum import Enum
-from typing import Any, Callable, Dict, List, Optional, Tuple
+from typing import Any, Dict, List, Optional
 
 import aiohttp
 import numpy as np
@@ -545,7 +543,7 @@ class StressTestingFramework:
                     f"Failure type {failure_type.value} not implemented"
                 )
 
-            injection_result.system_response = f"Failure injected successfully"
+            injection_result.system_response = "Failure injected successfully"
 
         except Exception as e:
             injection_result.system_response = f"Failure injection error: {e}"
@@ -1024,7 +1022,7 @@ async def run_stress_test_validation():
             print(f"Recovery capability: {resilience['recovery_capability']}")
 
             # Recommendations
-            print(f"\nRecommendations:")
+            print("\nRecommendations:")
             for rec in report['recommendations']:
                 print(f"  - {rec}")
 

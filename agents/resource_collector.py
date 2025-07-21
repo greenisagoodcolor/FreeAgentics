@@ -213,8 +213,7 @@ class ResourceCollectorAgent(ActiveInferenceAgent):
         max_len = max(len(p) for p in policies)
         padded_policies = []
         for policy in policies:
-            padded = policy +
-                [policy[-1]] * (max_len - len(policy))  # Repeat last action
+            padded = policy + [policy[-1]] * (max_len - len(policy))  # Repeat last action
             padded_policies.append(padded)
 
         return np.array(padded_policies)
@@ -358,8 +357,7 @@ class ResourceCollectorAgent(ActiveInferenceAgent):
                     action = self._fallback_action_selection()
 
                 # Override if necessary
-                if self.current_load >= self.carrying_capacity and
-                    action != "return_to_base":
+                if self.current_load >= self.carrying_capacity and action != "return_to_base":
                     action = "return_to_base"
 
             except Exception as e:
@@ -401,8 +399,7 @@ class ResourceCollectorAgent(ActiveInferenceAgent):
 
         for pos, resource in self.resource_memory.items():
             if not resource["collected"]:
-                distance = abs(pos[0] - self.position[0]) +
-                    abs(pos[1] - self.position[1])
+                distance = abs(pos[0] - self.position[0]) + abs(pos[1] - self.position[1])
                 if distance < min_distance:
                     min_distance = distance
                     nearest = pos

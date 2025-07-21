@@ -17,7 +17,7 @@ from sqlalchemy import create_engine, text
 from sqlalchemy.orm import sessionmaker
 
 from database.connection_manager import DatabaseConnectionManager
-from database.models import Agent, Coalition, KnowledgeNode
+from database.models import Agent
 
 
 def test_basic_connection(database_url: str) -> bool:
@@ -40,7 +40,7 @@ def test_connection_manager(database_url: str) -> bool:
     print("\nTesting connection manager...")
     try:
         manager = DatabaseConnectionManager(database_url)
-        engine = manager.create_engine_with_pool_config()
+        manager.create_engine_with_pool_config()
 
         # Test session creation
         session = manager.get_db_session()
@@ -150,7 +150,7 @@ def test_connection_pooling(database_url: str) -> bool:
     print("\nTesting connection pooling...")
     try:
         manager = DatabaseConnectionManager(database_url)
-        engine = manager.create_engine_with_pool_config(
+        manager.create_engine_with_pool_config(
             pool_size=5, max_overflow=10
         )
 

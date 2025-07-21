@@ -27,7 +27,7 @@ class TestHealthAPI:
             assert health_check is not None
             assert database_exception_handler is not None
 
-        except ImportError as e:
+        except ImportError:
             assert False, "Test bypass removed - must fix underlying issue"
 
     def test_router_is_api_router(self):
@@ -37,7 +37,7 @@ class TestHealthAPI:
 
             assert isinstance(router, APIRouter)
 
-        except ImportError as e:
+        except ImportError:
             assert False, "Test bypass removed - must fix underlying issue"
 
     @patch("api.v1.health.get_db")
@@ -68,7 +68,7 @@ class TestHealthAPI:
             # Verify response
             assert result == {"status": "healthy", "db": "connected"}
 
-        except ImportError as e:
+        except ImportError:
             assert False, "Test bypass removed - must fix underlying issue"
 
     @pytest.mark.asyncio
@@ -91,7 +91,7 @@ class TestHealthAPI:
             # Check content structure (would need to access body for full test)
             # For now, just verify it's a JSONResponse
 
-        except ImportError as e:
+        except ImportError:
             assert False, "Test bypass removed - must fix underlying issue"
 
     def test_health_check_function_attributes(self):
@@ -108,7 +108,7 @@ class TestHealthAPI:
             assert health_check.__doc__ is not None
             assert "Health check endpoint" in health_check.__doc__
 
-        except ImportError as e:
+        except ImportError:
             assert False, "Test bypass removed - must fix underlying issue"
 
     def test_database_exception_handler_function_attributes(self):
@@ -125,7 +125,7 @@ class TestHealthAPI:
             assert database_exception_handler.__doc__ is not None
             assert "Handle database operational errors" in database_exception_handler.__doc__
 
-        except ImportError as e:
+        except ImportError:
             assert False, "Test bypass removed - must fix underlying issue"
 
     def test_module_docstring(self):
@@ -136,7 +136,7 @@ class TestHealthAPI:
             assert api.v1.health.__doc__ is not None
             assert "Health check endpoint following TDD principles" in api.v1.health.__doc__
 
-        except ImportError as e:
+        except ImportError:
             assert False, "Test bypass removed - must fix underlying issue"
 
     def test_imports_exist(self):
@@ -157,7 +157,7 @@ class TestHealthAPI:
             assert OperationalError is not None
             assert Session is not None
 
-        except ImportError as e:
+        except ImportError:
             assert False, "Test bypass removed - must fix underlying issue"
 
     def test_router_routes_exist(self):
@@ -171,5 +171,5 @@ class TestHealthAPI:
             # There should be at least one route
             assert len(router.routes) > 0
 
-        except ImportError as e:
+        except ImportError:
             assert False, "Test bypass removed - must fix underlying issue"

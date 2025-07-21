@@ -3,7 +3,6 @@
 import uuid
 from unittest.mock import MagicMock, patch
 
-import pytest
 
 
 class TestAgentsTypeHelpers:
@@ -31,7 +30,7 @@ class TestAgentsTypeHelpers:
             assert match_coalition_id is not None
             assert get_agent_attribute is not None
             assert get_coalition_attribute is not None
-        except ImportError as e:
+        except ImportError:
             assert False, "Test bypass removed - must fix underlying issue"
 
     @patch("agents.type_helpers.AgentTypeAdapter")

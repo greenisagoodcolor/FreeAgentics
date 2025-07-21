@@ -118,11 +118,10 @@ class TestPrometheusMetrics:
         response1 = client.get("/metrics")
         
         if response1.status_code == 200:
-            content1 = response1.text
             
             # Try to create an agent (this might fail, which is OK for now)
             try:
-                agent_response = client.post("/api/v1/agents", json={
+                client.post("/api/v1/agents", json={
                     "name": "test_agent",
                     "agent_type": "active_inference"
                 })
@@ -174,7 +173,7 @@ class TestPrometheusMetrics:
         import time
         
         start_time = time.time()
-        response = client.get("/metrics")
+        client.get("/metrics")
         end_time = time.time()
         
         # Should respond within 1 second
@@ -188,7 +187,7 @@ class TestMetricsIntegration:
     def test_metrics_reflect_system_state(self, client):
         """Test that metrics reflect actual system state."""
         # First, get system info
-        info_response = client.get("/api/v1/system/info")
+        client.get("/api/v1/system/info")
         
         # Then get metrics
         metrics_response = client.get("/metrics")

@@ -2,12 +2,9 @@
 Comprehensive test suite for Knowledge Graph modules
 """
 
-import json
 from datetime import datetime
-from typing import Any, Dict, List, Optional
-from unittest.mock import MagicMock, Mock, patch
+from unittest.mock import MagicMock, patch
 
-import pytest
 
 # Mock complex dependencies
 mock_modules = {
@@ -33,7 +30,6 @@ with patch.dict('sys.modules', mock_modules):
         QueryEngine as FallbackQueryEngine,
     )
     from knowledge_graph.graph_engine import (
-        KnowledgeEdge,
         KnowledgeGraph,
         KnowledgeNode,
     )

@@ -16,12 +16,9 @@ This script validates all implemented enhancements:
 10. ✅ Clean up: Remove unused roles and permissions, consolidate duplicates
 """
 
-import asyncio
 import json
 import logging
-import tempfile
 from datetime import datetime, timedelta, timezone
-from typing import Any, Dict, List
 
 # Set up logging
 logging.basicConfig(level=logging.INFO)
@@ -360,7 +357,7 @@ def test_enhanced_rbac_functionality():
         print(f"  {key}: {value}")
 
     # Generate final comprehensive report
-    print(f"\n📄 Generating final RBAC enhancement report...")
+    print("\n📄 Generating final RBAC enhancement report...")
 
     final_report = {
         "audit_metadata": {
@@ -397,8 +394,8 @@ def test_enhanced_rbac_functionality():
 
     print("✅ Final report saved to: rbac_enhancement_validation_report.json")
 
-    print(f"\n🎉 TASK #14.14 RBAC AUDIT AND ACCESS CONTROL ENHANCEMENT")
-    print(f"🎉 SUCCESSFULLY COMPLETED WITH ALL REQUIREMENTS IMPLEMENTED!")
+    print("\n🎉 TASK #14.14 RBAC AUDIT AND ACCESS CONTROL ENHANCEMENT")
+    print("🎉 SUCCESSFULLY COMPLETED WITH ALL REQUIREMENTS IMPLEMENTED!")
 
     return True
 

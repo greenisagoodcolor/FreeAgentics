@@ -57,8 +57,8 @@ class PyMDPCompatibilityAdapter:
         # Strict return type validation and conversion
         if not isinstance(action_result, np.ndarray):
             raise RuntimeError(
-                f"PyMDP sample_action() returned {type(action_result)},
-                    expected numpy.ndarray"
+                f"PyMDP sample_action() returned {type(action_result)}, "
+                f"expected numpy.ndarray"
             )
 
         if action_result.dtype not in [
@@ -73,8 +73,8 @@ class PyMDPCompatibilityAdapter:
 
         if action_result.shape != (1,):
             raise RuntimeError(
-                f"PyMDP sample_action() returned shape {action_result.shape},
-                    expected (1,)"
+                f"PyMDP sample_action() returned shape {action_result.shape}, "
+                f"expected (1,)"
             )
 
         # Convert to exact int type - no fallbacks on failure
@@ -118,8 +118,8 @@ class PyMDPCompatibilityAdapter:
         # Strict return type validation
         if not isinstance(policies_result, tuple):
             raise RuntimeError(
-                f"PyMDP infer_policies() returned {type(policies_result)},
-                    expected tuple"
+                f"PyMDP infer_policies() returned {type(policies_result)}, "
+                f"expected tuple"
             )
 
         if len(policies_result) != 2:
@@ -185,8 +185,7 @@ class PyMDPCompatibilityAdapter:
             return self._handle_numpy_beliefs(beliefs_result)
         else:
             raise RuntimeError(
-                f"infer_states returned {type(beliefs_result)}, expected list or
-                    numpy.ndarray"
+                f"infer_states returned {type(beliefs_result)}, expected list or numpy.ndarray"
             )
 
     def _handle_numpy_beliefs(self,
@@ -212,8 +211,8 @@ class PyMDPCompatibilityAdapter:
                 return [content]
             else:
                 raise RuntimeError(
-                    f"infer_states object array contains {type(content)},
-                        expected list or ndarray"
+                    f"infer_states object array contains {type(content)}, "
+                    f"expected list or ndarray"
                 )
         else:
             # Multi-element object array - convert to list
@@ -230,12 +229,10 @@ class PyMDPCompatibilityAdapter:
         """Validate each belief array format."""
         for i, belief in enumerate(beliefs_list):
             if not isinstance(belief, np.ndarray):
-                raise RuntimeError(f"Belief {i} is {type(belief)},
-                    expected numpy.ndarray")
+                raise RuntimeError(f"Belief {i} is {type(belief)}, expected numpy.ndarray")
 
             if not np.issubdtype(belief.dtype, np.floating):
-                raise RuntimeError(f"Belief {i} has dtype {belief.dtype},
-                    expected floating point")
+                raise RuntimeError(f"Belief {i} has dtype {belief.dtype}, expected floating point")
 
     def infer_states(
         self,

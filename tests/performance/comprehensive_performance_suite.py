@@ -17,11 +17,9 @@ import asyncio
 import json
 import logging
 import time
-from concurrent.futures import ThreadPoolExecutor
-from contextlib import asynccontextmanager
 from dataclasses import dataclass, field
-from datetime import datetime, timedelta
-from typing import Any, Dict, List, Optional, Tuple
+from datetime import datetime
+from typing import Any, Dict, List
 
 import aiohttp
 import numpy as np
@@ -29,10 +27,8 @@ import psutil
 import pytest
 
 from observability.performance_monitor import (
-    PerformanceMonitor,
     get_performance_monitor,
 )
-from tests.conftest import test_client
 
 logger = logging.getLogger(__name__)
 
@@ -534,7 +530,7 @@ class ComprehensivePerformanceSuite:
 
             # Run concurrent operations
             tasks = [simulate_operation(i) for i in range(load_level)]
-            results = await asyncio.gather(*tasks)
+            await asyncio.gather(*tasks)
 
             duration = time.perf_counter() - start_time
             throughput = load_level / duration
@@ -1043,7 +1039,7 @@ async def run_performance_validation():
 
         # SLA validation
         sla = report['sla_validation']
-        print(f"\n" + "=" * 30)
+        print("\n" + "=" * 30)
         print("SLA VALIDATION")
         print("=" * 30)
         print(f"Requirements met: {'✓' if sla['requirements_met'] else '✗'}")
@@ -1056,7 +1052,7 @@ async def run_performance_validation():
                 )
 
         # Recommendations
-        print(f"\n" + "=" * 30)
+        print("\n" + "=" * 30)
         print("RECOMMENDATIONS")
         print("=" * 30)
         for rec in report['recommendations']:

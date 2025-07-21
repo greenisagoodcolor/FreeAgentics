@@ -5,23 +5,16 @@ during prompt processing pipeline execution.
 """
 
 import asyncio
-import json
 import uuid
-from datetime import datetime
-from typing import Any, Dict, List, Set
-from unittest.mock import AsyncMock, MagicMock, patch
+from unittest.mock import AsyncMock, patch
 
 import pytest
 from fastapi import WebSocket
-from sqlalchemy.ext.asyncio import AsyncSession
 
 from api.v1.prompts import websocket_pipeline_callback
 from api.v1.websocket import (
     ConnectionManager,
-    broadcast_agent_event,
-    broadcast_system_event,
 )
-from auth.security_implementation import Permission, Role, TokenData
 from services.websocket_integration import (
     PipelineEventType,
     PipelineStage,
