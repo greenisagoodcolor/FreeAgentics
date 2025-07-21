@@ -264,7 +264,9 @@ class PyMDPMathematicalValidator:
         return results
 
 
-@pytest.mark.skipif(not PYMDP_AVAILABLE, reason="PyMDP not available - skipping mathematical validation")
+@pytest.mark.skipif(
+    not PYMDP_AVAILABLE, reason="PyMDP not available - skipping mathematical validation"
+)
 def test_pymdp_mathematical_validation():
     """Run PyMDP mathematical validation tests."""
     validator = PyMDPMathematicalValidator()
