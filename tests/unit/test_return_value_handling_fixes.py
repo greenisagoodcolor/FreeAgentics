@@ -207,7 +207,7 @@ class TestReturnValueHandlingFixes:
 
                 print("Direct belief access successful")
             else:
-                pytest.skip(
+                pytest.fail(
                     "PyMDP agent not available - testing fallback scenario"
                 )
 

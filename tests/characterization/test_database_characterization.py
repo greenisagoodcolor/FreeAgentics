@@ -19,7 +19,7 @@ class TestDatabaseModelsCharacterization:
             assert Coalition is not None 
             assert User is not None
         except ImportError as e:
-            pytest.skip("Test disabled pending fixes")
+            pytest.fail("Test needs implementation")
 
     def test_agent_model_structure(self):
         """Characterize Agent model structure."""
@@ -36,7 +36,7 @@ class TestDatabaseModelsCharacterization:
             assert Agent.__tablename__ == 'agents'
             
         except Exception as e:
-            pytest.skip("Test disabled pending fixes")
+            pytest.fail("Test needs implementation")
 
     def test_coalition_model_structure(self):
         """Characterize Coalition model structure."""
@@ -52,7 +52,7 @@ class TestDatabaseModelsCharacterization:
             assert Coalition.__tablename__ == 'coalitions'
             
         except Exception as e:
-            pytest.skip("Test disabled pending fixes")
+            pytest.fail("Test needs implementation")
 
     def test_user_model_structure(self):
         """Characterize User model structure."""
@@ -69,7 +69,7 @@ class TestDatabaseModelsCharacterization:
             assert User.__tablename__ == 'users'
             
         except Exception as e:
-            pytest.skip("Test disabled pending fixes")
+            pytest.fail("Test needs implementation")
 
 class TestDatabaseSessionCharacterization:
     """Characterize database session behavior."""
@@ -81,7 +81,7 @@ class TestDatabaseSessionCharacterization:
             assert get_db is not None
             assert SessionLocal is not None
         except ImportError as e:
-            pytest.skip("Test disabled pending fixes")
+            pytest.fail("Test needs implementation")
 
     def test_session_local_structure(self):
         """Characterize SessionLocal structure."""
@@ -92,7 +92,7 @@ class TestDatabaseSessionCharacterization:
             assert hasattr(SessionLocal, 'bind')
             
         except Exception as e:
-            pytest.skip("Test disabled pending fixes")
+            pytest.fail("Test needs implementation")
 
     def test_get_db_function_structure(self):
         """Characterize get_db function behavior."""
@@ -104,7 +104,7 @@ class TestDatabaseSessionCharacterization:
             assert inspect.isgeneratorfunction(get_db)
             
         except Exception as e:
-            pytest.skip("Test disabled pending fixes")
+            pytest.fail("Test needs implementation")
 
 class TestDatabaseTypesCharacterization:
     """Characterize database types behavior."""
@@ -116,7 +116,7 @@ class TestDatabaseTypesCharacterization:
             assert AgentStatus is not None
             assert CoalitionStatus is not None
         except ImportError as e:
-            pytest.skip("Test disabled pending fixes")
+            pytest.fail("Test needs implementation")
 
     def test_agent_status_enum_values(self):
         """Characterize AgentStatus enum values."""
@@ -132,7 +132,7 @@ class TestDatabaseTypesCharacterization:
             assert len(members) > 0
             
         except Exception as e:
-            pytest.skip("Test disabled pending fixes")
+            pytest.fail("Test needs implementation")
 
     def test_coalition_status_enum_values(self):
         """Characterize CoalitionStatus enum values."""
@@ -148,7 +148,7 @@ class TestDatabaseTypesCharacterization:
             assert len(members) > 0
             
         except Exception as e:
-            pytest.skip("Test disabled pending fixes")
+            pytest.fail("Test needs implementation")
 
 class TestDatabaseConnectionCharacterization:
     """Characterize database connection behavior."""
@@ -159,7 +159,7 @@ class TestDatabaseConnectionCharacterization:
             from database.connection_manager import DatabaseManager
             assert DatabaseManager is not None
         except ImportError as e:
-            pytest.skip("Test disabled pending fixes")
+            pytest.fail("Test needs implementation")
 
     def test_database_manager_structure(self):
         """Characterize DatabaseManager structure."""
@@ -173,7 +173,7 @@ class TestDatabaseConnectionCharacterization:
             assert isinstance(DatabaseManager, type)
             
         except Exception as e:
-            pytest.skip("Test disabled pending fixes")
+            pytest.fail("Test needs implementation")
 
 class TestDatabaseUtilsCharacterization:
     """Characterize database utilities behavior."""
@@ -185,7 +185,7 @@ class TestDatabaseUtilsCharacterization:
             assert create_tables is not None
             assert drop_tables is not None
         except ImportError as e:
-            pytest.skip("Test disabled pending fixes")
+            pytest.fail("Test needs implementation")
 
     def test_create_tables_function(self):
         """Characterize create_tables function."""
@@ -198,7 +198,7 @@ class TestDatabaseUtilsCharacterization:
             assert isinstance(sig.parameters, dict)
             
         except Exception as e:
-            pytest.skip("Test disabled pending fixes")
+            pytest.fail("Test needs implementation")
 
 class TestDatabaseValidationCharacterization:
     """Characterize database validation behavior."""
@@ -209,7 +209,7 @@ class TestDatabaseValidationCharacterization:
             from database.validation import validate_agent_data
             assert validate_agent_data is not None
         except ImportError as e:
-            pytest.skip("Test disabled pending fixes")
+            pytest.fail("Test needs implementation")
 
     def test_validate_agent_data_structure(self):
         """Characterize validate_agent_data function."""
@@ -225,4 +225,4 @@ class TestDatabaseValidationCharacterization:
             assert isinstance(sig.parameters, dict)
             
         except Exception as e:
-            pytest.skip("Test disabled pending fixes")
+            pytest.fail("Test needs implementation")

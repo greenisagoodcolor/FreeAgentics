@@ -17,7 +17,7 @@ class TestLLMProvidersCharacterization:
             from inference.llm.anthropic_provider import AnthropicProvider
             assert AnthropicProvider is not None
         except ImportError as e:
-            pytest.skip("Test disabled pending fixes")
+            pytest.fail("Test needs implementation")
 
     def test_openai_provider_import(self):
         """Document OpenAI provider import behavior."""
@@ -25,7 +25,7 @@ class TestLLMProvidersCharacterization:
             from inference.llm.openai_provider import OpenAIProvider
             assert OpenAIProvider is not None
         except ImportError as e:
-            pytest.skip("Test disabled pending fixes")
+            pytest.fail("Test needs implementation")
 
     def test_provider_interface_structure(self):
         """Characterize provider interface structure."""
@@ -40,9 +40,9 @@ class TestLLMProvidersCharacterization:
             assert inspect.isclass(LLMProvider)
             
         except ImportError as e:
-            pytest.skip("Test disabled pending fixes")
+            pytest.fail("Test needs implementation")
         except Exception as e:
-            pytest.skip("Test disabled pending fixes")
+            pytest.fail("Test needs implementation")
 
     def test_provider_factory_structure(self):
         """Characterize provider factory behavior."""
@@ -57,9 +57,9 @@ class TestLLMProvidersCharacterization:
             assert isinstance(sig.parameters, dict)
             
         except ImportError as e:
-            pytest.skip("Test disabled pending fixes")
+            pytest.fail("Test needs implementation")
         except Exception as e:
-            pytest.skip("Test disabled pending fixes")
+            pytest.fail("Test needs implementation")
 
 class TestLocalLLMManagerCharacterization:
     """Characterize local LLM manager functionality."""
@@ -70,7 +70,7 @@ class TestLocalLLMManagerCharacterization:
             from inference.llm.local_llm_manager import LocalLLMManager
             assert LocalLLMManager is not None
         except ImportError as e:
-            pytest.skip("Test disabled pending fixes")
+            pytest.fail("Test needs implementation")
 
     def test_local_llm_manager_structure(self):
         """Characterize LocalLLMManager structure."""
@@ -87,7 +87,7 @@ class TestLocalLLMManagerCharacterization:
                     assert callable(getattr(LocalLLMManager, method_name))
                     
         except Exception as e:
-            pytest.skip("Test disabled pending fixes")
+            pytest.fail("Test needs implementation")
 
 class TestGNNComponentsCharacterization:
     """Characterize GNN components functionality."""
@@ -98,7 +98,7 @@ class TestGNNComponentsCharacterization:
             from inference.gnn.model import GNNModel
             assert GNNModel is not None
         except ImportError as e:
-            pytest.skip("Test disabled pending fixes")
+            pytest.fail("Test needs implementation")
 
     def test_feature_extractor_import(self):
         """Document feature extractor import behavior."""
@@ -106,7 +106,7 @@ class TestGNNComponentsCharacterization:
             from inference.gnn.feature_extractor import FeatureExtractor
             assert FeatureExtractor is not None
         except ImportError as e:
-            pytest.skip("Test disabled pending fixes")
+            pytest.fail("Test needs implementation")
 
     def test_gnn_parser_import(self):
         """Document GNN parser import behavior."""
@@ -114,7 +114,7 @@ class TestGNNComponentsCharacterization:
             from inference.gnn.parser import GNNParser
             assert GNNParser is not None
         except ImportError as e:
-            pytest.skip("Test disabled pending fixes")
+            pytest.fail("Test needs implementation")
 
     def test_gnn_validator_import(self):
         """Document GNN validator import behavior."""
@@ -122,7 +122,7 @@ class TestGNNComponentsCharacterization:
             from inference.gnn.validator import GNNValidator
             assert GNNValidator is not None
         except ImportError as e:
-            pytest.skip("Test disabled pending fixes")
+            pytest.fail("Test needs implementation")
 
     def test_h3_spatial_integration_import(self):
         """Document H3 spatial integration import behavior."""
@@ -130,7 +130,7 @@ class TestGNNComponentsCharacterization:
             from inference.gnn.h3_spatial_integration import H3SpatialIntegrator
             assert H3SpatialIntegrator is not None
         except ImportError as e:
-            pytest.skip("Test disabled pending fixes")
+            pytest.fail("Test needs implementation")
 
 class TestActiveInferenceCharacterization:
     """Characterize active inference functionality."""
@@ -141,7 +141,7 @@ class TestActiveInferenceCharacterization:
             from inference.active.gmn_parser import GMNParser
             assert GMNParser is not None
         except ImportError as e:
-            pytest.skip("Test disabled pending fixes")
+            pytest.fail("Test needs implementation")
 
     def test_gmn_validation_import(self):
         """Document GMN validation import behavior."""
@@ -149,7 +149,7 @@ class TestActiveInferenceCharacterization:
             from inference.active.gmn_validation import GMNValidator
             assert GMNValidator is not None
         except ImportError as e:
-            pytest.skip("Test disabled pending fixes")
+            pytest.fail("Test needs implementation")
 
     def test_gmn_parser_structure(self):
         """Characterize GMN parser structure."""
@@ -166,7 +166,7 @@ class TestActiveInferenceCharacterization:
                     assert callable(getattr(GMNParser, method_name))
                     
         except Exception as e:
-            pytest.skip("Test disabled pending fixes")
+            pytest.fail("Test needs implementation")
 
 class TestInferenceInitializationCharacterization:
     """Characterize inference module initialization."""
@@ -177,7 +177,7 @@ class TestInferenceInitializationCharacterization:
             import inference
             assert inference is not None
         except ImportError as e:
-            pytest.skip("Test disabled pending fixes")
+            pytest.fail("Test needs implementation")
 
     def test_llm_submodule_init(self):
         """Document LLM submodule initialization."""
@@ -185,7 +185,7 @@ class TestInferenceInitializationCharacterization:
             from inference import llm
             assert llm is not None
         except ImportError as e:
-            pytest.skip("Test disabled pending fixes")
+            pytest.fail("Test needs implementation")
 
     def test_gnn_submodule_init(self):
         """Document GNN submodule initialization."""
@@ -193,7 +193,7 @@ class TestInferenceInitializationCharacterization:
             from inference import gnn
             assert gnn is not None
         except ImportError as e:
-            pytest.skip("Test disabled pending fixes")
+            pytest.fail("Test needs implementation")
 
     def test_active_submodule_init(self):
         """Document active inference submodule initialization."""
@@ -201,7 +201,7 @@ class TestInferenceInitializationCharacterization:
             from inference import active
             assert active is not None
         except ImportError as e:
-            pytest.skip("Test disabled pending fixes")
+            pytest.fail("Test needs implementation")
 
 class TestInferenceFactoryPatternCharacterization:
     """Characterize inference factory patterns."""
@@ -220,7 +220,7 @@ class TestInferenceFactoryPatternCharacterization:
             assert provider.api_key == "test-key"
             
         except Exception as e:
-            pytest.skip("Test disabled pending fixes")
+            pytest.fail("Test needs implementation")
 
     @patch('openai.Client')
     def test_openai_provider_initialization(self, mock_client):
@@ -236,4 +236,4 @@ class TestInferenceFactoryPatternCharacterization:
             assert provider.api_key == "test-key"
             
         except Exception as e:
-            pytest.skip("Test disabled pending fixes")
+            pytest.fail("Test needs implementation")

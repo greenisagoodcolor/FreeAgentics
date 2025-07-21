@@ -23,7 +23,7 @@ class TestAgentEdgeCases:
             assert hasattr(empty_config, '__dict__')
             
         except Exception as e:
-            pytest.skip("Test disabled pending fixes")
+            pytest.fail("Test needs implementation")
 
     def test_agent_with_invalid_states(self):
         """Document behavior with invalid state configurations."""
@@ -45,7 +45,7 @@ class TestAgentEdgeCases:
                     assert isinstance(inner_e, Exception)
                     
         except Exception as e:
-            pytest.skip("Test disabled pending fixes")
+            pytest.fail("Test needs implementation")
 
     def test_agent_observation_with_none(self):
         """Document behavior when observing None values."""
@@ -72,7 +72,7 @@ class TestAgentEdgeCases:
                     assert isinstance(inner_e, Exception)
                     
         except Exception as e:
-            pytest.skip("Test disabled pending fixes")
+            pytest.fail("Test needs implementation")
 
     def test_agent_step_without_observation(self):
         """Document behavior when stepping without prior observation."""
@@ -97,7 +97,7 @@ class TestAgentEdgeCases:
                     assert isinstance(inner_e, Exception)
                     
         except Exception as e:
-            pytest.skip("Test disabled pending fixes")
+            pytest.fail("Test needs implementation")
 
 class TestAPIEdgeCases:
     """Characterize API behavior under edge conditions."""
@@ -121,7 +121,7 @@ class TestAPIEdgeCases:
                     assert isinstance(inner_e, Exception)
                     
         except Exception as e:
-            pytest.skip("Test disabled pending fixes")
+            pytest.fail("Test needs implementation")
 
     def test_agent_creation_with_invalid_data(self):
         """Document API behavior with invalid agent creation data."""
@@ -146,7 +146,7 @@ class TestAPIEdgeCases:
                     assert isinstance(inner_e, Exception)
                     
         except Exception as e:
-            pytest.skip("Test disabled pending fixes")
+            pytest.fail("Test needs implementation")
 
     def test_auth_with_malformed_token(self):
         """Document authentication behavior with malformed tokens."""
@@ -170,7 +170,7 @@ class TestAPIEdgeCases:
                     assert isinstance(inner_e, Exception)
                     
         except Exception as e:
-            pytest.skip("Test disabled pending fixes")
+            pytest.fail("Test needs implementation")
 
 class TestDatabaseEdgeCases:
     """Characterize database behavior under edge conditions."""
@@ -192,7 +192,7 @@ class TestDatabaseEdgeCases:
                 assert isinstance(inner_e, Exception)
                 
         except Exception as e:
-            pytest.skip("Test disabled pending fixes")
+            pytest.fail("Test needs implementation")
 
     def test_model_with_null_required_fields(self):
         """Document model behavior when required fields are None."""
@@ -208,7 +208,7 @@ class TestDatabaseEdgeCases:
                 assert isinstance(inner_e, Exception)
                 
         except Exception as e:
-            pytest.skip("Test disabled pending fixes")
+            pytest.fail("Test needs implementation")
 
     @patch('database.session.SessionLocal')
     def test_database_session_timeout(self, mock_session_class):
@@ -233,7 +233,7 @@ class TestDatabaseEdgeCases:
                 assert isinstance(inner_e, Exception)
                 
         except Exception as e:
-            pytest.skip("Test disabled pending fixes")
+            pytest.fail("Test needs implementation")
 
 class TestInferenceEdgeCases:
     """Characterize inference behavior under edge conditions."""
@@ -261,7 +261,7 @@ class TestInferenceEdgeCases:
                     assert isinstance(inner_e, Exception)
                     
         except Exception as e:
-            pytest.skip("Test disabled pending fixes")
+            pytest.fail("Test needs implementation")
 
     def test_gmn_parser_with_malformed_expressions(self):
         """Document GMN parser behavior with malformed input."""
@@ -286,7 +286,7 @@ class TestInferenceEdgeCases:
                     assert isinstance(inner_e, Exception)
                     
         except Exception as e:
-            pytest.skip("Test disabled pending fixes")
+            pytest.fail("Test needs implementation")
 
     def test_gnn_with_mismatched_dimensions(self):
         """Document GNN behavior with mismatched input dimensions."""
@@ -310,7 +310,7 @@ class TestInferenceEdgeCases:
                     assert isinstance(inner_e, Exception)
                     
         except Exception as e:
-            pytest.skip("Test disabled pending fixes")
+            pytest.fail("Test needs implementation")
 
 class TestConcurrencyEdgeCases:
     """Characterize system behavior under concurrent access."""
@@ -340,7 +340,7 @@ class TestConcurrencyEdgeCases:
                     assert isinstance(inner_e, Exception)
                     
         except Exception as e:
-            pytest.skip("Test disabled pending fixes")
+            pytest.fail("Test needs implementation")
 
     @patch('asyncio.Lock')
     async def test_async_operations_deadlock(self, mock_async_lock):
@@ -363,4 +363,4 @@ class TestConcurrencyEdgeCases:
                     assert isinstance(inner_e, Exception)
                     
         except Exception as e:
-            pytest.skip("Test disabled pending fixes")
+            pytest.fail("Test needs implementation")

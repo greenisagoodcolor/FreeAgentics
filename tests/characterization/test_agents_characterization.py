@@ -34,7 +34,8 @@ class TestBaseAgentCharacterization:
             
         except Exception as e:
             # Document the actual failure mode
-            pytest.skip("Test disabled pending fixes")
+            # Test needs implementation - marking as expected failure
+            pytest.fail("Test needs implementation")
 
     def test_base_agent_methods_exist(self):
         """Document which methods exist on BaseAgent."""
@@ -70,7 +71,8 @@ class TestAgentManagerCharacterization:
             assert len(manager.agents) == 0  # Should start empty
             
         except Exception as e:
-            pytest.skip("Test disabled pending fixes")
+            # Test needs implementation - marking as expected failure
+            pytest.fail("Test needs implementation")
 
     def test_agent_manager_create_agent_interface(self):
         """Characterize the create_agent method interface."""
@@ -93,7 +95,8 @@ class TestTypeHelpersCharacterization:
             assert validate_agent_config is not None
             assert ensure_numpy_array is not None
         except ImportError as e:
-            pytest.skip("Test disabled pending fixes")
+            # Test needs implementation - marking as expected failure
+            pytest.fail("Test needs implementation")
 
     def test_ensure_numpy_array_behavior(self):
         """Characterize ensure_numpy_array function behavior."""
@@ -112,7 +115,8 @@ class TestTypeHelpersCharacterization:
             np.testing.assert_array_equal(result2, arr)
             
         except Exception as e:
-            pytest.skip("Test disabled pending fixes")
+            # Test needs implementation - marking as expected failure
+            pytest.fail("Test needs implementation")
 
 class TestErrorHandlingCharacterization:
     """Characterize error handling functionality."""
@@ -124,7 +128,8 @@ class TestErrorHandlingCharacterization:
             assert handle_agent_error is not None
             assert AgentError is not None
         except ImportError as e:
-            pytest.skip("Test disabled pending fixes")
+            # Test needs implementation - marking as expected failure
+            pytest.fail("Test needs implementation")
 
     def test_agent_error_structure(self):
         """Characterize AgentError exception structure."""
@@ -137,7 +142,8 @@ class TestErrorHandlingCharacterization:
             assert str(error) == "test message"
             
         except Exception as e:
-            pytest.skip("Test disabled pending fixes")
+            # Test needs implementation - marking as expected failure
+            pytest.fail("Test needs implementation")
 
 class TestMemoryOptimizationCharacterization:
     """Characterize memory optimization functionality."""
@@ -148,7 +154,8 @@ class TestMemoryOptimizationCharacterization:
             from agents.memory_optimization.matrix_pooling import MatrixPool
             assert MatrixPool is not None
         except ImportError as e:
-            pytest.skip("Test disabled pending fixes")
+            # Test needs implementation - marking as expected failure
+            pytest.fail("Test needs implementation")
 
     def test_matrix_pool_initialization(self):
         """Characterize MatrixPool initialization behavior."""
@@ -161,4 +168,5 @@ class TestMemoryOptimizationCharacterization:
             assert hasattr(pool, 'pool')
             
         except Exception as e:
-            pytest.skip("Test disabled pending fixes")
+            # Test needs implementation - marking as expected failure
+            pytest.fail("Test needs implementation")

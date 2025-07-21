@@ -16,7 +16,7 @@ try:
     PYMDP_AVAILABLE = True
 except ImportError:
     PYMDP_AVAILABLE = False
-    pytest.skip(
+    pytest.fail(
         "PyMDP required for action sampling tests", allow_module_level=True
     )
 

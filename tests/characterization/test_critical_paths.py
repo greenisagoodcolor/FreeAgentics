@@ -35,7 +35,7 @@ class TestAgentCriticalPaths:
             assert agent.num_obs == [2, 2]
             
         except Exception as e:
-            pytest.skip("Test disabled pending fixes")
+            pytest.fail("Test needs implementation")
 
     @patch('numpy.random.rand')
     def test_agent_observation_processing(self, mock_rand):
@@ -63,7 +63,7 @@ class TestAgentCriticalPaths:
                 assert result is not None or result is None  # Document actual behavior
                 
         except Exception as e:
-            pytest.skip("Test disabled pending fixes")
+            pytest.fail("Test needs implementation")
 
     def test_agent_error_handling_paths(self):
         """Characterize error handling in agent operations."""
@@ -82,7 +82,7 @@ class TestAgentCriticalPaths:
             assert result is None or result is not None
             
         except Exception as e:
-            pytest.skip("Test disabled pending fixes")
+            pytest.fail("Test needs implementation")
 
 class TestAPICriticalPaths:
     """Test critical paths in API functionality."""
@@ -107,7 +107,7 @@ class TestAPICriticalPaths:
             assert "status" in result
             
         except Exception as e:
-            pytest.skip("Test disabled pending fixes")
+            pytest.fail("Test needs implementation")
 
     def test_agent_creation_api_path(self):
         """Characterize agent creation API paths."""
@@ -124,7 +124,7 @@ class TestAPICriticalPaths:
             assert isinstance(sig.parameters, dict)
             
         except Exception as e:
-            pytest.skip("Test disabled pending fixes")
+            pytest.fail("Test needs implementation")
 
     @patch('auth.jwt_handler.jwt_handler')
     def test_auth_critical_paths(self, mock_jwt):
@@ -141,7 +141,7 @@ class TestAPICriticalPaths:
             assert callable(verify_token)
             
         except Exception as e:
-            pytest.skip("Test disabled pending fixes")
+            pytest.fail("Test needs implementation")
 
 class TestDatabaseCriticalPaths:
     """Test critical paths in database functionality."""
@@ -165,7 +165,7 @@ class TestDatabaseCriticalPaths:
             assert agent.name == "test_agent"
             
         except Exception as e:
-            pytest.skip("Test disabled pending fixes")
+            pytest.fail("Test needs implementation")
 
     @patch('database.session.SessionLocal')
     def test_database_session_management(self, mock_session_class):
@@ -191,7 +191,7 @@ class TestDatabaseCriticalPaths:
                 pass  # Expected behavior
                 
         except Exception as e:
-            pytest.skip("Test disabled pending fixes")
+            pytest.fail("Test needs implementation")
 
     def test_database_validation_paths(self):
         """Characterize database validation logic."""
@@ -207,7 +207,7 @@ class TestDatabaseCriticalPaths:
             assert isinstance(result, (bool, dict, type(None)))
             
         except Exception as e:
-            pytest.skip("Test disabled pending fixes")
+            pytest.fail("Test needs implementation")
 
 class TestInferenceCriticalPaths:
     """Test critical paths in inference functionality."""
@@ -233,7 +233,7 @@ class TestInferenceCriticalPaths:
                 assert callable(provider.generate)
                 
         except Exception as e:
-            pytest.skip("Test disabled pending fixes")
+            pytest.fail("Test needs implementation")
 
     def test_gmn_parser_critical_paths(self):
         """Characterize GMN parser critical paths."""
@@ -249,7 +249,7 @@ class TestInferenceCriticalPaths:
             assert isinstance(result, (dict, list, str, type(None)))
             
         except Exception as e:
-            pytest.skip("Test disabled pending fixes")
+            pytest.fail("Test needs implementation")
 
     @patch('torch.nn.Module')
     def test_gnn_model_paths(self, mock_torch):
@@ -266,7 +266,7 @@ class TestInferenceCriticalPaths:
             assert model is not None
             
         except Exception as e:
-            pytest.skip("Test disabled pending fixes")
+            pytest.fail("Test needs implementation")
 
 class TestIntegrationCriticalPaths:
     """Test critical integration paths between modules."""
@@ -292,7 +292,7 @@ class TestIntegrationCriticalPaths:
             assert callable(create_agent_endpoint)
             
         except Exception as e:
-            pytest.skip("Test disabled pending fixes")
+            pytest.fail("Test needs implementation")
 
     @patch('auth.security_implementation.get_current_user')
     def test_auth_api_integration(self, mock_get_user):
@@ -312,4 +312,4 @@ class TestIntegrationCriticalPaths:
             assert middleware is not None
             
         except Exception as e:
-            pytest.skip("Test disabled pending fixes")
+            pytest.fail("Test needs implementation")

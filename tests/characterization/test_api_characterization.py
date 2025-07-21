@@ -17,7 +17,7 @@ class TestAPIMainCharacterization:
             from api.main import app
             assert app is not None
         except ImportError as e:
-            pytest.skip(f"Import failed: {e}")
+            pytest.fail("Test needs implementation")
 
     def test_fastapi_app_structure(self):
         """Characterize FastAPI app structure."""
@@ -32,7 +32,7 @@ class TestAPIMainCharacterization:
             assert app.title is not None  # Should have a title
             
         except Exception as e:
-            pytest.skip("Test disabled pending fixes")
+            pytest.fail("Test needs implementation")
 
     def test_api_routes_exist(self):
         """Document which routes exist on the API."""
@@ -51,7 +51,7 @@ class TestAPIMainCharacterization:
             assert len(health_routes) >= 0  # Document current state
             
         except Exception as e:
-            pytest.skip("Test disabled pending fixes")
+            pytest.fail("Test needs implementation")
 
 class TestHealthEndpointCharacterization:
     """Characterize health endpoint behavior."""
@@ -62,7 +62,7 @@ class TestHealthEndpointCharacterization:
             from api.v1.health import router
             assert router is not None
         except ImportError as e:
-            pytest.skip(f"Import failed: {e}")
+            pytest.fail("Test needs implementation")
 
     @patch('redis.Redis')
     @patch('sqlalchemy.create_engine')
@@ -87,10 +87,10 @@ class TestHealthEndpointCharacterization:
                 assert status in [200, 500, 503, 404]  # Common HTTP status codes
                 
             except Exception as inner_e:
-                pytest.skip(f"Health endpoint test failed: {inner_e}")
+                pytest.fail("Test needs implementation")
                 
         except Exception as e:
-            pytest.skip(f"Health check characterization failed: {e}")
+            pytest.fail("Test needs implementation")
 
 class TestAgentEndpointCharacterization:
     """Characterize agent endpoints behavior."""
@@ -101,7 +101,7 @@ class TestAgentEndpointCharacterization:
             from api.v1.agents import router
             assert router is not None
         except ImportError as e:
-            pytest.skip(f"Import failed: {e}")
+            pytest.fail("Test needs implementation")
 
     def test_agent_endpoint_routes_exist(self):
         """Document which agent routes exist."""
@@ -122,7 +122,7 @@ class TestAgentEndpointCharacterization:
                     assert isinstance(route.methods, set)
                     
         except Exception as e:
-            pytest.skip("Test disabled pending fixes")
+            pytest.fail("Test needs implementation")
 
 class TestAuthEndpointCharacterization:
     """Characterize authentication endpoint behavior."""
@@ -133,7 +133,7 @@ class TestAuthEndpointCharacterization:
             from api.v1.auth import router
             assert router is not None
         except ImportError as e:
-            pytest.skip(f"Import failed: {e}")
+            pytest.fail("Test needs implementation")
 
     def test_auth_dependencies_structure(self):
         """Characterize auth dependencies structure."""
@@ -145,7 +145,7 @@ class TestAuthEndpointCharacterization:
             assert jwt_handler is not None
             
         except ImportError as e:
-            pytest.skip(f"Import failed: {e}")
+            pytest.fail("Test needs implementation")
 
 class TestMiddlewareCharacterization:
     """Characterize middleware behavior."""
@@ -156,7 +156,7 @@ class TestMiddlewareCharacterization:
             from api.middleware.security_monitoring import SecurityMonitoringMiddleware
             assert SecurityMonitoringMiddleware is not None
         except ImportError as e:
-            pytest.skip(f"Import failed: {e}")
+            pytest.fail("Test needs implementation")
 
     def test_rate_limiter_middleware_import(self):
         """Document rate limiter import behavior."""
@@ -164,7 +164,7 @@ class TestMiddlewareCharacterization:
             from api.middleware.rate_limiter import RateLimiter
             assert RateLimiter is not None
         except ImportError as e:
-            pytest.skip(f"Import failed: {e}")
+            pytest.fail("Test needs implementation")
 
     def test_ddos_protection_middleware_import(self):
         """Document DDoS protection middleware import."""
@@ -172,7 +172,7 @@ class TestMiddlewareCharacterization:
             from api.middleware.ddos_protection import DDoSProtectionMiddleware
             assert DDoSProtectionMiddleware is not None
         except ImportError as e:
-            pytest.skip(f"Import failed: {e}")
+            pytest.fail("Test needs implementation")
 
 class TestInferenceEndpointCharacterization:
     """Characterize inference endpoint behavior."""
@@ -183,7 +183,7 @@ class TestInferenceEndpointCharacterization:
             from api.v1.inference import router
             assert router is not None
         except ImportError as e:
-            pytest.skip(f"Import failed: {e}")
+            pytest.fail("Test needs implementation")
 
     def test_inference_endpoint_structure(self):
         """Document inference endpoint structure."""
@@ -195,4 +195,4 @@ class TestInferenceEndpointCharacterization:
             assert isinstance(routes, list)
             
         except Exception as e:
-            pytest.skip("Test disabled pending fixes")
+            pytest.fail("Test needs implementation")

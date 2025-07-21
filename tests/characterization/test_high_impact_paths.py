@@ -26,7 +26,7 @@ class TestHighCoverageAPIPaths:
                 assert isinstance(new_app, FastAPI)
                 
         except Exception as e:
-            pytest.skip("Test disabled pending fixes")
+            pytest.fail("Test needs implementation")
 
     def test_health_endpoint_complete_paths(self):
         """Characterize all health endpoint paths."""
@@ -49,7 +49,7 @@ class TestHighCoverageAPIPaths:
                     assert callable(func)
                     
         except Exception as e:
-            pytest.skip("Test disabled pending fixes")
+            pytest.fail("Test needs implementation")
 
     def test_inference_endpoint_paths(self):
         """Characterize inference endpoint paths showing 53% coverage."""
@@ -72,7 +72,7 @@ class TestHighCoverageAPIPaths:
                     assert callable(func)
                     
         except Exception as e:
-            pytest.skip("Test disabled pending fixes")
+            pytest.fail("Test needs implementation")
 
     def test_security_endpoint_paths(self):
         """Characterize security endpoint paths showing 50% coverage."""
@@ -95,7 +95,7 @@ class TestHighCoverageAPIPaths:
                     assert callable(func)
                     
         except Exception as e:
-            pytest.skip("Test disabled pending fixes")
+            pytest.fail("Test needs implementation")
 
     def test_system_endpoint_paths(self):
         """Characterize system endpoint paths showing 48% coverage."""
@@ -118,7 +118,7 @@ class TestHighCoverageAPIPaths:
                     assert callable(func)
                     
         except Exception as e:
-            pytest.skip("Test disabled pending fixes")
+            pytest.fail("Test needs implementation")
 
 class TestObservabilityHighCoverage:
     """Target observability modules showing good coverage."""
@@ -142,7 +142,7 @@ class TestObservabilityHighCoverage:
                     assert callable(func)
                     
         except Exception as e:
-            pytest.skip("Test disabled pending fixes")
+            pytest.fail("Test needs implementation")
 
     def test_security_monitoring_paths(self):
         """Characterize security monitoring paths showing 29% coverage."""
@@ -162,7 +162,7 @@ class TestObservabilityHighCoverage:
                     assert callable(func)
                     
         except Exception as e:
-            pytest.skip("Test disabled pending fixes")
+            pytest.fail("Test needs implementation")
 
     def test_incident_response_paths(self):
         """Characterize incident response paths showing 30% coverage."""
@@ -182,7 +182,7 @@ class TestObservabilityHighCoverage:
                     assert callable(func)
                     
         except Exception as e:
-            pytest.skip("Test disabled pending fixes")
+            pytest.fail("Test needs implementation")
 
 class TestAuthHighCoverage:
     """Target auth modules showing good coverage potential."""
@@ -205,7 +205,7 @@ class TestAuthHighCoverage:
                     assert callable(func)
                     
         except Exception as e:
-            pytest.skip("Test disabled pending fixes")
+            pytest.fail("Test needs implementation")
 
     def test_jwt_handler_paths(self):
         """Characterize JWT handler paths showing 27% coverage."""
@@ -230,7 +230,7 @@ class TestAuthHighCoverage:
                     assert callable(method)
                     
         except Exception as e:
-            pytest.skip("Test disabled pending fixes")
+            pytest.fail("Test needs implementation")
 
     def test_https_enforcement_paths(self):
         """Characterize HTTPS enforcement paths showing 27% coverage."""
@@ -250,7 +250,7 @@ class TestAuthHighCoverage:
                     assert callable(func)
                     
         except Exception as e:
-            pytest.skip("Test disabled pending fixes")
+            pytest.fail("Test needs implementation")
 
     def test_certificate_pinning_paths(self):
         """Characterize certificate pinning paths showing 26% coverage."""
@@ -270,7 +270,7 @@ class TestAuthHighCoverage:
                     assert callable(func)
                     
         except Exception as e:
-            pytest.skip("Test disabled pending fixes")
+            pytest.fail("Test needs implementation")
 
 class TestMiddlewareHighCoverage:
     """Target middleware showing coverage potential."""
@@ -297,7 +297,7 @@ class TestMiddlewareHighCoverage:
                     assert callable(method)
                     
         except Exception as e:
-            pytest.skip("Test disabled pending fixes")
+            pytest.fail("Test needs implementation")
 
     def test_ddos_protection_middleware_paths(self):
         """Characterize DDoS protection middleware showing 20% coverage."""
@@ -321,7 +321,7 @@ class TestMiddlewareHighCoverage:
                     assert callable(method)
                     
         except Exception as e:
-            pytest.skip("Test disabled pending fixes")
+            pytest.fail("Test needs implementation")
 
     def test_websocket_rate_limiting_paths(self):
         """Characterize WebSocket rate limiting showing 17% coverage."""
@@ -341,7 +341,7 @@ class TestMiddlewareHighCoverage:
                     assert callable(func)
                     
         except Exception as e:
-            pytest.skip("Test disabled pending fixes")
+            pytest.fail("Test needs implementation")
 
 class TestWebSocketHighCoverage:
     """Target WebSocket modules showing coverage."""
@@ -364,7 +364,7 @@ class TestWebSocketHighCoverage:
                     assert callable(func)
                     
         except Exception as e:
-            pytest.skip("Test disabled pending fixes")
+            pytest.fail("Test needs implementation")
 
 class TestWorldHighCoverage:
     """Target world module showing 20% coverage."""
@@ -387,7 +387,7 @@ class TestWorldHighCoverage:
                     assert callable(func)
                     
         except Exception as e:
-            pytest.skip("Test disabled pending fixes")
+            pytest.fail("Test needs implementation")
 
 class TestInferenceLocalLLMPaths:
     """Target local LLM manager showing 19% coverage."""
@@ -414,7 +414,7 @@ class TestInferenceLocalLLMPaths:
                         assert callable(method)
                         
         except Exception as e:
-            pytest.skip("Test disabled pending fixes")
+            pytest.fail("Test needs implementation")
 
 class TestAgentsPracticalPaths:
     """Target agent modules showing some coverage."""
@@ -437,7 +437,7 @@ class TestAgentsPracticalPaths:
                     assert callable(func)
                     
         except Exception as e:
-            pytest.skip("Test disabled pending fixes")
+            pytest.fail("Test needs implementation")
 
     def test_agent_error_handling_paths(self):
         """Characterize agent error handling showing 20% coverage."""
@@ -457,7 +457,7 @@ class TestAgentsPracticalPaths:
                     assert callable(func)
                     
         except Exception as e:
-            pytest.skip("Test disabled pending fixes")
+            pytest.fail("Test needs implementation")
 
     def test_agent_manager_paths(self):
         """Characterize agent manager showing 16% coverage."""
@@ -482,4 +482,4 @@ class TestAgentsPracticalPaths:
                         assert callable(method)
                         
         except Exception as e:
-            pytest.skip("Test disabled pending fixes")
+            pytest.fail("Test needs implementation")
