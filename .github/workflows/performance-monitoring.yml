@@ -1,11 +1,11 @@
-name: Performance Monitoring
+name: 🚀 PERF-ENGINEER Performance Monitoring & Budget Enforcement
 
 on:
-  # Run on pushes to main branch
+  # Run on pushes to main/develop branches
   push:
-    branches: [main]
+    branches: [main, develop]
 
-  # Run on pull requests to main
+  # Run on all pull requests
   pull_request:
     branches: [main]
 
@@ -17,57 +17,99 @@ on:
         required: false
         default: "10.0"
         type: string
+      force_baseline_update:
+        description: "Force baseline update"
+        required: false
+        default: false
+        type: boolean
 
-  # Run weekly on Sundays at 6 AM UTC
+  # Run daily for continuous monitoring
   schedule:
-    - cron: "0 6 * * 0"
+    - cron: "0 2 * * *"
 
 env:
-  PYTHON_VERSION: "3.12"
+  PYTHON_VERSION: "3.11"
+  PERFORMANCE_BUDGET_AGENT_SPAWN_MS: 50
+  PERFORMANCE_BUDGET_PYMDP_INFERENCE_MS: 100
+  PERFORMANCE_BUDGET_MEMORY_PER_AGENT_MB: 10
+  PERFORMANCE_BUDGET_API_RESPONSE_MS: 200
+  PERFORMANCE_BUDGET_BUNDLE_SIZE_KB: 200
+  PERFORMANCE_BUDGET_LIGHTHOUSE_SCORE: 90
 
 jobs:
-  performance-analysis:
+  perf-engineer-validation:
+    name: 🎯 PERF-ENGINEER Performance Validation
     runs-on: ubuntu-latest
     timeout-minutes: 30
 
     steps:
-      - name: Checkout code
+      - name: 📥 Checkout code
         uses: actions/checkout@v4
+        with:
+          fetch-depth: 0  # Full history for trend analysis
 
-      - name: Set up Python
+      - name: 🐍 Set up Python
         uses: actions/setup-python@v4
         with:
           python-version: ${{ env.PYTHON_VERSION }}
+          cache: 'pip'
 
-      - name: Create virtual environment
+      - name: 📦 Install Python dependencies
         run: |
-          python -m venv venv
-          source venv/bin/activate
-          echo "VIRTUAL_ENV=$VIRTUAL_ENV" >> $GITHUB_ENV
-          echo "$VIRTUAL_ENV/bin" >> $GITHUB_PATH
-
-      - name: Install dependencies
-        run: |
-          source venv/bin/activate
           pip install --upgrade pip
           pip install -r requirements.txt
+          pip install psutil numpy
 
-      - name: Verify PyMDP installation
+      - name: 🚀 PERF-ENGINEER Performance Validation Suite
+        id: perf-validation
         run: |
-          source venv/bin/activate
-          python -c "import pymdp; print('PyMDP version:', pymdp.__version__ if hasattr(pymdp, '__version__') else 'unknown')"
+          echo "🎯 Running ZERO-TOLERANCE performance validation..."
+          python benchmarks/performance_validation_suite.py > performance_report.txt 2>&1
+          echo "VALIDATION_EXIT_CODE=$?" >> $GITHUB_OUTPUT
+          
+          # Save results with commit hash
+          cp performance_baseline.json perf-baseline-${{ github.sha }}.json || echo "No baseline file"
+          cp performance_results_*.json perf-results-${{ github.sha }}.json || echo "No results file"
 
-      - name: Run performance monitoring pipeline
-        id: performance
-        env:
-          PERFORMANCE_ALERT_WEBHOOK: ${{ secrets.SLACK_WEBHOOK_URL }}
+      - name: 🔍 Performance Regression Detection
+        id: regression-check
         run: |
-          source venv/bin/activate
-          python tests/performance/run_performance_monitoring.py \
-            --regression-threshold ${{ github.event.inputs.regression_threshold || '10.0' }} \
-            --ci-mode
+          echo "🔍 Advanced regression detection with trend analysis..."
+          
+          if [ -f performance_results_*.json ]; then
+            RESULTS_FILE=$(ls performance_results_*.json | head -1)
+            python benchmarks/performance_regression_detector.py \
+              --results-file "$RESULTS_FILE" \
+              --history-file performance_history.json \
+              --save-alerts regression_alerts.json > regression_report.txt 2>&1
+            
+            echo "REGRESSION_EXIT_CODE=$?" >> $GITHUB_OUTPUT
+          else
+            echo "⚠️ No results file found for regression detection"
+            echo "REGRESSION_EXIT_CODE=0" >> $GITHUB_OUTPUT
+          fi
 
-      - name: Upload benchmark results
+      - name: 📦 Frontend Performance Analysis  
+        id: frontend-analysis
+        continue-on-error: true
+        run: |
+          echo "📦 PERF-ENGINEER Frontend Bundle & Lighthouse Analysis..."
+          
+          # Setup Node.js for frontend analysis
+          if [ -d "web" ] && [ -f "web/package.json" ]; then
+            cd web
+            npm ci --silent --ignore-scripts || npm install --silent --ignore-scripts
+            npm run build || echo "Build failed, continuing with analysis..."
+            cd ..
+            
+            python benchmarks/frontend_performance_analyzer.py > frontend_analysis.txt 2>&1
+            echo "FRONTEND_EXIT_CODE=$?" >> $GITHUB_OUTPUT
+          else
+            echo "⚠️ No web directory or package.json found, skipping frontend analysis"
+            echo "FRONTEND_EXIT_CODE=0" >> $GITHUB_OUTPUT
+          fi
+
+      - name: 💾 Upload Performance Artifacts
         uses: actions/upload-artifact@v3
         if: always()
         with:

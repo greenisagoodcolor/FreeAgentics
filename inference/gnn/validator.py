@@ -12,8 +12,6 @@ logger = logging.getLogger(__name__)
 class ValidationError(Exception):
     """Custom exception for validation errors."""
 
-    pass
-
 
 @dataclass
 class ValidationResult:
@@ -119,11 +117,7 @@ class GMNValidator:
             config_dict["metadata"] = model_config.metadata
 
         # Extract name from AST or metadata
-        if (
-            hasattr(model_config, "ast")
-            and model_config.ast
-            and hasattr(model_config.ast, "name")
-        ):
+        if hasattr(model_config, "ast") and model_config.ast and hasattr(model_config.ast, "name"):
             config_dict["name"] = model_config.ast.name
         elif "name" in getattr(model_config, "metadata", {}):
             config_dict["name"] = model_config.metadata["name"]
@@ -189,9 +183,7 @@ class GMNValidator:
 
         return errors
 
-    def _run_comprehensive_validations(
-        self, model_config, original_parse_result=None
-    ):
+    def _run_comprehensive_validations(self, model_config, original_parse_result=None):
         """Run comprehensive validations on model configuration."""
         errors = []
         warnings = []
@@ -204,16 +196,12 @@ class GMNValidator:
         # Validate active inference configuration
         active_inference = model_config.get("active_inference", {})
         if active_inference:
-            ai_errors = self._validate_active_inference_config(
-                active_inference
-            )
+            ai_errors = self._validate_active_inference_config(active_inference)
             errors.extend(ai_errors)
 
         # Generate warnings for memory, performance, and numerical issues
         architecture_section = model_config.get("architecture", {})
-        architecture_warnings = self._check_architecture_warnings(
-            architecture_section, parameters
-        )
+        architecture_warnings = self._check_architecture_warnings(architecture_section, parameters)
         warnings.extend(architecture_warnings)
 
         # Security validation
@@ -222,9 +210,7 @@ class GMNValidator:
 
         # Check for circular dependencies
         if "dependencies" in model_config:
-            circular_errors = self._check_circular_dependencies(
-                model_config["dependencies"]
-            )
+            circular_errors = self._check_circular_dependencies(model_config["dependencies"])
             errors.extend(circular_errors)
 
         # Validate cross-references
@@ -260,11 +246,7 @@ class GMNValidator:
         for rule_name, rule_func in self._custom_rules.items():
             try:
                 # Pass the original ParseResult if available, otherwise processed config
-                rule_input = (
-                    original_parse_result
-                    if original_parse_result
-                    else model_config
-                )
+                rule_input = original_parse_result if original_parse_result else model_config
                 rule_result = rule_func(rule_input)
                 if isinstance(rule_result, list):
                     errors.extend(rule_result)
@@ -315,9 +297,7 @@ class GMNValidator:
             metadata=result_metadata,
         )
 
-    def validate(
-        self, model_config: Union[Dict[str, Any], Any]
-    ) -> ValidationResult:
+    def validate(self, model_config: Union[Dict[str, Any], Any]) -> ValidationResult:
         """Validate a model configuration."""
         start_time = time.time()
         errors = []
@@ -327,18 +307,14 @@ class GMNValidator:
 
         try:
             # Handle ParseResult objects
-            if hasattr(model_config, "sections") and hasattr(
-                model_config, "metadata"
-            ):
+            if hasattr(model_config, "sections") and hasattr(model_config, "metadata"):
                 (
                     model_config,
                     validated_model,
                     original_parse_result,
                 ) = self._process_parse_result(model_config)
             elif not isinstance(model_config, dict):
-                errors.append(
-                    "Model configuration must be a dictionary or ParseResult"
-                )
+                errors.append("Model configuration must be a dictionary or ParseResult")
                 return ValidationResult(is_valid=False, errors=errors)
 
             # Validate basic structure
@@ -367,9 +343,7 @@ class GMNValidator:
             # Limit errors
             if len(errors) > self.max_validation_errors:
                 errors = errors[: self.max_validation_errors]
-                errors.append(
-                    f"... and {len(errors) - self.max_validation_errors} more errors"
-                )
+                errors.append(f"... and {len(errors) - self.max_validation_errors} more errors")
 
             # Create result
             is_valid = len(errors) == 0
@@ -385,9 +359,7 @@ class GMNValidator:
 
         except Exception as e:
             logger.error(f"Validation failed with exception: {e}")
-            return ValidationResult(
-                is_valid=False, errors=[f"Validation failed: {str(e)}"]
-            )
+            return ValidationResult(is_valid=False, errors=[f"Validation failed: {str(e)}"])
 
     def _validate_layer(self, layer: Dict[str, Any], index: int) -> List[str]:
         """Validate a single layer configuration."""
@@ -415,35 +387,25 @@ class GMNValidator:
         if "input_dim" in layer:
             input_dim = layer["input_dim"]
             if not isinstance(input_dim, int) or input_dim <= 0:
-                errors.append(
-                    f"Layer {index} input_dim must be positive integer"
-                )
+                errors.append(f"Layer {index} input_dim must be positive integer")
 
         if "output_dim" in layer:
             output_dim = layer["output_dim"]
             if not isinstance(output_dim, int) or output_dim <= 0:
-                errors.append(
-                    f"Layer {index} output_dim must be positive integer"
-                )
+                errors.append(f"Layer {index} output_dim must be positive integer")
 
         # Validate layer-specific parameters
         if layer_type == "attention" and "num_heads" in layer:
             num_heads = layer["num_heads"]
             if not isinstance(num_heads, int) or num_heads <= 0:
-                errors.append(
-                    f"Layer {index} num_heads must be positive integer"
-                )
+                errors.append(f"Layer {index} num_heads must be positive integer")
 
             if "output_dim" in layer and layer["output_dim"] % num_heads != 0:
-                errors.append(
-                    f"Layer {index} output_dim must be divisible by num_heads"
-                )
+                errors.append(f"Layer {index} output_dim must be divisible by num_heads")
 
         return errors
 
-    def _validate_hyperparameters(
-        self, hyperparams: Dict[str, Any]
-    ) -> List[str]:
+    def _validate_hyperparameters(self, hyperparams: Dict[str, Any]) -> List[str]:
         """Validate hyperparameters."""
         errors = []
 
@@ -454,27 +416,21 @@ class GMNValidator:
                 if not isinstance(value, (int, float)):
                     errors.append(f"{param} must be numeric")
                 elif value < min_val or value > max_val:
-                    errors.append(
-                        f"{param} value {value} outside range [{min_val}, {max_val}]"
-                    )
+                    errors.append(f"{param} value {value} outside range [{min_val}, {max_val}]")
 
         return errors
 
-    def _validate_active_inference_config(
-        self, active_inference: Dict[str, Any]
-    ) -> List[str]:
+    def _validate_active_inference_config(self, active_inference: Dict[str, Any]) -> List[str]:
         """Validate Active Inference configuration."""
         errors = []
 
         # Check required fields and their values
         required_ai_fields = ["num_states", "num_observations", "num_actions"]
-        for field in required_ai_fields:
-            if field in active_inference:
-                value = active_inference[field]
+        for field_name in required_ai_fields:
+            if field_name in active_inference:
+                value = active_inference[field_name]
                 if not isinstance(value, int) or value <= 0:
-                    errors.append(
-                        f"Active Inference {field} must be a positive integer"
-                    )
+                    errors.append(f"Active Inference {field_name} must be a positive integer")
 
         return errors
 
@@ -493,30 +449,20 @@ class GMNValidator:
         batch_size = parameters.get("batch_size", 32)
 
         if layers > 50:
-            warnings.append(
-                f"High layer count ({layers}) may cause memory issues"
-            )
+            warnings.append(f"High layer count ({layers}) may cause memory issues")
         if hidden_dim > 5000:
-            warnings.append(
-                f"Large hidden dimension ({hidden_dim}) may cause memory issues"
-            )
+            warnings.append(f"Large hidden dimension ({hidden_dim}) may cause memory issues")
         if batch_size > 512:
-            warnings.append(
-                f"Large batch size ({batch_size}) may cause memory issues"
-            )
+            warnings.append(f"Large batch size ({batch_size}) may cause memory issues")
 
         # Performance implications
         arch_type = architecture.get("type", "")
         if arch_type == "GAT":
             num_heads = architecture.get("num_heads", 1)
             if num_heads > 16:
-                warnings.append(
-                    f"High attention head count ({num_heads}) may impact performance"
-                )
+                warnings.append(f"High attention head count ({num_heads}) may impact performance")
         if layers > 8:
-            warnings.append(
-                f"Deep network ({layers} layers) may have slow training"
-            )
+            warnings.append(f"Deep network ({layers} layers) may have slow training")
 
         # Numerical stability warnings
         gradient_clip = parameters.get("gradient_clip")
@@ -526,15 +472,11 @@ class GMNValidator:
             )
         eps = parameters.get("eps")
         if eps and eps < 1e-10:
-            warnings.append(
-                f"Very small epsilon ({eps}) may cause numerical instability"
-            )
+            warnings.append(f"Very small epsilon ({eps}) may cause numerical instability")
 
         # Layer compatibility warnings
         if arch_type == "GCN" and architecture.get("edge_features"):
-            warnings.append(
-                "GCN does not typically use edge features - consider GraphSAGE or GAT"
-            )
+            warnings.append("GCN does not typically use edge features - consider GraphSAGE or GAT")
 
         return warnings
 
@@ -547,9 +489,7 @@ class GMNValidator:
 
         for pattern in self.security_patterns:
             if re.search(pattern, config_str, re.IGNORECASE):
-                errors.append(
-                    f"Security violation: forbidden pattern '{pattern}' detected"
-                )
+                errors.append(f"Security violation: forbidden pattern '{pattern}' detected")
 
         # Check for suspicious keys
         suspicious_keys = {"__", "exec", "eval", "compile", "import"}
@@ -560,15 +500,11 @@ class GMNValidator:
 
         return errors
 
-    def _check_circular_dependencies(
-        self, dependencies: Dict[str, List[str]]
-    ) -> List[str]:
+    def _check_circular_dependencies(self, dependencies: Dict[str, List[str]]) -> List[str]:
         """Check for circular dependencies."""
         errors = []
 
-        def has_cycle(
-            node: str, visited: Set[str], rec_stack: Set[str]
-        ) -> bool:
+        def has_cycle(node: str, visited: Set[str], rec_stack: Set[str]) -> bool:
             visited.add(node)
             rec_stack.add(node)
 
@@ -588,9 +524,7 @@ class GMNValidator:
         for node in dependencies:
             if node not in visited:
                 if has_cycle(node, visited, rec_stack):
-                    errors.append(
-                        f"Circular dependency detected involving {node}"
-                    )
+                    errors.append(f"Circular dependency detected involving {node}")
 
         return errors
 
@@ -600,9 +534,9 @@ class GMNValidator:
 
         # Check for required metadata fields
         required_metadata = ["version", "created_at"]
-        for field in required_metadata:
-            if field not in metadata:
-                errors.append(f"Missing required metadata field: {field}")
+        for field_name in required_metadata:
+            if field_name not in metadata:
+                errors.append(f"Missing required metadata field: {field_name}")
 
         # Validate version format
         if "version" in metadata:
@@ -659,9 +593,7 @@ class GMNValidator:
 
         return keys
 
-    def _collect_variable_definitions(
-        self, config: Dict[str, Any]
-    ) -> Dict[str, Any]:
+    def _collect_variable_definitions(self, config: Dict[str, Any]) -> Dict[str, Any]:
         """Collect variable definitions from configuration."""
         variables = {}
 
@@ -701,25 +633,16 @@ class GMNValidator:
                 features = node_features["features"]
                 if isinstance(features, list):
                     # Collect all variable definitions
-                    defined_variables = self._collect_variable_definitions(
-                        config
-                    )
+                    defined_variables = self._collect_variable_definitions(config)
 
                     # Check each feature reference
                     for feature in features:
-                        if (
-                            isinstance(feature, str)
-                            and feature not in defined_variables
-                        ):
-                            errors.append(
-                                f"Undefined reference in node features: {feature}"
-                            )
+                        if isinstance(feature, str) and feature not in defined_variables:
+                            errors.append(f"Undefined reference in node features: {feature}")
 
         return errors
 
-    def _check_definitions_circular_dependencies(
-        self, definitions: Dict[str, Any]
-    ) -> List[str]:
+    def _check_definitions_circular_dependencies(self, definitions: Dict[str, Any]) -> List[str]:
         """Check for circular dependencies in definitions section."""
         errors = []
 
@@ -751,8 +674,6 @@ class GMNValidator:
         for node in definitions:
             if node not in visited:
                 if has_cycle(node, visited, rec_stack):
-                    errors.append(
-                        f"Circular dependency detected in definitions involving {node}"
-                    )
+                    errors.append(f"Circular dependency detected in definitions involving {node}")
 
         return errors

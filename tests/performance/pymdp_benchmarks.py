@@ -10,13 +10,12 @@ import time
 from dataclasses import dataclass, field
 from datetime import datetime
 from pathlib import Path
-from typing import Any, Dict, List, Optional, Tuple
+from typing import Any, Dict, List
 
 import numpy as np
 import psutil
 
 # Import PyMDP (using inferactively-pymdp package) - REQUIRED for benchmarks
-import pymdp
 from pymdp import utils
 from pymdp.agent import Agent as PyMDPAgent
 
@@ -76,9 +75,7 @@ class MemoryMonitor:
 
     def start(self):
         """Record baseline memory usage."""
-        self.baseline_memory = (
-            self.process.memory_info().rss / 1024 / 1024
-        )  # MB
+        self.baseline_memory = self.process.memory_info().rss / 1024 / 1024  # MB
 
     def get_usage(self) -> float:
         """Get current memory usage relative to baseline."""
@@ -158,9 +155,7 @@ class PyMDPBenchmark:
                 },
                 memory_usage_mb=self.memory_monitor.get_usage(),
                 iterations=iterations,
-                additional_metrics=metrics
-                if isinstance(metrics, dict)
-                else {},
+                additional_metrics=metrics if isinstance(metrics, dict) else {},
             )
 
             self.teardown()
@@ -182,9 +177,7 @@ class PyMDPBenchmark:
         print("\nPerformance Metrics:")
         print(f"  Mean time: {result.mean_time_ms:.2f} ms")
         print(f"  Std dev: {result.std_dev_ms:.2f} ms")
-        print(
-            f"  Min/Max: {result.min_time_ms:.2f} / {result.max_time_ms:.2f} ms"
-        )
+        print(f"  Min/Max: {result.min_time_ms:.2f} / {result.max_time_ms:.2f} ms")
         print("  Percentiles:")
         for p, value in result.percentiles.items():
             print(f"    {p}: {value:.2f} ms")
@@ -228,10 +221,7 @@ class BeliefUpdateBenchmark(PyMDPBenchmark):
 
         # Pre-generate random observations
         self.observations = [
-            [
-                np.random.randint(0, self.state_size)
-                for _ in range(self.num_modalities)
-            ]
+            [np.random.randint(0, self.state_size) for _ in range(self.num_modalities)]
             for _ in range(1000)
         ]
         self.obs_idx = 0
@@ -293,9 +283,7 @@ class ExpectedFreeEnergyBenchmark(PyMDPBenchmark):
         C = utils.obj_array_uniform(num_observations)
 
         # Create agent
-        self.agent = PyMDPAgent(
-            A, B, C=C, policy_len=self.policy_depth, inference_horizon=1
-        )
+        self.agent = PyMDPAgent(A, B, C=C, policy_len=self.policy_depth, inference_horizon=1)
 
     def run_iteration(self) -> Dict[str, Any]:
         """Calculate EFE for policies."""
@@ -313,9 +301,7 @@ class ExpectedFreeEnergyBenchmark(PyMDPBenchmark):
 
         return {
             "num_policies_evaluated": (
-                len(self.agent.policies)
-                if hasattr(self.agent, "policies")
-                else 0
+                len(self.agent.policies) if hasattr(self.agent, "policies") else 0
             ),
             "min_efe": float(np.min(G_values)) if G_values is not None else 0,
             "max_efe": float(np.max(G_values)) if G_values is not None else 0,
@@ -465,9 +451,7 @@ class BenchmarkSuite:
         print(f"\n{'='*60}")
         print("PyMDP PERFORMANCE BENCHMARK SUITE")
         print(f"{'='*60}")
-        print(
-            f"Running {len(self.benchmarks)} benchmarks with {iterations} iterations each\n"
-        )
+        print(f"Running {len(self.benchmarks)} benchmarks with {iterations} iterations each\n")
 
         for benchmark in self.benchmarks:
             try:
@@ -518,13 +502,10 @@ class BenchmarkSuite:
 
         for result in self.results:
             # Find matching baseline
-            baseline = next(
-                (b for b in baseline_data if b["name"] == result.name), None
-            )
+            baseline = next((b for b in baseline_data if b["name"] == result.name), None)
             if baseline:
                 diff_percent = (
-                    (result.mean_time_ms - baseline["mean_time_ms"])
-                    / baseline["mean_time_ms"]
+                    (result.mean_time_ms - baseline["mean_time_ms"]) / baseline["mean_time_ms"]
                 ) * 100
                 print(f"\n{result.name}:")
                 print(f"  Baseline: {baseline['mean_time_ms']:.2f} ms")
@@ -547,20 +528,12 @@ def run_basic_benchmarks():
     suite.add_benchmark(BeliefUpdateBenchmark(state_size=100))
 
     # EFE benchmarks
-    suite.add_benchmark(
-        ExpectedFreeEnergyBenchmark(state_size=10, policy_depth=3)
-    )
-    suite.add_benchmark(
-        ExpectedFreeEnergyBenchmark(state_size=20, policy_depth=5)
-    )
+    suite.add_benchmark(ExpectedFreeEnergyBenchmark(state_size=10, policy_depth=3))
+    suite.add_benchmark(ExpectedFreeEnergyBenchmark(state_size=20, policy_depth=5))
 
     # Caching benchmarks
-    suite.add_benchmark(
-        MatrixCachingBenchmark(state_size=50, cache_enabled=True)
-    )
-    suite.add_benchmark(
-        MatrixCachingBenchmark(state_size=50, cache_enabled=False)
-    )
+    suite.add_benchmark(MatrixCachingBenchmark(state_size=50, cache_enabled=True))
+    suite.add_benchmark(MatrixCachingBenchmark(state_size=50, cache_enabled=False))
 
     # Scaling benchmarks
     suite.add_benchmark(AgentScalingBenchmark(num_agents=1))

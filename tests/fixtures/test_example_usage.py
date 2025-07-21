@@ -5,11 +5,11 @@ to create comprehensive test scenarios.
 """
 
 import pytest
+from sqlalchemy import text
 
 from database.models import Agent
 from database.models import AgentStatus as DBAgentStatus
 from database.models import CoalitionStatus as DBCoalitionStatus
-from sqlalchemy import text
 from tests.fixtures import (
     AgentBuilder,
     AgentFactory,
@@ -19,18 +19,6 @@ from tests.fixtures import (
     generate_agent_batch,
     generate_knowledge_graph,
     generate_performance_dataset,
-)
-from tests.fixtures.fixtures import (
-    active_agent,
-    agent_batch,
-    coalition_with_agents,
-    db_session,
-    explorer_agent,
-    knowledge_graph_fixture,
-    multi_agent_scenario,
-    resource_coalition,
-    resource_collector_agent,
-    test_engine,
 )
 from tests.fixtures.schemas import (
     AgentStatus,
@@ -45,11 +33,7 @@ class TestBuildersExample:
     def test_simple_agent_builder(self):
         """Create a simple agent using builder."""
         agent = (
-            AgentBuilder()
-            .with_name("TestAgent001")
-            .with_template("grid_world")
-            .active()
-            .build()
+            AgentBuilder().with_name("TestAgent001").with_template("grid_world").active().build()
         )
 
         assert agent.name == "TestAgent001"
@@ -72,9 +56,7 @@ class TestBuildersExample:
             .build()
         )
 
-        assert (
-            agent.template == "grid_world"
-        )  # Overridden by with_grid_world_config
+        assert agent.template == "grid_world"  # Overridden by with_grid_world_config
         assert agent.position == [25.5, 30.2]
         assert agent.inference_count == 100
         assert agent.parameters.exploration_rate == 0.3
@@ -92,12 +74,8 @@ class TestBuildersExample:
                 "Explore northern territories",
                 priority="high",
             )
-            .with_objective(
-                "defend_base", "Defend home base", priority="critical"
-            )
-            .with_required_capabilities(
-                "exploration", "defense", "communication"
-            )
+            .with_objective("defend_base", "Defend home base", priority="critical")
+            .with_required_capabilities("exploration", "defense", "communication")
             .with_achieved_objectives("explore_north")
             .with_random_scores()
             .active()
@@ -115,7 +93,6 @@ class TestBuildersExample:
 class TestFactoriesExample:
     """Examples of using factories with database persistence."""
 
-    
     def test_agent_factory_create(self, db_session):
         """Create and persist an agent."""
         agent = AgentFactory.create(
@@ -127,13 +104,10 @@ class TestFactoriesExample:
 
         # Verify persistence
         assert agent.id is not None
-        db_agent = (
-            db_session.query(Agent).filter_by(name="FactoryAgent").first()
-        )
+        db_agent = db_session.query(Agent).filter_by(name="FactoryAgent").first()
         assert db_agent is not None
         assert db_agent.template == "resource_collector"
 
-    
     def test_agent_factory_batch(self, db_session):
         """Create multiple agents efficiently."""
         agents = AgentFactory.create_batch(
@@ -154,7 +128,6 @@ class TestFactoriesExample:
         assert len(positions) > 0
         assert all(0 <= p[0] <= 50 and 0 <= p[1] <= 50 for p in positions)
 
-    
     def test_coalition_with_agents(self, db_session):
         """Create coalition with member agents."""
         coalition, agents = CoalitionFactory.create_with_agents(
@@ -204,10 +177,7 @@ class TestFactoriesExample:
 class TestFixturesExample:
     """Examples of using pytest fixtures."""
 
-    
-    def test_agent_fixtures(
-        self, active_agent, resource_collector_agent, explorer_agent
-    ):
+    def test_agent_fixtures(self, active_agent, resource_collector_agent, explorer_agent):
         """Test with various agent fixtures."""
         # Active agent has full configuration
         assert active_agent.status == DBAgentStatus.ACTIVE
@@ -221,10 +191,7 @@ class TestFixturesExample:
         assert explorer_agent.template == "explorer"
         assert explorer_agent.parameters.get("exploration_rate", 0) > 0
 
-    
-    def test_coalition_fixtures(
-        self, coalition_with_agents, resource_coalition
-    ):
+    def test_coalition_fixtures(self, coalition_with_agents, resource_coalition):
         """Test coalition fixtures."""
         # Coalition with agents
         assert len(coalition_with_agents.agents) > 0
@@ -273,9 +240,7 @@ class TestGeneratorsExample:
 
     def test_generate_agent_batch(self):
         """Generate agents without database."""
-        agents = generate_agent_batch(
-            count=50, template="grid_world", status=AgentStatus.ACTIVE
-        )
+        agents = generate_agent_batch(count=50, template="grid_world", status=AgentStatus.ACTIVE)
 
         assert len(agents) == 50
         assert all(a.template == "grid_world" for a in agents)
@@ -292,9 +257,7 @@ class TestGeneratorsExample:
         assert random_graph["properties"]["actual_connectivity"] < 0.2
 
         # Scale-free graph
-        scale_free_graph = generate_knowledge_graph(
-            num_nodes=50, graph_type="scale_free"
-        )
+        scale_free_graph = generate_knowledge_graph(num_nodes=50, graph_type="scale_free")
 
         assert len(scale_free_graph["nodes"]) == 50
         # Scale-free graphs have high-degree hubs
@@ -371,9 +334,7 @@ class TestValidationExample:
         """Test coalition capability validation."""
         with pytest.raises(ValueError):
             # Invalid capability
-            CoalitionBuilder().with_required_capabilities(
-                "invalid_capability"
-            ).build()
+            CoalitionBuilder().with_required_capabilities("invalid_capability").build()
 
 
 class TestPerformanceExample:

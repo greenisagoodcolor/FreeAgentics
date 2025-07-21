@@ -13,7 +13,7 @@ from datetime import datetime, timedelta
 from pathlib import Path
 from typing import Any, Dict, List, Optional, Tuple
 
-from fastapi import HTTPException, Request, Response
+from fastapi import Request, Response
 from fastapi.responses import RedirectResponse
 from starlette.middleware.base import BaseHTTPMiddleware
 
@@ -64,9 +64,7 @@ class SSLConfiguration:
     def __post_init__(self) -> None:
         """Initialize configuration with defaults."""
         if self.production_mode is None:
-            self.production_mode = (
-                os.getenv("PRODUCTION", "false").lower() == "true"
-            )
+            self.production_mode = os.getenv("PRODUCTION", "false").lower() == "true"
 
         if self.letsencrypt_domains is None:
             self.letsencrypt_domains = []
@@ -137,9 +135,7 @@ class HTTPSEnforcementMiddleware(BaseHTTPMiddleware):
 
         # Add HSTS header for HTTPS requests
         if is_secure and self.config.hsts_enabled:
-            response.headers[
-                "Strict-Transport-Security"
-            ] = self._generate_hsts_header()
+            response.headers["Strict-Transport-Security"] = self._generate_hsts_header()
 
         # Ensure secure cookies
         if self.config.secure_cookies:
@@ -157,9 +153,7 @@ class HTTPSEnforcementMiddleware(BaseHTTPMiddleware):
         if self.config.behind_load_balancer:
             client_host = request.client.host if request.client else None
             if client_host in self.config.trusted_proxies:
-                forwarded_proto = request.headers.get(
-                    "X-Forwarded-Proto", ""
-                ).lower()
+                forwarded_proto = request.headers.get("X-Forwarded-Proto", "").lower()
                 if forwarded_proto == "https":
                     return True
 
@@ -192,9 +186,7 @@ class HTTPSEnforcementMiddleware(BaseHTTPMiddleware):
 
         return "; ".join(parts)
 
-    def _enforce_secure_cookies(
-        self, response: Response, is_secure: bool
-    ) -> None:
+    def _enforce_secure_cookies(self, response: Response, is_secure: bool) -> None:
         """Enforce secure cookie flags."""
         # Parse Set-Cookie headers
         set_cookie_headers = []
@@ -215,9 +207,7 @@ class HTTPSEnforcementMiddleware(BaseHTTPMiddleware):
                 if "samesite" not in cookie_str.lower():
                     cookie_str += f"; SameSite={self.config.cookie_samesite}"
 
-                set_cookie_headers.append(
-                    (b"set-cookie", cookie_str.encode("latin-1"))
-                )
+                set_cookie_headers.append((b"set-cookie", cookie_str.encode("latin-1")))
             else:
                 set_cookie_headers.append((header_name, header_value))
 
@@ -236,11 +226,13 @@ class SSLCertificateManager:
     def _find_certbot(self) -> Optional[str]:
         """Find certbot executable."""
         try:
-            result = subprocess.run(  # nosec B607 B603 # Safe use of which command for certbot detection
-                ["which", "certbot"],
-                capture_output=True,
-                text=True,
-                check=True,
+            result = (
+                subprocess.run(  # nosec B607 B603 # Safe use of which command for certbot detection
+                    ["which", "certbot"],
+                    capture_output=True,
+                    text=True,
+                    check=True,
+                )
             )
             return result.stdout.strip()
         except subprocess.CalledProcessError:
@@ -299,9 +291,7 @@ class SSLCertificateManager:
             return True
 
         except subprocess.CalledProcessError as e:
-            logger.error(
-                f"Failed to obtain Let's Encrypt certificate: {e.stderr}"
-            )
+            logger.error(f"Failed to obtain Let's Encrypt certificate: {e.stderr}")
             return False
 
     def _copy_certificates(self) -> None:
@@ -362,26 +352,21 @@ fi
                 f.write(renewal_script)
 
             # Make executable (only owner/root can read, write, execute)
-            os.chmod(script_path, 0o700)
+            # Security: 0o700 is restrictive - only owner can access (rwx------)
+            os.chmod(script_path, 0o700)  # nosec B103
 
             # Add to crontab (runs twice daily)
             cron_entry = f"0 0,12 * * * {script_path} >> /var/log/letsencrypt-renewal.log 2>&1\n"
 
             # Check if cron entry exists
-            result = subprocess.run(
-                ["crontab", "-l"], capture_output=True, text=True
-            )
+            result = subprocess.run(["crontab", "-l"], capture_output=True, text=True)
 
             if script_path not in result.stdout:
                 # Add cron entry
-                current_crontab = (
-                    result.stdout if result.returncode == 0 else ""
-                )
+                current_crontab = result.stdout if result.returncode == 0 else ""
                 new_crontab = current_crontab + cron_entry
 
-                process = subprocess.Popen(
-                    ["crontab", "-"], stdin=subprocess.PIPE, text=True
-                )
+                process = subprocess.Popen(["crontab", "-"], stdin=subprocess.PIPE, text=True)
                 process.communicate(input=new_crontab)
 
                 logger.info("Auto-renewal cron job added successfully")
@@ -422,9 +407,7 @@ fi
 
             # Log warning if expiring soon
             if time_until_expiry.days <= self.config.cert_expiry_warning_days:
-                logger.warning(
-                    f"Certificate expiring in {time_until_expiry.days} days"
-                )
+                logger.warning(f"Certificate expiring in {time_until_expiry.days} days")
 
             return time_until_expiry
 
@@ -468,9 +451,7 @@ class LoadBalancerSSLConfig:
             "Protocol": "HTTPS",
             "Port": 443,
             "SslPolicy": "ELBSecurityPolicy-TLS-1-2-2017-01",
-            "Certificates": [
-                {"CertificateArn": "arn:aws:acm:region:account:certificate/id"}
-            ],
+            "Certificates": [{"CertificateArn": "arn:aws:acm:region:account:certificate/id"}],
             "DefaultActions": [
                 {
                     "Type": "forward",
@@ -525,9 +506,7 @@ server {{
         return "; ".join(parts)
 
 
-def setup_https_enforcement(
-    app, config: Optional[SSLConfiguration] = None
-) -> SSLConfiguration:
+def setup_https_enforcement(app, config: Optional[SSLConfiguration] = None) -> SSLConfiguration:
     """Set up HTTPS enforcement middleware."""
     config = config or SSLConfiguration()
     app.add_middleware(HTTPSEnforcementMiddleware, config=config)
@@ -537,9 +516,7 @@ def setup_https_enforcement(
 
 
 # Development SSL setup helper
-def generate_self_signed_cert(
-    domain: str = "localhost", days: int = 365
-) -> Tuple[str, str]:
+def generate_self_signed_cert(domain: str = "localhost", days: int = 365) -> Tuple[str, str]:
     """Generate self-signed certificate for development."""
     cert_dir = Path("./ssl")
     cert_dir.mkdir(exist_ok=True)

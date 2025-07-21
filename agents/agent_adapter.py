@@ -44,9 +44,11 @@ class ActiveInferenceGridAdapter:
         self.ai_to_grid[ai_agent.agent_id] = grid_agent
         self.grid_to_ai[ai_agent.agent_id] = ai_agent
 
-        logger.info(
-            f"Registered agent {ai_agent.agent_id} at position {initial_position}"
-        )
+        # Synchronize AI agent's position with grid position
+        if hasattr(ai_agent, "position"):
+            ai_agent.position = initial_position
+
+        logger.info(f"Registered agent {ai_agent.agent_id} at position {initial_position}")
         return grid_agent
 
     def unregister_agent(self, agent_id: str):
@@ -72,9 +74,7 @@ class ActiveInferenceGridAdapter:
         """
         return self.ai_to_grid.get(ai_agent_id)
 
-    def get_ai_agent(
-        self, grid_agent_id: str
-    ) -> Optional[ActiveInferenceAgent]:
+    def get_ai_agent(self, grid_agent_id: str) -> Optional[ActiveInferenceAgent]:
         """Get ActiveInferenceAgent for given GridAgent ID.
 
         Args:
@@ -85,9 +85,7 @@ class ActiveInferenceGridAdapter:
         """
         return self.grid_to_ai.get(grid_agent_id)
 
-    def convert_observation(
-        self, grid_observation: Dict[str, Any]
-    ) -> Dict[str, Any]:
+    def convert_observation(self, grid_observation: Dict[str, Any]) -> Dict[str, Any]:
         """Convert GridWorld observation to ActiveInferenceAgent format.
 
         Args:
@@ -115,9 +113,7 @@ class ActiveInferenceGridAdapter:
 
         return ai_observation
 
-    def convert_action(
-        self, ai_action: str, current_position: Position
-    ) -> Position:
+    def convert_action(self, ai_action: str, current_position: Position) -> Position:
         """Convert AI agent action to GridWorld position.
 
         Args:
@@ -160,6 +156,4 @@ class ActiveInferenceGridAdapter:
             # Update metrics if available
             if hasattr(ai_agent, "metrics"):
                 ai_agent.metrics["energy"] = grid_agent.energy
-                ai_agent.metrics["resources_collected"] = len(
-                    grid_agent.resources
-                )
+                ai_agent.metrics["resources_collected"] = len(grid_agent.resources)

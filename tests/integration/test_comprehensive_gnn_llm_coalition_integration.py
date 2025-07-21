@@ -95,9 +95,7 @@ class IntegrationTestScenario:
         """Execute the scenario."""
         raise NotImplementedError
 
-    async def validate(
-        self, context: Dict[str, Any], results: Dict[str, Any]
-    ) -> bool:
+    async def validate(self, context: Dict[str, Any], results: Dict[str, Any]) -> bool:
         """Validate the scenario results."""
         return True
 
@@ -246,12 +244,8 @@ class ResourceDiscoveryAndCoalitionScenario(IntegrationTestScenario):
             knowledge_graph.add_edge(edge)
 
         # Initialize agents
-        explorer_agent = BasicExplorerAgent(
-            "explorer_1", "Explorer Agent", grid_size=50
-        )
-        collector_agent = ResourceCollectorAgent(
-            "collector_1", "Resource Collector", grid_size=50
-        )
+        explorer_agent = BasicExplorerAgent("explorer_1", "Explorer Agent", grid_size=50)
+        collector_agent = ResourceCollectorAgent("collector_1", "Resource Collector", grid_size=50)
         coordinator_agent = CoalitionCoordinatorAgent(
             "coordinator_1", "Coalition Coordinator", max_agents=5
         )
@@ -325,9 +319,7 @@ class ResourceDiscoveryAndCoalitionScenario(IntegrationTestScenario):
                         location[0],
                         location[1],
                         props.get("value", 0),
-                        {"large": 3, "medium": 2, "small": 1}.get(
-                            props.get("size", "small"), 1
-                        ),
+                        {"large": 3, "medium": 2, "small": 1}.get(props.get("size", "small"), 1),
                     ]
                 elif "agent" in node_id:
                     features = [
@@ -352,20 +344,14 @@ class ResourceDiscoveryAndCoalitionScenario(IntegrationTestScenario):
 
                 # Feature vector: [distance, effort/interference]
                 distance = edge_props.get("distance", 0)
-                effort = edge_props.get(
-                    "effort", edge_props.get("interference", 0)
-                )
+                effort = edge_props.get("effort", edge_props.get("interference", 0))
 
                 edges.append([source_idx, target_idx])
                 edge_features.append([distance, effort])
 
         # Convert to tensors and run GNN
         node_tensor = np.array(node_features, dtype=np.float32)
-        edge_tensor = (
-            np.array(edges, dtype=np.int32)
-            if edges
-            else np.empty((0, 2), dtype=np.int32)
-        )
+        edge_tensor = np.array(edges, dtype=np.int32) if edges else np.empty((0, 2), dtype=np.int32)
         edge_feat_tensor = (
             np.array(edge_features, dtype=np.float32)
             if edge_features
@@ -374,15 +360,11 @@ class ResourceDiscoveryAndCoalitionScenario(IntegrationTestScenario):
 
         try:
             # Run GNN forward pass
-            gnn_output = gnn_model.forward(
-                node_tensor, edge_tensor, edge_feat_tensor
-            )
+            gnn_output = gnn_model.forward(node_tensor, edge_tensor, edge_feat_tensor)
             gnn_embeddings = gnn_output.get("node_embeddings", node_tensor)
             gnn_success = True
         except Exception as e:
-            logger.warning(
-                f"GNN processing failed: {e}, using fallback analysis"
-            )
+            logger.warning(f"GNN processing failed: {e}, using fallback analysis")
             gnn_embeddings = node_tensor  # Fallback to original features
             gnn_success = False
 
@@ -423,21 +405,14 @@ class ResourceDiscoveryAndCoalitionScenario(IntegrationTestScenario):
                 )
 
                 llm_reasoning = (
-                    llm_response.text
-                    if hasattr(llm_response, "text")
-                    else "No response generated"
+                    llm_response.text if hasattr(llm_response, "text") else "No response generated"
                 )
 
                 # Extract strategy from LLM response (simple keyword matching)
                 response_lower = llm_reasoning.lower()
-                if (
-                    "centralized" in response_lower
-                    or "central" in response_lower
-                ):
+                if "centralized" in response_lower or "central" in response_lower:
                     coalition_strategy = CoordinationStrategy.HIERARCHICAL
-                elif (
-                    "distributed" in response_lower or "peer" in response_lower
-                ):
+                elif "distributed" in response_lower or "peer" in response_lower:
                     coalition_strategy = CoordinationStrategy.DIRECT
                 elif "hybrid" in response_lower:
                     coalition_strategy = CoordinationStrategy.HYBRID
@@ -445,9 +420,7 @@ class ResourceDiscoveryAndCoalitionScenario(IntegrationTestScenario):
                     coalition_strategy = CoordinationStrategy.ADAPTIVE
 
             except Exception as e:
-                logger.warning(
-                    f"LLM analysis failed: {e}, using fallback strategy"
-                )
+                logger.warning(f"LLM analysis failed: {e}, using fallback strategy")
                 coalition_strategy = CoordinationStrategy.ADAPTIVE
                 llm_reasoning = f"Fallback: LLM error - {str(e)}"
         else:
@@ -479,14 +452,10 @@ class ResourceDiscoveryAndCoalitionScenario(IntegrationTestScenario):
             timeout_seconds=30.0,
             metadata={
                 "target_resources": [
-                    e["id"]
-                    for e in context["test_entities"]
-                    if e["type"] == "resource"
+                    e["id"] for e in context["test_entities"] if e["type"] == "resource"
                 ],
                 "gnn_analysis": (
-                    gnn_embeddings.tolist()
-                    if isinstance(gnn_embeddings, np.ndarray)
-                    else []
+                    gnn_embeddings.tolist() if isinstance(gnn_embeddings, np.ndarray) else []
                 ),
                 "llm_reasoning": llm_reasoning,
             },
@@ -549,9 +518,7 @@ class ResourceDiscoveryAndCoalitionScenario(IntegrationTestScenario):
                     "location": getattr(agent, "position", [0, 0]),
                     "state": getattr(agent, "state", "active"),
                     "coalition_membership": (
-                        coalition_task.task_id
-                        if coalition_results.get("success")
-                        else None
+                        coalition_task.task_id if coalition_results.get("success") else None
                     ),
                 }
                 for agent in agents_list
@@ -562,18 +529,14 @@ class ResourceDiscoveryAndCoalitionScenario(IntegrationTestScenario):
                 if entity["type"] == "resource"
             },
             "gnn_embeddings": (
-                gnn_embeddings.tolist()
-                if isinstance(gnn_embeddings, np.ndarray)
-                else []
+                gnn_embeddings.tolist() if isinstance(gnn_embeddings, np.ndarray) else []
             ),
             "llm_analysis": llm_reasoning,
         }
 
         try:
             # Parse and validate GMN state
-            parsed_gmn = gmn_parser.parse_state_representation(
-                json.dumps(gmn_state)
-            )
+            parsed_gmn = gmn_parser.parse_state_representation(json.dumps(gmn_state))
             gmn_success = parsed_gmn is not None
         except Exception as e:
             logger.warning(f"GMN parsing failed: {e}")
@@ -590,28 +553,20 @@ class ResourceDiscoveryAndCoalitionScenario(IntegrationTestScenario):
                 "nodes_processed": len(nodes),
                 "edges_processed": len(edges),
                 "embeddings_shape": (
-                    gnn_embeddings.shape
-                    if isinstance(gnn_embeddings, np.ndarray)
-                    else None
+                    gnn_embeddings.shape if isinstance(gnn_embeddings, np.ndarray) else None
                 ),
             },
             "llm_analysis": {
                 "success": llm_available and llm_manager is not None,
                 "execution_time": llm_time,
-                "strategy_recommended": coalition_strategy.value
-                if coalition_strategy
-                else None,
+                "strategy_recommended": coalition_strategy.value if coalition_strategy else None,
                 "reasoning": llm_reasoning,
             },
             "coalition_formation": {
                 "success": coalition_results.get("success", False),
                 "execution_time": coalition_time,
-                "coordinator_action": coalition_results.get(
-                    "coordinator_action"
-                ),
-                "strategy_used": coalition_strategy.value
-                if coalition_strategy
-                else None,
+                "coordinator_action": coalition_results.get("coordinator_action"),
+                "strategy_used": coalition_strategy.value if coalition_strategy else None,
                 "results": coalition_results,
             },
             "gmn_parsing": {
@@ -626,8 +581,7 @@ class ResourceDiscoveryAndCoalitionScenario(IntegrationTestScenario):
                         gnn_success or len(gnn_embeddings) > 0,
                         coalition_strategy is not None,
                         coalition_results.get("success", False),
-                        gmn_success
-                        or parsed_gmn is None,  # Allow GMN to be optional
+                        gmn_success or parsed_gmn is None,  # Allow GMN to be optional
                     ]
                 ),
             },
@@ -635,9 +589,7 @@ class ResourceDiscoveryAndCoalitionScenario(IntegrationTestScenario):
 
         return results
 
-    async def validate(
-        self, context: Dict[str, Any], results: Dict[str, Any]
-    ) -> bool:
+    async def validate(self, context: Dict[str, Any], results: Dict[str, Any]) -> bool:
         """Validate the integration test results."""
 
         # Validation criteria
@@ -645,8 +597,7 @@ class ResourceDiscoveryAndCoalitionScenario(IntegrationTestScenario):
 
         # GNN Analysis Validation
         gnn_valid = (
-            results["gnn_analysis"]["success"]
-            or results["gnn_analysis"]["nodes_processed"] > 0
+            results["gnn_analysis"]["success"] or results["gnn_analysis"]["nodes_processed"] > 0
         ) and results["gnn_analysis"][
             "execution_time"
         ] < 30.0  # Should complete within 30 seconds
@@ -654,30 +605,25 @@ class ResourceDiscoveryAndCoalitionScenario(IntegrationTestScenario):
 
         # LLM Analysis Validation (optional but should not crash)
         llm_valid = (
-            results["llm_analysis"]["execution_time"]
-            < 60.0  # Should complete within 60 seconds
+            results["llm_analysis"]["execution_time"] < 60.0  # Should complete within 60 seconds
             and results["llm_analysis"]["strategy_recommended"] is not None
         )
         validations.append(("LLM Analysis", llm_valid))
 
         # Coalition Formation Validation
         coalition_valid = (
-            results["coalition_formation"]["execution_time"]
-            < 10.0  # Should be fast
+            results["coalition_formation"]["execution_time"] < 10.0  # Should be fast
             and results["coalition_formation"]["strategy_used"] is not None
         )
         validations.append(("Coalition Formation", coalition_valid))
 
         # GMN Parsing Validation (optional)
-        gmn_valid = (
-            results["gmn_parsing"]["execution_time"] < 5.0
-        )  # Should be very fast
+        gmn_valid = results["gmn_parsing"]["execution_time"] < 5.0  # Should be very fast
         validations.append(("GMN Parsing", gmn_valid))
 
         # Overall Performance Validation
         overall_valid = (
-            results["overall"]["total_time"]
-            < 120.0  # End-to-end should complete within 2 minutes
+            results["overall"]["total_time"] < 120.0  # End-to-end should complete within 2 minutes
             and results["overall"]["end_to_end_success"]
         )
         validations.append(("Overall Performance", overall_valid))
@@ -710,9 +656,7 @@ class AgentCommunicationProtocolScenario(IntegrationTestScenario):
         # Create multiple agents
         agents = []
         for i in range(5):
-            agent = BasicExplorerAgent(
-                f"comm_agent_{i}", f"Communication Agent {i}", grid_size=20
-            )
+            agent = BasicExplorerAgent(f"comm_agent_{i}", f"Communication Agent {i}", grid_size=20)
             agents.append(agent)
 
         return {
@@ -822,9 +766,7 @@ class AgentCommunicationProtocolScenario(IntegrationTestScenario):
 
         return results
 
-    async def validate(
-        self, context: Dict[str, Any], results: Dict[str, Any]
-    ) -> bool:
+    async def validate(self, context: Dict[str, Any], results: Dict[str, Any]) -> bool:
         """Validate communication protocol results."""
         validations = []
 
@@ -837,22 +779,19 @@ class AgentCommunicationProtocolScenario(IntegrationTestScenario):
 
         # Validate unicast
         unicast_valid = (
-            results["unicast_test"]["success"]
-            and results["unicast_test"]["time_taken"] < 1.0
+            results["unicast_test"]["success"] and results["unicast_test"]["time_taken"] < 1.0
         )
         validations.append(("Unicast Communication", unicast_valid))
 
         # Validate multicast
         multicast_valid = (
-            results["multicast_test"]["success"]
-            and results["multicast_test"]["time_taken"] < 1.0
+            results["multicast_test"]["success"] and results["multicast_test"]["time_taken"] < 1.0
         )
         validations.append(("Multicast Communication", multicast_valid))
 
         # Validate timing
         timing_valid = all(
-            results["timing_analysis"][key]
-            < 0.1  # Each message should be < 100ms
+            results["timing_analysis"][key] < 0.1  # Each message should be < 100ms
             for key in [
                 "avg_broadcast_time",
                 "avg_unicast_time",
@@ -887,9 +826,7 @@ class FaultToleranceAndRecoveryScenario(IntegrationTestScenario):
         # Create agents and systems
         agents = []
         for i in range(3):
-            agent = BasicExplorerAgent(
-                f"fault_agent_{i}", f"Fault Test Agent {i}", grid_size=10
-            )
+            agent = BasicExplorerAgent(f"fault_agent_{i}", f"Fault Test Agent {i}", grid_size=10)
             agents.append(agent)
 
         knowledge_graph = KnowledgeGraph()
@@ -960,9 +897,7 @@ class FaultToleranceAndRecoveryScenario(IntegrationTestScenario):
             if np.random.random() < 0.5:  # 50% chance of failure
                 raise ConnectionError("Network unavailable")
 
-            receiver.perceive(
-                {"message": {"from": sender.agent_id, "content": "test"}}
-            )
+            receiver.perceive({"message": {"from": sender.agent_id, "content": "test"}})
             message_sent = True
 
         except ConnectionError:
@@ -1010,9 +945,7 @@ class FaultToleranceAndRecoveryScenario(IntegrationTestScenario):
         try:
             # Validate before update
             if np.isfinite(corrupted_node.properties.get("value", 0)):
-                knowledge_graph.add_node(
-                    corrupted_node
-                )  # Would update existing
+                knowledge_graph.add_node(corrupted_node)  # Would update existing
             else:
                 raise ValueError("Invalid state detected")
 
@@ -1047,9 +980,7 @@ class FaultToleranceAndRecoveryScenario(IntegrationTestScenario):
 
         return results
 
-    async def validate(
-        self, context: Dict[str, Any], results: Dict[str, Any]
-    ) -> bool:
+    async def validate(self, context: Dict[str, Any], results: Dict[str, Any]) -> bool:
         """Validate fault tolerance results."""
         validations = []
 
@@ -1064,12 +995,9 @@ class FaultToleranceAndRecoveryScenario(IntegrationTestScenario):
         # Communication failure handling
         comm_failure_valid = (
             results["communication_failure_handling"]["success"]
-            and results["communication_failure_handling"]["recovery_time"]
-            < 2.0
+            and results["communication_failure_handling"]["recovery_time"] < 2.0
         )
-        validations.append(
-            ("Communication Failure Handling", comm_failure_valid)
-        )
+        validations.append(("Communication Failure Handling", comm_failure_valid))
 
         # State corruption recovery
         state_recovery_valid = (
@@ -1081,8 +1009,7 @@ class FaultToleranceAndRecoveryScenario(IntegrationTestScenario):
 
         # Overall fault tolerance
         overall_valid = (
-            results["overall"]["successful_recoveries"]
-            >= 2  # At least 2/3 tests pass
+            results["overall"]["successful_recoveries"] >= 2  # At least 2/3 tests pass
             and results["overall"]["avg_recovery_time"] < 3.0
         )
         validations.append(("Overall Fault Tolerance", overall_valid))
@@ -1117,9 +1044,7 @@ class DistributedTaskCoordinationScenario(IntegrationTestScenario):
 
         workers = []
         for i in range(4):
-            worker = ResourceCollectorAgent(
-                f"worker_{i}", f"Worker Agent {i}", grid_size=30
-            )
+            worker = ResourceCollectorAgent(f"worker_{i}", f"Worker Agent {i}", grid_size=30)
             workers.append(worker)
 
         # Define complex task that requires coordination
@@ -1220,9 +1145,7 @@ class DistributedTaskCoordinationScenario(IntegrationTestScenario):
             "total_subtasks": len(complex_task["subtasks"]),
             "agents_assigned": len(
                 set(
-                    agent
-                    for task in task_assignments.values()
-                    for agent in task["assigned_agents"]
+                    agent for task in task_assignments.values() for agent in task["assigned_agents"]
                 )
             ),
         }
@@ -1243,9 +1166,7 @@ class DistributedTaskCoordinationScenario(IntegrationTestScenario):
                 if "location" in subtask:
                     # Single location task
                     target = subtask["location"]
-                    distance = np.linalg.norm(
-                        np.array(worker.position) - np.array(target)
-                    )
+                    distance = np.linalg.norm(np.array(worker.position) - np.array(target))
 
                     # Update worker position (simulated)
                     worker.position = target
@@ -1263,9 +1184,7 @@ class DistributedTaskCoordinationScenario(IntegrationTestScenario):
                 elif "locations" in subtask:
                     # Multi-location task
                     for location in subtask["locations"]:
-                        distance = np.linalg.norm(
-                            np.array(worker.position) - np.array(location)
-                        )
+                        distance = np.linalg.norm(np.array(worker.position) - np.array(location))
                         worker.position = location
 
                         coordination_events.append(
@@ -1297,39 +1216,27 @@ class DistributedTaskCoordinationScenario(IntegrationTestScenario):
 
         results["performance_metrics"] = {
             "total_execution_time": total_time,
-            "allocation_overhead": results["task_allocation"][
-                "allocation_time"
-            ]
-            / total_time,
+            "allocation_overhead": results["task_allocation"]["allocation_time"] / total_time,
             "subtasks_completed": sum(
-                1
-                for s in results["subtask_completion"].values()
-                if s["completed"]
+                1 for s in results["subtask_completion"].values() if s["completed"]
             ),
             "avg_subtask_time": np.mean(
-                [
-                    s["completion_time"]
-                    for s in results["subtask_completion"].values()
-                ]
+                [s["completion_time"] for s in results["subtask_completion"].values()]
             ),
             "coordination_efficiency": len(coordination_events)
             / (len(workers) * len(complex_task["subtasks"])),
-            "within_time_limit": total_time
-            < complex_task["constraints"]["time_limit"],
+            "within_time_limit": total_time < complex_task["constraints"]["time_limit"],
         }
 
         return results
 
-    async def validate(
-        self, context: Dict[str, Any], results: Dict[str, Any]
-    ) -> bool:
+    async def validate(self, context: Dict[str, Any], results: Dict[str, Any]) -> bool:
         """Validate distributed coordination results."""
         validations = []
 
         # Task allocation validation
         allocation_valid = (
-            results["task_allocation"]["total_subtasks"]
-            == len(context["complex_task"]["subtasks"])
+            results["task_allocation"]["total_subtasks"] == len(context["complex_task"]["subtasks"])
             and results["task_allocation"]["agents_assigned"]
             >= context["complex_task"]["constraints"]["min_agents"]
             and results["task_allocation"]["allocation_time"] < 5.0
@@ -1358,8 +1265,7 @@ class DistributedTaskCoordinationScenario(IntegrationTestScenario):
 
         # Overall performance validation
         overall_valid = (
-            results["performance_metrics"]["allocation_overhead"]
-            < 0.2  # Less than 20% overhead
+            results["performance_metrics"]["allocation_overhead"] < 0.2  # Less than 20% overhead
             and results["performance_metrics"]["avg_subtask_time"] < 30.0
         )
         validations.append(("Overall Performance", overall_valid))
@@ -1455,15 +1361,11 @@ class ConcurrentOperationsPerformanceScenario(IntegrationTestScenario):
                     # Random exploration
                     new_pos = [
                         min(
-                            max(
-                                0, agent.position[0] + np.random.randint(-2, 3)
-                            ),
+                            max(0, agent.position[0] + np.random.randint(-2, 3)),
                             agent.grid_size - 1,
                         ),
                         min(
-                            max(
-                                0, agent.position[1] + np.random.randint(-2, 3)
-                            ),
+                            max(0, agent.position[1] + np.random.randint(-2, 3)),
                             agent.grid_size - 1,
                         ),
                     ]
@@ -1472,9 +1374,7 @@ class ConcurrentOperationsPerformanceScenario(IntegrationTestScenario):
                 elif op_type == "update_belief":
                     # Update beliefs based on observation
                     if PYMDP_AVAILABLE and hasattr(agent, "update_beliefs"):
-                        agent.perceive(
-                            {"grid_observation": np.random.randint(0, 5)}
-                        )
+                        agent.perceive({"grid_observation": np.random.randint(0, 5)})
                         agent.update_beliefs()
 
                 elif op_type == "collect_resource":
@@ -1489,8 +1389,7 @@ class ConcurrentOperationsPerformanceScenario(IntegrationTestScenario):
                         _nearest = min(
                             resources,
                             key=lambda r: np.linalg.norm(
-                                np.array(agent.position)
-                                - np.array(r[1]["location"])
+                                np.array(agent.position) - np.array(r[1]["location"])
                             ),
                         )
                         # Simulate collection (would normally update graph)
@@ -1533,29 +1432,21 @@ class ConcurrentOperationsPerformanceScenario(IntegrationTestScenario):
             agent = agents[i % self.concurrency_level]
             op_type = operation_types[i % len(operation_types)]
 
-            task = asyncio.create_task(
-                agent_operation(agent, op_type, f"op_{i}")
-            )
+            task = asyncio.create_task(agent_operation(agent, op_type, f"op_{i}"))
             operation_tasks.append(task)
 
             # Small delay to simulate realistic timing
             await asyncio.sleep(0.001)
 
         # Wait for all operations to complete
-        operation_results = await asyncio.gather(
-            *operation_tasks, return_exceptions=True
-        )
+        operation_results = await asyncio.gather(*operation_tasks, return_exceptions=True)
 
         # Process results
         successful_ops = [
-            r
-            for r in operation_results
-            if isinstance(r, dict) and r.get("success", False)
+            r for r in operation_results if isinstance(r, dict) and r.get("success", False)
         ]
         failed_ops = [
-            r
-            for r in operation_results
-            if isinstance(r, dict) and not r.get("success", False)
+            r for r in operation_results if isinstance(r, dict) and not r.get("success", False)
         ]
 
         results["concurrent_operations"] = operation_results
@@ -1587,14 +1478,11 @@ class ConcurrentOperationsPerformanceScenario(IntegrationTestScenario):
         operation_types_count = {}
         for op in successful_ops:
             op_type = op["operation"]
-            operation_types_count[op_type] = (
-                operation_types_count.get(op_type, 0) + 1
-            )
+            operation_types_count[op_type] = operation_types_count.get(op_type, 0) + 1
 
         results["resource_contention"] = {
             "operation_distribution": operation_types_count,
-            "avg_operations_per_agent": len(successful_ops)
-            / self.concurrency_level,
+            "avg_operations_per_agent": len(successful_ops) / self.concurrency_level,
             "concurrency_achieved": min(
                 self.concurrency_level,
                 len(set(op["agent"] for op in successful_ops)),
@@ -1603,9 +1491,7 @@ class ConcurrentOperationsPerformanceScenario(IntegrationTestScenario):
 
         return results
 
-    async def validate(
-        self, context: Dict[str, Any], results: Dict[str, Any]
-    ) -> bool:
+    async def validate(self, context: Dict[str, Any], results: Dict[str, Any]) -> bool:
         """Validate concurrent operations results."""
         validations = []
 
@@ -1623,12 +1509,9 @@ class ConcurrentOperationsPerformanceScenario(IntegrationTestScenario):
         # Performance validation
         if "avg_operation_time" in results["performance_metrics"]:
             performance_valid = (
-                results["performance_metrics"]["avg_operation_time"]
-                < 0.1  # Avg < 100ms
-                and results["performance_metrics"]["p95_operation_time"]
-                < 0.5  # P95 < 500ms
-                and results["performance_metrics"]["p99_operation_time"]
-                < 1.0  # P99 < 1s
+                results["performance_metrics"]["avg_operation_time"] < 0.1  # Avg < 100ms
+                and results["performance_metrics"]["p95_operation_time"] < 0.5  # P95 < 500ms
+                and results["performance_metrics"]["p99_operation_time"] < 1.0  # P99 < 1s
             )
         else:
             performance_valid = False
@@ -1638,8 +1521,7 @@ class ConcurrentOperationsPerformanceScenario(IntegrationTestScenario):
         # Throughput validation
         if "throughput" in results["performance_metrics"]:
             throughput_valid = (
-                results["performance_metrics"]["throughput"]
-                > self.concurrency_level
+                results["performance_metrics"]["throughput"] > self.concurrency_level
             )  # At least 1 op/sec per agent
         else:
             throughput_valid = False
@@ -1648,8 +1530,7 @@ class ConcurrentOperationsPerformanceScenario(IntegrationTestScenario):
 
         # Concurrency validation
         concurrency_valid = (
-            results["resource_contention"]["concurrency_achieved"]
-            >= self.concurrency_level * 0.8
+            results["resource_contention"]["concurrency_achieved"] >= self.concurrency_level * 0.8
         )
         validations.append(("Concurrency Level", concurrency_valid))
 
@@ -1697,17 +1578,11 @@ class TestMultiAgentSystemIntegration:
         await scenario.cleanup(context)
 
         # Log results for analysis
-        logger.info(
-            f"End-to-end scenario completed in {scenario.get_execution_time():.2f} seconds"
-        )
+        logger.info(f"End-to-end scenario completed in {scenario.get_execution_time():.2f} seconds")
         logger.info(f"GNN processing: {results['gnn_analysis']['success']}")
         logger.info(f"LLM analysis: {results['llm_analysis']['success']}")
-        logger.info(
-            f"Coalition formation: {results['coalition_formation']['success']}"
-        )
-        logger.info(
-            f"Overall success: {results['overall']['end_to_end_success']}"
-        )
+        logger.info(f"Coalition formation: {results['coalition_formation']['success']}")
+        logger.info(f"Overall success: {results['overall']['end_to_end_success']}")
 
         assert is_valid, f"End-to-end integration test failed: {results}"
 
@@ -1724,9 +1599,7 @@ class TestMultiAgentSystemIntegration:
         logger.info(
             f"Communication protocol test completed in {scenario.get_execution_time():.2f} seconds"
         )
-        logger.info(
-            f"Total messages: {results['timing_analysis']['total_messages']}"
-        )
+        logger.info(f"Total messages: {results['timing_analysis']['total_messages']}")
 
         assert is_valid, f"Communication protocol test failed: {results}"
 
@@ -1762,9 +1635,7 @@ class TestMultiAgentSystemIntegration:
         logger.info(
             f"Distributed coordination test completed in {scenario.get_execution_time():.2f} seconds"
         )
-        logger.info(
-            f"Subtasks completed: {results['performance_metrics']['subtasks_completed']}"
-        )
+        logger.info(f"Subtasks completed: {results['performance_metrics']['subtasks_completed']}")
         logger.info(
             f"Coordination efficiency: {results['performance_metrics']['coordination_efficiency']:.2f}"
         )
@@ -1785,18 +1656,14 @@ class TestMultiAgentSystemIntegration:
             f"Light concurrent load test completed in {scenario.get_execution_time():.2f} seconds"
         )
         if "throughput" in results["performance_metrics"]:
-            logger.info(
-                f"Throughput: {results['performance_metrics']['throughput']:.2f} ops/sec"
-            )
+            logger.info(f"Throughput: {results['performance_metrics']['throughput']:.2f} ops/sec")
 
         assert is_valid, f"Light concurrent load test failed: {results}"
 
     async def test_concurrent_operations_heavy_load(self):
         """Test performance under heavy concurrent load."""
 
-        scenario = ConcurrentOperationsPerformanceScenario(
-            concurrency_level=20
-        )
+        scenario = ConcurrentOperationsPerformanceScenario(concurrency_level=20)
 
         context = await scenario.setup()
         results = await scenario.execute(context)
@@ -1807,9 +1674,7 @@ class TestMultiAgentSystemIntegration:
             f"Heavy concurrent load test completed in {scenario.get_execution_time():.2f} seconds"
         )
         if "throughput" in results["performance_metrics"]:
-            logger.info(
-                f"Throughput: {results['performance_metrics']['throughput']:.2f} ops/sec"
-            )
+            logger.info(f"Throughput: {results['performance_metrics']['throughput']:.2f} ops/sec")
 
         assert is_valid, f"Heavy concurrent load test failed: {results}"
 
@@ -1877,7 +1742,7 @@ if __name__ == "__main__":
         total = len(results)
 
         print(f"\n{'='*60}")
-        print(f"INTEGRATION TEST SUMMARY")
+        print("INTEGRATION TEST SUMMARY")
         print(f"{'='*60}")
         print(f"Tests run: {total}")
         print(f"Passed: {passed}")

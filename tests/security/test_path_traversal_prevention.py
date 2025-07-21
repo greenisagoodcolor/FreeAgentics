@@ -179,9 +179,7 @@ class PathTraversalPreventionTester:
 
         for endpoint_template, param_name in api_endpoints:
             for category, payloads in self.path_traversal_payloads.items():
-                for payload in payloads[
-                    :3
-                ]:  # Test first 3 payloads per category
+                for payload in payloads[:3]:  # Test first 3 payloads per category
                     try:
                         # Test in URL path
                         if "{path}" in endpoint_template:
@@ -228,9 +226,7 @@ class PathTraversalPreventionTester:
                                             "category": category,
                                             "indicator": indicator,
                                             "severity": "critical",
-                                            "response_preview": response.text[
-                                                :200
-                                            ],
+                                            "response_preview": response.text[:200],
                                         }
                                     )
 
@@ -305,9 +301,7 @@ class PathTraversalPreventionTester:
 
         for endpoint in static_endpoints:
             for category, payloads in self.path_traversal_payloads.items():
-                for payload in payloads[
-                    :2
-                ]:  # Test first 2 payloads per category
+                for payload in payloads[:2]:  # Test first 2 payloads per category
                     try:
                         # Test direct path traversal
                         test_url = f"{endpoint}{payload}"
@@ -346,10 +340,7 @@ class PathTraversalPreventionTester:
                                 )
 
                             # Look for private keys
-                            if (
-                                "-----begin" in content.lower()
-                                and "private key" in content.lower()
-                            ):
+                            if "-----begin" in content.lower() and "private key" in content.lower():
                                 results["passed"] = False
                                 results["findings"].append(
                                     {
@@ -455,9 +446,7 @@ class PathTraversalPreventionTester:
 
                         # Test via POST body
                         post_data = {param_name: payload}
-                        post_response = self.client.post(
-                            endpoint, json=post_data
-                        )
+                        post_response = self.client.post(endpoint, json=post_data)
 
                         if post_response.status_code == 200:
                             content = post_response.text
@@ -866,9 +855,7 @@ class PathTraversalPreventionTester:
                     {
                         "test_name": test_method.__name__,
                         "passed": False,
-                        "findings": [
-                            {"issue": f"Test execution error: {str(e)}"}
-                        ],
+                        "findings": [{"issue": f"Test execution error: {str(e)}"}],
                         "recommendations": ["Fix test execution error"],
                     }
                 )
@@ -907,9 +894,7 @@ class PathTraversalPreventionTester:
                 "total_tests": total_tests,
                 "passed_tests": passed_tests,
                 "failed_tests": failed_tests,
-                "pass_rate": (passed_tests / total_tests * 100)
-                if total_tests > 0
-                else 0,
+                "pass_rate": (passed_tests / total_tests * 100) if total_tests > 0 else 0,
                 "critical_findings": len(critical_findings),
                 "high_findings": len(high_findings),
                 "medium_findings": len(medium_findings),
@@ -941,14 +926,10 @@ class TestPathTraversalPrevention:
 
         if not result["passed"]:
             critical_issues = [
-                f
-                for f in result.get("findings", [])
-                if f.get("severity") == "critical"
+                f for f in result.get("findings", []) if f.get("severity") == "critical"
             ]
             if critical_issues:
-                failure_msg = (
-                    "CRITICAL: API path traversal vulnerabilities detected:\n"
-                )
+                failure_msg = "CRITICAL: API path traversal vulnerabilities detected:\n"
                 for finding in critical_issues:
                     failure_msg += f"  - {finding['issue']}: {finding.get('endpoint', 'unknown')}\n"
                 pytest.fail(failure_msg)
@@ -959,14 +940,10 @@ class TestPathTraversalPrevention:
 
         if not result["passed"]:
             critical_issues = [
-                f
-                for f in result.get("findings", [])
-                if f.get("severity") == "critical"
+                f for f in result.get("findings", []) if f.get("severity") == "critical"
             ]
             if critical_issues:
-                failure_msg = (
-                    "CRITICAL: Static file path traversal vulnerabilities:\n"
-                )
+                failure_msg = "CRITICAL: Static file path traversal vulnerabilities:\n"
                 for finding in critical_issues:
                     failure_msg += f"  - {finding['issue']}\n"
                 pytest.fail(failure_msg)
@@ -977,9 +954,7 @@ class TestPathTraversalPrevention:
 
         if not result["passed"]:
             critical_issues = [
-                f
-                for f in result.get("findings", [])
-                if f.get("severity") == "critical"
+                f for f in result.get("findings", []) if f.get("severity") == "critical"
             ]
             if critical_issues:
                 failure_msg = "CRITICAL: Configuration files accessible:\n"
@@ -1026,7 +1001,7 @@ if __name__ == "__main__":
     print(f"Pass Rate: {summary['summary']['pass_rate']:.1f}%")
     print(f"Overall Status: {summary['overall_status']}")
 
-    print(f"\nFindings by Severity:")
+    print("\nFindings by Severity:")
     print(f"  Critical: {summary['summary']['critical_findings']}")
     print(f"  High: {summary['summary']['high_findings']}")
     print(f"  Medium: {summary['summary']['medium_findings']}")
@@ -1040,7 +1015,9 @@ if __name__ == "__main__":
 
     # Save report
     timestamp = time.strftime("%Y%m%d_%H%M%S")
-    report_file = f"/home/green/FreeAgentics/tests/security/path_traversal_prevention_report_{timestamp}.json"
+    report_file = (
+        f"/home/green/FreeAgentics/tests/security/path_traversal_prevention_report_{timestamp}.json"
+    )
 
     try:
         with open(report_file, "w") as f:

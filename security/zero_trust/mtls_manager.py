@@ -17,12 +17,12 @@ from dataclasses import dataclass, field
 from datetime import datetime, timedelta
 from enum import Enum
 from pathlib import Path
-from typing import Dict, List, Optional, Set, Tuple
+from typing import Dict, List, Optional, Tuple
 
 from cryptography import x509
 from cryptography.hazmat.primitives import hashes, serialization
 from cryptography.hazmat.primitives.asymmetric import rsa
-from cryptography.x509.oid import ExtensionOID, NameOID
+from cryptography.x509.oid import NameOID
 
 logger = logging.getLogger(__name__)
 
@@ -117,9 +117,7 @@ class MTLSManager:
 
     def _initialize_key_cache(self) -> None:
         """Pre-generate RSA keys for performance."""
-        logger.info(
-            f"Pre-generating {self._key_cache_size} RSA keys for cache"
-        )
+        logger.info(f"Pre-generating {self._key_cache_size} RSA keys for cache")
         for _ in range(self._key_cache_size):
             key = rsa.generate_private_key(
                 public_exponent=65537,
@@ -134,9 +132,7 @@ class MTLSManager:
                 if self._key_cache:
                     # Refill cache in background if getting low
                     if len(self._key_cache) < 3:
-                        threading.Thread(
-                            target=self._refill_key_cache, daemon=True
-                        ).start()
+                        threading.Thread(target=self._refill_key_cache, daemon=True).start()
                     return self._key_cache.pop()
 
         # Generate new key if cache is empty or disabled
@@ -177,9 +173,7 @@ class MTLSManager:
             ca_cert = x509.load_pem_x509_certificate(f.read())
 
         with open(self.ca_key_path, "rb") as f:
-            ca_key = serialization.load_pem_private_key(
-                f.read(), password=None
-            )
+            ca_key = serialization.load_pem_private_key(f.read(), password=None)
 
         return ca_cert, ca_key
 
@@ -197,9 +191,7 @@ class MTLSManager:
                 x509.NameAttribute(NameOID.COUNTRY_NAME, "US"),
                 x509.NameAttribute(NameOID.STATE_OR_PROVINCE_NAME, "CA"),
                 x509.NameAttribute(NameOID.LOCALITY_NAME, "San Francisco"),
-                x509.NameAttribute(
-                    NameOID.ORGANIZATION_NAME, "Zero Trust Network"
-                ),
+                x509.NameAttribute(NameOID.ORGANIZATION_NAME, "Zero Trust Network"),
                 x509.NameAttribute(NameOID.COMMON_NAME, "Zero Trust CA"),
             ]
         )
@@ -212,9 +204,7 @@ class MTLSManager:
             .public_key(private_key.public_key())
             .serial_number(x509.random_serial_number())
             .not_valid_before(datetime.utcnow())
-            .not_valid_after(
-                datetime.utcnow() + timedelta(days=3650)
-            )  # 10 years
+            .not_valid_after(datetime.utcnow() + timedelta(days=3650))  # 10 years
             .add_extension(
                 x509.BasicConstraints(ca=True, path_length=0),
                 critical=True,
@@ -281,12 +271,8 @@ class MTLSManager:
                     x509.NameAttribute(NameOID.COUNTRY_NAME, "US"),
                     x509.NameAttribute(NameOID.STATE_OR_PROVINCE_NAME, "CA"),
                     x509.NameAttribute(NameOID.LOCALITY_NAME, "San Francisco"),
-                    x509.NameAttribute(
-                        NameOID.ORGANIZATION_NAME, "Zero Trust Network"
-                    ),
-                    x509.NameAttribute(
-                        NameOID.ORGANIZATIONAL_UNIT_NAME, "Services"
-                    ),
+                    x509.NameAttribute(NameOID.ORGANIZATION_NAME, "Zero Trust Network"),
+                    x509.NameAttribute(NameOID.ORGANIZATIONAL_UNIT_NAME, "Services"),
                     x509.NameAttribute(NameOID.COMMON_NAME, service_name),
                 ]
             )
@@ -299,9 +285,7 @@ class MTLSManager:
                 .public_key(private_key.public_key())
                 .serial_number(x509.random_serial_number())
                 .not_valid_before(datetime.utcnow())
-                .not_valid_after(
-                    datetime.utcnow() + timedelta(days=validity_days)
-                )
+                .not_valid_after(datetime.utcnow() + timedelta(days=validity_days))
             )
 
             # Add SAN extension
@@ -349,9 +333,7 @@ class MTLSManager:
             ).decode()
 
             # Calculate fingerprint
-            fingerprint = hashlib.sha256(
-                cert.public_bytes(serialization.Encoding.DER)
-            ).hexdigest()
+            fingerprint = hashlib.sha256(cert.public_bytes(serialization.Encoding.DER)).hexdigest()
 
             # Create certificate info
             cert_info = CertificateInfo(
@@ -369,9 +351,7 @@ class MTLSManager:
             self._certificates[service_name] = cert_info
             self.save_certificate(cert_info)
 
-            logger.info(
-                f"Generated certificate for {service_name} (fingerprint: {fingerprint})"
-            )
+            logger.info(f"Generated certificate for {service_name} (fingerprint: {fingerprint})")
 
             return cert_info
 
@@ -392,9 +372,7 @@ class MTLSManager:
                 return False, "Certificate has expired"
 
             # Check revocation
-            fingerprint = hashlib.sha256(
-                cert.public_bytes(serialization.Encoding.DER)
-            ).hexdigest()
+            fingerprint = hashlib.sha256(cert.public_bytes(serialization.Encoding.DER)).hexdigest()
 
             if fingerprint in self._revocation_list:
                 entry = self._revocation_list[fingerprint]
@@ -431,9 +409,7 @@ class MTLSManager:
 
             return new_cert
 
-    def revoke_certificate(
-        self, fingerprint: str, reason: str = "Unspecified"
-    ) -> bool:
+    def revoke_certificate(self, fingerprint: str, reason: str = "Unspecified") -> bool:
         """Revoke a certificate."""
         with self._lock:
             # Find certificate by fingerprint
@@ -444,9 +420,7 @@ class MTLSManager:
                     break
 
             if not cert_info:
-                logger.warning(
-                    f"Certificate not found for revocation: {fingerprint}"
-                )
+                logger.warning(f"Certificate not found for revocation: {fingerprint}")
                 return False
 
             # Add to revocation list
@@ -467,15 +441,11 @@ class MTLSManager:
             logger.info(f"Revoked certificate {fingerprint}: {reason}")
             return True
 
-    def set_rotation_policy(
-        self, service_name: str, policy: CertificateRotationPolicy
-    ) -> None:
+    def set_rotation_policy(self, service_name: str, policy: CertificateRotationPolicy) -> None:
         """Set rotation policy for a service."""
         with self._lock:
             self._rotation_policies[service_name] = policy
-            logger.info(
-                f"Set rotation policy for {service_name}: {policy.strategy.value}"
-            )
+            logger.info(f"Set rotation policy for {service_name}: {policy.strategy.value}")
 
     def _should_rotate_certificate(self, cert_info: CertificateInfo) -> bool:
         """Check if a certificate should be rotated."""
@@ -509,9 +479,7 @@ class MTLSManager:
                         self.rotate_certificate(service_name)
                         rotated.append(service_name)
                     except Exception as e:
-                        logger.error(
-                            f"Failed to rotate certificate for {service_name}: {e}"
-                        )
+                        logger.error(f"Failed to rotate certificate for {service_name}: {e}")
 
         return rotated
 
@@ -613,15 +581,11 @@ class MTLSManager:
                 self._revocation_list[fingerprint] = RevocationEntry(
                     fingerprint=fingerprint,
                     serial_number=entry_data["serial_number"],
-                    revocation_time=datetime.fromisoformat(
-                        entry_data["revocation_time"]
-                    ),
+                    revocation_time=datetime.fromisoformat(entry_data["revocation_time"]),
                     reason=entry_data["reason"],
                 )
 
-            logger.info(
-                f"Loaded {len(self._revocation_list)} revoked certificates"
-            )
+            logger.info(f"Loaded {len(self._revocation_list)} revoked certificates")
 
         except Exception as e:
             logger.error(f"Failed to load CRL: {e}")
@@ -644,14 +608,10 @@ class MTLSManager:
 
     def get_ca_certificate(self) -> str:
         """Get CA certificate in PEM format."""
-        cert_bytes: bytes = self.ca_cert.public_bytes(
-            serialization.Encoding.PEM
-        )
+        cert_bytes: bytes = self.ca_cert.public_bytes(serialization.Encoding.PEM)
         return cert_bytes.decode()
 
-    def get_certificate_bundle(
-        self, service_name: str
-    ) -> Optional[Dict[str, str]]:
+    def get_certificate_bundle(self, service_name: str) -> Optional[Dict[str, str]]:
         """Get certificate bundle for a service."""
         cert_info = self._certificates.get(service_name)
         if not cert_info:

@@ -13,9 +13,7 @@ import numpy as np
 # Add parent directory to path
 sys.path.insert(
     0,
-    os.path.dirname(
-        os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
-    ),
+    os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__)))),
 )
 
 from scripts.identify_memory_hotspots import MemoryHotspotAnalyzer
@@ -52,9 +50,7 @@ class TestMemoryHotspotAnalyzer(unittest.TestCase):
             self.assertIn("total_mb", size_data)
 
             # B matrices should be larger (4 actions)
-            self.assertGreater(
-                size_data["B_matrices_mb"], size_data["A_matrices_mb"]
-            )
+            self.assertGreater(size_data["B_matrices_mb"], size_data["A_matrices_mb"])
 
     @patch("scripts.identify_memory_hotspots.tracemalloc")
     def test_memory_tracing(self, mock_tracemalloc):
@@ -111,15 +107,9 @@ class TestMemoryHotspotAnalyzer(unittest.TestCase):
 
     def test_generate_hotspot_report(self):
         """Test report generation."""
-        with patch.object(
-            self.analyzer, "analyze_pymdp_matrices"
-        ) as mock_matrix:
-            with patch.object(
-                self.analyzer, "analyze_belief_operations"
-            ) as mock_belief:
-                with patch.object(
-                    self.analyzer, "analyze_agent_lifecycle"
-                ) as mock_lifecycle:
+        with patch.object(self.analyzer, "analyze_pymdp_matrices") as mock_matrix:
+            with patch.object(self.analyzer, "analyze_belief_operations") as mock_belief:
+                with patch.object(self.analyzer, "analyze_agent_lifecycle") as mock_lifecycle:
                     with patch.object(
                         self.analyzer, "identify_optimization_opportunities"
                     ) as mock_opt:
@@ -189,9 +179,7 @@ class TestMemoryHotspotAnalyzer(unittest.TestCase):
 
     def test_data_output_format(self):
         """Test the format of saved data."""
-        with tempfile.NamedTemporaryFile(
-            mode="w", suffix=".json", delete=False
-        ) as f:
+        with tempfile.NamedTemporaryFile(mode="w", suffix=".json", delete=False) as f:
             test_data = {
                 "matrix_analysis": {"test": "data"},
                 "belief_operations": {"test": "data"},

@@ -13,7 +13,6 @@ from auth.rbac_enhancements import (
     AccessContext,
     RequestStatus,
     ResourceContext,
-    RoleAssignmentRequest,
     enhanced_rbac_manager,
 )
 
@@ -211,9 +210,7 @@ async def create_user(
 
 @router.get("/users/{user_id}", response_model=UserInfo)
 @require_permission(Permission.ADMIN_SYSTEM)
-async def get_user(
-    user_id: str, current_user: TokenData = Depends(get_current_user)
-) -> UserInfo:
+async def get_user(user_id: str, current_user: TokenData = Depends(get_current_user)) -> UserInfo:
     """Get user details by ID."""
     # Find user by ID
     for username, user_data in auth_manager.users.items():
@@ -229,9 +226,7 @@ async def get_user(
                 last_login=user.last_login,
             )
 
-    raise HTTPException(
-        status_code=status.HTTP_404_NOT_FOUND, detail="User not found"
-    )
+    raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="User not found")
 
 
 @router.put("/users/{user_id}", response_model=UserInfo)
@@ -251,9 +246,7 @@ async def update_user(
             break
 
     if not target_user:
-        raise HTTPException(
-            status_code=status.HTTP_404_NOT_FOUND, detail="User not found"
-        )
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="User not found")
 
     # Update user fields
     if user_update.email is not None:
@@ -300,9 +293,7 @@ async def delete_user(
             break
 
     if not target_user:
-        raise HTTPException(
-            status_code=status.HTTP_404_NOT_FOUND, detail="User not found"
-        )
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="User not found")
 
     # Prevent self-deletion
     if target_user.user_id == current_user.user_id:
@@ -349,18 +340,14 @@ async def request_role_change(
             break
 
     if not target_user:
-        raise HTTPException(
-            status_code=status.HTTP_404_NOT_FOUND, detail="User not found"
-        )
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="User not found")
 
     # Calculate expiry if temporary
     expiry_date = None
     if role_request.temporary and role_request.expiry_hours:
         from datetime import timedelta
 
-        expiry_date = datetime.now() + timedelta(
-            hours=role_request.expiry_hours
-        )
+        expiry_date = datetime.now() + timedelta(hours=role_request.expiry_hours)
 
     # Submit role assignment request
     request_id = enhanced_rbac_manager.request_role_assignment(
@@ -406,21 +393,15 @@ async def get_role_requests(
             "requester_id": req.requester_id,
             "target_user_id": req.target_user_id,
             "target_username": req.target_username,
-            "current_role": req.current_role.value
-            if req.current_role
-            else None,
+            "current_role": req.current_role.value if req.current_role else None,
             "requested_role": req.requested_role.value,
             "justification": req.justification,
             "business_justification": req.business_justification,
             "temporary": req.temporary,
-            "expiry_date": req.expiry_date.isoformat()
-            if req.expiry_date
-            else None,
+            "expiry_date": req.expiry_date.isoformat() if req.expiry_date else None,
             "status": req.status.value,
             "created_at": req.created_at.isoformat(),
-            "reviewed_at": req.reviewed_at.isoformat()
-            if req.reviewed_at
-            else None,
+            "reviewed_at": req.reviewed_at.isoformat() if req.reviewed_at else None,
             "reviewed_by": req.reviewed_by,
             "reviewer_notes": req.reviewer_notes,
             "auto_approved": req.auto_approved,
@@ -486,8 +467,7 @@ async def get_permissions_overview(
         "roles": [role.value for role in UserRole],
         "permissions": [perm.value for perm in Permission],
         "role_permission_matrix": {
-            role.value: [perm.value for perm in perms]
-            for role, perms in ROLE_PERMISSIONS.items()
+            role.value: [perm.value for perm in perms] for role, perms in ROLE_PERMISSIONS.items()
         },
         "user_distribution": {
             role.value: len(
@@ -519,11 +499,7 @@ async def list_abac_rules(
     if active_only:
         rules = [r for r in rules if r.is_active]
     if resource_type:
-        rules = [
-            r
-            for r in rules
-            if r.resource_type == resource_type or r.resource_type == "*"
-        ]
+        rules = [r for r in rules if r.resource_type == resource_type or r.resource_type == "*"]
 
     # Apply pagination
     rules.sort(key=lambda x: x.priority, reverse=True)
@@ -612,13 +588,9 @@ async def update_abac_rule(
 ) -> Dict[str, str]:
     """Update an ABAC rule."""
     # Find rule
-    rule = next(
-        (r for r in enhanced_rbac_manager.abac_rules if r.id == rule_id), None
-    )
+    rule = next((r for r in enhanced_rbac_manager.abac_rules if r.id == rule_id), None)
     if not rule:
-        raise HTTPException(
-            status_code=status.HTTP_404_NOT_FOUND, detail="ABAC rule not found"
-        )
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="ABAC rule not found")
 
     # Update rule fields
     if rule_update.name is not None:
@@ -639,9 +611,7 @@ async def update_abac_rule(
         rule.is_active = rule_update.is_active
 
     # Re-sort rules by priority
-    enhanced_rbac_manager.abac_rules.sort(
-        key=lambda x: x.priority, reverse=True
-    )
+    enhanced_rbac_manager.abac_rules.sort(key=lambda x: x.priority, reverse=True)
 
     # Log rule update
     security_auditor.log_event(
@@ -668,13 +638,9 @@ async def delete_abac_rule(
 ) -> Dict[str, str]:
     """Delete an ABAC rule."""
     # Find and remove rule
-    rule = next(
-        (r for r in enhanced_rbac_manager.abac_rules if r.id == rule_id), None
-    )
+    rule = next((r for r in enhanced_rbac_manager.abac_rules if r.id == rule_id), None)
     if not rule:
-        raise HTTPException(
-            status_code=status.HTTP_404_NOT_FOUND, detail="ABAC rule not found"
-        )
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="ABAC rule not found")
 
     enhanced_rbac_manager.abac_rules.remove(rule)
 
@@ -711,19 +677,11 @@ async def get_access_audit_log(
 
     # Apply filters
     if user_id:
-        audit_log = [
-            entry for entry in audit_log if entry.get("user_id") == user_id
-        ]
+        audit_log = [entry for entry in audit_log if entry.get("user_id") == user_id]
     if resource_type:
-        audit_log = [
-            entry
-            for entry in audit_log
-            if entry.get("resource_type") == resource_type
-        ]
+        audit_log = [entry for entry in audit_log if entry.get("resource_type") == resource_type]
     if decision is not None:
-        audit_log = [
-            entry for entry in audit_log if entry.get("decision") == decision
-        ]
+        audit_log = [entry for entry in audit_log if entry.get("decision") == decision]
 
     # Apply pagination
     audit_log.sort(key=lambda x: x.get("timestamp", ""), reverse=True)
@@ -758,9 +716,7 @@ async def test_access_control(
             break
 
     if not test_user:
-        raise HTTPException(
-            status_code=status.HTTP_404_NOT_FOUND, detail="Test user not found"
-        )
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Test user not found")
 
     # Create access context
     access_context = AccessContext(
@@ -772,15 +728,11 @@ async def test_access_control(
     )
 
     # Create resource context
-    resource_context = ResourceContext(
-        resource_id=resource_id, resource_type=resource_type
-    )
+    resource_context = ResourceContext(resource_id=resource_id, resource_type=resource_type)
 
     # Test RBAC
     rbac_allowed = any(
-        perm.value == action
-        or action in ["view", "read"]
-        and perm == Permission.VIEW_AGENTS
+        perm.value == action or action in ["view", "read"] and perm == Permission.VIEW_AGENTS
         for perm in access_context.permissions
     )
 
@@ -789,9 +741,7 @@ async def test_access_control(
         abac_allowed,
         abac_reason,
         applied_rules,
-    ) = enhanced_rbac_manager.evaluate_abac_access(
-        access_context, resource_context, action
-    )
+    ) = enhanced_rbac_manager.evaluate_abac_access(access_context, resource_context, action)
 
     return {
         "user_id": user_id,
@@ -850,9 +800,7 @@ async def get_rbac_stats(
     """Get RBAC system statistics."""
     # User statistics
     total_users = len(auth_manager.users)
-    active_users = len(
-        [u for u in auth_manager.users.values() if u["user"].is_active]
-    )
+    active_users = len([u for u in auth_manager.users.values() if u["user"].is_active])
 
     # Role distribution
     role_distribution = {}
@@ -871,12 +819,8 @@ async def get_rbac_stats(
 
     # Request statistics
     role_requests = enhanced_rbac_manager.role_requests
-    pending_requests = len(
-        [r for r in role_requests if r.status == RequestStatus.PENDING]
-    )
-    approved_requests = len(
-        [r for r in role_requests if r.status == RequestStatus.APPROVED]
-    )
+    pending_requests = len([r for r in role_requests if r.status == RequestStatus.PENDING])
+    approved_requests = len([r for r in role_requests if r.status == RequestStatus.APPROVED])
 
     # Access statistics
     audit_log = enhanced_rbac_manager.access_audit_log
@@ -900,25 +844,15 @@ async def get_rbac_stats(
             "total": len(role_requests),
             "pending": pending_requests,
             "approved": approved_requests,
-            "rejected": len(
-                [
-                    r
-                    for r in role_requests
-                    if r.status == RequestStatus.REJECTED
-                ]
-            ),
-            "expired": len(
-                [r for r in role_requests if r.status == RequestStatus.EXPIRED]
-            ),
+            "rejected": len([r for r in role_requests if r.status == RequestStatus.REJECTED]),
+            "expired": len([r for r in role_requests if r.status == RequestStatus.EXPIRED]),
         },
         "access_control": {
             "total_checks": total_access_checks,
             "granted": access_granted,
             "denied": access_denied,
             "grant_rate": (
-                (access_granted / total_access_checks * 100)
-                if total_access_checks > 0
-                else 0
+                (access_granted / total_access_checks * 100) if total_access_checks > 0 else 0
             ),
         },
     }

@@ -4,10 +4,9 @@ This module defines different user personas with distinct behavior patterns,
 preferences, and interaction styles for comprehensive system testing.
 """
 
-import random
 from abc import ABC, abstractmethod
 from dataclasses import dataclass, field
-from datetime import datetime, timedelta
+from datetime import datetime
 from enum import Enum
 from typing import Any, Dict, List, Optional, Tuple
 
@@ -77,9 +76,7 @@ class PersonaProfile:
 
     # Connection behavior
     connection_stability: float = 0.95  # Probability of maintaining connection
-    reconnect_probability: float = (
-        0.8  # Probability of reconnecting after disconnect
-    )
+    reconnect_probability: float = 0.8  # Probability of reconnecting after disconnect
     max_reconnect_attempts: int = 3
 
     # Message patterns
@@ -182,9 +179,7 @@ class UserBehavior(ABC):
 
         # Check if currently busy with a task
         if self.state["busy"] and self.state["task_start_time"]:
-            elapsed = (
-                datetime.now() - self.state["task_start_time"]
-            ).total_seconds()
+            elapsed = (datetime.now() - self.state["task_start_time"]).total_seconds()
             min_span, max_span = self.profile.attention_span
             task_duration = self.rng.uniform(min_span, max_span)
 
@@ -198,9 +193,7 @@ class UserBehavior(ABC):
         if self.profile.interaction_pattern == InteractionPattern.SCHEDULED:
             current_hour = datetime.now().hour
             if current_hour not in self.profile.active_hours:
-                return (
-                    self.rng.random() < 0.1
-                )  # 10% chance of off-hours activity
+                return self.rng.random() < 0.1  # 10% chance of off-hours activity
 
         # Activity level determines action frequency
         activity_thresholds = {
@@ -399,9 +392,7 @@ class ResearcherBehavior(UserBehavior):
 
         # Subscribe to multiple related events
         num_events = self.rng.integers(2, 5)
-        selected_events = self.rng.choice(
-            research_events, size=num_events, replace=False
-        )
+        selected_events = self.rng.choice(research_events, size=num_events, replace=False)
 
         return {
             "type": "subscribe",
@@ -421,13 +412,9 @@ class ResearcherBehavior(UserBehavior):
                     "belief_entropy",
                     "policy_entropy",
                 ],
-                "agents": list(self.state["active_agents"])
-                if self.state["active_agents"]
-                else [],
+                "agents": list(self.state["active_agents"]) if self.state["active_agents"] else [],
                 "sample_rate": self.rng.choice([0.5, 1.0, 2.0]),
-                "aggregation": self.rng.choice(
-                    ["mean", "std", "min_max", "percentiles"]
-                ),
+                "aggregation": self.rng.choice(["mean", "std", "min_max", "percentiles"]),
             },
         }
 
@@ -505,19 +492,12 @@ class CoordinatorBehavior(UserBehavior):
             }
 
         elif command == "assign_agent_role":
-            if (
-                self.state["managed_coalitions"]
-                and self.state["active_agents"]
-            ):
+            if self.state["managed_coalitions"] and self.state["active_agents"]:
                 return {
                     "type": "command",
                     "command": "assign_role",
-                    "coalition_id": self.rng.choice(
-                        list(self.state["managed_coalitions"])
-                    ),
-                    "agent_id": self.rng.choice(
-                        list(self.state["active_agents"])
-                    ),
+                    "coalition_id": self.rng.choice(list(self.state["managed_coalitions"])),
+                    "agent_id": self.rng.choice(list(self.state["active_agents"])),
                     "role": self.rng.choice(
                         [
                             "scout",
@@ -534,9 +514,7 @@ class CoordinatorBehavior(UserBehavior):
                 return {
                     "type": "command",
                     "command": "coordinate_action",
-                    "coalition_id": self.rng.choice(
-                        list(self.state["managed_coalitions"])
-                    ),
+                    "coalition_id": self.rng.choice(list(self.state["managed_coalitions"])),
                     "action_type": self.rng.choice(
                         [
                             "move_formation",
@@ -582,10 +560,7 @@ class CoordinatorBehavior(UserBehavior):
 
         query_type = self.rng.choice(query_types)
 
-        if (
-            query_type == "coalition_status"
-            and self.state["managed_coalitions"]
-        ):
+        if query_type == "coalition_status" and self.state["managed_coalitions"]:
             return {
                 "type": "query",
                 "query_type": "coalition_status",
@@ -636,9 +611,7 @@ class CoordinatorBehavior(UserBehavior):
             },
         }
 
-    def _handle_coordination_task(
-        self, task: Dict[str, Any]
-    ) -> Dict[str, Any]:
+    def _handle_coordination_task(self, task: Dict[str, Any]) -> Dict[str, Any]:
         """Handle specific coordination tasks."""
         task_type = task.get("type")
 
@@ -702,9 +675,7 @@ class ObserverBehavior(UserBehavior):
 
         # Observers tend to subscribe to many events
         num_events = self.rng.integers(5, 10)
-        selected_events = self.rng.choice(
-            all_events, size=num_events, replace=False
-        )
+        selected_events = self.rng.choice(all_events, size=num_events, replace=False)
 
         return {
             "type": "subscribe",
@@ -725,9 +696,7 @@ class ObserverBehavior(UserBehavior):
                 "type": "query",
                 "query_type": "event_stream",
                 "limit": self.rng.integers(50, 200),
-                "event_types": self.rng.choice(
-                    [None, ["agent:*"], ["coalition:*"], ["world:*"]]
-                ),
+                "event_types": self.rng.choice([None, ["agent:*"], ["coalition:*"], ["world:*"]]),
             },
             {
                 "type": "query",
@@ -753,9 +722,7 @@ class ObserverBehavior(UserBehavior):
                 ],
                 "sample_rate": self.rng.choice([5.0, 10.0, 30.0]),
                 "passive": True,
-                "visualization": self.rng.choice(
-                    ["dashboard", "timeline", "graph"]
-                ),
+                "visualization": self.rng.choice(["dashboard", "timeline", "graph"]),
             },
         }
 
@@ -877,9 +844,7 @@ class AdminBehavior(UserBehavior):
             {
                 "type": "query",
                 "query_type": "user_activity",
-                "group_by": self.rng.choice(
-                    ["persona_type", "connection_pattern", "hour"]
-                ),
+                "group_by": self.rng.choice(["persona_type", "connection_pattern", "hour"]),
                 "include_anomalies": True,
             },
             {
@@ -951,15 +916,11 @@ class AdminBehavior(UserBehavior):
                 "type": "command",
                 "command": "update_config",
                 "params": {
-                    "section": self.rng.choice(
-                        ["performance", "security", "logging", "limits"]
-                    ),
+                    "section": self.rng.choice(["performance", "security", "logging", "limits"]),
                     "changes": {
                         "max_connections": self.rng.integers(100, 1000),
                         "timeout": self.rng.integers(30, 300),
-                        "log_level": self.rng.choice(
-                            ["debug", "info", "warning", "error"]
-                        ),
+                        "log_level": self.rng.choice(["debug", "info", "warning", "error"]),
                     },
                 },
             }
@@ -1134,9 +1095,7 @@ def create_persona(persona_type: PersonaType, **kwargs) -> PersonaProfile:
 
 
 # Behavior factory
-def create_behavior(
-    user_id: str, persona_type: PersonaType, **kwargs
-) -> UserBehavior:
+def create_behavior(user_id: str, persona_type: PersonaType, **kwargs) -> UserBehavior:
     """Create a user behavior instance."""
     profile = create_persona(persona_type, **kwargs)
 

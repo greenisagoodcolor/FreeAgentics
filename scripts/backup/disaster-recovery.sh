@@ -49,13 +49,13 @@ send_alert() {
         local emoji="🚨"
         curl -X POST -H 'Content-type: application/json' \
             --data "{\"text\":\"$emoji *DISASTER RECOVERY* - $subject\\n$message\"}" \
-            "$SLACK_WEBHOOK" 2>/dev/null || true
+            "$SLACK_WEBHOOK" 2>/dev/null 
     fi
 
     # Send emergency email
     if command -v mail >/dev/null 2>&1; then
         echo "$message" | mail -s "EMERGENCY: FreeAgentics - $subject" \
-            ops@freeagentics.io,admin@freeagentics.io || true
+            ops@freeagentics.io,admin@freeagentics.io 
     fi
 }
 
@@ -263,7 +263,7 @@ recover_full_system() {
     # Step 1: Prepare recovery environment
     log "INFO" "Step 1: Preparing recovery environment..."
     if [[ "$dry_run" == "false" ]]; then
-        docker-compose down || true
+        docker-compose down 
         mkdir -p /home/green/FreeAgentics-recovery
         cd /home/green/FreeAgentics-recovery
     fi
@@ -277,7 +277,7 @@ recover_full_system() {
             git clean -fd
         else
             git clone https://github.com/your-org/FreeAgentics.git /home/green/FreeAgentics-new
-            mv /home/green/FreeAgentics /home/green/FreeAgentics-backup || true
+            mv /home/green/FreeAgentics /home/green/FreeAgentics-backup 
             mv /home/green/FreeAgentics-new /home/green/FreeAgentics
         fi
     fi
@@ -319,7 +319,7 @@ recover_database_corruption() {
 
     # Stop application services
     log "INFO" "Stopping application services..."
-    docker-compose stop backend-prod web worker || true
+    docker-compose stop backend-prod web worker 
 
     # Assess corruption
     log "INFO" "Assessing database corruption..."
@@ -375,7 +375,7 @@ recover_ransomware() {
 
     # Immediate isolation
     log "INFO" "Isolating affected systems..."
-    docker-compose down || true
+    docker-compose down 
 
     # Check backup integrity
     log "INFO" "Verifying backup integrity..."

@@ -141,9 +141,7 @@ class AgentSchema(BaseModel):
     # Metrics and state
     position: Optional[List[float]] = None
     metrics: AgentMetricsSchema = Field(default_factory=AgentMetricsSchema)
-    parameters: AgentParametersSchema = Field(
-        default_factory=AgentParametersSchema
-    )
+    parameters: AgentParametersSchema = Field(default_factory=AgentParametersSchema)
 
     # Timestamps
     created_at: datetime = Field(default_factory=datetime.utcnow)
@@ -184,12 +182,8 @@ class CoalitionObjectiveSchema(BaseModel):
 
     id: str = Field(default_factory=lambda: str(uuid.uuid4()))
     description: str
-    priority: str = Field(
-        default="medium", pattern="^(low|medium|high|critical)$"
-    )
-    status: str = Field(
-        default="pending", pattern="^(pending|in_progress|completed|failed)$"
-    )
+    priority: str = Field(default="medium", pattern="^(low|medium|high|critical)$")
+    status: str = Field(default="pending", pattern="^(pending|in_progress|completed|failed)$")
     progress: float = Field(default=0.0, ge=0.0, le=1.0)
     created_at: datetime = Field(default_factory=datetime.utcnow)
     completed_at: Optional[datetime] = None
@@ -204,9 +198,7 @@ class CoalitionSchema(BaseModel):
     status: CoalitionStatus = Field(default=CoalitionStatus.FORMING)
 
     # Coalition objectives and capabilities
-    objectives: Dict[str, CoalitionObjectiveSchema] = Field(
-        default_factory=dict
-    )
+    objectives: Dict[str, CoalitionObjectiveSchema] = Field(default_factory=dict)
     required_capabilities: List[str] = Field(default_factory=list)
     achieved_objectives: List[str] = Field(default_factory=list)
 
@@ -367,9 +359,7 @@ class BatchAgentSchema(BaseModel):
             if "min" not in v or "max" not in v:
                 raise ValueError("Position bounds must have 'min' and 'max'")
             if len(v["min"]) != len(v["max"]):
-                raise ValueError(
-                    "Min and max bounds must have same dimensions"
-                )
+                raise ValueError("Min and max bounds must have same dimensions")
         return v
 
 

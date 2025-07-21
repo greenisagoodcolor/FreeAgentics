@@ -74,9 +74,7 @@ class NLPEntityExtractor:
         self._setup_custom_patterns()
         self._entity_cache: Dict[str, List[Entity]] = {}
 
-        logger.info(
-            f"NLP Entity Extractor initialized with model: {model_name}"
-        )
+        logger.info(f"NLP Entity Extractor initialized with model: {model_name}")
 
     def _setup_custom_patterns(self):
         """Setup custom patterns for technology and concept detection."""
@@ -164,20 +162,8 @@ class NLPEntityExtractor:
                 }
             ],
             # Cloud and services
-            [
-                {
-                    "LOWER": {
-                        "IN": ["aws", "azure", "gcp", "docker", "kubernetes"]
-                    }
-                }
-            ],
-            [
-                {
-                    "TEXT": {
-                        "IN": ["AWS", "Azure", "GCP", "Docker", "Kubernetes"]
-                    }
-                }
-            ],
+            [{"LOWER": {"IN": ["aws", "azure", "gcp", "docker", "kubernetes"]}}],
+            [{"TEXT": {"IN": ["AWS", "Azure", "GCP", "Docker", "Kubernetes"]}}],
         ]
 
         # Concept patterns
@@ -248,11 +234,7 @@ class NLPEntityExtractor:
             label = self.nlp.vocab.strings[match_id]
             span = doc[start:end]
 
-            entity_type = (
-                EntityType.TECHNOLOGY
-                if label == "TECHNOLOGY"
-                else EntityType.CONCEPT
-            )
+            entity_type = EntityType.TECHNOLOGY if label == "TECHNOLOGY" else EntityType.CONCEPT
             entity = Entity(
                 text=span.text,
                 type=entity_type,
@@ -268,9 +250,7 @@ class NLPEntityExtractor:
             entity_type = self._map_spacy_label_to_entity_type(ent.label_)
             if entity_type:
                 # Avoid duplicates with custom patterns
-                if not self._is_duplicate_entity(
-                    entities, ent.text, ent.start_char, ent.end_char
-                ):
+                if not self._is_duplicate_entity(entities, ent.text, ent.start_char, ent.end_char):
                     entity = Entity(
                         text=ent.text,
                         type=entity_type,
@@ -297,9 +277,7 @@ class NLPEntityExtractor:
             extraction_time=extraction_time,
         )
 
-    def extract_entities_batch(
-        self, texts: List[str]
-    ) -> List[ExtractionResult]:
+    def extract_entities_batch(self, texts: List[str]) -> List[ExtractionResult]:
         """Extract entities from multiple texts."""
         return [self.extract_entities(text) for text in texts]
 
@@ -312,12 +290,8 @@ class NLPEntityExtractor:
             # Convert string patterns to spaCy pattern format
             if isinstance(pattern_rules, str):
                 pattern_rules = [{"LOWER": pattern_rules.lower()}]
-            elif isinstance(pattern_rules, list) and isinstance(
-                pattern_rules[0], str
-            ):
-                pattern_rules = [
-                    {"LOWER": token.lower()} for token in pattern_rules
-                ]
+            elif isinstance(pattern_rules, list) and isinstance(pattern_rules[0], str):
+                pattern_rules = [{"LOWER": token.lower()} for token in pattern_rules]
 
             # Add to appropriate category
             if label == "TECHNOLOGY":
@@ -327,9 +301,7 @@ class NLPEntityExtractor:
 
         logger.info(f"Added {len(patterns)} custom patterns")
 
-    def _map_spacy_label_to_entity_type(
-        self, spacy_label: str
-    ) -> Optional[EntityType]:
+    def _map_spacy_label_to_entity_type(self, spacy_label: str) -> Optional[EntityType]:
         """Map spaCy entity labels to our entity types."""
         mapping = {
             "PERSON": EntityType.PERSON,
@@ -368,11 +340,7 @@ class NLPEntityExtractor:
         """Check if entity is duplicate."""
         for entity in entities:
             # Exact match
-            if (
-                entity.text == text
-                and entity.start_pos == start_pos
-                and entity.end_pos == end_pos
-            ):
+            if entity.text == text and entity.start_pos == start_pos and entity.end_pos == end_pos:
                 return True
 
             # Overlapping spans
@@ -406,9 +374,7 @@ class NLPEntityExtractor:
 
         return deduplicated
 
-    def _extract_relationships(
-        self, entities: List[Entity], doc: Doc
-    ) -> List[Relationship]:
+    def _extract_relationships(self, entities: List[Entity], doc: Doc) -> List[Relationship]:
         """Extract relationships between entities."""
         relationships: List[Relationship] = []
 
@@ -418,9 +384,7 @@ class NLPEntityExtractor:
         # Simple rule-based relationship extraction
         for i, entity1 in enumerate(entities):
             for entity2 in entities[i + 1 :]:
-                relationship_type = self._infer_relationship_type(
-                    entity1, entity2, doc
-                )
+                relationship_type = self._infer_relationship_type(entity1, entity2, doc)
                 if relationship_type:
                     relationship = Relationship(
                         source=entity1,
@@ -432,56 +396,32 @@ class NLPEntityExtractor:
 
         return relationships
 
-    def _infer_relationship_type(
-        self, entity1: Entity, entity2: Entity, doc: Doc
-    ) -> Optional[str]:
+    def _infer_relationship_type(self, entity1: Entity, entity2: Entity, doc: Doc) -> Optional[str]:
         """Infer relationship type between two entities."""
         # Technology + Concept relationships
-        if (
-            entity1.type == EntityType.TECHNOLOGY
-            and entity2.type == EntityType.CONCEPT
-        ):
+        if entity1.type == EntityType.TECHNOLOGY and entity2.type == EntityType.CONCEPT:
             return "used_for"
-        elif (
-            entity1.type == EntityType.CONCEPT
-            and entity2.type == EntityType.TECHNOLOGY
-        ):
+        elif entity1.type == EntityType.CONCEPT and entity2.type == EntityType.TECHNOLOGY:
             return "implemented_by"
 
         # Person + Organization relationships
-        if (
-            entity1.type == EntityType.PERSON
-            and entity2.type == EntityType.ORGANIZATION
-        ):
+        if entity1.type == EntityType.PERSON and entity2.type == EntityType.ORGANIZATION:
             return "works_at"
-        elif (
-            entity1.type == EntityType.ORGANIZATION
-            and entity2.type == EntityType.PERSON
-        ):
+        elif entity1.type == EntityType.ORGANIZATION and entity2.type == EntityType.PERSON:
             return "employs"
 
         # Technology + Technology relationships
-        if (
-            entity1.type == EntityType.TECHNOLOGY
-            and entity2.type == EntityType.TECHNOLOGY
-        ):
+        if entity1.type == EntityType.TECHNOLOGY and entity2.type == EntityType.TECHNOLOGY:
             # Look for relationship words in context
-            text_between = self._get_text_between_entities(
-                entity1, entity2, doc.text
-            )
-            if any(
-                word in text_between.lower()
-                for word in ["built with", "uses", "based on"]
-            ):
+            text_between = self._get_text_between_entities(entity1, entity2, doc.text)
+            if any(word in text_between.lower() for word in ["built with", "uses", "based on"]):
                 return "uses"
             elif any(word in text_between.lower() for word in ["and", ","]):
                 return "related_to"
 
         return None
 
-    def _get_text_between_entities(
-        self, entity1: Entity, entity2: Entity, text: str
-    ) -> str:
+    def _get_text_between_entities(self, entity1: Entity, entity2: Entity, text: str) -> str:
         """Get text between two entities."""
         start = min(entity1.end_pos, entity2.end_pos)
         end = max(entity1.start_pos, entity2.start_pos)

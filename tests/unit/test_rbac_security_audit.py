@@ -6,15 +6,12 @@ This test suite performs a thorough security audit of the RBAC system,
 testing for common vulnerabilities and security best practices.
 """
 
-import json
-import time
 import uuid
 from datetime import datetime, timedelta, timezone
-from typing import Any, Dict, List, Optional
-from unittest.mock import MagicMock, Mock, patch
+from unittest.mock import Mock, patch
 
 import pytest
-from fastapi import HTTPException, Request, status
+from fastapi import HTTPException, Request
 from sqlalchemy.orm import Session
 
 from auth.rbac_enhancements import (
@@ -26,11 +23,12 @@ from auth.rbac_enhancements import (
     RoleAssignmentRequest,
 )
 from auth.rbac_enhancements import UserRole as ABACUserRole
-from auth.rbac_enhancements import enhanced_rbac_manager
+from auth.rbac_enhancements import (
+    enhanced_rbac_manager,
+)
 from auth.resource_access_control import (
     ResourceAccessValidator,
     require_department_access,
-    require_ownership,
     require_resource_access,
 )
 from auth.security_implementation import (
@@ -39,7 +37,6 @@ from auth.security_implementation import (
     SecurityValidator,
     TokenData,
     UserRole,
-    auth_manager,
 )
 from database.models import Agent as AgentModel
 from database.models import AgentStatus
@@ -146,17 +143,13 @@ class TestRBACSecurityAudit:
 
         # Downgrade should be auto-approved
         should_approve = enhanced_rbac_manager._should_auto_approve(request)
-        assert (
-            should_approve
-        ), "Downgrade from admin to observer should be auto-approved"
+        assert should_approve, "Downgrade from admin to observer should be auto-approved"
 
         # Upgrade should not be auto-approved
         request.current_role = UserRole.OBSERVER
         request.requested_role = UserRole.ADMIN
         should_approve = enhanced_rbac_manager._should_auto_approve(request)
-        assert (
-            not should_approve
-        ), "Upgrade from observer to admin should not be auto-approved"
+        assert not should_approve, "Upgrade from observer to admin should not be auto-approved"
 
     def test_permission_inheritance_security(self, test_users):
         """Test permission inheritance doesn't create vulnerabilities."""
@@ -181,9 +174,7 @@ class TestRBACSecurityAudit:
                     admin_perms
                 ), f"Role {role} has permissions not available to admin"
 
-    def test_privilege_escalation_prevention(
-        self, test_users, mock_db, mock_request
-    ):
+    def test_privilege_escalation_prevention(self, test_users, mock_db, mock_request):
         """Test prevention of privilege escalation attacks."""
         observer = test_users["observer"]
 
@@ -202,9 +193,7 @@ class TestRBACSecurityAudit:
         access_granted = ResourceAccessValidator.validate_system_access(
             observer, "system", "admin", mock_request
         )
-        assert (
-            not access_granted
-        ), "Permission manipulation should not grant access"
+        assert not access_granted, "Permission manipulation should not grant access"
 
         # Restore original permissions
         observer.permissions = original_perms
@@ -226,11 +215,7 @@ class TestRBACSecurityAudit:
 
         # Verify request was logged
         assert len(enhanced_rbac_manager.role_requests) > 0
-        request = next(
-            r
-            for r in enhanced_rbac_manager.role_requests
-            if r.id == request_id
-        )
+        request = next(r for r in enhanced_rbac_manager.role_requests if r.id == request_id)
         assert request is not None
         assert request.justification == "Project requirement"
 
@@ -241,11 +226,7 @@ class TestRBACSecurityAudit:
         assert success
 
         # Verify approval was logged
-        request = next(
-            r
-            for r in enhanced_rbac_manager.role_requests
-            if r.id == request_id
-        )
+        request = next(r for r in enhanced_rbac_manager.role_requests if r.id == request_id)
         assert request.status == RequestStatus.APPROVED
         assert request.reviewed_by == "admin-001"
         assert request.reviewer_notes == "Approved for research project"
@@ -288,11 +269,9 @@ class TestRBACSecurityAudit:
             # Mock current time (assuming test runs outside business hours)
             with patch("auth.rbac_enhancements.datetime") as mock_datetime:
                 # Test access during business hours
-                mock_datetime.now.return_value = datetime(
-                    2024, 1, 15, 14, 0
-                )  # Monday 2 PM
-                mock_datetime.now.return_value = (
-                    mock_datetime.now.return_value.replace(tzinfo=timezone.utc)
+                mock_datetime.now.return_value = datetime(2024, 1, 15, 14, 0)  # Monday 2 PM
+                mock_datetime.now.return_value = mock_datetime.now.return_value.replace(
+                    tzinfo=timezone.utc
                 )
 
                 access_context = AccessContext(
@@ -311,16 +290,12 @@ class TestRBACSecurityAudit:
                 ) = enhanced_rbac_manager.evaluate_abac_access(
                     access_context, resource_context, "admin"
                 )
-                assert (
-                    granted
-                ), "Admin access should be granted during business hours"
+                assert granted, "Admin access should be granted during business hours"
 
                 # Test access outside business hours
-                mock_datetime.now.return_value = datetime(
-                    2024, 1, 15, 22, 0
-                )  # Monday 10 PM
-                mock_datetime.now.return_value = (
-                    mock_datetime.now.return_value.replace(tzinfo=timezone.utc)
+                mock_datetime.now.return_value = datetime(2024, 1, 15, 22, 0)  # Monday 10 PM
+                mock_datetime.now.return_value = mock_datetime.now.return_value.replace(
+                    tzinfo=timezone.utc
                 )
 
                 (
@@ -330,9 +305,7 @@ class TestRBACSecurityAudit:
                 ) = enhanced_rbac_manager.evaluate_abac_access(
                     access_context, resource_context, "admin"
                 )
-                assert (
-                    not granted
-                ), "Admin access should be denied outside business hours"
+                assert not granted, "Admin access should be denied outside business hours"
         finally:
             # Restore original rules
             enhanced_rbac_manager.abac_rules = original_rules
@@ -350,9 +323,7 @@ class TestRBACSecurityAudit:
             action="modify",
             subject_conditions={},
             resource_conditions={},
-            environment_conditions={
-                "ip_whitelist": ["192.168.0.0/16", "10.0.0.0/8"]
-            },
+            environment_conditions={"ip_whitelist": ["192.168.0.0/16", "10.0.0.0/8"]},
             effect=ABACEffect.ALLOW,
             priority=150,
             created_at=datetime.now(timezone.utc),
@@ -398,9 +369,7 @@ class TestRBACSecurityAudit:
             # Restore original rules
             enhanced_rbac_manager.abac_rules = original_rules
 
-    def test_authorization_bypass_attempts(
-        self, test_users, mock_db, mock_request
-    ):
+    def test_authorization_bypass_attempts(self, test_users, mock_db, mock_request):
         """Test various authorization bypass attack vectors."""
         observer = test_users["observer"]
 
@@ -409,9 +378,7 @@ class TestRBACSecurityAudit:
         malicious_id = f"{agent_id}' OR '1'='1"
 
         # Mock agent query
-        mock_db.query.return_value.filter.return_value.first.return_value = (
-            None
-        )
+        mock_db.query.return_value.filter.return_value.first.return_value = None
 
         result = ResourceAccessValidator.validate_agent_access(
             observer, malicious_id, "view", mock_db, mock_request
@@ -419,7 +386,7 @@ class TestRBACSecurityAudit:
         assert not result, "SQL injection attempt should fail"
 
         # Test 2: Role manipulation
-        fake_token = TokenData(
+        TokenData(
             user_id=observer.user_id,
             username=observer.username,
             role=UserRole.ADMIN,  # Attempting to escalate role
@@ -438,17 +405,13 @@ class TestRBACSecurityAudit:
         agent.template = "test"
         agent.status = AgentStatus.ACTIVE
 
-        mock_db.query.return_value.filter.return_value.first.return_value = (
-            agent
-        )
+        mock_db.query.return_value.filter.return_value.first.return_value = agent
 
         # Observer trying to modify another user's agent
         result = ResourceAccessValidator.validate_agent_access(
             observer, str(agent.id), "modify", mock_db, mock_request
         )
-        assert (
-            not result
-        ), "Observer should not be able to modify others' agents"
+        assert not result, "Observer should not be able to modify others' agents"
 
     def test_role_manipulation_vulnerabilities(self, test_users):
         """Test for role manipulation vulnerabilities."""
@@ -478,9 +441,7 @@ class TestRBACSecurityAudit:
         }, "Unexpected shared permissions between roles"
 
     @pytest.mark.asyncio
-    async def test_api_endpoint_protection(
-        self, test_users, mock_db, mock_request
-    ):
+    async def test_api_endpoint_protection(self, test_users, mock_db, mock_request):
         """Test API endpoint protection mechanisms."""
 
         @require_resource_access("agent", "modify", "agent_id")
@@ -504,9 +465,7 @@ class TestRBACSecurityAudit:
         agent.template = "test"
         agent.status = AgentStatus.ACTIVE
 
-        mock_db.query.return_value.filter.return_value.first.return_value = (
-            agent
-        )
+        mock_db.query.return_value.filter.return_value.first.return_value = agent
 
         # Attempt to access protected endpoint
         with pytest.raises(HTTPException) as exc_info:
@@ -520,9 +479,7 @@ class TestRBACSecurityAudit:
         assert exc_info.value.status_code == 403
         assert "Access denied" in exc_info.value.detail
 
-    def test_injection_attack_prevention(
-        self, test_users, mock_db, mock_request
-    ):
+    def test_injection_attack_prevention(self, test_users, mock_db, mock_request):
         """Test prevention of injection attacks in RBAC."""
         malicious_user = test_users["malicious"]
 
@@ -577,20 +534,14 @@ class TestRBACSecurityAudit:
         # Approve some requests concurrently
         approved = 0
         for req_id in requests[:5]:
-            if enhanced_rbac_manager.approve_role_request(
-                req_id, "admin-001", "Batch approval"
-            ):
+            if enhanced_rbac_manager.approve_role_request(req_id, "admin-001", "Batch approval"):
                 approved += 1
 
         assert approved == 5, "All approval attempts should succeed"
 
         # Verify no duplicate approvals
         for req_id in requests[:5]:
-            request = next(
-                r
-                for r in enhanced_rbac_manager.role_requests
-                if r.id == req_id
-            )
+            request = next(r for r in enhanced_rbac_manager.role_requests if r.id == req_id)
             assert request.status == RequestStatus.APPROVED
 
     def test_session_hijacking_prevention(self, test_users, mock_request):
@@ -626,9 +577,7 @@ class TestRBACSecurityAudit:
             action="*",
             subject_conditions={},
             resource_conditions={},
-            environment_conditions={
-                "ip_whitelist": ["192.168.0.0/16", "10.0.0.0/8"]
-            },
+            environment_conditions={"ip_whitelist": ["192.168.0.0/16", "10.0.0.0/8"]},
             effect=ABACEffect.ALLOW,
             priority=200,
             created_at=datetime.now(timezone.utc),
@@ -737,14 +686,11 @@ class TestRBACSecurityAudit:
 
         # Attempt to modify audit log
         if original_log_size > 0:
-            original_entry = enhanced_rbac_manager.access_audit_log[0].copy()
+            enhanced_rbac_manager.access_audit_log[0].copy()
             enhanced_rbac_manager.access_audit_log[0]["tampered"] = True
 
             # Verify tampering is detectable
-            assert (
-                enhanced_rbac_manager.access_audit_log[0].get("tampered")
-                == True
-            )
+            assert enhanced_rbac_manager.access_audit_log[0].get("tampered") is True
 
             # In real implementation, audit logs should be immutable
             # This test demonstrates the need for write-once audit storage
@@ -757,9 +703,7 @@ class TestRBACSecurityAudit:
         agent_id = str(uuid.uuid4())
 
         # Mock agent not found
-        mock_db.query.return_value.filter.return_value.first.return_value = (
-            None
-        )
+        mock_db.query.return_value.filter.return_value.first.return_value = None
 
         # Admin should not bypass existence checks
         result = ResourceAccessValidator.validate_agent_access(
@@ -768,13 +712,11 @@ class TestRBACSecurityAudit:
         assert not result, "Admin should not access non-existent resources"
 
         # Test expired token handling
-        expired_admin = test_users["expired_admin"]
+        test_users["expired_admin"]
 
         # Expired tokens should be rejected regardless of role
         with patch("auth.security_implementation.datetime") as mock_datetime:
-            mock_datetime.now.return_value = datetime.now(
-                timezone.utc
-            ) + timedelta(hours=2)
+            mock_datetime.now.return_value = datetime.now(timezone.utc) + timedelta(hours=2)
 
             # In real implementation, this should fail
             # This test demonstrates the need for token expiration checks
@@ -809,13 +751,13 @@ class TestRBACSecurityReport:
         # Print security recommendations
         print("\n=== RBAC Security Audit Report ===")
         print(f"Generated at: {report['metadata']['generated_at']}")
-        print(f"\nRBAC Configuration:")
+        print("\nRBAC Configuration:")
         print(f"  - Total Roles: {rbac_config['total_roles']}")
         print(f"  - Total Permissions: {rbac_config['total_permissions']}")
-        print(f"\nABAC Configuration:")
+        print("\nABAC Configuration:")
         print(f"  - Total Rules: {abac_config['total_rules']}")
         print(f"  - Active Rules: {abac_config['active_rules']}")
-        print(f"\nSecurity Recommendations:")
+        print("\nSecurity Recommendations:")
         print("  1. Implement immutable audit logging")
         print("  2. Add rate limiting for permission changes")
         print("  3. Implement session binding to prevent hijacking")
@@ -823,6 +765,4 @@ class TestRBACSecurityReport:
         print("  5. Implement periodic access reviews")
         print("  6. Add multi-factor authentication for sensitive operations")
         print("  7. Implement just-in-time access provisioning")
-        print(
-            "  8. Add behavioral analysis for privilege escalation detection"
-        )
+        print("  8. Add behavioral analysis for privilege escalation detection")

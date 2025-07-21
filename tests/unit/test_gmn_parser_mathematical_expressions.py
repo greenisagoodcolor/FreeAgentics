@@ -31,9 +31,7 @@ class TestFreeEnergyCalculations:
                         "expression": "epistemic_value + pragmatic_value",
                         "epistemic_value": {
                             "formula": "-sum(q_pi * log(q_pi))",
-                            "variables": {
-                                "q_pi": "posterior_beliefs_over_states"
-                            },
+                            "variables": {"q_pi": "posterior_beliefs_over_states"},
                         },
                         "pragmatic_value": {
                             "formula": "sum(q_pi * log_preferences)",
@@ -290,9 +288,7 @@ class TestProbabilityDistributionOperations:
                         },
                         "variance": {
                             "formula": "(alpha_i * (sum(alpha) - alpha_i)) / (sum(alpha)^2 * (sum(alpha) + 1))",
-                            "variables": {
-                                "alpha_i": "concentration_parameter_i"
-                            },
+                            "variables": {"alpha_i": "concentration_parameter_i"},
                         },
                         "update": {
                             "method": "conjugate_bayesian",
@@ -577,9 +573,7 @@ class TestMatrixOperations:
                         },
                         "conditional_independence": {
                             "formula": "P(factor1, factor2 | factor3) = P(factor1 | factor3) * P(factor2 | factor3)",
-                            "assumptions": [
-                                "conditional_independence_given_factor3"
-                            ],
+                            "assumptions": ["conditional_independence_given_factor3"],
                         },
                         "tensor_contraction": {
                             "formula": "einsum('ijk,jkl->il', tensor_a, tensor_b)",
@@ -608,16 +602,11 @@ class TestMatrixOperations:
         # Marginal distributions
         marginals = tensor_ops["marginal_distributions"]
         factor1_marg = marginals["factor1_marginal"]
-        assert (
-            "sum(joint_distribution, axes=[1, 2])" in factor1_marg["formula"]
-        )
+        assert "sum(joint_distribution, axes=[1, 2])" in factor1_marg["formula"]
 
         # Conditional independence
         cond_indep = tensor_ops["conditional_independence"]
-        assert (
-            "P(factor1 | factor3) * P(factor2 | factor3)"
-            in cond_indep["formula"]
-        )
+        assert "P(factor1 | factor3) * P(factor2 | factor3)" in cond_indep["formula"]
 
         # Tensor contraction
         contraction = tensor_ops["tensor_contraction"]
@@ -749,10 +738,7 @@ class TestInformationTheoreticMeasures:
 
         # Excess entropy
         excess_entropy = process_node["excess_entropy"]
-        assert (
-            excess_entropy["interpretation"]
-            == "complexity_of_predictive_model"
-        )
+        assert excess_entropy["interpretation"] == "complexity_of_predictive_model"
         finite_ee = excess_entropy["finite_approximation"]
         assert finite_ee["max_order"] == 10
 
@@ -782,11 +768,7 @@ class TestNumericalValidation:
 
         # Should detect syntax error in mathematical expression
         assert is_valid is False
-        syntax_errors = [
-            e
-            for e in errors
-            if "syntax" in e.lower() or "formula" in e.lower()
-        ]
+        syntax_errors = [e for e in errors if "syntax" in e.lower() or "formula" in e.lower()]
         assert len(syntax_errors) > 0
 
     def test_validate_dimensional_consistency_in_operations(self):
@@ -840,9 +822,5 @@ class TestNumericalValidation:
 
         # Should detect probability constraint violation
         assert is_valid is False
-        prob_errors = [
-            e
-            for e in errors
-            if "probability" in e.lower() or "sum" in e.lower()
-        ]
+        prob_errors = [e for e in errors if "probability" in e.lower() or "sum" in e.lower()]
         assert len(prob_errors) > 0

@@ -20,19 +20,14 @@ import queue
 import random
 import threading
 import time
-from concurrent.futures import ProcessPoolExecutor, ThreadPoolExecutor
 from dataclasses import dataclass
-from datetime import datetime
-from typing import Any, Dict, List, Optional, Tuple
+from typing import Any, Dict, List, Optional
 
 import numpy as np
 import psutil
 
-from tests.performance.performance_utils import replace_sleep, cpu_work
-from agents.async_agent_manager import AsyncAgentManager
 from agents.base_agent import PYMDP_AVAILABLE, BasicExplorerAgent
-from agents.coalition_coordinator import CoalitionCoordinatorAgent
-from agents.resource_collector import ResourceCollectorAgent
+from tests.performance.performance_utils import replace_sleep
 
 logging.basicConfig(level=logging.WARNING)
 logger = logging.getLogger(__name__)
@@ -73,9 +68,7 @@ class MessageQueue:
         self.dropped_messages = 0
         self.latencies = []
 
-    def send(
-        self, sender_id: str, receiver_id: str, message: Dict[str, Any]
-    ) -> bool:
+    def send(self, sender_id: str, receiver_id: str, message: Dict[str, Any]) -> bool:
         """Send message with timestamp."""
         try:
             self.queue.put(
@@ -93,16 +86,11 @@ class MessageQueue:
             self.dropped_messages += 1
             return False
 
-    def receive(
-        self, receiver_id: str, timeout: float = 0.1
-    ) -> Optional[Dict[str, Any]]:
+    def receive(self, receiver_id: str, timeout: float = 0.1) -> Optional[Dict[str, Any]]:
         """Receive message for specific receiver."""
         try:
             msg = self.queue.get(timeout=timeout)
-            if (
-                msg["receiver"] == receiver_id
-                or msg["receiver"] == "broadcast"
-            ):
+            if msg["receiver"] == receiver_id or msg["receiver"] == "broadcast":
                 # Track latency
                 latency = time.time() - msg["timestamp"]
                 self.latencies.append(latency)
@@ -120,12 +108,8 @@ class MessageQueue:
             "total_messages": self.message_count,
             "dropped_messages": self.dropped_messages,
             "current_depth": self.queue.qsize(),
-            "avg_latency_ms": np.mean(self.latencies) * 1000
-            if self.latencies
-            else 0,
-            "max_latency_ms": np.max(self.latencies) * 1000
-            if self.latencies
-            else 0,
+            "avg_latency_ms": np.mean(self.latencies) * 1000 if self.latencies else 0,
+            "max_latency_ms": np.max(self.latencies) * 1000 if self.latencies else 0,
         }
 
 
@@ -172,23 +156,16 @@ class CoordinationAgent(BasicExplorerAgent):
                 break
         return messages
 
-    def coordinate_handoff(
-        self, target_agent_id: str, task_data: Dict[str, Any]
-    ) -> bool:
+    def coordinate_handoff(self, target_agent_id: str, task_data: Dict[str, Any]) -> bool:
         """Coordinate task handoff with another agent."""
         # Send handoff request
-        if self.send_coordination_message(
-            target_agent_id, "handoff_request", task_data
-        ):
+        if self.send_coordination_message(target_agent_id, "handoff_request", task_data):
             # Wait for acknowledgment
             start_time = time.time()
             while time.time() - start_time < 0.5:  # 500ms timeout
                 messages = self.check_messages()
                 for msg in messages:
-                    if (
-                        msg["sender"] == target_agent_id
-                        and msg["message"]["type"] == "handoff_ack"
-                    ):
+                    if msg["sender"] == target_agent_id and msg["message"]["type"] == "handoff_ack":
                         self.handoff_success += 1
                         return True
                 replace_sleep(0.01)
@@ -215,9 +192,7 @@ class CoordinationAgent(BasicExplorerAgent):
 
         if message["type"] == "handoff_request":
             # Acknowledge handoff
-            self.send_coordination_message(
-                msg["sender"], "handoff_ack", {"accepted": True}
-            )
+            self.send_coordination_message(msg["sender"], "handoff_ack", {"accepted": True})
             self.coordination_count += 1
 
         elif message["type"] == "consensus_vote":
@@ -237,9 +212,7 @@ class CoordinationLoadTester:
         self.metrics: List[CoordinationMetrics] = []
         self.failure_simulator = AgentFailureSimulator()
 
-    def spawn_agents(
-        self, count: int, grid_size: int = 10
-    ) -> List[CoordinationAgent]:
+    def spawn_agents(self, count: int, grid_size: int = 10) -> List[CoordinationAgent]:
         """Spawn multiple coordination agents."""
         agents = []
         for i in range(count):
@@ -249,17 +222,13 @@ class CoordinationLoadTester:
                 self.message_queue,
                 grid_size,
             )
-            agent.config[
-                "performance_mode"
-            ] = "fast"  # Optimize for load testing
+            agent.config["performance_mode"] = "fast"  # Optimize for load testing
             agent.start()
             agents.append(agent)
         self.agents.extend(agents)
         return agents
 
-    def simulate_task_handoffs(
-        self, duration_seconds: float = 5.0
-    ) -> Dict[str, Any]:
+    def simulate_task_handoffs(self, duration_seconds: float = 5.0) -> Dict[str, Any]:
         """Simulate task handoff coordination scenario."""
         start_time = time.time()
         handoff_count = 0
@@ -294,15 +263,11 @@ class CoordinationLoadTester:
         return {
             "total_handoffs": handoff_count,
             "successful_handoffs": successful_handoffs,
-            "success_rate": successful_handoffs / handoff_count
-            if handoff_count > 0
-            else 0,
+            "success_rate": successful_handoffs / handoff_count if handoff_count > 0 else 0,
             "handoffs_per_second": handoff_count / duration_seconds,
         }
 
-    def simulate_resource_contention(
-        self, duration_seconds: float = 5.0
-    ) -> Dict[str, Any]:
+    def simulate_resource_contention(self, duration_seconds: float = 5.0) -> Dict[str, Any]:
         """Simulate resource contention scenario."""
         start_time = time.time()
         resource_requests = 0
@@ -310,14 +275,10 @@ class CoordinationLoadTester:
         resolutions = 0
 
         # Define shared resources
-        resources = {
-            f"resource_{i}": None for i in range(max(1, len(self.agents) // 5))
-        }
+        resources = {f"resource_{i}": None for i in range(max(1, len(self.agents) // 5))}
         resource_locks = {r: threading.Lock() for r in resources}
 
-        def try_acquire_resource(
-            agent: CoordinationAgent, resource_id: str
-        ) -> bool:
+        def try_acquire_resource(agent: CoordinationAgent, resource_id: str) -> bool:
             """Try to acquire a resource with contention handling."""
             nonlocal contentions, resolutions
 
@@ -376,28 +337,18 @@ class CoordinationLoadTester:
                             agent.send_coordination_message(
                                 msg["sender"],
                                 "resource_release",
-                                {
-                                    "resource_id": msg["message"]["data"][
-                                        "resource_id"
-                                    ]
-                                },
+                                {"resource_id": msg["message"]["data"]["resource_id"]},
                             )
 
         return {
             "total_requests": resource_requests,
             "contentions": contentions,
             "resolutions": resolutions,
-            "contention_rate": contentions / resource_requests
-            if resource_requests > 0
-            else 0,
-            "resolution_rate": resolutions / contentions
-            if contentions > 0
-            else 0,
+            "contention_rate": contentions / resource_requests if resource_requests > 0 else 0,
+            "resolution_rate": resolutions / contentions if contentions > 0 else 0,
         }
 
-    def simulate_consensus_building(
-        self, consensus_rounds: int = 5
-    ) -> Dict[str, Any]:
+    def simulate_consensus_building(self, consensus_rounds: int = 5) -> Dict[str, Any]:
         """Simulate consensus building scenario."""
         consensus_times = []
         success_count = 0
@@ -421,8 +372,7 @@ class CoordinationLoadTester:
                 for msg in messages:
                     if (
                         msg["message"]["type"] == "consensus_vote"
-                        and msg["message"]["data"]["consensus_id"]
-                        == consensus_id
+                        and msg["message"]["data"]["consensus_id"] == consensus_id
                     ):
                         voter = msg["message"]["data"]["voter"]
                         vote = msg["message"]["data"]["vote"]
@@ -445,9 +395,7 @@ class CoordinationLoadTester:
             "success_rate": success_count / consensus_rounds,
         }
 
-    def measure_coordination_overhead(
-        self, agent_count: int
-    ) -> CoordinationMetrics:
+    def measure_coordination_overhead(self, agent_count: int) -> CoordinationMetrics:
         """Measure actual coordination overhead for given agent count."""
         # Clear previous agents
         for agent in self.agents:
@@ -471,15 +419,11 @@ class CoordinationLoadTester:
         start_time = time.time()
 
         # Run coordination scenarios in parallel
-        handoff_task = asyncio.create_task(
-            asyncio.to_thread(self.simulate_task_handoffs, 2.0)
-        )
+        handoff_task = asyncio.create_task(asyncio.to_thread(self.simulate_task_handoffs, 2.0))
         contention_task = asyncio.create_task(
             asyncio.to_thread(self.simulate_resource_contention, 2.0)
         )
-        consensus_task = asyncio.create_task(
-            asyncio.to_thread(self.simulate_consensus_building, 3)
-        )
+        consensus_task = asyncio.create_task(asyncio.to_thread(self.simulate_consensus_building, 3))
 
         # Wait for all scenarios
         loop = asyncio.new_event_loop()
@@ -488,9 +432,7 @@ class CoordinationLoadTester:
             handoff_results,
             contention_results,
             consensus_results,
-        ) = loop.run_until_complete(
-            asyncio.gather(handoff_task, contention_task, consensus_task)
-        )
+        ) = loop.run_until_complete(asyncio.gather(handoff_task, contention_task, consensus_task))
 
         coordination_time = time.time() - start_time
 
@@ -499,9 +441,7 @@ class CoordinationLoadTester:
 
         # Calculate efficiency
         theoretical_efficiency = 1.0  # Perfect linear scaling
-        actual_efficiency = (
-            single_agent_time * agent_count
-        ) / coordination_time
+        actual_efficiency = (single_agent_time * agent_count) / coordination_time
         coordination_overhead = 1.0 - actual_efficiency
 
         metrics = CoordinationMetrics(
@@ -522,9 +462,7 @@ class CoordinationLoadTester:
 
         return metrics
 
-    def simulate_agent_failures(
-        self, failure_rate: float = 0.1
-    ) -> Dict[str, Any]:
+    def simulate_agent_failures(self, failure_rate: float = 0.1) -> Dict[str, Any]:
         """Simulate agent failures and recovery."""
         recovery_times = []
         failure_count = 0
@@ -558,12 +496,8 @@ class CoordinationLoadTester:
 
         return {
             "failure_count": failure_count,
-            "avg_recovery_time_ms": np.mean(recovery_times) * 1000
-            if recovery_times
-            else 0,
-            "max_recovery_time_ms": np.max(recovery_times) * 1000
-            if recovery_times
-            else 0,
+            "avg_recovery_time_ms": np.mean(recovery_times) * 1000 if recovery_times else 0,
+            "max_recovery_time_ms": np.max(recovery_times) * 1000 if recovery_times else 0,
         }
 
 
@@ -614,11 +548,7 @@ def run_comprehensive_load_tests():
         else:
             expected_efficiency = 0.284  # Documented 28.4% at 50 agents
 
-        status = (
-            "✅"
-            if metrics.actual_efficiency >= expected_efficiency * 0.9
-            else "❌"
-        )
+        status = "✅" if metrics.actual_efficiency >= expected_efficiency * 0.9 else "❌"
 
         print(
             f"{count:6} | {metrics.total_messages:8} | {metrics.actual_efficiency:10.1%} | "
@@ -629,13 +559,9 @@ def run_comprehensive_load_tests():
     max_metrics = all_metrics[-1]  # 50 agents
     efficiency_loss = max_metrics.efficiency_loss()
 
-    print(
-        f"\n🎯 Efficiency Loss at {max_metrics.agent_count} agents: {efficiency_loss:.1f}%"
-    )
+    print(f"\n🎯 Efficiency Loss at {max_metrics.agent_count} agents: {efficiency_loss:.1f}%")
     if efficiency_loss >= 70 and efficiency_loss <= 75:
-        print(
-            "✅ Validated: ~72% efficiency loss at scale matches documentation"
-        )
+        print("✅ Validated: ~72% efficiency loss at scale matches documentation")
     else:
         print("❌ Warning: Efficiency loss doesn't match documented 72%")
 
@@ -645,12 +571,8 @@ def run_comprehensive_load_tests():
     failure_results = tester.simulate_agent_failures(failure_rate=0.2)
 
     print(f"Failures simulated: {failure_results['failure_count']}")
-    print(
-        f"Avg recovery time: {failure_results['avg_recovery_time_ms']:.1f}ms"
-    )
-    print(
-        f"Max recovery time: {failure_results['max_recovery_time_ms']:.1f}ms"
-    )
+    print(f"Avg recovery time: {failure_results['avg_recovery_time_ms']:.1f}ms")
+    print(f"Max recovery time: {failure_results['max_recovery_time_ms']:.1f}ms")
 
     # Memory usage analysis
     process = psutil.Process(os.getpid())
@@ -672,9 +594,7 @@ def run_comprehensive_load_tests():
         and max_metrics.coordination_latency_ms < 100
         and memory_per_agent < 50
     ):
-        print(
-            "✅ VALIDATED: Multi-agent coordination performs within documented limits"
-        )
+        print("✅ VALIDATED: Multi-agent coordination performs within documented limits")
         print("   - GIL constraints confirmed")
         print("   - ~50 agent practical limit validated")
         print("   - 72% efficiency loss at scale confirmed")

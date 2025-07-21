@@ -5,15 +5,12 @@ Tests the FastAPI system endpoints including metrics and health checks.
 """
 
 import os
-from datetime import datetime
 
 os.environ["REDIS_ENABLED"] = "false"
 os.environ["TESTING"] = "true"
 os.environ["DATABASE_URL"] = "sqlite:///./test.db"
 
-import pytest
 
-from api.v1.system import router
 from main import app
 from tests.test_client_compat import TestClient
 

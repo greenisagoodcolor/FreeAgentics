@@ -4,8 +4,6 @@ Basic test for encryption and SOAR functionality.
 """
 
 import asyncio
-import json
-import os
 import sys
 from pathlib import Path
 
@@ -65,9 +63,7 @@ def test_quantum_resistant():
     assert keypair.algorithm == "Kyber3"
 
     encapsulated = kyber.encapsulate(keypair.public_key)
-    shared_secret = kyber.decapsulate(
-        encapsulated.ciphertext, keypair.private_key
-    )
+    shared_secret = kyber.decapsulate(encapsulated.ciphertext, keypair.private_key)
     assert len(shared_secret) == 32
     print("✓ Kyber KEM works")
 
@@ -142,9 +138,7 @@ def test_incident_manager():
     )
 
     with tempfile.TemporaryDirectory() as tmpdir:
-        manager = IncidentManager(
-            data_dir=tmpdir, auto_triage=False, auto_playbook_execution=False
-        )
+        manager = IncidentManager(data_dir=tmpdir, auto_triage=False, auto_playbook_execution=False)
 
         # Create incident
         case = manager.create_incident(
@@ -152,9 +146,7 @@ def test_incident_manager():
             description="Test description",
             type=IncidentType.MALWARE,
             severity=IncidentSeverity.HIGH,
-            indicators=[
-                {"type": "ip", "value": "192.168.1.100", "confidence": 0.9}
-            ],
+            indicators=[{"type": "ip", "value": "192.168.1.100", "confidence": 0.9}],
         )
 
         assert case.case_id.startswith("INC-")

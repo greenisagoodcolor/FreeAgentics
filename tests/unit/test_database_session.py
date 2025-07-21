@@ -15,9 +15,7 @@ class TestGetDb:
     @patch("database.session.SessionLocal")
     @patch("database.session.db_state")
     @patch("database.session.db_circuit_breaker")
-    def test_get_db_success(
-        self, mock_circuit_breaker, mock_db_state, mock_session_local
-    ):
+    def test_get_db_success(self, mock_circuit_breaker, mock_db_state, mock_session_local):
         """Test successful database session creation."""
         # Setup mocks
         mock_session = Mock(spec=Session)
@@ -37,9 +35,7 @@ class TestGetDb:
     @patch("database.session.SessionLocal", None)
     def test_get_db_no_session_factory(self):
         """Test error when SessionLocal is not initialized."""
-        with pytest.raises(
-            RuntimeError, match="Database session factory not initialized"
-        ):
+        with pytest.raises(RuntimeError, match="Database session factory not initialized"):
             next(get_db())
 
     @patch("database.session.SessionLocal")
@@ -87,9 +83,7 @@ class TestGetDb:
 
         mock_circuit_breaker.call.side_effect = circuit_breaker_call
         # Make the session execute fail to simulate connection failure
-        mock_session.execute.side_effect = OperationalError(
-            "Connection failed", None, None
-        )
+        mock_session.execute.side_effect = OperationalError("Connection failed", None, None)
 
         with pytest.raises(RuntimeError, match="Database connection failed"):
             next(get_db())
@@ -97,9 +91,7 @@ class TestGetDb:
     @patch("database.session.SessionLocal")
     @patch("database.session.db_state")
     @patch("database.session.db_circuit_breaker", None)
-    def test_get_db_no_circuit_breaker(
-        self, mock_db_state, mock_session_local
-    ):
+    def test_get_db_no_circuit_breaker(self, mock_db_state, mock_session_local):
         """Test database session creation without circuit breaker."""
         mock_session = Mock(spec=Session)
         mock_session_local.return_value = mock_session
@@ -118,9 +110,7 @@ class TestCheckDatabaseHealth:
     @patch("database.session.engine")
     @patch("database.session.db_state")
     @patch("database.session.db_circuit_breaker")
-    def test_check_database_health_success(
-        self, mock_circuit_breaker, mock_db_state, mock_engine
-    ):
+    def test_check_database_health_success(self, mock_circuit_breaker, mock_db_state, mock_engine):
         """Test successful database health check."""
         # Setup mocks
         mock_db_state.is_available = True
@@ -142,9 +132,7 @@ class TestCheckDatabaseHealth:
         mock_result = Mock()
         mock_result.scalar.return_value = 1
         mock_connection.execute.return_value = mock_result
-        mock_engine.connect.return_value.__enter__.return_value = (
-            mock_connection
-        )
+        mock_engine.connect.return_value.__enter__.return_value = mock_connection
 
         def health_check_success():
             return {
@@ -166,9 +154,7 @@ class TestCheckDatabaseHealth:
     @patch("database.session.engine", None)
     @patch("database.session.db_state")
     @patch("database.session.db_circuit_breaker")
-    def test_check_database_health_no_engine(
-        self, mock_circuit_breaker, mock_db_state
-    ):
+    def test_check_database_health_no_engine(self, mock_circuit_breaker, mock_db_state):
         """Test health check when engine is not initialized."""
         mock_db_state.is_available = False
         mock_db_state.last_error = "No engine"
@@ -202,9 +188,7 @@ class TestCheckDatabaseHealth:
             "last_success_time": None,
         }
 
-        mock_engine.connect.side_effect = OperationalError(
-            "Connection failed", None, None
-        )
+        mock_engine.connect.side_effect = OperationalError("Connection failed", None, None)
 
         health_info = check_database_health()
 
@@ -231,9 +215,7 @@ class TestCheckDatabaseHealth:
         class CircuitBreakerOpenError(MockCircuitBreakerError):
             pass
 
-        mock_circuit_breaker.call.side_effect = CircuitBreakerOpenError(
-            "Circuit breaker is open"
-        )
+        mock_circuit_breaker.call.side_effect = CircuitBreakerOpenError("Circuit breaker is open")
         mock_circuit_breaker.get_metrics.return_value = {
             "state": "open",
             "failure_count": 5,
@@ -253,9 +235,7 @@ class TestCheckDatabaseHealth:
     @patch("database.session.engine")
     @patch("database.session.db_state")
     @patch("database.session.db_circuit_breaker", None)
-    def test_check_database_health_no_circuit_breaker(
-        self, mock_db_state, mock_engine
-    ):
+    def test_check_database_health_no_circuit_breaker(self, mock_db_state, mock_engine):
         """Test health check without circuit breaker."""
         mock_db_state.is_available = True
         mock_db_state.last_error = None
@@ -265,9 +245,7 @@ class TestCheckDatabaseHealth:
         mock_result = Mock()
         mock_result.scalar.return_value = 1
         mock_connection.execute.return_value = mock_result
-        mock_engine.connect.return_value.__enter__.return_value = (
-            mock_connection
-        )
+        mock_engine.connect.return_value.__enter__.return_value = mock_connection
         mock_engine.pool = Mock()
         mock_engine.pool.size.return_value = 5
         mock_engine.pool.checkedout.return_value = 2

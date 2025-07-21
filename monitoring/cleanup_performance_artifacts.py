@@ -12,9 +12,7 @@ from pathlib import Path
 from typing import Any, Dict, List
 
 # Setup logging
-logging.basicConfig(
-    level=logging.INFO, format="%(asctime)s - %(levelname)s - %(message)s"
-)
+logging.basicConfig(level=logging.INFO, format="%(asctime)s - %(levelname)s - %(message)s")
 logger = logging.getLogger(__name__)
 
 
@@ -68,9 +66,7 @@ class PerformanceArtifactCleaner:
                         file_size = file_path.stat().st_size
                         freed_space += file_size
                         file_path.unlink()
-                        self.cleanup_report["files_removed"].append(
-                            str(file_path)
-                        )
+                        self.cleanup_report["files_removed"].append(str(file_path))
                         removed_count += 1
                         logger.info(f"   Removed: {file_path}")
                 except Exception as e:
@@ -116,9 +112,7 @@ class PerformanceArtifactCleaner:
                         file_size = file_path.stat().st_size
                         freed_space += file_size
                         file_path.unlink()
-                        self.cleanup_report["files_removed"].append(
-                            str(file_path)
-                        )
+                        self.cleanup_report["files_removed"].append(str(file_path))
                         removed_count += 1
                         logger.info(f"   Removed: {file_path}")
                 except Exception as e:
@@ -163,22 +157,14 @@ class PerformanceArtifactCleaner:
                 try:
                     if dir_path.is_dir():
                         # Calculate directory size
-                        dir_size = sum(
-                            f.stat().st_size
-                            for f in dir_path.rglob("*")
-                            if f.is_file()
-                        )
+                        dir_size = sum(f.stat().st_size for f in dir_path.rglob("*") if f.is_file())
                         freed_space += dir_size
                         shutil.rmtree(dir_path)
-                        self.cleanup_report["directories_removed"].append(
-                            str(dir_path)
-                        )
+                        self.cleanup_report["directories_removed"].append(str(dir_path))
                         removed_count += 1
                         logger.info(f"   Removed directory: {dir_path}")
                 except Exception as e:
-                    logger.warning(
-                        f"   Failed to remove directory {dir_path}: {e}"
-                    )
+                    logger.warning(f"   Failed to remove directory {dir_path}: {e}")
 
         self.cleanup_report["space_freed"] += freed_space
         logger.info(
@@ -190,9 +176,7 @@ class PerformanceArtifactCleaner:
         logger.info("🧹 Consolidating performance reports...")
 
         # Create consolidated reports directory
-        consolidated_dir = (
-            self.project_root / "monitoring" / "reports" / "archived"
-        )
+        consolidated_dir = self.project_root / "monitoring" / "reports" / "archived"
         consolidated_dir.mkdir(parents=True, exist_ok=True)
 
         # Find all performance report files
@@ -209,9 +193,7 @@ class PerformanceArtifactCleaner:
             files = list(self.project_root.rglob(pattern))
             for file_path in files:
                 try:
-                    if file_path.is_file() and "monitoring/reports" not in str(
-                        file_path
-                    ):
+                    if file_path.is_file() and "monitoring/reports" not in str(file_path):
                         # Move to consolidated directory
                         new_path = consolidated_dir / file_path.name
                         if not new_path.exists():
@@ -220,13 +202,9 @@ class PerformanceArtifactCleaner:
                                 {"from": str(file_path), "to": str(new_path)}
                             )
                             consolidated_count += 1
-                            logger.info(
-                                f"   Consolidated: {file_path} -> {new_path}"
-                            )
+                            logger.info(f"   Consolidated: {file_path} -> {new_path}")
                 except Exception as e:
-                    logger.warning(
-                        f"   Failed to consolidate {file_path}: {e}"
-                    )
+                    logger.warning(f"   Failed to consolidate {file_path}: {e}")
 
         logger.info(f"✅ Consolidated {consolidated_count} performance reports")
 
@@ -264,15 +242,11 @@ class PerformanceArtifactCleaner:
                         file_size = duplicate_file.stat().st_size
                         freed_space += file_size
                         duplicate_file.unlink()
-                        self.cleanup_report["files_removed"].append(
-                            str(duplicate_file)
-                        )
+                        self.cleanup_report["files_removed"].append(str(duplicate_file))
                         removed_count += 1
                         logger.info(f"   Removed duplicate: {duplicate_file}")
                     except Exception as e:
-                        logger.warning(
-                            f"   Failed to remove duplicate {duplicate_file}: {e}"
-                        )
+                        logger.warning(f"   Failed to remove duplicate {duplicate_file}: {e}")
 
         self.cleanup_report["space_freed"] += freed_space
         logger.info(
@@ -297,27 +271,19 @@ class PerformanceArtifactCleaner:
         for report_file in report_dir.rglob("*.json"):
             try:
                 if report_file.is_file():
-                    file_time = datetime.fromtimestamp(
-                        report_file.stat().st_mtime
-                    )
+                    file_time = datetime.fromtimestamp(report_file.stat().st_mtime)
                     if file_time < cutoff_date:
                         file_size = report_file.stat().st_size
                         freed_space += file_size
                         report_file.unlink()
-                        self.cleanup_report["files_removed"].append(
-                            str(report_file)
-                        )
+                        self.cleanup_report["files_removed"].append(str(report_file))
                         removed_count += 1
                         logger.info(f"   Removed old report: {report_file}")
             except Exception as e:
-                logger.warning(
-                    f"   Failed to remove old report {report_file}: {e}"
-                )
+                logger.warning(f"   Failed to remove old report {report_file}: {e}")
 
         self.cleanup_report["space_freed"] += freed_space
-        logger.info(
-            f"✅ Removed {removed_count} old reports ({freed_space / 1024:.1f} KB freed)"
-        )
+        logger.info(f"✅ Removed {removed_count} old reports ({freed_space / 1024:.1f} KB freed)")
 
     def optimize_performance_configs(self) -> None:
         """Optimize and consolidate performance configuration files."""
@@ -353,9 +319,7 @@ class PerformanceArtifactCleaner:
 
                     logger.info(f"   Processed config: {config_file}")
             except Exception as e:
-                logger.warning(
-                    f"   Failed to process config {config_file}: {e}"
-                )
+                logger.warning(f"   Failed to process config {config_file}: {e}")
 
         # Save consolidated configs
         config_dir = self.project_root / "monitoring" / "config"
@@ -367,32 +331,20 @@ class PerformanceArtifactCleaner:
                 json.dump(config_data, f, indent=2)
             logger.info(f"   Saved consolidated config: {config_path}")
 
-        logger.info(
-            f"✅ Optimized {len(consolidated_configs)} performance configurations"
-        )
+        logger.info(f"✅ Optimized {len(consolidated_configs)} performance configurations")
 
     def generate_cleanup_report(self) -> str:
         """Generate a comprehensive cleanup report."""
         self.cleanup_report["summary"] = {
             "files_removed": len(self.cleanup_report["files_removed"]),
-            "directories_removed": len(
-                self.cleanup_report["directories_removed"]
-            ),
-            "files_consolidated": len(
-                self.cleanup_report["files_consolidated"]
-            ),
+            "directories_removed": len(self.cleanup_report["directories_removed"]),
+            "files_consolidated": len(self.cleanup_report["files_consolidated"]),
             "space_freed_kb": self.cleanup_report["space_freed"] / 1024,
-            "space_freed_mb": self.cleanup_report["space_freed"]
-            / (1024 * 1024),
+            "space_freed_mb": self.cleanup_report["space_freed"] / (1024 * 1024),
         }
 
         # Save report
-        report_path = (
-            self.project_root
-            / "monitoring"
-            / "reports"
-            / "cleanup_report.json"
-        )
+        report_path = self.project_root / "monitoring" / "reports" / "cleanup_report.json"
         report_path.parent.mkdir(parents=True, exist_ok=True)
 
         with open(report_path, "w") as f:
@@ -403,9 +355,7 @@ class PerformanceArtifactCleaner:
 
     def run_full_cleanup(self) -> str:
         """Run complete performance artifacts cleanup."""
-        logger.info(
-            "🚀 Starting comprehensive performance artifacts cleanup..."
-        )
+        logger.info("🚀 Starting comprehensive performance artifacts cleanup...")
 
         # Run all cleanup operations
         self.cleanup_obsolete_baseline_files()
@@ -438,12 +388,8 @@ def main():
     """Main function for CLI usage."""
     import argparse
 
-    parser = argparse.ArgumentParser(
-        description="Performance Test Artifacts Cleanup"
-    )
-    parser.add_argument(
-        "--project-root", default=".", help="Project root directory"
-    )
+    parser = argparse.ArgumentParser(description="Performance Test Artifacts Cleanup")
+    parser.add_argument("--project-root", default=".", help="Project root directory")
     parser.add_argument(
         "--dry-run",
         action="store_true",

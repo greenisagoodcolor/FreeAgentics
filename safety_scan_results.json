@@ -1,0 +1,1896 @@
+
+
++===========================================================================================================================================================================================+
+
+
+DEPRECATED: this command (`check`) has been DEPRECATED, and will be unsupported beyond 01 June 2024.
+
+
+We highly encourage switching to the new `scan` command which is easier to use, more powerful, and can be set up to mimic the deprecated command if required.
+
+
++===========================================================================================================================================================================================+
+
+
+/home/green/FreeAgentics/security_env/lib/python3.12/site-packages/safety/safety.py:1853: UserWarning: pkg_resources is deprecated as an API. See https://setuptools.pypa.io/en/latest/pkg_resources.html. The pkg_resources package is slated for removal as early as 2025-11-30. Refrain from using this package or pin to Setuptools<81.
+  import pkg_resources
+{
+    "report_meta": {
+        "scan_target": "environment",
+        "scanned": [
+            "/home/green/FreeAgentics/security_env/lib/python3.12/site-packages/setuptools/_vendor",
+            "/home/green/FreeAgentics/security_env/lib/python3.12/site-packages",
+            "/usr/lib/python3.12",
+            "/usr/lib/python312.zip",
+            "/usr/lib/python3.12/lib-dynload",
+            "/home/green/FreeAgentics/security_env/bin"
+        ],
+        "scanned_full_path": [
+            "/home/green/FreeAgentics/security_env/bin",
+            "/usr/lib/python312.zip",
+            "/usr/lib/python3.12",
+            "/usr/lib/python3.12/lib-dynload",
+            "/home/green/FreeAgentics/security_env/lib/python3.12/site-packages",
+            "/home/green/FreeAgentics/security_env/lib/python3.12/site-packages/setuptools/_vendor"
+        ],
+        "target_languages": [
+            "python"
+        ],
+        "policy_file": null,
+        "policy_file_source": "local",
+        "audit_and_monitor": false,
+        "api_key": false,
+        "account": "",
+        "local_database_path": null,
+        "safety_version": "3.6.0",
+        "timestamp": "2025-07-21 02:10:34",
+        "packages_found": 104,
+        "vulnerabilities_found": 1,
+        "vulnerabilities_ignored": 0,
+        "remediations_recommended": 0,
+        "telemetry": {
+            "safety_options": {
+                "json": {
+                    "--json": 1
+                }
+            },
+            "safety_version": "3.6.0",
+            "safety_source": "cli",
+            "os_type": "Linux",
+            "os_release": "6.6.87.2-microsoft-standard-WSL2",
+            "os_description": "Linux-6.6.87.2-microsoft-standard-WSL2-x86_64-with-glibc2.39",
+            "python_version": "3.12.3",
+            "safety_command": "check"
+        },
+        "git": {
+            "branch": "hardening/main",
+            "tag": "nemesis-hardening-v1.0",
+            "commit": "d2e5c4a31864e2f4155ac5d20c170d2f10fec6c4",
+            "dirty": "True",
+            "origin": "https://github.com/greenisagoodcolor/FreeAgentics"
+        },
+        "project": null,
+        "json_version": "1.1",
+        "remediations_attempted": 0,
+        "remediations_completed": 0,
+        "remediation_mode": "NON_INTERACTIVE"
+    },
+    "scanned_packages": {
+        "deprecated": {
+            "name": "deprecated",
+            "version": "1.2.18",
+            "requirements": [
+                {
+                    "raw": "deprecated==1.2.18",
+                    "extras": [],
+                    "marker": null,
+                    "name": "deprecated",
+                    "specifier": "==1.2.18",
+                    "url": null,
+                    "found": "/home/green/FreeAgentics/security_env/lib/python3.12/site-packages"
+                }
+            ]
+        },
+        "markupsafe": {
+            "name": "markupsafe",
+            "version": "3.0.2",
+            "requirements": [
+                {
+                    "raw": "markupsafe==3.0.2",
+                    "extras": [],
+                    "marker": null,
+                    "name": "markupsafe",
+                    "specifier": "==3.0.2",
+                    "url": null,
+                    "found": "/home/green/FreeAgentics/security_env/lib/python3.12/site-packages"
+                }
+            ]
+        },
+        "pyyaml": {
+            "name": "pyyaml",
+            "version": "6.0.2",
+            "requirements": [
+                {
+                    "raw": "pyyaml==6.0.2",
+                    "extras": [],
+                    "marker": null,
+                    "name": "pyyaml",
+                    "specifier": "==6.0.2",
+                    "url": null,
+                    "found": "/home/green/FreeAgentics/security_env/lib/python3.12/site-packages"
+                }
+            ]
+        },
+        "annotated-types": {
+            "name": "annotated-types",
+            "version": "0.7.0",
+            "requirements": [
+                {
+                    "raw": "annotated-types==0.7.0",
+                    "extras": [],
+                    "marker": null,
+                    "name": "annotated-types",
+                    "specifier": "==0.7.0",
+                    "url": null,
+                    "found": "/home/green/FreeAgentics/security_env/lib/python3.12/site-packages"
+                }
+            ]
+        },
+        "anyio": {
+            "name": "anyio",
+            "version": "4.9.0",
+            "requirements": [
+                {
+                    "raw": "anyio==4.9.0",
+                    "extras": [],
+                    "marker": null,
+                    "name": "anyio",
+                    "specifier": "==4.9.0",
+                    "url": null,
+                    "found": "/home/green/FreeAgentics/security_env/lib/python3.12/site-packages"
+                }
+            ]
+        },
+        "attrs": {
+            "name": "attrs",
+            "version": "25.3.0",
+            "requirements": [
+                {
+                    "raw": "attrs==25.3.0",
+                    "extras": [],
+                    "marker": null,
+                    "name": "attrs",
+                    "specifier": "==25.3.0",
+                    "url": null,
+                    "found": "/home/green/FreeAgentics/security_env/lib/python3.12/site-packages"
+                }
+            ]
+        },
+        "authlib": {
+            "name": "authlib",
+            "version": "1.6.1",
+            "requirements": [
+                {
+                    "raw": "authlib==1.6.1",
+                    "extras": [],
+                    "marker": null,
+                    "name": "authlib",
+                    "specifier": "==1.6.1",
+                    "url": null,
+                    "found": "/home/green/FreeAgentics/security_env/lib/python3.12/site-packages"
+                }
+            ]
+        },
+        "bandit": {
+            "name": "bandit",
+            "version": "1.8.6",
+            "requirements": [
+                {
+                    "raw": "bandit==1.8.6",
+                    "extras": [],
+                    "marker": null,
+                    "name": "bandit",
+                    "specifier": "==1.8.6",
+                    "url": null,
+                    "found": "/home/green/FreeAgentics/security_env/lib/python3.12/site-packages"
+                }
+            ]
+        },
+        "boltons": {
+            "name": "boltons",
+            "version": "21.0.0",
+            "requirements": [
+                {
+                    "raw": "boltons==21.0.0",
+                    "extras": [],
+                    "marker": null,
+                    "name": "boltons",
+                    "specifier": "==21.0.0",
+                    "url": null,
+                    "found": "/home/green/FreeAgentics/security_env/lib/python3.12/site-packages"
+                }
+            ]
+        },
+        "boolean-py": {
+            "name": "boolean-py",
+            "version": "5.0",
+            "requirements": [
+                {
+                    "raw": "boolean-py==5.0",
+                    "extras": [],
+                    "marker": null,
+                    "name": "boolean-py",
+                    "specifier": "==5.0",
+                    "url": null,
+                    "found": "/home/green/FreeAgentics/security_env/lib/python3.12/site-packages"
+                }
+            ]
+        },
+        "bracex": {
+            "name": "bracex",
+            "version": "2.6",
+            "requirements": [
+                {
+                    "raw": "bracex==2.6",
+                    "extras": [],
+                    "marker": null,
+                    "name": "bracex",
+                    "specifier": "==2.6",
+                    "url": null,
+                    "found": "/home/green/FreeAgentics/security_env/lib/python3.12/site-packages"
+                }
+            ]
+        },
+        "cachecontrol": {
+            "name": "cachecontrol",
+            "version": "0.14.3",
+            "requirements": [
+                {
+                    "raw": "cachecontrol==0.14.3",
+                    "extras": [],
+                    "marker": null,
+                    "name": "cachecontrol",
+                    "specifier": "==0.14.3",
+                    "url": null,
+                    "found": "/home/green/FreeAgentics/security_env/lib/python3.12/site-packages"
+                }
+            ]
+        },
+        "certifi": {
+            "name": "certifi",
+            "version": "2025.7.14",
+            "requirements": [
+                {
+                    "raw": "certifi==2025.7.14",
+                    "extras": [],
+                    "marker": null,
+                    "name": "certifi",
+                    "specifier": "==2025.7.14",
+                    "url": null,
+                    "found": "/home/green/FreeAgentics/security_env/lib/python3.12/site-packages"
+                }
+            ]
+        },
+        "cffi": {
+            "name": "cffi",
+            "version": "1.17.1",
+            "requirements": [
+                {
+                    "raw": "cffi==1.17.1",
+                    "extras": [],
+                    "marker": null,
+                    "name": "cffi",
+                    "specifier": "==1.17.1",
+                    "url": null,
+                    "found": "/home/green/FreeAgentics/security_env/lib/python3.12/site-packages"
+                }
+            ]
+        },
+        "charset-normalizer": {
+            "name": "charset-normalizer",
+            "version": "3.4.2",
+            "requirements": [
+                {
+                    "raw": "charset-normalizer==3.4.2",
+                    "extras": [],
+                    "marker": null,
+                    "name": "charset-normalizer",
+                    "specifier": "==3.4.2",
+                    "url": null,
+                    "found": "/home/green/FreeAgentics/security_env/lib/python3.12/site-packages"
+                }
+            ]
+        },
+        "click": {
+            "name": "click",
+            "version": "8.1.8",
+            "requirements": [
+                {
+                    "raw": "click==8.1.8",
+                    "extras": [],
+                    "marker": null,
+                    "name": "click",
+                    "specifier": "==8.1.8",
+                    "url": null,
+                    "found": "/home/green/FreeAgentics/security_env/lib/python3.12/site-packages"
+                }
+            ]
+        },
+        "click-option-group": {
+            "name": "click-option-group",
+            "version": "0.5.7",
+            "requirements": [
+                {
+                    "raw": "click-option-group==0.5.7",
+                    "extras": [],
+                    "marker": null,
+                    "name": "click-option-group",
+                    "specifier": "==0.5.7",
+                    "url": null,
+                    "found": "/home/green/FreeAgentics/security_env/lib/python3.12/site-packages"
+                }
+            ]
+        },
+        "colorama": {
+            "name": "colorama",
+            "version": "0.4.6",
+            "requirements": [
+                {
+                    "raw": "colorama==0.4.6",
+                    "extras": [],
+                    "marker": null,
+                    "name": "colorama",
+                    "specifier": "==0.4.6",
+                    "url": null,
+                    "found": "/home/green/FreeAgentics/security_env/lib/python3.12/site-packages"
+                }
+            ]
+        },
+        "cryptography": {
+            "name": "cryptography",
+            "version": "45.0.5",
+            "requirements": [
+                {
+                    "raw": "cryptography==45.0.5",
+                    "extras": [],
+                    "marker": null,
+                    "name": "cryptography",
+                    "specifier": "==45.0.5",
+                    "url": null,
+                    "found": "/home/green/FreeAgentics/security_env/lib/python3.12/site-packages"
+                }
+            ]
+        },
+        "cyclonedx-python-lib": {
+            "name": "cyclonedx-python-lib",
+            "version": "9.1.0",
+            "requirements": [
+                {
+                    "raw": "cyclonedx-python-lib==9.1.0",
+                    "extras": [],
+                    "marker": null,
+                    "name": "cyclonedx-python-lib",
+                    "specifier": "==9.1.0",
+                    "url": null,
+                    "found": "/home/green/FreeAgentics/security_env/lib/python3.12/site-packages"
+                }
+            ]
+        },
+        "defusedxml": {
+            "name": "defusedxml",
+            "version": "0.7.1",
+            "requirements": [
+                {
+                    "raw": "defusedxml==0.7.1",
+                    "extras": [],
+                    "marker": null,
+                    "name": "defusedxml",
+                    "specifier": "==0.7.1",
+                    "url": null,
+                    "found": "/home/green/FreeAgentics/security_env/lib/python3.12/site-packages"
+                }
+            ]
+        },
+        "dparse": {
+            "name": "dparse",
+            "version": "0.6.4",
+            "requirements": [
+                {
+                    "raw": "dparse==0.6.4",
+                    "extras": [],
+                    "marker": null,
+                    "name": "dparse",
+                    "specifier": "==0.6.4",
+                    "url": null,
+                    "found": "/home/green/FreeAgentics/security_env/lib/python3.12/site-packages"
+                }
+            ]
+        },
+        "exceptiongroup": {
+            "name": "exceptiongroup",
+            "version": "1.2.2",
+            "requirements": [
+                {
+                    "raw": "exceptiongroup==1.2.2",
+                    "extras": [],
+                    "marker": null,
+                    "name": "exceptiongroup",
+                    "specifier": "==1.2.2",
+                    "url": null,
+                    "found": "/home/green/FreeAgentics/security_env/lib/python3.12/site-packages"
+                }
+            ]
+        },
+        "face": {
+            "name": "face",
+            "version": "24.0.0",
+            "requirements": [
+                {
+                    "raw": "face==24.0.0",
+                    "extras": [],
+                    "marker": null,
+                    "name": "face",
+                    "specifier": "==24.0.0",
+                    "url": null,
+                    "found": "/home/green/FreeAgentics/security_env/lib/python3.12/site-packages"
+                }
+            ]
+        },
+        "filelock": {
+            "name": "filelock",
+            "version": "3.16.1",
+            "requirements": [
+                {
+                    "raw": "filelock==3.16.1",
+                    "extras": [],
+                    "marker": null,
+                    "name": "filelock",
+                    "specifier": "==3.16.1",
+                    "url": null,
+                    "found": "/home/green/FreeAgentics/security_env/lib/python3.12/site-packages"
+                }
+            ]
+        },
+        "glom": {
+            "name": "glom",
+            "version": "22.1.0",
+            "requirements": [
+                {
+                    "raw": "glom==22.1.0",
+                    "extras": [],
+                    "marker": null,
+                    "name": "glom",
+                    "specifier": "==22.1.0",
+                    "url": null,
+                    "found": "/home/green/FreeAgentics/security_env/lib/python3.12/site-packages"
+                }
+            ]
+        },
+        "googleapis-common-protos": {
+            "name": "googleapis-common-protos",
+            "version": "1.70.0",
+            "requirements": [
+                {
+                    "raw": "googleapis-common-protos==1.70.0",
+                    "extras": [],
+                    "marker": null,
+                    "name": "googleapis-common-protos",
+                    "specifier": "==1.70.0",
+                    "url": null,
+                    "found": "/home/green/FreeAgentics/security_env/lib/python3.12/site-packages"
+                }
+            ]
+        },
+        "h11": {
+            "name": "h11",
+            "version": "0.16.0",
+            "requirements": [
+                {
+                    "raw": "h11==0.16.0",
+                    "extras": [],
+                    "marker": null,
+                    "name": "h11",
+                    "specifier": "==0.16.0",
+                    "url": null,
+                    "found": "/home/green/FreeAgentics/security_env/lib/python3.12/site-packages"
+                }
+            ]
+        },
+        "httpcore": {
+            "name": "httpcore",
+            "version": "1.0.9",
+            "requirements": [
+                {
+                    "raw": "httpcore==1.0.9",
+                    "extras": [],
+                    "marker": null,
+                    "name": "httpcore",
+                    "specifier": "==1.0.9",
+                    "url": null,
+                    "found": "/home/green/FreeAgentics/security_env/lib/python3.12/site-packages"
+                }
+            ]
+        },
+        "httpx": {
+            "name": "httpx",
+            "version": "0.28.1",
+            "requirements": [
+                {
+                    "raw": "httpx==0.28.1",
+                    "extras": [],
+                    "marker": null,
+                    "name": "httpx",
+                    "specifier": "==0.28.1",
+                    "url": null,
+                    "found": "/home/green/FreeAgentics/security_env/lib/python3.12/site-packages"
+                }
+            ]
+        },
+        "idna": {
+            "name": "idna",
+            "version": "3.10",
+            "requirements": [
+                {
+                    "raw": "idna==3.10",
+                    "extras": [],
+                    "marker": null,
+                    "name": "idna",
+                    "specifier": "==3.10",
+                    "url": null,
+                    "found": "/home/green/FreeAgentics/security_env/lib/python3.12/site-packages"
+                }
+            ]
+        },
+        "importlib-metadata": {
+            "name": "importlib-metadata",
+            "version": "7.1.0",
+            "requirements": [
+                {
+                    "raw": "importlib-metadata==7.1.0",
+                    "extras": [],
+                    "marker": null,
+                    "name": "importlib-metadata",
+                    "specifier": "==7.1.0",
+                    "url": null,
+                    "found": "/home/green/FreeAgentics/security_env/lib/python3.12/site-packages"
+                }
+            ]
+        },
+        "jinja2": {
+            "name": "jinja2",
+            "version": "3.1.6",
+            "requirements": [
+                {
+                    "raw": "jinja2==3.1.6",
+                    "extras": [],
+                    "marker": null,
+                    "name": "jinja2",
+                    "specifier": "==3.1.6",
+                    "url": null,
+                    "found": "/home/green/FreeAgentics/security_env/lib/python3.12/site-packages"
+                }
+            ]
+        },
+        "joblib": {
+            "name": "joblib",
+            "version": "1.5.1",
+            "requirements": [
+                {
+                    "raw": "joblib==1.5.1",
+                    "extras": [],
+                    "marker": null,
+                    "name": "joblib",
+                    "specifier": "==1.5.1",
+                    "url": null,
+                    "found": "/home/green/FreeAgentics/security_env/lib/python3.12/site-packages"
+                }
+            ]
+        },
+        "jsonschema": {
+            "name": "jsonschema",
+            "version": "4.25.0",
+            "requirements": [
+                {
+                    "raw": "jsonschema==4.25.0",
+                    "extras": [],
+                    "marker": null,
+                    "name": "jsonschema",
+                    "specifier": "==4.25.0",
+                    "url": null,
+                    "found": "/home/green/FreeAgentics/security_env/lib/python3.12/site-packages"
+                }
+            ]
+        },
+        "jsonschema-specifications": {
+            "name": "jsonschema-specifications",
+            "version": "2025.4.1",
+            "requirements": [
+                {
+                    "raw": "jsonschema-specifications==2025.4.1",
+                    "extras": [],
+                    "marker": null,
+                    "name": "jsonschema-specifications",
+                    "specifier": "==2025.4.1",
+                    "url": null,
+                    "found": "/home/green/FreeAgentics/security_env/lib/python3.12/site-packages"
+                }
+            ]
+        },
+        "license-expression": {
+            "name": "license-expression",
+            "version": "30.4.3",
+            "requirements": [
+                {
+                    "raw": "license-expression==30.4.3",
+                    "extras": [],
+                    "marker": null,
+                    "name": "license-expression",
+                    "specifier": "==30.4.3",
+                    "url": null,
+                    "found": "/home/green/FreeAgentics/security_env/lib/python3.12/site-packages"
+                }
+            ]
+        },
+        "markdown-it-py": {
+            "name": "markdown-it-py",
+            "version": "3.0.0",
+            "requirements": [
+                {
+                    "raw": "markdown-it-py==3.0.0",
+                    "extras": [],
+                    "marker": null,
+                    "name": "markdown-it-py",
+                    "specifier": "==3.0.0",
+                    "url": null,
+                    "found": "/home/green/FreeAgentics/security_env/lib/python3.12/site-packages"
+                }
+            ]
+        },
+        "marshmallow": {
+            "name": "marshmallow",
+            "version": "4.0.0",
+            "requirements": [
+                {
+                    "raw": "marshmallow==4.0.0",
+                    "extras": [],
+                    "marker": null,
+                    "name": "marshmallow",
+                    "specifier": "==4.0.0",
+                    "url": null,
+                    "found": "/home/green/FreeAgentics/security_env/lib/python3.12/site-packages"
+                }
+            ]
+        },
+        "mdurl": {
+            "name": "mdurl",
+            "version": "0.1.2",
+            "requirements": [
+                {
+                    "raw": "mdurl==0.1.2",
+                    "extras": [],
+                    "marker": null,
+                    "name": "mdurl",
+                    "specifier": "==0.1.2",
+                    "url": null,
+                    "found": "/home/green/FreeAgentics/security_env/lib/python3.12/site-packages"
+                }
+            ]
+        },
+        "msgpack": {
+            "name": "msgpack",
+            "version": "1.1.1",
+            "requirements": [
+                {
+                    "raw": "msgpack==1.1.1",
+                    "extras": [],
+                    "marker": null,
+                    "name": "msgpack",
+                    "specifier": "==1.1.1",
+                    "url": null,
+                    "found": "/home/green/FreeAgentics/security_env/lib/python3.12/site-packages"
+                }
+            ]
+        },
+        "nltk": {
+            "name": "nltk",
+            "version": "3.9.1",
+            "requirements": [
+                {
+                    "raw": "nltk==3.9.1",
+                    "extras": [],
+                    "marker": null,
+                    "name": "nltk",
+                    "specifier": "==3.9.1",
+                    "url": null,
+                    "found": "/home/green/FreeAgentics/security_env/lib/python3.12/site-packages"
+                }
+            ]
+        },
+        "opentelemetry-api": {
+            "name": "opentelemetry-api",
+            "version": "1.25.0",
+            "requirements": [
+                {
+                    "raw": "opentelemetry-api==1.25.0",
+                    "extras": [],
+                    "marker": null,
+                    "name": "opentelemetry-api",
+                    "specifier": "==1.25.0",
+                    "url": null,
+                    "found": "/home/green/FreeAgentics/security_env/lib/python3.12/site-packages"
+                }
+            ]
+        },
+        "opentelemetry-exporter-otlp-proto-common": {
+            "name": "opentelemetry-exporter-otlp-proto-common",
+            "version": "1.25.0",
+            "requirements": [
+                {
+                    "raw": "opentelemetry-exporter-otlp-proto-common==1.25.0",
+                    "extras": [],
+                    "marker": null,
+                    "name": "opentelemetry-exporter-otlp-proto-common",
+                    "specifier": "==1.25.0",
+                    "url": null,
+                    "found": "/home/green/FreeAgentics/security_env/lib/python3.12/site-packages"
+                }
+            ]
+        },
+        "opentelemetry-exporter-otlp-proto-http": {
+            "name": "opentelemetry-exporter-otlp-proto-http",
+            "version": "1.25.0",
+            "requirements": [
+                {
+                    "raw": "opentelemetry-exporter-otlp-proto-http==1.25.0",
+                    "extras": [],
+                    "marker": null,
+                    "name": "opentelemetry-exporter-otlp-proto-http",
+                    "specifier": "==1.25.0",
+                    "url": null,
+                    "found": "/home/green/FreeAgentics/security_env/lib/python3.12/site-packages"
+                }
+            ]
+        },
+        "opentelemetry-instrumentation": {
+            "name": "opentelemetry-instrumentation",
+            "version": "0.46b0",
+            "requirements": [
+                {
+                    "raw": "opentelemetry-instrumentation==0.46b0",
+                    "extras": [],
+                    "marker": null,
+                    "name": "opentelemetry-instrumentation",
+                    "specifier": "==0.46b0",
+                    "url": null,
+                    "found": "/home/green/FreeAgentics/security_env/lib/python3.12/site-packages"
+                }
+            ]
+        },
+        "opentelemetry-instrumentation-requests": {
+            "name": "opentelemetry-instrumentation-requests",
+            "version": "0.46b0",
+            "requirements": [
+                {
+                    "raw": "opentelemetry-instrumentation-requests==0.46b0",
+                    "extras": [],
+                    "marker": null,
+                    "name": "opentelemetry-instrumentation-requests",
+                    "specifier": "==0.46b0",
+                    "url": null,
+                    "found": "/home/green/FreeAgentics/security_env/lib/python3.12/site-packages"
+                }
+            ]
+        },
+        "opentelemetry-proto": {
+            "name": "opentelemetry-proto",
+            "version": "1.25.0",
+            "requirements": [
+                {
+                    "raw": "opentelemetry-proto==1.25.0",
+                    "extras": [],
+                    "marker": null,
+                    "name": "opentelemetry-proto",
+                    "specifier": "==1.25.0",
+                    "url": null,
+                    "found": "/home/green/FreeAgentics/security_env/lib/python3.12/site-packages"
+                }
+            ]
+        },
+        "opentelemetry-sdk": {
+            "name": "opentelemetry-sdk",
+            "version": "1.25.0",
+            "requirements": [
+                {
+                    "raw": "opentelemetry-sdk==1.25.0",
+                    "extras": [],
+                    "marker": null,
+                    "name": "opentelemetry-sdk",
+                    "specifier": "==1.25.0",
+                    "url": null,
+                    "found": "/home/green/FreeAgentics/security_env/lib/python3.12/site-packages"
+                }
+            ]
+        },
+        "opentelemetry-semantic-conventions": {
+            "name": "opentelemetry-semantic-conventions",
+            "version": "0.46b0",
+            "requirements": [
+                {
+                    "raw": "opentelemetry-semantic-conventions==0.46b0",
+                    "extras": [],
+                    "marker": null,
+                    "name": "opentelemetry-semantic-conventions",
+                    "specifier": "==0.46b0",
+                    "url": null,
+                    "found": "/home/green/FreeAgentics/security_env/lib/python3.12/site-packages"
+                }
+            ]
+        },
+        "opentelemetry-util-http": {
+            "name": "opentelemetry-util-http",
+            "version": "0.46b0",
+            "requirements": [
+                {
+                    "raw": "opentelemetry-util-http==0.46b0",
+                    "extras": [],
+                    "marker": null,
+                    "name": "opentelemetry-util-http",
+                    "specifier": "==0.46b0",
+                    "url": null,
+                    "found": "/home/green/FreeAgentics/security_env/lib/python3.12/site-packages"
+                }
+            ]
+        },
+        "packageurl-python": {
+            "name": "packageurl-python",
+            "version": "0.17.1",
+            "requirements": [
+                {
+                    "raw": "packageurl-python==0.17.1",
+                    "extras": [],
+                    "marker": null,
+                    "name": "packageurl-python",
+                    "specifier": "==0.17.1",
+                    "url": null,
+                    "found": "/home/green/FreeAgentics/security_env/lib/python3.12/site-packages"
+                }
+            ]
+        },
+        "packaging": {
+            "name": "packaging",
+            "version": "25.0",
+            "requirements": [
+                {
+                    "raw": "packaging==25.0",
+                    "extras": [],
+                    "marker": null,
+                    "name": "packaging",
+                    "specifier": "==25.0",
+                    "url": null,
+                    "found": "/home/green/FreeAgentics/security_env/lib/python3.12/site-packages"
+                }
+            ]
+        },
+        "pbr": {
+            "name": "pbr",
+            "version": "6.1.1",
+            "requirements": [
+                {
+                    "raw": "pbr==6.1.1",
+                    "extras": [],
+                    "marker": null,
+                    "name": "pbr",
+                    "specifier": "==6.1.1",
+                    "url": null,
+                    "found": "/home/green/FreeAgentics/security_env/lib/python3.12/site-packages"
+                }
+            ]
+        },
+        "peewee": {
+            "name": "peewee",
+            "version": "3.18.2",
+            "requirements": [
+                {
+                    "raw": "peewee==3.18.2",
+                    "extras": [],
+                    "marker": null,
+                    "name": "peewee",
+                    "specifier": "==3.18.2",
+                    "url": null,
+                    "found": "/home/green/FreeAgentics/security_env/lib/python3.12/site-packages"
+                }
+            ]
+        },
+        "pip": {
+            "name": "pip",
+            "version": "24.0",
+            "requirements": [
+                {
+                    "raw": "pip==24.0",
+                    "extras": [],
+                    "marker": null,
+                    "name": "pip",
+                    "specifier": "==24.0",
+                    "url": null,
+                    "found": "/home/green/FreeAgentics/security_env/lib/python3.12/site-packages"
+                }
+            ]
+        },
+        "pip-api": {
+            "name": "pip-api",
+            "version": "0.0.34",
+            "requirements": [
+                {
+                    "raw": "pip-api==0.0.34",
+                    "extras": [],
+                    "marker": null,
+                    "name": "pip-api",
+                    "specifier": "==0.0.34",
+                    "url": null,
+                    "found": "/home/green/FreeAgentics/security_env/lib/python3.12/site-packages"
+                }
+            ]
+        },
+        "pip-audit": {
+            "name": "pip-audit",
+            "version": "2.9.0",
+            "requirements": [
+                {
+                    "raw": "pip-audit==2.9.0",
+                    "extras": [],
+                    "marker": null,
+                    "name": "pip-audit",
+                    "specifier": "==2.9.0",
+                    "url": null,
+                    "found": "/home/green/FreeAgentics/security_env/lib/python3.12/site-packages"
+                }
+            ]
+        },
+        "pip-requirements-parser": {
+            "name": "pip-requirements-parser",
+            "version": "32.0.1",
+            "requirements": [
+                {
+                    "raw": "pip-requirements-parser==32.0.1",
+                    "extras": [],
+                    "marker": null,
+                    "name": "pip-requirements-parser",
+                    "specifier": "==32.0.1",
+                    "url": null,
+                    "found": "/home/green/FreeAgentics/security_env/lib/python3.12/site-packages"
+                }
+            ]
+        },
+        "platformdirs": {
+            "name": "platformdirs",
+            "version": "4.3.8",
+            "requirements": [
+                {
+                    "raw": "platformdirs==4.3.8",
+                    "extras": [],
+                    "marker": null,
+                    "name": "platformdirs",
+                    "specifier": "==4.3.8",
+                    "url": null,
+                    "found": "/home/green/FreeAgentics/security_env/lib/python3.12/site-packages"
+                }
+            ]
+        },
+        "protobuf": {
+            "name": "protobuf",
+            "version": "4.25.8",
+            "requirements": [
+                {
+                    "raw": "protobuf==4.25.8",
+                    "extras": [],
+                    "marker": null,
+                    "name": "protobuf",
+                    "specifier": "==4.25.8",
+                    "url": null,
+                    "found": "/home/green/FreeAgentics/security_env/lib/python3.12/site-packages"
+                }
+            ]
+        },
+        "psutil": {
+            "name": "psutil",
+            "version": "6.1.1",
+            "requirements": [
+                {
+                    "raw": "psutil==6.1.1",
+                    "extras": [],
+                    "marker": null,
+                    "name": "psutil",
+                    "specifier": "==6.1.1",
+                    "url": null,
+                    "found": "/home/green/FreeAgentics/security_env/lib/python3.12/site-packages"
+                }
+            ]
+        },
+        "py-serializable": {
+            "name": "py-serializable",
+            "version": "2.0.0",
+            "requirements": [
+                {
+                    "raw": "py-serializable==2.0.0",
+                    "extras": [],
+                    "marker": null,
+                    "name": "py-serializable",
+                    "specifier": "==2.0.0",
+                    "url": null,
+                    "found": "/home/green/FreeAgentics/security_env/lib/python3.12/site-packages"
+                }
+            ]
+        },
+        "pycparser": {
+            "name": "pycparser",
+            "version": "2.22",
+            "requirements": [
+                {
+                    "raw": "pycparser==2.22",
+                    "extras": [],
+                    "marker": null,
+                    "name": "pycparser",
+                    "specifier": "==2.22",
+                    "url": null,
+                    "found": "/home/green/FreeAgentics/security_env/lib/python3.12/site-packages"
+                }
+            ]
+        },
+        "pydantic": {
+            "name": "pydantic",
+            "version": "2.9.2",
+            "requirements": [
+                {
+                    "raw": "pydantic==2.9.2",
+                    "extras": [],
+                    "marker": null,
+                    "name": "pydantic",
+                    "specifier": "==2.9.2",
+                    "url": null,
+                    "found": "/home/green/FreeAgentics/security_env/lib/python3.12/site-packages"
+                }
+            ]
+        },
+        "pydantic-core": {
+            "name": "pydantic-core",
+            "version": "2.23.4",
+            "requirements": [
+                {
+                    "raw": "pydantic-core==2.23.4",
+                    "extras": [],
+                    "marker": null,
+                    "name": "pydantic-core",
+                    "specifier": "==2.23.4",
+                    "url": null,
+                    "found": "/home/green/FreeAgentics/security_env/lib/python3.12/site-packages"
+                }
+            ]
+        },
+        "pygments": {
+            "name": "pygments",
+            "version": "2.19.2",
+            "requirements": [
+                {
+                    "raw": "pygments==2.19.2",
+                    "extras": [],
+                    "marker": null,
+                    "name": "pygments",
+                    "specifier": "==2.19.2",
+                    "url": null,
+                    "found": "/home/green/FreeAgentics/security_env/lib/python3.12/site-packages"
+                }
+            ]
+        },
+        "pyparsing": {
+            "name": "pyparsing",
+            "version": "3.2.3",
+            "requirements": [
+                {
+                    "raw": "pyparsing==3.2.3",
+                    "extras": [],
+                    "marker": null,
+                    "name": "pyparsing",
+                    "specifier": "==3.2.3",
+                    "url": null,
+                    "found": "/home/green/FreeAgentics/security_env/lib/python3.12/site-packages"
+                }
+            ]
+        },
+        "referencing": {
+            "name": "referencing",
+            "version": "0.36.2",
+            "requirements": [
+                {
+                    "raw": "referencing==0.36.2",
+                    "extras": [],
+                    "marker": null,
+                    "name": "referencing",
+                    "specifier": "==0.36.2",
+                    "url": null,
+                    "found": "/home/green/FreeAgentics/security_env/lib/python3.12/site-packages"
+                }
+            ]
+        },
+        "regex": {
+            "name": "regex",
+            "version": "2024.11.6",
+            "requirements": [
+                {
+                    "raw": "regex==2024.11.6",
+                    "extras": [],
+                    "marker": null,
+                    "name": "regex",
+                    "specifier": "==2024.11.6",
+                    "url": null,
+                    "found": "/home/green/FreeAgentics/security_env/lib/python3.12/site-packages"
+                }
+            ]
+        },
+        "requests": {
+            "name": "requests",
+            "version": "2.32.4",
+            "requirements": [
+                {
+                    "raw": "requests==2.32.4",
+                    "extras": [],
+                    "marker": null,
+                    "name": "requests",
+                    "specifier": "==2.32.4",
+                    "url": null,
+                    "found": "/home/green/FreeAgentics/security_env/lib/python3.12/site-packages"
+                }
+            ]
+        },
+        "rich": {
+            "name": "rich",
+            "version": "13.5.3",
+            "requirements": [
+                {
+                    "raw": "rich==13.5.3",
+                    "extras": [],
+                    "marker": null,
+                    "name": "rich",
+                    "specifier": "==13.5.3",
+                    "url": null,
+                    "found": "/home/green/FreeAgentics/security_env/lib/python3.12/site-packages"
+                }
+            ]
+        },
+        "rpds-py": {
+            "name": "rpds-py",
+            "version": "0.26.0",
+            "requirements": [
+                {
+                    "raw": "rpds-py==0.26.0",
+                    "extras": [],
+                    "marker": null,
+                    "name": "rpds-py",
+                    "specifier": "==0.26.0",
+                    "url": null,
+                    "found": "/home/green/FreeAgentics/security_env/lib/python3.12/site-packages"
+                }
+            ]
+        },
+        "ruamel.yaml": {
+            "name": "ruamel.yaml",
+            "version": "0.18.14",
+            "requirements": [
+                {
+                    "raw": "ruamel.yaml==0.18.14",
+                    "extras": [],
+                    "marker": null,
+                    "name": "ruamel.yaml",
+                    "specifier": "==0.18.14",
+                    "url": null,
+                    "found": "/home/green/FreeAgentics/security_env/lib/python3.12/site-packages"
+                }
+            ]
+        },
+        "ruamel.yaml.clib": {
+            "name": "ruamel.yaml.clib",
+            "version": "0.2.12",
+            "requirements": [
+                {
+                    "raw": "ruamel.yaml.clib==0.2.12",
+                    "extras": [],
+                    "marker": null,
+                    "name": "ruamel.yaml.clib",
+                    "specifier": "==0.2.12",
+                    "url": null,
+                    "found": "/home/green/FreeAgentics/security_env/lib/python3.12/site-packages"
+                }
+            ]
+        },
+        "safety": {
+            "name": "safety",
+            "version": "3.6.0",
+            "requirements": [
+                {
+                    "raw": "safety==3.6.0",
+                    "extras": [],
+                    "marker": null,
+                    "name": "safety",
+                    "specifier": "==3.6.0",
+                    "url": null,
+                    "found": "/home/green/FreeAgentics/security_env/lib/python3.12/site-packages"
+                }
+            ]
+        },
+        "safety-schemas": {
+            "name": "safety-schemas",
+            "version": "0.0.14",
+            "requirements": [
+                {
+                    "raw": "safety-schemas==0.0.14",
+                    "extras": [],
+                    "marker": null,
+                    "name": "safety-schemas",
+                    "specifier": "==0.0.14",
+                    "url": null,
+                    "found": "/home/green/FreeAgentics/security_env/lib/python3.12/site-packages"
+                }
+            ]
+        },
+        "semgrep": {
+            "name": "semgrep",
+            "version": "1.128.1",
+            "requirements": [
+                {
+                    "raw": "semgrep==1.128.1",
+                    "extras": [],
+                    "marker": null,
+                    "name": "semgrep",
+                    "specifier": "==1.128.1",
+                    "url": null,
+                    "found": "/home/green/FreeAgentics/security_env/lib/python3.12/site-packages"
+                }
+            ]
+        },
+        "setuptools": {
+            "name": "setuptools",
+            "version": "80.9.0",
+            "requirements": [
+                {
+                    "raw": "setuptools==80.9.0",
+                    "extras": [],
+                    "marker": null,
+                    "name": "setuptools",
+                    "specifier": "==80.9.0",
+                    "url": null,
+                    "found": "/home/green/FreeAgentics/security_env/lib/python3.12/site-packages"
+                }
+            ]
+        },
+        "shellingham": {
+            "name": "shellingham",
+            "version": "1.5.4",
+            "requirements": [
+                {
+                    "raw": "shellingham==1.5.4",
+                    "extras": [],
+                    "marker": null,
+                    "name": "shellingham",
+                    "specifier": "==1.5.4",
+                    "url": null,
+                    "found": "/home/green/FreeAgentics/security_env/lib/python3.12/site-packages"
+                }
+            ]
+        },
+        "sniffio": {
+            "name": "sniffio",
+            "version": "1.3.1",
+            "requirements": [
+                {
+                    "raw": "sniffio==1.3.1",
+                    "extras": [],
+                    "marker": null,
+                    "name": "sniffio",
+                    "specifier": "==1.3.1",
+                    "url": null,
+                    "found": "/home/green/FreeAgentics/security_env/lib/python3.12/site-packages"
+                }
+            ]
+        },
+        "sortedcontainers": {
+            "name": "sortedcontainers",
+            "version": "2.4.0",
+            "requirements": [
+                {
+                    "raw": "sortedcontainers==2.4.0",
+                    "extras": [],
+                    "marker": null,
+                    "name": "sortedcontainers",
+                    "specifier": "==2.4.0",
+                    "url": null,
+                    "found": "/home/green/FreeAgentics/security_env/lib/python3.12/site-packages"
+                }
+            ]
+        },
+        "stevedore": {
+            "name": "stevedore",
+            "version": "5.4.1",
+            "requirements": [
+                {
+                    "raw": "stevedore==5.4.1",
+                    "extras": [],
+                    "marker": null,
+                    "name": "stevedore",
+                    "specifier": "==5.4.1",
+                    "url": null,
+                    "found": "/home/green/FreeAgentics/security_env/lib/python3.12/site-packages"
+                }
+            ]
+        },
+        "tenacity": {
+            "name": "tenacity",
+            "version": "9.1.2",
+            "requirements": [
+                {
+                    "raw": "tenacity==9.1.2",
+                    "extras": [],
+                    "marker": null,
+                    "name": "tenacity",
+                    "specifier": "==9.1.2",
+                    "url": null,
+                    "found": "/home/green/FreeAgentics/security_env/lib/python3.12/site-packages"
+                }
+            ]
+        },
+        "toml": {
+            "name": "toml",
+            "version": "0.10.2",
+            "requirements": [
+                {
+                    "raw": "toml==0.10.2",
+                    "extras": [],
+                    "marker": null,
+                    "name": "toml",
+                    "specifier": "==0.10.2",
+                    "url": null,
+                    "found": "/home/green/FreeAgentics/security_env/lib/python3.12/site-packages"
+                }
+            ]
+        },
+        "tomli": {
+            "name": "tomli",
+            "version": "2.0.2",
+            "requirements": [
+                {
+                    "raw": "tomli==2.0.2",
+                    "extras": [],
+                    "marker": null,
+                    "name": "tomli",
+                    "specifier": "==2.0.2",
+                    "url": null,
+                    "found": "/home/green/FreeAgentics/security_env/lib/python3.12/site-packages"
+                }
+            ]
+        },
+        "tomlkit": {
+            "name": "tomlkit",
+            "version": "0.13.3",
+            "requirements": [
+                {
+                    "raw": "tomlkit==0.13.3",
+                    "extras": [],
+                    "marker": null,
+                    "name": "tomlkit",
+                    "specifier": "==0.13.3",
+                    "url": null,
+                    "found": "/home/green/FreeAgentics/security_env/lib/python3.12/site-packages"
+                }
+            ]
+        },
+        "tqdm": {
+            "name": "tqdm",
+            "version": "4.67.1",
+            "requirements": [
+                {
+                    "raw": "tqdm==4.67.1",
+                    "extras": [],
+                    "marker": null,
+                    "name": "tqdm",
+                    "specifier": "==4.67.1",
+                    "url": null,
+                    "found": "/home/green/FreeAgentics/security_env/lib/python3.12/site-packages"
+                }
+            ]
+        },
+        "typer": {
+            "name": "typer",
+            "version": "0.16.0",
+            "requirements": [
+                {
+                    "raw": "typer==0.16.0",
+                    "extras": [],
+                    "marker": null,
+                    "name": "typer",
+                    "specifier": "==0.16.0",
+                    "url": null,
+                    "found": "/home/green/FreeAgentics/security_env/lib/python3.12/site-packages"
+                }
+            ]
+        },
+        "typing-extensions": {
+            "name": "typing-extensions",
+            "version": "4.14.1",
+            "requirements": [
+                {
+                    "raw": "typing-extensions==4.14.1",
+                    "extras": [],
+                    "marker": null,
+                    "name": "typing-extensions",
+                    "specifier": "==4.14.1",
+                    "url": null,
+                    "found": "/home/green/FreeAgentics/security_env/lib/python3.12/site-packages"
+                }
+            ]
+        },
+        "urllib3": {
+            "name": "urllib3",
+            "version": "2.5.0",
+            "requirements": [
+                {
+                    "raw": "urllib3==2.5.0",
+                    "extras": [],
+                    "marker": null,
+                    "name": "urllib3",
+                    "specifier": "==2.5.0",
+                    "url": null,
+                    "found": "/home/green/FreeAgentics/security_env/lib/python3.12/site-packages"
+                }
+            ]
+        },
+        "wcmatch": {
+            "name": "wcmatch",
+            "version": "8.5.2",
+            "requirements": [
+                {
+                    "raw": "wcmatch==8.5.2",
+                    "extras": [],
+                    "marker": null,
+                    "name": "wcmatch",
+                    "specifier": "==8.5.2",
+                    "url": null,
+                    "found": "/home/green/FreeAgentics/security_env/lib/python3.12/site-packages"
+                }
+            ]
+        },
+        "wrapt": {
+            "name": "wrapt",
+            "version": "1.17.2",
+            "requirements": [
+                {
+                    "raw": "wrapt==1.17.2",
+                    "extras": [],
+                    "marker": null,
+                    "name": "wrapt",
+                    "specifier": "==1.17.2",
+                    "url": null,
+                    "found": "/home/green/FreeAgentics/security_env/lib/python3.12/site-packages"
+                }
+            ]
+        },
+        "zipp": {
+            "name": "zipp",
+            "version": "3.23.0",
+            "requirements": [
+                {
+                    "raw": "zipp==3.23.0",
+                    "extras": [],
+                    "marker": null,
+                    "name": "zipp",
+                    "specifier": "==3.23.0",
+                    "url": null,
+                    "found": "/home/green/FreeAgentics/security_env/lib/python3.12/site-packages"
+                }
+            ]
+        },
+        "autocommand": {
+            "name": "autocommand",
+            "version": "2.2.2",
+            "requirements": [
+                {
+                    "raw": "autocommand==2.2.2",
+                    "extras": [],
+                    "marker": null,
+                    "name": "autocommand",
+                    "specifier": "==2.2.2",
+                    "url": null,
+                    "found": "/home/green/FreeAgentics/security_env/lib/python3.12/site-packages/setuptools/_vendor"
+                }
+            ]
+        },
+        "backports.tarfile": {
+            "name": "backports.tarfile",
+            "version": "1.2.0",
+            "requirements": [
+                {
+                    "raw": "backports.tarfile==1.2.0",
+                    "extras": [],
+                    "marker": null,
+                    "name": "backports.tarfile",
+                    "specifier": "==1.2.0",
+                    "url": null,
+                    "found": "/home/green/FreeAgentics/security_env/lib/python3.12/site-packages/setuptools/_vendor"
+                }
+            ]
+        },
+        "inflect": {
+            "name": "inflect",
+            "version": "7.3.1",
+            "requirements": [
+                {
+                    "raw": "inflect==7.3.1",
+                    "extras": [],
+                    "marker": null,
+                    "name": "inflect",
+                    "specifier": "==7.3.1",
+                    "url": null,
+                    "found": "/home/green/FreeAgentics/security_env/lib/python3.12/site-packages/setuptools/_vendor"
+                }
+            ]
+        },
+        "jaraco.collections": {
+            "name": "jaraco.collections",
+            "version": "5.1.0",
+            "requirements": [
+                {
+                    "raw": "jaraco.collections==5.1.0",
+                    "extras": [],
+                    "marker": null,
+                    "name": "jaraco.collections",
+                    "specifier": "==5.1.0",
+                    "url": null,
+                    "found": "/home/green/FreeAgentics/security_env/lib/python3.12/site-packages/setuptools/_vendor"
+                }
+            ]
+        },
+        "jaraco.context": {
+            "name": "jaraco.context",
+            "version": "5.3.0",
+            "requirements": [
+                {
+                    "raw": "jaraco.context==5.3.0",
+                    "extras": [],
+                    "marker": null,
+                    "name": "jaraco.context",
+                    "specifier": "==5.3.0",
+                    "url": null,
+                    "found": "/home/green/FreeAgentics/security_env/lib/python3.12/site-packages/setuptools/_vendor"
+                }
+            ]
+        },
+        "jaraco.functools": {
+            "name": "jaraco.functools",
+            "version": "4.0.1",
+            "requirements": [
+                {
+                    "raw": "jaraco.functools==4.0.1",
+                    "extras": [],
+                    "marker": null,
+                    "name": "jaraco.functools",
+                    "specifier": "==4.0.1",
+                    "url": null,
+                    "found": "/home/green/FreeAgentics/security_env/lib/python3.12/site-packages/setuptools/_vendor"
+                }
+            ]
+        },
+        "jaraco.text": {
+            "name": "jaraco.text",
+            "version": "3.12.1",
+            "requirements": [
+                {
+                    "raw": "jaraco.text==3.12.1",
+                    "extras": [],
+                    "marker": null,
+                    "name": "jaraco.text",
+                    "specifier": "==3.12.1",
+                    "url": null,
+                    "found": "/home/green/FreeAgentics/security_env/lib/python3.12/site-packages/setuptools/_vendor"
+                }
+            ]
+        },
+        "more-itertools": {
+            "name": "more-itertools",
+            "version": "10.3.0",
+            "requirements": [
+                {
+                    "raw": "more-itertools==10.3.0",
+                    "extras": [],
+                    "marker": null,
+                    "name": "more-itertools",
+                    "specifier": "==10.3.0",
+                    "url": null,
+                    "found": "/home/green/FreeAgentics/security_env/lib/python3.12/site-packages/setuptools/_vendor"
+                }
+            ]
+        },
+        "typeguard": {
+            "name": "typeguard",
+            "version": "4.3.0",
+            "requirements": [
+                {
+                    "raw": "typeguard==4.3.0",
+                    "extras": [],
+                    "marker": null,
+                    "name": "typeguard",
+                    "specifier": "==4.3.0",
+                    "url": null,
+                    "found": "/home/green/FreeAgentics/security_env/lib/python3.12/site-packages/setuptools/_vendor"
+                }
+            ]
+        },
+        "wheel": {
+            "name": "wheel",
+            "version": "0.45.1",
+            "requirements": [
+                {
+                    "raw": "wheel==0.45.1",
+                    "extras": [],
+                    "marker": null,
+                    "name": "wheel",
+                    "specifier": "==0.45.1",
+                    "url": null,
+                    "found": "/home/green/FreeAgentics/security_env/lib/python3.12/site-packages/setuptools/_vendor"
+                }
+            ]
+        }
+    },
+    "affected_packages": {
+        "pip": {
+            "name": "pip",
+            "version": "24.0",
+            "requirements": [
+                {
+                    "raw": "pip==24.0",
+                    "extras": [],
+                    "marker": null,
+                    "name": "pip",
+                    "specifier": "==24.0",
+                    "url": null,
+                    "found": "/home/green/FreeAgentics/security_env/lib/python3.12/site-packages"
+                }
+            ],
+            "found": null,
+            "insecure_versions": [
+                "0.2",
+                "0.2.1",
+                "0.3",
+                "0.3.1",
+                "0.4",
+                "0.5",
+                "0.5.1",
+                "0.6",
+                "0.6.1",
+                "0.6.2",
+                "0.6.3",
+                "0.7",
+                "0.7.1",
+                "0.7.2",
+                "0.8",
+                "0.8.1",
+                "0.8.2",
+                "0.8.3",
+                "1.0",
+                "10.0.0",
+                "10.0.0b1",
+                "10.0.0b2",
+                "10.0.1",
+                "1.0.1",
+                "1.0.2",
+                "1.1",
+                "1.2",
+                "1.2.1",
+                "1.3",
+                "1.3.1",
+                "1.4",
+                "1.4.1",
+                "1.5",
+                "1.5.1",
+                "1.5.2",
+                "1.5.3",
+                "1.5.4",
+                "1.5.5",
+                "1.5.6",
+                "18.0",
+                "18.1",
+                "19.0",
+                "19.0.1",
+                "19.0.2",
+                "19.0.3",
+                "19.1",
+                "19.1.1",
+                "19.2",
+                "19.2.1",
+                "19.2.2",
+                "19.2.3",
+                "19.3",
+                "19.3.1",
+                "20.0",
+                "20.0.1",
+                "20.0.2",
+                "20.1",
+                "20.1.1",
+                "20.1b1",
+                "20.2",
+                "20.2.1",
+                "20.2.2",
+                "20.2.3",
+                "20.2.4",
+                "20.2b1",
+                "20.3",
+                "20.3.1",
+                "20.3.2",
+                "20.3.3",
+                "20.3.4",
+                "20.3b1",
+                "21.0",
+                "21.0.1",
+                "21.1",
+                "21.1.1",
+                "21.1.2",
+                "21.1.3",
+                "21.2",
+                "21.2.1",
+                "21.2.2",
+                "21.2.3",
+                "21.2.4",
+                "21.3",
+                "21.3.1",
+                "22.0",
+                "22.0.1",
+                "22.0.2",
+                "22.0.3",
+                "22.0.4",
+                "22.1",
+                "22.1.1",
+                "22.1.2",
+                "22.1b1",
+                "22.2",
+                "22.2.1",
+                "22.2.2",
+                "22.3",
+                "22.3.1",
+                "23.0",
+                "23.0.1",
+                "23.1",
+                "23.1.1",
+                "23.1.2",
+                "23.2",
+                "23.2.1",
+                "23.3",
+                "23.3.1",
+                "23.3.2",
+                "24.0",
+                "24.1",
+                "24.1.1",
+                "24.1.2",
+                "24.1b1",
+                "24.1b2",
+                "24.2",
+                "24.3",
+                "24.3.1",
+                "6.0",
+                "6.0.1",
+                "6.0.2",
+                "6.0.3",
+                "6.0.4",
+                "6.0.5",
+                "6.0.6",
+                "6.0.7",
+                "6.0.8",
+                "6.1.0",
+                "6.1.1",
+                "7.0.0",
+                "7.0.1",
+                "7.0.2",
+                "7.0.3",
+                "7.1.0",
+                "7.1.1",
+                "7.1.2",
+                "8.0.0",
+                "8.0.1",
+                "8.0.2",
+                "8.0.3",
+                "8.1.0",
+                "8.1.1",
+                "8.1.2",
+                "9.0.0",
+                "9.0.1",
+                "9.0.2",
+                "9.0.3"
+            ],
+            "secure_versions": [
+                "25.1.1",
+                "25.1",
+                "25.0.1",
+                "25.0"
+            ],
+            "latest_version_without_known_vulnerabilities": "25.1.1",
+            "latest_version": "25.1.1",
+            "more_info_url": "https://data.safetycli.com/p/pypi/pip/97c/"
+        }
+    },
+    "announcements": [],
+    "vulnerabilities": [
+        {
+            "vulnerability_id": "75180",
+            "package_name": "pip",
+            "ignored": {},
+            "ignored_reason": null,
+            "ignored_expires": null,
+            "vulnerable_spec": [
+                "<25.0"
+            ],
+            "all_vulnerable_specs": [
+                "<25.0"
+            ],
+            "analyzed_version": "24.0",
+            "analyzed_requirement": {
+                "raw": "pip==24.0",
+                "extras": [],
+                "marker": null,
+                "name": "pip",
+                "specifier": "==24.0",
+                "url": null,
+                "found": "/home/green/FreeAgentics/security_env/lib/python3.12/site-packages"
+            },
+            "advisory": "Pip solves a security vulnerability that previously allowed maliciously crafted wheel files to execute unauthorized code during installation.",
+            "is_transitive": false,
+            "published_date": null,
+            "fixed_versions": [],
+            "closest_versions_without_known_vulnerabilities": [],
+            "resources": [],
+            "CVE": null,
+            "severity": null,
+            "affected_versions": [],
+            "more_info_url": "https://data.safetycli.com/v/75180/97c"
+        }
+    ],
+    "ignored_vulnerabilities": [],
+    "remediations": {
+        "pip": {
+            "requirements": {
+                "==24.0": {
+                    "vulnerabilities_found": 1,
+                    "version": "24.0",
+                    "requirement": {
+                        "raw": "pip==24.0",
+                        "extras": [],
+                        "marker": null,
+                        "name": "pip",
+                        "specifier": "==24.0",
+                        "url": null,
+                        "found": "/home/green/FreeAgentics/security_env/lib/python3.12/site-packages"
+                    },
+                    "more_info_url": "https://data.safetycli.com/p/pypi/pip/97c/"
+                }
+            },
+            "current_version": null,
+            "vulnerabilities_found": null,
+            "recommended_version": null,
+            "other_recommended_versions": [],
+            "more_info_url": null
+        }
+    },
+    "remediations_results": {
+        "vulnerabilities_fixed": [],
+        "remediations_applied": {},
+        "remediations_skipped": {}
+    }
+}
+
+
++===========================================================================================================================================================================================+
+
+
+DEPRECATED: this command (`check`) has been DEPRECATED, and will be unsupported beyond 01 June 2024.
+
+
+We highly encourage switching to the new `scan` command which is easier to use, more powerful, and can be set up to mimic the deprecated command if required.
+
+
++===========================================================================================================================================================================================+
+
+

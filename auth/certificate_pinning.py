@@ -91,27 +91,17 @@ class CertificateValidator:
         """Retrieve certificate from server for pin generation."""
         try:
             context = ssl.create_default_context()
-            with socket.create_connection(
-                (hostname, port), timeout=10
-            ) as sock:
-                with context.wrap_socket(
-                    sock, server_hostname=hostname
-                ) as ssock:
+            with socket.create_connection((hostname, port), timeout=10) as sock:
+                with context.wrap_socket(sock, server_hostname=hostname) as ssock:
                     cert_der = ssock.getpeercert(binary_form=True)
                     if cert_der is None:
-                        raise ValueError(
-                            f"No certificate received from {hostname}:{port}"
-                        )
+                        raise ValueError(f"No certificate received from {hostname}:{port}")
                     cert = x509.load_der_x509_certificate(cert_der)
 
-                    return cert.public_bytes(
-                        serialization.Encoding.PEM
-                    ).decode()
+                    return cert.public_bytes(serialization.Encoding.PEM).decode()
 
         except Exception as e:
-            logger.error(
-                f"Failed to retrieve certificate from {hostname}:{port}: {e}"
-            )
+            logger.error(f"Failed to retrieve certificate from {hostname}:{port}: {e}")
             raise
 
     @staticmethod
@@ -159,9 +149,7 @@ class MobileCertificatePinner:
         self._load_env_configuration()
 
         # Load from configuration file if present
-        config_file = os.getenv(
-            "CERT_PIN_CONFIG_FILE", "/app/config/cert_pins.json"
-        )
+        config_file = os.getenv("CERT_PIN_CONFIG_FILE", "/app/config/cert_pins.json")
         if os.path.exists(config_file):
             self._load_file_configuration(config_file)
 
@@ -185,8 +173,7 @@ class MobileCertificatePinner:
                 config = PinConfiguration(
                     primary_pins=[primary_pin] if primary_pin else [],
                     backup_pins=[backup_pin] if backup_pin else [],
-                    enforce_pinning=os.getenv("PRODUCTION", "false").lower()
-                    == "true",
+                    enforce_pinning=os.getenv("PRODUCTION", "false").lower() == "true",
                 )
                 self.domain_configs[domain] = config
 
@@ -201,26 +188,18 @@ class MobileCertificatePinner:
                     primary_pins=domain_config.get("primary_pins", []),
                     backup_pins=domain_config.get("backup_pins", []),
                     max_age=domain_config.get("max_age", 5184000),
-                    include_subdomains=domain_config.get(
-                        "include_subdomains", True
-                    ),
+                    include_subdomains=domain_config.get("include_subdomains", True),
                     enforce_pinning=domain_config.get("enforce_pinning", True),
                     allow_fallback=domain_config.get("allow_fallback", True),
-                    mobile_specific=domain_config.get(
-                        "mobile_specific", False
-                    ),
+                    mobile_specific=domain_config.get("mobile_specific", False),
                     report_uri=domain_config.get("report_uri"),
                 )
                 self.domain_configs[domain] = config
 
-            logger.info(
-                f"Loaded certificate pinning configuration for {len(config_data)} domains"
-            )
+            logger.info(f"Loaded certificate pinning configuration for {len(config_data)} domains")
 
         except Exception as e:
-            logger.error(
-                f"Failed to load certificate pinning configuration: {e}"
-            )
+            logger.error(f"Failed to load certificate pinning configuration: {e}")
 
     def add_domain_pins(self, domain: str, config: PinConfiguration) -> None:
         """Add certificate pins for a domain."""
@@ -232,9 +211,7 @@ class MobileCertificatePinner:
         self.domain_configs[domain] = config
         logger.info(f"Added certificate pinning for domain: {domain}")
 
-    def get_pinning_header(
-        self, domain: str, user_agent: str = ""
-    ) -> Optional[str]:
+    def get_pinning_header(self, domain: str, user_agent: str = "") -> Optional[str]:
         """Generate Public-Key-Pins header for a domain."""
         config = self.domain_configs.get(domain)
         if not config:
@@ -274,9 +251,7 @@ class MobileCertificatePinner:
 
         return "; ".join(header_parts)
 
-    def validate_certificate_chain(
-        self, domain: str, cert_chain: List[str]
-    ) -> bool:
+    def validate_certificate_chain(self, domain: str, cert_chain: List[str]) -> bool:
         """Validate certificate chain against pins."""
         config = self.domain_configs.get(domain)
         if not config or not config.enforce_pinning:
@@ -324,12 +299,8 @@ class MobileCertificatePinner:
                 "date-time": datetime.now().isoformat(),
                 "hostname": domain,
                 "port": 443,
-                "effective-expiration-date": (
-                    datetime.now() + timedelta(days=60)
-                ).isoformat(),
-                "include-subdomains": self.domain_configs[
-                    domain
-                ].include_subdomains,
+                "effective-expiration-date": (datetime.now() + timedelta(days=60)).isoformat(),
+                "include-subdomains": self.domain_configs[domain].include_subdomains,
                 "served-certificate-chain": chain_pins,
                 "validated-certificate-chain": chain_pins,
                 "known-pins": expected_pins,
@@ -343,23 +314,17 @@ class MobileCertificatePinner:
         except Exception as e:
             logger.error(f"Failed to report pin failure: {e}")
 
-    def emergency_bypass_domain(
-        self, domain: str, duration_hours: int = 24
-    ) -> None:
+    def emergency_bypass_domain(self, domain: str, duration_hours: int = 24) -> None:
         """Emergency bypass pinning for a domain."""
         config = self.domain_configs.get(domain)
         if config:
             config.emergency_bypass = True
-            config.emergency_bypass_until = datetime.now() + timedelta(
-                hours=duration_hours
-            )
+            config.emergency_bypass_until = datetime.now() + timedelta(hours=duration_hours)
             logger.warning(
                 f"Emergency bypass activated for {domain} until {config.emergency_bypass_until}"
             )
 
-    def get_mobile_pinning_config(
-        self, domain: str
-    ) -> Optional[Dict[str, Any]]:
+    def get_mobile_pinning_config(self, domain: str) -> Optional[Dict[str, Any]]:
         """Get mobile app pinning configuration."""
         config = self.domain_configs.get(domain)
         if not config:
@@ -378,12 +343,8 @@ class MobileCertificatePinner:
     def update_pins_from_server(self, domain: str, port: int = 443) -> bool:
         """Update pins by fetching current certificate from server."""
         try:
-            cert_pem = CertificateValidator.get_certificate_from_server(
-                domain, port
-            )
-            new_pin = (
-                f"sha256-{CertificateValidator.extract_spki_pin(cert_pem)}"
-            )
+            cert_pem = CertificateValidator.get_certificate_from_server(domain, port)
+            new_pin = f"sha256-{CertificateValidator.extract_spki_pin(cert_pem)}"
 
             config = self.domain_configs.get(domain, PinConfiguration())
 

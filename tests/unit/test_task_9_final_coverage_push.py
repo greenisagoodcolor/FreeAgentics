@@ -33,7 +33,9 @@ class TestFinalCoveragePush:
                     pass
 
         except ImportError:
-            pytest.skip("Agent manager not available")
+
+            assert False, "Test bypass removed - must fix underlying issue"
+            assert False, "Test bypass removed - must fix underlying issue"
 
     def test_async_agent_manager_operations(self):
         """Test async agent manager operations."""
@@ -52,7 +54,9 @@ class TestFinalCoveragePush:
                 pass
 
         except ImportError:
-            pytest.skip("Async agent manager not available")
+
+            assert False, "Test bypass removed - must fix underlying issue"
+            assert False, "Test bypass removed - must fix underlying issue"
 
     def test_performance_optimizer_detailed(self):
         """Test performance optimizer in more detail."""

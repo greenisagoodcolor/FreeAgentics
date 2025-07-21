@@ -22,9 +22,7 @@ def validate_database_url(url: str) -> str:
 
     # PostgreSQL URL pattern: postgresql://user:pass@host[:port]/dbname
     # Also accept postgres:// and postgresql+driver://
-    pattern = (
-        r"^(postgresql|postgres)(\+\w+)?://[^:]+:[^@]+@[^:/]+(?::\d+)?/\w+$"
-    )
+    pattern = r"^(postgresql|postgres)(\+\w+)?://[^:]+:[^@]+@[^:/]+(?::\d+)?/\w+$"
 
     if not re.match(pattern, url):
         raise ValueError("Invalid PostgreSQL DATABASE_URL")
@@ -86,9 +84,7 @@ class Settings(BaseModel):
     @classmethod
     def validate_not_empty(cls, v: str, info) -> str:
         """Ensure required fields are not empty or whitespace."""
-        field_name = (
-            info.field_name if hasattr(info, "field_name") else "Field"
-        )
+        field_name = info.field_name if hasattr(info, "field_name") else "Field"
 
         if not v or not v.strip():
             raise ValueError(f"{field_name} cannot be empty")
@@ -147,9 +143,7 @@ class Settings(BaseModel):
         required_fields = self._get_required_fields()
 
         # First pass: check which fields are missing
-        missing_fields, present_fields = self._check_missing_fields(
-            required_fields
-        )
+        missing_fields, present_fields = self._check_missing_fields(required_fields)
 
         # If any required field is missing, report the first one
         if missing_fields:

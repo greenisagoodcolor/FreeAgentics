@@ -5,7 +5,7 @@ Verifies that CSRF protection is properly implemented on state-changing endpoint
 """
 
 from datetime import datetime, timezone
-from unittest.mock import AsyncMock, MagicMock
+from unittest.mock import MagicMock
 
 import pytest
 from fastapi import HTTPException, Request
@@ -52,25 +52,19 @@ class TestCSRFProtection:
         assert exc_info.value.status_code == 403
         assert "CSRF token required" in exc_info.value.detail
 
-    async def test_csrf_token_validation_success(
-        self, mock_request, test_token_data
-    ):
+    async def test_csrf_token_validation_success(self, mock_request, test_token_data):
         """Test successful CSRF token validation."""
         # Generate CSRF token
-        csrf_token = auth_manager.csrf_protection.generate_csrf_token(
-            test_token_data.user_id
-        )
+        csrf_token = auth_manager.csrf_protection.generate_csrf_token(test_token_data.user_id)
 
         # Create protected function
         @require_csrf_token
-        async def protected_endpoint(
-            request: Request, current_user: TokenData
-        ):
+        async def protected_endpoint(request: Request, current_user: TokenData):
             return {"status": "success", "user": current_user.username}
 
         # Add CSRF token to request
         mock_request.headers = {
-            "Authorization": f"Bearer fake-token",
+            "Authorization": "Bearer fake-token",
             "X-CSRF-Token": csrf_token,
         }
 
@@ -84,25 +78,19 @@ class TestCSRFProtection:
             result = await protected_endpoint(mock_request, test_token_data)
             assert result["status"] == "success"
 
-    async def test_csrf_token_validation_failure(
-        self, mock_request, test_token_data
-    ):
+    async def test_csrf_token_validation_failure(self, mock_request, test_token_data):
         """Test CSRF token validation with wrong token."""
         # Generate CSRF token but use wrong one in request
-        auth_manager.csrf_protection.generate_csrf_token(
-            test_token_data.user_id
-        )
+        auth_manager.csrf_protection.generate_csrf_token(test_token_data.user_id)
 
         # Create protected function
         @require_csrf_token
-        async def protected_endpoint(
-            request: Request, current_user: TokenData
-        ):
+        async def protected_endpoint(request: Request, current_user: TokenData):
             return {"status": "success"}
 
         # Add wrong CSRF token
         mock_request.headers = {
-            "Authorization": f"Bearer fake-token",
+            "Authorization": "Bearer fake-token",
             "X-CSRF-Token": "wrong-csrf-token",
         }
 
@@ -132,33 +120,23 @@ class TestCSRFProtection:
 
         # Each token should work only for its session
         assert auth_manager.csrf_protection.verify_csrf_token(session1, token1)
-        assert not auth_manager.csrf_protection.verify_csrf_token(
-            session1, token2
-        )
+        assert not auth_manager.csrf_protection.verify_csrf_token(session1, token2)
         assert auth_manager.csrf_protection.verify_csrf_token(session2, token2)
-        assert not auth_manager.csrf_protection.verify_csrf_token(
-            session2, token1
-        )
+        assert not auth_manager.csrf_protection.verify_csrf_token(session2, token1)
 
     def test_csrf_token_invalidation(self):
         """Test CSRF token invalidation on logout."""
         session_id = "test-session"
 
         # Generate token
-        csrf_token = auth_manager.csrf_protection.generate_csrf_token(
-            session_id
-        )
-        assert auth_manager.csrf_protection.verify_csrf_token(
-            session_id, csrf_token
-        )
+        csrf_token = auth_manager.csrf_protection.generate_csrf_token(session_id)
+        assert auth_manager.csrf_protection.verify_csrf_token(session_id, csrf_token)
 
         # Invalidate token
         auth_manager.csrf_protection.invalidate_csrf_token(session_id)
 
         # Token should no longer be valid
-        assert not auth_manager.csrf_protection.verify_csrf_token(
-            session_id, csrf_token
-        )
+        assert not auth_manager.csrf_protection.verify_csrf_token(session_id, csrf_token)
 
     async def test_csrf_form_data_support(self, mock_request):
         """Test CSRF token can be extracted from form data."""
@@ -185,9 +163,7 @@ class TestCSRFProtection:
 
             # Generate matching CSRF token
             auth_manager.csrf_protection.generate_csrf_token("test-user")
-            auth_manager.csrf_protection._token_store[
-                "test-user"
-            ] = "csrf-token-from-form"
+            auth_manager.csrf_protection._token_store["test-user"] = "csrf-token-from-form"
 
             # Should succeed with CSRF token from form
             result = await protected_endpoint(mock_request)
@@ -209,9 +185,7 @@ class TestCSRFProtection:
 
         # Generate multiple tokens
         for i in range(100):
-            token = auth_manager.csrf_protection.generate_csrf_token(
-                f"session-{i}"
-            )
+            token = auth_manager.csrf_protection.generate_csrf_token(f"session-{i}")
             tokens.add(token)
 
             # Each token should be at least 32 characters

@@ -27,14 +27,10 @@ class ReleaseSecurityValidator:
                 with open(test_results_path) as f:
                     failed_tests = json.load(f)
                     security_failures = [
-                        test
-                        for test in failed_tests
-                        if "security" in test or "auth" in test
+                        test for test in failed_tests if "security" in test or "auth" in test
                     ]
                     if security_failures:
-                        self.errors.append(
-                            f"Security tests failed: {len(security_failures)} tests"
-                        )
+                        self.errors.append(f"Security tests failed: {len(security_failures)} tests")
                         return False
 
             self.checks_passed += 1
@@ -54,15 +50,11 @@ class ReleaseSecurityValidator:
                     results = json.load(f)
 
                 high_severity = sum(
-                    1
-                    for r in results.get("results", [])
-                    if r.get("issue_severity") == "HIGH"
+                    1 for r in results.get("results", []) if r.get("issue_severity") == "HIGH"
                 )
 
                 if high_severity > 0:
-                    self.errors.append(
-                        f"High severity vulnerabilities found: {high_severity}"
-                    )
+                    self.errors.append(f"High severity vulnerabilities found: {high_severity}")
                     return False
 
             # Check dependency vulnerabilities
@@ -71,9 +63,7 @@ class ReleaseSecurityValidator:
                 with open(safety_report) as f:
                     vulnerabilities = json.load(f)
                     if vulnerabilities:
-                        self.errors.append(
-                            f"Dependency vulnerabilities: {len(vulnerabilities)}"
-                        )
+                        self.errors.append(f"Dependency vulnerabilities: {len(vulnerabilities)}")
                         return False
 
             self.checks_passed += 1
@@ -111,9 +101,7 @@ class ReleaseSecurityValidator:
                     missing_headers.append(header)
 
             if missing_headers:
-                self.errors.append(
-                    f"Missing security headers: {', '.join(missing_headers)}"
-                )
+                self.errors.append(f"Missing security headers: {', '.join(missing_headers)}")
                 return False
 
             self.checks_passed += 1
@@ -143,14 +131,10 @@ class ReleaseSecurityValidator:
                 "Rate limiting": "rate_limit" in content.lower(),
             }
 
-            failed_checks = [
-                check for check, passed in checks.items() if not passed
-            ]
+            failed_checks = [check for check, passed in checks.items() if not passed]
 
             if failed_checks:
-                self.errors.append(
-                    f"Authentication issues: {', '.join(failed_checks)}"
-                )
+                self.errors.append(f"Authentication issues: {', '.join(failed_checks)}")
                 return False
 
             self.checks_passed += 1
@@ -181,10 +165,7 @@ class ReleaseSecurityValidator:
                 try:
                     with open(py_file) as f:
                         content = f.read()
-                        if any(
-                            pattern in content
-                            for pattern in encryption_patterns
-                        ):
+                        if any(pattern in content for pattern in encryption_patterns):
                             encryption_found = True
                             break
                 except Exception:
@@ -204,18 +185,14 @@ class ReleaseSecurityValidator:
         """Validate compliance requirements."""
         try:
             # Check OWASP compliance
-            owasp_report = Path(
-                "security/owasp_focused_assessment_report.json"
-            )
+            owasp_report = Path("security/owasp_focused_assessment_report.json")
             if owasp_report.exists():
                 with open(owasp_report) as f:
                     report = json.load(f)
 
                 score = report.get("overall_score", 0)
                 if score < 80:
-                    self.errors.append(
-                        f"OWASP compliance score too low: {score}/100"
-                    )
+                    self.errors.append(f"OWASP compliance score too low: {score}/100")
                     return False
             else:
                 self.warnings.append("OWASP assessment report not found")
@@ -242,9 +219,7 @@ class ReleaseSecurityValidator:
                     total_secrets += len(file_secrets)
 
                 if total_secrets > 0:
-                    self.errors.append(
-                        f"Potential secrets found: {total_secrets}"
-                    )
+                    self.errors.append(f"Potential secrets found: {total_secrets}")
                     return False
 
             self.checks_passed += 1
@@ -274,9 +249,7 @@ class ReleaseSecurityValidator:
                     issues.append("Running as root user")
 
                 if "--no-cache" not in content:
-                    self.warnings.append(
-                        f"{dockerfile}: Consider using --no-cache"
-                    )
+                    self.warnings.append(f"{dockerfile}: Consider using --no-cache")
 
                 if "COPY . ." in content or "ADD . ." in content:
                     issues.append("Copying entire context")
@@ -301,9 +274,7 @@ class ReleaseSecurityValidator:
             "errors": self.errors,
             "warnings": self.warnings,
             "security_score": (
-                self.checks_passed
-                / (self.checks_passed + self.checks_failed)
-                * 100
+                self.checks_passed / (self.checks_passed + self.checks_failed) * 100
                 if (self.checks_passed + self.checks_failed) > 0
                 else 0
             ),

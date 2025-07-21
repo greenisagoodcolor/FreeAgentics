@@ -12,9 +12,10 @@ from dataclasses import dataclass, field
 from datetime import datetime, timedelta
 from typing import Any, Dict, List, Optional
 
+from fastapi import APIRouter, Query
+
 from observability.distributed_tracing import (
     DistributedTracer,
-    Trace,
     TraceSpan,
     get_distributed_tracer,
     trace_span,
@@ -84,35 +85,21 @@ class TracingAnalyzer:
         metrics = TracingMetrics()
         metrics.total_traces = len(relevant_traces)
 
-        completed_traces = [
-            t for t in relevant_traces if t.end_time is not None
-        ]
+        completed_traces = [t for t in relevant_traces if t.end_time is not None]
         failed_traces = [t for t in relevant_traces if t.error_count > 0]
 
         metrics.completed_traces = len(completed_traces)
         metrics.failed_traces = len(failed_traces)
-        metrics.error_rate = (
-            len(failed_traces) / len(relevant_traces)
-            if relevant_traces
-            else 0.0
-        )
+        metrics.error_rate = len(failed_traces) / len(relevant_traces) if relevant_traces else 0.0
 
         # Duration metrics
         if completed_traces:
-            durations = [
-                t.duration_ms
-                for t in completed_traces
-                if t.duration_ms is not None
-            ]
+            durations = [t.duration_ms for t in completed_traces if t.duration_ms is not None]
             if durations:
                 metrics.avg_trace_duration = sum(durations) / len(durations)
                 sorted_durations = sorted(durations)
-                metrics.p95_duration = sorted_durations[
-                    int(len(sorted_durations) * 0.95)
-                ]
-                metrics.p99_duration = sorted_durations[
-                    int(len(sorted_durations) * 0.99)
-                ]
+                metrics.p95_duration = sorted_durations[int(len(sorted_durations) * 0.95)]
+                metrics.p99_duration = sorted_durations[int(len(sorted_durations) * 0.99)]
 
         # Service and operation metrics
         for trace in relevant_traces:
@@ -126,9 +113,7 @@ class TracingAnalyzer:
 
         return metrics
 
-    def detect_performance_issues(
-        self, metrics: TracingMetrics
-    ) -> List[Dict[str, Any]]:
+    def detect_performance_issues(self, metrics: TracingMetrics) -> List[Dict[str, Any]]:
         """Detect performance issues from tracing metrics."""
         issues = []
 
@@ -195,9 +180,7 @@ class TracingIntegration:
         # Hook into span completion to export metrics
         original_finish_span = self.tracer.finish_span
 
-        def hooked_finish_span(
-            span: TraceSpan, status: str = "ok", error: Optional[str] = None
-        ):
+        def hooked_finish_span(span: TraceSpan, status: str = "ok", error: Optional[str] = None):
             """Hooked finish_span to export metrics."""
             # Call original method
             original_finish_span(span, status, error)
@@ -255,9 +238,7 @@ class TracingIntegration:
         self.integration_task = asyncio.create_task(self._integration_loop())
 
         # Start metrics export task
-        self.metrics_export_task = asyncio.create_task(
-            self._metrics_export_loop()
-        )
+        self.metrics_export_task = asyncio.create_task(self._metrics_export_loop())
 
         logger.info("🚀 Distributed tracing integration started")
 
@@ -321,9 +302,7 @@ class TracingIntegration:
         # Log issues
         for issue in issues:
             log_entry = create_structured_log_entry(
-                level=LogLevel.WARNING
-                if issue["severity"] == "medium"
-                else LogLevel.ERROR,
+                level=LogLevel.WARNING if issue["severity"] == "medium" else LogLevel.ERROR,
                 source=LogSource.OBSERVABILITY,
                 message=issue["message"],
                 module="tracing_integration",
@@ -375,9 +354,7 @@ class TracingIntegration:
             if span.operation_name.startswith("coordination_"):
                 # Agent coordination metrics
                 status = "success" if span.status == "ok" else "failure"
-                coordination_type = span.operation_name.replace(
-                    "coordination_", ""
-                )
+                coordination_type = span.operation_name.replace("coordination_", "")
 
                 record_agent_coordination_request(
                     agent_id=span.tags.get("agent_id", "unknown"),
@@ -456,11 +433,7 @@ class TracingIntegration:
         }
 
 
-from typing import List as ListType
-
 # FastAPI endpoints for tracing integration
-from fastapi import APIRouter, Query
-
 tracing_router = APIRouter()
 
 
@@ -502,9 +475,7 @@ async def get_trace_stats():
     integration_status = {}
     try:
         integration_status = tracing_integration.get_integration_status()
-    except (
-        Exception
-    ):  # nosec B110 # Safe fallback to empty dict if integration status unavailable
+    except Exception:  # nosec B110 # Safe fallback to empty dict if integration status unavailable
         pass
 
     return {"tracer_stats": stats, "integration_status": integration_status}
@@ -557,9 +528,7 @@ async def trace_agent_operation(
     """Trace an agent operation with automatic metrics export."""
     tracer = get_distributed_tracer()
 
-    async with trace_span(
-        tracer, operation_name, service_name=f"agent-{agent_id}"
-    ) as span:
+    async with trace_span(tracer, operation_name, service_name=f"agent-{agent_id}") as span:
         span.add_tag("agent_id", agent_id)
         span.add_tag("operation", operation_name)
 
@@ -568,9 +537,7 @@ async def trace_agent_operation(
             span.add_log(f"Operation {operation_name} completed successfully")
             return result
         except Exception as e:
-            span.add_log(
-                f"Operation {operation_name} failed: {e}", level="error"
-            )
+            span.add_log(f"Operation {operation_name} failed: {e}", level="error")
             raise
 
 
@@ -590,14 +557,10 @@ async def trace_coordination_operation(
 
         try:
             result = await operation_func(*args, **kwargs)
-            span.add_log(
-                f"Coordination {coordination_type} completed successfully"
-            )
+            span.add_log(f"Coordination {coordination_type} completed successfully")
             return result
         except Exception as e:
-            span.add_log(
-                f"Coordination {coordination_type} failed: {e}", level="error"
-            )
+            span.add_log(f"Coordination {coordination_type} failed: {e}", level="error")
             raise
 
 
@@ -618,7 +581,5 @@ async def trace_inference_operation(
             span.add_log(f"Inference {inference_type} completed successfully")
             return result
         except Exception as e:
-            span.add_log(
-                f"Inference {inference_type} failed: {e}", level="error"
-            )
+            span.add_log(f"Inference {inference_type} failed: {e}", level="error")
             raise

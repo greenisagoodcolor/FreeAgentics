@@ -13,20 +13,16 @@ from abc import ABC, abstractmethod
 from collections import defaultdict
 from contextlib import contextmanager
 from dataclasses import dataclass, field
-from datetime import datetime, timedelta
-from functools import lru_cache, wraps
-from typing import Any, Dict, List, Optional, Tuple, Union
+from datetime import datetime
+from functools import wraps
+from typing import Any, Dict, List, Optional, Tuple
 
 import boto3
 import hvac
 from botocore.exceptions import ClientError
-from cryptography.hazmat.backends import default_backend
-from cryptography.hazmat.primitives import constant_time, hashes, serialization
 
 # Cryptography imports
-from cryptography.hazmat.primitives.ciphers import Cipher, algorithms, modes
 from cryptography.hazmat.primitives.ciphers.aead import AESGCM
-from cryptography.hazmat.primitives.kdf.pbkdf2 import PBKDF2HMAC
 
 logger = logging.getLogger(__name__)
 
@@ -70,9 +66,7 @@ class KeyProvider(ABC):
 class AWSKMSProvider(KeyProvider):
     """AWS KMS key provider with FIPS 140-2 compliance."""
 
-    def __init__(
-        self, region: str = "us-east-1", endpoint_url: Optional[str] = None
-    ):
+    def __init__(self, region: str = "us-east-1", endpoint_url: Optional[str] = None):
         self.client = boto3.client(
             "kms",
             region_name=region,
@@ -85,9 +79,7 @@ class AWSKMSProvider(KeyProvider):
     def generate_data_key(self, key_id: str) -> Tuple[bytes, bytes]:
         """Generate AES-256 data key using AWS KMS."""
         try:
-            response = self.client.generate_data_key(
-                KeyId=key_id, KeySpec="AES_256"
-            )
+            response = self.client.generate_data_key(KeyId=key_id, KeySpec="AES_256")
             return response["Plaintext"], response["CiphertextBlob"]
         except ClientError as e:
             logger.error(f"AWS KMS error generating data key: {e}")
@@ -104,9 +96,7 @@ class AWSKMSProvider(KeyProvider):
                     return plaintext
 
         try:
-            response = self.client.decrypt(
-                CiphertextBlob=encrypted_key, KeyId=key_id
-            )
+            response = self.client.decrypt(CiphertextBlob=encrypted_key, KeyId=key_id)
             plaintext = response["Plaintext"]
 
             with self._cache_lock:
@@ -143,9 +133,7 @@ class AWSKMSProvider(KeyProvider):
         """Remove expired entries from cache."""
         current_time = time.time()
         expired_keys = [
-            k
-            for k, (_, ts) in self._key_cache.items()
-            if current_time - ts >= self._cache_ttl
+            k for k, (_, ts) in self._key_cache.items() if current_time - ts >= self._cache_ttl
         ]
         for k in expired_keys:
             del self._key_cache[k]
@@ -154,9 +142,7 @@ class AWSKMSProvider(KeyProvider):
 class HashiCorpVaultProvider(KeyProvider):
     """HashiCorp Vault key provider with transit engine."""
 
-    def __init__(
-        self, vault_url: str, vault_token: str, mount_point: str = "transit"
-    ):
+    def __init__(self, vault_url: str, vault_token: str, mount_point: str = "transit"):
         self.client = hvac.Client(url=vault_url, token=vault_token)
         self.mount_point = mount_point
         self._ensure_transit_engine()
@@ -166,9 +152,7 @@ class HashiCorpVaultProvider(KeyProvider):
         try:
             engines = self.client.sys.list_mounted_secrets_engines()
             if f"{self.mount_point}/" not in engines:
-                self.client.sys.enable_secrets_engine(
-                    backend_type="transit", path=self.mount_point
-                )
+                self.client.sys.enable_secrets_engine(backend_type="transit", path=self.mount_point)
         except Exception as e:
             logger.error(f"Vault error enabling transit engine: {e}")
             raise
@@ -195,9 +179,7 @@ class HashiCorpVaultProvider(KeyProvider):
         """Decrypt data key using Vault."""
         try:
             ciphertext = (
-                encrypted_key.decode()
-                if isinstance(encrypted_key, bytes)
-                else encrypted_key
+                encrypted_key.decode() if isinstance(encrypted_key, bytes) else encrypted_key
             )
 
             response = self.client.secrets.transit.decrypt_data(
@@ -214,9 +196,7 @@ class HashiCorpVaultProvider(KeyProvider):
     def rotate_key(self, key_id: str) -> str:
         """Rotate key in Vault."""
         try:
-            self.client.secrets.transit.rotate_key(
-                name=key_id, mount_point=self.mount_point
-            )
+            self.client.secrets.transit.rotate_key(name=key_id, mount_point=self.mount_point)
             # Get latest version
             response = self.client.secrets.transit.read_key(
                 name=key_id, mount_point=self.mount_point
@@ -261,9 +241,7 @@ class FieldEncryptor:
         self._operation_lock = threading.Lock()
 
         # Encryption cache for performance
-        self._encryption_cache: Dict[
-            str, Tuple[bytes, EncryptionMetadata]
-        ] = {}
+        self._encryption_cache: Dict[str, Tuple[bytes, EncryptionMetadata]] = {}
         self._cache_lock = threading.Lock()
 
     @contextmanager
@@ -277,16 +255,12 @@ class FieldEncryptor:
         try:
             yield
         finally:
-            elapsed = (
-                time.perf_counter() - start_time
-            ) * 1000  # Convert to ms
+            elapsed = (time.perf_counter() - start_time) * 1000  # Convert to ms
             with self._operation_lock:
                 self._operation_times[operation].append(elapsed)
                 # Keep only last 1000 measurements
                 if len(self._operation_times[operation]) > 1000:
-                    self._operation_times[operation] = self._operation_times[
-                        operation
-                    ][-1000:]
+                    self._operation_times[operation] = self._operation_times[operation][-1000:]
 
     def encrypt_field(
         self,
@@ -309,19 +283,14 @@ class FieldEncryptor:
                 plaintext = json.dumps(value).encode()
 
             # Generate or retrieve data key
-            plaintext_key, encrypted_key = self.provider.generate_data_key(
-                key_id
-            )
+            plaintext_key, encrypted_key = self.provider.generate_data_key(key_id)
 
             # Use AES-GCM for authenticated encryption
             aesgcm = AESGCM(plaintext_key)
             nonce = os.urandom(12)  # 96-bit nonce for GCM
 
             # Create additional authenticated data
-            aad = (
-                additional_data
-                or f"{field_name}:{datetime.utcnow().isoformat()}".encode()
-            )
+            aad = additional_data or f"{field_name}:{datetime.utcnow().isoformat()}".encode()
 
             # Encrypt
             ciphertext = aesgcm.encrypt(nonce, plaintext, aad)
@@ -367,15 +336,12 @@ class FieldEncryptor:
             # Validate field name if provided
             if (
                 expected_field_name
-                and metadata.get("additional_data", {}).get("field_name")
-                != expected_field_name
+                and metadata.get("additional_data", {}).get("field_name") != expected_field_name
             ):
                 raise ValueError("Field name mismatch in encrypted data")
 
             # Decrypt data key
-            plaintext_key = self.provider.decrypt_data_key(
-                encrypted_key, metadata["key_id"]
-            )
+            plaintext_key = self.provider.decrypt_data_key(encrypted_key, metadata["key_id"])
 
             # Decrypt value
             aesgcm = AESGCM(plaintext_key)
@@ -423,9 +389,7 @@ class FieldEncryptor:
             decrypted_data = encrypted_data.copy()
 
             for field_name in fields_to_decrypt:
-                if field_name in encrypted_data and isinstance(
-                    encrypted_data[field_name], dict
-                ):
+                if field_name in encrypted_data and isinstance(encrypted_data[field_name], dict):
                     if "ciphertext" in encrypted_data[field_name]:
                         decrypted_data[field_name] = self.decrypt_field(
                             encrypted_data[field_name], field_name
@@ -445,9 +409,7 @@ class FieldEncryptor:
 
             # Get field name from metadata
             field_name = (
-                encrypted_data["metadata"]
-                .get("additional_data", {})
-                .get("field_name", "unknown")
+                encrypted_data["metadata"].get("additional_data", {}).get("field_name", "unknown")
             )
 
             # Re-encrypt with new key
@@ -469,9 +431,7 @@ class FieldEncryptor:
                         "min_ms": min(times),
                         "max_ms": max(times),
                         "p95_ms": (
-                            sorted(times)[int(len(times) * 0.95)]
-                            if len(times) > 20
-                            else max(times)
+                            sorted(times)[int(len(times) * 0.95)] if len(times) > 20 else max(times)
                         ),
                     }
             return stats
@@ -499,24 +459,16 @@ class TransparentFieldEncryptor:
         def decorator(prop):
             @wraps(prop.fget)
             def getter(instance):
-                encrypted_value = getattr(
-                    instance, f"_encrypted_{field_name}", None
-                )
+                encrypted_value = getattr(instance, f"_encrypted_{field_name}", None)
                 if encrypted_value:
-                    return self.encryptor.decrypt_field(
-                        encrypted_value, field_name
-                    )
+                    return self.encryptor.decrypt_field(encrypted_value, field_name)
                 return None
 
             @wraps(prop.fset)
             def setter(instance, value):
                 if value is not None:
-                    encrypted_value = self.encryptor.encrypt_field(
-                        value, field_name, key_id
-                    )
-                    setattr(
-                        instance, f"_encrypted_{field_name}", encrypted_value
-                    )
+                    encrypted_value = self.encryptor.encrypt_field(value, field_name, key_id)
+                    setattr(instance, f"_encrypted_{field_name}", encrypted_value)
                 else:
                     setattr(instance, f"_encrypted_{field_name}", None)
 
@@ -566,9 +518,7 @@ class TransparentFieldEncryptor:
         return decorator
 
 
-def create_field_encryptor(
-    provider_type: str = "aws_kms", **provider_config
-) -> FieldEncryptor:
+def create_field_encryptor(provider_type: str = "aws_kms", **provider_config) -> FieldEncryptor:
     """
     Factory function to create field encryptor with specified provider.
 
@@ -585,9 +535,7 @@ def create_field_encryptor(
             region=provider_config.get("region", "us-east-1"),
             endpoint_url=provider_config.get("endpoint_url"),
         )
-        default_key_id = provider_config.get(
-            "key_id", "alias/field-encryption"
-        )
+        default_key_id = provider_config.get("key_id", "alias/field-encryption")
     elif provider_type == "vault":
         provider = HashiCorpVaultProvider(
             vault_url=provider_config["vault_url"],
@@ -602,7 +550,5 @@ def create_field_encryptor(
         provider=provider,
         default_key_id=default_key_id,
         cache_size=provider_config.get("cache_size", 1000),
-        performance_monitoring=provider_config.get(
-            "performance_monitoring", True
-        ),
+        performance_monitoring=provider_config.get("performance_monitoring", True),
     )

@@ -60,9 +60,7 @@ class MatrixCache:
         with self._lock:
             if len(self.cache) >= self.max_size:
                 # Remove oldest accessed item
-                oldest_key = min(
-                    self.access_times.keys(), key=self.access_times.get
-                )
+                oldest_key = min(self.access_times.keys(), key=self.access_times.get)
                 del self.cache[oldest_key]
                 del self.access_times[oldest_key]
 
@@ -126,9 +124,7 @@ class AsyncInferenceEngine:
         self.agent_pool = AgentPool()
         self.metrics = PerformanceMetrics()
 
-    async def run_inference(
-        self, agent, observation: Any
-    ) -> Tuple[Any, Dict[str, float]]:
+    async def run_inference(self, agent, observation: Any) -> Tuple[Any, Dict[str, float]]:
         """Run PyMDP inference asynchronously with performance tracking."""
         start_time = time.time()
 
@@ -168,10 +164,7 @@ class AsyncInferenceEngine:
         self, agents: List[Any], observations: List[Any]
     ) -> List[Tuple[Any, Dict[str, float]]]:
         """Run inference for multiple agents concurrently."""
-        tasks = [
-            self.run_inference(agent, obs)
-            for agent, obs in zip(agents, observations)
-        ]
+        tasks = [self.run_inference(agent, obs) for agent, obs in zip(agents, observations)]
 
         return await asyncio.gather(*tasks, return_exceptions=True)
 
@@ -201,9 +194,7 @@ def performance_monitor(operation_name: str):
                 return result
             except Exception as e:
                 elapsed = time.time() - start_time
-                logger.error(
-                    f"Failed {operation_name} after {elapsed:.3f}s: {e}"
-                )
+                logger.error(f"Failed {operation_name} after {elapsed:.3f}s: {e}")
                 raise
 
         return wrapper
@@ -211,9 +202,7 @@ def performance_monitor(operation_name: str):
     return decorator
 
 
-def optimize_matrix_operations(
-    matrix: np.ndarray, operation: str
-) -> np.ndarray:
+def optimize_matrix_operations(matrix: np.ndarray, operation: str) -> np.ndarray:
     """Optimize matrix operations for PyMDP."""
     if operation == "normalize":
         # Use faster normalization for probability matrices
@@ -280,9 +269,7 @@ class PerformanceOptimizer:
 
         # Inject optimized methods
         agent._original_get_cached_matrix = agent._get_cached_matrix
-        agent._get_cached_matrix = self._optimized_get_cached_matrix.__get__(
-            agent, type(agent)
-        )
+        agent._get_cached_matrix = self._optimized_get_cached_matrix.__get__(agent, type(agent))
 
         logger.info(
             f"Applied performance optimizations to agent {getattr(agent, 'agent_id', 'unknown')}"
@@ -296,9 +283,7 @@ class PerformanceOptimizer:
         normalization_func: callable,
     ) -> Any:
         """Optimized matrix caching with global cache."""
-        cache_key = (
-            f"{agent_self.agent_id}_{matrix_name}_{hash(str(matrix_data))}"
-        )
+        cache_key = f"{agent_self.agent_id}_{matrix_name}_{hash(str(matrix_data))}"
 
         # Check global cache first
         cached_matrix = self.matrix_cache.get(cache_key)
@@ -311,9 +296,7 @@ class PerformanceOptimizer:
 
         return normalized_matrix
 
-    def benchmark_system(
-        self, agents: List[Any], num_steps: int = 50
-    ) -> Dict[str, Any]:
+    def benchmark_system(self, agents: List[Any], num_steps: int = 50) -> Dict[str, Any]:
         """Comprehensive system performance benchmark."""
         results = {"single_agent": {}, "multi_agent": {}, "memory_usage": {}}
 
@@ -326,9 +309,7 @@ class PerformanceOptimizer:
                 start_time = time.time()
 
                 # Simulate multi-agent step
-                observations = [
-                    {"position": [i % 10, i // 10]} for i in range(len(agents))
-                ]
+                observations = [{"position": [i % 10, i // 10]} for i in range(len(agents))]
 
                 for agent, obs in zip(agents, observations):
                     agent.step(obs)

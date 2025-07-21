@@ -10,7 +10,7 @@ from typing import Sequence, Union
 
 import sqlalchemy as sa
 
-from alembic import op  
+from alembic import op
 
 # revision identifiers, used by Alembic.
 revision: str = "1b4306802749"
@@ -105,9 +105,7 @@ def upgrade() -> None:
         sa.Column("coalition_id", sa.UUID(), nullable=False),
         sa.Column(
             "role",
-            sa.Enum(
-                "LEADER", "COORDINATOR", "MEMBER", "OBSERVER", name="agentrole"
-            ),
+            sa.Enum("LEADER", "COORDINATOR", "MEMBER", "OBSERVER", name="agentrole"),
             nullable=True,
         ),
         sa.Column(

@@ -3,7 +3,6 @@
 import asyncio
 import json
 import logging
-from datetime import datetime
 from typing import Optional
 
 import websockets
@@ -24,9 +23,7 @@ class FreeAgenticsWebSocketClient:
         self.base_url = base_url
         self.client_id = client_id
         self.websocket: Optional[websockets.WebSocketClientProtocol] = None
-        self.monitoring_websocket: Optional[
-            websockets.WebSocketClientProtocol
-        ] = None
+        self.monitoring_websocket: Optional[websockets.WebSocketClientProtocol] = None
 
     async def connect(self):
         """Connect to the WebSocket server."""
@@ -65,9 +62,7 @@ class FreeAgenticsWebSocketClient:
         await self.websocket.send(json.dumps(message))
         logger.info(f"Subscribed to events: {event_types}")
 
-    async def start_monitoring(
-        self, metrics: list, agents: list = None, sample_rate: float = 1.0
-    ):
+    async def start_monitoring(self, metrics: list, agents: list = None, sample_rate: float = 1.0):
         """Start real-time monitoring."""
         if not self.monitoring_websocket:
             raise RuntimeError("Not connected to monitoring WebSocket")
@@ -83,9 +78,7 @@ class FreeAgenticsWebSocketClient:
         await self.monitoring_websocket.send(json.dumps(message))
         logger.info(f"Started monitoring: {metrics}")
 
-    async def send_agent_command(
-        self, agent_id: str, command: str, params: dict = None
-    ):
+    async def send_agent_command(self, agent_id: str, command: str, params: dict = None):
         """Send a command to an agent."""
         if not self.websocket:
             raise RuntimeError("Not connected to WebSocket")
@@ -120,9 +113,7 @@ class FreeAgenticsWebSocketClient:
                 # Check main WebSocket
                 if self.websocket:
                     try:
-                        message = await asyncio.wait_for(
-                            self.websocket.recv(), timeout=0.1
-                        )
+                        message = await asyncio.wait_for(self.websocket.recv(), timeout=0.1)
                         data = json.loads(message)
                         await self.handle_message(data, "main")
                     except asyncio.TimeoutError:
@@ -142,9 +133,7 @@ class FreeAgenticsWebSocketClient:
                     except asyncio.TimeoutError:
                         pass
                     except websockets.exceptions.ConnectionClosed:
-                        logger.warning(
-                            "Monitoring WebSocket connection closed"
-                        )
+                        logger.warning("Monitoring WebSocket connection closed")
                         self.monitoring_websocket = None
 
                 # Small delay to prevent busy waiting
@@ -160,22 +149,16 @@ class FreeAgenticsWebSocketClient:
         msg_type = message.get("type", "unknown")
 
         if msg_type == "connection_established":
-            logger.info(
-                f"[{source}] Connection established: {message.get('client_id')}"
-            )
+            logger.info(f"[{source}] Connection established: {message.get('client_id')}")
 
         elif msg_type == "subscription_confirmed":
-            logger.info(
-                f"[{source}] Subscription confirmed: {message.get('event_types')}"
-            )
+            logger.info(f"[{source}] Subscription confirmed: {message.get('event_types')}")
 
         elif msg_type == "agent_event":
             event_type = message.get("event_type")
             agent_id = message.get("agent_id")
             data = message.get("data", {})
-            logger.info(
-                f"[{source}] Agent event - {event_type} from {agent_id}: {data}"
-            )
+            logger.info(f"[{source}] Agent event - {event_type} from {agent_id}: {data}")
 
         elif msg_type == "world_event":
             event_type = message.get("event_type")
@@ -196,9 +179,7 @@ class FreeAgenticsWebSocketClient:
                 logger.info(f"[{source}] Metrics update:")
                 for metric_type, value in metrics.items():
                     if isinstance(value, dict):
-                        logger.info(
-                            f"  {metric_type}: {value.get('value', 'N/A')}"
-                        )
+                        logger.info(f"  {metric_type}: {value.get('value', 'N/A')}")
                     else:
                         logger.info(f"  {metric_type}: {value}")
 
@@ -207,9 +188,7 @@ class FreeAgenticsWebSocketClient:
 
         elif msg_type == "monitoring_started":
             session_id = message.get("session_id")
-            logger.info(
-                f"[{source}] Monitoring started - session: {session_id}"
-            )
+            logger.info(f"[{source}] Monitoring started - session: {session_id}")
 
         elif msg_type == "error":
             error_msg = message.get("message", "Unknown error")
@@ -254,9 +233,7 @@ class FreeAgenticsWebSocketClient:
             await self.send_agent_command("agent_1", "start")
 
             await asyncio.sleep(2)
-            await self.send_agent_command(
-                "agent_1", "move", {"direction": "up"}
-            )
+            await self.send_agent_command("agent_1", "move", {"direction": "up"})
 
             # Listen for messages
             logger.info("Listening for messages... (Press Ctrl+C to stop)")

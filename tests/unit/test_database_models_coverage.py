@@ -2,11 +2,10 @@
 
 import uuid
 from datetime import datetime
-from unittest.mock import Mock, patch
 
 import pytest
 from sqlalchemy import create_engine
-from sqlalchemy.orm import Session, sessionmaker
+from sqlalchemy.orm import sessionmaker
 
 from database.base import Base
 from database.models import (
@@ -179,9 +178,7 @@ class TestDatabaseModels:
         test_session.add(coalition)
         test_session.commit()
 
-        retrieved = (
-            test_session.query(Coalition).filter_by(id=coalition_id).first()
-        )
+        retrieved = test_session.query(Coalition).filter_by(id=coalition_id).first()
         assert retrieved is not None
         assert retrieved.name == "Test Coalition"
         assert retrieved.description == "Test description"
@@ -303,9 +300,7 @@ class TestDatabaseModels:
         test_session.add(node)
         test_session.commit()
 
-        retrieved = (
-            test_session.query(KnowledgeNode).filter_by(id=node_id).first()
-        )
+        retrieved = test_session.query(KnowledgeNode).filter_by(id=node_id).first()
         assert retrieved is not None
         assert retrieved.type == "concept"
         assert retrieved.label == "Test Concept"
@@ -356,9 +351,7 @@ class TestDatabaseModels:
         test_session.add(edge)
         test_session.commit()
 
-        retrieved = (
-            test_session.query(KnowledgeEdge).filter_by(id=edge_id).first()
-        )
+        retrieved = test_session.query(KnowledgeEdge).filter_by(id=edge_id).first()
         assert retrieved is not None
         assert retrieved.source_id == node1.id
         assert retrieved.target_id == node2.id
@@ -460,19 +453,9 @@ class TestDatabaseModels:
     def test_association_table_columns(self):
         """Test agent_coalition_association table has all columns."""
         # Test table columns exist
-        assert "agent_id" in [
-            c.name for c in agent_coalition_association.columns
-        ]
-        assert "coalition_id" in [
-            c.name for c in agent_coalition_association.columns
-        ]
+        assert "agent_id" in [c.name for c in agent_coalition_association.columns]
+        assert "coalition_id" in [c.name for c in agent_coalition_association.columns]
         assert "role" in [c.name for c in agent_coalition_association.columns]
-        assert "joined_at" in [
-            c.name for c in agent_coalition_association.columns
-        ]
-        assert "contribution_score" in [
-            c.name for c in agent_coalition_association.columns
-        ]
-        assert "trust_score" in [
-            c.name for c in agent_coalition_association.columns
-        ]
+        assert "joined_at" in [c.name for c in agent_coalition_association.columns]
+        assert "contribution_score" in [c.name for c in agent_coalition_association.columns]
+        assert "trust_score" in [c.name for c in agent_coalition_association.columns]

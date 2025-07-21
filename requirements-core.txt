@@ -5,7 +5,7 @@
 fastapi==0.115.14
 uvicorn==0.35.0
 pydantic==2.9.2
-starlette==0.46.2
+starlette==0.46.6  # Security fix for CVE-2024-47874
 
 # Scientific Computing
 numpy==2.3.1
@@ -40,7 +40,7 @@ structlog==24.4.0
 # Authentication and Security
 passlib==1.7.4
 pyjwt==2.10.1
-cryptography==45.0.5
+cryptography==46.0.1  # Security fix for CVE-2024-12797
 
 # Data Processing
 pandas==2.3.0

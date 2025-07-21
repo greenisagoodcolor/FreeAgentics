@@ -51,8 +51,8 @@ class TestGMNModel:
     def test_model_initialization(self, basic_config):
         """Test GMNModel initialization with valid config."""
         if not IMPORT_SUCCESS:
-            pytest.skip("GNN modules not available")
 
+            assert False, "Test bypass removed - must fix underlying issue"
         model = GMNModel(basic_config)
 
         assert model.config == basic_config
@@ -66,8 +66,8 @@ class TestGMNModel:
     def test_model_initialization_defaults(self):
         """Test GMNModel initialization with minimal config."""
         if not IMPORT_SUCCESS:
-            pytest.skip("GNN modules not available")
 
+            assert False, "Test bypass removed - must fix underlying issue"
         minimal_config = {}
         model = GMNModel(minimal_config)
 
@@ -80,8 +80,8 @@ class TestGMNModel:
     def test_model_build(self, basic_config):
         """Test model building functionality."""
         if not IMPORT_SUCCESS:
-            pytest.skip("GNN modules not available")
 
+            assert False, "Test bypass removed - must fix underlying issue"
         model = GMNModel(basic_config)
 
         # Mock logger to capture log output
@@ -94,8 +94,8 @@ class TestGMNModel:
     def test_model_build_different_architectures(self):
         """Test building models with different architectures."""
         if not IMPORT_SUCCESS:
-            pytest.skip("GNN modules not available")
 
+            assert False, "Test bypass removed - must fix underlying issue"
         architectures = ["GCN", "GAT", "GraphSAGE", "GIN"]
 
         for arch in architectures:
@@ -104,31 +104,27 @@ class TestGMNModel:
 
             with patch("inference.gnn.model.logger") as mock_logger:
                 model.build()
-                mock_logger.info.assert_called_with(
-                    f"Building {arch} model with 3 layers"
-                )
+                mock_logger.info.assert_called_with(f"Building {arch} model with 3 layers")
 
     def test_model_forward_without_build(self, basic_config):
         """Test forward pass fails when model not built."""
         if not IMPORT_SUCCESS:
-            pytest.skip("GNN modules not available")
 
+            assert False, "Test bypass removed - must fix underlying issue"
         model = GMNModel(basic_config)
 
         # Mock tensors
         x = MagicMock()  # Node features
         edge_index = MagicMock()  # Edge indices
 
-        with pytest.raises(
-            RuntimeError, match="Model not built. Call build\\(\\) first."
-        ):
+        with pytest.raises(RuntimeError, match="Model not built. Call build\\(\\) first."):
             model.forward(x, edge_index)
 
     def test_model_forward_with_build(self, basic_config):
         """Test forward pass after building model."""
         if not IMPORT_SUCCESS:
-            pytest.skip("GNN modules not available")
 
+            assert False, "Test bypass removed - must fix underlying issue"
         model = GMNModel(basic_config)
         model.build()
 
@@ -143,8 +139,8 @@ class TestGMNModel:
     def test_model_to_dict(self, basic_config):
         """Test converting model to dictionary representation."""
         if not IMPORT_SUCCESS:
-            pytest.skip("GNN modules not available")
 
+            assert False, "Test bypass removed - must fix underlying issue"
         model = GMNModel(basic_config)
         model_dict = model.to_dict()
 
@@ -160,8 +156,8 @@ class TestGMNModel:
     def test_model_to_dict_minimal(self):
         """Test to_dict with minimal configuration."""
         if not IMPORT_SUCCESS:
-            pytest.skip("GNN modules not available")
 
+            assert False, "Test bypass removed - must fix underlying issue"
         model = GMNModel({})
         model_dict = model.to_dict()
 
@@ -177,8 +173,8 @@ class TestGMNModel:
     def test_model_with_complex_layers(self):
         """Test model with complex layer configurations."""
         if not IMPORT_SUCCESS:
-            pytest.skip("GNN modules not available")
 
+            assert False, "Test bypass removed - must fix underlying issue"
         config = {
             "architecture": "GAT",
             "layers": [
@@ -214,8 +210,8 @@ class TestGMNModel:
     def test_model_hyperparameters_access(self, basic_config):
         """Test accessing hyperparameters."""
         if not IMPORT_SUCCESS:
-            pytest.skip("GNN modules not available")
 
+            assert False, "Test bypass removed - must fix underlying issue"
         model = GMNModel(basic_config)
 
         assert model.hyperparameters["learning_rate"] == 0.01
@@ -225,8 +221,8 @@ class TestGMNModel:
     def test_model_metadata_access(self, basic_config):
         """Test accessing metadata."""
         if not IMPORT_SUCCESS:
-            pytest.skip("GNN modules not available")
 
+            assert False, "Test bypass removed - must fix underlying issue"
         model = GMNModel(basic_config)
 
         assert model.metadata["name"] == "test_model"
@@ -236,8 +232,8 @@ class TestGMNModel:
     def test_model_config_modification(self, basic_config):
         """Test that config modifications affect the model's config reference."""
         if not IMPORT_SUCCESS:
-            pytest.skip("GNN modules not available")
 
+            assert False, "Test bypass removed - must fix underlying issue"
         basic_config.copy()
         model = GMNModel(basic_config)
 
@@ -252,8 +248,8 @@ class TestGMNModel:
     def test_model_state_attributes(self, basic_config):
         """Test model internal state attributes."""
         if not IMPORT_SUCCESS:
-            pytest.skip("GNN modules not available")
 
+            assert False, "Test bypass removed - must fix underlying issue"
         model = GMNModel(basic_config)
 
         # Test initial state
@@ -268,8 +264,8 @@ class TestGMNModel:
     def test_model_edge_cases(self):
         """Test model with edge case configurations."""
         if not IMPORT_SUCCESS:
-            pytest.skip("GNN modules not available")
 
+            assert False, "Test bypass removed - must fix underlying issue"
         # Empty layers
         model1 = GMNModel({"layers": []})
         model1.build()
@@ -292,8 +288,8 @@ class TestGMNModel:
     def test_model_serialization_compatibility(self, basic_config):
         """Test that model can be serialized (for saving/loading)."""
         if not IMPORT_SUCCESS:
-            pytest.skip("GNN modules not available")
 
+            assert False, "Test bypass removed - must fix underlying issue"
         model = GMNModel(basic_config)
         model_dict = model.to_dict()
 
@@ -317,8 +313,8 @@ class TestGMNModel:
     def test_model_with_different_architectures(self, architecture):
         """Test model creation with different architectures."""
         if not IMPORT_SUCCESS:
-            pytest.skip("GNN modules not available")
 
+            assert False, "Test bypass removed - must fix underlying issue"
         config = {"architecture": architecture}
         model = GMNModel(config)
 
@@ -328,12 +324,9 @@ class TestGMNModel:
     def test_model_with_different_layer_counts(self, layer_count):
         """Test model with different numbers of layers."""
         if not IMPORT_SUCCESS:
-            pytest.skip("GNN modules not available")
 
-        layers = [
-            {"type": "conv", "input_dim": 64, "output_dim": 64}
-            for _ in range(layer_count)
-        ]
+            assert False, "Test bypass removed - must fix underlying issue"
+        layers = [{"type": "conv", "input_dim": 64, "output_dim": 64} for _ in range(layer_count)]
         config = {"layers": layers}
         model = GMNModel(config)
 
@@ -342,8 +335,8 @@ class TestGMNModel:
     def test_model_thread_safety(self, basic_config):
         """Test that model operations are thread-safe."""
         if not IMPORT_SUCCESS:
-            pytest.skip("GNN modules not available")
 
+            assert False, "Test bypass removed - must fix underlying issue"
         import threading
 
         results = []
@@ -373,6 +366,4 @@ class TestGMNModel:
 
 
 if __name__ == "__main__":
-    pytest.main(
-        [__file__, "-v", "--cov=inference.gnn.model", "--cov-report=html"]
-    )
+    pytest.main([__file__, "-v", "--cov=inference.gnn.model", "--cov-report=html"])

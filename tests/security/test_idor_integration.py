@@ -173,9 +173,7 @@ class TestIDORSystemIntegration:
             assert response.status_code == status.HTTP_403_FORBIDDEN
 
             # Try to delete
-            response = self.client.delete(
-                f"/api/v1/agents/{agent_id}", headers=observer_headers
-            )
+            response = self.client.delete(f"/api/v1/agents/{agent_id}", headers=observer_headers)
             assert response.status_code == status.HTTP_403_FORBIDDEN
 
     def test_coalition_membership_idor(self):
@@ -184,9 +182,7 @@ class TestIDORSystemIntegration:
         am1_headers = self.users["agent_manager1"]["headers"]
 
         research_coalition_id = None
-        for coalition_id, coalition_info in self.resources[
-            "coalitions"
-        ].items():
+        for coalition_id, coalition_info in self.resources["coalitions"].items():
             if coalition_info["leader"] == self.users["researcher1"]["id"]:
                 research_coalition_id = coalition_id
                 break
@@ -201,9 +197,7 @@ class TestIDORSystemIntegration:
             # Should not expose members of coalition they don't belong to
             if response.status_code == status.HTTP_200_OK:
                 members = response.json()
-                assert self.users["agent_manager1"]["id"] not in [
-                    m.get("id") for m in members
-                ]
+                assert self.users["agent_manager1"]["id"] not in [m.get("id") for m in members]
 
     def test_knowledge_graph_idor(self):
         """Test IDOR protection for knowledge graph resources."""
@@ -246,9 +240,7 @@ class TestIDORSystemIntegration:
 
         # Try to access resources
         for agent_id in self.resources["agents"]:
-            response = self.client.get(
-                f"/api/v1/agents/{agent_id}", headers=api_key_headers
-            )
+            response = self.client.get(f"/api/v1/agents/{agent_id}", headers=api_key_headers)
 
             # Should not authenticate with fake API key
             assert response.status_code == status.HTTP_401_UNAUTHORIZED
@@ -285,7 +277,7 @@ class TestIDORSystemIntegration:
 
                             # Should be rejected
                             assert data.get("status") != "subscribed"
-                    except:
+                    except Exception:
                         # WebSocket might not be available
                         pass
 
@@ -331,9 +323,7 @@ class TestIDORSystemIntegration:
         researcher1_headers = self.users["researcher1"]["headers"]
 
         # Admin exports all agents
-        response = self.client.get(
-            "/api/v1/export/agents", headers=admin_headers
-        )
+        response = self.client.get("/api/v1/export/agents", headers=admin_headers)
 
         if response.status_code == status.HTTP_200_OK:
             export_data = response.json()
@@ -352,10 +342,7 @@ class TestIDORSystemIntegration:
 
                 # Verify no unauthorized imports
                 for agent_data in export_data.get("agents", []):
-                    if (
-                        agent_data.get("owner_id")
-                        != self.users["researcher1"]["id"]
-                    ):
+                    if agent_data.get("owner_id") != self.users["researcher1"]["id"]:
                         check_response = self.client.get(
                             f"/api/v1/agents/{agent_data['id']}",
                             headers=researcher1_headers,
@@ -370,9 +357,7 @@ class TestIDORSystemIntegration:
         search_params = [
             {"search": "*"},  # Wildcard
             {"filter": "owner_id:*"},  # All owners
-            {
-                "filter": f"owner_id:{self.users['researcher2']['id']}"
-            },  # Specific user
+            {"filter": f"owner_id:{self.users['researcher2']['id']}"},  # Specific user
             {"query": "SELECT * FROM agents"},  # SQL injection attempt
             {"filter": "' OR '1'='1"},  # SQL injection in filter
         ]
@@ -401,9 +386,7 @@ class TestIDORSystemIntegration:
         observer_headers = self.users["observer1"]["headers"]
 
         # Observers can view metrics but should only see authorized data
-        response = self.client.get(
-            "/api/v1/metrics/agents", headers=observer_headers
-        )
+        response = self.client.get("/api/v1/metrics/agents", headers=observer_headers)
 
         if response.status_code == status.HTTP_200_OK:
             metrics = response.json()
@@ -495,9 +478,7 @@ class TestIDOREdgeCases:
         ]
 
         for invalid_id in invalid_ids:
-            response = client.get(
-                f"/api/v1/agents/{invalid_id}", headers=headers
-            )
+            response = client.get(f"/api/v1/agents/{invalid_id}", headers=headers)
             # Should handle gracefully
             assert response.status_code in [
                 status.HTTP_400_BAD_REQUEST,
@@ -533,9 +514,7 @@ class TestIDOREdgeCases:
         ]
 
         for encoded_id in encoded_ids:
-            response = client.get(
-                f"/api/v1/agents/{encoded_id}", headers=headers
-            )
+            response = client.get(f"/api/v1/agents/{encoded_id}", headers=headers)
             assert response.status_code != status.HTTP_200_OK
 
     def test_extremely_long_ids(self, client):
@@ -596,9 +575,7 @@ class TestIDOREdgeCases:
         ]
 
         for special_id in special_ids:
-            response = client.get(
-                f"/api/v1/agents/{special_id}", headers=headers
-            )
+            response = client.get(f"/api/v1/agents/{special_id}", headers=headers)
             assert response.status_code != status.HTTP_200_OK
 
             # Ensure no command execution or injection
@@ -644,13 +621,11 @@ class TestIDORCompliance:
 
         # 3. Verify consistent error messages
         response1 = client.get(f"/api/v1/agents/{fake_id}", headers=headers)
-        response2 = client.get(f"/api/v1/agents/invalid-id", headers=headers)
+        response2 = client.get("/api/v1/agents/invalid-id", headers=headers)
 
         # Error messages should not reveal whether resource exists
         if response1.status_code == response2.status_code:
-            assert response1.json().get("detail") == response2.json().get(
-                "detail"
-            )
+            assert response1.json().get("detail") == response2.json().get("detail")
 
     def test_gdpr_compliance_idor(self, client):
         """Test IDOR protection for GDPR compliance."""

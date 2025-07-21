@@ -5,7 +5,6 @@ NO IN-MEMORY STORAGE - everything must persist to PostgreSQL.
 """
 
 import uuid
-from datetime import datetime
 from enum import Enum as PyEnum
 from typing import Optional
 
@@ -27,7 +26,6 @@ from sqlalchemy.sql import func
 
 from database.base import Base
 from database.types import GUID
-from database.json_encoder import dumps, loads
 
 
 # Enums for database columns
@@ -64,10 +62,12 @@ agent_coalition_association = Table(
     "agent_coalition",
     Base.metadata,
     Column("agent_id", GUID(), ForeignKey("agents.id"), primary_key=True),
+    Column("coalition_id", GUID(), ForeignKey("coalitions.id"), primary_key=True),
     Column(
-        "coalition_id", GUID(), ForeignKey("coalitions.id"), primary_key=True
+        "role",
+        Enum(AgentRole, values_callable=lambda x: [e.value for e in x]),
+        default=AgentRole.MEMBER.value,
     ),
-    Column("role", Enum(AgentRole, values_callable=lambda x: [e.value for e in x]), default=AgentRole.MEMBER.value),
     Column("joined_at", DateTime, server_default=func.now()),
     Column("contribution_score", Float, default=0.0),
     Column("trust_score", Float, default=1.0),
@@ -89,8 +89,8 @@ class Agent(Base):
     name = Column(String(100), nullable=False)
     template = Column(String(50), nullable=False)
     status: Column[AgentStatus] = Column(
-        Enum(AgentStatus, values_callable=lambda x: [e.value for e in x]), 
-        default=AgentStatus.PENDING.value
+        Enum(AgentStatus, values_callable=lambda x: [e.value for e in x]),
+        default=AgentStatus.PENDING.value,
     )
 
     # Active Inference specific
@@ -107,9 +107,7 @@ class Agent(Base):
     # Timestamps
     created_at = Column(DateTime, server_default=func.now())
     last_active = Column(DateTime, nullable=True)
-    updated_at = Column(
-        DateTime, server_default=func.now(), onupdate=func.now()
-    )
+    updated_at = Column(DateTime, server_default=func.now(), onupdate=func.now())
 
     # Statistics
     inference_count = Column(Integer, default=0)
@@ -124,9 +122,7 @@ class Agent(Base):
     )
 
     # Knowledge graph nodes created by this agent
-    knowledge_nodes = relationship(
-        "KnowledgeNode", back_populates="creator_agent", lazy="select"
-    )
+    knowledge_nodes = relationship("KnowledgeNode", back_populates="creator_agent", lazy="select")
 
     def to_dict(self) -> dict:
         """Convert agent to dictionary for API responses."""
@@ -136,9 +132,7 @@ class Agent(Base):
             "template": self.template,
             "status": self.status.value,
             "created_at": self.created_at.isoformat(),
-            "last_active": self.last_active.isoformat()
-            if self.last_active
-            else None,
+            "last_active": self.last_active.isoformat() if self.last_active else None,
             "inference_count": self.inference_count,
             "parameters": self.parameters,
             "metrics": self.metrics,
@@ -161,8 +155,8 @@ class Coalition(Base):
     name = Column(String(100), nullable=False)
     description = Column(Text, nullable=True)
     status: Column[CoalitionStatus] = Column(
-        Enum(CoalitionStatus, values_callable=lambda x: [e.value for e in x]), 
-        default=CoalitionStatus.FORMING.value
+        Enum(CoalitionStatus, values_callable=lambda x: [e.value for e in x]),
+        default=CoalitionStatus.FORMING.value,
     )
 
     # Coalition objectives and capabilities
@@ -177,9 +171,7 @@ class Coalition(Base):
     # Timestamps
     created_at = Column(DateTime, server_default=func.now())
     dissolved_at = Column(DateTime, nullable=True)
-    updated_at = Column(
-        DateTime, server_default=func.now(), onupdate=func.now()
-    )
+    updated_at = Column(DateTime, server_default=func.now(), onupdate=func.now())
 
     # Relationships
     agents = relationship(
@@ -202,9 +194,7 @@ class Coalition(Base):
             "performance_score": self.performance_score,
             "cohesion_score": self.cohesion_score,
             "created_at": self.created_at.isoformat(),
-            "dissolved_at": self.dissolved_at.isoformat()
-            if self.dissolved_at
-            else None,
+            "dissolved_at": self.dissolved_at.isoformat() if self.dissolved_at else None,
             "agent_count": len(self.agents),
         }
 
@@ -234,16 +224,12 @@ class KnowledgeNode(Base):
     source = Column(String(100), nullable=True)
 
     # Creator agent relationship
-    creator_agent_id: Column[Optional[str]] = Column(
-        GUID(), ForeignKey("agents.id"), nullable=True
-    )
+    creator_agent_id: Column[Optional[str]] = Column(GUID(), ForeignKey("agents.id"), nullable=True)
     creator_agent = relationship("Agent", back_populates="knowledge_nodes")
 
     # Timestamps
     created_at = Column(DateTime, server_default=func.now())
-    updated_at = Column(
-        DateTime, server_default=func.now(), onupdate=func.now()
-    )
+    updated_at = Column(DateTime, server_default=func.now(), onupdate=func.now())
 
     # Relationships to edges
     outgoing_edges = relationship(
@@ -260,6 +246,26 @@ class KnowledgeNode(Base):
     )
 
 
+class User(Base):
+    """User model for authentication and authorization.
+
+    Simple user model for testing database security features.
+    """
+
+    __tablename__ = "users"
+
+    # Primary key
+    id: Column[str] = Column(GUID(), primary_key=True, default=uuid.uuid4)
+
+    # Basic user properties
+    username = Column(String(100), nullable=False, unique=True)
+    email = Column(String(255), nullable=False, unique=True)
+
+    # Timestamps
+    created_at = Column(DateTime, server_default=func.now())
+    updated_at = Column(DateTime, server_default=func.now(), onupdate=func.now())
+
+
 class KnowledgeEdge(Base):
     """Knowledge graph edge stored in database.
 
@@ -272,12 +278,8 @@ class KnowledgeEdge(Base):
     id: Column[str] = Column(GUID(), primary_key=True, default=uuid.uuid4)
 
     # Edge endpoints
-    source_id: Column[str] = Column(
-        GUID(), ForeignKey("db_knowledge_nodes.id")
-    )
-    target_id: Column[str] = Column(
-        GUID(), ForeignKey("db_knowledge_nodes.id")
-    )
+    source_id: Column[str] = Column(GUID(), ForeignKey("db_knowledge_nodes.id"))
+    target_id: Column[str] = Column(GUID(), ForeignKey("db_knowledge_nodes.id"))
 
     # Edge properties
     type = Column(String(50), nullable=False)

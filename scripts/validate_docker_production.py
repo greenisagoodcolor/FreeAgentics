@@ -50,16 +50,12 @@ class DockerProductionValidator:
         print(f"[ERROR] {message}")
         self.results["errors"].append(message)
 
-    def run_command(
-        self, command: List[str], timeout: int = 300
-    ) -> Tuple[int, str, str]:
+    def run_command(self, command: List[str], timeout: int = 300) -> Tuple[int, str, str]:
         """
         Run a command and return return code, stdout, stderr
         """
         try:
-            result = subprocess.run(
-                command, capture_output=True, text=True, timeout=timeout
-            )
+            result = subprocess.run(command, capture_output=True, text=True, timeout=timeout)
             return result.returncode, result.stdout, result.stderr
         except subprocess.TimeoutExpired:
             return 1, "", f"Command timed out after {timeout} seconds"
@@ -102,18 +98,14 @@ class DockerProductionValidator:
                 return False
 
             from_statements = [
-                line
-                for line in content.split("\n")
-                if line.strip().startswith("FROM")
+                line for line in content.split("\n") if line.strip().startswith("FROM")
             ]
             if len(from_statements) < 2:
                 self.log_warning(
                     "Single-stage build detected - consider multi-stage for optimization"
                 )
             else:
-                self.log_info(
-                    f"Multi-stage build detected ({len(from_statements)} stages)"
-                )
+                self.log_info(f"Multi-stage build detected ({len(from_statements)} stages)")
 
             # Check for production target
             if "as production" not in content.lower():
@@ -154,9 +146,7 @@ class DockerProductionValidator:
             ".",
         ]
 
-        returncode, stdout, stderr = self.run_command(
-            build_command, timeout=600
-        )
+        returncode, stdout, stderr = self.run_command(build_command, timeout=600)
         if returncode != 0:
             self.log_error(f"Production build failed: {stderr}")
             return False
@@ -199,19 +189,13 @@ class DockerProductionValidator:
                 size_mb = size_bytes / (1024 * 1024)
 
                 self.results["performance_results"]["image_size_mb"] = size_mb
-                self.results["performance_results"][
-                    "image_size_human"
-                ] = image_size
+                self.results["performance_results"]["image_size_human"] = image_size
 
                 # Check if size is reasonable (< 2GB)
                 if size_mb < 2048:
-                    self.log_info(
-                        f"✓ Image size is reasonable: {size_mb:.1f} MB"
-                    )
+                    self.log_info(f"✓ Image size is reasonable: {size_mb:.1f} MB")
                 else:
-                    self.log_warning(
-                        f"⚠ Image size is large: {size_mb:.1f} MB"
-                    )
+                    self.log_warning(f"⚠ Image size is large: {size_mb:.1f} MB")
 
             except Exception as e:
                 self.log_error(f"Error analyzing image info: {e}")
@@ -269,9 +253,7 @@ class DockerProductionValidator:
             self.log_info("✓ Container runs with security restrictions")
             self.results["security_results"]["security_restrictions"] = True
         else:
-            self.log_error(
-                "Container failed to run with security restrictions"
-            )
+            self.log_error("Container failed to run with security restrictions")
             self.results["security_results"]["security_restrictions"] = False
 
         # Clean up
@@ -375,9 +357,7 @@ class DockerProductionValidator:
             ".",
         ]
 
-        returncode, stdout, stderr = self.run_command(
-            dev_build_command, timeout=600
-        )
+        returncode, stdout, stderr = self.run_command(dev_build_command, timeout=600)
         if returncode != 0:
             self.log_error(f"Development build failed: {stderr}")
             return False
@@ -409,17 +389,11 @@ class DockerProductionValidator:
 
             optimization_ratio = (dev_size - prod_size) / dev_size * 100
 
-            self.log_info(
-                f"Development image size: {dev_size / (1024*1024):.1f} MB"
-            )
-            self.log_info(
-                f"Production image size: {prod_size / (1024*1024):.1f} MB"
-            )
+            self.log_info(f"Development image size: {dev_size / (1024*1024):.1f} MB")
+            self.log_info(f"Production image size: {prod_size / (1024*1024):.1f} MB")
             self.log_info(f"Size optimization: {optimization_ratio:.1f}%")
 
-            self.results["performance_results"][
-                "size_optimization_percent"
-            ] = optimization_ratio
+            self.results["performance_results"]["size_optimization_percent"] = optimization_ratio
 
             if optimization_ratio > 0:
                 self.log_info("✓ Multi-stage build provides size optimization")
@@ -436,9 +410,7 @@ class DockerProductionValidator:
         self.log_info("Testing production deployment scenario...")
 
         # Create temporary environment file
-        temp_env = tempfile.NamedTemporaryFile(
-            mode="w", suffix=".env", delete=False
-        )
+        temp_env = tempfile.NamedTemporaryFile(mode="w", suffix=".env", delete=False)
         temp_env.write(
             """
 DATABASE_URL=postgresql://test:test@localhost:5432/test
@@ -529,9 +501,7 @@ ENVIRONMENT=production
             if "/cleanup" in content:
                 self.log_info("✓ API cleanup endpoint already exists")
             else:
-                self.log_info(
-                    "API cleanup endpoint not found - would need to be implemented"
-                )
+                self.log_info("API cleanup endpoint not found - would need to be implemented")
 
         except Exception as e:
             self.log_error(f"Error checking API cleanup endpoint: {e}")
@@ -544,9 +514,9 @@ ENVIRONMENT=production
         total_checks = len(self.results["validation_results"]) + len(
             self.results["security_results"]
         )
-        passed_checks = sum(
-            1 for v in self.results["validation_results"].values() if v
-        ) + sum(1 for v in self.results["security_results"].values() if v)
+        passed_checks = sum(1 for v in self.results["validation_results"].values() if v) + sum(
+            1 for v in self.results["security_results"].values() if v
+        )
 
         if total_checks > 0:
             success_rate = (passed_checks / total_checks) * 100
@@ -557,9 +527,7 @@ ENVIRONMENT=production
             "total_checks": total_checks,
             "passed_checks": passed_checks,
             "success_rate": success_rate,
-            "overall_status": "PASS"
-            if len(self.results["errors"]) == 0
-            else "FAIL",
+            "overall_status": "PASS" if len(self.results["errors"]) == 0 else "FAIL",
         }
 
         # Save results to file

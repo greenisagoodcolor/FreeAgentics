@@ -48,9 +48,7 @@ class BruteForceBenchmark:
 
     async def run_all_benchmarks(self):
         """Run all benchmark scenarios."""
-        console.print(
-            "[bold blue]Starting Brute Force Protection Benchmarks[/bold blue]"
-        )
+        console.print("[bold blue]Starting Brute Force Protection Benchmarks[/bold blue]")
 
         scenarios = [
             self.benchmark_no_attack,
@@ -170,9 +168,7 @@ class BruteForceBenchmark:
             TextColumn("[progress.percentage]{task.percentage:>3.0f}%"),
             console=console,
         ) as progress:
-            task = progress.add_task(
-                f"Running {scenario_name}", total=duration
-            )
+            task = progress.add_task(f"Running {scenario_name}", total=duration)
 
             # Start time
             start_time = time.time()
@@ -228,19 +224,12 @@ class BruteForceBenchmark:
         # Legitimate user metrics
         if legitimate_metrics["requests"] > 0:
             legitimate_success_rate = (
-                legitimate_metrics["successes"]
-                / legitimate_metrics["requests"]
+                legitimate_metrics["successes"] / legitimate_metrics["requests"]
             )
             latencies = legitimate_metrics["latencies"]
-            legitimate_avg_latency = (
-                statistics.mean(latencies) if latencies else 0
-            )
-            legitimate_p95_latency = (
-                np.percentile(latencies, 95) if latencies else 0
-            )
-            legitimate_p99_latency = (
-                np.percentile(latencies, 99) if latencies else 0
-            )
+            legitimate_avg_latency = statistics.mean(latencies) if latencies else 0
+            legitimate_p95_latency = np.percentile(latencies, 95) if latencies else 0
+            legitimate_p99_latency = np.percentile(latencies, 99) if latencies else 0
         else:
             legitimate_success_rate = 0
             legitimate_avg_latency = 0
@@ -249,9 +238,7 @@ class BruteForceBenchmark:
 
         # Attack metrics
         if attack_metrics["requests"] > 0:
-            attack_block_rate = (
-                attack_metrics["blocked"] / attack_metrics["requests"]
-            )
+            attack_block_rate = attack_metrics["blocked"] / attack_metrics["requests"]
         else:
             attack_block_rate = 0
 
@@ -260,21 +247,16 @@ class BruteForceBenchmark:
             legitimate_requests=legitimate_metrics["requests"],
             attack_requests=attack_metrics["requests"],
             legitimate_success_rate=legitimate_success_rate,
-            legitimate_avg_latency=legitimate_avg_latency
-            * 1000,  # Convert to ms
+            legitimate_avg_latency=legitimate_avg_latency * 1000,  # Convert to ms
             legitimate_p95_latency=legitimate_p95_latency * 1000,
             legitimate_p99_latency=legitimate_p99_latency * 1000,
             attack_block_rate=attack_block_rate,
             total_duration=total_duration,
             memory_usage_mb=final_memory - initial_memory,
-            cpu_usage_percent=statistics.mean(cpu_samples)
-            if cpu_samples
-            else 0,
+            cpu_usage_percent=statistics.mean(cpu_samples) if cpu_samples else 0,
         )
 
-    async def _legitimate_user_task(
-        self, user_id: int, rps: float, duration: int, metrics: Dict
-    ):
+    async def _legitimate_user_task(self, user_id: int, rps: float, duration: int, metrics: Dict):
         """Simulate legitimate user behavior."""
         async with AsyncClient(base_url=self.base_url) as client:
             start_time = time.time()
@@ -299,9 +281,7 @@ class BruteForceBenchmark:
                 request_start = time.perf_counter()
 
                 # Mix of different endpoints
-                endpoint = np.random.choice(
-                    ["/api/v1/users/me", "/api/v1/data", "/api/v1/health"]
-                )
+                endpoint = np.random.choice(["/api/v1/users/me", "/api/v1/data", "/api/v1/health"])
 
                 try:
                     response = await client.get(endpoint, headers=headers)
@@ -374,18 +354,10 @@ class BruteForceBenchmark:
         table.add_column("Value", style="green")
 
         table.add_row("Legitimate Requests", f"{result.legitimate_requests:,}")
-        table.add_row(
-            "Legitimate Success Rate", f"{result.legitimate_success_rate:.2%}"
-        )
-        table.add_row(
-            "Legitimate Avg Latency", f"{result.legitimate_avg_latency:.2f} ms"
-        )
-        table.add_row(
-            "Legitimate P95 Latency", f"{result.legitimate_p95_latency:.2f} ms"
-        )
-        table.add_row(
-            "Legitimate P99 Latency", f"{result.legitimate_p99_latency:.2f} ms"
-        )
+        table.add_row("Legitimate Success Rate", f"{result.legitimate_success_rate:.2%}")
+        table.add_row("Legitimate Avg Latency", f"{result.legitimate_avg_latency:.2f} ms")
+        table.add_row("Legitimate P95 Latency", f"{result.legitimate_p95_latency:.2f} ms")
+        table.add_row("Legitimate P99 Latency", f"{result.legitimate_p99_latency:.2f} ms")
         table.add_row("Attack Requests", f"{result.attack_requests:,}")
         table.add_row("Attack Block Rate", f"{result.attack_block_rate:.2%}")
         table.add_row("Memory Usage", f"{result.memory_usage_mb:.2f} MB")
@@ -451,9 +423,7 @@ class BruteForceBenchmark:
         x = np.arange(len(scenarios))
         width = 0.35
 
-        ax2.bar(
-            x - width / 2, avg_latencies, width, label="Average", alpha=0.7
-        )
+        ax2.bar(x - width / 2, avg_latencies, width, label="Average", alpha=0.7)
         ax2.bar(x + width / 2, p99_latencies, width, label="P99", alpha=0.7)
         ax2.set_title("Response Latency")
         ax2.set_ylabel("Latency (ms)")
@@ -463,9 +433,7 @@ class BruteForceBenchmark:
 
         # Attack Block Rate Chart
         ax3 = axes[1, 0]
-        block_rates = [
-            r.attack_block_rate for r in self.results[1:]
-        ]  # Skip baseline
+        block_rates = [r.attack_block_rate for r in self.results[1:]]  # Skip baseline
         attack_scenarios = scenarios[1:]
         ax3.bar(attack_scenarios, block_rates, color="red", alpha=0.7)
         ax3.set_title("Attack Block Rate")
@@ -480,7 +448,7 @@ class BruteForceBenchmark:
 
         ax4_cpu = ax4.twinx()
 
-        p1 = ax4.bar(
+        ax4.bar(
             x - width / 2,
             memory_usage,
             width,
@@ -488,7 +456,7 @@ class BruteForceBenchmark:
             color="blue",
             alpha=0.7,
         )
-        p2 = ax4_cpu.bar(
+        ax4_cpu.bar(
             x + width / 2,
             cpu_usage,
             width,
@@ -516,9 +484,7 @@ class BruteForceBenchmark:
             dpi=300,
             bbox_inches="tight",
         )
-        console.print(
-            "\n[green]Charts saved to brute_force_protection_benchmark.png[/green]"
-        )
+        console.print("\n[green]Charts saved to brute_force_protection_benchmark.png[/green]")
 
     def _save_detailed_report(self):
         """Save detailed benchmark report."""
@@ -527,17 +493,12 @@ class BruteForceBenchmark:
             "summary": {
                 "baseline_latency": self.results[0].legitimate_avg_latency,
                 "max_latency_increase": max(
-                    r.legitimate_avg_latency
-                    / self.results[0].legitimate_avg_latency
+                    r.legitimate_avg_latency / self.results[0].legitimate_avg_latency
                     for r in self.results[1:]
                 ),
-                "min_success_rate": min(
-                    r.legitimate_success_rate for r in self.results
-                ),
+                "min_success_rate": min(r.legitimate_success_rate for r in self.results),
                 "avg_attack_block_rate": statistics.mean(
-                    r.attack_block_rate
-                    for r in self.results
-                    if r.attack_requests > 0
+                    r.attack_block_rate for r in self.results if r.attack_requests > 0
                 ),
             },
             "scenarios": [
@@ -572,9 +533,7 @@ class BruteForceBenchmark:
         console.print("\n[bold yellow]Recommendations:[/bold yellow]")
 
         baseline = self.results[0]
-        worst_case = max(
-            self.results[1:], key=lambda r: r.legitimate_avg_latency
-        )
+        worst_case = max(self.results[1:], key=lambda r: r.legitimate_avg_latency)
 
         # Success rate recommendation
         min_success = min(r.legitimate_success_rate for r in self.results)
@@ -589,9 +548,7 @@ class BruteForceBenchmark:
             )
 
         # Latency recommendation
-        max_latency_increase = (
-            worst_case.legitimate_avg_latency / baseline.legitimate_avg_latency
-        )
+        max_latency_increase = worst_case.legitimate_avg_latency / baseline.legitimate_avg_latency
         if max_latency_increase > 2:
             console.print(
                 f"[red]⚠️  Latency increases {max_latency_increase:.1f}x under heavy attack. "
@@ -612,9 +569,7 @@ class BruteForceBenchmark:
                 "Consider strengthening protection thresholds.[/yellow]"
             )
         else:
-            console.print(
-                f"[green]✓ Excellent attack block rate ({avg_block_rate:.2%})[/green]"
-            )
+            console.print(f"[green]✓ Excellent attack block rate ({avg_block_rate:.2%})[/green]")
 
         # Resource usage
         max_memory = max(r.memory_usage_mb for r in self.results)

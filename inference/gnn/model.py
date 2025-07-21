@@ -1,7 +1,7 @@
 """Base model class for GNN implementations."""
 
 import logging
-from typing import Any, Dict, Optional
+from typing import Any, Dict
 
 logger = logging.getLogger(__name__)
 
@@ -22,9 +22,7 @@ class GMNModel:
     def build(self):
         """Build the model architecture."""
         # This would be implemented with actual PyTorch Geometric models
-        logger.info(
-            f"Building {self.architecture} model with {len(self.layers)} layers"
-        )
+        logger.info(f"Building {self.architecture} model with {len(self.layers)} layers")
 
     def forward(self, x, edge_index):
         """Forward pass through the model."""

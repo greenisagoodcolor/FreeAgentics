@@ -11,6 +11,8 @@ import inspect
 import os
 import re
 
+import numpy as np
+
 
 class TestSystematicMockPatternAudit:
     """Audit for remaining mock patterns and performance theater throughout codebase."""
@@ -41,13 +43,9 @@ class TestSystematicMockPatternAudit:
 
                             # Look for @safe_pymdp_operation with default_value
                             pattern = r"@safe_pymdp_operation\([^)]*default_value[^)]*\)"
-                            matches = re.findall(
-                                pattern, content, re.MULTILINE
-                            )
+                            matches = re.findall(pattern, content, re.MULTILINE)
                             if matches:
-                                decorator_violations.append(
-                                    f"{file_path}: {matches}"
-                                )
+                                decorator_violations.append(f"{file_path}: {matches}")
 
         assert (
             not decorator_violations
@@ -62,8 +60,7 @@ class TestSystematicMockPatternAudit:
 
         # Should not have @safe_pymdp_operation with default_value
         assert (
-            "@safe_pymdp_operation" not in source
-            or "default_value" not in source
+            "@safe_pymdp_operation" not in source or "default_value" not in source
         ), "update_beliefs method should not use @safe_pymdp_operation with default_value (performance theater)"
 
         # Should raise exceptions on error, not return None
@@ -80,8 +77,7 @@ class TestSystematicMockPatternAudit:
 
         # Should not have @safe_pymdp_operation with default_value
         assert (
-            "@safe_pymdp_operation" not in source
-            or "default_value" not in source
+            "@safe_pymdp_operation" not in source or "default_value" not in source
         ), "select_action method should not use @safe_pymdp_operation with default_value (performance theater)"
 
         # Should raise exceptions on error, not return default action
@@ -117,9 +113,7 @@ class TestSystematicMockPatternAudit:
                             # Look for _fallback_ method definitions
                             matches = re.findall(fallback_pattern, content)
                             if matches:
-                                fallback_violations.append(
-                                    f"{file_path}: {matches}"
-                                )
+                                fallback_violations.append(f"{file_path}: {matches}")
 
         assert (
             not fallback_violations
@@ -151,9 +145,7 @@ class TestSystematicMockPatternAudit:
                                 content = f.read()
 
                             for pattern in mock_llm_patterns:
-                                matches = re.findall(
-                                    pattern, content, re.IGNORECASE
-                                )
+                                matches = re.findall(pattern, content, re.IGNORECASE)
                                 if matches:
                                     mock_llm_violations.append(
                                         f"{file_path}: {pattern} -> {matches}"
@@ -166,9 +158,7 @@ class TestSystematicMockPatternAudit:
     def test_no_fake_data_returns_in_websocket_demo_mode(self):
         """FAILING TEST: WebSocket demo mode should not create fake user data."""
 
-        websocket_files = [
-            "/home/green/FreeAgentics/api/v1/websocket_conversations.py"
-        ]
+        websocket_files = ["/home/green/FreeAgentics/api/v1/websocket_conversations.py"]
 
         fake_data_violations = []
         fake_patterns = [
@@ -185,9 +175,7 @@ class TestSystematicMockPatternAudit:
                 for pattern in fake_patterns:
                     matches = re.findall(pattern, content, re.IGNORECASE)
                     if matches:
-                        fake_data_violations.append(
-                            f"{file_path}: {pattern} -> {matches}"
-                        )
+                        fake_data_violations.append(f"{file_path}: {pattern} -> {matches}")
 
         assert (
             not fake_data_violations
@@ -257,9 +245,7 @@ class TestProductionPerformanceTheaterElimination:
                     for file in files:
                         if file.endswith(".py"):
                             file_path = os.path.join(root, file)
-                            relative_path = os.path.relpath(
-                                file_path, "/home/green/FreeAgentics"
-                            )
+                            relative_path = os.path.relpath(file_path, "/home/green/FreeAgentics")
 
                             # Skip allowed files
                             if relative_path in allowed_sleep_files:
@@ -307,17 +293,13 @@ class TestProductionPerformanceTheaterElimination:
                     for file in files:
                         if file.endswith(".py"):
                             file_path = os.path.join(root, file)
-                            relative_path = os.path.relpath(
-                                file_path, "/home/green/FreeAgentics"
-                            )
+                            relative_path = os.path.relpath(file_path, "/home/green/FreeAgentics")
 
                             with open(file_path, "r") as f:
                                 content = f.read()
 
                             for pattern in theater_patterns:
-                                matches = re.findall(
-                                    pattern, content, re.IGNORECASE
-                                )
+                                matches = re.findall(pattern, content, re.IGNORECASE)
                                 if matches:
                                     visibility_violations.append(
                                         f"{relative_path}: {pattern} -> {matches}"
@@ -395,13 +377,9 @@ class TestHardFailureEnforcement:
                                     content,
                                 )
                             )
+                            theater_count += len(re.findall(r"def _fallback_", content))
                             theater_count += len(
-                                re.findall(r"def _fallback_", content)
-                            )
-                            theater_count += len(
-                                re.findall(
-                                    r"return.*mock", content, re.IGNORECASE
-                                )
+                                re.findall(r"return.*mock", content, re.IGNORECASE)
                             )
 
         # Should be zero after systematic elimination
@@ -409,6 +387,4 @@ class TestHardFailureEnforcement:
             theater_count == 0
         ), f"Task 9.1 incomplete: {theater_count} performance theater patterns still found"
 
-        print(
-            "✅ Task 9.1 Systematic Mock Pattern Removal Audit: ALL patterns eliminated"
-        )
+        print("✅ Task 9.1 Systematic Mock Pattern Removal Audit: ALL patterns eliminated")

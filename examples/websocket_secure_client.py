@@ -9,12 +9,11 @@ import asyncio
 import json
 import logging
 import ssl
-from datetime import datetime, timedelta
+from datetime import datetime
 from typing import Optional
 from urllib.parse import urlencode
 
 import websockets
-from websockets.exceptions import WebSocketException
 
 # Configure logging
 logging.basicConfig(level=logging.INFO)
@@ -133,9 +132,7 @@ class SecureWebSocketClient:
         """Subscribe to specific event types."""
         await self.send_message("subscribe", {"event_types": event_types})
 
-    async def send_agent_command(
-        self, agent_id: str, command: str, params: dict = None
-    ):
+    async def send_agent_command(self, agent_id: str, command: str, params: dict = None):
         """Send a command to control an agent."""
         await self.send_message(
             "agent_command",
@@ -152,9 +149,7 @@ class SecureWebSocketClient:
             logger.warning("No refresh token available")
             return False
 
-        await self.send_message(
-            "refresh_token", {"refresh_token": self.refresh_token}
-        )
+        await self.send_message("refresh_token", {"refresh_token": self.refresh_token})
         return True
 
     async def _heartbeat_loop(self):
@@ -168,12 +163,8 @@ class SecureWebSocketClient:
                 await asyncio.sleep(30)
 
                 # Check if we received acknowledgment
-                if (
-                    datetime.now() - self.last_heartbeat_ack
-                ).total_seconds() > 60:
-                    logger.warning(
-                        "Heartbeat timeout - no acknowledgment received"
-                    )
+                if (datetime.now() - self.last_heartbeat_ack).total_seconds() > 60:
+                    logger.warning("Heartbeat timeout - no acknowledgment received")
                     await self._handle_connection_loss()
                     break
 
@@ -204,9 +195,7 @@ class SecureWebSocketClient:
         msg_type = message.get("type")
 
         if msg_type == "connection_established":
-            logger.info(
-                f"Connected as {message.get('user')} with role {message.get('role')}"
-            )
+            logger.info(f"Connected as {message.get('user')} with role {message.get('role')}")
 
         elif msg_type == "heartbeat_ack":
             self.last_heartbeat_ack = datetime.now()
@@ -277,9 +266,7 @@ class SecureWebSocketClient:
         """Run an interactive session."""
         print("\nSecure WebSocket Client")
         print("Commands:")
-        print(
-            "  subscribe <event_types> - Subscribe to events (comma-separated)"
-        )
+        print("  subscribe <event_types> - Subscribe to events (comma-separated)")
         print("  agent <id> <command> - Send agent command")
         print("  status - Query agent status")
         print("  refresh - Refresh authentication token")
@@ -291,17 +278,13 @@ class SecureWebSocketClient:
                 try:
                     # Get user input with timeout to allow message processing
                     command = await asyncio.wait_for(
-                        asyncio.get_event_loop().run_in_executor(
-                            None, input, "> "
-                        ),
+                        asyncio.get_event_loop().run_in_executor(None, input, "> "),
                         timeout=1.0,
                     )
 
                     if command.startswith("subscribe "):
                         event_types = command[10:].split(",")
-                        await self.subscribe_to_events(
-                            [e.strip() for e in event_types]
-                        )
+                        await self.subscribe_to_events([e.strip() for e in event_types])
 
                     elif command.startswith("agent "):
                         parts = command[6:].split()

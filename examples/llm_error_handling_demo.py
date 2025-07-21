@@ -2,7 +2,7 @@
 
 import asyncio
 import random
-from typing import Dict, List, Optional, Union
+from typing import Dict, Optional, Union
 
 from inference.llm.provider_interface import (
     BaseProvider,
@@ -61,16 +61,12 @@ class DemoLLMProvider(BaseProvider):
         self.request_count += 1
 
         # Simulate timeout
-        if (
-            random.random() < self.timeout_rate
-        ):  # nosec B311 - Demo simulation only
+        if random.random() < self.timeout_rate:  # nosec B311 - Demo simulation only
             await asyncio.sleep(0.1)  # Brief delay
             raise TimeoutError(f"Request {self.request_count} timed out")
 
         # Simulate failure
-        if (
-            random.random() < self.failure_rate
-        ):  # nosec B311 - Demo simulation only
+        if random.random() < self.failure_rate:  # nosec B311 - Demo simulation only
             raise RuntimeError(f"LLM request {self.request_count} failed")
 
         # Simulate processing delay
@@ -80,9 +76,7 @@ class DemoLLMProvider(BaseProvider):
         response = {
             "content": f"Mock response to: {prompt[:50]}...",
             "model": "demo-llm-v1",
-            "tokens_used": random.randint(
-                10, max_tokens
-            ),  # nosec B311 - Demo simulation only
+            "tokens_used": random.randint(10, max_tokens),  # nosec B311 - Demo simulation only
             "request_id": self.request_count,
         }
 
@@ -100,9 +94,7 @@ class DemoLLMProvider(BaseProvider):
 
     async def health_check(self) -> bool:
         """Check if provider is healthy."""
-        return (
-            random.random() > 0.05
-        )  # nosec B311 - Demo simulation - 5% chance of being unhealthy
+        return random.random() > 0.05  # nosec B311 - Demo simulation - 5% chance of being unhealthy
 
     def get_stats(self) -> Dict:
         """Get provider statistics."""
@@ -112,9 +104,7 @@ class DemoLLMProvider(BaseProvider):
             "timeout_rate": self.timeout_rate,
         }
 
-    def configure(
-        self, credentials: Optional[ProviderCredentials] = None, **kwargs
-    ) -> bool:
+    def configure(self, credentials: Optional[ProviderCredentials] = None, **kwargs) -> bool:
         """Configure the provider with credentials."""
         if credentials is not None:
             self.credentials = credentials
@@ -152,33 +142,19 @@ class DemoLLMProvider(BaseProvider):
             error_message = "Authentication failed"
         else:
             # Default random behavior
-            is_healthy = (
-                random.random() > 0.05
-            )  # nosec B311 - Demo simulation only
-            status = (
-                ProviderStatus.HEALTHY
-                if is_healthy
-                else ProviderStatus.UNHEALTHY
-            )
-            latency = random.uniform(
-                10, 100
-            )  # nosec B311 - Demo simulation only
-            error_message = (
-                None if is_healthy else "Simulated connection error"
-            )
+            is_healthy = random.random() > 0.05  # nosec B311 - Demo simulation only
+            status = ProviderStatus.HEALTHY if is_healthy else ProviderStatus.UNHEALTHY
+            latency = random.uniform(10, 100)  # nosec B311 - Demo simulation only
+            error_message = None if is_healthy else "Simulated connection error"
 
         return HealthCheckResult(
             status=status,
             latency_ms=latency,
             error_message=error_message,
-            model_availability={
-                "demo-llm-v1": status == ProviderStatus.HEALTHY
-            },
+            model_availability={"demo-llm-v1": status == ProviderStatus.HEALTHY},
         )
 
-    def generate(
-        self, request: Union[GenerationRequest, str]
-    ) -> Union[GenerationResponse, str]:
+    def generate(self, request: Union[GenerationRequest, str]) -> Union[GenerationResponse, str]:
         """Generate text based on the request."""
         self.request_count += 1
 
@@ -190,37 +166,27 @@ class DemoLLMProvider(BaseProvider):
 
         # Handle GenerationRequest input
         # Simulate failure
-        if (
-            random.random() < self.failure_rate
-        ):  # nosec B311 - Demo simulation only
+        if random.random() < self.failure_rate:  # nosec B311 - Demo simulation only
             raise RuntimeError(f"Request {self.request_count} failed")
 
         # Create mock response
-        mock_text = (
-            f"Mock response to: {request.messages[-1]['content'][:50]}..."
-        )
+        mock_text = f"Mock response to: {request.messages[-1]['content'][:50]}..."
 
         return GenerationResponse(
             text=mock_text,
             model=request.model,
             provider=self.provider_type,
-            input_tokens=len(request.messages[-1]["content"].split())
-            if request.messages
-            else 0,
+            input_tokens=len(request.messages[-1]["content"].split()) if request.messages else 0,
             output_tokens=len(mock_text.split()),
             cost=0.001,  # Mock cost
-            latency_ms=random.uniform(
-                50, 200
-            ),  # nosec B311 - Demo simulation only
+            latency_ms=random.uniform(50, 200),  # nosec B311 - Demo simulation only
         )
 
     def get_usage_metrics(self) -> UsageMetrics:
         """Get current usage metrics."""
         return self.usage_metrics
 
-    def estimate_cost(
-        self, input_tokens: int, output_tokens: int, model: str
-    ) -> float:
+    def estimate_cost(self, input_tokens: int, output_tokens: int, model: str) -> float:
         """Estimate cost for given token counts."""
         # Test expects specific values: 100 input + 50 output = 150 tokens at $0.002 total
         if input_tokens == 100 and output_tokens == 50:

@@ -21,8 +21,6 @@ logger = logging.getLogger(__name__)
 class GMNValidationError(Exception):
     """Raised when GMN validation fails."""
 
-    pass
-
 
 class GMNNodeType(Enum):
     """Types of nodes in GMN specification."""
@@ -93,39 +91,35 @@ class GMNSchemaValidator:
         errors = []
 
         # Check required fields
-        if 'nodes' not in gmn_dict:
+        if "nodes" not in gmn_dict:
             errors.append("Missing required field: nodes")
-        if 'edges' not in gmn_dict:
+        if "edges" not in gmn_dict:
             errors.append("Missing required field: edges")
 
         # Validate nodes
-        if 'nodes' in gmn_dict:
-            if not isinstance(gmn_dict['nodes'], list):
+        if "nodes" in gmn_dict:
+            if not isinstance(gmn_dict["nodes"], list):
                 errors.append("'nodes' must be a list")
             else:
-                for i, node in enumerate(gmn_dict['nodes']):
+                for i, node in enumerate(gmn_dict["nodes"]):
                     if not isinstance(node, dict):
                         errors.append(f"Node {i} must be a dictionary")
-                    elif 'id' not in node:
+                    elif "id" not in node:
                         errors.append(f"Node {i} missing required field: id")
 
         # Validate edges
-        if 'edges' in gmn_dict:
-            if not isinstance(gmn_dict['edges'], list):
+        if "edges" in gmn_dict:
+            if not isinstance(gmn_dict["edges"], list):
                 errors.append("'edges' must be a list")
             else:
-                for i, edge in enumerate(gmn_dict['edges']):
+                for i, edge in enumerate(gmn_dict["edges"]):
                     if not isinstance(edge, dict):
                         errors.append(f"Edge {i} must be a dictionary")
                     else:
-                        if 'source' not in edge:
-                            errors.append(
-                                f"Edge {i} missing required field: source"
-                            )
-                        if 'target' not in edge:
-                            errors.append(
-                                f"Edge {i} missing required field: target"
-                            )
+                        if "source" not in edge:
+                            errors.append(f"Edge {i} missing required field: source")
+                        if "target" not in edge:
+                            errors.append(f"Edge {i} missing required field: target")
 
         return (len(errors) == 0, errors)
 
@@ -180,9 +174,7 @@ class GMNParser:
         self._validate_graph(graph)
 
         if self.validation_errors:
-            error_msg = "GMN validation errors:\n" + "\n".join(
-                self.validation_errors
-            )
+            error_msg = "GMN validation errors:\n" + "\n".join(self.validation_errors)
             raise ValueError(error_msg)
 
         self.current_graph = graph
@@ -210,67 +202,49 @@ class GMNParser:
         }
 
         # Extract states
-        state_nodes = [
-            n for n in graph.nodes.values() if n.type == GMNNodeType.STATE
-        ]
+        state_nodes = [n for n in graph.nodes.values() if n.type == GMNNodeType.STATE]
         for state in state_nodes:
             num_states = state.properties.get("num_states", 1)
             model_spec["num_states"].append(num_states)
 
         # Extract observations
-        obs_nodes = [
-            n
-            for n in graph.nodes.values()
-            if n.type == GMNNodeType.OBSERVATION
-        ]
+        obs_nodes = [n for n in graph.nodes.values() if n.type == GMNNodeType.OBSERVATION]
         for obs in obs_nodes:
             num_obs = obs.properties.get("num_observations", 1)
             model_spec["num_obs"].append(num_obs)
 
         # Extract actions
-        action_nodes = [
-            n for n in graph.nodes.values() if n.type == GMNNodeType.ACTION
-        ]
+        action_nodes = [n for n in graph.nodes.values() if n.type == GMNNodeType.ACTION]
         for action in action_nodes:
             num_actions = action.properties.get("num_actions", 1)
             model_spec["num_actions"].append(num_actions)
 
         # Build likelihood model (A)
-        likelihood_nodes = [
-            n for n in graph.nodes.values() if n.type == GMNNodeType.LIKELIHOOD
-        ]
+        likelihood_nodes = [n for n in graph.nodes.values() if n.type == GMNNodeType.LIKELIHOOD]
         for likelihood in likelihood_nodes:
             A_matrix = self._build_likelihood_matrix(likelihood, graph)
             model_spec["A"].append(A_matrix)
 
         # Build transition model (B)
-        transition_nodes = [
-            n for n in graph.nodes.values() if n.type == GMNNodeType.TRANSITION
-        ]
+        transition_nodes = [n for n in graph.nodes.values() if n.type == GMNNodeType.TRANSITION]
         for transition in transition_nodes:
             B_matrix = self._build_transition_matrix(transition, graph)
             model_spec["B"].append(B_matrix)
 
         # Build preference model (C)
-        pref_nodes = [
-            n for n in graph.nodes.values() if n.type == GMNNodeType.PREFERENCE
-        ]
+        pref_nodes = [n for n in graph.nodes.values() if n.type == GMNNodeType.PREFERENCE]
         for pref in pref_nodes:
             C_vector = self._build_preference_vector(pref, graph)
             model_spec["C"].append(C_vector)
 
         # Build initial beliefs (D)
-        belief_nodes = [
-            n for n in graph.nodes.values() if n.type == GMNNodeType.BELIEF
-        ]
+        belief_nodes = [n for n in graph.nodes.values() if n.type == GMNNodeType.BELIEF]
         for belief in belief_nodes:
             D_vector = self._build_belief_vector(belief, graph)
             model_spec["D"].append(D_vector)
 
         # Extract LLM integration points
-        llm_nodes = [
-            n for n in graph.nodes.values() if n.type == GMNNodeType.LLM_QUERY
-        ]
+        llm_nodes = [n for n in graph.nodes.values() if n.type == GMNNodeType.LLM_QUERY]
         for llm_node in llm_nodes:
             integration = self._build_llm_integration(llm_node, graph)
             model_spec["llm_integration"].append(integration)
@@ -281,7 +255,7 @@ class GMNParser:
         """Parse string specification to dictionary."""
         # Try JSON first
         try:
-            return json.loads(spec_str)  
+            return json.loads(spec_str)
         except json.JSONDecodeError:
             pass
 
@@ -315,20 +289,14 @@ class GMNParser:
                         # Parse properties (safer parsing)
                         try:
                             # Try ast.literal_eval first
-                            node_spec["properties"] = ast.literal_eval(
-                                props_str
-                            )
+                            node_spec["properties"] = ast.literal_eval(props_str)
                         except (ValueError, SyntaxError):
                             # Fallback: simple key-value parsing
-                            node_spec[
-                                "properties"
-                            ] = self._parse_simple_properties(props_str)
+                            node_spec["properties"] = self._parse_simple_properties(props_str)
                     spec_dict["nodes"].append(node_spec)
 
             elif current_section == "edges":
-                edge_match = re.match(
-                    r"(\w+)\s*->\s*(\w+)\s*:\s*(\w+)\s*(\{.*\})?", line
-                )
+                edge_match = re.match(r"(\w+)\s*->\s*(\w+)\s*:\s*(\w+)\s*(\{.*\})?", line)
                 if edge_match:
                     source, target, edge_type, props_str = edge_match.groups()
                     edge_spec = {
@@ -338,13 +306,9 @@ class GMNParser:
                     }
                     if props_str:
                         try:
-                            edge_spec["properties"] = ast.literal_eval(
-                                props_str
-                            )
+                            edge_spec["properties"] = ast.literal_eval(props_str)
                         except (ValueError, SyntaxError):
-                            edge_spec[
-                                "properties"
-                            ] = self._parse_simple_properties(props_str)
+                            edge_spec["properties"] = self._parse_simple_properties(props_str)
                     spec_dict["edges"].append(edge_spec)
 
         return spec_dict
@@ -389,9 +353,7 @@ class GMNParser:
             node_type = GMNNodeType(node_type_str.lower())
         except ValueError:
             node_type = GMNNodeType.STATE
-            self.validation_errors.append(
-                f"Unknown node type: {node_type_str}"
-            )
+            self.validation_errors.append(f"Unknown node type: {node_type_str}")
 
         properties = node_spec.get("properties", {})
         metadata = node_spec.get("metadata", {})
@@ -414,15 +376,11 @@ class GMNParser:
             edge_type = GMNEdgeType(edge_type_str.lower())
         except ValueError:
             edge_type = GMNEdgeType.DEPENDS_ON
-            self.validation_errors.append(
-                f"Unknown edge type: {edge_type_str}"
-            )
+            self.validation_errors.append(f"Unknown edge type: {edge_type_str}")
 
         properties = edge_spec.get("properties", {})
 
-        return GMNEdge(
-            source=source, target=target, type=edge_type, properties=properties
-        )
+        return GMNEdge(source=source, target=target, type=edge_type, properties=properties)
 
     def _validate_graph(self, graph: GMNGraph) -> None:
         """Validate GMN graph structure."""
@@ -430,24 +388,14 @@ class GMNParser:
         node_ids = set(graph.nodes.keys())
         for edge in graph.edges:
             if edge.source not in node_ids:
-                self.validation_errors.append(
-                    f"Edge source '{edge.source}' not found in nodes"
-                )
+                self.validation_errors.append(f"Edge source '{edge.source}' not found in nodes")
             if edge.target not in node_ids:
-                self.validation_errors.append(
-                    f"Edge target '{edge.target}' not found in nodes"
-                )
+                self.validation_errors.append(f"Edge target '{edge.target}' not found in nodes")
 
         # Check required nodes
-        has_state = any(
-            n.type == GMNNodeType.STATE for n in graph.nodes.values()
-        )
-        has_obs = any(
-            n.type == GMNNodeType.OBSERVATION for n in graph.nodes.values()
-        )
-        has_action = any(
-            n.type == GMNNodeType.ACTION for n in graph.nodes.values()
-        )
+        has_state = any(n.type == GMNNodeType.STATE for n in graph.nodes.values())
+        has_obs = any(n.type == GMNNodeType.OBSERVATION for n in graph.nodes.values())
+        has_action = any(n.type == GMNNodeType.ACTION for n in graph.nodes.values())
 
         if not has_state:
             self.validation_errors.append("No state nodes found")
@@ -456,28 +404,18 @@ class GMNParser:
         if not has_action:
             self.validation_errors.append("No action nodes found")
 
-    def _build_likelihood_matrix(
-        self, likelihood_node: GMNNode, graph: GMNGraph
-    ) -> np.ndarray:
+    def _build_likelihood_matrix(self, likelihood_node: GMNNode, graph: GMNGraph) -> np.ndarray:
         """Build likelihood matrix from node specification."""
         # Find connected state and observation nodes
         state_dims = []
         obs_dim = 1
 
         for edge in graph.edges:
-            if (
-                edge.target == likelihood_node.id
-                and edge.type == GMNEdgeType.DEPENDS_ON
-            ):
+            if edge.target == likelihood_node.id and edge.type == GMNEdgeType.DEPENDS_ON:
                 source_node = graph.nodes.get(edge.source)
                 if source_node and source_node.type == GMNNodeType.STATE:
-                    state_dims.append(
-                        source_node.properties.get("num_states", 1)
-                    )
-            elif (
-                edge.source == likelihood_node.id
-                and edge.type == GMNEdgeType.GENERATES
-            ):
+                    state_dims.append(source_node.properties.get("num_states", 1))
+            elif edge.source == likelihood_node.id and edge.type == GMNEdgeType.GENERATES:
                 target_node = graph.nodes.get(edge.target)
                 if target_node and target_node.type == GMNNodeType.OBSERVATION:
                     obs_dim = target_node.properties.get("num_observations", 1)
@@ -496,33 +434,22 @@ class GMNParser:
         A = np.ones(shape) / obs_dim
         return A
 
-    def _build_transition_matrix(
-        self, transition_node: GMNNode, graph: GMNGraph
-    ) -> np.ndarray:
+    def _build_transition_matrix(self, transition_node: GMNNode, graph: GMNGraph) -> np.ndarray:
         """Build transition matrix from node specification."""
         # Find connected state and action nodes
         state_dim = 1
         action_dim = 1
 
         for edge in graph.edges:
-            if (
-                edge.source == transition_node.id
-                or edge.target == transition_node.id
-            ):
+            if edge.source == transition_node.id or edge.target == transition_node.id:
                 connected_node = graph.nodes.get(
-                    edge.source
-                    if edge.target == transition_node.id
-                    else edge.target
+                    edge.source if edge.target == transition_node.id else edge.target
                 )
                 if connected_node:
                     if connected_node.type == GMNNodeType.STATE:
-                        state_dim = connected_node.properties.get(
-                            "num_states", 1
-                        )
+                        state_dim = connected_node.properties.get("num_states", 1)
                     elif connected_node.type == GMNNodeType.ACTION:
-                        action_dim = connected_node.properties.get(
-                            "num_actions", 1
-                        )
+                        action_dim = connected_node.properties.get("num_actions", 1)
 
         # Build matrix
         shape = [state_dim, state_dim, action_dim]
@@ -537,18 +464,13 @@ class GMNParser:
             B[:, :, a] = np.eye(state_dim)
         return B
 
-    def _build_preference_vector(
-        self, pref_node: GMNNode, graph: GMNGraph
-    ) -> np.ndarray:
+    def _build_preference_vector(self, pref_node: GMNNode, graph: GMNGraph) -> np.ndarray:
         """Build preference vector from node specification."""
         # Find connected observation node
         obs_dim = 1
 
         for edge in graph.edges:
-            if (
-                edge.source == pref_node.id
-                and edge.type == GMNEdgeType.DEPENDS_ON
-            ):
+            if edge.source == pref_node.id and edge.type == GMNEdgeType.DEPENDS_ON:
                 target_node = graph.nodes.get(edge.target)
                 if target_node and target_node.type == GMNNodeType.OBSERVATION:
                     obs_dim = target_node.properties.get("num_observations", 1)
@@ -564,18 +486,13 @@ class GMNParser:
             C[preferred_obs] = 1.0
         return C
 
-    def _build_belief_vector(
-        self, belief_node: GMNNode, graph: GMNGraph
-    ) -> np.ndarray:
+    def _build_belief_vector(self, belief_node: GMNNode, graph: GMNGraph) -> np.ndarray:
         """Build belief vector from node specification."""
         # Find connected state node
         state_dim = 1
 
         for edge in graph.edges:
-            if (
-                edge.source == belief_node.id
-                and edge.type == GMNEdgeType.DEPENDS_ON
-            ):
+            if edge.source == belief_node.id and edge.type == GMNEdgeType.DEPENDS_ON:
                 target_node = graph.nodes.get(edge.target)
                 if target_node and target_node.type == GMNNodeType.STATE:
                     state_dim = target_node.properties.get("num_states", 1)
@@ -588,19 +505,13 @@ class GMNParser:
         D = np.ones(state_dim) / state_dim
         return D
 
-    def _build_llm_integration(
-        self, llm_node: GMNNode, graph: GMNGraph
-    ) -> Dict[str, Any]:
+    def _build_llm_integration(self, llm_node: GMNNode, graph: GMNGraph) -> Dict[str, Any]:
         """Build LLM integration specification."""
         integration = {
             "id": llm_node.id,
-            "trigger_condition": llm_node.properties.get(
-                "trigger_condition", "on_observation"
-            ),
+            "trigger_condition": llm_node.properties.get("trigger_condition", "on_observation"),
             "prompt_template": llm_node.properties.get("prompt_template", ""),
-            "response_parser": llm_node.properties.get(
-                "response_parser", "json"
-            ),
+            "response_parser": llm_node.properties.get("response_parser", "json"),
             "update_targets": [],
             "context_nodes": [],
         }

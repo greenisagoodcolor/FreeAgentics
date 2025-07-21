@@ -1,6 +1,6 @@
 """Comprehensive tests for api.v1.health module to achieve high coverage."""
 
-from unittest.mock import Mock, patch
+from unittest.mock import Mock
 
 import pytest
 from fastapi import FastAPI
@@ -57,9 +57,7 @@ class TestHealthEndpoint:
         """Test health check when database is down."""
         # Mock database session that raises OperationalError
         mock_db = Mock(spec=Session)
-        mock_db.execute.side_effect = OperationalError(
-            "Connection failed", None, None
-        )
+        mock_db.execute.side_effect = OperationalError("Connection failed", None, None)
 
         # Override dependency
         from database.session import get_db
@@ -105,9 +103,9 @@ class TestHealthEndpoint:
         result = await health_check(db=mock_db)
 
         # Verify result is JSONResponse
-        assert hasattr(result, 'status_code')
+        assert hasattr(result, "status_code")
         assert result.status_code == 503
-        assert hasattr(result, 'body')
+        assert hasattr(result, "body")
 
     def test_database_exception_handler(self):
         """Test database_exception_handler function."""
@@ -119,9 +117,9 @@ class TestHealthEndpoint:
         response = database_exception_handler(mock_request, mock_exception)
 
         # Verify response
-        assert hasattr(response, 'status_code')
+        assert hasattr(response, "status_code")
         assert response.status_code == 503
-        assert hasattr(response, 'body')
+        assert hasattr(response, "body")
 
         # Check content by parsing body
         import json
@@ -143,9 +141,7 @@ class TestHealthEndpoint:
 
         # Test with connection error
         mock_db = Mock(spec=Session)
-        mock_db.execute.side_effect = OperationalError(
-            "could not connect to server", None, None
-        )
+        mock_db.execute.side_effect = OperationalError("could not connect to server", None, None)
 
         def override_get_db():
             yield mock_db
@@ -158,7 +154,6 @@ class TestHealthEndpoint:
 
     def test_health_check_execute_query_format(self, client):
         """Test that health check executes correct SQL query."""
-        from sqlalchemy import text
 
         from database.session import get_db
 
@@ -172,14 +167,14 @@ class TestHealthEndpoint:
 
         client.app.dependency_overrides[get_db] = override_get_db
 
-        response = client.get("/health")
+        client.get("/health")
 
         # Verify the exact query
         mock_db.execute.assert_called_once()
         call_args = mock_db.execute.call_args[0]
         assert len(call_args) == 1
         query = call_args[0]
-        assert hasattr(query, 'text')
+        assert hasattr(query, "text")
         assert str(query) == "SELECT 1"
 
     def test_exception_handler_with_different_errors(self):
@@ -193,9 +188,7 @@ class TestHealthEndpoint:
         assert "Simple error" in content
 
         # Test with complex error
-        exc = OperationalError(
-            "FATAL: password authentication failed for user", None, None
-        )
+        exc = OperationalError("FATAL: password authentication failed for user", None, None)
         response = database_exception_handler(mock_request, exc)
         content = response.body.decode()
         assert "password authentication failed" in content

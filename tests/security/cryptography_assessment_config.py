@@ -249,27 +249,21 @@ class CryptographyStandards:
             minimum_key_size=256,
             recommended_key_size=256,
             security_level=SecurityLevel.HIGH,
-            compliance_standards=[
-                ComplianceStandard.OWASP_CRYPTOGRAPHIC_STORAGE
-            ],
+            compliance_standards=[ComplianceStandard.OWASP_CRYPTOGRAPHIC_STORAGE],
         ),
         "argon2": AlgorithmStandard(
             name="Argon2",
             minimum_key_size=256,
             recommended_key_size=256,
             security_level=SecurityLevel.HIGH,
-            compliance_standards=[
-                ComplianceStandard.OWASP_CRYPTOGRAPHIC_STORAGE
-            ],
+            compliance_standards=[ComplianceStandard.OWASP_CRYPTOGRAPHIC_STORAGE],
         ),
         "bcrypt": AlgorithmStandard(
             name="bcrypt",
             minimum_key_size=184,  # bcrypt output size
             recommended_key_size=184,
             security_level=SecurityLevel.HIGH,
-            compliance_standards=[
-                ComplianceStandard.OWASP_CRYPTOGRAPHIC_STORAGE
-            ],
+            compliance_standards=[ComplianceStandard.OWASP_CRYPTOGRAPHIC_STORAGE],
         ),
     }
 
@@ -346,9 +340,7 @@ class SecurityRequirements:
             requirement_id="CRYPTO-005",
             description="Protect against timing attacks",
             security_level=SecurityLevel.MEDIUM,
-            compliance_standards=[
-                ComplianceStandard.OWASP_CRYPTOGRAPHIC_STORAGE
-            ],
+            compliance_standards=[ComplianceStandard.OWASP_CRYPTOGRAPHIC_STORAGE],
             test_criteria=[
                 "Constant-time operations for sensitive comparisons",
                 "No timing-based information leakage",
@@ -377,9 +369,7 @@ class SecurityRequirements:
             requirement_id="CRYPTO-007",
             description="Implement proper password storage",
             security_level=SecurityLevel.CRITICAL,
-            compliance_standards=[
-                ComplianceStandard.OWASP_CRYPTOGRAPHIC_STORAGE
-            ],
+            compliance_standards=[ComplianceStandard.OWASP_CRYPTOGRAPHIC_STORAGE],
             test_criteria=[
                 "Strong password hashing function (bcrypt, scrypt, Argon2)",
                 "Unique salt per password",
@@ -392,9 +382,7 @@ class SecurityRequirements:
             requirement_id="CRYPTO-008",
             description="Implement certificate pinning for critical connections",
             security_level=SecurityLevel.MEDIUM,
-            compliance_standards=[
-                ComplianceStandard.OWASP_CRYPTOGRAPHIC_STORAGE
-            ],
+            compliance_standards=[ComplianceStandard.OWASP_CRYPTOGRAPHIC_STORAGE],
             test_criteria=[
                 "Certificate pinning implemented for API endpoints",
                 "Pin validation working correctly",
@@ -516,9 +504,7 @@ SCORING_WEIGHTS = {
 }
 
 
-def get_algorithm_standard(
-    algorithm_type: str, algorithm_name: str
-) -> Optional[AlgorithmStandard]:
+def get_algorithm_standard(algorithm_type: str, algorithm_name: str) -> Optional[AlgorithmStandard]:
     """Get algorithm standard by type and name."""
     standards_map = {
         "hash": CryptographyStandards.HASH_ALGORITHMS,
@@ -568,9 +554,7 @@ def calculate_security_score(findings: List[Dict[str, Any]]) -> Dict[str, Any]:
     }
 
 
-def get_compliance_status(
-    findings: List[Dict[str, Any]]
-) -> Dict[ComplianceStandard, str]:
+def get_compliance_status(findings: List[Dict[str, Any]]) -> Dict[ComplianceStandard, str]:
     """Determine compliance status for each standard."""
     compliance_status = {}
 

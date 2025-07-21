@@ -4,8 +4,9 @@ import logging
 from datetime import datetime
 from typing import Any, Dict, List, Optional
 
-from fastapi import APIRouter, HTTPException, Query
+from fastapi import APIRouter, Depends, HTTPException, Query
 from pydantic import BaseModel, Field
+from sqlalchemy.orm import Session
 
 # Security imports
 from auth.security_implementation import (
@@ -14,6 +15,11 @@ from auth.security_implementation import (
     get_current_user,
     require_permission,
 )
+
+# Database imports - NO IN-MEMORY STORAGE
+from database.models import Agent as AgentModel
+from database.models import AgentStatus as DBAgentStatus
+from database.session import get_db
 
 logger = logging.getLogger(__name__)
 
@@ -30,12 +36,8 @@ class AgentConfig(BaseModel):
     gmn_spec: Optional[str] = Field(
         None, description="GMN specification for Active Inference model"
     )
-    use_pymdp: Optional[bool] = Field(
-        True, description="Whether to use PyMDP for Active Inference"
-    )
-    planning_horizon: Optional[int] = Field(
-        3, description="Planning horizon for Active Inference"
-    )
+    use_pymdp: Optional[bool] = Field(True, description="Whether to use PyMDP for Active Inference")
+    planning_horizon: Optional[int] = Field(3, description="Planning horizon for Active Inference")
 
 
 class Agent(BaseModel):
@@ -61,22 +63,13 @@ class AgentMetrics(BaseModel):
     last_update: datetime
 
 
-from fastapi import Depends  
-
-# Database imports - NO IN-MEMORY STORAGE
-from sqlalchemy.orm import Session  
-
-from database.models import Agent as AgentModel  
-from database.models import AgentStatus as DBAgentStatus  
-from database.session import get_db  
-
 # Import agent manager
 try:
     from agents.agent_manager import AgentManager
 
     agent_manager = AgentManager()
     # Create default world
-    agent_manager.create_world(size=20)
+    agent_manager.create_world(20)
     AGENT_MANAGER_AVAILABLE = True
 except ImportError:
     logger.warning("Agent manager not available")
@@ -121,9 +114,14 @@ async def create_agent(
     db.commit()
     db.refresh(db_agent)
 
-    logger.info(
-        f"Created agent in DB: {db_agent.id} with template: {config.template}"
-    )
+    logger.info(f"Created agent in DB: {db_agent.id} with template: {config.template}")
+    
+    # Record metrics for agent spawn
+    try:
+        from observability.prometheus_metrics import record_agent_spawn
+        record_agent_spawn(agent_type=config.template)
+    except Exception as e:
+        logger.warning(f"Failed to record agent spawn metric: {e}")
 
     # Convert to API model
     return Agent(
@@ -156,9 +154,7 @@ async def list_agents(
             status_enum = DBAgentStatus(status)
             query = query.filter(AgentModel.status == status_enum)
         except ValueError:
-            raise HTTPException(
-                status_code=400, detail=f"Invalid status: {status}"
-            )
+            raise HTTPException(status_code=400, detail=f"Invalid status: {status}")
 
     db_agents = query.limit(limit).all()
 
@@ -195,15 +191,11 @@ async def get_agent(
 
         agent_uuid = UUID(agent_id)
     except ValueError:
-        raise HTTPException(
-            status_code=400, detail=f"Invalid agent ID format: {agent_id}"
-        )
+        raise HTTPException(status_code=400, detail=f"Invalid agent ID format: {agent_id}")
 
     db_agent = db.query(AgentModel).filter(AgentModel.id == agent_uuid).first()
     if not db_agent:
-        raise HTTPException(
-            status_code=404, detail=f"Agent {agent_id} not found"
-        )
+        raise HTTPException(status_code=404, detail=f"Agent {agent_id} not found")
 
     return Agent(
         id=str(db_agent.id),
@@ -234,15 +226,11 @@ async def update_agent_status(
 
         agent_uuid = UUID(agent_id)
     except ValueError:
-        raise HTTPException(
-            status_code=400, detail=f"Invalid agent ID format: {agent_id}"
-        )
+        raise HTTPException(status_code=400, detail=f"Invalid agent ID format: {agent_id}")
 
     db_agent = db.query(AgentModel).filter(AgentModel.id == agent_uuid).first()
     if not db_agent:
-        raise HTTPException(
-            status_code=404, detail=f"Agent {agent_id} not found"
-        )
+        raise HTTPException(status_code=404, detail=f"Agent {agent_id} not found")
 
     # Validate status
     try:
@@ -288,15 +276,11 @@ async def delete_agent(
 
         agent_uuid = UUID(agent_id)
     except ValueError:
-        raise HTTPException(
-            status_code=400, detail=f"Invalid agent ID format: {agent_id}"
-        )
+        raise HTTPException(status_code=400, detail=f"Invalid agent ID format: {agent_id}")
 
     db_agent = db.query(AgentModel).filter(AgentModel.id == agent_uuid).first()
     if not db_agent:
-        raise HTTPException(
-            status_code=404, detail=f"Agent {agent_id} not found"
-        )
+        raise HTTPException(status_code=404, detail=f"Agent {agent_id} not found")
 
     # Remove from agent manager if present
     if AGENT_MANAGER_AVAILABLE and agent_manager:
@@ -327,15 +311,11 @@ async def get_agent_metrics(
 
         agent_uuid = UUID(agent_id)
     except ValueError:
-        raise HTTPException(
-            status_code=400, detail=f"Invalid agent ID format: {agent_id}"
-        )
+        raise HTTPException(status_code=400, detail=f"Invalid agent ID format: {agent_id}")
 
     db_agent = db.query(AgentModel).filter(AgentModel.id == agent_uuid).first()
     if not db_agent:
-        raise HTTPException(
-            status_code=404, detail=f"Agent {agent_id} not found"
-        )
+        raise HTTPException(status_code=404, detail=f"Agent {agent_id} not found")
 
     # Get real metrics from database
     metrics_data = db_agent.metrics or {}
@@ -357,12 +337,8 @@ class GMNAgentRequest(BaseModel):
 
     name: str = Field(..., min_length=1, max_length=100)
     gmn_spec: str = Field(..., description="GMN specification string or JSON")
-    template: str = Field(
-        "gmn_agent", description="Agent template for GMN-based agents"
-    )
-    planning_horizon: Optional[int] = Field(
-        3, description="Planning horizon for Active Inference"
-    )
+    template: str = Field("gmn_agent", description="Agent template for GMN-based agents")
+    planning_horizon: Optional[int] = Field(3, description="Planning horizon for Active Inference")
 
 
 @router.post("/agents/from-gmn", response_model=Agent, status_code=201)
@@ -421,9 +397,7 @@ async def create_agent_from_gmn(
         db.commit()
         db.refresh(db_agent)
 
-        logger.info(
-            f"Created GMN agent in DB: {db_agent.id} with {len(gmn_graph.nodes)} GMN nodes"
-        )
+        logger.info(f"Created GMN agent in DB: {db_agent.id} with {len(gmn_graph.nodes)} GMN nodes")
 
         # Return API model
         return Agent(
@@ -438,9 +412,7 @@ async def create_agent_from_gmn(
 
     except Exception as e:
         logger.error(f"Failed to create agent from GMN: {e}")
-        raise HTTPException(
-            status_code=400, detail=f"Invalid GMN specification: {str(e)}"
-        )
+        raise HTTPException(status_code=400, detail=f"Invalid GMN specification: {str(e)}")
 
 
 @router.get("/agents/{agent_id}/gmn", response_model=dict)
@@ -456,15 +428,11 @@ async def get_agent_gmn_spec(
 
         agent_uuid = UUID(agent_id)
     except ValueError:
-        raise HTTPException(
-            status_code=400, detail=f"Invalid agent ID format: {agent_id}"
-        )
+        raise HTTPException(status_code=400, detail=f"Invalid agent ID format: {agent_id}")
 
     db_agent = db.query(AgentModel).filter(AgentModel.id == agent_uuid).first()
     if not db_agent:
-        raise HTTPException(
-            status_code=404, detail=f"Agent {agent_id} not found"
-        )
+        raise HTTPException(status_code=404, detail=f"Agent {agent_id} not found")
 
     if not db_agent.gmn_spec:
         raise HTTPException(
@@ -494,15 +462,11 @@ async def update_agent_gmn_spec(
 
         agent_uuid = UUID(agent_id)
     except ValueError:
-        raise HTTPException(
-            status_code=400, detail=f"Invalid agent ID format: {agent_id}"
-        )
+        raise HTTPException(status_code=400, detail=f"Invalid agent ID format: {agent_id}")
 
     db_agent = db.query(AgentModel).filter(AgentModel.id == agent_uuid).first()
     if not db_agent:
-        raise HTTPException(
-            status_code=404, detail=f"Agent {agent_id} not found"
-        )
+        raise HTTPException(status_code=404, detail=f"Agent {agent_id} not found")
 
     try:
         # Validate new GMN specification
@@ -537,9 +501,7 @@ async def update_agent_gmn_spec(
 
     except Exception as e:
         logger.error(f"Failed to update GMN spec: {e}")
-        raise HTTPException(
-            status_code=400, detail=f"Invalid GMN specification: {str(e)}"
-        )
+        raise HTTPException(status_code=400, detail=f"Invalid GMN specification: {str(e)}")
 
 
 @router.get("/gmn/examples")

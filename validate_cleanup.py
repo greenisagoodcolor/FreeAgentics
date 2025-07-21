@@ -11,8 +11,7 @@ import os
 import subprocess
 import sys
 import time
-from pathlib import Path
-from typing import Any, Dict, List, Optional, Tuple
+from typing import Any, Dict, Optional, Tuple
 
 
 class CleanupValidator:
@@ -23,15 +22,13 @@ class CleanupValidator:
         self.validation_results: Dict[str, Any] = {}
         self.start_time: float = time.time()
 
-    def run_command(
-        self, command: str, capture_output: bool = True
-    ) -> Tuple[int, str, str]:
+    def run_command(self, command: str, capture_output: bool = True) -> Tuple[int, str, str]:
         """Run a shell command and return (exit_code, stdout, stderr)."""
         try:
             import shlex
 
             # Check if command contains pipes or redirects - these need shell processing
-            if '|' in command or '>' in command or '<' in command:
+            if "|" in command or ">" in command or "<" in command:
                 # For commands with pipes/redirects, we need to use shell but be careful
                 # In this validator context, all commands are hardcoded and safe
                 result = subprocess.run(
@@ -95,9 +92,7 @@ class CleanupValidator:
             "make_format",
             format_passed,
             "Code formatting check",
-            f"Exit code: {exit_code}\nStderr: {stderr}"
-            if not format_passed
-            else None,
+            f"Exit code: {exit_code}\nStderr: {stderr}" if not format_passed else None,
         )
 
         # Run make test
@@ -107,9 +102,7 @@ class CleanupValidator:
             "make_test",
             test_passed,
             "Test suite execution",
-            f"Exit code: {exit_code}\nStderr: {stderr}"
-            if not test_passed
-            else None,
+            f"Exit code: {exit_code}\nStderr: {stderr}" if not test_passed else None,
         )
 
         # Run make lint
@@ -119,9 +112,7 @@ class CleanupValidator:
             "make_lint",
             lint_passed,
             "Linting check",
-            f"Exit code: {exit_code}\nStderr: {stderr}"
-            if not lint_passed
-            else None,
+            f"Exit code: {exit_code}\nStderr: {stderr}" if not lint_passed else None,
         )
 
         return format_passed and test_passed and lint_passed
@@ -131,9 +122,7 @@ class CleanupValidator:
         print("\n=== VALIDATING TYPE ERRORS ===")
 
         # Check Python type errors with mypy
-        exit_code, stdout, stderr = self.run_command(
-            "mypy . --ignore-missing-imports"
-        )
+        exit_code, stdout, stderr = self.run_command("mypy . --ignore-missing-imports")
         python_types_passed = exit_code == 0
         self.log_result(
             "python_types",
@@ -145,9 +134,7 @@ class CleanupValidator:
         # Check TypeScript type errors if applicable
         ts_types_passed = True
         if os.path.exists("tsconfig.json"):
-            exit_code, stdout, stderr = self.run_command(
-                "npx tsc --noEmit --skipLibCheck"
-            )
+            exit_code, stdout, stderr = self.run_command("npx tsc --noEmit --skipLibCheck")
             ts_types_passed = exit_code == 0
             self.log_result(
                 "typescript_types",
@@ -165,23 +152,17 @@ class CleanupValidator:
         # Check if pre-commit is installed
         exit_code, stdout, stderr = self.run_command("pre-commit --version")
         if exit_code != 0:
-            self.log_result(
-                "precommit_installed", False, "Pre-commit not installed"
-            )
+            self.log_result("precommit_installed", False, "Pre-commit not installed")
             return False
 
         # Run pre-commit hooks
-        exit_code, stdout, stderr = self.run_command(
-            "pre-commit run --all-files"
-        )
+        exit_code, stdout, stderr = self.run_command("pre-commit run --all-files")
         hooks_passed = exit_code == 0
         self.log_result(
             "precommit_hooks",
             hooks_passed,
             "Pre-commit hooks execution",
-            f"Output: {stdout}\nErrors: {stderr}"
-            if not hooks_passed
-            else None,
+            f"Output: {stdout}\nErrors: {stderr}" if not hooks_passed else None,
         )
 
         return hooks_passed
@@ -205,9 +186,7 @@ class CleanupValidator:
 
         found_obsolete = []
         for pattern in obsolete_patterns:
-            exit_code, stdout, stderr = self.run_command(
-                f"find . -name '{pattern}' -type f"
-            )
+            exit_code, stdout, stderr = self.run_command(f"find . -name '{pattern}' -type f")
             if stdout.strip():
                 found_obsolete.extend(stdout.strip().split("\n"))
 
@@ -228,9 +207,7 @@ class CleanupValidator:
             "obsolete_files",
             no_obsolete,
             "Obsolete files removal",
-            f"Found obsolete files: {found_obsolete}"
-            if not no_obsolete
-            else None,
+            f"Found obsolete files: {found_obsolete}" if not no_obsolete else None,
         )
 
         return no_obsolete
@@ -241,20 +218,14 @@ class CleanupValidator:
 
         # Check if README exists
         readme_exists = os.path.exists("README.md")
-        self.log_result(
-            "readme_exists", readme_exists, "README.md file exists"
-        )
+        self.log_result("readme_exists", readme_exists, "README.md file exists")
 
         # Check if CLAUDE.md exists
         claude_exists = os.path.exists("CLAUDE.md")
-        self.log_result(
-            "claude_exists", claude_exists, "CLAUDE.md file exists"
-        )
+        self.log_result("claude_exists", claude_exists, "CLAUDE.md file exists")
 
         # Count documentation files
-        exit_code, stdout, stderr = self.run_command(
-            "find . -name '*.md' -type f | wc -l"
-        )
+        exit_code, stdout, stderr = self.run_command("find . -name '*.md' -type f | wc -l")
         doc_count = int(stdout.strip()) if stdout.strip().isdigit() else 0
 
         # Check for documentation organization
@@ -266,9 +237,7 @@ class CleanupValidator:
             "docs_organized",
             docs_organized,
             f"Documentation organization ({doc_count} .md files)",
-            f"Consider consolidating if > 10 files"
-            if not docs_organized
-            else None,
+            "Consider consolidating if > 10 files" if not docs_organized else None,
         )
 
         return readme_exists and claude_exists and docs_organized
@@ -317,9 +286,7 @@ class CleanupValidator:
             "conventional_commits",
             conventional_commits,
             "Conventional commit format",
-            f"Non-conventional commits: {non_conventional}"
-            if not conventional_commits
-            else None,
+            f"Non-conventional commits: {non_conventional}" if not conventional_commits else None,
         )
 
         return git_clean and conventional_commits
@@ -335,9 +302,7 @@ class CleanupValidator:
         if coverage_available:
             # Extract coverage percentage
             coverage_lines = stdout.split("\n")
-            total_line = next(
-                (line for line in coverage_lines if "TOTAL" in line), ""
-            )
+            total_line = next((line for line in coverage_lines if "TOTAL" in line), "")
             if total_line:
                 # Extract percentage (assuming format like "TOTAL    100   50    50%")
                 parts = total_line.split()
@@ -359,23 +324,17 @@ class CleanupValidator:
         test_count = int(stdout.strip()) if stdout.strip().isdigit() else 0
 
         # Check for Python files
-        exit_code, stdout, stderr = self.run_command(
-            "find . -name '*.py' | wc -l"
-        )
+        exit_code, stdout, stderr = self.run_command("find . -name '*.py' | wc -l")
         python_count = int(stdout.strip()) if stdout.strip().isdigit() else 0
 
         test_ratio = test_count / python_count if python_count > 0 else 0
-        adequate_tests = (
-            test_ratio >= 0.3
-        )  # At least 30% of files should be tests
+        adequate_tests = test_ratio >= 0.3  # At least 30% of files should be tests
 
         self.log_result(
             "test_coverage",
             adequate_tests,
             f"Test file ratio: {test_ratio:.2%} ({test_count}/{python_count})",
-            "Should have adequate test coverage"
-            if not adequate_tests
-            else None,
+            "Should have adequate test coverage" if not adequate_tests else None,
         )
 
         return adequate_tests
@@ -417,9 +376,7 @@ class CleanupValidator:
         print("\n=== VALIDATING PERFORMANCE BASELINE ===")
 
         # Check for large files that might indicate performance issues
-        exit_code, stdout, stderr = self.run_command(
-            "find . -size +10M -type f"
-        )
+        exit_code, stdout, stderr = self.run_command("find . -size +10M -type f")
         large_files = stdout.strip().split("\n") if stdout.strip() else []
 
         no_large_files = len(large_files) == 0 or large_files == [""]
@@ -427,9 +384,7 @@ class CleanupValidator:
             "large_files",
             no_large_files,
             "No unexpectedly large files",
-            f"Large files found: {large_files}"
-            if not no_large_files
-            else None,
+            f"Large files found: {large_files}" if not no_large_files else None,
         )
 
         # Check for obvious performance anti-patterns in Python
@@ -443,9 +398,7 @@ class CleanupValidator:
             "star_imports",
             no_star_imports,
             "No star imports found",
-            f"Found {star_imports} star imports"
-            if not no_star_imports
-            else None,
+            f"Found {star_imports} star imports" if not no_star_imports else None,
         )
 
         return no_large_files and no_star_imports
@@ -459,9 +412,7 @@ class CleanupValidator:
             "timestamp": time.strftime("%Y-%m-%d %H:%M:%S"),
             "duration_seconds": round(duration, 2),
             "total_checks": len(self.validation_results),
-            "passed_checks": sum(
-                1 for r in self.validation_results.values() if r["passed"]
-            ),
+            "passed_checks": sum(1 for r in self.validation_results.values() if r["passed"]),
             "failed_checks": self.issues_found,
             "overall_status": "PASS" if self.issues_found == 0 else "FAIL",
             "results": self.validation_results,
@@ -518,7 +469,7 @@ class CleanupValidator:
             print("🚨 CLEANUP INCOMPLETE - ISSUES MUST BE RESOLVED")
             print("\nReview the issues above and run cleanup steps again.")
 
-        print(f"\nDetailed report saved to: cleanup_validation_report.json")
+        print("\nDetailed report saved to: cleanup_validation_report.json")
 
         return self.issues_found == 0
 
@@ -528,12 +479,8 @@ def main():
     if len(sys.argv) > 1 and sys.argv[1] == "--help":
         print("Comprehensive Cleanup Validation Script")
         print("Usage: python validate_cleanup.py")
-        print(
-            "\nThis script validates that repository cleanup has been completed"
-        )
-        print(
-            "according to CLAUDE.md guidelines and zero tolerance quality standards."
-        )
+        print("\nThis script validates that repository cleanup has been completed")
+        print("according to CLAUDE.md guidelines and zero tolerance quality standards.")
         return 0
 
     validator = CleanupValidator()

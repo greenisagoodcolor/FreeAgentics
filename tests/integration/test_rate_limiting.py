@@ -127,9 +127,7 @@ class TestRateLimiter:
         request.state = MagicMock()
 
         # Mock hasattr to return False for user
-        with patch(
-            "api.middleware.ddos_protection.hasattr", return_value=False
-        ):
+        with patch("api.middleware.ddos_protection.hasattr", return_value=False):
             key = await rate_limiter._get_client_key(request)
             assert key == "rate_limit:ip:192.168.1.100"
 
@@ -142,9 +140,7 @@ class TestRateLimiter:
         request.headers = {"X-Forwarded-For": "203.0.113.1, 192.168.1.1"}
         request.state = MagicMock()
 
-        with patch(
-            "api.middleware.ddos_protection.hasattr", return_value=False
-        ):
+        with patch("api.middleware.ddos_protection.hasattr", return_value=False):
             key = await rate_limiter._get_client_key(request)
             assert key == "rate_limit:ip:203.0.113.1"
 
@@ -160,9 +156,7 @@ class TestRateLimiter:
         request.state.user.user_id = "user123"
 
         # Mock hasattr to return True for user attribute
-        with patch(
-            "api.middleware.ddos_protection.hasattr", return_value=True
-        ):
+        with patch("api.middleware.ddos_protection.hasattr", return_value=True):
             with patch(
                 "api.middleware.ddos_protection.getattr",
                 return_value="user123",
@@ -180,9 +174,7 @@ class TestRateLimiter:
     @pytest.mark.asyncio
     async def test_get_endpoint_config_websocket(self, rate_limiter):
         """Test endpoint configuration for WebSocket endpoints."""
-        config = await rate_limiter._get_endpoint_config(
-            "/api/v1/websocket/connect"
-        )
+        config = await rate_limiter._get_endpoint_config("/api/v1/websocket/connect")
         assert config.requests_per_minute == 200
         assert config.requests_per_hour == 5000
 
@@ -213,9 +205,7 @@ class TestRateLimiter:
         """Test blocking detection from Redis."""
         mock_redis.get.return_value = json.dumps({"blocked": True})
 
-        is_blocked = await rate_limiter._is_blocked(
-            "test_key", "192.168.1.100"
-        )
+        is_blocked = await rate_limiter._is_blocked("test_key", "192.168.1.100")
         assert is_blocked is True
 
     @pytest.mark.asyncio
@@ -223,9 +213,7 @@ class TestRateLimiter:
         """Test when client is not blocked."""
         mock_redis.get.return_value = None
 
-        is_blocked = await rate_limiter._is_blocked(
-            "test_key", "192.168.1.100"
-        )
+        is_blocked = await rate_limiter._is_blocked("test_key", "192.168.1.100")
         assert is_blocked is False
 
     @pytest.mark.asyncio
@@ -236,18 +224,14 @@ class TestRateLimiter:
         pipeline_mock = mock_redis.pipeline.return_value
         pipeline_mock.execute.return_value = [5, True, 50, True]
 
-        minute_count, hour_count = await rate_limiter._record_request(
-            "test_key", config
-        )
+        minute_count, hour_count = await rate_limiter._record_request("test_key", config)
 
         assert minute_count == 5
         assert hour_count == 50
         assert mock_redis.pipeline.called
 
     @pytest.mark.asyncio
-    async def test_detect_ddos_threshold_exceeded(
-        self, rate_limiter, mock_redis
-    ):
+    async def test_detect_ddos_threshold_exceeded(self, rate_limiter, mock_redis):
         """Test DDoS detection when threshold is exceeded."""
         config = RateLimitConfig(ddos_threshold=100)
 
@@ -257,9 +241,7 @@ class TestRateLimiter:
         mock_redis.setex.assert_called_once()
 
     @pytest.mark.asyncio
-    async def test_detect_ddos_threshold_not_exceeded(
-        self, rate_limiter, mock_redis
-    ):
+    async def test_detect_ddos_threshold_not_exceeded(self, rate_limiter, mock_redis):
         """Test DDoS detection when threshold is not exceeded."""
         config = RateLimitConfig(ddos_threshold=100)
 
@@ -273,9 +255,7 @@ class TestRateLimiter:
         """Test client blocking."""
         config = RateLimitConfig()
 
-        await rate_limiter._block_client(
-            "test_key", "192.168.1.100", config, "TEST_REASON"
-        )
+        await rate_limiter._block_client("test_key", "192.168.1.100", config, "TEST_REASON")
 
         mock_redis.setex.assert_called_once()
         args = mock_redis.setex.call_args
@@ -288,9 +268,7 @@ class TestDDoSProtectionMiddleware:
 
     @patch("api.middleware.ddos_protection.aioredis.ConnectionPool.from_url")
     @patch("api.middleware.ddos_protection.aioredis.Redis")
-    def test_middleware_initialization(
-        self, mock_redis_class, mock_pool_from_url
-    ):
+    def test_middleware_initialization(self, mock_redis_class, mock_pool_from_url):
         """Test middleware initialization."""
         mock_pool = MagicMock()
         mock_pool_from_url.return_value = mock_pool
@@ -298,9 +276,7 @@ class TestDDoSProtectionMiddleware:
         mock_redis = MagicMock()
         mock_redis_class.return_value = mock_redis
 
-        middleware = DDoSProtectionMiddleware(
-            None, redis_url="redis://localhost:6379"
-        )
+        middleware = DDoSProtectionMiddleware(None, redis_url="redis://localhost:6379")
 
         assert middleware.redis_url == "redis://localhost:6379"
         assert middleware.redis_client is None
@@ -308,9 +284,7 @@ class TestDDoSProtectionMiddleware:
 
     def test_middleware_config(self):
         """Test middleware configuration."""
-        middleware = DDoSProtectionMiddleware(
-            None, redis_url="redis://custom:6379"
-        )
+        middleware = DDoSProtectionMiddleware(None, redis_url="redis://custom:6379")
         assert middleware.redis_url == "redis://custom:6379"
 
 

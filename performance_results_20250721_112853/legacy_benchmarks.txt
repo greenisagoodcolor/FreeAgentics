@@ -1,0 +1,107 @@
+========================================================
+FREEAGENTICS THREADING VS MULTIPROCESSING BENCHMARKS
+========================================================
+
+Warning: No virtual environment detected
+Attempting to activate venv...
+✅ Virtual environment activated
+Results will be saved to: benchmarks/results/benchmark_20250721_112856*
+
+========================================================
+1. QUICK VALIDATION TEST (2 minutes)
+========================================================
+This quick test validates the benchmark approach...
+
+============================================================
+SIMPLE THREADING VS MULTIPROCESSING TEST
+============================================================
+CPU cores: 20
+Platform: linux
+
+⭐ Testing BASELINE (single agent)...
+
+Baseline (single agent): 1.8ms avg, 534.7 ops/sec
+
+========================================
+Testing with 1 agents, 20 steps each
+========================================
+
+🧵 Testing THREADING with 1 agents...
+  Threading: 0.03s total, 581.6 ops/sec, 1.6ms avg
+
+🔧 Testing MULTIPROCESSING with 1 agents...
+  Multiprocessing: 1.74s total, 11.5 ops/sec, 1.7ms avg
+
+  🏆 Winner: Threading (50.52x faster)
+  💾 Memory: Threading=0.0MB, Multiprocessing=0.0MB
+
+========================================
+Testing with 5 agents, 20 steps each
+========================================
+
+🧵 Testing THREADING with 5 agents...
+  Threading: 0.56s total, 177.8 ops/sec, 27.1ms avg
+
+🔧 Testing MULTIPROCESSING with 5 agents...
+Slow action_selection: 0.121s for agent thread_4
+Slow action_selection: 0.109s for agent thread_3
+Slow action_selection: 0.102s for agent thread_2
+Slow action_selection: 0.106s for agent thread_4
+Slow action_selection: 0.140s for agent thread_9
+Slow action_selection: 0.108s for agent thread_3
+Slow action_selection: 0.128s for agent thread_4
+Slow action_selection: 0.123s for agent thread_9
+Slow action_selection: 0.108s for agent thread_7
+  Multiprocessing: 2.44s total, 41.0 ops/sec, 2.3ms avg
+
+  🏆 Winner: Threading (4.34x faster)
+  💾 Memory: Threading=0.0MB, Multiprocessing=0.0MB
+
+========================================
+Testing with 10 agents, 20 steps each
+========================================
+
+🧵 Testing THREADING with 10 agents...
+  Threading: 1.12s total, 178.7 ops/sec, 51.7ms avg
+
+🔧 Testing MULTIPROCESSING with 10 agents...
+  Multiprocessing: 3.33s total, 60.0 ops/sec, 3.6ms avg
+
+  🏆 Winner: Threading (2.98x faster)
+  💾 Memory: Threading=0.1MB, Multiprocessing=0.0MB
+
+============================================================
+SUMMARY
+============================================================
+
+Valid comparisons: 3
+Performance wins: Threading=3, Multiprocessing=0
+
+✅ THREADING is recommended for FreeAgentics Active Inference agents
+   - Better performance for PyMDP computations
+   - Lower memory overhead
+   - Simpler shared memory model
+
+============================================================
+PERFORMANCE ANALYSIS
+============================================================
+Threading single-agent: 1.6ms avg (1.1x improvement over baseline)
+Multiprocessing single-agent: 1.7ms avg (1.1x improvement over baseline)
+
+Scaling Analysis:
+  5 agents threading: 6.1% efficiency
+  10 agents threading: 3.1% efficiency
+
+🎯 RECOMMENDATION FOR FREEAGENTICS:
+   Use threading for most Active Inference agent scenarios
+   - Python-based PyMDP computations benefit from shared memory
+   - Lower overhead for frequent, small operations
+   - Better for coordination-heavy multi-agent systems
+
+✅ Quick test complete
+
+========================================================
+2. PRODUCTION BENCHMARK (10-15 minutes)
+========================================================
+This comprehensive test provides detailed analysis...
+

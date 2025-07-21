@@ -18,8 +18,8 @@ import logging
 import time
 from concurrent.futures import ThreadPoolExecutor, as_completed
 from dataclasses import dataclass, field
-from datetime import datetime, timedelta
-from typing import Any, Dict, List, Optional, Tuple, Union
+from datetime import datetime
+from typing import Any, Dict, List, Optional, Tuple
 
 import numpy as np
 import psutil
@@ -29,8 +29,6 @@ from agents.optimized_agent_manager import (
     OptimizationConfig,
     OptimizedAgentManager,
 )
-from api.performance_middleware import PerformanceConfig, PerformanceMiddleware
-from database.optimized_db import DatabaseConfig, OptimizedConnectionPool
 from observability.memory_optimizer import (
     get_memory_optimizer,
     start_memory_optimization,
@@ -157,9 +155,7 @@ class PerformanceBenchmarkRunner:
             ),
         }
 
-    async def run_benchmark_suite(
-        self, suite_name: str
-    ) -> List[BenchmarkResult]:
+    async def run_benchmark_suite(self, suite_name: str) -> List[BenchmarkResult]:
         """Run a complete benchmark suite."""
         if suite_name not in self.benchmark_suites:
             raise ValueError(f"Unknown benchmark suite: {suite_name}")
@@ -179,16 +175,12 @@ class PerformanceBenchmarkRunner:
 
                 # Warmup iterations
                 for i in range(suite.warmup_iterations):
-                    await self._run_single_benchmark(
-                        benchmark_name, warmup=True
-                    )
+                    await self._run_single_benchmark(benchmark_name, warmup=True)
 
                 # Test iterations
                 benchmark_results = []
                 for i in range(suite.test_iterations):
-                    result = await self._run_single_benchmark(
-                        benchmark_name, warmup=False
-                    )
+                    result = await self._run_single_benchmark(benchmark_name, warmup=False)
                     benchmark_results.append(result)
 
                 # Calculate aggregated result
@@ -205,9 +197,7 @@ class PerformanceBenchmarkRunner:
             # Store results
             self.results.extend(suite_results)
 
-        logger.info(
-            f"Benchmark suite {suite.name} completed with {len(suite_results)} results"
-        )
+        logger.info(f"Benchmark suite {suite.name} completed with {len(suite_results)} results")
         return suite_results
 
     async def _run_single_benchmark(
@@ -321,9 +311,7 @@ class PerformanceBenchmarkRunner:
         }
         return category_map.get(benchmark_name, "unknown")
 
-    def _aggregate_results(
-        self, results: List[BenchmarkResult]
-    ) -> BenchmarkResult:
+    def _aggregate_results(self, results: List[BenchmarkResult]) -> BenchmarkResult:
         """Aggregate multiple benchmark results."""
         if not results:
             raise ValueError("No results to aggregate")
@@ -335,18 +323,12 @@ class PerformanceBenchmarkRunner:
             return results[0]
 
         # Calculate averages
-        avg_duration = sum(
-            r.duration_seconds for r in successful_results
-        ) / len(successful_results)
-        avg_throughput = sum(
-            r.throughput_ops_per_second for r in successful_results
-        ) / len(successful_results)
-        avg_memory = sum(r.memory_usage_mb for r in successful_results) / len(
+        avg_duration = sum(r.duration_seconds for r in successful_results) / len(successful_results)
+        avg_throughput = sum(r.throughput_ops_per_second for r in successful_results) / len(
             successful_results
         )
-        avg_cpu = sum(r.cpu_usage_percent for r in successful_results) / len(
-            successful_results
-        )
+        avg_memory = sum(r.memory_usage_mb for r in successful_results) / len(successful_results)
+        avg_cpu = sum(r.cpu_usage_percent for r in successful_results) / len(successful_results)
 
         # Aggregate metadata
         metadata = {
@@ -356,12 +338,8 @@ class PerformanceBenchmarkRunner:
             "std_deviation_throughput": np.std(
                 [r.throughput_ops_per_second for r in successful_results]
             ),
-            "min_throughput": min(
-                r.throughput_ops_per_second for r in successful_results
-            ),
-            "max_throughput": max(
-                r.throughput_ops_per_second for r in successful_results
-            ),
+            "min_throughput": min(r.throughput_ops_per_second for r in successful_results),
+            "max_throughput": max(r.throughput_ops_per_second for r in successful_results),
         }
 
         return BenchmarkResult(
@@ -488,9 +466,7 @@ class PerformanceBenchmarkRunner:
         start_time = time.perf_counter()
 
         with ThreadPoolExecutor(max_workers=num_threads) as executor:
-            futures = [
-                executor.submit(concurrent_access) for _ in range(num_threads)
-            ]
+            futures = [executor.submit(concurrent_access) for _ in range(num_threads)]
             for future in as_completed(futures):
                 future.result()
 
@@ -556,9 +532,7 @@ class PerformanceBenchmarkRunner:
                 return result
 
         # Run queries with repetition to test caching
-        queries = [
-            f"query_{i % 20}" for i in range(100)
-        ]  # 20 unique queries, repeated
+        queries = [f"query_{i % 20}" for i in range(100)]  # 20 unique queries, repeated
 
         start_time = time.perf_counter()
 
@@ -659,9 +633,7 @@ class PerformanceBenchmarkRunner:
         import gzip
 
         # Generate test data
-        test_data = {
-            "data": [{"id": i, "value": f"value_{i}"} for i in range(1000)]
-        }
+        test_data = {"data": [{"id": i, "value": f"value_{i}"} for i in range(1000)]}
         json_data = json.dumps(test_data).encode()
 
         original_size = len(json_data)
@@ -681,10 +653,7 @@ class PerformanceBenchmarkRunner:
             "original_size_bytes": original_size,
             "compressed_size_bytes": compressed_size,
             "compression_ratio": original_size / compressed_size,
-            "space_saved_percent": (
-                (original_size - compressed_size) / original_size
-            )
-            * 100,
+            "space_saved_percent": ((original_size - compressed_size) / original_size) * 100,
         }
 
         return throughput, metadata
@@ -705,10 +674,7 @@ class PerformanceBenchmarkRunner:
 
         # Process requests in batches for controlled concurrency
         for i in range(0, num_requests, concurrency):
-            batch = [
-                mock_api_request()
-                for _ in range(min(concurrency, num_requests - i))
-            ]
+            batch = [mock_api_request() for _ in range(min(concurrency, num_requests - i))]
             await asyncio.gather(*batch)
 
         elapsed = time.perf_counter() - start_time
@@ -809,9 +775,7 @@ class PerformanceBenchmarkRunner:
         throughput = len(leaked_objects) / elapsed
 
         # Measure memory usage
-        memory_usage = (
-            len(leaked_objects) * 100 * 8 / 1024 / 1024
-        )  # Approximate MB
+        memory_usage = len(leaked_objects) * 100 * 8 / 1024 / 1024  # Approximate MB
 
         metadata = {
             "objects_created": len(leaked_objects),
@@ -831,9 +795,7 @@ class PerformanceBenchmarkRunner:
 
         # Mock agent batch processing
         async def process_agent_batch(batch_size: int):
-            await asyncio.sleep(
-                batch_size * 0.001
-            )  # Simulate batch processing
+            await asyncio.sleep(batch_size * 0.001)  # Simulate batch processing
             return batch_size
 
         total_agents = 1000
@@ -901,12 +863,8 @@ class PerformanceBenchmarkRunner:
         message_queue = asyncio.Queue()
         messages_processed = 0
 
-        async def send_message(
-            sender: str, receiver: str, message: Dict[str, Any]
-        ):
-            await message_queue.put(
-                {"sender": sender, "receiver": receiver, "message": message}
-            )
+        async def send_message(sender: str, receiver: str, message: Dict[str, Any]):
+            await message_queue.put({"sender": sender, "receiver": receiver, "message": message})
 
         async def process_messages():
             nonlocal messages_processed
@@ -968,23 +926,17 @@ class PerformanceBenchmarkRunner:
 
         # Agent operations
         for i in range(num_agents):
-            task = asyncio.create_task(
-                self._simulate_agent_operation(f"agent_{i}")
-            )
+            task = asyncio.create_task(self._simulate_agent_operation(f"agent_{i}"))
             tasks.append(task)
 
         # API requests
         for i in range(num_requests):
-            task = asyncio.create_task(
-                self._simulate_api_request(f"request_{i}")
-            )
+            task = asyncio.create_task(self._simulate_api_request(f"request_{i}"))
             tasks.append(task)
 
         # Database operations
         for i in range(num_db_operations):
-            task = asyncio.create_task(
-                self._simulate_db_operation(f"query_{i}")
-            )
+            task = asyncio.create_task(self._simulate_db_operation(f"query_{i}"))
             tasks.append(task)
 
         # Wait for all operations
@@ -1031,9 +983,7 @@ class PerformanceBenchmarkRunner:
             # Simulate agent operations
             tasks = []
             for i in range(agent_count):
-                task = asyncio.create_task(
-                    self._simulate_agent_operation(f"agent_{i}")
-                )
+                task = asyncio.create_task(self._simulate_agent_operation(f"agent_{i}"))
                 tasks.append(task)
 
             await asyncio.gather(*tasks)
@@ -1105,9 +1055,7 @@ class PerformanceBenchmarkRunner:
         await asyncio.sleep(0.001)  # Very fast operation
         return "stress_result"
 
-    def get_benchmark_results(
-        self, category: str = None
-    ) -> List[BenchmarkResult]:
+    def get_benchmark_results(self, category: str = None) -> List[BenchmarkResult]:
         """Get benchmark results, optionally filtered by category."""
         if category:
             return [r for r in self.results if r.category == category]
@@ -1139,9 +1087,7 @@ class PerformanceBenchmarkRunner:
 
         # Add category-specific stats
         for category, results in results_by_category.items():
-            report["category_stats"][
-                category
-            ] = self._calculate_category_stats(results)
+            report["category_stats"][category] = self._calculate_category_stats(results)
 
         return report
 
@@ -1154,25 +1100,17 @@ class PerformanceBenchmarkRunner:
 
         return {
             "success_rate": len(successful_results) / len(self.results) * 100,
-            "avg_throughput": sum(
-                r.throughput_ops_per_second for r in successful_results
-            )
+            "avg_throughput": sum(r.throughput_ops_per_second for r in successful_results)
             / len(successful_results),
             "avg_duration": sum(r.duration_seconds for r in successful_results)
             / len(successful_results),
-            "avg_memory_usage": sum(
-                r.memory_usage_mb for r in successful_results
-            )
+            "avg_memory_usage": sum(r.memory_usage_mb for r in successful_results)
             / len(successful_results),
-            "avg_cpu_usage": sum(
-                r.cpu_usage_percent for r in successful_results
-            )
+            "avg_cpu_usage": sum(r.cpu_usage_percent for r in successful_results)
             / len(successful_results),
         }
 
-    def _calculate_category_stats(
-        self, results: List[BenchmarkResult]
-    ) -> Dict[str, Any]:
+    def _calculate_category_stats(self, results: List[BenchmarkResult]) -> Dict[str, Any]:
         """Calculate statistics for a specific category."""
         successful_results = [r for r in results if r.success]
 
@@ -1263,13 +1201,11 @@ class PerformanceBenchmarkRunner:
 
         # Threading recommendations
         if "threading" in category_stats:
-            thread_results = [
-                r for r in category_stats["threading"] if r.success
-            ]
+            thread_results = [r for r in category_stats["threading"] if r.success]
             if thread_results:
-                avg_throughput = sum(
-                    r.throughput_ops_per_second for r in thread_results
-                ) / len(thread_results)
+                avg_throughput = sum(r.throughput_ops_per_second for r in thread_results) / len(
+                    thread_results
+                )
                 if avg_throughput < 100:
                     recommendations.append(
                         "Consider optimizing thread pool configuration for better throughput"
@@ -1279,9 +1215,7 @@ class PerformanceBenchmarkRunner:
         if "database" in category_stats:
             db_results = [r for r in category_stats["database"] if r.success]
             if db_results:
-                avg_duration = sum(
-                    r.duration_seconds for r in db_results
-                ) / len(db_results)
+                avg_duration = sum(r.duration_seconds for r in db_results) / len(db_results)
                 if avg_duration > 1.0:
                     recommendations.append(
                         "Database operations are slow. Consider query optimization or connection pooling"
@@ -1291,9 +1225,7 @@ class PerformanceBenchmarkRunner:
         if "memory" in category_stats:
             memory_results = [r for r in category_stats["memory"] if r.success]
             if memory_results:
-                avg_memory = sum(
-                    r.memory_usage_mb for r in memory_results
-                ) / len(memory_results)
+                avg_memory = sum(r.memory_usage_mb for r in memory_results) / len(memory_results)
                 if avg_memory > 100:
                     recommendations.append(
                         "High memory usage detected. Consider implementing memory pooling"
@@ -1399,12 +1331,8 @@ async def run_complete_benchmark_suite():
 
     print(f"Total benchmarks: {report['total_benchmarks']}")
     print(f"Categories: {', '.join(report['categories'])}")
-    print(
-        f"Overall success rate: {report['overall_stats']['success_rate']:.1f}%"
-    )
-    print(
-        f"Average throughput: {report['overall_stats']['avg_throughput']:.1f} ops/sec"
-    )
+    print(f"Overall success rate: {report['overall_stats']['success_rate']:.1f}%")
+    print(f"Average throughput: {report['overall_stats']['avg_throughput']:.1f} ops/sec")
 
     print("\nTop performers:")
     for performer in report["top_performers"]:

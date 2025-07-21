@@ -35,8 +35,8 @@ class TestASTNode:
     def test_ast_node_creation(self):
         """Test ASTNode creation with basic parameters."""
         if not IMPORT_SUCCESS:
-            pytest.skip("GNN modules not available")
 
+            assert False, "Test bypass removed - must fix underlying issue"
         node = ASTNode(node_type="test_type", line=1, column=5)
 
         assert node.node_type == "test_type"
@@ -48,8 +48,8 @@ class TestASTNode:
     def test_ast_node_with_children_and_attributes(self):
         """Test ASTNode with children and attributes."""
         if not IMPORT_SUCCESS:
-            pytest.skip("GNN modules not available")
 
+            assert False, "Test bypass removed - must fix underlying issue"
         child1 = ASTNode("child1", 2, 1)
         child2 = ASTNode("child2", 3, 1)
 
@@ -70,8 +70,8 @@ class TestASTNode:
     def test_ast_node_modification(self):
         """Test modifying ASTNode after creation."""
         if not IMPORT_SUCCESS:
-            pytest.skip("GNN modules not available")
 
+            assert False, "Test bypass removed - must fix underlying issue"
         node = ASTNode("test", 1, 1)
 
         # Add children
@@ -92,8 +92,8 @@ class TestParseResult:
     def test_parse_result_creation(self):
         """Test ParseResult creation with default values."""
         if not IMPORT_SUCCESS:
-            pytest.skip("GNN modules not available")
 
+            assert False, "Test bypass removed - must fix underlying issue"
         result = ParseResult()
 
         assert result.ast is None
@@ -105,8 +105,8 @@ class TestParseResult:
     def test_parse_result_with_data(self):
         """Test ParseResult with actual data."""
         if not IMPORT_SUCCESS:
-            pytest.skip("GNN modules not available")
 
+            assert False, "Test bypass removed - must fix underlying issue"
         ast_node = ASTNode("root", 1, 1)
         result = ParseResult(
             ast=ast_node,
@@ -130,7 +130,8 @@ class TestConfigParser:
     def parser(self):
         """Create ConfigParser instance."""
         if not IMPORT_SUCCESS:
-            pytest.skip("GNN modules not available")
+
+            assert False, "Test bypass removed - must fix underlying issue"
         return ConfigParser()
 
     @pytest.fixture
@@ -191,11 +192,7 @@ class TestConfigParser:
         result = parser.parse(config)
 
         # Find architecture node in AST
-        arch_nodes = [
-            child
-            for child in result.ast.children
-            if child.node_type == "architecture"
-        ]
+        arch_nodes = [child for child in result.ast.children if child.node_type == "architecture"]
         assert len(arch_nodes) == 1
         assert arch_nodes[0].attributes["name"] == "GAT"
 
@@ -210,11 +207,7 @@ class TestConfigParser:
         result = parser.parse(config)
 
         # Find layers node in AST
-        layer_nodes = [
-            child
-            for child in result.ast.children
-            if child.node_type == "layers"
-        ]
+        layer_nodes = [child for child in result.ast.children if child.node_type == "layers"]
         assert len(layer_nodes) == 1
 
         layers_node = layer_nodes[0]
@@ -239,9 +232,7 @@ class TestConfigParser:
 
         # Find hyperparameters node
         hyper_nodes = [
-            child
-            for child in result.ast.children
-            if child.node_type == "hyperparameters"
+            child for child in result.ast.children if child.node_type == "hyperparameters"
         ]
         assert len(hyper_nodes) == 1
         assert hyper_nodes[0].attributes == hyperparams
@@ -258,11 +249,7 @@ class TestConfigParser:
         result = parser.parse(config)
 
         # Find metadata node
-        meta_nodes = [
-            child
-            for child in result.ast.children
-            if child.node_type == "metadata"
-        ]
+        meta_nodes = [child for child in result.ast.children if child.node_type == "metadata"]
         assert len(meta_nodes) == 1
         assert meta_nodes[0].attributes == metadata
         assert result.metadata == metadata
@@ -402,9 +389,7 @@ class TestConfigParser:
 
         assert result.ast is not None
         assert len(result.errors) == 0
-        assert (
-            len(result.ast.children) == 4
-        )  # arch, layers, hyperparams, metadata
+        assert len(result.ast.children) == 4  # arch, layers, hyperparams, metadata
 
         # Verify all sections were parsed
         assert "architecture" in result.sections
@@ -465,6 +450,4 @@ class TestConfigParser:
 
 
 if __name__ == "__main__":
-    pytest.main(
-        [__file__, "-v", "--cov=inference.gnn.parser", "--cov-report=html"]
-    )
+    pytest.main([__file__, "-v", "--cov=inference.gnn.parser", "--cov-report=html"])

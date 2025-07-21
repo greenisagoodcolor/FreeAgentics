@@ -16,16 +16,12 @@ def generate_password(length=32):
 
 def generate_secret_key(length=64):
     """Generate a cryptographically secure secret key."""
-    return base64.urlsafe_b64encode(secrets.token_bytes(length)).decode(
-        "utf-8"
-    )
+    return base64.urlsafe_b64encode(secrets.token_bytes(length)).decode("utf-8")
 
 
 def generate_jwt_secret(length=64):
     """Generate a cryptographically secure JWT secret."""
-    return base64.urlsafe_b64encode(secrets.token_bytes(length)).decode(
-        "utf-8"
-    )
+    return base64.urlsafe_b64encode(secrets.token_bytes(length)).decode("utf-8")
 
 
 def create_secret_file(filepath, content):

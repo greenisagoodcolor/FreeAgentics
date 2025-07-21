@@ -19,24 +19,19 @@ import time
 # Add project root to path
 sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
-import numpy as np
 
 from agents.base_agent import PYMDP_AVAILABLE, BasicExplorerAgent
 from world.grid_world import GridWorld, GridWorldConfig
 
 # Setup logging
-logging.basicConfig(
-    level=logging.INFO, format="%(name)s - %(levelname)s - %(message)s"
-)
+logging.basicConfig(level=logging.INFO, format="%(name)s - %(levelname)s - %(message)s")
 logger = logging.getLogger(__name__)
 
 
 def check_pymdp_availability():
     """Check if PyMDP is available for the demo."""
     if not PYMDP_AVAILABLE:
-        print(
-            "❌ PyMDP not available! This demo requires real Active Inference."
-        )
+        print("❌ PyMDP not available! This demo requires real Active Inference.")
         print("Install with: pip install inferactively-pymdp==0.0.7.1")
         return False
 
@@ -55,9 +50,7 @@ def create_world_environment():
     world.set_cell(4, 4, 1)  # Goal
     world.set_cell(2, 2, -1)  # Obstacle
 
-    print(
-        f"✅ Created {config.width}x{config.height} world with goals and obstacles"
-    )
+    print(f"✅ Created {config.width}x{config.height} world with goals and obstacles")
     print()
     return world
 
@@ -90,13 +83,9 @@ def print_agent_metrics(agent, agent_name):
     if "belief_entropy" in agent.metrics:
         print(f"    Belief entropy: {agent.metrics['belief_entropy']:.3f}")
     if "expected_free_energy" in agent.metrics:
-        print(
-            f"    Expected free energy: {agent.metrics['expected_free_energy']:.3f}"
-        )
+        print(f"    Expected free energy: {agent.metrics['expected_free_energy']:.3f}")
     if "total_free_energy" in agent.metrics:
-        print(
-            f"    Total free energy: {agent.metrics['total_free_energy']:.3f}"
-        )
+        print(f"    Total free energy: {agent.metrics['total_free_energy']:.3f}")
 
 
 def update_position(agent, action):
@@ -135,9 +124,7 @@ def run_agent_step(agent, world, agent_num):
     """Run a single step for an agent and return the action."""
     obs = {
         "position": agent.position.copy(),
-        "surroundings": world.get_observation(
-            agent.position[0], agent.position[1]
-        ),
+        "surroundings": world.get_observation(agent.position[0], agent.position[1]),
     }
 
     action = agent.step(obs)
@@ -182,34 +169,24 @@ def print_final_metrics(agent1, agent2):
     print(f"  Total steps: {status1['total_steps']}")
     print(f"  Final position: {agent1.position}")
     if "belief_entropy" in agent1.metrics:
-        print(
-            f"  Final belief entropy: {agent1.metrics['belief_entropy']:.3f}"
-        )
+        print(f"  Final belief entropy: {agent1.metrics['belief_entropy']:.3f}")
     if "total_free_energy" in agent1.metrics:
-        print(
-            f"  Total free energy: {agent1.metrics['total_free_energy']:.3f}"
-        )
+        print(f"  Total free energy: {agent1.metrics['total_free_energy']:.3f}")
 
     print("\n🔍 Agent 2:")
     status2 = agent2.get_status()
     print(f"  Total steps: {status2['total_steps']}")
     print(f"  Final position: {agent2.position}")
     if "belief_entropy" in agent2.metrics:
-        print(
-            f"  Final belief entropy: {agent2.metrics['belief_entropy']:.3f}"
-        )
+        print(f"  Final belief entropy: {agent2.metrics['belief_entropy']:.3f}")
     if "total_free_energy" in agent2.metrics:
-        print(
-            f"  Total free energy: {agent2.metrics['total_free_energy']:.3f}"
-        )
+        print(f"  Total free energy: {agent2.metrics['total_free_energy']:.3f}")
 
 
 def print_demo_summary():
     """Print the demo completion summary."""
     print("\n✅ Demo Complete!")
-    print(
-        "🎉 FreeAgentics successfully demonstrated real Active Inference with PyMDP!"
-    )
+    print("🎉 FreeAgentics successfully demonstrated real Active Inference with PyMDP!")
     print("\nKey Features Demonstrated:")
     print("• Real variational inference for belief updates")
     print("• Expected free energy minimization for action selection")

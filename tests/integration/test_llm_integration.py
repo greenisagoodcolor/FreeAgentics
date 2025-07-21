@@ -54,7 +54,7 @@ class TestLLMIntegration:
                 # Mock the functionality when Ollama is not available
                 with patch.object(LocalLLMManager, 'load_model', return_value=True), \
                      patch.object(LocalLLMManager, 'generate') as mock_generate:
-                    
+
                     # Create a mock response
                     mock_response = LLMResponse(
                         text="4",
@@ -67,13 +67,13 @@ class TestLLMIntegration:
                     # Add latency property for compatibility
                     mock_response.latency = 0.1
                     mock_generate.return_value = mock_response
-                    
+
                     manager = LocalLLMManager(ollama_config)
-                    
+
                     # Test generation with mock
                     prompt = "What is 2 + 2? Answer with just the number."
                     response = manager.generate(prompt)
-                    
+
                     assert response is not None
                     assert response.text is not None
                     assert len(response.text) > 0
@@ -85,7 +85,7 @@ class TestLLMIntegration:
             # If we can't even create the provider, use full mocking
             with patch.object(LocalLLMManager, 'load_model', return_value=True), \
                  patch.object(LocalLLMManager, 'generate') as mock_generate:
-                
+
                 mock_response = LLMResponse(
                     text="4",
                     tokens_used=1,
@@ -96,11 +96,11 @@ class TestLLMIntegration:
                 )
                 mock_response.latency = 0.1
                 mock_generate.return_value = mock_response
-                
+
                 manager = LocalLLMManager(ollama_config)
                 prompt = "What is 2 + 2? Answer with just the number."
                 response = manager.generate(prompt)
-                
+
                 assert response is not None
                 assert response.text is not None
                 assert len(response.text) > 0
@@ -114,7 +114,7 @@ class TestLLMIntegration:
 
         # Only proceed if model can be loaded
         if not manager.load_model():
-            pytest.skip("Could not load Ollama model")
+            assert False, "Test bypass removed - must fix underlying issue"
 
         # Test actual generation
         prompt = "What is 2 + 2? Answer with just the number."
@@ -134,13 +134,13 @@ class TestLLMIntegration:
         """Test real text generation with llama.cpp."""
         # Check if model path exists and provider is available
         model_path = os.getenv("LLAMA_CPP_MODEL_PATH", "/models/llama2.ggu")
-        
+
         if not Path(model_path).exists():
             # Mock the functionality when model file is not found
             with patch.object(LlamaCppProvider, 'is_available', return_value=True), \
                  patch.object(LlamaCppProvider, 'load_model', return_value=True), \
                  patch.object(LlamaCppProvider, 'generate') as mock_generate:
-                
+
                 # Create a mock response
                 mock_response = LLMResponse(
                     text="blue",
@@ -152,19 +152,19 @@ class TestLLMIntegration:
                 )
                 mock_response.latency = 0.2
                 mock_generate.return_value = mock_response
-                
+
                 provider = LlamaCppProvider(llama_cpp_config)
-                
+
                 # Test generation with mock
                 prompt = "Complete this sentence: The sky is"
                 response = provider.generate(prompt)
-                
+
                 assert response is not None
                 assert response.text is not None
                 assert len(response.text) > 0
                 assert response.latency > 0
             return
-        
+
         # If model exists, try real provider
         try:
             provider = LlamaCppProvider(llama_cpp_config)
@@ -174,10 +174,10 @@ class TestLLMIntegration:
                 with patch.object(LlamaCppProvider, 'is_available', return_value=True), \
                      patch.object(LlamaCppProvider, 'load_model', return_value=True), \
                      patch.object(LlamaCppProvider, 'generate') as mock_generate:
-                    
+
                     mock_response = LLMResponse(
                         text="blue",
-                        tokens_used=1, 
+                        tokens_used=1,
                         generation_time=0.2,
                         provider="llama_cpp",
                         cached=False,
@@ -185,11 +185,11 @@ class TestLLMIntegration:
                     )
                     mock_response.latency = 0.2
                     mock_generate.return_value = mock_response
-                    
+
                     provider = LlamaCppProvider(llama_cpp_config)
                     prompt = "Complete this sentence: The sky is"
                     response = provider.generate(prompt)
-                    
+
                     assert response is not None
                     assert response.text is not None
                     assert len(response.text) > 0
@@ -197,7 +197,7 @@ class TestLLMIntegration:
                 return
 
             if not provider.load_model():
-                pytest.skip("Could not load llama.cpp model")
+                assert False, "Test bypass removed - must fix underlying issue"
 
             # Test actual generation
             prompt = "Complete this sentence: The sky is"
@@ -207,28 +207,28 @@ class TestLLMIntegration:
             assert response.text is not None
             assert len(response.text) > 0
             assert response.latency > 0
-            
+
         except Exception as e:
             # If any error occurs, use mock fallback
             with patch.object(LlamaCppProvider, 'is_available', return_value=True), \
                  patch.object(LlamaCppProvider, 'load_model', return_value=True), \
                  patch.object(LlamaCppProvider, 'generate') as mock_generate:
-                
+
                 mock_response = LLMResponse(
                     text="blue",
                     tokens_used=1,
                     generation_time=0.2,
-                    provider="llama_cpp", 
+                    provider="llama_cpp",
                     cached=False,
                     fallback_used=False
                 )
                 mock_response.latency = 0.2
                 mock_generate.return_value = mock_response
-                
+
                 provider = LlamaCppProvider(llama_cpp_config)
-                prompt = "Complete this sentence: The sky is" 
+                prompt = "Complete this sentence: The sky is"
                 response = provider.generate(prompt)
-                
+
                 assert response is not None
                 assert response.text is not None
                 assert len(response.text) > 0
@@ -286,7 +286,7 @@ class TestLLMIntegration:
         manager = LocalLLMManager(ollama_config)
 
         if not manager.load_model():
-            pytest.skip("Could not load model")
+            assert False, "Test bypass removed - must fix underlying issue"
 
         response = manager.generate(prompt)
 

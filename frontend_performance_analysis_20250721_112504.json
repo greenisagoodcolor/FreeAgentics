@@ -1,0 +1,89 @@
+{
+  "timestamp": "2025-07-21T11:25:04.871879",
+  "bundle_analysis": {
+    "total_size_kb": 722.8251953125,
+    "gzipped_size_kb": 225.5107421875,
+    "chunk_count": 15,
+    "largest_chunks": [
+      {
+        "name": "fd9d1056-cf48984c1108c87a.js",
+        "size_kb": 168.783203125,
+        "gzipped_kb": 52.5126953125,
+        "type": "main_chunk"
+      },
+      {
+        "name": "framework-f66176bb897dc684.js",
+        "size_kb": 136.697265625,
+        "gzipped_kb": 43.9130859375,
+        "type": "main_chunk"
+      },
+      {
+        "name": "main-cee4c2de2bb0bf2b.js",
+        "size_kb": 128.3564453125,
+        "gzipped_kb": 37.845703125,
+        "type": "main_chunk"
+      },
+      {
+        "name": "117-23d354c87a93db8d.js",
+        "size_kb": 120.6328125,
+        "gzipped_kb": 30.9619140625,
+        "type": "main_chunk"
+      },
+      {
+        "name": "polyfills-42372ed130431b0a.js",
+        "size_kb": 109.955078125,
+        "gzipped_kb": 38.5478515625,
+        "type": "main_chunk"
+      },
+      {
+        "name": "648-55c85f69d3e6066d.js",
+        "size_kb": 25.5380859375,
+        "gzipped_kb": 8.49609375,
+        "type": "main_chunk"
+      },
+      {
+        "name": "app/error-da3ddf03d2cdc046.js",
+        "size_kb": 9.859375,
+        "gzipped_kb": 3.7578125,
+        "type": "app_chunk"
+      },
+      {
+        "name": "app/global-error-5b870af572de1d58.js",
+        "size_kb": 6.7392578125,
+        "gzipped_kb": 2.64453125,
+        "type": "app_chunk"
+      },
+      {
+        "name": "app/agents/page-03e64a5898afedc9.js",
+        "size_kb": 3.9345703125,
+        "gzipped_kb": 1.5234375,
+        "type": "app_chunk"
+      },
+      {
+        "name": "app/page-c67d804fc33953e4.js",
+        "size_kb": 3.4990234375,
+        "gzipped_kb": 1.29296875,
+        "type": "app_chunk"
+      }
+    ],
+    "compression_ratio": 3.205280548061475,
+    "performance_impact": "good",
+    "recommendations": [
+      "Bundle size (225.5KB) exceeds budget (200KB)",
+      "Large chunks detected: fd9d1056-cf48984c1108c87a.js",
+      "Consider code splitting and dynamic imports"
+    ]
+  },
+  "lighthouse_metrics": {
+    "performance_score": 85,
+    "fcp_ms": 1500,
+    "lcp_ms": 2200,
+    "cls": 0.08,
+    "tbt_ms": 180,
+    "si_ms": 2800
+  },
+  "performance_budget_compliance": {
+    "bundle_size_compliant": false,
+    "lighthouse_compliant": false
+  }
+}

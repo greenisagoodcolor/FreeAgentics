@@ -1,9 +1,7 @@
 """Database testing helpers and mocks."""
 
-import os
-
 from sqlalchemy import create_engine
-from sqlalchemy.orm import Session, sessionmaker
+from sqlalchemy.orm import sessionmaker
 from sqlalchemy.pool import StaticPool
 
 from database.base import Base
@@ -20,9 +18,7 @@ def get_test_db():
         connect_args={"check_same_thread": False},
         poolclass=StaticPool,  # Important for in-memory databases
     )
-    TestingSessionLocal = sessionmaker(
-        autocommit=False, autoflush=False, bind=engine
-    )
+    TestingSessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engine)
 
     # Create all tables
     Base.metadata.create_all(bind=engine)
@@ -58,7 +54,7 @@ class MockDatabase:
             self.data[obj_type] = {}
 
         # Assign ID if not present
-        if not hasattr(obj, 'id') or obj.id is None:
+        if not hasattr(obj, "id") or obj.id is None:
             obj.id = self._id_counter
             self._id_counter += 1
 
@@ -117,11 +113,7 @@ class MockQuery:
         """Mock all operation."""
         model_name = self.model.__name__
         if model_name in self.db.data:
-            return [
-                obj
-                for obj in self.db.data[model_name].values()
-                if self._matches_filters(obj)
-            ]
+            return [obj for obj in self.db.data[model_name].values() if self._matches_filters(obj)]
         return []
 
     def count(self):
@@ -133,9 +125,7 @@ class MockQuery:
         to_delete = self.all()
         model_name = self.model.__name__
         for obj in to_delete:
-            if hasattr(obj, 'id') and obj.id in self.db.data.get(
-                model_name, {}
-            ):
+            if hasattr(obj, "id") and obj.id in self.db.data.get(model_name, {}):
                 del self.db.data[model_name][obj.id]
         return len(to_delete)
 

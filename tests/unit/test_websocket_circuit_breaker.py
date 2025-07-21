@@ -4,8 +4,6 @@ import asyncio
 import sys
 import time
 import unittest
-from datetime import datetime, timedelta
-from unittest.mock import AsyncMock, Mock, patch
 
 import pytest
 
@@ -232,9 +230,7 @@ class TestCircuitBreaker(unittest.IsolatedAsyncioTestCase):
         status = self.breaker.get_status()
 
         self.assertEqual(status["state"], CircuitState.OPEN)
-        self.assertEqual(
-            status["failure_count"], self.config.failure_threshold
-        )
+        self.assertEqual(status["failure_count"], self.config.failure_threshold)
         self.assertIsNotNone(status["last_failure_time"])
 
     def test_reset(self):
@@ -254,9 +250,7 @@ class TestCircuitBreaker(unittest.IsolatedAsyncioTestCase):
     def test_custom_exceptions(self):
         """Test handling specific exceptions differently."""
         # Configure to ignore certain exceptions
-        config = CircuitBreakerConfig(
-            failure_threshold=3, excluded_exceptions=(ValueError,)
-        )
+        config = CircuitBreakerConfig(failure_threshold=3, excluded_exceptions=(ValueError,))
         breaker = CircuitBreaker("test", config)
 
         # ValueError should not count as failure
@@ -270,9 +264,7 @@ class TestCircuitBreaker(unittest.IsolatedAsyncioTestCase):
         # Other exceptions should count
         for _ in range(config.failure_threshold):
             with self.assertRaises(RuntimeError):
-                breaker.call(
-                    lambda: (_ for _ in ()).throw(RuntimeError("Test"))
-                )
+                breaker.call(lambda: (_ for _ in ()).throw(RuntimeError("Test")))
 
         self.assertEqual(breaker.state, CircuitState.OPEN)
 

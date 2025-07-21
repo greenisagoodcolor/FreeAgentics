@@ -14,12 +14,11 @@ import time
 from dataclasses import dataclass, field
 from datetime import datetime, timedelta
 from enum import Enum
-from pathlib import Path
 from typing import Any, Dict, List, Optional, Set, Tuple
 from urllib.parse import urlparse
 
 import aiohttp
-import redis.asyncio as redis  
+import redis.asyncio as redis
 from bloom_filter2 import BloomFilter
 
 # Configure logging
@@ -139,7 +138,7 @@ class ThreatFeedManager:
                     f"Error fetching from feed {self.feeds[i].__class__.__name__}: {result}"
                 )
             else:
-                all_indicators.extend(result)  
+                all_indicators.extend(result)
 
         # Deduplicate indicators
         unique_indicators = self._deduplicate_indicators(all_indicators)
@@ -149,9 +148,7 @@ class ThreatFeedManager:
         )
         return unique_indicators
 
-    def _deduplicate_indicators(
-        self, indicators: List[ThreatIndicator]
-    ) -> List[ThreatIndicator]:
+    def _deduplicate_indicators(self, indicators: List[ThreatIndicator]) -> List[ThreatIndicator]:
         """Deduplicate indicators, keeping highest threat level"""
         indicator_map: Dict[Tuple[str, str], ThreatIndicator] = {}
 
@@ -169,12 +166,8 @@ class ThreatFeedManager:
                         set(existing.threat_types + indicator.threat_types)
                     )
                     existing.tags = list(set(existing.tags + indicator.tags))
-                    existing.last_seen = max(
-                        existing.last_seen, indicator.last_seen
-                    )
-                    existing.confidence = max(
-                        existing.confidence, indicator.confidence
-                    )
+                    existing.last_seen = max(existing.last_seen, indicator.last_seen)
+                    existing.confidence = max(existing.confidence, indicator.confidence)
             else:
                 indicator_map[key] = indicator
 
@@ -202,7 +195,7 @@ class OTXFeed:
 
             async with aiohttp.ClientSession() as session:
                 # Fetch subscribed pulses
-                async with session.get(  
+                async with session.get(
                     f"{self.api_url}/pulses/subscribed",
                     headers=headers,
                     params={"limit": 100},
@@ -223,12 +216,8 @@ class OTXFeed:
     def _parse_pulse(self, pulse: Dict[str, Any]) -> List[ThreatIndicator]:
         """Parse OTX pulse into indicators"""
         indicators = []
-        pulse_created = datetime.fromisoformat(
-            pulse.get("created", "").replace("Z", "+00:00")
-        )
-        pulse_modified = datetime.fromisoformat(
-            pulse.get("modified", "").replace("Z", "+00:00")
-        )
+        pulse_created = datetime.fromisoformat(pulse.get("created", "").replace("Z", "+00:00"))
+        pulse_modified = datetime.fromisoformat(pulse.get("modified", "").replace("Z", "+00:00"))
 
         for indicator_data in pulse.get("indicators", []):
             indicator_type = indicator_data.get("type", "").lower()
@@ -342,7 +331,7 @@ class AbuseIPDBFeed:
                 # Fetch blacklist
                 params = {"confidenceMinimum": 75, "limit": 10000}
 
-                async with session.get(  
+                async with session.get(
                     f"{self.api_url}/blacklist", headers=headers, params=params
                 ) as response:
                     if response.status == 200:
@@ -374,8 +363,7 @@ class AbuseIPDBFeed:
             threat_types=threat_types,
             threat_level=self._calculate_threat_level(entry),
             source="AbuseIPDB",
-            first_seen=datetime.now()
-            - timedelta(days=entry.get("numReports", 1)),
+            first_seen=datetime.now() - timedelta(days=entry.get("numReports", 1)),
             last_seen=datetime.now(),
             confidence=entry.get("abuseConfidenceScore", 0) / 100.0,
             metadata={
@@ -477,7 +465,7 @@ class CustomFeed:
 
         try:
             async with aiohttp.ClientSession() as session:
-                async with session.get(self.feed_url) as response:  
+                async with session.get(self.feed_url) as response:
                     if response.status == 200:
                         content = await response.text()
                         indicators = self._parse_feed(content)
@@ -533,14 +521,10 @@ class CustomFeed:
 
         return indicators
 
-    def _parse_json_line(
-        self, data: Dict[str, Any]
-    ) -> Optional[ThreatIndicator]:
+    def _parse_json_line(self, data: Dict[str, Any]) -> Optional[ThreatIndicator]:
         """Parse JSON formatted indicator"""
         # Common field mappings
-        indicator = (
-            data.get("indicator") or data.get("ioc") or data.get("value")
-        )
+        indicator = data.get("indicator") or data.get("ioc") or data.get("value")
         if not indicator:
             return None
 
@@ -553,9 +537,7 @@ class CustomFeed:
             indicator_type=ind_type,
             threat_types=[ThreatType.REPUTATION],
             threat_level=ThreatLevel.MEDIUM,
-            source=data.get(
-                "source", urlparse(self.feed_url).netloc or "custom"
-            ),
+            source=data.get("source", urlparse(self.feed_url).netloc or "custom"),
             first_seen=datetime.now(),
             last_seen=datetime.now(),
             confidence=data.get("confidence", 0.5),
@@ -574,9 +556,7 @@ class CustomFeed:
             logger.debug(f"Not an IP address: {e}")
 
         # Domain
-        if re.match(
-            r"^[a-zA-Z0-9][a-zA-Z0-9-]{0,61}[a-zA-Z0-9]?\.[a-zA-Z]{2,}$", value
-        ):
+        if re.match(r"^[a-zA-Z0-9][a-zA-Z0-9-]{0,61}[a-zA-Z0-9]?\.[a-zA-Z]{2,}$", value):
             return "domain"
 
         # URL
@@ -651,9 +631,7 @@ class ThreatIntelligenceEngine:
             pipeline.setex(key, self.config.cache_ttl, value)
 
             # Add to type-specific sets for scanning
-            pipeline.sadd(
-                f"threats:{indicator.indicator_type}", indicator.indicator
-            )
+            pipeline.sadd(f"threats:{indicator.indicator_type}", indicator.indicator)
 
         await pipeline.execute()
         logger.info(f"Loaded {len(indicators)} threat indicators")
@@ -669,10 +647,7 @@ class ThreatIntelligenceEngine:
         # Check whitelist
         if indicator_type == "ip" and indicator in self.config.whitelist_ips:
             return None
-        elif (
-            indicator_type == "domain"
-            and indicator in self.config.whitelist_domains
-        ):
+        elif indicator_type == "domain" and indicator in self.config.whitelist_domains:
             return None
 
         # Get from Redis
@@ -683,7 +658,7 @@ class ThreatIntelligenceEngine:
             threat_info = json.loads(data)
             threat_info["indicator"] = indicator
             threat_info["indicator_type"] = indicator_type
-            return threat_info  
+            return threat_info
 
         return None
 
@@ -709,9 +684,7 @@ class ThreatIntelligenceEngine:
 
         return None
 
-    async def check_request(
-        self, request_data: Dict[str, Any]
-    ) -> Dict[str, Any]:
+    async def check_request(self, request_data: Dict[str, Any]) -> Dict[str, Any]:
         """Check request for threats"""
         threats = []
 
@@ -775,14 +748,10 @@ class ThreatIntelligenceEngine:
             "highest_threat_level": highest_threat.name,
         }
 
-    async def block_indicator(
-        self, indicator: str, indicator_type: str, reason: str
-    ) -> None:
+    async def block_indicator(self, indicator: str, indicator_type: str, reason: str) -> None:
         """Block an indicator"""
         key = f"blocked:{indicator_type}:{indicator}"
-        value = json.dumps(
-            {"reason": reason, "blocked_at": datetime.now().isoformat()}
-        )
+        value = json.dumps({"reason": reason, "blocked_at": datetime.now().isoformat()})
 
         await self.redis_client.setex(key, self.config.block_duration, value)
 
@@ -840,11 +809,7 @@ class ThreatIntelligenceEngine:
         minute_key = int(now / 60)
 
         # Clean old entries
-        self._rate_limiter = {
-            k: v
-            for k, v in self._rate_limiter.items()
-            if k[1] >= minute_key - 1
-        }
+        self._rate_limiter = {k: v for k, v in self._rate_limiter.items() if k[1] >= minute_key - 1}
 
         # Count requests
         key = (ip, minute_key)
@@ -895,9 +860,7 @@ class ThreatIntelligenceMiddleware:
                 client_ip = scope["client"][0]
 
             # Check if IP is blocked
-            if client_ip and await self.threat_engine.is_blocked(
-                client_ip, "ip"
-            ):
+            if client_ip and await self.threat_engine.is_blocked(client_ip, "ip"):
                 await self._send_blocked_response(send)
                 return
 
@@ -909,9 +872,7 @@ class ThreatIntelligenceMiddleware:
                     "user_agent": self._get_header(scope, b"user-agent"),
                 }
 
-                check_result = await self.threat_engine.check_request(
-                    request_data
-                )
+                check_result = await self.threat_engine.check_request(request_data)
 
                 if check_result["should_block"]:
                     # Block the IP
@@ -958,9 +919,7 @@ def main():
     parser = argparse.ArgumentParser(description="Threat Intelligence Engine")
     parser.add_argument("--check-ip", help="Check if IP is a threat")
     parser.add_argument("--check-domain", help="Check if domain is a threat")
-    parser.add_argument(
-        "--load-feeds", action="store_true", help="Load threat feeds"
-    )
+    parser.add_argument("--load-feeds", action="store_true", help="Load threat feeds")
     parser.add_argument("--stats", action="store_true", help="Show statistics")
 
     args = parser.parse_args()

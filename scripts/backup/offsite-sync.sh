@@ -50,7 +50,7 @@ send_notification() {
 
         curl -X POST -H 'Content-type: application/json' \
             --data "{\"text\":\"$emoji *S3 Sync* - $subject\\n$message\"}" \
-            "$SLACK_WEBHOOK" 2>/dev/null || true
+            "$SLACK_WEBHOOK" 2>/dev/null 
     fi
 }
 

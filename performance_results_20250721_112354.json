@@ -1,0 +1,152 @@
+{
+  "result": {
+    "suite_name": "Comprehensive Performance Validation",
+    "metrics": [
+      {
+        "name": "single_agent_spawn",
+        "category": "agent_spawning",
+        "value": 14.47615004144609,
+        "unit": "ms",
+        "target": 50,
+        "compliant": true,
+        "timestamp": "2025-07-21 11:23:54.536580",
+        "metadata": {
+          "memory_used_mb": 3.75
+        }
+      },
+      {
+        "name": "parallel_agent_spawn_10",
+        "category": "agent_spawning",
+        "value": 5.331877968274057,
+        "unit": "ms",
+        "target": 100,
+        "compliant": true,
+        "timestamp": "2025-07-21 11:23:54.541936",
+        "metadata": {}
+      },
+      {
+        "name": "memory_per_agent",
+        "category": "agent_spawning",
+        "value": 3.75,
+        "unit": "MB",
+        "target": 10,
+        "compliant": true,
+        "timestamp": "2025-07-21 11:23:54.541952",
+        "metadata": {}
+      },
+      {
+        "name": "pymdp_inference_100_steps",
+        "category": "pymdp_inference",
+        "value": 17.42982503492385,
+        "unit": "ms",
+        "target": 100,
+        "compliant": true,
+        "timestamp": "2025-07-21 11:23:54.560022",
+        "metadata": {
+          "steps": 100
+        }
+      },
+      {
+        "name": "memory_per_agent_100_agents",
+        "category": "memory_usage",
+        "value": 0.0,
+        "unit": "MB",
+        "target": 10,
+        "compliant": true,
+        "timestamp": "2025-07-21 11:23:54.562405",
+        "metadata": {
+          "total_agents": 100,
+          "total_memory_mb": 0.0
+        }
+      },
+      {
+        "name": "memory_leak_after_cleanup",
+        "category": "memory_usage",
+        "value": 0.0,
+        "unit": "MB",
+        "target": 5.0,
+        "compliant": true,
+        "timestamp": "2025-07-21 11:23:54.567730",
+        "metadata": {}
+      },
+      {
+        "name": "api_avg_response_time",
+        "category": "api_performance",
+        "value": 4.234285879647359,
+        "unit": "ms",
+        "target": 200,
+        "compliant": true,
+        "timestamp": "2025-07-21 11:23:54.779721",
+        "metadata": {
+          "requests_tested": 50
+        }
+      },
+      {
+        "name": "bundle_size_gzipped",
+        "category": "frontend_performance",
+        "value": 385.7063802083333,
+        "unit": "KB",
+        "target": 200,
+        "compliant": false,
+        "timestamp": "2025-07-21 11:23:54.781067",
+        "metadata": {
+          "uncompressed_kb": 1157.119140625,
+          "js_files_count": 45,
+          "compression_ratio": 3.0
+        }
+      },
+      {
+        "name": "lighthouse_performance",
+        "category": "lighthouse",
+        "value": 85,
+        "unit": "score",
+        "target": 90,
+        "compliant": false,
+        "timestamp": "2025-07-21 11:23:54.781216",
+        "metadata": {
+          "audit_type": "mock"
+        }
+      },
+      {
+        "name": "lighthouse_accessibility",
+        "category": "lighthouse",
+        "value": 95,
+        "unit": "score",
+        "target": 85,
+        "compliant": true,
+        "timestamp": "2025-07-21 11:23:54.781220",
+        "metadata": {
+          "audit_type": "mock"
+        }
+      },
+      {
+        "name": "lighthouse_best_practices",
+        "category": "lighthouse",
+        "value": 90,
+        "unit": "score",
+        "target": 85,
+        "compliant": true,
+        "timestamp": "2025-07-21 11:23:54.781221",
+        "metadata": {
+          "audit_type": "mock"
+        }
+      },
+      {
+        "name": "lighthouse_seo",
+        "category": "lighthouse",
+        "value": 88,
+        "unit": "score",
+        "target": 85,
+        "compliant": true,
+        "timestamp": "2025-07-21 11:23:54.781222",
+        "metadata": {
+          "audit_type": "mock"
+        }
+      }
+    ],
+    "overall_score": 83,
+    "passed": true,
+    "duration_seconds": 0.2593847730313428,
+    "timestamp": "2025-07-21 11:23:54.781232"
+  }
+}

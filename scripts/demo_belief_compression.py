@@ -73,9 +73,7 @@ def demo_multiple_agents():
     baseline_memory = measure_memory()
 
     # Create beliefs without compression
-    print(
-        f"\nCreating {n_agents} agents with {grid_size}x{grid_size} beliefs..."
-    )
+    print(f"\nCreating {n_agents} agents with {grid_size}x{grid_size} beliefs...")
     uncompressed_beliefs = []
     for _ in range(n_agents):
         belief = np.zeros((grid_size, grid_size), dtype=np.float64)
@@ -101,9 +99,7 @@ def demo_multiple_agents():
     compressed_beliefs = []
 
     for _ in range(n_agents):
-        belief = np.zeros(
-            (grid_size, grid_size), dtype=np.float32
-        )  # Use float32
+        belief = np.zeros((grid_size, grid_size), dtype=np.float32)  # Use float32
         # Sparse belief
         for _ in range(10):
             i, j = np.random.randint(0, grid_size, 2)
@@ -187,9 +183,7 @@ def demo_incremental_updates():
         update = update / update.sum()
 
         # Apply incremental update
-        compressed = compressor.incremental_update(
-            compressed, update, learning_rate=0.2
-        )
+        compressed = compressor.incremental_update(compressed, update, learning_rate=0.2)
 
         print(
             f"Step {step + 1}: non-zero values: {compressed.nnz}, "

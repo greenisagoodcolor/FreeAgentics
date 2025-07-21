@@ -3,18 +3,16 @@ Comprehensive Performance Monitoring System for FreeAgentics.
 Tracks system performance metrics, identifies bottlenecks, and provides optimization insights.
 """
 
-import asyncio
 import gc
 import logging
 import threading
 import time
-from collections import defaultdict, deque
+from collections import deque
 from contextlib import contextmanager
 from dataclasses import dataclass, field
 from datetime import datetime, timedelta
-from typing import Any, Dict, List, Optional, Tuple, Union
+from typing import Any, Dict, List, Optional
 
-import numpy as np
 import psutil
 
 logger = logging.getLogger(__name__)
@@ -78,9 +76,7 @@ class PerformanceMonitor:
         self.metrics_history: deque[PerformanceMetrics] = deque(
             maxlen=1000
         )  # Keep last 1000 measurements
-        self.alerts: deque[PerformanceAlert] = deque(
-            maxlen=100
-        )  # Keep last 100 alerts
+        self.alerts: deque[PerformanceAlert] = deque(maxlen=100)  # Keep last 100 alerts
         self.is_monitoring = False
         self.monitor_thread = None
         self.process = psutil.Process()
@@ -118,9 +114,7 @@ class PerformanceMonitor:
             return
 
         self.is_monitoring = True
-        self.monitor_thread = threading.Thread(
-            target=self._monitor_loop, daemon=True
-        )
+        self.monitor_thread = threading.Thread(target=self._monitor_loop, daemon=True)
         self.monitor_thread.start()
         logger.info("Performance monitoring started")
 
@@ -168,29 +162,19 @@ class PerformanceMonitor:
 
         # API metrics
         current_time = time.time()
-        recent_requests = [
-            t for t in self.api_requests if current_time - t < 60
-        ]
+        recent_requests = [t for t in self.api_requests if current_time - t < 60]
         metrics.api_requests_per_second = len(recent_requests) / 60.0
-        metrics.api_response_time_ms = self._get_average_time(
-            self.request_times
-        )
+        metrics.api_response_time_ms = self._get_average_time(self.request_times)
         metrics.api_error_rate = getattr(self, "_api_error_rate", 0.0)
 
         # Agent metrics
         metrics.agent_count = getattr(self, "_agent_count", 0)
-        metrics.agent_step_time_ms = self._get_average_time(
-            self.agent_step_times
-        )
+        metrics.agent_step_time_ms = self._get_average_time(self.agent_step_times)
         metrics.agent_memory_mb = getattr(self, "_agent_memory_mb", 0.0)
 
         # WebSocket metrics
-        metrics.websocket_connections = getattr(
-            self, "_websocket_connections", 0
-        )
-        recent_messages = [
-            t for t in self.websocket_messages if current_time - t < 60
-        ]
+        metrics.websocket_connections = getattr(self, "_websocket_connections", 0)
+        recent_messages = [t for t in self.websocket_messages if current_time - t < 60]
         metrics.websocket_messages_per_second = len(recent_messages) / 60.0
 
         # GIL contention (periodically measured)
@@ -201,9 +185,7 @@ class PerformanceMonitor:
             metrics.gil_contention = self._measure_gil_contention()
             self._last_gil_measurement = current_time
         else:
-            metrics.gil_contention = getattr(
-                self, "_cached_gil_contention", 0.0
-            )
+            metrics.gil_contention = getattr(self, "_cached_gil_contention", 0.0)
 
         return metrics
 
@@ -276,7 +258,9 @@ class PerformanceMonitor:
         severity: str,
     ):
         """Add a performance alert."""
-        message = f"{metric} is {current_value:.2f}, exceeding {severity} threshold of {threshold:.2f}"
+        message = (
+            f"{metric} is {current_value:.2f}, exceeding {severity} threshold of {threshold:.2f}"
+        )
 
         alert = PerformanceAlert(
             metric=metric,
@@ -298,9 +282,7 @@ class PerformanceMonitor:
         try:
             yield
         finally:
-            elapsed = (
-                time.perf_counter() - start_time
-            ) * 1000  # Convert to ms
+            elapsed = (time.perf_counter() - start_time) * 1000  # Convert to ms
             self.request_times.append(elapsed)
             self.api_requests.append(time.time())
 
@@ -311,9 +293,7 @@ class PerformanceMonitor:
         try:
             yield
         finally:
-            elapsed = (
-                time.perf_counter() - start_time
-            ) * 1000  # Convert to ms
+            elapsed = (time.perf_counter() - start_time) * 1000  # Convert to ms
             self.db_query_times.append(elapsed)
 
     @contextmanager
@@ -323,9 +303,7 @@ class PerformanceMonitor:
         try:
             yield
         finally:
-            elapsed = (
-                time.perf_counter() - start_time
-            ) * 1000  # Convert to ms
+            elapsed = (time.perf_counter() - start_time) * 1000  # Convert to ms
             self.agent_step_times.append(elapsed)
 
     # Metric update methods
@@ -366,16 +344,12 @@ class PerformanceMonitor:
             return self.metrics_history[-1]
         return None
 
-    def get_metrics_history(
-        self, minutes: int = 10
-    ) -> List[PerformanceMetrics]:
+    def get_metrics_history(self, minutes: int = 10) -> List[PerformanceMetrics]:
         """Get metrics history for the last N minutes."""
         cutoff_time = datetime.now() - timedelta(minutes=minutes)
         return [m for m in self.metrics_history if m.timestamp >= cutoff_time]
 
-    def get_alerts(
-        self, severity: Optional[str] = None
-    ) -> List[PerformanceAlert]:
+    def get_alerts(self, severity: Optional[str] = None) -> List[PerformanceAlert]:
         """Get recent alerts, optionally filtered by severity."""
         alerts = list(self.alerts)
         if severity:
@@ -418,18 +392,12 @@ class PerformanceMonitor:
                 "api_response_time_ms": avg_metric("api_response_time_ms"),
                 "db_query_time_ms": avg_metric("db_query_time_ms"),
                 "agent_step_time_ms": avg_metric("agent_step_time_ms"),
-                "api_requests_per_second": avg_metric(
-                    "api_requests_per_second"
-                ),
+                "api_requests_per_second": avg_metric("api_requests_per_second"),
             },
             "alerts": {
                 "total": len(self.alerts),
-                "critical": len(
-                    [a for a in self.alerts if a.severity == "critical"]
-                ),
-                "warning": len(
-                    [a for a in self.alerts if a.severity == "warning"]
-                ),
+                "critical": len([a for a in self.alerts if a.severity == "critical"]),
+                "warning": len([a for a in self.alerts if a.severity == "warning"]),
                 "recent": [
                     {
                         "metric": a.metric,
@@ -445,9 +413,7 @@ class PerformanceMonitor:
 
         return report
 
-    def _generate_insights(
-        self, metrics: List[PerformanceMetrics]
-    ) -> List[str]:
+    def _generate_insights(self, metrics: List[PerformanceMetrics]) -> List[str]:
         """Generate performance insights based on metrics."""
         insights: List[str] = []
 
@@ -471,11 +437,7 @@ class PerformanceMonitor:
             )
 
         # API response time insights
-        api_times = [
-            m.api_response_time_ms
-            for m in metrics
-            if m.api_response_time_ms > 0
-        ]
+        api_times = [m.api_response_time_ms for m in metrics if m.api_response_time_ms > 0]
         if api_times:
             avg_api_time = sum(api_times) / len(api_times)
             if avg_api_time > 200:
@@ -484,9 +446,7 @@ class PerformanceMonitor:
                 )
 
         # Database query insights
-        db_times = [
-            m.db_query_time_ms for m in metrics if m.db_query_time_ms > 0
-        ]
+        db_times = [m.db_query_time_ms for m in metrics if m.db_query_time_ms > 0]
         if db_times:
             avg_db_time = sum(db_times) / len(db_times)
             if avg_db_time > 50:
@@ -503,9 +463,7 @@ class PerformanceMonitor:
             )
 
         # GIL contention insights
-        gil_values = [
-            m.gil_contention for m in metrics if m.gil_contention > 0
-        ]
+        gil_values = [m.gil_contention for m in metrics if m.gil_contention > 0]
         if gil_values:
             avg_gil = sum(gil_values) / len(gil_values)
             if avg_gil > 0.8:

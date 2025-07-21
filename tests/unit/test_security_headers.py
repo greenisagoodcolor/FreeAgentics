@@ -65,8 +65,7 @@ class TestCertificatePinner:
 
         assert "example.com" in self.pinner.pins
         assert (
-            "sha256-AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA="
-            in self.pinner.pins["example.com"]
+            "sha256-AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA=" in self.pinner.pins["example.com"]
         )
 
     def test_add_backup_pin(self):
@@ -171,9 +170,7 @@ class TestSecurityHeadersManager:
 
     def test_generate_csp_header_custom_policy(self):
         """Test CSP header generation with custom policy."""
-        self.manager.policy.csp_policy = (
-            "default-src 'self'; script-src 'self' 'unsafe-inline'"
-        )
+        self.manager.policy.csp_policy = "default-src 'self'; script-src 'self' 'unsafe-inline'"
         csp = self.manager.generate_csp_header()
 
         assert csp == "default-src 'self'; script-src 'self' 'unsafe-inline'"

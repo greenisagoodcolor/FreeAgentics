@@ -53,9 +53,7 @@ class ExponentialBackoffRetry:
                 return func(*args, **kwargs)
             except (OperationalError, SQLTimeoutError, ConnectionError) as e:
                 last_exception = e
-                if (
-                    attempt < self.max_retries - 1
-                ):  # Don't sleep on last attempt
+                if attempt < self.max_retries - 1:  # Don't sleep on last attempt
                     delay = self.calculate_delay(attempt)
                     logger.warning(
                         f"Connection attempt {attempt + 1} failed, retrying in {delay}s: {e}"
@@ -65,17 +63,13 @@ class ExponentialBackoffRetry:
                     packet_data = np.random.bytes(1024)
                     _ = sum(packet_data)  # Simulate packet processing
                 else:
-                    logger.error(
-                        f"All {self.max_retries} connection attempts failed"
-                    )
+                    logger.error(f"All {self.max_retries} connection attempts failed")
 
         # Raise the last exception if all retries exhausted
         if last_exception:
             raise last_exception
         else:
-            raise RuntimeError(
-                "Retry logic failed without capturing exception"
-            )
+            raise RuntimeError("Retry logic failed without capturing exception")
 
 
 class DatabaseConnectionManager:
@@ -88,9 +82,7 @@ class DatabaseConnectionManager:
         self._engine: Optional[Engine] = None
         self._async_engine: Optional[AsyncEngine] = None
         self._session_factory: Optional[sessionmaker[Session]] = None
-        self._async_session_factory: Optional[
-            async_sessionmaker[AsyncSession]
-        ] = None
+        self._async_session_factory: Optional[async_sessionmaker[AsyncSession]] = None
 
     def get_connection_with_retry(self, max_retries: int = 3) -> Engine:
         """Get database connection with retry logic."""
@@ -133,16 +125,12 @@ class DatabaseConnectionManager:
         try:
             result = self.retry_handler.execute_with_retry(create_engine_func)
             if result is None:
-                raise RuntimeError(
-                    "Failed to create database engine: retry handler returned None"
-                )
+                raise RuntimeError("Failed to create database engine: retry handler returned None")
             engine = cast(Engine, result)
             self._engine = engine
             return engine
         except Exception as e:
-            logger.error(
-                f"Failed to create database engine after retries: {e}"
-            )
+            logger.error(f"Failed to create database engine after retries: {e}")
             raise RuntimeError(f"Database connection failed: {e}") from e
 
     def get_session_factory(self) -> sessionmaker[Session]:
@@ -152,9 +140,7 @@ class DatabaseConnectionManager:
 
         if self._session_factory is None:
             if self._engine is None:
-                raise RuntimeError(
-                    "Engine not available for session factory creation"
-                )
+                raise RuntimeError("Engine not available for session factory creation")
 
             try:
                 self._session_factory = sessionmaker(
@@ -195,9 +181,7 @@ class DatabaseConnectionManager:
 
         try:
             # Convert PostgreSQL URL to asyncpg format
-            async_url = self.database_url.replace(
-                "postgresql://", "postgresql+asyncpg://"
-            )
+            async_url = self.database_url.replace("postgresql://", "postgresql+asyncpg://")
 
             # Async pool configuration
             async_pool_config = {
@@ -208,9 +192,7 @@ class DatabaseConnectionManager:
                 "pool_recycle": 1800,
             }
 
-            self._async_engine = create_async_engine(
-                async_url, **async_pool_config
-            )
+            self._async_engine = create_async_engine(async_url, **async_pool_config)
             if self._async_engine is None:
                 raise RuntimeError("Failed to create async database engine")
             return self._async_engine
@@ -225,9 +207,7 @@ class DatabaseConnectionManager:
 
         if self._async_session_factory is None:
             if self._async_engine is None:
-                raise RuntimeError(
-                    "Async engine not available for session factory creation"
-                )
+                raise RuntimeError("Async engine not available for session factory creation")
 
             try:
                 self._async_session_factory = async_sessionmaker(
@@ -236,9 +216,7 @@ class DatabaseConnectionManager:
                     expire_on_commit=False,
                 )
             except Exception as e:
-                raise RuntimeError(
-                    f"Failed to create async session factory: {e}"
-                )
+                raise RuntimeError(f"Failed to create async session factory: {e}")
 
         if self._async_session_factory is None:
             raise RuntimeError("Failed to create async session factory")
@@ -257,6 +235,4 @@ class DatabaseConnectionManager:
             return session
         except Exception as e:
             await session.close()
-            raise RuntimeError(
-                f"Async database session validation failed: {e}"
-            )
+            raise RuntimeError(f"Async database session validation failed: {e}")

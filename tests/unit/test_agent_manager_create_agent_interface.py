@@ -39,9 +39,7 @@ class TestAgentManagerCreateAgentInterface:
         }
 
         # This should work according to docs but will fail with current implementation
-        with pytest.raises(
-            TypeError, match="missing 1 required positional argument"
-        ):
+        with pytest.raises(TypeError, match="missing 1 required positional argument"):
             self.manager.create_agent(config)
 
     def test_create_agent_with_async_interface_should_fail(self):
@@ -93,7 +91,6 @@ class TestAgentManagerCreateAgentInterface:
         The test_simple_validation.py expects to get an agent object with .name and .id
         but current implementation returns just the string ID.
         """
-        config = {"name": "TestAgent", "type": "explorer"}
 
         # Current implementation returns string, but tests expect Agent object
         agent_id = self.manager.create_agent("explorer", "TestAgent")

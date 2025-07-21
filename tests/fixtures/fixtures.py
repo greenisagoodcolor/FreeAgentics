@@ -130,7 +130,7 @@ def active_agent(db_session: Session) -> Agent:
 
     # Agent data should already be properly serialized by AgentFactory
     agent_data = agent.dict()
-    
+
     # Ensure status is the string value, not the enum
     if "status" in agent_data and hasattr(agent_data["status"], "value"):
         agent_data["status"] = agent_data["status"].value
@@ -159,13 +159,7 @@ def agent_batch(db_session: Session) -> List[Agent]:
 @pytest.fixture
 def resource_collector_agent(db_session: Session) -> Agent:
     """Create a resource collector agent."""
-    agent = (
-        AgentBuilder()
-        .as_resource_collector()
-        .with_name("ResourceCollector01")
-        .active()
-        .build()
-    )
+    agent = AgentBuilder().as_resource_collector().with_name("ResourceCollector01").active().build()
 
     agent_data = agent.dict()
     # Ensure status is the string value, not the enum
@@ -183,9 +177,7 @@ def resource_collector_agent(db_session: Session) -> Agent:
 @pytest.fixture
 def explorer_agent(db_session: Session) -> Agent:
     """Create an explorer agent."""
-    agent = (
-        AgentBuilder().as_explorer().with_name("Explorer01").active().build()
-    )
+    agent = AgentBuilder().as_explorer().with_name("Explorer01").active().build()
 
     agent_data = agent.dict()
     # Ensure status is the string value, not the enum
@@ -203,13 +195,7 @@ def explorer_agent(db_session: Session) -> Agent:
 @pytest.fixture
 def coordinator_agent(db_session: Session) -> Agent:
     """Create a coordinator agent."""
-    agent = (
-        AgentBuilder()
-        .as_coordinator()
-        .with_name("Coordinator01")
-        .active()
-        .build()
-    )
+    agent = AgentBuilder().as_coordinator().with_name("Coordinator01").active().build()
 
     agent_data = agent.dict()
     # Ensure status is the string value, not the enum
@@ -240,9 +226,7 @@ def coalition_builder() -> CoalitionBuilder:
 
 
 @pytest.fixture
-def coalition_with_agents(
-    db_session: Session, agent_batch: List[Agent]
-) -> Coalition:
+def coalition_with_agents(db_session: Session, agent_batch: List[Agent]) -> Coalition:
     """Create a coalition with member agents."""
     return CoalitionFactory.create(
         session=db_session,
@@ -256,22 +240,23 @@ def coalition_with_agents(
 def resource_coalition(db_session: Session) -> Coalition:
     """Create a resource-focused coalition."""
     coalition = (
-        CoalitionBuilder()
-        .as_resource_coalition()
-        .with_name("ResourceOptimizers")
-        .active()
-        .build()
+        CoalitionBuilder().as_resource_coalition().with_name("ResourceOptimizers").active().build()
     )
 
     # Serialize datetime fields in objectives
     coalition_data = coalition.dict()
     if "objectives" in coalition_data:
         from database.utils import serialize_for_json
+
         coalition_data["objectives"] = serialize_for_json(coalition_data["objectives"])
     if "achieved_objectives" in coalition_data:
-        coalition_data["achieved_objectives"] = serialize_for_json(coalition_data["achieved_objectives"])
+        coalition_data["achieved_objectives"] = serialize_for_json(
+            coalition_data["achieved_objectives"]
+        )
     if "required_capabilities" in coalition_data:
-        coalition_data["required_capabilities"] = serialize_for_json(coalition_data["required_capabilities"])
+        coalition_data["required_capabilities"] = serialize_for_json(
+            coalition_data["required_capabilities"]
+        )
 
     db_coalition = Coalition(**coalition_data)
     db_session.add(db_coalition)
@@ -285,22 +270,23 @@ def resource_coalition(db_session: Session) -> Coalition:
 def exploration_coalition(db_session: Session) -> Coalition:
     """Create an exploration-focused coalition."""
     coalition = (
-        CoalitionBuilder()
-        .as_exploration_coalition()
-        .with_name("Explorers")
-        .active()
-        .build()
+        CoalitionBuilder().as_exploration_coalition().with_name("Explorers").active().build()
     )
 
     # Serialize datetime fields in objectives
     coalition_data = coalition.dict()
     if "objectives" in coalition_data:
         from database.utils import serialize_for_json
+
         coalition_data["objectives"] = serialize_for_json(coalition_data["objectives"])
     if "achieved_objectives" in coalition_data:
-        coalition_data["achieved_objectives"] = serialize_for_json(coalition_data["achieved_objectives"])
+        coalition_data["achieved_objectives"] = serialize_for_json(
+            coalition_data["achieved_objectives"]
+        )
     if "required_capabilities" in coalition_data:
-        coalition_data["required_capabilities"] = serialize_for_json(coalition_data["required_capabilities"])
+        coalition_data["required_capabilities"] = serialize_for_json(
+            coalition_data["required_capabilities"]
+        )
 
     db_coalition = Coalition(**coalition_data)
     db_session.add(db_coalition)
@@ -369,9 +355,7 @@ def large_knowledge_graph(db_session: Session) -> Dict[str, Any]:
 
 
 @pytest.fixture
-def agent_knowledge_scenario(
-    db_session: Session, active_agent: Agent
-) -> Dict[str, Any]:
+def agent_knowledge_scenario(db_session: Session, active_agent: Agent) -> Dict[str, Any]:
     """Create a knowledge scenario for an agent."""
     return KnowledgeGraphFactory.create_agent_knowledge_scenario(
         session=db_session,
@@ -416,9 +400,7 @@ def multi_agent_scenario(db_session: Session) -> Dict[str, Any]:
 
     # Mixed coalition with coordinators
     coordinator_agents = [a for a in agents if "coordinator" in a.template]
-    mixed_agents = (
-        coordinator_agents + resource_agents[:1] + explorer_agents[:1]
-    )
+    mixed_agents = coordinator_agents + resource_agents[:1] + explorer_agents[:1]
     mixed_coalition = CoalitionFactory.create(
         session=db_session, agents=mixed_agents, name="StrategicAlliance"
     )
@@ -448,9 +430,7 @@ def performance_test_scenario(db_session: Session) -> Dict[str, Any]:
         batch_size=50,
     )
 
-    return PerformanceDataFactory.create_performance_scenario(
-        session=db_session, config=config
-    )
+    return PerformanceDataFactory.create_performance_scenario(session=db_session, config=config)
 
 
 @pytest.fixture
@@ -481,9 +461,7 @@ def mock_knowledge_node_data() -> Dict[str, Any]:
 
 
 # Parameterized fixtures
-@pytest.fixture(
-    params=["grid_world", "resource_collector", "explorer", "coordinator"]
-)
+@pytest.fixture(params=["grid_world", "resource_collector", "explorer", "coordinator"])
 def agent_by_template(request, db_session: Session) -> Agent:
     """Create agents of different templates."""
     return AgentFactory.create(
@@ -506,9 +484,7 @@ def agent_batch_sized(request, db_session: Session) -> List[Agent]:
 
 
 @pytest.fixture(params=[0.1, 0.2, 0.3])
-def knowledge_graph_connectivity(
-    request, db_session: Session
-) -> Dict[str, Any]:
+def knowledge_graph_connectivity(request, db_session: Session) -> Dict[str, Any]:
     """Create knowledge graphs with different connectivity levels."""
     return KnowledgeGraphFactory.create_knowledge_graph(
         session=db_session, num_nodes=20, connectivity=request.param

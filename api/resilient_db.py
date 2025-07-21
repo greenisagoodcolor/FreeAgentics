@@ -1,7 +1,7 @@
 """Database connection pooling with resilient error handling."""
 
 import asyncio
-from typing import Any, Dict, Optional
+from typing import Any, Optional
 
 import asyncpg
 
@@ -12,8 +12,6 @@ RETRY_DELAY = 1.0  # seconds
 
 class ConnectionPoolError(Exception):
     """Exception raised when connection pool operations fail."""
-
-    pass
 
 
 # Global connection pool (initialized by create_pool)
@@ -44,9 +42,7 @@ async def create_pool(database_url: str, **kwargs) -> asyncpg.Pool:
             return _pool
         except Exception as e:
             if attempt == MAX_RETRIES - 1:
-                raise ConnectionPoolError(
-                    f"Failed to create connection pool: {e}"
-                )
+                raise ConnectionPoolError(f"Failed to create connection pool: {e}")
             await asyncio.sleep(RETRY_DELAY * (attempt + 1))
 
     raise ConnectionPoolError("Max retries exceeded")

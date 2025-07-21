@@ -1,0 +1,56 @@
+[run]
+branch = True
+source = .
+omit = 
+    # Virtual environments
+    */venv/*
+    */test_venv/*
+    */lint_env/*
+    */security_env/*
+    */pipeline_test_env/*
+    */security_audit_env/*
+    */security_scan_env/*
+    # Test files
+    */tests/*
+    */test_*.py
+    *_test.py
+    # Setup and configuration
+    setup.py
+    */setup.py
+    # Cache and temporary files
+    */__pycache__/*
+    */.pytest_cache/*
+    # Frontend/web files
+    */web/*
+    */node_modules/*
+    # Documentation
+    */docs/*
+    # Scripts
+    */scripts/*
+    # Build artifacts
+    */build/*
+    */dist/*
+    */.eggs/*
+    */htmlcov/*
+    # Third-party code
+    */site-packages/*
+    
+parallel = True
+data_file = .coverage
+concurrency = thread,multiprocessing
+
+[report]
+# NO omit or exclude patterns here - we want full coverage
+precision = 2
+show_missing = True
+skip_empty = True
+
+[html]
+directory = htmlcov
+
+[xml]
+output = coverage.xml
+
+[json]
+output = coverage.json
+pretty_print = True

@@ -19,13 +19,12 @@ from unittest.mock import Mock, patch
 
 import numpy as np
 
-from tests.performance.performance_utils import replace_sleep, cpu_work
+from tests.performance.performance_utils import replace_sleep
+
 # Add parent directory to path
 sys.path.insert(
     0,
-    os.path.dirname(
-        os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
-    ),
+    os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__)))),
 )
 
 from agents.optimized_threadpool_manager import OptimizedThreadPoolManager
@@ -84,9 +83,7 @@ class TestThreadPoolOptimization(unittest.TestCase):
         futures = []
         for _ in range(50):
             for agent in self.test_agents:
-                future = manager.submit_task(
-                    agent.agent_id, "step", {"observation": {}}
-                )
+                future = manager.submit_task(agent.agent_id, "step", {"observation": {}})
                 futures.append(future)
 
         # Wait for some completion
@@ -124,10 +121,7 @@ class TestThreadPoolOptimization(unittest.TestCase):
 
             # Measure throughput
             start_time = time.time()
-            observations = {
-                agent.agent_id: {"data": i}
-                for i, agent in enumerate(self.test_agents)
-            }
+            observations = {agent.agent_id: {"data": i} for i, agent in enumerate(self.test_agents)}
 
             for _ in range(10):
                 results = manager.step_all_agents(observations)
@@ -348,9 +342,7 @@ class TestMemoryAccessPatterns(unittest.TestCase):
         duration = time.time() - start_time
 
         # Should complete quickly with minimal contention
-        self.assertLess(
-            duration, 1.0, "Read-write lock should minimize contention"
-        )
+        self.assertLess(duration, 1.0, "Read-write lock should minimize contention")
 
 
 class TestLockFreeDataStructures(unittest.TestCase):
@@ -378,7 +370,7 @@ class TestLockFreeDataStructures(unittest.TestCase):
                     try:
                         _ = test_queue.get(timeout=0.1)
                         count += 1
-                    except:
+                    except Exception:
                         pass
 
             start_time = time.time()
@@ -435,9 +427,7 @@ class TestLockFreeDataStructures(unittest.TestCase):
                 counter.increment()
 
         # Create multiple threads
-        threads = [
-            threading.Thread(target=increment_thread) for _ in range(10)
-        ]
+        threads = [threading.Thread(target=increment_thread) for _ in range(10)]
 
         # Run threads
         start_time = time.time()
@@ -450,9 +440,7 @@ class TestLockFreeDataStructures(unittest.TestCase):
         duration = time.time() - start_time
 
         # Verify correctness
-        self.assertEqual(
-            counter.get(), 10000, "Atomic counter should maintain consistency"
-        )
+        self.assertEqual(counter.get(), 10000, "Atomic counter should maintain consistency")
 
         # Should be fast
         self.assertLess(duration, 0.5, "Atomic operations should be fast")
@@ -553,9 +541,7 @@ class TestWorkloadSpecificOptimizations(unittest.TestCase):
             np.testing.assert_allclose(v, s, rtol=1e-10)
 
         # Vectorized should be faster
-        self.assertLess(
-            vec_duration, seq_duration, "Vectorized updates should be faster"
-        )
+        self.assertLess(vec_duration, seq_duration, "Vectorized updates should be faster")
 
 
 class TestIntegrationPerformance(unittest.TestCase):
@@ -572,7 +558,7 @@ class TestIntegrationPerformance(unittest.TestCase):
         )
 
         # Create async inference engine
-        inference_engine = AsyncInferenceEngine(max_workers=mp.cpu_count())
+        AsyncInferenceEngine(max_workers=mp.cpu_count())
 
         # Create test agents with optimizations
         agents = []
@@ -589,9 +575,7 @@ class TestIntegrationPerformance(unittest.TestCase):
         # Run performance test
         start_time = time.time()
 
-        observations = {
-            agent.agent_id: {"data": i} for i, agent in enumerate(agents)
-        }
+        observations = {agent.agent_id: {"data": i} for i, agent in enumerate(agents)}
 
         # Run multiple rounds
         for _ in range(10):

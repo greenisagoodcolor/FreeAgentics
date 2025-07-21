@@ -1,11 +1,10 @@
 """Comprehensive tests for database.conversation_models to achieve high coverage."""
 
 from datetime import datetime
-from unittest.mock import patch
 
 import pytest
 from sqlalchemy import create_engine
-from sqlalchemy.orm import Session, sessionmaker
+from sqlalchemy.orm import sessionmaker
 
 from database.base import Base
 from database.conversation_models import (
@@ -56,11 +55,7 @@ class TestConversationModels:
         test_session.commit()
 
         # Retrieve and verify
-        retrieved = (
-            test_session.query(Conversation)
-            .filter_by(user_id="user123")
-            .first()
-        )
+        retrieved = test_session.query(Conversation).filter_by(user_id="user123").first()
 
         assert retrieved is not None
         assert retrieved.user_id == "user123"
@@ -114,11 +109,7 @@ class TestConversationModels:
         test_session.commit()
 
         # Retrieve and verify
-        retrieved = (
-            test_session.query(Message)
-            .filter_by(conversation_id=conversation.id)
-            .first()
-        )
+        retrieved = test_session.query(Message).filter_by(conversation_id=conversation.id).first()
 
         assert retrieved is not None
         assert retrieved.sender_type == "user"
@@ -209,26 +200,17 @@ class TestConversationModels:
         test_session.commit()
 
         # Verify conversation is deleted
-        assert (
-            test_session.query(Conversation).filter_by(id=conv_id).first()
-            is None
-        )
+        assert test_session.query(Conversation).filter_by(id=conv_id).first() is None
 
         # Verify messages are also deleted (cascade)
-        assert (
-            test_session.query(Message).filter_by(id=msg1_id).first() is None
-        )
-        assert (
-            test_session.query(Message).filter_by(id=msg2_id).first() is None
-        )
+        assert test_session.query(Message).filter_by(id=msg1_id).first() is None
+        assert test_session.query(Message).filter_by(id=msg2_id).first() is None
 
     def test_conversation_updated_at(self, test_session):
         """Test updated_at field is updated on modification."""
         conversation = Conversation(user_id="user123")
         test_session.add(conversation)
         test_session.commit()
-
-        original_updated = conversation.updated_at
 
         # Update conversation
         conversation.title = "Updated Title"
@@ -269,9 +251,7 @@ class TestConversationModels:
         test_session.commit()
 
         # Query all conversations for user
-        user_convs = (
-            test_session.query(Conversation).filter_by(user_id=user_id).all()
-        )
+        user_convs = test_session.query(Conversation).filter_by(user_id=user_id).all()
 
         assert len(user_convs) == 3
         titles = [c.title for c in user_convs]
@@ -331,9 +311,7 @@ class TestConversationModels:
         test_session.commit()
 
         # Retrieve and verify JSON string is preserved
-        retrieved = (
-            test_session.query(Message).filter_by(id=message.id).first()
-        )
+        retrieved = test_session.query(Message).filter_by(id=message.id).first()
         assert retrieved.gmn_spec == complex_gmn
 
     def test_table_names(self):

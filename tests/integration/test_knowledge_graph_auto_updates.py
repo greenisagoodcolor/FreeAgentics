@@ -71,14 +71,10 @@ class TestKnowledgeGraphAutoUpdates:
         await auto_updater.process_message(message)
 
         # Query knowledge for the conversation
-        knowledge = await auto_updater.query_knowledge_for_conversation(
-            conversation_id
-        )
+        knowledge = await auto_updater.query_knowledge_for_conversation(conversation_id)
 
         # Should find entities related to this conversation
-        assert (
-            "direct_entities" in knowledge or "connected_entities" in knowledge
-        )
+        assert "direct_entities" in knowledge or "connected_entities" in knowledge
 
         # Test context suggestions
         suggestions = await auto_updater.suggest_conversation_context(
@@ -193,17 +189,12 @@ class TestKnowledgeGraphAutoUpdates:
             await auto_updater.process_message(message)
 
         # Export the knowledge
-        exported_knowledge = await auto_updater.export_conversation_knowledge(
-            conversation_id
-        )
+        exported_knowledge = await auto_updater.export_conversation_knowledge(conversation_id)
 
         # Verify export structure
         assert "extraction_metadata" in exported_knowledge
         assert "nlp_model" in exported_knowledge["extraction_metadata"]
-        assert (
-            "entity_types_detected"
-            in exported_knowledge["extraction_metadata"]
-        )
+        assert "entity_types_detected" in exported_knowledge["extraction_metadata"]
 
     @pytest.mark.asyncio
     async def test_entity_deduplication(self):
@@ -230,17 +221,11 @@ class TestKnowledgeGraphAutoUpdates:
             await auto_updater.process_message(message)
 
         # Query the knowledge graph
-        knowledge = await auto_updater.query_knowledge_for_conversation(
-            conversation_id
-        )
+        knowledge = await auto_updater.query_knowledge_for_conversation(conversation_id)
 
         # Python should appear as a single entity, not duplicated
         direct_entities = knowledge.get("direct_entities", [])
-        python_entities = [
-            e
-            for e in direct_entities
-            if "python" in e.get("label", "").lower()
-        ]
+        python_entities = [e for e in direct_entities if "python" in e.get("label", "").lower()]
 
         # Should have at most one Python entity (due to deduplication)
         assert len(python_entities) <= 1

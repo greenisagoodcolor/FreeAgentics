@@ -34,9 +34,7 @@ class TestBasicRateLimiting:
     @pytest.fixture
     async def redis_client(self):
         """Create real Redis client for integration tests."""
-        client = aioredis.Redis.from_url(
-            "redis://localhost:6379", decode_responses=True
-        )
+        client = aioredis.Redis.from_url("redis://localhost:6379", decode_responses=True)
 
         # Clear test keys
         keys = await client.keys("rate_limit:*")
@@ -60,7 +58,7 @@ class TestBasicRateLimiting:
     async def test_requests_per_second_limit(self, rate_limiter, redis_client):
         """Test request per second rate limiting."""
         # Configure strict per-second limit
-        config = RateLimitConfig(
+        RateLimitConfig(
             requests_per_minute=60,  # 1 per second average
             burst_limit=2,
             window_size=1,
@@ -107,10 +105,7 @@ class TestBasicRateLimiting:
         response = await rate_limiter.check_rate_limit(request)
         assert response is not None
         assert response.status_code == status.HTTP_429_TOO_MANY_REQUESTS
-        assert (
-            "Too many requests per minute"
-            in json.loads(response.body)["message"]
-        )
+        assert "Too many requests per minute" in json.loads(response.body)["message"]
 
     @pytest.mark.asyncio
     async def test_requests_per_hour_limit(self, rate_limiter, redis_client):
@@ -143,10 +138,7 @@ class TestBasicRateLimiting:
         # Next request should be rate limited
         response = await rate_limiter.check_rate_limit(request)
         assert response is not None
-        assert (
-            "Too many requests per hour"
-            in json.loads(response.body)["message"]
-        )
+        assert "Too many requests per hour" in json.loads(response.body)["message"]
 
     @pytest.mark.asyncio
     async def test_burst_capacity(self, rate_limiter, redis_client):
@@ -235,9 +227,7 @@ class TestAdvancedRateLimiting:
     @pytest.fixture
     async def redis_client(self):
         """Create real Redis client for integration tests."""
-        client = aioredis.Redis.from_url(
-            "redis://localhost:6379", decode_responses=True
-        )
+        client = aioredis.Redis.from_url("redis://localhost:6379", decode_responses=True)
 
         # Clear test keys
         keys = await client.keys("rate_limit:*")
@@ -314,9 +304,7 @@ class TestAdvancedRateLimiting:
             request.state.user.user_id = user_id
 
             # Mock hasattr and getattr for user detection
-            with patch(
-                "api.middleware.ddos_protection.hasattr", return_value=True
-            ):
+            with patch("api.middleware.ddos_protection.hasattr", return_value=True):
                 with patch(
                     "api.middleware.ddos_protection.getattr",
                     return_value=user_id,
@@ -458,9 +446,7 @@ class TestRateLimitBypassAttempts:
     @pytest.fixture
     async def redis_client(self):
         """Create real Redis client for integration tests."""
-        client = aioredis.Redis.from_url(
-            "redis://localhost:6379", decode_responses=True
-        )
+        client = aioredis.Redis.from_url("redis://localhost:6379", decode_responses=True)
 
         # Clear test keys
         keys = await client.keys("rate_limit:*")
@@ -559,9 +545,7 @@ class TestRateLimitBypassAttempts:
             if client_ip in TRUSTED_PROXIES:
                 real_ip = (
                     request.headers.get("X-Real-IP")
-                    or request.headers.get("X-Forwarded-For", "")
-                    .split(",")[0]
-                    .strip()
+                    or request.headers.get("X-Forwarded-For", "").split(",")[0].strip()
                 )
                 if real_ip:
                     return f"rate_limit:ip:{real_ip}"
@@ -593,14 +577,10 @@ class TestRateLimitBypassAttempts:
                 assert response is None
             else:
                 assert response is not None
-                assert (
-                    response.status_code == status.HTTP_429_TOO_MANY_REQUESTS
-                )
+                assert response.status_code == status.HTTP_429_TOO_MANY_REQUESTS
 
     @pytest.mark.asyncio
-    async def test_distributed_request_patterns(
-        self, rate_limiter, redis_client
-    ):
+    async def test_distributed_request_patterns(self, rate_limiter, redis_client):
         """Test detection of distributed attack patterns."""
         config = RateLimitConfig(
             requests_per_minute=10,
@@ -681,9 +661,7 @@ class TestRateLimitBypassAttempts:
             await rate_limiter.check_rate_limit(request)
 
     @pytest.mark.asyncio
-    async def test_cache_poisoning_for_rate_limits(
-        self, rate_limiter, redis_client
-    ):
+    async def test_cache_poisoning_for_rate_limits(self, rate_limiter, redis_client):
         """Test cache poisoning attempts on rate limit storage."""
         config = RateLimitConfig(requests_per_minute=10)
 
@@ -715,11 +693,7 @@ class TestRateLimitBypassAttempts:
             try:
                 response = await rate_limiter.check_rate_limit(request)
                 # Should handle malicious input gracefully
-                assert (
-                    response is None
-                    or response.status_code
-                    == status.HTTP_429_TOO_MANY_REQUESTS
-                )
+                assert response is None or response.status_code == status.HTTP_429_TOO_MANY_REQUESTS
             except Exception as e:
                 # Should not raise exceptions on malicious input
                 pytest.fail(f"Rate limiter failed on malicious input: {e}")
@@ -731,9 +705,7 @@ class TestRateLimitingPerformance:
     @pytest.fixture
     async def redis_client(self):
         """Create real Redis client for integration tests."""
-        client = aioredis.Redis.from_url(
-            "redis://localhost:6379", decode_responses=True
-        )
+        client = aioredis.Redis.from_url("redis://localhost:6379", decode_responses=True)
 
         # Clear test keys
         keys = await client.keys("rate_limit:*")
@@ -798,9 +770,7 @@ class TestRateLimitingPerformance:
         max_response_time = max(response_times)
 
         # Performance assertions
-        assert (
-            total_time < 5.0
-        )  # Should handle 1000 requests in under 5 seconds
+        assert total_time < 5.0  # Should handle 1000 requests in under 5 seconds
         assert avg_response_time < 0.01  # Average response under 10ms
         assert max_response_time < 0.1  # Max response under 100ms
 
@@ -809,9 +779,7 @@ class TestRateLimitingPerformance:
         assert successful_requests > 0  # Some requests should succeed
 
     @pytest.mark.asyncio
-    async def test_memory_usage_during_rate_limiting(
-        self, rate_limiter, redis_client
-    ):
+    async def test_memory_usage_during_rate_limiting(self, rate_limiter, redis_client):
         """Test memory usage efficiency of rate limiting."""
         import os
 
@@ -947,9 +915,7 @@ class TestRateLimitingPerformance:
         assert blocked == num_concurrent - successful
 
     @pytest.mark.asyncio
-    async def test_rate_limit_storage_efficiency(
-        self, rate_limiter, redis_client
-    ):
+    async def test_rate_limit_storage_efficiency(self, rate_limiter, redis_client):
         """Test efficiency of rate limit data storage."""
         config = RateLimitConfig(
             requests_per_minute=100,
@@ -997,9 +963,7 @@ class TestWebSocketRateLimiting:
     @pytest.fixture
     async def redis_client(self):
         """Create real Redis client for integration tests."""
-        client = aioredis.Redis.from_url(
-            "redis://localhost:6379", decode_responses=True
-        )
+        client = aioredis.Redis.from_url("redis://localhost:6379", decode_responses=True)
 
         # Clear test keys
         keys = await client.keys("ws_*")
@@ -1049,9 +1013,7 @@ class TestWebSocketRateLimiting:
         message_size = 100  # bytes
 
         for i in range(100):  # Max messages per minute
-            allowed = await ws_rate_limiter.check_message_rate(
-                ip, message_size
-            )
+            allowed = await ws_rate_limiter.check_message_rate(ip, message_size)
             assert allowed is True
 
         # 101st message should be rate limited
@@ -1067,15 +1029,11 @@ class TestWebSocketRateLimiting:
         large_message_size = 100 * 1024  # 100KB
 
         for i in range(10):  # 10 * 100KB = 1MB
-            allowed = await ws_rate_limiter.check_message_rate(
-                ip, large_message_size
-            )
+            allowed = await ws_rate_limiter.check_message_rate(ip, large_message_size)
             assert allowed is True
 
         # Next large message should exceed data limit
-        allowed = await ws_rate_limiter.check_message_rate(
-            ip, large_message_size
-        )
+        allowed = await ws_rate_limiter.check_message_rate(ip, large_message_size)
         assert allowed is False
 
 
@@ -1088,9 +1046,7 @@ class TestRateLimitingIntegration:
         app = FastAPI()
 
         # Add rate limiting middleware
-        app.add_middleware(
-            DDoSProtectionMiddleware, redis_url="redis://localhost:6379"
-        )
+        app.add_middleware(DDoSProtectionMiddleware, redis_url="redis://localhost:6379")
 
         @app.get("/api/v1/test")
         async def test_endpoint():

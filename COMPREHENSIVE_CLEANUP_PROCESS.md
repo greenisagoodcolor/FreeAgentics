@@ -146,20 +146,20 @@ find . -type d -name "*util*" | head -10
 # Example consolidation commands (adjust based on findings)
 # Consolidate test directories
 if [ -d "test" ] && [ -d "tests" ]; then
-    mv test/* tests/ 2>/dev/null || true
-    rmdir test 2>/dev/null || true
+    mv test/* tests/ 2>/dev/null 
+    rmdir test 2>/dev/null 
 fi
 
 # Consolidate documentation directories
 if [ -d "doc" ] && [ -d "docs" ]; then
-    mv doc/* docs/ 2>/dev/null || true
-    rmdir doc 2>/dev/null || true
+    mv doc/* docs/ 2>/dev/null 
+    rmdir doc 2>/dev/null 
 fi
 
 # Consolidate utility directories
 if [ -d "util" ] && [ -d "utils" ]; then
-    mv util/* utils/ 2>/dev/null || true
-    rmdir util 2>/dev/null || true
+    mv util/* utils/ 2>/dev/null 
+    rmdir util 2>/dev/null 
 fi
 ```
 
@@ -171,7 +171,7 @@ fi
 autoflake --check --recursive --remove-all-unused-imports --remove-unused-variables . > unused_imports.txt
 
 # For TypeScript files (if applicable)
-npx ts-unused-exports tsconfig.json > unused_exports.txt 2>/dev/null || true
+npx ts-unused-exports tsconfig.json > unused_exports.txt 2>/dev/null 
 ```
 
 #### 2.3.2 Remove Unused Code
@@ -295,7 +295,7 @@ EOF
 mypy . --ignore-missing-imports --show-error-codes > type_errors.txt 2>&1
 
 # For TypeScript
-npx tsc --noEmit --skipLibCheck > ts_type_errors.txt 2>&1 || true
+npx tsc --noEmit --skipLibCheck > ts_type_errors.txt 2>&1 
 
 # Count and categorize errors
 echo "=== Type Error Summary ===" > type_error_summary.txt
@@ -366,7 +366,7 @@ pip install pre-commit
 pre-commit install
 
 # Run all hooks on all files
-pre-commit run --all-files > precommit_results.txt 2>&1 || true
+pre-commit run --all-files > precommit_results.txt 2>&1 
 
 # Analyze results
 echo "=== Pre-commit Hook Results ===" > precommit_analysis.txt
@@ -404,7 +404,7 @@ fix_precommit_issues() {
             # Auto-fix common issues
             black . --check --diff || black .
             isort . --check-only --diff || isort .
-            flake8 . || true  # Report issues but continue
+            flake8 .   # Report issues but continue
             
             attempt=$((attempt + 1))
         fi
@@ -502,7 +502,7 @@ cat > RED_FLAGS_REPORT.md << 'EOF'
 EOF
 
 # Run security scan
-bandit -r . -f json -o security_scan.json 2>/dev/null || true
+bandit -r . -f json -o security_scan.json 2>/dev/null 
 if [ -f security_scan.json ]; then
     echo "Security scan completed. Review security_scan.json"
 fi

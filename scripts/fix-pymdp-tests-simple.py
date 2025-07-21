@@ -80,7 +80,7 @@ def fix_test_file(filepath):
             f.write(content)
         return True
     else:
-        print(f"  - No changes needed")
+        print("  - No changes needed")
         return False
 
 

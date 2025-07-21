@@ -30,10 +30,7 @@ def test_framework_components():
 
         # Test algorithm standards lookup
         sha256_standard = CryptographyStandards.HASH_ALGORITHMS.get("sha256")
-        if (
-            sha256_standard
-            and sha256_standard.security_level == SecurityLevel.HIGH
-        ):
+        if sha256_standard and sha256_standard.security_level == SecurityLevel.HIGH:
             print("   ✓ Algorithm standards configuration working")
         else:
             print("   ✗ Algorithm standards configuration failed")
@@ -66,9 +63,7 @@ def test_framework_components():
 
         matcher = CryptographicPatternMatcher()
         if matcher.patterns and len(matcher.patterns) > 0:
-            pattern_count = sum(
-                len(patterns) for patterns in matcher.patterns.values()
-            )
+            pattern_count = sum(len(patterns) for patterns in matcher.patterns.values())
             print(f"   ✓ {pattern_count} vulnerability patterns loaded")
         else:
             print("   ✗ Vulnerability patterns not loaded")
@@ -135,9 +130,7 @@ def test_framework_components():
         )
 
         if COMPLIANCE_MAPPINGS and len(COMPLIANCE_MAPPINGS) > 0:
-            print(
-                f"   ✓ {len(COMPLIANCE_MAPPINGS)} compliance standards mapped"
-            )
+            print(f"   ✓ {len(COMPLIANCE_MAPPINGS)} compliance standards mapped")
         else:
             print("   ✗ Compliance mapping failed")
 
@@ -161,9 +154,7 @@ def test_cryptographic_implementations():
         test_data = b"test_data_for_validation"
         sha256_hash = hashlib.sha256(test_data).hexdigest()
 
-        if len(sha256_hash) == 64 and all(
-            c in "0123456789abcdef" for c in sha256_hash
-        ):
+        if len(sha256_hash) == 64 and all(c in "0123456789abcdef" for c in sha256_hash):
             print("   ✓ SHA-256 implementation correct")
         else:
             print("   ✗ SHA-256 implementation failed")
@@ -195,9 +186,7 @@ def test_cryptographic_implementations():
         iv = secrets.token_bytes(12)  # 96-bit IV for GCM
         plaintext = b"test_encryption_data"
 
-        cipher = Cipher(
-            algorithms.AES(key), modes.GCM(iv), backend=default_backend()
-        )
+        cipher = Cipher(algorithms.AES(key), modes.GCM(iv), backend=default_backend())
 
         encryptor = cipher.encryptor()
         ciphertext = encryptor.update(plaintext) + encryptor.finalize()

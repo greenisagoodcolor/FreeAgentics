@@ -76,9 +76,7 @@ class AdaptiveGCTuner:
 
         # GC statistics tracking
         self.stats = GCStats()
-        self._gc_history: List[
-            Tuple[float, int, float]
-        ] = []  # (timestamp, gen, duration)
+        self._gc_history: List[Tuple[float, int, float]] = []  # (timestamp, gen, duration)
         self._last_gc_time = 0.0
         self._lock = threading.RLock()
 
@@ -92,9 +90,7 @@ class AdaptiveGCTuner:
         # Install GC callback for monitoring
         gc.callbacks.append(self._gc_callback)
 
-        logger.info(
-            f"Initialized adaptive GC tuner with thresholds: {self.current_thresholds}"
-        )
+        logger.info(f"Initialized adaptive GC tuner with thresholds: {self.current_thresholds}")
 
     def _apply_gc_settings(self):
         """Apply current GC threshold settings."""
@@ -145,24 +141,18 @@ class AdaptiveGCTuner:
         self.stats.total_gc_time_ms += duration_ms
 
         total_collections = (
-            self.stats.gen0_collections
-            + self.stats.gen1_collections
-            + self.stats.gen2_collections
+            self.stats.gen0_collections + self.stats.gen1_collections + self.stats.gen2_collections
         )
 
         if total_collections > 0:
-            self.stats.avg_gc_time_ms = (
-                self.stats.total_gc_time_ms / total_collections
-            )
+            self.stats.avg_gc_time_ms = self.stats.total_gc_time_ms / total_collections
 
         # Update memory stats
         if psutil:
             process = psutil.Process()
             memory_info = process.memory_info()
             self.stats.current_memory_mb = memory_info.rss / (1024 * 1024)
-            self.stats.peak_memory_mb = max(
-                self.stats.peak_memory_mb, self.stats.current_memory_mb
-            )
+            self.stats.peak_memory_mb = max(self.stats.peak_memory_mb, self.stats.current_memory_mb)
 
     def _auto_tune_thresholds(self):
         """Automatically tune GC thresholds based on performance metrics."""
@@ -187,18 +177,13 @@ class AdaptiveGCTuner:
             gen_counts[gen] += 1
 
         total_gc_time = sum(gen_overheads)
-        gc_overhead = total_gc_time / (
-            recent_window * 1000
-        )  # Fraction of time in GC
+        gc_overhead = total_gc_time / (recent_window * 1000)  # Fraction of time in GC
 
         # Adjust thresholds based on overhead and memory pressure
         if gc_overhead > self.target_gc_overhead:
             # Too much GC overhead - increase thresholds
             self._increase_thresholds()
-        elif (
-            gc_overhead < self.target_gc_overhead * 0.5
-            and self._memory_pressure > 0.7
-        ):
+        elif gc_overhead < self.target_gc_overhead * 0.5 and self._memory_pressure > 0.7:
             # Low GC overhead but high memory pressure - decrease thresholds
             self._decrease_thresholds()
 
@@ -226,9 +211,7 @@ class AdaptiveGCTuner:
                     )
                 )
 
-            logger.debug(
-                f"Increased GC thresholds to: {self.current_thresholds}"
-            )
+            logger.debug(f"Increased GC thresholds to: {self.current_thresholds}")
 
     def _decrease_thresholds(self):
         """Decrease GC thresholds to free memory more aggressively."""
@@ -241,9 +224,7 @@ class AdaptiveGCTuner:
                     )
                 )
 
-            logger.debug(
-                f"Decreased GC thresholds to: {self.current_thresholds}"
-            )
+            logger.debug(f"Decreased GC thresholds to: {self.current_thresholds}")
 
     def update_memory_pressure(self, pressure: float):
         """Update memory pressure metric (0.0 to 1.0).
@@ -448,6 +429,4 @@ def optimize_gc_for_agents(agent_count: int, memory_limit_mb: float):
     if tuner.enable_auto_tuning:
         tuner._auto_tune_thresholds()
 
-    logger.info(
-        f"Optimized GC for {agent_count} agents with {memory_limit_mb}MB limit"
-    )
+    logger.info(f"Optimized GC for {agent_count} agents with {memory_limit_mb}MB limit")

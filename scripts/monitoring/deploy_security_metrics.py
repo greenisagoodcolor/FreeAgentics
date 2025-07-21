@@ -85,9 +85,7 @@ class SecurityMetricsDeployer:
                             "targets": ["localhost:8000"],
                             "labels": {
                                 "service": "freeagentics",
-                                "environment": os.getenv(
-                                    "ENVIRONMENT", "production"
-                                ),
+                                "environment": os.getenv("ENVIRONMENT", "production"),
                             },
                         }
                     ],
@@ -97,9 +95,7 @@ class SecurityMetricsDeployer:
                 }
             ],
             "alerting": {
-                "alertmanagers": [
-                    {"static_configs": [{"targets": ["alertmanager:9093"]}]}
-                ]
+                "alertmanagers": [{"static_configs": [{"targets": ["alertmanager:9093"]}]}]
             },
         }
 
@@ -162,9 +158,7 @@ class SecurityMetricsDeployer:
                             "smarthost": "smtp.gmail.com:587",
                             "auth_username": "alerts@freeagentics.com",
                             "auth_password": os.getenv("SMTP_PASSWORD", ""),
-                            "headers": {
-                                "Subject": "Security Alert: {{ .GroupLabels.alertname }}"
-                            },
+                            "headers": {"Subject": "Security Alert: {{ .GroupLabels.alertname }}"},
                         }
                     ],
                 },
@@ -427,9 +421,7 @@ def track_data_access(resource: str) -> Callable:
 
         # Deploy Alertmanager config
         alertmanager_config = self.create_alertmanager_config()
-        with open(
-            "monitoring/alertmanager/alertmanager-security.yml", "w"
-        ) as f:
+        with open("monitoring/alertmanager/alertmanager-security.yml", "w") as f:
             yaml.dump(alertmanager_config, f, default_flow_style=False)
         print("✓ Alertmanager configuration deployed")
 

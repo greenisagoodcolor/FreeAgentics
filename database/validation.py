@@ -3,15 +3,36 @@
 import logging
 import sys
 import traceback
-from typing import Any, Dict, List, Tuple
+from typing import Any, Dict, List, Tuple, Type
 
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
 
 
-def _test_single_import(
-    module_name: str, display_name: str
-) -> Tuple[bool, str]:
+def validate_model_data(model_class: Type, data: Dict[str, Any]) -> bool:
+    """Validate data for a SQLAlchemy model.
+
+    Args:
+        model_class: The SQLAlchemy model class
+        data: Dictionary of data to validate
+
+    Returns:
+        True if data is valid for the model, False otherwise
+    """
+    try:
+        # Check if model_class has required attributes
+        if not hasattr(model_class, "__tablename__"):
+            return False
+
+        # Try to create instance with the data (basic validation)
+        # This is a simple validation - just check if we can instantiate
+        model_class(**data)
+        return True
+    except (TypeError, ValueError, AttributeError):
+        return False
+
+
+def _test_single_import(module_name: str, display_name: str) -> Tuple[bool, str]:
     """Test a single import and return success status and error message if any."""
     try:
         # The actual import would happen in the calling function
@@ -60,9 +81,7 @@ def _test_infrastructure_imports() -> Dict[str, bool]:
     results["session"], _ = _test_single_import("session", "Session")
 
     # Test repository imports
-    results["repositories"], _ = _test_single_import(
-        "repositories", "Repositories"
-    )
+    results["repositories"], _ = _test_single_import("repositories", "Repositories")
 
     return results
 
@@ -186,14 +205,10 @@ def test_session_type_annotations() -> Dict[str, bool]:
         agent_repo_hints = get_type_hints(AgentRepository.get_agent)
         if "return" in agent_repo_hints:
             results["repository_annotations"] = True
-            logger.info(
-                f"✓ AgentRepository.get_agent return type: {agent_repo_hints['return']}"
-            )
+            logger.info(f"✓ AgentRepository.get_agent return type: {agent_repo_hints['return']}")
         else:
             results["repository_annotations"] = False
-            logger.error(
-                "✗ AgentRepository.get_agent missing return type annotation"
-            )
+            logger.error("✗ AgentRepository.get_agent missing return type annotation")
 
         return results
 
@@ -264,24 +279,18 @@ def _test_numpy_array_serialization() -> Tuple[bool, List[str]]:
                 numpy_serialization_success = False
                 continue
 
-            deserialized = PyMDPStateSerializer.deserialize_numpy_array(
-                serialized
-            )
+            deserialized = PyMDPStateSerializer.deserialize_numpy_array(serialized)
             if deserialized is None:
-                numpy_errors.append(
-                    f"Array {i}: deserialization returned None"
-                )
+                numpy_errors.append(f"Array {i}: deserialization returned None")
                 numpy_serialization_success = False
                 continue
 
             if not isinstance(deserialized, np.ndarray):
-                numpy_errors.append(
-                    f"Array {i}: not numpy array after deserialization"
-                )
+                numpy_errors.append(f"Array {i}: not numpy array after deserialization")
                 numpy_serialization_success = False
                 continue
 
-            if test_array.shape != deserialized.shape:  
+            if test_array.shape != deserialized.shape:
                 numpy_errors.append(f"Array {i}: shape mismatch")
                 numpy_serialization_success = False
                 continue
@@ -318,9 +327,7 @@ def _validate_deserialized_a_matrices(
         validation_errors.append("A matrices count mismatch")
         return False, validation_errors
 
-    for i, (original, deserialized) in enumerate(
-        zip(test_state["A"], deserialized_A)
-    ):
+    for i, (original, deserialized) in enumerate(zip(test_state["A"], deserialized_A)):
         if not isinstance(deserialized, np.ndarray):
             validation_errors.append(f"A[{i}] not numpy array")
             return False, validation_errors
@@ -377,12 +384,8 @@ def _test_full_state_serialization() -> Tuple[bool, List[str]]:
         "other_param": "test_value",
     }
 
-    serialized_state = PyMDPStateSerializer.serialize_pymdp_matrices(
-        test_state
-    )
-    deserialized_state = PyMDPStateSerializer.deserialize_pymdp_matrices(
-        serialized_state
-    )
+    serialized_state = PyMDPStateSerializer.serialize_pymdp_matrices(test_state)
+    deserialized_state = PyMDPStateSerializer.deserialize_pymdp_matrices(serialized_state)
 
     # Check if arrays are correctly deserialized
     deserialized_A = deserialized_state.get("A")
@@ -394,16 +397,12 @@ def _test_full_state_serialization() -> Tuple[bool, List[str]]:
 
     try:
         # Check A matrices
-        success, errors = _validate_deserialized_a_matrices(
-            test_state, deserialized_A
-        )
+        success, errors = _validate_deserialized_a_matrices(test_state, deserialized_A)
         if not success:
             validation_errors.extend(errors)
 
         # Check beliefs
-        success, errors = _validate_deserialized_beliefs(
-            test_state, deserialized_beliefs
-        )
+        success, errors = _validate_deserialized_beliefs(test_state, deserialized_beliefs)
         if not success:
             validation_errors.extend(errors)
 
@@ -431,9 +430,7 @@ def test_serialization() -> Dict[str, Any]:
             logger.info("✓ Numpy array serialization works correctly")
         else:
             results["numpy_serialization"] = False
-            logger.error(
-                f"✗ Numpy array serialization failed: {'; '.join(numpy_errors)}"
-            )
+            logger.error(f"✗ Numpy array serialization failed: {'; '.join(numpy_errors)}")
 
         # Test full state serialization
         state_success, validation_errors = _test_full_state_serialization()
@@ -443,16 +440,12 @@ def test_serialization() -> Dict[str, Any]:
             logger.info("✓ PyMDP state serialization works correctly")
         else:
             results["state_serialization"] = False
-            logger.error(
-                f"✗ PyMDP state serialization failed: {'; '.join(validation_errors)}"
-            )
+            logger.error(f"✗ PyMDP state serialization failed: {'; '.join(validation_errors)}")
 
         return results
 
     except ImportError as e:
-        logger.error(
-            f"✗ Serialization test failed - missing dependencies: {e}"
-        )
+        logger.error(f"✗ Serialization test failed - missing dependencies: {e}")
         return {
             "serialization": False,
             "error": "Missing numpy or serialization dependencies",

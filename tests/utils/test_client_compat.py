@@ -44,9 +44,7 @@ class CompatTestClient:
         self.transport = httpx.ASGITransport(app=app)
 
         # Create httpx client with the transport
-        self.client = httpx.Client(
-            transport=self.transport, base_url=base_url, **kwargs
-        )
+        self.client = httpx.Client(transport=self.transport, base_url=base_url, **kwargs)
 
     def __enter__(self):
         """Enter context manager."""

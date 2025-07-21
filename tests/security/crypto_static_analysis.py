@@ -282,9 +282,7 @@ class CryptographicStaticAnalyzer:
 
     def analyze_project(self) -> List[CryptoVulnerability]:
         """Analyze the entire project for cryptographic vulnerabilities."""
-        logger.info(
-            f"Starting cryptographic static analysis of {self.project_root}"
-        )
+        logger.info(f"Starting cryptographic static analysis of {self.project_root}")
 
         # Get all source files
         source_files = self._get_source_files()
@@ -297,9 +295,7 @@ class CryptographicStaticAnalyzer:
             except Exception as e:
                 logger.warning(f"Error analyzing {file_path}: {e}")
 
-        logger.info(
-            f"Analysis complete. Found {len(self.vulnerabilities)} potential issues"
-        )
+        logger.info(f"Analysis complete. Found {len(self.vulnerabilities)} potential issues")
         return self.vulnerabilities
 
     def _get_source_files(self) -> List[Path]:
@@ -323,10 +319,7 @@ class CryptographicStaticAnalyzer:
             if (
                 file_path.is_file()
                 and file_path.suffix in self.file_extensions
-                and not any(
-                    exclude_dir in file_path.parts
-                    for exclude_dir in exclude_dirs
-                )
+                and not any(exclude_dir in file_path.parts for exclude_dir in exclude_dirs)
             ):
                 source_files.append(file_path)
 
@@ -350,9 +343,7 @@ class CryptographicStaticAnalyzer:
         except Exception as e:
             logger.warning(f"Error reading {file_path}: {e}")
 
-    def _analyze_line(
-        self, file_path: Path, line_number: int, line_content: str
-    ):
+    def _analyze_line(self, file_path: Path, line_number: int, line_content: str):
         """Analyze a single line for cryptographic vulnerabilities."""
         line_stripped = line_content.strip()
 
@@ -369,9 +360,7 @@ class CryptographicStaticAnalyzer:
                     vulnerability = CryptoVulnerability(
                         vulnerability_type=vuln_type,
                         severity=pattern_info["severity"],
-                        file_path=str(
-                            file_path.relative_to(self.project_root)
-                        ),
+                        file_path=str(file_path.relative_to(self.project_root)),
                         line_number=line_number,
                         line_content=line_stripped,
                         description=pattern_info["description"],
@@ -404,10 +393,7 @@ class CryptographicStaticAnalyzer:
         line_lower = vulnerability.line_content.lower()
 
         # Skip test files and comments
-        if (
-            "test_" in vulnerability.file_path
-            or "/test" in vulnerability.file_path
-        ):
+        if "test_" in vulnerability.file_path or "/test" in vulnerability.file_path:
             return True
 
         # Skip documentation strings
@@ -415,17 +401,11 @@ class CryptographicStaticAnalyzer:
             return True
 
         # Skip example or demo code
-        if any(
-            keyword in line_lower
-            for keyword in ["example", "demo", "sample", "placeholder"]
-        ):
+        if any(keyword in line_lower for keyword in ["example", "demo", "sample", "placeholder"]):
             return True
 
         # Context-specific filters
-        if (
-            vulnerability.vulnerability_type
-            == VulnerabilityType.HARDCODED_SECRET
-        ):
+        if vulnerability.vulnerability_type == VulnerabilityType.HARDCODED_SECRET:
             # Allow development defaults with proper warnings
             if "dev_" in line_lower and "not_for_production" in line_lower:
                 return False  # This is actually a good pattern
@@ -474,15 +454,9 @@ class CryptographicStaticAnalyzer:
         return {
             "analysis_summary": {
                 "total_vulnerabilities": len(self.vulnerabilities),
-                "critical_count": len(
-                    vuln_by_severity.get(SecurityLevel.CRITICAL, [])
-                ),
-                "high_count": len(
-                    vuln_by_severity.get(SecurityLevel.HIGH, [])
-                ),
-                "medium_count": len(
-                    vuln_by_severity.get(SecurityLevel.MEDIUM, [])
-                ),
+                "critical_count": len(vuln_by_severity.get(SecurityLevel.CRITICAL, [])),
+                "high_count": len(vuln_by_severity.get(SecurityLevel.HIGH, [])),
+                "medium_count": len(vuln_by_severity.get(SecurityLevel.MEDIUM, [])),
                 "low_count": len(vuln_by_severity.get(SecurityLevel.LOW, [])),
                 "risk_score": risk_score,
                 "files_analyzed": len(self._get_source_files()),
@@ -542,20 +516,14 @@ class CryptographicStaticAnalyzer:
         recommendations = []
 
         # Critical issues first
-        critical_vulns = [
-            v
-            for v in self.vulnerabilities
-            if v.severity == SecurityLevel.CRITICAL
-        ]
+        critical_vulns = [v for v in self.vulnerabilities if v.severity == SecurityLevel.CRITICAL]
         if critical_vulns:
             recommendations.append(
                 {
                     "priority": "CRITICAL",
                     "title": "Address Critical Cryptographic Vulnerabilities",
                     "description": f"Found {len(critical_vulns)} critical cryptographic issues",
-                    "action_items": list(
-                        set([v.recommendation for v in critical_vulns[:5]])
-                    ),
+                    "action_items": list(set([v.recommendation for v in critical_vulns[:5]])),
                 }
             )
 
@@ -592,9 +560,7 @@ class CryptographicStaticAnalyzer:
 
         return recommendations
 
-    def _identify_top_risk_files(
-        self, vuln_by_file: Dict[str, List]
-    ) -> List[Dict[str, Any]]:
+    def _identify_top_risk_files(self, vuln_by_file: Dict[str, List]) -> List[Dict[str, Any]]:
         """Identify files with highest risk."""
         file_risks = []
 
@@ -606,9 +572,7 @@ class CryptographicStaticAnalyzer:
                     else (
                         15
                         if v.severity == SecurityLevel.HIGH
-                        else 5
-                        if v.severity == SecurityLevel.MEDIUM
-                        else 1
+                        else 5 if v.severity == SecurityLevel.MEDIUM else 1
                     )
                 )
                 for v in vulns
@@ -620,15 +584,9 @@ class CryptographicStaticAnalyzer:
                     "risk_score": risk_score,
                     "vulnerability_count": len(vulns),
                     "critical_count": len(
-                        [
-                            v
-                            for v in vulns
-                            if v.severity == SecurityLevel.CRITICAL
-                        ]
+                        [v for v in vulns if v.severity == SecurityLevel.CRITICAL]
                     ),
-                    "high_count": len(
-                        [v for v in vulns if v.severity == SecurityLevel.HIGH]
-                    ),
+                    "high_count": len([v for v in vulns if v.severity == SecurityLevel.HIGH]),
                 }
             )
 
@@ -779,9 +737,7 @@ def main():
     import argparse
     import json
 
-    parser = argparse.ArgumentParser(
-        description="Cryptographic static code analysis"
-    )
+    parser = argparse.ArgumentParser(description="Cryptographic static code analysis")
     parser.add_argument("project_path", help="Path to project root")
     parser.add_argument("--output", "-o", help="Output file for results")
     parser.add_argument("--format", choices=["json", "text"], default="json")
@@ -811,14 +767,10 @@ def main():
                 f.write(
                     f"Total vulnerabilities: {report['analysis_summary']['total_vulnerabilities']}\n"
                 )
-                f.write(
-                    f"Risk score: {report['analysis_summary']['risk_score']}\n\n"
-                )
+                f.write(f"Risk score: {report['analysis_summary']['risk_score']}\n\n")
 
                 for vuln in vulnerabilities:
-                    f.write(
-                        f"{vuln.severity.value.upper()}: {vuln.description}\n"
-                    )
+                    f.write(f"{vuln.severity.value.upper()}: {vuln.description}\n")
                     f.write(f"File: {vuln.file_path}:{vuln.line_number}\n")
                     f.write(f"Recommendation: {vuln.recommendation}\n\n")
     else:

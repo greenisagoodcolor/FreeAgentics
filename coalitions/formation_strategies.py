@@ -6,8 +6,6 @@ from dataclasses import dataclass
 from itertools import combinations
 from typing import Any, Dict, List, Optional, Set, Tuple
 
-import numpy as np
-
 from coalitions.coalition import Coalition, CoalitionObjective, CoalitionRole
 
 logger = logging.getLogger(__name__)
@@ -113,8 +111,7 @@ class FormationStrategy(ABC):
         # Calculate capability coverage
         required_capabilities = set(objective.required_capabilities)
         capability_coverage = (
-            len(all_capabilities.intersection(required_capabilities))
-            / len(required_capabilities)
+            len(all_capabilities.intersection(required_capabilities)) / len(required_capabilities)
             if required_capabilities
             else 1.0
         )
@@ -150,9 +147,7 @@ class FormationStrategy(ABC):
         for i, agent1 in enumerate(agents):
             for agent2 in agents[i + 1 :]:
                 # Check if agent1 has preference for agent2
-                preference = agent1.preferences.get(
-                    agent2.agent_id, 0.5
-                )  # Default neutral
+                preference = agent1.preferences.get(agent2.agent_id, 0.5)  # Default neutral
                 synergy_sum += preference
                 pair_count += 1
 
@@ -188,9 +183,7 @@ class GreedyFormation(FormationStrategy):
         assigned_agents = set()
 
         # Sort objectives by priority (highest first)
-        sorted_objectives = sorted(
-            objectives, key=lambda x: x.priority, reverse=True
-        )
+        sorted_objectives = sorted(objectives, key=lambda x: x.priority, reverse=True)
 
         for obj_idx, objective in enumerate(sorted_objectives):
             # Create coalition for this objective
@@ -203,11 +196,7 @@ class GreedyFormation(FormationStrategy):
             )
 
             # Find best agents for this objective
-            candidate_agents = [
-                a
-                for a in available_agents
-                if a.agent_id not in assigned_agents
-            ]
+            candidate_agents = [a for a in available_agents if a.agent_id not in assigned_agents]
 
             # Score each agent for this objective
             agent_scores = []
@@ -215,9 +204,7 @@ class GreedyFormation(FormationStrategy):
                 agent_caps = set(agent.capabilities)
                 required_caps = set(objective.required_capabilities)
 
-                capability_match = self._calculate_capability_match(
-                    agent_caps, required_caps
-                )
+                capability_match = self._calculate_capability_match(agent_caps, required_caps)
                 score = capability_match * agent.reputation * agent.capacity
 
                 agent_scores.append((agent, score))
@@ -242,10 +229,7 @@ class GreedyFormation(FormationStrategy):
                 new_capabilities = agent_caps - covered_capabilities
 
                 if (
-                    new_capabilities
-                    and not required_capabilities.issubset(
-                        covered_capabilities
-                    )
+                    new_capabilities and not required_capabilities.issubset(covered_capabilities)
                 ) or len(
                     coalition.members
                 ) == 0:  # Always add at least one agent
@@ -255,17 +239,13 @@ class GreedyFormation(FormationStrategy):
                         else CoalitionRole.MEMBER
                     )
 
-                    if coalition.add_member(
-                        agent.agent_id, role, agent.capabilities
-                    ):
+                    if coalition.add_member(agent.agent_id, role, agent.capabilities):
                         assigned_agents.add(agent.agent_id)
                         agent.current_coalitions.append(coalition_id)
                         covered_capabilities.update(agent_caps)
 
                         # Stop if all required capabilities are covered
-                        if required_capabilities.issubset(
-                            covered_capabilities
-                        ):
+                        if required_capabilities.issubset(covered_capabilities):
                             break
 
             # Only add coalition if it has members and can make progress
@@ -277,9 +257,7 @@ class GreedyFormation(FormationStrategy):
                 )
 
         formation_time = time.time() - start_time
-        unassigned_agents = [
-            a.agent_id for a in agents if a.agent_id not in assigned_agents
-        ]
+        unassigned_agents = [a.agent_id for a in agents if a.agent_id not in assigned_agents]
 
         # Calculate objective coverage
         achievable_objectives = 0
@@ -288,9 +266,7 @@ class GreedyFormation(FormationStrategy):
                 if coalition.can_achieve_objective(objective):
                     achievable_objectives += 1
 
-        objective_coverage = (
-            achievable_objectives / len(objectives) if objectives else 1.0
-        )
+        objective_coverage = achievable_objectives / len(objectives) if objectives else 1.0
 
         # Calculate formation score
         total_value = sum(
@@ -335,13 +311,8 @@ class OptimalFormation(FormationStrategy):
         start_time = time.time()
 
         # Fall back to greedy if problem is too large
-        if (
-            len(agents) > self.max_search_size
-            or len(objectives) > self.max_search_size
-        ):
-            logger.warning(
-                "Problem too large for optimal search, falling back to greedy"
-            )
+        if len(agents) > self.max_search_size or len(objectives) > self.max_search_size:
+            logger.warning("Problem too large for optimal search, falling back to greedy")
             greedy = GreedyFormation()
             return greedy.form_coalitions(agents, objectives, constraints)
 
@@ -352,12 +323,8 @@ class OptimalFormation(FormationStrategy):
         best_score = -1.0
 
         # Generate all possible ways to assign agents to objectives
-        for assignment in self._generate_assignments(
-            agents, objectives, max_coalition_size
-        ):
-            coalitions = self._create_coalitions_from_assignment(
-                assignment, objectives
-            )
+        for assignment in self._generate_assignments(agents, objectives, max_coalition_size):
+            coalitions = self._create_coalitions_from_assignment(assignment, objectives)
             score = self._evaluate_formation(coalitions, objectives)
 
             if score > best_score:
@@ -374,9 +341,7 @@ class OptimalFormation(FormationStrategy):
         for coalition in best_formation:
             assigned_agents.update(coalition.members.keys())
 
-        unassigned_agents = [
-            a.agent_id for a in agents if a.agent_id not in assigned_agents
-        ]
+        unassigned_agents = [a.agent_id for a in agents if a.agent_id not in assigned_agents]
 
         achievable_objectives = sum(
             1
@@ -384,9 +349,7 @@ class OptimalFormation(FormationStrategy):
             for objective in coalition.objectives
             if coalition.can_achieve_objective(objective)
         )
-        objective_coverage = (
-            achievable_objectives / len(objectives) if objectives else 1.0
-        )
+        objective_coverage = achievable_objectives / len(objectives) if objectives else 1.0
 
         return FormationResult(
             coalitions=best_formation,
@@ -518,9 +481,7 @@ class HierarchicalFormation(FormationStrategy):
             )
 
             # Find best coordinator (agent with highest reputation and broad capabilities)
-            available_agents = [
-                a for a in agents if a.agent_id not in assigned_agents
-            ]
+            available_agents = [a for a in agents if a.agent_id not in assigned_agents]
 
             if not available_agents:
                 continue
@@ -603,9 +564,7 @@ class HierarchicalFormation(FormationStrategy):
                 )
 
         formation_time = time.time() - start_time
-        unassigned_agents = [
-            a.agent_id for a in agents if a.agent_id not in assigned_agents
-        ]
+        unassigned_agents = [a.agent_id for a in agents if a.agent_id not in assigned_agents]
 
         # Calculate metrics
         achievable_objectives = 0
@@ -614,20 +573,14 @@ class HierarchicalFormation(FormationStrategy):
                 if coalition.can_achieve_objective(objective):
                     achievable_objectives += 1
 
-        objective_coverage = (
-            achievable_objectives / len(objectives) if objectives else 1.0
-        )
+        objective_coverage = achievable_objectives / len(objectives) if objectives else 1.0
 
         # Calculate formation score with hierarchy bonus
         total_value = 0.0
         for coalition in coalitions:
             for objective in coalition.objectives:
-                coalition_agents = [
-                    a for a in agents if a.agent_id in coalition.members
-                ]
-                value = self._calculate_coalition_value(
-                    coalition_agents, objective
-                )
+                coalition_agents = [a for a in agents if a.agent_id in coalition.members]
+                value = self._calculate_coalition_value(coalition_agents, objective)
 
                 # Hierarchy bonus for well-structured coalitions
                 hierarchy_bonus = self._calculate_hierarchy_bonus(coalition)
@@ -669,9 +622,7 @@ class HierarchicalFormation(FormationStrategy):
                     objective_caps.union(group_caps)
                 )
 
-                if (
-                    overlap > best_overlap and overlap > 0.3
-                ):  # Threshold for grouping
+                if overlap > best_overlap and overlap > 0.3:  # Threshold for grouping
                     best_group = group
                     best_overlap = overlap
 
@@ -692,9 +643,7 @@ class HierarchicalFormation(FormationStrategy):
         # Count roles
         role_counts: Dict[str, int] = {}
         for member in coalition.members.values():
-            role_counts[member.role.value] = (
-                role_counts.get(member.role.value, 0) + 1
-            )
+            role_counts[member.role.value] = role_counts.get(member.role.value, 0) + 1
 
         # Ideal hierarchy ratios
         leaders = role_counts.get(CoalitionRole.LEADER.value, 0)
@@ -702,9 +651,7 @@ class HierarchicalFormation(FormationStrategy):
         members = role_counts.get(CoalitionRole.MEMBER.value, 0)
 
         # Should have 1 leader, some coordinators, and members
-        ideal_coordinators = max(
-            1, member_count // 5
-        )  # 1 coordinator per 5 members
+        ideal_coordinators = max(1, member_count // 5)  # 1 coordinator per 5 members
 
         hierarchy_score = 0.0
 
@@ -714,9 +661,7 @@ class HierarchicalFormation(FormationStrategy):
 
         # Check coordinator ratio
         if coordinators > 0:
-            coordinator_ratio = abs(coordinators - ideal_coordinators) / max(
-                ideal_coordinators, 1
-            )
+            coordinator_ratio = abs(coordinators - ideal_coordinators) / max(ideal_coordinators, 1)
             hierarchy_score += 0.3 * max(0.0, 1.0 - coordinator_ratio)
 
         # Check span of control (not too many direct reports)

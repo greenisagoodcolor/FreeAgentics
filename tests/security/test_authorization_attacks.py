@@ -115,8 +115,7 @@ class TestIDORVulnerabilities:
                                 {
                                     "id": predicted_id,
                                     "status": response.status_code,
-                                    "found": response.status_code
-                                    == status.HTTP_200_OK,
+                                    "found": response.status_code == status.HTTP_200_OK,
                                 }
                             )
             except ValueError:
@@ -215,9 +214,7 @@ class TestIDORVulnerabilities:
             if response.status_code == status.HTTP_200_OK:
                 data = response.json()
                 # Verify no sensitive data is exposed
-                assert "parameters" not in data or "owner" not in data.get(
-                    "parameters", {}
-                )
+                assert "parameters" not in data or "owner" not in data.get("parameters", {})
 
             # Attempt 2: Array parameter pollution
             response = client.get(
@@ -276,23 +273,15 @@ class TestIDORVulnerabilities:
                 if method == "GET":
                     response = client.get(endpoint, headers=attacker_headers)
                 elif method == "PUT":
-                    response = client.put(
-                        endpoint, headers=attacker_headers, json={}
-                    )
+                    response = client.put(endpoint, headers=attacker_headers, json={})
                 elif method == "DELETE":
-                    response = client.delete(
-                        endpoint, headers=attacker_headers
-                    )
+                    response = client.delete(endpoint, headers=attacker_headers)
                 elif method == "POST":
-                    response = client.post(
-                        endpoint, headers=attacker_headers, json={}
-                    )
+                    response = client.post(endpoint, headers=attacker_headers, json={})
 
                 # Check if response differs for existing vs non-existing resources
                 non_existing_id = f"non_existing_{secrets.token_hex(8)}"
-                non_existing_endpoint = endpoint.replace(
-                    existing_id, non_existing_id
-                )
+                non_existing_endpoint = endpoint.replace(existing_id, non_existing_id)
 
                 if method == "GET":
                     response_non_existing = client.get(
@@ -369,9 +358,7 @@ class TestPrivilegeEscalationVectors:
         original_token = observer["token"]
 
         # Decode without verification
-        unverified_payload = jwt.decode(
-            original_token, options={"verify_signature": False}
-        )
+        unverified_payload = jwt.decode(original_token, options={"verify_signature": False})
 
         # Attempt 1: Change algorithm to none
         try:
@@ -409,13 +396,9 @@ class TestPrivilegeEscalationVectors:
 
             for secret in potential_secrets:
                 try:
-                    hs256_token = jwt.encode(
-                        admin_payload, secret, algorithm="HS256"
-                    )
+                    hs256_token = jwt.encode(admin_payload, secret, algorithm="HS256")
                     headers = {"Authorization": f"Bearer {hs256_token}"}
-                    response = client.get(
-                        "/api/v1/system/config", headers=headers
-                    )
+                    response = client.get("/api/v1/system/config", headers=headers)
 
                     # Should not authenticate with algorithm confusion
                     assert (
@@ -463,18 +446,13 @@ class TestPrivilegeEscalationVectors:
         ]
 
         for payload in injection_payloads:
-            response = client.post(
-                "/api/v1/agents", headers=headers, json=payload
-            )
+            response = client.post("/api/v1/agents", headers=headers, json=payload)
 
             # None should grant elevated privileges
             if response.status_code == status.HTTP_201_CREATED:
                 # Check that created resource doesn't have elevated permissions
                 agent_data = response.json()
-                assert (
-                    "role" not in agent_data
-                    or agent_data.get("role") != "admin"
-                )
+                assert "role" not in agent_data or agent_data.get("role") != "admin"
 
             # Try to access admin endpoint after each attempt
             response = client.get("/api/v1/system/config", headers=headers)
@@ -509,12 +487,8 @@ class TestPrivilegeEscalationVectors:
         response = client.get("/api/v1/coalitions", headers=headers)
         if response.status_code == status.HTTP_200_OK:
             coalitions = response.json()
-            bypass_coalitions = [
-                c for c in coalitions if "Bypass" in c.get("name", "")
-            ]
-            assert (
-                len(bypass_coalitions) == 0
-            ), "Coalition created through permission bypass"
+            bypass_coalitions = [c for c in coalitions if "Bypass" in c.get("name", "")]
+            assert len(bypass_coalitions) == 0, "Coalition created through permission bypass"
 
         # Chain 2: Exploit race condition with token refresh
         def attempt_privileged_action():
@@ -539,12 +513,8 @@ class TestPrivilegeEscalationVectors:
         import concurrent.futures
 
         with concurrent.futures.ThreadPoolExecutor(max_workers=5) as executor:
-            futures = [
-                executor.submit(attempt_privileged_action) for _ in range(10)
-            ]
-            results = [
-                f.result() for f in concurrent.futures.as_completed(futures)
-            ]
+            futures = [executor.submit(attempt_privileged_action) for _ in range(10)]
+            results = [f.result() for f in concurrent.futures.as_completed(futures)]
 
         # All should fail with 403
         for result in results:
@@ -557,7 +527,6 @@ class TestPrivilegeEscalationVectors:
 
         # Get base token
         base_token = researcher["token"]
-        headers = {"Authorization": f"Bearer {base_token}"}
 
         # Chain 1: Token format confusion
         # Try different token formats
@@ -592,9 +561,7 @@ class TestPrivilegeEscalationVectors:
 
         # Try to extend expiration
         future_payload = payload.copy()
-        future_payload["exp"] = int(
-            (datetime.now(timezone.utc) + timedelta(days=365)).timestamp()
-        )
+        future_payload["exp"] = int((datetime.now(timezone.utc) + timedelta(days=365)).timestamp())
 
         # Try to reuse with modified non-signature fields
         modified_payloads = [
@@ -659,9 +626,7 @@ class TestAuthorizationBypassTechniques:
         # Standard verbs
         standard_verbs = ["GET", "POST", "PUT", "DELETE", "PATCH"]
         for verb in standard_verbs:
-            response = client.request(
-                verb, protected_endpoint, headers=headers
-            )
+            response = client.request(verb, protected_endpoint, headers=headers)
             assert response.status_code in [
                 status.HTTP_403_FORBIDDEN,
                 status.HTTP_405_METHOD_NOT_ALLOWED,
@@ -679,9 +644,7 @@ class TestAuthorizationBypassTechniques:
         ]
         for verb in nonstandard_verbs:
             try:
-                response = client.request(
-                    verb, protected_endpoint, headers=headers
-                )
+                response = client.request(verb, protected_endpoint, headers=headers)
                 assert response.status_code in [
                     status.HTTP_403_FORBIDDEN,
                     status.HTTP_405_METHOD_NOT_ALLOWED,
@@ -692,9 +655,7 @@ class TestAuthorizationBypassTechniques:
 
         # Custom verbs
         try:
-            response = client.request(
-                "FOOBAR", protected_endpoint, headers=headers
-            )
+            response = client.request("FOOBAR", protected_endpoint, headers=headers)
             assert response.status_code != status.HTTP_200_OK
         except Exception:
             pass  # Expected
@@ -794,9 +755,7 @@ class TestAuthorizationBypassTechniques:
         observer_headers = {"Authorization": f"Bearer {observer['token']}"}
         for _ in range(10):
             start = time.time()
-            response = client.get(
-                "/api/v1/system/config", headers=observer_headers
-            )
+            response = client.get("/api/v1/system/config", headers=observer_headers)
             end = time.time()
             timings["unauthorized"].append(end - start)
             assert response.status_code == status.HTTP_403_FORBIDDEN
@@ -805,26 +764,18 @@ class TestAuthorizationBypassTechniques:
         admin_headers = {"Authorization": f"Bearer {admin['token']}"}
         for _ in range(10):
             start = time.time()
-            response = client.get(
-                "/api/v1/system/config", headers=admin_headers
-            )
+            response = client.get("/api/v1/system/config", headers=admin_headers)
             end = time.time()
             timings["authorized"].append(end - start)
             # Admin should have access
 
         # Calculate average timings
-        avg_unauthorized = sum(timings["unauthorized"]) / len(
-            timings["unauthorized"]
-        )
-        avg_authorized = sum(timings["authorized"]) / len(
-            timings["authorized"]
-        )
+        avg_unauthorized = sum(timings["unauthorized"]) / len(timings["unauthorized"])
+        avg_authorized = sum(timings["authorized"]) / len(timings["authorized"])
 
         # Timing should not reveal authorization logic
         # (In practice, some difference is expected, but should be minimal)
-        timing_ratio = (
-            avg_unauthorized / avg_authorized if avg_authorized > 0 else 1
-        )
+        timing_ratio = avg_unauthorized / avg_authorized if avg_authorized > 0 else 1
 
         # Log for analysis
         print(f"Timing ratio (unauthorized/authorized): {timing_ratio:.2f}")
@@ -845,11 +796,7 @@ class TestAuthorizationBypassTechniques:
         # First, admin makes a request
         admin_headers = {"Authorization": f"Bearer {admin['token']}"}
         response = client.get("/api/v1/system/config", headers=admin_headers)
-        admin_response_data = (
-            response.json()
-            if response.status_code == status.HTTP_200_OK
-            else None
-        )
+        (response.json() if response.status_code == status.HTTP_200_OK else None)
 
         # Observer tries cache poisoning techniques
         observer_headers = {"Authorization": f"Bearer {observer['token']}"}
@@ -875,9 +822,7 @@ class TestAuthorizationBypassTechniques:
         assert response.status_code == status.HTTP_403_FORBIDDEN
 
         # Attempt 3: Fragment identifier cache bypass
-        response = client.get(
-            "/api/v1/system/config#admin_view", headers=observer_headers
-        )
+        response = client.get("/api/v1/system/config#admin_view", headers=observer_headers)
         assert response.status_code == status.HTTP_403_FORBIDDEN
 
 
@@ -951,13 +896,11 @@ class TestAuthorizationRaceConditions:
 
         def change_user_role():
             """Admin changes user role back and forth."""
-            admin_headers = {"Authorization": f"Bearer {admin['token']}"}
+            {"Authorization": f"Bearer {admin['token']}"}
 
             for i in range(25):
                 # Promote to RESEARCHER
-                new_role = (
-                    UserRole.RESEARCHER if i % 2 == 0 else UserRole.OBSERVER
-                )
+                new_role = UserRole.RESEARCHER if i % 2 == 0 else UserRole.OBSERVER
 
                 # In real system, this would be an API call
                 # Simulating role change
@@ -984,9 +927,7 @@ class TestAuthorizationRaceConditions:
 
         # In a secure system, success should only happen when role is appropriate
         # Race conditions might allow unauthorized access
-        print(
-            f"Race condition test: {len(successes)} successful privileged actions"
-        )
+        print(f"Race condition test: {len(successes)} successful privileged actions")
 
         # The token should maintain consistent permissions despite role changes
         # (tokens are immutable after creation)
@@ -1023,8 +964,7 @@ class TestAuthorizationRaceConditions:
                 "method": method,
                 "permission": permission,
                 "status": response.status_code,
-                "expected": permission
-                in ROLE_PERMISSIONS.get(user["user"].role, []),
+                "expected": permission in ROLE_PERMISSIONS.get(user["user"].role, []),
             }
 
         # Run concurrent permission checks
@@ -1033,13 +973,9 @@ class TestAuthorizationRaceConditions:
             futures = []
             for _ in range(10):  # 10 rounds
                 for endpoint_data in test_endpoints:
-                    futures.append(
-                        executor.submit(check_endpoint, endpoint_data)
-                    )
+                    futures.append(executor.submit(check_endpoint, endpoint_data))
 
-            results = [
-                f.result() for f in concurrent.futures.as_completed(futures)
-            ]
+            results = [f.result() for f in concurrent.futures.as_completed(futures)]
 
         # Verify consistency
         # Group by endpoint
@@ -1068,23 +1004,16 @@ class TestAuthorizationRaceConditions:
         refresh_results = []
 
         def refresh_token_concurrent():
-            response = client.post(
-                "/api/v1/auth/refresh", json={"refresh_token": refresh_token}
-            )
+            response = client.post("/api/v1/auth/refresh", json={"refresh_token": refresh_token})
             refresh_results.append(
                 {
                     "status": response.status_code,
-                    "data": response.json()
-                    if response.status_code == status.HTTP_200_OK
-                    else None,
+                    "data": response.json() if response.status_code == status.HTTP_200_OK else None,
                 }
             )
 
         # Launch multiple concurrent refresh attempts
-        threads = [
-            threading.Thread(target=refresh_token_concurrent)
-            for _ in range(10)
-        ]
+        threads = [threading.Thread(target=refresh_token_concurrent) for _ in range(10)]
 
         for t in threads:
             t.start()
@@ -1092,17 +1021,13 @@ class TestAuthorizationRaceConditions:
             t.join()
 
         # Analyze results
-        successful_refreshes = [
-            r for r in refresh_results if r["status"] == status.HTTP_200_OK
-        ]
+        successful_refreshes = [r for r in refresh_results if r["status"] == status.HTTP_200_OK]
 
         # Only one refresh should succeed (token rotation)
         # Or all should succeed with same new token (if no rotation)
         # But shouldn't have multiple different tokens
         if len(successful_refreshes) > 1:
-            access_tokens = [
-                r["data"]["access_token"] for r in successful_refreshes
-            ]
+            access_tokens = [r["data"]["access_token"] for r in successful_refreshes]
             unique_tokens = set(access_tokens)
 
             # Should either be all same (no rotation) or all different (proper rotation)

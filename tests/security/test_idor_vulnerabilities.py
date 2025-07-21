@@ -85,9 +85,7 @@ class IDORTestBase:
         db.commit()
         return str(agent.id)
 
-    def create_test_coalition(
-        self, db: Session, leader_id: str, name: str
-    ) -> str:
+    def create_test_coalition(self, db: Session, leader_id: str, name: str) -> str:
         """Create a test coalition led by a specific user."""
         coalition = Coalition(
             id=uuid.uuid4(),
@@ -118,15 +116,11 @@ class TestSequentialIDEnumeration(IDORTestBase):
         self.user2_agents = []
 
         for i in range(5):
-            agent_id = self.create_test_agent(
-                db, self.user1_id, f"user1_agent_{i}"
-            )
+            agent_id = self.create_test_agent(db, self.user1_id, f"user1_agent_{i}")
             self.user1_agents.append(agent_id)
 
         for i in range(5):
-            agent_id = self.create_test_agent(
-                db, self.user2_id, f"user2_agent_{i}"
-            )
+            agent_id = self.create_test_agent(db, self.user2_id, f"user2_agent_{i}")
             self.user2_agents.append(agent_id)
 
     def test_agent_id_enumeration(self):
@@ -135,9 +129,7 @@ class TestSequentialIDEnumeration(IDORTestBase):
         user1_headers = self.test_users["user1"]["headers"]
 
         for agent_id in self.user2_agents:
-            response = self.client.get(
-                f"/api/v1/agents/{agent_id}", headers=user1_headers
-            )
+            response = self.client.get(f"/api/v1/agents/{agent_id}", headers=user1_headers)
             # Should be forbidden or filtered
             assert response.status_code in [
                 status.HTTP_403_FORBIDDEN,
@@ -160,9 +152,7 @@ class TestSequentialIDEnumeration(IDORTestBase):
             ]
 
             for test_id in test_ids:
-                response = self.client.get(
-                    f"/api/v1/agents/{test_id}", headers=user1_headers
-                )
+                response = self.client.get(f"/api/v1/agents/{test_id}", headers=user1_headers)
                 if response.status_code == status.HTTP_200_OK:
                     accessed_resources.append((test_id, response.json()))
 
@@ -177,9 +167,7 @@ class TestSequentialIDEnumeration(IDORTestBase):
 
         # Try to enumerate user IDs
         for i in range(1000, 1100):
-            response = self.client.get(
-                f"/api/v1/users/{i}", headers=user1_headers
-            )
+            response = self.client.get(f"/api/v1/users/{i}", headers=user1_headers)
             # Should not expose user existence
             assert response.status_code == status.HTTP_404_NOT_FOUND
 
@@ -187,16 +175,12 @@ class TestSequentialIDEnumeration(IDORTestBase):
         """Test coalition ID enumeration vulnerabilities."""
         # Create coalitions
         self.create_test_coalition(db, self.user1_id, "Coalition1")
-        coalition2 = self.create_test_coalition(
-            db, self.user2_id, "Coalition2"
-        )
+        coalition2 = self.create_test_coalition(db, self.user2_id, "Coalition2")
 
         user1_headers = self.test_users["user1"]["headers"]
 
         # User1 should not access User2's coalition details
-        response = self.client.get(
-            f"/api/v1/coalitions/{coalition2}", headers=user1_headers
-        )
+        response = self.client.get(f"/api/v1/coalitions/{coalition2}", headers=user1_headers)
         assert response.status_code in [
             status.HTTP_403_FORBIDDEN,
             status.HTTP_404_NOT_FOUND,
@@ -231,9 +215,7 @@ class TestUUIDAttacks(IDORTestBase):
         # Generate potential UUIDs based on patterns
         for _ in range(100):
             predicted_uuid = str(uuid.uuid4())
-            response = self.client.get(
-                f"/api/v1/agents/{predicted_uuid}", headers=user1_headers
-            )
+            response = self.client.get(f"/api/v1/agents/{predicted_uuid}", headers=user1_headers)
             # Should not find any through prediction
             assert response.status_code != status.HTTP_200_OK
 
@@ -248,9 +230,7 @@ class TestUUIDAttacks(IDORTestBase):
             test_uuid = f"{current_time + i:032x}"
             formatted_uuid = f"{test_uuid[:8]}-{test_uuid[8:12]}-{test_uuid[12:16]}-{test_uuid[16:20]}-{test_uuid[20:32]}"
 
-            response = self.client.get(
-                f"/api/v1/agents/{formatted_uuid}", headers=user1_headers
-            )
+            response = self.client.get(f"/api/v1/agents/{formatted_uuid}", headers=user1_headers)
             assert response.status_code != status.HTTP_200_OK
 
     def test_uuid_collision_attempts(self):
@@ -266,9 +246,7 @@ class TestUUIDAttacks(IDORTestBase):
         ]
 
         for test_uuid in problematic_uuids:
-            response = self.client.get(
-                f"/api/v1/agents/{test_uuid}", headers=user1_headers
-            )
+            response = self.client.get(f"/api/v1/agents/{test_uuid}", headers=user1_headers)
             assert response.status_code != status.HTTP_200_OK
 
 
@@ -282,12 +260,8 @@ class TestParameterManipulation(IDORTestBase):
         self.user2_id, _ = self.create_test_user("user2", UserRole.RESEARCHER)
 
         # Create test resources
-        self.user1_agent = self.create_test_agent(
-            db, self.user1_id, "user1_agent"
-        )
-        self.user2_agent = self.create_test_agent(
-            db, self.user2_id, "user2_agent"
-        )
+        self.user1_agent = self.create_test_agent(db, self.user1_id, "user1_agent")
+        self.user2_agent = self.create_test_agent(db, self.user2_id, "user2_agent")
 
     def test_query_parameter_idor(self):
         """Test IDOR through query parameter manipulation."""
@@ -303,25 +277,19 @@ class TestParameterManipulation(IDORTestBase):
         ]
 
         for params in attack_params:
-            response = self.client.get(
-                "/api/v1/agents", headers=user1_headers, params=params
-            )
+            response = self.client.get("/api/v1/agents", headers=user1_headers, params=params)
             if response.status_code == status.HTTP_200_OK:
                 agents = response.json()
                 # Should not return other user's agents
                 for agent in agents:
-                    assert (
-                        agent["id"] != self.user2_agent
-                    ), f"Leaked agent through params: {params}"
+                    assert agent["id"] != self.user2_agent, f"Leaked agent through params: {params}"
 
     def test_path_parameter_idor(self):
         """Test IDOR through path parameter manipulation."""
         user1_headers = self.test_users["user1"]["headers"]
 
         # Direct path parameter manipulation
-        response = self.client.get(
-            f"/api/v1/agents/{self.user2_agent}", headers=user1_headers
-        )
+        response = self.client.get(f"/api/v1/agents/{self.user2_agent}", headers=user1_headers)
         assert response.status_code in [
             status.HTTP_403_FORBIDDEN,
             status.HTTP_404_NOT_FOUND,
@@ -336,9 +304,7 @@ class TestParameterManipulation(IDORTestBase):
         ]
 
         for path in traversal_attempts:
-            response = self.client.get(
-                f"/api/v1/{path}", headers=user1_headers
-            )
+            response = self.client.get(f"/api/v1/{path}", headers=user1_headers)
             assert response.status_code != status.HTTP_200_OK
 
     def test_json_payload_idor(self):
@@ -388,17 +354,11 @@ class TestAuthorizationBypass(IDORTestBase):
         """Set up test data with complex ownership."""
         self.user1_id, _ = self.create_test_user("user1", UserRole.RESEARCHER)
         self.user2_id, _ = self.create_test_user("user2", UserRole.RESEARCHER)
-        self.observer_id, _ = self.create_test_user(
-            "observer", UserRole.OBSERVER
-        )
+        self.observer_id, _ = self.create_test_user("observer", UserRole.OBSERVER)
 
         # Create resources with different access levels
-        self.private_agent = self.create_test_agent(
-            db, self.user1_id, "private_agent"
-        )
-        self.shared_coalition = self.create_test_coalition(
-            db, self.user1_id, "shared_coalition"
-        )
+        self.private_agent = self.create_test_agent(db, self.user1_id, "private_agent")
+        self.shared_coalition = self.create_test_coalition(db, self.user1_id, "shared_coalition")
 
     def test_direct_object_access(self):
         """Test direct object access bypassing authorization."""
@@ -455,12 +415,8 @@ class TestAuthorizationBypass(IDORTestBase):
     def test_cross_tenant_access(self, db: Session):
         """Test cross-tenant access in multi-tenant scenarios."""
         # Create tenant-specific resources
-        tenant1_agent = self.create_test_agent(
-            db, self.user1_id, "tenant1_agent"
-        )
-        tenant2_agent = self.create_test_agent(
-            db, self.user2_id, "tenant2_agent"
-        )
+        tenant1_agent = self.create_test_agent(db, self.user1_id, "tenant1_agent")
+        tenant2_agent = self.create_test_agent(db, self.user2_id, "tenant2_agent")
 
         # Update agents with tenant info
         db.query(Agent).filter(Agent.id == uuid.UUID(tenant1_agent)).update(
@@ -473,9 +429,7 @@ class TestAuthorizationBypass(IDORTestBase):
 
         # Try cross-tenant access
         user1_headers = self.test_users["user1"]["headers"]
-        response = self.client.get(
-            f"/api/v1/agents/{tenant2_agent}", headers=user1_headers
-        )
+        response = self.client.get(f"/api/v1/agents/{tenant2_agent}", headers=user1_headers)
         assert response.status_code in [
             status.HTTP_403_FORBIDDEN,
             status.HTTP_404_NOT_FOUND,
@@ -495,9 +449,7 @@ class TestAuthorizationBypass(IDORTestBase):
         ]
 
         for path in traversal_attempts:
-            response = self.client.get(
-                f"/api/v1/files/{path}", headers=user1_headers
-            )
+            response = self.client.get(f"/api/v1/files/{path}", headers=user1_headers)
             assert response.status_code != status.HTTP_200_OK
 
 
@@ -511,15 +463,9 @@ class TestAdvancedIDORAttacks(IDORTestBase):
         self.user2_id, _ = self.create_test_user("user2", UserRole.RESEARCHER)
 
         # Create interlinked resources
-        self.user1_agent = self.create_test_agent(
-            db, self.user1_id, "user1_agent"
-        )
-        self.user2_agent = self.create_test_agent(
-            db, self.user2_id, "user2_agent"
-        )
-        self.shared_coalition = self.create_test_coalition(
-            db, self.user1_id, "shared"
-        )
+        self.user1_agent = self.create_test_agent(db, self.user1_id, "user1_agent")
+        self.user2_agent = self.create_test_agent(db, self.user2_id, "user2_agent")
+        self.shared_coalition = self.create_test_coalition(db, self.user1_id, "shared")
 
     def test_blind_idor_detection(self):
         """Test blind IDOR vulnerabilities through timing and response differences."""
@@ -532,9 +478,7 @@ class TestAdvancedIDORAttacks(IDORTestBase):
         # Time valid resource access
         for _ in range(10):
             start = time.time()
-            response = self.client.get(
-                f"/api/v1/agents/{self.user1_agent}", headers=user1_headers
-            )
+            response = self.client.get(f"/api/v1/agents/{self.user1_agent}", headers=user1_headers)
             valid_times.append(time.time() - start)
             assert response.status_code == status.HTTP_200_OK
 
@@ -542,9 +486,7 @@ class TestAdvancedIDORAttacks(IDORTestBase):
         for _ in range(10):
             fake_id = str(uuid.uuid4())
             start = time.time()
-            response = self.client.get(
-                f"/api/v1/agents/{fake_id}", headers=user1_headers
-            )
+            response = self.client.get(f"/api/v1/agents/{fake_id}", headers=user1_headers)
             invalid_times.append(time.time() - start)
 
         # Response times should be similar (no timing leaks)
@@ -564,9 +506,7 @@ class TestAdvancedIDORAttacks(IDORTestBase):
         current_timestamp = int(time.time())
 
         # Try various timestamp-based IDs
-        for offset in range(
-            -3600, 3600, 300
-        ):  # -1 hour to +1 hour, 5 min intervals
+        for offset in range(-3600, 3600, 300):  # -1 hour to +1 hour, 5 min intervals
             timestamp = current_timestamp + offset
 
             # Try different timestamp formats
@@ -578,9 +518,7 @@ class TestAdvancedIDORAttacks(IDORTestBase):
             ]
 
             for test_id in timestamp_ids:
-                response = self.client.get(
-                    f"/api/v1/agents/{test_id}", headers=user1_headers
-                )
+                response = self.client.get(f"/api/v1/agents/{test_id}", headers=user1_headers)
                 assert response.status_code != status.HTTP_200_OK
 
     def test_mass_assignment_idor(self):
@@ -611,9 +549,7 @@ class TestAdvancedIDORAttacks(IDORTestBase):
 
         for payload in mass_assignment_attacks:
             # Try on create
-            response = self.client.post(
-                "/api/v1/agents", headers=user1_headers, json=payload
-            )
+            response = self.client.post("/api/v1/agents", headers=user1_headers, json=payload)
             if response.status_code == status.HTTP_201_CREATED:
                 created = response.json()
                 # Should not have bypassed ownership
@@ -665,15 +601,11 @@ class TestAdvancedIDORAttacks(IDORTestBase):
 
         async def attempt_access(headers, agent_id):
             """Attempt to access an agent."""
-            return self.client.get(
-                f"/api/v1/agents/{agent_id}", headers=headers
-            )
+            return self.client.get(f"/api/v1/agents/{agent_id}", headers=headers)
 
         async def attempt_delete(headers, agent_id):
             """Attempt to delete an agent."""
-            return self.client.delete(
-                f"/api/v1/agents/{agent_id}", headers=headers
-            )
+            return self.client.delete(f"/api/v1/agents/{agent_id}", headers=headers)
 
         # Create a new agent as user2
         response = self.client.post(
@@ -698,9 +630,7 @@ class TestAdvancedIDORAttacks(IDORTestBase):
                 attempt_access(user1_headers, race_agent_id),
             ]
 
-            results = loop.run_until_complete(
-                asyncio.gather(*tasks, return_exceptions=True)
-            )
+            results = loop.run_until_complete(asyncio.gather(*tasks, return_exceptions=True))
 
             # Check that user1 never got access
             for result in results[1:]:  # Skip delete result
@@ -735,9 +665,7 @@ class TestIDORProtectionValidation(IDORTestBase):
         ]
 
         for method, path, json_data in crud_tests:
-            response = self.client.request(
-                method, path, headers=user1_headers, json=json_data
-            )
+            response = self.client.request(method, path, headers=user1_headers, json=json_data)
             assert response.status_code in [
                 status.HTTP_403_FORBIDDEN,
                 status.HTTP_404_NOT_FOUND,
@@ -752,9 +680,7 @@ class TestIDORProtectionValidation(IDORTestBase):
         fake_id = str(uuid.uuid4())
 
         # Non-existent resource
-        response1 = self.client.get(
-            f"/api/v1/agents/{fake_id}", headers=user1_headers
-        )
+        response1 = self.client.get(f"/api/v1/agents/{fake_id}", headers=user1_headers)
 
         # Forbidden resource (if we can identify one)
         # Error responses should be consistent
@@ -790,9 +716,7 @@ class TestIDORProtectionValidation(IDORTestBase):
                 pytest.fail(f"Non-UUID ID detected: {resource_id}")
 
         # Verify no sequential patterns
-        assert len(set(created_ids)) == len(
-            created_ids
-        ), "Duplicate IDs detected"
+        assert len(set(created_ids)) == len(created_ids), "Duplicate IDs detected"
 
 
 # Performance impact tests
@@ -802,9 +726,7 @@ class TestIDORPerformanceImpact:
     def test_authorization_performance(self, benchmark):
         """Benchmark authorization checks."""
         test_base = IDORTestBase()
-        user_id, _ = test_base.create_test_user(
-            "perf_user", UserRole.RESEARCHER
-        )
+        user_id, _ = test_base.create_test_user("perf_user", UserRole.RESEARCHER)
         headers = test_base.test_users["perf_user"]["headers"]
 
         def make_authorized_request():

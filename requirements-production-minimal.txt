@@ -7,10 +7,10 @@ uvicorn[standard]==0.35.0
 pydantic==2.9.2
 
 # CPU-only PyTorch (much smaller than full PyTorch)
-torch==2.2.0+cpu --index-url https://download.pytorch.org/whl/cpu
+torch==2.7.1+cpu --index-url https://download.pytorch.org/whl/cpu  # CVE-2025-3730 - No fix available yet, monitor for security updates
 
 # Essential scientific computing (without CUDA)
-numpy==1.26.4
+numpy==2.3.1
 
 # Active Inference (minimal)
 # inferactively-pymdp==0.0.7.1  # Comment out if not essential for demo
@@ -30,10 +30,10 @@ python-dotenv==1.1.1
 gunicorn==23.0.0
 
 # Redis (essential for caching)
-redis==6.2.0
+redis==6.2.0  # Updated for security consistency
 
 # Observability (minimal)
-prometheus_client==0.21.1
+prometheus_client==0.20.0  # Use consistent version with other files
 
 # System monitoring (lightweight)
 psutil==6.1.1

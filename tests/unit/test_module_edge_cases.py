@@ -105,7 +105,7 @@ class TestGraphStorageEdgeCases:
     def test_storage_with_circular_references(self):
         """Test storage of data with circular references."""
         if not IMPORT_SUCCESS:
-            pytest.skip("Required modules not available")
+            assert False, "Test bypass removed - must fix underlying issue"
 
         storage = GraphStorage()
 
@@ -123,14 +123,12 @@ class TestGraphStorageEdgeCases:
             pytest.fail("Circular reference caused infinite recursion")
         except Exception as e:
             # Should handle with specific error
-            assert (
-                "circular" in str(e).lower() or "reference" in str(e).lower()
-            )
+            assert "circular" in str(e).lower() or "reference" in str(e).lower()
 
     def test_storage_with_very_large_data(self):
         """Test storage of very large data structures."""
         if not IMPORT_SUCCESS:
-            pytest.skip("Required modules not available")
+            assert False, "Test bypass removed - must fix underlying issue"
 
         storage = GraphStorage()
 
@@ -153,7 +151,7 @@ class TestGraphStorageEdgeCases:
     def test_storage_with_invalid_keys(self):
         """Test storage operations with invalid keys."""
         if not IMPORT_SUCCESS:
-            pytest.skip("Required modules not available")
+            assert False, "Test bypass removed - must fix underlying issue"
 
         storage = GraphStorage()
 
@@ -187,7 +185,7 @@ class TestGraphStorageEdgeCases:
     def test_storage_with_special_characters(self):
         """Test storage with special characters in keys and values."""
         if not IMPORT_SUCCESS:
-            pytest.skip("Required modules not available")
+            assert False, "Test bypass removed - must fix underlying issue"
 
         storage = GraphStorage()
 
@@ -215,7 +213,7 @@ class TestEvolutionEngineEdgeCases:
     def test_evolution_with_empty_population(self):
         """Test evolution with empty population."""
         if not IMPORT_SUCCESS:
-            pytest.skip("Required modules not available")
+            assert False, "Test bypass removed - must fix underlying issue"
 
         engine = EvolutionEngine()
 
@@ -227,7 +225,7 @@ class TestEvolutionEngineEdgeCases:
     def test_evolution_with_single_individual(self):
         """Test evolution with single individual."""
         if not IMPORT_SUCCESS:
-            pytest.skip("Required modules not available")
+            assert False, "Test bypass removed - must fix underlying issue"
 
         engine = EvolutionEngine()
 
@@ -240,7 +238,7 @@ class TestEvolutionEngineEdgeCases:
     def test_evolution_with_invalid_fitness_values(self):
         """Test evolution with invalid fitness values."""
         if not IMPORT_SUCCESS:
-            pytest.skip("Required modules not available")
+            assert False, "Test bypass removed - must fix underlying issue"
 
         engine = EvolutionEngine()
 
@@ -262,7 +260,7 @@ class TestEvolutionEngineEdgeCases:
     def test_evolution_with_malformed_individuals(self):
         """Test evolution with malformed individuals."""
         if not IMPORT_SUCCESS:
-            pytest.skip("Required modules not available")
+            assert False, "Test bypass removed - must fix underlying issue"
 
         engine = EvolutionEngine()
 
@@ -290,7 +288,7 @@ class TestGMNParserEdgeCases:
     def test_parser_with_empty_input(self):
         """Test GMN parser with empty input."""
         if not IMPORT_SUCCESS:
-            pytest.skip("Required modules not available")
+            assert False, "Test bypass removed - must fix underlying issue"
 
         parser = GMNParser()
 
@@ -311,7 +309,7 @@ class TestGMNParserEdgeCases:
     def test_parser_with_malformed_gmn(self):
         """Test GMN parser with malformed GMN text."""
         if not IMPORT_SUCCESS:
-            pytest.skip("Required modules not available")
+            assert False, "Test bypass removed - must fix underlying issue"
 
         parser = GMNParser()
 
@@ -328,7 +326,7 @@ class TestGMNParserEdgeCases:
     def test_parser_with_very_large_gmn(self):
         """Test GMN parser with very large GMN text."""
         if not IMPORT_SUCCESS:
-            pytest.skip("Required modules not available")
+            assert False, "Test bypass removed - must fix underlying issue"
 
         parser = GMNParser()
 
@@ -355,12 +353,14 @@ class TestGMNParserEdgeCases:
     def test_parser_with_unicode_content(self):
         """Test GMN parser with unicode content."""
         if not IMPORT_SUCCESS:
-            pytest.skip("Required modules not available")
+            assert False, "Test bypass removed - must fix underlying issue"
 
         parser = GMNParser()
 
         # Test with unicode content
-        unicode_gmn = '{"nodes": [{"id": "节点_1", "名称": "测试节点", "description": "包含中文的节点"}]}'
+        unicode_gmn = (
+            '{"nodes": [{"id": "节点_1", "名称": "测试节点", "description": "包含中文的节点"}]}'
+        )
 
         try:
             result = parser.parse(unicode_gmn)
@@ -377,7 +377,7 @@ class TestGNNModelEdgeCases:
     def test_model_with_empty_input(self):
         """Test GNN model with empty input."""
         if not IMPORT_SUCCESS:
-            pytest.skip("Required modules not available")
+            assert False, "Test bypass removed - must fix underlying issue"
 
         model = GNNModel()
 
@@ -400,7 +400,7 @@ class TestGNNModelEdgeCases:
     def test_model_with_mismatched_dimensions(self):
         """Test GNN model with mismatched input dimensions."""
         if not IMPORT_SUCCESS:
-            pytest.skip("Required modules not available")
+            assert False, "Test bypass removed - must fix underlying issue"
 
         model = GNNModel()
 
@@ -421,7 +421,7 @@ class TestGNNModelEdgeCases:
     def test_model_with_invalid_data_types(self):
         """Test GNN model with invalid data types."""
         if not IMPORT_SUCCESS:
-            pytest.skip("Required modules not available")
+            assert False, "Test bypass removed - must fix underlying issue"
 
         model = GNNModel()
 
@@ -446,7 +446,7 @@ class TestBeliefCompressionEdgeCases:
     def test_compression_with_empty_beliefs(self):
         """Test belief compression with empty beliefs."""
         if not IMPORT_SUCCESS:
-            pytest.skip("Required modules not available")
+            assert False, "Test bypass removed - must fix underlying issue"
 
         compressor = BeliefCompressor()
 
@@ -458,7 +458,7 @@ class TestBeliefCompressionEdgeCases:
     def test_compression_with_single_belief(self):
         """Test belief compression with single belief."""
         if not IMPORT_SUCCESS:
-            pytest.skip("Required modules not available")
+            assert False, "Test bypass removed - must fix underlying issue"
 
         compressor = BeliefCompressor()
 
@@ -471,7 +471,7 @@ class TestBeliefCompressionEdgeCases:
     def test_compression_with_extreme_values(self):
         """Test belief compression with extreme values."""
         if not IMPORT_SUCCESS:
-            pytest.skip("Required modules not available")
+            assert False, "Test bypass removed - must fix underlying issue"
 
         compressor = BeliefCompressor()
 
@@ -496,7 +496,7 @@ class TestBeliefCompressionEdgeCases:
     def test_compression_with_invalid_probabilities(self):
         """Test belief compression with invalid probability values."""
         if not IMPORT_SUCCESS:
-            pytest.skip("Required modules not available")
+            assert False, "Test bypass removed - must fix underlying issue"
 
         compressor = BeliefCompressor()
 
@@ -518,7 +518,7 @@ class TestMatrixPoolEdgeCases:
     def test_pool_with_zero_size_matrix(self):
         """Test matrix pool with zero-size matrix request."""
         if not IMPORT_SUCCESS:
-            pytest.skip("Required modules not available")
+            assert False, "Test bypass removed - must fix underlying issue"
 
         pool = MatrixPool()
 
@@ -534,7 +534,7 @@ class TestMatrixPoolEdgeCases:
     def test_pool_with_negative_size(self):
         """Test matrix pool with negative size request."""
         if not IMPORT_SUCCESS:
-            pytest.skip("Required modules not available")
+            assert False, "Test bypass removed - must fix underlying issue"
 
         pool = MatrixPool()
 
@@ -549,7 +549,7 @@ class TestMatrixPoolEdgeCases:
     def test_pool_with_extremely_large_size(self):
         """Test matrix pool with extremely large size request."""
         if not IMPORT_SUCCESS:
-            pytest.skip("Required modules not available")
+            assert False, "Test bypass removed - must fix underlying issue"
 
         pool = MatrixPool()
 
@@ -564,7 +564,7 @@ class TestMatrixPoolEdgeCases:
     def test_pool_with_invalid_size_types(self):
         """Test matrix pool with invalid size types."""
         if not IMPORT_SUCCESS:
-            pytest.skip("Required modules not available")
+            assert False, "Test bypass removed - must fix underlying issue"
 
         pool = MatrixPool()
 
@@ -592,7 +592,7 @@ class TestSecurityMiddlewareEdgeCases:
     def test_middleware_with_malformed_requests(self):
         """Test security middleware with malformed requests."""
         if not IMPORT_SUCCESS:
-            pytest.skip("Required modules not available")
+            assert False, "Test bypass removed - must fix underlying issue"
 
         app = Mock()
         middleware = SecurityMonitoringMiddleware(app)
@@ -617,14 +617,12 @@ class TestSecurityMiddlewareEdgeCases:
                 # Should not raise unhandled exceptions
             except Exception as e:
                 # Should handle with specific security error
-                assert (
-                    "security" in str(e).lower() or "request" in str(e).lower()
-                )
+                assert "security" in str(e).lower() or "request" in str(e).lower()
 
     def test_middleware_with_missing_headers(self):
         """Test security middleware with missing headers."""
         if not IMPORT_SUCCESS:
-            pytest.skip("Required modules not available")
+            assert False, "Test bypass removed - must fix underlying issue"
 
         app = Mock()
         middleware = SecurityMonitoringMiddleware(app)
@@ -650,7 +648,7 @@ class TestSecurityMiddlewareEdgeCases:
     def test_middleware_with_oversized_requests(self):
         """Test security middleware with oversized requests."""
         if not IMPORT_SUCCESS:
-            pytest.skip("Required modules not available")
+            assert False, "Test bypass removed - must fix underlying issue"
 
         app = Mock()
         middleware = SecurityMonitoringMiddleware(app)
@@ -686,7 +684,7 @@ class TestFileSystemEdgeCases:
     def test_file_operations_with_invalid_paths(self):
         """Test file operations with invalid paths."""
         if not IMPORT_SUCCESS:
-            pytest.skip("Required modules not available")
+            assert False, "Test bypass removed - must fix underlying issue"
 
         # Test with various invalid paths
         invalid_paths = [
@@ -702,9 +700,7 @@ class TestFileSystemEdgeCases:
             try:
                 # Try to create temporary file with invalid path
                 if path:
-                    with tempfile.NamedTemporaryFile(
-                        prefix=path, delete=False
-                    ) as f:
+                    with tempfile.NamedTemporaryFile(prefix=path, delete=False) as f:
                         f.write(b"test")
                         temp_path = f.name
 
@@ -721,7 +717,7 @@ class TestFileSystemEdgeCases:
     def test_file_operations_with_permissions(self):
         """Test file operations with permission issues."""
         if not IMPORT_SUCCESS:
-            pytest.skip("Required modules not available")
+            assert False, "Test bypass removed - must fix underlying issue"
 
         # Create temporary file and modify permissions
         with tempfile.NamedTemporaryFile(delete=False) as f:
@@ -755,7 +751,7 @@ class TestJSONHandlingEdgeCases:
     def test_json_with_circular_references(self):
         """Test JSON handling with circular references."""
         if not IMPORT_SUCCESS:
-            pytest.skip("Required modules not available")
+            assert False, "Test bypass removed - must fix underlying issue"
 
         # Create circular reference
         obj = {"name": "test"}
@@ -772,7 +768,7 @@ class TestJSONHandlingEdgeCases:
     def test_json_with_invalid_types(self):
         """Test JSON handling with invalid types."""
         if not IMPORT_SUCCESS:
-            pytest.skip("Required modules not available")
+            assert False, "Test bypass removed - must fix underlying issue"
 
         # Test with non-serializable types
         invalid_objects = [
@@ -793,7 +789,7 @@ class TestJSONHandlingEdgeCases:
     def test_json_with_extreme_nesting(self):
         """Test JSON handling with extreme nesting."""
         if not IMPORT_SUCCESS:
-            pytest.skip("Required modules not available")
+            assert False, "Test bypass removed - must fix underlying issue"
 
         # Create deeply nested structure
         nested_obj = {"level": 0}

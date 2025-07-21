@@ -1,16 +1,14 @@
 """Coalition manager for coordinating coalition formation and lifecycle."""
 
-import asyncio
 import logging
 import threading
 from dataclasses import dataclass
 from datetime import datetime, timedelta
-from typing import Any, Callable, Dict, List, Optional, Set
+from typing import Any, Callable, Dict, List, Optional
 
 from coalitions.coalition import (
     Coalition,
     CoalitionObjective,
-    CoalitionRole,
     CoalitionStatus,
 )
 from coalitions.formation_strategies import (
@@ -110,9 +108,7 @@ class CoalitionManager:
         self.agent_profiles[agent_id] = profile
         self._emit_event("agent_registered", "", {"agent_id": agent_id})
 
-        logger.info(
-            f"Registered agent {agent_id} with {len(capabilities)} capabilities"
-        )
+        logger.info(f"Registered agent {agent_id} with {len(capabilities)} capabilities")
         return True
 
     def unregister_agent(self, agent_id: str) -> bool:
@@ -170,13 +166,9 @@ class CoalitionManager:
 
         # Add to pending objectives for next formation round
         self.pending_objectives.append(objective)
-        self._emit_event(
-            "objective_added", "", {"objective_id": objective.objective_id}
-        )
+        self._emit_event("objective_added", "", {"objective_id": objective.objective_id})
 
-        logger.info(
-            f"Added objective {objective.objective_id} to pending list"
-        )
+        logger.info(f"Added objective {objective.objective_id} to pending list")
         return True
 
     def form_coalitions(
@@ -214,10 +206,7 @@ class CoalitionManager:
         available_agents = []
         for agent_profile in self.agent_profiles.values():
             # Only include agents that can join more coalitions
-            if (
-                len(agent_profile.current_coalitions)
-                < agent_profile.max_coalitions
-            ):
+            if len(agent_profile.current_coalitions) < agent_profile.max_coalitions:
                 available_agents.append(agent_profile)
 
         if not available_agents:
@@ -230,9 +219,7 @@ class CoalitionManager:
 
         # Perform formation
         start_time = datetime.now()
-        result = strategy.form_coalitions(
-            available_agents, objectives_to_form, constraints
-        )
+        result = strategy.form_coalitions(available_agents, objectives_to_form, constraints)
         formation_time = (datetime.now() - start_time).total_seconds()
 
         # Register new coalitions
@@ -249,9 +236,7 @@ class CoalitionManager:
                 )
 
         # Remove formed objectives from pending list
-        if (
-            objectives is None
-        ):  # Only remove from pending if we used pending objectives
+        if objectives is None:  # Only remove from pending if we used pending objectives
             formed_objective_ids = set()
             for coalition in result.coalitions:
                 for obj in coalition.objectives:
@@ -312,9 +297,7 @@ class CoalitionManager:
 
         return coalitions
 
-    def dissolve_coalition(
-        self, coalition_id: str, reason: str = "Manual dissolution"
-    ) -> bool:
+    def dissolve_coalition(self, coalition_id: str, reason: str = "Manual dissolution") -> bool:
         """Dissolve a coalition.
 
         Args:
@@ -348,16 +331,12 @@ class CoalitionManager:
         coalition.status = CoalitionStatus.DISSOLVED
         del self.coalitions[coalition_id]
 
-        self._emit_event(
-            "coalition_dissolved", coalition_id, {"reason": reason}
-        )
+        self._emit_event("coalition_dissolved", coalition_id, {"reason": reason})
 
         logger.info(f"Dissolved coalition {coalition_id}: {reason}")
         return True
 
-    def update_agent_reputation(
-        self, agent_id: str, reputation: float
-    ) -> bool:
+    def update_agent_reputation(self, agent_id: str, reputation: float) -> bool:
         """Update an agent's reputation score.
 
         Args:
@@ -372,9 +351,7 @@ class CoalitionManager:
             return False
 
         old_reputation = self.agent_profiles[agent_id].reputation
-        self.agent_profiles[agent_id].reputation = max(
-            0.0, min(1.0, reputation)
-        )
+        self.agent_profiles[agent_id].reputation = max(0.0, min(1.0, reputation))
 
         self._emit_event(
             "agent_reputation_updated",
@@ -412,9 +389,7 @@ class CoalitionManager:
             0.0, min(1.0, preference)
         )
 
-        logger.info(
-            f"Set preference for {agent_id} -> {preferred_agent_id}: {preference:.2f}"
-        )
+        logger.info(f"Set preference for {agent_id} -> {preferred_agent_id}: {preference:.2f}")
         return True
 
     def start_monitoring(self) -> bool:
@@ -428,9 +403,7 @@ class CoalitionManager:
             return False
 
         self._monitoring_active = True
-        self._monitoring_thread = threading.Thread(
-            target=self._monitoring_loop, daemon=True
-        )
+        self._monitoring_thread = threading.Thread(target=self._monitoring_loop, daemon=True)
         self._monitoring_thread.start()
 
         logger.info("Started coalition monitoring")
@@ -474,42 +447,26 @@ class CoalitionManager:
 
             if time_since_modification > timedelta(hours=24):
                 if coalition.status == CoalitionStatus.ACTIVE:
-                    logger.warning(
-                        f"Coalition {coalition_id} has been inactive for 24 hours"
-                    )
+                    logger.warning(f"Coalition {coalition_id} has been inactive for 24 hours")
                     self._emit_event(
                         "coalition_inactive",
                         coalition_id,
-                        {
-                            "inactive_hours": time_since_modification.total_seconds()
-                            / 3600
-                        },
+                        {"inactive_hours": time_since_modification.total_seconds() / 3600},
                     )
 
             # Check for coalitions with completed objectives
-            if (
-                all(obj.completed for obj in coalition.objectives)
-                and coalition.objectives
-            ):
+            if all(obj.completed for obj in coalition.objectives) and coalition.objectives:
                 if coalition.status == CoalitionStatus.ACTIVE:
                     coalition.status = CoalitionStatus.DISBANDING
-                    self._emit_event(
-                        "coalition_objectives_completed", coalition_id, {}
-                    )
+                    self._emit_event("coalition_objectives_completed", coalition_id, {})
 
                     # Schedule dissolution after a grace period
-                    logger.info(
-                        f"Coalition {coalition_id} completed all objectives"
-                    )
+                    logger.info(f"Coalition {coalition_id} completed all objectives")
 
             # Check for coalitions with expired objectives
             expired_objectives = []
             for obj in coalition.objectives:
-                if (
-                    obj.deadline
-                    and current_time > obj.deadline
-                    and not obj.completed
-                ):
+                if obj.deadline and current_time > obj.deadline and not obj.completed:
                     expired_objectives.append(obj.objective_id)
 
             if expired_objectives:
@@ -525,9 +482,7 @@ class CoalitionManager:
             # Update coalition performance metrics
             coalition._update_performance_metrics()
 
-    def add_event_handler(
-        self, event_type: str, handler: Callable[[CoalitionEvent], None]
-    ):
+    def add_event_handler(self, event_type: str, handler: Callable[[CoalitionEvent], None]):
         """Add an event handler for coalition events.
 
         Args:
@@ -540,9 +495,7 @@ class CoalitionManager:
         self.event_handlers[event_type].append(handler)
         logger.info(f"Added event handler for {event_type}")
 
-    def _emit_event(
-        self, event_type: str, coalition_id: str, details: Dict[str, Any]
-    ):
+    def _emit_event(self, event_type: str, coalition_id: str, details: Dict[str, Any]):
         """Emit a coalition event.
 
         Args:
@@ -569,13 +522,9 @@ class CoalitionManager:
                 try:
                     handler(event)
                 except Exception as e:
-                    logger.error(
-                        f"Error in event handler for {event_type}: {e}"
-                    )
+                    logger.error(f"Error in event handler for {event_type}: {e}")
 
-    def _update_formation_stats(
-        self, result: FormationResult, formation_time: float
-    ):
+    def _update_formation_stats(self, result: FormationResult, formation_time: float):
         """Update formation statistics."""
         self.formation_stats["total_formations"] += 1
 
@@ -594,9 +543,7 @@ class CoalitionManager:
             avg_size = total_members / len(result.coalitions)
 
             old_avg_size = self.formation_stats["average_coalition_size"]
-            successful_formations = self.formation_stats[
-                "successful_formations"
-            ]
+            successful_formations = self.formation_stats["successful_formations"]
             self.formation_stats["average_coalition_size"] = (
                 old_avg_size * (successful_formations - 1) + avg_size
             ) / successful_formations
@@ -608,9 +555,7 @@ class CoalitionManager:
             Status dictionary with system metrics
         """
         active_coalitions = sum(
-            1
-            for c in self.coalitions.values()
-            if c.status == CoalitionStatus.ACTIVE
+            1 for c in self.coalitions.values() if c.status == CoalitionStatus.ACTIVE
         )
 
         total_agents = len(self.agent_profiles)

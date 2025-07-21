@@ -8,8 +8,7 @@ that validates the documented 72% efficiency loss at scale.
 
 import time
 
-import numpy as np
-from test_coordination_load import CoordinationAgent, CoordinationLoadTester
+from test_coordination_load import CoordinationLoadTester
 
 from .agent_simulation_framework import (
     AgentSpawnConfig,
@@ -34,13 +33,9 @@ def demo_coordination_overhead():
 
         print("  📊 Results:")
         print(f"     - Actual efficiency: {metrics.actual_efficiency:.1%}")
-        print(
-            f"     - Coordination overhead: {metrics.coordination_overhead:.1%}"
-        )
+        print(f"     - Coordination overhead: {metrics.coordination_overhead:.1%}")
         print(f"     - Efficiency loss: {metrics.efficiency_loss():.1f}%")
-        print(
-            f"     - Message latency: {metrics.coordination_latency_ms:.1f}ms"
-        )
+        print(f"     - Message latency: {metrics.coordination_latency_ms:.1f}ms")
         print(f"     - Total messages: {metrics.total_messages}")
 
         # Show if it matches documentation
@@ -102,9 +97,7 @@ def demo_agent_simulation():
         tick_count += 1
 
         if tick_count % 10 == 0:
-            print(
-                f"  Tick {tick_count}: {tick_result['agents_processed']} agents processed"
-            )
+            print(f"  Tick {tick_count}: {tick_result['agents_processed']} agents processed")
 
     # Get final metrics
     all_metrics = env.lifecycle_manager.get_all_metrics()
@@ -142,9 +135,7 @@ def demo_coordination_scenarios():
 
     # Test 2: Resource Contention
     print("\n🔒 Testing resource contention...")
-    contention_results = tester.simulate_resource_contention(
-        duration_seconds=3.0
-    )
+    contention_results = tester.simulate_resource_contention(duration_seconds=3.0)
     print(f"  - Contention events: {contention_results['contentions']}")
     print(f"  - Contention rate: {contention_results['contention_rate']:.1%}")
     print(f"  - Resolution rate: {contention_results['resolution_rate']:.1%}")
@@ -155,9 +146,7 @@ def demo_coordination_scenarios():
     print(
         f"  - Successful consensus: {consensus_results['successful_consensus']}/{consensus_results['rounds']}"
     )
-    print(
-        f"  - Average time: {consensus_results['avg_consensus_time_ms']:.1f}ms"
-    )
+    print(f"  - Average time: {consensus_results['avg_consensus_time_ms']:.1f}ms")
     print(f"  - Success rate: {consensus_results['success_rate']:.1%}")
 
 
@@ -165,9 +154,7 @@ def main():
     """Run all demonstrations."""
     print("🚀 FreeAgentics Load Testing Framework Demo")
     print("=" * 80)
-    print(
-        "This demo shows how the load tests validate architectural limitations."
-    )
+    print("This demo shows how the load tests validate architectural limitations.")
     print("Expected: ~72% efficiency loss at 50 agents due to Python GIL\n")
 
     # Run demonstrations

@@ -1,13 +1,11 @@
 """Database connection pool configuration for load testing."""
 
-import json
 import logging
 import os
 from contextlib import contextmanager
 from typing import Any, Dict, Generator, Optional
 
 from sqlalchemy import create_engine, pool, text
-from sqlalchemy.engine import Engine
 from sqlalchemy.orm import Session, sessionmaker
 
 logger = logging.getLogger(__name__)
@@ -29,9 +27,7 @@ class DatabasePool:
     ):
         """Initialize connection pool with configurable parameters."""
         # Build database URL
-        self.database_url = (
-            f"postgresql://{user}:{password}@{host}:{port}/{database}"
-        )
+        self.database_url = f"postgresql://{user}:{password}@{host}:{port}/{database}"
 
         # Create engine with QueuePool for thread safety
         self.engine = create_engine(
@@ -46,9 +42,7 @@ class DatabasePool:
         )
 
         # Create session factory
-        self.SessionLocal = sessionmaker(
-            autocommit=False, autoflush=False, bind=self.engine
-        )
+        self.SessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=self.engine)
 
         self.min_connections = min_connections
         self.max_connections = max_connections
@@ -100,14 +94,10 @@ class DatabasePool:
         """Execute operations within a transaction with optional isolation level."""
         with self.get_session() as session:
             if isolation_level:
-                session.connection().execution_options(
-                    isolation_level=isolation_level
-                )
+                session.connection().execution_options(isolation_level=isolation_level)
             yield session
 
-    def execute(
-        self, query: str, params: Optional[Dict[str, Any]] = None
-    ) -> Any:
+    def execute(self, query: str, params: Optional[Dict[str, Any]] = None) -> Any:
         """Execute a single query and return results."""
         with self.get_session() as session:
             result = session.execute(text(query), params or {})
@@ -132,9 +122,7 @@ class DatabasePool:
             "checked_out_connections": pool_impl.checkedout(),
             "overflow": pool_impl.overflow(),
             "total": pool_impl.size() + pool_impl.overflow(),
-            "available": pool_impl.size()
-            + pool_impl.overflow()
-            - pool_impl.checkedout(),
+            "available": pool_impl.size() + pool_impl.overflow() - pool_impl.checkedout(),
         }
 
     def close(self):

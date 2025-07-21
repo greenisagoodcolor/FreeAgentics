@@ -1,8 +1,9 @@
 """Test suite for matrix caching benchmarks."""
 
+from unittest.mock import patch
+
 import numpy as np
 import pytest
-from unittest.mock import Mock, patch
 
 from tests.performance.matrix_caching_benchmarks import (
     CacheComparisonBenchmark,
@@ -83,9 +84,7 @@ class TestMatrixCache:
 
         memory_usage = cache.get_memory_usage_mb()
         assert memory_usage > 0.0
-        assert (
-            memory_usage < 1.0
-        )  # Should be less than 1MB for 100x100 float64
+        assert memory_usage < 1.0  # Should be less than 1MB for 100x100 float64
 
 
 class TestCachingBenchmarks:
@@ -96,28 +95,33 @@ class TestCachingBenchmarks:
         # Check if PyMDP is available
         try:
             import pymdp
+
             pymdp_available = True
         except ImportError:
             pymdp_available = False
-        
+
         if not pymdp_available:
             # Mock the benchmark when PyMDP is not available
             mock_result = {
                 "avg_computation_time_ms": 1.5,
                 "cache_hit_rate": 0.75,
-                "cache_memory_mb": 2.1, 
-                "total_likelihood_operations": 100
+                "cache_memory_mb": 2.1,
+                "total_likelihood_operations": 100,
             }
-            
-            with patch.object(ObservationLikelihoodCachingBenchmark, 'setup'), \
-                 patch.object(ObservationLikelihoodCachingBenchmark, 'run_iteration', return_value=mock_result):
-                
+
+            with (
+                patch.object(ObservationLikelihoodCachingBenchmark, "setup"),
+                patch.object(
+                    ObservationLikelihoodCachingBenchmark, "run_iteration", return_value=mock_result
+                ),
+            ):
+
                 benchmark = ObservationLikelihoodCachingBenchmark(
                     state_size=10, num_modalities=2, cache_enabled=True
                 )
                 benchmark.setup()
                 result = benchmark.run_iteration()
-                
+
                 # Check that result contains expected metrics
                 assert "avg_computation_time_ms" in result
                 assert "cache_hit_rate" in result
@@ -130,7 +134,7 @@ class TestCachingBenchmarks:
                 assert result["cache_memory_mb"] >= 0
                 assert result["total_likelihood_operations"] > 0
             return
-        
+
         # Real test when PyMDP is available
         benchmark = ObservationLikelihoodCachingBenchmark(
             state_size=10, num_modalities=2, cache_enabled=True
@@ -156,28 +160,33 @@ class TestCachingBenchmarks:
         # Check if PyMDP is available
         try:
             import pymdp
+
             pymdp_available = True
         except ImportError:
             pymdp_available = False
-        
+
         if not pymdp_available:
             # Mock the benchmark when PyMDP is not available
             mock_result = {
                 "avg_computation_time_ms": 2.3,
                 "cache_hit_rate": 0.68,
                 "cache_memory_mb": 1.7,
-                "total_operations": 50
+                "total_operations": 50,
             }
-            
-            with patch.object(IntermediateResultCachingBenchmark, 'setup'), \
-                 patch.object(IntermediateResultCachingBenchmark, 'run_iteration', return_value=mock_result):
-                
+
+            with (
+                patch.object(IntermediateResultCachingBenchmark, "setup"),
+                patch.object(
+                    IntermediateResultCachingBenchmark, "run_iteration", return_value=mock_result
+                ),
+            ):
+
                 benchmark = IntermediateResultCachingBenchmark(
                     complexity_level=2, cache_enabled=True
                 )
                 benchmark.setup()
                 result = benchmark.run_iteration()
-                
+
                 # Check that result contains expected metrics
                 assert "avg_computation_time_ms" in result
                 assert "cache_hit_rate" in result
@@ -190,11 +199,9 @@ class TestCachingBenchmarks:
                 assert result["cache_memory_mb"] >= 0
                 assert result["total_operations"] > 0
             return
-        
+
         # Real test when PyMDP is available
-        benchmark = IntermediateResultCachingBenchmark(
-            complexity_level=2, cache_enabled=True
-        )
+        benchmark = IntermediateResultCachingBenchmark(complexity_level=2, cache_enabled=True)
 
         benchmark.setup()
         result = benchmark.run_iteration()
@@ -216,10 +223,11 @@ class TestCachingBenchmarks:
         # Check if PyMDP is available
         try:
             import pymdp
+
             pymdp_available = True
         except ImportError:
             pymdp_available = False
-        
+
         if not pymdp_available:
             # Mock the benchmark when PyMDP is not available
             mock_result = {
@@ -227,16 +235,18 @@ class TestCachingBenchmarks:
                 "uncached_avg_time_ms": 3.5,
                 "speedup_factor": 2.9,
                 "cache_hit_rate": 0.82,
-                "efficiency_gain": 65.7
+                "efficiency_gain": 65.7,
             }
-            
-            with patch.object(CacheComparisonBenchmark, 'setup'), \
-                 patch.object(CacheComparisonBenchmark, 'run_iteration', return_value=mock_result):
-                
+
+            with (
+                patch.object(CacheComparisonBenchmark, "setup"),
+                patch.object(CacheComparisonBenchmark, "run_iteration", return_value=mock_result),
+            ):
+
                 benchmark = CacheComparisonBenchmark("mixed_workload")
                 benchmark.setup()
                 result = benchmark.run_iteration()
-                
+
                 # Check that result contains expected metrics
                 assert "cached_avg_time_ms" in result
                 assert "uncached_avg_time_ms" in result
@@ -251,7 +261,7 @@ class TestCachingBenchmarks:
                 assert 0 <= result["cache_hit_rate"] <= 1
                 assert result["efficiency_gain"] >= 0
             return
-        
+
         # Real test when PyMDP is available
         benchmark = CacheComparisonBenchmark("mixed_workload")
 
@@ -277,33 +287,31 @@ class TestCachingBenchmarks:
         # Check if PyMDP is available
         try:
             import pymdp
+
             pymdp_available = True
         except ImportError:
             pymdp_available = False
-        
+
         if not pymdp_available:
             # Mock the benchmark when PyMDP is not available
-            mock_config = {
-                "complexity_level": 3,
-                "cache_enabled": True
-            }
-            
-            with patch.object(IntermediateResultCachingBenchmark, 'get_configuration', return_value=mock_config):
+            mock_config = {"complexity_level": 3, "cache_enabled": True}
+
+            with patch.object(
+                IntermediateResultCachingBenchmark, "get_configuration", return_value=mock_config
+            ):
                 benchmark = IntermediateResultCachingBenchmark(
                     complexity_level=3, cache_enabled=True
                 )
                 config = benchmark.get_configuration()
-                
+
                 assert "complexity_level" in config
                 assert "cache_enabled" in config
                 assert config["complexity_level"] == 3
                 assert config["cache_enabled"] is True
             return
-        
+
         # Real test when PyMDP is available
-        benchmark = IntermediateResultCachingBenchmark(
-            complexity_level=3, cache_enabled=True
-        )
+        benchmark = IntermediateResultCachingBenchmark(complexity_level=3, cache_enabled=True)
 
         config = benchmark.get_configuration()
 
@@ -334,9 +342,7 @@ class TestCachingBenchmarksWithoutPyMDP:
 
         finally:
             # Restore original value
-            matrix_caching_benchmarks.PYMDP_AVAILABLE = (
-                original_pymdp_available
-            )
+            matrix_caching_benchmarks.PYMDP_AVAILABLE = original_pymdp_available
 
 
 if __name__ == "__main__":

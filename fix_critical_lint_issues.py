@@ -66,10 +66,7 @@ def fix_docstring_issues():
 
     count = 0
     for path in Path(".").rglob("*.py"):
-        if any(
-            skip in str(path)
-            for skip in [".venv", "venv", "__pycache__", "migrations"]
-        ):
+        if any(skip in str(path) for skip in [".venv", "venv", "__pycache__", "migrations"]):
             continue
 
         try:
@@ -102,10 +99,7 @@ def fix_whitespace_issues():
 
     count = 0
     for path in Path(".").rglob("*.py"):
-        if any(
-            skip in str(path)
-            for skip in [".venv", "venv", "__pycache__", "migrations"]
-        ):
+        if any(skip in str(path) for skip in [".venv", "venv", "__pycache__", "migrations"]):
             continue
 
         try:
@@ -113,10 +107,7 @@ def fix_whitespace_issues():
                 lines = f.readlines()
 
             # Fix trailing whitespace
-            new_lines = [
-                line.rstrip() + "\n" if line.strip() else "\n"
-                for line in lines
-            ]
+            new_lines = [line.rstrip() + "\n" if line.strip() else "\n" for line in lines]
 
             # Fix multiple blank lines
             final_lines = []

@@ -19,16 +19,14 @@ import socket
 import ssl
 import subprocess
 import sys
-import threading
 import time
 from concurrent.futures import ThreadPoolExecutor, as_completed
-from datetime import datetime, timedelta
+from datetime import datetime
 from pathlib import Path
-from typing import Any, Dict, List, Optional, Tuple
+from typing import Any, Dict, Tuple
 
 import psutil
 import requests
-import websockets
 import yaml
 
 # Configure logging
@@ -62,9 +60,7 @@ class ProductionValidator:
         self.warnings = []
         self.passes = []
 
-    def log_result(
-        self, category: str, test_name: str, result: Dict[str, Any]
-    ):
+    def log_result(self, category: str, test_name: str, result: Dict[str, Any]):
         """Log test result."""
         if category not in self.results["validation_results"]:
             self.results["validation_results"][category] = {}
@@ -84,9 +80,7 @@ class ProductionValidator:
             self.passes.append(f"{category}: {test_name}")
             logger.info(f"PASS: {category} - {test_name}")
         else:
-            logger.info(
-                f"INFO: {category} - {test_name}: {result.get('message', 'No status')}"
-            )
+            logger.info(f"INFO: {category} - {test_name}: {result.get('message', 'No status')}")
 
     def check_environment_readiness(self) -> bool:
         """Check if environment is ready for testing."""
@@ -104,9 +98,7 @@ class ProductionValidator:
                 logger.info("API server is running")
                 return True
             else:
-                logger.error(
-                    f"API server not responding correctly: {response.status_code}"
-                )
+                logger.error(f"API server not responding correctly: {response.status_code}")
                 return False
         except Exception as e:
             logger.error(f"Cannot connect to API server: {e}")
@@ -129,9 +121,7 @@ class ProductionValidator:
                 break
 
         if response_times:
-            p95_response = sorted(response_times)[
-                int(len(response_times) * 0.95)
-            ]
+            p95_response = sorted(response_times)[int(len(response_times) * 0.95)]
 
             self.log_result(
                 "performance",
@@ -189,9 +179,7 @@ class ProductionValidator:
         # Analyze results
         successful_requests = sum(1 for status, _ in results if status == 200)
         total_requests = len(results)
-        success_rate = (
-            successful_requests / total_requests if total_requests > 0 else 0
-        )
+        success_rate = successful_requests / total_requests if total_requests > 0 else 0
 
         self.log_result(
             "performance",
@@ -230,7 +218,6 @@ class ProductionValidator:
 
         try:
             # Test database connection pool
-            import psycopg2
             from psycopg2.pool import ThreadedConnectionPool
 
             db_url = os.getenv("DATABASE_URL")
@@ -333,27 +320,19 @@ class ProductionValidator:
         try:
             # Test SSL certificate
             context = ssl.create_default_context()
-            with socket.create_connection(
-                ("localhost", 443), timeout=10
-            ) as sock:
-                with context.wrap_socket(
-                    sock, server_hostname="localhost"
-                ) as ssock:
+            with socket.create_connection(("localhost", 443), timeout=10) as sock:
+                with context.wrap_socket(sock, server_hostname="localhost") as ssock:
                     cert = ssock.getpeercert()
 
                     # Check certificate expiry
-                    not_after = datetime.strptime(
-                        cert["notAfter"], "%b %d %H:%M:%S %Y %Z"
-                    )
+                    not_after = datetime.strptime(cert["notAfter"], "%b %d %H:%M:%S %Y %Z")
                     days_until_expiry = (not_after - datetime.now()).days
 
                     self.log_result(
                         "security",
                         "ssl_certificate",
                         {
-                            "status": "PASS"
-                            if days_until_expiry > 30
-                            else "WARNING",
+                            "status": "PASS" if days_until_expiry > 30 else "WARNING",
                             "days_until_expiry": days_until_expiry,
                             "certificate_subject": cert.get("subject", []),
                             "message": f"SSL certificate expires in {days_until_expiry} days",
@@ -435,9 +414,7 @@ class ProductionValidator:
                 "security",
                 "authentication_security",
                 {
-                    "status": "PASS"
-                    if response.status_code in [401, 403]
-                    else "WARNING",
+                    "status": "PASS" if response.status_code in [401, 403] else "WARNING",
                     "response_code": response.status_code,
                     "message": f"Authentication correctly rejected invalid credentials: {response.status_code}",
                 },
@@ -523,9 +500,7 @@ class ProductionValidator:
                     return
 
             except Exception as e:
-                logger.debug(
-                    f"Input validation test with payload {payload}: {e}"
-                )
+                logger.debug(f"Input validation test with payload {payload}: {e}")
 
         self.log_result(
             "security",
@@ -550,9 +525,7 @@ class ProductionValidator:
                 timeout=10,
             )
 
-            cors_headers = response.headers.get(
-                "Access-Control-Allow-Origin", ""
-            )
+            cors_headers = response.headers.get("Access-Control-Allow-Origin", "")
 
             self.log_result(
                 "security",
@@ -606,9 +579,7 @@ class ProductionValidator:
                     "disaster_recovery",
                     "backup_procedures",
                     {
-                        "status": "PASS"
-                        if result.returncode == 0
-                        else "WARNING",
+                        "status": "PASS" if result.returncode == 0 else "WARNING",
                         "return_code": result.returncode,
                         "output": result.stdout[:500],
                         "message": f"Backup script test: {'SUCCESS' if result.returncode == 0 else 'FAILED'}",
@@ -683,9 +654,7 @@ class ProductionValidator:
             "scripts/rollback-deployment.sh",
         ]
 
-        existing_scripts = [
-            script for script in recovery_scripts if os.path.exists(script)
-        ]
+        existing_scripts = [script for script in recovery_scripts if os.path.exists(script)]
 
         self.log_result(
             "disaster_recovery",
@@ -768,19 +737,13 @@ class ProductionValidator:
                     "process_resident_memory_bytes",
                 ]
 
-                found_metrics = [
-                    metric
-                    for metric in required_metrics
-                    if metric in metrics_text
-                ]
+                found_metrics = [metric for metric in required_metrics if metric in metrics_text]
 
                 self.log_result(
                     "monitoring",
                     "prometheus_metrics",
                     {
-                        "status": "PASS"
-                        if len(found_metrics) >= 3
-                        else "WARNING",
+                        "status": "PASS" if len(found_metrics) >= 3 else "WARNING",
                         "found_metrics": found_metrics,
                         "total_metrics": len(required_metrics),
                         "message": f"Prometheus metrics: {len(found_metrics)}/{len(required_metrics)} found",
@@ -818,9 +781,7 @@ class ProductionValidator:
                 "monitoring",
                 "grafana_dashboards",
                 {
-                    "status": "PASS"
-                    if len(dashboard_files) > 0
-                    else "WARNING",
+                    "status": "PASS" if len(dashboard_files) > 0 else "WARNING",
                     "dashboard_count": len(dashboard_files),
                     "dashboards": [f.name for f in dashboard_files],
                     "message": f"Grafana dashboards found: {len(dashboard_files)}",
@@ -853,9 +814,7 @@ class ProductionValidator:
                     "monitoring",
                     "alert_manager",
                     {
-                        "status": "PASS"
-                        if has_routing and has_receivers
-                        else "WARNING",
+                        "status": "PASS" if has_routing and has_receivers else "WARNING",
                         "has_routing": has_routing,
                         "has_receivers": has_receivers,
                         "message": f"Alert manager config: routing={has_routing}, receivers={has_receivers}",
@@ -915,9 +874,7 @@ class ProductionValidator:
         healthy_endpoints = []
         for endpoint in health_endpoints:
             try:
-                response = requests.get(
-                    f"{self.base_url}{endpoint}", timeout=10
-                )
+                response = requests.get(f"{self.base_url}{endpoint}", timeout=10)
                 if response.status_code == 200:
                     healthy_endpoints.append(endpoint)
             except Exception:
@@ -927,9 +884,7 @@ class ProductionValidator:
             "monitoring",
             "health_endpoints",
             {
-                "status": "PASS"
-                if len(healthy_endpoints) >= 1
-                else "CRITICAL",
+                "status": "PASS" if len(healthy_endpoints) >= 1 else "CRITICAL",
                 "healthy_endpoints": healthy_endpoints,
                 "total_endpoints": len(health_endpoints),
                 "message": f"Health endpoints: {len(healthy_endpoints)}/{len(health_endpoints)} healthy",
@@ -961,9 +916,7 @@ class ProductionValidator:
             "scripts/deployment/deploy-production.sh",
         ]
 
-        existing_scripts = [
-            script for script in deployment_scripts if os.path.exists(script)
-        ]
+        existing_scripts = [script for script in deployment_scripts if os.path.exists(script)]
 
         self.log_result(
             "operational",
@@ -984,9 +937,7 @@ class ProductionValidator:
             "scripts/deployment/rollback.sh",
         ]
 
-        existing_scripts = [
-            script for script in rollback_scripts if os.path.exists(script)
-        ]
+        existing_scripts = [script for script in rollback_scripts if os.path.exists(script)]
 
         self.log_result(
             "operational",
@@ -1033,9 +984,7 @@ class ProductionValidator:
             "docs/runbooks/MAINTENANCE_PROCEDURES.md",
         ]
 
-        existing_docs = [
-            doc for doc in maintenance_docs if os.path.exists(doc)
-        ]
+        existing_docs = [doc for doc in maintenance_docs if os.path.exists(doc)]
 
         self.log_result(
             "operational",
@@ -1052,12 +1001,8 @@ class ProductionValidator:
         logger.info("Generating final comprehensive report...")
 
         # Calculate summary statistics
-        total_tests = (
-            len(self.passes) + len(self.warnings) + len(self.critical_failures)
-        )
-        pass_rate = (
-            (len(self.passes) / total_tests) * 100 if total_tests > 0 else 0
-        )
+        total_tests = len(self.passes) + len(self.warnings) + len(self.critical_failures)
+        pass_rate = (len(self.passes) / total_tests) * 100 if total_tests > 0 else 0
 
         self.results["summary"] = {
             "total_tests": total_tests,
@@ -1086,12 +1031,8 @@ class ProductionValidator:
     def generate_markdown_report(self, filename: str):
         """Generate markdown report."""
         with open(filename, "w") as f:
-            f.write(
-                "# FreeAgentics Production Readiness Validation Report\n\n"
-            )
-            f.write(
-                f"**Generated:** {datetime.now().strftime('%Y-%m-%d %H:%M:%S')}\n"
-            )
+            f.write("# FreeAgentics Production Readiness Validation Report\n\n")
+            f.write(f"**Generated:** {datetime.now().strftime('%Y-%m-%d %H:%M:%S')}\n")
             f.write(f"**Environment:** {self.results['environment']}\n\n")
 
             # Summary
@@ -1100,9 +1041,7 @@ class ProductionValidator:
             f.write(f"- **Total Tests:** {summary['total_tests']}\n")
             f.write(f"- **Passed:** {summary['passed']}\n")
             f.write(f"- **Warnings:** {summary['warnings']}\n")
-            f.write(
-                f"- **Critical Failures:** {summary['critical_failures']}\n"
-            )
+            f.write(f"- **Critical Failures:** {summary['critical_failures']}\n")
             f.write(f"- **Pass Rate:** {summary['pass_rate']:.1f}%\n")
             f.write(
                 f"- **Production Ready:** {'✅ YES' if summary['production_ready'] else '❌ NO'}\n\n"
@@ -1156,9 +1095,7 @@ class ProductionValidator:
                 f.write("1. Fix all critical failures listed above\n")
                 f.write("2. Re-run validation after fixes\n")
                 f.write("3. Address warnings for optimal performance\n")
-                f.write(
-                    "4. Do not deploy until all critical issues are resolved\n"
-                )
+                f.write("4. Do not deploy until all critical issues are resolved\n")
 
     async def run_validation(self):
         """Run comprehensive validation."""
@@ -1190,9 +1127,7 @@ class ProductionValidator:
             print(f"Warnings: {summary['warnings']}")
             print(f"Critical Failures: {summary['critical_failures']}")
             print(f"Pass Rate: {summary['pass_rate']:.1f}%")
-            print(
-                f"Production Ready: {'YES' if summary['production_ready'] else 'NO'}"
-            )
+            print(f"Production Ready: {'YES' if summary['production_ready'] else 'NO'}")
             print("=" * 60)
 
             if summary["production_ready"]:

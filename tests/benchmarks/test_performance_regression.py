@@ -7,13 +7,10 @@ This module provides comprehensive tests for performance regression detection,
 ensuring that performance benchmarks work correctly and catch regressions.
 """
 
-import json
 import tempfile
 import time
 from datetime import datetime
 from pathlib import Path
-from typing import Dict, List
-from unittest.mock import MagicMock, patch
 
 import numpy as np
 import pytest
@@ -24,13 +21,10 @@ from benchmarks.ci_integration import (
     PerformanceHistory,
     PerformanceResult,
     RegressionDetector,
-    RegressionReport,
 )
 from benchmarks.performance_suite import (
-    AgentSpawnBenchmarks,
     BenchmarkMetrics,
     MemoryTracker,
-    MessageThroughputBenchmarks,
     PerformanceReportGenerator,
     track_performance,
 )
@@ -189,10 +183,7 @@ class TestPerformanceBaseline:
             # Load baseline
             baseline2 = PerformanceBaseline(baseline_path)
             assert "category1.test1" in baseline2.baseline_data
-            assert (
-                baseline2.baseline_data["category1.test1"]["duration_ms"]
-                == 100
-            )
+            assert baseline2.baseline_data["category1.test1"]["duration_ms"] == 100
 
     def test_baseline_update(self):
         """Test updating baseline with new results."""
@@ -272,9 +263,7 @@ class TestRegressionDetection:
                 )
             ]
 
-            regressions, improvements = detector.detect_regressions(
-                current_results
-            )
+            regressions, improvements = detector.detect_regressions(current_results)
 
             assert len(regressions) > 0
             assert any(r.regression_percent > 10 for r in regressions)
@@ -315,9 +304,7 @@ class TestRegressionDetection:
                 )
             ]
 
-            regressions, improvements = detector.detect_regressions(
-                current_results
-            )
+            regressions, improvements = detector.detect_regressions(current_results)
 
             assert len(improvements) > 0
             assert len(regressions) == 0
@@ -549,13 +536,11 @@ class TestCIIntegration:
 class TestPerformanceBenchmarks:
     """Test the actual performance benchmarks."""
 
-    
     def test_agent_spawn_benchmark(self):
         """Test agent spawn benchmark."""
         # This would normally use pytest-benchmark fixture
         pass
 
-    
     def test_message_throughput_benchmark(self):
         """Test message throughput benchmark."""
         # This would normally use pytest-benchmark fixture
@@ -631,9 +616,7 @@ class TestReportGeneration:
                 ),
             ]
 
-            report = PerformanceReportGenerator.generate_report(
-                metrics, output_dir
-            )
+            report = PerformanceReportGenerator.generate_report(metrics, output_dir)
 
             assert report["summary"]["total_benchmarks"] == 3
             assert len(report["summary"]["categories"]) == 2
@@ -664,9 +647,7 @@ class TestEndToEndPerformance:
 
             # Generate report
             output_dir = Path(tmpdir)
-            report = PerformanceReportGenerator.generate_report(
-                metrics, output_dir
-            )
+            report = PerformanceReportGenerator.generate_report(metrics, output_dir)
 
             assert report["summary"]["total_benchmarks"] == 1
             assert "integration" in report["benchmarks"]

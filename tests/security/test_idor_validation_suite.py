@@ -131,9 +131,7 @@ class IDORTestSuite:
                     {
                         "name": test["nodeid"],
                         "duration": test["duration"],
-                        "error": test.get("call", {}).get(
-                            "longrepr", "Unknown error"
-                        ),
+                        "error": test.get("call", {}).get("longrepr", "Unknown error"),
                     }
                 )
 
@@ -261,9 +259,7 @@ class IDORTestSuite:
         if coverage_complete:
             print("\n✅ All required IDOR attack patterns are covered!")
         else:
-            print(
-                f"\n⚠️  Missing coverage for {len(missing_patterns)} patterns:"
-            )
+            print(f"\n⚠️  Missing coverage for {len(missing_patterns)} patterns:")
             for pattern in missing_patterns:
                 print(f"  - {pattern}")
 
@@ -309,17 +305,13 @@ class IDORSecurityValidator:
         if coverage_complete:
             report.append("✅ All IDOR attack patterns are covered by tests")
         else:
-            report.append(
-                f"⚠️  Missing test coverage for {len(missing)} patterns"
-            )
+            report.append(f"⚠️  Missing test coverage for {len(missing)} patterns")
 
         report.append("\n## Recommendations")
         report.append(
             "1. **Use UUIDs**: All resource identifiers should use UUIDs instead of sequential IDs"
         )
-        report.append(
-            "2. **Validate Ownership**: Every request must validate resource ownership"
-        )
+        report.append("2. **Validate Ownership**: Every request must validate resource ownership")
         report.append(
             "3. **Consistent Errors**: Return consistent error messages (404) for both non-existent and unauthorized resources"
         )
@@ -353,20 +345,14 @@ def main():
     with open("tests/security/IDOR_SECURITY_REPORT.md", "w") as f:
         f.write(report)
 
-    print(
-        "\n📄 Security report saved to: tests/security/IDOR_SECURITY_REPORT.md"
-    )
+    print("\n📄 Security report saved to: tests/security/IDOR_SECURITY_REPORT.md")
 
     # Exit with appropriate code
     if results["failed"] > 0:
-        print(
-            "\n❌ IDOR vulnerability tests failed! Security vulnerabilities may exist."
-        )
+        print("\n❌ IDOR vulnerability tests failed! Security vulnerabilities may exist.")
         sys.exit(1)
     elif not coverage_complete:
-        print(
-            "\n⚠️  IDOR test coverage incomplete! Some attack patterns not tested."
-        )
+        print("\n⚠️  IDOR test coverage incomplete! Some attack patterns not tested.")
         sys.exit(1)
     else:
         print("\n✅ All IDOR vulnerability tests passed! System is protected.")

@@ -41,15 +41,11 @@ class TestWebSocketAuth:
         )
 
     @pytest.mark.asyncio
-    async def test_websocket_auth_success(
-        self, mock_websocket, valid_token_data
-    ):
+    async def test_websocket_auth_success(self, mock_websocket, valid_token_data):
         """Test successful WebSocket authentication."""
         token = "valid.jwt.token"
 
-        with patch(
-            "api.v1.websocket.auth_manager.verify_token"
-        ) as mock_verify:
+        with patch("api.v1.websocket.auth_manager.verify_token") as mock_verify:
             mock_verify.return_value = valid_token_data
 
             result = await websocket_auth(mock_websocket, token)
@@ -87,12 +83,8 @@ class TestWebSocketAuth:
 
         token = "invalid.jwt.token"
 
-        with patch(
-            "api.v1.websocket.auth_manager.verify_token"
-        ) as mock_verify:
-            mock_verify.side_effect = HTTPException(
-                status_code=401, detail="Invalid token"
-            )
+        with patch("api.v1.websocket.auth_manager.verify_token") as mock_verify:
+            mock_verify.side_effect = HTTPException(status_code=401, detail="Invalid token")
 
             with pytest.raises(WebSocketDisconnect) as exc_info:
                 await websocket_auth(mock_websocket, token)
@@ -107,12 +99,8 @@ class TestWebSocketAuth:
 
         token = "expired.jwt.token"
 
-        with patch(
-            "api.v1.websocket.auth_manager.verify_token"
-        ) as mock_verify:
-            mock_verify.side_effect = HTTPException(
-                status_code=401, detail="Token expired"
-            )
+        with patch("api.v1.websocket.auth_manager.verify_token") as mock_verify:
+            mock_verify.side_effect = HTTPException(status_code=401, detail="Token expired")
 
             with pytest.raises(WebSocketDisconnect) as exc_info:
                 await websocket_auth(mock_websocket, token)
@@ -127,9 +115,7 @@ class TestWebSocketAuth:
 
         token = "problematic.jwt.token"
 
-        with patch(
-            "api.v1.websocket.auth_manager.verify_token"
-        ) as mock_verify:
+        with patch("api.v1.websocket.auth_manager.verify_token") as mock_verify:
             mock_verify.side_effect = Exception("Unexpected error")
 
             with pytest.raises(WebSocketDisconnect) as exc_info:
@@ -178,9 +164,7 @@ class TestWebSocketAgentCommands:
         client_id = "test_client"
         command_data = {"command": "create", "agent_id": "new_agent_001"}
 
-        with patch(
-            "api.v1.websocket.manager.send_personal_message"
-        ) as mock_send:
+        with patch("api.v1.websocket.manager.send_personal_message") as mock_send:
             await handle_agent_command(client_id, command_data, admin_user)
 
             mock_send.assert_called_once()
@@ -193,16 +177,12 @@ class TestWebSocketAgentCommands:
             assert message["user"] == "admin"
 
     @pytest.mark.asyncio
-    async def test_agent_command_create_without_permission(
-        self, observer_user
-    ):
+    async def test_agent_command_create_without_permission(self, observer_user):
         """Test agent creation command without proper permissions."""
         client_id = "test_client"
         command_data = {"command": "create", "agent_id": "new_agent_001"}
 
-        with patch(
-            "api.v1.websocket.manager.send_personal_message"
-        ) as mock_send:
+        with patch("api.v1.websocket.manager.send_personal_message") as mock_send:
             await handle_agent_command(client_id, command_data, observer_user)
 
             mock_send.assert_called_once()
@@ -219,9 +199,7 @@ class TestWebSocketAgentCommands:
         client_id = "test_client"
         command_data = {"command": "delete", "agent_id": "agent_to_delete"}
 
-        with patch(
-            "api.v1.websocket.manager.send_personal_message"
-        ) as mock_send:
+        with patch("api.v1.websocket.manager.send_personal_message") as mock_send:
             await handle_agent_command(client_id, command_data, admin_user)
 
             mock_send.assert_called_once()
@@ -238,9 +216,7 @@ class TestWebSocketAgentCommands:
         client_id = "test_client"
         command_data = {"command": "create"}  # Missing agent_id
 
-        with patch(
-            "api.v1.websocket.manager.send_personal_message"
-        ) as mock_send:
+        with patch("api.v1.websocket.manager.send_personal_message") as mock_send:
             await handle_agent_command(client_id, command_data, admin_user)
 
             mock_send.assert_called_once()
@@ -251,16 +227,12 @@ class TestWebSocketAgentCommands:
             assert "Missing command or agent_id" in message["message"]
 
     @pytest.mark.asyncio
-    async def test_agent_command_view_with_observer_permission(
-        self, observer_user
-    ):
+    async def test_agent_command_view_with_observer_permission(self, observer_user):
         """Test read-only agent command with observer permissions."""
         client_id = "test_client"
         command_data = {"command": "status", "agent_id": "agent_001"}
 
-        with patch(
-            "api.v1.websocket.manager.send_personal_message"
-        ) as mock_send:
+        with patch("api.v1.websocket.manager.send_personal_message") as mock_send:
             await handle_agent_command(client_id, command_data, observer_user)
 
             mock_send.assert_called_once()
@@ -309,9 +281,7 @@ class TestWebSocketQueries:
         client_id = "test_client"
         query_data = {"query_type": "agent_status"}
 
-        with patch(
-            "api.v1.websocket.manager.send_personal_message"
-        ) as mock_send:
+        with patch("api.v1.websocket.manager.send_personal_message") as mock_send:
             await handle_query(client_id, query_data, researcher_user)
 
             mock_send.assert_called_once()
@@ -329,9 +299,7 @@ class TestWebSocketQueries:
         client_id = "test_client"
         query_data = {"query_type": "world_state"}
 
-        with patch(
-            "api.v1.websocket.manager.send_personal_message"
-        ) as mock_send:
+        with patch("api.v1.websocket.manager.send_personal_message") as mock_send:
             await handle_query(client_id, query_data, researcher_user)
 
             mock_send.assert_called_once()
@@ -343,16 +311,12 @@ class TestWebSocketQueries:
             assert "user" in message["data"]
 
     @pytest.mark.asyncio
-    async def test_query_agent_status_without_permission(
-        self, no_permission_user
-    ):
+    async def test_query_agent_status_without_permission(self, no_permission_user):
         """Test agent status query without proper permissions."""
         client_id = "test_client"
         query_data = {"query_type": "agent_status"}
 
-        with patch(
-            "api.v1.websocket.manager.send_personal_message"
-        ) as mock_send:
+        with patch("api.v1.websocket.manager.send_personal_message") as mock_send:
             await handle_query(client_id, query_data, no_permission_user)
 
             mock_send.assert_called_once()
@@ -369,9 +333,7 @@ class TestWebSocketQueries:
         client_id = "test_client"
         query_data = {"query_type": "unknown_query"}
 
-        with patch(
-            "api.v1.websocket.manager.send_personal_message"
-        ) as mock_send:
+        with patch("api.v1.websocket.manager.send_personal_message") as mock_send:
             await handle_query(client_id, query_data, researcher_user)
 
             mock_send.assert_called_once()

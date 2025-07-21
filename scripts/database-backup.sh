@@ -31,14 +31,14 @@ send_notification() {
     if [[ -n "$SLACK_WEBHOOK" ]]; then
         curl -X POST -H 'Content-type: application/json' \
             --data "{\"text\":\"🗄️ FreeAgentics DB Backup $status: $message\"}" \
-            "$SLACK_WEBHOOK" || true
+            "$SLACK_WEBHOOK" 
     fi
 }
 
 # Function to cleanup old backups
 cleanup_old_backups() {
     echo "Cleaning up backups older than $RETENTION_DAYS days..."
-    find "$BACKUP_DIR" -name "freeagentics_backup_*.sql.gz" -mtime +$RETENTION_DAYS -delete || true
+    find "$BACKUP_DIR" -name "freeagentics_backup_*.sql.gz" -mtime +$RETENTION_DAYS -delete 
 }
 
 # Function to perform backup

@@ -11,11 +11,10 @@ import asyncio
 import logging
 import sys
 from pathlib import Path
-from typing import Dict, Optional
+from typing import Dict
 
 from tests.simulation.concurrent_simulator import (
     ConcurrentSimulator,
-    SimulationConfig,
 )
 from tests.simulation.scenarios import ScenarioScheduler, SimulationScenarios
 from tests.simulation.user_personas import PersonaType
@@ -65,8 +64,7 @@ async def run_single_scenario(args):
             name=args.custom_name or "custom_scenario",
             duration_seconds=args.duration,
             user_counts={p.value: c for p, c in distribution.items()},
-            description=args.custom_description
-            or "Custom simulation scenario",
+            description=args.custom_description or "Custom simulation scenario",
             user_spawn_rate=args.spawn_rate,
             warmup_period=args.warmup,
             cooldown_period=args.cooldown,
@@ -125,15 +123,9 @@ async def run_single_scenario(args):
         print(f"Duration: {summary['metrics']['duration_seconds']:.1f}s")
         print(f"Users created: {summary['metrics']['users']['created']}")
         print(f"Messages sent: {summary['metrics']['messages']['sent']}")
-        print(
-            f"Message success rate: {summary['metrics']['messages']['success_rate']:.1%}"
-        )
-        print(
-            f"Avg DB latency: {summary['metrics']['database']['avg_latency_ms']:.1f}ms"
-        )
-        print(
-            f"Avg WS latency: {summary['metrics']['websocket']['avg_latency_ms']:.1f}ms"
-        )
+        print(f"Message success rate: {summary['metrics']['messages']['success_rate']:.1%}")
+        print(f"Avg DB latency: {summary['metrics']['database']['avg_latency_ms']:.1f}ms")
+        print(f"Avg WS latency: {summary['metrics']['websocket']['avg_latency_ms']:.1f}ms")
 
         if config.export_results:
             print(f"\nResults exported to: {config.results_path}")
@@ -148,9 +140,7 @@ async def run_single_scenario(args):
 async def run_schedule(args):
     """Run a scheduled sequence of scenarios."""
     scheduler = ScenarioScheduler(
-        results_base_path=Path(args.output)
-        if args.output
-        else Path("simulation_results")
+        results_base_path=Path(args.output) if args.output else Path("simulation_results")
     )
 
     if args.schedule == "daily":
@@ -169,30 +159,22 @@ async def run_schedule(args):
             delay = scenario_def.get("delay_minutes", 0)
 
             if scenario_name == "custom":
-                config = SimulationScenarios.create_custom(
-                    **scenario_def["config"]
-                )
+                config = SimulationScenarios.create_custom(**scenario_def["config"])
             else:
                 config = SimulationScenarios.get_scenario(scenario_name)
                 if not config:
-                    print(
-                        f"Warning: Unknown scenario {scenario_name}, skipping"
-                    )
+                    print(f"Warning: Unknown scenario {scenario_name}, skipping")
                     continue
 
             scheduler.add_scenario(config, delay_minutes=delay)
 
-    print(
-        f"\nRunning scenario schedule with {len(scheduler.scheduled_scenarios)} scenarios"
-    )
+    print(f"\nRunning scenario schedule with {len(scheduler.scheduled_scenarios)} scenarios")
     await scheduler.run_schedule()
 
 
 def main():
     """Main entry point."""
-    parser = argparse.ArgumentParser(
-        description="Run concurrent user simulations for FreeAgentics"
-    )
+    parser = argparse.ArgumentParser(description="Run concurrent user simulations for FreeAgentics")
 
     subparsers = parser.add_subparsers(dest="command", help="Command to run")
 
@@ -215,12 +197,8 @@ def main():
         type=float,
         help="User spawn rate (users per second)",
     )
-    single_parser.add_argument(
-        "--warmup", "-w", type=float, help="Warmup period (seconds)"
-    )
-    single_parser.add_argument(
-        "--cooldown", "-c", type=float, help="Cooldown period (seconds)"
-    )
+    single_parser.add_argument("--warmup", "-w", type=float, help="Warmup period (seconds)")
+    single_parser.add_argument("--cooldown", "-c", type=float, help="Cooldown period (seconds)")
     single_parser.add_argument(
         "--ws-url", help="WebSocket server URL (default: ws://localhost:8000)"
     )
@@ -228,51 +206,35 @@ def main():
         "--db-url",
         help="Database URL (default: postgresql://localhost/freeagentics_test)",
     )
-    single_parser.add_argument(
-        "--output", "-o", help="Output directory for results"
-    )
+    single_parser.add_argument("--output", "-o", help="Output directory for results")
     single_parser.add_argument(
         "--no-monitoring",
         action="store_true",
         help="Disable performance monitoring",
     )
-    single_parser.add_argument(
-        "--no-export", action="store_true", help="Disable result export"
-    )
+    single_parser.add_argument("--no-export", action="store_true", help="Disable result export")
 
     # Custom scenario options
-    single_parser.add_argument(
-        "--custom-name", help="Name for custom scenario"
-    )
-    single_parser.add_argument(
-        "--custom-description", help="Description for custom scenario"
-    )
+    single_parser.add_argument("--custom-name", help="Name for custom scenario")
+    single_parser.add_argument("--custom-description", help="Description for custom scenario")
     single_parser.add_argument(
         "--custom-users",
         help="User distribution (e.g., 'researcher:20,coordinator:10,observer:30')",
     )
 
     # Schedule command
-    schedule_parser = subparsers.add_parser(
-        "schedule", help="Run a scenario schedule"
-    )
+    schedule_parser = subparsers.add_parser("schedule", help="Run a scenario schedule")
     schedule_parser.add_argument(
         "schedule",
         help="Schedule to run ('daily', 'stress', or path to JSON file)",
     )
-    schedule_parser.add_argument(
-        "--output", "-o", help="Base output directory for results"
-    )
+    schedule_parser.add_argument("--output", "-o", help="Base output directory for results")
 
     # List command
-    list_parser = subparsers.add_parser(
-        "list", help="List available scenarios"
-    )
+    subparsers.add_parser("list", help="List available scenarios")
 
     # Common options
-    parser.add_argument(
-        "--verbose", "-v", action="store_true", help="Enable verbose logging"
-    )
+    parser.add_argument("--verbose", "-v", action="store_true", help="Enable verbose logging")
 
     args = parser.parse_args()
 

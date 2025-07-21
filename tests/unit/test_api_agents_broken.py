@@ -7,8 +7,6 @@ and real Active Inference implementation.
 
 import os
 import uuid
-from datetime import datetime
-from unittest.mock import Mock, patch
 
 os.environ["REDIS_ENABLED"] = "false"
 os.environ["TESTING"] = "true"
@@ -16,9 +14,8 @@ os.environ["DATABASE_URL"] = "sqlite:///./test.db"
 
 import pytest
 from sqlalchemy import create_engine
-from sqlalchemy.orm import Session, sessionmaker
+from sqlalchemy.orm import sessionmaker
 
-from api.v1.agents import router
 from database.base import Base
 from database.models import Agent as AgentModel
 from database.models import AgentStatus
@@ -33,12 +30,8 @@ except ImportError:
 
 # Create test database
 SQLALCHEMY_DATABASE_URL = "sqlite:///./test.db"
-engine = create_engine(
-    SQLALCHEMY_DATABASE_URL, connect_args={"check_same_thread": False}
-)
-TestingSessionLocal = sessionmaker(
-    autocommit=False, autoflush=False, bind=engine
-)
+engine = create_engine(SQLALCHEMY_DATABASE_URL, connect_args={"check_same_thread": False})
+TestingSessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engine)
 
 # Create tables
 Base.metadata.create_all(bind=engine)
@@ -57,9 +50,10 @@ def override_get_db():
 app.dependency_overrides[get_db] = override_get_db
 
 
+from tests.helpers import get_auth_headers
+
 # Create a test client using compatibility wrapper
 from tests.test_client_compat import TestClient
-from tests.helpers import get_auth_headers
 
 # Create global test client
 client = TestClient(app)
@@ -191,9 +185,7 @@ class TestAgentsAPI:
 
         # Verify in database
         db = TestingSessionLocal()
-        updated_agent = (
-            db.query(AgentModel).filter(AgentModel.id == agent.id).first()
-        )
+        updated_agent = db.query(AgentModel).filter(AgentModel.id == agent.id).first()
         assert updated_agent.status == AgentStatus.ACTIVE
         assert updated_agent.last_active is not None
         db.close()
@@ -219,9 +211,7 @@ class TestAgentsAPI:
 
         # Verify agent is gone
         db = TestingSessionLocal()
-        deleted_agent = (
-            db.query(AgentModel).filter(AgentModel.id == agent.id).first()
-        )
+        deleted_agent = db.query(AgentModel).filter(AgentModel.id == agent.id).first()
         assert deleted_agent is None
         db.close()
 
@@ -254,15 +244,9 @@ class TestAgentsAPI:
         """Test filtering agents by status."""
         # Create agents with different statuses
         db = TestingSessionLocal()
-        active = AgentModel(
-            name="Active", template="t1", status=AgentStatus.ACTIVE
-        )
-        pending = AgentModel(
-            name="Pending", template="t2", status=AgentStatus.PENDING
-        )
-        stopped = AgentModel(
-            name="Stopped", template="t3", status=AgentStatus.STOPPED
-        )
+        active = AgentModel(name="Active", template="t1", status=AgentStatus.ACTIVE)
+        pending = AgentModel(name="Pending", template="t2", status=AgentStatus.PENDING)
+        stopped = AgentModel(name="Stopped", template="t3", status=AgentStatus.STOPPED)
         db.add_all([active, pending, stopped])
         db.commit()
         db.close()

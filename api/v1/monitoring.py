@@ -69,16 +69,12 @@ class MetricsCollector:
         for metric in default_metrics:
             self.metrics[metric] = deque(maxlen=self.buffer_size)
 
-    def record_metric(
-        self, metric_type: str, value: float, agent_id: Optional[str] = None
-    ) -> None:
+    def record_metric(self, metric_type: str, value: float, agent_id: Optional[str] = None) -> None:
         """Record a metric value."""
         if metric_type not in self.metrics:
             self.metrics[metric_type] = deque(maxlen=self.buffer_size)
 
-        point = MetricPoint(
-            value=value, agent_id=agent_id, metric_type=metric_type
-        )
+        point = MetricPoint(value=value, agent_id=agent_id, metric_type=metric_type)
 
         self.metrics[metric_type].append(point)
 
@@ -105,9 +101,7 @@ class MetricsCollector:
 
         return [m.dict() for m in metrics]
 
-    def get_summary(
-        self, metric_type: str, duration: float = 60.0
-    ) -> Dict[str, float]:
+    def get_summary(self, metric_type: str, duration: float = 60.0) -> Dict[str, float]:
         """Get summary statistics for a metric."""
         metrics = self.get_metrics(metric_type, duration)
 
@@ -153,9 +147,7 @@ class MonitoringManager:
         self.sessions: Dict[str, MonitoringSession] = {}
         self.active_streams: Dict[str, asyncio.Task] = {}
 
-    async def start_session(
-        self, websocket: WebSocket, session: MonitoringSession
-    ) -> None:
+    async def start_session(self, websocket: WebSocket, session: MonitoringSession) -> None:
         """Start a monitoring session."""
         self.sessions[session.session_id] = session
 
@@ -183,9 +175,7 @@ class MonitoringManager:
 
         logger.info(f"Stopped monitoring session {session_id}")
 
-    async def _stream_metrics(
-        self, websocket: WebSocket, session: MonitoringSession
-    ) -> None:
+    async def _stream_metrics(self, websocket: WebSocket, session: MonitoringSession) -> None:
         """Stream metrics to a WebSocket client."""
         try:
             while True:
@@ -204,8 +194,7 @@ class MonitoringManager:
                         metrics = [
                             m
                             for m in metrics
-                            if not m.get("agent_id")
-                            or m["agent_id"] in session.agents
+                            if not m.get("agent_id") or m["agent_id"] in session.agents
                         ]
 
                     if metrics:
@@ -226,9 +215,7 @@ class MonitoringManager:
                 await asyncio.sleep(session.sample_rate)
 
         except asyncio.CancelledError:
-            logger.info(
-                f"Metric streaming cancelled for session {session.session_id}"
-            )
+            logger.info(f"Metric streaming cancelled for session {session.session_id}")
         except Exception as e:
             logger.error(f"Error streaming metrics: {e}")
 
@@ -260,9 +247,7 @@ async def monitor_endpoint(websocket: WebSocket, client_id: str) -> None:
                     session = MonitoringSession(
                         session_id=session_id,
                         client_id=client_id,
-                        metrics=config.get(
-                            "metrics", ["cpu_usage", "memory_usage"]
-                        ),
+                        metrics=config.get("metrics", ["cpu_usage", "memory_usage"]),
                         agents=config.get("agents", []),
                         sample_rate=config.get("sample_rate", 1.0),
                         buffer_size=config.get("buffer_size", 1000),
@@ -295,9 +280,7 @@ async def monitor_endpoint(websocket: WebSocket, client_id: str) -> None:
                     duration = message.get("duration", 60.0)
 
                     if metric_type:
-                        summary = metrics_collector.get_summary(
-                            metric_type, duration
-                        )
+                        summary = metrics_collector.get_summary(metric_type, duration)
 
                         await websocket.send_json(
                             {

@@ -23,7 +23,6 @@ from auth.security_headers import (
     SecurityHeadersMiddleware,
     SecurityPolicy,
 )
-from auth.security_implementation import SecurityMiddleware
 
 # Configure logging
 logging.basicConfig(level=logging.INFO)
@@ -55,9 +54,7 @@ async def lifespan(app: FastAPI):
         init_db()
         logger.info("Database initialized successfully")
     except Exception as e:
-        logger.warning(
-            f"Database initialization skipped (may already exist): {e}"
-        )
+        logger.warning(f"Database initialization skipped (may already exist): {e}")
 
     yield
     # Shutdown
@@ -98,14 +95,10 @@ security_manager = SecurityHeadersManager(
         production_mode=True,
     )
 )
-app.add_middleware(
-    SecurityHeadersMiddleware, security_manager=security_manager
-)
+app.add_middleware(SecurityHeadersMiddleware, security_manager=security_manager)
 
 # Include routers
-app.include_router(
-    auth.router, prefix="/api/v1", tags=["auth"]
-)  # Auth must be first
+app.include_router(auth.router, prefix="/api/v1", tags=["auth"])  # Auth must be first
 app.include_router(mfa.router, tags=["mfa"])  # MFA router has its own prefix
 app.include_router(agents.router, prefix="/api/v1", tags=["agents"])
 app.include_router(inference.router, prefix="/api/v1", tags=["inference"])

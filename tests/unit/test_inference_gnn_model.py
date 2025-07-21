@@ -68,9 +68,7 @@ class TestGMNModel:
         model.build()
 
         # Should log the build information
-        mock_logger.info.assert_called_once_with(
-            "Building GCN model with 3 layers"
-        )
+        mock_logger.info.assert_called_once_with("Building GCN model with 3 layers")
 
     @patch("inference.gnn.model.logger")
     def test_gmn_model_build_no_layers(self, mock_logger):
@@ -82,9 +80,7 @@ class TestGMNModel:
         model.build()
 
         # Should log the build information
-        mock_logger.info.assert_called_once_with(
-            "Building GAT model with 0 layers"
-        )
+        mock_logger.info.assert_called_once_with("Building GAT model with 0 layers")
 
     def test_gmn_model_forward_without_build(self):
         """Test GMNModel forward without building first."""
@@ -94,9 +90,7 @@ class TestGMNModel:
         model = GMNModel(config)
 
         # Should raise RuntimeError if model not built
-        with pytest.raises(
-            RuntimeError, match="Model not built. Call build\\(\\) first."
-        ):
+        with pytest.raises(RuntimeError, match="Model not built. Call build\\(\\) first."):
             model.forward(None, None)
 
     def test_gmn_model_forward_with_build(self):

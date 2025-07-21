@@ -23,9 +23,7 @@ _security_manager = SecurityHeadersManager(
 )
 
 
-async def security_headers_middleware(
-    request: Request, call_next: Callable
-) -> Response:
+async def security_headers_middleware(request: Request, call_next: Callable) -> Response:
     """Add comprehensive security headers to all responses."""
     start_time = time.time()
 
@@ -35,14 +33,10 @@ async def security_headers_middleware(
         # Create error response
         from fastapi.responses import JSONResponse
 
-        response = JSONResponse(
-            status_code=500, content={"detail": "Internal server error"}
-        )
+        response = JSONResponse(status_code=500, content={"detail": "Internal server error"})
 
     # Apply comprehensive security headers
-    security_headers = _security_manager.get_security_headers(
-        request, response
-    )
+    security_headers = _security_manager.get_security_headers(request, response)
 
     for header_name, header_value in security_headers.items():
         if header_value:  # Only set non-empty headers

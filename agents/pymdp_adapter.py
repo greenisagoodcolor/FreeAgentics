@@ -27,9 +27,7 @@ class PyMDPCompatibilityAdapter:
 
     def __init__(self):
         """Initialize the compatibility adapter."""
-        logger.info(
-            "Initializing PyMDP compatibility adapter with strict type checking"
-        )
+        logger.info("Initializing PyMDP compatibility adapter with strict type checking")
 
     def sample_action(self, pymdp_agent: PyMDPAgent) -> int:
         """Convert PyMDP action result to strict int type.
@@ -86,9 +84,7 @@ class PyMDPCompatibilityAdapter:
         if action_int < 0:
             raise ValueError(f"Action index {action_int} is negative")
 
-        logger.debug(
-            f"Converted PyMDP action {action_result} to int {action_int}"
-        )
+        logger.debug(f"Converted PyMDP action {action_result} to int {action_int}")
         return action_int
 
     def infer_policies(
@@ -134,22 +130,16 @@ class PyMDPCompatibilityAdapter:
             raise RuntimeError(f"q_pi is {type(q_pi)}, expected numpy.ndarray")
 
         if not np.issubdtype(q_pi.dtype, np.floating):
-            raise RuntimeError(
-                f"q_pi has dtype {q_pi.dtype}, expected floating point"
-            )
+            raise RuntimeError(f"q_pi has dtype {q_pi.dtype}, expected floating point")
 
         # Validate G
         if not isinstance(G, np.ndarray):
             raise RuntimeError(f"G is {type(G)}, expected numpy.ndarray")
 
         if not np.issubdtype(G.dtype, np.floating):
-            raise RuntimeError(
-                f"G has dtype {G.dtype}, expected floating point"
-            )
+            raise RuntimeError(f"G has dtype {G.dtype}, expected floating point")
 
-        logger.debug(
-            f"Validated infer_policies return: q_pi shape {q_pi.shape}, G shape {G.shape}"
-        )
+        logger.debug(f"Validated infer_policies return: q_pi shape {q_pi.shape}, G shape {G.shape}")
         return q_pi, G
 
     def _validate_observation_format(
@@ -163,13 +153,9 @@ class PyMDPCompatibilityAdapter:
         elif isinstance(observation, np.ndarray):
             return self._handle_numpy_observation(observation)
         else:
-            raise TypeError(
-                f"Observation type {type(observation)} not supported"
-            )
+            raise TypeError(f"Observation type {type(observation)} not supported")
 
-    def _handle_numpy_observation(
-        self, observation: NDArray[Any]
-    ) -> List[int]:
+    def _handle_numpy_observation(self, observation: NDArray[Any]) -> List[int]:
         """Handle different numpy array observation formats."""
         if observation.ndim == 0:
             # 0-dimensional array (scalar)
@@ -184,9 +170,7 @@ class PyMDPCompatibilityAdapter:
                 f"Multi-dimensional observation arrays not supported: shape {observation.shape}"
             )
 
-    def _process_beliefs_result(
-        self, beliefs_result
-    ) -> List[NDArray[np.floating]]:
+    def _process_beliefs_result(self, beliefs_result) -> List[NDArray[np.floating]]:
         """Process PyMDP infer_states result into standard format."""
         if isinstance(beliefs_result, list):
             return beliefs_result
@@ -197,9 +181,7 @@ class PyMDPCompatibilityAdapter:
                 f"infer_states returned {type(beliefs_result)}, expected list or numpy.ndarray"
             )
 
-    def _handle_numpy_beliefs(
-        self, beliefs_result: NDArray[Any]
-    ) -> List[NDArray[np.floating]]:
+    def _handle_numpy_beliefs(self, beliefs_result: NDArray[Any]) -> List[NDArray[np.floating]]:
         """Handle numpy array beliefs result."""
         if beliefs_result.dtype == np.object_:
             return self._handle_object_array_beliefs(beliefs_result)
@@ -228,26 +210,18 @@ class PyMDPCompatibilityAdapter:
             result_list = beliefs_result.tolist()
             # Ensure we return a list of ndarrays
             return [
-                np.array(item, dtype=np.float64)
-                if not isinstance(item, np.ndarray)
-                else item
+                (np.array(item, dtype=np.float64) if not isinstance(item, np.ndarray) else item)
                 for item in result_list
             ]
 
-    def _validate_beliefs_format(
-        self, beliefs_list: List[NDArray[np.floating]]
-    ) -> None:
+    def _validate_beliefs_format(self, beliefs_list: List[NDArray[np.floating]]) -> None:
         """Validate each belief array format."""
         for i, belief in enumerate(beliefs_list):
             if not isinstance(belief, np.ndarray):
-                raise RuntimeError(
-                    f"Belief {i} is {type(belief)}, expected numpy.ndarray"
-                )
+                raise RuntimeError(f"Belief {i} is {type(belief)}, expected numpy.ndarray")
 
             if not np.issubdtype(belief.dtype, np.floating):
-                raise RuntimeError(
-                    f"Belief {i} has dtype {belief.dtype}, expected floating point"
-                )
+                raise RuntimeError(f"Belief {i} has dtype {belief.dtype}, expected floating point")
 
     def infer_states(
         self,
@@ -281,9 +255,7 @@ class PyMDPCompatibilityAdapter:
         beliefs_list = self._process_beliefs_result(beliefs_result)
         self._validate_beliefs_format(beliefs_list)
 
-        logger.debug(
-            f"Validated infer_states return: {len(beliefs_list)} belief arrays"
-        )
+        logger.debug(f"Validated infer_states return: {len(beliefs_list)} belief arrays")
         return beliefs_list
 
     def validate_agent_state(self, pymdp_agent: PyMDPAgent) -> bool:
@@ -308,9 +280,7 @@ class PyMDPCompatibilityAdapter:
         required_attrs = ["A", "B"]
         for attr in required_attrs:
             if not hasattr(pymdp_agent, attr):
-                raise RuntimeError(
-                    f"PyMDP agent missing required attribute: {attr}"
-                )
+                raise RuntimeError(f"PyMDP agent missing required attribute: {attr}")
 
         # Check if agent can sample actions (requires q_pi to be set)
         try:
@@ -318,17 +288,13 @@ class PyMDPCompatibilityAdapter:
             if hasattr(pymdp_agent, "q_pi") and pymdp_agent.q_pi is not None:
                 logger.debug("Agent q_pi is initialized")
             else:
-                logger.debug(
-                    "Agent q_pi not initialized - may need infer_policies() call"
-                )
+                logger.debug("Agent q_pi not initialized - may need infer_policies() call")
         except AttributeError:
             logger.debug("Agent does not have q_pi attribute")
 
         return True
 
-    def safe_array_conversion(
-        self, value: Any, target_type: type = int
-    ) -> Union[int, float]:
+    def safe_array_conversion(self, value: Any, target_type: type = int) -> Union[int, float]:
         """Strict array to scalar conversion with no fallbacks.
 
         Args:
@@ -343,9 +309,7 @@ class PyMDPCompatibilityAdapter:
             ValueError: If conversion results in invalid value
         """
         if target_type not in [int, float]:
-            raise TypeError(
-                f"target_type must be int or float, got {target_type}"
-            )
+            raise TypeError(f"target_type must be int or float, got {target_type}")
 
         # Handle numpy arrays
         if isinstance(value, np.ndarray):
@@ -377,6 +341,4 @@ class PyMDPCompatibilityAdapter:
             else:
                 raise TypeError(f"Unsupported target_type: {target_type}")
         except (ValueError, TypeError, OverflowError) as e:
-            raise ValueError(
-                f"Failed to convert {scalar_value} to {target_type}: {e}"
-            )
+            raise ValueError(f"Failed to convert {scalar_value} to {target_type}: {e}")

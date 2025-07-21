@@ -5,15 +5,12 @@ This demonstrates how to replace in-memory WebSocket state management
 with proper database persistence for connection tracking and event history.
 """
 
-import asyncio
-import json
 import uuid
 from datetime import datetime, timedelta
-from typing import Dict, List, Optional
+from typing import Optional
 
 import pytest
 from fastapi import WebSocket
-from fastapi.testclient import TestClient
 from sqlalchemy import (
     JSON,
     Boolean,
@@ -21,24 +18,13 @@ from sqlalchemy import (
     DateTime,
     ForeignKey,
     String,
-    create_engine,
-    select,
-)
-from database.types import GUID
-from database.json_encoder import dumps, loads
-from sqlalchemy.ext.asyncio import (
-    AsyncSession,
-    async_sessionmaker,
-    create_async_engine,
 )
 from sqlalchemy.orm import Session, relationship
 
-from api.v1.websocket import ConnectionManager, WebSocketMessage
+from api.v1.websocket import ConnectionManager
 from database.base import Base
-from database.models import Agent, AgentStatus
-from tests.db_infrastructure.factories import AgentFactory
-from tests.db_infrastructure.fixtures import DatabaseTestCase, db_session
-from tests.db_infrastructure.test_config import TEST_DATABASE_URL
+from database.types import GUID
+from tests.db_infrastructure.fixtures import DatabaseTestCase
 
 
 # Define WebSocket-specific database models
@@ -78,9 +64,7 @@ class WebSocketSubscription(Base):
     subscribed_at = Column(DateTime, default=datetime.utcnow)
 
     # Relationships
-    connection = relationship(
-        "WebSocketConnection", back_populates="subscriptions"
-    )
+    connection = relationship("WebSocketConnection", back_populates="subscriptions")
 
 
 class WebSocketEvent(Base):
@@ -115,9 +99,7 @@ class DatabaseConnectionManager(ConnectionManager):
     def _restore_active_connections(self):
         """Restore active connections from database on startup."""
         active_conns = (
-            self.db.query(WebSocketConnection)
-            .filter(WebSocketConnection.is_active == True)
-            .all()
+            self.db.query(WebSocketConnection).filter(WebSocketConnection.is_active is True).all()
         )
 
         for conn in active_conns:
@@ -151,9 +133,7 @@ class DatabaseConnectionManager(ConnectionManager):
             existing.connection_metadata = metadata or {}
         else:
             # Create new connection record
-            conn = WebSocketConnection(
-                client_id=client_id, metadata=metadata or {}, is_active=True
-            )
+            conn = WebSocketConnection(client_id=client_id, metadata=metadata or {}, is_active=True)
             self.db.add(conn)
 
         self.db.commit()
@@ -197,9 +177,7 @@ class DatabaseConnectionManager(ConnectionManager):
             )
 
             if not existing_sub:
-                sub = WebSocketSubscription(
-                    connection_id=conn.id, event_type=event_type
-                )
+                sub = WebSocketSubscription(connection_id=conn.id, event_type=event_type)
                 self.db.add(sub)
                 self.db.commit()
 
@@ -215,7 +193,7 @@ class DatabaseConnectionManager(ConnectionManager):
                 .join(WebSocketSubscription)
                 .filter(
                     WebSocketSubscription.event_type == event_type,
-                    WebSocketConnection.is_active == True,
+                    WebSocketConnection.is_active is True,
                 )
                 .all()
             )
@@ -254,9 +232,7 @@ class TestWebSocketDatabase(DatabaseTestCase):
         db_manager.connection_metadata[client_id] = metadata
 
         # Manually create connection record
-        conn = WebSocketConnection(
-            client_id=client_id, metadata=metadata, is_active=True
-        )
+        conn = WebSocketConnection(client_id=client_id, metadata=metadata, is_active=True)
         db_session.add(conn)
         db_session.commit()
 
@@ -345,7 +321,7 @@ class TestWebSocketDatabase(DatabaseTestCase):
             .join(WebSocketSubscription)
             .filter(
                 WebSocketSubscription.event_type == "agent:created",
-                WebSocketConnection.is_active == True,
+                WebSocketConnection.is_active is True,
             )
             .all()
         )
@@ -369,9 +345,7 @@ class TestWebSocketDatabase(DatabaseTestCase):
 
         assert len(events) == 2  # Only client_0 and client_1 subscribed
         for event in events:
-            assert (
-                event.event_data["agent_id"] == agent_created_msg["agent_id"]
-            )
+            assert event.event_data["agent_id"] == agent_created_msg["agent_id"]
 
     def test_connection_recovery_after_restart(self, db_session: Session):
         """Test that connections can be recovered after system restart."""
@@ -391,9 +365,7 @@ class TestWebSocketDatabase(DatabaseTestCase):
         # Add subscriptions for active connections
         for i in range(3):
             conn = existing_connections[i]
-            sub = WebSocketSubscription(
-                connection_id=conn.id, event_type="system:status"
-            )
+            sub = WebSocketSubscription(connection_id=conn.id, event_type="system:status")
             db_session.add(sub)
 
         db_session.commit()
@@ -407,17 +379,12 @@ class TestWebSocketDatabase(DatabaseTestCase):
 
         # Verify only active connections are tracked
         for i in range(3):
-            assert (
-                f"persistent_client_{i}"
-                in new_manager.subscriptions["system:status"]
-            )
+            assert f"persistent_client_{i}" in new_manager.subscriptions["system:status"]
 
     def test_event_analytics_queries(self, db_session: Session):
         """Test analytics queries on WebSocket event history."""
         # Create test data
-        conn = WebSocketConnection(
-            client_id="analytics_client", is_active=True
-        )
+        conn = WebSocketConnection(client_id="analytics_client", is_active=True)
         db_session.add(conn)
         db_session.commit()
 
@@ -438,11 +405,7 @@ class TestWebSocketDatabase(DatabaseTestCase):
                     event = WebSocketEvent(
                         connection_id=conn.id,
                         event_type=event_type,
-                        event_data={
-                            "timestamp": (
-                                base_time + timedelta(hours=hour)
-                            ).isoformat()
-                        },
+                        event_data={"timestamp": (base_time + timedelta(hours=hour)).isoformat()},
                         sent_at=base_time + timedelta(hours=hour),
                     )
                     db_session.add(event)
@@ -457,10 +420,7 @@ class TestWebSocketDatabase(DatabaseTestCase):
                 WebSocketEvent.event_type,
                 func.count(WebSocketEvent.id).label("count"),
             )
-            .filter(
-                WebSocketEvent.sent_at
-                >= datetime.utcnow() - timedelta(hours=24)
-            )
+            .filter(WebSocketEvent.sent_at >= datetime.utcnow() - timedelta(hours=24))
             .group_by(WebSocketEvent.event_type)
             .all()
         )
@@ -484,21 +444,16 @@ class TestWebSocketDatabase(DatabaseTestCase):
         assert len(hourly_events) > 0
 
         # Query 3: Connection activity patterns
-        connection_durations = (
+        (
             db_session.query(
                 WebSocketConnection.client_id,
                 func.extract(
                     "epoch",
-                    func.coalesce(
-                        WebSocketConnection.disconnected_at, func.now()
-                    )
+                    func.coalesce(WebSocketConnection.disconnected_at, func.now())
                     - WebSocketConnection.connected_at,
                 ).label("duration_seconds"),
             )
-            .filter(
-                WebSocketConnection.connected_at
-                >= datetime.utcnow() - timedelta(days=7)
-            )
+            .filter(WebSocketConnection.connected_at >= datetime.utcnow() - timedelta(days=7))
             .all()
         )
 
@@ -507,9 +462,7 @@ class TestWebSocketDatabase(DatabaseTestCase):
             db_session.query(
                 WebSocketEvent.event_type,
                 func.count(WebSocketEvent.id).label("total"),
-                func.count(func.distinct(WebSocketEvent.connection_id)).label(
-                    "unique_connections"
-                ),
+                func.count(func.distinct(WebSocketEvent.connection_id)).label("unique_connections"),
             )
             .group_by(WebSocketEvent.event_type)
             .order_by(func.count(WebSocketEvent.id).desc())
@@ -553,7 +506,7 @@ class TestWebSocketDatabase(DatabaseTestCase):
             db_session.query(WebSocketConnection)
             .filter(
                 WebSocketConnection.disconnected_at < cutoff_date,
-                WebSocketConnection.is_active == False,
+                WebSocketConnection.is_active is False,
             )
             .delete()
         )

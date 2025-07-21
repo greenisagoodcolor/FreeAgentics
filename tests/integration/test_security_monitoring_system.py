@@ -5,10 +5,9 @@ Tests the security monitoring, vulnerability scanning, incident response,
 and security API endpoints.
 """
 
-import asyncio
 import json
-from datetime import datetime, timedelta
-from unittest.mock import AsyncMock, Mock, patch
+from datetime import datetime
+from unittest.mock import Mock, patch
 
 import pytest
 from fastapi import status
@@ -20,19 +19,16 @@ from observability.incident_response import (
     IncidentResponseSystem,
     IncidentSeverity,
     IncidentStatus,
-    incident_response,
 )
 from observability.security_monitoring import (
     AttackType,
     SecurityMonitoringSystem,
     ThreatLevel,
-    security_monitor,
 )
 from observability.vulnerability_scanner import (
     SeverityLevel,
     VulnerabilityScanner,
     VulnerabilityType,
-    vulnerability_scanner,
 )
 
 
@@ -228,9 +224,7 @@ class TestSecurityMonitoringSystem:
         )
 
         # Create incident from alert
-        incident = await self.incident_response.create_incident_from_alert(
-            test_alert
-        )
+        incident = await self.incident_response.create_incident_from_alert(test_alert)
 
         # Check incident creation
         assert incident.id in self.incident_response.incidents
@@ -342,9 +336,7 @@ class TestSecurityMonitoringSystem:
 
         if alert_id:
             # Test alert resolution
-            success = self.security_monitor.resolve_alert(
-                alert_id, "Resolved by admin"
-            )
+            success = self.security_monitor.resolve_alert(alert_id, "Resolved by admin")
             assert success
 
             # Check alert status
@@ -372,19 +364,12 @@ class TestSecurityMonitoringSystem:
         self.vulnerability_scanner.vulnerabilities[test_vuln.id] = test_vuln
 
         # Test suppression
-        self.vulnerability_scanner.suppress_vulnerability(
-            test_vuln.id, "False positive"
-        )
-        assert (
-            test_vuln.id
-            in self.vulnerability_scanner.suppressed_vulnerabilities
-        )
+        self.vulnerability_scanner.suppress_vulnerability(test_vuln.id, "False positive")
+        assert test_vuln.id in self.vulnerability_scanner.suppressed_vulnerabilities
         assert test_vuln.suppressed
 
         # Test false positive marking
-        self.vulnerability_scanner.mark_false_positive(
-            test_vuln.id, "Not a real issue"
-        )
+        self.vulnerability_scanner.mark_false_positive(test_vuln.id, "Not a real issue")
         assert test_vuln.id in self.vulnerability_scanner.false_positives
         assert test_vuln.false_positive
 
@@ -405,9 +390,7 @@ class TestSecurityMonitoringSystem:
             evidence={"payload": "'; DROP TABLE users; --"},
         )
 
-        incident = await self.incident_response.create_incident_from_alert(
-            test_alert
-        )
+        incident = await self.incident_response.create_incident_from_alert(test_alert)
 
         # Check initial state
         assert incident.status == IncidentStatus.INVESTIGATING
@@ -423,10 +406,7 @@ class TestSecurityMonitoringSystem:
         updated_incident = self.incident_response.get_incident(incident.id)
         assert updated_incident.status == IncidentStatus.RESOLVED
         assert updated_incident.resolved_at is not None
-        assert (
-            updated_incident.lesson_learned
-            == "Attack blocked, vulnerability patched"
-        )
+        assert updated_incident.lesson_learned == "Attack blocked, vulnerability patched"
 
     @pytest.mark.asyncio
     async def test_security_monitoring_start_stop(self):
@@ -511,8 +491,7 @@ class TestSecurityMonitoringSystem:
 
         # Should detect both SQL injection and suspicious user agent
         assert (
-            AttackType.SQL_INJECTION in alert_types
-            or AttackType.SUSPICIOUS_ACTIVITY in alert_types
+            AttackType.SQL_INJECTION in alert_types or AttackType.SUSPICIOUS_ACTIVITY in alert_types
         )
 
 

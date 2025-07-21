@@ -21,16 +21,10 @@ import os
 import queue
 import sys
 import time
-import tracemalloc
-from concurrent.futures import (
-    ProcessPoolExecutor,
-    ThreadPoolExecutor,
-    as_completed,
-)
 from dataclasses import dataclass
-from multiprocessing import Manager, Pool, Process, Queue
-from threading import Event, Lock, Thread
-from typing import Any, Dict, List, Optional, Tuple
+from multiprocessing import Manager, Process, Queue
+from threading import Lock
+from typing import Any, Dict, List
 
 import numpy as np
 import psutil
@@ -89,13 +83,9 @@ class MemoryTracker:
         return {
             "initial_mb": self.initial_memory,
             "peak_mb": self.peak_memory,
-            "current_mb": self.samples[-1]
-            if self.samples
-            else self.initial_memory,
+            "current_mb": self.samples[-1] if self.samples else self.initial_memory,
             "delta_mb": self.peak_memory - self.initial_memory,
-            "avg_mb": np.mean(self.samples)
-            if self.samples
-            else self.initial_memory,
+            "avg_mb": np.mean(self.samples) if self.samples else self.initial_memory,
         }
 
 
@@ -103,9 +93,7 @@ class AgentWorkload:
     """Simulates different agent workload patterns."""
 
     @staticmethod
-    def exploration_workload(
-        agent_id: str, num_steps: int = 100
-    ) -> List[Dict[str, Any]]:
+    def exploration_workload(agent_id: str, num_steps: int = 100) -> List[Dict[str, Any]]:
         """Generate exploration workload for an agent."""
         observations = []
         for i in range(num_steps):
@@ -152,10 +140,7 @@ class AgentWorkload:
                     "position": [i % 10, i % 10],
                     "surroundings": np.zeros((3, 3)),
                     "other_agents": other_positions,
-                    "messages": [
-                        f"msg_{i}"
-                        for _ in range(min(i % 5, len(other_agents)))
-                    ],
+                    "messages": [f"msg_{i}" for _ in range(min(i % 5, len(other_agents)))],
                     "timestamp": i,
                 }
             )
@@ -181,25 +166,19 @@ class ThreadingBenchmark:
         """Setup agents for threading benchmark."""
         for i in range(self.num_agents):
             agent_id = f"thread_agent_{i}"
-            agent = BasicExplorerAgent(
-                agent_id, f"ThreadAgent-{i}", grid_size=10
-            )
+            agent = BasicExplorerAgent(agent_id, f"ThreadAgent-{i}", grid_size=10)
             agent.config["performance_mode"] = "fast"
             self.agents[agent_id] = agent
             self.thread_pool.register_agent(agent_id, agent)
 
     def run_exploration(self, num_steps: int = 100) -> Dict[str, Any]:
         """Run exploration benchmark with threading."""
-        logger.info(
-            f"Running threading exploration benchmark with {self.num_agents} agents"
-        )
+        logger.info(f"Running threading exploration benchmark with {self.num_agents} agents")
 
         # Generate workloads
         workloads = {}
         for agent_id in self.agents:
-            workloads[agent_id] = AgentWorkload.exploration_workload(
-                agent_id, num_steps
-            )
+            workloads[agent_id] = AgentWorkload.exploration_workload(agent_id, num_steps)
 
         # Track metrics
         latencies = []
@@ -212,9 +191,7 @@ class ThreadingBenchmark:
             step_start = time.time()
 
             # Prepare observations for this step
-            observations = {
-                agent_id: workloads[agent_id][step] for agent_id in self.agents
-            }
+            observations = {agent_id: workloads[agent_id][step] for agent_id in self.agents}
 
             # Execute step for all agents
             self.thread_pool.step_all_agents(observations, timeout=5.0)
@@ -244,9 +221,7 @@ class ThreadingBenchmark:
 
     def run_coordination(self, num_steps: int = 100) -> Dict[str, Any]:
         """Run coordination benchmark with inter-agent communication."""
-        logger.info(
-            f"Running threading coordination benchmark with {self.num_agents} agents"
-        )
+        logger.info(f"Running threading coordination benchmark with {self.num_agents} agents")
 
         agent_ids = list(self.agents.keys())
 
@@ -351,9 +326,7 @@ class MultiprocessingBenchmark:
     ):
         """Worker process for an agent."""
         # Create agent in this process
-        agent = BasicExplorerAgent(
-            agent_id, f"ProcessAgent-{agent_id}", grid_size=10
-        )
+        agent = BasicExplorerAgent(agent_id, f"ProcessAgent-{agent_id}", grid_size=10)
         agent.config["performance_mode"] = "fast"
         agent.start()
 
@@ -418,17 +391,13 @@ class MultiprocessingBenchmark:
 
     def run_exploration(self, num_steps: int = 100) -> Dict[str, Any]:
         """Run exploration benchmark with multiprocessing."""
-        logger.info(
-            f"Running multiprocessing exploration benchmark with {self.num_agents} agents"
-        )
+        logger.info(f"Running multiprocessing exploration benchmark with {self.num_agents} agents")
 
         # Generate workloads
         workloads = {}
         for i in range(self.num_agents):
             agent_id = f"proc_agent_{i}"
-            workloads[agent_id] = AgentWorkload.exploration_workload(
-                agent_id, num_steps
-            )
+            workloads[agent_id] = AgentWorkload.exploration_workload(agent_id, num_steps)
 
         memory_tracker = MemoryTracker()
         start_time = time.time()
@@ -475,9 +444,7 @@ class MultiprocessingBenchmark:
 
     def run_coordination(self, num_steps: int = 100) -> Dict[str, Any]:
         """Run coordination benchmark with inter-agent communication."""
-        logger.info(
-            f"Running multiprocessing coordination benchmark with {self.num_agents} agents"
-        )
+        logger.info(f"Running multiprocessing coordination benchmark with {self.num_agents} agents")
 
         agent_ids = [f"proc_agent_{i}" for i in range(self.num_agents)]
 
@@ -582,17 +549,13 @@ def run_benchmark_suite(
         # Threading exploration
         thread_explore = thread_bench.run_exploration(num_steps)
         results["threading_exploration"].append(
-            create_benchmark_result(
-                "threading_exploration", num_agents, num_steps, thread_explore
-            )
+            create_benchmark_result("threading_exploration", num_agents, num_steps, thread_explore)
         )
 
         # Threading coordination
         thread_coord = thread_bench.run_coordination(num_steps)
         results["threading_coordination"].append(
-            create_benchmark_result(
-                "threading_coordination", num_agents, num_steps, thread_coord
-            )
+            create_benchmark_result("threading_coordination", num_agents, num_steps, thread_coord)
         )
 
         thread_bench.cleanup()
@@ -618,9 +581,7 @@ def run_benchmark_suite(
         # Multiprocessing coordination
         mp_coord = mp_bench.run_coordination(num_steps)
         results["multiprocessing_coordination"].append(
-            create_benchmark_result(
-                "multiprocessing_coordination", num_agents, num_steps, mp_coord
-            )
+            create_benchmark_result("multiprocessing_coordination", num_agents, num_steps, mp_coord)
         )
 
         mp_bench.cleanup()
@@ -647,14 +608,8 @@ def create_benchmark_result(
     throughput = total_operations / raw_results["total_time"]
 
     # Calculate scaling efficiency (compared to single agent)
-    base_throughput = (
-        total_operations / raw_results["total_time"] if num_agents == 1 else 0
-    )
-    scaling_efficiency = (
-        throughput / (num_agents * base_throughput)
-        if base_throughput > 0
-        else 1.0
-    )
+    base_throughput = total_operations / raw_results["total_time"] if num_agents == 1 else 0
+    scaling_efficiency = throughput / (num_agents * base_throughput) if base_throughput > 0 else 1.0
 
     return BenchmarkResult(
         test_name=test_name,
@@ -667,9 +622,7 @@ def create_benchmark_result(
         p99_latency_ms=np.percentile(latencies, 99),
         memory_usage_mb=raw_results["memory"]["delta_mb"],
         cpu_usage_percent=psutil.cpu_percent(),
-        communication_overhead_ms=np.mean(
-            raw_results.get("communication_times", [0])
-        ),
+        communication_overhead_ms=np.mean(raw_results.get("communication_times", [0])),
         errors=0,
         scaling_efficiency=scaling_efficiency,
     )
@@ -699,9 +652,9 @@ def analyze_results(results: Dict[str, List[BenchmarkResult]]):
             if t_result.throughput_ops_sec > m_result.throughput_ops_sec
             else "Multiprocessing"
         )
-        margin = max(
+        margin = max(t_result.throughput_ops_sec, m_result.throughput_ops_sec) / min(
             t_result.throughput_ops_sec, m_result.throughput_ops_sec
-        ) / min(t_result.throughput_ops_sec, m_result.throughput_ops_sec)
+        )
 
         print(
             f"{t_result.num_agents:<10} {t_result.throughput_ops_sec:<20.1f} "
@@ -725,9 +678,9 @@ def analyze_results(results: Dict[str, List[BenchmarkResult]]):
             if t_result.throughput_ops_sec > m_result.throughput_ops_sec
             else "Multiprocessing"
         )
-        margin = max(
+        margin = max(t_result.throughput_ops_sec, m_result.throughput_ops_sec) / min(
             t_result.throughput_ops_sec, m_result.throughput_ops_sec
-        ) / min(t_result.throughput_ops_sec, m_result.throughput_ops_sec)
+        )
 
         print(
             f"{t_result.num_agents:<10} {t_result.throughput_ops_sec:<20.1f} "
@@ -814,9 +767,7 @@ def analyze_results(results: Dict[str, List[BenchmarkResult]]):
 
     print("\n1. PERFORMANCE:")
     if threading_wins > multiproc_wins:
-        print(
-            "   ✅ Threading shows better overall performance for Active Inference agents"
-        )
+        print("   ✅ Threading shows better overall performance for Active Inference agents")
         print("   - Lower overhead for Python-based computation")
         print("   - Better cache locality for shared model parameters")
         print("   - More efficient for frequent, small computations")
@@ -826,17 +777,11 @@ def analyze_results(results: Dict[str, List[BenchmarkResult]]):
         print("   - Better for CPU-intensive workloads")
 
     print("\n2. MEMORY EFFICIENCY:")
-    avg_thread_mem = np.mean(
-        [r.memory_usage_mb for r in results["threading_exploration"]]
-    )
-    avg_mp_mem = np.mean(
-        [r.memory_usage_mb for r in results["multiprocessing_exploration"]]
-    )
+    avg_thread_mem = np.mean([r.memory_usage_mb for r in results["threading_exploration"]])
+    avg_mp_mem = np.mean([r.memory_usage_mb for r in results["multiprocessing_exploration"]])
 
     if avg_thread_mem < avg_mp_mem * 0.5:
-        print(
-            f"   ✅ Threading uses {avg_mp_mem / avg_thread_mem:.1f}x less memory"
-        )
+        print(f"   ✅ Threading uses {avg_mp_mem / avg_thread_mem:.1f}x less memory")
         print("   - Shared memory model reduces duplication")
         print("   - More scalable for large agent populations")
     else:
@@ -845,23 +790,13 @@ def analyze_results(results: Dict[str, List[BenchmarkResult]]):
         )
 
     print("\n3. COMMUNICATION OVERHEAD:")
-    thread_comm = np.mean(
-        [
-            r.communication_overhead_ms
-            for r in results["threading_coordination"]
-        ]
-    )
+    thread_comm = np.mean([r.communication_overhead_ms for r in results["threading_coordination"]])
     mp_comm = np.mean(
-        [
-            r.communication_overhead_ms
-            for r in results["multiprocessing_coordination"]
-        ]
+        [r.communication_overhead_ms for r in results["multiprocessing_coordination"]]
     )
 
     if thread_comm < mp_comm * 0.3:
-        print(
-            f"   ✅ Threading has {mp_comm / thread_comm:.1f}x lower communication overhead"
-        )
+        print(f"   ✅ Threading has {mp_comm / thread_comm:.1f}x lower communication overhead")
         print("   - Direct memory access vs IPC")
         print("   - Critical for coordination-heavy scenarios")
 
@@ -921,9 +856,7 @@ if __name__ == "__main__":
 
     print("🚀 THREADING VS MULTIPROCESSING BENCHMARK FOR FREEAGENTICS")
     print("=" * 80)
-    print(
-        "This benchmark compares threading and multiprocessing for Active Inference agents"
-    )
+    print("This benchmark compares threading and multiprocessing for Active Inference agents")
     print("measuring performance, memory usage, and communication overhead.")
     print("=" * 80)
 

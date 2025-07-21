@@ -177,9 +177,7 @@ class CoordinationTypeHelper:
             raise ValueError("Invalid agent collection provided")
 
         if strategy is None:
-            strategy = CoordinationTypeHelper.get_coordination_strategy(
-                len(agent_list)
-            )
+            strategy = CoordinationTypeHelper.get_coordination_strategy(len(agent_list))
 
         return CoordinationTask(
             task_id=task_id,

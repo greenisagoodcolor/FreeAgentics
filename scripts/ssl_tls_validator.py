@@ -66,9 +66,7 @@ class SSLTLSValidator:
 
             try:
                 content = config_path.read_text()
-                file_valid = self._validate_ssl_config_content(
-                    content, config_file
-                )
+                file_valid = self._validate_ssl_config_content(content, config_file)
                 if not file_valid:
                     all_valid = False
 
@@ -78,9 +76,7 @@ class SSLTLSValidator:
 
         return all_valid
 
-    def _validate_ssl_config_content(
-        self, content: str, filename: str
-    ) -> bool:
+    def _validate_ssl_config_content(self, content: str, filename: str) -> bool:
         """Validate SSL configuration content."""
         logger.info(f"  📄 Validating {filename}...")
 
@@ -129,9 +125,7 @@ class SSLTLSValidator:
         for pattern, description in validations:
             if re.search(pattern, content, re.IGNORECASE):
                 logger.info(f"    ✅ {description}")
-                self.validation_results.append(
-                    f"{filename}: {description} - PASS"
-                )
+                self.validation_results.append(f"{filename}: {description} - PASS")
             else:
                 logger.warning(f"    ⚠️ {description} - NOT FOUND")
                 self.warnings.append(f"{filename}: {description} - MISSING")
@@ -175,9 +169,7 @@ class SSLTLSValidator:
             logger.info("✅ Cipher suite configuration is strong")
             return True
         else:
-            self.errors.append(
-                f"Only {recommended_found} recommended ciphers found"
-            )
+            self.errors.append(f"Only {recommended_found} recommended ciphers found")
             return False
 
     def validate_hsts_configuration(self) -> bool:
@@ -274,9 +266,7 @@ class SSLTLSValidator:
             else:
                 logger.warning(f"  ⚠️ {description} - MISSING")
                 # CT is important but not critical for A+ rating
-                self.warnings.append(
-                    f"Certificate Transparency: {description}"
-                )
+                self.warnings.append(f"Certificate Transparency: {description}")
 
         return True  # CT issues are warnings, not failures
 
@@ -344,9 +334,7 @@ class SSLTLSValidator:
                 logger.info("  ✅ Nginx configuration syntax is valid")
                 return True
             else:
-                logger.error(
-                    f"  ❌ Nginx configuration syntax error: {result.stderr}"
-                )
+                logger.error(f"  ❌ Nginx configuration syntax error: {result.stderr}")
                 self.errors.append(f"Nginx syntax error: {result.stderr}")
                 return False
 
@@ -422,24 +410,16 @@ class SSLTLSValidator:
         recommendations = []
 
         if self.errors:
-            recommendations.append(
-                "Address all critical errors to achieve A+ rating"
-            )
+            recommendations.append("Address all critical errors to achieve A+ rating")
 
         if any("preload" in w for w in self.warnings):
-            recommendations.append(
-                "Consider adding HSTS preload directive for maximum security"
-            )
+            recommendations.append("Consider adding HSTS preload directive for maximum security")
 
         if any("Certificate Transparency" in w for w in self.warnings):
-            recommendations.append(
-                "Configure Expect-CT with report-uri for CT monitoring"
-            )
+            recommendations.append("Configure Expect-CT with report-uri for CT monitoring")
 
         if not recommendations:
-            recommendations.append(
-                "SSL/TLS configuration meets A+ grade requirements"
-            )
+            recommendations.append("SSL/TLS configuration meets A+ grade requirements")
 
         return recommendations
 
@@ -459,7 +439,7 @@ def main():
     validator = SSLTLSValidator()
     report = validator.generate_ssl_report()
 
-    print(f"\n📊 SSL/TLS Configuration Report:")
+    print("\n📊 SSL/TLS Configuration Report:")
     print(f"   Grade: {report['grade']}")
     print(f"   Score: {report['score']}")
     print(f"   Percentage: {report['percentage']}")
@@ -474,7 +454,7 @@ def main():
         for warning in report["warnings"]:
             print(f"   • {warning}")
 
-    print(f"\n💡 Recommendations:")
+    print("\n💡 Recommendations:")
     for recommendation in report["recommendations"]:
         print(f"   • {recommendation}")
 
@@ -486,7 +466,7 @@ def main():
         print("✅ Task #14.5 - SSL/TLS validation: COMPLETED")
         return True
     else:
-        print(f"\n⚠️ SSL/TLS configuration needs improvement for A+ grade")
+        print("\n⚠️ SSL/TLS configuration needs improvement for A+ grade")
         print("❌ Task #14.5 - SSL/TLS validation: NEEDS ATTENTION")
         return False
 

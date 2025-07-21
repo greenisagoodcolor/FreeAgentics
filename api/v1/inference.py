@@ -23,13 +23,9 @@ router = APIRouter()
 class InferenceRequest(BaseModel):
     """Request model for inference operations."""
 
-    agent_id: str = Field(
-        ..., description="ID of the agent to perform inference"
-    )
+    agent_id: str = Field(..., description="ID of the agent to perform inference")
     observation: Dict[str, Any] = Field(..., description="Observation data")
-    context: Optional[Dict[str, Any]] = Field(
-        default=None, description="Additional context"
-    )
+    context: Optional[Dict[str, Any]] = Field(default=None, description="Additional context")
 
 
 class InferenceResponse(BaseModel):
@@ -77,8 +73,7 @@ async def perform_inference(
             beliefs={"uncertainty": 0.5, "position": [0, 0]},
             free_energy=1.23,
             timestamp=datetime.now(),
-            execution_time_ms=(datetime.now() - start_time).total_seconds()
-            * 1000,
+            execution_time_ms=(datetime.now() - start_time).total_seconds() * 1000,
         )
 
         logger.info(f"Performed inference for agent {request.agent_id}")
@@ -86,9 +81,7 @@ async def perform_inference(
 
     except Exception as e:
         logger.error(f"Inference failed for agent {request.agent_id}: {e}")
-        raise HTTPException(
-            status_code=500, detail=f"Inference failed: {str(e)}"
-        )
+        raise HTTPException(status_code=500, detail=f"Inference failed: {str(e)}")
 
 
 @router.post("/inference/batch", response_model=List[InferenceResponse])
@@ -109,15 +102,11 @@ async def perform_batch_inference(
             response = await perform_inference(request)
             responses.append(response)
         except Exception as e:
-            logger.error(
-                f"Batch inference failed for agent {request.agent_id}: {e}"
-            )
+            logger.error(f"Batch inference failed for agent {request.agent_id}: {e}")
             # Continue with other agents even if one fails
             continue
 
-    logger.info(
-        f"Performed batch inference for {len(responses)}/{len(requests)} agents"
-    )
+    logger.info(f"Performed batch inference for {len(responses)}/{len(requests)} agents")
     return responses
 
 
@@ -137,18 +126,14 @@ async def update_beliefs(
         # In a full implementation, this would update the agent's beliefs
         # through the agent manager
 
-        update = BeliefUpdate(
-            agent_id=agent_id, new_beliefs=beliefs, timestamp=datetime.now()
-        )
+        update = BeliefUpdate(agent_id=agent_id, new_beliefs=beliefs, timestamp=datetime.now())
 
         logger.info(f"Updated beliefs for agent {agent_id}")
         return update
 
     except Exception as e:
         logger.error(f"Failed to update beliefs for agent {agent_id}: {e}")
-        raise HTTPException(
-            status_code=500, detail=f"Belief update failed: {str(e)}"
-        )
+        raise HTTPException(status_code=500, detail=f"Belief update failed: {str(e)}")
 
 
 @router.get("/beliefs/{agent_id}")
@@ -181,9 +166,7 @@ async def get_beliefs(
 
     except Exception as e:
         logger.error(f"Failed to get beliefs for agent {agent_id}: {e}")
-        raise HTTPException(
-            status_code=404, detail=f"Agent {agent_id} not found"
-        )
+        raise HTTPException(status_code=404, detail=f"Agent {agent_id} not found")
 
 
 @router.get("/inference/status")

@@ -44,10 +44,7 @@ if not DATABASE_URL:
 # Security validation for production
 if os.getenv("PRODUCTION", "false").lower() == "true":
     # Ensure we're not using default dev credentials in production
-    if (
-        "freeagentics_dev_2025" in DATABASE_URL
-        or "freeagentics123" in DATABASE_URL
-    ):
+    if "freeagentics_dev_2025" in DATABASE_URL or "freeagentics123" in DATABASE_URL:
         raise ValueError(
             "Production environment detected but using development database credentials. "
             "Please set secure DATABASE_URL in production."
@@ -62,9 +59,7 @@ engine_args: Dict[str, Any] = {
 }
 
 # Configure pooling based on database dialect
-if DATABASE_URL.startswith("postgresql://") or DATABASE_URL.startswith(
-    "postgres://"
-):
+if DATABASE_URL.startswith("postgresql://") or DATABASE_URL.startswith("postgres://"):
     # PostgreSQL-specific configuration
     engine_args.update(
         {

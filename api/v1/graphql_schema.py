@@ -2,7 +2,7 @@
 
 import logging
 from datetime import datetime
-from typing import TYPE_CHECKING, Any, List, Optional, Type
+from typing import Any, List, Optional, Type
 
 try:
     import strawberry
@@ -128,34 +128,34 @@ if STRAWBERRY_AVAILABLE:
 
 else:
     # Dummy classes when strawberry is not available
-    class Agent:  
+    class Agent:
         pass
 
-    class Coalition:  
+    class Coalition:
         pass
 
-    class Objective:  
+    class Objective:
         pass
 
-    class WorldState:  
+    class WorldState:
         pass
 
-    class SystemMetrics:  
+    class SystemMetrics:
         pass
 
-    class InferenceResult:  
+    class InferenceResult:
         pass
 
-    class AgentInput:  
+    class AgentInput:
         pass
 
-    class CoalitionInput:  
+    class CoalitionInput:
         pass
 
-    class ObjectiveInput:  
+    class ObjectiveInput:
         pass
 
-    class InferenceInput:  
+    class InferenceInput:
         pass
 
 
@@ -190,9 +190,7 @@ def _create_query_resolvers(
         """GraphQL query root."""
 
         @strawberry.field
-        def agents(
-            self, status: Optional[str] = None, limit: int = 100
-        ) -> List[Agent]:
+        def agents(self, status: Optional[str] = None, limit: int = 100) -> List[Agent]:
             """Get list of agents."""
             # Mock implementation - replace with actual agent manager calls
             mock_agents = [
@@ -241,9 +239,7 @@ def _create_query_resolvers(
             return None
 
         @strawberry.field
-        def coalitions(
-            self, status: Optional[str] = None, limit: int = 100
-        ) -> List[Coalition]:
+        def coalitions(self, status: Optional[str] = None, limit: int = 100) -> List[Coalition]:
             """Get list of coalitions."""
             # Mock implementation
             mock_coalitions = [
@@ -262,9 +258,7 @@ def _create_query_resolvers(
             ]
 
             if status:
-                mock_coalitions = [
-                    c for c in mock_coalitions if c.status == status
-                ]
+                mock_coalitions = [c for c in mock_coalitions if c.status == status]
 
             return mock_coalitions[:limit]
 
@@ -288,9 +282,7 @@ def _create_query_resolvers(
             return None
 
         @strawberry.field
-        def objectives(
-            self, completed: Optional[bool] = None, limit: int = 100
-        ) -> List[Objective]:
+        def objectives(self, completed: Optional[bool] = None, limit: int = 100) -> List[Objective]:
             """Get list of objectives."""
             # Mock implementation
             mock_objectives = [
@@ -315,9 +307,7 @@ def _create_query_resolvers(
             ]
 
             if completed is not None:
-                mock_objectives = [
-                    o for o in mock_objectives if o.completed == completed
-                ]
+                mock_objectives = [o for o in mock_objectives if o.completed == completed]
 
             return mock_objectives[:limit]
 
@@ -355,16 +345,12 @@ def _create_query_resolvers(
             all_agents = self.agents()
 
             # Simple text search in name
-            filtered_agents = [
-                a for a in all_agents if query.lower() in a.name.lower()
-            ]
+            filtered_agents = [a for a in all_agents if query.lower() in a.name.lower()]
 
             # Filter by capabilities if provided
             if capabilities:
                 filtered_agents = [
-                    a
-                    for a in filtered_agents
-                    if any(cap in a.capabilities for cap in capabilities)
+                    a for a in filtered_agents if any(cap in a.capabilities for cap in capabilities)
                 ]
 
             return filtered_agents
@@ -404,9 +390,7 @@ def _create_mutation_resolvers(
             )
 
         @strawberry.mutation
-        def update_agent_status(
-            self, agent_id: str, status: str
-        ) -> Optional[Agent]:
+        def update_agent_status(self, agent_id: str, status: str) -> Optional[Agent]:
             """Update agent status."""
             # Mock implementation
             if agent_id == "agent_1":
@@ -440,9 +424,7 @@ def _create_mutation_resolvers(
             )
 
         @strawberry.mutation
-        def add_coalition_member(
-            self, coalition_id: str, agent_id: str
-        ) -> Optional[Coalition]:
+        def add_coalition_member(self, coalition_id: str, agent_id: str) -> Optional[Coalition]:
             """Add an agent to a coalition."""
             # Mock implementation
             if coalition_id == "coalition_1":
@@ -598,9 +580,7 @@ def _create_graphql_schema_and_router():
     ) = _create_graphql_input_types()
 
     # Create resolvers
-    Query = _create_query_resolvers(
-        Agent, Coalition, Objective, WorldState, SystemMetrics
-    )
+    Query = _create_query_resolvers(Agent, Coalition, Objective, WorldState, SystemMetrics)
     Mutation = _create_mutation_resolvers(
         Agent,
         Coalition,
@@ -611,9 +591,7 @@ def _create_graphql_schema_and_router():
         ObjectiveInput,
         InferenceInput,
     )
-    Subscription = _create_subscription_resolvers(
-        Agent, Coalition, SystemMetrics
-    )
+    Subscription = _create_subscription_resolvers(Agent, Coalition, SystemMetrics)
 
     # Create schema
     schema = strawberry.Schema(
@@ -631,9 +609,7 @@ if STRAWBERRY_AVAILABLE:
 
 else:
     # Fallback when strawberry-graphql is not available
-    logger.warning(
-        "strawberry-graphql not available - GraphQL endpoint disabled"
-    )
+    logger.warning("strawberry-graphql not available - GraphQL endpoint disabled")
 
     from fastapi import APIRouter
 

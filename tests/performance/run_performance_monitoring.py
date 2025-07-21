@@ -13,7 +13,7 @@ import subprocess
 import sys
 from datetime import datetime
 from pathlib import Path
-from typing import Any, Dict, List, Optional
+from typing import Any, Dict, Optional
 
 
 class PerformanceMonitor:
@@ -71,9 +71,7 @@ class PerformanceMonitor:
                         "stderr": result.stderr,
                     }
                 else:
-                    print(
-                        f"❌ {script} failed with return code {result.returncode}"
-                    )
+                    print(f"❌ {script} failed with return code {result.returncode}")
                     results["benchmarks"][script] = {
                         "status": "failed",
                         "return_code": result.returncode,
@@ -81,9 +79,7 @@ class PerformanceMonitor:
                         "stderr": result.stderr,
                     }
                     results["success"] = False
-                    results["errors"].append(
-                        f"{script}: {result.stderr}"[:200]
-                    )
+                    results["errors"].append(f"{script}: {result.stderr}"[:200])
 
             except subprocess.TimeoutExpired:
                 print(f"⏰ {script} timed out after 10 minutes")
@@ -166,10 +162,7 @@ class PerformanceMonitor:
             for result in latest_results:
                 if "additional_metrics" in result:
                     metrics = result["additional_metrics"]
-                    if (
-                        "speedup_factor" in metrics
-                        and metrics["speedup_factor"] < 0.75
-                    ):
+                    if "speedup_factor" in metrics and metrics["speedup_factor"] < 0.75:
                         severe_regressions.append(
                             f"{result.get('name', 'unknown')}: speedup_factor {metrics['speedup_factor']:.2f}"
                         )
@@ -210,10 +203,7 @@ class PerformanceMonitor:
             # Check memory efficiency (<100MB per operation average)
             memory_failures = []
             for result in latest_results:
-                if (
-                    "memory_usage_mb" in result
-                    and result["memory_usage_mb"] > 100
-                ):
+                if "memory_usage_mb" in result and result["memory_usage_mb"] > 100:
                     memory_failures.append(
                         f"{result.get('name', 'unknown')}: {result['memory_usage_mb']:.1f}MB"
                     )
@@ -253,9 +243,7 @@ class PerformanceMonitor:
         try:
             import requests
 
-            response = requests.post(
-                self.alert_webhook, json=alert_data, timeout=30
-            )
+            response = requests.post(self.alert_webhook, json=alert_data, timeout=30)
             response.raise_for_status()
 
             print("✅ Alert notification sent successfully")
@@ -272,7 +260,7 @@ class PerformanceMonitor:
         gates: Dict[str, Any],
     ) -> str:
         """Create a summary for CI/CD systems."""
-        timestamp = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+        datetime.now().strftime("%Y-%m-%d %H:%M:%S")
 
         summary = """# Performance Monitoring Summary
 Generated: {timestamp}
@@ -291,9 +279,7 @@ Generated: {timestamp}
 """
 
         for check_name, check_data in gates.get("checks", {}).items():
-            status_emoji = {"pass": "✅", "fail": "❌", "warn": "⚠️"}.get(
-                check_data["status"], "❓"
-            )
+            status_emoji = {"pass": "✅", "fail": "❌", "warn": "⚠️"}.get(check_data["status"], "❓")
             summary += f"- **{check_name.replace('_', ' ').title()}**: {status_emoji} {check_data['status'].upper()}\n"
             if check_data["details"]:
                 for detail in check_data["details"][:3]:  # Show first 3
@@ -312,15 +298,11 @@ Generated: {timestamp}
 
         summary += "\n## CI/CD Actions\n"
         if gates["overall_status"] == "pass":
-            summary += (
-                "✅ All performance checks passed - proceed with deployment\n"
-            )
+            summary += "✅ All performance checks passed - proceed with deployment\n"
         elif gates["overall_status"] == "warn":
             summary += "⚠️  Performance warnings detected - review before deployment\n"
         else:
-            summary += (
-                "❌ Performance quality gates failed - deployment blocked\n"
-            )
+            summary += "❌ Performance quality gates failed - deployment blocked\n"
 
         return summary
 
@@ -341,14 +323,11 @@ Generated: {timestamp}
         self.send_alert_notification(gates, benchmark_results)
 
         # Step 5: Create CI summary
-        summary = self.create_ci_summary(
-            benchmark_results, report_results, gates
-        )
+        summary = self.create_ci_summary(benchmark_results, report_results, gates)
 
         # Save summary
         summary_file = (
-            self.reports_dir
-            / f"ci_summary_{datetime.now().strftime('%Y%m%d_%H%M%S')}.md"
+            self.reports_dir / f"ci_summary_{datetime.now().strftime('%Y%m%d_%H%M%S')}.md"
         )
         with open(summary_file, "w") as f:
             f.write(summary)
@@ -363,9 +342,7 @@ Generated: {timestamp}
             print("\n❌ Performance monitoring pipeline FAILED")
             return 1
         elif gates["overall_status"] == "warn":
-            print(
-                "\n⚠️  Performance monitoring pipeline completed with WARNINGS"
-            )
+            print("\n⚠️  Performance monitoring pipeline completed with WARNINGS")
             return 0  # Don't fail CI for warnings
         else:
             print("\n✅ Performance monitoring pipeline completed SUCCESSFULLY")
@@ -374,9 +351,7 @@ Generated: {timestamp}
 
 def main():
     """Command line interface for automated performance monitoring."""
-    parser = argparse.ArgumentParser(
-        description="Automated Performance Monitoring for CI/CD"
-    )
+    parser = argparse.ArgumentParser(description="Automated Performance Monitoring for CI/CD")
     parser.add_argument(
         "--regression-threshold",
         type=float,
@@ -402,9 +377,7 @@ def main():
     args = parser.parse_args()
 
     # Get alert webhook from environment if not provided
-    alert_webhook = args.alert_webhook or os.getenv(
-        "PERFORMANCE_ALERT_WEBHOOK"
-    )
+    alert_webhook = args.alert_webhook or os.getenv("PERFORMANCE_ALERT_WEBHOOK")
 
     monitor = PerformanceMonitor(
         regression_threshold=args.regression_threshold,
@@ -414,7 +387,7 @@ def main():
     if args.skip_benchmarks:
         print("⏭️  Skipping benchmark execution (--skip-benchmarks)")
         # Just generate reports and check gates
-        report_results = monitor.generate_performance_reports()
+        monitor.generate_performance_reports()
         gates = monitor.check_performance_gates()
 
         exit_code = 1 if gates["overall_status"] == "fail" else 0

@@ -7,7 +7,6 @@ Tests for Task 20.4: Memory Optimization and Garbage Collection Tuning
 import gc
 import time
 import unittest
-from unittest.mock import Mock, patch
 
 try:
     import psutil
@@ -23,8 +22,6 @@ from agents.memory_optimization import (
     get_gc_tuner,
     get_memory_profiler,
     optimize_gc_for_agents,
-    register_agent_memory,
-    update_agent_memory_usage,
 )
 from agents.optimized_threadpool_manager import OptimizedThreadPoolManager
 
@@ -38,9 +35,7 @@ class MockAgent:
         self.active = True
 
         # Create large memory structures to simulate 34.5MB per agent
-        belief_size = int(
-            memory_size_mb * 1024 * 1024 / 8
-        )  # 8 bytes per float64
+        belief_size = int(memory_size_mb * 1024 * 1024 / 8)  # 8 bytes per float64
         self.beliefs = np.random.random((belief_size,)).astype(np.float64)
         # Make beliefs sparse (95% zeros) to test compression
         self.beliefs[self.beliefs < 0.95] = 0.0
@@ -48,9 +43,7 @@ class MockAgent:
         self.transition_matrix = np.random.random((100, 100))
 
         # Cache structures
-        self.computation_cache = {
-            f"cache_{i}": np.random.random((100,)) for i in range(50)
-        }
+        self.computation_cache = {f"cache_{i}": np.random.random((100,)) for i in range(50)}
 
     def step(self, observation):
         """Mock step method."""
@@ -147,9 +140,7 @@ class TestMemoryOptimization(unittest.TestCase):
 
         # Action history (rough estimate)
         if hasattr(agent, "action_history"):
-            total_bytes += (
-                len(agent.action_history) * 50
-            )  # 50 bytes per action
+            total_bytes += len(agent.action_history) * 50  # 50 bytes per action
 
         # Transition matrix
         if hasattr(agent, "transition_matrix"):
@@ -192,8 +183,8 @@ class TestMemoryOptimization(unittest.TestCase):
         # Cleanup
         manager.shutdown()
 
-    @unittest.skipUnless(PSUTIL_AVAILABLE, "psutil not available")
     def test_memory_usage_reduction_benchmark(self):
+        assert False, "Test bypass removed - must fix underlying issue"
         """Test that memory optimizations actually reduce memory usage."""
         # Get initial memory usage
         process = psutil.Process()
@@ -231,12 +222,10 @@ class TestMemoryOptimization(unittest.TestCase):
         memory_reduction = unoptimized_usage - optimized_usage
         reduction_percentage = (memory_reduction / unoptimized_usage) * 100
 
-        print(f"Memory usage comparison:")
+        print("Memory usage comparison:")
         print(f"  Unoptimized: {unoptimized_usage:.1f}MB")
         print(f"  Optimized: {optimized_usage:.1f}MB")
-        print(
-            f"  Reduction: {memory_reduction:.1f}MB ({reduction_percentage:.1f}%)"
-        )
+        print(f"  Reduction: {memory_reduction:.1f}MB ({reduction_percentage:.1f}%)")
 
         # Should see at least 30% reduction
         self.assertGreater(reduction_percentage, 30)
@@ -339,14 +328,10 @@ class TestMemoryOptimization(unittest.TestCase):
         self.assertGreater(efficiency["memory_efficiency"], 0.5)
 
         # Per-agent memory should be under target
-        avg_memory = (
-            efficiency["actual_memory_mb"] / efficiency["agents_count"]
-        )
-        self.assertLess(
-            avg_memory, 15.0
-        )  # Under 15MB per agent (vs 34.5MB baseline)
+        avg_memory = efficiency["actual_memory_mb"] / efficiency["agents_count"]
+        self.assertLess(avg_memory, 15.0)  # Under 15MB per agent (vs 34.5MB baseline)
 
-        print(f"Performance with 50 agents:")
+        print("Performance with 50 agents:")
         print(f"  Registration time: {registration_time:.2f}s")
         print(f"  Execution time: {execution_time:.2f}s")
         print(f"  Memory efficiency: {efficiency['memory_efficiency']:.1%}")

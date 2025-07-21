@@ -1,12 +1,9 @@
 """Comprehensive tests for database.connection_manager module to achieve high coverage."""
 
-import asyncio
 import logging
-from unittest.mock import AsyncMock, MagicMock, Mock, patch
+from unittest.mock import AsyncMock, Mock, patch
 
-import numpy as np
 import pytest
-from sqlalchemy import create_engine, text
 from sqlalchemy.exc import OperationalError
 from sqlalchemy.exc import TimeoutError as SQLTimeoutError
 from sqlalchemy.ext.asyncio import AsyncSession
@@ -44,9 +41,7 @@ class TestExponentialBackoffRetry:
 
     def test_calculate_delay(self):
         """Test delay calculation with exponential backoff."""
-        retry = ExponentialBackoffRetry(
-            base_delay=0.1, max_delay=2.0, backoff_factor=2.0
-        )
+        retry = ExponentialBackoffRetry(base_delay=0.1, max_delay=2.0, backoff_factor=2.0)
 
         # Test exponential growth
         assert retry.calculate_delay(0) == 0.1  # 0.1 * 2^0 = 0.1
@@ -57,9 +52,7 @@ class TestExponentialBackoffRetry:
 
         # Test max_delay cap
         assert retry.calculate_delay(5) == 2.0  # Would be 3.2, capped at 2.0
-        assert (
-            retry.calculate_delay(10) == 2.0
-        )  # Would be much higher, capped at 2.0
+        assert retry.calculate_delay(10) == 2.0  # Would be much higher, capped at 2.0
 
     def test_execute_with_retry_success_first_attempt(self):
         """Test successful execution on first attempt."""
@@ -87,9 +80,9 @@ class TestExponentialBackoffRetry:
             ]
         )
 
-        with patch.object(retry, 'calculate_delay', return_value=0.1):
-            with patch('numpy.random.bytes') as mock_bytes:
-                mock_bytes.return_value = b'test'
+        with patch.object(retry, "calculate_delay", return_value=0.1):
+            with patch("numpy.random.bytes") as mock_bytes:
+                mock_bytes.return_value = b"test"
 
                 result = retry.execute_with_retry(mock_func)
 
@@ -105,9 +98,9 @@ class TestExponentialBackoffRetry:
         exception = OperationalError("Connection failed", None, None)
         mock_func = Mock(side_effect=exception)
 
-        with patch.object(retry, 'calculate_delay', return_value=0.1):
-            with patch('numpy.random.bytes') as mock_bytes:
-                mock_bytes.return_value = b'test'
+        with patch.object(retry, "calculate_delay", return_value=0.1):
+            with patch("numpy.random.bytes") as mock_bytes:
+                mock_bytes.return_value = b"test"
 
                 with pytest.raises(OperationalError) as exc_info:
                     retry.execute_with_retry(mock_func)
@@ -123,8 +116,8 @@ class TestExponentialBackoffRetry:
         # Mock function that raises ConnectionError
         mock_func = Mock(side_effect=ConnectionError("Network unreachable"))
 
-        with patch('numpy.random.bytes') as mock_bytes:
-            mock_bytes.return_value = b'test'
+        with patch("numpy.random.bytes") as mock_bytes:
+            mock_bytes.return_value = b"test"
 
             with pytest.raises(ConnectionError):
                 retry.execute_with_retry(mock_func)
@@ -142,9 +135,7 @@ class TestExponentialBackoffRetry:
             retry.execute_with_retry(mock_func)
 
         assert str(exc_info.value) == "Invalid parameter"
-        assert (
-            mock_func.call_count == 1
-        )  # No retries for non-retryable exceptions
+        assert mock_func.call_count == 1  # No retries for non-retryable exceptions
 
     def test_execute_with_retry_no_exception_runtime_error(self):
         """Test RuntimeError when retry logic fails without exception."""
@@ -157,13 +148,11 @@ class TestExponentialBackoffRetry:
 
         # This is a edge case that shouldn't happen in practice
         # but we test it for coverage
-        with patch.object(retry, 'max_retries', 0):
+        with patch.object(retry, "max_retries", 0):
             with pytest.raises(RuntimeError) as exc_info:
                 retry.execute_with_retry(lambda: None)
 
-            assert "Retry logic failed without capturing exception" in str(
-                exc_info.value
-            )
+            assert "Retry logic failed without capturing exception" in str(exc_info.value)
 
     def test_execute_with_retry_logging(self, caplog):
         """Test logging during retry attempts."""
@@ -177,7 +166,7 @@ class TestExponentialBackoffRetry:
             ]
         )
 
-        with patch('numpy.random.bytes', return_value=b'test'):
+        with patch("numpy.random.bytes", return_value=b"test"):
             with caplog.at_level(logging.WARNING):
                 result = retry.execute_with_retry(mock_func)
 
@@ -192,18 +181,14 @@ class TestExponentialBackoffRetry:
 
         mock_func = Mock(side_effect=OperationalError("Failed", None, None))
 
-        with patch('numpy.random.bytes', return_value=b'test'):
+        with patch("numpy.random.bytes", return_value=b"test"):
             with caplog.at_level(logging.ERROR):
                 with pytest.raises(OperationalError):
                     retry.execute_with_retry(mock_func)
 
-                error_logs = [
-                    r for r in caplog.records if r.levelname == "ERROR"
-                ]
+                error_logs = [r for r in caplog.records if r.levelname == "ERROR"]
                 assert len(error_logs) == 1
-                assert (
-                    "All 2 connection attempts failed" in error_logs[0].message
-                )
+                assert "All 2 connection attempts failed" in error_logs[0].message
 
 
 class TestDatabaseConnectionManager:
@@ -224,18 +209,14 @@ class TestDatabaseConnectionManager:
         """Test successful connection with retry."""
         manager = DatabaseConnectionManager("sqlite:///:memory:")
 
-        with patch(
-            'database.connection_manager.create_engine'
-        ) as mock_create_engine:
+        with patch("database.connection_manager.create_engine") as mock_create_engine:
             mock_engine = Mock()
             mock_conn = Mock()
             mock_result = Mock()
             mock_result.scalar.return_value = 1
 
             mock_conn.execute.return_value = mock_result
-            mock_engine.connect.return_value.__enter__ = Mock(
-                return_value=mock_conn
-            )
+            mock_engine.connect.return_value.__enter__ = Mock(return_value=mock_conn)
             mock_engine.connect.return_value.__exit__ = Mock(return_value=None)
 
             mock_create_engine.return_value = mock_engine
@@ -250,43 +231,25 @@ class TestDatabaseConnectionManager:
         """Test connection with custom retry count."""
         manager = DatabaseConnectionManager("sqlite:///:memory:")
 
-        with patch(
-            'database.connection_manager.create_engine'
-        ) as mock_create_engine:
+        with patch("database.connection_manager.create_engine") as mock_create_engine:
             # Create a series of mock engines - first few fail, last succeeds
             failed_engine1 = Mock()
             failed_conn1 = Mock()
-            failed_conn1.execute.side_effect = OperationalError(
-                "Failed", None, None
-            )
-            failed_engine1.connect.return_value.__enter__ = Mock(
-                return_value=failed_conn1
-            )
-            failed_engine1.connect.return_value.__exit__ = Mock(
-                return_value=None
-            )
+            failed_conn1.execute.side_effect = OperationalError("Failed", None, None)
+            failed_engine1.connect.return_value.__enter__ = Mock(return_value=failed_conn1)
+            failed_engine1.connect.return_value.__exit__ = Mock(return_value=None)
 
             failed_engine2 = Mock()
             failed_conn2 = Mock()
-            failed_conn2.execute.side_effect = OperationalError(
-                "Failed", None, None
-            )
-            failed_engine2.connect.return_value.__enter__ = Mock(
-                return_value=failed_conn2
-            )
-            failed_engine2.connect.return_value.__exit__ = Mock(
-                return_value=None
-            )
+            failed_conn2.execute.side_effect = OperationalError("Failed", None, None)
+            failed_engine2.connect.return_value.__enter__ = Mock(return_value=failed_conn2)
+            failed_engine2.connect.return_value.__exit__ = Mock(return_value=None)
 
             success_engine = Mock()
             success_conn = Mock()
             success_conn.execute.return_value = Mock()
-            success_engine.connect.return_value.__enter__ = Mock(
-                return_value=success_conn
-            )
-            success_engine.connect.return_value.__exit__ = Mock(
-                return_value=None
-            )
+            success_engine.connect.return_value.__enter__ = Mock(return_value=success_conn)
+            success_engine.connect.return_value.__exit__ = Mock(return_value=None)
 
             mock_create_engine.side_effect = [
                 failed_engine1,
@@ -294,7 +257,7 @@ class TestDatabaseConnectionManager:
                 success_engine,
             ]
 
-            with patch('numpy.random.bytes', return_value=b'test'):
+            with patch("numpy.random.bytes", return_value=b"test"):
                 result = manager.get_connection_with_retry(max_retries=3)
 
                 assert result == success_engine
@@ -309,9 +272,7 @@ class TestDatabaseConnectionManager:
         mock_session.execute = Mock()
         mock_factory = Mock(return_value=mock_session)
 
-        with patch.object(
-            manager, 'get_session_factory', return_value=mock_factory
-        ):
+        with patch.object(manager, "get_session_factory", return_value=mock_factory):
             session = manager.get_db_session()
 
             assert session == mock_session
@@ -334,19 +295,13 @@ class TestDatabaseConnectionManager:
     def test_create_engine_with_pool_config(self):
         """Test creating engine with pool configuration."""
         # Use PostgreSQL URL to allow pool config
-        manager = DatabaseConnectionManager(
-            "postgresql://user:pass@localhost/test"
-        )
+        manager = DatabaseConnectionManager("postgresql://user:pass@localhost/test")
 
-        with patch(
-            'database.connection_manager.create_engine'
-        ) as mock_create_engine:
+        with patch("database.connection_manager.create_engine") as mock_create_engine:
             mock_engine = Mock()
             mock_conn = Mock()
             mock_conn.execute = Mock()
-            mock_engine.connect.return_value.__enter__ = Mock(
-                return_value=mock_conn
-            )
+            mock_engine.connect.return_value.__enter__ = Mock(return_value=mock_conn)
             mock_engine.connect.return_value.__exit__ = Mock(return_value=None)
             mock_create_engine.return_value = mock_engine
 
@@ -358,14 +313,12 @@ class TestDatabaseConnectionManager:
             # Check pool config was passed
             mock_create_engine.assert_called_once()
             _, kwargs = mock_create_engine.call_args
-            assert kwargs['pool_size'] == 20
-            assert kwargs['pool_pre_ping'] is True
+            assert kwargs["pool_size"] == 20
+            assert kwargs["pool_pre_ping"] is True
 
     async def test_get_async_db_session(self):
         """Test getting async database session."""
-        manager = DatabaseConnectionManager(
-            "postgresql+asyncpg://localhost/test"
-        )
+        manager = DatabaseConnectionManager("postgresql+asyncpg://localhost/test")
 
         # Setup async mocks
         mock_session = AsyncMock(spec=AsyncSession)
@@ -384,9 +337,7 @@ class TestDatabaseConnectionManager:
         """Test creating async engine pool."""
         manager = DatabaseConnectionManager("postgresql://localhost/test")
 
-        with patch(
-            'database.connection_manager.create_async_engine'
-        ) as mock_create:
+        with patch("database.connection_manager.create_async_engine") as mock_create:
             mock_engine = Mock()
             mock_create.return_value = mock_engine
 
@@ -399,5 +350,5 @@ class TestDatabaseConnectionManager:
             mock_create.assert_called_once()
             args, kwargs = mock_create.call_args
             assert args[0] == "postgresql+asyncpg://localhost/test"
-            assert kwargs['pool_size'] == 10
-            assert kwargs['pool_pre_ping'] is True
+            assert kwargs["pool_size"] == 10
+            assert kwargs["pool_pre_ping"] is True

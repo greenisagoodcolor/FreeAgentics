@@ -66,7 +66,7 @@ def fix_test_file(filepath):
         print(f"  ✓ Fixed {fixes} BasicExplorerAgent constructor calls")
         return True
     else:
-        print(f"  - No fixes needed")
+        print("  - No fixes needed")
         return False
 
 

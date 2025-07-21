@@ -292,7 +292,7 @@ class TestReturnValueHandlingFixes:
             except AttributeError as e:
                 pytest.fail(f"Direct matrix access failed: {e}")
         else:
-            pytest.skip("PyMDP agent not available")
+            assert False, "Test bypass removed - must fix underlying issue"
 
     def test_action_conversion_no_fallback_handling(self):
         """Test that action conversion should not use fallback/default handling.
@@ -395,7 +395,7 @@ class TestDirectAccessPatterns:
 
             print("PyMDP operations with valid state successful")
         else:
-            pytest.skip("PyMDP not available")
+            assert False, "Test bypass removed - must fix underlying issue"
 
     def test_action_sampling_must_return_valid_action(self):
         """Test that action sampling must return valid action or fail.
@@ -437,4 +437,4 @@ class TestDirectAccessPatterns:
 
             print("Direct matrix operations successful")
         else:
-            pytest.skip("PyMDP not available")
+            assert False, "Test bypass removed - must fix underlying issue"

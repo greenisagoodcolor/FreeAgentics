@@ -8,9 +8,7 @@ Create Date: 2025-01-13 12:00:00.000000
 
 from typing import Optional, Sequence, Union
 
-import sqlalchemy as sa  
-
-from alembic import op  
+from alembic import op
 
 # revision identifiers, used by Alembic.
 revision: str = "performance_indexes_001"
@@ -21,13 +19,9 @@ depends_on: Optional[Union[str, Sequence[str]]] = None
 
 def upgrade() -> None:
     """Add performance indexes for common queries."""
-    op.create_index(
-        "idx_agents_status_template", "agents", ["status", "template"]
-    )
+    op.create_index("idx_agents_status_template", "agents", ["status", "template"])
     op.create_index("idx_agents_last_active", "agents", ["last_active"])
-    op.create_index(
-        "idx_agents_inference_count", "agents", ["inference_count"]
-    )
+    op.create_index("idx_agents_inference_count", "agents", ["inference_count"])
 
     # Coalitions table indexes
     op.create_index("idx_coalitions_status", "coalitions", ["status"])
@@ -35,18 +29,12 @@ def upgrade() -> None:
 
     # Agent-Coalition association indexes
     op.create_index("idx_agent_coalition_role", "agent_coalition", ["role"])
-    op.create_index(
-        "idx_agent_coalition_joined_at", "agent_coalition", ["joined_at"]
-    )
+    op.create_index("idx_agent_coalition_joined_at", "agent_coalition", ["joined_at"])
 
     # Knowledge graph indexes (if they exist)
     try:
-        op.create_index(
-            "idx_knowledge_nodes_type", "knowledge_nodes", ["type"]
-        )
-        op.create_index(
-            "idx_knowledge_edges_type", "knowledge_edges", ["type"]
-        )
+        op.create_index("idx_knowledge_nodes_type", "knowledge_nodes", ["type"])
+        op.create_index("idx_knowledge_edges_type", "knowledge_edges", ["type"])
     except Exception:
         # Tables might not exist yet, skip silently
         pass
@@ -64,9 +52,7 @@ def downgrade() -> None:
 
     # Remove association indexes
     op.drop_index("idx_agent_coalition_role", table_name="agent_coalition")
-    op.drop_index(
-        "idx_agent_coalition_joined_at", table_name="agent_coalition"
-    )
+    op.drop_index("idx_agent_coalition_joined_at", table_name="agent_coalition")
 
     # Remove knowledge graph indexes (if they exist)
     try:

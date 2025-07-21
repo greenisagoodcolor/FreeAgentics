@@ -17,7 +17,7 @@ The project has TypeScript errors from Next.js type definitions related to Heade
 // tsconfig.json
 {
   "compilerOptions": {
-    "skipLibCheck": true, // Already set to false - should be true for production
+    "skipLibCheck": false, // Already set to false - should be true for production
     // ... other options
   }
 }

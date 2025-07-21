@@ -133,10 +133,7 @@ class TestCoalitionTypeAdapter:
 
     def test_get_id_from_in_memory_coalition(self):
         """Test getting ID from in-memory coalition."""
-        coalition = Coalition(
-            coalition_id="coalition_123",
-            name="Test Coalition"
-        )
+        coalition = Coalition(coalition_id="coalition_123", name="Test Coalition")
 
         result = CoalitionTypeAdapter.get_id(coalition)
         assert result == "coalition_123"
@@ -233,17 +230,12 @@ class TestTypeHelpers:
 
     def test_get_coalition_attribute(self):
         """Test getting coalition attributes safely."""
-        coalition = Coalition(
-            "test_coalition", "Test Coalition"
-        )
+        coalition = Coalition("test_coalition", "Test Coalition")
         coalition.add_member("agent_1")
 
         # Standard attributes
         assert get_coalition_attribute(coalition, "name") == "Test Coalition"
-        assert (
-            get_coalition_attribute(coalition, "coalition_id")
-            == "test_coalition"
-        )
+        assert get_coalition_attribute(coalition, "coalition_id") == "test_coalition"
         assert get_coalition_attribute(coalition, "id") == "test_coalition"
 
         # Members

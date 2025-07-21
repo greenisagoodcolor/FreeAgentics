@@ -11,9 +11,7 @@ import time
 def run_command(command, timeout=300):
     """Run a command with timeout."""
     try:
-        result = subprocess.run(
-            command, capture_output=True, text=True, timeout=timeout
-        )
+        result = subprocess.run(command, capture_output=True, text=True, timeout=timeout)
         return result.returncode, result.stdout, result.stderr
     except subprocess.TimeoutExpired:
         return 1, "", f"Command timed out after {timeout} seconds"

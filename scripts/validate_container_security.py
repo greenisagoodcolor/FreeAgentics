@@ -10,7 +10,7 @@ import subprocess
 import sys
 from datetime import datetime
 from pathlib import Path
-from typing import Any, Dict, List, Optional, Sequence, Tuple
+from typing import Any, Dict, Optional, Sequence, Tuple
 
 
 class ContainerSecurityValidator:
@@ -41,9 +41,7 @@ class ContainerSecurityValidator:
         """Log error message"""
         print(f"[ERROR] {message}")
 
-    def run_command(
-        self, command: Sequence[str], timeout: int = 300
-    ) -> Tuple[int, str, str]:
+    def run_command(self, command: Sequence[str], timeout: int = 300) -> Tuple[int, str, str]:
         """Run a command and return return code, stdout, stderr"""
         try:
             result = subprocess.run(
@@ -191,34 +189,24 @@ class ContainerSecurityValidator:
                                 if "Vulnerabilities" in result:
                                     for vuln in result["Vulnerabilities"]:
                                         total_vulns += 1
-                                        severity = vuln.get(
-                                            "Severity", ""
-                                        ).upper()
+                                        severity = vuln.get("Severity", "").upper()
                                         if severity == "HIGH":
                                             high_vulns += 1
                                         elif severity == "CRITICAL":
                                             critical_vulns += 1
 
-                            self.security_results["vulnerabilities"][
-                                scanner["name"]
-                            ] = {
+                            self.security_results["vulnerabilities"][scanner["name"]] = {
                                 "total": total_vulns,
                                 "high": high_vulns,
                                 "critical": critical_vulns,
                             }
 
-                            self.log_info(
-                                f"Vulnerabilities found: {total_vulns}"
-                            )
+                            self.log_info(f"Vulnerabilities found: {total_vulns}")
                             self.log_info(f"High severity: {high_vulns}")
-                            self.log_info(
-                                f"Critical severity: {critical_vulns}"
-                            )
+                            self.log_info(f"Critical severity: {critical_vulns}")
 
                             if critical_vulns > 0:
-                                self.log_error(
-                                    f"Critical vulnerabilities found: {critical_vulns}"
-                                )
+                                self.log_error(f"Critical vulnerabilities found: {critical_vulns}")
                                 vulnerability_found = True
                             elif high_vulns > 0:
                                 self.log_warning(
@@ -226,23 +214,17 @@ class ContainerSecurityValidator:
                                 )
                                 vulnerability_found = True
                             else:
-                                self.log_info(
-                                    "✓ No high or critical vulnerabilities found"
-                                )
+                                self.log_info("✓ No high or critical vulnerabilities found")
 
                     except json.JSONDecodeError:
-                        self.log_warning(
-                            f"Could not parse {scanner['name']} output"
-                        )
+                        self.log_warning(f"Could not parse {scanner['name']} output")
 
                 break  # Use first available scanner
             else:
                 self.log_warning(f"{scanner['name']} scan failed: {stderr}")
 
         if not vulnerability_found:
-            self.log_info(
-                "No vulnerability scanner found or no vulnerabilities detected"
-            )
+            self.log_info("No vulnerability scanner found or no vulnerabilities detected")
 
         return True
 
@@ -288,14 +270,10 @@ class ContainerSecurityValidator:
             user = stdout.strip()
             if user != "root":
                 self.log_info(f"✓ Container runs as non-root user: {user}")
-                self.security_results["runtime_security"][
-                    "non_root_user"
-                ] = True
+                self.security_results["runtime_security"]["non_root_user"] = True
             else:
                 self.log_error("✗ Container runs as root user")
-                self.security_results["runtime_security"][
-                    "non_root_user"
-                ] = False
+                self.security_results["runtime_security"]["non_root_user"] = False
         else:
             self.log_warning("Could not determine container user")
             self.security_results["runtime_security"]["non_root_user"] = False
@@ -317,14 +295,10 @@ class ContainerSecurityValidator:
 
         if returncode == 0:
             self.log_info("✓ No new privileges security option works")
-            self.security_results["runtime_security"][
-                "no_new_privileges"
-            ] = True
+            self.security_results["runtime_security"]["no_new_privileges"] = True
         else:
             self.log_warning("⚠ No new privileges security option failed")
-            self.security_results["runtime_security"][
-                "no_new_privileges"
-            ] = False
+            self.security_results["runtime_security"]["no_new_privileges"] = False
 
         # Test 4: Capabilities drop
         self.log_info("Testing capabilities drop...")
@@ -353,14 +327,10 @@ class ContainerSecurityValidator:
 
         if returncode == 0:
             self.log_info("✓ Minimal capabilities configuration works")
-            self.security_results["runtime_security"][
-                "minimal_capabilities"
-            ] = True
+            self.security_results["runtime_security"]["minimal_capabilities"] = True
         else:
             self.log_warning("⚠ Minimal capabilities configuration failed")
-            self.security_results["runtime_security"][
-                "minimal_capabilities"
-            ] = False
+            self.security_results["runtime_security"]["minimal_capabilities"] = False
 
         return True
 
@@ -389,14 +359,10 @@ class ContainerSecurityValidator:
 
         if returncode == 0:
             self.log_info("✓ Container can run with isolated network")
-            self.security_results["runtime_security"][
-                "network_isolation"
-            ] = True
+            self.security_results["runtime_security"]["network_isolation"] = True
         else:
             self.log_warning("⚠ Container cannot run with isolated network")
-            self.security_results["runtime_security"][
-                "network_isolation"
-            ] = False
+            self.security_results["runtime_security"]["network_isolation"] = False
 
         # Clean up
         self.run_command(["docker", "rm", "-f", container_name])
@@ -429,39 +395,25 @@ class ContainerSecurityValidator:
                         break
 
                 if secrets_found:
-                    self.log_warning(
-                        "⚠ Potential secrets found in image layers"
-                    )
-                    self.security_results["image_security"][
-                        "secrets_in_layers"
-                    ] = True
+                    self.log_warning("⚠ Potential secrets found in image layers")
+                    self.security_results["image_security"]["secrets_in_layers"] = True
                 else:
                     self.log_info("✓ No obvious secrets found in image layers")
-                    self.security_results["image_security"][
-                        "secrets_in_layers"
-                    ] = False
+                    self.security_results["image_security"]["secrets_in_layers"] = False
 
                 # Check layer size distribution
                 large_layers = 0
                 for line in lines[1:]:  # Skip header
                     if "MB" in line:
                         size_part = line.split()[-1]
-                        if (
-                            size_part.replace("MB", "")
-                            .replace(".", "")
-                            .isdigit()
-                        ):
+                        if size_part.replace("MB", "").replace(".", "").isdigit():
                             size = float(size_part.replace("MB", ""))
                             if size > 100:  # Layers > 100MB
                                 large_layers += 1
 
                 if large_layers > 0:
-                    self.log_warning(
-                        f"⚠ {large_layers} large layers (>100MB) found"
-                    )
-                    self.security_results["image_security"][
-                        "large_layers"
-                    ] = large_layers
+                    self.log_warning(f"⚠ {large_layers} large layers (>100MB) found")
+                    self.security_results["image_security"]["large_layers"] = large_layers
                 else:
                     self.log_info("✓ No excessively large layers found")
                     self.security_results["image_security"]["large_layers"] = 0
@@ -475,46 +427,32 @@ class ContainerSecurityValidator:
         recommendations = []
 
         # Dockerfile security recommendations
-        dockerfile_security = self.security_results.get(
-            "dockerfile_security", {}
-        )
+        dockerfile_security = self.security_results.get("dockerfile_security", {})
         for check_name, check_result in dockerfile_security.items():
             if check_result["required"] and not check_result["status"]:
-                recommendations.append(
-                    f"Fix Dockerfile security: {check_result['description']}"
-                )
+                recommendations.append(f"Fix Dockerfile security: {check_result['description']}")
 
         # Runtime security recommendations
         runtime_security = self.security_results.get("runtime_security", {})
         if not runtime_security.get("readonly_fs", False):
-            recommendations.append(
-                "Enable read-only filesystem with --read-only flag"
-            )
+            recommendations.append("Enable read-only filesystem with --read-only flag")
 
         if not runtime_security.get("non_root_user", False):
-            recommendations.append(
-                "Configure container to run as non-root user"
-            )
+            recommendations.append("Configure container to run as non-root user")
 
         if not runtime_security.get("no_new_privileges", False):
             recommendations.append("Add --security-opt no-new-privileges:true")
 
         if not runtime_security.get("minimal_capabilities", False):
-            recommendations.append(
-                "Drop all capabilities and add only necessary ones"
-            )
+            recommendations.append("Drop all capabilities and add only necessary ones")
 
         # Vulnerability recommendations
         vulnerabilities = self.security_results.get("vulnerabilities", {})
         for scanner, vuln_data in vulnerabilities.items():
             if vuln_data.get("critical", 0) > 0:
-                recommendations.append(
-                    f"Fix {vuln_data['critical']} critical vulnerabilities"
-                )
+                recommendations.append(f"Fix {vuln_data['critical']} critical vulnerabilities")
             if vuln_data.get("high", 0) > 0:
-                recommendations.append(
-                    f"Fix {vuln_data['high']} high severity vulnerabilities"
-                )
+                recommendations.append(f"Fix {vuln_data['high']} high severity vulnerabilities")
 
         # Image security recommendations
         image_security = self.security_results.get("image_security", {})
@@ -522,9 +460,7 @@ class ContainerSecurityValidator:
             recommendations.append("Remove secrets from image layers")
 
         if image_security.get("large_layers", 0) > 0:
-            recommendations.append(
-                "Optimize large layers to reduce attack surface"
-            )
+            recommendations.append("Optimize large layers to reduce attack surface")
 
         self.security_results["recommendations"] = recommendations
 
@@ -546,13 +482,8 @@ class ContainerSecurityValidator:
             "image_security",
         ]:
             if category in self.security_results:
-                for check_name, check_result in self.security_results[
-                    category
-                ].items():
-                    if (
-                        isinstance(check_result, dict)
-                        and "status" in check_result
-                    ):
+                for check_name, check_result in self.security_results[category].items():
+                    if isinstance(check_result, dict) and "status" in check_result:
                         total_checks += 1
                         if check_result["status"]:
                             passed_checks += 1
@@ -561,9 +492,7 @@ class ContainerSecurityValidator:
                         if check_result:
                             passed_checks += 1
 
-        security_score = (
-            (passed_checks / total_checks * 100) if total_checks > 0 else 0
-        )
+        security_score = (passed_checks / total_checks * 100) if total_checks > 0 else 0
 
         self.security_results["summary"] = {
             "security_score": security_score,
@@ -605,9 +534,7 @@ class ContainerSecurityValidator:
         self.log_info("Starting container security validation...")
 
         # Build image if it doesn't exist
-        returncode, stdout, stderr = self.run_command(
-            ["docker", "inspect", image_name]
-        )
+        returncode, stdout, stderr = self.run_command(["docker", "inspect", image_name])
 
         if returncode != 0:
             self.log_info("Building production image for security testing...")
@@ -659,9 +586,7 @@ def main():
         print("\n✅ Container security validation PASSED")
         return 0
     else:
-        print(
-            "\n⚠ Container security validation completed with recommendations"
-        )
+        print("\n⚠ Container security validation completed with recommendations")
         return 1
 
 

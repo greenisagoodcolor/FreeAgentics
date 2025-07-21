@@ -5,7 +5,6 @@ This test demonstrates how to use the real PostgreSQL database infrastructure
 instead of mocks for testing coalition formation and management.
 """
 
-import uuid
 from datetime import datetime, timedelta
 
 import pytest
@@ -19,7 +18,7 @@ from database.models import (
     CoalitionStatus,
 )
 from tests.db_infrastructure.factories import AgentFactory, CoalitionFactory
-from tests.db_infrastructure.fixtures import DatabaseTestCase, db_session
+from tests.db_infrastructure.fixtures import DatabaseTestCase
 
 
 class TestCoalitionDatabase(DatabaseTestCase):
@@ -193,9 +192,7 @@ class TestCoalitionDatabase(DatabaseTestCase):
                 "efficiency": efficiency,
                 "uptime_hours": hour,
                 "task_completion_rate": 0.8 + (hour * 0.02),
-                "timestamp": (
-                    datetime.utcnow() + timedelta(hours=hour)
-                ).isoformat(),
+                "timestamp": (datetime.utcnow() + timedelta(hours=hour)).isoformat(),
             }
 
             performance_history.append(
@@ -215,9 +212,7 @@ class TestCoalitionDatabase(DatabaseTestCase):
 
         # Verify we can query historical data
         assert len(performance_history) == 5
-        assert (
-            performance_history[-1]["efficiency"] == 2.0
-        )  # 40 tasks / 20 resources
+        assert performance_history[-1]["efficiency"] == 2.0  # 40 tasks / 20 resources
 
     def test_multi_coalition_agent_membership(self, db_session: Session):
         """Test agents being members of multiple coalitions."""
@@ -283,9 +278,7 @@ class TestCoalitionDatabase(DatabaseTestCase):
             assert len(agent.coalitions) == 1
             assert agent.coalitions[0] == coalitions[i]
 
-    def test_coalition_trust_and_contribution_tracking(
-        self, db_session: Session
-    ):
+    def test_coalition_trust_and_contribution_tracking(self, db_session: Session):
         """Test tracking trust scores and contributions within coalitions."""
         # Create coalition and agents
         coalition = CoalitionFactory(name="Trust Test Coalition")
@@ -413,9 +406,7 @@ class TestCoalitionDatabase(DatabaseTestCase):
                 Coalition.id,
                 Coalition.name,
                 func.count(Agent.id).label("member_count"),
-                func.avg(agent_coalition_association.c.trust_score).label(
-                    "avg_trust"
-                ),
+                func.avg(agent_coalition_association.c.trust_score).label("avg_trust"),
             )
             .select_from(Coalition)
             .join(agent_coalition_association)

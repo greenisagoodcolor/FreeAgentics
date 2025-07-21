@@ -34,15 +34,11 @@ class TestRefreshTokenRotation:
 
         # Create second refresh token (should rotate/revoke first)
         second_refresh_token = auth_manager.create_refresh_token(user)
-        assert (
-            auth_manager.refresh_tokens[user.user_id] == second_refresh_token
-        )
+        assert auth_manager.refresh_tokens[user.user_id] == second_refresh_token
         assert first_refresh_token != second_refresh_token
 
         # First token should be blacklisted
-        first_payload = jwt.decode(
-            first_refresh_token, options={"verify_signature": False}
-        )
+        first_payload = jwt.decode(first_refresh_token, options={"verify_signature": False})
         first_jti = first_payload.get("jti")
         assert first_jti in auth_manager.blacklist
 
@@ -76,9 +72,7 @@ class TestRefreshTokenRotation:
         assert token_data.user_id == user.user_id
 
         # Original refresh token should be blacklisted
-        original_payload = jwt.decode(
-            original_refresh_token, options={"verify_signature": False}
-        )
+        original_payload = jwt.decode(original_refresh_token, options={"verify_signature": False})
         original_jti = original_payload.get("jti")
         assert original_jti in auth_manager.blacklist
 
@@ -153,15 +147,9 @@ class TestRefreshTokenRotation:
             "jti": "expired_refresh_jti",
             "iss": "freeagentics",
             "aud": "freeagentics-api",
-            "exp": (
-                datetime.now(timezone.utc) - timedelta(minutes=1)
-            ).timestamp(),  # Expired
-            "nbf": (
-                datetime.now(timezone.utc) - timedelta(hours=1)
-            ).timestamp(),
-            "iat": (
-                datetime.now(timezone.utc) - timedelta(hours=1)
-            ).timestamp(),
+            "exp": (datetime.now(timezone.utc) - timedelta(minutes=1)).timestamp(),  # Expired
+            "nbf": (datetime.now(timezone.utc) - timedelta(hours=1)).timestamp(),
+            "iat": (datetime.now(timezone.utc) - timedelta(hours=1)).timestamp(),
         }
 
         expired_refresh_token = jwt.encode(
@@ -222,18 +210,14 @@ class TestRefreshTokenRotation:
         client_fingerprint = "test_client_fingerprint"
 
         # Create tokens with client fingerprint
-        original_access_token = auth_manager.create_access_token(
-            user, client_fingerprint=client_fingerprint
-        )
+        auth_manager.create_access_token(user, client_fingerprint=client_fingerprint)
         refresh_token = auth_manager.create_refresh_token(user)
 
         # Refresh with same fingerprint
         (
             new_access_token,
             new_refresh_token,
-        ) = auth_manager.refresh_access_token(
-            refresh_token, client_fingerprint=client_fingerprint
-        )
+        ) = auth_manager.refresh_access_token(refresh_token, client_fingerprint=client_fingerprint)
 
         # Should work fine
         token_data = auth_manager.verify_token(
@@ -286,9 +270,7 @@ class TestRefreshTokenSecurityValidation:
         user = self._create_test_user()
 
         refresh_token = auth_manager.create_refresh_token(user)
-        payload = jwt.decode(
-            refresh_token, options={"verify_signature": False}
-        )
+        payload = jwt.decode(refresh_token, options={"verify_signature": False})
 
         # Check all required claims
         required_claims = [
@@ -302,9 +284,7 @@ class TestRefreshTokenSecurityValidation:
             "iat",
         ]
         for claim in required_claims:
-            assert (
-                claim in payload
-            ), f"Refresh token must include claim: {claim}"
+            assert claim in payload, f"Refresh token must include claim: {claim}"
 
         # Check claim values
         assert payload["type"] == "refresh"

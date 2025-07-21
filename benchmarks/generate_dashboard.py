@@ -4,21 +4,21 @@ Performance Dashboard Generator
 PERF-ENGINEER: Bryan Cantrill + Brendan Gregg Methodology
 """
 
+import argparse
 import json
 import statistics
 from datetime import datetime
 from pathlib import Path
-from typing import Dict, List, Any, Optional
-import argparse
+from typing import Any, Dict, Optional
 
 
 class PerformanceDashboard:
     """Generate performance dashboards in various formats."""
-    
+
     def __init__(self, results_dir: str = "benchmarks/results"):
         self.results_dir = Path(results_dir)
         self.template = self._load_template()
-    
+
     def _load_template(self) -> str:
         """Load HTML template for dashboard."""
         return """
@@ -204,95 +204,95 @@ class PerformanceDashboard:
 </body>
 </html>
         """
-    
+
     def load_latest_results(self) -> Optional[Dict[str, Any]]:
         """Load the latest benchmark results."""
         daily_dir = self.results_dir / "daily"
         if not daily_dir.exists():
             return None
-        
+
         # Find most recent file
         files = sorted(daily_dir.glob("*_results.json"), reverse=True)
         if not files:
             return None
-        
-        with open(files[0], 'r') as f:
+
+        with open(files[0], "r") as f:
             return json.load(f)
-    
+
     def load_baseline(self) -> Optional[Dict[str, Any]]:
         """Load baseline results."""
         baseline_file = self.results_dir / "baseline" / "baseline_results.json"
         if not baseline_file.exists():
             return None
-        
-        with open(baseline_file, 'r') as f:
+
+        with open(baseline_file, "r") as f:
             return json.load(f)
-    
+
     def calculate_metrics(self, results: Dict[str, Any]) -> Dict[str, Any]:
         """Calculate summary metrics from results."""
         metrics = {
-            'total_benchmarks': 0,
-            'avg_duration_ms': 0,
-            'total_throughput': 0,
-            'avg_memory_mb': 0,
-            'improvements': 0,
-            'regressions': 0
+            "total_benchmarks": 0,
+            "avg_duration_ms": 0,
+            "total_throughput": 0,
+            "avg_memory_mb": 0,
+            "improvements": 0,
+            "regressions": 0,
         }
-        
-        if 'benchmarks' in results:
-            benchmarks = results['benchmarks']
-            metrics['total_benchmarks'] = len(benchmarks)
-            
+
+        if "benchmarks" in results:
+            benchmarks = results["benchmarks"]
+            metrics["total_benchmarks"] = len(benchmarks)
+
             durations = []
             throughputs = []
             memories = []
-            
+
             for bench in benchmarks:
-                stats = bench.get('stats', {})
-                durations.append(stats.get('mean', 0) * 1000)  # Convert to ms
-                
-                if stats.get('mean', 0) > 0:
-                    throughputs.append(1.0 / stats['mean'])
-                
-                extra = bench.get('extra_info', {})
-                if 'memory_mb' in extra:
-                    memories.append(extra['memory_mb'])
-            
+                stats = bench.get("stats", {})
+                durations.append(stats.get("mean", 0) * 1000)  # Convert to ms
+
+                if stats.get("mean", 0) > 0:
+                    throughputs.append(1.0 / stats["mean"])
+
+                extra = bench.get("extra_info", {})
+                if "memory_mb" in extra:
+                    memories.append(extra["memory_mb"])
+
             if durations:
-                metrics['avg_duration_ms'] = statistics.mean(durations)
+                metrics["avg_duration_ms"] = statistics.mean(durations)
             if throughputs:
-                metrics['total_throughput'] = sum(throughputs)
+                metrics["total_throughput"] = sum(throughputs)
             if memories:
-                metrics['avg_memory_mb'] = statistics.mean(memories)
-        
+                metrics["avg_memory_mb"] = statistics.mean(memories)
+
         return metrics
-    
+
     def generate_trends_data(self, days: int = 30) -> Dict[str, Any]:
         """Generate trend data for charts."""
         daily_dir = self.results_dir / "daily"
         if not daily_dir.exists():
             return {"labels": [], "datasets": []}
-        
+
         # Load last N days of data
         files = sorted(daily_dir.glob("*_results.json"))[-days:]
-        
+
         labels = []
         duration_data = []
         throughput_data = []
         memory_data = []
-        
+
         for file in files:
             # Extract date from filename
             date_str = file.stem.replace("_results", "")
             labels.append(date_str)
-            
-            with open(file, 'r') as f:
+
+            with open(file, "r") as f:
                 data = json.load(f)
                 metrics = self.calculate_metrics(data)
-                duration_data.append(metrics['avg_duration_ms'])
-                throughput_data.append(metrics['total_throughput'])
-                memory_data.append(metrics['avg_memory_mb'])
-        
+                duration_data.append(metrics["avg_duration_ms"])
+                throughput_data.append(metrics["total_throughput"])
+                memory_data.append(metrics["avg_memory_mb"])
+
         return {
             "labels": labels,
             "datasets": [
@@ -300,56 +300,58 @@ class PerformanceDashboard:
                     "label": "Avg Duration (ms)",
                     "data": duration_data,
                     "borderColor": "rgb(255, 99, 132)",
-                    "backgroundColor": "rgba(255, 99, 132, 0.1)"
+                    "backgroundColor": "rgba(255, 99, 132, 0.1)",
                 },
                 {
                     "label": "Total Throughput (ops/s)",
                     "data": throughput_data,
                     "borderColor": "rgb(54, 162, 235)",
-                    "backgroundColor": "rgba(54, 162, 235, 0.1)"
+                    "backgroundColor": "rgba(54, 162, 235, 0.1)",
                 },
                 {
                     "label": "Avg Memory (MB)",
                     "data": memory_data,
                     "borderColor": "rgb(75, 192, 192)",
-                    "backgroundColor": "rgba(75, 192, 192, 0.1)"
-                }
-            ]
+                    "backgroundColor": "rgba(75, 192, 192, 0.1)",
+                },
+            ],
         }
-    
+
     def generate_comparison_data(self, current: Dict[str, Any]) -> Dict[str, Any]:
         """Generate comparison data for bar chart."""
-        if 'benchmarks' not in current:
+        if "benchmarks" not in current:
             return {"labels": [], "datasets": []}
-        
+
         labels = []
         durations = []
-        
-        for bench in current['benchmarks'][:10]:  # Top 10 benchmarks
-            name = bench['name'].split('.')[-1]
+
+        for bench in current["benchmarks"][:10]:  # Top 10 benchmarks
+            name = bench["name"].split(".")[-1]
             labels.append(name)
-            durations.append(bench.get('stats', {}).get('mean', 0) * 1000)
-        
+            durations.append(bench.get("stats", {}).get("mean", 0) * 1000)
+
         return {
             "labels": labels,
-            "datasets": [{
-                "label": "Duration (ms)",
-                "data": durations,
-                "backgroundColor": [
-                    'rgba(255, 99, 132, 0.6)',
-                    'rgba(54, 162, 235, 0.6)',
-                    'rgba(255, 206, 86, 0.6)',
-                    'rgba(75, 192, 192, 0.6)',
-                    'rgba(153, 102, 255, 0.6)',
-                    'rgba(255, 159, 64, 0.6)',
-                    'rgba(199, 199, 199, 0.6)',
-                    'rgba(83, 102, 255, 0.6)',
-                    'rgba(255, 99, 132, 0.6)',
-                    'rgba(54, 162, 235, 0.6)'
-                ]
-            }]
+            "datasets": [
+                {
+                    "label": "Duration (ms)",
+                    "data": durations,
+                    "backgroundColor": [
+                        "rgba(255, 99, 132, 0.6)",
+                        "rgba(54, 162, 235, 0.6)",
+                        "rgba(255, 206, 86, 0.6)",
+                        "rgba(75, 192, 192, 0.6)",
+                        "rgba(153, 102, 255, 0.6)",
+                        "rgba(255, 159, 64, 0.6)",
+                        "rgba(199, 199, 199, 0.6)",
+                        "rgba(83, 102, 255, 0.6)",
+                        "rgba(255, 99, 132, 0.6)",
+                        "rgba(54, 162, 235, 0.6)",
+                    ],
+                }
+            ],
         }
-    
+
     def generate_metric_card(self, title: str, value: Any, change: Optional[float] = None) -> str:
         """Generate HTML for a metric card."""
         change_html = ""
@@ -357,7 +359,7 @@ class PerformanceDashboard:
             change_class = "improvement" if change < 0 else "regression"
             change_symbol = "↓" if change < 0 else "↑"
             change_html = f'<div class="metric-change {change_class}">{change_symbol} {abs(change):.1f}%</div>'
-        
+
         return f"""
         <div class="metric-card">
             <div class="metric-title">{title}</div>
@@ -365,23 +367,25 @@ class PerformanceDashboard:
             {change_html}
         </div>
         """
-    
-    def generate_table_row(self, benchmark: Dict[str, Any], baseline: Optional[Dict[str, Any]] = None) -> str:
+
+    def generate_table_row(
+        self, benchmark: Dict[str, Any], baseline: Optional[Dict[str, Any]] = None
+    ) -> str:
         """Generate HTML for a benchmark table row."""
-        name = benchmark['name'].split('.')[-1]
-        stats = benchmark.get('stats', {})
-        duration = stats.get('mean', 0) * 1000
-        throughput = 1.0 / stats.get('mean', 1) if stats.get('mean', 0) > 0 else 0
-        memory = benchmark.get('extra_info', {}).get('memory_mb', 0)
-        
+        name = benchmark["name"].split(".")[-1]
+        stats = benchmark.get("stats", {})
+        duration = stats.get("mean", 0) * 1000
+        throughput = 1.0 / stats.get("mean", 1) if stats.get("mean", 0) > 0 else 0
+        memory = benchmark.get("extra_info", {}).get("memory_mb", 0)
+
         # Calculate change
         change = 0
         status = "pass"
         if baseline:
             # Find matching baseline
-            for base_bench in baseline.get('benchmarks', []):
-                if base_bench['name'] == benchmark['name']:
-                    base_duration = base_bench.get('stats', {}).get('mean', 0) * 1000
+            for base_bench in baseline.get("benchmarks", []):
+                if base_bench["name"] == benchmark["name"]:
+                    base_duration = base_bench.get("stats", {}).get("mean", 0) * 1000
                     if base_duration > 0:
                         change = ((duration - base_duration) / base_duration) * 100
                         if change > 10:
@@ -389,10 +393,10 @@ class PerformanceDashboard:
                         elif change > 5:
                             status = "warning"
                     break
-        
+
         change_str = f"{change:+.1f}%" if change != 0 else "—"
         status_badge = f'<span class="status-badge status-{status}">{status.upper()}</span>'
-        
+
         return f"""
         <tr>
             <td>{name}</td>
@@ -403,66 +407,68 @@ class PerformanceDashboard:
             <td>{status_badge}</td>
         </tr>
         """
-    
+
     def generate_html(self, output_file: Path):
         """Generate HTML dashboard."""
         # Load data
         current = self.load_latest_results()
         baseline = self.load_baseline()
-        
+
         if not current:
             print("No benchmark results found")
             return
-        
+
         # Calculate metrics
         metrics = self.calculate_metrics(current)
-        
+
         # Generate metric cards
         metric_cards = [
-            self.generate_metric_card("Total Benchmarks", metrics['total_benchmarks']),
+            self.generate_metric_card("Total Benchmarks", metrics["total_benchmarks"]),
             self.generate_metric_card("Avg Duration", f"{metrics['avg_duration_ms']:.1f}ms"),
-            self.generate_metric_card("Total Throughput", f"{metrics['total_throughput']:.0f} ops/s"),
-            self.generate_metric_card("Avg Memory", f"{metrics['avg_memory_mb']:.1f}MB")
+            self.generate_metric_card(
+                "Total Throughput", f"{metrics['total_throughput']:.0f} ops/s"
+            ),
+            self.generate_metric_card("Avg Memory", f"{metrics['avg_memory_mb']:.1f}MB"),
         ]
-        
+
         # Generate table rows
         table_rows = []
-        if 'benchmarks' in current:
-            for bench in current['benchmarks']:
+        if "benchmarks" in current:
+            for bench in current["benchmarks"]:
                 table_rows.append(self.generate_table_row(bench, baseline))
-        
+
         # Generate chart data
         trends_data = json.dumps(self.generate_trends_data())
         comparison_data = json.dumps(self.generate_comparison_data(current))
-        
+
         # Fill template
         html = self.template.format(
             timestamp=datetime.now().strftime("%Y-%m-%d %H:%M:%S"),
             metrics_cards="\n".join(metric_cards),
             table_rows="\n".join(table_rows),
             trends_data=trends_data,
-            comparison_data=comparison_data
+            comparison_data=comparison_data,
         )
-        
+
         # Write output
-        with open(output_file, 'w') as f:
+        with open(output_file, "w") as f:
             f.write(html)
-        
+
         print(f"✅ Dashboard generated: {output_file}")
-    
+
     def generate_markdown(self, output_file: Path):
         """Generate Markdown dashboard."""
         # Load data
         current = self.load_latest_results()
         baseline = self.load_baseline()
-        
+
         if not current:
             print("No benchmark results found")
             return
-        
+
         # Calculate metrics
         metrics = self.calculate_metrics(current)
-        
+
         md = f"""# 🚀 FreeAgentics Performance Dashboard
 
 **Generated:** {datetime.now().strftime("%Y-%m-%d %H:%M:%S")}
@@ -479,22 +485,22 @@ class PerformanceDashboard:
 | Benchmark | Duration (ms) | Throughput (ops/s) | Memory (MB) | Change | Status |
 |-----------|--------------|-------------------|-------------|---------|---------|
 """
-        
-        if 'benchmarks' in current:
-            for bench in current['benchmarks']:
-                name = bench['name'].split('.')[-1]
-                stats = bench.get('stats', {})
-                duration = stats.get('mean', 0) * 1000
-                throughput = 1.0 / stats.get('mean', 1) if stats.get('mean', 0) > 0 else 0
-                memory = bench.get('extra_info', {}).get('memory_mb', 0)
-                
+
+        if "benchmarks" in current:
+            for bench in current["benchmarks"]:
+                name = bench["name"].split(".")[-1]
+                stats = bench.get("stats", {})
+                duration = stats.get("mean", 0) * 1000
+                throughput = 1.0 / stats.get("mean", 1) if stats.get("mean", 0) > 0 else 0
+                memory = bench.get("extra_info", {}).get("memory_mb", 0)
+
                 # Calculate change
                 change = 0
                 status = "✅"
                 if baseline:
-                    for base_bench in baseline.get('benchmarks', []):
-                        if base_bench['name'] == benchmark['name']:
-                            base_duration = base_bench.get('stats', {}).get('mean', 0) * 1000
+                    for base_bench in baseline.get("benchmarks", []):
+                        if base_bench["name"] == benchmark["name"]:
+                            base_duration = base_bench.get("stats", {}).get("mean", 0) * 1000
                             if base_duration > 0:
                                 change = ((duration - base_duration) / base_duration) * 100
                                 if change > 10:
@@ -502,51 +508,38 @@ class PerformanceDashboard:
                                 elif change > 5:
                                     status = "⚠️"
                             break
-                
+
                 change_str = f"{change:+.1f}%" if change != 0 else "—"
                 md += f"| {name} | {duration:.2f} | {throughput:.1f} | {memory:.1f} | {change_str} | {status} |\n"
-        
+
         md += "\n---\n*Powered by PERF-ENGINEER • Following Bryan Cantrill + Brendan Gregg Methodology*\n"
-        
-        with open(output_file, 'w') as f:
+
+        with open(output_file, "w") as f:
             f.write(md)
-        
+
         print(f"✅ Markdown dashboard generated: {output_file}")
 
 
 def main():
     """Main CLI entry point."""
-    parser = argparse.ArgumentParser(
-        description="Generate performance dashboard"
-    )
-    
+    parser = argparse.ArgumentParser(description="Generate performance dashboard")
+
+    parser.add_argument("--output", default="performance_dashboard.html", help="Output file path")
+
     parser.add_argument(
-        '--output',
-        default='performance_dashboard.html',
-        help='Output file path'
+        "--format", choices=["html", "markdown"], default="html", help="Output format"
     )
-    
-    parser.add_argument(
-        '--format',
-        choices=['html', 'markdown'],
-        default='html',
-        help='Output format'
-    )
-    
-    parser.add_argument(
-        '--results-dir',
-        default='benchmarks/results',
-        help='Results directory'
-    )
-    
+
+    parser.add_argument("--results-dir", default="benchmarks/results", help="Results directory")
+
     args = parser.parse_args()
-    
+
     # Generate dashboard
     dashboard = PerformanceDashboard(args.results_dir)
-    
+
     output_path = Path(args.output)
-    
-    if args.format == 'html':
+
+    if args.format == "html":
         dashboard.generate_html(output_path)
     else:
         dashboard.generate_markdown(output_path)

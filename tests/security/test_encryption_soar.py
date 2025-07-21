@@ -10,11 +10,9 @@ import os
 # Import modules to test
 import sys
 import time
-from datetime import datetime, timedelta
-from unittest.mock import MagicMock, Mock, patch
+from unittest.mock import MagicMock, patch
 
 import boto3
-import hvac
 import pytest
 from moto import mock_aws
 
@@ -25,7 +23,6 @@ from security.encryption.field_encryptor import (
     FieldEncryptor,
     HashiCorpVaultProvider,
     TransparentFieldEncryptor,
-    create_field_encryptor,
 )
 from security.encryption.quantum_resistant import (
     DilithiumSigner,
@@ -46,7 +43,6 @@ from security.soar.playbook_engine import (
     NotificationAction,
     PlaybookEngine,
     PlaybookTrigger,
-    UserDisableAction,
     save_example_playbook,
 )
 
@@ -137,9 +133,7 @@ class TestFieldEncryption:
         end_time = time.perf_counter()
 
         encryption_time_ms = (end_time - start_time) * 1000
-        assert (
-            encryption_time_ms < 5
-        ), f"Encryption took {encryption_time_ms}ms"
+        assert encryption_time_ms < 5, f"Encryption took {encryption_time_ms}ms"
 
         # Test decryption performance
         start_time = time.perf_counter()
@@ -147,9 +141,7 @@ class TestFieldEncryption:
         end_time = time.perf_counter()
 
         decryption_time_ms = (end_time - start_time) * 1000
-        assert (
-            decryption_time_ms < 5
-        ), f"Decryption took {decryption_time_ms}ms"
+        assert decryption_time_ms < 5, f"Decryption took {decryption_time_ms}ms"
         assert decrypted == test_data["ssn"]
 
         # Check performance stats
@@ -233,9 +225,7 @@ class TestQuantumResistantCrypto:
         assert len(encapsulated.shared_secret) == 32
 
         # Test decapsulation
-        shared_secret = kyber.decapsulate(
-            encapsulated.ciphertext, keypair.private_key
-        )
+        shared_secret = kyber.decapsulate(encapsulated.ciphertext, keypair.private_key)
         assert len(shared_secret) == 32
 
     def test_dilithium_signatures(self):
@@ -277,7 +267,7 @@ class TestQuantumResistantCrypto:
 
         # Test multiplication (simplified)
         enc_prod = he.multiply(enc1, enc2)
-        decrypted_prod = he.decrypt(enc_prod)
+        he.decrypt(enc_prod)
         # Note: Simplified implementation, exact match not expected
 
         # Test vector operations
@@ -436,20 +426,19 @@ class TestSOARPlaybookEngine:
 
         result = await action.execute(context)
         assert result.status == ActionStatus.SUCCESS
-        assert result.output["condition_met"] == True
+        assert result.output["condition_met"] is True
 
         # Test false condition
         action2 = ConditionalAction("condition_2", {"condition": "2 > 5"})
 
         result2 = await action2.execute(context)
         assert result2.status == ActionStatus.SKIPPED
-        assert result2.output["condition_met"] == False
+        assert result2.output["condition_met"] is False
 
     @pytest.mark.asyncio
     async def test_variable_resolution(self):
         """Test variable resolution in actions."""
         from security.soar.playbook_engine import (
-            NotificationAction,
             PlaybookContext,
         )
 
@@ -475,10 +464,7 @@ class TestSOARPlaybookEngine:
 
         result = await action.execute(context)
         assert result.status == ActionStatus.SUCCESS
-        assert (
-            result.output["notifications"][0]["recipient"]
-            == "security@example.com"
-        )
+        assert result.output["notifications"][0]["recipient"] == "security@example.com"
         assert "192.168.1.100" in result.output["notifications"][0]["message"]
 
     def test_playbook_metrics(self, playbook_engine):
@@ -614,15 +600,11 @@ class TestIncidentManager:
 
         # Simulate response
         time.sleep(0.1)
-        incident_manager.update_incident_status(
-            case.case_id, IncidentStatus.IN_PROGRESS
-        )
+        incident_manager.update_incident_status(case.case_id, IncidentStatus.IN_PROGRESS)
 
         # Simulate containment
         time.sleep(0.1)
-        incident_manager.update_incident_status(
-            case.case_id, IncidentStatus.CONTAINED
-        )
+        incident_manager.update_incident_status(case.case_id, IncidentStatus.CONTAINED)
 
         # Get metrics
         summary = incident_manager.get_incident_summary(case.case_id)

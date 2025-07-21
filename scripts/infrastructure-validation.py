@@ -10,18 +10,15 @@ the application to be running.
 import json
 import logging
 import os
-import subprocess
 import sys
 from datetime import datetime
 from pathlib import Path
-from typing import Any, Dict, List
+from typing import Any, Dict
 
 import yaml
 
 # Configure logging
-logging.basicConfig(
-    level=logging.INFO, format="%(asctime)s - %(levelname)s - %(message)s"
-)
+logging.basicConfig(level=logging.INFO, format="%(asctime)s - %(levelname)s - %(message)s")
 logger = logging.getLogger(__name__)
 
 
@@ -39,9 +36,7 @@ class InfrastructureValidator:
         self.warnings = []
         self.passes = []
 
-    def log_result(
-        self, category: str, test_name: str, result: Dict[str, Any]
-    ):
+    def log_result(self, category: str, test_name: str, result: Dict[str, Any]):
         """Log test result"""
         if category not in self.results["validation_results"]:
             self.results["validation_results"][category] = {}
@@ -108,9 +103,7 @@ class InfrastructureValidator:
                 "your_",
                 "dev_secret",
             ]
-            dev_issues = [
-                pattern for pattern in dev_patterns if pattern in content
-            ]
+            dev_issues = [pattern for pattern in dev_patterns if pattern in content]
 
             self.log_result(
                 "environment",
@@ -154,17 +147,13 @@ class InfrastructureValidator:
                         "backend",
                         "nginx",
                     ]
-                    missing_services = [
-                        svc for svc in required_services if svc not in services
-                    ]
+                    missing_services = [svc for svc in required_services if svc not in services]
 
                     self.log_result(
                         "docker",
                         "required_services",
                         {
-                            "status": "PASS"
-                            if not missing_services
-                            else "CRITICAL",
+                            "status": "PASS" if not missing_services else "CRITICAL",
                             "missing_services": missing_services,
                             "message": (
                                 f"Missing services: {missing_services}"
@@ -178,21 +167,15 @@ class InfrastructureValidator:
                     security_features = []
                     for service_name, service_config in services.items():
                         if service_config.get("read_only"):
-                            security_features.append(
-                                f"{service_name}: read-only"
-                            )
+                            security_features.append(f"{service_name}: read-only")
                         if service_config.get("user"):
-                            security_features.append(
-                                f"{service_name}: non-root user"
-                            )
+                            security_features.append(f"{service_name}: non-root user")
 
                     self.log_result(
                         "docker",
                         "security_features",
                         {
-                            "status": "PASS"
-                            if security_features
-                            else "WARNING",
+                            "status": "PASS" if security_features else "WARNING",
                             "security_features": security_features,
                             "message": f"Security features: {len(security_features)} configured",
                         },
@@ -225,8 +208,7 @@ class InfrastructureValidator:
 
             security_checks = {
                 "non_root_user": "USER " in content,
-                "multi_stage_build": "FROM " in content
-                and content.count("FROM") > 1,
+                "multi_stage_build": "FROM " in content and content.count("FROM") > 1,
                 "health_check": "HEALTHCHECK" in content,
                 "minimal_base": "slim" in content or "alpine" in content,
             }
@@ -348,9 +330,7 @@ class InfrastructureValidator:
                 "status": "PASS" if not missing_keys else "CRITICAL",
                 "missing_keys": missing_keys,
                 "message": (
-                    f"Missing JWT keys: {missing_keys}"
-                    if missing_keys
-                    else "JWT keys present"
+                    f"Missing JWT keys: {missing_keys}" if missing_keys else "JWT keys present"
                 ),
             },
         )
@@ -389,9 +369,7 @@ class InfrastructureValidator:
             "monitoring/prometheus-production.yml",
         ]
 
-        prometheus_config = next(
-            (c for c in prometheus_configs if os.path.exists(c)), None
-        )
+        prometheus_config = next((c for c in prometheus_configs if os.path.exists(c)), None)
 
         if prometheus_config:
             with open(prometheus_config, "r") as f:
@@ -405,9 +383,7 @@ class InfrastructureValidator:
                         "monitoring",
                         "prometheus_config",
                         {
-                            "status": "PASS"
-                            if scrape_configs and rule_files
-                            else "WARNING",
+                            "status": "PASS" if scrape_configs and rule_files else "WARNING",
                             "scrape_configs": len(scrape_configs),
                             "rule_files": len(rule_files),
                             "message": f"Prometheus: {len(scrape_configs)} scrape configs, {len(rule_files)} rule files",
@@ -578,10 +554,8 @@ class InfrastructureValidator:
             deployment_features = {
                 "health_checks": "health" in content.lower(),
                 "rollback_capability": "rollback" in content.lower(),
-                "zero_downtime": "zero" in content.lower()
-                or "blue" in content.lower(),
-                "database_migration": "migrate" in content.lower()
-                or "alembic" in content.lower(),
+                "zero_downtime": "zero" in content.lower() or "blue" in content.lower(),
+                "database_migration": "migrate" in content.lower() or "alembic" in content.lower(),
             }
 
             passed_features = sum(deployment_features.values())
@@ -661,12 +635,8 @@ class InfrastructureValidator:
         self.validate_test_coverage()
 
         # Calculate summary
-        total_tests = (
-            len(self.passes) + len(self.warnings) + len(self.critical_failures)
-        )
-        pass_rate = (
-            (len(self.passes) / total_tests) * 100 if total_tests > 0 else 0
-        )
+        total_tests = len(self.passes) + len(self.warnings) + len(self.critical_failures)
+        pass_rate = (len(self.passes) / total_tests) * 100 if total_tests > 0 else 0
 
         self.results["summary"] = {
             "total_tests": total_tests,
@@ -695,13 +665,9 @@ class InfrastructureValidator:
         print(f"Total Tests: {self.results['summary']['total_tests']}")
         print(f"Passed: {self.results['summary']['passed']}")
         print(f"Warnings: {self.results['summary']['warnings']}")
-        print(
-            f"Critical Failures: {self.results['summary']['critical_failures']}"
-        )
+        print(f"Critical Failures: {self.results['summary']['critical_failures']}")
         print(f"Pass Rate: {self.results['summary']['pass_rate']:.1f}%")
-        print(
-            f"Production Ready: {'YES' if self.results['summary']['production_ready'] else 'NO'}"
-        )
+        print(f"Production Ready: {'YES' if self.results['summary']['production_ready'] else 'NO'}")
         print("=" * 60)
 
         if self.results["summary"]["production_ready"]:
@@ -719,9 +685,7 @@ class InfrastructureValidator:
         """Generate markdown report"""
         with open(filename, "w") as f:
             f.write("# FreeAgentics Infrastructure Validation Report\n\n")
-            f.write(
-                f"**Generated:** {datetime.now().strftime('%Y-%m-%d %H:%M:%S')}\n"
-            )
+            f.write(f"**Generated:** {datetime.now().strftime('%Y-%m-%d %H:%M:%S')}\n")
             f.write(f"**Environment:** {self.results['environment']}\n\n")
 
             # Summary
@@ -730,9 +694,7 @@ class InfrastructureValidator:
             f.write(f"- **Total Tests:** {summary['total_tests']}\n")
             f.write(f"- **Passed:** {summary['passed']}\n")
             f.write(f"- **Warnings:** {summary['warnings']}\n")
-            f.write(
-                f"- **Critical Failures:** {summary['critical_failures']}\n"
-            )
+            f.write(f"- **Critical Failures:** {summary['critical_failures']}\n")
             f.write(f"- **Pass Rate:** {summary['pass_rate']:.1f}%\n")
             f.write(
                 f"- **Production Ready:** {'✅ YES' if summary['production_ready'] else '❌ NO'}\n\n"

@@ -4,11 +4,9 @@ This module provides detailed audit logging for all RBAC, ABAC, and
 resource access control decisions in the FreeAgentics platform.
 """
 
-import asyncio
-import json
 import logging
 from datetime import datetime, timedelta, timezone
-from typing import Any, Dict, List, Optional, Union
+from typing import Any, Dict, List, Optional
 
 from auth.security_logging import (
     SecurityEventSeverity,
@@ -57,15 +55,9 @@ class AccessDecisionAuditor:
 
         # Log to security auditor
         event_type = (
-            SecurityEventType.ACCESS_GRANTED
-            if has_permission
-            else SecurityEventType.ACCESS_DENIED
+            SecurityEventType.ACCESS_GRANTED if has_permission else SecurityEventType.ACCESS_DENIED
         )
-        severity = (
-            SecurityEventSeverity.INFO
-            if has_permission
-            else SecurityEventSeverity.WARNING
-        )
+        severity = SecurityEventSeverity.INFO if has_permission else SecurityEventSeverity.WARNING
 
         security_auditor.log_event(
             event_type,
@@ -114,15 +106,9 @@ class AccessDecisionAuditor:
 
         # Log to security auditor
         event_type = (
-            SecurityEventType.ACCESS_GRANTED
-            if decision
-            else SecurityEventType.ACCESS_DENIED
+            SecurityEventType.ACCESS_GRANTED if decision else SecurityEventType.ACCESS_DENIED
         )
-        severity = (
-            SecurityEventSeverity.INFO
-            if decision
-            else SecurityEventSeverity.WARNING
-        )
+        severity = SecurityEventSeverity.INFO if decision else SecurityEventSeverity.WARNING
 
         security_auditor.log_event(
             event_type,
@@ -171,21 +157,11 @@ class AccessDecisionAuditor:
         # Log to security auditor
         decision_result = is_owner or admin_override
         event_type = (
-            SecurityEventType.ACCESS_GRANTED
-            if decision_result
-            else SecurityEventType.ACCESS_DENIED
+            SecurityEventType.ACCESS_GRANTED if decision_result else SecurityEventType.ACCESS_DENIED
         )
-        severity = (
-            SecurityEventSeverity.INFO
-            if decision_result
-            else SecurityEventSeverity.WARNING
-        )
+        severity = SecurityEventSeverity.INFO if decision_result else SecurityEventSeverity.WARNING
 
-        reason = (
-            "owner"
-            if is_owner
-            else ("admin_override" if admin_override else "not_owner")
-        )
+        reason = "owner" if is_owner else ("admin_override" if admin_override else "not_owner")
 
         security_auditor.log_event(
             event_type,
@@ -247,9 +223,7 @@ class AccessDecisionAuditor:
             "suspicious_activity": SecurityEventType.SUSPICIOUS_PATTERN,
         }
 
-        security_event_type = event_type_map.get(
-            event_type, SecurityEventType.API_ACCESS
-        )
+        security_event_type = event_type_map.get(event_type, SecurityEventType.API_ACCESS)
         severity = (
             SecurityEventSeverity.WARNING
             if event_type == "suspicious_activity"
@@ -346,9 +320,7 @@ class AccessDecisionAuditor:
         # Log to security auditor
         security_auditor.log_event(
             SecurityEventType.PRIVILEGE_ESCALATION,
-            SecurityEventSeverity.ERROR
-            if blocked
-            else SecurityEventSeverity.CRITICAL,
+            SecurityEventSeverity.ERROR if blocked else SecurityEventSeverity.CRITICAL,
             f"Permission escalation attempt: {username} ({current_role}) -> {attempted_permission} on {endpoint} [{'BLOCKED' if blocked else 'ALLOWED'}]",
             user_id=user_id,
             username=username,
@@ -390,23 +362,13 @@ class AccessDecisionAuditor:
 
         # Log to security auditor
         event_type = (
-            SecurityEventType.ACCESS_GRANTED
-            if authorized
-            else SecurityEventType.ACCESS_DENIED
+            SecurityEventType.ACCESS_GRANTED if authorized else SecurityEventType.ACCESS_DENIED
         )
-        severity = (
-            SecurityEventSeverity.INFO
-            if authorized
-            else SecurityEventSeverity.WARNING
-        )
+        severity = SecurityEventSeverity.INFO if authorized else SecurityEventSeverity.WARNING
 
         # Increase severity for sensitive data
         if sensitivity_level in ["confidential", "restricted"]:
-            severity = (
-                SecurityEventSeverity.WARNING
-                if authorized
-                else SecurityEventSeverity.ERROR
-            )
+            severity = SecurityEventSeverity.WARNING if authorized else SecurityEventSeverity.ERROR
 
         security_auditor.log_event(
             event_type,
@@ -442,20 +404,14 @@ class AccessDecisionAuditor:
             for decision in self.decision_log
             if decision.get("user_id") == user_id
             and start_time
-            <= datetime.fromisoformat(
-                decision["timestamp"].replace("Z", "+00:00")
-            )
+            <= datetime.fromisoformat(decision["timestamp"].replace("Z", "+00:00"))
             <= end_time
         ]
 
         # Calculate statistics
         total_decisions = len(user_decisions)
-        allowed_decisions = len(
-            [d for d in user_decisions if d.get("decision") == "allow"]
-        )
-        denied_decisions = len(
-            [d for d in user_decisions if d.get("decision") == "deny"]
-        )
+        allowed_decisions = len([d for d in user_decisions if d.get("decision") == "allow"])
+        denied_decisions = len([d for d in user_decisions if d.get("decision") == "deny"])
 
         # Group by decision type
         decision_types = {}
@@ -478,9 +434,7 @@ class AccessDecisionAuditor:
         for decision in user_decisions:
             if decision.get("resource_id"):
                 resource_type = decision.get("resource_type", "unknown")
-                accessed_resources.add(
-                    f"{resource_type}:{decision['resource_id']}"
-                )
+                accessed_resources.add(f"{resource_type}:{decision['resource_id']}")
 
         return {
             "user_id": user_id,
@@ -493,9 +447,7 @@ class AccessDecisionAuditor:
                 "allowed_decisions": allowed_decisions,
                 "denied_decisions": denied_decisions,
                 "success_rate": (
-                    (allowed_decisions / total_decisions * 100)
-                    if total_decisions > 0
-                    else 0
+                    (allowed_decisions / total_decisions * 100) if total_decisions > 0 else 0
                 ),
             },
             "decision_types": decision_types,
@@ -522,9 +474,7 @@ class AccessDecisionAuditor:
             decision
             for decision in self.decision_log
             if start_time
-            <= datetime.fromisoformat(
-                decision["timestamp"].replace("Z", "+00:00")
-            )
+            <= datetime.fromisoformat(decision["timestamp"].replace("Z", "+00:00"))
             <= end_time
         ]
 
@@ -539,9 +489,7 @@ class AccessDecisionAuditor:
 
         # Look for suspicious patterns
         for user_id, decisions in user_decisions.items():
-            denied_decisions = [
-                d for d in decisions if d.get("decision") == "deny"
-            ]
+            denied_decisions = [d for d in decisions if d.get("decision") == "deny"]
 
             # High number of denied access attempts
             if len(denied_decisions) > 10:
@@ -559,9 +507,7 @@ class AccessDecisionAuditor:
 
             # Permission escalation attempts
             escalation_attempts = [
-                d
-                for d in decisions
-                if d.get("event_type") == "permission_escalation"
+                d for d in decisions if d.get("event_type") == "permission_escalation"
             ]
             if escalation_attempts:
                 incidents.append(
@@ -580,8 +526,7 @@ class AccessDecisionAuditor:
             sensitive_access = [
                 d
                 for d in decisions
-                if d.get("metadata", {}).get("sensitivity_level")
-                in ["confidential", "restricted"]
+                if d.get("metadata", {}).get("sensitivity_level") in ["confidential", "restricted"]
             ]
             if sensitive_access:
                 incidents.append(
@@ -605,9 +550,7 @@ class AccessDecisionAuditor:
             if severity_order.index(incident["severity"]) >= threshold_index
         ]
 
-        return sorted(
-            filtered_incidents, key=lambda x: x["timestamp"], reverse=True
-        )
+        return sorted(filtered_incidents, key=lambda x: x["timestamp"], reverse=True)
 
     def generate_audit_report(
         self,
@@ -625,23 +568,15 @@ class AccessDecisionAuditor:
             decision
             for decision in self.decision_log
             if start_time
-            <= datetime.fromisoformat(
-                decision["timestamp"].replace("Z", "+00:00")
-            )
+            <= datetime.fromisoformat(decision["timestamp"].replace("Z", "+00:00"))
             <= end_time
         ]
 
         total_decisions = len(time_filtered_decisions)
         allowed_decisions = len(
-            [
-                d
-                for d in time_filtered_decisions
-                if d.get("decision") == "allow"
-            ]
+            [d for d in time_filtered_decisions if d.get("decision") == "allow"]
         )
-        denied_decisions = len(
-            [d for d in time_filtered_decisions if d.get("decision") == "deny"]
-        )
+        denied_decisions = len([d for d in time_filtered_decisions if d.get("decision") == "deny"])
 
         # Decision type breakdown
         decision_types = {}
@@ -695,9 +630,7 @@ class AccessDecisionAuditor:
                     resource_access[resource_type]["denied"] += 1
 
         # Get security incidents
-        incidents = self.get_security_incidents(
-            start_time=start_time, end_time=end_time
-        )
+        incidents = self.get_security_incidents(start_time=start_time, end_time=end_time)
 
         return {
             "report_metadata": {
@@ -713,9 +646,7 @@ class AccessDecisionAuditor:
                 "allowed_decisions": allowed_decisions,
                 "denied_decisions": denied_decisions,
                 "success_rate": (
-                    (allowed_decisions / total_decisions * 100)
-                    if total_decisions > 0
-                    else 0
+                    (allowed_decisions / total_decisions * 100) if total_decisions > 0 else 0
                 ),
                 "active_users": len(user_activity),
                 "accessed_resource_types": len(resource_access),
@@ -741,37 +672,28 @@ class AccessDecisionAuditor:
 
     async def cleanup_old_logs(self, retention_days: int = 30) -> int:
         """Clean up old log entries."""
-        cutoff_date = datetime.now(timezone.utc) - timedelta(
-            days=retention_days
-        )
+        cutoff_date = datetime.now(timezone.utc) - timedelta(days=retention_days)
 
         # Clean decision log
         initial_count = len(self.decision_log)
         self.decision_log = [
             decision
             for decision in self.decision_log
-            if datetime.fromisoformat(
-                decision["timestamp"].replace("Z", "+00:00")
-            )
-            > cutoff_date
+            if datetime.fromisoformat(decision["timestamp"].replace("Z", "+00:00")) > cutoff_date
         ]
 
         # Clean session log
         expired_sessions = [
             session_id
             for session_id, session_data in self.session_log.items()
-            if datetime.fromisoformat(
-                session_data["started_at"].replace("Z", "+00:00")
-            )
+            if datetime.fromisoformat(session_data["started_at"].replace("Z", "+00:00"))
             < cutoff_date
         ]
 
         for session_id in expired_sessions:
             del self.session_log[session_id]
 
-        cleaned_count = (
-            initial_count - len(self.decision_log) + len(expired_sessions)
-        )
+        cleaned_count = initial_count - len(self.decision_log) + len(expired_sessions)
 
         if cleaned_count > 0:
             logger.info(f"Cleaned up {cleaned_count} old audit log entries")

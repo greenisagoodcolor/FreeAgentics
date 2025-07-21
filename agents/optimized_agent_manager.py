@@ -20,13 +20,10 @@ import queue
 import threading
 import time
 from collections import defaultdict, deque
-from concurrent.futures import ThreadPoolExecutor, as_completed
-from contextlib import contextmanager
 from dataclasses import dataclass, field
-from typing import Any, Callable, Dict, List, Optional, Tuple, Union
+from typing import Any, Callable, Dict, List, Optional, Union
 
 import numpy as np
-import psutil
 
 from observability.performance_monitor import get_performance_monitor
 
@@ -125,9 +122,7 @@ class AdaptiveThreadPool:
         self.config = config
         self.num_workers = self._calculate_optimal_workers()
         self.workers: List[threading.Thread] = []
-        self.work_queues = [
-            WorkStealingQueue() for _ in range(self.num_workers)
-        ]
+        self.work_queues = [WorkStealingQueue() for _ in range(self.num_workers)]
         self.shutdown_event = threading.Event()
         self.performance_monitor = get_performance_monitor()
 
@@ -142,9 +137,7 @@ class AdaptiveThreadPool:
         self.stolen_tasks = 0
 
         self._start_workers()
-        logger.info(
-            f"Adaptive thread pool initialized with {self.num_workers} workers"
-        )
+        logger.info(f"Adaptive thread pool initialized with {self.num_workers} workers")
 
     def _calculate_optimal_workers(self) -> int:
         """Calculate optimal number of workers based on CPU topology."""
@@ -153,9 +146,7 @@ class AdaptiveThreadPool:
 
         # Get CPU topology
         cpu_count = mp.cpu_count()
-        physical_cores = (
-            cpu_count // 2 if hasattr(os, "sched_getaffinity") else cpu_count
-        )
+        physical_cores = cpu_count // 2 if hasattr(os, "sched_getaffinity") else cpu_count
 
         # Detect workload type for initial sizing
         if self.workload_type == "io_bound":
@@ -246,8 +237,7 @@ class AdaptiveThreadPool:
         # Check if we should resize
         current_time = time.time()
         if (
-            new_workload != self.workload_type
-            and current_time - self.last_resize_time > 30
+            new_workload != self.workload_type and current_time - self.last_resize_time > 30
         ):  # Resize at most every 30s
             self.workload_type = new_workload
             self._resize_pool()
@@ -300,14 +290,9 @@ class AdaptiveThreadPool:
             "stolen_tasks": self.stolen_tasks,
             "queue_sizes": queue_sizes,
             "avg_queue_size": sum(queue_sizes) / len(queue_sizes),
-            "steal_efficiency": (
-                self.stolen_tasks / max(self.completed_tasks, 1)
-            )
-            * 100,
+            "steal_efficiency": (self.stolen_tasks / max(self.completed_tasks, 1)) * 100,
             "avg_task_time_ms": (
-                (sum(self.task_times) / len(self.task_times)) * 1000
-                if self.task_times
-                else 0
+                (sum(self.task_times) / len(self.task_times)) * 1000 if self.task_times else 0
             ),
         }
 
@@ -401,9 +386,7 @@ class MemoryPool:
         """
         self.pool_size = pool_size
         self.state_size = state_size
-        self.available: queue.Queue[np.ndarray] = queue.Queue(
-            maxsize=pool_size
-        )
+        self.available: queue.Queue[np.ndarray] = queue.Queue(maxsize=pool_size)
         self.in_use: set[int] = set()
         self.lock = threading.Lock()
 
@@ -464,9 +447,7 @@ class OptimizedAgentManager:
         # Core components
         self.agent_registry = LockFreeAgentRegistry()
         self.thread_pool = AdaptiveThreadPool(self.config)
-        self.memory_pool = (
-            MemoryPool() if self.config.memory_pooling_enabled else None
-        )
+        self.memory_pool = MemoryPool() if self.config.memory_pooling_enabled else None
 
         # Batching system
         self.batch_queue: queue.Queue[AgentBatch] = queue.Queue()
@@ -495,9 +476,7 @@ class OptimizedAgentManager:
         # Start batch processor
         self._start_batch_processor()
 
-        logger.info(
-            "OptimizedAgentManager initialized with advanced optimizations"
-        )
+        logger.info("OptimizedAgentManager initialized with advanced optimizations")
 
     def _initialize_async_io(self):
         """Initialize async I/O components."""
@@ -536,9 +515,7 @@ class OptimizedAgentManager:
                     item = None
 
                 current_time = time.time()
-                batch_age = (
-                    current_time - last_batch_time
-                ) * 1000  # Convert to ms
+                batch_age = (current_time - last_batch_time) * 1000  # Convert to ms
 
                 # Process batch if it's full or timed out
                 if len(current_batch) >= self.config.batch_size or (
@@ -582,13 +559,10 @@ class OptimizedAgentManager:
         with self.stats_lock:
             self.stats["batches_processed"] += 1
             self.stats["avg_batch_size"] = (
-                self.stats["avg_batch_size"]
-                * (self.stats["batches_processed"] - 1)
-                + len(batch)
+                self.stats["avg_batch_size"] * (self.stats["batches_processed"] - 1) + len(batch)
             ) / self.stats["batches_processed"]
             self.stats["avg_processing_time_ms"] = (
-                self.stats["avg_processing_time_ms"]
-                * (self.stats["batches_processed"] - 1)
+                self.stats["avg_processing_time_ms"] * (self.stats["batches_processed"] - 1)
                 + elapsed_ms
             ) / self.stats["batches_processed"]
 
@@ -677,9 +651,7 @@ class OptimizedAgentManager:
         """Unregister an agent."""
         success = self.agent_registry.remove(agent_id)
         if success:
-            self.performance_monitor.update_agent_count(
-                self.agent_registry.size()
-            )
+            self.performance_monitor.update_agent_count(self.agent_registry.size())
             logger.debug(f"Unregistered agent {agent_id}")
         return success
 
@@ -738,9 +710,7 @@ class OptimizedAgentManager:
                     "shards": len(self.agent_registry.shards),
                 },
                 "batch_queue_size": self.batch_queue.qsize(),
-                "memory_pool": self.memory_pool.get_stats()
-                if self.memory_pool
-                else None,
+                "memory_pool": (self.memory_pool.get_stats() if self.memory_pool else None),
             }
         )
 
@@ -832,10 +802,7 @@ def benchmark_optimized_manager():
         print(f"Created {num_agents} agents")
 
         # Benchmark batch processing
-        observations = {
-            f"agent_{i}": {"data": np.random.rand(10)}
-            for i in range(num_agents)
-        }
+        observations = {f"agent_{i}": {"data": np.random.rand(10)} for i in range(num_agents)}
 
         # Warm up
         for _ in range(5):
@@ -867,9 +834,7 @@ def benchmark_optimized_manager():
         print("\nStatistics:")
         print(f"  Batches processed: {stats['batches_processed']}")
         print(f"  Average batch size: {stats['avg_batch_size']:.1f}")
-        print(
-            f"  Average processing time: {stats['avg_processing_time_ms']:.2f}ms"
-        )
+        print(f"  Average processing time: {stats['avg_processing_time_ms']:.2f}ms")
         print(f"  Thread pool stats: {stats['thread_pool']}")
 
     finally:

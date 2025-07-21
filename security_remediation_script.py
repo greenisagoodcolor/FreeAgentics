@@ -4,18 +4,15 @@ Security Remediation Script for FreeAgentics
 Addresses critical security issues identified by SECURITY-PALADIN
 """
 
-import os
 import re
-import sys
 from pathlib import Path
-from typing import List, Tuple
 
 # Color codes for output
-RED = '\033[91m'
-GREEN = '\033[92m'
-YELLOW = '\033[93m'
-BLUE = '\033[94m'
-RESET = '\033[0m'
+RED = "\033[91m"
+GREEN = "\033[92m"
+YELLOW = "\033[93m"
+BLUE = "\033[94m"
+RESET = "\033[0m"
 
 
 def print_header(message: str):
@@ -43,46 +40,44 @@ def print_error(message: str):
 def fix_jwt_verification():
     """Fix JWT verification issues by removing verify=False."""
     print_header("Fixing JWT Verification Issues")
-    
+
     files_to_fix = [
         ("auth/jwt_handler.py", 468),
         ("auth/security_implementation.py", 490),
-        ("auth/security_implementation.py", 810)
+        ("auth/security_implementation.py", 810),
     ]
-    
+
     for filepath, line_num in files_to_fix:
         try:
             path = Path(filepath)
             if not path.exists():
                 print_warning(f"File not found: {filepath}")
                 continue
-                
+
             content = path.read_text()
-            
+
             # Replace jwt.decode with verify=False
-            pattern = r'jwt\.decode\([^)]+verify\s*=\s*False[^)]*\)'
+            pattern = r"jwt\.decode\([^)]+verify\s*=\s*False[^)]*\)"
             matches = list(re.finditer(pattern, content))
-            
+
             if matches:
                 # Replace verify=False with proper verification
                 new_content = re.sub(
-                    r'(jwt\.decode\([^,]+,[^,]+)(,\s*verify\s*=\s*False)([^)]*\))',
-                    r'\1\3',
-                    content
+                    r"(jwt\.decode\([^,]+,[^,]+)(,\s*verify\s*=\s*False)([^)]*\))", r"\1\3", content
                 )
-                
+
                 # Also ensure options are properly set
                 new_content = re.sub(
-                    r'(jwt\.decode\([^)]+)\)',
+                    r"(jwt\.decode\([^)]+)\)",
                     r'\1, options={"verify_signature": True})',
-                    new_content
+                    new_content,
                 )
-                
+
                 path.write_text(new_content)
                 print_success(f"Fixed JWT verification in {filepath}")
             else:
                 print_warning(f"No verify=False found in {filepath}")
-                
+
         except Exception as e:
             print_error(f"Error fixing {filepath}: {e}")
 
@@ -90,7 +85,7 @@ def fix_jwt_verification():
 def add_password_validation():
     """Add comprehensive password validation."""
     print_header("Adding Password Validation")
-    
+
     password_validator_code = '''
 import re
 from typing import List, Tuple
@@ -158,13 +153,13 @@ class PasswordValidator:
                 
         return False
 '''
-    
+
     try:
         # Create password validator file
         validator_path = Path("auth/password_validator.py")
         validator_path.write_text(password_validator_code)
         print_success("Created password_validator.py")
-        
+
         # Update auth module to use password validator
         auth_init_path = Path("auth/__init__.py")
         if auth_init_path.exists():
@@ -173,7 +168,7 @@ class PasswordValidator:
                 content += "\nfrom .password_validator import PasswordValidator\n"
                 auth_init_path.write_text(content)
                 print_success("Updated auth/__init__.py to include PasswordValidator")
-                
+
     except Exception as e:
         print_error(f"Error creating password validator: {e}")
 
@@ -181,27 +176,29 @@ class PasswordValidator:
 def secure_jwt_keys():
     """Move JWT keys to environment variables."""
     print_header("Securing JWT Keys")
-    
+
     # Check if private key exists
     private_key_path = Path("auth/keys/jwt_private.pem")
-    public_key_path = Path("auth/keys/jwt_public.pem")
-    
+    Path("auth/keys/jwt_public.pem")
+
     if private_key_path.exists():
         print_warning("CRITICAL: Private key found in repository!")
         print_warning("Action required: Remove this file and rotate keys immediately")
-        
+
         # Create .gitignore entry
         gitignore_path = Path(".gitignore")
         try:
             if gitignore_path.exists():
                 content = gitignore_path.read_text()
                 if "auth/keys/" not in content:
-                    content += "\n# JWT Keys - NEVER commit these!\nauth/keys/*.pem\nauth/keys/*.key\n"
+                    content += (
+                        "\n# JWT Keys - NEVER commit these!\nauth/keys/*.pem\nauth/keys/*.key\n"
+                    )
                     gitignore_path.write_text(content)
                     print_success("Added JWT keys to .gitignore")
         except Exception as e:
             print_error(f"Error updating .gitignore: {e}")
-            
+
         # Create key management documentation
         key_mgmt_doc = """# JWT Key Management Guide
 
@@ -247,7 +244,7 @@ JWT private keys have been detected in the repository. This is a critical securi
    export JWT_PUBLIC_KEY="$(cat jwt_public.pem)"
    ```
 """
-        
+
         try:
             key_mgmt_path = Path("auth/JWT_KEY_MANAGEMENT.md")
             key_mgmt_path.write_text(key_mgmt_doc)
@@ -259,7 +256,7 @@ JWT private keys have been detected in the repository. This is a critical securi
 def add_security_headers_middleware():
     """Add comprehensive security headers middleware."""
     print_header("Adding Security Headers Middleware")
-    
+
     security_headers_code = '''
 from fastapi import Request
 from fastapi.responses import Response
@@ -300,18 +297,18 @@ class SecurityHeadersMiddleware:
         
         return response
 '''
-    
+
     try:
         # Create security headers middleware
         headers_path = Path("api/middleware/comprehensive_security_headers.py")
         headers_path.parent.mkdir(exist_ok=True)
         headers_path.write_text(security_headers_code)
         print_success("Created comprehensive security headers middleware")
-        
+
         # Add integration note
         print_warning("Remember to add this middleware to your FastAPI app:")
         print("    app.add_middleware(SecurityHeadersMiddleware)")
-        
+
     except Exception as e:
         print_error(f"Error creating security headers middleware: {e}")
 
@@ -319,7 +316,7 @@ class SecurityHeadersMiddleware:
 def create_security_checklist():
     """Create a security checklist for ongoing maintenance."""
     print_header("Creating Security Checklist")
-    
+
     checklist = """# Security Checklist for FreeAgentics
 
 ## Daily Checks
@@ -359,7 +356,7 @@ def create_security_checklist():
 - Incident Response: [Add contact]
 - External Security Team: [Add contact]
 """
-    
+
     try:
         checklist_path = Path("SECURITY_CHECKLIST.md")
         checklist_path.write_text(checklist)
@@ -372,14 +369,14 @@ def main():
     """Run all security remediation tasks."""
     print_header("FreeAgentics Security Remediation Script")
     print("This script addresses critical security issues identified by SECURITY-PALADIN\n")
-    
+
     # Run remediation tasks
     fix_jwt_verification()
     add_password_validation()
     secure_jwt_keys()
     add_security_headers_middleware()
     create_security_checklist()
-    
+
     print_header("Remediation Summary")
     print_success("Security remediation tasks completed!")
     print_warning("CRITICAL: Remove JWT private keys from repository immediately!")

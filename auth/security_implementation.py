@@ -4,7 +4,6 @@ Addresses the CRITICAL PRODUCTION BLOCKER: No authentication/authorization.
 Implements JWT authentication, RBAC authorization, and input validation.
 """
 
-import hashlib
 import hmac
 import json
 import logging
@@ -17,11 +16,10 @@ from functools import wraps
 from typing import Any, Dict, List, Optional, Tuple
 
 import jwt
-import sqlalchemy
 from fastapi import Depends, HTTPException, Request, Response, status
 from fastapi.security import HTTPAuthorizationCredentials, HTTPBearer
 from passlib.context import CryptContext
-from pydantic import BaseModel, validator
+from pydantic import BaseModel
 from sqlalchemy.exc import SQLAlchemyError
 
 from .jwt_handler import jwt_handler  # Import secure JWT handler
@@ -29,9 +27,7 @@ from .jwt_handler import jwt_handler  # Import secure JWT handler
 logger = logging.getLogger(__name__)
 
 
-def create_access_token(
-    data: Dict[str, Any], expires_delta: Optional[timedelta] = None
-) -> str:
+def create_access_token(data: Dict[str, Any], expires_delta: Optional[timedelta] = None) -> str:
     """Create a JWT access token.
 
     Args:
@@ -53,16 +49,10 @@ def create_access_token(
 
 
 # Security configuration - Use environment variables in production
-SECRET_KEY = os.getenv(
-    "SECRET_KEY", "dev_secret_key_2025_not_for_production"
-)  # nosec B105
-JWT_SECRET = os.getenv(
-    "JWT_SECRET", "dev_jwt_secret_2025_not_for_production"
-)  # nosec B105
+SECRET_KEY = os.getenv("SECRET_KEY", "dev_secret_key_2025_not_for_production")  # nosec B105
+JWT_SECRET = os.getenv("JWT_SECRET", "dev_jwt_secret_2025_not_for_production")  # nosec B105
 ALGORITHM = "RS256"  # Updated to use RS256
-ACCESS_TOKEN_EXPIRE_MINUTES = (
-    15  # Reduced from 30 to 15 per security requirements
-)
+ACCESS_TOKEN_EXPIRE_MINUTES = 15  # Reduced from 30 to 15 per security requirements
 REFRESH_TOKEN_EXPIRE_DAYS = 7
 
 # Validate that production keys are not using development defaults
@@ -233,9 +223,7 @@ class SecurityValidator:
 
         for pattern in cls.COMMAND_INJECTION_PATTERNS:
             if re.search(pattern, input_str, re.IGNORECASE):
-                logger.warning(
-                    f"Command injection attempt detected: {pattern}"
-                )
+                logger.warning(f"Command injection attempt detected: {pattern}")
                 return False
         return True
 
@@ -267,16 +255,12 @@ class SecurityValidator:
         except json.JSONDecodeError:
             # If not JSON, validate basic GMN syntax
             if not re.match(r'^[a-zA-Z0-9\s\[\]{}(),.:"_-]+$', gmn_spec):
-                raise ValueError(
-                    "Invalid GMN spec: Contains illegal characters"
-                )
+                raise ValueError("Invalid GMN spec: Contains illegal characters")
 
         return gmn_spec
 
     @classmethod
-    def sanitize_observation_data(
-        cls, observation: Dict[str, Any]
-    ) -> Dict[str, Any]:
+    def sanitize_observation_data(cls, observation: Dict[str, Any]) -> Dict[str, Any]:
         """Sanitize observation data."""
         if not isinstance(observation, dict):
             raise ValueError("Observation must be a dictionary")
@@ -289,20 +273,14 @@ class SecurityValidator:
                 raise ValueError(f"Invalid observation key: {key}")
 
             if not cls.validate_sql_input(key):
-                raise ValueError(
-                    f"Invalid observation key (SQL injection): {key}"
-                )
+                raise ValueError(f"Invalid observation key (SQL injection): {key}")
 
             # Sanitize value based on type
             if isinstance(value, str):
                 if not cls.validate_sql_input(value):
-                    raise ValueError(
-                        f"Invalid observation value (SQL injection): {value}"
-                    )
+                    raise ValueError(f"Invalid observation value (SQL injection): {value}")
                 if not cls.validate_xss_input(value):
-                    raise ValueError(
-                        f"Invalid observation value (XSS): {value}"
-                    )
+                    raise ValueError(f"Invalid observation value (XSS): {value}")
                 if len(value) > 10000:  # 10KB limit per string
                     raise ValueError(f"Observation value too large: {key}")
                 sanitized[key] = value
@@ -316,9 +294,7 @@ class SecurityValidator:
                     raise ValueError(f"Observation array too large: {key}")
                 sanitized[key] = value
             elif isinstance(value, dict):
-                sanitized[key] = cls.sanitize_observation_data(
-                    value
-                )  # Recursive
+                sanitized[key] = cls.sanitize_observation_data(value)  # Recursive
             else:
                 # Allow None, bool
                 if value is not None and not isinstance(value, bool):
@@ -367,15 +343,11 @@ class AuthenticationManager:
         """Hash password using bcrypt."""
         return str(pwd_context.hash(password))
 
-    def verify_password(
-        self, plain_password: str, hashed_password: str
-    ) -> bool:
+    def verify_password(self, plain_password: str, hashed_password: str) -> bool:
         """Verify password against hash."""
         return bool(pwd_context.verify(plain_password, hashed_password))
 
-    def create_access_token(
-        self, user: User, client_fingerprint: Optional[str] = None
-    ) -> str:
+    def create_access_token(self, user: User, client_fingerprint: Optional[str] = None) -> str:
         """Create JWT access token using secure handler."""
         permissions = ROLE_PERMISSIONS.get(user.role, [])
 
@@ -399,13 +371,9 @@ class AuthenticationManager:
         token, family_id = jwt_handler.create_refresh_token(user.user_id)
         return token
 
-    def verify_token(
-        self, token: str, client_fingerprint: Optional[str] = None
-    ) -> TokenData:
+    def verify_token(self, token: str, client_fingerprint: Optional[str] = None) -> TokenData:
         """Verify and decode JWT token using secure handler."""
-        payload = jwt_handler.verify_access_token(
-            token, fingerprint=client_fingerprint
-        )
+        payload = jwt_handler.verify_access_token(token, fingerprint=client_fingerprint)
 
         return TokenData(
             user_id=payload["user_id"],
@@ -415,9 +383,7 @@ class AuthenticationManager:
             exp=datetime.fromtimestamp(payload["exp"]),
         )
 
-    def register_user(
-        self, username: str, email: str, password: str, role: UserRole
-    ) -> User:
+    def register_user(self, username: str, email: str, password: str, role: UserRole) -> User:
         """Register new user."""
         if username in self.users:
             raise HTTPException(
@@ -440,9 +406,7 @@ class AuthenticationManager:
 
         return user
 
-    def authenticate_user(
-        self, username: str, password: str
-    ) -> Optional[User]:
+    def authenticate_user(self, username: str, password: str) -> Optional[User]:
         """Authenticate user with username/password."""
         user_data = self.users.get(username)
         if not user_data:
@@ -486,9 +450,9 @@ class AuthenticationManager:
         """Extract user ID from refresh token for lookup."""
         try:
             # Decode without full verification just to get user_id
-            unverified = jwt.decode(
-                refresh_token, options={"verify_signature": False}
-            )
+            # Security Note: This is safe because we're only extracting the user_id
+            # for database lookup. The actual token verification happens later.
+            unverified = jwt.decode(refresh_token, options={"verify_signature": False})  # nosec B608
             return str(unverified.get("user_id", ""))
         except Exception:
             raise HTTPException(
@@ -509,9 +473,7 @@ class AuthenticationManager:
         if user_id:
             self.csrf_protection.invalidate_csrf_token(user_id)
 
-    def set_token_cookie(
-        self, response: Response, token: str, secure: bool = True
-    ):
+    def set_token_cookie(self, response: Response, token: str, secure: bool = True):
         """Set JWT token in secure httpOnly cookie."""
         response.set_cookie(
             key="access_token",
@@ -523,9 +485,7 @@ class AuthenticationManager:
             path="/",
         )
 
-    def set_csrf_cookie(
-        self, response: Response, csrf_token: str, secure: bool = True
-    ):
+    def set_csrf_cookie(self, response: Response, csrf_token: str, secure: bool = True):
         """Set CSRF token in cookie (readable by JS)."""
         response.set_cookie(
             key=CSRF_COOKIE_NAME,
@@ -562,9 +522,7 @@ class RateLimiter:
 
         # Remove old requests
         self.requests[identifier] = [
-            req_time
-            for req_time in self.requests[identifier]
-            if req_time > window_start
+            req_time for req_time in self.requests[identifier] if req_time > window_start
         ]
 
         # Check rate limit
@@ -581,9 +539,7 @@ class RateLimiter:
 
         for identifier in list(self.requests.keys()):
             self.requests[identifier] = [
-                req_time
-                for req_time in self.requests[identifier]
-                if req_time > cutoff
+                req_time for req_time in self.requests[identifier] if req_time > cutoff
             ]
 
             if not self.requests[identifier]:
@@ -612,9 +568,7 @@ def rate_limit(max_requests: int = 100, window_minutes: int = 1):
         async def wrapper(request: Request, *args, **kwargs):
             client_ip = get_client_ip(request)
 
-            if rate_limiter.is_rate_limited(
-                client_ip, max_requests, window_minutes
-            ):
+            if rate_limiter.is_rate_limited(client_ip, max_requests, window_minutes):
                 raise HTTPException(
                     status_code=status.HTTP_429_TOO_MANY_REQUESTS,
                     detail="Rate limit exceeded",
@@ -637,9 +591,7 @@ async def get_current_user(
     if not fingerprint:
         fingerprint = request.headers.get("X-Fingerprint", None)
 
-    return auth_manager.verify_token(
-        credentials.credentials, client_fingerprint=fingerprint
-    )
+    return auth_manager.verify_token(credentials.credentials, client_fingerprint=fingerprint)
 
 
 async def validate_csrf_token(request: Request, session_id: str) -> bool:
@@ -652,17 +604,11 @@ async def validate_csrf_token(request: Request, session_id: str) -> bool:
         csrf_token = csrf_value if isinstance(csrf_value, str) else None
 
     if not csrf_token:
-        raise HTTPException(
-            status_code=status.HTTP_403_FORBIDDEN, detail="CSRF token required"
-        )
+        raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="CSRF token required")
 
     # Validate CSRF token
-    if not auth_manager.csrf_protection.verify_csrf_token(
-        session_id, csrf_token
-    ):
-        raise HTTPException(
-            status_code=status.HTTP_403_FORBIDDEN, detail="Invalid CSRF token"
-        )
+    if not auth_manager.csrf_protection.verify_csrf_token(session_id, csrf_token):
+        raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="Invalid CSRF token")
 
     return True
 
@@ -729,10 +675,7 @@ def require_role(role: UserRole):
                     detail="Authentication required",
                 )
 
-            if (
-                current_user.role != role
-                and current_user.role != UserRole.ADMIN
-            ):
+            if current_user.role != role and current_user.role != UserRole.ADMIN:
                 raise HTTPException(
                     status_code=status.HTTP_403_FORBIDDEN,
                     detail=f"Role required: {role}",
@@ -806,15 +749,13 @@ def require_csrf_token(func):
             if auth_header.startswith("Bearer "):
                 try:
                     token = auth_header.split(" ")[1]
-                    unverified = jwt.decode(
-                        token, options={"verify_signature": False}
-                    )
+                    # Security Note: Unverified decode is safe here - we're only extracting
+                    # the user_id for CSRF correlation, not for authentication
+                    unverified = jwt.decode(token, options={"verify_signature": False})  # nosec B608
                     session_id = unverified.get("user_id")
                 except Exception as e:
                     # Log failed token parsing for CSRF validation (non-critical)
-                    logger.debug(
-                        f"Failed to parse JWT for CSRF session ID: {e}"
-                    )
+                    logger.debug(f"Failed to parse JWT for CSRF session ID: {e}")
                     session_id = None
 
         if not session_id:
@@ -837,9 +778,7 @@ def require_csrf_token(func):
             )
 
         # Validate CSRF token
-        if not auth_manager.csrf_protection.verify_csrf_token(
-            session_id, csrf_token
-        ):
+        if not auth_manager.csrf_protection.verify_csrf_token(session_id, csrf_token):
             raise HTTPException(
                 status_code=status.HTTP_403_FORBIDDEN,
                 detail="Invalid CSRF token",

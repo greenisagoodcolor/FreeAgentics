@@ -22,16 +22,13 @@ import os
 import pickle  # nosec B403 - Required for agent state serialization, only used with trusted data
 import tempfile
 import threading
-import weakref
 from collections import defaultdict
 from contextlib import contextmanager
 from dataclasses import dataclass
-from typing import Any, Callable, Dict, List, Optional, Set, Tuple, Union
+from typing import Any, Callable, Dict, List, Optional, Tuple
 
 import numpy as np
-from scipy import sparse
 
-from .belief_compression import BeliefCompressor
 from .efficient_structures import LazyBeliefArray
 from .gc_tuning import get_gc_tuner
 from .lifecycle_manager import AgentMemoryProfile
@@ -73,17 +70,13 @@ class OptimizedAgentMemory:
         if self._beliefs is not None:
             if hasattr(self._beliefs, "memory_usage"):
                 # Use LazyBeliefArray's memory_usage method which returns MB
-                return self._beliefs.memory_usage() + (
-                    total_bytes / (1024 * 1024)
-                )
+                return self._beliefs.memory_usage() + (total_bytes / (1024 * 1024))
             elif hasattr(self._beliefs, "sparse"):
                 sparse_beliefs = self._beliefs.sparse
                 total_bytes += sparse_beliefs.data.nbytes
                 total_bytes += sparse_beliefs.indices.nbytes
                 total_bytes += (
-                    sparse_beliefs.indptr.nbytes
-                    if hasattr(sparse_beliefs, "indptr")
-                    else 0
+                    sparse_beliefs.indptr.nbytes if hasattr(sparse_beliefs, "indptr") else 0
                 )
             elif (
                 hasattr(self._beliefs, "_sparse_representation")
@@ -93,9 +86,7 @@ class OptimizedAgentMemory:
                 total_bytes += sparse_beliefs.data.nbytes
                 total_bytes += sparse_beliefs.indices.nbytes
                 total_bytes += (
-                    sparse_beliefs.indptr.nbytes
-                    if hasattr(sparse_beliefs, "indptr")
-                    else 0
+                    sparse_beliefs.indptr.nbytes if hasattr(sparse_beliefs, "indptr") else 0
                 )
             else:
                 # Use small placeholder size since we optimize away the full dense array
@@ -150,9 +141,7 @@ class SharedAgentParameters:
                     if initializer:
                         self._transition_matrices[key] = initializer(shape)
                     else:
-                        self._transition_matrices[key] = (
-                            np.ones(shape) / shape[-1]
-                        )
+                        self._transition_matrices[key] = np.ones(shape) / shape[-1]
                 return self._transition_matrices[key]
 
             elif matrix_type == "observation":
@@ -218,9 +207,7 @@ class SharedObservationBuffer:
         self.mmap = mmap.mmap(self.mmap_file.fileno(), self.buffer_size)
 
         # Allocation tracking
-        self._allocations: Dict[
-            str, Tuple[int, int]
-        ] = {}  # agent_id -> (offset, size)
+        self._allocations: Dict[str, Tuple[int, int]] = {}  # agent_id -> (offset, size)
         self._free_list: List[Tuple[int, int]] = [(0, self.buffer_size)]
         self._lock = threading.RLock()
 
@@ -251,9 +238,7 @@ class SharedObservationBuffer:
 
                     return offset
 
-            raise MemoryError(
-                f"Cannot allocate {size} bytes for agent {agent_id}"
-            )
+            raise MemoryError(f"Cannot allocate {size} bytes for agent {agent_id}")
 
     def deallocate(self, agent_id: str):
         """Deallocate an agent's observation space.
@@ -298,16 +283,11 @@ class SharedObservationBuffer:
 
         # Write shape and data
         shape_json = json.dumps(observation.shape)
-        shape_bytes = shape_json.encode('utf-8')
+        shape_bytes = shape_json.encode("utf-8")
         self.mmap[offset : offset + 4] = len(shape_bytes).to_bytes(4, "little")
         self.mmap[offset + 4 : offset + 4 + len(shape_bytes)] = shape_bytes
         self.mmap[
-            offset
-            + 4
-            + len(shape_bytes) : offset
-            + 4
-            + len(shape_bytes)
-            + observation.nbytes
+            offset + 4 + len(shape_bytes) : offset + 4 + len(shape_bytes) + observation.nbytes
         ] = observation.tobytes()
 
     def read_observation(self, agent_id: str) -> Optional[np.ndarray]:
@@ -326,9 +306,7 @@ class SharedObservationBuffer:
 
         # Read shape
         shape_len = int.from_bytes(self.mmap[offset : offset + 4], "little")
-        shape_json = self.mmap[offset + 4 : offset + 4 + shape_len].decode(
-            'utf-8'
-        )
+        shape_json = self.mmap[offset + 4 : offset + 4 + shape_len].decode("utf-8")
         shape = tuple(json.loads(shape_json))
 
         # Read data
@@ -413,9 +391,7 @@ class CompressedHistory:
         count = min(n, self._count)
 
         for i in range(count):
-            idx = (self._start_idx + self._count - count + i) % len(
-                self._buffer
-            )
+            idx = (self._start_idx + self._count - count + i) % len(self._buffer)
             compressed = self._buffer[idx]
             data = zlib.decompress(compressed)
             # Note: This pickle usage is safe as we only unpickle data we created
@@ -440,9 +416,7 @@ class SharedComputationPool:
 
     def __init__(self):
         """Initialize shared computation pool."""
-        self._pools: Dict[
-            Tuple[Tuple[int, ...], type], List[np.ndarray]
-        ] = defaultdict(list)
+        self._pools: Dict[Tuple[Tuple[int, ...], type], List[np.ndarray]] = defaultdict(list)
         self._lock = threading.RLock()
         self.matrix_pool = get_global_pool()
 
@@ -512,8 +486,7 @@ class AgentMemoryOptimizer:
         self.gc_tuner = get_gc_tuner()
 
         logger.info(
-            f"Initialized agent memory optimizer "
-            f"(target: {target_memory_per_agent_mb}MB/agent)"
+            f"Initialized agent memory optimizer " f"(target: {target_memory_per_agent_mb}MB/agent)"
         )
 
     def optimize_agent(self, agent: Any) -> OptimizedAgentMemory:
@@ -531,9 +504,7 @@ class AgentMemoryOptimizer:
             # Create optimized memory structure
             opt_memory = OptimizedAgentMemory(
                 agent_id=agent_id,
-                position=np.array(
-                    getattr(agent, "position", [0, 0]), dtype=np.float32
-                ),
+                position=np.array(getattr(agent, "position", [0, 0]), dtype=np.float32),
                 active=getattr(agent, "active", True),
             )
 
@@ -544,9 +515,7 @@ class AgentMemoryOptimizer:
                     # Create lazy belief array
                     opt_memory._beliefs = LazyBeliefArray(
                         shape=beliefs_array.shape,
-                        dtype=np.dtype(
-                            np.float32
-                        ),  # Force float32 to reduce memory
+                        dtype=np.dtype(np.float32),  # Force float32 to reduce memory
                         sparsity_threshold=0.9,
                     )
                     # Only load non-zero values
@@ -568,9 +537,7 @@ class AgentMemoryOptimizer:
             if self.enable_compression and hasattr(agent, "action_history"):
                 history = getattr(agent, "action_history", [])
                 if history:
-                    opt_memory._action_history = CompressedHistory(
-                        max_size=100
-                    )
+                    opt_memory._action_history = CompressedHistory(max_size=100)
                     for item in history[-100:]:  # Keep last 100
                         opt_memory._action_history.append(item)
 
@@ -610,10 +577,7 @@ class AgentMemoryOptimizer:
 
             # Log optimization results
             memory_usage = opt_memory.get_memory_usage_mb()
-            logger.info(
-                f"Optimized agent {agent_id}: "
-                f"memory reduced to {memory_usage:.1f}MB"
-            )
+            logger.info(f"Optimized agent {agent_id}: " f"memory reduced to {memory_usage:.1f}MB")
 
             return opt_memory
 
@@ -628,9 +592,7 @@ class AgentMemoryOptimizer:
             if total_agents == 0:
                 return {"error": "No agents optimized"}
 
-            memory_per_agent = [
-                agent.get_memory_usage_mb() for agent in self._agents.values()
-            ]
+            memory_per_agent = [agent.get_memory_usage_mb() for agent in self._agents.values()]
 
             # Calculate shared parameters count
             shared_params_count = (
@@ -654,8 +616,7 @@ class AgentMemoryOptimizer:
                 },
                 "shared_resources": {
                     "parameters": shared_params_count,
-                    "observation_buffer_mb": self.observation_buffer.buffer_size
-                    / (1024 * 1024),
+                    "observation_buffer_mb": self.observation_buffer.buffer_size / (1024 * 1024),
                 },
             }
 

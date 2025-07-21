@@ -7,135 +7,116 @@ Creates visual representations of the unified pipeline
 import argparse
 import json
 from pathlib import Path
-from typing import Dict, List, Any
+
 
 # Color codes for output
 class Colors:
-    GREEN = '\033[92m'
-    RED = '\033[91m'
-    YELLOW = '\033[93m'
-    BLUE = '\033[94m'
-    CYAN = '\033[96m'
-    BOLD = '\033[1m'
-    RESET = '\033[0m'
+    GREEN = "\033[92m"
+    RED = "\033[91m"
+    YELLOW = "\033[93m"
+    BLUE = "\033[94m"
+    CYAN = "\033[96m"
+    BOLD = "\033[1m"
+    RESET = "\033[0m"
+
 
 class PipelineGraphGenerator:
     """Generates visual pipeline graphs in various formats."""
-    
+
     def __init__(self):
         self.pipeline_stages = [
             {
-                'id': 'commit',
-                'name': '💻 Commit',
-                'type': 'trigger',
-                'description': 'Developer commits code'
+                "id": "commit",
+                "name": "💻 Commit",
+                "type": "trigger",
+                "description": "Developer commits code",
             },
             {
-                'id': 'pre_flight',
-                'name': '🔍 Pre-flight Checks',
-                'type': 'validation',
-                'description': 'Fast feedback - code quality and security validation',
-                'timeout': '5 minutes',
-                'substages': [
-                    '🎯 Code Quality Gate',
-                    '🔐 Secret Scanning',
-                    '🛡️ Dependency Security'
-                ]
+                "id": "pre_flight",
+                "name": "🔍 Pre-flight Checks",
+                "type": "validation",
+                "description": "Fast feedback - code quality and security validation",
+                "timeout": "5 minutes",
+                "substages": [
+                    "🎯 Code Quality Gate",
+                    "🔐 Secret Scanning",
+                    "🛡️ Dependency Security",
+                ],
             },
             {
-                'id': 'build',
-                'name': '🏗️ Build & Package',
-                'type': 'build',
-                'description': 'Artifact creation with multi-arch support',
-                'timeout': '15 minutes',
-                'substages': [
-                    '🏗️ Backend Build',
-                    '🎨 Frontend Build',
-                    '📦 Multi-arch Images'
-                ]
+                "id": "build",
+                "name": "🏗️ Build & Package",
+                "type": "build",
+                "description": "Artifact creation with multi-arch support",
+                "timeout": "15 minutes",
+                "substages": ["🏗️ Backend Build", "🎨 Frontend Build", "📦 Multi-arch Images"],
             },
             {
-                'id': 'test',
-                'name': '🧪 Comprehensive Test Suite',
-                'type': 'testing',
-                'description': 'Multi-layered testing with parallel execution',
-                'timeout': '20 minutes',
-                'substages': [
-                    '🧪 Unit Tests',
-                    '🔗 Integration Tests',
-                    '🎨 Frontend Tests'
-                ]
+                "id": "test",
+                "name": "🧪 Comprehensive Test Suite",
+                "type": "testing",
+                "description": "Multi-layered testing with parallel execution",
+                "timeout": "20 minutes",
+                "substages": ["🧪 Unit Tests", "🔗 Integration Tests", "🎨 Frontend Tests"],
             },
             {
-                'id': 'security',
-                'name': '🔒 Security Validation',
-                'type': 'security',
-                'description': 'Comprehensive security testing with zero-tolerance',
-                'timeout': '15 minutes',
-                'substages': [
-                    '🔒 SAST Analysis',
-                    '🐳 Container Security',
-                    '📋 Compliance Check'
-                ]
+                "id": "security",
+                "name": "🔒 Security Validation",
+                "type": "security",
+                "description": "Comprehensive security testing with zero-tolerance",
+                "timeout": "15 minutes",
+                "substages": ["🔒 SAST Analysis", "🐳 Container Security", "📋 Compliance Check"],
             },
             {
-                'id': 'performance',
-                'name': '⚡ Performance Verification',
-                'type': 'performance',
-                'description': 'Performance testing with regression detection',
-                'timeout': '25 minutes',
-                'substages': [
-                    '⚡ Benchmarks',
-                    '📊 Regression Analysis',
-                    '🎯 Baseline Comparison'
-                ]
+                "id": "performance",
+                "name": "⚡ Performance Verification",
+                "type": "performance",
+                "description": "Performance testing with regression detection",
+                "timeout": "25 minutes",
+                "substages": ["⚡ Benchmarks", "📊 Regression Analysis", "🎯 Baseline Comparison"],
             },
             {
-                'id': 'e2e',
-                'name': '🌐 End-to-End Tests',
-                'type': 'integration',
-                'description': 'Full system integration testing',
-                'timeout': '30 minutes',
-                'substages': [
-                    '🌐 E2E Scenarios',
-                    '🧪 Smoke Tests',
-                    '🏥 Health Checks'
-                ]
+                "id": "e2e",
+                "name": "🌐 End-to-End Tests",
+                "type": "integration",
+                "description": "Full system integration testing",
+                "timeout": "30 minutes",
+                "substages": ["🌐 E2E Scenarios", "🧪 Smoke Tests", "🏥 Health Checks"],
             },
             {
-                'id': 'deployment_readiness',
-                'name': '🚀 Deployment Readiness',
-                'type': 'gate',
-                'description': 'Final validation before deployment',
-                'timeout': '8 minutes'
+                "id": "deployment_readiness",
+                "name": "🚀 Deployment Readiness",
+                "type": "gate",
+                "description": "Final validation before deployment",
+                "timeout": "8 minutes",
             },
             {
-                'id': 'deploy_staging',
-                'name': '🎭 Staging Deploy',
-                'type': 'deployment',
-                'description': 'Deploy to staging environment',
-                'timeout': '15 minutes'
+                "id": "deploy_staging",
+                "name": "🎭 Staging Deploy",
+                "type": "deployment",
+                "description": "Deploy to staging environment",
+                "timeout": "15 minutes",
             },
             {
-                'id': 'deploy_production',
-                'name': '🚀 Production Deploy',
-                'type': 'deployment',
-                'description': 'Blue-green deployment to production',
-                'timeout': '20 minutes'
-            }
+                "id": "deploy_production",
+                "name": "🚀 Production Deploy",
+                "type": "deployment",
+                "description": "Blue-green deployment to production",
+                "timeout": "20 minutes",
+            },
         ]
-    
+
     def generate_mermaid_graph(self, detailed: bool = False) -> str:
         """Generate Mermaid flowchart of the pipeline."""
-        
+
         if detailed:
             return self._generate_detailed_mermaid()
         else:
             return self._generate_simple_mermaid()
-    
+
     def _generate_simple_mermaid(self) -> str:
         """Generate simple Mermaid flowchart."""
-        
+
         mermaid = """```mermaid
 graph TD
     A[💻 Commit] --> B[🔍 Pre-flight Checks]
@@ -179,10 +160,10 @@ graph TD
     class O,P,Q successClass
 ```"""
         return mermaid
-    
+
     def _generate_detailed_mermaid(self) -> str:
         """Generate detailed Mermaid flowchart with substages."""
-        
+
         mermaid = """```mermaid
 graph TD
     A[💻 Commit] --> B[🔍 Pre-flight Checks]
@@ -285,10 +266,10 @@ graph TD
     class O,Q successClass
 ```"""
         return mermaid
-    
+
     def generate_ascii_graph(self) -> str:
         """Generate ASCII art representation of the pipeline."""
-        
+
         ascii_graph = """
 ╔══════════════════════════════════════════════════════════════════════════════╗
 ║                        UNIFIED CI/CD PIPELINE ARCHITECTURE                   ║
@@ -403,10 +384,10 @@ graph TD
 ═══════════════════════════════════════════════════════════════════════════════
         """
         return ascii_graph
-    
+
     def generate_json_representation(self) -> str:
         """Generate JSON representation of the pipeline."""
-        
+
         pipeline_json = {
             "pipeline": {
                 "name": "Unified CI/CD Pipeline",
@@ -414,36 +395,36 @@ graph TD
                 "methodology": "Martin Fowler + Jessica Kerr",
                 "principles": [
                     "Zero-Tolerance Quality Gates",
-                    "No Bypass Mechanisms", 
+                    "No Bypass Mechanisms",
                     "Fast Feedback Loops",
                     "Progressive Quality Gates",
-                    "Comprehensive Observability"
+                    "Comprehensive Observability",
                 ],
-                "stages": []
+                "stages": [],
             }
         }
-        
+
         for stage in self.pipeline_stages:
             stage_data = {
-                "id": stage['id'],
-                "name": stage['name'],
-                "type": stage['type'],
-                "description": stage['description']
+                "id": stage["id"],
+                "name": stage["name"],
+                "type": stage["type"],
+                "description": stage["description"],
             }
-            
-            if 'timeout' in stage:
-                stage_data['timeout'] = stage['timeout']
-            
-            if 'substages' in stage:
-                stage_data['substages'] = stage['substages']
-            
+
+            if "timeout" in stage:
+                stage_data["timeout"] = stage["timeout"]
+
+            if "substages" in stage:
+                stage_data["substages"] = stage["substages"]
+
             pipeline_json["pipeline"]["stages"].append(stage_data)
-        
+
         return json.dumps(pipeline_json, indent=2)
-    
+
     def generate_dot_graph(self) -> str:
         """Generate DOT format graph for Graphviz."""
-        
+
         dot = """digraph PipelineArchitecture {
     rankdir=TB;
     node [fontname="Arial", fontsize=10];
@@ -575,39 +556,47 @@ graph TD
 }"""
         return dot
 
+
 def main():
     """Main entry point."""
-    parser = argparse.ArgumentParser(description='Pipeline Graph Generator')
-    parser.add_argument('--format', choices=['mermaid', 'mermaid-detailed', 'ascii', 'json', 'dot'], 
-                        default='mermaid', help='Output format')
-    parser.add_argument('--output', type=str, help='Output file path')
-    parser.add_argument('--detailed', action='store_true', help='Generate detailed graph')
-    
+    parser = argparse.ArgumentParser(description="Pipeline Graph Generator")
+    parser.add_argument(
+        "--format",
+        choices=["mermaid", "mermaid-detailed", "ascii", "json", "dot"],
+        default="mermaid",
+        help="Output format",
+    )
+    parser.add_argument("--output", type=str, help="Output file path")
+    parser.add_argument("--detailed", action="store_true", help="Generate detailed graph")
+
     args = parser.parse_args()
-    
+
     generator = PipelineGraphGenerator()
-    
+
     # Generate graph based on format
-    if args.format == 'mermaid' or args.format == 'mermaid-detailed':
-        graph = generator.generate_mermaid_graph(detailed=args.detailed or args.format == 'mermaid-detailed')
-    elif args.format == 'ascii':
+    if args.format == "mermaid" or args.format == "mermaid-detailed":
+        graph = generator.generate_mermaid_graph(
+            detailed=args.detailed or args.format == "mermaid-detailed"
+        )
+    elif args.format == "ascii":
         graph = generator.generate_ascii_graph()
-    elif args.format == 'json':
+    elif args.format == "json":
         graph = generator.generate_json_representation()
-    elif args.format == 'dot':
+    elif args.format == "dot":
         graph = generator.generate_dot_graph()
     else:
         print(f"{Colors.RED}❌ Unknown format: {args.format}{Colors.RESET}")
         return
-    
+
     # Output graph
     if args.output:
         Path(args.output).parent.mkdir(parents=True, exist_ok=True)
-        with open(args.output, 'w') as f:
+        with open(args.output, "w") as f:
             f.write(graph)
         print(f"{Colors.GREEN}✅ Graph saved to: {args.output}{Colors.RESET}")
     else:
         print(graph)
+
 
 if __name__ == "__main__":
     main()

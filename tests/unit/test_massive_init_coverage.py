@@ -1,8 +1,6 @@
 """Massive coverage boost for init files and simple modules."""
 
-from unittest.mock import Mock, patch
-
-import pytest
+from unittest.mock import patch
 
 
 def test_api_submodules():
@@ -29,7 +27,7 @@ def test_agents_submodules():
 def test_database_submodules():
     """Test database submodule imports."""
     # Test models
-    with patch('database.models.os.getenv', return_value='sqlite:///test.db'):
+    with patch("database.models.os.getenv", return_value="sqlite:///test.db"):
         import database.models
 
         assert database.models is not None
@@ -40,7 +38,7 @@ def test_database_submodules():
     assert database.base is not None
 
     # Test session
-    with patch('database.session.os.getenv', return_value='sqlite:///test.db'):
+    with patch("database.session.os.getenv", return_value="sqlite:///test.db"):
         import database.session
 
         assert database.session is not None
@@ -64,8 +62,8 @@ def test_api_middleware_init():
     import api.middleware
 
     # Should have rate_limiter
-    assert hasattr(api.middleware, 'RateLimiter')
-    assert hasattr(api.middleware, 'RateLimitMiddleware')
+    assert hasattr(api.middleware, "RateLimiter")
+    assert hasattr(api.middleware, "RateLimitMiddleware")
 
 
 def test_api_v1_init():
@@ -74,10 +72,10 @@ def test_api_v1_init():
 
     # Check for routers
     expected_attrs = [
-        'agents_router',
-        'auth_router',
-        'system_router',
-        'monitoring_router',
+        "agents_router",
+        "auth_router",
+        "system_router",
+        "monitoring_router",
     ]
 
     for attr in expected_attrs:
@@ -90,10 +88,10 @@ def test_agents_memory_optimization_init():
 
     # Check expected exports
     expected = [
-        'MemoryProfiler',
-        'AgentMemoryOptimizer',
-        'MatrixPooling',
-        'LifecycleManager',
+        "MemoryProfiler",
+        "AgentMemoryOptimizer",
+        "MatrixPooling",
+        "LifecycleManager",
     ]
 
     for item in expected:
@@ -131,7 +129,7 @@ def test_config_structure():
 
     # Check settings attributes
     settings = config.settings
-    assert hasattr(settings, 'Settings')
+    assert hasattr(settings, "Settings")
 
 
 def test_knowledge_graph_submodules():
@@ -170,7 +168,7 @@ def test_observability_submodules():
     assert observability.logging_config is not None
 
     # Test prometheus_metrics
-    with patch('observability.prometheus_metrics.prometheus_client'):
+    with patch("observability.prometheus_metrics.prometheus_client"):
         import observability.prometheus_metrics
 
         assert observability.prometheus_metrics is not None
@@ -217,13 +215,13 @@ def test_world_structure():
     import world
 
     # Check for GridWorld
-    assert hasattr(world, 'GridWorld')
+    assert hasattr(world, "GridWorld")
 
     # Test grid_world import
     import world.grid_world
 
     assert world.grid_world is not None
-    assert hasattr(world.grid_world, 'GridWorld')
+    assert hasattr(world.grid_world, "GridWorld")
 
 
 def test_auth_submodules():

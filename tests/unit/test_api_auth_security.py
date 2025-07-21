@@ -10,15 +10,14 @@ This test suite covers API authentication security:
 """
 
 import time
-from datetime import datetime, timedelta
-from unittest.mock import AsyncMock, MagicMock, Mock, patch
+from unittest.mock import patch
 
 import pytest
-from fastapi import status
+from fastapi import Depends, status
 from fastapi.testclient import TestClient
 
 from api.main import app
-from api.v1.auth import router as auth_router
+from auth.security_implementation import get_current_user
 from auth.jwt_handler import jwt_handler
 
 
@@ -33,7 +32,7 @@ class TestLoginEndpointSecurity:
     @pytest.fixture
     def mock_user_service(self):
         """Mock user service for testing."""
-        with patch('api.v1.auth.UserService') as mock:
+        with patch("api.v1.auth.UserService") as mock:
             yield mock
 
     def test_successful_login_with_valid_credentials(self, client, mock_user_service):
@@ -43,17 +42,14 @@ class TestLoginEndpointSecurity:
             "id": "user-123",
             "username": "testuser",
             "role": "user",
-            "permissions": ["read"]
+            "permissions": ["read"],
         }
-        
-        login_data = {
-            "username": "testuser",
-            "password": "SecurePass123!"
-        }
-        
+
+        login_data = {"username": "testuser", "password": "SecurePass123!"}
+
         # Act
         response = client.post("/api/v1/auth/login", json=login_data)
-        
+
         # Assert
         assert response.status_code == status.HTTP_200_OK
         data = response.json()
@@ -66,15 +62,12 @@ class TestLoginEndpointSecurity:
         """Test login failure with invalid credentials."""
         # Arrange
         mock_user_service.authenticate.return_value = None
-        
-        login_data = {
-            "username": "testuser",
-            "password": "WrongPassword"
-        }
-        
+
+        login_data = {"username": "testuser", "password": "WrongPassword"}
+
         # Act
         response = client.post("/api/v1/auth/login", json=login_data)
-        
+
         # Assert
         assert response.status_code == status.HTTP_401_UNAUTHORIZED
         data = response.json()
@@ -92,38 +85,32 @@ class TestLoginEndpointSecurity:
             {"username": "test", "password": ""},  # Empty password
             {"username": "a" * 256, "password": "test"},  # Too long
         ]
-        
+
         for invalid_input in invalid_inputs:
             # Act
             response = client.post("/api/v1/auth/login", json=invalid_input)
-            
+
             # Assert
             assert response.status_code in [
                 status.HTTP_422_UNPROCESSABLE_ENTITY,
-                status.HTTP_400_BAD_REQUEST
+                status.HTTP_400_BAD_REQUEST,
             ]
 
     def test_login_prevents_timing_attacks(self, client, mock_user_service):
         """Test constant-time comparison prevents timing attacks."""
         # Arrange
         mock_user_service.authenticate.return_value = None
-        
+
         # Measure time for valid username
         start1 = time.time()
-        response1 = client.post("/api/v1/auth/login", json={
-            "username": "validuser",
-            "password": "wrongpass"
-        })
+        client.post("/api/v1/auth/login", json={"username": "validuser", "password": "wrongpass"})
         time1 = time.time() - start1
-        
+
         # Measure time for invalid username
         start2 = time.time()
-        response2 = client.post("/api/v1/auth/login", json={
-            "username": "invaliduser",
-            "password": "wrongpass"
-        })
+        client.post("/api/v1/auth/login", json={"username": "invaliduser", "password": "wrongpass"})
         time2 = time.time() - start2
-        
+
         # Assert - Times should be similar (constant-time)
         assert abs(time1 - time2) < 0.1  # Within 100ms
 
@@ -132,13 +119,13 @@ class TestLoginEndpointSecurity:
         # Arrange
         mock_user_service.authenticate.return_value = None
         login_data = {"username": "test", "password": "wrong"}
-        
+
         # Act - Make multiple rapid requests
         responses = []
         for _ in range(10):
             response = client.post("/api/v1/auth/login", json=login_data)
             responses.append(response.status_code)
-        
+
         # Assert - Should hit rate limit
         assert status.HTTP_429_TOO_MANY_REQUESTS in responses
 
@@ -146,14 +133,13 @@ class TestLoginEndpointSecurity:
         """Test that failed login attempts are logged."""
         # Arrange
         mock_user_service.authenticate.return_value = None
-        
-        with patch('api.v1.auth.logger') as mock_logger:
+
+        with patch("api.v1.auth.logger") as mock_logger:
             # Act
-            response = client.post("/api/v1/auth/login", json={
-                "username": "attacker",
-                "password": "malicious"
-            })
-        
+            response = client.post(
+                "/api/v1/auth/login", json={"username": "attacker", "password": "malicious"}
+            )
+
         # Assert
         assert response.status_code == status.HTTP_401_UNAUTHORIZED
         mock_logger.warning.assert_called()
@@ -169,25 +155,20 @@ class TestTokenRefreshSecurity:
         """Create client with valid tokens."""
         # Generate valid tokens
         access_token = jwt_handler.create_access_token(
-            user_id="user-123",
-            username="testuser",
-            role="user",
-            permissions=["read"]
+            user_id="user-123", username="testuser", role="user", permissions=["read"]
         )
-        
+
         refresh_token, family_id = jwt_handler.create_refresh_token("user-123")
-        
+
         return client, access_token, refresh_token, family_id
 
     def test_successful_token_refresh(self, authenticated_client):
         """Test successful token refresh."""
         client, _, refresh_token, _ = authenticated_client
-        
+
         # Act
-        response = client.post("/api/v1/auth/refresh", json={
-            "refresh_token": refresh_token
-        })
-        
+        response = client.post("/api/v1/auth/refresh", json={"refresh_token": refresh_token})
+
         # Assert
         assert response.status_code == status.HTTP_200_OK
         data = response.json()
@@ -198,51 +179,38 @@ class TestTokenRefreshSecurity:
     def test_refresh_with_invalid_token_fails(self, client):
         """Test refresh with invalid token fails."""
         # Act
-        response = client.post("/api/v1/auth/refresh", json={
-            "refresh_token": "invalid-token"
-        })
-        
+        response = client.post("/api/v1/auth/refresh", json={"refresh_token": "invalid-token"})
+
         # Assert
         assert response.status_code == status.HTTP_401_UNAUTHORIZED
 
     def test_refresh_token_reuse_detection(self, authenticated_client):
         """Test that reused refresh tokens are detected."""
         client, _, refresh_token, _ = authenticated_client
-        
+
         # First refresh - should succeed
-        response1 = client.post("/api/v1/auth/refresh", json={
-            "refresh_token": refresh_token
-        })
+        response1 = client.post("/api/v1/auth/refresh", json={"refresh_token": refresh_token})
         assert response1.status_code == status.HTTP_200_OK
-        
+
         # Attempt to reuse old token - should fail
-        response2 = client.post("/api/v1/auth/refresh", json={
-            "refresh_token": refresh_token
-        })
+        response2 = client.post("/api/v1/auth/refresh", json={"refresh_token": refresh_token})
         assert response2.status_code == status.HTTP_401_UNAUTHORIZED
-        
+
         # New token from first refresh should also be invalidated
         new_refresh = response1.json()["refresh_token"]
-        response3 = client.post("/api/v1/auth/refresh", json={
-            "refresh_token": new_refresh
-        })
+        response3 = client.post("/api/v1/auth/refresh", json={"refresh_token": new_refresh})
         assert response3.status_code == status.HTTP_401_UNAUTHORIZED
 
     def test_refresh_validates_token_type(self, client):
         """Test that only refresh tokens can be used for refresh."""
         # Create access token (wrong type)
         access_token = jwt_handler.create_access_token(
-            user_id="user-123",
-            username="testuser",
-            role="user",
-            permissions=[]
+            user_id="user-123", username="testuser", role="user", permissions=[]
         )
-        
+
         # Act
-        response = client.post("/api/v1/auth/refresh", json={
-            "refresh_token": access_token
-        })
-        
+        response = client.post("/api/v1/auth/refresh", json={"refresh_token": access_token})
+
         # Assert
         assert response.status_code == status.HTTP_401_UNAUTHORIZED
 
@@ -254,10 +222,7 @@ class TestLogoutSecurity:
     def auth_headers(self):
         """Create authorization headers."""
         access_token = jwt_handler.create_access_token(
-            user_id="user-123",
-            username="testuser",
-            role="user",
-            permissions=["read"]
+            user_id="user-123", username="testuser", role="user", permissions=["read"]
         )
         return {"Authorization": f"Bearer {access_token}"}
 
@@ -265,10 +230,10 @@ class TestLogoutSecurity:
         """Test successful logout revokes tokens."""
         # Act
         response = client.post("/api/v1/auth/logout", headers=auth_headers)
-        
+
         # Assert
         assert response.status_code == status.HTTP_200_OK
-        
+
         # Verify token is revoked
         response2 = client.get("/api/v1/auth/me", headers=auth_headers)
         assert response2.status_code == status.HTTP_401_UNAUTHORIZED
@@ -277,7 +242,7 @@ class TestLogoutSecurity:
         """Test that logout requires valid authentication."""
         # Act - No auth headers
         response = client.post("/api/v1/auth/logout")
-        
+
         # Assert
         assert response.status_code == status.HTTP_401_UNAUTHORIZED
 
@@ -286,7 +251,7 @@ class TestLogoutSecurity:
         # Act
         headers = {"Authorization": "Bearer invalid-token"}
         response = client.post("/api/v1/auth/logout", headers=headers)
-        
+
         # Assert
         assert response.status_code == status.HTTP_401_UNAUTHORIZED
 
@@ -297,10 +262,11 @@ class TestAuthorizationHeaders:
     @pytest.fixture
     def protected_endpoint(self, client):
         """Create a protected test endpoint."""
+
         @app.get("/test/protected")
         async def protected(current_user=Depends(get_current_user)):
             return {"user_id": current_user["user_id"]}
-        
+
         return client
 
     def test_bearer_token_format_validation(self, protected_endpoint):
@@ -312,7 +278,7 @@ class TestAuthorizationHeaders:
             "Basic dGVzdDp0ZXN0",  # Wrong auth type
             "Bearer token1 token2",  # Multiple tokens
         ]
-        
+
         for invalid_format in invalid_formats:
             headers = {"Authorization": invalid_format}
             response = protected_endpoint.get("/test/protected", headers=headers)
@@ -327,17 +293,17 @@ class TestAuthorizationHeaders:
             username="testuser",
             role="user",
             permissions=[],
-            fingerprint=fingerprint
+            fingerprint=fingerprint,
         )
-        
+
         # Set fingerprint in cookie
         client.cookies.set("fingerprint", fingerprint)
-        
+
         # Valid request with matching fingerprint
         headers = {"Authorization": f"Bearer {access_token}"}
         response = client.get("/api/v1/auth/me", headers=headers)
         assert response.status_code == status.HTTP_200_OK
-        
+
         # Invalid request with wrong fingerprint
         client.cookies.set("fingerprint", "wrong-fingerprint")
         response2 = client.get("/api/v1/auth/me", headers=headers)
@@ -349,38 +315,35 @@ class TestSecurityHeaders:
 
     def test_security_headers_present(self, client):
         """Test that security headers are set."""
-        response = client.post("/api/v1/auth/login", json={
-            "username": "test",
-            "password": "test"
-        })
-        
+        response = client.post("/api/v1/auth/login", json={"username": "test", "password": "test"})
+
         # Check security headers
         headers = response.headers
-        
+
         # Strict-Transport-Security
         assert "strict-transport-security" in headers
         assert "max-age=" in headers["strict-transport-security"]
-        
+
         # X-Content-Type-Options
         assert headers.get("x-content-type-options") == "nosniff"
-        
+
         # X-Frame-Options
         assert headers.get("x-frame-options") == "DENY"
-        
+
         # Content-Security-Policy
         assert "content-security-policy" in headers
-        
+
         # X-XSS-Protection (legacy but still good)
         assert headers.get("x-xss-protection") == "1; mode=block"
 
     def test_cors_configuration(self, client):
         """Test CORS is properly configured."""
         # Preflight request
-        response = client.options("/api/v1/auth/login", headers={
-            "Origin": "https://example.com",
-            "Access-Control-Request-Method": "POST"
-        })
-        
+        response = client.options(
+            "/api/v1/auth/login",
+            headers={"Origin": "https://example.com", "Access-Control-Request-Method": "POST"},
+        )
+
         # Should either block (no CORS) or have proper headers
         if response.status_code == status.HTTP_200_OK:
             # If CORS is enabled, verify proper configuration

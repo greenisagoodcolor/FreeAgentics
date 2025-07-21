@@ -10,14 +10,14 @@ import os
 import ssl
 import subprocess  # nosec B404
 from dataclasses import dataclass, field
-from typing import Any, Callable, Dict, List, Optional, Set
+from typing import Any, Callable, Dict, List, Optional
 
 try:
     from cryptography import x509
     from cryptography.x509.ocsp import OCSPRequestBuilder
 except ImportError:
-    x509 = None  
-    OCSPRequestBuilder = None  
+    x509 = None
+    OCSPRequestBuilder = None
 
 logger = logging.getLogger(__name__)
 
@@ -84,8 +84,7 @@ class TLSConfiguration:
 
     # Production Mode
     production_mode: bool = field(
-        default_factory=lambda: os.getenv("PRODUCTION", "false").lower()
-        == "true"
+        default_factory=lambda: os.getenv("PRODUCTION", "false").lower() == "true"
     )
 
 
@@ -110,9 +109,7 @@ class SSLContextBuilder:
 
         # Load certificates
         if self.config.cert_file and self.config.key_file:
-            context.load_cert_chain(
-                certfile=self.config.cert_file, keyfile=self.config.key_file
-            )
+            context.load_cert_chain(certfile=self.config.cert_file, keyfile=self.config.key_file)
 
         # Load CA certificates for client verification
         if self.config.ca_cert_file:
@@ -125,7 +122,7 @@ class SSLContextBuilder:
         # Configure session settings
         context.session_stats()
         # Note: OP_NO_SESSION_RESUMPTION_ON_RENEGOTIATION may not be available in all Python versions
-        if hasattr(ssl, 'OP_NO_SESSION_RESUMPTION_ON_RENEGOTIATION'):
+        if hasattr(ssl, "OP_NO_SESSION_RESUMPTION_ON_RENEGOTIATION"):
             context.options |= ssl.OP_NO_SESSION_RESUMPTION_ON_RENEGOTIATION
 
         # Disable insecure features
@@ -167,9 +164,7 @@ class SSLContextBuilder:
 
         # Load client certificates if provided
         if self.config.cert_file and self.config.key_file:
-            context.load_cert_chain(
-                certfile=self.config.cert_file, keyfile=self.config.key_file
-            )
+            context.load_cert_chain(certfile=self.config.cert_file, keyfile=self.config.key_file)
 
         # Configure verification
         context.verify_mode = ssl.CERT_REQUIRED
@@ -261,10 +256,7 @@ class OCSPStapler:
             ).value
 
             for access in aia:
-                if (
-                    access.access_method
-                    == x509.oid.AuthorityInformationAccessOID.OCSP
-                ):
+                if access.access_method == x509.oid.AuthorityInformationAccessOID.OCSP:
                     return str(access.access_location.value)
 
         except (AttributeError, KeyError):
@@ -371,12 +363,8 @@ def create_production_ssl_context() -> ssl.SSLContext:
     config = TLSConfiguration(
         min_tls_version=ssl.TLSVersion.TLSv1_2,
         preferred_tls_version=ssl.TLSVersion.TLSv1_3,
-        cert_file=os.getenv(
-            "SSL_CERT_FILE", "/etc/ssl/certs/freeagentics.crt"
-        ),
-        key_file=os.getenv(
-            "SSL_KEY_FILE", "/etc/ssl/private/freeagentics.key"
-        ),
+        cert_file=os.getenv("SSL_CERT_FILE", "/etc/ssl/certs/freeagentics.crt"),
+        key_file=os.getenv("SSL_KEY_FILE", "/etc/ssl/private/freeagentics.key"),
         ca_cert_file=os.getenv("SSL_CA_FILE", "/etc/ssl/certs/ca-bundle.crt"),
         enable_ocsp_stapling=True,
         production_mode=True,
@@ -392,9 +380,9 @@ def validate_ssl_configuration(context: ssl.SSLContext) -> Dict[str, bool]:
 
     # Check TLS versions
     validation_results["tls_1_2_enabled"] = True  # Minimum version
-    validation_results["tls_1_3_supported"] = hasattr(
-        ssl, "TLSVersion"
-    ) and hasattr(ssl.TLSVersion, "TLSv1_3")
+    validation_results["tls_1_3_supported"] = hasattr(ssl, "TLSVersion") and hasattr(
+        ssl.TLSVersion, "TLSv1_3"
+    )
 
     # Check cipher configuration
     try:
@@ -407,14 +395,10 @@ def validate_ssl_configuration(context: ssl.SSLContext) -> Dict[str, bool]:
         validation_results["forward_secrecy"] = False
 
     # Check certificate configuration
-    validation_results["certificate_loaded"] = (
-        context.cert_store_stats()["x509"] > 0
-    )
+    validation_results["certificate_loaded"] = context.cert_store_stats()["x509"] > 0
 
     # Check security options
-    validation_results["compression_disabled"] = bool(
-        context.options & ssl.OP_NO_COMPRESSION
-    )
+    validation_results["compression_disabled"] = bool(context.options & ssl.OP_NO_COMPRESSION)
     validation_results["renegotiation_disabled"] = (
         bool(context.options & ssl.OP_NO_RENEGOTIATION)
         if hasattr(ssl, "OP_NO_RENEGOTIATION")

@@ -8,9 +8,9 @@ using the circuit breaker pattern.
 import asyncio
 import logging
 import time
-from datetime import datetime, timedelta
+from datetime import datetime
 from enum import Enum
-from typing import Any, Callable, List, Optional, Set, Tuple, Type
+from typing import Any, Callable, List, Optional, Tuple, Type
 
 logger = logging.getLogger(__name__)
 
@@ -26,9 +26,7 @@ class CircuitState(Enum):
 class CircuitOpenException(Exception):
     """Raised when circuit breaker is open and rejecting calls."""
 
-    def __init__(
-        self, breaker_name: str, last_failure: Optional[datetime] = None
-    ):
+    def __init__(self, breaker_name: str, last_failure: Optional[datetime] = None):
         self.breaker_name = breaker_name
         self.last_failure = last_failure
         super().__init__(f"Circuit breaker '{breaker_name}' is OPEN")
@@ -130,8 +128,7 @@ class CircuitBreaker:
             # Check if we should transition to half-open
             if (
                 self._last_failure_time
-                and time.time() - self._last_failure_time
-                >= self.config.timeout
+                and time.time() - self._last_failure_time >= self.config.timeout
             ):
                 return True  # Will transition to half-open on next call
             return False
@@ -156,8 +153,7 @@ class CircuitBreaker:
         if self._state == CircuitState.OPEN:
             if (
                 self._last_failure_time
-                and time.time() - self._last_failure_time
-                >= self.config.timeout
+                and time.time() - self._last_failure_time >= self.config.timeout
             ):
                 self._transition_to(CircuitState.HALF_OPEN)
 
@@ -194,8 +190,7 @@ class CircuitBreaker:
         if self._state == CircuitState.OPEN:
             if (
                 self._last_failure_time
-                and time.time() - self._last_failure_time
-                >= self.config.timeout
+                and time.time() - self._last_failure_time >= self.config.timeout
             ):
                 self._transition_to(CircuitState.HALF_OPEN)
 
@@ -269,22 +264,16 @@ class CircuitBreaker:
             f"Circuit breaker '{self.name}' transitioned from {old_state.value} to {new_state.value}"
         )
 
-    def add_listener(
-        self, listener: Callable[[CircuitState, CircuitState, str], None]
-    ):
+    def add_listener(self, listener: Callable[[CircuitState, CircuitState, str], None]):
         """Add a state change listener."""
         self._listeners.append(listener)
 
-    def remove_listener(
-        self, listener: Callable[[CircuitState, CircuitState, str], None]
-    ):
+    def remove_listener(self, listener: Callable[[CircuitState, CircuitState, str], None]):
         """Remove a state change listener."""
         if listener in self._listeners:
             self._listeners.remove(listener)
 
-    def _notify_listeners(
-        self, old_state: CircuitState, new_state: CircuitState
-    ):
+    def _notify_listeners(self, old_state: CircuitState, new_state: CircuitState):
         """Notify all listeners of state change."""
         for listener in self._listeners:
             try:
@@ -338,10 +327,7 @@ class CircuitBreakerRegistry:
 
     def get_status_all(self) -> dict[str, dict]:
         """Get status of all circuit breakers."""
-        return {
-            name: breaker.get_status()
-            for name, breaker in self._breakers.items()
-        }
+        return {name: breaker.get_status() for name, breaker in self._breakers.items()}
 
     def reset_all(self):
         """Reset all circuit breakers."""

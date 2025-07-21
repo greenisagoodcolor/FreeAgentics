@@ -73,9 +73,7 @@ class RBACTestCleanup:
 
             if user_count > 0 or token_count > 0:
                 if self.verbose:
-                    print(
-                        f"  Found {user_count} users and {token_count} tokens"
-                    )
+                    print(f"  Found {user_count} users and {token_count} tokens")
 
                 # Clear all test users and tokens
                 auth_manager.users.clear()
@@ -89,9 +87,7 @@ class RBACTestCleanup:
                     }
                 )
 
-                print(
-                    f"  ✅ Cleared {user_count} users and {token_count} tokens"
-                )
+                print(f"  ✅ Cleared {user_count} users and {token_count} tokens")
             else:
                 print("  ✅ No test users or tokens to clean up")
 
@@ -328,7 +324,7 @@ class RBACTestCleanup:
         try:
             with open("rbac_cleanup_report.json", "w") as f:
                 json.dump(report, f, indent=2)
-            print(f"📊 Cleanup report saved to: rbac_cleanup_report.json")
+            print("📊 Cleanup report saved to: rbac_cleanup_report.json")
         except Exception as e:
             print(f"⚠️  Could not save cleanup report: {e}")
 
@@ -341,13 +337,9 @@ class RBACTestCleanup:
         # Check auth manager
         if AUTH_AVAILABLE:
             if len(auth_manager.users) > 0:
-                issues.append(
-                    f"Auth manager still has {len(auth_manager.users)} users"
-                )
+                issues.append(f"Auth manager still has {len(auth_manager.users)} users")
             if len(auth_manager.refresh_tokens) > 0:
-                issues.append(
-                    f"Auth manager still has {len(auth_manager.refresh_tokens)} tokens"
-                )
+                issues.append(f"Auth manager still has {len(auth_manager.refresh_tokens)} tokens")
 
         # Check for remaining temporary files
         temp_files = [
@@ -372,26 +364,20 @@ class RBACTestCleanup:
 
 def main():
     """Main function."""
-    parser = argparse.ArgumentParser(
-        description="Clean up RBAC authorization matrix test data"
-    )
+    parser = argparse.ArgumentParser(description="Clean up RBAC authorization matrix test data")
     parser.add_argument(
         "--force",
         "-f",
         action="store_true",
         help="Force cleanup without confirmation",
     )
-    parser.add_argument(
-        "--verbose", "-v", action="store_true", help="Verbose output"
-    )
+    parser.add_argument("--verbose", "-v", action="store_true", help="Verbose output")
 
     args = parser.parse_args()
 
     # Confirm cleanup if not forced
     if not args.force:
-        response = input(
-            "Are you sure you want to clean up RBAC test data? (y/N): "
-        )
+        response = input("Are you sure you want to clean up RBAC test data? (y/N): ")
         if response.lower() not in ["y", "yes"]:
             print("Cleanup cancelled.")
             return

@@ -1,7 +1,7 @@
 """Tests for database.types module."""
 
 import uuid
-from unittest.mock import MagicMock, patch
+from unittest.mock import MagicMock
 
 import pytest
 
@@ -38,9 +38,7 @@ class TestDatabaseTypes:
         # Create mock PostgreSQL dialect
         mock_dialect = MagicMock()
         mock_dialect.name = "postgresql"
-        mock_dialect.type_descriptor = MagicMock(
-            return_value="PostgreSQL UUID Type"
-        )
+        mock_dialect.type_descriptor = MagicMock(return_value="PostgreSQL UUID Type")
 
         guid_type = GUID()
         result = guid_type.load_dialect_impl(mock_dialect)
@@ -61,9 +59,7 @@ class TestDatabaseTypes:
         # Create mock SQLite dialect
         mock_dialect = MagicMock()
         mock_dialect.name = "sqlite"
-        mock_dialect.type_descriptor = MagicMock(
-            return_value="SQLite CHAR Type"
-        )
+        mock_dialect.type_descriptor = MagicMock(return_value="SQLite CHAR Type")
 
         guid_type = GUID()
         result = guid_type.load_dialect_impl(mock_dialect)

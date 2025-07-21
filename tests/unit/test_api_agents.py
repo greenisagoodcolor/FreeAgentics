@@ -6,19 +6,14 @@ and real Active Inference implementation.
 """
 
 import uuid
-from datetime import datetime
-from unittest.mock import Mock, patch
 
 import pytest
-from tests.test_client_compat import TestClient
 from sqlalchemy.orm import Session
 
-from api.v1.agents import router
 from database.models import Agent as AgentModel
-from database.models import AgentStatus
 from database.session import get_db
-from tests.fixtures.fixtures import db_session, test_engine
 from tests.helpers import get_auth_headers
+from tests.test_client_compat import TestClient
 
 # Import the app from the correct location
 try:
@@ -57,11 +52,7 @@ class TestAgentsAPI:
             "parameters": {"grid_size": 10},
         }
 
-        response = client.post(
-            "/api/v1/agents", 
-            json=agent_data,
-            headers=get_auth_headers()
-        )
+        response = client.post("/api/v1/agents", json=agent_data, headers=get_auth_headers())
 
         if response.status_code != 201:
             print(f"Response status: {response.status_code}")
@@ -74,11 +65,7 @@ class TestAgentsAPI:
         assert "id" in data
 
         # Verify in database
-        db_agent = (
-            db_session.query(AgentModel)
-            .filter_by(id=uuid.UUID(data["id"]))
-            .first()
-        )
+        db_agent = db_session.query(AgentModel).filter_by(id=uuid.UUID(data["id"])).first()
         assert db_agent is not None
         assert db_agent.name == "Test Explorer"
 
@@ -124,7 +111,9 @@ class TestAgentsAPI:
         agent_id = create_response.json()["id"]
 
         # Update agent status (API only supports PATCH for status)
-        response = client.patch(f"/api/v1/agents/{agent_id}/status?status=active", headers=get_auth_headers())
+        response = client.patch(
+            f"/api/v1/agents/{agent_id}/status?status=active", headers=get_auth_headers()
+        )
 
         assert response.status_code == 200
         data = response.json()
@@ -166,9 +155,7 @@ class TestAgentsAPI:
         response = client.post("/api/v1/agents", json=invalid_data, headers=get_auth_headers())
         assert response.status_code == 422
 
-    def test_agent_creation_with_parameters(
-        self, client: TestClient, db_session: Session
-    ):
+    def test_agent_creation_with_parameters(self, client: TestClient, db_session: Session):
         """Test agent creation with custom parameters."""
         # Create agent with parameters
         agent_data = {
@@ -177,7 +164,7 @@ class TestAgentsAPI:
             "parameters": {"test": True, "exploration_rate": 0.5},
         }
         response = client.post("/api/v1/agents", json=agent_data, headers=get_auth_headers())
-        
+
         assert response.status_code == 201
         data = response.json()
         assert data["name"] == "AI Agent"
@@ -185,9 +172,7 @@ class TestAgentsAPI:
         assert data["parameters"]["test"] is True
         assert data["parameters"]["exploration_rate"] == 0.5
 
-    def test_agent_status_transitions(
-        self, client: TestClient, db_session: Session
-    ):
+    def test_agent_status_transitions(self, client: TestClient, db_session: Session):
         """Test agent status state machine."""
         # Create agent
         agent_data = {"name": "State Test", "template": "basic-explorer"}
@@ -207,7 +192,7 @@ class TestAgentsAPI:
             if current_status == from_status:
                 response = client.patch(
                     f"/api/v1/agents/{agent_id}/status?status={to_status}",
-                    headers=get_auth_headers()
+                    headers=get_auth_headers(),
                 )
                 assert response.status_code == 200
                 assert response.json()["status"] == to_status

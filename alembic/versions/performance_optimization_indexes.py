@@ -8,7 +8,7 @@ Create Date: 2025-07-15 15:45:00.000000
 
 import sqlalchemy as sa
 
-from alembic import op  
+from alembic import op
 
 # revision identifiers, used by Alembic.
 revision = "performance_optimization_20250715"
@@ -371,16 +371,12 @@ def upgrade():
 def downgrade():
     """Remove performance optimization indexes."""
     # Drop triggers
-    op.execute(
-        "DROP TRIGGER IF EXISTS trigger_agent_activity_update ON agents"
-    )
+    op.execute("DROP TRIGGER IF EXISTS trigger_agent_activity_update ON agents")
     op.execute("DROP FUNCTION IF EXISTS update_agent_last_active()")
     op.execute("DROP FUNCTION IF EXISTS refresh_performance_views()")
 
     # Drop materialized views
-    op.execute(
-        "DROP MATERIALIZED VIEW IF EXISTS coalition_performance_summary"
-    )
+    op.execute("DROP MATERIALIZED VIEW IF EXISTS coalition_performance_summary")
     op.execute("DROP MATERIALIZED VIEW IF EXISTS agent_performance_summary")
 
     # Drop indexes (in reverse order)

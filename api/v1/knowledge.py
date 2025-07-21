@@ -5,7 +5,6 @@ knowledge graphs in the FreeAgentics system.
 """
 
 import logging
-from datetime import datetime
 from typing import Any, Dict, List, Optional
 
 from fastapi import APIRouter, HTTPException, Query, status
@@ -213,11 +212,7 @@ async def get_graph(graph_id: str) -> GraphResponse:
         updated_at=graph.updated_at.isoformat(),
         node_count=len(graph.nodes),
         edge_count=len(graph.edges),
-        metadata={
-            "node_types": {
-                nt.value: len(graph.type_index.get(nt, [])) for nt in NodeType
-            }
-        },
+        metadata={"node_types": {nt.value: len(graph.type_index.get(nt, [])) for nt in NodeType}},
     )
 
 
@@ -249,9 +244,7 @@ async def delete_graph(graph_id: str):
 
 
 @router.post("/graphs/{graph_id}/nodes", response_model=NodeResponse)
-async def create_node(
-    graph_id: str, request: NodeCreateRequest
-) -> NodeResponse:
+async def create_node(graph_id: str, request: NodeCreateRequest) -> NodeResponse:
     """Create a node in the knowledge graph."""
     graph = get_active_graph(graph_id)
 
@@ -422,9 +415,7 @@ async def delete_node(graph_id: str, node_id: str):
 
 
 @router.post("/graphs/{graph_id}/edges", response_model=EdgeResponse)
-async def create_edge(
-    graph_id: str, request: EdgeCreateRequest
-) -> EdgeResponse:
+async def create_edge(graph_id: str, request: EdgeCreateRequest) -> EdgeResponse:
     """Create an edge in the knowledge graph."""
     graph = get_active_graph(graph_id)
 
@@ -470,12 +461,8 @@ async def create_edge(
 async def list_edges(
     graph_id: str,
     type: Optional[str] = Query(None, description="Filter by edge type"),
-    source_id: Optional[str] = Query(
-        None, description="Filter by source node"
-    ),
-    target_id: Optional[str] = Query(
-        None, description="Filter by target node"
-    ),
+    source_id: Optional[str] = Query(None, description="Filter by source node"),
+    target_id: Optional[str] = Query(None, description="Filter by target node"),
     limit: Optional[int] = Query(100, ge=1, le=1000),
 ) -> List[EdgeResponse]:
     """List edges in the knowledge graph."""
@@ -522,9 +509,7 @@ async def list_edges(
 
 
 @router.post("/graphs/{graph_id}/query", response_model=QueryResultResponse)
-async def query_graph(
-    graph_id: str, request: GraphQueryRequest
-) -> QueryResultResponse:
+async def query_graph(graph_id: str, request: GraphQueryRequest) -> QueryResultResponse:
     """Query the knowledge graph."""
     engine = get_query_engine(graph_id)
 

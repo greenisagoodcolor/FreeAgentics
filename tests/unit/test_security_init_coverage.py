@@ -1,7 +1,5 @@
 """Test coverage for security module __init__ files."""
 
-import pytest
-
 
 def test_security_init_import():
     """Test that security module can be imported."""

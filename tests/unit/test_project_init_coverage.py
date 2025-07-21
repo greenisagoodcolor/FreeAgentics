@@ -1,7 +1,5 @@
 """Test coverage for all project __init__ files."""
 
-import pytest
-
 
 def test_api_init():
     """Test api module imports."""

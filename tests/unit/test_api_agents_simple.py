@@ -12,7 +12,6 @@ from sqlalchemy.orm import Session
 from api.main import app
 from auth.security_implementation import get_current_user
 from database.session import get_db
-from tests.fixtures.fixtures import db_session, test_engine
 from tests.test_helpers.auth_helpers import mock_auth_dependency
 
 
@@ -58,9 +57,7 @@ class TestAgentEndpoints:
         # We expect 422 (validation error) not 404 (not found)
         assert response.status_code != 404
 
-    def test_create_agent_returns_validation_error_for_empty_body(
-        self, client
-    ):
+    def test_create_agent_returns_validation_error_for_empty_body(self, client):
         """Test that empty request body returns validation error."""
         response = client.post("/api/v1/agents", json={})
         assert response.status_code == 422
@@ -81,9 +78,7 @@ class TestAgentEndpoints:
     def test_get_agent_by_id(self, client, sample_agent_config):
         """Test retrieving agent by ID."""
         # First create an agent
-        create_response = client.post(
-            "/api/v1/agents", json=sample_agent_config
-        )
+        create_response = client.post("/api/v1/agents", json=sample_agent_config)
         assert create_response.status_code == 201
         agent_id = create_response.json()["id"]
 
@@ -123,9 +118,7 @@ class TestAgentEndpoints:
     def test_update_agent_status(self, client, sample_agent_config):
         """Test updating agent status."""
         # Create agent
-        create_response = client.post(
-            "/api/v1/agents", json=sample_agent_config
-        )
+        create_response = client.post("/api/v1/agents", json=sample_agent_config)
         agent_id = create_response.json()["id"]
 
         # Update status
@@ -137,9 +130,7 @@ class TestAgentEndpoints:
     def test_delete_agent(self, client, sample_agent_config):
         """Test deleting an agent."""
         # Create agent
-        create_response = client.post(
-            "/api/v1/agents", json=sample_agent_config
-        )
+        create_response = client.post("/api/v1/agents", json=sample_agent_config)
         agent_id = create_response.json()["id"]
 
         # Delete agent

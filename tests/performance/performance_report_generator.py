@@ -7,16 +7,12 @@ optimization recommendations.
 
 import argparse
 import json
-import os
 from dataclasses import dataclass
-from datetime import datetime, timedelta
+from datetime import datetime
 from pathlib import Path
-from typing import Any, Dict, List, Optional, Tuple
+from typing import Any, Dict, List, Optional
 
-import matplotlib.dates as mdates
 import matplotlib.pyplot as plt
-import numpy as np
-import pandas as pd
 import seaborn as sns
 
 
@@ -77,18 +73,14 @@ class PerformanceReportGenerator:
 
         return results
 
-    def extract_metrics(
-        self, results: List[Dict[str, Any]]
-    ) -> List[PerformanceMetric]:
+    def extract_metrics(self, results: List[Dict[str, Any]]) -> List[PerformanceMetric]:
         """Extract performance metrics from benchmark results."""
         metrics = []
 
         for result in results:
             timestamp_str = result.get("timestamp", datetime.now().isoformat())
             try:
-                timestamp = datetime.fromisoformat(
-                    timestamp_str.replace("Z", "+00:00")
-                )
+                timestamp = datetime.fromisoformat(timestamp_str.replace("Z", "+00:00"))
             except ValueError:
                 timestamp = datetime.now()
 
@@ -145,13 +137,9 @@ class PerformanceReportGenerator:
             return "ms"
         elif "memory" in metric_name.lower():
             return "MB"
-        elif (
-            "rate" in metric_name.lower() or "hit_rate" in metric_name.lower()
-        ):
+        elif "rate" in metric_name.lower() or "hit_rate" in metric_name.lower():
             return "%"
-        elif (
-            "factor" in metric_name.lower() or "speedup" in metric_name.lower()
-        ):
+        elif "factor" in metric_name.lower() or "speedup" in metric_name.lower():
             return "x"
         elif (
             "count" in metric_name.lower()
@@ -195,9 +183,7 @@ class PerformanceReportGenerator:
             if previous.value == 0:
                 continue
 
-            regression_percent = (
-                (current.value - previous.value) / previous.value
-            ) * 100
+            regression_percent = ((current.value - previous.value) / previous.value) * 100
 
             # For metrics where lower is better (time, memory), positive change is bad
             # For metrics where higher is better (hit rates, speedup), negative change is bad
@@ -234,9 +220,7 @@ class PerformanceReportGenerator:
 
         return alerts
 
-    def generate_performance_charts(
-        self, metrics: List[PerformanceMetric]
-    ) -> List[str]:
+    def generate_performance_charts(self, metrics: List[PerformanceMetric]) -> List[str]:
         """Generate performance visualization charts."""
         chart_files = []
 
@@ -253,18 +237,14 @@ class PerformanceReportGenerator:
                 continue
 
             # Create time series chart
-            chart_file = self._create_time_series_chart(
-                metric_name, metric_list
-            )
+            chart_file = self._create_time_series_chart(metric_name, metric_list)
             if chart_file:
                 chart_files.append(chart_file)
 
             # Create comparison chart if multiple benchmarks
             benchmarks = set(m.benchmark_name for m in metric_list)
             if len(benchmarks) > 1:
-                comparison_chart = self._create_comparison_chart(
-                    metric_name, metric_list
-                )
+                comparison_chart = self._create_comparison_chart(metric_name, metric_list)
                 if comparison_chart:
                     chart_files.append(comparison_chart)
 
@@ -300,17 +280,13 @@ class PerformanceReportGenerator:
 
         plt.title(f'{metric_name.replace("_", " ").title()} Over Time')
         plt.xlabel("Time")
-        plt.ylabel(
-            f'{metric_name.replace("_", " ").title()} ({metrics[0].unit})'
-        )
+        plt.ylabel(f'{metric_name.replace("_", " ").title()} ({metrics[0].unit})')
         plt.legend()
         plt.grid(True, alpha=0.3)
         plt.xticks(rotation=45)
         plt.tight_layout()
 
-        chart_file = str(
-            self.output_directory / f"{metric_name}_timeseries.png"
-        )
+        chart_file = str(self.output_directory / f"{metric_name}_timeseries.png")
         plt.savefig(chart_file, dpi=300, bbox_inches="tight")
         plt.close()
 
@@ -327,10 +303,7 @@ class PerformanceReportGenerator:
         latest_metrics = {}
         for metric in metrics:
             key = metric.benchmark_name
-            if (
-                key not in latest_metrics
-                or metric.timestamp > latest_metrics[key].timestamp
-            ):
+            if key not in latest_metrics or metric.timestamp > latest_metrics[key].timestamp:
                 latest_metrics[key] = metric
 
         if len(latest_metrics) < 2:
@@ -346,21 +319,13 @@ class PerformanceReportGenerator:
         if metric_name in ["mean_time", "memory_usage"]:
             # Lower is better
             colors = [
-                "red"
-                if v == max(values)
-                else "green"
-                if v == min(values)
-                else "orange"
+                "red" if v == max(values) else "green" if v == min(values) else "orange"
                 for v in values
             ]
         else:
             # Higher is better
             colors = [
-                "green"
-                if v == max(values)
-                else "red"
-                if v == min(values)
-                else "orange"
+                "green" if v == max(values) else "red" if v == min(values) else "orange"
                 for v in values
             ]
 
@@ -369,15 +334,11 @@ class PerformanceReportGenerator:
 
         plt.title(f'{metric_name.replace("_", " ").title()} Comparison')
         plt.xlabel("Benchmark")
-        plt.ylabel(
-            f'{metric_name.replace("_", " ").title()} ({metrics[0].unit})'
-        )
+        plt.ylabel(f'{metric_name.replace("_", " ").title()} ({metrics[0].unit})')
         plt.xticks(rotation=45)
         plt.tight_layout()
 
-        chart_file = str(
-            self.output_directory / f"{metric_name}_comparison.png"
-        )
+        chart_file = str(self.output_directory / f"{metric_name}_comparison.png")
         plt.savefig(chart_file, dpi=300, bbox_inches="tight")
         plt.close()
 
@@ -390,7 +351,7 @@ class PerformanceReportGenerator:
         charts: List[str],
     ) -> str:
         """Generate a comprehensive summary report."""
-        timestamp = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+        datetime.now().strftime("%Y-%m-%d %H:%M:%S")
 
         report = """# PyMDP Performance Analysis Report
 Generated: {timestamp}
@@ -404,7 +365,7 @@ The analysis includes matrix caching optimizations, selective update mechanisms,
 
         # Performance Overview
         if metrics:
-            benchmark_names = set(m.benchmark_name for m in metrics)
+            set(m.benchmark_name for m in metrics)
             report += """## Performance Overview
 
 - **Total Benchmarks Analyzed**: {len(benchmark_names)}
@@ -416,43 +377,29 @@ The analysis includes matrix caching optimizations, selective update mechanisms,
 """
 
             # Analyze caching performance
-            caching_metrics = [
-                m for m in metrics if "caching" in m.benchmark_name
-            ]
+            caching_metrics = [m for m in metrics if "caching" in m.benchmark_name]
             if caching_metrics:
-                cache_speedups = [
-                    m for m in caching_metrics if m.name == "speedup_factor"
-                ]
+                cache_speedups = [m for m in caching_metrics if m.name == "speedup_factor"]
                 if cache_speedups:
                     max_speedup = max(m.value for m in cache_speedups)
-                    avg_speedup = sum(m.value for m in cache_speedups) / len(
-                        cache_speedups
-                    )
+                    avg_speedup = sum(m.value for m in cache_speedups) / len(cache_speedups)
                     report += f"- **Matrix Caching**: Achieved up to {max_speedup:.1f}x speedup (average: {avg_speedup:.1f}x)\n"
 
-                cache_hit_rates = [
-                    m for m in caching_metrics if m.name == "cache_hit_rate"
-                ]
+                cache_hit_rates = [m for m in caching_metrics if m.name == "cache_hit_rate"]
                 if cache_hit_rates:
                     avg_hit_rate = (
-                        sum(m.value for m in cache_hit_rates)
-                        / len(cache_hit_rates)
-                        * 100
+                        sum(m.value for m in cache_hit_rates) / len(cache_hit_rates) * 100
                     )
-                    report += f"- **Cache Effectiveness**: Average hit rate of {avg_hit_rate:.1f}%\n"
+                    report += (
+                        f"- **Cache Effectiveness**: Average hit rate of {avg_hit_rate:.1f}%\n"
+                    )
 
             # Analyze selective update performance
-            selective_metrics = [
-                m for m in metrics if "selective" in m.benchmark_name
-            ]
+            selective_metrics = [m for m in metrics if "selective" in m.benchmark_name]
             if selective_metrics:
-                selective_speedups = [
-                    m for m in selective_metrics if m.name == "speedup_factor"
-                ]
+                selective_speedups = [m for m in selective_metrics if m.name == "speedup_factor"]
                 if selective_speedups:
-                    max_selective_speedup = max(
-                        m.value for m in selective_speedups
-                    )
+                    max_selective_speedup = max(m.value for m in selective_speedups)
                     report += f"- **Selective Updates**: Up to {max_selective_speedup:.1f}x improvement in hierarchical operations\n"
 
                 savings = [m for m in selective_metrics if "savings" in m.name]
@@ -464,18 +411,14 @@ The analysis includes matrix caching optimizations, selective update mechanisms,
         if regressions:
             report += f"\n## Performance Regressions\n\n⚠️  **{len(regressions)} potential regressions detected:**\n\n"
 
-            for alert in sorted(
-                regressions, key=lambda x: x.regression_percent, reverse=True
-            ):
+            for alert in sorted(regressions, key=lambda x: x.regression_percent, reverse=True):
                 severity_emoji = {"severe": "🔴", "moderate": "🟡", "minor": "🟠"}
                 emoji = severity_emoji.get(alert.severity, "⚠️")
 
                 report += f"{emoji} **{alert.benchmark_name}** - {alert.metric_name}:\n"
                 report += f"   - Current: {alert.current_value:.2f}\n"
                 report += f"   - Previous: {alert.previous_value:.2f}\n"
-                report += (
-                    f"   - Regression: {alert.regression_percent:.1f}%\n\n"
-                )
+                report += f"   - Regression: {alert.regression_percent:.1f}%\n\n"
         else:
             report += "\n## Performance Regressions\n\n✅ No significant performance regressions detected.\n\n"
 
@@ -761,9 +704,7 @@ for the FreeAgentics multi-agent system.*
         print(f"Generated {len(charts)} performance charts")
 
         print("Creating summary report...")
-        summary_report = self.generate_summary_report(
-            metrics, regressions, charts
-        )
+        summary_report = self.generate_summary_report(metrics, regressions, charts)
 
         print("Generating benchmark documentation...")
         methodology_doc = self.generate_benchmark_documentation()
@@ -785,9 +726,7 @@ for the FreeAgentics multi-agent system.*
 
 def main():
     """Command line interface for performance report generation."""
-    parser = argparse.ArgumentParser(
-        description="Generate PyMDP performance analysis reports"
-    )
+    parser = argparse.ArgumentParser(description="Generate PyMDP performance analysis reports")
     parser.add_argument(
         "--results-dir",
         default="tests/performance",

@@ -6,17 +6,14 @@ connection pool before implementation.
 """
 
 import asyncio
-from datetime import datetime, timedelta
-from typing import Optional, Set
-from unittest.mock import AsyncMock, MagicMock, Mock, patch
+from datetime import datetime
+from unittest.mock import AsyncMock, Mock, patch
 
 import pytest
 
 from websocket.connection_pool import (
     ConnectionHealthMonitor,
     ConnectionMetrics,
-    ConnectionNotFoundError,
-    ConnectionPoolError,
     ConnectionState,
     PoolConfig,
     PooledConnection,
@@ -57,9 +54,7 @@ class TestPoolConfig:
     def test_config_validation(self):
         """Test configuration validation."""
         # Min size cannot be greater than max size
-        with pytest.raises(
-            ValueError, match="min_size cannot be greater than max_size"
-        ):
+        with pytest.raises(ValueError, match="min_size cannot be greater than max_size"):
             PoolConfig(min_size=100, max_size=50)
 
         # Negative values should raise errors
@@ -226,7 +221,7 @@ class TestWebSocketConnectionPool:
             await pool.initialize("ws://test.example.com")
 
             # Acquire the only connection
-            conn1 = await pool.acquire()
+            await pool.acquire()
 
             # Try to acquire another (should fail)
             with pytest.raises(PoolExhaustedError):
@@ -318,8 +313,8 @@ class TestWebSocketConnectionPool:
             assert pool.size == 2
 
             # Acquire connections to trigger scaling
-            conn1 = await pool.acquire()
-            conn2 = await pool.acquire()
+            await pool.acquire()
+            await pool.acquire()
 
             # Should trigger scale up (100% utilization > 80% threshold)
             await pool._auto_scale()
@@ -411,8 +406,8 @@ class TestWebSocketConnectionPool:
             await pool.initialize("ws://test.example.com")
 
             # Acquire some connections
-            conn1 = await pool.acquire()
-            conn2 = await pool.acquire()
+            await pool.acquire()
+            await pool.acquire()
 
             # Shutdown pool
             await pool.shutdown(graceful=True)
@@ -458,9 +453,7 @@ class TestConnectionMetrics:
         """Test pool utilization calculation."""
         metrics = ConnectionMetrics()
 
-        utilization = metrics.calculate_utilization(
-            in_use=5, available=10, total=15
-        )
+        utilization = metrics.calculate_utilization(in_use=5, available=10, total=15)
         assert utilization == pytest.approx(0.333, rel=0.01)  # 5/15
 
     def test_metrics_snapshot(self):
@@ -517,9 +510,7 @@ class TestConnectionHealthMonitor:
     async def test_monitor_error_handling(self):
         """Test health monitor error handling."""
         pool = AsyncMock()
-        pool._health_check_cycle = AsyncMock(
-            side_effect=Exception("Health check error")
-        )
+        pool._health_check_cycle = AsyncMock(side_effect=Exception("Health check error"))
 
         monitor = ConnectionHealthMonitor(pool, check_interval=0.1)
 

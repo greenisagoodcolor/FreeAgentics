@@ -9,7 +9,7 @@ import logging
 from dataclasses import dataclass, field
 from datetime import datetime
 from enum import Enum
-from typing import Any, Dict, List, Optional, Tuple, Union
+from typing import Any, Dict, List, Optional
 
 import numpy as np
 
@@ -48,9 +48,7 @@ class Position:
 
     def distance_to(self, other: "Position") -> float:
         """Calculate Euclidean distance to another position."""
-        return float(
-            np.sqrt((self.x - other.x) ** 2 + (self.y - other.y) ** 2)
-        )
+        return float(np.sqrt((self.x - other.x) ** 2 + (self.y - other.y) ** 2))
 
     def manhattan_distance(self, other: "Position") -> int:
         """Calculate Manhattan distance to another position."""
@@ -303,9 +301,7 @@ class GridWorld:
 
         return neighbors
 
-    def get_observation(
-        self, agent_id: str, radius: int = 1
-    ) -> Optional[Dict[str, Any]]:
+    def get_observation(self, agent_id: str, radius: int = 1) -> Optional[Dict[str, Any]]:
         """Get observation for an agent.
 
         Args:
@@ -325,9 +321,7 @@ class GridWorld:
         for dx in range(-radius, radius + 1):
             row = []
             for dy in range(-radius, radius + 1):
-                check_pos = Position(
-                    agent.position.x + dx, agent.position.y + dy
-                )
+                check_pos = Position(agent.position.x + dx, agent.position.y + dy)
                 cell = self.get_cell(check_pos)
                 if cell:
                     row.append(
@@ -352,9 +346,7 @@ class GridWorld:
         for other_agent in self.agents.values():
             if other_agent.id != agent_id:
                 distance = agent.position.distance_to(other_agent.position)
-                if distance <= radius * np.sqrt(
-                    2
-                ):  # Within observation radius
+                if distance <= radius * np.sqrt(2):  # Within observation radius
                     nearby_agents.append(
                         {
                             "id": other_agent.id,
@@ -472,9 +464,7 @@ class GridWorld:
 
         logger.info("World state loaded")
 
-    def find_path(
-        self, start: Position, goal: Position
-    ) -> Optional[List[Position]]:
+    def find_path(self, start: Position, goal: Position) -> Optional[List[Position]]:
         """Find path from start to goal using A* algorithm.
 
         Args:
@@ -484,9 +474,7 @@ class GridWorld:
         Returns:
             List of positions forming path, or None if no path exists
         """
-        if not self.is_valid_position(start) or not self.is_valid_position(
-            goal
-        ):
+        if not self.is_valid_position(start) or not self.is_valid_position(goal):
             return None
 
         # A* pathfinding
@@ -513,11 +501,7 @@ class GridWorld:
             for neighbor in self.get_neighbors(current):
                 # Check if neighbor is passable and not a hazard
                 cell = self.get_cell(neighbor)
-                if (
-                    not cell
-                    or not cell.is_passable()
-                    or cell.type == CellType.HAZARD
-                ):
+                if not cell or not cell.is_passable() or cell.type == CellType.HAZARD:
                     continue
 
                 tentative_g = g_score[current] + 1
@@ -525,9 +509,7 @@ class GridWorld:
                 if neighbor not in g_score or tentative_g < g_score[neighbor]:
                     came_from[neighbor] = current
                     g_score[neighbor] = tentative_g
-                    f_score[
-                        neighbor
-                    ] = tentative_g + neighbor.manhattan_distance(goal)
+                    f_score[neighbor] = tentative_g + neighbor.manhattan_distance(goal)
                     heapq.heappush(open_set, (f_score[neighbor], neighbor))
 
         return None  # No path found
@@ -541,9 +523,7 @@ class GridWorld:
         Returns:
             2D array of Manhattan distances to target
         """
-        distance_map = [
-            [float("inf")] * self.height for _ in range(self.width)
-        ]
+        distance_map = [[float("inf")] * self.height for _ in range(self.width)]
 
         if not self.is_valid_position(target):
             return distance_map
@@ -608,9 +588,7 @@ class GridWorld:
         Returns:
             ASCII representation of the world
         """
-        display = [
-            ["." for _ in range(self.height)] for _ in range(self.width)
-        ]
+        display = [["." for _ in range(self.height)] for _ in range(self.width)]
 
         # Mark cells
         for x in range(self.width):

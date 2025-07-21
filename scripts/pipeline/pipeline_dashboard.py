@@ -4,25 +4,27 @@ Pipeline Dashboard Generator for PIPELINE-ARCHITECT
 Creates visual pipeline status dashboards and metrics
 """
 
+import argparse
 import json
 import os
 import sys
 from datetime import datetime, timedelta
 from pathlib import Path
-from typing import Dict, List, Any, Optional
-import argparse
+from typing import Any, Dict
+
 
 # Color codes for terminal output
 class Colors:
-    GREEN = '\033[92m'
-    RED = '\033[91m'
-    YELLOW = '\033[93m'
-    BLUE = '\033[94m'
-    PURPLE = '\033[95m'
-    CYAN = '\033[96m'
-    WHITE = '\033[97m'
-    BOLD = '\033[1m'
-    RESET = '\033[0m'
+    GREEN = "\033[92m"
+    RED = "\033[91m"
+    YELLOW = "\033[93m"
+    BLUE = "\033[94m"
+    PURPLE = "\033[95m"
+    CYAN = "\033[96m"
+    WHITE = "\033[97m"
+    BOLD = "\033[1m"
+    RESET = "\033[0m"
+
 
 def print_header(message: str, color: str = Colors.BLUE):
     """Print a formatted header."""
@@ -30,37 +32,39 @@ def print_header(message: str, color: str = Colors.BLUE):
     print(f"{color}{Colors.BOLD}{message}{Colors.RESET}")
     print(f"{color}{Colors.BOLD}{'=' * 60}{Colors.RESET}\n")
 
+
 def print_status(status: str) -> str:
     """Return formatted status with emoji and color."""
     status_map = {
-        'success': f"{Colors.GREEN}✅ SUCCESS{Colors.RESET}",
-        'failure': f"{Colors.RED}❌ FAILURE{Colors.RESET}",
-        'skipped': f"{Colors.YELLOW}⏭️ SKIPPED{Colors.RESET}",
-        'in_progress': f"{Colors.BLUE}🔄 IN PROGRESS{Colors.RESET}",
-        'pending': f"{Colors.PURPLE}⏳ PENDING{Colors.RESET}",
-        'cancelled': f"{Colors.RED}🚫 CANCELLED{Colors.RESET}",
-        'completed': f"{Colors.GREEN}✅ COMPLETED{Colors.RESET}"
+        "success": f"{Colors.GREEN}✅ SUCCESS{Colors.RESET}",
+        "failure": f"{Colors.RED}❌ FAILURE{Colors.RESET}",
+        "skipped": f"{Colors.YELLOW}⏭️ SKIPPED{Colors.RESET}",
+        "in_progress": f"{Colors.BLUE}🔄 IN PROGRESS{Colors.RESET}",
+        "pending": f"{Colors.PURPLE}⏳ PENDING{Colors.RESET}",
+        "cancelled": f"{Colors.RED}🚫 CANCELLED{Colors.RESET}",
+        "completed": f"{Colors.GREEN}✅ COMPLETED{Colors.RESET}",
     }
     return status_map.get(status.lower(), f"{Colors.WHITE}{status.upper()}{Colors.RESET}")
 
+
 class PipelineDashboard:
     """Pipeline dashboard generator and metrics collector."""
-    
+
     def __init__(self):
         self.pipeline_data = {}
         self.metrics = {
-            'total_pipelines': 0,
-            'success_rate': 0.0,
-            'average_duration': 0.0,
-            'failure_trends': [],
-            'performance_trends': []
+            "total_pipelines": 0,
+            "success_rate": 0.0,
+            "average_duration": 0.0,
+            "failure_trends": [],
+            "performance_trends": [],
         }
-    
+
     def load_pipeline_data(self, data_path: str) -> bool:
         """Load pipeline data from JSON file or GitHub Actions."""
         try:
             if os.path.exists(data_path):
-                with open(data_path, 'r') as f:
+                with open(data_path, "r") as f:
                     self.pipeline_data = json.load(f)
                 return True
             else:
@@ -69,87 +73,93 @@ class PipelineDashboard:
         except Exception as e:
             print(f"{Colors.RED}❌ Error loading pipeline data: {e}{Colors.RESET}")
             return False
-    
+
     def generate_terminal_dashboard(self) -> str:
         """Generate a terminal-based dashboard."""
         dashboard = []
-        
+
         # Header
         dashboard.append(f"{Colors.CYAN}{Colors.BOLD}")
         dashboard.append("🚀 PIPELINE-ARCHITECT DASHBOARD")
         dashboard.append("=" * 50)
         dashboard.append(f"{Colors.RESET}")
-        
+
         if not self.pipeline_data:
             dashboard.append(f"{Colors.YELLOW}⚠️ No pipeline data available{Colors.RESET}")
             return "\n".join(dashboard)
-        
+
         # Pipeline Overview
-        pipeline_id = self.pipeline_data.get('pipeline_id', 'Unknown')
-        status = self.pipeline_data.get('status', 'unknown')
-        commit_sha = self.pipeline_data.get('commit_sha', 'Unknown')[:8]
-        branch = self.pipeline_data.get('branch', 'Unknown')
-        
+        pipeline_id = self.pipeline_data.get("pipeline_id", "Unknown")
+        status = self.pipeline_data.get("status", "unknown")
+        commit_sha = self.pipeline_data.get("commit_sha", "Unknown")[:8]
+        branch = self.pipeline_data.get("branch", "Unknown")
+
         dashboard.append(f"📊 {Colors.BOLD}Pipeline Overview{Colors.RESET}")
         dashboard.append(f"   ID: {Colors.CYAN}{pipeline_id}{Colors.RESET}")
         dashboard.append(f"   Status: {print_status(status)}")
         dashboard.append(f"   Commit: {Colors.CYAN}{commit_sha}{Colors.RESET}")
         dashboard.append(f"   Branch: {Colors.CYAN}{branch}{Colors.RESET}")
         dashboard.append("")
-        
+
         # Stage Status
-        stages = self.pipeline_data.get('stages', {})
+        stages = self.pipeline_data.get("stages", {})
         dashboard.append(f"🏗️ {Colors.BOLD}Stage Status{Colors.RESET}")
-        
+
         stage_info = [
-            ('🔍 Pre-flight', 'pre_flight'),
-            ('🏗️ Build', 'build'),
-            ('🧪 Tests', 'tests'),
-            ('🔒 Security', 'security'),
-            ('⚡ Performance', 'performance'),
-            ('🌐 E2E', 'e2e'),
-            ('🎭 Staging', 'staging_deploy'),
-            ('🚀 Production', 'production_deploy')
+            ("🔍 Pre-flight", "pre_flight"),
+            ("🏗️ Build", "build"),
+            ("🧪 Tests", "tests"),
+            ("🔒 Security", "security"),
+            ("⚡ Performance", "performance"),
+            ("🌐 E2E", "e2e"),
+            ("🎭 Staging", "staging_deploy"),
+            ("🚀 Production", "production_deploy"),
         ]
-        
+
         for stage_name, stage_key in stage_info:
-            stage_status = stages.get(stage_key, 'unknown')
+            stage_status = stages.get(stage_key, "unknown")
             dashboard.append(f"   {stage_name}: {print_status(stage_status)}")
-        
+
         dashboard.append("")
-        
+
         # Quality Metrics
         dashboard.append(f"📋 {Colors.BOLD}Quality Metrics{Colors.RESET}")
-        change_scope = self.pipeline_data.get('change_scope', 'unknown')
-        security_sensitive = self.pipeline_data.get('security_sensitive', False)
-        deployment_ready = self.pipeline_data.get('deployment_ready', False)
-        
+        change_scope = self.pipeline_data.get("change_scope", "unknown")
+        security_sensitive = self.pipeline_data.get("security_sensitive", False)
+        deployment_ready = self.pipeline_data.get("deployment_ready", False)
+
         dashboard.append(f"   Change Scope: {Colors.CYAN}{change_scope}{Colors.RESET}")
-        dashboard.append(f"   Security Sensitive: {Colors.RED if security_sensitive else Colors.GREEN}{'Yes' if security_sensitive else 'No'}{Colors.RESET}")
-        dashboard.append(f"   Deployment Ready: {Colors.GREEN if deployment_ready else Colors.RED}{'Yes' if deployment_ready else 'No'}{Colors.RESET}")
+        dashboard.append(
+            f"   Security Sensitive: {Colors.RED if security_sensitive else Colors.GREEN}{'Yes' if security_sensitive else 'No'}{Colors.RESET}"
+        )
+        dashboard.append(
+            f"   Deployment Ready: {Colors.GREEN if deployment_ready else Colors.RED}{'Yes' if deployment_ready else 'No'}{Colors.RESET}"
+        )
         dashboard.append("")
-        
+
         # Timing Information
-        start_time = self.pipeline_data.get('start_time')
-        end_time = self.pipeline_data.get('end_time')
-        
+        start_time = self.pipeline_data.get("start_time")
+        end_time = self.pipeline_data.get("end_time")
+
         if start_time and end_time:
-            start_dt = datetime.fromisoformat(start_time.replace('Z', '+00:00'))
-            end_dt = datetime.fromisoformat(end_time.replace('Z', '+00:00'))
+            start_dt = datetime.fromisoformat(start_time.replace("Z", "+00:00"))
+            end_dt = datetime.fromisoformat(end_time.replace("Z", "+00:00"))
             duration = end_dt - start_dt
-            
+
             dashboard.append(f"⏱️ {Colors.BOLD}Timing{Colors.RESET}")
-            dashboard.append(f"   Started: {Colors.CYAN}{start_dt.strftime('%Y-%m-%d %H:%M:%S UTC')}{Colors.RESET}")
+            dashboard.append(
+                f"   Started: {Colors.CYAN}{start_dt.strftime('%Y-%m-%d %H:%M:%S UTC')}{Colors.RESET}"
+            )
             dashboard.append(f"   Duration: {Colors.CYAN}{duration}{Colors.RESET}")
             dashboard.append("")
-        
+
         return "\n".join(dashboard)
-    
+
     def generate_html_dashboard(self) -> str:
         """Generate an HTML dashboard."""
         if not self.pipeline_data:
             return "<html><body><h1>No pipeline data available</h1></body></html>"
-        
+
         html = f"""
         <!DOCTYPE html>
         <html lang="en">
@@ -315,25 +325,33 @@ class PipelineDashboard:
                             </thead>
                             <tbody>
         """
-        
+
         # Add stage rows
-        stages = self.pipeline_data.get('stages', {})
+        stages = self.pipeline_data.get("stages", {})
         stage_info = [
-            ('🔍 Pre-flight Checks', 'pre_flight', 'Code quality and security validation'),
-            ('🏗️ Build & Package', 'build', 'Artifact creation and containerization'),
-            ('🧪 Test Suite', 'tests', 'Unit and integration testing'),
-            ('🔒 Security Validation', 'security', 'Security scanning and compliance'),
-            ('⚡ Performance Tests', 'performance', 'Performance benchmarks'),
-            ('🌐 E2E Tests', 'e2e', 'End-to-end system validation'),
-            ('🎭 Staging Deploy', 'staging_deploy', 'Staging environment deployment'),
-            ('🚀 Production Deploy', 'production_deploy', 'Production environment deployment')
+            ("🔍 Pre-flight Checks", "pre_flight", "Code quality and security validation"),
+            ("🏗️ Build & Package", "build", "Artifact creation and containerization"),
+            ("🧪 Test Suite", "tests", "Unit and integration testing"),
+            ("🔒 Security Validation", "security", "Security scanning and compliance"),
+            ("⚡ Performance Tests", "performance", "Performance benchmarks"),
+            ("🌐 E2E Tests", "e2e", "End-to-end system validation"),
+            ("🎭 Staging Deploy", "staging_deploy", "Staging environment deployment"),
+            ("🚀 Production Deploy", "production_deploy", "Production environment deployment"),
         ]
-        
+
         for stage_name, stage_key, stage_desc in stage_info:
-            status = stages.get(stage_key, 'unknown')
-            status_class = 'status-success' if status == 'success' else 'status-failure' if status == 'failure' else 'status-skipped'
-            status_text = '✅ Success' if status == 'success' else '❌ Failed' if status == 'failure' else '⏭️ Skipped'
-            
+            status = stages.get(stage_key, "unknown")
+            status_class = (
+                "status-success"
+                if status == "success"
+                else "status-failure" if status == "failure" else "status-skipped"
+            )
+            status_text = (
+                "✅ Success"
+                if status == "success"
+                else "❌ Failed" if status == "failure" else "⏭️ Skipped"
+            )
+
             html += f"""
                                 <tr>
                                     <td>{stage_name}</td>
@@ -341,7 +359,7 @@ class PipelineDashboard:
                                     <td>{stage_desc}</td>
                                 </tr>
             """
-        
+
         html += f"""
                             </tbody>
                         </table>
@@ -378,9 +396,9 @@ class PipelineDashboard:
         </body>
         </html>
         """
-        
+
         return html
-    
+
     def generate_mermaid_pipeline_graph(self) -> str:
         """Generate a Mermaid diagram showing pipeline flow."""
         mermaid = """
@@ -433,25 +451,26 @@ class PipelineDashboard:
         ```
         """
         return mermaid
-    
-    def generate_pipeline_report(self, output_format: str = 'terminal') -> str:
+
+    def generate_pipeline_report(self, output_format: str = "terminal") -> str:
         """Generate comprehensive pipeline report."""
-        if output_format == 'html':
+        if output_format == "html":
             return self.generate_html_dashboard()
-        elif output_format == 'mermaid':
+        elif output_format == "mermaid":
             return self.generate_mermaid_pipeline_graph()
         else:
             return self.generate_terminal_dashboard()
-    
+
     def save_report(self, report: str, output_path: str):
         """Save report to file."""
         try:
             Path(output_path).parent.mkdir(parents=True, exist_ok=True)
-            with open(output_path, 'w') as f:
+            with open(output_path, "w") as f:
                 f.write(report)
             print(f"{Colors.GREEN}✅ Report saved to: {output_path}{Colors.RESET}")
         except Exception as e:
             print(f"{Colors.RED}❌ Error saving report: {e}{Colors.RESET}")
+
 
 def create_sample_pipeline_data() -> Dict[str, Any]:
     """Create sample pipeline data for testing."""
@@ -470,30 +489,35 @@ def create_sample_pipeline_data() -> Dict[str, Any]:
         "stages": {
             "pre_flight": "success",
             "build": "success",
-            "tests": "success", 
+            "tests": "success",
             "security": "success",
             "performance": "success",
             "e2e": "success",
             "staging_deploy": "success",
-            "production_deploy": "success"
-        }
+            "production_deploy": "success",
+        },
     }
+
 
 def main():
     """Main entry point."""
-    parser = argparse.ArgumentParser(description='Pipeline Dashboard Generator')
-    parser.add_argument('--data', type=str, help='Path to pipeline data JSON file')
-    parser.add_argument('--format', choices=['terminal', 'html', 'mermaid'], 
-                        default='terminal', help='Output format')
-    parser.add_argument('--output', type=str, help='Output file path')
-    parser.add_argument('--sample', action='store_true', help='Use sample data')
-    
+    parser = argparse.ArgumentParser(description="Pipeline Dashboard Generator")
+    parser.add_argument("--data", type=str, help="Path to pipeline data JSON file")
+    parser.add_argument(
+        "--format",
+        choices=["terminal", "html", "mermaid"],
+        default="terminal",
+        help="Output format",
+    )
+    parser.add_argument("--output", type=str, help="Output file path")
+    parser.add_argument("--sample", action="store_true", help="Use sample data")
+
     args = parser.parse_args()
-    
+
     print_header("🚀 Pipeline Dashboard Generator", Colors.CYAN)
-    
+
     dashboard = PipelineDashboard()
-    
+
     if args.sample:
         print(f"{Colors.BLUE}📊 Using sample pipeline data{Colors.RESET}")
         dashboard.pipeline_data = create_sample_pipeline_data()
@@ -504,14 +528,15 @@ def main():
     else:
         print(f"{Colors.YELLOW}⚠️ No data source specified. Use --data or --sample{Colors.RESET}")
         sys.exit(1)
-    
+
     # Generate report
     report = dashboard.generate_pipeline_report(args.format)
-    
+
     if args.output:
         dashboard.save_report(report, args.output)
     else:
         print(report)
+
 
 if __name__ == "__main__":
     main()

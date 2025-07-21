@@ -1,9 +1,8 @@
 """Comprehensive test suite for PyMDP error handling module."""
 
-from unittest.mock import Mock, patch
+from unittest.mock import patch
 
 import numpy as np
-import pytest
 
 from agents.pymdp_error_handling import (
     PyMDPError,
@@ -24,9 +23,7 @@ class TestPyMDPError:
         original_error = ValueError("Test error")
         context = {"agent_id": "test-123", "operation": "test_op"}
 
-        error = PyMDPError(
-            PyMDPErrorType.NUMPY_CONVERSION, original_error, context
-        )
+        error = PyMDPError(PyMDPErrorType.NUMPY_CONVERSION, original_error, context)
 
         assert error.error_type == PyMDPErrorType.NUMPY_CONVERSION
         assert error.original_error == original_error
@@ -82,9 +79,7 @@ class TestPyMDPErrorHandler:
         def fallback_op():
             return "fallback_result"
 
-        success, result, error = handler.safe_execute(
-            "test_op", failing_op, fallback_op
-        )
+        success, result, error = handler.safe_execute("test_op", failing_op, fallback_op)
 
         assert success is False
         assert result == "fallback_result"
@@ -104,9 +99,7 @@ class TestPyMDPErrorHandler:
         def failing_fallback():
             raise RuntimeError("Fallback failed")
 
-        success, result, error = handler.safe_execute(
-            "test_op", failing_op, failing_fallback
-        )
+        success, result, error = handler.safe_execute("test_op", failing_op, failing_fallback)
 
         assert success is False
         assert result is None
@@ -125,16 +118,12 @@ class TestPyMDPErrorHandler:
 
         # First two attempts should use fallback
         for i in range(2):
-            success, result, error = handler.safe_execute(
-                "test_op", failing_op, fallback_op
-            )
+            success, result, error = handler.safe_execute("test_op", failing_op, fallback_op)
             assert success is False
             assert result == "recovered"
 
         # Third attempt should not use fallback
-        success, result, error = handler.safe_execute(
-            "test_op", failing_op, fallback_op
-        )
+        success, result, error = handler.safe_execute("test_op", failing_op, fallback_op)
         assert success is False
         assert result is None
         assert handler.operation_failures["test_op"] == 3
@@ -144,9 +133,7 @@ class TestPyMDPErrorHandler:
         handler = PyMDPErrorHandler("test-agent")
 
         error = TypeError("unhashable type: 'numpy.ndarray'")
-        assert (
-            handler._classify_error(error) == PyMDPErrorType.NUMPY_CONVERSION
-        )
+        assert handler._classify_error(error) == PyMDPErrorType.NUMPY_CONVERSION
 
     def test_classify_error_matrix_dimension(self):
         """Test error classification for matrix dimension errors."""
@@ -160,10 +147,7 @@ class TestPyMDPErrorHandler:
         ]
 
         for error in errors:
-            assert (
-                handler._classify_error(error)
-                == PyMDPErrorType.MATRIX_DIMENSION
-            )
+            assert handler._classify_error(error) == PyMDPErrorType.MATRIX_DIMENSION
 
     def test_classify_error_convergence(self):
         """Test error classification for convergence errors."""
@@ -176,10 +160,7 @@ class TestPyMDPErrorHandler:
         ]
 
         for error in errors:
-            assert (
-                handler._classify_error(error)
-                == PyMDPErrorType.INFERENCE_CONVERGENCE
-            )
+            assert handler._classify_error(error) == PyMDPErrorType.INFERENCE_CONVERGENCE
 
     def test_classify_error_policy_sampling(self):
         """Test error classification for policy sampling errors."""
@@ -192,10 +173,7 @@ class TestPyMDPErrorHandler:
         ]
 
         for error in errors:
-            assert (
-                handler._classify_error(error)
-                == PyMDPErrorType.POLICY_SAMPLING
-            )
+            assert handler._classify_error(error) == PyMDPErrorType.POLICY_SAMPLING
 
     def test_classify_error_belief_update(self):
         """Test error classification for belief update errors."""
@@ -208,9 +186,7 @@ class TestPyMDPErrorHandler:
         ]
 
         for error in errors:
-            assert (
-                handler._classify_error(error) == PyMDPErrorType.BELIEF_UPDATE
-            )
+            assert handler._classify_error(error) == PyMDPErrorType.BELIEF_UPDATE
 
     def test_classify_error_index(self):
         """Test error classification for index errors."""
@@ -237,10 +213,7 @@ class TestPyMDPErrorHandler:
         ]
 
         for error in errors:
-            assert (
-                handler._classify_error(error)
-                == PyMDPErrorType.NUMERICAL_INSTABILITY
-            )
+            assert handler._classify_error(error) == PyMDPErrorType.NUMERICAL_INSTABILITY
 
     def test_get_error_report(self):
         """Test error report generation."""
@@ -307,7 +280,7 @@ class TestSafeNumpyConversion:
     def test_numpy_multi_element_conversion(self):
         """Test converting multi-element arrays."""
         # Multi-element arrays should trigger warning and use first element
-        with patch('agents.pymdp_error_handling.logger') as mock_logger:
+        with patch("agents.pymdp_error_handling.logger") as mock_logger:
             result = safe_numpy_conversion(np.array([1, 2, 3]), int)
             # Check warning was logged
             mock_logger.warning.assert_called()
@@ -326,9 +299,7 @@ class TestSafeNumpyConversion:
         assert safe_numpy_conversion(3.14, float) == 3.14
         # Strings are treated as array-like, so it takes first character
         assert safe_numpy_conversion("hello", str) == "h"
-        assert (
-            safe_numpy_conversion(True, bool) == True
-        )  # Don't use 'is' for comparison
+        assert safe_numpy_conversion(True, bool) is True  # Don't use 'is' for comparison
 
     def test_none_conversion(self):
         """Test converting None values."""
@@ -347,7 +318,7 @@ class TestSafeNumpyConversion:
         # Invalid conversions should return default
         assert safe_numpy_conversion("not_a_number", int) == 0
         # Regular python list - the function tries to convert the whole list which fails
-        with patch('agents.pymdp_error_handling.logger') as mock_logger:
+        with patch("agents.pymdp_error_handling.logger"):
             result = safe_numpy_conversion([1, 2, 3], float, default=-1.0)
             assert result == -1.0  # Should return default on error
 
@@ -391,9 +362,6 @@ class TestValidatePyMDPMatrices:
     def test_valid_matrices(self):
         """Test validation of valid PyMDP matrices."""
         # Create valid matrices
-        num_obs = 3
-        num_states = 2
-        num_actions = 2
 
         A = np.array([[0.7, 0.8], [0.2, 0.1], [0.1, 0.1]])  # 3x2
         B = np.array(

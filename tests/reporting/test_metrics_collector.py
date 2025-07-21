@@ -170,25 +170,17 @@ class MetricsCollector:
         )
 
         # Create indexes
-        cursor.execute(
-            "CREATE INDEX IF NOT EXISTS idx_test_runs_timestamp ON test_runs(timestamp)"
-        )
-        cursor.execute(
-            "CREATE INDEX IF NOT EXISTS idx_test_metrics_run_id ON test_metrics(run_id)"
-        )
+        cursor.execute("CREATE INDEX IF NOT EXISTS idx_test_runs_timestamp ON test_runs(timestamp)")
+        cursor.execute("CREATE INDEX IF NOT EXISTS idx_test_metrics_run_id ON test_metrics(run_id)")
         cursor.execute(
             "CREATE INDEX IF NOT EXISTS idx_test_metrics_test_id ON test_metrics(test_id)"
         )
-        cursor.execute(
-            "CREATE INDEX IF NOT EXISTS idx_flaky_tests_test_id ON flaky_tests(test_id)"
-        )
+        cursor.execute("CREATE INDEX IF NOT EXISTS idx_flaky_tests_test_id ON flaky_tests(test_id)")
 
         conn.commit()
         conn.close()
 
-    def start_test_suite(
-        self, test_run_id: str, environment: str = "development"
-    ):
+    def start_test_suite(self, test_run_id: str, environment: str = "development"):
         """Start test suite metrics collection."""
         self.test_run_id = test_run_id
         self.environment = environment
@@ -241,9 +233,7 @@ class MetricsCollector:
         total_duration = end_time - (self.suite_start_time or end_time)
 
         # Count test statuses
-        status_counts = Counter(
-            metric.status for metric in self.current_metrics
-        )
+        status_counts = Counter(metric.status for metric in self.current_metrics)
 
         suite_metrics = SuiteMetrics(
             test_run_id=self.test_run_id,
@@ -459,9 +449,7 @@ class MetricsCollector:
         except ImportError:
             return None
 
-    def get_flaky_tests(
-        self, min_flaky_percentage: float = 10.0
-    ) -> List[Dict[str, Any]]:
+    def get_flaky_tests(self, min_flaky_percentage: float = 10.0) -> List[Dict[str, Any]]:
         """Get flaky tests above the minimum percentage."""
         conn = sqlite3.connect(self.db_path)
         cursor = conn.cursor()
@@ -495,9 +483,7 @@ class MetricsCollector:
         conn.close()
         return flaky_tests
 
-    def get_slow_tests(
-        self, min_duration: float = 1.0
-    ) -> List[Dict[str, Any]]:
+    def get_slow_tests(self, min_duration: float = 1.0) -> List[Dict[str, Any]]:
         """Get slow tests above the minimum duration."""
         conn = sqlite3.connect(self.db_path)
         cursor = conn.cursor()
@@ -531,9 +517,7 @@ class MetricsCollector:
         conn.close()
         return slow_tests
 
-    def get_test_trends(
-        self, days: int = 30
-    ) -> Dict[str, List[Dict[str, Any]]]:
+    def get_test_trends(self, days: int = 30) -> Dict[str, List[Dict[str, Any]]]:
         """Get test execution trends over time."""
         conn = sqlite3.connect(self.db_path)
         cursor = conn.cursor()
@@ -598,9 +582,7 @@ class MetricsCollector:
             "duration_trends": duration_trends,
         }
 
-    def generate_metrics_report(
-        self, output_path: str = "tests/reporting/metrics_report.html"
-    ):
+    def generate_metrics_report(self, output_path: str = "tests/reporting/metrics_report.html"):
         """Generate HTML metrics report."""
         flaky_tests = self.get_flaky_tests()
         slow_tests = self.get_slow_tests()
@@ -624,9 +606,7 @@ class MetricsCollector:
             logger.warning("No test run data found")
             return
 
-        pass_rate = (
-            (latest_run[3] / latest_run[2]) * 100 if latest_run[2] > 0 else 0
-        )
+        pass_rate = (latest_run[3] / latest_run[2]) * 100 if latest_run[2] > 0 else 0
 
         html_content = f"""
         <!DOCTYPE html>
@@ -762,9 +742,7 @@ class MetricsCollector:
         logger.info(f"HTML metrics report generated: {output_path}")
         return output_path
 
-    def export_metrics_json(
-        self, output_path: str = "tests/reporting/metrics_data.json"
-    ):
+    def export_metrics_json(self, output_path: str = "tests/reporting/metrics_data.json"):
         """Export metrics data as JSON."""
         data = {
             "flaky_tests": self.get_flaky_tests(),

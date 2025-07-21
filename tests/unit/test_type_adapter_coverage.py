@@ -24,11 +24,8 @@ class TestAgentTypeAdapter:
         """Test getting ID from database model."""
         # Test with UUID
         agent = Mock()
-        agent.id = uuid.UUID('12345678-1234-5678-1234-567812345678')
-        assert (
-            AgentTypeAdapter.get_id(agent)
-            == '12345678-1234-5678-1234-567812345678'
-        )
+        agent.id = uuid.UUID("12345678-1234-5678-1234-567812345678")
+        assert AgentTypeAdapter.get_id(agent) == "12345678-1234-5678-1234-567812345678"
 
         # Test with string ID
         agent.id = "test-id-123"
@@ -137,7 +134,7 @@ class TestAgentTypeAdapter:
         """Test converting agent to dictionary."""
         # Full database model
         agent = Mock()
-        agent.id = uuid.UUID('12345678-1234-5678-1234-567812345678')
+        agent.id = uuid.UUID("12345678-1234-5678-1234-567812345678")
         agent.name = "Test Agent"
         agent.status = StatusEnum.ACTIVE
         agent.position = (10, 20)
@@ -146,7 +143,7 @@ class TestAgentTypeAdapter:
         agent.metrics = {"score": 100}
 
         result = AgentTypeAdapter.to_dict(agent)
-        assert result["id"] == '12345678-1234-5678-1234-567812345678'
+        assert result["id"] == "12345678-1234-5678-1234-567812345678"
         assert result["name"] == "Test Agent"
         assert result["status"] == "active"
         assert result["position"] == "(10, 20)"
@@ -195,11 +192,8 @@ class TestCoalitionTypeAdapter:
         """Test getting ID from database model."""
         # Test with UUID
         coalition = Mock()
-        coalition.id = uuid.UUID('87654321-4321-8765-4321-876543218765')
-        assert (
-            CoalitionTypeAdapter.get_id(coalition)
-            == '87654321-4321-8765-4321-876543218765'
-        )
+        coalition.id = uuid.UUID("87654321-4321-8765-4321-876543218765")
+        assert CoalitionTypeAdapter.get_id(coalition) == "87654321-4321-8765-4321-876543218765"
 
         # Test with string ID
         coalition.id = "coal-id-123"
@@ -220,9 +214,7 @@ class TestCoalitionTypeAdapter:
 
         # Test with 'coalition_id' key
         coalition = {"coalition_id": "dict-coalition-id-012"}
-        assert (
-            CoalitionTypeAdapter.get_id(coalition) == "dict-coalition-id-012"
-        )
+        assert CoalitionTypeAdapter.get_id(coalition) == "dict-coalition-id-012"
 
     def test_get_id_raises_attribute_error(self):
         """Test get_id raises AttributeError for invalid objects."""
@@ -286,9 +278,7 @@ class TestCoalitionTypeAdapter:
 
         # Dict with members
         coalition = {"members": {"agent3": {"name": "Agent Three"}}}
-        assert CoalitionTypeAdapter.get_members(coalition) == {
-            "agent3": {"name": "Agent Three"}
-        }
+        assert CoalitionTypeAdapter.get_members(coalition) == {"agent3": {"name": "Agent Three"}}
 
         # Dict with agents
         coalition = {"agents": ["agent4", "agent5"]}
@@ -316,9 +306,7 @@ class TestCoalitionTypeAdapter:
 
         # From dict
         coalition = {"leader_id": "dict-leader-456"}
-        assert (
-            CoalitionTypeAdapter.get_leader_id(coalition) == "dict-leader-456"
-        )
+        assert CoalitionTypeAdapter.get_leader_id(coalition) == "dict-leader-456"
 
         # No leader attribute
         coalition = Mock()
@@ -349,7 +337,7 @@ class TestCoalitionTypeAdapter:
         """Test converting coalition to dictionary."""
         # Full database model
         coalition = Mock()
-        coalition.id = uuid.UUID('87654321-4321-8765-4321-876543218765')
+        coalition.id = uuid.UUID("87654321-4321-8765-4321-876543218765")
         coalition.name = "Test Coalition"
         coalition.status = StatusEnum.ACTIVE
         coalition.members = {
@@ -362,7 +350,7 @@ class TestCoalitionTypeAdapter:
         coalition.performance_score = 85.5
 
         result = CoalitionTypeAdapter.to_dict(coalition)
-        assert result["id"] == '87654321-4321-8765-4321-876543218765'
+        assert result["id"] == "87654321-4321-8765-4321-876543218765"
         assert result["name"] == "Test Coalition"
         assert result["status"] == "active"
         assert result["member_count"] == "2"

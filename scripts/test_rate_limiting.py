@@ -8,7 +8,6 @@ import asyncio
 import os
 import sys
 import time
-from concurrent.futures import ThreadPoolExecutor, as_completed
 
 import httpx
 
@@ -48,22 +47,14 @@ class RateLimitTester:
 
                 # Check for rate limit headers
                 rate_limit_headers = {
-                    "X-RateLimit-Limit": response.headers.get(
-                        "X-RateLimit-Limit"
-                    ),
-                    "X-RateLimit-Remaining": response.headers.get(
-                        "X-RateLimit-Remaining"
-                    ),
-                    "X-RateLimit-Reset": response.headers.get(
-                        "X-RateLimit-Reset"
-                    ),
+                    "X-RateLimit-Limit": response.headers.get("X-RateLimit-Limit"),
+                    "X-RateLimit-Remaining": response.headers.get("X-RateLimit-Remaining"),
+                    "X-RateLimit-Reset": response.headers.get("X-RateLimit-Reset"),
                     "Retry-After": response.headers.get("Retry-After"),
                 }
 
                 if any(rate_limit_headers.values()):
-                    self.results["rate_limit_headers"].append(
-                        rate_limit_headers
-                    )
+                    self.results["rate_limit_headers"].append(rate_limit_headers)
 
                 if response.status_code == 429:
                     self.results["rate_limited_requests"] += 1
@@ -85,9 +76,7 @@ class RateLimitTester:
     ):
         """Test rate limiting for a specific endpoint."""
         print(f"\nTesting endpoint: {endpoint}")
-        print(
-            f"Making {requests_per_test} requests with {delay_between_requests}s delay..."
-        )
+        print(f"Making {requests_per_test} requests with {delay_between_requests}s delay...")
 
         for i in range(requests_per_test):
             success, status, headers = await self.make_request(endpoint)
@@ -127,9 +116,7 @@ class RateLimitTester:
 
     async def test_authenticated_vs_anonymous(self, endpoint, auth_token=None):
         """Test different rate limits for authenticated vs anonymous users."""
-        print(
-            f"\nTesting authenticated vs anonymous rate limits on: {endpoint}"
-        )
+        print(f"\nTesting authenticated vs anonymous rate limits on: {endpoint}")
 
         # Test anonymous requests
         print("\nAnonymous requests:")
@@ -146,9 +133,7 @@ class RateLimitTester:
             headers = {"Authorization": f"Bearer {auth_token}"}
 
             for i in range(10):
-                success, status, rate_headers = await self.make_request(
-                    endpoint, headers
-                )
+                success, status, rate_headers = await self.make_request(endpoint, headers)
                 if status == 429:
                     print(f"  Request {i+1}: Rate limited!")
                 else:
@@ -186,9 +171,7 @@ class RateLimitTester:
         print("=" * 50)
         print(f"Total requests made: {self.results['total_requests']}")
         print(f"Successful requests: {self.results['successful_requests']}")
-        print(
-            f"Rate limited requests: {self.results['rate_limited_requests']}"
-        )
+        print(f"Rate limited requests: {self.results['rate_limited_requests']}")
         print(f"Errors: {self.results['errors']}")
 
         if self.results["response_times"]:
@@ -218,9 +201,7 @@ async def main():
     ]
 
     print("Starting rate limiting tests...")
-    print(
-        "Make sure the FastAPI application is running on http://localhost:8000"
-    )
+    print("Make sure the FastAPI application is running on http://localhost:8000")
     print("Make sure Redis is running for distributed rate limiting")
 
     # Test each endpoint

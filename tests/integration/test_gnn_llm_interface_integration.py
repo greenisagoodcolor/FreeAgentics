@@ -81,7 +81,7 @@ class GNNToLLMTransformer:
         description_parts = []
 
         # Overall graph characteristics
-        description_parts.append(f"Graph Analysis Summary:")
+        description_parts.append("Graph Analysis Summary:")
         description_parts.append(f"- Total nodes analyzed: {len(embeddings)}")
         description_parts.append(
             f"- Average embedding magnitude: {np.mean(embedding_norms):.3f}"
@@ -97,7 +97,7 @@ class GNNToLLMTransformer:
             len(embeddings) - high_activity_count - medium_activity_count
         )
 
-        description_parts.append(f"\nNode Activity Levels:")
+        description_parts.append("\nNode Activity Levels:")
         description_parts.append(
             f"- High activity nodes: {high_activity_count}"
         )
@@ -108,7 +108,7 @@ class GNNToLLMTransformer:
 
         # Connectivity analysis
         well_connected_count = np.sum(well_connected)
-        description_parts.append(f"\nConnectivity Analysis:")
+        description_parts.append("\nConnectivity Analysis:")
         description_parts.append(
             f"- Well-connected nodes: {well_connected_count}"
         )
@@ -124,7 +124,7 @@ class GNNToLLMTransformer:
                 -min(3, len(node_ids)) :
             ]
 
-            description_parts.append(f"\nKey Nodes Identified:")
+            description_parts.append("\nKey Nodes Identified:")
             for idx in reversed(top_indices):
                 node_id = node_ids[idx]
                 importance = importance_scores[idx]
@@ -134,7 +134,7 @@ class GNNToLLMTransformer:
 
         # Graph metadata integration
         if graph_metadata:
-            description_parts.append(f"\nGraph Context:")
+            description_parts.append("\nGraph Context:")
             for key, value in graph_metadata.items():
                 description_parts.append(f"- {key}: {value}")
 
@@ -504,7 +504,7 @@ class TestGNNLLMInterfaceIntegration:
             "connect" in text_description.lower()
         ), "Connectivity analysis missing"
 
-        logger.info(f"✓ Embedding→text transformation successful")
+        logger.info("✓ Embedding→text transformation successful")
         logger.info(f"  Text length: {len(text_description)} characters")
         logger.info(
             f"  Quality score: {validation_results['overall_quality']:.3f}"
@@ -516,7 +516,7 @@ class TestGNNLLMInterfaceIntegration:
         """Test LLM's ability to reason about graph structures from text descriptions."""
 
         if not llm_manager:
-            pytest.skip("LLM manager not available for testing")
+            assert False, "Test bypass removed - must fix underlying issue"
 
         # Generate text description from embeddings
         embeddings = test_graph_data["node_features"]
@@ -641,7 +641,7 @@ class TestGNNLLMInterfaceIntegration:
                     semantic_preservation_score > 0.6
                 ), f"Poor semantic preservation: {semantic_preservation_score}"
 
-                logger.info(f"✓ Round-trip semantic preservation successful")
+                logger.info("✓ Round-trip semantic preservation successful")
                 logger.info(
                     f"  Semantic preservation score: {semantic_preservation_score:.3f}"
                 )
@@ -769,7 +769,7 @@ class TestGNNLLMInterfaceIntegration:
             total_time < 30.0
         ), f"Overall pipeline too slow: {total_time:.3f}s"
 
-        logger.info(f"✓ Integration performance validation successful")
+        logger.info("✓ Integration performance validation successful")
         logger.info(f"  GNN processing: {gnn_time:.3f}s")
         logger.info(f"  Text transformation: {transform_time:.3f}s")
         logger.info(f"  Total pipeline: {total_time:.3f}s")
@@ -1002,7 +1002,7 @@ if __name__ == "__main__":
         total = len(results)
 
         print(f"\n{'='*60}")
-        print(f"GNN-LLM INTERFACE INTEGRATION TEST SUMMARY")
+        print("GNN-LLM INTERFACE INTEGRATION TEST SUMMARY")
         print(f"{'='*60}")
         print(f"Tests run: {total}")
         print(f"Passed: {passed}")

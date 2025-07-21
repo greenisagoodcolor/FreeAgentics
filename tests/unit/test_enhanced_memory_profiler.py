@@ -13,7 +13,7 @@ import tracemalloc
 import unittest
 from contextlib import contextmanager
 from dataclasses import dataclass
-from typing import Any, Dict, List, Optional, Tuple
+from typing import Any, Dict, List
 from unittest.mock import MagicMock, patch
 
 import numpy as np
@@ -22,9 +22,7 @@ import pytest
 # Add project root to path
 sys.path.insert(
     0,
-    os.path.dirname(
-        os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
-    ),
+    os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__)))),
 )
 
 
@@ -89,9 +87,7 @@ class EnhancedMemoryProfiler:
             tm_snapshot = tracemalloc.take_snapshot()
             top_stats = tm_snapshot.statistics("lineno")[:10]
             snapshot["tracemalloc"] = {
-                "total_size": sum(stat.size for stat in top_stats)
-                / 1024
-                / 1024,
+                "total_size": sum(stat.size for stat in top_stats) / 1024 / 1024,
                 "peak_size": tracemalloc.get_traced_memory()[1] / 1024 / 1024,
                 "top_allocations": [
                     {
@@ -113,9 +109,7 @@ class EnhancedMemoryProfiler:
             snapshot["memory_profiler"] = {
                 "rss_mb": mem_info.rss / 1024 / 1024,
                 "vms_mb": mem_info.vms / 1024 / 1024,
-                "available_mb": psutil.virtual_memory().available
-                / 1024
-                / 1024,
+                "available_mb": psutil.virtual_memory().available / 1024 / 1024,
             }
 
         # Pympler data (simulated)
@@ -151,10 +145,7 @@ class EnhancedMemoryProfiler:
         # Analyze tracemalloc data
         if self.tracemalloc_enabled and self.snapshots:
             latest = self.snapshots[-1]
-            if (
-                latest["tracemalloc"]
-                and "top_allocations" in latest["tracemalloc"]
-            ):
+            if latest["tracemalloc"] and "top_allocations" in latest["tracemalloc"]:
                 for alloc in latest["tracemalloc"]["top_allocations"]:
                     if alloc["size_mb"] > 1.0:  # Hotspot threshold: 1MB
                         hotspots.append(
@@ -170,9 +161,7 @@ class EnhancedMemoryProfiler:
         if self.pympler_enabled and self.snapshots:
             latest = self.snapshots[-1]
             if latest["pympler"] and "type_stats" in latest["pympler"]:
-                for type_name, stats in latest["pympler"][
-                    "type_stats"
-                ].items():
+                for type_name, stats in latest["pympler"]["type_stats"].items():
                     size_mb = stats["size"] / 1024 / 1024
                     if size_mb > 0.5:  # Type hotspot threshold: 0.5MB
                         hotspots.append(
@@ -214,10 +203,8 @@ class EnhancedMemoryProfiler:
         # Compare memory_profiler data
         if snap1["memory_profiler"] and snap2["memory_profiler"]:
             comparison["memory_profiler_diff"] = {
-                "rss_diff": snap2["memory_profiler"]["rss_mb"]
-                - snap1["memory_profiler"]["rss_mb"],
-                "vms_diff": snap2["memory_profiler"]["vms_mb"]
-                - snap1["memory_profiler"]["vms_mb"],
+                "rss_diff": snap2["memory_profiler"]["rss_mb"] - snap1["memory_profiler"]["rss_mb"],
+                "vms_diff": snap2["memory_profiler"]["vms_mb"] - snap1["memory_profiler"]["vms_mb"],
             }
 
         # Compare pympler data
@@ -250,25 +237,14 @@ class EnhancedMemoryProfiler:
 
             if first["tracemalloc"] and last["tracemalloc"]:
                 total_growth = (
-                    last["tracemalloc"]["total_size"]
-                    - first["tracemalloc"]["total_size"]
+                    last["tracemalloc"]["total_size"] - first["tracemalloc"]["total_size"]
                 )
-                peak_growth = (
-                    last["tracemalloc"]["peak_size"]
-                    - first["tracemalloc"]["peak_size"]
-                )
-                report.append(
-                    f"Tracemalloc total growth: {total_growth:+.2f} MB"
-                )
-                report.append(
-                    f"Tracemalloc peak growth: {peak_growth:+.2f} MB"
-                )
+                peak_growth = last["tracemalloc"]["peak_size"] - first["tracemalloc"]["peak_size"]
+                report.append(f"Tracemalloc total growth: {total_growth:+.2f} MB")
+                report.append(f"Tracemalloc peak growth: {peak_growth:+.2f} MB")
 
             if first["memory_profiler"] and last["memory_profiler"]:
-                rss_growth = (
-                    last["memory_profiler"]["rss_mb"]
-                    - first["memory_profiler"]["rss_mb"]
-                )
+                rss_growth = last["memory_profiler"]["rss_mb"] - first["memory_profiler"]["rss_mb"]
                 report.append(f"RSS memory growth: {rss_growth:+.2f} MB")
 
             report.append("")
@@ -301,9 +277,7 @@ class EnhancedMemoryProfiler:
                 )
 
             if snap["pympler"]:
-                report.append(
-                    f"Pympler - Total objects: {snap['pympler']['total_objects']}"
-                )
+                report.append(f"Pympler - Total objects: {snap['pympler']['total_objects']}")
 
         return "\n".join(report)
 
@@ -372,7 +346,7 @@ class TestEnhancedMemoryProfiler(unittest.TestCase):
         self.profiler.start_profiling(["tracemalloc"])
 
         # Allocate some memory
-        data = [i for i in range(10000)]
+        [i for i in range(10000)]
 
         snapshot = self.profiler.take_snapshot("test_snapshot")
 
@@ -406,9 +380,9 @@ class TestEnhancedMemoryProfiler(unittest.TestCase):
         self.profiler.start_profiling(["pympler"])
 
         # Create various objects
-        test_list = [i for i in range(1000)]
-        test_dict = {str(i): i for i in range(100)}
-        test_array = np.zeros((100, 100))
+        [i for i in range(1000)]
+        {str(i): i for i in range(100)}
+        np.zeros((100, 100))
 
         snapshot = self.profiler.take_snapshot("pympler_test")
 
@@ -423,13 +397,13 @@ class TestEnhancedMemoryProfiler(unittest.TestCase):
         self.profiler.start_profiling()
 
         # Create memory allocations
-        large_list = [i for i in range(100000)]  # ~3.8 MB
-        large_array = np.zeros((1000, 1000))  # ~8 MB
+        [i for i in range(100000)]  # ~3.8 MB
+        np.zeros((1000, 1000))  # ~8 MB
 
         self.profiler.take_snapshot("before")
 
         # More allocations
-        more_data = [str(i) * 100 for i in range(10000)]
+        [str(i) * 100 for i in range(10000)]
 
         self.profiler.take_snapshot("after")
 
@@ -448,7 +422,7 @@ class TestEnhancedMemoryProfiler(unittest.TestCase):
         self.profiler.take_snapshot("initial")
 
         # Allocate memory
-        data = [i for i in range(50000)]
+        [i for i in range(50000)]
 
         # Second snapshot
         time.sleep(0.1)  # Ensure time difference
@@ -461,9 +435,7 @@ class TestEnhancedMemoryProfiler(unittest.TestCase):
 
         if comparison["tracemalloc_diff"]:
             self.assertIn("total_size_diff", comparison["tracemalloc_diff"])
-            self.assertGreaterEqual(
-                comparison["tracemalloc_diff"]["total_size_diff"], 0
-            )
+            self.assertGreaterEqual(comparison["tracemalloc_diff"]["total_size_diff"], 0)
 
     def test_compare_snapshots_invalid_indices(self):
         """Test snapshot comparison with invalid indices."""
@@ -481,9 +453,9 @@ class TestEnhancedMemoryProfiler(unittest.TestCase):
 
         # Take multiple snapshots
         self.profiler.take_snapshot("start")
-        data1 = [i for i in range(10000)]
+        [i for i in range(10000)]
         self.profiler.take_snapshot("after_data1")
-        data2 = np.zeros((500, 500))
+        np.zeros((500, 500))
         self.profiler.take_snapshot("after_data2")
 
         # Analyze hotspots
@@ -515,14 +487,10 @@ class TestEnhancedMemoryProfiler(unittest.TestCase):
         comparison = self.profiler.compare_snapshots(0, 4)
 
         if comparison["tracemalloc_diff"]:
-            self.assertGreater(
-                comparison["tracemalloc_diff"]["total_size_diff"], 0
-            )
+            self.assertGreater(comparison["tracemalloc_diff"]["total_size_diff"], 0)
 
         if comparison["pympler_diff"]:
-            self.assertGreater(
-                comparison["pympler_diff"]["object_count_diff"], 0
-            )
+            self.assertGreater(comparison["pympler_diff"]["object_count_diff"], 0)
 
     def test_context_manager_profiling(self):
         """Test profiling with context manager pattern."""
@@ -538,15 +506,11 @@ class TestEnhancedMemoryProfiler(unittest.TestCase):
         with profile_operation(self.profiler, "test_operation"):
             # Simulate some work
             data = np.random.rand(1000, 1000)
-            result = np.sum(data)
+            np.sum(data)
 
         self.assertEqual(len(self.profiler.snapshots), 2)
-        self.assertEqual(
-            self.profiler.snapshots[0]["label"], "test_operation_start"
-        )
-        self.assertEqual(
-            self.profiler.snapshots[1]["label"], "test_operation_end"
-        )
+        self.assertEqual(self.profiler.snapshots[0]["label"], "test_operation_start")
+        self.assertEqual(self.profiler.snapshots[1]["label"], "test_operation_end")
 
     def test_agent_memory_profiling(self):
         """Test profiling agent memory usage patterns."""
@@ -560,9 +524,7 @@ class TestEnhancedMemoryProfiler(unittest.TestCase):
 
             def step(self):
                 # Simulate agent step
-                self.action_history.append(
-                    f"action_{len(self.action_history)}"
-                )
+                self.action_history.append(f"action_{len(self.action_history)}")
                 self.observations.append(np.random.rand(100))
 
         self.profiler.start_profiling()
@@ -585,7 +547,7 @@ class TestEnhancedMemoryProfiler(unittest.TestCase):
         self.profiler.take_snapshot("after_agent_operations")
 
         # Analyze
-        hotspots = self.profiler.analyze_hotspots()
+        self.profiler.analyze_hotspots()
         report = self.profiler.generate_report()
 
         # Verify memory growth tracking
@@ -593,9 +555,7 @@ class TestEnhancedMemoryProfiler(unittest.TestCase):
 
         if comparison["tracemalloc_diff"]:
             # Should show memory increase from agent creation and operations
-            self.assertGreater(
-                comparison["tracemalloc_diff"]["total_size_diff"], 0
-            )
+            self.assertGreater(comparison["tracemalloc_diff"]["total_size_diff"], 0)
 
         self.assertIn("Memory Timeline", report)
 

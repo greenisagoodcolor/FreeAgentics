@@ -2,35 +2,60 @@
 
 > **Multi-agent AI platform implementing Active Inference for autonomous, mathematically-principled intelligent systems**
 
-⚠️ **v0.0.1-prototype - Early Development Stage** ⚠️
+🛑 **v0.0.1-prototype - NOT READY FOR INVESTMENT** 🛑
 
 Building on work from John Clippinger, Andrea Pashea, and Daniel Friedman as well as the Active Inference Institute and many others.
 
-This is an early prototype for developers interested in Active Inference and multi-agent systems. **Core functionality has been recently implemented and tested.** Not ready for production use.
+This is an early prototype for developers interested in Active Inference and multi-agent systems. **Only ~20% of advertised functionality is actually working.** Not ready for production use or investment evaluation.
 
-📋 **Latest Status (2025-07-19)**: Real PyMDP Active Inference working! PostgreSQL database integration complete with SQLite fallback for easy development setup!
+📋 **Honest Status (2025-07-21)**: Basic PyMDP adapter working. Core pipeline (Prompt→LLM→GMN→PyMDP→KG→D3) NOT INTEGRATED. See [HONEST_PROJECT_STATUS.md](HONEST_PROJECT_STATUS.md) for full details.
 
 [![Python](https://img.shields.io/badge/python-3.9+-blue.svg)](https://www.python.org/)
 [![Node.js](https://img.shields.io/badge/node-18+-green.svg)](https://nodejs.org/)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
-[![Documentation](https://img.shields.io/badge/docs-partial-yellow.svg)](docs/)
-[![Status](https://img.shields.io/badge/status-alpha-orange.svg)](#implementation-status)
+[![Documentation](https://img.shields.io/badge/docs-30%25-red.svg)](docs/)
+[![Status](https://img.shields.io/badge/status-prototype-red.svg)](#implementation-status)
+[![Investment Ready](https://img.shields.io/badge/investment-NOT_READY-red.svg)](NEMESIS_RELEASE_BLOCKERS.md)
 
 ## 🎯 What is FreeAgentics?
 
 FreeAgentics creates **AI agents** using **Active Inference** - a mathematical framework from cognitive science. Unlike chatbots or scripted AI, our agents make decisions by minimizing free energy, leading to emergent, intelligent behavior.
 
-### ⚡ Features & Status
+## ⏰ Realistic Timeline to v1.0.0-alpha+
 
-- 🧠 **Mathematical Rigor**: Based on peer-reviewed Active Inference theory using `inferactively-pymdp` - **✅ WORKING**
-- 🗄️ **Database Integration**: PostgreSQL backend with real data persistence - **✅ WORKING**
-- 🧪 **Tested Implementation**: Comprehensive test suite covering core functionality - **✅ WORKING**
-- 🎯 **Active Inference Demo**: Real PyMDP agents with belief updates and free energy minimization - **✅ WORKING**
-- 🤖 **Basic Autonomy**: Actions emerge from Active Inference principles (BasicExplorerAgent) - **✅ WORKING**
-- 👥 **Multi-Agent Framework**: Infrastructure for multiple agents (coordination logic pending) - **15% complete**
-- 🎮 **Real-time Visualization**: Live dashboard showing belief states and decisions - **40% complete**
-- 🚀 **Production Ready**: Enterprise-grade performance and edge deployment - **5% started**
-- 📝 **GMN Specification**: Create agents using Generalized Notation Notation - **20% complete**
+Based on honest assessment of current state:
+- **Current**: v0.0.1-prototype (July 2025) - ~20% complete
+- **Phase 1**: Fix foundation issues (2-3 weeks) - Tests, linting, observability
+- **Phase 2**: Core integration (4-6 weeks) - GMN parser, LLM, Knowledge Graph, pipeline
+- **Phase 3**: Production hardening (2-3 weeks) - Performance, security, deployment
+- **Realistic v1.0.0-alpha+**: October-November 2025 (3-4 months)
+- **Investment Ready**: December 2025 (5 months)
+
+**Critical Blockers**: See [NEMESIS_RELEASE_BLOCKERS.md](NEMESIS_RELEASE_BLOCKERS.md) for the 50+ issues that must be resolved.
+
+### ⚡ Features & Status (HONEST ASSESSMENT)
+
+**Actually Working** ✅:
+- 🧠 **PyMDP Adapter**: Basic Active Inference wrapper using `inferactively-pymdp` - **70% complete**
+- 🗄️ **Database Integration**: PostgreSQL/SQLite backends functional - **80% complete**
+- 🤖 **BasicExplorerAgent**: Simple grid world agent with belief updates - **60% complete**
+- 🌐 **API Server**: FastAPI with /health endpoint (missing /metrics) - **50% complete**
+- 🏗️ **Docker Builds**: Multi-arch development builds work - **70% complete**
+
+**Partially Implemented** 🚧:
+- 🎮 **Visualization**: D3 force layout exists but not integrated - **40% complete**
+- 🧪 **Test Suite**: 32 tests exist but 5 files have errors, coverage broken - **40% complete**
+- 🔌 **LLM Interface**: Provider interface defined, no implementation - **20% complete**
+- 👥 **Multi-Agent Framework**: Basic structure, no coordination - **15% complete**
+
+**Not Implemented** ❌:
+- 📝 **GMN Parser**: No implementation found - **0% complete**
+- 🔗 **End-to-End Pipeline**: Prompt→LLM→GMN→PyMDP→KG→D3 NOT CONNECTED - **0% complete**
+- 📊 **Knowledge Graph Backend**: Frontend components exist, no backend - **10% complete**
+- 📈 **Observability**: No /metrics, no Prometheus, no traces - **0% complete**
+- 🚀 **Production Ready**: Missing benchmarks, security, deployment - **5% complete**
+
+**Overall Project Completion: ~20%** - See [NEMESIS_RELEASE_BLOCKERS.md](NEMESIS_RELEASE_BLOCKERS.md)
 
 ## 🚀 Quick Start & Developer Setup
 

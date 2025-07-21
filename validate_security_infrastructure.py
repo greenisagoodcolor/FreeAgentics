@@ -5,7 +5,6 @@ Validate Security Testing Infrastructure
 Simple validation script to check if all security modules are properly structured.
 """
 
-import os
 import sys
 from pathlib import Path
 
@@ -122,9 +121,7 @@ def validate_security_features():
                     missing_checks.append(check)
 
             if missing_checks:
-                print(
-                    f"⚠️  {feature_name}: Missing features: {missing_checks}"
-                )
+                print(f"⚠️  {feature_name}: Missing features: {missing_checks}")
             else:
                 print(f"✅ {feature_name}: All key features present")
 
@@ -240,17 +237,13 @@ def main():
     if passed == total:
         print("\n🎉 Security testing infrastructure is properly configured!")
         print("\nNext steps:")
-        print(
-            "1. Install required dependencies: pip install bandit semgrep safety"
-        )
+        print("1. Install required dependencies: pip install bandit semgrep safety")
         print("2. Configure API keys for threat intelligence feeds")
         print("3. Run security scans: python security/testing/sast_scanner.py")
         print("4. Set up GitHub Actions secrets for automation")
         return True
     else:
-        print(
-            f"\n⚠️  {total - passed} validation(s) failed. Please review and fix issues."
-        )
+        print(f"\n⚠️  {total - passed} validation(s) failed. Please review and fix issues.")
         return False
 
 

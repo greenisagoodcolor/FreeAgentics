@@ -35,6 +35,7 @@ def mock_redis_for_api_tests(request):
     if "test_api" in request.node.name:
         try:
             from tests.mocks.mock_redis import patch_redis_imports
+
             patch_redis_imports()
         except ImportError:
             pass  # Mock not needed
@@ -45,4 +46,5 @@ def mock_redis_for_api_tests(request):
 def mock_redis_client():
     """Provide a mock Redis client."""
     from tests.mocks.mock_redis import create_mock_redis_client
+
     return create_mock_redis_client()
