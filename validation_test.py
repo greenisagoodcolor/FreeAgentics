@@ -159,7 +159,7 @@ try:
     response = requests.get("http://localhost:8000/api/v1/health", timeout=5)
     print("✅ Backend API is running")
     results["components"]["backend_api"] = "PASS"
-except:
+except Exception:
     # Try to start it
     print("⚠️  Backend API not running (import issues prevent startup)")
     results["components"]["backend_api"] = "FAIL: Import issues"
