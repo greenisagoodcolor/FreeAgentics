@@ -13,6 +13,7 @@ import psutil
 project_root = Path(__file__).parent
 sys.path.insert(0, str(project_root))
 
+# Project imports after path setup
 from agents.memory_optimization.agent_memory_optimizer import (
     get_agent_optimizer,
 )
