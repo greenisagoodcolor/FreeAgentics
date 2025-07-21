@@ -1,5 +1,5 @@
 # Optimized Multi-stage build for FreeAgentics
-FROM python:3.11.9-slim AS base
+FROM python: AS base
 
 # Set environment variables
 ENV PYTHONUNBUFFERED=1 \

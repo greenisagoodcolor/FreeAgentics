@@ -1,4 +1,4 @@
-FROM nginx:1.25-alpine
+FROM nginx:
 
 # Install dependencies
 RUN apk add --no-cache \
