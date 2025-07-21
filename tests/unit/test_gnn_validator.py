@@ -18,7 +18,6 @@ try:
         GMNValidator,
         ValidationError,
         ValidationResult,
-        logger,
     )
 
     IMPORT_SUCCESS = True

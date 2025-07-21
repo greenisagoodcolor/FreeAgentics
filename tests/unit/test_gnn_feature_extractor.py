@@ -20,7 +20,6 @@ try:
         FeatureType,
         NodeFeatureExtractor,
         NormalizationStrategy,
-        logger,
     )
 
     IMPORT_SUCCESS = True

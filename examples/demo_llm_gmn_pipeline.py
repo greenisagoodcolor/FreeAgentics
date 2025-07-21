@@ -37,10 +37,7 @@ def main():
     print("\n🔍 Checking LLM Provider Availability...")
 
     try:
-        from inference.llm.provider_factory import (
-            create_llm_manager,
-            get_provider_factory,
-        )
+        from inference.llm.provider_factory import create_llm_manager
         from inference.llm.provider_interface import GenerationRequest
         from config.llm_config import get_llm_config
 
@@ -81,8 +78,7 @@ def main():
     # Check for PyMDP
     print("\n🔍 Checking PyMDP Availability...")
     try:
-        import pymdp
-
+        __import__("pymdp")
         print("✅ PyMDP Available")
         pymdp_available = True
     except ImportError:

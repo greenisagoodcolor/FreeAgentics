@@ -332,7 +332,6 @@ try:
     from api.v1.agents import router as agents_router
     from api.v1.auth import router as auth_router
     from api.v1.knowledge import router as knowledge_router
-    from api.v1.prompts import router as prompts_router
     from api.v1.system import router as system_router
     from api.v1.websocket import router as websocket_router
 

@@ -107,7 +107,7 @@ class OllamaProvider(LLMProvider):
                 timeout=aiohttp.ClientTimeout(total=5.0),
             ) as response:
                 return response.status == 200
-        except:
+        except (OSError, IOError, ConnectionError, TimeoutError):
             return False
 
     async def _ensure_model_available(self, model: str) -> None:
@@ -166,7 +166,7 @@ class OllamaProvider(LLMProvider):
                     self._available_models = [m["name"] for m in data.get("models", [])]
                     self._models_last_check = datetime.now()
                     return self._available_models
-        except:
+        except (OSError, IOError, ConnectionError, TimeoutError):
             pass
 
         return []

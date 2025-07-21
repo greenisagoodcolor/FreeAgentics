@@ -8,7 +8,7 @@ def check_file_for_any_error(filepath):
     try:
         with open(filepath, "r", encoding="utf-8") as f:
             content = f.read()
-    except:
+    except (OSError, IOError, UnicodeDecodeError):
         return False
 
     # Check if file uses 'Any' in type annotations
