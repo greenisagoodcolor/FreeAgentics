@@ -28,7 +28,9 @@ router = APIRouter()
 class PromptRequest(BaseModel):
     """Request model for creating agent from prompt."""
 
-    prompt: str = Field(..., description="Goal prompt describing desired agent behavior")
+    prompt: str = Field(
+        ..., description="Goal prompt describing desired agent behavior"
+    )
     agent_name: Optional[str] = Field(None, description="Optional name for the agent")
     llm_provider: Optional[str] = Field("openai", description="LLM provider to use")
     model: Optional[str] = Field(None, description="Specific model to use")
@@ -80,12 +82,14 @@ async def create_agent_from_prompt(
         except Exception as e:
             logger.error(f"Failed to get LLM provider: {e}")
             raise HTTPException(
-                status_code=503, detail="No LLM providers available. Please configure API keys."
+                status_code=503,
+                detail="No LLM providers available. Please configure API keys.",
             )
 
         if not provider:
             raise HTTPException(
-                status_code=503, detail=f"LLM provider {request.llm_provider} not available"
+                status_code=503,
+                detail=f"LLM provider {request.llm_provider} not available",
             )
 
         # Construct GMN generation prompt
@@ -132,7 +136,9 @@ Ensure all probability distributions sum to 1.0."""
             gmn_spec = json.loads(gmn_response.content)
         except json.JSONDecodeError as e:
             logger.error(f"Failed to parse LLM response as JSON: {e}")
-            raise HTTPException(status_code=422, detail="LLM generated invalid JSON for GMN spec")
+            raise HTTPException(
+                status_code=422, detail="LLM generated invalid JSON for GMN spec"
+            )
 
         # Step 2: Validate GMN spec
         logger.info("Validating generated GMN spec...")
@@ -143,19 +149,21 @@ Ensure all probability distributions sum to 1.0."""
             # Try to regenerate if we have retries left
             if request.max_retries > 0:
                 # Add error to prompt and retry
-                user_prompt += (
-                    f"\n\nPrevious attempt failed with: {str(e)}\nPlease fix and regenerate."
-                )
+                user_prompt += f"\n\nPrevious attempt failed with: {str(e)}\nPlease fix and regenerate."
                 request.max_retries -= 1
                 return await create_agent_from_prompt(request, current_user)
-            raise HTTPException(status_code=422, detail=f"Generated GMN spec is invalid: {str(e)}")
+            raise HTTPException(
+                status_code=422, detail=f"Generated GMN spec is invalid: {str(e)}"
+            )
 
         # Step 3: Convert to PyMDP format
         logger.info("Converting GMN to PyMDP format...")
         pymdp_model = adapt_gmn_to_pymdp(validated_gmn)
 
         # Step 4: Create agent with the model
-        agent_name = request.agent_name or gmn_spec.get("name", f"agent_{uuid4().hex[:8]}")
+        agent_name = request.agent_name or gmn_spec.get(
+            "name", f"agent_{uuid4().hex[:8]}"
+        )
         agent_id = f"agent_{uuid4().hex}"
 
         # Create agent using the validated model
@@ -164,7 +172,9 @@ Ensure all probability distributions sum to 1.0."""
         )
 
         if not agent:
-            raise HTTPException(status_code=500, detail="Failed to create agent from GMN model")
+            raise HTTPException(
+                status_code=500, detail="Failed to create agent from GMN model"
+            )
 
         # Step 5: Initialize knowledge graph for the agent
         from agents.kg_integration import AgentKnowledgeGraphIntegration
@@ -200,7 +210,9 @@ Ensure all probability distributions sum to 1.0."""
             generation_time_ms=generation_time,
         )
 
-        logger.info(f"Successfully created agent {agent_id} from prompt in {generation_time:.1f}ms")
+        logger.info(
+            f"Successfully created agent {agent_id} from prompt in {generation_time:.1f}ms"
+        )
         return response
 
     except HTTPException:

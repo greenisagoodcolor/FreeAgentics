@@ -58,7 +58,9 @@ class SparseBeliefState:
         if len(self.shape) == 2:
             rows = self.indices // self.shape[1]
             cols = self.indices % self.shape[1]
-            return sparse.csr_matrix((self.data, (rows, cols)), shape=self.shape, dtype=self.dtype)
+            return sparse.csr_matrix(
+                (self.data, (rows, cols)), shape=self.shape, dtype=self.dtype
+            )
         else:
             raise ValueError("Conversion to scipy sparse only supports 2D arrays")
 
@@ -75,7 +77,9 @@ class BeliefCompressor:
         self.sparsity_threshold = sparsity_threshold
         self._component_cache: Dict[str, Any] = {}
 
-    def compress(self, belief: np.ndarray, dtype: np.dtype = DEFAULT_DTYPE) -> SparseBeliefState:
+    def compress(
+        self, belief: np.ndarray, dtype: np.dtype = DEFAULT_DTYPE
+    ) -> SparseBeliefState:
         """Compress a belief state to sparse format.
 
         Args:
@@ -92,7 +96,10 @@ class BeliefCompressor:
         sparsity = 1 - (np.count_nonzero(belief) / belief.size)
 
         if sparsity < self.sparsity_threshold:
-            logger.debug(f"Belief sparsity {sparsity:.1%} below threshold, using dense" f" storage")
+            logger.debug(
+                f"Belief sparsity {sparsity:.1%} below threshold, using dense"
+                f" storage"
+            )
             # For non-sparse beliefs, store all values
             data = belief.ravel()
             indices = np.arange(belief.size, dtype=np.int32)
@@ -102,7 +109,9 @@ class BeliefCompressor:
             data = belief.ravel()[nonzero_indices]
             indices = nonzero_indices.astype(np.int32)
 
-        return SparseBeliefState(data=data, indices=indices, shape=belief.shape, dtype=dtype)
+        return SparseBeliefState(
+            data=data, indices=indices, shape=belief.shape, dtype=dtype
+        )
 
     def decompress(self, sparse_belief: SparseBeliefState) -> np.ndarray:
         """Decompress a sparse belief state to dense format.

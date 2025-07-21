@@ -213,7 +213,9 @@ class ResourceCollectorAgent(ActiveInferenceAgent):
         max_len = max(len(p) for p in policies)
         padded_policies = []
         for policy in policies:
-            padded = policy + [policy[-1]] * (max_len - len(policy))  # Repeat last action
+            padded = policy + [policy[-1]] * (
+                max_len - len(policy)
+            )  # Repeat last action
             padded_policies.append(padded)
 
         return np.array(padded_policies)
@@ -283,7 +285,9 @@ class ResourceCollectorAgent(ActiveInferenceAgent):
         """Use LLM to assess resource value and strategy."""
         try:
             visible_resources = [
-                cell for cell in observation.get("visible_cells", []) if cell["type"] == "resource"
+                cell
+                for cell in observation.get("visible_cells", [])
+                if cell["type"] == "resource"
             ]
 
             if visible_resources:
@@ -356,7 +360,10 @@ class ResourceCollectorAgent(ActiveInferenceAgent):
                     action = self._fallback_action_selection()
 
                 # Override if necessary
-                if self.current_load >= self.carrying_capacity and action != "return_to_base":
+                if (
+                    self.current_load >= self.carrying_capacity
+                    and action != "return_to_base"
+                ):
                     action = "return_to_base"
 
             except Exception as e:
@@ -398,7 +405,9 @@ class ResourceCollectorAgent(ActiveInferenceAgent):
 
         for pos, resource in self.resource_memory.items():
             if not resource["collected"]:
-                distance = abs(pos[0] - self.position[0]) + abs(pos[1] - self.position[1])
+                distance = abs(pos[0] - self.position[0]) + abs(
+                    pos[1] - self.position[1]
+                )
                 if distance < min_distance:
                     min_distance = distance
                     nearest = pos
@@ -462,7 +471,9 @@ class ResourceCollectorAgent(ActiveInferenceAgent):
             total_cost = self.metrics.get("movement_cost", 0) + self.metrics.get(
                 "collection_cost", 0
             )
-            self.collection_efficiency = self.metrics["collections"] / max(total_cost, 1.0)
+            self.collection_efficiency = self.metrics["collections"] / max(
+                total_cost, 1.0
+            )
 
     def get_status(self) -> Dict[str, Any]:
         """Get collector agent status."""
@@ -536,7 +547,9 @@ class ResourceCollectorAgent(ActiveInferenceAgent):
 
             # Expected free energy (simplified)
             if hasattr(self.pymdp_agent, "G") and self.pymdp_agent.G is not None:
-                fe_components["expected_free_energy"] = float(np.mean(self.pymdp_agent.G))
+                fe_components["expected_free_energy"] = float(
+                    np.mean(self.pymdp_agent.G)
+                )
 
             return fe_components
 

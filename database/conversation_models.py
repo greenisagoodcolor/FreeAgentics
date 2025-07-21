@@ -46,7 +46,9 @@ class Conversation(Base):
     is_active = Column(Boolean, default=True)
 
     # Relationships
-    messages = relationship("Message", back_populates="conversation", cascade="all, delete-orphan")
+    messages = relationship(
+        "Message", back_populates="conversation", cascade="all, delete-orphan"
+    )
 
     def __repr__(self):
         return f"<Conversation(id={self.id}, title='{self.title}')>"

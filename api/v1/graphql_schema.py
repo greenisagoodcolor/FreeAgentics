@@ -239,7 +239,9 @@ def _create_query_resolvers(
             return None
 
         @strawberry.field
-        def coalitions(self, status: Optional[str] = None, limit: int = 100) -> List[Coalition]:
+        def coalitions(
+            self, status: Optional[str] = None, limit: int = 100
+        ) -> List[Coalition]:
             """Get list of coalitions."""
             # Mock implementation
             mock_coalitions = [
@@ -282,7 +284,9 @@ def _create_query_resolvers(
             return None
 
         @strawberry.field
-        def objectives(self, completed: Optional[bool] = None, limit: int = 100) -> List[Objective]:
+        def objectives(
+            self, completed: Optional[bool] = None, limit: int = 100
+        ) -> List[Objective]:
             """Get list of objectives."""
             # Mock implementation
             mock_objectives = [
@@ -307,7 +311,9 @@ def _create_query_resolvers(
             ]
 
             if completed is not None:
-                mock_objectives = [o for o in mock_objectives if o.completed == completed]
+                mock_objectives = [
+                    o for o in mock_objectives if o.completed == completed
+                ]
 
             return mock_objectives[:limit]
 
@@ -350,7 +356,9 @@ def _create_query_resolvers(
             # Filter by capabilities if provided
             if capabilities:
                 filtered_agents = [
-                    a for a in filtered_agents if any(cap in a.capabilities for cap in capabilities)
+                    a
+                    for a in filtered_agents
+                    if any(cap in a.capabilities for cap in capabilities)
                 ]
 
             return filtered_agents
@@ -424,7 +432,9 @@ def _create_mutation_resolvers(
             )
 
         @strawberry.mutation
-        def add_coalition_member(self, coalition_id: str, agent_id: str) -> Optional[Coalition]:
+        def add_coalition_member(
+            self, coalition_id: str, agent_id: str
+        ) -> Optional[Coalition]:
             """Add an agent to a coalition."""
             # Mock implementation
             if coalition_id == "coalition_1":
@@ -580,7 +590,9 @@ def _create_graphql_schema_and_router():
     ) = _create_graphql_input_types()
 
     # Create resolvers
-    Query = _create_query_resolvers(Agent, Coalition, Objective, WorldState, SystemMetrics)
+    Query = _create_query_resolvers(
+        Agent, Coalition, Objective, WorldState, SystemMetrics
+    )
     Mutation = _create_mutation_resolvers(
         Agent,
         Coalition,

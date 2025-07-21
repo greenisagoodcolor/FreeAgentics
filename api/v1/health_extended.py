@@ -83,9 +83,13 @@ class HealthChecker:
                     "total": pool_status.total_connections if pool_status else 0,
                     "active": pool_status.active if pool_status else 0,
                     "idle": pool_status.idle if pool_status else 0,
-                    "idle_in_transaction": pool_status.idle_in_transaction if pool_status else 0,
+                    "idle_in_transaction": (
+                        pool_status.idle_in_transaction if pool_status else 0
+                    ),
                 },
-                "database_size_mb": round(db_size.size / 1024 / 1024, 2) if db_size else 0,
+                "database_size_mb": (
+                    round(db_size.size / 1024 / 1024, 2) if db_size else 0
+                ),
                 "slow_queries": slow_queries.count if slow_queries else 0,
             }
 
@@ -128,10 +132,13 @@ class HealthChecker:
                 "latency_ms": round(latency, 2),
                 "version": info.get("redis_version", "unknown"),
                 "connected_clients": info.get("connected_clients", 0),
-                "used_memory_mb": round(memory_info.get("used_memory", 0) / 1024 / 1024, 2),
+                "used_memory_mb": round(
+                    memory_info.get("used_memory", 0) / 1024 / 1024, 2
+                ),
                 "memory_usage_ratio": (
                     round(
-                        memory_info.get("used_memory", 0) / memory_info.get("maxmemory", 1),
+                        memory_info.get("used_memory", 0)
+                        / memory_info.get("maxmemory", 1),
                         3,
                     )
                     if memory_info.get("maxmemory", 0) > 0
@@ -332,7 +339,9 @@ async def readiness_check(db: Session = Depends(get_db)):
         return {"status": "ready"}
 
     except Exception as e:
-        return JSONResponse(content={"status": "not_ready", "error": str(e)}, status_code=503)
+        return JSONResponse(
+            content={"status": "not_ready", "error": str(e)}, status_code=503
+        )
 
 
 @router.get("/health/live")
@@ -384,7 +393,9 @@ async def startup_check(db: Session = Depends(get_db)):
         }
 
     except Exception as e:
-        return JSONResponse(content={"status": "starting", "error": str(e)}, status_code=503)
+        return JSONResponse(
+            content={"status": "starting", "error": str(e)}, status_code=503
+        )
 
 
 @router.get("/health/dependencies")
@@ -473,7 +484,9 @@ async def check_elasticsearch_external() -> Dict[str, Any]:
                 if resp.status == 200:
                     data = await resp.json()
                     return {
-                        "status": "healthy" if data.get("status") != "red" else "unhealthy",
+                        "status": (
+                            "healthy" if data.get("status") != "red" else "unhealthy"
+                        ),
                         "cluster_status": data.get("status", "unknown"),
                     }
         return {"status": "unhealthy", "error": "Unable to connect"}

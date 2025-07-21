@@ -17,7 +17,9 @@ from pydantic import BaseModel, Field
 class BaseResponse(BaseModel):
     """Base response model with common fields."""
 
-    timestamp: datetime = Field(default_factory=datetime.now, description="Response timestamp")
+    timestamp: datetime = Field(
+        default_factory=datetime.now, description="Response timestamp"
+    )
     status: str = Field("success", description="Response status")
 
 
@@ -27,7 +29,9 @@ class ErrorResponse(BaseModel):
     error: str = Field(..., description="Error type")
     message: str = Field(..., description="Error message")
     field: Optional[str] = Field(None, description="Field that caused the error")
-    timestamp: datetime = Field(default_factory=datetime.now, description="Error timestamp")
+    timestamp: datetime = Field(
+        default_factory=datetime.now, description="Error timestamp"
+    )
 
 
 class SuccessResponse(BaseResponse):
@@ -57,7 +61,9 @@ class AgentResponse(BaseModel):
     created_at: datetime = Field(..., description="Creation timestamp")
     last_active: Optional[datetime] = Field(None, description="Last activity timestamp")
     inference_count: int = Field(0, description="Number of inferences performed")
-    parameters: Dict[str, Any] = Field(default_factory=dict, description="Agent parameters")
+    parameters: Dict[str, Any] = Field(
+        default_factory=dict, description="Agent parameters"
+    )
 
 
 class ConversationResponse(BaseModel):
@@ -90,8 +96,12 @@ class HealthCheckResponse(BaseModel):
     """Health check response model."""
 
     status: str = Field(..., description="Overall system status")
-    timestamp: datetime = Field(default_factory=datetime.now, description="Check timestamp")
-    services: List[Dict[str, Any]] = Field(..., description="Individual service statuses")
+    timestamp: datetime = Field(
+        default_factory=datetime.now, description="Check timestamp"
+    )
+    services: List[Dict[str, Any]] = Field(
+        ..., description="Individual service statuses"
+    )
     version: str = Field(..., description="Application version")
 
 
@@ -101,7 +111,9 @@ class TokenResponse(BaseModel):
     access_token: str = Field(..., description="JWT access token")
     token_type: str = Field("bearer", description="Token type")
     expires_in: int = Field(..., description="Token expiration time in seconds")
-    user: Dict[str, Union[str, bool, List[str]]] = Field(..., description="User information")
+    user: Dict[str, Union[str, bool, List[str]]] = Field(
+        ..., description="User information"
+    )
 
 
 class UserPermissionsResponse(BaseModel):
@@ -178,7 +190,9 @@ NodeListResponse = List[NodeResponse]
 EdgeListResponse = List[EdgeResponse]
 
 # Union types for flexible responses
-FlexibleResponse = Union[SuccessResponse, ErrorResponse, Dict[str, Any], List[Dict[str, Any]]]
+FlexibleResponse = Union[
+    SuccessResponse, ErrorResponse, Dict[str, Any], List[Dict[str, Any]]
+]
 
 StringResponse = Dict[str, str]
 IntResponse = Dict[str, int]

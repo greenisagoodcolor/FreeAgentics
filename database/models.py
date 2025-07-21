@@ -122,7 +122,9 @@ class Agent(Base):
     )
 
     # Knowledge graph nodes created by this agent
-    knowledge_nodes = relationship("KnowledgeNode", back_populates="creator_agent", lazy="select")
+    knowledge_nodes = relationship(
+        "KnowledgeNode", back_populates="creator_agent", lazy="select"
+    )
 
     def to_dict(self) -> dict:
         """Convert agent to dictionary for API responses."""
@@ -194,7 +196,9 @@ class Coalition(Base):
             "performance_score": self.performance_score,
             "cohesion_score": self.cohesion_score,
             "created_at": self.created_at.isoformat(),
-            "dissolved_at": self.dissolved_at.isoformat() if self.dissolved_at else None,
+            "dissolved_at": (
+                self.dissolved_at.isoformat() if self.dissolved_at else None
+            ),
             "agent_count": len(self.agents),
         }
 
@@ -224,7 +228,9 @@ class KnowledgeNode(Base):
     source = Column(String(100), nullable=True)
 
     # Creator agent relationship
-    creator_agent_id: Column[Optional[str]] = Column(GUID(), ForeignKey("agents.id"), nullable=True)
+    creator_agent_id: Column[Optional[str]] = Column(
+        GUID(), ForeignKey("agents.id"), nullable=True
+    )
     creator_agent = relationship("Agent", back_populates="knowledge_nodes")
 
     # Timestamps

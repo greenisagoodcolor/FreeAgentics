@@ -108,7 +108,9 @@ class CircuitBreaker:
 
             if self.state == "HALF_OPEN":
                 if self.half_open_calls >= self.half_open_max_calls:
-                    raise Exception("Circuit breaker is HALF_OPEN with max calls exceeded")
+                    raise Exception(
+                        "Circuit breaker is HALF_OPEN with max calls exceeded"
+                    )
                 self.half_open_calls += 1
 
         try:
@@ -170,13 +172,17 @@ class WebSocketConnectionPool:
 
     def _start_background_tasks(self):
         """Start background maintenance tasks."""
-        self._cleanup_task = threading.Thread(target=self._cleanup_expired_connections, daemon=True)
+        self._cleanup_task = threading.Thread(
+            target=self._cleanup_expired_connections, daemon=True
+        )
         self._metrics_task = threading.Thread(target=self._update_metrics, daemon=True)
 
         self._cleanup_task.start()
         self._metrics_task.start()
 
-    async def get_connection(self, client_id: str, pool_name: str = "default") -> WebSocket:
+    async def get_connection(
+        self, client_id: str, pool_name: str = "default"
+    ) -> WebSocket:
         """Get a connection from the pool or create a new one."""
         start_time = time.time()
 
@@ -189,9 +195,9 @@ class WebSocketConnectionPool:
             connection_time = time.time() - start_time
             with self._metrics_lock:
                 self.metrics.connection_times.append(connection_time)
-                self.metrics.avg_connection_time = sum(self.metrics.connection_times) / len(
+                self.metrics.avg_connection_time = sum(
                     self.metrics.connection_times
-                )
+                ) / len(self.metrics.connection_times)
                 self.metrics.max_connection_time = max(
                     self.metrics.max_connection_time, connection_time
                 )
@@ -207,7 +213,9 @@ class WebSocketConnectionPool:
             logger.error(f"Failed to get connection for {client_id}: {e}")
             raise
 
-    async def _get_or_create_connection(self, client_id: str, pool_name: str) -> WebSocket:
+    async def _get_or_create_connection(
+        self, client_id: str, pool_name: str
+    ) -> WebSocket:
         """Get or create a connection for the specified client."""
         with self._connections_lock:
             if client_id in self.active_connections:
@@ -229,7 +237,9 @@ class WebSocketConnectionPool:
         # Create new connection if pool is empty
         # Note: In real implementation, this would create WebSocket connection
         # For now, we'll return a placeholder
-        logger.info(f"Creating new WebSocket connection for {client_id} in pool" f" {pool_name}")
+        logger.info(
+            f"Creating new WebSocket connection for {client_id} in pool" f" {pool_name}"
+        )
         return None  # Placeholder - would be actual WebSocket connection
 
     def return_connection(self, client_id: str):
@@ -288,11 +298,15 @@ class WebSocketConnectionPool:
                         for pool in self.connection_pools.values()
                     )
                     if total_capacity > 0:
-                        used_capacity = sum(len(pool) for pool in self.connection_pools.values())
+                        used_capacity = sum(
+                            len(pool) for pool in self.connection_pools.values()
+                        )
                         self.metrics.pool_utilization = used_capacity / total_capacity
 
                     # Update utilization history
-                    self.metrics.utilization_history.append(self.metrics.pool_utilization)
+                    self.metrics.utilization_history.append(
+                        self.metrics.pool_utilization
+                    )
                     if len(self.metrics.utilization_history) > 100:
                         self.metrics.utilization_history.pop(0)
 
@@ -327,7 +341,9 @@ class WebSocketConnectionPool:
         with self._connections_lock, self._pools_lock:
             return {
                 "active_connections": len(self.active_connections),
-                "pools": {name: len(pool) for name, pool in self.connection_pools.items()},
+                "pools": {
+                    name: len(pool) for name, pool in self.connection_pools.items()
+                },
                 "total_pools": len(self.connection_pools),
                 "circuit_breaker_state": self.circuit_breaker.state,
                 "metrics": self.metrics,
@@ -500,7 +516,9 @@ class ResourceMonitor:
         self._lock = threading.Lock()
 
         # Start monitoring thread
-        self._monitor_thread = threading.Thread(target=self._monitor_resources, daemon=True)
+        self._monitor_thread = threading.Thread(
+            target=self._monitor_resources, daemon=True
+        )
         self._monitor_thread.start()
 
     def _monitor_resources(self):
@@ -516,8 +534,12 @@ class ResourceMonitor:
                     "cpu_percent": cpu_percent,
                     "memory_percent": memory.percent,
                     "memory_available_mb": memory.available / (1024 * 1024),
-                    "disk_read_mb": (disk_io.read_bytes / (1024 * 1024) if disk_io else 0),
-                    "disk_write_mb": (disk_io.write_bytes / (1024 * 1024) if disk_io else 0),
+                    "disk_read_mb": (
+                        disk_io.read_bytes / (1024 * 1024) if disk_io else 0
+                    ),
+                    "disk_write_mb": (
+                        disk_io.write_bytes / (1024 * 1024) if disk_io else 0
+                    ),
                 }
 
                 with self._lock:
@@ -541,11 +563,17 @@ class ResourceMonitor:
             latest = self.metrics_history[-1]
 
             # Calculate averages over last 60 seconds
-            recent_metrics = [m for m in self.metrics_history if time.time() - m["timestamp"] < 60]
+            recent_metrics = [
+                m for m in self.metrics_history if time.time() - m["timestamp"] < 60
+            ]
 
             if recent_metrics:
-                avg_cpu = sum(m["cpu_percent"] for m in recent_metrics) / len(recent_metrics)
-                avg_memory = sum(m["memory_percent"] for m in recent_metrics) / len(recent_metrics)
+                avg_cpu = sum(m["cpu_percent"] for m in recent_metrics) / len(
+                    recent_metrics
+                )
+                avg_memory = sum(m["memory_percent"] for m in recent_metrics) / len(
+                    recent_metrics
+                )
             else:
                 avg_cpu = latest["cpu_percent"]
                 avg_memory = latest["memory_percent"]

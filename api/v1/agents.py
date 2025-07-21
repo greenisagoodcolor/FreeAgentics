@@ -36,8 +36,12 @@ class AgentConfig(BaseModel):
     gmn_spec: Optional[str] = Field(
         None, description="GMN specification for Active Inference model"
     )
-    use_pymdp: Optional[bool] = Field(True, description="Whether to use PyMDP for Active Inference")
-    planning_horizon: Optional[int] = Field(3, description="Planning horizon for Active Inference")
+    use_pymdp: Optional[bool] = Field(
+        True, description="Whether to use PyMDP for Active Inference"
+    )
+    planning_horizon: Optional[int] = Field(
+        3, description="Planning horizon for Active Inference"
+    )
 
 
 class Agent(BaseModel):
@@ -192,7 +196,9 @@ async def get_agent(
 
         agent_uuid = UUID(agent_id)
     except ValueError:
-        raise HTTPException(status_code=400, detail=f"Invalid agent ID format: {agent_id}")
+        raise HTTPException(
+            status_code=400, detail=f"Invalid agent ID format: {agent_id}"
+        )
 
     db_agent = db.query(AgentModel).filter(AgentModel.id == agent_uuid).first()
     if not db_agent:
@@ -227,7 +233,9 @@ async def update_agent_status(
 
         agent_uuid = UUID(agent_id)
     except ValueError:
-        raise HTTPException(status_code=400, detail=f"Invalid agent ID format: {agent_id}")
+        raise HTTPException(
+            status_code=400, detail=f"Invalid agent ID format: {agent_id}"
+        )
 
     db_agent = db.query(AgentModel).filter(AgentModel.id == agent_uuid).first()
     if not db_agent:
@@ -277,7 +285,9 @@ async def delete_agent(
 
         agent_uuid = UUID(agent_id)
     except ValueError:
-        raise HTTPException(status_code=400, detail=f"Invalid agent ID format: {agent_id}")
+        raise HTTPException(
+            status_code=400, detail=f"Invalid agent ID format: {agent_id}"
+        )
 
     db_agent = db.query(AgentModel).filter(AgentModel.id == agent_uuid).first()
     if not db_agent:
@@ -312,7 +322,9 @@ async def get_agent_metrics(
 
         agent_uuid = UUID(agent_id)
     except ValueError:
-        raise HTTPException(status_code=400, detail=f"Invalid agent ID format: {agent_id}")
+        raise HTTPException(
+            status_code=400, detail=f"Invalid agent ID format: {agent_id}"
+        )
 
     db_agent = db.query(AgentModel).filter(AgentModel.id == agent_uuid).first()
     if not db_agent:
@@ -338,8 +350,12 @@ class GMNAgentRequest(BaseModel):
 
     name: str = Field(..., min_length=1, max_length=100)
     gmn_spec: str = Field(..., description="GMN specification string or JSON")
-    template: str = Field("gmn_agent", description="Agent template for GMN-based agents")
-    planning_horizon: Optional[int] = Field(3, description="Planning horizon for Active Inference")
+    template: str = Field(
+        "gmn_agent", description="Agent template for GMN-based agents"
+    )
+    planning_horizon: Optional[int] = Field(
+        3, description="Planning horizon for Active Inference"
+    )
 
 
 @router.post("/agents/from-gmn", response_model=Agent, status_code=201)
@@ -398,7 +414,9 @@ async def create_agent_from_gmn(
         db.commit()
         db.refresh(db_agent)
 
-        logger.info(f"Created GMN agent in DB: {db_agent.id} with {len(gmn_graph.nodes)} GMN nodes")
+        logger.info(
+            f"Created GMN agent in DB: {db_agent.id} with {len(gmn_graph.nodes)} GMN nodes"
+        )
 
         # Return API model
         return Agent(
@@ -413,7 +431,9 @@ async def create_agent_from_gmn(
 
     except Exception as e:
         logger.error(f"Failed to create agent from GMN: {e}")
-        raise HTTPException(status_code=400, detail=f"Invalid GMN specification: {str(e)}")
+        raise HTTPException(
+            status_code=400, detail=f"Invalid GMN specification: {str(e)}"
+        )
 
 
 @router.get("/agents/{agent_id}/gmn", response_model=dict)
@@ -429,7 +449,9 @@ async def get_agent_gmn_spec(
 
         agent_uuid = UUID(agent_id)
     except ValueError:
-        raise HTTPException(status_code=400, detail=f"Invalid agent ID format: {agent_id}")
+        raise HTTPException(
+            status_code=400, detail=f"Invalid agent ID format: {agent_id}"
+        )
 
     db_agent = db.query(AgentModel).filter(AgentModel.id == agent_uuid).first()
     if not db_agent:
@@ -463,7 +485,9 @@ async def update_agent_gmn_spec(
 
         agent_uuid = UUID(agent_id)
     except ValueError:
-        raise HTTPException(status_code=400, detail=f"Invalid agent ID format: {agent_id}")
+        raise HTTPException(
+            status_code=400, detail=f"Invalid agent ID format: {agent_id}"
+        )
 
     db_agent = db.query(AgentModel).filter(AgentModel.id == agent_uuid).first()
     if not db_agent:
@@ -502,7 +526,9 @@ async def update_agent_gmn_spec(
 
     except Exception as e:
         logger.error(f"Failed to update GMN spec: {e}")
-        raise HTTPException(status_code=400, detail=f"Invalid GMN specification: {str(e)}")
+        raise HTTPException(
+            status_code=400, detail=f"Invalid GMN specification: {str(e)}"
+        )
 
 
 @router.get("/gmn/examples")

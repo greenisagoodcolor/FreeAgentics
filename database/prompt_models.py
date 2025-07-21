@@ -60,9 +60,7 @@ class Conversation(Base):
     )
 
     # Primary key
-    id: Column[uuid.UUID] = Column(
-        GUID(), primary_key=True, default=uuid.uuid4
-    )
+    id: Column[uuid.UUID] = Column(GUID(), primary_key=True, default=uuid.uuid4)
 
     # User association
     user_id: Column[str] = Column(String(100), nullable=False)
@@ -106,9 +104,7 @@ class Prompt(Base):
     )
 
     # Primary key
-    id: Column[uuid.UUID] = Column(
-        GUID(), primary_key=True, default=uuid.uuid4
-    )
+    id: Column[uuid.UUID] = Column(GUID(), primary_key=True, default=uuid.uuid4)
 
     # Conversation association
     conversation_id: Column[uuid.UUID] = Column(
@@ -162,9 +158,7 @@ class KnowledgeGraphUpdate(Base):
     )
 
     # Primary key
-    id: Column[uuid.UUID] = Column(
-        GUID(), primary_key=True, default=uuid.uuid4
-    )
+    id: Column[uuid.UUID] = Column(GUID(), primary_key=True, default=uuid.uuid4)
 
     # Prompt association
     prompt_id: Column[uuid.UUID] = Column(
@@ -174,9 +168,7 @@ class KnowledgeGraphUpdate(Base):
     # Update details
     node_id: Column[str] = Column(String(100), nullable=False)
     node_type: Column[str] = Column(String(50), nullable=False)
-    operation: Column[str] = Column(
-        String(20), nullable=False
-    )  # add, update, delete
+    operation: Column[str] = Column(String(20), nullable=False)  # add, update, delete
     properties: Column[dict] = Column(JSON, default=dict)
 
     # Success tracking
@@ -201,9 +193,7 @@ class PromptTemplate(Base):
     )
 
     # Primary key
-    id: Column[uuid.UUID] = Column(
-        GUID(), primary_key=True, default=uuid.uuid4
-    )
+    id: Column[uuid.UUID] = Column(GUID(), primary_key=True, default=uuid.uuid4)
 
     # Template metadata
     name: Column[str] = Column(String(100), nullable=False)
@@ -216,9 +206,7 @@ class PromptTemplate(Base):
     example_prompts: Column[list] = Column(JSON, default=list)
 
     # GMN hints
-    suggested_gmn_structure: Column[Optional[str]] = Column(
-        Text, nullable=True
-    )
+    suggested_gmn_structure: Column[Optional[str]] = Column(Text, nullable=True)
     constraints: Column[dict] = Column(JSON, default=dict)
 
     # Usage tracking

@@ -112,7 +112,9 @@ class AgentKnowledgeGraphIntegration:
             # Save graph periodically (every 10 updates)
             if len(self.graph.nodes) % 10 == 0:
                 self.storage_manager.save(self.graph)
-                logger.debug(f"Saved knowledge graph with {len(self.graph.nodes)} nodes")
+                logger.debug(
+                    f"Saved knowledge graph with {len(self.graph.nodes)} nodes"
+                )
 
         except Exception as e:
             logger.error(f"Failed to update knowledge graph: {e}")
@@ -136,10 +138,16 @@ class AgentKnowledgeGraphIntegration:
             ]
 
             # Sort by timestamp
-            agent_nodes.sort(key=lambda n: n.properties.get("timestamp", ""), reverse=True)
+            agent_nodes.sort(
+                key=lambda n: n.properties.get("timestamp", ""), reverse=True
+            )
 
             # Build history
-            history = {"agent_id": agent_id, "total_events": len(agent_nodes), "events": []}
+            history = {
+                "agent_id": agent_id,
+                "total_events": len(agent_nodes),
+                "events": [],
+            }
 
             for node in agent_nodes[:limit]:
                 event = {
