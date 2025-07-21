@@ -543,7 +543,7 @@ class TestActiveInferenceAgentIntegration:
         config = {"use_pymdp": True, "gmn_spec": gmn_spec}
 
         with patch("agents.base_agent.parse_gmn_spec") as mock_parse:
-            with patch("agents.base_agent.PyMDPAgent"):
+            with patch("pymdp.agent.Agent"):
                 mock_parse.return_value = {
                     "num_states": [4],
                     "num_obs": [4],
