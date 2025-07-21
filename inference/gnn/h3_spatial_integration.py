@@ -34,7 +34,8 @@ class H3SpatialProcessor:
         self.max_resolution = max_resolution
         self.h3_cache: Dict[str, Optional[str]] = {}
 
-    def latlng_to_h3(self, lat: float, lon: float, resolution: int = None) -> Optional[str]:
+    def latlng_to_h3(self, lat: float, lon: float,
+        resolution: int = None) -> Optional[str]:
         """Convert lat/lng to H3 index with caching."""
         if not H3_AVAILABLE:
             return None
@@ -87,7 +88,8 @@ class H3SpatialProcessor:
             logger.warning(f"H3 distance failed for {h3_index1}, {h3_index2}: {e}")
             return None
 
-    def adaptive_resolution(self, agent_density: float, observation_scale: float) -> int:
+    def adaptive_resolution(self, agent_density: float,
+        observation_scale: float) -> int:
         """Calculate adaptive H3 resolution based on agent density and scale."""
         # Base resolution
         resolution = self.default_resolution
@@ -106,15 +108,22 @@ class H3SpatialProcessor:
 
         return resolution
 
-    def create_h3_spatial_graph(self, h3_indices: List[str], k: int = 1) -> Tuple[Tensor, Tensor]:
+    def create_h3_spatial_graph(self, h3_indices: List[str],
+        k: int = 1) -> Tuple[Tensor, Tensor]:
         """Create spatial graph edges based on H3 adjacency."""
         if not H3_AVAILABLE or not h3_indices:
-            return torch.empty((2, 0), dtype=torch.long), torch.empty(0, dtype=torch.float32)
+            return torch.empty((2, 0), dtype=torch.long), torch.empty(0,
+                dtype=torch.float32)
 
         # Remove None values and create index mapping
-        valid_indices = [(i, h3_idx) for i, h3_idx in enumerate(h3_indices) if h3_idx is not None]
+        valid_indices = [
+            (i,
+            h3_idx) for i,
+            h3_idx in enumerate(h3_indices) if h3_idx is not None
+        ]
         if not valid_indices:
-            return torch.empty((2, 0), dtype=torch.long), torch.empty(0, dtype=torch.float32)
+            return torch.empty((2, 0), dtype=torch.long), torch.empty(0,
+                dtype=torch.float32)
 
         edges = []
         edge_weights = []
@@ -173,7 +182,8 @@ class H3MultiResolutionAnalyzer:
                 else:
                     res_features.append([lat, lon, 0.0])
 
-            features[f"resolution_{resolution}"] = torch.tensor(res_features, dtype=torch.float32)
+            features[f"resolution_{resolution}"] = torch.tensor(res_features,
+                dtype=torch.float32)
             features[f"h3_indices_{resolution}"] = h3_indices
 
         return features
@@ -268,7 +278,8 @@ class GNNSpatialIntegration:
         self.h3_processor = H3SpatialProcessor(default_resolution)
         self.multi_res_analyzer = H3MultiResolutionAnalyzer()
 
-    def create_spatial_aware_features(self, nodes: List[Dict[str, Any]]) -> Dict[str, Tensor]:
+    def create_spatial_aware_features(self, nodes: List[Dict[str, Any]]) -> Dict[str,
+        Tensor]:
         """Create spatially-aware features for GNN processing."""
         # Extract positions
         positions = []
@@ -310,7 +321,8 @@ class GNNSpatialIntegration:
 
         return multi_res_features
 
-    def adaptive_spatial_resolution(self, agents: List[Any], observation_scale: float) -> int:
+    def adaptive_spatial_resolution(self, agents: List[Any],
+        observation_scale: float) -> int:
         """Calculate adaptive spatial resolution for agent processing."""
         if not agents:
             return self.h3_processor.default_resolution
@@ -340,7 +352,8 @@ def integrate_h3_with_active_inference(
         and spatial_features["spatial_edge_index"].numel() > 0
     ):
         edge_index = spatial_features["spatial_edge_index"]
-        edge_weights = spatial_features.get("spatial_edge_weights", torch.ones(edge_index.size(1)))
+        edge_weights = spatial_features.get("spatial_edge_weights",
+            torch.ones(edge_index.size(1)))
 
         # Create spatial adjacency matrix for PyMDP
         num_nodes = max(edge_index.max().item() + 1, 1)

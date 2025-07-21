@@ -161,7 +161,8 @@ class WorkStealingThreadPool:
     def _start_threads(self):
         """Start worker threads."""
         for i in range(self.num_threads):
-            thread = threading.Thread(target=self._worker, args=(i,), name=f"WorkerThread-{i}")
+            thread = threading.Thread(target=self._worker, args=(i,),
+                name=f"WorkerThread-{i}")
             thread.start()
             self.threads.append(thread)
 
@@ -245,7 +246,8 @@ class AsyncAgentManagerOptimized:
     def start(self):
         """Start the async manager with dedicated event loop."""
         self._loop = asyncio.new_event_loop()
-        self._loop_thread = threading.Thread(target=self._run_event_loop, name="AsyncEventLoop")
+        self._loop_thread = threading.Thread(target=self._run_event_loop,
+            name="AsyncEventLoop")
         self._loop_thread.start()
 
     def _run_event_loop(self):
@@ -399,7 +401,8 @@ def benchmark_optimizations():
     with concurrent.futures.ThreadPoolExecutor(max_workers=16) as pool:
         futures = []
         for i in range(1000):
-            futures.append(pool.submit(lockfree_registry.register, f"agent_{i}", f"data_{i}"))
+            futures.append(pool.submit(lockfree_registry.register, f"agent_{i}",
+                f"data_{i}"))
         for f in futures:
             f.result()
     lockfree_time = time.perf_counter() - start

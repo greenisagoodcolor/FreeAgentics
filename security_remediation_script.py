@@ -93,64 +93,64 @@ from typing import List, Tuple
 
 class PasswordValidator:
     """Comprehensive password validation following security best practices."""
-    
+
     MIN_LENGTH = 12
     COMMON_PASSWORDS = {
         "password", "123456", "password123", "admin", "letmein",
         "qwerty", "abc123", "111111", "123123", "password1"
     }
-    
+
     @classmethod
     def validate(cls, password: str) -> Tuple[bool, List[str]]:
         """
         Validate password strength.
-        
+
         Returns:
             Tuple of (is_valid, list_of_errors)
         """
         errors = []
-        
+
         # Length check
         if len(password) < cls.MIN_LENGTH:
             errors.append(f"Password must be at least {cls.MIN_LENGTH} characters long")
-        
+
         # Complexity checks
         if not re.search(r'[A-Z]', password):
             errors.append("Password must contain at least one uppercase letter")
-            
+
         if not re.search(r'[a-z]', password):
             errors.append("Password must contain at least one lowercase letter")
-            
+
         if not re.search(r'[0-9]', password):
             errors.append("Password must contain at least one number")
-            
+
         if not re.search(r'[!@#$%^&*(),.?":{}|<>]', password):
             errors.append("Password must contain at least one special character")
-        
+
         # Common password check
         if password.lower() in cls.COMMON_PASSWORDS:
             errors.append("Password is too common and easily guessable")
-        
+
         # Sequential character check
         if cls._has_sequential_chars(password):
             errors.append("Password contains sequential characters")
-        
+
         return len(errors) == 0, errors
-    
+
     @staticmethod
     def _has_sequential_chars(password: str, threshold: int = 3) -> bool:
         """Check for sequential characters like 'abc' or '123'."""
         for i in range(len(password) - threshold + 1):
             substr = password[i:i + threshold]
-            
+
             # Check ascending
             if all(ord(substr[j]) == ord(substr[j-1]) + 1 for j in range(1, len(substr))):
                 return True
-                
+
             # Check descending
             if all(ord(substr[j]) == ord(substr[j-1]) - 1 for j in range(1, len(substr))):
                 return True
-                
+
         return False
 '''
 
@@ -222,7 +222,7 @@ JWT private keys have been detected in the repository. This is a critical securi
    # In your JWT handler:
    import os
    from cryptography.hazmat.primitives import serialization
-   
+
    # Load from environment
    private_key = os.environ['JWT_PRIVATE_KEY']
    public_key = os.environ['JWT_PUBLIC_KEY']
@@ -238,7 +238,7 @@ JWT private keys have been detected in the repository. This is a critical securi
    # Generate new RSA key pair
    openssl genrsa -out jwt_private.pem 4096
    openssl rsa -in jwt_private.pem -pubout -out jwt_public.pem
-   
+
    # Store in environment variables
    export JWT_PRIVATE_KEY="$(cat jwt_private.pem)"
    export JWT_PUBLIC_KEY="$(cat jwt_public.pem)"
@@ -265,20 +265,20 @@ from typing import Callable
 
 class SecurityHeadersMiddleware:
     """Middleware to add comprehensive security headers to all responses."""
-    
+
     def __init__(self, app):
         self.app = app
-    
+
     async def __call__(self, request: Request, call_next: Callable) -> Response:
         response = await call_next(request)
-        
+
         # Add security headers
         response.headers["X-Content-Type-Options"] = "nosniff"
         response.headers["X-Frame-Options"] = "DENY"
         response.headers["X-XSS-Protection"] = "1; mode=block"
         response.headers["Referrer-Policy"] = "strict-origin-when-cross-origin"
         response.headers["Permissions-Policy"] = "geolocation=(), microphone=(), camera=()"
-        
+
         # Content Security Policy
         csp = (
             "default-src 'self'; "
@@ -290,11 +290,11 @@ class SecurityHeadersMiddleware:
             "frame-ancestors 'none';"
         )
         response.headers["Content-Security-Policy"] = csp
-        
+
         # Strict Transport Security (if HTTPS)
         if request.url.scheme == "https":
             response.headers["Strict-Transport-Security"] = "max-age=31536000; includeSubDomains; preload"
-        
+
         return response
 '''
 

@@ -246,7 +246,8 @@ class MemoryMappedBuffer:
 
         # Create memory map
         self._file = open(self.filename, "r+b")
-        self._mmap = mmap.mmap(self._file.fileno(), self.buffer_size, access=mmap.ACCESS_WRITE)
+        self._mmap = mmap.mmap(self._file.fileno(), self.buffer_size,
+            access=mmap.ACCESS_WRITE)
         self._array = np.frombuffer(self._mmap, dtype=dtype).reshape(shape)
 
         # Thread safety
@@ -298,7 +299,8 @@ class MemoryMappedBuffer:
 
             # Create new mapping
             self._file = open(self.filename, "r+b")
-            self._mmap = mmap.mmap(self._file.fileno(), self.buffer_size, access=mmap.ACCESS_WRITE)
+            self._mmap = mmap.mmap(self._file.fileno(), self.buffer_size,
+                access=mmap.ACCESS_WRITE)
             self._array = np.frombuffer(self._mmap, dtype=self.dtype).reshape(new_shape)
 
             # Copy old data with proper 2D indexing
@@ -360,7 +362,8 @@ class CompactActionHistory:
         # Storage
         self._actions = np.zeros(max_actions, dtype=self.action_dtype)
         self._timestamps = np.zeros(max_actions, dtype=np.float32)
-        self._rewards = np.zeros(max_actions, dtype=np.float16)  # Half precision for rewards
+        self._rewards = np.zeros(max_actions,
+            dtype=np.float16)  # Half precision for rewards
 
         # Circular buffer state
         self._head = 0
@@ -383,7 +386,8 @@ class CompactActionHistory:
             self._head = (self._head + 1) % self.max_actions
             self._size = min(self._size + 1, self.max_actions)
 
-    def get_recent_actions(self, count: int) -> Tuple[np.ndarray, np.ndarray, np.ndarray]:
+    def get_recent_actions(self, count: int) -> Tuple[np.ndarray, np.ndarray,
+        np.ndarray]:
         """Get recent actions.
 
         Args:
@@ -456,7 +460,8 @@ class CompactActionHistory:
 
     def memory_usage_bytes(self) -> int:
         """Get memory usage in bytes."""
-        return int(self._actions.nbytes + self._timestamps.nbytes + self._rewards.nbytes)
+        return int(self._actions.nbytes + self._timestamps.nbytes +
+            self._rewards.nbytes)
 
     def compress_old_entries(self, keep_recent: int = 100):
         """Compress old entries by downsampling.
@@ -481,7 +486,8 @@ class CompactActionHistory:
             old_rewards = rewards[:-keep_recent]
 
             # Downsample old entries (keep every nth entry)
-            downsample_factor = max(2, len(old_actions) // (self.max_actions - keep_recent))
+            downsample_factor = max(2,
+                len(old_actions) // (self.max_actions - keep_recent))
             downsampled_indices = np.arange(0, len(old_actions), downsample_factor)
 
             downsampled_actions = old_actions[downsampled_indices]
@@ -490,7 +496,8 @@ class CompactActionHistory:
 
             # Combine downsampled old + recent
             combined_actions = np.concatenate([downsampled_actions, recent_actions])
-            combined_timestamps = np.concatenate([downsampled_timestamps, recent_timestamps])
+            combined_timestamps = np.concatenate([downsampled_timestamps,
+                recent_timestamps])
             combined_rewards = np.concatenate([downsampled_rewards, recent_rewards])
 
             # Reset buffer and add combined data
@@ -551,7 +558,8 @@ class EfficientTemporalSequence:
 
             # Check if we should store a new base state
             should_store_base = (
-                len(self._deltas) % self._base_interval == 0 or len(self._base_states) == 0
+                len(self._deltas) % self._base_interval == 0 or
+                    len(self._base_states) == 0
             )
 
             if should_store_base:
@@ -851,7 +859,8 @@ class CompactKnowledgeGraph:
         """
         with self._lock:
             nodes_mb = (
-                self._node_ids.nbytes + self._node_types.nbytes + self._node_features.data.nbytes
+                self._node_ids.nbytes + self._node_types.nbytes +
+                    self._node_features.data.nbytes
             ) / (1024 * 1024)
 
             edges_mb = (
@@ -864,7 +873,8 @@ class CompactKnowledgeGraph:
             total_mb = nodes_mb + edges_mb
 
             # Calculate efficiency
-            utilization = (self._num_nodes / self.max_nodes + self._num_edges / self.max_edges) / 2
+            utilization = (self._num_nodes / self.max_nodes +
+                self._num_edges / self.max_edges) / 2
 
             return {
                 "nodes_mb": nodes_mb,

@@ -48,7 +48,10 @@ class ActiveInferenceGridAdapter:
         if hasattr(ai_agent, "position"):
             ai_agent.position = initial_position
 
-        logger.info(f"Registered agent {ai_agent.agent_id} at position {initial_position}")
+        logger.info(
+            f"Registered agent {ai_agent.agent_id} at position"
+            f" {initial_position}"
+        )
         return grid_agent
 
     def unregister_agent(self, agent_id: str):

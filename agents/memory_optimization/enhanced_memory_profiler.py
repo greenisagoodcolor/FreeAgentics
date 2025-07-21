@@ -196,7 +196,8 @@ class EnhancedMemoryProfiler:
                 return
 
             self._monitoring = True
-            self._monitor_thread = threading.Thread(target=self._monitor_loop, daemon=True)
+            self._monitor_thread = threading.Thread(target=self._monitor_loop,
+                daemon=True)
             self._monitor_thread.start()
             logger.info("Started continuous memory monitoring")
 
@@ -389,7 +390,8 @@ class EnhancedMemoryProfiler:
                     continue
 
                 # Check for consistent growth
-                growth_count = sum(1 for i in range(1, len(sizes)) if sizes[i] > sizes[i - 1])
+                growth_count = sum(1 for i in range(1, len(sizes)) if
+                    sizes[i] > sizes[i - 1])
 
                 if growth_count >= len(sizes) * 0.7:  # 70% growth trend
                     # Calculate growth rate
@@ -420,7 +422,10 @@ class EnhancedMemoryProfiler:
                 peak_memory_mb=initial_memory,
             )
 
-            logger.info(f"Registered agent {agent_id} with baseline memory {initial_memory:.2f} MB")
+            logger.info(
+                f"Registered agent {agent_id} with baseline memory"
+                f" {initial_memory:.2f} MB"
+            )
 
     def update_agent_memory(self, agent_id: str, agent_obj: Any):
         """Update memory tracking for an agent.
@@ -586,9 +591,11 @@ class EnhancedMemoryProfiler:
     def _generate_tools_section(self) -> List[str]:
         """Generate the profiling tools status section."""
         report = ["## Profiling Tools"]
-        report.append(f"- Tracemalloc: {'Enabled' if self.tracemalloc_enabled else 'Disabled'}")
+        report.append(f"- Tracemalloc: {'Enabled' if self.tracemalloc_enabled else
+            'Disabled'}")
         report.append(
-            f"- Memory Profiler: {'Enabled' if self.memory_profiler_enabled else 'Disabled'}"
+            f"- Memory Profiler: {'Enabled' if self.memory_profiler_enabled else
+                'Disabled'}"
         )
         report.append(f"- Pympler: {'Enabled' if self.pympler_enabled else 'Disabled'}")
         report.append("")
@@ -703,19 +710,22 @@ class EnhancedMemoryProfiler:
             if snap["tracemalloc"]:
                 tm = snap["tracemalloc"]
                 report.append(
-                    f"  Tracemalloc: {tm['current_mb']:.2f} MB current, {tm['peak_mb']:.2f} MB peak"
+                    f"  Tracemalloc: {tm['current_mb']:.2f} MB current,
+                        {tm['peak_mb']:.2f} MB peak"
                 )
 
             if snap["memory_profiler"]:
                 mp = snap["memory_profiler"]
                 report.append(
-                    f"  Memory Profiler: {mp['rss_mb']:.2f} MB RSS, {mp['percent']:.1f}% of total"
+                    f"  Memory Profiler: {mp['rss_mb']:.2f} MB RSS,
+                        {mp['percent']:.1f}% of total"
                 )
 
             if snap["pympler"]:
                 pm = snap["pympler"]
                 report.append(
-                    f"  Pympler: {pm['total_objects']:,} objects, {pm['total_size_mb']:.2f} MB total"
+                    f"  Pympler: {pm['total_objects']:,} objects,
+                        {pm['total_size_mb']:.2f} MB total"
                 )
         return report
 
@@ -759,7 +769,8 @@ class EnhancedMemoryProfiler:
                         "type": "large_allocation",
                         "location": hotspot.location,
                         "size_mb": hotspot.size_mb,
-                        "recommendation": "Consider using memory-mapped files or lazy loading for large data structures",
+                        "recommendation": "Consider using memory-mapped files or
+                            lazy loading for large data structures",
                     }
                 )
 

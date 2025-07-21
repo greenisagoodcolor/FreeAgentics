@@ -124,7 +124,8 @@ class AsyncInferenceEngine:
         self.agent_pool = AgentPool()
         self.metrics = PerformanceMetrics()
 
-    async def run_inference(self, agent, observation: Any) -> Tuple[Any, Dict[str, float]]:
+    async def run_inference(self, agent, observation: Any) -> Tuple[Any, Dict[str,
+        float]]:
         """Run PyMDP inference asynchronously with performance tracking."""
         start_time = time.time()
 
@@ -164,7 +165,12 @@ class AsyncInferenceEngine:
         self, agents: List[Any], observations: List[Any]
     ) -> List[Tuple[Any, Dict[str, float]]]:
         """Run inference for multiple agents concurrently."""
-        tasks = [self.run_inference(agent, obs) for agent, obs in zip(agents, observations)]
+        tasks = [
+            self.run_inference(agent,
+            obs) for agent,
+            obs in zip(agents,
+            observations)
+        ]
 
         return await asyncio.gather(*tasks, return_exceptions=True)
 
@@ -269,10 +275,12 @@ class PerformanceOptimizer:
 
         # Inject optimized methods
         agent._original_get_cached_matrix = agent._get_cached_matrix
-        agent._get_cached_matrix = self._optimized_get_cached_matrix.__get__(agent, type(agent))
+        agent._get_cached_matrix = self._optimized_get_cached_matrix.__get__(agent,
+            type(agent))
 
         logger.info(
-            f"Applied performance optimizations to agent {getattr(agent, 'agent_id', 'unknown')}"
+            f"Applied performance optimizations to agent {getattr(agent, 'agent_id',
+                'unknown')}"
         )
 
     def _optimized_get_cached_matrix(
@@ -296,7 +304,8 @@ class PerformanceOptimizer:
 
         return normalized_matrix
 
-    def benchmark_system(self, agents: List[Any], num_steps: int = 50) -> Dict[str, Any]:
+    def benchmark_system(self, agents: List[Any], num_steps: int = 50) -> Dict[str,
+        Any]:
         """Comprehensive system performance benchmark."""
         results = {"single_agent": {}, "multi_agent": {}, "memory_usage": {}}
 
@@ -309,7 +318,8 @@ class PerformanceOptimizer:
                 start_time = time.time()
 
                 # Simulate multi-agent step
-                observations = [{"position": [i % 10, i // 10]} for i in range(len(agents))]
+                observations = [{"position": [i % 10,
+                    i // 10]} for i in range(len(agents))]
 
                 for agent, obs in zip(agents, observations):
                     agent.step(obs)

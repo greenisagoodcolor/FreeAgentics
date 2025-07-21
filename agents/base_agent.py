@@ -87,12 +87,12 @@ _PyMDPAgent = None
 def _get_pymdp_components():
     """Lazy-load PyMDP components on first use."""
     global PYMDP_AVAILABLE, _pymdp_utils, _PyMDPAgent
-    
+
     if PYMDP_AVAILABLE is None:
         try:
             from pymdp import utils
             from pymdp.agent import Agent as PyMDPAgent
-            
+
             _pymdp_utils = utils
             _PyMDPAgent = PyMDPAgent
             PYMDP_AVAILABLE = True
@@ -100,7 +100,7 @@ def _get_pymdp_components():
         except ImportError:
             logger.warning("PyMDP not available - using simplified implementation")
             PYMDP_AVAILABLE = False
-    
+
     return PYMDP_AVAILABLE
 
 
@@ -113,7 +113,7 @@ def _get_llm_manager(agent_instance):
     if agent_instance.llm_manager is None and LLM_AVAILABLE:
         # Import here to avoid slow startup
         from inference.llm.local_llm_manager import LocalLLMManager as LLMManagerClass
-        
+
         # Create LocalLLMConfig with default values and user overrides
         llm_config = LocalLLMConfig()
         for key, value in agent_instance._llm_config_dict.items():
@@ -121,7 +121,7 @@ def _get_llm_manager(agent_instance):
                 setattr(llm_config, key, value)
         agent_instance.llm_manager = LLMManagerClass(llm_config)
         logger.debug("LLM manager loaded on-demand")
-    
+
     return agent_instance.llm_manager
 
 
@@ -241,7 +241,8 @@ class ActiveInferenceAgent(ABC):
     4. Act in the environment
     """
 
-    def __init__(self, agent_id: str, name: str, config: Optional[Dict[str, Any]] = None):
+    def __init__(self, agent_id: str, name: str, config: Optional[Dict[str,
+        Any]] = None):
         """Initialize an Active Inference agent.
 
         Args:
@@ -275,7 +276,8 @@ class ActiveInferenceAgent(ABC):
         self.policies: list[Any] = []  # Available action policies
 
         # GMN and LLM integration (lazy-loaded for performance)
-        self.gmn_spec: Optional[Dict[str, Any]] = None  # GMN specification for the agent
+        self.gmn_spec: Optional[Dict[str,
+            Any]] = None  # GMN specification for the agent
         self.llm_manager = None  # Will be lazy-loaded on first use
         self._llm_config_dict = self.config.get("llm_config", {})
 
@@ -310,7 +312,8 @@ class ActiveInferenceAgent(ABC):
         self.performance_metrics: Dict[str, Any] = {}
 
         logger.info(
-            f"Created agent {self.agent_id} ({self.name}) - PyMDP: {PYMDP_AVAILABLE}, Performance Mode: {self.performance_mode}"
+            f"Created agent {self.agent_id} ({self.name}) - PyMDP: {PYMDP_AVAILABLE}, "
+            f"Performance Mode: {self.performance_mode}"
         )
 
         # Record agent creation in observability system
@@ -457,7 +460,8 @@ class ActiveInferenceAgent(ABC):
 
             # Create default matrices if not provided
             if not A_matrices:
-                A = np.eye(num_obs[0], num_states[0])  # Default identity observation model
+                A = np.eye(num_obs[0],
+                    num_states[0])  # Default identity observation model
                 A_matrices = [A]
 
             if not B_matrices:
@@ -480,16 +484,16 @@ class ActiveInferenceAgent(ABC):
             if _get_pymdp_components():
                 # Use adapter to convert GMN format to PyMDP format
                 from agents.gmn_pymdp_adapter import adapt_gmn_to_pymdp
-                
+
                 gmn_model = {
                     "A": A_matrices,
                     "B": B_matrices,
                     "C": C_vectors,
                     "D": D_vectors
                 }
-                
+
                 adapted_model = adapt_gmn_to_pymdp(gmn_model)
-                
+
                 self.pymdp_agent = _PyMDPAgent(
                     A=adapted_model["A"],
                     B=adapted_model["B"],
@@ -501,7 +505,10 @@ class ActiveInferenceAgent(ABC):
                     inference_horizon=self.config.get("planning_horizon", 3),
                 )
 
-            logger.info(f"Successfully initialized PyMDP agent from GMN spec for {self.agent_id}")
+            logger.info(
+                f"Successfully initialized PyMDP agent from GMN spec for"
+                f" {self.agent_id}"
+            )
 
         except Exception as e:
             logger.error(f"Failed to initialize PyMDP from GMN: {e}")
@@ -576,6 +583,20 @@ class ActiveInferenceAgent(ABC):
             self.last_action_at = datetime.now()
             self.metrics["total_observations"] += 1
             self.metrics["total_actions"] += 1
+            
+            # Update knowledge graph if integration is available
+            if hasattr(self, 'kg_integration'):
+                current_beliefs = None
+                if hasattr(self, 'beliefs') and self.beliefs is not None:
+                    current_beliefs = self.beliefs.tolist() if hasattr(self.beliefs, 'tolist') else self.beliefs
+                
+                self.kg_integration.update_from_agent_step(
+                    agent_id=self.agent_id,
+                    observation=observation,
+                    action=action,
+                    beliefs=current_beliefs,
+                    free_energy=self.metrics.get("current_free_energy")
+                )
 
             logger.debug(f"Agent {self.agent_id} step {self.total_steps}: {action}")
 
@@ -653,7 +674,8 @@ class ActiveInferenceAgent(ABC):
             "name": self.name,
             "is_active": self.is_active,
             "created_at": self.created_at.isoformat(),
-            "last_action_at": (self.last_action_at.isoformat() if self.last_action_at else None),
+            "last_action_at": (self.last_action_at.isoformat() if
+                self.last_action_at else None),
             "total_steps": self.total_steps,
             "metrics": self.metrics,
         }
@@ -682,7 +704,10 @@ class ActiveInferenceAgent(ABC):
 
             return belief_monitoring_hooks.get_agent_statistics(self.agent_id)
         except Exception as e:
-            logger.error(f"Failed to get belief monitoring stats for agent {self.agent_id}: {e}")
+            logger.error(
+                f"Failed to get belief monitoring stats for agent"
+                f" {self.agent_id}: {e}"
+            )
             return {"error": str(e)}
 
 
@@ -769,7 +794,8 @@ class BasicExplorerAgent(ActiveInferenceAgent):
 
             # Normalize - utils.norm_dist normalizes along first dimension
             # PERFORMANCE OPTIMIZATION: Cache matrix normalization
-            A = self._get_cached_matrix("A_observation", A, _pymdp_utils.norm_dist if _pymdp_utils else lambda x: x/x.sum(axis=0, keepdims=True))
+            A = self._get_cached_matrix("A_observation", A, _pymdp_utils.norm_dist if
+                _pymdp_utils else lambda x: x/x.sum(axis=0, keepdims=True))
 
             # B matrix: P(next_state|state,action) - transition dynamics
             # Shape: (num_states, num_states, num_actions)
@@ -860,7 +886,8 @@ class BasicExplorerAgent(ActiveInferenceAgent):
                     policy_len=self._get_policy_length(),  # Adaptive planning horizon
                     inference_algo="VANILLA",  # Standard variational inference
                     use_states_info_gain=True,  # Epistemic value (curiosity)
-                    use_param_info_gain=self._get_param_info_gain(),  # Adaptive learning signal
+                    use_param_info_gain=self._get_param_info_gain(),
+                        # Adaptive learning signal
                     use_utility=True,  # Pragmatic value (goal-seeking)
                     gamma=self._get_gamma(),  # Adaptive policy precision
                     alpha=self._get_alpha(),  # Adaptive action precision
@@ -973,7 +1000,8 @@ class BasicExplorerAgent(ActiveInferenceAgent):
                 factor = qs[0]
                 entropy = -np.sum(factor * np.log(factor + epsilon))
             else:  # Multiple factors
-                entropy = sum(-np.sum(factor * np.log(factor + epsilon)) for factor in qs)
+                entropy = sum(-np.sum(factor * np.log(factor +
+                    epsilon)) for factor in qs)
             return float(entropy)
         except Exception as e:
             logger.warning(f"Entropy calculation failed: {e}")
@@ -1138,11 +1166,13 @@ class BasicExplorerAgent(ActiveInferenceAgent):
                     )
                     if error:
                         logger.warning(
-                            f"Action index conversion failed, original error: {e}, using fallback: {error}"
+                            f"Action index conversion failed, original error: {e}, "
+                            f"using fallback: {error}"
                         )
 
                 # Convert action index to string with safe indexing
-                selected_action = safe_array_index(self.action_map, action_idx_converted, "stay")
+                selected_action = safe_array_index(self.action_map,
+                    action_idx_converted, "stay")
 
                 # Store expected free energy for analysis
                 if G is not None:
@@ -1163,7 +1193,8 @@ class BasicExplorerAgent(ActiveInferenceAgent):
                     ) = self.pymdp_error_handler.safe_execute(
                         "policy_index_extraction",
                         lambda: (
-                            safe_array_to_int(np.argmax(q_pi)) if hasattr(q_pi, "__len__") else 0
+                            safe_array_to_int(np.argmax(q_pi)) if hasattr(q_pi,
+                                "__len__") else 0
                         ),
                         lambda: 0,  # Default policy index
                     )

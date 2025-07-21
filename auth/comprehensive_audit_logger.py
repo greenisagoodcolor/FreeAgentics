@@ -55,14 +55,22 @@ class AccessDecisionAuditor:
 
         # Log to security auditor
         event_type = (
-            SecurityEventType.ACCESS_GRANTED if has_permission else SecurityEventType.ACCESS_DENIED
+            SecurityEventType.ACCESS_GRANTED
+            if has_permission
+            else SecurityEventType.ACCESS_DENIED
         )
-        severity = SecurityEventSeverity.INFO if has_permission else SecurityEventSeverity.WARNING
+        severity = (
+            SecurityEventSeverity.INFO
+            if has_permission
+            else SecurityEventSeverity.WARNING
+        )
 
         security_auditor.log_event(
             event_type,
             severity,
-            f"RBAC decision: {username} ({role}) -> {endpoint} [{required_permission}] = {'ALLOW' if has_permission else 'DENY'}",
+            f"RBAC decision: {username} ({role}) -> {endpoint} "
+            f"[{required_permission}] = "
+            f"{'ALLOW' if has_permission else 'DENY'}".
             user_id=user_id,
             username=username,
             details={
@@ -106,14 +114,22 @@ class AccessDecisionAuditor:
 
         # Log to security auditor
         event_type = (
-            SecurityEventType.ACCESS_GRANTED if decision else SecurityEventType.ACCESS_DENIED
+            SecurityEventType.ACCESS_GRANTED
+            if decision
+            else SecurityEventType.ACCESS_DENIED
         )
-        severity = SecurityEventSeverity.INFO if decision else SecurityEventSeverity.WARNING
+        severity = (
+            SecurityEventSeverity.INFO
+            if decision
+            else SecurityEventSeverity.WARNING
+        )
 
         security_auditor.log_event(
             event_type,
             severity,
-            f"ABAC decision: {username} -> {resource_type}:{resource_id or 'N/A'} ({action}) = {'ALLOW' if decision else 'DENY'} - {reason}",
+            f"ABAC decision: {username} -> "
+            f"{resource_type}:{resource_id or 'N/A'} ({action}) = "
+            f"{'ALLOW' if decision else 'DENY'} - {reason}",
             user_id=user_id,
             username=username,
             details={
@@ -157,16 +173,28 @@ class AccessDecisionAuditor:
         # Log to security auditor
         decision_result = is_owner or admin_override
         event_type = (
-            SecurityEventType.ACCESS_GRANTED if decision_result else SecurityEventType.ACCESS_DENIED
+            SecurityEventType.ACCESS_GRANTED
+            if decision_result
+            else SecurityEventType.ACCESS_DENIED
         )
-        severity = SecurityEventSeverity.INFO if decision_result else SecurityEventSeverity.WARNING
+        severity = (
+            SecurityEventSeverity.INFO
+            if decision_result
+            else SecurityEventSeverity.WARNING
+        )
 
-        reason = "owner" if is_owner else ("admin_override" if admin_override else "not_owner")
+        reason = (
+            "owner"
+            if is_owner
+            else ("admin_override" if admin_override else "not_owner")
+        )
 
         security_auditor.log_event(
             event_type,
             severity,
-            f"Ownership check: {username} -> {resource_type}:{resource_id} = {'ALLOW' if decision_result else 'DENY'} ({reason})",
+            f"Ownership check: {username} -> "
+            f"{resource_type}:{resource_id} = "
+            f"{'ALLOW' if decision_result else 'DENY'} ({reason})",
             user_id=user_id,
             username=username,
             details={
@@ -223,7 +251,9 @@ class AccessDecisionAuditor:
             "suspicious_activity": SecurityEventType.SUSPICIOUS_PATTERN,
         }
 
-        security_event_type = event_type_map.get(event_type, SecurityEventType.API_ACCESS)
+        security_event_type = event_type_map.get(
+            event_type, SecurityEventType.API_ACCESS
+        )
         severity = (
             SecurityEventSeverity.WARNING
             if event_type == "suspicious_activity"
@@ -279,7 +309,8 @@ class AccessDecisionAuditor:
             security_auditor.log_event(
                 SecurityEventType.RATE_LIMIT_EXCEEDED,
                 SecurityEventSeverity.WARNING,
-                f"Rate limit exceeded: {username or 'anonymous'} ({ip_address}) -> {endpoint} ({current_count}/{limit})",
+                f"Rate limit exceeded: {username or 'anonymous'} "
+                f"({ip_address}) -> {endpoint} ({current_count}/{limit})",
                 user_id=user_id,
                 username=username,
                 details={
@@ -321,7 +352,9 @@ class AccessDecisionAuditor:
         security_auditor.log_event(
             SecurityEventType.PRIVILEGE_ESCALATION,
             SecurityEventSeverity.ERROR if blocked else SecurityEventSeverity.CRITICAL,
-            f"Permission escalation attempt: {username} ({current_role}) -> {attempted_permission} on {endpoint} [{'BLOCKED' if blocked else 'ALLOWED'}]",
+            f"Permission escalation attempt: {username} ({current_role}) -> "
+            f"{attempted_permission} on {endpoint} "
+            f"[{'BLOCKED' if blocked else 'ALLOWED'}]",
             user_id=user_id,
             username=username,
             details={

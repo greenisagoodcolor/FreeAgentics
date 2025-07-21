@@ -16,12 +16,14 @@ except Exception as e:
 try:
     import pymdp
     print("✓ PyMDP imported")
+    del pymdp  # Remove unused import
 except Exception as e:
     print(f"✗ PyMDP import failed: {e}")
 
 try:
     from pymdp.agent import Agent as PyMDPAgent
     print("✓ PyMDP Agent imported")
+    del PyMDPAgent  # Remove unused import
 except Exception as e:
     print(f"✗ PyMDP Agent import failed: {e}")
 
@@ -41,7 +43,7 @@ try:
     parser = GMNParser()
     graph = parser.parse(gmn_spec)
     print(f"✓ GMN parsed: {len(graph.nodes)} nodes, {len(graph.edges)} edges")
-    
+
     # Convert to PyMDP
     model = parser.to_pymdp_model(graph)
     print(f"✓ PyMDP model created: states={model.get('num_states')}, obs={model.get('num_obs')}, actions={model.get('num_actions')}")

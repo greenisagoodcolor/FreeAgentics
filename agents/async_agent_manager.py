@@ -283,7 +283,8 @@ class AsyncAgentManager:
 
         Args:
             agent_id: ID of the agent
-            operation_type: Type of operation ('perceive', 'update_beliefs', 'select_action', 'step')
+            operation_type: Type of operation ('perceive', 'update_beliefs',
+                'select_action', 'step')
             data: Operation data
             timeout: Timeout in seconds
 
@@ -379,7 +380,8 @@ class AsyncAgentManager:
         operations = []
         for agent_id in self.agent_configs:
             if agent_id in observations:
-                operations.append((agent_id, "step", {"observation": observations[agent_id]}))
+                operations.append((agent_id, "step",
+                    {"observation": observations[agent_id]}))
 
         results = await self.execute_batch_operations(operations, timeout)
 
@@ -437,7 +439,8 @@ async def benchmark_async_multi_agent_performance():
                 round_start = time.time()
 
                 # Step all agents concurrently
-                round_results = await manager.step_all_agents(observations, timeout=30.0)
+                round_results = await manager.step_all_agents(observations,
+                    timeout=30.0)
 
                 round_time = time.time() - round_start
 
@@ -502,10 +505,16 @@ if __name__ == "__main__":
     max_agents = max(results.keys())
     max_agent_result = results[max_agents]
 
-    print(f"Single agent async performance: {single_agent['avg_time_per_operation']:.1f}ms")
+    print(
+        f"Single agent async performance:"
+        f" {single_agent['avg_time_per_operation']:.1f}ms"
+    )
     print(f"Max agents tested: {max_agents}")
     print(f"Max agent performance: {max_agent_result['avg_time_per_operation']:.1f}ms")
-    print(f"Throughput scaling: {max_agent_result['throughput_ops_per_sec']:.1f} ops/sec")
+    print(
+        f"Throughput scaling:"
+        f" {max_agent_result['throughput_ops_per_sec']:.1f} ops/sec"
+    )
 
     # Calculate scaling efficiency
     theoretical_max = single_agent["throughput_ops_per_sec"] * max_agents

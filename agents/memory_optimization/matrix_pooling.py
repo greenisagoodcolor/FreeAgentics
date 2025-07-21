@@ -111,7 +111,8 @@ class MatrixPool:
         data = np.zeros(self.shape, dtype=self.dtype)
         pool_id = f"{id(data)}_{time.time()}"
 
-        matrix = PooledMatrix(data=data, shape=self.shape, dtype=self.dtype, pool_id=pool_id)
+        matrix = PooledMatrix(data=data, shape=self.shape, dtype=self.dtype,
+            pool_id=pool_id)
 
         self.stats.total_memory_bytes += data.nbytes
         return matrix
@@ -222,7 +223,8 @@ class MatrixOperationPool:
             "operation_counts": defaultdict(int),
         }
 
-    def get_pool(self, shape: Tuple[int, ...], dtype: np.dtype = np.float32) -> MatrixPool:
+    def get_pool(self, shape: Tuple[int, ...],
+        dtype: np.dtype = np.float32) -> MatrixPool:
         """Get or create a pool for specific shape and dtype.
 
         Args:
@@ -275,7 +277,8 @@ class MatrixOperationPool:
             pool.release(matrix)
 
     @contextmanager
-    def allocate_einsum_operands(self, *shapes: Tuple[int, ...], dtype: np.dtype = np.float32):
+    def allocate_einsum_operands(self, *shapes: Tuple[int, ...],
+        dtype: np.dtype = np.float32):
         """Allocate multiple matrices for einsum operations.
 
         Args:

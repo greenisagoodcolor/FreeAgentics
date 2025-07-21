@@ -117,7 +117,8 @@ class GMNValidator:
             config_dict["metadata"] = model_config.metadata
 
         # Extract name from AST or metadata
-        if hasattr(model_config, "ast") and model_config.ast and hasattr(model_config.ast, "name"):
+        if hasattr(model_config, "ast") and model_config.ast and
+            hasattr(model_config.ast, "name"):
             config_dict["name"] = model_config.ast.name
         elif "name" in getattr(model_config, "metadata", {}):
             config_dict["name"] = model_config.metadata["name"]
@@ -201,7 +202,8 @@ class GMNValidator:
 
         # Generate warnings for memory, performance, and numerical issues
         architecture_section = model_config.get("architecture", {})
-        architecture_warnings = self._check_architecture_warnings(architecture_section, parameters)
+        architecture_warnings = self._check_architecture_warnings(architecture_section,
+            parameters)
         warnings.extend(architecture_warnings)
 
         # Security validation
@@ -246,7 +248,8 @@ class GMNValidator:
         for rule_name, rule_func in self._custom_rules.items():
             try:
                 # Pass the original ParseResult if available, otherwise processed config
-                rule_input = original_parse_result if original_parse_result else model_config
+                rule_input = original_parse_result if original_parse_result else
+                    model_config
                 rule_result = rule_func(rule_input)
                 if isinstance(rule_result, list):
                     errors.extend(rule_result)
@@ -343,7 +346,8 @@ class GMNValidator:
             # Limit errors
             if len(errors) > self.max_validation_errors:
                 errors = errors[: self.max_validation_errors]
-                errors.append(f"... and {len(errors) - self.max_validation_errors} more errors")
+                errors.append(f"... and
+                    {len(errors) - self.max_validation_errors} more errors")
 
             # Create result
             is_valid = len(errors) == 0
@@ -359,7 +363,8 @@ class GMNValidator:
 
         except Exception as e:
             logger.error(f"Validation failed with exception: {e}")
-            return ValidationResult(is_valid=False, errors=[f"Validation failed: {str(e)}"])
+            return ValidationResult(is_valid=False,
+                errors=[f"Validation failed: {str(e)}"])
 
     def _validate_layer(self, layer: Dict[str, Any], index: int) -> List[str]:
         """Validate a single layer configuration."""
@@ -416,11 +421,13 @@ class GMNValidator:
                 if not isinstance(value, (int, float)):
                     errors.append(f"{param} must be numeric")
                 elif value < min_val or value > max_val:
-                    errors.append(f"{param} value {value} outside range [{min_val}, {max_val}]")
+                    errors.append(f"{param} value {value} outside range [{min_val},
+                        {max_val}]")
 
         return errors
 
-    def _validate_active_inference_config(self, active_inference: Dict[str, Any]) -> List[str]:
+    def _validate_active_inference_config(self, active_inference: Dict[str,
+        Any]) -> List[str]:
         """Validate Active Inference configuration."""
         errors = []
 
@@ -500,7 +507,8 @@ class GMNValidator:
 
         return errors
 
-    def _check_circular_dependencies(self, dependencies: Dict[str, List[str]]) -> List[str]:
+    def _check_circular_dependencies(self, dependencies: Dict[str,
+        List[str]]) -> List[str]:
         """Check for circular dependencies."""
         errors = []
 
@@ -637,12 +645,14 @@ class GMNValidator:
 
                     # Check each feature reference
                     for feature in features:
-                        if isinstance(feature, str) and feature not in defined_variables:
+                        if isinstance(feature, str) and
+                            feature not in defined_variables:
                             errors.append(f"Undefined reference in node features: {feature}")
 
         return errors
 
-    def _check_definitions_circular_dependencies(self, definitions: Dict[str, Any]) -> List[str]:
+    def _check_definitions_circular_dependencies(self, definitions: Dict[str,
+        Any]) -> List[str]:
         """Check for circular dependencies in definitions section."""
         errors = []
 

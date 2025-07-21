@@ -7,19 +7,19 @@ from typing import Dict, Any, List, Union, Optional
 def adapt_gmn_to_pymdp(gmn_model: Dict[str, Any]) -> Dict[str, Any]:
     """
     Convert GMN parser output to PyMDP Agent compatible format.
-    
+
     PyMDP v0.0.7.1 expects:
     - Single numpy arrays (not lists) for single-factor models
     - Properly normalized matrices
-    
+
     Args:
         gmn_model: Output from GMNParser.to_pymdp_model()
-        
+
     Returns:
         Dictionary with PyMDP compatible parameters
     """
     adapted = {}
-    
+
     # Handle A matrix (likelihood)
     A = gmn_model.get("A", [])
     if isinstance(A, list) and len(A) == 1:
@@ -30,7 +30,7 @@ def adapt_gmn_to_pymdp(gmn_model: Dict[str, Any]) -> Dict[str, Any]:
         raise ValueError("Multi-factor models not supported in PyMDP v0.0.7.1")
     else:
         adapted["A"] = A
-        
+
     # Handle B matrix (transition)
     B = gmn_model.get("B", [])
     if isinstance(B, list) and len(B) == 1:
@@ -39,7 +39,7 @@ def adapt_gmn_to_pymdp(gmn_model: Dict[str, Any]) -> Dict[str, Any]:
         raise ValueError("Multi-factor models not supported in PyMDP v0.0.7.1")
     else:
         adapted["B"] = B
-        
+
     # Handle C vector (preferences) - can be None
     C = gmn_model.get("C", None)
     if isinstance(C, list) and len(C) == 1:
@@ -48,7 +48,7 @@ def adapt_gmn_to_pymdp(gmn_model: Dict[str, Any]) -> Dict[str, Any]:
         adapted["C"] = None
     else:
         adapted["C"] = C
-        
+
     # Handle D vector (initial beliefs) - can be None
     D = gmn_model.get("D", None)
     if isinstance(D, list) and len(D) == 1:
@@ -57,12 +57,12 @@ def adapt_gmn_to_pymdp(gmn_model: Dict[str, Any]) -> Dict[str, Any]:
         adapted["D"] = None
     else:
         adapted["D"] = D
-        
+
     # Validate normalization
     if "A" in adapted and adapted["A"] is not None:
         A_sums = adapted["A"].sum(axis=0)
         if not np.allclose(A_sums, 1.0):
             # Renormalize if needed
             adapted["A"] = adapted["A"] / A_sums[np.newaxis, :]
-            
+
     return adapted
