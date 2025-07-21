@@ -1,0 +1,355 @@
+# PostgreSQL Exporter Custom Queries for FreeAgentics
+# Advanced database monitoring and performance metrics
+
+pg_stat_database:
+  query: |
+    SELECT 
+      datname,
+      numbackends,
+      tup_returned,
+      tup_fetched,
+      tup_inserted,
+      tup_updated,
+      tup_deleted,
+      conflicts,
+      temp_files,
+      temp_bytes,
+      deadlocks,
+      blk_read_time,
+      blk_write_time,
+      stats_reset
+    FROM pg_stat_database 
+    WHERE datname = 'freeagentics'
+  master: true
+  metrics:
+    - datname:
+        usage: "LABEL"
+        description: "Database name"
+    - numbackends:
+        usage: "GAUGE"
+        description: "Number of backends currently connected to this database"
+    - tup_returned:
+        usage: "COUNTER"
+        description: "Number of rows returned by queries in this database"
+    - tup_fetched:
+        usage: "COUNTER"
+        description: "Number of rows fetched by queries in this database"
+    - tup_inserted:
+        usage: "COUNTER"
+        description: "Number of rows inserted by queries in this database"
+    - tup_updated:
+        usage: "COUNTER"
+        description: "Number of rows updated by queries in this database"
+    - tup_deleted:
+        usage: "COUNTER"
+        description: "Number of rows deleted by queries in this database"
+    - conflicts:
+        usage: "COUNTER"
+        description: "Number of queries canceled due to conflicts with recovery"
+    - temp_files:
+        usage: "COUNTER"
+        description: "Number of temporary files created by queries"
+    - temp_bytes:
+        usage: "COUNTER"
+        description: "Total amount of data written to temporary files"
+    - deadlocks:
+        usage: "COUNTER"
+        description: "Number of deadlocks detected in this database"
+    - blk_read_time:
+        usage: "COUNTER"
+        description: "Time spent reading data file blocks by backends"
+    - blk_write_time:
+        usage: "COUNTER"
+        description: "Time spent writing data file blocks by backends"
+
+pg_stat_user_tables:
+  query: |
+    SELECT 
+      schemaname,
+      relname,
+      seq_scan,
+      seq_tup_read,
+      idx_scan,
+      idx_tup_fetch,
+      n_tup_ins,
+      n_tup_upd,
+      n_tup_del,
+      n_tup_hot_upd,
+      n_live_tup,
+      n_dead_tup,
+      n_mod_since_analyze,
+      last_vacuum,
+      last_autovacuum,
+      last_analyze,
+      last_autoanalyze,
+      vacuum_count,
+      autovacuum_count,
+      analyze_count,
+      autoanalyze_count
+    FROM pg_stat_user_tables
+  master: true
+  metrics:
+    - schemaname:
+        usage: "LABEL"
+        description: "Name of schema"
+    - relname:
+        usage: "LABEL"
+        description: "Name of table"
+    - seq_scan:
+        usage: "COUNTER"
+        description: "Number of sequential scans initiated on this table"
+    - seq_tup_read:
+        usage: "COUNTER"
+        description: "Number of live rows fetched by sequential scans"
+    - idx_scan:
+        usage: "COUNTER"
+        description: "Number of index scans initiated on this table"
+    - idx_tup_fetch:
+        usage: "COUNTER"
+        description: "Number of live rows fetched by index scans"
+    - n_tup_ins:
+        usage: "COUNTER"
+        description: "Number of rows inserted"
+    - n_tup_upd:
+        usage: "COUNTER"
+        description: "Number of rows updated"
+    - n_tup_del:
+        usage: "COUNTER"
+        description: "Number of rows deleted"
+    - n_tup_hot_upd:
+        usage: "COUNTER"
+        description: "Number of rows HOT updated"
+    - n_live_tup:
+        usage: "GAUGE"
+        description: "Estimated number of live rows"
+    - n_dead_tup:
+        usage: "GAUGE"
+        description: "Estimated number of dead rows"
+    - n_mod_since_analyze:
+        usage: "GAUGE"
+        description: "Number of rows modified since last analyze"
+    - vacuum_count:
+        usage: "COUNTER"
+        description: "Number of times this table has been manually vacuumed"
+    - autovacuum_count:
+        usage: "COUNTER"
+        description: "Number of times this table has been vacuumed by autovacuum"
+    - analyze_count:
+        usage: "COUNTER"
+        description: "Number of times this table has been manually analyzed"
+    - autoanalyze_count:
+        usage: "COUNTER"
+        description: "Number of times this table has been analyzed by autoanalyze"
+
+pg_stat_user_indexes:
+  query: |
+    SELECT 
+      schemaname,
+      relname,
+      indexrelname,
+      idx_scan,
+      idx_tup_read,
+      idx_tup_fetch
+    FROM pg_stat_user_indexes
+  master: true
+  metrics:
+    - schemaname:
+        usage: "LABEL"
+        description: "Name of schema"
+    - relname:
+        usage: "LABEL"
+        description: "Name of table for this index"
+    - indexrelname:
+        usage: "LABEL"
+        description: "Name of index"
+    - idx_scan:
+        usage: "COUNTER"
+        description: "Number of index scans initiated on this index"
+    - idx_tup_read:
+        usage: "COUNTER"
+        description: "Number of index entries returned by scans on this index"
+    - idx_tup_fetch:
+        usage: "COUNTER"
+        description: "Number of live table rows fetched by simple index scans"
+
+pg_statio_user_tables:
+  query: |
+    SELECT 
+      schemaname,
+      relname,
+      heap_blks_read,
+      heap_blks_hit,
+      idx_blks_read,
+      idx_blks_hit,
+      toast_blks_read,
+      toast_blks_hit,
+      tidx_blks_read,
+      tidx_blks_hit
+    FROM pg_statio_user_tables
+  master: true
+  metrics:
+    - schemaname:
+        usage: "LABEL"
+        description: "Name of schema"
+    - relname:
+        usage: "LABEL"
+        description: "Name of table"
+    - heap_blks_read:
+        usage: "COUNTER"
+        description: "Number of disk blocks read from this table"
+    - heap_blks_hit:
+        usage: "COUNTER"
+        description: "Number of buffer hits in this table"
+    - idx_blks_read:
+        usage: "COUNTER"
+        description: "Number of disk blocks read from all indexes on this table"
+    - idx_blks_hit:
+        usage: "COUNTER"
+        description: "Number of buffer hits in all indexes on this table"
+    - toast_blks_read:
+        usage: "COUNTER"
+        description: "Number of disk blocks read from this table's TOAST table"
+    - toast_blks_hit:
+        usage: "COUNTER"
+        description: "Number of buffer hits in this table's TOAST table"
+    - tidx_blks_read:
+        usage: "COUNTER"
+        description: "Number of disk blocks read from this table's TOAST table indexes"
+    - tidx_blks_hit:
+        usage: "COUNTER"
+        description: "Number of buffer hits in this table's TOAST table indexes"
+
+pg_database_size:
+  query: |
+    SELECT 
+      datname,
+      pg_database_size(datname) as size_bytes
+    FROM pg_database 
+    WHERE datname = 'freeagentics'
+  master: true
+  metrics:
+    - datname:
+        usage: "LABEL"
+        description: "Database name"
+    - size_bytes:
+        usage: "GAUGE"
+        description: "Database size in bytes"
+
+pg_stat_bgwriter:
+  query: |
+    SELECT 
+      checkpoints_timed,
+      checkpoints_req,
+      checkpoint_write_time,
+      checkpoint_sync_time,
+      buffers_checkpoint,
+      buffers_clean,
+      maxwritten_clean,
+      buffers_backend,
+      buffers_backend_fsync,
+      buffers_alloc,
+      stats_reset
+    FROM pg_stat_bgwriter
+  master: true
+  metrics:
+    - checkpoints_timed:
+        usage: "COUNTER"
+        description: "Number of scheduled checkpoints that have been performed"
+    - checkpoints_req:
+        usage: "COUNTER"
+        description: "Number of requested checkpoints that have been performed"
+    - checkpoint_write_time:
+        usage: "COUNTER"
+        description: "Total amount of time spent in checkpoint processing writing files to disk"
+    - checkpoint_sync_time:
+        usage: "COUNTER"
+        description: "Total amount of time spent in checkpoint processing synchronizing files to disk"
+    - buffers_checkpoint:
+        usage: "COUNTER"
+        description: "Number of buffers written during checkpoints"
+    - buffers_clean:
+        usage: "COUNTER"
+        description: "Number of buffers written by the background writer"
+    - maxwritten_clean:
+        usage: "COUNTER"
+        description: "Number of times the background writer stopped a cleaning scan"
+    - buffers_backend:
+        usage: "COUNTER"
+        description: "Number of buffers written directly by a backend"
+    - buffers_backend_fsync:
+        usage: "COUNTER"
+        description: "Number of times a backend had to execute its own fsync call"
+    - buffers_alloc:
+        usage: "COUNTER"
+        description: "Number of buffers allocated"
+
+pg_replication_slots:
+  query: |
+    SELECT 
+      slot_name,
+      slot_type,
+      database,
+      active,
+      CASE WHEN pg_current_wal_lsn() > confirmed_flush_lsn 
+           THEN pg_wal_lsn_diff(pg_current_wal_lsn(), confirmed_flush_lsn) 
+           ELSE 0 
+      END AS replication_lag_bytes
+    FROM pg_replication_slots
+  master: true
+  metrics:
+    - slot_name:
+        usage: "LABEL"
+        description: "Replication slot name"
+    - slot_type:
+        usage: "LABEL"
+        description: "Slot type"
+    - database:
+        usage: "LABEL"
+        description: "Database name this slot is associated with"
+    - active:
+        usage: "GAUGE"
+        description: "True if slot is currently actively being used"
+    - replication_lag_bytes:
+        usage: "GAUGE"
+        description: "Replication lag in bytes"
+
+pg_stat_activity:
+  query: |
+    SELECT 
+      state,
+      COUNT(*) as count,
+      MAX(EXTRACT(EPOCH FROM (now() - query_start))) as max_query_duration,
+      AVG(EXTRACT(EPOCH FROM (now() - query_start))) as avg_query_duration
+    FROM pg_stat_activity 
+    WHERE datname = 'freeagentics'
+    GROUP BY state
+  master: true
+  metrics:
+    - state:
+        usage: "LABEL"
+        description: "Current overall state of this backend"
+    - count:
+        usage: "GAUGE"
+        description: "Number of connections in this state"
+    - max_query_duration:
+        usage: "GAUGE"
+        description: "Maximum query duration in seconds"
+    - avg_query_duration:
+        usage: "GAUGE"
+        description: "Average query duration in seconds"
+
+pg_locks:
+  query: |
+    SELECT 
+      mode,
+      COUNT(*) as count
+    FROM pg_locks 
+    GROUP BY mode
+  master: true
+  metrics:
+    - mode:
+        usage: "LABEL"
+        description: "Lock mode"
+    - count:
+        usage: "GAUGE"
+        description: "Number of locks of this mode"

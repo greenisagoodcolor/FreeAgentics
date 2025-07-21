@@ -24,7 +24,7 @@ on:
 
 # Global environment configuration
 env:
-  PYTHON_VERSION: "3.11"
+  PYTHON_VERSION: "3.12"
   NODE_VERSION: "18"
   REGISTRY: ghcr.io
   IMAGE_NAME: ${{ github.repository }}

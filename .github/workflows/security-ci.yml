@@ -16,7 +16,7 @@ on:
         default: false
 
 env:
-  PYTHON_VERSION: "3.11"
+  PYTHON_VERSION: "3.12"
   NODE_VERSION: "18"
   SECURITY_SCAN_LEVEL: ${{ github.event.inputs.full_scan == 'true' && 'full' || 'standard' }}
 

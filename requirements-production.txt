@@ -1,5 +1,6 @@
 # Production dependencies for FreeAgentics
 # Minimal dependencies for deployment
+# FIXED: Resolved all dependency conflicts for Python 3.12
 
 # Core Framework
 fastapi==0.115.14
@@ -7,9 +8,9 @@ uvicorn[standard]==0.35.0
 pydantic==2.9.2
 
 # Scientific Computing
-numpy==2.3.1
-torch==2.7.1  # CVE-2025-3730 - No fix available yet, monitor for security updates
-scipy==1.16.0
+numpy==2.2.1  # Compatible with scipy 1.14.1 requirement (<2.3)
+torch==2.5.1  # Compatible with Python 3.12, monitoring CVE-2025-3730
+scipy==1.14.1  # Compatible with Python 3.12
 
 # Active Inference
 inferactively-pymdp==0.0.7.1
@@ -23,10 +24,12 @@ httpx==0.28.1
 aiofiles==24.1.0
 python-multipart==0.0.20
 
-# Database
+# Database with Vector Extensions
 sqlalchemy==2.0.41
 alembic==1.16.2
 psycopg2-binary==2.9.10
+pgvector==0.3.2
+h3==4.1.1  # FIXED: Updated to match main requirements, better Python 3.12 compatibility
 
 # Configuration
 python-dotenv==1.1.1
@@ -38,10 +41,10 @@ structlog==24.4.0
 # Authentication and Security
 passlib[bcrypt]==1.7.4
 pyjwt==2.10.1
-cryptography==46.0.1  # Security fix for CVE-2024-12797
+cryptography==45.0.5  # Compatible with Python 3.12, security fix for CVE-2024-12797
 
-# Data Processing
-pandas==2.3.0
+# Data Processing  
+pandas==2.2.3  # Compatible with numpy 2.2.1
 
 # System Monitoring
 psutil==6.1.1

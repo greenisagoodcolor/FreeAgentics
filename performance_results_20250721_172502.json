@@ -1,0 +1,152 @@
+{
+  "result": {
+    "suite_name": "Comprehensive Performance Validation",
+    "metrics": [
+      {
+        "name": "single_agent_spawn",
+        "category": "agent_spawning",
+        "value": 29.41171801649034,
+        "unit": "ms",
+        "target": 50,
+        "compliant": true,
+        "timestamp": "2025-07-21 17:25:02.576507",
+        "metadata": {
+          "memory_used_mb": 6.71875
+        }
+      },
+      {
+        "name": "parallel_agent_spawn_10",
+        "category": "agent_spawning",
+        "value": 12.05103105166927,
+        "unit": "ms",
+        "target": 100,
+        "compliant": true,
+        "timestamp": "2025-07-21 17:25:02.588591",
+        "metadata": {}
+      },
+      {
+        "name": "memory_per_agent",
+        "category": "agent_spawning",
+        "value": 6.71875,
+        "unit": "MB",
+        "target": 10,
+        "compliant": true,
+        "timestamp": "2025-07-21 17:25:02.588615",
+        "metadata": {}
+      },
+      {
+        "name": "pymdp_inference_100_steps",
+        "category": "pymdp_inference",
+        "value": 5.892044981010258,
+        "unit": "ms",
+        "target": 100,
+        "compliant": true,
+        "timestamp": "2025-07-21 17:25:02.595423",
+        "metadata": {
+          "steps": 100
+        }
+      },
+      {
+        "name": "memory_per_agent_100_agents",
+        "category": "memory_usage",
+        "value": 0.0,
+        "unit": "MB",
+        "target": 10,
+        "compliant": true,
+        "timestamp": "2025-07-21 17:25:02.600090",
+        "metadata": {
+          "total_agents": 100,
+          "total_memory_mb": 0.0
+        }
+      },
+      {
+        "name": "memory_leak_after_cleanup",
+        "category": "memory_usage",
+        "value": 0.0,
+        "unit": "MB",
+        "target": 5.0,
+        "compliant": true,
+        "timestamp": "2025-07-21 17:25:02.607483",
+        "metadata": {}
+      },
+      {
+        "name": "api_avg_response_time",
+        "category": "api_performance",
+        "value": 7.555267079733312,
+        "unit": "ms",
+        "target": 200,
+        "compliant": true,
+        "timestamp": "2025-07-21 17:25:02.985447",
+        "metadata": {
+          "requests_tested": 50
+        }
+      },
+      {
+        "name": "bundle_size_gzipped",
+        "category": "frontend_performance",
+        "value": 386.6578776041667,
+        "unit": "KB",
+        "target": 200,
+        "compliant": false,
+        "timestamp": "2025-07-21 17:25:02.992364",
+        "metadata": {
+          "uncompressed_kb": 1159.9736328125,
+          "js_files_count": 87,
+          "compression_ratio": 3.0
+        }
+      },
+      {
+        "name": "lighthouse_performance",
+        "category": "lighthouse",
+        "value": 85,
+        "unit": "score",
+        "target": 90,
+        "compliant": false,
+        "timestamp": "2025-07-21 17:25:02.992604",
+        "metadata": {
+          "audit_type": "mock"
+        }
+      },
+      {
+        "name": "lighthouse_accessibility",
+        "category": "lighthouse",
+        "value": 95,
+        "unit": "score",
+        "target": 85,
+        "compliant": true,
+        "timestamp": "2025-07-21 17:25:02.992612",
+        "metadata": {
+          "audit_type": "mock"
+        }
+      },
+      {
+        "name": "lighthouse_best_practices",
+        "category": "lighthouse",
+        "value": 90,
+        "unit": "score",
+        "target": 85,
+        "compliant": true,
+        "timestamp": "2025-07-21 17:25:02.992615",
+        "metadata": {
+          "audit_type": "mock"
+        }
+      },
+      {
+        "name": "lighthouse_seo",
+        "category": "lighthouse",
+        "value": 88,
+        "unit": "score",
+        "target": 85,
+        "compliant": true,
+        "timestamp": "2025-07-21 17:25:02.992618",
+        "metadata": {
+          "audit_type": "mock"
+        }
+      }
+    ],
+    "overall_score": 83,
+    "passed": true,
+    "duration_seconds": 0.44590922800125554,
+    "timestamp": "2025-07-21 17:25:02.992637"
+  }
+}

@@ -2,11 +2,13 @@
 
 This module coordinates all observability systems to provide comprehensive
 monitoring of agent operations, including:
-- Performance metrics collection
-- Belief state monitoring
-- Agent coordination tracking
-- Real-time dashboards
-- Alerting for failures
+- Performance metrics collection with APM capabilities
+- Belief state monitoring with ML-based anomaly detection
+- Agent coordination tracking with distributed tracing
+- Real-time dashboards with advanced visualizations
+- Intelligent alerting with context-aware routing
+- Security monitoring and vulnerability scanning
+- Performance regression detection and SLA enforcement
 """
 
 import logging

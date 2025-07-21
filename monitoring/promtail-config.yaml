@@ -1,0 +1,176 @@
+# Promtail Configuration for FreeAgentics Production
+# Log collection and shipping configuration
+
+server:
+  http_listen_port: 9080
+  grpc_listen_port: 0
+
+positions:
+  filename: /tmp/positions.yaml
+
+clients:
+  - url: http://loki:3100/loki/api/v1/push
+
+scrape_configs:
+  # System logs
+  - job_name: system
+    static_configs:
+      - targets:
+          - localhost
+        labels:
+          job: system
+          __path__: /var/log/*log
+          environment: production
+          service: system
+
+  # Docker container logs
+  - job_name: containers
+    docker_sd_configs:
+      - host: unix:///var/run/docker.sock
+        refresh_interval: 5s
+    relabel_configs:
+      - source_labels: ['__meta_docker_container_name']
+        regex: '/(.*)$'
+        target_label: 'container'
+        replacement: '${1}'
+      - source_labels: ['__meta_docker_container_label_com_docker_compose_service']
+        target_label: 'service'
+      - source_labels: ['__meta_docker_container_label_com_docker_compose_project']
+        target_label: 'project'
+      - source_labels: ['__meta_docker_container_log_stream']
+        target_label: 'stream'
+    pipeline_stages:
+      - json:
+          expressions:
+            output: log
+            stream: stream
+            timestamp: time
+      - timestamp:
+          source: timestamp
+          format: RFC3339Nano
+      - output:
+          source: output
+
+  # FreeAgentics Backend logs
+  - job_name: freeagentics-backend
+    static_configs:
+      - targets:
+          - localhost
+        labels:
+          job: freeagentics-backend
+          __path__: /var/lib/docker/containers/*/*log
+          environment: production
+          service: backend
+    relabel_configs:
+      - source_labels: ['__path__']
+        regex: '.*/var/lib/docker/containers/(.{12})[^/]*/.*.log'
+        target_label: 'container_id'
+        replacement: '${1}'
+    pipeline_stages:
+      - json:
+          expressions:
+            message: log
+            stream: stream
+            timestamp: time
+            container_name: attrs.name
+      - labels:
+          container_name:
+          stream:
+      - timestamp:
+          source: timestamp
+          format: RFC3339Nano
+      - regex:
+          expression: '(?P<level>DEBUG|INFO|WARN|ERROR|CRITICAL)'
+          source: message
+      - labels:
+          level:
+
+  # Nginx access logs
+  - job_name: nginx-access
+    static_configs:
+      - targets:
+          - localhost
+        labels:
+          job: nginx
+          type: access
+          __path__: /var/log/nginx/access.log
+          environment: production
+          service: nginx
+    pipeline_stages:
+      - regex:
+          expression: '^(?P<remote_addr>[\d\.]+) - (?P<remote_user>[^ ]*) \[(?P<time_local>[^\]]*)\] "(?P<method>\S+)(?: +(?P<path>[^\"]*?)(?: +\S*)?)?" (?P<status>\d+) (?P<body_bytes_sent>\d+) "(?P<http_referer>[^\"]*)" "(?P<http_user_agent>[^\"]*)" "(?P<http_x_forwarded_for>[^\"]*)"'
+      - labels:
+          method:
+          path:
+          status:
+          remote_addr:
+      - timestamp:
+          source: time_local
+          format: "02/Jan/2006:15:04:05 -0700"
+
+  # Nginx error logs
+  - job_name: nginx-error
+    static_configs:
+      - targets:
+          - localhost
+        labels:
+          job: nginx
+          type: error
+          __path__: /var/log/nginx/error.log
+          environment: production
+          service: nginx
+    pipeline_stages:
+      - regex:
+          expression: '^(?P<timestamp>\d{4}/\d{2}/\d{2} \d{2}:\d{2}:\d{2}) \[(?P<level>\w+)\] (?P<pid>\d+)#(?P<tid>\d+): \*(?P<cid>\d+) (?P<message>.*)'
+      - labels:
+          level:
+          pid:
+      - timestamp:
+          source: timestamp
+          format: "2006/01/02 15:04:05"
+
+  # PostgreSQL logs
+  - job_name: postgres
+    static_configs:
+      - targets:
+          - localhost
+        labels:
+          job: postgres
+          __path__: /var/log/postgresql/*.log
+          environment: production
+          service: postgres
+    pipeline_stages:
+      - regex:
+          expression: '^(?P<timestamp>\d{4}-\d{2}-\d{2} \d{2}:\d{2}:\d{2}.\d{3} \w+) \[(?P<pid>\d+)\] (?P<level>\w+): (?P<message>.*)'
+      - labels:
+          level:
+          pid:
+      - timestamp:
+          source: timestamp
+          format: "2006-01-02 15:04:05.000 MST"
+
+  # Application specific logs
+  - job_name: application-logs
+    static_configs:
+      - targets:
+          - localhost
+        labels:
+          job: application
+          __path__: /app/logs/*.log
+          environment: production
+          service: freeagentics
+    pipeline_stages:
+      - json:
+          expressions:
+            level: level
+            message: message
+            timestamp: timestamp
+            module: module
+            request_id: request_id
+      - labels:
+          level:
+          module:
+          request_id:
+      - timestamp:
+          source: timestamp
+          format: RFC3339Nano

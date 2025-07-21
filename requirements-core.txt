@@ -24,10 +24,12 @@ httpx==0.28.1
 aiofiles==24.1.0
 python-multipart==0.0.20
 
-# Database
+# Database with Vector Extensions
 sqlalchemy==2.0.41
 alembic==1.16.2
 psycopg2-binary==2.9.10
+pgvector==0.3.2
+h3==4.1.1
 
 # Configuration and Environment
 python-dotenv==1.1.1

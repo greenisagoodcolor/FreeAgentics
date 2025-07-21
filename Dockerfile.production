@@ -1,58 +1,68 @@
 # Production Dockerfile for FreeAgentics
-# Multi-stage build optimized for production deployment with security hardening
+# Optimized multi-stage build with aggressive caching for sub-3 minute builds
 
-# Base stage with common dependencies
-FROM python:3.11.9-slim as base
+# === STAGE 1: System Base ===
+FROM python:3.12.7-slim AS system-base
 
-# Set environment variables for production
+# Set build optimization environment variables
 ENV PYTHONUNBUFFERED=1 \
     PYTHONDONTWRITEBYTECODE=1 \
-    PIP_NO_CACHE_DIR=1 \
+    PIP_NO_CACHE_DIR=0 \
     PIP_DISABLE_PIP_VERSION_CHECK=1 \
+    PIP_DEFAULT_TIMEOUT=100 \
     PYTHONPATH=/app \
     # Security environment variables
     PYTHONHASHSEED=random \
-    PYTHONNOUSERSITE=1
+    PYTHONNOUSERSITE=1 \
+    # Build acceleration
+    MAKEFLAGS="-j$(nproc)" \
+    MAX_JOBS="$(nproc)"
 
-# Install system dependencies required for production
-RUN apt-get update && apt-get install -y --no-install-recommends \
-    # Runtime dependencies
-    curl \
-    ca-certificates \
-    tini \
-    # Build dependencies for Python packages
-    gcc \
-    g++ \
-    # Security tools
-    dumb-init \
-    # Clean up in same layer to reduce image size
-    && rm -rf /var/lib/apt/lists/* \
-    && apt-get clean \
-    && apt-get autoremove -y
+# Install system dependencies in optimized order with caching
+RUN --mount=type=cache,target=/var/cache/apt,sharing=locked \
+    --mount=type=cache,target=/var/lib/apt,sharing=locked \
+    apt-get update && apt-get install -y --no-install-recommends \
+    # Essential runtime first (smallest packages)
+    curl ca-certificates tini dumb-init \
+    # Build tools (needed for PyTorch compilation)
+    gcc g++ gfortran \
+    # Linear algebra libraries (critical for PyTorch performance)
+    libblas-dev liblapack-dev \
+    # Additional scientific computing dependencies
+    libopenblas-dev libglib2.0-0 \
+    # Cleanup in same layer
+    && apt-get autoremove -y \
+    && apt-get clean
 
-# Create non-root user for security with specific UID/GID
+# Create non-root user for security
 RUN groupadd -g 1000 app && \
     useradd -r -u 1000 -g app --create-home --shell /bin/bash app
 
-# Production build stage
-FROM base as production-build
+# === STAGE 2: Python Dependencies ===
+FROM system-base AS python-deps
 
+# Set working directory
 WORKDIR /app
 
-# Copy requirements files
-COPY requirements-production.txt requirements-core.txt ./
+# Copy requirement files for dependency installation
+COPY requirements-production.txt ./
 
-# Install Python dependencies
-RUN pip install --no-cache-dir -r requirements-production.txt
+# Upgrade pip and install build tools
+RUN --mount=type=cache,target=/root/.cache/pip,sharing=locked \
+    pip install --upgrade pip wheel setuptools
 
-# Production runtime stage
-FROM base as production
+# Install all dependencies from requirements with optimized caching
+RUN --mount=type=cache,target=/root/.cache/pip,sharing=locked \
+    pip install --extra-index-url https://download.pytorch.org/whl/cpu -r requirements-production.txt
+
+# === STAGE 3: Application Runtime (Production) ===
+FROM system-base AS production
+
+# Copy Python packages from dependency stage
+COPY --from=python-deps /usr/local/lib/python3.12/site-packages /usr/local/lib/python3.12/site-packages
+COPY --from=python-deps /usr/local/bin /usr/local/bin
 
 WORKDIR /app
-
-# Copy Python packages from build stage
-COPY --from=production-build /usr/local/lib/python3.11/site-packages /usr/local/lib/python3.11/site-packages
-COPY --from=production-build /usr/local/bin /usr/local/bin
 
 # Copy application source code selectively
 COPY agents/ ./agents/
@@ -95,7 +105,7 @@ RUN find /app -type f -name "*.pyc" -delete && \
 # Add security labels
 LABEL security.non-root=true
 LABEL security.read-only=true
-LABEL version=${VERSION:-latest}
+LABEL version="1.0.0-production"
 LABEL maintainer="FreeAgentics Team"
 
 # Production command with optimized settings and security

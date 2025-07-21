@@ -76,8 +76,7 @@ class AdaptiveGCTuner:
 
         # GC statistics tracking
         self.stats = GCStats()
-        self._gc_history: List[Tuple[float, int, float]] = []  # (timestamp, gen,
-            duration)
+        self._gc_history: List[Tuple[float, int, float]] = []  # (timestamp, gen, duration)
         self._last_gc_time = 0.0
         self._lock = threading.RLock()
 

@@ -13,35 +13,32 @@ print("\n1️⃣ Testing GMN Parser...")
 try:
     from inference.active.gmn_parser import parse_gmn_spec
     gmn = {
-        "name": "test",
-        "states": ["s1", "s2"],
-        "observations": ["o1", "o2"],
-        "actions": ["a1", "a2"],
-        "parameters": {
-            "A": [[0.7, 0.3], [0.3, 0.7]],
-            "B": [
-                [[[0.8, 0.2], [0.2, 0.8]]],
-                [[[0.7, 0.3], [0.3, 0.7]]]
-            ],
-            "C": [[0.5, 0.5]],
-            "D": [[0.5, 0.5]]
-        }
+        "nodes": [
+            {"id": "test_state", "type": "state", "properties": {"num_states": 2}},
+            {"id": "test_obs", "type": "observation", "properties": {"num_observations": 2}},
+            {"id": "test_action", "type": "action", "properties": {"num_actions": 2}},
+            {"id": "test_likelihood", "type": "likelihood", "properties": {"matrix": [[0.7, 0.3], [0.3, 0.7]]}},
+            {"id": "test_transition", "type": "transition", "properties": {"matrix": [[[0.8, 0.2], [0.2, 0.8]], [[0.7, 0.3], [0.3, 0.7]]]}}
+        ],
+        "edges": [
+            {"source": "test_state", "target": "test_likelihood", "type": "depends_on"},
+            {"source": "test_likelihood", "target": "test_obs", "type": "generates"},
+            {"source": "test_action", "target": "test_transition", "type": "depends_on"}
+        ],
+        "metadata": {"name": "test"}
     }
     result = parse_gmn_spec(gmn)
     print("✅ GMN Parser works!")
-except Exception as e:
-    print(f"❌ GMN Parser failed: {e}")
-
-# Test 2: PyMDP Adapter
-print("\n2️⃣ Testing PyMDP Adapter...")
-try:
+    
+    # Test 2: PyMDP Adapter (within same try block to use result)
+    print("\n2️⃣ Testing PyMDP Adapter...")
     from agents.gmn_pymdp_adapter import adapt_gmn_to_pymdp
     pymdp_model = adapt_gmn_to_pymdp(result)
     print("✅ PyMDP Adapter works!")
     print(f"   - A shape: {pymdp_model['A'][0].shape}")
     print(f"   - B shape: {pymdp_model['B'][0].shape}")
 except Exception as e:
-    print(f"❌ PyMDP Adapter failed: {e}")
+    print(f"❌ GMN Parser or PyMDP Adapter failed: {e}")
 
 # Test 3: Knowledge Graph
 print("\n3️⃣ Testing Knowledge Graph...")
@@ -49,7 +46,7 @@ try:
     from knowledge_graph.graph_engine import KnowledgeGraph, KnowledgeNode, NodeType
     kg = KnowledgeGraph()
     node = KnowledgeNode(
-        node_type=NodeType.ENTITY,
+        type=NodeType.ENTITY,
         label="test_node",
         properties={"test": True}
     )
