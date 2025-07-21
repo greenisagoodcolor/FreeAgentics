@@ -2,7 +2,7 @@
 # Multi-stage build optimized for production deployment
 
 # Base stage with Node.js
-FROM node:18.20.4-alpine AS base
+FROM node: AS base
 
 # Set production environment
 ENV NODE_ENV=production

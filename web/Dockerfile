@@ -1,5 +1,5 @@
 # Frontend Dockerfile for FreeAgentics Next.js app
-FROM node:18.20.4-alpine AS base
+FROM node: AS base
 
 # Install dependencies only when needed
 FROM base AS deps
