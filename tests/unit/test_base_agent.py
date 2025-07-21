@@ -244,7 +244,7 @@ class TestActiveInferenceAgent:
     @patch("agents.base_agent.PYMDP_AVAILABLE", True)
     def test_initialization_with_pymdp(self):
         """Test initialization with PyMDP enabled."""
-        with patch("agents.base_agent.PyMDPAgent") as mock_pymdp:
+        with patch("pymdp.agent.Agent") as mock_pymdp:
             mock_agent_instance = Mock()
             mock_pymdp.return_value = mock_agent_instance
 
