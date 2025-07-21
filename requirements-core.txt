@@ -8,9 +8,9 @@ pydantic==2.9.2
 starlette==0.46.2  # Latest 0.46.x version, security fix for CVE-2024-47874
 
 # Scientific Computing
-numpy==2.3.1
-torch==2.7.1  # CVE-2025-3730 - No fix available yet, monitor for security updates
-scipy==1.16.0
+numpy==2.2.1  # Compatible with scipy 1.14.1 requirement (<2.3)
+torch==2.5.1  # Compatible with Python 3.12, monitoring CVE-2025-3730
+scipy==1.14.1  # Compatible with Python 3.12
 
 # Active Inference
 inferactively-pymdp==0.0.7.1
