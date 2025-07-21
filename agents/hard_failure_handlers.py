@@ -117,8 +117,7 @@ class InferenceErrorHardFailure(Exception):
     """Hard failure for inference errors."""
 
 
-def safe_array_index_hard_failure(array: np.ndarray, index: int,
-    default: Any = None) -> Any:
+def safe_array_index_hard_failure(array: np.ndarray, index: int, default: Any = None) -> Any:
     """Array indexing with assertion-based bounds checking - no graceful fallbacks."""
     # HARD FAILURE VALIDATION: Array must be valid numpy array
     if not isinstance(array, np.ndarray):
@@ -134,8 +133,7 @@ def safe_array_index_hard_failure(array: np.ndarray, index: int,
     return array[index]
 
 
-def safe_pymdp_operation_hard_failure(operation_name: str,
-    default_value: Optional[Any] = None):
+def safe_pymdp_operation_hard_failure(operation_name: str, default_value: Optional[Any] = None):
     """Enforce hard failures for PyMDP operations."""
 
     def decorator(func):
@@ -175,8 +173,7 @@ def validate_observation_hard_failure(observation: Any) -> Any:
     return observation
 
 
-def validate_pymdp_matrices_hard_failure(A: Any, B: Any, C: Any, D: Any) -> Tuple[bool,
-    str]:
+def validate_pymdp_matrices_hard_failure(A: Any, B: Any, C: Any, D: Any) -> Tuple[bool, str]:
     """Validate PyMDP matrices with assertion-based checks."""
     # HARD FAILURE VALIDATION: All matrices must be provided
     if A is None:
@@ -202,8 +199,7 @@ def validate_pymdp_matrices_hard_failure(A: Any, B: Any, C: Any, D: Any) -> Tupl
     return True, "All matrices validated successfully"
 
 
-def with_error_handling_hard_failure(operation_name: str,
-    fallback_result: Optional[Any] = None):
+def with_error_handling_hard_failure(operation_name: str, fallback_result: Optional[Any] = None):
     """Enforce hard failures instead of fallbacks for error handling."""
 
     def decorator(func):

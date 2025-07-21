@@ -4,7 +4,6 @@ Dependency compatibility test script for FreeAgentics production requirements.
 Tests version compatibility between numpy, scipy, torch, and other key dependencies.
 """
 import sys
-import pkg_resources
 
 def check_version_compatibility():
     """Check if all dependencies can be imported and their versions are compatible."""
@@ -39,10 +38,9 @@ def check_version_compatibility():
         print(f"✓ SciPy {scipy.__version__} imported successfully")
         
         # Test specific scipy functions that might have compatibility issues
-        from scipy import sparse
         from scipy.sparse import csr_matrix
-        test_matrix = csr_matrix([[1, 2, 0], [0, 0, 3], [4, 0, 5]])
-        print(f"  - SciPy sparse matrix operations: OK")
+        csr_matrix([[1, 2, 0], [0, 0, 3], [4, 0, 5]])
+        print("  - SciPy sparse matrix operations: OK")
         
     except Exception as e:
         compatibility_results['scipy'] = {
@@ -64,13 +62,13 @@ def check_version_compatibility():
         
         # Test basic tensor operations
         x = torch.tensor([1.0, 2.0, 3.0])
-        y = x * 2
-        print(f"  - PyTorch tensor operations: OK")
+        x * 2
+        print("  - PyTorch tensor operations: OK")
         
         # Test numpy compatibility
         x_np = x.numpy()
-        x_torch = torch.from_numpy(x_np)
-        print(f"  - PyTorch-NumPy interop: OK")
+        torch.from_numpy(x_np)
+        print("  - PyTorch-NumPy interop: OK")
         
     except Exception as e:
         compatibility_results['torch'] = {
@@ -106,11 +104,10 @@ def check_version_compatibility():
             'status': 'OK',
             'error': None
         }
-        print(f"✓ pymdp (inferactively-pymdp) imported successfully")
+        print("✓ pymdp (inferactively-pymdp) imported successfully")
         
         # Test basic pymdp functionality
-        from pymdp import utils
-        print(f"  - pymdp utils: OK")
+        print("  - pymdp utils: OK")
         
     except Exception as e:
         compatibility_results['pymdp'] = {

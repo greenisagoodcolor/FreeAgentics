@@ -5,15 +5,17 @@ import json
 import sys
 from typing import Dict, List, Tuple
 
+
 def load_coverage_data(coverage_file: str = "coverage.json") -> Dict:
     """Load coverage data from JSON file."""
     try:
-        with open(coverage_file, 'r') as f:
+        with open(coverage_file, "r") as f:
             return json.load(f)
     except FileNotFoundError:
         print(f"Error: Coverage file '{coverage_file}' not found.")
         print("Please run coverage tests first.")
         sys.exit(1)
+
 
 def analyze_coverage(data: Dict) -> List[Tuple[str, float, int, int]]:
     """Analyze coverage data and return list of (module, coverage%, statements, missing)."""
@@ -34,13 +36,14 @@ def analyze_coverage(data: Dict) -> List[Tuple[str, float, int, int]]:
 
     return results
 
+
 def categorize_modules(results: List[Tuple[str, float, int, int]]) -> Dict[str, List]:
     """Categorize modules by coverage level."""
     categories = {
-        "critical": [],    # 0-20% coverage
-        "high": [],        # 20-50% coverage
-        "medium": [],      # 50-80% coverage
-        "good": []         # 80%+ coverage
+        "critical": [],  # 0-20% coverage
+        "high": [],  # 20-50% coverage
+        "medium": [],  # 50-80% coverage
+        "good": [],  # 80%+ coverage
     }
 
     for module, coverage, statements, missing in results:
@@ -54,6 +57,7 @@ def categorize_modules(results: List[Tuple[str, float, int, int]]) -> Dict[str, 
             categories["good"].append((module, coverage, statements, missing))
 
     return categories
+
 
 def print_report(categories: Dict[str, List], totals: Dict):
     """Print coverage analysis report."""
@@ -122,6 +126,7 @@ def print_report(categories: Dict[str, List], totals: Dict):
     for i, (module, coverage, statements, missing) in enumerate(all_low_coverage[:10], 1):
         print(f"{i:2}. {module:<45} ({missing:>4} lines to cover)")
 
+
 def main():
     """Main function."""
     # Load coverage data
@@ -138,6 +143,7 @@ def main():
 
     # Print report
     print_report(categories, totals)
+
 
 if __name__ == "__main__":
     main()

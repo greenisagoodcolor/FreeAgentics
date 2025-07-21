@@ -6,7 +6,6 @@ Every test drives the implementation - RED-GREEN-REFACTOR cycle.
 """
 
 
-
 class TestGMNParserTDD:
     """TDD test suite for GMN parser implementation."""
 
@@ -24,8 +23,8 @@ class TestGMNParserTDD:
         result = parser.parse(gmn_spec)
 
         assert result is not None
-        assert result['name'] == 'Empty'
-        assert result['type'] is None  # No type specified
+        assert result["name"] == "Empty"
+        assert result["type"] is None  # No type specified
 
     def test_parse_agent_with_type(self):
         """Test 2: Parse agent with type specification."""
@@ -41,5 +40,5 @@ class TestGMNParserTDD:
         result = parser.parse(gmn_spec)
 
         assert result is not None
-        assert result['name'] == 'Explorer'
-        assert result['type'] == 'active_inference'
+        assert result["name"] == "Explorer"
+        assert result["type"] == "active_inference"

@@ -76,8 +76,7 @@ class OptimizedAgentMemory:
                 total_bytes += sparse_beliefs.data.nbytes
                 total_bytes += sparse_beliefs.indices.nbytes
                 total_bytes += (
-                    sparse_beliefs.indptr.nbytes if hasattr(sparse_beliefs,
-                        "indptr") else 0
+                    sparse_beliefs.indptr.nbytes if hasattr(sparse_beliefs, "indptr") else 0
                 )
             elif (
                 hasattr(self._beliefs, "_sparse_representation")
@@ -87,8 +86,7 @@ class OptimizedAgentMemory:
                 total_bytes += sparse_beliefs.data.nbytes
                 total_bytes += sparse_beliefs.indices.nbytes
                 total_bytes += (
-                    sparse_beliefs.indptr.nbytes if hasattr(sparse_beliefs,
-                        "indptr") else 0
+                    sparse_beliefs.indptr.nbytes if hasattr(sparse_beliefs, "indptr") else 0
                 )
             else:
                 # Use small placeholder size since we optimize away the full dense array
@@ -289,8 +287,7 @@ class SharedObservationBuffer:
         self.mmap[offset : offset + 4] = len(shape_bytes).to_bytes(4, "little")
         self.mmap[offset + 4 : offset + 4 + len(shape_bytes)] = shape_bytes
         self.mmap[
-            offset + 4 + len(shape_bytes) : offset + 4 + len(shape_bytes) +
-                observation.nbytes
+            offset + 4 + len(shape_bytes) : offset + 4 + len(shape_bytes) + observation.nbytes
         ] = observation.tobytes()
 
     def read_observation(self, agent_id: str) -> Optional[np.ndarray]:
@@ -419,8 +416,7 @@ class SharedComputationPool:
 
     def __init__(self):
         """Initialize shared computation pool."""
-        self._pools: Dict[Tuple[Tuple[int, ...], type],
-            List[np.ndarray]] = defaultdict(list)
+        self._pools: Dict[Tuple[Tuple[int, ...], type], List[np.ndarray]] = defaultdict(list)
         self._lock = threading.RLock()
         self.matrix_pool = get_global_pool()
 
@@ -582,8 +578,7 @@ class AgentMemoryOptimizer:
             # Log optimization results
             memory_usage = opt_memory.get_memory_usage_mb()
             logger.info(
-                f"Optimized agent {agent_id}: " f"memory reduced to"
-                f" {memory_usage:.1f}MB"
+                f"Optimized agent {agent_id}: " f"memory reduced to" f" {memory_usage:.1f}MB"
             )
 
             return opt_memory

@@ -13,19 +13,17 @@ This script performs a thorough security assessment including:
 
 import asyncio
 import json
-import os
 import subprocess
 import sys
 from datetime import datetime
 from pathlib import Path
-from typing import Dict, List, Optional, Tuple
+from typing import List
 
 import requests
 from rich.console import Console
 from rich.panel import Panel
 from rich.progress import Progress, SpinnerColumn, TextColumn
 from rich.table import Table
-from rich.text import Text
 
 console = Console()
 
@@ -109,11 +107,6 @@ class SecurityAudit:
         issues = []
         
         # A01: Broken Access Control
-        auth_files = [
-            "auth/security_implementation.py",
-            "api/dependencies/auth.py",
-            "api/v1/*.py"
-        ]
         
         access_control_score = 0
         if self._check_file_exists("auth/security_implementation.py"):
@@ -656,11 +649,11 @@ class SecurityAudit:
         
         # Return final assessment
         if score < 85:
-            console.print(f"\n[bold red]❌ SECURITY GATE FAILED[/bold red]")
+            console.print("\n[bold red]❌ SECURITY GATE FAILED[/bold red]")
             console.print("Security score below minimum threshold of 85/100")
             return False
         else:
-            console.print(f"\n[bold green]✅ SECURITY GATE PASSED[/bold green]")
+            console.print("\n[bold green]✅ SECURITY GATE PASSED[/bold green]")
             console.print("Security requirements met for v1.0.0-alpha+ release")
             return True
     
@@ -749,12 +742,10 @@ if __name__ == "__main__":
         import rich
     except ImportError:
         subprocess.run([sys.executable, "-m", "pip", "install", "rich"])
-        import rich
     
     try:
         import requests
     except ImportError:
         subprocess.run([sys.executable, "-m", "pip", "install", "requests"])
-        import requests
     
     asyncio.run(main())

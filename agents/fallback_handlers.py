@@ -124,8 +124,7 @@ def safe_array_index_fallback(array: np.ndarray, index: int, default: Any = 0) -
         return default
 
 
-def safe_pymdp_operation_fallback(operation_name: str,
-    default_value: Optional[Any] = None):
+def safe_pymdp_operation_fallback(operation_name: str, default_value: Optional[Any] = None):
     """Create a decorator for safe PyMDP operations."""
 
     def decorator(func):
@@ -146,8 +145,7 @@ def validate_observation_fallback(observation: Any) -> Any:
     return observation
 
 
-def validate_pymdp_matrices_fallback(A: Any, B: Any, C: Any, D: Any) -> Tuple[bool,
-    str]:
+def validate_pymdp_matrices_fallback(A: Any, B: Any, C: Any, D: Any) -> Tuple[bool, str]:
     """Validate PyMDP matrix inputs."""
     try:
         # Basic validation - just check if they exist
@@ -158,8 +156,7 @@ def validate_pymdp_matrices_fallback(A: Any, B: Any, C: Any, D: Any) -> Tuple[bo
         return False, f"Validation error: {e}"
 
 
-def with_error_handling_fallback(operation_name: str,
-    fallback_result: Optional[Any] = None):
+def with_error_handling_fallback(operation_name: str, fallback_result: Optional[Any] = None):
     """Create a decorator for error handling with fallback result."""
 
     def decorator(func):

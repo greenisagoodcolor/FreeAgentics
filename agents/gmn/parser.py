@@ -16,10 +16,7 @@ class GMNParser:
 
     def __init__(self):
         """Initialize the GMN parser."""
-        self._agent_pattern = re.compile(
-            r'agent\s+(\w+)\s*\{([^}]*)\}',
-            re.DOTALL | re.MULTILINE
-        )
+        self._agent_pattern = re.compile(r"agent\s+(\w+)\s*\{([^}]*)\}", re.DOTALL | re.MULTILINE)
 
     def parse(self, gmn_spec: str) -> Dict[str, Any]:
         """
@@ -43,16 +40,13 @@ class GMNParser:
         agent_body = match.group(2).strip()
 
         # Build result
-        result = {
-            'name': agent_name,
-            'type': None
-        }
+        result = {"name": agent_name, "type": None}
 
         # Parse agent body
         if agent_body:
             # Parse type field
             type_match = re.search(r'type:\s*"([^"]+)"', agent_body)
             if type_match:
-                result['type'] = type_match.group(1)
+                result["type"] = type_match.group(1)
 
         return result

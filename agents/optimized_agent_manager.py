@@ -237,8 +237,7 @@ class AdaptiveThreadPool:
         # Check if we should resize
         current_time = time.time()
         if (
-            new_workload != self.workload_type and
-                current_time - self.last_resize_time > 30
+            new_workload != self.workload_type and current_time - self.last_resize_time > 30
         ):  # Resize at most every 30s
             self.workload_type = new_workload
             self._resize_pool()
@@ -291,11 +290,9 @@ class AdaptiveThreadPool:
             "stolen_tasks": self.stolen_tasks,
             "queue_sizes": queue_sizes,
             "avg_queue_size": sum(queue_sizes) / len(queue_sizes),
-            "steal_efficiency": (self.stolen_tasks / max(self.completed_tasks,
-                1)) * 100,
+            "steal_efficiency": (self.stolen_tasks / max(self.completed_tasks, 1)) * 100,
             "avg_task_time_ms": (
-                (sum(self.task_times) / len(self.task_times)) * 1000 if
-                    self.task_times else 0
+                (sum(self.task_times) / len(self.task_times)) * 1000 if self.task_times else 0
             ),
         }
 
@@ -562,8 +559,7 @@ class OptimizedAgentManager:
         with self.stats_lock:
             self.stats["batches_processed"] += 1
             self.stats["avg_batch_size"] = (
-                self.stats["avg_batch_size"] * (self.stats["batches_processed"] - 1) +
-                    len(batch)
+                self.stats["avg_batch_size"] * (self.stats["batches_processed"] - 1) + len(batch)
             ) / self.stats["batches_processed"]
             self.stats["avg_processing_time_ms"] = (
                 self.stats["avg_processing_time_ms"] * (self.stats["batches_processed"] - 1)
@@ -714,8 +710,7 @@ class OptimizedAgentManager:
                     "shards": len(self.agent_registry.shards),
                 },
                 "batch_queue_size": self.batch_queue.qsize(),
-                "memory_pool": (self.memory_pool.get_stats() if self.memory_pool else
-                    None),
+                "memory_pool": (self.memory_pool.get_stats() if self.memory_pool else None),
             }
         )
 

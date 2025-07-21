@@ -196,8 +196,7 @@ class EnhancedMemoryProfiler:
                 return
 
             self._monitoring = True
-            self._monitor_thread = threading.Thread(target=self._monitor_loop,
-                daemon=True)
+            self._monitor_thread = threading.Thread(target=self._monitor_loop, daemon=True)
             self._monitor_thread.start()
             logger.info("Started continuous memory monitoring")
 
@@ -390,8 +389,7 @@ class EnhancedMemoryProfiler:
                     continue
 
                 # Check for consistent growth
-                growth_count = sum(1 for i in range(1, len(sizes)) if
-                    sizes[i] > sizes[i - 1])
+                growth_count = sum(1 for i in range(1, len(sizes)) if sizes[i] > sizes[i - 1])
 
                 if growth_count >= len(sizes) * 0.7:  # 70% growth trend
                     # Calculate growth rate
@@ -423,8 +421,7 @@ class EnhancedMemoryProfiler:
             )
 
             logger.info(
-                f"Registered agent {agent_id} with baseline memory"
-                f" {initial_memory:.2f} MB"
+                f"Registered agent {agent_id} with baseline memory" f" {initial_memory:.2f} MB"
             )
 
     def update_agent_memory(self, agent_id: str, agent_obj: Any):
@@ -591,8 +588,10 @@ class EnhancedMemoryProfiler:
     def _generate_tools_section(self) -> List[str]:
         """Generate the profiling tools status section."""
         report = ["## Profiling Tools"]
-        report.append(f"- Tracemalloc: {'Enabled' if self.tracemalloc_enabled else
-            'Disabled'}")
+        report.append(
+            f"- Tracemalloc: {'Enabled' if self.tracemalloc_enabled else
+            'Disabled'}"
+        )
         report.append(
             f"- Memory Profiler: {'Enabled' if self.memory_profiler_enabled else
                 'Disabled'}"
@@ -770,7 +769,7 @@ class EnhancedMemoryProfiler:
                         "location": hotspot.location,
                         "size_mb": hotspot.size_mb,
                         "recommendation": "Consider using memory-mapped files or "
-                                         "lazy loading for large data structures",
+                        "lazy loading for large data structures",
                     }
                 )
 

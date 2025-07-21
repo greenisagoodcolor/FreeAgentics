@@ -115,10 +115,11 @@ async def create_agent(
     db.refresh(db_agent)
 
     logger.info(f"Created agent in DB: {db_agent.id} with template: {config.template}")
-    
+
     # Record metrics for agent spawn
     try:
         from observability.prometheus_metrics import record_agent_spawn
+
         record_agent_spawn(agent_type=config.template)
     except Exception as e:
         logger.warning(f"Failed to record agent spawn metric: {e}")

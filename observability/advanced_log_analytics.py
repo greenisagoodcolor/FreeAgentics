@@ -18,13 +18,10 @@ import sqlite3
 import statistics
 from collections import Counter, defaultdict, deque
 from dataclasses import dataclass, field
-from datetime import datetime, timedelta
 from enum import Enum
 from typing import Any, Callable, Dict, List, Optional, Pattern, Tuple
-from uuid import uuid4
 
 import numpy as np
-from scipy import stats
 
 logger = logging.getLogger(__name__)
 
@@ -422,7 +419,7 @@ class AnomalyDetector:
             return []
 
         baseline_mean = statistics.mean(historical_p95s)
-        baseline_std = statistics.stdev(historical_p95s) if len(historical_p95s) > 1 else 0
+        statistics.stdev(historical_p95s) if len(historical_p95s) > 1 else 0
         
         # IQR-based anomaly detection for response times
         q1 = np.percentile(historical_p95s, 25)

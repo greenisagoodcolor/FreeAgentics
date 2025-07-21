@@ -29,20 +29,14 @@ def fix_unused_variables(content: str) -> str:
             ] and not value.strip().startswith("("):
                 # Check if variable is used in next few lines
                 var_used = False
-                for i in range(
-                    len(new_lines), min(len(new_lines) + 10, len(lines))
-                ):
-                    if i < len(lines) and re.search(
-                        rf"\b{var_name}\b", lines[i]
-                    ):
+                for i in range(len(new_lines), min(len(new_lines) + 10, len(lines))):
+                    if i < len(lines) and re.search(rf"\b{var_name}\b", lines[i]):
                         var_used = True
                         break
 
                 if not var_used and "logger" not in var_name:
                     # Comment out the line instead of using underscore
-                    new_lines.append(
-                        f"{indent}# {var_name} = {value}  # Unused variable"
-                    )
+                    new_lines.append(f"{indent}# {var_name} = {value}  # Unused variable")
                     continue
 
         new_lines.append(line)
@@ -97,9 +91,7 @@ def fix_undefined_names(content: str) -> str:
 def fix_whitespace_issues(content: str) -> str:
     """Fix E226 missing whitespace around operators."""
     # Fix common whitespace issues
-    content = re.sub(
-        r"(\w)(\+|\-|\*|\/|\%|\=\=|\!\=|\<\=|\>\=)(\w)", r"\1 \2 \3", content
-    )
+    content = re.sub(r"(\w)(\+|\-|\*|\/|\%|\=\=|\!\=|\<\=|\>\=)(\w)", r"\1 \2 \3", content)
     content = re.sub(r"(\w)(\+|\-|\*|\/|\%)=(\w)", r"\1 \2= \3", content)
     return content
 
@@ -180,9 +172,7 @@ def main():
         text=True,
     )
     if result.returncode == 0:
-        total_errors_before = (
-            int(result.stdout.strip()) if result.stdout.strip() else 0
-        )
+        total_errors_before = int(result.stdout.strip()) if result.stdout.strip() else 0
 
     # Find all Python files
     python_files = []
@@ -225,9 +215,7 @@ def main():
         text=True,
     )
     if result.returncode == 0:
-        total_errors_after = (
-            int(result.stdout.strip()) if result.stdout.strip() else 0
-        )
+        total_errors_after = int(result.stdout.strip()) if result.stdout.strip() else 0
 
     print(f"\n{'='*60}")
     print(f"Fixed {fixed_count} files")

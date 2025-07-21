@@ -283,8 +283,7 @@ class ResourceCollectorAgent(ActiveInferenceAgent):
         """Use LLM to assess resource value and strategy."""
         try:
             visible_resources = [
-                cell for cell in observation.get("visible_cells", []) if
-                    cell["type"] == "resource"
+                cell for cell in observation.get("visible_cells", []) if cell["type"] == "resource"
             ]
 
             if visible_resources:
@@ -463,8 +462,7 @@ class ResourceCollectorAgent(ActiveInferenceAgent):
             total_cost = self.metrics.get("movement_cost", 0) + self.metrics.get(
                 "collection_cost", 0
             )
-            self.collection_efficiency = self.metrics["collections"] / max(total_cost,
-                1.0)
+            self.collection_efficiency = self.metrics["collections"] / max(total_cost, 1.0)
 
     def get_status(self) -> Dict[str, Any]:
         """Get collector agent status."""

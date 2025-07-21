@@ -262,8 +262,7 @@ class ThreadingProfiler:
 
             return total_cpu_time / total_wall_time
 
-    def measure_gil_contention(self, duration: float = 1.0,
-        thread_count: int = 4) -> float:
+    def measure_gil_contention(self, duration: float = 1.0, thread_count: int = 4) -> float:
         """Measure GIL contention using CPU-bound workload."""
         import math
 

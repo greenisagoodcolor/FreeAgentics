@@ -55,15 +55,9 @@ class AccessDecisionAuditor:
 
         # Log to security auditor
         event_type = (
-            SecurityEventType.ACCESS_GRANTED
-            if has_permission
-            else SecurityEventType.ACCESS_DENIED
+            SecurityEventType.ACCESS_GRANTED if has_permission else SecurityEventType.ACCESS_DENIED
         )
-        severity = (
-            SecurityEventSeverity.INFO
-            if has_permission
-            else SecurityEventSeverity.WARNING
-        )
+        severity = SecurityEventSeverity.INFO if has_permission else SecurityEventSeverity.WARNING
 
         security_auditor.log_event(
             event_type,
@@ -114,15 +108,9 @@ class AccessDecisionAuditor:
 
         # Log to security auditor
         event_type = (
-            SecurityEventType.ACCESS_GRANTED
-            if decision
-            else SecurityEventType.ACCESS_DENIED
+            SecurityEventType.ACCESS_GRANTED if decision else SecurityEventType.ACCESS_DENIED
         )
-        severity = (
-            SecurityEventSeverity.INFO
-            if decision
-            else SecurityEventSeverity.WARNING
-        )
+        severity = SecurityEventSeverity.INFO if decision else SecurityEventSeverity.WARNING
 
         security_auditor.log_event(
             event_type,
@@ -173,21 +161,11 @@ class AccessDecisionAuditor:
         # Log to security auditor
         decision_result = is_owner or admin_override
         event_type = (
-            SecurityEventType.ACCESS_GRANTED
-            if decision_result
-            else SecurityEventType.ACCESS_DENIED
+            SecurityEventType.ACCESS_GRANTED if decision_result else SecurityEventType.ACCESS_DENIED
         )
-        severity = (
-            SecurityEventSeverity.INFO
-            if decision_result
-            else SecurityEventSeverity.WARNING
-        )
+        severity = SecurityEventSeverity.INFO if decision_result else SecurityEventSeverity.WARNING
 
-        reason = (
-            "owner"
-            if is_owner
-            else ("admin_override" if admin_override else "not_owner")
-        )
+        reason = "owner" if is_owner else ("admin_override" if admin_override else "not_owner")
 
         security_auditor.log_event(
             event_type,
@@ -251,9 +229,7 @@ class AccessDecisionAuditor:
             "suspicious_activity": SecurityEventType.SUSPICIOUS_PATTERN,
         }
 
-        security_event_type = event_type_map.get(
-            event_type, SecurityEventType.API_ACCESS
-        )
+        security_event_type = event_type_map.get(event_type, SecurityEventType.API_ACCESS)
         severity = (
             SecurityEventSeverity.WARNING
             if event_type == "suspicious_activity"

@@ -434,8 +434,7 @@ class AdvancedMemoryProfiler:
             suggestions = []
 
             # Check belief state size
-            if hasattr(agent_obj, "beliefs") and isinstance(agent_obj.beliefs,
-                np.ndarray):
+            if hasattr(agent_obj, "beliefs") and isinstance(agent_obj.beliefs, np.ndarray):
                 belief_size_mb = agent_obj.beliefs.nbytes / (1024 * 1024)
                 if belief_size_mb > 5.0:
                     suggestions.append(
@@ -443,7 +442,7 @@ class AdvancedMemoryProfiler:
                             "type": "belief_compression",
                             "reason": f"Large belief state: {belief_size_mb:.1f}MB",
                             "suggestion": "Enable belief compression or "
-                                         "use sparse representations",
+                            "use sparse representations",
                         }
                     )
 

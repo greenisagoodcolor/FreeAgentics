@@ -6,7 +6,6 @@ using pgvector extension, optimized for Active Inference agent memories and know
 """
 
 from datetime import datetime
-from typing import List, Optional
 from uuid import uuid4
 
 from pgvector.sqlalchemy import Vector

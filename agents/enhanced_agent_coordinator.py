@@ -54,8 +54,7 @@ class EnhancedAgentCoordinator:
         self.config = config or ConnectionPoolConfig()
 
         # Initialize connection pool manager
-        self.pool_manager = EnhancedConnectionPoolManager(self.config, database_url or
-            "")
+        self.pool_manager = EnhancedConnectionPoolManager(self.config, database_url or "")
 
         # Initialize optimized thread pool manager
         self.thread_pool_manager = OptimizedThreadPoolManager(
@@ -101,8 +100,7 @@ class EnhancedAgentCoordinator:
 
         logger.info("Enhanced agent coordinator fully initialized")
 
-    def register_agent(self, agent_id: str, agent: Any,
-        metadata: Optional[Dict] = None) -> bool:
+    def register_agent(self, agent_id: str, agent: Any, metadata: Optional[Dict] = None) -> bool:
         """Register an agent with enhanced coordination."""
         try:
             with self._agents_lock:
@@ -156,11 +154,9 @@ class EnhancedAgentCoordinator:
             logger.error(f"Failed to unregister agent {agent_id}: {e}")
             return False
 
-    async def coordinate_agents(self, coordination_request: Dict[str,
-        Any]) -> Dict[str, Any]:
+    async def coordinate_agents(self, coordination_request: Dict[str, Any]) -> Dict[str, Any]:
         """Coordinate multiple agents with enhanced resource management."""
-        coordination_id = coordination_request.get("coordination_id",
-            f"coord_{int(time.time())}")
+        coordination_id = coordination_request.get("coordination_id", f"coord_{int(time.time())}")
         agent_ids = coordination_request.get("agent_ids", [])
         operation = coordination_request.get("operation", "step")
         coordination_data = coordination_request.get("data", {})

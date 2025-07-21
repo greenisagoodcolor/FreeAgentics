@@ -170,15 +170,13 @@ class WebSocketConnectionPool:
 
     def _start_background_tasks(self):
         """Start background maintenance tasks."""
-        self._cleanup_task = threading.Thread(target=self._cleanup_expired_connections,
-            daemon=True)
+        self._cleanup_task = threading.Thread(target=self._cleanup_expired_connections, daemon=True)
         self._metrics_task = threading.Thread(target=self._update_metrics, daemon=True)
 
         self._cleanup_task.start()
         self._metrics_task.start()
 
-    async def get_connection(self, client_id: str,
-        pool_name: str = "default") -> WebSocket:
+    async def get_connection(self, client_id: str, pool_name: str = "default") -> WebSocket:
         """Get a connection from the pool or create a new one."""
         start_time = time.time()
 
@@ -209,8 +207,7 @@ class WebSocketConnectionPool:
             logger.error(f"Failed to get connection for {client_id}: {e}")
             raise
 
-    async def _get_or_create_connection(self, client_id: str,
-        pool_name: str) -> WebSocket:
+    async def _get_or_create_connection(self, client_id: str, pool_name: str) -> WebSocket:
         """Get or create a connection for the specified client."""
         with self._connections_lock:
             if client_id in self.active_connections:
@@ -232,10 +229,7 @@ class WebSocketConnectionPool:
         # Create new connection if pool is empty
         # Note: In real implementation, this would create WebSocket connection
         # For now, we'll return a placeholder
-        logger.info(
-            f"Creating new WebSocket connection for {client_id} in pool"
-            f" {pool_name}"
-        )
+        logger.info(f"Creating new WebSocket connection for {client_id} in pool" f" {pool_name}")
         return None  # Placeholder - would be actual WebSocket connection
 
     def return_connection(self, client_id: str):
@@ -333,8 +327,7 @@ class WebSocketConnectionPool:
         with self._connections_lock, self._pools_lock:
             return {
                 "active_connections": len(self.active_connections),
-                "pools": {name: len(pool) for name,
-                    pool in self.connection_pools.items()},
+                "pools": {name: len(pool) for name, pool in self.connection_pools.items()},
                 "total_pools": len(self.connection_pools),
                 "circuit_breaker_state": self.circuit_breaker.state,
                 "metrics": self.metrics,
@@ -507,8 +500,7 @@ class ResourceMonitor:
         self._lock = threading.Lock()
 
         # Start monitoring thread
-        self._monitor_thread = threading.Thread(target=self._monitor_resources,
-            daemon=True)
+        self._monitor_thread = threading.Thread(target=self._monitor_resources, daemon=True)
         self._monitor_thread.start()
 
     def _monitor_resources(self):
@@ -524,10 +516,8 @@ class ResourceMonitor:
                     "cpu_percent": cpu_percent,
                     "memory_percent": memory.percent,
                     "memory_available_mb": memory.available / (1024 * 1024),
-                    "disk_read_mb": (disk_io.read_bytes / (1024 * 1024) if disk_io else
-                        0),
-                    "disk_write_mb": (disk_io.write_bytes / (1024 * 1024) if
-                        disk_io else 0),
+                    "disk_read_mb": (disk_io.read_bytes / (1024 * 1024) if disk_io else 0),
+                    "disk_write_mb": (disk_io.write_bytes / (1024 * 1024) if disk_io else 0),
                 }
 
                 with self._lock:
@@ -551,8 +541,7 @@ class ResourceMonitor:
             latest = self.metrics_history[-1]
 
             # Calculate averages over last 60 seconds
-            recent_metrics = [m for m in self.metrics_history if
-                time.time() - m["timestamp"] < 60]
+            recent_metrics = [m for m in self.metrics_history if time.time() - m["timestamp"] < 60]
 
             if recent_metrics:
                 avg_cpu = sum(m["cpu_percent"] for m in recent_metrics) / len(recent_metrics)

@@ -135,13 +135,10 @@ async def login_user(request: Request, response: Response, login_data: UserLogin
     """Authenticate user and return tokens."""
     # Start Honeycomb trace for login operation
     async with honeycomb_auth_tracer.trace_auth_operation(
-        "login_attempt",
-        request=request,
-        username=login_data.username,
-        auth_method="password"
+        "login_attempt", request=request, username=login_data.username, auth_method="password"
     ) as span:
         user = auth_manager.authenticate_user(login_data.username, login_data.password)
-        
+
         if not user:
             # Log failed login attempt
             if span:
@@ -214,14 +211,12 @@ async def get_current_user_info(
 ):
     """Get current user information."""
     async with honeycomb_auth_tracer.trace_auth_operation(
-        "get_user_info",
-        request=request,
-        user_id=current_user.user_id
+        "get_user_info", request=request, user_id=current_user.user_id
     ) as span:
         if span:
             span.add_tag("user.role", current_user.role)
             span.add_tag("permissions.count", len(current_user.permissions))
-        
+
         return {
             "user_id": current_user.user_id,
             "username": current_user.username,

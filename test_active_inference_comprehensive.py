@@ -5,7 +5,6 @@ import sys
 import os
 import numpy as np
 import time
-from typing import Dict, Any
 
 # Add project root to path
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
@@ -15,7 +14,6 @@ def test_pymdp_basic():
     print("\n=== Test 1: Basic PyMDP Functionality ===")
     
     try:
-        import pymdp
         from pymdp.agent import Agent as PyMDPAgent
         print("✓ PyMDP imported successfully")
         
@@ -48,7 +46,7 @@ def test_gmn_parser():
     print("\n=== Test 2: GMN Parser Functionality ===")
     
     try:
-        from inference.active.gmn_parser import GMNParser, parse_gmn_spec
+        from inference.active.gmn_parser import parse_gmn_spec
         
         gmn_spec = """
         [nodes]
@@ -294,7 +292,6 @@ def test_performance_optimization():
         results = {}
         
         for mode in modes:
-            config = {'performance_mode': mode}
             agent = BasicExplorerAgent('perf_test', f'Perf Test {mode}', grid_size=4)
             agent.performance_mode = mode
             agent.start()

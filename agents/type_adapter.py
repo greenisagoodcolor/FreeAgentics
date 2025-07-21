@@ -10,7 +10,7 @@ from typing import Any, Dict, Optional, Union
 
 class AgentTypeAdapter:
     """Adapter for consistent agent attribute access across database and
-        in-memory objects."""
+    in-memory objects."""
 
     @staticmethod
     def get_id(agent: Any) -> str:
@@ -171,7 +171,7 @@ class AgentTypeAdapter:
 
 class CoalitionTypeAdapter:
     """Adapter for consistent coalition attribute access across database and
-        in-memory objects."""
+    in-memory objects."""
 
     @staticmethod
     def get_id(coalition: Any) -> str:
@@ -253,8 +253,7 @@ class CoalitionTypeAdapter:
                 members[agent_id] = {
                     "agent_id": agent_id,
                     "name": (
-                        AgentTypeAdapter.get_name(agent) if hasattr(agent, "name") else
-                            "Unknown"
+                        AgentTypeAdapter.get_name(agent) if hasattr(agent, "name") else "Unknown"
                     ),
                 }
             return members

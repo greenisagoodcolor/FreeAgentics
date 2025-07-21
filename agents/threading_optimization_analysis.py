@@ -31,8 +31,7 @@ logger = logging.getLogger(__name__)
 class OptimizationOpportunity:
     """Represents a threading optimization opportunity."""
 
-    category: str  # 'lock_contention', 'thread_pool', 'async_io', 'memory',
-        'context_switch'
+    category: str  # 'lock_contention', 'thread_pool', 'async_io', 'memory', 'context_switch'
     severity: str  # 'high', 'medium', 'low'
     description: str
     current_performance: Dict[str, Any]
@@ -110,8 +109,7 @@ class ThreadingOptimizationAnalyzer:
                             },
                             expected_improvement="50-70% reduction in wait time",
                             implementation_effort="medium",
-                            recommendation="Replace with lock-free data structures or
-                                use finer-grained locking",
+                            recommendation="Replace with lock-free data structures or use finer-grained locking",
                         )
                     )
 
@@ -129,8 +127,7 @@ class ThreadingOptimizationAnalyzer:
                     },
                     expected_improvement="3-5x speedup",
                     implementation_effort="medium",
-                    recommendation="Use concurrent hash map or
-                        sharded locks for agent registry",
+                    recommendation="Use concurrent hash map or sharded locks for agent registry",
                 )
             )
 
@@ -172,22 +169,17 @@ class ThreadingOptimizationAnalyzer:
         cpu_count = mp.cpu_count()
 
         for workload_name, workload_func in workloads:
-            optimal,
-                throughputs = self.profiler.find_optimal_thread_count(workload_func)
+            optimal, throughputs = self.profiler.find_optimal_thread_count(workload_func)
 
             # Check if current sizing is optimal
             current_default = 8  # From OptimizedThreadPoolManager
 
             # Log CPU count for analysis context
-            logger.debug(
-                f"System CPU count: {cpu_count}, analyzing {workload_name}"
-                f" workload"
-            )
+            logger.debug(f"System CPU count: {cpu_count}, analyzing {workload_name}" f" workload")
             current_throughput = throughputs.get(current_default, 0)
             optimal_throughput = throughputs[optimal]
 
-            if optimal != current_default and
-                optimal_throughput > current_throughput * 1.2:
+            if optimal != current_default and optimal_throughput > current_throughput * 1.2:
                 improvement = ((optimal_throughput / current_throughput) - 1) * 100
 
                 opportunities.append(
@@ -296,7 +288,7 @@ class ThreadingOptimizationAnalyzer:
                     "agent_id": f"agent_{i}",
                     "beliefs": np.random.rand(100, 100),  # 80KB per agent
                     "observations": [np.random.rand(50, 50) for _ in range(10)],
-                        # 200KB
+                    # 200KB
                     "policy": np.random.rand(100, 100),  # 80KB
                 },
             )()
@@ -333,8 +325,7 @@ class ThreadingOptimizationAnalyzer:
                 },  # Estimated
                 expected_improvement="3x memory efficiency",
                 implementation_effort="medium",
-                recommendation="Use numpy's shared memory arrays or
-                    memory-mapped files",
+                recommendation="Use numpy's shared memory arrays or memory-mapped files",
             )
         )
 
@@ -384,8 +375,7 @@ class ThreadingOptimizationAnalyzer:
                     },
                     expected_improvement="30-50% reduction in context switches",
                     implementation_effort="medium",
-                    recommendation="Batch operations and
-                        use thread affinity to reduce context switching",
+                    recommendation="Batch operations and use thread affinity to reduce context switching",
                 )
             )
 
@@ -446,10 +436,8 @@ class ThreadingOptimizationAnalyzer:
         # Calculate summary statistics
         summary = {
             "total_opportunities": len(all_opportunities),
-            "high_severity": len([o for o in all_opportunities if
-                o.severity == "high"]),
-            "medium_severity": len([o for o in all_opportunities if
-                o.severity == "medium"]),
+            "high_severity": len([o for o in all_opportunities if o.severity == "high"]),
+            "medium_severity": len([o for o in all_opportunities if o.severity == "medium"]),
             "low_severity": len([o for o in all_opportunities if o.severity == "low"]),
             "by_category": defaultdict(int),
             "expected_overall_improvement": "10-50% based on workload",
@@ -514,8 +502,7 @@ def generate_optimization_report():
     ]
 
     high_impact_high_effort = [
-        o for o in opportunities if o.severity == "high" and
-            o.implementation_effort == "high"
+        o for o in opportunities if o.severity == "high" and o.implementation_effort == "high"
     ]
 
     print("\nPhase 1 - Quick Wins (1-2 days):")

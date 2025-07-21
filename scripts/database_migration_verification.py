@@ -9,40 +9,29 @@ Author: Database Migration Specialist Agent
 Critical Mission: Bulletproof migration system for production deployment
 """
 
-import asyncio
 import json
 import logging
 import os
-import subprocess
 import sys
 import time
 from contextlib import contextmanager
 from datetime import datetime
 from pathlib import Path
-from typing import Dict, List, Optional, Tuple
+from typing import Dict
 
 import psycopg2
 from alembic import command, script
 from alembic.config import Config
 from pgvector.psycopg2 import register_vector
-from sqlalchemy import create_engine, text
-from sqlalchemy.exc import SQLAlchemyError
+from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker
 
 # Add project root to path
 PROJECT_ROOT = Path(__file__).parent.parent
 sys.path.insert(0, str(PROJECT_ROOT))
 
-from database.models import Agent, Coalition, KnowledgeNode, User
-from database.session import DATABASE_URL, engine
-from database.vector_models import (
-    VectorEmbedding,
-    AgentMemory,
-    KnowledgeVector,
-    SemanticCluster,
-    create_vector_indexes,
-    create_vector_functions,
-)
+from database.models import Agent, Coalition
+from database.session import DATABASE_URL
 
 # Configure logging
 logging.basicConfig(
@@ -1024,7 +1013,7 @@ log ""
             for rec in self.verification_report['recommendations'][:10]:  # Show first 10
                 print(f"   - {rec}")
         
-        print(f"\n🏁 FINAL ASSESSMENT:")
+        print("\n🏁 FINAL ASSESSMENT:")
         if self.verification_report['production_ready']:
             print("   ✅ SYSTEM IS READY FOR PRODUCTION DEPLOYMENT")
         else:

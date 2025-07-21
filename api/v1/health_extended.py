@@ -80,18 +80,12 @@ class HealthChecker:
                 "status": "healthy",
                 "latency_ms": round(latency, 2),
                 "connections": {
-                    "total": pool_status.total_connections
-                    if pool_status
-                    else 0,
+                    "total": pool_status.total_connections if pool_status else 0,
                     "active": pool_status.active if pool_status else 0,
                     "idle": pool_status.idle if pool_status else 0,
-                    "idle_in_transaction": pool_status.idle_in_transaction
-                    if pool_status
-                    else 0,
+                    "idle_in_transaction": pool_status.idle_in_transaction if pool_status else 0,
                 },
-                "database_size_mb": round(db_size.size / 1024 / 1024, 2)
-                if db_size
-                else 0,
+                "database_size_mb": round(db_size.size / 1024 / 1024, 2) if db_size else 0,
                 "slow_queries": slow_queries.count if slow_queries else 0,
             }
 
@@ -106,12 +100,10 @@ class HealthChecker:
         """Check if pg_stat_statements extension is available."""
         try:
             result = db.execute(
-                text(
-                    "SELECT 1 FROM pg_extension WHERE extname = 'pg_stat_statements'"
-                )
+                text("SELECT 1 FROM pg_extension WHERE extname = 'pg_stat_statements'")
             ).fetchone()
             return result is not None
-        except:
+        except Exception:
             return False
 
     async def check_redis(self) -> Dict[str, Any]:
@@ -120,9 +112,7 @@ class HealthChecker:
             import redis
 
             start_time = time.time()
-            r = redis.Redis(
-                host=os.getenv("REDIS_HOST", "localhost"), port=6379
-            )
+            r = redis.Redis(host=os.getenv("REDIS_HOST", "localhost"), port=6379)
 
             # Ping check
             r.ping()
@@ -138,16 +128,15 @@ class HealthChecker:
                 "latency_ms": round(latency, 2),
                 "version": info.get("redis_version", "unknown"),
                 "connected_clients": info.get("connected_clients", 0),
-                "used_memory_mb": round(
-                    memory_info.get("used_memory", 0) / 1024 / 1024, 2
+                "used_memory_mb": round(memory_info.get("used_memory", 0) / 1024 / 1024, 2),
+                "memory_usage_ratio": (
+                    round(
+                        memory_info.get("used_memory", 0) / memory_info.get("maxmemory", 1),
+                        3,
+                    )
+                    if memory_info.get("maxmemory", 0) > 0
+                    else 0
                 ),
-                "memory_usage_ratio": round(
-                    memory_info.get("used_memory", 0)
-                    / memory_info.get("maxmemory", 1),
-                    3,
-                )
-                if memory_info.get("maxmemory", 0) > 0
-                else 0,
                 "hit_rate": self._calculate_hit_rate(info),
                 "evicted_keys": info.get("evicted_keys", 0),
             }
@@ -207,7 +196,7 @@ class HealthChecker:
             memory = psutil.virtual_memory()
 
             # Disk usage
-            disk = psutil.disk_usage('/')
+            disk = psutil.disk_usage("/")
 
             # Network I/O
             net_io = psutil.net_io_counters()
@@ -258,9 +247,7 @@ class HealthChecker:
 
     def calculate_overall_health(self, checks: Dict[str, Dict]) -> str:
         """Calculate overall system health status."""
-        statuses = [
-            check.get("status", "unknown") for check in checks.values()
-        ]
+        statuses = [check.get("status", "unknown") for check in checks.values()]
 
         if "unhealthy" in statuses:
             return "unhealthy"
@@ -332,10 +319,7 @@ async def readiness_check(db: Session = Depends(get_db)):
 
         manager = AgentManager()
 
-        if (
-            len(manager.agents) == 0
-            and time.time() - health_checker.startup_time > 60
-        ):
+        if len(manager.agents) == 0 and time.time() - health_checker.startup_time > 60:
             # No agents after 1 minute of startup
             return JSONResponse(
                 content={
@@ -348,9 +332,7 @@ async def readiness_check(db: Session = Depends(get_db)):
         return {"status": "ready"}
 
     except Exception as e:
-        return JSONResponse(
-            content={"status": "not_ready", "error": str(e)}, status_code=503
-        )
+        return JSONResponse(content={"status": "not_ready", "error": str(e)}, status_code=503)
 
 
 @router.get("/health/live")
@@ -372,9 +354,7 @@ async def startup_check(db: Session = Depends(get_db)):
     """
     try:
         # Check database migrations
-        result = db.execute(
-            text("SELECT 1 FROM alembic_version LIMIT 1")
-        ).fetchone()
+        result = db.execute(text("SELECT 1 FROM alembic_version LIMIT 1")).fetchone()
 
         if not result:
             return JSONResponse(
@@ -404,9 +384,7 @@ async def startup_check(db: Session = Depends(get_db)):
         }
 
     except Exception as e:
-        return JSONResponse(
-            content={"status": "starting", "error": str(e)}, status_code=503
-        )
+        return JSONResponse(content={"status": "starting", "error": str(e)}, status_code=503)
 
 
 @router.get("/health/dependencies")
@@ -430,9 +408,7 @@ async def dependency_health_check():
         dependencies[name] = await check_func()
 
     # Calculate overall dependency health
-    all_healthy = all(
-        dep.get("status") == "healthy" for dep in dependencies.values()
-    )
+    all_healthy = all(dep.get("status") == "healthy" for dep in dependencies.values())
 
     return {
         "status": "healthy" if all_healthy else "degraded",
@@ -497,9 +473,7 @@ async def check_elasticsearch_external() -> Dict[str, Any]:
                 if resp.status == 200:
                     data = await resp.json()
                     return {
-                        "status": "healthy"
-                        if data.get("status") != "red"
-                        else "unhealthy",
+                        "status": "healthy" if data.get("status") != "red" else "unhealthy",
                         "cluster_status": data.get("status", "unknown"),
                     }
         return {"status": "unhealthy", "error": "Unable to connect"}
