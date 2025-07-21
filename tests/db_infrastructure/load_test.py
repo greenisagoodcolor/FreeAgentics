@@ -11,7 +11,6 @@ import threading
 import time
 from collections import defaultdict
 from datetime import datetime
-from typing import Any, Dict, List
 
 # Add parent directory to path
 sys.path.append(os.path.dirname(os.path.dirname(os.path.dirname(__file__))))
@@ -223,9 +222,7 @@ class DatabaseLoadTest:
                 WHERE id = %s
             """,
                 (
-                    json.dumps(
-                        {"last_inference_time": random.uniform(0.1, 2.0)}
-                    ),
+                    json.dumps({"last_inference_time": random.uniform(0.1, 2.0)}),
                     agent_id,
                 ),
             )
@@ -345,13 +342,9 @@ class DatabaseLoadTest:
         operations_per_second: int = 100,
     ):
         """Run the main load test."""
-        logger.info(
-            f"Starting load test: {num_threads} threads, {test_duration}s duration"
-        )
+        logger.info(f"Starting load test: {num_threads} threads, {test_duration}s duration")
 
-        monitor = PerformanceMonitor(
-            f"load_test_{datetime.now().strftime('%Y%m%d_%H%M%S')}"
-        )
+        monitor = PerformanceMonitor(f"load_test_{datetime.now().strftime('%Y%m%d_%H%M%S')}")
         monitor.start_test_run(
             {
                 "num_threads": num_threads,
@@ -387,9 +380,7 @@ class DatabaseLoadTest:
                     cumulative += weight
                     if rand <= cumulative:
                         try:
-                            with monitor.measure_operation(
-                                "database_operation", op_name
-                            ):
+                            with monitor.measure_operation("database_operation", op_name):
                                 op_func()
                             operation_counts[op_name] += 1
                         except Exception as e:
@@ -400,9 +391,7 @@ class DatabaseLoadTest:
                 time.sleep(sleep_between_ops)
 
         # Start worker threads
-        with concurrent.futures.ThreadPoolExecutor(
-            max_workers=num_threads
-        ) as executor:
+        with concurrent.futures.ThreadPoolExecutor(max_workers=num_threads) as executor:
             futures = [executor.submit(worker, i) for i in range(num_threads)]
 
             # Run for specified duration
@@ -427,10 +416,8 @@ class DatabaseLoadTest:
         )
 
         # Generate report
-        report_path = (
-            f"load_test_report_{datetime.now().strftime('%Y%m%d_%H%M%S')}.md"
-        )
-        _report = monitor.generate_report(report_path)
+        report_path = f"load_test_report_{datetime.now().strftime('%Y%m%d_%H%M%S')}.md"
+        _ = monitor.generate_report(report_path)
 
         logger.info(f"Load test completed. Report saved to: {report_path}")
         logger.info(f"Total operations: {summary['total_operations']}")
@@ -438,17 +425,11 @@ class DatabaseLoadTest:
 
         return summary
 
-    def run_stress_test(
-        self, max_connections: int = 200, ramp_up_time: int = 30
-    ):
+    def run_stress_test(self, max_connections: int = 200, ramp_up_time: int = 30):
         """Run a stress test to find breaking points."""
-        logger.info(
-            f"Starting stress test: ramping up to {max_connections} connections"
-        )
+        logger.info(f"Starting stress test: ramping up to {max_connections} connections")
 
-        runner = LoadTestRunner(
-            f"stress_test_{datetime.now().strftime('%Y%m%d_%H%M%S')}"
-        )
+        runner = LoadTestRunner(f"stress_test_{datetime.now().strftime('%Y%m%d_%H%M%S')}")
 
         def stress_operation():
             """Single stress test operation."""
@@ -481,24 +462,16 @@ def main():
         default="quick",
         help="Type of test to run",
     )
-    parser.add_argument(
-        "--duration", type=int, default=60, help="Test duration in seconds"
-    )
-    parser.add_argument(
-        "--threads", type=int, default=10, help="Number of concurrent threads"
-    )
+    parser.add_argument("--duration", type=int, default=60, help="Test duration in seconds")
+    parser.add_argument("--threads", type=int, default=10, help="Number of concurrent threads")
     parser.add_argument(
         "--ops-per-second",
         type=int,
         default=100,
         help="Target operations per second",
     )
-    parser.add_argument(
-        "--no-reset", action="store_true", help="Skip database reset"
-    )
-    parser.add_argument(
-        "--no-populate", action="store_true", help="Skip data population"
-    )
+    parser.add_argument("--no-reset", action="store_true", help="Skip database reset")
+    parser.add_argument("--no-populate", action="store_true", help="Skip data population")
 
     args = parser.parse_args()
 
@@ -506,9 +479,7 @@ def main():
     test = DatabaseLoadTest()
 
     try:
-        test.setup(
-            reset_db=not args.no_reset, populate_data=not args.no_populate
-        )
+        test.setup(reset_db=not args.no_reset, populate_data=not args.no_populate)
 
         if args.test == "load":
             summary = test.run_load_test(
@@ -519,9 +490,7 @@ def main():
         elif args.test == "stress":
             summary = test.run_stress_test(max_connections=args.threads)
         else:  # quick
-            summary = test.run_load_test(
-                test_duration=10, num_threads=5, operations_per_second=50
-            )
+            summary = test.run_load_test(test_duration=10, num_threads=5, operations_per_second=50)
 
         print("\nTest completed successfully!")
         print(f"Total operations: {summary.get('total_operations', 0)}")

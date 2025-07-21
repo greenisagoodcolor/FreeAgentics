@@ -12,17 +12,13 @@ This module tests for authentication vulnerabilities including:
 import asyncio
 import base64
 import concurrent.futures
-import hashlib
 import json
 import time
 from datetime import datetime, timedelta
-from typing import Dict, List, Optional
-from unittest.mock import AsyncMock, Mock, patch
+from unittest.mock import patch
 
 import jwt
 import pytest
-from fastapi import HTTPException
-from jose import JWTError
 
 from auth.security_headers import SecurityHeadersManager
 from auth.security_implementation import AuthenticationManager, UserRole
@@ -93,13 +89,13 @@ class TestAuthenticationAttacks:
         # Attempt to decode and modify token
         try:
             # Try decoding with wrong secret (should fail)
-            decoded = jwt.decode(token, "wrong_secret", algorithms=["HS256"])
+            jwt.decode(token, "wrong_secret", algorithms=["HS256"])
             pytest.fail("JWT signature verification bypass detected!")
         except jwt.InvalidSignatureError:
             pass  # Expected
 
         # Test algorithm confusion attack
-        header = jwt.get_unverified_header(token)
+        jwt.get_unverified_header(token)
 
         # Attempt to create token with 'none' algorithm
         try:
@@ -115,7 +111,7 @@ class TestAuthenticationAttacks:
             # Try to validate fake token
             validated = auth_manager.validate_token(fake_token)
             assert validated is None, "Algorithm confusion attack successful!"
-        except:
+        except Exception:
             pass  # Expected to fail
 
     def test_authentication_bypass_sql_injection(self, auth_manager):
@@ -136,9 +132,7 @@ class TestAuthenticationAttacks:
 
         for username, password in sql_injection_payloads:
             result = auth_manager.authenticate_user(username, password)
-            assert (
-                result is None
-            ), f"SQL injection successful with payload: {username}"
+            assert result is None, f"SQL injection successful with payload: {username}"
 
     def test_authentication_bypass_ldap_injection(self, auth_manager):
         """Test LDAP injection in authentication."""
@@ -152,9 +146,7 @@ class TestAuthenticationAttacks:
 
         for username, password in ldap_injection_payloads:
             result = auth_manager.authenticate_user(username, password)
-            assert (
-                result is None
-            ), f"LDAP injection successful with payload: {username}"
+            assert result is None, f"LDAP injection successful with payload: {username}"
 
     def test_authentication_bypass_nosql_injection(self, auth_manager):
         """Test NoSQL injection in authentication."""
@@ -169,14 +161,10 @@ class TestAuthenticationAttacks:
         for username_payload, password in nosql_payloads:
             # Convert payload to string for testing
             username = (
-                str(username_payload)
-                if isinstance(username_payload, dict)
-                else username_payload
+                str(username_payload) if isinstance(username_payload, dict) else username_payload
             )
             result = auth_manager.authenticate_user(username, password)
-            assert (
-                result is None
-            ), f"NoSQL injection successful with payload: {username_payload}"
+            assert result is None, f"NoSQL injection successful with payload: {username_payload}"
 
     def test_credential_stuffing_attack(self, auth_manager):
         """Test credential stuffing attack detection and prevention."""
@@ -230,9 +218,7 @@ class TestAuthenticationAttacks:
 
         for user in users:
             for password in common_passwords:
-                result = auth_manager.authenticate_user(
-                    user["username"], password
-                )
+                result = auth_manager.authenticate_user(user["username"], password)
                 if result is not None:
                     successful_attempts += 1
 
@@ -246,15 +232,13 @@ class TestAuthenticationAttacks:
         initial_session = auth_manager.create_session("test_user")
 
         # Register and authenticate user
-        user = auth_manager.register_user(
+        auth_manager.register_user(
             "session_test",
             "session@example.com",
             "SecurePass123!",
             UserRole.OBSERVER,
         )
-        auth_result = auth_manager.authenticate_user(
-            "session_test", "SecurePass123!"
-        )
+        auth_manager.authenticate_user("session_test", "SecurePass123!")
 
         # Get new session after authentication
         new_session = auth_manager.create_session("session_test")
@@ -267,7 +251,7 @@ class TestAuthenticationAttacks:
     def test_session_hijacking_prevention(self, auth_manager):
         """Test session hijacking prevention mechanisms."""
         # Create user and session
-        user = auth_manager.register_user(
+        auth_manager.register_user(
             "hijack_test",
             "hijack@example.com",
             "SecurePass123!",
@@ -297,7 +281,7 @@ class TestAuthenticationAttacks:
     def test_timing_attack_on_authentication(self, auth_manager):
         """Test timing attack resistance in authentication."""
         # Create a test user
-        user = auth_manager.register_user(
+        auth_manager.register_user(
             "timing_user",
             "timing@example.com",
             "CorrectPassword123!",
@@ -311,9 +295,7 @@ class TestAuthenticationAttacks:
         # Test with correct password
         for _ in range(20):
             start = time.perf_counter()
-            auth_manager.authenticate_user(
-                "timing_user", "CorrectPassword123!"
-            )
+            auth_manager.authenticate_user("timing_user", "CorrectPassword123!")
             end = time.perf_counter()
             correct_times.append(end - start)
 
@@ -338,14 +320,12 @@ class TestAuthenticationAttacks:
 
         # Time difference should be minimal (< 10ms)
         time_diff = abs(avg_correct - avg_incorrect)
-        assert (
-            time_diff < 0.01
-        ), f"Timing attack possible: {time_diff*1000:.2f}ms difference"
+        assert time_diff < 0.01, f"Timing attack possible: {time_diff*1000:.2f}ms difference"
 
     def test_brute_force_protection(self, auth_manager):
         """Test brute force attack protection."""
         # Create target user
-        user = auth_manager.register_user(
+        auth_manager.register_user(
             "brute_target",
             "brute@example.com",
             "VerySecurePass123!",
@@ -357,23 +337,19 @@ class TestAuthenticationAttacks:
         locked_out = False
 
         for i in range(20):  # Try 20 failed attempts
-            result = auth_manager.authenticate_user(
-                "brute_target", f"WrongPass{i}"
-            )
+            result = auth_manager.authenticate_user("brute_target", f"WrongPass{i}")
             if result is None:
                 failed_attempts += 1
 
             # Check if account gets locked after certain attempts
-            if hasattr(
-                auth_manager, "is_account_locked"
-            ) and auth_manager.is_account_locked("brute_target"):
+            if hasattr(auth_manager, "is_account_locked") and auth_manager.is_account_locked(
+                "brute_target"
+            ):
                 locked_out = True
                 break
 
         # Should implement some form of rate limiting or account locking
-        assert (
-            failed_attempts < 20 or locked_out
-        ), "No brute force protection detected"
+        assert failed_attempts < 20 or locked_out, "No brute force protection detected"
 
     def test_authentication_token_replay_attack(self, auth_manager):
         """Test token replay attack prevention."""
@@ -404,7 +380,7 @@ class TestAuthenticationAttacks:
         # Ensure strong authentication methods cannot be downgraded
 
         # Create user with strong password
-        user = auth_manager.register_user(
+        auth_manager.register_user(
             "strong_auth_user",
             "strong@example.com",
             "VeryStrongPassword123!@#",
@@ -418,9 +394,7 @@ class TestAuthenticationAttacks:
             # Attempt with None password
             lambda: auth_manager.authenticate_user("strong_auth_user", None),
             # Attempt to bypass password check
-            lambda: auth_manager.authenticate_user(
-                "strong_auth_user", {"bypass": True}
-            ),
+            lambda: auth_manager.authenticate_user("strong_auth_user", {"bypass": True}),
         ]
 
         for attempt in weak_attempts:
@@ -431,7 +405,7 @@ class TestAuthenticationAttacks:
         """Test MFA bypass attempts."""
         # If MFA is implemented, test bypass attempts
         if hasattr(auth_manager, "verify_mfa"):
-            user = auth_manager.register_user(
+            auth_manager.register_user(
                 "mfa_user",
                 "mfa@example.com",
                 "SecurePass123!",
@@ -453,14 +427,12 @@ class TestAuthenticationAttacks:
 
             for code in bypass_attempts:
                 result = auth_manager.verify_mfa("mfa_user", code)
-                assert (
-                    result is False
-                ), f"MFA bypass successful with code: {code}"
+                assert result is False, f"MFA bypass successful with code: {code}"
 
     def test_password_reset_token_security(self, auth_manager):
         """Test password reset token security."""
         if hasattr(auth_manager, "generate_reset_token"):
-            user = auth_manager.register_user(
+            auth_manager.register_user(
                 "reset_user",
                 "reset@example.com",
                 "OldPassword123!",
@@ -480,16 +452,14 @@ class TestAuthenticationAttacks:
                 assert auth_manager.validate_reset_token(reset_token) is True
 
                 # Test expired token (would need to mock time)
-                with patch(
-                    "time.time", return_value=time.time() + 3700
-                ):  # 1 hour + later
+                with patch("time.time", return_value=time.time() + 3700):  # 1 hour + later
                     assert (
                         auth_manager.validate_reset_token(reset_token) is False
                     ), "Reset token doesn't expire"
 
     def test_concurrent_authentication_race_condition(self, auth_manager):
         """Test race conditions in concurrent authentication."""
-        user = auth_manager.register_user(
+        auth_manager.register_user(
             "race_user", "race@example.com", "RacePass123!", UserRole.OBSERVER
         )
 
@@ -499,9 +469,7 @@ class TestAuthenticationAttacks:
 
         def authenticate():
             try:
-                result = auth_manager.authenticate_user(
-                    "race_user", "RacePass123!"
-                )
+                result = auth_manager.authenticate_user("race_user", "RacePass123!")
                 results.append(result)
             except Exception as e:
                 errors.append(e)
@@ -513,12 +481,8 @@ class TestAuthenticationAttacks:
 
         # All attempts should succeed without errors
         assert len(errors) == 0, f"Race condition errors: {errors}"
-        assert (
-            len(results) == 10
-        ), "Not all concurrent authentications completed"
-        assert all(
-            r is not None for r in results
-        ), "Some concurrent authentications failed"
+        assert len(results) == 10, "Not all concurrent authentications completed"
+        assert all(r is not None for r in results), "Some concurrent authentications failed"
 
     def test_authentication_state_manipulation(self, auth_manager):
         """Test authentication state manipulation attacks."""
@@ -531,7 +495,7 @@ class TestAuthenticationAttacks:
             "StatePass123!",
             UserRole.OBSERVER,
         )
-        token = auth_manager.create_access_token(user)
+        auth_manager.create_access_token(user)
 
         # Test token state manipulation
         if hasattr(auth_manager, "get_user_state"):
@@ -552,7 +516,7 @@ class TestAuthenticationAttacks:
         """Test authentication vulnerabilities in async contexts."""
         # Test async authentication if supported
         if hasattr(auth_manager, "authenticate_user_async"):
-            user = auth_manager.register_user(
+            auth_manager.register_user(
                 "async_user",
                 "async@example.com",
                 "AsyncPass123!",
@@ -562,9 +526,7 @@ class TestAuthenticationAttacks:
             # Test concurrent async authentication
             tasks = []
             for i in range(10):
-                task = auth_manager.authenticate_user_async(
-                    "async_user", "AsyncPass123!"
-                )
+                task = auth_manager.authenticate_user_async("async_user", "AsyncPass123!")
                 tasks.append(task)
 
             results = await asyncio.gather(*tasks, return_exceptions=True)
@@ -605,7 +567,7 @@ class TestAuthenticationAttacks:
                 )
                 validated = auth_manager.validate_token(fake_token)
                 assert validated is None, "Key confusion attack successful"
-            except:
+            except Exception:
                 pass  # Expected to fail
 
     def test_authentication_bypass_via_parameter_pollution(self, auth_manager):
@@ -653,7 +615,7 @@ class TestAuthenticationAttacks:
             try:
                 new_token = auth_manager.refresh_access_token(access_token)
                 assert new_token is None, "Token type confusion successful"
-            except:
+            except Exception:
                 pass  # Expected to fail
 
         # Try to use session ID as JWT

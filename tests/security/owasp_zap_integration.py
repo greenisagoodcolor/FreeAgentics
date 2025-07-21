@@ -14,12 +14,9 @@ automated security scanning capabilities including:
 import asyncio
 import json
 import os
-import time
-import xml.etree.ElementTree as ET
 from datetime import datetime
-from typing import Dict, List, Optional, Tuple
+from typing import Dict, List, Optional
 
-import httpx
 from zapv2 import ZAPv2
 
 
@@ -45,9 +42,7 @@ class OWASPZAPIntegration:
         self.target_url = target_url
 
         # Initialize ZAP client
-        self.zap = ZAPv2(
-            apikey=self.api_key, proxies={"http": zap_url, "https": zap_url}
-        )
+        self.zap = ZAPv2(apikey=self.api_key, proxies={"http": zap_url, "https": zap_url})
 
         self.scan_results = {
             "passive_scan": [],
@@ -114,9 +109,7 @@ class OWASPZAPIntegration:
             context_id = self.zap.context.new_context(context_name)
 
             # Include target in context
-            self.zap.context.include_in_context(
-                context_name, f"{self.target_url}.*"
-            )
+            self.zap.context.include_in_context(context_name, f"{self.target_url}.*")
 
             self.context_id = context_id
             self.context_name = context_name
@@ -179,7 +172,7 @@ class OWASPZAPIntegration:
                     self.zap.ascan.set_scanner_attack_strength(
                         rule_id, "HIGH", scanpolicyname=policy_name
                     )
-                except:
+                except Exception:
                     pass
 
             self.scan_policy = policy_name
@@ -259,9 +252,7 @@ class OWASPZAPIntegration:
 
         try:
             # Start active scan
-            scan_id = self.zap.ascan.scan(
-                self.target_url, scanpolicyname=self.scan_policy
-            )
+            scan_id = self.zap.ascan.scan(self.target_url, scanpolicyname=self.scan_policy)
 
             # Wait for active scan
             while int(self.zap.ascan.status(scan_id)) < 100:
@@ -289,7 +280,7 @@ class OWASPZAPIntegration:
             try:
                 self.zap.openapi.import_url(openapi_url, self.target_url)
                 print("Imported OpenAPI specification")
-            except:
+            except Exception:
                 print("No OpenAPI spec found, using standard API scanning")
 
             # Configure API scan
@@ -319,9 +310,7 @@ class OWASPZAPIntegration:
             # Get API-specific alerts
             api_alerts = []
             for endpoint in api_endpoints:
-                alerts = self.zap.core.alerts(
-                    baseurl=f"{self.target_url}{endpoint}"
-                )
+                alerts = self.zap.core.alerts(baseurl=f"{self.target_url}{endpoint}")
                 api_alerts.extend(alerts)
 
             self.scan_results["api_scan"] = api_alerts
@@ -405,9 +394,7 @@ class OWASPZAPIntegration:
         unique_alerts = {}
         for alert in all_alerts:
             key = f"{alert.get('alert')}_{alert.get('url')}"
-            if key not in unique_alerts or alert.get("risk") > unique_alerts[
-                key
-            ].get("risk"):
+            if key not in unique_alerts or alert.get("risk") > unique_alerts[key].get("risk"):
                 unique_alerts[key] = alert
 
         # Categorize by risk
@@ -432,9 +419,7 @@ class OWASPZAPIntegration:
                 "scan_date": datetime.now().isoformat(),
                 "zap_version": self.zap.core.version,
                 "total_alerts": len(unique_alerts),
-                "urls_discovered": len(
-                    self.scan_results.get("spider_results", [])
-                )
+                "urls_discovered": len(self.scan_results.get("spider_results", []))
                 + len(self.scan_results.get("ajax_spider_results", [])),
             },
             "risk_summary": {
@@ -446,20 +431,12 @@ class OWASPZAPIntegration:
             "detailed_findings": risk_summary,
             "owasp_mapping": owasp_mapping,
             "scan_coverage": {
-                "spider_urls": len(
-                    self.scan_results.get("spider_results", [])
-                ),
-                "ajax_urls": len(
-                    self.scan_results.get("ajax_spider_results", [])
-                ),
-                "passive_alerts": len(
-                    self.scan_results.get("passive_scan", [])
-                ),
+                "spider_urls": len(self.scan_results.get("spider_results", [])),
+                "ajax_urls": len(self.scan_results.get("ajax_spider_results", [])),
+                "passive_alerts": len(self.scan_results.get("passive_scan", [])),
                 "active_alerts": len(self.scan_results.get("active_scan", [])),
                 "api_alerts": len(self.scan_results.get("api_scan", [])),
-                "auth_alerts": len(
-                    self.scan_results.get("authenticated_scan", [])
-                ),
+                "auth_alerts": len(self.scan_results.get("authenticated_scan", [])),
             },
             "recommendations": self._generate_recommendations(risk_summary),
         }
@@ -513,9 +490,7 @@ class OWASPZAPIntegration:
 
             if not mapped:
                 # Default mapping
-                owasp_mapping["A05:2021 – Security Misconfiguration"].append(
-                    alert
-                )
+                owasp_mapping["A05:2021 – Security Misconfiguration"].append(alert)
 
         return owasp_mapping
 
@@ -592,7 +567,7 @@ class OWASPZAPIntegration:
             html_report = self.zap.core.htmlreport()
             with open("zap_security_report.html", "w") as f:
                 f.write(html_report)
-        except:
+        except Exception:
             pass
 
         # XML report
@@ -600,7 +575,7 @@ class OWASPZAPIntegration:
             xml_report = self.zap.core.xmlreport()
             with open("zap_security_report.xml", "w") as f:
                 f.write(xml_report)
-        except:
+        except Exception:
             pass
 
         print("Reports exported:")

@@ -162,9 +162,7 @@ class TestAgentMemoryLifecycleManager(unittest.TestCase):
 
         # Should return the same profile
         self.assertEqual(profile1, profile2)
-        self.assertEqual(
-            profile1.memory_limit_mb, 30.0
-        )  # Original limit preserved
+        self.assertEqual(profile1.memory_limit_mb, 30.0)  # Original limit preserved
 
     def test_memory_usage_update(self):
         """Test memory usage updates."""
@@ -172,16 +170,12 @@ class TestAgentMemoryLifecycleManager(unittest.TestCase):
         profile = self.manager.register_agent(agent_id, memory_limit_mb=50.0)
 
         # Update within limit
-        within_limit = self.manager.update_agent_memory(
-            agent_id, 15.0, 10.0, 5.0
-        )
+        within_limit = self.manager.update_agent_memory(agent_id, 15.0, 10.0, 5.0)
         self.assertTrue(within_limit)
         self.assertEqual(profile.current_memory_mb, 30.0)
 
         # Update over limit
-        over_limit = self.manager.update_agent_memory(
-            agent_id, 30.0, 20.0, 10.0
-        )
+        over_limit = self.manager.update_agent_memory(agent_id, 30.0, 20.0, 10.0)
         self.assertFalse(over_limit)
         self.assertEqual(profile.current_memory_mb, 60.0)
 
@@ -297,18 +291,10 @@ class TestAgentMemoryLifecycleManager(unittest.TestCase):
 
         # Set different last access times and states
         current_time = time.time()
-        profile1.last_accessed = (
-            current_time - 70.0
-        )  # Hibernation candidate (>60s)
-        profile1.state = (
-            AgentLifecycleState.ACTIVE
-        )  # Must be ACTIVE to be hibernated
-        profile2.last_accessed = (
-            current_time - 130.0
-        )  # Recycling candidate (>120s)
-        profile2.state = (
-            AgentLifecycleState.HIBERNATING
-        )  # HIBERNATING can be recycled
+        profile1.last_accessed = current_time - 70.0  # Hibernation candidate (>60s)
+        profile1.state = AgentLifecycleState.ACTIVE  # Must be ACTIVE to be hibernated
+        profile2.last_accessed = current_time - 130.0  # Recycling candidate (>120s)
+        profile2.state = AgentLifecycleState.HIBERNATING  # HIBERNATING can be recycled
 
         # Run cleanup
         cleanup_stats = self.manager.cleanup_idle_agents()
@@ -344,9 +330,7 @@ class TestAgentMemoryLifecycleManager(unittest.TestCase):
 
         # Check global stats
         self.assertEqual(stats["global"]["total_agents"], 3)
-        self.assertEqual(
-            stats["global"]["total_memory_mb"], 29.0
-        )  # 17 + 12 + 0
+        self.assertEqual(stats["global"]["total_memory_mb"], 29.0)  # 17 + 12 + 0
 
         # Check state counts
         self.assertEqual(stats["agent_states"]["active"], 1)

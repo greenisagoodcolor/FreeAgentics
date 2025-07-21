@@ -4,10 +4,8 @@ Tests for Security Testing Infrastructure
 Tests SAST, DAST, dependency monitoring, and threat intelligence components.
 """
 
-import asyncio
 import json
-from datetime import datetime, timedelta
-from pathlib import Path
+from datetime import datetime
 from unittest.mock import AsyncMock, MagicMock, Mock, patch
 
 import pytest
@@ -42,8 +40,6 @@ from security.testing.sast_scanner import (
     Severity,
 )
 from security.testing.threat_intelligence import (
-    AbuseIPDBFeed,
-    CustomFeed,
     OTXFeed,
     ThreatIndicator,
     ThreatIntelConfig,
@@ -358,9 +354,7 @@ pandas==1.2.0
         )
         return req_file
 
-    def test_dependency_scanner_python(
-        self, monitor_config, test_requirements
-    ):
+    def test_dependency_scanner_python(self, monitor_config, test_requirements):
         """Test Python dependency scanning"""
         scanner = DependencyScanner(monitor_config)
 
@@ -500,12 +494,8 @@ pandas==1.2.0
 
         with (
             patch.object(monitor.scanner, "scan_dependencies") as mock_scan,
-            patch.object(
-                VulnerabilityDatabase, "check_vulnerabilities"
-            ) as mock_check_vulns,
-            patch.object(
-                monitor.update_manager, "check_updates"
-            ) as mock_check_updates,
+            patch.object(VulnerabilityDatabase, "check_vulnerabilities") as mock_check_vulns,
+            patch.object(monitor.update_manager, "check_updates") as mock_check_updates,
         ):
             mock_dependencies = [
                 Dependency(name="django", version="3.2.0", source="pip"),

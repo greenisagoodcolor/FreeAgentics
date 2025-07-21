@@ -66,9 +66,7 @@ class BrowserDriver(ABC):
         """Execute JavaScript"""
 
     @abstractmethod
-    async def get_element_attribute(
-        self, selector: str, attribute: str
-    ) -> str:
+    async def get_element_attribute(self, selector: str, attribute: str) -> str:
         """Get element attribute"""
 
     @abstractmethod
@@ -152,9 +150,7 @@ class BrowserDriver(ABC):
         """Wait for navigation to complete"""
 
     @abstractmethod
-    async def wait_for_load_state(
-        self, state: str = "load", timeout: float = 10.0
-    ):
+    async def wait_for_load_state(self, state: str = "load", timeout: float = 10.0):
         """Wait for specific load state"""
 
     @abstractmethod

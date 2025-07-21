@@ -39,9 +39,7 @@ def generate_memory_efficient_dataset(
     agent_start = time.time()
 
     # Process in batches to avoid memory issues
-    for batch in agent_gen.generate_stream(
-        count=config.num_agents, batch_size=config.batch_size
-    ):
+    for batch in agent_gen.generate_stream(count=config.num_agents, batch_size=config.batch_size):
         agent_count += len(batch)
         if agent_count % 1000 == 0:
             print(f"  Generated {agent_count} agents...")
@@ -61,9 +59,7 @@ def generate_memory_efficient_dataset(
 
     # Generate knowledge graph
     if config.num_knowledge_nodes > 0:
-        print(
-            f"Generating knowledge graph with {config.num_knowledge_nodes} nodes..."
-        )
+        print(f"Generating knowledge graph with {config.num_knowledge_nodes} nodes...")
         kg_start = time.time()
 
         kg_gen = KnowledgeGraphGenerator(seed=config.seed)
@@ -139,9 +135,7 @@ def generate_spatial_distribution_test():
     """Generate agents with different spatial distributions."""
     print("\nGenerating spatial distribution test data...")
 
-    agent_gen = AgentGenerator(
-        position_bounds={"min": [0, 0], "max": [1000, 1000]}
-    )
+    agent_gen = AgentGenerator(position_bounds={"min": [0, 0], "max": [1000, 1000]})
 
     distributions = {}
 
@@ -184,7 +178,7 @@ def generate_spatial_distribution_test():
 
 def generate_database_stress_test(db_url: str = "sqlite:///:memory:"):
     """Generate data directly to database for stress testing."""
-    print(f"\nRunning database stress test...")
+    print("\nRunning database stress test...")
 
     # Create engine and tables
     engine = create_engine(db_url)
@@ -207,9 +201,7 @@ def generate_database_stress_test(db_url: str = "sqlite:///:memory:"):
         print("\nDatabase Stress Test Results:")
         print(f"  Agents created: {len(results['agents'])}")
         print(f"  Coalitions created: {len(results['coalitions'])}")
-        print(
-            f"  Total creation time: {results['statistics']['total_creation_time']:.2f}s"
-        )
+        print(f"  Total creation time: {results['statistics']['total_creation_time']:.2f}s")
 
         # Test query performance
         print("\nTesting query performance...")
@@ -217,12 +209,8 @@ def generate_database_stress_test(db_url: str = "sqlite:///:memory:"):
         # Count queries
         start = time.time()
         agent_count = session.query("SELECT COUNT(*) FROM agents").scalar()
-        coalition_count = session.query(
-            "SELECT COUNT(*) FROM coalitions"
-        ).scalar()
-        node_count = session.query(
-            "SELECT COUNT(*) FROM db_knowledge_nodes"
-        ).scalar()
+        coalition_count = session.query("SELECT COUNT(*) FROM coalitions").scalar()
+        node_count = session.query("SELECT COUNT(*) FROM db_knowledge_nodes").scalar()
         query_time = time.time() - start
 
         print(f"  Count queries completed in {query_time:.3f}s")
@@ -276,9 +264,7 @@ def export_test_data_samples():
 
 def main():
     """Main entry point for performance data generation."""
-    parser = argparse.ArgumentParser(
-        description="Generate performance test data"
-    )
+    parser = argparse.ArgumentParser(description="Generate performance test data")
     parser.add_argument(
         "--test",
         choices=["scaling", "spatial", "database", "export", "all"],

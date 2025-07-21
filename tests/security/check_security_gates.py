@@ -11,7 +11,7 @@ import os
 import sys
 from datetime import datetime
 from pathlib import Path
-from typing import Dict, List, Tuple
+from typing import Dict, Tuple
 
 
 class SecurityGateValidator:
@@ -92,9 +92,7 @@ class SecurityGateValidator:
                 report = json.load(f)
 
             # Check vulnerability counts
-            vulnerabilities = report.get("summary", {}).get(
-                "vulnerabilities_found", 0
-            )
+            report.get("summary", {}).get("vulnerabilities_found", 0)
             security_score = report.get("summary", {}).get("security_score", 0)
 
             # Extract risk levels from detailed results
@@ -102,9 +100,7 @@ class SecurityGateValidator:
             medium_risk = 0
             low_risk = 0
 
-            for category, results in report.get(
-                "detailed_results", {}
-            ).items():
+            for category, results in report.get("detailed_results", {}).items():
                 for result in results:
                     if result.get("vulnerable"):
                         risk = result.get("risk", "low").lower()
@@ -160,9 +156,7 @@ class SecurityGateValidator:
                 self.validation_results["passed"] = False
 
             # Check OWASP compliance
-            owasp_compliance = report.get("compliance", {}).get(
-                "OWASP_Top_10", {}
-            )
+            owasp_compliance = report.get("compliance", {}).get("OWASP_Top_10", {})
             passed_checks = sum(1 for v in owasp_compliance.values() if v)
 
             if passed_checks < self.thresholds["owasp_compliance_min"]:
@@ -186,7 +180,7 @@ class SecurityGateValidator:
                 "owasp_compliance": f"{passed_checks}/10",
             }
 
-            print(f"✓ Security test suite validated")
+            print("✓ Security test suite validated")
             print(f"  - High risk: {high_risk}")
             print(f"  - Medium risk: {medium_risk}")
             print(f"  - Low risk: {low_risk}")
@@ -219,25 +213,13 @@ class SecurityGateValidator:
 
             # Count issues by severity
             high_severity = len(
-                [
-                    r
-                    for r in report.get("results", [])
-                    if r.get("issue_severity") == "HIGH"
-                ]
+                [r for r in report.get("results", []) if r.get("issue_severity") == "HIGH"]
             )
             medium_severity = len(
-                [
-                    r
-                    for r in report.get("results", [])
-                    if r.get("issue_severity") == "MEDIUM"
-                ]
+                [r for r in report.get("results", []) if r.get("issue_severity") == "MEDIUM"]
             )
             low_severity = len(
-                [
-                    r
-                    for r in report.get("results", [])
-                    if r.get("issue_severity") == "LOW"
-                ]
+                [r for r in report.get("results", []) if r.get("issue_severity") == "LOW"]
             )
 
             # Validate
@@ -268,7 +250,7 @@ class SecurityGateValidator:
                 "low": low_severity,
             }
 
-            print(f"✓ Bandit SAST validated")
+            print("✓ Bandit SAST validated")
             print(f"  - High severity: {high_severity}")
             print(f"  - Medium severity: {medium_severity}")
             print(f"  - Low severity: {low_severity}")
@@ -295,24 +277,16 @@ class SecurityGateValidator:
             if len(vulnerabilities) > 0:
                 # Check severity of vulnerabilities
                 critical_vulns = [
-                    v
-                    for v in vulnerabilities
-                    if "critical" in v.get("severity", "").lower()
+                    v for v in vulnerabilities if "critical" in v.get("severity", "").lower()
                 ]
-                high_vulns = [
-                    v
-                    for v in vulnerabilities
-                    if "high" in v.get("severity", "").lower()
-                ]
+                high_vulns = [v for v in vulnerabilities if "high" in v.get("severity", "").lower()]
 
                 if len(critical_vulns) > 0:
                     self.validation_results["failures"].append(
                         {
                             "test": "Critical Dependency Vulnerabilities",
                             "found": len(critical_vulns),
-                            "packages": [
-                                v.get("package") for v in critical_vulns
-                            ],
+                            "packages": [v.get("package") for v in critical_vulns],
                             "severity": "CRITICAL",
                         }
                     )
@@ -330,12 +304,10 @@ class SecurityGateValidator:
 
             self.validation_results["summary"]["safety"] = {
                 "total_vulnerabilities": len(vulnerabilities),
-                "packages_affected": list(
-                    set(v.get("package") for v in vulnerabilities)
-                ),
+                "packages_affected": list(set(v.get("package") for v in vulnerabilities)),
             }
 
-            print(f"✓ Safety dependency check validated")
+            print("✓ Safety dependency check validated")
             print(f"  - Vulnerabilities found: {len(vulnerabilities)}")
 
         except Exception as e:
@@ -384,7 +356,7 @@ class SecurityGateValidator:
 
             self.validation_results["summary"]["zap"] = risk_summary
 
-            print(f"✓ OWASP ZAP validated")
+            print("✓ OWASP ZAP validated")
             print(f"  - High risk: {high_risk}")
             print(f"  - Medium risk: {medium_risk}")
             print(f"  - Low risk: {risk_summary.get('low', 0)}")
@@ -400,9 +372,7 @@ class SecurityGateValidator:
         try:
             report_path = Path(self.reports["penetration_report"])
             if not report_path.exists():
-                print(
-                    "  - Penetration test report not found (may not have run)"
-                )
+                print("  - Penetration test report not found (may not have run)")
                 return
 
             with open(report_path) as f:
@@ -440,7 +410,7 @@ class SecurityGateValidator:
                 "tests_run": report.get("total_tests", 0),
             }
 
-            print(f"✓ Penetration tests validated")
+            print("✓ Penetration tests validated")
             print(f"  - Successful exploits: {successful_exploits}")
             print(f"  - Critical findings: {critical_findings}")
 
@@ -464,9 +434,7 @@ class SecurityGateValidator:
             for failure in self.validation_results["failures"]:
                 print(f"  - [{failure.get('severity')}] {failure.get('test')}")
                 if "found" in failure and "threshold" in failure:
-                    print(
-                        f"    Found: {failure['found']}, Threshold: {failure['threshold']}"
-                    )
+                    print(f"    Found: {failure['found']}, Threshold: {failure['threshold']}")
                 if "reason" in failure:
                     print(f"    Reason: {failure['reason']}")
 
@@ -475,9 +443,7 @@ class SecurityGateValidator:
             for warning in self.validation_results["warnings"]:
                 print(f"  - [{warning.get('severity')}] {warning.get('test')}")
                 if "found" in warning and "threshold" in warning:
-                    print(
-                        f"    Found: {warning['found']}, Threshold: {warning['threshold']}"
-                    )
+                    print(f"    Found: {warning['found']}, Threshold: {warning['threshold']}")
 
         # Save validation report
         report_path = "security_gate_validation_report.json"

@@ -19,24 +19,17 @@ import base64
 import json
 import random
 import re
-import string
 import time
-from datetime import datetime, timedelta
-from typing import Dict, List, Optional, Tuple
-from unittest.mock import AsyncMock, patch
-from urllib.parse import quote, urlencode
+from datetime import datetime
+from typing import Dict, List
+from urllib.parse import quote
 
 import httpx
 import jwt
 import pytest
-from cryptography.hazmat.primitives import hashes
-from cryptography.hazmat.primitives.asymmetric import padding
-from sqlalchemy import text
 
-from api.v1.security import router as security_router
 from auth.jwt_handler import JWTHandler
 from auth.security_implementation import SecurityImplementation
-from database.models import Permission, Resource, Session, User
 
 
 class SecurityTestPayloads:
@@ -247,9 +240,7 @@ class ComprehensiveSecurityTestSuite:
         for endpoint in search_endpoints:
             for payload in SecurityTestPayloads.XSS_PAYLOADS:
                 try:
-                    response = await self.client.get(
-                        f"{endpoint}?q={quote(payload)}"
-                    )
+                    response = await self.client.get(f"{endpoint}?q={quote(payload)}")
 
                     # Check if payload is reflected without encoding
                     if payload in response.text:
@@ -263,7 +254,7 @@ class ComprehensiveSecurityTestSuite:
                             }
                         )
 
-                except Exception as e:
+                except Exception:
                     pass
 
         # Test stored XSS
@@ -285,9 +276,7 @@ class ComprehensiveSecurityTestSuite:
                         resource_id = create_response.json().get("id")
 
                         # Retrieve and check if payload is stored unencoded
-                        get_response = await self.client.get(
-                            f"{config['endpoint']}/{resource_id}"
-                        )
+                        get_response = await self.client.get(f"{config['endpoint']}/{resource_id}")
 
                         if payload in get_response.text:
                             self.test_results["xss"].append(
@@ -301,7 +290,7 @@ class ComprehensiveSecurityTestSuite:
                                 }
                             )
 
-                except Exception as e:
+                except Exception:
                     pass
 
     async def test_csrf_protection(self):
@@ -352,7 +341,7 @@ class ComprehensiveSecurityTestSuite:
                         }
                     )
 
-            except Exception as e:
+            except Exception:
                 pass
 
     async def test_authentication_bypass(self):
@@ -370,24 +359,16 @@ class ComprehensiveSecurityTestSuite:
             {"headers": {}},  # No auth header
             {"headers": {"Authorization": "Bearer "}},  # Empty token
             {"headers": {"Authorization": "Bearer null"}},  # Null token
-            {
-                "headers": {"Authorization": "Bearer undefined"}
-            },  # Undefined token
-            {
-                "headers": {"Authorization": "Basic YWRtaW46YWRtaW4="}
-            },  # Basic auth
+            {"headers": {"Authorization": "Bearer undefined"}},  # Undefined token
+            {"headers": {"Authorization": "Basic YWRtaW46YWRtaW4="}},  # Basic auth
             {"headers": {"X-Forwarded-For": "127.0.0.1"}},  # IP spoofing
-            {
-                "headers": {"X-Original-URL": "/api/v1/public"}
-            },  # Path confusion
+            {"headers": {"X-Original-URL": "/api/v1/public"}},  # Path confusion
         ]
 
         for endpoint in protected_endpoints:
             for technique in bypass_techniques:
                 try:
-                    response = await self.client.get(
-                        endpoint, headers=technique["headers"]
-                    )
+                    response = await self.client.get(endpoint, headers=technique["headers"])
 
                     if response.status_code == 200:
                         self.test_results["auth_bypass"].append(
@@ -400,7 +381,7 @@ class ComprehensiveSecurityTestSuite:
                             }
                         )
 
-                except Exception as e:
+                except Exception:
                     pass
 
     async def test_authorization_escalation(self):
@@ -438,9 +419,7 @@ class ComprehensiveSecurityTestSuite:
 
             try:
                 response = await self.client.get(
-                    test["target_endpoint"].format(
-                        other_user_id=999, other_resource_id=999
-                    ),
+                    test["target_endpoint"].format(other_user_id=999, other_resource_id=999),
                     headers={"Authorization": f"Bearer {user_token}"},
                 )
 
@@ -457,7 +436,7 @@ class ComprehensiveSecurityTestSuite:
                         }
                     )
 
-            except Exception as e:
+            except Exception:
                 pass
 
     async def test_jwt_manipulation(self):
@@ -475,9 +454,7 @@ class ComprehensiveSecurityTestSuite:
             },
             {
                 "name": "Algorithm Confusion Attack",
-                "manipulate": lambda t: self._jwt_algorithm_confusion_attack(
-                    t
-                ),
+                "manipulate": lambda t: self._jwt_algorithm_confusion_attack(t),
             },
             {
                 "name": "Expired Token Usage",
@@ -555,9 +532,7 @@ class ComprehensiveSecurityTestSuite:
             },
             {
                 "name": "Case Variation",
-                "modify_url": lambda url: url.upper()
-                if random.random() > 0.5
-                else url.lower(),
+                "modify_url": lambda url: url.upper() if random.random() > 0.5 else url.lower(),
             },
             {
                 "name": "Path Traversal",
@@ -577,9 +552,7 @@ class ComprehensiveSecurityTestSuite:
                     # Make many requests to trigger rate limit
                     for i in range(100):
                         headers = technique.get("headers", lambda i: {})(i)
-                        url = technique.get("modify_url", lambda u: u)(
-                            endpoint
-                        )
+                        url = technique.get("modify_url", lambda u: u)(endpoint)
                         params = technique.get("params", lambda: {})()
 
                         response = await self.client.post(
@@ -596,7 +569,7 @@ class ComprehensiveSecurityTestSuite:
                         if i > 50 and response.status_code not in [429, 503]:
                             bypassed = True
 
-                except Exception as e:
+                except Exception:
                     pass
 
                 if bypassed:
@@ -647,18 +620,13 @@ class ComprehensiveSecurityTestSuite:
                         )
 
                     # Check for errors indicating poor input validation
-                    if (
-                        response.status_code == 500
-                        or self._detect_injection_error(response)
-                    ):
+                    if response.status_code == 500 or self._detect_injection_error(response):
                         self.test_results["input_fuzzing"].append(
                             {
                                 "endpoint": endpoint["url"],
                                 "field": endpoint["field"],
                                 "input": (
-                                    fuzz_input[:50] + "..."
-                                    if len(fuzz_input) > 50
-                                    else fuzz_input
+                                    fuzz_input[:50] + "..." if len(fuzz_input) > 50 else fuzz_input
                                 ),
                                 "vulnerable": True,
                                 "response_code": response.status_code,
@@ -673,9 +641,7 @@ class ComprehensiveSecurityTestSuite:
                             "endpoint": endpoint["url"],
                             "field": endpoint["field"],
                             "input": (
-                                fuzz_input[:50] + "..."
-                                if len(fuzz_input) > 50
-                                else fuzz_input
+                                fuzz_input[:50] + "..." if len(fuzz_input) > 50 else fuzz_input
                             ),
                             "error": str(e),
                             "potential_dos": True,
@@ -709,9 +675,7 @@ class ComprehensiveSecurityTestSuite:
         for scenario in abuse_scenarios:
             try:
                 result = await scenario["test"]()
-                self.test_results["api_abuse"].append(
-                    {"scenario": scenario["name"], **result}
-                )
+                self.test_results["api_abuse"].append({"scenario": scenario["name"], **result})
             except Exception as e:
                 self.test_results["api_abuse"].append(
                     {
@@ -784,7 +748,7 @@ class ComprehensiveSecurityTestSuite:
             payload = jwt.decode(token, options={"verify_signature": False})
             # Re-encode with 'none' algorithm
             return jwt.encode(payload, "", algorithm="none")
-        except:
+        except Exception:
             return token
 
     def _jwt_algorithm_confusion_attack(self, token: str) -> str:
@@ -793,7 +757,7 @@ class ComprehensiveSecurityTestSuite:
             # This would attempt to switch from RS256 to HS256
             # Using the public key as the secret
             return token  # Placeholder
-        except:
+        except Exception:
             return token
 
     def _jwt_expired_token(self, token: str) -> str:
@@ -802,7 +766,7 @@ class ComprehensiveSecurityTestSuite:
             payload = jwt.decode(token, options={"verify_signature": False})
             payload["exp"] = int(time.time()) - 3600  # 1 hour ago
             return jwt.encode(payload, "secret", algorithm="HS256")
-        except:
+        except Exception:
             return token
 
     def _jwt_invalid_signature(self, token: str) -> str:
@@ -810,9 +774,7 @@ class ComprehensiveSecurityTestSuite:
         parts = token.split(".")
         if len(parts) == 3:
             # Modify the signature
-            parts[2] = (
-                base64.urlsafe_b64encode(b"invalid").decode().rstrip("=")
-            )
+            parts[2] = base64.urlsafe_b64encode(b"invalid").decode().rstrip("=")
             return ".".join(parts)
         return token
 
@@ -823,7 +785,7 @@ class ComprehensiveSecurityTestSuite:
             payload["role"] = "admin"
             payload["user_id"] = 1
             return jwt.encode(payload, "secret", algorithm="HS256")
-        except:
+        except Exception:
             return token
 
     def _jwt_weak_secret_test(self, token: str) -> str:
@@ -835,7 +797,7 @@ class ComprehensiveSecurityTestSuite:
                 jwt.decode(token, secret, algorithms=["HS256"])
                 # If decode succeeds, we found the secret
                 return token
-            except:
+            except Exception:
                 continue
 
         return token
@@ -852,7 +814,7 @@ class ComprehensiveSecurityTestSuite:
                     json={"name": f"resource_{i}", "data": "A" * 10000},
                 )
                 results.append(response.status_code)
-            except:
+            except Exception:
                 break
 
         return {
@@ -871,8 +833,7 @@ class ComprehensiveSecurityTestSuite:
                 "/api/v1/batch",
                 json={
                     "operations": [
-                        {"action": "create", "resource": f"item_{i}"}
-                        for i in range(batch_size)
+                        {"action": "create", "resource": f"item_{i}"} for i in range(batch_size)
                     ]
                 },
             )
@@ -882,7 +843,7 @@ class ComprehensiveSecurityTestSuite:
                 "details": f"Batch operation with {batch_size} items",
                 "recommendation": "Limit batch operation size",
             }
-        except:
+        except Exception:
             return {
                 "vulnerable": False,
                 "details": "Batch operation protection in place",
@@ -895,16 +856,14 @@ class ComprehensiveSecurityTestSuite:
         query = "{ user " + "{ posts " * depth + "{ id }" + "}" * depth + "}"
 
         try:
-            response = await self.client.post(
-                "/api/v1/graphql", json={"query": query}
-            )
+            response = await self.client.post("/api/v1/graphql", json={"query": query})
 
             return {
                 "vulnerable": response.status_code == 200,
                 "details": f"Query depth: {depth}",
                 "recommendation": "Implement query depth limiting",
             }
-        except:
+        except Exception:
             return {
                 "vulnerable": False,
                 "details": "Query depth protection in place",
@@ -930,7 +889,7 @@ class ComprehensiveSecurityTestSuite:
                 "details": f"Registered {webhook_count} webhooks",
                 "recommendation": "Limit webhook registrations per user",
             }
-        except:
+        except Exception:
             return {
                 "vulnerable": False,
                 "details": "Webhook registration limits in place",
@@ -953,9 +912,7 @@ class ComprehensiveSecurityTestSuite:
         for file_data in abuse_files:
             try:
                 files = {"file": (file_data["name"], file_data["content"])}
-                response = await self.client.post(
-                    "/api/v1/upload", files=files
-                )
+                response = await self.client.post("/api/v1/upload", files=files)
 
                 if response.status_code == 201:
                     results.append(
@@ -965,7 +922,7 @@ class ComprehensiveSecurityTestSuite:
                             "concern": "Potentially dangerous file accepted",
                         }
                     )
-            except:
+            except Exception:
                 pass
 
         return {
@@ -977,9 +934,7 @@ class ComprehensiveSecurityTestSuite:
 
     def _generate_security_report(self) -> Dict:
         """Generate comprehensive security test report"""
-        total_tests = sum(
-            len(results) for results in self.test_results.values()
-        )
+        total_tests = sum(len(results) for results in self.test_results.values())
         vulnerabilities = sum(
             len([r for r in results if r.get("vulnerable")])
             for results in self.test_results.values()
@@ -990,9 +945,7 @@ class ComprehensiveSecurityTestSuite:
                 "total_tests": total_tests,
                 "vulnerabilities_found": vulnerabilities,
                 "test_date": datetime.now().isoformat(),
-                "security_score": max(
-                    0, 100 - (vulnerabilities * 5)
-                ),  # Simple scoring
+                "security_score": max(0, 100 - (vulnerabilities * 5)),  # Simple scoring
             },
             "detailed_results": self.test_results,
             "recommendations": self._generate_recommendations(),
@@ -1011,9 +964,7 @@ class ComprehensiveSecurityTestSuite:
                     "priority": "CRITICAL",
                     "category": "SQL Injection",
                     "recommendation": "Use parameterized queries for all database operations",
-                    "references": [
-                        "OWASP SQL Injection Prevention Cheat Sheet"
-                    ],
+                    "references": ["OWASP SQL Injection Prevention Cheat Sheet"],
                 }
             )
 
@@ -1043,9 +994,7 @@ class ComprehensiveSecurityTestSuite:
                     "priority": "CRITICAL",
                     "category": "JWT Security",
                     "recommendation": "Use strong secrets, validate algorithms, and implement proper token validation",
-                    "references": [
-                        "RFC 8725 - JSON Web Token Best Current Practices"
-                    ],
+                    "references": ["RFC 8725 - JSON Web Token Best Current Practices"],
                 }
             )
 
@@ -1063,12 +1012,8 @@ class ComprehensiveSecurityTestSuite:
     def _check_owasp_compliance(self) -> Dict:
         """Check OWASP Top 10 compliance"""
         return {
-            "A01_Broken_Access_Control": len(self.test_results["auth_bypass"])
-            == 0,
-            "A02_Cryptographic_Failures": len(
-                self.test_results["jwt_manipulation"]
-            )
-            == 0,
+            "A01_Broken_Access_Control": len(self.test_results["auth_bypass"]) == 0,
+            "A02_Cryptographic_Failures": len(self.test_results["jwt_manipulation"]) == 0,
             "A03_Injection": len(self.test_results["sql_injection"]) == 0,
             "A04_Insecure_Design": True,  # Requires architecture review
             "A05_Security_Misconfiguration": True,  # Requires config review
@@ -1082,8 +1027,7 @@ class ComprehensiveSecurityTestSuite:
     def _check_pci_compliance(self) -> Dict:
         """Check PCI DSS compliance indicators"""
         return {
-            "strong_cryptography": len(self.test_results["jwt_manipulation"])
-            == 0,
+            "strong_cryptography": len(self.test_results["jwt_manipulation"]) == 0,
             "access_control": len(self.test_results["auth_bypass"]) == 0,
             "secure_systems": len(self.test_results["sql_injection"]) == 0,
             "regular_testing": True,
@@ -1119,47 +1063,31 @@ class TestComprehensiveSecurity:
         suite = ComprehensiveSecurityTestSuite()
         await suite.test_sql_injection()
 
-        vulnerabilities = [
-            r
-            for r in suite.test_results["sql_injection"]
-            if r.get("vulnerable")
-        ]
-        assert (
-            len(vulnerabilities) == 0
-        ), f"SQL injection vulnerabilities found: {vulnerabilities}"
+        vulnerabilities = [r for r in suite.test_results["sql_injection"] if r.get("vulnerable")]
+        assert len(vulnerabilities) == 0, f"SQL injection vulnerabilities found: {vulnerabilities}"
 
     async def test_xss_protection(self):
         """Test XSS protection"""
         suite = ComprehensiveSecurityTestSuite()
         await suite.test_xss_attacks()
 
-        vulnerabilities = [
-            r for r in suite.test_results["xss"] if r.get("vulnerable")
-        ]
-        assert (
-            len(vulnerabilities) == 0
-        ), f"XSS vulnerabilities found: {vulnerabilities}"
+        vulnerabilities = [r for r in suite.test_results["xss"] if r.get("vulnerable")]
+        assert len(vulnerabilities) == 0, f"XSS vulnerabilities found: {vulnerabilities}"
 
     async def test_csrf_protection(self):
         """Test CSRF protection"""
         suite = ComprehensiveSecurityTestSuite()
         await suite.test_csrf_protection()
 
-        vulnerabilities = [
-            r for r in suite.test_results["csrf"] if r.get("vulnerable")
-        ]
-        assert (
-            len(vulnerabilities) == 0
-        ), f"CSRF vulnerabilities found: {vulnerabilities}"
+        vulnerabilities = [r for r in suite.test_results["csrf"] if r.get("vulnerable")]
+        assert len(vulnerabilities) == 0, f"CSRF vulnerabilities found: {vulnerabilities}"
 
     async def test_authentication_security(self):
         """Test authentication security"""
         suite = ComprehensiveSecurityTestSuite()
         await suite.test_authentication_bypass()
 
-        vulnerabilities = [
-            r for r in suite.test_results["auth_bypass"] if r.get("vulnerable")
-        ]
+        vulnerabilities = [r for r in suite.test_results["auth_bypass"] if r.get("vulnerable")]
         assert (
             len(vulnerabilities) == 0
         ), f"Authentication bypass vulnerabilities found: {vulnerabilities}"
@@ -1169,54 +1097,32 @@ class TestComprehensiveSecurity:
         suite = ComprehensiveSecurityTestSuite()
         await suite.test_jwt_manipulation()
 
-        vulnerabilities = [
-            r
-            for r in suite.test_results["jwt_manipulation"]
-            if r.get("vulnerable")
-        ]
-        assert (
-            len(vulnerabilities) == 0
-        ), f"JWT vulnerabilities found: {vulnerabilities}"
+        vulnerabilities = [r for r in suite.test_results["jwt_manipulation"] if r.get("vulnerable")]
+        assert len(vulnerabilities) == 0, f"JWT vulnerabilities found: {vulnerabilities}"
 
     async def test_rate_limiting(self):
         """Test rate limiting effectiveness"""
         suite = ComprehensiveSecurityTestSuite()
         await suite.test_rate_limit_bypass()
 
-        vulnerabilities = [
-            r
-            for r in suite.test_results["rate_limiting"]
-            if r.get("vulnerable")
-        ]
-        assert (
-            len(vulnerabilities) == 0
-        ), f"Rate limiting bypass found: {vulnerabilities}"
+        vulnerabilities = [r for r in suite.test_results["rate_limiting"] if r.get("vulnerable")]
+        assert len(vulnerabilities) == 0, f"Rate limiting bypass found: {vulnerabilities}"
 
     async def test_input_validation(self):
         """Test input validation"""
         suite = ComprehensiveSecurityTestSuite()
         await suite.test_input_fuzzing()
 
-        vulnerabilities = [
-            r
-            for r in suite.test_results["input_fuzzing"]
-            if r.get("vulnerable")
-        ]
-        assert (
-            len(vulnerabilities) == 0
-        ), f"Input validation failures found: {vulnerabilities}"
+        vulnerabilities = [r for r in suite.test_results["input_fuzzing"] if r.get("vulnerable")]
+        assert len(vulnerabilities) == 0, f"Input validation failures found: {vulnerabilities}"
 
     async def test_api_abuse_protection(self):
         """Test API abuse protection"""
         suite = ComprehensiveSecurityTestSuite()
         await suite.test_api_abuse_scenarios()
 
-        vulnerabilities = [
-            r for r in suite.test_results["api_abuse"] if r.get("vulnerable")
-        ]
-        assert (
-            len(vulnerabilities) == 0
-        ), f"API abuse vulnerabilities found: {vulnerabilities}"
+        vulnerabilities = [r for r in suite.test_results["api_abuse"] if r.get("vulnerable")]
+        assert len(vulnerabilities) == 0, f"API abuse vulnerabilities found: {vulnerabilities}"
 
     async def test_full_security_suite(self):
         """Run full security test suite"""
@@ -1232,11 +1138,9 @@ class TestComprehensiveSecurity:
         with open("security_test_report.json", "w") as f:
             json.dump(report, f, indent=2)
 
-        print(f"\nSecurity Test Summary:")
+        print("\nSecurity Test Summary:")
         print(f"Total Tests: {report['summary']['total_tests']}")
-        print(
-            f"Vulnerabilities Found: {report['summary']['vulnerabilities_found']}"
-        )
+        print(f"Vulnerabilities Found: {report['summary']['vulnerabilities_found']}")
         print(f"Security Score: {report['summary']['security_score']}/100")
 
 
@@ -1251,9 +1155,7 @@ if __name__ == "__main__":
         print("=" * 80)
         print(f"Date: {report['summary']['test_date']}")
         print(f"Total Tests: {report['summary']['total_tests']}")
-        print(
-            f"Vulnerabilities Found: {report['summary']['vulnerabilities_found']}"
-        )
+        print(f"Vulnerabilities Found: {report['summary']['vulnerabilities_found']}")
         print(f"Security Score: {report['summary']['security_score']}/100")
         print("\nRecommendations:")
 

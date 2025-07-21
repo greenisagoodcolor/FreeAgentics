@@ -5,9 +5,6 @@ Tests the GridWorld environment functionality for multi-agent
 Active Inference simulations.
 """
 
-from typing import Dict, List, Tuple
-from unittest.mock import Mock, patch
-
 import numpy as np
 import pytest
 
@@ -479,10 +476,7 @@ class TestGridWorld:
                     "properties": {},
                 }
             },
-            "grid": [
-                [{"type": "empty", "value": 0.0} for _ in range(5)]
-                for _ in range(5)
-            ],
+            "grid": [[{"type": "empty", "value": 0.0} for _ in range(5)] for _ in range(5)],
             "step_count": 42,
         }
 
@@ -654,7 +648,6 @@ class TestGridWorldIntegration:
             }
 
         # Collect resources
-        initial_energy = collector.energy
 
         # Move to first resource and collect
         world.move_agent("collector", Position(2, 2))

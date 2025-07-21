@@ -4,10 +4,9 @@
 import json
 import subprocess
 import sys
-import time
 from datetime import datetime
 from pathlib import Path
-from typing import Dict, List, Tuple
+from typing import List, Tuple
 
 
 class QualityGateValidator:
@@ -21,9 +20,7 @@ class QualityGateValidator:
         }
         self.project_root = Path(__file__).parent.parent
 
-    def run_command(
-        self, cmd: List[str], timeout: int = 300
-    ) -> Tuple[int, str, str]:
+    def run_command(self, cmd: List[str], timeout: int = 300) -> Tuple[int, str, str]:
         """Run a command and return exit code, stdout, stderr."""
         try:
             result = subprocess.run(
@@ -71,15 +68,15 @@ class QualityGateValidator:
 
         # Extract coverage percentage
         coverage: float = 0.0
-        for line in stdout.split('\n'):
+        for line in stdout.split("\n"):
             if "TOTAL" in line and "%" in line:
                 try:
                     parts = line.split()
                     for part in parts:
-                        if part.endswith('%'):
-                            coverage = float(part.rstrip('%'))
+                        if part.endswith("%"):
+                            coverage = float(part.rstrip("%"))
                             break
-                except:
+                except Exception:
                     pass
 
         passed = returncode == 0 and coverage >= 80
@@ -101,9 +98,7 @@ class QualityGateValidator:
             }
             return False
 
-        returncode, stdout, stderr = self.run_command(
-            ["npm", "run", "build"], timeout=300
-        )
+        returncode, stdout, stderr = self.run_command(["npm", "run", "build"], timeout=300)
 
         passed = returncode == 0
         self.results["gates"]["npm_build"] = {
@@ -115,9 +110,7 @@ class QualityGateValidator:
     def check_docker_build(self) -> bool:
         """Check if make docker-build succeeds."""
         print("🔍 Building Docker images...")
-        returncode, stdout, stderr = self.run_command(
-            ["make", "docker-build"], timeout=600
-        )
+        returncode, stdout, stderr = self.run_command(["make", "docker-build"], timeout=600)
 
         passed = returncode == 0
         self.results["gates"]["docker_build"] = {
@@ -144,13 +137,13 @@ class QualityGateValidator:
 
         # Extract error count
         error_count = 0
-        for line in stdout.split('\n'):
+        for line in stdout.split("\n"):
             if line.strip():
                 try:
                     parts = line.split()
                     if parts and parts[0].isdigit():
                         error_count += int(parts[0])
-                except:
+                except Exception:
                     pass
 
         passed = error_count == 0
@@ -177,13 +170,7 @@ class QualityGateValidator:
         )
 
         # Count errors
-        error_count = len(
-            [
-                line
-                for line in (stdout + stderr).split('\n')
-                if 'error:' in line
-            ]
-        )
+        error_count = len([line for line in (stdout + stderr).split("\n") if "error:" in line])
 
         passed = error_count == 0
         self.results["gates"]["mypy"] = {
@@ -236,19 +223,15 @@ class QualityGateValidator:
             self.project_root
             / f"quality_gate_report_{datetime.now().strftime('%Y%m%d_%H%M%S')}.json"
         )
-        with open(report_path, 'w') as f:
+        with open(report_path, "w") as f:
             json.dump(self.results, f, indent=2)
         print(f"\n📄 Report saved to: {report_path}")
 
-        all_passed = self.results['summary']['failed'] == 0
+        all_passed = self.results["summary"]["failed"] == 0
         if all_passed:
-            print(
-                "\n✅ All quality gates passed! Ready for v1.0.0-alpha+ release"
-            )
+            print("\n✅ All quality gates passed! Ready for v1.0.0-alpha+ release")
         else:
-            print(
-                "\n❌ Some quality gates failed. Please fix issues before release."
-            )
+            print("\n❌ Some quality gates failed. Please fix issues before release.")
 
         return all_passed
 

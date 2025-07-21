@@ -75,19 +75,55 @@ def safe_array_to_int(value):
             # regular scalar
             return int(value)
     except (TypeError, ValueError, IndexError) as e:
-        raise ValueError(
-            f"Cannot convert {type(value)} value {value} to integer: {e}"
-        )
+        raise ValueError(f"Cannot convert {type(value)} value {value} to integer: {e}")
 
 
-try:
-    from pymdp import utils
-    from pymdp.agent import Agent as PyMDPAgent
+# Lazy-load PyMDP for better import performance
+PYMDP_AVAILABLE = None
+_pymdp_utils = None
+_PyMDPAgent = None
 
-    PYMDP_AVAILABLE = True
-except ImportError:
-    logger.warning("PyMDP not available - using simplified implementation")
-    PYMDP_AVAILABLE = False
+
+def _get_pymdp_components():
+    """Lazy-load PyMDP components on first use."""
+    global PYMDP_AVAILABLE, _pymdp_utils, _PyMDPAgent
+
+    if PYMDP_AVAILABLE is None:
+        try:
+            from pymdp import utils
+            from pymdp.agent import Agent as PyMDPAgent
+
+            _pymdp_utils = utils
+            _PyMDPAgent = PyMDPAgent
+            PYMDP_AVAILABLE = True
+            logger.debug("PyMDP components loaded successfully")
+        except ImportError:
+            logger.warning("PyMDP not available - using simplified implementation")
+            PYMDP_AVAILABLE = False
+
+    return PYMDP_AVAILABLE
+
+
+# Initialize PyMDP availability on module load to avoid None checks
+_get_pymdp_components()
+
+
+def _get_llm_manager(agent_instance):
+    """Lazy-load LLM manager on first use."""
+    if agent_instance.llm_manager is None and LLM_AVAILABLE:
+        # Import here to avoid slow startup
+        from inference.llm.local_llm_manager import LocalLLMManager as LLMManagerClass
+
+        # Create LocalLLMConfig with default values and user overrides
+        llm_config = LocalLLMConfig()
+        for key, value in agent_instance._llm_config_dict.items():
+            if hasattr(llm_config, key):
+                setattr(llm_config, key, value)
+        agent_instance.llm_manager = LLMManagerClass(llm_config)
+        logger.debug("LLM manager loaded on-demand")
+
+    return agent_instance.llm_manager
+
 
 # Import observability integration
 try:
@@ -135,7 +171,6 @@ except ImportError:
             beliefs_after: Beliefs after update
             free_energy: Optional free energy value
         """
-        pass
 
     async def record_agent_lifecycle_event(
         agent_id: str, event: str, metadata: Dict[str, Any] = None
@@ -147,7 +182,6 @@ except ImportError:
             event: Lifecycle event name
             metadata: Optional event metadata
         """
-        pass
 
     async def monitor_belief_update(
         agent_id: str,
@@ -163,12 +197,11 @@ except ImportError:
             free_energy: Optional free energy value
             metadata: Optional additional metadata
         """
-        pass
 
 
 # Import GMN for model specification
 try:
-    from inference.active.gmn_parser import GMNParser, parse_gmn_spec
+    from inference.active.gmn_parser import parse_gmn_spec
 
     GMN_AVAILABLE = True
 except ImportError:
@@ -208,9 +241,8 @@ class ActiveInferenceAgent(ABC):
     4. Act in the environment
     """
 
-    def __init__(
-        self, agent_id: str, name: str, config: Optional[Dict[str, Any]] = None
-    ):
+    def __init__(self, agent_id: str, name: str, config: Optional[Dict[str,
+        Any]] = None):
         """Initialize an Active Inference agent.
 
         Args:
@@ -243,24 +275,15 @@ class ActiveInferenceAgent(ABC):
         self.preferences: Dict[str, Any] = {}  # Preferred observations
         self.policies: list[Any] = []  # Available action policies
 
-        # GMN and LLM integration
-        self.gmn_spec: Optional[
-            Dict[str, Any]
-        ] = None  # GMN specification for the agent
-        if LLM_AVAILABLE:
-            llm_config_dict = self.config.get("llm_config", {})
-            # Create LocalLLMConfig with default values and user overrides
-            llm_config = LocalLLMConfig()
-            for key, value in llm_config_dict.items():
-                if hasattr(llm_config, key):
-                    setattr(llm_config, key, value)
-            self.llm_manager = LocalLLMManager(llm_config)
-        else:
-            self.llm_manager = None
+        # GMN and LLM integration (lazy-loaded for performance)
+        self.gmn_spec: Optional[Dict[str,
+            Any]] = None  # GMN specification for the agent
+        self.llm_manager = None  # Will be lazy-loaded on first use
+        self._llm_config_dict = self.config.get("llm_config", {})
 
-        # Initialize PyMDP if available
-        if PYMDP_AVAILABLE and self.config.get("use_pymdp", True):
-            self._initialize_pymdp()
+        # Initialize PyMDP if available (defer expensive initialization)
+        self._pymdp_initialized = False
+        self._use_pymdp = self.config.get("use_pymdp", True)
 
         # Metrics
         self.metrics = {
@@ -276,9 +299,8 @@ class ActiveInferenceAgent(ABC):
         )
 
         # Belief monitoring integration
-        self.belief_monitoring_enabled = (
-            BELIEF_MONITORING_AVAILABLE
-            and config.get("enable_belief_monitoring", True)
+        self.belief_monitoring_enabled = BELIEF_MONITORING_AVAILABLE and config.get(
+            "enable_belief_monitoring", True
         )
 
         # Error handling
@@ -290,7 +312,8 @@ class ActiveInferenceAgent(ABC):
         self.performance_metrics: Dict[str, Any] = {}
 
         logger.info(
-            f"Created agent {self.agent_id} ({self.name}) - PyMDP: {PYMDP_AVAILABLE}, Performance Mode: {self.performance_mode}"
+            f"Created agent {self.agent_id} ({self.name}) - PyMDP: {PYMDP_AVAILABLE}, "
+            f"Performance Mode: {self.performance_mode}"
         )
 
         # Record agent creation in observability system
@@ -298,18 +321,24 @@ class ActiveInferenceAgent(ABC):
             import asyncio
 
             try:
-                asyncio.create_task(
-                    record_agent_lifecycle_event(
-                        self.agent_id,
-                        "created",
-                        {
-                            "name": self.name,
-                            "pymdp_available": PYMDP_AVAILABLE,
-                            "performance_mode": self.performance_mode,
-                            "config_keys": list(self.config.keys()),
-                        },
+                # Check if we're in an async context before creating task
+                try:
+                    asyncio.get_running_loop()
+                    asyncio.create_task(
+                        record_agent_lifecycle_event(
+                            self.agent_id,
+                            "created",
+                            {
+                                "name": self.name,
+                                "pymdp_available": PYMDP_AVAILABLE,
+                                "performance_mode": self.performance_mode,
+                                "config_keys": list(self.config.keys()),
+                            },
+                        )
                     )
-                )
+                except RuntimeError:
+                    # No running event loop, skip async logging for performance
+                    pass
             except Exception as e:
                 logger.warning(f"Failed to record agent creation event: {e}")
 
@@ -320,13 +349,11 @@ class ActiveInferenceAgent(ABC):
         Args:
             observation: Observation from the environment
         """
-        pass
 
     @abstractmethod
     def _initialize_pymdp(self) -> None:
         """Initialize PyMDP agent with default configuration."""
         # This will be overridden by subclasses with specific models
-        pass
 
     def _get_policy_length(self) -> int:
         """Get adaptive policy length based on performance mode."""
@@ -354,6 +381,12 @@ class ActiveInferenceAgent(ABC):
         else:  # "accurate"
             return 16.0  # High precision for accuracy
 
+    def _ensure_pymdp_initialized(self):
+        """Ensure PyMDP is initialized when needed."""
+        if not self._pymdp_initialized and self._use_pymdp and _get_pymdp_components():
+            self._initialize_pymdp()
+            self._pymdp_initialized = True
+
     def _get_alpha(self) -> float:
         """Get adaptive alpha (action precision) based on performance mode."""
         performance_mode = getattr(self, "performance_mode", "balanced")
@@ -366,9 +399,7 @@ class ActiveInferenceAgent(ABC):
 
     def _should_update_beliefs(self) -> bool:
         """Determine if beliefs should be updated this step (selective updating)."""
-        selective_update_interval = getattr(
-            self, "selective_update_interval", 1
-        )
+        selective_update_interval = getattr(self, "selective_update_interval", 1)
         total_steps = getattr(self, "total_steps", 0)
         if selective_update_interval <= 1:
             return True
@@ -386,9 +417,7 @@ class ActiveInferenceAgent(ABC):
 
         if cache_key not in self.matrix_cache:
             self.matrix_cache[cache_key] = normalization_func(matrix_data)
-            logger.debug(
-                f"Cached matrix {matrix_name} for agent {self.agent_id}"
-            )
+            logger.debug(f"Cached matrix {matrix_name} for agent {self.agent_id}")
 
         return self.matrix_cache[cache_key]
 
@@ -419,15 +448,9 @@ class ActiveInferenceAgent(ABC):
 
         try:
             # Extract PyMDP model components from GMN spec
-            num_states = self.gmn_spec.get(
-                "num_states", [4]
-            )  # Default 4 states
-            num_obs = self.gmn_spec.get(
-                "num_obs", [4]
-            )  # Default 4 observations
-            num_actions = self.gmn_spec.get(
-                "num_actions", [4]
-            )  # Default 4 actions
+            num_states = self.gmn_spec.get("num_states", [4])  # Default 4 states
+            num_obs = self.gmn_spec.get("num_obs", [4])  # Default 4 observations
+            num_actions = self.gmn_spec.get("num_actions", [4])  # Default 4 actions
 
             # Get matrices from GMN spec or use defaults
             A_matrices = self.gmn_spec.get("A", [])
@@ -437,17 +460,14 @@ class ActiveInferenceAgent(ABC):
 
             # Create default matrices if not provided
             if not A_matrices:
-                A = np.eye(
-                    num_obs[0], num_states[0]
-                )  # Default identity observation model
+                A = np.eye(num_obs[0],
+                    num_states[0])  # Default identity observation model
                 A_matrices = [A]
 
             if not B_matrices:
                 B = np.zeros((num_states[0], num_states[0], num_actions[0]))
                 for a in range(num_actions[0]):
-                    B[:, :, a] = np.eye(
-                        num_states[0]
-                    )  # Default identity transition
+                    B[:, :, a] = np.eye(num_states[0])  # Default identity transition
                 B_matrices = [B]
 
             if not C_vectors:
@@ -456,23 +476,38 @@ class ActiveInferenceAgent(ABC):
                 C_vectors = [C]
 
             if not D_vectors:
-                D = utils.norm_dist(np.ones(num_states[0]))  # Uniform prior
+                D = _pymdp_utils.norm_dist(np.ones(num_states[0])) if _pymdp_utils else np.ones(num_states[0])/num_states[0]  # Uniform prior
                 D_vectors = [D]
 
             # Create PyMDP agent with GMN-specified model
-            self.pymdp_agent = PyMDPAgent(
-                A=A_matrices,
-                B=B_matrices,
-                C=C_vectors,
-                D=D_vectors,
-                use_utility=True,
-                use_states_info_gain=True,
-                use_param_info_gain=False,
-                inference_horizon=self.config.get("planning_horizon", 3),
-            )
+            # Lazy-load PyMDP agent
+            if _get_pymdp_components():
+                # Use adapter to convert GMN format to PyMDP format
+                from agents.gmn_pymdp_adapter import adapt_gmn_to_pymdp
+
+                gmn_model = {
+                    "A": A_matrices,
+                    "B": B_matrices,
+                    "C": C_vectors,
+                    "D": D_vectors
+                }
+
+                adapted_model = adapt_gmn_to_pymdp(gmn_model)
+
+                self.pymdp_agent = _PyMDPAgent(
+                    A=adapted_model["A"],
+                    B=adapted_model["B"],
+                    C=adapted_model.get("C"),
+                    D=adapted_model.get("D"),
+                    use_utility=True,
+                    use_states_info_gain=True,
+                    use_param_info_gain=False,
+                    inference_horizon=self.config.get("planning_horizon", 3),
+                )
 
             logger.info(
-                f"Successfully initialized PyMDP agent from GMN spec for {self.agent_id}"
+                f"Successfully initialized PyMDP agent from GMN spec for"
+                f" {self.agent_id}"
             )
 
         except Exception as e:
@@ -482,7 +517,6 @@ class ActiveInferenceAgent(ABC):
     @abstractmethod
     def update_beliefs(self) -> None:
         """Update beliefs about hidden states using Active Inference."""
-        pass
 
     @abstractmethod
     def select_action(self) -> Any:
@@ -491,7 +525,6 @@ class ActiveInferenceAgent(ABC):
         Returns:
             Selected action
         """
-        pass
 
     @with_error_handling("agent_step", fallback_result="stay")
     def step(self, observation: Any) -> Any:
@@ -537,9 +570,7 @@ class ActiveInferenceAgent(ABC):
             if hasattr(self, "actions"):
                 action = validate_action(action, self.actions)
             elif hasattr(self, "action_map"):
-                action = validate_action(
-                    action, list(self.action_map.values())
-                )
+                action = validate_action(action, list(self.action_map.values()))
 
             # Compute and store free energy after belief update
             if self.pymdp_agent and PYMDP_AVAILABLE:
@@ -552,10 +583,22 @@ class ActiveInferenceAgent(ABC):
             self.last_action_at = datetime.now()
             self.metrics["total_observations"] += 1
             self.metrics["total_actions"] += 1
+            
+            # Update knowledge graph if integration is available
+            if hasattr(self, 'kg_integration'):
+                current_beliefs = None
+                if hasattr(self, 'beliefs') and self.beliefs is not None:
+                    current_beliefs = self.beliefs.tolist() if hasattr(self.beliefs, 'tolist') else self.beliefs
+                
+                self.kg_integration.update_from_agent_step(
+                    agent_id=self.agent_id,
+                    observation=observation,
+                    action=action,
+                    beliefs=current_beliefs,
+                    free_energy=self.metrics.get("current_free_energy")
+                )
 
-            logger.debug(
-                f"Agent {self.agent_id} step {self.total_steps}: {action}"
-            )
+            logger.debug(f"Agent {self.agent_id} step {self.total_steps}: {action}")
 
             return action
 
@@ -612,9 +655,7 @@ class ActiveInferenceAgent(ABC):
                 )
 
                 belief_monitoring_hooks.reset_agent_monitor(self.agent_id)
-                logger.debug(
-                    f"Cleaned up belief monitoring for agent {self.agent_id}"
-                )
+                logger.debug(f"Cleaned up belief monitoring for agent {self.agent_id}")
             except Exception as e:
                 logger.warning(
                     f"Failed to cleanup belief monitoring for agent {self.agent_id}: {e}"
@@ -633,9 +674,8 @@ class ActiveInferenceAgent(ABC):
             "name": self.name,
             "is_active": self.is_active,
             "created_at": self.created_at.isoformat(),
-            "last_action_at": self.last_action_at.isoformat()
-            if self.last_action_at
-            else None,
+            "last_action_at": (self.last_action_at.isoformat() if
+                self.last_action_at else None),
             "total_steps": self.total_steps,
             "metrics": self.metrics,
         }
@@ -646,9 +686,7 @@ class ActiveInferenceAgent(ABC):
 
         # Add PyMDP-specific error handling status
         if hasattr(self, "pymdp_error_handler"):
-            status[
-                "pymdp_error_report"
-            ] = self.pymdp_error_handler.get_error_report()
+            status["pymdp_error_report"] = self.pymdp_error_handler.get_error_report()
 
         return status
 
@@ -667,7 +705,8 @@ class ActiveInferenceAgent(ABC):
             return belief_monitoring_hooks.get_agent_statistics(self.agent_id)
         except Exception as e:
             logger.error(
-                f"Failed to get belief monitoring stats for agent {self.agent_id}: {e}"
+                f"Failed to get belief monitoring stats for agent"
+                f" {self.agent_id}: {e}"
             )
             return {"error": str(e)}
 
@@ -689,7 +728,9 @@ class BasicExplorerAgent(ActiveInferenceAgent):
         """
         # Initialize attributes BEFORE calling parent constructor
         self.grid_size = grid_size
-        self.position = [grid_size // 2, grid_size // 2]  # Start in center
+        from world.grid_world import Position
+
+        self.position = Position(grid_size // 2, grid_size // 2)  # Start in center
 
         # State space for PyMDP
         self.num_states = grid_size * grid_size  # Each grid cell is a state
@@ -720,7 +761,11 @@ class BasicExplorerAgent(ActiveInferenceAgent):
 
         # Simplified belief state (also maintained for non-PyMDP fallback)
         self.uncertainty_map = np.ones((grid_size, grid_size))
-        self.uncertainty_map[self.position[0], self.position[1]] = 0
+        # Handle both Position object and list formats
+        if hasattr(self.position, "x"):
+            self.uncertainty_map[self.position.x, self.position.y] = 0
+        else:
+            self.uncertainty_map[self.position[0], self.position[1]] = 0
 
         # Preferences: prefer to reduce uncertainty and find goals
         self.exploration_rate = 0.3
@@ -749,7 +794,8 @@ class BasicExplorerAgent(ActiveInferenceAgent):
 
             # Normalize - utils.norm_dist normalizes along first dimension
             # PERFORMANCE OPTIMIZATION: Cache matrix normalization
-            A = self._get_cached_matrix("A_observation", A, utils.norm_dist)
+            A = self._get_cached_matrix("A_observation", A, _pymdp_utils.norm_dist if
+                _pymdp_utils else lambda x: x/x.sum(axis=0, keepdims=True))
 
             # B matrix: P(next_state|state,action) - transition dynamics
             # Shape: (num_states, num_states, num_actions)
@@ -790,9 +836,7 @@ class BasicExplorerAgent(ActiveInferenceAgent):
                 # Set transitions
                 for state in range(self.num_states):
                     if valid_mask[state]:
-                        next_state = (
-                            next_x[state] * self.grid_size + next_y[state]
-                        )
+                        next_state = next_x[state] * self.grid_size + next_y[state]
                         B[next_state, state, action_idx] = 0.9
                         B[state, state, action_idx] = 0.1
                     else:
@@ -818,36 +862,39 @@ class BasicExplorerAgent(ActiveInferenceAgent):
             D = np.ones(self.num_states) / self.num_states  # Uniform prior
 
             # Add slight bias toward current position if known
-            current_state = (
-                self.position[0] * self.grid_size + self.position[1]
-            )
+            # Handle both Position object and list formats
+            if hasattr(self.position, "x"):
+                current_state = self.position.x * self.grid_size + self.position.y
+            else:
+                current_state = self.position[0] * self.grid_size + self.position[1]
             D[current_state] *= 2.0
             D = D / D.sum()  # Normalize
 
             # Validate matrices before creating PyMDP agent
             is_valid, validation_msg = validate_pymdp_matrices(A, B, C, D)
             if not is_valid:
-                raise ValueError(
-                    f"PyMDP matrix validation failed: {validation_msg}"
-                )
+                raise ValueError(f"PyMDP matrix validation failed: {validation_msg}")
 
             # PERFORMANCE OPTIMIZATION: Create PyMDP agent with optimized settings
-            self.pymdp_agent = PyMDPAgent(
-                A=A,
-                B=B,
-                C=C,
-                D=D,
-                policy_len=self._get_policy_length(),  # Adaptive planning horizon
-                inference_algo="VANILLA",  # Standard variational inference
-                use_states_info_gain=True,  # Epistemic value (curiosity)
-                use_param_info_gain=self._get_param_info_gain(),  # Adaptive learning signal
-                use_utility=True,  # Pragmatic value (goal-seeking)
-                gamma=self._get_gamma(),  # Adaptive policy precision
-                alpha=self._get_alpha(),  # Adaptive action precision
-                inference_horizon=1,  # Single-step state inference
-                control_fac_idx=None,  # All factors are controllable
-                save_belief_hist=False,  # PERFORMANCE: Disable history for speed
-            )
+            # Lazy-load PyMDP agent
+            if _get_pymdp_components():
+                self.pymdp_agent = _PyMDPAgent(
+                    A=A,
+                    B=B,
+                    C=C,
+                    D=D,
+                    policy_len=self._get_policy_length(),  # Adaptive planning horizon
+                    inference_algo="VANILLA",  # Standard variational inference
+                    use_states_info_gain=True,  # Epistemic value (curiosity)
+                    use_param_info_gain=self._get_param_info_gain(),
+                        # Adaptive learning signal
+                    use_utility=True,  # Pragmatic value (goal-seeking)
+                    gamma=self._get_gamma(),  # Adaptive policy precision
+                    alpha=self._get_alpha(),  # Adaptive action precision
+                    inference_horizon=1,  # Single-step state inference
+                    control_fac_idx=None,  # All factors are controllable
+                    save_belief_hist=False,  # PERFORMANCE: Disable history for speed
+                )
 
             logger.info(f"Initialized PyMDP agent for {self.agent_id}")
 
@@ -876,9 +923,7 @@ class BasicExplorerAgent(ActiveInferenceAgent):
 
             # Simplified mapping: categorize center cell observation
             if surroundings.size > 0:
-                center_val = (
-                    surroundings[1, 1] if surroundings.shape == (3, 3) else 0
-                )
+                center_val = surroundings[1, 1] if surroundings.shape == (3, 3) else 0
 
                 # Map to observation categories for Active Inference
                 if center_val == -2:  # Out of bounds
@@ -900,7 +945,11 @@ class BasicExplorerAgent(ActiveInferenceAgent):
                 self.metrics["last_observation"] = obs_idx
         else:
             # Fallback: update uncertainty map
-            x, y = self.position
+            # Handle both Position object and list formats
+            if hasattr(self.position, "x"):
+                x, y = self.position.x, self.position.y
+            else:
+                x, y = self.position[0], self.position[1]
             self.uncertainty_map[x, y] = 0
 
             # Slightly reduce uncertainty in neighboring cells
@@ -922,9 +971,7 @@ class BasicExplorerAgent(ActiveInferenceAgent):
             try:
                 beliefs_before = {
                     "belief_entropy": self.metrics.get("belief_entropy", 0.0),
-                    "avg_free_energy": self.metrics.get(
-                        "avg_free_energy", 0.0
-                    ),
+                    "avg_free_energy": self.metrics.get("avg_free_energy", 0.0),
                     "state_posterior_size": (
                         len(self.pymdp_agent.qs) if self.pymdp_agent.qs else 0
                     ),
@@ -938,9 +985,7 @@ class BasicExplorerAgent(ActiveInferenceAgent):
         if hasattr(self, "current_observation"):
             success, _, error = self.pymdp_error_handler.safe_execute(
                 "state_inference",
-                lambda: self.pymdp_agent.infer_states(
-                    self.current_observation
-                ),
+                lambda: self.pymdp_agent.infer_states(self.current_observation),
                 lambda: None,  # No fallback for inference - will use existing beliefs
             )
             if not success and error:
@@ -955,9 +1000,8 @@ class BasicExplorerAgent(ActiveInferenceAgent):
                 factor = qs[0]
                 entropy = -np.sum(factor * np.log(factor + epsilon))
             else:  # Multiple factors
-                entropy = sum(
-                    -np.sum(factor * np.log(factor + epsilon)) for factor in qs
-                )
+                entropy = sum(-np.sum(factor * np.log(factor +
+                    epsilon)) for factor in qs)
             return float(entropy)
         except Exception as e:
             logger.warning(f"Entropy calculation failed: {e}")
@@ -967,13 +1011,8 @@ class BasicExplorerAgent(ActiveInferenceAgent):
         """Update free energy metrics with reduced computation frequency."""
         # PERFORMANCE: Reduced free energy computation frequency
         if self.total_steps % 10 == 0:  # Only every 10 steps
-            if (
-                hasattr(self.pymdp_agent, "F")
-                and self.pymdp_agent.F is not None
-            ):
-                self.metrics["avg_free_energy"] = float(
-                    np.mean(self.pymdp_agent.F)
-                )
+            if hasattr(self.pymdp_agent, "F") and self.pymdp_agent.F is not None:
+                self.metrics["avg_free_energy"] = float(np.mean(self.pymdp_agent.F))
 
     def _record_belief_monitoring(self, qs, beliefs_before, beliefs_after):
         """Record belief monitoring data asynchronously."""
@@ -989,9 +1028,7 @@ class BasicExplorerAgent(ActiveInferenceAgent):
                         "qs": qs,
                         "entropy": self.metrics.get("belief_entropy", 0.0),
                         "state_posterior_size": len(qs) if qs else 0,
-                        "previous_entropy": beliefs_before.get(
-                            "belief_entropy", 0.0
-                        ),
+                        "previous_entropy": beliefs_before.get("belief_entropy", 0.0),
                     }
 
                     # Monitor belief update with detailed tracking
@@ -1070,23 +1107,16 @@ class BasicExplorerAgent(ActiveInferenceAgent):
                 self._perform_state_inference()
 
                 # PERFORMANCE OPTIMIZATION: Fast belief processing
-                if (
-                    hasattr(self.pymdp_agent, "qs")
-                    and self.pymdp_agent.qs is not None
-                ):
+                if hasattr(self.pymdp_agent, "qs") and self.pymdp_agent.qs is not None:
                     qs = self.pymdp_agent.qs  # Posterior beliefs over states
                     try:
                         self._process_belief_states(qs, beliefs_before)
                     except Exception as e:
-                        logger.warning(
-                            f"Fast belief processing failed: {e}, using fallback"
-                        )
+                        logger.warning(f"Fast belief processing failed: {e}, using fallback")
                         self.metrics["belief_entropy"] = 0.0
 
             except Exception as e:
-                logger.warning(
-                    f"PyMDP belief update failed: {e}, using fallback"
-                )
+                logger.warning(f"PyMDP belief update failed: {e}, using fallback")
                 raise InferenceError(f"PyMDP belief update failed: {e}")
         else:
             # Fallback: simple uncertainty update
@@ -1136,13 +1166,13 @@ class BasicExplorerAgent(ActiveInferenceAgent):
                     )
                     if error:
                         logger.warning(
-                            f"Action index conversion failed, original error: {e}, using fallback: {error}"
+                            f"Action index conversion failed, original error: {e}, "
+                            f"using fallback: {error}"
                         )
 
                 # Convert action index to string with safe indexing
-                selected_action = safe_array_index(
-                    self.action_map, action_idx_converted, "stay"
-                )
+                selected_action = safe_array_index(self.action_map,
+                    action_idx_converted, "stay")
 
                 # Store expected free energy for analysis
                 if G is not None:
@@ -1163,26 +1193,19 @@ class BasicExplorerAgent(ActiveInferenceAgent):
                     ) = self.pymdp_error_handler.safe_execute(
                         "policy_index_extraction",
                         lambda: (
-                            safe_array_to_int(np.argmax(q_pi))
-                            if hasattr(q_pi, "__len__")
-                            else 0
+                            safe_array_to_int(np.argmax(q_pi)) if hasattr(q_pi,
+                                "__len__") else 0
                         ),
                         lambda: 0,  # Default policy index
                     )
 
-                    self.metrics["selected_policy"] = (
-                        best_policy_idx if success else 0
-                    )
+                    self.metrics["selected_policy"] = best_policy_idx if success else 0
 
                 return selected_action
 
             except Exception as e:
-                logger.warning(
-                    f"PyMDP action selection failed: {e}, using fallback"
-                )
-                raise ActionSelectionError(
-                    f"PyMDP action selection failed: {e}"
-                )
+                logger.warning(f"PyMDP action selection failed: {e}, using fallback")
+                raise ActionSelectionError(f"PyMDP action selection failed: {e}")
 
         # This will trigger the fallback in the decorator
         return self._fallback_action_selection()
@@ -1194,7 +1217,11 @@ class BasicExplorerAgent(ActiveInferenceAgent):
     def _fallback_action_selection(self) -> str:
         """Fallback action selection when PyMDP fails."""
         # Fallback: simple uncertainty-based action selection
-        x, y = self.position
+        # Handle both Position object and list formats
+        if hasattr(self.position, "x"):
+            x, y = self.position.x, self.position.y
+        else:
+            x, y = self.position[0], self.position[1]
 
         # Calculate expected uncertainty reduction for each action
         action_values = {}
@@ -1222,9 +1249,7 @@ class BasicExplorerAgent(ActiveInferenceAgent):
         # Add some exploration noise
         if np.random.random() < self.exploration_rate:
             valid_actions = [a for a, v in action_values.items() if v >= 0]
-            selected_action = (
-                np.random.choice(valid_actions) if valid_actions else "stay"
-            )
+            selected_action = np.random.choice(valid_actions) if valid_actions else "stay"
         else:
             selected_action = max(action_values, key=action_values.get)
 
@@ -1291,9 +1316,7 @@ class BasicExplorerAgent(ActiveInferenceAgent):
 
             # Compute complexity term: KL[q(s)||p(s)]
             # This measures how much the posterior deviates from prior
-            complexity = np.sum(
-                qs * (np.log(qs + epsilon) - np.log(prior + epsilon))
-            )
+            complexity = np.sum(qs * (np.log(qs + epsilon) - np.log(prior + epsilon)))
 
             # Total variational free energy
             # F = complexity - accuracy

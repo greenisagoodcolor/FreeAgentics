@@ -19,14 +19,13 @@ Features:
 import asyncio
 import gc
 import json
-import os
 import time
 from concurrent.futures import ThreadPoolExecutor, as_completed
 from contextlib import contextmanager
 from dataclasses import dataclass, field
 from datetime import datetime
 from pathlib import Path
-from typing import Any, Callable, Dict, List, Optional, Tuple, Union
+from typing import Any, Dict, List, Tuple
 
 import numpy as np
 import psutil
@@ -249,7 +248,6 @@ class MessageThroughputBenchmarks:
     @pytest.mark.asyncio
     async def benchmark_async_message_throughput(benchmark):
         """Benchmark async message throughput."""
-        import asyncio
 
         async def async_message_processing(count=1000):
             queue = asyncio.Queue()
@@ -276,9 +274,7 @@ class MessageThroughputBenchmarks:
 
         # pytest-benchmark doesn't natively support async, so we wrap it
         loop = asyncio.new_event_loop()
-        result = benchmark(
-            lambda: loop.run_until_complete(async_message_processing(1000))
-        )
+        result = benchmark(lambda: loop.run_until_complete(async_message_processing(1000)))
         assert len(result) == 1000
 
 
@@ -330,9 +326,7 @@ class MemoryUsageBenchmarks:
             beliefs = np.zeros((100, 100))
             # Add some sparse data
             for i in range(10):
-                beliefs[
-                    np.random.randint(0, 100), np.random.randint(0, 100)
-                ] = np.random.rand()
+                beliefs[np.random.randint(0, 100), np.random.randint(0, 100)] = np.random.rand()
 
             compressed = compress_beliefs(beliefs)
             return compressed
@@ -491,9 +485,7 @@ class PerformanceReportGenerator:
     """Generate performance reports from benchmark results."""
 
     @staticmethod
-    def generate_report(
-        results: List[BenchmarkMetrics], output_dir: Path
-    ) -> Dict[str, Any]:
+    def generate_report(results: List[BenchmarkMetrics], output_dir: Path) -> Dict[str, Any]:
         """Generate comprehensive performance report."""
         report = {
             "timestamp": datetime.now().isoformat(),
@@ -501,9 +493,7 @@ class PerformanceReportGenerator:
                 "total_benchmarks": len(results),
                 "categories": list(set(r.category for r in results)),
                 "total_duration_ms": sum(r.duration_ms for r in results),
-                "avg_memory_growth_mb": np.mean(
-                    [r.memory_growth_mb for r in results]
-                ),
+                "avg_memory_growth_mb": np.mean([r.memory_growth_mb for r in results]),
                 "max_memory_peak_mb": max(r.memory_peak_mb for r in results),
             },
             "benchmarks": {},
@@ -522,15 +512,9 @@ class PerformanceReportGenerator:
         for category, cat_results in by_category.items():
             category_stats = {
                 "count": len(cat_results),
-                "avg_duration_ms": np.mean(
-                    [r.duration_ms for r in cat_results]
-                ),
-                "avg_ops_per_sec": np.mean(
-                    [r.operations_per_second for r in cat_results]
-                ),
-                "avg_memory_mb": np.mean(
-                    [r.memory_growth_mb for r in cat_results]
-                ),
+                "avg_duration_ms": np.mean([r.duration_ms for r in cat_results]),
+                "avg_ops_per_sec": np.mean([r.operations_per_second for r in cat_results]),
+                "avg_memory_mb": np.mean([r.memory_growth_mb for r in cat_results]),
                 "benchmarks": {},
             }
 
@@ -547,8 +531,7 @@ class PerformanceReportGenerator:
 
         # Save report
         report_path = (
-            output_dir
-            / f"performance_report_{datetime.now().strftime('%Y%m%d_%H%M%S')}.json"
+            output_dir / f"performance_report_{datetime.now().strftime('%Y%m%d_%H%M%S')}.json"
         )
         with open(report_path, "w") as f:
             json.dump(report, f, indent=2)
@@ -587,9 +570,7 @@ class RegressionDetector:
                     baseline_val = baseline_stats[metric]
 
                     if baseline_val > 0:
-                        regression_pct = (
-                            current_val - baseline_val
-                        ) / baseline_val
+                        regression_pct = (current_val - baseline_val) / baseline_val
 
                         if regression_pct > threshold:
                             regressions.append(
@@ -601,8 +582,7 @@ class RegressionDetector:
                                     "regression_percent": regression_pct * 100,
                                     "severity": (
                                         "critical"
-                                        if regression_pct
-                                        > REGRESSION_THRESHOLD
+                                        if regression_pct > REGRESSION_THRESHOLD
                                         else "warning"
                                     ),
                                 }

@@ -41,12 +41,8 @@ class RBACTestMetrics:
     successful_checks: int = 0
     failed_checks: int = 0
     check_times: List[float] = field(default_factory=list)
-    role_check_times: Dict[str, List[float]] = field(
-        default_factory=lambda: defaultdict(list)
-    )
-    permission_type_times: Dict[str, List[float]] = field(
-        default_factory=lambda: defaultdict(list)
-    )
+    role_check_times: Dict[str, List[float]] = field(default_factory=lambda: defaultdict(list))
+    permission_type_times: Dict[str, List[float]] = field(default_factory=lambda: defaultdict(list))
     concurrent_checks: int = 0
     cache_hits: int = 0
     cache_misses: int = 0
@@ -68,12 +64,8 @@ class RBACTestMetrics:
                 if self.permission_checks > 0
                 else 0
             ),
-            "avg_check_time": statistics.mean(self.check_times)
-            if self.check_times
-            else 0,
-            "median_check_time": statistics.median(self.check_times)
-            if self.check_times
-            else 0,
+            "avg_check_time": statistics.mean(self.check_times) if self.check_times else 0,
+            "median_check_time": statistics.median(self.check_times) if self.check_times else 0,
             "p95_check_time": (
                 statistics.quantiles(self.check_times, n=20)[18]
                 if len(self.check_times) > 20
@@ -85,9 +77,7 @@ class RBACTestMetrics:
                 else max(self.check_times, default=0)
             ),
             "checks_per_second": (
-                self.permission_checks / sum(self.check_times)
-                if self.check_times
-                else 0
+                self.permission_checks / sum(self.check_times) if self.check_times else 0
             ),
             "cache_hit_rate": (
                 (self.cache_hits / (self.cache_hits + self.cache_misses) * 100)
@@ -146,16 +136,12 @@ class TestRBACScale:
                 # Register user
                 self.auth_manager.users[user.username] = {
                     "user": user,
-                    "password_hash": self.auth_manager.hash_password(
-                        f"pass_{i}"
-                    ),
+                    "password_hash": self.auth_manager.hash_password(f"pass_{i}"),
                 }
 
         return users_by_role
 
-    def _check_permission(
-        self, user: User, permission: Permission
-    ) -> Tuple[bool, float]:
+    def _check_permission(self, user: User, permission: Permission) -> Tuple[bool, float]:
         """Check if user has permission and measure time."""
         start = time.time()
 
@@ -174,9 +160,7 @@ class TestRBACScale:
             else:
                 self.metrics.failed_checks += 1
 
-            self.metrics.add_check_time(
-                duration, user.role.value, permission.value
-            )
+            self.metrics.add_check_time(duration, user.role.value, permission.value)
 
             return has_permission, duration
 
@@ -214,10 +198,7 @@ class TestRBACScale:
 
         # Run concurrent permission checks
         with concurrent.futures.ThreadPoolExecutor(max_workers=50) as executor:
-            futures = [
-                executor.submit(check_user_permissions, user)
-                for user in all_users
-            ]
+            futures = [executor.submit(check_user_permissions, user) for user in all_users]
 
             all_results = []
             for future in concurrent.futures.as_completed(futures):
@@ -283,18 +264,12 @@ class TestRBACScale:
             )
 
         # All hierarchy checks should be correct
-        incorrect_checks = [
-            check for check in hierarchy_checks if not check["correct"]
-        ]
-        assert (
-            len(incorrect_checks) == 0
-        ), f"Role hierarchy violations found: {incorrect_checks}"
+        incorrect_checks = [check for check in hierarchy_checks if not check["correct"]]
+        assert len(incorrect_checks) == 0, f"Role hierarchy violations found: {incorrect_checks}"
 
         # Verify admin has all permissions
         admin_checks = [
-            check
-            for check in hierarchy_checks
-            if check["role"] == UserRole.ADMIN.value
+            check for check in hierarchy_checks if check["role"] == UserRole.ADMIN.value
         ]
         for check in admin_checks:
             assert (
@@ -303,9 +278,7 @@ class TestRBACScale:
 
         # Verify observer has limited permissions
         observer_checks = [
-            check
-            for check in hierarchy_checks
-            if check["role"] == UserRole.OBSERVER.value
+            check for check in hierarchy_checks if check["role"] == UserRole.OBSERVER.value
         ]
         for check in observer_checks:
             assert (
@@ -330,9 +303,7 @@ class TestRBACScale:
 
             for user in users:
                 for permission in Permission:
-                    has_perm, duration = self._check_permission(
-                        user, permission
-                    )
+                    has_perm, duration = self._check_permission(user, permission)
                     role_checks += 1
 
             role_time = time.time() - role_start
@@ -366,7 +337,7 @@ class TestRBACScale:
                     "permission": permission.value,
                     "expected": True,
                     "actual": has_perm,
-                    "passed": has_perm == True,
+                    "passed": has_perm is True,
                 }
             )
 
@@ -389,9 +360,7 @@ class TestRBACScale:
 
         # Scenario 3: Researcher cannot admin
         researcher_user = users_by_role[UserRole.RESEARCHER.value][0]
-        has_perm, _ = self._check_permission(
-            researcher_user, Permission.ADMIN_SYSTEM
-        )
+        has_perm, _ = self._check_permission(researcher_user, Permission.ADMIN_SYSTEM)
         scenarios.append(
             {
                 "scenario": "researcher_no_admin",
@@ -399,15 +368,13 @@ class TestRBACScale:
                 "permission": Permission.ADMIN_SYSTEM.value,
                 "expected": False,
                 "actual": has_perm,
-                "passed": has_perm == False,
+                "passed": has_perm is False,
             }
         )
 
         # Verify all scenarios passed
         failed_scenarios = [s for s in scenarios if not s["passed"]]
-        assert (
-            len(failed_scenarios) == 0
-        ), f"Failed permission scenarios: {failed_scenarios}"
+        assert len(failed_scenarios) == 0, f"Failed permission scenarios: {failed_scenarios}"
 
     def test_permission_validation_with_token_rotation(self):
         """Test permission checks during token refresh cycles."""
@@ -438,17 +405,11 @@ class TestRBACScale:
                         (
                             access_token,
                             refresh_token,
-                        ) = self.auth_manager.refresh_access_token(
-                            refresh_token
-                        )
+                        ) = self.auth_manager.refresh_access_token(refresh_token)
                     except Exception:
                         # If refresh fails, create new tokens
-                        access_token = self.auth_manager.create_access_token(
-                            user
-                        )
-                        refresh_token = self.auth_manager.create_refresh_token(
-                            user
-                        )
+                        access_token = self.auth_manager.create_access_token(user)
+                        refresh_token = self.auth_manager.create_refresh_token(user)
 
     def test_permission_check_with_concurrent_role_changes(self):
         """Test permission checks when roles are changed concurrently."""
@@ -479,9 +440,7 @@ class TestRBACScale:
             user = users[user_index]
 
             # Randomly change role
-            new_role = random.choice(
-                [UserRole.RESEARCHER, UserRole.AGENT_MANAGER, UserRole.ADMIN]
-            )
+            new_role = random.choice([UserRole.RESEARCHER, UserRole.AGENT_MANAGER, UserRole.ADMIN])
             user.role = new_role
 
             # Create new token with new role
@@ -502,23 +461,17 @@ class TestRBACScale:
                 )
 
         # Run concurrent role changes
-        with concurrent.futures.ThreadPoolExecutor(
-            max_workers=num_threads
-        ) as executor:
+        with concurrent.futures.ThreadPoolExecutor(max_workers=num_threads) as executor:
             futures = []
             for _ in range(100):  # Multiple iterations
                 user_index = random.randint(0, num_users - 1)
-                futures.append(
-                    executor.submit(change_role_and_check, user_index)
-                )
+                futures.append(executor.submit(change_role_and_check, user_index))
 
             concurrent.futures.wait(futures)
 
         # Verify all permission checks were correct
         mismatches = [r for r in results if not r["permissions_match"]]
-        assert (
-            len(mismatches) == 0
-        ), f"Permission mismatches after role changes: {mismatches}"
+        assert len(mismatches) == 0, f"Permission mismatches after role changes: {mismatches}"
 
     def test_resource_access_patterns_under_load(self):
         """Test different resource access patterns under load."""
@@ -530,17 +483,13 @@ class TestRBACScale:
         # Simulate different resource types
         resources = {
             "agents": [f"agent_{i}" for i in range(resources_per_type)],
-            "coalitions": [
-                f"coalition_{i}" for i in range(resources_per_type)
-            ],
+            "coalitions": [f"coalition_{i}" for i in range(resources_per_type)],
             "metrics": [f"metric_{i}" for i in range(resources_per_type)],
         }
 
         access_patterns = []
 
-        def simulate_resource_access(
-            user: User, resource_type: str, resource_id: str
-        ):
+        def simulate_resource_access(user: User, resource_type: str, resource_id: str):
             """Simulate accessing a resource."""
             start = time.time()
 
@@ -592,14 +541,10 @@ class TestRBACScale:
         # Analyze access patterns
         total_accesses = len(access_patterns)
         len([p for p in access_patterns if p["has_permission"]])
-        avg_access_time = statistics.mean(
-            [p["access_time"] for p in access_patterns]
-        )
+        avg_access_time = statistics.mean([p["access_time"] for p in access_patterns])
 
         assert total_accesses >= 900, "Some access attempts failed"
-        assert (
-            avg_access_time < 0.01
-        ), f"Average access time too high: {avg_access_time}s"
+        assert avg_access_time < 0.01, f"Average access time too high: {avg_access_time}s"
 
     def test_permission_caching_effectiveness(self):
         """Test effectiveness of permission caching under load."""
@@ -634,9 +579,7 @@ class TestRBACScale:
 
         # Warm cache should be faster (though our implementation creates new tokens each time)
         # In a real implementation with proper caching, warm would be significantly faster
-        assert (
-            avg_warm <= avg_cold * 1.1
-        ), "Cache not providing expected performance benefit"
+        assert avg_warm <= avg_cold * 1.1, "Cache not providing expected performance benefit"
 
     @pytest.mark.parametrize(
         "num_users,num_permissions",
@@ -646,9 +589,7 @@ class TestRBACScale:
             (100, 1000),
         ],
     )
-    def test_scalability_with_different_loads(
-        self, num_users, num_permissions
-    ):
+    def test_scalability_with_different_loads(self, num_users, num_permissions):
         """Test RBAC scalability with different load levels."""
         # Create users
         users = []

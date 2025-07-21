@@ -153,10 +153,7 @@ def measure_belief_update(agent_method: Callable) -> Callable:
         try:
             if hasattr(self, "compute_free_energy"):
                 fe_components = self.compute_free_energy()
-                if (
-                    isinstance(fe_components, dict)
-                    and "total_free_energy" in fe_components
-                ):
+                if isinstance(fe_components, dict) and "total_free_energy" in fe_components:
                     free_energy = fe_components["total_free_energy"]
         except Exception as e:
             logger.debug(f"Could not compute free energy: {e}")
@@ -214,15 +211,10 @@ def measure_agent_step(agent_method: Callable) -> Callable:
             loop = asyncio.get_event_loop()
             if loop.is_running():
                 asyncio.create_task(
-                    record_step_metric(
-                        agent_id=agent_id, step_time_ms=step_time_ms
-                    )
+                    record_step_metric(agent_id=agent_id, step_time_ms=step_time_ms)
                 )
             else:
-                logger.debug(
-                    f"Step metric - Agent: {agent_id}, "
-                    f"Time: {step_time_ms:.2f}ms"
-                )
+                logger.debug(f"Step metric - Agent: {agent_id}, " f"Time: {step_time_ms:.2f}ms")
         except Exception as e:
             logger.warning(f"Failed to record step metric: {e}")
 
@@ -324,9 +316,7 @@ def integrate_metrics_with_agent(agent_class):
             original_method = getattr(agent_class, method_name)
             wrapped_method = decorator(original_method)
             setattr(agent_class, method_name, wrapped_method)
-            logger.debug(
-                f"Instrumented {agent_class.__name__}.{method_name} with metrics"
-            )
+            logger.debug(f"Instrumented {agent_class.__name__}.{method_name} with metrics")
 
     return agent_class
 

@@ -13,7 +13,6 @@ from datetime import datetime
 def field_encryption_example():
     """Demonstrate field-level encryption with AWS KMS."""
     from security.encryption import (
-        TransparentFieldEncryptor,
         create_field_encryptor,
     )
 
@@ -107,14 +106,12 @@ def transparent_encryption_example():
 
     print(f"Customer name: {customer.name}")
     print(f"Customer SSN (transparently decrypted): {customer.ssn}")
-    print(
-        f"Internal encrypted SSN exists: {hasattr(customer, '_encrypted_ssn')}"
-    )
+    print(f"Internal encrypted SSN exists: {hasattr(customer, '_encrypted_ssn')}")
 
 
 def quantum_resistant_example():
     """Demonstrate quantum-resistant encryption."""
-    from security.encryption import EncryptionAtRest, QuantumResistantCrypto
+    from security.encryption import QuantumResistantCrypto
 
     print("\n=== Quantum-Resistant Encryption Example ===\n")
 
@@ -131,9 +128,7 @@ def quantum_resistant_example():
     print(f"Generated Dilithium key (Signature): {keys['sign'].algorithm}")
 
     # Encrypt sensitive data
-    sensitive_data = (
-        b"Top secret information that needs quantum-resistant protection"
-    )
+    sensitive_data = b"Top secret information that needs quantum-resistant protection"
 
     encrypted = qrc.hybrid_encrypt(
         sensitive_data,
@@ -187,9 +182,7 @@ async def soar_playbook_example():
             "id": "ransomware_response",
             "name": "Ransomware Attack Response",
             "description": "Automated response to ransomware detection",
-            "triggers": [
-                {"type": "alert", "conditions": [{"alert_type": "ransomware"}]}
-            ],
+            "triggers": [{"type": "alert", "conditions": [{"alert_type": "ransomware"}]}],
             "actions": [
                 {
                     "id": "isolate_host",
@@ -264,10 +257,8 @@ Please begin manual investigation immediately.""",
 
         print(f"Playbook execution ID: {context.execution_id}")
         print(f"Status: {context.status.value}")
-        print(
-            f"Duration: {(context.end_time - context.start_time).total_seconds():.2f}s"
-        )
-        print(f"\nArtifacts collected:")
+        print(f"Duration: {(context.end_time - context.start_time).total_seconds():.2f}s")
+        print("\nArtifacts collected:")
         for key, value in context.artifacts.items():
             print(f"  - {key}: {value}")
 
@@ -281,7 +272,6 @@ async def incident_management_example():
         IncidentSeverity,
         IncidentStatus,
         IncidentType,
-        PlaybookEngine,
     )
 
     print("\n=== Incident Management Example ===\n")
@@ -381,14 +371,14 @@ async def incident_management_example():
 
         # Get incident summary
         summary = manager.get_incident_summary(case.case_id)
-        print(f"\n=== Incident Summary ===")
+        print("\n=== Incident Summary ===")
         print(f"Timeline entries: {summary['timeline_entries']}")
         print(f"Indicators: {summary['indicators_count']}")
         print(f"Notes: {summary['notes_count']}")
 
         # Get dashboard metrics
         metrics = manager.get_dashboard_metrics()
-        print(f"\n=== Security Dashboard ===")
+        print("\n=== Security Dashboard ===")
         print(f"Total incidents: {metrics['total_incidents']}")
         print(f"Open incidents: {metrics['open_incidents']}")
         print(f"Indicators tracked: {metrics['indicators_tracked']}")
@@ -434,10 +424,8 @@ def encryption_at_rest_example():
 
     print("\nEncrypted record:")
     print(f"  - username: {encrypted_record['username']} (not encrypted)")
-    print(f"  - personal_info: <encrypted>")
-    print(
-        f"  - encryption metadata: {encrypted_record['_encryption_metadata']}"
-    )
+    print("  - personal_info: <encrypted>")
+    print(f"  - encryption metadata: {encrypted_record['_encryption_metadata']}")
 
     # Decrypt for authorized access
     decrypted_record = ear.decrypt_document(
@@ -458,7 +446,6 @@ async def integrated_security_example():
     from security.soar import (
         IncidentManager,
         IncidentSeverity,
-        IncidentStatus,
         IncidentType,
     )
 
@@ -516,9 +503,7 @@ async def integrated_security_example():
 
         print(f"\n2. Incident created: {case.case_id}")
         print("   - Sensitive data encrypted using field-level encryption")
-        print(
-            "   - Quantum-resistant encryption available for long-term storage"
-        )
+        print("   - Quantum-resistant encryption available for long-term storage")
 
         # Simulate automated response
         print("\n3. Automated response initiated:")
@@ -547,9 +532,7 @@ async def integrated_security_example():
 
         print("\n4. Incident report generated and encrypted")
         print(f"   - Report size: {len(json.dumps(incident_report))} bytes")
-        print(
-            f"   - Encrypted size: {len(encrypted_report['ciphertext'])} bytes"
-        )
+        print(f"   - Encrypted size: {len(encrypted_report['ciphertext'])} bytes")
         print(f"   - Using: {encrypted_report['algorithm']}")
 
 

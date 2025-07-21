@@ -49,9 +49,7 @@ __all__ = [
 
 
 # Convenience functions
-def generate_all_reports(
-    test_run_id: str = None, output_dir: str = "tests/reporting"
-):
+def generate_all_reports(test_run_id: str = None, output_dir: str = "tests/reporting"):
     """Generate all reports using the integration system."""
     integration = ReportingIntegration(output_dir)
     return integration.run_comprehensive_reporting(test_run_id)

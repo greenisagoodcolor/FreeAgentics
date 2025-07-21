@@ -213,7 +213,7 @@ main() {
 
     # Stop any existing test containers
     echo -e "${YELLOW}Stopping any existing test containers...${NC}"
-    docker-compose -f "$COMPOSE_FILE" down -v --remove-orphans 2>/dev/null || true
+    docker-compose -f "$COMPOSE_FILE" down -v --remove-orphans 2>/dev/null 
 
     # Start test containers
     echo -e "\n${BLUE}Starting test containers...${NC}"

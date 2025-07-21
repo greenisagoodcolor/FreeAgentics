@@ -271,9 +271,7 @@ class LogParser:
         if line.startswith("{") and line.endswith("}"):
             try:
                 return self._parse_json_log(line, source_hint)
-            except (
-                Exception
-            ):  # nosec B110 # Safe fallback to pattern matching for log parsing
+            except Exception:  # nosec B110 # Safe fallback to pattern matching for log parsing
                 pass
 
         # Try pattern matching
@@ -288,20 +286,14 @@ class LogParser:
         # Fallback to basic parsing
         return self._parse_fallback(line, source_hint)
 
-    def _parse_json_log(
-        self, line: str, source_hint: Optional[LogSource]
-    ) -> LogEntry:
+    def _parse_json_log(self, line: str, source_hint: Optional[LogSource]) -> LogEntry:
         """Parse JSON-formatted log entry."""
         data = json.loads(line)
 
         # Extract standard fields
-        timestamp = datetime.fromisoformat(
-            data.get("timestamp", datetime.now().isoformat())
-        )
+        timestamp = datetime.fromisoformat(data.get("timestamp", datetime.now().isoformat()))
         level = LogLevel(data.get("level", "INFO").upper())
-        source = LogSource(
-            data.get("source", source_hint.value if source_hint else "system")
-        )
+        source = LogSource(data.get("source", source_hint.value if source_hint else "system"))
         message = data.get("message", "")
         module = data.get("module", "unknown")
 
@@ -327,9 +319,7 @@ class LogParser:
             "session_id",
             "user_id",
         }
-        extra_fields = {
-            k: v for k, v in data.items() if k not in reserved_fields
-        }
+        extra_fields = {k: v for k, v in data.items() if k not in reserved_fields}
 
         return LogEntry(
             timestamp=timestamp,
@@ -346,9 +336,7 @@ class LogParser:
             extra_fields=extra_fields,
         )
 
-    def _extract_log_entry(
-        self, match: re.Match, pattern: LogPattern, line: str
-    ) -> LogEntry:
+    def _extract_log_entry(self, match: re.Match, pattern: LogPattern, line: str) -> LogEntry:
         """Extract log entry from regex match."""
         groups = match.groups()
 
@@ -358,9 +346,7 @@ class LogParser:
             try:
                 # Handle different timestamp formats
                 if "," in timestamp_str:
-                    timestamp = datetime.strptime(
-                        timestamp_str, "%Y-%m-%d %H:%M:%S,%f"
-                    )
+                    timestamp = datetime.strptime(timestamp_str, "%Y-%m-%d %H:%M:%S,%f")
                 else:
                     timestamp = datetime.fromisoformat(timestamp_str)
             except ValueError:
@@ -392,9 +378,7 @@ class LogParser:
             agent_id=agent_id,
         )
 
-    def _parse_fallback(
-        self, line: str, source_hint: Optional[LogSource]
-    ) -> LogEntry:
+    def _parse_fallback(self, line: str, source_hint: Optional[LogSource]) -> LogEntry:
         """Fallback parser for unmatched log lines."""
         return LogEntry(
             timestamp=datetime.now(),
@@ -408,9 +392,7 @@ class LogParser:
         """Add a custom log pattern."""
         self.patterns.append(pattern)
 
-    def add_custom_extractor(
-        self, name: str, extractor: Callable[[str], Dict[str, Any]]
-    ):
+    def add_custom_extractor(self, name: str, extractor: Callable[[str], Dict[str, Any]]):
         """Add a custom field extractor."""
         self.custom_extractors[name] = extractor
 
@@ -488,21 +470,11 @@ class LogAggregator:
         )
 
         # Create indexes
-        cursor.execute(
-            "CREATE INDEX IF NOT EXISTS idx_logs_timestamp ON logs(timestamp)"
-        )
-        cursor.execute(
-            "CREATE INDEX IF NOT EXISTS idx_logs_level ON logs(level)"
-        )
-        cursor.execute(
-            "CREATE INDEX IF NOT EXISTS idx_logs_source ON logs(source)"
-        )
-        cursor.execute(
-            "CREATE INDEX IF NOT EXISTS idx_logs_agent_id ON logs(agent_id)"
-        )
-        cursor.execute(
-            "CREATE INDEX IF NOT EXISTS idx_logs_correlation_id ON logs(correlation_id)"
-        )
+        cursor.execute("CREATE INDEX IF NOT EXISTS idx_logs_timestamp ON logs(timestamp)")
+        cursor.execute("CREATE INDEX IF NOT EXISTS idx_logs_level ON logs(level)")
+        cursor.execute("CREATE INDEX IF NOT EXISTS idx_logs_source ON logs(source)")
+        cursor.execute("CREATE INDEX IF NOT EXISTS idx_logs_agent_id ON logs(agent_id)")
+        cursor.execute("CREATE INDEX IF NOT EXISTS idx_logs_correlation_id ON logs(correlation_id)")
 
         # Create alerts table
         cursor.execute(
@@ -625,9 +597,7 @@ class LogAggregator:
                         entry.trace_id,
                         entry.session_id,
                         entry.user_id,
-                        json.dumps(entry.extra_fields)
-                        if entry.extra_fields
-                        else None,
+                        json.dumps(entry.extra_fields) if entry.extra_fields else None,
                     ),
                 )
 
@@ -645,17 +615,13 @@ class LogAggregator:
                 if self._matches_alert_pattern(entry, pattern):
                     await self._trigger_alert(entry, pattern)
 
-    def _matches_alert_pattern(
-        self, entry: LogEntry, pattern: Dict[str, Any]
-    ) -> bool:
+    def _matches_alert_pattern(self, entry: LogEntry, pattern: Dict[str, Any]) -> bool:
         """Check if log entry matches alert pattern."""
         # Basic pattern matching
         if pattern.get("level") and entry.level != LogLevel(pattern["level"]):
             return False
 
-        if pattern.get("source") and entry.source != LogSource(
-            pattern["source"]
-        ):
+        if pattern.get("source") and entry.source != LogSource(pattern["source"]):
             return False
 
         if pattern.get("message_regex"):
@@ -749,9 +715,7 @@ class LogAggregator:
         """Ingest a structured log entry."""
         self.buffer.append(entry)
 
-    async def ingest_log_file(
-        self, file_path: str, source: Optional[LogSource] = None
-    ):
+    async def ingest_log_file(self, file_path: str, source: Optional[LogSource] = None):
         """Ingest logs from a file."""
         try:
             async with aiofiles.open(file_path, "r") as f:
@@ -848,9 +812,7 @@ class LogAggregator:
         """Add an alert pattern."""
         self.alert_patterns.append(pattern)
 
-    def add_alert_callback(
-        self, callback: Callable[[LogAlert, LogEntry], None]
-    ):
+    def add_alert_callback(self, callback: Callable[[LogAlert, LogEntry], None]):
         """Add alert callback."""
         self.alert_callbacks.append(callback)
 
@@ -901,9 +863,7 @@ class LogStreamingServer:
         for client in self.clients.copy():
             try:
                 await client.close()
-            except (
-                Exception
-            ):  # nosec B110 # Safe to ignore errors during shutdown cleanup
+            except Exception:  # nosec B110 # Safe to ignore errors during shutdown cleanup
                 pass
 
         self.clients.clear()
@@ -919,9 +879,7 @@ class LogStreamingServer:
                 await ws.prepare(request)
 
                 self.clients.add(ws)
-                logger.info(
-                    f"📡 New log streaming client connected. Total: {len(self.clients)}"
-                )
+                logger.info(f"📡 New log streaming client connected. Total: {len(self.clients)}")
 
                 try:
                     async for msg in ws:
@@ -931,17 +889,13 @@ class LogStreamingServer:
                                 data = json.loads(msg.data)
                                 await self._handle_client_message(ws, data)
                             except Exception as e:
-                                logger.error(
-                                    f"Error handling client message: {e}"
-                                )
+                                logger.error(f"Error handling client message: {e}")
                         elif msg.type == WSMsgType.ERROR:
                             logger.error(f"WebSocket error: {ws.exception()}")
                             break
                 finally:
                     self.clients.discard(ws)
-                    logger.info(
-                        f"📡 Log streaming client disconnected. Total: {len(self.clients)}"
-                    )
+                    logger.info(f"📡 Log streaming client disconnected. Total: {len(self.clients)}")
 
                 return ws
 
@@ -1052,9 +1006,7 @@ def create_structured_log_entry(
     )
 
 
-def log_agent_action(
-    agent_id: str, action: str, details: Optional[Dict[str, Any]] = None
-):
+def log_agent_action(agent_id: str, action: str, details: Optional[Dict[str, Any]] = None):
     """Log agent action."""
     entry = create_structured_log_entry(
         level=LogLevel.INFO,
@@ -1068,9 +1020,7 @@ def log_agent_action(
     log_aggregator.ingest_log_entry(entry)
 
 
-def log_api_request(
-    method: str, path: str, status_code: int, user_id: Optional[str] = None
-):
+def log_api_request(method: str, path: str, status_code: int, user_id: Optional[str] = None):
     """Log API request."""
     entry = create_structured_log_entry(
         level=LogLevel.INFO,

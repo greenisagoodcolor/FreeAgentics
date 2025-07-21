@@ -2,13 +2,10 @@
 
 import os
 
-os.environ['DATABASE_URL'] = 'postgresql://test:test@localhost:5432/testdb'
+os.environ["DATABASE_URL"] = "postgresql://test:test@localhost:5432/testdb"
 
 import uuid
-from datetime import datetime
-from unittest.mock import MagicMock, Mock, patch
-
-import pytest
+from unittest.mock import MagicMock, patch
 
 # Mock the database engine at module level
 mock_engine = MagicMock()
@@ -16,8 +13,8 @@ mock_sessionmaker = MagicMock()
 mock_session = MagicMock()
 mock_sessionmaker.return_value = mock_session
 
-with patch('sqlalchemy.create_engine', return_value=mock_engine):
-    with patch('sqlalchemy.orm.sessionmaker', return_value=mock_sessionmaker):
+with patch("sqlalchemy.create_engine", return_value=mock_engine):
+    with patch("sqlalchemy.orm.sessionmaker", return_value=mock_sessionmaker):
         # Import all database modules to boost coverage
         import database
         import database.base
@@ -27,7 +24,6 @@ with patch('sqlalchemy.create_engine', return_value=mock_engine):
         import database.session
         import database.types
         import database.validation
-        from database.base import Base
         from database.connection_manager import DatabaseConnectionManager
         from database.conversation_models import (
             Conversation,
@@ -102,34 +98,34 @@ def test_all_model_enums():
 
     # AgentRole
     assert len(AgentRole) >= 4
-    assert hasattr(AgentRole, 'LEADER')
-    assert hasattr(AgentRole, 'MEMBER')
+    assert hasattr(AgentRole, "LEADER")
+    assert hasattr(AgentRole, "MEMBER")
 
 
 def test_model_relationships():
     """Test model relationship definitions."""
     # Agent relationships
-    assert hasattr(Agent, 'coalition')
-    assert hasattr(Agent, 'knowledge_nodes')
-    assert hasattr(Agent, 'conversations')
-    assert hasattr(Agent, 'sent_messages')
+    assert hasattr(Agent, "coalition")
+    assert hasattr(Agent, "knowledge_nodes")
+    assert hasattr(Agent, "conversations")
+    assert hasattr(Agent, "sent_messages")
 
     # Coalition relationships
-    assert hasattr(Coalition, 'agents')
-    assert hasattr(Coalition, 'memberships')
+    assert hasattr(Coalition, "agents")
+    assert hasattr(Coalition, "memberships")
 
     # KnowledgeNode relationships
-    assert hasattr(KnowledgeNode, 'agent')
-    assert hasattr(KnowledgeNode, 'source_edges')
-    assert hasattr(KnowledgeNode, 'target_edges')
+    assert hasattr(KnowledgeNode, "agent")
+    assert hasattr(KnowledgeNode, "source_edges")
+    assert hasattr(KnowledgeNode, "target_edges")
 
 
 def test_knowledge_edge_relationships():
     """Test KnowledgeEdge model relationships."""
-    assert hasattr(KnowledgeEdge, 'source')
-    assert hasattr(KnowledgeEdge, 'target')
-    assert hasattr(KnowledgeEdge, '__tablename__')
-    assert KnowledgeEdge.__tablename__ == 'db_knowledge_edges'
+    assert hasattr(KnowledgeEdge, "source")
+    assert hasattr(KnowledgeEdge, "target")
+    assert hasattr(KnowledgeEdge, "__tablename__")
+    assert KnowledgeEdge.__tablename__ == "db_knowledge_edges"
 
 
 def test_session_module():
@@ -140,19 +136,17 @@ def test_session_module():
 
     # Test get_db generator
     gen = get_db()
-    assert hasattr(gen, '__next__')
+    assert hasattr(gen, "__next__")
 
 
 def test_connection_manager_initialization():
     """Test DatabaseConnectionManager initialization."""
     # Create manager instance with mocked dependencies
-    with patch(
-        'database.connection_manager.create_engine', return_value=mock_engine
-    ):
+    with patch("database.connection_manager.create_engine", return_value=mock_engine):
         manager = DatabaseConnectionManager()
         assert manager is not None
-        assert hasattr(manager, 'engine')
-        assert hasattr(manager, 'SessionLocal')
+        assert hasattr(manager, "engine")
+        assert hasattr(manager, "SessionLocal")
 
 
 def test_validation_functions_exist():
@@ -164,40 +158,40 @@ def test_validation_functions_exist():
     try:
         result = test_imports()
         assert isinstance(result, dict)
-    except:
+    except Exception:
         pass
 
     try:
         result = test_model_relationships()
         assert isinstance(result, dict)
-    except:
+    except Exception:
         pass
 
 
 def test_conversation_model_enum():
     """Test conversation model ValidationStatus enum."""
-    assert hasattr(ValidationStatus, 'PENDING')
-    assert hasattr(ValidationStatus, 'VALID')
-    assert hasattr(ValidationStatus, 'INVALID')
+    assert hasattr(ValidationStatus, "PENDING")
+    assert hasattr(ValidationStatus, "VALID")
+    assert hasattr(ValidationStatus, "INVALID")
 
     # Test Conversation model
-    assert hasattr(Conversation, '__tablename__')
-    assert hasattr(Conversation, 'id')
+    assert hasattr(Conversation, "__tablename__")
+    assert hasattr(Conversation, "id")
 
     # Test Message model
-    assert hasattr(Message, '__tablename__')
-    assert hasattr(Message, 'id')
+    assert hasattr(Message, "__tablename__")
+    assert hasattr(Message, "id")
 
 
 def test_database_package_all():
     """Test database package __all__ exports."""
-    assert hasattr(database, '__all__')
+    assert hasattr(database, "__all__")
     exports = database.__all__
-    assert 'Base' in exports
-    assert 'Agent' in exports
-    assert 'Coalition' in exports
-    assert 'KnowledgeNode' in exports
-    assert 'KnowledgeEdge' in exports
-    assert 'engine' in exports
-    assert 'SessionLocal' in exports
-    assert 'get_db' in exports
+    assert "Base" in exports
+    assert "Agent" in exports
+    assert "Coalition" in exports
+    assert "KnowledgeNode" in exports
+    assert "KnowledgeEdge" in exports
+    assert "engine" in exports
+    assert "SessionLocal" in exports
+    assert "get_db" in exports

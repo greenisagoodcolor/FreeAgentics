@@ -110,9 +110,7 @@ class TestResult:
 class BasePenetrationTest(ABC):
     """Base class for all penetration tests."""
 
-    def __init__(
-        self, client: TestClient, auth_manager: AuthenticationManager
-    ):
+    def __init__(self, client: TestClient, auth_manager: AuthenticationManager):
         self.client = client
         self.auth_manager = auth_manager
         self.vulnerabilities: List[VulnerabilityFinding] = []
@@ -126,9 +124,7 @@ class BasePenetrationTest(ABC):
         self.vulnerabilities.append(vulnerability)
         logger.warning(f"Vulnerability discovered: {vulnerability.title}")
 
-    def create_test_user(
-        self, role: UserRole = UserRole.OBSERVER
-    ) -> Tuple[str, str, str]:
+    def create_test_user(self, role: UserRole = UserRole.OBSERVER) -> Tuple[str, str, str]:
         """Create a test user for testing purposes."""
         username = f"test_user_{int(time.time())}"
         password = "test_password_123"
@@ -172,17 +168,13 @@ class PenetrationTestingFramework:
 
         for test_module in self.test_modules:
             try:
-                logger.info(
-                    f"Executing test: {test_module.__class__.__name__}"
-                )
+                logger.info(f"Executing test: {test_module.__class__.__name__}")
                 result = await test_module.execute()
                 test_results.append(result)
                 all_vulnerabilities.extend(result.vulnerabilities)
 
             except Exception as e:
-                logger.error(
-                    f"Test {test_module.__class__.__name__} failed: {e}"
-                )
+                logger.error(f"Test {test_module.__class__.__name__} failed: {e}")
                 test_results.append(
                     TestResult(
                         test_name=test_module.__class__.__name__,
@@ -196,13 +188,9 @@ class PenetrationTestingFramework:
         total_time = time.time() - start_time
 
         # Generate comprehensive report
-        report = self._generate_report(
-            test_results, all_vulnerabilities, total_time
-        )
+        report = self._generate_report(test_results, all_vulnerabilities, total_time)
 
-        logger.info(
-            f"Penetration testing completed in {total_time:.2f} seconds"
-        )
+        logger.info(f"Penetration testing completed in {total_time:.2f} seconds")
         logger.info(f"Total vulnerabilities found: {len(all_vulnerabilities)}")
 
         return report
@@ -243,22 +231,16 @@ class PenetrationTestingFramework:
                 "severity_distribution": severity_counts,
                 "vulnerability_types": type_counts,
                 "risk_score": risk_score,
-                "recommendations": self._generate_recommendations(
-                    vulnerabilities
-                ),
+                "recommendations": self._generate_recommendations(vulnerabilities),
             },
             "detailed_findings": [asdict(vuln) for vuln in vulnerabilities],
             "test_results": [asdict(result) for result in test_results],
-            "remediation_plan": self._generate_remediation_plan(
-                vulnerabilities
-            ),
+            "remediation_plan": self._generate_remediation_plan(vulnerabilities),
         }
 
         return report
 
-    def _calculate_risk_score(
-        self, vulnerabilities: List[VulnerabilityFinding]
-    ) -> float:
+    def _calculate_risk_score(self, vulnerabilities: List[VulnerabilityFinding]) -> float:
         """Calculate overall risk score (0-100)."""
         if not vulnerabilities:
             return 0.0
@@ -271,31 +253,21 @@ class PenetrationTestingFramework:
             SeverityLevel.INFO: 1,
         }
 
-        total_score = sum(
-            severity_weights.get(vuln.severity, 1) for vuln in vulnerabilities
-        )
-        max_possible_score = (
-            len(vulnerabilities) * severity_weights[SeverityLevel.CRITICAL]
-        )
+        total_score = sum(severity_weights.get(vuln.severity, 1) for vuln in vulnerabilities)
+        max_possible_score = len(vulnerabilities) * severity_weights[SeverityLevel.CRITICAL]
 
         return (
-            min(100.0, (total_score / max_possible_score) * 100)
-            if max_possible_score > 0
-            else 0.0
+            min(100.0, (total_score / max_possible_score) * 100) if max_possible_score > 0 else 0.0
         )
 
-    def _generate_recommendations(
-        self, vulnerabilities: List[VulnerabilityFinding]
-    ) -> List[str]:
+    def _generate_recommendations(self, vulnerabilities: List[VulnerabilityFinding]) -> List[str]:
         """Generate high-level security recommendations."""
         recommendations = []
 
         vuln_types = {vuln.vulnerability_type for vuln in vulnerabilities}
 
         if VulnerabilityType.AUTHENTICATION_BYPASS in vuln_types:
-            recommendations.append(
-                "Implement multi-factor authentication for all user accounts"
-            )
+            recommendations.append("Implement multi-factor authentication for all user accounts")
 
         if VulnerabilityType.SQL_INJECTION in vuln_types:
             recommendations.append(
@@ -308,24 +280,16 @@ class PenetrationTestingFramework:
             )
 
         if VulnerabilityType.PRIVILEGE_ESCALATION_VERTICAL in vuln_types:
-            recommendations.append(
-                "Review and strengthen role-based access control implementation"
-            )
+            recommendations.append("Review and strengthen role-based access control implementation")
 
         if VulnerabilityType.IDOR in vuln_types:
-            recommendations.append(
-                "Implement proper authorization checks for all resource access"
-            )
+            recommendations.append("Implement proper authorization checks for all resource access")
 
         critical_count = sum(
-            1
-            for vuln in vulnerabilities
-            if vuln.severity == SeverityLevel.CRITICAL
+            1 for vuln in vulnerabilities if vuln.severity == SeverityLevel.CRITICAL
         )
         if critical_count > 0:
-            recommendations.append(
-                f"Immediately address {critical_count} critical vulnerabilities"
-            )
+            recommendations.append(f"Immediately address {critical_count} critical vulnerabilities")
 
         return recommendations
 
@@ -353,12 +317,8 @@ class PenetrationTestingFramework:
 
         return {
             "prioritization": timeline,
-            "estimated_effort": self._estimate_remediation_effort(
-                vulnerabilities
-            ),
-            "resource_requirements": self._estimate_resource_requirements(
-                vulnerabilities
-            ),
+            "estimated_effort": self._estimate_remediation_effort(vulnerabilities),
+            "resource_requirements": self._estimate_resource_requirements(vulnerabilities),
         }
 
     def _estimate_remediation_effort(
@@ -375,9 +335,7 @@ class PenetrationTestingFramework:
 
         vuln_types = {vuln.vulnerability_type for vuln in vulnerabilities}
         return {
-            vuln_type.value: effort_mapping.get(
-                vuln_type, "Medium - Requires investigation"
-            )
+            vuln_type.value: effort_mapping.get(vuln_type, "Medium - Requires investigation")
             for vuln_type in vuln_types
         }
 
@@ -411,22 +369,20 @@ class PenetrationTestingFramework:
             requirements.add("Application security developer")
 
         critical_count = sum(
-            1
-            for vuln in vulnerabilities
-            if vuln.severity == SeverityLevel.CRITICAL
+            1 for vuln in vulnerabilities if vuln.severity == SeverityLevel.CRITICAL
         )
         if critical_count > 3:
             requirements.add("Dedicated security team for immediate response")
 
         return list(requirements)
 
-    async def save_report(
-        self, report: Dict[str, Any], file_path: Optional[str] = None
-    ) -> str:
+    async def save_report(self, report: Dict[str, Any], file_path: Optional[str] = None) -> str:
         """Save penetration testing report to file."""
         if file_path is None:
             timestamp = datetime.now(timezone.utc).strftime("%Y%m%d_%H%M%S")
-            file_path = f"/home/green/FreeAgentics/tests/security/reports/pentest_report_{timestamp}.json"
+            file_path = (
+                f"/home/green/FreeAgentics/tests/security/reports/pentest_report_{timestamp}.json"
+            )
 
         # Ensure directory exists
         Path(file_path).parent.mkdir(parents=True, exist_ok=True)
@@ -503,9 +459,7 @@ def generate_jwt_manipulation_payloads(original_token: str) -> List[str]:
         import jwt
 
         header = jwt.get_unverified_header(original_token)
-        payload = jwt.decode(
-            original_token, options={"verify_signature": False}
-        )
+        payload = jwt.decode(original_token, options={"verify_signature": False})
 
         # Try "none" algorithm
         header["alg"] = "none"
@@ -521,17 +475,13 @@ def generate_jwt_manipulation_payloads(original_token: str) -> List[str]:
         # Try role escalation
         if "role" in payload:
             payload["role"] = "admin"
-            escalated_token = jwt.encode(
-                payload, "fake_secret", algorithm="HS256"
-            )
+            escalated_token = jwt.encode(payload, "fake_secret", algorithm="HS256")
             payloads.append(escalated_token)
 
         # Try extended expiration
         if "exp" in payload:
             payload["exp"] = payload["exp"] + 86400  # Add 24 hours
-            extended_token = jwt.encode(
-                payload, "fake_secret", algorithm="HS256"
-            )
+            extended_token = jwt.encode(payload, "fake_secret", algorithm="HS256")
             payloads.append(extended_token)
 
     except Exception as e:
@@ -559,6 +509,4 @@ if __name__ == "__main__":
     # Test modules will be registered in separate files
     # This is just the framework structure
     print("Penetration Testing Framework initialized")
-    print(
-        "Register test modules and run with: await framework.run_all_tests()"
-    )
+    print("Register test modules and run with: await framework.run_all_tests()")

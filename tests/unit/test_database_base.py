@@ -9,13 +9,13 @@ class TestDatabaseBase:
     def test_import_database_base(self):
         """Test that database.base can be imported."""
         try:
-            from database.base import Base  
+            from database.base import Base
 
             # Test that Base exists and is a class
             assert Base is not None
         except ImportError:
             # Skip if there are import issues in dependent modules
-            pytest.skip("Cannot import database.base due to dependency issues")
+            assert False, "Test bypass removed - must fix underlying issue"
 
     def test_base_attributes(self):
         """Test Base class attributes."""

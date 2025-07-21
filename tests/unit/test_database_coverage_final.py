@@ -2,13 +2,11 @@
 
 import os
 
-os.environ['DATABASE_URL'] = 'postgresql://test:test@localhost:5432/testdb'
+os.environ["DATABASE_URL"] = "postgresql://test:test@localhost:5432/testdb"
 
 import uuid
 from datetime import datetime
-from unittest.mock import MagicMock, Mock, PropertyMock, patch
-
-import pytest
+from unittest.mock import MagicMock, patch
 
 # Mock the database engine at module level
 mock_engine = MagicMock()
@@ -18,10 +16,10 @@ mock_sessionmaker.return_value = mock_session
 
 # Mock dialect for GUID type
 mock_dialect = MagicMock()
-mock_dialect.name = 'postgresql'
+mock_dialect.name = "postgresql"
 
-with patch('sqlalchemy.create_engine', return_value=mock_engine):
-    with patch('sqlalchemy.orm.sessionmaker', return_value=mock_sessionmaker):
+with patch("sqlalchemy.create_engine", return_value=mock_engine):
+    with patch("sqlalchemy.orm.sessionmaker", return_value=mock_sessionmaker):
         # Import database modules
         import database
         import database.base
@@ -40,14 +38,11 @@ with patch('sqlalchemy.create_engine', return_value=mock_engine):
             KnowledgeNode,
         )
         from database.session import (
-            SessionLocal,
             check_database_health,
-            get_db,
             init_db,
         )
         from database.types import GUID
         from database.validation import (
-            run_comprehensive_validation,
             test_imports,
             test_metadata_consistency,
             test_model_relationships,
@@ -81,28 +76,24 @@ def test_guid_type_with_dialect():
 
 def test_connection_manager_with_url():
     """Test DatabaseConnectionManager with URL."""
-    with patch(
-        'database.connection_manager.create_engine', return_value=mock_engine
-    ):
-        manager = DatabaseConnectionManager(
-            'postgresql://test:test@localhost:5432/testdb'
-        )
+    with patch("database.connection_manager.create_engine", return_value=mock_engine):
+        manager = DatabaseConnectionManager("postgresql://test:test@localhost:5432/testdb")
         assert manager is not None
-        assert hasattr(manager, 'engine')
-        assert hasattr(manager, 'SessionLocal')
+        assert hasattr(manager, "engine")
+        assert hasattr(manager, "SessionLocal")
 
         # Test get_session method
-        assert hasattr(manager, 'get_session')
+        assert hasattr(manager, "get_session")
 
         # Test close method if it exists
-        if hasattr(manager, 'close'):
+        if hasattr(manager, "close"):
             manager.close()
 
 
 def test_session_init_db():
     """Test session init_db function."""
     # Mock Base.metadata.create_all
-    with patch.object(Base.metadata, 'create_all') as mock_create_all:
+    with patch.object(Base.metadata, "create_all") as mock_create_all:
         init_db()
         mock_create_all.assert_called_once_with(bind=mock_engine)
 
@@ -115,7 +106,7 @@ def test_session_check_health():
     mock_connection.__exit__ = MagicMock(return_value=None)
     mock_connection.execute = MagicMock()
 
-    with patch.object(mock_engine, 'connect', return_value=mock_connection):
+    with patch.object(mock_engine, "connect", return_value=mock_connection):
         result = check_database_health()
         assert isinstance(result, bool)
 
@@ -197,9 +188,7 @@ def test_model_creation_with_values():
     assert node.agent_id == agent.id
 
     # Create knowledge edge
-    edge = KnowledgeEdge(
-        id=uuid.uuid4(), source_id=node.id, target_id=node.id, weight=0.75
-    )
+    edge = KnowledgeEdge(id=uuid.uuid4(), source_id=node.id, target_id=node.id, weight=0.75)
     assert edge.weight == 0.75
 
 
@@ -217,9 +206,7 @@ def test_conversation_models():
     assert ValidationStatus.INVALID.value == "invalid"
 
     # Create conversation
-    conv = Conversation(
-        id=uuid.uuid4(), agent_id=uuid.uuid4(), title="Test Conversation"
-    )
+    conv = Conversation(id=uuid.uuid4(), agent_id=uuid.uuid4(), title="Test Conversation")
     assert conv.title == "Test Conversation"
 
     # Create message
@@ -235,14 +222,14 @@ def test_conversation_models():
 def test_database_module_constants():
     """Test database module constants and configuration."""
     # Check if DATABASE_URL is set in session
-    assert hasattr(database.session, 'DATABASE_URL')
+    assert hasattr(database.session, "DATABASE_URL")
 
     # Check Base metadata
-    assert hasattr(Base, 'metadata')
-    assert hasattr(Base.metadata, 'tables')
+    assert hasattr(Base, "metadata")
+    assert hasattr(Base.metadata, "tables")
 
     # Check model table names
-    assert Agent.__tablename__ == 'agents'
-    assert Coalition.__tablename__ == 'coalitions'
-    assert KnowledgeNode.__tablename__ == 'db_knowledge_nodes'
-    assert KnowledgeEdge.__tablename__ == 'db_knowledge_edges'
+    assert Agent.__tablename__ == "agents"
+    assert Coalition.__tablename__ == "coalitions"
+    assert KnowledgeNode.__tablename__ == "db_knowledge_nodes"
+    assert KnowledgeEdge.__tablename__ == "db_knowledge_edges"

@@ -74,9 +74,7 @@ async def demo_websocket_authentication():
 
             pong_response = await websocket.recv()
             pong_data = json.loads(pong_response)
-            print(
-                f"📨 Pong response: {pong_data['type']} at {pong_data['timestamp']}"
-            )
+            print(f"📨 Pong response: {pong_data['type']} at {pong_data['timestamp']}")
 
             # 4. Test subscription management
             print("\n📺 Testing event subscriptions...")
@@ -122,15 +120,11 @@ async def demo_websocket_authentication():
 
     except websockets.exceptions.ConnectionClosed as e:
         if e.code == 4001:
-            print(
-                "❌ WebSocket connection closed: Authentication failed (4001)"
-            )
+            print("❌ WebSocket connection closed: Authentication failed (4001)")
         else:
             print(f"❌ WebSocket connection closed: {e}")
     except ConnectionRefusedError:
-        print(
-            "❌ Connection refused. Make sure the server is running on localhost:8000"
-        )
+        print("❌ Connection refused. Make sure the server is running on localhost:8000")
     except Exception as e:
         print(f"❌ Error during WebSocket communication: {e}")
 
@@ -159,9 +153,7 @@ async def demo_authentication_failure():
 
         except websockets.exceptions.ConnectionClosed as e:
             if e.code == 4001:
-                print(
-                    f"✅ Expected authentication failure (4001): {scenario_name}"
-                )
+                print(f"✅ Expected authentication failure (4001): {scenario_name}")
             else:
                 print(f"❓ Unexpected close code {e.code}: {scenario_name}")
         except ConnectionRefusedError:
@@ -190,14 +182,12 @@ async def demo_permission_testing():
     )
     observer_token = auth_manager.create_access_token(authenticated_observer)
 
-    print(f"👀 Created observer user with limited permissions")
+    print("👀 Created observer user with limited permissions")
     print(
         f"📝 Observer permissions: {[p.value for p in auth_manager.verify_token(observer_token).permissions]}"
     )
 
-    websocket_url = (
-        f"ws://localhost:8000/ws/observer_client?token={observer_token}"
-    )
+    websocket_url = f"ws://localhost:8000/ws/observer_client?token={observer_token}"
 
     try:
         async with websockets.connect(websocket_url) as websocket:
@@ -207,9 +197,7 @@ async def demo_permission_testing():
             await websocket.recv()
 
             # Try to perform privileged operation (should fail)
-            print(
-                "\n🚫 Testing privileged operation with observer permissions..."
-            )
+            print("\n🚫 Testing privileged operation with observer permissions...")
             privileged_command = {
                 "type": "agent_command",
                 "data": {
@@ -222,10 +210,7 @@ async def demo_permission_testing():
             error_response = await websocket.recv()
             error_data = json.loads(error_response)
 
-            if (
-                error_data["type"] == "error"
-                and error_data["code"] == "PERMISSION_DENIED"
-            ):
+            if error_data["type"] == "error" and error_data["code"] == "PERMISSION_DENIED":
                 print("✅ Permission denied as expected")
                 print(f"📝 Error message: {error_data['message']}")
             else:
@@ -281,9 +266,7 @@ async def main():
     print("- auth/security_implementation.py - JWT authentication")
     print("- api/v1/websocket.py - WebSocket authentication")
     print("- tests/unit/test_websocket_auth_enhanced.py - Unit tests")
-    print(
-        "- tests/integration/test_websocket_auth_integration.py - Integration tests"
-    )
+    print("- tests/integration/test_websocket_auth_integration.py - Integration tests")
 
 
 if __name__ == "__main__":

@@ -62,9 +62,7 @@ class ConfigParser:
                 result.sections["layers"] = config["layers"]
 
             if "hyperparameters" in config:
-                hyper_node = self._parse_hyperparameters(
-                    config["hyperparameters"]
-                )
+                hyper_node = self._parse_hyperparameters(config["hyperparameters"])
                 root.children.append(hyper_node)
                 result.sections["hyperparameters"] = config["hyperparameters"]
 

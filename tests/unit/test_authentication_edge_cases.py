@@ -63,9 +63,7 @@ class TestAuthenticationEdgeCases:
         long_username = "a" * 10000
         long_password = "b" * 10000
 
-        result = self.auth_manager.authenticate_user(
-            long_username, long_password
-        )
+        result = self.auth_manager.authenticate_user(long_username, long_password)
         assert result is None
 
     def test_invalid_token_formats(self):
@@ -105,7 +103,7 @@ class TestAuthenticationEdgeCases:
         )
 
         # Create an expired token payload
-        expired_payload = {
+        {
             "user_id": user.user_id,
             "username": user.username,
             "role": user.role.value,
@@ -114,15 +112,9 @@ class TestAuthenticationEdgeCases:
             "jti": secrets.token_urlsafe(32),
             "iss": "freeagentics",
             "aud": "freeagentics-api",
-            "exp": int(
-                (datetime.now(timezone.utc) - timedelta(hours=1)).timestamp()
-            ),
-            "nbf": int(
-                (datetime.now(timezone.utc) - timedelta(hours=2)).timestamp()
-            ),
-            "iat": int(
-                (datetime.now(timezone.utc) - timedelta(hours=2)).timestamp()
-            ),
+            "exp": int((datetime.now(timezone.utc) - timedelta(hours=1)).timestamp()),
+            "nbf": int((datetime.now(timezone.utc) - timedelta(hours=2)).timestamp()),
+            "iat": int((datetime.now(timezone.utc) - timedelta(hours=2)).timestamp()),
         }
 
         # Try to create token with expired timestamp
@@ -141,20 +133,21 @@ class TestAuthenticationEdgeCases:
 
     def test_token_blacklist_edge_cases(self):
         """Test token blacklist edge cases."""
-        from auth.jwt_handler import jwt_handler
         from datetime import datetime, timedelta
-        
+
+        from auth.jwt_handler import jwt_handler
+
         # Test adding duplicate JTI to blacklist
         jti = "duplicate-jti"
         exp_time = datetime.utcnow() + timedelta(hours=1)
-        
+
         # Add same JTI twice - should not cause issues
         jwt_handler.blacklist.add(jti, exp_time)
         jwt_handler.blacklist.add(jti, exp_time)
-        
+
         # Should be blacklisted
         assert jwt_handler.blacklist.is_blacklisted(jti)
-        
+
         # Test cleanup doesn't break on duplicate entries
         jwt_handler.blacklist._cleanup()
 
@@ -162,16 +155,11 @@ class TestAuthenticationEdgeCases:
         self.auth_manager.revoke_token(jti)  # Should not cause issues
 
         assert jti in self.auth_manager.blacklist
-        assert (
-            len([k for k in self.auth_manager.blacklist.keys() if k == jti])
-            == 1
-        )
+        assert len([k for k in self.auth_manager.blacklist.keys() if k == jti]) == 1
 
         # Test blacklist cleanup
         old_jti = "old-jti"
-        self.auth_manager.blacklist[old_jti] = datetime.now(
-            timezone.utc
-        ) - timedelta(days=30)
+        self.auth_manager.blacklist[old_jti] = datetime.now(timezone.utc) - timedelta(days=30)
 
         recent_jti = "recent-jti"
         self.auth_manager.blacklist[recent_jti] = datetime.now(timezone.utc)
@@ -227,9 +215,7 @@ class TestAuthenticationEdgeCases:
 
         # Make requests rapidly
         for i in range(10):
-            limited = limiter.is_rate_limited(
-                identifier, max_requests=5, window_minutes=1
-            )
+            limited = limiter.is_rate_limited(identifier, max_requests=5, window_minutes=1)
             if i < 5:
                 assert not limited, f"Request {i} should not be rate limited"
             else:
@@ -239,15 +225,11 @@ class TestAuthenticationEdgeCases:
         limiter.clear_old_requests()
 
         # Test with zero limits
-        always_limited = limiter.is_rate_limited(
-            "test", max_requests=0, window_minutes=1
-        )
+        always_limited = limiter.is_rate_limited("test", max_requests=0, window_minutes=1)
         assert always_limited
 
         # Test with negative limits (should be treated as zero)
-        negative_limited = limiter.is_rate_limited(
-            "test", max_requests=-1, window_minutes=1
-        )
+        negative_limited = limiter.is_rate_limited("test", max_requests=-1, window_minutes=1)
         assert negative_limited
 
     def test_password_hashing_edge_cases(self):
@@ -327,9 +309,7 @@ class TestAuthenticationEdgeCases:
                 # Register user
                 self.auth_manager.users[user.username] = {
                     "user": user,
-                    "password_hash": self.auth_manager.hash_password(
-                        f"password{i}"
-                    ),
+                    "password_hash": self.auth_manager.hash_password(f"password{i}"),
                 }
 
                 # Create tokens
@@ -377,7 +357,7 @@ class TestAuthenticationEdgeCases:
                 user = User(
                     user_id=f"unicode-{hash(unicode_text)}",
                     username=unicode_text,
-                    email=f"test@example.com",
+                    email="test@example.com",
                     role=UserRole.OBSERVER,
                     created_at=datetime.now(timezone.utc),
                 )
@@ -410,7 +390,7 @@ class TestAuthenticationEdgeCases:
             user = User(
                 user_id=f"tz-test-{tz}",
                 username=f"tzuser{tz}",
-                email=f"tz@example.com",
+                email="tz@example.com",
                 role=UserRole.OBSERVER,
                 created_at=datetime.now(tz),
             )
@@ -505,16 +485,12 @@ class TestAuthenticationEdgeCases:
     def test_database_connectivity_simulation(self):
         """Test database connectivity edge cases."""
         # Simulate database connection issues
-        with patch.object(
-            self.auth_manager, "users", new_callable=lambda: {}
-        ) as mock_users:
+        with patch.object(self.auth_manager, "users", new_callable=lambda: {}) as mock_users:
             # Simulate database unavailable
             mock_users.side_effect = ConnectionError("Database unavailable")
 
             try:
-                result = self.auth_manager.authenticate_user(
-                    "test", "password"
-                )
+                result = self.auth_manager.authenticate_user("test", "password")
                 # Should handle database errors gracefully
                 assert result is None
             except ConnectionError:
@@ -552,9 +528,7 @@ class TestAuthenticationEdgeCases:
         # Create multiple threads
         threads = []
         for i in range(10):
-            thread = threading.Thread(
-                target=generate_token, args=(f"race-{i}",)
-            )
+            thread = threading.Thread(target=generate_token, args=(f"race-{i}",))
             threads.append(thread)
 
         # Start all threads simultaneously
@@ -584,9 +558,7 @@ class TestAuthenticationEdgeCases:
 
         for pattern in sql_patterns:
             result = self.security_validator.validate_sql_input(pattern)
-            assert (
-                result is False
-            ), f"SQL injection pattern should be blocked: {pattern}"
+            assert result is False, f"SQL injection pattern should be blocked: {pattern}"
 
         # Test XSS patterns
         xss_patterns = [
@@ -603,12 +575,8 @@ class TestAuthenticationEdgeCases:
         cmd_patterns = ["; ls -la", "| whoami", "& net user", "`id`"]
 
         for pattern in cmd_patterns:
-            result = self.security_validator.validate_command_injection(
-                pattern
-            )
-            assert (
-                result is False
-            ), f"Command injection pattern should be blocked: {pattern}"
+            result = self.security_validator.validate_command_injection(pattern)
+            assert result is False, f"Command injection pattern should be blocked: {pattern}"
 
     def test_edge_case_token_data(self):
         """Test TokenData edge cases."""
@@ -658,9 +626,7 @@ class TestAuthenticationEdgeCases:
 
             self.auth_manager.users[user.username] = {
                 "user": user,
-                "password_hash": self.auth_manager.hash_password(
-                    f"password{i}"
-                ),
+                "password_hash": self.auth_manager.hash_password(f"password{i}"),
             }
 
             # Create tokens

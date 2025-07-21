@@ -186,9 +186,7 @@ async def record_event(event_data: Dict):
     try:
         event_type = event_data.get("type")
         if not event_type:
-            raise HTTPException(
-                status_code=400, detail="Event type is required"
-            )
+            raise HTTPException(status_code=400, detail="Event type is required")
 
         data = event_data.get("data", {})
 
@@ -222,9 +220,7 @@ async def dashboard_health():
 
         if dashboard_data:
             health["last_update"] = dashboard_data.get("timestamp")
-            health["agent_count"] = len(
-                dashboard_data.get("agent_dashboards", {})
-            )
+            health["agent_count"] = len(dashboard_data.get("agent_dashboards", {}))
             health["alert_count"] = len(dashboard_data.get("alerts", []))
 
         return health

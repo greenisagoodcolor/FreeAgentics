@@ -98,24 +98,16 @@ location_belief -> location: depends_on
     # Calculate expected metrics
     expected_node_count = len(basic_explorer_parsed["nodes"])
     expected_edge_count = len(basic_explorer_parsed["edges"])
-    expected_complexity = min(
-        expected_edge_count / (expected_node_count * 2), 1.0
-    )
-    expected_checksum = hashlib.sha256(
-        basic_explorer_text.encode("utf-8")
-    ).hexdigest()
+    expected_complexity = min(expected_edge_count / (expected_node_count * 2), 1.0)
+    expected_checksum = hashlib.sha256(basic_explorer_text.encode("utf-8")).hexdigest()
 
     # Test data structure validation
     assert expected_node_count == 7
     assert expected_edge_count == 6
     assert 0.0 <= expected_complexity <= 1.0
-    assert (
-        len(expected_checksum) == 64
-    )  # SHA-256 produces 64-character hex string
+    assert len(expected_checksum) == 64  # SHA-256 produces 64-character hex string
 
-    print(
-        f"✓ Basic explorer GMN - Nodes: {expected_node_count}, Edges: {expected_edge_count}"
-    )
+    print(f"✓ Basic explorer GMN - Nodes: {expected_node_count}, Edges: {expected_edge_count}")
     print(f"✓ Complexity score: {expected_complexity:.3f}")
     print(f"✓ Checksum calculated: {expected_checksum[:16]}...")
 
@@ -231,19 +223,14 @@ def test_reality_checkpoint_data_integrity():
     orphaned_references = []
 
     for spec in test_specifications:
-        if (
-            spec["parent_version_id"]
-            and spec["parent_version_id"] not in spec_ids
-        ):
+        if spec["parent_version_id"] and spec["parent_version_id"] not in spec_ids:
             orphaned_references.append(spec["id"])
 
     # This should detect the orphaned reference in version 2
     assert len(orphaned_references) == 0  # Fixed in this example
 
     # Reality checkpoint: Check version number consistency
-    version_numbers = sorted(
-        [spec["version_number"] for spec in test_specifications]
-    )
+    version_numbers = sorted([spec["version_number"] for spec in test_specifications])
     version_gaps = []
 
     for i in range(1, len(version_numbers)):
@@ -287,11 +274,7 @@ def test_gmn_storage_performance_considerations():
     # Test common query patterns that would benefit from indexes
 
     # 1. Find active specification for agent (most common query)
-    active_specs = [
-        s
-        for s in test_data
-        if s["agent_id"] == "agent1" and s["status"] == "active"
-    ]
+    active_specs = [s for s in test_data if s["agent_id"] == "agent1" and s["status"] == "active"]
     assert len(active_specs) == 1
 
     # 2. Find all specifications for agent ordered by version

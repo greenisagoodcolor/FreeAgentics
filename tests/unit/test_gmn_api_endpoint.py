@@ -64,9 +64,7 @@ class TestGMNAPIEndpoint:
             },
         }
 
-    def test_upload_valid_gmn_specification(
-        self, client, agent_id, valid_gmn_spec
-    ):
+    def test_upload_valid_gmn_specification(self, client, agent_id, valid_gmn_spec):
         """Test uploading a valid GMN specification."""
         with patch("database.gmn_repository.GMNRepository") as mock_repo:
             # Mock the database operations
@@ -84,9 +82,7 @@ class TestGMNAPIEndpoint:
             mock_gmn_spec.is_active = False
             mock_gmn_spec.created_at = None
             mock_gmn_spec.updated_at = None
-            mock_repo_instance.create_gmn_specification.return_value = (
-                mock_gmn_spec
-            )
+            mock_repo_instance.create_gmn_specification.return_value = mock_gmn_spec
 
             response = client.post(
                 f"/api/v1/agents/{agent_id}/gmn",
@@ -105,9 +101,7 @@ class TestGMNAPIEndpoint:
         invalid_spec = {
             "name": "Invalid Spec",
             "specification": {
-                "nodes": [
-                    {"name": "invalid", "type": "invalid_type"}
-                ],  # Invalid type
+                "nodes": [{"name": "invalid", "type": "invalid_type"}],  # Invalid type
                 "edges": [],
             },
         }
@@ -168,18 +162,12 @@ class TestGMNAPIEndpoint:
 
             assert response.status_code == status.HTTP_404_NOT_FOUND
 
-    def test_upload_gmn_triggers_free_energy_recalculation(
-        self, client, agent_id, valid_gmn_spec
-    ):
+    def test_upload_gmn_triggers_free_energy_recalculation(self, client, agent_id, valid_gmn_spec):
         """Test that uploading GMN triggers free energy recalculation."""
         with (
             patch("database.gmn_repository.GMNRepository") as mock_gmn_repo,
-            patch(
-                "database.agent_repository.AgentRepository"
-            ) as mock_agent_repo,
-            patch(
-                "agents.free_energy_triggers.FreeEnergyTrigger"
-            ) as mock_trigger,
+            patch("database.agent_repository.AgentRepository") as mock_agent_repo,
+            patch("agents.free_energy_triggers.FreeEnergyTrigger") as mock_trigger,
         ):
             # Mock successful operations
             mock_gmn_repo_instance = Mock()
@@ -187,16 +175,12 @@ class TestGMNAPIEndpoint:
 
             mock_agent_repo_instance = Mock()
             mock_agent_repo.return_value = mock_agent_repo_instance
-            mock_agent_repo_instance.get_agent.return_value = (
-                Mock()
-            )  # Agent exists
+            mock_agent_repo_instance.get_agent.return_value = Mock()  # Agent exists
 
             mock_gmn_spec = Mock()
             mock_gmn_spec.id = uuid.uuid4()
             mock_gmn_spec.validation_status = ValidationStatus.VALID
-            mock_gmn_repo_instance.create_gmn_specification.return_value = (
-                mock_gmn_spec
-            )
+            mock_gmn_repo_instance.create_gmn_specification.return_value = mock_gmn_spec
 
             mock_trigger_instance = Mock()
             mock_trigger.return_value = mock_trigger_instance
@@ -212,9 +196,7 @@ class TestGMNAPIEndpoint:
             # Verify free energy trigger was called
             mock_trigger_instance.trigger_belief_update.assert_called_once()
 
-    def test_upload_gmn_with_versioning(
-        self, client, agent_id, valid_gmn_spec
-    ):
+    def test_upload_gmn_with_versioning(self, client, agent_id, valid_gmn_spec):
         """Test that GMN specifications are properly versioned."""
         # First upload
         with patch("database.gmn_repository.GMNRepository") as mock_repo:
@@ -225,9 +207,7 @@ class TestGMNAPIEndpoint:
             mock_gmn_spec_v1.id = uuid.uuid4()
             mock_gmn_spec_v1.version = "1.0"
             mock_gmn_spec_v1.validation_status = ValidationStatus.VALID
-            mock_repo_instance.create_gmn_specification.return_value = (
-                mock_gmn_spec_v1
-            )
+            mock_repo_instance.create_gmn_specification.return_value = mock_gmn_spec_v1
 
             response1 = client.post(
                 f"/api/v1/agents/{agent_id}/gmn",
@@ -250,9 +230,7 @@ class TestGMNAPIEndpoint:
             mock_gmn_spec_v2.id = uuid.uuid4()
             mock_gmn_spec_v2.version = "1.1"
             mock_gmn_spec_v2.validation_status = ValidationStatus.VALID
-            mock_repo_instance.create_gmn_specification.return_value = (
-                mock_gmn_spec_v2
-            )
+            mock_repo_instance.create_gmn_specification.return_value = mock_gmn_spec_v2
 
             response2 = client.post(
                 f"/api/v1/agents/{agent_id}/gmn",
@@ -263,9 +241,7 @@ class TestGMNAPIEndpoint:
             assert response2.status_code == status.HTTP_201_CREATED
             assert response2.json()["version"] == "1.1"
 
-    def test_upload_gmn_returns_pymdp_matrices(
-        self, client, agent_id, valid_gmn_spec
-    ):
+    def test_upload_gmn_returns_pymdp_matrices(self, client, agent_id, valid_gmn_spec):
         """Test that uploaded GMN returns PyMDP matrices."""
         with patch("database.gmn_repository.GMNRepository") as mock_repo:
             mock_repo_instance = Mock()
@@ -274,9 +250,7 @@ class TestGMNAPIEndpoint:
             mock_gmn_spec = Mock()
             mock_gmn_spec.id = uuid.uuid4()
             mock_gmn_spec.validation_status = ValidationStatus.VALID
-            mock_repo_instance.create_gmn_specification.return_value = (
-                mock_gmn_spec
-            )
+            mock_repo_instance.create_gmn_specification.return_value = mock_gmn_spec
 
             response = client.post(
                 f"/api/v1/agents/{agent_id}/gmn",
@@ -317,9 +291,7 @@ class TestGMNAPIEndpoint:
             mock_gmn_spec = Mock()
             mock_gmn_spec.id = uuid.uuid4()
             mock_gmn_spec.validation_status = ValidationStatus.VALID
-            mock_repo_instance.create_gmn_specification.return_value = (
-                mock_gmn_spec
-            )
+            mock_repo_instance.create_gmn_specification.return_value = mock_gmn_spec
 
             response = client.post(
                 f"/api/v1/agents/{agent_id}/gmn",
@@ -351,9 +323,7 @@ class TestGMNAPIEndpoint:
             mock_gmn_spec = Mock()
             mock_gmn_spec.id = uuid.uuid4()
             mock_gmn_spec.validation_status = ValidationStatus.VALID
-            mock_repo_instance.create_gmn_specification.return_value = (
-                mock_gmn_spec
-            )
+            mock_repo_instance.create_gmn_specification.return_value = mock_gmn_spec
 
             response = client.post(
                 f"/api/v1/agents/{agent_id}/gmn",
@@ -409,9 +379,7 @@ class TestGMNAPIEndpoint:
             mock_gmn_spec = Mock()
             mock_gmn_spec.id = uuid.uuid4()
             mock_gmn_spec.validation_status = ValidationStatus.VALID
-            mock_repo_instance.create_gmn_specification.return_value = (
-                mock_gmn_spec
-            )
+            mock_repo_instance.create_gmn_specification.return_value = mock_gmn_spec
 
             response = client.post(
                 f"/api/v1/agents/{agent_id}/gmn",
@@ -428,9 +396,7 @@ class TestGMNAPIEndpoint:
             mock_repo.return_value = mock_repo_instance
 
             # Simulate database error
-            mock_repo_instance.create_gmn_specification.side_effect = (
-                Exception("Database error")
-            )
+            mock_repo_instance.create_gmn_specification.side_effect = Exception("Database error")
 
             response = client.post(
                 f"/api/v1/agents/{agent_id}/gmn",
@@ -438,13 +404,9 @@ class TestGMNAPIEndpoint:
                 headers={"Content-Type": "application/json"},
             )
 
-            assert (
-                response.status_code == status.HTTP_500_INTERNAL_SERVER_ERROR
-            )
+            assert response.status_code == status.HTTP_500_INTERNAL_SERVER_ERROR
 
-    def test_upload_gmn_concurrent_requests(
-        self, client, agent_id, valid_gmn_spec
-    ):
+    def test_upload_gmn_concurrent_requests(self, client, agent_id, valid_gmn_spec):
         """Test handling concurrent GMN upload requests."""
         import threading
 
@@ -458,9 +420,7 @@ class TestGMNAPIEndpoint:
                 mock_gmn_spec = Mock()
                 mock_gmn_spec.id = uuid.uuid4()
                 mock_gmn_spec.validation_status = ValidationStatus.VALID
-                mock_repo_instance.create_gmn_specification.return_value = (
-                    mock_gmn_spec
-                )
+                mock_repo_instance.create_gmn_specification.return_value = mock_gmn_spec
 
                 response = client.post(
                     f"/api/v1/agents/{agent_id}/gmn",
@@ -510,9 +470,7 @@ class TestGMNAPIEndpointGET:
             mock_gmn_spec.version = "1.0"
             mock_gmn_spec.is_active = True
             mock_gmn_spec.validation_status = ValidationStatus.VALID
-            mock_repo_instance.get_active_gmn_specification.return_value = (
-                mock_gmn_spec
-            )
+            mock_repo_instance.get_active_gmn_specification.return_value = mock_gmn_spec
 
             response = client.get(f"/api/v1/agents/{agent_id}/gmn/active")
 
@@ -553,9 +511,7 @@ class TestGMNAPIEndpointGET:
                     is_active=False,
                 ),
             ]
-            mock_repo_instance.get_agent_gmn_specifications.return_value = (
-                mock_specs
-            )
+            mock_repo_instance.get_agent_gmn_specifications.return_value = mock_specs
 
             response = client.get(f"/api/v1/agents/{agent_id}/gmn")
 
@@ -591,16 +547,11 @@ class TestGMNAPIEndpointPUT:
             mock_repo.return_value = mock_repo_instance
             mock_repo_instance.activate_gmn_specification.return_value = True
 
-            response = client.put(
-                f"/api/v1/agents/{agent_id}/gmn/{spec_id}/activate"
-            )
+            response = client.put(f"/api/v1/agents/{agent_id}/gmn/{spec_id}/activate")
 
             assert response.status_code == status.HTTP_200_OK
             response_data = response.json()
-            assert (
-                response_data["message"]
-                == "GMN specification activated successfully"
-            )
+            assert response_data["message"] == "GMN specification activated successfully"
 
     def test_deactivate_gmn_specification(self, client, agent_id, spec_id):
         """Test deactivating a specific GMN specification."""
@@ -609,16 +560,11 @@ class TestGMNAPIEndpointPUT:
             mock_repo.return_value = mock_repo_instance
             mock_repo_instance.deactivate_gmn_specification.return_value = True
 
-            response = client.put(
-                f"/api/v1/agents/{agent_id}/gmn/{spec_id}/deactivate"
-            )
+            response = client.put(f"/api/v1/agents/{agent_id}/gmn/{spec_id}/deactivate")
 
             assert response.status_code == status.HTTP_200_OK
             response_data = response.json()
-            assert (
-                response_data["message"]
-                == "GMN specification deactivated successfully"
-            )
+            assert response_data["message"] == "GMN specification deactivated successfully"
 
 
 class TestGMNAPIEndpointDELETE:
@@ -646,28 +592,19 @@ class TestGMNAPIEndpointDELETE:
             mock_repo.return_value = mock_repo_instance
             mock_repo_instance.delete_gmn_specification.return_value = True
 
-            response = client.delete(
-                f"/api/v1/agents/{agent_id}/gmn/{spec_id}"
-            )
+            response = client.delete(f"/api/v1/agents/{agent_id}/gmn/{spec_id}")
 
             assert response.status_code == status.HTTP_200_OK
             response_data = response.json()
-            assert (
-                response_data["message"]
-                == "GMN specification deleted successfully"
-            )
+            assert response_data["message"] == "GMN specification deleted successfully"
 
-    def test_delete_nonexistent_gmn_specification(
-        self, client, agent_id, spec_id
-    ):
+    def test_delete_nonexistent_gmn_specification(self, client, agent_id, spec_id):
         """Test deleting a nonexistent GMN specification."""
         with patch("database.gmn_repository.GMNRepository") as mock_repo:
             mock_repo_instance = Mock()
             mock_repo.return_value = mock_repo_instance
             mock_repo_instance.delete_gmn_specification.return_value = False
 
-            response = client.delete(
-                f"/api/v1/agents/{agent_id}/gmn/{spec_id}"
-            )
+            response = client.delete(f"/api/v1/agents/{agent_id}/gmn/{spec_id}")
 
             assert response.status_code == status.HTTP_404_NOT_FOUND

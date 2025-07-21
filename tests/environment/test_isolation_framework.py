@@ -40,12 +40,8 @@ class TestDatabaseIsolation:
             schema_name = db_isolation.create_isolated_schema("test_suite")
 
             assert schema_name.startswith("test_suite_")
-            mock_cursor.execute.assert_any_call(
-                f"CREATE SCHEMA IF NOT EXISTS {schema_name}"
-            )
-            mock_cursor.execute.assert_any_call(
-                f"SET search_path TO {schema_name}"
-            )
+            mock_cursor.execute.assert_any_call(f"CREATE SCHEMA IF NOT EXISTS {schema_name}")
+            mock_cursor.execute.assert_any_call(f"SET search_path TO {schema_name}")
             mock_conn.commit.assert_called()
 
     def test_create_isolated_database(self, db_isolation):
@@ -72,9 +68,7 @@ class TestDatabaseIsolation:
 
             db_isolation.cleanup_schema("test_schema")
 
-            mock_cursor.execute.assert_called_with(
-                "DROP SCHEMA IF EXISTS test_schema CASCADE"
-            )
+            mock_cursor.execute.assert_called_with("DROP SCHEMA IF EXISTS test_schema CASCADE")
             mock_conn.commit.assert_called()
 
     def test_cleanup_database(self, db_isolation):
@@ -100,15 +94,11 @@ class TestDatabaseIsolation:
             )
 
             # Then drop database
-            mock_cursor.execute.assert_any_call(
-                "DROP DATABASE IF EXISTS test_db"
-            )
+            mock_cursor.execute.assert_any_call("DROP DATABASE IF EXISTS test_db")
 
     def test_context_manager_schema(self, db_isolation):
         """Test using schema isolation as context manager."""
-        with patch.object(
-            db_isolation, "create_isolated_schema"
-        ) as mock_create:
+        with patch.object(db_isolation, "create_isolated_schema") as mock_create:
             mock_create.return_value = "test_schema_123"
 
             with patch.object(db_isolation, "cleanup_schema") as mock_cleanup:
@@ -171,14 +161,10 @@ class TestRedisIsolation:
 
     def test_context_manager(self, redis_isolation):
         """Test using Redis isolation as context manager."""
-        with patch.object(
-            redis_isolation, "create_isolated_namespace"
-        ) as mock_create:
+        with patch.object(redis_isolation, "create_isolated_namespace") as mock_create:
             mock_create.return_value = "test:namespace:123"
 
-            with patch.object(
-                redis_isolation, "cleanup_namespace"
-            ) as mock_cleanup:
+            with patch.object(redis_isolation, "cleanup_namespace") as mock_cleanup:
                 with redis_isolation.isolated_namespace("test") as namespace:
                     assert namespace == "test:namespace:123"
 
@@ -236,9 +222,7 @@ class TestMessageQueueIsolation:
         with patch.object(mq_isolation, "create_virtual_host") as mock_create:
             mock_create.return_value = "test_vhost_123"
 
-            with patch.object(
-                mq_isolation, "cleanup_virtual_host"
-            ) as mock_cleanup:
+            with patch.object(mq_isolation, "cleanup_virtual_host") as mock_cleanup:
                 with mq_isolation.isolated_vhost("test") as vhost:
                     assert vhost == "test_vhost_123"
 
@@ -261,9 +245,7 @@ class TestFilesystemIsolation:
             sandbox = fs_isolation.create_sandbox("test_suite")
 
             assert sandbox == Path("/tmp/test_sandbox_123")
-            mock_mkdtemp.assert_called_with(
-                prefix="test_suite_", dir="/tmp/test_isolation"
-            )
+            mock_mkdtemp.assert_called_with(prefix="test_suite_", dir="/tmp/test_isolation")
 
     def test_cleanup_sandbox(self, fs_isolation):
         """Test cleaning up a sandbox."""
@@ -271,9 +253,7 @@ class TestFilesystemIsolation:
             with patch("pathlib.Path.exists", return_value=True):
                 fs_isolation.cleanup_sandbox("/tmp/test_sandbox")
 
-                mock_rmtree.assert_called_with(
-                    Path("/tmp/test_sandbox"), ignore_errors=True
-                )
+                mock_rmtree.assert_called_with(Path("/tmp/test_sandbox"), ignore_errors=True)
 
     def test_context_manager(self, fs_isolation):
         """Test using filesystem isolation as context manager."""
@@ -288,7 +268,7 @@ class TestFilesystemIsolation:
 
     def test_copy_to_sandbox(self, fs_isolation):
         """Test copying files to sandbox."""
-        with patch("shutil.copytree") as _mock_copytree:
+        with patch("shutil.copytree"):
             with patch("shutil.copy2") as mock_copy2:
                 with patch("os.path.isdir") as mock_isdir:
                     mock_isdir.return_value = False
@@ -328,9 +308,7 @@ class TestTestIsolation:
 
     def test_isolate_all(self, test_isolation):
         """Test isolating all resources."""
-        with patch.object(
-            test_isolation.db_isolation, "create_isolated_schema"
-        ) as mock_db:
+        with patch.object(test_isolation.db_isolation, "create_isolated_schema") as mock_db:
             mock_db.return_value = "test_schema"
 
             with patch.object(
@@ -338,26 +316,18 @@ class TestTestIsolation:
             ) as mock_redis:
                 mock_redis.return_value = "test:namespace"
 
-                with patch.object(
-                    test_isolation.mq_isolation, "create_virtual_host"
-                ) as mock_mq:
+                with patch.object(test_isolation.mq_isolation, "create_virtual_host") as mock_mq:
                     mock_mq.return_value = "test_vhost"
 
-                    with patch.object(
-                        test_isolation.fs_isolation, "create_sandbox"
-                    ) as mock_fs:
+                    with patch.object(test_isolation.fs_isolation, "create_sandbox") as mock_fs:
                         mock_fs.return_value = Path("/tmp/sandbox")
 
                         context = test_isolation.isolate_all("test_suite")
 
                         assert context["database"]["schema"] == "test_schema"
-                        assert (
-                            context["redis"]["namespace"] == "test:namespace"
-                        )
+                        assert context["redis"]["namespace"] == "test:namespace"
                         assert context["rabbitmq"]["vhost"] == "test_vhost"
-                        assert context["filesystem"]["sandbox"] == Path(
-                            "/tmp/sandbox"
-                        )
+                        assert context["filesystem"]["sandbox"] == Path("/tmp/sandbox")
 
     def test_cleanup_all(self, test_isolation):
         """Test cleaning up all resources."""
@@ -368,18 +338,10 @@ class TestTestIsolation:
             "filesystem": {"sandbox": Path("/tmp/sandbox")},
         }
 
-        with patch.object(
-            test_isolation.db_isolation, "cleanup_schema"
-        ) as mock_db:
-            with patch.object(
-                test_isolation.redis_isolation, "cleanup_namespace"
-            ) as mock_redis:
-                with patch.object(
-                    test_isolation.mq_isolation, "cleanup_virtual_host"
-                ) as mock_mq:
-                    with patch.object(
-                        test_isolation.fs_isolation, "cleanup_sandbox"
-                    ) as mock_fs:
+        with patch.object(test_isolation.db_isolation, "cleanup_schema") as mock_db:
+            with patch.object(test_isolation.redis_isolation, "cleanup_namespace") as mock_redis:
+                with patch.object(test_isolation.mq_isolation, "cleanup_virtual_host") as mock_mq:
+                    with patch.object(test_isolation.fs_isolation, "cleanup_sandbox") as mock_fs:
                         test_isolation.cleanup_all(context)
 
                         mock_db.assert_called_with("test_schema")

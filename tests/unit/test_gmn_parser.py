@@ -6,7 +6,6 @@ and LLM integration capabilities.
 """
 
 import json
-from unittest.mock import patch
 
 import numpy as np
 import pytest
@@ -166,7 +165,7 @@ class TestGMNParser:
             ],
             "edges": [
                 {"source": "state1", "target": "obs1", "type": "generates"},
-                {"source": "action1", "target": "state1", "type": "influences"}
+                {"source": "action1", "target": "state1", "type": "influences"},
             ],
             "metadata": {"version": "1.0"},
         }
@@ -190,12 +189,12 @@ class TestGMNParser:
                 "nodes": [
                     {"id": "location", "type": "state"},
                     {"id": "obs_location", "type": "observation"},
-                    {"id": "move", "type": "action"}
-                ], 
+                    {"id": "move", "type": "action"},
+                ],
                 "edges": [
                     {"source": "location", "target": "obs_location", "type": "generates"},
-                    {"source": "move", "target": "location", "type": "influences"}
-                ]
+                    {"source": "move", "target": "location", "type": "influences"},
+                ],
             }
         )
 
@@ -640,9 +639,7 @@ class TestErrorHandling:
                 {
                     "id": "likelihood",
                     "type": "likelihood",
-                    "properties": {
-                        "matrix": [[1, 0], [0, 1]]
-                    },  # Wrong dimensions
+                    "properties": {"matrix": [[1, 0], [0, 1]]},  # Wrong dimensions
                 },
             ],
             "edges": [

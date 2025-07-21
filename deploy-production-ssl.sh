@@ -170,8 +170,8 @@ stop_services() {
     log "Stopping existing services..."
 
     # Stop with multiple compose files
-    docker-compose -f docker-compose.yml down --remove-orphans || true
-    docker-compose -f docker-compose.production.yml down --remove-orphans || true
+    docker-compose -f docker-compose.yml down --remove-orphans 
+    docker-compose -f docker-compose.production.yml down --remove-orphans 
 
     # Clean up unused containers and networks
     docker system prune -f

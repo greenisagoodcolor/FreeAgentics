@@ -95,9 +95,7 @@ class UsageMetrics:
         else:
             self.failed_requests += 1
             if error_type:
-                self.error_counts[error_type] = (
-                    self.error_counts.get(error_type, 0) + 1
-                )
+                self.error_counts[error_type] = self.error_counts.get(error_type, 0) + 1
 
         self.total_input_tokens += input_tokens
         self.total_output_tokens += output_tokens
@@ -110,8 +108,8 @@ class UsageMetrics:
             else:
                 # Running average
                 self.average_latency_ms = (
-                    self.average_latency_ms * (self.successful_requests - 1)
-                    + latency_ms
+                    self.average_latency_ms * (self.successful_requests - 1) +
+                        latency_ms
                 ) / self.successful_requests
 
         self.last_request_time = datetime.now()
@@ -164,36 +162,26 @@ class ILLMProvider(ABC):
     @abstractmethod
     def get_provider_type(self) -> ProviderType:
         """Return the provider type."""
-        pass
 
     @abstractmethod
-    def configure(
-        self, credentials: ProviderCredentials, **kwargs: Any
-    ) -> bool:
+    def configure(self, credentials: ProviderCredentials, **kwargs: Any) -> bool:
         """Configure the provider with credentials."""
-        pass
 
     @abstractmethod
     def test_connection(self) -> HealthCheckResult:
         """Test connection to the provider."""
-        pass
 
     @abstractmethod
     def generate(self, request: GenerationRequest) -> GenerationResponse:
         """Generate text based on the request."""
-        pass
 
     @abstractmethod
     def get_usage_metrics(self) -> UsageMetrics:
         """Get current usage metrics."""
-        pass
 
     @abstractmethod
-    def estimate_cost(
-        self, input_tokens: int, output_tokens: int, model: str
-    ) -> float:
+    def estimate_cost(self, input_tokens: int, output_tokens: int, model: str) -> float:
         """Estimate cost for given token counts."""
-        pass
 
 
 class BaseProvider(ILLMProvider):
@@ -212,9 +200,7 @@ class BaseProvider(ILLMProvider):
         """Return the provider type."""
         return self.provider_type
 
-    def configure(
-        self, credentials: ProviderCredentials, **kwargs: Any
-    ) -> bool:
+    def configure(self, credentials: ProviderCredentials, **kwargs: Any) -> bool:
         """Configure the provider with credentials.
 
         Returns:
@@ -234,9 +220,7 @@ class BaseProvider(ILLMProvider):
                 ProviderStatus.HEALTHY,
                 ProviderStatus.DEGRADED,
             ]:
-                logger.info(
-                    f"Configured {self.provider_type.value} provider successfully"
-                )
+                logger.info(f"Configured {self.provider_type.value} provider successfully")
                 return True
             else:
                 logger.error(
@@ -245,7 +229,8 @@ class BaseProvider(ILLMProvider):
                 return False
         except Exception as e:
             logger.error(
-                f"Failed to test connection for {self.provider_type.value}: {e}"
+                f"Failed to test connection for {self.provider_type.value}:"
+                f" {e}"
             )
             return False
 
@@ -287,19 +272,14 @@ class BaseProvider(ILLMProvider):
     @abstractmethod
     def test_connection(self) -> HealthCheckResult:
         """Test connection to the provider."""
-        pass
 
     @abstractmethod
     def generate(self, request: GenerationRequest) -> GenerationResponse:
         """Generate text based on the request."""
-        pass
 
     @abstractmethod
-    def estimate_cost(
-        self, input_tokens: int, output_tokens: int, model: str
-    ) -> float:
+    def estimate_cost(self, input_tokens: int, output_tokens: int, model: str) -> float:
         """Estimate cost for given token counts."""
-        pass
 
 
 class ProviderRegistry:
@@ -312,9 +292,7 @@ class ProviderRegistry:
         self._provider_priority_values: Dict[ProviderType, int] = {}
         self._health_check_cache: Dict[ProviderType, HealthCheckResult] = {}
 
-    def register_provider(
-        self, provider: ILLMProvider, priority: int = 50
-    ) -> None:
+    def register_provider(self, provider: ILLMProvider, priority: int = 50) -> None:
         """Register a provider with optional priority."""
         provider_type = provider.get_provider_type()
         self._providers[provider_type] = provider
@@ -325,27 +303,21 @@ class ProviderRegistry:
             self._provider_priorities.append(provider_type)
 
         # Sort by priority (lower number = higher priority)
-        self._provider_priorities.sort(
-            key=lambda pt: self._provider_priority_values[pt]
-        )
+        self._provider_priorities.sort(key=lambda pt: self._provider_priority_values[pt])
 
         logger.info(
-            f"Registered provider: {provider_type.value} with priority {priority}"
+            f"Registered provider: {provider_type.value} with priority"
+            f" {priority}"
         )
 
-    def get_provider(
-        self, provider_type: ProviderType
-    ) -> Optional[ILLMProvider]:
+    def get_provider(self, provider_type: ProviderType) -> Optional[ILLMProvider]:
         """Get a specific provider by type."""
         return self._providers.get(provider_type)
 
     def get_providers_by_priority(self) -> List[ILLMProvider]:
         """Get all providers sorted by priority (highest first)."""
-        return [
-            self._providers[pt]
-            for pt in self._provider_priorities
-            if pt in self._providers
-        ]
+        return [self._providers[pt] for pt in self._provider_priorities if
+            pt in self._providers]
 
     def get_healthy_providers(self) -> List[ILLMProvider]:
         """Get all healthy providers."""
@@ -369,9 +341,7 @@ class ProviderRegistry:
         """Reorder providers based on new priorities."""
         for provider_type in priorities:
             if provider_type not in self._providers:
-                raise ValueError(
-                    f"Unknown provider type: {provider_type.value}"
-                )
+                raise ValueError(f"Unknown provider type: {provider_type.value}")
         self._provider_priorities = priorities
 
     def remove_provider(self, provider_type: ProviderType) -> bool:
@@ -397,9 +367,7 @@ class ProviderManager:
         if config_path:
             self._load_configuration(config_path)
 
-    def generate_with_fallback(
-        self, request: GenerationRequest
-    ) -> GenerationResponse:
+    def generate_with_fallback(self, request: GenerationRequest) -> GenerationResponse:
         """Generate text with automatic fallback to healthy providers."""
         providers = self.registry.get_healthy_providers()
 
@@ -414,7 +382,8 @@ class ProviderManager:
 
             except Exception as e:
                 logger.error(
-                    f"Provider {provider.get_provider_type().value} failed: {str(e)}"
+                    f"Provider {provider.get_provider_type().value} failed:"
+                    f" {str(e)}"
                 )
                 continue
 
@@ -456,16 +425,12 @@ class ProviderManager:
             # Check usage metrics
             metrics = provider.get_usage_metrics()
             if metrics.total_requests > 0:
-                success_rate = (
-                    metrics.successful_requests / metrics.total_requests
-                )
+                success_rate = metrics.successful_requests / metrics.total_requests
                 score *= success_rate
 
                 # Penalize high latency
                 if metrics.average_latency_ms > 0:
-                    latency_penalty = min(
-                        1.0, 1000.0 / metrics.average_latency_ms
-                    )
+                    latency_penalty = min(1.0, 1000.0 / metrics.average_latency_ms)
                     score *= latency_penalty
 
             # Check cost if available

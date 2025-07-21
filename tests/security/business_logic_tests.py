@@ -97,9 +97,7 @@ class BusinessLogicTests(BasePenetrationTest):
         logger.info("Testing workflow bypass vulnerabilities")
 
         # Create test user
-        username, password, user_id = self.create_test_user(
-            UserRole.RESEARCHER
-        )
+        username, password, user_id = self.create_test_user(UserRole.RESEARCHER)
         token = self.get_auth_token(username, password)
 
         # Test agent creation workflow bypass
@@ -261,9 +259,7 @@ class BusinessLogicTests(BasePenetrationTest):
         logger.info("Testing state manipulation vulnerabilities")
 
         # Create test user
-        username, password, user_id = self.create_test_user(
-            UserRole.RESEARCHER
-        )
+        username, password, user_id = self.create_test_user(UserRole.RESEARCHER)
         token = self.get_auth_token(username, password)
 
         # Test agent state manipulation
@@ -401,9 +397,7 @@ class BusinessLogicTests(BasePenetrationTest):
                             )
                         )
                 except Exception as e:
-                    logger.debug(
-                        f"User state manipulation response parsing error: {e}"
-                    )
+                    logger.debug(f"User state manipulation response parsing error: {e}")
 
     async def _test_session_state_manipulation(self, token: str):
         """Test session state manipulation."""
@@ -461,18 +455,14 @@ class BusinessLogicTests(BasePenetrationTest):
                                 )
                             )
                 except Exception as e:
-                    logger.debug(
-                        f"Session state manipulation response parsing error: {e}"
-                    )
+                    logger.debug(f"Session state manipulation response parsing error: {e}")
 
     async def _test_race_conditions(self):
         """Test race condition vulnerabilities."""
         logger.info("Testing race condition vulnerabilities")
 
         # Create test user
-        username, password, user_id = self.create_test_user(
-            UserRole.RESEARCHER
-        )
+        username, password, user_id = self.create_test_user(UserRole.RESEARCHER)
         token = self.get_auth_token(username, password)
 
         # Test concurrent agent creation
@@ -507,9 +497,7 @@ class BusinessLogicTests(BasePenetrationTest):
             futures = [executor.submit(create_agent, i) for i in range(20)]
             results = [future.result() for future in as_completed(futures)]
 
-        successful_creations = sum(
-            1 for status, _ in results if status in [200, 201]
-        )
+        successful_creations = sum(1 for status, _ in results if status in [200, 201])
 
         # Check for race condition indicators
         agent_ids = []
@@ -549,9 +537,7 @@ class BusinessLogicTests(BasePenetrationTest):
             )
 
         # Check if too many agents were created (resource exhaustion)
-        if (
-            successful_creations > 15
-        ):  # Expected some to fail due to rate limiting
+        if successful_creations > 15:  # Expected some to fail due to rate limiting
             self.add_vulnerability(
                 VulnerabilityFinding(
                     vulnerability_type=VulnerabilityType.RACE_CONDITION,
@@ -631,13 +617,8 @@ class BusinessLogicTests(BasePenetrationTest):
                         "read",
                     ]
                     with ThreadPoolExecutor(max_workers=6) as executor:
-                        futures = [
-                            executor.submit(access_agent, op)
-                            for op in operations
-                        ]
-                        results = [
-                            future.result() for future in as_completed(futures)
-                        ]
+                        futures = [executor.submit(access_agent, op) for op in operations]
+                        results = [future.result() for future in as_completed(futures)]
 
                     # Analyze results for race condition indicators
                     read_after_delete = False
@@ -645,9 +626,7 @@ class BusinessLogicTests(BasePenetrationTest):
                         if operations[i] == "read" and status == 200:
                             # Check if read succeeded after delete
                             delete_results = [
-                                r
-                                for j, r in enumerate(results)
-                                if operations[j] == "delete"
+                                r for j, r in enumerate(results) if operations[j] == "delete"
                             ]
                             if any(s in [200, 204] for s, _ in delete_results):
                                 read_after_delete = True
@@ -707,14 +686,10 @@ class BusinessLogicTests(BasePenetrationTest):
                         escalate_response = self.client.patch(
                             "/api/v1/auth/me",
                             json={"role": "admin"},
-                            headers={
-                                "Authorization": f"Bearer {user_data['access_token']}"
-                            },
+                            headers={"Authorization": f"Bearer {user_data['access_token']}"},
                         )
                         return escalate_response.status_code, (
-                            escalate_response.json()
-                            if escalate_response.text
-                            else {}
+                            escalate_response.json() if escalate_response.text else {}
                         )
 
                 return create_response.status_code, {}
@@ -723,16 +698,12 @@ class BusinessLogicTests(BasePenetrationTest):
 
         # Test concurrent user creation and privilege escalation
         with ThreadPoolExecutor(max_workers=5) as executor:
-            futures = [
-                executor.submit(create_and_modify_user, i) for i in range(10)
-            ]
+            futures = [executor.submit(create_and_modify_user, i) for i in range(10)]
             results = [future.result() for future in as_completed(futures)]
 
         # Check if any privilege escalation succeeded
         successful_escalations = sum(
-            1
-            for status, data in results
-            if status == 200 and data.get("role") == "admin"
+            1 for status, data in results if status == 200 and data.get("role") == "admin"
         )
 
         if successful_escalations > 0:
@@ -767,9 +738,7 @@ class BusinessLogicTests(BasePenetrationTest):
         logger.info("Testing multi-step process vulnerabilities")
 
         # Create test user
-        username, password, user_id = self.create_test_user(
-            UserRole.RESEARCHER
-        )
+        username, password, user_id = self.create_test_user(UserRole.RESEARCHER)
         token = self.get_auth_token(username, password)
 
         # Test agent deployment process
@@ -1105,9 +1074,7 @@ class BusinessLogicTests(BasePenetrationTest):
         logger.info("Testing agent lifecycle vulnerabilities")
 
         # Create test user with agent management permissions
-        username, password, user_id = self.create_test_user(
-            UserRole.AGENT_MANAGER
-        )
+        username, password, user_id = self.create_test_user(UserRole.AGENT_MANAGER)
         token = self.get_auth_token(username, password)
 
         # Test agent lifecycle state transitions
@@ -1144,8 +1111,7 @@ class BusinessLogicTests(BasePenetrationTest):
                     ]
 
                     for method, endpoint, data in [
-                        (t[0], t[1], t[2] if len(t) > 2 else None)
-                        for t in invalid_transitions
+                        (t[0], t[1], t[2] if len(t) > 2 else None) for t in invalid_transitions
                     ]:
                         if method == "delete":
                             response = self.client.delete(
@@ -1158,9 +1124,7 @@ class BusinessLogicTests(BasePenetrationTest):
                                 headers=self.get_auth_headers(token),
                             )
 
-                        if hasattr(
-                            response, "status_code"
-                        ) and response.status_code in [
+                        if hasattr(response, "status_code") and response.status_code in [
                             200,
                             202,
                             204,
@@ -1195,9 +1159,7 @@ class BusinessLogicTests(BasePenetrationTest):
     async def _test_agent_ownership_transfer(self, token: str):
         """Test agent ownership transfer vulnerabilities."""
         # Create another user
-        user2_name, user2_pass, user2_id = self.create_test_user(
-            UserRole.AGENT_MANAGER
-        )
+        user2_name, user2_pass, user2_id = self.create_test_user(UserRole.AGENT_MANAGER)
 
         # Create an agent with first user
         create_response = self.client.post(
@@ -1263,9 +1225,7 @@ class BusinessLogicTests(BasePenetrationTest):
         logger.info("Testing coalition logic vulnerabilities")
 
         # Create test user
-        username, password, user_id = self.create_test_user(
-            UserRole.RESEARCHER
-        )
+        username, password, user_id = self.create_test_user(UserRole.RESEARCHER)
         token = self.get_auth_token(username, password)
 
         # Test coalition member limits
@@ -1363,7 +1323,7 @@ class BusinessLogicTests(BasePenetrationTest):
                                     severity=SeverityLevel.HIGH,
                                     title="Coalition-based Permission Escalation",
                                     description="Creating admin coalition grants admin permissions",
-                                    affected_endpoint=f"/api/v1/coalitions",
+                                    affected_endpoint="/api/v1/coalitions",
                                     proof_of_concept="Admin permissions gained through coalition creation",
                                     exploitation_steps=[
                                         "1. Create coalition with admin type",
@@ -1382,9 +1342,7 @@ class BusinessLogicTests(BasePenetrationTest):
                             )
 
             except Exception as e:
-                logger.debug(
-                    f"Coalition permission escalation test error: {e}"
-                )
+                logger.debug(f"Coalition permission escalation test error: {e}")
 
     async def _test_business_logic_escalation(self):
         """Test privilege escalation through business logic."""
@@ -1429,9 +1387,9 @@ class BusinessLogicTests(BasePenetrationTest):
 
                 if perms_response.status_code == 200:
                     perms_data = perms_response.json()
-                    if perms_data.get(
-                        "can_admin_system", False
-                    ) or perms_data.get("can_delete_agents", False):
+                    if perms_data.get("can_admin_system", False) or perms_data.get(
+                        "can_delete_agents", False
+                    ):
                         self.add_vulnerability(
                             VulnerabilityFinding(
                                 vulnerability_type=VulnerabilityType.PRIVILEGE_ESCALATION_VERTICAL,
@@ -1472,9 +1430,7 @@ class BusinessLogicTests(BasePenetrationTest):
         ]
 
         for test in collaboration_tests:
-            if self.client.__dict__.get(
-                test["endpoint"]
-            ):  # Check if endpoint exists
+            if self.client.__dict__.get(test["endpoint"]):  # Check if endpoint exists
                 response = self.client.post(
                     test["endpoint"],
                     json=test["data"],
@@ -1520,9 +1476,7 @@ class BusinessLogicTests(BasePenetrationTest):
         logger.info("Testing data validation bypass")
 
         # Create test user
-        username, password, user_id = self.create_test_user(
-            UserRole.RESEARCHER
-        )
+        username, password, user_id = self.create_test_user(UserRole.RESEARCHER)
         token = self.get_auth_token(username, password)
 
         # Test business rule validation bypass
@@ -1624,9 +1578,7 @@ class BusinessLogicTests(BasePenetrationTest):
         logger.info("Testing transaction logic vulnerabilities")
 
         # Create test user
-        username, password, user_id = self.create_test_user(
-            UserRole.RESEARCHER
-        )
+        username, password, user_id = self.create_test_user(UserRole.RESEARCHER)
         token = self.get_auth_token(username, password)
 
         # Test atomicity violations
@@ -1672,9 +1624,7 @@ class BusinessLogicTests(BasePenetrationTest):
                         # If agent exists but dependencies failed, atomicity violated
                         if agent_status.get(
                             "status"
-                        ) != "error" and "nonexistent_dependency" in str(
-                            create_data
-                        ):
+                        ) != "error" and "nonexistent_dependency" in str(create_data):
                             self.add_vulnerability(
                                 VulnerabilityFinding(
                                     vulnerability_type=VulnerabilityType.BUSINESS_LOGIC_BYPASS,
@@ -1720,7 +1670,7 @@ class BusinessLogicTests(BasePenetrationTest):
 
                 if agent_id:
                     # Try to create conflicting state
-                    update1 = self.client.patch(
+                    self.client.patch(
                         f"/api/v1/agents/{agent_id}",
                         json={"status": "active"},
                         headers=self.get_auth_headers(token),

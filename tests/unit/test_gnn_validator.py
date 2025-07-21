@@ -6,9 +6,7 @@ which validates and secures GNN model definitions.
 Coverage target: 95%+
 """
 
-import re
-from typing import Any, Dict, List, Optional
-from unittest.mock import MagicMock, Mock, call, patch
+from unittest.mock import Mock, patch
 
 import pytest
 
@@ -45,7 +43,7 @@ class TestGMNValidator:
     def validator(self):
         """Create GMNValidator instance."""
         if not IMPORT_SUCCESS:
-            pytest.skip("GNN modules not available")
+            assert False, "Test bypass removed - must fix underlying issue"
         return GMNValidator()
 
     @pytest.fixture
@@ -143,23 +141,17 @@ class TestGMNValidator:
 
     def test_validate_invalid_activation(self, validator, mock_parse_result):
         """Test validation with invalid activation function."""
-        mock_parse_result.sections["architecture"][
-            "activation"
-        ] = "invalid_activation"
+        mock_parse_result.sections["architecture"]["activation"] = "invalid_activation"
 
         result = validator.validate(mock_parse_result)
 
         assert result.is_valid is False
         assert any("activation" in error.lower() for error in result.errors)
 
-    def test_validate_parameter_constraints(
-        self, validator, mock_parse_result
-    ):
+    def test_validate_parameter_constraints(self, validator, mock_parse_result):
         """Test parameter constraint validation."""
         # Test learning rate out of bounds
-        mock_parse_result.sections["parameters"][
-            "learning_rate"
-        ] = 10.0  # Too high
+        mock_parse_result.sections["parameters"]["learning_rate"] = 10.0  # Too high
 
         result = validator.validate(mock_parse_result)
 
@@ -174,16 +166,13 @@ class TestGMNValidator:
 
         assert result.is_valid is False
         assert any(
-            "negative" in error.lower() or "positive" in error.lower()
-            for error in result.errors
+            "negative" in error.lower() or "positive" in error.lower() for error in result.errors
         )
 
     def test_validate_security_patterns(self, validator, mock_parse_result):
         """Test security pattern detection."""
         # Add potentially malicious code
-        mock_parse_result.sections["custom_code"] = {
-            "initialization": "exec('malicious code')"
-        }
+        mock_parse_result.sections["custom_code"] = {"initialization": "exec('malicious code')"}
 
         result = validator.validate(mock_parse_result)
 
@@ -209,21 +198,16 @@ class TestGMNValidator:
         }
 
         # Mock AST traversal
-        validator._collect_variable_definitions = Mock(
-            return_value={"position", "velocity"}
-        )
+        validator._collect_variable_definitions = Mock(return_value={"position", "velocity"})
 
         result = validator.validate(mock_parse_result)
 
         assert result.is_valid is False
         assert any(
-            "undefined" in error.lower() or "reference" in error.lower()
-            for error in result.errors
+            "undefined" in error.lower() or "reference" in error.lower() for error in result.errors
         )
 
-    def test_validate_circular_dependencies(
-        self, validator, mock_parse_result
-    ):
+    def test_validate_circular_dependencies(self, validator, mock_parse_result):
         """Test circular dependency detection."""
         # Create circular reference
         mock_parse_result.sections["definitions"] = {
@@ -253,9 +237,7 @@ class TestGMNValidator:
             if hasattr(validator.circuit_breaker, "is_open"):
                 assert validator.circuit_breaker.is_open()
 
-    def test_validate_active_inference_config(
-        self, validator, mock_parse_result
-    ):
+    def test_validate_active_inference_config(self, validator, mock_parse_result):
         """Test Active Inference configuration validation."""
         # Test invalid state dimensions
         mock_parse_result.sections["active_inference"]["num_states"] = 0
@@ -265,9 +247,7 @@ class TestGMNValidator:
         assert result.is_valid is False
         assert any("states" in error.lower() for error in result.errors)
 
-    def test_validate_gnn_layer_compatibility(
-        self, validator, mock_parse_result
-    ):
+    def test_validate_gnn_layer_compatibility(self, validator, mock_parse_result):
         """Test GNN layer configuration compatibility."""
         # Test incompatible layer configuration
         mock_parse_result.sections["architecture"]["type"] = "GCN"
@@ -283,9 +263,7 @@ class TestGMNValidator:
     def test_validate_numerical_stability(self, validator, mock_parse_result):
         """Test numerical stability checks."""
         # Add parameters that could cause instability
-        mock_parse_result.sections["parameters"][
-            "gradient_clip"
-        ] = 1e10  # Too large
+        mock_parse_result.sections["parameters"]["gradient_clip"] = 1e10  # Too large
         mock_parse_result.sections["parameters"]["eps"] = 1e-20  # Too small
 
         result = validator.validate(mock_parse_result)
@@ -331,18 +309,12 @@ class TestGMNValidator:
         # Should warn about memory requirements
         assert len(result.warnings) > 0
 
-    def test_validate_performance_implications(
-        self, validator, mock_parse_result
-    ):
+    def test_validate_performance_implications(self, validator, mock_parse_result):
         """Test performance implication warnings."""
         # Configure model for poor performance
         mock_parse_result.sections["architecture"]["type"] = "GAT"
-        mock_parse_result.sections["architecture"][
-            "num_heads"
-        ] = 32  # Too many attention heads
-        mock_parse_result.sections["architecture"][
-            "layers"
-        ] = 10  # Deep network
+        mock_parse_result.sections["architecture"]["num_heads"] = 32  # Too many attention heads
+        mock_parse_result.sections["architecture"]["layers"] = 10  # Deep network
 
         result = validator.validate(mock_parse_result)
 
@@ -361,16 +333,12 @@ class TestGMNValidator:
         # Add many validation errors
         with patch.object(validator, "max_validation_errors", 5):
             # Create conditions that generate many errors
-            parse_result.sections = {
-                f"invalid_section_{i}": {"error": True} for i in range(20)
-            }
+            parse_result.sections = {f"invalid_section_{i}": {"error": True} for i in range(20)}
 
             result = validator.validate(parse_result)
 
             # Should limit errors
-            assert (
-                len(result.errors) <= validator.max_validation_errors + 5
-            )  # Some buffer
+            assert len(result.errors) <= validator.max_validation_errors + 5  # Some buffer
 
     def test_custom_validation_rules(self, validator, mock_parse_result):
         """Test custom validation rule injection."""
@@ -434,9 +402,7 @@ class TestGMNValidator:
         assert len(results) == 10
         assert all(r.is_valid for r in results)
 
-    def test_validation_result_serialization(
-        self, validator, mock_parse_result
-    ):
+    def test_validation_result_serialization(self, validator, mock_parse_result):
         """Test that validation results can be serialized."""
         result = validator.validate(mock_parse_result)
 
@@ -466,9 +432,7 @@ class TestGMNValidator:
         # If incremental validation is supported, second should be faster
         # (This would require timing measurements in real implementation)
 
-    def test_validation_context_preservation(
-        self, validator, mock_parse_result
-    ):
+    def test_validation_context_preservation(self, validator, mock_parse_result):
         """Test that validation context is preserved across calls."""
         # Validate with specific context
         if hasattr(validator, "set_context"):
@@ -477,9 +441,7 @@ class TestGMNValidator:
             result = validator.validate(mock_parse_result)
 
             # Context should affect validation
-            assert (
-                result.metadata.get("context", {}).get("strict_mode") is True
-            )
+            assert result.metadata.get("context", {}).get("strict_mode") is True
 
     def test_recovery_from_malformed_input(self, validator):
         """Test recovery from malformed input."""
@@ -549,9 +511,7 @@ class TestGMNValidator:
         param_errors = [
             e
             for e in result.errors
-            if "parameter" in e.lower()
-            or "learning_rate" in e.lower()
-            or "batch_size" in e.lower()
+            if "parameter" in e.lower() or "learning_rate" in e.lower() or "batch_size" in e.lower()
         ]
 
         if expected_valid:
@@ -566,7 +526,7 @@ class TestValidationResult:
     def test_result_creation(self):
         """Test creation of validation results."""
         if not IMPORT_SUCCESS:
-            pytest.skip("GNN modules not available")
+            assert False, "Test bypass removed - must fix underlying issue"
 
         result = ValidationResult(
             is_valid=True,
@@ -585,7 +545,7 @@ class TestValidationResult:
     def test_result_with_errors(self):
         """Test validation result with errors."""
         if not IMPORT_SUCCESS:
-            pytest.skip("GNN modules not available")
+            assert False, "Test bypass removed - must fix underlying issue"
 
         result = ValidationResult(
             is_valid=False,
@@ -607,7 +567,7 @@ class TestSecurityValidation:
     def validator(self):
         """Create validator with security focus."""
         if not IMPORT_SUCCESS:
-            pytest.skip("GNN modules not available")
+            assert False, "Test bypass removed - must fix underlying issue"
         return GMNValidator()
 
     @pytest.fixture
@@ -671,15 +631,12 @@ class TestSecurityValidation:
 
         assert result.is_valid is False
         assert any(
-            "security" in error.lower() or "injection" in error.lower()
-            for error in result.errors
+            "security" in error.lower() or "injection" in error.lower() for error in result.errors
         )
 
     def test_path_traversal_detection(self, validator, mock_parse_result):
         """Test path traversal detection."""
-        mock_parse_result.sections["file_operations"] = {
-            "load_path": "../../../etc/passwd"
-        }
+        mock_parse_result.sections["file_operations"] = {"load_path": "../../../etc/passwd"}
 
         result = validator.validate(mock_parse_result)
 
@@ -701,14 +658,10 @@ class TestSecurityValidation:
 
             assert result.is_valid is False
             assert any(
-                "security" in e.lower()
-                or "exec" in e.lower()
-                or "eval" in e.lower()
+                "security" in e.lower() or "exec" in e.lower() or "eval" in e.lower()
                 for e in result.errors
             )
 
 
 if __name__ == "__main__":
-    pytest.main(
-        [__file__, "-v", "--cov=inference.gnn.validator", "--cov-report=html"]
-    )
+    pytest.main([__file__, "-v", "--cov=inference.gnn.validator", "--cov-report=html"])

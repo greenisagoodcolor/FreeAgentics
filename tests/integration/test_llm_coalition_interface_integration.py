@@ -649,7 +649,7 @@ class TestLLMCoalitionInterfaceIntegration:
         """Test LLM's ability to generate coordination strategies for realistic scenarios."""
 
         if not llm_manager:
-            pytest.skip("LLM manager not available for testing")
+            assert False, "Test bypass removed - must fix underlying issue"
 
         strategy_results = {}
 
@@ -771,7 +771,7 @@ class TestLLMCoalitionInterfaceIntegration:
         """Test parsing of LLM strategies into structured coordination parameters."""
 
         if not llm_manager:
-            pytest.skip("LLM manager not available for testing")
+            assert False, "Test bypass removed - must fix underlying issue"
 
         parser = StrategyParser()
         parsing_results = {}
@@ -947,7 +947,7 @@ class TestLLMCoalitionInterfaceIntegration:
         """Test complete LLM→Coalition integration pipeline."""
 
         if not llm_manager:
-            pytest.skip("LLM manager not available for testing")
+            assert False, "Test bypass removed - must fix underlying issue"
 
         # End-to-end integration test scenario
         integration_scenario = {
@@ -1059,7 +1059,7 @@ class TestLLMCoalitionInterfaceIntegration:
             "end_to_end_success"
         ], "End-to-end integration failed"
 
-        logger.info(f"✓ End-to-end LLM→Coalition integration successful")
+        logger.info("✓ End-to-end LLM→Coalition integration successful")
         logger.info(f"  LLM generation: {llm_time:.3f}s")
         logger.info(f"  Strategy parsing: {parse_time:.3f}s")
         logger.info(f"  Coordination execution: {exec_time:.3f}s")
@@ -1262,7 +1262,7 @@ if __name__ == "__main__":
         total = len(results)
 
         print(f"\n{'='*60}")
-        print(f"LLM-COALITION INTERFACE INTEGRATION TEST SUMMARY")
+        print("LLM-COALITION INTERFACE INTEGRATION TEST SUMMARY")
         print(f"{'='*60}")
         print(f"Tests run: {total}")
         print(f"Passed: {passed}")

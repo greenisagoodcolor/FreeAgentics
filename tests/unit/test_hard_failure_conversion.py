@@ -26,9 +26,7 @@ class TestErrorHandlerHardFailure:
         with pytest.raises(HardFailureError) as exc_info:
             handler.handle_error(original_error, "test_operation")
 
-        assert "Hard failure in test_operation for agent test_agent" in str(
-            exc_info.value
-        )
+        assert "Hard failure in test_operation for agent test_agent" in str(exc_info.value)
         assert exc_info.value.__cause__ is original_error
 
     def test_reset_strategy_raises_not_implemented(self):
@@ -38,9 +36,7 @@ class TestErrorHandlerHardFailure:
         with pytest.raises(NotImplementedError) as exc_info:
             handler.reset_strategy("test_strategy")
 
-        assert "Hard failure mode does not support recovery strategies" in str(
-            exc_info.value
-        )
+        assert "Hard failure mode does not support recovery strategies" in str(exc_info.value)
 
     def test_reset_all_strategies_raises_not_implemented(self):
         """Test that reset_all_strategies raises NotImplementedError."""
@@ -49,9 +45,7 @@ class TestErrorHandlerHardFailure:
         with pytest.raises(NotImplementedError) as exc_info:
             handler.reset_all_strategies()
 
-        assert "Hard failure mode does not support recovery strategies" in str(
-            exc_info.value
-        )
+        assert "Hard failure mode does not support recovery strategies" in str(exc_info.value)
 
     def test_get_error_statistics_minimal_info(self):
         """Test that error statistics indicate hard failure mode."""
@@ -72,9 +66,7 @@ class TestPyMDPErrorHandlerHardFailure:
         def successful_operation():
             return "success"
 
-        success, result, error = handler.safe_execute(
-            "test_op", successful_operation
-        )
+        success, result, error = handler.safe_execute("test_op", successful_operation)
 
         assert success is True
         assert result == "success"
@@ -104,9 +96,7 @@ class TestPyMDPErrorHandlerHardFailure:
 
         # Should raise despite having a fallback function
         with pytest.raises(HardFailureError):
-            handler.safe_execute(
-                "test_op", failing_operation, fallback_operation
-            )
+            handler.safe_execute("test_op", failing_operation, fallback_operation)
 
     def test_safe_execute_validates_callable(self):
         """Test safe_execute validates operation is callable."""
@@ -302,9 +292,7 @@ class TestErrorHandlingDecorator:
     def test_ignores_fallback_result_parameter(self):
         """Test decorator ignores fallback_result and raises exception."""
 
-        @with_error_handling_hard_failure(
-            "test_operation", fallback_result="fallback"
-        )
+        @with_error_handling_hard_failure("test_operation", fallback_result="fallback")
         def failing_operation():
             raise ValueError("Test error")
 
@@ -335,7 +323,7 @@ class TestHardFailureIntegration:
         with pytest.raises(HardFailureError) as exc_info:
             result1 = step1()
             result2 = step2(result1)
-            result3 = step3(result2)  # This should never execute
+            step3(result2)  # This should never execute
 
         assert "step2" in str(exc_info.value)
 
@@ -352,9 +340,7 @@ class TestHardFailureIntegration:
         # Even operations that try to catch their own errors should be caught
         # when wrapped in our hard failure system
         with pytest.raises(HardFailureError):
-            handler.safe_execute(
-                "silent_test", lambda: silent_failure_attempt()
-            )
+            handler.safe_execute("silent_test", lambda: silent_failure_attempt())
 
 
 if __name__ == "__main__":

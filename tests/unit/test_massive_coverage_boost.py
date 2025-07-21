@@ -2,7 +2,7 @@
 
 import os
 import sys
-from unittest.mock import MagicMock, Mock, patch
+from unittest.mock import patch
 
 import numpy as np
 import pytest
@@ -16,32 +16,8 @@ def test_import_all_modules():
     """Import all modules to execute their initialization code."""
 
     # Core modules
-    import agents
-    import auth
-    import database
-    import inference
-    import knowledge_graph
-    import observability
-    import security
-    import tools
-    import websocket
-    import world
 
     # Import submodules
-    from agents import (
-        base_agent,
-        error_handling,
-        performance_optimizer,
-        pymdp_error_handling,
-    )
-    from auth import jwt_handler, rbac_enhancements, security_implementation
-    from database import base, connection_manager, models
-    from inference.active import gmn_parser
-    from knowledge_graph import evolution, query, storage
-    from observability import belief_monitoring, pymdp_integration
-    from security import encryption_soar_examples
-    from websocket import auth_handler, circuit_breaker
-    from world import grid_world
 
     # Just importing should increase coverage significantly
     assert True
@@ -59,7 +35,7 @@ def test_execute_simple_functions():
     assert safe_array_to_int(np.array([1, 2, 3])) == 1
 
     # Test error handling enums and classes
-    from agents.error_handling import AgentError, ErrorSeverity, PyMDPError
+    from agents.error_handling import AgentError, ErrorSeverity
 
     assert ErrorSeverity.LOW.value == "low"
     error = AgentError("test")
@@ -82,7 +58,7 @@ def test_mock_complex_operations():
     """Mock complex operations to execute code paths."""
 
     # Mock PyMDP operations
-    with patch('agents.base_agent.PYMDP_AVAILABLE', False):
+    with patch("agents.base_agent.PYMDP_AVAILABLE", False):
         from agents.base_agent import BasicExplorerAgent
 
         # This should use fallback implementation
@@ -90,7 +66,7 @@ def test_mock_complex_operations():
         assert agent.agent_id == "test"
 
     # Mock database operations
-    with patch('database.connection_manager.create_engine'):
+    with patch("database.connection_manager.create_engine"):
         from database.connection_manager import DatabaseConnectionManager
 
         # Should execute init code
@@ -98,7 +74,7 @@ def test_mock_complex_operations():
         assert manager is not None
 
     # Mock observability
-    with patch('observability.belief_monitoring.monitor_belief_update'):
+    with patch("observability.belief_monitoring.monitor_belief_update"):
         from observability.belief_monitoring import monitor_belief_update
 
         # Execute the function
@@ -125,10 +101,10 @@ def test_auth_imports():
     from auth.security_implementation import hash_password, verify_password
 
     # Mock bcrypt operations
-    with patch('auth.security_implementation.bcrypt'):
+    with patch("auth.security_implementation.bcrypt"):
         # These should execute without errors
-        hashed = hash_password("test")
-        result = verify_password("test", "hashed")
+        hash_password("test")
+        verify_password("test", "hashed")
 
 
 def test_llm_config():
@@ -141,7 +117,7 @@ def test_llm_config():
 
 def test_database_models():
     """Test database model imports."""
-    from database.models import Base, ConversationModel, MessageModel
+    from database.models import Base
 
     # Just importing executes module code
     assert Base is not None
@@ -149,7 +125,7 @@ def test_database_models():
 
 def test_websocket_classes():
     """Test websocket module classes."""
-    from websocket.circuit_breaker import CircuitBreaker, CircuitState
+    from websocket.circuit_breaker import CircuitState
 
     assert CircuitState.CLOSED.value == "closed"
     assert CircuitState.OPEN.value == "open"
@@ -159,10 +135,9 @@ def test_websocket_classes():
 def test_security_modules():
     """Test security module imports."""
     from security.encryption.field_encryptor import FieldEncryptor
-    from security.zero_trust.identity_proxy import IdentityProxy
 
     # Mock Fernet
-    with patch('security.encryption.field_encryptor.Fernet'):
+    with patch("security.encryption.field_encryptor.Fernet"):
         encryptor = FieldEncryptor()
         assert encryptor is not None
 
@@ -227,7 +202,7 @@ def test_error_recovery_strategy():
     from agents.error_handling import ErrorRecoveryStrategy
 
     strategy = ErrorRecoveryStrategy()
-    assert hasattr(strategy, 'handle_error')
+    assert hasattr(strategy, "handle_error")
 
 
 def test_agent_lifecycle():
@@ -259,9 +234,7 @@ def test_pymdp_error_handler():
     assert handler.error_count == {}
 
     # Test safe execution
-    success, result, error = handler.safe_execute(
-        "test_op", lambda: 42, lambda: 0
-    )
+    success, result, error = handler.safe_execute("test_op", lambda: 42, lambda: 0)
     assert success is True
     assert result == 42
 

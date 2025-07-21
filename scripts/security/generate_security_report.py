@@ -455,9 +455,7 @@ class SecurityReportGenerator:
                 capture_output=True,
                 text=True,
             )
-            return (
-                result.stdout.strip() if result.returncode == 0 else "unknown"
-            )
+            return result.stdout.strip() if result.returncode == 0 else "unknown"
         except Exception:
             return "unknown"
 
@@ -497,9 +495,7 @@ class SecurityReportGenerator:
                     findings.append(
                         {
                             "rule": result.get("ruleId", "unknown"),
-                            "message": result.get("message", {}).get(
-                                "text", ""
-                            ),
+                            "message": result.get("message", {}).get("text", ""),
                             "file": result.get("locations", [{}])[0]
                             .get("physicalLocation", {})
                             .get("artifactLocation", {})
@@ -553,9 +549,7 @@ class SecurityReportGenerator:
 
         self.data["vulnerable_deps"] = vulnerable_deps
         self.data["vulnerabilities"] += len(vulnerable_deps)
-        self.data[
-            "license_summary"
-        ] = "All dependencies use compatible licenses"
+        self.data["license_summary"] = "All dependencies use compatible licenses"
 
     def load_container_results(self, container_dir: Path):
         """Load container scan results."""
@@ -572,9 +566,7 @@ class SecurityReportGenerator:
                     issues.append(
                         {
                             "title": result.get("ruleId", "Unknown"),
-                            "description": result.get("message", {}).get(
-                                "text", ""
-                            ),
+                            "description": result.get("message", {}).get("text", ""),
                             "severity": "HIGH",
                             "file": "Dockerfile",
                         }
@@ -670,11 +662,11 @@ class SecurityReportGenerator:
         elif self.data["security_score"] >= 60:
             summary = "The security posture of FreeAgentics is FAIR and needs improvement. "
         else:
-            summary = "The security posture of FreeAgentics is POOR and requires immediate attention. "
+            summary = (
+                "The security posture of FreeAgentics is POOR and requires immediate attention. "
+            )
 
-        summary += (
-            f"The overall security score is {self.data['security_score']}%. "
-        )
+        summary += f"The overall security score is {self.data['security_score']}%. "
 
         if self.data["critical_issues"] > 0:
             summary += f"There are {self.data['critical_issues']} critical issues that must be addressed immediately. "
@@ -714,9 +706,7 @@ class SecurityReportGenerator:
             },
         }
 
-        self.data[
-            "cors_summary"
-        ] = "CORS is properly configured with whitelisted origins"
+        self.data["cors_summary"] = "CORS is properly configured with whitelisted origins"
 
     def add_trend_summary(self):
         """Add security trend summary."""
@@ -751,14 +741,10 @@ class SecurityReportGenerator:
 def main():
     parser = argparse.ArgumentParser(description="Generate security report")
     parser.add_argument("--sast", help="SAST results directory")
-    parser.add_argument(
-        "--dependency", help="Dependency scan results directory"
-    )
+    parser.add_argument("--dependency", help="Dependency scan results directory")
     parser.add_argument("--container", help="Container scan results directory")
     parser.add_argument("--compliance", help="Compliance results directory")
-    parser.add_argument(
-        "--output", default="security-report.html", help="Output file"
-    )
+    parser.add_argument("--output", default="security-report.html", help="Output file")
 
     args = parser.parse_args()
 

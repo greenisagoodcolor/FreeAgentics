@@ -34,7 +34,7 @@ class TestAgentManagerCore:
     def agent_manager(self):
         """Create AgentManager instance with mocked dependencies."""
         if not IMPORT_SUCCESS:
-            pytest.skip("Agent manager modules not available")
+            assert False, "Test bypass removed - must fix underlying issue"
 
         with patch("agents.agent_manager.ActiveInferenceGridAdapter"):
             with patch("agents.agent_manager.logger"):
@@ -124,9 +124,7 @@ class TestAgentManagerCore:
 
     def test_create_agent_basic(self, agent_manager):
         """Test basic agent creation."""
-        with patch(
-            "agents.agent_manager.BasicExplorerAgent"
-        ) as mock_agent_class:
+        with patch("agents.agent_manager.BasicExplorerAgent") as mock_agent_class:
             with patch("agents.agent_manager.Position") as mock_position:
                 mock_agent = Mock()
                 mock_agent.id = "test_agent_1"
@@ -155,17 +153,15 @@ class TestAgentManagerCore:
         mock_world.get_random_empty_position.return_value = Mock(x=0, y=0)
         mock_world.agents = {}  # Empty dict of agents
         mock_world.get_cell.return_value = Mock(type=CellType.EMPTY)
-        
+
         # Set the world directly
         agent_manager.world = mock_world
-        
-        agent_id = agent_manager.create_agent(
-            "active_inference", "AIAgent"
-        )
+
+        agent_id = agent_manager.create_agent("active_inference", "AIAgent")
 
         assert agent_id == "ai_agent_1"
         assert agent_id in agent_manager.agents
-        
+
         # Verify it's a BasicExplorerAgent (our current implementation)
         agent = agent_manager.agents[agent_id]
         assert agent.name == "AIAgent"
@@ -283,18 +279,12 @@ class TestAgentManagerCore:
 
         def create_agents():
             try:
-                with patch(
-                    "agents.agent_manager.BasicExplorerAgent"
-                ) as mock_agent_class:
+                with patch("agents.agent_manager.BasicExplorerAgent") as mock_agent_class:
                     mock_agent = Mock()
-                    mock_agent.id = (
-                        f"thread_agent_{threading.current_thread().ident}"
-                    )
+                    mock_agent.id = f"thread_agent_{threading.current_thread().ident}"
                     mock_agent_class.return_value = mock_agent
 
-                    agent_id = agent_manager.create_agent(
-                        "basic", "ThreadAgent"
-                    )
+                    agent_id = agent_manager.create_agent("basic", "ThreadAgent")
                     results.append(agent_id)
             except Exception as e:
                 errors.append(e)
@@ -341,9 +331,7 @@ class TestAgentManagerCore:
         """Test that agent counter increments properly."""
         initial_count = agent_manager._agent_counter
 
-        with patch(
-            "agents.agent_manager.BasicExplorerAgent"
-        ) as mock_agent_class:
+        with patch("agents.agent_manager.BasicExplorerAgent") as mock_agent_class:
             mock_agent = Mock()
             mock_agent.id = "test_agent"
             mock_agent_class.return_value = mock_agent
@@ -368,9 +356,7 @@ class TestAgentManagerCore:
         agent_manager.set_world(mock_world)
 
         # Create agent
-        with patch(
-            "agents.agent_manager.BasicExplorerAgent"
-        ) as mock_agent_class:
+        with patch("agents.agent_manager.BasicExplorerAgent") as mock_agent_class:
             mock_agent = Mock()
             mock_agent.id = "world_test_agent"
             mock_agent_class.return_value = mock_agent
@@ -405,7 +391,7 @@ class TestAgentManagerErrorHandling:
     def agent_manager(self):
         """Create AgentManager instance."""
         if not IMPORT_SUCCESS:
-            pytest.skip("Agent manager modules not available")
+            assert False, "Test bypass removed - must fix underlying issue"
 
         with patch("agents.agent_manager.ActiveInferenceGridAdapter"):
             with patch("agents.agent_manager.logger"):
@@ -413,9 +399,7 @@ class TestAgentManagerErrorHandling:
 
     def test_create_agent_with_exception(self, agent_manager):
         """Test agent creation when constructor raises exception."""
-        with patch(
-            "agents.agent_manager.BasicExplorerAgent"
-        ) as mock_agent_class:
+        with patch("agents.agent_manager.BasicExplorerAgent") as mock_agent_class:
             mock_agent_class.side_effect = Exception("Agent creation failed")
 
             agent_id = agent_manager.create_agent("basic", "FailAgent")
@@ -456,18 +440,12 @@ class TestAgentManagerErrorHandling:
 
         def create_and_remove_agent():
             try:
-                with patch(
-                    "agents.agent_manager.BasicExplorerAgent"
-                ) as mock_agent_class:
+                with patch("agents.agent_manager.BasicExplorerAgent") as mock_agent_class:
                     mock_agent = Mock()
-                    mock_agent.id = (
-                        f"concurrent_{threading.current_thread().ident}"
-                    )
+                    mock_agent.id = f"concurrent_{threading.current_thread().ident}"
                     mock_agent_class.return_value = mock_agent
 
-                    agent_id = agent_manager.create_agent(
-                        "basic", "ConcurrentAgent"
-                    )
+                    agent_id = agent_manager.create_agent("basic", "ConcurrentAgent")
                     if agent_id:
                         time.sleep(0.01)  # Small delay
                         agent_manager.remove_agent(agent_id)
@@ -489,6 +467,4 @@ class TestAgentManagerErrorHandling:
 
 
 if __name__ == "__main__":
-    pytest.main(
-        [__file__, "-v", "--cov=agents.agent_manager", "--cov-report=html"]
-    )
+    pytest.main([__file__, "-v", "--cov=agents.agent_manager", "--cov-report=html"])

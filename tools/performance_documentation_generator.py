@@ -7,17 +7,15 @@ analysis, and recommendations for multi-agent coordination.
 """
 
 import json
-import os
 from dataclasses import dataclass
 from datetime import datetime
 from pathlib import Path
-from typing import Any, Dict, List, Optional, Tuple
+from typing import Any, Dict, List
 
 import matplotlib.pyplot as plt
 import numpy as np
 import pandas as pd
 import seaborn as sns
-from matplotlib.figure import Figure
 
 
 @dataclass
@@ -53,9 +51,7 @@ class PerformanceAnalyzer:
 
         # Calculate efficiency loss at 50 agents
         idx_50 = agent_counts.index(50) if 50 in agent_counts else -1
-        efficiency_at_50 = (
-            efficiencies[idx_50] if idx_50 >= 0 else efficiencies[-1]
-        )
+        efficiency_at_50 = efficiencies[idx_50] if idx_50 >= 0 else efficiencies[-1]
         efficiency_loss = 100 - efficiency_at_50
 
         bottlenecks["coordination_overhead"] = {
@@ -79,13 +75,9 @@ class PerformanceAnalyzer:
         # Analyze GIL contention
         throughputs = data.get("throughputs", [])
         if throughputs:
-            throughput_degradation = (
-                (throughputs[0] - throughputs[-1]) / throughputs[0] * 100
-            )
+            throughput_degradation = (throughputs[0] - throughputs[-1]) / throughputs[0] * 100
             bottlenecks["gil_contention"] = {
-                "severity": "high"
-                if throughput_degradation > 60
-                else "medium",
+                "severity": "high" if throughput_degradation > 60 else "medium",
                 "throughput_degradation_percent": throughput_degradation,
                 "description": f"GIL contention causes {throughput_degradation:.1f}% throughput degradation",
             }
@@ -142,9 +134,7 @@ class PerformanceAnalyzer:
 
         return root_causes
 
-    def generate_recommendations(
-        self, data: Dict[str, List]
-    ) -> Dict[str, List[Dict]]:
+    def generate_recommendations(self, data: Dict[str, List]) -> Dict[str, List[Dict]]:
         """Generate optimization recommendations based on analysis."""
         recommendations: Dict[str, List[Dict[str, Any]]] = {
             "immediate": [],
@@ -480,31 +470,21 @@ class PerformanceDocumentationGenerator:
         self.output_dir.mkdir(exist_ok=True)
 
         self.analyzer = PerformanceAnalyzer()
-        self.chart_generator = PerformanceChartGenerator(
-            output_dir=str(self.output_dir / "charts")
-        )
+        self.chart_generator = PerformanceChartGenerator(output_dir=str(self.output_dir / "charts"))
 
-    def generate_comprehensive_documentation(
-        self, test_results: Dict[str, Any]
-    ) -> str:
+    def generate_comprehensive_documentation(self, test_results: Dict[str, Any]) -> str:
         """Generate complete performance documentation with all sections."""
         timestamp = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
 
         # Extract data for analysis
         coord_data = test_results["coordination_load_test"]
-        memory_data = test_results["memory_analysis"]
-        threading_data = test_results["threading_benchmark"]
+        test_results["memory_analysis"]
+        test_results["threading_benchmark"]
 
         # Generate charts
-        efficiency_chart = self.chart_generator.generate_efficiency_chart(
-            coord_data
-        )
-        throughput_chart = self.chart_generator.generate_throughput_chart(
-            coord_data
-        )
-        memory_chart = self.chart_generator.generate_memory_scaling_chart(
-            coord_data
-        )
+        self.chart_generator.generate_efficiency_chart(coord_data)
+        self.chart_generator.generate_throughput_chart(coord_data)
+        self.chart_generator.generate_memory_scaling_chart(coord_data)
 
         # Generate bottleneck heatmap
         bottleneck_data = {
@@ -517,9 +497,7 @@ class PerformanceDocumentationGenerator:
                 [5, 10, 15],  # I/O impact
             ],
         }
-        heatmap_chart = self.chart_generator.generate_bottleneck_heatmap(
-            bottleneck_data
-        )
+        self.chart_generator.generate_bottleneck_heatmap(bottleneck_data)
 
         # Perform analysis
         bottlenecks = self.analyzer.identify_bottlenecks(coord_data)
@@ -654,7 +632,7 @@ However, these improvements require substantial engineering effort and potential
             content.append(f"### {cause.replace('_', ' ').title()}")
             content.append(f"**Impact**: {details['impact'].title()}")
             content.append(f"\n{details['description']}")
-            content.append(f"\n**Effects**:")
+            content.append("\n**Effects**:")
             for effect in details["effects"]:
                 content.append(f"- {effect.replace('_', ' ').title()}")
             content.append(f"\n**Evidence**: {details['evidence']}")
@@ -682,9 +660,7 @@ However, these improvements require substantial engineering effort and potential
 
         return "\n".join(content)
 
-    def _format_recommendations(
-        self, recommendations: Dict[str, List[Dict]]
-    ) -> str:
+    def _format_recommendations(self, recommendations: Dict[str, List[Dict]]) -> str:
         """Format optimization recommendations for documentation."""
         content = []
 
@@ -694,16 +670,10 @@ However, these improvements require substantial engineering effort and potential
 
             for rec in items:
                 content.append(f"#### {rec['title']}")
-                content.append(
-                    f"- **Impact**: {rec['impact'].replace('_', ' ').title()}"
-                )
-                content.append(
-                    f"- **Effort**: {rec['effort'].replace('_', ' ').title()}"
-                )
+                content.append(f"- **Impact**: {rec['impact'].replace('_', ' ').title()}")
+                content.append(f"- **Effort**: {rec['effort'].replace('_', ' ').title()}")
                 content.append(f"- **Description**: {rec['description']}")
-                content.append(
-                    f"- **Expected Benefit**: {rec['expected_benefit']}"
-                )
+                content.append(f"- **Expected Benefit**: {rec['expected_benefit']}")
                 content.append("")
 
         return "\n".join(content)
@@ -769,9 +739,7 @@ However, these improvements require substantial engineering effort and potential
 
         return str(html_path)
 
-    def export_performance_data(
-        self, test_results: Dict[str, Any], format: str = "json"
-    ) -> Any:
+    def export_performance_data(self, test_results: Dict[str, Any], format: str = "json") -> Any:
         """Export performance data in various formats."""
         if format == "json":
             # Export as JSON

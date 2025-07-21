@@ -10,7 +10,6 @@ import random
 import time
 from concurrent.futures import ThreadPoolExecutor, as_completed
 from datetime import datetime, timezone
-from typing import Dict, List, Set
 
 import pytest
 
@@ -20,8 +19,6 @@ from auth.security_implementation import (
     Permission,
     User,
     UserRole,
-    require_permission,
-    require_role,
 )
 
 
@@ -63,12 +60,8 @@ class TestRBACPermissionsAtScale:
         """Test that role-permission mapping is correct and complete."""
         # Verify all roles have permissions defined
         for role in UserRole:
-            assert (
-                role in ROLE_PERMISSIONS
-            ), f"Role {role} missing from ROLE_PERMISSIONS"
-            assert (
-                len(ROLE_PERMISSIONS[role]) > 0
-            ), f"Role {role} has no permissions"
+            assert role in ROLE_PERMISSIONS, f"Role {role} missing from ROLE_PERMISSIONS"
+            assert len(ROLE_PERMISSIONS[role]) > 0, f"Role {role} has no permissions"
 
         # Verify all permissions are valid
         for role, permissions in ROLE_PERMISSIONS.items():
@@ -80,16 +73,12 @@ class TestRBACPermissionsAtScale:
         # Verify permission hierarchy makes sense
         admin_permissions = set(ROLE_PERMISSIONS[UserRole.ADMIN])
         researcher_permissions = set(ROLE_PERMISSIONS[UserRole.RESEARCHER])
-        agent_manager_permissions = set(
-            ROLE_PERMISSIONS[UserRole.AGENT_MANAGER]
-        )
+        agent_manager_permissions = set(ROLE_PERMISSIONS[UserRole.AGENT_MANAGER])
         observer_permissions = set(ROLE_PERMISSIONS[UserRole.OBSERVER])
 
         # Admin should have all permissions
         all_permissions = set(Permission)
-        assert (
-            admin_permissions == all_permissions
-        ), "Admin should have all permissions"
+        assert admin_permissions == all_permissions, "Admin should have all permissions"
 
         # Observer should have subset of agent manager permissions
         assert observer_permissions.issubset(
@@ -106,9 +95,7 @@ class TestRBACPermissionsAtScale:
             admin_permissions
         ), "Researcher should be subset of admin"
 
-    def test_token_permission_validation_at_scale(
-        self, auth_manager, test_users_by_role
-    ):
+    def test_token_permission_validation_at_scale(self, auth_manager, test_users_by_role):
         """Test token permission validation with large number of users."""
         results = []
 
@@ -136,8 +123,7 @@ class TestRBACPermissionsAtScale:
                 return {
                     "user_id": user.user_id,
                     "role": user.role,
-                    "permissions_correct": expected_permissions
-                    == actual_permissions,
+                    "permissions_correct": expected_permissions == actual_permissions,
                     "permission_count": len(actual_permissions),
                     "duration": end_time - start_time,
                     "success": True,
@@ -152,10 +138,7 @@ class TestRBACPermissionsAtScale:
 
         # Test with concurrent users
         with ThreadPoolExecutor(max_workers=10) as executor:
-            futures = [
-                executor.submit(validate_user_permissions, user)
-                for user in all_users
-            ]
+            futures = [executor.submit(validate_user_permissions, user) for user in all_users]
 
             for future in as_completed(futures):
                 result = future.result()
@@ -175,13 +158,9 @@ class TestRBACPermissionsAtScale:
         # Verify performance
         durations = [r["duration"] for r in successful_results]
         avg_duration = sum(durations) / len(durations)
-        assert (
-            avg_duration < 0.1
-        ), f"Average permission validation too slow: {avg_duration:.3f}s"
+        assert avg_duration < 0.1, f"Average permission validation too slow: {avg_duration:.3f}s"
 
-    def test_permission_inheritance_scenarios(
-        self, auth_manager, test_users_by_role
-    ):
+    def test_permission_inheritance_scenarios(self, auth_manager, test_users_by_role):
         """Test complex permission inheritance scenarios."""
 
         # Test scenarios where higher roles should have all permissions of lower roles
@@ -218,18 +197,14 @@ class TestRBACPermissionsAtScale:
                 set(higher_token_data.permissions)
             ), f"{higher_role} token should have all permissions of {lower_role} token"
 
-    def test_permission_access_control_enforcement(
-        self, auth_manager, test_users_by_role
-    ):
+    def test_permission_access_control_enforcement(self, auth_manager, test_users_by_role):
         """Test that permission access control is properly enforced."""
 
         # Test each permission with users that should and shouldn't have it
         for permission in Permission:
             # Find roles that should have this permission
             roles_with_permission = [
-                role
-                for role, perms in ROLE_PERMISSIONS.items()
-                if permission in perms
+                role for role, perms in ROLE_PERMISSIONS.items() if permission in perms
             ]
             roles_without_permission = [
                 role for role in UserRole if role not in roles_with_permission
@@ -255,9 +230,7 @@ class TestRBACPermissionsAtScale:
                     permission not in token_data.permissions
                 ), f"User with role {role} should not have permission {permission}"
 
-    def test_concurrent_permission_checks(
-        self, auth_manager, test_users_by_role
-    ):
+    def test_concurrent_permission_checks(self, auth_manager, test_users_by_role):
         """Test concurrent permission checks don't interfere with each other."""
 
         # Create mixed set of users with different roles
@@ -306,10 +279,7 @@ class TestRBACPermissionsAtScale:
 
         # Run concurrent permission checks
         with ThreadPoolExecutor(max_workers=20) as executor:
-            futures = [
-                executor.submit(check_permissions, user)
-                for user in mixed_users
-            ]
+            futures = [executor.submit(check_permissions, user) for user in mixed_users]
 
             for future in as_completed(futures):
                 result = future.result()
@@ -324,9 +294,7 @@ class TestRBACPermissionsAtScale:
         # Verify performance
         durations = [r["duration"] for r in successful_results]
         avg_duration = sum(durations) / len(durations)
-        assert (
-            avg_duration < 0.1
-        ), f"Concurrent permission checks too slow: {avg_duration:.3f}s"
+        assert avg_duration < 0.1, f"Concurrent permission checks too slow: {avg_duration:.3f}s"
 
     def test_permission_scalability_with_large_user_base(self, auth_manager):
         """Test permission system scalability with a large user base."""
@@ -372,16 +340,13 @@ class TestRBACPermissionsAtScale:
             return {
                 "user_id": user.user_id,
                 "role": user.role,
-                "permissions_correct": expected_permissions
-                == actual_permissions,
+                "permissions_correct": expected_permissions == actual_permissions,
                 "duration": end_time - start_time,
             }
 
         # Test with high concurrency
         with ThreadPoolExecutor(max_workers=50) as executor:
-            futures = [
-                executor.submit(validate_user_at_scale, user) for user in users
-            ]
+            futures = [executor.submit(validate_user_at_scale, user) for user in users]
 
             for future in as_completed(futures):
                 result = future.result()
@@ -416,9 +381,7 @@ class TestRBACPermissionsAtScale:
         token_data = auth_manager.verify_token(token)
 
         # Test non-existent permission
-        assert "non_existent_permission" not in [
-            p.value for p in token_data.permissions
-        ]
+        assert "non_existent_permission" not in [p.value for p in token_data.permissions]
 
         # Test permission case sensitivity
         for permission in token_data.permissions:
@@ -440,9 +403,7 @@ class TestRBACPermissionsAtScale:
             token_data = auth_manager.verify_token(token)
 
             for permission in Permission:
-                access_matrix[role][permission] = (
-                    permission in token_data.permissions
-                )
+                access_matrix[role][permission] = permission in token_data.permissions
 
         # Verify access matrix properties
 
@@ -453,12 +414,8 @@ class TestRBACPermissionsAtScale:
             ], f"Admin should have access to {permission}"
 
         # Observer should have minimal access
-        observer_permissions = [
-            p for p in Permission if access_matrix[UserRole.OBSERVER][p]
-        ]
-        assert (
-            len(observer_permissions) <= 2
-        ), "Observer should have minimal permissions"
+        observer_permissions = [p for p in Permission if access_matrix[UserRole.OBSERVER][p]]
+        assert len(observer_permissions) <= 2, "Observer should have minimal permissions"
 
         # Verify hierarchical access
         role_hierarchy = [
@@ -478,9 +435,7 @@ class TestRBACPermissionsAtScale:
                         permission
                     ], f"{higher_role} should have {permission} if {lower_role} has it"
 
-    def test_permission_performance_under_load(
-        self, auth_manager, test_users_by_role
-    ):
+    def test_permission_performance_under_load(self, auth_manager, test_users_by_role):
         """Test permission system performance under sustained load."""
 
         # Create continuous load
@@ -512,8 +467,7 @@ class TestRBACPermissionsAtScale:
                     {
                         "user_id": user.user_id,
                         "role": user.role,
-                        "permissions_correct": expected_permissions
-                        == actual_permissions,
+                        "permissions_correct": expected_permissions == actual_permissions,
                         "duration": check_end - check_start,
                     }
                 )
@@ -522,9 +476,7 @@ class TestRBACPermissionsAtScale:
 
         # Run continuous load with multiple threads
         with ThreadPoolExecutor(max_workers=10) as executor:
-            futures = [
-                executor.submit(continuous_permission_check) for _ in range(10)
-            ]
+            futures = [executor.submit(continuous_permission_check) for _ in range(10)]
 
             for future in as_completed(futures):
                 thread_results = future.result()
@@ -539,26 +491,20 @@ class TestRBACPermissionsAtScale:
         durations = [r["duration"] for r in results]
         avg_duration = sum(durations) / len(durations)
 
-        assert (
-            avg_duration < 0.1
-        ), f"Permission checks too slow under load: {avg_duration:.3f}s"
+        assert avg_duration < 0.1, f"Permission checks too slow under load: {avg_duration:.3f}s"
 
         # Verify we processed a reasonable number of requests
         assert (
             len(results) > 100
         ), f"Should have processed many requests under load, got {len(results)}"
 
-    def test_multi_role_permission_scenarios(
-        self, auth_manager, test_users_by_role
-    ):
+    def test_multi_role_permission_scenarios(self, auth_manager, test_users_by_role):
         """Test scenarios involving multiple roles and complex permission interactions."""
 
         # Test permission combinations
         permission_combinations = list(itertools.combinations(Permission, 2))
 
-        for perm1, perm2 in permission_combinations[
-            :10
-        ]:  # Test first 10 combinations
+        for perm1, perm2 in permission_combinations[:10]:  # Test first 10 combinations
             # Find roles that have both permissions
             roles_with_both = []
             roles_with_one = []
@@ -579,12 +525,8 @@ class TestRBACPermissionsAtScale:
                 token = auth_manager.create_access_token(user)
                 token_data = auth_manager.verify_token(token)
 
-                assert (
-                    perm1 in token_data.permissions
-                ), f"{role} should have {perm1}"
-                assert (
-                    perm2 in token_data.permissions
-                ), f"{role} should have {perm2}"
+                assert perm1 in token_data.permissions, f"{role} should have {perm1}"
+                assert perm2 in token_data.permissions, f"{role} should have {perm2}"
 
             # Test users with only one permission
             for role in roles_with_one:
@@ -603,9 +545,7 @@ class TestRBACPermissionsAtScale:
                     has_perm1 and has_perm2
                 ), f"{role} should not have both {perm1} and {perm2}"
 
-    def test_permission_consistency_across_tokens(
-        self, auth_manager, test_users_by_role
-    ):
+    def test_permission_consistency_across_tokens(self, auth_manager, test_users_by_role):
         """Test that permissions are consistent across multiple token generations."""
 
         # Test each role

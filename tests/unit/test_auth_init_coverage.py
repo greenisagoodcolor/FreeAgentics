@@ -1,7 +1,5 @@
 """Tests for auth/__init__.py to boost coverage."""
 
-import pytest
-
 
 class TestAuthInit:
     """Test auth package imports."""

@@ -9,6 +9,7 @@ T = TypeVar("T")
 class Factory:
     class Meta:
         model: Any
+
     def __init__(self, **kwargs: Any) -> None: ...
 
 def Sequence(fn: Callable[[int], Any]) -> Any: ...

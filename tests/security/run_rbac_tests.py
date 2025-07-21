@@ -23,9 +23,7 @@ from typing import Dict, List, Optional
 class RBACTestRunner:
     """Test runner for RBAC authorization matrix tests."""
 
-    def __init__(
-        self, verbose: bool = False, report_file: Optional[str] = None
-    ):
+    def __init__(self, verbose: bool = False, report_file: Optional[str] = None):
         self.verbose = verbose
         self.report_file = report_file or "rbac_test_report.json"
         self.test_results = {}
@@ -79,9 +77,7 @@ class RBACTestRunner:
             if self.verbose:
                 print(f"Running command: {' '.join(cmd)}")
 
-            result = subprocess.run(
-                cmd, capture_output=True, text=True, timeout=300
-            )
+            result = subprocess.run(cmd, capture_output=True, text=True, timeout=300)
 
             end_time = time.time()
             execution_time = end_time - start_time
@@ -132,28 +128,14 @@ class RBACTestRunner:
     def _generate_summary(self) -> Dict:
         """Generate test summary."""
         total_tests = len(self.test_results)
-        passed_tests = len(
-            [
-                r
-                for r in self.test_results.values()
-                if r.get("status") == "passed"
-            ]
-        )
-        failed_tests = len(
-            [
-                r
-                for r in self.test_results.values()
-                if r.get("status") == "failed"
-            ]
-        )
+        passed_tests = len([r for r in self.test_results.values() if r.get("status") == "passed"])
+        failed_tests = len([r for r in self.test_results.values() if r.get("status") == "failed"])
 
         summary = {
             "total_test_files": total_tests,
             "passed_files": passed_tests,
             "failed_files": failed_tests,
-            "success_rate": (passed_tests / total_tests * 100)
-            if total_tests > 0
-            else 0,
+            "success_rate": (passed_tests / total_tests * 100) if total_tests > 0 else 0,
             "total_execution_time": sum(
                 r.get("execution_time", 0) for r in self.test_results.values()
             ),
@@ -194,10 +176,7 @@ class RBACTestRunner:
                         }
                     )
 
-                if (
-                    "sql injection" in stderr.lower()
-                    or "sql injection" in stdout.lower()
-                ):
+                if "sql injection" in stderr.lower() or "sql injection" in stdout.lower():
                     findings.append(
                         {
                             "type": "sql_injection_vulnerability",
@@ -226,16 +205,13 @@ class RBACTestRunner:
 
     def _calculate_performance_metrics(self) -> Dict:
         """Calculate performance metrics."""
-        execution_times = [
-            r.get("execution_time", 0) for r in self.test_results.values()
-        ]
+        execution_times = [r.get("execution_time", 0) for r in self.test_results.values()]
 
         if not execution_times:
             return {}
 
         metrics = {
-            "average_execution_time": sum(execution_times)
-            / len(execution_times),
+            "average_execution_time": sum(execution_times) / len(execution_times),
             "max_execution_time": max(execution_times),
             "min_execution_time": min(execution_times),
             "total_execution_time": sum(execution_times),
@@ -248,11 +224,7 @@ class RBACTestRunner:
         recommendations = []
 
         # Check for failed tests
-        failed_tests = [
-            f
-            for f, r in self.test_results.items()
-            if r.get("status") == "failed"
-        ]
+        failed_tests = [f for f, r in self.test_results.items() if r.get("status") == "failed"]
         if failed_tests:
             recommendations.append(
                 {
@@ -265,11 +237,7 @@ class RBACTestRunner:
             )
 
         # Check for security findings
-        critical_findings = [
-            f
-            for f in self.security_findings
-            if f.get("severity") == "critical"
-        ]
+        critical_findings = [f for f in self.security_findings if f.get("severity") == "critical"]
         if critical_findings:
             recommendations.append(
                 {
@@ -347,20 +315,14 @@ class RBACTestRunner:
         print(f"✅ Passed: {summary['passed_files']}")
         print(f"❌ Failed: {summary['failed_files']}")
         print(f"📊 Success rate: {summary['success_rate']:.1f}%")
-        print(
-            f"⏱️  Total execution time: {summary['total_execution_time']:.2f}s"
-        )
+        print(f"⏱️  Total execution time: {summary['total_execution_time']:.2f}s")
 
         # Security findings
         if self.security_findings:
             print(f"\n🚨 Security Findings: {len(self.security_findings)}")
             for finding in self.security_findings:
-                severity_icon = (
-                    "🔴" if finding["severity"] == "critical" else "🟡"
-                )
-                print(
-                    f"  {severity_icon} {finding['type']}: {finding['description']}"
-                )
+                severity_icon = "🔴" if finding["severity"] == "critical" else "🟡"
+                print(f"  {severity_icon} {finding['type']}: {finding['description']}")
 
         # Recommendations
         recommendations = self._generate_recommendations()
@@ -370,9 +332,7 @@ class RBACTestRunner:
                 priority_icon = (
                     "🔴"
                     if rec["priority"] == "critical"
-                    else "🟡"
-                    if rec["priority"] == "high"
-                    else "🟢"
+                    else "🟡" if rec["priority"] == "high" else "🟢"
                 )
                 print(f"  {priority_icon} {rec['title']}")
 
@@ -382,12 +342,8 @@ class RBACTestRunner:
 
 def main():
     """Main function."""
-    parser = argparse.ArgumentParser(
-        description="Run RBAC Authorization Matrix Tests"
-    )
-    parser.add_argument(
-        "--verbose", "-v", action="store_true", help="Verbose output"
-    )
+    parser = argparse.ArgumentParser(description="Run RBAC Authorization Matrix Tests")
+    parser.add_argument("--verbose", "-v", action="store_true", help="Verbose output")
     parser.add_argument(
         "--report-file",
         "-r",
@@ -407,13 +363,7 @@ def main():
     runner.print_summary()
 
     # Exit with appropriate code
-    failed_tests = len(
-        [
-            r
-            for r in runner.test_results.values()
-            if r.get("status") == "failed"
-        ]
-    )
+    failed_tests = len([r for r in runner.test_results.values() if r.get("status") == "failed"])
     sys.exit(1 if failed_tests > 0 else 0)
 
 

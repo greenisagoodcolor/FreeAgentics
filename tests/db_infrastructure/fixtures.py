@@ -9,12 +9,11 @@ from contextlib import contextmanager
 from typing import Generator, Optional
 
 import pytest
-from sqlalchemy import create_engine, event
-from sqlalchemy.engine import Connection, Engine
+from sqlalchemy import event
+from sqlalchemy.engine import Engine
 from sqlalchemy.orm import Session, sessionmaker
 
 from .test_config import (
-    DatabaseTestConfig,
     create_test_engine,
     setup_test_database,
 )
@@ -258,10 +257,10 @@ def populated_db(db_session: Session) -> Session:
     from .factories import AgentFactory, KnowledgeGraphFactory
 
     # Create some agents
-    _agents = AgentFactory.create_batch(db_session, count=10)
+    _ = AgentFactory.create_batch(db_session, count=10)
 
     # Create a knowledge graph
-    _graph = KnowledgeGraphFactory.create_connected_graph(
+    _ = KnowledgeGraphFactory.create_connected_graph(
         db_session, num_nodes=20, connectivity=0.3
     )
 
@@ -273,9 +272,7 @@ def multi_agent_db(db_session: Session) -> Session:
     """Provide a database with a multi-agent scenario."""
     from .factories import TestDataGenerator
 
-    TestDataGenerator.create_multi_agent_scenario(
-        db_session, num_agents=50, num_coalitions=5
-    )
+    TestDataGenerator.create_multi_agent_scenario(db_session, num_agents=50, num_coalitions=5)
 
     return db_session
 
@@ -285,26 +282,16 @@ def multi_agent_db(db_session: Session) -> Session:
 
 def pytest_configure(config):
     """Register custom pytest markers."""
-    config.addinivalue_line(
-        "markers", "db_test: mark test as requiring database"
-    )
-    config.addinivalue_line(
-        "markers", "slow_db_test: mark test as slow database test"
-    )
-    config.addinivalue_line(
-        "markers", "postgres_only: mark test as requiring PostgreSQL"
-    )
-    config.addinivalue_line(
-        "markers", "sqlite_compatible: mark test as compatible with SQLite"
-    )
+    config.addinivalue_line("markers", "db_test: mark test as requiring database")
+    config.addinivalue_line("markers", "slow_db_test: mark test as slow database test")
+    config.addinivalue_line("markers", "postgres_only: mark test as requiring PostgreSQL")
+    config.addinivalue_line("markers", "sqlite_compatible: mark test as compatible with SQLite")
 
 
 # Utility functions for common test operations
 
 
-def assert_transaction_rolled_back(
-    session: Session, model_class, count_before: int
-):
+def assert_transaction_rolled_back(session: Session, model_class, count_before: int):
     """Assert that a transaction was properly rolled back.
 
     Args:

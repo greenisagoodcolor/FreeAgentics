@@ -56,7 +56,7 @@ class TestRuffRules:
 
         config_path = Path("pyproject.toml")
         if not config_path.exists():
-            pytest.skip("pyproject.toml not yet created")
+            assert False, "Test bypass removed - must fix underlying issue"
 
         config = toml.load(config_path)
         assert "tool" in config, "pyproject.toml should have [tool] section"
@@ -76,7 +76,7 @@ class TestRuffRules:
 
         config_path = Path("pyproject.toml")
         if not config_path.exists():
-            pytest.skip("pyproject.toml not yet created")
+            assert False, "Test bypass removed - must fix underlying issue"
 
         config = toml.load(config_path)
         ruff_lint_config = (
@@ -96,7 +96,7 @@ class TestRuffRules:
 
         config_path = Path("pyproject.toml")
         if not config_path.exists():
-            pytest.skip("pyproject.toml not yet created")
+            assert False, "Test bypass removed - must fix underlying issue"
 
         config = toml.load(config_path)
         ruff_lint_config = (
@@ -203,7 +203,7 @@ class TestRuffIntegration:
         """Test that Makefile includes Ruff command."""
         makefile_path = Path("Makefile")
         if not makefile_path.exists():
-            pytest.skip("Makefile not found")
+            assert False, "Test bypass removed - must fix underlying issue"
 
         content = makefile_path.read_text()
         assert (
@@ -216,7 +216,7 @@ class TestRuffIntegration:
 
         config_path = Path(".pre-commit-config.yaml")
         if not config_path.exists():
-            pytest.skip(".pre-commit-config.yaml not found")
+            assert False, "Test bypass removed - must fix underlying issue"
 
         with open(config_path) as f:
             config = yaml.safe_load(f)
@@ -231,7 +231,7 @@ class TestRuffIntegration:
         """Test that GitHub Actions CI includes Ruff checks."""
         ci_path = Path(".github/workflows/ci.yml")
         if not ci_path.exists():
-            pytest.skip("CI configuration not found")
+            assert False, "Test bypass removed - must fix underlying issue"
 
         content = ci_path.read_text()
         assert "ruff" in content.lower(), "CI should include Ruff checks"
@@ -246,7 +246,7 @@ class TestRuffCompatibility:
 
         config_path = Path("pyproject.toml")
         if not config_path.exists():
-            pytest.skip("pyproject.toml not yet created")
+            assert False, "Test bypass removed - must fix underlying issue"
 
         config = toml.load(config_path)
         ruff_config = config.get("tool", {}).get("ruff", {})
@@ -266,7 +266,7 @@ class TestRuffCompatibility:
 
         config_path = Path("pyproject.toml")
         if not config_path.exists():
-            pytest.skip("pyproject.toml not yet created")
+            assert False, "Test bypass removed - must fix underlying issue"
 
         config = toml.load(config_path)
         ruff_isort = (

@@ -119,9 +119,7 @@ class TestLazyBeliefArray(unittest.TestCase):
     def test_get_values(self):
         """Test getting values at specific indices."""
         # Set up test data
-        test_data = np.arange(np.prod(self.shape), dtype=self.dtype).reshape(
-            self.shape
-        )
+        test_data = np.arange(np.prod(self.shape), dtype=self.dtype).reshape(self.shape)
         self.belief_array.update(test_data)
 
         # Get specific values
@@ -239,9 +237,7 @@ class TestMemoryMappedBuffer(unittest.TestCase):
         """Test memory usage calculation."""
         buffer = MemoryMappedBuffer(self.shape, self.dtype)
 
-        expected_mb = (
-            np.prod(self.shape) * np.dtype(self.dtype).itemsize / (1024 * 1024)
-        )
+        expected_mb = np.prod(self.shape) * np.dtype(self.dtype).itemsize / (1024 * 1024)
         actual_mb = buffer.memory_usage()
 
         self.assertAlmostEqual(actual_mb, expected_mb, places=6)
@@ -257,16 +253,12 @@ class TestCompactActionHistory(unittest.TestCase):
         """Set up test fixtures."""
         self.max_actions = 100
         self.action_space_size = 8
-        self.history = CompactActionHistory(
-            self.max_actions, self.action_space_size
-        )
+        self.history = CompactActionHistory(self.max_actions, self.action_space_size)
 
     def test_initialization(self):
         """Test action history initialization."""
         self.assertEqual(self.history.max_actions, self.max_actions)
-        self.assertEqual(
-            self.history.action_space_size, self.action_space_size
-        )
+        self.assertEqual(self.history.action_space_size, self.action_space_size)
         self.assertEqual(self.history._size, 0)
         self.assertEqual(self.history._head, 0)
 
@@ -291,9 +283,7 @@ class TestCompactActionHistory(unittest.TestCase):
         """Test circular buffer behavior."""
         # Fill beyond capacity
         for i in range(self.max_actions + 10):
-            self.history.add_action(
-                i % self.action_space_size, time.time() + i, i * 0.1
-            )
+            self.history.add_action(i % self.action_space_size, time.time() + i, i * 0.1)
 
         # Should have max_actions items
         self.assertEqual(self.history._size, self.max_actions)
@@ -308,9 +298,7 @@ class TestCompactActionHistory(unittest.TestCase):
         for i in range(20):
             timestamp = time.time() + i
             timestamps.append(timestamp)
-            self.history.add_action(
-                i % self.action_space_size, timestamp, i * 0.1
-            )
+            self.history.add_action(i % self.action_space_size, timestamp, i * 0.1)
 
         # Get recent actions
         actions, times, rewards = self.history.get_recent_actions(5)
@@ -320,9 +308,7 @@ class TestCompactActionHistory(unittest.TestCase):
         self.assertEqual(len(rewards), 5)
 
         # Should be most recent
-        expected_actions = (
-            np.array([15, 16, 17, 18, 19]) % self.action_space_size
-        )
+        expected_actions = np.array([15, 16, 17, 18, 19]) % self.action_space_size
         np.testing.assert_array_equal(actions, expected_actions)
 
     def test_action_statistics(self):
@@ -330,9 +316,7 @@ class TestCompactActionHistory(unittest.TestCase):
         # Add diverse actions
         for i in range(50):
             action = i % 4  # Use only actions 0, 1, 2, 3
-            self.history.add_action(
-                action, time.time() + i, np.random.random()
-            )
+            self.history.add_action(action, time.time() + i, np.random.random())
 
         stats = self.history.get_action_statistics()
 
@@ -346,17 +330,13 @@ class TestCompactActionHistory(unittest.TestCase):
         # Should have roughly equal distribution for actions 0-3
         for action in range(4):
             self.assertIn(action, dist)
-            self.assertGreaterEqual(
-                dist[action], 10
-            )  # At least 10 occurrences
+            self.assertGreaterEqual(dist[action], 10)  # At least 10 occurrences
 
     def test_memory_usage(self):
         """Test memory usage calculation."""
         # Add some actions
         for i in range(50):
-            self.history.add_action(
-                i % self.action_space_size, time.time() + i, i * 0.1
-            )
+            self.history.add_action(i % self.action_space_size, time.time() + i, i * 0.1)
 
         memory_bytes = self.history.memory_usage_bytes()
 
@@ -368,9 +348,7 @@ class TestCompactActionHistory(unittest.TestCase):
         """Test compression of old entries."""
         # Fill with many actions
         for i in range(200):
-            self.history.add_action(
-                i % self.action_space_size, time.time() + i, i * 0.01
-            )
+            self.history.add_action(i % self.action_space_size, time.time() + i, i * 0.01)
 
         original_count = self.history._size
 
@@ -393,9 +371,7 @@ class TestEfficientTemporalSequence(unittest.TestCase):
         """Set up test fixtures."""
         self.max_length = 100
         self.feature_dim = 16
-        self.sequence = EfficientTemporalSequence(
-            self.max_length, self.feature_dim
-        )
+        self.sequence = EfficientTemporalSequence(self.max_length, self.feature_dim)
 
     def test_initialization(self):
         """Test temporal sequence initialization."""
@@ -455,9 +431,7 @@ class TestEfficientTemporalSequence(unittest.TestCase):
         for i in range(len(states)):
             reconstructed = self.sequence.get_state_at_index(i)
             self.assertIsNotNone(reconstructed)
-            np.testing.assert_array_almost_equal(
-                reconstructed, states[i], decimal=5
-            )
+            np.testing.assert_array_almost_equal(reconstructed, states[i], decimal=5)
 
     def test_get_recent_states(self):
         """Test getting recent states."""
@@ -603,9 +577,7 @@ class TestCompactKnowledgeGraph(unittest.TestCase):
 
         self.assertIsNotNone(retrieved_features)
         # Note: features are stored as float16 and may have precision loss
-        np.testing.assert_array_almost_equal(
-            retrieved_features[:4], features, decimal=2
-        )
+        np.testing.assert_array_almost_equal(retrieved_features[:4], features, decimal=2)
 
     def test_compact_storage(self):
         """Test storage compaction."""
@@ -665,9 +637,7 @@ class TestFactoryFunctions(unittest.TestCase):
         shape = (10, 10)
         buffer_size = 5
 
-        buffer = create_efficient_belief_buffer(
-            shape, buffer_size, use_memory_mapping=False
-        )
+        buffer = create_efficient_belief_buffer(shape, buffer_size, use_memory_mapping=False)
 
         # Should return LazyBeliefArray for small buffers
         self.assertIsInstance(buffer, LazyBeliefArray)
@@ -678,9 +648,7 @@ class TestFactoryFunctions(unittest.TestCase):
         shape = (100, 100)
         buffer_size = 50
 
-        buffer = create_efficient_belief_buffer(
-            shape, buffer_size, use_memory_mapping=True
-        )
+        buffer = create_efficient_belief_buffer(shape, buffer_size, use_memory_mapping=True)
 
         # Should return MemoryMappedBuffer for large buffers
         self.assertIsInstance(buffer, MemoryMappedBuffer)

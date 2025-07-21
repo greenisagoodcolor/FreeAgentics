@@ -76,9 +76,7 @@ class PyMDPErrorHandlerFallback:
             return True, result, None
         except Exception as e:
             self.error_count += 1
-            logging.error(
-                f"PyMDP operation {operation_name} failed for {self.agent_id}: {e}"
-            )
+            logging.error(f"PyMDP operation {operation_name} failed for {self.agent_id}: {e}")
 
             if fallback_func:
                 try:
@@ -116,9 +114,7 @@ class InferenceErrorFallback(Exception):
     """Fallback for inference errors."""
 
 
-def safe_array_index_fallback(
-    array: np.ndarray, index: int, default: Any = 0
-) -> Any:
+def safe_array_index_fallback(array: np.ndarray, index: int, default: Any = 0) -> Any:
     """Safe array indexing with bounds checking."""
     try:
         if 0 <= index < len(array):
@@ -128,9 +124,8 @@ def safe_array_index_fallback(
         return default
 
 
-def safe_pymdp_operation_fallback(
-    operation_name: str, default_value: Optional[Any] = None
-):
+def safe_pymdp_operation_fallback(operation_name: str,
+    default_value: Optional[Any] = None):
     """Create a decorator for safe PyMDP operations."""
 
     def decorator(func):
@@ -151,9 +146,8 @@ def validate_observation_fallback(observation: Any) -> Any:
     return observation
 
 
-def validate_pymdp_matrices_fallback(
-    A: Any, B: Any, C: Any, D: Any
-) -> Tuple[bool, str]:
+def validate_pymdp_matrices_fallback(A: Any, B: Any, C: Any, D: Any) -> Tuple[bool,
+    str]:
     """Validate PyMDP matrix inputs."""
     try:
         # Basic validation - just check if they exist
@@ -164,9 +158,8 @@ def validate_pymdp_matrices_fallback(
         return False, f"Validation error: {e}"
 
 
-def with_error_handling_fallback(
-    operation_name: str, fallback_result: Optional[Any] = None
-):
+def with_error_handling_fallback(operation_name: str,
+    fallback_result: Optional[Any] = None):
     """Create a decorator for error handling with fallback result."""
 
     def decorator(func):

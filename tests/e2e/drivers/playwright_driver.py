@@ -45,9 +45,7 @@ class PlaywrightDriver(BrowserDriver):
         self.console_logs = []
 
         if not PLAYWRIGHT_AVAILABLE:
-            raise ImportError(
-                "Playwright is not available. Install with: pip install playwright"
-            )
+            raise ImportError("Playwright is not available. Install with: pip install playwright")
 
     async def start(self):
         """Start the Playwright browser"""
@@ -87,9 +85,7 @@ class PlaywrightDriver(BrowserDriver):
             await self._setup_event_listeners()
 
             # Set default timeout
-            self.page.set_default_timeout(
-                self.config.browser_config.timeout * 1000
-            )
+            self.page.set_default_timeout(self.config.browser_config.timeout * 1000)
 
             logger.info(f"Playwright browser started: {browser_type}")
 
@@ -242,9 +238,7 @@ class PlaywrightDriver(BrowserDriver):
 
         return await self.page.evaluate(script)
 
-    async def get_element_attribute(
-        self, selector: str, attribute: str
-    ) -> str:
+    async def get_element_attribute(self, selector: str, attribute: str) -> str:
         """Get element attribute"""
         if not self.page:
             raise RuntimeError("Browser not started")
@@ -399,13 +393,9 @@ class PlaywrightDriver(BrowserDriver):
         if not self.page:
             raise RuntimeError("Browser not started")
 
-        await self.page.wait_for_load_state(
-            "networkidle", timeout=timeout * 1000
-        )
+        await self.page.wait_for_load_state("networkidle", timeout=timeout * 1000)
 
-    async def wait_for_load_state(
-        self, state: str = "load", timeout: float = 10.0
-    ):
+    async def wait_for_load_state(self, state: str = "load", timeout: float = 10.0):
         """Wait for specific load state"""
         if not self.page:
             raise RuntimeError("Browser not started")

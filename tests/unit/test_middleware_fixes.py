@@ -5,7 +5,7 @@ Unit tests for middleware fixes - Task #14.5
 import os
 from unittest.mock import patch
 
-from api.middleware.security_monitoring import SecurityHeadersMiddleware
+from auth.security_headers import SecurityHeadersMiddleware
 from auth.security_implementation import SecurityMiddleware
 
 
@@ -14,8 +14,11 @@ class TestSecurityMiddlewareFixes:
 
     def test_security_middleware_typo_fixed(self):
         """Test that the typo in SecurityMiddleware is fixed."""
+
         # Create a mock app
-        app = lambda scope, receive, send: None
+        def app(scope, receive, send):
+            return None
+
         SecurityMiddleware(app)
 
         # Test that when we get the headers, the typo is fixed
@@ -33,7 +36,10 @@ class TestSecurityMiddlewareFixes:
 
     def test_enhanced_security_headers_middleware_uses_manager(self):
         """Test that SecurityHeadersMiddleware uses the unified manager."""
-        app = lambda scope, receive, send: None
+
+        def app(scope, receive, send):
+            return None
+
         middleware = SecurityHeadersMiddleware(app)
 
         # Verify it has our security manager
@@ -57,9 +63,7 @@ class TestUnifiedSecurityApproach:
 
         # Mock request and response
         class MockRequest:
-            url = type(
-                "obj", (object,), {"scheme": "https", "path": "/test"}
-            )()
+            url = type("obj", (object,), {"scheme": "https", "path": "/test"})()
             headers = {"host": "example.com"}
 
         class MockResponse:

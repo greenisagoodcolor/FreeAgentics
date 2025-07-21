@@ -84,10 +84,7 @@ class FocusedOWASPAssessment:
             return False
 
         # Skip test files for some checks
-        if any(
-            test_dir in file_path.parts
-            for test_dir in ["tests", "test", "__tests__"]
-        ):
+        if any(test_dir in file_path.parts for test_dir in ["tests", "test", "__tests__"]):
             return True  # We want to analyze tests but with different criteria
 
         return True
@@ -204,7 +201,7 @@ class FocusedOWASPAssessment:
                     "A01: Broken Access Control",
                     "HIGH",
                     "Unprotected API endpoint",
-                    f"API endpoint lacks authentication protection",
+                    "API endpoint lacks authentication protection",
                     file_path=endpoint["file"],
                     line_number=endpoint["line"],
                     evidence=endpoint["endpoint"],
@@ -338,9 +335,7 @@ class FocusedOWASPAssessment:
         rate_limit_files.extend(self.project_root.glob("**/*rate*limit*.py"))
 
         # Filter application files only
-        app_rate_limit_files = [
-            f for f in rate_limit_files if self.should_analyze_file(f)
-        ]
+        app_rate_limit_files = [f for f in rate_limit_files if self.should_analyze_file(f)]
 
         if not app_rate_limit_files:
             self.add_finding(
@@ -351,9 +346,7 @@ class FocusedOWASPAssessment:
                 remediation="Implement rate limiting for API endpoints",
             )
         else:
-            print(
-                f"  ✓ Rate limiting implementation found ({len(app_rate_limit_files)} files)"
-            )
+            print(f"  ✓ Rate limiting implementation found ({len(app_rate_limit_files)} files)")
 
         # Check for input validation
         validation_patterns = [
@@ -392,9 +385,7 @@ class FocusedOWASPAssessment:
                 remediation="Implement comprehensive input validation with Pydantic",
             )
         else:
-            print(
-                f"  ✓ Input validation detected in {len(validation_files)} files"
-            )
+            print(f"  ✓ Input validation detected in {len(validation_files)} files")
 
     def test_a05_security_misconfiguration(self):
         """Test for A05:2021 – Security Misconfiguration."""
@@ -415,9 +406,7 @@ class FocusedOWASPAssessment:
 
                 # Check for debug mode
                 if re.search(r"DEBUG\s*=\s*True", content):
-                    line_number = (
-                        content[: content.find("DEBUG = True")].count("\n") + 1
-                    )
+                    line_number = content[: content.find("DEBUG = True")].count("\n") + 1
 
                     self.add_finding(
                         "A05: Security Misconfiguration",
@@ -453,9 +442,7 @@ class FocusedOWASPAssessment:
                 found_requirements.append(req_file)
 
         if found_requirements:
-            print(
-                f"  ✓ Found requirements files: {', '.join(found_requirements)}"
-            )
+            print(f"  ✓ Found requirements files: {', '.join(found_requirements)}")
         else:
             self.add_finding(
                 "A06: Vulnerable Components",
@@ -582,17 +569,11 @@ class FocusedOWASPAssessment:
 
         # Check for security logging
         security_log_files = []
-        security_log_files.extend(
-            self.project_root.glob("**/security_log*.py")
-        )
+        security_log_files.extend(self.project_root.glob("**/security_log*.py"))
         security_log_files.extend(self.project_root.glob("**/audit*.py"))
-        security_log_files.extend(
-            self.project_root.glob("observability/**/*.py")
-        )
+        security_log_files.extend(self.project_root.glob("observability/**/*.py"))
 
-        app_log_files = [
-            f for f in security_log_files if self.should_analyze_file(f)
-        ]
+        app_log_files = [f for f in security_log_files if self.should_analyze_file(f)]
 
         if app_log_files:
             print(f"  ✓ Security logging files found: {len(app_log_files)}")
@@ -727,9 +708,7 @@ class FocusedOWASPAssessment:
             category_counts[category] = category_counts.get(category, 0) + 1
 
             if finding.get("file_path"):
-                file_counts[finding["file_path"]] = (
-                    file_counts.get(finding["file_path"], 0) + 1
-                )
+                file_counts[finding["file_path"]] = file_counts.get(finding["file_path"], 0) + 1
 
         return {
             "assessment_date": datetime.now().isoformat(),
@@ -750,7 +729,7 @@ class FocusedOWASPAssessment:
         print("Task 14.11 - Application Code Analysis")
         print("=" * 70)
         print(f"Project Root: {self.project_root}")
-        print(f"Focus: Application code only (excluding dependencies)")
+        print("Focus: Application code only (excluding dependencies)")
         print("=" * 70)
 
         # Run all tests
@@ -781,11 +760,7 @@ class FocusedOWASPAssessment:
             print(f"  {category}: {count}")
 
         # Save report
-        report_path = (
-            self.project_root
-            / "security"
-            / "owasp_focused_assessment_report.json"
-        )
+        report_path = self.project_root / "security" / "owasp_focused_assessment_report.json"
         with open(report_path, "w") as f:
             json.dump(report, f, indent=2)
 
@@ -799,18 +774,14 @@ def main():
     report = assessor.run_focused_assessment()
 
     # Summary for task completion
-    print(f"\n✅ Task 14.11 Assessment Complete")
+    print("\n✅ Task 14.11 Assessment Complete")
     print(f"Files analyzed: {report['files_analyzed']}")
     print(f"Total findings: {report['total_findings']}")
 
     if report["severity_summary"]["HIGH"] > 0:
-        print(
-            f"⚠️  HIGH priority issues: {report['severity_summary']['HIGH']}"
-        )
+        print(f"⚠️  HIGH priority issues: {report['severity_summary']['HIGH']}")
     if report["severity_summary"]["MEDIUM"] > 0:
-        print(
-            f"ℹ️  MEDIUM priority issues: {report['severity_summary']['MEDIUM']}"
-        )
+        print(f"ℹ️  MEDIUM priority issues: {report['severity_summary']['MEDIUM']}")
 
 
 if __name__ == "__main__":

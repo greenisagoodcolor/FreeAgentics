@@ -65,9 +65,7 @@ class SimpleAgent:
         else:
             return random.choice(possible_actions)
 
-    def execute_action(
-        self, action: str, world_bounds: Tuple[int, int]
-    ) -> bool:
+    def execute_action(self, action: str, world_bounds: Tuple[int, int]) -> bool:
         """Execute the chosen action."""
         x, y = self.position
         new_x, new_y = x, y
@@ -157,9 +155,7 @@ class SimpleWorld:
             if agent.position in self.resources:
                 self.resources.remove(agent.position)
                 agent.energy = min(100, agent.energy + 30)
-                logger.info(
-                    f"{agent.name} collected a resource at {agent.position}!"
-                )
+                logger.info(f"{agent.name} collected a resource at {agent.position}!")
 
             # Log agent status
             logger.info(

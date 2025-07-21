@@ -3,8 +3,7 @@
 import json
 import random
 import uuid
-from datetime import datetime, timedelta
-from typing import Any, Dict, List, Optional, Tuple
+from typing import Any, Dict, List, Optional
 
 import numpy as np
 from faker import Faker
@@ -121,12 +120,8 @@ class TestDataGenerator:
             "parameters": json.dumps(parameters),
             "inference_count": random.randint(0, 1000),
             "total_steps": random.randint(0, 10000),
-            "created_at": fake.date_time_between(
-                start_date="-30d", end_date="now"
-            ),
-            "last_active": fake.date_time_between(
-                start_date="-1d", end_date="now"
-            ),
+            "created_at": fake.date_time_between(start_date="-30d", end_date="now"),
+            "last_active": fake.date_time_between(start_date="-1d", end_date="now"),
         }
 
     def generate_agents(self, count: int) -> List[Dict[str, Any]]:
@@ -157,9 +152,7 @@ class TestDataGenerator:
             ),
             "performance_score": random.uniform(0.0, 1.0),
             "cohesion_score": random.uniform(0.0, 1.0),
-            "created_at": fake.date_time_between(
-                start_date="-7d", end_date="now"
-            ),
+            "created_at": fake.date_time_between(start_date="-7d", end_date="now"),
         }
 
         if status == "DISSOLVED":
@@ -176,18 +169,12 @@ class TestDataGenerator:
         return {
             "agent_id": agent_id,
             "coalition_id": coalition_id,
-            "role": random.choice(
-                ["LEADER", "COORDINATOR", "MEMBER", "OBSERVER"]
-            ),
-            "joined_at": fake.date_time_between(
-                start_date="-7d", end_date="now"
-            ),
+            "role": random.choice(["LEADER", "COORDINATOR", "MEMBER", "OBSERVER"]),
+            "joined_at": fake.date_time_between(start_date="-7d", end_date="now"),
             "contribution_score": random.uniform(0.0, 1.0),
         }
 
-    def generate_knowledge_node(
-        self, creator_agent_id: Optional[str] = None
-    ) -> Dict[str, Any]:
+    def generate_knowledge_node(self, creator_agent_id: Optional[str] = None) -> Dict[str, Any]:
         """Generate a knowledge node."""
         node_type = random.choice(self.node_types)
 
@@ -199,22 +186,14 @@ class TestDataGenerator:
             "label": f"{node_type}_{fake.word()}_{fake.random_number(3)}",
             "properties": json.dumps(properties),
             "version": random.randint(1, 5),
-            "is_current": random.choice(
-                [True, True, True, False]
-            ),  # 75% current
+            "is_current": random.choice([True, True, True, False]),  # 75% current
             "confidence": random.uniform(0.5, 1.0),
-            "source": random.choice(
-                ["observation", "inference", "communication", "prior"]
-            ),
+            "source": random.choice(["observation", "inference", "communication", "prior"]),
             "creator_agent_id": creator_agent_id,
-            "created_at": fake.date_time_between(
-                start_date="-30d", end_date="now"
-            ),
+            "created_at": fake.date_time_between(start_date="-30d", end_date="now"),
         }
 
-    def generate_knowledge_edge(
-        self, source_id: str, target_id: str
-    ) -> Dict[str, Any]:
+    def generate_knowledge_edge(self, source_id: str, target_id: str) -> Dict[str, Any]:
         """Generate a knowledge edge between nodes."""
         edge_type = random.choice(self.edge_types)
 
@@ -227,9 +206,7 @@ class TestDataGenerator:
             "type": edge_type,
             "properties": json.dumps(properties),
             "confidence": random.uniform(0.3, 1.0),
-            "created_at": fake.date_time_between(
-                start_date="-30d", end_date="now"
-            ),
+            "created_at": fake.date_time_between(start_date="-30d", end_date="now"),
         }
 
     def generate_complete_dataset(
@@ -257,18 +234,12 @@ class TestDataGenerator:
             )
 
             for coalition_id in selected_coalitions:
-                memberships.append(
-                    self.generate_agent_coalition_membership(
-                        agent_id, coalition_id
-                    )
-                )
+                memberships.append(self.generate_agent_coalition_membership(agent_id, coalition_id))
 
         # Generate knowledge nodes
         knowledge_nodes = []
         for _ in range(num_knowledge_nodes):
-            creator_id = (
-                random.choice(agent_ids) if random.random() > 0.2 else None
-            )
+            creator_id = random.choice(agent_ids) if random.random() > 0.2 else None
             knowledge_nodes.append(self.generate_knowledge_node(creator_id))
 
         node_ids = [node["id"] for node in knowledge_nodes]
@@ -277,9 +248,7 @@ class TestDataGenerator:
         edges = []
         for _ in range(num_edges):
             source_id = random.choice(node_ids)
-            target_id = random.choice(
-                [nid for nid in node_ids if nid != source_id]
-            )
+            target_id = random.choice([nid for nid in node_ids if nid != source_id])
             edges.append(self.generate_knowledge_edge(source_id, target_id))
 
         return {
@@ -409,9 +378,7 @@ class TestDataGenerator:
     def _generate_node_properties(self, node_type: str) -> Dict[str, Any]:
         """Generate properties for a knowledge node."""
         base_props = {
-            "timestamp": fake.date_time_between(
-                start_date="-30d", end_date="now"
-            ).isoformat(),
+            "timestamp": fake.date_time_between(start_date="-30d", end_date="now").isoformat(),
             "relevance": random.uniform(0, 1),
             "certainty": random.uniform(0.5, 1),
         }
@@ -420,25 +387,16 @@ class TestDataGenerator:
         if node_type == "entity":
             base_props.update(
                 {
-                    "entity_type": random.choice(
-                        ["agent", "object", "location", "resource"]
-                    ),
-                    "attributes": {
-                        fake.word(): fake.word()
-                        for _ in range(random.randint(1, 5))
-                    },
+                    "entity_type": random.choice(["agent", "object", "location", "resource"]),
+                    "attributes": {fake.word(): fake.word() for _ in range(random.randint(1, 5))},
                 }
             )
         elif node_type == "process":
             base_props.update(
                 {
                     "duration": random.uniform(0.1, 100),
-                    "inputs": [
-                        fake.word() for _ in range(random.randint(0, 3))
-                    ],
-                    "outputs": [
-                        fake.word() for _ in range(random.randint(1, 3))
-                    ],
+                    "inputs": [fake.word() for _ in range(random.randint(0, 3))],
+                    "outputs": [fake.word() for _ in range(random.randint(1, 3))],
                 }
             )
 
@@ -456,8 +414,6 @@ class TestDataGenerator:
             base_props["causality_strength"] = random.uniform(0.3, 1.0)
             base_props["delay"] = random.uniform(0, 10)
         elif edge_type == "requires":
-            base_props["necessity"] = random.choice(
-                ["mandatory", "optional", "conditional"]
-            )
+            base_props["necessity"] = random.choice(["mandatory", "optional", "conditional"])
 
         return base_props

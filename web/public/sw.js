@@ -208,8 +208,6 @@ async function networkOnly(request) {
  * Handle offline requests
  */
 async function handleOfflineRequest(request) {
-  const url = new URL(request.url);
-
   // Serve cached version if available
   const cache = await caches.open(CACHE_NAME);
   const cached = await cache.match(request);

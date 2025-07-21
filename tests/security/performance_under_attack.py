@@ -10,10 +10,9 @@ import json
 import statistics
 import threading
 import time
-from concurrent.futures import ThreadPoolExecutor
 from dataclasses import dataclass
 from datetime import datetime
-from typing import Dict, List, Optional, Tuple
+from typing import Dict, List
 
 import httpx
 import psutil
@@ -83,13 +82,9 @@ class PerformanceUnderAttackTester:
                 metrics = await scenario_func()
                 results[scenario_name] = {
                     "metrics": metrics,
-                    "performance_impact": self._calculate_performance_impact(
-                        metrics
-                    ),
+                    "performance_impact": self._calculate_performance_impact(metrics),
                     "passed": self._evaluate_performance_threshold(metrics),
-                    "recommendations": self._generate_recommendations(
-                        scenario_name, metrics
-                    ),
+                    "recommendations": self._generate_recommendations(scenario_name, metrics),
                 }
 
                 # Brief recovery time between scenarios
@@ -126,9 +121,7 @@ class PerformanceUnderAttackTester:
 
         for i in range(total_requests):
             try:
-                response = await self.client.get(
-                    f"{self.target_url}/api/v1/health"
-                )
+                response = await self.client.get(f"{self.target_url}/api/v1/health")
                 response_times.append(response.elapsed.total_seconds())
 
                 if response.status_code == 200:
@@ -154,10 +147,8 @@ class PerformanceUnderAttackTester:
             timestamp=datetime.now(),
         )
 
-        print(f"Baseline established:")
-        print(
-            f"  - Average response time: {statistics.mean(response_times):.2f}s"
-        )
+        print("Baseline established:")
+        print(f"  - Average response time: {statistics.mean(response_times):.2f}s")
         print(f"  - Success rate: {successful_requests/total_requests:.2%}")
         print(f"  - Throughput: {successful_requests/duration:.2f} req/s")
 
@@ -186,9 +177,7 @@ class PerformanceUnderAttackTester:
 
             async with semaphore:
                 try:
-                    response = await self.client.get(
-                        f"{self.target_url}/api/v1/health"
-                    )
+                    response = await self.client.get(f"{self.target_url}/api/v1/health")
                     response_times.append(response.elapsed.total_seconds())
                     total_requests += 1
 
@@ -620,31 +609,20 @@ class PerformanceUnderAttackTester:
         if not self.baseline_metrics:
             return {"error": "No baseline metrics available"}
 
-        baseline_avg_response = statistics.mean(
-            self.baseline_metrics.response_times
-        )
+        baseline_avg_response = statistics.mean(self.baseline_metrics.response_times)
         attack_avg_response = (
-            statistics.mean(metrics.response_times)
-            if metrics.response_times
-            else 0
+            statistics.mean(metrics.response_times) if metrics.response_times else 0
         )
 
         baseline_cpu = statistics.mean(self.baseline_metrics.cpu_usage)
-        attack_cpu = (
-            statistics.mean(metrics.cpu_usage) if metrics.cpu_usage else 0
-        )
+        attack_cpu = statistics.mean(metrics.cpu_usage) if metrics.cpu_usage else 0
 
         baseline_memory = statistics.mean(self.baseline_metrics.memory_usage)
-        attack_memory = (
-            statistics.mean(metrics.memory_usage)
-            if metrics.memory_usage
-            else 0
-        )
+        attack_memory = statistics.mean(metrics.memory_usage) if metrics.memory_usage else 0
 
         return {
             "response_time_increase": (
-                (attack_avg_response - baseline_avg_response)
-                / baseline_avg_response
+                (attack_avg_response - baseline_avg_response) / baseline_avg_response
             )
             * 100,
             "success_rate_decrease": (
@@ -657,12 +635,8 @@ class PerformanceUnderAttackTester:
                 / self.baseline_metrics.throughput
             )
             * 100,
-            "cpu_usage_increase": ((attack_cpu - baseline_cpu) / baseline_cpu)
-            * 100,
-            "memory_usage_increase": (
-                (attack_memory - baseline_memory) / baseline_memory
-            )
-            * 100,
+            "cpu_usage_increase": ((attack_cpu - baseline_cpu) / baseline_cpu) * 100,
+            "memory_usage_increase": ((attack_memory - baseline_memory) / baseline_memory) * 100,
         }
 
     def _evaluate_performance_threshold(self, metrics: AttackMetrics) -> bool:
@@ -685,18 +659,12 @@ class PerformanceUnderAttackTester:
 
         # Check throughput ratio if baseline exists
         if self.baseline_metrics:
-            throughput_ratio = (
-                metrics.throughput / self.baseline_metrics.throughput
-            )
-            checks.append(
-                throughput_ratio >= self.thresholds["min_throughput_ratio"]
-            )
+            throughput_ratio = metrics.throughput / self.baseline_metrics.throughput
+            checks.append(throughput_ratio >= self.thresholds["min_throughput_ratio"])
 
         return all(checks)
 
-    def _generate_recommendations(
-        self, scenario: str, metrics: AttackMetrics
-    ) -> List[str]:
+    def _generate_recommendations(self, scenario: str, metrics: AttackMetrics) -> List[str]:
         """Generate performance recommendations based on attack results"""
 
         recommendations = []
@@ -713,32 +681,22 @@ class PerformanceUnderAttackTester:
                 f"Success rate ({metrics.success_rate:.2%}) below threshold. Implement better error handling and rate limiting."
             )
 
-        if (
-            metrics.cpu_usage
-            and max(metrics.cpu_usage) > self.thresholds["max_cpu_usage"]
-        ):
+        if metrics.cpu_usage and max(metrics.cpu_usage) > self.thresholds["max_cpu_usage"]:
             recommendations.append(
                 "High CPU usage detected. Consider horizontal scaling or CPU optimization."
             )
 
-        if (
-            metrics.memory_usage
-            and max(metrics.memory_usage) > self.thresholds["max_memory_usage"]
-        ):
+        if metrics.memory_usage and max(metrics.memory_usage) > self.thresholds["max_memory_usage"]:
             recommendations.append(
                 "High memory usage detected. Implement memory optimization and garbage collection tuning."
             )
 
         # Scenario-specific recommendations
         if "DDoS" in scenario:
-            recommendations.append(
-                "Implement DDoS protection (rate limiting, IP filtering, CDN)."
-            )
+            recommendations.append("Implement DDoS protection (rate limiting, IP filtering, CDN).")
 
         if "Brute Force" in scenario:
-            recommendations.append(
-                "Implement account lockout and progressive delays."
-            )
+            recommendations.append("Implement account lockout and progressive delays.")
 
         if "SQL Injection" in scenario:
             recommendations.append(
@@ -746,9 +704,7 @@ class PerformanceUnderAttackTester:
             )
 
         if "Resource Exhaustion" in scenario:
-            recommendations.append(
-                "Implement request size limits and resource quotas."
-            )
+            recommendations.append("Implement request size limits and resource quotas.")
 
         return recommendations
 
@@ -756,19 +712,14 @@ class PerformanceUnderAttackTester:
         """Generate comprehensive attack performance report"""
 
         total_scenarios = len(results)
-        passed_scenarios = sum(
-            1 for r in results.values() if r.get("passed", False)
-        )
+        passed_scenarios = sum(1 for r in results.values() if r.get("passed", False))
 
         report = {
             "summary": {
                 "total_scenarios": total_scenarios,
                 "passed_scenarios": passed_scenarios,
                 "failed_scenarios": total_scenarios - passed_scenarios,
-                "overall_resilience_score": (
-                    passed_scenarios / total_scenarios
-                )
-                * 100,
+                "overall_resilience_score": (passed_scenarios / total_scenarios) * 100,
                 "test_date": datetime.now().isoformat(),
             },
             "baseline_metrics": {
@@ -777,17 +728,11 @@ class PerformanceUnderAttackTester:
                     if self.baseline_metrics
                     else 0
                 ),
-                "success_rate": self.baseline_metrics.success_rate
-                if self.baseline_metrics
-                else 0,
-                "throughput": self.baseline_metrics.throughput
-                if self.baseline_metrics
-                else 0,
+                "success_rate": self.baseline_metrics.success_rate if self.baseline_metrics else 0,
+                "throughput": self.baseline_metrics.throughput if self.baseline_metrics else 0,
             },
             "attack_scenarios": results,
-            "overall_recommendations": self._generate_overall_recommendations(
-                results
-            ),
+            "overall_recommendations": self._generate_overall_recommendations(results),
             "performance_thresholds": self.thresholds,
         }
 
@@ -803,9 +748,7 @@ class PerformanceUnderAttackTester:
         recommendations = []
 
         failed_scenarios = [
-            name
-            for name, result in results.items()
-            if not result.get("passed", False)
+            name for name, result in results.items() if not result.get("passed", False)
         ]
 
         if len(failed_scenarios) > 3:
@@ -823,9 +766,7 @@ class PerformanceUnderAttackTester:
                 "Strengthen authentication mechanisms and implement account protection."
             )
 
-        if any(
-            "Resource Exhaustion" in scenario for scenario in failed_scenarios
-        ):
+        if any("Resource Exhaustion" in scenario for scenario in failed_scenarios):
             recommendations.append("Implement resource limits and monitoring.")
 
         recommendations.extend(
@@ -876,9 +817,7 @@ class SystemMonitor:
 
                 # Network usage (simplified)
                 network = psutil.net_io_counters()
-                self.metrics["network"].append(
-                    network.bytes_sent + network.bytes_recv
-                )
+                self.metrics["network"].append(network.bytes_sent + network.bytes_recv)
 
             except Exception:
                 pass
@@ -895,9 +834,7 @@ if __name__ == "__main__":
         print("\n" + "=" * 80)
         print("PERFORMANCE UNDER ATTACK REPORT")
         print("=" * 80)
-        print(
-            f"Overall Resilience Score: {report['summary']['overall_resilience_score']:.1f}%"
-        )
+        print(f"Overall Resilience Score: {report['summary']['overall_resilience_score']:.1f}%")
         print(
             f"Passed Scenarios: {report['summary']['passed_scenarios']}/{report['summary']['total_scenarios']}"
         )
@@ -911,8 +848,6 @@ if __name__ == "__main__":
         for rec in report["overall_recommendations"]:
             print(f"  - {rec}")
 
-        print(
-            "\nDetailed report saved to: performance_under_attack_report.json"
-        )
+        print("\nDetailed report saved to: performance_under_attack_report.json")
 
     asyncio.run(main())

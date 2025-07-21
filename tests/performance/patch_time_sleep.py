@@ -1,6 +1,7 @@
 """Monkey patch time.sleep for performance tests to use real CPU work."""
 
 import time
+
 import numpy as np
 
 # Store the original sleep function
@@ -11,9 +12,9 @@ def patched_sleep(duration):
     """Replace time.sleep with actual CPU work."""
     if duration <= 0:
         return
-    
+
     start_time = time.time()
-    
+
     # For very short sleeps (< 1ms), do minimal work
     if duration < 0.001:
         _ = sum(i**2 for i in range(100))
@@ -24,7 +25,7 @@ def patched_sleep(duration):
             remaining = duration - (time.time() - start_time)
             if remaining < 0.001:
                 break
-            
+
             # Scale work to remaining time
             if remaining > 0.01:
                 # Heavier work for longer durations
@@ -49,10 +50,9 @@ def disable_patch():
 
 # Auto-patch when imported from performance or benchmark directories
 import inspect
-import os
 
 frame = inspect.currentframe()
 if frame and frame.f_back:
-    caller_file = frame.f_back.f_globals.get('__file__', '')
-    if 'performance' in caller_file or 'benchmark' in caller_file:
+    caller_file = frame.f_back.f_globals.get("__file__", "")
+    if "performance" in caller_file or "benchmark" in caller_file:
         enable_patch()

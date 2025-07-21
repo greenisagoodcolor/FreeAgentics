@@ -8,7 +8,6 @@ import ssl
 from unittest.mock import MagicMock, patch
 
 import pytest
-from fastapi import Request, Response
 from fastapi.testclient import TestClient
 
 from auth.security_headers import (
@@ -160,9 +159,7 @@ class TestSecurityHeaders:
 
         headers = manager.get_security_headers(request, response)
 
-        assert (
-            headers["Cache-Control"] == "public, max-age=31536000, immutable"
-        )
+        assert headers["Cache-Control"] == "public, max-age=31536000, immutable"
 
     def test_additional_security_headers(self):
         """Test additional security headers."""
@@ -246,18 +243,12 @@ class TestSecurityHeaders:
 
     def test_certificate_pinning_header(self):
         """Test certificate pinning header generation."""
-        policy = SecurityPolicy(
-            enable_certificate_pinning=True, production_mode=True
-        )
+        policy = SecurityPolicy(enable_certificate_pinning=True, production_mode=True)
         manager = SecurityHeadersManager(policy)
 
         # Mock the certificate pinner
-        with patch.object(
-            manager.certificate_pinner, "generate_header"
-        ) as mock_generate:
-            mock_generate.return_value = (
-                'pin-sha256="test123"; max-age=5184000'
-            )
+        with patch.object(manager.certificate_pinner, "generate_header") as mock_generate:
+            mock_generate.return_value = 'pin-sha256="test123"; max-age=5184000'
 
             request = MagicMock()
             request.url.scheme = "https"
@@ -270,7 +261,7 @@ class TestSecurityHeaders:
             response = MagicMock()
             response.headers = {"content-type": "text/html"}
 
-            headers = manager.get_security_headers(request, response)
+            manager.get_security_headers(request, response)
 
             # Public-Key-Pins header should be present for mobile apps
             assert mock_generate.called
@@ -300,7 +291,7 @@ class TestSSLTLSConfiguration:
             mock_context = MagicMock()
             mock_create.return_value = mock_context
 
-            context = builder.create_server_context()
+            builder.create_server_context()
 
             # Verify secure options are set
             assert mock_context.minimum_version == ssl.TLSVersion.TLSv1_2
@@ -328,9 +319,7 @@ class TestSSLTLSConfiguration:
         """Test SSL configuration validation."""
         # Create a mock SSL context
         mock_context = MagicMock()
-        mock_context.options = (
-            ssl.OP_NO_COMPRESSION | ssl.OP_NO_SSLv2 | ssl.OP_NO_SSLv3
-        )
+        mock_context.options = ssl.OP_NO_COMPRESSION | ssl.OP_NO_SSLv2 | ssl.OP_NO_SSLv3
         mock_context.cert_store_stats.return_value = {
             "x509": 1,
             "crl": 0,
@@ -350,7 +339,7 @@ class TestSSLTLSConfiguration:
                 mock_context = MagicMock()
                 mock_create.return_value = mock_context
 
-                context = create_production_ssl_context()
+                create_production_ssl_context()
 
                 assert mock_create.called
                 assert mock_context.minimum_version == ssl.TLSVersion.TLSv1_2

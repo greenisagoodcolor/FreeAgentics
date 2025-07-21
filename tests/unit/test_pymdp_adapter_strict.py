@@ -47,13 +47,9 @@ class TestPyMDPAdapterStrictTypeChecking:
         result = adapter.sample_action(agent)
 
         # Must be EXACT int type, no numpy types allowed
-        assert (
-            type(result) is int
-        ), f"Expected exact int type, got {type(result)}"
+        assert type(result) is int, f"Expected exact int type, got {type(result)}"
         assert result >= 0, "Action index must be non-negative"
-        assert (
-            result < num_controls[0]
-        ), f"Action {result} exceeds max {num_controls[0]-1}"
+        assert result < num_controls[0], f"Action {result} exceeds max {num_controls[0]-1}"
 
     def test_adapter_sample_action_type_validation_fails_on_wrong_agent_type(
         self,
@@ -119,16 +115,12 @@ class TestPyMDPAdapterStrictTypeChecking:
         q_pi, G = adapter.infer_policies(agent)
 
         # Must return exactly tuple of two numpy arrays
-        assert isinstance(
-            q_pi, np.ndarray
-        ), f"q_pi must be ndarray, got {type(q_pi)}"
+        assert isinstance(q_pi, np.ndarray), f"q_pi must be ndarray, got {type(q_pi)}"
         assert isinstance(G, np.ndarray), f"G must be ndarray, got {type(G)}"
         assert np.issubdtype(
             q_pi.dtype, np.floating
         ), f"q_pi must be floating type, got {q_pi.dtype}"
-        assert np.issubdtype(
-            G.dtype, np.floating
-        ), f"G must be floating type, got {G.dtype}"
+        assert np.issubdtype(G.dtype, np.floating), f"G must be floating type, got {G.dtype}"
 
     def test_adapter_infer_policies_validation_fails_on_wrong_return_types(
         self,
@@ -147,9 +139,7 @@ class TestPyMDPAdapterStrictTypeChecking:
 
         # Test case 2: Returns tuple of wrong length
         mock_agent.infer_policies.return_value = (np.array([1.0]),)  # length 1
-        with pytest.raises(
-            RuntimeError, match="tuple of length 1, expected 2"
-        ):
+        with pytest.raises(RuntimeError, match="tuple of length 1, expected 2"):
             adapter.infer_policies(mock_agent)
 
         # Test case 3: Returns tuple with non-ndarray elements
@@ -189,12 +179,8 @@ class TestPyMDPAdapterStrictTypeChecking:
 
             # Validate each belief array
             for i, belief in enumerate(result):
-                assert isinstance(
-                    belief, np.ndarray
-                ), f"Belief {i} must be ndarray"
-                assert np.issubdtype(
-                    belief.dtype, np.floating
-                ), f"Belief {i} must be floating type"
+                assert isinstance(belief, np.ndarray), f"Belief {i} must be ndarray"
+                assert np.issubdtype(belief.dtype, np.floating), f"Belief {i} must be floating type"
 
     def test_adapter_infer_states_rejects_invalid_observation_types(self):
         """Adapter must reject invalid observation types with TypeError."""
@@ -239,9 +225,7 @@ class TestPyMDPAdapterStrictTypeChecking:
         mock_agent.__class__ = PyMDPAgent
         # Remove required attribute by not setting it
 
-        with pytest.raises(
-            RuntimeError, match="missing required attribute: A"
-        ):
+        with pytest.raises(RuntimeError, match="missing required attribute: A"):
             adapter.validate_agent_state(mock_agent)
 
     def test_adapter_safe_array_conversion_strict_no_fallbacks(self):
@@ -272,9 +256,7 @@ class TestPyMDPAdapterStrictTypeChecking:
         adapter = PyMDPCompatibilityAdapter()
 
         # Test invalid target types
-        with pytest.raises(
-            TypeError, match="target_type must be int or float"
-        ):
+        with pytest.raises(TypeError, match="target_type must be int or float"):
             adapter.safe_array_conversion(5, str)
 
         # Test empty arrays
@@ -282,9 +264,7 @@ class TestPyMDPAdapterStrictTypeChecking:
             adapter.safe_array_conversion(np.array([]), int)
 
         # Test multi-element arrays
-        with pytest.raises(
-            ValueError, match="Cannot convert multi-element array"
-        ):
+        with pytest.raises(ValueError, match="Cannot convert multi-element array"):
             adapter.safe_array_conversion(np.array([1, 2, 3]), int)
 
         # Test unconvertible types
@@ -489,9 +469,7 @@ class TestPyMDPAdapterRealIntegration:
         elapsed = time.time() - start_time
 
         # Adapter overhead should be minimal (< 1 second for 10 operations)
-        assert (
-            elapsed < 1.0
-        ), f"Adapter too slow: {elapsed:.3f}s for 10 operations"
+        assert elapsed < 1.0, f"Adapter too slow: {elapsed:.3f}s for 10 operations"
 
         # Validate last results
         assert type(action) is int

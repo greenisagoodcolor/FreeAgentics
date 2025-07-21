@@ -11,9 +11,7 @@ from pathlib import Path
 def run_command(command, timeout=60):
     """Run a command with timeout"""
     try:
-        result = subprocess.run(
-            command, capture_output=True, text=True, timeout=timeout
-        )
+        result = subprocess.run(command, capture_output=True, text=True, timeout=timeout)
         return result.returncode, result.stdout, result.stderr
     except subprocess.TimeoutExpired:
         return 1, "", f"Command timed out after {timeout} seconds"
@@ -114,9 +112,7 @@ def main():
     print("6. Checking docker-compose.yml...")
     compose_path = Path("docker-compose.yml")
     if compose_path.exists():
-        returncode, stdout, stderr = run_command(
-            ["docker", "compose", "config"]
-        )
+        returncode, stdout, stderr = run_command(["docker", "compose", "config"])
         if returncode == 0:
             print("✅ Docker Compose configuration valid")
         else:

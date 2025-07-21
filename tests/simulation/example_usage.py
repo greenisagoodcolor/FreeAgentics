@@ -5,7 +5,6 @@ programmatically for custom testing scenarios.
 """
 
 import asyncio
-import json
 from datetime import datetime
 from pathlib import Path
 
@@ -15,10 +14,8 @@ from tests.simulation.concurrent_simulator import (
 )
 from tests.simulation.scenarios import ScenarioScheduler, SimulationScenarios
 from tests.simulation.user_personas import (
-    CoordinatorBehavior,
     PersonaType,
     ResearcherBehavior,
-    create_behavior,
 )
 
 
@@ -42,9 +39,7 @@ async def example_basic_simulation():
     summary = simulator.get_summary()
     print("\nSimulation completed!")
     print(f"Total messages sent: {summary['metrics']['messages']['sent']}")
-    print(
-        f"Average DB latency: {summary['metrics']['database']['avg_latency_ms']:.1f}ms"
-    )
+    print(f"Average DB latency: {summary['metrics']['database']['avg_latency_ms']:.1f}ms")
 
 
 async def example_custom_scenario():
@@ -96,12 +91,8 @@ async def example_stress_test_with_monitoring():
     # Custom monitoring during simulation
     async def monitor_simulation():
         while simulator.is_running:
-            active_users = sum(
-                1 for u in simulator.users.values() if u.connected
-            )
-            print(
-                f"Active users: {active_users}, Messages: {simulator.metrics.messages_sent}"
-            )
+            active_users = sum(1 for u in simulator.users.values() if u.connected)
+            print(f"Active users: {active_users}, Messages: {simulator.metrics.messages_sent}")
             await asyncio.sleep(10)
 
     # Run simulation with monitoring
@@ -121,9 +112,7 @@ async def example_scheduled_scenarios():
     scheduler = ScenarioScheduler(results_base_path=Path("example_results"))
 
     # Add custom sequence
-    scheduler.add_scenario(
-        SimulationScenarios.mixed_workload(), delay_minutes=0
-    )
+    scheduler.add_scenario(SimulationScenarios.mixed_workload(), delay_minutes=0)
     scheduler.add_scenario(
         SimulationScenarios.burst_activity(),
         delay_minutes=2,  # 2 minutes after first scenario
@@ -151,9 +140,7 @@ async def example_custom_user_behavior():
         async def decide_next_action(self):
             # Always query specific agents in sequence
             if not self.state.get("test_agents"):
-                self.state["test_agents"] = [
-                    f"test_agent_{i}" for i in range(10)
-                ]
+                self.state["test_agents"] = [f"test_agent_{i}" for i in range(10)]
                 self.state["current_index"] = 0
 
             # Query each agent in sequence
@@ -192,10 +179,7 @@ async def example_results_analysis():
     await simulator.run()
 
     # Load and analyze results
-    metrics_file = (
-        config.results_path
-        / f"metrics_{config.name}_{datetime.now().strftime('%Y%m%d')}"
-    )
+    (config.results_path / f"metrics_{config.name}_{datetime.now().strftime('%Y%m%d')}")
 
     # Get summary for analysis
     summary = simulator.get_summary()
@@ -207,9 +191,7 @@ async def example_results_analysis():
 
     print("\nAnalysis Results:")
     print(f"Average messages per user: {messages_per_user:.1f}")
-    print(
-        f"System efficiency: {summary['metrics']['messages']['success_rate']:.1%}"
-    )
+    print(f"System efficiency: {summary['metrics']['messages']['success_rate']:.1%}")
 
     # Analyze by persona
     print("\nPersona Performance:")
@@ -301,17 +283,13 @@ async def main():
 if __name__ == "__main__":
     print("Concurrent Simulation Framework Examples")
     print("=" * 60)
-    print(
-        "These examples demonstrate various features of the simulation framework."
-    )
+    print("These examples demonstrate various features of the simulation framework.")
     print("Some examples are shortened for demonstration purposes.\n")
 
     asyncio.run(main())
 
     print("\nAll examples completed!")
-    print(
-        "\nFor production use, run simulations with appropriate durations and monitoring."
-    )
+    print("\nFor production use, run simulations with appropriate durations and monitoring.")
     print("Use the command-line interface for easier execution:")
     print("  python run_simulation.py run mixed_workload --duration 3600")
     print("  python run_simulation.py schedule daily")

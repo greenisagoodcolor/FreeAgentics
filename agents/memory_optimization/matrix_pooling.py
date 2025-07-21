@@ -35,13 +35,9 @@ class PooledMatrix:
     def __post_init__(self):
         """Validate matrix properties."""
         if self.data.shape != self.shape:
-            raise ValueError(
-                f"Data shape {self.data.shape} != declared shape {self.shape}"
-            )
+            raise ValueError(f"Data shape {self.data.shape} != declared shape {self.shape}")
         if self.data.dtype != self.dtype:
-            raise ValueError(
-                f"Data dtype {self.data.dtype} != declared dtype {self.dtype}"
-            )
+            raise ValueError(f"Data dtype {self.data.dtype} != declared dtype {self.dtype}")
 
 
 @dataclass
@@ -115,9 +111,8 @@ class MatrixPool:
         data = np.zeros(self.shape, dtype=self.dtype)
         pool_id = f"{id(data)}_{time.time()}"
 
-        matrix = PooledMatrix(
-            data=data, shape=self.shape, dtype=self.dtype, pool_id=pool_id
-        )
+        matrix = PooledMatrix(data=data, shape=self.shape, dtype=self.dtype,
+            pool_id=pool_id)
 
         self.stats.total_memory_bytes += data.nbytes
         return matrix
@@ -145,9 +140,7 @@ class MatrixPool:
                     logger.debug(f"Created new matrix for pool {self.shape}")
                 else:
                     # Pool exhausted, log warning
-                    logger.warning(
-                        f"Matrix pool exhausted for shape {self.shape}"
-                    )
+                    logger.warning(f"Matrix pool exhausted for shape {self.shape}")
                     matrix = self._create_matrix()  # Emergency allocation
                     self.stats.cache_misses += 1
 
@@ -170,9 +163,7 @@ class MatrixPool:
             matrix_id = id(matrix)
 
             if matrix_id not in self._in_use:
-                logger.warning(
-                    "Attempting to release matrix not from this pool"
-                )
+                logger.warning("Attempting to release matrix not from this pool")
                 return
 
             # Remove from in-use tracking
@@ -232,9 +223,8 @@ class MatrixOperationPool:
             "operation_counts": defaultdict(int),
         }
 
-    def get_pool(
-        self, shape: Tuple[int, ...], dtype: np.dtype = np.float32
-    ) -> MatrixPool:
+    def get_pool(self, shape: Tuple[int, ...],
+        dtype: np.dtype = np.float32) -> MatrixPool:
         """Get or create a pool for specific shape and dtype.
 
         Args:
@@ -249,9 +239,7 @@ class MatrixOperationPool:
 
             if key not in self._pools:
                 # Determine pool size based on matrix size
-                matrix_size_mb = (
-                    np.prod(shape) * np.dtype(dtype).itemsize / (1024 * 1024)
-                )
+                matrix_size_mb = np.prod(shape) * np.dtype(dtype).itemsize / (1024 * 1024)
 
                 if matrix_size_mb < 1:  # Small matrices
                     initial_size = 10
@@ -263,20 +251,14 @@ class MatrixOperationPool:
                     initial_size = 2
                     max_size = 10
 
-                self._pools[key] = MatrixPool(
-                    shape, dtype, initial_size, max_size
-                )
+                self._pools[key] = MatrixPool(shape, dtype, initial_size, max_size)
                 self.global_stats["total_pools"] += 1
-                logger.info(
-                    f"Created matrix pool for shape {shape}, dtype {dtype}"
-                )
+                logger.info(f"Created matrix pool for shape {shape}, dtype {dtype}")
 
             return self._pools[key]
 
     @contextmanager
-    def allocate_matrix(
-        self, shape: Tuple[int, ...], dtype: np.dtype = np.float32
-    ):
+    def allocate_matrix(self, shape: Tuple[int, ...], dtype: np.dtype = np.float32):
         """Context manager for temporary matrix allocation.
 
         Args:
@@ -295,9 +277,8 @@ class MatrixOperationPool:
             pool.release(matrix)
 
     @contextmanager
-    def allocate_einsum_operands(
-        self, *shapes: Tuple[int, ...], dtype: np.dtype = np.float32
-    ):
+    def allocate_einsum_operands(self, *shapes: Tuple[int, ...],
+        dtype: np.dtype = np.float32):
         """Allocate multiple matrices for einsum operations.
 
         Args:
@@ -392,9 +373,7 @@ class MatrixOperationPool:
         elif operation == "einsum":
             # For einsum, we need the subscripts
             if len(operands) < 2:
-                raise ValueError(
-                    "einsum requires subscripts and at least one operand"
-                )
+                raise ValueError("einsum requires subscripts and at least one operand")
 
             subscripts = operands[0]
             arrays = operands[1:]

@@ -5,25 +5,13 @@ Tests HTTPS enforcement, certificate validation, HSTS, secure cookies,
 and SSL/TLS security configurations.
 """
 
-import asyncio
 import os
-import re
-import ssl
-import subprocess
 from datetime import datetime, timedelta
-from typing import Dict, List, Optional
-from unittest.mock import AsyncMock, MagicMock, Mock, patch
+from unittest.mock import MagicMock, patch
 
 import pytest
-from cryptography import x509
-from cryptography.hazmat.backends import default_backend
-from cryptography.hazmat.primitives import hashes, serialization
-from cryptography.hazmat.primitives.asymmetric import rsa
-from cryptography.x509.oid import NameOID
-from fastapi import FastAPI, Request, Response
+from fastapi import FastAPI, Response
 from fastapi.testclient import TestClient
-from httpx import AsyncClient
-from starlette.middleware.base import BaseHTTPMiddleware
 
 from auth.https_enforcement import (
     HTTPSEnforcementMiddleware,
@@ -31,7 +19,6 @@ from auth.https_enforcement import (
     SSLCertificateManager,
     SSLConfiguration,
     generate_self_signed_cert,
-    setup_https_enforcement,
 )
 from auth.security_headers import SecurityHeadersMiddleware, SecurityPolicy
 
@@ -124,9 +111,7 @@ class TestHTTPSEnforcementMiddleware:
 
         assert response.status_code == 301
         assert response.headers["location"].startswith("https://")
-        assert "HTTPS-Required" in response.headers.get(
-            "X-Redirect-Reason", ""
-        )
+        assert "HTTPS-Required" in response.headers.get("X-Redirect-Reason", "")
 
     def test_acme_challenge_allowed_over_http(self, app):
         """Test Let's Encrypt challenges allowed over HTTP."""
@@ -175,9 +160,7 @@ class TestHTTPSEnforcementMiddleware:
 
         # Test with HTTPS
         with patch.object(client, "_base_url", "https://testserver"):
-            response = client.get(
-                "/secure", headers={"X-Forwarded-Proto": "https"}
-            )
+            response = client.get("/secure", headers={"X-Forwarded-Proto": "https"})
 
         set_cookie = response.headers.get("set-cookie")
         assert set_cookie is not None
@@ -233,9 +216,7 @@ class TestSSLCertificateManager:
     @patch("subprocess.run")
     def test_find_certbot(self, mock_run):
         """Test finding certbot executable."""
-        mock_run.return_value = MagicMock(
-            stdout="/usr/bin/certbot\n", returncode=0
-        )
+        mock_run.return_value = MagicMock(stdout="/usr/bin/certbot\n", returncode=0)
 
         config = SSLConfiguration()
         manager = SSLCertificateManager(config)
@@ -288,9 +269,7 @@ class TestSSLCertificateManager:
     @patch("subprocess.run")
     @patch("builtins.open", create=True)
     @patch("os.chmod")
-    def test_setup_auto_renewal(
-        self, mock_chmod, mock_open, mock_run, manager
-    ):
+    def test_setup_auto_renewal(self, mock_chmod, mock_open, mock_run, manager):
         """Test setting up automatic certificate renewal."""
         # Mock crontab listing
         mock_run.return_value = MagicMock(stdout="", returncode=0)
@@ -300,14 +279,10 @@ class TestSSLCertificateManager:
         assert result is True
 
         # Verify script was written
-        mock_open.assert_called_once_with(
-            "/usr/local/bin/renew-letsencrypt.sh", "w"
-        )
+        mock_open.assert_called_once_with("/usr/local/bin/renew-letsencrypt.sh", "w")
 
         # Verify script permissions
-        mock_chmod.assert_called_with(
-            "/usr/local/bin/renew-letsencrypt.sh", 0o755
-        )
+        mock_chmod.assert_called_with("/usr/local/bin/renew-letsencrypt.sh", 0o755)
 
     @patch("subprocess.run")
     @patch("pathlib.Path.exists")
@@ -330,9 +305,7 @@ class TestSSLCertificateManager:
     @patch("subprocess.run")
     def test_validate_certificate_chain(self, mock_run, manager):
         """Test certificate chain validation."""
-        mock_run.return_value = MagicMock(
-            stdout="test-cert.pem: OK\n", returncode=0
-        )
+        mock_run.return_value = MagicMock(stdout="test-cert.pem: OK\n", returncode=0)
 
         result = manager.validate_certificate_chain()
 
@@ -422,11 +395,7 @@ class TestSSLSecurityValidation:
             assert cipher.startswith("ECDHE") or cipher.startswith("DHE")
 
             # Should use strong encryption (AES128 or AES256)
-            assert (
-                "AES128" in cipher
-                or "AES256" in cipher
-                or "CHACHA20" in cipher
-            )
+            assert "AES128" in cipher or "AES256" in cipher or "CHACHA20" in cipher
 
     def test_tls_version_security(self):
         """Test TLS version security."""
@@ -477,14 +446,10 @@ class TestIntegrationSSLTLS:
         security_policy = SecurityPolicy(
             production_mode=True, enable_hsts=True, secure_cookies=True
         )
-        app.add_middleware(
-            SecurityHeadersMiddleware, security_manager=security_policy
-        )
+        app.add_middleware(SecurityHeadersMiddleware, security_manager=security_policy)
 
         # Add HTTPS enforcement
-        ssl_config = SSLConfiguration(
-            production_mode=True, hsts_enabled=True, secure_cookies=True
-        )
+        ssl_config = SSLConfiguration(production_mode=True, hsts_enabled=True, secure_cookies=True)
         app.add_middleware(HTTPSEnforcementMiddleware, config=ssl_config)
 
         @app.get("/api/data")
@@ -506,9 +471,7 @@ class TestIntegrationSSLTLS:
 
         # Test HTTPS request simulation
         with patch.object(client, "_base_url", "https://testserver"):
-            response = client.get(
-                "/api/data", headers={"X-Forwarded-Proto": "https"}
-            )
+            response = client.get("/api/data", headers={"X-Forwarded-Proto": "https"})
 
         assert response.status_code == 200
 

@@ -20,13 +20,13 @@ B_obj = utils.to_obj_array(B)
 print(f"\nB as object array has {len(B_obj)} elements")
 
 # Check normalization manually
-print(f"\nManual normalization check:")
+print("\nManual normalization check:")
 print(f"Sum over axis 0: \n{B.sum(axis=0)}")
 print(f"Sum over axis 1: \n{B.sum(axis=1)}")
 print(f"Sum over axis 2: \n{B.sum(axis=2)}")
 
 # Let's see what PyMDP expects by looking at its normalization
-print(f"\nChecking PyMDP is_normalized on B:")
+print("\nChecking PyMDP is_normalized on B:")
 print(f"Is normalized: {utils.is_normalized(B_obj)}")
 
 # Try transposing to see if that helps

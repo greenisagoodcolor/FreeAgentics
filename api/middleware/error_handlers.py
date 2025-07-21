@@ -8,9 +8,7 @@ from starlette.exceptions import HTTPException as StarletteHTTPException
 logger = logging.getLogger(__name__)
 
 
-async def validation_exception_handler(
-    request: Request, exc: RequestValidationError
-):
+async def validation_exception_handler(request: Request, exc: RequestValidationError):
     """Handle validation errors without exposing internal details."""
     logger.warning(f"Validation error: {exc.errors()}")
     return JSONResponse(
@@ -19,9 +17,7 @@ async def validation_exception_handler(
     )
 
 
-async def http_exception_handler(
-    request: Request, exc: StarletteHTTPException
-):
+async def http_exception_handler(request: Request, exc: StarletteHTTPException):
     """Handle HTTP exceptions securely."""
     logger.error(f"HTTP exception: {exc.detail}")
 
@@ -32,9 +28,7 @@ async def http_exception_handler(
             content={"detail": "An internal error occurred"},
         )
 
-    return JSONResponse(
-        status_code=exc.status_code, content={"detail": exc.detail}
-    )
+    return JSONResponse(status_code=exc.status_code, content={"detail": exc.detail})
 
 
 async def general_exception_handler(request: Request, exc: Exception):

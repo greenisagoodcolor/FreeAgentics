@@ -29,9 +29,7 @@ SQLITE_MEMORY_URL = "sqlite:///:memory:"
 class DatabaseTestConfig:
     """Configuration for test database operations."""
 
-    def __init__(
-        self, database_url: Optional[str] = None, use_sqlite: bool = False
-    ):
+    def __init__(self, database_url: Optional[str] = None, use_sqlite: bool = False):
         """Initialize test database configuration.
 
         Args:
@@ -40,9 +38,7 @@ class DatabaseTestConfig:
         """
         if use_sqlite:
             self.database_url = SQLITE_MEMORY_URL
-            self.pool_class = (
-                NullPool  # SQLite doesn't support connection pooling
-            )
+            self.pool_class = NullPool  # SQLite doesn't support connection pooling
             self.connect_args = {"check_same_thread": False}
         else:
             self.database_url = database_url or TEST_DATABASE_URL
@@ -95,12 +91,6 @@ def setup_test_database(engine: Optional[Engine] = None) -> Engine:
     try:
         # Import models to ensure they're registered
         from database.base import Base
-        from database.models import (
-            Agent,
-            Coalition,
-            KnowledgeEdge,
-            KnowledgeNode,
-        )
 
         # Create all tables
         Base.metadata.create_all(bind=engine)

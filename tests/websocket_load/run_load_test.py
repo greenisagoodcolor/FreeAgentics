@@ -35,9 +35,7 @@ async def run_steady_load_test(args):
         message_interval=args.message_interval,
         concurrent_connections=args.concurrent,
         enable_prometheus=args.prometheus,
-        metrics_export_path=Path(
-            f"metrics/steady_load_{args.clients}c_{args.duration}s.json"
-        ),
+        metrics_export_path=Path(f"metrics/steady_load_{args.clients}c_{args.duration}s.json"),
     )
 
     scenario = SteadyLoadScenario(config)
@@ -57,9 +55,7 @@ async def run_burst_load_test(args):
         message_interval=args.message_interval,
         concurrent_connections=args.concurrent,
         enable_prometheus=args.prometheus,
-        metrics_export_path=Path(
-            f"metrics/burst_load_{args.clients}c_{args.duration}s.json"
-        ),
+        metrics_export_path=Path(f"metrics/burst_load_{args.clients}c_{args.duration}s.json"),
     )
 
     scenario = BurstLoadScenario(
@@ -84,9 +80,7 @@ async def run_ramp_up_test(args):
         message_interval=args.message_interval,
         concurrent_connections=args.concurrent,
         enable_prometheus=args.prometheus,
-        metrics_export_path=Path(
-            f"metrics/ramp_up_{args.clients}c_{args.duration}s.json"
-        ),
+        metrics_export_path=Path(f"metrics/ramp_up_{args.clients}c_{args.duration}s.json"),
     )
 
     scenario = RampUpScenario(
@@ -111,9 +105,7 @@ async def run_stress_test(args):
         message_interval=args.message_interval,
         concurrent_connections=args.concurrent,
         enable_prometheus=args.prometheus,
-        metrics_export_path=Path(
-            f"metrics/stress_test_{args.max_clients}c.json"
-        ),
+        metrics_export_path=Path(f"metrics/stress_test_{args.max_clients}c.json"),
     )
 
     scenario = StressTestScenario(
@@ -137,9 +129,7 @@ async def run_realistic_test(args):
         message_interval=1.0,  # Will be overridden by profile
         concurrent_connections=args.concurrent,
         enable_prometheus=args.prometheus,
-        metrics_export_path=Path(
-            f"metrics/realistic_{args.clients}c_{args.duration}s.json"
-        ),
+        metrics_export_path=Path(f"metrics/realistic_{args.clients}c_{args.duration}s.json"),
     )
 
     # Parse user profiles if provided
@@ -202,22 +192,14 @@ def main():
         default=1.0,
         help="Seconds between messages (default: 1.0)",
     )
-    parser.add_argument(
-        "--prometheus", action="store_true", help="Enable Prometheus metrics"
-    )
-    parser.add_argument(
-        "--debug", action="store_true", help="Enable debug logging"
-    )
+    parser.add_argument("--prometheus", action="store_true", help="Enable Prometheus metrics")
+    parser.add_argument("--debug", action="store_true", help="Enable debug logging")
 
     # Subcommands for different scenarios
-    subparsers = parser.add_subparsers(
-        dest="scenario", help="Load test scenario"
-    )
+    subparsers = parser.add_subparsers(dest="scenario", help="Load test scenario")
 
     # Steady load
-    steady_parser = subparsers.add_parser(
-        "steady", help="Run steady load test"
-    )
+    subparsers.add_parser("steady", help="Run steady load test")
 
     # Burst load
     burst_parser = subparsers.add_parser("burst", help="Run burst load test")
@@ -289,9 +271,7 @@ def main():
     )
 
     # Realistic usage
-    realistic_parser = subparsers.add_parser(
-        "realistic", help="Run realistic usage test"
-    )
+    realistic_parser = subparsers.add_parser("realistic", help="Run realistic usage test")
     realistic_parser.add_argument(
         "--user-profiles",
         nargs="+",

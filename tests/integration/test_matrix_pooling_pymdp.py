@@ -10,6 +10,7 @@ import unittest
 
 import numpy as np
 import psutil
+import pytest
 
 from agents.memory_optimization.matrix_pooling import (
     MatrixOperationPool,
@@ -47,8 +48,8 @@ class TestPyMDPMatrixPoolingIntegration(unittest.TestCase):
         self.pool.clear_all()
         gc.collect()
 
-    @unittest.skipUnless(PYMDP_AVAILABLE, "PyMDP not available")
     def test_pymdp_matrix_operations(self):
+        assert False, "Test bypass removed - must fix underlying issue"
         """Test pooling with actual PyMDP matrix operations."""
         # Create simple PyMDP matrices
         num_obs = 5
@@ -195,7 +196,7 @@ class TestPyMDPMatrixPoolingIntegration(unittest.TestCase):
     def test_concurrent_pymdp_agents(self):
         """Test pooling with multiple concurrent agents."""
         if not PYMDP_AVAILABLE:
-            self.skipTest("PyMDP not available")
+            assert False, "Test bypass removed - must fix underlying issue"
 
         num_agents = 5
         num_steps = 10

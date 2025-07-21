@@ -4,7 +4,6 @@ Standalone test runner for security encryption and SOAR features.
 Runs without requiring the full application stack.
 """
 
-import asyncio
 import os
 import sys
 from pathlib import Path

@@ -1,6 +1,5 @@
 """Simple unit tests for System API endpoints without external dependencies."""
 
-import asyncio
 from datetime import datetime
 from unittest.mock import Mock, patch
 
@@ -122,19 +121,15 @@ async def test_get_prometheus_metrics_not_available():
 async def test_get_prometheus_metrics_with_error():
     """Test get_prometheus_metrics with an exception."""
     with patch(
-        'api.v1.system.get_prometheus_metrics',
+        "api.v1.system.get_prometheus_metrics",
         side_effect=Exception("Test error"),
     ):
         # Create a new function that imports and raises
         async def test_func():
-            from observability.prometheus_metrics import (
-                get_prometheus_content_type,
-                get_prometheus_metrics,
-            )
 
             raise Exception("Test error")
 
-        with patch('api.v1.system.get_prometheus_metrics', test_func):
+        with patch("api.v1.system.get_prometheus_metrics", test_func):
             # This test is tricky because we need to trigger the exception path
             # Let's skip it for now since the module import logic is complex
             pass
@@ -144,15 +139,11 @@ async def test_get_prometheus_metrics_with_error():
 async def test_get_prometheus_metrics_success():
     """Test get_prometheus_metrics when prometheus is available."""
     # Mock the prometheus functions
-    mock_get_metrics = Mock(
-        return_value="# HELP test\n# TYPE test gauge\ntest 1.0"
-    )
+    mock_get_metrics = Mock(return_value="# HELP test\n# TYPE test gauge\ntest 1.0")
     mock_get_content_type = Mock(return_value="text/plain; version=0.0.4")
 
-    with patch('api.v1.system.get_prometheus_metrics', mock_get_metrics):
-        with patch(
-            'api.v1.system.get_prometheus_content_type', mock_get_content_type
-        ):
+    with patch("api.v1.system.get_prometheus_metrics", mock_get_metrics):
+        with patch("api.v1.system.get_prometheus_content_type", mock_get_content_type):
             # This would need to mock the import as well
             # Skip for now due to complexity
             pass
@@ -174,11 +165,9 @@ async def test_get_health_metrics_with_error():
     """Test get_health_metrics with an exception."""
     # Mock to simulate an exception after import succeeds
     mock_collector = Mock()
-    mock_collector.get_metrics_snapshot.side_effect = Exception(
-        "Metrics error"
-    )
+    mock_collector.get_metrics_snapshot.side_effect = Exception("Metrics error")
 
-    with patch('api.v1.system.prometheus_collector', mock_collector):
+    with patch("api.v1.system.prometheus_collector", mock_collector):
         # This test would need complex mocking of the import mechanism
         # Skip for now
         pass
@@ -201,7 +190,7 @@ async def test_get_health_metrics_success():
     mock_collector = Mock()
     mock_collector.get_metrics_snapshot.return_value = mock_snapshot
 
-    with patch('api.v1.system.prometheus_collector', mock_collector):
+    with patch("api.v1.system.prometheus_collector", mock_collector):
         # This test would need to mock the import as well
         # Skip for now due to complexity
         pass
@@ -244,7 +233,5 @@ def test_service_health_model():
     assert health.details == {"version": "1.0", "uptime": 3600}
 
     # Test with empty details
-    health2 = ServiceHealth(
-        service="test-service2", status="degraded", last_check=datetime.now()
-    )
+    health2 = ServiceHealth(service="test-service2", status="degraded", last_check=datetime.now())
     assert health2.details == {}

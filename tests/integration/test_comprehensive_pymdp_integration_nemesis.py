@@ -316,7 +316,7 @@ class TestPerformanceBenchmarksWithRealMeasurements:
         This validates the "<500ms latency" claim from PRD requirements.
         """
         if not PYMDP_AVAILABLE:
-            pytest.skip("PyMDP required for performance testing")
+            assert False, "Test bypass removed - must fix underlying issue"
 
         # Create multiple agents for load testing
         num_agents = 5  # Realistic load
@@ -388,7 +388,7 @@ class TestErrorPropagationAndFailureModes:
         or numerical instability in PyMDP calculations.
         """
         if not PYMDP_AVAILABLE:
-            pytest.skip("PyMDP required for memory pressure testing")
+            assert False, "Test bypass removed - must fix underlying issue"
 
         agent = BasicExplorerAgent(
             agent_id="memory_test_agent", position=(0, 0)
@@ -438,7 +438,7 @@ class TestErrorPropagationAndFailureModes:
         like NaN values, infinite values, or ill-conditioned matrices.
         """
         if not PYMDP_AVAILABLE:
-            pytest.skip("PyMDP required for numerical testing")
+            assert False, "Test bypass removed - must fix underlying issue"
 
         agent = BasicExplorerAgent(
             agent_id="numerical_test_agent", position=(0, 0)

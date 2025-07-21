@@ -46,9 +46,7 @@ async def test_observability_components():
 
     # Test 3: Test lifecycle event recording
     try:
-        await record_agent_lifecycle_event(
-            "test_agent", "created", {"test": True}
-        )
+        await record_agent_lifecycle_event("test_agent", "created", {"test": True})
         print("✅ Lifecycle event recording works")
     except Exception as e:
         print(f"❌ Lifecycle event recording failed: {e}")
@@ -58,9 +56,7 @@ async def test_observability_components():
     try:
         beliefs_before = {"entropy": 0.8, "free_energy": 10.0}
         beliefs_after = {"entropy": 0.6, "free_energy": 8.0}
-        await record_belief_update(
-            "test_agent", beliefs_before, beliefs_after, 8.0
-        )
+        await record_belief_update("test_agent", beliefs_before, beliefs_after, 8.0)
         print("✅ Belief update recording works")
     except Exception as e:
         print(f"❌ Belief update recording failed: {e}")
@@ -75,7 +71,7 @@ async def test_observability_components():
             _result = sum(range(100))  # Simple computation
             return "test_result"
 
-        _result = mock_inference()
+        result = mock_inference()
         assert result == "test_result"
         print("✅ Monitoring decorator works")
     except Exception as e:
@@ -137,9 +133,7 @@ async def test_observability_performance():
         )
     duration = time.time() - start_time
 
-    print(
-        f"✅ 100 belief updates recorded in {duration:.3f}s ({duration*10:.1f}ms avg)"
-    )
+    print(f"✅ 100 belief updates recorded in {duration:.3f}s ({duration*10:.1f}ms avg)")
 
     # Test 2: Monitoring decorator overhead
     @monitor_pymdp_inference("perf_test_agent")
@@ -154,21 +148,15 @@ async def test_observability_performance():
         _result = monitored_operation()
     duration = time.time() - start_time
 
-    print(
-        f"✅ 50 monitored operations in {duration:.3f}s ({duration*20:.1f}ms avg)"
-    )
+    print(f"✅ 50 monitored operations in {duration:.3f}s ({duration*20:.1f}ms avg)")
 
     # Test 3: Performance summary generation
     start_time = time.time()
     for i in range(20):
-        _summary = await integrator.get_performance_summary(
-            f"perf_agent_{i % 5}"
-        )
+        _summary = await integrator.get_performance_summary(f"perf_agent_{i % 5}")
     duration = time.time() - start_time
 
-    print(
-        f"✅ 20 performance summaries in {duration:.3f}s ({duration*50:.1f}ms avg)"
-    )
+    print(f"✅ 20 performance summaries in {duration:.3f}s ({duration*50:.1f}ms avg)")
 
     print("🎯 Observability performance tests completed")
     return True
@@ -193,14 +181,10 @@ async def test_agent_integration_patterns():
     agent_id = "integration_test_agent"
 
     # Agent creation
-    await record_agent_lifecycle_event(
-        agent_id, "created", {"type": "mock_agent"}
-    )
+    await record_agent_lifecycle_event(agent_id, "created", {"type": "mock_agent"})
 
     # Agent activation
-    await record_agent_lifecycle_event(
-        agent_id, "activated", {"timestamp": "test"}
-    )
+    await record_agent_lifecycle_event(agent_id, "activated", {"timestamp": "test"})
 
     # Multiple belief updates (simulating agent steps)
     for step in range(10):
@@ -218,9 +202,7 @@ async def test_agent_integration_patterns():
         )
 
     # Agent deactivation
-    await record_agent_lifecycle_event(
-        agent_id, "deactivated", {"final_step": 10}
-    )
+    await record_agent_lifecycle_event(agent_id, "deactivated", {"final_step": 10})
 
     # Verify complete lifecycle was tracked
     lifecycle_events = pymdp_observer.agent_lifecycles[agent_id]

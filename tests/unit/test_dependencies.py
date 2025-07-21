@@ -22,17 +22,11 @@ class TestDependencyVerification:
             import fastapi
 
             # Minimum version requirement for production features
-            assert version.parse(fastapi.__version__) >= version.parse(
-                "0.100.0"
-            )
+            assert version.parse(fastapi.__version__) >= version.parse("0.100.0")
         except ImportError:
-            pytest.fail(
-                "FastAPI is not installed - required for API endpoints"
-            )
+            pytest.fail("FastAPI is not installed - required for API endpoints")
         except AttributeError:
-            pytest.fail(
-                "FastAPI installation is corrupted - no version attribute"
-            )
+            pytest.fail("FastAPI installation is corrupted - no version attribute")
 
     def test_sqlalchemy_available_and_correct_version(self):
         """Test SQLAlchemy is available and meets minimum version for async support."""
@@ -40,17 +34,11 @@ class TestDependencyVerification:
             import sqlalchemy
 
             # Minimum version for proper async support
-            assert version.parse(sqlalchemy.__version__) >= version.parse(
-                "2.0.0"
-            )
+            assert version.parse(sqlalchemy.__version__) >= version.parse("2.0.0")
         except ImportError:
-            pytest.fail(
-                "SQLAlchemy is not installed - required for database operations"
-            )
+            pytest.fail("SQLAlchemy is not installed - required for database operations")
         except AttributeError:
-            pytest.fail(
-                "SQLAlchemy installation is corrupted - no version attribute"
-            )
+            pytest.fail("SQLAlchemy installation is corrupted - no version attribute")
 
     def test_psycopg2_available(self):
         """Test psycopg2 is available for PostgreSQL connectivity."""
@@ -60,9 +48,7 @@ class TestDependencyVerification:
             # Verify it can create a connection string
             assert hasattr(psycopg2, "connect")
         except ImportError:
-            pytest.fail(
-                "psycopg2 is not installed - required for PostgreSQL connectivity"
-            )
+            pytest.fail("psycopg2 is not installed - required for PostgreSQL connectivity")
 
     def test_asyncpg_available(self):
         """Test asyncpg is available for async PostgreSQL operations."""
@@ -71,9 +57,7 @@ class TestDependencyVerification:
 
             assert hasattr(asyncpg, "connect")
         except ImportError:
-            pytest.fail(
-                "asyncpg is not installed - required for async database operations"
-            )
+            pytest.fail("asyncpg is not installed - required for async database operations")
 
     def test_passlib_available_with_bcrypt(self):
         """Test passlib is available with bcrypt support for password hashing."""
@@ -85,9 +69,7 @@ class TestDependencyVerification:
             test_hash = pwd_context.hash("test")
             assert pwd_context.verify("test", test_hash)
         except ImportError:
-            pytest.fail(
-                "passlib is not installed - required for password hashing"
-            )
+            pytest.fail("passlib is not installed - required for password hashing")
         except Exception as e:
             pytest.fail(f"passlib bcrypt support failed: {e}")
 
@@ -107,14 +89,14 @@ class TestDependencyVerification:
         except Exception as e:
             pytest.fail(f"PyJWT functionality test failed: {e}")
 
-    def test_python_jose_cryptography_available(self):
-        """Test python-jose with cryptography backend is available."""
+    def test_pyjwt_cryptography_available(self):
+        """Test PyJWT with cryptography backend is available (replaces python-jose)."""
         try:
-            from jose import jwt as jose_jwt
+            import jwt
 
             # Test that basic JWT functionality works
-            assert hasattr(jose_jwt, "encode")
-            assert hasattr(jose_jwt, "decode")
+            assert hasattr(jwt, "encode")
+            assert hasattr(jwt, "decode")
 
             # Test actual cryptography functionality with RS256
             import cryptography.hazmat.primitives.asymmetric.rsa as rsa
@@ -140,18 +122,14 @@ class TestDependencyVerification:
 
             # Test JWT encode/decode with RS256
             payload = {"test": "data"}
-            token = jose_jwt.encode(payload, private_pem, algorithm="RS256")
-            decoded = jose_jwt.decode(token, public_pem, algorithms=["RS256"])
+            token = jwt.encode(payload, private_pem, algorithm="RS256")
+            decoded = jwt.decode(token, public_pem, algorithms=["RS256"])
             assert decoded["test"] == "data"
 
         except ImportError:
-            pytest.fail(
-                "python-jose[cryptography] is not installed - required for JWT RS256"
-            )
+            pytest.fail("PyJWT is not installed - required for JWT RS256 (replaces python-jose)")
         except Exception as e:
-            pytest.fail(
-                f"python-jose cryptography functionality test failed: {e}"
-            )
+            pytest.fail(f"PyJWT cryptography functionality test failed: {e}")
 
     def test_uvicorn_available_and_correct_version(self):
         """Test uvicorn is available for ASGI server."""
@@ -159,17 +137,11 @@ class TestDependencyVerification:
             import uvicorn
 
             # Check version for security and performance fixes
-            assert version.parse(uvicorn.__version__) >= version.parse(
-                "0.20.0"
-            )
+            assert version.parse(uvicorn.__version__) >= version.parse("0.20.0")
         except ImportError:
-            pytest.fail(
-                "uvicorn is not installed - required for running FastAPI server"
-            )
+            pytest.fail("uvicorn is not installed - required for running FastAPI server")
         except AttributeError:
-            pytest.fail(
-                "uvicorn installation is corrupted - no version attribute"
-            )
+            pytest.fail("uvicorn installation is corrupted - no version attribute")
 
     def test_pydantic_v2_available(self):
         """Test Pydantic v2 is available for data validation."""
@@ -177,9 +149,7 @@ class TestDependencyVerification:
             import pydantic
 
             # Ensure we have v2 for performance and features
-            assert version.parse(pydantic.__version__) >= version.parse(
-                "2.0.0"
-            )
+            assert version.parse(pydantic.__version__) >= version.parse("2.0.0")
             # Test v2 features are available
             from pydantic import BaseModel, Field
 
@@ -190,9 +160,7 @@ class TestDependencyVerification:
             test_instance = TestModel(name="test")
             assert test_instance.name == "test"
         except ImportError:
-            pytest.fail(
-                "Pydantic is not installed - required for data validation"
-            )
+            pytest.fail("Pydantic is not installed - required for data validation")
         except Exception as e:
             pytest.fail(f"Pydantic v2 functionality test failed: {e}")
 
@@ -205,9 +173,7 @@ class TestDependencyVerification:
             client = redis.Redis()
             assert hasattr(client, "ping")
         except ImportError:
-            pytest.fail(
-                "redis is not installed - required for caching and real-time updates"
-            )
+            pytest.fail("redis is not installed - required for caching and real-time updates")
 
     def test_alembic_available_for_migrations(self):
         """Test Alembic is available for database migrations."""
@@ -221,9 +187,7 @@ class TestDependencyVerification:
             assert hasattr(alembic.command, "upgrade")
             assert hasattr(alembic.command, "downgrade")
         except ImportError as e:
-            pytest.fail(
-                f"alembic is not installed - required for database migrations: {e}"
-            )
+            pytest.fail(f"alembic is not installed - required for database migrations: {e}")
         except Exception as e:
             pytest.fail(f"alembic functionality test failed: {e}")
 
@@ -239,9 +203,7 @@ class TestDependencyCompatibility:
 
             # This should not raise any compatibility errors
             engine = create_engine("sqlite:///:memory:")
-            SessionLocal = sessionmaker(
-                autocommit=False, autoflush=False, bind=engine
-            )
+            SessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engine)
 
             def get_db():
                 db = SessionLocal()
@@ -371,11 +333,11 @@ class TestCriticalDependencyImports:
         """Test critical authentication imports work."""
         try:
             import jwt as pyjwt
-            from jose import JWTError, jwt
+            from jwt.exceptions import InvalidTokenError  # Replaces JWTError from jose
             from passlib.context import CryptContext
 
             # These must all succeed
-            assert all([CryptContext, jwt, JWTError, pyjwt])
+            assert all([CryptContext, pyjwt, InvalidTokenError])
         except ImportError as e:
             pytest.fail(f"Critical auth import failed: {e}")
 

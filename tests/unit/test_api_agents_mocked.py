@@ -2,20 +2,14 @@
 
 import uuid
 from datetime import datetime
-from unittest.mock import patch, MagicMock
-
-import pytest
-from tests.test_client_compat import TestClient
-from sqlalchemy.orm import Session
-
-from database.models import Agent as AgentModel
-from database.models import AgentStatus
-from tests.fixtures.fixtures import db_session, test_engine
+from typing import Optional
 
 # Create a minimal FastAPI app for testing
-from fastapi import FastAPI, Depends, HTTPException
+from fastapi import Depends, FastAPI
 from pydantic import BaseModel
-from typing import List, Optional
+from sqlalchemy.orm import Session
+
+from tests.test_client_compat import TestClient
 
 
 class AgentConfig(BaseModel):
@@ -39,12 +33,18 @@ app = FastAPI()
 
 # Mock authentication - always return authorized user
 async def mock_get_current_user():
-    return {"sub": "test-user", "username": "test", "role": "admin", "permissions": ["CREATE_AGENT"]}
+    return {
+        "sub": "test-user",
+        "username": "test",
+        "role": "admin",
+        "permissions": ["CREATE_AGENT"],
+    }
 
 
 def mock_require_permission(permission):
     def decorator(func):
         return func
+
     return decorator
 
 
@@ -59,7 +59,7 @@ async def create_agent(config: AgentConfig, db: Session = Depends(lambda: None))
         template=config.template,
         status="pending",
         created_at=datetime.utcnow(),
-        parameters=config.parameters or {}
+        parameters=config.parameters or {},
     )
 
 
@@ -72,7 +72,7 @@ async def get_agent(agent_id: str):
         template="basic-explorer",
         status="active",
         created_at=datetime.utcnow(),
-        parameters={}
+        parameters={},
     )
 
 
@@ -86,7 +86,7 @@ async def list_agents():
             template="basic-explorer",
             status="active",
             created_at=datetime.utcnow(),
-            parameters={}
+            parameters={},
         )
         for i in range(3)
     ]
@@ -102,7 +102,7 @@ async def update_agent(agent_id: str, update_data: dict):
         template="basic-explorer",
         status=update_data.get("status", "active"),
         created_at=datetime.utcnow(),
-        parameters={}
+        parameters={},
     )
 
 
@@ -118,16 +118,16 @@ class TestAgentsAPIMocked:
     def test_create_agent(self):
         """Test creating an agent."""
         client = TestClient(app)
-        
+
         agent_data = {
             "name": "Test Explorer",
             "template": "basic-explorer",
-            "parameters": {"grid_size": 10}
+            "parameters": {"grid_size": 10},
         }
-        
+
         response = client.post("/api/v1/agents", json=agent_data)
         assert response.status_code == 201
-        
+
         data = response.json()
         assert data["name"] == "Test Explorer"
         assert data["template"] == "basic-explorer"
@@ -138,10 +138,10 @@ class TestAgentsAPIMocked:
         """Test getting an agent."""
         client = TestClient(app)
         agent_id = str(uuid.uuid4())
-        
+
         response = client.get(f"/api/v1/agents/{agent_id}")
         assert response.status_code == 200
-        
+
         data = response.json()
         assert data["id"] == agent_id
         assert data["name"] == "Test Agent"
@@ -149,10 +149,10 @@ class TestAgentsAPIMocked:
     def test_list_agents(self):
         """Test listing agents."""
         client = TestClient(app)
-        
+
         response = client.get("/api/v1/agents")
         assert response.status_code == 200
-        
+
         data = response.json()
         assert len(data["agents"]) == 3
         assert data["total"] == 3
@@ -161,10 +161,10 @@ class TestAgentsAPIMocked:
         """Test updating an agent."""
         client = TestClient(app)
         agent_id = str(uuid.uuid4())
-        
+
         update_data = {"name": "Updated Name", "status": "active"}
         response = client.put(f"/api/v1/agents/{agent_id}", json=update_data)
-        
+
         assert response.status_code == 200
         data = response.json()
         assert data["name"] == "Updated Name"
@@ -174,18 +174,18 @@ class TestAgentsAPIMocked:
         """Test deleting an agent."""
         client = TestClient(app)
         agent_id = str(uuid.uuid4())
-        
+
         response = client.delete(f"/api/v1/agents/{agent_id}")
         assert response.status_code == 204
 
     def test_invalid_agent_data(self):
         """Test creating agent with invalid data."""
         client = TestClient(app)
-        
+
         # Test with empty data
         response = client.post("/api/v1/agents", json={})
         assert response.status_code == 422
-        
+
         # Test with missing template
         response = client.post("/api/v1/agents", json={"name": "Test"})
         assert response.status_code == 422

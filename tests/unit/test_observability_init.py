@@ -1,6 +1,6 @@
 """Tests for observability.__init__ module."""
 
-from unittest.mock import MagicMock, patch
+from unittest.mock import patch
 
 import pytest
 
@@ -43,9 +43,7 @@ class TestObservabilityInit:
             assert record_coordination_event is not None
 
         except ImportError as e:
-            pytest.skip(
-                f"Cannot import observability due to dependency issues: {e}"
-            )
+            assert False, "Test bypass removed - must fix underlying issue"
 
     def test_observability_all_exports(self):
         """Test that __all__ contains expected exports."""
@@ -65,9 +63,7 @@ class TestObservabilityInit:
             assert set(observability.__all__) == set(expected_exports)
 
         except ImportError as e:
-            pytest.skip(
-                f"Cannot import observability due to dependency issues: {e}"
-            )
+            assert False, "Test bypass removed - must fix underlying issue"
 
     def test_observability_module_docstring(self):
         """Test that observability module has proper docstring."""
@@ -81,9 +77,7 @@ class TestObservabilityInit:
             )
 
         except ImportError as e:
-            pytest.skip(
-                f"Cannot import observability due to dependency issues: {e}"
-            )
+            assert False, "Test bypass removed - must fix underlying issue"
 
     @patch("observability.pymdp_integration.get_pymdp_performance_summary")
     @patch("observability.pymdp_integration.monitor_pymdp_inference")
@@ -113,6 +107,4 @@ class TestObservabilityInit:
             assert hasattr(observability, "record_coordination_event")
 
         except ImportError as e:
-            pytest.skip(
-                f"Cannot import observability due to dependency issues: {e}"
-            )
+            assert False, "Test bypass removed - must fix underlying issue"

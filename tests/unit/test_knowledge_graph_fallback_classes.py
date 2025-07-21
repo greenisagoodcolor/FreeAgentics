@@ -384,9 +384,7 @@ class TestCreateAllFallbackClasses:
         result = create_all_fallback_classes()
 
         # Check that logger was created
-        mock_get_logger.assert_called_once_with(
-            "knowledge_graph.fallback_classes"
-        )
+        mock_get_logger.assert_called_once_with("knowledge_graph.fallback_classes")
 
         # Check that all expected classes are returned
         expected_keys = {
@@ -438,10 +436,7 @@ class TestCreateAllFallbackClasses:
         result = create_all_fallback_classes()
 
         # Test that correct classes are returned
-        assert (
-            result["ConversationEventIntegration"]
-            == ConversationEventIntegration
-        )
+        assert result["ConversationEventIntegration"] == ConversationEventIntegration
         assert result["EventSource"] == EventSource
         assert result["EventType"] == EventType
         assert result["create_node_event"] == create_node_event

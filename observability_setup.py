@@ -40,18 +40,12 @@ class SystemMetricsCollector:
             # Memory metrics
             memory = psutil.virtual_memory()
             await record_system_metric("memory_usage", memory.percent)
-            await record_system_metric(
-                "memory_available_gb", memory.available / (1024**3)
-            )
+            await record_system_metric("memory_available_gb", memory.available / (1024**3))
 
             # Process-specific metrics
             process_memory = self.process.memory_info()
-            await record_system_metric(
-                "process_memory_mb", process_memory.rss / (1024**2)
-            )
-            await record_system_metric(
-                "process_cpu_percent", self.process.cpu_percent()
-            )
+            await record_system_metric("process_memory_mb", process_memory.rss / (1024**2))
+            await record_system_metric("process_cpu_percent", self.process.cpu_percent())
 
             # Disk metrics
             disk = psutil.disk_usage("/")
@@ -145,9 +139,7 @@ class StructuredLogger:
 
                 # Add exception info if present
                 if record.exc_info:
-                    log_entry["exception"] = self.formatException(
-                        record.exc_info
-                    )
+                    log_entry["exception"] = self.formatException(record.exc_info)
 
                 # Add agent context if present
                 if hasattr(record, "agent_id"):
@@ -171,13 +163,9 @@ class StructuredLogger:
         # Keep console handler for development
         console_handler = logging.StreamHandler()
         console_handler.setFormatter(
-            logging.Formatter(
-                "%(asctime)s - %(name)s - %(levelname)s - %(message)s"
-            )
+            logging.Formatter("%(asctime)s - %(name)s - %(levelname)s - %(message)s")
         )
-        console_handler.setLevel(
-            logging.WARNING
-        )  # Only warnings/errors to console
+        console_handler.setLevel(logging.WARNING)  # Only warnings/errors to console
         root_logger.addHandler(console_handler)
 
         root_logger.setLevel(logging.INFO)
@@ -213,14 +201,10 @@ class AlertManager:
             summary = metrics_collector.get_summary(metric_type, duration=60.0)
 
             if summary and summary["latest"] > threshold:
-                await self._send_alert(
-                    metric_type, summary["latest"], threshold
-                )
+                await self._send_alert(metric_type, summary["latest"], threshold)
                 self.alert_cooldowns[metric_type] = current_time
 
-    async def _send_alert(
-        self, metric_type: str, value: float, threshold: float
-    ):
+    async def _send_alert(self, metric_type: str, value: float, threshold: float):
         """Send alert notification."""
         alert_message = {
             "type": "alert",
@@ -232,9 +216,7 @@ class AlertManager:
         }
 
         # Log the alert
-        logging.warning(
-            f"ALERT: {metric_type} = {value:.2f} (threshold: {threshold})"
-        )
+        logging.warning(f"ALERT: {metric_type} = {value:.2f} (threshold: {threshold})")
 
         # Record alert as metric
         await record_system_metric("alerts_triggered", 1)
@@ -291,13 +273,7 @@ class HealthChecker:
         # Check agent manager
         try:
             if self.agent_manager:
-                active_agents = len(
-                    [
-                        a
-                        for a in self.agent_manager.agents.values()
-                        if a.is_active
-                    ]
-                )
+                active_agents = len([a for a in self.agent_manager.agents.values() if a.is_active])
                 health_status["components"]["agent_manager"] = {
                     "status": "healthy",
                     "active_agents": active_agents,
@@ -434,9 +410,7 @@ class ObservabilityManager:
                     await record_system_metric("system_health", 0.0)
 
                 # Log health status
-                logging.info(
-                    f"Health check: {health_status['overall_status']}"
-                )
+                logging.info(f"Health check: {health_status['overall_status']}")
 
                 # Write detailed health status to file
                 os.makedirs("logs", exist_ok=True)
@@ -459,9 +433,7 @@ def get_observability_manager() -> Optional[ObservabilityManager]:
     return _observability_manager
 
 
-def initialize_observability(
-    agent_manager=None, database=None
-) -> ObservabilityManager:
+def initialize_observability(agent_manager=None, database=None) -> ObservabilityManager:
     """Initialize and return the global observability manager."""
     global _observability_manager
 

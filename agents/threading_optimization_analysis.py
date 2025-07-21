@@ -4,32 +4,24 @@ Comprehensive analysis of threading bottlenecks and optimization opportunities
 in the multi-agent system.
 """
 
-import asyncio
 import concurrent.futures
 import logging
 import multiprocessing as mp
 import os
 import sys
-import threading
 import time
 from collections import defaultdict
 from dataclasses import dataclass
-from typing import Any, Dict, List, Optional, Tuple
+from typing import Any, Dict, List, Tuple
 
 import numpy as np
 import psutil
 
-# Add project root to path
+# Add project root to path before importing local modules
 sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
-# Project imports must be after sys.path.append
-from agents.optimized_threadpool_manager import (  
-    OptimizedThreadPoolManager,
-)
-from agents.threading_profiler import (  
-    InstrumentedLock,
-    ThreadingProfiler,
-)
+from agents.optimized_threadpool_manager import OptimizedThreadPoolManager
+from agents.threading_profiler import ThreadingProfiler
 
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
@@ -39,7 +31,8 @@ logger = logging.getLogger(__name__)
 class OptimizationOpportunity:
     """Represents a threading optimization opportunity."""
 
-    category: str  # 'lock_contention', 'thread_pool', 'async_io', 'memory', 'context_switch'
+    category: str  # 'lock_contention', 'thread_pool', 'async_io', 'memory',
+        'context_switch'
     severity: str  # 'high', 'medium', 'low'
     description: str
     current_performance: Dict[str, Any]
@@ -71,9 +64,7 @@ class ThreadingOptimizationAnalyzer:
             def __init__(self, agent_id):
                 self.agent_id = agent_id
                 self.state = 0
-                self.lock = profiler.create_instrumented_lock(
-                    f"agent_{agent_id}_lock"
-                )
+                self.lock = profiler.create_instrumented_lock(f"agent_{agent_id}_lock")
 
             def step(self, observation):
                 with self.lock:
@@ -109,23 +100,18 @@ class ThreadingOptimizationAnalyzer:
                     opportunities.append(
                         OptimizationOpportunity(
                             category="lock_contention",
-                            severity="high"
-                            if contention_rate > 0.3
-                            else "medium",
+                            severity="high" if contention_rate > 0.3 else "medium",
                             description=f"Lock {lock_id} has {contention_rate:.1%} contention rate",
                             current_performance={
                                 "contention_rate": contention_rate,
-                                "avg_wait_time_ms": (
-                                    metrics.total_wait_time
-                                    / metrics.acquisitions
-                                )
+                                "avg_wait_time_ms": (metrics.total_wait_time / metrics.acquisitions)
                                 * 1000,
-                                "max_wait_time_ms": metrics.max_wait_time
-                                * 1000,
+                                "max_wait_time_ms": metrics.max_wait_time * 1000,
                             },
                             expected_improvement="50-70% reduction in wait time",
                             implementation_effort="medium",
-                            recommendation="Replace with lock-free data structures or use finer-grained locking",
+                            recommendation="Replace with lock-free data structures or
+                                use finer-grained locking",
                         )
                     )
 
@@ -143,7 +129,8 @@ class ThreadingOptimizationAnalyzer:
                     },
                     expected_improvement="3-5x speedup",
                     implementation_effort="medium",
-                    recommendation="Use concurrent hash map or sharded locks for agent registry",
+                    recommendation="Use concurrent hash map or
+                        sharded locks for agent registry",
                 )
             )
 
@@ -185,27 +172,23 @@ class ThreadingOptimizationAnalyzer:
         cpu_count = mp.cpu_count()
 
         for workload_name, workload_func in workloads:
-            optimal, throughputs = self.profiler.find_optimal_thread_count(
-                workload_func
-            )
+            optimal,
+                throughputs = self.profiler.find_optimal_thread_count(workload_func)
 
             # Check if current sizing is optimal
             current_default = 8  # From OptimizedThreadPoolManager
 
             # Log CPU count for analysis context
             logger.debug(
-                f"System CPU count: {cpu_count}, analyzing {workload_name} workload"
+                f"System CPU count: {cpu_count}, analyzing {workload_name}"
+                f" workload"
             )
             current_throughput = throughputs.get(current_default, 0)
             optimal_throughput = throughputs[optimal]
 
-            if (
-                optimal != current_default
-                and optimal_throughput > current_throughput * 1.2
-            ):
-                improvement = (
-                    (optimal_throughput / current_throughput) - 1
-                ) * 100
+            if optimal != current_default and
+                optimal_throughput > current_throughput * 1.2:
+                improvement = ((optimal_throughput / current_throughput) - 1) * 100
 
                 opportunities.append(
                     OptimizationOpportunity(
@@ -312,18 +295,15 @@ class ThreadingOptimizationAnalyzer:
                 {
                     "agent_id": f"agent_{i}",
                     "beliefs": np.random.rand(100, 100),  # 80KB per agent
-                    "observations": [
-                        np.random.rand(50, 50) for _ in range(10)
-                    ],  # 200KB
+                    "observations": [np.random.rand(50, 50) for _ in range(10)],
+                        # 200KB
                     "policy": np.random.rand(100, 100),  # 80KB
                 },
             )()
             agents.append(agent)
 
         mem_after = process.memory_info().rss
-        mem_per_agent = (
-            (mem_after - mem_before) / len(agents) / 1024 / 1024
-        )  # MB
+        mem_per_agent = (mem_after - mem_before) / len(agents) / 1024 / 1024  # MB
 
         if mem_per_agent > 1:  # >1MB per agent
             opportunities.append(
@@ -353,7 +333,8 @@ class ThreadingOptimizationAnalyzer:
                 },  # Estimated
                 expected_improvement="3x memory efficiency",
                 implementation_effort="medium",
-                recommendation="Use numpy's shared memory arrays or memory-mapped files",
+                recommendation="Use numpy's shared memory arrays or
+                    memory-mapped files",
             )
         )
 
@@ -371,9 +352,7 @@ class ThreadingOptimizationAnalyzer:
             ctx_before = process.num_ctx_switches()
 
             # Run thread-heavy workload
-            with concurrent.futures.ThreadPoolExecutor(
-                max_workers=32
-            ) as executor:
+            with concurrent.futures.ThreadPoolExecutor(max_workers=32) as executor:
                 futures = []
                 for _ in range(1000):
                     futures.append(executor.submit(lambda: sum(range(1000))))
@@ -401,12 +380,12 @@ class ThreadingOptimizationAnalyzer:
                     description="High context switching overhead",
                     current_performance={
                         "context_switches": switches,
-                        "overhead_estimate_ms": switches
-                        * 0.001,  # ~1us per switch
+                        "overhead_estimate_ms": switches * 0.001,  # ~1us per switch
                     },
                     expected_improvement="30-50% reduction in context switches",
                     implementation_effort="medium",
-                    recommendation="Batch operations and use thread affinity to reduce context switching",
+                    recommendation="Batch operations and
+                        use thread affinity to reduce context switching",
                 )
             )
 
@@ -457,32 +436,21 @@ class ThreadingOptimizationAnalyzer:
         work_opts = self.analyze_work_stealing()
 
         all_opportunities = (
-            lock_opts
-            + pool_opts
-            + async_opts
-            + memory_opts
-            + context_opts
-            + work_opts
+            lock_opts + pool_opts + async_opts + memory_opts + context_opts + work_opts
         )
 
         # Sort by severity and expected improvement
         severity_order = {"high": 0, "medium": 1, "low": 2}
-        all_opportunities.sort(
-            key=lambda x: (severity_order[x.severity], x.category)
-        )
+        all_opportunities.sort(key=lambda x: (severity_order[x.severity], x.category))
 
         # Calculate summary statistics
         summary = {
             "total_opportunities": len(all_opportunities),
-            "high_severity": len(
-                [o for o in all_opportunities if o.severity == "high"]
-            ),
-            "medium_severity": len(
-                [o for o in all_opportunities if o.severity == "medium"]
-            ),
-            "low_severity": len(
-                [o for o in all_opportunities if o.severity == "low"]
-            ),
+            "high_severity": len([o for o in all_opportunities if
+                o.severity == "high"]),
+            "medium_severity": len([o for o in all_opportunities if
+                o.severity == "medium"]),
+            "low_severity": len([o for o in all_opportunities if o.severity == "low"]),
             "by_category": defaultdict(int),
             "expected_overall_improvement": "10-50% based on workload",
         }
@@ -505,9 +473,7 @@ def generate_optimization_report():
 
     print("\nOPTIMIZATION SUMMARY")
     print("-" * 80)
-    print(
-        f"Total optimization opportunities: {summary['total_opportunities']}"
-    )
+    print(f"Total optimization opportunities: {summary['total_opportunities']}")
     print(f"  High severity: {summary['high_severity']}")
     print(f"  Medium severity: {summary['medium_severity']}")
     print(f"  Low severity: {summary['low_severity']}")
@@ -516,9 +482,7 @@ def generate_optimization_report():
     for category, count in summary["by_category"].items():
         print(f"  {category}: {count}")
     print()
-    print(
-        f"Expected overall improvement: {summary['expected_overall_improvement']}"
-    )
+    print(f"Expected overall improvement: {summary['expected_overall_improvement']}")
 
     print("\n\nDETAILED OPTIMIZATION OPPORTUNITIES")
     print("-" * 80)
@@ -540,21 +504,18 @@ def generate_optimization_report():
     high_impact_low_effort = [
         o
         for o in opportunities
-        if o.severity in ["high", "medium"]
-        and o.implementation_effort == "low"
+        if o.severity in ["high", "medium"] and o.implementation_effort == "low"
     ]
 
     high_impact_medium_effort = [
         o
         for o in opportunities
-        if o.severity in ["high", "medium"]
-        and o.implementation_effort == "medium"
+        if o.severity in ["high", "medium"] and o.implementation_effort == "medium"
     ]
 
     high_impact_high_effort = [
-        o
-        for o in opportunities
-        if o.severity == "high" and o.implementation_effort == "high"
+        o for o in opportunities if o.severity == "high" and
+            o.implementation_effort == "high"
     ]
 
     print("\nPhase 1 - Quick Wins (1-2 days):")

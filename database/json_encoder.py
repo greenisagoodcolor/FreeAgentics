@@ -8,7 +8,7 @@ from uuid import UUID
 
 class DatabaseJSONEncoder(json.JSONEncoder):
     """JSON encoder that handles datetime and UUID objects."""
-    
+
     def default(self, obj: Any) -> Any:
         """Convert non-serializable objects to JSON-serializable formats."""
         if isinstance(obj, datetime):

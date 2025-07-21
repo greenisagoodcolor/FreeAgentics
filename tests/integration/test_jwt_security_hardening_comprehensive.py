@@ -14,15 +14,11 @@ Tests all security requirements:
 10. Rate limiting on auth endpoints
 """
 
-import asyncio
-import os
-import time
 from datetime import datetime, timedelta, timezone
-from unittest.mock import AsyncMock, MagicMock, patch
+from unittest.mock import patch
 
 import jwt
 import pytest
-from cryptography.hazmat.primitives import serialization
 from cryptography.hazmat.primitives.asymmetric import rsa
 from fastapi import HTTPException, status
 from fastapi.testclient import TestClient
@@ -75,9 +71,7 @@ class TestJWTSecurityIntegration:
 
         # Should be exactly 15 minutes
         duration = exp_time - iat_time
-        assert (
-            890 <= duration.total_seconds() <= 910
-        )  # 15 minutes ± 10 seconds
+        assert 890 <= duration.total_seconds() <= 910  # 15 minutes ± 10 seconds
 
     def test_refresh_token_expiration_7_days(self, test_user):
         """Verify refresh tokens expire in 7 days."""
@@ -92,9 +86,7 @@ class TestJWTSecurityIntegration:
         # Should be exactly 7 days
         duration = exp_time - iat_time
         expected_seconds = 7 * 24 * 60 * 60
-        assert (
-            abs(duration.total_seconds() - expected_seconds) < 3600
-        )  # Within 1 hour
+        assert abs(duration.total_seconds() - expected_seconds) < 3600  # Within 1 hour
 
     def test_jwt_includes_all_required_claims(self, test_user):
         """Verify JWT includes all required claims."""
@@ -143,21 +135,15 @@ class TestJWTSecurityIntegration:
         fingerprint = jwt_handler.generate_fingerprint()
 
         # Create token with fingerprint
-        token = auth_manager.create_access_token(
-            test_user, client_fingerprint=fingerprint
-        )
+        token = auth_manager.create_access_token(test_user, client_fingerprint=fingerprint)
 
         # Should succeed with correct fingerprint
-        token_data = auth_manager.verify_token(
-            token, client_fingerprint=fingerprint
-        )
+        token_data = auth_manager.verify_token(token, client_fingerprint=fingerprint)
         assert token_data.user_id == test_user.user_id
 
         # Should fail with wrong fingerprint
         with pytest.raises(HTTPException) as exc_info:
-            auth_manager.verify_token(
-                token, client_fingerprint="wrong_fingerprint"
-            )
+            auth_manager.verify_token(token, client_fingerprint="wrong_fingerprint")
         assert exc_info.value.status_code == status.HTTP_401_UNAUTHORIZED
         assert "fingerprint" in str(exc_info.value.detail).lower()
 
@@ -176,7 +162,7 @@ class TestJWTSecurityIntegration:
 
         # Access token cookie should be httpOnly
         if "access_token" in cookies:
-            cookie = cookies["access_token"]
+            cookies["access_token"]
             # FastAPI test client doesn't expose all cookie attributes
             # In production, these would be set correctly
 
@@ -211,9 +197,7 @@ class TestJWTSecurityIntegration:
         refresh_token = auth_manager.create_refresh_token(test_user)
 
         # Use refresh token to get new tokens
-        new_access, new_refresh = auth_manager.refresh_access_token(
-            refresh_token
-        )
+        new_access, new_refresh = auth_manager.refresh_access_token(refresh_token)
 
         # New tokens should be different
         assert new_access != access_token
@@ -308,9 +292,7 @@ class TestJWTSecurityIntegration:
             "jti": "test-jti",
         }
 
-        wrong_token = jwt.encode(
-            token_data, jwt_handler.private_key, algorithm="RS256"
-        )
+        wrong_token = jwt.encode(token_data, jwt_handler.private_key, algorithm="RS256")
 
         # Should fail validation
         with pytest.raises(HTTPException) as exc_info:

@@ -220,9 +220,7 @@ class APISecurityResponseTester:
                 # Make rapid requests to trigger rate limiting
                 responses = []
                 for i in range(15):  # Try to exceed typical rate limits
-                    response = self.client.post(
-                        endpoint, json={"test": f"request_{i}"}
-                    )
+                    response = self.client.post(endpoint, json={"test": f"request_{i}"})
                     responses.append(response)
 
                     # Small delay to avoid overwhelming the server
@@ -252,18 +250,14 @@ class APISecurityResponseTester:
                         # Check response content for information disclosure
                         response_text = response.text
                         for pattern in self.sensitive_response_patterns:
-                            if re.search(
-                                pattern, response_text, re.IGNORECASE
-                            ):
+                            if re.search(pattern, response_text, re.IGNORECASE):
                                 results["passed"] = False
                                 results["findings"].append(
                                     {
                                         "issue": "Sensitive information in rate limit response",
                                         "endpoint": endpoint,
                                         "pattern": pattern,
-                                        "response_preview": response_text[
-                                            :200
-                                        ],
+                                        "response_preview": response_text[:200],
                                     }
                                 )
 
@@ -343,9 +337,7 @@ class APISecurityResponseTester:
                 )
 
                 # Test actual request
-                actual_response = self.client.get(
-                    test_endpoint, headers=headers
-                )
+                actual_response = self.client.get(test_endpoint, headers=headers)
 
                 # Check CORS headers in responses
                 for response in [preflight_response, actual_response]:
@@ -367,8 +359,7 @@ class APISecurityResponseTester:
                     # Check for overly permissive CORS
                     if (
                         cors_headers["Access-Control-Allow-Origin"] == "*"
-                        and cors_headers["Access-Control-Allow-Credentials"]
-                        == "true"
+                        and cors_headers["Access-Control-Allow-Credentials"] == "true"
                     ):
                         results["passed"] = False
                         results["findings"].append(
@@ -382,8 +373,7 @@ class APISecurityResponseTester:
                     # Check if unknown origins are allowed
                     if (
                         origin in ["https://malicious-site.com"]
-                        and cors_headers["Access-Control-Allow-Origin"]
-                        == origin
+                        and cors_headers["Access-Control-Allow-Origin"] == origin
                     ):
                         results["passed"] = False
                         results["findings"].append(
@@ -441,23 +431,17 @@ class APISecurityResponseTester:
                 headers = {"Content-Type": content_type}
 
                 if isinstance(payload, str):
-                    response = self.client.post(
-                        test_endpoint, data=payload, headers=headers
-                    )
+                    response = self.client.post(test_endpoint, data=payload, headers=headers)
                 else:
-                    response = self.client.post(
-                        test_endpoint, content=payload, headers=headers
-                    )
+                    response = self.client.post(test_endpoint, content=payload, headers=headers)
 
                 # Check response content type
-                response_content_type = response.headers.get(
-                    "Content-Type", ""
-                )
+                response_content_type = response.headers.get("Content-Type", "")
 
                 # Responses should generally be JSON for API endpoints
-                if test_endpoint.startswith(
-                    "/api/"
-                ) and not response_content_type.startswith("application/json"):
+                if test_endpoint.startswith("/api/") and not response_content_type.startswith(
+                    "application/json"
+                ):
                     results["findings"].append(
                         {
                             "issue": "Non-JSON response from API endpoint",
@@ -618,9 +602,7 @@ class APISecurityResponseTester:
                         search_response_text = search_response.text
 
                         for pattern in dangerous_patterns:
-                            if re.search(
-                                pattern, search_response_text, re.IGNORECASE
-                            ):
+                            if re.search(pattern, search_response_text, re.IGNORECASE):
                                 results["passed"] = False
                                 results["findings"].append(
                                     {
@@ -684,9 +666,7 @@ class APISecurityResponseTester:
                             headers={"Content-Type": "application/json"},
                         )
                     else:
-                        response = self.client.post(
-                            endpoint, json={"data": data} if data else {}
-                        )
+                        response = self.client.post(endpoint, json={"data": data} if data else {})
                 elif method == "DELETE":
                     response = self.client.delete(endpoint)
                 elif method == "PATCH":
@@ -734,9 +714,7 @@ class APISecurityResponseTester:
                             "scenario": scenario_name,
                             "endpoint": endpoint,
                             "status_code": response.status_code,
-                            "content_type": response.headers.get(
-                                "Content-Type", "unknown"
-                            ),
+                            "content_type": response.headers.get("Content-Type", "unknown"),
                         }
                     )
 
@@ -802,7 +780,7 @@ class APISecurityResponseTester:
                 start_time = time.time()
 
                 if data:
-                    response = self.client.post(endpoint, json=data)
+                    self.client.post(endpoint, json=data)
                 else:
                     self.client.get(endpoint)
 
@@ -810,9 +788,7 @@ class APISecurityResponseTester:
                 times.append(end_time - start_time)
 
             avg_time = sum(times) / len(times)
-            std_dev = (
-                sum((t - avg_time) ** 2 for t in times) / len(times)
-            ) ** 0.5
+            std_dev = (sum((t - avg_time) ** 2 for t in times) / len(times)) ** 0.5
 
             timing_results[scenario_name] = {
                 "avg_time": avg_time,
@@ -884,9 +860,7 @@ class APISecurityResponseTester:
                     {
                         "test_name": test_method.__name__,
                         "passed": False,
-                        "findings": [
-                            {"issue": f"Test execution error: {str(e)}"}
-                        ],
+                        "findings": [{"issue": f"Test execution error: {str(e)}"}],
                         "recommendations": ["Fix test execution error"],
                     }
                 )
@@ -925,9 +899,7 @@ class APISecurityResponseTester:
                 "total_tests": total_tests,
                 "passed_tests": passed_tests,
                 "failed_tests": failed_tests,
-                "pass_rate": (passed_tests / total_tests * 100)
-                if total_tests > 0
-                else 0,
+                "pass_rate": (passed_tests / total_tests * 100) if total_tests > 0 else 0,
                 "critical_findings": len(critical_findings),
                 "high_findings": len(high_findings),
                 "medium_findings": len(medium_findings),
@@ -1022,9 +994,7 @@ class TestAPISecurityResponses:
 
             if summary["recommendations"]:
                 failure_msg += "\nRecommendations:\n"
-                for rec in summary["recommendations"][
-                    :10
-                ]:  # Limit to first 10
+                for rec in summary["recommendations"][:10]:  # Limit to first 10
                     failure_msg += f"  - {rec}\n"
 
             pytest.fail(failure_msg)
@@ -1047,7 +1017,7 @@ if __name__ == "__main__":
     print(f"Pass Rate: {summary['summary']['pass_rate']:.1f}%")
     print(f"Overall Status: {summary['overall_status']}")
 
-    print(f"\nFindings by Severity:")
+    print("\nFindings by Severity:")
     print(f"  Critical: {summary['summary']['critical_findings']}")
     print(f"  High: {summary['summary']['high_findings']}")
     print(f"  Medium: {summary['summary']['medium_findings']}")
@@ -1061,7 +1031,9 @@ if __name__ == "__main__":
 
     # Save report
     timestamp = time.strftime("%Y%m%d_%H%M%S")
-    report_file = f"/home/green/FreeAgentics/tests/security/api_security_response_report_{timestamp}.json"
+    report_file = (
+        f"/home/green/FreeAgentics/tests/security/api_security_response_report_{timestamp}.json"
+    )
 
     try:
         with open(report_file, "w") as f:

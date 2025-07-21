@@ -167,9 +167,7 @@ class TestGMNVersionTracking:
         """Create GMN repository instance."""
         return MockGMNRepository(db_session)
 
-    def test_create_gmn_specification_with_version_tracking(
-        self, gmn_repository, agent
-    ):
+    def test_create_gmn_specification_with_version_tracking(self, gmn_repository, agent):
         """Test creating GMN specification with proper version tracking.
 
         This test will fail initially because we need to enhance the schema
@@ -178,7 +176,7 @@ class TestGMNVersionTracking:
         """
         # This should fail initially - versioned methods not implemented
         with pytest.raises(Exception, match="Method not implemented"):
-            spec = gmn_repository.create_gmn_specification_versioned(
+            gmn_repository.create_gmn_specification_versioned(
                 agent_id=agent.id,
                 specification="goal: explore\nbeliefs: location_uniform",
                 name="Explorer Agent v1.0",
@@ -194,14 +192,14 @@ class TestGMNVersionTracking:
         that tracks parent-child relationships between versions.
         """
         # Create initial version
-        v1_spec = gmn_repository.create_gmn_specification(
+        gmn_repository.create_gmn_specification(
             agent_id=agent.id,
             specification="goal: explore\nbeliefs: location_uniform",
         )
 
         # This should fail - enhanced versioning not implemented
         with pytest.raises(Exception, match="Method not implemented"):
-            v2_spec = gmn_repository.create_new_version(
+            gmn_repository.create_new_version(
                 parent_specification_id=uuid.uuid4(),
                 specification="goal: explore_efficiently\nbeliefs: location_informed",
                 version_metadata={"change_summary": "Added informed beliefs"},
@@ -225,7 +223,7 @@ class TestGMNVersionTracking:
         """
         # This should fail - rollback functionality not implemented
         with pytest.raises(Exception, match="Method not implemented"):
-            result = gmn_repository.rollback_to_version(
+            gmn_repository.rollback_to_version(
                 agent_id=agent.id,
                 target_version_id=uuid.uuid4(),
                 rollback_reason="Testing rollback",
@@ -239,9 +237,7 @@ class TestGMNVersionTracking:
         """
         # This should fail - version comparison not implemented
         with pytest.raises(Exception, match="Method not implemented"):
-            diff = gmn_repository.compare_versions(
-                version_a_id=uuid.uuid4(), version_b_id=uuid.uuid4()
-            )
+            gmn_repository.compare_versions(version_a_id=uuid.uuid4(), version_b_id=uuid.uuid4())
 
 
 class TestGMNAdvancedQuerying:
@@ -270,7 +266,7 @@ class TestGMNAdvancedQuerying:
         """
         # This should fail - parsed content search not implemented
         with pytest.raises(Exception, match="Method not implemented"):
-            results = gmn_repository.search_by_parsed_content(
+            gmn_repository.search_by_parsed_content(
                 agent_id=agent.id,
                 node_type="belief",
                 property_filter={"distribution_type": "uniform"},
@@ -284,7 +280,7 @@ class TestGMNAdvancedQuerying:
         """
         # This should fail - complexity metrics not implemented
         with pytest.raises(Exception):
-            specs = gmn_repository.get_by_complexity_range(
+            gmn_repository.get_by_complexity_range(
                 agent_id=agent.id,
                 min_nodes=5,
                 max_edges=20,
@@ -299,7 +295,7 @@ class TestGMNAdvancedQuerying:
         """
         # This should fail - enhanced temporal queries not implemented
         with pytest.raises(Exception):
-            specs = gmn_repository.get_by_time_range(
+            gmn_repository.get_by_time_range(
                 agent_id=agent.id,
                 start_time=datetime.utcnow() - timedelta(days=7),
                 end_time=datetime.utcnow(),
@@ -314,7 +310,7 @@ class TestGMNAdvancedQuerying:
         """
         # This should fail - enhanced statistics not implemented
         with pytest.raises(Exception):
-            stats = gmn_repository.get_detailed_statistics(
+            gmn_repository.get_detailed_statistics(
                 agent_id=agent.id, time_window_days=30, include_trends=True
             )
 
@@ -345,7 +341,7 @@ class TestGMNDataIntegrity:
         """
         # This should fail - integrity validation not implemented
         with pytest.raises(Exception):
-            integrity_report = gmn_repository.validate_data_integrity(
+            gmn_repository.validate_data_integrity(
                 agent_id=agent.id,
                 check_version_consistency=True,
                 check_parsed_data_sync=True,
@@ -369,9 +365,7 @@ class TestGMNDataIntegrity:
         """
         # This should fail - lineage repair not implemented
         with pytest.raises(Exception):
-            repair_result = gmn_repository.repair_version_lineage(
-                agent_id=agent.id, dry_run=True
-            )
+            gmn_repository.repair_version_lineage(agent_id=agent.id, dry_run=True)
 
     def test_constraint_validation(self, gmn_repository, agent):
         """Test database constraint validation for GMN data.
@@ -424,7 +418,7 @@ class TestGMNPerformanceOptimization:
                 for i in range(100)
             ]
 
-            result = gmn_repository.bulk_create_specifications(
+            gmn_repository.bulk_create_specifications(
                 agent_id=agent.id, specifications=specifications, batch_size=10
             )
 
@@ -436,7 +430,7 @@ class TestGMNPerformanceOptimization:
         """
         # This should fail - cursor pagination not implemented
         with pytest.raises(Exception):
-            page = gmn_repository.get_specifications_paginated(
+            gmn_repository.get_specifications_paginated(
                 agent_id=agent.id, cursor=None, limit=20, sort_direction="desc"
             )
 
@@ -449,14 +443,10 @@ class TestGMNPerformanceOptimization:
         # This should fail - query caching not implemented
         with pytest.raises(Exception):
             # First call should cache the result
-            specs1 = gmn_repository.get_agent_specifications_cached(
-                agent_id=agent.id, cache_ttl=300
-            )
+            gmn_repository.get_agent_specifications_cached(agent_id=agent.id, cache_ttl=300)
 
             # Second call should use cache
-            specs2 = gmn_repository.get_agent_specifications_cached(
-                agent_id=agent.id, cache_ttl=300
-            )
+            gmn_repository.get_agent_specifications_cached(agent_id=agent.id, cache_ttl=300)
 
     def test_index_performance_analysis(self, gmn_repository, agent):
         """Test database index performance analysis.
@@ -466,6 +456,6 @@ class TestGMNPerformanceOptimization:
         """
         # This should fail - performance analysis not implemented
         with pytest.raises(Exception):
-            analysis = gmn_repository.analyze_query_performance(
+            gmn_repository.analyze_query_performance(
                 query_type="agent_specifications", agent_id=agent.id
             )

@@ -1,340 +1,254 @@
-"""Prompt processing API endpoint for FreeAgentics platform.
-
-This endpoint handles natural language prompts and orchestrates the
-prompt → agent → knowledge graph pipeline.
-"""
+"""Prompts API endpoint for goal-driven agent creation via LLM."""
 
 import logging
 from datetime import datetime
-from typing import Any, Dict, List, Optional
+from typing import Any, Dict, Optional
+from uuid import uuid4
 
-from fastapi import APIRouter, Depends, HTTPException, status
-from fastapi.responses import JSONResponse
-from pydantic import BaseModel, Field, validator
-from sqlalchemy.ext.asyncio import AsyncSession
+from fastapi import APIRouter, Depends, HTTPException
+from pydantic import BaseModel, Field
 
-# These will be injected via dependency injection
 from agents.agent_manager import AgentManager
-from agents.pymdp_adapter import PyMDPCompatibilityAdapter
-
-# Import WebSocket broadcasting functions
-from api.v1.websocket import broadcast_agent_event, broadcast_system_event
+from agents.gmn_pymdp_adapter import adapt_gmn_to_pymdp
 from auth.security_implementation import (
     Permission,
     TokenData,
     get_current_user,
     require_permission,
 )
-from database.session import get_db
-from inference.active.gmn_parser import GMNParser
-from knowledge_graph.graph_engine import KnowledgeGraph
-from services.agent_factory import AgentFactory
-from services.belief_kg_bridge import BeliefKGBridge
-from services.gmn_generator import GMNGenerator
-from services.iterative_controller import IterativeController
-from services.prompt_processor import PromptProcessor
+from inference.active.gmn_parser import parse_gmn_spec
+from inference.llm.provider_factory import LLMProviderFactory
+from inference.llm.provider_interface import GenerationRequest
 
 logger = logging.getLogger(__name__)
 
 router = APIRouter()
 
 
-# Request/Response models
 class PromptRequest(BaseModel):
-    """Request model for prompt processing."""
-
-    prompt: str = Field(
-        ...,
-        min_length=1,
-        max_length=2000,
-        description="Natural language prompt for agent creation or modification",
-    )
-    conversation_id: Optional[str] = Field(
-        None, description="Optional conversation ID for context continuation"
-    )
-    iteration_count: Optional[int] = Field(
-        default=1,
-        ge=1,
-        le=10,
-        description="Number of GMN refinement iterations",
-    )
-
-    @validator('prompt')
-    def validate_prompt(cls, v):
-        """Ensure prompt is not just whitespace."""
-        if not v.strip():
-            raise ValueError("Prompt cannot be empty or just whitespace")
-        return v.strip()
+    """Request model for creating agent from prompt."""
+    
+    prompt: str = Field(..., description="Goal prompt describing desired agent behavior")
+    agent_name: Optional[str] = Field(None, description="Optional name for the agent")
+    llm_provider: Optional[str] = Field("openai", description="LLM provider to use")
+    model: Optional[str] = Field(None, description="Specific model to use")
+    max_retries: int = Field(3, description="Max retries for GMN generation")
 
 
 class PromptResponse(BaseModel):
     """Response model for prompt processing."""
-
-    agent_id: str = Field(..., description="ID of created/modified agent")
-    gmn_specification: str = Field(
-        ..., description="Generated GMN specification"
-    )
-    knowledge_graph_updates: List[Dict[str, Any]] = Field(
-        ..., description="List of knowledge graph updates applied"
-    )
-    next_suggestions: List[str] = Field(
-        ..., description="Suggested next actions or refinements"
-    )
-    status: str = Field(
-        ..., description="Processing status: success, partial_success, failed"
-    )
-    warnings: Optional[List[str]] = Field(
-        None, description="Any warnings during processing"
-    )
-    processing_time_ms: Optional[float] = Field(
-        None, description="Processing time in milliseconds"
-    )
-    iteration_context: Optional[Dict[str, Any]] = Field(
-        None, description="Context about the iterative conversation"
-    )
+    
+    agent_id: str
+    agent_name: str
+    gmn_spec: Dict[str, Any]
+    pymdp_model: Dict[str, Any]
+    status: str
+    timestamp: datetime
+    llm_provider_used: str
+    generation_time_ms: float
 
 
-# Dependency injection
-_prompt_processor: Optional[PromptProcessor] = None
-
-
-async def websocket_pipeline_callback(event_type: str, data: Dict[str, Any]):
-    """Callback for WebSocket updates during pipeline processing."""
-    # Broadcast pipeline events to WebSocket subscribers
-    await broadcast_system_event(f"pipeline:{event_type}", data)
-
-    # Also broadcast specific agent events
-    if event_type == "agent_created" and "agent_id" in data:
-        await broadcast_agent_event(
-            data["agent_id"],
-            "created",
-            {
-                "prompt_id": data.get("prompt_id"),
-                "agent_type": data.get("agent_type"),
-            },
-        )
-    elif event_type == "knowledge_graph_updated" and "prompt_id" in data:
-        await broadcast_system_event(
-            "knowledge_graph:updated",
-            {
-                "prompt_id": data["prompt_id"],
-                "updates_count": data.get("updates_count", 0),
-                "nodes_added": data.get("nodes_added", 0),
-            },
-        )
-
-
-def get_prompt_processor() -> PromptProcessor:
-    """Get or create prompt processor instance."""
-    global _prompt_processor
-
-    if _prompt_processor is None:
-        # Initialize with real implementations
-        gmn_generator = GMNGenerator()  # Uses MockLLMProvider by default
-        gmn_parser = GMNParser()
-        agent_factory = AgentFactory()
-        agent_manager = AgentManager()
-        knowledge_graph = KnowledgeGraph()
-        belief_kg_bridge = BeliefKGBridge()
-        pymdp_adapter = PyMDPCompatibilityAdapter()
-
-        # Create iterative controller
-        iterative_controller = IterativeController(
-            knowledge_graph=knowledge_graph,
-            belief_kg_bridge=belief_kg_bridge,
-            pymdp_adapter=pymdp_adapter,
-        )
-
-        _prompt_processor = PromptProcessor(
-            gmn_generator=gmn_generator,
-            gmn_parser=gmn_parser,
-            agent_factory=agent_factory,
-            agent_manager=agent_manager,
-            knowledge_graph=knowledge_graph,
-            belief_kg_bridge=belief_kg_bridge,
-            pymdp_adapter=pymdp_adapter,
-            iterative_controller=iterative_controller,
-            websocket_callback=websocket_pipeline_callback,
-        )
-
-    return _prompt_processor
+# Global instances - in production these would be dependency injected
+agent_manager = AgentManager()
+llm_factory = LLMProviderFactory()
 
 
 @router.post("/prompts", response_model=PromptResponse)
-async def process_prompt(
+@require_permission(Permission.CREATE_AGENT)
+async def create_agent_from_prompt(
     request: PromptRequest,
     current_user: TokenData = Depends(get_current_user),
-    db: AsyncSession = Depends(get_db),
-    prompt_processor: PromptProcessor = Depends(get_prompt_processor),
-    _: None = Depends(require_permission(Permission.CREATE_AGENT)),
 ) -> PromptResponse:
-    """Process a natural language prompt to create or modify an agent.
-
-    This endpoint orchestrates the full prompt → agent → knowledge graph pipeline:
-    1. Converts natural language to GMN specification via LLM
-    2. Validates and parses GMN into PyMDP model
-    3. Creates active inference agent from model
-    4. Updates knowledge graph with agent beliefs
-    5. Returns suggestions for next actions
-
-    Args:
-        request: The prompt request containing text and optional parameters
-        current_user: Authenticated user from JWT token
-        db: Database session
-        prompt_processor: Injected prompt processing service
-
-    Returns:
-        PromptResponse with agent ID, GMN spec, KG updates, and suggestions
-
-    Raises:
-        400: If GMN validation fails
-        401: If user is not authenticated
-        403: If user lacks CREATE_AGENT permission
-        422: If request validation fails
-        500: If agent creation fails
+    """Create an agent from a natural language prompt.
+    
+    This implements the core FreeAgentics flow:
+    1. Goal prompt → LLM (generate GMN)
+    2. GMN → Parser (validate)
+    3. GMN → PyMDP adapter (convert)
+    4. PyMDP model → Create agent
     """
-    import time
-
-    start_time = time.time()
-
-    logger.info(
-        f"Processing prompt for user {current_user.username}: {request.prompt[:100]}..."
-    )
-
+    start_time = datetime.now()
+    
     try:
-        # Process the prompt
-        result = await prompt_processor.process_prompt(
-            prompt_text=request.prompt,
-            user_id=current_user.username,
-            db=db,
-            conversation_id=request.conversation_id,
-            iteration_count=request.iteration_count,
+        # Step 1: Generate GMN from prompt using LLM
+        logger.info(f"Processing prompt: {request.prompt[:100]}...")
+        
+        # Get LLM provider using configuration
+        try:
+            config = llm_factory.create_from_config()
+            provider = config.get_best_available_provider()
+        except Exception as e:
+            logger.error(f"Failed to get LLM provider: {e}")
+            raise HTTPException(
+                status_code=503,
+                detail="No LLM providers available. Please configure API keys."
+            )
+        
+        if not provider:
+            raise HTTPException(
+                status_code=503,
+                detail=f"LLM provider {request.llm_provider} not available"
+            )
+        
+        # Construct GMN generation prompt
+        system_prompt = """You are an expert in Active Inference and the GMN (Generalized Notation) format.
+Convert the user's goal description into a valid GMN specification.
+
+GMN format structure:
+{
+  "name": "agent_name",
+  "description": "what the agent does",
+  "states": ["state1", "state2", ...],
+  "observations": ["obs1", "obs2", ...],
+  "actions": ["action1", "action2", ...],
+  "parameters": {
+    "A": [[probability_matrix]],  // P(o|s) observation model
+    "B": [[[transition_tensor]]],  // P(s'|s,a) transition model
+    "C": [[preferences]],  // Observation preferences
+    "D": [[initial_beliefs]]  // Initial state distribution
+  }
+}
+
+Ensure all probability distributions sum to 1.0."""
+
+        user_prompt = f"Create a GMN specification for an agent that: {request.prompt}"
+        
+        # Generate GMN
+        generation_request = GenerationRequest(
+            messages=[
+                {"role": "system", "content": system_prompt},
+                {"role": "user", "content": user_prompt}
+            ],
+            model=request.model,
+            temperature=0.7,
+            max_tokens=2000,
+            response_format="json"
         )
-
-        # Calculate processing time
-        processing_time = (time.time() - start_time) * 1000
-
-        # Add processing time to result
-        result["processing_time_ms"] = processing_time
-
-        # Log success
-        logger.info(
-            f"Successfully created agent {result['agent_id']} in {processing_time:.2f}ms"
+        
+        gmn_response = provider.generate(generation_request)
+        
+        # Parse the generated GMN
+        try:
+            import json
+            gmn_spec = json.loads(gmn_response.content)
+        except json.JSONDecodeError as e:
+            logger.error(f"Failed to parse LLM response as JSON: {e}")
+            raise HTTPException(
+                status_code=422,
+                detail="LLM generated invalid JSON for GMN spec"
+            )
+        
+        # Step 2: Validate GMN spec
+        logger.info("Validating generated GMN spec...")
+        try:
+            validated_gmn = parse_gmn_spec(gmn_spec)
+        except Exception as e:
+            logger.error(f"GMN validation failed: {e}")
+            # Try to regenerate if we have retries left
+            if request.max_retries > 0:
+                # Add error to prompt and retry
+                user_prompt += f"\n\nPrevious attempt failed with: {str(e)}\nPlease fix and regenerate."
+                request.max_retries -= 1
+                return await create_agent_from_prompt(request, current_user)
+            raise HTTPException(
+                status_code=422,
+                detail=f"Generated GMN spec is invalid: {str(e)}"
+            )
+        
+        # Step 3: Convert to PyMDP format
+        logger.info("Converting GMN to PyMDP format...")
+        pymdp_model = adapt_gmn_to_pymdp(validated_gmn)
+        
+        # Step 4: Create agent with the model
+        agent_name = request.agent_name or gmn_spec.get("name", f"agent_{uuid4().hex[:8]}")
+        agent_id = f"agent_{uuid4().hex}"
+        
+        # Create agent using the validated model
+        agent = agent_manager.create_agent(
+            agent_id=agent_id,
+            name=agent_name,
+            gmn_config=validated_gmn
         )
-
-        return PromptResponse(**result)
-
-    except ValueError as e:
-        # GMN validation error
-        logger.error(f"GMN validation error: {str(e)}")
-        raise HTTPException(
-            status_code=status.HTTP_400_BAD_REQUEST, detail=str(e)
+        
+        if not agent:
+            raise HTTPException(
+                status_code=500,
+                detail="Failed to create agent from GMN model"
+            )
+        
+        # Step 5: Initialize knowledge graph for the agent
+        from agents.kg_integration import AgentKnowledgeGraphIntegration
+        kg_integration = AgentKnowledgeGraphIntegration()
+        
+        # Store KG integration in agent for later use
+        agent.kg_integration = kg_integration
+        
+        # Step 6: Start agent and broadcast via WebSocket
+        agent_manager.start_agent(agent_id)
+        
+        # Broadcast agent creation event
+        from api.v1.websocket import broadcast_agent_event
+        await broadcast_agent_event(
+            agent_id,
+            "agent_created",
+            {
+                "name": agent_name,
+                "gmn_spec": gmn_spec,
+                "status": "active"
+            }
         )
-
-    except RuntimeError as e:
-        # Agent creation error
-        logger.error(f"Agent creation error: {str(e)}")
-        raise HTTPException(
-            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR, detail=str(e)
+        
+        # Calculate timing
+        generation_time = (datetime.now() - start_time).total_seconds() * 1000
+        
+        response = PromptResponse(
+            agent_id=agent_id,
+            agent_name=agent_name,
+            gmn_spec=gmn_spec,
+            pymdp_model=pymdp_model,
+            status="active",
+            timestamp=datetime.now(),
+            llm_provider_used=provider.get_provider_type().value,
+            generation_time_ms=generation_time
         )
-
+        
+        logger.info(f"Successfully created agent {agent_id} from prompt in {generation_time:.1f}ms")
+        return response
+        
+    except HTTPException:
+        raise
     except Exception as e:
-        # Unexpected error
-        logger.error(
-            f"Unexpected error processing prompt: {str(e)}", exc_info=True
-        )
+        logger.error(f"Failed to create agent from prompt: {e}")
         raise HTTPException(
-            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-            detail=f"An unexpected error occurred: {str(e)}",
+            status_code=500,
+            detail=f"Agent creation failed: {str(e)}"
         )
 
 
-@router.get("/prompts/templates")
-async def get_prompt_templates(
-    category: Optional[str] = None,
-    current_user: TokenData = Depends(get_current_user),
-    db: AsyncSession = Depends(get_db),
-) -> List[Dict[str, Any]]:
-    """Get available prompt templates.
-
-    Returns a list of pre-defined prompt templates that can be used
-    as starting points for agent creation.
-
-    Args:
-        category: Optional filter by template category
-        current_user: Authenticated user
-        db: Database session
-
-    Returns:
-        List of prompt templates with examples
-    """
-    # TODO: Implement template retrieval from database
-    templates = [
-        {
-            "id": "explorer-basic",
-            "name": "Basic Explorer Agent",
-            "category": "explorer",
-            "description": "Simple grid world exploration agent",
-            "example_prompt": "Create an explorer agent for a 5x5 grid world",
-            "suggested_parameters": {
-                "grid_size": [5, 5],
-                "planning_horizon": 3,
-            },
-        },
-        {
-            "id": "trader-market",
-            "name": "Market Trader Agent",
-            "category": "trader",
-            "description": "Agent for trading in a market environment",
-            "example_prompt": "Create a trader agent that can buy and sell resources",
-            "suggested_parameters": {
-                "resource_types": ["gold", "silver", "copper"],
-                "initial_capital": 1000,
-            },
-        },
-    ]
-
-    if category:
-        templates = [t for t in templates if t["category"] == category]
-
-    return templates
-
-
-@router.get("/prompts/suggestions")
-async def get_contextual_suggestions(
-    agent_id: str,
-    current_user: TokenData = Depends(get_current_user),
-    db: AsyncSession = Depends(get_db),
-) -> Dict[str, Any]:
-    """Get contextual suggestions for an existing agent.
-
-    Analyzes the current state of an agent and provides suggestions
-    for improvements or next actions.
-
-    Args:
-        agent_id: ID of the agent to analyze
-        current_user: Authenticated user
-        db: Database session
-
-    Returns:
-        Dictionary containing suggestions and agent analysis
-    """
-    # TODO: Implement actual agent analysis
+@router.get("/prompts/examples")
+async def get_prompt_examples() -> Dict[str, Any]:
+    """Get example prompts for agent creation."""
     return {
-        "agent_id": agent_id,
-        "current_state": {
-            "belief_entropy": 0.75,
-            "exploration_coverage": 0.3,
-            "goal_progress": 0.5,
-        },
-        "suggestions": [
-            "Add curiosity-driven exploration to reduce uncertainty",
-            "Define clearer goal states for directed behavior",
-            "Consider forming a coalition for complex tasks",
-        ],
-        "recommended_prompts": [
-            "Make the agent more curious about unexplored areas",
-            "Add a specific goal location to the agent's preferences",
-            "Create a coordinator agent to work with this explorer",
-        ],
+        "examples": [
+            {
+                "name": "Explorer",
+                "prompt": "Create an agent that explores a grid world to find hidden rewards while avoiding obstacles",
+                "description": "Basic exploration agent with curiosity drive"
+            },
+            {
+                "name": "Forager",
+                "prompt": "Create an agent that forages for food in a environment with depleting resources",
+                "description": "Resource collection agent with planning"
+            },
+            {
+                "name": "Navigator",
+                "prompt": "Create an agent that navigates to specified goals while learning the environment layout",
+                "description": "Goal-directed navigation with map building"
+            },
+            {
+                "name": "Guardian",
+                "prompt": "Create an agent that patrols an area and responds to intrusions",
+                "description": "Monitoring agent with reactive behavior"
+            }
+        ]
     }

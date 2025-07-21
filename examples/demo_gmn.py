@@ -12,7 +12,6 @@ This demo showcases the GMN (Generalized Notation Notation) integration:
 import logging
 import os
 import sys
-from datetime import datetime
 
 # Add project root to path
 sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
@@ -85,9 +84,7 @@ position_belief -> position: depends_on
     try:
         # Parse GMN specification
         gmn_graph = parser.parse(simple_gmn_spec)
-        print(
-            f"✅ Parsed GMN with {len(gmn_graph.nodes)} nodes and {len(gmn_graph.edges)} edges"
-        )
+        print(f"✅ Parsed GMN with {len(gmn_graph.nodes)} nodes and {len(gmn_graph.edges)} edges")
 
         # Show parsed components
         print("\n📋 GMN Components:")
@@ -110,9 +107,7 @@ position_belief -> position: depends_on
     print("🤖 Creating GMN-Specified Agent...")
 
     # For now, create a basic agent and show how GMN could be integrated
-    agent = BasicExplorerAgent(
-        "gmn_explorer", "GMN Explorer Agent", grid_size=4
-    )
+    agent = BasicExplorerAgent("gmn_explorer", "GMN Explorer Agent", grid_size=4)
     agent.start()
 
     # Simulate loading GMN spec into agent
@@ -131,8 +126,14 @@ position_belief -> position: depends_on
 
     # Simulate some steps
     for step in range(3):
+        # Create observation with defensive position handling
+        if hasattr(agent.position, 'x'):
+            pos_list = [agent.position.x, agent.position.y]
+        else:
+            pos_list = agent.position
+            
         observation = {
-            "position": agent.position.copy(),
+            "position": pos_list,
             "surroundings": [
                 [0, 0, 0],
                 [0, 0, 0],
@@ -141,23 +142,43 @@ position_belief -> position: depends_on
         }
 
         action = agent.step(observation)
-        print(f"  Step {step + 1}: pos={agent.position}, action={action}")
+        # Handle both Position object and list formats
+        if hasattr(agent.position, 'x'):
+            pos_str = f"({agent.position.x}, {agent.position.y})"
+        else:
+            pos_str = f"({agent.position[0]}, {agent.position[1]})"
+        print(f"  Step {step + 1}: pos={pos_str}, action={action}")
 
         # Update position based on action
-        if action == "up" and agent.position[0] > 0:
-            agent.position[0] -= 1
-        elif action == "down" and agent.position[0] < 3:
-            agent.position[0] += 1
-        elif action == "left" and agent.position[1] > 0:
-            agent.position[1] -= 1
-        elif action == "right" and agent.position[1] < 3:
-            agent.position[1] += 1
+        if hasattr(agent.position, 'x'):
+            # Position object
+            if action == "up" and agent.position.y > 0:
+                agent.position.y -= 1
+            elif action == "down" and agent.position.y < 3:
+                agent.position.y += 1
+            elif action == "left" and agent.position.x > 0:
+                agent.position.x -= 1
+            elif action == "right" and agent.position.x < 3:
+                agent.position.x += 1
+        else:
+            # List format
+            if action == "up" and agent.position[1] > 0:
+                agent.position[1] -= 1
+            elif action == "down" and agent.position[1] < 3:
+                agent.position[1] += 1
+            elif action == "left" and agent.position[0] > 0:
+                agent.position[0] -= 1
+            elif action == "right" and agent.position[0] < 3:
+                agent.position[0] += 1
 
     # Show agent status
     print("\n📊 Final Agent Status:")
     status = agent.get_status()
     print(f"  Total steps: {status['total_steps']}")
-    print(f"  Final position: {agent.position}")
+    if hasattr(agent.position, 'x'):
+        print(f"  Final position: ({agent.position.x}, {agent.position.y})")
+    else:
+        print(f"  Final position: ({agent.position[0]}, {agent.position[1]})")
     if "belief_entropy" in agent.metrics:
         print(f"  Belief entropy: {agent.metrics['belief_entropy']:.3f}")
 

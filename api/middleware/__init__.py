@@ -15,10 +15,8 @@ from .ddos_protection import (
     RateLimiter,
     WebSocketRateLimiter,
 )
-from .security_monitoring import (
-    SecurityHeadersMiddleware,
-    SecurityMonitoringMiddleware,
-)
+from .security_monitoring import SecurityMonitoringMiddleware
+from auth.security_headers import SecurityHeadersMiddleware
 
 __all__ = [
     "DDoSProtectionMiddleware",

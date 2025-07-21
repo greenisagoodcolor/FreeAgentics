@@ -8,22 +8,22 @@ from pathlib import Path
 
 def add_docstrings_to_file(filepath):
     """Add missing docstrings to a Python file."""
-    with open(filepath, 'r') as f:
+    with open(filepath, "r") as f:
         content = f.read()
 
     # Pattern replacements for classes and methods
     replacements = [
         # Classes without docstrings
         (
-            r'class (\w+):\n(\s+)def',
+            r"class (\w+):\n(\s+)def",
             r'class \1:\n\2"""TODO: Add docstring."""\n\2def',
         ),
         (
-            r'class (\w+):\n(\s+)pass',
+            r"class (\w+):\n(\s+)pass",
             r'class \1:\n\2"""TODO: Add docstring."""\n\2pass',
         ),
         (
-            r'class (\w+):\n(\s+)(\w+)',
+            r"class (\w+):\n(\s+)(\w+)",
             r'class \1:\n\2"""TODO: Add docstring."""\n\2\3',
         ),
         # Methods without docstrings
@@ -43,7 +43,7 @@ def add_docstrings_to_file(filepath):
         modified = re.sub(pattern, replacement, modified, flags=re.MULTILINE)
 
     if modified != content:
-        with open(filepath, 'w') as f:
+        with open(filepath, "w") as f:
             f.write(modified)
         return True
     return False
@@ -57,7 +57,7 @@ def main():
 
     for filepath in sys.argv[1:]:
         path = Path(filepath)
-        if path.exists() and path.suffix == '.py':
+        if path.exists() and path.suffix == ".py":
             if add_docstrings_to_file(path):
                 print(f"Added docstrings to {path}")
             else:

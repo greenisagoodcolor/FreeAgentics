@@ -9,16 +9,11 @@ import asyncio
 import json
 import time
 from datetime import datetime, timedelta, timezone
-from typing import Dict, List, Optional
-from unittest.mock import AsyncMock, MagicMock, patch
+from unittest.mock import MagicMock, patch
 
-import jwt
 import pytest
-from fastapi import WebSocket, WebSocketDisconnect
-from fastapi.testclient import TestClient
-from websockets.exceptions import WebSocketException
+from fastapi import WebSocketDisconnect
 
-from api.v1.websocket import manager, router
 from auth.security_implementation import (
     AuthenticationManager,
     Permission,
@@ -28,16 +23,13 @@ from auth.security_implementation import (
 from websocket.auth_handler import (
     WebSocketAuthHandler,
     WebSocketErrorCode,
-    ws_auth_handler,
 )
 
 
 class MockWebSocket:
     """Mock WebSocket for testing."""
 
-    def __init__(
-        self, path="/ws/test_client", headers=None, query_params=None
-    ):
+    def __init__(self, path="/ws/test_client", headers=None, query_params=None):
         self.path = path
         self.headers = headers or {}
         self.query_params = query_params or {}
@@ -106,28 +98,19 @@ class TestWebSocketAuthentication:
         )
 
     @pytest.mark.asyncio
-    async def test_successful_authentication_with_query_token(
-        self, valid_token_data
-    ):
+    async def test_successful_authentication_with_query_token(self, valid_token_data):
         """Test successful WebSocket authentication with token in query params."""
         ws = MockWebSocket(query_params={"token": "valid.jwt.token"})
         handler = WebSocketAuthHandler()
 
-        with patch(
-            "websocket.auth_handler.auth_manager.verify_token"
-        ) as mock_verify:
+        with patch("websocket.auth_handler.auth_manager.verify_token") as mock_verify:
             mock_verify.return_value = valid_token_data
 
-            result = await handler.authenticate_connection(
-                ws, "test_client", "valid.jwt.token"
-            )
+            result = await handler.authenticate_connection(ws, "test_client", "valid.jwt.token")
 
             assert result == valid_token_data
             assert "test_client" in handler.connections
-            assert (
-                handler.connections["test_client"].user_data
-                == valid_token_data
-            )
+            assert handler.connections["test_client"].user_data == valid_token_data
 
     @pytest.mark.asyncio
     async def test_authentication_with_expired_token(self, expired_token_data):
@@ -135,15 +118,11 @@ class TestWebSocketAuthentication:
         ws = MockWebSocket()
         handler = WebSocketAuthHandler()
 
-        with patch(
-            "websocket.auth_handler.auth_manager.verify_token"
-        ) as mock_verify:
+        with patch("websocket.auth_handler.auth_manager.verify_token") as mock_verify:
             mock_verify.side_effect = Exception("Token has expired")
 
             with pytest.raises(WebSocketDisconnect) as exc_info:
-                await handler.authenticate_connection(
-                    ws, "test_client", "expired.jwt.token"
-                )
+                await handler.authenticate_connection(ws, "test_client", "expired.jwt.token")
 
             assert exc_info.value.code == WebSocketErrorCode.TOKEN_EXPIRED
             assert ws.closed
@@ -168,19 +147,13 @@ class TestWebSocketAuthentication:
         ws = MockWebSocket()
         handler = WebSocketAuthHandler()
 
-        with patch(
-            "websocket.auth_handler.auth_manager.verify_token"
-        ) as mock_verify:
+        with patch("websocket.auth_handler.auth_manager.verify_token") as mock_verify:
             mock_verify.side_effect = Exception("Invalid token")
 
             with pytest.raises(WebSocketDisconnect) as exc_info:
-                await handler.authenticate_connection(
-                    ws, "test_client", "invalid.jwt.token"
-                )
+                await handler.authenticate_connection(ws, "test_client", "invalid.jwt.token")
 
-            assert (
-                exc_info.value.code == WebSocketErrorCode.AUTHENTICATION_FAILED
-            )
+            assert exc_info.value.code == WebSocketErrorCode.AUTHENTICATION_FAILED
             assert ws.closed
 
     @pytest.mark.asyncio
@@ -211,14 +184,10 @@ class TestWebSocketAuthentication:
         # Add 3 connections for the user
         for i in range(3):
             handler.connections[f"client_{i}"] = MagicMock()
-            handler.user_connections[valid_token_data.user_id] = {
-                f"client_{i}"
-            }
+            handler.user_connections[valid_token_data.user_id] = {f"client_{i}"}
 
         # 4th connection should be rejected
-        result = await handler._check_connection_limit(
-            valid_token_data.user_id, "client_3"
-        )
+        result = await handler._check_connection_limit(valid_token_data.user_id, "client_3")
         assert result is False
 
     @pytest.mark.asyncio
@@ -252,9 +221,7 @@ class TestWebSocketAuthorization:
         handler = WebSocketAuthHandler()
         handler.connections["test_client"] = MagicMock()
         handler.connections["test_client"].user_data = valid_token_data
-        handler.connections["test_client"].permissions = set(
-            valid_token_data.permissions
-        )
+        handler.connections["test_client"].permissions = set(valid_token_data.permissions)
         return handler
 
     @pytest.mark.asyncio
@@ -274,9 +241,7 @@ class TestWebSocketAuthorization:
         assert result is False
 
     @pytest.mark.asyncio
-    async def test_permission_check_unknown_client(
-        self, handler_with_connection
-    ):
+    async def test_permission_check_unknown_client(self, handler_with_connection):
         """Test permission check for unknown client."""
         result = await handler_with_connection.verify_permission(
             "unknown_client", Permission.VIEW_AGENTS
@@ -293,9 +258,7 @@ class TestWebSocketMessageValidation:
         from api.v1.websocket import WebSocketMessage
 
         # Valid message
-        valid_msg = WebSocketMessage(
-            type="subscribe", data={"event_types": ["agent:update"]}
-        )
+        valid_msg = WebSocketMessage(type="subscribe", data={"event_types": ["agent:update"]})
         assert valid_msg.type == "subscribe"
 
         # Invalid type with special characters
@@ -363,17 +326,14 @@ class TestWebSocketHeartbeat:
 
         # Setup connection
         handler.connections["test_client"] = MagicMock()
-        handler.connections[
-            "test_client"
-        ].last_heartbeat = datetime.utcnow() - timedelta(minutes=5)
+        handler.connections["test_client"].last_heartbeat = datetime.utcnow() - timedelta(minutes=5)
 
         # Update heartbeat
         await handler.update_heartbeat("test_client")
 
         # Check updated
         assert (
-            datetime.utcnow()
-            - handler.connections["test_client"].last_heartbeat
+            datetime.utcnow() - handler.connections["test_client"].last_heartbeat
         ).total_seconds() < 1
 
     @pytest.mark.asyncio
@@ -387,15 +347,11 @@ class TestWebSocketHeartbeat:
 
         # Active connection
         handler.connections["active_client"] = MagicMock()
-        handler.connections["active_client"].last_heartbeat = now - timedelta(
-            seconds=30
-        )
+        handler.connections["active_client"].last_heartbeat = now - timedelta(seconds=30)
 
         # Timed out connection
         handler.connections["timeout_client"] = MagicMock()
-        handler.connections["timeout_client"].last_heartbeat = now - timedelta(
-            seconds=90
-        )
+        handler.connections["timeout_client"].last_heartbeat = now - timedelta(seconds=90)
 
         # Check timeouts
         timed_out = await handler.check_heartbeat_timeout()
@@ -416,17 +372,13 @@ class TestWebSocketTokenRefresh:
         handler.connections["test_client"] = MagicMock()
         handler.connections["test_client"].user_data = valid_token_data
 
-        with patch(
-            "websocket.auth_handler.auth_manager.refresh_access_token"
-        ) as mock_refresh:
+        with patch("websocket.auth_handler.auth_manager.refresh_access_token") as mock_refresh:
             mock_refresh.return_value = (
                 "new_access_token",
                 "new_refresh_token",
             )
 
-            with patch(
-                "websocket.auth_handler.auth_manager.verify_token"
-            ) as mock_verify:
+            with patch("websocket.auth_handler.auth_manager.verify_token") as mock_verify:
                 mock_verify.return_value = valid_token_data
 
                 new_token, user_data = await handler.refresh_token(
@@ -638,24 +590,18 @@ class TestWebSocketReconnection:
         handler = WebSocketAuthHandler()
         ws = MockWebSocket()
 
-        with patch(
-            "websocket.auth_handler.auth_manager.verify_token"
-        ) as mock_verify:
+        with patch("websocket.auth_handler.auth_manager.verify_token") as mock_verify:
             mock_verify.return_value = valid_token_data
 
             # First connection
-            result1 = await handler.authenticate_connection(
-                ws, "client_1", "valid.token"
-            )
+            result1 = await handler.authenticate_connection(ws, "client_1", "valid.token")
             assert result1 == valid_token_data
 
             # Disconnect
             await handler.disconnect("client_1")
 
             # Reconnect with same token
-            result2 = await handler.authenticate_connection(
-                ws, "client_1", "valid.token"
-            )
+            result2 = await handler.authenticate_connection(ws, "client_1", "valid.token")
             assert result2 == valid_token_data
 
     @pytest.mark.asyncio
@@ -668,36 +614,26 @@ class TestWebSocketReconnection:
         handler.connections["client_1"].user_data = valid_token_data
 
         # Refresh token
-        with patch(
-            "websocket.auth_handler.auth_manager.refresh_access_token"
-        ) as mock_refresh:
+        with patch("websocket.auth_handler.auth_manager.refresh_access_token") as mock_refresh:
             mock_refresh.return_value = (
                 "new_access_token",
                 "new_refresh_token",
             )
 
-            with patch(
-                "websocket.auth_handler.auth_manager.verify_token"
-            ) as mock_verify:
+            with patch("websocket.auth_handler.auth_manager.verify_token") as mock_verify:
                 mock_verify.return_value = valid_token_data
 
-                new_token, _ = await handler.refresh_token(
-                    "client_1", "old_refresh_token"
-                )
+                new_token, _ = await handler.refresh_token("client_1", "old_refresh_token")
 
         # Disconnect
         await handler.disconnect("client_1")
 
         # Reconnect with new token
         ws = MockWebSocket()
-        with patch(
-            "websocket.auth_handler.auth_manager.verify_token"
-        ) as mock_verify:
+        with patch("websocket.auth_handler.auth_manager.verify_token") as mock_verify:
             mock_verify.return_value = valid_token_data
 
-            result = await handler.authenticate_connection(
-                ws, "client_1", new_token
-            )
+            result = await handler.authenticate_connection(ws, "client_1", new_token)
             assert result == valid_token_data
 
 
@@ -712,16 +648,12 @@ class TestWebSocketPerformance:
 
         async def authenticate_client(client_id):
             ws = MockWebSocket()
-            with patch(
-                "websocket.auth_handler.auth_manager.verify_token"
-            ) as mock_verify:
+            with patch("websocket.auth_handler.auth_manager.verify_token") as mock_verify:
                 mock_verify.return_value = valid_token_data
                 try:
-                    await handler.authenticate_connection(
-                        ws, client_id, "valid.token"
-                    )
+                    await handler.authenticate_connection(ws, client_id, "valid.token")
                     return True
-                except:
+                except Exception:
                     return False
 
         # Create concurrent authentication tasks

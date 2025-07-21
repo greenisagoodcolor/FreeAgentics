@@ -1,17 +1,26 @@
 [run]
+branch = True
 source = .
 omit =
     */tests/*
     */test_*
     *_test.py
     */venv/*
+    */test_venv/*
+    */lint_env/*
+    */security_env/*
+    */pipeline_test_env/*
+    */security_audit_env/*
+    */security_scan_env/*
     */__pycache__/*
+    */.pytest_cache/*
     */node_modules/*
     */htmlcov*/*
     */test-reports/*
     */coverage/*
     */build/*
     */dist/*
+    */.eggs/*
     */.git/*
     */migrations/*
     */alembic/*
@@ -38,8 +47,10 @@ omit =
     */benchmarks/*
     */cleanup_scripts/*
     */taskmaster_tasks/*
-    */test-reports/*
     */knowledge_graphs/*
+    */site-packages/*
+    setup.py
+    */setup.py
 
 # Include core modules only
 include =
@@ -54,6 +65,10 @@ include =
     knowledge_graph/*
     auth/*
     websocket/*
+
+parallel = True
+data_file = .coverage
+concurrency = thread,multiprocessing
 
 [report]
 exclude_lines =
@@ -74,6 +89,17 @@ exclude_lines =
     print.*Warning.*not available
 
 precision = 2
-show_missing = true
-skip_covered = false
+show_missing = True
+skip_empty = True
+skip_covered = False
 fail_under = 90
+
+[html]
+directory = htmlcov
+
+[xml]
+output = coverage.xml
+
+[json]
+output = coverage.json
+pretty_print = True

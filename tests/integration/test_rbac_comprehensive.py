@@ -15,7 +15,6 @@ from unittest.mock import Mock, patch
 
 import pytest
 from fastapi import HTTPException, status
-from fastapi.testclient import TestClient
 
 from auth.comprehensive_audit_logger import comprehensive_auditor
 from auth.rbac_enhancements import (
@@ -84,16 +83,12 @@ class TestRBACBasics:
         assert user.is_active is True
 
         # Test authentication
-        authenticated_user = auth_manager.authenticate_user(
-            "test_user", "testpassword123"
-        )
+        authenticated_user = auth_manager.authenticate_user("test_user", "testpassword123")
         assert authenticated_user is not None
         assert authenticated_user.username == "test_user"
 
         # Test failed authentication
-        failed_auth = auth_manager.authenticate_user(
-            "test_user", "wrongpassword"
-        )
+        failed_auth = auth_manager.authenticate_user("test_user", "wrongpassword")
         assert failed_auth is None
 
     def test_token_generation_and_validation(self):
@@ -167,11 +162,7 @@ class TestABACFunctionality:
 
         # Check rule was added
         added_rule = next(
-            (
-                r
-                for r in enhanced_rbac_manager.abac_rules
-                if r.id == "test_rule_001"
-            ),
+            (r for r in enhanced_rbac_manager.abac_rules if r.id == "test_rule_001"),
             None,
         )
         assert added_rule is not None
@@ -209,9 +200,7 @@ class TestABACFunctionality:
             admin_access,
             admin_reason,
             admin_rules,
-        ) = enhanced_rbac_manager.evaluate_abac_access(
-            admin_context, resource_context, "delete"
-        )
+        ) = enhanced_rbac_manager.evaluate_abac_access(admin_context, resource_context, "delete")
         assert admin_access is True  # Admin should have access
 
         # Test observer access to delete (should be denied)
@@ -219,9 +208,7 @@ class TestABACFunctionality:
             observer_access,
             observer_reason,
             observer_rules,
-        ) = enhanced_rbac_manager.evaluate_abac_access(
-            observer_context, resource_context, "delete"
-        )
+        ) = enhanced_rbac_manager.evaluate_abac_access(observer_context, resource_context, "delete")
         # Observer might be denied based on ABAC rules
         assert observer_reason is not None
 
@@ -256,9 +243,7 @@ class TestABACFunctionality:
 
         # Test during business hours (mocked)
         with patch("datetime.datetime") as mock_datetime:
-            mock_datetime.now.return_value.time.return_value.fromisoformat.return_value = (
-                "10:00"
-            )
+            mock_datetime.now.return_value.time.return_value.fromisoformat.return_value = "10:00"
             mock_datetime.now.return_value.strftime.return_value = "Monday"
 
             context = AccessContext(
@@ -301,9 +286,7 @@ class TestResourceAccessControl:
         mock_agent.status.value = "active"
         mock_agent.created_by = "user_001"  # User owns the agent
 
-        mock_db.query.return_value.filter.return_value.first.return_value = (
-            mock_agent
-        )
+        mock_db.query.return_value.filter.return_value.first.return_value = mock_agent
 
         # Test view access (should be allowed)
         access_granted = ResourceAccessValidator.validate_agent_access(
@@ -350,9 +333,7 @@ class TestResourceAccessControl:
         mock_agent.status.value = "active"
         mock_agent.created_by = "user_001"
 
-        mock_db.query.return_value.filter.return_value.first.return_value = (
-            mock_agent
-        )
+        mock_db.query.return_value.filter.return_value.first.return_value = mock_agent
 
         # Test successful access
         with patch(
@@ -397,14 +378,10 @@ class TestResourceAccessControl:
         mock_agent.id = uuid.uuid4()
         mock_agent.created_by = "user_001"  # User owns the agent
 
-        mock_db.query.return_value.filter.return_value.first.return_value = (
-            mock_agent
-        )
+        mock_db.query.return_value.filter.return_value.first.return_value = mock_agent
 
         # Test successful access (user owns resource)
-        with patch(
-            "auth.resource_access_control.ResourceAccessValidator.validate_agent_access"
-        ):
+        with patch("auth.resource_access_control.ResourceAccessValidator.validate_agent_access"):
             result = await test_endpoint(str(mock_agent.id), user, db=mock_db)
             assert result["message"] == "success"
 
@@ -437,11 +414,7 @@ class TestRoleAssignmentWorkflow:
 
         # Check request was created
         request = next(
-            (
-                r
-                for r in enhanced_rbac_manager.role_requests
-                if r.id == request_id
-            ),
+            (r for r in enhanced_rbac_manager.role_requests if r.id == request_id),
             None,
         )
         assert request is not None
@@ -463,11 +436,7 @@ class TestRoleAssignmentWorkflow:
         )
 
         request = next(
-            (
-                r
-                for r in enhanced_rbac_manager.role_requests
-                if r.id == request_id
-            ),
+            (r for r in enhanced_rbac_manager.role_requests if r.id == request_id),
             None,
         )
         assert request is not None
@@ -488,11 +457,7 @@ class TestRoleAssignmentWorkflow:
         )
 
         request = next(
-            (
-                r
-                for r in enhanced_rbac_manager.role_requests
-                if r.id == request_id
-            ),
+            (r for r in enhanced_rbac_manager.role_requests if r.id == request_id),
             None,
         )
         assert request.status == RequestStatus.PENDING
@@ -532,19 +497,12 @@ class TestRoleAssignmentWorkflow:
         assert success is True
 
         request = next(
-            (
-                r
-                for r in enhanced_rbac_manager.role_requests
-                if r.id == request_id
-            ),
+            (r for r in enhanced_rbac_manager.role_requests if r.id == request_id),
             None,
         )
         assert request.status == RequestStatus.REJECTED
         assert request.reviewed_by == "admin_001"
-        assert (
-            request.reviewer_notes
-            == "Insufficient justification for admin access"
-        )
+        assert request.reviewer_notes == "Insufficient justification for admin access"
 
     def test_expired_requests_cleanup(self):
         """Test cleanup of expired requests."""
@@ -561,16 +519,13 @@ class TestRoleAssignmentWorkflow:
             temporary=False,
             expiry_date=None,
             status=RequestStatus.PENDING,
-            created_at=datetime.now(timezone.utc)
-            - timedelta(days=35),  # 35 days old
+            created_at=datetime.now(timezone.utc) - timedelta(days=35),  # 35 days old
         )
 
         enhanced_rbac_manager.role_requests.append(old_request)
 
         # Run cleanup
-        expired_count = enhanced_rbac_manager.expire_old_requests(
-            max_age_days=30
-        )
+        expired_count = enhanced_rbac_manager.expire_old_requests(max_age_days=30)
 
         assert expired_count > 0
         assert old_request.status == RequestStatus.EXPIRED
@@ -779,9 +734,7 @@ class TestAuditLogging:
 
         # Add old log entry
         old_entry = {
-            "timestamp": (
-                datetime.now(timezone.utc) - timedelta(days=35)
-            ).isoformat(),
+            "timestamp": (datetime.now(timezone.utc) - timedelta(days=35)).isoformat(),
             "decision_type": "rbac",
             "user_id": "user_001",
             "decision": "allow",
@@ -800,9 +753,7 @@ class TestAuditLogging:
         # Run cleanup
         import asyncio
 
-        cleaned_count = asyncio.run(
-            comprehensive_auditor.cleanup_old_logs(retention_days=30)
-        )
+        cleaned_count = asyncio.run(comprehensive_auditor.cleanup_old_logs(retention_days=30))
 
         assert cleaned_count > 0
         assert len(comprehensive_auditor.decision_log) == 1
@@ -837,9 +788,7 @@ class TestAdminInterface:
         )
 
         assert regular_user.role == UserRole.OBSERVER
-        assert (
-            Permission.ADMIN_SYSTEM not in ROLE_PERMISSIONS[UserRole.OBSERVER]
-        )
+        assert Permission.ADMIN_SYSTEM not in ROLE_PERMISSIONS[UserRole.OBSERVER]
 
     def test_admin_abac_rule_management(self):
         """Test admin ABAC rule management."""
@@ -865,11 +814,7 @@ class TestAdminInterface:
 
         # Verify rule was added
         added_rule = next(
-            (
-                r
-                for r in enhanced_rbac_manager.abac_rules
-                if r.id == "admin_test_rule"
-            ),
+            (r for r in enhanced_rbac_manager.abac_rules if r.id == "admin_test_rule"),
             None,
         )
         assert added_rule is not None
@@ -883,11 +828,7 @@ class TestAdminInterface:
         # Remove rule
         enhanced_rbac_manager.abac_rules.remove(added_rule)
         removed_rule = next(
-            (
-                r
-                for r in enhanced_rbac_manager.abac_rules
-                if r.id == "admin_test_rule"
-            ),
+            (r for r in enhanced_rbac_manager.abac_rules if r.id == "admin_test_rule"),
             None,
         )
         assert removed_rule is None
@@ -907,12 +848,8 @@ class TestSecurityIntegration:
         )
 
         # Observer should not have admin permissions
-        assert (
-            Permission.ADMIN_SYSTEM not in ROLE_PERMISSIONS[UserRole.OBSERVER]
-        )
-        assert (
-            Permission.DELETE_AGENT not in ROLE_PERMISSIONS[UserRole.OBSERVER]
-        )
+        assert Permission.ADMIN_SYSTEM not in ROLE_PERMISSIONS[UserRole.OBSERVER]
+        assert Permission.DELETE_AGENT not in ROLE_PERMISSIONS[UserRole.OBSERVER]
 
         # Create token for observer
         token = auth_manager.create_access_token(observer)

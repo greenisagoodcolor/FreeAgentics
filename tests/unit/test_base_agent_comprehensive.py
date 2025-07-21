@@ -1,15 +1,11 @@
 """Comprehensive tests for base_agent.py targeting 80%+ coverage."""
 
-from datetime import datetime
-from unittest.mock import AsyncMock, MagicMock, Mock, patch
+from unittest.mock import AsyncMock, Mock, patch
 
 import numpy as np
 import pytest
 
 from agents.base_agent import (
-    OBSERVABILITY_AVAILABLE,
-    PYMDP_AVAILABLE,
-    ActiveInferenceAgent,
     AgentConfig,
     BasicExplorerAgent,
     safe_array_to_int,
@@ -47,9 +43,7 @@ class TestSafeArrayToInt:
     def test_empty_array(self):
         """Test with empty array - should raise ValueError."""
         value = np.array([])
-        with pytest.raises(
-            ValueError, match="Empty array cannot be converted"
-        ):
+        with pytest.raises(ValueError, match="Empty array cannot be converted"):
             safe_array_to_int(value)
 
     def test_list_input(self):
@@ -60,9 +54,7 @@ class TestSafeArrayToInt:
     def test_empty_list(self):
         """Test with empty list - should raise ValueError."""
         value = []
-        with pytest.raises(
-            ValueError, match="Empty array cannot be converted"
-        ):
+        with pytest.raises(ValueError, match="Empty array cannot be converted"):
             safe_array_to_int(value)
 
     def test_numpy_scalar(self):
@@ -122,7 +114,7 @@ class TestBasicExplorerAgent:
     @patch("agents.base_agent.PYMDP_AVAILABLE", False)
     def test_initialization_without_pymdp(self):
         """Test initialization when PyMDP is not available."""
-        config = AgentConfig(name="test_agent")
+        AgentConfig(name="test_agent")
         agent = BasicExplorerAgent(
             num_states=[4],
             num_actions=[3],
@@ -182,9 +174,7 @@ class TestBasicExplorerAgent:
         """Test belief update with PyMDP."""
         # Mock PyMDP agent
         mock_agent_instance = Mock()
-        mock_agent_instance.infer_states.return_value = np.array(
-            [0.7, 0.1, 0.1, 0.1]
-        )
+        mock_agent_instance.infer_states.return_value = np.array([0.7, 0.1, 0.1, 0.1])
         mock_pymdp_agent.return_value = mock_agent_instance
 
         agent = BasicExplorerAgent(
@@ -336,9 +326,7 @@ class TestBasicExplorerAgent:
         """Test recovery from belief update errors."""
         # Mock PyMDP agent
         mock_agent_instance = Mock()
-        mock_agent_instance.infer_states.side_effect = Exception(
-            "Inference error"
-        )
+        mock_agent_instance.infer_states.side_effect = Exception("Inference error")
         mock_pymdp_agent.return_value = mock_agent_instance
 
         agent = BasicExplorerAgent(
@@ -358,9 +346,7 @@ class TestBasicExplorerAgent:
         """Test action selection with PyMDP error."""
         # Mock PyMDP agent that raises error
         mock_agent_instance = Mock()
-        mock_agent_instance.infer_policies.side_effect = Exception(
-            "PyMDP error"
-        )
+        mock_agent_instance.infer_policies.side_effect = Exception("PyMDP error")
         mock_pymdp_agent.return_value = mock_agent_instance
 
         agent = BasicExplorerAgent(
@@ -380,7 +366,7 @@ class TestBasicExplorerAgent:
         # Mock as coroutine
         mock_record_event.return_value = AsyncMock()
 
-        agent = BasicExplorerAgent(
+        BasicExplorerAgent(
             num_states=[4],
             num_actions=[3],
             num_observations=[4],

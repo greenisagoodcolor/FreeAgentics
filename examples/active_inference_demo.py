@@ -61,9 +61,7 @@ class ActiveInferenceWorld:
         self.agents[agent.agent_id] = agent
         agent.position = list(start_pos)
         agent.start()
-        logger.info(
-            f"Added Active Inference agent {agent.name} at position {start_pos}"
-        )
+        logger.info(f"Added Active Inference agent {agent.name} at position {start_pos}")
 
     def get_observation(self, agent: BasicExplorerAgent) -> Dict:
         """Generate observation for the agent based on its position."""
@@ -207,16 +205,10 @@ class ActiveInferenceWorld:
         for agent in self.agents.values():
             print(f"{agent.name}:")
             if "total_free_energy" in agent.metrics:
-                print(
-                    f"  Free Energy: {agent.metrics['total_free_energy']:.3f}"
-                )
+                print(f"  Free Energy: {agent.metrics['total_free_energy']:.3f}")
                 print(f"  Accuracy: {agent.metrics.get('accuracy', 0):.3f}")
-                print(
-                    f"  Complexity: {agent.metrics.get('complexity', 0):.3f}"
-                )
-            print(
-                f"  Belief Entropy: {agent.metrics.get('belief_entropy', 0):.3f}"
-            )
+                print(f"  Complexity: {agent.metrics.get('complexity', 0):.3f}")
+            print(f"  Belief Entropy: {agent.metrics.get('belief_entropy', 0):.3f}")
 
 
 def run_active_inference_demo():
@@ -227,9 +219,7 @@ def run_active_inference_demo():
     print("\nThis demonstrates real Active Inference agents that:")
     print("- Use variational inference to update beliefs")
     print("- Minimize expected free energy for action selection")
-    print(
-        "- Balance exploration (epistemic value) and exploitation (pragmatic value)"
-    )
+    print("- Balance exploration (epistemic value) and exploitation (pragmatic value)")
     print("- Track free energy decomposition (accuracy vs complexity)")
 
     # Create world
@@ -277,17 +267,11 @@ def run_active_inference_demo():
 
         if agent.pymdp_agent:
             print("\n  PyMDP Active Inference Metrics:")
-            print(
-                f"    Free Energy: {agent.metrics.get('total_free_energy', 0):.3f}"
-            )
+            print(f"    Free Energy: {agent.metrics.get('total_free_energy', 0):.3f}")
             print(f"    Accuracy: {agent.metrics.get('accuracy', 0):.3f}")
             print(f"    Complexity: {agent.metrics.get('complexity', 0):.3f}")
-            print(
-                f"    Belief Entropy: {agent.metrics.get('belief_entropy', 0):.3f}"
-            )
-            print(
-                f"    Expected Free Energy: {agent.metrics.get('expected_free_energy', 0):.3f}"
-            )
+            print(f"    Belief Entropy: {agent.metrics.get('belief_entropy', 0):.3f}")
+            print(f"    Expected Free Energy: {agent.metrics.get('expected_free_energy', 0):.3f}")
 
             # Show belief distribution if available
             if "state_posterior" in agent.beliefs:

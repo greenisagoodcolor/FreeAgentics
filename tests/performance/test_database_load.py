@@ -7,14 +7,13 @@ CRITICAL PRODUCTION BLOCKER: Database performance under load
 """
 
 import asyncio
-import json
 import logging
 import os
 import resource
 import time
 from concurrent.futures import ThreadPoolExecutor
 from datetime import datetime, timedelta
-from typing import Any, Dict, List, Tuple
+from typing import Any, Dict, List
 
 # Import psutil if available, otherwise use resource module
 try:
@@ -107,9 +106,7 @@ class DatabaseLoadTester:
     """Database load testing with realistic scenarios."""
 
     def __init__(self, test_db_url: str = None):
-        self.test_db_url = test_db_url or os.getenv(
-            "TEST_DATABASE_URL", "sqlite:///./test_perf.db"
-        )
+        self.test_db_url = test_db_url or os.getenv("TEST_DATABASE_URL", "sqlite:///./test_perf.db")
         self.engine = None
         self.session_factory = None
         self.performance_metrics = {}
@@ -117,15 +114,11 @@ class DatabaseLoadTester:
     def setup_test_database(self):
         """Setup test database with connection pooling."""
         if not SQLALCHEMY_AVAILABLE:
-            logger.warning(
-                "⚠️ SQLAlchemy not available - skipping database tests"
-            )
+            logger.warning("⚠️ SQLAlchemy not available - skipping database tests")
             return False
 
         if not DATABASE_MODELS_AVAILABLE:
-            logger.warning(
-                "⚠️ Database models not available - skipping database tests"
-            )
+            logger.warning("⚠️ Database models not available - skipping database tests")
             return False
 
         try:
@@ -166,13 +159,10 @@ class DatabaseLoadTester:
             async def wrapper(*args, **kwargs):
                 start_time = time.time()
                 if PSUTIL_AVAILABLE:
-                    start_memory = (
-                        psutil.Process().memory_info().rss / 1024 / 1024
-                    )  # MB
+                    start_memory = psutil.Process().memory_info().rss / 1024 / 1024  # MB
                 else:
                     start_memory = (
-                        resource.getrusage(resource.RUSAGE_SELF).ru_maxrss
-                        / 1024
+                        resource.getrusage(resource.RUSAGE_SELF).ru_maxrss / 1024
                     )  # KB to MB
 
                 try:
@@ -186,13 +176,10 @@ class DatabaseLoadTester:
 
                 end_time = time.time()
                 if PSUTIL_AVAILABLE:
-                    end_memory = (
-                        psutil.Process().memory_info().rss / 1024 / 1024
-                    )  # MB
+                    end_memory = psutil.Process().memory_info().rss / 1024 / 1024  # MB
                 else:
                     end_memory = (
-                        resource.getrusage(resource.RUSAGE_SELF).ru_maxrss
-                        / 1024
+                        resource.getrusage(resource.RUSAGE_SELF).ru_maxrss / 1024
                     )  # KB to MB
 
                 metrics = {
@@ -222,9 +209,7 @@ class DatabaseLoadTester:
 
         return decorator
 
-    async def test_create_agents_batch(
-        self, num_agents: int = 100
-    ) -> List[str]:
+    async def test_create_agents_batch(self, num_agents: int = 100) -> List[str]:
         """Test batch agent creation performance."""
         agent_ids = []
         session = self.session_factory()
@@ -275,11 +260,7 @@ class DatabaseLoadTester:
             try:
                 for agent_id in batch_ids:
                     try:
-                        agent = (
-                            session.query(Agent)
-                            .filter(Agent.agent_id == agent_id)
-                            .first()
-                        )
+                        agent = session.query(Agent).filter(Agent.agent_id == agent_id).first()
                         if agent:
                             local_results["found"] += 1
                         local_results["successful"] += 1
@@ -292,15 +273,10 @@ class DatabaseLoadTester:
 
         # Split agent IDs into batches for concurrent processing
         batch_size = max(1, len(agent_ids) // num_threads)
-        batches = [
-            agent_ids[i : i + batch_size]
-            for i in range(0, len(agent_ids), batch_size)
-        ]
+        batches = [agent_ids[i : i + batch_size] for i in range(0, len(agent_ids), batch_size)]
 
         with ThreadPoolExecutor(max_workers=num_threads) as executor:
-            futures = [
-                executor.submit(read_agent_batch, batch) for batch in batches
-            ]
+            futures = [executor.submit(read_agent_batch, batch) for batch in batches]
 
             for future in futures:
                 batch_result = future.result()
@@ -328,11 +304,7 @@ class DatabaseLoadTester:
             try:
                 for agent_id in batch_ids:
                     try:
-                        agent = (
-                            session.query(Agent)
-                            .filter(Agent.agent_id == agent_id)
-                            .first()
-                        )
+                        agent = session.query(Agent).filter(Agent.agent_id == agent_id).first()
                         if agent:
                             # Simulate belief state update
                             agent.belief_state = {
@@ -354,15 +326,10 @@ class DatabaseLoadTester:
 
         # Split into smaller batches for updates (more conservative)
         batch_size = max(1, len(agent_ids) // num_threads)
-        batches = [
-            agent_ids[i : i + batch_size]
-            for i in range(0, len(agent_ids), batch_size)
-        ]
+        batches = [agent_ids[i : i + batch_size] for i in range(0, len(agent_ids), batch_size)]
 
         with ThreadPoolExecutor(max_workers=num_threads) as executor:
-            futures = [
-                executor.submit(update_agent_batch, batch) for batch in batches
-            ]
+            futures = [executor.submit(update_agent_batch, batch) for batch in batches]
 
             for future in futures:
                 batch_result = future.result()
@@ -422,9 +389,7 @@ class DatabaseLoadTester:
             session.add_all(edges)
             session.commit()
 
-            logger.info(
-                f"✅ Created knowledge graph: {num_nodes} nodes, {len(edges)} edges"
-            )
+            logger.info(f"✅ Created knowledge graph: {num_nodes} nodes, {len(edges)} edges")
             return True
 
         except Exception as e:
@@ -445,9 +410,7 @@ class DatabaseLoadTester:
             recent_time = datetime.utcnow() - timedelta(minutes=30)
             active_agents = (
                 session.query(Agent)
-                .filter(
-                    Agent.status == "active", Agent.updated_at >= recent_time
-                )
+                .filter(Agent.status == "active", Agent.updated_at >= recent_time)
                 .count()
             )
             results["active_agents_query"] = {
@@ -507,9 +470,7 @@ class DatabaseLoadTester:
                 "duration": time.time() - start_time,
             }
 
-            logger.info(
-                f"✅ Complex queries completed: {len(results)} query types"
-            )
+            logger.info(f"✅ Complex queries completed: {len(results)} query types")
             return results
 
         except Exception as e:
@@ -527,12 +488,8 @@ class DatabaseLoadTester:
                 continue
 
             durations = [m["duration"] for m in metrics_list if m["success"]]
-            memory_deltas = [
-                m["memory_delta"] for m in metrics_list if m["success"]
-            ]
-            success_rate = sum(1 for m in metrics_list if m["success"]) / len(
-                metrics_list
-            )
+            memory_deltas = [m["memory_delta"] for m in metrics_list if m["success"]]
+            success_rate = sum(1 for m in metrics_list if m["success"]) / len(metrics_list)
 
             if durations:
                 analysis[operation] = {
@@ -540,9 +497,7 @@ class DatabaseLoadTester:
                     "max_duration": np.max(durations),
                     "min_duration": np.min(durations),
                     "p95_duration": np.percentile(durations, 95),
-                    "avg_memory_delta": np.mean(memory_deltas)
-                    if memory_deltas
-                    else 0,
+                    "avg_memory_delta": np.mean(memory_deltas) if memory_deltas else 0,
                     "success_rate": success_rate,
                     "total_operations": len(metrics_list),
                 }
@@ -564,14 +519,10 @@ async def test_database_load_small():
         assert len(agent_ids) == 10
 
         # Concurrent operations
-        read_results = await tester.test_concurrent_agent_reads(
-            agent_ids, num_threads=3
-        )
+        read_results = await tester.test_concurrent_agent_reads(agent_ids, num_threads=3)
         assert read_results["agents_found"] == 10
 
-        update_results = await tester.test_concurrent_agent_updates(
-            agent_ids, num_threads=2
-        )
+        update_results = await tester.test_concurrent_agent_updates(agent_ids, num_threads=2)
         assert update_results["successful_updates"] >= 8  # Allow some failures
 
         # Knowledge graph
@@ -586,15 +537,9 @@ async def test_database_load_small():
         analysis = tester.analyze_performance_results()
 
         # Performance assertions
-        assert (
-            analysis["create_agents_batch"]["avg_duration"] < 5.0
-        )  # < 5s for 10 agents
-        assert (
-            analysis["read_agents_concurrent"]["avg_duration"] < 2.0
-        )  # < 2s for reads
-        assert (
-            analysis["create_agents_batch"]["success_rate"] >= 0.95
-        )  # 95% success rate
+        assert analysis["create_agents_batch"]["avg_duration"] < 5.0  # < 5s for 10 agents
+        assert analysis["read_agents_concurrent"]["avg_duration"] < 2.0  # < 2s for reads
+        assert analysis["create_agents_batch"]["success_rate"] >= 0.95  # 95% success rate
 
         logger.info("✅ Small population load test passed")
 
@@ -616,17 +561,11 @@ async def test_database_load_medium():
         assert len(agent_ids) == 100
 
         # Concurrent operations with higher load
-        read_results = await tester.test_concurrent_agent_reads(
-            agent_ids, num_threads=10
-        )
+        read_results = await tester.test_concurrent_agent_reads(agent_ids, num_threads=10)
         assert read_results["agents_found"] == 100
 
-        update_results = await tester.test_concurrent_agent_updates(
-            agent_ids, num_threads=5
-        )
-        assert (
-            update_results["successful_updates"] >= 90
-        )  # Allow some failures
+        update_results = await tester.test_concurrent_agent_updates(agent_ids, num_threads=5)
+        assert update_results["successful_updates"] >= 90  # Allow some failures
 
         # Larger knowledge graph
         kg_success = await tester.test_knowledge_graph_operations(200, 500)
@@ -640,18 +579,10 @@ async def test_database_load_medium():
         analysis = tester.analyze_performance_results()
 
         # Performance assertions
-        assert (
-            analysis["create_agents_batch"]["avg_duration"] < 15.0
-        )  # < 15s for 100 agents
-        assert (
-            analysis["read_agents_concurrent"]["avg_duration"] < 5.0
-        )  # < 5s for reads
-        assert (
-            analysis["update_agents_concurrent"]["avg_duration"] < 10.0
-        )  # < 10s for updates
-        assert (
-            analysis["create_agents_batch"]["success_rate"] >= 0.90
-        )  # 90% success rate
+        assert analysis["create_agents_batch"]["avg_duration"] < 15.0  # < 15s for 100 agents
+        assert analysis["read_agents_concurrent"]["avg_duration"] < 5.0  # < 5s for reads
+        assert analysis["update_agents_concurrent"]["avg_duration"] < 10.0  # < 10s for updates
+        assert analysis["create_agents_batch"]["success_rate"] >= 0.90  # 90% success rate
 
         logger.info("✅ Medium population load test passed")
 
@@ -673,17 +604,11 @@ async def test_database_load_large():
         assert len(agent_ids) == 500
 
         # High concurrency operations
-        read_results = await tester.test_concurrent_agent_reads(
-            agent_ids, num_threads=20
-        )
+        read_results = await tester.test_concurrent_agent_reads(agent_ids, num_threads=20)
         assert read_results["agents_found"] == 500
 
-        update_results = await tester.test_concurrent_agent_updates(
-            agent_ids, num_threads=10
-        )
-        assert (
-            update_results["successful_updates"] >= 450
-        )  # Allow some failures under load
+        update_results = await tester.test_concurrent_agent_updates(agent_ids, num_threads=10)
+        assert update_results["successful_updates"] >= 450  # Allow some failures under load
 
         # Large knowledge graph
         kg_success = await tester.test_knowledge_graph_operations(1000, 2000)
@@ -697,27 +622,17 @@ async def test_database_load_large():
         analysis = tester.analyze_performance_results()
 
         # Performance assertions for production readiness
-        assert (
-            analysis["create_agents_batch"]["avg_duration"] < 60.0
-        )  # < 1min for 500 agents
-        assert (
-            analysis["read_agents_concurrent"]["avg_duration"] < 15.0
-        )  # < 15s for reads
-        assert (
-            analysis["update_agents_concurrent"]["avg_duration"] < 30.0
-        )  # < 30s for updates
+        assert analysis["create_agents_batch"]["avg_duration"] < 60.0  # < 1min for 500 agents
+        assert analysis["read_agents_concurrent"]["avg_duration"] < 15.0  # < 15s for reads
+        assert analysis["update_agents_concurrent"]["avg_duration"] < 30.0  # < 30s for updates
         assert (
             analysis["create_agents_batch"]["success_rate"] >= 0.85
         )  # 85% success rate under load
 
         # Memory efficiency
         if "create_agents_batch" in analysis:
-            memory_per_agent = (
-                analysis["create_agents_batch"]["avg_memory_delta"] / 500
-            )
-            assert (
-                memory_per_agent < 1.0
-            )  # < 1MB per agent in database operations
+            memory_per_agent = analysis["create_agents_batch"]["avg_memory_delta"] / 500
+            assert memory_per_agent < 1.0  # < 1MB per agent in database operations
 
         logger.info("✅ Large population load test passed")
 

@@ -87,9 +87,7 @@ class BruteForceTestRunner:
             console=console,
         ) as progress:
             for test_class in suite["tests"]:
-                task = progress.add_task(
-                    f"Testing {test_class}...", total=None
-                )
+                task = progress.add_task(f"Testing {test_class}...", total=None)
 
                 # Run pytest for specific test class
                 cmd = [
@@ -151,9 +149,7 @@ class BruteForceTestRunner:
             TextColumn("[progress.description]{task.description}"),
             console=console,
         ) as progress:
-            task = progress.add_task(
-                "Running benchmark scenarios...", total=None
-            )
+            task = progress.add_task("Running benchmark scenarios...", total=None)
 
             result = subprocess.run(cmd, capture_output=True, text=True)
 
@@ -161,9 +157,7 @@ class BruteForceTestRunner:
 
         self.results["benchmark"] = {
             "completed": result.returncode == 0,
-            "output": result.stdout
-            if result.returncode == 0
-            else result.stderr,
+            "output": result.stdout if result.returncode == 0 else result.stderr,
         }
 
     def _print_suite_results(self, suite_name: str, results: Dict):
@@ -214,23 +208,15 @@ class BruteForceTestRunner:
         summary_table.add_column("Value", style="green")
 
         summary_table.add_row("Total Tests", str(total_tests))
-        summary_table.add_row(
-            "Passed", f"{total_passed} ({total_passed/total_tests*100:.1f}%)"
-        )
-        summary_table.add_row(
-            "Failed", f"{total_failed} ({total_failed/total_tests*100:.1f}%)"
-        )
+        summary_table.add_row("Passed", f"{total_passed} ({total_passed/total_tests*100:.1f}%)")
+        summary_table.add_row("Failed", f"{total_failed} ({total_failed/total_tests*100:.1f}%)")
         summary_table.add_row("Duration", f"{total_duration:.2f} seconds")
-        summary_table.add_row(
-            "Timestamp", datetime.now().strftime("%Y-%m-%d %H:%M:%S")
-        )
+        summary_table.add_row("Timestamp", datetime.now().strftime("%Y-%m-%d %H:%M:%S"))
 
         console.print(summary_table)
 
         # Security validation checklist
-        console.print(
-            "\n[bold yellow]Security Validation Checklist:[/bold yellow]"
-        )
+        console.print("\n[bold yellow]Security Validation Checklist:[/bold yellow]")
 
         checklist = [
             ("Authentication Rate Limiting", self._check_auth_protection()),
@@ -373,9 +359,7 @@ def check_prerequisites():
         r.ping()
         console.print("✅ Redis is running")
     except Exception:
-        console.print(
-            "[red]❌ Redis is not running. Please start Redis first.[/red]"
-        )
+        console.print("[red]❌ Redis is not running. Please start Redis first.[/red]")
         console.print("   Run: docker run -d -p 6379:6379 redis:latest")
         return False
 
@@ -386,9 +370,7 @@ def check_prerequisites():
         console.print("✅ pytest is installed")
     except ImportError:
         console.print("[red]❌ pytest is not installed.[/red]")
-        console.print(
-            "   Run: pip install pytest pytest-asyncio pytest-json-report"
-        )
+        console.print("   Run: pip install pytest pytest-asyncio pytest-json-report")
         return False
 
     return True

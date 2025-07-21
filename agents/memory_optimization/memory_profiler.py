@@ -23,8 +23,7 @@ import weakref
 from collections import defaultdict, deque
 from contextlib import contextmanager
 from dataclasses import dataclass, field
-from datetime import datetime
-from typing import Any, Callable, Dict, List, Optional, Set, Tuple
+from typing import Any, Dict, List, Optional, Set, Tuple
 
 import numpy as np
 
@@ -112,9 +111,7 @@ class AdvancedMemoryProfiler:
             lambda: AllocationPattern("unknown")
         )
         self._agent_memory: Dict[str, float] = {}
-        self._agent_objects: weakref.WeakValueDictionary = (
-            weakref.WeakValueDictionary()
-        )
+        self._agent_objects: weakref.WeakValueDictionary = weakref.WeakValueDictionary()
 
         # Thread safety
         self._lock = threading.RLock()
@@ -141,9 +138,7 @@ class AdvancedMemoryProfiler:
             return
 
         self._monitoring = True
-        self._monitor_thread = threading.Thread(
-            target=self._monitor_loop, daemon=True
-        )
+        self._monitor_thread = threading.Thread(target=self._monitor_loop, daemon=True)
         self._monitor_thread.start()
         logger.info("Started memory monitoring")
 
@@ -225,13 +220,8 @@ class AdvancedMemoryProfiler:
                         )
 
             # Calculate memory delta
-            memory_delta = (
-                snapshot_after.total_memory_mb
-                - snapshot_before.total_memory_mb
-            )
-            logger.info(
-                f"{operation_name} memory delta: {memory_delta:+.1f} MB"
-            )
+            memory_delta = snapshot_after.total_memory_mb - snapshot_before.total_memory_mb
+            logger.info(f"{operation_name} memory delta: {memory_delta:+.1f} MB")
 
     def take_snapshot(self, tag: Optional[str] = None) -> MemorySnapshot:
         """Take a memory snapshot.
@@ -277,12 +267,8 @@ class AdvancedMemoryProfiler:
 
                         # Track allocation pattern
                         if location not in self.allocation_patterns:
-                            self.allocation_patterns[
-                                location
-                            ] = AllocationPattern(location)
-                        self.allocation_patterns[location].record_allocation(
-                            stat.size
-                        )
+                            self.allocation_patterns[location] = AllocationPattern(location)
+                        self.allocation_patterns[location].record_allocation(stat.size)
 
             # Calculate per-agent memory
             agent_memory = {}
@@ -292,9 +278,7 @@ class AdvancedMemoryProfiler:
                     agent_size = self._estimate_object_size(agent_obj)
                     agent_memory[agent_id] = agent_size / (1024 * 1024)
                 except Exception as e:
-                    logger.debug(
-                        f"Failed to estimate size for agent {agent_id}: {e}"
-                    )
+                    logger.debug(f"Failed to estimate size for agent {agent_id}: {e}")
 
             # Create snapshot
             snapshot = MemorySnapshot(
@@ -383,11 +367,8 @@ class AdvancedMemoryProfiler:
             # Calculate trends
             memory_growth = latest.total_memory_mb - first.total_memory_mb
             time_elapsed = latest.timestamp - first.timestamp
-            growth_rate = (
-                memory_growth / (time_elapsed / 3600)
-                if time_elapsed > 0
-                else 0
-            )
+            growth_rate = memory_growth / (time_elapsed / 3600) if
+                time_elapsed > 0 else 0
 
             # Analyze allocation patterns
             top_allocators = sorted(
@@ -420,8 +401,7 @@ class AdvancedMemoryProfiler:
                 "top_allocations": [
                     {
                         "location": location,
-                        "current_size_mb": pattern.current_size
-                        / (1024 * 1024),
+                        "current_size_mb": pattern.current_size / (1024 * 1024),
                         "peak_size_mb": pattern.peak_size / (1024 * 1024),
                         "allocation_count": pattern.count,
                     }
@@ -455,24 +435,22 @@ class AdvancedMemoryProfiler:
             suggestions = []
 
             # Check belief state size
-            if hasattr(agent_obj, "beliefs") and isinstance(
-                agent_obj.beliefs, np.ndarray
-            ):
+            if hasattr(agent_obj, "beliefs") and isinstance(agent_obj.beliefs,
+                np.ndarray):
                 belief_size_mb = agent_obj.beliefs.nbytes / (1024 * 1024)
                 if belief_size_mb > 5.0:
                     suggestions.append(
                         {
                             "type": "belief_compression",
                             "reason": f"Large belief state: {belief_size_mb:.1f}MB",
-                            "suggestion": "Enable belief compression or use sparse representations",
+                            "suggestion": "Enable belief compression or
+                                use sparse representations",
                         }
                     )
 
             # Check action history
-            if (
-                hasattr(agent_obj, "action_history")
-                and len(agent_obj.action_history) > 1000
-            ):
+            if hasattr(agent_obj, "action_history") and
+                len(agent_obj.action_history) > 1000:
                 suggestions.append(
                     {
                         "type": "history_pruning",
@@ -482,9 +460,7 @@ class AdvancedMemoryProfiler:
                 )
 
             # Check for large cached computations
-            cache_attrs = [
-                attr for attr in dir(agent_obj) if "cache" in attr.lower()
-            ]
+            cache_attrs = [attr for attr in dir(agent_obj) if "cache" in attr.lower()]
             for attr in cache_attrs:
                 try:
                     cache_obj = getattr(agent_obj, attr)
@@ -498,9 +474,7 @@ class AdvancedMemoryProfiler:
                         )
                 except Exception as e:
                     # Skip inaccessible attributes - may be properties with side effects
-                    logger.debug(
-                        f"Could not inspect cache attribute {attr}: {e}"
-                    )
+                    logger.debug(f"Could not inspect cache attribute {attr}: {e}")
 
             return {
                 "agent_id": agent_id,

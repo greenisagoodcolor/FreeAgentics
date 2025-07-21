@@ -21,9 +21,7 @@ try:
     PYMDP_AVAILABLE = True
 except ImportError:
     PYMDP_AVAILABLE = False
-    pytest.skip(
-        "PyMDP required for performance benchmarks", allow_module_level=True
-    )
+    assert False, "Test bypass removed - must fix underlying issue"
 
 # FreeAgentics imports
 from agents.base_agent import BasicExplorerAgent
@@ -71,9 +69,7 @@ class TestPyMDPBaselineComparison:
             },
         }
 
-    def _measure_operation_time(
-        self, operation, num_iterations: int = 100
-    ) -> Dict[str, float]:
+    def _measure_operation_time(self, operation, num_iterations: int = 100) -> Dict[str, float]:
         """Measure operation timing statistics."""
         times = []
 
@@ -116,9 +112,7 @@ class TestPyMDPBaselineComparison:
                 obs = np.random.randint(0, model_config["num_obs"])
                 agent.infer_states([obs])
 
-            baseline_stats = self._measure_operation_time(
-                baseline_belief_update, 50
-            )
+            baseline_stats = self._measure_operation_time(baseline_belief_update, 50)
 
             # Our integration
             def our_belief_update():
@@ -183,9 +177,7 @@ class TestPyMDPBaselineComparison:
                 action = agent.sample_action()
                 return action
 
-            baseline_stats = self._measure_operation_time(
-                baseline_action_selection, 20
-            )
+            baseline_stats = self._measure_operation_time(baseline_action_selection, 20)
 
             # Our integration with adapter
             def our_action_selection():
@@ -204,8 +196,7 @@ class TestPyMDPBaselineComparison:
                 "baseline_mean": baseline_stats["mean"],
                 "our_mean": our_stats["mean"],
                 "overhead_ratio": overhead_ratio,
-                "acceptable": overhead_ratio
-                < 1.3,  # Max 30% overhead for action selection
+                "acceptable": overhead_ratio < 1.3,  # Max 30% overhead for action selection
             }
 
             # Assert performance is acceptable
@@ -229,9 +220,7 @@ class TestPyMDPBaselineComparison:
         """Compare full active inference cycle performance."""
         results = {}
 
-        model_config = benchmark_models[
-            "small"
-        ]  # Use small model for full cycle
+        model_config = benchmark_models["small"]  # Use small model for full cycle
         A = model_config["A"]()
         B = model_config["B"]()
         C = model_config["C"]()
@@ -320,9 +309,7 @@ class TestPyMDPBaselineComparison:
         our_agents = []
         for i in range(10):
             agent = BasicExplorerAgent(f"mem_test_{i}", (0, 0))
-            agent.perceive(
-                {"position": (0, 0), "surroundings": np.zeros((3, 3))}
-            )
+            agent.perceive({"position": (0, 0), "surroundings": np.zeros((3, 3))})
             agent.update_beliefs()
             our_agents.append(agent)
 
@@ -384,9 +371,7 @@ class TestPyMDPBaselineComparison:
         print(f"Overhead: {overhead_ratio:.2f}x")
 
         # Adapter should add minimal overhead (less than 20%)
-        assert (
-            overhead_ratio < 1.2
-        ), f"Adapter overhead too high: {overhead_ratio:.2f}x slower"
+        assert overhead_ratio < 1.2, f"Adapter overhead too high: {overhead_ratio:.2f}x slower"
 
         return {
             "direct_mean_us": direct_stats["mean"] * 1000000,
@@ -402,9 +387,7 @@ class TestPyMDPBaselineComparison:
         for num_states in state_sizes:
             # Create models
             A = np.eye(num_states)[np.newaxis, :, :]
-            B = np.eye(num_states)[np.newaxis, :, :].repeat(
-                min(num_states, 10), axis=0
-            )
+            B = np.eye(num_states)[np.newaxis, :, :].repeat(min(num_states, 10), axis=0)
             C = np.random.rand(1, num_states)
             D = np.ones(num_states) / num_states
 
@@ -429,9 +412,7 @@ class TestPyMDPBaselineComparison:
         print("States | Time (ms) | Ops/sec")
         print("-" * 60)
         for r in results:
-            print(
-                f"{r['num_states']:6} | {r['mean_time']*1000:9.3f} | {r['ops_per_second']:7.1f}"
-            )
+            print(f"{r['num_states']:6} | {r['mean_time']*1000:9.3f} | {r['ops_per_second']:7.1f}")
 
         # Check that scaling is reasonable (not exponential)
         time_ratio = results[-1]["mean_time"] / results[0]["mean_time"]
@@ -478,9 +459,7 @@ class TestRealTimePerformanceRequirements:
         avg_time_per_update = total_time / total_updates
         updates_per_second = total_updates / total_time
 
-        print(
-            f"\nReal-time Performance ({num_agents} agents, {total_updates} updates):"
-        )
+        print(f"\nReal-time Performance ({num_agents} agents, {total_updates} updates):")
         print(f"Average time per update: {avg_time_per_update*1000:.3f}ms")
         print(f"Updates per second: {updates_per_second:.1f}")
 

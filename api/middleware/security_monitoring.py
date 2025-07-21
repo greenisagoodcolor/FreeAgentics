@@ -15,7 +15,6 @@ from auth.security_logging import (
     SecurityEventSeverity,
     SecurityEventType,
     log_api_access,
-    log_suspicious_activity,
     security_auditor,
 )
 
@@ -23,15 +22,11 @@ from auth.security_logging import (
 class SecurityMonitoringMiddleware(BaseHTTPMiddleware):
     """Middleware for monitoring and logging security events."""
 
-    async def dispatch(
-        self, request: Request, call_next: Callable
-    ) -> Response:
+    async def dispatch(self, request: Request, call_next: Callable) -> Response:
         """Process request with security monitoring."""
         # Generate request ID for tracking
         request_id = str(uuid.uuid4())
-        request.headers.__dict__["_list"].append(
-            (b"x-request-id", request_id.encode())
-        )
+        request.headers.__dict__["_list"].append((b"x-request-id", request_id.encode()))
 
         # Track request timing
         start_time = time.time()
@@ -99,4 +94,3 @@ class SecurityMonitoringMiddleware(BaseHTTPMiddleware):
 
 
 # Import the enhanced SecurityHeadersMiddleware from auth module
-from auth.security_headers import SecurityHeadersMiddleware  

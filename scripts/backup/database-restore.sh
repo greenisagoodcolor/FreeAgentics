@@ -118,7 +118,7 @@ stop_services() {
 
     # Stop Docker services
     if command -v docker-compose >/dev/null 2>&1; then
-        docker-compose stop backend-prod web worker || true
+        docker-compose stop backend-prod web worker 
     fi
 
     # Wait for connections to close
@@ -179,7 +179,7 @@ restore_full() {
     PGPASSWORD="$POSTGRES_PASSWORD" psql \
         -h "$DB_HOST" -p "$DB_PORT" -U "$DB_USER" -d postgres \
         -c "SELECT pg_terminate_backend(pid) FROM pg_stat_activity WHERE datname = '$DB_NAME' AND pid <> pg_backend_pid();" \
-        >/dev/null 2>&1 || true
+        >/dev/null 2>&1 
 
     # Perform restore
     log "INFO" "Restoring database..."

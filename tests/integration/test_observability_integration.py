@@ -6,7 +6,6 @@ Active Inference agents and PyMDP operations.
 
 import asyncio
 import logging
-import time
 from typing import Any, Dict
 
 # import pytest  # Not available in this environment
@@ -61,9 +60,7 @@ logger = logging.getLogger(__name__)
 class MockObservableAgent(BaseAgent):
     """Mock agent for testing observability integration."""
 
-    def __init__(
-        self, agent_id: str, name: str = "Mock Agent", config: Dict = None
-    ):
+    def __init__(self, agent_id: str, name: str = "Mock Agent", config: Dict = None):
         config = config or {"enable_observability": True}
         super().__init__(agent_id, name, config)
         self.test_beliefs = {"test_belie": 0.5}
@@ -96,9 +93,7 @@ async def test_observability_lifecycle_events():
         return
 
     # Create agent (should record creation event)
-    agent = MockObservableAgent(
-        "test_agent_lifecycle", config={"enable_observability": True}
-    )
+    agent = MockObservableAgent("test_agent_lifecycle", config={"enable_observability": True})
 
     # Wait a bit for async event recording
     # No artificial delays - operations should complete synchronously
@@ -107,12 +102,8 @@ async def test_observability_lifecycle_events():
     assert agent.agent_id in pymdp_observer.agent_lifecycles
 
     # Record custom lifecycle events
-    await record_agent_lifecycle_event(
-        agent.agent_id, "activated", {"status": "active"}
-    )
-    await record_agent_lifecycle_event(
-        agent.agent_id, "terminated", {"reason": "test_complete"}
-    )
+    await record_agent_lifecycle_event(agent.agent_id, "activated", {"status": "active"})
+    await record_agent_lifecycle_event(agent.agent_id, "terminated", {"reason": "test_complete"})
 
     # Verify events were recorded
     events = pymdp_observer.agent_lifecycles[agent.agent_id]
@@ -131,18 +122,14 @@ async def test_observability_belief_monitoring():
         logger.warning("⚠️ Observability not available - skipping test")
         return
 
-    agent = MockObservableAgent(
-        "test_agent_beliefs", config={"enable_observability": True}
-    )
+    agent = MockObservableAgent("test_agent_beliefs", config={"enable_observability": True})
 
     # Test belief update recording
     beliefs_before = {"test_belie": 0.5, "entropy": 0.8}
     beliefs_after = {"test_belie": 0.7, "entropy": 0.6}
     free_energy = 5.2
 
-    await record_belief_update(
-        agent.agent_id, beliefs_before, beliefs_after, free_energy
-    )
+    await record_belief_update(agent.agent_id, beliefs_before, beliefs_after, free_energy)
 
     # Wait for async processing
     # No artificial delays - operations should complete synchronously
@@ -166,16 +153,14 @@ async def test_observability_inference_monitoring():
         logger.warning("⚠️ Observability not available - skipping test")
         return
 
-    agent = MockObservableAgent(
-        "test_agent_inference", config={"enable_observability": True}
-    )
+    agent = MockObservableAgent("test_agent_inference", config={"enable_observability": True})
 
     # Test monitoring decorator
     @monitor_pymdp_inference(agent.agent_id)
     async def mock_inference_operation():
         """Mock inference with computation."""
         # Perform actual computation instead of sleep
-        result = sum(range(10000))  # Real computation
+        sum(range(10000))  # Real computation
         return "inference_result"
 
     # Run monitored inference
@@ -202,9 +187,7 @@ async def test_observability_inference_monitoring():
 async def test_observability_agent_integration():
     """Test observability integration with real agent operations."""
     if not OBSERVABILITY_AVAILABLE or not AGENTS_AVAILABLE:
-        logger.warning(
-            "⚠️ Observability or agents not available - skipping test"
-        )
+        logger.warning("⚠️ Observability or agents not available - skipping test")
         return
 
     # Create ResourceCollectorAgent with observability enabled
@@ -214,9 +197,7 @@ async def test_observability_agent_integration():
         "use_pymdp": False,  # Use fallback for testing
     }
 
-    agent = ResourceCollectorAgent(
-        "test_integration_agent", "Test Agent", config
-    )
+    agent = ResourceCollectorAgent("test_integration_agent", "Test Agent", config)
 
     # Activate agent
     agent.activate()
@@ -262,16 +243,12 @@ async def test_observability_performance_summary():
     # Create multiple agents
     agents = []
     for i in range(3):
-        agent = MockObservableAgent(
-            f"perf_test_agent_{i}", config={"enable_observability": True}
-        )
+        agent = MockObservableAgent(f"perf_test_agent_{i}", config={"enable_observability": True})
         agents.append(agent)
 
         # Record some metrics
         await record_agent_lifecycle_event(agent.agent_id, "created")
-        await record_belief_update(
-            agent.agent_id, {"belief": 0.0}, {"belie": 0.5}
-        )
+        await record_belief_update(agent.agent_id, {"belief": 0.0}, {"belie": 0.5})
 
     # No artificial delays - operations should complete synchronously
 

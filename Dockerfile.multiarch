@@ -1,0 +1,230 @@
+# Multi-architecture optimized Dockerfile for FreeAgentics
+# Supports linux/amd64 and linux/arm64 with build caching optimization
+# Following Evan You & Rich Harris principles: Fast, reliable, bulletproof builds
+
+# syntax=docker/dockerfile:1.5
+
+# ==============================================================================
+# Base stage - Common dependencies for all architectures
+# ==============================================================================
+FROM --platform=$BUILDPLATFORM python:3.11.9-slim AS base
+
+# Build arguments for multi-arch support
+ARG TARGETPLATFORM
+ARG BUILDPLATFORM
+ARG TARGETOS
+ARG TARGETARCH
+
+# Environment variables for Python optimization
+ENV PYTHONUNBUFFERED=1 \
+    PYTHONDONTWRITEBYTECODE=1 \
+    PIP_NO_CACHE_DIR=1 \
+    PIP_DISABLE_PIP_VERSION_CHECK=1 \
+    PYTHONPATH=/app \
+    # Poetry configuration
+    POETRY_VERSION=1.7.1 \
+    POETRY_HOME="/opt/poetry" \
+    POETRY_VIRTUALENVS_CREATE=false \
+    POETRY_NO_INTERACTION=1
+
+# Add poetry to PATH
+ENV PATH="$POETRY_HOME/bin:$PATH"
+
+# Install system dependencies with proper cleanup
+RUN --mount=type=cache,target=/var/cache/apt,sharing=locked \
+    --mount=type=cache,target=/var/lib/apt,sharing=locked \
+    apt-get update && apt-get install -y --no-install-recommends \
+    # Essential runtime dependencies
+    curl \
+    ca-certificates \
+    # Build dependencies for Python packages
+    gcc \
+    g++ \
+    libc-dev \
+    libffi-dev \
+    # Architecture-specific optimizations
+    $([ "$TARGETARCH" = "arm64" ] && echo "libopenblas-dev" || echo "") \
+    && rm -rf /var/lib/apt/lists/*
+
+# Install Poetry using pip with architecture support
+RUN --mount=type=cache,target=/root/.cache/pip \
+    pip install --upgrade pip setuptools wheel && \
+    pip install poetry==$POETRY_VERSION
+
+# Create non-root user with consistent UID/GID
+RUN groupadd -g 1000 app && \
+    useradd -r -u 1000 -g app --create-home --shell /bin/bash app
+
+# ==============================================================================
+# Dependencies stage - Install Python packages with caching
+# ==============================================================================
+FROM base AS dependencies
+
+WORKDIR /app
+
+# Copy dependency files first for better caching
+COPY pyproject.toml poetry.lock* requirements*.txt ./
+
+# Install dependencies with mount cache for pip
+RUN --mount=type=cache,target=/root/.cache/pip \
+    --mount=type=cache,target=/root/.cache/pypoetry \
+    # Export requirements from poetry if available
+    if [ -f "poetry.lock" ]; then \
+        poetry export -f requirements.txt --output requirements-poetry.txt --without-hashes; \
+        pip install -r requirements-poetry.txt; \
+    elif [ -f "requirements-production.txt" ]; then \
+        pip install -r requirements-production.txt; \
+    else \
+        pip install -r requirements.txt; \
+    fi
+
+# ==============================================================================
+# Development stage - Full development environment
+# ==============================================================================
+FROM dependencies AS development
+
+WORKDIR /app
+
+# Install development dependencies
+COPY requirements-dev.txt* ./
+RUN --mount=type=cache,target=/root/.cache/pip \
+    if [ -f "requirements-dev.txt" ]; then \
+        pip install -r requirements-dev.txt; \
+    fi
+
+# Copy all source code
+COPY . .
+
+# Fix ownership
+RUN chown -R app:app /app
+
+USER app
+
+# Development health check
+HEALTHCHECK --interval=30s --timeout=10s --start-period=40s --retries=3 \
+    CMD python -c "import requests; requests.get('http://localhost:8000/health').raise_for_status()"
+
+EXPOSE 8000
+
+# Development command with hot reload
+CMD ["uvicorn", "main:app", "--host", "0.0.0.0", "--port", "8000", "--reload"]
+
+# ==============================================================================
+# Builder stage - Compile and optimize for production
+# ==============================================================================
+FROM dependencies AS builder
+
+WORKDIR /app
+
+# Copy source code
+COPY . .
+
+# Compile Python bytecode for faster startup
+RUN python -m compileall -b . && \
+    find . -name "*.py" -delete && \
+    find . -name "__pycache__" -type d -exec rm -rf {} +
+
+# Remove unnecessary files
+RUN find . -type f -name "*.pyc" -delete && \
+    find . -type d -name "__pycache__" -delete && \
+    rm -rf tests/ docs/ scripts/ benchmarks/ examples/ \
+           *.md *.yml *.yaml .git* .env*
+
+# ==============================================================================
+# Production stage - Minimal runtime with security hardening
+# ==============================================================================
+FROM python:3.11.9-slim AS production
+
+# Import build arguments
+ARG TARGETARCH
+ARG BUILD_DATE
+ARG VCS_REF
+ARG VERSION
+
+# Labels for image metadata
+LABEL org.opencontainers.image.created=$BUILD_DATE \
+      org.opencontainers.image.url="https://github.com/yourusername/freeagentics" \
+      org.opencontainers.image.source="https://github.com/yourusername/freeagentics" \
+      org.opencontainers.image.version=$VERSION \
+      org.opencontainers.image.revision=$VCS_REF \
+      org.opencontainers.image.vendor="FreeAgentics" \
+      org.opencontainers.image.title="FreeAgentics Multi-Agent Platform" \
+      org.opencontainers.image.description="Production-ready multi-agent AI platform with Active Inference" \
+      org.opencontainers.image.architecture=$TARGETARCH
+
+# Production environment variables
+ENV PYTHONUNBUFFERED=1 \
+    PYTHONDONTWRITEBYTECODE=1 \
+    PYTHONPATH=/app \
+    PORT=8000
+
+# Install only runtime dependencies
+RUN --mount=type=cache,target=/var/cache/apt,sharing=locked \
+    --mount=type=cache,target=/var/lib/apt,sharing=locked \
+    apt-get update && apt-get install -y --no-install-recommends \
+    curl \
+    ca-certificates \
+    # Architecture-specific runtime optimizations
+    $([ "$TARGETARCH" = "arm64" ] && echo "libopenblas0" || echo "") \
+    && apt-get clean \
+    && rm -rf /var/lib/apt/lists/*
+
+# Create non-root user
+RUN groupadd -g 1000 app && \
+    useradd -r -u 1000 -g app --create-home --shell /bin/bash app
+
+WORKDIR /app
+
+# Copy Python packages from dependencies stage
+COPY --from=dependencies /usr/local/lib/python3.11/site-packages /usr/local/lib/python3.11/site-packages
+COPY --from=dependencies /usr/local/bin /usr/local/bin
+
+# Copy optimized application from builder
+COPY --from=builder --chown=app:app /app /app
+
+# Create necessary directories with proper permissions
+RUN mkdir -p /app/logs /tmp/freeagentics && \
+    chown -R app:app /app /tmp/freeagentics && \
+    chmod 755 /app && \
+    chmod 777 /tmp/freeagentics
+
+# Security: Switch to non-root user
+USER app
+
+# Production health check
+HEALTHCHECK --interval=30s --timeout=10s --start-period=40s --retries=3 \
+    CMD curl -f http://localhost:8000/health || exit 1
+
+# Expose port
+EXPOSE 8000
+
+# Production command with Gunicorn
+CMD ["gunicorn", "main:app", \
+     "--workers", "4", \
+     "--worker-class", "uvicorn.workers.UvicornWorker", \
+     "--bind", "0.0.0.0:8000", \
+     "--timeout", "60", \
+     "--keep-alive", "2", \
+     "--max-requests", "1000", \
+     "--max-requests-jitter", "100", \
+     "--preload", \
+     "--access-logfile", "-", \
+     "--error-logfile", "-", \
+     "--log-level", "info"]
+
+# ==============================================================================
+# Test stage - For running tests in CI/CD
+# ==============================================================================
+FROM development AS test
+
+USER root
+RUN chown -R app:app /app
+USER app
+
+# Install test dependencies
+COPY requirements-dev.txt ./
+RUN --mount=type=cache,target=/home/app/.cache/pip \
+    pip install --user -r requirements-dev.txt
+
+# Run tests by default
+CMD ["pytest", "-v", "--cov=.", "--cov-report=xml", "--cov-report=term"]

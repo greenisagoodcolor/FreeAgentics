@@ -9,18 +9,17 @@ import io
 import pstats
 import time
 from contextlib import contextmanager
-from typing import Any, Dict, List, Optional, Tuple
+from typing import Any, Dict, List
 
 import numpy as np
 
 # Import PyMDP - REQUIRED for inference benchmarks
-import pymdp
 from pymdp import utils
 from pymdp.agent import Agent as PyMDPAgent
 from pymdp.maths import softmax, spm_dot
 from pymdp.maths import spm_log_single as log_stable
 
-from tests.performance.pymdp_benchmarks import BenchmarkResult, PyMDPBenchmark
+from tests.performance.pymdp_benchmarks import PyMDPBenchmark
 
 PYMDP_AVAILABLE = True
 
@@ -178,12 +177,8 @@ class BeliefPropagationBenchmark(PyMDPBenchmark):
         # Initialize messages
         self.messages = {}
         for edge in self.factor_graph["edges"]:
-            self.messages[edge] = np.random.rand(
-                self.factor_graph["node_dims"][edge[1]]
-            )
-            self.messages[edge] = self.messages[edge] / np.sum(
-                self.messages[edge]
-            )
+            self.messages[edge] = np.random.rand(self.factor_graph["node_dims"][edge[1]])
+            self.messages[edge] = self.messages[edge] / np.sum(self.messages[edge])
 
     def run_iteration(self) -> Dict[str, Any]:
         """Run belief propagation iteration."""
@@ -212,9 +207,7 @@ class BeliefPropagationBenchmark(PyMDPBenchmark):
         return {
             "num_message_updates": num_updates,
             "max_message_delta": float(max_delta),
-            "avg_belief_entropy": float(
-                np.mean([self._entropy(b) for b in beliefs.values()])
-            ),
+            "avg_belief_entropy": float(np.mean([self._entropy(b) for b in beliefs.values()])),
         }
 
     def _create_factor_graph(self):
@@ -254,9 +247,7 @@ class BeliefPropagationBenchmark(PyMDPBenchmark):
             combined = np.ones(self.factor_graph["node_dims"][from_node])
 
         # Project to target dimension (simplified)
-        message = np.random.rand(
-            dim
-        )  # Would use actual factor in real implementation
+        message = np.random.rand(dim)  # Would use actual factor in real implementation
         message = message * np.sum(combined)
 
         # Normalize
@@ -293,9 +284,7 @@ class BeliefPropagationBenchmark(PyMDPBenchmark):
         return {
             "num_nodes": self.num_nodes,
             "connectivity": self.connectivity,
-            "num_edges": len(self.factor_graph["edges"])
-            if self.factor_graph
-            else 0,
+            "num_edges": len(self.factor_graph["edges"]) if self.factor_graph else 0,
         }
 
 
@@ -314,13 +303,9 @@ class MessagePassingBenchmark(PyMDPBenchmark):
             return
 
         # Initialize beliefs on grid
-        self.grid_beliefs = np.random.rand(
-            self.grid_size, self.grid_size, 4
-        )  # 4 states per cell
+        self.grid_beliefs = np.random.rand(self.grid_size, self.grid_size, 4)  # 4 states per cell
         # Normalize
-        self.grid_beliefs = self.grid_beliefs / np.sum(
-            self.grid_beliefs, axis=2, keepdims=True
-        )
+        self.grid_beliefs = self.grid_beliefs / np.sum(self.grid_beliefs, axis=2, keepdims=True)
 
     def run_iteration(self) -> Dict[str, Any]:
         """Run message passing iteration."""
@@ -378,11 +363,7 @@ class MessagePassingBenchmark(PyMDPBenchmark):
     def _random_update(self):
         """Update beliefs in random order."""
         updates = 0
-        cells = [
-            (i, j)
-            for i in range(self.grid_size)
-            for j in range(self.grid_size)
-        ]
+        cells = [(i, j) for i in range(self.grid_size) for j in range(self.grid_size)]
         np.random.shuffle(cells)
 
         for i, j in cells:
@@ -477,7 +458,7 @@ class InferenceProfilingBenchmark(PyMDPBenchmark):
 
         # Action selection
         start = time.perf_counter()
-        action = self.agent.sample_action()
+        self.agent.sample_action()
         timings["action_selection"] = (time.perf_counter() - start) * 1000
 
         # Total time
@@ -507,20 +488,12 @@ def run_inference_benchmarks():
 
     # Belief propagation
     suite.add_benchmark(BeliefPropagationBenchmark(num_nodes=10))
-    suite.add_benchmark(
-        BeliefPropagationBenchmark(num_nodes=20, connectivity=0.2)
-    )
+    suite.add_benchmark(BeliefPropagationBenchmark(num_nodes=20, connectivity=0.2))
 
     # Message passing schedules
-    suite.add_benchmark(
-        MessagePassingBenchmark(grid_size=5, schedule="sequential")
-    )
-    suite.add_benchmark(
-        MessagePassingBenchmark(grid_size=5, schedule="parallel")
-    )
-    suite.add_benchmark(
-        MessagePassingBenchmark(grid_size=5, schedule="random")
-    )
+    suite.add_benchmark(MessagePassingBenchmark(grid_size=5, schedule="sequential"))
+    suite.add_benchmark(MessagePassingBenchmark(grid_size=5, schedule="parallel"))
+    suite.add_benchmark(MessagePassingBenchmark(grid_size=5, schedule="random"))
 
     # Profiling
     suite.add_benchmark(InferenceProfilingBenchmark(state_size=25))

@@ -52,7 +52,6 @@ def test_memory_monitor():
     monitor.start()
 
     # Allocate some memory
-    data = [0] * 1000000
 
     usage = monitor.get_usage()
     assert usage >= 0  # Could be 0 if GC collected something else

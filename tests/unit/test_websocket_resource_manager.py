@@ -5,22 +5,18 @@ Tests resource allocation, cleanup, and lifecycle management for agents
 using pooled WebSocket connections.
 """
 
-import asyncio
 from datetime import datetime, timedelta
-from typing import Dict, List, Optional
-from unittest.mock import AsyncMock, MagicMock, Mock, patch
+from unittest.mock import AsyncMock, Mock
 
 import pytest
 
-from websocket.connection_pool import PooledConnection, WebSocketConnectionPool
+from websocket.connection_pool import WebSocketConnectionPool
 from websocket.resource_manager import (
     AgentResource,
     AgentResourceManager,
     ResourceAllocationError,
     ResourceConfig,
-    ResourceLimits,
     ResourceMetrics,
-    ResourceNotFoundError,
     ResourceState,
 )
 
@@ -273,22 +269,16 @@ class TestAgentResourceManager:
         resource = await manager.allocate_resource("agent-mem")
 
         # Update within limits - should succeed
-        await manager.update_resource_usage(
-            "agent-mem", memory=50 * 1024 * 1024, cpu=0.5
-        )
+        await manager.update_resource_usage("agent-mem", memory=50 * 1024 * 1024, cpu=0.5)
         assert resource.memory_usage == 50 * 1024 * 1024
 
         # Update exceeding memory limit - should raise error
         with pytest.raises(ResourceAllocationError):
-            await manager.update_resource_usage(
-                "agent-mem", memory=150 * 1024 * 1024, cpu=0.5
-            )
+            await manager.update_resource_usage("agent-mem", memory=150 * 1024 * 1024, cpu=0.5)
 
         # Update exceeding CPU limit - should raise error
         with pytest.raises(ResourceAllocationError):
-            await manager.update_resource_usage(
-                "agent-mem", memory=50 * 1024 * 1024, cpu=1.5
-            )
+            await manager.update_resource_usage("agent-mem", memory=50 * 1024 * 1024, cpu=1.5)
 
     async def test_get_agent_connection(self, manager, pool):
         """Test getting connection for an agent."""
@@ -399,9 +389,7 @@ class TestAgentResourceManager:
         assert resource1.connection_id == "conn-region-us"
 
         # Allocate with preference (should try to get matching connection)
-        resource2 = await manager.allocate_resource(
-            "agent-2", prefer_metadata={"region": "eu-west"}
-        )
+        await manager.allocate_resource("agent-2", prefer_metadata={"region": "eu-west"})
 
         # Pool.acquire should be called with preference
         pool.acquire.assert_called_with(prefer_metadata={"region": "eu-west"})

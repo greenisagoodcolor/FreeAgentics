@@ -61,7 +61,7 @@ class TestLocalLLMConfig:
     def test_config_default_values(self):
         """Test default configuration values."""
         if not IMPORT_SUCCESS:
-            pytest.skip("Local LLM modules not available")
+            assert False, "Test bypass removed - must fix underlying issue"
 
         config = LocalLLMConfig()
 
@@ -82,7 +82,7 @@ class TestLocalLLMConfig:
     def test_config_custom_values(self):
         """Test configuration with custom values."""
         if not IMPORT_SUCCESS:
-            pytest.skip("Local LLM modules not available")
+            assert False, "Test bypass removed - must fix underlying issue"
 
         config = LocalLLMConfig(
             provider=LocalLLMProvider.LLAMA_CPP,
@@ -117,7 +117,7 @@ class TestLocalLLMConfig:
     def test_config_serialization(self):
         """Test configuration can be serialized to dict."""
         if not IMPORT_SUCCESS:
-            pytest.skip("Local LLM modules not available")
+            assert False, "Test bypass removed - must fix underlying issue"
 
         config = LocalLLMConfig(model_name="test-model", temperature=0.8)
 
@@ -126,13 +126,11 @@ class TestLocalLLMConfig:
         assert config_dict["model_name"] == "test-model"
         assert config_dict["temperature"] == 0.8
 
-    @pytest.mark.parametrize(
-        "provider", [LocalLLMProvider.OLLAMA, LocalLLMProvider.LLAMA_CPP]
-    )
+    @pytest.mark.parametrize("provider", [LocalLLMProvider.OLLAMA, LocalLLMProvider.LLAMA_CPP])
     def test_config_with_different_providers(self, provider):
         """Test configuration with different provider types."""
         if not IMPORT_SUCCESS:
-            pytest.skip("Local LLM modules not available")
+            assert False, "Test bypass removed - must fix underlying issue"
 
         config = LocalLLMConfig(provider=provider)
         assert config.provider == provider
@@ -149,7 +147,7 @@ class TestLocalLLMConfig:
     def test_config_with_different_quantizations(self, quantization):
         """Test configuration with different quantization levels."""
         if not IMPORT_SUCCESS:
-            pytest.skip("Local LLM modules not available")
+            assert False, "Test bypass removed - must fix underlying issue"
 
         config = LocalLLMConfig(quantization=quantization)
         assert config.quantization == quantization
@@ -163,7 +161,7 @@ class TestOllamaProvider:
     def ollama_config(self):
         """Create configuration for Ollama provider."""
         if not IMPORT_SUCCESS:
-            pytest.skip("Local LLM modules not available")
+            assert False, "Test bypass removed - must fix underlying issue"
         return LocalLLMConfig(
             provider=LocalLLMProvider.OLLAMA,
             model_name="llama2",
@@ -174,12 +172,10 @@ class TestOllamaProvider:
     def ollama_provider(self, ollama_config):
         """Create OllamaProvider instance."""
         if not IMPORT_SUCCESS:
-            pytest.skip("Local LLM modules not available")
+            assert False, "Test bypass removed - must fix underlying issue"
         return OllamaProvider(ollama_config)
 
-    def test_ollama_provider_initialization(
-        self, ollama_provider, ollama_config
-    ):
+    def test_ollama_provider_initialization(self, ollama_provider, ollama_config):
         """Test OllamaProvider initialization."""
         assert ollama_provider.config == ollama_config
         assert ollama_provider.base_url == "http://localhost:11434"
@@ -267,13 +263,11 @@ class TestOllamaProvider:
         """Test pulling a model with Ollama."""
         with (
             patch.object(ollama_provider.session, "get") as mock_get,
-            patch.object(ollama_provider.session, "post") as mock_post,
+            patch.object(ollama_provider.session, "post"),
         ):
             # Mock successful model list
             mock_get.return_value.status_code = 200
-            mock_get.return_value.json.return_value = {
-                "models": [{"name": "llama2"}]
-            }
+            mock_get.return_value.json.return_value = {"models": [{"name": "llama2"}]}
 
             # Test load_model method
             result = ollama_provider.load_model()
@@ -285,9 +279,7 @@ class TestOllamaProvider:
             # Mock error response
             mock_post.side_effect = httpx.RequestError("Server error")
 
-            with patch(
-                "inference.llm.local_llm_manager.logger"
-            ) as mock_logger:
+            with patch("inference.llm.local_llm_manager.logger") as mock_logger:
                 with pytest.raises(
                     Exception
                 ):  # generate() raises exceptions instead of returning None
@@ -344,7 +336,7 @@ class TestLlamaCppProvider:
     def llama_cpp_config(self):
         """Create configuration for llama.cpp provider."""
         if not IMPORT_SUCCESS:
-            pytest.skip("Local LLM modules not available")
+            assert False, "Test bypass removed - must fix underlying issue"
         return LocalLLMConfig(
             provider=LocalLLMProvider.LLAMA_CPP,
             model_name="llama-7b",
@@ -358,12 +350,10 @@ class TestLlamaCppProvider:
     def llama_cpp_provider(self, llama_cpp_config):
         """Create LlamaCppProvider instance."""
         if not IMPORT_SUCCESS:
-            pytest.skip("Local LLM modules not available")
+            assert False, "Test bypass removed - must fix underlying issue"
         return LlamaCppProvider(llama_cpp_config)
 
-    def test_llama_cpp_provider_initialization(
-        self, llama_cpp_provider, llama_cpp_config
-    ):
+    def test_llama_cpp_provider_initialization(self, llama_cpp_provider, llama_cpp_config):
         """Test LlamaCppProvider initialization."""
         assert llama_cpp_provider.config == llama_cpp_config
         assert llama_cpp_provider.binary_path == "/usr/local/bin/llama-cpp"
@@ -371,9 +361,7 @@ class TestLlamaCppProvider:
 
     def test_llama_cpp_check_availability(self, llama_cpp_provider):
         """Test checking llama.cpp availability."""
-        with patch(
-            "inference.llm.local_llm_manager.subprocess.run"
-        ) as mock_run:
+        with patch("inference.llm.local_llm_manager.subprocess.run") as mock_run:
             mock_result = Mock()
             mock_result.returncode = 0
             mock_run.return_value = mock_result
@@ -383,25 +371,17 @@ class TestLlamaCppProvider:
 
             mock_run.assert_called_once()
 
-    def test_llama_cpp_check_availability_missing_binary(
-        self, llama_cpp_provider
-    ):
+    def test_llama_cpp_check_availability_missing_binary(self, llama_cpp_provider):
         """Test availability check with missing binary."""
-        with patch(
-            "inference.llm.local_llm_manager.subprocess.run"
-        ) as mock_run:
+        with patch("inference.llm.local_llm_manager.subprocess.run") as mock_run:
             mock_run.side_effect = FileNotFoundError("Binary not found")
 
             is_available = llama_cpp_provider.is_available()
             assert is_available is False
 
-    def test_llama_cpp_check_availability_missing_model(
-        self, llama_cpp_provider
-    ):
+    def test_llama_cpp_check_availability_missing_model(self, llama_cpp_provider):
         """Test availability check with missing model."""
-        with patch(
-            "inference.llm.local_llm_manager.subprocess.run"
-        ) as mock_run:
+        with patch("inference.llm.local_llm_manager.subprocess.run") as mock_run:
             mock_result = Mock()
             mock_result.returncode = 1  # Command failed
             mock_run.return_value = mock_result
@@ -451,9 +431,7 @@ class TestLlamaCppProvider:
     def test_llama_cpp_build_command(self, llama_cpp_provider):
         """Test that llama.cpp provider can generate text properly."""
         # Test that the provider builds commands internally during generation
-        with patch(
-            "inference.llm.local_llm_manager.subprocess.run"
-        ) as mock_run:
+        with patch("inference.llm.local_llm_manager.subprocess.run") as mock_run:
             mock_result = Mock()
             mock_result.stdout = "Test response"
             mock_result.stderr = "tokens: 10"
@@ -469,7 +447,7 @@ class TestLlamaCppProvider:
     def test_llama_cpp_command_with_gpu_layers(self, llama_cpp_config):
         """Test that GPU layers config is respected."""
         if not IMPORT_SUCCESS:
-            pytest.skip("Local LLM modules not available")
+            assert False, "Test bypass removed - must fix underlying issue"
 
         llama_cpp_config.gpu_layers = 32
         provider = LlamaCppProvider(llama_cpp_config)
@@ -497,14 +475,14 @@ class TestLocalLLMManager:
     def manager_config(self):
         """Create configuration for LocalLLMManager."""
         if not IMPORT_SUCCESS:
-            pytest.skip("Local LLM modules not available")
+            assert False, "Test bypass removed - must fix underlying issue"
         return LocalLLMConfig()
 
     @pytest.fixture
     def manager(self, manager_config):
         """Create LocalLLMManager instance."""
         if not IMPORT_SUCCESS:
-            pytest.skip("Local LLM modules not available")
+            assert False, "Test bypass removed - must fix underlying issue"
         return LocalLLMManager(manager_config)
 
     def test_manager_initialization(self, manager, manager_config):
@@ -516,7 +494,7 @@ class TestLocalLLMManager:
     def test_manager_initialization_with_providers(self, manager_config):
         """Test manager initialization creates appropriate providers."""
         if not IMPORT_SUCCESS:
-            pytest.skip("Local LLM modules not available")
+            assert False, "Test bypass removed - must fix underlying issue"
 
         # Test Ollama provider
         ollama_config = LocalLLMConfig(provider=LocalLLMProvider.OLLAMA)
@@ -528,9 +506,7 @@ class TestLocalLLMManager:
         llama_cpp_config = LocalLLMConfig(provider=LocalLLMProvider.LLAMA_CPP)
         llama_cpp_manager = LocalLLMManager(llama_cpp_config)
         assert "llama_cpp" in llama_cpp_manager.providers
-        assert isinstance(
-            llama_cpp_manager.providers["llama_cpp"], LlamaCppProvider
-        )
+        assert isinstance(llama_cpp_manager.providers["llama_cpp"], LlamaCppProvider)
 
     def test_manager_find_best_provider(self, manager):
         """Test finding the best available provider."""
@@ -584,9 +560,7 @@ class TestLocalLLMManager:
         # First provider fails, second succeeds
         failing_provider = Mock()
         failing_provider.is_available.return_value = True
-        failing_provider.load_model.return_value = (
-            False  # First provider fails to load
-        )
+        failing_provider.load_model.return_value = False  # First provider fails to load
 
         working_provider = Mock()
         working_provider.is_available.return_value = True
@@ -759,7 +733,7 @@ class TestIntegrationScenarios:
     def test_full_ollama_workflow(self):
         """Test complete Ollama workflow."""
         if not IMPORT_SUCCESS:
-            pytest.skip("Local LLM modules not available")
+            assert False, "Test bypass removed - must fix underlying issue"
 
         config = LocalLLMConfig(
             provider=LocalLLMProvider.OLLAMA,
@@ -777,9 +751,7 @@ class TestIntegrationScenarios:
             # Mock successful availability check
             mock_get_response = Mock()
             mock_get_response.status_code = 200
-            mock_get_response.json.return_value = {
-                "models": [{"name": "llama2"}]
-            }
+            mock_get_response.json.return_value = {"models": [{"name": "llama2"}]}
             mock_get.return_value = mock_get_response
 
             # Mock successful generation
@@ -802,7 +774,7 @@ class TestIntegrationScenarios:
     def test_llama_cpp_workflow(self):
         """Test complete llama.cpp workflow."""
         if not IMPORT_SUCCESS:
-            pytest.skip("Local LLM modules not available")
+            assert False, "Test bypass removed - must fix underlying issue"
 
         config = LocalLLMConfig(
             provider=LocalLLMProvider.LLAMA_CPP,
@@ -810,12 +782,8 @@ class TestIntegrationScenarios:
             model_path="/models/llama-7b.ggml",
         )
 
-        with patch(
-            "inference.llm.local_llm_manager.os.path.exists"
-        ) as mock_exists:
-            with patch(
-                "inference.llm.local_llm_manager.subprocess.run"
-            ) as mock_run:
+        with patch("inference.llm.local_llm_manager.os.path.exists") as mock_exists:
+            with patch("inference.llm.local_llm_manager.subprocess.run") as mock_run:
                 # Mock availability
                 mock_exists.return_value = True
 
@@ -836,7 +804,7 @@ class TestIntegrationScenarios:
     def test_provider_fallback_workflow(self):
         """Test fallback between providers."""
         if not IMPORT_SUCCESS:
-            pytest.skip("Local LLM modules not available")
+            assert False, "Test bypass removed - must fix underlying issue"
 
         config = LocalLLMConfig(enable_fallback=True)
         manager = LocalLLMManager(config)
@@ -871,7 +839,7 @@ class TestIntegrationScenarios:
     def test_error_recovery_and_logging(self):
         """Test error recovery and logging mechanisms."""
         if not IMPORT_SUCCESS:
-            pytest.skip("Local LLM modules not available")
+            assert False, "Test bypass removed - must fix underlying issue"
 
         config = LocalLLMConfig()
         manager = LocalLLMManager(config)

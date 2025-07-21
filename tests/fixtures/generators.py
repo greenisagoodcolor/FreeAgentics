@@ -60,9 +60,7 @@ class DataGenerator:
         return {
             "generated_count": self.generated_count,
             "elapsed_seconds": elapsed,
-            "rate_per_second": self.generated_count / elapsed
-            if elapsed > 0
-            else 0,
+            "rate_per_second": self.generated_count / elapsed if elapsed > 0 else 0,
         }
 
 
@@ -150,9 +148,7 @@ class AgentGenerator(DataGenerator):
         self._update_progress()
         return builder.build()
 
-    def generate_batch(
-        self, count: int, **common_overrides
-    ) -> List[AgentSchema]:
+    def generate_batch(self, count: int, **common_overrides) -> List[AgentSchema]:
         """Generate a batch of agents."""
         agents = []
         for i in range(count):
@@ -177,10 +173,7 @@ class AgentGenerator(DataGenerator):
         """Generate a diverse population with template distribution."""
         if distribution is None:
             # Default even distribution
-            distribution = {
-                template: 1.0 / len(self.templates)
-                for template in self.templates
-            }
+            distribution = {template: 1.0 / len(self.templates) for template in self.templates}
 
         # Normalize distribution
         total_weight = sum(distribution.values())
@@ -219,9 +212,7 @@ class AgentGenerator(DataGenerator):
 
         for _ in range(num_clusters):
             center = [
-                random.uniform(
-                    min_bounds[i] + cluster_std, max_bounds[i] - cluster_std
-                )
+                random.uniform(min_bounds[i] + cluster_std, max_bounds[i] - cluster_std)
                 for i in range(len(min_bounds))
             ]
             cluster_centers.append(center)
@@ -311,9 +302,7 @@ class CoalitionGenerator(DataGenerator):
         self._update_progress()
         return builder.build()
 
-    def generate_batch(
-        self, count: int, **common_overrides
-    ) -> List[CoalitionSchema]:
+    def generate_batch(self, count: int, **common_overrides) -> List[CoalitionSchema]:
         """Generate a batch of coalitions."""
         return [self.generate_single(**common_overrides) for _ in range(count)]
 
@@ -326,9 +315,7 @@ class CoalitionGenerator(DataGenerator):
         """Generate a hierarchical coalition structure."""
         structure = {"top_level": [], "hierarchy": {}, "all_coalitions": []}
 
-        def create_level(
-            parent_name: Optional[str], level: int, index: int
-        ) -> CoalitionSchema:
+        def create_level(parent_name: Optional[str], level: int, index: int) -> CoalitionSchema:
             """Recursively create coalition levels."""
             if parent_name:
                 name = f"{parent_name} Division {index}"
@@ -345,9 +332,7 @@ class CoalitionGenerator(DataGenerator):
                     sub = create_level(coalition.name, level + 1, i + 1)
                     sub_coalitions.append(sub)
 
-                structure["hierarchy"][coalition.id] = [
-                    sc.id for sc in sub_coalitions
-                ]
+                structure["hierarchy"][coalition.id] = [sc.id for sc in sub_coalitions]
 
             return coalition
 
@@ -381,30 +366,22 @@ class KnowledgeGraphGenerator(DataGenerator):
             "derived_from",
         ]
 
-    def generate_node(
-        self, node_type: Optional[str] = None, **overrides
-    ) -> KnowledgeNodeSchema:
+    def generate_node(self, node_type: Optional[str] = None, **overrides) -> KnowledgeNodeSchema:
         """Generate a single knowledge node."""
         if node_type is None:
-            node_type = random.choice(
-                ["concept", "entity", "fact", "observation", "inference"]
-            )
+            node_type = random.choice(["concept", "entity", "fact", "observation", "inference"])
 
         builder = KnowledgeNodeBuilder().with_type(node_type)
 
         # Type-specific generation
         if node_type == "concept":
             domain = random.choice(self._concept_domains)
-            concept = (
-                f"{domain.capitalize()}Concept_{random.randint(1000, 9999)}"
-            )
+            concept = f"{domain.capitalize()}Concept_{random.randint(1000, 9999)}"
             builder = builder.as_concept(concept)
 
         elif node_type == "entity":
             entity_type = random.choice(self._entity_types)
-            entity_name = (
-                f"{entity_type.capitalize()}_{random.randint(1000, 9999)}"
-            )
+            entity_name = f"{entity_type.capitalize()}_{random.randint(1000, 9999)}"
             builder = builder.as_entity(entity_name, entity_type)
 
         elif node_type == "observation":
@@ -413,9 +390,7 @@ class KnowledgeGraphGenerator(DataGenerator):
 
         else:
             # Generic node
-            builder = builder.with_label(
-                f"{node_type.capitalize()}_{random.randint(1000, 9999)}"
-            )
+            builder = builder.with_label(f"{node_type.capitalize()}_{random.randint(1000, 9999)}")
 
         # Add confidence
         builder = builder.with_confidence(random.uniform(0.5, 1.0))
@@ -504,10 +479,7 @@ class KnowledgeGraphGenerator(DataGenerator):
             source = random.choice(nodes)
             target = random.choice(nodes)
 
-            if (
-                source.id != target.id
-                and (source.id, target.id) not in existing_edges
-            ):
+            if source.id != target.id and (source.id, target.id) not in existing_edges:
                 edge = self.generate_edge(source.id, target.id)
                 edges.append(edge)
                 existing_edges.add((source.id, target.id))
@@ -523,9 +495,7 @@ class KnowledgeGraphGenerator(DataGenerator):
                 "num_nodes": len(nodes),
                 "num_edges": len(edges),
                 "actual_connectivity": (
-                    len(edges) / num_possible_edges
-                    if num_possible_edges > 0
-                    else 0
+                    len(edges) / num_possible_edges if num_possible_edges > 0 else 0
                 ),
                 "is_connected": ensure_connected,
             },
@@ -566,14 +536,10 @@ class KnowledgeGraphGenerator(DataGenerator):
             degree_sum = sum(node_degrees.values())
             if degree_sum == 0:
                 # Fallback to random selection
-                targets = random.sample(
-                    nodes[:-1], min(edges_per_new_node, len(nodes) - 1)
-                )
+                targets = random.sample(nodes[:-1], min(edges_per_new_node, len(nodes) - 1))
             else:
                 # Preferential attachment
-                probabilities = [
-                    node_degrees[n.id] / degree_sum for n in nodes[:-1]
-                ]
+                probabilities = [node_degrees[n.id] / degree_sum for n in nodes[:-1]]
                 targets = np.random.choice(
                     nodes[:-1],
                     size=min(edges_per_new_node, len(nodes) - 1),
@@ -595,12 +561,8 @@ class KnowledgeGraphGenerator(DataGenerator):
                 "num_nodes": len(nodes),
                 "num_edges": len(edges),
                 "degree_distribution": dict(node_degrees),
-                "max_degree": max(node_degrees.values())
-                if node_degrees
-                else 0,
-                "avg_degree": sum(node_degrees.values()) / len(node_degrees)
-                if node_degrees
-                else 0,
+                "max_degree": max(node_degrees.values()) if node_degrees else 0,
+                "avg_degree": sum(node_degrees.values()) / len(node_degrees) if node_degrees else 0,
             },
         }
 
@@ -608,9 +570,7 @@ class KnowledgeGraphGenerator(DataGenerator):
 class PerformanceDataGenerator:
     """Generator for creating performance test datasets."""
 
-    def __init__(
-        self, session: Optional[Session] = None, seed: Optional[int] = None
-    ):
+    def __init__(self, session: Optional[Session] = None, seed: Optional[int] = None):
         self.session = session
         self.agent_gen = AgentGenerator(seed=seed)
         self.coalition_gen = CoalitionGenerator(seed=seed)
@@ -620,9 +580,7 @@ class PerformanceDataGenerator:
             random.seed(seed)
             np.random.seed(seed)
 
-    def generate_dataset(
-        self, config: PerformanceTestConfigSchema
-    ) -> Dict[str, Any]:
+    def generate_dataset(self, config: PerformanceTestConfigSchema) -> Dict[str, Any]:
         """Generate a complete performance test dataset."""
         results = {
             "config": config.dict(),
@@ -645,33 +603,23 @@ class PerformanceDataGenerator:
         results["agents"] = self.agent_gen.generate_diverse_population(
             config.num_agents, distribution=agent_distribution
         )
-        results["timing"]["agent_generation"] = (
-            datetime.utcnow() - start_time
-        ).total_seconds()
+        results["timing"]["agent_generation"] = (datetime.utcnow() - start_time).total_seconds()
 
         # Generate coalitions
         start_time = datetime.utcnow()
-        results["coalitions"] = self.coalition_gen.generate_batch(
-            config.num_coalitions
-        )
-        results["timing"]["coalition_generation"] = (
-            datetime.utcnow() - start_time
-        ).total_seconds()
+        results["coalitions"] = self.coalition_gen.generate_batch(config.num_coalitions)
+        results["timing"]["coalition_generation"] = (datetime.utcnow() - start_time).total_seconds()
 
         # Generate knowledge graph
         start_time = datetime.utcnow()
         if config.num_knowledge_nodes > 0:
             # Use scale-free graph for more realistic structure
-            results[
-                "knowledge_graph"
-            ] = self.graph_gen.generate_scale_free_graph(
+            results["knowledge_graph"] = self.graph_gen.generate_scale_free_graph(
                 config.num_knowledge_nodes,
                 initial_nodes=5,
                 edges_per_new_node=3,
             )
-        results["timing"]["knowledge_generation"] = (
-            datetime.utcnow() - start_time
-        ).total_seconds()
+        results["timing"]["knowledge_generation"] = (datetime.utcnow() - start_time).total_seconds()
 
         # Calculate dataset statistics
         results["statistics"] = self._calculate_statistics(results)
@@ -713,17 +661,13 @@ class PerformanceDataGenerator:
                 session.commit()
 
             results["counts"]["agents"] = agent_count
-            results["timing"]["agent_creation"] = (
-                datetime.utcnow() - start_time
-            ).total_seconds()
+            results["timing"]["agent_creation"] = (datetime.utcnow() - start_time).total_seconds()
 
             # Generate coalitions
             start_time = datetime.utcnow()
             coalition_count = 0
 
-            for coalition_schema in self.coalition_gen.generate_batch(
-                config.num_coalitions
-            ):
+            for coalition_schema in self.coalition_gen.generate_batch(config.num_coalitions):
                 try:
                     coalition_dict = coalition_schema.dict()
                     coalition = Coalition(**coalition_dict)
@@ -760,9 +704,7 @@ class PerformanceDataGenerator:
 
         return results
 
-    def export_to_file(
-        self, dataset: Dict[str, Any], filepath: Path, format: str = "json"
-    ) -> None:
+    def export_to_file(self, dataset: Dict[str, Any], filepath: Path, format: str = "json") -> None:
         """Export generated dataset to file."""
         filepath = Path(filepath)
         filepath.parent.mkdir(parents=True, exist_ok=True)
@@ -772,26 +714,20 @@ class PerformanceDataGenerator:
             export_data = {
                 "config": dataset.get("config", {}),
                 "agents": [
-                    a.dict() if hasattr(a, "dict") else a
-                    for a in dataset.get("agents", [])
+                    a.dict() if hasattr(a, "dict") else a for a in dataset.get("agents", [])
                 ],
                 "coalitions": [
-                    c.dict() if hasattr(c, "dict") else c
-                    for c in dataset.get("coalitions", [])
+                    c.dict() if hasattr(c, "dict") else c for c in dataset.get("coalitions", [])
                 ],
                 "knowledge_graph": (
                     {
                         "nodes": [
                             n.dict() if hasattr(n, "dict") else n
-                            for n in dataset.get("knowledge_graph", {}).get(
-                                "nodes", []
-                            )
+                            for n in dataset.get("knowledge_graph", {}).get("nodes", [])
                         ],
                         "edges": [
                             e.dict() if hasattr(e, "dict") else e
-                            for e in dataset.get("knowledge_graph", {}).get(
-                                "edges", []
-                            )
+                            for e in dataset.get("knowledge_graph", {}).get("edges", [])
                         ],
                     }
                     if dataset.get("knowledge_graph")
@@ -807,9 +743,7 @@ class PerformanceDataGenerator:
                     return str(obj)
                 elif isinstance(obj, datetime):
                     return obj.isoformat()
-                elif isinstance(
-                    obj, (AgentStatus, CoalitionStatus, AgentRole)
-                ):
+                elif isinstance(obj, (AgentStatus, CoalitionStatus, AgentRole)):
                     return obj.value
                 else:
                     return str(obj)
@@ -834,9 +768,7 @@ class PerformanceDataGenerator:
                 coalitions_file = filepath.with_suffix(".coalitions.csv")
                 with open(coalitions_file, "w", newline="") as f:
                     if hasattr(dataset["coalitions"][0], "dict"):
-                        fieldnames = list(
-                            dataset["coalitions"][0].dict().keys()
-                        )
+                        fieldnames = list(dataset["coalitions"][0].dict().keys())
                         writer = csv.DictWriter(f, fieldnames=fieldnames)
                         writer.writeheader()
                         for coalition in dataset["coalitions"]:
@@ -859,14 +791,10 @@ class PerformanceDataGenerator:
             statuses = {}
             for agent in dataset["agents"]:
                 if hasattr(agent, "template"):
-                    templates[agent.template] = (
-                        templates.get(agent.template, 0) + 1
-                    )
+                    templates[agent.template] = templates.get(agent.template, 0) + 1
                 if hasattr(agent, "status"):
                     status_val = (
-                        agent.status.value
-                        if hasattr(agent.status, "value")
-                        else str(agent.status)
+                        agent.status.value if hasattr(agent.status, "value") else str(agent.status)
                     )
                     statuses[status_val] = statuses.get(status_val, 0) + 1
 
@@ -894,9 +822,7 @@ def generate_agent_batch(count: int = 10, **kwargs) -> List[AgentSchema]:
     return generator.generate_batch(count, **kwargs)
 
 
-def generate_coalition_scenario(
-    num_coalitions: int = 5, **kwargs
-) -> List[CoalitionSchema]:
+def generate_coalition_scenario(num_coalitions: int = 5, **kwargs) -> List[CoalitionSchema]:
     """Generate a coalition scenario."""
     generator = CoalitionGenerator()
     return generator.generate_batch(num_coalitions, **kwargs)

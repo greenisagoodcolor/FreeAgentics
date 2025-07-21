@@ -1,9 +1,5 @@
 """Comprehensive tests for gmn_parser.py to boost coverage."""
 
-from typing import Any, Dict
-from unittest.mock import Mock, patch
-
-import numpy as np
 import pytest
 
 from inference.active.gmn_parser import (
@@ -20,9 +16,7 @@ class TestGMNNode:
 
     def test_initialization(self):
         """Test node initialization."""
-        node = GMNNode(
-            id="test_node", type="state", properties={"num_states": 4}
-        )
+        node = GMNNode(id="test_node", type="state", properties={"num_states": 4})
         assert node.id == "test_node"
         assert node.type == "state"
         assert node.properties == {"num_states": 4}
@@ -121,9 +115,7 @@ class TestGMNParser:
                     "properties": {"num_observations": 3},
                 },
             ],
-            "edges": [
-                {"source": "state1", "target": "obs1", "type": "generates"}
-            ],
+            "edges": [{"source": "state1", "target": "obs1", "type": "generates"}],
         }
 
         graph = parser.parse(spec)
@@ -250,9 +242,7 @@ class TestGMNParser:
         """Test validation catches missing edge source."""
         spec = {
             "nodes": [{"id": "n1", "type": "state"}],
-            "edges": [
-                {"target": "n1", "type": "depends_on"}  # Missing source
-            ],
+            "edges": [{"target": "n1", "type": "depends_on"}],  # Missing source
         }
 
         with pytest.raises(ValueError, match="GMN validation errors"):
@@ -334,9 +324,7 @@ class TestGMNParser:
         graph = parser.parse(spec)
 
         assert graph.nodes["agent"].properties["name"] == "test agent"
-        assert (
-            graph.nodes["agent"].properties["description"] == "This is a test"
-        )
+        assert graph.nodes["agent"].properties["description"] == "This is a test"
 
     def test_edge_properties_parsing(self, parser):
         """Test parsing edge properties."""

@@ -4,14 +4,12 @@ This module provides various simulation scenarios that test different
 aspects of the system under realistic concurrent load.
 """
 
-from datetime import datetime, timedelta
+from datetime import datetime
 from pathlib import Path
 from typing import Dict, List, Optional
 
 from tests.simulation.concurrent_simulator import SimulationConfig
 from tests.simulation.user_personas import (
-    ActivityLevel,
-    InteractionPattern,
     PersonaType,
 )
 
@@ -412,29 +410,19 @@ class ScenarioScheduler:
     def add_daily_scenarios(self):
         """Add a typical daily scenario sequence."""
         # Morning: System monitoring
-        self.add_scenario(
-            SimulationScenarios.system_monitoring(), delay_minutes=0
-        )
+        self.add_scenario(SimulationScenarios.system_monitoring(), delay_minutes=0)
 
         # Mid-morning: Mixed workload ramp-up
-        self.add_scenario(
-            SimulationScenarios.mixed_workload(), delay_minutes=5
-        )
+        self.add_scenario(SimulationScenarios.mixed_workload(), delay_minutes=5)
 
         # Noon: Burst activity (lunch break patterns)
-        self.add_scenario(
-            SimulationScenarios.burst_activity(), delay_minutes=5
-        )
+        self.add_scenario(SimulationScenarios.burst_activity(), delay_minutes=5)
 
         # Afternoon: Research conference
-        self.add_scenario(
-            SimulationScenarios.research_conference(), delay_minutes=10
-        )
+        self.add_scenario(SimulationScenarios.research_conference(), delay_minutes=10)
 
         # Evening: Coalition operations
-        self.add_scenario(
-            SimulationScenarios.coalition_operations(), delay_minutes=5
-        )
+        self.add_scenario(SimulationScenarios.coalition_operations(), delay_minutes=5)
 
         # Night: Long-running stability
         self.add_scenario(SimulationScenarios.long_running(), delay_minutes=10)
@@ -442,27 +430,19 @@ class ScenarioScheduler:
     def add_stress_test_sequence(self):
         """Add a stress testing sequence."""
         # Warmup with mixed load
-        self.add_scenario(
-            SimulationScenarios.mixed_workload(), delay_minutes=0
-        )
+        self.add_scenario(SimulationScenarios.mixed_workload(), delay_minutes=0)
 
         # Database stress
-        self.add_scenario(
-            SimulationScenarios.database_intensive(), delay_minutes=5
-        )
+        self.add_scenario(SimulationScenarios.database_intensive(), delay_minutes=5)
 
         # Connection stress
         self.add_scenario(SimulationScenarios.stress_test(), delay_minutes=5)
 
         # Failover testing
-        self.add_scenario(
-            SimulationScenarios.failover_test(), delay_minutes=10
-        )
+        self.add_scenario(SimulationScenarios.failover_test(), delay_minutes=10)
 
         # Recovery verification
-        self.add_scenario(
-            SimulationScenarios.mixed_workload(), delay_minutes=10
-        )
+        self.add_scenario(SimulationScenarios.mixed_workload(), delay_minutes=10)
 
     async def run_schedule(self):
         """Run all scheduled scenarios."""
@@ -474,28 +454,19 @@ class ScenarioScheduler:
 
         for i, scenario in enumerate(self.scheduled_scenarios):
             # Wait for delay
-            if (
-                hasattr(scenario, "_delay_minutes")
-                and scenario._delay_minutes > 0
-            ):
+            if hasattr(scenario, "_delay_minutes") and scenario._delay_minutes > 0:
                 wait_time = scenario._delay_minutes * 60
-                print(
-                    f"Waiting {scenario._delay_minutes} minutes before next scenario..."
-                )
+                print(f"Waiting {scenario._delay_minutes} minutes before next scenario...")
                 await asyncio.sleep(wait_time)
 
             # Update results path for this scenario
             scenario.results_path = (
-                self.results_base_path
-                / scenario.name
-                / start_time.strftime("%Y%m%d_%H%M%S")
+                self.results_base_path / scenario.name / start_time.strftime("%Y%m%d_%H%M%S")
             )
 
             # Run scenario
             print(f"\n{'='*60}")
-            print(
-                f"Running scenario {i+1}/{len(self.scheduled_scenarios)}: {scenario.name}"
-            )
+            print(f"Running scenario {i+1}/{len(self.scheduled_scenarios)}: {scenario.name}")
             print(f"Description: {scenario.description}")
             print(f"Duration: {scenario.duration_seconds}s")
             print(f"Total users: {scenario.total_users}")
@@ -544,19 +515,9 @@ class ScenarioScheduler:
                     "schedule_start": datetime.now().isoformat(),
                     "total_scenarios": len(self.scheduled_scenarios),
                     "completed": len(
-                        [
-                            s
-                            for s in self.completed_scenarios
-                            if s["status"] == "completed"
-                        ]
+                        [s for s in self.completed_scenarios if s["status"] == "completed"]
                     ),
-                    "failed": len(
-                        [
-                            s
-                            for s in self.completed_scenarios
-                            if s["status"] == "failed"
-                        ]
-                    ),
+                    "failed": len([s for s in self.completed_scenarios if s["status"] == "failed"]),
                     "scenarios": self.completed_scenarios,
                 },
                 f,

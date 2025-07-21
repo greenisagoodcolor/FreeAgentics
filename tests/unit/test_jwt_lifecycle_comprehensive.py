@@ -7,7 +7,7 @@ for the FreeAgentics authentication system.
 
 import time
 from datetime import datetime, timedelta, timezone
-from unittest.mock import Mock, patch
+from unittest.mock import patch
 
 import jwt
 import pytest
@@ -69,9 +69,7 @@ class TestJWTLifecycle:
         exp_time = datetime.fromtimestamp(payload["exp"], tz=timezone.utc)
         now = datetime.now(timezone.utc)
         expected_exp = now + timedelta(minutes=ACCESS_TOKEN_EXPIRE_MINUTES)
-        assert (
-            abs((exp_time - expected_exp).total_seconds()) < 5
-        )  # Allow 5 second tolerance
+        assert abs((exp_time - expected_exp).total_seconds()) < 5  # Allow 5 second tolerance
 
     def test_refresh_token_generation(self, auth_manager, test_user):
         """Test refresh token generation with proper claims."""
@@ -140,9 +138,7 @@ class TestJWTLifecycle:
     def test_token_expiration_handling(self, auth_manager, test_user):
         """Test token expiration and rejection of expired tokens."""
         # Create token with very short expiration
-        with patch(
-            "auth.security_implementation.ACCESS_TOKEN_EXPIRE_MINUTES", 0
-        ):
+        with patch("auth.security_implementation.ACCESS_TOKEN_EXPIRE_MINUTES", 0):
             token = auth_manager.create_access_token(test_user)
 
             # Wait for token to expire
@@ -197,9 +193,7 @@ class TestJWTLifecycle:
         refresh_token_1 = auth_manager.create_refresh_token(test_user)
 
         # Use it to get new tokens
-        new_access_token, refresh_token_2 = auth_manager.refresh_access_token(
-            refresh_token_1
-        )
+        new_access_token, refresh_token_2 = auth_manager.refresh_access_token(refresh_token_1)
 
         # Verify new refresh token is different
         assert refresh_token_2 != refresh_token_1
@@ -213,21 +207,15 @@ class TestJWTLifecycle:
         client_fingerprint = "test-client-fingerprint-123"
 
         # Create token with client binding
-        token = auth_manager.create_access_token(
-            test_user, client_fingerprint=client_fingerprint
-        )
+        token = auth_manager.create_access_token(test_user, client_fingerprint=client_fingerprint)
 
         # Verify token works with correct fingerprint
-        token_data = auth_manager.verify_token(
-            token, client_fingerprint=client_fingerprint
-        )
+        token_data = auth_manager.verify_token(token, client_fingerprint=client_fingerprint)
         assert token_data.user_id == test_user.user_id
 
         # Verify token fails with wrong fingerprint
         with pytest.raises(Exception) as exc_info:
-            auth_manager.verify_token(
-                token, client_fingerprint="wrong-fingerprint"
-            )
+            auth_manager.verify_token(token, client_fingerprint="wrong-fingerprint")
 
         assert "binding" in str(exc_info.value).lower()
 
@@ -249,9 +237,7 @@ class TestJWTLifecycle:
         }
 
         # Sign token without JTI
-        token = jwt.encode(
-            payload, auth_manager.private_key, algorithm=ALGORITHM
-        )
+        token = jwt.encode(payload, auth_manager.private_key, algorithm=ALGORITHM)
 
         # Verify token is rejected
         with pytest.raises(Exception) as exc_info:
@@ -290,17 +276,14 @@ class TestJWTLifecycle:
         }
 
         # Sign token with future time
-        token = jwt.encode(
-            payload, auth_manager.private_key, algorithm=ALGORITHM
-        )
+        token = jwt.encode(payload, auth_manager.private_key, algorithm=ALGORITHM)
 
         # Verify token is rejected
         with pytest.raises(Exception) as exc_info:
             auth_manager.verify_token(token)
 
         assert (
-            "not yet valid" in str(exc_info.value).lower()
-            or "iat" in str(exc_info.value).lower()
+            "not yet valid" in str(exc_info.value).lower() or "iat" in str(exc_info.value).lower()
         )
 
     def test_token_wrong_audience_rejection(self, auth_manager, test_user):
@@ -322,9 +305,7 @@ class TestJWTLifecycle:
         }
 
         # Sign token with wrong audience
-        token = jwt.encode(
-            payload, auth_manager.private_key, algorithm=ALGORITHM
-        )
+        token = jwt.encode(payload, auth_manager.private_key, algorithm=ALGORITHM)
 
         # Verify token is rejected
         with pytest.raises(Exception) as exc_info:
@@ -351,9 +332,7 @@ class TestJWTLifecycle:
         }
 
         # Sign token with wrong issuer
-        token = jwt.encode(
-            payload, auth_manager.private_key, algorithm=ALGORITHM
-        )
+        token = jwt.encode(payload, auth_manager.private_key, algorithm=ALGORITHM)
 
         # Verify token is rejected
         with pytest.raises(Exception) as exc_info:

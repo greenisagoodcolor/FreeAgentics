@@ -13,8 +13,7 @@ import asyncio
 import hashlib
 import json
 import logging
-from datetime import datetime, timedelta
-from typing import Dict, List
+from datetime import datetime
 from uuid import uuid4
 
 from sqlalchemy import text
@@ -52,14 +51,10 @@ async def setup_optimized_database():
 
         # Log recommendations
         logger.info(f"Found {len(report['missing_indexes'])} missing indexes")
-        logger.info(
-            f"Found {len(report['redundant_indexes'])} redundant indexes"
-        )
+        logger.info(f"Found {len(report['redundant_indexes'])} redundant indexes")
 
         # Apply recommendations (with manual approval in production)
-        await indexing_strategy.apply_recommendations(
-            session, auto_approve=False
-        )
+        await indexing_strategy.apply_recommendations(session, auto_approve=False)
 
         # 3. Setup monitoring
         logger.info("Setting up database monitoring...")
@@ -98,9 +93,7 @@ async def example_batch_operations(optimizer):
             )
 
         # Batch insert
-        inserted = await batch_manager.batch_insert(
-            session, "agents", agents_to_insert
-        )
+        inserted = await batch_manager.batch_insert(session, "agents", agents_to_insert)
         logger.info(f"Batch inserted {inserted} agents")
 
         # Example 2: Batch update agent activities
@@ -197,15 +190,11 @@ async def example_prepared_statements(optimizer):
             stmt = prep_manager.get_statement("find_active_agents")
             if stmt:
                 result = await session.execute(
-                    text(
-                        f"EXECUTE {stmt['name']} (:status, :template, :limit)"
-                    ),
+                    text(f"EXECUTE {stmt['name']} (:status, :template, :limit)"),
                     {"status": "active", "template": "explorer", "limit": 10},
                 )
                 agents = result.fetchall()
-                logger.info(
-                    f"Iteration {i + 1}: Found {len(agents)} active agents"
-                )
+                logger.info(f"Iteration {i + 1}: Found {len(agents)} active agents")
 
         # Get performance stats
         stats = prep_manager.get_performance_stats()
@@ -230,17 +219,13 @@ async def example_query_caching(optimizer):
 
         # First execution (cache miss)
         start = datetime.now()
-        await optimizer.execute_with_cache(
-            session, query, cache_key="agent_stats", ttl=300
-        )
+        await optimizer.execute_with_cache(session, query, cache_key="agent_stats", ttl=300)
         time1 = (datetime.now() - start).total_seconds()
         logger.info(f"First execution (cache miss): {time1:.3f}s")
 
         # Second execution (cache hit)
         start = datetime.now()
-        await optimizer.execute_with_cache(
-            session, query, cache_key="agent_stats", ttl=300
-        )
+        await optimizer.execute_with_cache(session, query, cache_key="agent_stats", ttl=300)
         time2 = (datetime.now() - start).total_seconds()
         logger.info(f"Second execution (cache hit): {time2:.3f}s")
 
@@ -281,19 +266,13 @@ async def example_query_analysis(optimizer):
             # Analyze execution plan
             plan = await analyzer.analyze_query(session, query_info["sql"])
 
-            logger.info(
-                f"Execution time: {plan.get('execution_time', 'N/A')}ms"
-            )
+            logger.info(f"Execution time: {plan.get('execution_time', 'N/A')}ms")
             logger.info(f"Sequential scans: {plan.get('seq_scans', 0)}")
             logger.info(f"Index scans: {plan.get('index_scans', 0)}")
 
             # Get optimization suggestions
-            query_hash = hashlib.md5(
-                query_info["sql"].encode(), usedforsecurity=False
-            ).hexdigest()
-            suggestions = analyzer.optimization_suggestions.get(
-                query_hash, set()
-            )
+            query_hash = hashlib.md5(query_info["sql"].encode(), usedforsecurity=False).hexdigest()
+            suggestions = analyzer.optimization_suggestions.get(query_hash, set())
 
             if suggestions:
                 logger.info("Optimization suggestions:")
@@ -309,12 +288,8 @@ async def example_maintenance_scheduling(indexing_strategy):
     from sqlalchemy.ext.asyncio import AsyncSession, create_async_engine
     from sqlalchemy.orm import sessionmaker
 
-    engine = create_async_engine(
-        "postgresql+asyncpg://user:password@localhost/db"
-    )
-    async_session = sessionmaker(
-        engine, class_=AsyncSession, expire_on_commit=False
-    )
+    engine = create_async_engine("postgresql+asyncpg://user:password@localhost/db")
+    async_session = sessionmaker(engine, class_=AsyncSession, expire_on_commit=False)
 
     async with async_session() as session:
         async with indexing_strategy.maintenance_scheduler as scheduler:
@@ -333,17 +308,13 @@ async def example_maintenance_scheduling(indexing_strategy):
             if bloated_indexes:
                 logger.info(f"\nFound {len(bloated_indexes)} bloated indexes:")
                 for idx in bloated_indexes[:5]:  # Show first 5
-                    logger.info(
-                        f"  {idx['index']}: {idx['bloat_ratio']} bloat"
-                    )
+                    logger.info(f"  {idx['index']}: {idx['bloat_ratio']} bloat")
 
             # Perform maintenance (example - only ANALYZE)
             result = await scheduler.perform_maintenance(
                 session, "ANALYZE", ["agents", "coalitions"]
             )
-            logger.info(
-                f"\nMaintenance result: {result['task']} - Success: {result['success']}"
-            )
+            logger.info(f"\nMaintenance result: {result['task']} - Success: {result['success']}")
 
 
 async def generate_performance_report(optimizer, indexing_strategy):
@@ -357,13 +328,9 @@ async def generate_performance_report(optimizer, indexing_strategy):
     for query_type, stats in perf_report["query_statistics"].items():
         if stats["count"] > 0:
             avg_time = stats["total_time"] / stats["count"]
-            logger.info(
-                f"  {query_type}: {stats['count']} queries, avg time: {avg_time:.3f}s"
-            )
+            logger.info(f"  {query_type}: {stats['count']} queries, avg time: {avg_time:.3f}s")
 
-    logger.info(
-        f"\nCache hit rate: {perf_report['cache_statistics']['hit_rate']:.1f}%"
-    )
+    logger.info(f"\nCache hit rate: {perf_report['cache_statistics']['hit_rate']:.1f}%")
 
     logger.info("\nSlow queries:")
     for query in perf_report["slow_queries"][:5]:  # Show top 5
@@ -371,23 +338,13 @@ async def generate_performance_report(optimizer, indexing_strategy):
 
     # Get indexing report
     async with optimizer.optimized_session() as session:
-        index_report = await indexing_strategy.generate_indexing_report(
-            session
-        )
+        index_report = await indexing_strategy.generate_indexing_report(session)
 
         logger.info("\nIndex usage summary:")
-        logger.info(
-            f"  Total indexes: {index_report['index_usage']['total_indexes']}"
-        )
-        logger.info(
-            f"  Unused indexes: {len(index_report['index_usage']['unused_indexes'])}"
-        )
-        logger.info(
-            f"  Missing indexes: {len(index_report['missing_indexes'])}"
-        )
-        logger.info(
-            f"  Redundant indexes: {len(index_report['redundant_indexes'])}"
-        )
+        logger.info(f"  Total indexes: {index_report['index_usage']['total_indexes']}")
+        logger.info(f"  Unused indexes: {len(index_report['index_usage']['unused_indexes'])}")
+        logger.info(f"  Missing indexes: {len(index_report['missing_indexes'])}")
+        logger.info(f"  Redundant indexes: {len(index_report['redundant_indexes'])}")
 
 
 async def main():
@@ -414,9 +371,7 @@ if __name__ == "__main__":
     import os
 
     # Example environment variables
-    os.environ[
-        "DATABASE_URL"
-    ] = "postgresql://user:pass@localhost:5432/freeagentics"
+    os.environ["DATABASE_URL"] = "postgresql://user:pass@localhost:5432/freeagentics"
     os.environ["ENABLE_PGBOUNCER"] = "false"
 
     asyncio.run(main())

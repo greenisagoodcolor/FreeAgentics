@@ -1,0 +1,7 @@
+# JWT Keys - Should not be committed to repository
+jwt_private.pem
+jwt_public.pem
+
+# Keep the directory structure
+!.gitignore
+!README.md

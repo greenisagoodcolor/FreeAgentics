@@ -307,7 +307,7 @@ test_integration_scenarios() {
         run_test "Knowledge graph API is accessible" "curl -f -s --max-time $TIMEOUT $api_base/api/v1/knowledge"
 
         # Test WebSocket endpoint
-        run_test "WebSocket endpoint is accessible" "curl -f -s --max-time $TIMEOUT -H 'Connection: Upgrade' -H 'Upgrade: websocket' $api_base/ws/agents || true"
+        run_test "WebSocket endpoint is accessible" "curl -f -s --max-time $TIMEOUT -H 'Connection: Upgrade' -H 'Upgrade: websocket' $api_base/ws/agents "
     fi
 }
 

@@ -27,7 +27,7 @@ class TestGNNBasicCoverage:
 
         except ImportError:
             # If module doesn't exist or has dependency issues
-            pytest.skip("GNN model not available")
+            assert False, "Test bypass removed - must fix underlying issue"
 
     def test_feature_extractor_basic_functionality(self):
         """Test basic feature extractor functionality."""
@@ -47,7 +47,7 @@ class TestGNNBasicCoverage:
                 pass
 
         except ImportError:
-            pytest.skip("Feature extractor not available")
+            assert False, "Test bypass removed - must fix underlying issue"
 
     def test_h3_spatial_integration_basic(self):
         """Test basic H3 spatial integration."""
@@ -69,7 +69,7 @@ class TestGNNBasicCoverage:
                 pass
 
         except ImportError:
-            pytest.skip("H3 spatial integration not available")
+            assert False, "Test bypass removed - must fix underlying issue"
 
     def test_gnn_parser_basic(self):
         """Test basic GNN parser functionality."""
@@ -93,7 +93,7 @@ class TestGNNBasicCoverage:
                 pass
 
         except ImportError:
-            pytest.skip("GNN parser not available")
+            assert False, "Test bypass removed - must fix underlying issue"
 
     def test_gnn_validator_basic(self):
         """Test basic GNN validator functionality."""
@@ -113,8 +113,10 @@ class TestGNNBasicCoverage:
                 pass
 
         except ImportError:
-            pytest.skip("GNN validator not available")
+            
 
+
+            assert False, "Test bypass removed - must fix underlying issue"
 
 class TestKnowledgeGraphBasicCoverage:
     """Basic coverage tests for Knowledge Graph modules."""
@@ -128,7 +130,7 @@ class TestKnowledgeGraphBasicCoverage:
             assert engine is not None
 
         except ImportError:
-            pytest.skip("Graph engine not available")
+            assert False, "Test bypass removed - must fix underlying issue"
 
     def test_graph_evolution_basic(self):
         """Test basic graph evolution functionality."""
@@ -147,7 +149,7 @@ class TestKnowledgeGraphBasicCoverage:
                 pass
 
         except ImportError:
-            pytest.skip("Graph evolution not available")
+            assert False, "Test bypass removed - must fix underlying issue"
 
     def test_query_engine_basic(self):
         """Test basic query engine functionality."""
@@ -166,8 +168,10 @@ class TestKnowledgeGraphBasicCoverage:
                 pass
 
         except ImportError:
-            pytest.skip("Query engine not available")
+            
 
+
+            assert False, "Test bypass removed - must fix underlying issue"
 
 class TestAgentManagerBasicCoverage:
     """Basic coverage tests for Agent Manager modules."""
@@ -181,7 +185,7 @@ class TestAgentManagerBasicCoverage:
             assert manager is not None
 
         except ImportError:
-            pytest.skip("Agent manager not available")
+            assert False, "Test bypass removed - must fix underlying issue"
 
     def test_async_agent_manager_initialization(self):
         """Test basic async agent manager initialization."""
@@ -192,8 +196,10 @@ class TestAgentManagerBasicCoverage:
             assert manager is not None
 
         except ImportError:
-            pytest.skip("Async agent manager not available")
+            
 
+
+            assert False, "Test bypass removed - must fix underlying issue"
 
 class TestErrorHandlingCoverage:
     """Tests to improve error handling coverage."""
@@ -334,7 +340,7 @@ class TestMiscellaneousCoverage:
             assert adapter is not None
 
         except ImportError:
-            pytest.skip("Type adapter not available")
+            assert False, "Test bypass removed - must fix underlying issue"
 
     def test_agent_adapter_basic(self):
         """Test basic agent adapter functionality."""
@@ -345,7 +351,7 @@ class TestMiscellaneousCoverage:
             assert adapter is not None
 
         except ImportError:
-            pytest.skip("Agent adapter not available")
+            assert False, "Test bypass removed - must fix underlying issue"
 
     def test_pymdp_adapter_basic(self):
         """Test basic PyMDP adapter functionality."""
@@ -356,8 +362,10 @@ class TestMiscellaneousCoverage:
             assert adapter is not None
 
         except ImportError:
-            pytest.skip("PyMDP adapter not available")
+            
 
+
+            assert False, "Test bypass removed - must fix underlying issue"
 
 class TestBasicFunctionalityTests:
     """Basic functionality tests to ensure core features work."""

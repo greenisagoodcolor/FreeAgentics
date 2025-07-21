@@ -1,9 +1,9 @@
 """Authentication helpers for tests."""
 
-import os
 from datetime import datetime, timedelta
+from typing import Dict, List
+
 import jwt
-from typing import Dict, Any, List
 
 # Import the JWT handler for RS256 token creation
 try:
@@ -18,17 +18,17 @@ def create_test_token(
     username: str = "testuser",
     role: str = "admin",
     permissions: List[str] = None,
-    expires_in: int = 30
+    expires_in: int = 30,
 ) -> str:
     """Create a test JWT token for authentication in tests.
-    
+
     Args:
         user_id: User ID for the token
         username: Username for the token
         role: User role
         permissions: List of permissions (defaults to all if admin)
         expires_in: Token expiration in minutes
-    
+
     Returns:
         JWT token string
     """
@@ -41,30 +41,25 @@ def create_test_token(
             "modify_agent",
             "create_coalition",
             "view_metrics",
-            "admin_system"
+            "admin_system",
         ]
     elif permissions is None:
         permissions = ["view_agents"]
-    
+
     # Use the actual JWT handler if available (for RS256)
     if jwt_handler:
         return jwt_handler.create_access_token(
-            user_id=user_id,
-            username=username,
-            role=role,
-            permissions=permissions
+            user_id=user_id, username=username, role=role, permissions=permissions
         )
-    
+
     # Fallback to RS256 with mock keys for environments without the handler
-    from cryptography.hazmat.primitives import serialization
     from cryptography.hazmat.primitives.asymmetric import rsa
-    
+
     # Generate a test RSA key for tests
     private_key = rsa.generate_private_key(
-        public_exponent=65537,
-        key_size=2048  # Smaller key for faster test execution
+        public_exponent=65537, key_size=2048  # Smaller key for faster test execution
     )
-    
+
     # Create token payload compatible with the app
     now = datetime.utcnow()
     payload = {
@@ -78,25 +73,23 @@ def create_test_token(
         "nbf": now,
         "iss": "freeagentics-auth",
         "aud": "freeagentics-api",
-        "jti": f"test-{user_id}-{now.timestamp()}"
+        "jti": f"test-{user_id}-{now.timestamp()}",
     }
-    
+
     return jwt.encode(payload, private_key, algorithm="RS256")
 
 
 def get_auth_headers(token: str = None, **kwargs) -> Dict[str, str]:
     """Get authorization headers for API requests.
-    
+
     Args:
         token: JWT token (if not provided, creates one)
         **kwargs: Arguments to pass to create_test_token
-    
+
     Returns:
         Dictionary with Authorization header
     """
     if token is None:
         token = create_test_token(**kwargs)
-    
-    return {
-        "Authorization": f"Bearer {token}"
-    }
+
+    return {"Authorization": f"Bearer {token}"}

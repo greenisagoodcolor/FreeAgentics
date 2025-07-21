@@ -9,7 +9,6 @@ monitoring of agent operations, including:
 - Alerting for failures
 """
 
-import asyncio
 import logging
 import time
 from contextlib import asynccontextmanager
@@ -18,15 +17,10 @@ from typing import Any, Dict, List, Optional
 
 from observability.agent_metrics_integration import (
     MetricsContext,
-    integrate_metrics_with_agent,
-    measure_agent_step,
-    measure_belief_update,
-    measure_inference_time,
     record_custom_agent_metric,
 )
 from observability.alerting_system import (
     check_agent_alert,
-    check_system_alert,
     get_active_alerts,
     get_alert_stats,
 )
@@ -38,7 +32,6 @@ from observability.belief_monitoring import (
 from observability.coordination_metrics import (
     get_agent_coordination_stats,
     get_system_coordination_report,
-    record_coalition_event,
     record_coordination,
 )
 from observability.performance_metrics import (
@@ -57,7 +50,6 @@ from observability.prometheus_metrics import (
 from observability.pymdp_integration import (
     get_pymdp_performance_summary,
     record_agent_lifecycle_event,
-    record_belief_update,
     record_coordination_event,
 )
 
@@ -86,15 +78,9 @@ class IntegratedObservabilityManager:
 
         # Component status
         self.prometheus_enabled = self.config.get("prometheus", True)
-        self.performance_tracking_enabled = self.config.get(
-            "performance_tracking", True
-        )
-        self.belief_monitoring_enabled = self.config.get(
-            "belief_monitoring", True
-        )
-        self.coordination_tracking_enabled = self.config.get(
-            "coordination_tracking", True
-        )
+        self.performance_tracking_enabled = self.config.get("performance_tracking", True)
+        self.belief_monitoring_enabled = self.config.get("belief_monitoring", True)
+        self.coordination_tracking_enabled = self.config.get("coordination_tracking", True)
         self.alerting_enabled = self.config.get("alerting", True)
 
         logger.info("Integrated observability manager initialized")
@@ -152,9 +138,7 @@ class IntegratedObservabilityManager:
 
         logger.info("🛑 Integrated observability systems stopped")
 
-    async def register_agent(
-        self, agent_id: str, agent_type: str, metadata: Optional[Dict] = None
-    ):
+    async def register_agent(self, agent_id: str, agent_type: str, metadata: Optional[Dict] = None):
         """Register an agent with observability systems.
 
         Args:
@@ -179,9 +163,7 @@ class IntegratedObservabilityManager:
             },
         )
 
-        logger.info(
-            f"📋 Agent {agent_id} registered with observability systems"
-        )
+        logger.info(f"📋 Agent {agent_id} registered with observability systems")
 
     async def unregister_agent(self, agent_id: str, reason: str = "stopped"):
         """Unregister an agent from observability systems.
@@ -207,9 +189,7 @@ class IntegratedObservabilityManager:
                 },
             )
 
-            logger.info(
-                f"📋 Agent {agent_id} unregistered from observability systems"
-            )
+            logger.info(f"📋 Agent {agent_id} unregistered from observability systems")
 
     @asynccontextmanager
     async def monitor_agent_operation(
@@ -243,9 +223,7 @@ class IntegratedObservabilityManager:
 
             # Record operation metrics based on type
             if operation == "inference":
-                await record_inference_metric(
-                    agent_id, duration_ms, success, error
-                )
+                await record_inference_metric(agent_id, duration_ms, success, error)
             elif operation == "belief_update":
                 await record_belief_metric(agent_id, duration_ms)
             elif operation == "step":
@@ -261,9 +239,7 @@ class IntegratedObservabilityManager:
 
             # Check for performance alerts
             if self.alerting_enabled:
-                await self._check_operation_alerts(
-                    agent_id, operation, duration_ms, success
-                )
+                await self._check_operation_alerts(agent_id, operation, duration_ms, success)
 
     async def monitor_belief_update_detailed(
         self,
@@ -289,15 +265,11 @@ class IntegratedObservabilityManager:
                 free_energy=free_energy,
                 metadata={
                     "timestamp": datetime.now().isoformat(),
-                    "beliefs_size": len(beliefs)
-                    if isinstance(beliefs, dict)
-                    else 0,
+                    "beliefs_size": len(beliefs) if isinstance(beliefs, dict) else 0,
                 },
             )
         except Exception as e:
-            logger.error(
-                f"Failed to monitor belief update for agent {agent_id}: {e}"
-            )
+            logger.error(f"Failed to monitor belief update for agent {agent_id}: {e}")
 
     async def monitor_coordination_event(
         self,
@@ -333,9 +305,7 @@ class IntegratedObservabilityManager:
             )
 
             # Record in PyMDP integration
-            await record_coordination_event(
-                event_type, participant_ids, metadata
-            )
+            await record_coordination_event(event_type, participant_ids, metadata)
         except Exception as e:
             logger.error(f"Failed to monitor coordination event: {e}")
 
@@ -381,9 +351,7 @@ class IntegratedObservabilityManager:
         except Exception as e:
             logger.error(f"Failed to check operation alerts: {e}")
 
-    async def get_agent_observability_summary(
-        self, agent_id: str
-    ) -> Dict[str, Any]:
+    async def get_agent_observability_summary(self, agent_id: str) -> Dict[str, Any]:
         """Get comprehensive observability summary for an agent.
 
         Args:
@@ -575,27 +543,19 @@ async def register_agent_for_observability(
     await observability_manager.register_agent(agent_id, agent_type, metadata)
 
 
-async def unregister_agent_from_observability(
-    agent_id: str, reason: str = "stopped"
-):
+async def unregister_agent_from_observability(agent_id: str, reason: str = "stopped"):
     """Unregister an agent from observability monitoring."""
     await observability_manager.unregister_agent(agent_id, reason)
 
 
-async def monitor_agent_operation(
-    agent_id: str, operation: str, metadata: Optional[Dict] = None
-):
+async def monitor_agent_operation(agent_id: str, operation: str, metadata: Optional[Dict] = None):
     """Context manager for monitoring agent operations."""
-    return observability_manager.monitor_agent_operation(
-        agent_id, operation, metadata
-    )
+    return observability_manager.monitor_agent_operation(agent_id, operation, metadata)
 
 
 async def get_agent_observability_summary(agent_id: str) -> Dict[str, Any]:
     """Get observability summary for an agent."""
-    return await observability_manager.get_agent_observability_summary(
-        agent_id
-    )
+    return await observability_manager.get_agent_observability_summary(agent_id)
 
 
 async def get_system_observability_dashboard() -> Dict[str, Any]:

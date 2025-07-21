@@ -45,18 +45,12 @@ class ReportingIntegration:
             ],
         )
 
-    def run_comprehensive_reporting(
-        self, test_run_id: str = None
-    ) -> Dict[str, Any]:
+    def run_comprehensive_reporting(self, test_run_id: str = None) -> Dict[str, Any]:
         """Run comprehensive test reporting workflow."""
         if test_run_id is None:
-            test_run_id = (
-                f"integration_{datetime.now().strftime('%Y%m%d_%H%M%S')}"
-            )
+            test_run_id = f"integration_{datetime.now().strftime('%Y%m%d_%H%M%S')}"
 
-        self.logger.info(
-            f"Starting comprehensive reporting for run: {test_run_id}"
-        )
+        self.logger.info(f"Starting comprehensive reporting for run: {test_run_id}")
 
         results = {
             "test_run_id": test_run_id,
@@ -68,14 +62,10 @@ class ReportingIntegration:
         try:
             # Step 1: Analyze coverage
             self.logger.info("Analyzing test coverage...")
-            coverage_report = self.coverage_analyzer.analyze_coverage(
-                test_run_id
-            )
+            coverage_report = self.coverage_analyzer.analyze_coverage(test_run_id)
 
             # Generate coverage reports
-            html_report = (
-                self.coverage_analyzer.generate_coverage_report_html()
-            )
+            html_report = self.coverage_analyzer.generate_coverage_report_html()
             json_report = self.coverage_analyzer.export_coverage_json()
 
             results["reports_generated"].extend([html_report, json_report])
@@ -108,9 +98,7 @@ class ReportingIntegration:
             dashboard_html = self.dashboard_generator.generate_dashboard()
             dashboard_json = self.dashboard_generator.generate_json_export()
 
-            results["reports_generated"].extend(
-                [dashboard_html, dashboard_json]
-            )
+            results["reports_generated"].extend([dashboard_html, dashboard_json])
 
             # Step 4: Run archival process
             self.logger.info("Running report archival process...")
@@ -150,9 +138,7 @@ class ReportingIntegration:
             - datetime.fromisoformat(results["start_time"])
         ).total_seconds()
 
-        self.logger.info(
-            f"Comprehensive reporting completed in {results['duration']:.2f} seconds"
-        )
+        self.logger.info(f"Comprehensive reporting completed in {results['duration']:.2f} seconds")
         return results
 
     def calculate_overall_quality_score(
@@ -287,13 +273,7 @@ class ReportingIntegration:
 
         if "quality_score" in results:
             for score_type, score in results["quality_score"].items():
-                css_class = (
-                    "good"
-                    if score >= 80
-                    else "warning"
-                    if score >= 60
-                    else "critical"
-                )
+                css_class = "good" if score >= 80 else "warning" if score >= 60 else "critical"
                 html_content += f"""
                 <div class="metric {css_class}">
                     <strong>{score_type.replace('_', ' ').title()}: {score:.1f}%</strong>
@@ -437,12 +417,8 @@ def main():
 
     parser = argparse.ArgumentParser(description="Test reporting integration")
     parser.add_argument("--run-id", help="Test run ID")
-    parser.add_argument(
-        "--health-check", action="store_true", help="Run health check"
-    )
-    parser.add_argument(
-        "--output-dir", default="tests/reporting", help="Output directory"
-    )
+    parser.add_argument("--health-check", action="store_true", help="Run health check")
+    parser.add_argument("--output-dir", default="tests/reporting", help="Output directory")
 
     args = parser.parse_args()
 
@@ -468,19 +444,19 @@ def main():
     print(f"Reports Generated: {len(results['reports_generated'])}")
 
     if "quality_score" in results:
-        print(f"\\nQuality Scores:")
+        print("\\nQuality Scores:")
         for score_type, score in results["quality_score"].items():
             print(f"  {score_type.replace('_', ' ').title()}: {score:.1f}%")
 
     if "coverage_summary" in results:
-        print(f"\\nCoverage Summary:")
+        print("\\nCoverage Summary:")
         coverage = results["coverage_summary"]
         print(f"  Total Coverage: {coverage['total_coverage']:.1f}%")
         print(f"  Total Statements: {coverage['total_statements']}")
         print(f"  Missing Statements: {coverage['total_missing']}")
 
     if "quality_insights" in results:
-        print(f"\\nQuality Insights:")
+        print("\\nQuality Insights:")
         insights = results["quality_insights"]
         print(f"  Flaky Tests: {insights['flaky_tests_count']}")
         print(f"  Slow Tests: {insights['slow_tests_count']}")

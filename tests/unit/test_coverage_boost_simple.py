@@ -1,9 +1,6 @@
 """Simple tests to boost overall coverage to 80%+."""
 
-import json
-import os
-import tempfile
-from unittest.mock import MagicMock, Mock, patch
+from unittest.mock import patch
 
 import numpy as np
 import pytest
@@ -26,7 +23,6 @@ class TestAuthInit:
 
     def test_auth_init_import(self):
         """Test that auth init can be imported."""
-        import auth
 
         # Just importing should execute the module
 
@@ -36,7 +32,6 @@ class TestAgentsInit:
 
     def test_agents_init_import(self):
         """Test that agents init can be imported."""
-        import agents
 
         # Just importing should execute the module
 
@@ -48,7 +43,7 @@ class TestWorldGridWorld:
         """Test grid world can be imported."""
         from world import grid_world
 
-        assert hasattr(grid_world, 'GridWorld')
+        assert hasattr(grid_world, "GridWorld")
 
 
 class TestDatabaseBase:
@@ -56,7 +51,6 @@ class TestDatabaseBase:
 
     def test_database_base_import(self):
         """Test database base can be imported."""
-        from database import base
 
         # Module defines base classes
 
@@ -95,6 +89,7 @@ class TestErrorHandlingCoverage:
         """Test specific error types."""
         from agents.error_handling import (
             ActionSelectionError,
+            AgentError,
             InferenceError,
             PyMDPError,
         )
@@ -110,7 +105,7 @@ class TestErrorHandlingCoverage:
 
     def test_validate_action(self):
         """Test validate_action function."""
-        from agents.error_handling import validate_action
+        from agents.error_handling import ActionSelectionError, validate_action
 
         # Valid action
         assert validate_action(1, 5) == 1
@@ -129,7 +124,7 @@ class TestErrorHandlingCoverage:
 
     def test_validate_observation(self):
         """Test validate_observation function."""
-        from agents.error_handling import validate_observation
+        from agents.error_handling import AgentError, validate_observation
 
         # Valid observation
         assert validate_observation(2, 10) == 2
@@ -146,7 +141,7 @@ class TestErrorHandlingCoverage:
         with pytest.raises(AgentError):
             validate_observation("invalid", 10)
 
-    @patch('agents.error_handling.logger')
+    @patch("agents.error_handling.logger")
     def test_with_error_handling_decorator(self, mock_logger):
         """Test with_error_handling decorator."""
         from agents.error_handling import with_error_handling
@@ -192,7 +187,7 @@ class TestPerformanceOptimizer:
 
         assert test_func() == "result"
 
-    @patch('agents.performance_optimizer.time.time')
+    @patch("agents.performance_optimizer.time.time")
     def test_performance_timing(self, mock_time):
         """Test performance timing."""
         from agents.performance_optimizer import performance_monitor
@@ -258,9 +253,7 @@ class TestPyMDPErrorHandling:
 
         # Test with invalid dimensions
         with pytest.raises(ValueError):
-            validate_pymdp_matrices(
-                A, B, num_states=5, num_obs=3, num_actions=3
-            )
+            validate_pymdp_matrices(A, B, num_states=5, num_obs=3, num_actions=3)
 
 
 class TestTypeHelpers:

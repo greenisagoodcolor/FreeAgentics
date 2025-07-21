@@ -1,13 +1,12 @@
 """Test error handling in agent operations."""
 
-from unittest.mock import MagicMock, patch
+from unittest.mock import MagicMock
 
 import numpy as np
 import pytest
 
-from agents.base_agent import PYMDP_AVAILABLE, BasicExplorerAgent
+from agents.base_agent import BasicExplorerAgent
 from agents.error_handling import (
-    ActionSelectionError,
     ErrorHandler,
     ErrorSeverity,
     InferenceError,
@@ -44,9 +43,7 @@ class TestErrorHandler:
 
         # Simulate multiple failures
         for i in range(4):  # Max retries is 3
-            recovery_info = handler.handle_error(
-                PyMDPError(f"Failure {i}"), "pymdp_operation"
-            )
+            recovery_info = handler.handle_error(PyMDPError(f"Failure {i}"), "pymdp_operation")
 
         # Should not be able to retry after max attempts
         assert recovery_info["can_retry"] is False
@@ -116,7 +113,6 @@ class TestActionValidation:
         assert validate_action(10, valid_actions) == "up"  # 10 % 5 = 0
 
 
-
 class TestAgentErrorHandling:
     """Test error handling in actual agent operations."""
 
@@ -180,9 +176,7 @@ class TestAgentErrorHandling:
 
         # Mock PyMDP agent to fail on action selection
         mock_agent = MagicMock()
-        mock_agent.infer_policies.side_effect = Exception(
-            "Policy inference failed"
-        )
+        mock_agent.infer_policies.side_effect = Exception("Policy inference failed")
         agent.pymdp_agent = mock_agent
 
         # Should handle action selection failure gracefully
@@ -195,9 +189,7 @@ class TestAgentErrorHandling:
         agent.start()
 
         # Trigger an error
-        agent.error_handler.handle_error(
-            PyMDPError("Test error"), "test_operation"
-        )
+        agent.error_handler.handle_error(PyMDPError("Test error"), "test_operation")
 
         # Check status includes error information
         status = agent.get_status()
@@ -206,19 +198,14 @@ class TestAgentErrorHandling:
 
     def test_concurrent_error_handling(self):
         """Test error handling with multiple agents."""
-        agents = [
-            BasicExplorerAgent(f"agent_{i}", f"Agent {i}", grid_size=3)
-            for i in range(3)
-        ]
+        agents = [BasicExplorerAgent(f"agent_{i}", f"Agent {i}", grid_size=3) for i in range(3)]
 
         for agent in agents:
             agent.start()
 
             # Mock different failures for each agent
             mock_agent = MagicMock()
-            mock_agent.infer_policies.side_effect = Exception(
-                f"Failure for {agent.agent_id}"
-            )
+            mock_agent.infer_policies.side_effect = Exception(f"Failure for {agent.agent_id}")
             agent.pymdp_agent = mock_agent
 
         # All agents should handle errors independently
@@ -257,14 +244,14 @@ class TestErrorRecovery:
 
         # First step should handle error
         observation = {"position": [1, 1], "surroundings": np.zeros((3, 3))}
-        action1 = agent.step(observation)
+        agent.step(observation)
 
         # Reset the mock for success case
         mock_agent.infer_policies.side_effect = None
         mock_agent.infer_policies.return_value = (np.array([0.2, 0.8]), None)
 
         # Second step should succeed and reset retry counters
-        action2 = agent.step(observation)
+        agent.step(observation)
 
         # Check that retry counters are reset
         for strategy in agent.error_handler.recovery_strategies.values():

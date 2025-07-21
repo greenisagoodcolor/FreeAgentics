@@ -2,12 +2,10 @@
 
 import os
 import warnings
-from unittest.mock import MagicMock, Mock, patch
+from unittest.mock import Mock, patch
 
 import pytest
-from sqlalchemy import create_engine, text
 from sqlalchemy.exc import OperationalError
-from sqlalchemy.orm import Session
 
 
 class TestDatabaseSession:
@@ -29,9 +27,7 @@ class TestDatabaseSession:
         # Test DEVELOPMENT_MODE
         os.environ.clear()
         os.environ["DEVELOPMENT_MODE"] = "true"
-        os.environ[
-            "DATABASE_URL"
-        ] = "sqlite:///:memory:"  # Add URL to prevent error
+        os.environ["DATABASE_URL"] = "sqlite:///:memory:"  # Add URL to prevent error
 
         # Import module to test
         import importlib
@@ -79,10 +75,7 @@ class TestDatabaseSession:
 
             assert len(w) == 1
             assert "Using SQLite for development" in str(w[0].message)
-            assert (
-                database.session.DATABASE_URL
-                == "sqlite:///./freeagentics_dev.db"
-            )
+            assert database.session.DATABASE_URL == "sqlite:///./freeagentics_dev.db"
 
     def test_database_url_required_production(self):
         """Test DATABASE_URL is required in production."""
@@ -97,17 +90,13 @@ class TestDatabaseSession:
 
             importlib.reload(database.session)
 
-        assert "DATABASE_URL environment variable is required" in str(
-            exc_info.value
-        )
+        assert "DATABASE_URL environment variable is required" in str(exc_info.value)
 
     def test_production_security_validation(self):
         """Test production security validations."""
         os.environ.clear()
         os.environ["PRODUCTION"] = "true"
-        os.environ[
-            "DATABASE_URL"
-        ] = "postgresql://freeagentics_dev_2025:pass@localhost/db"
+        os.environ["DATABASE_URL"] = "postgresql://freeagentics_dev_2025:pass@localhost/db"
 
         # Should reject dev credentials in production
         with pytest.raises(ValueError) as exc_info:
@@ -120,9 +109,7 @@ class TestDatabaseSession:
         assert "using development database credentials" in str(exc_info.value)
 
         # Test with freeagentics123
-        os.environ[
-            "DATABASE_URL"
-        ] = "postgresql://user:freeagentics123@localhost/db"
+        os.environ["DATABASE_URL"] = "postgresql://user:freeagentics123@localhost/db"
         with pytest.raises(ValueError):
             importlib.reload(database.session)
 
@@ -130,9 +117,7 @@ class TestDatabaseSession:
         """Test SSL is added in production."""
         os.environ.clear()
         os.environ["PRODUCTION"] = "true"
-        os.environ[
-            "DATABASE_URL"
-        ] = "postgresql://user:secure_pass@localhost/db"
+        os.environ["DATABASE_URL"] = "postgresql://user:secure_pass@localhost/db"
 
         import importlib
 
@@ -151,7 +136,7 @@ class TestDatabaseSession:
         os.environ["DB_POOL_TIMEOUT"] = "45"
         os.environ["DEBUG_SQL"] = "true"
 
-        with patch('sqlalchemy.create_engine') as mock_create_engine:
+        with patch("sqlalchemy.create_engine") as mock_create_engine:
             import importlib
 
             import database.session
@@ -170,12 +155,10 @@ class TestDatabaseSession:
     def test_engine_configuration_postgresql_production(self):
         """Test PostgreSQL production configuration."""
         os.environ.clear()
-        os.environ[
-            "DATABASE_URL"
-        ] = "postgresql://user:secure_pass@localhost/db"
+        os.environ["DATABASE_URL"] = "postgresql://user:secure_pass@localhost/db"
         os.environ["PRODUCTION"] = "true"
 
-        with patch('sqlalchemy.create_engine') as mock_create_engine:
+        with patch("sqlalchemy.create_engine") as mock_create_engine:
             import importlib
 
             import database.session
@@ -187,17 +170,14 @@ class TestDatabaseSession:
             assert kwargs["pool_recycle"] == 3600
             assert "connect_args" in kwargs
             assert kwargs["connect_args"]["connect_timeout"] == 10
-            assert (
-                kwargs["connect_args"]["application_name"]
-                == "freeagentics_api"
-            )
+            assert kwargs["connect_args"]["application_name"] == "freeagentics_api"
 
     def test_engine_configuration_sqlite(self):
         """Test SQLite engine configuration."""
         os.environ.clear()
         os.environ["DATABASE_URL"] = "sqlite:///test.db"
 
-        with patch('sqlalchemy.create_engine') as mock_create_engine:
+        with patch("sqlalchemy.create_engine") as mock_create_engine:
             import importlib
 
             import database.session
@@ -254,7 +234,7 @@ class TestDatabaseSession:
         database.session.SessionLocal = Mock(return_value=mock_session)
 
         gen = database.session.get_db()
-        session = next(gen)
+        next(gen)
 
         # Simulate exception
         with pytest.raises(RuntimeError):
@@ -275,11 +255,9 @@ class TestDatabaseSession:
         importlib.reload(database.session)
 
         # Mock Base.metadata
-        with patch('database.base.Base.metadata') as mock_metadata:
+        with patch("database.base.Base.metadata") as mock_metadata:
             database.session.init_db()
-            mock_metadata.create_all.assert_called_once_with(
-                bind=database.session.engine
-            )
+            mock_metadata.create_all.assert_called_once_with(bind=database.session.engine)
 
     def test_drop_all_tables_development(self):
         """Test dropping tables in development mode."""
@@ -293,11 +271,9 @@ class TestDatabaseSession:
 
         importlib.reload(database.session)
 
-        with patch('database.base.Base.metadata') as mock_metadata:
+        with patch("database.base.Base.metadata") as mock_metadata:
             database.session.drop_all_tables()
-            mock_metadata.drop_all.assert_called_once_with(
-                bind=database.session.engine
-            )
+            mock_metadata.drop_all.assert_called_once_with(bind=database.session.engine)
 
     def test_drop_all_tables_production_protection(self):
         """Test protection against dropping tables in production."""
@@ -343,10 +319,8 @@ class TestDatabaseSession:
         importlib.reload(database.session)
 
         # Mock engine to raise exception
-        with patch.object(database.session.engine, 'connect') as mock_connect:
-            mock_connect.side_effect = OperationalError(
-                "Connection failed", None, None
-            )
+        with patch.object(database.session.engine, "connect") as mock_connect:
+            mock_connect.side_effect = OperationalError("Connection failed", None, None)
 
             result = database.session.check_database_health()
             assert result is False
@@ -356,7 +330,7 @@ class TestDatabaseSession:
         os.environ.clear()
         os.environ["DATABASE_URL"] = "postgres://user:pass@localhost/db"
 
-        with patch('sqlalchemy.create_engine') as mock_create_engine:
+        with patch("sqlalchemy.create_engine") as mock_create_engine:
             import importlib
 
             import database.session

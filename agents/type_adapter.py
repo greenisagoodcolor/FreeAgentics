@@ -9,7 +9,8 @@ from typing import Any, Dict, Optional, Union
 
 
 class AgentTypeAdapter:
-    """Adapter for consistent agent attribute access across database and in-memory objects."""
+    """Adapter for consistent agent attribute access across database and
+        in-memory objects."""
 
     @staticmethod
     def get_id(agent: Any) -> str:
@@ -43,9 +44,8 @@ class AgentTypeAdapter:
             if "agent_id" in agent:
                 return str(agent["agent_id"])
 
-        raise AttributeError(
-            f"Agent object {type(agent)} has no 'id' or 'agent_id' attribute"
-        )
+        raise AttributeError(f"Agent object {type(agent)} has no 'id' or
+            'agent_id' attribute")
 
     @staticmethod
     def get_name(agent: Any) -> str:
@@ -66,9 +66,7 @@ class AgentTypeAdapter:
         if isinstance(agent, dict) and "name" in agent:
             return str(agent["name"])
 
-        raise AttributeError(
-            f"Agent object {type(agent)} has no 'name' attribute"
-        )
+        raise AttributeError(f"Agent object {type(agent)} has no 'name' attribute")
 
     @staticmethod
     def get_status(agent: Any) -> str:
@@ -95,11 +93,7 @@ class AgentTypeAdapter:
         if isinstance(agent, dict):
             if "status" in agent:
                 status = agent["status"]
-                return (
-                    str(status.value)
-                    if hasattr(status, "value")
-                    else str(status)
-                )
+                return str(status.value) if hasattr(status, "value") else str(status)
             if "is_active" in agent:
                 return "active" if agent["is_active"] else "inactive"
 
@@ -116,10 +110,10 @@ class AgentTypeAdapter:
             Agent position as tuple, list, or dict (or None)
         """
         if hasattr(agent, "position"):
-            return agent.position  
+            return agent.position
 
         if isinstance(agent, dict) and "position" in agent:
-            return agent["position"]  
+            return agent["position"]
 
         return None
 
@@ -177,7 +171,8 @@ class AgentTypeAdapter:
 
 
 class CoalitionTypeAdapter:
-    """Adapter for consistent coalition attribute access across database and in-memory objects."""
+    """Adapter for consistent coalition attribute access across database and
+        in-memory objects."""
 
     @staticmethod
     def get_id(coalition: Any) -> str:
@@ -212,7 +207,8 @@ class CoalitionTypeAdapter:
                 return str(coalition["coalition_id"])
 
         raise AttributeError(
-            f"Coalition object {type(coalition)} has no 'id' or 'coalition_id' attribute"
+            f"Coalition object {type(coalition)} has no 'id' or
+                'coalition_id' attribute"
         )
 
     @staticmethod
@@ -234,9 +230,7 @@ class CoalitionTypeAdapter:
         if isinstance(coalition, dict) and "name" in coalition:
             return str(coalition["name"])
 
-        raise AttributeError(
-            f"Coalition object {type(coalition)} has no 'name' attribute"
-        )
+        raise AttributeError(f"Coalition object {type(coalition)} has no 'name' attribute")
 
     @staticmethod
     def get_members(coalition: Any) -> Union[list, dict]:
@@ -250,7 +244,7 @@ class CoalitionTypeAdapter:
         """
         # In-memory coalition has members dict
         if hasattr(coalition, "members"):
-            return coalition.members  
+            return coalition.members
 
         # Database model has agents relationship
         if hasattr(coalition, "agents"):
@@ -261,9 +255,8 @@ class CoalitionTypeAdapter:
                 members[agent_id] = {
                     "agent_id": agent_id,
                     "name": (
-                        AgentTypeAdapter.get_name(agent)
-                        if hasattr(agent, "name")
-                        else "Unknown"
+                        AgentTypeAdapter.get_name(agent) if hasattr(agent, "name") else
+                            "Unknown"
                     ),
                 }
             return members
@@ -271,9 +264,9 @@ class CoalitionTypeAdapter:
         # Dict representation
         if isinstance(coalition, dict):
             if "members" in coalition:
-                return coalition["members"]  
+                return coalition["members"]
             if "agents" in coalition:
-                return coalition["agents"]  
+                return coalition["agents"]
 
         return {}
 
@@ -320,9 +313,7 @@ class CoalitionTypeAdapter:
 
         if isinstance(coalition, dict) and "status" in coalition:
             status = coalition["status"]
-            return (
-                str(status.value) if hasattr(status, "value") else str(status)
-            )
+            return str(status.value) if hasattr(status, "value") else str(status)
 
         return "unknown"
 
@@ -361,9 +352,7 @@ class CoalitionTypeAdapter:
         else:
             result["member_count"] = str(len(members) if members else 0)
             result["member_ids"] = str(
-                [AgentTypeAdapter.get_id(m) for m in members]
-                if members
-                else []
+                [AgentTypeAdapter.get_id(m) for m in members] if members else []
             )
 
         # Leader

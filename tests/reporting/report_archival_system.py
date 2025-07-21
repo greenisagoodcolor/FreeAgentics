@@ -53,9 +53,7 @@ class ArchivalConfig:
 class ReportArchivalSystem:
     """Manages archival and cleanup of test reports."""
 
-    def __init__(
-        self, config_path: str = "tests/reporting/archival_config.yml"
-    ):
+    def __init__(self, config_path: str = "tests/reporting/archival_config.yml"):
         self.config_path = Path(config_path)
         self.config = self._load_config()
         self.reports_dir = Path("tests/reporting")
@@ -165,9 +163,7 @@ class ReportArchivalSystem:
                         self._track_archived_file(file_info, archived_path)
 
                 except Exception as e:
-                    results["errors"].append(
-                        f"Error archiving {file_info['path']}: {e}"
-                    )
+                    results["errors"].append(f"Error archiving {file_info['path']}: {e}")
 
             # Step 3: Compress old archives
             compressed_count = self._compress_old_archives()
@@ -198,9 +194,7 @@ class ReportArchivalSystem:
     def _identify_files_for_archival(self) -> List[Dict[str, Any]]:
         """Identify files that should be archived."""
         files_to_archive = []
-        cutoff_date = datetime.now() - timedelta(
-            days=self.config.compress_after_days
-        )
+        cutoff_date = datetime.now() - timedelta(days=self.config.compress_after_days)
 
         # Define file patterns to archive
         file_patterns = [
@@ -218,9 +212,7 @@ class ReportArchivalSystem:
             for file_path in self.reports_dir.glob(pattern):
                 if file_path.is_file():
                     # Check file age
-                    file_time = datetime.fromtimestamp(
-                        file_path.stat().st_mtime
-                    )
+                    file_time = datetime.fromtimestamp(file_path.stat().st_mtime)
 
                     if file_time < cutoff_date:
                         files_to_archive.append(
@@ -240,9 +232,7 @@ class ReportArchivalSystem:
         report_type = file_info["type"]
 
         # Create archive directory structure
-        archive_subdir = (
-            self.archive_dir / report_type / str(file_info["modified"].year)
-        )
+        archive_subdir = self.archive_dir / report_type / str(file_info["modified"].year)
         archive_subdir.mkdir(parents=True, exist_ok=True)
 
         # Generate archive filename
@@ -262,23 +252,15 @@ class ReportArchivalSystem:
     def _compress_old_archives(self) -> int:
         """Compress old archive files."""
         compressed_count = 0
-        compress_cutoff = datetime.now() - timedelta(
-            days=self.config.compress_after_days * 2
-        )
+        compress_cutoff = datetime.now() - timedelta(days=self.config.compress_after_days * 2)
 
         for archive_file in self.archive_dir.rglob("*"):
-            if archive_file.is_file() and not archive_file.name.endswith(
-                ".gz"
-            ):
-                file_time = datetime.fromtimestamp(
-                    archive_file.stat().st_mtime
-                )
+            if archive_file.is_file() and not archive_file.name.endswith(".gz"):
+                file_time = datetime.fromtimestamp(archive_file.stat().st_mtime)
 
                 if file_time < compress_cutoff:
                     # Compress file
-                    compressed_path = archive_file.with_suffix(
-                        archive_file.suffix + ".gz"
-                    )
+                    compressed_path = archive_file.with_suffix(archive_file.suffix + ".gz")
 
                     with open(archive_file, "rb") as f_in:
                         with gzip.open(compressed_path, "wb") as f_out:
@@ -288,9 +270,7 @@ class ReportArchivalSystem:
                     archive_file.unlink()
                     compressed_count += 1
 
-                    logger.info(
-                        f"Compressed {archive_file} to {compressed_path}"
-                    )
+                    logger.info(f"Compressed {archive_file} to {compressed_path}")
 
         return compressed_count
 
@@ -306,9 +286,7 @@ class ReportArchivalSystem:
         # Clean up archived files
         for archive_file in self.archive_dir.rglob("*"):
             if archive_file.is_file():
-                file_time = datetime.fromtimestamp(
-                    archive_file.stat().st_mtime
-                )
+                file_time = datetime.fromtimestamp(archive_file.stat().st_mtime)
 
                 if file_time < cutoff_date:
                     # Check retention policy
@@ -323,9 +301,7 @@ class ReportArchivalSystem:
 
         return cleanup_results
 
-    def _should_delete_file(
-        self, file_path: Path, file_time: datetime
-    ) -> bool:
+    def _should_delete_file(self, file_path: Path, file_time: datetime) -> bool:
         """Determine if file should be deleted based on retention policy."""
         if self.config.retention_policy == RetentionPolicy.PERMANENT:
             return False
@@ -343,15 +319,11 @@ class ReportArchivalSystem:
 
         if self.config.retention_policy == RetentionPolicy.YEARLY:
             # Keep one file per year
-            return not (
-                file_time.month == 1 and file_time.day == 1
-            )  # Keep Jan 1st
+            return not (file_time.month == 1 and file_time.day == 1)  # Keep Jan 1st
 
         return True
 
-    def _track_archived_file(
-        self, file_info: Dict[str, Any], archive_path: Path
-    ):
+    def _track_archived_file(self, file_info: Dict[str, Any], archive_path: Path):
         """Track archived file in database."""
         conn = sqlite3.connect(self.db_path)
         cursor = conn.cursor()
@@ -381,9 +353,7 @@ class ReportArchivalSystem:
         conn.commit()
         conn.close()
 
-    def _record_cleanup_history(
-        self, results: Dict[str, Any], duration: float
-    ):
+    def _record_cleanup_history(self, results: Dict[str, Any], duration: float):
         """Record cleanup history in database."""
         conn = sqlite3.connect(self.db_path)
         cursor = conn.cursor()
@@ -470,9 +440,7 @@ class ReportArchivalSystem:
             "by_type": by_type,
         }
 
-    def restore_archived_file(
-        self, archive_path: str, restore_path: str = None
-    ) -> bool:
+    def restore_archived_file(self, archive_path: str, restore_path: str = None) -> bool:
         """Restore a file from archive."""
         archive_file = Path(archive_path)
 
@@ -612,9 +580,7 @@ def main():
         action="store_true",
         help="Create default configuration file",
     )
-    parser.add_argument(
-        "--status", action="store_true", help="Show archival status"
-    )
+    parser.add_argument("--status", action="store_true", help="Show archival status")
     parser.add_argument(
         "--cleanup-databases",
         type=int,

@@ -46,9 +46,7 @@ class ProductionDeploymentTester:
         print(f"[ERROR] {message}")
         self.test_results["errors"].append(message)
 
-    def run_command(
-        self, command: List[str], timeout: int = 300
-    ) -> Tuple[int, str, str]:
+    def run_command(self, command: List[str], timeout: int = 300) -> Tuple[int, str, str]:
         """Run a command and return return code, stdout, stderr"""
         try:
             result = subprocess.run(
@@ -69,9 +67,7 @@ class ProductionDeploymentTester:
         self.log_info("Creating test environment configuration...")
 
         # Create temporary environment file
-        temp_env = tempfile.NamedTemporaryFile(
-            mode="w", suffix=".env", delete=False
-        )
+        temp_env = tempfile.NamedTemporaryFile(mode="w", suffix=".env", delete=False)
         temp_env.write(
             """
 # Test Environment Configuration
@@ -155,9 +151,7 @@ WORKERS=2
 
             if returncode == 0 and stdout.strip():
                 self.log_info("✓ Single container deployment successful")
-                self.test_results["deployment_tests"][
-                    "single_container"
-                ] = True
+                self.test_results["deployment_tests"]["single_container"] = True
 
                 # Test health endpoint
                 time.sleep(5)
@@ -167,20 +161,14 @@ WORKERS=2
 
                 if returncode == 0:
                     self.log_info("✓ Health endpoint responding")
-                    self.test_results["deployment_tests"][
-                        "health_endpoint"
-                    ] = True
+                    self.test_results["deployment_tests"]["health_endpoint"] = True
                 else:
                     self.log_warning("⚠ Health endpoint not responding")
-                    self.test_results["deployment_tests"][
-                        "health_endpoint"
-                    ] = False
+                    self.test_results["deployment_tests"]["health_endpoint"] = False
 
             else:
                 self.log_error("Single container deployment failed")
-                self.test_results["deployment_tests"][
-                    "single_container"
-                ] = False
+                self.test_results["deployment_tests"]["single_container"] = False
 
         except Exception as e:
             self.log_error(f"Single container test failed: {e}")
@@ -192,11 +180,7 @@ WORKERS=2
             self.run_command(["docker", "rmi", "freeagentics:single-test"])
             os.unlink(env_file)
 
-        return bool(
-            self.test_results["deployment_tests"].get(
-                "single_container", False
-            )
-        )
+        return bool(self.test_results["deployment_tests"].get("single_container", False))
 
     def test_docker_compose_deployment(self) -> bool:
         """Test Docker Compose deployment"""
@@ -220,9 +204,7 @@ WORKERS=2
                 dst.write("REDIS_PASSWORD=test_redis_password\n")
 
             # Test compose file validation
-            returncode, stdout, stderr = self.run_command(
-                ["docker", "compose", "config"]
-            )
+            returncode, stdout, stderr = self.run_command(["docker", "compose", "config"])
 
             if returncode != 0:
                 self.log_error(f"Docker Compose config invalid: {stderr}")
@@ -231,9 +213,7 @@ WORKERS=2
             self.log_info("✓ Docker Compose configuration valid")
 
             # Test compose up (dry run)
-            returncode, stdout, stderr = self.run_command(
-                ["docker", "compose", "up", "--dry-run"]
-            )
+            returncode, stdout, stderr = self.run_command(["docker", "compose", "up", "--dry-run"])
 
             if returncode == 0:
                 self.log_info("✓ Docker Compose dry run successful")
@@ -253,9 +233,7 @@ WORKERS=2
             if compose_env_path.exists():
                 os.unlink(compose_env_path)
 
-        return bool(
-            self.test_results["deployment_tests"].get("docker_compose", False)
-        )
+        return bool(self.test_results["deployment_tests"].get("docker_compose", False))
 
     def test_scaling_scenarios(self) -> bool:
         """Test scaling scenarios"""
@@ -306,9 +284,7 @@ WORKERS=2
                 if returncode == 0:
                     container_names.append(container_name)
                 else:
-                    self.log_error(
-                        f"Failed to start container {container_name}: {stderr}"
-                    )
+                    self.log_error(f"Failed to start container {container_name}: {stderr}")
 
             # Wait for containers to start
             time.sleep(20)
@@ -339,9 +315,7 @@ WORKERS=2
                 self.log_error(
                     f"Scaling test failed: only {running_containers}/3 containers running"
                 )
-                self.test_results["scaling_tests"][
-                    "horizontal_scaling"
-                ] = False
+                self.test_results["scaling_tests"]["horizontal_scaling"] = False
 
         except Exception as e:
             self.log_error(f"Scaling test failed: {e}")
@@ -354,9 +328,7 @@ WORKERS=2
             self.run_command(["docker", "rmi", "freeagentics:scale-test"])
             os.unlink(env_file)
 
-        return bool(
-            self.test_results["scaling_tests"].get("horizontal_scaling", False)
-        )
+        return bool(self.test_results["scaling_tests"].get("horizontal_scaling", False))
 
     def test_rollback_scenarios(self) -> bool:
         """Test rollback scenarios"""
@@ -383,9 +355,7 @@ WORKERS=2
                 return False
 
             # Tag as v2 (simulating new version)
-            self.run_command(
-                ["docker", "tag", "freeagentics:v1", "freeagentics:v2"]
-            )
+            self.run_command(["docker", "tag", "freeagentics:v1", "freeagentics:v2"])
 
             # Deploy v1
             container_name = "freeagentics-rollback-test"
@@ -462,19 +432,13 @@ WORKERS=2
 
                     if returncode == 0 and stdout.strip():
                         self.log_info("✓ Rollback test successful")
-                        self.test_results["rollback_tests"][
-                            "version_rollback"
-                        ] = True
+                        self.test_results["rollback_tests"]["version_rollback"] = True
                     else:
                         self.log_error("Rollback test failed")
-                        self.test_results["rollback_tests"][
-                            "version_rollback"
-                        ] = False
+                        self.test_results["rollback_tests"]["version_rollback"] = False
                 else:
                     self.log_error(f"Failed to deploy v2: {stderr}")
-                    self.test_results["rollback_tests"][
-                        "version_rollback"
-                    ] = False
+                    self.test_results["rollback_tests"]["version_rollback"] = False
             else:
                 self.log_error("Failed to deploy v1")
                 self.test_results["rollback_tests"]["version_rollback"] = False
@@ -490,9 +454,7 @@ WORKERS=2
             self.run_command(["docker", "rmi", "freeagentics:v2"])
             os.unlink(env_file)
 
-        return bool(
-            self.test_results["rollback_tests"].get("version_rollback", False)
-        )
+        return bool(self.test_results["rollback_tests"].get("version_rollback", False))
 
     def test_monitoring_integration(self) -> bool:
         """Test monitoring integration"""
@@ -548,14 +510,10 @@ WORKERS=2
 
             if returncode == 0:
                 self.log_info("✓ Metrics endpoint responding")
-                self.test_results["monitoring_tests"][
-                    "metrics_endpoint"
-                ] = True
+                self.test_results["monitoring_tests"]["metrics_endpoint"] = True
             else:
                 self.log_warning("⚠ Metrics endpoint not responding")
-                self.test_results["monitoring_tests"][
-                    "metrics_endpoint"
-                ] = False
+                self.test_results["monitoring_tests"]["metrics_endpoint"] = False
 
             # Test health endpoint
             returncode, stdout, stderr = self.run_command(
@@ -567,9 +525,7 @@ WORKERS=2
                 self.test_results["monitoring_tests"]["health_endpoint"] = True
             else:
                 self.log_warning("⚠ Health endpoint not responding")
-                self.test_results["monitoring_tests"][
-                    "health_endpoint"
-                ] = False
+                self.test_results["monitoring_tests"]["health_endpoint"] = False
 
             # Test container resource monitoring
             returncode, stdout, stderr = self.run_command(
@@ -585,22 +541,16 @@ WORKERS=2
 
             if returncode == 0:
                 self.log_info("✓ Container resource monitoring working")
-                self.test_results["monitoring_tests"][
-                    "resource_monitoring"
-                ] = True
+                self.test_results["monitoring_tests"]["resource_monitoring"] = True
             else:
                 self.log_warning("⚠ Container resource monitoring failed")
-                self.test_results["monitoring_tests"][
-                    "resource_monitoring"
-                ] = False
+                self.test_results["monitoring_tests"]["resource_monitoring"] = False
 
         except Exception as e:
             self.log_error(f"Monitoring test failed: {e}")
             self.test_results["monitoring_tests"]["metrics_endpoint"] = False
             self.test_results["monitoring_tests"]["health_endpoint"] = False
-            self.test_results["monitoring_tests"][
-                "resource_monitoring"
-            ] = False
+            self.test_results["monitoring_tests"]["resource_monitoring"] = False
 
         finally:
             # Clean up
@@ -615,9 +565,7 @@ WORKERS=2
         self.log_info("Testing environment variable handling...")
 
         # Test with minimal environment
-        minimal_env = tempfile.NamedTemporaryFile(
-            mode="w", suffix=".env", delete=False
-        )
+        minimal_env = tempfile.NamedTemporaryFile(mode="w", suffix=".env", delete=False)
         minimal_env.write("ENVIRONMENT=production\n")
         minimal_env.close()
 
@@ -655,14 +603,10 @@ WORKERS=2
             )
 
             if returncode != 0:
-                self.log_info(
-                    "✓ Container correctly fails with minimal environment"
-                )
+                self.log_info("✓ Container correctly fails with minimal environment")
                 self.test_results["deployment_tests"]["env_validation"] = True
             else:
-                self.log_warning(
-                    "⚠ Container should fail with minimal environment"
-                )
+                self.log_warning("⚠ Container should fail with minimal environment")
                 self.test_results["deployment_tests"]["env_validation"] = False
 
         except Exception as e:
@@ -674,9 +618,7 @@ WORKERS=2
             self.run_command(["docker", "rmi", "freeagentics:env-test"])
             os.unlink(minimal_env.name)
 
-        return bool(
-            self.test_results["deployment_tests"].get("env_validation", False)
-        )
+        return bool(self.test_results["deployment_tests"].get("env_validation", False))
 
     def add_api_cleanup_functionality(self):
         """Add API cleanup functionality as specified in subtask"""
@@ -704,9 +646,7 @@ WORKERS=2
             self.log_info("✓ API cleanup endpoints found")
             self.test_results["deployment_tests"]["api_cleanup"] = True
         else:
-            self.log_info(
-                "API cleanup endpoints not found - implementation needed"
-            )
+            self.log_info("API cleanup endpoints not found - implementation needed")
             self.test_results["deployment_tests"]["api_cleanup"] = False
 
         # Create a simple cleanup endpoint implementation example
@@ -756,9 +696,7 @@ async def cleanup_resources():
                     if result:
                         passed_tests += 1
 
-        success_rate = (
-            (passed_tests / total_tests * 100) if total_tests > 0 else 0
-        )
+        success_rate = (passed_tests / total_tests * 100) if total_tests > 0 else 0
 
         self.test_results["summary"] = {
             "total_tests": total_tests,

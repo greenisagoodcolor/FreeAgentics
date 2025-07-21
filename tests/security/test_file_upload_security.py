@@ -184,10 +184,7 @@ class FileUploadSecurityTester:
                     )
 
                 # Check response for information disclosure
-                if (
-                    "path" in response.text.lower()
-                    or "directory" in response.text.lower()
-                ):
+                if "path" in response.text.lower() or "directory" in response.text.lower():
                     results["passed"] = False
                     results["findings"].append(
                         {
@@ -325,9 +322,7 @@ class FileUploadSecurityTester:
                         "text/plain",
                     )
                 }
-                response = self.client.post(
-                    "/api/v1/upload", files=files, data=form_data
-                )
+                response = self.client.post("/api/v1/upload", files=files, data=form_data)
 
                 if response.status_code in [200, 201, 202]:
                     response_data = response.text
@@ -384,14 +379,10 @@ class FileUploadSecurityTester:
         for size_name, size_bytes in size_tests:
             try:
                 # Create file of specified size
-                file_content = b"A" * min(
-                    size_bytes, 1024 * 1024
-                )  # Limit to 1MB for testing
+                file_content = b"A" * min(size_bytes, 1024 * 1024)  # Limit to 1MB for testing
                 filename = f"size_test_{size_name}.txt"
 
-                files = {
-                    "file": (filename, io.BytesIO(file_content), "text/plain")
-                }
+                files = {"file": (filename, io.BytesIO(file_content), "text/plain")}
                 response = self.client.post("/api/v1/upload", files=files)
 
                 # Very large files should be rejected
@@ -410,10 +401,7 @@ class FileUploadSecurityTester:
                 # Check for proper error messages for oversized files
                 if response.status_code == 413:  # Payload Too Large
                     # Good - proper HTTP status code
-                    if (
-                        "path" in response.text.lower()
-                        or "directory" in response.text.lower()
-                    ):
+                    if "path" in response.text.lower() or "directory" in response.text.lower():
                         results["findings"].append(
                             {
                                 "issue": "File size error message discloses paths",
@@ -477,10 +465,7 @@ class FileUploadSecurityTester:
                     )
 
                 # Check if content scanning is mentioned in response
-                if (
-                    "scanned" in response.text.lower()
-                    or "virus" in response.text.lower()
-                ):
+                if "scanned" in response.text.lower() or "virus" in response.text.lower():
                     # Good - indicates content scanning
                     pass
 
@@ -551,9 +536,7 @@ class FileUploadSecurityTester:
         for test_name, filename in metadata_tests:
             try:
                 file_content = b"Test content"
-                files = {
-                    "file": (filename, io.BytesIO(file_content), "text/plain")
-                }
+                files = {"file": (filename, io.BytesIO(file_content), "text/plain")}
                 response = self.client.post("/api/v1/upload", files=files)
 
                 # Check if server discloses file system information
@@ -644,10 +627,7 @@ class FileUploadSecurityTester:
 
                 if response.status_code == 200:
                     # Directory listing might be enabled
-                    if (
-                        "index of" in response.text.lower()
-                        or "<a href=" in response.text.lower()
-                    ):
+                    if "index of" in response.text.lower() or "<a href=" in response.text.lower():
                         results["passed"] = False
                         results["findings"].append(
                             {
@@ -669,8 +649,7 @@ class FileUploadSecurityTester:
                     if traversal_response.status_code == 200:
                         if (
                             "root:" in traversal_response.text
-                            or "administrator"
-                            in traversal_response.text.lower()
+                            or "administrator" in traversal_response.text.lower()
                         ):
                             results["passed"] = False
                             results["findings"].append(
@@ -735,9 +714,7 @@ class FileUploadSecurityTester:
             try:
                 # Upload executable file
                 files = {"file": (filename, io.BytesIO(content), content_type)}
-                upload_response = self.client.post(
-                    "/api/v1/upload", files=files
-                )
+                upload_response = self.client.post("/api/v1/upload", files=files)
 
                 if upload_response.status_code in [200, 201, 202]:
                     # Try to access and execute the uploaded file
@@ -768,10 +745,7 @@ class FileUploadSecurityTester:
                                 )
 
                             # Even if not executed, direct access to uploaded files is a risk
-                            elif (
-                                content.decode("utf-8", errors="ignore")
-                                in response_text
-                            ):
+                            elif content.decode("utf-8", errors="ignore") in response_text:
                                 results["findings"].append(
                                     {
                                         "issue": "Uploaded file directly accessible",
@@ -825,9 +799,7 @@ class FileUploadSecurityTester:
 
         for filename, content, fake_mime_type in spoofing_tests:
             try:
-                files = {
-                    "file": (filename, io.BytesIO(content), fake_mime_type)
-                }
+                files = {"file": (filename, io.BytesIO(content), fake_mime_type)}
                 response = self.client.post("/api/v1/upload", files=files)
 
                 # Should be rejected based on actual content, not declared MIME type
@@ -859,9 +831,7 @@ class FileUploadSecurityTester:
 
         for filename, content, correct_mime_type in valid_tests:
             try:
-                files = {
-                    "file": (filename, io.BytesIO(content), correct_mime_type)
-                }
+                files = {"file": (filename, io.BytesIO(content), correct_mime_type)}
                 response = self.client.post("/api/v1/upload", files=files)
 
                 # Valid files should be accepted (if upload endpoint exists)
@@ -924,9 +894,7 @@ class FileUploadSecurityTester:
                     {
                         "test_name": test_method.__name__,
                         "passed": False,
-                        "findings": [
-                            {"issue": f"Test execution error: {str(e)}"}
-                        ],
+                        "findings": [{"issue": f"Test execution error: {str(e)}"}],
                         "recommendations": ["Fix test execution error"],
                     }
                 )
@@ -965,9 +933,7 @@ class FileUploadSecurityTester:
                 "total_tests": total_tests,
                 "passed_tests": passed_tests,
                 "failed_tests": failed_tests,
-                "pass_rate": (passed_tests / total_tests * 100)
-                if total_tests > 0
-                else 0,
+                "pass_rate": (passed_tests / total_tests * 100) if total_tests > 0 else 0,
                 "critical_findings": len(critical_findings),
                 "high_findings": len(high_findings),
                 "medium_findings": len(medium_findings),
@@ -999,9 +965,7 @@ class TestFileUploadSecurity:
 
         # Check specifically for high severity findings (dangerous extensions allowed)
         high_severity_issues = [
-            f
-            for f in result.get("findings", [])
-            if f.get("severity") == "high"
+            f for f in result.get("findings", []) if f.get("severity") == "high"
         ]
 
         if high_severity_issues:
@@ -1016,14 +980,10 @@ class TestFileUploadSecurity:
 
         if not result["passed"]:
             critical_issues = [
-                f
-                for f in result.get("findings", [])
-                if f.get("severity") == "critical"
+                f for f in result.get("findings", []) if f.get("severity") == "critical"
             ]
             if critical_issues:
-                failure_msg = (
-                    "Critical path traversal vulnerabilities detected:\n"
-                )
+                failure_msg = "Critical path traversal vulnerabilities detected:\n"
                 for finding in critical_issues:
                     failure_msg += f"  - {finding['issue']}\n"
                 pytest.fail(failure_msg)
@@ -1034,9 +994,7 @@ class TestFileUploadSecurity:
 
         if not result["passed"]:
             high_severity_issues = [
-                f
-                for f in result.get("findings", [])
-                if f.get("severity") == "high"
+                f for f in result.get("findings", []) if f.get("severity") == "high"
             ]
             if high_severity_issues:
                 failure_msg = "Malicious file content not being detected:\n"
@@ -1050,9 +1008,7 @@ class TestFileUploadSecurity:
 
         if not result["passed"]:
             critical_issues = [
-                f
-                for f in result.get("findings", [])
-                if f.get("severity") == "critical"
+                f for f in result.get("findings", []) if f.get("severity") == "critical"
             ]
             if critical_issues:
                 failure_msg = "CRITICAL: Uploaded files can be executed:\n"
@@ -1099,7 +1055,7 @@ if __name__ == "__main__":
     print(f"Pass Rate: {summary['summary']['pass_rate']:.1f}%")
     print(f"Overall Status: {summary['overall_status']}")
 
-    print(f"\nFindings by Severity:")
+    print("\nFindings by Severity:")
     print(f"  Critical: {summary['summary']['critical_findings']}")
     print(f"  High: {summary['summary']['high_findings']}")
     print(f"  Medium: {summary['summary']['medium_findings']}")
@@ -1113,7 +1069,9 @@ if __name__ == "__main__":
 
     # Save report
     timestamp = time.strftime("%Y%m%d_%H%M%S")
-    report_file = f"/home/green/FreeAgentics/tests/security/file_upload_security_report_{timestamp}.json"
+    report_file = (
+        f"/home/green/FreeAgentics/tests/security/file_upload_security_report_{timestamp}.json"
+    )
 
     try:
         with open(report_file, "w") as f:

@@ -11,15 +11,13 @@ from agents.type_adapter import AgentTypeAdapter, CoalitionTypeAdapter
 
 # Import PyMDPErrorHandler from the correct module
 if TYPE_CHECKING:
-    from agents.pymdp_error_handling import PyMDPErrorHandler
+    pass
 else:
     try:
-        from agents.pymdp_error_handling import PyMDPErrorHandler
+        pass
     except ImportError:
         # Fallback to hard failure handler if pymdp_error_handling is not available
-        from agents.hard_failure_handlers import (
-            PyMDPErrorHandlerHardFailure as PyMDPErrorHandler,
-        )
+        pass
 
 
 def safe_get_agent_id(agent: Any) -> Optional[str]:
@@ -84,9 +82,7 @@ def match_agent_id(agent: Any, target_id: Union[str, uuid.UUID]) -> bool:
     return agent_id == target_str
 
 
-def match_coalition_id(
-    coalition: Any, target_id: Union[str, uuid.UUID]
-) -> bool:
+def match_coalition_id(coalition: Any, target_id: Union[str, uuid.UUID]) -> bool:
     """Check if coalition matches target ID, handling type conversions.
 
     Args:
@@ -104,9 +100,8 @@ def match_coalition_id(
     return coalition_id == target_str
 
 
-def get_agent_attribute(
-    agent: Any, attribute: str, default: Optional[Any] = None
-) -> Any:
+def get_agent_attribute(agent: Any, attribute: str,
+    default: Optional[Any] = None) -> Any:
     """Safely get an attribute from an agent object.
 
     Args:
@@ -146,9 +141,8 @@ def get_agent_attribute(
     return default
 
 
-def get_coalition_attribute(
-    coalition: Any, attribute: str, default: Optional[Any] = None
-) -> Any:
+def get_coalition_attribute(coalition: Any, attribute: str,
+    default: Optional[Any] = None) -> Any:
     """Safely get an attribute from a coalition object.
 
     Args:

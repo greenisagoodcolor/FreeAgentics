@@ -429,9 +429,7 @@ position_belief -> position: depends_on
         return cls.TEST_USERS.get(role)
 
     @classmethod
-    def get_endpoint_config(
-        cls, category: str, operation: str
-    ) -> TestEndpoint:
+    def get_endpoint_config(cls, category: str, operation: str) -> TestEndpoint:
         """Get test endpoint configuration."""
         return cls.TEST_ENDPOINTS.get(category, {}).get(operation)
 
@@ -464,18 +462,12 @@ position_belief -> position: depends_on
     def should_have_access(cls, role: UserRole, operation: str) -> bool:
         """Check if a role should have access to an operation."""
         user_config = cls.TEST_USERS.get(role.value)
-        return (
-            user_config.should_have_access.get(operation, False)
-            if user_config
-            else False
-        )
+        return user_config.should_have_access.get(operation, False) if user_config else False
 
     @classmethod
     def get_agent_test_data(cls, agent_type: str) -> Dict:
         """Get agent test data for a specific type."""
-        return cls.AGENT_TEST_DATA.get(
-            agent_type, cls.AGENT_TEST_DATA["basic_agent"]
-        )
+        return cls.AGENT_TEST_DATA.get(agent_type, cls.AGENT_TEST_DATA["basic_agent"])
 
     @classmethod
     def get_test_config(cls, key: str):
@@ -490,9 +482,7 @@ position_belief -> position: depends_on
     @classmethod
     def is_higher_role(cls, role1: UserRole, role2: UserRole) -> bool:
         """Check if role1 is higher than role2 in the hierarchy."""
-        return cls.ROLE_HIERARCHY.get(role1, 0) > cls.ROLE_HIERARCHY.get(
-            role2, 0
-        )
+        return cls.ROLE_HIERARCHY.get(role1, 0) > cls.ROLE_HIERARCHY.get(role2, 0)
 
 
 # Test data validation
@@ -503,9 +493,7 @@ def validate_test_config():
     # Validate that all users have valid roles
     for user_name, user_config in RBACTestConfig.TEST_USERS.items():
         if not isinstance(user_config.role, UserRole):
-            errors.append(
-                f"User {user_name} has invalid role: {user_config.role}"
-            )
+            errors.append(f"User {user_name} has invalid role: {user_config.role}")
 
     # Validate that all endpoints have valid permissions
     for category, operations in RBACTestConfig.TEST_ENDPOINTS.items():

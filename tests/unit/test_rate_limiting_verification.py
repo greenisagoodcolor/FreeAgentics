@@ -7,7 +7,6 @@ Tests proper rate limit headers, retry-after responses, and edge cases.
 
 import time
 from concurrent.futures import ThreadPoolExecutor, as_completed
-from datetime import datetime, timedelta, timezone
 from unittest.mock import Mock, patch
 
 import pytest
@@ -41,21 +40,15 @@ class TestRateLimitingVerification:
 
         # First 5 requests should be allowed
         for i in range(max_requests):
-            is_limited = rate_limiter.is_rate_limited(
-                identifier, max_requests, window_minutes
-            )
+            is_limited = rate_limiter.is_rate_limited(identifier, max_requests, window_minutes)
             assert not is_limited, f"Request {i+1} should be allowed"
 
         # 6th request should be limited
-        is_limited = rate_limiter.is_rate_limited(
-            identifier, max_requests, window_minutes
-        )
+        is_limited = rate_limiter.is_rate_limited(identifier, max_requests, window_minutes)
         assert is_limited, "Request 6 should be rate limited"
 
         # 7th request should also be limited
-        is_limited = rate_limiter.is_rate_limited(
-            identifier, max_requests, window_minutes
-        )
+        is_limited = rate_limiter.is_rate_limited(identifier, max_requests, window_minutes)
         assert is_limited, "Request 7 should be rate limited"
 
     def test_rate_limit_window_expiry(self, rate_limiter):
@@ -66,24 +59,18 @@ class TestRateLimitingVerification:
 
         # Use up the rate limit
         for i in range(max_requests):
-            is_limited = rate_limiter.is_rate_limited(
-                identifier, max_requests, window_minutes
-            )
+            is_limited = rate_limiter.is_rate_limited(identifier, max_requests, window_minutes)
             assert not is_limited, f"Request {i+1} should be allowed"
 
         # Next request should be limited
-        is_limited = rate_limiter.is_rate_limited(
-            identifier, max_requests, window_minutes
-        )
+        is_limited = rate_limiter.is_rate_limited(identifier, max_requests, window_minutes)
         assert is_limited, "Request should be rate limited"
 
         # Wait for window to expire
         time.sleep(1.5)
 
         # Now request should be allowed again
-        is_limited = rate_limiter.is_rate_limited(
-            identifier, max_requests, window_minutes
-        )
+        is_limited = rate_limiter.is_rate_limited(identifier, max_requests, window_minutes)
         assert not is_limited, "Request should be allowed after window expiry"
 
     def test_different_identifiers_independent(self, rate_limiter):
@@ -95,38 +82,24 @@ class TestRateLimitingVerification:
 
         # Use up rate limit for identifier1
         for i in range(max_requests):
-            is_limited = rate_limiter.is_rate_limited(
-                identifier1, max_requests, window_minutes
-            )
-            assert (
-                not is_limited
-            ), f"Request {i+1} for client_1 should be allowed"
+            is_limited = rate_limiter.is_rate_limited(identifier1, max_requests, window_minutes)
+            assert not is_limited, f"Request {i+1} for client_1 should be allowed"
 
         # identifier1 should now be limited
-        is_limited = rate_limiter.is_rate_limited(
-            identifier1, max_requests, window_minutes
-        )
+        is_limited = rate_limiter.is_rate_limited(identifier1, max_requests, window_minutes)
         assert is_limited, "client_1 should be rate limited"
 
         # identifier2 should still be allowed
-        is_limited = rate_limiter.is_rate_limited(
-            identifier2, max_requests, window_minutes
-        )
+        is_limited = rate_limiter.is_rate_limited(identifier2, max_requests, window_minutes)
         assert not is_limited, "client_2 should not be rate limited"
 
         # Use up rate limit for identifier2
         for i in range(max_requests - 1):  # -1 because we already used one
-            is_limited = rate_limiter.is_rate_limited(
-                identifier2, max_requests, window_minutes
-            )
-            assert (
-                not is_limited
-            ), f"Request {i+2} for client_2 should be allowed"
+            is_limited = rate_limiter.is_rate_limited(identifier2, max_requests, window_minutes)
+            assert not is_limited, f"Request {i+2} for client_2 should be allowed"
 
         # Now identifier2 should also be limited
-        is_limited = rate_limiter.is_rate_limited(
-            identifier2, max_requests, window_minutes
-        )
+        is_limited = rate_limiter.is_rate_limited(identifier2, max_requests, window_minutes)
         assert is_limited, "client_2 should now be rate limited"
 
     def test_concurrent_rate_limiting(self, rate_limiter):
@@ -139,15 +112,11 @@ class TestRateLimitingVerification:
         results = []
 
         def make_request():
-            return rate_limiter.is_rate_limited(
-                identifier, max_requests, window_minutes
-            )
+            return rate_limiter.is_rate_limited(identifier, max_requests, window_minutes)
 
         # Make concurrent requests
         with ThreadPoolExecutor(max_workers=10) as executor:
-            futures = [
-                executor.submit(make_request) for _ in range(total_requests)
-            ]
+            futures = [executor.submit(make_request) for _ in range(total_requests)]
 
             for future in as_completed(futures):
                 is_limited = future.result()
@@ -176,9 +145,7 @@ class TestRateLimitingVerification:
 
         # Make some requests
         for i in range(max_requests):
-            rate_limiter.is_rate_limited(
-                identifier, max_requests, window_minutes
-            )
+            rate_limiter.is_rate_limited(identifier, max_requests, window_minutes)
 
         # Verify requests are recorded
         assert identifier in rate_limiter.requests
@@ -200,9 +167,7 @@ class TestRateLimitingVerification:
         window_minutes = 1
 
         # All requests should be limited
-        is_limited = rate_limiter.is_rate_limited(
-            identifier, max_requests, window_minutes
-        )
+        is_limited = rate_limiter.is_rate_limited(identifier, max_requests, window_minutes)
         assert is_limited, "Request should be limited when max_requests is 0"
 
     def test_rate_limit_with_very_high_max_requests(self, rate_limiter):
@@ -213,12 +178,8 @@ class TestRateLimitingVerification:
 
         # Make many requests
         for i in range(100):
-            is_limited = rate_limiter.is_rate_limited(
-                identifier, max_requests, window_minutes
-            )
-            assert (
-                not is_limited
-            ), f"Request {i+1} should be allowed with high limit"
+            is_limited = rate_limiter.is_rate_limited(identifier, max_requests, window_minutes)
+            assert not is_limited, f"Request {i+1} should be allowed with high limit"
 
     def test_rate_limit_edge_cases(self, rate_limiter):
         """Test rate limiting edge cases."""
@@ -229,9 +190,7 @@ class TestRateLimitingVerification:
         window_minutes = 1
 
         # Should be treated as 0 or similar
-        is_limited = rate_limiter.is_rate_limited(
-            identifier, max_requests, window_minutes
-        )
+        is_limited = rate_limiter.is_rate_limited(identifier, max_requests, window_minutes)
         assert is_limited, "Negative max_requests should limit all requests"
 
         # Test with zero window
@@ -239,9 +198,7 @@ class TestRateLimitingVerification:
         window_minutes = 0
 
         # Should still work (though practically limits everything)
-        is_limited = rate_limiter.is_rate_limited(
-            identifier, max_requests, window_minutes
-        )
+        is_limited = rate_limiter.is_rate_limited(identifier, max_requests, window_minutes)
         # Behavior depends on implementation, but should not crash
 
     def test_rate_limit_performance(self, rate_limiter):
@@ -254,23 +211,17 @@ class TestRateLimitingVerification:
         start_time = time.time()
 
         for i in range(50):
-            rate_limiter.is_rate_limited(
-                identifier, max_requests, window_minutes
-            )
+            rate_limiter.is_rate_limited(identifier, max_requests, window_minutes)
 
         end_time = time.time()
         duration = end_time - start_time
 
         # Should be very fast
-        assert (
-            duration < 0.1
-        ), f"Rate limiting too slow: {duration:.3f}s for 50 checks"
+        assert duration < 0.1, f"Rate limiting too slow: {duration:.3f}s for 50 checks"
 
         # Average per check should be very fast
         avg_per_check = duration / 50
-        assert (
-            avg_per_check < 0.002
-        ), f"Average per check too slow: {avg_per_check:.6f}s"
+        assert avg_per_check < 0.002, f"Average per check too slow: {avg_per_check:.6f}s"
 
     def test_rate_limit_memory_usage(self, rate_limiter):
         """Test that rate limiting doesn't accumulate excessive memory."""
@@ -280,17 +231,13 @@ class TestRateLimitingVerification:
         # Create many different identifiers
         for i in range(1000):
             identifier = f"memory_client_{i}"
-            rate_limiter.is_rate_limited(
-                identifier, max_requests, window_minutes
-            )
+            rate_limiter.is_rate_limited(identifier, max_requests, window_minutes)
 
         # Wait for records to expire
         time.sleep(1)
 
         # Trigger cleanup by making new request
-        rate_limiter.is_rate_limited(
-            "cleanup_trigger", max_requests, window_minutes
-        )
+        rate_limiter.is_rate_limited("cleanup_trigger", max_requests, window_minutes)
 
         # Memory should be cleaned up
         # Note: This test depends on implementation details
@@ -306,9 +253,7 @@ class TestRateLimitingVerification:
         mock_request.client.host = "127.0.0.1"
 
         ip = get_client_ip(mock_request)
-        assert (
-            ip == "192.168.1.1"
-        ), "Should extract first IP from X-Forwarded-For"
+        assert ip == "192.168.1.1", "Should extract first IP from X-Forwarded-For"
 
         # Test without X-Forwarded-For header
         mock_request = Mock()
@@ -317,9 +262,7 @@ class TestRateLimitingVerification:
         mock_request.client.host = "127.0.0.1"
 
         ip = get_client_ip(mock_request)
-        assert (
-            ip == "127.0.0.1"
-        ), "Should use client.host when no X-Forwarded-For"
+        assert ip == "127.0.0.1", "Should use client.host when no X-Forwarded-For"
 
         # Test with no client
         mock_request = Mock()
@@ -338,9 +281,7 @@ class TestRateLimitingVerification:
             return {"message": "success"}
 
         # Test that decorator is applied
-        assert hasattr(
-            test_endpoint, "__wrapped__"
-        ), "Decorator should wrap function"
+        assert hasattr(test_endpoint, "__wrapped__"), "Decorator should wrap function"
 
         # Test with mock request
         mock_request = Mock()
@@ -359,9 +300,7 @@ class TestRateLimitingVerification:
 
         # Make requests
         for i in range(max_requests):
-            rate_limiter.is_rate_limited(
-                identifier, max_requests, window_minutes
-            )
+            rate_limiter.is_rate_limited(identifier, max_requests, window_minutes)
 
         # Verify requests are recorded
         assert identifier in rate_limiter.requests
@@ -393,9 +332,7 @@ class TestRateLimitingVerification:
 
             for i in range(requests_per_client):
                 start_time = time.time()
-                is_limited = rate_limiter.is_rate_limited(
-                    identifier, max_requests, window_minutes
-                )
+                is_limited = rate_limiter.is_rate_limited(identifier, max_requests, window_minutes)
                 end_time = time.time()
 
                 client_results.append(
@@ -409,9 +346,7 @@ class TestRateLimitingVerification:
 
         # Run stress test
         with ThreadPoolExecutor(max_workers=20) as executor:
-            futures = [
-                executor.submit(client_requests, i) for i in range(num_clients)
-            ]
+            futures = [executor.submit(client_requests, i) for i in range(num_clients)]
 
             for future in as_completed(futures):
                 client_id, client_results = future.result()
@@ -446,18 +381,12 @@ class TestRateLimitingVerification:
 
         # First burst - should be allowed
         for i in range(max_requests):
-            is_limited = rate_limiter.is_rate_limited(
-                identifier, max_requests, window_minutes
-            )
-            assert (
-                not is_limited
-            ), f"First burst request {i+1} should be allowed"
+            is_limited = rate_limiter.is_rate_limited(identifier, max_requests, window_minutes)
+            assert not is_limited, f"First burst request {i+1} should be allowed"
 
         # Additional requests in same window - should be limited
         for i in range(3):
-            is_limited = rate_limiter.is_rate_limited(
-                identifier, max_requests, window_minutes
-            )
+            is_limited = rate_limiter.is_rate_limited(identifier, max_requests, window_minutes)
             assert is_limited, f"Additional request {i+1} should be limited"
 
         # Wait for window to partially expire
@@ -465,12 +394,8 @@ class TestRateLimitingVerification:
 
         # Second burst - should be allowed again
         for i in range(max_requests):
-            is_limited = rate_limiter.is_rate_limited(
-                identifier, max_requests, window_minutes
-            )
-            assert (
-                not is_limited
-            ), f"Second burst request {i+1} should be allowed"
+            is_limited = rate_limiter.is_rate_limited(identifier, max_requests, window_minutes)
+            assert not is_limited, f"Second burst request {i+1} should be allowed"
 
     def test_rate_limiting_configuration_validation(self, rate_limiter):
         """Test rate limiting with various configuration values."""
@@ -498,23 +423,17 @@ class TestRateLimitingVerification:
 
         # Make requests
         for i in range(max_requests):
-            is_limited = rate_limiter.is_rate_limited(
-                identifier, max_requests, window_minutes
-            )
+            is_limited = rate_limiter.is_rate_limited(identifier, max_requests, window_minutes)
             assert not is_limited, f"Request {i+1} should be allowed"
 
         # Next request should be limited
-        is_limited = rate_limiter.is_rate_limited(
-            identifier, max_requests, window_minutes
-        )
+        is_limited = rate_limiter.is_rate_limited(identifier, max_requests, window_minutes)
         assert is_limited, "Request should be limited"
 
         # Mock time going backwards (edge case)
         with patch("time.time", return_value=time.time() - 3600):  # 1 hour ago
             # Should handle gracefully
-            is_limited = rate_limiter.is_rate_limited(
-                identifier, max_requests, window_minutes
-            )
+            is_limited = rate_limiter.is_rate_limited(identifier, max_requests, window_minutes)
             assert isinstance(is_limited, bool)
 
     def test_rate_limiting_identifier_types(self, rate_limiter):
@@ -535,17 +454,11 @@ class TestRateLimitingVerification:
         for identifier in identifiers:
             # Each identifier should have independent rate limiting
             for i in range(max_requests):
-                is_limited = rate_limiter.is_rate_limited(
-                    identifier, max_requests, window_minutes
-                )
-                assert (
-                    not is_limited
-                ), f"Request {i+1} for {identifier} should be allowed"
+                is_limited = rate_limiter.is_rate_limited(identifier, max_requests, window_minutes)
+                assert not is_limited, f"Request {i+1} for {identifier} should be allowed"
 
             # Next request should be limited
-            is_limited = rate_limiter.is_rate_limited(
-                identifier, max_requests, window_minutes
-            )
+            is_limited = rate_limiter.is_rate_limited(identifier, max_requests, window_minutes)
             assert is_limited, f"Request should be limited for {identifier}"
 
     def test_rate_limiting_thread_safety(self, rate_limiter):
@@ -559,9 +472,7 @@ class TestRateLimitingVerification:
         def make_requests():
             thread_results = []
             for i in range(10):
-                is_limited = rate_limiter.is_rate_limited(
-                    identifier, max_requests, window_minutes
-                )
+                is_limited = rate_limiter.is_rate_limited(identifier, max_requests, window_minutes)
                 thread_results.append(is_limited)
             return thread_results
 
@@ -577,6 +488,4 @@ class TestRateLimitingVerification:
         allowed_count = sum(1 for r in results if not r)
 
         # Should not exceed max_requests due to race conditions
-        assert (
-            allowed_count <= max_requests
-        ), f"Race condition: {allowed_count} > {max_requests}"
+        assert allowed_count <= max_requests, f"Race condition: {allowed_count} > {max_requests}"

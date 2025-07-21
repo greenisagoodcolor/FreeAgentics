@@ -139,7 +139,7 @@ class TestNetworkFailureHandling:
     def test_llm_network_timeout(self):
         """Test LLM manager handling of network timeouts."""
         if not IMPORT_SUCCESS:
-            pytest.skip("Required modules not available")
+            assert False, "Test bypass removed - must fix underlying issue"
 
         manager = LocalLLMManager()
 
@@ -156,7 +156,7 @@ class TestNetworkFailureHandling:
     def test_api_database_connection_failure(self):
         """Test API handling of database connection failures."""
         if not IMPORT_SUCCESS:
-            pytest.skip("Required modules not available")
+            assert False, "Test bypass removed - must fix underlying issue"
 
         # Mock database connection failure
         with patch("database.session.get_db") as mock_get_db:
@@ -169,15 +169,13 @@ class TestNetworkFailureHandling:
     def test_graph_engine_remote_query_failure(self):
         """Test graph engine handling of remote query failures."""
         if not IMPORT_SUCCESS:
-            pytest.skip("Required modules not available")
+            assert False, "Test bypass removed - must fix underlying issue"
 
         engine = GraphEngine()
 
         # Mock remote query failure
         with patch.object(engine, "query") as mock_query:
-            mock_query.side_effect = ConnectionError(
-                "Remote graph server unavailable"
-            )
+            mock_query.side_effect = ConnectionError("Remote graph server unavailable")
 
             # Should handle remote failure gracefully
             try:
@@ -190,7 +188,7 @@ class TestNetworkFailureHandling:
     def test_concurrent_network_failures(self):
         """Test handling of multiple concurrent network failures."""
         if not IMPORT_SUCCESS:
-            pytest.skip("Required modules not available")
+            assert False, "Test bypass removed - must fix underlying issue"
 
         def simulate_network_call(call_id):
             """Simulate a network call that might fail."""
@@ -200,9 +198,7 @@ class TestNetworkFailureHandling:
 
         # Test concurrent failures
         with ThreadPoolExecutor(max_workers=5) as executor:
-            futures = [
-                executor.submit(simulate_network_call, i) for i in range(10)
-            ]
+            futures = [executor.submit(simulate_network_call, i) for i in range(10)]
 
             results = []
             for future in futures:
@@ -216,9 +212,7 @@ class TestNetworkFailureHandling:
             # Should have both successes and failures
             assert len(results) == 10
             assert "FAILED" in results
-            assert any(
-                "Success" in result for result in results if result != "FAILED"
-            )
+            assert any("Success" in result for result in results if result != "FAILED")
 
 
 class TestMemoryExhaustionHandling:
@@ -227,7 +221,7 @@ class TestMemoryExhaustionHandling:
     def test_large_agent_population_memory_limit(self):
         """Test system behavior with large agent populations."""
         if not IMPORT_SUCCESS:
-            pytest.skip("Required modules not available")
+            assert False, "Test bypass removed - must fix underlying issue"
 
         manager = AgentManager()
         created_agents = []
@@ -235,9 +229,7 @@ class TestMemoryExhaustionHandling:
         try:
             # Create agents until memory pressure
             for i in range(1000):  # Large number to test memory handling
-                agent_id = manager.create_agent(
-                    "explorer", f"Agent_{i}", grid_size=10
-                )
+                agent_id = manager.create_agent("explorer", f"Agent_{i}", grid_size=10)
                 created_agents.append(agent_id)
 
                 # Check memory usage periodically
@@ -263,7 +255,7 @@ class TestMemoryExhaustionHandling:
     def test_large_graph_structure_memory_handling(self):
         """Test memory handling with large graph structures."""
         if not IMPORT_SUCCESS:
-            pytest.skip("Required modules not available")
+            assert False, "Test bypass removed - must fix underlying issue"
 
         engine = GraphEngine()
 
@@ -293,7 +285,7 @@ class TestMemoryExhaustionHandling:
     def test_memory_leak_detection(self):
         """Test for memory leaks in agent lifecycle."""
         if not IMPORT_SUCCESS:
-            pytest.skip("Required modules not available")
+            assert False, "Test bypass removed - must fix underlying issue"
 
         manager = AgentManager()
         initial_agent_count = len(manager.agents)
@@ -328,7 +320,7 @@ class TestConcurrentAccessScenarios:
     def test_concurrent_agent_operations(self):
         """Test concurrent operations on agents."""
         if not IMPORT_SUCCESS:
-            pytest.skip("Required modules not available")
+            assert False, "Test bypass removed - must fix underlying issue"
 
         manager = AgentManager()
         agent_id = manager.create_agent("explorer", "ConcurrentAgent")
@@ -359,14 +351,12 @@ class TestConcurrentAccessScenarios:
         # Check results
         assert len(results) + len(errors) == 20
         # Should handle concurrent access gracefully (some operations may fail)
-        assert (
-            len(errors) >= 0
-        )  # Some errors are expected with concurrent access
+        assert len(errors) >= 0  # Some errors are expected with concurrent access
 
     def test_concurrent_coalition_formation(self):
         """Test concurrent coalition formation operations."""
         if not IMPORT_SUCCESS:
-            pytest.skip("Required modules not available")
+            assert False, "Test bypass removed - must fix underlying issue"
 
         coordinator = CoalitionCoordinator()
 
@@ -374,9 +364,7 @@ class TestConcurrentAccessScenarios:
             """Create a coalition concurrently."""
             try:
                 agents = [f"agent_{i}" for i in range(3)]
-                result = coordinator.create_coalition(
-                    f"coalition_{coalition_id}", agents
-                )
+                result = coordinator.create_coalition(f"coalition_{coalition_id}", agents)
                 return f"Coalition {coalition_id}: {result}"
             except Exception as e:
                 return f"Coalition {coalition_id}: ERROR - {e}"
@@ -398,7 +386,7 @@ class TestConcurrentAccessScenarios:
     def test_concurrent_graph_queries(self):
         """Test concurrent graph query operations."""
         if not IMPORT_SUCCESS:
-            pytest.skip("Required modules not available")
+            assert False, "Test bypass removed - must fix underlying issue"
 
         engine = GraphEngine()
         query_engine = QueryEngine(engine)
@@ -437,7 +425,7 @@ class TestInvalidStateTransitions:
     def test_agent_invalid_state_transitions(self):
         """Test invalid agent state transitions."""
         if not IMPORT_SUCCESS:
-            pytest.skip("Required modules not available")
+            assert False, "Test bypass removed - must fix underlying issue"
 
         agent = BasicExplorerAgent("test_agent", "Test Agent")
 
@@ -460,7 +448,7 @@ class TestInvalidStateTransitions:
     def test_coalition_invalid_operations(self):
         """Test invalid coalition operations."""
         if not IMPORT_SUCCESS:
-            pytest.skip("Required modules not available")
+            assert False, "Test bypass removed - must fix underlying issue"
 
         coordinator = CoalitionCoordinator()
 
@@ -476,7 +464,7 @@ class TestInvalidStateTransitions:
     def test_graph_engine_invalid_operations(self):
         """Test invalid graph engine operations."""
         if not IMPORT_SUCCESS:
-            pytest.skip("Required modules not available")
+            assert False, "Test bypass removed - must fix underlying issue"
 
         engine = GraphEngine()
 
@@ -503,7 +491,7 @@ class TestCascadingFailures:
     def test_agent_failure_cascade(self):
         """Test handling of cascading agent failures."""
         if not IMPORT_SUCCESS:
-            pytest.skip("Required modules not available")
+            assert False, "Test bypass removed - must fix underlying issue"
 
         manager = AgentManager()
 
@@ -538,7 +526,7 @@ class TestCascadingFailures:
     def test_graph_engine_failure_cascade(self):
         """Test handling of cascading graph engine failures."""
         if not IMPORT_SUCCESS:
-            pytest.skip("Required modules not available")
+            assert False, "Test bypass removed - must fix underlying issue"
 
         engine = GraphEngine()
         query_engine = QueryEngine(engine)
@@ -567,7 +555,7 @@ class TestBoundaryValueHandling:
     def test_zero_and_negative_values(self):
         """Test handling of zero and negative values."""
         if not IMPORT_SUCCESS:
-            pytest.skip("Required modules not available")
+            assert False, "Test bypass removed - must fix underlying issue"
 
         # Test agent with zero grid size
         try:
@@ -588,7 +576,7 @@ class TestBoundaryValueHandling:
     def test_extremely_large_values(self):
         """Test handling of extremely large values."""
         if not IMPORT_SUCCESS:
-            pytest.skip("Required modules not available")
+            assert False, "Test bypass removed - must fix underlying issue"
 
         # Test very large grid size
         try:
@@ -601,7 +589,7 @@ class TestBoundaryValueHandling:
     def test_empty_and_null_inputs(self):
         """Test handling of empty and null inputs."""
         if not IMPORT_SUCCESS:
-            pytest.skip("Required modules not available")
+            assert False, "Test bypass removed - must fix underlying issue"
 
         agent = BasicExplorerAgent("test", "Test Agent")
         agent.start()
@@ -621,7 +609,7 @@ class TestBoundaryValueHandling:
     def test_unicode_and_special_characters(self):
         """Test handling of unicode and special characters."""
         if not IMPORT_SUCCESS:
-            pytest.skip("Required modules not available")
+            assert False, "Test bypass removed - must fix underlying issue"
 
         # Test agent with unicode name
         try:
@@ -651,7 +639,7 @@ class TestErrorPropagationAndRecovery:
     def test_error_propagation_limits(self):
         """Test that errors don't propagate beyond intended boundaries."""
         if not IMPORT_SUCCESS:
-            pytest.skip("Required modules not available")
+            assert False, "Test bypass removed - must fix underlying issue"
 
         manager = AgentManager()
         agent_id = manager.create_agent("explorer", "Test Agent")
@@ -673,7 +661,7 @@ class TestErrorPropagationAndRecovery:
     def test_error_recovery_mechanisms(self):
         """Test automated error recovery mechanisms."""
         if not IMPORT_SUCCESS:
-            pytest.skip("Required modules not available")
+            assert False, "Test bypass removed - must fix underlying issue"
 
         agent = BasicExplorerAgent("test", "Test Agent")
         agent.start()
@@ -701,7 +689,7 @@ class TestErrorPropagationAndRecovery:
     def test_graceful_degradation(self):
         """Test graceful degradation under failure conditions."""
         if not IMPORT_SUCCESS:
-            pytest.skip("Required modules not available")
+            assert False, "Test bypass removed - must fix underlying issue"
 
         agent = BasicExplorerAgent("test", "Test Agent")
         agent.start()
@@ -726,7 +714,7 @@ class TestResourceExhaustionHandling:
     def test_file_handle_exhaustion(self):
         """Test handling of file handle exhaustion."""
         if not IMPORT_SUCCESS:
-            pytest.skip("Required modules not available")
+            assert False, "Test bypass removed - must fix underlying issue"
 
         # Create temporary files to exhaust handles
         temp_files = []
@@ -749,7 +737,7 @@ class TestResourceExhaustionHandling:
     def test_thread_pool_exhaustion(self):
         """Test handling of thread pool exhaustion."""
         if not IMPORT_SUCCESS:
-            pytest.skip("Required modules not available")
+            assert False, "Test bypass removed - must fix underlying issue"
 
         def long_running_task(task_id):
             """Simulate a long-running task."""
@@ -760,9 +748,7 @@ class TestResourceExhaustionHandling:
         try:
             with ThreadPoolExecutor(max_workers=2) as executor:
                 # Submit more tasks than workers
-                futures = [
-                    executor.submit(long_running_task, i) for i in range(10)
-                ]
+                futures = [executor.submit(long_running_task, i) for i in range(10)]
 
                 results = []
                 for future in futures:
@@ -789,7 +775,7 @@ class TestAsyncOperationErrorHandling:
     async def test_async_operation_timeout(self):
         """Test handling of async operation timeouts."""
         if not IMPORT_SUCCESS:
-            pytest.skip("Required modules not available")
+            assert False, "Test bypass removed - must fix underlying issue"
 
         async def slow_operation():
             """Simulate slow async operation."""
@@ -809,7 +795,7 @@ class TestAsyncOperationErrorHandling:
     async def test_async_operation_cancellation(self):
         """Test handling of async operation cancellation."""
         if not IMPORT_SUCCESS:
-            pytest.skip("Required modules not available")
+            assert False, "Test bypass removed - must fix underlying issue"
 
         async def cancellable_operation():
             """Simulate cancellable async operation."""
@@ -835,7 +821,7 @@ class TestAsyncOperationErrorHandling:
     async def test_concurrent_async_failures(self):
         """Test handling of concurrent async failures."""
         if not IMPORT_SUCCESS:
-            pytest.skip("Required modules not available")
+            assert False, "Test bypass removed - must fix underlying issue"
 
         async def failing_operation(op_id):
             """Async operation that sometimes fails."""
@@ -851,9 +837,7 @@ class TestAsyncOperationErrorHandling:
         # Should handle mixed success/failure
         assert len(results) == 10
 
-        success_count = sum(
-            1 for r in results if isinstance(r, str) and "succeeded" in r
-        )
+        success_count = sum(1 for r in results if isinstance(r, str) and "succeeded" in r)
         error_count = sum(1 for r in results if isinstance(r, Exception))
 
         assert success_count > 0

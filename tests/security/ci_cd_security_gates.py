@@ -5,9 +5,8 @@ This module provides security gate configurations for various CI/CD platforms
 to ensure security tests pass before deployment.
 """
 
-import json
 from pathlib import Path
-from typing import Dict, List, Optional
+from typing import Dict
 
 import yaml
 
@@ -78,14 +77,14 @@ class SecurityGatesConfig:
                             "name": "Run Bandit Security Scan",
                             "run": """
                                 pip install bandit
-                                bandit -r . -f json -o bandit-report.json 
+                                bandit -r . -f json -o bandit-report.json
                             """,
                         },
                         {
                             "name": "Run Safety Check",
                             "run": """
                                 pip install safety
-                                safety check --json > safety-report.json 
+                                safety check --json > safety-report.json
                             """,
                         },
                         {
@@ -199,9 +198,7 @@ class SecurityGatesConfig:
                 },
                 "script": ["/analyzer run"],
                 "artifacts": {
-                    "reports": {
-                        "container_scanning": "gl-container-scanning-report.json"
-                    }
+                    "reports": {"container_scanning": "gl-container-scanning-report.json"}
                 },
             },
             "sast": {
@@ -265,7 +262,7 @@ pipeline {
                         sh '''
                             . venv/bin/activate
                             bandit -r . -f json -o results/bandit-report.json
-                            pylint **/*.py --output-format=json > results/pylint-report.json 
+                            pylint **/*.py --output-format=json > results/pylint-report.json
                         '''
                     }
                 }
@@ -401,11 +398,7 @@ pipeline {
                                 "command": "python tests/security/check_security_gates.py",
                             }
                         },
-                        {
-                            "store_artifacts": {
-                                "path": "security_test_report.json"
-                            }
-                        },
+                        {"store_artifacts": {"path": "security_test_report.json"}},
                         {"store_test_results": {"path": "test-results"}},
                     ],
                 }

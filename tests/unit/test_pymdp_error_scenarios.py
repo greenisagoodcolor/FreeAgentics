@@ -6,13 +6,12 @@ to ensure production robustness.
 """
 
 import logging
-from datetime import datetime
-from unittest.mock import Mock, patch
+from unittest.mock import patch
 
 import numpy as np
 import pytest
 
-from agents.base_agent import PYMDP_AVAILABLE, BasicExplorerAgent
+from agents.base_agent import BasicExplorerAgent
 from agents.coalition_coordinator import CoalitionCoordinatorAgent
 from agents.pymdp_error_handling import PyMDPErrorHandler, PyMDPErrorType
 from agents.resource_collector import ResourceCollectorAgent
@@ -29,16 +28,12 @@ class TestPyMDPErrorScenarios:
         agent = BasicExplorerAgent("test-explorer", "Explorer", grid_size=3)
 
         # Test 0-dimensional array action
-        with patch.object(
-            agent.pymdp_agent, "sample_action", return_value=np.array(2)
-        ):
+        with patch.object(agent.pymdp_agent, "sample_action", return_value=np.array(2)):
             action = agent.select_action()
             assert action in ["up", "down", "left", "right", "stay"]
 
         # Test single-element array action
-        with patch.object(
-            agent.pymdp_agent, "sample_action", return_value=np.array([3])
-        ):
+        with patch.object(agent.pymdp_agent, "sample_action", return_value=np.array([3])):
             action = agent.select_action()
             assert action in ["up", "down", "left", "right", "stay"]
 
@@ -53,9 +48,7 @@ class TestPyMDPErrorScenarios:
 
     def test_resource_collector_matrix_errors(self):
         """Test ResourceCollectorAgent handles matrix dimension errors."""
-        agent = ResourceCollectorAgent(
-            "test-collector", "Collector", grid_size=3
-        )
+        agent = ResourceCollectorAgent("test-collector", "Collector", grid_size=3)
 
         # Test invalid observation index
         observation = {"cell_type": "unknown_type"}
@@ -83,9 +76,7 @@ class TestPyMDPErrorScenarios:
 
     def test_coalition_coordinator_state_errors(self):
         """Test CoalitionCoordinatorAgent handles state transition errors."""
-        agent = CoalitionCoordinatorAgent(
-            "test-coordinator", "Coordinator", max_agents=4
-        )
+        agent = CoalitionCoordinatorAgent("test-coordinator", "Coordinator", max_agents=4)
 
         # Test with invalid coalition state
         observation = {
@@ -102,18 +93,14 @@ class TestPyMDPErrorScenarios:
                 side_effect=ValueError("Matrix dimension mismatch"),
             ):
                 action = agent.select_action()
-                assert (
-                    action in agent.action_map.values()
-                )  # Should use fallback
+                assert action in agent.action_map.values()  # Should use fallback
 
     def test_belief_update_errors_all_agents(self):
         """Test belief update error handling across all agent types."""
         agents = [
             BasicExplorerAgent("explorer", "Explorer", grid_size=3),
             ResourceCollectorAgent("collector", "Collector", grid_size=3),
-            CoalitionCoordinatorAgent(
-                "coordinator", "Coordinator", max_agents=3
-            ),
+            CoalitionCoordinatorAgent("coordinator", "Coordinator", max_agents=3),
         ]
 
         for agent in agents:
@@ -123,9 +110,7 @@ class TestPyMDPErrorScenarios:
                     agent.update_beliefs()  # Should not crash
 
                 # Test belief update with NaN values
-                with patch.object(
-                    agent.pymdp_agent, "qs", [np.array([np.nan, 0.5, 0.5])]
-                ):
+                with patch.object(agent.pymdp_agent, "qs", [np.array([np.nan, 0.5, 0.5])]):
                     agent.update_beliefs()  # Should handle NaN gracefully
 
     def test_free_energy_computation_errors(self):
@@ -133,9 +118,7 @@ class TestPyMDPErrorScenarios:
         agents = [
             BasicExplorerAgent("explorer", "Explorer", grid_size=3),
             ResourceCollectorAgent("collector", "Collector", grid_size=3),
-            CoalitionCoordinatorAgent(
-                "coordinator", "Coordinator", max_agents=3
-            ),
+            CoalitionCoordinatorAgent("coordinator", "Coordinator", max_agents=3),
         ]
 
         for agent in agents:
@@ -183,9 +166,7 @@ class TestPyMDPErrorScenarios:
         assert "dimensions" in msg
 
         # Test non-normalized matrix
-        A_invalid = np.array(
-            [[0.3, 0.3], [0.3, 0.3]]
-        )  # Columns don't sum to 1
+        A_invalid = np.array([[0.3, 0.3], [0.3, 0.3]])  # Columns don't sum to 1
         is_valid, msg = validate_pymdp_matrices(A_invalid, B, C, D)
         assert not is_valid
 
@@ -199,8 +180,7 @@ class TestPyMDPErrorScenarios:
 
         # Create agents with potential errors
         agents = [
-            BasicExplorerAgent(f"explorer-{i}", f"Explorer-{i}", grid_size=3)
-            for i in range(3)
+            BasicExplorerAgent(f"explorer-{i}", f"Explorer-{i}", grid_size=3) for i in range(3)
         ]
 
         # Register agents
@@ -217,9 +197,7 @@ class TestPyMDPErrorScenarios:
                 "position": [5, 5],
                 "surroundings": None,
             },  # Out of bounds
-            "explorer-2": {
-                "invalid_key": "invalid_value"
-            },  # Missing expected keys
+            "explorer-2": {"invalid_key": "invalid_value"},  # Missing expected keys
         }
 
         # Execute with error handling
@@ -248,17 +226,13 @@ class TestPyMDPErrorScenarios:
 
         # Test with out-of-range action index
         if agent.pymdp_agent:
-            with patch.object(
-                agent.pymdp_agent, "sample_action", return_value=99
-            ):
+            with patch.object(agent.pymdp_agent, "sample_action", return_value=99):
                 action = agent.select_action()
                 assert action == "stay"  # Should handle gracefully
 
     def test_error_recovery_and_logging(self):
         """Test error recovery and proper logging."""
         import io
-        import sys
-        from contextlib import redirect_stderr
 
         agent = ResourceCollectorAgent("test", "Test", grid_size=3)
 
@@ -278,10 +252,7 @@ class TestPyMDPErrorScenarios:
 
         # Check logs contain error info
         log_output = log_capture.getvalue()
-        assert (
-            "Test error" in log_output
-            or "action selection failed" in log_output
-        )
+        assert "Test error" in log_output or "action selection failed" in log_output
 
         logger.removeHandler(handler)
 

@@ -124,9 +124,7 @@ class TestAuthorizationWithSecurityHeaders:
             assert "default-src" in csp_header
             assert "script-src" in csp_header
 
-    def test_authorization_with_security_headers_manipulation(
-        self, client, security_users
-    ):
+    def test_authorization_with_security_headers_manipulation(self, client, security_users):
         """Test authorization when security headers are manipulated."""
         observer = security_users[UserRole.OBSERVER]
 
@@ -188,9 +186,7 @@ class TestAuthorizationWithRateLimiting:
 
         return users
 
-    def test_authorization_under_rate_limit_attack(
-        self, client, rate_limit_users
-    ):
+    def test_authorization_under_rate_limit_attack(self, client, rate_limit_users):
         """Test authorization decisions under rate limit attacks."""
         attacker = rate_limit_users["rate_user_0"]
         legitimate_user = rate_limit_users["rate_user_1"]
@@ -209,10 +205,7 @@ class TestAuthorizationWithRateLimiting:
             attacker_responses.append(response.status_code)
 
         # Check that rate limiting kicked in
-        rate_limited = any(
-            status == status.HTTP_429_TOO_MANY_REQUESTS
-            for status in attacker_responses
-        )
+        any(status == status.HTTP_429_TOO_MANY_REQUESTS for status in attacker_responses)
 
         # Legitimate user should still work
         legitimate_headers = {
@@ -227,9 +220,7 @@ class TestAuthorizationWithRateLimiting:
             status.HTTP_429_TOO_MANY_REQUESTS,
         ]
 
-    def test_authorization_bypass_attempts_trigger_rate_limit(
-        self, client, rate_limit_users
-    ):
+    def test_authorization_bypass_attempts_trigger_rate_limit(self, client, rate_limit_users):
         """Test that authorization bypass attempts trigger rate limiting."""
         attacker = rate_limit_users["rate_user_2"]
 
@@ -354,9 +345,7 @@ class TestAuthorizationWithAuditLogging:
             assert "action" in log
             assert "decision" in log
 
-    def test_attack_patterns_trigger_security_alerts(
-        self, client, audit_users
-    ):
+    def test_attack_patterns_trigger_security_alerts(self, client, audit_users):
         """Test that attack patterns trigger appropriate security alerts."""
         attacker = audit_users[UserRole.OBSERVER]
 
@@ -376,9 +365,7 @@ class TestAuthorizationWithAuditLogging:
             )
             return original_log_event(event_type, severity, message, **kwargs)
 
-        with patch.object(
-            security_auditor, "log_event", side_effect=mock_log_event
-        ):
+        with patch.object(security_auditor, "log_event", side_effect=mock_log_event):
             # Perform suspicious activities
             headers = {"Authorization": f"Bearer {attacker['token']}"}
 
@@ -404,22 +391,16 @@ class TestAuthorizationWithAuditLogging:
         security_events = [
             e
             for e in captured_events
-            if e["severity"]
-            in [SecurityEventSeverity.WARNING, SecurityEventSeverity.CRITICAL]
+            if e["severity"] in [SecurityEventSeverity.WARNING, SecurityEventSeverity.CRITICAL]
         ]
 
-        assert (
-            len(security_events) > 0
-        ), "Attack patterns should trigger security alerts"
+        assert len(security_events) > 0, "Attack patterns should trigger security alerts"
 
         # Check for specific event types
         event_types = [e["type"] for e in security_events]
 
         # Should include access denied events
-        assert any(
-            event_type == SecurityEventType.ACCESS_DENIED
-            for event_type in event_types
-        )
+        assert any(event_type == SecurityEventType.ACCESS_DENIED for event_type in event_types)
 
 
 class TestAuthorizationWithDatabaseIntegration:
@@ -481,9 +462,7 @@ class TestAuthorizationWithDatabaseIntegration:
             headers2 = {"Authorization": f"Bearer {researcher2['token']}"}
 
             # View might be allowed
-            response = client.get(
-                f"/api/v1/agents/{agent_id}", headers=headers2
-            )
+            response = client.get(f"/api/v1/agents/{agent_id}", headers=headers2)
 
             # But modification should be restricted
             response = client.put(
@@ -494,9 +473,7 @@ class TestAuthorizationWithDatabaseIntegration:
             assert response.status_code == status.HTTP_403_FORBIDDEN
 
             # Admin should be able to access
-            admin_headers = {
-                "Authorization": f"Bearer {db_users[UserRole.ADMIN]['token']}"
-            }
+            admin_headers = {"Authorization": f"Bearer {db_users[UserRole.ADMIN]['token']}"}
             response = client.put(
                 f"/api/v1/agents/{agent_id}",
                 headers=admin_headers,
@@ -533,9 +510,7 @@ class TestAuthorizationWithDatabaseIntegration:
             if isinstance(attempt, str):
                 response = client.get(attempt, headers=headers)
             else:
-                response = client.post(
-                    attempt["endpoint"], headers=headers, json=attempt["body"]
-                )
+                response = client.post(attempt["endpoint"], headers=headers, json=attempt["body"])
 
             # Should either be forbidden (no permission) or bad request (invalid input)
             assert response.status_code in [
@@ -666,9 +641,7 @@ class TestComplexAuthorizationScenarios:
 
             # Research admin tries to access
             research_admin = complex_setup["users"]["research_admin"]
-            research_headers = {
-                "Authorization": f"Bearer {research_admin['token']}"
-            }
+            research_headers = {"Authorization": f"Bearer {research_admin['token']}"}
 
             # Should not be able to modify cross-department
             response = client.put(
@@ -721,9 +694,7 @@ class TestComplexAuthorizationScenarios:
         )
 
         # Even with "delegation", observer shouldn't access admin functions
-        observer_headers = {
-            "Authorization": f"Bearer {finance_observer['token']}"
-        }
+        observer_headers = {"Authorization": f"Bearer {finance_observer['token']}"}
 
         # Try to claim delegation
         delegated_headers = {
@@ -732,9 +703,7 @@ class TestComplexAuthorizationScenarios:
             "X-Delegation-Token": "fake_delegation_token",
         }
 
-        response = client.delete(
-            "/api/v1/financial_records/all", headers=delegated_headers
-        )
+        response = client.delete("/api/v1/financial_records/all", headers=delegated_headers)
 
         # Should still be forbidden
         assert response.status_code == status.HTTP_403_FORBIDDEN
@@ -770,7 +739,7 @@ class TestComplexAuthorizationScenarios:
         # But should still be audited and time-limited
 
         # Add emergency access rule
-        emergency_rule = ABACRule(
+        ABACRule(
             id="emergency_access",
             name="Emergency Access",
             description="Time-limited emergency access",
@@ -826,12 +795,8 @@ class TestAuthorizationPerformance:
                 description=f"Rule for performance testing {i}",
                 resource_type="*" if i % 2 == 0 else "agent",
                 action="*" if i % 3 == 0 else "view",
-                subject_conditions={"role": ["researcher"]}
-                if i % 4 == 0
-                else {},
-                resource_conditions={"department": f"dept_{i % 10}"}
-                if i % 5 == 0
-                else {},
+                subject_conditions={"role": ["researcher"]} if i % 4 == 0 else {},
+                resource_conditions={"department": f"dept_{i % 10}"} if i % 5 == 0 else {},
                 environment_conditions={},
                 effect=ABACEffect.ALLOW if i % 2 == 0 else ABACEffect.DENY,
                 priority=100 + i,
@@ -852,7 +817,7 @@ class TestAuthorizationPerformance:
             headers = {"Authorization": f"Bearer {user['token']}"}
 
             start_time = time.time()
-            response = client.get("/api/v1/agents", headers=headers)
+            client.get("/api/v1/agents", headers=headers)
             end_time = time.time()
 
             latency = end_time - start_time
@@ -884,7 +849,7 @@ class TestAuthorizationPerformance:
             user = users[request_count % len(users)]
             headers = {"Authorization": f"Bearer {user['token']}"}
 
-            response = client.get("/api/v1/agents", headers=headers)
+            client.get("/api/v1/agents", headers=headers)
             request_count += 1
 
         rps = request_count / duration
@@ -903,21 +868,15 @@ class TestAuthorizationPerformance:
         def make_request(user_data):
             headers = {"Authorization": f"Bearer {user_data['token']}"}
             endpoint = (
-                "/api/v1/agents"
-                if user_data["role"] != UserRole.ADMIN
-                else "/api/v1/system/config"
+                "/api/v1/agents" if user_data["role"] != UserRole.ADMIN else "/api/v1/system/config"
             )
 
             response = client.get(endpoint, headers=headers)
 
             expected_success = (
                 endpoint == "/api/v1/agents"
-                and Permission.VIEW_AGENTS
-                in ROLE_PERMISSIONS[user_data["role"]]
-            ) or (
-                endpoint == "/api/v1/system/config"
-                and user_data["role"] == UserRole.ADMIN
-            )
+                and Permission.VIEW_AGENTS in ROLE_PERMISSIONS[user_data["role"]]
+            ) or (endpoint == "/api/v1/system/config" and user_data["role"] == UserRole.ADMIN)
 
             return {
                 "user": user_data["user"].username,
@@ -936,9 +895,7 @@ class TestAuthorizationPerformance:
                 for user in users[:20]:
                     futures.append(executor.submit(make_request, user))
 
-            results = [
-                f.result() for f in concurrent.futures.as_completed(futures)
-            ]
+            results = [f.result() for f in concurrent.futures.as_completed(futures)]
 
         # Verify consistency
         inconsistencies = []

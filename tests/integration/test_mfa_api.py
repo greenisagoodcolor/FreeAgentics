@@ -10,14 +10,13 @@ Tests cover:
 - API response formats
 """
 
-import json
 from unittest.mock import Mock, patch
 
 import pytest
 from fastapi.testclient import TestClient
 
 from api.main import app
-from auth.mfa_service import MFAResponse, MFAService
+from auth.mfa_service import MFAResponse
 
 
 class TestMFAAPI:
@@ -86,9 +85,7 @@ class TestMFAAPI:
             assert data["backup_codes"] is not None
             assert len(data["backup_codes"]) == 3
 
-    def test_enroll_mfa_unauthorized_user(
-        self, client, mock_user, auth_headers
-    ):
+    def test_enroll_mfa_unauthorized_user(self, client, mock_user, auth_headers):
         """Test MFA enrollment for different user (should fail)."""
         with (
             patch("api.v1.mfa.get_current_user") as mock_get_user,
@@ -111,10 +108,7 @@ class TestMFAAPI:
 
             # Verify response
             assert response.status_code == 403
-            assert (
-                "Can only enroll MFA for your own account"
-                in response.json()["detail"]
-            )
+            assert "Can only enroll MFA for your own account" in response.json()["detail"]
 
     def test_enroll_mfa_already_enabled(self, client, mock_user, auth_headers):
         """Test MFA enrollment when already enabled."""
@@ -249,9 +243,7 @@ class TestMFAAPI:
 
             # Verify response
             assert response.status_code == 429
-            assert (
-                "too many failed attempts" in response.json()["detail"].lower()
-            )
+            assert "too many failed attempts" in response.json()["detail"].lower()
 
     def test_get_mfa_status_enabled(self, client, mock_user, auth_headers):
         """Test getting MFA status for enabled user."""
@@ -348,9 +340,7 @@ class TestMFAAPI:
             assert data["success"] is True
             assert data["message"] == "MFA has been disabled"
 
-    def test_regenerate_backup_codes_success(
-        self, client, mock_user, auth_headers
-    ):
+    def test_regenerate_backup_codes_success(self, client, mock_user, auth_headers):
         """Test successful backup code regeneration."""
         with (
             patch("api.v1.mfa.get_current_user") as mock_get_user,
@@ -371,9 +361,7 @@ class TestMFAAPI:
             mock_get_service.return_value = mock_service
 
             # Test regeneration
-            response = client.post(
-                "/api/v1/mfa/regenerate-backup-codes", headers=auth_headers
-            )
+            response = client.post("/api/v1/mfa/regenerate-backup-codes", headers=auth_headers)
 
             # Verify response
             assert response.status_code == 200
@@ -394,9 +382,7 @@ class TestMFAAPI:
         assert "backup_method" in data
 
         # Check TOTP method is available
-        totp_method = next(
-            (m for m in data["methods"] if m["name"] == "totp"), None
-        )
+        totp_method = next((m for m in data["methods"] if m["name"] == "totp"), None)
         assert totp_method is not None
         assert totp_method["enabled"] is True
 
@@ -476,9 +462,7 @@ class TestMFAAPI:
             # Mock MFA service
             mock_service = Mock()
             mock_service._encrypt_secret.return_value = "encrypted_test"
-            mock_service._decrypt_secret.return_value = (
-                "test_secret_for_health_check"
-            )
+            mock_service._decrypt_secret.return_value = "test_secret_for_health_check"
             mock_get_service.return_value = mock_service
 
             # Test health check
@@ -495,9 +479,7 @@ class TestMFAAPI:
         with patch("api.v1.mfa.get_mfa_service") as mock_get_service:
             # Mock MFA service to raise exception
             mock_service = Mock()
-            mock_service._encrypt_secret.side_effect = Exception(
-                "Encryption failed"
-            )
+            mock_service._encrypt_secret.side_effect = Exception("Encryption failed")
             mock_get_service.return_value = mock_service
 
             # Test health check
@@ -544,12 +526,8 @@ class TestMFAAPI:
             # Should return 403 for missing CSRF token
             assert response.status_code == 403
 
-    @pytest.mark.parametrize(
-        "method", ["totp", "sms", "email", "hardware_key"]
-    )
-    def test_enroll_mfa_method_validation(
-        self, client, mock_user, auth_headers, method
-    ):
+    @pytest.mark.parametrize("method", ["totp", "sms", "email", "hardware_key"])
+    def test_enroll_mfa_method_validation(self, client, mock_user, auth_headers, method):
         """Test MFA enrollment method validation."""
         with (
             patch("api.v1.mfa.get_current_user") as mock_get_user,

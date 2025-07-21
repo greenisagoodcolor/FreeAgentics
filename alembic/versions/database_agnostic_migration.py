@@ -8,7 +8,7 @@ Create Date: 2025-01-13 12:00:00.000000
 
 from typing import Optional, Sequence, Union
 
-from alembic import op  
+from alembic import op
 
 # revision identifiers, used by Alembic.
 revision: str = "database_agnostic_001"
@@ -24,20 +24,14 @@ def upgrade() -> None:
         # Agents table indexes
         op.create_index("idx_agents_status_active", "agents", ["status"])
         op.create_index("idx_agents_template_type", "agents", ["template"])
-        op.create_index(
-            "idx_agents_last_active_desc", "agents", ["last_active"]
-        )
+        op.create_index("idx_agents_last_active_desc", "agents", ["last_active"])
 
         # Coalitions table indexes
-        op.create_index(
-            "idx_coalitions_status_active", "coalitions", ["status"]
-        )
+        op.create_index("idx_coalitions_status_active", "coalitions", ["status"])
         op.create_index("idx_coalitions_type_category", "coalitions", ["type"])
 
         # Agent-Coalition association indexes
-        op.create_index(
-            "idx_agent_coalition_agent_lookup", "agent_coalition", ["agent_id"]
-        )
+        op.create_index("idx_agent_coalition_agent_lookup", "agent_coalition", ["agent_id"])
         op.create_index(
             "idx_agent_coalition_coalition_lookup",
             "agent_coalition",
@@ -46,15 +40,9 @@ def upgrade() -> None:
 
         # Conversations table indexes (if exists)
         try:
-            op.create_index(
-                "idx_conversations_agent_id", "conversations", ["agent_id"]
-            )
-            op.create_index(
-                "idx_conversations_session_id", "conversations", ["session_id"]
-            )
-            op.create_index(
-                "idx_conversations_created_at", "conversations", ["created_at"]
-            )
+            op.create_index("idx_conversations_agent_id", "conversations", ["agent_id"])
+            op.create_index("idx_conversations_session_id", "conversations", ["session_id"])
+            op.create_index("idx_conversations_created_at", "conversations", ["created_at"])
         except Exception:
             # Table might not exist in all environments
             pass
@@ -93,9 +81,7 @@ def downgrade() -> None:
         op.drop_index("idx_coalitions_type_category", table_name="coalitions")
 
         # Remove association indexes
-        op.drop_index(
-            "idx_agent_coalition_agent_lookup", table_name="agent_coalition"
-        )
+        op.drop_index("idx_agent_coalition_agent_lookup", table_name="agent_coalition")
         op.drop_index(
             "idx_agent_coalition_coalition_lookup",
             table_name="agent_coalition",
@@ -103,15 +89,9 @@ def downgrade() -> None:
 
         # Remove conversation indexes (if exists)
         try:
-            op.drop_index(
-                "idx_conversations_agent_id", table_name="conversations"
-            )
-            op.drop_index(
-                "idx_conversations_session_id", table_name="conversations"
-            )
-            op.drop_index(
-                "idx_conversations_created_at", table_name="conversations"
-            )
+            op.drop_index("idx_conversations_agent_id", table_name="conversations")
+            op.drop_index("idx_conversations_session_id", table_name="conversations")
+            op.drop_index("idx_conversations_created_at", table_name="conversations")
         except Exception:
             pass
 

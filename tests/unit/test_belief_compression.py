@@ -65,9 +65,7 @@ class TestBeliefCompressor:
         sparse_memory = sparse_belief.memory_usage()
 
         compression_ratio = dense_memory / sparse_memory
-        assert (
-            compression_ratio > 10
-        )  # Should achieve >10x compression for 95% sparse
+        assert compression_ratio > 10  # Should achieve >10x compression for 95% sparse
 
     def test_incremental_update(self):
         """Test incremental belief updates."""

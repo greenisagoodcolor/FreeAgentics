@@ -40,7 +40,7 @@ for action in range(3):
         # From current state, distribute probability to next states
         B3[action, :, curr_state] = [0.33, 0.33, 0.34]  # Sums to 1
 
-print(f"Format 3 - Manual normalization:")
+print("Format 3 - Manual normalization:")
 print(f"Shape: {B3.shape}")
 print(f"Sum along axis 1 (over next states): {B3.sum(axis=1)}")
 print(f"Is normalized: {utils.is_normalized(B3)}")
@@ -65,7 +65,7 @@ for a in range(3):
     B_correct[a] = np.eye(3)  # Identity transition
 
 print(f"B_correct sum over axis 1: {B_correct.sum(axis=1)}")
-print(f"Each element should be 1.0")
+print("Each element should be 1.0")
 
 # Test with PyMDP's actual normalization check
 print(f"\nDirect check with axis=1: {np.all(B_correct.sum(axis=1) == 1.0)}")

@@ -247,7 +247,7 @@ send_notifications() {
                     \"ts\": $(date +%s)
                 }]
             }" \
-            "$SLACK_WEBHOOK" || true
+            "$SLACK_WEBHOOK" 
     fi
 
     # Email notification
@@ -255,7 +255,7 @@ send_notifications() {
         local subject="FreeAgentics Database Backup $status"
         local body="Environment: $ENVIRONMENT\nBackup Path: $backup_path\nSize: $backup_size\nTimestamp: $(date)"
 
-        echo -e "$body" | mail -s "$subject" "$BACKUP_EMAIL" || true
+        echo -e "$body" | mail -s "$subject" "$BACKUP_EMAIL" 
     fi
 }
 
@@ -290,10 +290,10 @@ restore_backup() {
     log "Creating target database: $target_db"
 
     if docker ps | grep -q "freeagentics.*postgres"; then
-        docker exec freeagentics-postgres createdb -U "$DB_USER" "$target_db" || true
+        docker exec freeagentics-postgres createdb -U "$DB_USER" "$target_db" 
         docker exec -i freeagentics-postgres psql -U "$DB_USER" -d "$target_db" < "$temp_file"
     else
-        PGPASSWORD="$DB_PASSWORD" createdb -h "$DB_HOST" -p "$DB_PORT" -U "$DB_USER" "$target_db" || true
+        PGPASSWORD="$DB_PASSWORD" createdb -h "$DB_HOST" -p "$DB_PORT" -U "$DB_USER" "$target_db" 
         PGPASSWORD="$DB_PASSWORD" psql -h "$DB_HOST" -p "$DB_PORT" -U "$DB_USER" -d "$target_db" < "$temp_file"
     fi
 

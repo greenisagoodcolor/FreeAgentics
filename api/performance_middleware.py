@@ -18,20 +18,14 @@ import hashlib
 import json
 import logging
 import time
-from collections import defaultdict, deque
-from contextlib import asynccontextmanager
+from collections import deque
 from dataclasses import dataclass, field
-from datetime import datetime, timedelta
-from typing import Any, Callable, Dict, List, Optional, Tuple, Union
+from typing import Any, Callable, Dict, List, Optional, Union
 
 import cachetools
 from fastapi import FastAPI, Request, Response
 from fastapi.middleware.base import BaseHTTPMiddleware
 from fastapi.responses import StreamingResponse
-from starlette.middleware.base import (
-    BaseHTTPMiddleware as StarletteBaseHTTPMiddleware,
-)
-from starlette.responses import Response as StarletteResponse
 
 from observability.performance_monitor import get_performance_monitor
 
@@ -47,9 +41,7 @@ class CacheConfig:
     default_ttl: int = 300  # 5 minutes
 
     # Cache key settings
-    include_headers: List[str] = field(
-        default_factory=lambda: ["Authorization", "Accept-Language"]
-    )
+    include_headers: List[str] = field(default_factory=lambda: ["Authorization", "Accept-Language"])
     include_query_params: bool = True
 
     # Cache invalidation
@@ -71,9 +63,7 @@ class CompressionConfig:
     compression_level: int = 6  # Compression level (1-9)
 
     # Supported algorithms
-    algorithms: List[str] = field(
-        default_factory=lambda: ["gzip", "deflate", "br"]
-    )
+    algorithms: List[str] = field(default_factory=lambda: ["gzip", "deflate", "br"])
 
     # MIME types to compress
     compressible_types: List[str] = field(
@@ -99,9 +89,7 @@ class PerformanceConfig:
 
     # Response compression
     compression_enabled: bool = True
-    compression_config: CompressionConfig = field(
-        default_factory=CompressionConfig
-    )
+    compression_config: CompressionConfig = field(default_factory=CompressionConfig)
 
     # Request deduplication
     deduplication_enabled: bool = True
@@ -126,9 +114,7 @@ class ResponseCache:
             config: Cache configuration settings.
         """
         self.config = config
-        self.cache = cachetools.TTLCache(
-            maxsize=config.max_size, ttl=config.default_ttl
-        )
+        self.cache = cachetools.TTLCache(maxsize=config.max_size, ttl=config.default_ttl)
         self.hit_count = 0
         self.miss_count = 0
         self.invalidation_count = 0
@@ -151,9 +137,7 @@ class ResponseCache:
 
         # Generate hash
         key_string = "|".join(key_parts)
-        return hashlib.md5(
-            key_string.encode(), usedforsecurity=False
-        ).hexdigest()
+        return hashlib.md5(key_string.encode(), usedforsecurity=False).hexdigest()
 
     def _get_ttl(self, request: Request) -> int:
         """Get TTL for specific endpoint."""
@@ -184,9 +168,7 @@ class ResponseCache:
         try:
             # Create cache entry with custom TTL
             self.cache[cache_key] = response_data
-            logger.debug(
-                f"Cached response for {request.url.path} (TTL: {ttl}s)"
-            )
+            logger.debug(f"Cached response for {request.url.path} (TTL: {ttl}s)")
         except Exception as e:
             logger.warning(f"Cache set error: {e}")
 
@@ -203,9 +185,7 @@ class ResponseCache:
             del self.cache[key]
             self.invalidation_count += 1
 
-        logger.info(
-            f"Invalidated {len(keys_to_remove)} cache entries for pattern: {pattern}"
-        )
+        logger.info(f"Invalidated {len(keys_to_remove)} cache entries for pattern: {pattern}")
 
     def clear(self):
         """Clear entire cache."""
@@ -216,11 +196,7 @@ class ResponseCache:
     def get_stats(self) -> Dict[str, Any]:
         """Get cache statistics."""
         total_requests = self.hit_count + self.miss_count
-        hit_rate = (
-            (self.hit_count / total_requests) * 100
-            if total_requests > 0
-            else 0
-        )
+        hit_rate = (self.hit_count / total_requests) * 100 if total_requests > 0 else 0
 
         return {
             "size": len(self.cache),
@@ -261,9 +237,7 @@ class RequestDeduplicator:
         if hasattr(request, "_body_hash"):
             key_parts.append(request._body_hash)
 
-        return hashlib.md5(
-            "|".join(key_parts).encode(), usedforsecurity=False
-        ).hexdigest()
+        return hashlib.md5("|".join(key_parts).encode(), usedforsecurity=False).hexdigest()
 
     def _cleanup_expired(self):
         """Clean up expired requests."""
@@ -279,9 +253,7 @@ class RequestDeduplicator:
             if key in self.pending_requests:
                 del self.pending_requests[key]
 
-    async def deduplicate_request(
-        self, request: Request, handler: Callable
-    ) -> Any:
+    async def deduplicate_request(self, request: Request, handler: Callable) -> Any:
         """Deduplicate request or return existing response."""
         request_key = self._generate_request_key(request)
         current_time = time.time()
@@ -338,9 +310,7 @@ class ResponseCompressor:
         """Check if response should be compressed."""
         # Check content type
         content_type = response.headers.get("content-type", "")
-        if not any(
-            ct in content_type for ct in self.config.compressible_types
-        ):
+        if not any(ct in content_type for ct in self.config.compressible_types):
             return False
 
         # Check content length
@@ -360,10 +330,7 @@ class ResponseCompressor:
 
         # Priority order based on efficiency
         for encoding in ["br", "gzip", "deflate"]:
-            if (
-                encoding in accept_encoding
-                and encoding in self.config.algorithms
-            ):
+            if encoding in accept_encoding and encoding in self.config.algorithms:
                 return encoding
 
         return None
@@ -371,9 +338,7 @@ class ResponseCompressor:
     def _compress_data(self, data: bytes, encoding: str) -> bytes:
         """Compress data using specified encoding."""
         if encoding == "gzip":
-            return gzip.compress(
-                data, compresslevel=self.config.compression_level
-            )
+            return gzip.compress(data, compresslevel=self.config.compression_level)
         elif encoding == "deflate":
             import zlib
 
@@ -382,20 +347,14 @@ class ResponseCompressor:
             try:
                 import brotli
 
-                return brotli.compress(
-                    data, quality=self.config.compression_level
-                )
+                return brotli.compress(data, quality=self.config.compression_level)
             except ImportError:
                 logger.warning("Brotli not available, falling back to gzip")
-                return gzip.compress(
-                    data, compresslevel=self.config.compression_level
-                )
+                return gzip.compress(data, compresslevel=self.config.compression_level)
 
         return data
 
-    async def compress_response(
-        self, request: Request, response: Response
-    ) -> Response:
+    async def compress_response(self, request: Request, response: Response) -> Response:
         """Compress response if appropriate."""
         if not self._should_compress(response):
             return response
@@ -454,9 +413,7 @@ class PerformanceMiddleware(BaseHTTPMiddleware):
 
         # Initialize components
         self.cache = (
-            ResponseCache(self.config.cache_config)
-            if self.config.caching_enabled
-            else None
+            ResponseCache(self.config.cache_config) if self.config.caching_enabled else None
         )
         self.deduplicator = (
             RequestDeduplicator(self.config.deduplication_window)
@@ -477,9 +434,7 @@ class PerformanceMiddleware(BaseHTTPMiddleware):
 
         logger.info("Performance middleware initialized")
 
-    async def dispatch(
-        self, request: Request, call_next: Callable
-    ) -> Response:
+    async def dispatch(self, request: Request, call_next: Callable) -> Response:
         """Process incoming requests through the performance middleware pipeline."""
         start_time = time.perf_counter()
 
@@ -489,9 +444,7 @@ class PerformanceMiddleware(BaseHTTPMiddleware):
         # Add body hash for POST/PUT requests (for deduplication)
         if request.method in ["POST", "PUT", "PATCH"]:
             body = await request.body()
-            request._body_hash = hashlib.md5(
-                body, usedforsecurity=False
-            ).hexdigest()
+            request._body_hash = hashlib.md5(body, usedforsecurity=False).hexdigest()
             # Reset body for downstream processing
             request._body = body
 
@@ -525,9 +478,7 @@ class PerformanceMiddleware(BaseHTTPMiddleware):
         # Track slow requests
         if response_time > self.config.slow_request_threshold:
             self.slow_request_count += 1
-            logger.warning(
-                f"Slow request detected: {request.url.path} - {response_time:.3f}s"
-            )
+            logger.warning(f"Slow request detected: {request.url.path} - {response_time:.3f}s")
 
         # Update performance monitor
         with self.performance_monitor.time_api_request():
@@ -549,15 +500,11 @@ class PerformanceMiddleware(BaseHTTPMiddleware):
 
         # Compress response
         if self.compressor:
-            response = await self.compressor.compress_response(
-                request, response
-            )
+            response = await self.compressor.compress_response(request, response)
 
         # Add performance headers
         response.headers["X-Response-Time"] = f"{response_time:.3f}s"
-        response.headers[
-            "X-Cache-Status"
-        ] = "MISS"  # TODO: Update based on cache hit/miss
+        response.headers["X-Cache-Status"] = "MISS"  # TODO: Update based on cache hit/miss
 
         # Track response size
         content_length = response.headers.get("content-length")
@@ -566,9 +513,7 @@ class PerformanceMiddleware(BaseHTTPMiddleware):
 
         return response
 
-    def _create_response_from_cache(
-        self, cache_data: Dict[str, Any]
-    ) -> Response:
+    def _create_response_from_cache(self, cache_data: Dict[str, Any]) -> Response:
         """Create response from cached data."""
         response = Response(
             content=cache_data["body"],
@@ -581,14 +526,10 @@ class PerformanceMiddleware(BaseHTTPMiddleware):
     def get_statistics(self) -> Dict[str, Any]:
         """Get comprehensive middleware statistics."""
         avg_response_time = (
-            (self.total_response_time / self.request_count)
-            if self.request_count > 0
-            else 0
+            (self.total_response_time / self.request_count) if self.request_count > 0 else 0
         )
         avg_response_size = (
-            sum(self.response_sizes) / len(self.response_sizes)
-            if self.response_sizes
-            else 0
+            sum(self.response_sizes) / len(self.response_sizes) if self.response_sizes else 0
         )
 
         stats = {

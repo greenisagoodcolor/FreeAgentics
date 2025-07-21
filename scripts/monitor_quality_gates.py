@@ -1,13 +1,12 @@
 #!/usr/bin/env python3
 """Monitor quality gates and report when ready for release."""
 
-import json
 import subprocess
 import sys
 import time
 from datetime import datetime
 from pathlib import Path
-from typing import Dict, List, Tuple
+from typing import Dict, List
 
 
 class QualityGateMonitor:
@@ -31,7 +30,7 @@ class QualityGateMonitor:
                 cwd=self.project_root,
             )
             results["pytest_collect"] = result.returncode == 0
-        except:
+        except Exception:
             results["pytest_collect"] = False
 
         # Quick flake8 count
@@ -54,7 +53,7 @@ class QualityGateMonitor:
             )
             # E9,F63,F7,F82 are the "showstopper" flake8 issues
             results["flake8_critical"] = result.returncode == 0
-        except:
+        except Exception:
             results["flake8_critical"] = False
 
         # Check if npm build still works
@@ -67,7 +66,7 @@ class QualityGateMonitor:
                 cwd=web_dir,
             )
             results["npm_build"] = result.returncode == 0
-        except:
+        except Exception:
             results["npm_build"] = False
 
         # Check Docker build
@@ -79,7 +78,7 @@ class QualityGateMonitor:
                 cwd=self.project_root,
             )
             results["docker_build"] = result.returncode == 0
-        except:
+        except Exception:
             results["docker_build"] = False
 
         return results
@@ -110,7 +109,7 @@ class QualityGateMonitor:
             )
 
             if result.returncode == 0:
-                files = result.stdout.strip().split('\n')
+                files = result.stdout.strip().split("\n")
                 recent_files = [
                     f
                     for f in files
@@ -118,15 +117,15 @@ class QualityGateMonitor:
                     and not any(
                         skip in f
                         for skip in [
-                            'venv/',
-                            'node_modules/',
-                            '.git/',
-                            '__pycache__/',
-                            'htmlcov/',
+                            "venv/",
+                            "node_modules/",
+                            ".git/",
+                            "__pycache__/",
+                            "htmlcov/",
                         ]
                     )
                 ]
-        except:
+        except Exception:
             pass
 
         return recent_files
@@ -158,15 +157,13 @@ Files modified in last hour: {len(recent_activity)}
                 summary += f"- {file}\n"
 
         # Check if ready for full validation
-        critical_passed = quick_results.get(
-            'pytest_collect', False
-        ) and quick_results.get('flake8_critical', False)
+        critical_passed = quick_results.get("pytest_collect", False) and quick_results.get(
+            "flake8_critical", False
+        )
 
         if critical_passed:
             summary += "\n## Status: Ready for Full Validation\n"
-            summary += (
-                "Critical checks passed. Run full quality gate validation.\n"
-            )
+            summary += "Critical checks passed. Run full quality gate validation.\n"
         else:
             summary += "\n## Status: Waiting for Fixes\n"
             summary += "Critical issues remain. Continue monitoring.\n"
@@ -176,9 +173,7 @@ Files modified in last hour: {len(recent_activity)}
     def monitor_once(self) -> bool:
         """Perform one monitoring cycle. Returns True if ready for release."""
         print("\n" + "=" * 60)
-        print(
-            f"🔍 Quality Gate Monitor - {datetime.now().strftime('%Y-%m-%d %H:%M:%S')}"
-        )
+        print(f"🔍 Quality Gate Monitor - {datetime.now().strftime('%Y-%m-%d %H:%M:%S')}")
         print("=" * 60)
 
         summary = self.generate_status_summary()
@@ -186,17 +181,14 @@ Files modified in last hour: {len(recent_activity)}
 
         # Save summary
         report_path = (
-            self.project_root
-            / f"quality_monitor_{datetime.now().strftime('%Y%m%d_%H%M%S')}.md"
+            self.project_root / f"quality_monitor_{datetime.now().strftime('%Y%m%d_%H%M%S')}.md"
         )
-        with open(report_path, 'w') as f:
+        with open(report_path, "w") as f:
             f.write(summary)
 
         # Check if we should run full validation
         quick_results = self.quick_check()
-        if quick_results.get('pytest_collect') and quick_results.get(
-            'flake8_critical'
-        ):
+        if quick_results.get("pytest_collect") and quick_results.get("flake8_critical"):
             print("\n🎯 Critical checks passed! Running full validation...")
 
             # Run full validation

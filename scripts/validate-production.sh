@@ -203,7 +203,7 @@ validate_ssl_tls() {
         fi
 
         # Check certificate chain
-        run_test "Certificate chain is valid" "openssl verify -CAfile nginx/ssl/ca.pem nginx/ssl/cert.pem 2>/dev/null || true" false
+        run_test "Certificate chain is valid" "openssl verify -CAfile nginx/ssl/ca.pem nginx/ssl/cert.pem 2>/dev/null " false
     fi
 
     # Check nginx SSL configuration

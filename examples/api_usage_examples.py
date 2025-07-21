@@ -33,23 +33,17 @@ class FreeAgenticsAPIClient:
 
     async def create_agent(self, agent_data: Dict) -> Dict:
         """Create a new agent."""
-        async with self.session.post(
-            f"{self.base_url}/api/v1/agents", json=agent_data
-        ) as response:
+        async with self.session.post(f"{self.base_url}/api/v1/agents", json=agent_data) as response:
             return await response.json()
 
     async def get_agent(self, agent_id: str) -> Dict:
         """Get agent information."""
-        async with self.session.get(
-            f"{self.base_url}/api/v1/agents/{agent_id}"
-        ) as response:
+        async with self.session.get(f"{self.base_url}/api/v1/agents/{agent_id}") as response:
             return await response.json()
 
     async def list_agents(self) -> List[Dict]:
         """List all agents."""
-        async with self.session.get(
-            f"{self.base_url}/api/v1/agents"
-        ) as response:
+        async with self.session.get(f"{self.base_url}/api/v1/agents") as response:
             return await response.json()
 
     async def update_agent(self, agent_id: str, updates: Dict) -> Dict:
@@ -61,23 +55,17 @@ class FreeAgenticsAPIClient:
 
     async def delete_agent(self, agent_id: str) -> bool:
         """Delete an agent."""
-        async with self.session.delete(
-            f"{self.base_url}/api/v1/agents/{agent_id}"
-        ) as response:
+        async with self.session.delete(f"{self.base_url}/api/v1/agents/{agent_id}") as response:
             return response.status == 200
 
     async def start_agent(self, agent_id: str) -> Dict:
         """Start an agent."""
-        async with self.session.post(
-            f"{self.base_url}/api/v1/agents/{agent_id}/start"
-        ) as response:
+        async with self.session.post(f"{self.base_url}/api/v1/agents/{agent_id}/start") as response:
             return await response.json()
 
     async def stop_agent(self, agent_id: str) -> Dict:
         """Stop an agent."""
-        async with self.session.post(
-            f"{self.base_url}/api/v1/agents/{agent_id}/stop"
-        ) as response:
+        async with self.session.post(f"{self.base_url}/api/v1/agents/{agent_id}/stop") as response:
             return await response.json()
 
     async def agent_step(self, agent_id: str, observation: Dict) -> Dict:
@@ -102,18 +90,14 @@ class FreeAgenticsAPIClient:
         ) as response:
             return await response.json()
 
-    async def add_agent_to_coalition(
-        self, coalition_id: str, agent_id: str
-    ) -> Dict:
+    async def add_agent_to_coalition(self, coalition_id: str, agent_id: str) -> Dict:
         """Add agent to coalition."""
         async with self.session.post(
             f"{self.base_url}/api/v1/coalitions/{coalition_id}/agents/{agent_id}"
         ) as response:
             return await response.json()
 
-    async def get_system_metrics(
-        self, metric_type: str, duration: float = 60.0
-    ) -> Dict:
+    async def get_system_metrics(self, metric_type: str, duration: float = 60.0) -> Dict:
         """Get system metrics."""
         params = {"duration": duration}
         async with self.session.get(
@@ -269,9 +253,7 @@ async def example_3_multi_agent_coalition():
 
         # Add agents to coalition
         for agent in agents:
-            result = await client.add_agent_to_coalition(
-                coalition_id, agent["agent_id"]
-            )
+            result = await client.add_agent_to_coalition(coalition_id, agent["agent_id"])
             print(f"Added agent {agent['agent_id']} to coalition")
 
         # Simulate coordinated actions
@@ -282,21 +264,13 @@ async def example_3_multi_agent_coalition():
                 observation = {
                     "position": [i * 5 + step, step],
                     "resources_visible": (
-                        [{"type": "energy", "amount": 10}]
-                        if step % 2 == i % 2
-                        else []
+                        [{"type": "energy", "amount": 10}] if step % 2 == i % 2 else []
                     ),
-                    "coalition_members": [
-                        a["agent_id"] for a in agents if a != agent
-                    ],
+                    "coalition_members": [a["agent_id"] for a in agents if a != agent],
                 }
 
-                result = await client.agent_step(
-                    agent["agent_id"], observation
-                )
-                print(
-                    f"Coalition step {step}, Agent {i}: {result.get('action')}"
-                )
+                result = await client.agent_step(agent["agent_id"], observation)
+                print(f"Coalition step {step}, Agent {i}: {result.get('action')}")
 
         # Clean up
         for agent in agents:
@@ -330,9 +304,7 @@ async def example_4_realtime_monitoring():
 
             while time.time() - start_time < 10:
                 try:
-                    message = await asyncio.wait_for(
-                        websocket.recv(), timeout=2.0
-                    )
+                    message = await asyncio.wait_for(websocket.recv(), timeout=2.0)
                     data = json.loads(message)
 
                     if data.get("type") == "metrics_update":
@@ -386,9 +358,7 @@ async def example_5_batch_operations():
         all_agents = await client.list_agents()
         for agent_info in all_agents:
             if agent_info["name"].startswith("Batch-"):
-                print(
-                    f"Agent {agent_info['name']}: {agent_info.get('status', 'unknown')}"
-                )
+                print(f"Agent {agent_info['name']}: {agent_info.get('status', 'unknown')}")
 
         # Bulk observation sending
         print("Sending bulk observations...")
@@ -398,10 +368,7 @@ async def example_5_batch_operations():
         }
 
         # Send same observation to all agents simultaneously
-        tasks = [
-            client.agent_step(agent["agent_id"], observation)
-            for agent in agents
-        ]
+        tasks = [client.agent_step(agent["agent_id"], observation) for agent in agents]
 
         results = await asyncio.gather(*tasks)
         for i, result in enumerate(results):
@@ -460,13 +427,9 @@ async def example_6_performance_testing():
 
         # Get detailed metrics
         metrics = await client.get_agent_metrics(agent_id)
-        print(
-            f"  - Total observations: {metrics.get('total_observations', 0)}"
-        )
+        print(f"  - Total observations: {metrics.get('total_observations', 0)}")
         print(f"  - Total actions: {metrics.get('total_actions', 0)}")
-        print(
-            f"  - Average free energy: {metrics.get('avg_free_energy', 0):.3f}"
-        )
+        print(f"  - Average free energy: {metrics.get('avg_free_energy', 0):.3f}")
         print(f"  - Belief entropy: {metrics.get('belief_entropy', 0):.3f}")
 
         # Get system metrics during the test
@@ -509,9 +472,7 @@ async def main():
             await example()
         except Exception as e:
             print(f"Example failed: {e}")
-            print(
-                "Make sure the FreeAgentics server is running on http://localhost:8000"
-            )
+            print("Make sure the FreeAgentics server is running on http://localhost:8000")
 
         # Small delay between examples
         await asyncio.sleep(1)

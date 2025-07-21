@@ -1,0 +1,152 @@
+{
+  "result": {
+    "suite_name": "Comprehensive Performance Validation",
+    "metrics": [
+      {
+        "name": "single_agent_spawn",
+        "category": "agent_spawning",
+        "value": 27.71920897066593,
+        "unit": "ms",
+        "target": 50,
+        "compliant": true,
+        "timestamp": "2025-07-21 11:28:53.900850",
+        "metadata": {
+          "memory_used_mb": 3.90625
+        }
+      },
+      {
+        "name": "parallel_agent_spawn_10",
+        "category": "agent_spawning",
+        "value": 5.853551032487303,
+        "unit": "ms",
+        "target": 100,
+        "compliant": true,
+        "timestamp": "2025-07-21 11:28:53.906730",
+        "metadata": {}
+      },
+      {
+        "name": "memory_per_agent",
+        "category": "agent_spawning",
+        "value": 3.90625,
+        "unit": "MB",
+        "target": 10,
+        "compliant": true,
+        "timestamp": "2025-07-21 11:28:53.906744",
+        "metadata": {}
+      },
+      {
+        "name": "pymdp_inference_100_steps",
+        "category": "pymdp_inference",
+        "value": 1.8870059866458178,
+        "unit": "ms",
+        "target": 100,
+        "compliant": true,
+        "timestamp": "2025-07-21 11:28:53.909185",
+        "metadata": {
+          "steps": 100
+        }
+      },
+      {
+        "name": "memory_per_agent_100_agents",
+        "category": "memory_usage",
+        "value": 0.0,
+        "unit": "MB",
+        "target": 10,
+        "compliant": true,
+        "timestamp": "2025-07-21 11:28:53.911435",
+        "metadata": {
+          "total_agents": 100,
+          "total_memory_mb": 0.0
+        }
+      },
+      {
+        "name": "memory_leak_after_cleanup",
+        "category": "memory_usage",
+        "value": 0.0,
+        "unit": "MB",
+        "target": 5.0,
+        "compliant": true,
+        "timestamp": "2025-07-21 11:28:53.915980",
+        "metadata": {}
+      },
+      {
+        "name": "api_avg_response_time",
+        "category": "api_performance",
+        "value": 4.0537847799714655,
+        "unit": "ms",
+        "target": 200,
+        "compliant": true,
+        "timestamp": "2025-07-21 11:28:54.118766",
+        "metadata": {
+          "requests_tested": 50
+        }
+      },
+      {
+        "name": "bundle_size_gzipped",
+        "category": "frontend_performance",
+        "value": 385.7063802083333,
+        "unit": "KB",
+        "target": 200,
+        "compliant": false,
+        "timestamp": "2025-07-21 11:28:54.120846",
+        "metadata": {
+          "uncompressed_kb": 1157.119140625,
+          "js_files_count": 45,
+          "compression_ratio": 3.0
+        }
+      },
+      {
+        "name": "lighthouse_performance",
+        "category": "lighthouse",
+        "value": 85,
+        "unit": "score",
+        "target": 90,
+        "compliant": false,
+        "timestamp": "2025-07-21 11:28:54.120979",
+        "metadata": {
+          "audit_type": "mock"
+        }
+      },
+      {
+        "name": "lighthouse_accessibility",
+        "category": "lighthouse",
+        "value": 95,
+        "unit": "score",
+        "target": 85,
+        "compliant": true,
+        "timestamp": "2025-07-21 11:28:54.121033",
+        "metadata": {
+          "audit_type": "mock"
+        }
+      },
+      {
+        "name": "lighthouse_best_practices",
+        "category": "lighthouse",
+        "value": 90,
+        "unit": "score",
+        "target": 85,
+        "compliant": true,
+        "timestamp": "2025-07-21 11:28:54.121041",
+        "metadata": {
+          "audit_type": "mock"
+        }
+      },
+      {
+        "name": "lighthouse_seo",
+        "category": "lighthouse",
+        "value": 88,
+        "unit": "score",
+        "target": 85,
+        "compliant": true,
+        "timestamp": "2025-07-21 11:28:54.121042",
+        "metadata": {
+          "audit_type": "mock"
+        }
+      }
+    ],
+    "overall_score": 83,
+    "passed": true,
+    "duration_seconds": 0.24834857397945598,
+    "timestamp": "2025-07-21 11:28:54.121055"
+  }
+}

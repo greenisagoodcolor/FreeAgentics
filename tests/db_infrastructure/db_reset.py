@@ -5,13 +5,12 @@ import os
 import subprocess
 import sys
 import time
-from typing import Any, Dict, List, Optional
+from typing import Any, Dict
 
-from sqlalchemy import create_engine, inspect, text
+from sqlalchemy import create_engine, text
 from sqlalchemy.engine import Engine
-from sqlalchemy.orm import Session
 
-from .pool_config import DatabasePool, close_all_pools, get_pool
+from .pool_config import close_all_pools, get_pool
 
 logger = logging.getLogger(__name__)
 
@@ -34,14 +33,14 @@ class DatabaseReset:
         self.admin_password = admin_password
         self.admin_database = admin_database
 
-        self.admin_url = f"postgresql://{admin_user}:{admin_password}@{host}:{port}/{admin_database}"
+        self.admin_url = (
+            f"postgresql://{admin_user}:{admin_password}@{host}:{port}/{admin_database}"
+        )
 
     def _get_admin_engine(self) -> Engine:
         """Get an engine with admin privileges."""
         # Create engine with autocommit for DDL operations
-        engine = create_engine(
-            self.admin_url, isolation_level="AUTOCOMMIT", pool_pre_ping=True
-        )
+        engine = create_engine(self.admin_url, isolation_level="AUTOCOMMIT", pool_pre_ping=True)
         return engine
 
     def create_test_database(self, db_name: str = "freeagentics_test") -> bool:
@@ -61,9 +60,7 @@ class DatabaseReset:
                     return True
 
                 # Create database
-                conn.execute(
-                    text(f"CREATE DATABASE {db_name} OWNER {self.admin_user}")
-                )
+                conn.execute(text(f"CREATE DATABASE {db_name} OWNER {self.admin_user}"))
                 logger.info(f"Created database '{db_name}'")
 
             engine.dispose()
@@ -151,9 +148,7 @@ class DatabaseReset:
             env = os.environ.copy()
             env["PGPASSWORD"] = self.admin_password
 
-            result = subprocess.run(
-                cmd, env=env, capture_output=True, text=True
-            )
+            result = subprocess.run(cmd, env=env, capture_output=True, text=True)
 
             if result.returncode != 0:
                 logger.error(f"Schema application failed: {result.stderr}")
@@ -233,9 +228,7 @@ class DatabaseReset:
             env = os.environ.copy()
             env["PGPASSWORD"] = self.admin_password
 
-            result = subprocess.run(
-                cmd, env=env, capture_output=True, text=True
-            )
+            result = subprocess.run(cmd, env=env, capture_output=True, text=True)
 
             if result.returncode != 0:
                 logger.error(f"Snapshot creation failed: {result.stderr}")
@@ -283,9 +276,7 @@ class DatabaseReset:
             env = os.environ.copy()
             env["PGPASSWORD"] = self.admin_password
 
-            result = subprocess.run(
-                cmd, env=env, capture_output=True, text=True
-            )
+            result = subprocess.run(cmd, env=env, capture_output=True, text=True)
 
             if result.returncode != 0:
                 logger.error(f"Snapshot restoration failed: {result.stderr}")
@@ -298,9 +289,7 @@ class DatabaseReset:
             logger.error(f"Failed to restore snapshot: {e}")
             return False
 
-    def get_table_counts(
-        self, db_name: str = "freeagentics_test"
-    ) -> Dict[str, int]:
+    def get_table_counts(self, db_name: str = "freeagentics_test") -> Dict[str, int]:
         """Get row counts for all tables."""
         counts = {}
 
@@ -329,9 +318,7 @@ class DatabaseReset:
 
                 # Get count for each table
                 for table in tables:
-                    result = session.execute(
-                        text(f"SELECT COUNT(*) as count FROM {table}")
-                    )
+                    result = session.execute(text(f"SELECT COUNT(*) as count FROM {table}"))
                     counts[table] = result.scalar()
 
             return counts
@@ -342,9 +329,7 @@ class DatabaseReset:
         finally:
             close_all_pools()
 
-    def verify_schema(
-        self, db_name: str = "freeagentics_test"
-    ) -> Dict[str, Any]:
+    def verify_schema(self, db_name: str = "freeagentics_test") -> Dict[str, Any]:
         """Verify that the schema is correctly applied."""
         verification = {
             "tables": {},
@@ -373,9 +358,7 @@ class DatabaseReset:
                 """
                     )
                 )
-                verification["tables"] = {
-                    row.tablename: True for row in result
-                }
+                verification["tables"] = {row.tablename: True for row in result}
 
                 # Check custom types
                 result = session.execute(
@@ -402,9 +385,7 @@ class DatabaseReset:
                 """
                     )
                 )
-                verification["indexes"] = {
-                    row.indexname: True for row in result
-                }
+                verification["indexes"] = {row.indexname: True for row in result}
 
                 # Check constraints
                 result = session.execute(
@@ -418,9 +399,7 @@ class DatabaseReset:
                 """
                     )
                 )
-                verification["constraints"] = {
-                    row.conname: True for row in result
-                }
+                verification["constraints"] = {row.conname: True for row in result}
 
                 # Check triggers
                 result = session.execute(
@@ -467,9 +446,7 @@ def main():
             "counts",
         ],
     )
-    parser.add_argument(
-        "--database", default="freeagentics_test", help="Database name"
-    )
+    parser.add_argument("--database", default="freeagentics_test", help="Database name")
     parser.add_argument(
         "--snapshot",
         default="test_snapshot",

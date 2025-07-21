@@ -5,7 +5,7 @@ import argparse
 import json
 import os
 import subprocess
-from typing import Any, Dict, List
+from typing import Dict, List
 
 
 def get_violation_stats(directory: str) -> Dict[str, int]:
@@ -148,9 +148,7 @@ def fix_line_length_violations(file_path: str) -> int:
                         if len(current_line) + len(word) + 1 <= 78:
                             current_line += " " + word
                         else:
-                            new_lines.append(
-                                " " * indent + current_line + "\n"
-                            )
+                            new_lines.append(" " * indent + current_line + "\n")
                             current_line = "#" + " " + word
                             fixed_count += 1
                     new_lines.append(" " * indent + current_line + "\n")
@@ -165,21 +163,15 @@ def fix_line_length_violations(file_path: str) -> int:
                     # Try to break at commas
                     prefix = line[: line.index("(") + 1]
                     suffix = line[line.rindex(")") :]
-                    params = line[
-                        line.index("(") + 1 : line.rindex(")")
-                    ].split(",")
+                    params = line[line.index("(") + 1 : line.rindex(")")].split(",")
 
                     if len(params) > 1:
                         new_lines.append(prefix + "\n")
                         for j, param in enumerate(params):
                             if j < len(params) - 1:
-                                new_lines.append(
-                                    " " * (indent + 4) + param.strip() + ",\n"
-                                )
+                                new_lines.append(" " * (indent + 4) + param.strip() + ",\n")
                             else:
-                                new_lines.append(
-                                    " " * (indent + 4) + param.strip() + "\n"
-                                )
+                                new_lines.append(" " * (indent + 4) + param.strip() + "\n")
                         new_lines.append(" " * indent + suffix)
                         fixed_count += 1
                     else:
@@ -238,16 +230,12 @@ def process_directory(directory: str, fix_types: List[str]) -> Dict[str, int]:
             if "unused" in fix_types:
                 removed = remove_unused_imports(file_path)
                 if removed > 0:
-                    print(
-                        f"    Removed {removed} unused imports from {file_path}"
-                    )
+                    print(f"    Removed {removed} unused imports from {file_path}")
 
             if "length" in fix_types:
                 fixed = fix_line_length_violations(file_path)
                 if fixed > 0:
-                    print(
-                        f"    Fixed {fixed} line length violations in {file_path}"
-                    )
+                    print(f"    Fixed {fixed} line length violations in {file_path}")
 
     # Get final stats
     after_stats = get_violation_stats(directory)
@@ -274,24 +262,12 @@ def main():
         default=["agents", "api", "database", "inference", "knowledge_graph"],
         help="Directories to process",
     )
-    parser.add_argument(
-        "--fix-imports", action="store_true", help="Fix import ordering"
-    )
-    parser.add_argument(
-        "--fix-format", action="store_true", help="Format with black"
-    )
-    parser.add_argument(
-        "--fix-unused", action="store_true", help="Remove unused imports"
-    )
-    parser.add_argument(
-        "--fix-length", action="store_true", help="Fix line length violations"
-    )
-    parser.add_argument(
-        "--fix-all", action="store_true", help="Apply all fixes"
-    )
-    parser.add_argument(
-        "--report", default="flake8_fix_report.json", help="Output report file"
-    )
+    parser.add_argument("--fix-imports", action="store_true", help="Fix import ordering")
+    parser.add_argument("--fix-format", action="store_true", help="Format with black")
+    parser.add_argument("--fix-unused", action="store_true", help="Remove unused imports")
+    parser.add_argument("--fix-length", action="store_true", help="Fix line length violations")
+    parser.add_argument("--fix-all", action="store_true", help="Apply all fixes")
+    parser.add_argument("--report", default="flake8_fix_report.json", help="Output report file")
 
     args = parser.parse_args()
 
@@ -313,7 +289,7 @@ def main():
         # Default: fix unused imports and basic issues
         fix_types = ["unused"]
 
-    print(f"🔧 Flake8 Batch Fixer")
+    print("🔧 Flake8 Batch Fixer")
     print(f"Directories: {args.directories}")
     print(f"Fix types: {fix_types}")
 

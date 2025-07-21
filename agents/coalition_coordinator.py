@@ -6,7 +6,7 @@ using Active Inference principles to optimize collective objectives.
 
 import logging
 from datetime import datetime
-from typing import Any, Dict, List, Optional, Set, Tuple
+from typing import Any, Dict, List, Optional, Tuple
 
 import numpy as np
 
@@ -16,15 +16,12 @@ from agents.base_agent import (
     safe_array_to_int,
 )
 from agents.error_handling import (
-    InferenceError,
     PyMDPError,
     safe_pymdp_operation,
-    with_error_handling,
 )
 from agents.pymdp_error_handling import (
     PyMDPErrorHandler,
     safe_array_index,
-    safe_numpy_conversion,
     validate_pymdp_matrices,
 )
 
@@ -54,29 +51,23 @@ except ImportError:
 
         async def record_coordination_end(self, *args, **kwargs):
             """Mock recording of coordination end event."""
-            pass
 
         async def record_coalition_formation(self, *args, **kwargs):
             """Mock recording of coalition formation event."""
-            pass
 
         async def record_coalition_dissolution(self, *args, **kwargs):
             """Mock recording of coalition dissolution event."""
-            pass
 
         async def record_inter_agent_message(self, *args, **kwargs):
             """Mock recording of inter-agent message event."""
-            pass
 
     coordination_metrics = MockCoordinationMetrics()
 
     async def record_coordination(*args, **kwargs):
         """Mock function for recording coordination events."""
-        pass
 
     async def record_coalition_event(*args, **kwargs):
         """Mock function for recording coalition events."""
-        pass
 
     def get_agent_coordination_stats(agent_id: str):
         """Mock function to get agent coordination statistics.
@@ -122,11 +113,11 @@ class CoalitionCoordinatorAgent(ActiveInferenceAgent):
 
         # Coalition state space for PyMDP
         # States represent different coalition configurations
-        self.num_states = min(
-            2**max_agents, 64
-        )  # Limit state space for tractability
+        self.num_states = min(2**max_agents, 64)  # Limit state space for tractability
         self.num_obs = 8  # Coalition observations: empty, forming, active, conflict, success, failure, idle, unknown
-        self.num_actions = 6  # Coalition actions: invite, exclude, merge, split, coordinate, dissolve
+        self.num_actions = (
+            6  # Coalition actions: invite, exclude, merge, split, coordinate, dissolve
+        )
 
         config = {
             "use_pymdp": PYMDP_AVAILABLE,
@@ -135,24 +126,18 @@ class CoalitionCoordinatorAgent(ActiveInferenceAgent):
             "agent_type": "coalition_coordinator",
         }
         # Coalition formation parameters - set BEFORE super().__init__
-        self.coordination_range = (
-            5.0  # Distance within which agents can coordinate
-        )
+        self.coordination_range = 5.0  # Distance within which agents can coordinate
         self.min_coalition_size = 2
         self.max_coalition_size = min(max_agents // 2, 5)
 
         super().__init__(agent_id, name, config)
 
         # Coalition-specific state
-        self.known_agents: Dict[
-            str, Dict[str, Any]
-        ] = {}  # Other agents we know about
-        self.active_coalitions: Dict[
-            str, Dict[str, Any]
-        ] = {}  # Currently active coalitions
-        self.coalition_history: List[
-            Dict[str, Any]
-        ] = []  # Historical coalition performance
+        self.known_agents: Dict[str, Dict[str, Any]] = {}  # Other agents we know about
+        self.active_coalitions: Dict[str, Dict[str,
+            Any]] = {}  # Currently active coalitions
+        self.coalition_history: List[Dict[str,
+            Any]] = []  # Historical coalition performance
 
         # Action mapping for PyMDP
         self.action_map = {
@@ -249,9 +234,8 @@ class CoalitionCoordinatorAgent(ActiveInferenceAgent):
                     B[state, state, action] = 1.0
         return B
 
-    def _get_action_transitions(
-        self, action: int, state: int
-    ) -> List[Tuple[int, float]]:
+    def _get_action_transitions(self, action: int, state: int) -> List[Tuple[int,
+        float]]:
         """Get state transitions for a given action and state."""
         if action == 0:  # invite
             return self._get_invite_transitions(state)
@@ -299,9 +283,7 @@ class CoalitionCoordinatorAgent(ActiveInferenceAgent):
             # Validate matrices before creating PyMDP agent
             is_valid, validation_msg = validate_pymdp_matrices(A, B, C, D)
             if not is_valid:
-                raise ValueError(
-                    f"PyMDP matrix validation failed: {validation_msg}"
-                )
+                raise ValueError(f"PyMDP matrix validation failed: {validation_msg}")
 
             # Create PyMDP agent with coalition-specific configuration
             self.pymdp_agent = PyMDPAgent(
@@ -316,9 +298,7 @@ class CoalitionCoordinatorAgent(ActiveInferenceAgent):
                 inference_horizon=self.config.get("planning_horizon", 3),
             )
 
-            logger.info(
-                f"Initialized PyMDP for coalition coordinator {self.agent_id}"
-            )
+            logger.info(f"Initialized PyMDP for coalition coordinator {self.agent_id}")
 
         except Exception as e:
             logger.error(f"Failed to initialize PyMDP: {e}")
@@ -468,16 +448,16 @@ class CoalitionCoordinatorAgent(ActiveInferenceAgent):
                     }
                 )
 
-    def _assess_coalition_opportunities(
-        self, observation: Dict[str, Any]
-    ) -> Dict[str, Any]:
+    def _assess_coalition_opportunities(self, observation: Dict[str, Any]) -> Dict[str,
+        Any]:
         """Use LLM to assess coalition opportunities and strategies."""
         try:
             visible_agents = observation.get("visible_agents", [])
             current_coalitions = list(self.active_coalitions.keys())
 
             if visible_agents or current_coalitions:
-                prompt = """As a coalition coordinator agent, analyze the current situation:
+                prompt = """As a coalition coordinator agent,
+                    analyze the current situation:
 
                 Visible agents: {len(visible_agents)}
                 Active coalitions: {len(current_coalitions)}
@@ -538,9 +518,8 @@ class CoalitionCoordinatorAgent(ActiveInferenceAgent):
                     if success:
                         # Convert numpy array to scalar for dictionary lookup
                         action_idx = safe_array_to_int(action_idx)
-                        action = safe_array_index(
-                            self.action_map, action_idx, "coordinate"
-                        )
+                        action = safe_array_index(self.action_map, action_idx,
+                            "coordinate")
                     else:
                         logger.warning(f"Action sampling failed: {error}")
                         action = self._fallback_action_selection()
@@ -560,9 +539,7 @@ class CoalitionCoordinatorAgent(ActiveInferenceAgent):
         # Update coordination metrics
         self._update_coordination_metrics(action)
 
-        logger.debug(
-            f"Coalition coordinator {self.agent_id} selected action: {action}"
-        )
+        logger.debug(f"Coalition coordinator {self.agent_id} selected action: {action}")
         return action
 
     def _fallback_action_selection(self) -> str:
@@ -570,10 +547,8 @@ class CoalitionCoordinatorAgent(ActiveInferenceAgent):
         # Simple coalition strategy
 
         # If we have no active coalitions and multiple known agents, try to form one
-        if (
-            not self.active_coalitions
-            and len(self.known_agents) >= self.min_coalition_size
-        ):
+        if not self.active_coalitions and
+            len(self.known_agents) >= self.min_coalition_size:
             return "invite"
 
         # If we have oversized coalitions, consider splitting
@@ -595,13 +570,13 @@ class CoalitionCoordinatorAgent(ActiveInferenceAgent):
 
     @safe_pymdp_operation("belief_update", default_value=None)
     def update_beliefs(self) -> None:
-        """Update beliefs about coalition states and opportunities with error handling."""
+        """Update beliefs about coalition states and
+            opportunities with error handling."""
         # Update coordination success rate
         if self.total_actions > 0:
             successful_coordinations = sum(
-                1
-                for c in self.active_coalitions.values()
-                if c.get("performance", 0) > 0.6
+                1 for c in self.active_coalitions.values() if c.get("performance",
+                    0) > 0.6
             )
             self.coordination_success_rate = (
                 successful_coordinations / len(self.active_coalitions)
@@ -612,9 +587,7 @@ class CoalitionCoordinatorAgent(ActiveInferenceAgent):
         # Update average coalition lifetime
         if self.coalition_history:
             lifetimes = [c.get("lifetime", 0) for c in self.coalition_history]
-            self.average_coalition_lifetime = (
-                np.mean(lifetimes) if lifetimes else 0.0
-            )
+            self.average_coalition_lifetime = np.mean(lifetimes) if lifetimes else 0.0
 
         # Decay old agent information
         current_time = datetime.now()
@@ -638,25 +611,17 @@ class CoalitionCoordinatorAgent(ActiveInferenceAgent):
 
         # Update basic metrics
         if action == "coordinate":
-            self.metrics["coordination_attempts"] = (
-                self.metrics.get("coordination_attempts", 0) + 1
-            )
+            self.metrics["coordination_attempts"] = self.metrics.get("coordination_attempts", 0) + 1
         elif action == "invite":
-            self.metrics["invitations_sent"] = (
-                self.metrics.get("invitations_sent", 0) + 1
-            )
+            self.metrics["invitations_sent"] = self.metrics.get("invitations_sent",
+                0) + 1
         elif action == "dissolve":
-            self.metrics["coalitions_dissolved"] = (
-                self.metrics.get("coalitions_dissolved", 0) + 1
-            )
+            self.metrics["coalitions_dissolved"] = self.metrics.get("coalitions_dissolved", 0) + 1
 
         # Update efficiency metrics
         if self.active_coalitions:
             avg_performance = np.mean(
-                [
-                    c.get("performance", 0)
-                    for c in self.active_coalitions.values()
-                ]
+                [c.get("performance", 0) for c in self.active_coalitions.values()]
             )
             self.metrics["avg_coalition_performance"] = avg_performance
 
@@ -673,9 +638,7 @@ class CoalitionCoordinatorAgent(ActiveInferenceAgent):
                     if action == "coordinate" and self.active_coalitions:
                         # Get participants from all active coalitions
                         for coalition in self.active_coalitions.values():
-                            participant_ids.extend(
-                                coalition.get("members", [])
-                            )
+                            participant_ids.extend(coalition.get("members", []))
                     elif action == "invite" and self.known_agents:
                         # Include known agents as potential participants
                         participant_ids = list(self.known_agents.keys())[
@@ -689,14 +652,12 @@ class CoalitionCoordinatorAgent(ActiveInferenceAgent):
                                 self.agent_id,
                                 participant_ids,
                                 action,
-                                current_time
-                                - 0.01,  # Small duration for synchronous action
+                                current_time - 0.01,
+                                    # Small duration for synchronous action
                                 True,  # Assume success for now
                                 {
                                     "action": action,
-                                    "coalition_count": len(
-                                        self.active_coalitions
-                                    ),
+                                    "coalition_count": len(self.active_coalitions),
                                 },
                             )
                         )
@@ -717,12 +678,8 @@ class CoalitionCoordinatorAgent(ActiveInferenceAgent):
             {
                 "known_agents": len(self.known_agents),
                 "active_coalitions": len(self.active_coalitions),
-                "coordination_success_rate": round(
-                    self.coordination_success_rate, 3
-                ),
-                "average_coalition_lifetime": round(
-                    self.average_coalition_lifetime, 2
-                ),
+                "coordination_success_rate": round(self.coordination_success_rate, 3),
+                "average_coalition_lifetime": round(self.average_coalition_lifetime, 2),
                 "total_coordinated_tasks": self.total_coordinated_tasks,
                 "coordination_range": self.coordination_range,
                 "coordination_metrics_enabled": self.coordination_metrics_enabled,
@@ -735,9 +692,7 @@ class CoalitionCoordinatorAgent(ActiveInferenceAgent):
 
         return status
 
-    def _observation_to_index(
-        self, observation: Dict[str, Any]
-    ) -> Optional[int]:
+    def _observation_to_index(self, observation: Dict[str, Any]) -> Optional[int]:
         """Convert observation to PyMDP index."""
         # Determine coalition state based on active coalitions
         if not self.active_coalitions:
@@ -756,10 +711,7 @@ class CoalitionCoordinatorAgent(ActiveInferenceAgent):
         else:
             # Multiple coalitions
             avg_performance = np.mean(
-                [
-                    c.get("performance", 0)
-                    for c in self.active_coalitions.values()
-                ]
+                [c.get("performance", 0) for c in self.active_coalitions.values()]
             )
             if avg_performance > 0.7:
                 return 4  # Success
@@ -779,32 +731,22 @@ class CoalitionCoordinatorAgent(ActiveInferenceAgent):
             fe_components = {}
 
             # Get belief entropy if available
-            if (
-                hasattr(self.pymdp_agent, "qs")
-                and self.pymdp_agent.qs is not None
-            ):
+            if hasattr(self.pymdp_agent, "qs") and self.pymdp_agent.qs is not None:
                 qs = self.pymdp_agent.qs
                 if isinstance(qs, list):
                     # Handle multiple factors
                     belief_entropy = 0
                     for factor in qs:
                         if hasattr(factor, "shape") and factor.size > 0:
-                            belief_entropy += -np.sum(
-                                factor * np.log(factor + 1e-16)
-                            )
+                            belief_entropy += -np.sum(factor * np.log(factor + 1e-16))
                 else:
                     # Single factor
                     belief_entropy = -np.sum(qs * np.log(qs + 1e-16))
                 fe_components["belief_entropy"] = float(belief_entropy)
 
             # Expected free energy (simplified)
-            if (
-                hasattr(self.pymdp_agent, "G")
-                and self.pymdp_agent.G is not None
-            ):
-                fe_components["expected_free_energy"] = float(
-                    np.mean(self.pymdp_agent.G)
-                )
+            if hasattr(self.pymdp_agent, "G") and self.pymdp_agent.G is not None:
+                fe_components["expected_free_energy"] = float(np.mean(self.pymdp_agent.G))
 
             return fe_components
 

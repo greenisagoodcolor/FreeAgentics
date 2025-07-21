@@ -24,7 +24,7 @@ Usage:
 import asyncio
 import logging
 import os
-from typing import Any, Dict, Optional
+from typing import Any, Dict
 
 from fastapi import FastAPI
 
@@ -66,9 +66,7 @@ class PerformanceManager:
         # Performance configurations
         self.configs = self._create_default_configs()
 
-        logger.info(
-            f"Performance manager initialized for {environment} environment"
-        )
+        logger.info(f"Performance manager initialized for {environment} environment")
 
     def _create_default_configs(self) -> Dict[str, Any]:
         """Create default configurations for different environments."""
@@ -122,9 +120,7 @@ class PerformanceManager:
 
     async def initialize_all_optimizations(self):
         """Initialize all performance optimizations."""
-        logger.info(
-            "Starting comprehensive performance optimization initialization"
-        )
+        logger.info("Starting comprehensive performance optimization initialization")
 
         try:
             # 1. Start performance monitoring
@@ -148,9 +144,7 @@ class PerformanceManager:
             # 7. Validate all optimizations
             await self._validate_optimizations()
 
-            logger.info(
-                "All performance optimizations initialized successfully"
-            )
+            logger.info("All performance optimizations initialized successfully")
 
         except Exception as e:
             logger.error(f"Failed to initialize optimizations: {e}")
@@ -181,9 +175,7 @@ class PerformanceManager:
         self.memory_optimizer = get_memory_optimizer()
 
         self.optimizations_enabled["memory"] = True
-        logger.info(
-            f"Memory optimization initialized for {workload_type} workload"
-        )
+        logger.info(f"Memory optimization initialized for {workload_type} workload")
 
     async def _initialize_database_optimization(self):
         """Initialize database optimization."""
@@ -193,9 +185,7 @@ class PerformanceManager:
         config = self.configs["database"]
 
         # Set database URL (in production, get from environment)
-        database_url = os.getenv(
-            "DATABASE_URL", "postgresql://user:pass@localhost/freeagentics"
-        )
+        database_url = os.getenv("DATABASE_URL", "postgresql://user:pass@localhost/freeagentics")
         config.write_primary_url = database_url
 
         # Add read replicas if available
@@ -305,9 +295,7 @@ class PerformanceManager:
         async def run_benchmark_suite(suite_name: str):
             """Run a specific benchmark suite."""
             try:
-                results = await self.benchmark_runner.run_benchmark_suite(
-                    suite_name
-                )
+                results = await self.benchmark_runner.run_benchmark_suite(suite_name)
                 return {
                     "suite": suite_name,
                     "results": [
@@ -342,9 +330,7 @@ class PerformanceManager:
         # Check threading optimization
         if self.optimizations_enabled["threading"]:
             threading_stats = self.agent_manager.get_statistics()
-            validation_results["threading"] = (
-                threading_stats["thread_pool"]["workers"] > 0
-            )
+            validation_results["threading"] = threading_stats["thread_pool"]["workers"] > 0
 
         # Check database optimization
         if self.optimizations_enabled["database"]:
@@ -396,16 +382,13 @@ class PerformanceManager:
         for suite_name in suite_names:
             try:
                 logger.info(f"Running {suite_name} benchmark suite")
-                results = await self.benchmark_runner.run_benchmark_suite(
-                    suite_name
-                )
+                results = await self.benchmark_runner.run_benchmark_suite(suite_name)
                 all_results[suite_name] = results
 
                 # Log summary
                 successful = [r for r in results if r.success]
                 avg_throughput = (
-                    sum(r.throughput_ops_per_second for r in successful)
-                    / len(successful)
+                    sum(r.throughput_ops_per_second for r in successful) / len(successful)
                     if successful
                     else 0
                 )
@@ -507,31 +490,25 @@ async def main():
 
     # Get optimization status
     status = manager.get_optimization_status()
-    print(f"\nOptimization Status:")
+    print("\nOptimization Status:")
     for opt, enabled in status["optimizations_enabled"].items():
         print(f"  {opt}: {'✓' if enabled else '✗'}")
 
     # Run quick benchmark
-    print(f"\nRunning quick benchmark...")
+    print("\nRunning quick benchmark...")
     try:
         benchmark_results = await manager.run_comprehensive_benchmark()
 
-        print(f"Benchmark Results:")
+        print("Benchmark Results:")
         for suite, results in benchmark_results["suite_results"].items():
             if isinstance(results, list):
                 successful = [r for r in results if r.success]
-                print(
-                    f"  {suite}: {len(successful)}/{len(results)} successful"
-                )
+                print(f"  {suite}: {len(successful)}/{len(results)} successful")
 
         report = benchmark_results["comprehensive_report"]
-        print(f"\nOverall Performance:")
-        print(
-            f"  Success rate: {report['overall_stats']['success_rate']:.1f}%"
-        )
-        print(
-            f"  Average throughput: {report['overall_stats']['avg_throughput']:.1f} ops/sec"
-        )
+        print("\nOverall Performance:")
+        print(f"  Success rate: {report['overall_stats']['success_rate']:.1f}%")
+        print(f"  Average throughput: {report['overall_stats']['avg_throughput']:.1f} ops/sec")
 
     except Exception as e:
         print(f"Benchmark failed: {e}")

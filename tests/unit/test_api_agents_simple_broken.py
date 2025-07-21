@@ -56,9 +56,7 @@ class TestAgentEndpoints:
         response = client.post("/api/v1/agents", json=sample_agent_config)
 
         # The endpoint should exist (not 404) and handle the request
-        assert (
-            response.status_code != 404
-        ), "Create agent endpoint should exist"
+        assert response.status_code != 404, "Create agent endpoint should exist"
 
         # The response should be either success (201) or an error we can handle
         assert response.status_code in [
@@ -83,14 +81,10 @@ class TestAgentEndpoints:
 
     def test_get_single_agent_endpoint_exists(self, client):
         """Test that the get single agent endpoint exists."""
-        response = client.get(
-            "/api/v1/agents/12345678-1234-1234-1234-123456789012"
-        )
+        response = client.get("/api/v1/agents/12345678-1234-1234-1234-123456789012")
 
         # The endpoint should exist (not 404)
-        assert (
-            response.status_code != 404
-        ), "Get single agent endpoint should exist"
+        assert response.status_code != 404, "Get single agent endpoint should exist"
 
         # Should handle the request (even if agent doesn't exist)
         assert response.status_code in [
@@ -101,14 +95,10 @@ class TestAgentEndpoints:
 
     def test_delete_agent_endpoint_exists(self, client):
         """Test that the delete agent endpoint exists."""
-        response = client.delete(
-            "/api/v1/agents/12345678-1234-1234-1234-123456789012"
-        )
+        response = client.delete("/api/v1/agents/12345678-1234-1234-1234-123456789012")
 
         # The endpoint should exist (not 404)
-        assert (
-            response.status_code != 404
-        ), "Delete agent endpoint should exist"
+        assert response.status_code != 404, "Delete agent endpoint should exist"
 
         # Should handle the request
         assert response.status_code in [
@@ -120,14 +110,10 @@ class TestAgentEndpoints:
 
     def test_get_agent_metrics_endpoint_exists(self, client):
         """Test that the agent metrics endpoint exists."""
-        response = client.get(
-            "/api/v1/agents/12345678-1234-1234-1234-123456789012/metrics"
-        )
+        response = client.get("/api/v1/agents/12345678-1234-1234-1234-123456789012/metrics")
 
         # The endpoint should exist (not 404)
-        assert (
-            response.status_code != 404
-        ), "Agent metrics endpoint should exist"
+        assert response.status_code != 404, "Agent metrics endpoint should exist"
 
         # Should handle the request
         assert response.status_code in [
@@ -138,9 +124,7 @@ class TestAgentEndpoints:
 
     def test_start_agent_endpoint_exists(self, client):
         """Test that the start agent endpoint exists."""
-        response = client.post(
-            "/api/v1/agents/12345678-1234-1234-1234-123456789012/start"
-        )
+        response = client.post("/api/v1/agents/12345678-1234-1234-1234-123456789012/start")
 
         # The endpoint should exist (not 404)
         assert response.status_code != 404, "Start agent endpoint should exist"
@@ -154,9 +138,7 @@ class TestAgentEndpoints:
 
     def test_stop_agent_endpoint_exists(self, client):
         """Test that the stop agent endpoint exists."""
-        response = client.post(
-            "/api/v1/agents/12345678-1234-1234-1234-123456789012/stop"
-        )
+        response = client.post("/api/v1/agents/12345678-1234-1234-1234-123456789012/stop")
 
         # The endpoint should exist (not 404)
         assert response.status_code != 404, "Stop agent endpoint should exist"
@@ -170,14 +152,10 @@ class TestAgentEndpoints:
 
     def test_agent_conversations_endpoint_exists(self, client):
         """Test that the agent conversations endpoint exists."""
-        response = client.get(
-            "/api/v1/agents/12345678-1234-1234-1234-123456789012/conversations"
-        )
+        response = client.get("/api/v1/agents/12345678-1234-1234-1234-123456789012/conversations")
 
         # The endpoint should exist (not 404)
-        assert (
-            response.status_code != 404
-        ), "Agent conversations endpoint should exist"
+        assert response.status_code != 404, "Agent conversations endpoint should exist"
 
         # Should handle the request
         assert response.status_code in [
@@ -200,9 +178,7 @@ class TestAgentEndpoints:
         )
 
         # The endpoint should exist (not 404)
-        assert (
-            response.status_code != 404
-        ), "Create conversation endpoint should exist"
+        assert response.status_code != 404, "Create conversation endpoint should exist"
 
         # Should handle the request
         assert response.status_code in [
@@ -231,9 +207,7 @@ class TestAgentEndpoints:
         response = client.get("/api/v1/templates/public")
 
         # The endpoint should exist (not 404)
-        assert (
-            response.status_code != 404
-        ), "Public templates endpoint should exist"
+        assert response.status_code != 404, "Public templates endpoint should exist"
 
         # Should handle the request
         assert response.status_code in [
@@ -256,9 +230,7 @@ class TestAgentEndpoints:
         response = client.post("/api/v1/agents/from-gmn", json=gmn_config)
 
         # The endpoint should exist (not 404)
-        assert (
-            response.status_code != 404
-        ), "GMN agent creation endpoint should exist"
+        assert response.status_code != 404, "GMN agent creation endpoint should exist"
 
         # Should handle the request
         assert response.status_code in [

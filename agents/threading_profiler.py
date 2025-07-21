@@ -14,7 +14,7 @@ import time
 from concurrent.futures import ThreadPoolExecutor, as_completed
 from contextlib import contextmanager
 from dataclasses import dataclass, field
-from typing import Any, Callable, Dict, List, Optional, Tuple
+from typing import Any, Callable, Dict, List, Tuple
 
 import numpy as np
 import psutil
@@ -235,10 +235,7 @@ class ThreadingProfiler:
             "tasks_submitted": len(workload),
             "tasks_completed": len([r for r in results if r is not None]),
             "avg_submit_time": np.mean(
-                [
-                    completion_times[i] - submit_times[i]
-                    for i in range(len(futures))
-                ]
+                [completion_times[i] - submit_times[i] for i in range(len(futures))]
             ),
             "throughput": len(workload) / total_duration,
             "thread_efficiency": self._calculate_thread_efficiency(),
@@ -257,21 +254,16 @@ class ThreadingProfiler:
             if not self.thread_metrics:
                 return 0.0
 
-            total_cpu_time = sum(
-                m.cpu_time for m in self.thread_metrics.values()
-            )
-            total_wall_time = sum(
-                m.total_time for m in self.thread_metrics.values()
-            )
+            total_cpu_time = sum(m.cpu_time for m in self.thread_metrics.values())
+            total_wall_time = sum(m.total_time for m in self.thread_metrics.values())
 
             if total_wall_time == 0:
                 return 0.0
 
             return total_cpu_time / total_wall_time
 
-    def measure_gil_contention(
-        self, duration: float = 1.0, thread_count: int = 4
-    ) -> float:
+    def measure_gil_contention(self, duration: float = 1.0,
+        thread_count: int = 4) -> float:
         """Measure GIL contention using CPU-bound workload."""
         import math
 
@@ -291,9 +283,7 @@ class ThreadingProfiler:
         # Multi-threaded test
         with ThreadPoolExecutor(max_workers=thread_count) as pool:
             multi_start = time.perf_counter()
-            futures = [
-                pool.submit(cpu_bound_work) for _ in range(thread_count)
-            ]
+            futures = [pool.submit(cpu_bound_work) for _ in range(thread_count)]
             for future in futures:
                 future.result()
             multi_duration = time.perf_counter() - multi_start
@@ -350,9 +340,7 @@ class ThreadingProfiler:
 
         # Lock contention
         for lock_id, metrics in self.lock_metrics.items():
-            if (
-                metrics.contentions > metrics.acquisitions * 0.1
-            ):  # >10% contention
+            if metrics.contentions > metrics.acquisitions * 0.1:  # >10% contention
                 bottlenecks.append(
                     f"High lock contention on {lock_id}: "
                     f"{metrics.contentions}/{metrics.acquisitions} acquisitions contended"
@@ -366,23 +354,16 @@ class ThreadingProfiler:
         # Thread efficiency
         efficiency = self._calculate_thread_efficiency()
         if efficiency < 0.7:  # <70% CPU utilization
-            bottlenecks.append(
-                f"Low thread efficiency: {efficiency:.1%} CPU utilization"
-            )
+            bottlenecks.append(f"Low thread efficiency: {efficiency:.1%} CPU utilization")
 
         # Imbalanced workload
         if self.thread_metrics:
             cpu_times = [m.cpu_time for m in self.thread_metrics.values()]
             if cpu_times:
-                cv = (
-                    np.std(cpu_times) / np.mean(cpu_times)
-                    if np.mean(cpu_times) > 0
-                    else 0
-                )
+                cv = np.std(cpu_times) / np.mean(cpu_times) if
+                    np.mean(cpu_times) > 0 else 0
                 if cv > 0.3:  # >30% coefficient of variation
-                    bottlenecks.append(
-                        f"Imbalanced thread workload: CV={cv:.1%}"
-                    )
+                    bottlenecks.append(f"Imbalanced thread workload: CV={cv:.1%}")
 
         return bottlenecks
 
@@ -452,9 +433,7 @@ class ThreadingProfiler:
             optimal_threads = current_threads
 
         return ThreadingProfile(
-            total_duration=self.end_time - self.start_time
-            if self.end_time
-            else 0,
+            total_duration=self.end_time - self.start_time if self.end_time else 0,
             thread_metrics=self.thread_metrics,
             lock_metrics=self.lock_metrics,
             pool_metrics=self.profile_memory_usage(),
@@ -486,8 +465,6 @@ def profile_code_section(func: Callable) -> Tuple[Any, pstats.Stats]:
 
 def benchmark_threading_implementations():
     """Benchmark different threading implementations."""
-    from agents.async_agent_manager import AsyncAgentManager
-    from agents.optimized_threadpool_manager import OptimizedThreadPoolManager
 
     print("=" * 60)
     print("THREADING PERFORMANCE ANALYSIS")
@@ -514,17 +491,13 @@ def benchmark_threading_implementations():
     # 1. Profile ThreadPoolExecutor
     print("\n1. Profiling ThreadPoolExecutor...")
     with ThreadPoolExecutor(max_workers=8) as pool:
-        pool_metrics = profiler.profile_thread_pool(
-            pool, [simulate_agent_work] * 100
-        )
+        pool_metrics = profiler.profile_thread_pool(pool, [simulate_agent_work] * 100)
         print(f"   Throughput: {pool_metrics['throughput']:.1f} tasks/sec")
         print(f"   Efficiency: {pool_metrics['thread_efficiency']:.1%}")
 
     # 2. Find optimal thread count
     print("\n2. Finding optimal thread count...")
-    optimal, throughputs = profiler.find_optimal_thread_count(
-        simulate_agent_work
-    )
+    optimal, throughputs = profiler.find_optimal_thread_count(simulate_agent_work)
     print(f"   Optimal threads: {optimal}")
     for count, throughput in sorted(throughputs.items()):
         print(f"   {count} threads: {throughput:.1f} tasks/sec")

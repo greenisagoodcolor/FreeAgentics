@@ -15,9 +15,7 @@ from typing import List, Optional
 import requests
 
 # Setup logging
-logging.basicConfig(
-    level=logging.INFO, format="%(asctime)s - %(levelname)s - %(message)s"
-)
+logging.basicConfig(level=logging.INFO, format="%(asctime)s - %(levelname)s - %(message)s")
 logger = logging.getLogger(__name__)
 
 
@@ -241,9 +239,7 @@ class PerformanceRegressionDetector:
             logger.error(f"Prometheus query failed for '{query}': {e}")
             return None
 
-    def evaluate_baseline(
-        self, baseline: PerformanceBaseline
-    ) -> PerformanceResult:
+    def evaluate_baseline(self, baseline: PerformanceBaseline) -> PerformanceResult:
         """Evaluate a single performance baseline."""
         logger.info(f"Evaluating baseline: {baseline.name}")
 
@@ -297,9 +293,7 @@ class PerformanceRegressionDetector:
             measurement_time=datetime.now().isoformat(),
         )
 
-    def run_regression_tests(
-        self, deployment_version: str = "unknown"
-    ) -> RegressionReport:
+    def run_regression_tests(self, deployment_version: str = "unknown") -> RegressionReport:
         """Run all performance regression tests."""
         logger.info("Starting performance regression tests...")
 
@@ -341,9 +335,7 @@ class PerformanceRegressionDetector:
             recommendations=recommendations,
         )
 
-    def _generate_recommendations(
-        self, results: List[PerformanceResult]
-    ) -> List[str]:
+    def _generate_recommendations(self, results: List[PerformanceResult]) -> List[str]:
         """Generate recommendations based on test results."""
         recommendations = []
 
@@ -379,9 +371,7 @@ class PerformanceRegressionDetector:
         # Check for warning conditions
         warning_results = [r for r in results if r.status == "warning"]
         if warning_results:
-            recommendations.append(
-                "WARNING: Performance degradation detected - monitor closely"
-            )
+            recommendations.append("WARNING: Performance degradation detected - monitor closely")
 
             for result in warning_results:
                 if result.metric_name == "coordination_success_rate":
@@ -442,11 +432,7 @@ class PerformanceRegressionDetector:
 
         for result in report.results:
             status_icon = (
-                "✅"
-                if result.status == "pass"
-                else "⚠️"
-                if result.status == "warning"
-                else "❌"
+                "✅" if result.status == "pass" else "⚠️" if result.status == "warning" else "❌"
             )
             print(f"{status_icon} {result.metric_name}")
             print(f"   Current: {result.current_value:.4f}")
@@ -466,17 +452,13 @@ class PerformanceRegressionDetector:
 
 def main():
     """Main function for CLI usage."""
-    parser = argparse.ArgumentParser(
-        description="FreeAgentics Performance Regression Detector"
-    )
+    parser = argparse.ArgumentParser(description="FreeAgentics Performance Regression Detector")
     parser.add_argument(
         "--prometheus-url",
         default="http://prometheus:9090",
         help="Prometheus URL",
     )
-    parser.add_argument(
-        "--deployment-version", default="unknown", help="Deployment version"
-    )
+    parser.add_argument("--deployment-version", default="unknown", help="Deployment version")
     parser.add_argument("--output-file", help="Output file for report")
     parser.add_argument(
         "--fail-on-warning",
@@ -503,9 +485,7 @@ def main():
 
         # Determine exit code
         if report.overall_status == "critical":
-            print(
-                "\n❌ CRITICAL: Performance regression detected - deployment should be blocked"
-            )
+            print("\n❌ CRITICAL: Performance regression detected - deployment should be blocked")
             sys.exit(1)
         elif report.overall_status == "warning":
             if args.fail_on_warning:
@@ -514,9 +494,7 @@ def main():
                 )
                 sys.exit(1)
             else:
-                print(
-                    "\n⚠️ WARNING: Performance degradation detected - monitor closely"
-                )
+                print("\n⚠️ WARNING: Performance degradation detected - monitor closely")
                 sys.exit(0)
         else:
             print("\n✅ SUCCESS: All performance tests passed")

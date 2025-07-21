@@ -14,6 +14,7 @@ from api.v1 import (
     inference,
     mfa,
     monitoring,
+    prompts,
     security,
     system,
     websocket,
@@ -64,9 +65,7 @@ async def lifespan(app: FastAPI):
         init_db()
         logger.info("Database initialized successfully")
     except Exception as e:
-        logger.warning(
-            f"Database initialization skipped (may already exist): {e}"
-        )
+        logger.warning(f"Database initialization skipped (may already exist): {e}")
     yield
     # Shutdown
     logger.info("Shutting down FreeAgentics API...")
@@ -106,14 +105,10 @@ security_manager = SecurityHeadersManager(
         production_mode=True,
     )
 )
-app.add_middleware(
-    SecurityHeadersMiddleware, security_manager=security_manager
-)
+app.add_middleware(SecurityHeadersMiddleware, security_manager=security_manager)
 
 # Include routers
-app.include_router(
-    auth.router, prefix="/api/v1", tags=["auth"]
-)  # Auth must be first
+app.include_router(auth.router, prefix="/api/v1", tags=["auth"])  # Auth must be first
 app.include_router(mfa.router, tags=["mfa"])  # MFA router has its own prefix
 app.include_router(agents.router, prefix="/api/v1", tags=["agents"])
 app.include_router(prompts.router, prefix="/api/v1", tags=["prompts"])

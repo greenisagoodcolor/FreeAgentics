@@ -29,9 +29,7 @@ class ErrorHandlerHardFailure:
     def handle_error(self, error: Exception, operation: str) -> Dict[str, Any]:
         """Handle an error by raising it immediately - no recovery information."""
         self.error_count += 1
-        logging.error(
-            f"Agent {self.agent_id} hard failure in {operation}: {error}"
-        )
+        logging.error(f"Agent {self.agent_id} hard failure in {operation}: {error}")
 
         # HARD FAILURE: Raise the original error immediately, no graceful degradation
         raise HardFailureError(
@@ -40,15 +38,11 @@ class ErrorHandlerHardFailure:
 
     def reset_strategy(self, strategy_name: str) -> None:
         """Hard failure mode - no recovery strategies exist."""
-        raise NotImplementedError(
-            "Hard failure mode does not support recovery strategies"
-        )
+        raise NotImplementedError("Hard failure mode does not support recovery strategies")
 
     def reset_all_strategies(self) -> None:
         """Hard failure mode - no recovery strategies exist."""
-        raise NotImplementedError(
-            "Hard failure mode does not support recovery strategies"
-        )
+        raise NotImplementedError("Hard failure mode does not support recovery strategies")
 
     def get_error_statistics(self) -> Dict[str, Any]:
         """Get error statistics - minimal information since we fail fast."""
@@ -93,9 +87,7 @@ class PyMDPErrorHandlerHardFailure:
             result = operation_func()
             return True, result, None
         except Exception as e:
-            logging.error(
-                f"PyMDP operation {operation_name} failed for {self.agent_id}: {e}"
-            )
+            logging.error(f"PyMDP operation {operation_name} failed for {self.agent_id}: {e}")
 
             # HARD FAILURE: No fallback execution, raise immediately
             raise HardFailureError(
@@ -125,9 +117,8 @@ class InferenceErrorHardFailure(Exception):
     """Hard failure for inference errors."""
 
 
-def safe_array_index_hard_failure(
-    array: np.ndarray, index: int, default: Any = None
-) -> Any:
+def safe_array_index_hard_failure(array: np.ndarray, index: int,
+    default: Any = None) -> Any:
     """Array indexing with assertion-based bounds checking - no graceful fallbacks."""
     # HARD FAILURE VALIDATION: Array must be valid numpy array
     if not isinstance(array, np.ndarray):
@@ -137,26 +128,21 @@ def safe_array_index_hard_failure(
 
     # HARD FAILURE VALIDATION: Index must be within bounds
     if not (0 <= index < len(array)):
-        raise IndexError(
-            f"Index {index} out of bounds for array of length {len(array)}"
-        )
+        raise IndexError(f"Index {index} out of bounds for array of length {len(array)}")
 
     # Direct access with no fallback
     return array[index]
 
 
-def safe_pymdp_operation_hard_failure(
-    operation_name: str, default_value: Optional[Any] = None
-):
+def safe_pymdp_operation_hard_failure(operation_name: str,
+    default_value: Optional[Any] = None):
     """Enforce hard failures for PyMDP operations."""
 
     def decorator(func):
         def wrapper(*args, **kwargs):
             # HARD FAILURE VALIDATION: Function must be executable
             if not callable(func):
-                raise TypeError(
-                    f"PyMDP operation {operation_name} must be callable"
-                )
+                raise TypeError(f"PyMDP operation {operation_name} must be callable")
 
             # HARD FAILURE: Execute with no try/catch, let exceptions propagate
             try:
@@ -164,9 +150,7 @@ def safe_pymdp_operation_hard_failure(
             except Exception as e:
                 logging.error(f"PyMDP operation {operation_name} failed: {e}")
                 # HARD FAILURE: Raise immediately, no default values
-                raise HardFailureError(
-                    f"PyMDP operation {operation_name} failed: {e}"
-                ) from e
+                raise HardFailureError(f"PyMDP operation {operation_name} failed: {e}") from e
 
         return wrapper
 
@@ -191,9 +175,8 @@ def validate_observation_hard_failure(observation: Any) -> Any:
     return observation
 
 
-def validate_pymdp_matrices_hard_failure(
-    A: Any, B: Any, C: Any, D: Any
-) -> Tuple[bool, str]:
+def validate_pymdp_matrices_hard_failure(A: Any, B: Any, C: Any, D: Any) -> Tuple[bool,
+    str]:
     """Validate PyMDP matrices with assertion-based checks."""
     # HARD FAILURE VALIDATION: All matrices must be provided
     if A is None:
@@ -219,9 +202,8 @@ def validate_pymdp_matrices_hard_failure(
     return True, "All matrices validated successfully"
 
 
-def with_error_handling_hard_failure(
-    operation_name: str, fallback_result: Optional[Any] = None
-):
+def with_error_handling_hard_failure(operation_name: str,
+    fallback_result: Optional[Any] = None):
     """Enforce hard failures instead of fallbacks for error handling."""
 
     def decorator(func):
@@ -236,9 +218,7 @@ def with_error_handling_hard_failure(
             except Exception as e:
                 logging.error(f"Operation {operation_name} failed: {e}")
                 # HARD FAILURE: Raise immediately, ignore fallback_result
-                raise HardFailureError(
-                    f"Operation {operation_name} failed: {e}"
-                ) from e
+                raise HardFailureError(f"Operation {operation_name} failed: {e}") from e
 
         return wrapper
 

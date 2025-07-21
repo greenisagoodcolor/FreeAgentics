@@ -54,9 +54,7 @@ async def test_agent_failure_alert(setup_alerting):
     assert len(alerts) > 0
 
     # Find the failure alert
-    failure_alerts = [
-        a for a in alerts if a["type"] == AlertType.AGENT_FAILURE.value
-    ]
+    failure_alerts = [a for a in alerts if a["type"] == AlertType.AGENT_FAILURE.value]
     assert len(failure_alerts) == 1
 
     alert = failure_alerts[0]
@@ -82,11 +80,7 @@ async def test_performance_degradation_alert(setup_alerting):
 
     # Check alerts
     alerts = get_active_alerts()
-    perf_alerts = [
-        a
-        for a in alerts
-        if a["type"] == AlertType.PERFORMANCE_DEGRADATION.value
-    ]
+    perf_alerts = [a for a in alerts if a["type"] == AlertType.PERFORMANCE_DEGRADATION.value]
     assert len(perf_alerts) == 1
 
     alert = perf_alerts[0]
@@ -138,9 +132,7 @@ async def test_belief_anomaly_alert(setup_alerting):
 
     # Check alerts
     alerts = get_active_alerts()
-    anomaly_alerts = [
-        a for a in alerts if a["type"] == AlertType.BELIEF_ANOMALY.value
-    ]
+    anomaly_alerts = [a for a in alerts if a["type"] == AlertType.BELIEF_ANOMALY.value]
     assert len(anomaly_alerts) == 1
 
     alert = anomaly_alerts[0]
@@ -161,9 +153,7 @@ async def test_resource_exhaustion_alert(setup_alerting):
 
     # Check alerts
     alerts = get_active_alerts()
-    resource_alerts = [
-        a for a in alerts if a["type"] == AlertType.RESOURCE_EXHAUSTION.value
-    ]
+    resource_alerts = [a for a in alerts if a["type"] == AlertType.RESOURCE_EXHAUSTION.value]
     assert len(resource_alerts) == 1
 
     alert = resource_alerts[0]
@@ -245,9 +235,7 @@ async def test_alert_statistics(setup_alerting):
         {"agent_id": "agent-1", "agent_status": "failed", "error": "Error 1"},
     )
 
-    await check_agent_alert(
-        "agent-2", {"agent_id": "agent-2", "inference_time_ms": 150}
-    )
+    await check_agent_alert("agent-2", {"agent_id": "agent-2", "inference_time_ms": 150})
 
     await check_system_alert({"memory_usage_mb": 850})
 

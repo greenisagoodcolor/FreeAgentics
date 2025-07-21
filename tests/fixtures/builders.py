@@ -39,9 +39,7 @@ class BaseBuilder(Generic[T]):
     def _check_not_built(self):
         """Ensure builder hasn't been used already."""
         if self._built:
-            raise RuntimeError(
-                "Builder has already been used. Create a new builder."
-            )
+            raise RuntimeError("Builder has already been used. Create a new builder.")
 
     def reset(self) -> "BaseBuilder[T]":
         """Reset the builder to initial state."""
@@ -64,9 +62,7 @@ class BaseBuilder(Generic[T]):
     @staticmethod
     def random_string(length: int = 10, prefix: str = "") -> str:
         """Generate random string with optional prefix."""
-        suffix = "".join(
-            random.choices(string.ascii_lowercase + string.digits, k=length)
-        )
+        suffix = "".join(random.choices(string.ascii_lowercase + string.digits, k=length))
         return f"{prefix}{suffix}" if prefix else suffix
 
     @staticmethod
@@ -138,9 +134,7 @@ class AgentBuilder(BaseBuilder[AgentSchema]):
         self._data["pymdp_config"] = PyMDPConfigSchema(**config).dict()
         return self
 
-    def with_grid_world_config(
-        self, grid_size: int = 5, num_actions: int = 4
-    ) -> "AgentBuilder":
+    def with_grid_world_config(self, grid_size: int = 5, num_actions: int = 4) -> "AgentBuilder":
         """Configure for grid world environment."""
         self._check_not_built()
         return self.with_pymdp_config(
@@ -169,25 +163,18 @@ class AgentBuilder(BaseBuilder[AgentSchema]):
         self._data["preferences"] = PreferenceSchema(**preferences).dict()
         return self
 
-    def with_position(
-        self, x: float, y: float, z: Optional[float] = None
-    ) -> "AgentBuilder":
+    def with_position(self, x: float, y: float, z: Optional[float] = None) -> "AgentBuilder":
         """Set agent position."""
         self._check_not_built()
         self._data["position"] = [x, y] if z is None else [x, y, z]
         return self
 
-    def with_random_position(
-        self, bounds: Dict[str, List[float]]
-    ) -> "AgentBuilder":
+    def with_random_position(self, bounds: Dict[str, List[float]]) -> "AgentBuilder":
         """Set random position within bounds."""
         self._check_not_built()
         min_bounds = bounds.get("min", [0, 0])
         max_bounds = bounds.get("max", [10, 10])
-        position = [
-            random.uniform(min_bounds[i], max_bounds[i])
-            for i in range(len(min_bounds))
-        ]
+        position = [random.uniform(min_bounds[i], max_bounds[i]) for i in range(len(min_bounds))]
         self._data["position"] = position
         return self
 
@@ -239,9 +226,7 @@ class AgentBuilder(BaseBuilder[AgentSchema]):
         self._data["updated_at"] = datetime.utcnow()
         return self
 
-    def with_inference_history(
-        self, inference_count: int, total_steps: int
-    ) -> "AgentBuilder":
+    def with_inference_history(self, inference_count: int, total_steps: int) -> "AgentBuilder":
         """Set inference statistics."""
         self._check_not_built()
         self._data["inference_count"] = inference_count
@@ -296,9 +281,7 @@ class CoalitionBuilder(BaseBuilder[CoalitionSchema]):
             "achieved_objectives": [],
         }
 
-    def with_id(
-        self, coalition_id: Optional[uuid.UUID] = None
-    ) -> "CoalitionBuilder":
+    def with_id(self, coalition_id: Optional[uuid.UUID] = None) -> "CoalitionBuilder":
         """Set coalition ID."""
         self._check_not_built()
         self._data["id"] = coalition_id or self.random_uuid()
@@ -368,17 +351,13 @@ class CoalitionBuilder(BaseBuilder[CoalitionSchema]):
             priority="medium",
         )
 
-    def with_required_capabilities(
-        self, *capabilities: str
-    ) -> "CoalitionBuilder":
+    def with_required_capabilities(self, *capabilities: str) -> "CoalitionBuilder":
         """Set required capabilities."""
         self._check_not_built()
         self._data["required_capabilities"] = list(capabilities)
         return self
 
-    def with_achieved_objectives(
-        self, *objective_ids: str
-    ) -> "CoalitionBuilder":
+    def with_achieved_objectives(self, *objective_ids: str) -> "CoalitionBuilder":
         """Mark objectives as achieved."""
         self._check_not_built()
         self._data["achieved_objectives"] = list(objective_ids)
@@ -428,22 +407,16 @@ class CoalitionBuilder(BaseBuilder[CoalitionSchema]):
                 "Coalition focused on efficient resource collection and distribution"
             )
             .with_resource_optimization_objective()
-            .with_required_capabilities(
-                "resource_collection", "coordination", "planning"
-            )
+            .with_required_capabilities("resource_collection", "coordination", "planning")
             .with_random_scores()
         )
 
     def as_exploration_coalition(self) -> "CoalitionBuilder":
         """Configure as exploration-focused coalition."""
         return (
-            self.with_description(
-                "Coalition dedicated to exploring and mapping new territories"
-            )
+            self.with_description("Coalition dedicated to exploring and mapping new territories")
             .with_exploration_objective()
-            .with_required_capabilities(
-                "exploration", "communication", "analysis"
-            )
+            .with_required_capabilities("exploration", "communication", "analysis")
             .with_random_scores()
         )
 
@@ -459,9 +432,7 @@ class KnowledgeNodeBuilder(BaseBuilder[KnowledgeNodeSchema]):
             "properties": {},
         }
 
-    def with_id(
-        self, node_id: Optional[uuid.UUID] = None
-    ) -> "KnowledgeNodeBuilder":
+    def with_id(self, node_id: Optional[uuid.UUID] = None) -> "KnowledgeNodeBuilder":
         """Set node ID."""
         self._check_not_built()
         self._data["id"] = node_id or self.random_uuid()
@@ -485,9 +456,7 @@ class KnowledgeNodeBuilder(BaseBuilder[KnowledgeNodeSchema]):
         self._data["properties"] = properties
         return self
 
-    def with_version(
-        self, version: int, is_current: bool = True
-    ) -> "KnowledgeNodeBuilder":
+    def with_version(self, version: int, is_current: bool = True) -> "KnowledgeNodeBuilder":
         """Set version information."""
         self._check_not_built()
         self._data["version"] = version
@@ -506,9 +475,7 @@ class KnowledgeNodeBuilder(BaseBuilder[KnowledgeNodeSchema]):
         self._data["source"] = source
         return self
 
-    def with_creator_agent(
-        self, agent_id: uuid.UUID
-    ) -> "KnowledgeNodeBuilder":
+    def with_creator_agent(self, agent_id: uuid.UUID) -> "KnowledgeNodeBuilder":
         """Set creator agent."""
         self._check_not_built()
         self._data["creator_agent_id"] = agent_id
@@ -548,21 +515,15 @@ class KnowledgeNodeBuilder(BaseBuilder[KnowledgeNodeSchema]):
         return (
             self.with_type("concept")
             .with_label(f"Concept: {concept}")
-            .with_properties(
-                category="abstract", domain="general", importance="medium"
-            )
+            .with_properties(category="abstract", domain="general", importance="medium")
         )
 
-    def as_entity(
-        self, entity_name: str, entity_type: str
-    ) -> "KnowledgeNodeBuilder":
+    def as_entity(self, entity_name: str, entity_type: str) -> "KnowledgeNodeBuilder":
         """Configure as entity node."""
         return (
             self.with_type("entity")
             .with_label(entity_name)
-            .with_properties(
-                entity_type=entity_type, attributes={}, relationships=[]
-            )
+            .with_properties(entity_type=entity_type, attributes={}, relationships=[])
         )
 
     def as_observation(
@@ -594,17 +555,13 @@ class KnowledgeEdgeBuilder(BaseBuilder[KnowledgeEdgeSchema]):
         super().__init__(KnowledgeEdgeSchema)
         self._data = {"type": "relates_to", "properties": {}}
 
-    def with_id(
-        self, edge_id: Optional[uuid.UUID] = None
-    ) -> "KnowledgeEdgeBuilder":
+    def with_id(self, edge_id: Optional[uuid.UUID] = None) -> "KnowledgeEdgeBuilder":
         """Set edge ID."""
         self._check_not_built()
         self._data["id"] = edge_id or self.random_uuid()
         return self
 
-    def with_nodes(
-        self, source_id: uuid.UUID, target_id: uuid.UUID
-    ) -> "KnowledgeEdgeBuilder":
+    def with_nodes(self, source_id: uuid.UUID, target_id: uuid.UUID) -> "KnowledgeEdgeBuilder":
         """Set source and target nodes."""
         self._check_not_built()
         self._data["source_id"] = source_id
@@ -629,9 +586,7 @@ class KnowledgeEdgeBuilder(BaseBuilder[KnowledgeEdgeSchema]):
         self._data["confidence"] = confidence
         return self
 
-    def with_timestamp(
-        self, created_at: Optional[datetime] = None
-    ) -> "KnowledgeEdgeBuilder":
+    def with_timestamp(self, created_at: Optional[datetime] = None) -> "KnowledgeEdgeBuilder":
         """Set creation timestamp."""
         self._check_not_built()
         self._data["created_at"] = created_at or datetime.utcnow()

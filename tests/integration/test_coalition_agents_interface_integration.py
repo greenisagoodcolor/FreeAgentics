@@ -31,9 +31,7 @@ import pytest
 # Add project root to path for imports
 sys.path.insert(
     0,
-    os.path.dirname(
-        os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
-    ),
+    os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__)))),
 )
 
 # Core components for Coalition-Agents integration
@@ -142,9 +140,7 @@ class CoordinationMessageExecutor:
         strategy_config = self.strategy_to_action_map.get(strategy, {})
 
         primary_action = strategy_config.get("primary_action", "explore")
-        coordination_style = strategy_config.get(
-            "coordination_style", "independent"
-        )
+        coordination_style = strategy_config.get("coordination_style", "independent")
         autonomy_level = strategy_config.get("autonomy_level", "medium")
 
         # Extract coordination parameters from message
@@ -158,20 +154,12 @@ class CoordinationMessageExecutor:
             "parameters": self._extract_action_parameters(
                 primary_action, coordination_params, agent_context
             ),
-            "priorities": self.action_mappings.get(primary_action, {}).get(
-                "priorities", []
-            ),
+            "priorities": self.action_mappings.get(primary_action, {}).get("priorities", []),
             "execution_context": {
-                "strategy": strategy.value
-                if hasattr(strategy, "value")
-                else str(strategy),
+                "strategy": strategy.value if hasattr(strategy, "value") else str(strategy),
                 "team_size": coordination_params.get("team_size", 1),
-                "coordination_range": coordination_params.get(
-                    "coordination_range", 10.0
-                ),
-                "update_frequency": coordination_params.get(
-                    "update_frequency", 1.0
-                ),
+                "coordination_range": coordination_params.get("coordination_range", 10.0),
+                "update_frequency": coordination_params.get("update_frequency", 1.0),
             },
         }
 
@@ -194,67 +182,39 @@ class CoordinationMessageExecutor:
         if action_type == "explore":
             return {
                 **base_params,
-                "search_radius": coordination_params.get(
-                    "coordination_range", 5.0
-                ),
-                "movement_speed": coordination_params.get(
-                    "movement_speed", 1.0
-                ),
+                "search_radius": coordination_params.get("coordination_range", 5.0),
+                "movement_speed": coordination_params.get("movement_speed", 1.0),
                 "target_areas": coordination_params.get("target_areas", []),
-                "discovery_priority": coordination_params.get(
-                    "discovery_priority", 0.5
-                ),
+                "discovery_priority": coordination_params.get("discovery_priority", 0.5),
             }
         elif action_type == "collect":
             return {
                 **base_params,
-                "collection_rate": coordination_params.get(
-                    "collection_rate", 1.0
-                ),
-                "capacity_limits": coordination_params.get(
-                    "capacity_limits", 100
-                ),
-                "target_resources": coordination_params.get(
-                    "target_resources", []
-                ),
-                "competition_factor": coordination_params.get(
-                    "competition_factor", 0.3
-                ),
+                "collection_rate": coordination_params.get("collection_rate", 1.0),
+                "capacity_limits": coordination_params.get("capacity_limits", 100),
+                "target_resources": coordination_params.get("target_resources", []),
+                "competition_factor": coordination_params.get("competition_factor", 0.3),
             }
         elif action_type == "coordinate":
             return {
                 **base_params,
-                "update_frequency": coordination_params.get(
-                    "update_frequency", 2.0
-                ),
-                "coordination_range": coordination_params.get(
-                    "coordination_range", 15.0
-                ),
+                "update_frequency": coordination_params.get("update_frequency", 2.0),
+                "coordination_range": coordination_params.get("coordination_range", 15.0),
                 "team_size": coordination_params.get("team_size", 3),
-                "synchronization_level": coordination_params.get(
-                    "synchronization_level", 0.7
-                ),
+                "synchronization_level": coordination_params.get("synchronization_level", 0.7),
             }
         elif action_type == "defend":
             return {
                 **base_params,
-                "alert_threshold": coordination_params.get(
-                    "alert_threshold", 0.8
-                ),
+                "alert_threshold": coordination_params.get("alert_threshold", 0.8),
                 "response_time": coordination_params.get("response_time", 0.5),
-                "defensive_positions": coordination_params.get(
-                    "defensive_positions", []
-                ),
-                "threat_assessment": coordination_params.get(
-                    "threat_assessment", 0.2
-                ),
+                "defensive_positions": coordination_params.get("defensive_positions", []),
+                "threat_assessment": coordination_params.get("threat_assessment", 0.2),
             }
         else:
             return base_params
 
-    def _generate_default_action(
-        self, agent_context: Dict[str, Any]
-    ) -> Dict[str, Any]:
+    def _generate_default_action(self, agent_context: Dict[str, Any]) -> Dict[str, Any]:
         """Generate default action when coordination message is unavailable."""
         return {
             "action_type": "explore",
@@ -289,15 +249,11 @@ class CoordinationMessageExecutor:
                 param in execution_results.get("parameters_used", {})
                 for param in action_spec.get("parameters", {}).keys()
             ),
-            "strategy_alignment": self._check_strategy_alignment(
-                action_spec, execution_results
-            ),
+            "strategy_alignment": self._check_strategy_alignment(action_spec, execution_results),
             "coordination_compliance": self._check_coordination_compliance(
                 action_spec, execution_results
             ),
-            "performance_metrics": execution_results.get(
-                "performance_metrics", {}
-            ),
+            "performance_metrics": execution_results.get("performance_metrics", {}),
         }
 
         validation_results["overall_success"] = (
@@ -337,9 +293,7 @@ class CoordinationMessageExecutor:
                     else:
                         score = max(
                             0,
-                            1
-                            - abs(intended_value - executed_value)
-                            / abs(intended_value),
+                            1 - abs(intended_value - executed_value) / abs(intended_value),
                         )
                     alignment_scores.append(score)
                 elif intended_value == executed_value:
@@ -356,9 +310,7 @@ class CoordinationMessageExecutor:
     ) -> float:
         """Check compliance with coordination requirements."""
 
-        coordination_style = action_spec.get(
-            "coordination_style", "independent"
-        )
+        coordination_style = action_spec.get("coordination_style", "independent")
         autonomy_level = action_spec.get("autonomy_level", "medium")
 
         execution_context = execution_results.get("execution_context", {})
@@ -369,23 +321,17 @@ class CoordinationMessageExecutor:
         if coordination_style == "hierarchical":
             # Hierarchical should show ordered, structured behavior
             compliance_scores.append(
-                0.8
-                if execution_context.get("followed_hierarchy", False)
-                else 0.2
+                0.8 if execution_context.get("followed_hierarchy", False) else 0.2
             )
         elif coordination_style == "peer_to_peer":
             # Peer-to-peer should show collaborative behavior
             compliance_scores.append(
-                0.8
-                if execution_context.get("collaborated_with_peers", False)
-                else 0.2
+                0.8 if execution_context.get("collaborated_with_peers", False) else 0.2
             )
         elif coordination_style == "competitive":
             # Competitive should show optimization-focused behavior
             compliance_scores.append(
-                0.8
-                if execution_context.get("optimized_for_competition", False)
-                else 0.2
+                0.8 if execution_context.get("optimized_for_competition", False) else 0.2
             )
         else:
             compliance_scores.append(0.5)  # Neutral for unknown styles
@@ -477,15 +423,11 @@ class AgentBehaviorValidator:
                 behavior_observations["strategy_adherence_events"] += 0.9
 
         # Calculate behavior metrics
-        behavior_metrics = self._calculate_behavior_metrics(
-            behavior_observations
-        )
+        behavior_metrics = self._calculate_behavior_metrics(behavior_observations)
 
         # Validate against expectations
         expectations = self.behavior_expectations.get(strategy, {})
-        validation_results = self._validate_against_expectations(
-            behavior_metrics, expectations
-        )
+        validation_results = self._validate_against_expectations(behavior_metrics, expectations)
 
         return {
             "observations": behavior_observations,
@@ -495,24 +437,16 @@ class AgentBehaviorValidator:
             "overall_compliance": validation_results.get("overall_score", 0.0),
         }
 
-    def _calculate_behavior_metrics(
-        self, observations: Dict[str, Any]
-    ) -> Dict[str, Any]:
+    def _calculate_behavior_metrics(self, observations: Dict[str, Any]) -> Dict[str, Any]:
         """Calculate behavior metrics from observations."""
 
-        total_actions = max(
-            observations["total_actions"], 1
-        )  # Avoid division by zero
+        total_actions = max(observations["total_actions"], 1)  # Avoid division by zero
 
         return {
-            "communication_frequency": observations["communication_events"]
-            / total_actions,
-            "decision_independence": observations["independent_actions"]
-            / total_actions,
-            "coordination_adherence": observations["coordinated_actions"]
-            / total_actions,
-            "strategy_consistency": observations["strategy_adherence_events"]
-            / total_actions,
+            "communication_frequency": observations["communication_events"] / total_actions,
+            "decision_independence": observations["independent_actions"] / total_actions,
+            "coordination_adherence": observations["coordinated_actions"] / total_actions,
+            "strategy_consistency": observations["strategy_adherence_events"] / total_actions,
         }
 
     def _validate_against_expectations(
@@ -532,9 +466,7 @@ class AgentBehaviorValidator:
             if expected_value == 0:
                 score = 1.0 if actual_value == 0 else 0.0
             else:
-                score = max(
-                    0, 1 - abs(expected_value - actual_value) / expected_value
-                )
+                score = max(0, 1 - abs(expected_value - actual_value) / expected_value)
 
             validation_scores[expectation_name] = {
                 "expected": expected_value,
@@ -543,9 +475,7 @@ class AgentBehaviorValidator:
             }
 
         overall_score = (
-            np.mean([v["score"] for v in validation_scores.values()])
-            if validation_scores
-            else 0.0
+            np.mean([v["score"] for v in validation_scores.values()]) if validation_scores else 0.0
         )
 
         return {
@@ -654,30 +584,16 @@ class TestCoalitionAgentsInterfaceIntegration:
             )
 
             # Validate action specification structure
-            assert (
-                "action_type" in action_spec
-            ), f"Missing action_type for {strategy}"
-            assert (
-                "coordination_style" in action_spec
-            ), f"Missing coordination_style for {strategy}"
-            assert (
-                "autonomy_level" in action_spec
-            ), f"Missing autonomy_level for {strategy}"
-            assert (
-                "parameters" in action_spec
-            ), f"Missing parameters for {strategy}"
-            assert (
-                "execution_context" in action_spec
-            ), f"Missing execution_context for {strategy}"
+            assert "action_type" in action_spec, f"Missing action_type for {strategy}"
+            assert "coordination_style" in action_spec, f"Missing coordination_style for {strategy}"
+            assert "autonomy_level" in action_spec, f"Missing autonomy_level for {strategy}"
+            assert "parameters" in action_spec, f"Missing parameters for {strategy}"
+            assert "execution_context" in action_spec, f"Missing execution_context for {strategy}"
 
             # Validate parameter structure
             parameters = action_spec["parameters"]
-            assert (
-                "agent_id" in parameters
-            ), f"Missing agent_id in parameters for {strategy}"
-            assert (
-                "position" in parameters
-            ), f"Missing position in parameters for {strategy}"
+            assert "agent_id" in parameters, f"Missing agent_id in parameters for {strategy}"
+            assert "position" in parameters, f"Missing position in parameters for {strategy}"
 
             # Validate execution context
             exec_context = action_spec["execution_context"]
@@ -690,34 +606,18 @@ class TestCoalitionAgentsInterfaceIntegration:
 
             parsing_results[strategy] = action_spec
 
-            logger.info(
-                f"✓ Parsed {strategy} coordination message successfully"
-            )
+            logger.info(f"✓ Parsed {strategy} coordination message successfully")
             logger.info(f"  Action type: {action_spec['action_type']}")
-            logger.info(
-                f"  Coordination style: {action_spec['coordination_style']}"
-            )
+            logger.info(f"  Coordination style: {action_spec['coordination_style']}")
             logger.info(f"  Autonomy level: {action_spec['autonomy_level']}")
 
         # Validate strategy-specific action mappings
         assert (
-            parsing_results[CoalitionFormationStrategy.CENTRALIZED][
-                "coordination_style"
-            ]
+            parsing_results[CoalitionFormationStrategy.CENTRALIZED]["coordination_style"]
             == "hierarchical"
         )
-        assert (
-            parsing_results[CoalitionFormationStrategy.DISTRIBUTED][
-                "autonomy_level"
-            ]
-            == "high"
-        )
-        assert (
-            parsing_results[CoalitionFormationStrategy.AUCTION_BASED][
-                "action_type"
-            ]
-            == "collect"
-        )
+        assert parsing_results[CoalitionFormationStrategy.DISTRIBUTED]["autonomy_level"] == "high"
+        assert parsing_results[CoalitionFormationStrategy.AUCTION_BASED]["action_type"] == "collect"
 
         return parsing_results
 
@@ -729,9 +629,7 @@ class TestCoalitionAgentsInterfaceIntegration:
         execution_results = {}
 
         for i, agent in enumerate(test_agents[:2]):  # Test with first 2 agents
-            strategy = list(CoalitionFormationStrategy)[
-                i % len(CoalitionFormationStrategy)
-            ]
+            strategy = list(CoalitionFormationStrategy)[i % len(CoalitionFormationStrategy)]
             coordination_msg = test_coordination_messages[strategy]
 
             agent_context = {
@@ -757,15 +655,10 @@ class TestCoalitionAgentsInterfaceIntegration:
                     "execution_time": 0.1,
                     "success": True,
                     "execution_context": {
-                        "followed_hierarchy": action_spec["coordination_style"]
-                        == "hierarchical",
-                        "collaborated_with_peers": action_spec[
-                            "coordination_style"
-                        ]
+                        "followed_hierarchy": action_spec["coordination_style"] == "hierarchical",
+                        "collaborated_with_peers": action_spec["coordination_style"]
                         == "peer_to_peer",
-                        "optimized_for_competition": action_spec[
-                            "coordination_style"
-                        ]
+                        "optimized_for_competition": action_spec["coordination_style"]
                         == "competitive",
                         "autonomy_exercised": {
                             "high": 0.8,
@@ -784,10 +677,8 @@ class TestCoalitionAgentsInterfaceIntegration:
                 execution_result["actual_execution_time"] = execution_time
 
                 # Validate execution against action specification
-                validation_results = (
-                    coordination_executor.validate_action_execution(
-                        action_spec, execution_result
-                    )
+                validation_results = coordination_executor.validate_action_execution(
+                    action_spec, execution_result
                 )
 
                 execution_results[f"{strategy}_{i}"] = {
@@ -802,20 +693,14 @@ class TestCoalitionAgentsInterfaceIntegration:
                     "overall_success"
                 ], f"Action execution failed for {strategy}"
 
-                logger.info(
-                    f"✓ Agent {i} executed {strategy} coordination successfully"
-                )
-                logger.info(
-                    f"  Strategy alignment: {validation_results['strategy_alignment']:.3f}"
-                )
+                logger.info(f"✓ Agent {i} executed {strategy} coordination successfully")
+                logger.info(f"  Strategy alignment: {validation_results['strategy_alignment']:.3f}")
                 logger.info(
                     f"  Coordination compliance: {validation_results['coordination_compliance']:.3f}"
                 )
 
             except Exception as e:
-                logger.warning(
-                    f"✗ Agent {i} execution failed for {strategy}: {e}"
-                )
+                logger.warning(f"✗ Agent {i} execution failed for {strategy}: {e}")
                 execution_results[f"{strategy}_{i}"] = {
                     "agent_id": agent_context["agent_id"],
                     "strategy": strategy,
@@ -825,9 +710,7 @@ class TestCoalitionAgentsInterfaceIntegration:
 
         # At least one execution should succeed
         successful_executions = [
-            r
-            for r in execution_results.values()
-            if not r.get("execution_failed", False)
+            r for r in execution_results.values() if not r.get("execution_failed", False)
         ]
         assert len(successful_executions) > 0, "No agent executions succeeded"
 
@@ -840,22 +723,18 @@ class TestCoalitionAgentsInterfaceIntegration:
 
         coordination_results = {}
 
-        for strategy in list(CoalitionFormationStrategy)[
-            :2
-        ]:  # Test first 2 strategies
+        for strategy in list(CoalitionFormationStrategy)[:2]:  # Test first 2 strategies
             coordination_msg = test_coordination_messages[strategy]
 
             # Test behavior validation for multiple agents
             agent_behaviors = []
 
             for i, agent in enumerate(test_agents[:2]):
-                behavior_result = (
-                    await behavior_validator.validate_agent_behavior(
-                        agent,
-                        strategy,
-                        coordination_msg,
-                        observation_duration=1.0,  # Short duration for testing
-                    )
+                behavior_result = await behavior_validator.validate_agent_behavior(
+                    agent,
+                    strategy,
+                    coordination_msg,
+                    observation_duration=1.0,  # Short duration for testing
                 )
 
                 agent_behaviors.append(
@@ -866,20 +745,14 @@ class TestCoalitionAgentsInterfaceIntegration:
                 )
 
                 # Validate behavior metrics
-                assert (
-                    "metrics" in behavior_result
-                ), f"Missing behavior metrics for agent {i}"
-                assert (
-                    "validation" in behavior_result
-                ), f"Missing validation results for agent {i}"
+                assert "metrics" in behavior_result, f"Missing behavior metrics for agent {i}"
+                assert "validation" in behavior_result, f"Missing validation results for agent {i}"
                 assert (
                     "overall_compliance" in behavior_result
                 ), f"Missing compliance score for agent {i}"
 
                 compliance_score = behavior_result["overall_compliance"]
-                assert (
-                    0 <= compliance_score <= 1
-                ), f"Invalid compliance score: {compliance_score}"
+                assert 0 <= compliance_score <= 1, f"Invalid compliance score: {compliance_score}"
 
                 logger.info(f"✓ Agent {i} behavior validated for {strategy}")
                 logger.info(f"  Compliance score: {compliance_score:.3f}")
@@ -888,18 +761,13 @@ class TestCoalitionAgentsInterfaceIntegration:
                 "strategy": strategy,
                 "agent_behaviors": agent_behaviors,
                 "team_compliance": np.mean(
-                    [
-                        b["behavior"]["overall_compliance"]
-                        for b in agent_behaviors
-                    ]
+                    [b["behavior"]["overall_compliance"] for b in agent_behaviors]
                 ),
             }
 
             # Team compliance should be reasonable
             team_compliance = coordination_results[strategy]["team_compliance"]
-            assert (
-                team_compliance > 0.3
-            ), f"Poor team compliance for {strategy}: {team_compliance}"
+            assert team_compliance > 0.3, f"Poor team compliance for {strategy}: {team_compliance}"
 
         return coordination_results
 
@@ -949,10 +817,8 @@ class TestCoalitionAgentsInterfaceIntegration:
                 }
 
                 validation_start = time.time()
-                _validation_results = (
-                    coordination_executor.validate_action_execution(
-                        action_spec, mock_execution_result
-                    )
+                _validation_results = coordination_executor.validate_action_execution(
+                    action_spec, mock_execution_result
                 )
                 validation_time = time.time() - validation_start
                 validation_times.append(validation_time)
@@ -962,8 +828,7 @@ class TestCoalitionAgentsInterfaceIntegration:
                 "parse_time_std": np.std(parse_times),
                 "validation_time_avg": np.mean(validation_times),
                 "validation_time_std": np.std(validation_times),
-                "total_time_avg": np.mean(parse_times)
-                + np.mean(validation_times),
+                "total_time_avg": np.mean(parse_times) + np.mean(validation_times),
             }
 
             # Performance requirements
@@ -1000,13 +865,10 @@ class TestCoalitionAgentsInterfaceIntegration:
 
         # Edge case 1: None coordination message
         try:
-            action_spec = coordination_executor.parse_coordination_message(
-                None, test_agent_context
-            )
+            action_spec = coordination_executor.parse_coordination_message(None, test_agent_context)
             edge_case_results["none_message"] = {
                 "handled": True,
-                "generated_default": action_spec.get("action_type")
-                == "explore",
+                "generated_default": action_spec.get("action_type") == "explore",
             }
         except Exception as e:
             edge_case_results["none_message"] = {
@@ -1022,8 +884,7 @@ class TestCoalitionAgentsInterfaceIntegration:
             )
             edge_case_results["empty_message"] = {
                 "handled": True,
-                "generated_default": action_spec.get("action_type")
-                == "explore",
+                "generated_default": action_spec.get("action_type") == "explore",
             }
         except Exception as e:
             edge_case_results["empty_message"] = {
@@ -1041,13 +902,10 @@ class TestCoalitionAgentsInterfaceIntegration:
                     "parameters": {},
                 },
             )()
-            action_spec = coordination_executor.parse_coordination_message(
-                mock_msg, {}
-            )
+            action_spec = coordination_executor.parse_coordination_message(mock_msg, {})
             edge_case_results["empty_context"] = {
                 "handled": True,
-                "has_defaults": "agent_id"
-                in action_spec.get("parameters", {}),
+                "has_defaults": "agent_id" in action_spec.get("parameters", {}),
             }
         except Exception as e:
             edge_case_results["empty_context"] = {
@@ -1092,12 +950,8 @@ class TestCoalitionAgentsInterfaceIntegration:
                 )
 
         # At least basic cases should be handled
-        assert edge_case_results["none_message"][
-            "handled"
-        ], "None message case not handled"
-        assert edge_case_results["empty_context"][
-            "handled"
-        ], "Empty context case not handled"
+        assert edge_case_results["none_message"]["handled"], "None message case not handled"
+        assert edge_case_results["empty_context"]["handled"], "Empty context case not handled"
 
         return edge_case_results
 
@@ -1190,9 +1044,7 @@ if __name__ == "__main__":
             ),
             (
                 "Coordination Edge Cases",
-                lambda: test_class.test_coordination_edge_cases(
-                    coordination_executor
-                ),
+                lambda: test_class.test_coordination_edge_cases(coordination_executor),
             ),
         ]
 
@@ -1232,7 +1084,7 @@ if __name__ == "__main__":
         total = len(results)
 
         print(f"\n{'='*60}")
-        print(f"COALITION-AGENTS INTERFACE INTEGRATION TEST SUMMARY")
+        print("COALITION-AGENTS INTERFACE INTEGRATION TEST SUMMARY")
         print(f"{'='*60}")
         print(f"Tests run: {total}")
         print(f"Passed: {passed}")

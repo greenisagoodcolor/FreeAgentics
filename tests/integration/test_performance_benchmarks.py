@@ -103,7 +103,7 @@ class TestPerformanceBenchmarks:
     def test_pymdp_vs_fallback_performance(self):
         """Compare PyMDP vs fallback performance."""
         if not PYMDP_AVAILABLE:
-            pytest.skip("PyMDP not available")
+            assert False, "Test bypass removed - must fix underlying issue"
 
         # Test with PyMDP
         agent_pymdp = BasicExplorerAgent(

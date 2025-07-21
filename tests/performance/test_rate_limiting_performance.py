@@ -103,9 +103,7 @@ class RateLimitingPerformanceTester:
 
         # Redis monitoring
         initial_redis_info = await self.redis_client.info()
-        initial_redis_ops = int(
-            initial_redis_info.get("total_commands_processed", 0)
-        )
+        initial_redis_ops = int(initial_redis_info.get("total_commands_processed", 0))
 
         # Barrier for synchronized start
         barrier = asyncio.Barrier(num_concurrent)
@@ -132,7 +130,7 @@ class RateLimitingPerformanceTester:
                 else:
                     blocked += 1
 
-            except Exception as e:
+            except Exception:
                 errors += 1
                 end_time = time.perf_counter()
                 latency_ms = (end_time - start_time) * 1000
@@ -144,19 +142,13 @@ class RateLimitingPerformanceTester:
         # Create batches of requests
         batches = num_requests // num_concurrent
         for batch in range(batches):
-            tasks = [
-                make_request(batch * num_concurrent + i)
-                for i in range(num_concurrent)
-            ]
+            tasks = [make_request(batch * num_concurrent + i) for i in range(num_concurrent)]
             await asyncio.gather(*tasks)
 
         # Handle remaining requests
         remaining = num_requests % num_concurrent
         if remaining:
-            tasks = [
-                make_request(batches * num_concurrent + i)
-                for i in range(remaining)
-            ]
+            tasks = [make_request(batches * num_concurrent + i) for i in range(remaining)]
             await asyncio.gather(*tasks)
 
         test_end = time.time()
@@ -167,12 +159,8 @@ class RateLimitingPerformanceTester:
         final_memory = process.memory_info().rss / 1024 / 1024
 
         final_redis_info = await self.redis_client.info()
-        final_redis_ops = int(
-            final_redis_info.get("total_commands_processed", 0)
-        )
-        redis_memory = (
-            int(final_redis_info.get("used_memory", 0)) / 1024 / 1024
-        )
+        final_redis_ops = int(final_redis_info.get("total_commands_processed", 0))
+        redis_memory = int(final_redis_info.get("used_memory", 0)) / 1024 / 1024
 
         # Calculate statistics
         if latencies:
@@ -230,9 +218,7 @@ class RateLimitingPerformanceTester:
 
         return request
 
-    def generate_report(
-        self, output_file: str = "rate_limiting_performance_report.json"
-    ):
+    def generate_report(self, output_file: str = "rate_limiting_performance_report.json"):
         """Generate performance report."""
         report = {"timestamp": datetime.now().isoformat(), "tests": []}
 
@@ -257,9 +243,7 @@ class RateLimitingPerformanceTester:
                         "redis_operations": metrics.redis_operations,
                     },
                     "errors": metrics.error_count,
-                    "duration_seconds": round(
-                        metrics.test_duration_seconds, 2
-                    ),
+                    "duration_seconds": round(metrics.test_duration_seconds, 2),
                 }
             )
 
@@ -347,9 +331,7 @@ class TestRateLimitingPerformance:
         # Burst handling assertions
         assert metrics.successful_requests <= 110  # Burst limit + small buffer
         assert metrics.blocked_requests > 800  # Most should be blocked
-        assert (
-            metrics.max_latency_ms < 500
-        )  # Max latency under 500ms even during burst
+        assert metrics.max_latency_ms < 500  # Max latency under 500ms even during burst
 
     @pytest.mark.asyncio
     @pytest.mark.performance
@@ -455,9 +437,7 @@ class TestRateLimitingPerformance:
 
         # Calculate Redis operation efficiency
         # Should use pipeline, so operations should be less than 2x requests
-        redis_ops_per_request = (
-            metrics.redis_operations / metrics.total_requests
-        )
+        redis_ops_per_request = metrics.redis_operations / metrics.total_requests
         assert redis_ops_per_request < 3  # Less than 3 Redis ops per request
 
     @pytest.mark.asyncio
@@ -488,12 +468,8 @@ class TestRateLimitingPerformance:
         avg_latencies = [m.average_latency_ms for m in metrics_over_time]
 
         # Performance should remain stable
-        throughput_cv = statistics.stdev(avg_throughputs) / statistics.mean(
-            avg_throughputs
-        )
-        latency_cv = statistics.stdev(avg_latencies) / statistics.mean(
-            avg_latencies
-        )
+        throughput_cv = statistics.stdev(avg_throughputs) / statistics.mean(avg_throughputs)
+        latency_cv = statistics.stdev(avg_latencies) / statistics.mean(avg_latencies)
 
         assert throughput_cv < 0.1  # Coefficient of variation < 10%
         assert latency_cv < 0.2  # Latency CV < 20%
@@ -518,9 +494,7 @@ class TestRateLimitingPerformance:
 
         # Even with high block rate, performance should be good
         assert metrics.average_latency_ms < 5  # Blocking should be fast
-        assert (
-            metrics.throughput_rps > 5000
-        )  # Can handle many requests even if blocking
+        assert metrics.throughput_rps > 5000  # Can handle many requests even if blocking
 
     @pytest.mark.asyncio
     @pytest.mark.performance
@@ -648,7 +622,7 @@ class TestRateLimitingOptimizations:
 
         for i in range(10000):
             key = f"rate_limit:test:{i % 100}"
-            result = await script(keys=[key], args=[100, 60, int(time.time())])
+            await script(keys=[key], args=[100, 60, int(time.time())])
 
         duration = time.time() - start_time
 
@@ -690,9 +664,7 @@ class TestRateLimitingOptimizations:
         start_time = time.time()
 
         for _ in range(num_batches):
-            requests = [
-                (f"10.0.0.{i}", "/api/v1/test") for i in range(batch_size)
-            ]
+            requests = [(f"10.0.0.{i}", "/api/v1/test") for i in range(batch_size)]
             await batch_check_rate_limits(requests)
 
         duration = time.time() - start_time
@@ -753,8 +725,8 @@ if __name__ == "__main__":
             print(f"  Memory Usage: {metrics.memory_usage_mb:.2f} MB")
 
         # Generate report
-        report = tester.generate_report()
-        print(f"\nReport saved to: rate_limiting_performance_report.json")
+        tester.generate_report()
+        print("\nReport saved to: rate_limiting_performance_report.json")
 
         await tester.teardown()
 

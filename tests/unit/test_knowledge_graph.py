@@ -4,13 +4,8 @@ Test suite for Knowledge Graph Evolution system.
 Tests the graph engine, evolution operators, query system, and storage.
 """
 
-import json
 import tempfile
-from datetime import datetime, timedelta
-from pathlib import Path
-from typing import List
-
-import pytest
+from datetime import datetime
 
 from knowledge_graph.evolution import (
     BeliefUpdater,
@@ -34,7 +29,6 @@ from knowledge_graph.storage import (
     PickleStorageBackend,
     StorageManager,
 )
-from tests.db_infrastructure.fixtures import DatabaseTestCase, db_session
 
 
 class TestKnowledgeNode:
@@ -111,9 +105,7 @@ class TestKnowledgeEdge:
 
     def test_edge_to_dict(self):
         """Test converting edge to dictionary."""
-        edge = KnowledgeEdge(
-            source_id="a", target_id="b", type=EdgeType.CAUSES
-        )
+        edge = KnowledgeEdge(source_id="a", target_id="b", type=EdgeType.CAUSES)
 
         edge_dict = edge.to_dict()
 
@@ -160,9 +152,7 @@ class TestKnowledgeGraph:
         graph.add_node(node1)
         graph.add_node(node2)
 
-        edge = KnowledgeEdge(
-            source_id=node1.id, target_id=node2.id, type=EdgeType.RELATED_TO
-        )
+        edge = KnowledgeEdge(source_id=node1.id, target_id=node2.id, type=EdgeType.RELATED_TO)
 
         assert graph.add_edge(edge) is True
         assert len(graph.edges) == 1
@@ -200,9 +190,7 @@ class TestKnowledgeGraph:
         graph.add_node(node1)
         graph.add_node(node2)
 
-        edge = KnowledgeEdge(
-            source_id=node1.id, target_id=node2.id, type=EdgeType.RELATED_TO
-        )
+        edge = KnowledgeEdge(source_id=node1.id, target_id=node2.id, type=EdgeType.RELATED_TO)
         graph.add_edge(edge)
 
         # Remove node should also remove connected edges
@@ -321,9 +309,7 @@ class TestKnowledgeGraph:
         graph2 = KnowledgeGraph()
 
         # Add nodes to graph1
-        node1 = KnowledgeNode(
-            type=NodeType.ENTITY, label="shared", confidence=0.7
-        )
+        node1 = KnowledgeNode(type=NodeType.ENTITY, label="shared", confidence=0.7)
         node2 = KnowledgeNode(type=NodeType.ENTITY, label="unique1")
         graph1.add_node(node1)
         graph1.add_node(node2)
@@ -340,7 +326,7 @@ class TestKnowledgeGraph:
         graph2.add_node(node4)
 
         # Merge with higher confidence resolution
-        original_count = len(graph1.nodes)
+        len(graph1.nodes)
         graph1.merge(graph2, conflict_resolution="higher_confidence")
 
         # Should have 3 nodes total
@@ -504,9 +490,7 @@ class TestEvolutionOperators:
         assert metrics.edges_added > 0  # Causal edges added
 
         # Check causal edges exist
-        causal_edges = [
-            e for e in graph.edges.values() if e.type == EdgeType.CAUSES
-        ]
+        causal_edges = [e for e in graph.edges.values() if e.type == EdgeType.CAUSES]
         assert len(causal_edges) > 0
 
     def test_contradiction_resolver(self):
@@ -613,9 +597,7 @@ class TestQueryEngine:
         engine = QueryEngine(graph)
 
         # Query by type
-        query = GraphQuery(
-            query_type=QueryType.NODE_LOOKUP, node_types=[NodeType.ENTITY]
-        )
+        query = GraphQuery(query_type=QueryType.NODE_LOOKUP, node_types=[NodeType.ENTITY])
 
         result = engine.execute(query)
 
@@ -623,9 +605,7 @@ class TestQueryEngine:
         assert all(n.type == NodeType.ENTITY for n in result.nodes)
 
         # Query with confidence threshold
-        query = GraphQuery(
-            query_type=QueryType.NODE_LOOKUP, confidence_threshold=0.7
-        )
+        query = GraphQuery(query_type=QueryType.NODE_LOOKUP, confidence_threshold=0.7)
 
         result = engine.execute(query)
         assert all(n.confidence >= 0.7 for n in result.nodes)
@@ -672,9 +652,7 @@ class TestQueryEngine:
 
         neighbors = []
         for i in range(4):
-            neighbor = KnowledgeNode(
-                type=NodeType.ENTITY, label=f"neighbor_{i}"
-            )
+            neighbor = KnowledgeNode(type=NodeType.ENTITY, label=f"neighbor_{i}")
             graph.add_node(neighbor)
             neighbors.append(neighbor)
 
@@ -687,9 +665,7 @@ class TestQueryEngine:
 
         engine = QueryEngine(graph)
 
-        query = GraphQuery(
-            query_type=QueryType.NEIGHBORHOOD, center_id=center.id, radius=1
-        )
+        query = GraphQuery(query_type=QueryType.NEIGHBORHOOD, center_id=center.id, radius=1)
 
         result = engine.execute(query)
 
@@ -771,9 +747,7 @@ class TestStorage:
         graph.add_node(node1)
         graph.add_node(node2)
 
-        edge = KnowledgeEdge(
-            source_id=node1.id, target_id=node2.id, type=EdgeType.IS_A
-        )
+        edge = KnowledgeEdge(source_id=node1.id, target_id=node2.id, type=EdgeType.IS_A)
         graph.add_edge(edge)
 
         assert storage.save_graph(graph) is True

@@ -35,9 +35,7 @@ class TDDPlugin:
     def pytest_configure(self, config: Config) -> None:
         """Configure TDD plugin."""
         # Register custom markers
-        config.addinivalue_line(
-            "markers", "tdd_compliant: mark test as TDD compliant"
-        )
+        config.addinivalue_line("markers", "tdd_compliant: mark test as TDD compliant")
         config.addinivalue_line(
             "markers",
             "red_green_refactor: mark test as following Red-Green-Refactor",
@@ -59,39 +57,27 @@ class TDDPlugin:
 
         # Check for TDD environment setup
         required_env_vars = ["TDD_MODE", "TESTING"]
-        missing_vars = [
-            var for var in required_env_vars if not os.environ.get(var)
-        ]
+        missing_vars = [var for var in required_env_vars if not os.environ.get(var)]
 
         if missing_vars:
-            pytest.exit(
-                f"TDD setup incomplete. Missing environment variables: {missing_vars}"
-            )
+            pytest.exit(f"TDD setup incomplete. Missing environment variables: {missing_vars}")
 
         # Validate no production mocks
         self._validate_no_production_mocks()
 
         print("✅ TDD environment validated")
 
-    def pytest_collection_modifyitems(
-        self, config: Config, items: List[Item]
-    ) -> None:
+    def pytest_collection_modifyitems(self, config: Config, items: List[Item]) -> None:
         """Modify collected items to enforce TDD compliance."""
         # Check for skipped tests (TDD violation)
         for item in items:
-            if item.get_closest_marker("skip") or item.get_closest_marker(
-                "skipif"
-            ):
+            if item.get_closest_marker("skip") or item.get_closest_marker("skipif"):
                 self.skipped_tests.append(item.nodeid)
 
         if self.skipped_tests:
-            print(
-                f"⚠️  WARNING: {len(self.skipped_tests)} skipped tests found (TDD violation)"
-            )
+            print(f"⚠️  WARNING: {len(self.skipped_tests)} skipped tests found (TDD violation)")
             if os.environ.get("TDD_STRICT") == "true":
-                pytest.exit(
-                    "TDD violation: Skipped tests are not allowed in strict TDD mode"
-                )
+                pytest.exit("TDD violation: Skipped tests are not allowed in strict TDD mode")
 
         # Validate test naming follows TDD conventions
         self._validate_test_naming(items)
@@ -109,9 +95,7 @@ class TDDPlugin:
         """Test execution - monitor TDD compliance."""
         # Track test execution for TDD metrics
 
-    def pytest_runtest_teardown(
-        self, item: Item, nextitem: Optional[Item]
-    ) -> None:
+    def pytest_runtest_teardown(self, item: Item, nextitem: Optional[Item]) -> None:
         """Teardown after each test - validate TDD compliance."""
         # Calculate test execution time
         if item.nodeid in self.test_start_times:
@@ -123,9 +107,7 @@ class TDDPlugin:
                     UserWarning,
                 )
 
-    def pytest_runtest_makereport(
-        self, item: Item, call: CallInfo
-    ) -> Optional[TestReport]:
+    def pytest_runtest_makereport(self, item: Item, call: CallInfo) -> Optional[TestReport]:
         """Generate test report with TDD compliance information."""
         if call.when == "call":
             if call.excinfo is not None:
@@ -161,9 +143,7 @@ class TDDPlugin:
                         if file.endswith(".py"):
                             file_path = os.path.join(root, file)
                             try:
-                                with open(
-                                    file_path, "r", encoding="utf-8"
-                                ) as f:
+                                with open(file_path, "r", encoding="utf-8") as f:
                                     content = f.read()
                                     if any(
                                         mock_term in content
@@ -180,10 +160,7 @@ class TDDPlugin:
 
         if mock_violations:
             self.tdd_violations.extend(
-                [
-                    f"Mock usage in production code: {path}"
-                    for path in mock_violations
-                ]
+                [f"Mock usage in production code: {path}" for path in mock_violations]
             )
 
     def _validate_test_naming(self, items: List[Item]) -> None:
@@ -209,16 +186,10 @@ class TDDPlugin:
         print("TDD COMPLIANCE REPORT")
         print("=" * 60)
 
-        total_tests = (
-            len(self.test_results)
-            + len(self.failed_tests)
-            + len(self.skipped_tests)
-        )
-        passed_tests = len(
-            [r for r in self.test_results.values() if r == "passed"]
-        )
+        total_tests = len(self.test_results) + len(self.failed_tests) + len(self.skipped_tests)
+        passed_tests = len([r for r in self.test_results.values() if r == "passed"])
 
-        print(f"📊 TEST SUMMARY:")
+        print("📊 TEST SUMMARY:")
         print(f"   Total tests: {total_tests}")
         print(f"   Passed: {passed_tests}")
         print(f"   Failed: {len(self.failed_tests)}")
@@ -228,9 +199,7 @@ class TDDPlugin:
         tdd_compliant = True
 
         if self.skipped_tests:
-            print(
-                f"\n⚠️  TDD VIOLATIONS - SKIPPED TESTS ({len(self.skipped_tests)}):"
-            )
+            print(f"\n⚠️  TDD VIOLATIONS - SKIPPED TESTS ({len(self.skipped_tests)}):")
             for test in self.skipped_tests[:5]:  # Show first 5
                 print(f"   • {test}")
             if len(self.skipped_tests) > 5:
@@ -254,7 +223,7 @@ class TDDPlugin:
             tdd_compliant = False
 
         # Overall TDD Compliance
-        print(f"\n🎯 TDD COMPLIANCE:")
+        print("\n🎯 TDD COMPLIANCE:")
         if tdd_compliant and exitstatus == 0:
             print("   ✅ FULLY COMPLIANT - All TDD principles followed")
             print("   ✅ Ready for production deployment")

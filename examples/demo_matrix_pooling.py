@@ -139,9 +139,7 @@ def demonstrate_memory_efficiency():
         np.dot(a, b)
 
     print_memory_usage("   After non-pooled operations")
-    no_pool_mem_increase = (
-        psutil.Process().memory_info().rss / 1024 / 1024 - start_mem
-    )
+    no_pool_mem_increase = psutil.Process().memory_info().rss / 1024 / 1024 - start_mem
 
     # 2. With pooling
     print("\n2. With pooling (100 iterations):")
@@ -156,9 +154,7 @@ def demonstrate_memory_efficiency():
         pooled_dot(a, b)
 
     print_memory_usage("   After pooled operations")
-    pool_mem_increase = (
-        psutil.Process().memory_info().rss / 1024 / 1024 - start_mem
-    )
+    pool_mem_increase = psutil.Process().memory_info().rss / 1024 / 1024 - start_mem
 
     print("\nMemory increase comparison:")
     print(f"   Without pooling: +{no_pool_mem_increase:.1f} MB")
@@ -236,10 +232,7 @@ def demonstrate_pymdp_integration():
     print("\nPool efficiency for belief updates:")
     for pool_key, pool_stats in final_stats["pools"].items():
         initial_requests = (
-            initial_stats["pools"]
-            .get(pool_key, {})
-            .get("stats", {})
-            .get("total_requests", 0)
+            initial_stats["pools"].get(pool_key, {}).get("stats", {}).get("total_requests", 0)
         )
         final_requests = pool_stats["stats"]["total_requests"]
 
@@ -274,9 +267,7 @@ def demonstrate_advanced_pooling():
         # hidden = states @ W1
         np.dot(states, W1, out=hidden)
 
-        with pool.allocate_matrix(
-            (batch_size, action_dim), np.float32
-        ) as output:
+        with pool.allocate_matrix((batch_size, action_dim), np.float32) as output:
             # output = hidden @ W2
             np.dot(hidden, W2, out=output)
             result = output.copy()
@@ -330,9 +321,7 @@ def main():
     print("Final Global Pool Statistics:")
     print(f"Total pools created: {stats['global']['total_pools']}")
     print(f"Total matrices in pools: {stats['global']['total_matrices']}")
-    print(
-        f"Total memory allocated: {stats['global']['total_memory_mb']:.2f} MB"
-    )
+    print(f"Total memory allocated: {stats['global']['total_memory_mb']:.2f} MB")
 
     print("\nPool utilization:")
     for pool_key, pool_stats in stats["pools"].items():
@@ -344,9 +333,7 @@ def main():
             print(f"  {shape} ({dtype}):")
             print(f"    - Requests: {requests}")
             print(f"    - Hit rate: {pool_stats['hit_rate']:.1%}")
-            print(
-                f"    - Memory: {pool_stats['stats']['total_memory_bytes'] / 1024 / 1024:.2f} MB"
-            )
+            print(f"    - Memory: {pool_stats['stats']['total_memory_bytes'] / 1024 / 1024:.2f} MB")
 
 
 if __name__ == "__main__":

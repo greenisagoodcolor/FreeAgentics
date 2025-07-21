@@ -114,9 +114,7 @@ except ImportError:
             return set()
 
     class CoalitionObjective:
-        def __init__(
-            self, objective_id, description, required_capabilities, priority
-        ):
+        def __init__(self, objective_id, description, required_capabilities, priority):
             """Initialize coalition objective with requirements and priority."""
             self.objective_id = objective_id
             self.description = description
@@ -140,18 +138,14 @@ class TestCoalitionStabilityCalculations:
     def test_coalition_stability_core_concept(self):
         """Test core concept of coalition stability."""
         if not IMPORT_SUCCESS:
-            pytest.skip("Coalition modules not available")
+            assert False, "Test bypass removed - must fix underlying issue"
 
         # Create a simple coalition with known properties
         coalition = Coalition("test_coalition", "Test Coalition")
 
         # Add members with complementary capabilities
-        assert coalition.add_member(
-            "agent_1", CoalitionRole.LEADER, ["skill_a", "skill_b"]
-        )
-        assert coalition.add_member(
-            "agent_2", CoalitionRole.MEMBER, ["skill_c", "skill_d"]
-        )
+        assert coalition.add_member("agent_1", CoalitionRole.LEADER, ["skill_a", "skill_b"])
+        assert coalition.add_member("agent_2", CoalitionRole.MEMBER, ["skill_c", "skill_d"])
 
         # Coalition should be stable with complementary skills
         assert len(coalition.members) == 2
@@ -163,7 +157,7 @@ class TestCoalitionStabilityCalculations:
     def test_coalition_capability_coverage(self):
         """Test that coalition capability coverage is calculated correctly."""
         if not IMPORT_SUCCESS:
-            pytest.skip("Coalition modules not available")
+            assert False, "Test bypass removed - must fix underlying issue"
 
         # Create objective requiring specific capabilities
         objective = CoalitionObjective(
@@ -175,24 +169,20 @@ class TestCoalitionStabilityCalculations:
 
         # Create coalition with partial coverage
         coalition = Coalition("test_coalition", "Test Coalition", [objective])
-        coalition.add_member(
-            "agent_1", CoalitionRole.LEADER, ["skill_a", "skill_b"]
-        )
+        coalition.add_member("agent_1", CoalitionRole.LEADER, ["skill_a", "skill_b"])
 
         # Should not be able to achieve objective with partial coverage
         available_caps = coalition.get_capabilities()
         required_caps = set(objective.required_capabilities)
 
         # Test coverage calculation
-        coverage = len(available_caps.intersection(required_caps)) / len(
-            required_caps
-        )
+        coverage = len(available_caps.intersection(required_caps)) / len(required_caps)
         assert coverage < 1.0  # Partial coverage
 
     def test_coalition_size_optimization(self):
         """Test that coalition size affects formation quality."""
         if not IMPORT_SUCCESS:
-            pytest.skip("Coalition modules not available")
+            assert False, "Test bypass removed - must fix underlying issue"
 
         # Create agents with overlapping capabilities
         agents = [
@@ -232,7 +222,7 @@ class TestConstraintSatisfactionAlgorithms:
     def test_max_coalition_size_constraint(self):
         """Test that maximum coalition size constraint is respected."""
         if not IMPORT_SUCCESS:
-            pytest.skip("Coalition modules not available")
+            assert False, "Test bypass removed - must fix underlying issue"
 
         # Create many agents with same capabilities
         agents = [
@@ -267,7 +257,7 @@ class TestConstraintSatisfactionAlgorithms:
     def test_agent_coalition_limit_constraint(self):
         """Test that agent coalition limit constraint is respected."""
         if not IMPORT_SUCCESS:
-            pytest.skip("Coalition modules not available")
+            assert False, "Test bypass removed - must fix underlying issue"
 
         # Create agent with low coalition limit
         agent = AgentProfile(
@@ -297,16 +287,14 @@ class TestConstraintSatisfactionAlgorithms:
 
         # Agent should not be over-assigned
         agent_assignments = sum(
-            1
-            for coalition in result.coalitions
-            if "limited_agent" in coalition.members
+            1 for coalition in result.coalitions if "limited_agent" in coalition.members
         )
         assert agent_assignments <= 1  # Can join at most 1 more coalition
 
     def test_capability_satisfaction_priority(self):
         """Test that capability satisfaction is prioritized correctly."""
         if not IMPORT_SUCCESS:
-            pytest.skip("Coalition modules not available")
+            assert False, "Test bypass removed - must fix underlying issue"
 
         # Create agents with different specializations
         specialist = AgentProfile(
@@ -359,7 +347,7 @@ class TestFormationPerformanceBenchmarks:
     def test_greedy_formation_performance(self):
         """Test performance of greedy formation algorithm."""
         if not IMPORT_SUCCESS:
-            pytest.skip("Coalition modules not available")
+            assert False, "Test bypass removed - must fix underlying issue"
 
         # Create medium-sized problem
         agents = [
@@ -398,7 +386,7 @@ class TestFormationPerformanceBenchmarks:
     def test_optimal_formation_scalability(self):
         """Test scalability limits of optimal formation."""
         if not IMPORT_SUCCESS:
-            pytest.skip("Coalition modules not available")
+            assert False, "Test bypass removed - must fix underlying issue"
 
         # Create small problem for optimal solution
         agents = [
@@ -430,25 +418,21 @@ class TestFormationPerformanceBenchmarks:
         formation_time = time.time() - start_time
 
         # Should handle small problems efficiently
-        assert (
-            formation_time < 5.0
-        )  # Reasonable time for small optimal problems
+        assert formation_time < 5.0  # Reasonable time for small optimal problems
         assert len(result.coalitions) > 0
         assert result.objective_coverage > 0.0
 
     def test_hierarchical_formation_large_scale(self):
         """Test hierarchical formation with large agent populations."""
         if not IMPORT_SUCCESS:
-            pytest.skip("Coalition modules not available")
+            assert False, "Test bypass removed - must fix underlying issue"
 
         # Create large population
         agents = [
             AgentProfile(
                 agent_id=f"agent_{i}",
                 capabilities=(
-                    [f"skill_{i % 10}", "coordination"]
-                    if i % 10 == 0
-                    else [f"skill_{i % 10}"]
+                    [f"skill_{i % 10}", "coordination"] if i % 10 == 0 else [f"skill_{i % 10}"]
                 ),
                 capacity=0.8,
                 reputation=0.9 if i % 10 == 0 else 0.7,  # Some leaders
@@ -486,7 +470,7 @@ class TestAlgorithmCorrectnessValidation:
     def test_simple_optimal_assignment(self):
         """Test against known optimal solution for simple problem."""
         if not IMPORT_SUCCESS:
-            pytest.skip("Coalition modules not available")
+            assert False, "Test bypass removed - must fix underlying issue"
 
         # Perfect matching problem: 1 agent per objective
         agents = [
@@ -539,7 +523,7 @@ class TestAlgorithmCorrectnessValidation:
     def test_impossible_assignment_handling(self):
         """Test handling of impossible assignments."""
         if not IMPORT_SUCCESS:
-            pytest.skip("Coalition modules not available")
+            assert False, "Test bypass removed - must fix underlying issue"
 
         # Create impossible scenario
         agents = [
@@ -574,14 +558,12 @@ class TestAlgorithmCorrectnessValidation:
 
             # Should handle gracefully
             assert isinstance(result, FormationResult)
-            assert (
-                result.objective_coverage < 1.0
-            )  # Cannot achieve all objectives
+            assert result.objective_coverage < 1.0  # Cannot achieve all objectives
 
     def test_multi_objective_optimization(self):
         """Test multi-objective optimization scenarios."""
         if not IMPORT_SUCCESS:
-            pytest.skip("Coalition modules not available")
+            assert False, "Test bypass removed - must fix underlying issue"
 
         # Create agent with multiple capabilities
         versatile_agent = AgentProfile(
@@ -630,18 +612,14 @@ class TestDynamicCoalitionOperations:
     def test_coalition_member_addition(self):
         """Test adding members to existing coalitions."""
         if not IMPORT_SUCCESS:
-            pytest.skip("Coalition modules not available")
+            assert False, "Test bypass removed - must fix underlying issue"
 
         # Create coalition with initial member
         coalition = Coalition("test_coalition", "Test Coalition")
-        assert coalition.add_member(
-            "agent_1", CoalitionRole.LEADER, ["skill_a"]
-        )
+        assert coalition.add_member("agent_1", CoalitionRole.LEADER, ["skill_a"])
 
         # Add additional member
-        assert coalition.add_member(
-            "agent_2", CoalitionRole.MEMBER, ["skill_b"]
-        )
+        assert coalition.add_member("agent_2", CoalitionRole.MEMBER, ["skill_b"])
 
         # Verify addition
         assert len(coalition.members) == 2
@@ -651,7 +629,7 @@ class TestDynamicCoalitionOperations:
     def test_coalition_member_removal(self):
         """Test removing members from coalitions."""
         if not IMPORT_SUCCESS:
-            pytest.skip("Coalition modules not available")
+            assert False, "Test bypass removed - must fix underlying issue"
 
         # Create coalition with members
         coalition = Coalition("test_coalition", "Test Coalition")
@@ -669,7 +647,7 @@ class TestDynamicCoalitionOperations:
     def test_coalition_leader_election(self):
         """Test leader election when leader leaves."""
         if not IMPORT_SUCCESS:
-            pytest.skip("Coalition modules not available")
+            assert False, "Test bypass removed - must fix underlying issue"
 
         # Create coalition with leader and member
         coalition = Coalition("test_coalition", "Test Coalition")
@@ -690,7 +668,7 @@ class TestDynamicCoalitionOperations:
     def test_coalition_dissolution(self):
         """Test coalition dissolution when empty."""
         if not IMPORT_SUCCESS:
-            pytest.skip("Coalition modules not available")
+            assert False, "Test bypass removed - must fix underlying issue"
 
         # Create coalition with single member
         coalition = Coalition("test_coalition", "Test Coalition")
@@ -711,7 +689,7 @@ class TestEdgeCasesAndErrorHandling:
     def test_empty_agent_list(self):
         """Test formation with empty agent list."""
         if not IMPORT_SUCCESS:
-            pytest.skip("Coalition modules not available")
+            assert False, "Test bypass removed - must fix underlying issue"
 
         objectives = [
             CoalitionObjective(
@@ -739,7 +717,7 @@ class TestEdgeCasesAndErrorHandling:
     def test_empty_objectives_list(self):
         """Test formation with empty objectives list."""
         if not IMPORT_SUCCESS:
-            pytest.skip("Coalition modules not available")
+            assert False, "Test bypass removed - must fix underlying issue"
 
         agents = [
             AgentProfile(
@@ -769,7 +747,7 @@ class TestEdgeCasesAndErrorHandling:
     def test_malformed_agent_data(self):
         """Test handling of malformed agent data."""
         if not IMPORT_SUCCESS:
-            pytest.skip("Coalition modules not available")
+            assert False, "Test bypass removed - must fix underlying issue"
 
         # Test with various malformed data
         malformed_agents = [
@@ -810,7 +788,7 @@ class TestEdgeCasesAndErrorHandling:
     def test_invalid_constraints(self):
         """Test handling of invalid constraints."""
         if not IMPORT_SUCCESS:
-            pytest.skip("Coalition modules not available")
+            assert False, "Test bypass removed - must fix underlying issue"
 
         agents = [
             AgentProfile(
@@ -839,15 +817,11 @@ class TestEdgeCasesAndErrorHandling:
         }
 
         strategy = GreedyFormation()
-        result = strategy.form_coalitions(
-            agents, objectives, invalid_constraints
-        )
+        result = strategy.form_coalitions(agents, objectives, invalid_constraints)
 
         # Should handle gracefully
         assert isinstance(result, FormationResult)
 
 
 if __name__ == "__main__":
-    pytest.main(
-        [__file__, "-v", "--cov=coalitions", "--cov-report=term-missing"]
-    )
+    pytest.main([__file__, "-v", "--cov=coalitions", "--cov-report=term-missing"])

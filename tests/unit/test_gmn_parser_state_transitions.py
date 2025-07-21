@@ -264,10 +264,7 @@ class TestActionDependentTransitions:
 
         dynamics_params = dynamics["dynamics"]
         assert dynamics_params["model_type"] == "linear_gaussian"
-        assert (
-            dynamics_params["state_equation"]
-            == "x_{t+1} = A * x_t + B * u_t + w_t"
-        )
+        assert dynamics_params["state_equation"] == "x_{t+1} = A * x_t + B * u_t + w_t"
 
         # Parameters
         params = dynamics_params["parameters"]
@@ -1013,9 +1010,7 @@ class TestTransitionLearning:
 
         # Verify contextual transitions
         contextual_trans = result["nodes"][0]
-        assert (
-            contextual_trans["transition_type"] == "context_dependent_adaptive"
-        )
+        assert contextual_trans["transition_type"] == "context_dependent_adaptive"
 
         # Context structure
         context_struct = contextual_trans["context_structure"]
@@ -1095,11 +1090,7 @@ class TestTransitionValidation:
 
         # Should detect invalid transition probabilities
         assert is_valid is False
-        prob_errors = [
-            e
-            for e in errors
-            if "probability" in e.lower() or "sum" in e.lower()
-        ]
+        prob_errors = [e for e in errors if "probability" in e.lower() or "sum" in e.lower()]
         assert len(prob_errors) > 0
 
     def test_validate_temporal_consistency_constraints(self):
@@ -1140,11 +1131,7 @@ class TestTransitionValidation:
 
         # Should detect temporal overlap
         assert is_valid is False
-        temporal_errors = [
-            e
-            for e in errors
-            if "temporal" in e.lower() or "overlap" in e.lower()
-        ]
+        temporal_errors = [e for e in errors if "temporal" in e.lower() or "overlap" in e.lower()]
         assert len(temporal_errors) > 0
 
     def test_validate_hierarchical_consistency_constraints(self):
@@ -1174,8 +1161,6 @@ class TestTransitionValidation:
         # Should detect hierarchical inconsistency
         assert is_valid is False
         hierarchy_errors = [
-            e
-            for e in errors
-            if "hierarchy" in e.lower() or "aggregation" in e.lower()
+            e for e in errors if "hierarchy" in e.lower() or "aggregation" in e.lower()
         ]
         assert len(hierarchy_errors) > 0

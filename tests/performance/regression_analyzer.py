@@ -8,22 +8,18 @@ system versions and configurations.
 import asyncio
 import json
 import logging
-import statistics
 from collections import defaultdict
 from dataclasses import dataclass, field
-from datetime import datetime, timedelta
+from datetime import datetime
 from enum import Enum
 from pathlib import Path
-from typing import Any, Dict, List, Optional, Set, Tuple, Union
+from typing import Any, Dict, List, Optional
 
 import numpy as np
-import pandas as pd
 from scipy import stats as scipy_stats
 
 from tests.performance.unified_metrics_collector import (
-    AggregatedMetric,
     MetricSource,
-    MetricType,
     UnifiedMetricsCollector,
 )
 
@@ -180,9 +176,7 @@ class RegressionAnalyzer:
 
         while (datetime.now() - start_time).total_seconds() < duration_seconds:
             # Get current metrics
-            summary = await self.metrics_collector.get_metrics_summary(
-                window_seconds=60
-            )
+            summary = await self.metrics_collector.get_metrics_summary(window_seconds=60)
 
             for source_name, metrics in summary["sources"].items():
                 if sources and MetricSource(source_name) not in sources:
@@ -239,9 +233,7 @@ class RegressionAnalyzer:
         regressions = []
 
         # Get current metrics
-        summary = await self.metrics_collector.get_metrics_summary(
-            window_seconds=window_seconds
-        )
+        summary = await self.metrics_collector.get_metrics_summary(window_seconds=window_seconds)
 
         for source_name, metrics in summary["sources"].items():
             if sources and MetricSource(source_name) not in sources:
@@ -258,9 +250,7 @@ class RegressionAnalyzer:
                 current_stats = metric_data["stats"]
 
                 # Determine regression type
-                regression_type = self._determine_regression_type(
-                    metric_data["name"], source
-                )
+                regression_type = self._determine_regression_type(metric_data["name"], source)
 
                 # Perform statistical test
                 regression = self._test_for_regression(
@@ -282,22 +272,14 @@ class RegressionAnalyzer:
 
         return regressions
 
-    def _determine_regression_type(
-        self, metric_name: str, source: MetricSource
-    ) -> RegressionType:
+    def _determine_regression_type(self, metric_name: str, source: MetricSource) -> RegressionType:
         """Determine the type of regression for a metric."""
         # Latency metrics
-        if any(
-            keyword in metric_name.lower()
-            for keyword in ["latency", "time", "duration"]
-        ):
+        if any(keyword in metric_name.lower() for keyword in ["latency", "time", "duration"]):
             return RegressionType.LATENCY
 
         # Throughput metrics
-        if any(
-            keyword in metric_name.lower()
-            for keyword in ["throughput", "rate", "per_second"]
-        ):
+        if any(keyword in metric_name.lower() for keyword in ["throughput", "rate", "per_second"]):
             return RegressionType.THROUGHPUT
 
         # Memory metrics
@@ -343,9 +325,7 @@ class RegressionAnalyzer:
         if baseline_value == 0:
             return None
 
-        change_percent = (
-            (current_value - baseline_value) / baseline_value
-        ) * 100
+        change_percent = ((current_value - baseline_value) / baseline_value) * 100
 
         # For throughput and efficiency, negative change is bad
         if regression_type in [
@@ -360,17 +340,12 @@ class RegressionAnalyzer:
 
         # Perform t-test
         # Approximate t-test using summary statistics
-        pooled_std = np.sqrt(
-            (baseline_std**2 + current_stats.get("std", baseline_std) ** 2)
-            / 2
-        )
+        pooled_std = np.sqrt((baseline_std**2 + current_stats.get("std", baseline_std) ** 2) / 2)
 
         if pooled_std == 0:
             return None
 
-        t_statistic = abs(current_value - baseline_value) / (
-            pooled_std * np.sqrt(2 / sample_count)
-        )
+        t_statistic = abs(current_value - baseline_value) / (pooled_std * np.sqrt(2 / sample_count))
 
         # Approximate p-value
         df = 2 * sample_count - 2
@@ -419,9 +394,7 @@ class RegressionAnalyzer:
         else:
             return RegressionSeverity.CRITICAL
 
-    async def _check_architectural_limits(
-        self, summary: Dict[str, Any]
-    ) -> List[RegressionResult]:
+    async def _check_architectural_limits(self, summary: Dict[str, Any]) -> List[RegressionResult]:
         """Check metrics against documented architectural limits."""
         violations = []
 
@@ -433,19 +406,14 @@ class RegressionAnalyzer:
             for key, data in agent_metrics.items():
                 if "active_agents" in key:
                     active_agents = data["stats"]["latest"]
-                    if (
-                        active_agents
-                        > self._architectural_limits["agent"]["max_agents"]
-                    ):
+                    if active_agents > self._architectural_limits["agent"]["max_agents"]:
                         violations.append(
                             RegressionResult(
                                 metric_name="active_agents",
                                 source=MetricSource.AGENT,
                                 regression_type=RegressionType.EFFICIENCY,
                                 severity=RegressionSeverity.CRITICAL,
-                                baseline_value=self._architectural_limits[
-                                    "agent"
-                                ]["max_agents"],
+                                baseline_value=self._architectural_limits["agent"]["max_agents"],
                                 current_value=active_agents,
                                 change_percent=(active_agents - 50) / 50 * 100,
                                 confidence_level=1.0,
@@ -455,9 +423,7 @@ class RegressionAnalyzer:
                                 detected_at=datetime.now(),
                                 details={
                                     "limit_type": "architectural",
-                                    "expected_efficiency": self._architectural_limits[
-                                        "agent"
-                                    ][
+                                    "expected_efficiency": self._architectural_limits["agent"][
                                         "efficiency_at_50"
                                     ],
                                 },
@@ -466,16 +432,12 @@ class RegressionAnalyzer:
 
         # Check inference limits
         if MetricSource.INFERENCE.value in summary["sources"]:
-            inference_metrics = summary["sources"][
-                MetricSource.INFERENCE.value
-            ]
+            inference_metrics = summary["sources"][MetricSource.INFERENCE.value]
 
             for key, data in inference_metrics.items():
                 if "inference_time" in key:
                     latency = data["stats"]["p95"]
-                    target = self._architectural_limits["inference"][
-                        "target_latency_ms"
-                    ]
+                    target = self._architectural_limits["inference"]["target_latency_ms"]
                     if latency > target * 2:  # 2x target is a violation
                         violations.append(
                             RegressionResult(
@@ -485,9 +447,7 @@ class RegressionAnalyzer:
                                 severity=RegressionSeverity.MAJOR,
                                 baseline_value=target,
                                 current_value=latency,
-                                change_percent=(latency - target)
-                                / target
-                                * 100,
+                                change_percent=(latency - target) / target * 100,
                                 confidence_level=0.95,
                                 p_value=0.05,
                                 sample_size=data["stats"]["count"],
@@ -523,9 +483,7 @@ class RegressionAnalyzer:
         )
 
         if len(history) < 10:
-            raise ValueError(
-                f"Insufficient data for trend analysis: {len(history)} points"
-            )
+            raise ValueError(f"Insufficient data for trend analysis: {len(history)} points")
 
         # Convert to arrays
         timestamps = np.array([h[0].timestamp() for h in history])
@@ -548,28 +506,14 @@ class RegressionAnalyzer:
         if abs(slope) < 0.01:
             trend_direction = "stable"
         elif slope > 0:
-            trend_direction = (
-                "degrading"
-                if self._is_higher_worse(metric_name)
-                else "improving"
-            )
+            trend_direction = "degrading" if self._is_higher_worse(metric_name) else "improving"
         else:
-            trend_direction = (
-                "improving"
-                if self._is_higher_worse(metric_name)
-                else "degrading"
-            )
+            trend_direction = "improving" if self._is_higher_worse(metric_name) else "degrading"
 
         # Forecast future values
         current_time = timestamps[-1]
-        forecast_1h = (
-            slope * ((current_time + 3600 - timestamps[0]) / time_range)
-            + intercept
-        )
-        forecast_24h = (
-            slope * ((current_time + 86400 - timestamps[0]) / time_range)
-            + intercept
-        )
+        forecast_1h = slope * ((current_time + 3600 - timestamps[0]) / time_range) + intercept
+        forecast_24h = slope * ((current_time + 86400 - timestamps[0]) / time_range) + intercept
 
         # Detect change points (simplified)
         change_points = self._detect_change_points(timestamps, values)
@@ -714,9 +658,7 @@ class RegressionAnalyzer:
 
         # Add architectural limit violations
         architectural_violations = [
-            r
-            for r in regressions
-            if r.details.get("limit_type") == "architectural"
+            r for r in regressions if r.details.get("limit_type") == "architectural"
         ]
 
         if architectural_violations:
@@ -733,9 +675,7 @@ class RegressionAnalyzer:
 
         return "\n".join(report)
 
-    def _generate_recommendations(
-        self, regression: RegressionResult
-    ) -> List[str]:
+    def _generate_recommendations(self, regression: RegressionResult) -> List[str]:
         """Generate specific recommendations for a regression."""
         recommendations = []
 
@@ -746,9 +686,7 @@ class RegressionAnalyzer:
                     "Significant latency increase detected. Profile the operation "
                     "to identify bottlenecks."
                 )
-            recommendations.append(
-                "Consider implementing caching or optimizing algorithms."
-            )
+            recommendations.append("Consider implementing caching or optimizing algorithms.")
 
         elif regression.regression_type == RegressionType.MEMORY:
             recommendations.append(
@@ -782,8 +720,7 @@ class RegressionAnalyzer:
 
         elif regression.source == MetricSource.WEBSOCKET:
             recommendations.append(
-                "WebSocket performance issue. Check message queue sizes "
-                "and connection handling."
+                "WebSocket performance issue. Check message queue sizes " "and connection handling."
             )
 
         # Severity-based recommendations
@@ -847,9 +784,7 @@ class RegressionAnalyzer:
 
             # Determine if improvement or regression
             is_improvement = (
-                change_percent < 0
-                if self._is_higher_worse(metric)
-                else change_percent > 0
+                change_percent < 0 if self._is_higher_worse(metric) else change_percent > 0
             )
 
             if abs(change_percent) < 2:  # <2% change is noise
@@ -867,8 +802,7 @@ class RegressionAnalyzer:
             "unchanged": len(comparison["unchanged"]),
             "overall_verdict": (
                 "improved"
-                if len(comparison["improvements"])
-                > len(comparison["regressions"])
+                if len(comparison["improvements"]) > len(comparison["regressions"])
                 else "degraded"
             ),
         }

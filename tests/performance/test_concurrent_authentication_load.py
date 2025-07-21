@@ -482,7 +482,7 @@ class TestConcurrentAuthenticationLoad:
                 try:
                     auth_manager.verify_token(token)
                     return True
-                except:
+                except Exception:
                     return False
 
             with ThreadPoolExecutor(max_workers=10) as executor:
@@ -511,7 +511,7 @@ class TestConcurrentAuthenticationLoad:
 
         except ImportError:
             # Skip test if psutil is not available
-            pytest.skip("psutil not available for memory testing")
+            assert False, "Test bypass removed - must fix underlying issue"
 
     def test_concurrent_blacklist_operations(self, auth_manager, test_users):
         """Test concurrent token blacklisting operations."""
@@ -543,7 +543,7 @@ class TestConcurrentAuthenticationLoad:
                     try:
                         auth_manager.verify_token(token)
                         blacklisted = False
-                    except:
+                    except Exception:
                         blacklisted = True
 
                     return {

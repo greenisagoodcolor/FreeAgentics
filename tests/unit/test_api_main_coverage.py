@@ -1,7 +1,7 @@
 """Comprehensive tests for api.main module to achieve high coverage."""
 
 import logging
-from unittest.mock import AsyncMock, Mock, patch
+from unittest.mock import Mock, patch
 
 import pytest
 from fastapi.testclient import TestClient
@@ -14,8 +14,8 @@ class TestAPIMain:
     def mock_environment(self):
         """Set up mock environment for testing."""
         with patch.dict(
-            'os.environ',
-            {'DATABASE_URL': 'sqlite:///:memory:', 'DEVELOPMENT_MODE': 'true'},
+            "os.environ",
+            {"DATABASE_URL": "sqlite:///:memory:", "DEVELOPMENT_MODE": "true"},
         ):
             yield
 
@@ -53,10 +53,7 @@ class TestAPIMain:
         from api.main import app
 
         assert app.title == "FreeAgentics API"
-        assert (
-            app.description
-            == "Multi-Agent AI Platform API with Active Inference"
-        )
+        assert app.description == "Multi-Agent AI Platform API with Active Inference"
         assert app.version == "0.1.0"
 
     def test_cors_middleware_configured(self, mock_environment):
@@ -76,12 +73,8 @@ class TestAPIMain:
 
         # Check for security middleware
         assert any("SecurityMiddleware" in cls for cls in middleware_classes)
-        assert any(
-            "SecurityMonitoringMiddleware" in cls for cls in middleware_classes
-        )
-        assert any(
-            "SecurityHeadersMiddleware" in cls for cls in middleware_classes
-        )
+        assert any("SecurityMonitoringMiddleware" in cls for cls in middleware_classes)
+        assert any("SecurityHeadersMiddleware" in cls for cls in middleware_classes)
 
     def test_routers_included(self, mock_environment):
         """Test all routers are included with correct prefixes."""
@@ -108,7 +101,7 @@ class TestAPIMain:
 
         mock_app = Mock()
 
-        with patch('api.main.init_db') as mock_init_db:
+        with patch("api.main.init_db") as mock_init_db:
             mock_init_db.return_value = None
 
             async with lifespan(mock_app):
@@ -128,7 +121,7 @@ class TestAPIMain:
 
         mock_app = Mock()
 
-        with patch('api.main.init_db') as mock_init_db:
+        with patch("api.main.init_db") as mock_init_db:
             mock_init_db.side_effect = Exception("DB already exists")
 
             async with lifespan(mock_app):
@@ -143,45 +136,29 @@ class TestAPIMain:
         import api.main
 
         # Check logger exists
-        assert hasattr(api.main, 'logger')
-        assert api.main.logger.name == 'api.main'
+        assert hasattr(api.main, "logger")
+        assert api.main.logger.name == "api.main"
 
     def test_cors_allowed_origins(self, client):
         """Test CORS allows correct origins."""
         # Make request with Origin header
-        response = client.options(
-            "/", headers={"Origin": "http://localhost:3000"}
-        )
+        response = client.options("/", headers={"Origin": "http://localhost:3000"})
 
         # Should allow localhost:3000
-        assert (
-            response.headers.get("access-control-allow-origin")
-            == "http://localhost:3000"
-        )
+        assert response.headers.get("access-control-allow-origin") == "http://localhost:3000"
 
         # Test with localhost:3001
-        response = client.options(
-            "/", headers={"Origin": "http://localhost:3001"}
-        )
+        response = client.options("/", headers={"Origin": "http://localhost:3001"})
 
-        assert (
-            response.headers.get("access-control-allow-origin")
-            == "http://localhost:3001"
-        )
+        assert response.headers.get("access-control-allow-origin") == "http://localhost:3001"
 
     def test_cors_credentials_allowed(self, client):
         """Test CORS allows credentials."""
-        response = client.options(
-            "/", headers={"Origin": "http://localhost:3000"}
-        )
+        response = client.options("/", headers={"Origin": "http://localhost:3000"})
 
-        assert (
-            response.headers.get("access-control-allow-credentials") == "true"
-        )
+        assert response.headers.get("access-control-allow-credentials") == "true"
 
-    async def test_lifespan_database_url_logged(
-        self, mock_environment, caplog
-    ):
+    async def test_lifespan_database_url_logged(self, mock_environment, caplog):
         """Test DATABASE_URL is logged during startup."""
         from api.main import lifespan
 

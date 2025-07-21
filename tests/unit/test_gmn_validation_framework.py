@@ -71,19 +71,13 @@ class TestGMNSyntaxValidation:
         """Test that non-dictionary specification fails validation."""
         validator = GMNSyntaxValidator()
 
-        with pytest.raises(
-            GMNValidationError, match="Specification must be a dictionary"
-        ):
+        with pytest.raises(GMNValidationError, match="Specification must be a dictionary"):
             validator.validate("invalid")
 
-        with pytest.raises(
-            GMNValidationError, match="Specification must be a dictionary"
-        ):
+        with pytest.raises(GMNValidationError, match="Specification must be a dictionary"):
             validator.validate([])
 
-        with pytest.raises(
-            GMNValidationError, match="Specification must be a dictionary"
-        ):
+        with pytest.raises(GMNValidationError, match="Specification must be a dictionary"):
             validator.validate(None)
 
     def test_missing_required_top_level_fields_fails_validation(self):
@@ -91,15 +85,11 @@ class TestGMNSyntaxValidation:
         validator = GMNSyntaxValidator()
 
         # Missing nodes field
-        with pytest.raises(
-            GMNValidationError, match="Missing required field: nodes"
-        ):
+        with pytest.raises(GMNValidationError, match="Missing required field: nodes"):
             validator.validate({"edges": []})
 
         # Invalid nodes type
-        with pytest.raises(
-            GMNValidationError, match="Field 'nodes' must be a list"
-        ):
+        with pytest.raises(GMNValidationError, match="Field 'nodes' must be a list"):
             validator.validate({"nodes": "invalid"})
 
     def test_invalid_node_structure_fails_validation(self):
@@ -108,22 +98,16 @@ class TestGMNSyntaxValidation:
 
         # Non-dict node
         spec = {"nodes": ["invalid_node"]}
-        with pytest.raises(
-            GMNValidationError, match="Node must be a dictionary"
-        ):
+        with pytest.raises(GMNValidationError, match="Node must be a dictionary"):
             validator.validate(spec)
 
         # Missing required fields
         spec = {"nodes": [{}]}
-        with pytest.raises(
-            GMNValidationError, match="Missing required field: name"
-        ):
+        with pytest.raises(GMNValidationError, match="Missing required field: name"):
             validator.validate(spec)
 
         spec = {"nodes": [{"name": "test"}]}
-        with pytest.raises(
-            GMNValidationError, match="Missing required field: type"
-        ):
+        with pytest.raises(GMNValidationError, match="Missing required field: type"):
             validator.validate(spec)
 
     def test_invalid_node_names_fail_validation(self):
@@ -132,16 +116,12 @@ class TestGMNSyntaxValidation:
 
         # Empty name
         spec = {"nodes": [{"name": "", "type": "state"}]}
-        with pytest.raises(
-            GMNValidationError, match="Node name cannot be empty"
-        ):
+        with pytest.raises(GMNValidationError, match="Node name cannot be empty"):
             validator.validate(spec)
 
         # Invalid characters in name
         spec = {"nodes": [{"name": "node-with-dashes", "type": "state"}]}
-        with pytest.raises(
-            GMNValidationError, match="Node name contains invalid characters"
-        ):
+        with pytest.raises(GMNValidationError, match="Node name contains invalid characters"):
             validator.validate(spec)
 
         # Duplicate names
@@ -151,9 +131,7 @@ class TestGMNSyntaxValidation:
                 {"name": "duplicate", "type": "observation"},
             ]
         }
-        with pytest.raises(
-            GMNValidationError, match="Duplicate node name: duplicate"
-        ):
+        with pytest.raises(GMNValidationError, match="Duplicate node name: duplicate"):
             validator.validate(spec)
 
     def test_invalid_edge_structure_fails_validation(self):
@@ -165,16 +143,12 @@ class TestGMNSyntaxValidation:
             "nodes": [{"name": "node1", "type": "state"}],
             "edges": ["invalid_edge"],
         }
-        with pytest.raises(
-            GMNValidationError, match="Edge must be a dictionary"
-        ):
+        with pytest.raises(GMNValidationError, match="Edge must be a dictionary"):
             validator.validate(spec)
 
         # Missing required edge fields
         spec = {"nodes": [{"name": "node1", "type": "state"}], "edges": [{}]}
-        with pytest.raises(
-            GMNValidationError, match="Missing required field: from"
-        ):
+        with pytest.raises(GMNValidationError, match="Missing required field: from"):
             validator.validate(spec)
 
     def test_malformed_gmn_text_format_fails_validation(self):
@@ -212,9 +186,7 @@ class TestGMNSemanticValidation:
             ],
             "edges": [],
         }
-        with pytest.raises(
-            GMNValidationError, match="Unreferenced node: orphan_node"
-        ):
+        with pytest.raises(GMNValidationError, match="Unreferenced node: orphan_node"):
             validator.validate(spec)
 
     def test_circular_dependencies_fail_validation(self):
@@ -233,9 +205,7 @@ class TestGMNSemanticValidation:
                 {"from": "node3", "to": "node1", "type": "depends_on"},
             ],
         }
-        with pytest.raises(
-            GMNValidationError, match="Circular dependency detected"
-        ):
+        with pytest.raises(GMNValidationError, match="Circular dependency detected"):
             validator.validate(spec)
 
     def test_invalid_edge_relationships_fail_validation(self):
@@ -356,12 +326,8 @@ class TestGMNMathematicalValidation:
         validator = GMNMathematicalValidator()
 
         # Zero or negative dimensions
-        spec = {
-            "nodes": [{"name": "state1", "type": "state", "num_states": 0}]
-        }
-        with pytest.raises(
-            GMNValidationError, match="Number of states must be positive"
-        ):
+        spec = {"nodes": [{"name": "state1", "type": "state", "num_states": 0}]}
+        with pytest.raises(GMNValidationError, match="Number of states must be positive"):
             validator.validate(spec)
 
         # Invalid precision values
@@ -374,9 +340,7 @@ class TestGMNMathematicalValidation:
                 }
             ]
         }
-        with pytest.raises(
-            GMNValidationError, match="Precision must be positive"
-        ):
+        with pytest.raises(GMNValidationError, match="Precision must be positive"):
             validator.validate(spec)
 
     def test_matrix_constraint_violations_fail_validation(self):
@@ -396,9 +360,7 @@ class TestGMNMathematicalValidation:
                 }
             ]
         }
-        with pytest.raises(
-            GMNValidationError, match="Transition matrix columns must sum to 1"
-        ):
+        with pytest.raises(GMNValidationError, match="Transition matrix columns must sum to 1"):
             validator.validate(spec)
 
 
@@ -410,9 +372,7 @@ class TestGMNTypeValidation:
         validator = GMNTypeValidator()
 
         spec = {"nodes": [{"name": "invalid", "type": "invalid_type"}]}
-        with pytest.raises(
-            GMNValidationError, match="Invalid node type: invalid_type"
-        ):
+        with pytest.raises(GMNValidationError, match="Invalid node type: invalid_type"):
             validator.validate(spec)
 
     def test_invalid_edge_types_fail_validation(self):
@@ -424,13 +384,9 @@ class TestGMNTypeValidation:
                 {"name": "node1", "type": "state"},
                 {"name": "node2", "type": "observation"},
             ],
-            "edges": [
-                {"from": "node1", "to": "node2", "type": "invalid_edge_type"}
-            ],
+            "edges": [{"from": "node1", "to": "node2", "type": "invalid_edge_type"}],
         }
-        with pytest.raises(
-            GMNValidationError, match="Invalid edge type: invalid_edge_type"
-        ):
+        with pytest.raises(GMNValidationError, match="Invalid edge type: invalid_edge_type"):
             validator.validate(spec)
 
     def test_missing_required_attributes_for_node_types_fail_validation(self):
@@ -438,9 +394,7 @@ class TestGMNTypeValidation:
         validator = GMNTypeValidator()
 
         # State node missing num_states
-        spec = {
-            "nodes": [{"name": "state1", "type": "state"}]
-        }  # Missing num_states
+        spec = {"nodes": [{"name": "state1", "type": "state"}]}  # Missing num_states
         with pytest.raises(
             GMNValidationError,
             match="State node 'state1' missing required attribute: num_states",
@@ -448,9 +402,7 @@ class TestGMNTypeValidation:
             validator.validate(spec)
 
         # Belief node missing about
-        spec = {
-            "nodes": [{"name": "belief1", "type": "belief"}]
-        }  # Missing about
+        spec = {"nodes": [{"name": "belief1", "type": "belief"}]}  # Missing about
         with pytest.raises(
             GMNValidationError,
             match="Belief node 'belief1' missing required attribute: about",
@@ -462,14 +414,8 @@ class TestGMNTypeValidation:
         validator = GMNTypeValidator()
 
         # num_states should be integer
-        spec = {
-            "nodes": [
-                {"name": "state1", "type": "state", "num_states": "invalid"}
-            ]
-        }
-        with pytest.raises(
-            GMNValidationError, match="num_states must be an integer"
-        ):
+        spec = {"nodes": [{"name": "state1", "type": "state", "num_states": "invalid"}]}
+        with pytest.raises(GMNValidationError, match="num_states must be an integer"):
             validator.validate(spec)
 
         # initial_distribution should be list
@@ -482,9 +428,7 @@ class TestGMNTypeValidation:
                 }
             ]
         }
-        with pytest.raises(
-            GMNValidationError, match="initial_distribution must be a list"
-        ):
+        with pytest.raises(GMNValidationError, match="initial_distribution must be a list"):
             validator.validate(spec)
 
 
@@ -529,9 +473,7 @@ class TestGMNConstraintValidation:
                 }
             ]
         }
-        with pytest.raises(
-            GMNValidationError, match="Conflicting entropy constraints"
-        ):
+        with pytest.raises(GMNValidationError, match="Conflicting entropy constraints"):
             validator.validate(spec)
 
     def test_invalid_business_rules_fail_validation(self):
@@ -539,11 +481,7 @@ class TestGMNConstraintValidation:
         validator = GMNConstraintValidator()
 
         # Action space too large
-        spec = {
-            "nodes": [
-                {"name": "action1", "type": "action", "num_actions": 1000000}
-            ]
-        }
+        spec = {"nodes": [{"name": "action1", "type": "action", "num_actions": 1000000}]}
         with pytest.raises(GMNValidationError, match="Action space too large"):
             validator.validate(spec)
 
@@ -597,9 +535,7 @@ class TestGMNValidationFrameworkIntegration:
             "edges": [{"from": "state1", "to": "obs1", "type": "generates"}],
         }
 
-        with pytest.raises(
-            GMNValidationError, match="Suspicious dimension ratio"
-        ):
+        with pytest.raises(GMNValidationError, match="Suspicious dimension ratio"):
             framework.validate_with_reality_checks(problematic_spec)
 
     def test_valid_specifications_pass_all_validation(self):
@@ -616,9 +552,7 @@ class TestGMNValidationFrameworkIntegration:
                 },
                 {"name": "move", "type": "action", "num_actions": 4},
             ],
-            "edges": [
-                {"from": "location", "to": "obs_location", "type": "generates"}
-            ],
+            "edges": [{"from": "location", "to": "obs_location", "type": "generates"}],
         }
 
         # Should not raise any exceptions
@@ -630,11 +564,7 @@ class TestGMNValidationFrameworkIntegration:
         """Test that validation error messages provide comprehensive information."""
         framework = GMNValidationFramework()
 
-        invalid_spec = {
-            "nodes": [
-                {"name": "test", "type": "invalid_type", "num_states": -1}
-            ]
-        }
+        invalid_spec = {"nodes": [{"name": "test", "type": "invalid_type", "num_states": -1}]}
 
         with pytest.raises(GMNValidationError) as exc_info:
             framework.validate(invalid_spec)

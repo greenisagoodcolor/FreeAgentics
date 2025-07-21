@@ -1,11 +1,8 @@
 """Comprehensive tests for base_agent.py module to achieve 100% coverage."""
 
-import logging
-
 # Mock modules before import
 import sys
-from datetime import datetime
-from unittest.mock import MagicMock, Mock, patch
+from unittest.mock import MagicMock, patch
 
 import numpy as np
 import pytest
@@ -51,9 +48,7 @@ class TestSafeArrayToInt:
     def test_empty_numpy_array(self):
         """Test empty numpy array raises ValueError."""
         value = np.array([])
-        with pytest.raises(
-            ValueError, match="Empty array cannot be converted to integer"
-        ):
+        with pytest.raises(ValueError, match="Empty array cannot be converted to integer"):
             safe_array_to_int(value)
 
     def test_list_input(self):
@@ -64,9 +59,7 @@ class TestSafeArrayToInt:
     def test_empty_list(self):
         """Test empty list raises ValueError."""
         value = []
-        with pytest.raises(
-            ValueError, match="Empty array cannot be converted to integer"
-        ):
+        with pytest.raises(ValueError, match="Empty array cannot be converted to integer"):
             safe_array_to_int(value)
 
     def test_tuple_input(self):
@@ -266,9 +259,7 @@ class TestBasicExplorerAgent:
             ]
 
             for center_val, expected_obs in test_cases:
-                surroundings = np.array(
-                    [[0, 0, 0], [0, center_val, 0], [0, 0, 0]]
-                )
+                surroundings = np.array([[0, 0, 0], [0, center_val, 0], [0, 0, 0]])
                 observation = {"surroundings": surroundings}
                 agent.perceive(observation)
 
@@ -309,9 +300,7 @@ class TestBasicExplorerAgent:
 
         agent.update_beliefs()
 
-        mock_pymdp.infer_states.assert_called_once_with(
-            agent.current_observation
-        )
+        mock_pymdp.infer_states.assert_called_once_with(agent.current_observation)
 
     def test_update_beliefs_pymdp_error(self):
         """Test update_beliefs with PyMDP error handling."""
@@ -440,7 +429,7 @@ class TestBasicExplorerAgent:
 
         observation = {"position": [1, 1]}
 
-        with patch("agents.base_agent.measure_agent_step") as mock_measure:
+        with patch("agents.base_agent.measure_agent_step"):
             action = agent.step(observation)
 
         assert action in agent.actions
@@ -450,9 +439,7 @@ class TestBasicExplorerAgent:
         """Test step method with error handling."""
         agent = BasicExplorerAgent("test", "test")
 
-        with patch.object(
-            agent, "update_beliefs", side_effect=Exception("Error")
-        ):
+        with patch.object(agent, "update_beliefs", side_effect=Exception("Error")):
             observation = {"position": [1, 1]}
             action = agent.step(observation)
 
@@ -485,9 +472,7 @@ class TestBasicExplorerAgent:
         agent.position = [1, 1]
         agent.uncertainty_map[1, 1] = 0.5
 
-        with patch(
-            "agents.base_agent.record_agent_lifecycle_event"
-        ) as mock_record:
+        with patch("agents.base_agent.record_agent_lifecycle_event"):
             agent.reset()
 
         # Should reset to initial state
@@ -497,12 +482,8 @@ class TestBasicExplorerAgent:
         """Test PyMDP initialization method."""
         with patch("agents.base_agent.PYMDP_AVAILABLE", True):
             with patch("agents.base_agent.utils") as mock_utils:
-                mock_utils.initialize_empty_A.return_value = [
-                    np.ones((5, 100))
-                ]
-                mock_utils.initialize_empty_B.return_value = [
-                    np.ones((100, 100, 5))
-                ]
+                mock_utils.initialize_empty_A.return_value = [np.ones((5, 100))]
+                mock_utils.initialize_empty_B.return_value = [np.ones((100, 100, 5))]
 
                 agent = BasicExplorerAgent("test", "test")
                 agent._initialize_pymdp()
@@ -515,9 +496,7 @@ class TestBasicExplorerAgent:
         """Test PyMDP initialization with error."""
         with patch("agents.base_agent.PYMDP_AVAILABLE", True):
             with patch("agents.base_agent.utils") as mock_utils:
-                mock_utils.initialize_empty_A.side_effect = Exception(
-                    "Init error"
-                )
+                mock_utils.initialize_empty_A.side_effect = Exception("Init error")
 
                 agent = BasicExplorerAgent("test", "test")
                 agent._initialize_pymdp()

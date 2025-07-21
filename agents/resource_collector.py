@@ -16,15 +16,12 @@ from agents.base_agent import (
     safe_array_to_int,
 )
 from agents.error_handling import (
-    InferenceError,
     PyMDPError,
     safe_pymdp_operation,
-    with_error_handling,
 )
 from agents.pymdp_error_handling import (
     PyMDPErrorHandler,
     safe_array_index,
-    safe_numpy_conversion,
     validate_pymdp_matrices,
 )
 
@@ -171,9 +168,7 @@ class ResourceCollectorAgent(ActiveInferenceAgent):
             # Validate matrices before creating PyMDP agent
             is_valid, validation_msg = validate_pymdp_matrices(A, B, C, D)
             if not is_valid:
-                raise ValueError(
-                    f"PyMDP matrix validation failed: {validation_msg}"
-                )
+                raise ValueError(f"PyMDP matrix validation failed: {validation_msg}")
 
             # Create PyMDP agent with simplified configuration
             self.pymdp_agent = PyMDPAgent(
@@ -188,9 +183,7 @@ class ResourceCollectorAgent(ActiveInferenceAgent):
                 inference_horizon=3,
             )
 
-            logger.info(
-                f"Initialized PyMDP for resource collector {self.agent_id}"
-            )
+            logger.info(f"Initialized PyMDP for resource collector {self.agent_id}")
 
         except Exception as e:
             logger.error(f"Failed to initialize PyMDP: {e}")
@@ -220,9 +213,8 @@ class ResourceCollectorAgent(ActiveInferenceAgent):
         max_len = max(len(p) for p in policies)
         padded_policies = []
         for policy in policies:
-            padded = policy + [policy[-1]] * (
-                max_len - len(policy)
-            )  # Repeat last action
+            padded = policy +
+                [policy[-1]] * (max_len - len(policy))  # Repeat last action
             padded_policies.append(padded)
 
         return np.array(padded_policies)
@@ -288,15 +280,12 @@ class ResourceCollectorAgent(ActiveInferenceAgent):
                 self.resource_memory[pos]["collected"] = True
                 self.resource_memory[pos]["last_seen"] = current_time
 
-    def _assess_resource_value(
-        self, observation: Dict[str, Any]
-    ) -> Dict[str, Any]:
+    def _assess_resource_value(self, observation: Dict[str, Any]) -> Dict[str, Any]:
         """Use LLM to assess resource value and strategy."""
         try:
             visible_resources = [
-                cell
-                for cell in observation.get("visible_cells", [])
-                if cell["type"] == "resource"
+                cell for cell in observation.get("visible_cells", []) if
+                    cell["type"] == "resource"
             ]
 
             if visible_resources:
@@ -360,9 +349,7 @@ class ResourceCollectorAgent(ActiveInferenceAgent):
                     if success:
                         # Convert numpy array to scalar for dictionary lookup
                         action_idx = safe_array_to_int(action_idx)
-                        action = safe_array_index(
-                            self.action_map, action_idx, "stay"
-                        )
+                        action = safe_array_index(self.action_map, action_idx, "stay")
                     else:
                         logger.warning(f"Action sampling failed: {error}")
                         action = self._fallback_action_selection()
@@ -371,10 +358,8 @@ class ResourceCollectorAgent(ActiveInferenceAgent):
                     action = self._fallback_action_selection()
 
                 # Override if necessary
-                if (
-                    self.current_load >= self.carrying_capacity
-                    and action != "return_to_base"
-                ):
+                if self.current_load >= self.carrying_capacity and
+                    action != "return_to_base":
                     action = "return_to_base"
 
             except Exception as e:
@@ -389,9 +374,7 @@ class ResourceCollectorAgent(ActiveInferenceAgent):
         # Update metrics
         self._update_collection_metrics(action)
 
-        logger.debug(
-            f"Resource collector {self.agent_id} selected action: {action}"
-        )
+        logger.debug(f"Resource collector {self.agent_id} selected action: {action}")
         return action
 
     def _fallback_action_selection(self) -> str:
@@ -400,10 +383,7 @@ class ResourceCollectorAgent(ActiveInferenceAgent):
         current_pos = tuple(self.position)
         if current_pos in self.resource_memory:
             resource = self.resource_memory[current_pos]
-            if (
-                not resource["collected"]
-                and self.current_load < self.carrying_capacity
-            ):
+            if not resource["collected"] and self.current_load < self.carrying_capacity:
                 return "collect"
 
         # Find nearest known resource
@@ -421,9 +401,8 @@ class ResourceCollectorAgent(ActiveInferenceAgent):
 
         for pos, resource in self.resource_memory.items():
             if not resource["collected"]:
-                distance = abs(pos[0] - self.position[0]) + abs(
-                    pos[1] - self.position[1]
-                )
+                distance = abs(pos[0] - self.position[0]) +
+                    abs(pos[1] - self.position[1])
                 if distance < min_distance:
                     min_distance = distance
                     nearest = pos
@@ -474,26 +453,21 @@ class ResourceCollectorAgent(ActiveInferenceAgent):
         """Update collection efficiency metrics."""
         if action in ["up", "down", "left", "right"]:
             self.metrics["movement_cost"] = (
-                self.metrics.get("movement_cost", 0)
-                + self.energy_cost_per_move
+                self.metrics.get("movement_cost", 0) + self.energy_cost_per_move
             )
         elif action == "collect":
             self.metrics["collection_cost"] = (
-                self.metrics.get("collection_cost", 0)
-                + self.energy_cost_per_collect
+                self.metrics.get("collection_cost", 0) + self.energy_cost_per_collect
             )
-            self.metrics["collections"] = (
-                self.metrics.get("collections", 0) + 1
-            )
+            self.metrics["collections"] = self.metrics.get("collections", 0) + 1
 
         # Calculate efficiency
         if self.metrics.get("collections", 0) > 0:
-            total_cost = self.metrics.get(
-                "movement_cost", 0
-            ) + self.metrics.get("collection_cost", 0)
-            self.collection_efficiency = self.metrics["collections"] / max(
-                total_cost, 1.0
+            total_cost = self.metrics.get("movement_cost", 0) + self.metrics.get(
+                "collection_cost", 0
             )
+            self.collection_efficiency = self.metrics["collections"] / max(total_cost,
+                1.0)
 
     def get_status(self) -> Dict[str, Any]:
         """Get collector agent status."""
@@ -503,11 +477,7 @@ class ResourceCollectorAgent(ActiveInferenceAgent):
                 "collected_resources": self.collected_resources,
                 "current_load": f"{self.current_load}/{self.carrying_capacity}",
                 "known_resources": len(
-                    [
-                        r
-                        for r in self.resource_memory.values()
-                        if not r["collected"]
-                    ]
+                    [r for r in self.resource_memory.values() if not r["collected"]]
                 ),
                 "collection_efficiency": round(self.collection_efficiency, 3),
                 "resource_memory_size": len(self.resource_memory),
@@ -515,9 +485,7 @@ class ResourceCollectorAgent(ActiveInferenceAgent):
         )
         return status
 
-    def _get_next_position(
-        self, x: int, y: int, action: int
-    ) -> Tuple[int, int]:
+    def _get_next_position(self, x: int, y: int, action: int) -> Tuple[int, int]:
         """Get next position based on action."""
         if action == 0:  # up
             y = max(0, y - 1)
@@ -530,9 +498,7 @@ class ResourceCollectorAgent(ActiveInferenceAgent):
 
         return x, y
 
-    def _observation_to_index(
-        self, observation: Dict[str, Any]
-    ) -> Optional[int]:
+    def _observation_to_index(self, observation: Dict[str, Any]) -> Optional[int]:
         """Convert observation to PyMDP index."""
         if "cell_type" not in observation:
             return None
@@ -560,32 +526,22 @@ class ResourceCollectorAgent(ActiveInferenceAgent):
             fe_components = {}
 
             # Get belief entropy if available
-            if (
-                hasattr(self.pymdp_agent, "qs")
-                and self.pymdp_agent.qs is not None
-            ):
+            if hasattr(self.pymdp_agent, "qs") and self.pymdp_agent.qs is not None:
                 qs = self.pymdp_agent.qs
                 if isinstance(qs, list):
                     # Handle multiple factors
                     belief_entropy = 0
                     for factor in qs:
                         if hasattr(factor, "shape") and factor.size > 0:
-                            belief_entropy += -np.sum(
-                                factor * np.log(factor + 1e-16)
-                            )
+                            belief_entropy += -np.sum(factor * np.log(factor + 1e-16))
                 else:
                     # Single factor
                     belief_entropy = -np.sum(qs * np.log(qs + 1e-16))
                 fe_components["belief_entropy"] = float(belief_entropy)
 
             # Expected free energy (simplified)
-            if (
-                hasattr(self.pymdp_agent, "G")
-                and self.pymdp_agent.G is not None
-            ):
-                fe_components["expected_free_energy"] = float(
-                    np.mean(self.pymdp_agent.G)
-                )
+            if hasattr(self.pymdp_agent, "G") and self.pymdp_agent.G is not None:
+                fe_components["expected_free_energy"] = float(np.mean(self.pymdp_agent.G))
 
             return fe_components
 

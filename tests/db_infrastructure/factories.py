@@ -27,9 +27,7 @@ class BaseFactory:
     @staticmethod
     def random_string(length: int = 10) -> str:
         """Generate a random string."""
-        return "".join(
-            random.choices(string.ascii_lowercase + string.digits, k=length)
-        )
+        return "".join(random.choices(string.ascii_lowercase + string.digits, k=length))
 
     @staticmethod
     def random_uuid() -> str:
@@ -95,9 +93,7 @@ class AgentFactory(BaseFactory):
                 "lon": -122.4194 + random.uniform(-0.1, 0.1),
                 "elevation": random.uniform(0, 100),
             },
-            "capabilities": random.sample(
-                cls.CAPABILITIES, k=random.randint(2, 5)
-            ),
+            "capabilities": random.sample(cls.CAPABILITIES, k=random.randint(2, 5)),
             "parameters": {
                 "speed": random.uniform(0.5, 2.0),
                 "range": random.uniform(10, 100),
@@ -120,9 +116,7 @@ class AgentFactory(BaseFactory):
         return agent
 
     @classmethod
-    def create_batch(
-        cls, session: Session, count: int = 10, **kwargs
-    ) -> List[Agent]:
+    def create_batch(cls, session: Session, count: int = 10, **kwargs) -> List[Agent]:
         """Create multiple agents in a batch.
 
         Args:
@@ -177,9 +171,7 @@ class CoalitionFactory(BaseFactory):
     ]
 
     @classmethod
-    def create(
-        cls, session: Session, agents: Optional[List[Agent]] = None, **kwargs
-    ) -> Coalition:
+    def create(cls, session: Session, agents: Optional[List[Agent]] = None, **kwargs) -> Coalition:
         """Create a test coalition with agents.
 
         Args:
@@ -192,9 +184,7 @@ class CoalitionFactory(BaseFactory):
         """
         if agents is None:
             # Create some agents for the coalition
-            agents = AgentFactory.create_batch(
-                session, count=random.randint(3, 7)
-            )
+            agents = AgentFactory.create_batch(session, count=random.randint(3, 7))
 
         defaults = {
             "coalition_id": f"coalition_{cls.random_uuid()}",
@@ -258,13 +248,9 @@ class KnowledgeGraphFactory(BaseFactory):
                 "source": f"agent_{cls.random_string(6)}",
                 "confidence": random.uniform(0.5, 1.0),
                 "timestamp": datetime.utcnow().isoformat(),
-                "tags": random.sample(
-                    ["physics", "behavior", "environment", "agent"], k=2
-                ),
+                "tags": random.sample(["physics", "behavior", "environment", "agent"], k=2),
             },
-            "embedding": [
-                random.random() for _ in range(128)
-            ],  # Mock embedding
+            "embedding": [random.random() for _ in range(128)],  # Mock embedding
             "created_at": cls.random_timestamp(days_ago=14),
             "updated_at": datetime.utcnow(),
         }
@@ -479,9 +465,7 @@ class TestDataGenerator:
                     source = random.choice(all_nodes)
                     target = random.choice(all_nodes)
                     if source.node_id != target.node_id:
-                        KnowledgeGraphFactory.create_edge(
-                            session, source, target
-                        )
+                        KnowledgeGraphFactory.create_edge(session, source, target)
                         edges_added += 1
 
                 history.append(
@@ -555,9 +539,7 @@ if __name__ == "__main__":
         # Test coalition creation
         print("\nCreating coalition...")
         coalition = CoalitionFactory.create(session, agents=agents[:3])
-        print(
-            f"✅ Created coalition: {coalition.coalition_id} with {len(coalition.agents)} agents"
-        )
+        print(f"✅ Created coalition: {coalition.coalition_id} with {len(coalition.agents)} agents")
 
         # Test knowledge graph
         print("\nCreating knowledge graph...")

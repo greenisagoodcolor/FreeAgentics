@@ -10,12 +10,11 @@ This module implements an identity-aware proxy that:
 
 import asyncio
 import hashlib
-import json
 import logging
 import time
 from dataclasses import dataclass, field
-from datetime import datetime, timedelta
-from typing import Any, Dict, List, Optional, Set, Tuple
+from datetime import datetime
+from typing import Any, Dict, List, Optional, Tuple
 
 from fastapi import HTTPException, Request, status
 
@@ -144,9 +143,7 @@ class IdentityAwareProxy:
 
             # Validate mTLS if enabled
             if self.config.enable_mtls:
-                cert_valid, cert_fingerprint = await self._validate_mtls(
-                    request, source_service
-                )
+                cert_valid, cert_fingerprint = await self._validate_mtls(request, source_service)
                 context.mtls_verified = cert_valid
                 context.certificate_fingerprint = cert_fingerprint
 
@@ -194,9 +191,7 @@ class IdentityAwareProxy:
             # Log validation time
             validation_time_ms = (time.time() - start_time) * 1000
             if validation_time_ms > 10:
-                logger.warning(
-                    f"Request validation took {validation_time_ms:.2f}ms"
-                )
+                logger.warning(f"Request validation took {validation_time_ms:.2f}ms")
 
             return context
 
@@ -246,9 +241,7 @@ class IdentityAwareProxy:
             # Calculate fingerprint
             from cryptography.hazmat.primitives import serialization
 
-            fingerprint = hashlib.sha256(
-                cert.public_bytes(serialization.Encoding.DER)
-            ).hexdigest()
+            fingerprint = hashlib.sha256(cert.public_bytes(serialization.Encoding.DER)).hexdigest()
 
             return True, fingerprint
 
@@ -288,9 +281,7 @@ class IdentityAwareProxy:
 
         return False
 
-    def _evaluate_policy_conditions(
-        self, policy: ServicePolicy, context: RequestContext
-    ) -> bool:
+    def _evaluate_policy_conditions(self, policy: ServicePolicy, context: RequestContext) -> bool:
         """Evaluate policy conditions."""
         for condition_key, condition_value in policy.conditions.items():
             if condition_key == "time_window":
@@ -326,8 +317,7 @@ class IdentityAwareProxy:
         cached_score = self._risk_cache.get(session_id)
         if (
             cached_score
-            and (datetime.utcnow() - cached_score.timestamp).total_seconds()
-            < self._risk_cache_ttl
+            and (datetime.utcnow() - cached_score.timestamp).total_seconds() < self._risk_cache_ttl
         ):
             return cached_score
 
@@ -375,9 +365,7 @@ class IdentityAwareProxy:
 
         return risk_score
 
-    def _extract_risk_factors(
-        self, request: Request, context: RequestContext
-    ) -> Dict[str, Any]:
+    def _extract_risk_factors(self, request: Request, context: RequestContext) -> Dict[str, Any]:
         """Extract risk factors from request."""
         factors = {}
 
@@ -397,18 +385,14 @@ class IdentityAwareProxy:
             factors["unusual_time"] = True
 
         # Check failed attempts
-        factors["failed_attempts"] = self._failed_attempts.get(
-            context.client_ip, 0
-        )
+        factors["failed_attempts"] = self._failed_attempts.get(context.client_ip, 0)
 
         # Placeholder for ML-based anomaly detection
         factors["anomaly_score"] = 0.1  # Would be calculated by ML model
 
         return factors
 
-    async def start_continuous_verification(
-        self, session_id: str, request: Request
-    ) -> None:
+    async def start_continuous_verification(self, session_id: str, request: Request) -> None:
         """Start continuous verification for a session."""
         async with self._session_lock:
             if session_id in self._sessions:
@@ -453,9 +437,7 @@ class IdentityAwareProxy:
                 if session_id in self._sessions:
                     del self._sessions[session_id]
 
-    async def _perform_verification(
-        self, session: VerificationSession
-    ) -> None:
+    async def _perform_verification(self, session: VerificationSession) -> None:
         """Perform a verification check on a session."""
         session.last_verification = datetime.utcnow()
         session.verification_count += 1
@@ -463,16 +445,12 @@ class IdentityAwareProxy:
         # Calculate current risk score
         risk_factors = {
             "verification_count": session.verification_count,
-            "session_duration": (
-                datetime.utcnow() - session.start_time
-            ).total_seconds()
+            "session_duration": (datetime.utcnow() - session.start_time).total_seconds()
             / 3600,  # hours
             "anomaly_count": len(session.anomalies),
         }
 
-        risk_score = await self.calculate_session_risk(
-            session.session_id, risk_factors
-        )
+        risk_score = await self.calculate_session_risk(session.session_id, risk_factors)
         session.risk_scores.append(risk_score)
 
         # Check if session should be terminated
@@ -553,22 +531,15 @@ class IdentityAwareProxy:
 
             # Check time window if specified
             if "time_window" in policy.conditions:
-                current_time = context.get(
-                    "time", datetime.utcnow().strftime("%H:%M")
-                )
+                current_time = context.get("time", datetime.utcnow().strftime("%H:%M"))
                 time_window = policy.conditions["time_window"]
-                if not (
-                    time_window["start"] <= current_time <= time_window["end"]
-                ):
+                if not (time_window["start"] <= current_time <= time_window["end"]):
                     continue
 
             # Check request rate if specified
             if "max_requests_per_minute" in policy.conditions:
                 request_count = context.get("request_count", 0)
-                if (
-                    request_count
-                    > policy.conditions["max_requests_per_minute"]
-                ):
+                if request_count > policy.conditions["max_requests_per_minute"]:
                     continue
 
             # All conditions met
@@ -600,9 +571,7 @@ class IdentityAwareProxy:
         user_agent = request.headers.get("User-Agent", "")
         cert_fingerprint = request.headers.get("X-Certificate-Fingerprint", "")
 
-        session_data = (
-            f"{service_name}:{client_ip}:{user_agent}:{cert_fingerprint}"
-        )
+        session_data = f"{service_name}:{client_ip}:{user_agent}:{cert_fingerprint}"
         return hashlib.sha256(session_data.encode()).hexdigest()
 
     def _extract_service_name(self, cert_pem: str) -> str:

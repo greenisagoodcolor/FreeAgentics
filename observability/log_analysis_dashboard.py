@@ -18,6 +18,7 @@ from observability.log_aggregation import (
     LogEntry,
     LogLevel,
     LogSource,
+    log_aggregator,
 )
 
 logger = logging.getLogger(__name__)
@@ -105,9 +106,7 @@ class LogAnalysisEngine:
             end_time = datetime.now()
 
         # Query logs
-        logs = await self._query_logs_for_analysis(
-            start_time, end_time, sources
-        )
+        logs = await self._query_logs_for_analysis(start_time, end_time, sources)
 
         if not logs:
             return LogAnalysisResult(
@@ -219,33 +218,23 @@ class LogAnalysisEngine:
 
         return logs
 
-    def _analyze_level_distribution(
-        self, logs: List[LogEntry]
-    ) -> Dict[str, int]:
+    def _analyze_level_distribution(self, logs: List[LogEntry]) -> Dict[str, int]:
         """Analyze distribution of log levels."""
         distribution = defaultdict(int)
         for log in logs:
             distribution[log.level.value] += 1
         return dict(distribution)
 
-    def _analyze_source_distribution(
-        self, logs: List[LogEntry]
-    ) -> Dict[str, int]:
+    def _analyze_source_distribution(self, logs: List[LogEntry]) -> Dict[str, int]:
         """Analyze distribution of log sources."""
         distribution = defaultdict(int)
         for log in logs:
             distribution[log.source.value] += 1
         return dict(distribution)
 
-    def _analyze_top_errors(
-        self, logs: List[LogEntry]
-    ) -> List[Dict[str, Any]]:
+    def _analyze_top_errors(self, logs: List[LogEntry]) -> List[Dict[str, Any]]:
         """Analyze top error messages."""
-        error_logs = [
-            log
-            for log in logs
-            if log.level in [LogLevel.ERROR, LogLevel.CRITICAL]
-        ]
+        error_logs = [log for log in logs if log.level in [LogLevel.ERROR, LogLevel.CRITICAL]]
 
         # Count error messages
         error_counts = Counter(log.message for log in error_logs)
@@ -254,9 +243,7 @@ class LogAnalysisEngine:
         top_errors = []
         for message, count in error_counts.most_common(10):
             # Find first occurrence for timestamp
-            first_occurrence = next(
-                log for log in error_logs if log.message == message
-            )
+            first_occurrence = next(log for log in error_logs if log.message == message)
 
             top_errors.append(
                 {
@@ -300,9 +287,7 @@ class LogAnalysisEngine:
 
         return timeline
 
-    async def _detect_anomalies(
-        self, logs: List[LogEntry]
-    ) -> List[Dict[str, Any]]:
+    async def _detect_anomalies(self, logs: List[LogEntry]) -> List[Dict[str, Any]]:
         """Detect anomalies in log patterns."""
         anomalies = []
 
@@ -328,18 +313,10 @@ class LogAnalysisEngine:
 
         return anomalies
 
-    def _detect_error_rate_anomaly(
-        self, logs: List[LogEntry]
-    ) -> Optional[Dict[str, Any]]:
+    def _detect_error_rate_anomaly(self, logs: List[LogEntry]) -> Optional[Dict[str, Any]]:
         """Detect error rate anomalies."""
         total_logs = len(logs)
-        error_logs = len(
-            [
-                log
-                for log in logs
-                if log.level in [LogLevel.ERROR, LogLevel.CRITICAL]
-            ]
-        )
+        error_logs = len([log for log in logs if log.level in [LogLevel.ERROR, LogLevel.CRITICAL]])
 
         if total_logs == 0:
             return None
@@ -364,9 +341,7 @@ class LogAnalysisEngine:
 
         return None
 
-    def _detect_response_time_anomaly(
-        self, logs: List[LogEntry]
-    ) -> Optional[Dict[str, Any]]:
+    def _detect_response_time_anomaly(self, logs: List[LogEntry]) -> Optional[Dict[str, Any]]:
         """Detect response time anomalies."""
         # Look for response time patterns in log messages
         response_times = []
@@ -404,15 +379,11 @@ class LogAnalysisEngine:
 
         return None
 
-    def _detect_agent_failure_anomaly(
-        self, logs: List[LogEntry]
-    ) -> Optional[Dict[str, Any]]:
+    def _detect_agent_failure_anomaly(self, logs: List[LogEntry]) -> Optional[Dict[str, Any]]:
         """Detect agent failure anomalies."""
         agent_logs = [log for log in logs if log.agent_id]
         agent_errors = [
-            log
-            for log in agent_logs
-            if log.level in [LogLevel.ERROR, LogLevel.CRITICAL]
+            log for log in agent_logs if log.level in [LogLevel.ERROR, LogLevel.CRITICAL]
         ]
 
         if not agent_logs:
@@ -442,17 +413,13 @@ class LogAnalysisEngine:
 
         return None
 
-    def _detect_volume_anomaly(
-        self, logs: List[LogEntry]
-    ) -> Optional[Dict[str, Any]]:
+    def _detect_volume_anomaly(self, logs: List[LogEntry]) -> Optional[Dict[str, Any]]:
         """Detect log volume anomalies."""
         if not logs:
             return None
 
         # Calculate logs per minute
-        time_span = (
-            logs[0].timestamp - logs[-1].timestamp
-        ).total_seconds() / 60.0
+        time_span = (logs[0].timestamp - logs[-1].timestamp).total_seconds() / 60.0
         if time_span == 0:
             return None
 
@@ -483,11 +450,7 @@ class LogAnalysisEngine:
         recommendations = []
 
         # Error rate recommendations
-        error_logs = [
-            log
-            for log in logs
-            if log.level in [LogLevel.ERROR, LogLevel.CRITICAL]
-        ]
+        error_logs = [log for log in logs if log.level in [LogLevel.ERROR, LogLevel.CRITICAL]]
         if error_logs:
             error_rate = len(error_logs) / len(logs)
             if error_rate > 0.05:
@@ -498,11 +461,7 @@ class LogAnalysisEngine:
         # Agent-specific recommendations
         agent_activity = self._analyze_agent_activity(logs)
         if agent_activity:
-            inactive_agents = [
-                agent_id
-                for agent_id, count in agent_activity.items()
-                if count < 10
-            ]
+            inactive_agents = [agent_id for agent_id, count in agent_activity.items() if count < 10]
             if inactive_agents:
                 recommendations.append(
                     f"Low activity detected for agents: {', '.join(inactive_agents[:5])}. Check agent health."
@@ -537,18 +496,10 @@ class LogAnalysisEngine:
         if not logs:
             return 0.0
 
-        error_count = len(
-            [
-                log
-                for log in logs
-                if log.level in [LogLevel.ERROR, LogLevel.CRITICAL]
-            ]
-        )
+        error_count = len([log for log in logs if log.level in [LogLevel.ERROR, LogLevel.CRITICAL]])
         return error_count / len(logs)
 
-    def _analyze_agent_timeline(
-        self, logs: List[LogEntry]
-    ) -> List[Dict[str, Any]]:
+    def _analyze_agent_timeline(self, logs: List[LogEntry]) -> List[Dict[str, Any]]:
         """Analyze agent activity timeline."""
         # Group by hour
         hourly_activity = defaultdict(int)
@@ -564,9 +515,7 @@ class LogAnalysisEngine:
 
         return timeline
 
-    def _analyze_common_actions(
-        self, logs: List[LogEntry]
-    ) -> List[Dict[str, Any]]:
+    def _analyze_common_actions(self, logs: List[LogEntry]) -> List[Dict[str, Any]]:
         """Analyze common actions for an agent."""
         # Extract actions from log messages and extra fields
         actions = []
@@ -598,14 +547,11 @@ class LogAnalysisEngine:
 
         return common_actions
 
-    def _analyze_agent_performance(
-        self, logs: List[LogEntry]
-    ) -> Dict[str, float]:
+    def _analyze_agent_performance(self, logs: List[LogEntry]) -> Dict[str, float]:
         """Analyze agent performance metrics."""
         metrics = {
             "error_rate": self._calculate_error_rate(logs),
-            "activity_rate": len(logs)
-            / 24.0,  # logs per hour (assuming 24-hour window)
+            "activity_rate": len(logs) / 24.0,  # logs per hour (assuming 24-hour window)
             "avg_response_time": 0.0,
             "success_rate": 0.0,
         }
@@ -620,9 +566,7 @@ class LogAnalysisEngine:
             metrics["avg_response_time"] = statistics.mean(response_times)
 
         # Calculate success rate
-        success_logs = [
-            log for log in logs if log.level in [LogLevel.INFO, LogLevel.DEBUG]
-        ]
+        success_logs = [log for log in logs if log.level in [LogLevel.INFO, LogLevel.DEBUG]]
         if logs:
             metrics["success_rate"] = len(success_logs) / len(logs)
 
@@ -635,9 +579,7 @@ class LogAnalysisEngine:
         correlations = []
 
         # Find logs with same correlation_id
-        correlation_ids = set(
-            log.correlation_id for log in logs if log.correlation_id
-        )
+        correlation_ids = set(log.correlation_id for log in logs if log.correlation_id)
 
         for correlation_id in correlation_ids:
             # Query logs with same correlation_id
@@ -647,14 +589,10 @@ class LogAnalysisEngine:
 
             # Analyze involved components
             involved_agents = set(
-                log.agent_id
-                for log in correlated_logs
-                if log.agent_id and log.agent_id != agent_id
+                log.agent_id for log in correlated_logs if log.agent_id and log.agent_id != agent_id
             )
             involved_sources = set(
-                log.source.value
-                for log in correlated_logs
-                if log.source.value != "agent"
+                log.source.value for log in correlated_logs if log.source.value != "agent"
             )
 
             if involved_agents or involved_sources:
@@ -666,8 +604,7 @@ class LogAnalysisEngine:
                         "total_logs": len(correlated_logs),
                         "time_span": (
                             (
-                                correlated_logs[0].timestamp
-                                - correlated_logs[-1].timestamp
+                                correlated_logs[0].timestamp - correlated_logs[-1].timestamp
                             ).total_seconds()
                             if len(correlated_logs) > 1
                             else 0
@@ -689,9 +626,7 @@ class LogDashboardGenerator:
     def __init__(self, analysis_engine: LogAnalysisEngine):
         self.analysis_engine = analysis_engine
 
-    async def generate_dashboard(
-        self, output_path: str = "logs/dashboard.html"
-    ):
+    async def generate_dashboard(self, output_path: str = "logs/dashboard.html"):
         """Generate comprehensive log analysis dashboard."""
         # Perform analysis
         analysis_result = await self.analysis_engine.analyze_logs()
@@ -789,9 +724,7 @@ class LogDashboardGenerator:
             stats.append(f"<li>{level}: {count:,}</li>")
         return "\n".join(stats)
 
-    def _generate_source_stats(
-        self, source_distribution: Dict[str, int]
-    ) -> str:
+    def _generate_source_stats(self, source_distribution: Dict[str, int]) -> str:
         """Generate source statistics HTML."""
         stats = []
         for source, count in source_distribution.items():
@@ -806,9 +739,7 @@ class LogDashboardGenerator:
         most_active = max(agent_activity.items(), key=lambda x: x[1])
         return f"{most_active[0]} ({most_active[1]} logs)"
 
-    def _generate_anomalies_section(
-        self, anomalies: List[Dict[str, Any]]
-    ) -> str:
+    def _generate_anomalies_section(self, anomalies: List[Dict[str, Any]]) -> str:
         """Generate anomalies section."""
         if not anomalies:
             return ""
@@ -826,9 +757,7 @@ class LogDashboardGenerator:
 
         return html
 
-    def _generate_recommendations_section(
-        self, recommendations: List[str]
-    ) -> str:
+    def _generate_recommendations_section(self, recommendations: List[str]) -> str:
         """Generate recommendations section."""
         if not recommendations:
             return ""
@@ -839,9 +768,7 @@ class LogDashboardGenerator:
 
         return html
 
-    def _generate_top_errors_section(
-        self, top_errors: List[Dict[str, Any]]
-    ) -> str:
+    def _generate_top_errors_section(self, top_errors: List[Dict[str, Any]]) -> str:
         """Generate top errors section."""
         if not top_errors:
             return ""
@@ -877,9 +804,7 @@ class LogDashboardGenerator:
 
         return html
 
-    def _generate_timeline_chart_script(
-        self, timeline_data: List[Dict[str, Any]]
-    ) -> str:
+    def _generate_timeline_chart_script(self, timeline_data: List[Dict[str, Any]]) -> str:
         """Generate timeline chart JavaScript."""
         labels = [item["timestamp"] for item in timeline_data]
         data = [item["total"] for item in timeline_data]
@@ -920,9 +845,7 @@ class LogDashboardGenerator:
         }});
         """
 
-    def _generate_level_chart_script(
-        self, level_distribution: Dict[str, int]
-    ) -> str:
+    def _generate_level_chart_script(self, level_distribution: Dict[str, int]) -> str:
         """Generate level distribution chart JavaScript."""
         labels = list(level_distribution.keys())
         data = list(level_distribution.values())
@@ -965,8 +888,6 @@ class LogDashboardGenerator:
 # ============================================================================
 
 # Initialize global instances
-from observability.log_aggregation import log_aggregator
-
 log_analysis_engine = LogAnalysisEngine(log_aggregator)
 log_dashboard_generator = LogDashboardGenerator(log_analysis_engine)
 
@@ -989,6 +910,4 @@ async def analyze_recent_logs(hours: int = 24):
 async def analyze_agent_performance(agent_id: str, hours: int = 24):
     """Analyze specific agent performance."""
     start_time = datetime.now() - timedelta(hours=hours)
-    return await log_analysis_engine.analyze_agent_logs(
-        agent_id, start_time=start_time
-    )
+    return await log_analysis_engine.analyze_agent_logs(agent_id, start_time=start_time)

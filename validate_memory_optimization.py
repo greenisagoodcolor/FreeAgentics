@@ -13,6 +13,7 @@ import psutil
 project_root = Path(__file__).parent
 sys.path.insert(0, str(project_root))
 
+# Project imports after path setup
 from agents.memory_optimization.agent_memory_optimizer import (
     get_agent_optimizer,
 )
@@ -35,15 +36,11 @@ class SimpleAgent:
         elif complexity == "medium":
             self.beliefs = np.random.rand(2000).astype(np.float32)
             self.action_history = [f"action_{i}" for i in range(200)]
-            self.transition_matrix = np.random.rand(100, 100).astype(
-                np.float32
-            )
+            self.transition_matrix = np.random.rand(100, 100).astype(np.float32)
         else:  # high
             self.beliefs = np.random.rand(10000).astype(np.float32)
             self.action_history = [f"action_{i}" for i in range(1000)]
-            self.transition_matrix = np.random.rand(500, 500).astype(
-                np.float32
-            )
+            self.transition_matrix = np.random.rand(500, 500).astype(np.float32)
             self.observations = np.random.rand(1000, 50).astype(np.float32)
 
 
@@ -95,9 +92,7 @@ def validate_memory_optimization():
 
         print(f"   Initial memory: {initial_memory:.2f} MB")
         print(f"   Optimized memory: {optimized_memory:.2f} MB")
-        print(
-            f"   Reduction: {(1 - optimized_memory/initial_memory)*100:.1f}%"
-        )
+        print(f"   Reduction: {(1 - optimized_memory/initial_memory)*100:.1f}%")
 
         requirement_1 = optimized_memory < 10.0
         print(f"   ✅ Memory < 10MB: {requirement_1}")
@@ -121,16 +116,12 @@ def validate_memory_optimization():
         optimization_time = time.time() - start_time
 
         # Calculate statistics
-        total_memory = sum(
-            opt.get_memory_usage_mb() for opt in optimized_agents
-        )
+        total_memory = sum(opt.get_memory_usage_mb() for opt in optimized_agents)
         avg_memory = total_memory / len(optimized_agents)
 
         print(f"   Agents optimized: {len(optimized_agents)}")
         print(f"   Optimization time: {optimization_time:.2f} seconds")
-        print(
-            f"   Time per agent: {optimization_time/len(optimized_agents)*1000:.1f} ms"
-        )
+        print(f"   Time per agent: {optimization_time/len(optimized_agents)*1000:.1f} ms")
         print(f"   Average memory per agent: {avg_memory:.3f} MB")
         print(f"   Total agent memory: {total_memory:.2f} MB")
 
@@ -144,9 +135,7 @@ def validate_memory_optimization():
 
         # Test 3: Memory leak detection
         print("\n3. Testing memory leak detection...")
-        initial_system_memory = (
-            psutil.Process().memory_info().rss / 1024 / 1024
-        )
+        initial_system_memory = psutil.Process().memory_info().rss / 1024 / 1024
 
         # Create and destroy agents repeatedly
         for cycle in range(5):
@@ -178,9 +167,7 @@ def validate_memory_optimization():
         print("\n4. Testing matrix pooling efficiency...")
 
         # Test matrix operations
-        test_matrices = [
-            np.random.rand(500, 500).astype(np.float32) for _ in range(10)
-        ]
+        [np.random.rand(500, 500).astype(np.float32) for _ in range(10)]
 
         # Without pooling
         start = time.time()
@@ -212,9 +199,7 @@ def validate_memory_optimization():
         print(f"   Time without pooling: {time_no_pool:.3f} seconds")
         print(f"   Time with pooling: {time_with_pool:.3f} seconds")
         print(f"   Overhead: {overhead:.1f}%")
-        print(
-            f"   Pool memory: {pool_stats['global']['total_memory_mb']:.1f} MB"
-        )
+        print(f"   Pool memory: {pool_stats['global']['total_memory_mb']:.1f} MB")
 
         requirement_4 = overhead < 50.0  # Allow up to 50% overhead
         print(f"   ✅ Reasonable pooling overhead: {requirement_4}")
@@ -224,12 +209,8 @@ def validate_memory_optimization():
 
         stats = optimizer.get_optimization_stats()
         print(f"   Total agents optimized: {stats['agents_optimized']}")
-        print(
-            f"   Target memory per agent: {stats['target_memory_mb']:.1f} MB"
-        )
-        print(
-            f"   Actual average memory: {stats['actual_memory_mb']['mean']:.3f} MB"
-        )
+        print(f"   Target memory per agent: {stats['target_memory_mb']:.1f} MB")
+        print(f"   Actual average memory: {stats['actual_memory_mb']['mean']:.3f} MB")
         print(
             f"   Memory range: {stats['actual_memory_mb']['min']:.3f} - {stats['actual_memory_mb']['max']:.3f} MB"
         )

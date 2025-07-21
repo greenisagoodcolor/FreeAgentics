@@ -1,9 +1,10 @@
 """Simple API test without authentication requirements."""
 
-import pytest
-from tests.test_client_compat import TestClient
+from unittest.mock import patch
+
 from fastapi import FastAPI
-from unittest.mock import patch, MagicMock
+
+from tests.test_client_compat import TestClient
 
 # Create a simple test app
 app = FastAPI()

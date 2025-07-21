@@ -2,7 +2,6 @@
 
 import logging
 import os
-from contextlib import asynccontextmanager
 from unittest.mock import AsyncMock, MagicMock, patch
 
 import pytest
@@ -40,9 +39,7 @@ with patch.dict(
 ):
     # Mock the middleware classes in the API middleware module
     with patch("api.middleware.DDoSProtectionMiddleware", MockMiddleware):
-        with patch(
-            "api.middleware.SecurityMonitoringMiddleware", MockMiddleware
-        ):
+        with patch("api.middleware.SecurityMonitoringMiddleware", MockMiddleware):
             with patch(
                 "auth.security_headers.SecurityHeadersMiddleware",
                 MockMiddleware,
@@ -57,9 +54,7 @@ with patch.dict(
 
                     with patch("api.v1.agents.router", mock_router.router):
                         with patch("api.v1.auth.router", mock_router.router):
-                            with patch(
-                                "api.v1.inference.router", mock_router.router
-                            ):
+                            with patch("api.v1.inference.router", mock_router.router):
                                 with patch(
                                     "api.v1.monitoring.router",
                                     mock_router.router,
@@ -93,10 +88,7 @@ class TestAPIMain:
         """Test that the FastAPI app is created correctly."""
         assert isinstance(app, FastAPI)
         assert app.title == "FreeAgentics API"
-        assert (
-            app.description
-            == "Multi-Agent AI Platform API with Active Inference"
-        )
+        assert app.description == "Multi-Agent AI Platform API with Active Inference"
         assert app.version == "0.1.0"
 
     def test_app_configuration(self):
@@ -110,9 +102,7 @@ class TestAPIMain:
                 middleware_names.append(str(middleware.cls))
 
         # Check that security middleware is present
-        assert any(
-            "Security" in name or "Mock" in name for name in middleware_names
-        )
+        assert any("Security" in name or "Mock" in name for name in middleware_names)
         assert any("CORS" in name for name in middleware_names)
 
     def test_root_endpoint(self):
@@ -162,15 +152,9 @@ class TestLifespan:
 
                     async with lifespan(mock_app):
                         # Verify startup logging
-                        mock_logger.info.assert_any_call(
-                            "Starting FreeAgentics API..."
-                        )
-                        mock_logger.info.assert_any_call(
-                            "✅ Prometheus metrics collection started"
-                        )
-                        mock_logger.info.assert_any_call(
-                            "✅ Performance tracking started"
-                        )
+                        mock_logger.info.assert_any_call("Starting FreeAgentics API...")
+                        mock_logger.info.assert_any_call("✅ Prometheus metrics collection started")
+                        mock_logger.info.assert_any_call("✅ Performance tracking started")
 
                         # Verify services were started
                         mock_prometheus.assert_called_once()
@@ -186,9 +170,7 @@ class TestLifespan:
                 with patch(
                     "observability.performance_metrics.start_performance_tracking"
                 ) as mock_perf:
-                    mock_prometheus.side_effect = Exception(
-                        "Prometheus connection failed"
-                    )
+                    mock_prometheus.side_effect = Exception("Prometheus connection failed")
                     mock_perf.return_value = AsyncMock()
 
                     async with lifespan(mock_app):
@@ -199,9 +181,7 @@ class TestLifespan:
 
                         # Verify performance tracking still starts
                         mock_perf.assert_called_once()
-                        mock_logger.info.assert_any_call(
-                            "✅ Performance tracking started"
-                        )
+                        mock_logger.info.assert_any_call("✅ Performance tracking started")
 
     @pytest.mark.asyncio
     async def test_lifespan_startup_performance_failure(self, mock_app):
@@ -214,16 +194,12 @@ class TestLifespan:
                     "observability.performance_metrics.start_performance_tracking"
                 ) as mock_perf:
                     mock_prometheus.return_value = AsyncMock()
-                    mock_perf.side_effect = Exception(
-                        "Performance tracking failed"
-                    )
+                    mock_perf.side_effect = Exception("Performance tracking failed")
 
                     async with lifespan(mock_app):
                         # Verify Prometheus still starts
                         mock_prometheus.assert_called_once()
-                        mock_logger.info.assert_any_call(
-                            "✅ Prometheus metrics collection started"
-                        )
+                        mock_logger.info.assert_any_call("✅ Prometheus metrics collection started")
 
                         # Verify failure is logged as warning
                         mock_logger.warning.assert_any_call(
@@ -234,12 +210,8 @@ class TestLifespan:
     async def test_lifespan_shutdown_success(self, mock_app):
         """Test successful shutdown sequence."""
         with patch("api.main.logger") as mock_logger:
-            with patch(
-                "observability.prometheus_metrics.start_prometheus_metrics_collection"
-            ):
-                with patch(
-                    "observability.performance_metrics.start_performance_tracking"
-                ):
+            with patch("observability.prometheus_metrics.start_prometheus_metrics_collection"):
+                with patch("observability.performance_metrics.start_performance_tracking"):
                     with patch(
                         "observability.prometheus_metrics.stop_prometheus_metrics_collection"
                     ) as mock_stop_prometheus:
@@ -253,15 +225,11 @@ class TestLifespan:
                                 pass
 
                             # Verify shutdown logging
-                            mock_logger.info.assert_any_call(
-                                "Shutting down FreeAgentics API..."
-                            )
+                            mock_logger.info.assert_any_call("Shutting down FreeAgentics API...")
                             mock_logger.info.assert_any_call(
                                 "✅ Prometheus metrics collection stopped"
                             )
-                            mock_logger.info.assert_any_call(
-                                "✅ Performance tracking stopped"
-                            )
+                            mock_logger.info.assert_any_call("✅ Performance tracking stopped")
 
                             # Verify services were stopped
                             mock_stop_prometheus.assert_called_once()
@@ -271,21 +239,15 @@ class TestLifespan:
     async def test_lifespan_shutdown_prometheus_failure(self, mock_app):
         """Test shutdown with Prometheus failure."""
         with patch("api.main.logger") as mock_logger:
-            with patch(
-                "observability.prometheus_metrics.start_prometheus_metrics_collection"
-            ):
-                with patch(
-                    "observability.performance_metrics.start_performance_tracking"
-                ):
+            with patch("observability.prometheus_metrics.start_prometheus_metrics_collection"):
+                with patch("observability.performance_metrics.start_performance_tracking"):
                     with patch(
                         "observability.prometheus_metrics.stop_prometheus_metrics_collection"
                     ) as mock_stop_prometheus:
                         with patch(
                             "observability.performance_metrics.stop_performance_tracking"
                         ) as mock_stop_perf:
-                            mock_stop_prometheus.side_effect = Exception(
-                                "Prometheus stop failed"
-                            )
+                            mock_stop_prometheus.side_effect = Exception("Prometheus stop failed")
                             mock_stop_perf.return_value = AsyncMock()
 
                             async with lifespan(mock_app):
@@ -298,20 +260,14 @@ class TestLifespan:
 
                             # Verify performance tracking still stops
                             mock_stop_perf.assert_called_once()
-                            mock_logger.info.assert_any_call(
-                                "✅ Performance tracking stopped"
-                            )
+                            mock_logger.info.assert_any_call("✅ Performance tracking stopped")
 
     @pytest.mark.asyncio
     async def test_lifespan_shutdown_performance_failure(self, mock_app):
         """Test shutdown with performance tracking failure."""
         with patch("api.main.logger") as mock_logger:
-            with patch(
-                "observability.prometheus_metrics.start_prometheus_metrics_collection"
-            ):
-                with patch(
-                    "observability.performance_metrics.start_performance_tracking"
-                ):
+            with patch("observability.prometheus_metrics.start_prometheus_metrics_collection"):
+                with patch("observability.performance_metrics.start_performance_tracking"):
                     with patch(
                         "observability.prometheus_metrics.stop_prometheus_metrics_collection"
                     ) as mock_stop_prometheus:
@@ -319,9 +275,7 @@ class TestLifespan:
                             "observability.performance_metrics.stop_performance_tracking"
                         ) as mock_stop_perf:
                             mock_stop_prometheus.return_value = AsyncMock()
-                            mock_stop_perf.side_effect = Exception(
-                                "Performance stop failed"
-                            )
+                            mock_stop_perf.side_effect = Exception("Performance stop failed")
 
                             async with lifespan(mock_app):
                                 pass
@@ -347,9 +301,7 @@ class TestLifespan:
                 with patch(
                     "observability.performance_metrics.start_performance_tracking"
                 ) as mock_perf:
-                    mock_prometheus.side_effect = Exception(
-                        "Prometheus failed"
-                    )
+                    mock_prometheus.side_effect = Exception("Prometheus failed")
                     mock_perf.side_effect = Exception("Performance failed")
 
                     async with lifespan(mock_app):
@@ -417,9 +369,7 @@ class TestMiddlewareConfiguration:
 
     def test_security_middleware_order(self):
         """Test that security middleware is added in correct order."""
-        middleware_names = [
-            middleware.cls.__name__ for middleware in app.user_middleware
-        ]
+        middleware_names = [middleware.cls.__name__ for middleware in app.user_middleware]
 
         # Security middleware should be present
         assert any("Security" in name for name in middleware_names)
@@ -430,7 +380,7 @@ class TestMiddlewareConfiguration:
     @patch.dict(os.environ, {"REDIS_URL": "redis://test:6379"})
     def test_redis_url_configuration(self):
         """Test Redis URL configuration from environment."""
-        with patch("api.main.DDoSProtectionMiddleware") as mock_ddos:
+        with patch("api.main.DDoSProtectionMiddleware"):
             # Re-import to test environment variable
             import importlib
 
@@ -492,10 +442,7 @@ class TestAppMetadata:
     def test_app_metadata(self):
         """Test FastAPI app metadata."""
         assert app.title == "FreeAgentics API"
-        assert (
-            app.description
-            == "Multi-Agent AI Platform API with Active Inference"
-        )
+        assert app.description == "Multi-Agent AI Platform API with Active Inference"
         assert app.version == "0.1.0"
 
     def test_app_has_lifespan(self):
@@ -517,7 +464,7 @@ class TestErrorHandling:
         """Test lifespan handles import errors gracefully."""
         mock_app = MagicMock(spec=FastAPI)
 
-        with patch("api.main.logger") as mock_logger:
+        with patch("api.main.logger"):
             # Mock import failure
             with patch(
                 "builtins.__import__",
@@ -528,9 +475,7 @@ class TestErrorHandling:
                         pass
                 except ImportError:
                     # If this raises, the error handling isn't working
-                    pytest.fail(
-                        "Lifespan should handle import errors gracefully"
-                    )
+                    pytest.fail("Lifespan should handle import errors gracefully")
 
 
 class TestIntegration:
@@ -550,9 +495,7 @@ class TestIntegration:
     def test_cors_headers_in_response(self):
         """Test that CORS headers are present in responses."""
         with TestClient(app) as client:
-            response = client.get(
-                "/", headers={"Origin": "http://localhost:3000"}
-            )
+            response = client.get("/", headers={"Origin": "http://localhost:3000"})
             assert response.status_code == 200
             # CORS headers should be present if configured correctly
             # (exact headers depend on CORS middleware implementation)

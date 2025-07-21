@@ -105,7 +105,7 @@ async def example_connection_patterns():
 
     # Example 1: Persistent connection
     logger.info("\n1. Persistent connection pattern:")
-    task1 = asyncio.create_task(
+    asyncio.create_task(
         lifecycle.manage_connection_lifecycle(
             clients[0],
             pattern="persistent",
@@ -116,7 +116,7 @@ async def example_connection_patterns():
 
     # Example 2: Intermittent connection
     logger.info("\n2. Intermittent connection pattern:")
-    task2 = asyncio.create_task(
+    asyncio.create_task(
         lifecycle.manage_connection_lifecycle(
             clients[1],
             pattern="intermittent",
@@ -128,7 +128,7 @@ async def example_connection_patterns():
 
     # Example 3: Bursty connection
     logger.info("\n3. Bursty connection pattern:")
-    task3 = asyncio.create_task(
+    asyncio.create_task(
         lifecycle.manage_connection_lifecycle(
             clients[2],
             pattern="bursty",
@@ -159,9 +159,7 @@ async def example_connection_pool():
     manager = WebSocketClientManager()
 
     # Create connection pool
-    pool = ConnectionPool(
-        manager, min_size=5, max_size=20, acquire_timeout=5.0
-    )
+    pool = ConnectionPool(manager, min_size=5, max_size=20, acquire_timeout=5.0)
 
     # Initialize pool
     await pool.initialize()
@@ -174,9 +172,7 @@ async def example_connection_pool():
         # Acquire connection
         client = await pool.acquire()
         if client:
-            logger.info(
-                f"Task {task_id} acquired connection {client.client_id}"
-            )
+            logger.info(f"Task {task_id} acquired connection {client.client_id}")
 
             # Use connection
             message_gen = EventMessageGenerator()
@@ -186,9 +182,7 @@ async def example_connection_pool():
 
             # Release back to pool
             await pool.release(client)
-            logger.info(
-                f"Task {task_id} released connection {client.client_id}"
-            )
+            logger.info(f"Task {task_id} released connection {client.client_id}")
         else:
             logger.error(f"Task {task_id} failed to acquire connection")
 
@@ -241,18 +235,14 @@ async def example_metrics_collection():
     logger.info(f"\nReal-time stats: {real_time}")
 
     # Get time series data
-    latency_series = metrics.get_time_series_data(
-        "latency_ms", duration_seconds=10
-    )
-    logger.info(
-        f"\nLatency time series (last 10s): {len(latency_series)} points"
-    )
+    latency_series = metrics.get_time_series_data("latency_ms", duration_seconds=10)
+    logger.info(f"\nLatency time series (last 10s): {len(latency_series)} points")
 
     # Stop real-time stats
     await metrics.stop_real_time_stats()
 
     # Get final metrics
-    final_metrics = metrics.finalize()
+    metrics.finalize()
     logger.info("\nFinal metrics summary:")
     logger.info(metrics.generate_summary_report())
 
@@ -304,16 +294,12 @@ async def example_custom_scenario():
         def __init__(self):
             self.manager = WebSocketClientManager()
             self.metrics = MetricsCollector()
-            self.lifecycle = ConnectionLifecycleManager(
-                self.manager, self.metrics
-            )
+            self.lifecycle = ConnectionLifecycleManager(self.manager, self.metrics)
 
         async def run(self):
             # Phase 1: Login rush (many connections at once)
             logger.info("Phase 1: Login rush")
-            players = await self.manager.create_clients(
-                50, client_prefix="player"
-            )
+            players = await self.manager.create_clients(50, client_prefix="player")
             await self.manager.connect_clients(players, concurrent_limit=50)
 
             # Everyone subscribes to game events

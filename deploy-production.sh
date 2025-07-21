@@ -57,7 +57,7 @@ send_notification() {
     if [[ -n "$SLACK_WEBHOOK" ]]; then
         curl -X POST -H 'Content-type: application/json' \
             --data "{\"text\":\"$emoji FreeAgentics Deployment [$ENVIRONMENT]: $message\"}" \
-            "$SLACK_WEBHOOK" 2>/dev/null || true
+            "$SLACK_WEBHOOK" 2>/dev/null 
     fi
 }
 
@@ -150,7 +150,7 @@ build_images() {
         if [[ "$image" != "null:null" ]]; then
             local base_name
             base_name=$(echo "$image" | cut -d':' -f1)
-            docker tag "$image" "${base_name}:${VERSION}" || true
+            docker tag "$image" "${base_name}:${VERSION}" 
         fi
     done
 }
@@ -349,7 +349,7 @@ rollback_deployment() {
 
     if [[ -n "$latest_backup" ]]; then
         warn "Restoring database from backup: $latest_backup"
-        ./scripts/database-backup.sh restore "$latest_backup" || true
+        ./scripts/database-backup.sh restore "$latest_backup" 
     fi
 
     # Deploy previous version
@@ -369,10 +369,10 @@ cleanup_old_images() {
     log "Cleaning up old Docker images..."
 
     # Remove unused images older than 7 days
-    docker image prune -f --filter "until=168h" || true
+    docker image prune -f --filter "until=168h" 
 
     # Remove dangling images
-    docker image prune -f || true
+    docker image prune -f 
 
     log "Docker cleanup completed"
 }
@@ -391,7 +391,7 @@ show_deployment_summary() {
 
     # Show resource usage
     log "Resource Usage:"
-    docker stats --no-stream --format "table {{.Name}}\t{{.CPUPerc}}\t{{.MemUsage}}" || true
+    docker stats --no-stream --format "table {{.Name}}\t{{.CPUPerc}}\t{{.MemUsage}}" 
 }
 
 # Main deployment function

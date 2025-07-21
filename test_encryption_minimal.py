@@ -3,8 +3,6 @@
 Minimal test for encryption and SOAR functionality without external dependencies.
 """
 
-import asyncio
-import json
 import os
 import sys
 from pathlib import Path
@@ -30,9 +28,7 @@ def test_basic_encryption():
     nonce = os.urandom(12)  # 96-bit nonce for GCM
 
     # Create cipher
-    cipher = Cipher(
-        algorithms.AES(key), modes.GCM(nonce), backend=default_backend()
-    )
+    cipher = Cipher(algorithms.AES(key), modes.GCM(nonce), backend=default_backend())
     encryptor = cipher.encryptor()
 
     # Encrypt data

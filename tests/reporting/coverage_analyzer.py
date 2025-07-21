@@ -137,9 +137,7 @@ class CoverageAnalyzer:
         try:
             cov.load()
         except coverage.CoverageException:
-            logger.warning(
-                "No coverage data found. Run tests with coverage first."
-            )
+            logger.warning("No coverage data found. Run tests with coverage first.")
             return CoverageReport(
                 total_statements=0,
                 total_missing=0,
@@ -173,48 +171,24 @@ class CoverageAnalyzer:
                 # Handle different analysis result types
                 if hasattr(analysis, "statements"):
                     statements = len(analysis.statements)
-                    missing = (
-                        len(analysis.missing)
-                        if hasattr(analysis, "missing")
-                        else 0
-                    )
-                    excluded = (
-                        len(analysis.excluded)
-                        if hasattr(analysis, "excluded")
-                        else 0
-                    )
-                    missing_lines = (
-                        sorted(analysis.missing)
-                        if hasattr(analysis, "missing")
-                        else []
-                    )
+                    missing = len(analysis.missing) if hasattr(analysis, "missing") else 0
+                    excluded = len(analysis.excluded) if hasattr(analysis, "excluded") else 0
+                    missing_lines = sorted(analysis.missing) if hasattr(analysis, "missing") else []
                 else:
                     # Handle tuple format (older coverage.py versions)
                     if isinstance(analysis, tuple) and len(analysis) >= 3:
                         statements = len(analysis[1]) if analysis[1] else 0
-                        missing = (
-                            len(analysis[3])
-                            if len(analysis) > 3 and analysis[3]
-                            else 0
-                        )
-                        excluded = (
-                            len(analysis[2])
-                            if len(analysis) > 2 and analysis[2]
-                            else 0
-                        )
+                        missing = len(analysis[3]) if len(analysis) > 3 and analysis[3] else 0
+                        excluded = len(analysis[2]) if len(analysis) > 2 and analysis[2] else 0
                         missing_lines = (
-                            sorted(analysis[3])
-                            if len(analysis) > 3 and analysis[3]
-                            else []
+                            sorted(analysis[3]) if len(analysis) > 3 and analysis[3] else []
                         )
                     else:
                         # Skip this file if we can't parse it
                         continue
 
                 if statements > 0:
-                    coverage_percent = (
-                        (statements - missing) / statements
-                    ) * 100
+                    coverage_percent = ((statements - missing) / statements) * 100
                 else:
                     coverage_percent = 0.0
 
@@ -239,9 +213,7 @@ class CoverageAnalyzer:
 
         # Calculate total coverage
         if total_statements > 0:
-            total_coverage = (
-                (total_statements - total_missing) / total_statements
-            ) * 100
+            total_coverage = ((total_statements - total_missing) / total_statements) * 100
         else:
             total_coverage = 0.0
 
@@ -418,9 +390,7 @@ class CoverageAnalyzer:
         conn.close()
         return trends
 
-    def get_file_coverage_history(
-        self, file_path: str, days: int = 30
-    ) -> List[Dict[str, Any]]:
+    def get_file_coverage_history(self, file_path: str, days: int = 30) -> List[Dict[str, Any]]:
         """Get coverage history for a specific file."""
         conn = sqlite3.connect(self.db_path)
         cursor = conn.cursor()
@@ -451,9 +421,7 @@ class CoverageAnalyzer:
         conn.close()
         return history
 
-    def get_coverage_gaps(
-        self, min_coverage: float = 80.0
-    ) -> List[Dict[str, Any]]:
+    def get_coverage_gaps(self, min_coverage: float = 80.0) -> List[Dict[str, Any]]:
         """Get files with coverage below the minimum threshold."""
         conn = sqlite3.connect(self.db_path)
         cursor = conn.cursor()
@@ -587,15 +555,11 @@ class CoverageAnalyzer:
                 </tr>
         """
 
-        for file_stats in sorted(
-            report.files, key=lambda x: x.coverage_percent
-        ):
+        for file_stats in sorted(report.files, key=lambda x: x.coverage_percent):
             css_class = (
                 "zero-coverage"
                 if file_stats.coverage_percent == 0
-                else "low-coverage"
-                if file_stats.coverage_percent < 80
-                else "good-coverage"
+                else "low-coverage" if file_stats.coverage_percent < 80 else "good-coverage"
             )
 
             html_content += f"""
@@ -622,9 +586,7 @@ class CoverageAnalyzer:
         logger.info(f"HTML coverage report generated: {output_path}")
         return output_path
 
-    def export_coverage_json(
-        self, output_path: str = "tests/reporting/coverage_data.json"
-    ):
+    def export_coverage_json(self, output_path: str = "tests/reporting/coverage_data.json"):
         """Export coverage data as JSON."""
         report = self.analyze_coverage()
 
@@ -697,9 +659,7 @@ def main():
     if zero_coverage:
         print(f"\nZero coverage files ({len(zero_coverage)}):")
         for file_info in zero_coverage:
-            print(
-                f"  {file_info['file_path']} (detected {file_info['times_detected']} times)"
-            )
+            print(f"  {file_info['file_path']} (detected {file_info['times_detected']} times)")
 
 
 if __name__ == "__main__":

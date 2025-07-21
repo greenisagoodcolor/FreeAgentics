@@ -1,6 +1,139 @@
-# FreeAgentics Threading vs Multiprocessing Benchmarks
+# 🚀 Performance Benchmarks Suite
 
-This directory contains comprehensive benchmarks comparing threading and multiprocessing approaches for FreeAgentics Active Inference agents.
+**PERF-ENGINEER** implementation following **Bryan Cantrill + Brendan Gregg** systems performance methodology.
+
+## 📊 Benchmark Overview
+
+```
+Benchmark Suite
+├── test_agent_spawning.py     # Agent creation performance
+├── test_message_throughput.py # Message routing efficiency  
+├── test_memory_usage.py       # Memory profiling & leak detection
+├── test_database_queries.py   # Database performance (TBD)
+├── test_concurrent_load.py    # Concurrency & scalability (TBD)
+└── threading_vs_multiprocessing_benchmark.py # Threading vs multiprocessing comparison
+```
+
+## 🎯 Performance Targets
+
+| Component | Metric | Target | Current | Status |
+|-----------|--------|--------|---------|---------|
+| **Agent Spawning** | Single agent | < 50ms | TBD | 🔄 |
+| | Parallel (10 agents) | < 100ms | TBD | 🔄 |
+| | Memory per agent | < 10MB | TBD | 🔄 |
+| **Message Throughput** | Simple routing | > 1000 msg/s | TBD | 🔄 |
+| | Concurrent routing | > 5000 msg/s | TBD | 🔄 |
+| | Async routing | > 10000 msg/s | TBD | 🔄 |
+| **Memory Usage** | Agent footprint | < 10MB | TBD | 🔄 |
+| | Message history | < 100MB/10k | TBD | 🔄 |
+| | No memory leaks | 0 growth | TBD | 🔄 |
+| **Database** | Query p95 | < 50ms | TBD | 🔄 |
+| | Connection pool | 10-50 | TBD | 🔄 |
+| | Transaction/sec | > 500 | TBD | 🔄 |
+
+## 🏃 Running Benchmarks
+
+### Quick Start
+```bash
+# Run all benchmarks
+python -m pytest benchmarks/ --benchmark-only
+
+# Run specific benchmark group
+python -m pytest benchmarks/test_agent_spawning.py --benchmark-only
+
+# Generate HTML report
+python -m pytest benchmarks/ --benchmark-only --benchmark-autosave --benchmark-histogram
+```
+
+### Individual Benchmark Suites
+
+#### Agent Spawning Performance
+```bash
+# Test agent creation performance
+python benchmarks/test_agent_spawning.py
+
+# Key metrics:
+# - Single agent spawn time
+# - Parallel spawning efficiency
+# - Memory usage per agent
+# - Scaling characteristics
+```
+
+#### Message Throughput
+```bash
+# Test message routing performance
+python benchmarks/test_message_throughput.py
+
+# Key metrics:
+# - Messages per second
+# - Routing algorithm efficiency
+# - Serialization performance
+# - Queue implementation comparison
+```
+
+#### Memory Usage
+```bash
+# Test memory efficiency
+python benchmarks/test_memory_usage.py
+
+# Key metrics:
+# - Agent memory footprint
+# - Message history efficiency
+# - Memory leak detection
+# - Object pooling benefits
+```
+
+## 📈 Continuous Performance Monitoring
+
+### CI Integration
+```yaml
+# .github/workflows/unified-pipeline.yml
+performance-verification:
+  runs-on: ubuntu-latest
+  steps:
+    - name: Run performance benchmarks
+      run: |
+        python -m pytest benchmarks/ \
+          --benchmark-only \
+          --benchmark-json=benchmark_results.json
+    
+    - name: Check for regressions
+      run: python benchmarks/ci_integration.py --check-regression
+```
+
+### Performance Dashboard
+```bash
+# Generate performance dashboard
+python benchmarks/generate_dashboard.py --output performance_dashboard.html
+
+# View historical trends
+python benchmarks/analyze_trends.py --days 30
+```
+
+## 🔥 Flame Graphs
+
+### Generate CPU Flame Graphs
+```bash
+# Profile with py-spy
+py-spy record -o profile.svg -- python benchmarks/test_agent_spawning.py
+
+# Profile with cProfile
+python -m cProfile -o profile.stats benchmarks/test_message_throughput.py
+python benchmarks/generate_flamegraph.py profile.stats
+```
+
+### Memory Profiling
+```bash
+# Memory profiling with memory_profiler
+python -m memory_profiler benchmarks/test_memory_usage.py
+
+# Heap analysis with pympler
+python benchmarks/heap_analysis.py
+```
+
+## Threading vs Multiprocessing Benchmarks
+
+This directory also contains comprehensive benchmarks comparing threading and multiprocessing approaches for FreeAgentics Active Inference agents.
 
 ## Overview
 
@@ -239,6 +372,131 @@ Based on initial testing on a 20-core Linux system:
 - Better PyMDP computation patterns
 - Faster inter-agent communication
 
+## 📊 Benchmark Configuration
+
+### pytest-benchmark Settings
+```ini
+# pytest.ini
+[tool:pytest]
+addopts = 
+    --benchmark-columns=min,max,mean,stddev,median,iqr,outliers
+    --benchmark-sort=mean
+    --benchmark-group-by=group
+    --benchmark-warmup=on
+    --benchmark-disable-gc
+```
+
+### Custom Benchmark Parameters
+```python
+# benchmarks/config.py
+BENCHMARK_CONFIG = {
+    'min_rounds': 5,
+    'warmup_rounds': 2,
+    'calibration_precision': 10,
+    'disable_gc': True,
+    'timer': time.perf_counter
+}
+```
+
+## 🎯 Performance Optimization Checklist
+
+### Before Optimization
+- [ ] Run baseline benchmarks
+- [ ] Generate flame graphs
+- [ ] Identify bottlenecks
+- [ ] Set performance targets
+
+### During Optimization
+- [ ] Focus on hot paths (flame graph)
+- [ ] Measure after each change
+- [ ] Document optimization rationale
+- [ ] Ensure no functionality regression
+
+### After Optimization
+- [ ] Verify performance improvements
+- [ ] Update baseline metrics
+- [ ] Add regression tests
+- [ ] Document in PERF_IMPROVEMENTS.md
+
+## 🚨 Performance Regression Detection
+
+### Automated Checks
+```python
+# benchmarks/ci_integration.py
+class PerformanceRegression:
+    THRESHOLDS = {
+        'agent_spawn': 0.1,      # 10% regression allowed
+        'message_throughput': 0.15,  # 15% regression allowed
+        'memory_usage': 0.2      # 20% regression allowed
+    }
+```
+
+### Manual Analysis
+```bash
+# Compare with baseline
+python benchmarks/compare_results.py \
+    --baseline baseline_results.json \
+    --current benchmark_results.json
+
+# Generate regression report
+python benchmarks/regression_report.py --format markdown > REGRESSION_REPORT.md
+```
+
+## 📚 Methodology References
+
+### Bryan Cantrill Principles
+- **Observability First**: Every benchmark includes detailed metrics
+- **Systems Thinking**: Consider full system impact
+- **Production Relevance**: Benchmarks reflect real workloads
+
+### Brendan Gregg Methods
+- **USE Method**: Utilization, Saturation, Errors
+- **Flame Graphs**: Visual performance analysis
+- **Latency Analysis**: Percentile-based metrics
+
+## 🔧 Troubleshooting
+
+### Common Issues
+
+#### ImportError in benchmarks
+```bash
+# Ensure project is in PYTHONPATH
+export PYTHONPATH="${PYTHONPATH}:$(pwd)"
+```
+
+#### Inconsistent results
+```bash
+# Increase rounds for stability
+python -m pytest benchmarks/ --benchmark-only --benchmark-min-rounds=10
+```
+
+#### Memory profiling issues
+```bash
+# Install required tools
+pip install memory-profiler pympler psutil
+```
+
+## 📈 Historical Performance
+
+Results are tracked in `benchmarks/results/` with the following structure:
+```
+results/
+├── baseline/
+│   └── baseline_results.json
+├── daily/
+│   └── 2025-01-20_results.json
+└── releases/
+    └── v1.0.0_results.json
+```
+
+## 🏆 Performance Achievements
+
+- [ ] Agent spawn < 50ms ⏳
+- [ ] Message throughput > 1000/s ⏳
+- [ ] Zero memory leaks ⏳
+- [ ] Database queries < 50ms p95 ⏳
+- [ ] 10x improvement in critical paths ⏳
+
 ## Future Enhancements
 
 Planned improvements:
@@ -248,3 +506,7 @@ Planned improvements:
 - Fault tolerance testing
 - Integration with external systems
 - Real-time performance requirements
+
+---
+
+*Powered by PERF-ENGINEER • Following Bryan Cantrill + Brendan Gregg Methodology*

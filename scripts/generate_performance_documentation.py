@@ -6,7 +6,6 @@ This script generates detailed performance documentation for multi-agent
 coordination based on empirical test results and analysis.
 """
 
-import json
 import sys
 from pathlib import Path
 
@@ -106,15 +105,11 @@ def main():
     performance_data = load_real_performance_data()
 
     # Create documentation generator
-    doc_generator = PerformanceDocumentationGenerator(
-        output_dir="performance_documentation"
-    )
+    doc_generator = PerformanceDocumentationGenerator(output_dir="performance_documentation")
 
     # Generate comprehensive documentation
     print("📝 Creating markdown documentation...")
-    doc_path = doc_generator.generate_comprehensive_documentation(
-        performance_data
-    )
+    doc_path = doc_generator.generate_comprehensive_documentation(performance_data)
     print(f"✅ Documentation created: {doc_path}")
 
     # Generate HTML report
@@ -124,14 +119,10 @@ def main():
 
     # Export data in various formats
     print("💾 Exporting performance data...")
-    json_path = doc_generator.export_performance_data(
-        performance_data, format="json"
-    )
+    json_path = doc_generator.export_performance_data(performance_data, format="json")
     print(f"✅ JSON data exported: {json_path}")
 
-    csv_paths = doc_generator.export_performance_data(
-        performance_data, format="csv"
-    )
+    csv_paths = doc_generator.export_performance_data(performance_data, format="csv")
     for csv_path in csv_paths:
         print(f"✅ CSV data exported: {csv_path}")
 
@@ -140,9 +131,7 @@ def main():
     print(
         f"  - Efficiency at 50 agents: {performance_data['coordination_load_test']['efficiencies'][-1]}%"
     )
-    print(
-        f"  - Memory per agent: {performance_data['memory_analysis']['per_agent_mb']} MB"
-    )
+    print(f"  - Memory per agent: {performance_data['memory_analysis']['per_agent_mb']} MB")
     print(
         f"  - Threading advantage: {performance_data['threading_benchmark']['vs_multiprocessing']['speedup_single']:.1f}x"
     )

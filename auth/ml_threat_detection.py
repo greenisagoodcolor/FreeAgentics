@@ -17,14 +17,11 @@ import time
 from collections import defaultdict, deque
 from dataclasses import dataclass, field
 from datetime import datetime, timedelta
-from typing import Any, Dict, List, Optional, Tuple, Union
+from typing import Any, Dict, List
 
 import joblib
 import numpy as np
-import pandas as pd
 from sklearn.ensemble import IsolationForest
-from sklearn.metrics import classification_report, confusion_matrix
-from sklearn.model_selection import train_test_split
 from sklearn.preprocessing import StandardScaler
 
 from auth.security_logging import (
@@ -136,12 +133,12 @@ class FeatureExtractor:
 
     def __init__(self):
         """Initialize threat detection feature extractor."""
-        self.user_request_history: Dict[
-            str, deque[Dict[str, Any]]
-        ] = defaultdict(lambda: deque(maxlen=1000))
-        self.ip_request_history: Dict[
-            str, deque[Dict[str, Any]]
-        ] = defaultdict(lambda: deque(maxlen=1000))
+        self.user_request_history: Dict[str, deque[Dict[str, Any]]] = defaultdict(
+            lambda: deque(maxlen=1000)
+        )
+        self.ip_request_history: Dict[str, deque[Dict[str, Any]]] = defaultdict(
+            lambda: deque(maxlen=1000)
+        )
         self.user_baselines: Dict[str, UserBehaviorBaseline] = {}
         self.suspicious_user_agents = {
             "curl/",
@@ -177,9 +174,7 @@ class FeatureExtractor:
             user_id = request_data.get("user_id")
             ip_address = request_data.get("ip_address")
             # Parse timestamp (currently unused)
-            datetime.fromisoformat(
-                request_data.get("timestamp", datetime.utcnow().isoformat())
-            )
+            datetime.fromisoformat(request_data.get("timestamp", datetime.utcnow().isoformat()))
 
             # Store request in history
             if user_id:
@@ -191,76 +186,50 @@ class FeatureExtractor:
             features = ThreatFeatures()
 
             # Request pattern features
-            features.request_frequency = self._calculate_request_frequency(
-                user_id, ip_address
-            )
+            features.request_frequency = self._calculate_request_frequency(user_id, ip_address)
             features.request_size = len(json.dumps(request_data))
-            features.endpoint_diversity = self._calculate_endpoint_diversity(
-                user_id, ip_address
-            )
-            features.method_diversity = self._calculate_method_diversity(
-                user_id, ip_address
-            )
+            features.endpoint_diversity = self._calculate_endpoint_diversity(user_id, ip_address)
+            features.method_diversity = self._calculate_method_diversity(user_id, ip_address)
 
             # Timing features
-            features.time_since_last_request = (
-                self._calculate_time_since_last_request(user_id, ip_address)
-            )
-            features.requests_per_minute = self._calculate_requests_per_minute(
+            features.time_since_last_request = self._calculate_time_since_last_request(
                 user_id, ip_address
             )
-            features.requests_per_hour = self._calculate_requests_per_hour(
-                user_id, ip_address
-            )
+            features.requests_per_minute = self._calculate_requests_per_minute(user_id, ip_address)
+            features.requests_per_hour = self._calculate_requests_per_hour(user_id, ip_address)
 
             # Geographic features
             country = request_data.get("country", "US")
-            features.country_risk_score = self.country_risk_scores.get(
-                country, 0.5
-            )
-            features.distance_from_usual_location = (
-                self._calculate_location_distance(user_id, request_data)
+            features.country_risk_score = self.country_risk_scores.get(country, 0.5)
+            features.distance_from_usual_location = self._calculate_location_distance(
+                user_id, request_data
             )
 
             # User agent features
             user_agent = request_data.get("user_agent", "")
             features.user_agent_entropy = self._calculate_entropy(user_agent)
-            features.is_suspicious_user_agent = self._is_suspicious_user_agent(
-                user_agent
-            )
+            features.is_suspicious_user_agent = self._is_suspicious_user_agent(user_agent)
 
             # Authentication features
-            features.failed_login_rate = self._calculate_failed_login_rate(
+            features.failed_login_rate = self._calculate_failed_login_rate(user_id, ip_address)
+            features.successful_login_rate = self._calculate_successful_login_rate(
                 user_id, ip_address
             )
-            features.successful_login_rate = (
-                self._calculate_successful_login_rate(user_id, ip_address)
-            )
-            features.mfa_bypass_attempts = self._calculate_mfa_bypass_attempts(
-                user_id, ip_address
-            )
+            features.mfa_bypass_attempts = self._calculate_mfa_bypass_attempts(user_id, ip_address)
 
             # API usage features
-            features.error_rate = self._calculate_error_rate(
+            features.error_rate = self._calculate_error_rate(user_id, ip_address)
+            features.privileged_endpoint_access = self._calculate_privileged_access(
                 user_id, ip_address
             )
-            features.privileged_endpoint_access = (
-                self._calculate_privileged_access(user_id, ip_address)
-            )
-            features.data_access_volume = self._calculate_data_access_volume(
-                user_id, ip_address
-            )
+            features.data_access_volume = self._calculate_data_access_volume(user_id, ip_address)
 
             # Behavioral features
-            features.deviation_from_baseline = (
-                self._calculate_baseline_deviation(user_id, request_data)
-            )
-            features.session_duration = self._calculate_session_duration(
+            features.deviation_from_baseline = self._calculate_baseline_deviation(
                 user_id, request_data
             )
-            features.concurrent_sessions = self._calculate_concurrent_sessions(
-                user_id
-            )
+            features.session_duration = self._calculate_session_duration(user_id, request_data)
+            features.concurrent_sessions = self._calculate_concurrent_sessions(user_id)
 
             return features
 
@@ -268,9 +237,7 @@ class FeatureExtractor:
             logger.error(f"Feature extraction failed: {str(e)}")
             return ThreatFeatures()  # Return empty features on error
 
-    def _calculate_request_frequency(
-        self, user_id: str, ip_address: str
-    ) -> float:
+    def _calculate_request_frequency(self, user_id: str, ip_address: str) -> float:
         """Calculate request frequency for user/IP."""
         now = datetime.utcnow()
         recent_requests = 0
@@ -280,17 +247,13 @@ class FeatureExtractor:
             self.ip_request_history.get(ip_address, []),
         ]:
             for req in requests:
-                req_time = datetime.fromisoformat(
-                    req.get("timestamp", now.isoformat())
-                )
+                req_time = datetime.fromisoformat(req.get("timestamp", now.isoformat()))
                 if now - req_time < timedelta(minutes=1):
                     recent_requests += 1
 
         return min(recent_requests / 60.0, 1.0)  # Normalize to 0-1
 
-    def _calculate_endpoint_diversity(
-        self, user_id: str, ip_address: str
-    ) -> float:
+    def _calculate_endpoint_diversity(self, user_id: str, ip_address: str) -> float:
         """Calculate endpoint diversity (Shannon entropy)."""
         endpoints = []
         for requests in [
@@ -304,9 +267,7 @@ class FeatureExtractor:
 
         return self._calculate_entropy("".join(endpoints))
 
-    def _calculate_method_diversity(
-        self, user_id: str, ip_address: str
-    ) -> float:
+    def _calculate_method_diversity(self, user_id: str, ip_address: str) -> float:
         """Calculate HTTP method diversity."""
         methods = []
         for requests in [
@@ -321,9 +282,7 @@ class FeatureExtractor:
         unique_methods = len(set(methods))
         return min(unique_methods / 10.0, 1.0)  # Normalize
 
-    def _calculate_time_since_last_request(
-        self, user_id: str, ip_address: str
-    ) -> float:
+    def _calculate_time_since_last_request(self, user_id: str, ip_address: str) -> float:
         """Calculate time since last request."""
         now = datetime.utcnow()
         last_request_time = None
@@ -333,9 +292,7 @@ class FeatureExtractor:
             self.ip_request_history.get(ip_address, []),
         ]:
             if requests:
-                req_time = datetime.fromisoformat(
-                    requests[-1].get("timestamp", now.isoformat())
-                )
+                req_time = datetime.fromisoformat(requests[-1].get("timestamp", now.isoformat()))
                 if not last_request_time or req_time > last_request_time:
                     last_request_time = req_time
 
@@ -345,9 +302,7 @@ class FeatureExtractor:
         delta = (now - last_request_time).total_seconds()
         return min(delta / 3600.0, 1.0)  # Normalize to hours
 
-    def _calculate_requests_per_minute(
-        self, user_id: str, ip_address: str
-    ) -> float:
+    def _calculate_requests_per_minute(self, user_id: str, ip_address: str) -> float:
         """Calculate requests per minute."""
         now = datetime.utcnow()
         recent_requests = 0
@@ -357,17 +312,13 @@ class FeatureExtractor:
             self.ip_request_history.get(ip_address, []),
         ]:
             for req in requests:
-                req_time = datetime.fromisoformat(
-                    req.get("timestamp", now.isoformat())
-                )
+                req_time = datetime.fromisoformat(req.get("timestamp", now.isoformat()))
                 if now - req_time < timedelta(minutes=1):
                     recent_requests += 1
 
         return min(recent_requests / 60.0, 1.0)
 
-    def _calculate_requests_per_hour(
-        self, user_id: str, ip_address: str
-    ) -> float:
+    def _calculate_requests_per_hour(self, user_id: str, ip_address: str) -> float:
         """Calculate requests per hour."""
         now = datetime.utcnow()
         recent_requests = 0
@@ -377,17 +328,13 @@ class FeatureExtractor:
             self.ip_request_history.get(ip_address, []),
         ]:
             for req in requests:
-                req_time = datetime.fromisoformat(
-                    req.get("timestamp", now.isoformat())
-                )
+                req_time = datetime.fromisoformat(req.get("timestamp", now.isoformat()))
                 if now - req_time < timedelta(hours=1):
                     recent_requests += 1
 
         return min(recent_requests / 3600.0, 1.0)
 
-    def _calculate_location_distance(
-        self, user_id: str, request_data: Dict[str, Any]
-    ) -> float:
+    def _calculate_location_distance(self, user_id: str, request_data: Dict[str, Any]) -> float:
         """Calculate distance from user's usual location."""
         if not user_id or user_id not in self.user_baselines:
             return 0.0
@@ -408,9 +355,9 @@ class FeatureExtractor:
         min_distance = float("inf")
         for location in typical_locations:
             if location["country"] == current_location["country"]:
-                distance = abs(
-                    location["latitude"] - current_location["latitude"]
-                ) + abs(location["longitude"] - current_location["longitude"])
+                distance = abs(location["latitude"] - current_location["latitude"]) + abs(
+                    location["longitude"] - current_location["longitude"]
+                )
                 min_distance = min(min_distance, distance)
 
         return min(min_distance / 180.0, 1.0)  # Normalize to 0-1
@@ -444,9 +391,7 @@ class FeatureExtractor:
 
         return 0.0
 
-    def _calculate_failed_login_rate(
-        self, user_id: str, ip_address: str
-    ) -> float:
+    def _calculate_failed_login_rate(self, user_id: str, ip_address: str) -> float:
         """Calculate failed login rate."""
         now = datetime.utcnow()
         failed_logins = 0
@@ -457,27 +402,21 @@ class FeatureExtractor:
             self.ip_request_history.get(ip_address, []),
         ]:
             for req in requests:
-                req_time = datetime.fromisoformat(
-                    req.get("timestamp", now.isoformat())
-                )
-                if now - req_time < timedelta(hours=1) and req.get(
-                    "endpoint", ""
-                ).endswith("/login"):
+                req_time = datetime.fromisoformat(req.get("timestamp", now.isoformat()))
+                if now - req_time < timedelta(hours=1) and req.get("endpoint", "").endswith(
+                    "/login"
+                ):
                     total_logins += 1
                     if req.get("status_code", 200) >= 400:
                         failed_logins += 1
 
         return failed_logins / max(total_logins, 1)
 
-    def _calculate_successful_login_rate(
-        self, user_id: str, ip_address: str
-    ) -> float:
+    def _calculate_successful_login_rate(self, user_id: str, ip_address: str) -> float:
         """Calculate successful login rate."""
         return 1.0 - self._calculate_failed_login_rate(user_id, ip_address)
 
-    def _calculate_mfa_bypass_attempts(
-        self, user_id: str, ip_address: str
-    ) -> float:
+    def _calculate_mfa_bypass_attempts(self, user_id: str, ip_address: str) -> float:
         """Calculate MFA bypass attempts."""
         now = datetime.utcnow()
         mfa_bypass_attempts = 0
@@ -487,15 +426,10 @@ class FeatureExtractor:
             self.ip_request_history.get(ip_address, []),
         ]:
             for req in requests:
-                req_time = datetime.fromisoformat(
-                    req.get("timestamp", now.isoformat())
-                )
+                req_time = datetime.fromisoformat(req.get("timestamp", now.isoformat()))
                 if now - req_time < timedelta(hours=1):
                     endpoint = req.get("endpoint", "")
-                    if (
-                        "/mfa/" in endpoint
-                        and req.get("status_code", 200) >= 400
-                    ):
+                    if "/mfa/" in endpoint and req.get("status_code", 200) >= 400:
                         mfa_bypass_attempts += 1
 
         return min(mfa_bypass_attempts / 10.0, 1.0)
@@ -511,9 +445,7 @@ class FeatureExtractor:
             self.ip_request_history.get(ip_address, []),
         ]:
             for req in requests:
-                req_time = datetime.fromisoformat(
-                    req.get("timestamp", now.isoformat())
-                )
+                req_time = datetime.fromisoformat(req.get("timestamp", now.isoformat()))
                 if now - req_time < timedelta(hours=1):
                     total_requests += 1
                     if req.get("status_code", 200) >= 400:
@@ -521,9 +453,7 @@ class FeatureExtractor:
 
         return errors / max(total_requests, 1)
 
-    def _calculate_privileged_access(
-        self, user_id: str, ip_address: str
-    ) -> float:
+    def _calculate_privileged_access(self, user_id: str, ip_address: str) -> float:
         """Calculate privileged endpoint access."""
         now = datetime.utcnow()
         privileged_access = 0
@@ -539,22 +469,15 @@ class FeatureExtractor:
             self.ip_request_history.get(ip_address, []),
         ]:
             for req in requests:
-                req_time = datetime.fromisoformat(
-                    req.get("timestamp", now.isoformat())
-                )
+                req_time = datetime.fromisoformat(req.get("timestamp", now.isoformat()))
                 if now - req_time < timedelta(hours=1):
                     endpoint = req.get("endpoint", "")
-                    if any(
-                        priv_endpoint in endpoint
-                        for priv_endpoint in privileged_endpoints
-                    ):
+                    if any(priv_endpoint in endpoint for priv_endpoint in privileged_endpoints):
                         privileged_access += 1
 
         return min(privileged_access / 10.0, 1.0)
 
-    def _calculate_data_access_volume(
-        self, user_id: str, ip_address: str
-    ) -> float:
+    def _calculate_data_access_volume(self, user_id: str, ip_address: str) -> float:
         """Calculate data access volume."""
         now = datetime.utcnow()
         data_volume = 0
@@ -564,17 +487,13 @@ class FeatureExtractor:
             self.ip_request_history.get(ip_address, []),
         ]:
             for req in requests:
-                req_time = datetime.fromisoformat(
-                    req.get("timestamp", now.isoformat())
-                )
+                req_time = datetime.fromisoformat(req.get("timestamp", now.isoformat()))
                 if now - req_time < timedelta(hours=1):
                     data_volume += len(json.dumps(req))
 
         return min(data_volume / 1000000.0, 1.0)  # Normalize to MB
 
-    def _calculate_baseline_deviation(
-        self, user_id: str, request_data: Dict[str, Any]
-    ) -> float:
+    def _calculate_baseline_deviation(self, user_id: str, request_data: Dict[str, Any]) -> float:
         """Calculate deviation from user's behavioral baseline."""
         if not user_id or user_id not in self.user_baselines:
             return 0.0
@@ -585,36 +504,26 @@ class FeatureExtractor:
         # Simple deviation calculation
         deviation = 0.0
         for pattern, value in current_patterns.items():
-            baseline_value = baseline.typical_request_patterns.get(
-                pattern, value
-            )
+            baseline_value = baseline.typical_request_patterns.get(pattern, value)
             deviation += abs(value - baseline_value)
 
         return min(deviation / len(current_patterns), 1.0)
 
-    def _extract_request_patterns(
-        self, request_data: Dict[str, Any]
-    ) -> Dict[str, float]:
+    def _extract_request_patterns(self, request_data: Dict[str, Any]) -> Dict[str, float]:
         """Extract request patterns for baseline comparison."""
         return {
             "request_size": len(json.dumps(request_data)),
             "endpoint_length": len(request_data.get("endpoint", "")),
             "has_query_params": float("?" in request_data.get("endpoint", "")),
-            "is_post_request": float(
-                request_data.get("method", "GET") == "POST"
-            ),
+            "is_post_request": float(request_data.get("method", "GET") == "POST"),
         }
 
-    def _calculate_session_duration(
-        self, user_id: str, request_data: Dict[str, Any]
-    ) -> float:
+    def _calculate_session_duration(self, user_id: str, request_data: Dict[str, Any]) -> float:
         """Calculate session duration."""
         if not user_id:
             return 0.0
 
-        requests: deque[Dict[str, Any]] = self.user_request_history.get(
-            user_id, deque()
-        )
+        requests: deque[Dict[str, Any]] = self.user_request_history.get(user_id, deque())
         if len(requests) < 2:
             return 0.0
 
@@ -661,14 +570,10 @@ class MLThreatDetector:
         # Load pre-trained model if available
         self._load_model()
 
-    def train_model(
-        self, training_data: List[Dict[str, Any]]
-    ) -> Dict[str, Any]:
+    def train_model(self, training_data: List[Dict[str, Any]]) -> Dict[str, Any]:
         """Train the threat detection model."""
         try:
-            logger.info(
-                f"Training threat detection model with {len(training_data)} samples"
-            )
+            logger.info(f"Training threat detection model with {len(training_data)} samples")
 
             # Extract features from training data
             features = []
@@ -698,9 +603,7 @@ class MLThreatDetector:
             anomaly_count = np.sum(predictions == -1)
             anomaly_percentage = (anomaly_count / len(predictions)) * 100
 
-            logger.info(
-                f"Model training completed. Anomaly rate: {anomaly_percentage:.2f}%"
-            )
+            logger.info(f"Model training completed. Anomaly rate: {anomaly_percentage:.2f}%")
 
             return {
                 "trained": True,
@@ -714,9 +617,7 @@ class MLThreatDetector:
             logger.error(f"Model training failed: {str(e)}")
             return {"trained": False, "error": str(e)}
 
-    async def analyze_request(
-        self, request_data: Dict[str, Any]
-    ) -> ThreatPrediction:
+    async def analyze_request(self, request_data: Dict[str, Any]) -> ThreatPrediction:
         """Analyze a request for threats using ML model."""
         start_time = time.time()
 
@@ -740,9 +641,7 @@ class MLThreatDetector:
             feature_array_scaled = self.scaler.transform(feature_array)
 
             # Make prediction
-            anomaly_score = self.model.decision_function(feature_array_scaled)[
-                0
-            ]
+            anomaly_score = self.model.decision_function(feature_array_scaled)[0]
             # Check if anomaly (prediction not currently used)
             # self.model.predict(feature_array_scaled)[0] == -1
 
@@ -756,14 +655,10 @@ class MLThreatDetector:
             confidence = min(abs(anomaly_score) / 2.0, 1.0)
 
             # Detect specific attack types
-            detected_attacks = self._detect_attack_types(
-                features, request_data
-            )
+            detected_attacks = self._detect_attack_types(features, request_data)
 
             # Calculate feature contributions
-            features_contribution = self._calculate_feature_contributions(
-                features, anomaly_score
-            )
+            features_contribution = self._calculate_feature_contributions(features, anomaly_score)
 
             # Create prediction
             prediction = ThreatPrediction(
@@ -825,39 +720,24 @@ class MLThreatDetector:
         detected_attacks = []
 
         # Brute force detection
-        if (
-            features.failed_login_rate > 0.5
-            and features.request_frequency > 0.8
-        ):
+        if features.failed_login_rate > 0.5 and features.request_frequency > 0.8:
             detected_attacks.append(AttackType.BRUTE_FORCE)
 
         # DDoS detection
-        if (
-            features.request_frequency > 0.9
-            and features.requests_per_minute > 0.8
-        ):
+        if features.request_frequency > 0.9 and features.requests_per_minute > 0.8:
             detected_attacks.append(AttackType.DDoS)
 
         # SQL injection detection
         endpoint = request_data.get("endpoint", "")
-        if any(
-            pattern in endpoint.lower()
-            for pattern in ["select", "union", "drop", "insert"]
-        ):
+        if any(pattern in endpoint.lower() for pattern in ["select", "union", "drop", "insert"]):
             detected_attacks.append(AttackType.SQL_INJECTION)
 
         # Suspicious activity detection
-        if (
-            features.is_suspicious_user_agent > 0.5
-            or features.country_risk_score > 0.7
-        ):
+        if features.is_suspicious_user_agent > 0.5 or features.country_risk_score > 0.7:
             detected_attacks.append(AttackType.SUSPICIOUS_ACTIVITY)
 
         # Privilege escalation detection
-        if (
-            features.privileged_endpoint_access > 0.5
-            and features.mfa_bypass_attempts > 0.3
-        ):
+        if features.privileged_endpoint_access > 0.5 and features.mfa_bypass_attempts > 0.3:
             detected_attacks.append(AttackType.PRIVILEGE_ESCALATION)
 
         return detected_attacks
@@ -912,9 +792,7 @@ class MLThreatDetector:
                 "risk_score": prediction.risk_score,
                 "threat_level": prediction.threat_level,
                 "confidence": prediction.confidence,
-                "detected_attacks": [
-                    str(attack) for attack in prediction.detected_attacks
-                ],
+                "detected_attacks": [str(attack) for attack in prediction.detected_attacks],
                 "ip_address": request_data.get("ip_address"),
                 "endpoint": request_data.get("endpoint"),
                 "user_agent": request_data.get("user_agent"),
@@ -958,9 +836,7 @@ class MLThreatDetector:
         threat_levels = [pred.threat_level for pred in self.recent_predictions]
         threat_level_counts = {}
         for level in ThreatLevel:
-            threat_level_counts[level] = sum(
-                1 for tl in threat_levels if tl == level
-            )
+            threat_level_counts[level] = sum(1 for tl in threat_levels if tl == level)
 
         return {
             "average_prediction_time_ms": avg_time,
@@ -979,9 +855,7 @@ class MLThreatDetector:
     def update_user_baseline(self, user_id: str, request_data: Dict[str, Any]):
         """Update user behavioral baseline."""
         if user_id not in self.feature_extractor.user_baselines:
-            self.feature_extractor.user_baselines[
-                user_id
-            ] = UserBehaviorBaseline(
+            self.feature_extractor.user_baselines[user_id] = UserBehaviorBaseline(
                 user_id=user_id,
                 typical_request_patterns={},
                 typical_timing_patterns={},
@@ -992,17 +866,14 @@ class MLThreatDetector:
         baseline = self.feature_extractor.user_baselines[user_id]
 
         # Update patterns
-        patterns = self.feature_extractor._extract_request_patterns(
-            request_data
-        )
+        patterns = self.feature_extractor._extract_request_patterns(request_data)
         for pattern, value in patterns.items():
             if pattern not in baseline.typical_request_patterns:
                 baseline.typical_request_patterns[pattern] = value
             else:
                 # Simple exponential smoothing
                 baseline.typical_request_patterns[pattern] = (
-                    0.9 * baseline.typical_request_patterns[pattern]
-                    + 0.1 * value
+                    0.9 * baseline.typical_request_patterns[pattern] + 0.1 * value
                 )
 
         # Update location

@@ -100,18 +100,14 @@ class GraphEngine:
                 )
         return matching_nodes
 
-    async def search_similar_nodes(
-        self, name: str, context: Optional[Dict] = None
-    ) -> List[Node]:
+    async def search_similar_nodes(self, name: str, context: Optional[Dict] = None) -> List[Node]:
         """Search for similar nodes using fuzzy matching."""
         similar_nodes = []
         threshold = 0.7
 
         for node_id, node in self.graph.nodes.items():
             # Check name similarity
-            name_similarity = SequenceMatcher(
-                None, name.lower(), node.label.lower()
-            ).ratio()
+            name_similarity = SequenceMatcher(None, name.lower(), node.label.lower()).ratio()
             prop_name_similarity = SequenceMatcher(
                 None, name.lower(), node.properties.get("name", "").lower()
             ).ratio()
@@ -121,9 +117,7 @@ class GraphEngine:
             # Check aliases
             aliases = node.properties.get("aliases", [])
             for alias in aliases:
-                alias_similarity = SequenceMatcher(
-                    None, name.lower(), alias.lower()
-                ).ratio()
+                alias_similarity = SequenceMatcher(None, name.lower(), alias.lower()).ratio()
                 max_similarity = max(max_similarity, alias_similarity)
 
             if max_similarity >= threshold:
@@ -138,9 +132,7 @@ class GraphEngine:
                 similar_nodes.append(similar_node)
 
         # Sort by similarity
-        similar_nodes.sort(
-            key=lambda n: n.properties.get("similarity", 0), reverse=True
-        )
+        similar_nodes.sort(key=lambda n: n.properties.get("similarity", 0), reverse=True)
         return similar_nodes
 
     async def create_node(self, type: str, properties: Dict[str, Any]) -> Node:
@@ -187,9 +179,7 @@ class GraphEngine:
             "related_to": EdgeType.RELATED_TO,
         }
 
-        mapped_edge_type = edge_type_mapping.get(
-            edge_type, EdgeType.RELATED_TO
-        )
+        mapped_edge_type = edge_type_mapping.get(edge_type, EdgeType.RELATED_TO)
 
         knowledge_edge = KnowledgeEdge(
             source_id=source_id,
@@ -226,9 +216,7 @@ class GraphEngine:
                     # Merge aliases
                     existing_aliases = merged_properties.get("aliases", [])
                     new_aliases = value if isinstance(value, list) else [value]
-                    merged_properties["aliases"] = list(
-                        set(existing_aliases + new_aliases)
-                    )
+                    merged_properties["aliases"] = list(set(existing_aliases + new_aliases))
 
         merged_properties["merged"] = True
         merged_properties["merged_from"] = [node.id for node in nodes]
@@ -277,9 +265,7 @@ class EntityNodeMapper:
                 return mapping
 
             # Try fuzzy/semantic match
-            similar_nodes = await self.graph_engine.search_similar_nodes(
-                entity.text, context
-            )
+            similar_nodes = await self.graph_engine.search_similar_nodes(entity.text, context)
             if similar_nodes:
                 # Check if similarity is above threshold
                 best_node = similar_nodes[0]
@@ -287,13 +273,9 @@ class EntityNodeMapper:
 
                 if similarity >= self.similarity_threshold:
                     strategy = (
-                        MappingStrategy.SEMANTIC_MATCH
-                        if context
-                        else MappingStrategy.FUZZY_MATCH
+                        MappingStrategy.SEMANTIC_MATCH if context else MappingStrategy.FUZZY_MATCH
                     )
-                    confidence = (
-                        similarity * 0.9
-                    )  # Reduce confidence for fuzzy matches
+                    confidence = similarity * 0.9  # Reduce confidence for fuzzy matches
 
                     mapping = NodeMapping(
                         entity=entity,
@@ -313,9 +295,7 @@ class EntityNodeMapper:
                 "created_from": "entity_extraction",
             }
 
-            new_node = await self.graph_engine.create_node(
-                node_type, properties
-            )
+            new_node = await self.graph_engine.create_node(node_type, properties)
 
             mapping = NodeMapping(
                 entity=entity,

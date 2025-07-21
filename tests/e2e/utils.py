@@ -109,9 +109,7 @@ class E2ETestUtils:
             error_message=f"Element {selector} did not contain text '{expected_text}'",
         )
 
-    async def wait_for_element_visible(
-        self, driver, selector: str, timeout: float = 10.0
-    ) -> bool:
+    async def wait_for_element_visible(self, driver, selector: str, timeout: float = 10.0) -> bool:
         """Wait for element to be visible"""
 
         async def check_visible():
@@ -126,9 +124,7 @@ class E2ETestUtils:
             error_message=f"Element {selector} not visible",
         )
 
-    async def wait_for_url_change(
-        self, driver, initial_url: str, timeout: float = 10.0
-    ) -> bool:
+    async def wait_for_url_change(self, driver, initial_url: str, timeout: float = 10.0) -> bool:
         """Wait for URL to change from initial URL"""
 
         async def check_url():
@@ -149,9 +145,7 @@ class E2ETestUtils:
 
         async def check_loaded():
             try:
-                ready_state = await driver.execute_script(
-                    "return document.readyState"
-                )
+                ready_state = await driver.execute_script("return document.readyState")
                 return ready_state == "complete"
             except Exception:
                 return False
@@ -186,9 +180,7 @@ class E2ETestUtils:
             logger.debug(f"API {method} {url} -> {response.status_code}")
             return response
 
-    async def authenticate_user(
-        self, username: str, password: str
-    ) -> Optional[Dict[str, Any]]:
+    async def authenticate_user(self, username: str, password: str) -> Optional[Dict[str, Any]]:
         """Authenticate user and return tokens"""
         try:
             response = await self.make_api_request(
@@ -207,9 +199,7 @@ class E2ETestUtils:
             logger.error(f"Authentication error: {e}")
             return None
 
-    async def create_authenticated_headers(
-        self, username: str, password: str
-    ) -> Dict[str, str]:
+    async def create_authenticated_headers(self, username: str, password: str) -> Dict[str, str]:
         """Create headers with authentication token"""
         auth_data = await self.authenticate_user(username, password)
         if auth_data and "access_token" in auth_data:
@@ -221,14 +211,10 @@ class E2ETestUtils:
 
     # Screenshot helpers
 
-    def generate_screenshot_filename(
-        self, test_name: str, suffix: str = ""
-    ) -> str:
+    def generate_screenshot_filename(self, test_name: str, suffix: str = "") -> str:
         """Generate screenshot filename"""
         timestamp = time.strftime("%Y%m%d_%H%M%S")
-        safe_test_name = "".join(
-            c for c in test_name if c.isalnum() or c in "_-"
-        )
+        safe_test_name = "".join(c for c in test_name if c.isalnum() or c in "_-")
         filename = f"{safe_test_name}_{timestamp}"
         if suffix:
             filename += f"_{suffix}"
@@ -279,9 +265,7 @@ class E2ETestUtils:
             logger.error(f"Screenshot comparison failed: {e}")
             return False
 
-    def _calculate_image_similarity(
-        self, img1: Image.Image, img2: Image.Image
-    ) -> float:
+    def _calculate_image_similarity(self, img1: Image.Image, img2: Image.Image) -> float:
         """Calculate image similarity using histogram comparison"""
         # Convert to RGB if needed
         if img1.mode != "RGB":
@@ -310,9 +294,7 @@ class E2ETestUtils:
 
     # Data validation helpers
 
-    def validate_json_schema(
-        self, data: Dict[str, Any], schema: Dict[str, Any]
-    ) -> bool:
+    def validate_json_schema(self, data: Dict[str, Any], schema: Dict[str, Any]) -> bool:
         """Validate JSON data against schema"""
         try:
             import jsonschema
@@ -335,9 +317,7 @@ class E2ETestUtils:
         """Validate API response"""
         # Check status code
         if response.status_code != expected_status:
-            logger.error(
-                f"Expected status {expected_status}, got {response.status_code}"
-            )
+            logger.error(f"Expected status {expected_status}, got {response.status_code}")
             return False
 
         # Check JSON content
@@ -369,25 +349,19 @@ class E2ETestUtils:
         required_fields = ["type", "data", "timestamp"]
         for field in required_fields:
             if field not in message:
-                logger.error(
-                    f"Required field '{field}' missing from WebSocket message"
-                )
+                logger.error(f"Required field '{field}' missing from WebSocket message")
                 return False
 
         # Check message type
         if expected_type and message["type"] != expected_type:
-            logger.error(
-                f"Expected message type '{expected_type}', got '{message['type']}'"
-            )
+            logger.error(f"Expected message type '{expected_type}', got '{message['type']}'")
             return False
 
         return True
 
     # Performance helpers
 
-    async def measure_performance(
-        self, operation: Callable, *args, **kwargs
-    ) -> Dict[str, Any]:
+    async def measure_performance(self, operation: Callable, *args, **kwargs) -> Dict[str, Any]:
         """Measure performance of an operation"""
         start_time = time.time()
         start_memory = self._get_memory_usage()
@@ -477,15 +451,11 @@ class E2ETestUtils:
     def assert_url_path_equals(self, actual_url: str, expected_path: str):
         """Assert that URL path equals expected path"""
         actual_path = self.extract_path_from_url(actual_url)
-        assert (
-            actual_path == expected_path
-        ), f"Expected path '{expected_path}', got '{actual_path}'"
+        assert actual_path == expected_path, f"Expected path '{expected_path}', got '{actual_path}'"
 
     def assert_response_time_under(self, duration: float, threshold: float):
         """Assert that response time is under threshold"""
-        assert (
-            duration < threshold
-        ), f"Response time {duration:.2f}s exceeds threshold {threshold}s"
+        assert duration < threshold, f"Response time {duration:.2f}s exceeds threshold {threshold}s"
 
     def assert_memory_usage_under(self, memory_mb: float, threshold: float):
         """Assert that memory usage is under threshold"""

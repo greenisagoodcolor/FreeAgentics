@@ -3,8 +3,10 @@ pipeline {
     agent any
 
     environment {
-        PYTHON_VERSION = '3.10'
+        PYTHON_VERSION = '3.12'
         DATABASE_URL = 'postgresql://postgres:postgres@localhost/freeagentics_test'
+        HONEYCOMB_API_KEY = credentials('honeycomb-api-key')
+        HONEYCOMB_DATASET = 'freeagentics-security'
     }
 
     stages {
@@ -44,7 +46,8 @@ pipeline {
                     steps {
                         sh '''
                             . venv/bin/activate
-                            bandit -r . -f json -o results/bandit-report.json
+                            bandit -r . -f json -o results/bandit-report.json -x "./venv,./test_venv,./security_env"
+                            semgrep --config=auto --json --output=results/semgrep-report.json .
                             pylint **/*.py --output-format=json > results/pylint-report.json || true
                         '''
                     }

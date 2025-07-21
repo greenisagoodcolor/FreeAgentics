@@ -48,9 +48,7 @@ class TestEnvironmentVariables:
         for invalid_url in invalid_urls:
             env_vars = {**base_env, "DATABASE_URL": invalid_url}
             with patch.dict(os.environ, env_vars, clear=True):
-                with pytest.raises(
-                    ValueError, match="Invalid PostgreSQL DATABASE_URL"
-                ):
+                with pytest.raises(ValueError, match="Invalid PostgreSQL DATABASE_URL"):
                     Settings()
 
     def test_valid_database_url_accepted(self):
@@ -176,9 +174,7 @@ class TestEnvironmentVariables:
         # Test missing POSTGRES_PASSWORD
         env_with_user = {**base_env, "POSTGRES_USER": "testuser"}
         with patch.dict(os.environ, env_with_user, clear=True):
-            with pytest.raises(
-                ValueError, match="POSTGRES_PASSWORD is required"
-            ):
+            with pytest.raises(ValueError, match="POSTGRES_PASSWORD is required"):
                 Settings()
 
         # Test missing POSTGRES_DB

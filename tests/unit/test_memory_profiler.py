@@ -10,9 +10,7 @@ import numpy as np
 # Add parent directory to path
 sys.path.insert(
     0,
-    os.path.dirname(
-        os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
-    ),
+    os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__)))),
 )
 
 from scripts.memory_profiler_pymdp import MemoryProfiler
@@ -31,7 +29,7 @@ class TestMemoryProfiler(unittest.TestCase):
         mem1 = self.profiler.get_memory_usage()
 
         # Allocate some memory
-        data = np.zeros((1000, 1000))  # ~8MB
+        np.zeros((1000, 1000))  # ~8MB
 
         # Get memory after allocation
         mem2 = self.profiler.get_memory_usage()
@@ -61,9 +59,7 @@ class TestMemoryProfiler(unittest.TestCase):
 
         # Check measurement was recorded
         self.assertEqual(len(self.profiler.measurements), 1)
-        self.assertEqual(
-            self.profiler.measurements[0]["label"], "Test measurement"
-        )
+        self.assertEqual(self.profiler.measurements[0]["label"], "Test measurement")
 
     def test_component_memory_profiling(self):
         """Test component memory profiling."""
@@ -90,8 +86,8 @@ class TestMemoryProfiler(unittest.TestCase):
     def test_hotspot_identification(self):
         """Test memory hotspot identification."""
         # Create some large arrays
-        large_array1 = np.zeros((1000, 1000))  # ~8MB
-        large_array2 = np.ones((500, 500))  # ~2MB
+        np.zeros((1000, 1000))  # ~8MB
+        np.ones((500, 500))  # ~2MB
 
         hotspots = self.profiler.identify_memory_hotspots()
 

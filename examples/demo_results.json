@@ -1,0 +1,14 @@
+{
+  "timestamp": "1753088818.118807",
+  "pipeline_status": {
+    "LLM Generation": "\u26a0\ufe0f Needs API keys",
+    "GMN Parsing": "\u2705 Working",
+    "PyMDP Conversion": "\u2705 Working",
+    "Agent Simulation": "\ud83c\udfaf Ready"
+  },
+  "working_stages": 2,
+  "total_stages": 4,
+  "llm_used": false,
+  "gmn_available": true,
+  "pymdp_available": true
+}

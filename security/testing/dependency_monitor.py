@@ -17,7 +17,6 @@ from pathlib import Path
 from typing import Any, Dict, List, Optional, Set, Tuple
 
 import aiohttp
-import requests
 import toml
 from packaging import version
 from packaging.requirements import Requirement
@@ -92,9 +91,7 @@ class MonitorConfig:
     check_interval: int = 3600  # Check every hour
     severity_threshold: VulnerabilitySeverity = VulnerabilitySeverity.HIGH
     auto_update: bool = False
-    auto_update_severity: VulnerabilitySeverity = (
-        VulnerabilitySeverity.CRITICAL
-    )
+    auto_update_severity: VulnerabilitySeverity = VulnerabilitySeverity.CRITICAL
     create_prs: bool = True
     snyk_token: Optional[str] = None
     github_token: Optional[str] = None
@@ -146,9 +143,7 @@ class DependencyScanner:
                             if req.name not in seen:
                                 seen.add(req.name)
                                 # Get actual installed version
-                                installed_version = self._get_pip_version(
-                                    req.name
-                                )
+                                installed_version = self._get_pip_version(req.name)
                                 if installed_version:
                                     dependencies.append(
                                         Dependency(
@@ -159,9 +154,7 @@ class DependencyScanner:
                                         )
                                     )
                         except Exception as e:
-                            logger.warning(
-                                f"Failed to parse requirement: {line} - {e}"
-                            )
+                            logger.warning(f"Failed to parse requirement: {line} - {e}")
 
         # Also scan pyproject.toml if it exists
         pyproject_path = self.config.project_root / "pyproject.toml"
@@ -184,9 +177,7 @@ class DependencyScanner:
                                         direct=True,
                                     )
                                 )
-                    except (
-                        Exception
-                    ):  # nosec B110 # Safe fallback for malformed requirements files
+                    except Exception:  # nosec B110 # Safe fallback for malformed requirements files
                         pass
 
         # Get all installed packages (including transitive)
@@ -216,9 +207,7 @@ class DependencyScanner:
     def _scan_node_dependencies(self) -> List[Dependency]:
         """Scan Node.js dependencies from package.json"""
         dependencies = []
-        package_json_files = list(
-            self.config.project_root.glob("**/package.json")
-        )
+        package_json_files = list(self.config.project_root.glob("**/package.json"))
 
         for package_json in package_json_files:
             # Skip node_modules
@@ -232,9 +221,7 @@ class DependencyScanner:
                 # Direct dependencies
                 for name, version_spec in data.get("dependencies", {}).items():
                     # Get actual installed version
-                    installed_version = self._get_npm_version(
-                        name, package_json.parent
-                    )
+                    installed_version = self._get_npm_version(name, package_json.parent)
                     if installed_version:
                         dependencies.append(
                             Dependency(
@@ -246,12 +233,8 @@ class DependencyScanner:
                         )
 
                 # Dev dependencies
-                for name, version_spec in data.get(
-                    "devDependencies", {}
-                ).items():
-                    installed_version = self._get_npm_version(
-                        name, package_json.parent
-                    )
+                for name, version_spec in data.get("devDependencies", {}).items():
+                    installed_version = self._get_npm_version(name, package_json.parent)
                     if installed_version:
                         dependencies.append(
                             Dependency(
@@ -285,9 +268,7 @@ class DependencyScanner:
                     for line in result.stdout.strip().split("\n"):
                         if line:
                             dep_info = json.loads(line)
-                            if dep_info.get("Path") and dep_info.get(
-                                "Version"
-                            ):
+                            if dep_info.get("Path") and dep_info.get("Version"):
                                 dependencies.append(
                                     Dependency(
                                         name=dep_info["Path"],
@@ -304,9 +285,7 @@ class DependencyScanner:
     def _get_pip_version(self, package_name: str) -> Optional[str]:
         """Get installed pip package version"""
         try:
-            result = subprocess.run(
-                ["pip", "show", package_name], capture_output=True, text=True
-            )
+            result = subprocess.run(["pip", "show", package_name], capture_output=True, text=True)
             if result.returncode == 0:
                 for line in result.stdout.split("\n"):
                     if line.startswith("Version:"):
@@ -315,9 +294,7 @@ class DependencyScanner:
             pass
         return None
 
-    def _get_npm_version(
-        self, package_name: str, working_dir: Path
-    ) -> Optional[str]:
+    def _get_npm_version(self, package_name: str, working_dir: Path) -> Optional[str]:
         """Get installed npm package version"""
         try:
             result = subprocess.run(
@@ -352,9 +329,7 @@ class VulnerabilityDatabase:
         if self.session:
             await self.session.close()
 
-    async def check_vulnerabilities(
-        self, dependencies: List[Dependency]
-    ) -> List[Dependency]:
+    async def check_vulnerabilities(self, dependencies: List[Dependency]) -> List[Dependency]:
         """Check dependencies for known vulnerabilities"""
         # Check from multiple sources
         tasks = []
@@ -383,9 +358,7 @@ class VulnerabilityDatabase:
 
         return dependencies
 
-    async def _check_python_vulnerabilities(
-        self, dependencies: List[Dependency]
-    ) -> None:
+    async def _check_python_vulnerabilities(self, dependencies: List[Dependency]) -> None:
         """Check Python packages against PyUp Safety database"""
         try:
             # Download the latest safety database
@@ -409,27 +382,19 @@ class VulnerabilityDatabase:
                                         ),
                                         package=dep.name,
                                         installed_version=dep.version,
-                                        affected_versions=", ".join(
-                                            vuln_data.get("specs", [])
-                                        ),
+                                        affected_versions=", ".join(vuln_data.get("specs", [])),
                                         fixed_versions=self._extract_fixed_versions(
                                             vuln_data.get("specs", [])
                                         ),
-                                        severity=self._estimate_severity(
-                                            vuln_data
-                                        ),
+                                        severity=self._estimate_severity(vuln_data),
                                         title=vuln_data.get(
                                             "advisory",
                                             "Vulnerability in " + dep.name,
                                         ),
-                                        description=vuln_data.get(
-                                            "description", ""
-                                        ),
+                                        description=vuln_data.get("description", ""),
                                         published_date=datetime.now(),  # Safety DB doesn't provide dates
                                         cve_ids=(
-                                            [vuln_data.get("cve")]
-                                            if vuln_data.get("cve")
-                                            else []
+                                            [vuln_data.get("cve")] if vuln_data.get("cve") else []
                                         ),
                                     )
                                     dep.vulnerabilities.append(vuln)
@@ -437,15 +402,11 @@ class VulnerabilityDatabase:
         except Exception as e:
             logger.error(f"Error checking Python vulnerabilities: {e}")
 
-    async def _check_npm_vulnerabilities(
-        self, dependencies: List[Dependency]
-    ) -> None:
+    async def _check_npm_vulnerabilities(self, dependencies: List[Dependency]) -> None:
         """Check NPM packages for vulnerabilities"""
         for dep in dependencies:
             try:
-                async with self.session.get(
-                    f"{self.config.npm_registry}/{dep.name}"
-                ) as response:
+                async with self.session.get(f"{self.config.npm_registry}/{dep.name}") as response:
                     if response.status == 200:
                         data = await response.json()
 
@@ -457,14 +418,8 @@ class VulnerabilityDatabase:
                                 package=dep.name,
                                 installed_version=dep.version,
                                 affected_versions="<"
-                                + security_info.get(
-                                    "patched_version", "unknown"
-                                ),
-                                fixed_versions=[
-                                    security_info.get(
-                                        "patched_version", "unknown"
-                                    )
-                                ],
+                                + security_info.get("patched_version", "unknown"),
+                                fixed_versions=[security_info.get("patched_version", "unknown")],
                                 severity=VulnerabilitySeverity.HIGH,
                                 title="Security holding on package",
                                 description=security_info.get(
@@ -476,13 +431,9 @@ class VulnerabilityDatabase:
                             dep.vulnerabilities.append(vuln)
 
             except Exception as e:
-                logger.warning(
-                    f"Error checking NPM vulnerabilities for {dep.name}: {e}"
-                )
+                logger.warning(f"Error checking NPM vulnerabilities for {dep.name}: {e}")
 
-    async def _check_snyk_vulnerabilities(
-        self, dependencies: List[Dependency]
-    ) -> None:
+    async def _check_snyk_vulnerabilities(self, dependencies: List[Dependency]) -> None:
         """Check vulnerabilities using Snyk API"""
         # Group by source for batch checking
         by_source: Dict[str, List[Dependency]] = {}
@@ -509,9 +460,7 @@ class VulnerabilityDatabase:
             except Exception as e:
                 logger.error(f"Error checking Snyk vulnerabilities: {e}")
 
-    async def _check_github_advisories(
-        self, dependencies: List[Dependency]
-    ) -> None:
+    async def _check_github_advisories(self, dependencies: List[Dependency]) -> None:
         """Check GitHub Security Advisories"""
         headers = {
             "Authorization": f"token {self.config.github_token}",
@@ -566,9 +515,7 @@ class VulnerabilityDatabase:
                         data = await response.json()
                         self._process_github_advisories(data, dep)
             except Exception as e:
-                logger.warning(
-                    f"Error checking GitHub advisories for {dep.name}: {e}"
-                )
+                logger.warning(f"Error checking GitHub advisories for {dep.name}: {e}")
 
     def _is_version_affected(self, version_str: str, specs: List[str]) -> bool:
         """Check if version matches vulnerability specs"""
@@ -611,24 +558,14 @@ class VulnerabilityDatabase:
                 fixed.append(spec[2:])
         return fixed
 
-    def _estimate_severity(
-        self, vuln_data: Dict[str, Any]
-    ) -> VulnerabilitySeverity:
+    def _estimate_severity(self, vuln_data: Dict[str, Any]) -> VulnerabilitySeverity:
         """Estimate severity from vulnerability data"""
         # Look for severity indicators in the text
-        text = (
-            vuln_data.get("advisory", "") + vuln_data.get("description", "")
-        ).lower()
+        text = (vuln_data.get("advisory", "") + vuln_data.get("description", "")).lower()
 
-        if any(
-            word in text
-            for word in ["critical", "severe", "remote code execution", "rce"]
-        ):
+        if any(word in text for word in ["critical", "severe", "remote code execution", "rce"]):
             return VulnerabilitySeverity.CRITICAL
-        elif any(
-            word in text
-            for word in ["high", "sql injection", "xss", "authentication"]
-        ):
+        elif any(word in text for word in ["high", "sql injection", "xss", "authentication"]):
             return VulnerabilitySeverity.HIGH
         elif any(word in text for word in ["medium", "moderate", "dos"]):
             return VulnerabilitySeverity.MEDIUM
@@ -646,22 +583,14 @@ class VulnerabilityDatabase:
         }
         return mapping.get(source)
 
-    def _process_snyk_results(
-        self, data: Dict[str, Any], dependencies: List[Dependency]
-    ) -> None:
+    def _process_snyk_results(self, data: Dict[str, Any], dependencies: List[Dependency]) -> None:
         """Process Snyk vulnerability results"""
         # Implementation depends on Snyk API response format
         pass
 
-    def _process_github_advisories(
-        self, data: Dict[str, Any], dependency: Dependency
-    ) -> None:
+    def _process_github_advisories(self, data: Dict[str, Any], dependency: Dependency) -> None:
         """Process GitHub advisory results"""
-        vulnerabilities = (
-            data.get("data", {})
-            .get("securityVulnerabilities", {})
-            .get("nodes", [])
-        )
+        vulnerabilities = data.get("data", {}).get("securityVulnerabilities", {}).get("nodes", [])
 
         for vuln_node in vulnerabilities:
             advisory = vuln_node.get("advisory", {})
@@ -680,23 +609,15 @@ class VulnerabilityDatabase:
                     package=dependency.name,
                     installed_version=dependency.version,
                     affected_versions=vuln_range,
-                    fixed_versions=[
-                        vuln_node.get("firstPatchedVersion", {}).get(
-                            "identifier", ""
-                        )
-                    ],
-                    severity=VulnerabilitySeverity(
-                        advisory.get("severity", "LOW").lower()
-                    ),
+                    fixed_versions=[vuln_node.get("firstPatchedVersion", {}).get("identifier", "")],
+                    severity=VulnerabilitySeverity(advisory.get("severity", "LOW").lower()),
                     title=advisory.get("summary", ""),
                     description=advisory.get("description", ""),
                     published_date=datetime.fromisoformat(
                         advisory.get("publishedAt", "").replace("Z", "+00:00")
                     ),
                     cve_ids=cve_ids,
-                    references=[
-                        ref["url"] for ref in advisory.get("references", [])
-                    ],
+                    references=[ref["url"] for ref in advisory.get("references", [])],
                 )
                 dependency.vulnerabilities.append(vuln)
 
@@ -721,9 +642,7 @@ class UpdateManager:
                 dep.latest_version = latest
                 dep.update_available = True
 
-    async def _get_latest_pip_version(
-        self, package_name: str
-    ) -> Optional[str]:
+    async def _get_latest_pip_version(self, package_name: str) -> Optional[str]:
         """Get latest version from PyPI"""
         try:
             async with aiohttp.ClientSession() as session:
@@ -737,9 +656,7 @@ class UpdateManager:
             pass
         return None
 
-    async def _get_latest_npm_version(
-        self, package_name: str
-    ) -> Optional[str]:
+    async def _get_latest_npm_version(self, package_name: str) -> Optional[str]:
         """Get latest version from NPM"""
         try:
             async with aiohttp.ClientSession() as session:
@@ -753,26 +670,18 @@ class UpdateManager:
             pass
         return None
 
-    def create_update_pr(
-        self, dependencies: List[Dependency]
-    ) -> Optional[str]:
+    def create_update_pr(self, dependencies: List[Dependency]) -> Optional[str]:
         """Create PR for dependency updates"""
         if not self.config.create_prs or not self.config.github_token:
             return None
 
-        updates_needed = [
-            d
-            for d in dependencies
-            if d.update_available and self._should_update(d)
-        ]
+        updates_needed = [d for d in dependencies if d.update_available and self._should_update(d)]
 
         if not updates_needed:
             return None
 
         # Create branch
-        branch_name = (
-            f"dependency-updates-{datetime.now().strftime('%Y%m%d-%H%M%S')}"
-        )
+        branch_name = f"dependency-updates-{datetime.now().strftime('%Y%m%d-%H%M%S')}"
         subprocess.run(["git", "checkout", "-b", branch_name])
 
         # Update dependencies
@@ -842,18 +751,14 @@ class UpdateManager:
             # Update version in requirements
             pattern = rf"^{re.escape(dependency.name)}[=<>~!].*$"
             replacement = f"{dependency.name}=={dependency.latest_version}"
-            new_content = re.sub(
-                pattern, replacement, content, flags=re.MULTILINE
-            )
+            new_content = re.sub(pattern, replacement, content, flags=re.MULTILINE)
 
             if new_content != content:
                 req_file.write_text(new_content)
 
     def _update_npm_dependency(self, dependency: Dependency) -> None:
         """Update Node.js dependency"""
-        package_json_files = list(
-            self.config.project_root.glob("**/package.json")
-        )
+        package_json_files = list(self.config.project_root.glob("**/package.json"))
 
         for package_json in package_json_files:
             if "node_modules" in str(package_json):
@@ -865,9 +770,7 @@ class UpdateManager:
             updated = False
             for dep_type in ["dependencies", "devDependencies"]:
                 if dep_type in data and dependency.name in data[dep_type]:
-                    data[dep_type][
-                        dependency.name
-                    ] = f"^{dependency.latest_version}"
+                    data[dep_type][dependency.name] = f"^{dependency.latest_version}"
                     updated = True
 
             if updated:
@@ -885,7 +788,9 @@ class UpdateManager:
     def _generate_pr_body(self, updates: List[Dependency]) -> str:
         """Generate PR body with update details"""
         body = "## Dependency Security Updates\n\n"
-        body += "This PR updates the following dependencies to address security vulnerabilities:\n\n"
+        body += (
+            "This PR updates the following dependencies to address security vulnerabilities:\n\n"
+        )
 
         for dep in updates:
             body += f"### {dep.name}\n"
@@ -893,11 +798,9 @@ class UpdateManager:
             body += f"- **Updated to:** {dep.latest_version}\n"
 
             if dep.vulnerabilities:
-                body += f"- **Vulnerabilities fixed:**\n"
+                body += "- **Vulnerabilities fixed:**\n"
                 for vuln in dep.vulnerabilities:
-                    body += (
-                        f"  - {vuln.severity.value.upper()}: {vuln.title}\n"
-                    )
+                    body += f"  - {vuln.severity.value.upper()}: {vuln.title}\n"
                     if vuln.cve_ids:
                         body += f"    - CVE: {', '.join(vuln.cve_ids)}\n"
 
@@ -967,18 +870,13 @@ class DependencyMonitor:
             "vulnerable_dependencies": len(vulnerable_deps),
             "critical_vulnerabilities": len(critical_vulns),
             "high_vulnerabilities": len(high_vulns),
-            "dependencies_with_updates": len(
-                [d for d in dependencies if d.update_available]
-            ),
+            "dependencies_with_updates": len([d for d in dependencies if d.update_available]),
         }
 
         # Auto-update if configured
         if self.config.auto_update and (
             critical_vulns
-            or (
-                self.config.auto_update_severity == VulnerabilitySeverity.HIGH
-                and high_vulns
-            )
+            or (self.config.auto_update_severity == VulnerabilitySeverity.HIGH and high_vulns)
         ):
             pr_url = await self._handle_auto_update(dependencies)
             if pr_url:
@@ -993,9 +891,7 @@ class DependencyMonitor:
 
         return report
 
-    async def _handle_auto_update(
-        self, dependencies: List[Dependency]
-    ) -> Optional[str]:
+    async def _handle_auto_update(self, dependencies: List[Dependency]) -> Optional[str]:
         """Handle automatic updates"""
         # Check update frequency
         now = datetime.now()
@@ -1015,9 +911,7 @@ class DependencyMonitor:
         self, critical_vulns: List[Tuple[Dependency, Vulnerability]]
     ) -> None:
         """Send alert for critical vulnerabilities"""
-        logger.critical(
-            f"CRITICAL VULNERABILITIES DETECTED: {len(critical_vulns)} issues found"
-        )
+        logger.critical(f"CRITICAL VULNERABILITIES DETECTED: {len(critical_vulns)} issues found")
 
         for dep, vuln in critical_vulns:
             logger.critical(
@@ -1026,9 +920,7 @@ class DependencyMonitor:
 
         # In production, this would send to alerting system
 
-    def _save_report(
-        self, dependencies: List[Dependency], summary: Dict[str, Any]
-    ) -> None:
+    def _save_report(self, dependencies: List[Dependency], summary: Dict[str, Any]) -> None:
         """Save detailed vulnerability report"""
         report_path = (
             self.config.project_root
@@ -1079,12 +971,8 @@ def main():
         default=Path.cwd(),
         help="Project root directory",
     )
-    parser.add_argument(
-        "--continuous", action="store_true", help="Run continuous monitoring"
-    )
-    parser.add_argument(
-        "--auto-update", action="store_true", help="Enable automatic updates"
-    )
+    parser.add_argument("--continuous", action="store_true", help="Run continuous monitoring")
+    parser.add_argument("--auto-update", action="store_true", help="Enable automatic updates")
     parser.add_argument("--snyk-token", help="Snyk API token")
     parser.add_argument("--github-token", help="GitHub API token")
 

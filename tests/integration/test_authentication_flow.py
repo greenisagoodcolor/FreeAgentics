@@ -94,9 +94,7 @@ class TestAuthenticationFlow:
         assert "user_id" in user
         assert "created_at" in user
 
-    def test_user_registration_duplicate_username(
-        self, client, test_user_data
-    ):
+    def test_user_registration_duplicate_username(self, client, test_user_data):
         """Test registration with duplicate username."""
         # Register first user
         response = client.post("/api/v1/auth/register", json=test_user_data)
@@ -139,9 +137,7 @@ class TestAuthenticationFlow:
     def test_login_success(self, client, test_user_data):
         """Test successful login."""
         # Register user first
-        register_response = client.post(
-            "/api/v1/auth/register", json=test_user_data
-        )
+        register_response = client.post("/api/v1/auth/register", json=test_user_data)
         assert register_response.status_code == 200
 
         # Login with correct credentials
@@ -176,9 +172,7 @@ class TestAuthenticationFlow:
     def test_login_invalid_password(self, client, test_user_data):
         """Test login with invalid password."""
         # Register user first
-        register_response = client.post(
-            "/api/v1/auth/register", json=test_user_data
-        )
+        register_response = client.post("/api/v1/auth/register", json=test_user_data)
         assert register_response.status_code == 200
 
         # Login with wrong password
@@ -194,9 +188,7 @@ class TestAuthenticationFlow:
     def test_login_inactive_user(self, client, test_user_data):
         """Test login with inactive user."""
         # Register user and deactivate
-        register_response = client.post(
-            "/api/v1/auth/register", json=test_user_data
-        )
+        register_response = client.post("/api/v1/auth/register", json=test_user_data)
         assert register_response.status_code == 200
 
         # Manually deactivate user
@@ -216,9 +208,7 @@ class TestAuthenticationFlow:
     def test_login_rate_limiting(self, client, test_user_data):
         """Test login rate limiting."""
         # Register user first
-        register_response = client.post(
-            "/api/v1/auth/register", json=test_user_data
-        )
+        register_response = client.post("/api/v1/auth/register", json=test_user_data)
         assert register_response.status_code == 200
 
         login_data = {
@@ -238,9 +228,7 @@ class TestAuthenticationFlow:
     def test_get_current_user_info(self, client, test_user_data):
         """Test getting current user information."""
         # Register and login
-        register_response = client.post(
-            "/api/v1/auth/register", json=test_user_data
-        )
+        register_response = client.post("/api/v1/auth/register", json=test_user_data)
         assert register_response.status_code == 200
 
         access_token = register_response.json()["access_token"]
@@ -269,9 +257,7 @@ class TestAuthenticationFlow:
     def test_get_current_user_info_expired_token(self, client, test_user_data):
         """Test getting user info with expired token."""
         # Register user
-        register_response = client.post(
-            "/api/v1/auth/register", json=test_user_data
-        )
+        register_response = client.post("/api/v1/auth/register", json=test_user_data)
         assert register_response.status_code == 200
 
         # Create expired token
@@ -281,8 +267,7 @@ class TestAuthenticationFlow:
             "username": user.username,
             "role": user.role,
             "permissions": [],
-            "exp": datetime.utcnow()
-            - timedelta(hours=1),  # Expired 1 hour ago
+            "exp": datetime.utcnow() - timedelta(hours=1),  # Expired 1 hour ago
             "type": "access",
         }
 
@@ -305,9 +290,7 @@ class TestAuthenticationFlow:
     def test_logout_success(self, client, test_user_data):
         """Test successful logout."""
         # Register and login
-        register_response = client.post(
-            "/api/v1/auth/register", json=test_user_data
-        )
+        register_response = client.post("/api/v1/auth/register", json=test_user_data)
         assert register_response.status_code == 200
 
         access_token = register_response.json()["access_token"]
@@ -334,9 +317,7 @@ class TestAuthenticationFlow:
     def test_get_permissions(self, client, test_user_data, admin_user_data):
         """Test getting user permissions."""
         # Test observer permissions
-        register_response = client.post(
-            "/api/v1/auth/register", json=test_user_data
-        )
+        register_response = client.post("/api/v1/auth/register", json=test_user_data)
         assert register_response.status_code == 200
 
         access_token = register_response.json()["access_token"]
@@ -353,17 +334,13 @@ class TestAuthenticationFlow:
         assert permissions["can_admin_system"] is False
 
         # Test admin permissions
-        admin_response = client.post(
-            "/api/v1/auth/register", json=admin_user_data
-        )
+        admin_response = client.post("/api/v1/auth/register", json=admin_user_data)
         assert admin_response.status_code == 200
 
         admin_token = admin_response.json()["access_token"]
         admin_headers = {"Authorization": f"Bearer {admin_token}"}
 
-        response = client.get(
-            "/api/v1/auth/permissions", headers=admin_headers
-        )
+        response = client.get("/api/v1/auth/permissions", headers=admin_headers)
         assert response.status_code == 200
 
         admin_permissions = response.json()
@@ -376,21 +353,15 @@ class TestAuthenticationFlow:
     def test_token_refresh_flow(self, client, test_user_data):
         """Test token refresh functionality."""
         # Register user
-        register_response = client.post(
-            "/api/v1/auth/register", json=test_user_data
-        )
+        register_response = client.post("/api/v1/auth/register", json=test_user_data)
         assert register_response.status_code == 200
 
         access_token = register_response.json()["access_token"]
         refresh_token = register_response.json()["refresh_token"]
 
         # Decode tokens to verify structure
-        access_payload = jwt.decode(
-            access_token, options={"verify_signature": False}
-        )
-        refresh_payload = jwt.decode(
-            refresh_token, options={"verify_signature": False}
-        )
+        access_payload = jwt.decode(access_token, options={"verify_signature": False})
+        refresh_payload = jwt.decode(refresh_token, options={"verify_signature": False})
 
         assert access_payload["type"] == "access"
         assert refresh_payload["type"] == "refresh"
@@ -400,22 +371,14 @@ class TestAuthenticationFlow:
         refresh_exp = datetime.fromtimestamp(refresh_payload["exp"])
 
         # Access token should expire in ~30 minutes
-        assert (
-            access_exp - datetime.utcnow()
-        ).total_seconds() < 1900  # Less than 32 minutes
-        assert (
-            access_exp - datetime.utcnow()
-        ).total_seconds() > 1700  # More than 28 minutes
+        assert (access_exp - datetime.utcnow()).total_seconds() < 1900  # Less than 32 minutes
+        assert (access_exp - datetime.utcnow()).total_seconds() > 1700  # More than 28 minutes
 
         # Refresh token should expire in ~7 days
-        assert (
-            refresh_exp - datetime.utcnow()
-        ).total_seconds() > 600000  # More than 6.9 days
+        assert (refresh_exp - datetime.utcnow()).total_seconds() > 600000  # More than 6.9 days
 
     @patch("auth.security_logging.security_auditor.log_event")
-    def test_security_event_logging(
-        self, mock_log_event, client, test_user_data
-    ):
+    def test_security_event_logging(self, mock_log_event, client, test_user_data):
         """Test security event logging during authentication flow."""
         # Test registration logging
         response = client.post("/api/v1/auth/register", json=test_user_data)
@@ -475,9 +438,7 @@ class TestAuthenticationFlow:
         mock_log_event.reset_mock()
 
         # Test logout logging
-        access_token = client.post(
-            "/api/v1/auth/login", json=login_data
-        ).json()["access_token"]
+        access_token = client.post("/api/v1/auth/login", json=login_data).json()["access_token"]
         headers = {"Authorization": f"Bearer {access_token}"}
         response = client.post("/api/v1/auth/logout", headers=headers)
         assert response.status_code == 200
@@ -485,18 +446,14 @@ class TestAuthenticationFlow:
         # Verify logout event was logged
         assert mock_log_event.called
         logout_call = [
-            call
-            for call in mock_log_event.call_args_list
-            if call[0][0] == SecurityEventType.LOGOUT
+            call for call in mock_log_event.call_args_list if call[0][0] == SecurityEventType.LOGOUT
         ][0]
         assert logout_call[0][1] == SecurityEventSeverity.INFO
 
     def test_concurrent_session_management(self, client, test_user_data):
         """Test concurrent session handling."""
         # Register user
-        register_response = client.post(
-            "/api/v1/auth/register", json=test_user_data
-        )
+        register_response = client.post("/api/v1/auth/register", json=test_user_data)
         assert register_response.status_code == 200
 
         # Login from multiple sessions
@@ -521,9 +478,7 @@ class TestAuthenticationFlow:
     def test_session_persistence(self, client, test_user_data):
         """Test session persistence across requests."""
         # Register and login
-        register_response = client.post(
-            "/api/v1/auth/register", json=test_user_data
-        )
+        register_response = client.post("/api/v1/auth/register", json=test_user_data)
         assert register_response.status_code == 200
 
         access_token = register_response.json()["access_token"]
@@ -536,9 +491,7 @@ class TestAuthenticationFlow:
             "/api/v1/agents",  # This will test auth on other endpoints
         ]
 
-        for endpoint in endpoints[
-            :2
-        ]:  # Skip agents endpoint if it doesn't exist
+        for endpoint in endpoints[:2]:  # Skip agents endpoint if it doesn't exist
             response = client.get(endpoint, headers=headers)
             assert response.status_code == 200
 
@@ -688,7 +641,7 @@ class TestAuthenticationEdgeCases:
                 "role": "observer",
             }
 
-            _response = client.post("/api/v1/auth/register", json=data)
+            _ = client.post("/api/v1/auth/register", json=data)
             # Depending on implementation, might accept or reject
             # This test documents the behavior
 
@@ -701,7 +654,7 @@ class TestAuthenticationEdgeCases:
             "role": "observer",
         }
 
-        _response = client.post("/api/v1/auth/register", json=unicode_data)
+        _ = client.post("/api/v1/auth/register", json=unicode_data)
         # Document behavior with unicode
 
     def test_long_input_fields(self, client):
@@ -715,7 +668,7 @@ class TestAuthenticationEdgeCases:
             "role": "observer",
         }
 
-        _response = client.post("/api/v1/auth/register", json=data)
+        _ = client.post("/api/v1/auth/register", json=data)
         # Should handle gracefully, either truncate or reject
 
     def test_null_and_empty_fields(self, client):

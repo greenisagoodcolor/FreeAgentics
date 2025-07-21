@@ -1,6 +1,6 @@
 """Type stubs for aiohttp library."""
 
-from typing import Any, AsyncContextManager, Dict, Optional, Union
+from typing import Any, AsyncContextManager, Dict, Optional
 
 class ClientResponse:
     status: int

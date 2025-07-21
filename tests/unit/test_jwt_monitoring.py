@@ -131,7 +131,7 @@ class TestJWTSuspiciousPatternDetection:
 
         # Create and revoke token
         token = auth_manager.create_access_token(user)
-        decoded = auth_manager.verify_token(token)  # Should work initially
+        auth_manager.verify_token(token)  # Should work initially
 
         # Revoke token
         auth_manager.logout(token)
@@ -159,20 +159,12 @@ class TestJWTSuspiciousPatternDetection:
             "jti": "expired_test_jti",
             "iss": "freeagentics",
             "aud": "freeagentics-api",
-            "exp": (
-                datetime.now(timezone.utc) - timedelta(minutes=1)
-            ).timestamp(),  # Expired
-            "nbf": (
-                datetime.now(timezone.utc) - timedelta(minutes=10)
-            ).timestamp(),
-            "iat": (
-                datetime.now(timezone.utc) - timedelta(minutes=10)
-            ).timestamp(),
+            "exp": (datetime.now(timezone.utc) - timedelta(minutes=1)).timestamp(),  # Expired
+            "nbf": (datetime.now(timezone.utc) - timedelta(minutes=10)).timestamp(),
+            "iat": (datetime.now(timezone.utc) - timedelta(minutes=10)).timestamp(),
         }
 
-        expired_token = jwt.encode(
-            expired_payload, auth_manager.private_key, algorithm="RS256"
-        )
+        expired_token = jwt.encode(expired_payload, auth_manager.private_key, algorithm="RS256")
 
         # Attempt to use expired token should log security event and raise exception
         with pytest.raises(HTTPException):
@@ -229,21 +221,15 @@ class TestJWTMonitoringIntegration:
 
         # Create token with binding
         client_fingerprint = "test_fingerprint"
-        token = auth_manager.create_access_token(
-            user, client_fingerprint=client_fingerprint
-        )
+        token = auth_manager.create_access_token(user, client_fingerprint=client_fingerprint)
 
         # Valid usage should not trigger monitoring
-        token_data = auth_manager.verify_token(
-            token, client_fingerprint=client_fingerprint
-        )
+        token_data = auth_manager.verify_token(token, client_fingerprint=client_fingerprint)
         assert token_data.user_id == user.user_id
 
         # Invalid binding should trigger monitoring
         with pytest.raises(HTTPException):
-            auth_manager.verify_token(
-                token, client_fingerprint="wrong_fingerprint"
-            )
+            auth_manager.verify_token(token, client_fingerprint="wrong_fingerprint")
 
         # Should have logged the binding mismatch
         assert (

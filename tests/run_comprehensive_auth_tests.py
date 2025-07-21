@@ -93,9 +93,7 @@ class ComprehensiveAuthTestRunner:
             security_suite.setup_method()
 
             # Run comprehensive security tests
-            security_report = (
-                security_suite.test_generate_comprehensive_security_report()
-            )
+            security_report = security_suite.test_generate_comprehensive_security_report()
 
             suite_results["status"] = "passed"
             suite_results["security_report"] = security_report
@@ -103,9 +101,7 @@ class ComprehensiveAuthTestRunner:
             # Check for critical vulnerabilities
             if security_report["summary"]["vulnerabilities_found"] > 0:
                 suite_results["status"] = "failed"
-                suite_results["errors"].append(
-                    "Critical security vulnerabilities found"
-                )
+                suite_results["errors"].append("Critical security vulnerabilities found")
 
             security_suite.teardown_method()
 
@@ -139,9 +135,7 @@ class ComprehensiveAuthTestRunner:
             integration_suite.setup_method()
 
             # Run comprehensive flow tests
-            flow_report = (
-                integration_suite.test_generate_comprehensive_flow_report()
-            )
+            flow_report = integration_suite.test_generate_comprehensive_flow_report()
 
             suite_results["status"] = "passed"
             suite_results["flow_report"] = flow_report
@@ -149,9 +143,7 @@ class ComprehensiveAuthTestRunner:
             # Check success rate
             if flow_report["summary"]["success_rate"] < 90:
                 suite_results["status"] = "failed"
-                suite_results["errors"].append(
-                    "Integration test success rate too low"
-                )
+                suite_results["errors"].append("Integration test success rate too low")
 
             integration_suite.teardown_method()
 
@@ -161,9 +153,7 @@ class ComprehensiveAuthTestRunner:
 
         except Exception as e:
             suite_results["status"] = "failed"
-            suite_results["errors"].append(
-                f"Integration test failure: {str(e)}"
-            )
+            suite_results["errors"].append(f"Integration test failure: {str(e)}")
             print(f"✗ Integration tests failed: {e}")
             if verbose:
                 traceback.print_exc()
@@ -203,9 +193,7 @@ class ComprehensiveAuthTestRunner:
                 try:
                     test_method = getattr(edge_case_suite, test_name)
                     test_method()
-                    suite_results["tests"].append(
-                        {"name": test_name, "status": "passed"}
-                    )
+                    suite_results["tests"].append({"name": test_name, "status": "passed"})
                 except Exception as e:
                     suite_results["tests"].append(
                         {
@@ -233,9 +221,7 @@ class ComprehensiveAuthTestRunner:
                 try:
                     test_method = getattr(error_suite, test_name)
                     test_method()
-                    suite_results["tests"].append(
-                        {"name": test_name, "status": "passed"}
-                    )
+                    suite_results["tests"].append({"name": test_name, "status": "passed"})
                 except Exception as e:
                     suite_results["tests"].append(
                         {
@@ -249,9 +235,7 @@ class ComprehensiveAuthTestRunner:
             error_suite.teardown_method()
 
             # Determine overall status
-            failed_tests = [
-                t for t in suite_results["tests"] if t["status"] == "failed"
-            ]
+            failed_tests = [t for t in suite_results["tests"] if t["status"] == "failed"]
             if failed_tests:
                 suite_results["status"] = "failed"
             else:
@@ -270,9 +254,7 @@ class ComprehensiveAuthTestRunner:
 
         return suite_results
 
-    def run_performance_tests(
-        self, quick: bool = False, verbose: bool = False
-    ) -> Dict[str, Any]:
+    def run_performance_tests(self, quick: bool = False, verbose: bool = False) -> Dict[str, Any]:
         """Run comprehensive performance tests."""
         print("Running Authentication Performance Tests...")
 
@@ -312,9 +294,7 @@ class ComprehensiveAuthTestRunner:
                 try:
                     test_method = getattr(performance_suite, test_name)
                     test_method()
-                    suite_results["tests"].append(
-                        {"name": test_name, "status": "passed"}
-                    )
+                    suite_results["tests"].append({"name": test_name, "status": "passed"})
                 except Exception as e:
                     suite_results["tests"].append(
                         {
@@ -332,9 +312,7 @@ class ComprehensiveAuthTestRunner:
             performance_suite.teardown_method()
 
             # Determine overall status
-            failed_tests = [
-                t for t in suite_results["tests"] if t["status"] == "failed"
-            ]
+            failed_tests = [t for t in suite_results["tests"] if t["status"] == "failed"]
             if failed_tests:
                 suite_results["status"] = "failed"
             else:
@@ -346,9 +324,7 @@ class ComprehensiveAuthTestRunner:
 
         except Exception as e:
             suite_results["status"] = "failed"
-            suite_results["errors"].append(
-                f"Performance test failure: {str(e)}"
-            )
+            suite_results["errors"].append(f"Performance test failure: {str(e)}")
             print(f"✗ Performance tests failed: {e}")
             if verbose:
                 traceback.print_exc()
@@ -369,43 +345,27 @@ class ComprehensiveAuthTestRunner:
         print("COMPREHENSIVE AUTHENTICATION TEST SUITE")
         print("=" * 60)
 
-        self.results["summary"]["start_time"] = datetime.now(
-            timezone.utc
-        ).isoformat()
+        self.results["summary"]["start_time"] = datetime.now(timezone.utc).isoformat()
         start_time = time.time()
 
         # Run selected test suites
         if security_only:
-            self.results["test_suites"]["security"] = self.run_security_tests(
-                verbose
-            )
+            self.results["test_suites"]["security"] = self.run_security_tests(verbose)
         elif integration_only:
-            self.results["test_suites"][
-                "integration"
-            ] = self.run_integration_tests(verbose)
+            self.results["test_suites"]["integration"] = self.run_integration_tests(verbose)
         elif unit_only:
             self.results["test_suites"]["unit"] = self.run_unit_tests(verbose)
         elif performance_only:
-            self.results["test_suites"][
-                "performance"
-            ] = self.run_performance_tests(quick, verbose)
+            self.results["test_suites"]["performance"] = self.run_performance_tests(quick, verbose)
         else:
             # Run all test suites
-            self.results["test_suites"]["security"] = self.run_security_tests(
-                verbose
-            )
-            self.results["test_suites"][
-                "integration"
-            ] = self.run_integration_tests(verbose)
+            self.results["test_suites"]["security"] = self.run_security_tests(verbose)
+            self.results["test_suites"]["integration"] = self.run_integration_tests(verbose)
             self.results["test_suites"]["unit"] = self.run_unit_tests(verbose)
-            self.results["test_suites"][
-                "performance"
-            ] = self.run_performance_tests(quick, verbose)
+            self.results["test_suites"]["performance"] = self.run_performance_tests(quick, verbose)
 
         end_time = time.time()
-        self.results["summary"]["end_time"] = datetime.now(
-            timezone.utc
-        ).isoformat()
+        self.results["summary"]["end_time"] = datetime.now(timezone.utc).isoformat()
         self.results["summary"]["duration"] = end_time - start_time
 
         # Calculate summary statistics
@@ -420,10 +380,7 @@ class ComprehensiveAuthTestRunner:
             # Collect errors
             if suite_results["errors"]:
                 self.results["errors"].extend(
-                    [
-                        f"{suite_name}: {error}"
-                        for error in suite_results["errors"]
-                    ]
+                    [f"{suite_name}: {error}" for error in suite_results["errors"]]
                 )
 
         # Generate recommendations
@@ -439,17 +396,11 @@ class ComprehensiveAuthTestRunner:
         if "security" in self.results["test_suites"]:
             security_results = self.results["test_suites"]["security"]
             if security_results["status"] == "failed":
-                recommendations.append(
-                    "CRITICAL: Address security vulnerabilities immediately"
-                )
+                recommendations.append("CRITICAL: Address security vulnerabilities immediately")
             elif "security_report" in security_results:
-                score = security_results["security_report"]["summary"][
-                    "security_score"
-                ]
+                score = security_results["security_report"]["summary"]["security_score"]
                 if score < 95:
-                    recommendations.append(
-                        "Improve security posture - current score below 95%"
-                    )
+                    recommendations.append("Improve security posture - current score below 95%")
 
         # Integration recommendations
         if "integration" in self.results["test_suites"]:
@@ -457,13 +408,9 @@ class ComprehensiveAuthTestRunner:
             if integration_results["status"] == "failed":
                 recommendations.append("Fix authentication flow issues")
             elif "flow_report" in integration_results:
-                success_rate = integration_results["flow_report"]["summary"][
-                    "success_rate"
-                ]
+                success_rate = integration_results["flow_report"]["summary"]["success_rate"]
                 if success_rate < 95:
-                    recommendations.append(
-                        "Improve authentication flow reliability"
-                    )
+                    recommendations.append("Improve authentication flow reliability")
 
         # Performance recommendations
         if "performance" in self.results["test_suites"]:
@@ -473,13 +420,9 @@ class ComprehensiveAuthTestRunner:
             elif "performance_report" in performance_results:
                 perf_report = performance_results["performance_report"]
                 if perf_report["response_times"]["avg"] > 0.5:
-                    recommendations.append(
-                        "Optimize response times - average too high"
-                    )
+                    recommendations.append("Optimize response times - average too high")
                 if perf_report["summary"]["success_rate"] < 95:
-                    recommendations.append(
-                        "Improve system stability under load"
-                    )
+                    recommendations.append("Improve system stability under load")
 
         # Unit test recommendations
         if "unit" in self.results["test_suites"]:
@@ -489,14 +432,10 @@ class ComprehensiveAuthTestRunner:
 
         # General recommendations
         if self.results["summary"]["failed_tests"] > 0:
-            recommendations.append(
-                "Review and fix all failing tests before production deployment"
-            )
+            recommendations.append("Review and fix all failing tests before production deployment")
 
         if not recommendations:
-            recommendations.append(
-                "All tests passed - system ready for production"
-            )
+            recommendations.append("All tests passed - system ready for production")
 
         self.results["recommendations"] = recommendations
 
@@ -540,31 +479,21 @@ class ComprehensiveAuthTestRunner:
 
 def main():
     """Main function."""
-    parser = argparse.ArgumentParser(
-        description="Comprehensive Authentication Test Suite Runner"
-    )
-    parser.add_argument(
-        "--security-only", action="store_true", help="Run only security tests"
-    )
+    parser = argparse.ArgumentParser(description="Comprehensive Authentication Test Suite Runner")
+    parser.add_argument("--security-only", action="store_true", help="Run only security tests")
     parser.add_argument(
         "--integration-only",
         action="store_true",
         help="Run only integration tests",
     )
-    parser.add_argument(
-        "--unit-only", action="store_true", help="Run only unit tests"
-    )
+    parser.add_argument("--unit-only", action="store_true", help="Run only unit tests")
     parser.add_argument(
         "--performance-only",
         action="store_true",
         help="Run only performance tests",
     )
-    parser.add_argument(
-        "--quick", action="store_true", help="Run quick tests only"
-    )
-    parser.add_argument(
-        "--verbose", action="store_true", help="Enable verbose output"
-    )
+    parser.add_argument("--quick", action="store_true", help="Run quick tests only")
+    parser.add_argument("--verbose", action="store_true", help="Enable verbose output")
     parser.add_argument("--report", type=str, help="Save report to file")
 
     args = parser.parse_args()

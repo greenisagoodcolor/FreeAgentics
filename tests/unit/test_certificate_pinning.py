@@ -106,9 +106,7 @@ class TestCertificateValidator:
     @patch("auth.certificate_pinning.socket.create_connection")
     @patch("auth.certificate_pinning.ssl.create_default_context")
     @patch("auth.certificate_pinning.x509.load_der_x509_certificate")
-    def test_get_certificate_from_server(
-        self, mock_load_cert, mock_context, mock_socket
-    ):
+    def test_get_certificate_from_server(self, mock_load_cert, mock_context, mock_socket):
         """Test certificate retrieval from server."""
         # Mock certificate
         mock_cert = Mock()
@@ -129,9 +127,7 @@ class TestCertificateValidator:
 
         # Mock context manager for regular socket
         mock_socket_instance = Mock()
-        mock_socket_instance.__enter__ = Mock(
-            return_value=mock_socket_instance
-        )
+        mock_socket_instance.__enter__ = Mock(return_value=mock_socket_instance)
         mock_socket_instance.__exit__ = Mock(return_value=None)
 
         mock_context_instance = Mock()
@@ -140,9 +136,7 @@ class TestCertificateValidator:
 
         mock_socket.return_value = mock_socket_instance
 
-        result = CertificateValidator.get_certificate_from_server(
-            "example.com"
-        )
+        result = CertificateValidator.get_certificate_from_server("example.com")
 
         assert "BEGIN CERTIFICATE" in result
         mock_socket.assert_called_once_with(("example.com", 443), timeout=10)
@@ -164,21 +158,14 @@ class TestMobileCertificatePinner:
     def test_add_domain_pins(self):
         """Test adding domain pins."""
         config = PinConfiguration(
-            primary_pins=[
-                "sha256-AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA="
-            ],
-            backup_pins=[
-                "sha256-BBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBB="
-            ],
+            primary_pins=["sha256-AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA="],
+            backup_pins=["sha256-BBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBB="],
         )
 
         self.pinner.add_domain_pins("example.com", config)
 
         assert "example.com" in self.pinner.domain_configs
-        assert (
-            self.pinner.domain_configs["example.com"].primary_pins
-            == config.primary_pins
-        )
+        assert self.pinner.domain_configs["example.com"].primary_pins == config.primary_pins
 
     def test_add_domain_pins_invalid_format(self):
         """Test adding domain pins with invalid format."""
@@ -190,12 +177,8 @@ class TestMobileCertificatePinner:
     def test_get_pinning_header_basic(self):
         """Test basic pinning header generation."""
         config = PinConfiguration(
-            primary_pins=[
-                "sha256-AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA="
-            ],
-            backup_pins=[
-                "sha256-BBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBB="
-            ],
+            primary_pins=["sha256-AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA="],
+            backup_pins=["sha256-BBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBB="],
         )
         self.pinner.add_domain_pins("example.com", config)
 
@@ -209,31 +192,23 @@ class TestMobileCertificatePinner:
     def test_get_pinning_header_mobile_specific(self):
         """Test mobile-specific pinning header generation."""
         config = PinConfiguration(
-            primary_pins=[
-                "sha256-AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA="
-            ],
+            primary_pins=["sha256-AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA="],
             mobile_specific=True,
         )
         self.pinner.add_domain_pins("example.com", config)
 
         # Should return None for non-mobile user agent
-        header = self.pinner.get_pinning_header(
-            "example.com", "Mozilla/5.0 Desktop"
-        )
+        header = self.pinner.get_pinning_header("example.com", "Mozilla/5.0 Desktop")
         assert header is None
 
         # Should return header for mobile user agent
-        header = self.pinner.get_pinning_header(
-            "example.com", "FreeAgentics-iOS/1.0"
-        )
+        header = self.pinner.get_pinning_header("example.com", "FreeAgentics-iOS/1.0")
         assert header is not None
 
     def test_get_pinning_header_emergency_bypass(self):
         """Test emergency bypass functionality."""
         config = PinConfiguration(
-            primary_pins=[
-                "sha256-AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA="
-            ],
+            primary_pins=["sha256-AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA="],
             emergency_bypass=True,
             emergency_bypass_until=datetime.now() + timedelta(hours=1),
         )
@@ -250,82 +225,56 @@ class TestMobileCertificatePinner:
     def test_validate_certificate_chain_valid(self):
         """Test valid certificate chain validation."""
         config = PinConfiguration(
-            primary_pins=[
-                "sha256-AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA="
-            ],
+            primary_pins=["sha256-AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA="],
             enforce_pinning=True,
         )
         self.pinner.add_domain_pins("example.com", config)
 
         # Mock certificate chain that matches the pin
-        cert_chain = [
-            "-----BEGIN CERTIFICATE-----\nMOCK\n-----END CERTIFICATE-----"
-        ]
+        cert_chain = ["-----BEGIN CERTIFICATE-----\nMOCK\n-----END CERTIFICATE-----"]
 
-        with patch.object(
-            CertificateValidator, "extract_spki_pin"
-        ) as mock_extract:
-            mock_extract.return_value = (
-                "AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA="
-            )
+        with patch.object(CertificateValidator, "extract_spki_pin") as mock_extract:
+            mock_extract.return_value = "AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA="
 
-            result = self.pinner.validate_certificate_chain(
-                "example.com", cert_chain
-            )
+            result = self.pinner.validate_certificate_chain("example.com", cert_chain)
             assert result is True
 
     def test_validate_certificate_chain_invalid(self):
         """Test invalid certificate chain validation."""
         config = PinConfiguration(
-            primary_pins=[
-                "sha256-AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA="
-            ],
+            primary_pins=["sha256-AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA="],
             enforce_pinning=True,
         )
         self.pinner.add_domain_pins("example.com", config)
 
         # Mock certificate chain that doesn't match the pin
-        cert_chain = [
-            "-----BEGIN CERTIFICATE-----\nMOCK\n-----END CERTIFICATE-----"
-        ]
+        cert_chain = ["-----BEGIN CERTIFICATE-----\nMOCK\n-----END CERTIFICATE-----"]
 
-        with patch.object(
-            CertificateValidator, "extract_spki_pin"
-        ) as mock_extract:
+        with patch.object(CertificateValidator, "extract_spki_pin") as mock_extract:
             mock_extract.return_value = "DIFFERENT_PIN_HASH"
 
-            result = self.pinner.validate_certificate_chain(
-                "example.com", cert_chain
-            )
+            result = self.pinner.validate_certificate_chain("example.com", cert_chain)
             assert result is False
             assert self.pinner.failure_count.get("example.com", 0) > 0
 
     def test_validate_certificate_chain_no_enforcement(self):
         """Test certificate chain validation when enforcement is disabled."""
         config = PinConfiguration(
-            primary_pins=[
-                "sha256-AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA="
-            ],
+            primary_pins=["sha256-AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA="],
             enforce_pinning=False,
         )
         self.pinner.add_domain_pins("example.com", config)
 
-        cert_chain = [
-            "-----BEGIN CERTIFICATE-----\nMOCK\n-----END CERTIFICATE-----"
-        ]
+        cert_chain = ["-----BEGIN CERTIFICATE-----\nMOCK\n-----END CERTIFICATE-----"]
 
         # Should always return True when enforcement is disabled
-        result = self.pinner.validate_certificate_chain(
-            "example.com", cert_chain
-        )
+        result = self.pinner.validate_certificate_chain("example.com", cert_chain)
         assert result is True
 
     def test_emergency_bypass_domain(self):
         """Test emergency domain bypass."""
         config = PinConfiguration(
-            primary_pins=[
-                "sha256-AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA="
-            ]
+            primary_pins=["sha256-AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA="]
         )
         self.pinner.add_domain_pins("example.com", config)
 
@@ -338,12 +287,8 @@ class TestMobileCertificatePinner:
     def test_get_mobile_pinning_config(self):
         """Test mobile app pinning configuration."""
         config = PinConfiguration(
-            primary_pins=[
-                "sha256-AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA="
-            ],
-            backup_pins=[
-                "sha256-BBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBB="
-            ],
+            primary_pins=["sha256-AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA="],
+            backup_pins=["sha256-BBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBB="],
             include_subdomains=True,
             max_age=2592000,
         )
@@ -359,9 +304,7 @@ class TestMobileCertificatePinner:
 
     def test_get_mobile_pinning_config_not_found(self):
         """Test mobile app config for non-existent domain."""
-        mobile_config = self.pinner.get_mobile_pinning_config(
-            "nonexistent.com"
-        )
+        mobile_config = self.pinner.get_mobile_pinning_config("nonexistent.com")
         assert mobile_config is None
 
     @patch.dict(
@@ -379,25 +322,15 @@ class TestMobileCertificatePinner:
         # The _load_env_configuration method checks for freeagentics.com domains
         assert "freeagentics.com" in pinner.domain_configs
         config = pinner.domain_configs["freeagentics.com"]
-        assert (
-            "sha256-AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA="
-            in config.primary_pins
-        )
-        assert (
-            "sha256-BBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBB="
-            in config.backup_pins
-        )
+        assert "sha256-AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA=" in config.primary_pins
+        assert "sha256-BBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBB=" in config.backup_pins
 
     def test_load_file_configuration(self):
         """Test loading configuration from file."""
         config_data = {
             "example.com": {
-                "primary_pins": [
-                    "sha256-AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA="
-                ],
-                "backup_pins": [
-                    "sha256-BBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBB="
-                ],
+                "primary_pins": ["sha256-AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA="],
+                "backup_pins": ["sha256-BBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBB="],
                 "max_age": 2592000,
                 "include_subdomains": True,
                 "mobile_specific": True,
@@ -405,9 +338,7 @@ class TestMobileCertificatePinner:
             }
         }
 
-        with patch(
-            "builtins.open", mock_open(read_data=json.dumps(config_data))
-        ):
+        with patch("builtins.open", mock_open(read_data=json.dumps(config_data))):
             with patch("os.path.exists", return_value=True):
                 pinner = MobileCertificatePinner()
 
@@ -421,22 +352,16 @@ class TestMobileCertificatePinner:
     def test_report_pin_failure(self, mock_post):
         """Test pin failure reporting."""
         config = PinConfiguration(
-            primary_pins=[
-                "sha256-AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA="
-            ],
+            primary_pins=["sha256-AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA="],
             report_uri="/pin-violations",
             enforce_pinning=True,
         )
         self.pinner.add_domain_pins("example.com", config)
 
         # Mock certificate chain that doesn't match
-        cert_chain = [
-            "-----BEGIN CERTIFICATE-----\nMOCK\n-----END CERTIFICATE-----"
-        ]
+        cert_chain = ["-----BEGIN CERTIFICATE-----\nMOCK\n-----END CERTIFICATE-----"]
 
-        with patch.object(
-            CertificateValidator, "extract_spki_pin"
-        ) as mock_extract:
+        with patch.object(CertificateValidator, "extract_spki_pin") as mock_extract:
             mock_extract.return_value = "DIFFERENT_PIN_HASH"
 
             self.pinner.validate_certificate_chain("example.com", cert_chain)

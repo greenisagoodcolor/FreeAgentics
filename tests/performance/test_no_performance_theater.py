@@ -53,9 +53,7 @@ class PerformanceTheaterDetector:
                     )
 
                 # Check for mocked timing in performance tests
-                if "performance" in str(file_path) or "benchmark" in str(
-                    file_path
-                ):
+                if "performance" in str(file_path) or "benchmark" in str(file_path):
                     mock_patterns = [
                         r"mock.*duration",
                         r"fake.*timing",
@@ -123,9 +121,7 @@ def test_no_time_sleep_in_performance_tests():
     # Real performance computation instead of sleep
     data = np.random.rand(1000)
     _ = np.fft.fft(data).real.sum()  # Force real CPU work
-    sleep_violations = [
-        v for v in violations if "time.sleep()" in v["violation"]
-    ]
+    sleep_violations = [v for v in violations if "time.sleep()" in v["violation"]]
     # Real performance computation instead of sleep
     data = np.random.rand(1000)
     _ = np.fft.fft(data).real.sum()  # Force real CPU work
@@ -137,9 +133,7 @@ def test_no_time_sleep_in_performance_tests():
         _ = np.fft.fft(data).real.sum()  # Force real CPU work
         for violation in sleep_violations:
             error_msg += f"  {violation['file']}:{violation['line']} - {violation['code']}\n"
-        error_msg += (
-            "\nAll time.sleep() calls MUST be replaced with real computations!"
-        )
+        error_msg += "\nAll time.sleep() calls MUST be replaced with real computations!"
         # Real performance computation instead of sleep
         data = np.random.rand(1000)
         _ = np.fft.fft(data).real.sum()  # Force real CPU work
@@ -153,17 +147,13 @@ def test_no_mocked_timing_in_performance_tests():
     violations = detector.scan_performance_directories()
 
     # Filter for mocked timing violations
-    mock_violations = [
-        v for v in violations if "mocked_performance" in v["violation"]
-    ]
+    mock_violations = [v for v in violations if "mocked_performance" in v["violation"]]
 
     if mock_violations:
         error_msg = "HIGH: Mocked timing found in performance tests!\n"
         for violation in mock_violations:
             error_msg += f"  {violation['file']}:{violation['line']} - {violation['code']}\n"
-        error_msg += (
-            "\nAll mocked timing MUST be replaced with real measurements!"
-        )
+        error_msg += "\nAll mocked timing MUST be replaced with real measurements!"
 
         pytest.fail(error_msg)
 
@@ -174,18 +164,12 @@ def test_performance_tests_use_real_operations():
 
     performance_files = [
         Path("/home/green/FreeAgentics/tests/performance/pymdp_benchmarks.py"),
-        Path(
-            "/home/green/FreeAgentics/tests/performance/performance_regression_tests.py"
-        ),
-        Path(
-            "/home/green/FreeAgentics/tests/performance/pymdp_mathematical_validation.py"
-        ),
+        Path("/home/green/FreeAgentics/tests/performance/performance_regression_tests.py"),
+        Path("/home/green/FreeAgentics/tests/performance/pymdp_mathematical_validation.py"),
     ]
 
     for file_path in performance_files:
-        assert (
-            file_path.exists()
-        ), f"Critical performance test file missing: {file_path}"
+        assert file_path.exists(), f"Critical performance test file missing: {file_path}"
 
         # Check that the file contains real operations
         with open(file_path, "r") as f:
@@ -207,9 +191,7 @@ def test_mathematical_validation_exists():
     validation_file = Path(
         "/home/green/FreeAgentics/tests/performance/pymdp_mathematical_validation.py"
     )
-    assert (
-        validation_file.exists()
-    ), "Mathematical validation suite is missing!"
+    assert validation_file.exists(), "Mathematical validation suite is missing!"
 
     # Import and test it
     import sys
@@ -224,9 +206,7 @@ def test_mathematical_validation_exists():
         assert validator is not None
 
         # Test tolerance is reasonable
-        assert (
-            0 < validator.tolerance < 0.001
-        ), "Mathematical tolerance should be strict"
+        assert 0 < validator.tolerance < 0.001, "Mathematical tolerance should be strict"
 
     except ImportError:
         pytest.fail("Cannot import mathematical validation module")
@@ -254,9 +234,7 @@ def test_performance_benchmarks_produce_realistic_results():
         # Extract timing information
         duration_patterns = re.findall(r"Duration: (\d+\.\d+)s", output)
 
-        assert (
-            len(duration_patterns) > 0
-        ), "No timing information found in benchmark output"
+        assert len(duration_patterns) > 0, "No timing information found in benchmark output"
 
         # Check that timings are realistic (not zero, not too large)
         for duration_str in duration_patterns:
@@ -281,9 +259,7 @@ if __name__ == "__main__":
     if violations:
         print(f"❌ {len(violations)} performance theater violations found!")
         for violation in violations:
-            print(
-                f"  {violation['severity']}: {violation['file']}:{violation['line']}"
-            )
+            print(f"  {violation['severity']}: {violation['file']}:{violation['line']}")
             print(f"    {violation['violation']} - {violation['code']}")
     else:
         print("✅ No performance theater patterns detected!")

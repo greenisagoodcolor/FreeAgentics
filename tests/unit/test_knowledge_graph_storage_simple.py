@@ -417,7 +417,7 @@ class TestStorageManager:
         mock_graph = MagicMock()
 
         # Should not raise exception
-        result = manager.save_graph(mock_graph)
+        manager.save_graph(mock_graph)
         # The exact return value depends on implementation
         # but it should handle the error gracefully
 

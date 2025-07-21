@@ -50,14 +50,10 @@ class ProductionValidator:
         color = color_map.get(level, Colors.RESET)
         print(f"{color}[{level}] {message}{Colors.RESET}")
 
-    def run_command(
-        self, cmd: List[str], check: bool = True
-    ) -> Tuple[int, str, str]:
+    def run_command(self, cmd: List[str], check: bool = True) -> Tuple[int, str, str]:
         """Run command and return result"""
         try:
-            result = subprocess.run(
-                cmd, capture_output=True, text=True, check=check
-            )
+            result = subprocess.run(cmd, capture_output=True, text=True, check=check)
             return result.returncode, result.stdout, result.stderr
         except subprocess.CalledProcessError as e:
             return e.returncode, e.stdout, e.stderr
@@ -113,13 +109,8 @@ class ProductionValidator:
                 compose_data = yaml.safe_load(f)
 
             # Check resource limits
-            for service_name, service_config in compose_data.get(
-                "services", {}
-            ).items():
-                if (
-                    "deploy" in service_config
-                    and "resources" in service_config["deploy"]
-                ):
+            for service_name, service_config in compose_data.get("services", {}).items():
+                if "deploy" in service_config and "resources" in service_config["deploy"]:
                     results["resource_limits"] = True
                     self.log(
                         f"✓ Resource limits configured for {service_name}",
@@ -157,9 +148,7 @@ class ProductionValidator:
             with open(".env.production", "r") as f:
                 content = f.read()
                 if "dev_secret" in content or "your_" in content:
-                    self.errors.append(
-                        "Development secrets found in production environment"
-                    )
+                    self.errors.append("Development secrets found in production environment")
                     results["secure_secrets"] = False
                 else:
                     results["secure_secrets"] = True
@@ -186,13 +175,9 @@ class ProductionValidator:
         missing_vars = [var for var in required_vars if var not in env_vars]
         if not missing_vars:
             results["required_vars"] = True
-            self.log(
-                "✓ All required environment variables configured", "SUCCESS"
-            )
+            self.log("✓ All required environment variables configured", "SUCCESS")
         else:
-            self.warnings.append(
-                f"Missing environment variables: {', '.join(missing_vars)}"
-            )
+            self.warnings.append(f"Missing environment variables: {', '.join(missing_vars)}")
 
         return results
 
@@ -228,17 +213,15 @@ class ProductionValidator:
                 "Strict-Transport-Security",
             ]
 
-            headers_found = all(
-                header in nginx_content for header in security_headers
-            )
+            headers_found = all(header in nginx_content for header in security_headers)
             if headers_found:
                 results["security_headers"] = True
                 self.log("✓ Security headers configured", "SUCCESS")
 
         # Check SSL certificates
-        if self.check_file_exists(
-            "nginx/ssl/cert.pem"
-        ) and self.check_file_exists("nginx/ssl/key.pem"):
+        if self.check_file_exists("nginx/ssl/cert.pem") and self.check_file_exists(
+            "nginx/ssl/key.pem"
+        ):
             results["ssl_certs"] = True
             self.log("✓ SSL certificates found", "SUCCESS")
 
@@ -277,9 +260,7 @@ class ProductionValidator:
             with open("docker-compose.production.yml", "r") as f:
                 compose_data = yaml.safe_load(f)
 
-            postgres_config = compose_data.get("services", {}).get(
-                "postgres", {}
-            )
+            postgres_config = compose_data.get("services", {}).get("postgres", {})
             if postgres_config:
                 results["postgres_config"] = True
 
@@ -288,9 +269,7 @@ class ProductionValidator:
                     self.log("✓ PostgreSQL health check configured", "SUCCESS")
 
         # Check migration files
-        if self.check_file_exists("alembic.ini") and os.path.exists(
-            "alembic/versions"
-        ):
+        if self.check_file_exists("alembic.ini") and os.path.exists("alembic/versions"):
             results["migrations"] = True
             self.log("✓ Database migrations configured", "SUCCESS")
 
@@ -321,10 +300,7 @@ class ProductionValidator:
                 deploy_content = f.read()
 
             # Check for zero-downtime deployment
-            if (
-                "zero_downtime" in deploy_content
-                or "rolling_update" in deploy_content
-            ):
+            if "zero_downtime" in deploy_content or "rolling_update" in deploy_content:
                 results["zero_downtime"] = True
                 self.log("✓ Zero-downtime deployment configured", "SUCCESS")
 
@@ -336,9 +312,7 @@ class ProductionValidator:
             # Check for health checks
             if "wait_for_health" in deploy_content:
                 results["health_checks"] = True
-                self.log(
-                    "✓ Health check verification in deployment", "SUCCESS"
-                )
+                self.log("✓ Health check verification in deployment", "SUCCESS")
 
         # Check SSL deployment script
         if self.check_file_exists("deploy-production-ssl.sh"):
@@ -365,9 +339,7 @@ class ProductionValidator:
             self.log("✓ Prometheus production configuration found", "SUCCESS")
 
         # Check alerting rules
-        if os.path.exists("monitoring/rules") and os.listdir(
-            "monitoring/rules"
-        ):
+        if os.path.exists("monitoring/rules") and os.listdir("monitoring/rules"):
             results["alerting_rules"] = True
             self.log("✓ Alerting rules configured", "SUCCESS")
 
@@ -428,18 +400,14 @@ class ProductionValidator:
 
         # Test make docker-build (dry run)
         self.log("Testing 'make docker-build' (dry run)...", "INFO")
-        ret, stdout, stderr = self.run_command(
-            ["make", "-n", "docker-build"], check=False
-        )
+        ret, stdout, stderr = self.run_command(["make", "-n", "docker-build"], check=False)
         if ret == 0:
             results["make_docker_build"] = True
             self.log("✓ make docker-build command available", "SUCCESS")
 
         # Test make prod-env
         self.log("Testing 'make prod-env'...", "INFO")
-        ret, stdout, stderr = self.run_command(
-            ["make", "prod-env"], check=False
-        )
+        ret, stdout, stderr = self.run_command(["make", "prod-env"], check=False)
         if ret == 0:
             results["make_prod_env"] = True
             self.log("✓ make prod-env command successful", "SUCCESS")
@@ -471,29 +439,19 @@ class ProductionValidator:
         }
 
         # Save report
-        report_filename = (
-            f"production_validation_report_{self.validation_timestamp}.json"
-        )
+        report_filename = f"production_validation_report_{self.validation_timestamp}.json"
         with open(report_filename, "w") as f:
             json.dump(report, f, indent=2)
 
         self.log(f"\nValidation report saved to: {report_filename}", "INFO")
 
         # Print summary
-        print(
-            f"\n{Colors.BOLD}=== PRODUCTION DEPLOYMENT VALIDATION SUMMARY ==={Colors.RESET}"
-        )
+        print(f"\n{Colors.BOLD}=== PRODUCTION DEPLOYMENT VALIDATION SUMMARY ==={Colors.RESET}")
         print(f"Timestamp: {self.validation_timestamp}")
         print(f"Total Checks: {report['summary']['total_checks']}")
-        print(
-            f"{Colors.GREEN}Passed: {report['summary']['passed']}{Colors.RESET}"
-        )
-        print(
-            f"{Colors.YELLOW}Warnings: {report['summary']['warnings']}{Colors.RESET}"
-        )
-        print(
-            f"{Colors.RED}Errors: {report['summary']['errors']}{Colors.RESET}"
-        )
+        print(f"{Colors.GREEN}Passed: {report['summary']['passed']}{Colors.RESET}")
+        print(f"{Colors.YELLOW}Warnings: {report['summary']['warnings']}{Colors.RESET}")
+        print(f"{Colors.RED}Errors: {report['summary']['errors']}{Colors.RESET}")
 
         if self.errors:
             print(f"\n{Colors.RED}Critical Issues:{Colors.RESET}")
@@ -514,18 +472,14 @@ class ProductionValidator:
             print(
                 f"\n{Colors.RED}❌ Production deployment infrastructure validation FAILED{Colors.RESET}"
             )
-            print(
-                "Please address the critical issues before deploying to production."
-            )
+            print("Please address the critical issues before deploying to production.")
 
         return report
 
 
 def main():
     """Main validation entry point"""
-    print(
-        f"{Colors.BOLD}FreeAgentics Production Deployment Validator{Colors.RESET}"
-    )
+    print(f"{Colors.BOLD}FreeAgentics Production Deployment Validator{Colors.RESET}")
     print("=" * 50)
 
     validator = ProductionValidator()
@@ -540,9 +494,7 @@ def main():
             sys.exit(0)
 
     except Exception as e:
-        print(
-            f"{Colors.RED}[CRITICAL] Validation failed with error: {e}{Colors.RESET}"
-        )
+        print(f"{Colors.RED}[CRITICAL] Validation failed with error: {e}{Colors.RESET}")
         sys.exit(2)
 
 

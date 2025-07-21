@@ -10,7 +10,7 @@ import time
 from datetime import datetime, timedelta
 from typing import Callable, Dict, Optional, Set, Tuple
 
-import redis.asyncio as aioredis  
+import redis.asyncio as aioredis
 from fastapi import Request, Response, status
 from fastapi.responses import JSONResponse
 from starlette.middleware.base import BaseHTTPMiddleware
@@ -123,9 +123,11 @@ class RateLimiter:
             user_id = getattr(request.state.user, "user_id", None)
 
         if user_id:
-            return f"rate_limit:user:{user_id}"
+            # This is a cache key, not user-facing output
+            return f"rate_limit:user:{user_id}"  # nosec
         else:
-            return f"rate_limit:ip:{real_ip}"
+            # This is a cache key, not user-facing output
+            return f"rate_limit:ip:{real_ip}"  # nosec
 
     async def _get_endpoint_config(self, path: str) -> RateLimitConfig:
         """Get rate limit configuration for endpoint."""
@@ -152,9 +154,7 @@ class RateLimiter:
 
         return False
 
-    async def _record_request(
-        self, client_key: str, config: RateLimitConfig
-    ) -> Tuple[int, int]:
+    async def _record_request(self, client_key: str, config: RateLimitConfig) -> Tuple[int, int]:
         """Record request and return current counts."""
         now = int(time.time())
         minute_key = f"{client_key}:minute:{now // 60}"
@@ -175,9 +175,7 @@ class RateLimiter:
 
         return minute_count, hour_count
 
-    async def _detect_ddos(
-        self, ip: str, minute_count: int, config: RateLimitConfig
-    ) -> bool:
+    async def _detect_ddos(self, ip: str, minute_count: int, config: RateLimitConfig) -> bool:
         """Detect potential DDoS attack."""
         if minute_count >= config.ddos_threshold:
             # Block IP for extended period
@@ -218,9 +216,7 @@ class RateLimiter:
         block_data = {
             "blocked_at": datetime.now().isoformat(),
             "reason": reason,
-            "expires_at": (
-                datetime.now() + timedelta(seconds=config.block_duration)
-            ).isoformat(),
+            "expires_at": (datetime.now() + timedelta(seconds=config.block_duration)).isoformat(),
         }
 
         await self.redis.setex(
@@ -242,9 +238,7 @@ class RateLimiter:
             },
         )
 
-    async def check_rate_limit(
-        self, request: Request
-    ) -> Optional[JSONResponse]:
+    async def check_rate_limit(self, request: Request) -> Optional[JSONResponse]:
         """Check if request should be rate limited."""
         client_key = await self._get_client_key(request)
         config = await self._get_endpoint_config(request.url.path)
@@ -271,9 +265,7 @@ class RateLimiter:
             )
 
         # Record request and get counts
-        minute_count, hour_count = await self._record_request(
-            client_key, config
-        )
+        minute_count, hour_count = await self._record_request(client_key, config)
 
         # Check for DDoS
         if await self._detect_ddos(ip, minute_count, config):
@@ -289,9 +281,7 @@ class RateLimiter:
 
         # Check rate limits
         if minute_count > config.requests_per_minute:
-            await self._block_client(
-                client_key, ip, config, "REQUESTS_PER_MINUTE_EXCEEDED"
-            )
+            await self._block_client(client_key, ip, config, "REQUESTS_PER_MINUTE_EXCEEDED")
             return JSONResponse(
                 status_code=status.HTTP_429_TOO_MANY_REQUESTS,
                 content={
@@ -303,9 +293,7 @@ class RateLimiter:
             )
 
         if hour_count > config.requests_per_hour:
-            await self._block_client(
-                client_key, ip, config, "REQUESTS_PER_HOUR_EXCEEDED"
-            )
+            await self._block_client(client_key, ip, config, "REQUESTS_PER_HOUR_EXCEEDED")
             return JSONResponse(
                 status_code=status.HTTP_429_TOO_MANY_REQUESTS,
                 content={
@@ -320,12 +308,8 @@ class RateLimiter:
         response_headers = {
             "X-RateLimit-Limit-Minute": str(config.requests_per_minute),
             "X-RateLimit-Limit-Hour": str(config.requests_per_hour),
-            "X-RateLimit-Remaining-Minute": str(
-                max(0, config.requests_per_minute - minute_count)
-            ),
-            "X-RateLimit-Remaining-Hour": str(
-                max(0, config.requests_per_hour - hour_count)
-            ),
+            "X-RateLimit-Remaining-Minute": str(max(0, config.requests_per_minute - minute_count)),
+            "X-RateLimit-Remaining-Hour": str(max(0, config.requests_per_hour - hour_count)),
             "X-RateLimit-Reset": str(int(time.time()) + 60),
         }
 
@@ -365,9 +349,7 @@ class DDoSProtectionMiddleware(BaseHTTPMiddleware):
                     health_check_interval=30,
                 )
 
-                self.redis_client = aioredis.Redis(
-                    connection_pool=self._connection_pool
-                )
+                self.redis_client = aioredis.Redis(connection_pool=self._connection_pool)
 
                 # Test connection
                 if self.redis_client:
@@ -390,9 +372,7 @@ class DDoSProtectionMiddleware(BaseHTTPMiddleware):
 
         return self.rate_limiter
 
-    async def dispatch(
-        self, request: Request, call_next: Callable
-    ) -> Response:
+    async def dispatch(self, request: Request, call_next: Callable) -> Response:
         """Process request with DDoS protection and rate limiting."""
         # Skip rate limiting for internal health checks
         if request.url.path in ["/health", "/metrics"]:
@@ -454,10 +434,7 @@ class WebSocketRateLimiter:
 
         if current_connections:
             current_count = int(current_connections)
-            if (
-                current_count
-                >= self.connection_limits["max_connections_per_ip"]
-            ):
+            if current_count >= self.connection_limits["max_connections_per_ip"]:
                 return False
 
         # Increment connection count

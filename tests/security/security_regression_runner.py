@@ -8,12 +8,10 @@ to ensure no security regressions are introduced.
 
 import asyncio
 import json
-import subprocess
 import sys
-import tempfile
 from datetime import datetime
 from pathlib import Path
-from typing import Dict, List, Tuple
+from typing import Dict, List
 
 
 class SecurityRegressionRunner:
@@ -99,18 +97,13 @@ class SecurityRegressionRunner:
                 self.test_results["comprehensive_security_suite"] = {
                     "status": (
                         "PASSED"
-                        if report_data.get("summary", {}).get(
-                            "vulnerabilities_found", 0
-                        )
-                        == 0
+                        if report_data.get("summary", {}).get("vulnerabilities_found", 0) == 0
                         else "FAILED"
                     ),
-                    "vulnerabilities_found": report_data.get(
-                        "summary", {}
-                    ).get("vulnerabilities_found", 0),
-                    "security_score": report_data.get("summary", {}).get(
-                        "security_score", 0
+                    "vulnerabilities_found": report_data.get("summary", {}).get(
+                        "vulnerabilities_found", 0
                     ),
+                    "security_score": report_data.get("summary", {}).get("security_score", 0),
                     "details": report_data,
                     "output": stdout.decode(),
                     "errors": stderr.decode(),
@@ -159,9 +152,7 @@ class SecurityRegressionRunner:
                 successful_exploits = report_data.get("successful_exploits", 0)
 
                 self.test_results["penetration_tests"] = {
-                    "status": "PASSED"
-                    if successful_exploits == 0
-                    else "FAILED",
+                    "status": "PASSED" if successful_exploits == 0 else "FAILED",
                     "successful_exploits": successful_exploits,
                     "total_tests": report_data.get("total_tests", 0),
                     "details": report_data,
@@ -176,9 +167,7 @@ class SecurityRegressionRunner:
                     "errors": stderr.decode(),
                 }
 
-            print(
-                f"  ✓ Penetration Tests: {self.test_results['penetration_tests']['status']}"
-            )
+            print(f"  ✓ Penetration Tests: {self.test_results['penetration_tests']['status']}")
 
         except Exception as e:
             self.test_results["penetration_tests"] = {
@@ -209,19 +198,13 @@ class SecurityRegressionRunner:
                 with open(report_file) as f:
                     report_data = json.load(f)
 
-                resilience_score = report_data.get("summary", {}).get(
-                    "overall_resilience_score", 0
-                )
+                resilience_score = report_data.get("summary", {}).get("overall_resilience_score", 0)
 
                 self.test_results["performance_under_attack"] = {
                     "status": "PASSED" if resilience_score >= 80 else "FAILED",
                     "resilience_score": resilience_score,
-                    "passed_scenarios": report_data.get("summary", {}).get(
-                        "passed_scenarios", 0
-                    ),
-                    "total_scenarios": report_data.get("summary", {}).get(
-                        "total_scenarios", 0
-                    ),
+                    "passed_scenarios": report_data.get("summary", {}).get("passed_scenarios", 0),
+                    "total_scenarios": report_data.get("summary", {}).get("total_scenarios", 0),
                     "details": report_data,
                     "output": stdout.decode(),
                     "errors": stderr.decode(),
@@ -295,9 +278,7 @@ class SecurityRegressionRunner:
                 self.test_results["owasp_zap_scan"] = {
                     "status": "PASSED" if high_risk == 0 else "FAILED",
                     "high_risk_issues": high_risk,
-                    "total_alerts": report_data.get("scan_info", {}).get(
-                        "total_alerts", 0
-                    ),
+                    "total_alerts": report_data.get("scan_info", {}).get("total_alerts", 0),
                     "details": report_data,
                     "output": stdout.decode(),
                     "errors": stderr.decode(),
@@ -310,9 +291,7 @@ class SecurityRegressionRunner:
                     "errors": stderr.decode(),
                 }
 
-            print(
-                f"  ✓ OWASP ZAP Scan: {self.test_results['owasp_zap_scan']['status']}"
-            )
+            print(f"  ✓ OWASP ZAP Scan: {self.test_results['owasp_zap_scan']['status']}")
 
         except Exception as e:
             self.test_results["owasp_zap_scan"] = {
@@ -342,11 +321,7 @@ class SecurityRegressionRunner:
 
             # Parse pytest output
             output = stdout.decode()
-            status = (
-                "PASSED"
-                if "FAILED" not in output and process.returncode == 0
-                else "FAILED"
-            )
+            status = "PASSED" if "FAILED" not in output and process.returncode == 0 else "FAILED"
 
             self.test_results["security_headers_validation"] = {
                 "status": status,
@@ -385,11 +360,7 @@ class SecurityRegressionRunner:
 
             # Parse pytest output
             output = stdout.decode()
-            status = (
-                "PASSED"
-                if "FAILED" not in output and process.returncode == 0
-                else "FAILED"
-            )
+            status = "PASSED" if "FAILED" not in output and process.returncode == 0 else "FAILED"
 
             self.test_results["rate_limiting_verification"] = {
                 "status": status,
@@ -428,11 +399,7 @@ class SecurityRegressionRunner:
 
             # Parse pytest output
             output = stdout.decode()
-            status = (
-                "PASSED"
-                if "FAILED" not in output and process.returncode == 0
-                else "FAILED"
-            )
+            status = "PASSED" if "FAILED" not in output and process.returncode == 0 else "FAILED"
 
             self.test_results["rbac_comprehensive"] = {
                 "status": status,
@@ -471,11 +438,7 @@ class SecurityRegressionRunner:
 
             # Parse pytest output
             output = stdout.decode()
-            status = (
-                "PASSED"
-                if "FAILED" not in output and process.returncode == 0
-                else "FAILED"
-            )
+            status = "PASSED" if "FAILED" not in output and process.returncode == 0 else "FAILED"
 
             self.test_results["security_monitoring"] = {
                 "status": status,
@@ -509,9 +472,7 @@ class SecurityRegressionRunner:
             if result and result.get("status") == "FAILED"
         )
         error_tests = sum(
-            1
-            for result in self.test_results.values()
-            if result and result.get("status") == "ERROR"
+            1 for result in self.test_results.values() if result and result.get("status") == "ERROR"
         )
         skipped_tests = sum(
             1
@@ -549,10 +510,7 @@ class SecurityRegressionRunner:
                 "failed_tests": failed_tests,
                 "error_tests": error_tests,
                 "skipped_tests": skipped_tests,
-                "success_rate": (
-                    passed_tests / max(total_tests - skipped_tests, 1)
-                )
-                * 100,
+                "success_rate": (passed_tests / max(total_tests - skipped_tests, 1)) * 100,
             },
             "test_results": self.test_results,
             "critical_failures": self.critical_failures,
@@ -579,22 +537,16 @@ class SecurityRegressionRunner:
             result = self.test_results["comprehensive_security_suite"]
             if result.get("details"):
                 metrics["vulnerability_count"] = (
-                    result["details"]
-                    .get("summary", {})
-                    .get("vulnerabilities_found", 0)
+                    result["details"].get("summary", {}).get("vulnerabilities_found", 0)
                 )
                 metrics["security_score"] = (
-                    result["details"]
-                    .get("summary", {})
-                    .get("security_score", 0)
+                    result["details"].get("summary", {}).get("security_score", 0)
                 )
 
         # Penetration test metrics
         if self.test_results.get("penetration_tests"):
             result = self.test_results["penetration_tests"]
-            metrics["exploitable_vulnerabilities"] = result.get(
-                "successful_exploits", 0
-            )
+            metrics["exploitable_vulnerabilities"] = result.get("successful_exploits", 0)
 
         # ZAP scan metrics
         if self.test_results.get("owasp_zap_scan"):
@@ -608,16 +560,10 @@ class SecurityRegressionRunner:
             if result and result.get("status") == "PASSED"
         )
         total_tests = len(
-            [
-                r
-                for r in self.test_results.values()
-                if r and r.get("status") != "SKIPPED"
-            ]
+            [r for r in self.test_results.values() if r and r.get("status") != "SKIPPED"]
         )
 
-        metrics["compliance_score"] = (
-            passed_tests / max(total_tests, 1)
-        ) * 100
+        metrics["compliance_score"] = (passed_tests / max(total_tests, 1)) * 100
 
         return metrics
 
@@ -633,9 +579,7 @@ class SecurityRegressionRunner:
                     "priority": "CRITICAL",
                     "category": "Test Failures",
                     "recommendation": f"Address {len(self.critical_failures)} critical test failures immediately",
-                    "affected_tests": [
-                        f["test"] for f in self.critical_failures
-                    ],
+                    "affected_tests": [f["test"] for f in self.critical_failures],
                 }
             )
 
@@ -736,18 +680,12 @@ class SecurityRegressionRunner:
         if self.test_results.get("comprehensive_security_suite"):
             result = self.test_results["comprehensive_security_suite"]
             if result.get("details") and result["details"].get("compliance"):
-                owasp_compliance = result["details"]["compliance"].get(
-                    "OWASP_Top_10", {}
-                )
+                owasp_compliance = result["details"]["compliance"].get("OWASP_Top_10", {})
                 passed_checks = sum(1 for v in owasp_compliance.values() if v)
                 total_checks = len(owasp_compliance)
 
-                compliance["OWASP_Top_10"]["score"] = (
-                    passed_checks / max(total_checks, 1)
-                ) * 100
-                compliance["OWASP_Top_10"]["status"] = (
-                    "PASSED" if passed_checks >= 9 else "FAILED"
-                )
+                compliance["OWASP_Top_10"]["score"] = (passed_checks / max(total_checks, 1)) * 100
+                compliance["OWASP_Top_10"]["status"] = "PASSED" if passed_checks >= 9 else "FAILED"
                 compliance["OWASP_Top_10"][
                     "details"
                 ] = f"Passed {passed_checks}/{total_checks} checks"
@@ -895,9 +833,7 @@ class SecurityRegressionRunner:
         summary = report["summary"]
         print(f"Overall Status: {summary['overall_status']}")
         print(f"Success Rate: {summary['success_rate']:.1f}%")
-        print(
-            f"Tests: {summary['passed_tests']}/{summary['total_tests']} passed"
-        )
+        print(f"Tests: {summary['passed_tests']}/{summary['total_tests']} passed")
 
         if summary["failed_tests"] > 0:
             print(f"Failed Tests: {summary['failed_tests']}")
@@ -907,29 +843,25 @@ class SecurityRegressionRunner:
 
         # Security metrics
         metrics = report["security_metrics"]
-        print(f"\nSecurity Metrics:")
+        print("\nSecurity Metrics:")
         print(f"  Vulnerabilities Found: {metrics['vulnerability_count']}")
         print(f"  Security Score: {metrics['security_score']}/100")
-        print(
-            f"  Exploitable Vulnerabilities: {metrics['exploitable_vulnerabilities']}"
-        )
+        print(f"  Exploitable Vulnerabilities: {metrics['exploitable_vulnerabilities']}")
         print(f"  High Risk Issues: {metrics['high_risk_issues']}")
         print(f"  Compliance Score: {metrics['compliance_score']:.1f}%")
 
         # Critical failures
         if self.critical_failures:
-            print(f"\nCritical Failures:")
+            print("\nCritical Failures:")
             for failure in self.critical_failures:
                 print(f"  - {failure['test']}: {failure['status']}")
 
         # Recommendations
         high_priority_recs = [
-            r
-            for r in report["recommendations"]
-            if r["priority"] in ["CRITICAL", "HIGH"]
+            r for r in report["recommendations"] if r["priority"] in ["CRITICAL", "HIGH"]
         ]
         if high_priority_recs:
-            print(f"\nHigh Priority Recommendations:")
+            print("\nHigh Priority Recommendations:")
             for rec in high_priority_recs:
                 print(f"  - [{rec['priority']}] {rec['recommendation']}")
 

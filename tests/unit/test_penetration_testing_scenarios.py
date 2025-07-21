@@ -5,14 +5,11 @@ Performs automated security testing for common vulnerabilities
 based on OWASP Top 10 and other security best practices.
 """
 
-import asyncio
-import json
 import time
-from unittest.mock import Mock, patch
 
 import jwt
 import pytest
-from fastapi import FastAPI, HTTPException, Request, Response
+from fastapi import FastAPI, HTTPException
 from fastapi.testclient import TestClient
 
 from auth.security_headers import SecurityHeadersManager
@@ -80,9 +77,7 @@ class TestPenetrationTestingScenarios:
 
         for payload in sql_payloads:
             # Test in login endpoint
-            response = client.post(
-                "/auth/login", json={"username": payload, "password": "test"}
-            )
+            response = client.post("/auth/login", json={"username": payload, "password": "test"})
             # Should not return 500 error (indicating SQL injection)
             assert (
                 response.status_code != 500
@@ -114,18 +109,10 @@ class TestPenetrationTestingScenarios:
 
             # Response should not contain unescaped payload
             response_text = response.text
-            assert (
-                "<script>" not in response_text
-            ), f"XSS payload not escaped: {payload}"
-            assert (
-                "javascript:" not in response_text
-            ), f"XSS payload not escaped: {payload}"
-            assert (
-                "onerror=" not in response_text
-            ), f"XSS payload not escaped: {payload}"
-            assert (
-                "onload=" not in response_text
-            ), f"XSS payload not escaped: {payload}"
+            assert "<script>" not in response_text, f"XSS payload not escaped: {payload}"
+            assert "javascript:" not in response_text, f"XSS payload not escaped: {payload}"
+            assert "onerror=" not in response_text, f"XSS payload not escaped: {payload}"
+            assert "onload=" not in response_text, f"XSS payload not escaped: {payload}"
 
     def test_csrf_protection(self, client):
         """Test Cross-Site Request Forgery (CSRF) protection."""
@@ -141,8 +128,7 @@ class TestPenetrationTestingScenarios:
 
         # Check for security headers that help prevent CSRF
         assert (
-            "X-Frame-Options" in headers
-            or "Content-Security-Policy" in headers
+            "X-Frame-Options" in headers or "Content-Security-Policy" in headers
         ), "Missing CSRF protection headers"
 
     def test_authentication_bypass_attempts(self, client, auth_manager):
@@ -162,8 +148,7 @@ class TestPenetrationTestingScenarios:
 
             # Should not return successful authentication
             assert (
-                response.status_code != 200
-                or "access_token" not in response.json()
+                response.status_code != 200 or "access_token" not in response.json()
             ), f"Authentication bypass possible with payload: {payload}"
 
     def test_session_fixation_prevention(self, auth_manager):
@@ -181,18 +166,14 @@ class TestPenetrationTestingScenarios:
         )
 
         # Authenticate user
-        auth_result = auth_manager.authenticate_user(
-            "test_user", "password123"
-        )
+        auth_result = auth_manager.authenticate_user("test_user", "password123")
         assert auth_result is not None
 
         # Create new session after authentication
         new_session = auth_manager.create_session("test_user")
 
         # Session IDs should be different (preventing session fixation)
-        assert (
-            initial_session != new_session
-        ), "Session fixation vulnerability detected"
+        assert initial_session != new_session, "Session fixation vulnerability detected"
 
     def test_privilege_escalation_prevention(self, client, auth_manager):
         """Test privilege escalation prevention."""
@@ -200,9 +181,7 @@ class TestPenetrationTestingScenarios:
         from auth.security_implementation import UserRole
 
         # Register users
-        admin_user = auth_manager.register_user(
-            "admin", "admin@example.com", "admin_pass", UserRole.ADMIN
-        )
+        auth_manager.register_user("admin", "admin@example.com", "admin_pass", UserRole.ADMIN)
         regular_user = auth_manager.register_user(
             "regular", "regular@example.com", "user_pass", UserRole.OBSERVER
         )
@@ -216,9 +195,7 @@ class TestPenetrationTestingScenarios:
         # Attempt to decode and modify token
         try:
             # This should fail due to signature verification
-            decoded = jwt.decode(
-                user_token, "wrong_secret", algorithms=["HS256"]
-            )
+            jwt.decode(user_token, "wrong_secret", algorithms=["HS256"])
             pytest.fail("JWT token signature verification failed")
         except jwt.InvalidSignatureError:
             # Expected behavior
@@ -239,18 +216,12 @@ class TestPenetrationTestingScenarios:
         for payload in command_injection_payloads:
             response = client.get(f"/search?q={payload}")
             # Should not execute system commands
-            assert (
-                response.status_code != 500
-            ), f"Command injection may be possible: {payload}"
+            assert response.status_code != 500, f"Command injection may be possible: {payload}"
 
             # Check that system information is not leaked
             response_text = response.text.lower()
-            assert (
-                "root:" not in response_text
-            ), f"System information leaked: {payload}"
-            assert (
-                "bin/bash" not in response_text
-            ), f"System information leaked: {payload}"
+            assert "root:" not in response_text, f"System information leaked: {payload}"
+            assert "bin/bash" not in response_text, f"System information leaked: {payload}"
 
     def test_directory_traversal_prevention(self, client):
         """Test directory traversal attack prevention."""
@@ -268,12 +239,8 @@ class TestPenetrationTestingScenarios:
 
             # Should not return system files
             response_text = response.text
-            assert (
-                "root:" not in response_text
-            ), f"Directory traversal possible: {payload}"
-            assert (
-                "Administrator:" not in response_text
-            ), f"Directory traversal possible: {payload}"
+            assert "root:" not in response_text, f"Directory traversal possible: {payload}"
+            assert "Administrator:" not in response_text, f"Directory traversal possible: {payload}"
 
     def test_timing_attack_resistance(self, auth_manager):
         """Test resistance to timing attacks."""
@@ -294,20 +261,16 @@ class TestPenetrationTestingScenarios:
             start_time = time.time()
             try:
                 auth_manager.authenticate_user("timing_user", password)
-            except:
+            except Exception:
                 pass
             end_time = time.time()
             return end_time - start_time
 
         # Test with correct password
-        correct_times = [
-            time_authentication("correct_password") for _ in range(10)
-        ]
+        correct_times = [time_authentication("correct_password") for _ in range(10)]
 
         # Test with incorrect password
-        incorrect_times = [
-            time_authentication("wrong_password") for _ in range(10)
-        ]
+        incorrect_times = [time_authentication("wrong_password") for _ in range(10)]
 
         # Calculate average times
         avg_correct = sum(correct_times) / len(correct_times)
@@ -352,9 +315,7 @@ class TestPenetrationTestingScenarios:
             failed_attempts += 1
 
         # Should implement rate limiting after several failed attempts
-        assert (
-            failed_attempts < max_attempts
-        ), "No brute force protection detected"
+        assert failed_attempts < max_attempts, "No brute force protection detected"
 
     def test_information_disclosure_prevention(self, client):
         """Test information disclosure prevention."""
@@ -379,9 +340,7 @@ class TestPenetrationTestingScenarios:
         ]
 
         for pattern in sensitive_patterns:
-            assert (
-                pattern not in response_text
-            ), f"Information disclosure: {pattern}"
+            assert pattern not in response_text, f"Information disclosure: {pattern}"
 
     def test_secure_headers_implementation(self, client):
         """Test that security headers are properly implemented."""
@@ -409,16 +368,12 @@ class TestPenetrationTestingScenarios:
         for method in dangerous_methods:
             response = client.request(method, "/")
             # Should not return 200 for dangerous methods
-            assert (
-                response.status_code != 200
-            ), f"Dangerous HTTP method allowed: {method}"
+            assert response.status_code != 200, f"Dangerous HTTP method allowed: {method}"
 
     def test_cookie_security(self, client):
         """Test cookie security settings."""
         # Test that cookies have secure flags
-        response = client.post(
-            "/auth/login", json={"username": "test", "password": "test"}
-        )
+        response = client.post("/auth/login", json={"username": "test", "password": "test"})
 
         # Check Set-Cookie headers
         set_cookie_headers = response.headers.get("Set-Cookie", "")
@@ -426,16 +381,13 @@ class TestPenetrationTestingScenarios:
         if set_cookie_headers:
             # Cookies should have security flags
             assert (
-                "HttpOnly" in set_cookie_headers
-                or "httponly" in set_cookie_headers.lower()
+                "HttpOnly" in set_cookie_headers or "httponly" in set_cookie_headers.lower()
             ), "Cookies missing HttpOnly flag"
             assert (
-                "Secure" in set_cookie_headers
-                or "secure" in set_cookie_headers.lower()
+                "Secure" in set_cookie_headers or "secure" in set_cookie_headers.lower()
             ), "Cookies missing Secure flag"
             assert (
-                "SameSite" in set_cookie_headers
-                or "samesite" in set_cookie_headers.lower()
+                "SameSite" in set_cookie_headers or "samesite" in set_cookie_headers.lower()
             ), "Cookies missing SameSite flag"
 
     def test_input_validation_bypass(self, client):
@@ -459,9 +411,7 @@ class TestPenetrationTestingScenarios:
             response = client.post("/auth/login", json=payload)
 
             # Should handle invalid input gracefully
-            assert (
-                response.status_code != 500
-            ), f"Input validation bypass possible: {payload}"
+            assert response.status_code != 500, f"Input validation bypass possible: {payload}"
 
     def test_authorization_bypass(self, client):
         """Test authorization bypass attempts."""
@@ -514,9 +464,7 @@ class TestPenetrationTestingScenarios:
         threads = []
 
         for i in range(10):
-            thread = threading.Thread(
-                target=lambda: results.append(authenticate())
-            )
+            thread = threading.Thread(target=lambda: results.append(authenticate()))
             threads.append(thread)
             thread.start()
 
@@ -525,9 +473,7 @@ class TestPenetrationTestingScenarios:
 
         # All authentications should succeed consistently
         successful_auths = [r for r in results if r is not None]
-        assert (
-            len(successful_auths) == 10
-        ), "Race condition detected in authentication"
+        assert len(successful_auths) == 10, "Race condition detected in authentication"
 
     def test_password_complexity_enforcement(self, auth_manager):
         """Test password complexity enforcement."""
@@ -576,17 +522,13 @@ class TestPenetrationTestingScenarios:
         session_id = auth_manager.create_session("session_user")
 
         # Validate session
-        assert (
-            auth_manager.validate_session(session_id) is True
-        ), "Session validation failed"
+        assert auth_manager.validate_session(session_id) is True, "Session validation failed"
 
         # Test session cleanup
         auth_manager.cleanup_expired_sessions()
 
         # Session should still be valid immediately after cleanup
-        assert (
-            auth_manager.validate_session(session_id) is True
-        ), "Session prematurely expired"
+        assert auth_manager.validate_session(session_id) is True, "Session prematurely expired"
 
     def test_cryptographic_security(self, auth_manager):
         """Test cryptographic security implementation."""

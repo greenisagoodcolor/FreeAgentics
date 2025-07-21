@@ -5,7 +5,7 @@ import logging
 import random
 import time
 from enum import Enum
-from typing import Any, Callable, Dict, List, Optional, Set, Tuple
+from typing import Callable, Dict, List, Optional, Set, Tuple
 
 from .client_manager import WebSocketClient, WebSocketClientManager
 from .message_generators import MessageGenerator
@@ -100,9 +100,7 @@ class ConnectionLifecycleManager:
                     # Start activity if generator provided
                     if activity_generator:
                         activity_task = asyncio.create_task(
-                            self._generate_activity(
-                                client, activity_generator, activity_interval
-                            )
+                            self._generate_activity(client, activity_generator, activity_interval)
                         )
 
                     # Wait for disconnection
@@ -124,23 +122,15 @@ class ConnectionLifecycleManager:
                     self.reconnection_attempts[client_id] += 1
 
                 # Wait before reconnecting
-                if (
-                    self.reconnection_attempts[client_id]
-                    < max_reconnect_attempts
-                ):
+                if self.reconnection_attempts[client_id] < max_reconnect_attempts:
                     self._update_state(client_id, ConnectionState.RECONNECTING)
                     await asyncio.sleep(reconnect_interval)
 
             except Exception as e:
-                logger.error(
-                    f"Persistent connection error for {client_id}: {e}"
-                )
+                logger.error(f"Persistent connection error for {client_id}: {e}")
                 self.reconnection_attempts[client_id] += 1
 
-                if (
-                    self.reconnection_attempts[client_id]
-                    < max_reconnect_attempts
-                ):
+                if self.reconnection_attempts[client_id] < max_reconnect_attempts:
                     self._update_state(client_id, ConnectionState.RECONNECTING)
                     await asyncio.sleep(reconnect_interval)
 
@@ -178,9 +168,7 @@ class ConnectionLifecycleManager:
                     # Start activity if generator provided
                     if activity_generator:
                         activity_task = asyncio.create_task(
-                            self._generate_activity(
-                                client, activity_generator, activity_interval
-                            )
+                            self._generate_activity(client, activity_generator, activity_interval)
                         )
 
                     # Wait for connection duration
@@ -195,9 +183,7 @@ class ConnectionLifecycleManager:
                             pass
 
                     # Disconnect
-                    self._update_state(
-                        client_id, ConnectionState.DISCONNECTING
-                    )
+                    self._update_state(client_id, ConnectionState.DISCONNECTING)
                     await client.disconnect()
 
                     # Record connection duration
@@ -214,9 +200,7 @@ class ConnectionLifecycleManager:
                     await asyncio.sleep(disconnect_time)
 
             except Exception as e:
-                logger.error(
-                    f"Intermittent connection error for {client_id}: {e}"
-                )
+                logger.error(f"Intermittent connection error for {client_id}: {e}")
                 self.metrics.record_error("connection")
 
         self._update_state(client_id, ConnectionState.DISCONNECTED)
@@ -298,9 +282,7 @@ class ConnectionLifecycleManager:
                 if consecutive_failures >= failover_threshold:
                     current_url_index = (current_url_index + 1) % len(urls)
                     consecutive_failures = 0
-                    logger.info(
-                        f"Failing over {client_id} to {urls[current_url_index]}"
-                    )
+                    logger.info(f"Failing over {client_id} to {urls[current_url_index]}")
 
                 # Update client URL
                 if current_url_index >= 0:
@@ -356,17 +338,13 @@ class ConnectionLifecycleManager:
             while client.is_connected:
                 message = generator.generate()
                 await client.send_message(message)
-                self.metrics.record_message_sent(
-                    message.get("type", "unknown"), len(str(message))
-                )
+                self.metrics.record_message_sent(message.get("type", "unknown"), len(str(message)))
                 await asyncio.sleep(interval)
 
         except asyncio.CancelledError:
             pass
         except Exception as e:
-            logger.error(
-                f"Activity generation error for {client.client_id}: {e}"
-            )
+            logger.error(f"Activity generation error for {client.client_id}: {e}")
             self.metrics.record_error("send")
 
     def _update_state(self, client_id: str, state: ConnectionState):
@@ -377,9 +355,7 @@ class ConnectionLifecycleManager:
         logger.debug(f"Client {client_id} state: {old_state} -> {state}")
 
         if self.on_state_change:
-            asyncio.create_task(
-                self.on_state_change(client_id, old_state, state)
-            )
+            asyncio.create_task(self.on_state_change(client_id, old_state, state))
 
     async def start_lifecycle_management(
         self,
@@ -391,9 +367,7 @@ class ConnectionLifecycleManager:
         tasks = []
 
         for client in clients:
-            task = asyncio.create_task(
-                self.manage_connection_lifecycle(client, pattern, **kwargs)
-            )
+            task = asyncio.create_task(self.manage_connection_lifecycle(client, pattern, **kwargs))
             self.lifecycle_tasks[client.client_id] = task
             tasks.append(task)
 
@@ -405,27 +379,20 @@ class ConnectionLifecycleManager:
             task.cancel()
 
         if self.lifecycle_tasks:
-            await asyncio.gather(
-                *self.lifecycle_tasks.values(), return_exceptions=True
-            )
+            await asyncio.gather(*self.lifecycle_tasks.values(), return_exceptions=True)
 
         self.lifecycle_tasks.clear()
 
     def get_connection_states(self) -> Dict[str, str]:
         """Get current connection states for all clients."""
-        return {
-            client_id: state.value
-            for client_id, state in self.connection_states.items()
-        }
+        return {client_id: state.value for client_id, state in self.connection_states.items()}
 
     def get_state_distribution(self) -> Dict[str, int]:
         """Get distribution of connection states."""
         distribution = {}
 
         for state in ConnectionState:
-            count = sum(
-                1 for s in self.connection_states.values() if s == state
-            )
+            count = sum(1 for s in self.connection_states.values() if s == state)
             if count > 0:
                 distribution[state.value] = count
 
@@ -473,17 +440,13 @@ class ConnectionPool:
         self._running = True
         self._pool_task = asyncio.create_task(self._maintain_pool())
 
-        logger.info(
-            f"Connection pool initialized with {self.available.qsize()} connections"
-        )
+        logger.info(f"Connection pool initialized with {self.available.qsize()} connections")
 
     async def acquire(self) -> Optional[WebSocketClient]:
         """Acquire a connection from the pool."""
         try:
             # Try to get an available connection
-            client = await asyncio.wait_for(
-                self.available.get(), timeout=self.acquire_timeout
-            )
+            client = await asyncio.wait_for(self.available.get(), timeout=self.acquire_timeout)
 
             # Verify it's still connected
             if client.is_connected:

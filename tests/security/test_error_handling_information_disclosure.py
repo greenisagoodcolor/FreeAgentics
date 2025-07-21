@@ -299,9 +299,7 @@ class ErrorHandlingTester:
 
         for category, patterns in self.sensitive_patterns.items():
             for pattern in patterns:
-                matches = re.findall(
-                    pattern, response_text, re.IGNORECASE | re.MULTILINE
-                )
+                matches = re.findall(pattern, response_text, re.IGNORECASE | re.MULTILINE)
                 if matches:
                     findings.append(
                         {
@@ -310,9 +308,7 @@ class ErrorHandlingTester:
                             "matches": matches,
                             "status_code": response_status,
                             "severity": self._get_severity(category),
-                            "recommendation": self._get_recommendation(
-                                category
-                            ),
+                            "recommendation": self._get_recommendation(category),
                         }
                     )
 
@@ -342,13 +338,9 @@ class ErrorHandlingTester:
             "configuration_info": "Never expose configuration in error messages",
             "system_info": "Remove system information from error responses",
         }
-        return recommendations.get(
-            category, "Review and sanitize error response"
-        )
+        return recommendations.get(category, "Review and sanitize error response")
 
-    def validate_error_message_generic(
-        self, response_text: str, status_code: int
-    ) -> bool:
+    def validate_error_message_generic(self, response_text: str, status_code: int) -> bool:
         """Validate that error message is generic and safe for production."""
         expected_messages = self.expected_generic_messages.get(status_code, [])
 
@@ -359,9 +351,7 @@ class ErrorHandlingTester:
                 return True
 
         # If no expected message found, check for sensitive patterns
-        findings = self.check_for_sensitive_information(
-            response_text, status_code
-        )
+        findings = self.check_for_sensitive_information(response_text, status_code)
         return len(findings) == 0
 
     def test_database_error_disclosure(self) -> List[ErrorDisclosureTestCase]:
@@ -433,9 +423,7 @@ class ErrorHandlingTester:
                     if method == "GET":
                         # For GET requests, add payload as query parameter
                         test_endpoint = (
-                            f"{endpoint}?search={payload}"
-                            if "search" not in endpoint
-                            else endpoint
+                            f"{endpoint}?search={payload}" if "search" not in endpoint else endpoint
                         )
                         response = self.client.get(test_endpoint)
                     elif method == "POST":
@@ -449,28 +437,20 @@ class ErrorHandlingTester:
 
                     # Check response for database error disclosure
                     response_text = (
-                        response.text
-                        if hasattr(response, "text")
-                        else str(response.content)
+                        response.text if hasattr(response, "text") else str(response.content)
                     )
                     findings = self.check_for_sensitive_information(
                         response_text, response.status_code
                     )
 
-                    database_findings = [
-                        f
-                        for f in findings
-                        if f["category"] == "database_errors"
-                    ]
+                    database_findings = [f for f in findings if f["category"] == "database_errors"]
 
                     if database_findings:
                         test_case.passed = False
                         test_case.error_details = database_findings
                         test_case.response_data = {
                             "status_code": response.status_code,
-                            "response_text": response_text[
-                                :1000
-                            ],  # Limit size
+                            "response_text": response_text[:1000],  # Limit size
                             "payload": payload,
                             "endpoint": endpoint,
                             "method": method,
@@ -534,32 +514,22 @@ class ErrorHandlingTester:
                             headers={"Content-Type": content_type},
                         )
                     else:
-                        response = self.client.post(
-                            endpoint, json=payload_data
-                        )
+                        response = self.client.post(endpoint, json=payload_data)
 
                     # Check response for stack trace disclosure
                     response_text = (
-                        response.text
-                        if hasattr(response, "text")
-                        else str(response.content)
+                        response.text if hasattr(response, "text") else str(response.content)
                     )
                     findings = self.check_for_sensitive_information(
                         response_text, response.status_code
                     )
 
-                    stack_trace_findings = [
-                        f for f in findings if f["category"] == "stack_traces"
-                    ]
-                    debug_findings = [
-                        f for f in findings if f["category"] == "debug_info"
-                    ]
+                    stack_trace_findings = [f for f in findings if f["category"] == "stack_traces"]
+                    debug_findings = [f for f in findings if f["category"] == "debug_info"]
 
                     if stack_trace_findings or debug_findings:
                         test_case.passed = False
-                        test_case.error_details = (
-                            stack_trace_findings + debug_findings
-                        )
+                        test_case.error_details = stack_trace_findings + debug_findings
                         test_case.response_data = {
                             "status_code": response.status_code,
                             "response_text": response_text[:1000],
@@ -614,28 +584,18 @@ class ErrorHandlingTester:
 
                 try:
                     if method == "GET":
-                        response = self.client.get(
-                            f"{endpoint}?file={payload}"
-                        )
+                        response = self.client.get(f"{endpoint}?file={payload}")
                     else:
-                        response = self.client.post(
-                            endpoint, json={"file": payload}
-                        )
+                        response = self.client.post(endpoint, json={"file": payload})
 
                     response_text = (
-                        response.text
-                        if hasattr(response, "text")
-                        else str(response.content)
+                        response.text if hasattr(response, "text") else str(response.content)
                     )
                     findings = self.check_for_sensitive_information(
                         response_text, response.status_code
                     )
 
-                    path_findings = [
-                        f
-                        for f in findings
-                        if f["category"] == "internal_paths"
-                    ]
+                    path_findings = [f for f in findings if f["category"] == "internal_paths"]
 
                     if path_findings:
                         test_case.passed = False
@@ -689,17 +649,11 @@ class ErrorHandlingTester:
             try:
                 response = self.client.get(endpoint)
                 response_text = (
-                    response.text
-                    if hasattr(response, "text")
-                    else str(response.content)
+                    response.text if hasattr(response, "text") else str(response.content)
                 )
-                findings = self.check_for_sensitive_information(
-                    response_text, response.status_code
-                )
+                findings = self.check_for_sensitive_information(response_text, response.status_code)
 
-                version_findings = [
-                    f for f in findings if f["category"] == "version_info"
-                ]
+                version_findings = [f for f in findings if f["category"] == "version_info"]
 
                 # Version info in some endpoints might be acceptable (like /health)
                 # But we'll flag it for review
@@ -716,9 +670,7 @@ class ErrorHandlingTester:
 
             except Exception as e:
                 test_case.passed = False
-                test_case.error_details = [
-                    {"error": str(e), "category": "test_execution_error"}
-                ]
+                test_case.error_details = [{"error": str(e), "category": "test_execution_error"}]
 
             test_cases.append(test_case)
 
@@ -753,19 +705,13 @@ class ErrorHandlingTester:
                 try:
                     response = self.client.post(endpoint, json=test_data)
                     response_text = (
-                        response.text
-                        if hasattr(response, "text")
-                        else str(response.content)
+                        response.text if hasattr(response, "text") else str(response.content)
                     )
                     findings = self.check_for_sensitive_information(
                         response_text, response.status_code
                     )
 
-                    config_findings = [
-                        f
-                        for f in findings
-                        if f["category"] == "configuration_info"
-                    ]
+                    config_findings = [f for f in findings if f["category"] == "configuration_info"]
 
                     if config_findings:
                         test_case.passed = False
@@ -845,9 +791,7 @@ class ErrorHandlingTester:
                             headers={"Content-Type": "application/json"},
                         )
                     else:
-                        response = self.client.post(
-                            endpoint, json={"data": data} if data else {}
-                        )
+                        response = self.client.post(endpoint, json={"data": data} if data else {})
                 elif method == "DELETE":
                     response = self.client.delete(endpoint)
                 elif method == "PATCH":
@@ -870,13 +814,9 @@ class ErrorHandlingTester:
 
                 # Also check for information disclosure in error response
                 response_text = (
-                    response.text
-                    if hasattr(response, "text")
-                    else str(response.content)
+                    response.text if hasattr(response, "text") else str(response.content)
                 )
-                findings = self.check_for_sensitive_information(
-                    response_text, response.status_code
-                )
+                findings = self.check_for_sensitive_information(response_text, response.status_code)
 
                 if findings:
                     test_case.passed = False
@@ -893,9 +833,7 @@ class ErrorHandlingTester:
 
             except Exception as e:
                 test_case.passed = False
-                test_case.error_details = [
-                    {"error": str(e), "category": "test_execution_error"}
-                ]
+                test_case.error_details = [{"error": str(e), "category": "test_execution_error"}]
 
             test_cases.append(test_case)
 
@@ -943,9 +881,7 @@ class ErrorHandlingTester:
 
                     response = self.client.post(endpoint, json=test_data)
                     response_text = (
-                        response.text
-                        if hasattr(response, "text")
-                        else str(response.content)
+                        response.text if hasattr(response, "text") else str(response.content)
                     )
 
                     # Check if payload appears unsanitized in response
@@ -1008,9 +944,7 @@ class ErrorHandlingTester:
             for endpoint in debug_endpoints:
                 response = self.client.get(endpoint)
                 response_text = (
-                    response.text
-                    if hasattr(response, "text")
-                    else str(response.content)
+                    response.text if hasattr(response, "text") else str(response.content)
                 )
 
                 debug_indicators = [
@@ -1042,9 +976,7 @@ class ErrorHandlingTester:
 
         except Exception as e:
             debug_test.passed = False
-            debug_test.error_details = [
-                {"error": str(e), "category": "test_execution_error"}
-            ]
+            debug_test.error_details = [{"error": str(e), "category": "test_execution_error"}]
 
         test_cases.append(debug_test)
 
@@ -1057,14 +989,8 @@ class ErrorHandlingTester:
 
         try:
             # Trigger an error and check if detailed logging occurs without disclosure
-            response = self.client.post(
-                "/api/v1/agents", json={"invalid": "data"}
-            )
-            response_text = (
-                response.text
-                if hasattr(response, "text")
-                else str(response.content)
-            )
+            response = self.client.post("/api/v1/agents", json={"invalid": "data"})
+            response_text = response.text if hasattr(response, "text") else str(response.content)
 
             # Should have generic error message
             generic_message = self.validate_error_message_generic(
@@ -1075,9 +1001,7 @@ class ErrorHandlingTester:
                 logging_test.passed = True
             else:
                 logging_test.passed = False
-                logging_test.error_details = [
-                    {"category": "detailed_error_exposed"}
-                ]
+                logging_test.error_details = [{"category": "detailed_error_exposed"}]
                 logging_test.response_data = {
                     "status_code": response.status_code,
                     "response_text": response_text[:500],
@@ -1085,9 +1009,7 @@ class ErrorHandlingTester:
 
         except Exception as e:
             logging_test.passed = False
-            logging_test.error_details = [
-                {"error": str(e), "category": "test_execution_error"}
-            ]
+            logging_test.error_details = [{"error": str(e), "category": "test_execution_error"}]
 
         test_cases.append(logging_test)
 
@@ -1127,9 +1049,7 @@ class ErrorHandlingTester:
 
         except Exception as e:
             headers_test.passed = False
-            headers_test.error_details = [
-                {"error": str(e), "category": "test_execution_error"}
-            ]
+            headers_test.error_details = [{"error": str(e), "category": "test_execution_error"}]
 
         test_cases.append(headers_test)
 
@@ -1137,9 +1057,7 @@ class ErrorHandlingTester:
 
     def run_all_tests(self) -> Dict[str, Any]:
         """Run all error handling disclosure tests."""
-        self.logger.info(
-            "Starting comprehensive error handling information disclosure tests"
-        )
+        self.logger.info("Starting comprehensive error handling information disclosure tests")
 
         # Run all test categories
         all_test_results = []
@@ -1215,9 +1133,7 @@ class ErrorHandlingTester:
                 "total_tests": total_tests,
                 "passed_tests": passed_tests,
                 "failed_tests": failed_tests,
-                "pass_rate": (passed_tests / total_tests * 100)
-                if total_tests > 0
-                else 0,
+                "pass_rate": (passed_tests / total_tests * 100) if total_tests > 0 else 0,
                 "critical_failures": len(critical_failures),
                 "high_failures": len(high_failures),
                 "medium_failures": len(medium_failures),
@@ -1225,60 +1141,28 @@ class ErrorHandlingTester:
             },
             "test_categories": {
                 "database_errors": len(
-                    [
-                        t
-                        for t in all_test_results
-                        if t.category == "database_errors"
-                    ]
+                    [t for t in all_test_results if t.category == "database_errors"]
                 ),
                 "exception_handling": len(
-                    [
-                        t
-                        for t in all_test_results
-                        if t.category == "exception_handling"
-                    ]
+                    [t for t in all_test_results if t.category == "exception_handling"]
                 ),
                 "path_disclosure": len(
-                    [
-                        t
-                        for t in all_test_results
-                        if t.category == "path_disclosure"
-                    ]
+                    [t for t in all_test_results if t.category == "path_disclosure"]
                 ),
                 "version_disclosure": len(
-                    [
-                        t
-                        for t in all_test_results
-                        if t.category == "version_disclosure"
-                    ]
+                    [t for t in all_test_results if t.category == "version_disclosure"]
                 ),
                 "configuration_disclosure": len(
-                    [
-                        t
-                        for t in all_test_results
-                        if t.category == "configuration_disclosure"
-                    ]
+                    [t for t in all_test_results if t.category == "configuration_disclosure"]
                 ),
                 "status_consistency": len(
-                    [
-                        t
-                        for t in all_test_results
-                        if t.category == "status_consistency"
-                    ]
+                    [t for t in all_test_results if t.category == "status_consistency"]
                 ),
                 "message_sanitization": len(
-                    [
-                        t
-                        for t in all_test_results
-                        if t.category == "message_sanitization"
-                    ]
+                    [t for t in all_test_results if t.category == "message_sanitization"]
                 ),
                 "production_hardening": len(
-                    [
-                        t
-                        for t in all_test_results
-                        if t.category == "production_hardening"
-                    ]
+                    [t for t in all_test_results if t.category == "production_hardening"]
                 ),
             },
             "failures": {
@@ -1287,12 +1171,8 @@ class ErrorHandlingTester:
                 "medium": [self._test_to_dict(t) for t in medium_failures],
                 "low": [self._test_to_dict(t) for t in low_failures],
             },
-            "recommendations": self._generate_recommendations(
-                all_test_results
-            ),
-            "detailed_results": [
-                self._test_to_dict(t) for t in all_test_results
-            ],
+            "recommendations": self._generate_recommendations(all_test_results),
+            "detailed_results": [self._test_to_dict(t) for t in all_test_results],
         }
 
         self.logger.info(
@@ -1301,9 +1181,7 @@ class ErrorHandlingTester:
 
         return report
 
-    def _test_to_dict(
-        self, test_case: ErrorDisclosureTestCase
-    ) -> Dict[str, Any]:
+    def _test_to_dict(self, test_case: ErrorDisclosureTestCase) -> Dict[str, Any]:
         """Convert test case to dictionary for JSON serialization."""
         return {
             "name": test_case.name,
@@ -1314,9 +1192,7 @@ class ErrorHandlingTester:
             "response_data": test_case.response_data,
         }
 
-    def _generate_recommendations(
-        self, test_results: List[ErrorDisclosureTestCase]
-    ) -> List[str]:
+    def _generate_recommendations(self, test_results: List[ErrorDisclosureTestCase]) -> List[str]:
         """Generate security recommendations based on test results."""
         recommendations = []
 
@@ -1332,80 +1208,50 @@ class ErrorHandlingTester:
             for test in failed_tests:
                 if test.error_details:
                     for error in test.error_details:
-                        categories_with_failures.add(
-                            error.get("category", test.category)
-                        )
+                        categories_with_failures.add(error.get("category", test.category))
 
             if "database_errors" in categories_with_failures:
                 recommendations.append(
                     "- Implement generic database error handling to prevent SQL error disclosure"
                 )
-                recommendations.append(
-                    "- Use parameterized queries and input validation"
-                )
+                recommendations.append("- Use parameterized queries and input validation")
                 recommendations.append(
                     "- Log detailed errors server-side but return generic messages to clients"
                 )
 
             if "stack_traces" in categories_with_failures:
-                recommendations.append(
-                    "- Disable debug mode in production environment"
-                )
+                recommendations.append("- Disable debug mode in production environment")
                 recommendations.append(
                     "- Implement custom exception handlers that return generic error messages"
                 )
-                recommendations.append(
-                    "- Use structured logging for internal error tracking"
-                )
+                recommendations.append("- Use structured logging for internal error tracking")
 
             if "internal_paths" in categories_with_failures:
-                recommendations.append(
-                    "- Sanitize file paths in error messages"
-                )
+                recommendations.append("- Sanitize file paths in error messages")
                 recommendations.append(
                     "- Use relative paths or abstract identifiers in client responses"
                 )
                 recommendations.append("- Implement path traversal protection")
 
             if "version_info" in categories_with_failures:
-                recommendations.append(
-                    "- Remove version information from error responses"
-                )
-                recommendations.append(
-                    "- Implement custom error pages without server signatures"
-                )
+                recommendations.append("- Remove version information from error responses")
+                recommendations.append("- Implement custom error pages without server signatures")
 
             if "configuration_info" in categories_with_failures:
                 recommendations.append(
                     "- URGENT: Never expose configuration details in error messages"
                 )
-                recommendations.append(
-                    "- Review and sanitize all error response content"
-                )
-                recommendations.append(
-                    "- Implement configuration validation without disclosure"
-                )
+                recommendations.append("- Review and sanitize all error response content")
+                recommendations.append("- Implement configuration validation without disclosure")
 
-            recommendations.append(
-                "- Implement comprehensive error handling middleware"
-            )
-            recommendations.append(
-                "- Use centralized logging with correlation IDs"
-            )
-            recommendations.append(
-                "- Regular security testing of error handling paths"
-            )
-            recommendations.append(
-                "- Implement proper security headers on all responses"
-            )
+            recommendations.append("- Implement comprehensive error handling middleware")
+            recommendations.append("- Use centralized logging with correlation IDs")
+            recommendations.append("- Regular security testing of error handling paths")
+            recommendations.append("- Implement proper security headers on all responses")
 
         else:
-            recommendations.append(
-                "No critical information disclosure vulnerabilities detected"
-            )
-            recommendations.append(
-                "Continue regular security testing and monitoring"
-            )
+            recommendations.append("No critical information disclosure vulnerabilities detected")
+            recommendations.append("Continue regular security testing and monitoring")
 
         return recommendations
 
@@ -1441,9 +1287,7 @@ class TestErrorHandlingInformationDisclosure:
                             )
 
             if failure_details:
-                pytest.fail(
-                    f"Database error disclosure detected: {failure_details}"
-                )
+                pytest.fail(f"Database error disclosure detected: {failure_details}")
 
     def test_exception_handling_disclosure(self, error_tester):
         """Test exception handling disclosure."""
@@ -1465,9 +1309,7 @@ class TestErrorHandlingInformationDisclosure:
                             )
 
             if failure_details:
-                pytest.fail(
-                    f"Exception handling disclosure detected: {failure_details}"
-                )
+                pytest.fail(f"Exception handling disclosure detected: {failure_details}")
 
     def test_path_disclosure(self, error_tester):
         """Test internal path disclosure."""
@@ -1486,9 +1328,7 @@ class TestErrorHandlingInformationDisclosure:
                             )
 
             if failure_details:
-                pytest.fail(
-                    f"Internal path disclosure detected: {failure_details}"
-                )
+                pytest.fail(f"Internal path disclosure detected: {failure_details}")
 
     def test_configuration_disclosure(self, error_tester):
         """Test configuration information disclosure."""
@@ -1507,9 +1347,7 @@ class TestErrorHandlingInformationDisclosure:
                             )
 
             if failure_details:
-                pytest.fail(
-                    f"CRITICAL: Configuration disclosure detected: {failure_details}"
-                )
+                pytest.fail(f"CRITICAL: Configuration disclosure detected: {failure_details}")
 
     def test_http_status_consistency(self, error_tester):
         """Test HTTP status code consistency."""
@@ -1528,9 +1366,7 @@ class TestErrorHandlingInformationDisclosure:
                             )
 
             if failure_details:
-                pytest.fail(
-                    f"HTTP status consistency issues: {failure_details}"
-                )
+                pytest.fail(f"HTTP status consistency issues: {failure_details}")
 
     def test_error_message_sanitization(self, error_tester):
         """Test error message sanitization."""
@@ -1549,9 +1385,7 @@ class TestErrorHandlingInformationDisclosure:
                             )
 
             if failure_details:
-                pytest.fail(
-                    f"Error message sanitization failures: {failure_details}"
-                )
+                pytest.fail(f"Error message sanitization failures: {failure_details}")
 
     def test_production_hardening(self, error_tester):
         """Test production hardening configuration."""
@@ -1575,9 +1409,7 @@ class TestErrorHandlingInformationDisclosure:
                             )
 
             if failure_details:
-                pytest.fail(
-                    f"Production hardening failures: {failure_details}"
-                )
+                pytest.fail(f"Production hardening failures: {failure_details}")
 
     def test_comprehensive_error_disclosure_scan(self, error_tester):
         """Run comprehensive error disclosure scan."""
@@ -1621,9 +1453,7 @@ if __name__ == "__main__":
     client = TestClient(app)
     tester = ErrorHandlingTester(client)
 
-    print(
-        "Running comprehensive error handling information disclosure tests..."
-    )
+    print("Running comprehensive error handling information disclosure tests...")
     report = tester.run_all_tests()
 
     # Print summary
@@ -1634,7 +1464,7 @@ if __name__ == "__main__":
     print(f"Passed: {report['summary']['passed_tests']}")
     print(f"Failed: {report['summary']['failed_tests']}")
     print(f"Pass Rate: {report['summary']['pass_rate']:.1f}%")
-    print(f"\nSeverity Breakdown:")
+    print("\nSeverity Breakdown:")
     print(f"  Critical: {report['summary']['critical_failures']}")
     print(f"  High: {report['summary']['high_failures']}")
     print(f"  Medium: {report['summary']['medium_failures']}")
@@ -1650,7 +1480,9 @@ if __name__ == "__main__":
 
     # Save detailed report
     timestamp = time.strftime("%Y%m%d_%H%M%S")
-    report_file = f"/home/green/FreeAgentics/tests/security/error_disclosure_report_{timestamp}.json"
+    report_file = (
+        f"/home/green/FreeAgentics/tests/security/error_disclosure_report_{timestamp}.json"
+    )
 
     try:
         with open(report_file, "w") as f:

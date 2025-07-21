@@ -1,14 +1,13 @@
 """Integration test for PyMDP numpy array handling in real agent scenarios."""
 
-from unittest.mock import MagicMock, patch
+from unittest.mock import MagicMock
 
 import numpy as np
 import pytest
 
-from agents.base_agent import PYMDP_AVAILABLE, BasicExplorerAgent
+from agents.base_agent import BasicExplorerAgent
 from agents.coalition_coordinator import CoalitionCoordinatorAgent
 from agents.resource_collector import ResourceCollectorAgent
-
 
 
 class TestPyMDPArrayIntegration:
@@ -16,9 +15,7 @@ class TestPyMDPArrayIntegration:
 
     def test_basic_explorer_with_array_actions(self):
         """Test BasicExplorerAgent handles PyMDP array responses."""
-        agent = BasicExplorerAgent(
-            "test_explorer", "Test Explorer", grid_size=5
-        )
+        agent = BasicExplorerAgent("test_explorer", "Test Explorer", grid_size=5)
         agent.start()
 
         # Mock PyMDP agent to return various array types
@@ -54,9 +51,7 @@ class TestPyMDPArrayIntegration:
 
     def test_resource_collector_with_array_actions(self):
         """Test ResourceCollectorAgent handles PyMDP array responses."""
-        agent = ResourceCollectorAgent(
-            "test_collector", "Test Collector", grid_size=5
-        )
+        agent = ResourceCollectorAgent("test_collector", "Test Collector", grid_size=5)
         agent.start()
 
         # Mock PyMDP agent
@@ -71,9 +66,7 @@ class TestPyMDPArrayIntegration:
         # Test step with collect action
         observation = {
             "position": [2, 2],
-            "visible_cells": [
-                {"x": 2, "y": 2, "type": "resource", "amount": 5}
-            ],
+            "visible_cells": [{"x": 2, "y": 2, "type": "resource", "amount": 5}],
             "current_load": 3,
         }
 
@@ -82,9 +75,7 @@ class TestPyMDPArrayIntegration:
 
     def test_coalition_coordinator_with_array_actions(self):
         """Test CoalitionCoordinatorAgent handles PyMDP array responses."""
-        agent = CoalitionCoordinatorAgent(
-            "test_coordinator", "Test Coordinator", max_agents=5
-        )
+        agent = CoalitionCoordinatorAgent("test_coordinator", "Test Coordinator", max_agents=5)
         agent.start()
 
         # Mock PyMDP agent
@@ -176,7 +167,6 @@ class TestPyMDPArrayIntegration:
         assert isinstance(fe_components["total_free_energy"], float)
 
 
-
 class TestEdgeCases:
     """Test edge cases in PyMDP array handling."""
 
@@ -213,8 +203,7 @@ class TestEdgeCases:
     def test_concurrent_agent_operations(self):
         """Test that multiple agents can operate concurrently without array issues."""
         agents = [
-            BasicExplorerAgent(f"explorer_{i}", f"Explorer {i}", grid_size=3)
-            for i in range(3)
+            BasicExplorerAgent(f"explorer_{i}", f"Explorer {i}", grid_size=3) for i in range(3)
         ]
 
         for i, agent in enumerate(agents):
@@ -222,9 +211,7 @@ class TestEdgeCases:
 
             # Mock each agent's PyMDP with different response types
             mock_agent = MagicMock()
-            mock_agent.sample_action.return_value = np.array(
-                i % 5
-            )  # Different actions
+            mock_agent.sample_action.return_value = np.array(i % 5)  # Different actions
             mock_agent.infer_policies.return_value = (np.ones(5) / 5, None)
             agent.pymdp_agent = mock_agent
 
