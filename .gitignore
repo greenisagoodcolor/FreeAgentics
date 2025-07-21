@@ -219,3 +219,5 @@ logs/*.log
 test_venv/
 security_scan_env/
 .archive/
+.llm_venv/
+temp_security_venv/
