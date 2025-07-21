@@ -43,7 +43,9 @@ class WebSocketRateLimitManager:
                     await self.redis_client.ping()
                     logger.info("WebSocket rate limiter connected to Redis")
             except Exception as e:
-                logger.error(f"Failed to connect to Redis for WebSocket rate limiting: {e}")
+                logger.error(
+                    f"Failed to connect to Redis for WebSocket rate limiting: {e}"
+                )
                 self.redis_client = None
 
         return self.redis_client
@@ -149,7 +151,9 @@ class WebSocketRateLimitManager:
                 )
             except Exception as e:
                 # Log failed message send, but continue (websocket may already be closed)
-                logger.debug(f"Failed to send message rate limit error to websocket: {e}")
+                logger.debug(
+                    f"Failed to send message rate limit error to websocket: {e}"
+                )
 
         return allowed
 
@@ -158,7 +162,9 @@ class WebSocketRateLimitManager:
         self.active_connections[connection_id] = websocket
 
         client_ip = self._get_client_ip(websocket)
-        logger.info(f"WebSocket connection registered: {connection_id} from {client_ip}")
+        logger.info(
+            f"WebSocket connection registered: {connection_id} from {client_ip}"
+        )
 
     async def unregister_connection(self, connection_id: str):
         """Unregister a WebSocket connection."""
@@ -172,7 +178,9 @@ class WebSocketRateLimitManager:
                 await rate_limiter.release_connection(client_ip)
 
             del self.active_connections[connection_id]
-            logger.info(f"WebSocket connection unregistered: {connection_id} from {client_ip}")
+            logger.info(
+                f"WebSocket connection unregistered: {connection_id} from {client_ip}"
+            )
 
     async def handle_websocket_with_rate_limiting(
         self,
@@ -227,7 +235,9 @@ class WebSocketRateLimitManager:
                         )
                     except Exception as e:
                         # Log failed error message send
-                        logger.debug(f"Failed to send internal error message to websocket: {e}")
+                        logger.debug(
+                            f"Failed to send internal error message to websocket: {e}"
+                        )
                     break
 
         except Exception as e:
@@ -243,7 +253,9 @@ class WebSocketRateLimitManager:
                     await websocket.close()
                 except Exception as e:
                     # Log failed websocket close attempt
-                    logger.debug(f"Failed to close websocket connection {connection_id}: {e}")
+                    logger.debug(
+                        f"Failed to close websocket connection {connection_id}: {e}"
+                    )
 
 
 # Global instance for use across the application

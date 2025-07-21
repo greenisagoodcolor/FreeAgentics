@@ -22,7 +22,7 @@ class MetricsMiddleware(BaseHTTPMiddleware):
 
     def __init__(self, app: ASGIApp):
         """Initialize metrics middleware.
-        
+
         Args:
             app: The ASGI application
         """
@@ -31,21 +31,21 @@ class MetricsMiddleware(BaseHTTPMiddleware):
 
     async def dispatch(self, request: Request, call_next: Callable) -> Response:
         """Process request and collect metrics.
-        
+
         Args:
             request: The incoming request
             call_next: The next middleware/handler
-            
+
         Returns:
             The response from the handler
         """
         # Start timing
         start_time = time.time()
-        
+
         # Get request details
         method = request.method
         path = request.url.path
-        
+
         # Process request
         try:
             response = await call_next(request)
@@ -58,17 +58,14 @@ class MetricsMiddleware(BaseHTTPMiddleware):
         finally:
             # Calculate duration
             duration = time.time() - start_time
-            
+
             # Record metrics
             try:
                 record_http_request(
-                    method=method,
-                    endpoint=path,
-                    status=status,
-                    duration=duration
+                    method=method, endpoint=path, status=status, duration=duration
                 )
             except Exception as e:
                 # Never let metrics collection break the app
                 logger.error(f"Failed to record metrics: {e}")
-        
+
         return response

@@ -10,7 +10,7 @@ from typing import Any, Dict, Optional, Union
 
 class AgentTypeAdapter:
     """Adapter for consistent agent attribute access across database and
-        in-memory objects."""
+    in-memory objects."""
 
     @staticmethod
     def get_id(agent: Any) -> str:
@@ -44,7 +44,9 @@ class AgentTypeAdapter:
             if "agent_id" in agent:
                 return str(agent["agent_id"])
 
-        raise AttributeError(f"Agent object {type(agent)} has no 'id' or 'agent_id' attribute")
+        raise AttributeError(
+            f"Agent object {type(agent)} has no 'id' or 'agent_id' attribute"
+        )
 
     @staticmethod
     def get_name(agent: Any) -> str:
@@ -171,7 +173,7 @@ class AgentTypeAdapter:
 
 class CoalitionTypeAdapter:
     """Adapter for consistent coalition attribute access across database and
-        in-memory objects."""
+    in-memory objects."""
 
     @staticmethod
     def get_id(coalition: Any) -> str:
@@ -228,7 +230,9 @@ class CoalitionTypeAdapter:
         if isinstance(coalition, dict) and "name" in coalition:
             return str(coalition["name"])
 
-        raise AttributeError(f"Coalition object {type(coalition)} has no 'name' attribute")
+        raise AttributeError(
+            f"Coalition object {type(coalition)} has no 'name' attribute"
+        )
 
     @staticmethod
     def get_members(coalition: Any) -> Union[list, dict]:
@@ -253,8 +257,9 @@ class CoalitionTypeAdapter:
                 members[agent_id] = {
                     "agent_id": agent_id,
                     "name": (
-                        AgentTypeAdapter.get_name(agent) if hasattr(agent, "name") else
-                            "Unknown"
+                        AgentTypeAdapter.get_name(agent)
+                        if hasattr(agent, "name")
+                        else "Unknown"
                     ),
                 }
             return members

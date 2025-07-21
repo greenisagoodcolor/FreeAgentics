@@ -125,7 +125,9 @@ class DatabaseConnectionManager:
         try:
             result = self.retry_handler.execute_with_retry(create_engine_func)
             if result is None:
-                raise RuntimeError("Failed to create database engine: retry handler returned None")
+                raise RuntimeError(
+                    "Failed to create database engine: retry handler returned None"
+                )
             engine = cast(Engine, result)
             self._engine = engine
             return engine
@@ -181,7 +183,9 @@ class DatabaseConnectionManager:
 
         try:
             # Convert PostgreSQL URL to asyncpg format
-            async_url = self.database_url.replace("postgresql://", "postgresql+asyncpg://")
+            async_url = self.database_url.replace(
+                "postgresql://", "postgresql+asyncpg://"
+            )
 
             # Async pool configuration
             async_pool_config = {
@@ -207,7 +211,9 @@ class DatabaseConnectionManager:
 
         if self._async_session_factory is None:
             if self._async_engine is None:
-                raise RuntimeError("Async engine not available for session factory creation")
+                raise RuntimeError(
+                    "Async engine not available for session factory creation"
+                )
 
             try:
                 self._async_session_factory = async_sessionmaker(

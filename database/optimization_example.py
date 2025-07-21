@@ -219,13 +219,17 @@ async def example_query_caching(optimizer):
 
         # First execution (cache miss)
         start = datetime.now()
-        await optimizer.execute_with_cache(session, query, cache_key="agent_stats", ttl=300)
+        await optimizer.execute_with_cache(
+            session, query, cache_key="agent_stats", ttl=300
+        )
         time1 = (datetime.now() - start).total_seconds()
         logger.info(f"First execution (cache miss): {time1:.3f}s")
 
         # Second execution (cache hit)
         start = datetime.now()
-        await optimizer.execute_with_cache(session, query, cache_key="agent_stats", ttl=300)
+        await optimizer.execute_with_cache(
+            session, query, cache_key="agent_stats", ttl=300
+        )
         time2 = (datetime.now() - start).total_seconds()
         logger.info(f"Second execution (cache hit): {time2:.3f}s")
 
@@ -271,7 +275,9 @@ async def example_query_analysis(optimizer):
             logger.info(f"Index scans: {plan.get('index_scans', 0)}")
 
             # Get optimization suggestions
-            query_hash = hashlib.md5(query_info["sql"].encode(), usedforsecurity=False).hexdigest()
+            query_hash = hashlib.md5(
+                query_info["sql"].encode(), usedforsecurity=False
+            ).hexdigest()
             suggestions = analyzer.optimization_suggestions.get(query_hash, set())
 
             if suggestions:
@@ -314,7 +320,9 @@ async def example_maintenance_scheduling(indexing_strategy):
             result = await scheduler.perform_maintenance(
                 session, "ANALYZE", ["agents", "coalitions"]
             )
-            logger.info(f"\nMaintenance result: {result['task']} - Success: {result['success']}")
+            logger.info(
+                f"\nMaintenance result: {result['task']} - Success: {result['success']}"
+            )
 
 
 async def generate_performance_report(optimizer, indexing_strategy):
@@ -328,7 +336,9 @@ async def generate_performance_report(optimizer, indexing_strategy):
     for query_type, stats in perf_report["query_statistics"].items():
         if stats["count"] > 0:
             avg_time = stats["total_time"] / stats["count"]
-            logger.info(f"  {query_type}: {stats['count']} queries, avg time: {avg_time:.3f}s")
+            logger.info(
+                f"  {query_type}: {stats['count']} queries, avg time: {avg_time:.3f}s"
+            )
 
     logger.info(f"\nCache hit rate: {perf_report['cache_statistics']['hit_rate']:.1f}%")
 
@@ -342,7 +352,9 @@ async def generate_performance_report(optimizer, indexing_strategy):
 
         logger.info("\nIndex usage summary:")
         logger.info(f"  Total indexes: {index_report['index_usage']['total_indexes']}")
-        logger.info(f"  Unused indexes: {len(index_report['index_usage']['unused_indexes'])}")
+        logger.info(
+            f"  Unused indexes: {len(index_report['index_usage']['unused_indexes'])}"
+        )
         logger.info(f"  Missing indexes: {len(index_report['missing_indexes'])}")
         logger.info(f"  Redundant indexes: {len(index_report['redundant_indexes'])}")
 

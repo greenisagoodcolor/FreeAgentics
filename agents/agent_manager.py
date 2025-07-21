@@ -105,8 +105,9 @@ class AgentManager:
                 "active_inference",
             ]:  # Support all names
                 grid_size = self.world.width
-                agent = BasicExplorerAgent(agent_id=agent_id, name=name,
-                    grid_size=grid_size)
+                agent = BasicExplorerAgent(
+                    agent_id=agent_id, name=name, grid_size=grid_size
+                )
                 # Pass any PyMDP config parameters to the agent
                 for key, value in kwargs.items():
                     if key in ["num_states", "num_obs", "num_controls", "num_actions"]:
@@ -166,8 +167,9 @@ class AgentManager:
     def _queue_event(self, agent_id: str, event_type: str, data: dict):
         """Queue an event for async broadcast."""
         with self._event_lock:
-            self._event_queue.append({"agent_id": agent_id, "event_type": event_type,
-                "data": data})
+            self._event_queue.append(
+                {"agent_id": agent_id, "event_type": event_type, "data": data}
+            )
 
         # Submit async broadcast task to thread pool
         self._executor.submit(self._process_event_queue)
@@ -222,8 +224,9 @@ class AgentManager:
         agent.start()
 
         # Queue agent start event
-        self._queue_event(agent_id, "started",
-            {"timestamp": datetime.now().isoformat()})
+        self._queue_event(
+            agent_id, "started", {"timestamp": datetime.now().isoformat()}
+        )
 
         return True
 
@@ -244,8 +247,9 @@ class AgentManager:
         agent.stop()
 
         # Queue agent stop event
-        self._queue_event(agent_id, "stopped",
-            {"timestamp": datetime.now().isoformat()})
+        self._queue_event(
+            agent_id, "stopped", {"timestamp": datetime.now().isoformat()}
+        )
 
         return True
 
@@ -524,10 +528,9 @@ class AgentManager:
         Returns:
             List of agent information dictionaries
         """
-        return [{
-            "id": agent_id,
-            "name": agent.name} for agent_id,
-            agent in self.agents.items()
+        return [
+            {"id": agent_id, "name": agent.name}
+            for agent_id, agent in self.agents.items()
         ]
 
     def start(self) -> None:

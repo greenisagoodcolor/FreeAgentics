@@ -97,7 +97,9 @@ class EnhancedMemoryProfiler:
             leak_detection_window: Number of snapshots for leak detection
         """
         self.enable_tracemalloc = enable_tracemalloc and True  # Check availability
-        self.enable_memory_profiler = enable_memory_profiler and memory_usage is not None
+        self.enable_memory_profiler = (
+            enable_memory_profiler and memory_usage is not None
+        )
         self.enable_pympler = enable_pympler and muppy is not None
 
         self.snapshot_interval = snapshot_interval
@@ -196,8 +198,9 @@ class EnhancedMemoryProfiler:
                 return
 
             self._monitoring = True
-            self._monitor_thread = threading.Thread(target=self._monitor_loop,
-                daemon=True)
+            self._monitor_thread = threading.Thread(
+                target=self._monitor_loop, daemon=True
+            )
             self._monitor_thread.start()
             logger.info("Started continuous memory monitoring")
 
@@ -259,7 +262,9 @@ class EnhancedMemoryProfiler:
                     snapshot["tracemalloc"] = {
                         "current_mb": current / 1024 / 1024,
                         "peak_mb": peak / 1024 / 1024,
-                        "total_size": sum(stat.size for stat in top_stats) / 1024 / 1024,
+                        "total_size": sum(stat.size for stat in top_stats)
+                        / 1024
+                        / 1024,
                         "total_count": sum(stat.count for stat in top_stats),
                         "top_allocations": top_allocations[:10],
                     }
@@ -390,8 +395,9 @@ class EnhancedMemoryProfiler:
                     continue
 
                 # Check for consistent growth
-                growth_count = sum(1 for i in range(1, len(sizes)) if
-                    sizes[i] > sizes[i - 1])
+                growth_count = sum(
+                    1 for i in range(1, len(sizes)) if sizes[i] > sizes[i - 1]
+                )
 
                 if growth_count >= len(sizes) * 0.7:  # 70% growth trend
                     # Calculate growth rate
@@ -591,11 +597,11 @@ class EnhancedMemoryProfiler:
     def _generate_tools_section(self) -> List[str]:
         """Generate the profiling tools status section."""
         report = ["## Profiling Tools"]
-        report.append(f"- Tracemalloc: {'Enabled' if self.tracemalloc_enabled else
-            'Disabled'}")
         report.append(
-            f"- Memory Profiler: {'Enabled' if self.memory_profiler_enabled else
-                'Disabled'}"
+            f"- Tracemalloc: {'Enabled' if self.tracemalloc_enabled else 'Disabled'}"
+        )
+        report.append(
+            f"- Memory Profiler: {'Enabled' if self.memory_profiler_enabled else 'Disabled'}"
         )
         report.append(f"- Pympler: {'Enabled' if self.pympler_enabled else 'Disabled'}")
         report.append("")
@@ -615,14 +621,20 @@ class EnhancedMemoryProfiler:
             # Memory growth
             if first["tracemalloc"] and last["tracemalloc"]:
                 current_growth = (
-                    last["tracemalloc"]["current_mb"] - first["tracemalloc"]["current_mb"]
+                    last["tracemalloc"]["current_mb"]
+                    - first["tracemalloc"]["current_mb"]
                 )
-                peak_growth = last["tracemalloc"]["peak_mb"] - first["tracemalloc"]["peak_mb"]
+                peak_growth = (
+                    last["tracemalloc"]["peak_mb"] - first["tracemalloc"]["peak_mb"]
+                )
                 report.append(f"Tracemalloc current growth: {current_growth:+.2f} MB")
                 report.append(f"Tracemalloc peak growth: {peak_growth:+.2f} MB")
 
             if first["memory_profiler"] and last["memory_profiler"]:
-                rss_growth = last["memory_profiler"]["rss_mb"] - first["memory_profiler"]["rss_mb"]
+                rss_growth = (
+                    last["memory_profiler"]["rss_mb"]
+                    - first["memory_profiler"]["rss_mb"]
+                )
                 report.append(f"RSS memory growth: {rss_growth:+.2f} MB")
 
         report.append("")
@@ -695,7 +707,9 @@ class EnhancedMemoryProfiler:
             report.append(f"  Peak: {profile.peak_memory_mb:.2f} MB")
 
             if profile.growth_rate_mb_per_hour != 0:
-                report.append(f"  Growth rate: {profile.growth_rate_mb_per_hour:+.2f} MB/hour")
+                report.append(
+                    f"  Growth rate: {profile.growth_rate_mb_per_hour:+.2f} MB/hour"
+                )
             report.append("")
         return report
 
@@ -770,7 +784,7 @@ class EnhancedMemoryProfiler:
                         "location": hotspot.location,
                         "size_mb": hotspot.size_mb,
                         "recommendation": "Consider using memory-mapped files or "
-                                         "lazy loading for large data structures",
+                        "lazy loading for large data structures",
                     }
                 )
 

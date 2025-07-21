@@ -1,7 +1,7 @@
-name: Main CI/CD Pipeline
+name: Main CI/CD Pipeline - Zero Tolerance Edition
 
-# 50 years of wisdom: One workflow to rule them all
-# KISS principle: Keep It Simple, Ship Software
+# Nemesis × Committee Standards: No bypasses, no exceptions
+# Every check must pass or the pipeline fails
 
 on:
   push:
@@ -15,6 +15,9 @@ env:
   NODE_VERSION: "18"
   REGISTRY: ghcr.io
   IMAGE_NAME: ${{ github.repository }}
+  # Zero-tolerance thresholds
+  MIN_COVERAGE: 80
+  MAX_LINT_ERRORS: 0
 
 jobs:
   # Stage 1: Quick Checks (Fail Fast - 5 minutes max)
@@ -33,12 +36,11 @@ jobs:
       - name: Basic Linting
         run: |
           pip install flake8 black
-          black --check . || echo "Format issues found - fix later"
-          flake8 . --max-line-length=120 --exclude=.archive,web,tests --exit-zero
+          black --check .
+          flake8 . --max-line-length=120 --exclude=.archive,web,tests
       
       - name: Secret Scanning
         uses: trufflesecurity/trufflehog@main
-        continue-on-error: true
         with:
           path: ./
           base: main
@@ -109,7 +111,7 @@ jobs:
             --cov-report=term \
             --junit-xml=test-results.xml \
             --tb=short \
-            --maxfail=10
+            --cov-fail-under=$MIN_COVERAGE
       
       - name: Upload Test Results
         if: always()
@@ -156,11 +158,10 @@ jobs:
       
       - name: Basic Container Security Scan
         uses: aquasecurity/trivy-action@master
-        continue-on-error: true
         with:
           image-ref: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:${{ github.sha }}
           severity: CRITICAL,HIGH
-          exit-code: 0
+          exit-code: 1
 
   # Stage 4: Essential Security Checks
   security-essentials:
@@ -181,12 +182,19 @@ jobs:
         run: |
           pip install safety
           pip install -r requirements-core.txt
-          safety check --bare || echo "Some vulnerabilities found - review later"
+          safety check --bare --json > safety_report.json
+          # Fail on any critical/high vulnerabilities
+          CRITICAL=$(jq '[.vulnerabilities[] | select(.severity == "critical")] | length' safety_report.json || echo 0)
+          HIGH=$(jq '[.vulnerabilities[] | select(.severity == "high")] | length' safety_report.json || echo 0)
+          if [ "$CRITICAL" -gt 0 ] || [ "$HIGH" -gt 0 ]; then
+            echo "Found $CRITICAL critical and $HIGH high vulnerabilities"
+            exit 1
+          fi
       
       - name: Basic SAST
         run: |
           pip install bandit
-          bandit -r . -f txt --severity-level high --confidence-level high --exclude .archive,web,tests || true
+          bandit -r . -f txt --severity-level high --confidence-level high --exclude .archive,web,tests
 
   # Stage 5: Deploy (Simple and Working)
   deploy:
@@ -205,6 +213,7 @@ jobs:
           # Add your actual deployment commands here
           # Keep it simple - use whatever works (k8s, docker-compose, etc.)
           echo "Deployment complete"
+          echo "✅ Zero-tolerance pipeline certified"
       
       - name: Basic Health Check
         run: |

@@ -35,9 +35,13 @@ class PooledMatrix:
     def __post_init__(self):
         """Validate matrix properties."""
         if self.data.shape != self.shape:
-            raise ValueError(f"Data shape {self.data.shape} != declared shape {self.shape}")
+            raise ValueError(
+                f"Data shape {self.data.shape} != declared shape {self.shape}"
+            )
         if self.data.dtype != self.dtype:
-            raise ValueError(f"Data dtype {self.data.dtype} != declared dtype {self.dtype}")
+            raise ValueError(
+                f"Data dtype {self.data.dtype} != declared dtype {self.dtype}"
+            )
 
 
 @dataclass
@@ -111,8 +115,9 @@ class MatrixPool:
         data = np.zeros(self.shape, dtype=self.dtype)
         pool_id = f"{id(data)}_{time.time()}"
 
-        matrix = PooledMatrix(data=data, shape=self.shape, dtype=self.dtype,
-            pool_id=pool_id)
+        matrix = PooledMatrix(
+            data=data, shape=self.shape, dtype=self.dtype, pool_id=pool_id
+        )
 
         self.stats.total_memory_bytes += data.nbytes
         return matrix
@@ -223,8 +228,9 @@ class MatrixOperationPool:
             "operation_counts": defaultdict(int),
         }
 
-    def get_pool(self, shape: Tuple[int, ...],
-        dtype: np.dtype = np.float32) -> MatrixPool:
+    def get_pool(
+        self, shape: Tuple[int, ...], dtype: np.dtype = np.float32
+    ) -> MatrixPool:
         """Get or create a pool for specific shape and dtype.
 
         Args:
@@ -239,7 +245,9 @@ class MatrixOperationPool:
 
             if key not in self._pools:
                 # Determine pool size based on matrix size
-                matrix_size_mb = np.prod(shape) * np.dtype(dtype).itemsize / (1024 * 1024)
+                matrix_size_mb = (
+                    np.prod(shape) * np.dtype(dtype).itemsize / (1024 * 1024)
+                )
 
                 if matrix_size_mb < 1:  # Small matrices
                     initial_size = 10
@@ -277,8 +285,9 @@ class MatrixOperationPool:
             pool.release(matrix)
 
     @contextmanager
-    def allocate_einsum_operands(self, *shapes: Tuple[int, ...],
-        dtype: np.dtype = np.float32):
+    def allocate_einsum_operands(
+        self, *shapes: Tuple[int, ...], dtype: np.dtype = np.float32
+    ):
         """Allocate multiple matrices for einsum operations.
 
         Args:

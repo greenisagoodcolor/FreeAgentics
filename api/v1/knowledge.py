@@ -212,7 +212,11 @@ async def get_graph(graph_id: str) -> GraphResponse:
         updated_at=graph.updated_at.isoformat(),
         node_count=len(graph.nodes),
         edge_count=len(graph.edges),
-        metadata={"node_types": {nt.value: len(graph.type_index.get(nt, [])) for nt in NodeType}},
+        metadata={
+            "node_types": {
+                nt.value: len(graph.type_index.get(nt, [])) for nt in NodeType
+            }
+        },
     )
 
 

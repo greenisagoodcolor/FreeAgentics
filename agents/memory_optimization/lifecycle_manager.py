@@ -91,8 +91,9 @@ class AgentMemoryProfile:
         if self.belief_compressor is None:
             self.belief_compressor = BeliefCompressor()
 
-        self.record_lifecycle_event("created",
-            {"initial_limit_mb": self.memory_limit_mb})
+        self.record_lifecycle_event(
+            "created", {"initial_limit_mb": self.memory_limit_mb}
+        )
 
     def record_lifecycle_event(self, event: str, metadata: Optional[Dict] = None):
         """Record a lifecycle event with timestamp."""
@@ -235,8 +236,7 @@ class AgentMemoryLifecycleManager:
             self.stats["total_agents_created"] += 1
 
             logger.info(
-                f"Registered agent {agent_id} with {memory_limit_mb:.1f}MB"
-                f" limit"
+                f"Registered agent {agent_id} with {memory_limit_mb:.1f}MB" f" limit"
             )
             profile.record_lifecycle_event(
                 "registered",
@@ -261,8 +261,9 @@ class AgentMemoryLifecycleManager:
                 return
 
             profile = self._profiles[agent_id]
-            profile.record_lifecycle_event("unregistering",
-                {"force_cleanup": force_cleanup})
+            profile.record_lifecycle_event(
+                "unregistering", {"force_cleanup": force_cleanup}
+            )
 
             if force_cleanup:
                 self._cleanup_agent_resources(profile)
@@ -311,8 +312,9 @@ class AgentMemoryLifecycleManager:
                 logger.warning(f"Agent {agent_id} not found for memory update")
                 return False
 
-            profile.update_memory_usage(belief_memory_mb, matrix_memory_mb,
-                other_memory_mb)
+            profile.update_memory_usage(
+                belief_memory_mb, matrix_memory_mb, other_memory_mb
+            )
 
             # Check if agent needs state transition
             self._check_agent_state_transition(profile)
@@ -448,8 +450,9 @@ class AgentMemoryLifecycleManager:
 
             # Update state
             profile.state = AgentLifecycleState.RECYCLING
-            profile.record_lifecycle_event("recycled",
-                {"freed_memory_mb": freed_memory})
+            profile.record_lifecycle_event(
+                "recycled", {"freed_memory_mb": freed_memory}
+            )
 
             self.stats["total_agents_recycled"] += 1
             self.stats["total_memory_cleaned_mb"] += freed_memory
@@ -576,8 +579,9 @@ class AgentMemoryLifecycleManager:
         if self.get_memory_pressure() > self.cleanup_threshold:
             with self._lock:
                 # Sort agents by last access time and hibernate oldest
-                sorted_agents = sorted(self._profiles.items(),
-                    key=lambda x: x[1].last_accessed)
+                sorted_agents = sorted(
+                    self._profiles.items(), key=lambda x: x[1].last_accessed
+                )
 
                 forced_hibernations = 0
                 for agent_id, profile in sorted_agents:
@@ -680,12 +684,16 @@ class AgentMemoryLifecycleManager:
         idle_time = current_time - profile.last_accessed
 
         # Transition to idle if not accessed recently
-        if profile.state == AgentLifecycleState.ACTIVE and idle_time > 60.0:  # 1 minute idle
+        if (
+            profile.state == AgentLifecycleState.ACTIVE and idle_time > 60.0
+        ):  # 1 minute idle
             profile.state = AgentLifecycleState.IDLE
             profile.record_lifecycle_event("transitioned_to_idle")
 
         # Transition back to active on access
-        elif profile.state == AgentLifecycleState.IDLE and idle_time < 10.0:  # Recent access
+        elif (
+            profile.state == AgentLifecycleState.IDLE and idle_time < 10.0
+        ):  # Recent access
             profile.state = AgentLifecycleState.ACTIVE
             profile.record_lifecycle_event("transitioned_to_active")
 

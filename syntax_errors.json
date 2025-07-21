@@ -1,0 +1,2 @@
+ruff failed
+  Cause: Rule `E999` was removed and cannot be selected.

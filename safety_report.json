@@ -1,4 +1,0 @@
-Usage: safety check [OPTIONS]
-Try 'safety check --help' for help.
-
-Error: No such option: --format Did you mean --no-prompt?

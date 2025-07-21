@@ -380,8 +380,9 @@ class AsyncAgentManager:
         operations = []
         for agent_id in self.agent_configs:
             if agent_id in observations:
-                operations.append((agent_id, "step",
-                    {"observation": observations[agent_id]}))
+                operations.append(
+                    (agent_id, "step", {"observation": observations[agent_id]})
+                )
 
         results = await self.execute_batch_operations(operations, timeout)
 
@@ -439,8 +440,9 @@ async def benchmark_async_multi_agent_performance():
                 round_start = time.time()
 
                 # Step all agents concurrently
-                round_results = await manager.step_all_agents(observations,
-                    timeout=30.0)
+                round_results = await manager.step_all_agents(
+                    observations, timeout=30.0
+                )
 
                 round_time = time.time() - round_start
 
@@ -450,8 +452,12 @@ async def benchmark_async_multi_agent_performance():
 
                 # Print first error for debugging
                 if failed > 0:
-                    first_error = next(r.error for r in round_results.values() if not r.success)
-                    error_msg = first_error.split("\n")[0] if first_error else "Unknown error"
+                    first_error = next(
+                        r.error for r in round_results.values() if not r.success
+                    )
+                    error_msg = (
+                        first_error.split("\n")[0] if first_error else "Unknown error"
+                    )
                     print(
                         f"  Round {round_num + 1}: {round_time:.3f}s, "
                         f"{successful} success, {failed} failed (error: {error_msg[:50]}...)"
@@ -475,7 +481,8 @@ async def benchmark_async_multi_agent_performance():
                 "total_time": total_time,
                 "avg_time_per_operation": (total_time / total_operations) * 1000,  # ms
                 "throughput_ops_per_sec": total_operations / total_time,
-                "success_rate": stats["successful_operations"] / stats["total_operations"],
+                "success_rate": stats["successful_operations"]
+                / stats["total_operations"],
                 "avg_execution_time_ms": stats["avg_execution_time"],
             }
 
@@ -526,7 +533,9 @@ if __name__ == "__main__":
     if scaling_efficiency > 0.7:
         print("🎯 EXCELLENT: Async thread processing enables near-linear scaling")
     elif scaling_efficiency > 0.5:
-        print("✅ GOOD: Significant improvement in multi-agent scaling via async threads")
+        print(
+            "✅ GOOD: Significant improvement in multi-agent scaling via async threads"
+        )
     elif scaling_efficiency > 0.2:
         print("✅ MODERATE: Meaningful improvement over sequential processing")
     else:

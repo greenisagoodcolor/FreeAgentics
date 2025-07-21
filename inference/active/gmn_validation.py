@@ -156,8 +156,7 @@ class GMNSyntaxValidator:
 
         if not result.is_valid:
             error_messages = [
-                f"Line {error.context.get('line',
-                    '?')}: {error.message}" for error in result.errors
+                f"Line {error.context.get('line', '?')}: {error.message}" for error in result.errors
             ]
             raise GMNValidationError(f"Text format validation failed: {'; '.join(error_messages)}")
 
@@ -853,8 +852,7 @@ class GMNTypeValidator:
                 if field in node and not isinstance(node[field], int):
                     result.add_error(
                         "TypeValidator",
-                        f"{field} must be an integer,
-                            got {type(node[field]).__name__}: {node[field]}",
+                        f"{field} must be an integer, got {type(node[field]).__name__}: {node[field]}",
                         node_name=node_name,
                     )
 
@@ -864,8 +862,7 @@ class GMNTypeValidator:
                 if field in node and not isinstance(node[field], (int, float)):
                     result.add_error(
                         "TypeValidator",
-                        f"{field} must be a number,
-                            got {type(node[field]).__name__}: {node[field]}",
+                        f"{field} must be a number, got {type(node[field]).__name__}: {node[field]}",
                         node_name=node_name,
                     )
 
@@ -885,8 +882,7 @@ class GMNTypeValidator:
                 if field in node and not isinstance(node[field], str):
                     result.add_error(
                         "TypeValidator",
-                        f"{field} must be a string,
-                            got {type(node[field]).__name__}: {node[field]}",
+                        f"{field} must be a string, got {type(node[field]).__name__}: {node[field]}",
                         node_name=node_name,
                     )
 
@@ -965,8 +961,8 @@ class GMNConstraintValidator:
         # Build observation space lookup
         obs_spaces = {}
         for node in nodes:
-            if node.get("type") == "observation" and "name" in node and
-                "num_observations" in node:
+            if (node.get("type") == "observation" and "name" in node and
+                "num_observations" in node):
                 obs_spaces[node["name"]] = node["num_observations"]
 
         for node in nodes:
@@ -1087,8 +1083,7 @@ class GMNValidationFramework:
             min_state = min(state_dims)
             max_obs = max(obs_dims)
 
- if
-                max_obs / min_state > 100:  # Observation space 100x larger than state space
+            if max_obs / min_state > 100:  # Observation space 100x larger than state space
                 result.add_error(
                     "RealityCheckValidator",
                     f"Suspicious dimension ratio: observation space ({max_obs}) >> state space ({min_state})",

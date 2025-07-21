@@ -12,15 +12,13 @@ This module provides comprehensive APM capabilities including:
 """
 
 import asyncio
-import json
 import logging
-import math
 import statistics
 import time
 from contextlib import asynccontextmanager
 from dataclasses import dataclass, field
-from datetime import datetime, timedelta
-from typing import Any, Dict, List, Optional, Set, Tuple
+from datetime import datetime
+from typing import Any, Dict, List, Optional, Tuple
 from uuid import uuid4
 
 import psutil

@@ -218,3 +218,4 @@ logs/*.log
 !logs/.gitkeep
 test_venv/
 security_scan_env/
+.archive/

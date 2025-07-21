@@ -262,8 +262,9 @@ class ThreadingProfiler:
 
             return total_cpu_time / total_wall_time
 
-    def measure_gil_contention(self, duration: float = 1.0,
-        thread_count: int = 4) -> float:
+    def measure_gil_contention(
+        self, duration: float = 1.0, thread_count: int = 4
+    ) -> float:
         """Measure GIL contention using CPU-bound workload."""
         import math
 
@@ -354,13 +355,19 @@ class ThreadingProfiler:
         # Thread efficiency
         efficiency = self._calculate_thread_efficiency()
         if efficiency < 0.7:  # <70% CPU utilization
-            bottlenecks.append(f"Low thread efficiency: {efficiency:.1%} CPU utilization")
+            bottlenecks.append(
+                f"Low thread efficiency: {efficiency:.1%} CPU utilization"
+            )
 
         # Imbalanced workload
         if self.thread_metrics:
             cpu_times = [m.cpu_time for m in self.thread_metrics.values()]
             if cpu_times:
-                cv = np.std(cpu_times) / np.mean(cpu_times) if np.mean(cpu_times) > 0 else 0
+                cv = (
+                    np.std(cpu_times) / np.mean(cpu_times)
+                    if np.mean(cpu_times) > 0
+                    else 0
+                )
                 if cv > 0.3:  # >30% coefficient of variation
                     bottlenecks.append(f"Imbalanced thread workload: CV={cv:.1%}")
 

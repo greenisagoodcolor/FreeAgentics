@@ -137,7 +137,9 @@ class IndexUsageMonitor:
         self.missing_index_recommendations = recommendations
         return recommendations
 
-    async def _analyze_column_usage(self, session: AsyncSession, table_name: str) -> List[str]:
+    async def _analyze_column_usage(
+        self, session: AsyncSession, table_name: str
+    ) -> List[str]:
         """Analyze which columns are frequently used in queries."""
         # This is a simplified version - in production, you'd analyze pg_stat_statements
         # For now, return common patterns based on table structure
@@ -151,7 +153,9 @@ class IndexUsageMonitor:
 
         return column_patterns.get(table_name, [])
 
-    async def find_redundant_indexes(self, session: AsyncSession) -> List[Dict[str, Any]]:
+    async def find_redundant_indexes(
+        self, session: AsyncSession
+    ) -> List[Dict[str, Any]]:
         """Identify redundant or duplicate indexes."""
         redundant_query = text(
             """
@@ -230,7 +234,9 @@ class PartitioningStrategy:
             },
         }
 
-    async def create_partitioned_table(self, session: AsyncSession, table_name: str) -> bool:
+    async def create_partitioned_table(
+        self, session: AsyncSession, table_name: str
+    ) -> bool:
         """Create a partitioned version of a table."""
         if table_name not in self.partition_config:
             logger.warning(f"No partition config for table: {table_name}")
@@ -283,7 +289,9 @@ class PartitioningStrategy:
         # Create partitions for past 3 months and next 3 months
         for i in range(-3, 4):
             partition_date = current_date + timedelta(days=i * 30)
-            partition_name = f"{table_name}_partitioned_{partition_date.strftime('%Y_%m')}"
+            partition_name = (
+                f"{table_name}_partitioned_{partition_date.strftime('%Y_%m')}"
+            )
 
             start_date = partition_date.replace(day=1)
             if partition_date.month == 12:
@@ -315,9 +323,13 @@ class PartitioningStrategy:
         # Create partitions for past 7 days and next 7 days
         for i in range(-7, 8):
             partition_date = current_date + timedelta(days=i)
-            partition_name = f"{table_name}_partitioned_{partition_date.strftime('%Y_%m_%d')}"
+            partition_name = (
+                f"{table_name}_partitioned_{partition_date.strftime('%Y_%m_%d')}"
+            )
 
-            start_date = partition_date.replace(hour=0, minute=0, second=0, microsecond=0)
+            start_date = partition_date.replace(
+                hour=0, minute=0, second=0, microsecond=0
+            )
             end_date = start_date + timedelta(days=1)
 
             create_partition_sql = f"""
@@ -375,7 +387,9 @@ class PartitioningStrategy:
         for table_name, config in self.partition_config.items():
             try:
                 # Create future partitions
-                created = await self._create_future_partitions(session, table_name, config)
+                created = await self._create_future_partitions(
+                    session, table_name, config
+                )
                 maintenance_report["created_partitions"].extend(created)
 
                 # Drop old partitions based on retention
@@ -383,7 +397,9 @@ class PartitioningStrategy:
                 maintenance_report["dropped_partitions"].extend(dropped)
 
             except Exception as e:
-                maintenance_report["errors"].append({"table": table_name, "error": str(e)})
+                maintenance_report["errors"].append(
+                    {"table": table_name, "error": str(e)}
+                )
 
         return maintenance_report
 
@@ -427,13 +443,17 @@ class PartitioningStrategy:
             # This is simplified - actual implementation would parse the constraint properly
             if self._is_partition_old(partition.partition_constraint, cutoff_date):
                 try:
-                    await session.execute(text(f"DROP TABLE {partition.partition_name}"))
+                    await session.execute(
+                        text(f"DROP TABLE {partition.partition_name}")
+                    )
                     await session.commit()
                     dropped.append(partition.partition_name)
                     logger.info(f"Dropped old partition: {partition.partition_name}")
                 except Exception as e:
                     await session.rollback()
-                    logger.error(f"Failed to drop partition {partition.partition_name}: {e}")
+                    logger.error(
+                        f"Failed to drop partition {partition.partition_name}: {e}"
+                    )
 
         return dropped
 
@@ -452,7 +472,9 @@ class CompositeIndexDesigner:
         self.query_patterns: Dict[str, List[List[str]]] = defaultdict(list)
         self.composite_recommendations: List[Dict[str, Any]] = []
 
-    def analyze_query_pattern(self, table: str, columns: List[str], query_type: str = "SELECT"):
+    def analyze_query_pattern(
+        self, table: str, columns: List[str], query_type: str = "SELECT"
+    ):
         """Analyze query patterns to recommend composite indexes."""
         # Store query pattern
         self.query_patterns[table].append(columns)
@@ -461,7 +483,9 @@ class CompositeIndexDesigner:
         if len(columns) > 1:
             self._analyze_composite_opportunity(table, columns, query_type)
 
-    def _analyze_composite_opportunity(self, table: str, columns: List[str], query_type: str):
+    def _analyze_composite_opportunity(
+        self, table: str, columns: List[str], query_type: str
+    ):
         """Analyze if a composite index would be beneficial."""
         # Count how often this column combination appears
         pattern_count = sum(
@@ -528,7 +552,9 @@ class IndexMaintenanceScheduler:
             "CHECK_BLOAT": {"interval_days": 7, "last_run": None},
         }
 
-    async def get_maintenance_schedule(self, session: AsyncSession) -> List[Dict[str, Any]]:
+    async def get_maintenance_schedule(
+        self, session: AsyncSession
+    ) -> List[Dict[str, Any]]:
         """Get upcoming maintenance tasks."""
         schedule = []
         current_time = datetime.now()
@@ -543,7 +569,9 @@ class IndexMaintenanceScheduler:
                         "task": task_name,
                         "priority": "HIGH" if last_run is None else "NORMAL",
                         "overdue_by": (
-                            (current_time - (last_run + interval)).days if last_run else 0
+                            (current_time - (last_run + interval)).days
+                            if last_run
+                            else 0
                         ),
                         "recommended_time": self._get_recommended_time(task_name),
                     }
@@ -655,7 +683,9 @@ class IndexMaintenanceScheduler:
         result["completed_at"] = datetime.now()
         return result
 
-    async def _perform_analyze(self, session: AsyncSession, tables: Optional[List[str]] = None):
+    async def _perform_analyze(
+        self, session: AsyncSession, tables: Optional[List[str]] = None
+    ):
         """Perform ANALYZE on tables."""
         if tables is None:
             tables = [
@@ -671,7 +701,9 @@ class IndexMaintenanceScheduler:
             await session.commit()
             logger.info(f"Analyzed table: {table}")
 
-    async def _perform_vacuum(self, session: AsyncSession, tables: Optional[List[str]] = None):
+    async def _perform_vacuum(
+        self, session: AsyncSession, tables: Optional[List[str]] = None
+    ):
         """Perform VACUUM on tables."""
         if tables is None:
             tables = ["agents", "coalitions", "agent_coalition"]
@@ -681,7 +713,9 @@ class IndexMaintenanceScheduler:
             await session.commit()
             logger.info(f"Vacuumed table: {table}")
 
-    async def _perform_reindex(self, session: AsyncSession, tables: Optional[List[str]] = None):
+    async def _perform_reindex(
+        self, session: AsyncSession, tables: Optional[List[str]] = None
+    ):
         """Perform REINDEX on tables."""
         if tables is None:
             # Get all indexes that need reindexing
@@ -729,7 +763,9 @@ class IndexingStrategy:
             "timestamp": datetime.now().isoformat(),
             "index_usage": await self.usage_monitor.analyze_index_usage(session),
             "missing_indexes": await self.usage_monitor.find_missing_indexes(session),
-            "redundant_indexes": await self.usage_monitor.find_redundant_indexes(session),
+            "redundant_indexes": await self.usage_monitor.find_redundant_indexes(
+                session
+            ),
             "composite_recommendations": self.composite_designer.get_composite_index_recommendations(),
             "maintenance_schedule": await self.maintenance_scheduler.get_maintenance_schedule(
                 session
@@ -797,14 +833,18 @@ class IndexingStrategy:
         # Apply missing indexes
         for rec in report["missing_indexes"]:
             if not auto_approve and rec["priority"] != "HIGH":
-                results["skipped"].append(f"Skipped {rec['table']} index (requires approval)")
+                results["skipped"].append(
+                    f"Skipped {rec['table']} index (requires approval)"
+                )
                 continue
 
             for col in rec["suggested_columns"]:
                 index_name = f"idx_{rec['table']}_{col}"
                 try:
                     await session.execute(
-                        text(f"CREATE INDEX CONCURRENTLY {index_name} ON {rec['table']} ({col})")
+                        text(
+                            f"CREATE INDEX CONCURRENTLY {index_name} ON {rec['table']} ({col})"
+                        )
                     )
                     await session.commit()
                     results["created_indexes"].append(index_name)
@@ -828,7 +868,9 @@ class IndexingStrategy:
                 logger.info(f"Dropped redundant index: {idx['redundant_index']}")
             except Exception as e:
                 await session.rollback()
-                results["errors"].append(f"Failed to drop {idx['redundant_index']}: {str(e)}")
+                results["errors"].append(
+                    f"Failed to drop {idx['redundant_index']}: {str(e)}"
+                )
 
         return results
 

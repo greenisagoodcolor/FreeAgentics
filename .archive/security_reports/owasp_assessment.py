@@ -413,7 +413,6 @@ class OWASPAssessment:
         # Test endpoints that might make external requests
         # Look for URL parameters that could be exploited
 
-
         print("  ℹ SSRF testing requires identifying endpoints that make external requests")
 
     def generate_report(self) -> Dict[str, Any]:

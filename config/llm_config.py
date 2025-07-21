@@ -31,15 +31,17 @@ class OpenAIConfig(LLMProviderConfig):
     endpoint_url: Optional[str] = "https://api.openai.com/v1"
 
     # OpenAI pricing per 1K tokens (as of 2024)
-    pricing: Dict[str, Dict[str, float]] = Field(default_factory=lambda: {
-        "gpt-3.5-turbo": {"input": 0.0005, "output": 0.0015},
-        "gpt-3.5-turbo-16k": {"input": 0.003, "output": 0.004},
-        "gpt-4": {"input": 0.03, "output": 0.06},
-        "gpt-4-32k": {"input": 0.06, "output": 0.12},
-        "gpt-4-turbo": {"input": 0.01, "output": 0.03},
-        "gpt-4o": {"input": 0.005, "output": 0.015},
-        "gpt-4o-mini": {"input": 0.00015, "output": 0.0006},
-    })
+    pricing: Dict[str, Dict[str, float]] = Field(
+        default_factory=lambda: {
+            "gpt-3.5-turbo": {"input": 0.0005, "output": 0.0015},
+            "gpt-3.5-turbo-16k": {"input": 0.003, "output": 0.004},
+            "gpt-4": {"input": 0.03, "output": 0.06},
+            "gpt-4-32k": {"input": 0.06, "output": 0.12},
+            "gpt-4-turbo": {"input": 0.01, "output": 0.03},
+            "gpt-4o": {"input": 0.005, "output": 0.015},
+            "gpt-4o-mini": {"input": 0.00015, "output": 0.0006},
+        }
+    )
 
 
 class AnthropicConfig(LLMProviderConfig):
@@ -49,12 +51,14 @@ class AnthropicConfig(LLMProviderConfig):
     endpoint_url: Optional[str] = "https://api.anthropic.com"
 
     # Anthropic pricing per 1K tokens (as of 2024)
-    pricing: Dict[str, Dict[str, float]] = Field(default_factory=lambda: {
-        "claude-3-sonnet-20240229": {"input": 0.015, "output": 0.075},
-        "claude-3-opus-20240229": {"input": 0.075, "output": 0.225},
-        "claude-3-haiku-20240307": {"input": 0.00025, "output": 0.00125},
-        "claude-3-5-sonnet-20241022": {"input": 0.003, "output": 0.015},
-    })
+    pricing: Dict[str, Dict[str, float]] = Field(
+        default_factory=lambda: {
+            "claude-3-sonnet-20240229": {"input": 0.015, "output": 0.075},
+            "claude-3-opus-20240229": {"input": 0.075, "output": 0.225},
+            "claude-3-haiku-20240307": {"input": 0.00025, "output": 0.00125},
+            "claude-3-5-sonnet-20241022": {"input": 0.003, "output": 0.015},
+        }
+    )
 
 
 class LLMConfig(BaseModel):

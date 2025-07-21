@@ -27,8 +27,10 @@ router = APIRouter()
 
 class PromptRequest(BaseModel):
     """Request model for creating agent from prompt."""
-    
-    prompt: str = Field(..., description="Goal prompt describing desired agent behavior")
+
+    prompt: str = Field(
+        ..., description="Goal prompt describing desired agent behavior"
+    )
     agent_name: Optional[str] = Field(None, description="Optional name for the agent")
     llm_provider: Optional[str] = Field("openai", description="LLM provider to use")
     model: Optional[str] = Field(None, description="Specific model to use")
@@ -37,7 +39,7 @@ class PromptRequest(BaseModel):
 
 class PromptResponse(BaseModel):
     """Response model for prompt processing."""
-    
+
     agent_id: str
     agent_name: str
     gmn_spec: Dict[str, Any]
@@ -60,7 +62,7 @@ async def create_agent_from_prompt(
     current_user: TokenData = Depends(get_current_user),
 ) -> PromptResponse:
     """Create an agent from a natural language prompt.
-    
+
     This implements the core FreeAgentics flow:
     1. Goal prompt → LLM (generate GMN)
     2. GMN → Parser (validate)
@@ -68,11 +70,11 @@ async def create_agent_from_prompt(
     4. PyMDP model → Create agent
     """
     start_time = datetime.now()
-    
+
     try:
         # Step 1: Generate GMN from prompt using LLM
         logger.info(f"Processing prompt: {request.prompt[:100]}...")
-        
+
         # Get LLM provider using configuration
         try:
             config = llm_factory.create_from_config()
@@ -81,15 +83,15 @@ async def create_agent_from_prompt(
             logger.error(f"Failed to get LLM provider: {e}")
             raise HTTPException(
                 status_code=503,
-                detail="No LLM providers available. Please configure API keys."
+                detail="No LLM providers available. Please configure API keys.",
             )
-        
+
         if not provider:
             raise HTTPException(
                 status_code=503,
-                detail=f"LLM provider {request.llm_provider} not available"
+                detail=f"LLM provider {request.llm_provider} not available",
             )
-        
+
         # Construct GMN generation prompt
         system_prompt = """You are an expert in Active Inference and the GMN (Generalized Notation) format.
 Convert the user's goal description into a valid GMN specification.
@@ -112,32 +114,32 @@ GMN format structure:
 Ensure all probability distributions sum to 1.0."""
 
         user_prompt = f"Create a GMN specification for an agent that: {request.prompt}"
-        
+
         # Generate GMN
         generation_request = GenerationRequest(
             messages=[
                 {"role": "system", "content": system_prompt},
-                {"role": "user", "content": user_prompt}
+                {"role": "user", "content": user_prompt},
             ],
             model=request.model,
             temperature=0.7,
             max_tokens=2000,
-            response_format="json"
+            response_format="json",
         )
-        
+
         gmn_response = provider.generate(generation_request)
-        
+
         # Parse the generated GMN
         try:
             import json
+
             gmn_spec = json.loads(gmn_response.content)
         except json.JSONDecodeError as e:
             logger.error(f"Failed to parse LLM response as JSON: {e}")
             raise HTTPException(
-                status_code=422,
-                detail="LLM generated invalid JSON for GMN spec"
+                status_code=422, detail="LLM generated invalid JSON for GMN spec"
             )
-        
+
         # Step 2: Validate GMN spec
         logger.info("Validating generated GMN spec...")
         try:
@@ -151,56 +153,52 @@ Ensure all probability distributions sum to 1.0."""
                 request.max_retries -= 1
                 return await create_agent_from_prompt(request, current_user)
             raise HTTPException(
-                status_code=422,
-                detail=f"Generated GMN spec is invalid: {str(e)}"
+                status_code=422, detail=f"Generated GMN spec is invalid: {str(e)}"
             )
-        
+
         # Step 3: Convert to PyMDP format
         logger.info("Converting GMN to PyMDP format...")
         pymdp_model = adapt_gmn_to_pymdp(validated_gmn)
-        
+
         # Step 4: Create agent with the model
-        agent_name = request.agent_name or gmn_spec.get("name", f"agent_{uuid4().hex[:8]}")
+        agent_name = request.agent_name or gmn_spec.get(
+            "name", f"agent_{uuid4().hex[:8]}"
+        )
         agent_id = f"agent_{uuid4().hex}"
-        
+
         # Create agent using the validated model
         agent = agent_manager.create_agent(
-            agent_id=agent_id,
-            name=agent_name,
-            gmn_config=validated_gmn
+            agent_id=agent_id, name=agent_name, gmn_config=validated_gmn
         )
-        
+
         if not agent:
             raise HTTPException(
-                status_code=500,
-                detail="Failed to create agent from GMN model"
+                status_code=500, detail="Failed to create agent from GMN model"
             )
-        
+
         # Step 5: Initialize knowledge graph for the agent
         from agents.kg_integration import AgentKnowledgeGraphIntegration
+
         kg_integration = AgentKnowledgeGraphIntegration()
-        
+
         # Store KG integration in agent for later use
         agent.kg_integration = kg_integration
-        
+
         # Step 6: Start agent and broadcast via WebSocket
         agent_manager.start_agent(agent_id)
-        
+
         # Broadcast agent creation event
         from api.v1.websocket import broadcast_agent_event
+
         await broadcast_agent_event(
             agent_id,
             "agent_created",
-            {
-                "name": agent_name,
-                "gmn_spec": gmn_spec,
-                "status": "active"
-            }
+            {"name": agent_name, "gmn_spec": gmn_spec, "status": "active"},
         )
-        
+
         # Calculate timing
         generation_time = (datetime.now() - start_time).total_seconds() * 1000
-        
+
         response = PromptResponse(
             agent_id=agent_id,
             agent_name=agent_name,
@@ -209,20 +207,19 @@ Ensure all probability distributions sum to 1.0."""
             status="active",
             timestamp=datetime.now(),
             llm_provider_used=provider.get_provider_type().value,
-            generation_time_ms=generation_time
+            generation_time_ms=generation_time,
         )
-        
-        logger.info(f"Successfully created agent {agent_id} from prompt in {generation_time:.1f}ms")
+
+        logger.info(
+            f"Successfully created agent {agent_id} from prompt in {generation_time:.1f}ms"
+        )
         return response
-        
+
     except HTTPException:
         raise
     except Exception as e:
         logger.error(f"Failed to create agent from prompt: {e}")
-        raise HTTPException(
-            status_code=500,
-            detail=f"Agent creation failed: {str(e)}"
-        )
+        raise HTTPException(status_code=500, detail=f"Agent creation failed: {str(e)}")
 
 
 @router.get("/prompts/examples")
@@ -233,22 +230,22 @@ async def get_prompt_examples() -> Dict[str, Any]:
             {
                 "name": "Explorer",
                 "prompt": "Create an agent that explores a grid world to find hidden rewards while avoiding obstacles",
-                "description": "Basic exploration agent with curiosity drive"
+                "description": "Basic exploration agent with curiosity drive",
             },
             {
                 "name": "Forager",
                 "prompt": "Create an agent that forages for food in a environment with depleting resources",
-                "description": "Resource collection agent with planning"
+                "description": "Resource collection agent with planning",
             },
             {
                 "name": "Navigator",
                 "prompt": "Create an agent that navigates to specified goals while learning the environment layout",
-                "description": "Goal-directed navigation with map building"
+                "description": "Goal-directed navigation with map building",
             },
             {
                 "name": "Guardian",
                 "prompt": "Create an agent that patrols an area and responds to intrusions",
-                "description": "Monitoring agent with reactive behavior"
-            }
+                "description": "Monitoring agent with reactive behavior",
+            },
         ]
     }

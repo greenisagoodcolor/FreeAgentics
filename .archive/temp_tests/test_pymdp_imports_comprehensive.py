@@ -264,7 +264,6 @@ class TestPyMDPImportsComprehensive:
         try:
             from pymdp.agent import Agent
 
-
             # Expected Agent methods based on documentation
             expected_methods = [
                 "infer_states",

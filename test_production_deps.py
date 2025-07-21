@@ -5,8 +5,6 @@ Tests the fixed requirements-production.txt for compatibility issues.
 """
 import subprocess
 import sys
-import tempfile
-import os
 
 def test_pip_dependency_resolution():
     """Test pip dependency resolution without actually installing packages."""
@@ -96,7 +94,7 @@ def analyze_requirements_file():
 
 def check_python_version():
     """Check if we're running on Python 3.12."""
-    print(f"\nPython version check...")
+    print("\nPython version check...")
     print("=" * 60)
     
     version = sys.version_info

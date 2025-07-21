@@ -6,4 +6,4 @@ following Clean Architecture principles as mandated by Robert C. Martin.
 
 from agents.gmn.parser import GMNParser
 
-__all__ = ['GMNParser']
+__all__ = ["GMNParser"]

@@ -8,7 +8,7 @@ to ensure production-grade security.
 import asyncio
 import json
 import time
-from typing import Dict, List, Optional
+from typing import Dict, List
 
 import aiohttp
 import requests
@@ -124,7 +124,7 @@ class RateLimitTester:
                     pass
             
             # Test path scanning detection
-            paths = [f"/admin", "/config", "/backup", "/debug", "/test", "/api/admin", 
+            paths = ["/admin", "/config", "/backup", "/debug", "/test", "/api/admin", 
                     "/sensitive", "/internal", "/private", "/system", "/management",
                     "/statistics", "/metrics", "/status", "/health", "/info"]
             
@@ -301,7 +301,7 @@ class RateLimitTester:
                     {
                         "missing_headers": missing_headers,
                         "invalid_headers": invalid_headers,
-                        "message": f"Security headers issues detected"
+                        "message": "Security headers issues detected"
                     }
                 )
                 
@@ -354,7 +354,7 @@ class RateLimitTester:
         recommendations = []
         
         failed_tests = [t for t in self.results["tests"] if t["status"] == "failed"]
-        warning_tests = [t for t in self.results["tests"] if t["status"] == "warnings"]
+        [t for t in self.results["tests"] if t["status"] == "warnings"]
         
         if any("Rate Limiting" in t["test"] for t in failed_tests):
             recommendations.append("Implement or strengthen rate limiting mechanisms")
@@ -401,7 +401,7 @@ async def main():
     print(f"Warnings: {report['summary']['warnings']}")
     
     if report['recommendations']:
-        print(f"\nRecommendations:")
+        print("\nRecommendations:")
         for rec in report['recommendations']:
             print(f"  • {rec}")
     

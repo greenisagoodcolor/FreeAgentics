@@ -158,7 +158,9 @@ async def websocket_endpoint(
             return
 
         # Authenticate the connection
-        user_data = await ws_auth_handler.authenticate_connection(websocket, client_id, token)
+        user_data = await ws_auth_handler.authenticate_connection(
+            websocket, client_id, token
+        )
 
         # Accept the connection after successful authentication
         await websocket.accept()
@@ -185,7 +187,9 @@ async def websocket_endpoint(
                 data = await websocket.receive_text()
 
                 # Check message rate limiting
-                if not await websocket_rate_limit_manager.check_message_allowed(websocket, data):
+                if not await websocket_rate_limit_manager.check_message_allowed(
+                    websocket, data
+                ):
                     await manager.send_personal_message(
                         {
                             "type": "error",
@@ -213,7 +217,9 @@ async def websocket_endpoint(
                     if validated_msg.type == "refresh_token":
                         refresh_token = validated_msg.data.get("refresh_token")
                         if refresh_token:
-                            result = await handle_token_refresh(client_id, refresh_token)
+                            result = await handle_token_refresh(
+                                client_id, refresh_token
+                            )
                             await manager.send_personal_message(result, client_id)
                         else:
                             await manager.send_personal_message(
@@ -307,7 +313,9 @@ async def handle_client_message_with_auth(client_id: str, message: dict):
 
     if msg_type == "subscribe":
         # Check permission for subscriptions
-        if not await ws_auth_handler.verify_permission(client_id, Permission.VIEW_AGENTS):
+        if not await ws_auth_handler.verify_permission(
+            client_id, Permission.VIEW_AGENTS
+        ):
             await manager.send_personal_message(
                 {
                     "type": "error",
@@ -323,7 +331,9 @@ async def handle_client_message_with_auth(client_id: str, message: dict):
         # Validate event types
         valid_event_types = []
         for event_type in event_types:
-            if isinstance(event_type, str) and re.match(r"^[a-zA-Z0-9:_-]+$", event_type):
+            if isinstance(event_type, str) and re.match(
+                r"^[a-zA-Z0-9:_-]+$", event_type
+            ):
                 valid_event_types.append(event_type)
             else:
                 logger.warning(f"Invalid event type rejected: {event_type}")
@@ -385,7 +395,9 @@ async def handle_client_message_with_auth(client_id: str, message: dict):
 
     elif msg_type == "query":
         # Check permission for queries
-        if not await ws_auth_handler.verify_permission(client_id, Permission.VIEW_AGENTS):
+        if not await ws_auth_handler.verify_permission(
+            client_id, Permission.VIEW_AGENTS
+        ):
             await manager.send_personal_message(
                 {
                     "type": "error",
@@ -564,7 +576,9 @@ async def get_active_connections():
 
     return {
         "total_connections": len(manager.active_connections),
-        "authenticated_connections": len([c for c in connections_info if c.get("user_id")]),
+        "authenticated_connections": len(
+            [c for c in connections_info if c.get("user_id")]
+        ),
         "connections": connections_info,
     }
 

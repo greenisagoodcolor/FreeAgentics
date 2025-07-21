@@ -165,12 +165,8 @@ class PyMDPErrorHandler:
 
         # Matrix dimension mismatches
         if any(
-            keyword in error_msg for keyword in [
-                "dimension",
-                "shape",
-                "broadcasting",
-                "matmul"
-            ]
+            keyword in error_msg
+            for keyword in ["dimension", "shape", "broadcasting", "matmul"]
         ):
             return PyMDPErrorType.MATRIX_DIMENSION
 
@@ -200,12 +196,8 @@ class PyMDPErrorHandler:
 
         # Belief update errors
         if any(
-            keyword in error_msg for keyword in [
-                "belie",
-                "update",
-                "infer_states",
-                "posterior"
-            ]
+            keyword in error_msg
+            for keyword in ["belie", "update", "infer_states", "posterior"]
         ):
             return PyMDPErrorType.BELIEF_UPDATE
 
@@ -238,10 +230,10 @@ class PyMDPErrorHandler:
             "total_errors": self.error_count,
             "operation_failures": dict(self.operation_failures),
             "successful_recoveries": dict(self.recovery_stats),
-            "error_rate": self.error_count / max(sum(self.operation_failures.values()),
-                1),
-            "recovery_rate": sum(self.recovery_stats.values()) / max(self.error_count,
-                1),
+            "error_rate": self.error_count
+            / max(sum(self.operation_failures.values()), 1),
+            "recovery_rate": sum(self.recovery_stats.values())
+            / max(self.error_count, 1),
         }
 
     def reset_stats(self) -> None:
@@ -251,8 +243,9 @@ class PyMDPErrorHandler:
         self.recovery_stats.clear()
 
 
-def safe_numpy_conversion(value: Any, target_type: type = int,
-    default: Any = None) -> Any:
+def safe_numpy_conversion(
+    value: Any, target_type: type = int, default: Any = None
+) -> Any:
     """Safely convert numpy arrays/scalars to Python primitives.
 
     This is the most robust solution for the common PyMDP issue where operations

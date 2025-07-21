@@ -499,7 +499,7 @@ class PerformanceDashboard:
                 status = "✅"
                 if baseline:
                     for base_bench in baseline.get("benchmarks", []):
-                        if base_bench["name"] == benchmark["name"]:
+                        if base_bench["name"] == bench["name"]:
                             base_duration = base_bench.get("stats", {}).get("mean", 0) * 1000
                             if base_duration > 0:
                                 change = ((duration - base_duration) / base_duration) * 100
