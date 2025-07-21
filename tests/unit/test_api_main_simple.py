@@ -137,18 +137,26 @@ class TestAPIMainSimple:
                                 pass
 
                             # Verify startup calls
-                            mock_logger.info.assert_any_call("Starting FreeAgentics API...")
+                            mock_logger.info.assert_any_call(
+                                "Starting FreeAgentics API..."
+                            )
                             mock_logger.info.assert_any_call(
                                 "✅ Prometheus metrics collection started"
                             )
-                            mock_logger.info.assert_any_call("✅ Performance tracking started")
+                            mock_logger.info.assert_any_call(
+                                "✅ Performance tracking started"
+                            )
 
                             # Verify shutdown calls
-                            mock_logger.info.assert_any_call("Shutting down FreeAgentics API...")
+                            mock_logger.info.assert_any_call(
+                                "Shutting down FreeAgentics API..."
+                            )
                             mock_logger.info.assert_any_call(
                                 "✅ Prometheus metrics collection stopped"
                             )
-                            mock_logger.info.assert_any_call("✅ Performance tracking stopped")
+                            mock_logger.info.assert_any_call(
+                                "✅ Performance tracking stopped"
+                            )
 
     @pytest.mark.asyncio
     async def test_lifespan_startup_prometheus_failure(self):
@@ -156,7 +164,9 @@ class TestAPIMainSimple:
         mock_app = MagicMock()
 
         # Mock prometheus start failure
-        mock_prometheus_start = MagicMock(side_effect=Exception("Prometheus connection failed"))
+        mock_prometheus_start = MagicMock(
+            side_effect=Exception("Prometheus connection failed")
+        )
 
         # Mock successful performance tracking start
         mock_perf_start = MagicMock()
@@ -188,7 +198,9 @@ class TestAPIMainSimple:
                             )
 
                             # Verify performance tracking still succeeded
-                            mock_logger.info.assert_any_call("✅ Performance tracking started")
+                            mock_logger.info.assert_any_call(
+                                "✅ Performance tracking started"
+                            )
 
     @pytest.mark.asyncio
     async def test_lifespan_startup_performance_failure(self):
@@ -200,7 +212,9 @@ class TestAPIMainSimple:
         mock_prometheus_start.return_value = None
 
         # Mock performance tracking start failure
-        mock_perf_start = MagicMock(side_effect=Exception("Performance tracking failed"))
+        mock_perf_start = MagicMock(
+            side_effect=Exception("Performance tracking failed")
+        )
 
         with patch("api.main.logger") as mock_logger:
             with patch(
@@ -242,7 +256,9 @@ class TestAPIMainSimple:
         mock_perf_start = MagicMock()
 
         # Mock prometheus stop failure
-        mock_prometheus_stop = MagicMock(side_effect=Exception("Prometheus stop failed"))
+        mock_prometheus_stop = MagicMock(
+            side_effect=Exception("Prometheus stop failed")
+        )
         mock_perf_stop = MagicMock()
 
         with patch("api.main.logger") as mock_logger:
@@ -271,7 +287,9 @@ class TestAPIMainSimple:
                             )
 
                             # Verify performance tracking still stopped
-                            mock_logger.info.assert_any_call("✅ Performance tracking stopped")
+                            mock_logger.info.assert_any_call(
+                                "✅ Performance tracking stopped"
+                            )
 
     @pytest.mark.asyncio
     async def test_lifespan_shutdown_performance_failure(self):

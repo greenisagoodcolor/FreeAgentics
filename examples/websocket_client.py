@@ -62,7 +62,9 @@ class FreeAgenticsWebSocketClient:
         await self.websocket.send(json.dumps(message))
         logger.info(f"Subscribed to events: {event_types}")
 
-    async def start_monitoring(self, metrics: list, agents: list = None, sample_rate: float = 1.0):
+    async def start_monitoring(
+        self, metrics: list, agents: list = None, sample_rate: float = 1.0
+    ):
         """Start real-time monitoring."""
         if not self.monitoring_websocket:
             raise RuntimeError("Not connected to monitoring WebSocket")
@@ -78,7 +80,9 @@ class FreeAgenticsWebSocketClient:
         await self.monitoring_websocket.send(json.dumps(message))
         logger.info(f"Started monitoring: {metrics}")
 
-    async def send_agent_command(self, agent_id: str, command: str, params: dict = None):
+    async def send_agent_command(
+        self, agent_id: str, command: str, params: dict = None
+    ):
         """Send a command to an agent."""
         if not self.websocket:
             raise RuntimeError("Not connected to WebSocket")
@@ -113,7 +117,9 @@ class FreeAgenticsWebSocketClient:
                 # Check main WebSocket
                 if self.websocket:
                     try:
-                        message = await asyncio.wait_for(self.websocket.recv(), timeout=0.1)
+                        message = await asyncio.wait_for(
+                            self.websocket.recv(), timeout=0.1
+                        )
                         data = json.loads(message)
                         await self.handle_message(data, "main")
                     except asyncio.TimeoutError:
@@ -149,16 +155,22 @@ class FreeAgenticsWebSocketClient:
         msg_type = message.get("type", "unknown")
 
         if msg_type == "connection_established":
-            logger.info(f"[{source}] Connection established: {message.get('client_id')}")
+            logger.info(
+                f"[{source}] Connection established: {message.get('client_id')}"
+            )
 
         elif msg_type == "subscription_confirmed":
-            logger.info(f"[{source}] Subscription confirmed: {message.get('event_types')}")
+            logger.info(
+                f"[{source}] Subscription confirmed: {message.get('event_types')}"
+            )
 
         elif msg_type == "agent_event":
             event_type = message.get("event_type")
             agent_id = message.get("agent_id")
             data = message.get("data", {})
-            logger.info(f"[{source}] Agent event - {event_type} from {agent_id}: {data}")
+            logger.info(
+                f"[{source}] Agent event - {event_type} from {agent_id}: {data}"
+            )
 
         elif msg_type == "world_event":
             event_type = message.get("event_type")

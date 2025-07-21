@@ -218,7 +218,9 @@ class MonitoringDashboard:
             value=coord_report["system_success_rate"] * 100,
             unit="%",
             timestamp=timestamp,
-            status="healthy" if coord_report["system_success_rate"] > 0.8 else "warning",
+            status="healthy"
+            if coord_report["system_success_rate"] > 0.8
+            else "warning",
         )
 
         # Update history
@@ -235,7 +237,9 @@ class MonitoringDashboard:
         for agent_id in performance_tracker.agent_metrics.keys():
             try:
                 # Get agent performance metrics
-                agent_perf = await performance_tracker.get_agent_performance_summary(agent_id)
+                agent_perf = await performance_tracker.get_agent_performance_summary(
+                    agent_id
+                )
 
                 # Get belief statistics
                 belief_stats = belief_monitoring_hooks.get_agent_statistics(agent_id)
@@ -277,7 +281,9 @@ class MonitoringDashboard:
                         value=agent_perf["error_rate"]["count"],
                         unit="errors",
                         timestamp=datetime.now(),
-                        status="healthy" if agent_perf["error_rate"]["count"] == 0 else "warning",
+                        status="healthy"
+                        if agent_perf["error_rate"]["count"] == 0
+                        else "warning",
                     ),
                 }
 
@@ -337,7 +343,9 @@ class MonitoringDashboard:
                         "type": "system",
                         "metric": metric_name,
                         "value": metric.value,
-                        "threshold": self.alert_thresholds.get(metric_name, {}).get("warning"),
+                        "threshold": self.alert_thresholds.get(metric_name, {}).get(
+                            "warning"
+                        ),
                         "timestamp": timestamp.isoformat(),
                         "message": f"System {metric.name} is above warning threshold",
                     }
@@ -349,7 +357,9 @@ class MonitoringDashboard:
                         "type": "system",
                         "metric": metric_name,
                         "value": metric.value,
-                        "threshold": self.alert_thresholds.get(metric_name, {}).get("critical"),
+                        "threshold": self.alert_thresholds.get(metric_name, {}).get(
+                            "critical"
+                        ),
                         "timestamp": timestamp.isoformat(),
                         "message": f"System {metric.name} is above critical threshold",
                     }
@@ -525,7 +535,9 @@ def get_dashboard_data() -> Optional[Dict[str, Any]]:
     return monitoring_dashboard.get_current_dashboard()
 
 
-def get_metric_time_series(metric_name: str, duration_minutes: int = 5) -> Optional[Dict[str, Any]]:
+def get_metric_time_series(
+    metric_name: str, duration_minutes: int = 5
+) -> Optional[Dict[str, Any]]:
     """Get time series data for a metric."""
     time_series = monitoring_dashboard.get_metric_history(metric_name, duration_minutes)
     if not time_series:

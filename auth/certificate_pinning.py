@@ -95,7 +95,9 @@ class CertificateValidator:
                 with context.wrap_socket(sock, server_hostname=hostname) as ssock:
                     cert_der = ssock.getpeercert(binary_form=True)
                     if cert_der is None:
-                        raise ValueError(f"No certificate received from {hostname}:{port}")
+                        raise ValueError(
+                            f"No certificate received from {hostname}:{port}"
+                        )
                     cert = x509.load_der_x509_certificate(cert_der)
 
                     return cert.public_bytes(serialization.Encoding.PEM).decode()
@@ -197,7 +199,8 @@ class MobileCertificatePinner:
                 self.domain_configs[domain] = config
 
             logger.info(
-                f"Loaded certificate pinning configuration for " f"{len(config_data)} domains"
+                f"Loaded certificate pinning configuration for "
+                f"{len(config_data)} domains"
             )
 
         except Exception as e:
@@ -303,7 +306,9 @@ class MobileCertificatePinner:
                 "date-time": datetime.now().isoformat(),
                 "hostname": domain,
                 "port": 443,
-                "effective-expiration-date": (datetime.now() + timedelta(days=60)).isoformat(),
+                "effective-expiration-date": (
+                    datetime.now() + timedelta(days=60)
+                ).isoformat(),
                 "include-subdomains": self.domain_configs[domain].include_subdomains,
                 "served-certificate-chain": chain_pins,
                 "validated-certificate-chain": chain_pins,
@@ -323,9 +328,12 @@ class MobileCertificatePinner:
         config = self.domain_configs.get(domain)
         if config:
             config.emergency_bypass = True
-            config.emergency_bypass_until = datetime.now() + timedelta(hours=duration_hours)
+            config.emergency_bypass_until = datetime.now() + timedelta(
+                hours=duration_hours
+            )
             logger.warning(
-                f"Emergency bypass activated for {domain} until " f"{config.emergency_bypass_until}"
+                f"Emergency bypass activated for {domain} until "
+                f"{config.emergency_bypass_until}"
             )
 
     def get_mobile_pinning_config(self, domain: str) -> Optional[Dict[str, Any]]:

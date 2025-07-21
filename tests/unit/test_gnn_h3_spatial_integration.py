@@ -63,7 +63,6 @@ class TestH3SpatialProcessor:
     def processor(self):
         """Create H3SpatialProcessor instance."""
         if not IMPORT_SUCCESS:
-
             assert False, "Test bypass removed - must fix underlying issue"
             assert False, "Test bypass removed - must fix underlying issue"
         return H3SpatialProcessor(default_resolution=7, max_resolution=10)
@@ -196,7 +195,9 @@ class TestH3SpatialProcessor:
         with patch.object(processor, "get_h3_distance") as mock_distance:
             mock_distance.return_value = 1
 
-            edge_index, edge_weights = processor.create_h3_spatial_graph(h3_indices, k=1)
+            edge_index, edge_weights = processor.create_h3_spatial_graph(
+                h3_indices, k=1
+            )
 
             # Should create edges between valid indices only
             assert mock_torch.tensor.called
@@ -204,7 +205,6 @@ class TestH3SpatialProcessor:
     def test_create_h3_spatial_graph_empty_input(self, processor):
         """Test spatial graph creation with empty input."""
         if not TORCH_AVAILABLE:
-
             assert False, "Test bypass removed - must fix underlying issue"
         edge_index, edge_weights = processor.create_h3_spatial_graph([], k=1)
 
@@ -220,7 +220,6 @@ class TestH3MultiResolutionAnalyzer:
     def analyzer(self):
         """Create H3MultiResolutionAnalyzer instance."""
         if not IMPORT_SUCCESS:
-
             assert False, "Test bypass removed - must fix underlying issue"
             assert False, "Test bypass removed - must fix underlying issue"
         return H3MultiResolutionAnalyzer(resolutions=[5, 7, 9])
@@ -309,7 +308,6 @@ class TestGNNSpatialIntegration:
     def integration(self):
         """Create GNNSpatialIntegration instance."""
         if not IMPORT_SUCCESS:
-
             assert False, "Test bypass removed - must fix underlying issue"
             assert False, "Test bypass removed - must fix underlying issue"
         return GNNSpatialIntegration(default_resolution=7)
@@ -345,7 +343,9 @@ class TestGNNSpatialIntegration:
                 "h3_indices_7": ["index1", "index2"],
             }
 
-            with patch.object(integration.h3_processor, "create_h3_spatial_graph") as mock_graph:
+            with patch.object(
+                integration.h3_processor, "create_h3_spatial_graph"
+            ) as mock_graph:
                 with patch.object(
                     integration.multi_res_analyzer,
                     "compute_spatial_relationships",
@@ -389,7 +389,6 @@ class TestModuleLevelFunctions:
     def test_global_h3_spatial_integration(self):
         """Test global h3_spatial_integration instance."""
         if not IMPORT_SUCCESS:
-
             assert False, "Test bypass removed - must fix underlying issue"
             assert False, "Test bypass removed - must fix underlying issue"
         assert h3_spatial_integration is not None
@@ -399,7 +398,6 @@ class TestModuleLevelFunctions:
     def test_integrate_h3_with_active_inference_no_pymdp(self):
         """Test integration function with agent without PyMDP."""
         if not IMPORT_SUCCESS:
-
             assert False, "Test bypass removed - must fix underlying issue"
             assert False, "Test bypass removed - must fix underlying issue"
         agent = Mock()
@@ -412,7 +410,6 @@ class TestModuleLevelFunctions:
     def test_integrate_h3_with_active_inference_no_agent_attr(self):
         """Test integration function with agent without pymdp_agent attribute."""
         if not IMPORT_SUCCESS:
-
             assert False, "Test bypass removed - must fix underlying issue"
             assert False, "Test bypass removed - must fix underlying issue"
         agent = Mock()
@@ -425,7 +422,6 @@ class TestModuleLevelFunctions:
     def test_integrate_h3_with_active_inference_full(self):
         """Test full integration with active inference."""
         if not IMPORT_SUCCESS:
-
             assert False, "Test bypass removed - must fix underlying issue"
             assert False, "Test bypass removed - must fix underlying issue"
         # Skip this test - it's mock-heavy and not testing real functionality
@@ -484,7 +480,6 @@ class TestErrorHandlingAndEdgeCases:
     def test_h3_import_error_handling(self):
         """Test handling when h3 library is not available."""
         if not IMPORT_SUCCESS:
-
             assert False, "Test bypass removed - must fix underlying issue"
             assert False, "Test bypass removed - must fix underlying issue"
         with patch("inference.gnn.h3_spatial_integration.H3_AVAILABLE", False):
@@ -499,7 +494,6 @@ class TestErrorHandlingAndEdgeCases:
     def test_invalid_coordinates(self):
         """Test handling of invalid coordinates."""
         if not IMPORT_SUCCESS:
-
             assert False, "Test bypass removed - must fix underlying issue"
             assert False, "Test bypass removed - must fix underlying issue"
         processor = H3SpatialProcessor()
@@ -514,7 +508,6 @@ class TestErrorHandlingAndEdgeCases:
     def test_thread_safety(self):
         """Test thread safety of spatial operations."""
         if not IMPORT_SUCCESS:
-
             assert False, "Test bypass removed - must fix underlying issue"
             assert False, "Test bypass removed - must fix underlying issue"
         import threading

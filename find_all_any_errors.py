@@ -37,7 +37,9 @@ def check_file_for_any_error(filepath):
         r"from typing_extensions import.*\bAny\b",
     ]
 
-    has_import = any(re.search(pattern, content, re.MULTILINE) for pattern in import_patterns)
+    has_import = any(
+        re.search(pattern, content, re.MULTILINE) for pattern in import_patterns
+    )
 
     # Also check if typing.Any is used with full qualification
     if re.search(r"typing\.Any", content):
@@ -53,7 +55,8 @@ for root, dirs, files in os.walk("."):
     dirs[:] = [
         d
         for d in dirs
-        if not d.startswith(".") and d not in ["venv", "env", "__pycache__", "node_modules"]
+        if not d.startswith(".")
+        and d not in ["venv", "env", "__pycache__", "node_modules"]
     ]
 
     for file in files:

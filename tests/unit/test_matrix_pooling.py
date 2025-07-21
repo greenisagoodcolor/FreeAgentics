@@ -31,7 +31,9 @@ class TestPooledMatrix(unittest.TestCase):
     def test_pooled_matrix_creation(self):
         """Test creating a pooled matrix."""
         data = np.zeros((10, 10), dtype=np.float32)
-        matrix = PooledMatrix(data=data, shape=(10, 10), dtype=np.float32, pool_id="test_123")
+        matrix = PooledMatrix(
+            data=data, shape=(10, 10), dtype=np.float32, pool_id="test_123"
+        )
 
         self.assertEqual(matrix.shape, (10, 10))
         self.assertEqual(matrix.dtype, np.float32)
@@ -45,11 +47,15 @@ class TestPooledMatrix(unittest.TestCase):
 
         # Shape mismatch
         with self.assertRaises(ValueError):
-            PooledMatrix(data=data, shape=(5, 5), dtype=np.float32, pool_id="test")  # Wrong shape
+            PooledMatrix(
+                data=data, shape=(5, 5), dtype=np.float32, pool_id="test"
+            )  # Wrong shape
 
         # Dtype mismatch
         with self.assertRaises(ValueError):
-            PooledMatrix(data=data, shape=(10, 10), dtype=np.float64, pool_id="test")  # Wrong dtype
+            PooledMatrix(
+                data=data, shape=(10, 10), dtype=np.float64, pool_id="test"
+            )  # Wrong dtype
 
 
 class TestPoolStatistics(unittest.TestCase):
@@ -75,7 +81,9 @@ class TestMatrixPool(unittest.TestCase):
 
     def setUp(self):
         """Set up test fixtures."""
-        self.pool = MatrixPool(shape=(10, 10), dtype=np.float32, initial_size=3, max_size=10)
+        self.pool = MatrixPool(
+            shape=(10, 10), dtype=np.float32, initial_size=3, max_size=10
+        )
 
     def test_pool_initialization(self):
         """Test pool pre-allocation."""
@@ -211,7 +219,9 @@ class TestMatrixOperationPool(unittest.TestCase):
         """Test allocating multiple matrices for einsum."""
         shapes = [(10, 20), (20, 30), (30, 10)]
 
-        with self.op_pool.allocate_einsum_operands(*shapes, dtype=np.float32) as matrices:
+        with self.op_pool.allocate_einsum_operands(
+            *shapes, dtype=np.float32
+        ) as matrices:
             self.assertEqual(len(matrices), 3)
             for i, (matrix, shape) in enumerate(zip(matrices, shapes)):
                 self.assertEqual(matrix.shape, shape)

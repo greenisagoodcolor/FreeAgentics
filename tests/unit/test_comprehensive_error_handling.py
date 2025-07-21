@@ -364,7 +364,9 @@ class TestConcurrentAccessScenarios:
             """Create a coalition concurrently."""
             try:
                 agents = [f"agent_{i}" for i in range(3)]
-                result = coordinator.create_coalition(f"coalition_{coalition_id}", agents)
+                result = coordinator.create_coalition(
+                    f"coalition_{coalition_id}", agents
+                )
                 return f"Coalition {coalition_id}: {result}"
             except Exception as e:
                 return f"Coalition {coalition_id}: ERROR - {e}"
@@ -837,7 +839,9 @@ class TestAsyncOperationErrorHandling:
         # Should handle mixed success/failure
         assert len(results) == 10
 
-        success_count = sum(1 for r in results if isinstance(r, str) and "succeeded" in r)
+        success_count = sum(
+            1 for r in results if isinstance(r, str) and "succeeded" in r
+        )
         error_count = sum(1 for r in results if isinstance(r, Exception))
 
         assert success_count > 0

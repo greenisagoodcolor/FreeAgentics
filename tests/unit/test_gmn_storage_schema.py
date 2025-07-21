@@ -167,7 +167,9 @@ class TestGMNVersionTracking:
         """Create GMN repository instance."""
         return MockGMNRepository(db_session)
 
-    def test_create_gmn_specification_with_version_tracking(self, gmn_repository, agent):
+    def test_create_gmn_specification_with_version_tracking(
+        self, gmn_repository, agent
+    ):
         """Test creating GMN specification with proper version tracking.
 
         This test will fail initially because we need to enhance the schema
@@ -237,7 +239,9 @@ class TestGMNVersionTracking:
         """
         # This should fail - version comparison not implemented
         with pytest.raises(Exception, match="Method not implemented"):
-            gmn_repository.compare_versions(version_a_id=uuid.uuid4(), version_b_id=uuid.uuid4())
+            gmn_repository.compare_versions(
+                version_a_id=uuid.uuid4(), version_b_id=uuid.uuid4()
+            )
 
 
 class TestGMNAdvancedQuerying:
@@ -443,10 +447,14 @@ class TestGMNPerformanceOptimization:
         # This should fail - query caching not implemented
         with pytest.raises(Exception):
             # First call should cache the result
-            gmn_repository.get_agent_specifications_cached(agent_id=agent.id, cache_ttl=300)
+            gmn_repository.get_agent_specifications_cached(
+                agent_id=agent.id, cache_ttl=300
+            )
 
             # Second call should use cache
-            gmn_repository.get_agent_specifications_cached(agent_id=agent.id, cache_ttl=300)
+            gmn_repository.get_agent_specifications_cached(
+                agent_id=agent.id, cache_ttl=300
+            )
 
     def test_index_performance_analysis(self, gmn_repository, agent):
         """Test database index performance analysis.

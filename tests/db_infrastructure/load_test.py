@@ -342,9 +342,13 @@ class DatabaseLoadTest:
         operations_per_second: int = 100,
     ):
         """Run the main load test."""
-        logger.info(f"Starting load test: {num_threads} threads, {test_duration}s duration")
+        logger.info(
+            f"Starting load test: {num_threads} threads, {test_duration}s duration"
+        )
 
-        monitor = PerformanceMonitor(f"load_test_{datetime.now().strftime('%Y%m%d_%H%M%S')}")
+        monitor = PerformanceMonitor(
+            f"load_test_{datetime.now().strftime('%Y%m%d_%H%M%S')}"
+        )
         monitor.start_test_run(
             {
                 "num_threads": num_threads,
@@ -380,7 +384,9 @@ class DatabaseLoadTest:
                     cumulative += weight
                     if rand <= cumulative:
                         try:
-                            with monitor.measure_operation("database_operation", op_name):
+                            with monitor.measure_operation(
+                                "database_operation", op_name
+                            ):
                                 op_func()
                             operation_counts[op_name] += 1
                         except Exception as e:
@@ -427,9 +433,13 @@ class DatabaseLoadTest:
 
     def run_stress_test(self, max_connections: int = 200, ramp_up_time: int = 30):
         """Run a stress test to find breaking points."""
-        logger.info(f"Starting stress test: ramping up to {max_connections} connections")
+        logger.info(
+            f"Starting stress test: ramping up to {max_connections} connections"
+        )
 
-        runner = LoadTestRunner(f"stress_test_{datetime.now().strftime('%Y%m%d_%H%M%S')}")
+        runner = LoadTestRunner(
+            f"stress_test_{datetime.now().strftime('%Y%m%d_%H%M%S')}"
+        )
 
         def stress_operation():
             """Single stress test operation."""
@@ -462,8 +472,12 @@ def main():
         default="quick",
         help="Type of test to run",
     )
-    parser.add_argument("--duration", type=int, default=60, help="Test duration in seconds")
-    parser.add_argument("--threads", type=int, default=10, help="Number of concurrent threads")
+    parser.add_argument(
+        "--duration", type=int, default=60, help="Test duration in seconds"
+    )
+    parser.add_argument(
+        "--threads", type=int, default=10, help="Number of concurrent threads"
+    )
     parser.add_argument(
         "--ops-per-second",
         type=int,
@@ -471,7 +485,9 @@ def main():
         help="Target operations per second",
     )
     parser.add_argument("--no-reset", action="store_true", help="Skip database reset")
-    parser.add_argument("--no-populate", action="store_true", help="Skip data population")
+    parser.add_argument(
+        "--no-populate", action="store_true", help="Skip data population"
+    )
 
     args = parser.parse_args()
 
@@ -490,7 +506,9 @@ def main():
         elif args.test == "stress":
             summary = test.run_stress_test(max_connections=args.threads)
         else:  # quick
-            summary = test.run_load_test(test_duration=10, num_threads=5, operations_per_second=50)
+            summary = test.run_load_test(
+                test_duration=10, num_threads=5, operations_per_second=50
+            )
 
         print("\nTest completed successfully!")
         print(f"Total operations: {summary.get('total_operations', 0)}")

@@ -37,7 +37,10 @@ def fix_basic_explorer_agent_constructor(content):
 def add_safe_array_index_import(content):
     """Add import for safe_array_index if it's used but not imported."""
     # Check if safe_array_index is used
-    if "safe_array_index" in content and "from agents.pymdp_error_handling import" not in content:
+    if (
+        "safe_array_index" in content
+        and "from agents.pymdp_error_handling import" not in content
+    ):
         # Find the import section
         import_section_end = content.rfind("import ")
         if import_section_end != -1:
@@ -46,7 +49,9 @@ def add_safe_array_index_import(content):
             if line_end != -1:
                 # Insert the import after the last import
                 insert_pos = line_end + 1
-                import_statement = "from agents.pymdp_error_handling import safe_array_index\n"
+                import_statement = (
+                    "from agents.pymdp_error_handling import safe_array_index\n"
+                )
                 content = content[:insert_pos] + import_statement + content[insert_pos:]
 
     return content

@@ -49,7 +49,11 @@ class PipelineGraphGenerator:
                 "type": "build",
                 "description": "Artifact creation with multi-arch support",
                 "timeout": "15 minutes",
-                "substages": ["🏗️ Backend Build", "🎨 Frontend Build", "📦 Multi-arch Images"],
+                "substages": [
+                    "🏗️ Backend Build",
+                    "🎨 Frontend Build",
+                    "📦 Multi-arch Images",
+                ],
             },
             {
                 "id": "test",
@@ -57,7 +61,11 @@ class PipelineGraphGenerator:
                 "type": "testing",
                 "description": "Multi-layered testing with parallel execution",
                 "timeout": "20 minutes",
-                "substages": ["🧪 Unit Tests", "🔗 Integration Tests", "🎨 Frontend Tests"],
+                "substages": [
+                    "🧪 Unit Tests",
+                    "🔗 Integration Tests",
+                    "🎨 Frontend Tests",
+                ],
             },
             {
                 "id": "security",
@@ -65,7 +73,11 @@ class PipelineGraphGenerator:
                 "type": "security",
                 "description": "Comprehensive security testing with zero-tolerance",
                 "timeout": "15 minutes",
-                "substages": ["🔒 SAST Analysis", "🐳 Container Security", "📋 Compliance Check"],
+                "substages": [
+                    "🔒 SAST Analysis",
+                    "🐳 Container Security",
+                    "📋 Compliance Check",
+                ],
             },
             {
                 "id": "performance",
@@ -73,7 +85,11 @@ class PipelineGraphGenerator:
                 "type": "performance",
                 "description": "Performance testing with regression detection",
                 "timeout": "25 minutes",
-                "substages": ["⚡ Benchmarks", "📊 Regression Analysis", "🎯 Baseline Comparison"],
+                "substages": [
+                    "⚡ Benchmarks",
+                    "📊 Regression Analysis",
+                    "🎯 Baseline Comparison",
+                ],
             },
             {
                 "id": "e2e",
@@ -567,7 +583,9 @@ def main():
         help="Output format",
     )
     parser.add_argument("--output", type=str, help="Output file path")
-    parser.add_argument("--detailed", action="store_true", help="Generate detailed graph")
+    parser.add_argument(
+        "--detailed", action="store_true", help="Generate detailed graph"
+    )
 
     args = parser.parse_args()
 

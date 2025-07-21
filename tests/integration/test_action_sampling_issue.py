@@ -16,9 +16,7 @@ try:
     PYMDP_AVAILABLE = True
 except ImportError:
     PYMDP_AVAILABLE = False
-    pytest.fail(
-        "PyMDP required for action sampling tests", allow_module_level=True
-    )
+    pytest.fail("PyMDP required for action sampling tests", allow_module_level=True)
 
 from agents.base_agent import BasicExplorerAgent
 from agents.pymdp_adapter import PyMDPCompatibilityAdapter
@@ -60,12 +58,12 @@ class TestActionSamplingIssue:
         raw_action = pymdp_agent.sample_action()
 
         # Document the actual PyMDP behavior
-        assert isinstance(
-            raw_action, np.ndarray
-        ), f"PyMDP returns {type(raw_action)}, expected np.ndarray"
-        assert raw_action.shape == (
-            1,
-        ), f"PyMDP action has shape {raw_action.shape}, expected (1,)"
+        assert isinstance(raw_action, np.ndarray), (
+            f"PyMDP returns {type(raw_action)}, expected np.ndarray"
+        )
+        assert raw_action.shape == (1,), (
+            f"PyMDP action has shape {raw_action.shape}, expected (1,)"
+        )
         assert raw_action.dtype in [
             np.float64,
             np.float32,
@@ -75,20 +73,14 @@ class TestActionSamplingIssue:
 
         # The value should be a valid action index
         action_value = raw_action.item()
-        assert (
-            0 <= action_value < 3
-        ), f"Action index {action_value} out of range [0, 3)"
+        assert 0 <= action_value < 3, f"Action index {action_value} out of range [0, 3)"
 
         # Test multiple samples to check consistency
         for _ in range(20):
             action = pymdp_agent.sample_action()
-            assert isinstance(
-                action, np.ndarray
-            ), "All samples should be numpy arrays"
+            assert isinstance(action, np.ndarray), "All samples should be numpy arrays"
             assert action.shape == (1,), "All samples should have shape (1,)"
-            assert (
-                0 <= action.item() < 3
-            ), "All samples should be valid action indices"
+            assert 0 <= action.item() < 3, "All samples should be valid action indices"
 
     def test_adapter_conversion_strict_types(self):
         """Test that the adapter converts PyMDP actions to exact Python int."""
@@ -109,18 +101,18 @@ class TestActionSamplingIssue:
         converted_action = adapter.sample_action(pymdp_agent)
 
         # CRITICAL: Must be exact Python int, not numpy type
-        assert (
-            type(converted_action) is int
-        ), f"Expected exact Python int, got {type(converted_action)}"
-        assert not isinstance(
-            converted_action, np.integer
-        ), "Should not be numpy integer type"
+        assert type(converted_action) is int, (
+            f"Expected exact Python int, got {type(converted_action)}"
+        )
+        assert not isinstance(converted_action, np.integer), (
+            "Should not be numpy integer type"
+        )
         assert isinstance(converted_action, int), "Should be Python int"
 
         # Value validation
-        assert (
-            0 <= converted_action < 4
-        ), f"Action {converted_action} out of valid range"
+        assert 0 <= converted_action < 4, (
+            f"Action {converted_action} out of valid range"
+        )
 
     def test_adapter_handles_edge_cases(self):
         """Test adapter handles various edge cases in conversion."""
@@ -138,9 +130,9 @@ class TestActionSamplingIssue:
             single_action_agent.infer_policies()
 
             action = adapter.sample_action(single_action_agent)
-            assert (
-                action == 0
-            ), f"Single action agent should always return 0, got {action}"
+            assert action == 0, (
+                f"Single action agent should always return 0, got {action}"
+            )
             assert type(action) is int, "Must be Python int"
         except (TypeError, ValueError, AttributeError):
             # Handle PyMDP API compatibility issues with single-factor models
@@ -189,9 +181,9 @@ class TestActionSamplingIssue:
         action = agent.select_action()
 
         # Agent converts numeric action to string
-        assert isinstance(
-            action, str
-        ), f"Agent should return string action, got {type(action)}"
+        assert isinstance(action, str), (
+            f"Agent should return string action, got {type(action)}"
+        )
         assert action in [
             "up",
             "down",
@@ -231,9 +223,7 @@ class TestActionSamplingIssue:
         print(f"Agent used {actions_used} different actions: {action_counts}")
         # Just warn if only one action is used, don't fail
         if actions_used == 1:
-            print(
-                f"Warning: Agent only using {actions_used} action(s), may be stuck"
-            )
+            print(f"Warning: Agent only using {actions_used} action(s), may be stuck")
 
     def test_adapter_error_handling(self):
         """Test that adapter properly handles error conditions."""
@@ -289,12 +279,12 @@ class TestActionSamplingIssue:
         avg_time = total_time / num_samples
 
         # Should be fast - less than 5ms per action (relaxed for complex agent processing)
-        assert (
-            avg_time < 0.005
-        ), f"Action sampling too slow: {avg_time*1000:.3f}ms per action"
+        assert avg_time < 0.005, (
+            f"Action sampling too slow: {avg_time * 1000:.3f}ms per action"
+        )
 
         print(
-            f"Action sampling performance: {avg_time*1000:.3f}ms per action ({num_samples/total_time:.0f} actions/sec)"
+            f"Action sampling performance: {avg_time * 1000:.3f}ms per action ({num_samples / total_time:.0f} actions/sec)"
         )
 
 
@@ -317,9 +307,9 @@ class TestActionMappingConsistency:
         # Access the agent's action mapping if available
         if hasattr(agent, "action_names"):
             for idx, name in enumerate(agent.action_names):
-                assert name == expected_mapping.get(
-                    idx
-                ), f"Action {idx} mapped to '{name}', expected '{expected_mapping.get(idx)}'"
+                assert name == expected_mapping.get(idx), (
+                    f"Action {idx} mapped to '{name}', expected '{expected_mapping.get(idx)}'"
+                )
 
         # Test through actual action selection
         observations = [
@@ -333,9 +323,7 @@ class TestActionMappingConsistency:
             agent.perceive({"position": (2, 2), "surroundings": obs})
             agent.update_beliefs()
             action = agent.select_action()
-            assert (
-                action in expected_mapping.values()
-            ), f"Unknown action: {action}"
+            assert action in expected_mapping.values(), f"Unknown action: {action}"
 
 
 if __name__ == "__main__":

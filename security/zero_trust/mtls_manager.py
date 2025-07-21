@@ -132,7 +132,9 @@ class MTLSManager:
                 if self._key_cache:
                     # Refill cache in background if getting low
                     if len(self._key_cache) < 3:
-                        threading.Thread(target=self._refill_key_cache, daemon=True).start()
+                        threading.Thread(
+                            target=self._refill_key_cache, daemon=True
+                        ).start()
                     return self._key_cache.pop()
 
         # Generate new key if cache is empty or disabled
@@ -333,7 +335,9 @@ class MTLSManager:
             ).decode()
 
             # Calculate fingerprint
-            fingerprint = hashlib.sha256(cert.public_bytes(serialization.Encoding.DER)).hexdigest()
+            fingerprint = hashlib.sha256(
+                cert.public_bytes(serialization.Encoding.DER)
+            ).hexdigest()
 
             # Create certificate info
             cert_info = CertificateInfo(
@@ -351,7 +355,9 @@ class MTLSManager:
             self._certificates[service_name] = cert_info
             self.save_certificate(cert_info)
 
-            logger.info(f"Generated certificate for {service_name} (fingerprint: {fingerprint})")
+            logger.info(
+                f"Generated certificate for {service_name} (fingerprint: {fingerprint})"
+            )
 
             return cert_info
 
@@ -372,7 +378,9 @@ class MTLSManager:
                 return False, "Certificate has expired"
 
             # Check revocation
-            fingerprint = hashlib.sha256(cert.public_bytes(serialization.Encoding.DER)).hexdigest()
+            fingerprint = hashlib.sha256(
+                cert.public_bytes(serialization.Encoding.DER)
+            ).hexdigest()
 
             if fingerprint in self._revocation_list:
                 entry = self._revocation_list[fingerprint]
@@ -441,11 +449,15 @@ class MTLSManager:
             logger.info(f"Revoked certificate {fingerprint}: {reason}")
             return True
 
-    def set_rotation_policy(self, service_name: str, policy: CertificateRotationPolicy) -> None:
+    def set_rotation_policy(
+        self, service_name: str, policy: CertificateRotationPolicy
+    ) -> None:
         """Set rotation policy for a service."""
         with self._lock:
             self._rotation_policies[service_name] = policy
-            logger.info(f"Set rotation policy for {service_name}: {policy.strategy.value}")
+            logger.info(
+                f"Set rotation policy for {service_name}: {policy.strategy.value}"
+            )
 
     def _should_rotate_certificate(self, cert_info: CertificateInfo) -> bool:
         """Check if a certificate should be rotated."""
@@ -479,7 +491,9 @@ class MTLSManager:
                         self.rotate_certificate(service_name)
                         rotated.append(service_name)
                     except Exception as e:
-                        logger.error(f"Failed to rotate certificate for {service_name}: {e}")
+                        logger.error(
+                            f"Failed to rotate certificate for {service_name}: {e}"
+                        )
 
         return rotated
 
@@ -581,7 +595,9 @@ class MTLSManager:
                 self._revocation_list[fingerprint] = RevocationEntry(
                     fingerprint=fingerprint,
                     serial_number=entry_data["serial_number"],
-                    revocation_time=datetime.fromisoformat(entry_data["revocation_time"]),
+                    revocation_time=datetime.fromisoformat(
+                        entry_data["revocation_time"]
+                    ),
                     reason=entry_data["reason"],
                 )
 

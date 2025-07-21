@@ -259,7 +259,9 @@ class SecurityMonitoringSystem:
             # Update metrics
             event_type = event.get("event_type", "unknown")
             severity = event.get("severity", "info")
-            self.security_events_total.labels(event_type=event_type, severity=severity).inc()
+            self.security_events_total.labels(
+                event_type=event_type, severity=severity
+            ).inc()
 
             # Extract relevant information
             source_ip = event.get("ip_address", "unknown")
@@ -330,7 +332,9 @@ class SecurityMonitoringSystem:
                         event,
                     )
 
-    async def _check_brute_force(self, source_ip: str, user_id: str, event: Dict[str, Any]):
+    async def _check_brute_force(
+        self, source_ip: str, user_id: str, event: Dict[str, Any]
+    ):
         """Check for brute force attacks."""
         now = datetime.utcnow()
         cutoff = now - timedelta(minutes=15)
@@ -422,7 +426,9 @@ class SecurityMonitoringSystem:
         self.active_alerts[alert_id] = alert
 
         # Update metrics
-        self.threats_detected_total.labels(threat_type=attack_type, severity=threat_level).inc()
+        self.threats_detected_total.labels(
+            threat_type=attack_type, severity=threat_level
+        ).inc()
 
         self.security_alerts_active.inc()
 
@@ -577,7 +583,9 @@ class SecurityMonitoringSystem:
         # Clean up old user activity
         for user_id in list(self.user_activity.keys()):
             self.user_activity[user_id] = [
-                activity for activity in self.user_activity[user_id] if activity > cutoff
+                activity
+                for activity in self.user_activity[user_id]
+                if activity > cutoff
             ]
             if not self.user_activity[user_id]:
                 del self.user_activity[user_id]
@@ -613,7 +621,9 @@ class SecurityMonitoringSystem:
         return SecurityMetrics(
             total_events=total_events,
             alerts_generated=alerts_generated,
-            threats_detected=len([a for a in self.active_alerts.values() if a.status == "active"]),
+            threats_detected=len(
+                [a for a in self.active_alerts.values() if a.status == "active"]
+            ),
             false_positives=len(
                 [a for a in self.active_alerts.values() if a.status == "false_positive"]
             ),
@@ -626,7 +636,9 @@ class SecurityMonitoringSystem:
 
     def get_active_alerts(self) -> List[SecurityAlert]:
         """Get all active security alerts."""
-        return [alert for alert in self.active_alerts.values() if alert.status == "active"]
+        return [
+            alert for alert in self.active_alerts.values() if alert.status == "active"
+        ]
 
     def resolve_alert(self, alert_id: str, resolution_notes: str = "") -> bool:
         """Resolve a security alert."""

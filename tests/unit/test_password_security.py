@@ -43,7 +43,9 @@ class PasswordValidator:
         errors = []
 
         if len(password) < self.min_length:
-            errors.append(f"Password must be at least {self.min_length} characters long")
+            errors.append(
+                f"Password must be at least {self.min_length} characters long"
+            )
 
         if REQUIRE_UPPERCASE and not self.patterns["uppercase"].search(password):
             errors.append("Password must contain at least one uppercase letter")
@@ -66,7 +68,9 @@ class PasswordHasher:
     def __init__(self):
         # Use bcrypt with strong settings
         self.pwd_context = CryptContext(
-            schemes=["bcrypt"], deprecated="auto", bcrypt__rounds=12  # OWASP recommended minimum
+            schemes=["bcrypt"],
+            deprecated="auto",
+            bcrypt__rounds=12,  # OWASP recommended minimum
         )
         self.validator = PasswordValidator()
 
@@ -201,7 +205,12 @@ class TestPasswordValidator:
         """Test that common passwords are rejected."""
         # Arrange
         validator = PasswordValidator()
-        common_passwords = ["Password123!", "Qwerty123!@#", "Admin@12345!", "Welcome123!!"]
+        common_passwords = [
+            "Password123!",
+            "Qwerty123!@#",
+            "Admin@12345!",
+            "Welcome123!!",
+        ]
 
         # Note: In production, use a common password list
         # For now, these pass validation but should be checked against a list
@@ -334,7 +343,9 @@ class TestPasswordHasher:
 
         # Simulate an old hash with fewer rounds
         old_hasher = PasswordHasher()
-        old_hasher.pwd_context = CryptContext(schemes=["bcrypt"], bcrypt__rounds=10)  # Fewer rounds
+        old_hasher.pwd_context = CryptContext(
+            schemes=["bcrypt"], bcrypt__rounds=10
+        )  # Fewer rounds
         old_hash = old_hasher.pwd_context.hash(password)
 
         # Act

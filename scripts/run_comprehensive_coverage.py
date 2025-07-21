@@ -177,9 +177,7 @@ def run_coverage_analysis():
             # Sort by coverage percentage
             files_coverage.sort(key=lambda x: x[1])
 
-            for file_path, coverage, statements, missing in files_coverage[
-                :10
-            ]:
+            for file_path, coverage, statements, missing in files_coverage[:10]:
                 print(
                     f"  {file_path}: {coverage:.1f}% ({len(missing)} of {statements} lines missing)"
                 )
@@ -228,9 +226,7 @@ def main():
 
     # Check if we're in the right directory
     if not os.path.exists("agents") or not os.path.exists("tests"):
-        print(
-            "❌ Error: Please run this script from the project root directory"
-        )
+        print("❌ Error: Please run this script from the project root directory")
         sys.exit(1)
 
     # Run coverage analysis

@@ -95,7 +95,9 @@ class SecurityMetricsDeployer:
                 }
             ],
             "alerting": {
-                "alertmanagers": [{"static_configs": [{"targets": ["alertmanager:9093"]}]}]
+                "alertmanagers": [
+                    {"static_configs": [{"targets": ["alertmanager:9093"]}]}
+                ]
             },
         }
 
@@ -158,7 +160,9 @@ class SecurityMetricsDeployer:
                             "smarthost": "smtp.gmail.com:587",
                             "auth_username": "alerts@freeagentics.com",
                             "auth_password": os.getenv("SMTP_PASSWORD", ""),
-                            "headers": {"Subject": "Security Alert: {{ .GroupLabels.alertname }}"},
+                            "headers": {
+                                "Subject": "Security Alert: {{ .GroupLabels.alertname }}"
+                            },
                         }
                     ],
                 },

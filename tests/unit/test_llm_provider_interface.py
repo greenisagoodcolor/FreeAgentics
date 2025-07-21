@@ -89,7 +89,6 @@ class TestProviderCredentials:
     def test_credentials_creation_basic(self):
         """Test basic credentials creation."""
         if not IMPORT_SUCCESS:
-
             assert False, "Test bypass removed - must fix underlying issue"
         credentials = ProviderCredentials(
             api_key="test-key",
@@ -105,7 +104,6 @@ class TestProviderCredentials:
     def test_credentials_is_complete_with_api_key(self):
         """Test credentials completeness check with API key."""
         if not IMPORT_SUCCESS:
-
             assert False, "Test bypass removed - must fix underlying issue"
         credentials = ProviderCredentials(api_key="test-key")
         assert credentials.is_complete() is True
@@ -113,7 +111,6 @@ class TestProviderCredentials:
     def test_credentials_is_complete_with_encrypted_id(self):
         """Test credentials completeness check with encrypted ID."""
         if not IMPORT_SUCCESS:
-
             assert False, "Test bypass removed - must fix underlying issue"
         credentials = ProviderCredentials(encrypted_credential_id="encrypted-123")
         assert credentials.is_complete() is True
@@ -121,7 +118,6 @@ class TestProviderCredentials:
     def test_credentials_is_complete_empty(self):
         """Test credentials completeness check when empty."""
         if not IMPORT_SUCCESS:
-
             assert False, "Test bypass removed - must fix underlying issue"
         credentials = ProviderCredentials()
         assert credentials.is_complete() is False
@@ -133,7 +129,6 @@ class TestModelInfo:
     def test_model_info_creation(self):
         """Test model info creation."""
         if not IMPORT_SUCCESS:
-
             assert False, "Test bypass removed - must fix underlying issue"
         model = ModelInfo(
             id="gpt-4",
@@ -165,7 +160,6 @@ class TestUsageMetrics:
     def test_usage_metrics_initialization(self):
         """Test usage metrics initialization."""
         if not IMPORT_SUCCESS:
-
             assert False, "Test bypass removed - must fix underlying issue"
         metrics = UsageMetrics()
 
@@ -183,7 +177,6 @@ class TestUsageMetrics:
     def test_update_request_success(self):
         """Test updating metrics with successful request."""
         if not IMPORT_SUCCESS:
-
             assert False, "Test bypass removed - must fix underlying issue"
         metrics = UsageMetrics()
 
@@ -213,7 +206,6 @@ class TestUsageMetrics:
     def test_update_request_failure(self):
         """Test updating metrics with failed request."""
         if not IMPORT_SUCCESS:
-
             assert False, "Test bypass removed - must fix underlying issue"
         metrics = UsageMetrics()
 
@@ -239,7 +231,6 @@ class TestUsageMetrics:
     def test_average_latency_calculation(self):
         """Test average latency calculation with multiple requests."""
         if not IMPORT_SUCCESS:
-
             assert False, "Test bypass removed - must fix underlying issue"
         metrics = UsageMetrics()
 
@@ -262,7 +253,6 @@ class TestHealthCheckResult:
     def test_health_check_result_creation(self):
         """Test health check result creation."""
         if not IMPORT_SUCCESS:
-
             assert False, "Test bypass removed - must fix underlying issue"
         result = HealthCheckResult(
             status=ProviderStatus.HEALTHY,
@@ -286,7 +276,6 @@ class TestGenerationRequest:
     def test_generation_request_creation(self):
         """Test generation request creation."""
         if not IMPORT_SUCCESS:
-
             assert False, "Test bypass removed - must fix underlying issue"
         request = GenerationRequest(
             model="gpt-4",
@@ -310,7 +299,6 @@ class TestGenerationResponse:
     def test_generation_response_creation(self):
         """Test generation response creation."""
         if not IMPORT_SUCCESS:
-
             assert False, "Test bypass removed - must fix underlying issue"
         response = GenerationResponse(
             text="Hello! How can I help you today?",
@@ -340,13 +328,14 @@ class TestBaseProvider:
     def base_provider(self):
         """Create a base provider instance."""
         if not IMPORT_SUCCESS:
-
             assert False, "Test bypass removed - must fix underlying issue"
 
         # Create a concrete implementation for testing
         class TestProvider(BaseProvider):
             def test_connection(self) -> HealthCheckResult:
-                return HealthCheckResult(status=ProviderStatus.HEALTHY, latency_ms=100.0)
+                return HealthCheckResult(
+                    status=ProviderStatus.HEALTHY, latency_ms=100.0
+                )
 
             def generate(self, request: GenerationRequest) -> GenerationResponse:
                 return GenerationResponse(
@@ -360,7 +349,9 @@ class TestBaseProvider:
                     finish_reason="stop",
                 )
 
-            def estimate_cost(self, input_tokens: int, output_tokens: int, model: str) -> float:
+            def estimate_cost(
+                self, input_tokens: int, output_tokens: int, model: str
+            ) -> float:
                 return (input_tokens * 0.01 + output_tokens * 0.02) / 1000
 
         return TestProvider(ProviderType.OPENAI)
@@ -505,7 +496,6 @@ class TestProviderRegistry:
     def registry(self):
         """Create a provider registry instance."""
         if not IMPORT_SUCCESS:
-
             assert False, "Test bypass removed - must fix underlying issue"
         return ProviderRegistry()
 
@@ -536,7 +526,6 @@ class TestProviderRegistry:
     def test_register_provider_with_priority(self, registry):
         """Test registering providers with different priorities."""
         if not IMPORT_SUCCESS:
-
             assert False, "Test bypass removed - must fix underlying issue"
         # Create mock providers
         high_priority_provider = Mock(spec=ILLMProvider)
@@ -587,7 +576,6 @@ class TestProviderRegistry:
     def test_get_healthy_providers_excludes_unhealthy(self, registry):
         """Test that unhealthy providers are excluded."""
         if not IMPORT_SUCCESS:
-
             assert False, "Test bypass removed - must fix underlying issue"
         unhealthy_provider = Mock(spec=ILLMProvider)
         unhealthy_provider.get_provider_type.return_value = ProviderType.OPENAI
@@ -602,7 +590,6 @@ class TestProviderRegistry:
     def test_reorder_providers(self, registry):
         """Test reordering provider priorities."""
         if not IMPORT_SUCCESS:
-
             assert False, "Test bypass removed - must fix underlying issue"
         # Create and register multiple providers
         provider1 = Mock(spec=ILLMProvider)
@@ -641,7 +628,9 @@ class TestProviderManager:
     @pytest.fixture
     def temp_config_file(self):
         """Create a temporary config file."""
-        config = {"providers": [{"type": "openai", "api_key": "test-key", "priority": 1}]}
+        config = {
+            "providers": [{"type": "openai", "api_key": "test-key", "priority": 1}]
+        }
 
         with tempfile.NamedTemporaryFile(mode="w", suffix=".json", delete=False) as f:
             json.dump(config, f)
@@ -651,7 +640,6 @@ class TestProviderManager:
     def manager(self, temp_config_file):
         """Create a provider manager instance."""
         if not IMPORT_SUCCESS:
-
             assert False, "Test bypass removed - must fix underlying issue"
         return ProviderManager(config_path=temp_config_file)
 
@@ -663,7 +651,6 @@ class TestProviderManager:
     def test_manager_initialization_no_config(self):
         """Test manager initialization without config file."""
         if not IMPORT_SUCCESS:
-
             assert False, "Test bypass removed - must fix underlying issue"
         manager = ProviderManager()
         assert isinstance(manager.registry, ProviderRegistry)
@@ -672,7 +659,6 @@ class TestProviderManager:
     def test_load_configuration_file_not_exists(self):
         """Test loading configuration when file doesn't exist."""
         if not IMPORT_SUCCESS:
-
             assert False, "Test bypass removed - must fix underlying issue"
         non_existent_path = Path("/non/existent/config.json")
         manager = ProviderManager(config_path=non_existent_path)
@@ -705,7 +691,9 @@ class TestProviderManager:
         manager.registry.register_provider(mock_provider)
 
         # Test generation
-        request = GenerationRequest(model="gpt-4", messages=[{"role": "user", "content": "test"}])
+        request = GenerationRequest(
+            model="gpt-4", messages=[{"role": "user", "content": "test"}]
+        )
 
         response = manager.generate_with_fallback(request)
 
@@ -744,7 +732,9 @@ class TestProviderManager:
         manager.registry.register_provider(working_provider, priority=2)
 
         # Test generation
-        request = GenerationRequest(model="gpt-4", messages=[{"role": "user", "content": "test"}])
+        request = GenerationRequest(
+            model="gpt-4", messages=[{"role": "user", "content": "test"}]
+        )
 
         response = manager.generate_with_fallback(request)
 
@@ -754,7 +744,9 @@ class TestProviderManager:
 
     def test_generate_with_fallback_no_providers(self, manager):
         """Test generation with no healthy providers."""
-        request = GenerationRequest(model="gpt-4", messages=[{"role": "user", "content": "test"}])
+        request = GenerationRequest(
+            model="gpt-4", messages=[{"role": "user", "content": "test"}]
+        )
 
         with pytest.raises(Exception, match="No healthy providers available"):
             manager.generate_with_fallback(request)
@@ -780,7 +772,9 @@ class TestProviderManager:
         # Create mock provider
         mock_provider = Mock(spec=ILLMProvider)
         mock_provider.get_provider_type.return_value = ProviderType.OPENAI
-        health_result = HealthCheckResult(status=ProviderStatus.HEALTHY, latency_ms=150.0)
+        health_result = HealthCheckResult(
+            status=ProviderStatus.HEALTHY, latency_ms=150.0
+        )
         mock_provider.test_connection.return_value = health_result
 
         manager.registry.register_provider(mock_provider)
@@ -827,7 +821,9 @@ class TestProviderManager:
 
         manager.registry.register_provider(mock_provider)
 
-        request = GenerationRequest(model="gpt-4", messages=[{"role": "user", "content": "test"}])
+        request = GenerationRequest(
+            model="gpt-4", messages=[{"role": "user", "content": "test"}]
+        )
 
         recommendations = manager.get_provider_recommendations(request)
 
@@ -844,7 +840,9 @@ class TestProviderManagerEdgeCases:
     @pytest.fixture
     def temp_config_file(self):
         """Create a temporary config file."""
-        config = {"providers": [{"type": "openai", "api_key": "test-key", "priority": 1}]}
+        config = {
+            "providers": [{"type": "openai", "api_key": "test-key", "priority": 1}]
+        }
 
         with tempfile.NamedTemporaryFile(mode="w", suffix=".json", delete=False) as f:
             json.dump(config, f)
@@ -853,7 +851,6 @@ class TestProviderManagerEdgeCases:
     def test_manager_with_corrupted_config(self):
         """Test manager with corrupted config file."""
         if not IMPORT_SUCCESS:
-
             assert False, "Test bypass removed - must fix underlying issue"
         # Create corrupted config file
         with tempfile.NamedTemporaryFile(mode="w", suffix=".json", delete=False) as f:
@@ -867,7 +864,6 @@ class TestProviderManagerEdgeCases:
     def test_provider_recommendations_no_metrics(self, temp_config_file):
         """Test provider recommendations with no usage metrics."""
         if not IMPORT_SUCCESS:
-
             assert False, "Test bypass removed - must fix underlying issue"
         manager = ProviderManager(config_path=temp_config_file)
 
@@ -882,7 +878,9 @@ class TestProviderManagerEdgeCases:
 
         manager.registry.register_provider(mock_provider)
 
-        request = GenerationRequest(model="gpt-4", messages=[{"role": "user", "content": "test"}])
+        request = GenerationRequest(
+            model="gpt-4", messages=[{"role": "user", "content": "test"}]
+        )
 
         recommendations = manager.get_provider_recommendations(request)
 
@@ -899,7 +897,6 @@ class TestIntegrationScenarios:
     def test_full_provider_lifecycle(self):
         """Test complete provider lifecycle."""
         if not IMPORT_SUCCESS:
-
             assert False, "Test bypass removed - must fix underlying issue"
         # Create manager
         manager = ProviderManager()
@@ -935,7 +932,9 @@ class TestIntegrationScenarios:
         mock_provider.generate.return_value = expected_response
 
         # Test generation
-        request = GenerationRequest(model="gpt-4", messages=[{"role": "user", "content": "test"}])
+        request = GenerationRequest(
+            model="gpt-4", messages=[{"role": "user", "content": "test"}]
+        )
         response = manager.generate_with_fallback(request)
         assert response == expected_response
 
@@ -946,7 +945,6 @@ class TestIntegrationScenarios:
     def test_multiple_provider_fallback_chain(self):
         """Test fallback chain with multiple providers."""
         if not IMPORT_SUCCESS:
-
             assert False, "Test bypass removed - must fix underlying issue"
         manager = ProviderManager()
 

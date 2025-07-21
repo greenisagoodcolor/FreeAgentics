@@ -10,22 +10,22 @@ from fastapi.testclient import TestClient
 
 # Mock complex dependencies
 mock_modules = {
-    'sqlalchemy': MagicMock(),
-    'sqlalchemy.orm': MagicMock(),
-    'redis': MagicMock(),
-    'database': MagicMock(),
-    'database.session': MagicMock(),
-    'database.models': MagicMock(),
-    'agents': MagicMock(),
-    'agents.base_agent': MagicMock(),
-    'agents.agent_manager': MagicMock(),
-    'auth': MagicMock(),
-    'auth.security_implementation': MagicMock(),
-    'observability': MagicMock(),
-    'websocket': MagicMock(),
+    "sqlalchemy": MagicMock(),
+    "sqlalchemy.orm": MagicMock(),
+    "redis": MagicMock(),
+    "database": MagicMock(),
+    "database.session": MagicMock(),
+    "database.models": MagicMock(),
+    "agents": MagicMock(),
+    "agents.base_agent": MagicMock(),
+    "agents.agent_manager": MagicMock(),
+    "auth": MagicMock(),
+    "auth.security_implementation": MagicMock(),
+    "observability": MagicMock(),
+    "websocket": MagicMock(),
 }
 
-with patch.dict('sys.modules', mock_modules):
+with patch.dict("sys.modules", mock_modules):
     from api.middleware.rate_limiter import RateLimitMiddleware
     from api.middleware.security_headers import SecurityHeadersMiddleware
     from api.v1.agents import router as agents_router
@@ -57,13 +57,11 @@ class TestSecurityHeadersMiddleware:
             response.headers["X-Content-Type-Options"] = "nosniff"
             response.headers["X-Frame-Options"] = "DENY"
             response.headers["X-XSS-Protection"] = "1; mode=block"
-            response.headers[
-                "Strict-Transport-Security"
-            ] = "max-age=31536000; includeSubDomains"
+            response.headers["Strict-Transport-Security"] = (
+                "max-age=31536000; includeSubDomains"
+            )
             response.headers["Content-Security-Policy"] = "default-src 'self'"
-            response.headers[
-                "Referrer-Policy"
-            ] = "strict-origin-when-cross-origin"
+            response.headers["Referrer-Policy"] = "strict-origin-when-cross-origin"
 
             return response
 
@@ -247,9 +245,7 @@ class TestRateLimitMiddleware:
         response = Mock()
         response.headers = {}
 
-        result = self.middleware.add_rate_limit_headers(
-            response, 42, 1640995200
-        )
+        result = self.middleware.add_rate_limit_headers(response, 42, 1640995200)
 
         assert result.headers["X-RateLimit-Remaining"] == "42"
         assert result.headers["X-RateLimit-Reset"] == "1640995200"
@@ -278,9 +274,7 @@ class TestErrorHandlers:
 
         # Test with different HTTP exceptions
         exc_404 = HTTPException(status_code=404, detail="Not Found")
-        exc_500 = HTTPException(
-            status_code=500, detail="Internal Server Error"
-        )
+        exc_500 = HTTPException(status_code=500, detail="Internal Server Error")
 
         request = Mock()
 
@@ -301,9 +295,7 @@ class TestErrorHandlers:
                 "error": {
                     "type": "ValidationError",
                     "message": "Request validation failed",
-                    "details": [
-                        {"field": "email", "message": "Invalid email format"}
-                    ],
+                    "details": [{"field": "email", "message": "Invalid email format"}],
                     "timestamp": datetime.now().isoformat(),
                 }
             }
@@ -328,7 +320,7 @@ class TestErrorHandlers:
                     "type": "InternalServerError",
                     "message": "An unexpected error occurred",
                     "timestamp": datetime.now().isoformat(),
-                    "request_id": getattr(request, 'id', 'unknown'),
+                    "request_id": getattr(request, "id", "unknown"),
                 }
             }
 
@@ -354,7 +346,7 @@ class TestHealthRouter:
 
     def test_health_check_endpoint(self):
         """Test health check endpoint."""
-        with patch('api.v1.health.get_health_status') as mock_health:
+        with patch("api.v1.health.get_health_status") as mock_health:
             mock_health.return_value = {
                 "status": "healthy",
                 "timestamp": datetime.now().isoformat(),
@@ -379,7 +371,7 @@ class TestHealthRouter:
 
     def test_health_check_unhealthy(self):
         """Test health check when services are unhealthy."""
-        with patch('api.v1.health.get_health_status') as mock_health:
+        with patch("api.v1.health.get_health_status") as mock_health:
             mock_health.return_value = {
                 "status": "unhealthy",
                 "timestamp": datetime.now().isoformat(),
@@ -402,9 +394,7 @@ class TestHealthRouter:
 
     def test_health_check_detailed(self):
         """Test detailed health check endpoint."""
-        with patch(
-            'api.v1.health.get_detailed_health_status'
-        ) as mock_detailed:
+        with patch("api.v1.health.get_detailed_health_status") as mock_detailed:
             mock_detailed.return_value = {
                 "status": "healthy",
                 "timestamp": datetime.now().isoformat(),
@@ -445,7 +435,7 @@ class TestAuthRouter:
 
     def test_login_endpoint(self):
         """Test login endpoint."""
-        with patch('api.v1.auth.authenticate_user') as mock_auth:
+        with patch("api.v1.auth.authenticate_user") as mock_auth:
             mock_auth.return_value = {
                 "access_token": "test_access_token",
                 "refresh_token": "test_refresh_token",
@@ -471,7 +461,7 @@ class TestAuthRouter:
 
     def test_login_invalid_credentials(self):
         """Test login with invalid credentials."""
-        with patch('api.v1.auth.authenticate_user') as mock_auth:
+        with patch("api.v1.auth.authenticate_user") as mock_auth:
             mock_auth.side_effect = HTTPException(
                 status_code=401, detail="Invalid credentials"
             )
@@ -486,7 +476,7 @@ class TestAuthRouter:
 
     def test_refresh_token_endpoint(self):
         """Test refresh token endpoint."""
-        with patch('api.v1.auth.refresh_access_token') as mock_refresh:
+        with patch("api.v1.auth.refresh_access_token") as mock_refresh:
             mock_refresh.return_value = {
                 "access_token": "new_access_token",
                 "refresh_token": "new_refresh_token",
@@ -505,7 +495,7 @@ class TestAuthRouter:
 
     def test_logout_endpoint(self):
         """Test logout endpoint."""
-        with patch('api.v1.auth.revoke_token') as mock_revoke:
+        with patch("api.v1.auth.revoke_token") as mock_revoke:
             mock_revoke.return_value = {
                 "message": "Successfully logged out",
                 "revoked_at": datetime.now().isoformat(),
@@ -532,7 +522,7 @@ class TestAgentsRouter:
 
     def test_list_agents_endpoint(self):
         """Test list agents endpoint."""
-        with patch('api.v1.agents.get_all_agents') as mock_get_agents:
+        with patch("api.v1.agents.get_all_agents") as mock_get_agents:
             mock_get_agents.return_value = [
                 {
                     "agent_id": "agent_001",
@@ -560,7 +550,7 @@ class TestAgentsRouter:
 
     def test_get_agent_endpoint(self):
         """Test get specific agent endpoint."""
-        with patch('api.v1.agents.get_agent_by_id') as mock_get_agent:
+        with patch("api.v1.agents.get_agent_by_id") as mock_get_agent:
             mock_get_agent.return_value = {
                 "agent_id": "agent_001",
                 "name": "Test Agent 1",
@@ -587,7 +577,7 @@ class TestAgentsRouter:
 
     def test_create_agent_endpoint(self):
         """Test create agent endpoint."""
-        with patch('api.v1.agents.create_new_agent') as mock_create:
+        with patch("api.v1.agents.create_new_agent") as mock_create:
             mock_create.return_value = {
                 "agent_id": "agent_003",
                 "name": "New Test Agent",
@@ -613,7 +603,7 @@ class TestAgentsRouter:
 
     def test_update_agent_endpoint(self):
         """Test update agent endpoint."""
-        with patch('api.v1.agents.update_agent') as mock_update:
+        with patch("api.v1.agents.update_agent") as mock_update:
             mock_update.return_value = {
                 "agent_id": "agent_001",
                 "name": "Updated Test Agent",
@@ -636,7 +626,7 @@ class TestAgentsRouter:
 
     def test_delete_agent_endpoint(self):
         """Test delete agent endpoint."""
-        with patch('api.v1.agents.delete_agent') as mock_delete:
+        with patch("api.v1.agents.delete_agent") as mock_delete:
             mock_delete.return_value = {
                 "message": "Agent deleted successfully",
                 "agent_id": "agent_001",
@@ -652,7 +642,7 @@ class TestAgentsRouter:
 
     def test_agent_action_endpoint(self):
         """Test agent action endpoint."""
-        with patch('api.v1.agents.execute_agent_action') as mock_action:
+        with patch("api.v1.agents.execute_agent_action") as mock_action:
             mock_action.return_value = {
                 "action_id": "action_123",
                 "agent_id": "agent_001",
@@ -670,9 +660,7 @@ class TestAgentsRouter:
                 "parameters": {"observation": {"sensor": "value"}},
             }
 
-            response = self.client.post(
-                "/agents/agent_001/actions", json=action_data
-            )
+            response = self.client.post("/agents/agent_001/actions", json=action_data)
 
             assert response.status_code == 200
             data = response.json()
@@ -737,9 +725,7 @@ class TestAPIIntegration:
         assert "v1" in api_versions
         assert "v2" in api_versions
         assert not api_versions["v1"]["deprecated"]
-        assert len(api_versions["v2"]["routes"]) > len(
-            api_versions["v1"]["routes"]
-        )
+        assert len(api_versions["v2"]["routes"]) > len(api_versions["v1"]["routes"])
 
     def test_authentication_flow(self):
         """Test complete authentication flow."""

@@ -261,12 +261,16 @@ def fix_missing_placeholders(lines: List[str], line_num: int) -> List[str]:
     # Remove f prefix from strings without placeholders
     lines[line_num] = re.sub(
         r'\bf"([^"]*)"',
-        lambda m: '"' + str(m.group(1)) + '"' if "{" not in str(m.group(1)) else m.group(0),
+        lambda m: '"' + str(m.group(1)) + '"'
+        if "{" not in str(m.group(1))
+        else m.group(0),
         line,
     )
     lines[line_num] = re.sub(
         r"\bf'([^']*)'",
-        lambda m: "'" + str(m.group(1)) + "'" if "{" not in str(m.group(1)) else m.group(0),
+        lambda m: "'" + str(m.group(1)) + "'"
+        if "{" not in str(m.group(1))
+        else m.group(0),
         lines[line_num],
     )
 
@@ -340,7 +344,9 @@ def fix_file_comprehensive(filepath: str) -> bool:
 
 
 def main():
-    parser = argparse.ArgumentParser(description="Fix flake8 violations comprehensively")
+    parser = argparse.ArgumentParser(
+        description="Fix flake8 violations comprehensively"
+    )
     parser.add_argument("paths", nargs="+", help="Files or directories to fix")
     parser.add_argument(
         "--max-iterations",

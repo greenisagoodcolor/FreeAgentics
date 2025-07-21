@@ -32,7 +32,7 @@ class HoneycombAuthTracer:
         """Initialize Honeycomb auth tracer."""
         self.tracer = get_distributed_tracer()
         self.enabled = HONEYCOMB_ENABLED
-        
+
         if self.enabled:
             logger.info(f"Honeycomb tracing enabled for dataset: {HONEYCOMB_DATASET}")
         else:
@@ -44,7 +44,7 @@ class HoneycombAuthTracer:
         operation: str,
         request: Optional[Request] = None,
         user_id: Optional[str] = None,
-        **extra_tags
+        **extra_tags,
     ):
         """Trace an authentication operation with Honeycomb-specific fields."""
         if not self.enabled:
@@ -53,24 +53,23 @@ class HoneycombAuthTracer:
 
         # Create span with Honeycomb fields
         span = self.tracer.start_span(
-            operation_name=f"auth.{operation}",
-            service_name="auth-service"
+            operation_name=f"auth.{operation}", service_name="auth-service"
         )
 
         # Add standard auth tags
         span.add_tag("auth.operation", operation)
         span.add_tag("honeycomb.dataset", HONEYCOMB_DATASET)
-        
+
         if user_id:
             span.add_tag("user.id", user_id)
-        
+
         if request:
             # Add request context
             span.add_tag("http.method", request.method)
             span.add_tag("http.url", str(request.url))
             span.add_tag("http.path", request.url.path)
             span.add_tag("http.client_ip", request.client.host)
-            
+
             # Add headers (excluding sensitive data)
             span.add_tag("http.user_agent", request.headers.get("User-Agent", ""))
             span.add_tag("http.content_type", request.headers.get("Content-Type", ""))
@@ -108,10 +107,10 @@ class HoneycombAuthTracer:
             "service_name": span.service_name,
             "status": span.status,
         }
-        
+
         # Add all tags as fields
         event.update(span.tags)
-        
+
         # Add logs as annotations
         if span.logs:
             event["annotations"] = json.dumps(span.logs)
@@ -122,110 +121,118 @@ class HoneycombAuthTracer:
 
     def trace_login(self, func):
         """Decorator to trace login operations."""
+
         @wraps(func)
         async def wrapper(*args, **kwargs):
             request = kwargs.get("request")
-            username = kwargs.get("login_data", {}).username if "login_data" in kwargs else None
-            
+            username = (
+                kwargs.get("login_data", {}).username
+                if "login_data" in kwargs
+                else None
+            )
+
             async with self.trace_auth_operation(
-                "login",
-                request=request,
-                username=username,
-                auth_type="password"
+                "login", request=request, username=username, auth_type="password"
             ) as span:
                 start_time = time.time()
                 try:
                     result = await func(*args, **kwargs)
                     if span:
                         span.add_tag("auth.success", True)
-                        span.add_tag("auth.duration_ms", (time.time() - start_time) * 1000)
+                        span.add_tag(
+                            "auth.duration_ms", (time.time() - start_time) * 1000
+                        )
                     return result
                 except Exception as e:
                     if span:
                         span.add_tag("auth.success", False)
                         span.add_tag("auth.failure_reason", str(e))
                     raise
-        
+
         return wrapper
 
     def trace_token_validation(self, func):
         """Decorator to trace token validation operations."""
+
         @wraps(func)
         async def wrapper(*args, **kwargs):
             token_type = kwargs.get("token_type", "access")
-            
+
             async with self.trace_auth_operation(
-                "token_validation",
-                token_type=token_type
+                "token_validation", token_type=token_type
             ) as span:
                 start_time = time.time()
                 try:
                     result = await func(*args, **kwargs)
                     if span:
                         span.add_tag("auth.token_valid", True)
-                        span.add_tag("auth.validation_duration_ms", (time.time() - start_time) * 1000)
+                        span.add_tag(
+                            "auth.validation_duration_ms",
+                            (time.time() - start_time) * 1000,
+                        )
                     return result
                 except Exception as e:
                     if span:
                         span.add_tag("auth.token_valid", False)
                         span.add_tag("auth.validation_error", str(e))
                     raise
-        
+
         return wrapper
 
     def trace_mfa(self, func):
         """Decorator to trace MFA operations."""
+
         @wraps(func)
         async def wrapper(*args, **kwargs):
             mfa_type = kwargs.get("mfa_type", "totp")
             user_id = kwargs.get("user_id")
-            
+
             async with self.trace_auth_operation(
-                "mfa_verification",
-                user_id=user_id,
-                mfa_type=mfa_type
+                "mfa_verification", user_id=user_id, mfa_type=mfa_type
             ) as span:
                 start_time = time.time()
                 try:
                     result = await func(*args, **kwargs)
                     if span:
                         span.add_tag("auth.mfa_success", True)
-                        span.add_tag("auth.mfa_duration_ms", (time.time() - start_time) * 1000)
+                        span.add_tag(
+                            "auth.mfa_duration_ms", (time.time() - start_time) * 1000
+                        )
                     return result
                 except Exception as e:
                     if span:
                         span.add_tag("auth.mfa_success", False)
                         span.add_tag("auth.mfa_failure_reason", str(e))
                     raise
-        
+
         return wrapper
 
     def trace_permission_check(self, func):
         """Decorator to trace permission/RBAC checks."""
+
         @wraps(func)
         async def wrapper(*args, **kwargs):
             user_id = kwargs.get("user_id")
             resource = kwargs.get("resource")
             action = kwargs.get("action")
-            
+
             async with self.trace_auth_operation(
-                "permission_check",
-                user_id=user_id,
-                resource=resource,
-                action=action
+                "permission_check", user_id=user_id, resource=resource, action=action
             ) as span:
                 start_time = time.time()
                 try:
                     result = await func(*args, **kwargs)
                     if span:
                         span.add_tag("auth.permission_granted", bool(result))
-                        span.add_tag("auth.check_duration_ms", (time.time() - start_time) * 1000)
+                        span.add_tag(
+                            "auth.check_duration_ms", (time.time() - start_time) * 1000
+                        )
                     return result
                 except Exception as e:
                     if span:
                         span.add_tag("auth.permission_error", str(e))
                     raise
-        
+
         return wrapper
 
 

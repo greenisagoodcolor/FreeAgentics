@@ -40,7 +40,9 @@ class Permission(Enum):
 class Role:
     """Role definition with permissions."""
 
-    def __init__(self, name: str, permissions: Set[Permission], parent: Optional["Role"] = None):
+    def __init__(
+        self, name: str, permissions: Set[Permission], parent: Optional["Role"] = None
+    ):
         self.name = name
         self.permissions = permissions
         self.parent = parent
@@ -140,7 +142,9 @@ class RBACManager:
     def revoke_role(self, user_id: str, role_name: str):
         """Revoke a role from a user."""
         if user_id in self.user_roles:
-            self.user_roles[user_id] = [r for r in self.user_roles[user_id] if r != role_name]
+            self.user_roles[user_id] = [
+                r for r in self.user_roles[user_id] if r != role_name
+            ]
             if not self.user_roles[user_id]:
                 del self.user_roles[user_id]
 
@@ -277,7 +281,9 @@ class TestRBACManager:
 
         # Act & Assert
         assert rbac.check_permission("user-123", Permission.AGENT_CREATE) is True
-        assert rbac.check_permission("user-123", Permission.AGENT_READ) is True  # Inherited
+        assert (
+            rbac.check_permission("user-123", Permission.AGENT_READ) is True
+        )  # Inherited
         assert rbac.check_permission("user-123", Permission.AGENT_DELETE) is False
 
     def test_check_permission_with_multiple_roles(self, rbac):
@@ -323,7 +329,9 @@ class TestResourcePermissions:
         assert rbac.check_permission("user-123", Permission.AGENT_UPDATE) is False
 
         # Act - Grant UPDATE on specific agent
-        rbac.grant_resource_permission("user-123", "agent", "agent-456", Permission.AGENT_UPDATE)
+        rbac.grant_resource_permission(
+            "user-123", "agent", "agent-456", Permission.AGENT_UPDATE
+        )
 
         # Assert
         assert (
@@ -336,7 +344,9 @@ class TestResourcePermissions:
     def test_resource_permission_overrides_general(self, rbac):
         """Test that resource-specific permissions can override general permissions."""
         # Arrange - User with no roles (no general permissions)
-        rbac.grant_resource_permission("user-123", "agent", "agent-456", Permission.AGENT_DELETE)
+        rbac.grant_resource_permission(
+            "user-123", "agent", "agent-456", Permission.AGENT_DELETE
+        )
 
         # Act & Assert - Should be allowed for specific resource
         assert (
@@ -358,7 +368,9 @@ class TestResourcePermissions:
         """Test that resource permissions are isolated."""
         # Arrange
         rbac.assign_role("user-123", "user")
-        rbac.grant_resource_permission("user-123", "agent", "agent-456", Permission.AGENT_UPDATE)
+        rbac.grant_resource_permission(
+            "user-123", "agent", "agent-456", Permission.AGENT_UPDATE
+        )
 
         # Act & Assert
         # Has permission on specific resource

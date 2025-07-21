@@ -380,7 +380,9 @@ class AuthenticationBypassTests(BasePenetrationTest):
                 modified_payload["role"] = "admin"
 
                 # Create token with modified payload but try to keep original signature structure
-                modified_token = pyjwt.encode(modified_payload, "fake_secret", algorithm="HS256")
+                modified_token = pyjwt.encode(
+                    modified_payload, "fake_secret", algorithm="HS256"
+                )
 
                 headers = {"Authorization": f"Bearer {modified_token}"}
                 response = self.client.get("/api/v1/auth/permissions", headers=headers)
@@ -545,7 +547,10 @@ class AuthenticationBypassTests(BasePenetrationTest):
 
         if response.status_code in [200, 201, 202]:
             # Test for information disclosure
-            if "not found" not in response.text.lower() and "invalid" not in response.text.lower():
+            if (
+                "not found" not in response.text.lower()
+                and "invalid" not in response.text.lower()
+            ):
                 self.add_vulnerability(
                     VulnerabilityFinding(
                         vulnerability_type=VulnerabilityType.AUTHENTICATION_BYPASS,

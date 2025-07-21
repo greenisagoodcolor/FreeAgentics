@@ -55,7 +55,9 @@ class TestConversationModels:
         test_session.commit()
 
         # Retrieve and verify
-        retrieved = test_session.query(Conversation).filter_by(user_id="user123").first()
+        retrieved = (
+            test_session.query(Conversation).filter_by(user_id="user123").first()
+        )
 
         assert retrieved is not None
         assert retrieved.user_id == "user123"
@@ -109,7 +111,11 @@ class TestConversationModels:
         test_session.commit()
 
         # Retrieve and verify
-        retrieved = test_session.query(Message).filter_by(conversation_id=conversation.id).first()
+        retrieved = (
+            test_session.query(Message)
+            .filter_by(conversation_id=conversation.id)
+            .first()
+        )
 
         assert retrieved is not None
         assert retrieved.sender_type == "user"

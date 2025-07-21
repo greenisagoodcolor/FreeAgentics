@@ -413,10 +413,14 @@ class SSLTLSValidator:
             recommendations.append("Address all critical errors to achieve A+ rating")
 
         if any("preload" in w for w in self.warnings):
-            recommendations.append("Consider adding HSTS preload directive for maximum security")
+            recommendations.append(
+                "Consider adding HSTS preload directive for maximum security"
+            )
 
         if any("Certificate Transparency" in w for w in self.warnings):
-            recommendations.append("Configure Expect-CT with report-uri for CT monitoring")
+            recommendations.append(
+                "Configure Expect-CT with report-uri for CT monitoring"
+            )
 
         if not recommendations:
             recommendations.append("SSL/TLS configuration meets A+ grade requirements")

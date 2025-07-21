@@ -34,7 +34,9 @@ class TestBasicRateLimiting:
     @pytest.fixture
     async def redis_client(self):
         """Create real Redis client for integration tests."""
-        client = aioredis.Redis.from_url("redis://localhost:6379", decode_responses=True)
+        client = aioredis.Redis.from_url(
+            "redis://localhost:6379", decode_responses=True
+        )
 
         # Clear test keys
         keys = await client.keys("rate_limit:*")
@@ -227,7 +229,9 @@ class TestAdvancedRateLimiting:
     @pytest.fixture
     async def redis_client(self):
         """Create real Redis client for integration tests."""
-        client = aioredis.Redis.from_url("redis://localhost:6379", decode_responses=True)
+        client = aioredis.Redis.from_url(
+            "redis://localhost:6379", decode_responses=True
+        )
 
         # Clear test keys
         keys = await client.keys("rate_limit:*")
@@ -446,7 +450,9 @@ class TestRateLimitBypassAttempts:
     @pytest.fixture
     async def redis_client(self):
         """Create real Redis client for integration tests."""
-        client = aioredis.Redis.from_url("redis://localhost:6379", decode_responses=True)
+        client = aioredis.Redis.from_url(
+            "redis://localhost:6379", decode_responses=True
+        )
 
         # Clear test keys
         keys = await client.keys("rate_limit:*")
@@ -693,7 +699,10 @@ class TestRateLimitBypassAttempts:
             try:
                 response = await rate_limiter.check_rate_limit(request)
                 # Should handle malicious input gracefully
-                assert response is None or response.status_code == status.HTTP_429_TOO_MANY_REQUESTS
+                assert (
+                    response is None
+                    or response.status_code == status.HTTP_429_TOO_MANY_REQUESTS
+                )
             except Exception as e:
                 # Should not raise exceptions on malicious input
                 pytest.fail(f"Rate limiter failed on malicious input: {e}")
@@ -705,7 +714,9 @@ class TestRateLimitingPerformance:
     @pytest.fixture
     async def redis_client(self):
         """Create real Redis client for integration tests."""
-        client = aioredis.Redis.from_url("redis://localhost:6379", decode_responses=True)
+        client = aioredis.Redis.from_url(
+            "redis://localhost:6379", decode_responses=True
+        )
 
         # Clear test keys
         keys = await client.keys("rate_limit:*")
@@ -963,7 +974,9 @@ class TestWebSocketRateLimiting:
     @pytest.fixture
     async def redis_client(self):
         """Create real Redis client for integration tests."""
-        client = aioredis.Redis.from_url("redis://localhost:6379", decode_responses=True)
+        client = aioredis.Redis.from_url(
+            "redis://localhost:6379", decode_responses=True
+        )
 
         # Clear test keys
         keys = await client.keys("ws_*")

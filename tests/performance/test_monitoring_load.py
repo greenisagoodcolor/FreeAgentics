@@ -44,7 +44,9 @@ async def monitoring_setup():
     await stop_performance_tracking()
 
 
-async def simulate_agent_operations(agent_id: str, num_operations: int, error_rate: float = 0.05):
+async def simulate_agent_operations(
+    agent_id: str, num_operations: int, error_rate: float = 0.05
+):
     """Simulate agent operations with metrics."""
     for i in range(num_operations):
         # Simulate inference with variable time
@@ -136,7 +138,10 @@ async def test_monitoring_under_light_load(monitoring_setup):
     # Run operations concurrently
     start_time = time.time()
 
-    tasks = [simulate_agent_operations(agent.agent_id, operations_per_agent) for agent in agents]
+    tasks = [
+        simulate_agent_operations(agent.agent_id, operations_per_agent)
+        for agent in agents
+    ]
 
     await asyncio.gather(*tasks)
 
@@ -144,7 +149,10 @@ async def test_monitoring_under_light_load(monitoring_setup):
 
     # Verify monitoring is working
     perf_report = await get_performance_report()
-    assert perf_report["system_counters"]["total_inferences"] >= num_agents * operations_per_agent
+    assert (
+        perf_report["system_counters"]["total_inferences"]
+        >= num_agents * operations_per_agent
+    )
 
     # Wait for dashboard to update
     await asyncio.sleep(2)
@@ -185,7 +193,9 @@ async def test_monitoring_under_moderate_load(monitoring_setup):
     for i, agent in enumerate(agents):
         if isinstance(agent, CoalitionCoordinatorAgent):
             tasks.append(
-                simulate_coordination_operations(agent.agent_id, operations_per_agent // 2)
+                simulate_coordination_operations(
+                    agent.agent_id, operations_per_agent // 2
+                )
             )
         tasks.append(simulate_agent_operations(agent.agent_id, operations_per_agent))
 
@@ -229,7 +239,9 @@ async def test_monitoring_under_heavy_load(monitoring_setup):
         batch_agents = []
         for i in range(10):
             agent_id = batch * 10 + i
-            agent = BasicExplorerAgent(f"heavy-agent-{agent_id}", f"Heavy Agent {agent_id}")
+            agent = BasicExplorerAgent(
+                f"heavy-agent-{agent_id}", f"Heavy Agent {agent_id}"
+            )
             agent.start()
             batch_agents.append(agent)
         agents.extend(batch_agents)
@@ -245,7 +257,9 @@ async def test_monitoring_under_heavy_load(monitoring_setup):
         async with semaphore:
             await simulate_agent_operations(agent_id, ops, error_rate=0.1)
 
-    tasks = [run_with_semaphore(agent.agent_id, operations_per_agent) for agent in agents]
+    tasks = [
+        run_with_semaphore(agent.agent_id, operations_per_agent) for agent in agents
+    ]
 
     await asyncio.gather(*tasks)
 
@@ -294,7 +308,9 @@ async def test_monitoring_burst_load(monitoring_setup):
         # Burst phase - high activity
         burst_tasks = []
         for agent in agents:
-            burst_tasks.append(simulate_agent_operations(agent.agent_id, 50, error_rate=0.2))
+            burst_tasks.append(
+                simulate_agent_operations(agent.agent_id, 50, error_rate=0.2)
+            )
 
         await asyncio.gather(*burst_tasks)
 
@@ -346,7 +362,9 @@ async def test_monitoring_sustained_load(monitoring_setup):
         return operations
 
     # Run all agents
-    results = await asyncio.gather(*[sustained_operations(agent.agent_id) for agent in agents])
+    results = await asyncio.gather(
+        *[sustained_operations(agent.agent_id) for agent in agents]
+    )
 
     total_operations = sum(results)
 
@@ -385,7 +403,8 @@ async def test_monitoring_error_scenarios(monitoring_setup):
 
     # Simulate high error rate
     tasks = [
-        simulate_agent_operations(agent.agent_id, 50, error_rate=0.5) for agent in failing_agents
+        simulate_agent_operations(agent.agent_id, 50, error_rate=0.5)
+        for agent in failing_agents
     ]
 
     await asyncio.gather(*tasks)

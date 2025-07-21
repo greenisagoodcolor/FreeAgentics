@@ -71,7 +71,9 @@ def io_work(operations: int = 100) -> None:
     data.sort()
 
 
-def adaptive_cpu_work(target_duration_seconds: float, max_iterations: int = 1000000) -> float:
+def adaptive_cpu_work(
+    target_duration_seconds: float, max_iterations: int = 1000000
+) -> float:
     """
     Perform CPU work that adapts to the system's speed to match target duration.
 
@@ -88,7 +90,10 @@ def adaptive_cpu_work(target_duration_seconds: float, max_iterations: int = 1000
     # Start with a small workload and increase if needed
     chunk_size = 1000
 
-    while time.time() - start_time < target_duration_seconds and iterations < max_iterations:
+    while (
+        time.time() - start_time < target_duration_seconds
+        and iterations < max_iterations
+    ):
         # Perform some CPU-intensive work
         _ = sum(i**2 for i in range(chunk_size))
         iterations += chunk_size

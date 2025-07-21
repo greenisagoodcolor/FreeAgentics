@@ -63,7 +63,9 @@ def demonstrate_error_recovery():
     print("\n5. Agent Status with Error Info:")
     status = agent.get_status()
     if "error_summary" in status:
-        print(f"   Agent handled {status['error_summary']['total_errors']} errors gracefully")
+        print(
+            f"   Agent handled {status['error_summary']['total_errors']} errors gracefully"
+        )
         print(f"   Agent completed {status['total_steps']} steps successfully")
 
     print("\n=== Demo Complete: Agent remained operational despite errors ===")
@@ -140,7 +142,9 @@ def demonstrate_concurrent_error_handling():
             if pattern == "inference_failure":
                 mock_agent.infer_states.side_effect = Exception("Inference failed")
             elif pattern == "action_selection_failure":
-                mock_agent.infer_policies.side_effect = Exception("Action selection failed")
+                mock_agent.infer_policies.side_effect = Exception(
+                    "Action selection failed"
+                )
             agent.pymdp_agent = mock_agent
 
         print(f"Agent {i}: {pattern}")

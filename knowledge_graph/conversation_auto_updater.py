@@ -86,9 +86,13 @@ class ConversationAutoUpdater:
 
             # Calculate processing time
             end_time = datetime.utcnow()
-            conversation_stats["processing_time"] = (end_time - start_time).total_seconds()
+            conversation_stats["processing_time"] = (
+                end_time - start_time
+            ).total_seconds()
 
-            logger.info(f"Processed conversation {conversation.id}: {conversation_stats}")
+            logger.info(
+                f"Processed conversation {conversation.id}: {conversation_stats}"
+            )
             return conversation_stats
 
         except Exception as e:
@@ -116,11 +120,15 @@ class ConversationAutoUpdater:
 
             # Map entities to nodes
             if extraction_result.entities:
-                entity_mappings = await self.entity_mapper.map_entities(extraction_result.entities)
+                entity_mappings = await self.entity_mapper.map_entities(
+                    extraction_result.entities
+                )
 
                 # Map relationships to edges
                 for relationship in extraction_result.relationships:
-                    await self.entity_mapper.map_relationship(relationship, entity_mappings)
+                    await self.entity_mapper.map_relationship(
+                        relationship, entity_mappings
+                    )
                     self.stats["relationships_created"] += 1
 
                 self.stats["nodes_created"] += len(entity_mappings)
@@ -185,7 +193,9 @@ class ConversationAutoUpdater:
             "errors": 0,
         }
 
-    async def query_knowledge_for_conversation(self, conversation_id: str) -> List[Dict[str, Any]]:
+    async def query_knowledge_for_conversation(
+        self, conversation_id: str
+    ) -> List[Dict[str, Any]]:
         """
         Query the knowledge graph for entities related to a conversation.
         Provides the bidirectional sync - getting knowledge back to inform conversations
@@ -236,7 +246,9 @@ class ConversationAutoUpdater:
             }
 
         except Exception as e:
-            logger.error(f"Error querying knowledge for conversation {conversation_id}: {e}")
+            logger.error(
+                f"Error querying knowledge for conversation {conversation_id}: {e}"
+            )
             return {"error": str(e)}
 
     async def suggest_conversation_context(
@@ -262,7 +274,9 @@ class ConversationAutoUpdater:
                     connected_info = []
                     for edge_id, edge in self.graph_engine.graph.edges.items():
                         if edge.source_id == node.id:
-                            target_node = self.graph_engine.graph.nodes.get(edge.target_id)
+                            target_node = self.graph_engine.graph.nodes.get(
+                                edge.target_id
+                            )
                             if target_node:
                                 connected_info.append(
                                     {
@@ -285,10 +299,14 @@ class ConversationAutoUpdater:
             return suggestions
 
         except Exception as e:
-            logger.error(f"Error generating suggestions for conversation {conversation_id}: {e}")
+            logger.error(
+                f"Error generating suggestions for conversation {conversation_id}: {e}"
+            )
             return []
 
-    async def export_conversation_knowledge(self, conversation_id: str) -> Dict[str, Any]:
+    async def export_conversation_knowledge(
+        self, conversation_id: str
+    ) -> Dict[str, Any]:
         """
         Export all knowledge derived from a specific conversation.
         Useful for debugging and understanding what was learned
@@ -313,5 +331,7 @@ class ConversationAutoUpdater:
             return knowledge
 
         except Exception as e:
-            logger.error(f"Error exporting knowledge for conversation {conversation_id}: {e}")
+            logger.error(
+                f"Error exporting knowledge for conversation {conversation_id}: {e}"
+            )
             return {"error": str(e)}

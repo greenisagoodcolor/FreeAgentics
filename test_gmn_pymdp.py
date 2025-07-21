@@ -3,18 +3,21 @@
 
 import os
 import sys
+
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 
 # Test imports
 print("Testing imports...")
 try:
     from inference.active.gmn_parser import GMNParser
+
     print("✓ GMN parser imported")
 except Exception as e:
     print(f"✗ GMN parser import failed: {e}")
 
 try:
     import pymdp
+
     print("✓ PyMDP imported")
     del pymdp  # Remove unused import
 except Exception as e:
@@ -22,6 +25,7 @@ except Exception as e:
 
 try:
     from pymdp.agent import Agent as PyMDPAgent
+
     print("✓ PyMDP Agent imported")
     del PyMDPAgent  # Remove unused import
 except Exception as e:
@@ -46,10 +50,13 @@ try:
 
     # Convert to PyMDP
     model = parser.to_pymdp_model(graph)
-    print(f"✓ PyMDP model created: states={model.get('num_states')}, obs={model.get('num_obs')}, actions={model.get('num_actions')}")
+    print(
+        f"✓ PyMDP model created: states={model.get('num_states')}, obs={model.get('num_obs')}, actions={model.get('num_actions')}"
+    )
 except Exception as e:
     print(f"✗ GMN parsing/conversion failed: {e}")
     import traceback
+
     traceback.print_exc()
 
 print("\nDone!")

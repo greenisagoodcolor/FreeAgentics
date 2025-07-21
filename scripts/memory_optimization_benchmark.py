@@ -46,7 +46,9 @@ class MockAgent:
         self.transition_matrix = np.random.random((100, 100))
 
         # Computation cache
-        self.computation_cache = {f"cache_{i}": np.random.random((100,)) for i in range(50)}
+        self.computation_cache = {
+            f"cache_{i}": np.random.random((100,)) for i in range(50)
+        }
 
     def step(self, observation):
         """Mock step method."""
@@ -294,7 +296,9 @@ def main():
         unopt_mb = unoptimized_results[i]["memory_per_agent_mb"]
         opt_mb = optimized_results[i]["optimized_memory_per_agent_mb"]
         reduction = (unopt_mb - opt_mb) / unopt_mb * 100
-        print(f"{num_agents:6d} | {unopt_mb:10.1f}MB | {opt_mb:8.1f}MB | {reduction:7.1f}%")
+        print(
+            f"{num_agents:6d} | {unopt_mb:10.1f}MB | {opt_mb:8.1f}MB | {reduction:7.1f}%"
+        )
 
     print("\nPerformance Metrics:")
     print("Agents | Exec Time | Success Rate | Memory Efficiency")
@@ -322,9 +326,13 @@ def main():
     print(
         f"✓ Memory per agent reduced from {unopt_memory:.1f}MB to {opt_memory:.1f}MB ({memory_reduction:.1f}% reduction)"
     )
-    print(f"✓ Target of <10MB per agent: {'ACHIEVED' if opt_memory < 10.0 else 'MISSED'}")
+    print(
+        f"✓ Target of <10MB per agent: {'ACHIEVED' if opt_memory < 10.0 else 'MISSED'}"
+    )
     print(f"✓ System efficiency with 50+ agents: {efficiency:.1%}")
-    print(f"✓ Target of >50% efficiency: {'ACHIEVED' if efficiency > 0.5 else 'MISSED'}")
+    print(
+        f"✓ Target of >50% efficiency: {'ACHIEVED' if efficiency > 0.5 else 'MISSED'}"
+    )
     print("✓ Baseline efficiency was 28.4%")
 
     print("\nMemory optimization successfully implemented!")

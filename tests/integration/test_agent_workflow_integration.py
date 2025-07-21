@@ -8,20 +8,20 @@ import pytest
 
 # Mock complex dependencies
 mock_modules = {
-    'pymdp': MagicMock(),
-    'pymdp.utils': MagicMock(),
-    'pymdp.agent': MagicMock(),
-    'sqlalchemy': MagicMock(),
-    'sqlalchemy.orm': MagicMock(),
-    'redis': MagicMock(),
-    'database': MagicMock(),
-    'database.session': MagicMock(),
-    'database.models': MagicMock(),
-    'observability': MagicMock(),
-    'observability.belief_monitoring': MagicMock(),
+    "pymdp": MagicMock(),
+    "pymdp.utils": MagicMock(),
+    "pymdp.agent": MagicMock(),
+    "sqlalchemy": MagicMock(),
+    "sqlalchemy.orm": MagicMock(),
+    "redis": MagicMock(),
+    "database": MagicMock(),
+    "database.session": MagicMock(),
+    "database.models": MagicMock(),
+    "observability": MagicMock(),
+    "observability.belief_monitoring": MagicMock(),
 }
 
-with patch.dict('sys.modules', mock_modules):
+with patch.dict("sys.modules", mock_modules):
     from agents.agent_manager import AgentManager
     from agents.base_agent import ActiveInferenceAgent
     from agents.error_handling import ErrorHandler
@@ -56,7 +56,7 @@ class TestAgentWorkflowIntegration:
 
         # Patch factory method
         with patch.object(
-            self.agent_factory, 'create_agent', side_effect=mock_create_agent
+            self.agent_factory, "create_agent", side_effect=mock_create_agent
         ):
             # Create agent
             agent = self.agent_factory.create_agent(
@@ -251,9 +251,7 @@ class TestAgentWorkflowIntegration:
                 # Simulate perception work
                 self.last_observation = observation
 
-                self.performance_metrics["perception_time"] += (
-                    time.time() - start_time
-                )
+                self.performance_metrics["perception_time"] += time.time() - start_time
                 self.performance_metrics["total_operations"] += 1
 
             def update_beliefs(self):
@@ -314,16 +312,13 @@ class TestAgentWorkflowIntegration:
                 }
 
             def perceive(self, observation):
-                self.persistent_state["observation_history"].append(
-                    observation
-                )
+                self.persistent_state["observation_history"].append(observation)
                 self.last_observation = observation
 
             def update_beliefs(self):
                 belief_state = {
                     "step": self.persistent_state["step_count"],
-                    "confidence": 0.5
-                    + (self.persistent_state["step_count"] * 0.1),
+                    "confidence": 0.5 + (self.persistent_state["step_count"] * 0.1),
                 }
                 self.beliefs = belief_state
                 self.persistent_state["belief_history"].append(belief_state)
@@ -376,9 +371,7 @@ class TestAgentWorkflowIntegration:
                     self.last_observation = observation
 
                 def update_beliefs(self):
-                    self.beliefs = {
-                        "config_mode": self.config.get("mode", "default")
-                    }
+                    self.beliefs = {"config_mode": self.config.get("mode", "default")}
 
                 def select_action(self):
                     return 0

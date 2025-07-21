@@ -227,9 +227,7 @@ class CoalitionFactory:
                 builder = builder.as_exploration_coalition()
             else:
                 # Generic objectives
-                builder = (
-                    builder.with_resource_optimization_objective().with_exploration_objective()
-                )
+                builder = builder.with_resource_optimization_objective().with_exploration_objective()
 
         # Apply overrides
         if "name" in overrides:
@@ -248,9 +246,15 @@ class CoalitionFactory:
             coalition_data["status"] = coalition_data["status"].value
 
         # Serialize any datetime objects in JSON fields
-        for json_field in ["objectives", "achieved_objectives", "required_capabilities"]:
+        for json_field in [
+            "objectives",
+            "achieved_objectives",
+            "required_capabilities",
+        ]:
             if json_field in coalition_data:
-                coalition_data[json_field] = serialize_for_json(coalition_data[json_field])
+                coalition_data[json_field] = serialize_for_json(
+                    coalition_data[json_field]
+                )
 
         coalition = Coalition(**coalition_data)
 
@@ -314,7 +318,9 @@ class CoalitionFactory:
         )
 
         # Create coalition with agents
-        coalition = CoalitionFactory.create(session, agents=agents, **coalition_overrides)
+        coalition = CoalitionFactory.create(
+            session, agents=agents, **coalition_overrides
+        )
 
         return coalition, agents
 
@@ -386,11 +392,13 @@ class CoalitionFactory:
             "total_agents": len(set(all_agents)),
             "network_stats": {
                 "num_coalitions": num_coalitions,
-                "avg_coalition_size": sum(len(c.agents) for c in coalitions) / num_coalitions,
+                "avg_coalition_size": sum(len(c.agents) for c in coalitions)
+                / num_coalitions,
                 "agents_in_multiple": sum(
                     1
                     for a in all_agents
-                    if sum(1 for c in coalitions if any(m.id == a.id for m in c.agents)) > 1
+                    if sum(1 for c in coalitions if any(m.id == a.id for m in c.agents))
+                    > 1
                 ),
             },
         }
@@ -570,7 +578,9 @@ class KnowledgeGraphFactory:
                 "num_edges": len(edges),
                 "avg_degree": avg_degree,
                 "connectivity": (
-                    len(edges) / (num_nodes * (num_nodes - 1) / 2) if num_nodes > 1 else 0
+                    len(edges) / (num_nodes * (num_nodes - 1) / 2)
+                    if num_nodes > 1
+                    else 0
                 ),
                 "node_type_distribution": {
                     node_type: sum(1 for n in nodes if n.type == node_type)
@@ -631,7 +641,9 @@ class KnowledgeGraphFactory:
                 creator_agent_id=agent.id,
                 confidence=min(o.confidence for o in source_obs) * 0.9,
                 properties={
-                    "inference_type": random.choice(["deductive", "inductive", "abductive"]),
+                    "inference_type": random.choice(
+                        ["deductive", "inductive", "abductive"]
+                    ),
                     "certainty": random.uniform(0.5, 0.9),
                 },
             )
@@ -697,15 +709,19 @@ class PerformanceDataFactory:
             agents = AgentFactory.create_batch(
                 session,
                 count=batch_size,
-                name_prefix=f"PerfAgent_B{batch_num//config.batch_size}",
-                template=random.choice(["grid_world", "resource_collector", "explorer"]),
+                name_prefix=f"PerfAgent_B{batch_num // config.batch_size}",
+                template=random.choice(
+                    ["grid_world", "resource_collector", "explorer"]
+                ),
                 status=DBAgentStatus.ACTIVE.value,
                 distribute_positions=True,
                 position_bounds={"min": [0, 0], "max": [100, 100]},
             )
             results["agents"].extend(agents)
 
-        results["timing"]["agent_creation"] = (datetime.utcnow() - agent_start).total_seconds()
+        results["timing"]["agent_creation"] = (
+            datetime.utcnow() - agent_start
+        ).total_seconds()
 
         # Create coalitions with agent distribution
         coalition_start = datetime.utcnow()
@@ -720,7 +736,9 @@ class PerformanceDataFactory:
 
                 # Add some random agents from other coalitions (overlap)
                 if i > 0 and random.random() < 0.3:
-                    additional = random.sample(results["agents"][:start_idx], min(5, start_idx))
+                    additional = random.sample(
+                        results["agents"][:start_idx], min(5, start_idx)
+                    )
                     coalition_agents.extend(additional)
 
                 coalition = CoalitionFactory.create(
@@ -762,15 +780,20 @@ class PerformanceDataFactory:
             "total_agents": len(results["agents"]),
             "total_coalitions": len(results["coalitions"]),
             "avg_coalition_size": (
-                sum(len(c.agents) for c in results["coalitions"]) / len(results["coalitions"])
+                sum(len(c.agents) for c in results["coalitions"])
+                / len(results["coalitions"])
                 if results["coalitions"]
                 else 0
             ),
             "total_knowledge_nodes": (
-                len(results["knowledge_graph"]["nodes"]) if results["knowledge_graph"] else 0
+                len(results["knowledge_graph"]["nodes"])
+                if results["knowledge_graph"]
+                else 0
             ),
             "total_knowledge_edges": (
-                len(results["knowledge_graph"]["edges"]) if results["knowledge_graph"] else 0
+                len(results["knowledge_graph"]["edges"])
+                if results["knowledge_graph"]
+                else 0
             ),
             "total_creation_time": (datetime.utcnow() - start_time).total_seconds(),
         }
@@ -778,7 +801,9 @@ class PerformanceDataFactory:
         return results
 
     @staticmethod
-    def create_stress_test_data(session: Session, scale_factor: int = 10) -> Dict[str, Any]:
+    def create_stress_test_data(
+        session: Session, scale_factor: int = 10
+    ) -> Dict[str, Any]:
         """Create stress test data with configurable scale.
 
         Args:

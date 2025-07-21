@@ -36,9 +36,7 @@ class TestLLMProviders:
         provider = MockLLMProvider(delay=0.01)
 
         messages = [
-            LLMMessage(
-                role=LLMRole.SYSTEM, content="You are a helpful assistant."
-            ),
+            LLMMessage(role=LLMRole.SYSTEM, content="You are a helpful assistant."),
             LLMMessage(
                 role=LLMRole.USER,
                 content="Generate a simple GMN for an explorer agent.",
@@ -58,16 +56,12 @@ class TestLLMProviders:
     )
     async def test_openai_provider(self):
         """Test OpenAI provider functionality."""
-        provider = OpenAIProvider(
-            model="gpt-4o-mini"
-        )  # Use cheaper model for tests
+        provider = OpenAIProvider(model="gpt-4o-mini")  # Use cheaper model for tests
 
         try:
             # Test basic generation
             messages = [
-                LLMMessage(
-                    role=LLMRole.USER, content="Say 'Hello, GMN world!'"
-                )
+                LLMMessage(role=LLMRole.USER, content="Say 'Hello, GMN world!'")
             ]
 
             response = await provider.generate(messages, max_tokens=50)
@@ -93,9 +87,7 @@ class TestLLMProviders:
         try:
             # Test basic generation
             messages = [
-                LLMMessage(
-                    role=LLMRole.USER, content="Say 'Hello, GMN world!'"
-                )
+                LLMMessage(role=LLMRole.USER, content="Say 'Hello, GMN world!'")
             ]
 
             response = await provider.generate(messages, max_tokens=50)
@@ -107,9 +99,7 @@ class TestLLMProviders:
             await provider.close()
 
     @pytest.mark.asyncio
-    @pytest.mark.skipif(
-        os.getenv("SKIP_OLLAMA_TESTS"), reason="Ollama tests skipped"
-    )
+    @pytest.mark.skipif(os.getenv("SKIP_OLLAMA_TESTS"), reason="Ollama tests skipped")
     async def test_ollama_provider(self):
         """Test Ollama provider functionality."""
         provider = OllamaProvider(model="llama3.2", timeout=30.0)
@@ -117,7 +107,9 @@ class TestLLMProviders:
         try:
             # Check if Ollama is running
             if not await provider._check_ollama_running():
-                assert False, "Ollama service not running - configure Ollama for this test"
+                assert False, (
+                    "Ollama service not running - configure Ollama for this test"
+                )
 
             # Test basic generation
             messages = [
@@ -165,9 +157,7 @@ class TestGMNGeneration:
 
         # Check for matrix definitions in transitions/emissions
         if "transition" in gmn and "matrix:" not in gmn and "from:" in gmn:
-            issues["warnings"].append(
-                "Transition node without matrix definition"
-            )
+            issues["warnings"].append("Transition node without matrix definition")
 
         return issues
 
@@ -183,9 +173,7 @@ class TestGMNGeneration:
         )
 
         issues = self.validate_gmn_structure(gmn)
-        assert (
-            len(issues["errors"]) == 0
-        ), f"GMN validation errors: {issues['errors']}"
+        assert len(issues["errors"]) == 0, f"GMN validation errors: {issues['errors']}"
         assert "25" in gmn or "5x5" in gmn, "Grid size not properly reflected"
 
     @pytest.mark.asyncio
@@ -203,13 +191,10 @@ class TestGMNGeneration:
             )
 
             issues = self.validate_gmn_structure(gmn)
-            assert (
-                len(issues["errors"]) == 0
-            ), f"GMN validation errors: {issues['errors']}"
-            assert any(
-                word in gmn.lower()
-                for word in ["buy", "sell", "hold", "trade"]
+            assert len(issues["errors"]) == 0, (
+                f"GMN validation errors: {issues['errors']}"
             )
+            assert any(word in gmn.lower() for word in ["buy", "sell", "hold", "trade"])
 
         finally:
             await provider.close()
@@ -232,9 +217,7 @@ class TestGMNGeneration:
         """
 
         is_valid, errors = await provider.validate_gmn(valid_gmn)
-        assert (
-            is_valid or len(errors) > 0
-        )  # Mock provider has simple validation
+        assert is_valid or len(errors) > 0  # Mock provider has simple validation
 
         # Invalid GMN
         invalid_gmn = """
@@ -335,9 +318,7 @@ class TestGMNConsistency:
             providers.append(("openai", OpenAIProvider(model="gpt-4o-mini")))
 
         if os.getenv("ANTHROPIC_API_KEY"):
-            providers.append(
-                ("anthropic", AnthropicProvider(model="claude-3-haiku"))
-            )
+            providers.append(("anthropic", AnthropicProvider(model="claude-3-haiku")))
 
         # Ollama if available
         ollama = OllamaProvider()
@@ -351,7 +332,7 @@ class TestGMNConsistency:
             except Exception as e:
                 results[name] = f"Error: {str(e)}"
             finally:
-                if hasattr(provider, 'close'):
+                if hasattr(provider, "close"):
                     await provider.close()
 
         return results
@@ -363,9 +344,7 @@ class TestGMNConsistency:
     )
     async def test_gmn_consistency(self):
         """Test that different providers generate structurally similar GMNs."""
-        prompt = (
-            "Create an agent that navigates a simple 3x3 grid to reach a goal"
-        )
+        prompt = "Create an agent that navigates a simple 3x3 grid to reach a goal"
 
         results = await self.generate_gmn_all_providers(prompt, "explorer")
 
@@ -373,9 +352,9 @@ class TestGMNConsistency:
         for provider, gmn in results.items():
             if not gmn.startswith("Error:"):
                 issues = self.validate_gmn_structure(gmn)
-                assert (
-                    len(issues["errors"]) == 0
-                ), f"{provider} GMN has errors: {issues['errors']}"
+                assert len(issues["errors"]) == 0, (
+                    f"{provider} GMN has errors: {issues['errors']}"
+                )
 
 
 # Performance benchmarking

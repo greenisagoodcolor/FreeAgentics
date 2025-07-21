@@ -25,10 +25,10 @@ def run_tests_for_module(test_pattern, module_name):
         "-q",
     ]
 
-    print(f"\n{'='*60}")
+    print(f"\n{'=' * 60}")
     print(f"Running tests for {module_name}")
     print(f"Command: {' '.join(cmd)}")
-    print(f"{'='*60}")
+    print(f"{'=' * 60}")
 
     try:
         result = subprocess.run(cmd, capture_output=True, text=True)
@@ -82,9 +82,9 @@ def main():
         results[module] = coverage
 
     # Summary
-    print(f"\n{'='*60}")
+    print(f"\n{'=' * 60}")
     print("COVERAGE SUMMARY")
-    print(f"{'='*60}")
+    print(f"{'=' * 60}")
 
     for module, coverage in sorted(results.items()):
         status = "✓" if coverage >= 80 else "✗"

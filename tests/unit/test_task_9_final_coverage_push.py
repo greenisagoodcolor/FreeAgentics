@@ -33,7 +33,6 @@ class TestFinalCoveragePush:
                     pass
 
         except ImportError:
-
             assert False, "Test bypass removed - must fix underlying issue"
             assert False, "Test bypass removed - must fix underlying issue"
 
@@ -54,7 +53,6 @@ class TestFinalCoveragePush:
                 pass
 
         except ImportError:
-
             assert False, "Test bypass removed - must fix underlying issue"
             assert False, "Test bypass removed - must fix underlying issue"
 

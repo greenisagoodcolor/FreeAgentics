@@ -172,11 +172,15 @@ class CommandMessageGenerator(MessageGenerator):
         elif command == "observe":
             return {
                 "radius": random.randint(1, 10),
-                "filters": random.sample(["agents", "objects", "terrain"], random.randint(1, 3)),
+                "filters": random.sample(
+                    ["agents", "objects", "terrain"], random.randint(1, 3)
+                ),
             }
         elif command == "act":
             return {
-                "action_type": random.choice(["explore", "gather", "interact", "communicate"]),
+                "action_type": random.choice(
+                    ["explore", "gather", "interact", "communicate"]
+                ),
                 "target": random.choice(
                     [
                         None,
@@ -238,7 +242,9 @@ class QueryMessageGenerator(MessageGenerator):
         """Generate parameters for a specific query type."""
         if query_type == "agent_status":
             return {
-                "agent_ids": random.sample([f"agent_{i}" for i in range(10)], random.randint(1, 5)),
+                "agent_ids": random.sample(
+                    [f"agent_{i}" for i in range(10)], random.randint(1, 5)
+                ),
                 "include_history": random.choice([True, False]),
             }
         elif query_type == "world_state":
@@ -255,7 +261,8 @@ class QueryMessageGenerator(MessageGenerator):
         elif query_type == "coalition_status":
             return {
                 "coalition_ids": [
-                    f"coalition_{random.randint(1, 5)}" for _ in range(random.randint(1, 3))
+                    f"coalition_{random.randint(1, 5)}"
+                    for _ in range(random.randint(1, 3))
                 ],
             }
         elif query_type == "system_metrics":
@@ -304,7 +311,9 @@ class MonitoringMessageGenerator(MessageGenerator):
 
     def generate(self) -> Dict[str, Any]:
         """Generate a monitoring configuration message."""
-        action = random.choice(["start_monitoring", "stop_monitoring", "update_monitoring"])
+        action = random.choice(
+            ["start_monitoring", "stop_monitoring", "update_monitoring"]
+        )
 
         if action == "start_monitoring":
             return self._generate_start_monitoring()
@@ -343,8 +352,12 @@ class MonitoringMessageGenerator(MessageGenerator):
             "session_id": str(uuid.uuid4()),
             "updates": {
                 "sample_rate": random.choice([0.5, 1.0, 2.0, 5.0, 10.0]),
-                "add_metrics": random.sample(self.available_metrics, random.randint(1, 3)),
-                "remove_metrics": random.sample(self.available_metrics, random.randint(0, 2)),
+                "add_metrics": random.sample(
+                    self.available_metrics, random.randint(1, 3)
+                ),
+                "remove_metrics": random.sample(
+                    self.available_metrics, random.randint(0, 2)
+                ),
             },
         }
 

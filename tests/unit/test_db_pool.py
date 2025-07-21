@@ -85,7 +85,9 @@ class TestDatabaseConnectionPool:
     async def test_connection_timeout_behavior(self):
         """Test connection acquisition timeout"""
         # This test should fail as timeout configuration doesn't exist
-        pool = await create_pool(TEST_DB_URL, min_size=1, max_size=1, command_timeout=2.0)
+        pool = await create_pool(
+            TEST_DB_URL, min_size=1, max_size=1, command_timeout=2.0
+        )
 
         # Acquire the only connection
         conn1 = await pool.acquire()

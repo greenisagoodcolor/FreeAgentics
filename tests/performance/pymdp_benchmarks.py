@@ -170,9 +170,9 @@ class PyMDPBenchmark:
 
     def report(self, result: BenchmarkResult):
         """Generate performance report."""
-        print(f"\n{'='*60}")
+        print(f"\n{'=' * 60}")
         print(f"Benchmark: {result.name}")
-        print(f"{'='*60}")
+        print(f"{'=' * 60}")
         print(f"Configuration: {json.dumps(result.configuration, indent=2)}")
         print("\nPerformance Metrics:")
         print(f"  Mean time: {result.mean_time_ms:.2f} ms")
@@ -283,7 +283,9 @@ class ExpectedFreeEnergyBenchmark(PyMDPBenchmark):
         C = utils.obj_array_uniform(num_observations)
 
         # Create agent
-        self.agent = PyMDPAgent(A, B, C=C, policy_len=self.policy_depth, inference_horizon=1)
+        self.agent = PyMDPAgent(
+            A, B, C=C, policy_len=self.policy_depth, inference_horizon=1
+        )
 
     def run_iteration(self) -> Dict[str, Any]:
         """Calculate EFE for policies."""
@@ -448,10 +450,12 @@ class BenchmarkSuite:
 
     def run_all(self, iterations: int = 100) -> List[BenchmarkResult]:
         """Run all benchmarks."""
-        print(f"\n{'='*60}")
+        print(f"\n{'=' * 60}")
         print("PyMDP PERFORMANCE BENCHMARK SUITE")
-        print(f"{'='*60}")
-        print(f"Running {len(self.benchmarks)} benchmarks with {iterations} iterations each\n")
+        print(f"{'=' * 60}")
+        print(
+            f"Running {len(self.benchmarks)} benchmarks with {iterations} iterations each\n"
+        )
 
         for benchmark in self.benchmarks:
             try:
@@ -496,16 +500,19 @@ class BenchmarkSuite:
         with open(baseline_file, "r") as f:
             baseline_data = json.load(f)
 
-        print(f"\n{'='*60}")
+        print(f"\n{'=' * 60}")
         print("PERFORMANCE COMPARISON WITH BASELINE")
-        print(f"{'='*60}")
+        print(f"{'=' * 60}")
 
         for result in self.results:
             # Find matching baseline
-            baseline = next((b for b in baseline_data if b["name"] == result.name), None)
+            baseline = next(
+                (b for b in baseline_data if b["name"] == result.name), None
+            )
             if baseline:
                 diff_percent = (
-                    (result.mean_time_ms - baseline["mean_time_ms"]) / baseline["mean_time_ms"]
+                    (result.mean_time_ms - baseline["mean_time_ms"])
+                    / baseline["mean_time_ms"]
                 ) * 100
                 print(f"\n{result.name}:")
                 print(f"  Baseline: {baseline['mean_time_ms']:.2f} ms")

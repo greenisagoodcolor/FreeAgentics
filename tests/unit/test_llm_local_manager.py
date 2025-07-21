@@ -126,7 +126,9 @@ class TestLocalLLMConfig:
         assert config_dict["model_name"] == "test-model"
         assert config_dict["temperature"] == 0.8
 
-    @pytest.mark.parametrize("provider", [LocalLLMProvider.OLLAMA, LocalLLMProvider.LLAMA_CPP])
+    @pytest.mark.parametrize(
+        "provider", [LocalLLMProvider.OLLAMA, LocalLLMProvider.LLAMA_CPP]
+    )
     def test_config_with_different_providers(self, provider):
         """Test configuration with different provider types."""
         if not IMPORT_SUCCESS:
@@ -353,7 +355,9 @@ class TestLlamaCppProvider:
             assert False, "Test bypass removed - must fix underlying issue"
         return LlamaCppProvider(llama_cpp_config)
 
-    def test_llama_cpp_provider_initialization(self, llama_cpp_provider, llama_cpp_config):
+    def test_llama_cpp_provider_initialization(
+        self, llama_cpp_provider, llama_cpp_config
+    ):
         """Test LlamaCppProvider initialization."""
         assert llama_cpp_provider.config == llama_cpp_config
         assert llama_cpp_provider.binary_path == "/usr/local/bin/llama-cpp"

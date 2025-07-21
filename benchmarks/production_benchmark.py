@@ -85,7 +85,9 @@ def get_memory_usage() -> float:
 
 def create_agent(agent_id: str, config: BenchmarkConfig) -> BasicExplorerAgent:
     """Create a test agent with specified configuration."""
-    agent = BasicExplorerAgent(agent_id, f"BenchAgent-{agent_id}", grid_size=config.grid_size)
+    agent = BasicExplorerAgent(
+        agent_id, f"BenchAgent-{agent_id}", grid_size=config.grid_size
+    )
     agent.config.update(
         {
             "performance_mode": config.performance_mode,
@@ -96,7 +98,9 @@ def create_agent(agent_id: str, config: BenchmarkConfig) -> BasicExplorerAgent:
     return agent
 
 
-def agent_workload(agent: BasicExplorerAgent, num_steps: int) -> tuple[List[float], int]:
+def agent_workload(
+    agent: BasicExplorerAgent, num_steps: int
+) -> tuple[List[float], int]:
     """Run agent workload and return timings and error count."""
     agent.start()
     timings = []
@@ -191,7 +195,8 @@ def run_threading_test(config: BenchmarkConfig, num_agents: int) -> TestResult:
 
     with ThreadPoolExecutor(max_workers=min(num_agents, mp.cpu_count())) as executor:
         futures = [
-            executor.submit(agent_workload, agent, config.steps_per_agent) for agent in agents
+            executor.submit(agent_workload, agent, config.steps_per_agent)
+            for agent in agents
         ]
         results = [future.result() for future in futures]
 
@@ -225,7 +230,9 @@ def run_threading_test(config: BenchmarkConfig, num_agents: int) -> TestResult:
     )
 
 
-def multiprocessing_worker(agent_id: str, config: BenchmarkConfig) -> tuple[List[float], int]:
+def multiprocessing_worker(
+    agent_id: str, config: BenchmarkConfig
+) -> tuple[List[float], int]:
     """Worker function for multiprocessing tests."""
     agent = create_agent(agent_id, config)
     return agent_workload(agent, config.steps_per_agent)
@@ -244,7 +251,8 @@ def run_multiprocessing_test(config: BenchmarkConfig, num_agents: int) -> TestRe
 
     with ProcessPoolExecutor(max_workers=min(num_agents, mp.cpu_count())) as executor:
         futures = [
-            executor.submit(multiprocessing_worker, f"proc_{i}", config) for i in range(num_agents)
+            executor.submit(multiprocessing_worker, f"proc_{i}", config)
+            for i in range(num_agents)
         ]
         results = [future.result() for future in futures]
 
@@ -285,7 +293,9 @@ def run_baseline_test(config: BenchmarkConfig) -> TestResult:
     agent = create_agent("baseline", config)
 
     start_time = time.time()
-    timings, errors = agent_workload(agent, config.steps_per_agent * 2)  # More steps for baseline
+    timings, errors = agent_workload(
+        agent, config.steps_per_agent * 2
+    )  # More steps for baseline
     total_time = time.time() - start_time
 
     import numpy as np
@@ -312,20 +322,29 @@ def generate_recommendations(summary: BenchmarkSummary) -> Dict[str, str]:
     total_comparisons = 0
 
     # Compare threading vs multiprocessing results
-    for t_result, m_result in zip(summary.threading_results, summary.multiprocessing_results):
+    for t_result, m_result in zip(
+        summary.threading_results, summary.multiprocessing_results
+    ):
         if t_result.num_agents == m_result.num_agents:
             total_comparisons += 1
             if t_result.throughput_ops_sec > m_result.throughput_ops_sec:
                 threading_wins += 1
 
-    threading_win_rate = threading_wins / total_comparisons if total_comparisons > 0 else 0
+    threading_win_rate = (
+        threading_wins / total_comparisons if total_comparisons > 0 else 0
+    )
 
     # Calculate average performance advantage
     avg_threading_advantage = 0
     if total_comparisons > 0:
         advantages = []
-        for t_result, m_result in zip(summary.threading_results, summary.multiprocessing_results):
-            if t_result.num_agents == m_result.num_agents and m_result.throughput_ops_sec > 0:
+        for t_result, m_result in zip(
+            summary.threading_results, summary.multiprocessing_results
+        ):
+            if (
+                t_result.num_agents == m_result.num_agents
+                and m_result.throughput_ops_sec > 0
+            ):
                 advantage = t_result.throughput_ops_sec / m_result.throughput_ops_sec
                 advantages.append(advantage)
         if advantages:
@@ -338,7 +357,9 @@ def generate_recommendations(summary: BenchmarkSummary) -> Dict[str, str]:
         recommendations["reason"] = (
             f"Threading wins {threading_win_rate:.0%} of comparisons with {avg_threading_advantage:.1f}x average advantage"
         )
-        recommendations["use_threading_when"] = "Most FreeAgentics scenarios (default choice)"
+        recommendations["use_threading_when"] = (
+            "Most FreeAgentics scenarios (default choice)"
+        )
         recommendations["use_multiprocessing_when"] = (
             "CPU-intensive custom models or fault isolation requirements"
         )
@@ -372,7 +393,9 @@ def print_results(summary: BenchmarkSummary):
 
     print("\n⭐ Baseline Performance:")
     b = summary.baseline_result
-    print(f"   Single agent: {b.avg_latency_ms:.1f}ms avg, {b.throughput_ops_sec:.1f} ops/sec")
+    print(
+        f"   Single agent: {b.avg_latency_ms:.1f}ms avg, {b.throughput_ops_sec:.1f} ops/sec"
+    )
     print(f"   P95 latency: {b.p95_latency_ms:.1f}ms")
 
     print("\n📈 Performance Comparison:")
@@ -381,7 +404,9 @@ def print_results(summary: BenchmarkSummary):
     )
     print("-" * 70)
 
-    for t_result, m_result in zip(summary.threading_results, summary.multiprocessing_results):
+    for t_result, m_result in zip(
+        summary.threading_results, summary.multiprocessing_results
+    ):
         if t_result.num_agents == m_result.num_agents:
             if t_result.throughput_ops_sec > m_result.throughput_ops_sec:
                 winner = "Threading"
@@ -399,7 +424,9 @@ def print_results(summary: BenchmarkSummary):
     print(f"{'Agents':<8} {'Threading':<12} {'Multiprocessing':<15}")
     print("-" * 35)
 
-    for t_result, m_result in zip(summary.threading_results, summary.multiprocessing_results):
+    for t_result, m_result in zip(
+        summary.threading_results, summary.multiprocessing_results
+    ):
         if t_result.num_agents == m_result.num_agents:
             print(
                 f"{t_result.num_agents:<8} {t_result.memory_delta_mb:<12.1f} {m_result.memory_delta_mb:<15.1f}"
@@ -409,7 +436,9 @@ def print_results(summary: BenchmarkSummary):
     print(f"{'Agents':<8} {'Threading':<12} {'Multiprocessing':<15}")
     print("-" * 35)
 
-    for t_result, m_result in zip(summary.threading_results, summary.multiprocessing_results):
+    for t_result, m_result in zip(
+        summary.threading_results, summary.multiprocessing_results
+    ):
         if t_result.num_agents == m_result.num_agents:
             print(
                 f"{t_result.num_agents:<8} {t_result.p95_latency_ms:<12.1f} {m_result.p95_latency_ms:<15.1f}"
@@ -419,7 +448,9 @@ def print_results(summary: BenchmarkSummary):
     print(f"   Primary choice: {summary.recommendations['primary']}")
     print(f"   Reason: {summary.recommendations['reason']}")
     print(f"   Use threading when: {summary.recommendations['use_threading_when']}")
-    print(f"   Use multiprocessing when: {summary.recommendations['use_multiprocessing_when']}")
+    print(
+        f"   Use multiprocessing when: {summary.recommendations['use_multiprocessing_when']}"
+    )
 
 
 def save_results(
@@ -464,7 +495,9 @@ def main():
         grid_size=8,
     )
 
-    print(f"\nStarting benchmark with {len(config.agent_counts)} test configurations...")
+    print(
+        f"\nStarting benchmark with {len(config.agent_counts)} test configurations..."
+    )
     input("Press Enter to continue...")
 
     # Run baseline test

@@ -46,9 +46,7 @@ class AgentFactory:
         self.default_inference_algo = "fpi"  # Fixed point iteration
         self.default_policy_len = 1
 
-    async def validate_model(
-        self, model: Dict[str, Any]
-    ) -> Tuple[bool, List[str]]:
+    async def validate_model(self, model: Dict[str, Any]) -> Tuple[bool, List[str]]:
         """Validate a PyMDP model before agent creation.
 
         Args:
@@ -85,9 +83,7 @@ class AgentFactory:
             if not isinstance(num_controls, list) or not all(
                 isinstance(n, int) and n > 0 for n in num_controls
             ):
-                errors.append(
-                    "num_controls must be a list of positive integers"
-                )
+                errors.append("num_controls must be a list of positive integers")
 
         # Validate matrices if provided
         if "A" in model and len(errors) == 0:
@@ -103,15 +99,11 @@ class AgentFactory:
             errors.extend(B_errors)
 
         if "C" in model:
-            C_errors = self._validate_C_matrix(
-                model["C"], model.get("num_obs")
-            )
+            C_errors = self._validate_C_matrix(model["C"], model.get("num_obs"))
             errors.extend(C_errors)
 
         if "D" in model:
-            D_errors = self._validate_D_matrix(
-                model["D"], model.get("num_states")
-            )
+            D_errors = self._validate_D_matrix(model["D"], model.get("num_states"))
             errors.extend(D_errors)
 
         is_valid = len(errors) == 0
@@ -119,9 +111,7 @@ class AgentFactory:
         if is_valid:
             logger.info("Model validation successful")
         else:
-            logger.warning(
-                f"Model validation failed with {len(errors)} errors"
-            )
+            logger.warning(f"Model validation failed with {len(errors)} errors")
 
         return is_valid, errors
 
@@ -168,9 +158,7 @@ class AgentFactory:
             planning_horizon = model.get(
                 "planning_horizon", self.default_planning_horizon
             )
-            inference_algo = model.get(
-                "inference_algo", self.default_inference_algo
-            )
+            inference_algo = model.get("inference_algo", self.default_inference_algo)
             policy_len = model.get("policy_len", self.default_policy_len)
 
             # Create agent with parameters
@@ -230,10 +218,7 @@ class AgentFactory:
                     )
             else:
                 # Multi-modality or multi-factor case
-                if (
-                    not isinstance(A_array, list)
-                    or len(A_array) != num_modalities
-                ):
+                if not isinstance(A_array, list) or len(A_array) != num_modalities:
                     errors.append(f"A must have {num_modalities} modalities")
 
             # Check normalization
@@ -337,9 +322,7 @@ class AgentFactory:
                     )
 
                 if not np.allclose(D_array.sum(), 1.0):
-                    errors.append(
-                        "D matrix must sum to 1 (probability distribution)"
-                    )
+                    errors.append("D matrix must sum to 1 (probability distribution)")
 
         except Exception as e:
             errors.append(f"Error validating D matrix: {str(e)}")
@@ -431,9 +414,7 @@ class AgentFactory:
 
         return B_matrices
 
-    def _create_C_matrix(
-        self, C_spec: Any, num_obs: List[int]
-    ) -> List[np.ndarray]:
+    def _create_C_matrix(self, C_spec: Any, num_obs: List[int]) -> List[np.ndarray]:
         """Create preference matrix."""
         if C_spec is not None:
             # Use provided matrix
@@ -455,9 +436,7 @@ class AgentFactory:
 
         return C_matrices
 
-    def _create_D_matrix(
-        self, D_spec: Any, num_states: List[int]
-    ) -> List[np.ndarray]:
+    def _create_D_matrix(self, D_spec: Any, num_states: List[int]) -> List[np.ndarray]:
         """Create initial state distribution."""
         if D_spec is not None:
             # Use provided matrix

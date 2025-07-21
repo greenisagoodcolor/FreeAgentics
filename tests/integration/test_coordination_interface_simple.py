@@ -98,7 +98,8 @@ class CoordinationProcessor:
             "has_action_type": "action_type" in action_spec,
             "has_parameters": "parameters" in action_spec,
             "has_strategy": "strategy" in action_spec,
-            "valid_autonomy": action_spec.get("autonomy_level") in ["low", "medium", "high"],
+            "valid_autonomy": action_spec.get("autonomy_level")
+            in ["low", "medium", "high"],
             "valid_communication": action_spec.get("communication_frequency")
             in ["low", "medium", "high"],
             "valid_timestamp": isinstance(action_spec.get("timestamp"), (int, float)),
@@ -157,7 +158,9 @@ class TestCoordinationInterfaceSimple:
             "capabilities": ["explore", "collect", "coordinate"],
         }
 
-    def test_coordination_message_processing(self, processor, test_messages, agent_context):
+    def test_coordination_message_processing(
+        self, processor, test_messages, agent_context
+    ):
         """Test processing of coordination messages into action specifications."""
 
         results = {}
@@ -174,9 +177,9 @@ class TestCoordinationInterfaceSimple:
             }
 
             # Basic assertions
-            assert validation[
-                "overall_valid"
-            ], f"Invalid action spec for {strategy_name}: {validation}"
+            assert validation["overall_valid"], (
+                f"Invalid action spec for {strategy_name}: {validation}"
+            )
             assert action_spec["strategy"] == strategy_name
             assert action_spec["parameters"]["agent_id"] == agent_context["agent_id"]
 
@@ -200,7 +203,9 @@ class TestCoordinationInterfaceSimple:
             for _ in range(100):  # Run multiple iterations for stable measurements
                 # Process coordination message
                 start_time = time.time()
-                action_spec = processor.process_coordination_message(message, agent_context)
+                action_spec = processor.process_coordination_message(
+                    message, agent_context
+                )
                 process_time = time.time() - start_time
                 process_times.append(process_time)
 
@@ -219,19 +224,19 @@ class TestCoordinationInterfaceSimple:
             }
 
             # Performance requirements
-            assert (
-                performance_results[strategy_name]["avg_process_time"] < 0.001
-            ), f"Processing too slow for {strategy_name}: {performance_results[strategy_name]['avg_process_time']:.6f}s"
-            assert (
-                performance_results[strategy_name]["avg_validation_time"] < 0.001
-            ), f"Validation too slow for {strategy_name}: {performance_results[strategy_name]['avg_validation_time']:.6f}s"
+            assert performance_results[strategy_name]["avg_process_time"] < 0.001, (
+                f"Processing too slow for {strategy_name}: {performance_results[strategy_name]['avg_process_time']:.6f}s"
+            )
+            assert performance_results[strategy_name]["avg_validation_time"] < 0.001, (
+                f"Validation too slow for {strategy_name}: {performance_results[strategy_name]['avg_validation_time']:.6f}s"
+            )
 
             logger.info(f"✓ {strategy_name} performance requirements met")
             logger.info(
-                f"  Avg process time: {performance_results[strategy_name]['avg_process_time']*1000:.3f}ms"
+                f"  Avg process time: {performance_results[strategy_name]['avg_process_time'] * 1000:.3f}ms"
             )
             logger.info(
-                f"  Avg validation time: {performance_results[strategy_name]['avg_validation_time']*1000:.3f}ms"
+                f"  Avg validation time: {performance_results[strategy_name]['avg_validation_time'] * 1000:.3f}ms"
             )
 
         return performance_results
@@ -251,7 +256,9 @@ class TestCoordinationInterfaceSimple:
         # Edge case 1: Empty message parameters
         empty_message = MockCoordinationMessage("distributed", {})
         try:
-            action_spec = processor.process_coordination_message(empty_message, agent_context)
+            action_spec = processor.process_coordination_message(
+                empty_message, agent_context
+            )
             validation = processor.validate_action_spec(action_spec)
             edge_cases["empty_parameters"] = {
                 "handled": True,
@@ -267,12 +274,15 @@ class TestCoordinationInterfaceSimple:
         # Edge case 2: Unknown strategy
         unknown_message = MockCoordinationMessage("unknown_strategy", {"team_size": 2})
         try:
-            action_spec = processor.process_coordination_message(unknown_message, agent_context)
+            action_spec = processor.process_coordination_message(
+                unknown_message, agent_context
+            )
             validation = processor.validate_action_spec(action_spec)
             edge_cases["unknown_strategy"] = {
                 "handled": True,
                 "valid": validation["overall_valid"],
-                "uses_fallback": action_spec["action_type"] == "explore",  # distributed fallback
+                "uses_fallback": action_spec["action_type"]
+                == "explore",  # distributed fallback
             }
         except Exception as e:
             edge_cases["unknown_strategy"] = {
@@ -303,7 +313,9 @@ class TestCoordinationInterfaceSimple:
             },
         )
         try:
-            action_spec = processor.process_coordination_message(invalid_message, agent_context)
+            action_spec = processor.process_coordination_message(
+                invalid_message, agent_context
+            )
             validation = processor.validate_action_spec(action_spec)
             edge_cases["invalid_parameters"] = {
                 "handled": True,
@@ -437,13 +449,13 @@ if __name__ == "__main__":
         passed = len([r for r in results if r["status"] == "PASSED"])
         total = len(results)
 
-        print(f"\n{'='*60}")
+        print(f"\n{'=' * 60}")
         print("COORDINATION INTERFACE INTEGRATION TEST SUMMARY")
-        print(f"{'='*60}")
+        print(f"{'=' * 60}")
         print(f"Tests run: {total}")
         print(f"Passed: {passed}")
         print(f"Failed: {total - passed}")
-        print(f"Success rate: {passed/total*100:.1f}%")
+        print(f"Success rate: {passed / total * 100:.1f}%")
 
         if passed == total:
             print("🎉 All coordination interface tests passed!")

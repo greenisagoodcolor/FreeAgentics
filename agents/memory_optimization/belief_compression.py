@@ -97,8 +97,7 @@ class BeliefCompressor:
 
         if sparsity < self.sparsity_threshold:
             logger.debug(
-                f"Belief sparsity {sparsity:.1%} below threshold, using dense"
-                f" storage"
+                f"Belief sparsity {sparsity:.1%} below threshold, using dense storage"
             )
             # For non-sparse beliefs, store all values
             data = belief.ravel()

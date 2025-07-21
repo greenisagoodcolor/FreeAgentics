@@ -112,8 +112,9 @@ class OllamaProvider:
                             status = json.loads(line)
                             if status.get("status") == "error":
                                 logger.error(
-                                    f"Failed to pull model: {status.get('error',
-                                        'Unknown error')}"
+                                    f"Failed to pull model: {
+                                        status.get('error', 'Unknown error')
+                                    }"
                                 )
                                 return False
                         except json.JSONDecodeError:
@@ -542,7 +543,9 @@ class LocalLLMManager:
             logger.warning("All generation attempts failed, using fallback")
             return self.fallback_responder.get_fallback_response(prompt)
         else:
-            raise RuntimeError("All generation attempts failed and fallback is disabled")
+            raise RuntimeError(
+                "All generation attempts failed and fallback is disabled"
+            )
 
     def _try_generate(self, prompt: str, system_prompt: Optional[str]) -> LLMResponse:
         """Try to generate with available providers."""

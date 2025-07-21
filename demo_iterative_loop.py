@@ -57,9 +57,7 @@ async def demonstrate_iterative_loop():
         print(f"Prompt: {prompt}")
 
         # Prepare iteration context
-        iteration_context = await controller.prepare_iteration_context(
-            context, prompt
-        )
+        iteration_context = await controller.prepare_iteration_context(context, prompt)
 
         print("\nIteration Context:")
         print(f"  - Iteration Number: {iteration_context['iteration_number']}")
@@ -73,22 +71,18 @@ async def demonstrate_iterative_loop():
         # Simulate agent creation and belief extraction
         agent_id = f"agent-{i}"
         mock_agent = type(
-            'MockAgent',
+            "MockAgent",
             (),
             {
-                'beliefs': {'state': [0.3 + i * 0.1, 0.7 - i * 0.1]},
-                'action_hist': list(range(i)),
+                "beliefs": {"state": [0.3 + i * 0.1, 0.7 - i * 0.1]},
+                "action_hist": list(range(i)),
             },
         )()
 
         # Simulate KG updates
         kg_updates = [
-            type(
-                'MockUpdate', (), {'node_id': f'node-{i}a', 'applied': True}
-            )(),
-            type(
-                'MockUpdate', (), {'node_id': f'node-{i}b', 'applied': True}
-            )(),
+            type("MockUpdate", (), {"node_id": f"node-{i}a", "applied": True})(),
+            type("MockUpdate", (), {"node_id": f"node-{i}b", "applied": True})(),
         ]
 
         # Generate intelligent suggestions
@@ -96,7 +90,7 @@ async def demonstrate_iterative_loop():
             agent_id,
             mock_agent,
             context,
-            {'state': [0.3 + i * 0.1, 0.7 - i * 0.1]},
+            {"state": [0.3 + i * 0.1, 0.7 - i * 0.1]},
             None,  # Mock DB
         )
 

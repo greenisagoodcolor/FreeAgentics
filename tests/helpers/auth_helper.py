@@ -57,7 +57,8 @@ def create_test_token(
 
     # Generate a test RSA key for tests
     private_key = rsa.generate_private_key(
-        public_exponent=65537, key_size=2048  # Smaller key for faster test execution
+        public_exponent=65537,
+        key_size=2048,  # Smaller key for faster test execution
     )
 
     # Create token payload compatible with the app

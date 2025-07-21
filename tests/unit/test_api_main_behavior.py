@@ -23,10 +23,7 @@ class TestAPIMainBehavior:
 
         assert isinstance(app, FastAPI)
         assert app.title == "FreeAgentics API"
-        assert (
-            app.description
-            == "Multi-Agent AI Platform API with Active Inference"
-        )
+        assert app.description == "Multi-Agent AI Platform API with Active Inference"
         assert app.version == "0.1.0"
 
     def test_root_endpoint_provides_welcome_information(self):
@@ -122,9 +119,7 @@ class TestAPIMainBehavior:
         security_middleware_found = any(
             "Security" in cls_name for cls_name in middleware_classes
         )
-        assert (
-            security_middleware_found
-        ), "API should include security middleware"
+        assert security_middleware_found, "API should include security middleware"
 
     def test_api_includes_agent_management_routes(self):
         """
@@ -138,9 +133,7 @@ class TestAPIMainBehavior:
         route_paths = [route.path for route in app.routes]
 
         # Look for agent-related routes
-        agent_routes_exist = any(
-            "agent" in path.lower() for path in route_paths
-        )
+        agent_routes_exist = any("agent" in path.lower() for path in route_paths)
         assert agent_routes_exist, "API should include agent management routes"
 
     def test_api_includes_monitoring_routes(self):
@@ -206,12 +199,8 @@ class TestAPIMainBehavior:
         route_paths = [route.path for route in app.routes]
 
         # Look for system-related routes
-        system_routes_exist = any(
-            "system" in path.lower() for path in route_paths
-        )
-        assert (
-            system_routes_exist
-        ), "API should include system management routes"
+        system_routes_exist = any("system" in path.lower() for path in route_paths)
+        assert system_routes_exist, "API should include system management routes"
 
 
 class TestAPILifecycleBehavior:

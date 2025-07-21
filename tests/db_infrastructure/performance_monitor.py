@@ -288,17 +288,23 @@ class PerformanceMonitor:
                     "memory_percent": psutil.virtual_memory().percent,
                     "memory_mb": psutil.virtual_memory().used / (1024 * 1024),
                     "disk_io": (
-                        psutil.disk_io_counters()._asdict() if psutil.disk_io_counters() else {}
+                        psutil.disk_io_counters()._asdict()
+                        if psutil.disk_io_counters()
+                        else {}
                     ),
                     "net_io": (
-                        psutil.net_io_counters()._asdict() if psutil.net_io_counters() else {}
+                        psutil.net_io_counters()._asdict()
+                        if psutil.net_io_counters()
+                        else {}
                     ),
                 }
 
                 self.system_metrics.append(metrics)
 
                 # Also record as performance metrics
-                self.record_metric("system", "cpu_usage", metrics["cpu_percent"], "percent")
+                self.record_metric(
+                    "system", "cpu_usage", metrics["cpu_percent"], "percent"
+                )
                 self.record_metric(
                     "system",
                     "memory_usage",
@@ -321,7 +327,9 @@ class PerformanceMonitor:
         """Calculate summary statistics for the test run."""
         summary = {
             "duration": time.time() - self.start_time,
-            "total_operations": sum(len(ops) for ops in self.operation_timings.values()),
+            "total_operations": sum(
+                len(ops) for ops in self.operation_timings.values()
+            ),
         }
 
         # Operation timing statistics
@@ -336,7 +344,8 @@ class PerformanceMonitor:
                     "max_time": max(durations),
                     "avg_time": statistics.mean(durations),
                     "median_time": statistics.median(durations),
-                    "success_rate": sum(1 for t in timings if t["success"]) / len(timings),
+                    "success_rate": sum(1 for t in timings if t["success"])
+                    / len(timings),
                 }
 
         summary["operation_timings"] = timing_stats
@@ -482,7 +491,9 @@ class LoadTestRunner:
         """Run a concurrent load test."""
         import concurrent.futures
 
-        logger.info(f"Starting concurrent test: {num_threads} threads for {duration_seconds}s")
+        logger.info(
+            f"Starting concurrent test: {num_threads} threads for {duration_seconds}s"
+        )
 
         # Start monitoring
         self.monitor.start_test_run(

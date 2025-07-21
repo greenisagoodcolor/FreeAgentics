@@ -133,7 +133,9 @@ async def test_observability_performance():
         )
     duration = time.time() - start_time
 
-    print(f"✅ 100 belief updates recorded in {duration:.3f}s ({duration*10:.1f}ms avg)")
+    print(
+        f"✅ 100 belief updates recorded in {duration:.3f}s ({duration * 10:.1f}ms avg)"
+    )
 
     # Test 2: Monitoring decorator overhead
     @monitor_pymdp_inference("perf_test_agent")
@@ -148,7 +150,7 @@ async def test_observability_performance():
         _result = monitored_operation()
     duration = time.time() - start_time
 
-    print(f"✅ 50 monitored operations in {duration:.3f}s ({duration*20:.1f}ms avg)")
+    print(f"✅ 50 monitored operations in {duration:.3f}s ({duration * 20:.1f}ms avg)")
 
     # Test 3: Performance summary generation
     start_time = time.time()
@@ -156,7 +158,7 @@ async def test_observability_performance():
         _summary = await integrator.get_performance_summary(f"perf_agent_{i % 5}")
     duration = time.time() - start_time
 
-    print(f"✅ 20 performance summaries in {duration:.3f}s ({duration*50:.1f}ms avg)")
+    print(f"✅ 20 performance summaries in {duration:.3f}s ({duration * 50:.1f}ms avg)")
 
     print("🎯 Observability performance tests completed")
     return True

@@ -44,7 +44,9 @@ logger = logging.getLogger(__name__)
 class ComprehensiveCryptoSecuritySuite:
     """Master class for comprehensive cryptographic security assessment."""
 
-    def __init__(self, project_root: str, output_dir: str = "./crypto_security_reports"):
+    def __init__(
+        self, project_root: str, output_dir: str = "./crypto_security_reports"
+    ):
         self.project_root = Path(project_root)
         self.output_dir = Path(output_dir)
         self.output_dir.mkdir(parents=True, exist_ok=True)
@@ -116,7 +118,9 @@ class ComprehensiveCryptoSecuritySuite:
             # Save comprehensive report
             self._save_comprehensive_report(final_report)
 
-            logger.info("Comprehensive cryptographic security assessment completed successfully")
+            logger.info(
+                "Comprehensive cryptographic security assessment completed successfully"
+            )
             return final_report
 
         except Exception as e:
@@ -212,7 +216,9 @@ class ComprehensiveCryptoSecuritySuite:
                 "status": "completed",
                 "summary": static_report.get("analysis_summary", {}),
                 "vulnerabilities_found": len(vulnerabilities),
-                "risk_score": static_report.get("analysis_summary", {}).get("risk_score", 0),
+                "risk_score": static_report.get("analysis_summary", {}).get(
+                    "risk_score", 0
+                ),
                 "report_path": str(static_report_path),
             }
 
@@ -262,7 +268,9 @@ class ComprehensiveCryptoSecuritySuite:
                 "critical_issues": len(
                     [i for i in config_issues if i.get("severity") == "critical"]
                 ),
-                "high_issues": len([i for i in config_issues if i.get("severity") == "high"]),
+                "high_issues": len(
+                    [i for i in config_issues if i.get("severity") == "high"]
+                ),
                 "issues_by_category": self._categorize_config_issues(config_issues),
             }
 
@@ -400,7 +408,9 @@ class ComprehensiveCryptoSecuritySuite:
 
         return issues
 
-    def _categorize_config_issues(self, issues: List[Dict[str, Any]]) -> Dict[str, List]:
+    def _categorize_config_issues(
+        self, issues: List[Dict[str, Any]]
+    ) -> Dict[str, List]:
         """Categorize configuration issues."""
         categories = {}
         for issue in issues:
@@ -421,7 +431,9 @@ class ComprehensiveCryptoSecuritySuite:
             # Evaluate compliance for each standard
             for standard in ComplianceStandard:
                 standard_findings = findings_by_standard.get(standard, [])
-                compliance_status = self._evaluate_compliance_status(standard, standard_findings)
+                compliance_status = self._evaluate_compliance_status(
+                    standard, standard_findings
+                )
                 compliance_results[standard.value] = compliance_status
 
             return {
@@ -458,13 +470,17 @@ class ComprehensiveCryptoSecuritySuite:
 
         return findings_by_standard
 
-    def _determine_relevant_standards(self, finding: Dict[str, Any]) -> List[ComplianceStandard]:
+    def _determine_relevant_standards(
+        self, finding: Dict[str, Any]
+    ) -> List[ComplianceStandard]:
         """Determine which compliance standards a finding relates to."""
         standards = []
         message = finding.get("message", "").lower()
 
         # NIST SP 800-57 - Key management and cryptographic algorithms
-        if any(keyword in message for keyword in ["algorithm", "key", "rsa", "aes", "sha"]):
+        if any(
+            keyword in message for keyword in ["algorithm", "key", "rsa", "aes", "sha"]
+        ):
             standards.append(ComplianceStandard.NIST_SP_800_57)
 
         # FIPS 140-2 - Cryptographic modules
@@ -472,11 +488,15 @@ class ComprehensiveCryptoSecuritySuite:
             standards.append(ComplianceStandard.FIPS_140_2)
 
         # OWASP Cryptographic Storage
-        if any(keyword in message for keyword in ["password", "storage", "hash", "salt"]):
+        if any(
+            keyword in message for keyword in ["password", "storage", "hash", "salt"]
+        ):
             standards.append(ComplianceStandard.OWASP_CRYPTOGRAPHIC_STORAGE)
 
         # RFC 8446 TLS 1.3
-        if any(keyword in message for keyword in ["tls", "ssl", "certificate", "cipher"]):
+        if any(
+            keyword in message for keyword in ["tls", "ssl", "certificate", "cipher"]
+        ):
             standards.append(ComplianceStandard.RFC_8446_TLS_1_3)
 
         return standards
@@ -504,10 +524,14 @@ class ComprehensiveCryptoSecuritySuite:
             "total_findings": len(findings),
             "critical_findings": len(critical_findings),
             "high_findings": len(high_findings),
-            "key_issues": [f.get("message", "") for f in critical_findings + high_findings][:5],
+            "key_issues": [
+                f.get("message", "") for f in critical_findings + high_findings
+            ][:5],
         }
 
-    def _calculate_overall_compliance_score(self, compliance_results: Dict[str, Any]) -> float:
+    def _calculate_overall_compliance_score(
+        self, compliance_results: Dict[str, Any]
+    ) -> float:
         """Calculate overall compliance score."""
         if not compliance_results:
             return 0.0
@@ -559,7 +583,9 @@ class ComprehensiveCryptoSecuritySuite:
         critical_findings = [
             f for f in self.consolidated_findings if f.get("severity") == "critical"
         ]
-        high_findings = [f for f in self.consolidated_findings if f.get("severity") == "high"]
+        high_findings = [
+            f for f in self.consolidated_findings if f.get("severity") == "high"
+        ]
 
         top_risks = []
 
@@ -578,7 +604,9 @@ class ComprehensiveCryptoSecuritySuite:
 
             risk_groups[message]["count"] += 1
             risk_groups[message]["sources"].add(finding.get("source", ""))
-            risk_groups[message]["recommendations"].add(finding.get("recommendation", ""))
+            risk_groups[message]["recommendations"].add(
+                finding.get("recommendation", "")
+            )
 
         # Convert to list and sort by severity and count
         for risk_data in risk_groups.values():
@@ -611,23 +639,29 @@ class ComprehensiveCryptoSecuritySuite:
         return {
             "status": "critical_issues_found",
             "total_critical": len(critical_findings),
-            "by_category": {cat: len(findings) for cat, findings in issue_categories.items()},
-            "immediate_actions": [f.get("recommendation", "") for f in critical_findings[:5]],
+            "by_category": {
+                cat: len(findings) for cat, findings in issue_categories.items()
+            },
+            "immediate_actions": [
+                f.get("recommendation", "") for f in critical_findings[:5]
+            ],
         }
 
-    def _create_executive_summary(self, consolidated_report: Dict[str, Any]) -> Dict[str, Any]:
+    def _create_executive_summary(
+        self, consolidated_report: Dict[str, Any]
+    ) -> Dict[str, Any]:
         """Create executive summary."""
         total_findings = consolidated_report["total_findings"]
         security_score = consolidated_report["security_score"]["overall_score"]
-        critical_count = len(consolidated_report["findings_by_severity"].get("critical", []))
+        critical_count = len(
+            consolidated_report["findings_by_severity"].get("critical", [])
+        )
         high_count = len(consolidated_report["findings_by_severity"].get("high", []))
 
         # Determine overall risk level
         if critical_count > 0:
             risk_level = "CRITICAL"
-            risk_description = (
-                "Immediate action required to address critical cryptographic vulnerabilities"
-            )
+            risk_description = "Immediate action required to address critical cryptographic vulnerabilities"
         elif high_count > 5:
             risk_level = "HIGH"
             risk_description = (
@@ -638,7 +672,9 @@ class ComprehensiveCryptoSecuritySuite:
             risk_description = "Some cryptographic improvements needed"
         else:
             risk_level = "LOW"
-            risk_description = "Cryptographic implementation appears secure with minor improvements"
+            risk_description = (
+                "Cryptographic implementation appears secure with minor improvements"
+            )
 
         return {
             "overall_risk_level": risk_level,
@@ -650,8 +686,10 @@ class ComprehensiveCryptoSecuritySuite:
             "assessment_coverage": {
                 "dynamic_testing": "dynamic_testing" in self.assessment_results,
                 "static_analysis": "static_analysis" in self.assessment_results,
-                "configuration_review": "configuration_review" in self.assessment_results,
-                "compliance_validation": "compliance_validation" in self.assessment_results,
+                "configuration_review": "configuration_review"
+                in self.assessment_results,
+                "compliance_validation": "compliance_validation"
+                in self.assessment_results,
             },
             "key_recommendations": [
                 rec
@@ -659,7 +697,9 @@ class ComprehensiveCryptoSecuritySuite:
                     "immediate_actions", []
                 )
             ][:3],
-            "business_impact": self._assess_business_impact(risk_level, critical_count, high_count),
+            "business_impact": self._assess_business_impact(
+                risk_level, critical_count, high_count
+            ),
         }
 
     def _assess_business_impact(
@@ -705,27 +745,37 @@ class ComprehensiveCryptoSecuritySuite:
         critical_findings = [
             f for f in self.consolidated_findings if f.get("severity") == "critical"
         ]
-        high_findings = [f for f in self.consolidated_findings if f.get("severity") == "high"]
-        medium_findings = [f for f in self.consolidated_findings if f.get("severity") == "medium"]
+        high_findings = [
+            f for f in self.consolidated_findings if f.get("severity") == "high"
+        ]
+        medium_findings = [
+            f for f in self.consolidated_findings if f.get("severity") == "medium"
+        ]
 
         roadmap = {
             "immediate_actions": {
                 "timeline": "24-48 hours",
                 "priority": "CRITICAL",
                 "description": "Address critical vulnerabilities immediately",
-                "actions": list(set([f.get("recommendation", "") for f in critical_findings]))[:5],
+                "actions": list(
+                    set([f.get("recommendation", "") for f in critical_findings])
+                )[:5],
             },
             "short_term_actions": {
                 "timeline": "1-2 weeks",
                 "priority": "HIGH",
                 "description": "Resolve high-severity issues",
-                "actions": list(set([f.get("recommendation", "") for f in high_findings]))[:10],
+                "actions": list(
+                    set([f.get("recommendation", "") for f in high_findings])
+                )[:10],
             },
             "medium_term_actions": {
                 "timeline": "1-3 months",
                 "priority": "MEDIUM",
                 "description": "Implement security improvements",
-                "actions": list(set([f.get("recommendation", "") for f in medium_findings]))[:10],
+                "actions": list(
+                    set([f.get("recommendation", "") for f in medium_findings])
+                )[:10],
             },
             "long_term_initiatives": {
                 "timeline": "3-6 months",
@@ -748,7 +798,9 @@ class ComprehensiveCryptoSecuritySuite:
         timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
 
         # Save JSON report
-        json_path = self.output_dir / f"comprehensive_crypto_security_report_{timestamp}.json"
+        json_path = (
+            self.output_dir / f"comprehensive_crypto_security_report_{timestamp}.json"
+        )
         with open(json_path, "w") as f:
             json.dump(report, f, indent=2, default=str)
 
@@ -793,7 +845,9 @@ def main():
 
     # Configure logging
     log_level = logging.DEBUG if args.verbose else logging.INFO
-    logging.basicConfig(level=log_level, format="%(asctime)s - %(levelname)s - %(message)s")
+    logging.basicConfig(
+        level=log_level, format="%(asctime)s - %(levelname)s - %(message)s"
+    )
 
     try:
         print("=" * 80)
@@ -832,10 +886,14 @@ def main():
             )
             sys.exit(1)
         elif exec_summary["overall_risk_level"] in ["HIGH", "CRITICAL"]:
-            print(f"\n⚠️  ASSESSMENT WARNING - {exec_summary['overall_risk_level']} risk level")
+            print(
+                f"\n⚠️  ASSESSMENT WARNING - {exec_summary['overall_risk_level']} risk level"
+            )
             sys.exit(2)
         else:
-            print(f"\n✅ ASSESSMENT PASSED - {exec_summary['overall_risk_level']} risk level")
+            print(
+                f"\n✅ ASSESSMENT PASSED - {exec_summary['overall_risk_level']} risk level"
+            )
             sys.exit(0)
 
     except KeyboardInterrupt:

@@ -98,7 +98,9 @@ class ComprehensiveErrorDisclosureTestRunner:
                     print(f"  Pass Rate: {summary.get('pass_rate', 0):.1f}%")
 
                     if "critical_failures" in summary:
-                        print(f"  Critical Issues: {summary.get('critical_failures', 0)}")
+                        print(
+                            f"  Critical Issues: {summary.get('critical_failures', 0)}"
+                        )
                     if "high_failures" in summary:
                         print(f"  High Issues: {summary.get('high_failures', 0)}")
 
@@ -146,7 +148,9 @@ class ComprehensiveErrorDisclosureTestRunner:
                 critical_issues += summary.get("critical_failures", 0) + summary.get(
                     "critical_findings", 0
                 )
-                high_issues += summary.get("high_failures", 0) + summary.get("high_findings", 0)
+                high_issues += summary.get("high_failures", 0) + summary.get(
+                    "high_findings", 0
+                )
                 medium_issues += summary.get("medium_failures", 0) + summary.get(
                     "medium_findings", 0
                 )
@@ -193,13 +197,17 @@ class ComprehensiveErrorDisclosureTestRunner:
             security_level = "GOOD"
 
         # Check production readiness
-        production_ready = critical_issues == 0 and high_issues <= 2 and security_score >= 80
+        production_ready = (
+            critical_issues == 0 and high_issues <= 2 and security_score >= 80
+        )
 
         comprehensive_report = {
             "metadata": {
                 "test_execution_time": datetime.now().strftime("%Y-%m-%d %H:%M:%S"),
                 "test_duration_seconds": (
-                    self.end_time - self.start_time if self.end_time and self.start_time else 0
+                    self.end_time - self.start_time
+                    if self.end_time and self.start_time
+                    else 0
                 ),
                 "platform": "FreeAgentics",
                 "test_version": "1.0.0",
@@ -233,7 +241,9 @@ class ComprehensiveErrorDisclosureTestRunner:
             "test_suite_results": test_suite_summaries,
             "detailed_results": self.test_results,
             "security_recommendations": {
-                "immediate_actions": self._get_immediate_actions(critical_issues, high_issues),
+                "immediate_actions": self._get_immediate_actions(
+                    critical_issues, high_issues
+                ),
                 "all_recommendations": unique_recommendations[:20],  # Limit to top 20
                 "priority_recommendations": self._prioritize_recommendations(
                     unique_recommendations
@@ -247,7 +257,9 @@ class ComprehensiveErrorDisclosureTestRunner:
 
         return comprehensive_report
 
-    def _get_immediate_actions(self, critical_issues: int, high_issues: int) -> List[str]:
+    def _get_immediate_actions(
+        self, critical_issues: int, high_issues: int
+    ) -> List[str]:
         """Get immediate actions based on issue severity."""
         immediate_actions = []
 
@@ -277,7 +289,9 @@ class ComprehensiveErrorDisclosureTestRunner:
 
         return immediate_actions
 
-    def _prioritize_recommendations(self, recommendations: List[str]) -> Dict[str, List[str]]:
+    def _prioritize_recommendations(
+        self, recommendations: List[str]
+    ) -> Dict[str, List[str]]:
         """Prioritize recommendations by category."""
         categorized = {"critical": [], "high": [], "medium": [], "low": []}
 
@@ -364,7 +378,9 @@ class ComprehensiveErrorDisclosureTestRunner:
 
         return compliance_results
 
-    def _assess_risk_levels(self, critical: int, high: int, medium: int) -> Dict[str, Any]:
+    def _assess_risk_levels(
+        self, critical: int, high: int, medium: int
+    ) -> Dict[str, Any]:
         """Assess risk levels for different attack vectors."""
         risk_assessment = {
             "information_disclosure": {
@@ -374,7 +390,10 @@ class ComprehensiveErrorDisclosureTestRunner:
             "authentication_bypass": {
                 "level": (
                     "HIGH"
-                    if any("authentication" in str(result) for result in self.test_results.values())
+                    if any(
+                        "authentication" in str(result)
+                        for result in self.test_results.values()
+                    )
                     else "LOW"
                 ),
                 "description": "Risk of authentication mechanisms being bypassed",
@@ -382,7 +401,10 @@ class ComprehensiveErrorDisclosureTestRunner:
             "injection_attacks": {
                 "level": (
                     "MEDIUM"
-                    if any("injection" in str(result) for result in self.test_results.values())
+                    if any(
+                        "injection" in str(result)
+                        for result in self.test_results.values()
+                    )
                     else "LOW"
                 ),
                 "description": "Risk of injection attacks through error handling",
@@ -568,34 +590,34 @@ class ComprehensiveErrorDisclosureTestRunner:
         <div class="header">
             <h1>FreeAgentics Security Assessment Report</h1>
             <p>Error Handling & Information Disclosure Security Analysis</p>
-            <p>Generated on {report['metadata']['test_execution_time']}</p>
+            <p>Generated on {report["metadata"]["test_execution_time"]}</p>
         </div>
 
         <div class="executive-summary">
             <h2>Executive Summary</h2>
-            <div class="status-badge status-{report['executive_summary']['security_level'].lower()}">
-                {report['executive_summary']['security_status']}
+            <div class="status-badge status-{report["executive_summary"]["security_level"].lower()}">
+                {report["executive_summary"]["security_status"]}
             </div>
 
             <div class="metrics">
                 <div class="metric">
-                    <div class="metric-value">{report['executive_summary']['security_score']}</div>
+                    <div class="metric-value">{report["executive_summary"]["security_score"]}</div>
                     <div class="metric-label">Security Score</div>
                 </div>
                 <div class="metric">
-                    <div class="metric-value">{report['overall_statistics']['total_tests']}</div>
+                    <div class="metric-value">{report["overall_statistics"]["total_tests"]}</div>
                     <div class="metric-label">Total Tests</div>
                 </div>
                 <div class="metric">
-                    <div class="metric-value">{report['overall_statistics']['overall_pass_rate']}%</div>
+                    <div class="metric-value">{report["overall_statistics"]["overall_pass_rate"]}%</div>
                     <div class="metric-label">Pass Rate</div>
                 </div>
                 <div class="metric">
-                    <div class="metric-value">{report['executive_summary']['critical_issues']}</div>
+                    <div class="metric-value">{report["executive_summary"]["critical_issues"]}</div>
                     <div class="metric-label">Critical Issues</div>
                 </div>
                 <div class="metric">
-                    <div class="metric-value">{report['executive_summary']['high_issues']}</div>
+                    <div class="metric-value">{report["executive_summary"]["high_issues"]}</div>
                     <div class="metric-label">High Issues</div>
                 </div>
             </div>
@@ -626,9 +648,9 @@ class ComprehensiveErrorDisclosureTestRunner:
 
             html += f"""
                 <div class="test-suite">
-                    <h3>{suite_name.replace('_', ' ').title()}</h3>
+                    <h3>{suite_name.replace("_", " ").title()}</h3>
                     <p><strong>Pass Rate:</strong> <span class="{status_class}">{pass_rate:.1f}%</span></p>
-                    <p><strong>Tests:</strong> {suite_data.get('total_tests', 0)} total, {suite_data.get('passed_tests', 0)} passed, {suite_data.get('failed_tests', 0)} failed</p>
+                    <p><strong>Tests:</strong> {suite_data.get("total_tests", 0)} total, {suite_data.get("passed_tests", 0)} passed, {suite_data.get("failed_tests", 0)} failed</p>
                 </div>
             """
 
@@ -649,7 +671,7 @@ class ComprehensiveErrorDisclosureTestRunner:
         html += f"""
         <div class="footer">
             <p>Report generated by FreeAgentics Security Testing Suite</p>
-            <p>Test duration: {report['metadata']['test_duration_seconds']:.1f} seconds</p>
+            <p>Test duration: {report["metadata"]["test_duration_seconds"]:.1f} seconds</p>
         </div>
     </div>
 </body>
@@ -669,7 +691,9 @@ class ComprehensiveErrorDisclosureTestRunner:
 
         print(f"Security Status: {exec_summary['security_status']}")
         print(f"Security Score: {exec_summary['security_score']}/100")
-        print(f"Production Ready: {'✅ YES' if exec_summary['production_ready'] else '❌ NO'}")
+        print(
+            f"Production Ready: {'✅ YES' if exec_summary['production_ready'] else '❌ NO'}"
+        )
         print()
 
         print("Test Statistics:")
@@ -711,7 +735,9 @@ def main():
         default="both",
         help="Output format for the report",
     )
-    parser.add_argument("--output-dir", default=None, help="Output directory for reports")
+    parser.add_argument(
+        "--output-dir", default=None, help="Output directory for reports"
+    )
     parser.add_argument(
         "--quiet",
         action="store_true",
@@ -750,13 +776,19 @@ def main():
         print("\n❌ CRITICAL ISSUES DETECTED - Application not ready for production")
         sys.exit(1)
     elif exec_summary["high_issues"] > 5:
-        print("\n⚠️  HIGH RISK ISSUES DETECTED - Significant security improvements needed")
+        print(
+            "\n⚠️  HIGH RISK ISSUES DETECTED - Significant security improvements needed"
+        )
         sys.exit(2)
     elif not exec_summary["production_ready"]:
-        print("\n⚠️  APPLICATION NOT PRODUCTION READY - Address security issues before deployment")
+        print(
+            "\n⚠️  APPLICATION NOT PRODUCTION READY - Address security issues before deployment"
+        )
         sys.exit(3)
     else:
-        print("\n✅ SECURITY ASSESSMENT COMPLETED - Application has acceptable security posture")
+        print(
+            "\n✅ SECURITY ASSESSMENT COMPLETED - Application has acceptable security posture"
+        )
         sys.exit(0)
 
 

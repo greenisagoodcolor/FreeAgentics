@@ -37,7 +37,9 @@ def main():
 
     # 3. Get connection pool
     print("\n3. Setting up connection pool...")
-    pool = DatabasePool(database="freeagentics_test", min_connections=2, max_connections=10)
+    pool = DatabasePool(
+        database="freeagentics_test", min_connections=2, max_connections=10
+    )
 
     # 4. Insert test data
     print("\n4. Inserting test data...")

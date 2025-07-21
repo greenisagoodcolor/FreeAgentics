@@ -126,7 +126,9 @@ class ComprehensiveOWASPAssessment:
         endpoint_files = [
             f
             for f in auth_files
-            if any(keyword in f.name for keyword in ["api", "endpoint", "route", "view"])
+            if any(
+                keyword in f.name for keyword in ["api", "endpoint", "route", "view"]
+            )
         ]
 
         unprotected_endpoints = 0
@@ -138,7 +140,9 @@ class ComprehensiveOWASPAssessment:
                 self.files_analyzed += 1
 
                 # Look for FastAPI endpoints
-                endpoint_matches = re.finditer(r"@app\.(get|post|put|delete|patch)\(", content)
+                endpoint_matches = re.finditer(
+                    r"@app\.(get|post|put|delete|patch)\(", content
+                )
                 auth_matches = re.finditer(
                     r"@require_permission|@require_role|@login_required",
                     content,
@@ -238,9 +242,13 @@ class ComprehensiveOWASPAssessment:
             except Exception as e:
                 print(f"  ! Error analyzing {file_path}: {e}")
 
-        injection_findings = [f for f in self.findings if "injection" in f["title"].lower()]
+        injection_findings = [
+            f for f in self.findings if "injection" in f["title"].lower()
+        ]
         if injection_findings:
-            print(f"  ⚠ Found {len(injection_findings)} potential injection vulnerabilities")
+            print(
+                f"  ⚠ Found {len(injection_findings)} potential injection vulnerabilities"
+            )
         else:
             print("  ✓ No obvious injection vulnerabilities found")
 
@@ -260,7 +268,9 @@ class ComprehensiveOWASPAssessment:
                 remediation="Implement rate limiting for API endpoints",
             )
         else:
-            print(f"  ✓ Rate limiting implementation found ({len(rate_limit_files)} files)")
+            print(
+                f"  ✓ Rate limiting implementation found ({len(rate_limit_files)} files)"
+            )
 
         # Check for input validation
         validation_patterns = [
@@ -321,7 +331,9 @@ class ComprehensiveOWASPAssessment:
                     for pattern in secret_patterns:
                         matches = re.finditer(pattern, content, re.IGNORECASE)
                         for match in matches:
-                            if "your_" not in match.group(0) and "example" not in match.group(0):
+                            if "your_" not in match.group(
+                                0
+                            ) and "example" not in match.group(0):
                                 self.add_finding(
                                     "A05: Security Misconfiguration",
                                     "HIGH",
@@ -400,7 +412,9 @@ class ComprehensiveOWASPAssessment:
                 if result.returncode == 0:
                     print("  ✓ pip-audit available for dependency scanning")
                 else:
-                    print("  ⚠ pip-audit not available - install for automated scanning")
+                    print(
+                        "  ⚠ pip-audit not available - install for automated scanning"
+                    )
             except Exception:
                 print("  ⚠ pip-audit not available - install for automated scanning")
 
@@ -623,7 +637,9 @@ class ComprehensiveOWASPAssessment:
             category_counts[category] = category_counts.get(category, 0) + 1
 
             if finding.get("file_path"):
-                file_counts[finding["file_path"]] = file_counts.get(finding["file_path"], 0) + 1
+                file_counts[finding["file_path"]] = (
+                    file_counts.get(finding["file_path"], 0) + 1
+                )
 
         return {
             "assessment_date": datetime.utcnow().isoformat(),
@@ -683,7 +699,11 @@ class ComprehensiveOWASPAssessment:
             print(f"  {category}: {count}")
 
         # Save comprehensive report
-        report_path = self.project_root / "security" / "owasp_comprehensive_assessment_report.json"
+        report_path = (
+            self.project_root
+            / "security"
+            / "owasp_comprehensive_assessment_report.json"
+        )
         report_path.parent.mkdir(exist_ok=True)
 
         with open(report_path, "w") as f:
@@ -698,15 +718,17 @@ class ComprehensiveOWASPAssessment:
 
     def generate_task_completion_summary(self, report: Dict[str, Any]):
         """Generate task completion summary."""
-        summary_path = self.project_root / "security" / "task_14_11_completion_summary.md"
+        summary_path = (
+            self.project_root / "security" / "task_14_11_completion_summary.md"
+        )
 
         summary_content = f"""# Task 14.11 - OWASP Top 10 Vulnerability Assessment Completion Summary
 
 ## Assessment Overview
-- **Date**: {report['assessment_date']}
+- **Date**: {report["assessment_date"]}
 - **Type**: Comprehensive Static Analysis
-- **Files Analyzed**: {report['files_analyzed']}
-- **Total Findings**: {report['total_findings']}
+- **Files Analyzed**: {report["files_analyzed"]}
+- **Total Findings**: {report["total_findings"]}
 
 ## Severity Breakdown
 """
@@ -758,7 +780,9 @@ def main():
     """Run comprehensive OWASP assessment."""
     import argparse
 
-    parser = argparse.ArgumentParser(description="Comprehensive OWASP Top 10 Security Assessment")
+    parser = argparse.ArgumentParser(
+        description="Comprehensive OWASP Top 10 Security Assessment"
+    )
     parser.add_argument(
         "--project-root",
         default=".",

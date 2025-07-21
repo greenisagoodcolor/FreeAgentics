@@ -61,10 +61,10 @@ class LoadTestConfig:
     min_success_rate: float = 99.0
     endpoints: List[str] = field(
         default_factory=lambda: [
-            '/health',
-            '/api/v1/agents',
-            '/api/v1/prompts',
-            '/api/v1/system/status',
+            "/health",
+            "/api/v1/agents",
+            "/api/v1/prompts",
+            "/api/v1/system/status",
         ]
     )
 
@@ -99,7 +99,7 @@ class ComprehensivePerformanceSuite:
 
             # Validate SLA requirements
             sla_validation = self._validate_sla_requirements(config)
-            report['sla_validation'] = sla_validation
+            report["sla_validation"] = sla_validation
 
             return report
 
@@ -124,7 +124,7 @@ class ComprehensivePerformanceSuite:
 
                     try:
                         async with session.get(
-                            f'http://localhost:8000{endpoint}'
+                            f"http://localhost:8000{endpoint}"
                         ) as response:
                             await response.read()
                             if response.status == 200:
@@ -143,9 +143,7 @@ class ComprehensivePerformanceSuite:
                     await asyncio.sleep(0.1)
 
                 # Calculate metrics
-                avg_response_time = (
-                    np.mean(response_times) if response_times else 0
-                )
+                avg_response_time = np.mean(response_times) if response_times else 0
                 success_rate = (success_count / 20) * 100
 
                 result = PerformanceTestResult(
@@ -155,22 +153,20 @@ class ComprehensivePerformanceSuite:
                     throughput_ops_per_second=20 / (20 * 0.1),
                     success_rate=success_rate,
                     error_count=error_count,
-                    memory_usage_mb=self.process.memory_info().rss
-                    / 1024
-                    / 1024,
+                    memory_usage_mb=self.process.memory_info().rss / 1024 / 1024,
                     cpu_usage_percent=self.process.cpu_percent(),
                     metadata={
-                        'endpoint': endpoint,
-                        'p95_response_time': np.percentile(response_times, 95)
+                        "endpoint": endpoint,
+                        "p95_response_time": np.percentile(response_times, 95)
                         if response_times
                         else 0,
-                        'p99_response_time': np.percentile(response_times, 99)
+                        "p99_response_time": np.percentile(response_times, 99)
                         if response_times
                         else 0,
-                        'max_response_time': np.max(response_times)
+                        "max_response_time": np.max(response_times)
                         if response_times
                         else 0,
-                        'min_response_time': np.min(response_times)
+                        "min_response_time": np.min(response_times)
                         if response_times
                         else 0,
                     },
@@ -187,9 +183,7 @@ class ComprehensivePerformanceSuite:
             f"Running load tests with {config.concurrent_users} concurrent users"
         )
 
-        async def simulate_user_session(
-            user_id: int, session: aiohttp.ClientSession
-        ):
+        async def simulate_user_session(user_id: int, session: aiohttp.ClientSession):
             """Simulate a user session."""
             user_requests = 0
             user_errors = 0
@@ -205,12 +199,10 @@ class ComprehensivePerformanceSuite:
                 request_start = time.perf_counter()
                 try:
                     async with session.get(
-                        f'http://localhost:8000{endpoint}'
+                        f"http://localhost:8000{endpoint}"
                     ) as response:
                         await response.read()
-                        response_time = (
-                            time.perf_counter() - request_start
-                        ) * 1000
+                        response_time = (time.perf_counter() - request_start) * 1000
                         user_response_times.append(response_time)
                         user_requests += 1
 
@@ -225,11 +217,11 @@ class ComprehensivePerformanceSuite:
                 await asyncio.sleep(np.random.uniform(0.1, 2.0))
 
             return {
-                'user_id': user_id,
-                'requests': user_requests,
-                'errors': user_errors,
-                'response_times': user_response_times,
-                'avg_response_time': np.mean(user_response_times)
+                "user_id": user_id,
+                "requests": user_requests,
+                "errors": user_errors,
+                "response_times": user_response_times,
+                "avg_response_time": np.mean(user_response_times)
                 if user_response_times
                 else 0,
             }
@@ -238,9 +230,7 @@ class ComprehensivePerformanceSuite:
         start_time = time.perf_counter()
 
         async with aiohttp.ClientSession(
-            timeout=aiohttp.ClientTimeout(
-                total=config.request_timeout_seconds
-            ),
+            timeout=aiohttp.ClientTimeout(total=config.request_timeout_seconds),
             connector=aiohttp.TCPConnector(limit=config.concurrent_users * 2),
         ) as session:
             # Ramp up users gradually
@@ -248,17 +238,14 @@ class ComprehensivePerformanceSuite:
             for i in range(config.concurrent_users):
                 if i > 0 and i % 10 == 0:  # Ramp up 10 users at a time
                     await asyncio.sleep(
-                        config.ramp_up_seconds
-                        / (config.concurrent_users // 10)
+                        config.ramp_up_seconds / (config.concurrent_users // 10)
                     )
 
                 task = asyncio.create_task(simulate_user_session(i, session))
                 user_tasks.append(task)
 
             # Wait for all users to complete
-            user_results = await asyncio.gather(
-                *user_tasks, return_exceptions=True
-            )
+            user_results = await asyncio.gather(*user_tasks, return_exceptions=True)
 
         # Analyze results
         total_requests = 0
@@ -270,9 +257,9 @@ class ComprehensivePerformanceSuite:
                 logger.error(f"User session failed: {result}")
                 continue
 
-            total_requests += result['requests']
-            total_errors += result['errors']
-            all_response_times.extend(result['response_times'])
+            total_requests += result["requests"]
+            total_errors += result["errors"]
+            all_response_times.extend(result["response_times"])
 
         duration = time.perf_counter() - start_time
         throughput = total_requests / duration
@@ -281,9 +268,7 @@ class ComprehensivePerformanceSuite:
             if total_requests > 0
             else 0
         )
-        avg_response_time = (
-            np.mean(all_response_times) if all_response_times else 0
-        )
+        avg_response_time = np.mean(all_response_times) if all_response_times else 0
 
         result = PerformanceTestResult(
             test_name="load_test_concurrent_users",
@@ -295,18 +280,18 @@ class ComprehensivePerformanceSuite:
             memory_usage_mb=self.process.memory_info().rss / 1024 / 1024,
             cpu_usage_percent=self.process.cpu_percent(),
             metadata={
-                'concurrent_users': config.concurrent_users,
-                'total_requests': total_requests,
-                'p95_response_time': np.percentile(all_response_times, 95)
+                "concurrent_users": config.concurrent_users,
+                "total_requests": total_requests,
+                "p95_response_time": np.percentile(all_response_times, 95)
                 if all_response_times
                 else 0,
-                'p99_response_time': np.percentile(all_response_times, 99)
+                "p99_response_time": np.percentile(all_response_times, 99)
                 if all_response_times
                 else 0,
-                'max_response_time': np.max(all_response_times)
+                "max_response_time": np.max(all_response_times)
                 if all_response_times
                 else 0,
-                'user_results': len(
+                "user_results": len(
                     [r for r in user_results if not isinstance(r, Exception)]
                 ),
             },
@@ -354,12 +339,10 @@ class ComprehensivePerformanceSuite:
             memory_usage_mb=self.process.memory_info().rss / 1024 / 1024,
             cpu_usage_percent=self.process.cpu_percent(),
             metadata={
-                'messages_sent': messages_sent,
-                'max_processing_time': np.max(message_processing_times),
-                'p95_processing_time': np.percentile(
-                    message_processing_times, 95
-                ),
-                'test_type': 'simulated_websocket',
+                "messages_sent": messages_sent,
+                "max_processing_time": np.max(message_processing_times),
+                "p95_processing_time": np.percentile(message_processing_times, 95),
+                "test_type": "simulated_websocket",
             },
         )
 
@@ -419,12 +402,12 @@ class ComprehensivePerformanceSuite:
             memory_usage_mb=self.process.memory_info().rss / 1024 / 1024,
             cpu_usage_percent=self.process.cpu_percent(),
             metadata={
-                'total_queries': successful_queries + failed_queries,
-                'query_types': ['SELECT', 'INSERT', 'UPDATE', 'JOIN'],
-                'p95_query_time': np.percentile(query_times, 95),
-                'p99_query_time': np.percentile(query_times, 99),
-                'max_query_time': np.max(query_times),
-                'test_type': 'simulated_database',
+                "total_queries": successful_queries + failed_queries,
+                "query_types": ["SELECT", "INSERT", "UPDATE", "JOIN"],
+                "p95_query_time": np.percentile(query_times, 95),
+                "p99_query_time": np.percentile(query_times, 99),
+                "max_query_time": np.max(query_times),
+                "test_type": "simulated_database",
             },
         )
 
@@ -484,28 +467,27 @@ class ComprehensivePerformanceSuite:
             test_name="memory_usage_optimization",
             duration_seconds=duration,
             response_time_ms=duration * 1000,  # Total test time
-            throughput_ops_per_second=100
-            / duration,  # Objects processed per second
+            throughput_ops_per_second=100 / duration,  # Objects processed per second
             success_rate=100.0,  # Memory test completed
             error_count=0,
             memory_usage_mb=memory_growth,
             cpu_usage_percent=self.process.cpu_percent(),
             metadata={
-                'initial_memory_mb': initial_memory,
-                'peak_memory_mb': peak_memory,
-                'final_memory_mb': final_memory,
-                'memory_growth_mb': memory_growth,
-                'memory_freed_mb': memory_freed,
-                'memory_efficiency': (memory_freed / memory_growth * 100)
+                "initial_memory_mb": initial_memory,
+                "peak_memory_mb": peak_memory,
+                "final_memory_mb": final_memory,
+                "memory_growth_mb": memory_growth,
+                "memory_freed_mb": memory_freed,
+                "memory_efficiency": (memory_freed / memory_growth * 100)
                 if memory_growth > 0
                 else 0,
-                'objects_created': 100,
+                "objects_created": 100,
             },
         )
 
         self.results.append(result)
         logger.info(
-            f"Memory test: {memory_growth:.1f}MB growth, {memory_freed:.1f}MB freed, {memory_freed/memory_growth*100:.1f}% efficiency"
+            f"Memory test: {memory_growth:.1f}MB growth, {memory_freed:.1f}MB freed, {memory_freed / memory_growth * 100:.1f}% efficiency"
         )
 
     async def _run_scalability_tests(self, config: LoadTestConfig):
@@ -517,9 +499,7 @@ class ComprehensivePerformanceSuite:
         scalability_results = []
 
         for load_level in load_levels:
-            logger.info(
-                f"Testing scalability with {load_level} concurrent operations"
-            )
+            logger.info(f"Testing scalability with {load_level} concurrent operations")
 
             start_time = time.perf_counter()
 
@@ -537,48 +517,46 @@ class ComprehensivePerformanceSuite:
 
             scalability_results.append(
                 {
-                    'load_level': load_level,
-                    'duration': duration,
-                    'throughput': throughput,
-                    'memory_mb': self.process.memory_info().rss / 1024 / 1024,
-                    'cpu_percent': self.process.cpu_percent(),
+                    "load_level": load_level,
+                    "duration": duration,
+                    "throughput": throughput,
+                    "memory_mb": self.process.memory_info().rss / 1024 / 1024,
+                    "cpu_percent": self.process.cpu_percent(),
                 }
             )
 
         # Calculate scaling efficiency
-        base_throughput = scalability_results[0]['throughput']
+        base_throughput = scalability_results[0]["throughput"]
         scaling_efficiency = []
 
         for result in scalability_results:
             expected_throughput = base_throughput * (
-                result['load_level'] / load_levels[0]
+                result["load_level"] / load_levels[0]
             )
-            efficiency = (result['throughput'] / expected_throughput) * 100
+            efficiency = (result["throughput"] / expected_throughput) * 100
             scaling_efficiency.append(efficiency)
 
         avg_scaling_efficiency = np.mean(scaling_efficiency)
 
         result = PerformanceTestResult(
             test_name="scalability_testing",
-            duration_seconds=sum(r['duration'] for r in scalability_results),
+            duration_seconds=sum(r["duration"] for r in scalability_results),
             response_time_ms=np.mean(
-                [r['duration'] * 1000 for r in scalability_results]
+                [r["duration"] * 1000 for r in scalability_results]
             ),
             throughput_ops_per_second=scalability_results[-1][
-                'throughput'
+                "throughput"
             ],  # Highest load throughput
             success_rate=100.0,  # All operations completed
             error_count=0,
-            memory_usage_mb=scalability_results[-1]['memory_mb'],
-            cpu_usage_percent=np.mean(
-                [r['cpu_percent'] for r in scalability_results]
-            ),
+            memory_usage_mb=scalability_results[-1]["memory_mb"],
+            cpu_usage_percent=np.mean([r["cpu_percent"] for r in scalability_results]),
             metadata={
-                'load_levels': load_levels,
-                'scalability_results': scalability_results,
-                'scaling_efficiency': avg_scaling_efficiency,
-                'max_load_tested': max(load_levels),
-                'linear_scaling_score': avg_scaling_efficiency,
+                "load_levels": load_levels,
+                "scalability_results": scalability_results,
+                "scaling_efficiency": avg_scaling_efficiency,
+                "max_load_tested": max(load_levels),
+                "linear_scaling_score": avg_scaling_efficiency,
             },
         )
 
@@ -669,19 +647,17 @@ class ComprehensivePerformanceSuite:
             memory_usage_mb=self.process.memory_info().rss / 1024 / 1024,
             cpu_usage_percent=self.process.cpu_percent(),
             metadata={
-                'stress_duration': stress_duration,
-                'target_ops_per_second': operations_per_second,
-                'total_operations': total_operations,
-                'completed_operations': completed_operations,
-                'p95_response_time': np.percentile(response_times, 95)
+                "stress_duration": stress_duration,
+                "target_ops_per_second": operations_per_second,
+                "total_operations": total_operations,
+                "completed_operations": completed_operations,
+                "p95_response_time": np.percentile(response_times, 95)
                 if response_times
                 else 0,
-                'p99_response_time': np.percentile(response_times, 99)
+                "p99_response_time": np.percentile(response_times, 99)
                 if response_times
                 else 0,
-                'max_response_time': np.max(response_times)
-                if response_times
-                else 0,
+                "max_response_time": np.max(response_times) if response_times else 0,
             },
         )
 
@@ -693,25 +669,19 @@ class ComprehensivePerformanceSuite:
     def _generate_performance_report(self) -> Dict[str, Any]:
         """Generate comprehensive performance report."""
         if not self.results:
-            return {'error': 'No test results available'}
+            return {"error": "No test results available"}
 
         # Calculate overall statistics
         total_tests = len(self.results)
-        successful_tests = len(
-            [r for r in self.results if r.success_rate >= 95.0]
-        )
+        successful_tests = len([r for r in self.results if r.success_rate >= 95.0])
 
         # Response time statistics
         response_times = [
             r.response_time_ms for r in self.results if r.response_time_ms > 0
         ]
         avg_response_time = np.mean(response_times) if response_times else 0
-        p95_response_time = (
-            np.percentile(response_times, 95) if response_times else 0
-        )
-        p99_response_time = (
-            np.percentile(response_times, 99) if response_times else 0
-        )
+        p95_response_time = np.percentile(response_times, 95) if response_times else 0
+        p99_response_time = np.percentile(response_times, 99) if response_times else 0
 
         # Throughput statistics
         throughputs = [r.throughput_ops_per_second for r in self.results]
@@ -733,71 +703,65 @@ class ComprehensivePerformanceSuite:
         for result in self.results:
             test_summaries.append(
                 {
-                    'test_name': result.test_name,
-                    'duration_seconds': result.duration_seconds,
-                    'response_time_ms': result.response_time_ms,
-                    'throughput_ops_per_second': result.throughput_ops_per_second,
-                    'success_rate': result.success_rate,
-                    'error_count': result.error_count,
-                    'memory_usage_mb': result.memory_usage_mb,
-                    'cpu_usage_percent': result.cpu_usage_percent,
-                    'metadata': result.metadata,
+                    "test_name": result.test_name,
+                    "duration_seconds": result.duration_seconds,
+                    "response_time_ms": result.response_time_ms,
+                    "throughput_ops_per_second": result.throughput_ops_per_second,
+                    "success_rate": result.success_rate,
+                    "error_count": result.error_count,
+                    "memory_usage_mb": result.memory_usage_mb,
+                    "cpu_usage_percent": result.cpu_usage_percent,
+                    "metadata": result.metadata,
                 }
             )
 
         report = {
-            'timestamp': datetime.now().isoformat(),
-            'test_summary': {
-                'total_tests': total_tests,
-                'successful_tests': successful_tests,
-                'test_success_rate': (successful_tests / total_tests * 100)
+            "timestamp": datetime.now().isoformat(),
+            "test_summary": {
+                "total_tests": total_tests,
+                "successful_tests": successful_tests,
+                "test_success_rate": (successful_tests / total_tests * 100)
                 if total_tests > 0
                 else 0,
-                'total_duration_seconds': sum(
-                    r.duration_seconds for r in self.results
-                ),
+                "total_duration_seconds": sum(r.duration_seconds for r in self.results),
             },
-            'performance_metrics': {
-                'response_time': {
-                    'average_ms': avg_response_time,
-                    'p95_ms': p95_response_time,
-                    'p99_ms': p99_response_time,
-                    'max_ms': np.max(response_times) if response_times else 0,
+            "performance_metrics": {
+                "response_time": {
+                    "average_ms": avg_response_time,
+                    "p95_ms": p95_response_time,
+                    "p99_ms": p99_response_time,
+                    "max_ms": np.max(response_times) if response_times else 0,
                 },
-                'throughput': {
-                    'average_ops_per_second': avg_throughput,
-                    'max_ops_per_second': max_throughput,
-                    'min_ops_per_second': np.min(throughputs)
-                    if throughputs
-                    else 0,
+                "throughput": {
+                    "average_ops_per_second": avg_throughput,
+                    "max_ops_per_second": max_throughput,
+                    "min_ops_per_second": np.min(throughputs) if throughputs else 0,
                 },
-                'reliability': {
-                    'average_success_rate': avg_success_rate,
-                    'min_success_rate': min_success_rate,
-                    'total_errors': sum(r.error_count for r in self.results),
+                "reliability": {
+                    "average_success_rate": avg_success_rate,
+                    "min_success_rate": min_success_rate,
+                    "total_errors": sum(r.error_count for r in self.results),
                 },
-                'resource_usage': {
-                    'average_memory_mb': avg_memory,
-                    'max_memory_mb': max_memory,
-                    'average_cpu_percent': np.mean(
+                "resource_usage": {
+                    "average_memory_mb": avg_memory,
+                    "max_memory_mb": max_memory,
+                    "average_cpu_percent": np.mean(
                         [r.cpu_usage_percent for r in self.results]
                     ),
                 },
             },
-            'test_results': test_summaries,
-            'recommendations': self._generate_recommendations(),
+            "test_results": test_summaries,
+            "recommendations": self._generate_recommendations(),
         }
 
         return report
 
-    def _validate_sla_requirements(
-        self, config: LoadTestConfig
-    ) -> Dict[str, Any]:
+    def _validate_sla_requirements(self, config: LoadTestConfig) -> Dict[str, Any]:
         """Validate SLA requirements."""
         validation_results = {
-            'requirements_met': True,
-            'violations': [],
-            'metrics': {},
+            "requirements_met": True,
+            "violations": [],
+            "metrics": {},
         }
 
         # Check response time requirement (<3s)
@@ -808,21 +772,17 @@ class ComprehensivePerformanceSuite:
             p95_response_time = np.percentile(response_times, 95)
             max_response_time = np.max(response_times)
 
-            validation_results['metrics'][
-                'p95_response_time_ms'
-            ] = p95_response_time
-            validation_results['metrics'][
-                'max_response_time_ms'
-            ] = max_response_time
+            validation_results["metrics"]["p95_response_time_ms"] = p95_response_time
+            validation_results["metrics"]["max_response_time_ms"] = max_response_time
 
             if p95_response_time > config.target_response_time_ms:
-                validation_results['requirements_met'] = False
-                validation_results['violations'].append(
+                validation_results["requirements_met"] = False
+                validation_results["violations"].append(
                     {
-                        'requirement': 'Response time <3s (P95)',
-                        'expected': config.target_response_time_ms,
-                        'actual': p95_response_time,
-                        'severity': 'critical',
+                        "requirement": "Response time <3s (P95)",
+                        "expected": config.target_response_time_ms,
+                        "actual": p95_response_time,
+                        "severity": "critical",
                     }
                 )
 
@@ -832,49 +792,41 @@ class ComprehensivePerformanceSuite:
             min_success_rate = np.min(success_rates)
             avg_success_rate = np.mean(success_rates)
 
-            validation_results['metrics'][
-                'min_success_rate'
-            ] = min_success_rate
-            validation_results['metrics'][
-                'avg_success_rate'
-            ] = avg_success_rate
+            validation_results["metrics"]["min_success_rate"] = min_success_rate
+            validation_results["metrics"]["avg_success_rate"] = avg_success_rate
 
             if min_success_rate < config.min_success_rate:
-                validation_results['requirements_met'] = False
-                validation_results['violations'].append(
+                validation_results["requirements_met"] = False
+                validation_results["violations"].append(
                     {
-                        'requirement': 'Success rate >99%',
-                        'expected': config.min_success_rate,
-                        'actual': min_success_rate,
-                        'severity': 'critical',
+                        "requirement": "Success rate >99%",
+                        "expected": config.min_success_rate,
+                        "actual": min_success_rate,
+                        "severity": "critical",
                     }
                 )
 
         # Check concurrent user handling
         load_test_results = [
-            r
-            for r in self.results
-            if r.test_name == 'load_test_concurrent_users'
+            r for r in self.results if r.test_name == "load_test_concurrent_users"
         ]
         if load_test_results:
             load_result = load_test_results[0]
-            concurrent_users = load_result.metadata.get('concurrent_users', 0)
+            concurrent_users = load_result.metadata.get("concurrent_users", 0)
 
-            validation_results['metrics'][
-                'concurrent_users_tested'
-            ] = concurrent_users
-            validation_results['metrics'][
-                'load_test_success_rate'
-            ] = load_result.success_rate
+            validation_results["metrics"]["concurrent_users_tested"] = concurrent_users
+            validation_results["metrics"]["load_test_success_rate"] = (
+                load_result.success_rate
+            )
 
             if concurrent_users < config.concurrent_users:
-                validation_results['requirements_met'] = False
-                validation_results['violations'].append(
+                validation_results["requirements_met"] = False
+                validation_results["violations"].append(
                     {
-                        'requirement': f'Handle {config.concurrent_users} concurrent users',
-                        'expected': config.concurrent_users,
-                        'actual': concurrent_users,
-                        'severity': 'high',
+                        "requirement": f"Handle {config.concurrent_users} concurrent users",
+                        "expected": config.concurrent_users,
+                        "actual": concurrent_users,
+                        "severity": "high",
                     }
                 )
 
@@ -948,7 +900,7 @@ class ComprehensivePerformanceSuite:
         """Save test results to file."""
         report = self._generate_performance_report()
 
-        with open(filename, 'w') as f:
+        with open(filename, "w") as f:
             json.dump(report, f, indent=2, default=str)
 
         logger.info(f"Performance test results saved to {filename}")
@@ -997,23 +949,13 @@ async def run_performance_validation():
         print("=" * 50)
 
         print(f"Total tests: {report['test_summary']['total_tests']}")
-        print(
-            f"Successful tests: {report['test_summary']['successful_tests']}"
-        )
-        print(
-            f"Test success rate: {report['test_summary']['test_success_rate']:.1f}%"
-        )
+        print(f"Successful tests: {report['test_summary']['successful_tests']}")
+        print(f"Test success rate: {report['test_summary']['test_success_rate']:.1f}%")
 
-        metrics = report['performance_metrics']
-        print(
-            f"\nResponse time (avg): {metrics['response_time']['average_ms']:.1f}ms"
-        )
-        print(
-            f"Response time (P95): {metrics['response_time']['p95_ms']:.1f}ms"
-        )
-        print(
-            f"Response time (P99): {metrics['response_time']['p99_ms']:.1f}ms"
-        )
+        metrics = report["performance_metrics"]
+        print(f"\nResponse time (avg): {metrics['response_time']['average_ms']:.1f}ms")
+        print(f"Response time (P95): {metrics['response_time']['p95_ms']:.1f}ms")
+        print(f"Response time (P99): {metrics['response_time']['p99_ms']:.1f}ms")
 
         print(
             f"\nThroughput (avg): {metrics['throughput']['average_ops_per_second']:.1f} ops/s"
@@ -1025,28 +967,24 @@ async def run_performance_validation():
         print(
             f"\nSuccess rate (avg): {metrics['reliability']['average_success_rate']:.1f}%"
         )
-        print(
-            f"Success rate (min): {metrics['reliability']['min_success_rate']:.1f}%"
-        )
+        print(f"Success rate (min): {metrics['reliability']['min_success_rate']:.1f}%")
         print(f"Total errors: {metrics['reliability']['total_errors']}")
 
         print(
             f"\nMemory usage (avg): {metrics['resource_usage']['average_memory_mb']:.1f}MB"
         )
-        print(
-            f"Memory usage (max): {metrics['resource_usage']['max_memory_mb']:.1f}MB"
-        )
+        print(f"Memory usage (max): {metrics['resource_usage']['max_memory_mb']:.1f}MB")
 
         # SLA validation
-        sla = report['sla_validation']
+        sla = report["sla_validation"]
         print("\n" + "=" * 30)
         print("SLA VALIDATION")
         print("=" * 30)
         print(f"Requirements met: {'✓' if sla['requirements_met'] else '✗'}")
 
-        if sla['violations']:
+        if sla["violations"]:
             print("\nViolations:")
-            for violation in sla['violations']:
+            for violation in sla["violations"]:
                 print(
                     f"  - {violation['requirement']}: {violation['actual']:.1f} (expected: {violation['expected']:.1f})"
                 )
@@ -1055,7 +993,7 @@ async def run_performance_validation():
         print("\n" + "=" * 30)
         print("RECOMMENDATIONS")
         print("=" * 30)
-        for rec in report['recommendations']:
+        for rec in report["recommendations"]:
             print(f"  - {rec}")
 
         # Save results

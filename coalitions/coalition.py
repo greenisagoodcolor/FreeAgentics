@@ -119,7 +119,9 @@ class Coalition:
             return False
 
         if agent_id in self.members:
-            logger.warning(f"Agent {agent_id} is already in coalition {self.coalition_id}")
+            logger.warning(
+                f"Agent {agent_id} is already in coalition {self.coalition_id}"
+            )
             return False
 
         member = CoalitionMember(
@@ -131,7 +133,9 @@ class Coalition:
         self.members[agent_id] = member
 
         # Set as leader if first member or explicitly assigned
-        if role == CoalitionRole.LEADER or (not self.leader_id and len(self.members) == 1):
+        if role == CoalitionRole.LEADER or (
+            not self.leader_id and len(self.members) == 1
+        ):
             self.leader_id = agent_id
             member.role = CoalitionRole.LEADER
 
@@ -151,7 +155,9 @@ class Coalition:
             True if member was removed successfully
         """
         if agent_id not in self.members:
-            logger.warning(f"Agent {agent_id} not found in coalition {self.coalition_id}")
+            logger.warning(
+                f"Agent {agent_id} not found in coalition {self.coalition_id}"
+            )
             return False
 
         was_leader = self.leader_id == agent_id
@@ -196,7 +202,9 @@ class Coalition:
             self.leader_id = best_candidate.agent_id
 
             self._log_decision(f"Elected new leader: {self.leader_id}")
-            logger.info(f"Elected new leader for coalition {self.coalition_id}: {self.leader_id}")
+            logger.info(
+                f"Elected new leader for coalition {self.coalition_id}: {self.leader_id}"
+            )
 
     def add_objective(self, objective: CoalitionObjective) -> bool:
         """Add an objective to the coalition.
@@ -225,7 +233,9 @@ class Coalition:
         self.last_modified = datetime.now()
         self._log_decision(f"Added objective {objective.objective_id}")
 
-        logger.info(f"Added objective {objective.objective_id} to coalition {self.coalition_id}")
+        logger.info(
+            f"Added objective {objective.objective_id} to coalition {self.coalition_id}"
+        )
         return True
 
     def update_objective_progress(self, objective_id: str, progress: float) -> bool:
@@ -253,7 +263,9 @@ class Coalition:
                 self._update_performance_metrics()
                 return True
 
-        logger.warning(f"Objective {objective_id} not found in coalition {self.coalition_id}")
+        logger.warning(
+            f"Objective {objective_id} not found in coalition {self.coalition_id}"
+        )
         return False
 
     def _update_performance_metrics(self) -> None:

@@ -42,10 +42,12 @@ class TestPyMDPReturnTypes:
         action_result = agent.sample_action()
 
         # Verify it's a numpy array with shape (1,)
-        assert isinstance(
-            action_result, np.ndarray
-        ), f"Expected numpy.ndarray, got {type(action_result)}"
-        assert action_result.shape == (1,), f"Expected shape (1,), got {action_result.shape}"
+        assert isinstance(action_result, np.ndarray), (
+            f"Expected numpy.ndarray, got {type(action_result)}"
+        )
+        assert action_result.shape == (1,), (
+            f"Expected shape (1,), got {action_result.shape}"
+        )
         assert action_result.dtype in [
             np.float64,
             np.float32,
@@ -90,14 +92,20 @@ class TestPyMDPReturnTypes:
         q_pi, G = result
 
         # Verify q_pi is numpy array
-        assert isinstance(q_pi, np.ndarray), f"Expected q_pi to be numpy.ndarray, got {type(q_pi)}"
-        assert np.issubdtype(
-            q_pi.dtype, np.floating
-        ), f"Expected floating dtype for q_pi, got {q_pi.dtype}"
+        assert isinstance(q_pi, np.ndarray), (
+            f"Expected q_pi to be numpy.ndarray, got {type(q_pi)}"
+        )
+        assert np.issubdtype(q_pi.dtype, np.floating), (
+            f"Expected floating dtype for q_pi, got {q_pi.dtype}"
+        )
 
         # Verify G is numpy array
-        assert isinstance(G, np.ndarray), f"Expected G to be numpy.ndarray, got {type(G)}"
-        assert np.issubdtype(G.dtype, np.floating), f"Expected floating dtype for G, got {G.dtype}"
+        assert isinstance(G, np.ndarray), (
+            f"Expected G to be numpy.ndarray, got {type(G)}"
+        )
+        assert np.issubdtype(G.dtype, np.floating), (
+            f"Expected floating dtype for G, got {G.dtype}"
+        )
 
     def test_infer_states_return_type(self):
         """Test that infer_states returns the expected types."""
@@ -123,26 +131,30 @@ class TestPyMDPReturnTypes:
         result = agent.infer_states(obs)
 
         # PyMDP returns numpy.ndarray with dtype=object containing list of belief arrays
-        assert isinstance(result, np.ndarray), f"Expected numpy.ndarray, got {type(result)}"
+        assert isinstance(result, np.ndarray), (
+            f"Expected numpy.ndarray, got {type(result)}"
+        )
         assert result.dtype == np.object_, f"Expected dtype object, got {result.dtype}"
         assert result.shape == (1,), f"Expected shape (1,), got {result.shape}"
 
         # Extract the actual list of beliefs
         beliefs_list = result.item()
-        assert isinstance(
-            beliefs_list, list
-        ), f"Expected list in object array, got {type(beliefs_list)}"
+        assert isinstance(beliefs_list, list), (
+            f"Expected list in object array, got {type(beliefs_list)}"
+        )
 
         # Verify each belief array
         for i, belief in enumerate(beliefs_list):
-            assert isinstance(
-                belief, np.ndarray
-            ), f"Belief {i} expected numpy.ndarray, got {type(belief)}"
-            assert np.issubdtype(
-                belief.dtype, np.floating
-            ), f"Belief {i} expected floating dtype, got {belief.dtype}"
+            assert isinstance(belief, np.ndarray), (
+                f"Belief {i} expected numpy.ndarray, got {type(belief)}"
+            )
+            assert np.issubdtype(belief.dtype, np.floating), (
+                f"Belief {i} expected floating dtype, got {belief.dtype}"
+            )
             # Beliefs should sum to 1 (probability distribution)
-            assert np.isclose(np.sum(belief), 1.0), f"Belief {i} doesn't sum to 1: {np.sum(belief)}"
+            assert np.isclose(np.sum(belief), 1.0), (
+                f"Belief {i} doesn't sum to 1: {np.sum(belief)}"
+            )
 
     def test_adapter_sample_action_conversion(self):
         """Test that the adapter correctly converts sample_action return value."""
@@ -174,7 +186,9 @@ class TestPyMDPReturnTypes:
 
         # Verify it's exactly int type
         assert isinstance(action_idx, int), f"Expected int, got {type(action_idx)}"
-        assert not isinstance(action_idx, np.integer), "Should be Python int, not numpy integer"
+        assert not isinstance(action_idx, np.integer), (
+            "Should be Python int, not numpy integer"
+        )
         assert 0 <= action_idx < num_actions, f"Invalid action index: {action_idx}"
 
     def test_no_tuple_unpacking_needed(self):
@@ -205,13 +219,15 @@ class TestPyMDPReturnTypes:
         action_result = agent.sample_action()
 
         # This should NOT be a tuple
-        assert not isinstance(
-            action_result, tuple
-        ), f"sample_action should not return tuple, got {type(action_result)}"
+        assert not isinstance(action_result, tuple), (
+            f"sample_action should not return tuple, got {type(action_result)}"
+        )
 
         # Direct conversion should work
         action_idx = int(action_result.item())
-        assert isinstance(action_idx, int), f"Expected int after conversion, got {type(action_idx)}"
+        assert isinstance(action_idx, int), (
+            f"Expected int after conversion, got {type(action_idx)}"
+        )
 
 
 if __name__ == "__main__":

@@ -33,7 +33,9 @@ class TestMultiAgentPerformance:
         """Create performance optimizer."""
         return PerformanceOptimizer()
 
-    def create_test_agents(self, count: int, grid_size: int = 5) -> List[BasicExplorerAgent]:
+    def create_test_agents(
+        self, count: int, grid_size: int = 5
+    ) -> List[BasicExplorerAgent]:
         """Create test agents with performance optimizations."""
         agents = []
         for i in range(count):
@@ -54,12 +56,12 @@ class TestMultiAgentPerformance:
         results = benchmark_inference(agent, num_steps=50)
 
         # Validate performance targets
-        assert (
-            results["ms_per_step"] < 40
-        ), f"Single agent too slow: {results['ms_per_step']:.1f}ms > 40ms target"
-        assert (
-            results["steps_per_second"] > 25
-        ), f"Single agent throughput too low: {results['steps_per_second']:.1f} < 25 steps/sec"
+        assert results["ms_per_step"] < 40, (
+            f"Single agent too slow: {results['ms_per_step']:.1f}ms > 40ms target"
+        )
+        assert results["steps_per_second"] > 25, (
+            f"Single agent throughput too low: {results['steps_per_second']:.1f} < 25 steps/sec"
+        )
 
         print(f"✅ Single agent performance: {results['ms_per_step']:.1f}ms per step")
 
@@ -80,12 +82,16 @@ class TestMultiAgentPerformance:
         time_per_agent = total_time / 10 * 1000
         agents_per_second = 10 / total_time
 
-        assert time_per_agent < 100, f"Average time per agent too high: {time_per_agent:.1f}ms"
-        assert (
-            agents_per_second > 10
-        ), f"Agent throughput too low: {agents_per_second:.1f} agents/sec"
+        assert time_per_agent < 100, (
+            f"Average time per agent too high: {time_per_agent:.1f}ms"
+        )
+        assert agents_per_second > 10, (
+            f"Agent throughput too low: {agents_per_second:.1f} agents/sec"
+        )
 
-        print(f"✅ 10 agents: {time_per_agent:.1f}ms per agent, {agents_per_second:.1f} agents/sec")
+        print(
+            f"✅ 10 agents: {time_per_agent:.1f}ms per agent, {agents_per_second:.1f} agents/sec"
+        )
 
     @pytest.mark.asyncio
     async def test_50_agent_scalability(self, async_engine):
@@ -94,7 +100,9 @@ class TestMultiAgentPerformance:
         This represents the upper bound of practical multi-agent
         coordination in Python due to GIL constraints.
         """
-        agents = self.create_test_agents(50, grid_size=3)  # Smaller grid for faster processing
+        agents = self.create_test_agents(
+            50, grid_size=3
+        )  # Smaller grid for faster processing
         observations = [{"position": [i % 3, (i // 3) % 3]} for i in range(50)]
 
         start_time = time.time()
@@ -109,12 +117,16 @@ class TestMultiAgentPerformance:
         agents_per_second = 50 / total_time
 
         # Relaxed constraints for larger scale
-        assert time_per_agent < 200, f"Average time per agent too high: {time_per_agent:.1f}ms"
-        assert (
-            agents_per_second > 10
-        ), f"Agent throughput too low: {agents_per_second:.1f} agents/sec"
+        assert time_per_agent < 200, (
+            f"Average time per agent too high: {time_per_agent:.1f}ms"
+        )
+        assert agents_per_second > 10, (
+            f"Agent throughput too low: {agents_per_second:.1f} agents/sec"
+        )
 
-        print(f"✅ 50 agents: {time_per_agent:.1f}ms per agent, {agents_per_second:.1f} agents/sec")
+        print(
+            f"✅ 50 agents: {time_per_agent:.1f}ms per agent, {agents_per_second:.1f} agents/sec"
+        )
 
     @pytest.mark.asyncio
     @pytest.mark.slow
@@ -143,7 +155,9 @@ class TestMultiAgentPerformance:
         # Validate realistic agent capability
         assert len(results) == agent_count, f"Should process all {agent_count} agents"
         # Relaxed timing for realistic expectations
-        assert total_time < 15.0, f"{agent_count} agents took too long: {total_time:.3f}s"
+        assert total_time < 15.0, (
+            f"{agent_count} agents took too long: {total_time:.3f}s"
+        )
 
         time_per_agent = total_time / agent_count * 1000
         agents_per_second = agent_count / total_time
@@ -158,19 +172,25 @@ class TestMultiAgentPerformance:
         expected_efficiency = 0.3 if agent_count > 30 else 0.4
 
         # Realistic production validation
-        assert time_per_agent < 800, f"Average time per agent too high: {time_per_agent:.1f}ms"
-        assert (
-            agents_per_second > 5
-        ), f"Agent throughput too low: {agents_per_second:.1f} agents/sec"
-        assert memory_per_agent < 50, f"Memory per agent too high: {memory_per_agent:.1f}MB"
-        assert (
-            actual_efficiency >= expected_efficiency
-        ), f"Efficiency {actual_efficiency:.2f} below expected {expected_efficiency:.2f}"
+        assert time_per_agent < 800, (
+            f"Average time per agent too high: {time_per_agent:.1f}ms"
+        )
+        assert agents_per_second > 5, (
+            f"Agent throughput too low: {agents_per_second:.1f} agents/sec"
+        )
+        assert memory_per_agent < 50, (
+            f"Memory per agent too high: {memory_per_agent:.1f}MB"
+        )
+        assert actual_efficiency >= expected_efficiency, (
+            f"Efficiency {actual_efficiency:.2f} below expected {expected_efficiency:.2f}"
+        )
 
         print(
             f"✅ {agent_count} agents: {time_per_agent:.1f}ms per agent, {agents_per_second:.1f} agents/sec"
         )
-        print(f"   Efficiency: {actual_efficiency:.1%} (expected >={expected_efficiency:.1%})")
+        print(
+            f"   Efficiency: {actual_efficiency:.1%} (expected >={expected_efficiency:.1%})"
+        )
         print(f"   Memory: {memory_per_agent:.1f}MB per agent")
 
     def test_memory_efficiency(self):
@@ -182,7 +202,9 @@ class TestMultiAgentPerformance:
         memory_per_agent = memory_usage / 5
 
         # Should be reasonable for production use (relaxed from 34.5MB baseline)
-        assert memory_per_agent < 40, f"Memory per agent too high: {memory_per_agent:.1f}MB"
+        assert memory_per_agent < 40, (
+            f"Memory per agent too high: {memory_per_agent:.1f}MB"
+        )
 
         print(f"✅ Memory efficiency: {memory_per_agent:.1f}MB per agent")
 
@@ -201,7 +223,9 @@ class TestMultiAgentPerformance:
 
         for agent_count in [1, 5, 10, 20, 30, 40, 50]:
             agents = self.create_test_agents(agent_count, grid_size=3)
-            observations = [{"position": [i % 3, (i // 3) % 3]} for i in range(agent_count)]
+            observations = [
+                {"position": [i % 3, (i // 3) % 3]} for i in range(agent_count)
+            ]
 
             # Time the execution
             start_time = time.time()
@@ -229,7 +253,9 @@ class TestMultiAgentPerformance:
                 expected_efficiency = 0.28  # Severe degradation near limit
                 status = "✅" if efficiency >= expected_efficiency else "❌"
 
-            print(f"{agent_count:6} | {execution_time:7.3f} | {efficiency:10.1%} | {status}")
+            print(
+                f"{agent_count:6} | {execution_time:7.3f} | {efficiency:10.1%} | {status}"
+            )
 
             # Cleanup agents
             for agent in agents:
@@ -244,12 +270,18 @@ class TestMultiAgentPerformance:
         agent.step(observation)
 
         # Check performance metrics were recorded
-        assert hasattr(agent, "performance_metrics"), "Performance metrics not initialized"
+        assert hasattr(agent, "performance_metrics"), (
+            "Performance metrics not initialized"
+        )
         assert len(agent.performance_metrics) > 0, "No performance metrics recorded"
 
         # Should have belief update and action selection times
-        assert "belief_update" in agent.performance_metrics, "Missing belief update timing"
-        assert "action_selection" in agent.performance_metrics, "Missing action selection timing"
+        assert "belief_update" in agent.performance_metrics, (
+            "Missing belief update timing"
+        )
+        assert "action_selection" in agent.performance_metrics, (
+            "Missing action selection timing"
+        )
 
         print(f"✅ Performance monitoring: {list(agent.performance_metrics.keys())}")
 
@@ -274,7 +306,9 @@ class TestMultiAgentPerformance:
         assert len(results) == 3, "Should complete all concurrent batches"
 
         throughput = (20 * 3) / total_time  # Total agent operations per second
-        assert throughput > 30, f"Concurrent throughput too low: {throughput:.1f} ops/sec"
+        assert throughput > 30, (
+            f"Concurrent throughput too low: {throughput:.1f} ops/sec"
+        )
 
         print(f"✅ Concurrent operations: {throughput:.1f} agent ops/sec")
 
@@ -298,7 +332,9 @@ class TestPerformanceRegression:
 
         # Performance regression thresholds
         assert avg_time < 40, f"Average performance regression: {avg_time:.1f}ms > 40ms"
-        assert max_time < 60, f"Worst case performance regression: {max_time:.1f}ms > 60ms"
+        assert max_time < 60, (
+            f"Worst case performance regression: {max_time:.1f}ms > 60ms"
+        )
 
         print(f"✅ No regression: avg={avg_time:.1f}ms, max={max_time:.1f}ms")
 

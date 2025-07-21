@@ -58,7 +58,6 @@ class PyMDPMathematicalValidator:
 
         return agent, A, B
 
-    
     def test_probability_matrix_normalization(self):
         """Test that probability matrices are properly normalized."""
         agent, A, B = self.create_simple_agent()
@@ -66,21 +65,20 @@ class PyMDPMathematicalValidator:
         # Check A matrix normalization (should sum to 1 across observations)
         for state_combo in range(A[0].shape[1]):
             obs_probs = A[0][:, state_combo]
-            assert (
-                abs(obs_probs.sum() - 1.0) < self.tolerance
-            ), f"A matrix not normalized: {obs_probs.sum()}"
+            assert abs(obs_probs.sum() - 1.0) < self.tolerance, (
+                f"A matrix not normalized: {obs_probs.sum()}"
+            )
 
         # Check B matrix normalization (should sum to 1 across next states)
         for state in range(B[0].shape[1]):
             for action in range(B[0].shape[2]):
                 trans_probs = B[0][:, state, action]
-                assert (
-                    abs(trans_probs.sum() - 1.0) < self.tolerance
-                ), f"B matrix not normalized: {trans_probs.sum()}"
+                assert abs(trans_probs.sum() - 1.0) < self.tolerance, (
+                    f"B matrix not normalized: {trans_probs.sum()}"
+                )
 
         print("✅ Probability matrices are correctly normalized")
 
-    
     def test_belief_state_normalization(self):
         """Test that belief states are properly normalized."""
         agent, A, B = self.create_simple_agent()
@@ -94,18 +92,15 @@ class PyMDPMathematicalValidator:
             # Check belief state normalization
             for factor_idx, belief in enumerate(qs):
                 belief_sum = belief.sum()
-                assert (
-                    abs(belief_sum - 1.0) < self.tolerance
-                ), f"Belief state not normalized: {belief_sum}"
+                assert abs(belief_sum - 1.0) < self.tolerance, (
+                    f"Belief state not normalized: {belief_sum}"
+                )
 
                 # Check no negative probabilities
-                assert (
-                    belief >= 0
-                ).all(), "Negative probabilities in belief state"
+                assert (belief >= 0).all(), "Negative probabilities in belief state"
 
         print("✅ Belief states are correctly normalized")
 
-    
     def test_bayesian_inference_correctness(self):
         """Test that Bayesian inference produces correct results."""
         agent, A, B = self.create_simple_agent()
@@ -117,9 +112,9 @@ class PyMDPMathematicalValidator:
         belief_state = qs[0]
 
         # Given our A matrix, observing 0 should make state 0 more likely
-        assert (
-            belief_state[0] > belief_state[1]
-        ), f"Incorrect inference: belief in state 0 ({belief_state[0]}) should be > state 1 ({belief_state[1]})"
+        assert belief_state[0] > belief_state[1], (
+            f"Incorrect inference: belief in state 0 ({belief_state[0]}) should be > state 1 ({belief_state[1]})"
+        )
 
         # Test with other observation
         obs = [1]
@@ -127,13 +122,12 @@ class PyMDPMathematicalValidator:
         belief_state = qs[0]
 
         # Observing 1 should make state 1 more likely
-        assert (
-            belief_state[1] > belief_state[0]
-        ), f"Incorrect inference: belief in state 1 ({belief_state[1]}) should be > state 0 ({belief_state[0]})"
+        assert belief_state[1] > belief_state[0], (
+            f"Incorrect inference: belief in state 1 ({belief_state[1]}) should be > state 0 ({belief_state[0]})"
+        )
 
         print("✅ Bayesian inference produces correct results")
 
-    
     def test_policy_evaluation_correctness(self):
         """Test that policy evaluation produces sensible results."""
         agent, A, B = self.create_simple_agent()
@@ -146,21 +140,18 @@ class PyMDPMathematicalValidator:
         q_pi, G = agent.infer_policies()
 
         # Check that policy probabilities are normalized
-        assert (
-            abs(q_pi.sum() - 1.0) < self.tolerance
-        ), f"Policy probabilities not normalized: {q_pi.sum()}"
+        assert abs(q_pi.sum() - 1.0) < self.tolerance, (
+            f"Policy probabilities not normalized: {q_pi.sum()}"
+        )
 
         # Check no negative probabilities
         assert (q_pi >= 0).all(), "Negative policy probabilities"
 
         # Check that G (expected free energy) has reasonable values
-        assert np.isfinite(
-            G
-        ).all(), "Non-finite values in expected free energy"
+        assert np.isfinite(G).all(), "Non-finite values in expected free energy"
 
         print("✅ Policy evaluation produces correct results")
 
-    
     def test_action_sampling_correctness(self):
         """Test that action sampling produces valid actions."""
         agent, A, B = self.create_simple_agent()
@@ -177,9 +168,9 @@ class PyMDPMathematicalValidator:
             actions_sampled.append(action)
 
             # Check action is valid
-            assert isinstance(
-                action, (list, np.ndarray)
-            ), "Action not in correct format"
+            assert isinstance(action, (list, np.ndarray)), (
+                "Action not in correct format"
+            )
             if isinstance(action, list):
                 assert len(action) == 1, "Incorrect action dimensionality"
                 assert action[0] in [
@@ -189,7 +180,6 @@ class PyMDPMathematicalValidator:
 
         print("✅ Action sampling produces valid actions")
 
-    
     def test_performance_benchmark_realism(self):
         """Test that performance benchmarks measure realistic operations."""
         start_time = time.perf_counter()
@@ -219,13 +209,12 @@ class PyMDPMathematicalValidator:
             agent.sample_action()
         multi_inference_time = time.perf_counter() - start_time
 
-        assert (
-            multi_inference_time > inference_time
-        ), "Multiple inferences should take more time than single inference"
+        assert multi_inference_time > inference_time, (
+            "Multiple inferences should take more time than single inference"
+        )
 
         print("✅ Performance benchmarks measure realistic operations")
 
-    
     def test_mathematical_consistency(self):
         """Test mathematical consistency across multiple runs."""
         agent, A, B = self.create_simple_agent()
@@ -243,9 +232,7 @@ class PyMDPMathematicalValidator:
         # Check consistency across runs
         for i in range(1, len(results)):
             diff = np.abs(results[0] - results[i])
-            assert (
-                diff < self.tolerance
-            ).all(), (
+            assert (diff < self.tolerance).all(), (
                 f"Inconsistent results across runs: max diff = {diff.max()}"
             )
 
@@ -277,11 +264,9 @@ class PyMDPMathematicalValidator:
         return results
 
 
+@pytest.mark.skipif(not PYMDP_AVAILABLE, reason="PyMDP not available - skipping mathematical validation")
 def test_pymdp_mathematical_validation():
     """Run PyMDP mathematical validation tests."""
-    if not PYMDP_AVAILABLE:
-        
-
     validator = PyMDPMathematicalValidator()
     results = validator.run_full_validation()
 

@@ -148,7 +148,9 @@ class ThreatFeedManager:
         )
         return unique_indicators
 
-    def _deduplicate_indicators(self, indicators: List[ThreatIndicator]) -> List[ThreatIndicator]:
+    def _deduplicate_indicators(
+        self, indicators: List[ThreatIndicator]
+    ) -> List[ThreatIndicator]:
         """Deduplicate indicators, keeping highest threat level"""
         indicator_map: Dict[Tuple[str, str], ThreatIndicator] = {}
 
@@ -216,8 +218,12 @@ class OTXFeed:
     def _parse_pulse(self, pulse: Dict[str, Any]) -> List[ThreatIndicator]:
         """Parse OTX pulse into indicators"""
         indicators = []
-        pulse_created = datetime.fromisoformat(pulse.get("created", "").replace("Z", "+00:00"))
-        pulse_modified = datetime.fromisoformat(pulse.get("modified", "").replace("Z", "+00:00"))
+        pulse_created = datetime.fromisoformat(
+            pulse.get("created", "").replace("Z", "+00:00")
+        )
+        pulse_modified = datetime.fromisoformat(
+            pulse.get("modified", "").replace("Z", "+00:00")
+        )
 
         for indicator_data in pulse.get("indicators", []):
             indicator_type = indicator_data.get("type", "").lower()
@@ -556,7 +562,9 @@ class CustomFeed:
             logger.debug(f"Not an IP address: {e}")
 
         # Domain
-        if re.match(r"^[a-zA-Z0-9][a-zA-Z0-9-]{0,61}[a-zA-Z0-9]?\.[a-zA-Z]{2,}$", value):
+        if re.match(
+            r"^[a-zA-Z0-9][a-zA-Z0-9-]{0,61}[a-zA-Z0-9]?\.[a-zA-Z]{2,}$", value
+        ):
             return "domain"
 
         # URL
@@ -748,7 +756,9 @@ class ThreatIntelligenceEngine:
             "highest_threat_level": highest_threat.name,
         }
 
-    async def block_indicator(self, indicator: str, indicator_type: str, reason: str) -> None:
+    async def block_indicator(
+        self, indicator: str, indicator_type: str, reason: str
+    ) -> None:
         """Block an indicator"""
         key = f"blocked:{indicator_type}:{indicator}"
         value = json.dumps({"reason": reason, "blocked_at": datetime.now().isoformat()})
@@ -809,7 +819,9 @@ class ThreatIntelligenceEngine:
         minute_key = int(now / 60)
 
         # Clean old entries
-        self._rate_limiter = {k: v for k, v in self._rate_limiter.items() if k[1] >= minute_key - 1}
+        self._rate_limiter = {
+            k: v for k, v in self._rate_limiter.items() if k[1] >= minute_key - 1
+        }
 
         # Count requests
         key = (ip, minute_key)

@@ -183,7 +183,9 @@ class PerformanceReportGenerator:
             if previous.value == 0:
                 continue
 
-            regression_percent = ((current.value - previous.value) / previous.value) * 100
+            regression_percent = (
+                (current.value - previous.value) / previous.value
+            ) * 100
 
             # For metrics where lower is better (time, memory), positive change is bad
             # For metrics where higher is better (hit rates, speedup), negative change is bad
@@ -220,7 +222,9 @@ class PerformanceReportGenerator:
 
         return alerts
 
-    def generate_performance_charts(self, metrics: List[PerformanceMetric]) -> List[str]:
+    def generate_performance_charts(
+        self, metrics: List[PerformanceMetric]
+    ) -> List[str]:
         """Generate performance visualization charts."""
         chart_files = []
 
@@ -244,7 +248,9 @@ class PerformanceReportGenerator:
             # Create comparison chart if multiple benchmarks
             benchmarks = set(m.benchmark_name for m in metric_list)
             if len(benchmarks) > 1:
-                comparison_chart = self._create_comparison_chart(metric_name, metric_list)
+                comparison_chart = self._create_comparison_chart(
+                    metric_name, metric_list
+                )
                 if comparison_chart:
                     chart_files.append(comparison_chart)
 
@@ -278,9 +284,9 @@ class PerformanceReportGenerator:
                 linewidth=2,
             )
 
-        plt.title(f'{metric_name.replace("_", " ").title()} Over Time')
+        plt.title(f"{metric_name.replace('_', ' ').title()} Over Time")
         plt.xlabel("Time")
-        plt.ylabel(f'{metric_name.replace("_", " ").title()} ({metrics[0].unit})')
+        plt.ylabel(f"{metric_name.replace('_', ' ').title()} ({metrics[0].unit})")
         plt.legend()
         plt.grid(True, alpha=0.3)
         plt.xticks(rotation=45)
@@ -303,7 +309,10 @@ class PerformanceReportGenerator:
         latest_metrics = {}
         for metric in metrics:
             key = metric.benchmark_name
-            if key not in latest_metrics or metric.timestamp > latest_metrics[key].timestamp:
+            if (
+                key not in latest_metrics
+                or metric.timestamp > latest_metrics[key].timestamp
+            ):
                 latest_metrics[key] = metric
 
         if len(latest_metrics) < 2:
@@ -332,9 +341,9 @@ class PerformanceReportGenerator:
         for bar, color in zip(bars, colors):
             bar.set_color(color)
 
-        plt.title(f'{metric_name.replace("_", " ").title()} Comparison')
+        plt.title(f"{metric_name.replace('_', ' ').title()} Comparison")
         plt.xlabel("Benchmark")
-        plt.ylabel(f'{metric_name.replace("_", " ").title()} ({metrics[0].unit})')
+        plt.ylabel(f"{metric_name.replace('_', ' ').title()} ({metrics[0].unit})")
         plt.xticks(rotation=45)
         plt.tight_layout()
 
@@ -379,25 +388,33 @@ The analysis includes matrix caching optimizations, selective update mechanisms,
             # Analyze caching performance
             caching_metrics = [m for m in metrics if "caching" in m.benchmark_name]
             if caching_metrics:
-                cache_speedups = [m for m in caching_metrics if m.name == "speedup_factor"]
+                cache_speedups = [
+                    m for m in caching_metrics if m.name == "speedup_factor"
+                ]
                 if cache_speedups:
                     max_speedup = max(m.value for m in cache_speedups)
-                    avg_speedup = sum(m.value for m in cache_speedups) / len(cache_speedups)
+                    avg_speedup = sum(m.value for m in cache_speedups) / len(
+                        cache_speedups
+                    )
                     report += f"- **Matrix Caching**: Achieved up to {max_speedup:.1f}x speedup (average: {avg_speedup:.1f}x)\n"
 
-                cache_hit_rates = [m for m in caching_metrics if m.name == "cache_hit_rate"]
+                cache_hit_rates = [
+                    m for m in caching_metrics if m.name == "cache_hit_rate"
+                ]
                 if cache_hit_rates:
                     avg_hit_rate = (
-                        sum(m.value for m in cache_hit_rates) / len(cache_hit_rates) * 100
+                        sum(m.value for m in cache_hit_rates)
+                        / len(cache_hit_rates)
+                        * 100
                     )
-                    report += (
-                        f"- **Cache Effectiveness**: Average hit rate of {avg_hit_rate:.1f}%\n"
-                    )
+                    report += f"- **Cache Effectiveness**: Average hit rate of {avg_hit_rate:.1f}%\n"
 
             # Analyze selective update performance
             selective_metrics = [m for m in metrics if "selective" in m.benchmark_name]
             if selective_metrics:
-                selective_speedups = [m for m in selective_metrics if m.name == "speedup_factor"]
+                selective_speedups = [
+                    m for m in selective_metrics if m.name == "speedup_factor"
+                ]
                 if selective_speedups:
                     max_selective_speedup = max(m.value for m in selective_speedups)
                     report += f"- **Selective Updates**: Up to {max_selective_speedup:.1f}x improvement in hierarchical operations\n"
@@ -411,7 +428,9 @@ The analysis includes matrix caching optimizations, selective update mechanisms,
         if regressions:
             report += f"\n## Performance Regressions\n\n⚠️  **{len(regressions)} potential regressions detected:**\n\n"
 
-            for alert in sorted(regressions, key=lambda x: x.regression_percent, reverse=True):
+            for alert in sorted(
+                regressions, key=lambda x: x.regression_percent, reverse=True
+            ):
                 severity_emoji = {"severe": "🔴", "moderate": "🟡", "minor": "🟠"}
                 emoji = severity_emoji.get(alert.severity, "⚠️")
 
@@ -470,7 +489,9 @@ Based on the performance analysis, here are key recommendations:
                 chart_name = Path(chart).stem.replace("_", " ").title()
                 report += f"- {chart_name}: `{Path(chart).name}`\n"
 
-        report += "\n---\n*Report generated by FreeAgentics Performance Analysis System*\n"
+        report += (
+            "\n---\n*Report generated by FreeAgentics Performance Analysis System*\n"
+        )
 
         # Save report
         report_file = str(
@@ -726,7 +747,9 @@ for the FreeAgentics multi-agent system.*
 
 def main():
     """Command line interface for performance report generation."""
-    parser = argparse.ArgumentParser(description="Generate PyMDP performance analysis reports")
+    parser = argparse.ArgumentParser(
+        description="Generate PyMDP performance analysis reports"
+    )
     parser.add_argument(
         "--results-dir",
         default="tests/performance",

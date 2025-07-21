@@ -48,9 +48,7 @@ def test_connection_manager(database_url: str) -> bool:
         db_name = result.scalar()
         session.close()
 
-        print(
-            f"✓ Connection manager working - Connected to database: {db_name}"
-        )
+        print(f"✓ Connection manager working - Connected to database: {db_name}")
         return True
     except Exception as e:
         print(f"✗ Connection manager failed: {e}")
@@ -64,11 +62,11 @@ def test_table_existence(database_url: str) -> bool:
         engine = create_engine(database_url)
 
         required_tables = [
-            'agents',
-            'coalitions',
-            'agent_coalition',
-            'db_knowledge_nodes',
-            'db_knowledge_edges',
+            "agents",
+            "coalitions",
+            "agent_coalition",
+            "db_knowledge_nodes",
+            "db_knowledge_edges",
         ]
 
         with engine.connect() as conn:
@@ -116,9 +114,7 @@ def test_crud_operations(database_url: str) -> bool:
         print(f"✓ Created test agent with ID: {test_agent.id}")
 
         # Test reading the agent
-        retrieved_agent = (
-            session.query(Agent).filter_by(name="Test Agent").first()
-        )
+        retrieved_agent = session.query(Agent).filter_by(name="Test Agent").first()
         if retrieved_agent:
             print(f"✓ Retrieved agent: {retrieved_agent.name}")
         else:
@@ -139,7 +135,7 @@ def test_crud_operations(database_url: str) -> bool:
         return True
     except Exception as e:
         print(f"✗ CRUD operations failed: {e}")
-        if 'session' in locals():
+        if "session" in locals():
             session.rollback()
             session.close()
         return False
@@ -150,21 +146,19 @@ def test_connection_pooling(database_url: str) -> bool:
     print("\nTesting connection pooling...")
     try:
         manager = DatabaseConnectionManager(database_url)
-        manager.create_engine_with_pool_config(
-            pool_size=5, max_overflow=10
-        )
+        manager.create_engine_with_pool_config(pool_size=5, max_overflow=10)
 
         # Create multiple sessions
         sessions = []
         for i in range(5):
             session = manager.get_db_session()
             sessions.append(session)
-            print(f"✓ Created session {i+1}")
+            print(f"✓ Created session {i + 1}")
 
         # Close all sessions
         for i, session in enumerate(sessions):
             session.close()
-            print(f"✓ Closed session {i+1}")
+            print(f"✓ Closed session {i + 1}")
 
         print("✓ Connection pooling working correctly")
         return True
@@ -176,7 +170,7 @@ def test_connection_pooling(database_url: str) -> bool:
 def main():
     """Main test function."""
     # Load environment variables
-    env_file = os.path.join(project_root, '.env.production')
+    env_file = os.path.join(project_root, ".env.production")
     if os.path.exists(env_file):
         load_dotenv(env_file)
         print(f"Loaded environment from: {env_file}")
@@ -185,7 +179,7 @@ def main():
         print("Using default .env file")
 
     # Get database URL
-    database_url = os.getenv('DATABASE_URL')
+    database_url = os.getenv("DATABASE_URL")
     if not database_url:
         print("✗ DATABASE_URL not found in environment")
         sys.exit(1)

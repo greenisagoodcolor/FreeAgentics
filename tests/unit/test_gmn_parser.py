@@ -192,7 +192,11 @@ class TestGMNParser:
                     {"id": "move", "type": "action"},
                 ],
                 "edges": [
-                    {"source": "location", "target": "obs_location", "type": "generates"},
+                    {
+                        "source": "location",
+                        "target": "obs_location",
+                        "type": "generates",
+                    },
                     {"source": "move", "target": "location", "type": "influences"},
                 ],
             }

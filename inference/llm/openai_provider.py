@@ -12,6 +12,7 @@ from typing import Any, Dict, Optional
 try:
     import openai
     from openai import OpenAI
+
     OPENAI_AVAILABLE = True
 except ImportError:
     OPENAI_AVAILABLE = False
@@ -47,7 +48,9 @@ class OpenAIProvider(BaseProvider):
         }
 
         if not OPENAI_AVAILABLE:
-            logger.warning("OpenAI library not available. Install with: pip install openai")
+            logger.warning(
+                "OpenAI library not available. Install with: pip install openai"
+            )
 
     def configure(self, credentials: ProviderCredentials, **kwargs: Any) -> bool:
         """Configure the OpenAI provider."""
@@ -79,12 +82,16 @@ class OpenAIProvider(BaseProvider):
 
             # Test connection
             health_result = self.test_connection()
-            if health_result.status in [ProviderStatus.HEALTHY,
-                ProviderStatus.DEGRADED]:
+            if health_result.status in [
+                ProviderStatus.HEALTHY,
+                ProviderStatus.DEGRADED,
+            ]:
                 logger.info("OpenAI provider configured successfully")
                 return True
             else:
-                logger.error(f"OpenAI provider unhealthy: {health_result.error_message}")
+                logger.error(
+                    f"OpenAI provider unhealthy: {health_result.error_message}"
+                )
                 return False
 
         except Exception as e:
@@ -99,7 +106,7 @@ class OpenAIProvider(BaseProvider):
             return HealthCheckResult(
                 status=ProviderStatus.OFFLINE,
                 latency_ms=0.0,
-                error_message="OpenAI client not configured"
+                error_message="OpenAI client not configured",
             )
 
         try:
@@ -115,14 +122,14 @@ class OpenAIProvider(BaseProvider):
                     status=ProviderStatus.DEGRADED,
                     latency_ms=latency_ms,
                     error_message="No models available",
-                    model_availability=available_models
+                    model_availability=available_models,
                 )
 
             # Successful health check
             return HealthCheckResult(
                 status=ProviderStatus.HEALTHY,
                 latency_ms=latency_ms,
-                model_availability=available_models
+                model_availability=available_models,
             )
 
         except openai.AuthenticationError as e:
@@ -130,7 +137,7 @@ class OpenAIProvider(BaseProvider):
             return HealthCheckResult(
                 status=ProviderStatus.OFFLINE,
                 latency_ms=latency_ms,
-                error_message=f"Authentication failed: {str(e)}"
+                error_message=f"Authentication failed: {str(e)}",
             )
 
         except openai.RateLimitError as e:
@@ -139,7 +146,7 @@ class OpenAIProvider(BaseProvider):
                 status=ProviderStatus.DEGRADED,
                 latency_ms=latency_ms,
                 error_message=f"Rate limited: {str(e)}",
-                rate_limit_info={"status": "rate_limited"}
+                rate_limit_info={"status": "rate_limited"},
             )
 
         except Exception as e:
@@ -147,7 +154,7 @@ class OpenAIProvider(BaseProvider):
             return HealthCheckResult(
                 status=ProviderStatus.UNHEALTHY,
                 latency_ms=latency_ms,
-                error_message=f"Connection test failed: {str(e)}"
+                error_message=f"Connection test failed: {str(e)}",
             )
         finally:
             self._last_health_check = time.time()
@@ -198,7 +205,7 @@ class OpenAIProvider(BaseProvider):
                 input_tokens=input_tokens,
                 output_tokens=output_tokens,
                 cost=cost,
-                latency_ms=latency_ms
+                latency_ms=latency_ms,
             )
 
             return GenerationResponse(
@@ -209,7 +216,7 @@ class OpenAIProvider(BaseProvider):
                 output_tokens=output_tokens,
                 cost=cost,
                 latency_ms=latency_ms,
-                finish_reason=finish_reason
+                finish_reason=finish_reason,
             )
 
         except openai.AuthenticationError as e:
@@ -227,9 +234,7 @@ class OpenAIProvider(BaseProvider):
         except Exception as e:
             latency_ms = (time.time() - start_time) * 1000
             self._update_usage_metrics(
-                success=False,
-                latency_ms=latency_ms,
-                error_type="unknown"
+                success=False, latency_ms=latency_ms, error_type="unknown"
             )
             raise RuntimeError(f"OpenAI generation failed: {str(e)}")
 
@@ -237,8 +242,9 @@ class OpenAIProvider(BaseProvider):
         """Estimate cost for given token usage."""
         if model not in self._model_pricing:
             # Use GPT-3.5-turbo pricing as default
-            pricing = self._model_pricing.get("gpt-3.5-turbo", {"input": 0.0005,
-                "output": 0.0015})
+            pricing = self._model_pricing.get(
+                "gpt-3.5-turbo", {"input": 0.0005, "output": 0.0015}
+            )
         else:
             pricing = self._model_pricing[model]
 
@@ -255,34 +261,34 @@ class OpenAIProvider(BaseProvider):
                 "max_output_tokens": 4096,
                 "supports_function_calling": True,
                 "supports_streaming": True,
-                "pricing": self._model_pricing["gpt-3.5-turbo"]
+                "pricing": self._model_pricing["gpt-3.5-turbo"],
             },
             "gpt-4": {
                 "context_window": 8192,
                 "max_output_tokens": 4096,
                 "supports_function_calling": True,
                 "supports_streaming": True,
-                "pricing": self._model_pricing["gpt-4"]
+                "pricing": self._model_pricing["gpt-4"],
             },
             "gpt-4-turbo": {
                 "context_window": 128000,
                 "max_output_tokens": 4096,
                 "supports_function_calling": True,
                 "supports_streaming": True,
-                "pricing": self._model_pricing["gpt-4-turbo"]
+                "pricing": self._model_pricing["gpt-4-turbo"],
             },
             "gpt-4o": {
                 "context_window": 128000,
                 "max_output_tokens": 4096,
                 "supports_function_calling": True,
                 "supports_streaming": True,
-                "pricing": self._model_pricing["gpt-4o"]
+                "pricing": self._model_pricing["gpt-4o"],
             },
             "gpt-4o-mini": {
                 "context_window": 128000,
                 "max_output_tokens": 16384,
                 "supports_function_calling": True,
                 "supports_streaming": True,
-                "pricing": self._model_pricing["gpt-4o-mini"]
-            }
+                "pricing": self._model_pricing["gpt-4o-mini"],
+            },
         }

@@ -69,9 +69,7 @@ async def mock_db_session():
     session.execute = AsyncMock()
 
     # Mock conversation query
-    session.execute.return_value.scalar_one_or_none = AsyncMock(
-        return_value=None
-    )
+    session.execute.return_value.scalar_one_or_none = AsyncMock(return_value=None)
 
     return session
 
@@ -95,10 +93,10 @@ class TestEndToEndPipelineWebSocket:
             ws_client.add_message(message)
 
         # Patch dependencies
-        with patch('api.v1.prompts.get_db', return_value=mock_db_session):
-            with patch('api.v1.prompts.get_current_user') as mock_get_user:
+        with patch("api.v1.prompts.get_db", return_value=mock_db_session):
+            with patch("api.v1.prompts.get_current_user") as mock_get_user:
                 with patch(
-                    'api.v1.websocket.manager.send_personal_message',
+                    "api.v1.websocket.manager.send_personal_message",
                     capture_ws_event,
                 ):
                     # Setup authenticated user
@@ -142,8 +140,7 @@ class TestEndToEndPipelineWebSocket:
 
                     # Check event types received
                     event_types = [
-                        e.get("type", e.get("event_type"))
-                        for e in received_events
+                        e.get("type", e.get("event_type")) for e in received_events
                     ]
 
                     # Should have received pipeline events
@@ -158,9 +155,9 @@ class TestEndToEndPipelineWebSocket:
                     ]
 
                     for expected in expected_events:
-                        assert any(
-                            expected in str(e) for e in event_types
-                        ), f"Missing event: {expected}"
+                        assert any(expected in str(e) for e in event_types), (
+                            f"Missing event: {expected}"
+                        )
 
                     # Verify event sequence and content
                     pipeline_events = [
@@ -192,10 +189,7 @@ class TestEndToEndPipelineWebSocket:
                     )
                     assert complete_event
                     assert complete_event["data"]["status"] == "success"
-                    assert (
-                        complete_event["data"]["agent_id"]
-                        == result["agent_id"]
-                    )
+                    assert complete_event["data"]["agent_id"] == result["agent_id"]
                     assert (
                         complete_event["data"]["processing_time_ms"] < 3000
                     )  # Under 3s requirement
@@ -212,10 +206,10 @@ class TestEndToEndPipelineWebSocket:
             if "pipeline_progress" in message.get("type", ""):
                 progress_updates.append(message["data"])
 
-        with patch('api.v1.prompts.get_db', return_value=mock_db_session):
-            with patch('api.v1.prompts.get_current_user') as mock_get_user:
+        with patch("api.v1.prompts.get_db", return_value=mock_db_session):
+            with patch("api.v1.prompts.get_current_user") as mock_get_user:
                 with patch(
-                    'api.v1.websocket.manager.send_personal_message',
+                    "api.v1.websocket.manager.send_personal_message",
                     capture_progress,
                 ):
                     # Setup user
@@ -242,9 +236,7 @@ class TestEndToEndPipelineWebSocket:
                     assert len(progress_updates) >= 6
 
                     # Verify stage progression
-                    stage_numbers = [
-                        u["stage_number"] for u in progress_updates
-                    ]
+                    stage_numbers = [u["stage_number"] for u in progress_updates]
                     assert sorted(stage_numbers) == list(
                         range(1, len(stage_numbers) + 1)
                     )
@@ -271,14 +263,14 @@ class TestEndToEndPipelineWebSocket:
                 error_events.append(message)
 
         # Force an error in GMN generation
-        with patch('api.v1.prompts.get_db', return_value=mock_db_session):
-            with patch('api.v1.prompts.get_current_user') as mock_get_user:
+        with patch("api.v1.prompts.get_db", return_value=mock_db_session):
+            with patch("api.v1.prompts.get_current_user") as mock_get_user:
                 with patch(
-                    'api.v1.websocket.manager.send_personal_message',
+                    "api.v1.websocket.manager.send_personal_message",
                     capture_errors,
                 ):
                     with patch(
-                        'services.gmn_generator.GMNGenerator.prompt_to_gmn'
+                        "services.gmn_generator.GMNGenerator.prompt_to_gmn"
                     ) as mock_gmn:
                         # Setup user
                         mock_get_user.return_value = TokenData(
@@ -297,9 +289,7 @@ class TestEndToEndPipelineWebSocket:
                         response = test_client.post(
                             "/api/v1/prompts",
                             json={"prompt": "This will fail"},
-                            headers={
-                                "Authorization": f"Bearer {mock_auth_token}"
-                            },
+                            headers={"Authorization": f"Bearer {mock_auth_token}"},
                         )
 
                         # Should return error
@@ -326,10 +316,10 @@ class TestEndToEndPipelineWebSocket:
         async def capture_all(message: dict, client_id: str):
             performance_events.append(message)
 
-        with patch('api.v1.prompts.get_db', return_value=mock_db_session):
-            with patch('api.v1.prompts.get_current_user') as mock_get_user:
+        with patch("api.v1.prompts.get_db", return_value=mock_db_session):
+            with patch("api.v1.prompts.get_current_user") as mock_get_user:
                 with patch(
-                    'api.v1.websocket.manager.send_personal_message',
+                    "api.v1.websocket.manager.send_personal_message",
                     capture_all,
                 ):
                     # Setup user
@@ -373,9 +363,7 @@ class TestEndToEndPipelineWebSocket:
                     )
 
                     assert completion_event
-                    assert (
-                        completion_event["data"]["processing_time_ms"] < 3000
-                    )
+                    assert completion_event["data"]["processing_time_ms"] < 3000
 
     @pytest.mark.asyncio
     async def test_multiple_clients_monitoring_same_pipeline(
@@ -389,15 +377,13 @@ class TestEndToEndPipelineWebSocket:
             if client_id in client_events:
                 client_events[client_id].append(message)
 
-        with patch('api.v1.prompts.get_db', return_value=mock_db_session):
-            with patch('api.v1.prompts.get_current_user') as mock_get_user:
+        with patch("api.v1.prompts.get_db", return_value=mock_db_session):
+            with patch("api.v1.prompts.get_current_user") as mock_get_user:
                 with patch(
-                    'api.v1.websocket.manager.send_personal_message',
+                    "api.v1.websocket.manager.send_personal_message",
                     route_events,
                 ):
-                    with patch(
-                        'api.v1.websocket.manager.broadcast'
-                    ) as mock_broadcast:
+                    with patch("api.v1.websocket.manager.broadcast") as mock_broadcast:
                         # Setup broadcast to simulate sending to all clients
                         async def broadcast_to_all(message, event_type=None):
                             for client_id in client_events:
@@ -417,9 +403,7 @@ class TestEndToEndPipelineWebSocket:
                         response = test_client.post(
                             "/api/v1/prompts",
                             json={"prompt": "Create a shared agent"},
-                            headers={
-                                "Authorization": f"Bearer {mock_auth_token}"
-                            },
+                            headers={"Authorization": f"Bearer {mock_auth_token}"},
                         )
 
                         assert response.status_code == 200
@@ -429,9 +413,9 @@ class TestEndToEndPipelineWebSocket:
 
                         # Verify all clients received events
                         for client_id, events in client_events.items():
-                            assert (
-                                len(events) > 0
-                            ), f"Client {client_id} received no events"
+                            assert len(events) > 0, (
+                                f"Client {client_id} received no events"
+                            )
 
                             # Each client should receive similar events
                             event_types = [e.get("type", "") for e in events]
@@ -450,28 +434,16 @@ class TestEndToEndPipelineWebSocket:
             # Simulate progress
             if i == 0:
                 # Complete first pipeline
-                pipeline_monitor.update_stage(
-                    pid, PipelineStage.GMN_GENERATION
-                )
-                pipeline_monitor.update_stage(
-                    pid, PipelineStage.AGENT_CREATION
-                )
-                pipeline_monitor.complete_pipeline(
-                    pid, f"agent_{i}", 1200.0, {}
-                )
+                pipeline_monitor.update_stage(pid, PipelineStage.GMN_GENERATION)
+                pipeline_monitor.update_stage(pid, PipelineStage.AGENT_CREATION)
+                pipeline_monitor.complete_pipeline(pid, f"agent_{i}", 1200.0, {})
             elif i == 1:
                 # Leave second in progress
-                pipeline_monitor.update_stage(
-                    pid, PipelineStage.GMN_GENERATION
-                )
-                pipeline_monitor.update_stage(
-                    pid, PipelineStage.GMN_VALIDATION
-                )
+                pipeline_monitor.update_stage(pid, PipelineStage.GMN_GENERATION)
+                pipeline_monitor.update_stage(pid, PipelineStage.GMN_VALIDATION)
             else:
                 # Mark third as failed
-                pipeline_monitor.update_stage(
-                    pid, PipelineStage.GMN_GENERATION
-                )
+                pipeline_monitor.update_stage(pid, PipelineStage.GMN_GENERATION)
                 pipeline_monitor.record_error(
                     pid, "Validation failed", PipelineStage.GMN_VALIDATION
                 )
@@ -491,9 +463,7 @@ class TestEndToEndPipelineWebSocket:
         assert sum(states.values()) >= 3
 
         # Get specific pipeline details
-        completed_pipeline = pipeline_monitor.get_pipeline_status(
-            pipeline_ids[0]
-        )
+        completed_pipeline = pipeline_monitor.get_pipeline_status(pipeline_ids[0])
         assert completed_pipeline["current_stage"] == "completed"
         assert completed_pipeline["agent_id"] == "agent_0"
         assert completed_pipeline["processing_time_ms"] == 1200.0

@@ -210,7 +210,7 @@ except ImportError:
 
 # Import LLM manager
 try:
-    from inference.llm.local_llm_manager import LocalLLMConfig, LocalLLMManager
+    from inference.llm.local_llm_manager import LocalLLMConfig
 
     LLM_AVAILABLE = True
 except ImportError:
@@ -717,8 +717,7 @@ class ActiveInferenceAgent(ABC):
             return belief_monitoring_hooks.get_agent_statistics(self.agent_id)
         except Exception as e:
             logger.error(
-                f"Failed to get belief monitoring stats for agent"
-                f" {self.agent_id}: {e}"
+                f"Failed to get belief monitoring stats for agent {self.agent_id}: {e}"
             )
             return {"error": str(e)}
 

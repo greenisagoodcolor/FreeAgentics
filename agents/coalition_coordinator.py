@@ -134,12 +134,12 @@ class CoalitionCoordinatorAgent(ActiveInferenceAgent):
 
         # Coalition-specific state
         self.known_agents: Dict[str, Dict[str, Any]] = {}  # Other agents we know about
-        self.active_coalitions: Dict[str, Dict[str, Any]] = (
-            {}
-        )  # Currently active coalitions
-        self.coalition_history: List[Dict[str, Any]] = (
-            []
-        )  # Historical coalition performance
+        self.active_coalitions: Dict[
+            str, Dict[str, Any]
+        ] = {}  # Currently active coalitions
+        self.coalition_history: List[
+            Dict[str, Any]
+        ] = []  # Historical coalition performance
 
         # Action mapping for PyMDP
         self.action_map = {

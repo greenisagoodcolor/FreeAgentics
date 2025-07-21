@@ -110,7 +110,9 @@ class ComponentProfiler:
         }
 
     @contextmanager
-    def profile_component(self, component: str, operation: str, metadata: Dict[str, Any] = None):
+    def profile_component(
+        self, component: str, operation: str, metadata: Dict[str, Any] = None
+    ):
         """Profile a component operation."""
         profile_id = f"{component}.{operation}.{time.time()}"
 
@@ -191,7 +193,9 @@ class ComponentProfiler:
     ):
         """Async version of profile_component."""
         if not self.profile_async:
-            async with self.profile_component(component, operation, metadata) as profile_id:
+            async with self.profile_component(
+                component, operation, metadata
+            ) as profile_id:
                 yield profile_id
             return
 
@@ -329,7 +333,9 @@ class ComponentProfiler:
                     if profile_id in self._active_profiles:
                         profile = self._active_profiles[profile_id]
                         profile["memory_samples"].append((current_time, current_memory))
-                        profile["peak_memory"] = max(profile["peak_memory"], current_memory)
+                        profile["peak_memory"] = max(
+                            profile["peak_memory"], current_memory
+                        )
                     else:
                         break
 
@@ -423,18 +429,23 @@ class ComponentProfiler:
 
         # CPU bottlenecks
         if result.function_stats:
-            total_time = sum(f["cumulative_time"] for f in result.function_stats.values())
+            total_time = sum(
+                f["cumulative_time"] for f in result.function_stats.values()
+            )
             for func_name, stats in result.function_stats.items():
                 if stats["cumulative_time"] > total_time * 0.1:  # >10% of total time
                     bottlenecks.append(
                         {
                             "type": "cpu",
                             "severity": (
-                                "high" if stats["cumulative_time"] > total_time * 0.25 else "medium"
+                                "high"
+                                if stats["cumulative_time"] > total_time * 0.25
+                                else "medium"
                             ),
                             "component": result.component,
                             "function": func_name,
-                            "time_percent": (stats["cumulative_time"] / total_time) * 100,
+                            "time_percent": (stats["cumulative_time"] / total_time)
+                            * 100,
                             "calls": stats["calls"],
                         }
                     )
@@ -444,7 +455,9 @@ class ComponentProfiler:
             bottlenecks.append(
                 {
                     "type": "memory",
-                    "severity": "high" if result.memory_allocated_mb > 500 else "medium",
+                    "severity": "high"
+                    if result.memory_allocated_mb > 500
+                    else "medium",
                     "component": result.component,
                     "allocated_mb": result.memory_allocated_mb,
                     "peak_mb": result.memory_peak_mb,
@@ -456,7 +469,9 @@ class ComponentProfiler:
 
         if result.component == "database":
             # Check for slow queries
-            if metadata.get("query_time_ms", 0) > settings.get("slow_query_threshold_ms", 100):
+            if metadata.get("query_time_ms", 0) > settings.get(
+                "slow_query_threshold_ms", 100
+            ):
                 bottlenecks.append(
                     {
                         "type": "database_query",
@@ -696,7 +711,9 @@ def profile_operation(component: str, operation: str):
 
             @functools.wraps(func)
             async def async_wrapper(*args, **kwargs):
-                async with component_profiler.profile_component_async(component, operation):
+                async with component_profiler.profile_component_async(
+                    component, operation
+                ):
                     return await func(*args, **kwargs)
 
             return async_wrapper

@@ -54,7 +54,9 @@ class TestPoolConfig:
     def test_config_validation(self):
         """Test configuration validation."""
         # Min size cannot be greater than max size
-        with pytest.raises(ValueError, match="min_size cannot be greater than max_size"):
+        with pytest.raises(
+            ValueError, match="min_size cannot be greater than max_size"
+        ):
             PoolConfig(min_size=100, max_size=50)
 
         # Negative values should raise errors
@@ -510,7 +512,9 @@ class TestConnectionHealthMonitor:
     async def test_monitor_error_handling(self):
         """Test health monitor error handling."""
         pool = AsyncMock()
-        pool._health_check_cycle = AsyncMock(side_effect=Exception("Health check error"))
+        pool._health_check_cycle = AsyncMock(
+            side_effect=Exception("Health check error")
+        )
 
         monitor = ConnectionHealthMonitor(pool, check_interval=0.1)
 

@@ -166,7 +166,9 @@ class AnomalyDetector:
 
         # Run different detection methods
         if self.config.enable_statistical:
-            statistical_anomalies = await self._detect_statistical_anomalies(key, metric_point)
+            statistical_anomalies = await self._detect_statistical_anomalies(
+                key, metric_point
+            )
             anomalies.extend(statistical_anomalies)
 
         if self.config.enable_ml:
@@ -174,7 +176,9 @@ class AnomalyDetector:
             anomalies.extend(ml_anomalies)
 
         if self.config.enable_threshold:
-            threshold_anomalies = await self._detect_threshold_anomalies(key, metric_point)
+            threshold_anomalies = await self._detect_threshold_anomalies(
+                key, metric_point
+            )
             anomalies.extend(threshold_anomalies)
 
         if self.config.enable_pattern:
@@ -211,7 +215,9 @@ class AnomalyDetector:
 
         if zscore > self.config.zscore_threshold:
             severity = self._calculate_severity(zscore)
-            anomaly_type = AnomalyType.SPIKE if metric_point.value > mean else AnomalyType.DROP
+            anomaly_type = (
+                AnomalyType.SPIKE if metric_point.value > mean else AnomalyType.DROP
+            )
 
             anomalies.append(
                 Anomaly(
@@ -237,7 +243,9 @@ class AnomalyDetector:
         if metric_point.value < lower_bound or metric_point.value > upper_bound:
             severity = AnomalySeverity.MEDIUM
             anomaly_type = (
-                AnomalyType.SPIKE if metric_point.value > upper_bound else AnomalyType.DROP
+                AnomalyType.SPIKE
+                if metric_point.value > upper_bound
+                else AnomalyType.DROP
             )
 
             anomalies.append(
@@ -290,7 +298,9 @@ class AnomalyDetector:
 
         return anomalies
 
-    async def _detect_ml_anomalies(self, key: str, metric_point: MetricPoint) -> List[Anomaly]:
+    async def _detect_ml_anomalies(
+        self, key: str, metric_point: MetricPoint
+    ) -> List[Anomaly]:
         """Detect anomalies using machine learning."""
         if not self.config.enable_ml:
             return []
@@ -385,7 +395,9 @@ class AnomalyDetector:
 
         return anomalies
 
-    async def _detect_pattern_anomalies(self, key: str, metric_point: MetricPoint) -> List[Anomaly]:
+    async def _detect_pattern_anomalies(
+        self, key: str, metric_point: MetricPoint
+    ) -> List[Anomaly]:
         """Detect pattern-based anomalies."""
         anomalies = []
 
@@ -399,7 +411,9 @@ class AnomalyDetector:
 
         # Normalize pattern
         if recent_pattern.std() > 0:
-            recent_pattern = (recent_pattern - recent_pattern.mean()) / recent_pattern.std()
+            recent_pattern = (
+                recent_pattern - recent_pattern.mean()
+            ) / recent_pattern.std()
         else:
             return anomalies
 
@@ -408,7 +422,9 @@ class AnomalyDetector:
             similarities = []
 
             for normal_pattern in self._normal_patterns[key]:
-                similarity = self._calculate_pattern_similarity(recent_pattern, normal_pattern)
+                similarity = self._calculate_pattern_similarity(
+                    recent_pattern, normal_pattern
+                )
                 similarities.append(similarity)
 
             max_similarity = max(similarities) if similarities else 0
@@ -423,7 +439,9 @@ class AnomalyDetector:
                         timestamp=metric_point.timestamp,
                         value=metric_point.value,
                         expected_value=(
-                            recent_values[-2] if len(recent_values) > 1 else metric_point.value
+                            recent_values[-2]
+                            if len(recent_values) > 1
+                            else metric_point.value
                         ),
                         deviation=1 - max_similarity,
                         confidence=1 - max_similarity,
@@ -512,7 +530,9 @@ class AnomalyDetector:
         self._last_ml_training[key] = datetime.now()
         logger.debug(f"Trained ML model for {key}")
 
-    def _extract_features(self, key: str, metric_point: MetricPoint) -> Optional[List[float]]:
+    def _extract_features(
+        self, key: str, metric_point: MetricPoint
+    ) -> Optional[List[float]]:
         """Extract features for ML model."""
         history = list(self._metric_history[key])
 
@@ -522,7 +542,9 @@ class AnomalyDetector:
         recent_values = [p.value for p in history[-10:]]
         return self._extract_features_from_window(recent_values)
 
-    def _extract_features_from_window(self, values: List[float]) -> Optional[List[float]]:
+    def _extract_features_from_window(
+        self, values: List[float]
+    ) -> Optional[List[float]]:
         """Extract statistical features from a window of values."""
         if len(values) < 5:
             return None
@@ -575,7 +597,9 @@ class AnomalyDetector:
 
         return thresholds
 
-    def _calculate_pattern_similarity(self, pattern1: np.ndarray, pattern2: np.ndarray) -> float:
+    def _calculate_pattern_similarity(
+        self, pattern1: np.ndarray, pattern2: np.ndarray
+    ) -> float:
         """Calculate similarity between two patterns."""
         if len(pattern1) != len(pattern2):
             return 0.0
@@ -623,10 +647,14 @@ class AnomalyDetector:
         }
         return scores.get(severity, 0)
 
-    async def detect_correlated_anomalies(self, window_seconds: int = 300) -> List[Dict[str, Any]]:
+    async def detect_correlated_anomalies(
+        self, window_seconds: int = 300
+    ) -> List[Dict[str, Any]]:
         """Detect correlated anomalies across multiple metrics."""
         cutoff_time = datetime.now() - timedelta(seconds=window_seconds)
-        recent_anomalies = [a for a in self._anomaly_history if a.timestamp >= cutoff_time]
+        recent_anomalies = [
+            a for a in self._anomaly_history if a.timestamp >= cutoff_time
+        ]
 
         if len(recent_anomalies) < 2:
             return []
@@ -642,7 +670,9 @@ class AnomalyDetector:
         for bucket, bucket_anomalies in time_buckets.items():
             if len(bucket_anomalies) >= 2:
                 # Check if anomalies are from different metrics
-                metrics = set(f"{a.source.value}.{a.metric_name}" for a in bucket_anomalies)
+                metrics = set(
+                    f"{a.source.value}.{a.metric_name}" for a in bucket_anomalies
+                )
 
                 if len(metrics) >= 2:
                     correlation = {
@@ -651,7 +681,9 @@ class AnomalyDetector:
                         "metrics": list(metrics),
                         "anomalies": bucket_anomalies,
                         "severity": max(a.severity for a in bucket_anomalies),
-                        "correlation_type": self._determine_correlation_type(bucket_anomalies),
+                        "correlation_type": self._determine_correlation_type(
+                            bucket_anomalies
+                        ),
                     }
                     correlations.append(correlation)
 
@@ -681,7 +713,9 @@ class AnomalyDetector:
     def get_anomaly_summary(self, window_seconds: int = 3600) -> Dict[str, Any]:
         """Get summary of recent anomalies."""
         cutoff_time = datetime.now() - timedelta(seconds=window_seconds)
-        recent_anomalies = [a for a in self._anomaly_history if a.timestamp >= cutoff_time]
+        recent_anomalies = [
+            a for a in self._anomaly_history if a.timestamp >= cutoff_time
+        ]
 
         # Group by various dimensions
         by_type = defaultdict(int)

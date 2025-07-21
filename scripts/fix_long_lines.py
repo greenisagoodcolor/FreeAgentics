@@ -169,12 +169,16 @@ def fix_long_lines_in_file(filepath: str, max_length: int = 79) -> Tuple[int, in
                 if " and " in line:
                     parts = line.split(" and ", 1)
                     new_lines.append(parts[0] + " and")
-                    new_lines.append(" " * (len(line) - len(line.lstrip()) + 4) + parts[1])
+                    new_lines.append(
+                        " " * (len(line) - len(line.lstrip()) + 4) + parts[1]
+                    )
                     fixed_count += 1
                 elif " or " in line:
                     parts = line.split(" or ", 1)
                     new_lines.append(parts[0] + " or")
-                    new_lines.append(" " * (len(line) - len(line.lstrip()) + 4) + parts[1])
+                    new_lines.append(
+                        " " * (len(line) - len(line.lstrip()) + 4) + parts[1]
+                    )
                     fixed_count += 1
                 else:
                     new_lines.append(line)
@@ -197,7 +201,9 @@ def fix_long_lines_in_file(filepath: str, max_length: int = 79) -> Tuple[int, in
 def main():
     parser = argparse.ArgumentParser(description="Fix E501 line length violations")
     parser.add_argument("paths", nargs="+", help="Files or directories to fix")
-    parser.add_argument("--max-length", type=int, default=79, help="Maximum line length")
+    parser.add_argument(
+        "--max-length", type=int, default=79, help="Maximum line length"
+    )
 
     args = parser.parse_args()
 

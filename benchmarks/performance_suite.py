@@ -274,7 +274,9 @@ class MessageThroughputBenchmarks:
 
         # pytest-benchmark doesn't natively support async, so we wrap it
         loop = asyncio.new_event_loop()
-        result = benchmark(lambda: loop.run_until_complete(async_message_processing(1000)))
+        result = benchmark(
+            lambda: loop.run_until_complete(async_message_processing(1000))
+        )
         assert len(result) == 1000
 
 
@@ -326,7 +328,9 @@ class MemoryUsageBenchmarks:
             beliefs = np.zeros((100, 100))
             # Add some sparse data
             for i in range(10):
-                beliefs[np.random.randint(0, 100), np.random.randint(0, 100)] = np.random.rand()
+                beliefs[np.random.randint(0, 100), np.random.randint(0, 100)] = (
+                    np.random.rand()
+                )
 
             compressed = compress_beliefs(beliefs)
             return compressed
@@ -485,7 +489,9 @@ class PerformanceReportGenerator:
     """Generate performance reports from benchmark results."""
 
     @staticmethod
-    def generate_report(results: List[BenchmarkMetrics], output_dir: Path) -> Dict[str, Any]:
+    def generate_report(
+        results: List[BenchmarkMetrics], output_dir: Path
+    ) -> Dict[str, Any]:
         """Generate comprehensive performance report."""
         report = {
             "timestamp": datetime.now().isoformat(),
@@ -513,7 +519,9 @@ class PerformanceReportGenerator:
             category_stats = {
                 "count": len(cat_results),
                 "avg_duration_ms": np.mean([r.duration_ms for r in cat_results]),
-                "avg_ops_per_sec": np.mean([r.operations_per_second for r in cat_results]),
+                "avg_ops_per_sec": np.mean(
+                    [r.operations_per_second for r in cat_results]
+                ),
                 "avg_memory_mb": np.mean([r.memory_growth_mb for r in cat_results]),
                 "benchmarks": {},
             }
@@ -531,7 +539,8 @@ class PerformanceReportGenerator:
 
         # Save report
         report_path = (
-            output_dir / f"performance_report_{datetime.now().strftime('%Y%m%d_%H%M%S')}.json"
+            output_dir
+            / f"performance_report_{datetime.now().strftime('%Y%m%d_%H%M%S')}.json"
         )
         with open(report_path, "w") as f:
             json.dump(report, f, indent=2)

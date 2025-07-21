@@ -82,9 +82,7 @@ class TestConcurrentAuthenticationLoad:
         test_subset = test_users[:50]
 
         with ThreadPoolExecutor(max_workers=10) as executor:
-            futures = [
-                executor.submit(create_token, user) for user in test_subset
-            ]
+            futures = [executor.submit(create_token, user) for user in test_subset]
 
             for future in as_completed(futures):
                 result = future.result()
@@ -135,10 +133,7 @@ class TestConcurrentAuthenticationLoad:
         test_subset = test_users[:30]
 
         with ThreadPoolExecutor(max_workers=10) as executor:
-            futures = [
-                executor.submit(authenticate_user, user)
-                for user in test_subset
-            ]
+            futures = [executor.submit(authenticate_user, user) for user in test_subset]
 
             for future in as_completed(futures):
                 result = future.result()
@@ -196,9 +191,7 @@ class TestConcurrentAuthenticationLoad:
                 return {"user_id": user.user_id, "success": False}
 
         with ThreadPoolExecutor(max_workers=5) as executor:
-            futures = [
-                executor.submit(refresh_token, rt) for rt in refresh_tokens
-            ]
+            futures = [executor.submit(refresh_token, rt) for rt in refresh_tokens]
 
             for future in as_completed(futures):
                 result = future.result()
@@ -359,9 +352,7 @@ class TestConcurrentAuthenticationLoad:
         test_subset = test_users[:15]
 
         with ThreadPoolExecutor(max_workers=5) as executor:
-            futures = [
-                executor.submit(manage_session, user) for user in test_subset
-            ]
+            futures = [executor.submit(manage_session, user) for user in test_subset]
 
             for future in as_completed(futures):
                 result = future.result()
@@ -413,9 +404,7 @@ class TestConcurrentAuthenticationLoad:
                 return end_time - start_time
 
             with ThreadPoolExecutor(max_workers=min(count, 20)) as executor:
-                futures = [
-                    executor.submit(create_token, user) for user in users
-                ]
+                futures = [executor.submit(create_token, user) for user in users]
 
                 for future in as_completed(futures):
                     duration = future.result()
@@ -437,16 +426,10 @@ class TestConcurrentAuthenticationLoad:
 
         # Performance should scale reasonably
         # Allow some degradation but not excessive
-        ratio_50_to_10 = (
-            results[50]["avg_duration"] / results[10]["avg_duration"]
-        )
-        ratio_100_to_50 = (
-            results[100]["avg_duration"] / results[50]["avg_duration"]
-        )
+        ratio_50_to_10 = results[50]["avg_duration"] / results[10]["avg_duration"]
+        ratio_100_to_50 = results[100]["avg_duration"] / results[50]["avg_duration"]
 
-        assert (
-            ratio_50_to_10 < 3.0
-        )  # 50 users shouldn't be more than 3x slower than 10
+        assert ratio_50_to_10 < 3.0  # 50 users shouldn't be more than 3x slower than 10
         assert (
             ratio_100_to_50 < 3.0
         )  # 100 users shouldn't be more than 3x slower than 50
@@ -483,9 +466,7 @@ class TestConcurrentAuthenticationLoad:
                     return False
 
             with ThreadPoolExecutor(max_workers=10) as executor:
-                futures = [
-                    executor.submit(verify_token, token) for token in tokens
-                ]
+                futures = [executor.submit(verify_token, token) for token in tokens]
 
                 results = []
                 for future in as_completed(futures):
@@ -526,9 +507,7 @@ class TestConcurrentAuthenticationLoad:
                 # Get JTI from token
                 import jwt
 
-                payload = jwt.decode(
-                    token, options={"verify_signature": False}
-                )
+                payload = jwt.decode(token, options={"verify_signature": False})
                 jti = payload.get("jti")
 
                 if jti:
@@ -556,9 +535,7 @@ class TestConcurrentAuthenticationLoad:
                 return {"success": False}
 
         with ThreadPoolExecutor(max_workers=10) as executor:
-            futures = [
-                executor.submit(blacklist_token, token) for token in tokens
-            ]
+            futures = [executor.submit(blacklist_token, token) for token in tokens]
 
             for future in as_completed(futures):
                 result = future.result()
@@ -644,9 +621,7 @@ class TestConcurrentAuthenticationLoad:
 
         # Run stress test with moderate concurrency
         with ThreadPoolExecutor(max_workers=25) as executor:
-            futures = [
-                executor.submit(stress_test_user, user) for user in users
-            ]
+            futures = [executor.submit(stress_test_user, user) for user in users]
 
             for future in as_completed(futures):
                 result = future.result()

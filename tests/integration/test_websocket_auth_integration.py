@@ -92,7 +92,9 @@ class TestWebSocketAuthenticationIntegration:
         mock_websocket = AsyncMock(spec=WebSocket)
 
         with patch("api.v1.websocket.auth_manager.verify_token") as mock_verify:
-            mock_verify.side_effect = HTTPException(status_code=401, detail="Invalid token")
+            mock_verify.side_effect = HTTPException(
+                status_code=401, detail="Invalid token"
+            )
 
             with pytest.raises(WebSocketDisconnect) as exc_info:
                 await websocket_auth(mock_websocket, "invalid.token")
@@ -269,7 +271,9 @@ class TestWebSocketCommandAuthorizationIntegration:
 
         # Test agent status query (should succeed)
         with patch("api.v1.websocket.manager.send_personal_message") as mock_send:
-            await handle_query(client_id, {"query_type": "agent_status"}, researcher_user)
+            await handle_query(
+                client_id, {"query_type": "agent_status"}, researcher_user
+            )
 
             mock_send.assert_called_once()
             args, _ = mock_send.call_args
@@ -281,7 +285,9 @@ class TestWebSocketCommandAuthorizationIntegration:
 
         # Test world state query (should succeed)
         with patch("api.v1.websocket.manager.send_personal_message") as mock_send:
-            await handle_query(client_id, {"query_type": "world_state"}, researcher_user)
+            await handle_query(
+                client_id, {"query_type": "world_state"}, researcher_user
+            )
 
             mock_send.assert_called_once()
             args, _ = mock_send.call_args
@@ -337,7 +343,9 @@ class TestWebSocketSecurityIntegration:
         for invalid_token in invalid_tokens:
             with patch("api.v1.websocket.auth_manager.verify_token") as mock_verify:
                 if invalid_token:
-                    mock_verify.side_effect = HTTPException(status_code=401, detail="Invalid token")
+                    mock_verify.side_effect = HTTPException(
+                        status_code=401, detail="Invalid token"
+                    )
 
                 with pytest.raises(WebSocketDisconnect) as exc_info:
                     await websocket_auth(mock_websocket, invalid_token)

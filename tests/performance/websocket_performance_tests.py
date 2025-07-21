@@ -76,12 +76,12 @@ class WebSocketPerformanceTester:
 
         # Performance thresholds
         self.thresholds = {
-            'connection_time_ms': 1000.0,  # 1 second max connection time
-            'message_latency_ms': 100.0,  # 100ms max message latency
-            'throughput_min_mps': 100.0,  # 100 messages per second minimum
-            'connection_success_rate': 95.0,  # 95% connection success rate
-            'message_loss_rate': 1.0,  # 1% max message loss
-            'memory_usage_max_mb': 500.0,  # 500MB max memory usage
+            "connection_time_ms": 1000.0,  # 1 second max connection time
+            "message_latency_ms": 100.0,  # 100ms max message latency
+            "throughput_min_mps": 100.0,  # 100 messages per second minimum
+            "connection_success_rate": 95.0,  # 95% connection success rate
+            "message_loss_rate": 1.0,  # 1% max message loss
+            "memory_usage_max_mb": 500.0,  # 500MB max memory usage
         }
 
     async def run_connection_performance_test(
@@ -111,20 +111,18 @@ class WebSocketPerformanceTester:
                         close_timeout=10,
                     )
 
-                    connection_time = (
-                        time.perf_counter() - connection_start
-                    ) * 1000
+                    connection_time = (time.perf_counter() - connection_start) * 1000
                     connection_times.append(connection_time)
                     connections.append(websocket)
                     successful_connections += 1
 
                     logger.debug(
-                        f"Connection {i+1} established in {connection_time:.1f}ms"
+                        f"Connection {i + 1} established in {connection_time:.1f}ms"
                     )
 
                 except Exception as e:
                     failed_connections += 1
-                    logger.warning(f"Connection {i+1} failed: {e}")
+                    logger.warning(f"Connection {i + 1} failed: {e}")
 
                 # Interval between connections
                 if i < max_connections - 1:
@@ -144,9 +142,7 @@ class WebSocketPerformanceTester:
             logger.error(f"Connection test error: {e}")
 
         duration = time.perf_counter() - start_time
-        connection_success_rate = (
-            successful_connections / max_connections
-        ) * 100
+        connection_success_rate = (successful_connections / max_connections) * 100
 
         # System metrics
         memory_usage = self.process.memory_info().rss / 1024 / 1024
@@ -174,11 +170,11 @@ class WebSocketPerformanceTester:
             cpu_usage_percent=cpu_usage,
             errors_encountered=failed_connections,
             test_metadata={
-                'connection_times': connection_times,
-                'max_connections': max_connections,
-                'connection_interval': connection_interval,
-                'successful_connections': successful_connections,
-                'failed_connections': failed_connections,
+                "connection_times": connection_times,
+                "max_connections": max_connections,
+                "connection_interval": connection_interval,
+                "successful_connections": successful_connections,
+                "failed_connections": failed_connections,
             },
         )
 
@@ -227,10 +223,10 @@ class WebSocketPerformanceTester:
 
             # Generate test message
             test_message = {
-                'type': 'performance_test',
-                'data': 'x' * message_size,
-                'timestamp': time.time(),
-                'id': str(uuid.uuid4()),
+                "type": "performance_test",
+                "data": "x" * message_size,
+                "timestamp": time.time(),
+                "id": str(uuid.uuid4()),
             }
 
             # Send messages concurrently
@@ -241,9 +237,9 @@ class WebSocketPerformanceTester:
                     try:
                         # Prepare message with unique ID
                         message = test_message.copy()
-                        message['connection_id'] = connection_id
-                        message['message_id'] = msg_id
-                        message['send_time'] = time.perf_counter()
+                        message["connection_id"] = connection_id
+                        message["message_id"] = msg_id
+                        message["send_time"] = time.perf_counter()
 
                         # Send message
                         await websocket.send(json.dumps(message))
@@ -255,7 +251,7 @@ class WebSocketPerformanceTester:
 
                         # Simulate receiving acknowledgment
                         receive_time = time.perf_counter()
-                        latency = (receive_time - message['send_time']) * 1000
+                        latency = (receive_time - message["send_time"]) * 1000
                         message_latencies.append(latency)
                         total_messages_received += 1
 
@@ -325,21 +321,15 @@ class WebSocketPerformanceTester:
             cpu_usage_percent=cpu_usage,
             errors_encountered=connection_errors + message_errors,
             test_metadata={
-                'connections': connections,
-                'messages_per_connection': messages_per_connection,
-                'message_size': message_size,
-                'connection_errors': connection_errors,
-                'message_errors': message_errors,
-                'latency_stats': {
-                    'min_ms': min(message_latencies)
-                    if message_latencies
-                    else 0,
-                    'max_ms': max(message_latencies)
-                    if message_latencies
-                    else 0,
-                    'std_ms': np.std(message_latencies)
-                    if message_latencies
-                    else 0,
+                "connections": connections,
+                "messages_per_connection": messages_per_connection,
+                "message_size": message_size,
+                "connection_errors": connection_errors,
+                "message_errors": message_errors,
+                "latency_stats": {
+                    "min_ms": min(message_latencies) if message_latencies else 0,
+                    "max_ms": max(message_latencies) if message_latencies else 0,
+                    "std_ms": np.std(message_latencies) if message_latencies else 0,
                 },
             },
         )
@@ -369,7 +359,11 @@ class WebSocketPerformanceTester:
         latencies = []
 
         async def stress_connection(connection_id):
-            nonlocal total_messages_sent, total_messages_received, connection_errors, message_errors
+            nonlocal \
+                total_messages_sent, \
+                total_messages_received, \
+                connection_errors, \
+                message_errors
 
             websocket = None
             try:
@@ -385,10 +379,10 @@ class WebSocketPerformanceTester:
                 while time.perf_counter() < end_time:
                     try:
                         message = {
-                            'type': 'stress_test',
-                            'connection_id': connection_id,
-                            'timestamp': time.perf_counter(),
-                            'data': f'stress_message_{total_messages_sent}',
+                            "type": "stress_test",
+                            "connection_id": connection_id,
+                            "timestamp": time.perf_counter(),
+                            "data": f"stress_message_{total_messages_sent}",
                         }
 
                         send_time = time.perf_counter()
@@ -471,21 +465,19 @@ class WebSocketPerformanceTester:
             p95_latency_ms=np.percentile(latencies, 95) if latencies else 0,
             p99_latency_ms=np.percentile(latencies, 99) if latencies else 0,
             throughput_messages_per_second=throughput,
-            connection_success_rate=(
-                successful_connections / max_connections * 100
-            )
+            connection_success_rate=(successful_connections / max_connections * 100)
             if max_connections > 0
             else 0,
             memory_usage_mb=memory_usage,
             cpu_usage_percent=cpu_usage,
             errors_encountered=connection_errors + message_errors,
             test_metadata={
-                'max_connections': max_connections,
-                'test_duration': test_duration,
-                'successful_connections': successful_connections,
-                'connection_errors': connection_errors,
-                'message_errors': message_errors,
-                'connection_interval': connection_interval,
+                "max_connections": max_connections,
+                "test_duration": test_duration,
+                "successful_connections": successful_connections,
+                "connection_errors": connection_errors,
+                "message_errors": message_errors,
+                "connection_interval": connection_interval,
             },
         )
 
@@ -516,7 +508,11 @@ class WebSocketPerformanceTester:
         latencies = []
 
         async def stability_connection(connection_id):
-            nonlocal stable_connections, connection_dropouts, reconnection_attempts, successful_reconnections
+            nonlocal \
+                stable_connections, \
+                connection_dropouts, \
+                reconnection_attempts, \
+                successful_reconnections
             nonlocal total_messages_sent, total_messages_received
 
             websocket = None
@@ -541,10 +537,10 @@ class WebSocketPerformanceTester:
                         # Send heartbeat message every 5 seconds
                         if current_time - last_heartbeat >= 5:
                             message = {
-                                'type': 'heartbeat',
-                                'connection_id': connection_id,
-                                'timestamp': current_time,
-                                'uptime': current_time - connection_start,
+                                "type": "heartbeat",
+                                "connection_id": connection_id,
+                                "timestamp": current_time,
+                                "uptime": current_time - connection_start,
                             }
 
                             send_time = time.perf_counter()
@@ -593,9 +589,7 @@ class WebSocketPerformanceTester:
                         await asyncio.sleep(1)  # Wait before retrying
 
             except Exception as e:
-                logger.error(
-                    f"Stability connection {connection_id} failed: {e}"
-                )
+                logger.error(f"Stability connection {connection_id} failed: {e}")
                 stable_connections -= 1
 
             finally:
@@ -658,13 +652,13 @@ class WebSocketPerformanceTester:
             cpu_usage_percent=cpu_usage,
             errors_encountered=connection_dropouts,
             test_metadata={
-                'connections': connections,
-                'test_duration': test_duration,
-                'stable_connections': stable_connections,
-                'connection_dropouts': connection_dropouts,
-                'reconnection_attempts': reconnection_attempts,
-                'successful_reconnections': successful_reconnections,
-                'reconnection_success_rate': reconnection_success_rate,
+                "connections": connections,
+                "test_duration": test_duration,
+                "stable_connections": stable_connections,
+                "connection_dropouts": connection_dropouts,
+                "reconnection_attempts": reconnection_attempts,
+                "successful_reconnections": successful_reconnections,
+                "reconnection_success_rate": reconnection_success_rate,
             },
         )
 
@@ -687,32 +681,32 @@ class WebSocketPerformanceTester:
             connection_result = await self.run_connection_performance_test(
                 max_connections=50
             )
-            test_results['connection_performance'] = connection_result
+            test_results["connection_performance"] = connection_result
 
             # 2. Message Throughput Test
             logger.info("Running message throughput test...")
             throughput_result = await self.run_message_throughput_test(
                 connections=20, messages_per_connection=50
             )
-            test_results['message_throughput'] = throughput_result
+            test_results["message_throughput"] = throughput_result
 
             # 3. Stress Test
             logger.info("Running stress test...")
             stress_result = await self.run_stress_test(
                 max_connections=100, test_duration=60
             )
-            test_results['stress_test'] = stress_result
+            test_results["stress_test"] = stress_result
 
             # 4. Stability Test
             logger.info("Running stability test...")
             stability_result = await self.run_stability_test(
                 connections=25, test_duration=120
             )
-            test_results['stability_test'] = stability_result
+            test_results["stability_test"] = stability_result
 
         except Exception as e:
             logger.error(f"Test suite error: {e}")
-            test_results['error'] = str(e)
+            test_results["error"] = str(e)
 
         # Generate comprehensive report
         report = self._generate_comprehensive_report(test_results)
@@ -724,51 +718,47 @@ class WebSocketPerformanceTester:
     ) -> Dict[str, Any]:
         """Generate comprehensive WebSocket performance report."""
         report = {
-            'timestamp': datetime.now().isoformat(),
-            'test_summary': {
-                'total_tests': len(
-                    [k for k in test_results.keys() if k != 'error']
-                ),
-                'tests_completed': len(
+            "timestamp": datetime.now().isoformat(),
+            "test_summary": {
+                "total_tests": len([k for k in test_results.keys() if k != "error"]),
+                "tests_completed": len(
                     [
                         k
                         for k, v in test_results.items()
                         if isinstance(v, WebSocketTestResult)
                     ]
                 ),
-                'errors': test_results.get('error', None),
+                "errors": test_results.get("error", None),
             },
-            'performance_metrics': {},
-            'sla_validation': {'violations': [], 'requirements_met': True},
-            'recommendations': [],
+            "performance_metrics": {},
+            "sla_validation": {"violations": [], "requirements_met": True},
+            "recommendations": [],
         }
 
         # Analyze each test result
         for test_name, result in test_results.items():
             if isinstance(result, WebSocketTestResult):
-                report['performance_metrics'][test_name] = {
-                    'concurrent_connections': result.concurrent_connections,
-                    'throughput_mps': result.throughput_messages_per_second,
-                    'average_latency_ms': result.average_latency_ms,
-                    'p95_latency_ms': result.p95_latency_ms,
-                    'p99_latency_ms': result.p99_latency_ms,
-                    'connection_success_rate': result.connection_success_rate,
-                    'message_loss_rate': result.message_loss_rate,
-                    'memory_usage_mb': result.memory_usage_mb,
-                    'cpu_usage_percent': result.cpu_usage_percent,
-                    'errors_encountered': result.errors_encountered,
+                report["performance_metrics"][test_name] = {
+                    "concurrent_connections": result.concurrent_connections,
+                    "throughput_mps": result.throughput_messages_per_second,
+                    "average_latency_ms": result.average_latency_ms,
+                    "p95_latency_ms": result.p95_latency_ms,
+                    "p99_latency_ms": result.p99_latency_ms,
+                    "connection_success_rate": result.connection_success_rate,
+                    "message_loss_rate": result.message_loss_rate,
+                    "memory_usage_mb": result.memory_usage_mb,
+                    "cpu_usage_percent": result.cpu_usage_percent,
+                    "errors_encountered": result.errors_encountered,
                 }
 
                 # Check SLA violations
                 violations = self._check_sla_violations(result)
                 if violations:
-                    report['sla_validation']['violations'].extend(violations)
-                    report['sla_validation']['requirements_met'] = False
+                    report["sla_validation"]["violations"].extend(violations)
+                    report["sla_validation"]["requirements_met"] = False
 
         # Generate recommendations
-        report['recommendations'] = self._generate_recommendations(
-            test_results
-        )
+        report["recommendations"] = self._generate_recommendations(test_results)
 
         return report
 
@@ -779,76 +769,71 @@ class WebSocketPerformanceTester:
         violations = []
 
         # Connection success rate
-        if (
-            result.connection_success_rate
-            < self.thresholds['connection_success_rate']
-        ):
+        if result.connection_success_rate < self.thresholds["connection_success_rate"]:
             violations.append(
                 {
-                    'metric': 'connection_success_rate',
-                    'threshold': self.thresholds['connection_success_rate'],
-                    'actual': result.connection_success_rate,
-                    'severity': 'high',
-                    'description': f'Connection success rate ({result.connection_success_rate:.1f}%) below threshold',
+                    "metric": "connection_success_rate",
+                    "threshold": self.thresholds["connection_success_rate"],
+                    "actual": result.connection_success_rate,
+                    "severity": "high",
+                    "description": f"Connection success rate ({result.connection_success_rate:.1f}%) below threshold",
                 }
             )
 
         # Message latency
-        if result.average_latency_ms > self.thresholds['message_latency_ms']:
+        if result.average_latency_ms > self.thresholds["message_latency_ms"]:
             violations.append(
                 {
-                    'metric': 'message_latency',
-                    'threshold': self.thresholds['message_latency_ms'],
-                    'actual': result.average_latency_ms,
-                    'severity': 'medium',
-                    'description': f'Average message latency ({result.average_latency_ms:.1f}ms) exceeds threshold',
+                    "metric": "message_latency",
+                    "threshold": self.thresholds["message_latency_ms"],
+                    "actual": result.average_latency_ms,
+                    "severity": "medium",
+                    "description": f"Average message latency ({result.average_latency_ms:.1f}ms) exceeds threshold",
                 }
             )
 
         # Throughput
         if (
             result.throughput_messages_per_second
-            < self.thresholds['throughput_min_mps']
+            < self.thresholds["throughput_min_mps"]
         ):
             violations.append(
                 {
-                    'metric': 'throughput',
-                    'threshold': self.thresholds['throughput_min_mps'],
-                    'actual': result.throughput_messages_per_second,
-                    'severity': 'medium',
-                    'description': f'Throughput ({result.throughput_messages_per_second:.1f} msg/s) below threshold',
+                    "metric": "throughput",
+                    "threshold": self.thresholds["throughput_min_mps"],
+                    "actual": result.throughput_messages_per_second,
+                    "severity": "medium",
+                    "description": f"Throughput ({result.throughput_messages_per_second:.1f} msg/s) below threshold",
                 }
             )
 
         # Message loss rate
-        if result.message_loss_rate > self.thresholds['message_loss_rate']:
+        if result.message_loss_rate > self.thresholds["message_loss_rate"]:
             violations.append(
                 {
-                    'metric': 'message_loss_rate',
-                    'threshold': self.thresholds['message_loss_rate'],
-                    'actual': result.message_loss_rate,
-                    'severity': 'high',
-                    'description': f'Message loss rate ({result.message_loss_rate:.2f}%) exceeds threshold',
+                    "metric": "message_loss_rate",
+                    "threshold": self.thresholds["message_loss_rate"],
+                    "actual": result.message_loss_rate,
+                    "severity": "high",
+                    "description": f"Message loss rate ({result.message_loss_rate:.2f}%) exceeds threshold",
                 }
             )
 
         # Memory usage
-        if result.memory_usage_mb > self.thresholds['memory_usage_max_mb']:
+        if result.memory_usage_mb > self.thresholds["memory_usage_max_mb"]:
             violations.append(
                 {
-                    'metric': 'memory_usage',
-                    'threshold': self.thresholds['memory_usage_max_mb'],
-                    'actual': result.memory_usage_mb,
-                    'severity': 'medium',
-                    'description': f'Memory usage ({result.memory_usage_mb:.1f}MB) exceeds threshold',
+                    "metric": "memory_usage",
+                    "threshold": self.thresholds["memory_usage_max_mb"],
+                    "actual": result.memory_usage_mb,
+                    "severity": "medium",
+                    "description": f"Memory usage ({result.memory_usage_mb:.1f}MB) exceeds threshold",
                 }
             )
 
         return violations
 
-    def _generate_recommendations(
-        self, test_results: Dict[str, Any]
-    ) -> List[str]:
+    def _generate_recommendations(self, test_results: Dict[str, Any]) -> List[str]:
         """Generate recommendations based on test results."""
         recommendations = []
 
@@ -894,30 +879,30 @@ class WebSocketPerformanceTester:
     def save_results(self, filename: str):
         """Save test results to file."""
         data = {
-            'timestamp': datetime.now().isoformat(),
-            'test_results': [
+            "timestamp": datetime.now().isoformat(),
+            "test_results": [
                 {
-                    'test_name': result.test_name,
-                    'concurrent_connections': result.concurrent_connections,
-                    'duration_seconds': result.duration_seconds,
-                    'total_messages_sent': result.total_messages_sent,
-                    'total_messages_received': result.total_messages_received,
-                    'message_loss_rate': result.message_loss_rate,
-                    'average_latency_ms': result.average_latency_ms,
-                    'p95_latency_ms': result.p95_latency_ms,
-                    'p99_latency_ms': result.p99_latency_ms,
-                    'throughput_messages_per_second': result.throughput_messages_per_second,
-                    'connection_success_rate': result.connection_success_rate,
-                    'memory_usage_mb': result.memory_usage_mb,
-                    'cpu_usage_percent': result.cpu_usage_percent,
-                    'errors_encountered': result.errors_encountered,
-                    'test_metadata': result.test_metadata,
+                    "test_name": result.test_name,
+                    "concurrent_connections": result.concurrent_connections,
+                    "duration_seconds": result.duration_seconds,
+                    "total_messages_sent": result.total_messages_sent,
+                    "total_messages_received": result.total_messages_received,
+                    "message_loss_rate": result.message_loss_rate,
+                    "average_latency_ms": result.average_latency_ms,
+                    "p95_latency_ms": result.p95_latency_ms,
+                    "p99_latency_ms": result.p99_latency_ms,
+                    "throughput_messages_per_second": result.throughput_messages_per_second,
+                    "connection_success_rate": result.connection_success_rate,
+                    "memory_usage_mb": result.memory_usage_mb,
+                    "cpu_usage_percent": result.cpu_usage_percent,
+                    "errors_encountered": result.errors_encountered,
+                    "test_metadata": result.test_metadata,
                 }
                 for result in self.test_results
             ],
         }
 
-        with open(filename, 'w') as f:
+        with open(filename, "w") as f:
             json.dump(data, f, indent=2)
 
         logger.info(f"WebSocket test results saved to {filename}")
@@ -947,40 +932,38 @@ async def run_websocket_performance_validation():
         print(f"Total tests: {report['test_summary']['total_tests']}")
         print(f"Tests completed: {report['test_summary']['tests_completed']}")
 
-        if report['test_summary'].get('errors'):
+        if report["test_summary"].get("errors"):
             print(f"Errors: {report['test_summary']['errors']}")
 
         # Print performance metrics
-        for test_name, metrics in report['performance_metrics'].items():
+        for test_name, metrics in report["performance_metrics"].items():
             print(f"\n{test_name.upper()}:")
             print(f"  Connections: {metrics['concurrent_connections']}")
             print(f"  Throughput: {metrics['throughput_mps']:.1f} msg/s")
             print(f"  Avg Latency: {metrics['average_latency_ms']:.1f}ms")
             print(f"  P95 Latency: {metrics['p95_latency_ms']:.1f}ms")
-            print(
-                f"  Connection Success: {metrics['connection_success_rate']:.1f}%"
-            )
+            print(f"  Connection Success: {metrics['connection_success_rate']:.1f}%")
             print(f"  Message Loss: {metrics['message_loss_rate']:.2f}%")
             print(f"  Memory Usage: {metrics['memory_usage_mb']:.1f}MB")
             print(f"  Errors: {metrics['errors_encountered']}")
 
         # SLA validation
-        sla = report['sla_validation']
+        sla = report["sla_validation"]
         print("\n" + "=" * 30)
         print("SLA VALIDATION")
         print("=" * 30)
         print(f"Requirements met: {'✓' if sla['requirements_met'] else '✗'}")
 
-        if sla['violations']:
+        if sla["violations"]:
             print("\nViolations:")
-            for violation in sla['violations']:
+            for violation in sla["violations"]:
                 print(f"  - {violation['metric']}: {violation['description']}")
 
         # Recommendations
         print("\n" + "=" * 30)
         print("RECOMMENDATIONS")
         print("=" * 30)
-        for rec in report['recommendations']:
+        for rec in report["recommendations"]:
             print(f"  - {rec}")
 
         # Save results

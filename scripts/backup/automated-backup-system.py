@@ -119,10 +119,10 @@ class BackupConfig:
         config = cls()
 
         if os.path.exists(env_file):
-            with open(env_file, 'r') as f:
+            with open(env_file, "r") as f:
                 for line in f:
-                    if '=' in line and not line.startswith('#'):
-                        key, value = line.strip().split('=', 1)
+                    if "=" in line and not line.startswith("#"):
+                        key, value = line.strip().split("=", 1)
                         key = key.strip()
                         value = value.strip().strip('"')
 
@@ -133,12 +133,12 @@ class BackupConfig:
                                 setattr(
                                     config,
                                     key.lower(),
-                                    value.lower() == 'true',
+                                    value.lower() == "true",
                                 )
                             elif attr_type == int:
                                 setattr(config, key.lower(), int(value))
                             elif attr_type == list:
-                                setattr(config, key.lower(), value.split(','))
+                                setattr(config, key.lower(), value.split(","))
                             else:
                                 setattr(config, key.lower(), value)
 
@@ -191,7 +191,7 @@ class BackupOrchestrator:
 
         # Formatter
         formatter = logging.Formatter(
-            '%(asctime)s - %(name)s - %(levelname)s - %(message)s'
+            "%(asctime)s - %(name)s - %(levelname)s - %(message)s"
         )
         fh.setFormatter(formatter)
         ch.setFormatter(formatter)
@@ -258,9 +258,7 @@ class BackupOrchestrator:
             # Calculate checksums
             for file_path in metadata.files:
                 if os.path.exists(file_path):
-                    metadata.checksums[file_path] = self._calculate_checksum(
-                        file_path
-                    )
+                    metadata.checksums[file_path] = self._calculate_checksum(file_path)
                     metadata.size_bytes += os.path.getsize(file_path)
 
             # Implement 3-2-1 strategy
@@ -302,9 +300,7 @@ class BackupOrchestrator:
         """Backup PostgreSQL database"""
         self.logger.info("Backing up PostgreSQL database...")
 
-        backup_file = (
-            f"{self.config.backup_root}/daily/postgres_{backup_id}.dump"
-        )
+        backup_file = f"{self.config.backup_root}/daily/postgres_{backup_id}.dump"
 
         # Use pg_dump with custom format for faster restore
         cmd = [
@@ -321,7 +317,7 @@ class BackupOrchestrator:
         ]
 
         env = os.environ.copy()
-        env['PGPASSWORD'] = self.config.db_password
+        env["PGPASSWORD"] = self.config.db_password
 
         result = subprocess.run(cmd, env=env, capture_output=True, text=True)
         if result.returncode != 0:
@@ -357,21 +353,19 @@ class BackupOrchestrator:
                 time.sleep(0.1)
 
             # Get RDB file location
-            redis_dir = r.config_get('dir')['dir']
-            redis_dbfilename = r.config_get('dbfilename')['dbfilename']
+            redis_dir = r.config_get("dir")["dir"]
+            redis_dbfilename = r.config_get("dbfilename")["dbfilename"]
             rdb_path = os.path.join(redis_dir, redis_dbfilename)
 
             # Copy and compress RDB file
-            backup_file = (
-                f"{self.config.backup_root}/redis/redis_{backup_id}.rdb.gz"
-            )
+            backup_file = f"{self.config.backup_root}/redis/redis_{backup_id}.rdb.gz"
 
-            with open(rdb_path, 'rb') as src:
+            with open(rdb_path, "rb") as src:
                 import gzip
 
                 with gzip.open(
                     backup_file,
-                    'wb',
+                    "wb",
                     compresslevel=self.config.compression_level,
                 ) as dst:
                     shutil.copyfileobj(src, dst)
@@ -387,9 +381,7 @@ class BackupOrchestrator:
         self.logger.info("Backing up knowledge graph...")
 
         # Query knowledge graph tables
-        backup_file = (
-            f"{self.config.backup_root}/knowledge_graph/kg_{backup_id}.sql"
-        )
+        backup_file = f"{self.config.backup_root}/knowledge_graph/kg_{backup_id}.sql"
 
         tables = [
             "knowledge_graph_nodes",
@@ -397,7 +389,7 @@ class BackupOrchestrator:
             "knowledge_graph_metadata",
         ]
 
-        with open(backup_file, 'w') as f:
+        with open(backup_file, "w") as f:
             for table in tables:
                 cmd = [
                     "pg_dump",
@@ -412,11 +404,9 @@ class BackupOrchestrator:
                 ]
 
                 env = os.environ.copy()
-                env['PGPASSWORD'] = self.config.db_password
+                env["PGPASSWORD"] = self.config.db_password
 
-                result = subprocess.run(
-                    cmd, env=env, capture_output=True, text=True
-                )
+                result = subprocess.run(cmd, env=env, capture_output=True, text=True)
                 if result.returncode == 0:
                     f.write(f"-- Table: {table}\n")
                     f.write(result.stdout)
@@ -450,13 +440,11 @@ class BackupOrchestrator:
 
         # Save state data
         state_file = f"{state_dir}/state.json"
-        with open(state_file, 'w') as f:
+        with open(state_file, "w") as f:
             json.dump(state_data, f, indent=2, default=str)
 
         # Archive and compress
-        archive_file = (
-            f"{self.config.backup_root}/app_state/state_{backup_id}.tar.gz"
-        )
+        archive_file = f"{self.config.backup_root}/app_state/state_{backup_id}.tar.gz"
         subprocess.run(
             [
                 "tar",
@@ -501,9 +489,7 @@ class BackupOrchestrator:
                     shutil.copy2(item, dest)
 
         # Archive and compress
-        archive_file = (
-            f"{self.config.backup_root}/config/config_{backup_id}.tar.gz"
-        )
+        archive_file = f"{self.config.backup_root}/config/config_{backup_id}.tar.gz"
         subprocess.run(
             [
                 "tar",
@@ -551,9 +537,7 @@ class BackupOrchestrator:
                             "status": row[2],
                             "beliefs": row[3],
                             "metrics": row[4],
-                            "updated_at": row[5].isoformat()
-                            if row[5]
-                            else None,
+                            "updated_at": row[5].isoformat() if row[5] else None,
                         }
                     )
 
@@ -594,9 +578,7 @@ class BackupOrchestrator:
                             "status": row[2],
                             "shared_beliefs": row[3],
                             "metrics": row[4],
-                            "created_at": row[5].isoformat()
-                            if row[5]
-                            else None,
+                            "created_at": row[5].isoformat() if row[5] else None,
                         }
                     )
 
@@ -618,9 +600,7 @@ class BackupOrchestrator:
             )
 
             # Count session keys
-            session_count = len(
-                [k for k in r.keys() if k.startswith("session:")]
-            )
+            session_count = len([k for k in r.keys() if k.startswith("session:")])
             return session_count
 
         except Exception:
@@ -629,11 +609,9 @@ class BackupOrchestrator:
     def _get_system_metrics(self) -> Dict[str, Any]:
         """Get current system metrics"""
         return {
-            "cpu_percent": psutil.cpu_percent()
-            if 'psutil' in sys.modules
-            else 0,
+            "cpu_percent": psutil.cpu_percent() if "psutil" in sys.modules else 0,
             "memory_percent": psutil.virtual_memory().percent
-            if 'psutil' in sys.modules
+            if "psutil" in sys.modules
             else 0,
             "disk_usage": shutil.disk_usage(self.config.backup_root)._asdict(),
         }
@@ -642,8 +620,8 @@ class BackupOrchestrator:
         """Calculate checksum of a file"""
         hash_algo = hashlib.new(self.config.checksum_algorithm)
 
-        with open(file_path, 'rb') as f:
-            for chunk in iter(lambda: f.read(4096), b''):
+        with open(file_path, "rb") as f:
+            for chunk in iter(lambda: f.read(4096), b""):
                 hash_algo.update(chunk)
 
         return hash_algo.hexdigest()
@@ -659,14 +637,10 @@ class BackupOrchestrator:
                 if os.path.exists(file_path):
                     dest_dir = os.path.join(
                         secondary_root,
-                        os.path.dirname(file_path).replace(
-                            self.config.backup_root, ""
-                        ),
+                        os.path.dirname(file_path).replace(self.config.backup_root, ""),
                     ).strip("/")
 
-                    os.makedirs(
-                        os.path.join(secondary_root, dest_dir), exist_ok=True
-                    )
+                    os.makedirs(os.path.join(secondary_root, dest_dir), exist_ok=True)
 
                     dest_path = os.path.join(
                         secondary_root, dest_dir, os.path.basename(file_path)
@@ -674,9 +648,9 @@ class BackupOrchestrator:
                     shutil.copy2(file_path, dest_path)
 
                     # Verify copy
-                    if self._calculate_checksum(
-                        dest_path
-                    ) != metadata.checksums.get(file_path):
+                    if self._calculate_checksum(dest_path) != metadata.checksums.get(
+                        file_path
+                    ):
                         raise Exception(
                             f"Secondary copy verification failed for {file_path}"
                         )
@@ -699,7 +673,7 @@ class BackupOrchestrator:
         self.logger.info("Syncing to AWS S3...")
 
         try:
-            s3 = boto3.client('s3', region_name=self.config.s3_region)
+            s3 = boto3.client("s3", region_name=self.config.s3_region)
 
             for file_path in metadata.files:
                 if os.path.exists(file_path):
@@ -711,13 +685,11 @@ class BackupOrchestrator:
                         self.config.s3_bucket,
                         key,
                         ExtraArgs={
-                            'StorageClass': self.config.s3_storage_class,
-                            'ServerSideEncryption': 'AES256',
-                            'Metadata': {
-                                'backup-id': metadata.backup_id,
-                                'checksum': metadata.checksums.get(
-                                    file_path, ''
-                                ),
+                            "StorageClass": self.config.s3_storage_class,
+                            "ServerSideEncryption": "AES256",
+                            "Metadata": {
+                                "backup-id": metadata.backup_id,
+                                "checksum": metadata.checksums.get(file_path, ""),
                             },
                         },
                     )
@@ -750,20 +722,16 @@ class BackupOrchestrator:
 
             for file_path in metadata.files:
                 if os.path.exists(file_path):
-                    blob_name = file_path.replace(
-                        self.config.backup_root + "/", ""
-                    )
+                    blob_name = file_path.replace(self.config.backup_root + "/", "")
 
-                    with open(file_path, 'rb') as data:
+                    with open(file_path, "rb") as data:
                         container_client.upload_blob(
                             name=blob_name,
                             data=data,
                             overwrite=True,
                             metadata={
-                                'backup_id': metadata.backup_id,
-                                'checksum': metadata.checksums.get(
-                                    file_path, ''
-                                ),
+                                "backup_id": metadata.backup_id,
+                                "checksum": metadata.checksums.get(file_path, ""),
                             },
                         )
 
@@ -787,14 +755,12 @@ class BackupOrchestrator:
 
             for file_path in metadata.files:
                 if os.path.exists(file_path):
-                    blob_name = file_path.replace(
-                        self.config.backup_root + "/", ""
-                    )
+                    blob_name = file_path.replace(self.config.backup_root + "/", "")
                     blob = bucket.blob(blob_name)
 
                     blob.metadata = {
-                        'backup-id': metadata.backup_id,
-                        'checksum': metadata.checksums.get(file_path, ''),
+                        "backup-id": metadata.backup_id,
+                        "checksum": metadata.checksums.get(file_path, ""),
                     }
 
                     blob.upload_from_filename(file_path)
@@ -818,25 +784,21 @@ class BackupOrchestrator:
 
             # Parse connection string for credentials
             # Format: "keyId:applicationKey:bucketName"
-            parts = self.config.secondary_connection_string.split(':')
+            parts = self.config.secondary_connection_string.split(":")
             if len(parts) >= 3:
                 b2_api.authorize_account("production", parts[0], parts[1])
                 bucket = b2_api.get_bucket_by_name(parts[2])
 
                 for file_path in metadata.files:
                     if os.path.exists(file_path):
-                        file_name = file_path.replace(
-                            self.config.backup_root + "/", ""
-                        )
+                        file_name = file_path.replace(self.config.backup_root + "/", "")
 
                         bucket.upload_local_file(
                             local_file=file_path,
                             file_name=file_name,
                             file_infos={
-                                'backup-id': metadata.backup_id,
-                                'checksum': metadata.checksums.get(
-                                    file_path, ''
-                                ),
+                                "backup-id": metadata.backup_id,
+                                "checksum": metadata.checksums.get(file_path, ""),
                             },
                         )
 
@@ -850,29 +812,27 @@ class BackupOrchestrator:
     def _configure_s3_lifecycle(self):
         """Configure S3 lifecycle policies for automatic archival"""
         try:
-            s3 = boto3.client('s3', region_name=self.config.s3_region)
+            s3 = boto3.client("s3", region_name=self.config.s3_region)
 
             lifecycle_policy = {
-                'Rules': [
+                "Rules": [
                     {
-                        'ID': 'ArchiveOldBackups',
-                        'Status': 'Enabled',
-                        'Transitions': [
+                        "ID": "ArchiveOldBackups",
+                        "Status": "Enabled",
+                        "Transitions": [
                             {
-                                'Days': self.config.s3_glacier_days,
-                                'StorageClass': 'GLACIER',
+                                "Days": self.config.s3_glacier_days,
+                                "StorageClass": "GLACIER",
                             },
                             {
-                                'Days': self.config.s3_deep_archive_days,
-                                'StorageClass': 'DEEP_ARCHIVE',
+                                "Days": self.config.s3_deep_archive_days,
+                                "StorageClass": "DEEP_ARCHIVE",
                             },
                         ],
-                        'NoncurrentVersionTransitions': [
-                            {'NoncurrentDays': 30, 'StorageClass': 'GLACIER'}
+                        "NoncurrentVersionTransitions": [
+                            {"NoncurrentDays": 30, "StorageClass": "GLACIER"}
                         ],
-                        'AbortIncompleteMultipartUpload': {
-                            'DaysAfterInitiation': 7
-                        },
+                        "AbortIncompleteMultipartUpload": {"DaysAfterInitiation": 7},
                     }
                 ]
             }
@@ -920,7 +880,9 @@ class BackupOrchestrator:
         """Test restore process"""
         self.logger.info("Testing backup restore...")
 
-        test_dir = f"{self.config.backup_root}/verification/test_restore_{metadata.backup_id}"
+        test_dir = (
+            f"{self.config.backup_root}/verification/test_restore_{metadata.backup_id}"
+        )
         os.makedirs(test_dir, exist_ok=True)
 
         try:
@@ -931,13 +893,15 @@ class BackupOrchestrator:
                     test_db = f"freeagentics_test_{metadata.backup_id[:8]}"
 
                     # Test restore command
-                    cmd = f"gunzip -c {file_path} | pg_restore --create --dbname=postgres"
+                    cmd = (
+                        f"gunzip -c {file_path} | pg_restore --create --dbname=postgres"
+                    )
                     result = subprocess.run(
                         cmd,
                         shell=True,
                         capture_output=True,
                         text=True,
-                        env={'PGPASSWORD': self.config.db_password},
+                        env={"PGPASSWORD": self.config.db_password},
                     )
 
                     if result.returncode == 0:
@@ -958,11 +922,9 @@ class BackupOrchestrator:
 
     def _save_metadata(self, metadata: BackupMetadata):
         """Save backup metadata"""
-        metadata_file = (
-            f"{self.config.backup_root}/metadata/{metadata.backup_id}.json"
-        )
+        metadata_file = f"{self.config.backup_root}/metadata/{metadata.backup_id}.json"
 
-        with open(metadata_file, 'w') as f:
+        with open(metadata_file, "w") as f:
             json.dump(
                 {
                     "backup_id": metadata.backup_id,
@@ -991,9 +953,7 @@ class BackupOrchestrator:
         for root, dirs, files in os.walk(self.config.backup_root):
             for file in files:
                 file_path = os.path.join(root, file)
-                file_age = now - datetime.fromtimestamp(
-                    os.path.getmtime(file_path)
-                )
+                file_age = now - datetime.fromtimestamp(os.path.getmtime(file_path))
 
                 if file_age.days > self.config.local_retention_days:
                     os.remove(file_path)
@@ -1055,16 +1015,13 @@ class BackupOrchestrator:
 
         for file in os.listdir(metadata_dir):
             if file.endswith(".json"):
-                with open(os.path.join(metadata_dir, file), 'r') as f:
+                with open(os.path.join(metadata_dir, file), "r") as f:
                     data = json.load(f)
 
                     if data.get("status") == "verified":
                         timestamp = datetime.fromisoformat(data["timestamp"])
 
-                        if (
-                            latest_timestamp is None
-                            or timestamp > latest_timestamp
-                        ):
+                        if latest_timestamp is None or timestamp > latest_timestamp:
                             latest_timestamp = timestamp
                             latest_backup = BackupMetadata(
                                 backup_id=data["backup_id"],
@@ -1075,12 +1032,8 @@ class BackupOrchestrator:
                                 duration_seconds=data["duration_seconds"],
                                 checksums=data["checksums"],
                                 files=data["files"],
-                                verification_status=data.get(
-                                    "verification_status"
-                                ),
-                                offsite_locations=data.get(
-                                    "offsite_locations", []
-                                ),
+                                verification_status=data.get("verification_status"),
+                                offsite_locations=data.get("offsite_locations", []),
                             )
 
         return latest_backup
@@ -1126,30 +1079,30 @@ class BackupMetrics:
 
             # Create gauges
             backup_size = Gauge(
-                'freeagentics_backup_size_bytes',
-                'Backup size in bytes',
+                "freeagentics_backup_size_bytes",
+                "Backup size in bytes",
                 registry=registry,
             )
             backup_duration = Gauge(
-                'freeagentics_backup_duration_seconds',
-                'Backup duration in seconds',
+                "freeagentics_backup_duration_seconds",
+                "Backup duration in seconds",
                 registry=registry,
             )
             backup_status = Gauge(
-                'freeagentics_backup_status',
-                'Backup status (1=success, 0=failure)',
+                "freeagentics_backup_status",
+                "Backup status (1=success, 0=failure)",
                 registry=registry,
             )
 
             # Set values
-            backup_size.set(metrics['size_bytes'])
-            backup_duration.set(metrics['duration_seconds'])
-            backup_status.set(1 if metrics['status'] == 'completed' else 0)
+            backup_size.set(metrics["size_bytes"])
+            backup_duration.set(metrics["duration_seconds"])
+            backup_status.set(1 if metrics["status"] == "completed" else 0)
 
             # Push to gateway
             push_to_gateway(
                 self.config.prometheus_pushgateway,
-                job='freeagentics_backup',
+                job="freeagentics_backup",
                 registry=registry,
             )
 
@@ -1163,7 +1116,7 @@ class BackupMetrics:
         # Load existing metrics
         existing_metrics = []
         if os.path.exists(self.metrics_file):
-            with open(self.metrics_file, 'r') as f:
+            with open(self.metrics_file, "r") as f:
                 existing_metrics = json.load(f)
 
         # Append new metrics
@@ -1174,7 +1127,7 @@ class BackupMetrics:
             existing_metrics = existing_metrics[-1000:]
 
         # Save
-        with open(self.metrics_file, 'w') as f:
+        with open(self.metrics_file, "w") as f:
             json.dump(existing_metrics, f, indent=2)
 
 
@@ -1276,9 +1229,9 @@ Status: {metadata.status.value}
         """Send email notification"""
         try:
             msg = MIMEMultipart()
-            msg['From'] = self.config.email_from
-            msg['To'] = ', '.join(self.config.email_to)
-            msg['Subject'] = f"[FreeAgentics Backup] {subject}"
+            msg["From"] = self.config.email_from
+            msg["To"] = ", ".join(self.config.email_to)
+            msg["Subject"] = f"[FreeAgentics Backup] {subject}"
 
             body = f"""
 FreeAgentics Backup Notification
@@ -1291,7 +1244,7 @@ Subject: {subject}
 This is an automated message from FreeAgentics Backup System
 """
 
-            msg.attach(MIMEText(body, 'plain'))
+            msg.attach(MIMEText(body, "plain"))
 
             with smtplib.SMTP(
                 self.config.email_smtp_server, self.config.email_smtp_port
@@ -1329,7 +1282,7 @@ This is an automated message from FreeAgentics Backup System
 
     def _format_size(self, size_bytes: int) -> str:
         """Format size in human-readable format"""
-        for unit in ['B', 'KB', 'MB', 'GB', 'TB']:
+        for unit in ["B", "KB", "MB", "GB", "TB"]:
             if size_bytes < 1024.0:
                 return f"{size_bytes:.2f} {unit}"
             size_bytes /= 1024.0
@@ -1340,27 +1293,25 @@ def main():
     """Main entry point"""
     import argparse
 
-    parser = argparse.ArgumentParser(
-        description='FreeAgentics Automated Backup System'
+    parser = argparse.ArgumentParser(description="FreeAgentics Automated Backup System")
+    parser.add_argument(
+        "--config",
+        default="/etc/freeagentics/backup.env",
+        help="Configuration file path",
     )
     parser.add_argument(
-        '--config',
-        default='/etc/freeagentics/backup.env',
-        help='Configuration file path',
+        "--run-now", action="store_true", help="Run full backup immediately"
     )
     parser.add_argument(
-        '--run-now', action='store_true', help='Run full backup immediately'
+        "--test-restore", action="store_true", help="Test disaster recovery"
     )
     parser.add_argument(
-        '--test-restore', action='store_true', help='Test disaster recovery'
+        "--cleanup", action="store_true", help="Run cleanup of old backups"
     )
     parser.add_argument(
-        '--cleanup', action='store_true', help='Run cleanup of old backups'
-    )
-    parser.add_argument(
-        '--daemon',
-        action='store_true',
-        help='Run as daemon with scheduled backups',
+        "--daemon",
+        action="store_true",
+        help="Run as daemon with scheduled backups",
     )
 
     args = parser.parse_args()

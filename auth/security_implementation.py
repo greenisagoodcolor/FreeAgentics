@@ -27,7 +27,9 @@ from .jwt_handler import jwt_handler  # Import secure JWT handler
 logger = logging.getLogger(__name__)
 
 
-def create_access_token(data: Dict[str, Any], expires_delta: Optional[timedelta] = None) -> str:
+def create_access_token(
+    data: Dict[str, Any], expires_delta: Optional[timedelta] = None
+) -> str:
     """Create a JWT access token.
 
     Args:
@@ -278,7 +280,9 @@ class SecurityValidator:
             # Sanitize value based on type
             if isinstance(value, str):
                 if not cls.validate_sql_input(value):
-                    raise ValueError(f"Invalid observation value (SQL injection): {value}")
+                    raise ValueError(
+                        f"Invalid observation value (SQL injection): {value}"
+                    )
                 if not cls.validate_xss_input(value):
                     raise ValueError(f"Invalid observation value (XSS): {value}")
                 if len(value) > 10000:  # 10KB limit per string
@@ -347,7 +351,9 @@ class AuthenticationManager:
         """Verify password against hash."""
         return bool(pwd_context.verify(plain_password, hashed_password))
 
-    def create_access_token(self, user: User, client_fingerprint: Optional[str] = None) -> str:
+    def create_access_token(
+        self, user: User, client_fingerprint: Optional[str] = None
+    ) -> str:
         """Create JWT access token using secure handler."""
         permissions = ROLE_PERMISSIONS.get(user.role, [])
 
@@ -371,7 +377,9 @@ class AuthenticationManager:
         token, family_id = jwt_handler.create_refresh_token(user.user_id)
         return token
 
-    def verify_token(self, token: str, client_fingerprint: Optional[str] = None) -> TokenData:
+    def verify_token(
+        self, token: str, client_fingerprint: Optional[str] = None
+    ) -> TokenData:
         """Verify and decode JWT token using secure handler."""
         payload = jwt_handler.verify_access_token(token, fingerprint=client_fingerprint)
 
@@ -383,7 +391,9 @@ class AuthenticationManager:
             exp=datetime.fromtimestamp(payload["exp"]),
         )
 
-    def register_user(self, username: str, email: str, password: str, role: UserRole) -> User:
+    def register_user(
+        self, username: str, email: str, password: str, role: UserRole
+    ) -> User:
         """Register new user."""
         if username in self.users:
             raise HTTPException(
@@ -452,9 +462,7 @@ class AuthenticationManager:
             # Decode without full verification just to get user_id
             # Security Note: This is safe because we're only extracting the user_id
             # for database lookup. The actual token verification happens later.
-            unverified = jwt.decode(
-                refresh_token, options={"verify_signature": False}
-            )  # nosec B608
+            unverified = jwt.decode(refresh_token, options={"verify_signature": False})  # nosec B608
             return str(unverified.get("user_id", ""))
         except Exception:
             raise HTTPException(
@@ -524,7 +532,9 @@ class RateLimiter:
 
         # Remove old requests
         self.requests[identifier] = [
-            req_time for req_time in self.requests[identifier] if req_time > window_start
+            req_time
+            for req_time in self.requests[identifier]
+            if req_time > window_start
         ]
 
         # Check rate limit
@@ -593,7 +603,9 @@ async def get_current_user(
     if not fingerprint:
         fingerprint = request.headers.get("X-Fingerprint", None)
 
-    return auth_manager.verify_token(credentials.credentials, client_fingerprint=fingerprint)
+    return auth_manager.verify_token(
+        credentials.credentials, client_fingerprint=fingerprint
+    )
 
 
 async def validate_csrf_token(request: Request, session_id: str) -> bool:
@@ -606,11 +618,15 @@ async def validate_csrf_token(request: Request, session_id: str) -> bool:
         csrf_token = csrf_value if isinstance(csrf_value, str) else None
 
     if not csrf_token:
-        raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="CSRF token required")
+        raise HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN, detail="CSRF token required"
+        )
 
     # Validate CSRF token
     if not auth_manager.csrf_protection.verify_csrf_token(session_id, csrf_token):
-        raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="Invalid CSRF token")
+        raise HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN, detail="Invalid CSRF token"
+        )
 
     return True
 
@@ -753,9 +769,7 @@ def require_csrf_token(func):
                     token = auth_header.split(" ")[1]
                     # Security Note: Unverified decode is safe here - we're only extracting
                     # the user_id for CSRF correlation, not for authentication
-                    unverified = jwt.decode(
-                        token, options={"verify_signature": False}
-                    )  # nosec B608
+                    unverified = jwt.decode(token, options={"verify_signature": False})  # nosec B608
                     session_id = unverified.get("user_id")
                 except Exception as e:
                     # Log failed token parsing for CSRF validation (non-critical)

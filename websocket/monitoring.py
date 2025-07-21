@@ -141,10 +141,14 @@ class ConnectionPoolMonitor:
         pool_metrics = self.pool.get_metrics()
         self.pool_size.add_value(pool_metrics.get("pool_size", 0))
         self.pool_utilization.add_value(pool_metrics.get("utilization", 0))
-        self.available_connections.add_value(pool_metrics.get("available_connections", 0))
+        self.available_connections.add_value(
+            pool_metrics.get("available_connections", 0)
+        )
         self.in_use_connections.add_value(pool_metrics.get("in_use_connections", 0))
         self.acquisition_wait_time.add_value(pool_metrics.get("average_wait_time", 0))
-        self.health_check_failures.add_value(pool_metrics.get("health_check_failures", 0))
+        self.health_check_failures.add_value(
+            pool_metrics.get("health_check_failures", 0)
+        )
 
         # Resource manager metrics
         resource_metrics = self.resource_manager.get_metrics()
@@ -259,7 +263,9 @@ class ConnectionPoolMonitor:
                         {
                             "agent_id": resource["agent_id"],
                             "state": resource["state"],
-                            "memory_mb": round(resource["memory_usage"] / (1024 * 1024), 2),
+                            "memory_mb": round(
+                                resource["memory_usage"] / (1024 * 1024), 2
+                            ),
                             "cpu": round(resource["cpu_usage"], 2),
                         }
                     )
@@ -327,7 +333,9 @@ class ConnectionPoolMonitor:
 monitor: Optional[ConnectionPoolMonitor] = None
 
 
-def initialize_monitor(pool: WebSocketConnectionPool, resource_manager: AgentResourceManager):
+def initialize_monitor(
+    pool: WebSocketConnectionPool, resource_manager: AgentResourceManager
+):
     """Initialize the global monitor instance."""
     global monitor
     monitor = ConnectionPoolMonitor(pool, resource_manager)

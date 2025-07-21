@@ -90,19 +90,17 @@ class PerformanceRegressionDetector:
 
         # Regression detection configuration
         self.regression_config = {
-            'confidence_threshold': 0.95,
-            'min_sample_size': 10,
-            'max_acceptable_deviation': 0.15,  # 15% deviation threshold
-            'critical_deviation': 0.30,  # 30% deviation is critical
-            'lookback_window_days': 30,
-            'baseline_update_threshold': 0.05,  # 5% change triggers baseline update
-            'anomaly_detection_sensitivity': 0.1,
+            "confidence_threshold": 0.95,
+            "min_sample_size": 10,
+            "max_acceptable_deviation": 0.15,  # 15% deviation threshold
+            "critical_deviation": 0.30,  # 30% deviation is critical
+            "lookback_window_days": 30,
+            "baseline_update_threshold": 0.05,  # 5% change triggers baseline update
+            "anomaly_detection_sensitivity": 0.1,
         }
 
         # Machine learning models for anomaly detection
-        self.anomaly_detector = IsolationForest(
-            contamination=0.1, random_state=42
-        )
+        self.anomaly_detector = IsolationForest(contamination=0.1, random_state=42)
         self.scaler = StandardScaler()
         self.ml_models_trained = False
 
@@ -115,50 +113,42 @@ class PerformanceRegressionDetector:
             # Load baselines
             baselines_file = self.data_directory / "baselines.json"
             if baselines_file.exists():
-                with open(baselines_file, 'r') as f:
+                with open(baselines_file, "r") as f:
                     data = json.load(f)
                     for metric_name, baseline_data in data.items():
                         self.baselines[metric_name] = PerformanceBaseline(
-                            metric_name=baseline_data['metric_name'],
-                            baseline_value=baseline_data['baseline_value'],
-                            baseline_std=baseline_data['baseline_std'],
-                            sample_count=baseline_data['sample_count'],
+                            metric_name=baseline_data["metric_name"],
+                            baseline_value=baseline_data["baseline_value"],
+                            baseline_std=baseline_data["baseline_std"],
+                            sample_count=baseline_data["sample_count"],
                             confidence_interval=tuple(
-                                baseline_data['confidence_interval']
+                                baseline_data["confidence_interval"]
                             ),
                             last_updated=datetime.fromisoformat(
-                                baseline_data['last_updated']
+                                baseline_data["last_updated"]
                             ),
-                            version=baseline_data.get('version', 'unknown'),
-                            environment=baseline_data.get(
-                                'environment', 'unknown'
-                            ),
-                            metadata=baseline_data.get('metadata', {}),
+                            version=baseline_data.get("version", "unknown"),
+                            environment=baseline_data.get("environment", "unknown"),
+                            metadata=baseline_data.get("metadata", {}),
                         )
 
             # Load test runs
             test_runs_file = self.data_directory / "test_runs.json"
             if test_runs_file.exists():
-                with open(test_runs_file, 'r') as f:
+                with open(test_runs_file, "r") as f:
                     data = json.load(f)
                     for run_data in data:
                         self.test_runs.append(
                             PerformanceTestRun(
-                                run_id=run_data['run_id'],
-                                timestamp=datetime.fromisoformat(
-                                    run_data['timestamp']
-                                ),
-                                version=run_data['version'],
-                                environment=run_data['environment'],
-                                branch=run_data['branch'],
-                                commit_hash=run_data['commit_hash'],
-                                metrics=run_data['metrics'],
-                                test_duration_seconds=run_data[
-                                    'test_duration_seconds'
-                                ],
-                                test_metadata=run_data.get(
-                                    'test_metadata', {}
-                                ),
+                                run_id=run_data["run_id"],
+                                timestamp=datetime.fromisoformat(run_data["timestamp"]),
+                                version=run_data["version"],
+                                environment=run_data["environment"],
+                                branch=run_data["branch"],
+                                commit_hash=run_data["commit_hash"],
+                                metrics=run_data["metrics"],
+                                test_duration_seconds=run_data["test_duration_seconds"],
+                                test_metadata=run_data.get("test_metadata", {}),
                             )
                         )
 
@@ -176,18 +166,18 @@ class PerformanceRegressionDetector:
             baselines_data = {}
             for metric_name, baseline in self.baselines.items():
                 baselines_data[metric_name] = {
-                    'metric_name': baseline.metric_name,
-                    'baseline_value': baseline.baseline_value,
-                    'baseline_std': baseline.baseline_std,
-                    'sample_count': baseline.sample_count,
-                    'confidence_interval': list(baseline.confidence_interval),
-                    'last_updated': baseline.last_updated.isoformat(),
-                    'version': baseline.version,
-                    'environment': baseline.environment,
-                    'metadata': baseline.metadata,
+                    "metric_name": baseline.metric_name,
+                    "baseline_value": baseline.baseline_value,
+                    "baseline_std": baseline.baseline_std,
+                    "sample_count": baseline.sample_count,
+                    "confidence_interval": list(baseline.confidence_interval),
+                    "last_updated": baseline.last_updated.isoformat(),
+                    "version": baseline.version,
+                    "environment": baseline.environment,
+                    "metadata": baseline.metadata,
                 }
 
-            with open(self.data_directory / "baselines.json", 'w') as f:
+            with open(self.data_directory / "baselines.json", "w") as f:
                 json.dump(baselines_data, f, indent=2)
 
             # Save test runs
@@ -195,19 +185,19 @@ class PerformanceRegressionDetector:
             for run in self.test_runs:
                 test_runs_data.append(
                     {
-                        'run_id': run.run_id,
-                        'timestamp': run.timestamp.isoformat(),
-                        'version': run.version,
-                        'environment': run.environment,
-                        'branch': run.branch,
-                        'commit_hash': run.commit_hash,
-                        'metrics': run.metrics,
-                        'test_duration_seconds': run.test_duration_seconds,
-                        'test_metadata': run.test_metadata,
+                        "run_id": run.run_id,
+                        "timestamp": run.timestamp.isoformat(),
+                        "version": run.version,
+                        "environment": run.environment,
+                        "branch": run.branch,
+                        "commit_hash": run.commit_hash,
+                        "metrics": run.metrics,
+                        "test_duration_seconds": run.test_duration_seconds,
+                        "test_metadata": run.test_metadata,
                     }
                 )
 
-            with open(self.data_directory / "test_runs.json", 'w') as f:
+            with open(self.data_directory / "test_runs.json", "w") as f:
                 json.dump(test_runs_data, f, indent=2)
 
             logger.info("Performance data saved successfully")
@@ -248,9 +238,7 @@ class PerformanceRegressionDetector:
         # Save data
         self.save_data()
 
-        logger.info(
-            f"Added performance test run: {run_id} for version {version}"
-        )
+        logger.info(f"Added performance test run: {run_id} for version {version}")
         return run_id
 
     def _update_baselines(self, test_run: PerformanceTestRun):
@@ -270,16 +258,11 @@ class PerformanceRegressionDetector:
                     metric_name, test_run.environment
                 )
 
-                if (
-                    len(recent_values)
-                    >= self.regression_config['min_sample_size']
-                ):
+                if len(recent_values) >= self.regression_config["min_sample_size"]:
                     # Calculate new baseline statistics
                     new_baseline_value = statistics.mean(recent_values)
                     new_baseline_std = (
-                        statistics.stdev(recent_values)
-                        if len(recent_values) > 1
-                        else 0
+                        statistics.stdev(recent_values) if len(recent_values) > 1 else 0
                     )
 
                     # Check if baseline should be updated
@@ -290,11 +273,11 @@ class PerformanceRegressionDetector:
 
                     if (
                         change_percentage
-                        > self.regression_config['baseline_update_threshold']
+                        > self.regression_config["baseline_update_threshold"]
                     ):
                         # Update baseline
-                        confidence_interval = (
-                            self._calculate_confidence_interval(recent_values)
+                        confidence_interval = self._calculate_confidence_interval(
+                            recent_values
                         )
 
                         self.baselines[metric_name] = PerformanceBaseline(
@@ -306,32 +289,24 @@ class PerformanceRegressionDetector:
                             last_updated=datetime.now(),
                             version=test_run.version,
                             environment=test_run.environment,
-                            metadata={'updated_from_run': test_run.run_id},
+                            metadata={"updated_from_run": test_run.run_id},
                         )
 
                         logger.info(
                             f"Updated baseline for {metric_name}: {new_baseline_value:.3f} "
-                            f"(change: {change_percentage*100:.1f}%)"
+                            f"(change: {change_percentage * 100:.1f}%)"
                         )
 
-    def _create_baseline(
-        self, metric_name: str, environment: str, version: str
-    ):
+    def _create_baseline(self, metric_name: str, environment: str, version: str):
         """Create a new baseline for a metric."""
-        recent_values = self._get_recent_metric_values(
-            metric_name, environment
-        )
+        recent_values = self._get_recent_metric_values(metric_name, environment)
 
-        if len(recent_values) >= self.regression_config['min_sample_size']:
+        if len(recent_values) >= self.regression_config["min_sample_size"]:
             baseline_value = statistics.mean(recent_values)
             baseline_std = (
-                statistics.stdev(recent_values)
-                if len(recent_values) > 1
-                else 0
+                statistics.stdev(recent_values) if len(recent_values) > 1 else 0
             )
-            confidence_interval = self._calculate_confidence_interval(
-                recent_values
-            )
+            confidence_interval = self._calculate_confidence_interval(recent_values)
 
             self.baselines[metric_name] = PerformanceBaseline(
                 metric_name=metric_name,
@@ -342,19 +317,17 @@ class PerformanceRegressionDetector:
                 last_updated=datetime.now(),
                 version=version,
                 environment=environment,
-                metadata={'created_from_samples': len(recent_values)},
+                metadata={"created_from_samples": len(recent_values)},
             )
 
-            logger.info(
-                f"Created new baseline for {metric_name}: {baseline_value:.3f}"
-            )
+            logger.info(f"Created new baseline for {metric_name}: {baseline_value:.3f}")
 
     def _get_recent_metric_values(
         self, metric_name: str, environment: str
     ) -> List[float]:
         """Get recent values for a metric."""
         cutoff_date = datetime.now() - timedelta(
-            days=self.regression_config['lookback_window_days']
+            days=self.regression_config["lookback_window_days"]
         )
 
         values = []
@@ -444,31 +417,28 @@ class PerformanceRegressionDetector:
         # Determine if regression is detected
         abs_deviation = abs(deviation_percentage)
         regression_detected = (
-            abs_deviation > self.regression_config['max_acceptable_deviation']
+            abs_deviation > self.regression_config["max_acceptable_deviation"]
         )
 
         # Calculate confidence score using statistical significance
         if baseline.baseline_std > 0:
             z_score = (
-                abs(current_value - baseline.baseline_value)
-                / baseline.baseline_std
+                abs(current_value - baseline.baseline_value) / baseline.baseline_std
             )
             confidence_score = stats.norm.cdf(z_score)
         else:
             confidence_score = 0.5  # Neutral confidence if no std dev
 
         # Determine severity
-        if abs_deviation > self.regression_config['critical_deviation']:
-            severity = 'critical'
-        elif (
-            abs_deviation > self.regression_config['max_acceptable_deviation']
-        ):
+        if abs_deviation > self.regression_config["critical_deviation"]:
+            severity = "critical"
+        elif abs_deviation > self.regression_config["max_acceptable_deviation"]:
             if abs_deviation > 0.20:  # 20%
-                severity = 'major'
+                severity = "major"
             else:
-                severity = 'minor'
+                severity = "minor"
         else:
-            severity = 'negligible'
+            severity = "negligible"
 
         # Calculate statistical significance
         if baseline.sample_count > 1:
@@ -514,9 +484,7 @@ class PerformanceRegressionDetector:
             scaled_values = self.scaler.transform([values])
 
             # Detect anomalies
-            anomaly_scores = self.anomaly_detector.decision_function(
-                scaled_values
-            )
+            anomaly_scores = self.anomaly_detector.decision_function(scaled_values)
             self.anomaly_detector.predict(scaled_values)
 
             # Return anomaly scores for each metric
@@ -533,9 +501,7 @@ class PerformanceRegressionDetector:
     def _train_anomaly_detection_models(self):
         """Train machine learning models for anomaly detection."""
         if len(self.test_runs) < 20:  # Need minimum data for training
-            logger.warning(
-                "Insufficient data for training anomaly detection models"
-            )
+            logger.warning("Insufficient data for training anomaly detection models")
             return
 
         try:
@@ -576,7 +542,7 @@ class PerformanceRegressionDetector:
                 break
 
         if not test_run:
-            return {'error': f'Test run not found: {test_run_id}'}
+            return {"error": f"Test run not found: {test_run_id}"}
 
         # Detect regressions
         regression_results = self.detect_regressions(
@@ -588,10 +554,10 @@ class PerformanceRegressionDetector:
 
         # Count regression types
         regression_counts = {
-            'critical': 0,
-            'major': 0,
-            'minor': 0,
-            'negligible': 0,
+            "critical": 0,
+            "major": 0,
+            "minor": 0,
+            "negligible": 0,
         }
 
         for result in regression_results:
@@ -599,62 +565,58 @@ class PerformanceRegressionDetector:
                 regression_counts[result.severity] += 1
 
         # Overall assessment
-        overall_status = 'pass'
-        if regression_counts['critical'] > 0:
-            overall_status = 'fail'
-        elif regression_counts['major'] > 0:
-            overall_status = 'warning'
-        elif regression_counts['minor'] > 0:
-            overall_status = 'caution'
+        overall_status = "pass"
+        if regression_counts["critical"] > 0:
+            overall_status = "fail"
+        elif regression_counts["major"] > 0:
+            overall_status = "warning"
+        elif regression_counts["minor"] > 0:
+            overall_status = "caution"
 
         # Generate report
         report = {
-            'test_run_info': {
-                'run_id': test_run.run_id,
-                'timestamp': test_run.timestamp.isoformat(),
-                'version': test_run.version,
-                'environment': test_run.environment,
-                'branch': test_run.branch,
-                'commit_hash': test_run.commit_hash,
-                'test_duration_seconds': test_run.test_duration_seconds,
+            "test_run_info": {
+                "run_id": test_run.run_id,
+                "timestamp": test_run.timestamp.isoformat(),
+                "version": test_run.version,
+                "environment": test_run.environment,
+                "branch": test_run.branch,
+                "commit_hash": test_run.commit_hash,
+                "test_duration_seconds": test_run.test_duration_seconds,
             },
-            'regression_analysis': {
-                'overall_status': overall_status,
-                'total_metrics_analyzed': len(regression_results),
-                'regressions_detected': sum(
+            "regression_analysis": {
+                "overall_status": overall_status,
+                "total_metrics_analyzed": len(regression_results),
+                "regressions_detected": sum(
                     1 for r in regression_results if r.regression_detected
                 ),
-                'regression_counts': regression_counts,
-                'detailed_results': [
+                "regression_counts": regression_counts,
+                "detailed_results": [
                     {
-                        'metric_name': r.metric_name,
-                        'current_value': r.current_value,
-                        'baseline_value': r.baseline_value,
-                        'deviation_percentage': r.deviation_percentage * 100,
-                        'regression_detected': r.regression_detected,
-                        'severity': r.severity,
-                        'confidence_score': r.confidence_score,
-                        'statistical_significance': r.statistical_significance,
+                        "metric_name": r.metric_name,
+                        "current_value": r.current_value,
+                        "baseline_value": r.baseline_value,
+                        "deviation_percentage": r.deviation_percentage * 100,
+                        "regression_detected": r.regression_detected,
+                        "severity": r.severity,
+                        "confidence_score": r.confidence_score,
+                        "statistical_significance": r.statistical_significance,
                     }
                     for r in regression_results
                 ],
             },
-            'anomaly_detection': {
-                'anomalies_detected': len(
-                    [
-                        score
-                        for score in anomaly_results.values()
-                        if score < -0.5
-                    ]
+            "anomaly_detection": {
+                "anomalies_detected": len(
+                    [score for score in anomaly_results.values() if score < -0.5]
                 ),
-                'anomaly_scores': anomaly_results,
+                "anomaly_scores": anomaly_results,
             },
-            'recommendations': self._generate_regression_recommendations(
+            "recommendations": self._generate_regression_recommendations(
                 regression_results, test_run
             ),
-            'baseline_info': {
-                'total_baselines': len(self.baselines),
-                'baseline_ages': {
+            "baseline_info": {
+                "total_baselines": len(self.baselines),
+                "baseline_ages": {
                     name: (datetime.now() - baseline.last_updated).days
                     for name, baseline in self.baselines.items()
                 },
@@ -673,7 +635,7 @@ class PerformanceRegressionDetector:
 
         # Critical regressions
         critical_regressions = [
-            r for r in regression_results if r.severity == 'critical'
+            r for r in regression_results if r.severity == "critical"
         ]
         if critical_regressions:
             recommendations.append(
@@ -682,9 +644,7 @@ class PerformanceRegressionDetector:
             )
 
         # Major regressions
-        major_regressions = [
-            r for r in regression_results if r.severity == 'major'
-        ]
+        major_regressions = [r for r in regression_results if r.severity == "major"]
         if major_regressions:
             recommendations.append(
                 f"MAJOR: {len(major_regressions)} major performance regressions detected. "
@@ -695,8 +655,7 @@ class PerformanceRegressionDetector:
         response_time_regressions = [
             r
             for r in regression_results
-            if 'response_time' in r.metric_name.lower()
-            and r.regression_detected
+            if "response_time" in r.metric_name.lower() and r.regression_detected
         ]
         if response_time_regressions:
             recommendations.append(
@@ -707,7 +666,7 @@ class PerformanceRegressionDetector:
         memory_regressions = [
             r
             for r in regression_results
-            if 'memory' in r.metric_name.lower() and r.regression_detected
+            if "memory" in r.metric_name.lower() and r.regression_detected
         ]
         if memory_regressions:
             recommendations.append(
@@ -718,8 +677,8 @@ class PerformanceRegressionDetector:
         throughput_regressions = [
             r
             for r in regression_results
-            if 'throughput' in r.metric_name.lower()
-            or 'rps' in r.metric_name.lower()
+            if "throughput" in r.metric_name.lower()
+            or "rps" in r.metric_name.lower()
             and r.regression_detected
         ]
         if throughput_regressions:
@@ -765,22 +724,22 @@ class PerformanceRegressionDetector:
             ):
                 data_points.append(
                     {
-                        'timestamp': run.timestamp,
-                        'value': run.metrics[metric_name],
-                        'version': run.version,
-                        'commit_hash': run.commit_hash,
+                        "timestamp": run.timestamp,
+                        "value": run.metrics[metric_name],
+                        "version": run.version,
+                        "commit_hash": run.commit_hash,
                     }
                 )
 
         if len(data_points) < 2:
-            return {'error': 'Insufficient data for trend analysis'}
+            return {"error": "Insufficient data for trend analysis"}
 
         # Sort by timestamp
-        data_points.sort(key=lambda x: x['timestamp'])
+        data_points.sort(key=lambda x: x["timestamp"])
 
         # Calculate trend
-        values = [point['value'] for point in data_points]
-        timestamps = [point['timestamp'].timestamp() for point in data_points]
+        values = [point["value"] for point in data_points]
+        timestamps = [point["timestamp"].timestamp() for point in data_points]
 
         # Linear regression for trend
         slope, intercept, r_value, p_value, std_err = stats.linregress(
@@ -789,34 +748,34 @@ class PerformanceRegressionDetector:
 
         # Determine trend direction
         if abs(slope) < 0.001:  # Very small slope
-            trend_direction = 'stable'
+            trend_direction = "stable"
         elif slope > 0:
-            trend_direction = 'increasing'
+            trend_direction = "increasing"
         else:
-            trend_direction = 'decreasing'
+            trend_direction = "decreasing"
 
         # Calculate volatility
         volatility = statistics.stdev(values) if len(values) > 1 else 0
 
         return {
-            'metric_name': metric_name,
-            'environment': environment,
-            'period_days': days,
-            'data_points': len(data_points),
-            'trend_direction': trend_direction,
-            'slope': slope,
-            'r_squared': r_value**2,
-            'statistical_significance': 1 - p_value,
-            'volatility': volatility,
-            'current_value': values[-1],
-            'average_value': statistics.mean(values),
-            'min_value': min(values),
-            'max_value': max(values),
-            'data_series': [
+            "metric_name": metric_name,
+            "environment": environment,
+            "period_days": days,
+            "data_points": len(data_points),
+            "trend_direction": trend_direction,
+            "slope": slope,
+            "r_squared": r_value**2,
+            "statistical_significance": 1 - p_value,
+            "volatility": volatility,
+            "current_value": values[-1],
+            "average_value": statistics.mean(values),
+            "min_value": min(values),
+            "max_value": max(values),
+            "data_series": [
                 {
-                    'timestamp': point['timestamp'].isoformat(),
-                    'value': point['value'],
-                    'version': point['version'],
+                    "timestamp": point["timestamp"].isoformat(),
+                    "value": point["value"],
+                    "version": point["version"],
                 }
                 for point in data_points
             ],
@@ -825,43 +784,41 @@ class PerformanceRegressionDetector:
     def export_performance_data(self, filename: str):
         """Export all performance data to a file."""
         data = {
-            'export_timestamp': datetime.now().isoformat(),
-            'baselines': {
+            "export_timestamp": datetime.now().isoformat(),
+            "baselines": {
                 name: {
-                    'metric_name': baseline.metric_name,
-                    'baseline_value': baseline.baseline_value,
-                    'baseline_std': baseline.baseline_std,
-                    'sample_count': baseline.sample_count,
-                    'confidence_interval': list(baseline.confidence_interval),
-                    'last_updated': baseline.last_updated.isoformat(),
-                    'version': baseline.version,
-                    'environment': baseline.environment,
-                    'metadata': baseline.metadata,
+                    "metric_name": baseline.metric_name,
+                    "baseline_value": baseline.baseline_value,
+                    "baseline_std": baseline.baseline_std,
+                    "sample_count": baseline.sample_count,
+                    "confidence_interval": list(baseline.confidence_interval),
+                    "last_updated": baseline.last_updated.isoformat(),
+                    "version": baseline.version,
+                    "environment": baseline.environment,
+                    "metadata": baseline.metadata,
                 }
                 for name, baseline in self.baselines.items()
             },
-            'test_runs': [
+            "test_runs": [
                 {
-                    'run_id': run.run_id,
-                    'timestamp': run.timestamp.isoformat(),
-                    'version': run.version,
-                    'environment': run.environment,
-                    'branch': run.branch,
-                    'commit_hash': run.commit_hash,
-                    'metrics': run.metrics,
-                    'test_duration_seconds': run.test_duration_seconds,
-                    'test_metadata': run.test_metadata,
+                    "run_id": run.run_id,
+                    "timestamp": run.timestamp.isoformat(),
+                    "version": run.version,
+                    "environment": run.environment,
+                    "branch": run.branch,
+                    "commit_hash": run.commit_hash,
+                    "metrics": run.metrics,
+                    "test_duration_seconds": run.test_duration_seconds,
+                    "test_metadata": run.test_metadata,
                 }
                 for run in self.test_runs
             ],
-            'configuration': self.regression_config,
-            'statistics': {
-                'total_test_runs': len(self.test_runs),
-                'total_baselines': len(self.baselines),
-                'environments': list(
-                    set(run.environment for run in self.test_runs)
-                ),
-                'metrics_tracked': list(
+            "configuration": self.regression_config,
+            "statistics": {
+                "total_test_runs": len(self.test_runs),
+                "total_baselines": len(self.baselines),
+                "environments": list(set(run.environment for run in self.test_runs)),
+                "metrics_tracked": list(
                     set(
                         metric
                         for run in self.test_runs
@@ -871,7 +828,7 @@ class PerformanceRegressionDetector:
             },
         }
 
-        with open(filename, 'w') as f:
+        with open(filename, "w") as f:
             json.dump(data, f, indent=2)
 
         logger.info(f"Performance data exported to {filename}")
@@ -892,11 +849,11 @@ async def demo_regression_detection():
     # Baseline runs (good performance)
     for i in range(15):
         metrics = {
-            'api_response_time_ms': 150 + np.random.normal(0, 10),
-            'api_requests_per_second': 100 + np.random.normal(0, 5),
-            'memory_usage_mb': 512 + np.random.normal(0, 20),
-            'cpu_usage_percent': 25 + np.random.normal(0, 3),
-            'db_query_time_ms': 25 + np.random.normal(0, 5),
+            "api_response_time_ms": 150 + np.random.normal(0, 10),
+            "api_requests_per_second": 100 + np.random.normal(0, 5),
+            "memory_usage_mb": 512 + np.random.normal(0, 20),
+            "cpu_usage_percent": 25 + np.random.normal(0, 3),
+            "db_query_time_ms": 25 + np.random.normal(0, 5),
         }
 
         detector.add_performance_test_run(
@@ -914,11 +871,11 @@ async def demo_regression_detection():
     print("\nAdding test run with performance regressions...")
 
     regressed_metrics = {
-        'api_response_time_ms': 250,  # 67% slower
-        'api_requests_per_second': 75,  # 25% slower
-        'memory_usage_mb': 720,  # 40% more memory
-        'cpu_usage_percent': 45,  # 80% more CPU
-        'db_query_time_ms': 60,  # 140% slower
+        "api_response_time_ms": 250,  # 67% slower
+        "api_requests_per_second": 75,  # 25% slower
+        "memory_usage_mb": 720,  # 40% more memory
+        "cpu_usage_percent": 45,  # 80% more CPU
+        "db_query_time_ms": 60,  # 140% slower
     }
 
     regression_run_id = detector.add_performance_test_run(
@@ -942,9 +899,7 @@ async def demo_regression_detection():
 
     # Display results
     print("\n--- REGRESSION ANALYSIS REPORT ---")
-    print(
-        f"Overall Status: {report['regression_analysis']['overall_status'].upper()}"
-    )
+    print(f"Overall Status: {report['regression_analysis']['overall_status'].upper()}")
     print(
         f"Total Metrics Analyzed: {report['regression_analysis']['total_metrics_analyzed']}"
     )
@@ -953,15 +908,13 @@ async def demo_regression_detection():
     )
 
     print("\nRegression Counts:")
-    for severity, count in report['regression_analysis'][
-        'regression_counts'
-    ].items():
+    for severity, count in report["regression_analysis"]["regression_counts"].items():
         if count > 0:
             print(f"  {severity.upper()}: {count}")
 
     print("\nDetailed Results:")
-    for result in report['regression_analysis']['detailed_results']:
-        if result['regression_detected']:
+    for result in report["regression_analysis"]["detailed_results"]:
+        if result["regression_detected"]:
             print(
                 f"  🔴 {result['metric_name']}: {result['current_value']:.1f} "
                 f"(baseline: {result['baseline_value']:.1f}, "
@@ -976,16 +929,14 @@ async def demo_regression_detection():
             )
 
     print("\nRecommendations:")
-    for rec in report['recommendations']:
+    for rec in report["recommendations"]:
         print(f"  - {rec}")
 
     # Show performance trends
     print("\n--- PERFORMANCE TRENDS ---")
 
-    trends = detector.get_performance_trends(
-        'api_response_time_ms', 'production', 30
-    )
-    if 'error' not in trends:
+    trends = detector.get_performance_trends("api_response_time_ms", "production", 30)
+    if "error" not in trends:
         print(
             f"Response Time Trend: {trends['trend_direction']} "
             f"(R²: {trends['r_squared']:.3f}, "

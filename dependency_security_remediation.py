@@ -24,7 +24,7 @@ class DependencySecurityRemediator:
             "timestamp": datetime.now().isoformat(),
             "action": action,
             "details": details,
-            "status": status
+            "status": status,
         }
         self.remediation_log.append(log_entry)
         print(f"[{status}] {action}: {details}")
@@ -34,14 +34,14 @@ class DependencySecurityRemediator:
         try:
             self.log_action(
                 "SECURITY_FIX",
-                "Updating cryptography from 45.0.5 to 46.0.1 to fix CVE-2024-12797"
+                "Updating cryptography from 45.0.5 to 46.0.1 to fix CVE-2024-12797",
             )
 
             # Update requirements files
             files_to_update = [
                 "requirements.txt",
                 "requirements-production.txt",
-                "requirements-core.txt"
+                "requirements-core.txt",
             ]
 
             for req_file in files_to_update:
@@ -50,19 +50,20 @@ class DependencySecurityRemediator:
                     content = file_path.read_text()
                     updated_content = content.replace(
                         "cryptography==45.0.5",
-                        "cryptography==46.0.1  # Security fix for CVE-2024-12797"
+                        "cryptography==46.0.1  # Security fix for CVE-2024-12797",
                     )
                     if content != updated_content:
                         file_path.write_text(updated_content)
                         self.log_action(
-                            "FILE_UPDATE",
-                            f"Updated cryptography version in {req_file}"
+                            "FILE_UPDATE", f"Updated cryptography version in {req_file}"
                         )
 
             return True
 
         except Exception as e:
-            self.log_action("ERROR", f"Failed to fix cryptography vulnerability: {e}", "ERROR")
+            self.log_action(
+                "ERROR", f"Failed to fix cryptography vulnerability: {e}", "ERROR"
+            )
             return False
 
     def fix_starlette_vulnerability(self) -> bool:
@@ -70,13 +71,13 @@ class DependencySecurityRemediator:
         try:
             self.log_action(
                 "SECURITY_FIX",
-                "Updating starlette from 0.46.2 to 0.46.6 to fix CVE-2024-47874"
+                "Updating starlette from 0.46.2 to 0.46.6 to fix CVE-2024-47874",
             )
 
             files_to_update = [
                 "requirements.txt",
                 "requirements-production.txt",
-                "requirements-core.txt"
+                "requirements-core.txt",
             ]
 
             for req_file in files_to_update:
@@ -85,19 +86,20 @@ class DependencySecurityRemediator:
                     content = file_path.read_text()
                     updated_content = content.replace(
                         "starlette==0.46.2",
-                        "starlette==0.46.6  # Security fix for CVE-2024-47874"
+                        "starlette==0.46.6  # Security fix for CVE-2024-47874",
                     )
                     if content != updated_content:
                         file_path.write_text(updated_content)
                         self.log_action(
-                            "FILE_UPDATE",
-                            f"Updated starlette version in {req_file}"
+                            "FILE_UPDATE", f"Updated starlette version in {req_file}"
                         )
 
             return True
 
         except Exception as e:
-            self.log_action("ERROR", f"Failed to fix starlette vulnerability: {e}", "ERROR")
+            self.log_action(
+                "ERROR", f"Failed to fix starlette vulnerability: {e}", "ERROR"
+            )
             return False
 
     def remove_vulnerable_py_package(self) -> bool:
@@ -105,7 +107,7 @@ class DependencySecurityRemediator:
         try:
             self.log_action(
                 "SECURITY_FIX",
-                "Removing py==1.11.0 package due to CVE-2022-42969 (already commented out)"
+                "Removing py==1.11.0 package due to CVE-2022-42969 (already commented out)",
             )
 
             # Verify py package is already removed from requirements.txt
@@ -115,18 +117,17 @@ class DependencySecurityRemediator:
             if "# py==1.11.0  # REMOVED - CVE-2022-42969" in content:
                 self.log_action(
                     "VERIFICATION_PASSED",
-                    "py package already safely removed from requirements.txt"
+                    "py package already safely removed from requirements.txt",
                 )
             else:
                 # Ensure it's commented out
                 updated_content = content.replace(
-                    "py==1.11.0",
-                    "# py==1.11.0  # REMOVED - CVE-2022-42969"
+                    "py==1.11.0", "# py==1.11.0  # REMOVED - CVE-2022-42969"
                 )
                 req_file.write_text(updated_content)
                 self.log_action(
                     "FILE_UPDATE",
-                    "Commented out vulnerable py package in requirements.txt"
+                    "Commented out vulnerable py package in requirements.txt",
                 )
 
             return True
@@ -139,8 +140,7 @@ class DependencySecurityRemediator:
         """Pin unpinned dependencies to exact versions"""
         try:
             self.log_action(
-                "SECURITY_HARDENING",
-                "Pinning unpinned dependencies to exact versions"
+                "SECURITY_HARDENING", "Pinning unpinned dependencies to exact versions"
             )
 
             req_file = self.project_root / "requirements.txt"
@@ -148,21 +148,20 @@ class DependencySecurityRemediator:
 
             # Pin OpenAI to latest stable version
             updated_content = content.replace(
-                "openai>=1.97.0",
-                "openai==1.97.0  # Pinned for reproducible builds"
+                "openai>=1.97.0", "openai==1.97.0  # Pinned for reproducible builds"
             )
 
             # Pin Anthropic to latest stable version
             updated_content = updated_content.replace(
                 "anthropic>=0.58.0",
-                "anthropic==0.58.0  # Pinned for reproducible builds"
+                "anthropic==0.58.0  # Pinned for reproducible builds",
             )
 
             if content != updated_content:
                 req_file.write_text(updated_content)
                 self.log_action(
                     "FILE_UPDATE",
-                    "Pinned OpenAI and Anthropic packages to exact versions"
+                    "Pinned OpenAI and Anthropic packages to exact versions",
                 )
 
             return True
@@ -175,8 +174,7 @@ class DependencySecurityRemediator:
         """Validate consistency across all requirements files"""
         try:
             self.log_action(
-                "VALIDATION",
-                "Validating consistency across requirements files"
+                "VALIDATION", "Validating consistency across requirements files"
             )
 
             core_deps = {}
@@ -208,13 +206,12 @@ class DependencySecurityRemediator:
                 self.log_action(
                     "WARNING",
                     f"Version inconsistencies found: {', '.join(inconsistencies)}",
-                    "WARNING"
+                    "WARNING",
                 )
                 return False
             else:
                 self.log_action(
-                    "VALIDATION_PASSED",
-                    "All requirements files are consistent"
+                    "VALIDATION_PASSED", "All requirements files are consistent"
                 )
                 return True
 
@@ -227,7 +224,7 @@ class DependencySecurityRemediator:
         try:
             self.log_action(
                 "DEPENDENCY_FREEZE",
-                "Generating pip freeze output for reproducible builds"
+                "Generating pip freeze output for reproducible builds",
             )
 
             # Note: We can't actually run pip freeze in this environment
@@ -252,10 +249,7 @@ class DependencySecurityRemediator:
 """
 
             freeze_file.write_text(freeze_content)
-            self.log_action(
-                "FILE_CREATED",
-                "Created requirements-freeze.txt template"
-            )
+            self.log_action("FILE_CREATED", "Created requirements-freeze.txt template")
 
             return True
 
@@ -266,10 +260,7 @@ class DependencySecurityRemediator:
     def create_security_policy(self) -> bool:
         """Create dependency security policy"""
         try:
-            self.log_action(
-                "POLICY_CREATION",
-                "Creating dependency security policy"
-            )
+            self.log_action("POLICY_CREATION", "Creating dependency security policy")
 
             policy_content = f"""# FreeAgentics Dependency Security Policy
 # Generated on: {datetime.now().isoformat()}
@@ -349,10 +340,7 @@ For critical security vulnerabilities:
             policy_file = self.project_root / "DEPENDENCY_SECURITY_POLICY.md"
             policy_file.write_text(policy_content)
 
-            self.log_action(
-                "FILE_CREATED",
-                "Created DEPENDENCY_SECURITY_POLICY.md"
-            )
+            self.log_action("FILE_CREATED", "Created DEPENDENCY_SECURITY_POLICY.md")
 
             return True
 
@@ -368,16 +356,21 @@ For critical security vulnerabilities:
             "vulnerabilities_fixed": 0,
             "dependencies_pinned": 0,
             "success": True,
-            "errors": []
+            "errors": [],
         }
 
         try:
-            self.log_action("START_REMEDIATION", "Beginning comprehensive dependency security remediation")
+            self.log_action(
+                "START_REMEDIATION",
+                "Beginning comprehensive dependency security remediation",
+            )
 
             # Fix identified vulnerabilities
             if self.fix_cryptography_vulnerability():
                 results["vulnerabilities_fixed"] += 1
-                results["remediation_steps"].append("Fixed CVE-2024-12797 in cryptography")
+                results["remediation_steps"].append(
+                    "Fixed CVE-2024-12797 in cryptography"
+                )
 
             if self.fix_starlette_vulnerability():
                 results["vulnerabilities_fixed"] += 1
@@ -385,26 +378,38 @@ For critical security vulnerabilities:
 
             if self.remove_vulnerable_py_package():
                 results["vulnerabilities_fixed"] += 1
-                results["remediation_steps"].append("Removed vulnerable py package (CVE-2022-42969)")
+                results["remediation_steps"].append(
+                    "Removed vulnerable py package (CVE-2022-42969)"
+                )
 
             # Pin unpinned dependencies
             if self.pin_unpinned_dependencies():
                 results["dependencies_pinned"] += 2
-                results["remediation_steps"].append("Pinned openai and anthropic packages")
+                results["remediation_steps"].append(
+                    "Pinned openai and anthropic packages"
+                )
 
             # Validation and policy creation
             if self.validate_requirements_consistency():
-                results["remediation_steps"].append("Validated requirements consistency")
+                results["remediation_steps"].append(
+                    "Validated requirements consistency"
+                )
 
             if self.generate_dependency_freeze():
-                results["remediation_steps"].append("Created requirements freeze template")
+                results["remediation_steps"].append(
+                    "Created requirements freeze template"
+                )
 
             if self.create_security_policy():
-                results["remediation_steps"].append("Created dependency security policy")
+                results["remediation_steps"].append(
+                    "Created dependency security policy"
+                )
 
-            self.log_action("REMEDIATION_COMPLETE",
-                          f"Fixed {results['vulnerabilities_fixed']} vulnerabilities, "
-                          f"pinned {results['dependencies_pinned']} dependencies")
+            self.log_action(
+                "REMEDIATION_COMPLETE",
+                f"Fixed {results['vulnerabilities_fixed']} vulnerabilities, "
+                f"pinned {results['dependencies_pinned']} dependencies",
+            )
 
         except Exception as e:
             results["success"] = False
@@ -415,7 +420,7 @@ For critical security vulnerabilities:
         results["log"] = self.remediation_log
 
         log_file = self.project_root / "dependency_remediation_log.json"
-        with open(log_file, 'w') as f:
+        with open(log_file, "w") as f:
             json.dump(results, f, indent=2)
 
         return results
@@ -439,14 +444,14 @@ def main():
     print(f"Dependencies Pinned: {results['dependencies_pinned']}")
     print(f"Remediation Steps: {len(results['remediation_steps'])}")
 
-    if results['errors']:
+    if results["errors"]:
         print(f"Errors: {len(results['errors'])}")
-        for error in results['errors']:
+        for error in results["errors"]:
             print(f"  - {error}")
 
     print("\nDetailed log saved to: dependency_remediation_log.json")
 
-    return 0 if results['success'] else 1
+    return 0 if results["success"] else 1
 
 
 if __name__ == "__main__":

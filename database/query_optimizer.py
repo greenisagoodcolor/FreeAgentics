@@ -373,7 +373,7 @@ class BatchOperationManager:
                 update_stmt = text(
                     f"""
                     UPDATE {escaped_table}
-                    SET {', '.join(set_clauses)}, updated_at = NOW()
+                    SET {", ".join(set_clauses)}, updated_at = NOW()
                     WHERE {where_clause}
                 """  # nosec B608
                 )
@@ -756,9 +756,7 @@ class EnhancedQueryOptimizer:
                 query
                 for stats in self.query_stats.values()
                 for query in stats.get("slow_queries", [])
-            ][
-                :20
-            ],  # Top 20 slow queries
+            ][:20],  # Top 20 slow queries
         }
 
     async def setup_monitoring(self, session: AsyncSession):

@@ -153,7 +153,9 @@ class AuthorizationTests(BasePenetrationTest):
         logger.info("Testing vertical privilege escalation")
 
         # Create users with different privilege levels
-        observer_name, observer_pass, observer_id = self.create_test_user(UserRole.OBSERVER)
+        observer_name, observer_pass, observer_id = self.create_test_user(
+            UserRole.OBSERVER
+        )
         (
             researcher_name,
             researcher_pass,
@@ -184,7 +186,11 @@ class AuthorizationTests(BasePenetrationTest):
             response = self._make_request(method, endpoint, observer_token)
 
             if response.status_code in [200, 201, 202]:
-                severity = SeverityLevel.CRITICAL if "admin" in endpoint else SeverityLevel.HIGH
+                severity = (
+                    SeverityLevel.CRITICAL
+                    if "admin" in endpoint
+                    else SeverityLevel.HIGH
+                )
 
                 self.add_vulnerability(
                     VulnerabilityFinding(
@@ -306,7 +312,9 @@ class AuthorizationTests(BasePenetrationTest):
 
         # Create users and resources
         owner_name, owner_pass, owner_id = self.create_test_user(UserRole.RESEARCHER)
-        attacker_name, attacker_pass, attacker_id = self.create_test_user(UserRole.RESEARCHER)
+        attacker_name, attacker_pass, attacker_id = self.create_test_user(
+            UserRole.RESEARCHER
+        )
 
         owner_token = self.get_auth_token(owner_name, owner_pass)
         attacker_token = self.get_auth_token(attacker_name, attacker_pass)
@@ -633,7 +641,9 @@ class AuthorizationTests(BasePenetrationTest):
 
             for algorithm, secret in escalation_attempts:
                 try:
-                    escalated_token = pyjwt.encode(escalated_payload, secret, algorithm=algorithm)
+                    escalated_token = pyjwt.encode(
+                        escalated_payload, secret, algorithm=algorithm
+                    )
 
                     # Test escalated token
                     response = self.client.get(
@@ -689,7 +699,9 @@ class AuthorizationTests(BasePenetrationTest):
             for test_id in range(base_id - 5, base_id + 5):
                 if str(test_id) != user1_id:  # Don't test own ID
                     endpoint = f"/api/v1/users/{test_id}"
-                    response = self.client.get(endpoint, headers=self.get_auth_headers(token))
+                    response = self.client.get(
+                        endpoint, headers=self.get_auth_headers(token)
+                    )
 
                     if response.status_code == 200:
                         self.add_vulnerability(
@@ -758,7 +770,9 @@ class AuthorizationTests(BasePenetrationTest):
             for offset in range(5):
                 test_id = base_id + offset
                 endpoint = f"/api/v1/agents/{test_id}"
-                response = self.client.get(endpoint, headers=self.get_auth_headers(token))
+                response = self.client.get(
+                    endpoint, headers=self.get_auth_headers(token)
+                )
 
                 if response.status_code == 200:
                     try:
@@ -830,7 +844,9 @@ class AuthorizationTests(BasePenetrationTest):
                     )
                 )
 
-    async def _test_resource_enumeration(self, token: str, user1_id: str, user2_id: str):
+    async def _test_resource_enumeration(
+        self, token: str, user1_id: str, user2_id: str
+    ):
         """Test resource enumeration capabilities."""
         # Test if user can enumerate other users' resources
         enum_endpoints = [
@@ -893,7 +909,9 @@ class AuthorizationTests(BasePenetrationTest):
             if response.status_code == 200:
                 try:
                     data = response.json()
-                    if data.get("role") == "admin" or "admin" in str(data.get("permissions", [])):
+                    if data.get("role") == "admin" or "admin" in str(
+                        data.get("permissions", [])
+                    ):
                         self.add_vulnerability(
                             VulnerabilityFinding(
                                 vulnerability_type=VulnerabilityType.PRIVILEGE_ESCALATION_VERTICAL,
@@ -954,16 +972,20 @@ class AuthorizationTests(BasePenetrationTest):
                 "admin_system",
             ]
 
-            return any(indicator in response_text for indicator in admin_indicators) or any(
-                indicator in str(data) for indicator in privilege_indicators
-            )
+            return any(
+                indicator in response_text for indicator in admin_indicators
+            ) or any(indicator in str(data) for indicator in privilege_indicators)
         except Exception:
             return False
 
     def _count_test_users(self) -> int:
         """Count the number of test users created."""
         return len(
-            [user for user in self.auth_manager.users.keys() if user.startswith("test_user_")]
+            [
+                user
+                for user in self.auth_manager.users.keys()
+                if user.startswith("test_user_")
+            ]
         )
 
     def _get_tested_endpoints(self) -> List[str]:

@@ -109,7 +109,9 @@ class SSLContextBuilder:
 
         # Load certificates
         if self.config.cert_file and self.config.key_file:
-            context.load_cert_chain(certfile=self.config.cert_file, keyfile=self.config.key_file)
+            context.load_cert_chain(
+                certfile=self.config.cert_file, keyfile=self.config.key_file
+            )
 
         # Load CA certificates for client verification
         if self.config.ca_cert_file:
@@ -164,7 +166,9 @@ class SSLContextBuilder:
 
         # Load client certificates if provided
         if self.config.cert_file and self.config.key_file:
-            context.load_cert_chain(certfile=self.config.cert_file, keyfile=self.config.key_file)
+            context.load_cert_chain(
+                certfile=self.config.cert_file, keyfile=self.config.key_file
+            )
 
         # Configure verification
         context.verify_mode = ssl.CERT_REQUIRED
@@ -398,7 +402,9 @@ def validate_ssl_configuration(context: ssl.SSLContext) -> Dict[str, bool]:
     validation_results["certificate_loaded"] = context.cert_store_stats()["x509"] > 0
 
     # Check security options
-    validation_results["compression_disabled"] = bool(context.options & ssl.OP_NO_COMPRESSION)
+    validation_results["compression_disabled"] = bool(
+        context.options & ssl.OP_NO_COMPRESSION
+    )
     validation_results["renegotiation_disabled"] = (
         bool(context.options & ssl.OP_NO_RENEGOTIATION)
         if hasattr(ssl, "OP_NO_RENEGOTIATION")

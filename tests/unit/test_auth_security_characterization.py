@@ -218,7 +218,9 @@ class TestRateLimiterCharacterization:
         endpoint = "/api/login"
 
         # When - First request
-        allowed = limiter.check_rate_limit(client_id, endpoint, max_requests=3, window_minutes=1)
+        allowed = limiter.check_rate_limit(
+            client_id, endpoint, max_requests=3, window_minutes=1
+        )
 
         # Then
         assert allowed is True
@@ -231,7 +233,9 @@ class TestRateLimiterCharacterization:
             assert allowed is True
 
         # When - Exceed limit
-        allowed = limiter.check_rate_limit(client_id, endpoint, max_requests=3, window_minutes=1)
+        allowed = limiter.check_rate_limit(
+            client_id, endpoint, max_requests=3, window_minutes=1
+        )
 
         # Then - Rate limited
         assert allowed is False
@@ -245,11 +249,16 @@ class TestRateLimiterCharacterization:
 
         # Use up rate limit
         for _ in range(2):
-            limiter.check_rate_limit(client_id, endpoint, max_requests=2, window_minutes=1)
+            limiter.check_rate_limit(
+                client_id, endpoint, max_requests=2, window_minutes=1
+            )
 
         # Verify limited
         assert (
-            limiter.check_rate_limit(client_id, endpoint, max_requests=2, window_minutes=1) is False
+            limiter.check_rate_limit(
+                client_id, endpoint, max_requests=2, window_minutes=1
+            )
+            is False
         )
 
         # When - Simulate time passing (manipulate internal state)
@@ -260,7 +269,10 @@ class TestRateLimiterCharacterization:
 
         # Then - New window allows requests
         assert (
-            limiter.check_rate_limit(client_id, endpoint, max_requests=2, window_minutes=1) is True
+            limiter.check_rate_limit(
+                client_id, endpoint, max_requests=2, window_minutes=1
+            )
+            is True
         )
 
     def test_rate_limit_per_endpoint(self):
@@ -271,11 +283,15 @@ class TestRateLimiterCharacterization:
 
         # When - Use up limit on one endpoint
         for _ in range(2):
-            limiter.check_rate_limit(client_id, "/api/endpoint1", max_requests=2, window_minutes=1)
+            limiter.check_rate_limit(
+                client_id, "/api/endpoint1", max_requests=2, window_minutes=1
+            )
 
         # Then - Other endpoint not affected
         assert (
-            limiter.check_rate_limit(client_id, "/api/endpoint2", max_requests=2, window_minutes=1)
+            limiter.check_rate_limit(
+                client_id, "/api/endpoint2", max_requests=2, window_minutes=1
+            )
             is True
         )
 
@@ -407,7 +423,9 @@ class TestAuthenticationManagerCharacterization:
 
         # When/Then
         with pytest.raises(HTTPException) as exc_info:
-            auth_manager.register_user("existing", "email@test.com", "pass", UserRole.OBSERVER)
+            auth_manager.register_user(
+                "existing", "email@test.com", "pass", UserRole.OBSERVER
+            )
 
         assert exc_info.value.status_code == 400
         assert "already exists" in exc_info.value.detail

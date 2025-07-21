@@ -62,7 +62,9 @@ class TestMTLSManager:
 
         # Verify CA certificate properties
         assert (
-            mtls_manager.ca_cert.subject.get_attributes_for_oid(NameOID.COMMON_NAME)[0].value
+            mtls_manager.ca_cert.subject.get_attributes_for_oid(NameOID.COMMON_NAME)[
+                0
+            ].value
             == "Zero Trust CA"
         )
         assert mtls_manager.ca_cert.issuer == mtls_manager.ca_cert.subject
@@ -88,7 +90,10 @@ class TestMTLSManager:
 
         # Verify certificate properties
         cert = x509.load_pem_x509_certificate(cert_info.certificate.encode())
-        assert cert.subject.get_attributes_for_oid(NameOID.COMMON_NAME)[0].value == service_name
+        assert (
+            cert.subject.get_attributes_for_oid(NameOID.COMMON_NAME)[0].value
+            == service_name
+        )
         assert cert.issuer == mtls_manager.ca_cert.subject
 
         # Check SAN extensions
@@ -113,8 +118,12 @@ class TestMTLSManager:
         private_key = rsa.generate_private_key(public_exponent=65537, key_size=2048)
         invalid_cert = (
             x509.CertificateBuilder()
-            .subject_name(x509.Name([x509.NameAttribute(NameOID.COMMON_NAME, "invalid")]))
-            .issuer_name(x509.Name([x509.NameAttribute(NameOID.COMMON_NAME, "invalid")]))
+            .subject_name(
+                x509.Name([x509.NameAttribute(NameOID.COMMON_NAME, "invalid")])
+            )
+            .issuer_name(
+                x509.Name([x509.NameAttribute(NameOID.COMMON_NAME, "invalid")])
+            )
             .public_key(private_key.public_key())
             .serial_number(x509.random_serial_number())
             .not_valid_before(datetime.utcnow())
@@ -145,7 +154,9 @@ class TestMTLSManager:
         mtls_manager.set_rotation_policy(service_name, policy)
 
         # Simulate certificate nearing expiration
-        with patch.object(mtls_manager, "_should_rotate_certificate", return_value=True):
+        with patch.object(
+            mtls_manager, "_should_rotate_certificate", return_value=True
+        ):
             new_cert = mtls_manager.rotate_certificate(service_name)
 
         assert new_cert.fingerprint != initial_fingerprint
@@ -166,7 +177,9 @@ class TestMTLSManager:
         assert is_valid is True
 
         # Revoke certificate
-        success = mtls_manager.revoke_certificate(cert_info.fingerprint, reason="Compromised")
+        success = mtls_manager.revoke_certificate(
+            cert_info.fingerprint, reason="Compromised"
+        )
         assert success is True
 
         # Certificate should now be invalid
@@ -206,7 +219,9 @@ class TestMTLSManager:
         end_time = time.time()
 
         avg_time_ms = ((end_time - start_time) / 10) * 1000
-        assert avg_time_ms < 10, f"Certificate generation took {avg_time_ms:.2f}ms on average"
+        assert avg_time_ms < 10, (
+            f"Certificate generation took {avg_time_ms:.2f}ms on average"
+        )
 
 
 class TestIdentityAwareProxy:
@@ -374,7 +389,9 @@ class TestIdentityAwareProxy:
             end_time = time.time()
 
             avg_time_ms = ((end_time - start_time) / 100) * 1000
-            assert avg_time_ms < 10, f"Request validation took {avg_time_ms:.2f}ms on average"
+            assert avg_time_ms < 10, (
+                f"Request validation took {avg_time_ms:.2f}ms on average"
+            )
 
 
 class TestServiceMeshConfig:
@@ -416,7 +433,10 @@ class TestServiceMeshConfig:
             item for item in istio_config["items"] if item["kind"] == "DestinationRule"
         ]
         assert len(destination_rules) > 0
-        assert destination_rules[0]["spec"]["trafficPolicy"]["tls"]["mode"] == "ISTIO_MUTUAL"
+        assert (
+            destination_rules[0]["spec"]["trafficPolicy"]["tls"]["mode"]
+            == "ISTIO_MUTUAL"
+        )
 
     def test_linkerd_config_generation(self):
         """Test Linkerd configuration generation."""
@@ -445,7 +465,9 @@ class TestServiceMeshConfig:
 
         # Verify ServerAuthorization
         server_auth = [
-            item for item in linkerd_config["items"] if item["kind"] == "ServerAuthorization"
+            item
+            for item in linkerd_config["items"]
+            if item["kind"] == "ServerAuthorization"
         ]
         assert len(server_auth) > 0
         assert server_auth[0]["spec"]["client"]["meshTLS"]["identities"] is not None
@@ -618,7 +640,9 @@ class TestZeroTrustIntegration:
         async def make_requests():
             for i in range(20):
                 mock_request = MagicMock()
-                mock_request.headers = {"X-Client-Certificate": original_cert.certificate}
+                mock_request.headers = {
+                    "X-Client-Certificate": original_cert.certificate
+                }
 
                 try:
                     context = await proxy.validate_request(
@@ -643,7 +667,9 @@ class TestZeroTrustIntegration:
 
         # Verify no failed requests during rotation
         failed_requests = [r for r in request_results if not r[1]]
-        assert len(failed_requests) == 0, f"Failed requests during rotation: {failed_requests}"
+        assert len(failed_requests) == 0, (
+            f"Failed requests during rotation: {failed_requests}"
+        )
 
     def test_performance_full_stack(self, zero_trust_system):
         """Test full zero-trust stack performance."""
@@ -667,7 +693,7 @@ class TestZeroTrustIntegration:
                 TrafficPolicy(
                     name=f"policy-{i}",
                     source_service=f"service-{i}",
-                    destination_service=f"service-{i+1}",
+                    destination_service=f"service-{i + 1}",
                     tls_mode="ISTIO_MUTUAL",
                 )
             )
@@ -679,5 +705,7 @@ class TestZeroTrustIntegration:
         total_time_ms = (end_time - start_time) * 1000
 
         # Should complete within reasonable time for 10 services
-        assert total_time_ms < 1000, f"Full stack configuration took {total_time_ms:.2f}ms"
+        assert total_time_ms < 1000, (
+            f"Full stack configuration took {total_time_ms:.2f}ms"
+        )
         assert len(istio_config["items"]) >= 19  # At least 10 services + 9 policies

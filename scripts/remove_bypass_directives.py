@@ -42,7 +42,14 @@ PATTERNS_TO_REMOVE = [
 def should_process_file(file_path: Path) -> bool:
     """Check if file should be processed."""
     # Skip certain directories
-    skip_dirs = {".git", "node_modules", "venv", "__pycache__", ".pytest_cache", "htmlcov"}
+    skip_dirs = {
+        ".git",
+        "node_modules",
+        "venv",
+        "__pycache__",
+        ".pytest_cache",
+        "htmlcov",
+    }
     if any(part in skip_dirs for part in file_path.parts):
         return False
 
@@ -80,7 +87,9 @@ def remove_bypass_directives(file_path: Path) -> List[str]:
 
     # Apply patterns
     for pattern, replacement in PATTERNS_TO_REMOVE:
-        new_content = re.sub(pattern, replacement, content, flags=re.MULTILINE | re.IGNORECASE)
+        new_content = re.sub(
+            pattern, replacement, content, flags=re.MULTILINE | re.IGNORECASE
+        )
         if new_content != content:
             changes.append(f"Removed pattern '{pattern}' from {file_path}")
             content = new_content

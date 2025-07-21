@@ -163,7 +163,9 @@ class ReportArchivalSystem:
                         self._track_archived_file(file_info, archived_path)
 
                 except Exception as e:
-                    results["errors"].append(f"Error archiving {file_info['path']}: {e}")
+                    results["errors"].append(
+                        f"Error archiving {file_info['path']}: {e}"
+                    )
 
             # Step 3: Compress old archives
             compressed_count = self._compress_old_archives()
@@ -232,7 +234,9 @@ class ReportArchivalSystem:
         report_type = file_info["type"]
 
         # Create archive directory structure
-        archive_subdir = self.archive_dir / report_type / str(file_info["modified"].year)
+        archive_subdir = (
+            self.archive_dir / report_type / str(file_info["modified"].year)
+        )
         archive_subdir.mkdir(parents=True, exist_ok=True)
 
         # Generate archive filename
@@ -252,7 +256,9 @@ class ReportArchivalSystem:
     def _compress_old_archives(self) -> int:
         """Compress old archive files."""
         compressed_count = 0
-        compress_cutoff = datetime.now() - timedelta(days=self.config.compress_after_days * 2)
+        compress_cutoff = datetime.now() - timedelta(
+            days=self.config.compress_after_days * 2
+        )
 
         for archive_file in self.archive_dir.rglob("*"):
             if archive_file.is_file() and not archive_file.name.endswith(".gz"):
@@ -260,7 +266,9 @@ class ReportArchivalSystem:
 
                 if file_time < compress_cutoff:
                     # Compress file
-                    compressed_path = archive_file.with_suffix(archive_file.suffix + ".gz")
+                    compressed_path = archive_file.with_suffix(
+                        archive_file.suffix + ".gz"
+                    )
 
                     with open(archive_file, "rb") as f_in:
                         with gzip.open(compressed_path, "wb") as f_out:
@@ -440,7 +448,9 @@ class ReportArchivalSystem:
             "by_type": by_type,
         }
 
-    def restore_archived_file(self, archive_path: str, restore_path: str = None) -> bool:
+    def restore_archived_file(
+        self, archive_path: str, restore_path: str = None
+    ) -> bool:
         """Restore a file from archive."""
         archive_file = Path(archive_path)
 

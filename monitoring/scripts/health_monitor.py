@@ -19,7 +19,7 @@ import yaml
 # Setup logging
 logging.basicConfig(
     level=logging.INFO,
-    format='%(asctime)s - %(name)s - %(levelname)s - %(message)s',
+    format="%(asctime)s - %(name)s - %(levelname)s - %(message)s",
 )
 logger = logging.getLogger(__name__)
 
@@ -35,7 +35,7 @@ class HealthMonitor:
 
     def _load_config(self, config_path: str) -> Dict[str, Any]:
         """Load monitoring configuration."""
-        with open(config_path, 'r') as f:
+        with open(config_path, "r") as f:
             return yaml.safe_load(f)
 
     async def start(self):
@@ -46,9 +46,7 @@ class HealthMonitor:
         try:
             while True:
                 await self.run_health_checks()
-                await asyncio.sleep(
-                    self.config['global']['evaluation_interval']
-                )
+                await asyncio.sleep(self.config["global"]["evaluation_interval"])
 
         except KeyboardInterrupt:
             logger.info("Monitoring stopped by user")
@@ -65,17 +63,17 @@ class HealthMonitor:
         tasks = []
 
         # API health checks
-        for endpoint_name, endpoint_config in self.config['health_checks'][
-            'endpoints'
+        for endpoint_name, endpoint_config in self.config["health_checks"][
+            "endpoints"
         ].items():
             task = self.check_endpoint(endpoint_name, endpoint_config)
             tasks.append(task)
 
         # Synthetic monitoring
         for journey in (
-            self.config['health_checks']
-            .get('synthetic_monitoring', {})
-            .get('user_journey', [])
+            self.config["health_checks"]
+            .get("synthetic_monitoring", {})
+            .get("user_journey", [])
         ):
             task = self.check_synthetic_journey(journey)
             tasks.append(task)
@@ -90,123 +88,117 @@ class HealthMonitor:
             else:
                 await self.process_check_result(result)
 
-    async def check_endpoint(
-        self, name: str, config: Dict[str, Any]
-    ) -> Dict[str, Any]:
+    async def check_endpoint(self, name: str, config: Dict[str, Any]) -> Dict[str, Any]:
         """Check a single endpoint."""
         start_time = time.time()
 
         try:
             async with self.session.get(
-                config['url'],
-                timeout=aiohttp.ClientTimeout(total=config.get('timeout', 5)),
+                config["url"],
+                timeout=aiohttp.ClientTimeout(total=config.get("timeout", 5)),
             ) as response:
                 latency = (time.time() - start_time) * 1000
 
                 result = {
-                    'name': name,
-                    'type': 'endpoint',
-                    'timestamp': datetime.utcnow().isoformat(),
-                    'status_code': response.status,
-                    'latency_ms': round(latency, 2),
-                    'success': response.status == 200,
+                    "name": name,
+                    "type": "endpoint",
+                    "timestamp": datetime.utcnow().isoformat(),
+                    "status_code": response.status,
+                    "latency_ms": round(latency, 2),
+                    "success": response.status == 200,
                 }
 
                 # Parse response body
                 try:
                     body = await response.json()
-                    result['response'] = body
-                    result['health_status'] = body.get('status', 'unknown')
+                    result["response"] = body
+                    result["health_status"] = body.get("status", "unknown")
                 except:
-                    result['response'] = await response.text()
+                    result["response"] = await response.text()
 
                 return result
 
         except asyncio.TimeoutError:
             return {
-                'name': name,
-                'type': 'endpoint',
-                'timestamp': datetime.utcnow().isoformat(),
-                'success': False,
-                'error': 'timeout',
-                'latency_ms': config.get('timeout', 5) * 1000,
+                "name": name,
+                "type": "endpoint",
+                "timestamp": datetime.utcnow().isoformat(),
+                "success": False,
+                "error": "timeout",
+                "latency_ms": config.get("timeout", 5) * 1000,
             }
         except Exception as e:
             return {
-                'name': name,
-                'type': 'endpoint',
-                'timestamp': datetime.utcnow().isoformat(),
-                'success': False,
-                'error': str(e),
-                'latency_ms': (time.time() - start_time) * 1000,
+                "name": name,
+                "type": "endpoint",
+                "timestamp": datetime.utcnow().isoformat(),
+                "success": False,
+                "error": str(e),
+                "latency_ms": (time.time() - start_time) * 1000,
             }
 
-    async def check_synthetic_journey(
-        self, journey: Dict[str, Any]
-    ) -> Dict[str, Any]:
+    async def check_synthetic_journey(self, journey: Dict[str, Any]) -> Dict[str, Any]:
         """Run a synthetic user journey test."""
         start_time = time.time()
-        journey_name = journey['name']
+        journey_name = journey["name"]
 
         try:
             # Prepare request
-            method = journey.get('method', 'GET')
+            method = journey.get("method", "GET")
             url = f"{self.config['health_checks']['endpoints']['api']['url']}{journey['endpoint']}"
 
             # Add test data if needed
             data = None
-            if method == 'POST':
+            if method == "POST":
                 data = self._get_test_data(journey_name)
 
             async with self.session.request(
                 method=method,
                 url=url,
                 json=data,
-                timeout=aiohttp.ClientTimeout(
-                    total=journey.get('timeout', 30)
-                ),
+                timeout=aiohttp.ClientTimeout(total=journey.get("timeout", 30)),
             ) as response:
                 latency = (time.time() - start_time) * 1000
 
                 return {
-                    'name': journey_name,
-                    'type': 'synthetic',
-                    'timestamp': datetime.utcnow().isoformat(),
-                    'status_code': response.status,
-                    'latency_ms': round(latency, 2),
-                    'success': 200 <= response.status < 300,
-                    'response': await response.json()
+                    "name": journey_name,
+                    "type": "synthetic",
+                    "timestamp": datetime.utcnow().isoformat(),
+                    "status_code": response.status,
+                    "latency_ms": round(latency, 2),
+                    "success": 200 <= response.status < 300,
+                    "response": await response.json()
                     if response.status == 200
                     else None,
                 }
 
         except Exception as e:
             return {
-                'name': journey_name,
-                'type': 'synthetic',
-                'timestamp': datetime.utcnow().isoformat(),
-                'success': False,
-                'error': str(e),
-                'latency_ms': (time.time() - start_time) * 1000,
+                "name": journey_name,
+                "type": "synthetic",
+                "timestamp": datetime.utcnow().isoformat(),
+                "success": False,
+                "error": str(e),
+                "latency_ms": (time.time() - start_time) * 1000,
             }
 
     def _get_test_data(self, journey_name: str) -> Dict[str, Any]:
         """Get test data for synthetic monitoring."""
         test_data = {
-            'Create Agent': {
-                'name': f'test-agent-{int(time.time())}',
-                'type': 'explorer',
-                'config': {'exploration_rate': 0.1},
+            "Create Agent": {
+                "name": f"test-agent-{int(time.time())}",
+                "type": "explorer",
+                "config": {"exploration_rate": 0.1},
             },
-            'Agent Inference': {
-                'agent_id': 'test-agent-1',
-                'observation': [0, 1, 0, 0],
-                'context': {'test': True},
+            "Agent Inference": {
+                "agent_id": "test-agent-1",
+                "observation": [0, 1, 0, 0],
+                "context": {"test": True},
             },
-            'Coalition Formation': {
-                'name': f'test-coalition-{int(time.time())}',
-                'agents': ['test-agent-1', 'test-agent-2'],
-                'strategy': 'collaborative',
+            "Coalition Formation": {
+                "name": f"test-coalition-{int(time.time())}",
+                "agents": ["test-agent-1", "test-agent-2"],
+                "strategy": "collaborative",
             },
         }
 
@@ -214,33 +206,33 @@ class HealthMonitor:
 
     async def process_check_result(self, result: Dict[str, Any]):
         """Process health check result and trigger alerts if needed."""
-        check_name = result['name']
+        check_name = result["name"]
 
         # Store result
         self.check_results[check_name] = result
 
         # Check against thresholds
-        if not result['success']:
+        if not result["success"]:
             await self.trigger_alert(
-                level='critical',
+                level="critical",
                 check_name=check_name,
                 message=f"Health check failed: {result.get('error', 'Unknown error')}",
                 details=result,
             )
 
         # Check latency thresholds
-        elif result.get('latency_ms', 0) > 1000:
+        elif result.get("latency_ms", 0) > 1000:
             await self.trigger_alert(
-                level='warning',
+                level="warning",
                 check_name=check_name,
                 message=f"High latency detected: {result['latency_ms']}ms",
                 details=result,
             )
 
         # Check specific health status
-        elif result.get('health_status') == 'unhealthy':
+        elif result.get("health_status") == "unhealthy":
             await self.trigger_alert(
-                level='critical',
+                level="critical",
                 check_name=check_name,
                 message="Service reported unhealthy status",
                 details=result,
@@ -255,15 +247,15 @@ class HealthMonitor:
     ):
         """Trigger an alert."""
         alert = {
-            'timestamp': datetime.utcnow().isoformat(),
-            'level': level,
-            'check_name': check_name,
-            'message': message,
-            'details': details,
+            "timestamp": datetime.utcnow().isoformat(),
+            "level": level,
+            "check_name": check_name,
+            "message": message,
+            "details": details,
         }
 
         # Log alert
-        if level == 'critical':
+        if level == "critical":
             logger.error(f"CRITICAL ALERT: {check_name} - {message}")
         else:
             logger.warning(f"WARNING: {check_name} - {message}")
@@ -277,50 +269,48 @@ class HealthMonitor:
     async def send_notifications(self, alert: Dict[str, Any]):
         """Send alert notifications to configured channels."""
         # Slack notification
-        if 'slack' in self.config.get('integrations', {}):
+        if "slack" in self.config.get("integrations", {}):
             await self.send_slack_notification(alert)
 
         # PagerDuty notification
-        if alert['level'] == 'critical' and 'pagerduty' in self.config.get(
-            'integrations', {}
+        if alert["level"] == "critical" and "pagerduty" in self.config.get(
+            "integrations", {}
         ):
             await self.send_pagerduty_notification(alert)
 
     async def send_slack_notification(self, alert: Dict[str, Any]):
         """Send Slack notification."""
-        webhook_url = os.getenv('SLACK_WEBHOOK_URL')
+        webhook_url = os.getenv("SLACK_WEBHOOK_URL")
         if not webhook_url:
             return
 
-        color = '#ff0000' if alert['level'] == 'critical' else '#ffaa00'
+        color = "#ff0000" if alert["level"] == "critical" else "#ffaa00"
 
         payload = {
-            'attachments': [
+            "attachments": [
                 {
-                    'color': color,
-                    'title': f"{alert['level'].upper()}: {alert['check_name']}",
-                    'text': alert['message'],
-                    'fields': [
+                    "color": color,
+                    "title": f"{alert['level'].upper()}: {alert['check_name']}",
+                    "text": alert["message"],
+                    "fields": [
                         {
-                            'title': 'Timestamp',
-                            'value': alert['timestamp'],
-                            'short': True,
+                            "title": "Timestamp",
+                            "value": alert["timestamp"],
+                            "short": True,
                         },
                         {
-                            'title': 'Environment',
-                            'value': os.getenv('ENVIRONMENT', 'production'),
-                            'short': True,
+                            "title": "Environment",
+                            "value": os.getenv("ENVIRONMENT", "production"),
+                            "short": True,
                         },
                     ],
-                    'footer': 'FreeAgentics Health Monitor',
+                    "footer": "FreeAgentics Health Monitor",
                 }
             ]
         }
 
         try:
-            async with self.session.post(
-                webhook_url, json=payload
-            ) as response:
+            async with self.session.post(webhook_url, json=payload) as response:
                 if response.status != 200:
                     logger.error(
                         f"Failed to send Slack notification: {response.status}"
@@ -330,25 +320,25 @@ class HealthMonitor:
 
     async def send_pagerduty_notification(self, alert: Dict[str, Any]):
         """Send PagerDuty notification."""
-        routing_key = os.getenv('PAGERDUTY_ROUTING_KEY')
+        routing_key = os.getenv("PAGERDUTY_ROUTING_KEY")
         if not routing_key:
             return
 
         payload = {
-            'routing_key': routing_key,
-            'event_action': 'trigger',
-            'payload': {
-                'summary': f"{alert['check_name']}: {alert['message']}",
-                'severity': 'critical',
-                'source': 'freeagentics-health-monitor',
-                'timestamp': alert['timestamp'],
-                'custom_details': alert['details'],
+            "routing_key": routing_key,
+            "event_action": "trigger",
+            "payload": {
+                "summary": f"{alert['check_name']}: {alert['message']}",
+                "severity": "critical",
+                "source": "freeagentics-health-monitor",
+                "timestamp": alert["timestamp"],
+                "custom_details": alert["details"],
             },
         }
 
         try:
             async with self.session.post(
-                'https://events.pagerduty.com/v2/enqueue', json=payload
+                "https://events.pagerduty.com/v2/enqueue", json=payload
             ) as response:
                 if response.status != 202:
                     logger.error(
@@ -370,8 +360,8 @@ class HealthMonitor:
         print("Health Check Results:")
         print("-" * 80)
         for check_name, result in self.check_results.items():
-            status = "✅ PASS" if result.get('success', False) else "❌ FAIL"
-            latency = result.get('latency_ms', 'N/A')
+            status = "✅ PASS" if result.get("success", False) else "❌ FAIL"
+            latency = result.get("latency_ms", "N/A")
             print(f"{check_name:<30} {status:<10} Latency: {latency}ms")
 
         # Recent alerts
@@ -391,7 +381,7 @@ async def main():
     config_path = (
         sys.argv[1]
         if len(sys.argv) > 1
-        else '/home/green/FreeAgentics/monitoring/config/monitoring_config.yaml'
+        else "/home/green/FreeAgentics/monitoring/config/monitoring_config.yaml"
     )
 
     monitor = HealthMonitor(config_path)

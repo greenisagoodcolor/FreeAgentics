@@ -97,13 +97,18 @@ class SecurityRegressionRunner:
                 self.test_results["comprehensive_security_suite"] = {
                     "status": (
                         "PASSED"
-                        if report_data.get("summary", {}).get("vulnerabilities_found", 0) == 0
+                        if report_data.get("summary", {}).get(
+                            "vulnerabilities_found", 0
+                        )
+                        == 0
                         else "FAILED"
                     ),
                     "vulnerabilities_found": report_data.get("summary", {}).get(
                         "vulnerabilities_found", 0
                     ),
-                    "security_score": report_data.get("summary", {}).get("security_score", 0),
+                    "security_score": report_data.get("summary", {}).get(
+                        "security_score", 0
+                    ),
                     "details": report_data,
                     "output": stdout.decode(),
                     "errors": stderr.decode(),
@@ -167,7 +172,9 @@ class SecurityRegressionRunner:
                     "errors": stderr.decode(),
                 }
 
-            print(f"  ✓ Penetration Tests: {self.test_results['penetration_tests']['status']}")
+            print(
+                f"  ✓ Penetration Tests: {self.test_results['penetration_tests']['status']}"
+            )
 
         except Exception as e:
             self.test_results["penetration_tests"] = {
@@ -198,13 +205,19 @@ class SecurityRegressionRunner:
                 with open(report_file) as f:
                     report_data = json.load(f)
 
-                resilience_score = report_data.get("summary", {}).get("overall_resilience_score", 0)
+                resilience_score = report_data.get("summary", {}).get(
+                    "overall_resilience_score", 0
+                )
 
                 self.test_results["performance_under_attack"] = {
                     "status": "PASSED" if resilience_score >= 80 else "FAILED",
                     "resilience_score": resilience_score,
-                    "passed_scenarios": report_data.get("summary", {}).get("passed_scenarios", 0),
-                    "total_scenarios": report_data.get("summary", {}).get("total_scenarios", 0),
+                    "passed_scenarios": report_data.get("summary", {}).get(
+                        "passed_scenarios", 0
+                    ),
+                    "total_scenarios": report_data.get("summary", {}).get(
+                        "total_scenarios", 0
+                    ),
                     "details": report_data,
                     "output": stdout.decode(),
                     "errors": stderr.decode(),
@@ -278,7 +291,9 @@ class SecurityRegressionRunner:
                 self.test_results["owasp_zap_scan"] = {
                     "status": "PASSED" if high_risk == 0 else "FAILED",
                     "high_risk_issues": high_risk,
-                    "total_alerts": report_data.get("scan_info", {}).get("total_alerts", 0),
+                    "total_alerts": report_data.get("scan_info", {}).get(
+                        "total_alerts", 0
+                    ),
                     "details": report_data,
                     "output": stdout.decode(),
                     "errors": stderr.decode(),
@@ -291,7 +306,9 @@ class SecurityRegressionRunner:
                     "errors": stderr.decode(),
                 }
 
-            print(f"  ✓ OWASP ZAP Scan: {self.test_results['owasp_zap_scan']['status']}")
+            print(
+                f"  ✓ OWASP ZAP Scan: {self.test_results['owasp_zap_scan']['status']}"
+            )
 
         except Exception as e:
             self.test_results["owasp_zap_scan"] = {
@@ -321,7 +338,11 @@ class SecurityRegressionRunner:
 
             # Parse pytest output
             output = stdout.decode()
-            status = "PASSED" if "FAILED" not in output and process.returncode == 0 else "FAILED"
+            status = (
+                "PASSED"
+                if "FAILED" not in output and process.returncode == 0
+                else "FAILED"
+            )
 
             self.test_results["security_headers_validation"] = {
                 "status": status,
@@ -360,7 +381,11 @@ class SecurityRegressionRunner:
 
             # Parse pytest output
             output = stdout.decode()
-            status = "PASSED" if "FAILED" not in output and process.returncode == 0 else "FAILED"
+            status = (
+                "PASSED"
+                if "FAILED" not in output and process.returncode == 0
+                else "FAILED"
+            )
 
             self.test_results["rate_limiting_verification"] = {
                 "status": status,
@@ -399,7 +424,11 @@ class SecurityRegressionRunner:
 
             # Parse pytest output
             output = stdout.decode()
-            status = "PASSED" if "FAILED" not in output and process.returncode == 0 else "FAILED"
+            status = (
+                "PASSED"
+                if "FAILED" not in output and process.returncode == 0
+                else "FAILED"
+            )
 
             self.test_results["rbac_comprehensive"] = {
                 "status": status,
@@ -438,7 +467,11 @@ class SecurityRegressionRunner:
 
             # Parse pytest output
             output = stdout.decode()
-            status = "PASSED" if "FAILED" not in output and process.returncode == 0 else "FAILED"
+            status = (
+                "PASSED"
+                if "FAILED" not in output and process.returncode == 0
+                else "FAILED"
+            )
 
             self.test_results["security_monitoring"] = {
                 "status": status,
@@ -472,7 +505,9 @@ class SecurityRegressionRunner:
             if result and result.get("status") == "FAILED"
         )
         error_tests = sum(
-            1 for result in self.test_results.values() if result and result.get("status") == "ERROR"
+            1
+            for result in self.test_results.values()
+            if result and result.get("status") == "ERROR"
         )
         skipped_tests = sum(
             1
@@ -510,7 +545,8 @@ class SecurityRegressionRunner:
                 "failed_tests": failed_tests,
                 "error_tests": error_tests,
                 "skipped_tests": skipped_tests,
-                "success_rate": (passed_tests / max(total_tests - skipped_tests, 1)) * 100,
+                "success_rate": (passed_tests / max(total_tests - skipped_tests, 1))
+                * 100,
             },
             "test_results": self.test_results,
             "critical_failures": self.critical_failures,
@@ -546,7 +582,9 @@ class SecurityRegressionRunner:
         # Penetration test metrics
         if self.test_results.get("penetration_tests"):
             result = self.test_results["penetration_tests"]
-            metrics["exploitable_vulnerabilities"] = result.get("successful_exploits", 0)
+            metrics["exploitable_vulnerabilities"] = result.get(
+                "successful_exploits", 0
+            )
 
         # ZAP scan metrics
         if self.test_results.get("owasp_zap_scan"):
@@ -560,7 +598,11 @@ class SecurityRegressionRunner:
             if result and result.get("status") == "PASSED"
         )
         total_tests = len(
-            [r for r in self.test_results.values() if r and r.get("status") != "SKIPPED"]
+            [
+                r
+                for r in self.test_results.values()
+                if r and r.get("status") != "SKIPPED"
+            ]
         )
 
         metrics["compliance_score"] = (passed_tests / max(total_tests, 1)) * 100
@@ -680,15 +722,21 @@ class SecurityRegressionRunner:
         if self.test_results.get("comprehensive_security_suite"):
             result = self.test_results["comprehensive_security_suite"]
             if result.get("details") and result["details"].get("compliance"):
-                owasp_compliance = result["details"]["compliance"].get("OWASP_Top_10", {})
+                owasp_compliance = result["details"]["compliance"].get(
+                    "OWASP_Top_10", {}
+                )
                 passed_checks = sum(1 for v in owasp_compliance.values() if v)
                 total_checks = len(owasp_compliance)
 
-                compliance["OWASP_Top_10"]["score"] = (passed_checks / max(total_checks, 1)) * 100
-                compliance["OWASP_Top_10"]["status"] = "PASSED" if passed_checks >= 9 else "FAILED"
-                compliance["OWASP_Top_10"][
-                    "details"
-                ] = f"Passed {passed_checks}/{total_checks} checks"
+                compliance["OWASP_Top_10"]["score"] = (
+                    passed_checks / max(total_checks, 1)
+                ) * 100
+                compliance["OWASP_Top_10"]["status"] = (
+                    "PASSED" if passed_checks >= 9 else "FAILED"
+                )
+                compliance["OWASP_Top_10"]["details"] = (
+                    f"Passed {passed_checks}/{total_checks} checks"
+                )
 
         return compliance
 
@@ -720,8 +768,8 @@ class SecurityRegressionRunner:
 <body>
     <div class="header">
         <h1>Security Regression Test Report</h1>
-        <p>Generated on: {report['summary']['test_date']}</p>
-        <p>Overall Status: <strong>{report['summary']['overall_status']}</strong></p>
+        <p>Generated on: {report["summary"]["test_date"]}</p>
+        <p>Overall Status: <strong>{report["summary"]["overall_status"]}</strong></p>
     </div>
 
     <div class="summary">
@@ -729,20 +777,20 @@ class SecurityRegressionRunner:
         <div class="metrics">
             <div class="metric">
                 <h3>Test Results</h3>
-                <p>Total Tests: {report['summary']['total_tests']}</p>
-                <p>Passed: {report['summary']['passed_tests']}</p>
-                <p>Failed: {report['summary']['failed_tests']}</p>
-                <p>Errors: {report['summary']['error_tests']}</p>
-                <p>Skipped: {report['summary']['skipped_tests']}</p>
-                <p>Success Rate: {report['summary']['success_rate']:.1f}%</p>
+                <p>Total Tests: {report["summary"]["total_tests"]}</p>
+                <p>Passed: {report["summary"]["passed_tests"]}</p>
+                <p>Failed: {report["summary"]["failed_tests"]}</p>
+                <p>Errors: {report["summary"]["error_tests"]}</p>
+                <p>Skipped: {report["summary"]["skipped_tests"]}</p>
+                <p>Success Rate: {report["summary"]["success_rate"]:.1f}%</p>
             </div>
             <div class="metric">
                 <h3>Security Metrics</h3>
-                <p>Vulnerabilities: {report['security_metrics']['vulnerability_count']}</p>
-                <p>Security Score: {report['security_metrics']['security_score']}</p>
-                <p>Exploitable: {report['security_metrics']['exploitable_vulnerabilities']}</p>
-                <p>High Risk: {report['security_metrics']['high_risk_issues']}</p>
-                <p>Compliance Score: {report['security_metrics']['compliance_score']:.1f}%</p>
+                <p>Vulnerabilities: {report["security_metrics"]["vulnerability_count"]}</p>
+                <p>Security Score: {report["security_metrics"]["security_score"]}</p>
+                <p>Exploitable: {report["security_metrics"]["exploitable_vulnerabilities"]}</p>
+                <p>High Risk: {report["security_metrics"]["high_risk_issues"]}</p>
+                <p>Compliance Score: {report["security_metrics"]["compliance_score"]:.1f}%</p>
             </div>
         </div>
     </div>
@@ -760,10 +808,10 @@ class SecurityRegressionRunner:
 
             html_content += f"""
         <div class="test-result {css_class}">
-            <h3>{test_name.replace('_', ' ').title()}</h3>
+            <h3>{test_name.replace("_", " ").title()}</h3>
             <p>Status: <strong>{status}</strong></p>
-            {f"<p>Error: {result.get('error', '')}</p>" if result.get('error') else ""}
-            {f"<p>Details: {result.get('details', {}).get('summary', {})}</p>" if result.get('details') else ""}
+            {f"<p>Error: {result.get('error', '')}</p>" if result.get("error") else ""}
+            {f"<p>Details: {result.get('details', {}).get('summary', {})}</p>" if result.get("details") else ""}
         </div>
         """
 
@@ -784,9 +832,9 @@ class SecurityRegressionRunner:
             for failure in report["critical_failures"]:
                 html_content += f"""
             <tr>
-                <td>{failure['test']}</td>
-                <td>{failure['status']}</td>
-                <td>{failure['error']}</td>
+                <td>{failure["test"]}</td>
+                <td>{failure["status"]}</td>
+                <td>{failure["error"]}</td>
             </tr>
             """
 
@@ -805,7 +853,7 @@ class SecurityRegressionRunner:
 
         for rec in report["recommendations"]:
             html_content += f"""
-            <li><strong>[{rec['priority']}]</strong> {rec['category']}: {rec['recommendation']}</li>
+            <li><strong>[{rec["priority"]}]</strong> {rec["category"]}: {rec["recommendation"]}</li>
             """
 
         html_content += """
@@ -846,7 +894,9 @@ class SecurityRegressionRunner:
         print("\nSecurity Metrics:")
         print(f"  Vulnerabilities Found: {metrics['vulnerability_count']}")
         print(f"  Security Score: {metrics['security_score']}/100")
-        print(f"  Exploitable Vulnerabilities: {metrics['exploitable_vulnerabilities']}")
+        print(
+            f"  Exploitable Vulnerabilities: {metrics['exploitable_vulnerabilities']}"
+        )
         print(f"  High Risk Issues: {metrics['high_risk_issues']}")
         print(f"  Compliance Score: {metrics['compliance_score']:.1f}%")
 
@@ -858,7 +908,9 @@ class SecurityRegressionRunner:
 
         # Recommendations
         high_priority_recs = [
-            r for r in report["recommendations"] if r["priority"] in ["CRITICAL", "HIGH"]
+            r
+            for r in report["recommendations"]
+            if r["priority"] in ["CRITICAL", "HIGH"]
         ]
         if high_priority_recs:
             print("\nHigh Priority Recommendations:")

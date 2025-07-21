@@ -202,7 +202,9 @@ class EnvironmentOrchestrator:
                         "status": "running",
                     }
 
-                    logger.info(f"Created environment {env_id} with profile {spec.profile.value}")
+                    logger.info(
+                        f"Created environment {env_id} with profile {spec.profile.value}"
+                    )
                     return env_id
                 else:
                     # Release resources if environment failed to start
@@ -306,7 +308,9 @@ class EnvironmentOrchestrator:
                 "busy_instances": len(pool.busy_instances),
                 "max_instances": pool.max_instances,
                 "utilization": (
-                    len(pool.busy_instances) / pool.max_instances if pool.max_instances > 0 else 0
+                    len(pool.busy_instances) / pool.max_instances
+                    if pool.max_instances > 0
+                    else 0
                 ),
             }
 
@@ -330,7 +334,9 @@ class EnvironmentOrchestrator:
                     pool.available_instances.add(instance_id)
 
                 pool.current_instances = target_instances
-                logger.info(f"Scaled up pool {pool_name} to {target_instances} instances")
+                logger.info(
+                    f"Scaled up pool {pool_name} to {target_instances} instances"
+                )
 
             elif target_instances < pool.current_instances:
                 # Scale down (only if instances are available)
@@ -352,7 +358,9 @@ class EnvironmentOrchestrator:
                             pool.available_instances.pop()
 
                     pool.current_instances = target_instances
-                    logger.info(f"Scaled down pool {pool_name} to {target_instances} instances")
+                    logger.info(
+                        f"Scaled down pool {pool_name} to {target_instances} instances"
+                    )
                 else:
                     logger.warning(
                         f"Cannot scale down pool {pool_name}: not enough available instances"

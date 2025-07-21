@@ -353,7 +353,10 @@ class TestBeliefSpecificationParsing:
 
         # Generative model
         gen_model = ai_beliefs["generative_model"]
-        assert gen_model["model_structure"] == "partially_observable_markov_decision_process"
+        assert (
+            gen_model["model_structure"]
+            == "partially_observable_markov_decision_process"
+        )
 
         components = gen_model["components"]
 
@@ -625,7 +628,8 @@ class TestBeliefValidation:
         precision_errors = [
             e
             for e in errors
-            if "precision" in e.lower() and ("positive" in e.lower() or "zero" in e.lower())
+            if "precision" in e.lower()
+            and ("positive" in e.lower() or "zero" in e.lower())
         ]
         assert len(precision_errors) > 0
 
@@ -662,5 +666,7 @@ class TestBeliefValidation:
 
         # Should detect missing hierarchy level
         assert is_valid is False
-        hierarchy_errors = [e for e in errors if "hierarchy" in e.lower() or "level" in e.lower()]
+        hierarchy_errors = [
+            e for e in errors if "hierarchy" in e.lower() or "level" in e.lower()
+        ]
         assert len(hierarchy_errors) > 0

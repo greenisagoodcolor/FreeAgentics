@@ -177,7 +177,8 @@ class CoverageAnalyzer:
                         "priority": "MEDIUM",
                         "category": f"{category.title()} Layer",
                         "action": f"Improve {len(low_coverage)} modules in {category} layer",
-                        "average_coverage": sum(m["coverage"] for m in modules) / len(modules),
+                        "average_coverage": sum(m["coverage"] for m in modules)
+                        / len(modules),
                     }
                 )
 
@@ -223,7 +224,9 @@ class CoverageAnalyzer:
 
         # Zero coverage
         if gaps["zero_coverage"]:
-            lines.append(f"MODULES WITH 0% COVERAGE ({len(gaps['zero_coverage'])} total):")
+            lines.append(
+                f"MODULES WITH 0% COVERAGE ({len(gaps['zero_coverage'])} total):"
+            )
             for module in gaps["zero_coverage"][:10]:
                 lines.append(f"  - {module['path']}")
             if len(gaps["zero_coverage"]) > 10:
@@ -279,7 +282,9 @@ class CoverageAnalyzer:
 
         # Zero coverage
         if gaps["zero_coverage"]:
-            lines.append(f"## Modules with 0% Coverage ({len(gaps['zero_coverage'])} total)")
+            lines.append(
+                f"## Modules with 0% Coverage ({len(gaps['zero_coverage'])} total)"
+            )
             lines.append("")
             for module in gaps["zero_coverage"][:20]:
                 lines.append(f"- `{module['path']}`")

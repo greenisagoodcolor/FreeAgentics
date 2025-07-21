@@ -125,9 +125,7 @@ class LLMProvider(ABC):
         Raises:
             LLMError: If GMN generation fails
         """
-        system_prompt = self._build_gmn_system_prompt(
-            agent_type, constraints, examples
-        )
+        system_prompt = self._build_gmn_system_prompt(agent_type, constraints, examples)
 
         messages = [
             LLMMessage(role=LLMRole.SYSTEM, content=system_prompt),
@@ -203,9 +201,11 @@ node preference C1 {
         if examples:
             base_prompt += "\n\nReference Examples:\n"
             for i, example in enumerate(examples[:3]):  # Limit to 3 examples
-                base_prompt += f"\nExample {i+1}:\n{example}\n"
+                base_prompt += f"\nExample {i + 1}:\n{example}\n"
 
-        base_prompt += "\n\nGenerate a valid GMN specification based on the user's description."
+        base_prompt += (
+            "\n\nGenerate a valid GMN specification based on the user's description."
+        )
 
         return base_prompt
 
@@ -245,9 +245,9 @@ Coordinator agents typically need:
             for i, part in enumerate(parts):
                 if i % 2 == 1:  # Odd indices are code blocks
                     # Remove language identifier if present
-                    lines = part.strip().split('\n')
-                    if lines and lines[0].lower() in ['gmn', 'yaml', 'json']:
-                        return '\n'.join(lines[1:])
+                    lines = part.strip().split("\n")
+                    if lines and lines[0].lower() in ["gmn", "yaml", "json"]:
+                        return "\n".join(lines[1:])
                     return part.strip()
 
         # If no code blocks, assume the entire response is GMN

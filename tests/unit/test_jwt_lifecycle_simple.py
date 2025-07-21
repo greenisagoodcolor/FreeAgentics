@@ -41,9 +41,7 @@ class TestJWTLifecycleSimple:
     def _verify_token(self, token: str) -> dict:
         """Verify a JWT token."""
         try:
-            payload = jwt.decode(
-                token, self.secret_key, algorithms=[self.algorithm]
-            )
+            payload = jwt.decode(token, self.secret_key, algorithms=[self.algorithm])
             return payload
         except jwt.ExpiredSignatureError:
             raise ValueError("Token has expired")
@@ -93,9 +91,7 @@ class TestJWTLifecycleSimple:
     def test_token_with_different_roles(self):
         """Test token creation with different user roles."""
         for role in UserRole:
-            token = self._create_token(
-                user_id=self.test_user.user_id, role=role.value
-            )
+            token = self._create_token(user_id=self.test_user.user_id, role=role.value)
 
             payload = self._verify_token(token)
             assert payload["role"] == role.value

@@ -268,9 +268,7 @@ def check_index_usage(engine):
         if indexes:
             print("\nTop 20 Most Used Indexes:")
             print("-" * 80)
-            print(
-                f"{'Index Name':<40} {'Scans':>10} {'Tuples Read':>15} {'Size':>10}"
-            )
+            print(f"{'Index Name':<40} {'Scans':>10} {'Tuples Read':>15} {'Size':>10}")
             print("-" * 80)
 
             for idx in indexes:
@@ -284,7 +282,7 @@ def check_index_usage(engine):
 def main():
     """Main function."""
     # Load environment variables
-    env_file = os.path.join(project_root, '.env.production')
+    env_file = os.path.join(project_root, ".env.production")
     if os.path.exists(env_file):
         load_dotenv(env_file)
         print(f"Loaded environment from: {env_file}")
@@ -293,7 +291,7 @@ def main():
         print("Using default .env file")
 
     # Get database URL
-    database_url = os.getenv('DATABASE_URL')
+    database_url = os.getenv("DATABASE_URL")
     if not database_url:
         print("✗ DATABASE_URL not found in environment")
         sys.exit(1)
@@ -320,9 +318,7 @@ def main():
         check_index_usage(engine)
 
         if errors > 0:
-            print(
-                "\n⚠️  Some indexes failed to create. Check the errors above."
-            )
+            print("\n⚠️  Some indexes failed to create. Check the errors above.")
             sys.exit(1)
         else:
             print("\n✓ All indexes are properly configured!")

@@ -54,9 +54,15 @@ def demo_basic_lifecycle():
 
     # Update memory usage for agents
     print("\n2. Updating memory usage...")
-    update_agent_memory_usage("explorer_001", belief_mb=8.0, matrix_mb=4.0, other_mb=2.0)
-    update_agent_memory_usage("collector_002", belief_mb=12.0, matrix_mb=6.0, other_mb=3.0)
-    update_agent_memory_usage("analyzer_003", belief_mb=15.0, matrix_mb=8.0, other_mb=4.0)
+    update_agent_memory_usage(
+        "explorer_001", belief_mb=8.0, matrix_mb=4.0, other_mb=2.0
+    )
+    update_agent_memory_usage(
+        "collector_002", belief_mb=12.0, matrix_mb=6.0, other_mb=3.0
+    )
+    update_agent_memory_usage(
+        "analyzer_003", belief_mb=15.0, matrix_mb=8.0, other_mb=4.0
+    )
 
     # Show memory statistics
     stats = get_memory_statistics()
@@ -97,7 +103,9 @@ def demo_memory_context_manager():
     print(f"\n1. Using managed agent memory context for {agent_id}...")
 
     with managed_agent_memory(agent_id, memory_limit_mb=25.0) as profile:
-        print(f"   Agent {profile.agent_id} created with {profile.memory_limit_mb}MB limit")
+        print(
+            f"   Agent {profile.agent_id} created with {profile.memory_limit_mb}MB limit"
+        )
         print(f"   Initial state: {profile.state}")
 
         # Simulate some memory operations
@@ -138,9 +146,7 @@ def demo_memory_pressure_cleanup():
         # Set agent to active state and old access time for some
         if random.random() > 0.5:  # nosec B311 - Demo simulation only
             profile.state = AgentLifecycleState.ACTIVE
-            profile.last_accessed = time.time() - random.uniform(
-                70, 150
-            )  # nosec B311 - Demo simulation only  # Old access
+            profile.last_accessed = time.time() - random.uniform(70, 150)  # nosec B311 - Demo simulation only  # Old access
 
     # Check memory pressure
     stats = get_memory_statistics()
@@ -189,7 +195,9 @@ def demo_lifecycle_events_tracking():
 
     # Show lifecycle events
     print(f"\n3. Lifecycle events for {agent_id}:")
-    for timestamp, event, metadata in profile.lifecycle_events[-10:]:  # Show last 10 events
+    for timestamp, event, metadata in profile.lifecycle_events[
+        -10:
+    ]:  # Show last 10 events
         event_time = time.strftime("%H:%M:%S", time.localtime(timestamp))
         print(f"   {event_time}: {event} - {metadata}")
 
@@ -236,7 +244,9 @@ def demo_agent_pool_simulation():
         other_mb = random.uniform(1, memory_limit * 0.2)  # nosec B311 - Demo simulation only
 
         update_agent_memory_usage(agent_id, belief_mb, matrix_mb, other_mb)
-        print(f"   Created {agent_id}: {belief_mb + matrix_mb + other_mb:.1f}MB/{memory_limit}MB")
+        print(
+            f"   Created {agent_id}: {belief_mb + matrix_mb + other_mb:.1f}MB/{memory_limit}MB"
+        )
 
     # Simulate agent activity over time
     print("\n2. Simulating agent activity...")
@@ -244,9 +254,7 @@ def demo_agent_pool_simulation():
         print(f"\n   Round {round_num + 1}:")
 
         # Some agents do work (update memory)
-        working_agents = random.sample(
-            active_agents, random.randint(3, 6)
-        )  # nosec B311 - Demo simulation only
+        working_agents = random.sample(active_agents, random.randint(3, 6))  # nosec B311 - Demo simulation only
         for agent_id in working_agents:
             profile = manager.get_agent_profile(agent_id)
             if profile and profile.state == AgentLifecycleState.ACTIVE:
@@ -265,15 +273,11 @@ def demo_agent_pool_simulation():
                 )
 
         # Some agents become idle (simulate old access time)
-        idle_agents = random.sample(
-            active_agents, random.randint(1, 3)
-        )  # nosec B311 - Demo simulation only
+        idle_agents = random.sample(active_agents, random.randint(1, 3))  # nosec B311 - Demo simulation only
         for agent_id in idle_agents:
             profile = manager.get_agent_profile(agent_id)
             if profile:
-                profile.last_accessed = time.time() - random.uniform(
-                    70, 200
-                )  # nosec B311 - Demo simulation only
+                profile.last_accessed = time.time() - random.uniform(70, 200)  # nosec B311 - Demo simulation only
 
         # Run cleanup
         cleanup_stats = manager.cleanup_idle_agents()

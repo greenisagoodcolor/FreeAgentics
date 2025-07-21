@@ -600,7 +600,9 @@ class TestIncidentManager:
 
         # Simulate response
         time.sleep(0.1)
-        incident_manager.update_incident_status(case.case_id, IncidentStatus.IN_PROGRESS)
+        incident_manager.update_incident_status(
+            case.case_id, IncidentStatus.IN_PROGRESS
+        )
 
         # Simulate containment
         time.sleep(0.1)

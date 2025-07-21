@@ -71,13 +71,19 @@ class TestGMNSyntaxValidation:
         """Test that non-dictionary specification fails validation."""
         validator = GMNSyntaxValidator()
 
-        with pytest.raises(GMNValidationError, match="Specification must be a dictionary"):
+        with pytest.raises(
+            GMNValidationError, match="Specification must be a dictionary"
+        ):
             validator.validate("invalid")
 
-        with pytest.raises(GMNValidationError, match="Specification must be a dictionary"):
+        with pytest.raises(
+            GMNValidationError, match="Specification must be a dictionary"
+        ):
             validator.validate([])
 
-        with pytest.raises(GMNValidationError, match="Specification must be a dictionary"):
+        with pytest.raises(
+            GMNValidationError, match="Specification must be a dictionary"
+        ):
             validator.validate(None)
 
     def test_missing_required_top_level_fields_fails_validation(self):
@@ -121,7 +127,9 @@ class TestGMNSyntaxValidation:
 
         # Invalid characters in name
         spec = {"nodes": [{"name": "node-with-dashes", "type": "state"}]}
-        with pytest.raises(GMNValidationError, match="Node name contains invalid characters"):
+        with pytest.raises(
+            GMNValidationError, match="Node name contains invalid characters"
+        ):
             validator.validate(spec)
 
         # Duplicate names
@@ -327,7 +335,9 @@ class TestGMNMathematicalValidation:
 
         # Zero or negative dimensions
         spec = {"nodes": [{"name": "state1", "type": "state", "num_states": 0}]}
-        with pytest.raises(GMNValidationError, match="Number of states must be positive"):
+        with pytest.raises(
+            GMNValidationError, match="Number of states must be positive"
+        ):
             validator.validate(spec)
 
         # Invalid precision values
@@ -360,7 +370,9 @@ class TestGMNMathematicalValidation:
                 }
             ]
         }
-        with pytest.raises(GMNValidationError, match="Transition matrix columns must sum to 1"):
+        with pytest.raises(
+            GMNValidationError, match="Transition matrix columns must sum to 1"
+        ):
             validator.validate(spec)
 
 
@@ -386,7 +398,9 @@ class TestGMNTypeValidation:
             ],
             "edges": [{"from": "node1", "to": "node2", "type": "invalid_edge_type"}],
         }
-        with pytest.raises(GMNValidationError, match="Invalid edge type: invalid_edge_type"):
+        with pytest.raises(
+            GMNValidationError, match="Invalid edge type: invalid_edge_type"
+        ):
             validator.validate(spec)
 
     def test_missing_required_attributes_for_node_types_fail_validation(self):
@@ -428,7 +442,9 @@ class TestGMNTypeValidation:
                 }
             ]
         }
-        with pytest.raises(GMNValidationError, match="initial_distribution must be a list"):
+        with pytest.raises(
+            GMNValidationError, match="initial_distribution must be a list"
+        ):
             validator.validate(spec)
 
 
@@ -481,7 +497,9 @@ class TestGMNConstraintValidation:
         validator = GMNConstraintValidator()
 
         # Action space too large
-        spec = {"nodes": [{"name": "action1", "type": "action", "num_actions": 1000000}]}
+        spec = {
+            "nodes": [{"name": "action1", "type": "action", "num_actions": 1000000}]
+        }
         with pytest.raises(GMNValidationError, match="Action space too large"):
             validator.validate(spec)
 
@@ -564,7 +582,9 @@ class TestGMNValidationFrameworkIntegration:
         """Test that validation error messages provide comprehensive information."""
         framework = GMNValidationFramework()
 
-        invalid_spec = {"nodes": [{"name": "test", "type": "invalid_type", "num_states": -1}]}
+        invalid_spec = {
+            "nodes": [{"name": "test", "type": "invalid_type", "num_states": -1}]
+        }
 
         with pytest.raises(GMNValidationError) as exc_info:
             framework.validate(invalid_spec)

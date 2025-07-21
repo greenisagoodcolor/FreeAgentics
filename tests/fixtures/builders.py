@@ -62,7 +62,9 @@ class BaseBuilder(Generic[T]):
     @staticmethod
     def random_string(length: int = 10, prefix: str = "") -> str:
         """Generate random string with optional prefix."""
-        suffix = "".join(random.choices(string.ascii_lowercase + string.digits, k=length))
+        suffix = "".join(
+            random.choices(string.ascii_lowercase + string.digits, k=length)
+        )
         return f"{prefix}{suffix}" if prefix else suffix
 
     @staticmethod
@@ -134,7 +136,9 @@ class AgentBuilder(BaseBuilder[AgentSchema]):
         self._data["pymdp_config"] = PyMDPConfigSchema(**config).dict()
         return self
 
-    def with_grid_world_config(self, grid_size: int = 5, num_actions: int = 4) -> "AgentBuilder":
+    def with_grid_world_config(
+        self, grid_size: int = 5, num_actions: int = 4
+    ) -> "AgentBuilder":
         """Configure for grid world environment."""
         self._check_not_built()
         return self.with_pymdp_config(
@@ -163,7 +167,9 @@ class AgentBuilder(BaseBuilder[AgentSchema]):
         self._data["preferences"] = PreferenceSchema(**preferences).dict()
         return self
 
-    def with_position(self, x: float, y: float, z: Optional[float] = None) -> "AgentBuilder":
+    def with_position(
+        self, x: float, y: float, z: Optional[float] = None
+    ) -> "AgentBuilder":
         """Set agent position."""
         self._check_not_built()
         self._data["position"] = [x, y] if z is None else [x, y, z]
@@ -174,7 +180,9 @@ class AgentBuilder(BaseBuilder[AgentSchema]):
         self._check_not_built()
         min_bounds = bounds.get("min", [0, 0])
         max_bounds = bounds.get("max", [10, 10])
-        position = [random.uniform(min_bounds[i], max_bounds[i]) for i in range(len(min_bounds))]
+        position = [
+            random.uniform(min_bounds[i], max_bounds[i]) for i in range(len(min_bounds))
+        ]
         self._data["position"] = position
         return self
 
@@ -226,7 +234,9 @@ class AgentBuilder(BaseBuilder[AgentSchema]):
         self._data["updated_at"] = datetime.utcnow()
         return self
 
-    def with_inference_history(self, inference_count: int, total_steps: int) -> "AgentBuilder":
+    def with_inference_history(
+        self, inference_count: int, total_steps: int
+    ) -> "AgentBuilder":
         """Set inference statistics."""
         self._check_not_built()
         self._data["inference_count"] = inference_count
@@ -407,14 +417,18 @@ class CoalitionBuilder(BaseBuilder[CoalitionSchema]):
                 "Coalition focused on efficient resource collection and distribution"
             )
             .with_resource_optimization_objective()
-            .with_required_capabilities("resource_collection", "coordination", "planning")
+            .with_required_capabilities(
+                "resource_collection", "coordination", "planning"
+            )
             .with_random_scores()
         )
 
     def as_exploration_coalition(self) -> "CoalitionBuilder":
         """Configure as exploration-focused coalition."""
         return (
-            self.with_description("Coalition dedicated to exploring and mapping new territories")
+            self.with_description(
+                "Coalition dedicated to exploring and mapping new territories"
+            )
             .with_exploration_objective()
             .with_required_capabilities("exploration", "communication", "analysis")
             .with_random_scores()
@@ -456,7 +470,9 @@ class KnowledgeNodeBuilder(BaseBuilder[KnowledgeNodeSchema]):
         self._data["properties"] = properties
         return self
 
-    def with_version(self, version: int, is_current: bool = True) -> "KnowledgeNodeBuilder":
+    def with_version(
+        self, version: int, is_current: bool = True
+    ) -> "KnowledgeNodeBuilder":
         """Set version information."""
         self._check_not_built()
         self._data["version"] = version
@@ -561,7 +577,9 @@ class KnowledgeEdgeBuilder(BaseBuilder[KnowledgeEdgeSchema]):
         self._data["id"] = edge_id or self.random_uuid()
         return self
 
-    def with_nodes(self, source_id: uuid.UUID, target_id: uuid.UUID) -> "KnowledgeEdgeBuilder":
+    def with_nodes(
+        self, source_id: uuid.UUID, target_id: uuid.UUID
+    ) -> "KnowledgeEdgeBuilder":
         """Set source and target nodes."""
         self._check_not_built()
         self._data["source_id"] = source_id
@@ -586,7 +604,9 @@ class KnowledgeEdgeBuilder(BaseBuilder[KnowledgeEdgeSchema]):
         self._data["confidence"] = confidence
         return self
 
-    def with_timestamp(self, created_at: Optional[datetime] = None) -> "KnowledgeEdgeBuilder":
+    def with_timestamp(
+        self, created_at: Optional[datetime] = None
+    ) -> "KnowledgeEdgeBuilder":
         """Set creation timestamp."""
         self._check_not_built()
         self._data["created_at"] = created_at or datetime.utcnow()

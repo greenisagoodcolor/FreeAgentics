@@ -130,7 +130,9 @@ class PrivilegeEscalationDetector:
 
             return True, None
 
-    def _detect_suspicious_pattern(self, user_id: str, context: SecurityContext) -> bool:
+    def _detect_suspicious_pattern(
+        self, user_id: str, context: SecurityContext
+    ) -> bool:
         """Detect suspicious patterns in escalation attempts."""
 
         attempts = self._escalation_attempts[user_id]
@@ -144,7 +146,11 @@ class PrivilegeEscalationDetector:
                 return True
 
         # Check for attempts from different IPs
-        ips = set(attempt["context"].source_ip for attempt in attempts if attempt.get("context"))
+        ips = set(
+            attempt["context"].source_ip
+            for attempt in attempts
+            if attempt.get("context")
+        )
         if len(ips) > 2:
             return True
 
@@ -233,7 +239,9 @@ class ZeroTrustValidator:
 
             decision = AuthorizationDecision(
                 granted=all_valid and confidence > 0.5,
-                reason=self._format_decision_reason(validations, trust_score, risk_score),
+                reason=self._format_decision_reason(
+                    validations, trust_score, risk_score
+                ),
                 decision_id=decision_id,
                 timestamp=datetime.now(timezone.utc),
                 evaluated_rules=[name for name, _, _ in validations],
@@ -413,7 +421,9 @@ class ZeroTrustValidator:
     ) -> str:
         """Format human-readable decision reason."""
 
-        failed = [f"{name}: {reason}" for name, valid, reason in validations if not valid]
+        failed = [
+            f"{name}: {reason}" for name, valid, reason in validations if not valid
+        ]
 
         if failed:
             return f"Access denied - {'; '.join(failed)}"
@@ -503,10 +513,15 @@ class SecureResourceIDGenerator:
             if not (len(timestamp_part) == 8 and timestamp_part.isdigit()):
                 return False
 
-            if not (len(random_part) == 32 and all(c in "0123456789abcdef" for c in random_part)):
+            if not (
+                len(random_part) == 32
+                and all(c in "0123456789abcdef" for c in random_part)
+            ):
                 return False
 
-            if not (len(checksum) == 8 and all(c in "0123456789abcdef" for c in checksum)):
+            if not (
+                len(checksum) == 8 and all(c in "0123456789abcdef" for c in checksum)
+            ):
                 return False
 
             return True
@@ -528,7 +543,9 @@ class RateLimiter:
             "admin_action": (20, timedelta(minutes=1)),  # 20 per minute
         }
 
-    def check_rate_limit(self, identifier: str, action_type: str) -> Tuple[bool, Optional[str]]:
+    def check_rate_limit(
+        self, identifier: str, action_type: str
+    ) -> Tuple[bool, Optional[str]]:
         """Check if action is within rate limits."""
 
         if action_type not in self._limits:
@@ -569,7 +586,9 @@ class ConstantTimeComparator:
         return hmac.compare_digest(a.encode(), b.encode())
 
     @staticmethod
-    def compare_permissions(required: List[Permission], actual: List[Permission]) -> bool:
+    def compare_permissions(
+        required: List[Permission], actual: List[Permission]
+    ) -> bool:
         """Compare permission lists in constant time."""
 
         # Convert to sets for comparison

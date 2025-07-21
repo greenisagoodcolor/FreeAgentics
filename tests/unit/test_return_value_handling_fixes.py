@@ -44,20 +44,18 @@ class TestReturnValueHandlingFixes:
         try:
             # Direct access - should always work after proper initialization
             qs = agent.qs
-            assert (
-                qs is not None
-            ), "qs should never be None after proper initialization"
+            assert qs is not None, "qs should never be None after proper initialization"
             # Fix: PyMDP returns numpy.ndarray with dtype=object, not list
-            assert isinstance(
-                qs, np.ndarray
-            ), f"qs should be numpy.ndarray, got {type(qs)}"
+            assert isinstance(qs, np.ndarray), (
+                f"qs should be numpy.ndarray, got {type(qs)}"
+            )
             assert qs.size > 0, "qs should not be empty"
 
             # Test that we can access first element directly
             first_belief = qs[0]
-            assert isinstance(
-                first_belief, np.ndarray
-            ), "First belief should be numpy array"
+            assert isinstance(first_belief, np.ndarray), (
+                "First belief should be numpy array"
+            )
 
             print(f"Direct access successful: qs has {qs.size} factors")
 
@@ -88,12 +86,8 @@ class TestReturnValueHandlingFixes:
         try:
             # This should work after infer_policies()
             G = agent.G
-            assert (
-                G is not None
-            ), "G should never be None after infer_policies()"
-            assert isinstance(
-                G, np.ndarray
-            ), f"G should be numpy array, got {type(G)}"
+            assert G is not None, "G should never be None after infer_policies()"
+            assert isinstance(G, np.ndarray), f"G should be numpy array, got {type(G)}"
 
             print(f"Direct G access successful: shape {G.shape}")
 
@@ -114,28 +108,26 @@ class TestReturnValueHandlingFixes:
         try:
             # Direct access should work for required attributes
             agent_id = agent.agent_id
-            assert (
-                agent_id == "test_agent"
-            ), f"Expected test_agent, got {agent_id}"
+            assert agent_id == "test_agent", f"Expected test_agent, got {agent_id}"
 
             name = agent.name
             assert name == "TestAgent", f"Expected TestAgent, got {name}"
 
             position = agent.position
             # Position can be list or tuple - both are valid
-            assert isinstance(
-                position, (list, tuple)
-            ), f"Position should be list or tuple, got {type(position)}"
+            assert isinstance(position, (list, tuple)), (
+                f"Position should be list or tuple, got {type(position)}"
+            )
 
             metrics = agent.metrics
-            assert isinstance(
-                metrics, dict
-            ), f"Metrics should be dict, got {type(metrics)}"
+            assert isinstance(metrics, dict), (
+                f"Metrics should be dict, got {type(metrics)}"
+            )
 
             beliefs = agent.beliefs
-            assert isinstance(
-                beliefs, dict
-            ), f"Beliefs should be dict, got {type(beliefs)}"
+            assert isinstance(beliefs, dict), (
+                f"Beliefs should be dict, got {type(beliefs)}"
+            )
 
             print("Direct attribute access successful")
 
@@ -160,15 +152,13 @@ class TestReturnValueHandlingFixes:
         # This should work without None checks - agent should be properly initialized
         try:
             action = agent.select_action()
-            assert (
-                action is not None
-            ), "Action should never be None from proper agent"
-            assert isinstance(
-                action, str
-            ), f"Action should be string, got {type(action)}"
-            assert (
-                action in agent.actions
-            ), f"Action {action} not in valid actions {agent.actions}"
+            assert action is not None, "Action should never be None from proper agent"
+            assert isinstance(action, str), (
+                f"Action should be string, got {type(action)}"
+            )
+            assert action in agent.actions, (
+                f"Action {action} not in valid actions {agent.actions}"
+            )
 
             print(f"Action sampling successful: {action}")
 
@@ -201,15 +191,11 @@ class TestReturnValueHandlingFixes:
                 assert B is not None, "B matrix should not be None"
 
                 qs = agent.pymdp_agent.qs
-                assert (
-                    qs is not None
-                ), "Beliefs should not be None after update"
+                assert qs is not None, "Beliefs should not be None after update"
 
                 print("Direct belief access successful")
             else:
-                pytest.fail(
-                    "PyMDP agent not available - testing fallback scenario"
-                )
+                pytest.fail("PyMDP agent not available - testing fallback scenario")
 
         except AttributeError as e:
             pytest.fail(f"Direct belief access failed: {e}")
@@ -236,9 +222,7 @@ class TestReturnValueHandlingFixes:
 
     def test_remove_defensive_none_checks_in_coalition_coordinator(self):
         """Test CoalitionCoordinatorAgent should not use defensive None checks."""
-        agent = CoalitionCoordinatorAgent(
-            "coalition_test", name="CoalitionTest"
-        )
+        agent = CoalitionCoordinatorAgent("coalition_test", name="CoalitionTest")
 
         # Direct attribute access - no getattr
         try:
@@ -274,18 +258,10 @@ class TestReturnValueHandlingFixes:
                 D = agent.pymdp_agent.D
 
                 # Validate types directly
-                assert isinstance(
-                    A, np.ndarray
-                ), f"A should be ndarray, got {type(A)}"
-                assert isinstance(
-                    B, np.ndarray
-                ), f"B should be ndarray, got {type(B)}"
-                assert isinstance(
-                    C, np.ndarray
-                ), f"C should be ndarray, got {type(C)}"
-                assert isinstance(
-                    D, np.ndarray
-                ), f"D should be ndarray, got {type(D)}"
+                assert isinstance(A, np.ndarray), f"A should be ndarray, got {type(A)}"
+                assert isinstance(B, np.ndarray), f"B should be ndarray, got {type(B)}"
+                assert isinstance(C, np.ndarray), f"C should be ndarray, got {type(C)}"
+                assert isinstance(D, np.ndarray), f"D should be ndarray, got {type(D)}"
 
                 print("Direct matrix access successful")
 
@@ -313,12 +289,10 @@ class TestReturnValueHandlingFixes:
 
         for test_input in test_cases:
             result = safe_array_to_int(test_input)
-            assert isinstance(
-                result, int
-            ), f"Expected int, got {type(result)} for {test_input}"
-            assert (
-                result >= 0
-            ), f"Expected non-negative, got {result} for {test_input}"
+            assert isinstance(result, int), (
+                f"Expected int, got {type(result)} for {test_input}"
+            )
+            assert result >= 0, f"Expected non-negative, got {result} for {test_input}"
 
         print("Action conversion without fallbacks successful")
 

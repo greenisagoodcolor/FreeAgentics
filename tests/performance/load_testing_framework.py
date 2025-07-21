@@ -94,12 +94,12 @@ class LoadTestingFramework:
 
         # Performance thresholds
         self.sla_thresholds = {
-            'response_time_p95_ms': 3000.0,  # <3s requirement
-            'response_time_p99_ms': 5000.0,  # <5s for 99th percentile
-            'error_rate_max': 1.0,  # <1% error rate
-            'throughput_min_rps': 50.0,  # Minimum 50 requests per second
-            'memory_usage_max_mb': 2000.0,  # Maximum 2GB memory
-            'cpu_usage_max_percent': 80.0,  # Maximum 80% CPU
+            "response_time_p95_ms": 3000.0,  # <3s requirement
+            "response_time_p99_ms": 5000.0,  # <5s for 99th percentile
+            "error_rate_max": 1.0,  # <1% error rate
+            "throughput_min_rps": 50.0,  # Minimum 50 requests per second
+            "memory_usage_max_mb": 2000.0,  # Maximum 2GB memory
+            "cpu_usage_max_percent": 80.0,  # Maximum 80% CPU
         }
 
         # Built-in scenarios
@@ -282,9 +282,7 @@ class LoadTestingFramework:
             ),
         }
 
-    async def run_load_test(
-        self, scenario: LoadTestScenario
-    ) -> LoadTestResult:
+    async def run_load_test(self, scenario: LoadTestScenario) -> LoadTestResult:
         """Run a load test scenario."""
         logger.info(f"Starting load test: {scenario.name}")
         logger.info(
@@ -313,16 +311,16 @@ class LoadTestingFramework:
             async with aiohttp.ClientSession(
                 connector=connector,
                 timeout=timeout,
-                headers={'User-Agent': 'FreeAgentics-LoadTest/1.0'},
+                headers={"User-Agent": "FreeAgentics-LoadTest/1.0"},
             ) as session:
                 # Initialize real-time metrics
                 self.real_time_metrics = {
-                    'active_users': 0,
-                    'requests_per_second': 0,
-                    'average_response_time': 0,
-                    'error_rate': 0,
-                    'memory_usage_mb': 0,
-                    'cpu_usage_percent': 0,
+                    "active_users": 0,
+                    "requests_per_second": 0,
+                    "average_response_time": 0,
+                    "error_rate": 0,
+                    "memory_usage_mb": 0,
+                    "cpu_usage_percent": 0,
                 }
 
                 # Start metrics collection task
@@ -379,9 +377,7 @@ class LoadTestingFramework:
         duration = (end_time - start_time).total_seconds()
 
         # Collect results
-        result = self._compile_results(
-            scenario, start_time, end_time, duration
-        )
+        result = self._compile_results(scenario, start_time, end_time, duration)
         self.results_history.append(result)
 
         logger.info(
@@ -454,14 +450,12 @@ class LoadTestingFramework:
             user_session.errors_encountered += 1
             logger.error(f"User {user_session.user_id} encountered error: {e}")
 
-    def _choose_endpoint(
-        self, endpoints: List[Dict[str, Any]]
-    ) -> Dict[str, Any]:
+    def _choose_endpoint(self, endpoints: List[Dict[str, Any]]) -> Dict[str, Any]:
         """Choose an endpoint based on weights."""
         if not endpoints:
             return {"path": "/health", "method": "GET", "weight": 1.0}
 
-        weights = [ep.get('weight', 1.0) for ep in endpoints]
+        weights = [ep.get("weight", 1.0) for ep in endpoints]
         return random.choices(endpoints, weights=weights)[0]
 
     async def _make_request(
@@ -472,25 +466,25 @@ class LoadTestingFramework:
     ):
         """Make an HTTP request."""
         url = f"{self.base_url}{endpoint['path']}"
-        method = endpoint.get('method', 'GET')
-        payload = endpoint.get('payload')
+        method = endpoint.get("method", "GET")
+        payload = endpoint.get("payload")
 
         start_time = time.perf_counter()
 
         try:
-            if method.upper() == 'GET':
+            if method.upper() == "GET":
                 async with session.get(url) as response:
                     await response.read()
                     success = response.status < 400
-            elif method.upper() == 'POST':
+            elif method.upper() == "POST":
                 async with session.post(url, json=payload) as response:
                     await response.read()
                     success = response.status < 400
-            elif method.upper() == 'PUT':
+            elif method.upper() == "PUT":
                 async with session.put(url, json=payload) as response:
                     await response.read()
                     success = response.status < 400
-            elif method.upper() == 'DELETE':
+            elif method.upper() == "DELETE":
                 async with session.delete(url) as response:
                     await response.read()
                     success = response.status < 400
@@ -510,9 +504,7 @@ class LoadTestingFramework:
             user_session.response_times.append(response_time)
             logger.debug(f"Request failed for {user_session.user_id}: {e}")
 
-    async def _simulate_websocket_user(
-        self, user_session: UserSession, duration: int
-    ):
+    async def _simulate_websocket_user(self, user_session: UserSession, duration: int):
         """Simulate WebSocket connections."""
         try:
             # Mock WebSocket simulation (replace with actual WebSocket logic)
@@ -529,13 +521,9 @@ class LoadTestingFramework:
         except asyncio.CancelledError:
             pass
         except Exception as e:
-            logger.error(
-                f"WebSocket simulation error for {user_session.user_id}: {e}"
-            )
+            logger.error(f"WebSocket simulation error for {user_session.user_id}: {e}")
 
-    async def _simulate_database_load(
-        self, user_session: UserSession, duration: int
-    ):
+    async def _simulate_database_load(self, user_session: UserSession, duration: int):
         """Simulate database load."""
         try:
             end_time = time.time() + duration
@@ -546,14 +534,14 @@ class LoadTestingFramework:
                 user_session.database_queries += 1
 
                 # Simulate query processing time
-                query_types = ['SELECT', 'INSERT', 'UPDATE', 'DELETE']
+                query_types = ["SELECT", "INSERT", "UPDATE", "DELETE"]
                 query_type = random.choice(query_types)
 
-                if query_type == 'SELECT':
+                if query_type == "SELECT":
                     await asyncio.sleep(0.005)  # 5ms
-                elif query_type == 'INSERT':
+                elif query_type == "INSERT":
                     await asyncio.sleep(0.010)  # 10ms
-                elif query_type == 'UPDATE':
+                elif query_type == "UPDATE":
                     await asyncio.sleep(0.008)  # 8ms
                 else:  # DELETE
                     await asyncio.sleep(0.006)  # 6ms
@@ -561,9 +549,7 @@ class LoadTestingFramework:
         except asyncio.CancelledError:
             pass
         except Exception as e:
-            logger.error(
-                f"Database simulation error for {user_session.user_id}: {e}"
-            )
+            logger.error(f"Database simulation error for {user_session.user_id}: {e}")
 
     async def _collect_real_time_metrics(self, duration: int):
         """Collect real-time metrics during the test."""
@@ -612,9 +598,7 @@ class LoadTestingFramework:
                     s.errors_encountered for s in self.active_sessions.values()
                 )
                 error_rate = (
-                    (total_errors / total_requests * 100)
-                    if total_requests > 0
-                    else 0
+                    (total_errors / total_requests * 100) if total_requests > 0 else 0
                 )
 
                 # System metrics
@@ -625,13 +609,13 @@ class LoadTestingFramework:
                 # Update real-time metrics
                 self.real_time_metrics.update(
                     {
-                        'active_users': active_users,
-                        'requests_per_second': rps,
-                        'average_response_time': avg_response_time,
-                        'error_rate': error_rate,
-                        'memory_usage_mb': memory_usage,
-                        'cpu_usage_percent': cpu_usage,
-                        'timestamp': current_time,
+                        "active_users": active_users,
+                        "requests_per_second": rps,
+                        "average_response_time": avg_response_time,
+                        "error_rate": error_rate,
+                        "memory_usage_mb": memory_usage,
+                        "cpu_usage_percent": cpu_usage,
+                        "timestamp": current_time,
                     }
                 )
 
@@ -664,9 +648,7 @@ class LoadTestingFramework:
 
         successful_requests = total_requests - total_errors
         throughput = successful_requests / duration if duration > 0 else 0
-        error_rate = (
-            (total_errors / total_requests * 100) if total_requests > 0 else 0
-        )
+        error_rate = (total_errors / total_requests * 100) if total_requests > 0 else 0
 
         # System metrics
         process = psutil.Process()
@@ -675,51 +657,41 @@ class LoadTestingFramework:
 
         # Performance metrics
         performance_metrics = {
-            'response_time_stats': {
-                'min_ms': np.min(all_response_times)
+            "response_time_stats": {
+                "min_ms": np.min(all_response_times) if all_response_times else 0,
+                "max_ms": np.max(all_response_times) if all_response_times else 0,
+                "mean_ms": np.mean(all_response_times) if all_response_times else 0,
+                "median_ms": np.median(all_response_times) if all_response_times else 0,
+                "p95_ms": np.percentile(all_response_times, 95)
                 if all_response_times
                 else 0,
-                'max_ms': np.max(all_response_times)
+                "p99_ms": np.percentile(all_response_times, 99)
                 if all_response_times
                 else 0,
-                'mean_ms': np.mean(all_response_times)
-                if all_response_times
-                else 0,
-                'median_ms': np.median(all_response_times)
-                if all_response_times
-                else 0,
-                'p95_ms': np.percentile(all_response_times, 95)
-                if all_response_times
-                else 0,
-                'p99_ms': np.percentile(all_response_times, 99)
-                if all_response_times
-                else 0,
-                'std_ms': np.std(all_response_times)
-                if all_response_times
-                else 0,
+                "std_ms": np.std(all_response_times) if all_response_times else 0,
             },
-            'throughput_stats': {
-                'requests_per_second': throughput,
-                'requests_per_minute': throughput * 60,
-                'requests_per_hour': throughput * 3600,
+            "throughput_stats": {
+                "requests_per_second": throughput,
+                "requests_per_minute": throughput * 60,
+                "requests_per_hour": throughput * 3600,
             },
-            'user_stats': {
-                'users_spawned': len(self.active_sessions),
-                'users_completed': len(
+            "user_stats": {
+                "users_spawned": len(self.active_sessions),
+                "users_completed": len(
                     [
                         s
                         for s in self.active_sessions.values()
                         if s.current_state == "completed"
                     ]
                 ),
-                'users_cancelled': len(
+                "users_cancelled": len(
                     [
                         s
                         for s in self.active_sessions.values()
                         if s.current_state == "cancelled"
                     ]
                 ),
-                'users_error': len(
+                "users_error": len(
                     [
                         s
                         for s in self.active_sessions.values()
@@ -727,15 +699,15 @@ class LoadTestingFramework:
                     ]
                 ),
             },
-            'websocket_stats': {
-                'total_messages': total_websocket_messages,
-                'messages_per_second': total_websocket_messages / duration
+            "websocket_stats": {
+                "total_messages": total_websocket_messages,
+                "messages_per_second": total_websocket_messages / duration
                 if duration > 0
                 else 0,
             },
-            'database_stats': {
-                'total_queries': total_database_queries,
-                'queries_per_second': total_database_queries / duration
+            "database_stats": {
+                "total_queries": total_database_queries,
+                "queries_per_second": total_database_queries / duration
                 if duration > 0
                 else 0,
             },
@@ -777,139 +749,125 @@ class LoadTestingFramework:
         violations = []
 
         # Response time violations
-        p95_response_time = performance_metrics['response_time_stats'][
-            'p95_ms'
-        ]
-        if p95_response_time > self.sla_thresholds['response_time_p95_ms']:
+        p95_response_time = performance_metrics["response_time_stats"]["p95_ms"]
+        if p95_response_time > self.sla_thresholds["response_time_p95_ms"]:
             violations.append(
                 {
-                    'metric': 'response_time_p95',
-                    'threshold': self.sla_thresholds['response_time_p95_ms'],
-                    'actual': p95_response_time,
-                    'severity': 'critical',
-                    'description': f'P95 response time ({p95_response_time:.1f}ms) exceeds threshold ({self.sla_thresholds["response_time_p95_ms"]:.1f}ms)',
+                    "metric": "response_time_p95",
+                    "threshold": self.sla_thresholds["response_time_p95_ms"],
+                    "actual": p95_response_time,
+                    "severity": "critical",
+                    "description": f"P95 response time ({p95_response_time:.1f}ms) exceeds threshold ({self.sla_thresholds['response_time_p95_ms']:.1f}ms)",
                 }
             )
 
-        p99_response_time = performance_metrics['response_time_stats'][
-            'p99_ms'
-        ]
-        if p99_response_time > self.sla_thresholds['response_time_p99_ms']:
+        p99_response_time = performance_metrics["response_time_stats"]["p99_ms"]
+        if p99_response_time > self.sla_thresholds["response_time_p99_ms"]:
             violations.append(
                 {
-                    'metric': 'response_time_p99',
-                    'threshold': self.sla_thresholds['response_time_p99_ms'],
-                    'actual': p99_response_time,
-                    'severity': 'high',
-                    'description': f'P99 response time ({p99_response_time:.1f}ms) exceeds threshold ({self.sla_thresholds["response_time_p99_ms"]:.1f}ms)',
+                    "metric": "response_time_p99",
+                    "threshold": self.sla_thresholds["response_time_p99_ms"],
+                    "actual": p99_response_time,
+                    "severity": "high",
+                    "description": f"P99 response time ({p99_response_time:.1f}ms) exceeds threshold ({self.sla_thresholds['response_time_p99_ms']:.1f}ms)",
                 }
             )
 
         # Error rate violations
-        if error_rate > self.sla_thresholds['error_rate_max']:
+        if error_rate > self.sla_thresholds["error_rate_max"]:
             violations.append(
                 {
-                    'metric': 'error_rate',
-                    'threshold': self.sla_thresholds['error_rate_max'],
-                    'actual': error_rate,
-                    'severity': 'critical',
-                    'description': f'Error rate ({error_rate:.2f}%) exceeds threshold ({self.sla_thresholds["error_rate_max"]:.1f}%)',
+                    "metric": "error_rate",
+                    "threshold": self.sla_thresholds["error_rate_max"],
+                    "actual": error_rate,
+                    "severity": "critical",
+                    "description": f"Error rate ({error_rate:.2f}%) exceeds threshold ({self.sla_thresholds['error_rate_max']:.1f}%)",
                 }
             )
 
         # Throughput violations
-        throughput = performance_metrics['throughput_stats'][
-            'requests_per_second'
-        ]
-        if throughput < self.sla_thresholds['throughput_min_rps']:
+        throughput = performance_metrics["throughput_stats"]["requests_per_second"]
+        if throughput < self.sla_thresholds["throughput_min_rps"]:
             violations.append(
                 {
-                    'metric': 'throughput',
-                    'threshold': self.sla_thresholds['throughput_min_rps'],
-                    'actual': throughput,
-                    'severity': 'medium',
-                    'description': f'Throughput ({throughput:.1f} RPS) below threshold ({self.sla_thresholds["throughput_min_rps"]:.1f} RPS)',
+                    "metric": "throughput",
+                    "threshold": self.sla_thresholds["throughput_min_rps"],
+                    "actual": throughput,
+                    "severity": "medium",
+                    "description": f"Throughput ({throughput:.1f} RPS) below threshold ({self.sla_thresholds['throughput_min_rps']:.1f} RPS)",
                 }
             )
 
         # Memory violations
-        if memory_usage > self.sla_thresholds['memory_usage_max_mb']:
+        if memory_usage > self.sla_thresholds["memory_usage_max_mb"]:
             violations.append(
                 {
-                    'metric': 'memory_usage',
-                    'threshold': self.sla_thresholds['memory_usage_max_mb'],
-                    'actual': memory_usage,
-                    'severity': 'high',
-                    'description': f'Memory usage ({memory_usage:.1f}MB) exceeds threshold ({self.sla_thresholds["memory_usage_max_mb"]:.1f}MB)',
+                    "metric": "memory_usage",
+                    "threshold": self.sla_thresholds["memory_usage_max_mb"],
+                    "actual": memory_usage,
+                    "severity": "high",
+                    "description": f"Memory usage ({memory_usage:.1f}MB) exceeds threshold ({self.sla_thresholds['memory_usage_max_mb']:.1f}MB)",
                 }
             )
 
         # CPU violations
-        if cpu_usage > self.sla_thresholds['cpu_usage_max_percent']:
+        if cpu_usage > self.sla_thresholds["cpu_usage_max_percent"]:
             violations.append(
                 {
-                    'metric': 'cpu_usage',
-                    'threshold': self.sla_thresholds['cpu_usage_max_percent'],
-                    'actual': cpu_usage,
-                    'severity': 'medium',
-                    'description': f'CPU usage ({cpu_usage:.1f}%) exceeds threshold ({self.sla_thresholds["cpu_usage_max_percent"]:.1f}%)',
+                    "metric": "cpu_usage",
+                    "threshold": self.sla_thresholds["cpu_usage_max_percent"],
+                    "actual": cpu_usage,
+                    "severity": "medium",
+                    "description": f"CPU usage ({cpu_usage:.1f}%) exceeds threshold ({self.sla_thresholds['cpu_usage_max_percent']:.1f}%)",
                 }
             )
 
         return violations
 
-    def generate_load_test_report(
-        self, result: LoadTestResult
-    ) -> Dict[str, Any]:
+    def generate_load_test_report(self, result: LoadTestResult) -> Dict[str, Any]:
         """Generate a comprehensive load test report."""
         report = {
-            'test_summary': {
-                'scenario_name': result.scenario_name,
-                'start_time': result.start_time.isoformat(),
-                'end_time': result.end_time.isoformat(),
-                'duration_seconds': result.duration_seconds,
-                'users_spawned': result.users_spawned,
+            "test_summary": {
+                "scenario_name": result.scenario_name,
+                "start_time": result.start_time.isoformat(),
+                "end_time": result.end_time.isoformat(),
+                "duration_seconds": result.duration_seconds,
+                "users_spawned": result.users_spawned,
             },
-            'request_summary': {
-                'total_requests': result.total_requests,
-                'successful_requests': result.successful_requests,
-                'failed_requests': result.failed_requests,
-                'success_rate': (
+            "request_summary": {
+                "total_requests": result.total_requests,
+                "successful_requests": result.successful_requests,
+                "failed_requests": result.failed_requests,
+                "success_rate": (
                     result.successful_requests / result.total_requests * 100
                 )
                 if result.total_requests > 0
                 else 0,
-                'error_rate': result.error_rate,
-                'throughput_rps': result.throughput_rps,
+                "error_rate": result.error_rate,
+                "throughput_rps": result.throughput_rps,
             },
-            'performance_metrics': result.performance_metrics,
-            'resource_usage': {
-                'memory_usage_mb': result.memory_usage_mb,
-                'cpu_usage_percent': result.cpu_usage_percent,
+            "performance_metrics": result.performance_metrics,
+            "resource_usage": {
+                "memory_usage_mb": result.memory_usage_mb,
+                "cpu_usage_percent": result.cpu_usage_percent,
             },
-            'sla_validation': {
-                'violations_count': len(result.sla_violations),
-                'violations': result.sla_violations,
-                'sla_met': len(result.sla_violations) == 0,
+            "sla_validation": {
+                "violations_count": len(result.sla_violations),
+                "violations": result.sla_violations,
+                "sla_met": len(result.sla_violations) == 0,
             },
-            'recommendations': self._generate_load_test_recommendations(
-                result
-            ),
-            'timestamp': datetime.now().isoformat(),
+            "recommendations": self._generate_load_test_recommendations(result),
+            "timestamp": datetime.now().isoformat(),
         }
 
         return report
 
-    def _generate_load_test_recommendations(
-        self, result: LoadTestResult
-    ) -> List[str]:
+    def _generate_load_test_recommendations(self, result: LoadTestResult) -> List[str]:
         """Generate recommendations based on load test results."""
         recommendations = []
 
         # Response time recommendations
-        p95_response_time = result.performance_metrics['response_time_stats'][
-            'p95_ms'
-        ]
+        p95_response_time = result.performance_metrics["response_time_stats"]["p95_ms"]
         if p95_response_time > 2000:
             recommendations.append(
                 f"High P95 response time ({p95_response_time:.1f}ms). Consider implementing caching, optimizing database queries, or scaling horizontally."
@@ -942,7 +900,7 @@ class LoadTestingFramework:
         # SLA violations
         if result.sla_violations:
             critical_violations = [
-                v for v in result.sla_violations if v['severity'] == 'critical'
+                v for v in result.sla_violations if v["severity"] == "critical"
             ]
             if critical_violations:
                 recommendations.append(
@@ -976,29 +934,29 @@ class LoadTestingFramework:
     def save_results(self, filename: str):
         """Save all results to a file."""
         data = {
-            'results': [
+            "results": [
                 {
-                    'scenario_name': r.scenario_name,
-                    'start_time': r.start_time.isoformat(),
-                    'end_time': r.end_time.isoformat(),
-                    'duration_seconds': r.duration_seconds,
-                    'users_spawned': r.users_spawned,
-                    'total_requests': r.total_requests,
-                    'successful_requests': r.successful_requests,
-                    'failed_requests': r.failed_requests,
-                    'throughput_rps': r.throughput_rps,
-                    'error_rate': r.error_rate,
-                    'memory_usage_mb': r.memory_usage_mb,
-                    'cpu_usage_percent': r.cpu_usage_percent,
-                    'sla_violations': r.sla_violations,
-                    'performance_metrics': r.performance_metrics,
+                    "scenario_name": r.scenario_name,
+                    "start_time": r.start_time.isoformat(),
+                    "end_time": r.end_time.isoformat(),
+                    "duration_seconds": r.duration_seconds,
+                    "users_spawned": r.users_spawned,
+                    "total_requests": r.total_requests,
+                    "successful_requests": r.successful_requests,
+                    "failed_requests": r.failed_requests,
+                    "throughput_rps": r.throughput_rps,
+                    "error_rate": r.error_rate,
+                    "memory_usage_mb": r.memory_usage_mb,
+                    "cpu_usage_percent": r.cpu_usage_percent,
+                    "sla_violations": r.sla_violations,
+                    "performance_metrics": r.performance_metrics,
                 }
                 for r in self.results_history
             ],
-            'timestamp': datetime.now().isoformat(),
+            "timestamp": datetime.now().isoformat(),
         }
 
-        with open(filename, 'w') as f:
+        with open(filename, "w") as f:
             json.dump(data, f, indent=2)
 
         logger.info(f"Load test results saved to {filename}")
@@ -1014,10 +972,10 @@ async def run_load_test_suite():
     framework = LoadTestingFramework()
 
     # Run different scenarios
-    scenarios_to_test = ['baseline', 'standard', 'peak']
+    scenarios_to_test = ["baseline", "standard", "peak"]
 
     for scenario_name in scenarios_to_test:
-        print(f"\n{'='*20} {scenario_name.upper()} LOAD TEST {'='*20}")
+        print(f"\n{'=' * 20} {scenario_name.upper()} LOAD TEST {'=' * 20}")
 
         scenario = framework.get_scenario(scenario_name)
         if not scenario:
@@ -1054,15 +1012,13 @@ async def run_load_test_suite():
             if result.sla_violations:
                 print("\nSLA Violations:")
                 for violation in result.sla_violations:
-                    print(
-                        f"  - {violation['metric']}: {violation['description']}"
-                    )
+                    print(f"  - {violation['metric']}: {violation['description']}")
             else:
                 print("\n✓ All SLA requirements met")
 
             # Recommendations
             print("\nRecommendations:")
-            for rec in report['recommendations']:
+            for rec in report["recommendations"]:
                 print(f"  - {rec}")
 
         except Exception as e:

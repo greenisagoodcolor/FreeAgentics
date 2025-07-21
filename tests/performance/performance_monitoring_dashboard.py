@@ -101,16 +101,14 @@ class PerformanceMonitoringDashboard:
 
         # Performance baselines
         self.baselines: Dict[str, float] = {}
-        self.baseline_window = (
-            100  # Number of samples for baseline calculation
-        )
+        self.baseline_window = 100  # Number of samples for baseline calculation
 
         # Health score components
         self.health_score_weights = {
-            'response_time': 0.25,
-            'error_rate': 0.25,
-            'resource_usage': 0.25,
-            'throughput': 0.25,
+            "response_time": 0.25,
+            "error_rate": 0.25,
+            "resource_usage": 0.25,
+            "throughput": 0.25,
         }
 
         # Initialize default alert rules
@@ -277,33 +275,33 @@ class PerformanceMonitoringDashboard:
         if current_perf_metrics:
             metrics.update(
                 {
-                    'cpu_usage': current_perf_metrics.cpu_usage,
-                    'memory_usage': current_perf_metrics.memory_usage,
-                    'memory_rss_mb': current_perf_metrics.memory_rss_mb,
-                    'thread_count': current_perf_metrics.thread_count,
-                    'api_requests_per_second': current_perf_metrics.api_requests_per_second,
-                    'api_response_time_ms': current_perf_metrics.api_response_time_ms,
-                    'api_error_rate': current_perf_metrics.api_error_rate,
-                    'db_query_time_ms': current_perf_metrics.db_query_time_ms,
-                    'db_connections': current_perf_metrics.db_connections,
-                    'agent_count': current_perf_metrics.agent_count,
-                    'agent_step_time_ms': current_perf_metrics.agent_step_time_ms,
-                    'websocket_connections': current_perf_metrics.websocket_connections,
-                    'websocket_messages_per_second': current_perf_metrics.websocket_messages_per_second,
-                    'gil_contention': current_perf_metrics.gil_contention,
+                    "cpu_usage": current_perf_metrics.cpu_usage,
+                    "memory_usage": current_perf_metrics.memory_usage,
+                    "memory_rss_mb": current_perf_metrics.memory_rss_mb,
+                    "thread_count": current_perf_metrics.thread_count,
+                    "api_requests_per_second": current_perf_metrics.api_requests_per_second,
+                    "api_response_time_ms": current_perf_metrics.api_response_time_ms,
+                    "api_error_rate": current_perf_metrics.api_error_rate,
+                    "db_query_time_ms": current_perf_metrics.db_query_time_ms,
+                    "db_connections": current_perf_metrics.db_connections,
+                    "agent_count": current_perf_metrics.agent_count,
+                    "agent_step_time_ms": current_perf_metrics.agent_step_time_ms,
+                    "websocket_connections": current_perf_metrics.websocket_connections,
+                    "websocket_messages_per_second": current_perf_metrics.websocket_messages_per_second,
+                    "gil_contention": current_perf_metrics.gil_contention,
                 }
             )
 
         # Add system metrics
         try:
             system_metrics = {
-                'disk_usage_percent': psutil.disk_usage('/').percent,
-                'network_io_bytes_sent': psutil.net_io_counters().bytes_sent,
-                'network_io_bytes_recv': psutil.net_io_counters().bytes_recv,
-                'load_average_1m': psutil.getloadavg()[0]
-                if hasattr(psutil, 'getloadavg')
+                "disk_usage_percent": psutil.disk_usage("/").percent,
+                "network_io_bytes_sent": psutil.net_io_counters().bytes_sent,
+                "network_io_bytes_recv": psutil.net_io_counters().bytes_recv,
+                "load_average_1m": psutil.getloadavg()[0]
+                if hasattr(psutil, "getloadavg")
                 else 0,
-                'swap_usage_percent': psutil.swap_memory().percent,
+                "swap_usage_percent": psutil.swap_memory().percent,
             }
             metrics.update(system_metrics)
         except Exception as e:
@@ -334,54 +332,52 @@ class PerformanceMonitoringDashboard:
         score = 100.0
 
         # Response time component
-        response_time = metrics.get('api_response_time_ms', 0)
+        response_time = metrics.get("api_response_time_ms", 0)
         if response_time > 0:
             if response_time > 5000:  # >5s is very bad
-                score -= 40 * self.health_score_weights['response_time']
+                score -= 40 * self.health_score_weights["response_time"]
             elif response_time > 3000:  # >3s is bad
-                score -= 25 * self.health_score_weights['response_time']
+                score -= 25 * self.health_score_weights["response_time"]
             elif response_time > 1000:  # >1s is concerning
-                score -= 15 * self.health_score_weights['response_time']
+                score -= 15 * self.health_score_weights["response_time"]
 
         # Error rate component
-        error_rate = metrics.get('api_error_rate', 0)
+        error_rate = metrics.get("api_error_rate", 0)
         if error_rate > 10:  # >10% error rate
-            score -= 40 * self.health_score_weights['error_rate']
+            score -= 40 * self.health_score_weights["error_rate"]
         elif error_rate > 5:  # >5% error rate
-            score -= 25 * self.health_score_weights['error_rate']
+            score -= 25 * self.health_score_weights["error_rate"]
         elif error_rate > 1:  # >1% error rate
-            score -= 10 * self.health_score_weights['error_rate']
+            score -= 10 * self.health_score_weights["error_rate"]
 
         # Resource usage component
-        cpu_usage = metrics.get('cpu_usage', 0)
-        memory_usage = metrics.get('memory_usage', 0)
+        cpu_usage = metrics.get("cpu_usage", 0)
+        memory_usage = metrics.get("memory_usage", 0)
 
         if cpu_usage > 90 or memory_usage > 90:
-            score -= 35 * self.health_score_weights['resource_usage']
+            score -= 35 * self.health_score_weights["resource_usage"]
         elif cpu_usage > 75 or memory_usage > 75:
-            score -= 20 * self.health_score_weights['resource_usage']
+            score -= 20 * self.health_score_weights["resource_usage"]
         elif cpu_usage > 60 or memory_usage > 60:
-            score -= 10 * self.health_score_weights['resource_usage']
+            score -= 10 * self.health_score_weights["resource_usage"]
 
         # Throughput component
-        throughput = metrics.get('api_requests_per_second', 0)
+        throughput = metrics.get("api_requests_per_second", 0)
         if throughput < 5:  # Very low throughput
-            score -= 25 * self.health_score_weights['throughput']
+            score -= 25 * self.health_score_weights["throughput"]
         elif throughput < 10:  # Low throughput
-            score -= 15 * self.health_score_weights['throughput']
+            score -= 15 * self.health_score_weights["throughput"]
         elif throughput < 20:  # Moderate throughput
-            score -= 5 * self.health_score_weights['throughput']
+            score -= 5 * self.health_score_weights["throughput"]
 
         return max(score, 0)
 
-    def _calculate_trends(
-        self, current_metrics: Dict[str, float]
-    ) -> Dict[str, str]:
+    def _calculate_trends(self, current_metrics: Dict[str, float]) -> Dict[str, str]:
         """Calculate trend indicators for key metrics."""
         trends = {}
 
         if len(self.metrics_history) < 10:
-            return {metric: 'stable' for metric in current_metrics.keys()}
+            return {metric: "stable" for metric in current_metrics.keys()}
 
         # Look at last 10 snapshots for trend analysis
         recent_snapshots = list(self.metrics_history)[-10:]
@@ -399,28 +395,28 @@ class PerformanceMonitoringDashboard:
 
                 # Determine trend based on slope and metric type
                 if metric_name in [
-                    'api_response_time_ms',
-                    'api_error_rate',
-                    'cpu_usage',
-                    'memory_usage',
+                    "api_response_time_ms",
+                    "api_error_rate",
+                    "cpu_usage",
+                    "memory_usage",
                 ]:
                     # For these metrics, increasing is bad
                     if slope > 0.1:
-                        trends[metric_name] = 'degrading'
+                        trends[metric_name] = "degrading"
                     elif slope < -0.1:
-                        trends[metric_name] = 'improving'
+                        trends[metric_name] = "improving"
                     else:
-                        trends[metric_name] = 'stable'
+                        trends[metric_name] = "stable"
                 else:
                     # For metrics like throughput, increasing is good
                     if slope > 0.1:
-                        trends[metric_name] = 'improving'
+                        trends[metric_name] = "improving"
                     elif slope < -0.1:
-                        trends[metric_name] = 'degrading'
+                        trends[metric_name] = "degrading"
                     else:
-                        trends[metric_name] = 'stable'
+                        trends[metric_name] = "stable"
             else:
-                trends[metric_name] = 'stable'
+                trends[metric_name] = "stable"
 
         return trends
 
@@ -434,11 +430,11 @@ class PerformanceMonitoringDashboard:
 
             # Check if condition is met
             condition_met = False
-            if rule.condition == 'greater_than':
+            if rule.condition == "greater_than":
                 condition_met = metric_value > rule.threshold
-            elif rule.condition == 'less_than':
+            elif rule.condition == "less_than":
                 condition_met = metric_value < rule.threshold
-            elif rule.condition == 'equals':
+            elif rule.condition == "equals":
                 condition_met = abs(metric_value - rule.threshold) < 0.01
 
             if condition_met:
@@ -457,14 +453,9 @@ class PerformanceMonitoringDashboard:
                 else:
                     # Check if duration threshold is met
                     alert = self.active_alerts[rule_name]
-                    duration = (
-                        datetime.now() - alert.timestamp
-                    ).total_seconds()
+                    duration = (datetime.now() - alert.timestamp).total_seconds()
 
-                    if (
-                        duration >= rule.duration_seconds
-                        and not alert.acknowledged
-                    ):
+                    if duration >= rule.duration_seconds and not alert.acknowledged:
                         # Fire the alert
                         self._fire_alert(rule_name, rule, metric_value)
             else:
@@ -489,9 +480,7 @@ class PerformanceMonitoringDashboard:
         self.active_alerts[rule_name] = alert
         logger.debug(f"Started tracking alert: {rule_name}")
 
-    def _fire_alert(
-        self, rule_name: str, rule: AlertRule, metric_value: float
-    ):
+    def _fire_alert(self, rule_name: str, rule: AlertRule, metric_value: float):
         """Fire an alert notification."""
         alert = self.active_alerts[rule_name]
         alert.current_value = metric_value
@@ -510,9 +499,7 @@ class PerformanceMonitoringDashboard:
             except Exception as e:
                 logger.error(f"Error in alert callback: {e}")
 
-        logger.warning(
-            f"ALERT FIRED: {alert.severity.upper()} - {alert.message}"
-        )
+        logger.warning(f"ALERT FIRED: {alert.severity.upper()} - {alert.message}")
 
     def _resolve_alert(self, rule_name: str, metrics: Dict[str, float]):
         """Resolve an active alert."""
@@ -555,9 +542,7 @@ class PerformanceMonitoringDashboard:
             del self.alert_rules[rule_name]
             logger.info(f"Removed alert rule: {rule_name}")
 
-    def add_alert_callback(
-        self, callback: Callable[[AlertNotification], None]
-    ):
+    def add_alert_callback(self, callback: Callable[[AlertNotification], None]):
         """Add a callback function for alert notifications."""
         self.alert_callbacks.append(callback)
 
@@ -572,28 +557,28 @@ class PerformanceMonitoringDashboard:
     def get_current_status(self) -> Dict[str, Any]:
         """Get current dashboard status."""
         if not self.metrics_history:
-            return {'error': 'No metrics available'}
+            return {"error": "No metrics available"}
 
         latest_snapshot = self.metrics_history[-1]
 
         return {
-            'timestamp': latest_snapshot.timestamp.isoformat(),
-            'health_score': latest_snapshot.system_health_score,
-            'active_alerts': len(self.active_alerts),
-            'metrics': latest_snapshot.metrics,
-            'trends': latest_snapshot.trend_indicators,
-            'baselines': self.baselines.copy(),
-            'alerts': [
+            "timestamp": latest_snapshot.timestamp.isoformat(),
+            "health_score": latest_snapshot.system_health_score,
+            "active_alerts": len(self.active_alerts),
+            "metrics": latest_snapshot.metrics,
+            "trends": latest_snapshot.trend_indicators,
+            "baselines": self.baselines.copy(),
+            "alerts": [
                 {
-                    'id': alert.id,
-                    'rule_name': alert.rule_name,
-                    'metric': alert.metric,
-                    'current_value': alert.current_value,
-                    'threshold': alert.threshold,
-                    'severity': alert.severity,
-                    'message': alert.message,
-                    'timestamp': alert.timestamp.isoformat(),
-                    'acknowledged': alert.acknowledged,
+                    "id": alert.id,
+                    "rule_name": alert.rule_name,
+                    "metric": alert.metric,
+                    "current_value": alert.current_value,
+                    "threshold": alert.threshold,
+                    "severity": alert.severity,
+                    "message": alert.message,
+                    "timestamp": alert.timestamp.isoformat(),
+                    "acknowledged": alert.acknowledged,
                 }
                 for alert in self.active_alerts.values()
             ],
@@ -608,10 +593,10 @@ class PerformanceMonitoringDashboard:
             if snapshot.timestamp >= cutoff_time:
                 history.append(
                     {
-                        'timestamp': snapshot.timestamp.isoformat(),
-                        'metrics': snapshot.metrics,
-                        'health_score': snapshot.system_health_score,
-                        'alerts_active': snapshot.alerts_active,
+                        "timestamp": snapshot.timestamp.isoformat(),
+                        "metrics": snapshot.metrics,
+                        "health_score": snapshot.system_health_score,
+                        "alerts_active": snapshot.alerts_active,
                     }
                 )
 
@@ -626,17 +611,17 @@ class PerformanceMonitoringDashboard:
             if alert.timestamp >= cutoff_time:
                 history.append(
                     {
-                        'id': alert.id,
-                        'rule_name': alert.rule_name,
-                        'metric': alert.metric,
-                        'current_value': alert.current_value,
-                        'threshold': alert.threshold,
-                        'severity': alert.severity,
-                        'message': alert.message,
-                        'timestamp': alert.timestamp.isoformat(),
-                        'acknowledged': alert.acknowledged,
-                        'resolved': alert.resolved,
-                        'resolution_time': alert.resolution_time.isoformat()
+                        "id": alert.id,
+                        "rule_name": alert.rule_name,
+                        "metric": alert.metric,
+                        "current_value": alert.current_value,
+                        "threshold": alert.threshold,
+                        "severity": alert.severity,
+                        "message": alert.message,
+                        "timestamp": alert.timestamp.isoformat(),
+                        "acknowledged": alert.acknowledged,
+                        "resolved": alert.resolved,
+                        "resolution_time": alert.resolution_time.isoformat()
                         if alert.resolution_time
                         else None,
                     }
@@ -647,114 +632,87 @@ class PerformanceMonitoringDashboard:
     def generate_dashboard_report(self) -> Dict[str, Any]:
         """Generate a comprehensive dashboard report."""
         if not self.metrics_history:
-            return {'error': 'No metrics available'}
+            return {"error": "No metrics available"}
 
         latest_snapshot = self.metrics_history[-1]
 
         # Calculate summary statistics
-        recent_snapshots = list(self.metrics_history)[
-            -50:
-        ]  # Last 50 snapshots
+        recent_snapshots = list(self.metrics_history)[-50:]  # Last 50 snapshots
 
         avg_health_score = statistics.mean(
             [s.system_health_score for s in recent_snapshots]
         )
         avg_response_time = statistics.mean(
-            [
-                s.metrics.get('api_response_time_ms', 0)
-                for s in recent_snapshots
-            ]
+            [s.metrics.get("api_response_time_ms", 0) for s in recent_snapshots]
         )
         avg_cpu_usage = statistics.mean(
-            [s.metrics.get('cpu_usage', 0) for s in recent_snapshots]
+            [s.metrics.get("cpu_usage", 0) for s in recent_snapshots]
         )
         avg_memory_usage = statistics.mean(
-            [s.metrics.get('memory_usage', 0) for s in recent_snapshots]
+            [s.metrics.get("memory_usage", 0) for s in recent_snapshots]
         )
 
         # Alert statistics
         alert_counts = {}
         for alert in self.alerts_history:
-            alert_counts[alert.severity] = (
-                alert_counts.get(alert.severity, 0) + 1
-            )
+            alert_counts[alert.severity] = alert_counts.get(alert.severity, 0) + 1
 
         # Trend analysis
         degrading_trends = [
-            k
-            for k, v in latest_snapshot.trend_indicators.items()
-            if v == 'degrading'
+            k for k, v in latest_snapshot.trend_indicators.items() if v == "degrading"
         ]
         improving_trends = [
-            k
-            for k, v in latest_snapshot.trend_indicators.items()
-            if v == 'improving'
+            k for k, v in latest_snapshot.trend_indicators.items() if v == "improving"
         ]
 
         report = {
-            'timestamp': datetime.now().isoformat(),
-            'dashboard_summary': {
-                'current_health_score': latest_snapshot.system_health_score,
-                'average_health_score': avg_health_score,
-                'active_alerts': len(self.active_alerts),
-                'total_alerts_24h': len(self.get_alerts_history(24)),
-                'monitoring_uptime_hours': len(self.metrics_history)
+            "timestamp": datetime.now().isoformat(),
+            "dashboard_summary": {
+                "current_health_score": latest_snapshot.system_health_score,
+                "average_health_score": avg_health_score,
+                "active_alerts": len(self.active_alerts),
+                "total_alerts_24h": len(self.get_alerts_history(24)),
+                "monitoring_uptime_hours": len(self.metrics_history)
                 * self.update_interval
                 / 3600,
             },
-            'performance_summary': {
-                'current_response_time_ms': latest_snapshot.metrics.get(
-                    'api_response_time_ms', 0
+            "performance_summary": {
+                "current_response_time_ms": latest_snapshot.metrics.get(
+                    "api_response_time_ms", 0
                 ),
-                'average_response_time_ms': avg_response_time,
-                'current_cpu_usage': latest_snapshot.metrics.get(
-                    'cpu_usage', 0
+                "average_response_time_ms": avg_response_time,
+                "current_cpu_usage": latest_snapshot.metrics.get("cpu_usage", 0),
+                "average_cpu_usage": avg_cpu_usage,
+                "current_memory_usage": latest_snapshot.metrics.get("memory_usage", 0),
+                "average_memory_usage": avg_memory_usage,
+                "current_throughput": latest_snapshot.metrics.get(
+                    "api_requests_per_second", 0
                 ),
-                'average_cpu_usage': avg_cpu_usage,
-                'current_memory_usage': latest_snapshot.metrics.get(
-                    'memory_usage', 0
-                ),
-                'average_memory_usage': avg_memory_usage,
-                'current_throughput': latest_snapshot.metrics.get(
-                    'api_requests_per_second', 0
-                ),
-                'error_rate': latest_snapshot.metrics.get('api_error_rate', 0),
+                "error_rate": latest_snapshot.metrics.get("api_error_rate", 0),
             },
-            'alert_summary': {
-                'active_alerts': len(self.active_alerts),
-                'critical_alerts': len(
-                    [
-                        a
-                        for a in self.active_alerts.values()
-                        if a.severity == 'critical'
-                    ]
+            "alert_summary": {
+                "active_alerts": len(self.active_alerts),
+                "critical_alerts": len(
+                    [a for a in self.active_alerts.values() if a.severity == "critical"]
                 ),
-                'warning_alerts': len(
-                    [
-                        a
-                        for a in self.active_alerts.values()
-                        if a.severity == 'warning'
-                    ]
+                "warning_alerts": len(
+                    [a for a in self.active_alerts.values() if a.severity == "warning"]
                 ),
-                'info_alerts': len(
-                    [
-                        a
-                        for a in self.active_alerts.values()
-                        if a.severity == 'info'
-                    ]
+                "info_alerts": len(
+                    [a for a in self.active_alerts.values() if a.severity == "info"]
                 ),
-                'alert_counts_24h': alert_counts,
+                "alert_counts_24h": alert_counts,
             },
-            'trend_analysis': {
-                'degrading_metrics': degrading_trends,
-                'improving_metrics': improving_trends,
-                'stable_metrics': [
+            "trend_analysis": {
+                "degrading_metrics": degrading_trends,
+                "improving_metrics": improving_trends,
+                "stable_metrics": [
                     k
                     for k, v in latest_snapshot.trend_indicators.items()
-                    if v == 'stable'
+                    if v == "stable"
                 ],
             },
-            'recommendations': self._generate_dashboard_recommendations(
+            "recommendations": self._generate_dashboard_recommendations(
                 latest_snapshot
             ),
         }
@@ -774,15 +732,15 @@ class PerformanceMonitoringDashboard:
             )
 
         # Response time recommendations
-        response_time = snapshot.metrics.get('api_response_time_ms', 0)
+        response_time = snapshot.metrics.get("api_response_time_ms", 0)
         if response_time > 3000:
             recommendations.append(
                 "API response time is high. Consider implementing caching and optimizing slow endpoints."
             )
 
         # Resource usage recommendations
-        cpu_usage = snapshot.metrics.get('cpu_usage', 0)
-        memory_usage = snapshot.metrics.get('memory_usage', 0)
+        cpu_usage = snapshot.metrics.get("cpu_usage", 0)
+        memory_usage = snapshot.metrics.get("memory_usage", 0)
 
         if cpu_usage > 80:
             recommendations.append(
@@ -802,7 +760,7 @@ class PerformanceMonitoringDashboard:
 
         # Trend recommendations
         degrading_trends = [
-            k for k, v in snapshot.trend_indicators.items() if v == 'degrading'
+            k for k, v in snapshot.trend_indicators.items() if v == "degrading"
         ]
         if degrading_trends:
             recommendations.append(
@@ -819,52 +777,52 @@ class PerformanceMonitoringDashboard:
     def export_metrics(self, filename: str):
         """Export metrics history to a file."""
         data = {
-            'timestamp': datetime.now().isoformat(),
-            'metrics_history': [
+            "timestamp": datetime.now().isoformat(),
+            "metrics_history": [
                 {
-                    'timestamp': snapshot.timestamp.isoformat(),
-                    'metrics': snapshot.metrics,
-                    'health_score': snapshot.system_health_score,
-                    'alerts_active': snapshot.alerts_active,
-                    'trends': snapshot.trend_indicators,
+                    "timestamp": snapshot.timestamp.isoformat(),
+                    "metrics": snapshot.metrics,
+                    "health_score": snapshot.system_health_score,
+                    "alerts_active": snapshot.alerts_active,
+                    "trends": snapshot.trend_indicators,
                 }
                 for snapshot in self.metrics_history
             ],
-            'alerts_history': [
+            "alerts_history": [
                 {
-                    'id': alert.id,
-                    'rule_name': alert.rule_name,
-                    'metric': alert.metric,
-                    'current_value': alert.current_value,
-                    'threshold': alert.threshold,
-                    'severity': alert.severity,
-                    'message': alert.message,
-                    'timestamp': alert.timestamp.isoformat(),
-                    'acknowledged': alert.acknowledged,
-                    'resolved': alert.resolved,
-                    'resolution_time': alert.resolution_time.isoformat()
+                    "id": alert.id,
+                    "rule_name": alert.rule_name,
+                    "metric": alert.metric,
+                    "current_value": alert.current_value,
+                    "threshold": alert.threshold,
+                    "severity": alert.severity,
+                    "message": alert.message,
+                    "timestamp": alert.timestamp.isoformat(),
+                    "acknowledged": alert.acknowledged,
+                    "resolved": alert.resolved,
+                    "resolution_time": alert.resolution_time.isoformat()
                     if alert.resolution_time
                     else None,
                 }
                 for alert in self.alerts_history
             ],
-            'baselines': self.baselines,
-            'alert_rules': {
+            "baselines": self.baselines,
+            "alert_rules": {
                 name: {
-                    'name': rule.name,
-                    'metric': rule.metric,
-                    'threshold': rule.threshold,
-                    'condition': rule.condition,
-                    'severity': rule.severity,
-                    'duration_seconds': rule.duration_seconds,
-                    'enabled': rule.enabled,
-                    'description': rule.description,
+                    "name": rule.name,
+                    "metric": rule.metric,
+                    "threshold": rule.threshold,
+                    "condition": rule.condition,
+                    "severity": rule.severity,
+                    "duration_seconds": rule.duration_seconds,
+                    "enabled": rule.enabled,
+                    "description": rule.description,
                 }
                 for name, rule in self.alert_rules.items()
             },
         }
 
-        with open(filename, 'w') as f:
+        with open(filename, "w") as f:
             json.dump(data, f, indent=2)
 
         logger.info(f"Metrics exported to {filename}")
@@ -914,23 +872,19 @@ async def run_performance_dashboard_demo():
             # Get current status
             status = dashboard.get_current_status()
 
-            print(f"\n--- Status Update {i+1} ---")
+            print(f"\n--- Status Update {i + 1} ---")
             print(f"Health Score: {status['health_score']:.1f}%")
             print(f"Active Alerts: {status['active_alerts']}")
             print(f"CPU Usage: {status['metrics'].get('cpu_usage', 0):.1f}%")
-            print(
-                f"Memory Usage: {status['metrics'].get('memory_usage', 0):.1f}%"
-            )
+            print(f"Memory Usage: {status['metrics'].get('memory_usage', 0):.1f}%")
             print(
                 f"Response Time: {status['metrics'].get('api_response_time_ms', 0):.1f}ms"
             )
 
-            if status['alerts']:
+            if status["alerts"]:
                 print("Active Alerts:")
-                for alert in status['alerts']:
-                    print(
-                        f"  - {alert['severity'].upper()}: {alert['message']}"
-                    )
+                for alert in status["alerts"]:
+                    print(f"  - {alert['severity'].upper()}: {alert['message']}")
 
         # Generate final report
         print("\n--- FINAL REPORT ---")
@@ -939,9 +893,7 @@ async def run_performance_dashboard_demo():
         print(
             f"Average Health Score: {report['dashboard_summary']['average_health_score']:.1f}%"
         )
-        print(
-            f"Total Alerts (24h): {report['dashboard_summary']['total_alerts_24h']}"
-        )
+        print(f"Total Alerts (24h): {report['dashboard_summary']['total_alerts_24h']}")
         print(
             f"Average Response Time: {report['performance_summary']['average_response_time_ms']:.1f}ms"
         )
@@ -953,7 +905,7 @@ async def run_performance_dashboard_demo():
         )
 
         print("\nRecommendations:")
-        for rec in report['recommendations']:
+        for rec in report["recommendations"]:
             print(f"  - {rec}")
 
         # Export metrics

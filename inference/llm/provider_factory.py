@@ -18,12 +18,14 @@ from .provider_interface import (
 
 try:
     from .openai_provider import OpenAIProvider
+
     OPENAI_PROVIDER_AVAILABLE = True
 except ImportError:
     OPENAI_PROVIDER_AVAILABLE = False
 
 try:
     from .anthropic_provider import AnthropicProvider
+
     ANTHROPIC_PROVIDER_AVAILABLE = True
 except ImportError:
     ANTHROPIC_PROVIDER_AVAILABLE = False
@@ -33,16 +35,19 @@ logger = logging.getLogger(__name__)
 
 class ProviderError(Exception):
     """Base exception for provider-related errors."""
+
     pass
 
 
 class ProviderConfigurationError(ProviderError):
     """Exception raised when provider configuration fails."""
+
     pass
 
 
 class ProviderNotAvailableError(ProviderError):
     """Exception raised when requested provider is not available."""
+
     pass
 
 
@@ -66,7 +71,9 @@ class LLMProviderFactory:
             self._provider_classes[ProviderType.ANTHROPIC] = AnthropicProvider
             logger.debug("Registered Anthropic provider")
         else:
-            logger.warning("Anthropic provider not available - install 'anthropic' package")
+            logger.warning(
+                "Anthropic provider not available - install 'anthropic' package"
+            )
 
     def get_available_providers(self) -> List[ProviderType]:
         """Get list of available provider types."""
@@ -91,7 +98,7 @@ class LLMProviderFactory:
         self,
         provider_type: ProviderType,
         credentials: ProviderCredentials,
-        **config_kwargs
+        **config_kwargs,
     ) -> ILLMProvider:
         """Create and configure a provider instance."""
         provider = self.create_provider(provider_type)
@@ -121,7 +128,9 @@ class LLMProviderFactory:
             provider_type = ProviderType(provider_name)
 
             if not self.is_provider_available(provider_type):
-                logger.error(f"Provider {provider_name} is configured but not available")
+                logger.error(
+                    f"Provider {provider_name} is configured but not available"
+                )
                 continue
 
             try:
@@ -129,7 +138,7 @@ class LLMProviderFactory:
                 credentials = ProviderCredentials(
                     api_key=provider_config.api_key,
                     organization_id=provider_config.organization_id,
-                    endpoint_url=provider_config.endpoint_url
+                    endpoint_url=provider_config.endpoint_url,
                 )
 
                 # Create configured provider
@@ -137,11 +146,15 @@ class LLMProviderFactory:
                     provider_type,
                     credentials,
                     timeout=provider_config.timeout_seconds,
-                    max_retries=provider_config.max_retries
+                    max_retries=provider_config.max_retries,
                 )
 
                 # Register with manager using priority from config
-                priority = config.provider_priority.index(provider_name) if provider_name in config.provider_priority else 50
+                priority = (
+                    config.provider_priority.index(provider_name)
+                    if provider_name in config.provider_priority
+                    else 50
+                )
                 manager.registry.register_provider(provider, priority)
 
                 logger.info(f"Successfully configured {provider_name} provider")
@@ -162,23 +175,29 @@ class ErrorHandler:
         error_str = str(error).lower()
 
         # Rate limit errors are retryable with backoff
-        if any(phrase in error_str for phrase in ["rate limit", "too many requests",
-            "429"]):
+        if any(
+            phrase in error_str for phrase in ["rate limit", "too many requests", "429"]
+        ):
             return True
 
         # Timeout errors are retryable
-        if any(phrase in error_str for phrase in ["timeout", "timed out",
-            "connection"]):
+        if any(
+            phrase in error_str for phrase in ["timeout", "timed out", "connection"]
+        ):
             return True
 
         # Server errors (5xx) are retryable
-        if any(phrase in error_str for phrase in ["500", "502", "503", "504",
-            "server error"]):
+        if any(
+            phrase in error_str
+            for phrase in ["500", "502", "503", "504", "server error"]
+        ):
             return True
 
         # Authentication and client errors are not retryable
-        if any(phrase in error_str for phrase in ["401", "403", "invalid api key",
-            "authentication"]):
+        if any(
+            phrase in error_str
+            for phrase in ["401", "403", "invalid api key", "authentication"]
+        ):
             return False
 
         # Bad request errors are not retryable
@@ -197,14 +216,14 @@ class ErrorHandler:
 
         # Use exponential backoff for rate limits
         if any(phrase in error_str for phrase in ["rate limit", "429"]):
-            return min(base_delay * (2 ** attempt), 60.0)  # Max 60 seconds
+            return min(base_delay * (2**attempt), 60.0)  # Max 60 seconds
 
         # Use shorter delays for connection issues
         if any(phrase in error_str for phrase in ["timeout", "connection"]):
-            return min(base_delay * (1.5 ** attempt), 30.0)  # Max 30 seconds
+            return min(base_delay * (1.5**attempt), 30.0)  # Max 30 seconds
 
         # Default exponential backoff
-        return min(base_delay * (2 ** attempt), 45.0)  # Max 45 seconds
+        return min(base_delay * (2**attempt), 45.0)  # Max 45 seconds
 
     @staticmethod
     def should_fallback(error: Exception) -> bool:
@@ -212,8 +231,10 @@ class ErrorHandler:
         error_str = str(error).lower()
 
         # Always fallback for authentication errors
-        if any(phrase in error_str for phrase in ["401", "403", "invalid api key",
-            "authentication"]):
+        if any(
+            phrase in error_str
+            for phrase in ["401", "403", "invalid api key", "authentication"]
+        ):
             return True
 
         # Fallback for persistent rate limiting
@@ -221,8 +242,9 @@ class ErrorHandler:
             return True
 
         # Fallback for service unavailable
-        if any(phrase in error_str for phrase in ["503", "service unavailable",
-            "offline"]):
+        if any(
+            phrase in error_str for phrase in ["503", "service unavailable", "offline"]
+        ):
             return True
 
         # Don't fallback for client errors (user's fault)

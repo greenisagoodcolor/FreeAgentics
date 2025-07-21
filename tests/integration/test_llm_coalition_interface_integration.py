@@ -146,9 +146,7 @@ class StrategyParser:
         for param_name, param_values in self.coordination_parameters.items():
             param_scores = {}
             for level, keywords in param_values.items():
-                score = sum(
-                    1 for keyword in keywords if keyword in llm_text_lower
-                )
+                score = sum(1 for keyword in keywords if keyword in llm_text_lower)
                 param_scores[level] = score
 
             # Select highest scoring level, default to medium
@@ -160,9 +158,7 @@ class StrategyParser:
             coordination_params[param_name] = selected_level
 
         # Extract numerical parameters from text
-        numerical_params = self._extract_numerical_parameters(
-            llm_text, context
-        )
+        numerical_params = self._extract_numerical_parameters(llm_text, context)
 
         # Generate coordination message structure
         coordination_structure = {
@@ -189,43 +185,31 @@ class StrategyParser:
         # Look for percentage values
         percentages = re.findall(r"(\d+(?:\.\d+)?)\s*%", text)
         if percentages:
-            numerical_params["efficiency_target"] = (
-                float(percentages[0]) / 100.0
-            )
+            numerical_params["efficiency_target"] = float(percentages[0]) / 100.0
 
         # Look for time values
-        time_matches = re.findall(
-            r"(\d+(?:\.\d+)?)\s*(second|minute|hour)", text
-        )
+        time_matches = re.findall(r"(\d+(?:\.\d+)?)\s*(second|minute|hour)", text)
         if time_matches:
             value, unit = time_matches[0]
             multiplier = {"second": 1, "minute": 60, "hour": 3600}
-            numerical_params["time_horizon"] = float(value) * multiplier.get(
-                unit, 1
-            )
+            numerical_params["time_horizon"] = float(value) * multiplier.get(unit, 1)
 
         # Look for agent count references
         agent_matches = re.findall(r"(\d+)\s*agent", text)
         if agent_matches:
             numerical_params["target_agent_count"] = float(agent_matches[0])
         elif context.get("agent_count"):
-            numerical_params["target_agent_count"] = float(
-                context["agent_count"]
-            )
+            numerical_params["target_agent_count"] = float(context["agent_count"])
 
         # Look for distance/range values
-        distance_matches = re.findall(
-            r"(\d+(?:\.\d+)?)\s*(meter|unit|step)", text
-        )
+        distance_matches = re.findall(r"(\d+(?:\.\d+)?)\s*(meter|unit|step)", text)
         if distance_matches:
             value, unit = distance_matches[0]
             numerical_params["coordination_range"] = float(value)
 
         # Default values based on context
         if "efficiency_target" not in numerical_params:
-            numerical_params[
-                "efficiency_target"
-            ] = 0.8  # Default 80% efficiency
+            numerical_params["efficiency_target"] = 0.8  # Default 80% efficiency
 
         if "time_horizon" not in numerical_params:
             numerical_params["time_horizon"] = 300.0  # Default 5 minutes
@@ -239,9 +223,7 @@ class StrategyParser:
         confidence_factors = []
 
         # Strategy confidence: based on keyword matches
-        max_strategy_score = (
-            max(strategy_scores.values()) if strategy_scores else 0
-        )
+        max_strategy_score = max(strategy_scores.values()) if strategy_scores else 0
         sum(len(keywords) for keywords in self.strategy_keywords.values())
         strategy_confidence = min(
             1.0, max_strategy_score / 3.0
@@ -285,9 +267,7 @@ class StrategyParser:
         validation_results = {
             "valid_strategy": coordination_structure.get("strategy")
             in CoalitionFormationStrategy,
-            "parameters_complete": len(
-                coordination_structure.get("parameters", {})
-            )
+            "parameters_complete": len(coordination_structure.get("parameters", {}))
             >= 3,
             "numerical_params_valid": True,
             "context_consistent": True,
@@ -312,14 +292,8 @@ class StrategyParser:
                 validation_results["numerical_params_valid"] = False
 
         # Validate context consistency
-        if (
-            context.get("agent_count")
-            and "target_agent_count" in numerical_params
-        ):
-            if (
-                numerical_params["target_agent_count"]
-                > context["agent_count"] * 2
-            ):
+        if context.get("agent_count") and "target_agent_count" in numerical_params:
+            if numerical_params["target_agent_count"] > context["agent_count"] * 2:
                 validation_results["context_consistent"] = False
 
         # Check if parameters are actionable
@@ -384,16 +358,12 @@ class CoordinationExecutor:
                         "strategy": strategy.value,
                         "parameters": parameters,
                         "numerical_params": numerical_params,
-                        "execution_context": coordination_structure.get(
-                            "context", {}
-                        ),
+                        "execution_context": coordination_structure.get("context", {}),
                     },
                     timestamp=datetime.now(),
                 )
 
-                execution_results["coordination_messages"].append(
-                    coordination_message
-                )
+                execution_results["coordination_messages"].append(coordination_message)
 
                 # Process coordination message
                 response = await coordinator.process_coordination_message(
@@ -419,42 +389,28 @@ class CoordinationExecutor:
 
             # Calculate coordination metrics
             successful_coordinations = len(
-                [
-                    a
-                    for a in execution_results["agents_coordinated"]
-                    if a["success"]
-                ]
+                [a for a in execution_results["agents_coordinated"] if a["success"]]
             )
-            coordination_rate = (
-                successful_coordinations / len(agents) if agents else 0
-            )
+            coordination_rate = successful_coordinations / len(agents) if agents else 0
 
             execution_results["coordination_metrics"] = {
                 "coordination_rate": coordination_rate,
                 "successful_agents": successful_coordinations,
                 "total_agents": len(agents),
                 "execution_time": time.time() - execution_start,
-                "messages_sent": len(
-                    execution_results["coordination_messages"]
-                ),
+                "messages_sent": len(execution_results["coordination_messages"]),
             }
 
             # Strategy-specific validation
             if strategy == CoalitionFormationStrategy.CENTRALIZED:
                 # All agents should coordinate through the coordinator
-                execution_results["strategy_validation"] = (
-                    coordination_rate > 0.8
-                )
+                execution_results["strategy_validation"] = coordination_rate > 0.8
             elif strategy == CoalitionFormationStrategy.DISTRIBUTED:
                 # Agents should have some autonomy
-                execution_results["strategy_validation"] = (
-                    coordination_rate > 0.5
-                )
+                execution_results["strategy_validation"] = coordination_rate > 0.5
             else:
                 # Other strategies should have reasonable coordination
-                execution_results["strategy_validation"] = (
-                    coordination_rate > 0.6
-                )
+                execution_results["strategy_validation"] = coordination_rate > 0.6
 
         except Exception as e:
             execution_results["execution_success"] = False
@@ -470,16 +426,12 @@ class CoordinationExecutor:
         Analyze how effectively the LLM strategy recommendation was translated into coordination behavior.
         """
         effectiveness_analysis = {
-            "strategy_implemented": execution_results.get(
-                "execution_success", False
-            ),
+            "strategy_implemented": execution_results.get("execution_success", False),
             "coordination_achieved": execution_results.get(
                 "coordination_metrics", {}
             ).get("coordination_rate", 0)
             > 0.5,
-            "strategy_appropriate": execution_results.get(
-                "strategy_validation", False
-            ),
+            "strategy_appropriate": execution_results.get("strategy_validation", False),
             "semantic_preservation": self._assess_semantic_preservation(
                 execution_results, original_llm_text
             ),
@@ -508,9 +460,9 @@ class CoordinationExecutor:
             term in original_text_lower
             for term in ["efficient", "optimize", "effective"]
         ):
-            coordination_rate = execution_results.get(
-                "coordination_metrics", {}
-            ).get("coordination_rate", 0)
+            coordination_rate = execution_results.get("coordination_metrics", {}).get(
+                "coordination_rate", 0
+            )
             semantic_checks.append(coordination_rate > 0.7)
 
         # If LLM mentioned speed/fast, check execution time
@@ -518,9 +470,9 @@ class CoordinationExecutor:
             term in original_text_lower
             for term in ["fast", "quick", "rapid", "immediate"]
         ):
-            execution_time = execution_results.get(
-                "coordination_metrics", {}
-            ).get("execution_time", float("inf"))
+            execution_time = execution_results.get("coordination_metrics", {}).get(
+                "execution_time", float("inf")
+            )
             semantic_checks.append(execution_time < 5.0)
 
         # If LLM mentioned coordination/collaboration, check success rate
@@ -528,19 +480,17 @@ class CoordinationExecutor:
             term in original_text_lower
             for term in ["coordinate", "collaborate", "work together"]
         ):
-            successful_agents = execution_results.get(
-                "coordination_metrics", {}
-            ).get("successful_agents", 0)
-            total_agents = execution_results.get(
-                "coordination_metrics", {}
-            ).get("total_agents", 1)
+            successful_agents = execution_results.get("coordination_metrics", {}).get(
+                "successful_agents", 0
+            )
+            total_agents = execution_results.get("coordination_metrics", {}).get(
+                "total_agents", 1
+            )
             semantic_checks.append(successful_agents / total_agents > 0.6)
 
         # Default check: basic execution success
         if not semantic_checks:
-            semantic_checks.append(
-                execution_results.get("execution_success", False)
-            )
+            semantic_checks.append(execution_results.get("execution_success", False))
 
         return all(semantic_checks)
 
@@ -643,9 +593,7 @@ class TestLLMCoalitionInterfaceIntegration:
             },
         ]
 
-    async def test_llm_strategy_generation(
-        self, llm_manager, coordination_scenarios
-    ):
+    async def test_llm_strategy_generation(self, llm_manager, coordination_scenarios):
         """Test LLM's ability to generate coordination strategies for realistic scenarios."""
 
         if not llm_manager:
@@ -677,9 +625,9 @@ class TestLLMCoalitionInterfaceIntegration:
                     "generation_success": True,
                 }
 
-                assert (
-                    strategy_quality["overall_score"] > 0.5
-                ), f"Low quality strategy for {scenario_name}: {strategy_quality['overall_score']}"
+                assert strategy_quality["overall_score"] > 0.5, (
+                    f"Low quality strategy for {scenario_name}: {strategy_quality['overall_score']}"
+                )
 
                 logger.info(
                     f"✓ LLM strategy generation for '{scenario_name}' successful (quality: {strategy_quality['overall_score']:.3f})"
@@ -700,9 +648,9 @@ class TestLLMCoalitionInterfaceIntegration:
         successful_scenarios = len(
             [r for r in strategy_results.values() if r["generation_success"]]
         )
-        assert (
-            successful_scenarios >= len(coordination_scenarios) / 2
-        ), "Too many LLM strategy generation failures"
+        assert successful_scenarios >= len(coordination_scenarios) / 2, (
+            "Too many LLM strategy generation failures"
+        )
 
         return strategy_results
 
@@ -715,8 +663,7 @@ class TestLLMCoalitionInterfaceIntegration:
 
         quality_metrics = {
             "mentions_agents": any(
-                term in strategy_text_lower
-                for term in ["agent", "robot", "unit"]
+                term in strategy_text_lower for term in ["agent", "robot", "unit"]
             ),
             "addresses_coordination": any(
                 term in strategy_text_lower
@@ -805,18 +752,16 @@ class TestLLMCoalitionInterfaceIntegration:
                     "coordination_structure": coordination_structure,
                     "validation_results": validation_results,
                     "parsing_success": True,
-                    "parsing_confidence": coordination_structure.get(
-                        "confidence", 0
-                    ),
+                    "parsing_confidence": coordination_structure.get("confidence", 0),
                 }
 
                 # Validate parsing quality
-                assert validation_results[
-                    "overall_valid"
-                ], f"Invalid coordination parameters for {scenario_name}: {validation_results}"
-                assert (
-                    coordination_structure.get("confidence", 0) > 0.3
-                ), f"Low parsing confidence for {scenario_name}"
+                assert validation_results["overall_valid"], (
+                    f"Invalid coordination parameters for {scenario_name}: {validation_results}"
+                )
+                assert coordination_structure.get("confidence", 0) > 0.3, (
+                    f"Low parsing confidence for {scenario_name}"
+                )
 
                 logger.info(
                     f"✓ Strategy parsing for '{scenario_name}' successful (confidence: {coordination_structure.get('confidence', 0):.3f})"
@@ -828,9 +773,7 @@ class TestLLMCoalitionInterfaceIntegration:
                     "error": str(e),
                     "parsing_confidence": 0.0,
                 }
-                logger.warning(
-                    f"✗ Strategy parsing for '{scenario_name}' failed: {e}"
-                )
+                logger.warning(f"✗ Strategy parsing for '{scenario_name}' failed: {e}")
 
         # Validate overall parsing success
         successful_parsing = len(
@@ -886,17 +829,13 @@ class TestLLMCoalitionInterfaceIntegration:
                 )
 
                 # Execute coordination strategy
-                execution_result = (
-                    await executor.execute_coordination_strategy(
-                        coordination_structure, test_agents, coordinator
-                    )
+                execution_result = await executor.execute_coordination_strategy(
+                    coordination_structure, test_agents, coordinator
                 )
 
                 # Analyze execution effectiveness
-                effectiveness_analysis = (
-                    executor.analyze_coordination_effectiveness(
-                        execution_result, strategy_text
-                    )
+                effectiveness_analysis = executor.analyze_coordination_effectiveness(
+                    execution_result, strategy_text
                 )
 
                 execution_results[scenario_name] = {
@@ -909,13 +848,12 @@ class TestLLMCoalitionInterfaceIntegration:
                 }
 
                 # Validate execution success
-                assert execution_result.get(
-                    "execution_success", False
-                ), f"Coordination execution failed for {scenario_name}"
-                assert (
-                    effectiveness_analysis.get("overall_effectiveness", 0)
-                    > 0.5
-                ), f"Low coordination effectiveness for {scenario_name}"
+                assert execution_result.get("execution_success", False), (
+                    f"Coordination execution failed for {scenario_name}"
+                )
+                assert effectiveness_analysis.get("overall_effectiveness", 0) > 0.5, (
+                    f"Low coordination effectiveness for {scenario_name}"
+                )
 
                 coordination_rate = execution_result.get(
                     "coordination_metrics", {}
@@ -981,9 +919,7 @@ class TestLLMCoalitionInterfaceIntegration:
         strategy_text = response.get("text", "")
         llm_time = time.time() - llm_start
 
-        assert (
-            len(strategy_text) > 50
-        ), "LLM generated insufficient strategy text"
+        assert len(strategy_text) > 50, "LLM generated insufficient strategy text"
 
         # Step 2: Strategy Parsing
         parser = StrategyParser()
@@ -996,9 +932,9 @@ class TestLLMCoalitionInterfaceIntegration:
         validation_results = parser.validate_coordination_parameters(
             coordination_structure, integration_scenario["context"]
         )
-        assert validation_results[
-            "overall_valid"
-        ], f"Invalid coordination parameters: {validation_results}"
+        assert validation_results["overall_valid"], (
+            f"Invalid coordination parameters: {validation_results}"
+        )
 
         # Step 3: Coordination Execution
         executor = CoordinationExecutor()
@@ -1008,9 +944,9 @@ class TestLLMCoalitionInterfaceIntegration:
         )
         exec_time = time.time() - exec_start
 
-        assert execution_result.get(
-            "execution_success", False
-        ), "Coordination execution failed"
+        assert execution_result.get("execution_success", False), (
+            "Coordination execution failed"
+        )
 
         # Step 4: Effectiveness Analysis
         effectiveness_analysis = executor.analyze_coordination_effectiveness(
@@ -1044,20 +980,19 @@ class TestLLMCoalitionInterfaceIntegration:
                         len(strategy_text) > 0,
                         validation_results["overall_valid"],
                         execution_result.get("execution_success", False),
-                        effectiveness_analysis.get("overall_effectiveness", 0)
-                        > 0.4,
+                        effectiveness_analysis.get("overall_effectiveness", 0) > 0.4,
                     ]
                 ),
             },
         }
 
         # Performance requirements
-        assert (
-            integration_results["overall_pipeline"]["total_time"] < 60.0
-        ), "End-to-end pipeline too slow"
-        assert integration_results["overall_pipeline"][
-            "end_to_end_success"
-        ], "End-to-end integration failed"
+        assert integration_results["overall_pipeline"]["total_time"] < 60.0, (
+            "End-to-end pipeline too slow"
+        )
+        assert integration_results["overall_pipeline"]["end_to_end_success"], (
+            "End-to-end integration failed"
+        )
 
         logger.info("✓ End-to-end LLM→Coalition integration successful")
         logger.info(f"  LLM generation: {llm_time:.3f}s")
@@ -1107,8 +1042,7 @@ class TestLLMCoalitionInterfaceIntegration:
 
         edge_case_results["minimal_strategy"] = {
             "parsing_confidence": coordination_structure.get("confidence", 0),
-            "fallback_handling": coordination_structure.get("strategy")
-            is not None,
+            "fallback_handling": coordination_structure.get("strategy") is not None,
         }
 
         # Edge case 4: Execution with no agents
@@ -1141,18 +1075,18 @@ class TestLLMCoalitionInterfaceIntegration:
             logger.info(f"Edge case '{case_name}': {case_result}")
 
         # Basic edge cases should be handled without crashing
-        assert edge_case_results["ambiguous_strategy"][
-            "handles_ambiguity"
-        ], "Ambiguous strategy not handled"
-        assert edge_case_results["contradictory_strategy"][
-            "handles_contradiction"
-        ], "Contradictory strategy not handled"
-        assert edge_case_results["minimal_strategy"][
-            "fallback_handling"
-        ], "Minimal strategy not handled"
-        assert edge_case_results["no_agents"][
-            "execution_completes"
-        ], "Empty agent list not handled"
+        assert edge_case_results["ambiguous_strategy"]["handles_ambiguity"], (
+            "Ambiguous strategy not handled"
+        )
+        assert edge_case_results["contradictory_strategy"]["handles_contradiction"], (
+            "Contradictory strategy not handled"
+        )
+        assert edge_case_results["minimal_strategy"]["fallback_handling"], (
+            "Minimal strategy not handled"
+        )
+        assert edge_case_results["no_agents"]["execution_completes"], (
+            "Empty agent list not handled"
+        )
 
         return edge_case_results
 
@@ -1176,9 +1110,7 @@ if __name__ == "__main__":
             llm_manager = LocalLLMManager()
         except Exception:
             llm_manager = None
-            print(
-                "Warning: LLM manager not available, some tests will be skipped"
-            )
+            print("Warning: LLM manager not available, some tests will be skipped")
 
         # Test agents and coordinator
         test_agents = [
@@ -1261,13 +1193,13 @@ if __name__ == "__main__":
         passed = len([r for r in results if r["status"] == "PASSED"])
         total = len(results)
 
-        print(f"\n{'='*60}")
+        print(f"\n{'=' * 60}")
         print("LLM-COALITION INTERFACE INTEGRATION TEST SUMMARY")
-        print(f"{'='*60}")
+        print(f"{'=' * 60}")
         print(f"Tests run: {total}")
         print(f"Passed: {passed}")
         print(f"Failed: {total - passed}")
-        print(f"Success rate: {passed/total*100:.1f}%")
+        print(f"Success rate: {passed / total * 100:.1f}%")
 
         if passed == total:
             print("🎉 All LLM-Coalition interface tests passed!")

@@ -33,7 +33,11 @@ class TestBuildersExample:
     def test_simple_agent_builder(self):
         """Create a simple agent using builder."""
         agent = (
-            AgentBuilder().with_name("TestAgent001").with_template("grid_world").active().build()
+            AgentBuilder()
+            .with_name("TestAgent001")
+            .with_template("grid_world")
+            .active()
+            .build()
         )
 
         assert agent.name == "TestAgent001"
@@ -177,7 +181,9 @@ class TestFactoriesExample:
 class TestFixturesExample:
     """Examples of using pytest fixtures."""
 
-    def test_agent_fixtures(self, active_agent, resource_collector_agent, explorer_agent):
+    def test_agent_fixtures(
+        self, active_agent, resource_collector_agent, explorer_agent
+    ):
         """Test with various agent fixtures."""
         # Active agent has full configuration
         assert active_agent.status == DBAgentStatus.ACTIVE
@@ -240,7 +246,9 @@ class TestGeneratorsExample:
 
     def test_generate_agent_batch(self):
         """Generate agents without database."""
-        agents = generate_agent_batch(count=50, template="grid_world", status=AgentStatus.ACTIVE)
+        agents = generate_agent_batch(
+            count=50, template="grid_world", status=AgentStatus.ACTIVE
+        )
 
         assert len(agents) == 50
         assert all(a.template == "grid_world" for a in agents)
@@ -257,7 +265,9 @@ class TestGeneratorsExample:
         assert random_graph["properties"]["actual_connectivity"] < 0.2
 
         # Scale-free graph
-        scale_free_graph = generate_knowledge_graph(num_nodes=50, graph_type="scale_free")
+        scale_free_graph = generate_knowledge_graph(
+            num_nodes=50, graph_type="scale_free"
+        )
 
         assert len(scale_free_graph["nodes"]) == 50
         # Scale-free graphs have high-degree hubs

@@ -63,16 +63,10 @@ class MockLLMProvider(LLMProvider):
             raise LLMError("No user message found")
 
         # Check if this is a validation request
-        if (
-            "validate" in user_message.lower()
-            and "json" in user_message.lower()
-        ):
+        if "validate" in user_message.lower() and "json" in user_message.lower():
             content = self._generate_validation_response(user_message)
         # Check if this is a refinement request
-        elif (
-            "refine" in user_message.lower()
-            and "feedback" in user_message.lower()
-        ):
+        elif "refine" in user_message.lower() and "feedback" in user_message.lower():
             content = self._generate_refinement_response(user_message)
         # Otherwise, assume it's a GMN generation request
         else:
@@ -127,7 +121,7 @@ class MockLLMProvider(LLMProvider):
     def _generate_validation_response(self, prompt: str) -> str:
         """Generate a validation response."""
         # Extract GMN from prompt
-        gmn_match = re.search(r'```\n?(.*?)\n?```', prompt, re.DOTALL)
+        gmn_match = re.search(r"```\n?(.*?)\n?```", prompt, re.DOTALL)
 
         if gmn_match:
             gmn_content = gmn_match.group(1)
@@ -145,9 +139,7 @@ class MockLLMProvider(LLMProvider):
                 errors.append("No transition nodes defined")
 
             # Check for basic syntax
-            if "{" in gmn_content and gmn_content.count(
-                "{"
-            ) != gmn_content.count("}"):
+            if "{" in gmn_content and gmn_content.count("{") != gmn_content.count("}"):
                 errors.append("Mismatched braces")
 
             is_valid = len(errors) == 0
@@ -175,9 +167,7 @@ class MockLLMProvider(LLMProvider):
     def _generate_refinement_response(self, prompt: str) -> str:
         """Generate a refined GMN based on feedback."""
         # Extract current GMN
-        gmn_match = re.search(
-            r'Current GMN:\n```\n?(.*?)\n?```', prompt, re.DOTALL
-        )
+        gmn_match = re.search(r"Current GMN:\n```\n?(.*?)\n?```", prompt, re.DOTALL)
 
         if gmn_match:
             current_gmn = gmn_match.group(1)
@@ -185,12 +175,9 @@ class MockLLMProvider(LLMProvider):
             # Apply common refinements based on feedback keywords
             if "dimension" in prompt.lower():
                 # Fix dimension issues
-                current_gmn = re.sub(r'size: \d+', 'size: 4', current_gmn)
+                current_gmn = re.sub(r"size: \d+", "size: 4", current_gmn)
 
-            if (
-                "preference" in prompt.lower()
-                and "preference" not in current_gmn
-            ):
+            if "preference" in prompt.lower() and "preference" not in current_gmn:
                 # Add preference node
                 current_gmn += """
 node preference C1 {
@@ -199,10 +186,7 @@ node preference C1 {
 }
 """
 
-            if (
-                "observation" in prompt.lower()
-                and "observation" not in current_gmn
-            ):
+            if "observation" in prompt.lower() and "observation" not in current_gmn:
                 # Add observation node
                 current_gmn += """
 node observation o1 {
@@ -229,17 +213,12 @@ node emission E1 {
         prompt_lower = prompt.lower()
 
         if any(
-            word in prompt_lower
-            for word in ["explore", "discover", "search", "grid"]
+            word in prompt_lower for word in ["explore", "discover", "search", "grid"]
         ):
             return "explorer"
-        elif any(
-            word in prompt_lower for word in ["trade", "market", "buy", "sell"]
-        ):
+        elif any(word in prompt_lower for word in ["trade", "market", "buy", "sell"]):
             return "trader"
-        elif any(
-            word in prompt_lower for word in ["coordinate", "team", "manage"]
-        ):
+        elif any(word in prompt_lower for word in ["coordinate", "team", "manage"]):
             return "coordinator"
         else:
             return "general"
@@ -433,13 +412,11 @@ node preference C1 {
     def _customize_for_grid(self, template: str, prompt: str) -> str:
         """Customize template for grid world."""
         # Extract grid size if mentioned
-        size_match = re.search(r'(\d+)x(\d+)', prompt)
+        size_match = re.search(r"(\d+)x(\d+)", prompt)
         if size_match:
             rows, cols = int(size_match.group(1)), int(size_match.group(2))
             grid_size = rows * cols
-            template = re.sub(
-                r'size: \d+', f'size: {grid_size}', template, count=1
-            )
+            template = re.sub(r"size: \d+", f"size: {grid_size}", template, count=1)
 
         return template
 
@@ -459,8 +436,8 @@ node preference C1 {
         if "preference" in template:
             # Modify existing preferences to be more conservative
             template = re.sub(
-                r'values: \[.*?\]',
-                'values: [0.9, 0.05, 0.03, 0.02]',
+                r"values: \[.*?\]",
+                "values: [0.9, 0.05, 0.03, 0.02]",
                 template,
                 count=1,
             )

@@ -111,14 +111,18 @@ class MatrixPoolingPerformanceTest(unittest.TestCase):
             b = np.random.rand(size, size).astype(np.float32)
 
             # Test dot product
-            numpy_dot_time = self.measure_operation_time(lambda: np.dot(a, b), iterations=20)
+            numpy_dot_time = self.measure_operation_time(
+                lambda: np.dot(a, b), iterations=20
+            )
 
-            pooled_dot_time = self.measure_operation_time(lambda: pooled_dot(a, b), iterations=20)
+            pooled_dot_time = self.measure_operation_time(
+                lambda: pooled_dot(a, b), iterations=20
+            )
 
             print("  Dot product:")
             print(f"    Numpy: {numpy_dot_time * 1000:.2f} ms")
             print(f"    Pooled: {pooled_dot_time * 1000:.2f} ms")
-            print(f"    Overhead: {(pooled_dot_time/numpy_dot_time - 1)*100:.1f}%")
+            print(f"    Overhead: {(pooled_dot_time / numpy_dot_time - 1) * 100:.1f}%")
 
             # Test einsum
             numpy_einsum_time = self.measure_operation_time(
@@ -132,7 +136,9 @@ class MatrixPoolingPerformanceTest(unittest.TestCase):
             print("  Einsum:")
             print(f"    Numpy: {numpy_einsum_time * 1000:.2f} ms")
             print(f"    Pooled: {pooled_einsum_time * 1000:.2f} ms")
-            print(f"    Overhead: {(pooled_einsum_time/numpy_einsum_time - 1)*100:.1f}%")
+            print(
+                f"    Overhead: {(pooled_einsum_time / numpy_einsum_time - 1) * 100:.1f}%"
+            )
 
             # Overhead should be reasonable
             self.assertLess(
@@ -187,7 +193,9 @@ class MatrixPoolingPerformanceTest(unittest.TestCase):
         )
         print(f"  Without pooling: {no_pool_mem:.1f} MB")
         print(f"  With pooling: {pool_mem:.1f} MB")
-        print(f"  Savings: {no_pool_mem - pool_mem:.1f} MB ({(1 - pool_mem/no_pool_mem)*100:.1f}%)")
+        print(
+            f"  Savings: {no_pool_mem - pool_mem:.1f} MB ({(1 - pool_mem / no_pool_mem) * 100:.1f}%)"
+        )
 
         # Get pool statistics
         stats = self.pool.get_statistics()
@@ -255,8 +263,8 @@ class MatrixPoolingPerformanceTest(unittest.TestCase):
         print(f"\nConcurrent operations ({num_threads} threads):")
         print(f"  Total operations: {total_ops}")
         print(f"  Total time: {total_time:.2f} s")
-        print(f"  Throughput: {total_ops/total_time:.1f} ops/s")
-        print(f"  Average op time: {avg_time*1000:.2f} ms")
+        print(f"  Throughput: {total_ops / total_time:.1f} ops/s")
+        print(f"  Average op time: {avg_time * 1000:.2f} ms")
 
         # Check pool efficiency
         stats = self.pool.get_statistics()
@@ -333,7 +341,7 @@ class MatrixPoolingPerformanceTest(unittest.TestCase):
         print("\nResults:")
         print(f"  Without pooling: {no_pool_time:.2f} s")
         print(f"  With pooling: {pool_time:.2f} s")
-        print(f"  Speedup: {no_pool_time/pool_time:.2f}x")
+        print(f"  Speedup: {no_pool_time / pool_time:.2f}x")
 
         # Check accuracy
         for i in range(num_agents):

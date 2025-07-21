@@ -170,12 +170,18 @@ class MetricsCollector:
         )
 
         # Create indexes
-        cursor.execute("CREATE INDEX IF NOT EXISTS idx_test_runs_timestamp ON test_runs(timestamp)")
-        cursor.execute("CREATE INDEX IF NOT EXISTS idx_test_metrics_run_id ON test_metrics(run_id)")
+        cursor.execute(
+            "CREATE INDEX IF NOT EXISTS idx_test_runs_timestamp ON test_runs(timestamp)"
+        )
+        cursor.execute(
+            "CREATE INDEX IF NOT EXISTS idx_test_metrics_run_id ON test_metrics(run_id)"
+        )
         cursor.execute(
             "CREATE INDEX IF NOT EXISTS idx_test_metrics_test_id ON test_metrics(test_id)"
         )
-        cursor.execute("CREATE INDEX IF NOT EXISTS idx_flaky_tests_test_id ON flaky_tests(test_id)")
+        cursor.execute(
+            "CREATE INDEX IF NOT EXISTS idx_flaky_tests_test_id ON flaky_tests(test_id)"
+        )
 
         conn.commit()
         conn.close()
@@ -449,7 +455,9 @@ class MetricsCollector:
         except ImportError:
             return None
 
-    def get_flaky_tests(self, min_flaky_percentage: float = 10.0) -> List[Dict[str, Any]]:
+    def get_flaky_tests(
+        self, min_flaky_percentage: float = 10.0
+    ) -> List[Dict[str, Any]]:
         """Get flaky tests above the minimum percentage."""
         conn = sqlite3.connect(self.db_path)
         cursor = conn.cursor()
@@ -582,7 +590,9 @@ class MetricsCollector:
             "duration_trends": duration_trends,
         }
 
-    def generate_metrics_report(self, output_path: str = "tests/reporting/metrics_report.html"):
+    def generate_metrics_report(
+        self, output_path: str = "tests/reporting/metrics_report.html"
+    ):
         """Generate HTML metrics report."""
         flaky_tests = self.get_flaky_tests()
         slow_tests = self.get_slow_tests()
@@ -631,10 +641,10 @@ class MetricsCollector:
         <body>
             <div class="header">
                 <h1>FreeAgentics Test Metrics Report</h1>
-                <p>Generated: {datetime.now().strftime('%Y-%m-%d %H:%M:%S')}</p>
+                <p>Generated: {datetime.now().strftime("%Y-%m-%d %H:%M:%S")}</p>
                 <p>Latest Run: {latest_run[0]} ({latest_run[1]})</p>
 
-                <div class="metric {'critical' if pass_rate < 50 else 'warning' if pass_rate < 80 else 'good'}">
+                <div class="metric {"critical" if pass_rate < 50 else "warning" if pass_rate < 80 else "good"}">
                     <strong>Pass Rate: {pass_rate:.1f}%</strong>
                 </div>
                 <div class="metric">
@@ -643,10 +653,10 @@ class MetricsCollector:
                 <div class="metric">
                     <strong>Duration: {latest_run[7]:.1f}s</strong>
                 </div>
-                <div class="metric {'warning' if len(flaky_tests) > 0 else 'good'}">
+                <div class="metric {"warning" if len(flaky_tests) > 0 else "good"}">
                     <strong>Flaky Tests: {len(flaky_tests)}</strong>
                 </div>
-                <div class="metric {'warning' if len(slow_tests) > 0 else 'good'}">
+                <div class="metric {"warning" if len(slow_tests) > 0 else "good"}">
                     <strong>Slow Tests: {len(slow_tests)}</strong>
                 </div>
             </div>
@@ -665,11 +675,11 @@ class MetricsCollector:
         for test in flaky_tests:
             html_content += f"""
                 <tr class="flaky">
-                    <td>{test['test_name']}</td>
-                    <td>{test['test_file']}</td>
-                    <td>{test['flaky_percentage']:.1f}%</td>
-                    <td>{test['flaky_count']}/{test['total_runs']}</td>
-                    <td>{test['first_flaky_run']}</td>
+                    <td>{test["test_name"]}</td>
+                    <td>{test["test_file"]}</td>
+                    <td>{test["flaky_percentage"]:.1f}%</td>
+                    <td>{test["flaky_count"]}/{test["total_runs"]}</td>
+                    <td>{test["first_flaky_run"]}</td>
                 </tr>
             """
 
@@ -690,11 +700,11 @@ class MetricsCollector:
         for test in slow_tests:
             html_content += f"""
                 <tr class="slow">
-                    <td>{test['test_name']}</td>
-                    <td>{test['test_file']}</td>
-                    <td>{test['avg_duration']:.2f}s</td>
-                    <td>{test['max_duration']:.2f}s</td>
-                    <td>{test['slow_run_count']}</td>
+                    <td>{test["test_name"]}</td>
+                    <td>{test["test_file"]}</td>
+                    <td>{test["avg_duration"]:.2f}s</td>
+                    <td>{test["max_duration"]:.2f}s</td>
+                    <td>{test["slow_run_count"]}</td>
                 </tr>
             """
 
@@ -742,7 +752,9 @@ class MetricsCollector:
         logger.info(f"HTML metrics report generated: {output_path}")
         return output_path
 
-    def export_metrics_json(self, output_path: str = "tests/reporting/metrics_data.json"):
+    def export_metrics_json(
+        self, output_path: str = "tests/reporting/metrics_data.json"
+    ):
         """Export metrics data as JSON."""
         data = {
             "flaky_tests": self.get_flaky_tests(),

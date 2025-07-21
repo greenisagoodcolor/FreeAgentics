@@ -50,8 +50,12 @@ class LoadTestReport:
 
             summary.append(f"- Maximum agents tested: {max_agents}")
             summary.append(f"- Efficiency at scale: {max_metric.actual_efficiency:.1%}")
-            summary.append(f"- Coordination overhead: {max_metric.coordination_overhead:.1%}")
-            summary.append(f"- Message latency: {max_metric.coordination_latency_ms:.1f}ms")
+            summary.append(
+                f"- Coordination overhead: {max_metric.coordination_overhead:.1%}"
+            )
+            summary.append(
+                f"- Message latency: {max_metric.coordination_latency_ms:.1f}ms"
+            )
 
             # Validate against documentation
             efficiency_loss = max_metric.efficiency_loss()
@@ -90,12 +94,18 @@ class LoadTestReport:
 
         if "handoff_results" in self.results:
             handoff = self.results["handoff_results"]
-            summary.append(f"- Task handoffs/sec: {handoff.get('handoffs_per_second', 0):.1f}")
-            summary.append(f"- Handoff success rate: {handoff.get('success_rate', 0):.1%}")
+            summary.append(
+                f"- Task handoffs/sec: {handoff.get('handoffs_per_second', 0):.1f}"
+            )
+            summary.append(
+                f"- Handoff success rate: {handoff.get('success_rate', 0):.1%}"
+            )
 
         if "consensus_results" in self.results:
             consensus = self.results["consensus_results"]
-            summary.append(f"- Consensus success rate: {consensus.get('success_rate', 0):.1%}")
+            summary.append(
+                f"- Consensus success rate: {consensus.get('success_rate', 0):.1%}"
+            )
             summary.append(
                 f"- Average consensus time: {consensus.get('avg_consensus_time_ms', 0):.1f}ms"
             )
@@ -109,7 +119,9 @@ class LoadTestReport:
             summary.append(
                 f"- Average recovery time: {failure.get('avg_recovery_time_ms', 0):.1f}ms"
             )
-            summary.append(f"- Max recovery time: {failure.get('max_recovery_time_ms', 0):.1f}ms")
+            summary.append(
+                f"- Max recovery time: {failure.get('max_recovery_time_ms', 0):.1f}ms"
+            )
 
         return "\n".join(summary)
 
@@ -201,7 +213,9 @@ class LoadTestReport:
 
         for key, value in self.results.items():
             if key == "coordination_metrics":
-                serializable_results[key] = [{k: v for k, v in m.__dict__.items()} for m in value]
+                serializable_results[key] = [
+                    {k: v for k, v in m.__dict__.items()} for m in value
+                ]
             else:
                 serializable_results[key] = value
 
@@ -212,7 +226,9 @@ class LoadTestReport:
 def run_full_load_test_suite(args):
     """Run the complete load test suite."""
     print("🚀 Starting comprehensive multi-agent coordination load tests...")
-    print(f"Test configuration: max_agents={args.max_agents}, duration={args.duration}s")
+    print(
+        f"Test configuration: max_agents={args.max_agents}, duration={args.duration}s"
+    )
 
     results = {}
 
@@ -312,7 +328,8 @@ def run_full_load_test_suite(args):
 
         # Save JSON results
         json_path = (
-            output_path / f"load_test_results_{datetime.now().strftime('%Y%m%d_%H%M%S')}.json"
+            output_path
+            / f"load_test_results_{datetime.now().strftime('%Y%m%d_%H%M%S')}.json"
         )
         report.save_json_results(json_path)
         print(f"\n📄 Detailed results saved to: {json_path}")
@@ -338,7 +355,9 @@ def run_full_load_test_suite(args):
     if 70 <= efficiency_loss <= 75:
         print("✅ Efficiency loss matches documented ~72%")
     else:
-        print(f"❌ Efficiency loss ({efficiency_loss:.1f}%) differs from documented 72%")
+        print(
+            f"❌ Efficiency loss ({efficiency_loss:.1f}%) differs from documented 72%"
+        )
         all_checks_pass = False
 
     # Check 2: Practical agent limit

@@ -277,7 +277,8 @@ class EnhancedRBACManager:
         applicable_rules = [
             rule
             for rule in self.abac_rules
-            if rule.is_active and self._rule_applies(rule, resource_context.resource_type, action)
+            if rule.is_active
+            and self._rule_applies(rule, resource_context.resource_type, action)
         ]
 
         # Sort by priority (highest first)
@@ -324,7 +325,9 @@ class EnhancedRBACManager:
         """Evaluate if a rule's conditions are satisfied."""
 
         # Evaluate subject conditions
-        if not self._evaluate_subject_conditions(rule.subject_conditions, access_context):
+        if not self._evaluate_subject_conditions(
+            rule.subject_conditions, access_context
+        ):
             return False
 
         # Evaluate resource conditions
@@ -334,7 +337,9 @@ class EnhancedRBACManager:
             return False
 
         # Evaluate environment conditions
-        if not self._evaluate_environment_conditions(rule.environment_conditions, access_context):
+        if not self._evaluate_environment_conditions(
+            rule.environment_conditions, access_context
+        ):
             return False
 
         return True
@@ -514,7 +519,9 @@ class EnhancedRBACManager:
 
         # Also log through security auditor
         event_type = (
-            SecurityEventType.ACCESS_GRANTED if decision else SecurityEventType.ACCESS_DENIED
+            SecurityEventType.ACCESS_GRANTED
+            if decision
+            else SecurityEventType.ACCESS_DENIED
         )
         security_auditor.log_event(
             event_type,
@@ -544,7 +551,9 @@ class EnhancedRBACManager:
     ) -> str:
         """Submit a role assignment request."""
 
-        request_id = f"RAR-{datetime.now().strftime('%Y%m%d%H%M%S')}-{len(self.role_requests)}"
+        request_id = (
+            f"RAR-{datetime.now().strftime('%Y%m%d%H%M%S')}-{len(self.role_requests)}"
+        )
 
         request = RoleAssignmentRequest(
             id=request_id,
@@ -666,7 +675,9 @@ class EnhancedRBACManager:
         logger.info(f"Role assignment request approved: {request_id}")
         return True
 
-    def reject_role_request(self, request_id: str, reviewer_id: str, reviewer_notes: str) -> bool:
+    def reject_role_request(
+        self, request_id: str, reviewer_id: str, reviewer_notes: str
+    ) -> bool:
         """Reject a role assignment request."""
 
         request = next((r for r in self.role_requests if r.id == request_id), None)
@@ -709,7 +720,9 @@ class EnhancedRBACManager:
     ) -> List[RoleAssignmentRequest]:
         """Get pending role assignment requests."""
 
-        pending_requests = [r for r in self.role_requests if r.status == RequestStatus.PENDING]
+        pending_requests = [
+            r for r in self.role_requests if r.status == RequestStatus.PENDING
+        ]
 
         # Filter based on reviewer role if specified
         if reviewer_role:
@@ -739,7 +752,10 @@ class EnhancedRBACManager:
         expired_count = 0
 
         for request in self.role_requests:
-            if request.status == RequestStatus.PENDING and request.created_at < cutoff_date:
+            if (
+                request.status == RequestStatus.PENDING
+                and request.created_at < cutoff_date
+            ):
                 request.status = RequestStatus.EXPIRED
                 expired_count += 1
 
@@ -760,7 +776,8 @@ class EnhancedRBACManager:
                 "total_roles": len(UserRole),
                 "total_permissions": len(Permission),
                 "role_permission_matrix": {
-                    role.value: [p.value for p in perms] for role, perms in ROLE_PERMISSIONS.items()
+                    role.value: [p.value for p in perms]
+                    for role, perms in ROLE_PERMISSIONS.items()
                 },
             },
             "abac_config": {
@@ -775,7 +792,9 @@ class EnhancedRBACManager:
                         "resource_type": rule.resource_type,
                         "action": rule.action,
                     }
-                    for rule in sorted(self.abac_rules, key=lambda x: x.priority, reverse=True)
+                    for rule in sorted(
+                        self.abac_rules, key=lambda x: x.priority, reverse=True
+                    )
                 ],
             },
             "role_assignment_workflow": {
@@ -784,17 +803,31 @@ class EnhancedRBACManager:
                     [r for r in self.role_requests if r.status == RequestStatus.PENDING]
                 ),
                 "approved_requests": len(
-                    [r for r in self.role_requests if r.status == RequestStatus.APPROVED]
+                    [
+                        r
+                        for r in self.role_requests
+                        if r.status == RequestStatus.APPROVED
+                    ]
                 ),
                 "rejected_requests": len(
-                    [r for r in self.role_requests if r.status == RequestStatus.REJECTED]
+                    [
+                        r
+                        for r in self.role_requests
+                        if r.status == RequestStatus.REJECTED
+                    ]
                 ),
-                "auto_approved_requests": len([r for r in self.role_requests if r.auto_approved]),
+                "auto_approved_requests": len(
+                    [r for r in self.role_requests if r.auto_approved]
+                ),
             },
             "audit_statistics": {
                 "total_access_decisions": len(self.access_audit_log),
-                "access_granted": len([e for e in self.access_audit_log if e.get("decision")]),
-                "access_denied": len([e for e in self.access_audit_log if not e.get("decision")]),
+                "access_granted": len(
+                    [e for e in self.access_audit_log if e.get("decision")]
+                ),
+                "access_denied": len(
+                    [e for e in self.access_audit_log if not e.get("decision")]
+                ),
             },
         }
 
@@ -855,7 +888,9 @@ def enhanced_permission_check(permission: Permission):
 
             # Basic resource context (could be enhanced based on function parameters)
             resource_context = ResourceContext(
-                resource_type=(func.__name__.split("_")[-1] if "_" in func.__name__ else "unknown")
+                resource_type=(
+                    func.__name__.split("_")[-1] if "_" in func.__name__ else "unknown"
+                )
             )
 
             (

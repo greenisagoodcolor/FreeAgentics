@@ -171,17 +171,29 @@ class CoverageAnalyzer:
                 # Handle different analysis result types
                 if hasattr(analysis, "statements"):
                     statements = len(analysis.statements)
-                    missing = len(analysis.missing) if hasattr(analysis, "missing") else 0
-                    excluded = len(analysis.excluded) if hasattr(analysis, "excluded") else 0
-                    missing_lines = sorted(analysis.missing) if hasattr(analysis, "missing") else []
+                    missing = (
+                        len(analysis.missing) if hasattr(analysis, "missing") else 0
+                    )
+                    excluded = (
+                        len(analysis.excluded) if hasattr(analysis, "excluded") else 0
+                    )
+                    missing_lines = (
+                        sorted(analysis.missing) if hasattr(analysis, "missing") else []
+                    )
                 else:
                     # Handle tuple format (older coverage.py versions)
                     if isinstance(analysis, tuple) and len(analysis) >= 3:
                         statements = len(analysis[1]) if analysis[1] else 0
-                        missing = len(analysis[3]) if len(analysis) > 3 and analysis[3] else 0
-                        excluded = len(analysis[2]) if len(analysis) > 2 and analysis[2] else 0
+                        missing = (
+                            len(analysis[3]) if len(analysis) > 3 and analysis[3] else 0
+                        )
+                        excluded = (
+                            len(analysis[2]) if len(analysis) > 2 and analysis[2] else 0
+                        )
                         missing_lines = (
-                            sorted(analysis[3]) if len(analysis) > 3 and analysis[3] else []
+                            sorted(analysis[3])
+                            if len(analysis) > 3 and analysis[3]
+                            else []
                         )
                     else:
                         # Skip this file if we can't parse it
@@ -213,7 +225,9 @@ class CoverageAnalyzer:
 
         # Calculate total coverage
         if total_statements > 0:
-            total_coverage = ((total_statements - total_missing) / total_statements) * 100
+            total_coverage = (
+                (total_statements - total_missing) / total_statements
+            ) * 100
         else:
             total_coverage = 0.0
 
@@ -390,7 +404,9 @@ class CoverageAnalyzer:
         conn.close()
         return trends
 
-    def get_file_coverage_history(self, file_path: str, days: int = 30) -> List[Dict[str, Any]]:
+    def get_file_coverage_history(
+        self, file_path: str, days: int = 30
+    ) -> List[Dict[str, Any]]:
         """Get coverage history for a specific file."""
         conn = sqlite3.connect(self.db_path)
         cursor = conn.cursor()
@@ -486,10 +502,10 @@ class CoverageAnalyzer:
         <body>
             <div class="header">
                 <h1>FreeAgentics Test Coverage Report</h1>
-                <p>Generated: {datetime.now().strftime('%Y-%m-%d %H:%M:%S')}</p>
+                <p>Generated: {datetime.now().strftime("%Y-%m-%d %H:%M:%S")}</p>
                 <p>Test Run ID: {report.test_run_id}</p>
 
-                <div class="metric {'critical' if report.total_coverage < 50 else 'warning' if report.total_coverage < 80 else 'good'}">
+                <div class="metric {"critical" if report.total_coverage < 50 else "warning" if report.total_coverage < 80 else "good"}">
                     <strong>Total Coverage: {report.total_coverage:.1f}%</strong>
                 </div>
                 <div class="metric">
@@ -512,9 +528,9 @@ class CoverageAnalyzer:
         for file_info in zero_coverage:
             html_content += f"""
                 <tr class="zero-coverage">
-                    <td>{file_info['file_path']}</td>
-                    <td>{file_info['first_detected']}</td>
-                    <td>{file_info['times_detected']}</td>
+                    <td>{file_info["file_path"]}</td>
+                    <td>{file_info["first_detected"]}</td>
+                    <td>{file_info["times_detected"]}</td>
                 </tr>
             """
 
@@ -533,11 +549,11 @@ class CoverageAnalyzer:
 
         for gap in gaps:
             html_content += f"""
-                <tr class="{'zero-coverage' if gap['coverage_percent'] == 0 else 'low-coverage'}">
-                    <td>{gap['file_path']}</td>
-                    <td>{gap['coverage_percent']:.1f}%</td>
-                    <td>{gap['missing_lines']}</td>
-                    <td>{gap['total_statements']}</td>
+                <tr class="{"zero-coverage" if gap["coverage_percent"] == 0 else "low-coverage"}">
+                    <td>{gap["file_path"]}</td>
+                    <td>{gap["coverage_percent"]:.1f}%</td>
+                    <td>{gap["missing_lines"]}</td>
+                    <td>{gap["total_statements"]}</td>
                 </tr>
             """
 
@@ -559,7 +575,9 @@ class CoverageAnalyzer:
             css_class = (
                 "zero-coverage"
                 if file_stats.coverage_percent == 0
-                else "low-coverage" if file_stats.coverage_percent < 80 else "good-coverage"
+                else "low-coverage"
+                if file_stats.coverage_percent < 80
+                else "good-coverage"
             )
 
             html_content += f"""
@@ -586,7 +604,9 @@ class CoverageAnalyzer:
         logger.info(f"HTML coverage report generated: {output_path}")
         return output_path
 
-    def export_coverage_json(self, output_path: str = "tests/reporting/coverage_data.json"):
+    def export_coverage_json(
+        self, output_path: str = "tests/reporting/coverage_data.json"
+    ):
         """Export coverage data as JSON."""
         report = self.analyze_coverage()
 
@@ -659,7 +679,9 @@ def main():
     if zero_coverage:
         print(f"\nZero coverage files ({len(zero_coverage)}):")
         for file_info in zero_coverage:
-            print(f"  {file_info['file_path']} (detected {file_info['times_detected']} times)")
+            print(
+                f"  {file_info['file_path']} (detected {file_info['times_detected']} times)"
+            )
 
 
 if __name__ == "__main__":

@@ -3,7 +3,6 @@
 from unittest.mock import MagicMock
 
 
-
 class TestCoalitionsTypes:
     """Test the coalitions types module."""
 

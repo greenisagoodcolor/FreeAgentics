@@ -162,7 +162,9 @@ class TestGMNAPIEndpoint:
 
             assert response.status_code == status.HTTP_404_NOT_FOUND
 
-    def test_upload_gmn_triggers_free_energy_recalculation(self, client, agent_id, valid_gmn_spec):
+    def test_upload_gmn_triggers_free_energy_recalculation(
+        self, client, agent_id, valid_gmn_spec
+    ):
         """Test that uploading GMN triggers free energy recalculation."""
         with (
             patch("database.gmn_repository.GMNRepository") as mock_gmn_repo,
@@ -396,7 +398,9 @@ class TestGMNAPIEndpoint:
             mock_repo.return_value = mock_repo_instance
 
             # Simulate database error
-            mock_repo_instance.create_gmn_specification.side_effect = Exception("Database error")
+            mock_repo_instance.create_gmn_specification.side_effect = Exception(
+                "Database error"
+            )
 
             response = client.post(
                 f"/api/v1/agents/{agent_id}/gmn",
@@ -551,7 +555,9 @@ class TestGMNAPIEndpointPUT:
 
             assert response.status_code == status.HTTP_200_OK
             response_data = response.json()
-            assert response_data["message"] == "GMN specification activated successfully"
+            assert (
+                response_data["message"] == "GMN specification activated successfully"
+            )
 
     def test_deactivate_gmn_specification(self, client, agent_id, spec_id):
         """Test deactivating a specific GMN specification."""
@@ -564,7 +570,9 @@ class TestGMNAPIEndpointPUT:
 
             assert response.status_code == status.HTTP_200_OK
             response_data = response.json()
-            assert response_data["message"] == "GMN specification deactivated successfully"
+            assert (
+                response_data["message"] == "GMN specification deactivated successfully"
+            )
 
 
 class TestGMNAPIEndpointDELETE:

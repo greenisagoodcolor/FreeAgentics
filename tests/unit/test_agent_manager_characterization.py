@@ -355,7 +355,9 @@ class TestActiveInferenceIntegrationCharacterization:
                 # Mock PyMDP agent behavior
                 instance = Mock()
                 instance.infer_states = Mock(return_value={"qs": np.array([0.5, 0.5])})
-                instance.infer_policies = Mock(return_value={"q_pi": np.array([0.6, 0.4])})
+                instance.infer_policies = Mock(
+                    return_value={"q_pi": np.array([0.6, 0.4])}
+                )
                 instance.sample_action = Mock(return_value=np.array(1))
                 instance.F = 10.5  # Free energy
                 mock_agent.return_value = instance
@@ -369,7 +371,11 @@ class TestActiveInferenceIntegrationCharacterization:
 
         # When
         agent_id = manager.create_agent(
-            "active_inference", "PyMDP Agent", num_states=[10, 10], num_obs=[5, 5], num_controls=4
+            "active_inference",
+            "PyMDP Agent",
+            num_states=[10, 10],
+            num_obs=[5, 5],
+            num_controls=4,
         )
 
         # Then

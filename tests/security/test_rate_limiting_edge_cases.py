@@ -27,7 +27,9 @@ class TestComplexAttackScenarios:
     @pytest.fixture
     async def redis_client(self):
         """Create real Redis client for integration tests."""
-        client = aioredis.Redis.from_url("redis://localhost:6379", decode_responses=True)
+        client = aioredis.Redis.from_url(
+            "redis://localhost:6379", decode_responses=True
+        )
 
         # Clear test keys
         keys = await client.keys("rate_limit:*")
@@ -122,8 +124,12 @@ class TestComplexAttackScenarios:
             request = MagicMock(spec=Request)
             request.client = MagicMock()
             request.client.host = attacker_ip
-            request.url.path = "/api/v1/large_response"  # Endpoint that returns large data
-            request.headers = {"X-Amplification-Factor": str(response_amplification_factor)}
+            request.url.path = (
+                "/api/v1/large_response"  # Endpoint that returns large data
+            )
+            request.headers = {
+                "X-Amplification-Factor": str(response_amplification_factor)
+            }
             request.state = MagicMock()
 
             await rate_limiter.check_rate_limit(request)
@@ -278,7 +284,9 @@ class TestEdgeCaseHandling:
     @pytest.fixture
     async def redis_client(self):
         """Create real Redis client for integration tests."""
-        client = aioredis.Redis.from_url("redis://localhost:6379", decode_responses=True)
+        client = aioredis.Redis.from_url(
+            "redis://localhost:6379", decode_responses=True
+        )
 
         # Clear test keys
         keys = await client.keys("rate_limit:*")
@@ -337,7 +345,10 @@ class TestEdgeCaseHandling:
             try:
                 response = await rate_limiter.check_rate_limit(request)
                 # Should handle gracefully without exceptions
-                assert response is None or response.status_code == status.HTTP_429_TOO_MANY_REQUESTS
+                assert (
+                    response is None
+                    or response.status_code == status.HTTP_429_TOO_MANY_REQUESTS
+                )
             except Exception as e:
                 pytest.fail(f"Failed to handle special character: {test_ip} - {e}")
 
@@ -552,7 +563,10 @@ class TestEdgeCaseHandling:
             try:
                 response = await rate_limiter.check_rate_limit(request)
                 # Should handle gracefully
-                assert response is None or response.status_code == status.HTTP_429_TOO_MANY_REQUESTS
+                assert (
+                    response is None
+                    or response.status_code == status.HTTP_429_TOO_MANY_REQUESTS
+                )
             except Exception as e:
                 pytest.fail(f"Failed to handle malformed request: {req_data} - {e}")
 
@@ -563,7 +577,9 @@ class TestSecurityVulnerabilities:
     @pytest.fixture
     async def redis_client(self):
         """Create real Redis client for integration tests."""
-        client = aioredis.Redis.from_url("redis://localhost:6379", decode_responses=True)
+        client = aioredis.Redis.from_url(
+            "redis://localhost:6379", decode_responses=True
+        )
 
         # Clear test keys
         keys = await client.keys("rate_limit:*")
@@ -619,7 +635,10 @@ class TestSecurityVulnerabilities:
             try:
                 response = await rate_limiter.check_rate_limit(request)
                 # Should sanitize input and not execute commands
-                assert response is None or response.status_code == status.HTTP_429_TOO_MANY_REQUESTS
+                assert (
+                    response is None
+                    or response.status_code == status.HTTP_429_TOO_MANY_REQUESTS
+                )
             except Exception as e:
                 # Should not raise exceptions
                 pytest.fail(f"Injection attempt caused exception: {payload} - {e}")
@@ -791,7 +810,9 @@ class TestDistributedSystemScenarios:
     @pytest.fixture
     async def redis_client(self):
         """Create real Redis client for integration tests."""
-        client = aioredis.Redis.from_url("redis://localhost:6379", decode_responses=True)
+        client = aioredis.Redis.from_url(
+            "redis://localhost:6379", decode_responses=True
+        )
 
         # Clear test keys
         keys = await client.keys("rate_limit:*")
@@ -978,7 +999,9 @@ class TestDistributedSystemScenarios:
 
         # Verify regional patterns
         for region in regions:
-            total_requests = region_stats[region]["allowed"] + region_stats[region]["blocked"]
+            total_requests = (
+                region_stats[region]["allowed"] + region_stats[region]["blocked"]
+            )
             assert total_requests > 0
             # Each region should have some blocked requests
             assert region_stats[region]["blocked"] > 0

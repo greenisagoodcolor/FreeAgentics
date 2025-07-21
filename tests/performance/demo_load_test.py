@@ -97,7 +97,9 @@ def demo_agent_simulation():
         tick_count += 1
 
         if tick_count % 10 == 0:
-            print(f"  Tick {tick_count}: {tick_result['agents_processed']} agents processed")
+            print(
+                f"  Tick {tick_count}: {tick_result['agents_processed']} agents processed"
+            )
 
     # Get final metrics
     all_metrics = env.lifecycle_manager.get_all_metrics()

@@ -85,31 +85,19 @@ class PerformanceMetrics:
 
     def get_summary(self) -> Dict[str, Any]:
         return {
-            "duration": self.end_time - self.start_time
-            if self.end_time
-            else 0,
+            "duration": self.end_time - self.start_time if self.end_time else 0,
             "agent_spawn_times": {
-                "min": min(self.agent_spawn_times)
-                if self.agent_spawn_times
-                else 0,
-                "max": max(self.agent_spawn_times)
-                if self.agent_spawn_times
-                else 0,
-                "avg": sum(self.agent_spawn_times)
-                / len(self.agent_spawn_times)
+                "min": min(self.agent_spawn_times) if self.agent_spawn_times else 0,
+                "max": max(self.agent_spawn_times) if self.agent_spawn_times else 0,
+                "avg": sum(self.agent_spawn_times) / len(self.agent_spawn_times)
                 if self.agent_spawn_times
                 else 0,
                 "count": len(self.agent_spawn_times),
             },
             "message_throughput": {
-                "min": min(self.message_throughput)
-                if self.message_throughput
-                else 0,
-                "max": max(self.message_throughput)
-                if self.message_throughput
-                else 0,
-                "avg": sum(self.message_throughput)
-                / len(self.message_throughput)
+                "min": min(self.message_throughput) if self.message_throughput else 0,
+                "max": max(self.message_throughput) if self.message_throughput else 0,
+                "avg": sum(self.message_throughput) / len(self.message_throughput)
                 if self.message_throughput
                 else 0,
                 "count": len(self.message_throughput),
@@ -151,9 +139,7 @@ class Month1PerformanceTestSuite:
         with ThreadPoolExecutor(max_workers=10) as executor:
             futures = []
             for i in range(100):
-                futures.append(
-                    executor.submit(self._create_agent, f"agent_{i}")
-                )
+                futures.append(executor.submit(self._create_agent, f"agent_{i}"))
 
             # Wait for all agents to be created
             for future in futures:
@@ -233,9 +219,7 @@ class Month1PerformanceTestSuite:
             / len(self.metrics.response_times),
         }
 
-        print(
-            f"✅ Processed {message_count} messages in {actual_duration:.2f}s"
-        )
+        print(f"✅ Processed {message_count} messages in {actual_duration:.2f}s")
         print(f"📊 Throughput: {throughput:.1f} msg/s (target: ≥1000 msg/s)")
         print(f"🎯 Status: {result['status']}")
 
@@ -255,9 +239,7 @@ class Month1PerformanceTestSuite:
             node_id = f"node_{node_count}"
             node_data = {
                 "id": node_id,
-                "type": random.choice(
-                    ["agent", "resource", "location", "action"]
-                ),
+                "type": random.choice(["agent", "resource", "location", "action"]),
                 "properties": {
                     "name": f"Node {node_count}",
                     "description": f"This is node {node_count} with some data",
@@ -274,7 +256,7 @@ class Month1PerformanceTestSuite:
             # Add some edges
             if node_count > 0:
                 for _ in range(random.randint(1, 3)):
-                    target_node = f"node_{random.randint(0, node_count-1)}"
+                    target_node = f"node_{random.randint(0, node_count - 1)}"
                     self.knowledge_graph.add_edge(node_id, target_node)
 
             node_count += 1
@@ -434,9 +416,7 @@ class Month1PerformanceTestSuite:
     def _simulate_knowledge_graph_update(self):
         """Simulate knowledge graph update"""
         node_id = f"sim_node_{len(self.knowledge_graph.nodes)}"
-        self.knowledge_graph.add_node(
-            node_id, {"type": "simulated", "data": "test"}
-        )
+        self.knowledge_graph.add_node(node_id, {"type": "simulated", "data": "test"})
 
     def _simulate_cleanup(self):
         """Simulate cleanup operations"""
@@ -449,9 +429,7 @@ class Month1PerformanceTestSuite:
         print("\n" + "=" * 80)
         print("🎯 FREEAGENTICS v1.0.0-alpha+ MONTH 1 PERFORMANCE TESTING")
         print("=" * 80)
-        print(
-            "Following POST_RELEASE_PREPARATION_v1.0.0-alpha.md requirements"
-        )
+        print("Following POST_RELEASE_PREPARATION_v1.0.0-alpha.md requirements")
         print(f"Started at: {datetime.now().strftime('%Y-%m-%d %H:%M:%S')}")
 
         results = {}
@@ -464,16 +442,14 @@ class Month1PerformanceTestSuite:
         results["test_5"] = self.test_multi_hour_operation()
 
         # Summary
-        passed_tests = sum(
-            1 for test in results.values() if test["status"] == "PASS"
-        )
+        passed_tests = sum(1 for test in results.values() if test["status"] == "PASS")
         total_tests = len(results)
 
         print("\n" + "=" * 80)
         print("📊 PERFORMANCE TEST SUMMARY")
         print("=" * 80)
         print(f"Tests passed: {passed_tests}/{total_tests}")
-        print(f"Success rate: {passed_tests/total_tests*100:.1f}%")
+        print(f"Success rate: {passed_tests / total_tests * 100:.1f}%")
 
         for test_name, result in results.items():
             status_emoji = "✅" if result["status"] == "PASS" else "❌"

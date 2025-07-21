@@ -585,7 +585,9 @@ class TestNestedValidationFramework:
 
         # Should detect temporal inconsistency
         assert is_valid is False
-        temporal_errors = [e for e in errors if "temporal" in e.lower() or "horizon" in e.lower()]
+        temporal_errors = [
+            e for e in errors if "temporal" in e.lower() or "horizon" in e.lower()
+        ]
         assert len(temporal_errors) > 0
 
 

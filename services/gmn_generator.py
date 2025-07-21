@@ -104,9 +104,7 @@ class GMNGenerator:
             if is_valid:
                 logger.info("GMN validation successful")
             else:
-                logger.warning(
-                    f"GMN validation failed with {len(errors)} errors"
-                )
+                logger.warning(f"GMN validation failed with {len(errors)} errors")
 
             return is_valid, errors
 
@@ -136,9 +134,7 @@ class GMNGenerator:
         logger.info(f"Refining GMN based on feedback: {feedback[:100]}...")
 
         try:
-            refined_gmn = await self.llm_provider.refine_gmn(
-                gmn_spec, feedback
-            )
+            refined_gmn = await self.llm_provider.refine_gmn(gmn_spec, feedback)
 
             # Validate the refined GMN
             is_valid, errors = await self.validate_gmn(refined_gmn)
@@ -164,7 +160,7 @@ class GMNGenerator:
             List of structural errors (empty if valid)
         """
         errors = []
-        lines = gmn_spec.strip().split('\n')
+        lines = gmn_spec.strip().split("\n")
 
         # Track node definitions
         defined_nodes = set()
@@ -179,29 +175,29 @@ class GMNGenerator:
             line = line.strip()
 
             # Track braces
-            brace_count += line.count('{') - line.count('}')
+            brace_count += line.count("{") - line.count("}")
 
             # Check for node definition
-            if line.startswith('node'):
+            if line.startswith("node"):
                 parts = line.split()
                 if len(parts) >= 3:
                     node_type = parts[1]
-                    node_name = parts[2].rstrip('{')
+                    node_name = parts[2].rstrip("{")
                     defined_nodes.add(node_name)
                     node_types[node_name] = node_type
                     current_node = node_name
                 else:
-                    errors.append(f"Line {i+1}: Invalid node definition")
+                    errors.append(f"Line {i + 1}: Invalid node definition")
 
             # Check for node references in properties
-            if current_node and ':' in line:
-                if 'from:' in line or 'to:' in line or 'state:' in line:
+            if current_node and ":" in line:
+                if "from:" in line or "to:" in line or "state:" in line:
                     # Extract referenced nodes
-                    value_part = line.split(':', 1)[1].strip()
+                    value_part = line.split(":", 1)[1].strip()
                     # Handle both single references and lists
-                    if value_part.startswith('['):
+                    if value_part.startswith("["):
                         # List of nodes
-                        node_refs = value_part.strip('[]').split(',')
+                        node_refs = value_part.strip("[]").split(",")
                         for ref in node_refs:
                             ref = ref.strip()
                             if ref and not ref.isdigit():
@@ -229,7 +225,7 @@ class GMNGenerator:
             )
 
         # Check for required node types
-        required_types = {'state', 'action'}
+        required_types = {"state", "action"}
         found_types = set(node_types.values())
         missing_types = required_types - found_types
         if missing_types:
@@ -238,7 +234,7 @@ class GMNGenerator:
             )
 
         # Check for transitions or emissions
-        if 'transition' not in found_types and 'emission' not in found_types:
+        if "transition" not in found_types and "emission" not in found_types:
             errors.append("No transition or emission nodes defined")
 
         return errors
@@ -258,33 +254,29 @@ class GMNGenerator:
         lines = gmn_spec.lower()
 
         # Check for preferences
-        if 'preference' not in lines:
+        if "preference" not in lines:
             suggestions.append("Add preference nodes to define agent goals")
 
         # Check for observations
-        if 'observation' not in lines:
+        if "observation" not in lines:
             suggestions.append("Add observation nodes for agent perception")
 
         # Check for emissions
-        if 'emission' not in lines and 'observation' in lines:
-            suggestions.append(
-                "Add emission nodes to link states to observations"
-            )
+        if "emission" not in lines and "observation" in lines:
+            suggestions.append("Add emission nodes to link states to observations")
 
         # Check for descriptions
-        if 'description:' not in lines:
-            suggestions.append(
-                "Add descriptions to nodes for better documentation"
-            )
+        if "description:" not in lines:
+            suggestions.append("Add descriptions to nodes for better documentation")
 
         # Check for deterministic vs stochastic
-        if 'stochastic:' not in lines and 'deterministic:' not in lines:
+        if "stochastic:" not in lines and "deterministic:" not in lines:
             suggestions.append(
                 "Specify whether transitions are deterministic or stochastic"
             )
 
         # Check for initial state distribution
-        if 'initial:' not in lines:
+        if "initial:" not in lines:
             suggestions.append("Consider adding initial state distribution")
 
         return suggestions

@@ -108,8 +108,8 @@ class UsageMetrics:
             else:
                 # Running average
                 self.average_latency_ms = (
-                    self.average_latency_ms * (self.successful_requests - 1) +
-                        latency_ms
+                    self.average_latency_ms * (self.successful_requests - 1)
+                    + latency_ms
                 ) / self.successful_requests
 
         self.last_request_time = datetime.now()
@@ -220,7 +220,9 @@ class BaseProvider(ILLMProvider):
                 ProviderStatus.HEALTHY,
                 ProviderStatus.DEGRADED,
             ]:
-                logger.info(f"Configured {self.provider_type.value} provider successfully")
+                logger.info(
+                    f"Configured {self.provider_type.value} provider successfully"
+                )
                 return True
             else:
                 logger.error(
@@ -229,8 +231,7 @@ class BaseProvider(ILLMProvider):
                 return False
         except Exception as e:
             logger.error(
-                f"Failed to test connection for {self.provider_type.value}:"
-                f" {e}"
+                f"Failed to test connection for {self.provider_type.value}: {e}"
             )
             return False
 
@@ -303,11 +304,12 @@ class ProviderRegistry:
             self._provider_priorities.append(provider_type)
 
         # Sort by priority (lower number = higher priority)
-        self._provider_priorities.sort(key=lambda pt: self._provider_priority_values[pt])
+        self._provider_priorities.sort(
+            key=lambda pt: self._provider_priority_values[pt]
+        )
 
         logger.info(
-            f"Registered provider: {provider_type.value} with priority"
-            f" {priority}"
+            f"Registered provider: {provider_type.value} with priority {priority}"
         )
 
     def get_provider(self, provider_type: ProviderType) -> Optional[ILLMProvider]:
@@ -316,8 +318,11 @@ class ProviderRegistry:
 
     def get_providers_by_priority(self) -> List[ILLMProvider]:
         """Get all providers sorted by priority (highest first)."""
-        return [self._providers[pt] for pt in self._provider_priorities if
-            pt in self._providers]
+        return [
+            self._providers[pt]
+            for pt in self._provider_priorities
+            if pt in self._providers
+        ]
 
     def get_healthy_providers(self) -> List[ILLMProvider]:
         """Get all healthy providers."""
@@ -382,8 +387,7 @@ class ProviderManager:
 
             except Exception as e:
                 logger.error(
-                    f"Provider {provider.get_provider_type().value} failed:"
-                    f" {str(e)}"
+                    f"Provider {provider.get_provider_type().value} failed: {str(e)}"
                 )
                 continue
 

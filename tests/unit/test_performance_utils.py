@@ -73,7 +73,11 @@ class TestTimeSleepPatch:
 
     def test_patch_functionality(self):
         """Test that patching works correctly."""
-        from tests.performance.patch_time_sleep import _original_sleep, disable_patch, enable_patch
+        from tests.performance.patch_time_sleep import (
+            _original_sleep,
+            disable_patch,
+            enable_patch,
+        )
 
         # Enable patch
         enable_patch()

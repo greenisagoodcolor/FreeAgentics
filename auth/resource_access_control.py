@@ -68,7 +68,9 @@ class ResourceAccessValidator:
             resource_context = ResourceContext(
                 resource_id=agent_id,
                 resource_type="agent",
-                owner_id=(str(agent.created_by) if hasattr(agent, "created_by") else None),
+                owner_id=(
+                    str(agent.created_by) if hasattr(agent, "created_by") else None
+                ),
                 metadata={
                     "agent_name": agent.name,
                     "agent_template": agent.template,
@@ -87,7 +89,10 @@ class ResourceAccessValidator:
             elif action in ["delete"]:
                 required_permission = Permission.DELETE_AGENT
 
-            if required_permission and required_permission not in current_user.permissions:
+            if (
+                required_permission
+                and required_permission not in current_user.permissions
+            ):
                 logger.warning(
                     f"User {current_user.username} lacks permission {required_permission.value} for action {action}"
                 )
@@ -98,7 +103,9 @@ class ResourceAccessValidator:
                 access_granted,
                 reason,
                 applied_rules,
-            ) = enhanced_rbac_manager.evaluate_abac_access(access_context, resource_context, action)
+            ) = enhanced_rbac_manager.evaluate_abac_access(
+                access_context, resource_context, action
+            )
 
             # Log ABAC decision
             comprehensive_auditor.log_abac_decision(
@@ -114,7 +121,9 @@ class ResourceAccessValidator:
                     "agent_name": agent.name,
                     "agent_template": agent.template,
                     "agent_status": agent.status.value,
-                    "ip_address": (request.client.host if request and request.client else None),
+                    "ip_address": (
+                        request.client.host if request and request.client else None
+                    ),
                 },
             )
 
@@ -126,7 +135,8 @@ class ResourceAccessValidator:
             if action in ["modify", "update", "patch", "delete"]:
                 # Only the creator or admin can modify/delete
                 is_owner = (
-                    hasattr(agent, "created_by") and str(agent.created_by) == current_user.user_id
+                    hasattr(agent, "created_by")
+                    and str(agent.created_by) == current_user.user_id
                 )
                 admin_override = current_user.role.value == "admin"
 
@@ -142,7 +152,9 @@ class ResourceAccessValidator:
                         "action": action,
                         "agent_name": agent.name,
                         "agent_creator": (
-                            str(agent.created_by) if hasattr(agent, "created_by") else None
+                            str(agent.created_by)
+                            if hasattr(agent, "created_by")
+                            else None
                         ),
                     },
                 )
@@ -185,7 +197,9 @@ class ResourceAccessValidator:
                 resource_type=resource_type,
                 metadata={
                     "system_resource": True,
-                    "sensitivity_level": ("restricted" if resource_type == "admin" else "internal"),
+                    "sensitivity_level": (
+                        "restricted" if resource_type == "admin" else "internal"
+                    ),
                 },
             )
 
@@ -194,7 +208,9 @@ class ResourceAccessValidator:
                 access_granted,
                 reason,
                 applied_rules,
-            ) = enhanced_rbac_manager.evaluate_abac_access(access_context, resource_context, action)
+            ) = enhanced_rbac_manager.evaluate_abac_access(
+                access_context, resource_context, action
+            )
 
             if not access_granted:
                 logger.warning(f"ABAC denied system access: {reason}")
@@ -243,7 +259,9 @@ class ResourceAccessValidator:
                 access_granted,
                 reason,
                 applied_rules,
-            ) = enhanced_rbac_manager.evaluate_abac_access(access_context, resource_context, action)
+            ) = enhanced_rbac_manager.evaluate_abac_access(
+                access_context, resource_context, action
+            )
 
             if not access_granted:
                 logger.warning(f"ABAC denied user access: {reason}")
@@ -252,7 +270,10 @@ class ResourceAccessValidator:
             # Additional checks for user management
             if action in ["modify", "update", "delete"]:
                 # Only admin or self can modify user data
-                if current_user.role.value != "admin" and current_user.user_id != target_user_id:
+                if (
+                    current_user.role.value != "admin"
+                    and current_user.user_id != target_user_id
+                ):
                     logger.warning(
                         f"User {current_user.username} not authorized to {action} user {target_user_id}"
                     )
@@ -335,7 +356,9 @@ def require_resource_access(
                     )
                 else:
                     # Default to basic permission check
-                    required_permission = _get_required_permission(resource_type, action)
+                    required_permission = _get_required_permission(
+                        resource_type, action
+                    )
                     if required_permission:
                         access_granted = required_permission in current_user.permissions
 
@@ -511,7 +534,9 @@ def require_ownership(
                     from database.models import Agent as AgentModel
 
                     agent_uuid = UUID(resource_id)
-                    agent = db.query(AgentModel).filter(AgentModel.id == agent_uuid).first()
+                    agent = (
+                        db.query(AgentModel).filter(AgentModel.id == agent_uuid).first()
+                    )
 
                     if agent and hasattr(agent, "created_by"):
                         is_owner = str(agent.created_by) == current_user.user_id

@@ -94,7 +94,7 @@ class BeliefKGBridge:
             edges_added = 0
 
             for node in nodes:
-                if hasattr(knowledge_graph, 'add_node'):
+                if hasattr(knowledge_graph, "add_node"):
                     result = await knowledge_graph.add_node(
                         node.id, node.type, node.properties
                     )
@@ -105,7 +105,7 @@ class BeliefKGBridge:
                     nodes_added += 1
 
             for edge in edges:
-                if hasattr(knowledge_graph, 'add_edge'):
+                if hasattr(knowledge_graph, "add_edge"):
                     result = await knowledge_graph.add_edge(
                         edge.source,
                         edge.target,
@@ -146,9 +146,9 @@ class BeliefKGBridge:
         """
         try:
             # Extract beliefs (qs) from agent
-            if hasattr(agent, 'qs'):
+            if hasattr(agent, "qs"):
                 factor_beliefs = agent.qs
-            elif hasattr(agent, 'beliefs'):
+            elif hasattr(agent, "beliefs"):
                 factor_beliefs = agent.beliefs
             else:
                 # Fallback for mock agent
@@ -170,9 +170,7 @@ class BeliefKGBridge:
                 entropies.append(entropy)
 
             # Get most likely states
-            most_likely_states = [
-                int(np.argmax(beliefs)) for beliefs in factor_beliefs
-            ]
+            most_likely_states = [int(np.argmax(beliefs)) for beliefs in factor_beliefs]
 
             # Overall entropy
             overall_entropy = np.mean(entropies)
@@ -182,18 +180,16 @@ class BeliefKGBridge:
                 "num_factors": len(factor_beliefs),
                 "factor_sizes": [len(b) for b in factor_beliefs],
                 "entropies": entropies,
-                "action_precision": getattr(agent, 'action_precision', 1.0),
-                "planning_horizon": getattr(agent, 'planning_horizon', 1),
+                "action_precision": getattr(agent, "action_precision", 1.0),
+                "planning_horizon": getattr(agent, "planning_horizon", 1),
             }
 
             # Add action history if available
-            if hasattr(agent, 'action') and agent.action is not None:
+            if hasattr(agent, "action") and agent.action is not None:
                 metadata["last_action"] = int(agent.action)
 
-            if hasattr(agent, 'action_hist'):
-                metadata["action_history"] = [
-                    int(a) for a in agent.action_hist[-5:]
-                ]
+            if hasattr(agent, "action_hist"):
+                metadata["action_history"] = [int(a) for a in agent.action_hist[-5:]]
 
             return BeliefState(
                 factor_beliefs=factor_beliefs,
@@ -261,7 +257,9 @@ class BeliefKGBridge:
             # Create nodes for significant beliefs
             for state_idx, belief_prob in enumerate(beliefs):
                 if belief_prob > self.belief_threshold:
-                    state_node_id = f"state_{agent_id}_f{factor_idx}_s{state_idx}_{timestamp}"
+                    state_node_id = (
+                        f"state_{agent_id}_f{factor_idx}_s{state_idx}_{timestamp}"
+                    )
                     state_node = KGNode(
                         id=state_node_id,
                         type="belief_value",
@@ -286,9 +284,7 @@ class BeliefKGBridge:
                     "agent_id": agent_id,
                     "action": belief_state.metadata["last_action"],
                     "timestamp": timestamp,
-                    "action_history": belief_state.metadata.get(
-                        "action_history", []
-                    ),
+                    "action_history": belief_state.metadata.get("action_history", []),
                 },
             )
             nodes.append(action_node)
@@ -305,9 +301,7 @@ class BeliefKGBridge:
                     "timestamp": timestamp,
                     "factors_uncertain": [
                         i
-                        for i, e in enumerate(
-                            belief_state.metadata["entropies"]
-                        )
+                        for i, e in enumerate(belief_state.metadata["entropies"])
                         if e > self.entropy_threshold
                     ],
                 },
@@ -345,9 +339,7 @@ class BeliefKGBridge:
         edges = []
 
         # Find main belief state node
-        belief_node = next(
-            (n for n in nodes if n.type == "belief_state"), None
-        )
+        belief_node = next((n for n in nodes if n.type == "belief_state"), None)
 
         if not belief_node:
             return edges
@@ -359,9 +351,7 @@ class BeliefKGBridge:
                 source=belief_node.id,
                 target=factor_node.id,
                 relationship="has_factor",
-                properties={
-                    "factor_index": factor_node.properties["factor_index"]
-                },
+                properties={"factor_index": factor_node.properties["factor_index"]},
             )
             edges.append(edge)
 
@@ -370,11 +360,7 @@ class BeliefKGBridge:
         for value_node in value_nodes:
             factor_idx = value_node.properties["factor_index"]
             factor_node = next(
-                (
-                    n
-                    for n in factor_nodes
-                    if n.properties["factor_index"] == factor_idx
-                ),
+                (n for n in factor_nodes if n.properties["factor_index"] == factor_idx),
                 None,
             )
             if factor_node:
@@ -390,9 +376,7 @@ class BeliefKGBridge:
                 edges.append(edge)
 
         # Connect belief state to action
-        action_node = next(
-            (n for n in nodes if n.type == "agent_action"), None
-        )
+        action_node = next((n for n in nodes if n.type == "agent_action"), None)
         if action_node:
             edge = KGEdge(
                 source=belief_node.id,
@@ -425,9 +409,7 @@ class BeliefKGBridge:
         edges.append(agent_edge)
 
         # Connect prompt context if available
-        prompt_node = next(
-            (n for n in nodes if n.type == "prompt_context"), None
-        )
+        prompt_node = next((n for n in nodes if n.type == "prompt_context"), None)
         if prompt_node:
             edge = KGEdge(
                 source=prompt_node.id,

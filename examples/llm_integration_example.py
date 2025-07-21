@@ -44,15 +44,11 @@ async def basic_usage_example():
             role=LLMRole.SYSTEM,
             content="You are an expert in active inference and GMN notation.",
         ),
-        LLMMessage(
-            role=LLMRole.USER, content="Explain what GMN is in one sentence."
-        ),
+        LLMMessage(role=LLMRole.USER, content="Explain what GMN is in one sentence."),
     ]
 
     try:
-        response = await factory.generate(
-            messages, temperature=0.7, max_tokens=100
-        )
+        response = await factory.generate(messages, temperature=0.7, max_tokens=100)
         print(f"Response from {response.metadata.get('provider')}:")
         print(f"{response.content}\n")
         print(f"Tokens used: {response.usage}\n")
@@ -91,8 +87,8 @@ async def gmn_generation_example():
 
         try:
             gmn = await factory.generate_gmn(
-                prompt=scenario['prompt'],
-                agent_type=scenario['agent_type'],
+                prompt=scenario["prompt"],
+                agent_type=scenario["agent_type"],
                 constraints={"max_states": 10, "max_actions": 5},
             )
 
@@ -160,9 +156,7 @@ async def provider_comparison_example():
                 "has_preferences": "preference" in gmn,
             }
 
-            print(
-                f"✓ Generated GMN with {results[provider_type.value]['nodes']} nodes"
-            )
+            print(f"✓ Generated GMN with {results[provider_type.value]['nodes']} nodes")
 
         except Exception as e:
             print(f"✗ Failed: {e}")
@@ -303,9 +297,9 @@ async def main():
     print()
 
     for name, example_func in examples:
-        print(f"\n{'='*50}")
+        print(f"\n{'=' * 50}")
         print(f"Running: {name}")
-        print('=' * 50 + "\n")
+        print("=" * 50 + "\n")
 
         try:
             await example_func()

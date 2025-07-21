@@ -112,10 +112,11 @@ class TestCachingBenchmarks:
             with (
                 patch.object(ObservationLikelihoodCachingBenchmark, "setup"),
                 patch.object(
-                    ObservationLikelihoodCachingBenchmark, "run_iteration", return_value=mock_result
+                    ObservationLikelihoodCachingBenchmark,
+                    "run_iteration",
+                    return_value=mock_result,
                 ),
             ):
-
                 benchmark = ObservationLikelihoodCachingBenchmark(
                     state_size=10, num_modalities=2, cache_enabled=True
                 )
@@ -177,10 +178,11 @@ class TestCachingBenchmarks:
             with (
                 patch.object(IntermediateResultCachingBenchmark, "setup"),
                 patch.object(
-                    IntermediateResultCachingBenchmark, "run_iteration", return_value=mock_result
+                    IntermediateResultCachingBenchmark,
+                    "run_iteration",
+                    return_value=mock_result,
                 ),
             ):
-
                 benchmark = IntermediateResultCachingBenchmark(
                     complexity_level=2, cache_enabled=True
                 )
@@ -201,7 +203,9 @@ class TestCachingBenchmarks:
             return
 
         # Real test when PyMDP is available
-        benchmark = IntermediateResultCachingBenchmark(complexity_level=2, cache_enabled=True)
+        benchmark = IntermediateResultCachingBenchmark(
+            complexity_level=2, cache_enabled=True
+        )
 
         benchmark.setup()
         result = benchmark.run_iteration()
@@ -240,9 +244,10 @@ class TestCachingBenchmarks:
 
             with (
                 patch.object(CacheComparisonBenchmark, "setup"),
-                patch.object(CacheComparisonBenchmark, "run_iteration", return_value=mock_result),
+                patch.object(
+                    CacheComparisonBenchmark, "run_iteration", return_value=mock_result
+                ),
             ):
-
                 benchmark = CacheComparisonBenchmark("mixed_workload")
                 benchmark.setup()
                 result = benchmark.run_iteration()
@@ -297,7 +302,9 @@ class TestCachingBenchmarks:
             mock_config = {"complexity_level": 3, "cache_enabled": True}
 
             with patch.object(
-                IntermediateResultCachingBenchmark, "get_configuration", return_value=mock_config
+                IntermediateResultCachingBenchmark,
+                "get_configuration",
+                return_value=mock_config,
             ):
                 benchmark = IntermediateResultCachingBenchmark(
                     complexity_level=3, cache_enabled=True
@@ -311,7 +318,9 @@ class TestCachingBenchmarks:
             return
 
         # Real test when PyMDP is available
-        benchmark = IntermediateResultCachingBenchmark(complexity_level=3, cache_enabled=True)
+        benchmark = IntermediateResultCachingBenchmark(
+            complexity_level=3, cache_enabled=True
+        )
 
         config = benchmark.get_configuration()
 

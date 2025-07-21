@@ -8,7 +8,6 @@ from datetime import datetime
 from unittest.mock import Mock, patch
 
 
-
 class TestCoalitionFormationBehavior:
     """Test coalition formation behaviors that users depend on."""
 
@@ -66,9 +65,7 @@ class TestCoalitionFormationBehavior:
         mock_agent.name = "TestAgent"
 
         # Mock the coalition retrieval
-        with patch.object(
-            manager, "get_coalition", return_value=mock_coalition
-        ):
+        with patch.object(manager, "get_coalition", return_value=mock_coalition):
             result = manager.add_agent_to_coalition(coalition_id, mock_agent)
 
             assert result is True
@@ -93,12 +90,8 @@ class TestCoalitionFormationBehavior:
         mock_coalition.members = [Mock(agent_id=agent_id)]
 
         # Mock the coalition retrieval
-        with patch.object(
-            manager, "get_coalition", return_value=mock_coalition
-        ):
-            result = manager.remove_agent_from_coalition(
-                coalition_id, agent_id
-            )
+        with patch.object(manager, "get_coalition", return_value=mock_coalition):
+            result = manager.remove_agent_from_coalition(coalition_id, agent_id)
 
             assert result is True
             mock_coalition.remove_member.assert_called_once_with(agent_id)
@@ -121,9 +114,7 @@ class TestCoalitionFormationBehavior:
         mock_coalition.status = "active"
 
         # Mock the coalition retrieval
-        with patch.object(
-            manager, "get_coalition", return_value=mock_coalition
-        ):
+        with patch.object(manager, "get_coalition", return_value=mock_coalition):
             result = manager.dissolve_coalition(coalition_id)
 
             assert result is True
@@ -206,9 +197,7 @@ class TestCoalitionMembershipBehavior:
         role = coalition.get_member_role(agent_id)
 
         assert role == "coordinator"
-        coalition.set_member_role.assert_called_once_with(
-            agent_id, "coordinator"
-        )
+        coalition.set_member_role.assert_called_once_with(agent_id, "coordinator")
         coalition.get_member_role.assert_called_once_with(agent_id)
 
 
@@ -426,9 +415,7 @@ class TestCoalitionErrorHandlingBehavior:
         coalition.handle_member_failure(failed_agent_id)
         coalition.redistribute_tasks()
 
-        coalition.handle_member_failure.assert_called_once_with(
-            failed_agent_id
-        )
+        coalition.handle_member_failure.assert_called_once_with(failed_agent_id)
         coalition.redistribute_tasks.assert_called_once()
 
     def test_coalition_recovers_from_communication_failures(self):

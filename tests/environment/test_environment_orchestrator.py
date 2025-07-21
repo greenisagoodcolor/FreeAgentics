@@ -181,7 +181,7 @@ class TestEnvironmentOrchestrator:
         pool = orchestrator.resource_pools["postgres"]
         pool.current_instances = pool.max_instances
         for i in range(pool.max_instances):
-            pool.busy_instances.add(f"postgres_{i+1}")
+            pool.busy_instances.add(f"postgres_{i + 1}")
 
         with pytest.raises(Exception, match="No resources available"):
             orchestrator._allocate_resources(spec)
@@ -197,9 +197,13 @@ class TestEnvironmentOrchestrator:
         orchestrator._release_resources(allocated)
 
         # Check instances moved to available
-        assert "postgres_1" in orchestrator.resource_pools["postgres"].available_instances
+        assert (
+            "postgres_1" in orchestrator.resource_pools["postgres"].available_instances
+        )
         assert "redis_1" in orchestrator.resource_pools["redis"].available_instances
-        assert "postgres_1" not in orchestrator.resource_pools["postgres"].busy_instances
+        assert (
+            "postgres_1" not in orchestrator.resource_pools["postgres"].busy_instances
+        )
         assert "redis_1" not in orchestrator.resource_pools["redis"].busy_instances
 
     def test_create_environment_success(self, orchestrator):
@@ -222,10 +226,14 @@ class TestEnvironmentOrchestrator:
             mock_env_class.return_value = mock_env_manager
 
             # Mock isolation
-            orchestrator.isolation_manager.isolate_all.return_value = {"test": "context"}
+            orchestrator.isolation_manager.isolate_all.return_value = {
+                "test": "context"
+            }
 
             # Pre-populate available instances
-            orchestrator.resource_pools["postgres"].available_instances.add("postgres_1")
+            orchestrator.resource_pools["postgres"].available_instances.add(
+                "postgres_1"
+            )
             orchestrator.resource_pools["redis"].available_instances.add("redis_1")
 
             env_id = orchestrator.create_environment(spec)
@@ -258,13 +266,18 @@ class TestEnvironmentOrchestrator:
             mock_env_class.return_value = mock_env_manager
 
             # Pre-populate available instances
-            orchestrator.resource_pools["postgres"].available_instances.add("postgres_1")
+            orchestrator.resource_pools["postgres"].available_instances.add(
+                "postgres_1"
+            )
 
             with pytest.raises(Exception, match="Failed to start environment"):
                 orchestrator.create_environment(spec)
 
             # Resources should be released
-            assert "postgres_1" in orchestrator.resource_pools["postgres"].available_instances
+            assert (
+                "postgres_1"
+                in orchestrator.resource_pools["postgres"].available_instances
+            )
 
     def test_destroy_environment_success(self, orchestrator):
         """Test successful environment destruction."""
@@ -289,7 +302,9 @@ class TestEnvironmentOrchestrator:
 
         assert result is True
         assert env_id not in orchestrator.active_environments
-        assert "postgres_1" in orchestrator.resource_pools["postgres"].available_instances
+        assert (
+            "postgres_1" in orchestrator.resource_pools["postgres"].available_instances
+        )
 
         # Check isolation cleanup was called
         orchestrator.isolation_manager.cleanup_all.assert_called_once()
@@ -418,7 +433,9 @@ class TestEnvironmentOrchestrator:
         with patch.object(orchestrator, "destroy_environment") as mock_destroy:
             mock_destroy.return_value = True
 
-            with patch.object(orchestrator, "cleanup_orphaned_resources") as mock_cleanup:
+            with patch.object(
+                orchestrator, "cleanup_orphaned_resources"
+            ) as mock_cleanup:
                 mock_cleanup.return_value = {}
 
                 orchestrator.auto_cleanup()

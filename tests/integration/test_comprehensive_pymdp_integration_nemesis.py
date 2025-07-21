@@ -56,7 +56,6 @@ class TestComprehensivePyMDPPipeline:
     belief updates, planning, and action selection.
     """
 
-    
     def test_full_pipeline_with_real_pymdp_agent(self):
         """
         NEMESIS TEST: Full active inference pipeline with real PyMDP mathematics.
@@ -65,14 +64,10 @@ class TestComprehensivePyMDPPipeline:
         end-to-end through the agent's built-in mechanisms.
         """
         # RED PHASE: This should fail initially if pipeline is broken
-        agent = BasicExplorerAgent(
-            agent_id="nemesis_test_agent", position=(0, 0)
-        )
+        agent = BasicExplorerAgent(agent_id="nemesis_test_agent", position=(0, 0))
 
         # The agent should have PyMDP initialized automatically
-        assert (
-            agent.pymdp_agent is not None
-        ), "PyMDP agent should be initialized"
+        assert agent.pymdp_agent is not None, "PyMDP agent should be initialized"
 
         # Test basic observation processing and action selection
         # Create observation with surroundings that PyMDP can process
@@ -93,26 +88,23 @@ class TestComprehensivePyMDPPipeline:
 
         # NEMESIS VALIDATION: Action must be mathematically valid
         assert action is not None, "Action should not be None"
-        assert isinstance(
-            action, (int, str, dict)
-        ), f"Action should be int, str or dict, got {type(action)}"
+        assert isinstance(action, (int, str, dict)), (
+            f"Action should be int, str or dict, got {type(action)}"
+        )
 
         # Step 3: Validate PyMDP agent has proper state
-        if (
-            hasattr(agent.pymdp_agent, "qs")
-            and agent.pymdp_agent.qs is not None
-        ):
+        if hasattr(agent.pymdp_agent, "qs") and agent.pymdp_agent.qs is not None:
             # Check that beliefs are proper probability distributions
             for factor_beliefs in agent.pymdp_agent.qs:
-                assert np.isclose(
-                    factor_beliefs.sum(), 1.0, atol=1e-6
-                ), f"Beliefs don't sum to 1: {factor_beliefs.sum()}"
-                assert np.all(
-                    factor_beliefs >= 0
-                ), f"Negative beliefs detected: {factor_beliefs}"
-                assert np.all(
-                    factor_beliefs <= 1
-                ), f"Beliefs exceed 1: {factor_beliefs}"
+                assert np.isclose(factor_beliefs.sum(), 1.0, atol=1e-6), (
+                    f"Beliefs don't sum to 1: {factor_beliefs.sum()}"
+                )
+                assert np.all(factor_beliefs >= 0), (
+                    f"Negative beliefs detected: {factor_beliefs}"
+                )
+                assert np.all(factor_beliefs <= 1), (
+                    f"Beliefs exceed 1: {factor_beliefs}"
+                )
 
         # Step 4: Test multiple cycles to ensure stability
         for cycle in range(3):
@@ -126,17 +118,12 @@ class TestComprehensivePyMDPPipeline:
             new_action = agent.select_action()
 
             # Actions should be consistent for similar observations
-            assert (
-                new_action is not None
-            ), f"Action should not be None in cycle {cycle}"
+            assert new_action is not None, f"Action should not be None in cycle {cycle}"
 
         # REALITY CHECK: Agent should maintain consistent internal state
-        assert (
-            agent.agent_id == "nemesis_test_agent"
-        ), "Agent ID should be preserved"
+        assert agent.agent_id == "nemesis_test_agent", "Agent ID should be preserved"
         # Position may have changed during the test cycles - this is expected behavior
 
-    
     def test_mathematical_correctness_through_agent_interface(self):
         """
         NEMESIS TEST: Verify PyMDP mathematics through the agent interface.
@@ -159,37 +146,32 @@ class TestComprehensivePyMDPPipeline:
             agent.update_beliefs()
 
             # Validate PyMDP state if accessible
-            if (
-                hasattr(agent.pymdp_agent, "qs")
-                and agent.pymdp_agent.qs is not None
-            ):
+            if hasattr(agent.pymdp_agent, "qs") and agent.pymdp_agent.qs is not None:
                 for factor_beliefs in agent.pymdp_agent.qs:
                     # MATHEMATICAL VALIDATION: Beliefs are proper probability distribution
-                    assert np.isclose(
-                        factor_beliefs.sum(), 1.0, atol=1e-6
-                    ), f"Beliefs don't sum to 1: {factor_beliefs.sum()}"
-                    assert np.all(
-                        factor_beliefs >= 0
-                    ), f"Negative beliefs: {factor_beliefs}"
-                    assert np.all(
-                        factor_beliefs <= 1
-                    ), f"Beliefs exceed 1: {factor_beliefs}"
+                    assert np.isclose(factor_beliefs.sum(), 1.0, atol=1e-6), (
+                        f"Beliefs don't sum to 1: {factor_beliefs.sum()}"
+                    )
+                    assert np.all(factor_beliefs >= 0), (
+                        f"Negative beliefs: {factor_beliefs}"
+                    )
+                    assert np.all(factor_beliefs <= 1), (
+                        f"Beliefs exceed 1: {factor_beliefs}"
+                    )
 
                     results.append(factor_beliefs.copy())
 
             action = agent.select_action()
-            assert (
-                action is not None
-            ), f"Action should not be None in cycle {cycle}"
+            assert action is not None, f"Action should not be None in cycle {cycle}"
 
         # CONVERGENCE TEST: Beliefs should show some stability over time
         if len(results) >= 2:
             final_beliefs = results[-1]
             penultimate_beliefs = results[-2]
             change = np.linalg.norm(final_beliefs - penultimate_beliefs)
-            assert (
-                change < 2.0
-            ), f"Excessive belief change suggests instability: {change}"
+            assert change < 2.0, (
+                f"Excessive belief change suggests instability: {change}"
+            )
 
     def test_multi_agent_coordination_mathematical_consistency(self):
         """
@@ -225,22 +207,19 @@ class TestComprehensivePyMDPPipeline:
             actions.append(action)
 
             # Collect beliefs if accessible
-            if (
-                hasattr(agent.pymdp_agent, "qs")
-                and agent.pymdp_agent.qs is not None
-            ):
+            if hasattr(agent.pymdp_agent, "qs") and agent.pymdp_agent.qs is not None:
                 agent_beliefs = []
                 for factor_beliefs in agent.pymdp_agent.qs:
                     # Validate each agent maintains proper probability distributions
-                    assert np.isclose(
-                        factor_beliefs.sum(), 1.0, atol=1e-6
-                    ), f"Agent {agent.agent_id} beliefs don't sum to 1"
-                    assert np.all(
-                        factor_beliefs >= 0
-                    ), f"Agent {agent.agent_id} has negative beliefs"
-                    assert np.all(
-                        factor_beliefs <= 1
-                    ), f"Agent {agent.agent_id} beliefs exceed 1"
+                    assert np.isclose(factor_beliefs.sum(), 1.0, atol=1e-6), (
+                        f"Agent {agent.agent_id} beliefs don't sum to 1"
+                    )
+                    assert np.all(factor_beliefs >= 0), (
+                        f"Agent {agent.agent_id} has negative beliefs"
+                    )
+                    assert np.all(factor_beliefs <= 1), (
+                        f"Agent {agent.agent_id} beliefs exceed 1"
+                    )
                     agent_beliefs.append(factor_beliefs.copy())
                 all_beliefs.append(agent_beliefs)
 
@@ -294,12 +273,8 @@ class TestPerformanceBenchmarksWithRealMeasurements:
 
         # Realistic expectations (not performance theater)
         assert mean_time > 0, "Initialization time should be positive"
-        assert (
-            mean_time < 1.0
-        ), f"Initialization taking too long: {mean_time:.3f}s"
-        assert (
-            std_time > 0
-        ), "Should have measurement variance (not fake timing)"
+        assert mean_time < 1.0, f"Initialization taking too long: {mean_time:.3f}s"
+        assert std_time > 0, "Should have measurement variance (not fake timing)"
 
         # Store in test data for reporting
         self._performance_data = {
@@ -323,9 +298,7 @@ class TestPerformanceBenchmarksWithRealMeasurements:
         agents = []
 
         for i in range(num_agents):
-            agent = BasicExplorerAgent(
-                agent_id=f"load_agent_{i}", position=(i, i)
-            )
+            agent = BasicExplorerAgent(agent_id=f"load_agent_{i}", position=(i, i))
             matrices = TEST_MATRICES["simple_2x2"]
             agent.pymdp_agent = PyMDPAgent(
                 A=matrices["A"],
@@ -361,17 +334,15 @@ class TestPerformanceBenchmarksWithRealMeasurements:
         p95_selection_time = np.percentile(all_selection_times, 95)
 
         # The PRD mentions "<500ms" - validate this is realistic
-        assert (
-            mean_selection_time < 0.5
-        ), f"Mean selection time {mean_selection_time:.3f}s exceeds 500ms"
-        assert (
-            p95_selection_time < 1.0
-        ), f"95th percentile {p95_selection_time:.3f}s too slow"
+        assert mean_selection_time < 0.5, (
+            f"Mean selection time {mean_selection_time:.3f}s exceeds 500ms"
+        )
+        assert p95_selection_time < 1.0, (
+            f"95th percentile {p95_selection_time:.3f}s too slow"
+        )
 
         # Ensure we're measuring real work (variance indicates real measurements)
-        assert (
-            np.std(all_selection_times) > 0
-        ), "No variance suggests fake timing"
+        assert np.std(all_selection_times) > 0, "No variance suggests fake timing"
 
 
 class TestErrorPropagationAndFailureModes:
@@ -390,9 +361,7 @@ class TestErrorPropagationAndFailureModes:
         if not PYMDP_AVAILABLE:
             assert False, "Test bypass removed - must fix underlying issue"
 
-        agent = BasicExplorerAgent(
-            agent_id="memory_test_agent", position=(0, 0)
-        )
+        agent = BasicExplorerAgent(agent_id="memory_test_agent", position=(0, 0))
 
         # Create large matrices that might cause memory issues
         large_size = 50  # Reasonably large but not excessive
@@ -408,9 +377,7 @@ class TestErrorPropagationAndFailureModes:
 
         try:
             # This might fail due to memory or computational limits
-            agent.pymdp_agent = PyMDPAgent(
-                A=A_large, B=B_large, C=C_large, D=D_large
-            )
+            agent.pymdp_agent = PyMDPAgent(A=A_large, B=B_large, C=C_large, D=D_large)
 
             # If creation succeeds, test inference
             agent.pymdp_agent.infer_states([0])
@@ -418,9 +385,9 @@ class TestErrorPropagationAndFailureModes:
             action = agent.pymdp_agent.sample_action()
 
             # Validate the result is still mathematically sound
-            assert isinstance(
-                action, (int, np.integer, np.ndarray)
-            ), "Action must be valid type"
+            assert isinstance(action, (int, np.integer, np.ndarray)), (
+                "Action must be valid type"
+            )
 
         except (MemoryError, ValueError, RuntimeError) as e:
             # Acceptable failures - system should fail gracefully with clear errors
@@ -440,9 +407,7 @@ class TestErrorPropagationAndFailureModes:
         if not PYMDP_AVAILABLE:
             assert False, "Test bypass removed - must fix underlying issue"
 
-        agent = BasicExplorerAgent(
-            agent_id="numerical_test_agent", position=(0, 0)
-        )
+        agent = BasicExplorerAgent(agent_id="numerical_test_agent", position=(0, 0))
 
         # Test various numerical pathologies
         numerical_test_cases = [
@@ -470,9 +435,7 @@ class TestErrorPropagationAndFailureModes:
         ]
 
         for test_case in numerical_test_cases:
-            with pytest.raises(
-                (ValueError, RuntimeError, AssertionError)
-            ) as exc_info:
+            with pytest.raises((ValueError, RuntimeError, AssertionError)) as exc_info:
                 agent.pymdp_agent = PyMDPAgent(
                     A=test_case["A"],
                     B=test_case["B"],
@@ -566,9 +529,9 @@ class TestNemesisLevelAuditAndValidation:
                 )
 
         # NEMESIS VALIDATION: No integration failures allowed
-        assert (
-            len(audit_results["integration_failures"]) == 0
-        ), f"Integration failures detected: {audit_results['integration_failures']}"
+        assert len(audit_results["integration_failures"]) == 0, (
+            f"Integration failures detected: {audit_results['integration_failures']}"
+        )
 
         # Store complete audit results
         self._audit_results = audit_results
@@ -599,9 +562,7 @@ class TestNemesisLevelAuditAndValidation:
             if np.isclose(policy_probs.sum(), 1.0, atol=1e-6):
                 properties_verified.append("policy_normalization")
 
-        audit_results["mathematical_properties_verified"].extend(
-            properties_verified
-        )
+        audit_results["mathematical_properties_verified"].extend(properties_verified)
 
     def _audit_performance(self, agent, audit_results):
         """Helper method to audit performance of an agent."""
@@ -686,26 +647,22 @@ class TestNemesisLevelAuditAndValidation:
         total_methods = 0
         for test_class in test_classes:
             methods = [
-                method
-                for method in dir(test_class)
-                if method.startswith("test_")
+                method for method in dir(test_class) if method.startswith("test_")
             ]
             total_methods += len(methods)
 
-        validation_report["test_suite_summary"][
-            "total_test_methods"
-        ] = total_methods
+        validation_report["test_suite_summary"]["total_test_methods"] = total_methods
 
         # Store for external review
         self._validation_report = validation_report
 
         # REALITY CHECKPOINT: This test serves as documentation for external validation
-        assert (
-            total_methods >= 8
-        ), f"Should have comprehensive test coverage: {total_methods} methods"
-        assert (
-            PYMDP_AVAILABLE or total_methods >= 2
-        ), "Should have fallback tests when PyMDP unavailable"
+        assert total_methods >= 8, (
+            f"Should have comprehensive test coverage: {total_methods} methods"
+        )
+        assert PYMDP_AVAILABLE or total_methods >= 2, (
+            "Should have fallback tests when PyMDP unavailable"
+        )
 
 
 # Test execution and reporting
@@ -737,7 +694,5 @@ if __name__ == "__main__":
         print(f"{key.replace('_', ' ').title()}: {value}")
     print("=" * 80)
     print("\nRun with pytest to execute all tests:")
-    print(
-        "pytest tests/integration/test_comprehensive_pymdp_integration_nemesis.py -v"
-    )
+    print("pytest tests/integration/test_comprehensive_pymdp_integration_nemesis.py -v")
     print("=" * 80)

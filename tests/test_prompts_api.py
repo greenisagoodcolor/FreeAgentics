@@ -338,25 +338,19 @@ class TestPromptsAPI:
             elapsed_time = time.time() - start_time
 
         assert response.status_code == status.HTTP_200_OK
-        assert (
-            elapsed_time < 3.0
-        ), f"Response time {elapsed_time}s exceeds 3s limit"
+        assert elapsed_time < 3.0, f"Response time {elapsed_time}s exceeds 3s limit"
 
     @pytest.mark.asyncio
     async def test_authentication_required(self, client: TestClient):
         """Test that authentication is required."""
-        response = client.post(
-            "/api/v1/prompts", json={"prompt": "Create agent"}
-        )
+        response = client.post("/api/v1/prompts", json={"prompt": "Create agent"})
         assert response.status_code == status.HTTP_401_UNAUTHORIZED
 
     @pytest.mark.asyncio
     async def test_permission_required(self, client: TestClient):
         """Test that proper permissions are required."""
         # Mock a user without agent creation permission
-        with patch(
-            "auth.security_implementation.get_current_user"
-        ) as mock_user:
+        with patch("auth.security_implementation.get_current_user") as mock_user:
             mock_user.return_value = MagicMock(permissions=[])
 
             response = client.post(
@@ -368,9 +362,7 @@ class TestPromptsAPI:
         assert response.status_code == status.HTTP_403_FORBIDDEN
 
     @pytest.mark.asyncio
-    async def test_concurrent_requests(
-        self, client: TestClient, mock_prompt_processor
-    ):
+    async def test_concurrent_requests(self, client: TestClient, mock_prompt_processor):
         """Test handling of concurrent prompt requests."""
 
         mock_prompt_processor.process_prompt.return_value = {
@@ -415,7 +407,5 @@ class TestPromptsAPI:
         assert response.status_code == status.HTTP_200_OK
 
         # Check for expected log entries
-        assert any(
-            "Processing prompt" in record.message for record in caplog.records
-        )
+        assert any("Processing prompt" in record.message for record in caplog.records)
         assert any(agent_id in record.message for record in caplog.records)

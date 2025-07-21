@@ -80,7 +80,9 @@ class PortAllocator:
 class ServiceHealth:
     """Health checking for various services."""
 
-    def check_postgres(self, host: str, port: int, user: str, password: str, database: str) -> bool:
+    def check_postgres(
+        self, host: str, port: int, user: str, password: str, database: str
+    ) -> bool:
         """Check PostgreSQL health."""
         try:
             conn = psycopg2.connect(
@@ -108,7 +110,9 @@ class ServiceHealth:
             logger.debug(f"Redis health check failed: {e}")
             return False
 
-    def check_rabbitmq(self, host: str, port: int, user: str, password: str, vhost: str) -> bool:
+    def check_rabbitmq(
+        self, host: str, port: int, user: str, password: str, vhost: str
+    ) -> bool:
         """Check RabbitMQ health."""
         try:
             credentials = pika.PlainCredentials(user, password)
@@ -229,7 +233,9 @@ class EnvironmentManager:
 
         logger.debug(f"Running: {' '.join(full_command)}")
 
-        return subprocess.run(full_command, cwd=self.work_dir, capture_output=True, text=True)
+        return subprocess.run(
+            full_command, cwd=self.work_dir, capture_output=True, text=True
+        )
 
     def start(self, services: Optional[List[str]] = None) -> bool:
         """Start the test environment."""

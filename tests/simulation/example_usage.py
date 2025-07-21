@@ -39,7 +39,9 @@ async def example_basic_simulation():
     summary = simulator.get_summary()
     print("\nSimulation completed!")
     print(f"Total messages sent: {summary['metrics']['messages']['sent']}")
-    print(f"Average DB latency: {summary['metrics']['database']['avg_latency_ms']:.1f}ms")
+    print(
+        f"Average DB latency: {summary['metrics']['database']['avg_latency_ms']:.1f}ms"
+    )
 
 
 async def example_custom_scenario():
@@ -92,7 +94,9 @@ async def example_stress_test_with_monitoring():
     async def monitor_simulation():
         while simulator.is_running:
             active_users = sum(1 for u in simulator.users.values() if u.connected)
-            print(f"Active users: {active_users}, Messages: {simulator.metrics.messages_sent}")
+            print(
+                f"Active users: {active_users}, Messages: {simulator.metrics.messages_sent}"
+            )
             await asyncio.sleep(10)
 
     # Run simulation with monitoring
@@ -289,7 +293,9 @@ if __name__ == "__main__":
     asyncio.run(main())
 
     print("\nAll examples completed!")
-    print("\nFor production use, run simulations with appropriate durations and monitoring.")
+    print(
+        "\nFor production use, run simulations with appropriate durations and monitoring."
+    )
     print("Use the command-line interface for easier execution:")
     print("  python run_simulation.py run mixed_workload --duration 3600")
     print("  python run_simulation.py schedule daily")

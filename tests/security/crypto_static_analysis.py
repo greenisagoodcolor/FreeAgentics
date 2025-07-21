@@ -295,7 +295,9 @@ class CryptographicStaticAnalyzer:
             except Exception as e:
                 logger.warning(f"Error analyzing {file_path}: {e}")
 
-        logger.info(f"Analysis complete. Found {len(self.vulnerabilities)} potential issues")
+        logger.info(
+            f"Analysis complete. Found {len(self.vulnerabilities)} potential issues"
+        )
         return self.vulnerabilities
 
     def _get_source_files(self) -> List[Path]:
@@ -319,7 +321,9 @@ class CryptographicStaticAnalyzer:
             if (
                 file_path.is_file()
                 and file_path.suffix in self.file_extensions
-                and not any(exclude_dir in file_path.parts for exclude_dir in exclude_dirs)
+                and not any(
+                    exclude_dir in file_path.parts for exclude_dir in exclude_dirs
+                )
             ):
                 source_files.append(file_path)
 
@@ -401,7 +405,10 @@ class CryptographicStaticAnalyzer:
             return True
 
         # Skip example or demo code
-        if any(keyword in line_lower for keyword in ["example", "demo", "sample", "placeholder"]):
+        if any(
+            keyword in line_lower
+            for keyword in ["example", "demo", "sample", "placeholder"]
+        ):
             return True
 
         # Context-specific filters
@@ -516,14 +523,18 @@ class CryptographicStaticAnalyzer:
         recommendations = []
 
         # Critical issues first
-        critical_vulns = [v for v in self.vulnerabilities if v.severity == SecurityLevel.CRITICAL]
+        critical_vulns = [
+            v for v in self.vulnerabilities if v.severity == SecurityLevel.CRITICAL
+        ]
         if critical_vulns:
             recommendations.append(
                 {
                     "priority": "CRITICAL",
                     "title": "Address Critical Cryptographic Vulnerabilities",
                     "description": f"Found {len(critical_vulns)} critical cryptographic issues",
-                    "action_items": list(set([v.recommendation for v in critical_vulns[:5]])),
+                    "action_items": list(
+                        set([v.recommendation for v in critical_vulns[:5]])
+                    ),
                 }
             )
 
@@ -560,7 +571,9 @@ class CryptographicStaticAnalyzer:
 
         return recommendations
 
-    def _identify_top_risk_files(self, vuln_by_file: Dict[str, List]) -> List[Dict[str, Any]]:
+    def _identify_top_risk_files(
+        self, vuln_by_file: Dict[str, List]
+    ) -> List[Dict[str, Any]]:
         """Identify files with highest risk."""
         file_risks = []
 
@@ -572,7 +585,9 @@ class CryptographicStaticAnalyzer:
                     else (
                         15
                         if v.severity == SecurityLevel.HIGH
-                        else 5 if v.severity == SecurityLevel.MEDIUM else 1
+                        else 5
+                        if v.severity == SecurityLevel.MEDIUM
+                        else 1
                     )
                 )
                 for v in vulns
@@ -586,7 +601,9 @@ class CryptographicStaticAnalyzer:
                     "critical_count": len(
                         [v for v in vulns if v.severity == SecurityLevel.CRITICAL]
                     ),
-                    "high_count": len([v for v in vulns if v.severity == SecurityLevel.HIGH]),
+                    "high_count": len(
+                        [v for v in vulns if v.severity == SecurityLevel.HIGH]
+                    ),
                 }
             )
 

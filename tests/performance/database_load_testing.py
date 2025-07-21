@@ -73,12 +73,12 @@ class DatabaseLoadTester:
 
         # Performance thresholds
         self.thresholds = {
-            'query_time_ms': 100.0,  # 100ms max query time
-            'connection_time_ms': 50.0,  # 50ms max connection time
-            'queries_per_second': 1000.0,  # 1000 QPS minimum
-            'connection_success_rate': 99.0,  # 99% success rate
-            'memory_usage_max_mb': 1000.0,  # 1GB max memory usage
-            'cpu_usage_max_percent': 80.0,  # 80% max CPU usage
+            "query_time_ms": 100.0,  # 100ms max query time
+            "connection_time_ms": 50.0,  # 50ms max connection time
+            "queries_per_second": 1000.0,  # 1000 QPS minimum
+            "connection_success_rate": 99.0,  # 99% success rate
+            "memory_usage_max_mb": 1000.0,  # 1GB max memory usage
+            "cpu_usage_max_percent": 80.0,  # 80% max CPU usage
         }
 
         # Predefined query benchmarks
@@ -179,9 +179,7 @@ class DatabaseLoadTester:
                 for setup_query in benchmark.setup_queries:
                     try:
                         await conn.execute(setup_query)
-                        logger.debug(
-                            f"Setup query executed: {setup_query[:50]}..."
-                        )
+                        logger.debug(f"Setup query executed: {setup_query[:50]}...")
                     except Exception as e:
                         logger.warning(f"Setup query failed: {e}")
 
@@ -223,9 +221,7 @@ class DatabaseLoadTester:
         self, max_connections: int = 50
     ) -> DatabaseTestResult:
         """Test database connection pool performance."""
-        logger.info(
-            f"Starting connection pool test with {max_connections} connections"
-        )
+        logger.info(f"Starting connection pool test with {max_connections} connections")
 
         start_time = time.perf_counter()
         successful_connections = 0
@@ -240,9 +236,7 @@ class DatabaseLoadTester:
                 connection_start = time.perf_counter()
                 try:
                     conn = await asyncpg.connect(**self.db_config)
-                    connection_time = (
-                        time.perf_counter() - connection_start
-                    ) * 1000
+                    connection_time = (time.perf_counter() - connection_start) * 1000
                     connection_times.append(connection_time)
 
                     # Test simple query
@@ -280,9 +274,7 @@ class DatabaseLoadTester:
             successful_queries=successful_connections,
             failed_queries=failed_connections,
             duration_seconds=duration,
-            queries_per_second=successful_connections / duration
-            if duration > 0
-            else 0,
+            queries_per_second=successful_connections / duration if duration > 0 else 0,
             average_query_time_ms=statistics.mean(connection_times)
             if connection_times
             else 0,
@@ -299,15 +291,11 @@ class DatabaseLoadTester:
             cpu_usage_percent=cpu_usage,
             connection_errors=failed_connections,
             test_metadata={
-                'max_connections': max_connections,
-                'success_rate': success_rate,
-                'connection_times': connection_times,
-                'min_connection_time': min(connection_times)
-                if connection_times
-                else 0,
-                'max_connection_time': max(connection_times)
-                if connection_times
-                else 0,
+                "max_connections": max_connections,
+                "success_rate": success_rate,
+                "connection_times": connection_times,
+                "min_connection_time": min(connection_times) if connection_times else 0,
+                "max_connection_time": max(connection_times) if connection_times else 0,
             },
         )
 
@@ -336,7 +324,11 @@ class DatabaseLoadTester:
         connection_errors = 0
 
         async def benchmark_user(user_id: int):
-            nonlocal total_queries, successful_queries, failed_queries, connection_errors
+            nonlocal \
+                total_queries, \
+                successful_queries, \
+                failed_queries, \
+                connection_errors
 
             try:
                 # Create connection for this user
@@ -345,9 +337,9 @@ class DatabaseLoadTester:
                 while time.perf_counter() < end_time:
                     # Choose random query benchmark
                     weights = [b.weight for b in self.query_benchmarks]
-                    benchmark = random.choices(
-                        self.query_benchmarks, weights=weights
-                    )[0]
+                    benchmark = random.choices(self.query_benchmarks, weights=weights)[
+                        0
+                    ]
 
                     query_start = time.perf_counter()
                     try:
@@ -355,7 +347,7 @@ class DatabaseLoadTester:
                             # Handle parameterized queries
                             params = [
                                 p
-                                if not isinstance(p, str) or '$' not in p
+                                if not isinstance(p, str) or "$" not in p
                                 else f"{p}_{user_id}_{total_queries}"
                                 for p in benchmark.parameters
                             ]
@@ -405,30 +397,24 @@ class DatabaseLoadTester:
             failed_queries=failed_queries,
             duration_seconds=duration,
             queries_per_second=qps,
-            average_query_time_ms=statistics.mean(query_times)
-            if query_times
-            else 0,
-            p95_query_time_ms=np.percentile(query_times, 95)
-            if query_times
-            else 0,
-            p99_query_time_ms=np.percentile(query_times, 99)
-            if query_times
-            else 0,
+            average_query_time_ms=statistics.mean(query_times) if query_times else 0,
+            p95_query_time_ms=np.percentile(query_times, 95) if query_times else 0,
+            p99_query_time_ms=np.percentile(query_times, 99) if query_times else 0,
             connection_time_ms=0,  # Not measured in this test
             memory_usage_mb=memory_usage,
             cpu_usage_percent=cpu_usage,
             connection_errors=connection_errors,
             test_metadata={
-                'concurrent_users': concurrent_users,
-                'test_duration': test_duration,
-                'query_types': len(self.query_benchmarks),
-                'success_rate': (successful_queries / total_queries * 100)
+                "concurrent_users": concurrent_users,
+                "test_duration": test_duration,
+                "query_types": len(self.query_benchmarks),
+                "success_rate": (successful_queries / total_queries * 100)
                 if total_queries > 0
                 else 0,
-                'query_time_stats': {
-                    'min_ms': min(query_times) if query_times else 0,
-                    'max_ms': max(query_times) if query_times else 0,
-                    'std_ms': np.std(query_times) if query_times else 0,
+                "query_time_stats": {
+                    "min_ms": min(query_times) if query_times else 0,
+                    "max_ms": max(query_times) if query_times else 0,
+                    "std_ms": np.std(query_times) if query_times else 0,
                 },
             },
         )
@@ -457,7 +443,11 @@ class DatabaseLoadTester:
         connection_errors = 0
 
         async def transaction_user(user_id: int):
-            nonlocal total_transactions, successful_transactions, failed_transactions, connection_errors
+            nonlocal \
+                total_transactions, \
+                successful_transactions, \
+                failed_transactions, \
+                connection_errors
 
             try:
                 conn = await asyncpg.connect(**self.db_config)
@@ -492,9 +482,7 @@ class DatabaseLoadTester:
 
                     except Exception as e:
                         failed_transactions += 1
-                        logger.debug(
-                            f"Transaction failed for user {user_id}: {e}"
-                        )
+                        logger.debug(f"Transaction failed for user {user_id}: {e}")
 
                     total_transactions += 1
 
@@ -505,9 +493,7 @@ class DatabaseLoadTester:
 
             except Exception as e:
                 connection_errors += 1
-                logger.error(
-                    f"Transaction user {user_id} connection error: {e}"
-                )
+                logger.error(f"Transaction user {user_id} connection error: {e}")
 
         try:
             # Run concurrent transaction users
@@ -546,23 +532,17 @@ class DatabaseLoadTester:
             cpu_usage_percent=cpu_usage,
             connection_errors=connection_errors,
             test_metadata={
-                'concurrent_users': concurrent_users,
-                'transactions_per_user': transactions_per_user,
-                'transaction_success_rate': (
+                "concurrent_users": concurrent_users,
+                "transactions_per_user": transactions_per_user,
+                "transaction_success_rate": (
                     successful_transactions / total_transactions * 100
                 )
                 if total_transactions > 0
                 else 0,
-                'transaction_time_stats': {
-                    'min_ms': min(transaction_times)
-                    if transaction_times
-                    else 0,
-                    'max_ms': max(transaction_times)
-                    if transaction_times
-                    else 0,
-                    'std_ms': np.std(transaction_times)
-                    if transaction_times
-                    else 0,
+                "transaction_time_stats": {
+                    "min_ms": min(transaction_times) if transaction_times else 0,
+                    "max_ms": max(transaction_times) if transaction_times else 0,
+                    "std_ms": np.std(transaction_times) if transaction_times else 0,
                 },
             },
         )
@@ -593,7 +573,12 @@ class DatabaseLoadTester:
         active_connections = 0
 
         async def stress_connection(conn_id: int):
-            nonlocal total_queries, successful_queries, failed_queries, connection_errors, active_connections
+            nonlocal \
+                total_queries, \
+                successful_queries, \
+                failed_queries, \
+                connection_errors, \
+                active_connections
 
             try:
                 conn = await asyncpg.connect(**self.db_config)
@@ -602,26 +587,26 @@ class DatabaseLoadTester:
                 while time.perf_counter() < end_time:
                     # Random query types with different loads
                     query_type = random.choices(
-                        ['simple', 'insert', 'update', 'select', 'complex'],
+                        ["simple", "insert", "update", "select", "complex"],
                         weights=[0.3, 0.2, 0.2, 0.2, 0.1],
                     )[0]
 
                     query_start = time.perf_counter()
                     try:
-                        if query_type == 'simple':
+                        if query_type == "simple":
                             await conn.execute("SELECT 1")
-                        elif query_type == 'insert':
+                        elif query_type == "insert":
                             await conn.execute(
                                 "INSERT INTO agents (name) VALUES ($1)",
                                 f"stress_{conn_id}_{total_queries}",
                             )
-                        elif query_type == 'update':
+                        elif query_type == "update":
                             await conn.execute(
                                 "UPDATE agents SET name = $1 WHERE id = $2",
                                 f"updated_{conn_id}",
                                 1,
                             )
-                        elif query_type == 'select':
+                        elif query_type == "select":
                             await conn.execute("SELECT * FROM agents LIMIT 10")
                         else:  # complex
                             await conn.execute(
@@ -682,34 +667,26 @@ class DatabaseLoadTester:
             failed_queries=failed_queries,
             duration_seconds=duration,
             queries_per_second=qps,
-            average_query_time_ms=statistics.mean(query_times)
-            if query_times
-            else 0,
-            p95_query_time_ms=np.percentile(query_times, 95)
-            if query_times
-            else 0,
-            p99_query_time_ms=np.percentile(query_times, 99)
-            if query_times
-            else 0,
+            average_query_time_ms=statistics.mean(query_times) if query_times else 0,
+            p95_query_time_ms=np.percentile(query_times, 95) if query_times else 0,
+            p99_query_time_ms=np.percentile(query_times, 99) if query_times else 0,
             connection_time_ms=0,  # Not measured in this test
             memory_usage_mb=memory_usage,
             cpu_usage_percent=cpu_usage,
             connection_errors=connection_errors,
             test_metadata={
-                'max_connections': max_connections,
-                'test_duration': test_duration,
-                'peak_active_connections': active_connections,
-                'query_success_rate': (
-                    successful_queries / total_queries * 100
-                )
+                "max_connections": max_connections,
+                "test_duration": test_duration,
+                "peak_active_connections": active_connections,
+                "query_success_rate": (successful_queries / total_queries * 100)
                 if total_queries > 0
                 else 0,
-                'query_distribution': {
-                    'simple': 0.3,
-                    'insert': 0.2,
-                    'update': 0.2,
-                    'select': 0.2,
-                    'complex': 0.1,
+                "query_distribution": {
+                    "simple": 0.3,
+                    "insert": 0.2,
+                    "update": 0.2,
+                    "select": 0.2,
+                    "complex": 0.1,
                 },
             },
         )
@@ -733,31 +710,29 @@ class DatabaseLoadTester:
 
             # 1. Connection Pool Test
             logger.info("Running connection pool test...")
-            connection_result = await self.run_connection_pool_test(
-                max_connections=25
-            )
-            test_results['connection_pool'] = connection_result
+            connection_result = await self.run_connection_pool_test(max_connections=25)
+            test_results["connection_pool"] = connection_result
 
             # 2. Query Benchmark Test
             logger.info("Running query benchmark test...")
             query_result = await self.run_query_benchmark_test(
                 concurrent_users=15, test_duration=60
             )
-            test_results['query_benchmark'] = query_result
+            test_results["query_benchmark"] = query_result
 
             # 3. Transaction Performance Test
             logger.info("Running transaction performance test...")
             transaction_result = await self.run_transaction_performance_test(
                 concurrent_users=10, transactions_per_user=50
             )
-            test_results['transaction_performance'] = transaction_result
+            test_results["transaction_performance"] = transaction_result
 
             # 4. Database Stress Test
             logger.info("Running database stress test...")
             stress_result = await self.run_database_stress_test(
                 max_connections=50, test_duration=120
             )
-            test_results['database_stress'] = stress_result
+            test_results["database_stress"] = stress_result
 
             # Generate comprehensive report
             report = self._generate_comprehensive_report(test_results)
@@ -766,7 +741,7 @@ class DatabaseLoadTester:
 
         except Exception as e:
             logger.error(f"Database test suite error: {e}")
-            return {'error': str(e)}
+            return {"error": str(e)}
 
         finally:
             # Cleanup test environment
@@ -780,99 +755,95 @@ class DatabaseLoadTester:
     ) -> Dict[str, Any]:
         """Generate comprehensive database performance report."""
         report = {
-            'timestamp': datetime.now().isoformat(),
-            'test_summary': {
-                'total_tests': len(test_results),
-                'tests_completed': len(
+            "timestamp": datetime.now().isoformat(),
+            "test_summary": {
+                "total_tests": len(test_results),
+                "tests_completed": len(
                     [
                         k
                         for k, v in test_results.items()
                         if isinstance(v, DatabaseTestResult)
                     ]
                 ),
-                'database_config': {
-                    'host': self.db_config.get('host', 'localhost'),
-                    'port': self.db_config.get('port', 5432),
-                    'database': self.db_config.get('database', 'unknown'),
+                "database_config": {
+                    "host": self.db_config.get("host", "localhost"),
+                    "port": self.db_config.get("port", 5432),
+                    "database": self.db_config.get("database", "unknown"),
                 },
             },
-            'performance_metrics': {},
-            'sla_validation': {'violations': [], 'requirements_met': True},
-            'recommendations': [],
+            "performance_metrics": {},
+            "sla_validation": {"violations": [], "requirements_met": True},
+            "recommendations": [],
         }
 
         # Analyze each test result
         for test_name, result in test_results.items():
             if isinstance(result, DatabaseTestResult):
-                report['performance_metrics'][test_name] = {
-                    'concurrent_connections': result.concurrent_connections,
-                    'queries_per_second': result.queries_per_second,
-                    'average_query_time_ms': result.average_query_time_ms,
-                    'p95_query_time_ms': result.p95_query_time_ms,
-                    'p99_query_time_ms': result.p99_query_time_ms,
-                    'connection_time_ms': result.connection_time_ms,
-                    'success_rate': (
+                report["performance_metrics"][test_name] = {
+                    "concurrent_connections": result.concurrent_connections,
+                    "queries_per_second": result.queries_per_second,
+                    "average_query_time_ms": result.average_query_time_ms,
+                    "p95_query_time_ms": result.p95_query_time_ms,
+                    "p99_query_time_ms": result.p99_query_time_ms,
+                    "connection_time_ms": result.connection_time_ms,
+                    "success_rate": (
                         result.successful_queries / result.total_queries * 100
                     )
                     if result.total_queries > 0
                     else 0,
-                    'memory_usage_mb': result.memory_usage_mb,
-                    'cpu_usage_percent': result.cpu_usage_percent,
-                    'connection_errors': result.connection_errors,
+                    "memory_usage_mb": result.memory_usage_mb,
+                    "cpu_usage_percent": result.cpu_usage_percent,
+                    "connection_errors": result.connection_errors,
                 }
 
                 # Check SLA violations
                 violations = self._check_sla_violations(result)
                 if violations:
-                    report['sla_validation']['violations'].extend(violations)
-                    report['sla_validation']['requirements_met'] = False
+                    report["sla_validation"]["violations"].extend(violations)
+                    report["sla_validation"]["requirements_met"] = False
 
         # Generate recommendations
-        report['recommendations'] = self._generate_recommendations(
-            test_results
-        )
+        report["recommendations"] = self._generate_recommendations(test_results)
 
         return report
 
-    def _check_sla_violations(
-        self, result: DatabaseTestResult
-    ) -> List[Dict[str, Any]]:
+    def _check_sla_violations(self, result: DatabaseTestResult) -> List[Dict[str, Any]]:
         """Check for SLA violations in test results."""
         violations = []
 
         # Query time violations
-        if result.average_query_time_ms > self.thresholds['query_time_ms']:
+        if result.average_query_time_ms > self.thresholds["query_time_ms"]:
             violations.append(
                 {
-                    'metric': 'query_time',
-                    'threshold': self.thresholds['query_time_ms'],
-                    'actual': result.average_query_time_ms,
-                    'severity': 'medium',
-                    'description': f'Average query time ({result.average_query_time_ms:.1f}ms) exceeds threshold',
+                    "metric": "query_time",
+                    "threshold": self.thresholds["query_time_ms"],
+                    "actual": result.average_query_time_ms,
+                    "severity": "medium",
+                    "description": f"Average query time ({result.average_query_time_ms:.1f}ms) exceeds threshold",
                 }
             )
 
         # Connection time violations
-        if result.connection_time_ms > self.thresholds['connection_time_ms']:
+        if result.connection_time_ms > self.thresholds["connection_time_ms"]:
             violations.append(
                 {
-                    'metric': 'connection_time',
-                    'threshold': self.thresholds['connection_time_ms'],
-                    'actual': result.connection_time_ms,
-                    'severity': 'medium',
-                    'description': f'Average connection time ({result.connection_time_ms:.1f}ms) exceeds threshold',
+                    "metric": "connection_time",
+                    "threshold": self.thresholds["connection_time_ms"],
+                    "actual": result.connection_time_ms,
+                    "severity": "medium",
+                    "description": f"Average connection time ({result.connection_time_ms:.1f}ms) exceeds threshold",
                 }
             )
 
         # Throughput violations
-        if result.queries_per_second < self.thresholds['queries_per_second']:
+        if result.queries_per_second < self.thresholds["queries_per_second"]:
             violations.append(
                 {
-                    'metric': 'queries_per_second',
-                    'threshold': self.thresholds['queries_per_second'],
-                    'actual': result.queries_per_second,
-                    'severity': 'high',
-                    'description': f'Queries per second ({result.queries_per_second:.1f}) below threshold',
+                    "metric": "queries_per_second",
+                    "threshold": self.thresholds["queries_per_second"],
+                    "actual": result.queries_per_second,
+                    "severity": "high",
+                    "description": f"Queries per second ({result.queries_per_second:.1f}) below threshold",
                 }
             )
 
@@ -882,46 +853,44 @@ class DatabaseLoadTester:
             if result.total_queries > 0
             else 0
         )
-        if success_rate < self.thresholds['connection_success_rate']:
+        if success_rate < self.thresholds["connection_success_rate"]:
             violations.append(
                 {
-                    'metric': 'success_rate',
-                    'threshold': self.thresholds['connection_success_rate'],
-                    'actual': success_rate,
-                    'severity': 'critical',
-                    'description': f'Success rate ({success_rate:.1f}%) below threshold',
+                    "metric": "success_rate",
+                    "threshold": self.thresholds["connection_success_rate"],
+                    "actual": success_rate,
+                    "severity": "critical",
+                    "description": f"Success rate ({success_rate:.1f}%) below threshold",
                 }
             )
 
         # Memory violations
-        if result.memory_usage_mb > self.thresholds['memory_usage_max_mb']:
+        if result.memory_usage_mb > self.thresholds["memory_usage_max_mb"]:
             violations.append(
                 {
-                    'metric': 'memory_usage',
-                    'threshold': self.thresholds['memory_usage_max_mb'],
-                    'actual': result.memory_usage_mb,
-                    'severity': 'medium',
-                    'description': f'Memory usage ({result.memory_usage_mb:.1f}MB) exceeds threshold',
+                    "metric": "memory_usage",
+                    "threshold": self.thresholds["memory_usage_max_mb"],
+                    "actual": result.memory_usage_mb,
+                    "severity": "medium",
+                    "description": f"Memory usage ({result.memory_usage_mb:.1f}MB) exceeds threshold",
                 }
             )
 
         # CPU violations
-        if result.cpu_usage_percent > self.thresholds['cpu_usage_max_percent']:
+        if result.cpu_usage_percent > self.thresholds["cpu_usage_max_percent"]:
             violations.append(
                 {
-                    'metric': 'cpu_usage',
-                    'threshold': self.thresholds['cpu_usage_max_percent'],
-                    'actual': result.cpu_usage_percent,
-                    'severity': 'medium',
-                    'description': f'CPU usage ({result.cpu_usage_percent:.1f}%) exceeds threshold',
+                    "metric": "cpu_usage",
+                    "threshold": self.thresholds["cpu_usage_max_percent"],
+                    "actual": result.cpu_usage_percent,
+                    "severity": "medium",
+                    "description": f"CPU usage ({result.cpu_usage_percent:.1f}%) exceeds threshold",
                 }
             )
 
         return violations
 
-    def _generate_recommendations(
-        self, test_results: Dict[str, Any]
-    ) -> List[str]:
+    def _generate_recommendations(self, test_results: Dict[str, Any]) -> List[str]:
         """Generate recommendations based on test results."""
         recommendations = []
 
@@ -972,33 +941,31 @@ class DatabaseLoadTester:
     def save_results(self, filename: str):
         """Save test results to file."""
         data = {
-            'timestamp': datetime.now().isoformat(),
-            'db_config': {
-                k: v for k, v in self.db_config.items() if k != 'password'
-            },
-            'test_results': [
+            "timestamp": datetime.now().isoformat(),
+            "db_config": {k: v for k, v in self.db_config.items() if k != "password"},
+            "test_results": [
                 {
-                    'test_name': result.test_name,
-                    'concurrent_connections': result.concurrent_connections,
-                    'total_queries': result.total_queries,
-                    'successful_queries': result.successful_queries,
-                    'failed_queries': result.failed_queries,
-                    'duration_seconds': result.duration_seconds,
-                    'queries_per_second': result.queries_per_second,
-                    'average_query_time_ms': result.average_query_time_ms,
-                    'p95_query_time_ms': result.p95_query_time_ms,
-                    'p99_query_time_ms': result.p99_query_time_ms,
-                    'connection_time_ms': result.connection_time_ms,
-                    'memory_usage_mb': result.memory_usage_mb,
-                    'cpu_usage_percent': result.cpu_usage_percent,
-                    'connection_errors': result.connection_errors,
-                    'test_metadata': result.test_metadata,
+                    "test_name": result.test_name,
+                    "concurrent_connections": result.concurrent_connections,
+                    "total_queries": result.total_queries,
+                    "successful_queries": result.successful_queries,
+                    "failed_queries": result.failed_queries,
+                    "duration_seconds": result.duration_seconds,
+                    "queries_per_second": result.queries_per_second,
+                    "average_query_time_ms": result.average_query_time_ms,
+                    "p95_query_time_ms": result.p95_query_time_ms,
+                    "p99_query_time_ms": result.p99_query_time_ms,
+                    "connection_time_ms": result.connection_time_ms,
+                    "memory_usage_mb": result.memory_usage_mb,
+                    "cpu_usage_percent": result.cpu_usage_percent,
+                    "connection_errors": result.connection_errors,
+                    "test_metadata": result.test_metadata,
                 }
                 for result in self.test_results
             ],
         }
 
-        with open(filename, 'w') as f:
+        with open(filename, "w") as f:
             json.dump(data, f, indent=2)
 
         logger.info(f"Database test results saved to {filename}")
@@ -1013,11 +980,11 @@ async def run_database_performance_validation():
 
     # Database configuration (mock for testing)
     db_config = {
-        'host': 'localhost',
-        'port': 5432,
-        'database': 'test_db',
-        'user': 'test_user',
-        'password': 'test_password',
+        "host": "localhost",
+        "port": 5432,
+        "database": "test_db",
+        "user": "test_user",
+        "password": "test_password",
     }
 
     # Note: This is a mock implementation for testing purposes
@@ -1031,7 +998,7 @@ async def run_database_performance_validation():
 
         # Simulate test results since we don't have a real database
         mock_results = {
-            'connection_pool': DatabaseTestResult(
+            "connection_pool": DatabaseTestResult(
                 test_name="connection_pool",
                 concurrent_connections=25,
                 total_queries=25,
@@ -1047,7 +1014,7 @@ async def run_database_performance_validation():
                 cpu_usage_percent=15.3,
                 connection_errors=1,
             ),
-            'query_benchmark': DatabaseTestResult(
+            "query_benchmark": DatabaseTestResult(
                 test_name="query_benchmark",
                 concurrent_connections=15,
                 total_queries=1847,
@@ -1076,15 +1043,11 @@ async def run_database_performance_validation():
         print(f"Tests completed: {report['test_summary']['tests_completed']}")
 
         # Print performance metrics
-        for test_name, metrics in report['performance_metrics'].items():
+        for test_name, metrics in report["performance_metrics"].items():
             print(f"\n{test_name.upper()}:")
-            print(
-                f"  Concurrent Connections: {metrics['concurrent_connections']}"
-            )
+            print(f"  Concurrent Connections: {metrics['concurrent_connections']}")
             print(f"  Queries per Second: {metrics['queries_per_second']:.1f}")
-            print(
-                f"  Avg Query Time: {metrics['average_query_time_ms']:.1f}ms"
-            )
+            print(f"  Avg Query Time: {metrics['average_query_time_ms']:.1f}ms")
             print(f"  P95 Query Time: {metrics['p95_query_time_ms']:.1f}ms")
             print(f"  P99 Query Time: {metrics['p99_query_time_ms']:.1f}ms")
             print(f"  Success Rate: {metrics['success_rate']:.1f}%")
@@ -1092,22 +1055,22 @@ async def run_database_performance_validation():
             print(f"  Connection Errors: {metrics['connection_errors']}")
 
         # SLA validation
-        sla = report['sla_validation']
+        sla = report["sla_validation"]
         print("\n" + "=" * 30)
         print("SLA VALIDATION")
         print("=" * 30)
         print(f"Requirements met: {'✓' if sla['requirements_met'] else '✗'}")
 
-        if sla['violations']:
+        if sla["violations"]:
             print("\nViolations:")
-            for violation in sla['violations']:
+            for violation in sla["violations"]:
                 print(f"  - {violation['metric']}: {violation['description']}")
 
         # Recommendations
         print("\n" + "=" * 30)
         print("RECOMMENDATIONS")
         print("=" * 30)
-        for rec in report['recommendations']:
+        for rec in report["recommendations"]:
             print(f"  - {rec}")
 
         # Save results

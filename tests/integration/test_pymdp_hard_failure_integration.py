@@ -60,9 +60,7 @@ class TestPyMDPHardFailureIntegration:
         agent.pymdp_agent = None
 
         # select_action should fail hard, not return a default action
-        with pytest.raises(
-            AttributeError
-        ):  # Trying to call sample_action on None
+        with pytest.raises(AttributeError):  # Trying to call sample_action on None
             agent.select_action({"time": 1})
 
     def test_pymdp_adapter_strict_type_checking(self):
@@ -75,9 +73,7 @@ class TestPyMDPHardFailureIntegration:
 
         # Test 2: Mock agent returns wrong dtype
         mock_agent = MagicMock(spec=PyMDPAgent)
-        mock_agent.sample_action.return_value = np.array(
-            ["string"]
-        )  # Wrong dtype
+        mock_agent.sample_action.return_value = np.array(["string"])  # Wrong dtype
 
         with pytest.raises(RuntimeError, match="unexpected dtype"):
             adapter.sample_action(mock_agent)
@@ -102,9 +98,7 @@ class TestPyMDPHardFailureIntegration:
 
         # Mock PyMDP agent to raise exception during belief update
         mock_pymdp_agent = MagicMock(spec=PyMDPAgent)
-        mock_pymdp_agent.infer_states.side_effect = ValueError(
-            "Belief update failed"
-        )
+        mock_pymdp_agent.infer_states.side_effect = ValueError("Belief update failed")
         agent.pymdp_agent = mock_pymdp_agent
         agent.current_observation = [0]
 
@@ -187,9 +181,9 @@ class TestPyMDPHardFailureIntegration:
         ]
 
         for pattern in forbidden_patterns:
-            assert (
-                pattern not in source
-            ), f"Found forbidden pattern '{pattern}' indicating graceful fallback"
+            assert pattern not in source, (
+                f"Found forbidden pattern '{pattern}' indicating graceful fallback"
+            )
 
     def test_resource_collector_hard_failures(self):
         """Test ResourceCollectorAgent fails hard on PyMDP errors."""
@@ -208,9 +202,7 @@ class TestPyMDPHardFailureIntegration:
 
     def test_coalition_coordinator_hard_failures(self):
         """Test CoalitionCoordinatorAgent fails hard on PyMDP errors."""
-        agent = CoalitionCoordinatorAgent(
-            agent_id="coordinator_1", position=(10, 10)
-        )
+        agent = CoalitionCoordinatorAgent(agent_id="coordinator_1", position=(10, 10))
 
         # Mock PyMDP to fail during policy inference
         mock_pymdp_agent = MagicMock(spec=PyMDPAgent)
@@ -231,9 +223,7 @@ class TestPyMDPHardFailureIntegration:
         with pytest.raises(Exception):  # Should raise validation error
             agent._initialize_pymdp_with_gmn(
                 {
-                    "beliefs": {
-                        "location": "invalid"
-                    },  # Invalid belief format
+                    "beliefs": {"location": "invalid"},  # Invalid belief format
                     "policies": [],
                     "A_matrix": "not_a_matrix",  # Invalid matrix
                     "B_matrix": None,
@@ -260,9 +250,9 @@ class TestPyMDPHardFailureIntegration:
             agent.select_action({"time": 1})
 
         # Verify the original error message is preserved
-        assert "numerical instability" in str(
+        assert "numerical instability" in str(exc_info.value) or "Deep PyMDP" in str(
             exc_info.value
-        ) or "Deep PyMDP" in str(exc_info.value)
+        )
 
 
 class TestPerformanceTheaterRemoval:
@@ -298,12 +288,9 @@ class TestPerformanceTheaterRemoval:
             assert "sleep(" not in content, f"Found sleep() in {file_path}"
 
             # Check for progress bar theater
+            assert "tqdm" not in content, f"Found tqdm progress bar in {file_path}"
             assert (
-                "tqdm" not in content
-            ), f"Found tqdm progress bar in {file_path}"
-            assert (
-                "progress" not in content.lower()
-                or "in progress" in content.lower()
+                "progress" not in content.lower() or "in progress" in content.lower()
             ), f"Found progress indicator in {file_path}"
 
     def test_no_mock_benchmark_data(self):

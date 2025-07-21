@@ -64,7 +64,9 @@ def test_connection_manager_methods():
     """Test DatabaseConnectionManager additional methods."""
     with patch("database.connection_manager.create_engine", return_value=mock_engine):
         # Create manager
-        manager = DatabaseConnectionManager("postgresql://test:test@localhost:5432/testdb")
+        manager = DatabaseConnectionManager(
+            "postgresql://test:test@localhost:5432/testdb"
+        )
 
         # Test get_session returns a generator
         session_gen = manager.get_session()
@@ -127,7 +129,9 @@ def test_session_module_attributes():
     """Test session module attributes and error handling."""
     # Test that DATABASE_URL is set
     assert hasattr(database.session, "DATABASE_URL")
-    assert database.session.DATABASE_URL == "postgresql://test:test@localhost:5432/testdb"
+    assert (
+        database.session.DATABASE_URL == "postgresql://test:test@localhost:5432/testdb"
+    )
 
     # Test engine
     assert hasattr(database.session, "engine")

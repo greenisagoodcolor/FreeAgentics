@@ -83,10 +83,14 @@ class TestMFAService:
         assert result.qr_code_url.startswith("data:image/png;base64,")
 
     @pytest.mark.asyncio
-    async def test_enroll_user_already_enabled(self, mfa_service, mock_db, sample_mfa_settings):
+    async def test_enroll_user_already_enabled(
+        self, mfa_service, mock_db, sample_mfa_settings
+    ):
         """Test enrollment when MFA is already enabled."""
         # Mock database query
-        mock_db.query.return_value.filter_by.return_value.first.return_value = sample_mfa_settings
+        mock_db.query.return_value.filter_by.return_value.first.return_value = (
+            sample_mfa_settings
+        )
 
         # Create enrollment request
         request = MFAEnrollmentRequest(
@@ -120,7 +124,9 @@ class TestMFAService:
             )
 
             # Mock database query
-            mock_db.query.return_value.filter_by.return_value.first.return_value = mfa_settings
+            mock_db.query.return_value.filter_by.return_value.first.return_value = (
+                mfa_settings
+            )
 
             # Generate valid TOTP token
             import pyotp
@@ -129,7 +135,9 @@ class TestMFAService:
             valid_token = totp.now()
 
             # Create verification request
-            request = MFAVerificationRequest(user_id="test_user", token=valid_token, method="totp")
+            request = MFAVerificationRequest(
+                user_id="test_user", token=valid_token, method="totp"
+            )
 
             # Test verification
             result = await mfa_service.verify_mfa(request)
@@ -154,11 +162,15 @@ class TestMFAService:
         )
 
         # Mock database query
-        mock_db.query.return_value.filter_by.return_value.first.return_value = mfa_settings
+        mock_db.query.return_value.filter_by.return_value.first.return_value = (
+            mfa_settings
+        )
 
         # Create verification request with invalid token
         request = MFAVerificationRequest(
-            user_id="test_user", token="000000", method="totp"  # Invalid token
+            user_id="test_user",
+            token="000000",
+            method="totp",  # Invalid token
         )
 
         # Test verification
@@ -185,7 +197,9 @@ class TestMFAService:
         )
 
         # Mock database query
-        mock_db.query.return_value.filter_by.return_value.first.return_value = mfa_settings
+        mock_db.query.return_value.filter_by.return_value.first.return_value = (
+            mfa_settings
+        )
 
         # Create verification request with valid backup code
         request = MFAVerificationRequest(
@@ -219,7 +233,9 @@ class TestMFAService:
         )
 
         # Mock database query
-        mock_db.query.return_value.filter_by.return_value.first.return_value = mfa_settings
+        mock_db.query.return_value.filter_by.return_value.first.return_value = (
+            mfa_settings
+        )
 
         # Create verification request
         request = MFAVerificationRequest(
@@ -250,11 +266,15 @@ class TestMFAService:
         )
 
         # Mock database query
-        mock_db.query.return_value.filter_by.return_value.first.return_value = mfa_settings
+        mock_db.query.return_value.filter_by.return_value.first.return_value = (
+            mfa_settings
+        )
 
         # Create verification request
         request = MFAVerificationRequest(
-            user_id="test_user", token="000000", method="totp"  # Invalid token
+            user_id="test_user",
+            token="000000",
+            method="totp",  # Invalid token
         )
 
         # Test verification (should trigger lockout)
@@ -280,7 +300,9 @@ class TestMFAService:
         )
 
         # Mock database query
-        mock_db.query.return_value.filter_by.return_value.first.return_value = mfa_settings
+        mock_db.query.return_value.filter_by.return_value.first.return_value = (
+            mfa_settings
+        )
 
         # Generate valid TOTP token
         import pyotp
@@ -289,7 +311,9 @@ class TestMFAService:
         valid_token = totp.now()
 
         # Create verification request
-        request = MFAVerificationRequest(user_id="test_user", token=valid_token, method="totp")
+        request = MFAVerificationRequest(
+            user_id="test_user", token=valid_token, method="totp"
+        )
 
         # Test verification
         result = await mfa_service.verify_mfa(request)
@@ -302,7 +326,9 @@ class TestMFAService:
     async def test_disable_mfa_success(self, mfa_service, mock_db, sample_mfa_settings):
         """Test successful MFA disable."""
         # Mock database query
-        mock_db.query.return_value.filter_by.return_value.first.return_value = sample_mfa_settings
+        mock_db.query.return_value.filter_by.return_value.first.return_value = (
+            sample_mfa_settings
+        )
 
         # Test disable
         result = await mfa_service.disable_mfa("test_user")
@@ -346,7 +372,9 @@ class TestMFAService:
         )
 
         # Mock database query
-        mock_db.query.return_value.filter_by.return_value.first.return_value = mfa_settings
+        mock_db.query.return_value.filter_by.return_value.first.return_value = (
+            mfa_settings
+        )
 
         # Test status
         status = await mfa_service.get_mfa_status("test_user")
@@ -374,10 +402,14 @@ class TestMFAService:
         assert status["locked_until"] is None
 
     @pytest.mark.asyncio
-    async def test_regenerate_backup_codes_success(self, mfa_service, mock_db, sample_mfa_settings):
+    async def test_regenerate_backup_codes_success(
+        self, mfa_service, mock_db, sample_mfa_settings
+    ):
         """Test successful backup code regeneration."""
         # Mock database query
-        mock_db.query.return_value.filter_by.return_value.first.return_value = sample_mfa_settings
+        mock_db.query.return_value.filter_by.return_value.first.return_value = (
+            sample_mfa_settings
+        )
 
         # Test regeneration
         result = await mfa_service.regenerate_backup_codes("test_user")
@@ -395,7 +427,9 @@ class TestMFAService:
         mfa_settings = MFASettings(user_id="test_user", is_enabled=False)
 
         # Mock database query
-        mock_db.query.return_value.filter_by.return_value.first.return_value = mfa_settings
+        mock_db.query.return_value.filter_by.return_value.first.return_value = (
+            mfa_settings
+        )
 
         # Test regeneration
         result = await mfa_service.regenerate_backup_codes("test_user")
@@ -441,9 +475,13 @@ class TestMFAService:
 
     def test_check_rate_limit_not_locked(self, mfa_service, mock_db):
         """Test rate limit check for non-locked user."""
-        mfa_settings = MFASettings(user_id="test_user", failed_attempts=3, locked_until=None)
+        mfa_settings = MFASettings(
+            user_id="test_user", failed_attempts=3, locked_until=None
+        )
 
-        mock_db.query.return_value.filter_by.return_value.first.return_value = mfa_settings
+        mock_db.query.return_value.filter_by.return_value.first.return_value = (
+            mfa_settings
+        )
 
         # Test rate limit check
         result = mfa_service._check_rate_limit("test_user")
@@ -457,7 +495,9 @@ class TestMFAService:
             locked_until=datetime.utcnow() + timedelta(minutes=10),
         )
 
-        mock_db.query.return_value.filter_by.return_value.first.return_value = mfa_settings
+        mock_db.query.return_value.filter_by.return_value.first.return_value = (
+            mfa_settings
+        )
 
         # Test rate limit check
         result = mfa_service._check_rate_limit("test_user")
@@ -471,7 +511,9 @@ class TestMFAService:
             locked_until=datetime.utcnow() - timedelta(minutes=10),  # Expired
         )
 
-        mock_db.query.return_value.filter_by.return_value.first.return_value = mfa_settings
+        mock_db.query.return_value.filter_by.return_value.first.return_value = (
+            mfa_settings
+        )
 
         # Test rate limit check
         result = mfa_service._check_rate_limit("test_user")
@@ -491,7 +533,9 @@ class TestMFAService:
                 locked_until=None,
             )
 
-            mock_db.query.return_value.filter_by.return_value.first.return_value = mfa_settings
+            mock_db.query.return_value.filter_by.return_value.first.return_value = (
+                mfa_settings
+            )
 
             # Create verification request with invalid token
             request = MFAVerificationRequest(

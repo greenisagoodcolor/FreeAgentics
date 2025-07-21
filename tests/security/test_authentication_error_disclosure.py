@@ -66,7 +66,9 @@ class AuthenticationErrorTester:
 
             response_times[username] = response_time
             response_messages[username] = (
-                response.json() if response.status_code != 500 else {"detail": "Server error"}
+                response.json()
+                if response.status_code != 500
+                else {"detail": "Server error"}
             )
 
         # Check for timing differences that could indicate username enumeration
@@ -215,7 +217,9 @@ class AuthenticationErrorTester:
             )
 
             response_data = (
-                response.json() if response.status_code != 500 else {"detail": "Server error"}
+                response.json()
+                if response.status_code != 500
+                else {"detail": "Server error"}
             )
             response_text = json.dumps(response_data)
 
@@ -246,7 +250,9 @@ class AuthenticationErrorTester:
                     )
 
         if results["findings"]:
-            results["recommendations"].append("Use generic error messages for account lockout")
+            results["recommendations"].append(
+                "Use generic error messages for account lockout"
+            )
             results["recommendations"].append(
                 "Do not disclose lockout duration or remaining attempts"
             )
@@ -284,7 +290,9 @@ class AuthenticationErrorTester:
 
             if response.status_code in [401, 403]:  # Auth errors
                 response_data = (
-                    response.json() if response.status_code != 500 else {"detail": "Server error"}
+                    response.json()
+                    if response.status_code != 500
+                    else {"detail": "Server error"}
                 )
                 response_text = json.dumps(response_data)
 
@@ -319,7 +327,9 @@ class AuthenticationErrorTester:
                         )
 
         if results["findings"]:
-            results["recommendations"].append('Use generic "Unauthorized" messages for JWT errors')
+            results["recommendations"].append(
+                'Use generic "Unauthorized" messages for JWT errors'
+            )
             results["recommendations"].append("Log JWT error details server-side only")
 
         return results
@@ -353,7 +363,9 @@ class AuthenticationErrorTester:
 
             if response.status_code in [401, 403]:
                 response_data = (
-                    response.json() if response.status_code != 500 else {"detail": "Server error"}
+                    response.json()
+                    if response.status_code != 500
+                    else {"detail": "Server error"}
                 )
                 response_text = json.dumps(response_data)
 
@@ -385,8 +397,12 @@ class AuthenticationErrorTester:
                         )
 
         if results["findings"]:
-            results["recommendations"].append("Use generic authentication error messages")
-            results["recommendations"].append("Do not expose session store implementation details")
+            results["recommendations"].append(
+                "Use generic authentication error messages"
+            )
+            results["recommendations"].append(
+                "Do not expose session store implementation details"
+            )
 
         return results
 
@@ -444,7 +460,8 @@ class AuthenticationErrorTester:
             timing_results[scenario_name] = {
                 "avg_time": avg_time,
                 "times": times,
-                "std_dev": (sum((t - avg_time) ** 2 for t in times) / len(times)) ** 0.5,
+                "std_dev": (sum((t - avg_time) ** 2 for t in times) / len(times))
+                ** 0.5,
             }
 
         # Check for significant timing differences
@@ -468,9 +485,15 @@ class AuthenticationErrorTester:
                 )
 
         if results["findings"]:
-            results["recommendations"].append("Implement constant-time authentication responses")
-            results["recommendations"].append("Use artificial delays to normalize response times")
-            results["recommendations"].append("Consider rate limiting to mitigate timing attacks")
+            results["recommendations"].append(
+                "Implement constant-time authentication responses"
+            )
+            results["recommendations"].append(
+                "Use artificial delays to normalize response times"
+            )
+            results["recommendations"].append(
+                "Consider rate limiting to mitigate timing attacks"
+            )
 
         return results
 
@@ -533,7 +556,9 @@ class AuthenticationErrorTester:
                 "total_tests": total_tests,
                 "passed_tests": passed_tests,
                 "failed_tests": failed_tests,
-                "pass_rate": (passed_tests / total_tests * 100) if total_tests > 0 else 0,
+                "pass_rate": (passed_tests / total_tests * 100)
+                if total_tests > 0
+                else 0,
             },
             "test_results": all_results,
             "recommendations": unique_recommendations,
@@ -645,9 +670,9 @@ if __name__ == "__main__":
     print("Running authentication error disclosure tests...")
     summary = tester.run_all_authentication_tests()
 
-    print(f"\n{'='*60}")
+    print(f"\n{'=' * 60}")
     print("AUTHENTICATION ERROR DISCLOSURE TEST REPORT")
-    print(f"{'='*60}")
+    print(f"{'=' * 60}")
     print(f"Total Tests: {summary['summary']['total_tests']}")
     print(f"Passed: {summary['summary']['passed_tests']}")
     print(f"Failed: {summary['summary']['failed_tests']}")
@@ -655,17 +680,15 @@ if __name__ == "__main__":
     print(f"Overall Status: {summary['overall_status']}")
 
     if summary["recommendations"]:
-        print(f"\n{'='*40}")
+        print(f"\n{'=' * 40}")
         print("RECOMMENDATIONS")
-        print(f"{'='*40}")
+        print(f"{'=' * 40}")
         for rec in summary["recommendations"]:
             print(f"• {rec}")
 
     # Save report
     timestamp = time.strftime("%Y%m%d_%H%M%S")
-    report_file = (
-        f"/home/green/FreeAgentics/tests/security/auth_error_disclosure_report_{timestamp}.json"
-    )
+    report_file = f"/home/green/FreeAgentics/tests/security/auth_error_disclosure_report_{timestamp}.json"
 
     try:
         with open(report_file, "w") as f:

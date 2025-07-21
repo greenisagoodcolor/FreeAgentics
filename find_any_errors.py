@@ -32,7 +32,11 @@ def check_file_for_any_error(filepath):
 test_files = []
 for root, dirs, files in os.walk("."):
     # Skip hidden directories and common non-test directories
-    dirs[:] = [d for d in dirs if not d.startswith(".") and d not in ["venv", "env", "__pycache__"]]
+    dirs[:] = [
+        d
+        for d in dirs
+        if not d.startswith(".") and d not in ["venv", "env", "__pycache__"]
+    ]
 
     for file in files:
         if "test" in file and file.endswith(".py"):

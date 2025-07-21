@@ -173,7 +173,9 @@ class TestIDORSystemIntegration:
             assert response.status_code == status.HTTP_403_FORBIDDEN
 
             # Try to delete
-            response = self.client.delete(f"/api/v1/agents/{agent_id}", headers=observer_headers)
+            response = self.client.delete(
+                f"/api/v1/agents/{agent_id}", headers=observer_headers
+            )
             assert response.status_code == status.HTTP_403_FORBIDDEN
 
     def test_coalition_membership_idor(self):
@@ -197,7 +199,9 @@ class TestIDORSystemIntegration:
             # Should not expose members of coalition they don't belong to
             if response.status_code == status.HTTP_200_OK:
                 members = response.json()
-                assert self.users["agent_manager1"]["id"] not in [m.get("id") for m in members]
+                assert self.users["agent_manager1"]["id"] not in [
+                    m.get("id") for m in members
+                ]
 
     def test_knowledge_graph_idor(self):
         """Test IDOR protection for knowledge graph resources."""
@@ -240,7 +244,9 @@ class TestIDORSystemIntegration:
 
         # Try to access resources
         for agent_id in self.resources["agents"]:
-            response = self.client.get(f"/api/v1/agents/{agent_id}", headers=api_key_headers)
+            response = self.client.get(
+                f"/api/v1/agents/{agent_id}", headers=api_key_headers
+            )
 
             # Should not authenticate with fake API key
             assert response.status_code == status.HTTP_401_UNAUTHORIZED

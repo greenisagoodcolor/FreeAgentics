@@ -54,7 +54,9 @@ class SimulationConfig:
 
     # Database configuration
     db_url: str = field(
-        default_factory=lambda: os.getenv("TEST_DATABASE_URL", "sqlite:///./test_simulation.db")
+        default_factory=lambda: os.getenv(
+            "TEST_DATABASE_URL", "sqlite:///./test_simulation.db"
+        )
     )
     db_pool_size: int = 20
     db_max_overflow: int = 10
@@ -116,7 +118,9 @@ class SimulationMetrics:
     memory_usage: List[float] = field(default_factory=list)
 
     # Per-persona metrics
-    persona_metrics: Dict[str, Dict[str, Any]] = field(default_factory=lambda: defaultdict(dict))
+    persona_metrics: Dict[str, Dict[str, Any]] = field(
+        default_factory=lambda: defaultdict(dict)
+    )
 
     def to_dict(self) -> Dict[str, Any]:
         """Convert metrics to dictionary."""
@@ -137,7 +141,9 @@ class SimulationMetrics:
             "database": {
                 "operations": self.db_operations,
                 "errors": self.db_errors,
-                "avg_latency_ms": np.mean(self.db_latency_ms) if self.db_latency_ms else 0,
+                "avg_latency_ms": np.mean(self.db_latency_ms)
+                if self.db_latency_ms
+                else 0,
                 "p95_latency_ms": (
                     np.percentile(self.db_latency_ms, 95) if self.db_latency_ms else 0
                 ),
@@ -146,7 +152,9 @@ class SimulationMetrics:
                 "connections": self.ws_connections,
                 "disconnections": self.ws_disconnections,
                 "errors": self.ws_errors,
-                "avg_latency_ms": np.mean(self.ws_latency_ms) if self.ws_latency_ms else 0,
+                "avg_latency_ms": np.mean(self.ws_latency_ms)
+                if self.ws_latency_ms
+                else 0,
                 "p95_latency_ms": (
                     np.percentile(self.ws_latency_ms, 95) if self.ws_latency_ms else 0
                 ),
@@ -269,7 +277,10 @@ class SimulatedUser:
             self.error_count += 1
 
             # Inject errors if configured
-            if self.config.enable_errors and np.random.random() < self.config.error_injection_rate:
+            if (
+                self.config.enable_errors
+                and np.random.random() < self.config.error_injection_rate
+            ):
                 raise e
 
             return None
@@ -395,7 +406,9 @@ class SimulatedUser:
                 # Create coalition in database
                 coalition_data = command.get("params", {})
                 coalition = Coalition(
-                    name=coalition_data.get("name", f"Coalition_{uuid.uuid4().hex[:8]}"),
+                    name=coalition_data.get(
+                        "name", f"Coalition_{uuid.uuid4().hex[:8]}"
+                    ),
                     goal=coalition_data.get("goal", "default_goal"),
                     status=CoalitionStatus.FORMING,
                     metadata=coalition_data,
@@ -430,7 +443,9 @@ class SimulatedUser:
             await self.db_session.rollback()
             return {"error": str(e)}
 
-    async def _process_subscription(self, subscription: Dict[str, Any]) -> Dict[str, Any]:
+    async def _process_subscription(
+        self, subscription: Dict[str, Any]
+    ) -> Dict[str, Any]:
         """Process event subscription."""
         event_types = subscription.get("event_types", [])
 
@@ -506,7 +521,9 @@ class SimulatedUser:
             "error_count": self.error_count,
             "owned_agents": len(self.owned_agents),
             "managed_coalitions": len(self.managed_coalitions),
-            "avg_action_latency_ms": np.mean(self.action_latencies) if self.action_latencies else 0,
+            "avg_action_latency_ms": np.mean(self.action_latencies)
+            if self.action_latencies
+            else 0,
             "avg_db_latency_ms": np.mean(self.db_latencies) if self.db_latencies else 0,
         }
 
@@ -520,7 +537,9 @@ class ConcurrentSimulator:
         self.metrics = SimulationMetrics()
 
         # WebSocket manager
-        self.ws_manager = WebSocketClientManager(base_url=f"{config.ws_base_url}{config.ws_path}")
+        self.ws_manager = WebSocketClientManager(
+            base_url=f"{config.ws_base_url}{config.ws_path}"
+        )
 
         # Performance monitor
         self.perf_monitor = PerformanceMonitor()
@@ -663,7 +682,9 @@ class ConcurrentSimulator:
         except asyncio.CancelledError:
             pass
 
-        logger.info(f"Main phase complete. Total messages: {self.metrics.messages_sent}")
+        logger.info(
+            f"Main phase complete. Total messages: {self.metrics.messages_sent}"
+        )
 
     async def _cooldown_phase(self):
         """Cooldown phase with gradual disconnection."""
@@ -682,7 +703,9 @@ class ConcurrentSimulator:
 
             # Calculate when to disconnect this user
             disconnect_time = i / disconnect_rate
-            await asyncio.sleep(max(0, disconnect_time - (time.time() - cooldown_start)))
+            await asyncio.sleep(
+                max(0, disconnect_time - (time.time() - cooldown_start))
+            )
 
             # Disconnect user
             user = self.users.get(user_id)
@@ -851,12 +874,16 @@ class ConcurrentSimulator:
         timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
 
         # Export metrics
-        metrics_file = self.config.results_path / f"metrics_{self.config.name}_{timestamp}.json"
+        metrics_file = (
+            self.config.results_path / f"metrics_{self.config.name}_{timestamp}.json"
+        )
         with open(metrics_file, "w") as f:
             json.dump(self.metrics.to_dict(), f, indent=2)
 
         # Export user behaviors
-        behaviors_file = self.config.results_path / f"behaviors_{self.config.name}_{timestamp}.json"
+        behaviors_file = (
+            self.config.results_path / f"behaviors_{self.config.name}_{timestamp}.json"
+        )
         behaviors = {
             user_id: {
                 "metrics": user.get_metrics(),
@@ -871,7 +898,8 @@ class ConcurrentSimulator:
         # Export performance data
         if self.config.enable_monitoring:
             perf_file = (
-                self.config.results_path / f"performance_{self.config.name}_{timestamp}.json"
+                self.config.results_path
+                / f"performance_{self.config.name}_{timestamp}.json"
             )
             with open(perf_file, "w") as f:
                 json.dump(self.perf_monitor.get_summary(), f, indent=2)
@@ -885,7 +913,9 @@ class ConcurrentSimulator:
                 "name": self.config.name,
                 "duration": self.config.duration_seconds,
                 "total_users": self.config.total_users,
-                "distribution": {p.value: c for p, c in self.config.user_distribution.items()},
+                "distribution": {
+                    p.value: c for p, c in self.config.user_distribution.items()
+                },
             },
             "metrics": self.metrics.to_dict(),
             "users": {

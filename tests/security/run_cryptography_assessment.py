@@ -44,7 +44,9 @@ from tests.security.test_cryptography_assessment import (
 )
 
 # Configure logging
-logging.basicConfig(level=logging.INFO, format="%(asctime)s - %(levelname)s - %(message)s")
+logging.basicConfig(
+    level=logging.INFO, format="%(asctime)s - %(levelname)s - %(message)s"
+)
 logger = logging.getLogger(__name__)
 
 
@@ -135,7 +137,9 @@ class CryptographyAssessmentRunner:
                             module_results[method_name] = test_result
 
                             # Process results into findings
-                            self._process_test_results(module_name, method_name, test_result)
+                            self._process_test_results(
+                                module_name, method_name, test_result
+                            )
 
                         except Exception as e:
                             logger.error(f"Error in {method_name}: {e}")
@@ -146,7 +150,9 @@ class CryptographyAssessmentRunner:
                                 "warnings": [],
                             }
                     else:
-                        logger.warning(f"Method {method_name} not found in {module_class.__name__}")
+                        logger.warning(
+                            f"Method {method_name} not found in {module_class.__name__}"
+                        )
 
                 self.assessment_results[module_name] = module_results
                 logger.info(f"Completed {module_name}")
@@ -164,7 +170,9 @@ class CryptographyAssessmentRunner:
         logger.info("Comprehensive cryptography assessment completed")
         return final_report
 
-    def _process_test_results(self, module_name: str, test_name: str, results: Dict[str, Any]):
+    def _process_test_results(
+        self, module_name: str, test_name: str, results: Dict[str, Any]
+    ):
         """Process test results into standardized findings."""
 
         # Process passed tests
@@ -177,7 +185,9 @@ class CryptographyAssessmentRunner:
                     "type": "pass",
                     "severity": SecurityLevel.INFO.value,
                     "message": passed_msg,
-                    "compliance_standards": self._map_to_compliance_standards(passed_msg),
+                    "compliance_standards": self._map_to_compliance_standards(
+                        passed_msg
+                    ),
                     "timestamp": datetime.now().isoformat(),
                 }
             )
@@ -193,8 +203,12 @@ class CryptographyAssessmentRunner:
                     "type": "failure",
                     "severity": severity.value,
                     "message": failed_msg,
-                    "compliance_standards": self._map_to_compliance_standards(failed_msg),
-                    "remediation": self._get_remediation_guidance(failed_msg, module_name),
+                    "compliance_standards": self._map_to_compliance_standards(
+                        failed_msg
+                    ),
+                    "remediation": self._get_remediation_guidance(
+                        failed_msg, module_name
+                    ),
                     "timestamp": datetime.now().isoformat(),
                 }
             )
@@ -209,8 +223,12 @@ class CryptographyAssessmentRunner:
                     "type": "warning",
                     "severity": SecurityLevel.MEDIUM.value,
                     "message": warning_msg,
-                    "compliance_standards": self._map_to_compliance_standards(warning_msg),
-                    "remediation": self._get_remediation_guidance(warning_msg, module_name),
+                    "compliance_standards": self._map_to_compliance_standards(
+                        warning_msg
+                    ),
+                    "remediation": self._get_remediation_guidance(
+                        warning_msg, module_name
+                    ),
                     "timestamp": datetime.now().isoformat(),
                 }
             )
@@ -349,7 +367,9 @@ class CryptographyAssessmentRunner:
         compliance_status = get_compliance_status(self.findings)
 
         # Generate executive summary
-        executive_summary = self._generate_executive_summary(security_score, compliance_status)
+        executive_summary = self._generate_executive_summary(
+            security_score, compliance_status
+        )
 
         # Create detailed findings report
         detailed_findings = self._organize_findings_by_category()
@@ -366,7 +386,9 @@ class CryptographyAssessmentRunner:
             },
             "executive_summary": executive_summary,
             "security_score": security_score,
-            "compliance_status": {std.value: status for std, status in compliance_status.items()},
+            "compliance_status": {
+                std.value: status for std, status in compliance_status.items()
+            },
             "detailed_findings": detailed_findings,
             "recommendations": self._generate_recommendations(),
             "assessment_results": self.assessment_results,
@@ -381,7 +403,11 @@ class CryptographyAssessmentRunner:
         """Generate executive summary of assessment results."""
         total_findings = len(self.findings)
         critical_findings = len(
-            [f for f in self.findings if f.get("severity") == SecurityLevel.CRITICAL.value]
+            [
+                f
+                for f in self.findings
+                if f.get("severity") == SecurityLevel.CRITICAL.value
+            ]
         )
         high_findings = len(
             [f for f in self.findings if f.get("severity") == SecurityLevel.HIGH.value]
@@ -390,25 +416,21 @@ class CryptographyAssessmentRunner:
         # Determine overall security posture
         if critical_findings > 0:
             posture = "CRITICAL"
-            posture_description = (
-                "Critical cryptographic vulnerabilities identified requiring immediate attention"
-            )
+            posture_description = "Critical cryptographic vulnerabilities identified requiring immediate attention"
         elif high_findings > 5:
             posture = "HIGH_RISK"
-            posture_description = (
-                "Multiple high-severity cryptographic issues requiring prompt remediation"
-            )
+            posture_description = "Multiple high-severity cryptographic issues requiring prompt remediation"
         elif high_findings > 0:
             posture = "MODERATE_RISK"
             posture_description = "Some cryptographic improvements needed"
         else:
             posture = "LOW_RISK"
-            posture_description = (
-                "Cryptographic implementation appears secure with minor improvements needed"
-            )
+            posture_description = "Cryptographic implementation appears secure with minor improvements needed"
 
         # Compliance summary
-        compliant_standards = len([s for s in compliance_status.values() if s == "COMPLIANT"])
+        compliant_standards = len(
+            [s for s in compliance_status.values() if s == "COMPLIANT"]
+        )
         total_standards = len(compliance_status)
 
         return {
@@ -453,7 +475,8 @@ class CryptographyAssessmentRunner:
             f
             for f in self.findings
             if "Key Management" in f.get("module", "")
-            and f.get("severity") in [SecurityLevel.CRITICAL.value, SecurityLevel.HIGH.value]
+            and f.get("severity")
+            in [SecurityLevel.CRITICAL.value, SecurityLevel.HIGH.value]
         ]
         if key_mgmt_findings:
             concerns.append("Key management security issues")
@@ -463,7 +486,8 @@ class CryptographyAssessmentRunner:
             f
             for f in self.findings
             if "Vulnerability" in f.get("module", "")
-            and f.get("severity") in [SecurityLevel.CRITICAL.value, SecurityLevel.HIGH.value]
+            and f.get("severity")
+            in [SecurityLevel.CRITICAL.value, SecurityLevel.HIGH.value]
         ]
         if vuln_findings:
             concerns.append("Cryptographic implementation vulnerabilities")
@@ -473,7 +497,8 @@ class CryptographyAssessmentRunner:
             f
             for f in self.findings
             if "SSL/TLS" in f.get("module", "")
-            and f.get("severity") in [SecurityLevel.CRITICAL.value, SecurityLevel.HIGH.value]
+            and f.get("severity")
+            in [SecurityLevel.CRITICAL.value, SecurityLevel.HIGH.value]
         ]
         if tls_findings:
             concerns.append("SSL/TLS configuration weaknesses")
@@ -508,7 +533,9 @@ class CryptographyAssessmentRunner:
 
         # Critical recommendations
         critical_findings = [
-            f for f in self.findings if f.get("severity") == SecurityLevel.CRITICAL.value
+            f
+            for f in self.findings
+            if f.get("severity") == SecurityLevel.CRITICAL.value
         ]
         if critical_findings:
             recommendations.append(
@@ -517,14 +544,17 @@ class CryptographyAssessmentRunner:
                     "title": "Address Critical Cryptographic Vulnerabilities",
                     "description": "Immediately address critical cryptographic weaknesses that pose severe security risks",
                     "actions": [
-                        f.get("remediation", f.get("message", "")) for f in critical_findings[:5]
+                        f.get("remediation", f.get("message", ""))
+                        for f in critical_findings[:5]
                     ],
                     "timeline": "Immediate (within 24-48 hours)",
                 }
             )
 
         # High priority recommendations
-        high_findings = [f for f in self.findings if f.get("severity") == SecurityLevel.HIGH.value]
+        high_findings = [
+            f for f in self.findings if f.get("severity") == SecurityLevel.HIGH.value
+        ]
         if high_findings:
             recommendations.append(
                 {
@@ -533,7 +563,10 @@ class CryptographyAssessmentRunner:
                     "description": "Address high-severity cryptographic issues to improve security posture",
                     "actions": list(
                         set(
-                            [f.get("remediation", f.get("message", "")) for f in high_findings[:10]]
+                            [
+                                f.get("remediation", f.get("message", ""))
+                                for f in high_findings[:10]
+                            ]
                         )
                     ),
                     "timeline": "Short-term (within 1-2 weeks)",
@@ -574,7 +607,9 @@ class CryptographyAssessmentRunner:
         """Save assessment report to file."""
         if not filename:
             timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
-            filename = f"cryptography_assessment_report_{timestamp}.{self.output_format}"
+            filename = (
+                f"cryptography_assessment_report_{timestamp}.{self.output_format}"
+            )
 
         filepath = self.output_dir / filename
 
@@ -623,15 +658,15 @@ class CryptographyAssessmentRunner:
         <body>
             <div class="header">
                 <h1>Cryptography Security Assessment Report</h1>
-                <p>Platform: FreeAgentics | Generated: {datetime.now().strftime('%Y-%m-%d %H:%M:%S')}</p>
+                <p>Platform: FreeAgentics | Generated: {datetime.now().strftime("%Y-%m-%d %H:%M:%S")}</p>
             </div>
 
             <div class="section">
                 <h2>Executive Summary</h2>
-                <p><strong>Overall Security Score:</strong> {report['security_score']['overall_score']}%</p>
-                <p><strong>Security Posture:</strong> {report['executive_summary']['overall_security_posture']}</p>
-                <p><strong>Total Findings:</strong> {report['executive_summary']['total_findings']}</p>
-                <p><strong>Critical Issues:</strong> {report['executive_summary']['critical_findings']}</p>
+                <p><strong>Overall Security Score:</strong> {report["security_score"]["overall_score"]}%</p>
+                <p><strong>Security Posture:</strong> {report["executive_summary"]["overall_security_posture"]}</p>
+                <p><strong>Total Findings:</strong> {report["executive_summary"]["total_findings"]}</p>
+                <p><strong>Critical Issues:</strong> {report["executive_summary"]["critical_findings"]}</p>
             </div>
 
             <div class="section">
@@ -669,7 +704,9 @@ def main():
 
     try:
         # Initialize and run assessment
-        runner = CryptographyAssessmentRunner(output_dir=args.output_dir, output_format=args.format)
+        runner = CryptographyAssessmentRunner(
+            output_dir=args.output_dir, output_format=args.format
+        )
 
         logger.info("Starting FreeAgentics cryptography security assessment...")
         report = runner.run_comprehensive_assessment()
@@ -682,10 +719,14 @@ def main():
         print("CRYPTOGRAPHY ASSESSMENT COMPLETED")
         print("=" * 80)
         print(f"Overall Security Score: {report['security_score']['overall_score']}%")
-        print(f"Security Posture: {report['executive_summary']['overall_security_posture']}")
+        print(
+            f"Security Posture: {report['executive_summary']['overall_security_posture']}"
+        )
         print(f"Total Findings: {report['executive_summary']['total_findings']}")
         print(f"Critical Issues: {report['executive_summary']['critical_findings']}")
-        print(f"High Severity Issues: {report['executive_summary']['high_severity_findings']}")
+        print(
+            f"High Severity Issues: {report['executive_summary']['high_severity_findings']}"
+        )
         print(f"\nReport saved to: {report_path}")
 
         # Exit with appropriate code

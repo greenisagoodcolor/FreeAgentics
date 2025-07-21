@@ -88,12 +88,16 @@ class WebSocketPooledConnectionManager:
             raise RuntimeError("Connection pool not initialized")
 
         # Allocate resources
-        resource = await self.resource_manager.allocate_resource(agent_id, prefer_metadata=metadata)
+        resource = await self.resource_manager.allocate_resource(
+            agent_id, prefer_metadata=metadata
+        )
 
         # Activate the resource
         await self.resource_manager.activate_resource(agent_id)
 
-        logger.info(f"Allocated connection {resource.connection_id} for agent {agent_id}")
+        logger.info(
+            f"Allocated connection {resource.connection_id} for agent {agent_id}"
+        )
         return resource.connection_id
 
     async def release_agent_connection(self, agent_id: str):
@@ -207,7 +211,9 @@ async def example_agent_lifecycle():
 
         # Update resource usage
         await pooled_connection_manager.resource_manager.update_resource_usage(
-            agent_id, memory=50 * 1024 * 1024, cpu=0.5  # 50MB  # 0.5 cores
+            agent_id,
+            memory=50 * 1024 * 1024,
+            cpu=0.5,  # 50MB  # 0.5 cores
         )
 
     finally:
@@ -234,7 +240,9 @@ async def example_multi_agent_scenario():
 
     logger.info(f"Pool size: {pool_metrics.get('pool_size')}")
     logger.info(f"Connections in use: {resource_metrics.get('connections_in_use')}")
-    logger.info(f"Agents per connection: {resource_metrics.get('avg_agents_per_connection')}")
+    logger.info(
+        f"Agents per connection: {resource_metrics.get('avg_agents_per_connection')}"
+    )
 
     # Simulate work
     await asyncio.sleep(5)
@@ -242,7 +250,9 @@ async def example_multi_agent_scenario():
     # Release all agents
     release_tasks = []
     for agent_id in agent_ids:
-        release_tasks.append(pooled_connection_manager.release_agent_connection(agent_id))
+        release_tasks.append(
+            pooled_connection_manager.release_agent_connection(agent_id)
+        )
 
     await asyncio.gather(*release_tasks)
     logger.info("All agents released")
@@ -300,7 +310,9 @@ async def benchmark_with_pooling(num_agents: int, duration: int):
     errors = 0
 
     # Get initial pool size
-    initial_pool_size = pooled_connection_manager.pool.size if pooled_connection_manager.pool else 0
+    initial_pool_size = (
+        pooled_connection_manager.pool.size if pooled_connection_manager.pool else 0
+    )
 
     async def agent_work(agent_id: str):
         nonlocal messages_sent, errors
@@ -336,7 +348,9 @@ async def benchmark_with_pooling(num_agents: int, duration: int):
     total_time = asyncio.get_event_loop().time() - start_time
 
     # Get final pool size
-    final_pool_size = pooled_connection_manager.pool.size if pooled_connection_manager.pool else 0
+    final_pool_size = (
+        pooled_connection_manager.pool.size if pooled_connection_manager.pool else 0
+    )
     connections_created = final_pool_size - initial_pool_size
 
     # Get pool metrics
@@ -348,7 +362,8 @@ async def benchmark_with_pooling(num_agents: int, duration: int):
         "duration": duration,
         "total_time": total_time,
         "connections_created": connections_created,
-        "connections_reused": pool_metrics.get("total_acquisitions", 0) - connections_created,
+        "connections_reused": pool_metrics.get("total_acquisitions", 0)
+        - connections_created,
         "messages_sent": messages_sent,
         "errors": errors,
         "avg_messages_per_second": messages_sent / total_time if total_time > 0 else 0,
@@ -359,7 +374,9 @@ async def benchmark_with_pooling(num_agents: int, duration: int):
 
 async def run_performance_comparison(num_agents: int = 50, duration: int = 30):
     """Run performance comparison between pooled and non-pooled approaches."""
-    logger.info(f"Running performance comparison with {num_agents} agents for {duration}s")
+    logger.info(
+        f"Running performance comparison with {num_agents} agents for {duration}s"
+    )
 
     # Run without pooling
     without_pooling = await benchmark_without_pooling(num_agents, duration)
@@ -377,7 +394,10 @@ async def run_performance_comparison(num_agents: int = 50, duration: int = 30):
     )
 
     throughput_improvement = (
-        (with_pooling["avg_messages_per_second"] - without_pooling["avg_messages_per_second"])
+        (
+            with_pooling["avg_messages_per_second"]
+            - without_pooling["avg_messages_per_second"]
+        )
         / without_pooling["avg_messages_per_second"]
         * 100
         if without_pooling["avg_messages_per_second"] > 0

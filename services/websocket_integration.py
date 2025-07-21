@@ -216,23 +216,15 @@ class WebSocketPipelineMonitor:
             "stages_completed": len(pipeline["stages_completed"]) + 1,
             "stage_timings": stage_timings,
             "result_summary": {
-                "suggestions_count": len(
-                    result_data.get("next_suggestions", [])
-                ),
-                "kg_updates_count": len(
-                    result_data.get("knowledge_graph_updates", [])
-                ),
+                "suggestions_count": len(result_data.get("next_suggestions", [])),
+                "kg_updates_count": len(result_data.get("knowledge_graph_updates", [])),
             },
         }
 
-        logger.info(
-            f"Pipeline {prompt_id} completed in {processing_time_ms}ms"
-        )
+        logger.info(f"Pipeline {prompt_id} completed in {processing_time_ms}ms")
 
         # Clean up after a delay
-        asyncio.create_task(
-            self._cleanup_pipeline(prompt_id, delay=300)
-        )  # 5 minutes
+        asyncio.create_task(self._cleanup_pipeline(prompt_id, delay=300))  # 5 minutes
 
         return completion_info
 
@@ -270,9 +262,7 @@ class WebSocketPipelineMonitor:
                         if pipeline.get("start_time")
                         else None,
                         "errors_count": len(pipeline.get("errors", [])),
-                        "stages_completed": len(
-                            pipeline.get("stages_completed", [])
-                        ),
+                        "stages_completed": len(pipeline.get("stages_completed", [])),
                     }
                 )
         return pipelines
@@ -312,17 +302,13 @@ class WebSocketPipelineMonitor:
         """
         return self.pipeline_subscribers.get(prompt_id, set())
 
-    def _calculate_stage_duration(
-        self, pipeline: Dict[str, Any], stage: str
-    ) -> float:
+    def _calculate_stage_duration(self, pipeline: Dict[str, Any], stage: str) -> float:
         """Calculate duration of a stage in milliseconds."""
         # This is a simplified calculation
         # In production, you'd track actual stage start/end times
         return 0.0
 
-    def _calculate_stage_timings(
-        self, pipeline: Dict[str, Any]
-    ) -> Dict[str, float]:
+    def _calculate_stage_timings(self, pipeline: Dict[str, Any]) -> Dict[str, float]:
         """Calculate timing breakdown by stage."""
         timings = {}
         total_time = pipeline.get("processing_time_ms", 0)
@@ -391,9 +377,7 @@ async def broadcast_pipeline_event(
     if websocket_manager and subscribers:
         # Send to specific subscribers
         for client_id in subscribers:
-            await websocket_manager.send_personal_message(
-                event_data, client_id
-            )
+            await websocket_manager.send_personal_message(event_data, client_id)
     elif websocket_manager:
         # Broadcast to all if no specific subscribers
         await websocket_manager.broadcast(

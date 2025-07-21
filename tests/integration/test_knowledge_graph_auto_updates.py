@@ -189,7 +189,9 @@ class TestKnowledgeGraphAutoUpdates:
             await auto_updater.process_message(message)
 
         # Export the knowledge
-        exported_knowledge = await auto_updater.export_conversation_knowledge(conversation_id)
+        exported_knowledge = await auto_updater.export_conversation_knowledge(
+            conversation_id
+        )
 
         # Verify export structure
         assert "extraction_metadata" in exported_knowledge
@@ -225,7 +227,9 @@ class TestKnowledgeGraphAutoUpdates:
 
         # Python should appear as a single entity, not duplicated
         direct_entities = knowledge.get("direct_entities", [])
-        python_entities = [e for e in direct_entities if "python" in e.get("label", "").lower()]
+        python_entities = [
+            e for e in direct_entities if "python" in e.get("label", "").lower()
+        ]
 
         # Should have at most one Python entity (due to deduplication)
         assert len(python_entities) <= 1

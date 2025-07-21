@@ -17,9 +17,7 @@ RESET = "\033[0m"
 BOLD = "\033[1m"
 
 
-def run_command(
-    cmd: str, description: str, timeout: int = 300
-) -> tuple[int, str, str]:
+def run_command(cmd: str, description: str, timeout: int = 300) -> tuple[int, str, str]:
     """Run a command and return exit code, stdout, stderr."""
     print(f"\n{BLUE}🔍 {description}...{RESET}")
     start_time = time.time()
@@ -51,15 +49,13 @@ def run_command(
 
 def main():
     """Run comprehensive quality checks with zero tolerance."""
-    print(f"{BOLD}{'='*80}{RESET}")
+    print(f"{BOLD}{'=' * 80}{RESET}")
     print(f"{BOLD}🎯 COMPREHENSIVE QUALITY CHECK - ZERO TOLERANCE MODE{RESET}")
-    print(f"{BOLD}{'='*80}{RESET}")
+    print(f"{BOLD}{'=' * 80}{RESET}")
     print(
         "\nFollowing CLAUDE.md: ALL automated checks must pass - everything must be ✅ GREEN!"
     )
-    print(
-        "No errors. No formatting issues. No linting problems. Zero tolerance.\n"
-    )
+    print("No errors. No formatting issues. No linting problems. Zero tolerance.\n")
 
     failed_checks = []
     all_checks = [
@@ -134,9 +130,9 @@ def main():
             passed_checks += 1
 
     # Summary Report
-    print(f"\n{BOLD}{'='*80}{RESET}")
+    print(f"\n{BOLD}{'=' * 80}{RESET}")
     print(f"{BOLD}📊 QUALITY CHECK SUMMARY{RESET}")
-    print(f"{BOLD}{'='*80}{RESET}")
+    print(f"{BOLD}{'=' * 80}{RESET}")
 
     print("\n📈 Results:")
     print(f"   Total Checks: {total_checks}")
@@ -151,21 +147,15 @@ def main():
             if check["stderr"]:
                 print(f"   Error: {check['stderr'][:200]}")
 
-        print(
-            f"\n{RED}{BOLD}⚠️  QUALITY GATE FAILED - ZERO TOLERANCE VIOLATED!{RESET}"
-        )
+        print(f"\n{RED}{BOLD}⚠️  QUALITY GATE FAILED - ZERO TOLERANCE VIOLATED!{RESET}")
         print(
             f"{RED}Fix ALL issues before continuing. These are not suggestions.{RESET}"
         )
-        print(
-            f"{RED}Following CLAUDE.md: Never ignore a failing check.{RESET}"
-        )
+        print(f"{RED}Following CLAUDE.md: Never ignore a failing check.{RESET}")
         return 1
     else:
         print(f"\n{GREEN}{BOLD}✅ ALL QUALITY CHECKS PASSED!{RESET}")
-        print(
-            f"{GREEN}All automated checks are GREEN. Zero tolerance achieved.{RESET}"
-        )
+        print(f"{GREEN}All automated checks are GREEN. Zero tolerance achieved.{RESET}")
         return 0
 
 

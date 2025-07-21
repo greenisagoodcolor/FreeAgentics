@@ -123,9 +123,15 @@ async def run_single_scenario(args):
         print(f"Duration: {summary['metrics']['duration_seconds']:.1f}s")
         print(f"Users created: {summary['metrics']['users']['created']}")
         print(f"Messages sent: {summary['metrics']['messages']['sent']}")
-        print(f"Message success rate: {summary['metrics']['messages']['success_rate']:.1%}")
-        print(f"Avg DB latency: {summary['metrics']['database']['avg_latency_ms']:.1f}ms")
-        print(f"Avg WS latency: {summary['metrics']['websocket']['avg_latency_ms']:.1f}ms")
+        print(
+            f"Message success rate: {summary['metrics']['messages']['success_rate']:.1%}"
+        )
+        print(
+            f"Avg DB latency: {summary['metrics']['database']['avg_latency_ms']:.1f}ms"
+        )
+        print(
+            f"Avg WS latency: {summary['metrics']['websocket']['avg_latency_ms']:.1f}ms"
+        )
 
         if config.export_results:
             print(f"\nResults exported to: {config.results_path}")
@@ -140,7 +146,9 @@ async def run_single_scenario(args):
 async def run_schedule(args):
     """Run a scheduled sequence of scenarios."""
     scheduler = ScenarioScheduler(
-        results_base_path=Path(args.output) if args.output else Path("simulation_results")
+        results_base_path=Path(args.output)
+        if args.output
+        else Path("simulation_results")
     )
 
     if args.schedule == "daily":
@@ -168,13 +176,17 @@ async def run_schedule(args):
 
             scheduler.add_scenario(config, delay_minutes=delay)
 
-    print(f"\nRunning scenario schedule with {len(scheduler.scheduled_scenarios)} scenarios")
+    print(
+        f"\nRunning scenario schedule with {len(scheduler.scheduled_scenarios)} scenarios"
+    )
     await scheduler.run_schedule()
 
 
 def main():
     """Main entry point."""
-    parser = argparse.ArgumentParser(description="Run concurrent user simulations for FreeAgentics")
+    parser = argparse.ArgumentParser(
+        description="Run concurrent user simulations for FreeAgentics"
+    )
 
     subparsers = parser.add_subparsers(dest="command", help="Command to run")
 
@@ -197,8 +209,12 @@ def main():
         type=float,
         help="User spawn rate (users per second)",
     )
-    single_parser.add_argument("--warmup", "-w", type=float, help="Warmup period (seconds)")
-    single_parser.add_argument("--cooldown", "-c", type=float, help="Cooldown period (seconds)")
+    single_parser.add_argument(
+        "--warmup", "-w", type=float, help="Warmup period (seconds)"
+    )
+    single_parser.add_argument(
+        "--cooldown", "-c", type=float, help="Cooldown period (seconds)"
+    )
     single_parser.add_argument(
         "--ws-url", help="WebSocket server URL (default: ws://localhost:8000)"
     )
@@ -212,11 +228,15 @@ def main():
         action="store_true",
         help="Disable performance monitoring",
     )
-    single_parser.add_argument("--no-export", action="store_true", help="Disable result export")
+    single_parser.add_argument(
+        "--no-export", action="store_true", help="Disable result export"
+    )
 
     # Custom scenario options
     single_parser.add_argument("--custom-name", help="Name for custom scenario")
-    single_parser.add_argument("--custom-description", help="Description for custom scenario")
+    single_parser.add_argument(
+        "--custom-description", help="Description for custom scenario"
+    )
     single_parser.add_argument(
         "--custom-users",
         help="User distribution (e.g., 'researcher:20,coordinator:10,observer:30')",
@@ -228,13 +248,17 @@ def main():
         "schedule",
         help="Schedule to run ('daily', 'stress', or path to JSON file)",
     )
-    schedule_parser.add_argument("--output", "-o", help="Base output directory for results")
+    schedule_parser.add_argument(
+        "--output", "-o", help="Base output directory for results"
+    )
 
     # List command
     subparsers.add_parser("list", help="List available scenarios")
 
     # Common options
-    parser.add_argument("--verbose", "-v", action="store_true", help="Enable verbose logging")
+    parser.add_argument(
+        "--verbose", "-v", action="store_true", help="Enable verbose logging"
+    )
 
     args = parser.parse_args()
 

@@ -392,7 +392,9 @@ class ResearcherBehavior(UserBehavior):
 
         # Subscribe to multiple related events
         num_events = self.rng.integers(2, 5)
-        selected_events = self.rng.choice(research_events, size=num_events, replace=False)
+        selected_events = self.rng.choice(
+            research_events, size=num_events, replace=False
+        )
 
         return {
             "type": "subscribe",
@@ -412,9 +414,13 @@ class ResearcherBehavior(UserBehavior):
                     "belief_entropy",
                     "policy_entropy",
                 ],
-                "agents": list(self.state["active_agents"]) if self.state["active_agents"] else [],
+                "agents": list(self.state["active_agents"])
+                if self.state["active_agents"]
+                else [],
                 "sample_rate": self.rng.choice([0.5, 1.0, 2.0]),
-                "aggregation": self.rng.choice(["mean", "std", "min_max", "percentiles"]),
+                "aggregation": self.rng.choice(
+                    ["mean", "std", "min_max", "percentiles"]
+                ),
             },
         }
 
@@ -496,7 +502,9 @@ class CoordinatorBehavior(UserBehavior):
                 return {
                     "type": "command",
                     "command": "assign_role",
-                    "coalition_id": self.rng.choice(list(self.state["managed_coalitions"])),
+                    "coalition_id": self.rng.choice(
+                        list(self.state["managed_coalitions"])
+                    ),
                     "agent_id": self.rng.choice(list(self.state["active_agents"])),
                     "role": self.rng.choice(
                         [
@@ -514,7 +522,9 @@ class CoordinatorBehavior(UserBehavior):
                 return {
                     "type": "command",
                     "command": "coordinate_action",
-                    "coalition_id": self.rng.choice(list(self.state["managed_coalitions"])),
+                    "coalition_id": self.rng.choice(
+                        list(self.state["managed_coalitions"])
+                    ),
                     "action_type": self.rng.choice(
                         [
                             "move_formation",
@@ -696,7 +706,9 @@ class ObserverBehavior(UserBehavior):
                 "type": "query",
                 "query_type": "event_stream",
                 "limit": self.rng.integers(50, 200),
-                "event_types": self.rng.choice([None, ["agent:*"], ["coalition:*"], ["world:*"]]),
+                "event_types": self.rng.choice(
+                    [None, ["agent:*"], ["coalition:*"], ["world:*"]]
+                ),
             },
             {
                 "type": "query",
@@ -844,7 +856,9 @@ class AdminBehavior(UserBehavior):
             {
                 "type": "query",
                 "query_type": "user_activity",
-                "group_by": self.rng.choice(["persona_type", "connection_pattern", "hour"]),
+                "group_by": self.rng.choice(
+                    ["persona_type", "connection_pattern", "hour"]
+                ),
                 "include_anomalies": True,
             },
             {
@@ -916,11 +930,15 @@ class AdminBehavior(UserBehavior):
                 "type": "command",
                 "command": "update_config",
                 "params": {
-                    "section": self.rng.choice(["performance", "security", "logging", "limits"]),
+                    "section": self.rng.choice(
+                        ["performance", "security", "logging", "limits"]
+                    ),
                     "changes": {
                         "max_connections": self.rng.integers(100, 1000),
                         "timeout": self.rng.integers(30, 300),
-                        "log_level": self.rng.choice(["debug", "info", "warning", "error"]),
+                        "log_level": self.rng.choice(
+                            ["debug", "info", "warning", "error"]
+                        ),
                     },
                 },
             }

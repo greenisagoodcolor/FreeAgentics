@@ -55,7 +55,7 @@ def fix_test_file(filepath):
     # BasicExplorerAgent("id", (x, y), grid_size=n) -> BasicExplorerAgent("id", "id_agent", grid_size=n)
     content = re.sub(
         r'BasicExplorerAgent\((["\'][^"\']+["\'])\s*,\s*\([0-9]+\s*,\s*[0-9]+\)\s*,\s*grid_size\s*=\s*([0-9]+)\)',
-        lambda m: f'BasicExplorerAgent({m.group(1)}, {m.group(1).strip(chr(39)).strip(chr(34)) + "_agent"!r}, grid_size={m.group(2)})',
+        lambda m: f"BasicExplorerAgent({m.group(1)}, {m.group(1).strip(chr(39)).strip(chr(34)) + '_agent'!r}, grid_size={m.group(2)})",
         content,
     )
 

@@ -90,16 +90,24 @@ class TracingAnalyzer:
 
         metrics.completed_traces = len(completed_traces)
         metrics.failed_traces = len(failed_traces)
-        metrics.error_rate = len(failed_traces) / len(relevant_traces) if relevant_traces else 0.0
+        metrics.error_rate = (
+            len(failed_traces) / len(relevant_traces) if relevant_traces else 0.0
+        )
 
         # Duration metrics
         if completed_traces:
-            durations = [t.duration_ms for t in completed_traces if t.duration_ms is not None]
+            durations = [
+                t.duration_ms for t in completed_traces if t.duration_ms is not None
+            ]
             if durations:
                 metrics.avg_trace_duration = sum(durations) / len(durations)
                 sorted_durations = sorted(durations)
-                metrics.p95_duration = sorted_durations[int(len(sorted_durations) * 0.95)]
-                metrics.p99_duration = sorted_durations[int(len(sorted_durations) * 0.99)]
+                metrics.p95_duration = sorted_durations[
+                    int(len(sorted_durations) * 0.95)
+                ]
+                metrics.p99_duration = sorted_durations[
+                    int(len(sorted_durations) * 0.99)
+                ]
 
         # Service and operation metrics
         for trace in relevant_traces:
@@ -113,7 +121,9 @@ class TracingAnalyzer:
 
         return metrics
 
-    def detect_performance_issues(self, metrics: TracingMetrics) -> List[Dict[str, Any]]:
+    def detect_performance_issues(
+        self, metrics: TracingMetrics
+    ) -> List[Dict[str, Any]]:
         """Detect performance issues from tracing metrics."""
         issues = []
 
@@ -180,7 +190,9 @@ class TracingIntegration:
         # Hook into span completion to export metrics
         original_finish_span = self.tracer.finish_span
 
-        def hooked_finish_span(span: TraceSpan, status: str = "ok", error: Optional[str] = None):
+        def hooked_finish_span(
+            span: TraceSpan, status: str = "ok", error: Optional[str] = None
+        ):
             """Hooked finish_span to export metrics."""
             # Call original method
             original_finish_span(span, status, error)
@@ -302,7 +314,9 @@ class TracingIntegration:
         # Log issues
         for issue in issues:
             log_entry = create_structured_log_entry(
-                level=LogLevel.WARNING if issue["severity"] == "medium" else LogLevel.ERROR,
+                level=LogLevel.WARNING
+                if issue["severity"] == "medium"
+                else LogLevel.ERROR,
                 source=LogSource.OBSERVABILITY,
                 message=issue["message"],
                 module="tracing_integration",
@@ -528,7 +542,9 @@ async def trace_agent_operation(
     """Trace an agent operation with automatic metrics export."""
     tracer = get_distributed_tracer()
 
-    async with trace_span(tracer, operation_name, service_name=f"agent-{agent_id}") as span:
+    async with trace_span(
+        tracer, operation_name, service_name=f"agent-{agent_id}"
+    ) as span:
         span.add_tag("agent_id", agent_id)
         span.add_tag("operation", operation_name)
 

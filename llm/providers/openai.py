@@ -101,9 +101,7 @@ class OpenAIProvider(LLMProvider):
         if len(self.request_times) >= config["rpm"]:
             # Calculate wait time
             oldest_request = self.request_times[0]
-            wait_time = (
-                oldest_request + timedelta(minutes=1) - now
-            ).total_seconds()
+            wait_time = (oldest_request + timedelta(minutes=1) - now).total_seconds()
             if wait_time > 0:
                 await asyncio.sleep(wait_time)
 
@@ -112,9 +110,7 @@ class OpenAIProvider(LLMProvider):
         if total_tokens >= config["tpm"]:
             # Wait for token window to clear
             oldest_token_time = self.token_usage[0][0]
-            wait_time = (
-                oldest_token_time + timedelta(minutes=1) - now
-            ).total_seconds()
+            wait_time = (oldest_token_time + timedelta(minutes=1) - now).total_seconds()
             if wait_time > 0:
                 await asyncio.sleep(wait_time)
 
@@ -132,8 +128,7 @@ class OpenAIProvider(LLMProvider):
 
         # Convert messages to OpenAI format
         openai_messages = [
-            {"role": msg.role.value, "content": msg.content}
-            for msg in messages
+            {"role": msg.role.value, "content": msg.content} for msg in messages
         ]
 
         # Build request payload
@@ -207,9 +202,7 @@ class OpenAIProvider(LLMProvider):
             except json.JSONDecodeError as e:
                 last_error = LLMError(f"Invalid response format: {str(e)}")
             except KeyError as e:
-                last_error = LLMError(
-                    f"Unexpected response structure: {str(e)}"
-                )
+                last_error = LLMError(f"Unexpected response structure: {str(e)}")
             except LLMError as e:
                 last_error = e
             except Exception as e:
@@ -217,15 +210,11 @@ class OpenAIProvider(LLMProvider):
 
             # If this isn't the last attempt, wait before retrying
             if attempt < self.max_retries - 1:
-                wait_time = self.retry_delay * (
-                    2**attempt
-                )  # Exponential backoff
+                wait_time = self.retry_delay * (2**attempt)  # Exponential backoff
                 await asyncio.sleep(wait_time)
 
         # All retries failed
-        raise last_error or LLMError(
-            "Failed to generate response after all retries"
-        )
+        raise last_error or LLMError("Failed to generate response after all retries")
 
     async def validate_model(self, model_name: str) -> bool:
         """Check if a model is available."""

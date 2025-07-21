@@ -148,8 +148,7 @@ class PyMDPErrorHandler:
                     # Fallback also failed
                     pymdp_error.context["fallback_error"] = str(fallback_error)
                     logger.error(
-                        f"Fallback also failed for '{operation_name}':"
-                        f" {fallback_error}"
+                        f"Fallback also failed for '{operation_name}': {fallback_error}"
                     )
 
             return False, None, pymdp_error

@@ -129,7 +129,9 @@ class IntegratedMonitoringSystem:
 
         self.regression_analyzer = None
         if self.config.enable_regression_analysis:
-            self.regression_analyzer = initialize_regression_analyzer(self.metrics_collector)
+            self.regression_analyzer = initialize_regression_analyzer(
+                self.metrics_collector
+            )
 
         self.report_generator = PerformanceReportGenerator()
 
@@ -214,7 +216,9 @@ class IntegratedMonitoringSystem:
             await self.metrics_collector.start()
 
             # Start metric collection tasks
-            self._background_tasks.append(asyncio.create_task(self._collect_all_metrics()))
+            self._background_tasks.append(
+                asyncio.create_task(self._collect_all_metrics())
+            )
 
         # Start dashboard
         if self.config.enable_dashboard and self.dashboard:
@@ -222,15 +226,21 @@ class IntegratedMonitoringSystem:
 
         # Start regression monitoring
         if self.config.enable_regression_analysis:
-            self._background_tasks.append(asyncio.create_task(self._regression_monitoring_loop()))
+            self._background_tasks.append(
+                asyncio.create_task(self._regression_monitoring_loop())
+            )
 
         # Start automated reporting
         if self.config.enable_automated_reports:
-            self._background_tasks.append(asyncio.create_task(self._automated_reporting_loop()))
+            self._background_tasks.append(
+                asyncio.create_task(self._automated_reporting_loop())
+            )
 
         # Start load testing if enabled
         if self.config.enable_load_testing:
-            self._background_tasks.append(asyncio.create_task(self._load_testing_loop()))
+            self._background_tasks.append(
+                asyncio.create_task(self._load_testing_loop())
+            )
 
         logger.info("Integrated monitoring system started successfully")
         logger.info(
@@ -432,7 +442,9 @@ class IntegratedMonitoringSystem:
         tester = CoordinationLoadTester()
 
         if self.profiler:
-            async with self.profiler.profile_component_async("coordination", "load_test"):
+            async with self.profiler.profile_component_async(
+                "coordination", "load_test"
+            ):
                 await tester.run_comprehensive_test()
         else:
             await tester.run_comprehensive_test()
@@ -455,11 +467,17 @@ class IntegratedMonitoringSystem:
                 report_data = {
                     "timestamp": timestamp.isoformat(),
                     "metrics_summary": metrics_summary,
-                    "profiling_data": self._get_profiling_summary() if self.profiler else {},
+                    "profiling_data": self._get_profiling_summary()
+                    if self.profiler
+                    else {},
                     "regression_analysis": (
-                        self._get_regression_summary() if self.regression_analyzer else {}
+                        self._get_regression_summary()
+                        if self.regression_analyzer
+                        else {}
                     ),
-                    "alerts": list(self.metrics_collector._alert_history)[-100:],  # Last 100 alerts
+                    "alerts": list(self.metrics_collector._alert_history)[
+                        -100:
+                    ],  # Last 100 alerts
                 }
 
                 report_path = (
@@ -530,7 +548,9 @@ class IntegratedMonitoringSystem:
             ),
         }
 
-    def _generate_html_report(self, timestamp: datetime, metrics_summary: Dict[str, Any]) -> str:
+    def _generate_html_report(
+        self, timestamp: datetime, metrics_summary: Dict[str, Any]
+    ) -> str:
         """Generate HTML format report."""
         html = """<!DOCTYPE html>
 <html>
@@ -733,7 +753,9 @@ def cli():
 
 
 @cli.command()
-@click.option("--config", type=click.Path(exists=True), help="Configuration file (YAML)")
+@click.option(
+    "--config", type=click.Path(exists=True), help="Configuration file (YAML)"
+)
 @click.option("--dashboard/--no-dashboard", default=True, help="Enable dashboard")
 @click.option("--port", default=8090, help="Dashboard port")
 @click.option("--profiling/--no-profiling", default=True, help="Enable profiling")
@@ -834,7 +856,9 @@ def report(format, window):
             metrics = generator.extract_metrics(results)
             regressions = generator.detect_regressions(metrics)
             charts = generator.generate_performance_charts(metrics)
-            report_file = generator.generate_summary_report(metrics, regressions, charts)
+            report_file = generator.generate_summary_report(
+                metrics, regressions, charts
+            )
 
             click.echo(f"Markdown report saved to: {report_file}")
 

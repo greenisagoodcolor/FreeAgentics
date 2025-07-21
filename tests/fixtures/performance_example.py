@@ -39,7 +39,9 @@ def generate_memory_efficient_dataset(
     agent_start = time.time()
 
     # Process in batches to avoid memory issues
-    for batch in agent_gen.generate_stream(count=config.num_agents, batch_size=config.batch_size):
+    for batch in agent_gen.generate_stream(
+        count=config.num_agents, batch_size=config.batch_size
+    ):
         agent_count += len(batch)
         if agent_count % 1000 == 0:
             print(f"  Generated {agent_count} agents...")
@@ -98,9 +100,9 @@ def run_scaling_test():
     results = []
 
     for name, agents, coalitions, nodes in scales:
-        print(f"\n{'='*50}")
+        print(f"\n{'=' * 50}")
         print(f"Running {name} scale test")
-        print(f"{'='*50}")
+        print(f"{'=' * 50}")
 
         config = PerformanceTestConfigSchema(
             num_agents=agents,
@@ -201,7 +203,9 @@ def generate_database_stress_test(db_url: str = "sqlite:///:memory:"):
         print("\nDatabase Stress Test Results:")
         print(f"  Agents created: {len(results['agents'])}")
         print(f"  Coalitions created: {len(results['coalitions'])}")
-        print(f"  Total creation time: {results['statistics']['total_creation_time']:.2f}s")
+        print(
+            f"  Total creation time: {results['statistics']['total_creation_time']:.2f}s"
+        )
 
         # Test query performance
         print("\nTesting query performance...")

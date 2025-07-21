@@ -147,11 +147,11 @@ def main():
 
     results = []
     for test_name, test_func in tests:
-        print(f"\n{'='*50}")
+        print(f"\n{'=' * 50}")
         success = test_func()
         results.append((test_name, success))
 
-    print(f"\n{'='*50}")
+    print(f"\n{'=' * 50}")
     print("\n=== Test Summary ===")
     for test_name, success in results:
         status = "✓ PASSED" if success else "✗ FAILED"

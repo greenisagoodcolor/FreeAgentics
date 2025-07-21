@@ -291,9 +291,7 @@ class SharedObservationBuffer:
         self.mmap[offset : offset + 4] = len(shape_bytes).to_bytes(4, "little")
         self.mmap[offset + 4 : offset + 4 + len(shape_bytes)] = shape_bytes
         self.mmap[
-            offset
-            + 4
-            + len(shape_bytes) : offset
+            offset + 4 + len(shape_bytes) : offset
             + 4
             + len(shape_bytes)
             + observation.nbytes
@@ -590,9 +588,7 @@ class AgentMemoryOptimizer:
             # Log optimization results
             memory_usage = opt_memory.get_memory_usage_mb()
             logger.info(
-                f"Optimized agent {agent_id}: "
-                f"memory reduced to"
-                f" {memory_usage:.1f}MB"
+                f"Optimized agent {agent_id}: memory reduced to {memory_usage:.1f}MB"
             )
 
             return opt_memory

@@ -184,7 +184,10 @@ class FileUploadSecurityTester:
                     )
 
                 # Check response for information disclosure
-                if "path" in response.text.lower() or "directory" in response.text.lower():
+                if (
+                    "path" in response.text.lower()
+                    or "directory" in response.text.lower()
+                ):
                     results["passed"] = False
                     results["findings"].append(
                         {
@@ -322,7 +325,9 @@ class FileUploadSecurityTester:
                         "text/plain",
                     )
                 }
-                response = self.client.post("/api/v1/upload", files=files, data=form_data)
+                response = self.client.post(
+                    "/api/v1/upload", files=files, data=form_data
+                )
 
                 if response.status_code in [200, 201, 202]:
                     response_data = response.text
@@ -379,7 +384,9 @@ class FileUploadSecurityTester:
         for size_name, size_bytes in size_tests:
             try:
                 # Create file of specified size
-                file_content = b"A" * min(size_bytes, 1024 * 1024)  # Limit to 1MB for testing
+                file_content = b"A" * min(
+                    size_bytes, 1024 * 1024
+                )  # Limit to 1MB for testing
                 filename = f"size_test_{size_name}.txt"
 
                 files = {"file": (filename, io.BytesIO(file_content), "text/plain")}
@@ -401,7 +408,10 @@ class FileUploadSecurityTester:
                 # Check for proper error messages for oversized files
                 if response.status_code == 413:  # Payload Too Large
                     # Good - proper HTTP status code
-                    if "path" in response.text.lower() or "directory" in response.text.lower():
+                    if (
+                        "path" in response.text.lower()
+                        or "directory" in response.text.lower()
+                    ):
                         results["findings"].append(
                             {
                                 "issue": "File size error message discloses paths",
@@ -465,7 +475,10 @@ class FileUploadSecurityTester:
                     )
 
                 # Check if content scanning is mentioned in response
-                if "scanned" in response.text.lower() or "virus" in response.text.lower():
+                if (
+                    "scanned" in response.text.lower()
+                    or "virus" in response.text.lower()
+                ):
                     # Good - indicates content scanning
                     pass
 
@@ -627,7 +640,10 @@ class FileUploadSecurityTester:
 
                 if response.status_code == 200:
                     # Directory listing might be enabled
-                    if "index of" in response.text.lower() or "<a href=" in response.text.lower():
+                    if (
+                        "index of" in response.text.lower()
+                        or "<a href=" in response.text.lower()
+                    ):
                         results["passed"] = False
                         results["findings"].append(
                             {
@@ -745,7 +761,10 @@ class FileUploadSecurityTester:
                                 )
 
                             # Even if not executed, direct access to uploaded files is a risk
-                            elif content.decode("utf-8", errors="ignore") in response_text:
+                            elif (
+                                content.decode("utf-8", errors="ignore")
+                                in response_text
+                            ):
                                 results["findings"].append(
                                     {
                                         "issue": "Uploaded file directly accessible",
@@ -933,7 +952,9 @@ class FileUploadSecurityTester:
                 "total_tests": total_tests,
                 "passed_tests": passed_tests,
                 "failed_tests": failed_tests,
-                "pass_rate": (passed_tests / total_tests * 100) if total_tests > 0 else 0,
+                "pass_rate": (passed_tests / total_tests * 100)
+                if total_tests > 0
+                else 0,
                 "critical_findings": len(critical_findings),
                 "high_findings": len(high_findings),
                 "medium_findings": len(medium_findings),
@@ -971,7 +992,9 @@ class TestFileUploadSecurity:
         if high_severity_issues:
             failure_msg = "Dangerous file extensions are being allowed:\n"
             for finding in high_severity_issues:
-                failure_msg += f"  - {finding['issue']}: {finding.get('extension', 'unknown')}\n"
+                failure_msg += (
+                    f"  - {finding['issue']}: {finding.get('extension', 'unknown')}\n"
+                )
             pytest.fail(failure_msg)
 
     def test_path_traversal_blocked(self, upload_tester):
@@ -1025,10 +1048,14 @@ class TestFileUploadSecurity:
 
             # Check for critical/high severity issues
             if summary["summary"]["critical_findings"] > 0:
-                failure_msg += f"\nCRITICAL ISSUES: {summary['summary']['critical_findings']}\n"
+                failure_msg += (
+                    f"\nCRITICAL ISSUES: {summary['summary']['critical_findings']}\n"
+                )
 
             if summary["summary"]["high_findings"] > 0:
-                failure_msg += f"HIGH SEVERITY ISSUES: {summary['summary']['high_findings']}\n"
+                failure_msg += (
+                    f"HIGH SEVERITY ISSUES: {summary['summary']['high_findings']}\n"
+                )
 
             if summary["recommendations"]:
                 failure_msg += "\nRecommendations:\n"
@@ -1046,9 +1073,9 @@ if __name__ == "__main__":
     print("Running file upload security validation tests...")
     summary = tester.run_all_file_upload_tests()
 
-    print(f"\n{'='*60}")
+    print(f"\n{'=' * 60}")
     print("FILE UPLOAD SECURITY VALIDATION REPORT")
-    print(f"{'='*60}")
+    print(f"{'=' * 60}")
     print(f"Total Tests: {summary['summary']['total_tests']}")
     print(f"Passed: {summary['summary']['passed_tests']}")
     print(f"Failed: {summary['summary']['failed_tests']}")
@@ -1061,17 +1088,15 @@ if __name__ == "__main__":
     print(f"  Medium: {summary['summary']['medium_findings']}")
 
     if summary["recommendations"]:
-        print(f"\n{'='*40}")
+        print(f"\n{'=' * 40}")
         print("RECOMMENDATIONS")
-        print(f"{'='*40}")
+        print(f"{'=' * 40}")
         for rec in summary["recommendations"]:
             print(f"• {rec}")
 
     # Save report
     timestamp = time.strftime("%Y%m%d_%H%M%S")
-    report_file = (
-        f"/home/green/FreeAgentics/tests/security/file_upload_security_report_{timestamp}.json"
-    )
+    report_file = f"/home/green/FreeAgentics/tests/security/file_upload_security_report_{timestamp}.json"
 
     try:
         with open(report_file, "w") as f:

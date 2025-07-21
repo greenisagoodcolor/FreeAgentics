@@ -251,7 +251,9 @@ class AuthenticationTester:
             "403",
             "access denied",
         ]
-        return any(indicator in response_body.lower() for indicator in auth_error_indicators)
+        return any(
+            indicator in response_body.lower() for indicator in auth_error_indicators
+        )
 
     def _create_none_algorithm_token(self, valid_token: str) -> str:
         """Create JWT with 'none' algorithm"""
@@ -349,7 +351,9 @@ class APIScanner:
 
             for i in range(100):  # Send 100 rapid requests
                 try:
-                    response = requests.get(url, headers=self.config.custom_headers, timeout=1)
+                    response = requests.get(
+                        url, headers=self.config.custom_headers, timeout=1
+                    )
                     if response.status_code != 429:  # Not rate limited
                         successful_requests += 1
                 except Exception as e:
@@ -481,7 +485,9 @@ class APIScanner:
 
         return vulnerabilities
 
-    def _find_sensitive_fields(self, data: Any, sensitive_fields: List[str]) -> List[str]:
+    def _find_sensitive_fields(
+        self, data: Any, sensitive_fields: List[str]
+    ) -> List[str]:
         """Recursively find sensitive field names in data"""
         found = []
 
@@ -543,7 +549,9 @@ class ZAPScanner:
         time.sleep(self.config.passive_scan_wait)
 
         while int(self.zap.pscan.records_to_scan) > 0:
-            logger.info(f"Passive scan records remaining: {self.zap.pscan.records_to_scan}")
+            logger.info(
+                f"Passive scan records remaining: {self.zap.pscan.records_to_scan}"
+            )
             time.sleep(5)
 
     def active_scan(self) -> Optional[str]:
@@ -560,7 +568,9 @@ class ZAPScanner:
             scan_policy_name = "Default Policy"
 
         # Start active scan
-        scan_id = self.zap.ascan.scan(self.config.target_url, scanpolicyname=scan_policy_name)
+        scan_id = self.zap.ascan.scan(
+            self.config.target_url, scanpolicyname=scan_policy_name
+        )
 
         # Wait for active scan
         start_time = time.time()
@@ -590,7 +600,9 @@ class ZAPScanner:
                 solution=raw_alert.get("solution", ""),
                 reference=raw_alert.get("reference", ""),
                 cwe_id=int(raw_alert.get("cweid")) if raw_alert.get("cweid") else None,
-                wasc_id=int(raw_alert.get("wascid")) if raw_alert.get("wascid") else None,
+                wasc_id=int(raw_alert.get("wascid"))
+                if raw_alert.get("wascid")
+                else None,
                 instances=[
                     {
                         "uri": raw_alert.get("url", ""),
@@ -671,7 +683,9 @@ class DASTOrchestrator:
             scan_results["alerts"] = [self._alert_to_dict(alert) for alert in alerts]
 
             # Calculate statistics
-            scan_results["stats"] = self._calculate_stats(alerts, scan_results["vulnerabilities"])
+            scan_results["stats"] = self._calculate_stats(
+                alerts, scan_results["vulnerabilities"]
+            )
 
             # Check if scan passed based on risk threshold
             scan_results["passed"] = self._check_threshold(alerts)
@@ -736,9 +750,13 @@ def main():
 
     parser = argparse.ArgumentParser(description="DAST Security Scanner")
     parser.add_argument("--target", required=True, help="Target URL to scan")
-    parser.add_argument("--zap-proxy", default="http://127.0.0.1:8080", help="ZAP proxy URL")
+    parser.add_argument(
+        "--zap-proxy", default="http://127.0.0.1:8080", help="ZAP proxy URL"
+    )
     parser.add_argument("--api-key", help="ZAP API key")
-    parser.add_argument("--no-active-scan", action="store_true", help="Skip active scanning")
+    parser.add_argument(
+        "--no-active-scan", action="store_true", help="Skip active scanning"
+    )
     parser.add_argument(
         "--output",
         type=Path,

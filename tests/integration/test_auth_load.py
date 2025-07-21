@@ -93,10 +93,14 @@ class LoadTestMetrics:
             "min_response_time": min(self.response_times, default=0),
             "max_response_time": max(self.response_times, default=0),
             "requests_per_second": (
-                self.total_requests / self.test_duration if self.test_duration > 0 else 0
+                self.total_requests / self.test_duration
+                if self.test_duration > 0
+                else 0
             ),
             "error_types": dict(self.error_types),
-            "avg_memory_mb": statistics.mean(self.memory_usage) if self.memory_usage else 0,
+            "avg_memory_mb": statistics.mean(self.memory_usage)
+            if self.memory_usage
+            else 0,
             "avg_cpu_percent": statistics.mean(self.cpu_usage) if self.cpu_usage else 0,
         }
 
@@ -142,13 +146,17 @@ class TestAuthenticationLoadTesting:
         """Monitor CPU and memory usage during test."""
         while not stop_event.is_set():
             try:
-                self.metrics.memory_usage.append(self.process.memory_info().rss / 1024 / 1024)  # MB
+                self.metrics.memory_usage.append(
+                    self.process.memory_info().rss / 1024 / 1024
+                )  # MB
                 self.metrics.cpu_usage.append(self.process.cpu_percent(interval=0.1))
             except Exception:
                 pass
             time.sleep(0.5)
 
-    def _simulate_user_session(self, user: User, duration: float = 5.0) -> Tuple[int, int]:
+    def _simulate_user_session(
+        self, user: User, duration: float = 5.0
+    ) -> Tuple[int, int]:
         """Simulate a complete user session."""
         successes = 0
         failures = 0
@@ -164,7 +172,9 @@ class TestAuthenticationLoadTesting:
 
             while time.time() < end_time:
                 # Random action
-                action = random.choice(["verify", "verify", "verify", "refresh", "revoke"])
+                action = random.choice(
+                    ["verify", "verify", "verify", "refresh", "revoke"]
+                )
 
                 try:
                     start = time.time()
@@ -218,7 +228,9 @@ class TestAuthenticationLoadTesting:
 
         # Start resource monitoring
         stop_monitor = threading.Event()
-        monitor_thread = threading.Thread(target=self._monitor_resources, args=(stop_monitor,))
+        monitor_thread = threading.Thread(
+            target=self._monitor_resources, args=(stop_monitor,)
+        )
         monitor_thread.start()
 
         # Run concurrent user sessions
@@ -249,16 +261,18 @@ class TestAuthenticationLoadTesting:
         stats = self.metrics.calculate_statistics()
 
         # Performance assertions
-        assert stats["success_rate"] > 95, f"Success rate too low: {stats['success_rate']}%"
-        assert (
-            stats["avg_response_time"] < 0.1
-        ), f"Average response time too high: {stats['avg_response_time']}s"
-        assert (
-            stats["p95_response_time"] < 0.2
-        ), f"P95 response time too high: {stats['p95_response_time']}s"
-        assert (
-            stats["requests_per_second"] > 100
-        ), f"Throughput too low: {stats['requests_per_second']} req/s"
+        assert stats["success_rate"] > 95, (
+            f"Success rate too low: {stats['success_rate']}%"
+        )
+        assert stats["avg_response_time"] < 0.1, (
+            f"Average response time too high: {stats['avg_response_time']}s"
+        )
+        assert stats["p95_response_time"] < 0.2, (
+            f"P95 response time too high: {stats['p95_response_time']}s"
+        )
+        assert stats["requests_per_second"] > 100, (
+            f"Throughput too low: {stats['requests_per_second']} req/s"
+        )
 
     def test_token_creation_under_load(self):
         """Test token creation performance under heavy load."""
@@ -304,12 +318,12 @@ class TestAuthenticationLoadTesting:
         stats = self.metrics.calculate_statistics()
 
         # Token creation should be fast even under load
-        assert (
-            stats["avg_response_time"] < 0.02
-        ), f"Token creation too slow: {stats['avg_response_time']}s"
-        assert (
-            stats["p99_response_time"] < 0.05
-        ), f"P99 token creation too slow: {stats['p99_response_time']}s"
+        assert stats["avg_response_time"] < 0.02, (
+            f"Token creation too slow: {stats['avg_response_time']}s"
+        )
+        assert stats["p99_response_time"] < 0.05, (
+            f"P99 token creation too slow: {stats['p99_response_time']}s"
+        )
 
     def test_token_verification_under_load(self):
         """Test token verification performance under load."""
@@ -343,7 +357,8 @@ class TestAuthenticationLoadTesting:
 
         with concurrent.futures.ThreadPoolExecutor(max_workers=num_threads) as executor:
             futures = [
-                executor.submit(verify_tokens, verifications_per_thread) for _ in range(num_threads)
+                executor.submit(verify_tokens, verifications_per_thread)
+                for _ in range(num_threads)
             ]
 
             all_times = []
@@ -361,15 +376,15 @@ class TestAuthenticationLoadTesting:
         stats = self.metrics.calculate_statistics()
 
         # Token verification should be very fast
-        assert (
-            stats["avg_response_time"] < 0.005
-        ), f"Token verification too slow: {stats['avg_response_time']}s"
-        assert (
-            stats["p99_response_time"] < 0.02
-        ), f"P99 verification too slow: {stats['p99_response_time']}s"
-        assert (
-            stats["requests_per_second"] > 1000
-        ), f"Verification throughput too low: {stats['requests_per_second']} req/s"
+        assert stats["avg_response_time"] < 0.005, (
+            f"Token verification too slow: {stats['avg_response_time']}s"
+        )
+        assert stats["p99_response_time"] < 0.02, (
+            f"P99 verification too slow: {stats['p99_response_time']}s"
+        )
+        assert stats["requests_per_second"] > 1000, (
+            f"Verification throughput too low: {stats['requests_per_second']} req/s"
+        )
 
     def test_refresh_token_rotation_under_load(self):
         """Test refresh token rotation under concurrent access."""
@@ -414,7 +429,9 @@ class TestAuthenticationLoadTesting:
         start_time = time.time()
 
         with concurrent.futures.ThreadPoolExecutor(max_workers=num_users) as executor:
-            futures = [executor.submit(refresh_token_worker, user, 10) for user in users]
+            futures = [
+                executor.submit(refresh_token_worker, user, 10) for user in users
+            ]
 
             for future in concurrent.futures.as_completed(futures):
                 try:
@@ -432,8 +449,12 @@ class TestAuthenticationLoadTesting:
         stats = self.metrics.calculate_statistics()
 
         # Some failures expected due to race conditions, but most should succeed
-        assert stats["success_rate"] > 70, f"Refresh success rate too low: {stats['success_rate']}%"
-        assert stats["avg_response_time"] < 0.05, f"Refresh too slow: {stats['avg_response_time']}s"
+        assert stats["success_rate"] > 70, (
+            f"Refresh success rate too low: {stats['success_rate']}%"
+        )
+        assert stats["avg_response_time"] < 0.05, (
+            f"Refresh too slow: {stats['avg_response_time']}s"
+        )
 
     def test_authentication_spike_load(self):
         """Test system behavior under sudden authentication spikes."""
@@ -459,7 +480,9 @@ class TestAuthenticationLoadTesting:
         # Phase 1: Base load
         with concurrent.futures.ThreadPoolExecutor(max_workers=base_users) as executor:
             for _ in range(5):
-                futures = [executor.submit(authenticate_user, user) for user in base_user_set]
+                futures = [
+                    executor.submit(authenticate_user, user) for user in base_user_set
+                ]
                 for future in concurrent.futures.as_completed(futures):
                     try:
                         duration = future.result()
@@ -471,7 +494,9 @@ class TestAuthenticationLoadTesting:
 
         # Phase 2: Spike load
         with concurrent.futures.ThreadPoolExecutor(max_workers=spike_users) as executor:
-            futures = [executor.submit(authenticate_user, user) for user in spike_user_set]
+            futures = [
+                executor.submit(authenticate_user, user) for user in spike_user_set
+            ]
             for future in concurrent.futures.as_completed(futures):
                 try:
                     duration = future.result()
@@ -484,7 +509,9 @@ class TestAuthenticationLoadTesting:
         time.sleep(1)  # Allow system to stabilize
         with concurrent.futures.ThreadPoolExecutor(max_workers=base_users) as executor:
             for _ in range(5):
-                futures = [executor.submit(authenticate_user, user) for user in base_user_set]
+                futures = [
+                    executor.submit(authenticate_user, user) for user in base_user_set
+                ]
                 for future in concurrent.futures.as_completed(futures):
                     try:
                         duration = future.result()
@@ -496,14 +523,20 @@ class TestAuthenticationLoadTesting:
 
         # Analyze results
         base_avg = statistics.mean(results["base_load"]) if results["base_load"] else 0
-        spike_avg = statistics.mean(results["spike_load"]) if results["spike_load"] else 0
-        recovery_avg = statistics.mean(results["recovery"]) if results["recovery"] else 0
+        spike_avg = (
+            statistics.mean(results["spike_load"]) if results["spike_load"] else 0
+        )
+        recovery_avg = (
+            statistics.mean(results["recovery"]) if results["recovery"] else 0
+        )
 
         # System should handle spike without severe degradation
-        assert spike_avg < base_avg * 5, f"Spike degradation too high: {spike_avg/base_avg}x slower"
-        assert (
-            recovery_avg < base_avg * 1.5
-        ), f"Recovery not achieved: {recovery_avg/base_avg}x slower"
+        assert spike_avg < base_avg * 5, (
+            f"Spike degradation too high: {spike_avg / base_avg}x slower"
+        )
+        assert recovery_avg < base_avg * 1.5, (
+            f"Recovery not achieved: {recovery_avg / base_avg}x slower"
+        )
 
     def test_memory_leak_during_extended_load(self):
         """Test for memory leaks during extended authentication operations."""
@@ -539,7 +572,9 @@ class TestAuthenticationLoadTesting:
                 memory_increase = current_memory - baseline_memory
 
                 # Memory increase should be reasonable
-                assert memory_increase < 50, f"Memory leak detected: {memory_increase}MB increase"
+                assert memory_increase < 50, (
+                    f"Memory leak detected: {memory_increase}MB increase"
+                )
 
     def test_concurrent_logout_handling(self):
         """Test system behavior when many users logout simultaneously."""
@@ -641,10 +676,17 @@ class TestAuthenticationLoadTesting:
 
         # Calculate averages
         avg_times = {
-            op_type: statistics.mean(times) if times else 0 for op_type, times in all_times.items()
+            op_type: statistics.mean(times) if times else 0
+            for op_type, times in all_times.items()
         }
 
         # Performance should not degrade significantly with more users
-        assert avg_times["create"] < 0.05, f"Token creation too slow with {num_workers} users"
-        assert avg_times["verify"] < 0.01, f"Token verification too slow with {num_workers} users"
-        assert total_time < num_workers * 0.5, f"Total time too high for {num_workers} users"
+        assert avg_times["create"] < 0.05, (
+            f"Token creation too slow with {num_workers} users"
+        )
+        assert avg_times["verify"] < 0.01, (
+            f"Token verification too slow with {num_workers} users"
+        )
+        assert total_time < num_workers * 0.5, (
+            f"Total time too high for {num_workers} users"
+        )

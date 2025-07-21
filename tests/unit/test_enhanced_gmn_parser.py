@@ -464,7 +464,9 @@ class TestGMNToPyMDPConverter:
             4,
             5,
         )  # num_states x num_states x num_actions
-        assert np.allclose(B_matrix.sum(axis=0), 1.0)  # Transition probabilities sum to 1
+        assert np.allclose(
+            B_matrix.sum(axis=0), 1.0
+        )  # Transition probabilities sum to 1
 
     def test_create_c_vector_from_preferences(self):
         """Test C vector creation from preference specifications."""
@@ -771,7 +773,8 @@ class TestGMNParserErrorHandling:
             parser.parse(spec)
 
         assert (
-            "negative" in str(exc_info.value).lower() or "positive" in str(exc_info.value).lower()
+            "negative" in str(exc_info.value).lower()
+            or "positive" in str(exc_info.value).lower()
         )
 
 

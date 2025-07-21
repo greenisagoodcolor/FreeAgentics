@@ -9,6 +9,7 @@ import json
 from datetime import datetime
 from pathlib import Path
 
+
 class ProductionReadinessValidator:
     """Comprehensive production readiness validation."""
 
@@ -21,7 +22,7 @@ class ProductionReadinessValidator:
             "overall_status": "PENDING",
             "blockers": [],
             "warnings": [],
-            "recommendations": []
+            "recommendations": [],
         }
 
     def check_infrastructure_files(self):
@@ -33,7 +34,7 @@ class ProductionReadinessValidator:
             "pyproject.toml",
             "alembic.ini",
             ".github/workflows/unified-pipeline.yml",
-            "README.md"
+            "README.md",
         ]
 
         missing_files = []
@@ -42,7 +43,9 @@ class ProductionReadinessValidator:
                 missing_files.append(file)
 
         if missing_files:
-            self.results["blockers"].extend([f"Missing critical file: {f}" for f in missing_files])
+            self.results["blockers"].extend(
+                [f"Missing critical file: {f}" for f in missing_files]
+            )
             status = "FAILED"
         else:
             status = "PASSED"
@@ -51,7 +54,7 @@ class ProductionReadinessValidator:
             "status": status,
             "required_files": len(required_files),
             "present_files": len(required_files) - len(missing_files),
-            "missing_files": missing_files
+            "missing_files": missing_files,
         }
 
     def check_security_configuration(self):
@@ -79,7 +82,7 @@ class ProductionReadinessValidator:
         self.results["checks"]["security_configuration"] = {
             "status": "PASSED" if len(security_checks) >= 2 else "WARNING",
             "active_security_features": security_checks,
-            "security_score": len(security_checks) * 25  # Out of 100
+            "security_score": len(security_checks) * 25,  # Out of 100
         }
 
     def check_observability_setup(self):
@@ -94,7 +97,7 @@ class ProductionReadinessValidator:
         monitoring_configs = [
             "monitoring/prometheus.yml",
             "monitoring/alertmanager.yml",
-            "monitoring/grafana/"
+            "monitoring/grafana/",
         ]
 
         for config in monitoring_configs:
@@ -103,7 +106,7 @@ class ProductionReadinessValidator:
 
         self.results["checks"]["observability_setup"] = {
             "status": "PASSED" if observability_checks else "WARNING",
-            "observability_features": observability_checks
+            "observability_features": observability_checks,
         }
 
     def check_api_endpoints(self):
@@ -112,7 +115,7 @@ class ProductionReadinessValidator:
             "api/v1/health.py",
             "api/v1/agents.py",
             "api/v1/auth.py",
-            "api/main.py"
+            "api/main.py",
         ]
 
         present_modules = []
@@ -128,10 +131,12 @@ class ProductionReadinessValidator:
             self.results["blockers"].append("Critical API main module missing")
 
         self.results["checks"]["api_endpoints"] = {
-            "status": "PASSED" if len(present_modules) >= len(api_modules) * 0.8 else "FAILED",
+            "status": "PASSED"
+            if len(present_modules) >= len(api_modules) * 0.8
+            else "FAILED",
             "present_modules": present_modules,
             "missing_modules": missing_modules,
-            "api_coverage": f"{len(present_modules)}/{len(api_modules)}"
+            "api_coverage": f"{len(present_modules)}/{len(api_modules)}",
         }
 
     def check_database_migrations(self):
@@ -153,7 +158,7 @@ class ProductionReadinessValidator:
 
         self.results["checks"]["database_migrations"] = {
             "status": migration_status,
-            **migration_info
+            **migration_info,
         }
 
     def check_test_coverage(self):
@@ -171,12 +176,14 @@ class ProductionReadinessValidator:
         total_tests = sum(test_coverage.values())
 
         if total_tests < 10:
-            self.results["warnings"].append(f"Low test coverage: only {total_tests} test files")
+            self.results["warnings"].append(
+                f"Low test coverage: only {total_tests} test files"
+            )
 
         self.results["checks"]["test_coverage"] = {
             "status": "PASSED" if total_tests >= 10 else "WARNING",
             "test_files_by_type": test_coverage,
-            "total_test_files": total_tests
+            "total_test_files": total_tests,
         }
 
     def check_performance_configuration(self):
@@ -197,24 +204,20 @@ class ProductionReadinessValidator:
 
         self.results["checks"]["performance_configuration"] = {
             "status": "PASSED" if len(perf_features) >= 2 else "WARNING",
-            "performance_features": perf_features
+            "performance_features": perf_features,
         }
 
     def run_syntax_validation(self):
         """Run Python syntax validation on critical modules."""
-        critical_modules = [
-            "main.py",
-            "api/main.py",
-            "agents/__init__.py"
-        ]
+        critical_modules = ["main.py", "api/main.py", "agents/__init__.py"]
 
         syntax_errors = []
 
         for module in critical_modules:
             if Path(module).exists():
                 try:
-                    with open(module, 'r') as f:
-                        compile(f.read(), module, 'exec')
+                    with open(module, "r") as f:
+                        compile(f.read(), module, "exec")
                 except SyntaxError as e:
                     syntax_errors.append(f"{module}: {str(e)}")
 
@@ -224,7 +227,7 @@ class ProductionReadinessValidator:
         self.results["checks"]["syntax_validation"] = {
             "status": "PASSED" if not syntax_errors else "FAILED",
             "modules_checked": len(critical_modules),
-            "syntax_errors": syntax_errors
+            "syntax_errors": syntax_errors,
         }
 
     def generate_deployment_recommendations(self):
@@ -236,24 +239,41 @@ class ProductionReadinessValidator:
             recommendations.append("SECURITY: Implement additional security middleware")
 
         # Performance recommendations
-        if len(self.results["checks"]["performance_configuration"]["performance_features"]) < 2:
-            recommendations.append("PERFORMANCE: Add more performance optimization features")
+        if (
+            len(
+                self.results["checks"]["performance_configuration"][
+                    "performance_features"
+                ]
+            )
+            < 2
+        ):
+            recommendations.append(
+                "PERFORMANCE: Add more performance optimization features"
+            )
 
         # Observability recommendations
         if not self.results["checks"]["observability_setup"]["observability_features"]:
             recommendations.append("MONITORING: Set up comprehensive monitoring stack")
 
         # General recommendations
-        recommendations.append("DEPLOYMENT: Use production Docker configuration with health checks")
-        recommendations.append("SCALING: Implement horizontal scaling with load balancer")
+        recommendations.append(
+            "DEPLOYMENT: Use production Docker configuration with health checks"
+        )
+        recommendations.append(
+            "SCALING: Implement horizontal scaling with load balancer"
+        )
         recommendations.append("BACKUP: Set up automated database backup strategy")
 
         self.results["recommendations"] = recommendations
 
     def determine_overall_status(self):
         """Determine overall production readiness status."""
-        failed_checks = [k for k, v in self.results["checks"].items() if v["status"] == "FAILED"]
-        warning_checks = [k for k, v in self.results["checks"].items() if v["status"] == "WARNING"]
+        failed_checks = [
+            k for k, v in self.results["checks"].items() if v["status"] == "FAILED"
+        ]
+        warning_checks = [
+            k for k, v in self.results["checks"].items() if v["status"] == "WARNING"
+        ]
 
         if self.results["blockers"] or failed_checks:
             self.results["overall_status"] = "BLOCKED"
@@ -304,6 +324,7 @@ class ProductionReadinessValidator:
 
         return self.results
 
+
 def main():
     """Main validation execution."""
     validator = ProductionReadinessValidator()
@@ -320,11 +341,14 @@ def main():
         print("\\n🚫 PRODUCTION DEPLOYMENT BLOCKED - Critical issues must be resolved")
         sys.exit(1)
     elif results["overall_status"] == "CONDITIONAL":
-        print("\\n⚠️ CONDITIONAL APPROVAL - Address warnings before production deployment")
+        print(
+            "\\n⚠️ CONDITIONAL APPROVAL - Address warnings before production deployment"
+        )
         sys.exit(0)
     else:
         print("\\n🎉 PRODUCTION READY - All critical validations passed")
         sys.exit(0)
+
 
 if __name__ == "__main__":
     main()

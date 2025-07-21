@@ -112,9 +112,9 @@ class TestRBACAuthorizationBypasses:
             user1, str(agent.id), "modify", mock_db, mock_request
         )
 
-        assert (
-            can_access is False
-        ), "Horizontal privilege escalation detected - user can modify another user's resource"
+        assert can_access is False, (
+            "Horizontal privilege escalation detected - user can modify another user's resource"
+        )
 
     def test_vertical_privilege_escalation(self, test_users, mock_db, mock_request):
         """Test vertical privilege escalation vulnerabilities."""
@@ -129,9 +129,9 @@ class TestRBACAuthorizationBypasses:
 
         for action, required_perm in actions_and_permissions:
             # Observer should not have these permissions
-            assert (
-                required_perm not in observer.permissions
-            ), f"Observer incorrectly has {required_perm} permission"
+            assert required_perm not in observer.permissions, (
+                f"Observer incorrectly has {required_perm} permission"
+            )
 
             # Test system access
             can_access = ResourceAccessValidator.validate_system_access(
@@ -139,9 +139,9 @@ class TestRBACAuthorizationBypasses:
             )
 
             # Should be denied by ABAC even if permission check passes
-            assert (
-                can_access is False
-            ), f"Vertical privilege escalation - observer can perform {action} action"
+            assert can_access is False, (
+                f"Vertical privilege escalation - observer can perform {action} action"
+            )
 
     def test_permission_boundary_violations(self, test_users, mock_db, mock_request):
         """Test permission boundary violations."""
@@ -165,11 +165,13 @@ class TestRBACAuthorizationBypasses:
             researcher, str(agent.id), "delete", mock_db, mock_request
         )
 
-        assert (
-            can_delete is False
-        ), "Permission boundary violation - user can perform action beyond their role"
+        assert can_delete is False, (
+            "Permission boundary violation - user can perform action beyond their role"
+        )
 
-    def test_indirect_object_reference_vulnerabilities(self, test_users, mock_db, mock_request):
+    def test_indirect_object_reference_vulnerabilities(
+        self, test_users, mock_db, mock_request
+    ):
         """Test Insecure Direct Object Reference (IDOR) vulnerabilities."""
         user1 = test_users["agent_manager"]
 
@@ -181,7 +183,9 @@ class TestRBACAuthorizationBypasses:
             user1, "non-existent-id", "view", mock_db, mock_request
         )
 
-        assert can_access is False, "IDOR vulnerability - access granted to non-existent resource"
+        assert can_access is False, (
+            "IDOR vulnerability - access granted to non-existent resource"
+        )
 
         # Test accessing resources with manipulated IDs
         malicious_ids = [
@@ -196,7 +200,9 @@ class TestRBACAuthorizationBypasses:
                 can_access = ResourceAccessValidator.validate_agent_access(
                     user1, malicious_id, "view", mock_db, mock_request
                 )
-                assert can_access is False, f"IDOR vulnerability with malicious ID: {malicious_id}"
+                assert can_access is False, (
+                    f"IDOR vulnerability with malicious ID: {malicious_id}"
+                )
             except Exception:
                 # Should handle invalid IDs gracefully
                 pass
@@ -210,14 +216,16 @@ class TestRBACAuthorizationBypasses:
         observer.role = UserRole.ADMIN  # Direct manipulation
 
         # Permissions should not automatically update
-        assert (
-            observer.permissions == ROLE_PERMISSIONS[UserRole.OBSERVER]
-        ), "Role manipulation vulnerability - permissions updated with role change"
+        assert observer.permissions == ROLE_PERMISSIONS[UserRole.OBSERVER], (
+            "Role manipulation vulnerability - permissions updated with role change"
+        )
 
         # Restore original role
         observer.role = original_role
 
-    def test_permission_inheritance_vulnerabilities(self, test_users, mock_db, mock_request):
+    def test_permission_inheritance_vulnerabilities(
+        self, test_users, mock_db, mock_request
+    ):
         """Test permission inheritance and delegation vulnerabilities."""
         # Test that child resources don't inherit parent permissions incorrectly
         admin = test_users["admin"]
@@ -238,9 +246,9 @@ class TestRBACAuthorizationBypasses:
             researcher, str(admin_agent.id), "delete", mock_db, mock_request
         )
 
-        assert (
-            can_delete is False
-        ), "Permission inheritance vulnerability - non-admin inherited admin permissions"
+        assert can_delete is False, (
+            "Permission inheritance vulnerability - non-admin inherited admin permissions"
+        )
 
     def test_context_manipulation_attacks(self, test_users, mock_request):
         """Test context manipulation attacks on ABAC."""
@@ -251,7 +259,9 @@ class TestRBACAuthorizationBypasses:
             user_id=observer.user_id,
             username=observer.username,
             role=UserRole.ADMIN,  # Attempt to escalate role in context
-            permissions=ROLE_PERMISSIONS[UserRole.ADMIN],  # Attempt to escalate permissions
+            permissions=ROLE_PERMISSIONS[
+                UserRole.ADMIN
+            ],  # Attempt to escalate permissions
             ip_address=mock_request.client.host,
             user_agent=mock_request.headers.get("user-agent"),
             timestamp=datetime.now(timezone.utc),
@@ -267,7 +277,9 @@ class TestRBACAuthorizationBypasses:
             access_granted,
             reason,
             rules,
-        ) = enhanced_rbac_manager.evaluate_abac_access(malicious_context, resource_context, "admin")
+        ) = enhanced_rbac_manager.evaluate_abac_access(
+            malicious_context, resource_context, "admin"
+        )
 
         # Should check actual user role/permissions, not just context
         # This test ensures ABAC rules properly validate user claims
@@ -329,12 +341,14 @@ class TestRBACAuthorizationBypasses:
                 access_granted,
                 reason,
                 rules,
-            ) = enhanced_rbac_manager.evaluate_abac_access(access_context, resource_context, "view")
+            ) = enhanced_rbac_manager.evaluate_abac_access(
+                access_context, resource_context, "view"
+            )
 
             # Access should be denied outside business hours
-            assert (
-                "Business Hours Only" in rules or not access_granted
-            ), "Time-based access control bypass - access granted outside allowed time"
+            assert "Business Hours Only" in rules or not access_granted, (
+                "Time-based access control bypass - access granted outside allowed time"
+            )
 
     def test_department_isolation_bypass(self, test_users, mock_db, mock_request):
         """Test department isolation bypass attempts."""
@@ -380,11 +394,13 @@ class TestRBACAuthorizationBypasses:
         ) = enhanced_rbac_manager.evaluate_abac_access(it_context, hr_resource, "view")
 
         # Should enforce department isolation
-        assert (
-            "Department-based Isolation" in rules or not access_granted
-        ), "Department isolation bypass - cross-department access allowed"
+        assert "Department-based Isolation" in rules or not access_granted, (
+            "Department isolation bypass - cross-department access allowed"
+        )
 
-    def test_permission_caching_vulnerabilities(self, test_users, mock_db, mock_request):
+    def test_permission_caching_vulnerabilities(
+        self, test_users, mock_db, mock_request
+    ):
         """Test permission caching vulnerabilities."""
         user = test_users["researcher"]
 
@@ -415,9 +431,9 @@ class TestRBACAuthorizationBypasses:
             user, str(agent.id), "modify", mock_db, mock_request
         )
 
-        assert (
-            can_access_after is False
-        ), "Permission caching vulnerability - access granted with revoked permissions"
+        assert can_access_after is False, (
+            "Permission caching vulnerability - access granted with revoked permissions"
+        )
 
         # Restore permissions
         user.permissions = original_permissions
@@ -438,9 +454,9 @@ class TestRBACAuthorizationBypasses:
                 can_access = ResourceAccessValidator.validate_agent_access(
                     user, payload, "view", mock_db, mock_request
                 )
-                assert (
-                    can_access is False
-                ), f"Null byte injection bypass with payload: {repr(payload)}"
+                assert can_access is False, (
+                    f"Null byte injection bypass with payload: {repr(payload)}"
+                )
             except Exception:
                 # Should handle null bytes safely
                 pass
@@ -481,9 +497,9 @@ class TestRBACAuthorizationBypasses:
             thread.join()
 
         # All results should be consistent
-        assert all(
-            r == results[0] for r in results
-        ), "Race condition vulnerability - inconsistent authorization results"
+        assert all(r == results[0] for r in results), (
+            "Race condition vulnerability - inconsistent authorization results"
+        )
 
 
 class TestAuthorizationBypassMitigations:
@@ -525,9 +541,9 @@ class TestAuthorizationBypassMitigations:
         layers_checked.append(("resource_check", resource_granted))
 
         # All layers should deny access
-        assert all(
-            not granted for _, granted in layers_checked
-        ), "Defense-in-depth failure - at least one layer allowed unauthorized access"
+        assert all(not granted for _, granted in layers_checked), (
+            "Defense-in-depth failure - at least one layer allowed unauthorized access"
+        )
 
     def test_fail_secure_authorization(self, test_users, mock_db, mock_request):
         """Test fail-secure authorization behavior."""
@@ -544,7 +560,9 @@ class TestAuthorizationBypassMitigations:
                 result = ResourceAccessValidator.validate_agent_access(
                     user, "test-id", "view", mock_db, mock_request
                 )
-                assert result is False, "Fail-open vulnerability - access granted on error"
+                assert result is False, (
+                    "Fail-open vulnerability - access granted on error"
+                )
             except Exception:
                 # Failing with exception is also acceptable (fail-secure)
                 pass
@@ -578,9 +596,9 @@ class TestAuthorizationBypassMitigations:
         )
 
         # Check audit log
-        assert (
-            len(enhanced_rbac_manager.access_audit_log) >= 2
-        ), "Incomplete audit trail - not all authorization decisions logged"
+        assert len(enhanced_rbac_manager.access_audit_log) >= 2, (
+            "Incomplete audit trail - not all authorization decisions logged"
+        )
 
         # Verify audit entries contain required information
         for entry in enhanced_rbac_manager.access_audit_log:

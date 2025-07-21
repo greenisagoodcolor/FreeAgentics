@@ -121,7 +121,8 @@ class TestDatabaseTransactions:
             try:
                 with connection_manager.get_session() as session:
                     user = User(
-                        username=f"concurrent_{user_id}", email=f"user{user_id}@example.com"
+                        username=f"concurrent_{user_id}",
+                        email=f"user{user_id}@example.com",
                     )
                     session.add(user)
                     # Add small delay to increase chance of conflicts
@@ -146,7 +147,9 @@ class TestDatabaseTransactions:
         assert len(results) == 10
 
         with connection_manager.get_session() as session:
-            count = session.query(User).filter(User.username.like("concurrent_%")).count()
+            count = (
+                session.query(User).filter(User.username.like("concurrent_%")).count()
+            )
             assert count == 10
 
 
@@ -184,7 +187,9 @@ class TestSQLInjectionPrevention:
         for malicious_input in malicious_inputs:
             with secure_db.get_session() as session:
                 # Safe parameterized query
-                result = session.query(User).filter(User.username == malicious_input).first()
+                result = (
+                    session.query(User).filter(User.username == malicious_input).first()
+                )
 
                 # Assert - Should not find user or execute injection
                 assert result is None
@@ -200,7 +205,9 @@ class TestSQLInjectionPrevention:
 
         # Act
         with secure_db.get_session() as session:
-            user = User(username=dangerous_inputs["username"], email=dangerous_inputs["email"])
+            user = User(
+                username=dangerous_inputs["username"], email=dangerous_inputs["email"]
+            )
             session.add(user)
             session.commit()
             user_id = user.id
@@ -227,7 +234,8 @@ class TestSQLInjectionPrevention:
         with secure_db.get_session() as session:
             # Safe approach with parameters
             result = session.execute(
-                text("SELECT * FROM users WHERE username = :username"), {"username": search_term}
+                text("SELECT * FROM users WHERE username = :username"),
+                {"username": search_term},
             ).fetchall()
 
         # Assert - Should find no results (injection prevented)
@@ -240,7 +248,9 @@ class TestConnectionPoolSecurity:
     @pytest.fixture
     def pool_manager(self):
         """Create connection pool manager."""
-        engine = create_engine("sqlite:///:memory:", pool_size=5, max_overflow=2, pool_timeout=30)
+        engine = create_engine(
+            "sqlite:///:memory:", pool_size=5, max_overflow=2, pool_timeout=30
+        )
         Base.metadata.create_all(engine)
 
         manager = ConnectionManager(engine)
@@ -286,7 +296,10 @@ class TestConnectionPoolSecurity:
         """Test handling of connection timeouts."""
         # Arrange - Create small pool
         small_engine = create_engine(
-            "sqlite:///:memory:", pool_size=1, max_overflow=0, pool_timeout=0.1  # 100ms timeout
+            "sqlite:///:memory:",
+            pool_size=1,
+            max_overflow=0,
+            pool_timeout=0.1,  # 100ms timeout
         )
         Base.metadata.create_all(small_engine)
         small_manager = ConnectionManager(small_engine)
@@ -403,7 +416,9 @@ class TestDatabaseSecurity:
         # Arrange
         from database.models import SensitiveData  # Hypothetical model
 
-        sensitive = SensitiveData(user_id=1, ssn="123-45-6789", credit_card="4111-1111-1111-1111")
+        sensitive = SensitiveData(
+            user_id=1, ssn="123-45-6789", credit_card="4111-1111-1111-1111"
+        )
 
         # Act - Save to database
         secure_session.add(sensitive)

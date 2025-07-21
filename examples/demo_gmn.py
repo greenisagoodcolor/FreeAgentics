@@ -84,7 +84,9 @@ position_belief -> position: depends_on
     try:
         # Parse GMN specification
         gmn_graph = parser.parse(simple_gmn_spec)
-        print(f"✅ Parsed GMN with {len(gmn_graph.nodes)} nodes and {len(gmn_graph.edges)} edges")
+        print(
+            f"✅ Parsed GMN with {len(gmn_graph.nodes)} nodes and {len(gmn_graph.edges)} edges"
+        )
 
         # Show parsed components
         print("\n📋 GMN Components:")
@@ -127,11 +129,11 @@ position_belief -> position: depends_on
     # Simulate some steps
     for step in range(3):
         # Create observation with defensive position handling
-        if hasattr(agent.position, 'x'):
+        if hasattr(agent.position, "x"):
             pos_list = [agent.position.x, agent.position.y]
         else:
             pos_list = agent.position
-            
+
         observation = {
             "position": pos_list,
             "surroundings": [
@@ -143,14 +145,14 @@ position_belief -> position: depends_on
 
         action = agent.step(observation)
         # Handle both Position object and list formats
-        if hasattr(agent.position, 'x'):
+        if hasattr(agent.position, "x"):
             pos_str = f"({agent.position.x}, {agent.position.y})"
         else:
             pos_str = f"({agent.position[0]}, {agent.position[1]})"
         print(f"  Step {step + 1}: pos={pos_str}, action={action}")
 
         # Update position based on action
-        if hasattr(agent.position, 'x'):
+        if hasattr(agent.position, "x"):
             # Position object
             if action == "up" and agent.position.y > 0:
                 agent.position.y -= 1
@@ -175,7 +177,7 @@ position_belief -> position: depends_on
     print("\n📊 Final Agent Status:")
     status = agent.get_status()
     print(f"  Total steps: {status['total_steps']}")
-    if hasattr(agent.position, 'x'):
+    if hasattr(agent.position, "x"):
         print(f"  Final position: ({agent.position.x}, {agent.position.y})")
     else:
         print(f"  Final position: ({agent.position[0]}, {agent.position[1]})")

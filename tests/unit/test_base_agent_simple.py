@@ -226,7 +226,7 @@ class TestActiveInferenceAgentBasic:
         self.agent.perceive(observation)
 
         # Check that observation was stored
-        assert hasattr(self.agent, 'last_observation')
+        assert hasattr(self.agent, "last_observation")
         assert self.agent.last_observation == observation
 
     def test_agent_select_action_method(self):

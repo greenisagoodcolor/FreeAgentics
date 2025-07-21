@@ -339,7 +339,9 @@ class RBACTestCleanup:
             if len(auth_manager.users) > 0:
                 issues.append(f"Auth manager still has {len(auth_manager.users)} users")
             if len(auth_manager.refresh_tokens) > 0:
-                issues.append(f"Auth manager still has {len(auth_manager.refresh_tokens)} tokens")
+                issues.append(
+                    f"Auth manager still has {len(auth_manager.refresh_tokens)} tokens"
+                )
 
         # Check for remaining temporary files
         temp_files = [
@@ -364,7 +366,9 @@ class RBACTestCleanup:
 
 def main():
     """Main function."""
-    parser = argparse.ArgumentParser(description="Clean up RBAC authorization matrix test data")
+    parser = argparse.ArgumentParser(
+        description="Clean up RBAC authorization matrix test data"
+    )
     parser.add_argument(
         "--force",
         "-f",

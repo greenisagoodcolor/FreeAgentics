@@ -3,7 +3,6 @@
 from unittest.mock import patch
 
 
-
 class TestObservabilityInit:
     """Test the observability package initialization."""
 

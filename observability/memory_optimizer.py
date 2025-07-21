@@ -130,7 +130,9 @@ class ObjectPool:
                 "max_size": self.max_size,
                 "created_count": self.created_count,
                 "reused_count": self.reused_count,
-                "reuse_rate": (self.reused_count / max(self.created_count + self.reused_count, 1))
+                "reuse_rate": (
+                    self.reused_count / max(self.created_count + self.reused_count, 1)
+                )
                 * 100,
             }
 
@@ -264,7 +266,9 @@ class MemoryProfiler:
                     previous_count = self.object_tracking[obj_type][-1]
                     growth_rate = (count - previous_count) / max(previous_count, 1)
 
-                    if growth_rate > 0.1 and count > 1000:  # 10% growth with significant count
+                    if (
+                        growth_rate > 0.1 and count > 1000
+                    ):  # 10% growth with significant count
                         leak = MemoryLeak(
                             object_type=obj_type,
                             count=count,
@@ -301,7 +305,9 @@ class MemoryProfiler:
                 previous_count = self.object_tracking[obj_type][-1]
                 growth_rate = (count - previous_count) / max(previous_count, 1)
 
-                if growth_rate > 0.2 and count > 500:  # 20% growth with significant count
+                if (
+                    growth_rate > 0.2 and count > 500
+                ):  # 20% growth with significant count
                     leak = MemoryLeak(
                         object_type=obj_type,
                         count=count,
@@ -328,7 +334,9 @@ class MemoryProfiler:
     def get_memory_history(self, minutes: int = 30) -> List[MemoryStats]:
         """Get memory history for specified time period."""
         cutoff_time = datetime.now() - timedelta(minutes=minutes)
-        return [stats for stats in self.memory_history if stats.timestamp >= cutoff_time]
+        return [
+            stats for stats in self.memory_history if stats.timestamp >= cutoff_time
+        ]
 
     def get_leak_detections(self) -> List[MemoryLeak]:
         """Get detected memory leaks."""
@@ -468,7 +476,9 @@ class GarbageCollectionTuner:
     def get_tuning_stats(self) -> Dict[str, Any]:
         """Get GC tuning statistics."""
         avg_collection_time = (
-            sum(self.collection_times) / len(self.collection_times) if self.collection_times else 0
+            sum(self.collection_times) / len(self.collection_times)
+            if self.collection_times
+            else 0
         )
 
         return {
@@ -477,7 +487,9 @@ class GarbageCollectionTuner:
             "original_thresholds": self.original_thresholds,
             "collection_count": len(self.collection_times),
             "avg_collection_time": avg_collection_time,
-            "max_collection_time": max(self.collection_times) if self.collection_times else 0,
+            "max_collection_time": max(self.collection_times)
+            if self.collection_times
+            else 0,
             "gc_stats": gc.get_stats(),
         }
 
@@ -595,7 +607,9 @@ class MemoryOptimizer:
             memory_trend = 0
 
         # Object pool stats
-        pool_stats = {name: pool.get_stats() for name, pool in self.object_pools.items()}
+        pool_stats = {
+            name: pool.get_stats() for name, pool in self.object_pools.items()
+        }
 
         return {
             "timestamp": datetime.now().isoformat(),
@@ -629,7 +643,9 @@ class MemoryOptimizer:
             # GC recommendations
             gc_stats = self.gc_tuner.get_tuning_stats()
             if gc_stats["avg_collection_time"] > 0.1:
-                recommendations.append("Long GC pauses detected. Consider tuning GC thresholds.")
+                recommendations.append(
+                    "Long GC pauses detected. Consider tuning GC thresholds."
+                )
 
             # Leak detection recommendations
             leaks = self.profiler.get_leak_detections()
@@ -729,7 +745,9 @@ def benchmark_memory_optimization():
 
         # Get updated stats
         final_stats = memory_optimizer.get_comprehensive_report()
-        print(f"Final memory usage: {final_stats['current_stats'].process_rss_mb:.2f}MB")
+        print(
+            f"Final memory usage: {final_stats['current_stats'].process_rss_mb:.2f}MB"
+        )
 
         # Print recommendations
         print("\nOptimization recommendations:")

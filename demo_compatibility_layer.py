@@ -8,7 +8,7 @@ This shows how the compatibility layer works without database dependencies.
 import json
 import sys
 
-sys.path.insert(0, '.')
+sys.path.insert(0, ".")
 
 from api.ui_compatibility import (
     extract_agent_name_from_description,

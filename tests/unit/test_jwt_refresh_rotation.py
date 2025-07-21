@@ -38,7 +38,9 @@ class TestRefreshTokenRotation:
         assert first_refresh_token != second_refresh_token
 
         # First token should be blacklisted
-        first_payload = jwt.decode(first_refresh_token, options={"verify_signature": False})
+        first_payload = jwt.decode(
+            first_refresh_token, options={"verify_signature": False}
+        )
         first_jti = first_payload.get("jti")
         assert first_jti in auth_manager.blacklist
 
@@ -72,7 +74,9 @@ class TestRefreshTokenRotation:
         assert token_data.user_id == user.user_id
 
         # Original refresh token should be blacklisted
-        original_payload = jwt.decode(original_refresh_token, options={"verify_signature": False})
+        original_payload = jwt.decode(
+            original_refresh_token, options={"verify_signature": False}
+        )
         original_jti = original_payload.get("jti")
         assert original_jti in auth_manager.blacklist
 
@@ -147,7 +151,9 @@ class TestRefreshTokenRotation:
             "jti": "expired_refresh_jti",
             "iss": "freeagentics",
             "aud": "freeagentics-api",
-            "exp": (datetime.now(timezone.utc) - timedelta(minutes=1)).timestamp(),  # Expired
+            "exp": (
+                datetime.now(timezone.utc) - timedelta(minutes=1)
+            ).timestamp(),  # Expired
             "nbf": (datetime.now(timezone.utc) - timedelta(hours=1)).timestamp(),
             "iat": (datetime.now(timezone.utc) - timedelta(hours=1)).timestamp(),
         }
@@ -217,7 +223,9 @@ class TestRefreshTokenRotation:
         (
             new_access_token,
             new_refresh_token,
-        ) = auth_manager.refresh_access_token(refresh_token, client_fingerprint=client_fingerprint)
+        ) = auth_manager.refresh_access_token(
+            refresh_token, client_fingerprint=client_fingerprint
+        )
 
         # Should work fine
         token_data = auth_manager.verify_token(

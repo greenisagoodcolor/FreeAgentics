@@ -52,9 +52,10 @@ class TestLLMIntegration:
             provider = OllamaProvider(ollama_config)
             if not provider.is_available():
                 # Mock the functionality when Ollama is not available
-                with patch.object(LocalLLMManager, 'load_model', return_value=True), \
-                     patch.object(LocalLLMManager, 'generate') as mock_generate:
-
+                with (
+                    patch.object(LocalLLMManager, "load_model", return_value=True),
+                    patch.object(LocalLLMManager, "generate") as mock_generate,
+                ):
                     # Create a mock response
                     mock_response = LLMResponse(
                         text="4",
@@ -62,7 +63,7 @@ class TestLLMIntegration:
                         generation_time=0.1,
                         provider="ollama",
                         cached=False,
-                        fallback_used=False
+                        fallback_used=False,
                     )
                     # Add latency property for compatibility
                     mock_response.latency = 0.1
@@ -83,16 +84,17 @@ class TestLLMIntegration:
                 return
         except Exception:
             # If we can't even create the provider, use full mocking
-            with patch.object(LocalLLMManager, 'load_model', return_value=True), \
-                 patch.object(LocalLLMManager, 'generate') as mock_generate:
-
+            with (
+                patch.object(LocalLLMManager, "load_model", return_value=True),
+                patch.object(LocalLLMManager, "generate") as mock_generate,
+            ):
                 mock_response = LLMResponse(
                     text="4",
                     tokens_used=1,
                     generation_time=0.1,
                     provider="ollama",
                     cached=False,
-                    fallback_used=False
+                    fallback_used=False,
                 )
                 mock_response.latency = 0.1
                 mock_generate.return_value = mock_response
@@ -137,10 +139,11 @@ class TestLLMIntegration:
 
         if not Path(model_path).exists():
             # Mock the functionality when model file is not found
-            with patch.object(LlamaCppProvider, 'is_available', return_value=True), \
-                 patch.object(LlamaCppProvider, 'load_model', return_value=True), \
-                 patch.object(LlamaCppProvider, 'generate') as mock_generate:
-
+            with (
+                patch.object(LlamaCppProvider, "is_available", return_value=True),
+                patch.object(LlamaCppProvider, "load_model", return_value=True),
+                patch.object(LlamaCppProvider, "generate") as mock_generate,
+            ):
                 # Create a mock response
                 mock_response = LLMResponse(
                     text="blue",
@@ -148,7 +151,7 @@ class TestLLMIntegration:
                     generation_time=0.2,
                     provider="llama_cpp",
                     cached=False,
-                    fallback_used=False
+                    fallback_used=False,
                 )
                 mock_response.latency = 0.2
                 mock_generate.return_value = mock_response
@@ -171,17 +174,18 @@ class TestLLMIntegration:
 
             if not provider.is_available():
                 # Mock when binary not available
-                with patch.object(LlamaCppProvider, 'is_available', return_value=True), \
-                     patch.object(LlamaCppProvider, 'load_model', return_value=True), \
-                     patch.object(LlamaCppProvider, 'generate') as mock_generate:
-
+                with (
+                    patch.object(LlamaCppProvider, "is_available", return_value=True),
+                    patch.object(LlamaCppProvider, "load_model", return_value=True),
+                    patch.object(LlamaCppProvider, "generate") as mock_generate,
+                ):
                     mock_response = LLMResponse(
                         text="blue",
                         tokens_used=1,
                         generation_time=0.2,
                         provider="llama_cpp",
                         cached=False,
-                        fallback_used=False
+                        fallback_used=False,
                     )
                     mock_response.latency = 0.2
                     mock_generate.return_value = mock_response
@@ -210,17 +214,18 @@ class TestLLMIntegration:
 
         except Exception:
             # If any error occurs, use mock fallback
-            with patch.object(LlamaCppProvider, 'is_available', return_value=True), \
-                 patch.object(LlamaCppProvider, 'load_model', return_value=True), \
-                 patch.object(LlamaCppProvider, 'generate') as mock_generate:
-
+            with (
+                patch.object(LlamaCppProvider, "is_available", return_value=True),
+                patch.object(LlamaCppProvider, "load_model", return_value=True),
+                patch.object(LlamaCppProvider, "generate") as mock_generate,
+            ):
                 mock_response = LLMResponse(
                     text="blue",
                     tokens_used=1,
                     generation_time=0.2,
                     provider="llama_cpp",
                     cached=False,
-                    fallback_used=False
+                    fallback_used=False,
                 )
                 mock_response.latency = 0.2
                 mock_generate.return_value = mock_response
@@ -252,9 +257,7 @@ class TestLLMIntegration:
     @pytest.mark.integration
     def test_llm_fallback_behavior(self):
         """Test fallback when no providers available."""
-        config = LocalLLMConfig(
-            provider=LocalLLMProvider.OLLAMA, enable_fallback=True
-        )
+        config = LocalLLMConfig(provider=LocalLLMProvider.OLLAMA, enable_fallback=True)
         manager = LocalLLMManager(config)
 
         # Force no providers available
@@ -279,9 +282,7 @@ class TestLLMIntegration:
             ),
         ],
     )
-    def test_llm_response_quality(
-        self, ollama_config, prompt, expected_keywords
-    ):
+    def test_llm_response_quality(self, ollama_config, prompt, expected_keywords):
         """Test quality of LLM responses for agent-related prompts."""
         manager = LocalLLMManager(ollama_config)
 
@@ -297,9 +298,9 @@ class TestLLMIntegration:
             # Real LLM should mention at least one keyword
             text_lower = response.text.lower()
             found_keyword = any(kw in text_lower for kw in expected_keywords)
-            assert (
-                found_keyword
-            ), f"Expected keywords {expected_keywords} not found in: {response.text}"
+            assert found_keyword, (
+                f"Expected keywords {expected_keywords} not found in: {response.text}"
+            )
 
 
 if __name__ == "__main__":

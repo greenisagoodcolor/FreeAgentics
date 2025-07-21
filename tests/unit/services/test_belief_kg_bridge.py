@@ -58,9 +58,7 @@ class TestBeliefKGBridge:
         assert isinstance(belief_state.timestamp, datetime)
 
     @pytest.mark.asyncio
-    async def test_extract_beliefs_entropy_calculation(
-        self, bridge, mock_agent
-    ):
+    async def test_extract_beliefs_entropy_calculation(self, bridge, mock_agent):
         """Test entropy calculation in belief extraction."""
         belief_state = await bridge.extract_beliefs(mock_agent)
 
@@ -137,9 +135,7 @@ class TestBeliefKGBridge:
             },
         )
 
-        nodes = await bridge.belief_to_nodes(
-            belief_state, "agent_123", context={}
-        )
+        nodes = await bridge.belief_to_nodes(belief_state, "agent_123", context={})
 
         # Should have uncertainty node
         uncertainty_nodes = [n for n in nodes if n.type == "high_uncertainty"]
@@ -150,9 +146,7 @@ class TestBeliefKGBridge:
     async def test_create_belief_edges(self, bridge, mock_agent):
         """Test edge creation between nodes."""
         belief_state = await bridge.extract_beliefs(mock_agent)
-        nodes = await bridge.belief_to_nodes(
-            belief_state, "test_agent", context={}
-        )
+        nodes = await bridge.belief_to_nodes(belief_state, "test_agent", context={})
 
         edges = await bridge.create_belief_edges(nodes, "test_agent")
 
@@ -169,9 +163,7 @@ class TestBeliefKGBridge:
         assert all(e.source == belief_node.id for e in factor_edges)
 
     @pytest.mark.asyncio
-    async def test_update_kg_from_agent(
-        self, bridge, mock_agent, mock_knowledge_graph
-    ):
+    async def test_update_kg_from_agent(self, bridge, mock_agent, mock_knowledge_graph):
         """Test full KG update from agent."""
         agent_id = "test_agent_123"
 
@@ -195,9 +187,7 @@ class TestBeliefKGBridge:
         mock_kg.add_node = AsyncMock(side_effect=Exception("KG error"))
 
         with pytest.raises(RuntimeError, match="KG update failed"):
-            await bridge.update_kg_from_agent(
-                mock_agent, "test_agent", mock_kg
-            )
+            await bridge.update_kg_from_agent(mock_agent, "test_agent", mock_kg)
 
     @pytest.mark.asyncio
     async def test_belief_threshold_filtering(self, bridge):
@@ -214,9 +204,7 @@ class TestBeliefKGBridge:
             },
         )
 
-        nodes = await bridge.belief_to_nodes(
-            belief_state, "agent_123", context={}
-        )
+        nodes = await bridge.belief_to_nodes(belief_state, "agent_123", context={})
 
         # Only beliefs above threshold should create nodes
         value_nodes = [n for n in nodes if n.type == "belief_value"]
@@ -227,9 +215,7 @@ class TestBeliefKGBridge:
     async def test_edge_properties(self, bridge, mock_agent):
         """Test that edges have proper properties."""
         belief_state = await bridge.extract_beliefs(mock_agent)
-        nodes = await bridge.belief_to_nodes(
-            belief_state, "test_agent", context={}
-        )
+        nodes = await bridge.belief_to_nodes(belief_state, "test_agent", context={})
 
         edges = await bridge.create_belief_edges(nodes, "test_agent")
 
@@ -240,9 +226,7 @@ class TestBeliefKGBridge:
             assert "state_index" in edge.properties
 
         # Check action edge has action value
-        action_edges = [
-            e for e in edges if e.relationship == "resulted_in_action"
-        ]
+        action_edges = [e for e in edges if e.relationship == "resulted_in_action"]
         if action_edges:
             assert "action" in action_edges[0].properties
 
@@ -262,18 +246,12 @@ class TestBeliefKGBridge:
 
         # Check edges include prompt connection
         edges = await bridge.create_belief_edges(nodes, "agent_123")
-        prompt_edges = [
-            e for e in edges if e.relationship == "generated_belief"
-        ]
+        prompt_edges = [e for e in edges if e.relationship == "generated_belief"]
         assert len(prompt_edges) == 1
 
     @pytest.mark.asyncio
-    async def test_query_agent_beliefs_placeholder(
-        self, bridge, mock_knowledge_graph
-    ):
+    async def test_query_agent_beliefs_placeholder(self, bridge, mock_knowledge_graph):
         """Test query method (currently returns empty)."""
-        result = await bridge.query_agent_beliefs(
-            mock_knowledge_graph, "agent_123"
-        )
+        result = await bridge.query_agent_beliefs(mock_knowledge_graph, "agent_123")
 
         assert result == []  # Placeholder implementation

@@ -114,7 +114,9 @@ class PipelineMigrator:
         print_success(
             f"Analysis complete: {len(self.analysis_results['existing_workflows'])} workflows found"
         )
-        print_info(f"Workflows to migrate: {len(self.analysis_results['backup_required'])}")
+        print_info(
+            f"Workflows to migrate: {len(self.analysis_results['backup_required'])}"
+        )
         print_warning(f"Issues found: {len(self.analysis_results['issues_found'])}")
 
         return self.analysis_results
@@ -144,7 +146,9 @@ class PipelineMigrator:
                                 "severity": "high",
                             }
                         )
-                        print_warning(f"Found bypass mechanism '{pattern}' in {workflow_file.name}")
+                        print_warning(
+                            f"Found bypass mechanism '{pattern}' in {workflow_file.name}"
+                        )
             except Exception as e:
                 print_error(f"Error analyzing {workflow_file.name}: {e}")
 
@@ -181,14 +185,18 @@ class PipelineMigrator:
                         "severity": "medium",
                     }
                 )
-                print_warning(f"Duplicated job found across {len(occurrences)} workflows")
+                print_warning(
+                    f"Duplicated job found across {len(occurrences)} workflows"
+                )
 
     def _get_job_signature(self, job_config: Dict[str, Any]) -> str:
         """Generate a signature for a job to detect duplicates."""
         steps = job_config.get("steps", [])
         if steps:
             # Use first few steps as signature
-            step_names = [step.get("name", step.get("run", ""))[:20] for step in steps[:3]]
+            step_names = [
+                step.get("name", step.get("run", ""))[:20] for step in steps[:3]
+            ]
             return "|".join(step_names)
         return str(hash(str(job_config)))
 
@@ -210,10 +218,15 @@ class PipelineMigrator:
             try:
                 content = workflow_file.read_text().lower()
                 for gate in required_gates:
-                    if gate.replace("_", "") in content or gate.replace("_", "-") in content:
+                    if (
+                        gate.replace("_", "") in content
+                        or gate.replace("_", "-") in content
+                    ):
                         found_gates.add(gate)
             except Exception as e:
-                print_error(f"Error checking quality gates in {workflow_file.name}: {e}")
+                print_error(
+                    f"Error checking quality gates in {workflow_file.name}: {e}"
+                )
 
         missing_gates = set(required_gates) - found_gates
         for gate in missing_gates:
@@ -259,7 +272,9 @@ class PipelineMigrator:
 
                 json.dump(metadata, f, indent=2)
 
-            print_success(f"Backup completed: {copied_count} workflows backed up to {backup_path}")
+            print_success(
+                f"Backup completed: {copied_count} workflows backed up to {backup_path}"
+            )
             return True
 
         except Exception as e:
@@ -284,7 +299,9 @@ class PipelineMigrator:
                 try:
                     workflow_path.rename(disabled_path)
                     disabled_count += 1
-                    print_success(f"Disabled: {workflow_name} → {workflow_name}.disabled")
+                    print_success(
+                        f"Disabled: {workflow_name} → {workflow_name}.disabled"
+                    )
                 except Exception as e:
                     print_error(f"Failed to disable {workflow_name}: {e}")
             else:
@@ -321,7 +338,9 @@ class PipelineMigrator:
             # Check required sections
             required_sections = ["jobs", "on", "env"]
             missing_sections = [
-                section for section in required_sections if section not in pipeline_config
+                section
+                for section in required_sections
+                if section not in pipeline_config
             ]
 
             if missing_sections:
@@ -350,9 +369,13 @@ class PipelineMigrator:
             pipeline_content = unified_pipeline_path.read_text()
             bypass_patterns = ["skip_tests", "force_deploy", "bypass"]
 
-            found_bypasses = [pattern for pattern in bypass_patterns if pattern in pipeline_content]
+            found_bypasses = [
+                pattern for pattern in bypass_patterns if pattern in pipeline_content
+            ]
             if found_bypasses:
-                print_error(f"Found bypass mechanisms in unified pipeline: {found_bypasses}")
+                print_error(
+                    f"Found bypass mechanisms in unified pipeline: {found_bypasses}"
+                )
                 return False
 
             print_success("No bypass mechanisms found in unified pipeline")
@@ -368,16 +391,16 @@ class PipelineMigrator:
 
         report = f"""# Pipeline Migration Report
 
-**Date:** {datetime.now().strftime('%Y-%m-%d %H:%M:%S')}  
+**Date:** {datetime.now().strftime("%Y-%m-%d %H:%M:%S")}  
 **Tool:** PIPELINE-ARCHITECT Migration Tool  
 **Methodology:** Martin Fowler + Jessica Kerr Principles
 
 ## Migration Summary
 
-- **Total Workflows Analyzed:** {len(self.analysis_results['existing_workflows'])}
-- **Workflows Migrated:** {len(self.analysis_results['backup_required'])}
-- **Issues Found:** {len(self.analysis_results['issues_found'])}
-- **Migration Mode:** {'DRY RUN' if self.dry_run else 'LIVE MIGRATION'}
+- **Total Workflows Analyzed:** {len(self.analysis_results["existing_workflows"])}
+- **Workflows Migrated:** {len(self.analysis_results["backup_required"])}
+- **Issues Found:** {len(self.analysis_results["issues_found"])}
+- **Migration Mode:** {"DRY RUN" if self.dry_run else "LIVE MIGRATION"}
 
 ## Existing Workflows
 
@@ -407,7 +430,9 @@ class PipelineMigrator:
                 severity_emoji = (
                     "🚨"
                     if issue["severity"] == "high"
-                    else "⚠️" if issue["severity"] == "medium" else "ℹ️"
+                    else "⚠️"
+                    if issue["severity"] == "medium"
+                    else "ℹ️"
                 )
                 report += f"- {severity_emoji} **{issue['severity'].upper()}**: "
 

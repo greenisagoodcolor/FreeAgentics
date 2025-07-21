@@ -85,9 +85,7 @@ class ProviderHealth:
         """Get the success rate as a percentage."""
         if self.total_requests == 0:
             return 100.0
-        return (
-            (self.total_requests - self.total_failures) / self.total_requests
-        ) * 100
+        return ((self.total_requests - self.total_failures) / self.total_requests) * 100
 
 
 class LLMProviderFactory:
@@ -119,9 +117,7 @@ class LLMProviderFactory:
     def _setup_providers(self):
         """Setup providers based on configuration."""
         # Get provider preference from config or environment
-        provider_pref = self.config.get(
-            "provider", os.getenv("LLM_PROVIDER", "auto")
-        )
+        provider_pref = self.config.get("provider", os.getenv("LLM_PROVIDER", "auto"))
 
         if provider_pref == "auto":
             self._setup_auto_providers()
@@ -131,9 +127,7 @@ class LLMProviderFactory:
                 provider_type = ProviderType(provider_pref.lower())
                 if provider_type != ProviderType.AUTO:
                     self._primary_provider = provider_type
-                    self._fallback_chain = self._get_fallback_chain(
-                        provider_type
-                    )
+                    self._fallback_chain = self._get_fallback_chain(provider_type)
             except ValueError:
                 logger.warning(
                     f"Unknown provider type: {provider_pref}, using auto mode"
@@ -195,9 +189,7 @@ class LLMProviderFactory:
                 provider = provider_class(**provider_config)
             elif provider_type == ProviderType.OPENAI:
                 provider = provider_class(
-                    api_key=provider_config.get(
-                        "api_key", os.getenv("OPENAI_API_KEY")
-                    ),
+                    api_key=provider_config.get("api_key", os.getenv("OPENAI_API_KEY")),
                     model=provider_config.get("model", "gpt-4o"),
                     **{
                         k: v
@@ -210,9 +202,7 @@ class LLMProviderFactory:
                     api_key=provider_config.get(
                         "api_key", os.getenv("ANTHROPIC_API_KEY")
                     ),
-                    model=provider_config.get(
-                        "model", "claude-3-5-sonnet-20241022"
-                    ),
+                    model=provider_config.get("model", "claude-3-5-sonnet-20241022"),
                     **{
                         k: v
                         for k, v in provider_config.items()
@@ -222,9 +212,7 @@ class LLMProviderFactory:
             elif provider_type == ProviderType.OLLAMA:
                 provider = provider_class(
                     model=provider_config.get("model", "llama3.2"),
-                    base_url=provider_config.get(
-                        "base_url", "http://localhost:11434"
-                    ),
+                    base_url=provider_config.get("base_url", "http://localhost:11434"),
                     **{
                         k: v
                         for k, v in provider_config.items()
@@ -241,12 +229,8 @@ class LLMProviderFactory:
             return provider
 
         except Exception as e:
-            logger.error(
-                f"Failed to create provider {provider_type}: {str(e)}"
-            )
-            raise LLMError(
-                f"Failed to create provider {provider_type}: {str(e)}"
-            )
+            logger.error(f"Failed to create provider {provider_type}: {str(e)}")
+            raise LLMError(f"Failed to create provider {provider_type}: {str(e)}")
 
     async def get_provider(
         self, provider_type: Optional[ProviderType] = None
@@ -338,9 +322,7 @@ class LLMProviderFactory:
 
             except Exception as e:
                 last_error = e
-                logger.warning(
-                    f"Provider {provider_type.value} failed: {str(e)}"
-                )
+                logger.warning(f"Provider {provider_type.value} failed: {str(e)}")
 
                 # Record failure
                 if provider_type in self._health:
@@ -391,9 +373,7 @@ class LLMProviderFactory:
             if provider_type is None:
                 continue
 
-            health = self._health.get(
-                provider_type, ProviderHealth(provider_type)
-            )
+            health = self._health.get(provider_type, ProviderHealth(provider_type))
 
             try:
                 provider = await self.get_provider(provider_type)
@@ -402,9 +382,7 @@ class LLMProviderFactory:
                 if provider_type == ProviderType.OPENAI:
                     is_available = await provider.validate_model("gpt-4")
                 elif provider_type == ProviderType.ANTHROPIC:
-                    is_available = await provider.validate_model(
-                        "claude-3-sonnet"
-                    )
+                    is_available = await provider.validate_model("claude-3-sonnet")
                 elif provider_type == ProviderType.OLLAMA:
                     is_available = await provider.validate_model("llama3.2")
                 else:
@@ -442,7 +420,7 @@ class LLMProviderFactory:
     async def close(self):
         """Close all provider connections."""
         for provider in self._providers.values():
-            if hasattr(provider, 'close'):
+            if hasattr(provider, "close"):
                 await provider.close()
 
     def get_config_template(self) -> Dict[str, Any]:
@@ -478,9 +456,7 @@ class LLMProviderFactory:
 
 
 # Convenience function for creating a factory
-def create_llm_factory(
-    config: Optional[Dict[str, Any]] = None
-) -> LLMProviderFactory:
+def create_llm_factory(config: Optional[Dict[str, Any]] = None) -> LLMProviderFactory:
     """Create an LLM provider factory with the given configuration.
 
     Args:

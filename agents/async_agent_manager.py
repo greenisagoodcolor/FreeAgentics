@@ -519,8 +519,7 @@ if __name__ == "__main__":
     print(f"Max agents tested: {max_agents}")
     print(f"Max agent performance: {max_agent_result['avg_time_per_operation']:.1f}ms")
     print(
-        f"Throughput scaling:"
-        f" {max_agent_result['throughput_ops_per_sec']:.1f} ops/sec"
+        f"Throughput scaling: {max_agent_result['throughput_ops_per_sec']:.1f} ops/sec"
     )
 
     # Calculate scaling efficiency

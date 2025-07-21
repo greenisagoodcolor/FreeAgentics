@@ -39,42 +39,54 @@ class MockAuthAPI:
         @self.app.post("/auth/login")
         async def login(request: Request, response: Response):
             # Apply security headers
-            headers = self.security_headers_manager.get_security_headers(request, response)
+            headers = self.security_headers_manager.get_security_headers(
+                request, response
+            )
             for key, value in headers.items():
                 response.headers[key] = value
             return {"access_token": "mock_token", "token_type": "bearer"}
 
         @self.app.post("/auth/register")
         async def register(request: Request, response: Response):
-            headers = self.security_headers_manager.get_security_headers(request, response)
+            headers = self.security_headers_manager.get_security_headers(
+                request, response
+            )
             for key, value in headers.items():
                 response.headers[key] = value
             return {"message": "User registered successfully"}
 
         @self.app.post("/auth/logout")
         async def logout(request: Request, response: Response):
-            headers = self.security_headers_manager.get_security_headers(request, response)
+            headers = self.security_headers_manager.get_security_headers(
+                request, response
+            )
             for key, value in headers.items():
                 response.headers[key] = value
             return {"message": "Logged out successfully"}
 
         @self.app.post("/auth/refresh")
         async def refresh(request: Request, response: Response):
-            headers = self.security_headers_manager.get_security_headers(request, response)
+            headers = self.security_headers_manager.get_security_headers(
+                request, response
+            )
             for key, value in headers.items():
                 response.headers[key] = value
             return {"access_token": "new_mock_token", "token_type": "bearer"}
 
         @self.app.post("/auth/password-reset")
         async def password_reset(request: Request, response: Response):
-            headers = self.security_headers_manager.get_security_headers(request, response)
+            headers = self.security_headers_manager.get_security_headers(
+                request, response
+            )
             for key, value in headers.items():
                 response.headers[key] = value
             return {"message": "Password reset email sent"}
 
         @self.app.get("/auth/verify")
         async def verify_token(request: Request, response: Response):
-            headers = self.security_headers_manager.get_security_headers(request, response)
+            headers = self.security_headers_manager.get_security_headers(
+                request, response
+            )
             for key, value in headers.items():
                 response.headers[key] = value
             return {"valid": True, "user_id": "test-user-123"}
@@ -105,7 +117,9 @@ class TestAuthenticationSecurityHeaders:
             "Expect-CT",
         }
 
-    def _validate_common_headers(self, headers: Dict[str, str], endpoint: str = None) -> List[str]:
+    def _validate_common_headers(
+        self, headers: Dict[str, str], endpoint: str = None
+    ) -> List[str]:
         """Validate common security headers."""
         issues = []
 
@@ -171,7 +185,9 @@ class TestAuthenticationSecurityHeaders:
 
     def test_logout_endpoint_headers(self):
         """Test security headers for logout endpoint."""
-        response = self.client.post("/auth/logout", headers={"Authorization": "Bearer mock_token"})
+        response = self.client.post(
+            "/auth/logout", headers={"Authorization": "Bearer mock_token"}
+        )
 
         assert response.status_code == 200
 
@@ -181,7 +197,9 @@ class TestAuthenticationSecurityHeaders:
 
     def test_token_refresh_headers(self):
         """Test security headers for token refresh endpoint."""
-        response = self.client.post("/auth/refresh", json={"refresh_token": "mock_refresh_token"})
+        response = self.client.post(
+            "/auth/refresh", json={"refresh_token": "mock_refresh_token"}
+        )
 
         assert response.status_code == 200
 
@@ -191,7 +209,9 @@ class TestAuthenticationSecurityHeaders:
 
     def test_password_reset_headers(self):
         """Test security headers for password reset endpoint."""
-        response = self.client.post("/auth/password-reset", json={"email": "user@example.com"})
+        response = self.client.post(
+            "/auth/password-reset", json={"email": "user@example.com"}
+        )
 
         assert response.status_code == 200
 
@@ -201,7 +221,9 @@ class TestAuthenticationSecurityHeaders:
 
     def test_token_verification_headers(self):
         """Test security headers for token verification endpoint."""
-        response = self.client.get("/auth/verify", headers={"Authorization": "Bearer mock_token"})
+        response = self.client.get(
+            "/auth/verify", headers={"Authorization": "Bearer mock_token"}
+        )
 
         assert response.status_code == 200
 
@@ -289,7 +311,9 @@ class TestAuthenticationSecurityHeaders:
             if method == "POST":
                 response = self.client.post(endpoint, json={})
             else:
-                response = self.client.get(endpoint, headers={"Authorization": "Bearer mock_token"})
+                response = self.client.get(
+                    endpoint, headers={"Authorization": "Bearer mock_token"}
+                )
 
             # Sensitive endpoints should not be cached
             if "Cache-Control" in response.headers:
@@ -351,7 +375,9 @@ class TestAuthenticationSecurityHeaders:
 
         for endpoint, method, data in endpoints:
             response = self.client.request(method, endpoint, json=data)
-            all_headers.append({"endpoint": endpoint, "headers": dict(response.headers)})
+            all_headers.append(
+                {"endpoint": endpoint, "headers": dict(response.headers)}
+            )
 
         # Check consistency
         common_headers = None
@@ -369,11 +395,15 @@ class TestAuthenticationSecurityHeaders:
                 missing = common_headers - endpoint_headers
                 endpoint_headers - common_headers
 
-                assert len(missing) == 0, f"{entry['endpoint']} missing headers: {missing}"
+                assert len(missing) == 0, (
+                    f"{entry['endpoint']} missing headers: {missing}"
+                )
 
     def test_certificate_pinning_headers(self):
         """Test certificate pinning headers in production."""
-        with patch.dict("os.environ", {"PRODUCTION": "true", "ENABLE_CERT_PINNING": "true"}):
+        with patch.dict(
+            "os.environ", {"PRODUCTION": "true", "ENABLE_CERT_PINNING": "true"}
+        ):
             self.mock_api.security_headers_manager = SecurityHeadersManager()
             response = self.client.post(
                 "/auth/login",
@@ -507,7 +537,9 @@ class TestSecurityHeadersIntegration:
         # 3. Verify token
         verify_response = self.client.get(
             "/auth/verify",
-            headers={"Authorization": f"Bearer {login_response.json()['access_token']}"},
+            headers={
+                "Authorization": f"Bearer {login_response.json()['access_token']}"
+            },
         )
         assert verify_response.status_code == 200
         assert "Referrer-Policy" in verify_response.headers
@@ -522,7 +554,9 @@ class TestSecurityHeadersIntegration:
         # 5. Logout
         logout_response = self.client.post(
             "/auth/logout",
-            headers={"Authorization": f"Bearer {login_response.json()['access_token']}"},
+            headers={
+                "Authorization": f"Bearer {login_response.json()['access_token']}"
+            },
         )
         assert logout_response.status_code == 200
         assert "X-Frame-Options" in logout_response.headers
@@ -538,7 +572,9 @@ class TestSecurityHeadersIntegration:
         def make_request(endpoint, method="POST"):
             """Make a request and check headers."""
             if method == "POST":
-                response = self.client.post(endpoint, json={"username": "test", "password": "test"})
+                response = self.client.post(
+                    endpoint, json={"username": "test", "password": "test"}
+                )
             else:
                 response = self.client.get(endpoint)
 

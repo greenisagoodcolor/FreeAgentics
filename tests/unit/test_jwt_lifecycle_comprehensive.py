@@ -69,7 +69,9 @@ class TestJWTLifecycle:
         exp_time = datetime.fromtimestamp(payload["exp"], tz=timezone.utc)
         now = datetime.now(timezone.utc)
         expected_exp = now + timedelta(minutes=ACCESS_TOKEN_EXPIRE_MINUTES)
-        assert abs((exp_time - expected_exp).total_seconds()) < 5  # Allow 5 second tolerance
+        assert (
+            abs((exp_time - expected_exp).total_seconds()) < 5
+        )  # Allow 5 second tolerance
 
     def test_refresh_token_generation(self, auth_manager, test_user):
         """Test refresh token generation with proper claims."""
@@ -193,7 +195,9 @@ class TestJWTLifecycle:
         refresh_token_1 = auth_manager.create_refresh_token(test_user)
 
         # Use it to get new tokens
-        new_access_token, refresh_token_2 = auth_manager.refresh_access_token(refresh_token_1)
+        new_access_token, refresh_token_2 = auth_manager.refresh_access_token(
+            refresh_token_1
+        )
 
         # Verify new refresh token is different
         assert refresh_token_2 != refresh_token_1
@@ -207,10 +211,14 @@ class TestJWTLifecycle:
         client_fingerprint = "test-client-fingerprint-123"
 
         # Create token with client binding
-        token = auth_manager.create_access_token(test_user, client_fingerprint=client_fingerprint)
+        token = auth_manager.create_access_token(
+            test_user, client_fingerprint=client_fingerprint
+        )
 
         # Verify token works with correct fingerprint
-        token_data = auth_manager.verify_token(token, client_fingerprint=client_fingerprint)
+        token_data = auth_manager.verify_token(
+            token, client_fingerprint=client_fingerprint
+        )
         assert token_data.user_id == test_user.user_id
 
         # Verify token fails with wrong fingerprint
@@ -283,7 +291,8 @@ class TestJWTLifecycle:
             auth_manager.verify_token(token)
 
         assert (
-            "not yet valid" in str(exc_info.value).lower() or "iat" in str(exc_info.value).lower()
+            "not yet valid" in str(exc_info.value).lower()
+            or "iat" in str(exc_info.value).lower()
         )
 
     def test_token_wrong_audience_rejection(self, auth_manager, test_user):

@@ -455,7 +455,9 @@ class BusinessLogicTests(BasePenetrationTest):
                                 )
                             )
                 except Exception as e:
-                    logger.debug(f"Session state manipulation response parsing error: {e}")
+                    logger.debug(
+                        f"Session state manipulation response parsing error: {e}"
+                    )
 
     async def _test_race_conditions(self):
         """Test race condition vulnerabilities."""
@@ -617,7 +619,9 @@ class BusinessLogicTests(BasePenetrationTest):
                         "read",
                     ]
                     with ThreadPoolExecutor(max_workers=6) as executor:
-                        futures = [executor.submit(access_agent, op) for op in operations]
+                        futures = [
+                            executor.submit(access_agent, op) for op in operations
+                        ]
                         results = [future.result() for future in as_completed(futures)]
 
                     # Analyze results for race condition indicators
@@ -626,7 +630,9 @@ class BusinessLogicTests(BasePenetrationTest):
                         if operations[i] == "read" and status == 200:
                             # Check if read succeeded after delete
                             delete_results = [
-                                r for j, r in enumerate(results) if operations[j] == "delete"
+                                r
+                                for j, r in enumerate(results)
+                                if operations[j] == "delete"
                             ]
                             if any(s in [200, 204] for s, _ in delete_results):
                                 read_after_delete = True
@@ -686,7 +692,9 @@ class BusinessLogicTests(BasePenetrationTest):
                         escalate_response = self.client.patch(
                             "/api/v1/auth/me",
                             json={"role": "admin"},
-                            headers={"Authorization": f"Bearer {user_data['access_token']}"},
+                            headers={
+                                "Authorization": f"Bearer {user_data['access_token']}"
+                            },
                         )
                         return escalate_response.status_code, (
                             escalate_response.json() if escalate_response.text else {}
@@ -703,7 +711,9 @@ class BusinessLogicTests(BasePenetrationTest):
 
         # Check if any privilege escalation succeeded
         successful_escalations = sum(
-            1 for status, data in results if status == 200 and data.get("role") == "admin"
+            1
+            for status, data in results
+            if status == 200 and data.get("role") == "admin"
         )
 
         if successful_escalations > 0:
@@ -1111,7 +1121,8 @@ class BusinessLogicTests(BasePenetrationTest):
                     ]
 
                     for method, endpoint, data in [
-                        (t[0], t[1], t[2] if len(t) > 2 else None) for t in invalid_transitions
+                        (t[0], t[1], t[2] if len(t) > 2 else None)
+                        for t in invalid_transitions
                     ]:
                         if method == "delete":
                             response = self.client.delete(
@@ -1124,7 +1135,9 @@ class BusinessLogicTests(BasePenetrationTest):
                                 headers=self.get_auth_headers(token),
                             )
 
-                        if hasattr(response, "status_code") and response.status_code in [
+                        if hasattr(
+                            response, "status_code"
+                        ) and response.status_code in [
                             200,
                             202,
                             204,

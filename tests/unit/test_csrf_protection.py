@@ -55,7 +55,9 @@ class TestCSRFProtection:
     async def test_csrf_token_validation_success(self, mock_request, test_token_data):
         """Test successful CSRF token validation."""
         # Generate CSRF token
-        csrf_token = auth_manager.csrf_protection.generate_csrf_token(test_token_data.user_id)
+        csrf_token = auth_manager.csrf_protection.generate_csrf_token(
+            test_token_data.user_id
+        )
 
         # Create protected function
         @require_csrf_token
@@ -136,7 +138,9 @@ class TestCSRFProtection:
         auth_manager.csrf_protection.invalidate_csrf_token(session_id)
 
         # Token should no longer be valid
-        assert not auth_manager.csrf_protection.verify_csrf_token(session_id, csrf_token)
+        assert not auth_manager.csrf_protection.verify_csrf_token(
+            session_id, csrf_token
+        )
 
     async def test_csrf_form_data_support(self, mock_request):
         """Test CSRF token can be extracted from form data."""
@@ -163,7 +167,9 @@ class TestCSRFProtection:
 
             # Generate matching CSRF token
             auth_manager.csrf_protection.generate_csrf_token("test-user")
-            auth_manager.csrf_protection._token_store["test-user"] = "csrf-token-from-form"
+            auth_manager.csrf_protection._token_store["test-user"] = (
+                "csrf-token-from-form"
+            )
 
             # Should succeed with CSRF token from form
             result = await protected_endpoint(mock_request)

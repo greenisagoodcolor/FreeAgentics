@@ -213,9 +213,7 @@ class TestJWTAuthenticationBehavior:
         exp_time = datetime.fromtimestamp(decoded["exp"])
         now = datetime.utcnow()
         assert exp_time > now  # Should not be expired
-        assert exp_time < now + timedelta(
-            days=1
-        )  # Should not be too far in future
+        assert exp_time < now + timedelta(days=1)  # Should not be too far in future
 
     def test_jwt_handler_token_refresh_workflow(self):
         """
@@ -235,9 +233,7 @@ class TestJWTAuthenticationBehavior:
         refresh_payload = jwt_handler.validate_refresh_token(refresh_token)
 
         # Generate new access token from refresh token
-        new_access_token = jwt_handler.generate_access_token(
-            refresh_payload["sub"]
-        )
+        new_access_token = jwt_handler.generate_access_token(refresh_payload["sub"])
 
         # Verify new access token is valid
         access_payload = jwt_handler.validate_access_token(new_access_token)
@@ -340,9 +336,7 @@ class TestJWTErrorHandlingBehavior:
         jwt_handler = JWTHandler()
 
         # Create a token with missing claims
-        incomplete_payload = {
-            "sub": "user123"
-        }  # Missing 'type' and other claims
+        incomplete_payload = {"sub": "user123"}  # Missing 'type' and other claims
 
         # Use the handler's secret key if available
         try:

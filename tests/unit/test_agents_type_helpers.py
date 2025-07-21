@@ -4,7 +4,6 @@ import uuid
 from unittest.mock import MagicMock, patch
 
 
-
 class TestAgentsTypeHelpers:
     """Test the agents type helpers module."""
 

@@ -166,13 +166,16 @@ class TestGMNValidator:
 
         assert result.is_valid is False
         assert any(
-            "negative" in error.lower() or "positive" in error.lower() for error in result.errors
+            "negative" in error.lower() or "positive" in error.lower()
+            for error in result.errors
         )
 
     def test_validate_security_patterns(self, validator, mock_parse_result):
         """Test security pattern detection."""
         # Add potentially malicious code
-        mock_parse_result.sections["custom_code"] = {"initialization": "exec('malicious code')"}
+        mock_parse_result.sections["custom_code"] = {
+            "initialization": "exec('malicious code')"
+        }
 
         result = validator.validate(mock_parse_result)
 
@@ -198,13 +201,16 @@ class TestGMNValidator:
         }
 
         # Mock AST traversal
-        validator._collect_variable_definitions = Mock(return_value={"position", "velocity"})
+        validator._collect_variable_definitions = Mock(
+            return_value={"position", "velocity"}
+        )
 
         result = validator.validate(mock_parse_result)
 
         assert result.is_valid is False
         assert any(
-            "undefined" in error.lower() or "reference" in error.lower() for error in result.errors
+            "undefined" in error.lower() or "reference" in error.lower()
+            for error in result.errors
         )
 
     def test_validate_circular_dependencies(self, validator, mock_parse_result):
@@ -251,9 +257,9 @@ class TestGMNValidator:
         """Test GNN layer configuration compatibility."""
         # Test incompatible layer configuration
         mock_parse_result.sections["architecture"]["type"] = "GCN"
-        mock_parse_result.sections["architecture"][
-            "edge_features"
-        ] = True  # GCN doesn't use edge features
+        mock_parse_result.sections["architecture"]["edge_features"] = (
+            True  # GCN doesn't use edge features
+        )
 
         result = validator.validate(mock_parse_result)
 
@@ -313,7 +319,9 @@ class TestGMNValidator:
         """Test performance implication warnings."""
         # Configure model for poor performance
         mock_parse_result.sections["architecture"]["type"] = "GAT"
-        mock_parse_result.sections["architecture"]["num_heads"] = 32  # Too many attention heads
+        mock_parse_result.sections["architecture"]["num_heads"] = (
+            32  # Too many attention heads
+        )
         mock_parse_result.sections["architecture"]["layers"] = 10  # Deep network
 
         result = validator.validate(mock_parse_result)
@@ -333,12 +341,16 @@ class TestGMNValidator:
         # Add many validation errors
         with patch.object(validator, "max_validation_errors", 5):
             # Create conditions that generate many errors
-            parse_result.sections = {f"invalid_section_{i}": {"error": True} for i in range(20)}
+            parse_result.sections = {
+                f"invalid_section_{i}": {"error": True} for i in range(20)
+            }
 
             result = validator.validate(parse_result)
 
             # Should limit errors
-            assert len(result.errors) <= validator.max_validation_errors + 5  # Some buffer
+            assert (
+                len(result.errors) <= validator.max_validation_errors + 5
+            )  # Some buffer
 
     def test_custom_validation_rules(self, validator, mock_parse_result):
         """Test custom validation rule injection."""
@@ -511,7 +523,9 @@ class TestGMNValidator:
         param_errors = [
             e
             for e in result.errors
-            if "parameter" in e.lower() or "learning_rate" in e.lower() or "batch_size" in e.lower()
+            if "parameter" in e.lower()
+            or "learning_rate" in e.lower()
+            or "batch_size" in e.lower()
         ]
 
         if expected_valid:
@@ -631,12 +645,15 @@ class TestSecurityValidation:
 
         assert result.is_valid is False
         assert any(
-            "security" in error.lower() or "injection" in error.lower() for error in result.errors
+            "security" in error.lower() or "injection" in error.lower()
+            for error in result.errors
         )
 
     def test_path_traversal_detection(self, validator, mock_parse_result):
         """Test path traversal detection."""
-        mock_parse_result.sections["file_operations"] = {"load_path": "../../../etc/passwd"}
+        mock_parse_result.sections["file_operations"] = {
+            "load_path": "../../../etc/passwd"
+        }
 
         result = validator.validate(mock_parse_result)
 

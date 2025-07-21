@@ -104,7 +104,9 @@ class DemoLLMProvider(BaseProvider):
             "timeout_rate": self.timeout_rate,
         }
 
-    def configure(self, credentials: Optional[ProviderCredentials] = None, **kwargs) -> bool:
+    def configure(
+        self, credentials: Optional[ProviderCredentials] = None, **kwargs
+    ) -> bool:
         """Configure the provider with credentials."""
         if credentials is not None:
             self.credentials = credentials
@@ -154,7 +156,9 @@ class DemoLLMProvider(BaseProvider):
             model_availability={"demo-llm-v1": status == ProviderStatus.HEALTHY},
         )
 
-    def generate(self, request: Union[GenerationRequest, str]) -> Union[GenerationResponse, str]:
+    def generate(
+        self, request: Union[GenerationRequest, str]
+    ) -> Union[GenerationResponse, str]:
         """Generate text based on the request."""
         self.request_count += 1
 
@@ -176,7 +180,9 @@ class DemoLLMProvider(BaseProvider):
             text=mock_text,
             model=request.model,
             provider=self.provider_type,
-            input_tokens=len(request.messages[-1]["content"].split()) if request.messages else 0,
+            input_tokens=len(request.messages[-1]["content"].split())
+            if request.messages
+            else 0,
             output_tokens=len(mock_text.split()),
             cost=0.001,  # Mock cost
             latency_ms=random.uniform(50, 200),  # nosec B311 - Demo simulation only

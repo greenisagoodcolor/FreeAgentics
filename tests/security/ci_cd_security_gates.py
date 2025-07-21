@@ -198,7 +198,9 @@ class SecurityGatesConfig:
                 },
                 "script": ["/analyzer run"],
                 "artifacts": {
-                    "reports": {"container_scanning": "gl-container-scanning-report.json"}
+                    "reports": {
+                        "container_scanning": "gl-container-scanning-report.json"
+                    }
                 },
             },
             "sast": {

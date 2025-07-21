@@ -274,7 +274,9 @@ class IncidentManager:
         """
         Create a new incident case.
         """
-        case_id = f"INC-{datetime.utcnow().strftime('%Y%m%d')}-{uuid.uuid4().hex[:8].upper()}"
+        case_id = (
+            f"INC-{datetime.utcnow().strftime('%Y%m%d')}-{uuid.uuid4().hex[:8].upper()}"
+        )
 
         # Create case
         case = IncidentCase(
@@ -392,7 +394,9 @@ class IncidentManager:
                     "incident_type": case.type.value,
                     "severity": case.severity.value,
                     "affected_assets": case.affected_assets,
-                    "indicators": [{"type": i.type, "value": i.value} for i in case.indicators],
+                    "indicators": [
+                        {"type": i.type, "value": i.value} for i in case.indicators
+                    ],
                 }
 
                 # Add specific variables based on indicators
@@ -465,7 +469,9 @@ class IncidentManager:
             self._save_cases()
             return True
 
-    def add_incident_notes(self, case_id: str, notes: str, actor: str = "analyst") -> bool:
+    def add_incident_notes(
+        self, case_id: str, notes: str, actor: str = "analyst"
+    ) -> bool:
         """Add notes to incident."""
         with self.case_lock:
             if case_id not in self.cases:
@@ -481,7 +487,9 @@ class IncidentManager:
             )
             case.updated_at = datetime.utcnow()
 
-            self._add_timeline_entry(case, "notes_added", "Added investigation notes", actor)
+            self._add_timeline_entry(
+                case, "notes_added", "Added investigation notes", actor
+            )
 
             self._save_cases()
             return True
@@ -570,7 +578,9 @@ class IncidentManager:
 
         return related
 
-    def _determine_team(self, incident_type: IncidentType, severity: IncidentSeverity) -> str:
+    def _determine_team(
+        self, incident_type: IncidentType, severity: IncidentSeverity
+    ) -> str:
         """Determine which team should handle incident."""
         # Simple mapping - extend based on organization
         team_mapping = {
@@ -624,10 +634,12 @@ class IncidentManager:
                             self._add_timeline_entry(
                                 case,
                                 "escalation",
-                                f'Escalated due to no response after {threshold["response_time"]} minutes',
+                                f"Escalated due to no response after {threshold['response_time']} minutes",
                                 "system",
                             )
-                            logger.warning(f"Escalated case {case.case_id} due to SLA breach")
+                            logger.warning(
+                                f"Escalated case {case.case_id} due to SLA breach"
+                            )
 
                 # Sleep for a minute
                 time.sleep(60)
@@ -744,7 +756,9 @@ class IncidentManager:
             return {
                 "total_incidents": total_cases,
                 "open_incidents": sum(
-                    1 for case in self.cases.values() if case.status != IncidentStatus.CLOSED
+                    1
+                    for case in self.cases.values()
+                    if case.status != IncidentStatus.CLOSED
                 ),
                 "status_breakdown": dict(status_counts),
                 "severity_breakdown": dict(severity_counts),
@@ -755,5 +769,7 @@ class IncidentManager:
                 "average_containment_time": (
                     sum(contain_times) / len(contain_times) if contain_times else 0
                 ),
-                "indicators_tracked": sum(len(v) for v in self.global_indicators.values()),
+                "indicators_tracked": sum(
+                    len(v) for v in self.global_indicators.values()
+                ),
             }

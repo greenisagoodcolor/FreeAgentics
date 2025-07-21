@@ -73,8 +73,7 @@ class GNNToLLMTransformer:
         # Calculate connectivity patterns
         connectivity_scores = np.mean(embeddings, axis=1)
         well_connected = (
-            connectivity_scores
-            > self.embedding_thresholds["connectivity_threshold"]
+            connectivity_scores > self.embedding_thresholds["connectivity_threshold"]
         )
 
         # Generate structured description
@@ -86,9 +85,7 @@ class GNNToLLMTransformer:
         description_parts.append(
             f"- Average embedding magnitude: {np.mean(embedding_norms):.3f}"
         )
-        description_parts.append(
-            f"- Embedding dimensionality: {embeddings.shape[1]}"
-        )
+        description_parts.append(f"- Embedding dimensionality: {embeddings.shape[1]}")
 
         # Node activity analysis
         high_activity_count = np.sum(high_activity_nodes)
@@ -98,20 +95,14 @@ class GNNToLLMTransformer:
         )
 
         description_parts.append("\nNode Activity Levels:")
-        description_parts.append(
-            f"- High activity nodes: {high_activity_count}"
-        )
-        description_parts.append(
-            f"- Medium activity nodes: {medium_activity_count}"
-        )
+        description_parts.append(f"- High activity nodes: {high_activity_count}")
+        description_parts.append(f"- Medium activity nodes: {medium_activity_count}")
         description_parts.append(f"- Low activity nodes: {low_activity_count}")
 
         # Connectivity analysis
         well_connected_count = np.sum(well_connected)
         description_parts.append("\nConnectivity Analysis:")
-        description_parts.append(
-            f"- Well-connected nodes: {well_connected_count}"
-        )
+        description_parts.append(f"- Well-connected nodes: {well_connected_count}")
         description_parts.append(
             f"- Isolated nodes: {len(embeddings) - well_connected_count}"
         )
@@ -120,9 +111,7 @@ class GNNToLLMTransformer:
         if len(node_ids) == len(embeddings):
             # Identify most important nodes
             importance_scores = embedding_norms + connectivity_scores
-            top_indices = np.argsort(importance_scores)[
-                -min(3, len(node_ids)) :
-            ]
+            top_indices = np.argsort(importance_scores)[-min(3, len(node_ids)) :]
 
             description_parts.append("\nKey Nodes Identified:")
             for idx in reversed(top_indices):
@@ -150,17 +139,14 @@ class GNNToLLMTransformer:
             "has_node_count": str(len(embeddings)) in text_description,
             "has_activity_analysis": "activity" in text_description.lower(),
             "has_connectivity_info": "connect" in text_description.lower(),
-            "has_numerical_data": any(
-                char.isdigit() for char in text_description
-            ),
+            "has_numerical_data": any(char.isdigit() for char in text_description),
             "reasonable_length": 100 < len(text_description) < 2000,
-            "structured_format": "\n" in text_description
-            and "-" in text_description,
+            "structured_format": "\n" in text_description and "-" in text_description,
         }
 
-        validation_results["overall_quality"] = sum(
-            validation_results.values()
-        ) / len(validation_results)
+        validation_results["overall_quality"] = sum(validation_results.values()) / len(
+            validation_results
+        )
 
         return validation_results
 
@@ -205,10 +191,7 @@ class LLMGraphReasoningValidator:
         """
         Test LLM's ability to reason about graph structures from text descriptions.
         """
-        if (
-            not self.llm_manager
-            or reasoning_type not in self.reasoning_prompts
-        ):
+        if not self.llm_manager or reasoning_type not in self.reasoning_prompts:
             return {
                 "success": False,
                 "error": "LLM manager not available or invalid reasoning type",
@@ -275,9 +258,7 @@ class LLMGraphReasoningValidator:
         # Type-specific validations
         if reasoning_type == "strategy_analysis":
             metrics["mentions_strategy"] = "strategy" in reasoning_text.lower()
-            metrics["considers_efficiency"] = (
-                "efficien" in reasoning_text.lower()
-            )
+            metrics["considers_efficiency"] = "efficien" in reasoning_text.lower()
         elif reasoning_type == "risk_assessment":
             metrics["identifies_risks"] = any(
                 risk in reasoning_text.lower()
@@ -388,9 +369,7 @@ class TestGNNLLMInterfaceIntegration:
             ),  # obstacle_1 affects resource_2: low weight
         ]
 
-        node_features = np.array(
-            [features for _, features in nodes], dtype=np.float32
-        )
+        node_features = np.array([features for _, features in nodes], dtype=np.float32)
         edge_indices = np.array([(i, j) for i, j, _ in edges], dtype=np.int32)
         edge_features = np.array(
             [features for _, _, features in edges], dtype=np.float32
@@ -424,35 +403,25 @@ class TestGNNLLMInterfaceIntegration:
 
         try:
             # Generate embeddings using GNN
-            gnn_output = gnn_model.forward(
-                node_features, edge_indices, edge_features
-            )
+            gnn_output = gnn_model.forward(node_features, edge_indices, edge_features)
             embeddings = gnn_output.get("node_embeddings", node_features)
 
             # Validate embedding properties
             assert embeddings is not None, "GNN failed to generate embeddings"
-            assert (
-                embeddings.shape[0] == node_features.shape[0]
-            ), "Embedding count mismatch"
-            assert not np.any(
-                np.isnan(embeddings)
-            ), "GNN embeddings contain NaN values"
-            assert not np.any(
-                np.isinf(embeddings)
-            ), "GNN embeddings contain infinite values"
+            assert embeddings.shape[0] == node_features.shape[0], (
+                "Embedding count mismatch"
+            )
+            assert not np.any(np.isnan(embeddings)), "GNN embeddings contain NaN values"
+            assert not np.any(np.isinf(embeddings)), (
+                "GNN embeddings contain infinite values"
+            )
 
             # Validate embedding characteristics
             embedding_norms = np.linalg.norm(embeddings, axis=1)
-            assert np.all(
-                embedding_norms > 0
-            ), "Some embeddings have zero norm"
-            assert (
-                np.std(embedding_norms) > 0
-            ), "All embeddings have identical norms"
+            assert np.all(embedding_norms > 0), "Some embeddings have zero norm"
+            assert np.std(embedding_norms) > 0, "All embeddings have identical norms"
 
-            logger.info(
-                f"✓ GNN generated valid embeddings: shape {embeddings.shape}"
-            )
+            logger.info(f"✓ GNN generated valid embeddings: shape {embeddings.shape}")
             logger.info(
                 f"  Embedding norm range: {np.min(embedding_norms):.3f} - {np.max(embedding_norms):.3f}"
             )
@@ -486,29 +455,23 @@ class TestGNNLLMInterfaceIntegration:
             embeddings, text_description
         )
 
-        assert (
-            text_description is not None and len(text_description) > 0
-        ), "Text transformation failed"
-        assert (
-            validation_results["overall_quality"] > 0.7
-        ), f"Transformation quality too low: {validation_results}"
+        assert text_description is not None and len(text_description) > 0, (
+            "Text transformation failed"
+        )
+        assert validation_results["overall_quality"] > 0.7, (
+            f"Transformation quality too low: {validation_results}"
+        )
 
         # Validate specific content preservation
-        assert (
-            str(len(embeddings)) in text_description
-        ), "Node count not preserved in text"
-        assert (
-            "activity" in text_description.lower()
-        ), "Activity analysis missing"
-        assert (
-            "connect" in text_description.lower()
-        ), "Connectivity analysis missing"
+        assert str(len(embeddings)) in text_description, (
+            "Node count not preserved in text"
+        )
+        assert "activity" in text_description.lower(), "Activity analysis missing"
+        assert "connect" in text_description.lower(), "Connectivity analysis missing"
 
         logger.info("✓ Embedding→text transformation successful")
         logger.info(f"  Text length: {len(text_description)} characters")
-        logger.info(
-            f"  Quality score: {validation_results['overall_quality']:.3f}"
-        )
+        logger.info(f"  Quality score: {validation_results['overall_quality']:.3f}")
 
         return text_description
 
@@ -545,9 +508,9 @@ class TestGNNLLMInterfaceIntegration:
             reasoning_results[reasoning_type] = result
 
             if result["success"]:
-                assert (
-                    result["reasoning_quality"] > 0.5
-                ), f"Low quality reasoning for {reasoning_type}: {result['reasoning_quality']}"
+                assert result["reasoning_quality"] > 0.5, (
+                    f"Low quality reasoning for {reasoning_type}: {result['reasoning_quality']}"
+                )
                 logger.info(
                     f"✓ LLM {reasoning_type} reasoning successful (quality: {result['reasoning_quality']:.3f})"
                 )
@@ -557,12 +520,8 @@ class TestGNNLLMInterfaceIntegration:
                 )
 
         # At least one reasoning type should succeed
-        successful_reasoning = [
-            r for r in reasoning_results.values() if r["success"]
-        ]
-        assert (
-            len(successful_reasoning) > 0
-        ), "No LLM reasoning attempts succeeded"
+        successful_reasoning = [r for r in reasoning_results.values() if r["success"]]
+        assert len(successful_reasoning) > 0, "No LLM reasoning attempts succeeded"
 
         return reasoning_results
 
@@ -580,9 +539,7 @@ class TestGNNLLMInterfaceIntegration:
 
         # Step 1: GNN processing
         try:
-            gnn_output = gnn_model.forward(
-                node_features, edge_indices, edge_features
-            )
+            gnn_output = gnn_model.forward(node_features, edge_indices, edge_features)
             embeddings = gnn_output.get("node_embeddings", node_features)
         except Exception:
             embeddings = node_features  # Fallback
@@ -607,8 +564,7 @@ class TestGNNLLMInterfaceIntegration:
                 # Check if key graph concepts are preserved
                 semantic_checks = {
                     "preserves_agent_concept": any(
-                        term in reasoning_text
-                        for term in ["agent", "robot", "unit"]
+                        term in reasoning_text for term in ["agent", "robot", "unit"]
                     ),
                     "preserves_resource_concept": any(
                         term in reasoning_text
@@ -633,13 +589,13 @@ class TestGNNLLMInterfaceIntegration:
                     ),
                 }
 
-                semantic_preservation_score = sum(
-                    semantic_checks.values()
-                ) / len(semantic_checks)
+                semantic_preservation_score = sum(semantic_checks.values()) / len(
+                    semantic_checks
+                )
 
-                assert (
-                    semantic_preservation_score > 0.6
-                ), f"Poor semantic preservation: {semantic_preservation_score}"
+                assert semantic_preservation_score > 0.6, (
+                    f"Poor semantic preservation: {semantic_preservation_score}"
+                )
 
                 logger.info("✓ Round-trip semantic preservation successful")
                 logger.info(
@@ -657,17 +613,15 @@ class TestGNNLLMInterfaceIntegration:
                     "semantic_checks": semantic_checks,
                 }
             else:
-                logger.warning(
-                    "LLM reasoning failed, testing text transformation only"
-                )
+                logger.warning("LLM reasoning failed, testing text transformation only")
 
         # Fallback validation without LLM
         validation_results = transformer.validate_transformation_quality(
             embeddings, text_description
         )
-        assert (
-            validation_results["overall_quality"] > 0.7
-        ), "Text transformation quality insufficient"
+        assert validation_results["overall_quality"] > 0.7, (
+            "Text transformation quality insufficient"
+        )
 
         return {
             "embeddings": embeddings,
@@ -704,9 +658,7 @@ class TestGNNLLMInterfaceIntegration:
             "success": gnn_success,
             "nodes_processed": len(test_graph_data["node_features"]),
             "throughput_nodes_per_sec": (
-                len(test_graph_data["node_features"]) / gnn_time
-                if gnn_time > 0
-                else 0
+                len(test_graph_data["node_features"]) / gnn_time if gnn_time > 0 else 0
             ),
         }
 
@@ -724,9 +676,7 @@ class TestGNNLLMInterfaceIntegration:
             "time_seconds": transform_time,
             "text_length": len(text_description),
             "throughput_chars_per_sec": (
-                len(text_description) / transform_time
-                if transform_time > 0
-                else 0
+                len(text_description) / transform_time if transform_time > 0 else 0
             ),
         }
 
@@ -742,9 +692,7 @@ class TestGNNLLMInterfaceIntegration:
             performance_results["llm_reasoning"] = {
                 "time_seconds": llm_time,
                 "success": reasoning_result["success"],
-                "reasoning_quality": reasoning_result.get(
-                    "reasoning_quality", 0
-                ),
+                "reasoning_quality": reasoning_result.get("reasoning_quality", 0),
             }
 
         # Overall pipeline performance
@@ -755,19 +703,16 @@ class TestGNNLLMInterfaceIntegration:
             "total_time_seconds": total_time,
             "pipeline_stages": len(performance_results),
             "end_to_end_success": all(
-                result.get("success", True)
-                for result in performance_results.values()
+                result.get("success", True) for result in performance_results.values()
             ),
         }
 
         # Performance requirements validation
         assert gnn_time < 5.0, f"GNN processing too slow: {gnn_time:.3f}s"
-        assert (
-            transform_time < 0.5
-        ), f"Text transformation too slow: {transform_time:.3f}s"
-        assert (
-            total_time < 30.0
-        ), f"Overall pipeline too slow: {total_time:.3f}s"
+        assert transform_time < 0.5, (
+            f"Text transformation too slow: {transform_time:.3f}s"
+        )
+        assert total_time < 30.0, f"Overall pipeline too slow: {total_time:.3f}s"
 
         logger.info("✓ Integration performance validation successful")
         logger.info(f"  GNN processing: {gnn_time:.3f}s")
@@ -841,9 +786,7 @@ class TestGNNLLMInterfaceIntegration:
 
         # Edge case 4: Very large graph
         large_graph_size = 100
-        large_embeddings = np.random.randn(large_graph_size, 6).astype(
-            np.float32
-        )
+        large_embeddings = np.random.randn(large_graph_size, 6).astype(np.float32)
         large_node_ids = [f"node_{i}" for i in range(large_graph_size)]
 
         large_start = time.time()
@@ -863,20 +806,18 @@ class TestGNNLLMInterfaceIntegration:
             if case_result.get("text_generated", False):
                 logger.info(f"✓ Edge case '{case_name}' handled successfully")
             else:
-                logger.warning(
-                    f"✗ Edge case '{case_name}' failed: {case_result}"
-                )
+                logger.warning(f"✗ Edge case '{case_name}' failed: {case_result}")
 
         # At least basic cases should work
-        assert edge_case_results["empty_graph"][
-            "text_generated"
-        ], "Empty graph case failed"
-        assert edge_case_results["single_node"][
-            "text_generated"
-        ], "Single node case failed"
-        assert edge_case_results["large_graph"][
-            "text_generated"
-        ], "Large graph case failed"
+        assert edge_case_results["empty_graph"]["text_generated"], (
+            "Empty graph case failed"
+        )
+        assert edge_case_results["single_node"]["text_generated"], (
+            "Single node case failed"
+        )
+        assert edge_case_results["large_graph"]["text_generated"], (
+            "Large graph case failed"
+        )
 
         return edge_case_results
 
@@ -904,9 +845,7 @@ if __name__ == "__main__":
             llm_manager = LocalLLMManager()
         except Exception:
             llm_manager = None
-            print(
-                "Warning: LLM manager not available, some tests will be skipped"
-            )
+            print("Warning: LLM manager not available, some tests will be skipped")
 
         # Test graph data
         test_graph_data = {
@@ -1001,13 +940,13 @@ if __name__ == "__main__":
         passed = len([r for r in results if r["status"] == "PASSED"])
         total = len(results)
 
-        print(f"\n{'='*60}")
+        print(f"\n{'=' * 60}")
         print("GNN-LLM INTERFACE INTEGRATION TEST SUMMARY")
-        print(f"{'='*60}")
+        print(f"{'=' * 60}")
         print(f"Tests run: {total}")
         print(f"Passed: {passed}")
         print(f"Failed: {total - passed}")
-        print(f"Success rate: {passed/total*100:.1f}%")
+        print(f"Success rate: {passed / total * 100:.1f}%")
 
         if passed == total:
             print("🎉 All GNN-LLM interface tests passed!")

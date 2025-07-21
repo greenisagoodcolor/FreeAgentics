@@ -96,7 +96,9 @@ class PlaybookAction(ABC):
             matches = re.findall(pattern, value)
             for match in matches:
                 if match in context.variables:
-                    value = value.replace(f"{{{{{match}}}}}", str(context.variables[match]))
+                    value = value.replace(
+                        f"{{{{{match}}}}}", str(context.variables[match])
+                    )
             return value
         elif isinstance(value, dict):
             return {k: self._resolve_variables(v, context) for k, v in value.items()}
@@ -192,7 +194,9 @@ class NotificationAction(PlaybookAction):
         """Send notifications."""
         start_time = datetime.utcnow()
         try:
-            recipients = self._resolve_variables(self.config.get("recipients", []), context)
+            recipients = self._resolve_variables(
+                self.config.get("recipients", []), context
+            )
             message = self._resolve_variables(self.config.get("message", ""), context)
             channels = self.config.get("channels", ["email"])
 
@@ -277,7 +281,9 @@ class ConditionalAction(PlaybookAction):
         """Evaluate condition and execute."""
         start_time = datetime.utcnow()
         try:
-            condition = self._resolve_variables(self.config.get("condition", ""), context)
+            condition = self._resolve_variables(
+                self.config.get("condition", ""), context
+            )
 
             # Simple condition evaluation (in production, use safe expression evaluator)
             result = self._evaluate_condition(condition, context)
@@ -421,12 +427,12 @@ class PlaybookEngine:
                 # Handle action result
                 if action_result.status == ActionStatus.FAILED:
                     if action_config.get("continue_on_error", False):
-                        logger.warning(f"Action {action_result.action_id} failed but continuing")
+                        logger.warning(
+                            f"Action {action_result.action_id} failed but continuing"
+                        )
                     else:
                         context.status = ActionStatus.FAILED
-                        context.error = (
-                            f"Action {action_result.action_id} failed: {action_result.error}"
-                        )
+                        context.error = f"Action {action_result.action_id} failed: {action_result.error}"
                         break
 
             if context.status == ActionStatus.RUNNING:
@@ -478,7 +484,9 @@ class PlaybookEngine:
                 )
 
             # Execute with timeout
-            result = await asyncio.wait_for(action.execute(context), timeout=action.timeout)
+            result = await asyncio.wait_for(
+                action.execute(context), timeout=action.timeout
+            )
 
             return result
 
@@ -529,8 +537,12 @@ class PlaybookEngine:
         """Get execution metrics."""
         with self.execution_lock:
             total_executions = len(self.execution_history)
-            successful = sum(1 for c in self.execution_history if c.status == ActionStatus.SUCCESS)
-            failed = sum(1 for c in self.execution_history if c.status == ActionStatus.FAILED)
+            successful = sum(
+                1 for c in self.execution_history if c.status == ActionStatus.SUCCESS
+            )
+            failed = sum(
+                1 for c in self.execution_history if c.status == ActionStatus.FAILED
+            )
 
             avg_duration = 0
             if self.execution_history:
@@ -546,7 +558,9 @@ class PlaybookEngine:
                 "total_executions": total_executions,
                 "successful": successful,
                 "failed": failed,
-                "success_rate": successful / total_executions if total_executions > 0 else 0,
+                "success_rate": successful / total_executions
+                if total_executions > 0
+                else 0,
                 "active_executions": len(self.active_executions),
                 "average_duration_seconds": avg_duration,
             }

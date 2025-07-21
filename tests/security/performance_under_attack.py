@@ -84,7 +84,9 @@ class PerformanceUnderAttackTester:
                     "metrics": metrics,
                     "performance_impact": self._calculate_performance_impact(metrics),
                     "passed": self._evaluate_performance_threshold(metrics),
-                    "recommendations": self._generate_recommendations(scenario_name, metrics),
+                    "recommendations": self._generate_recommendations(
+                        scenario_name, metrics
+                    ),
                 }
 
                 # Brief recovery time between scenarios
@@ -149,8 +151,8 @@ class PerformanceUnderAttackTester:
 
         print("Baseline established:")
         print(f"  - Average response time: {statistics.mean(response_times):.2f}s")
-        print(f"  - Success rate: {successful_requests/total_requests:.2%}")
-        print(f"  - Throughput: {successful_requests/duration:.2f} req/s")
+        print(f"  - Success rate: {successful_requests / total_requests:.2%}")
+        print(f"  - Throughput: {successful_requests / duration:.2f} req/s")
 
     async def _simulate_ddos_attack(self) -> AttackMetrics:
         """Simulate DDoS attack with high concurrent requests"""
@@ -618,7 +620,9 @@ class PerformanceUnderAttackTester:
         attack_cpu = statistics.mean(metrics.cpu_usage) if metrics.cpu_usage else 0
 
         baseline_memory = statistics.mean(self.baseline_metrics.memory_usage)
-        attack_memory = statistics.mean(metrics.memory_usage) if metrics.memory_usage else 0
+        attack_memory = (
+            statistics.mean(metrics.memory_usage) if metrics.memory_usage else 0
+        )
 
         return {
             "response_time_increase": (
@@ -636,7 +640,10 @@ class PerformanceUnderAttackTester:
             )
             * 100,
             "cpu_usage_increase": ((attack_cpu - baseline_cpu) / baseline_cpu) * 100,
-            "memory_usage_increase": ((attack_memory - baseline_memory) / baseline_memory) * 100,
+            "memory_usage_increase": (
+                (attack_memory - baseline_memory) / baseline_memory
+            )
+            * 100,
         }
 
     def _evaluate_performance_threshold(self, metrics: AttackMetrics) -> bool:
@@ -664,7 +671,9 @@ class PerformanceUnderAttackTester:
 
         return all(checks)
 
-    def _generate_recommendations(self, scenario: str, metrics: AttackMetrics) -> List[str]:
+    def _generate_recommendations(
+        self, scenario: str, metrics: AttackMetrics
+    ) -> List[str]:
         """Generate performance recommendations based on attack results"""
 
         recommendations = []
@@ -681,19 +690,27 @@ class PerformanceUnderAttackTester:
                 f"Success rate ({metrics.success_rate:.2%}) below threshold. Implement better error handling and rate limiting."
             )
 
-        if metrics.cpu_usage and max(metrics.cpu_usage) > self.thresholds["max_cpu_usage"]:
+        if (
+            metrics.cpu_usage
+            and max(metrics.cpu_usage) > self.thresholds["max_cpu_usage"]
+        ):
             recommendations.append(
                 "High CPU usage detected. Consider horizontal scaling or CPU optimization."
             )
 
-        if metrics.memory_usage and max(metrics.memory_usage) > self.thresholds["max_memory_usage"]:
+        if (
+            metrics.memory_usage
+            and max(metrics.memory_usage) > self.thresholds["max_memory_usage"]
+        ):
             recommendations.append(
                 "High memory usage detected. Implement memory optimization and garbage collection tuning."
             )
 
         # Scenario-specific recommendations
         if "DDoS" in scenario:
-            recommendations.append("Implement DDoS protection (rate limiting, IP filtering, CDN).")
+            recommendations.append(
+                "Implement DDoS protection (rate limiting, IP filtering, CDN)."
+            )
 
         if "Brute Force" in scenario:
             recommendations.append("Implement account lockout and progressive delays.")
@@ -728,8 +745,12 @@ class PerformanceUnderAttackTester:
                     if self.baseline_metrics
                     else 0
                 ),
-                "success_rate": self.baseline_metrics.success_rate if self.baseline_metrics else 0,
-                "throughput": self.baseline_metrics.throughput if self.baseline_metrics else 0,
+                "success_rate": self.baseline_metrics.success_rate
+                if self.baseline_metrics
+                else 0,
+                "throughput": self.baseline_metrics.throughput
+                if self.baseline_metrics
+                else 0,
             },
             "attack_scenarios": results,
             "overall_recommendations": self._generate_overall_recommendations(results),
@@ -834,7 +855,9 @@ if __name__ == "__main__":
         print("\n" + "=" * 80)
         print("PERFORMANCE UNDER ATTACK REPORT")
         print("=" * 80)
-        print(f"Overall Resilience Score: {report['summary']['overall_resilience_score']:.1f}%")
+        print(
+            f"Overall Resilience Score: {report['summary']['overall_resilience_score']:.1f}%"
+        )
         print(
             f"Passed Scenarios: {report['summary']['passed_scenarios']}/{report['summary']['total_scenarios']}"
         )

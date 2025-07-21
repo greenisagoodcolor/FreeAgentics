@@ -16,7 +16,9 @@ from pathlib import Path
 project_root = Path(__file__).parent.parent
 sys.path.insert(0, str(project_root))
 
-logging.basicConfig(level=logging.INFO, format="%(asctime)s - %(levelname)s - %(message)s")
+logging.basicConfig(
+    level=logging.INFO, format="%(asctime)s - %(levelname)s - %(message)s"
+)
 logger = logging.getLogger(__name__)
 
 
@@ -76,7 +78,9 @@ def run_integration_tests():
     """Run integration tests for security headers."""
     print("\n🔗 Running Integration Tests...\n")
 
-    integration_test = project_root / "tests/integration/test_security_headers_simple.py"
+    integration_test = (
+        project_root / "tests/integration/test_security_headers_simple.py"
+    )
 
     if integration_test.exists():
         try:
@@ -284,7 +288,7 @@ def generate_test_report():
     print(f"   Total Tests: {total_tests}")
     print(f"   Passed: {passed_tests}")
     print(f"   Failed: {total_tests - passed_tests}")
-    print(f"   Success Rate: {(passed_tests/total_tests)*100:.1f}%")
+    print(f"   Success Rate: {(passed_tests / total_tests) * 100:.1f}%")
 
     if passed_tests == total_tests:
         print("\n🎉 All tests passed! Security headers implementation is ready.")
@@ -305,7 +309,9 @@ def main():
         print("\n✅ Task #14.5 - Security Headers and SSL/TLS Configuration: COMPLETED")
         sys.exit(0)
     else:
-        print("\n❌ Task #14.5 - Security Headers and SSL/TLS Configuration: NEEDS ATTENTION")
+        print(
+            "\n❌ Task #14.5 - Security Headers and SSL/TLS Configuration: NEEDS ATTENTION"
+        )
         sys.exit(1)
 
 

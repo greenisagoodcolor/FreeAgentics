@@ -285,7 +285,9 @@ class DependencyScanner:
     def _get_pip_version(self, package_name: str) -> Optional[str]:
         """Get installed pip package version"""
         try:
-            result = subprocess.run(["pip", "show", package_name], capture_output=True, text=True)
+            result = subprocess.run(
+                ["pip", "show", package_name], capture_output=True, text=True
+            )
             if result.returncode == 0:
                 for line in result.stdout.split("\n"):
                     if line.startswith("Version:"):
@@ -329,7 +331,9 @@ class VulnerabilityDatabase:
         if self.session:
             await self.session.close()
 
-    async def check_vulnerabilities(self, dependencies: List[Dependency]) -> List[Dependency]:
+    async def check_vulnerabilities(
+        self, dependencies: List[Dependency]
+    ) -> List[Dependency]:
         """Check dependencies for known vulnerabilities"""
         # Check from multiple sources
         tasks = []
@@ -358,7 +362,9 @@ class VulnerabilityDatabase:
 
         return dependencies
 
-    async def _check_python_vulnerabilities(self, dependencies: List[Dependency]) -> None:
+    async def _check_python_vulnerabilities(
+        self, dependencies: List[Dependency]
+    ) -> None:
         """Check Python packages against PyUp Safety database"""
         try:
             # Download the latest safety database
@@ -382,7 +388,9 @@ class VulnerabilityDatabase:
                                         ),
                                         package=dep.name,
                                         installed_version=dep.version,
-                                        affected_versions=", ".join(vuln_data.get("specs", [])),
+                                        affected_versions=", ".join(
+                                            vuln_data.get("specs", [])
+                                        ),
                                         fixed_versions=self._extract_fixed_versions(
                                             vuln_data.get("specs", [])
                                         ),
@@ -394,7 +402,9 @@ class VulnerabilityDatabase:
                                         description=vuln_data.get("description", ""),
                                         published_date=datetime.now(),  # Safety DB doesn't provide dates
                                         cve_ids=(
-                                            [vuln_data.get("cve")] if vuln_data.get("cve") else []
+                                            [vuln_data.get("cve")]
+                                            if vuln_data.get("cve")
+                                            else []
                                         ),
                                     )
                                     dep.vulnerabilities.append(vuln)
@@ -406,7 +416,9 @@ class VulnerabilityDatabase:
         """Check NPM packages for vulnerabilities"""
         for dep in dependencies:
             try:
-                async with self.session.get(f"{self.config.npm_registry}/{dep.name}") as response:
+                async with self.session.get(
+                    f"{self.config.npm_registry}/{dep.name}"
+                ) as response:
                     if response.status == 200:
                         data = await response.json()
 
@@ -419,7 +431,9 @@ class VulnerabilityDatabase:
                                 installed_version=dep.version,
                                 affected_versions="<"
                                 + security_info.get("patched_version", "unknown"),
-                                fixed_versions=[security_info.get("patched_version", "unknown")],
+                                fixed_versions=[
+                                    security_info.get("patched_version", "unknown")
+                                ],
                                 severity=VulnerabilitySeverity.HIGH,
                                 title="Security holding on package",
                                 description=security_info.get(
@@ -431,7 +445,9 @@ class VulnerabilityDatabase:
                             dep.vulnerabilities.append(vuln)
 
             except Exception as e:
-                logger.warning(f"Error checking NPM vulnerabilities for {dep.name}: {e}")
+                logger.warning(
+                    f"Error checking NPM vulnerabilities for {dep.name}: {e}"
+                )
 
     async def _check_snyk_vulnerabilities(self, dependencies: List[Dependency]) -> None:
         """Check vulnerabilities using Snyk API"""
@@ -561,11 +577,18 @@ class VulnerabilityDatabase:
     def _estimate_severity(self, vuln_data: Dict[str, Any]) -> VulnerabilitySeverity:
         """Estimate severity from vulnerability data"""
         # Look for severity indicators in the text
-        text = (vuln_data.get("advisory", "") + vuln_data.get("description", "")).lower()
+        text = (
+            vuln_data.get("advisory", "") + vuln_data.get("description", "")
+        ).lower()
 
-        if any(word in text for word in ["critical", "severe", "remote code execution", "rce"]):
+        if any(
+            word in text
+            for word in ["critical", "severe", "remote code execution", "rce"]
+        ):
             return VulnerabilitySeverity.CRITICAL
-        elif any(word in text for word in ["high", "sql injection", "xss", "authentication"]):
+        elif any(
+            word in text for word in ["high", "sql injection", "xss", "authentication"]
+        ):
             return VulnerabilitySeverity.HIGH
         elif any(word in text for word in ["medium", "moderate", "dos"]):
             return VulnerabilitySeverity.MEDIUM
@@ -583,14 +606,20 @@ class VulnerabilityDatabase:
         }
         return mapping.get(source)
 
-    def _process_snyk_results(self, data: Dict[str, Any], dependencies: List[Dependency]) -> None:
+    def _process_snyk_results(
+        self, data: Dict[str, Any], dependencies: List[Dependency]
+    ) -> None:
         """Process Snyk vulnerability results"""
         # Implementation depends on Snyk API response format
         pass
 
-    def _process_github_advisories(self, data: Dict[str, Any], dependency: Dependency) -> None:
+    def _process_github_advisories(
+        self, data: Dict[str, Any], dependency: Dependency
+    ) -> None:
         """Process GitHub advisory results"""
-        vulnerabilities = data.get("data", {}).get("securityVulnerabilities", {}).get("nodes", [])
+        vulnerabilities = (
+            data.get("data", {}).get("securityVulnerabilities", {}).get("nodes", [])
+        )
 
         for vuln_node in vulnerabilities:
             advisory = vuln_node.get("advisory", {})
@@ -609,8 +638,12 @@ class VulnerabilityDatabase:
                     package=dependency.name,
                     installed_version=dependency.version,
                     affected_versions=vuln_range,
-                    fixed_versions=[vuln_node.get("firstPatchedVersion", {}).get("identifier", "")],
-                    severity=VulnerabilitySeverity(advisory.get("severity", "LOW").lower()),
+                    fixed_versions=[
+                        vuln_node.get("firstPatchedVersion", {}).get("identifier", "")
+                    ],
+                    severity=VulnerabilitySeverity(
+                        advisory.get("severity", "LOW").lower()
+                    ),
                     title=advisory.get("summary", ""),
                     description=advisory.get("description", ""),
                     published_date=datetime.fromisoformat(
@@ -675,7 +708,9 @@ class UpdateManager:
         if not self.config.create_prs or not self.config.github_token:
             return None
 
-        updates_needed = [d for d in dependencies if d.update_available and self._should_update(d)]
+        updates_needed = [
+            d for d in dependencies if d.update_available and self._should_update(d)
+        ]
 
         if not updates_needed:
             return None
@@ -788,9 +823,7 @@ class UpdateManager:
     def _generate_pr_body(self, updates: List[Dependency]) -> str:
         """Generate PR body with update details"""
         body = "## Dependency Security Updates\n\n"
-        body += (
-            "This PR updates the following dependencies to address security vulnerabilities:\n\n"
-        )
+        body += "This PR updates the following dependencies to address security vulnerabilities:\n\n"
 
         for dep in updates:
             body += f"### {dep.name}\n"
@@ -870,13 +903,18 @@ class DependencyMonitor:
             "vulnerable_dependencies": len(vulnerable_deps),
             "critical_vulnerabilities": len(critical_vulns),
             "high_vulnerabilities": len(high_vulns),
-            "dependencies_with_updates": len([d for d in dependencies if d.update_available]),
+            "dependencies_with_updates": len(
+                [d for d in dependencies if d.update_available]
+            ),
         }
 
         # Auto-update if configured
         if self.config.auto_update and (
             critical_vulns
-            or (self.config.auto_update_severity == VulnerabilitySeverity.HIGH and high_vulns)
+            or (
+                self.config.auto_update_severity == VulnerabilitySeverity.HIGH
+                and high_vulns
+            )
         ):
             pr_url = await self._handle_auto_update(dependencies)
             if pr_url:
@@ -891,7 +929,9 @@ class DependencyMonitor:
 
         return report
 
-    async def _handle_auto_update(self, dependencies: List[Dependency]) -> Optional[str]:
+    async def _handle_auto_update(
+        self, dependencies: List[Dependency]
+    ) -> Optional[str]:
         """Handle automatic updates"""
         # Check update frequency
         now = datetime.now()
@@ -911,7 +951,9 @@ class DependencyMonitor:
         self, critical_vulns: List[Tuple[Dependency, Vulnerability]]
     ) -> None:
         """Send alert for critical vulnerabilities"""
-        logger.critical(f"CRITICAL VULNERABILITIES DETECTED: {len(critical_vulns)} issues found")
+        logger.critical(
+            f"CRITICAL VULNERABILITIES DETECTED: {len(critical_vulns)} issues found"
+        )
 
         for dep, vuln in critical_vulns:
             logger.critical(
@@ -920,7 +962,9 @@ class DependencyMonitor:
 
         # In production, this would send to alerting system
 
-    def _save_report(self, dependencies: List[Dependency], summary: Dict[str, Any]) -> None:
+    def _save_report(
+        self, dependencies: List[Dependency], summary: Dict[str, Any]
+    ) -> None:
         """Save detailed vulnerability report"""
         report_path = (
             self.config.project_root
@@ -971,8 +1015,12 @@ def main():
         default=Path.cwd(),
         help="Project root directory",
     )
-    parser.add_argument("--continuous", action="store_true", help="Run continuous monitoring")
-    parser.add_argument("--auto-update", action="store_true", help="Enable automatic updates")
+    parser.add_argument(
+        "--continuous", action="store_true", help="Run continuous monitoring"
+    )
+    parser.add_argument(
+        "--auto-update", action="store_true", help="Enable automatic updates"
+    )
     parser.add_argument("--snyk-token", help="Snyk API token")
     parser.add_argument("--github-token", help="GitHub API token")
 

@@ -31,7 +31,9 @@ class MultiStageBuilder:
         """Log error message"""
         print(f"[ERROR] {message}")
 
-    def run_command(self, command: List[str], timeout: int = 600) -> Tuple[int, str, str]:
+    def run_command(
+        self, command: List[str], timeout: int = 600
+    ) -> Tuple[int, str, str]:
         """Run a command and return return code, stdout, stderr"""
         try:
             result = subprocess.run(
@@ -83,8 +85,10 @@ class MultiStageBuilder:
                 "image_size": image_size,
                 "image_tag": image_tag,
             }
-            self.log_info(f"✓ {stage_name} stage built successfully in {build_time:.2f}s")
-            self.log_info(f"  Size: {image_size / (1024*1024):.1f} MB")
+            self.log_info(
+                f"✓ {stage_name} stage built successfully in {build_time:.2f}s"
+            )
+            self.log_info(f"  Size: {image_size / (1024 * 1024):.1f} MB")
             return True
         else:
             self.log_error(f"✗ {stage_name} stage build failed: {stderr}")
@@ -137,7 +141,9 @@ class MultiStageBuilder:
         warm_build_time = time.time() - start_time
 
         if returncode == 0:
-            cache_efficiency = (cold_build_time - warm_build_time) / cold_build_time * 100
+            cache_efficiency = (
+                (cold_build_time - warm_build_time) / cold_build_time * 100
+            )
             self.log_info(f"Cold build time: {cold_build_time:.2f}s")
             self.log_info(f"Warm build time: {warm_build_time:.2f}s")
             self.log_info(f"Cache efficiency: {cache_efficiency:.1f}%")
@@ -166,7 +172,7 @@ class MultiStageBuilder:
         if returncode == 0:
             lines = stdout.strip().split("\n")
             if len(lines) > 1:
-                self.log_info(f"Image has {len(lines)-1} layers")
+                self.log_info(f"Image has {len(lines) - 1} layers")
 
                 # Count non-zero size layers
                 non_zero_layers = 0
@@ -342,7 +348,9 @@ class MultiStageBuilder:
             if result.get("success"):
                 size_mb = result["image_size"] / (1024 * 1024)
                 build_time = result["build_time"]
-                print(f"{stage_name.upper()}: {size_mb:.1f} MB (built in {build_time:.2f}s)")
+                print(
+                    f"{stage_name.upper()}: {size_mb:.1f} MB (built in {build_time:.2f}s)"
+                )
             else:
                 print(f"{stage_name.upper()}: BUILD FAILED")
 

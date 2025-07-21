@@ -174,7 +174,9 @@ class TestDataGenerator:
             "contribution_score": random.uniform(0.0, 1.0),
         }
 
-    def generate_knowledge_node(self, creator_agent_id: Optional[str] = None) -> Dict[str, Any]:
+    def generate_knowledge_node(
+        self, creator_agent_id: Optional[str] = None
+    ) -> Dict[str, Any]:
         """Generate a knowledge node."""
         node_type = random.choice(self.node_types)
 
@@ -188,7 +190,9 @@ class TestDataGenerator:
             "version": random.randint(1, 5),
             "is_current": random.choice([True, True, True, False]),  # 75% current
             "confidence": random.uniform(0.5, 1.0),
-            "source": random.choice(["observation", "inference", "communication", "prior"]),
+            "source": random.choice(
+                ["observation", "inference", "communication", "prior"]
+            ),
             "creator_agent_id": creator_agent_id,
             "created_at": fake.date_time_between(start_date="-30d", end_date="now"),
         }
@@ -234,7 +238,9 @@ class TestDataGenerator:
             )
 
             for coalition_id in selected_coalitions:
-                memberships.append(self.generate_agent_coalition_membership(agent_id, coalition_id))
+                memberships.append(
+                    self.generate_agent_coalition_membership(agent_id, coalition_id)
+                )
 
         # Generate knowledge nodes
         knowledge_nodes = []
@@ -378,7 +384,9 @@ class TestDataGenerator:
     def _generate_node_properties(self, node_type: str) -> Dict[str, Any]:
         """Generate properties for a knowledge node."""
         base_props = {
-            "timestamp": fake.date_time_between(start_date="-30d", end_date="now").isoformat(),
+            "timestamp": fake.date_time_between(
+                start_date="-30d", end_date="now"
+            ).isoformat(),
             "relevance": random.uniform(0, 1),
             "certainty": random.uniform(0.5, 1),
         }
@@ -387,8 +395,12 @@ class TestDataGenerator:
         if node_type == "entity":
             base_props.update(
                 {
-                    "entity_type": random.choice(["agent", "object", "location", "resource"]),
-                    "attributes": {fake.word(): fake.word() for _ in range(random.randint(1, 5))},
+                    "entity_type": random.choice(
+                        ["agent", "object", "location", "resource"]
+                    ),
+                    "attributes": {
+                        fake.word(): fake.word() for _ in range(random.randint(1, 5))
+                    },
                 }
             )
         elif node_type == "process":
@@ -414,6 +426,8 @@ class TestDataGenerator:
             base_props["causality_strength"] = random.uniform(0.3, 1.0)
             base_props["delay"] = random.uniform(0, 10)
         elif edge_type == "requires":
-            base_props["necessity"] = random.choice(["mandatory", "optional", "conditional"])
+            base_props["necessity"] = random.choice(
+                ["mandatory", "optional", "conditional"]
+            )
 
         return base_props

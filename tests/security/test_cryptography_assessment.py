@@ -145,7 +145,9 @@ class CryptographicAlgorithmAssessment:
             iv = secrets.token_bytes(12)  # 96-bit IV for GCM
             plaintext = b"test_encryption_data"
 
-            cipher = Cipher(algorithms.AES(key), modes.GCM(iv), backend=default_backend())
+            cipher = Cipher(
+                algorithms.AES(key), modes.GCM(iv), backend=default_backend()
+            )
 
             encryptor = cipher.encryptor()
             ciphertext = encryptor.update(plaintext) + encryptor.finalize()
@@ -170,7 +172,9 @@ class CryptographicAlgorithmAssessment:
 
         # Test for weak symmetric algorithms
         # This would typically scan for DES, 3DES, RC4 usage
-        results["warnings"].append("Manual review needed for weak symmetric cipher usage")
+        results["warnings"].append(
+            "Manual review needed for weak symmetric cipher usage"
+        )
 
         return results
 
@@ -339,12 +343,16 @@ class KeyManagementAssessment:
         try:
             auth_manager = AuthenticationManager()
             # Check if RSA keys are properly generated
-            if hasattr(auth_manager, "private_key") and hasattr(auth_manager, "public_key"):
+            if hasattr(auth_manager, "private_key") and hasattr(
+                auth_manager, "public_key"
+            ):
                 key_size = auth_manager.private_key.key_size
                 if key_size >= 2048:
                     results["passed"].append(f"RSA key size adequate: {key_size} bits")
                 else:
-                    results["failed"].append(f"RSA key size inadequate: {key_size} bits")
+                    results["failed"].append(
+                        f"RSA key size inadequate: {key_size} bits"
+                    )
             else:
                 results["warnings"].append("Could not access RSA keys for validation")
 
@@ -389,9 +397,13 @@ class KeyManagementAssessment:
                         "644",
                         "600",
                     ]:
-                        results["warnings"].append(f"Public key permissions unusual: {permissions}")
+                        results["warnings"].append(
+                            f"Public key permissions unusual: {permissions}"
+                        )
                     else:
-                        results["passed"].append(f"Key file permissions appropriate: {key_path}")
+                        results["passed"].append(
+                            f"Key file permissions appropriate: {key_path}"
+                        )
                 else:
                     results["warnings"].append(f"Key file not found: {key_path}")
 
@@ -431,7 +443,9 @@ class KeyManagementAssessment:
         # Test token revocation capability
         try:
             auth_manager = AuthenticationManager()
-            if hasattr(auth_manager, "blacklist") and hasattr(auth_manager, "revoke_token"):
+            if hasattr(auth_manager, "blacklist") and hasattr(
+                auth_manager, "revoke_token"
+            ):
                 results["passed"].append("Token revocation mechanism available")
             else:
                 results["failed"].append("Token revocation mechanism not found")
@@ -464,11 +478,15 @@ class EncryptionImplementationTesting:
             plaintext2 = b"message_two_test"
 
             # Encrypt two different messages with same IV
-            cipher1 = Cipher(algorithms.AES(key), modes.CBC(iv), backend=default_backend())
+            cipher1 = Cipher(
+                algorithms.AES(key), modes.CBC(iv), backend=default_backend()
+            )
             encryptor1 = cipher1.encryptor()
             ciphertext1 = encryptor1.update(plaintext1) + encryptor1.finalize()
 
-            cipher2 = Cipher(algorithms.AES(key), modes.CBC(iv), backend=default_backend())
+            cipher2 = Cipher(
+                algorithms.AES(key), modes.CBC(iv), backend=default_backend()
+            )
             encryptor2 = cipher2.encryptor()
             ciphertext2 = encryptor2.update(plaintext2) + encryptor2.finalize()
 
@@ -478,7 +496,9 @@ class EncryptionImplementationTesting:
                     "IV reuse test - ciphertexts differ (padding masks issue)"
                 )
             else:
-                results["failed"].append("IV reuse vulnerability - identical ciphertexts")
+                results["failed"].append(
+                    "IV reuse vulnerability - identical ciphertexts"
+                )
 
         except Exception as e:
             results["failed"].append(f"IV reuse test error: {e}")
@@ -497,7 +517,9 @@ class EncryptionImplementationTesting:
             block2 = ciphertext[16:32]
 
             if block1 == block2:
-                results["failed"].append("ECB mode vulnerability - pattern preservation")
+                results["failed"].append(
+                    "ECB mode vulnerability - pattern preservation"
+                )
             else:
                 results["passed"].append("ECB pattern test passed")
 
@@ -510,7 +532,9 @@ class EncryptionImplementationTesting:
             iv = secrets.token_bytes(12)
             plaintext = b"authenticated_encryption_test"
 
-            cipher = Cipher(algorithms.AES(key), modes.GCM(iv), backend=default_backend())
+            cipher = Cipher(
+                algorithms.AES(key), modes.GCM(iv), backend=default_backend()
+            )
             encryptor = cipher.encryptor()
             ciphertext = encryptor.update(plaintext) + encryptor.finalize()
             auth_tag = encryptor.tag
@@ -685,7 +709,9 @@ class SSLTLSSecurityAssessment:
             if context.verify_mode == ssl.CERT_REQUIRED:
                 results["passed"].append("Certificate verification required")
             else:
-                results["warnings"].append(f"Certificate verification mode: {context.verify_mode}")
+                results["warnings"].append(
+                    f"Certificate verification mode: {context.verify_mode}"
+                )
 
         except Exception as e:
             results["failed"].append(f"SSL context test error: {e}")
@@ -717,7 +743,9 @@ class SSLTLSSecurityAssessment:
             header = pinner.get_pinning_header("test.example.com")
 
             if header and test_pin.split("-")[1] in header:
-                results["passed"].append("Certificate pinning header generation working")
+                results["passed"].append(
+                    "Certificate pinning header generation working"
+                )
             else:
                 results["failed"].append("Certificate pinning header generation failed")
 
@@ -744,7 +772,9 @@ class SSLTLSSecurityAssessment:
             results["passed"].append("Strong cipher suite configuration available")
 
             # Check for perfect forward secrecy
-            results["warnings"].append("Manual verification needed for PFS cipher preference")
+            results["warnings"].append(
+                "Manual verification needed for PFS cipher preference"
+            )
 
         except Exception as e:
             results["failed"].append(f"Cipher suite test error: {e}")
@@ -788,10 +818,14 @@ class CryptographicVulnerabilityTesting:
             incorrect_time = time.time() - start_time
 
             # Check if timing difference is significant (potential timing attack)
-            time_ratio = max(correct_time, incorrect_time) / min(correct_time, incorrect_time)
+            time_ratio = max(correct_time, incorrect_time) / min(
+                correct_time, incorrect_time
+            )
 
             if time_ratio < 1.1:  # Less than 10% difference
-                results["passed"].append("Password verification timing appears constant")
+                results["passed"].append(
+                    "Password verification timing appears constant"
+                )
             else:
                 results["warnings"].append(
                     f"Password verification timing variance: {time_ratio:.2f}x"
@@ -841,7 +875,9 @@ class CryptographicVulnerabilityTesting:
             if time_ratio < 1.2:  # Less than 20% difference
                 results["passed"].append("JWT verification timing appears constant")
             else:
-                results["warnings"].append(f"JWT verification timing variance: {time_ratio:.2f}x")
+                results["warnings"].append(
+                    f"JWT verification timing variance: {time_ratio:.2f}x"
+                )
 
         except Exception as e:
             results["failed"].append(f"JWT timing test error: {e}")
@@ -869,7 +905,9 @@ class CryptographicVulnerabilityTesting:
             if len(unique_bytes) > 200:  # Should see most byte values
                 results["passed"].append("Good byte distribution in random values")
             else:
-                results["warnings"].append(f"Limited byte distribution: {len(unique_bytes)}/256")
+                results["warnings"].append(
+                    f"Limited byte distribution: {len(unique_bytes)}/256"
+                )
 
         except Exception as e:
             results["failed"].append(f"Randomness test error: {e}")
@@ -880,7 +918,9 @@ class CryptographicVulnerabilityTesting:
 
             # Check if standard random is used anywhere it shouldn't be
             # This would require code analysis in production
-            results["warnings"].append("Manual code review needed for insecure random usage")
+            results["warnings"].append(
+                "Manual code review needed for insecure random usage"
+            )
 
         except Exception as e:
             results["failed"].append(f"Random usage test error: {e}")
@@ -912,12 +952,16 @@ class CryptographicVulnerabilityTesting:
             padded_message = pkcs7_pad(message)
 
             # Encrypt
-            cipher = Cipher(algorithms.AES(key), modes.CBC(iv), backend=default_backend())
+            cipher = Cipher(
+                algorithms.AES(key), modes.CBC(iv), backend=default_backend()
+            )
             encryptor = cipher.encryptor()
             ciphertext = encryptor.update(padded_message) + encryptor.finalize()
 
             # Test decryption with proper padding
-            decryptor = Cipher(algorithms.AES(key), modes.CBC(iv), backend=default_backend())
+            decryptor = Cipher(
+                algorithms.AES(key), modes.CBC(iv), backend=default_backend()
+            )
             decrypted_padded = decryptor.update(ciphertext) + decryptor.finalize()
             decrypted = pkcs7_unpad(decrypted_padded)
 
@@ -934,9 +978,13 @@ class CryptographicVulnerabilityTesting:
                     modes.CBC(iv),
                     backend=default_backend(),
                 )
-                invalid_decrypted = decryptor.update(invalid_ciphertext) + decryptor.finalize()
+                invalid_decrypted = (
+                    decryptor.update(invalid_ciphertext) + decryptor.finalize()
+                )
                 pkcs7_unpad(invalid_decrypted)
-                results["warnings"].append("Invalid padding not detected - potential oracle")
+                results["warnings"].append(
+                    "Invalid padding not detected - potential oracle"
+                )
             except Exception:
                 results["passed"].append("Invalid padding correctly detected")
 
@@ -989,7 +1037,9 @@ class TestCryptographicAlgorithmAssessment:
         # Check for specific implementations
         passed_messages = " ".join(results["passed"])
         assert "SHA-256" in passed_messages, "SHA-256 implementation not validated"
-        assert "salt generation" in passed_messages, "Secure salt generation not validated"
+        assert "salt generation" in passed_messages, (
+            "Secure salt generation not validated"
+        )
 
         # Log any failures
         for failure in results["failed"]:
@@ -1083,10 +1133,14 @@ class TestEncryptionImplementation:
         """Test symmetric encryption security."""
         results = encryption_tester.test_symmetric_encryption_security()
 
-        assert len(results["passed"]) > 0, "No symmetric encryption security tests passed"
+        assert len(results["passed"]) > 0, (
+            "No symmetric encryption security tests passed"
+        )
 
         passed_messages = " ".join(results["passed"])
-        assert "tampering correctly detected" in passed_messages, "Authentication not working"
+        assert "tampering correctly detected" in passed_messages, (
+            "Authentication not working"
+        )
 
         for failure in results["failed"]:
             logger.error(f"Symmetric encryption security failure: {failure}")
@@ -1095,7 +1149,9 @@ class TestEncryptionImplementation:
         """Test asymmetric encryption security."""
         results = encryption_tester.test_asymmetric_encryption_security()
 
-        assert len(results["passed"]) > 0, "No asymmetric encryption security tests passed"
+        assert len(results["passed"]) > 0, (
+            "No asymmetric encryption security tests passed"
+        )
 
         for failure in results["failed"]:
             logger.error(f"Asymmetric encryption security failure: {failure}")
@@ -1107,8 +1163,12 @@ class TestEncryptionImplementation:
         assert len(results["passed"]) > 0, "No digital signature tests passed"
 
         passed_messages = " ".join(results["passed"])
-        assert "signature verification correct" in passed_messages, "Signature verification failed"
-        assert "correctly rejected" in passed_messages, "Tampered signature not rejected"
+        assert "signature verification correct" in passed_messages, (
+            "Signature verification failed"
+        )
+        assert "correctly rejected" in passed_messages, (
+            "Tampered signature not rejected"
+        )
 
         for failure in results["failed"]:
             logger.error(f"Digital signature failure: {failure}")
@@ -1156,7 +1216,9 @@ class TestCryptographicVulnerabilities:
         results = vulnerability_tester.test_timing_attack_resistance()
 
         # Should have some passing tests or warnings
-        assert len(results["passed"]) + len(results["warnings"]) > 0, "No timing tests completed"
+        assert len(results["passed"]) + len(results["warnings"]) > 0, (
+            "No timing tests completed"
+        )
 
         for failure in results["failed"]:
             logger.error(f"Timing attack test failure: {failure}")
@@ -1235,13 +1297,19 @@ class TestPlatformCryptographyIntegration:
         assert hashed.startswith("$2b$"), "bcrypt hash format incorrect"
 
         # Verify password verification
-        assert auth_manager.verify_password(password, hashed), "Password verification failed"
-        assert not auth_manager.verify_password("wrong_password", hashed), "Wrong password accepted"
+        assert auth_manager.verify_password(password, hashed), (
+            "Password verification failed"
+        )
+        assert not auth_manager.verify_password("wrong_password", hashed), (
+            "Wrong password accepted"
+        )
 
         # Test that same password produces different hashes (salt)
         hashed2 = auth_manager.hash_password(password)
         assert hashed != hashed2, "Password hashes are identical - no salt"
-        assert auth_manager.verify_password(password, hashed2), "Second hash verification failed"
+        assert auth_manager.verify_password(password, hashed2), (
+            "Second hash verification failed"
+        )
 
     def test_certificate_pinning_integration(self):
         """Test certificate pinning integration."""

@@ -163,9 +163,7 @@ class DatabaseIsolation:
 
     def get_connection_url(self, schema: Optional[str] = None) -> str:
         """Get database connection URL."""
-        base_url = (
-            f"postgresql://{self.user}:{self.password}@{self.host}:{self.port}/{self.database}"
-        )
+        base_url = f"postgresql://{self.user}:{self.password}@{self.host}:{self.port}/{self.database}"
 
         if schema:
             base_url += f"?options=--search_path%3D{schema}"
@@ -308,7 +306,9 @@ class MessageQueueIsolation:
             if vhost in self._vhosts:
                 self._vhosts.remove(vhost)
         else:
-            logger.warning(f"Failed to delete virtual host {vhost}: {response.status_code}")
+            logger.warning(
+                f"Failed to delete virtual host {vhost}: {response.status_code}"
+            )
 
     def get_connection_params(self, vhost: str) -> pika.ConnectionParameters:
         """Get connection parameters for a virtual host."""

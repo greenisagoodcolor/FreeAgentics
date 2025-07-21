@@ -111,7 +111,7 @@ class OptimizedThreadPoolManager:
         self._futures_lock = Lock()
 
         logger.info(
-            f"Initialized OptimizedThreadPoolManager with" f" {initial_workers} workers"
+            f"Initialized OptimizedThreadPoolManager with {initial_workers} workers"
         )
 
     def register_agent(self, agent_id: str, agent: Any) -> None:

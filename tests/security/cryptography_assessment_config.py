@@ -504,7 +504,9 @@ SCORING_WEIGHTS = {
 }
 
 
-def get_algorithm_standard(algorithm_type: str, algorithm_name: str) -> Optional[AlgorithmStandard]:
+def get_algorithm_standard(
+    algorithm_type: str, algorithm_name: str
+) -> Optional[AlgorithmStandard]:
     """Get algorithm standard by type and name."""
     standards_map = {
         "hash": CryptographyStandards.HASH_ALGORITHMS,
@@ -554,7 +556,9 @@ def calculate_security_score(findings: List[Dict[str, Any]]) -> Dict[str, Any]:
     }
 
 
-def get_compliance_status(findings: List[Dict[str, Any]]) -> Dict[ComplianceStandard, str]:
+def get_compliance_status(
+    findings: List[Dict[str, Any]],
+) -> Dict[ComplianceStandard, str]:
     """Determine compliance status for each standard."""
     compliance_status = {}
 

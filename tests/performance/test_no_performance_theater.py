@@ -132,7 +132,9 @@ def test_no_time_sleep_in_performance_tests():
         data = np.random.rand(1000)
         _ = np.fft.fft(data).real.sum()  # Force real CPU work
         for violation in sleep_violations:
-            error_msg += f"  {violation['file']}:{violation['line']} - {violation['code']}\n"
+            error_msg += (
+                f"  {violation['file']}:{violation['line']} - {violation['code']}\n"
+            )
         error_msg += "\nAll time.sleep() calls MUST be replaced with real computations!"
         # Real performance computation instead of sleep
         data = np.random.rand(1000)
@@ -152,7 +154,9 @@ def test_no_mocked_timing_in_performance_tests():
     if mock_violations:
         error_msg = "HIGH: Mocked timing found in performance tests!\n"
         for violation in mock_violations:
-            error_msg += f"  {violation['file']}:{violation['line']} - {violation['code']}\n"
+            error_msg += (
+                f"  {violation['file']}:{violation['line']} - {violation['code']}\n"
+            )
         error_msg += "\nAll mocked timing MUST be replaced with real measurements!"
 
         pytest.fail(error_msg)
@@ -164,26 +168,32 @@ def test_performance_tests_use_real_operations():
 
     performance_files = [
         Path("/home/green/FreeAgentics/tests/performance/pymdp_benchmarks.py"),
-        Path("/home/green/FreeAgentics/tests/performance/performance_regression_tests.py"),
-        Path("/home/green/FreeAgentics/tests/performance/pymdp_mathematical_validation.py"),
+        Path(
+            "/home/green/FreeAgentics/tests/performance/performance_regression_tests.py"
+        ),
+        Path(
+            "/home/green/FreeAgentics/tests/performance/pymdp_mathematical_validation.py"
+        ),
     ]
 
     for file_path in performance_files:
-        assert file_path.exists(), f"Critical performance test file missing: {file_path}"
+        assert file_path.exists(), (
+            f"Critical performance test file missing: {file_path}"
+        )
 
         # Check that the file contains real operations
         with open(file_path, "r") as f:
             content = f.read()
 
         # Should contain real operations, not theater
-        assert (
-            "pymdp" in content.lower() or "numpy" in content.lower()
-        ), f"Performance test {file_path} should use real libraries"
+        assert "pymdp" in content.lower() or "numpy" in content.lower(), (
+            f"Performance test {file_path} should use real libraries"
+        )
 
         # Should NOT contain theater patterns
-        assert (
-            "time.sleep(" not in content
-        ), f"Performance test {file_path} contains time.sleep() - THEATER!"
+        assert "time.sleep(" not in content, (
+            f"Performance test {file_path} contains time.sleep() - THEATER!"
+        )
 
 
 def test_mathematical_validation_exists():
@@ -206,7 +216,9 @@ def test_mathematical_validation_exists():
         assert validator is not None
 
         # Test tolerance is reasonable
-        assert 0 < validator.tolerance < 0.001, "Mathematical tolerance should be strict"
+        assert 0 < validator.tolerance < 0.001, (
+            "Mathematical tolerance should be strict"
+        )
 
     except ImportError:
         pytest.fail("Cannot import mathematical validation module")
@@ -234,14 +246,16 @@ def test_performance_benchmarks_produce_realistic_results():
         # Extract timing information
         duration_patterns = re.findall(r"Duration: (\d+\.\d+)s", output)
 
-        assert len(duration_patterns) > 0, "No timing information found in benchmark output"
+        assert len(duration_patterns) > 0, (
+            "No timing information found in benchmark output"
+        )
 
         # Check that timings are realistic (not zero, not too large)
         for duration_str in duration_patterns:
             duration = float(duration_str)
-            assert (
-                0.001 < duration < 10.0
-            ), f"Unrealistic timing found: {duration}s (should be between 1ms and 10s)"
+            assert 0.001 < duration < 10.0, (
+                f"Unrealistic timing found: {duration}s (should be between 1ms and 10s)"
+            )
 
     except subprocess.TimeoutExpired:
         pytest.fail("Benchmark took too long - possible performance issue")

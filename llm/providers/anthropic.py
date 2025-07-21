@@ -138,9 +138,7 @@ class AnthropicProvider(LLMProvider):
         # Check requests per minute
         if len(self.request_times) >= config["rpm"]:
             oldest_request = self.request_times[0]
-            wait_time = (
-                oldest_request + timedelta(minutes=1) - now
-            ).total_seconds()
+            wait_time = (oldest_request + timedelta(minutes=1) - now).total_seconds()
             if wait_time > 0:
                 await asyncio.sleep(wait_time)
 
@@ -148,9 +146,7 @@ class AnthropicProvider(LLMProvider):
         total_tokens = sum(tokens for _, tokens in self.token_usage)
         if total_tokens >= config["tpm"]:
             oldest_token_time = self.token_usage[0][0]
-            wait_time = (
-                oldest_token_time + timedelta(minutes=1) - now
-            ).total_seconds()
+            wait_time = (oldest_token_time + timedelta(minutes=1) - now).total_seconds()
             if wait_time > 0:
                 await asyncio.sleep(wait_time)
 
@@ -176,9 +172,7 @@ class AnthropicProvider(LLMProvider):
             else:
                 anthropic_messages.append(
                     {
-                        "role": "user"
-                        if msg.role == LLMRole.USER
-                        else "assistant",
+                        "role": "user" if msg.role == LLMRole.USER else "assistant",
                         "content": msg.content,
                     }
                 )
@@ -238,9 +232,7 @@ class AnthropicProvider(LLMProvider):
                     try:
                         response_json = json.loads(response_text)
                     except json.JSONDecodeError:
-                        raise LLMError(
-                            f"Invalid JSON response: {response_text[:200]}"
-                        )
+                        raise LLMError(f"Invalid JSON response: {response_text[:200]}")
 
                     if response.status != 200:
                         error_msg = response_json.get("error", {}).get(
@@ -272,9 +264,7 @@ class AnthropicProvider(LLMProvider):
                             "total_tokens": usage.get("input_tokens", 0)
                             + usage.get("output_tokens", 0),
                         }
-                        self.token_usage.append(
-                            (datetime.now(), usage["total_tokens"])
-                        )
+                        self.token_usage.append((datetime.now(), usage["total_tokens"]))
 
                     return LLMResponse(
                         content=content,
@@ -294,9 +284,7 @@ class AnthropicProvider(LLMProvider):
             except json.JSONDecodeError as e:
                 last_error = LLMError(f"Invalid response format: {str(e)}")
             except KeyError as e:
-                last_error = LLMError(
-                    f"Unexpected response structure: {str(e)}"
-                )
+                last_error = LLMError(f"Unexpected response structure: {str(e)}")
             except LLMError as e:
                 last_error = e
             except Exception as e:
@@ -308,9 +296,7 @@ class AnthropicProvider(LLMProvider):
                 await asyncio.sleep(wait_time)
 
         # All retries failed
-        raise last_error or LLMError(
-            "Failed to generate response after all retries"
-        )
+        raise last_error or LLMError("Failed to generate response after all retries")
 
     async def validate_model(self, model_name: str) -> bool:
         """Check if a model is available."""

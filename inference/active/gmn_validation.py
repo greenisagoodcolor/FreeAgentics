@@ -116,8 +116,12 @@ class GMNSyntaxValidator:
 
         # Hard failure on any errors
         if not result.is_valid:
-            error_messages = [f"{error.validator}: {error.message}" for error in result.errors]
-            raise GMNValidationError(f"Syntax validation failed: {'; '.join(error_messages)}")
+            error_messages = [
+                f"{error.validator}: {error.message}" for error in result.errors
+            ]
+            raise GMNValidationError(
+                f"Syntax validation failed: {'; '.join(error_messages)}"
+            )
 
         return result
 
@@ -156,14 +160,18 @@ class GMNSyntaxValidator:
 
         if not result.is_valid:
             error_messages = [
-                f"Line {error.context.get('line', '?')}: {error.message}" for error in result.errors
+                f"Line {error.context.get('line', '?')}: {error.message}"
+                for error in result.errors
             ]
-            raise GMNValidationError(f"Text format validation failed: {'; '.join(error_messages)}")
+            raise GMNValidationError(
+                f"Text format validation failed: {'; '.join(error_messages)}"
+            )
 
         return result
 
-    def _validate_top_level_structure(self, spec: Dict[str, Any],
-        result: ValidationResult):
+    def _validate_top_level_structure(
+        self, spec: Dict[str, Any], result: ValidationResult
+    ):
         """Validate top-level specification structure."""
         # Check required fields
         for field in self.required_top_level_fields:
@@ -291,13 +299,18 @@ class GMNSemanticValidator:
 
         # Hard failure on any errors
         if not result.is_valid:
-            error_messages = [f"{error.validator}: {error.message}" for error in result.errors]
-            raise GMNValidationError(f"Semantic validation failed: {'; '.join(error_messages)}")
+            error_messages = [
+                f"{error.validator}: {error.message}" for error in result.errors
+            ]
+            raise GMNValidationError(
+                f"Semantic validation failed: {'; '.join(error_messages)}"
+            )
 
         return result
 
-    def _build_node_lookup(self, nodes: List[Dict[str, Any]]) -> Dict[str, Dict[str,
-        Any]]:
+    def _build_node_lookup(
+        self, nodes: List[Dict[str, Any]]
+    ) -> Dict[str, Dict[str, Any]]:
         """Build lookup table for nodes by name."""
         return {node.get("name"): node for node in nodes if "name" in node}
 
@@ -450,8 +463,9 @@ class GMNSemanticValidator:
                 connected_states = [
                     dep
                     for dep in dependencies.get(node_name, [])
-                    if any(n.get("name") == dep and
-                        n.get("type") == "state" for n in nodes)
+                    if any(
+                        n.get("name") == dep and n.get("type") == "state" for n in nodes
+                    )
                 ]
                 if not connected_states:
                     result.add_error(
@@ -526,8 +540,12 @@ class GMNMathematicalValidator:
 
         # Hard failure on any errors
         if not result.is_valid:
-            error_messages = [f"{error.validator}: {error.message}" for error in result.errors]
-            raise GMNValidationError(f"Mathematical validation failed: {'; '.join(error_messages)}")
+            error_messages = [
+                f"{error.validator}: {error.message}" for error in result.errors
+            ]
+            raise GMNValidationError(
+                f"Mathematical validation failed: {'; '.join(error_messages)}"
+            )
 
         return result
 
@@ -641,7 +659,10 @@ class GMNMathematicalValidator:
                     to_node = nodes_by_name[to_node_name]
 
                     # Check state -> observation mappings
-                    if from_node.get("type") == "state" and to_node.get("type") == "observation":
+                    if (
+                        from_node.get("type") == "state"
+                        and to_node.get("type") == "observation"
+                    ):
                         from_dim = from_node.get("num_states")
                         to_dim = to_node.get("num_observations")
 
@@ -655,8 +676,9 @@ class GMNMathematicalValidator:
                                 },
                             )
 
-    def _validate_numerical_ranges(self, nodes: List[Dict[str, Any]],
-        result: ValidationResult):
+    def _validate_numerical_ranges(
+        self, nodes: List[Dict[str, Any]], result: ValidationResult
+    ):
         """Validate numerical ranges for all numeric fields."""
         for node in nodes:
             node_name = node.get("name", "unnamed")
@@ -707,8 +729,9 @@ class GMNMathematicalValidator:
                             node_name=node_name,
                         )
 
-    def _validate_matrix_constraints(self, nodes: List[Dict[str, Any]],
-        result: ValidationResult):
+    def _validate_matrix_constraints(
+        self, nodes: List[Dict[str, Any]], result: ValidationResult
+    ):
         """Validate matrix constraints for transition and likelihood matrices."""
         for node in nodes:
             node_name = node.get("name", "unnamed")
@@ -790,13 +813,18 @@ class GMNTypeValidator:
 
         # Hard failure on any errors
         if not result.is_valid:
-            error_messages = [f"{error.validator}: {error.message}" for error in result.errors]
-            raise GMNValidationError(f"Type validation failed: {'; '.join(error_messages)}")
+            error_messages = [
+                f"{error.validator}: {error.message}" for error in result.errors
+            ]
+            raise GMNValidationError(
+                f"Type validation failed: {'; '.join(error_messages)}"
+            )
 
         return result
 
-    def _validate_node_types(self, nodes: List[Dict[str, Any]],
-        result: ValidationResult):
+    def _validate_node_types(
+        self, nodes: List[Dict[str, Any]], result: ValidationResult
+    ):
         """Validate node types and required attributes."""
         for node in nodes:
             node_name = node.get("name", "unnamed")
@@ -822,8 +850,9 @@ class GMNTypeValidator:
                             node_name=node_name,
                         )
 
-    def _validate_edge_types(self, edges: List[Dict[str, Any]],
-        result: ValidationResult):
+    def _validate_edge_types(
+        self, edges: List[Dict[str, Any]], result: ValidationResult
+    ):
         """Validate edge types."""
         for i, edge in enumerate(edges):
             edge_type = edge.get("type")
@@ -835,8 +864,9 @@ class GMNTypeValidator:
                     edge_index=i,
                 )
 
-    def _validate_attribute_types(self, nodes: List[Dict[str, Any]],
-        result: ValidationResult):
+    def _validate_attribute_types(
+        self, nodes: List[Dict[str, Any]], result: ValidationResult
+    ):
         """Validate attribute data types."""
         for node in nodes:
             node_name = node.get("name", "unnamed")
@@ -894,7 +924,9 @@ class GMNConstraintValidator:
         """Initialize the constraint validator."""
         self.max_action_space = 100000  # Business rule: reasonable action space limit
         self.max_state_space = 100000  # Business rule: reasonable state space limit
-        self.max_observation_space = 100000  # Business rule: reasonable observation space limit
+        self.max_observation_space = (
+            100000  # Business rule: reasonable observation space limit
+        )
 
     def validate(self, spec: Dict[str, Any]) -> ValidationResult:
         """Validate GMN specification constraints with hard failures."""
@@ -913,13 +945,18 @@ class GMNConstraintValidator:
 
         # Hard failure on any errors
         if not result.is_valid:
-            error_messages = [f"{error.validator}: {error.message}" for error in result.errors]
-            raise GMNValidationError(f"Constraint validation failed: {'; '.join(error_messages)}")
+            error_messages = [
+                f"{error.validator}: {error.message}" for error in result.errors
+            ]
+            raise GMNValidationError(
+                f"Constraint validation failed: {'; '.join(error_messages)}"
+            )
 
         return result
 
-    def _validate_business_rules(self, nodes: List[Dict[str, Any]],
-        result: ValidationResult):
+    def _validate_business_rules(
+        self, nodes: List[Dict[str, Any]], result: ValidationResult
+    ):
         """Validate business rules for space sizes."""
         for node in nodes:
             node_name = node.get("name", "unnamed")
@@ -961,8 +998,11 @@ class GMNConstraintValidator:
         # Build observation space lookup
         obs_spaces = {}
         for node in nodes:
-            if (node.get("type") == "observation" and "name" in node and
-                "num_observations" in node):
+            if (
+                node.get("type") == "observation"
+                and "name" in node
+                and "num_observations" in node
+            ):
                 obs_spaces[node["name"]] = node["num_observations"]
 
         for node in nodes:
@@ -1066,8 +1106,9 @@ class GMNValidationFramework:
 
         return result
 
-    def _add_reality_checks(self, nodes: List[Dict[str, Any]],
-        result: ValidationResult):
+    def _add_reality_checks(
+        self, nodes: List[Dict[str, Any]], result: ValidationResult
+    ):
         """Add reality checks to catch suspicious patterns."""
         state_dims = []
         obs_dims = []
@@ -1083,7 +1124,9 @@ class GMNValidationFramework:
             min_state = min(state_dims)
             max_obs = max(obs_dims)
 
-            if max_obs / min_state > 100:  # Observation space 100x larger than state space
+            if (
+                max_obs / min_state > 100
+            ):  # Observation space 100x larger than state space
                 result.add_error(
                     "RealityCheckValidator",
                     f"Suspicious dimension ratio: observation space ({max_obs}) >> state space ({min_state})",

@@ -339,7 +339,9 @@ class IncidentResponseSystem:
                 logger.error(f"Error in escalation monitoring: {e}")
                 await asyncio.sleep(300)
 
-    async def create_incident_from_alert(self, alert: SecurityAlert) -> SecurityIncident:
+    async def create_incident_from_alert(
+        self, alert: SecurityAlert
+    ) -> SecurityIncident:
         """Create a security incident from an alert."""
         incident_id = f"INC-{int(time.time())}"
 
@@ -429,7 +431,9 @@ class IncidentResponseSystem:
                 )
 
             except Exception as e:
-                logger.error(f"Failed to execute {action.value} for incident {incident.id}: {e}")
+                logger.error(
+                    f"Failed to execute {action.value} for incident {incident.id}: {e}"
+                )
 
         # Update incident status
         incident.status = IncidentStatus.INVESTIGATING
@@ -603,7 +607,9 @@ class IncidentResponseSystem:
     async def _escalate_incident(self, incident: SecurityIncident):
         """Escalate an incident to higher severity."""
         incident.escalation_level += 1
-        logger.info(f"⬆️ Incident escalated: {incident.id} (Level {incident.escalation_level})")
+        logger.info(
+            f"⬆️ Incident escalated: {incident.id} (Level {incident.escalation_level})"
+        )
 
     async def _perform_log_analysis(self, incident: SecurityIncident) -> Dict[str, Any]:
         """Perform automated log analysis."""
@@ -670,7 +676,9 @@ class IncidentResponseSystem:
 
         stats = {
             "total_incidents": len(incidents),
-            "open_incidents": len([i for i in incidents if i.status == IncidentStatus.OPEN]),
+            "open_incidents": len(
+                [i for i in incidents if i.status == IncidentStatus.OPEN]
+            ),
             "resolved_incidents": len(
                 [i for i in incidents if i.status == IncidentStatus.RESOLVED]
             ),
@@ -678,7 +686,9 @@ class IncidentResponseSystem:
             "by_attack_type": {},
             "by_status": {},
             "average_response_time": 0.0,
-            "escalated_incidents": len([i for i in incidents if i.escalation_level > 0]),
+            "escalated_incidents": len(
+                [i for i in incidents if i.escalation_level > 0]
+            ),
             "false_positives": len([i for i in incidents if i.false_positive]),
         }
 
@@ -686,7 +696,9 @@ class IncidentResponseSystem:
         for incident in incidents:
             # Count by severity
             severity_key = incident.severity.value
-            stats["by_severity"][severity_key] = stats["by_severity"].get(severity_key, 0) + 1
+            stats["by_severity"][severity_key] = (
+                stats["by_severity"].get(severity_key, 0) + 1
+            )
 
             # Count by attack type
             attack_type_key = incident.attack_type.value
@@ -702,7 +714,9 @@ class IncidentResponseSystem:
 
     def get_recent_incidents(self, limit: int = 10) -> List[SecurityIncident]:
         """Get recent incidents."""
-        incidents = sorted(self.incidents.values(), key=lambda x: x.created_at, reverse=True)
+        incidents = sorted(
+            self.incidents.values(), key=lambda x: x.created_at, reverse=True
+        )
         return incidents[:limit]
 
     def get_incident(self, incident_id: str) -> Optional[SecurityIncident]:

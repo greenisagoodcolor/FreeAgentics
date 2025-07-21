@@ -41,9 +41,9 @@ class TestPyMDPAPICompatibility:
         action_result = agent.sample_action()
 
         # This assertion should fail - showing actual vs expected return type
-        assert isinstance(
-            action_result, int
-        ), f"Expected int, got {type(action_result)}: {action_result}"
+        assert isinstance(action_result, int), (
+            f"Expected int, got {type(action_result)}: {action_result}"
+        )
 
     def test_pymdp_sample_action_vs_expected_unpacking(self):
         """Test the exact unpacking scenario that fails in base_agent.py.
@@ -77,9 +77,9 @@ class TestPyMDPAPICompatibility:
             converted = safe_array_to_int(action_idx, 4)
 
             # The test should document what types we're actually dealing with
-            assert isinstance(
-                converted, int
-            ), f"safe_array_to_int should return int, got {type(converted)}"
+            assert isinstance(converted, int), (
+                f"safe_array_to_int should return int, got {type(converted)}"
+            )
 
         except Exception as e:
             pytest.fail(f"Conversion failed with actual error: {e}")
@@ -174,8 +174,12 @@ class TestPyMDPAPICompatibility:
 
         for test_input, expected in test_cases:
             result = adapter.safe_array_conversion(test_input, int)
-            assert type(result) is int, f"Failed for input {test_input} (type: {type(test_input)})"
-            assert result == expected, f"Expected {expected}, got {result} for input {test_input}"
+            assert type(result) is int, (
+                f"Failed for input {test_input} (type: {type(test_input)})"
+            )
+            assert result == expected, (
+                f"Expected {expected}, got {result} for input {test_input}"
+            )
 
     def test_real_pymdp_agent_return_types_documentation(self):
         """Document what PyMDP actually returns for debugging.

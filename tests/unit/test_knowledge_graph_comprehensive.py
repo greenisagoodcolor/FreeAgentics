@@ -8,18 +8,18 @@ from unittest.mock import MagicMock, patch
 
 # Mock complex dependencies
 mock_modules = {
-    'sqlalchemy': MagicMock(),
-    'sqlalchemy.orm': MagicMock(),
-    'sqlalchemy.ext.declarative': MagicMock(),
-    'networkx': MagicMock(),
-    'redis': MagicMock(),
-    'spacy': MagicMock(),
-    'database': MagicMock(),
-    'database.models': MagicMock(),
-    'database.session': MagicMock(),
+    "sqlalchemy": MagicMock(),
+    "sqlalchemy.orm": MagicMock(),
+    "sqlalchemy.ext.declarative": MagicMock(),
+    "networkx": MagicMock(),
+    "redis": MagicMock(),
+    "spacy": MagicMock(),
+    "database": MagicMock(),
+    "database.models": MagicMock(),
+    "database.session": MagicMock(),
 }
 
-with patch.dict('sys.modules', mock_modules):
+with patch.dict("sys.modules", mock_modules):
     from knowledge_graph.evolution import EvolutionEngine
     from knowledge_graph.fallback_classes import KnowledgeEdge as FallbackEdge
     from knowledge_graph.fallback_classes import (
@@ -138,9 +138,7 @@ class TestFallbackClasses:
         graph.add_node(node2)
 
         # Add edge
-        edge = FallbackEdge(
-            "edge1", "node1", "node2", "connects", {"weight": 1.0}
-        )
+        edge = FallbackEdge("edge1", "node1", "node2", "connects", {"weight": 1.0})
         graph.add_edge(edge)
 
         assert "edge1" in graph.edges
@@ -324,7 +322,7 @@ class TestKnowledgeGraph:
     def test_knowledge_graph_creation(self):
         """Test KnowledgeGraph creation."""
         with patch(
-            'knowledge_graph.graph_engine.KnowledgeGraph.__init__',
+            "knowledge_graph.graph_engine.KnowledgeGraph.__init__",
             return_value=None,
         ):
             graph = KnowledgeGraph()
@@ -365,9 +363,7 @@ class TestQueryEngine:
 
     def test_query_engine_creation(self):
         """Test QueryEngine creation."""
-        with patch(
-            'knowledge_graph.query.QueryEngine.__init__', return_value=None
-        ):
+        with patch("knowledge_graph.query.QueryEngine.__init__", return_value=None):
             engine = QueryEngine()
             # Mock the initialization
             engine.graph = FallbackGraph()
@@ -403,7 +399,7 @@ class TestEvolutionEngine:
     def test_evolution_engine_creation(self):
         """Test EvolutionEngine creation."""
         with patch(
-            'knowledge_graph.evolution.EvolutionEngine.__init__',
+            "knowledge_graph.evolution.EvolutionEngine.__init__",
             return_value=None,
         ):
             evolution = EvolutionEngine()
@@ -474,25 +470,17 @@ class TestKnowledgeGraphIntegration:
         query_engine = FallbackQueryEngine(graph)
 
         # Add some test data
-        person1 = FallbackNode(
-            "person1", "person", {"name": "Alice", "age": 30}
-        )
+        person1 = FallbackNode("person1", "person", {"name": "Alice", "age": 30})
         person2 = FallbackNode("person2", "person", {"name": "Bob", "age": 25})
-        company = FallbackNode(
-            "company1", "organization", {"name": "Tech Corp"}
-        )
+        company = FallbackNode("company1", "organization", {"name": "Tech Corp"})
 
         graph.add_node(person1)
         graph.add_node(person2)
         graph.add_node(company)
 
         # Add relationships
-        works_at1 = FallbackEdge(
-            "works1", "person1", "company1", "works_at", {}
-        )
-        works_at2 = FallbackEdge(
-            "works2", "person2", "company1", "works_at", {}
-        )
+        works_at1 = FallbackEdge("works1", "person1", "company1", "works_at", {})
+        works_at2 = FallbackEdge("works2", "person2", "company1", "works_at", {})
 
         graph.add_edge(works_at1)
         graph.add_edge(works_at2)
@@ -574,9 +562,7 @@ class TestKnowledgeGraphIntegration:
         graph = FallbackGraph()
 
         # Test adding edge without nodes
-        edge = FallbackEdge(
-            "orphan", "nonexistent1", "nonexistent2", "connects", {}
-        )
+        edge = FallbackEdge("orphan", "nonexistent1", "nonexistent2", "connects", {})
 
         # Should handle gracefully (depending on implementation)
         graph.add_edge(edge)

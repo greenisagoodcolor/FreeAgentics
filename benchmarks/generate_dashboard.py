@@ -352,7 +352,9 @@ class PerformanceDashboard:
             ],
         }
 
-    def generate_metric_card(self, title: str, value: Any, change: Optional[float] = None) -> str:
+    def generate_metric_card(
+        self, title: str, value: Any, change: Optional[float] = None
+    ) -> str:
         """Generate HTML for a metric card."""
         change_html = ""
         if change is not None:
@@ -395,7 +397,9 @@ class PerformanceDashboard:
                     break
 
         change_str = f"{change:+.1f}%" if change != 0 else "—"
-        status_badge = f'<span class="status-badge status-{status}">{status.upper()}</span>'
+        status_badge = (
+            f'<span class="status-badge status-{status}">{status.upper()}</span>'
+        )
 
         return f"""
         <tr>
@@ -424,11 +428,15 @@ class PerformanceDashboard:
         # Generate metric cards
         metric_cards = [
             self.generate_metric_card("Total Benchmarks", metrics["total_benchmarks"]),
-            self.generate_metric_card("Avg Duration", f"{metrics['avg_duration_ms']:.1f}ms"),
+            self.generate_metric_card(
+                "Avg Duration", f"{metrics['avg_duration_ms']:.1f}ms"
+            ),
             self.generate_metric_card(
                 "Total Throughput", f"{metrics['total_throughput']:.0f} ops/s"
             ),
-            self.generate_metric_card("Avg Memory", f"{metrics['avg_memory_mb']:.1f}MB"),
+            self.generate_metric_card(
+                "Avg Memory", f"{metrics['avg_memory_mb']:.1f}MB"
+            ),
         ]
 
         # Generate table rows
@@ -475,10 +483,10 @@ class PerformanceDashboard:
 
 ## 📊 Summary Metrics
 
-- **Total Benchmarks:** {metrics['total_benchmarks']}
-- **Average Duration:** {metrics['avg_duration_ms']:.1f}ms
-- **Total Throughput:** {metrics['total_throughput']:.0f} ops/s
-- **Average Memory:** {metrics['avg_memory_mb']:.1f}MB
+- **Total Benchmarks:** {metrics["total_benchmarks"]}
+- **Average Duration:** {metrics["avg_duration_ms"]:.1f}ms
+- **Total Throughput:** {metrics["total_throughput"]:.0f} ops/s
+- **Average Memory:** {metrics["avg_memory_mb"]:.1f}MB
 
 ## 📈 Benchmark Results
 
@@ -491,7 +499,9 @@ class PerformanceDashboard:
                 name = bench["name"].split(".")[-1]
                 stats = bench.get("stats", {})
                 duration = stats.get("mean", 0) * 1000
-                throughput = 1.0 / stats.get("mean", 1) if stats.get("mean", 0) > 0 else 0
+                throughput = (
+                    1.0 / stats.get("mean", 1) if stats.get("mean", 0) > 0 else 0
+                )
                 memory = bench.get("extra_info", {}).get("memory_mb", 0)
 
                 # Calculate change
@@ -500,9 +510,13 @@ class PerformanceDashboard:
                 if baseline:
                     for base_bench in baseline.get("benchmarks", []):
                         if base_bench["name"] == bench["name"]:
-                            base_duration = base_bench.get("stats", {}).get("mean", 0) * 1000
+                            base_duration = (
+                                base_bench.get("stats", {}).get("mean", 0) * 1000
+                            )
                             if base_duration > 0:
-                                change = ((duration - base_duration) / base_duration) * 100
+                                change = (
+                                    (duration - base_duration) / base_duration
+                                ) * 100
                                 if change > 10:
                                     status = "❌"
                                 elif change > 5:
@@ -524,13 +538,17 @@ def main():
     """Main CLI entry point."""
     parser = argparse.ArgumentParser(description="Generate performance dashboard")
 
-    parser.add_argument("--output", default="performance_dashboard.html", help="Output file path")
+    parser.add_argument(
+        "--output", default="performance_dashboard.html", help="Output file path"
+    )
 
     parser.add_argument(
         "--format", choices=["html", "markdown"], default="html", help="Output format"
     )
 
-    parser.add_argument("--results-dir", default="benchmarks/results", help="Results directory")
+    parser.add_argument(
+        "--results-dir", default="benchmarks/results", help="Results directory"
+    )
 
     args = parser.parse_args()
 

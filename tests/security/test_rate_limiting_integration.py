@@ -62,14 +62,18 @@ class TestRateLimiterIntegration:
         limiter = RateLimiter(
             redis_url="redis://localhost:6379",
             default_anonymous_limit=RateLimitConfig(max_requests=10, window_seconds=60),
-            default_authenticated_limit=RateLimitConfig(max_requests=50, window_seconds=60),
+            default_authenticated_limit=RateLimitConfig(
+                max_requests=50, window_seconds=60
+            ),
         )
 
         # Add test endpoint configurations
         limiter.endpoint_configs = [
             EndpointConfig(
                 path_pattern="/api/v1/auth/login",
-                anonymous_limit=RateLimitConfig(max_requests=3, window_seconds=60, burst_size=5),
+                anonymous_limit=RateLimitConfig(
+                    max_requests=3, window_seconds=60, burst_size=5
+                ),
                 authenticated_limit=RateLimitConfig(
                     max_requests=10, window_seconds=60, burst_size=20
                 ),
@@ -110,7 +114,7 @@ class TestRateLimiterIntegration:
         # Test anonymous rate limiting
         for i in range(3):
             allowed, response = await rate_limiter.process_request(request)
-            assert allowed, f"Request {i+1} should be allowed"
+            assert allowed, f"Request {i + 1} should be allowed"
             assert response is None
 
         # 4th request should be rate limited
@@ -140,8 +144,10 @@ class TestRateLimiterIntegration:
 
         # Authenticated users should have higher limits
         for i in range(10):
-            allowed, response = await rate_limiter.process_request(request, user_id=user_id)
-            assert allowed, f"Authenticated request {i+1} should be allowed"
+            allowed, response = await rate_limiter.process_request(
+                request, user_id=user_id
+            )
+            assert allowed, f"Authenticated request {i + 1} should be allowed"
 
         # 11th request should be rate limited
         allowed, response = await rate_limiter.process_request(request, user_id=user_id)
@@ -172,7 +178,9 @@ class TestRateLimiterIntegration:
                 break
 
         # Should allow close to burst size
-        assert requests_made >= burst_size - 5, f"Should allow burst requests, got {requests_made}"
+        assert requests_made >= burst_size - 5, (
+            f"Should allow burst requests, got {requests_made}"
+        )
 
     @pytest.mark.asyncio
     async def test_ddos_detection(self, rate_limiter, redis_client):
@@ -195,14 +203,18 @@ class TestRateLimiterIntegration:
 
         # Generate rapid errors to trigger DDoS detection
         for i in range(6):
-            block_reason = await rate_limiter.check_ddos_patterns(request, ip, response_status=500)
+            block_reason = await rate_limiter.check_ddos_patterns(
+                request, ip, response_status=500
+            )
 
             if i < 5:
-                assert block_reason is None, f"Should not detect DDoS on request {i+1}"
+                assert block_reason is None, (
+                    f"Should not detect DDoS on request {i + 1}"
+                )
             else:
-                assert (
-                    block_reason == BlockReason.SUSPICIOUS_PATTERN
-                ), "Should detect suspicious pattern"
+                assert block_reason == BlockReason.SUSPICIOUS_PATTERN, (
+                    "Should detect suspicious pattern"
+                )
 
     @pytest.mark.asyncio
     async def test_path_scanning_detection(self, rate_limiter, redis_client):
@@ -222,9 +234,13 @@ class TestRateLimiterIntegration:
             block_reason = await rate_limiter.check_ddos_patterns(request, ip)
 
             if i < 15:
-                assert block_reason is None, f"Should not detect path scanning at path {i+1}"
+                assert block_reason is None, (
+                    f"Should not detect path scanning at path {i + 1}"
+                )
             else:
-                assert block_reason == BlockReason.SUSPICIOUS_PATTERN, "Should detect path scanning"
+                assert block_reason == BlockReason.SUSPICIOUS_PATTERN, (
+                    "Should detect path scanning"
+                )
                 break
 
     @pytest.mark.asyncio
@@ -274,7 +290,7 @@ class TestRateLimiterIntegration:
         # Make many requests - all should be allowed
         for i in range(100):
             allowed, response = await rate_limiter.process_request(request)
-            assert allowed, f"Whitelisted IP request {i+1} should be allowed"
+            assert allowed, f"Whitelisted IP request {i + 1} should be allowed"
             assert response is None
 
     @pytest.mark.asyncio
@@ -322,7 +338,9 @@ class TestRateLimiterIntegration:
         assert "X-RateLimit-Reset" in headers
 
         # Verify header values
-        assert int(headers["X-RateLimit-Limit"]) == 20  # Anonymous limit for /api/v1/agents
+        assert (
+            int(headers["X-RateLimit-Limit"]) == 20
+        )  # Anonymous limit for /api/v1/agents
         assert int(headers["X-RateLimit-Remaining"]) == 19  # One request made
 
     @pytest.mark.asyncio
@@ -352,9 +370,9 @@ class TestRateLimiterIntegration:
         allowed_count = sum(1 for r in results if r)
 
         # Should allow exactly the rate limit amount
-        assert (
-            allowed_count <= max_allowed
-        ), f"Should allow at most {max_allowed} requests, got {allowed_count}"
+        assert allowed_count <= max_allowed, (
+            f"Should allow at most {max_allowed} requests, got {allowed_count}"
+        )
 
     @pytest.mark.asyncio
     async def test_rate_limit_reset(self, rate_limiter, redis_client):
@@ -374,7 +392,7 @@ class TestRateLimiterIntegration:
         # Use up rate limit
         for i in range(2):
             allowed, _ = await rate_limiter.process_request(request)
-            assert allowed, f"Request {i+1} should be allowed"
+            assert allowed, f"Request {i + 1} should be allowed"
 
         # Next request should be limited
         allowed, _ = await rate_limiter.process_request(request)
@@ -447,7 +465,9 @@ class TestRateLimitMiddleware:
     @pytest.fixture
     async def app_with_middleware(self, app):
         """Add rate limiting middleware to app."""
-        rate_limiter = create_rate_limiter(redis_url="redis://localhost:6379", config_file=None)
+        rate_limiter = create_rate_limiter(
+            redis_url="redis://localhost:6379", config_file=None
+        )
 
         async def get_user_id(request):
             # Mock user ID extraction

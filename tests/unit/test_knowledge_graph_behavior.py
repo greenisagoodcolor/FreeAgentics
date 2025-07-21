@@ -287,9 +287,7 @@ class TestKnowledgeGraphQueryBehavior:
             assert len(results) == 2
             assert all("similarity" in result for result in results)
             assert results[0]["similarity"] == 0.9
-            mock_semantic_search.assert_called_once_with(
-                "artificial intelligence"
-            )
+            mock_semantic_search.assert_called_once_with("artificial intelligence")
 
     def test_knowledge_graph_filters_nodes_by_metadata(self):
         """
@@ -322,9 +320,7 @@ class TestKnowledgeGraphQueryBehavior:
             results = engine.filter_nodes({"domain": "AI"})
 
             assert len(results) == 2
-            assert all(
-                result["metadata"]["domain"] == "AI" for result in results
-            )
+            assert all(result["metadata"]["domain"] == "AI" for result in results)
             mock_filter.assert_called_once_with({"domain": "AI"})
 
 
@@ -424,9 +420,7 @@ class TestKnowledgeGraphEvolutionBehavior:
         evolution = KnowledgeEvolution()
 
         # Mock relationship evolution
-        with patch.object(
-            evolution, "update_relationship_strength"
-        ) as mock_update:
+        with patch.object(evolution, "update_relationship_strength") as mock_update:
             mock_update.return_value = True
 
             edge_id = str(uuid.uuid4())
@@ -436,9 +430,7 @@ class TestKnowledgeGraphEvolutionBehavior:
             }
 
             # Update relationship
-            result = evolution.update_relationship_strength(
-                edge_id, usage_data
-            )
+            result = evolution.update_relationship_strength(edge_id, usage_data)
 
             assert result is True
             mock_update.assert_called_once_with(edge_id, usage_data)
@@ -487,9 +479,7 @@ class TestKnowledgeGraphEvolutionBehavior:
             },
         ]
 
-        with patch.object(
-            evolution, "discover_relationships"
-        ) as mock_discover:
+        with patch.object(evolution, "discover_relationships") as mock_discover:
             mock_discover.return_value = discovered_relationships
 
             # Discover relationships
@@ -534,9 +524,7 @@ class TestKnowledgeGraphErrorHandlingBehavior:
         engine = GraphEngine()
 
         # Mock circular relationship detection
-        with patch.object(
-            engine, "detect_circular_relationships"
-        ) as mock_detect:
+        with patch.object(engine, "detect_circular_relationships") as mock_detect:
             mock_detect.return_value = True
 
             # Check for circular relationships

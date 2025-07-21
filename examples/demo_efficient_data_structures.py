@@ -126,7 +126,9 @@ def demo_memory_mapped_buffers():
     preserved_data = buffer.array[:100, :100]
     checksum_preserved = np.sum(preserved_data)
     print(f"   Preserved data checksum: {checksum_preserved:.6f}")
-    print(f"   Data preserved correctly: {abs(checksum_original - checksum_preserved) < 1e-6}")
+    print(
+        f"   Data preserved correctly: {abs(checksum_original - checksum_preserved) < 1e-6}"
+    )
 
     # Test random access
     print("\n4. Testing random access performance...")
@@ -344,7 +346,9 @@ def demo_compact_knowledge_graph():
 
     print(f"   Average node degree: {avg_degree:.2f}")
     print(f"   Maximum node degree: {max_degree}")
-    print(f"   Graph density: {edges_added / (kg._num_nodes * (kg._num_nodes - 1)):.4f}")
+    print(
+        f"   Graph density: {edges_added / (kg._num_nodes * (kg._num_nodes - 1)):.4f}"
+    )
 
     # Test feature retrieval
     print("\n5. Feature retrieval test:")
@@ -438,7 +442,9 @@ def demo_factory_functions():
     print("\n1. Testing belief buffer factory...")
 
     # Small buffer (should use LazyBeliefArray)
-    small_buffer = create_efficient_belief_buffer((20, 20), buffer_size=5, use_memory_mapping=False)
+    small_buffer = create_efficient_belief_buffer(
+        (20, 20), buffer_size=5, use_memory_mapping=False
+    )
     print(f"   Small buffer type: {type(small_buffer).__name__}")
 
     # Large buffer (should use MemoryMappedBuffer)

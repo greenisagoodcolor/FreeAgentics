@@ -142,10 +142,10 @@ class QualityGateMonitor:
 **Monitor**: FINAL-RELEASE-VALIDATOR
 
 ## Quick Check Results
-- Pytest Collection: {'✅ PASS' if quick_results.get('pytest_collect') else '❌ FAIL'}
-- Flake8 Critical: {'✅ PASS' if quick_results.get('flake8_critical') else '❌ FAIL'}
-- NPM Build: {'✅ PASS' if quick_results.get('npm_build') else '❌ FAIL'}
-- Docker Build: {'✅ PASS' if quick_results.get('docker_build') else '❌ FAIL'}
+- Pytest Collection: {"✅ PASS" if quick_results.get("pytest_collect") else "❌ FAIL"}
+- Flake8 Critical: {"✅ PASS" if quick_results.get("flake8_critical") else "❌ FAIL"}
+- NPM Build: {"✅ PASS" if quick_results.get("npm_build") else "❌ FAIL"}
+- Docker Build: {"✅ PASS" if quick_results.get("docker_build") else "❌ FAIL"}
 
 ## Recent Agent Activity
 Files modified in last hour: {len(recent_activity)}
@@ -157,9 +157,9 @@ Files modified in last hour: {len(recent_activity)}
                 summary += f"- {file}\n"
 
         # Check if ready for full validation
-        critical_passed = quick_results.get("pytest_collect", False) and quick_results.get(
-            "flake8_critical", False
-        )
+        critical_passed = quick_results.get(
+            "pytest_collect", False
+        ) and quick_results.get("flake8_critical", False)
 
         if critical_passed:
             summary += "\n## Status: Ready for Full Validation\n"
@@ -173,7 +173,9 @@ Files modified in last hour: {len(recent_activity)}
     def monitor_once(self) -> bool:
         """Perform one monitoring cycle. Returns True if ready for release."""
         print("\n" + "=" * 60)
-        print(f"🔍 Quality Gate Monitor - {datetime.now().strftime('%Y-%m-%d %H:%M:%S')}")
+        print(
+            f"🔍 Quality Gate Monitor - {datetime.now().strftime('%Y-%m-%d %H:%M:%S')}"
+        )
         print("=" * 60)
 
         summary = self.generate_status_summary()
@@ -181,7 +183,8 @@ Files modified in last hour: {len(recent_activity)}
 
         # Save summary
         report_path = (
-            self.project_root / f"quality_monitor_{datetime.now().strftime('%Y%m%d_%H%M%S')}.md"
+            self.project_root
+            / f"quality_monitor_{datetime.now().strftime('%Y%m%d_%H%M%S')}.md"
         )
         with open(report_path, "w") as f:
             f.write(summary)

@@ -193,7 +193,10 @@ class TestCoalitionTypeAdapter:
         # Test with UUID
         coalition = Mock()
         coalition.id = uuid.UUID("87654321-4321-8765-4321-876543218765")
-        assert CoalitionTypeAdapter.get_id(coalition) == "87654321-4321-8765-4321-876543218765"
+        assert (
+            CoalitionTypeAdapter.get_id(coalition)
+            == "87654321-4321-8765-4321-876543218765"
+        )
 
         # Test with string ID
         coalition.id = "coal-id-123"
@@ -278,7 +281,9 @@ class TestCoalitionTypeAdapter:
 
         # Dict with members
         coalition = {"members": {"agent3": {"name": "Agent Three"}}}
-        assert CoalitionTypeAdapter.get_members(coalition) == {"agent3": {"name": "Agent Three"}}
+        assert CoalitionTypeAdapter.get_members(coalition) == {
+            "agent3": {"name": "Agent Three"}
+        }
 
         # Dict with agents
         coalition = {"agents": ["agent4", "agent5"]}

@@ -169,9 +169,13 @@ def fix_line_length_violations(file_path: str) -> int:
                         new_lines.append(prefix + "\n")
                         for j, param in enumerate(params):
                             if j < len(params) - 1:
-                                new_lines.append(" " * (indent + 4) + param.strip() + ",\n")
+                                new_lines.append(
+                                    " " * (indent + 4) + param.strip() + ",\n"
+                                )
                             else:
-                                new_lines.append(" " * (indent + 4) + param.strip() + "\n")
+                                new_lines.append(
+                                    " " * (indent + 4) + param.strip() + "\n"
+                                )
                         new_lines.append(" " * indent + suffix)
                         fixed_count += 1
                     else:
@@ -262,12 +266,20 @@ def main():
         default=["agents", "api", "database", "inference", "knowledge_graph"],
         help="Directories to process",
     )
-    parser.add_argument("--fix-imports", action="store_true", help="Fix import ordering")
+    parser.add_argument(
+        "--fix-imports", action="store_true", help="Fix import ordering"
+    )
     parser.add_argument("--fix-format", action="store_true", help="Format with black")
-    parser.add_argument("--fix-unused", action="store_true", help="Remove unused imports")
-    parser.add_argument("--fix-length", action="store_true", help="Fix line length violations")
+    parser.add_argument(
+        "--fix-unused", action="store_true", help="Remove unused imports"
+    )
+    parser.add_argument(
+        "--fix-length", action="store_true", help="Fix line length violations"
+    )
     parser.add_argument("--fix-all", action="store_true", help="Apply all fixes")
-    parser.add_argument("--report", default="flake8_fix_report.json", help="Output report file")
+    parser.add_argument(
+        "--report", default="flake8_fix_report.json", help="Output report file"
+    )
 
     args = parser.parse_args()
 

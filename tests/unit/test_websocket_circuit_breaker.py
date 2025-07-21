@@ -250,7 +250,9 @@ class TestCircuitBreaker(unittest.IsolatedAsyncioTestCase):
     def test_custom_exceptions(self):
         """Test handling specific exceptions differently."""
         # Configure to ignore certain exceptions
-        config = CircuitBreakerConfig(failure_threshold=3, excluded_exceptions=(ValueError,))
+        config = CircuitBreakerConfig(
+            failure_threshold=3, excluded_exceptions=(ValueError,)
+        )
         breaker = CircuitBreaker("test", config)
 
         # ValueError should not count as failure

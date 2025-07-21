@@ -113,10 +113,8 @@ class TestGNNBasicCoverage:
                 pass
 
         except ImportError:
-            
-
-
             assert False, "Test bypass removed - must fix underlying issue"
+
 
 class TestKnowledgeGraphBasicCoverage:
     """Basic coverage tests for Knowledge Graph modules."""
@@ -168,10 +166,8 @@ class TestKnowledgeGraphBasicCoverage:
                 pass
 
         except ImportError:
-            
-
-
             assert False, "Test bypass removed - must fix underlying issue"
+
 
 class TestAgentManagerBasicCoverage:
     """Basic coverage tests for Agent Manager modules."""
@@ -196,10 +192,8 @@ class TestAgentManagerBasicCoverage:
             assert manager is not None
 
         except ImportError:
-            
-
-
             assert False, "Test bypass removed - must fix underlying issue"
+
 
 class TestErrorHandlingCoverage:
     """Tests to improve error handling coverage."""
@@ -362,10 +356,8 @@ class TestMiscellaneousCoverage:
             assert adapter is not None
 
         except ImportError:
-            
-
-
             assert False, "Test bypass removed - must fix underlying issue"
+
 
 class TestBasicFunctionalityTests:
     """Basic functionality tests to ensure core features work."""

@@ -49,7 +49,11 @@ class MemoryMonitor:
         if self.tracemalloc_started:
             top_stats = tracemalloc.take_snapshot().statistics("lineno")[:10]
             snapshot["top_allocations"] = [
-                {"file": stat.traceback.format()[0], "size": stat.size, "count": stat.count}
+                {
+                    "file": stat.traceback.format()[0],
+                    "size": stat.size,
+                    "count": stat.count,
+                }
                 for stat in top_stats
             ]
 
@@ -96,11 +100,13 @@ class MemoryUsageBenchmarks:
         agent_count = 100
 
         for i in range(agent_count):
-            agent = BaseAgent(agent_id=f"memory-test-{i}", model="gpt-4", temperature=0.7)
+            agent = BaseAgent(
+                agent_id=f"memory-test-{i}", model="gpt-4", temperature=0.7
+            )
             agents.append(agent)
 
             if i % 20 == 19:  # Snapshot every 20 agents
-                memory_monitor.take_snapshot(f"after_{i+1}_agents")
+                memory_monitor.take_snapshot(f"after_{i + 1}_agents")
 
         memory_monitor.take_snapshot("all_agents_created")
 
@@ -111,7 +117,9 @@ class MemoryUsageBenchmarks:
 
             print("\nAgent Memory Footprint:")
             print(f"  Single agent size: {agent_size / 1024:.1f} KB")
-            print(f"  Total size ({agent_count} agents): {total_size / 1024 / 1024:.1f} MB")
+            print(
+                f"  Total size ({agent_count} agents): {total_size / 1024 / 1024:.1f} MB"
+            )
             print(f"  Average per agent: {total_size / agent_count / 1024:.1f} KB")
 
         # Show memory growth
@@ -180,7 +188,7 @@ class MemoryUsageBenchmarks:
         print(f"  Bounded (1k limit, 10k added): {bounded_size / 1024 / 1024:.1f} MB")
         print(
             f"  Memory saved: {(unbounded_size - bounded_size) / 1024 / 1024:.1f} MB "
-            f"({(1 - bounded_size/unbounded_size) * 100:.1f}%)"
+            f"({(1 - bounded_size / unbounded_size) * 100:.1f}%)"
         )
 
     @pytest.mark.benchmark(group="memory-usage")
@@ -354,7 +362,7 @@ class MemoryUsageBenchmarks:
         print(f"  With pooling: {with_pool_mem:.1f} MB")
         print(
             f"  Memory saved: {without_pool_mem - with_pool_mem:.1f} MB "
-            f"({(1 - with_pool_mem/without_pool_mem) * 100:.1f}%)"
+            f"({(1 - with_pool_mem / without_pool_mem) * 100:.1f}%)"
         )
 
     @pytest.mark.benchmark(group="memory-usage")
@@ -383,7 +391,9 @@ class MemoryUsageBenchmarks:
                 pass
 
         # Sort by size
-        sorted_types = sorted(type_stats.items(), key=lambda x: x[1]["size"], reverse=True)[:10]
+        sorted_types = sorted(
+            type_stats.items(), key=lambda x: x[1]["size"], reverse=True
+        )[:10]
 
         for type_name, stats in sorted_types:
             size_mb = stats["size"] / 1024 / 1024

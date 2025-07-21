@@ -123,7 +123,10 @@ class TestHealthAPI:
 
             # Test that it has a docstring
             assert database_exception_handler.__doc__ is not None
-            assert "Handle database operational errors" in database_exception_handler.__doc__
+            assert (
+                "Handle database operational errors"
+                in database_exception_handler.__doc__
+            )
 
         except ImportError:
             assert False, "Test bypass removed - must fix underlying issue"
@@ -134,7 +137,10 @@ class TestHealthAPI:
             import api.v1.health
 
             assert api.v1.health.__doc__ is not None
-            assert "Health check endpoint following TDD principles" in api.v1.health.__doc__
+            assert (
+                "Health check endpoint following TDD principles"
+                in api.v1.health.__doc__
+            )
 
         except ImportError:
             assert False, "Test bypass removed - must fix underlying issue"

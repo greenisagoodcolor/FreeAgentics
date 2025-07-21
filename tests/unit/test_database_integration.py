@@ -24,7 +24,9 @@ class TestDatabaseIntegration:
     def test_db_engine(self):
         """Create a test database engine."""
         # Use the same database as the main app for integration testing
-        DATABASE_URL = os.getenv("TEST_DATABASE_URL", "sqlite:///./test_freeagentics.db")
+        DATABASE_URL = os.getenv(
+            "TEST_DATABASE_URL", "sqlite:///./test_freeagentics.db"
+        )
         engine = create_engine(DATABASE_URL)
         # Create all tables
         Base.metadata.create_all(bind=engine)
@@ -89,7 +91,11 @@ class TestDatabaseIntegration:
         # Verify the specific agent exists
         from uuid import UUID
 
-        db_agent = test_db_session.query(AgentModel).filter(AgentModel.id == UUID(agent_id)).first()
+        db_agent = (
+            test_db_session.query(AgentModel)
+            .filter(AgentModel.id == UUID(agent_id))
+            .first()
+        )
 
         assert db_agent is not None
         assert db_agent.name == "Database Test Agent"
@@ -156,7 +162,9 @@ class TestDatabaseIntegration:
         Session = sessionmaker(bind=test_db_session.bind)
         new_session = Session()
 
-        persistent_agent = new_session.query(AgentModel).filter(AgentModel.id == agent_id).first()
+        persistent_agent = (
+            new_session.query(AgentModel).filter(AgentModel.id == agent_id).first()
+        )
 
         assert persistent_agent is not None
         assert persistent_agent.name == "Persistence Test Agent"
@@ -213,7 +221,9 @@ class TestDatabaseIntegration:
 
         # Verify it was removed from database
         test_db_session.commit()  # Ensure we see the latest state
-        deleted_agent = test_db_session.query(AgentModel).filter(AgentModel.id == agent_id).first()
+        deleted_agent = (
+            test_db_session.query(AgentModel).filter(AgentModel.id == agent_id).first()
+        )
 
         assert deleted_agent is None
 
@@ -228,12 +238,17 @@ class TestDatabaseIntegration:
             name
             for name, value in module_vars.items()
             if isinstance(value, dict)
-            and any(keyword in name.lower() for keyword in ["agent", "storage", "cache", "memory"])
+            and any(
+                keyword in name.lower()
+                for keyword in ["agent", "storage", "cache", "memory"]
+            )
         ]
 
         # Should not have any in-memory agent storage
         storage_vars = [var for var in suspect_vars if "agent" in var.lower()]
-        assert len(storage_vars) == 0, f"Found potential in-memory storage: {storage_vars}"
+        assert len(storage_vars) == 0, (
+            f"Found potential in-memory storage: {storage_vars}"
+        )
 
     def test_database_constraints_enforced(self, test_db_session):
         """Test that database constraints are properly enforced."""

@@ -48,7 +48,9 @@ class PerformanceMetrics:
                 "p99": np.percentile(self.spawn_times, 99),
                 "min": min(self.spawn_times),
                 "max": max(self.spawn_times),
-                "stdev": statistics.stdev(self.spawn_times) if len(self.spawn_times) > 1 else 0,
+                "stdev": statistics.stdev(self.spawn_times)
+                if len(self.spawn_times) > 1
+                else 0,
             },
             "memory": {
                 "mean": statistics.mean(self.memory_usage),
@@ -56,7 +58,10 @@ class PerformanceMetrics:
                 "p95": np.percentile(self.memory_usage, 95),
                 "max": max(self.memory_usage),
             },
-            "cpu": {"mean": statistics.mean(self.cpu_usage), "max": max(self.cpu_usage)},
+            "cpu": {
+                "mean": statistics.mean(self.cpu_usage),
+                "max": max(self.cpu_usage),
+            },
         }
 
 
@@ -157,14 +162,20 @@ class AgentSpawnBenchmarks:
             # Spawn agents
             agents = []
             for i in range(count):
-                agent = BaseAgent(agent_id=f"scaling-agent-{i}", model="gpt-4", temperature=0.7)
+                agent = BaseAgent(
+                    agent_id=f"scaling-agent-{i}", model="gpt-4", temperature=0.7
+                )
                 agents.append(agent)
 
             duration = time.perf_counter() - start_time
             per_agent_time = duration * 1000 / count
 
             scaling_results.append(
-                {"count": count, "total_time": duration * 1000, "per_agent_time": per_agent_time}
+                {
+                    "count": count,
+                    "total_time": duration * 1000,
+                    "per_agent_time": per_agent_time,
+                }
             )
 
             # Cleanup
@@ -184,7 +195,9 @@ class AgentSpawnBenchmarks:
         base_time = scaling_results[0]["per_agent_time"]
         for result in scaling_results[1:]:
             efficiency = base_time / result["per_agent_time"] * 100
-            print(f"  Scaling efficiency at {result['count']} agents: {efficiency:.1f}%")
+            print(
+                f"  Scaling efficiency at {result['count']} agents: {efficiency:.1f}%"
+            )
 
     @pytest.mark.benchmark(group="agent-spawn", min_rounds=5)
     @pytest.mark.asyncio
@@ -268,7 +281,9 @@ class AgentSpawnBenchmarks:
                 self.agents = []
                 for i in range(size):
                     self.agents.append(
-                        BaseAgent(agent_id=f"pooled-{i}", model="gpt-4", temperature=0.7)
+                        BaseAgent(
+                            agent_id=f"pooled-{i}", model="gpt-4", temperature=0.7
+                        )
                     )
                 self.index = 0
 
@@ -292,7 +307,7 @@ class AgentSpawnBenchmarks:
         print(f"  Pooled spawning growth: {pooled_growth / 1024 / 1024:.2f}MB")
         print(
             f"  Memory saved: {(regular_growth - pooled_growth) / 1024 / 1024:.2f}MB "
-            f"({(1 - pooled_growth/regular_growth) * 100:.1f}%)"
+            f"({(1 - pooled_growth / regular_growth) * 100:.1f}%)"
         )
 
 

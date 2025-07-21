@@ -74,8 +74,13 @@ class TestJWTComprehensiveValidation:
         access_duration = access_exp - access_iat
 
         # Should be 15 minutes (900 seconds) with 60 second tolerance
-        assert abs(access_duration.total_seconds() - (ACCESS_TOKEN_EXPIRE_MINUTES * 60)) < 60
-        assert 15 * 60 <= access_duration.total_seconds() <= 30 * 60  # Between 15-30 minutes
+        assert (
+            abs(access_duration.total_seconds() - (ACCESS_TOKEN_EXPIRE_MINUTES * 60))
+            < 60
+        )
+        assert (
+            15 * 60 <= access_duration.total_seconds() <= 30 * 60
+        )  # Between 15-30 minutes
 
         # Test refresh token expiration (should be 7 days)
         refresh_token = auth_manager.create_refresh_token(user)
@@ -208,7 +213,9 @@ class TestJWTComprehensiveValidation:
         client_fingerprint = "unique_client_fingerprint"
 
         # Create token with fingerprint
-        token = auth_manager.create_access_token(user, client_fingerprint=client_fingerprint)
+        token = auth_manager.create_access_token(
+            user, client_fingerprint=client_fingerprint
+        )
         payload = jwt.decode(token, options={"verify_signature": False})
 
         # Verify binding claim is present
@@ -216,7 +223,9 @@ class TestJWTComprehensiveValidation:
         assert payload["binding"] == client_fingerprint
 
         # Verify token works with correct fingerprint
-        token_data = auth_manager.verify_token(token, client_fingerprint=client_fingerprint)
+        token_data = auth_manager.verify_token(
+            token, client_fingerprint=client_fingerprint
+        )
         assert token_data.user_id == user.user_id
 
         # Verify token fails with wrong fingerprint
@@ -297,18 +306,24 @@ class TestJWTComprehensiveValidation:
         client_fingerprint = "production_client_fingerprint"
 
         # 1. Create initial tokens
-        access_token = auth_manager.create_access_token(user, client_fingerprint=client_fingerprint)
+        access_token = auth_manager.create_access_token(
+            user, client_fingerprint=client_fingerprint
+        )
         refresh_token = auth_manager.create_refresh_token(user)
 
         # 2. Verify access token
-        token_data = auth_manager.verify_token(access_token, client_fingerprint=client_fingerprint)
+        token_data = auth_manager.verify_token(
+            access_token, client_fingerprint=client_fingerprint
+        )
         assert token_data.user_id == user.user_id
 
         # 3. Refresh tokens
         (
             new_access_token,
             new_refresh_token,
-        ) = auth_manager.refresh_access_token(refresh_token, client_fingerprint=client_fingerprint)
+        ) = auth_manager.refresh_access_token(
+            refresh_token, client_fingerprint=client_fingerprint
+        )
         assert new_access_token != access_token
         assert new_refresh_token != refresh_token
 
@@ -323,7 +338,9 @@ class TestJWTComprehensiveValidation:
 
         # 6. Verify tokens are blacklisted
         with pytest.raises(HTTPException):
-            auth_manager.verify_token(new_access_token, client_fingerprint=client_fingerprint)
+            auth_manager.verify_token(
+                new_access_token, client_fingerprint=client_fingerprint
+            )
 
     def test_performance_requirements(self):
         """Test that JWT operations meet performance requirements."""

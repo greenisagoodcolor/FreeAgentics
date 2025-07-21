@@ -152,7 +152,9 @@ class TestKnowledgeGraph:
         graph.add_node(node1)
         graph.add_node(node2)
 
-        edge = KnowledgeEdge(source_id=node1.id, target_id=node2.id, type=EdgeType.RELATED_TO)
+        edge = KnowledgeEdge(
+            source_id=node1.id, target_id=node2.id, type=EdgeType.RELATED_TO
+        )
 
         assert graph.add_edge(edge) is True
         assert len(graph.edges) == 1
@@ -190,7 +192,9 @@ class TestKnowledgeGraph:
         graph.add_node(node1)
         graph.add_node(node2)
 
-        edge = KnowledgeEdge(source_id=node1.id, target_id=node2.id, type=EdgeType.RELATED_TO)
+        edge = KnowledgeEdge(
+            source_id=node1.id, target_id=node2.id, type=EdgeType.RELATED_TO
+        )
         graph.add_edge(edge)
 
         # Remove node should also remove connected edges
@@ -461,7 +465,7 @@ class TestEvolutionOperators:
             # Pattern: button_press always followed by light_on
             events.append(
                 {
-                    "id": f"event_{i*2}",
+                    "id": f"event_{i * 2}",
                     "type": "button_press",
                     "timestamp": base_time.timestamp() + i * 10,
                     "action": "press",
@@ -470,7 +474,7 @@ class TestEvolutionOperators:
 
             events.append(
                 {
-                    "id": f"event_{i*2+1}",
+                    "id": f"event_{i * 2 + 1}",
                     "type": "light_on",
                     "timestamp": base_time.timestamp() + i * 10 + 2,
                     "action": "activate",
@@ -597,7 +601,9 @@ class TestQueryEngine:
         engine = QueryEngine(graph)
 
         # Query by type
-        query = GraphQuery(query_type=QueryType.NODE_LOOKUP, node_types=[NodeType.ENTITY])
+        query = GraphQuery(
+            query_type=QueryType.NODE_LOOKUP, node_types=[NodeType.ENTITY]
+        )
 
         result = engine.execute(query)
 
@@ -665,7 +671,9 @@ class TestQueryEngine:
 
         engine = QueryEngine(graph)
 
-        query = GraphQuery(query_type=QueryType.NEIGHBORHOOD, center_id=center.id, radius=1)
+        query = GraphQuery(
+            query_type=QueryType.NEIGHBORHOOD, center_id=center.id, radius=1
+        )
 
         result = engine.execute(query)
 

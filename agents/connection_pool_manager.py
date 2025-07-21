@@ -238,7 +238,7 @@ class WebSocketConnectionPool:
         # Note: In real implementation, this would create WebSocket connection
         # For now, we'll return a placeholder
         logger.info(
-            f"Creating new WebSocket connection for {client_id} in pool" f" {pool_name}"
+            f"Creating new WebSocket connection for {client_id} in pool {pool_name}"
         )
         return None  # Placeholder - would be actual WebSocket connection
 

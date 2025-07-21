@@ -246,7 +246,9 @@ async def test_performance_snapshot(metrics_tracker):
     observation = {"grid": np.zeros((10, 10))}
     agent.step(observation)
 
-    await record_inference_metric(agent_id=agent.agent_id, inference_time_ms=5.0, success=True)
+    await record_inference_metric(
+        agent_id=agent.agent_id, inference_time_ms=5.0, success=True
+    )
 
     await asyncio.sleep(0.1)
 

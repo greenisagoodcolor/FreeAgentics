@@ -224,7 +224,9 @@ class TestRateLimiter:
         pipeline_mock = mock_redis.pipeline.return_value
         pipeline_mock.execute.return_value = [5, True, 50, True]
 
-        minute_count, hour_count = await rate_limiter._record_request("test_key", config)
+        minute_count, hour_count = await rate_limiter._record_request(
+            "test_key", config
+        )
 
         assert minute_count == 5
         assert hour_count == 50
@@ -255,7 +257,9 @@ class TestRateLimiter:
         """Test client blocking."""
         config = RateLimitConfig()
 
-        await rate_limiter._block_client("test_key", "192.168.1.100", config, "TEST_REASON")
+        await rate_limiter._block_client(
+            "test_key", "192.168.1.100", config, "TEST_REASON"
+        )
 
         mock_redis.setex.assert_called_once()
         args = mock_redis.setex.call_args

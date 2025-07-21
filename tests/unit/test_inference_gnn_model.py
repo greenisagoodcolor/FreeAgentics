@@ -90,7 +90,9 @@ class TestGMNModel:
         model = GMNModel(config)
 
         # Should raise RuntimeError if model not built
-        with pytest.raises(RuntimeError, match="Model not built. Call build\\(\\) first."):
+        with pytest.raises(
+            RuntimeError, match="Model not built. Call build\\(\\) first."
+        ):
             model.forward(None, None)
 
     def test_gmn_model_forward_with_build(self):

@@ -129,7 +129,9 @@ class TestSequentialIDEnumeration(IDORTestBase):
         user1_headers = self.test_users["user1"]["headers"]
 
         for agent_id in self.user2_agents:
-            response = self.client.get(f"/api/v1/agents/{agent_id}", headers=user1_headers)
+            response = self.client.get(
+                f"/api/v1/agents/{agent_id}", headers=user1_headers
+            )
             # Should be forbidden or filtered
             assert response.status_code in [
                 status.HTTP_403_FORBIDDEN,
@@ -152,14 +154,16 @@ class TestSequentialIDEnumeration(IDORTestBase):
             ]
 
             for test_id in test_ids:
-                response = self.client.get(f"/api/v1/agents/{test_id}", headers=user1_headers)
+                response = self.client.get(
+                    f"/api/v1/agents/{test_id}", headers=user1_headers
+                )
                 if response.status_code == status.HTTP_200_OK:
                     accessed_resources.append((test_id, response.json()))
 
         # Should not have accessed any resources through enumeration
-        assert (
-            len(accessed_resources) == 0
-        ), f"Accessed {len(accessed_resources)} resources through ID enumeration"
+        assert len(accessed_resources) == 0, (
+            f"Accessed {len(accessed_resources)} resources through ID enumeration"
+        )
 
     def test_user_id_enumeration(self):
         """Test enumeration of user IDs to access profiles."""
@@ -180,7 +184,9 @@ class TestSequentialIDEnumeration(IDORTestBase):
         user1_headers = self.test_users["user1"]["headers"]
 
         # User1 should not access User2's coalition details
-        response = self.client.get(f"/api/v1/coalitions/{coalition2}", headers=user1_headers)
+        response = self.client.get(
+            f"/api/v1/coalitions/{coalition2}", headers=user1_headers
+        )
         assert response.status_code in [
             status.HTTP_403_FORBIDDEN,
             status.HTTP_404_NOT_FOUND,
@@ -215,7 +221,9 @@ class TestUUIDAttacks(IDORTestBase):
         # Generate potential UUIDs based on patterns
         for _ in range(100):
             predicted_uuid = str(uuid.uuid4())
-            response = self.client.get(f"/api/v1/agents/{predicted_uuid}", headers=user1_headers)
+            response = self.client.get(
+                f"/api/v1/agents/{predicted_uuid}", headers=user1_headers
+            )
             # Should not find any through prediction
             assert response.status_code != status.HTTP_200_OK
 
@@ -230,7 +238,9 @@ class TestUUIDAttacks(IDORTestBase):
             test_uuid = f"{current_time + i:032x}"
             formatted_uuid = f"{test_uuid[:8]}-{test_uuid[8:12]}-{test_uuid[12:16]}-{test_uuid[16:20]}-{test_uuid[20:32]}"
 
-            response = self.client.get(f"/api/v1/agents/{formatted_uuid}", headers=user1_headers)
+            response = self.client.get(
+                f"/api/v1/agents/{formatted_uuid}", headers=user1_headers
+            )
             assert response.status_code != status.HTTP_200_OK
 
     def test_uuid_collision_attempts(self):
@@ -246,7 +256,9 @@ class TestUUIDAttacks(IDORTestBase):
         ]
 
         for test_uuid in problematic_uuids:
-            response = self.client.get(f"/api/v1/agents/{test_uuid}", headers=user1_headers)
+            response = self.client.get(
+                f"/api/v1/agents/{test_uuid}", headers=user1_headers
+            )
             assert response.status_code != status.HTTP_200_OK
 
 
@@ -277,19 +289,25 @@ class TestParameterManipulation(IDORTestBase):
         ]
 
         for params in attack_params:
-            response = self.client.get("/api/v1/agents", headers=user1_headers, params=params)
+            response = self.client.get(
+                "/api/v1/agents", headers=user1_headers, params=params
+            )
             if response.status_code == status.HTTP_200_OK:
                 agents = response.json()
                 # Should not return other user's agents
                 for agent in agents:
-                    assert agent["id"] != self.user2_agent, f"Leaked agent through params: {params}"
+                    assert agent["id"] != self.user2_agent, (
+                        f"Leaked agent through params: {params}"
+                    )
 
     def test_path_parameter_idor(self):
         """Test IDOR through path parameter manipulation."""
         user1_headers = self.test_users["user1"]["headers"]
 
         # Direct path parameter manipulation
-        response = self.client.get(f"/api/v1/agents/{self.user2_agent}", headers=user1_headers)
+        response = self.client.get(
+            f"/api/v1/agents/{self.user2_agent}", headers=user1_headers
+        )
         assert response.status_code in [
             status.HTTP_403_FORBIDDEN,
             status.HTTP_404_NOT_FOUND,
@@ -358,7 +376,9 @@ class TestAuthorizationBypass(IDORTestBase):
 
         # Create resources with different access levels
         self.private_agent = self.create_test_agent(db, self.user1_id, "private_agent")
-        self.shared_coalition = self.create_test_coalition(db, self.user1_id, "shared_coalition")
+        self.shared_coalition = self.create_test_coalition(
+            db, self.user1_id, "shared_coalition"
+        )
 
     def test_direct_object_access(self):
         """Test direct object access bypassing authorization."""
@@ -429,7 +449,9 @@ class TestAuthorizationBypass(IDORTestBase):
 
         # Try cross-tenant access
         user1_headers = self.test_users["user1"]["headers"]
-        response = self.client.get(f"/api/v1/agents/{tenant2_agent}", headers=user1_headers)
+        response = self.client.get(
+            f"/api/v1/agents/{tenant2_agent}", headers=user1_headers
+        )
         assert response.status_code in [
             status.HTTP_403_FORBIDDEN,
             status.HTTP_404_NOT_FOUND,
@@ -478,7 +500,9 @@ class TestAdvancedIDORAttacks(IDORTestBase):
         # Time valid resource access
         for _ in range(10):
             start = time.time()
-            response = self.client.get(f"/api/v1/agents/{self.user1_agent}", headers=user1_headers)
+            response = self.client.get(
+                f"/api/v1/agents/{self.user1_agent}", headers=user1_headers
+            )
             valid_times.append(time.time() - start)
             assert response.status_code == status.HTTP_200_OK
 
@@ -486,7 +510,9 @@ class TestAdvancedIDORAttacks(IDORTestBase):
         for _ in range(10):
             fake_id = str(uuid.uuid4())
             start = time.time()
-            response = self.client.get(f"/api/v1/agents/{fake_id}", headers=user1_headers)
+            response = self.client.get(
+                f"/api/v1/agents/{fake_id}", headers=user1_headers
+            )
             invalid_times.append(time.time() - start)
 
         # Response times should be similar (no timing leaks)
@@ -494,9 +520,9 @@ class TestAdvancedIDORAttacks(IDORTestBase):
         avg_invalid = sum(invalid_times) / len(invalid_times)
 
         # Allow 50ms difference maximum
-        assert (
-            abs(avg_valid - avg_invalid) < 0.05
-        ), "Timing attack possible - different response times"
+        assert abs(avg_valid - avg_invalid) < 0.05, (
+            "Timing attack possible - different response times"
+        )
 
     def test_time_based_idor(self):
         """Test time-based IDOR attacks using timestamps."""
@@ -518,7 +544,9 @@ class TestAdvancedIDORAttacks(IDORTestBase):
             ]
 
             for test_id in timestamp_ids:
-                response = self.client.get(f"/api/v1/agents/{test_id}", headers=user1_headers)
+                response = self.client.get(
+                    f"/api/v1/agents/{test_id}", headers=user1_headers
+                )
                 assert response.status_code != status.HTTP_200_OK
 
     def test_mass_assignment_idor(self):
@@ -549,7 +577,9 @@ class TestAdvancedIDORAttacks(IDORTestBase):
 
         for payload in mass_assignment_attacks:
             # Try on create
-            response = self.client.post("/api/v1/agents", headers=user1_headers, json=payload)
+            response = self.client.post(
+                "/api/v1/agents", headers=user1_headers, json=payload
+            )
             if response.status_code == status.HTTP_201_CREATED:
                 created = response.json()
                 # Should not have bypassed ownership
@@ -630,7 +660,9 @@ class TestAdvancedIDORAttacks(IDORTestBase):
                 attempt_access(user1_headers, race_agent_id),
             ]
 
-            results = loop.run_until_complete(asyncio.gather(*tasks, return_exceptions=True))
+            results = loop.run_until_complete(
+                asyncio.gather(*tasks, return_exceptions=True)
+            )
 
             # Check that user1 never got access
             for result in results[1:]:  # Skip delete result
@@ -665,7 +697,9 @@ class TestIDORProtectionValidation(IDORTestBase):
         ]
 
         for method, path, json_data in crud_tests:
-            response = self.client.request(method, path, headers=user1_headers, json=json_data)
+            response = self.client.request(
+                method, path, headers=user1_headers, json=json_data
+            )
             assert response.status_code in [
                 status.HTTP_403_FORBIDDEN,
                 status.HTTP_404_NOT_FOUND,

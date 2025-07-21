@@ -104,9 +104,7 @@ class StressTestingFramework:
         self.failure_injections: List[FailureInjectionResult] = []
 
         # Stress test configuration
-        self.breaking_point_threshold = (
-            50.0  # 50% error rate indicates breaking point
-        )
+        self.breaking_point_threshold = 50.0  # 50% error rate indicates breaking point
         self.recovery_timeout = 30.0  # 30 seconds max recovery time
         self.degradation_threshold = 200.0  # 200ms response time degradation
 
@@ -139,9 +137,7 @@ class StressTestingFramework:
                     FailureType.NETWORK_TIMEOUT,
                     0.2,
                 ),
-                StressTestPhase(
-                    "recovery_test", 120, 50, 25, recovery_expected=True
-                ),
+                StressTestPhase("recovery_test", 120, 50, 25, recovery_expected=True),
                 StressTestPhase(
                     "database_failure",
                     90,
@@ -150,9 +146,7 @@ class StressTestingFramework:
                     FailureType.DATABASE_UNAVAILABLE,
                     0.3,
                 ),
-                StressTestPhase(
-                    "final_recovery", 60, 50, 25, recovery_expected=True
-                ),
+                StressTestPhase("final_recovery", 60, 50, 25, recovery_expected=True),
             ],
             "resource_exhaustion": [
                 StressTestPhase("baseline", 60, 20, 10),
@@ -164,9 +158,7 @@ class StressTestingFramework:
                     FailureType.MEMORY_EXHAUSTION,
                     0.1,
                 ),
-                StressTestPhase(
-                    "cpu_stress", 120, 75, 40, FailureType.CPU_SPIKE, 0.1
-                ),
+                StressTestPhase("cpu_stress", 120, 75, 40, FailureType.CPU_SPIKE, 0.1),
                 StressTestPhase(
                     "combined_stress",
                     180,
@@ -197,9 +189,7 @@ class StressTestingFramework:
                     FailureType.SERVICE_OVERLOAD,
                     0.3,
                 ),
-                StressTestPhase(
-                    "recovery_chaos", 150, 40, 25, recovery_expected=True
-                ),
+                StressTestPhase("recovery_chaos", 150, 40, 25, recovery_expected=True),
                 StressTestPhase("stability_test", 90, 30, 20),
             ],
         }
@@ -212,9 +202,7 @@ class StressTestingFramework:
         self.baseline_metrics = await self._capture_system_metrics()
 
         # Start monitoring task
-        self.monitoring_task = asyncio.create_task(
-            self._monitor_system_health()
-        )
+        self.monitoring_task = asyncio.create_task(self._monitor_system_health())
 
         logger.info("System monitoring started")
 
@@ -222,7 +210,7 @@ class StressTestingFramework:
         """Stop system monitoring."""
         self.monitoring_active = False
 
-        if hasattr(self, 'monitoring_task'):
+        if hasattr(self, "monitoring_task"):
             self.monitoring_task.cancel()
             try:
                 await self.monitoring_task
@@ -243,19 +231,17 @@ class StressTestingFramework:
     async def _capture_system_metrics(self) -> Dict[str, Any]:
         """Capture current system metrics."""
         return {
-            'timestamp': time.time(),
-            'cpu_percent': self.process.cpu_percent(),
-            'memory_mb': self.process.memory_info().rss / 1024 / 1024,
-            'memory_percent': psutil.virtual_memory().percent,
-            'disk_usage_percent': psutil.disk_usage('/').percent,
-            'network_connections': len(psutil.net_connections()),
-            'open_files': len(self.process.open_files()),
-            'threads': self.process.num_threads(),
+            "timestamp": time.time(),
+            "cpu_percent": self.process.cpu_percent(),
+            "memory_mb": self.process.memory_info().rss / 1024 / 1024,
+            "memory_percent": psutil.virtual_memory().percent,
+            "disk_usage_percent": psutil.disk_usage("/").percent,
+            "network_connections": len(psutil.net_connections()),
+            "open_files": len(self.process.open_files()),
+            "threads": self.process.num_threads(),
         }
 
-    async def run_stress_test_scenario(
-        self, scenario_name: str
-    ) -> StressTestResult:
+    async def run_stress_test_scenario(self, scenario_name: str) -> StressTestResult:
         """Run a complete stress test scenario."""
         if scenario_name not in self.stress_scenarios:
             raise ValueError(f"Unknown stress test scenario: {scenario_name}")
@@ -291,21 +277,21 @@ class StressTestingFramework:
                 phase_result = await self._execute_stress_phase(phase)
 
                 # Update totals
-                total_requests += phase_result['total_requests']
-                successful_requests += phase_result['successful_requests']
-                failed_requests += phase_result['failed_requests']
+                total_requests += phase_result["total_requests"]
+                successful_requests += phase_result["successful_requests"]
+                failed_requests += phase_result["failed_requests"]
                 max_response_time = max(
-                    max_response_time, phase_result['max_response_time']
+                    max_response_time, phase_result["max_response_time"]
                 )
 
                 # Check for breaking point
                 error_rate = (
                     (
-                        phase_result['failed_requests']
-                        / phase_result['total_requests']
+                        phase_result["failed_requests"]
+                        / phase_result["total_requests"]
                         * 100
                     )
-                    if phase_result['total_requests'] > 0
+                    if phase_result["total_requests"] > 0
                     else 0
                 )
                 if error_rate > self.breaking_point_threshold:
@@ -318,15 +304,15 @@ class StressTestingFramework:
                 # Check for recovery
                 if phase.recovery_expected:
                     recovery_result = await self._validate_recovery(phase)
-                    if not recovery_result['recovered']:
+                    if not recovery_result["recovered"]:
                         recovery_success = False
                         logger.error(f"Recovery failed in phase: {phase.name}")
 
-                    failure_recovery_time += recovery_result['recovery_time']
+                    failure_recovery_time += recovery_result["recovery_time"]
 
                 # Check for graceful degradation
-                if phase_result['avg_response_time'] > (
-                    self.baseline_metrics.get('avg_response_time', 0)
+                if phase_result["avg_response_time"] > (
+                    self.baseline_metrics.get("avg_response_time", 0)
                     + self.degradation_threshold
                 ):
                     if (
@@ -338,9 +324,7 @@ class StressTestingFramework:
 
                 # Break if system is completely broken
                 if error_rate > 90:  # 90% error rate means system is down
-                    logger.error(
-                        f"System completely broken in phase: {phase.name}"
-                    )
+                    logger.error(f"System completely broken in phase: {phase.name}")
                     break
 
                 # Small delay between phases
@@ -356,18 +340,16 @@ class StressTestingFramework:
 
             # System metrics
             memory_peak = max(
-                self.current_metrics.get('memory_mb', 0),
-                self.baseline_metrics.get('memory_mb', 0),
+                self.current_metrics.get("memory_mb", 0),
+                self.baseline_metrics.get("memory_mb", 0),
             )
             cpu_peak = max(
-                self.current_metrics.get('cpu_percent', 0),
-                self.baseline_metrics.get('cpu_percent', 0),
+                self.current_metrics.get("cpu_percent", 0),
+                self.baseline_metrics.get("cpu_percent", 0),
             )
 
             error_rate = (
-                (failed_requests / total_requests * 100)
-                if total_requests > 0
-                else 0
+                (failed_requests / total_requests * 100) if total_requests > 0 else 0
             )
 
             result = StressTestResult(
@@ -389,11 +371,9 @@ class StressTestingFramework:
                 recovery_success=recovery_success,
                 graceful_degradation=graceful_degradation,
                 test_metadata={
-                    'phases': [phase.name for phase in phases],
-                    'failure_injections': len(self.failure_injections),
-                    'monitoring_duration': (
-                        end_time - start_time
-                    ).total_seconds(),
+                    "phases": [phase.name for phase in phases],
+                    "failure_injections": len(self.failure_injections),
+                    "monitoring_duration": (end_time - start_time).total_seconds(),
                 },
             )
 
@@ -408,9 +388,7 @@ class StressTestingFramework:
         finally:
             await self.stop_system_monitoring()
 
-    async def _execute_stress_phase(
-        self, phase: StressTestPhase
-    ) -> Dict[str, Any]:
+    async def _execute_stress_phase(self, phase: StressTestPhase) -> Dict[str, Any]:
         """Execute a single stress test phase."""
         start_time = time.perf_counter()
         end_time = start_time + phase.duration_seconds
@@ -422,9 +400,7 @@ class StressTestingFramework:
 
         # Failure injection if specified
         if phase.failure_injection:
-            await self._inject_failure(
-                phase.failure_injection, phase.failure_rate
-            )
+            await self._inject_failure(phase.failure_injection, phase.failure_rate)
 
         async def stress_user(user_id: int):
             nonlocal total_requests, successful_requests, failed_requests
@@ -435,11 +411,7 @@ class StressTestingFramework:
                 async with aiohttp.ClientSession(timeout=timeout) as session:
                     while time.perf_counter() < end_time:
                         # Calculate delay to maintain target RPS
-                        delay = (
-                            1.0
-                            / phase.requests_per_second
-                            * phase.concurrent_users
-                        )
+                        delay = 1.0 / phase.requests_per_second * phase.concurrent_users
 
                         # Make request
                         request_start = time.perf_counter()
@@ -447,15 +419,15 @@ class StressTestingFramework:
                             # Choose random endpoint
                             endpoint = random.choice(
                                 [
-                                    '/health',
-                                    '/api/v1/system/status',
-                                    '/api/v1/agents',
-                                    '/metrics',
+                                    "/health",
+                                    "/api/v1/system/status",
+                                    "/api/v1/agents",
+                                    "/metrics",
                                 ]
                             )
 
                             async with session.get(
-                                f'{self.base_url}{endpoint}'
+                                f"{self.base_url}{endpoint}"
                             ) as response:
                                 await response.read()
 
@@ -474,9 +446,7 @@ class StressTestingFramework:
                         except Exception as e:
                             failed_requests += 1
                             total_requests += 1
-                            logger.debug(
-                                f"Request failed for user {user_id}: {e}"
-                            )
+                            logger.debug(f"Request failed for user {user_id}: {e}")
 
                         # Wait before next request
                         await asyncio.sleep(delay + random.uniform(0, 0.1))
@@ -501,26 +471,22 @@ class StressTestingFramework:
         await asyncio.gather(*tasks, return_exceptions=True)
 
         # Calculate phase metrics
-        avg_response_time = (
-            statistics.mean(response_times) if response_times else 0
-        )
+        avg_response_time = statistics.mean(response_times) if response_times else 0
         max_response_time = max(response_times) if response_times else 0
 
         return {
-            'total_requests': total_requests,
-            'successful_requests': successful_requests,
-            'failed_requests': failed_requests,
-            'avg_response_time': avg_response_time,
-            'max_response_time': max_response_time,
-            'response_times': response_times,
+            "total_requests": total_requests,
+            "successful_requests": successful_requests,
+            "failed_requests": failed_requests,
+            "avg_response_time": avg_response_time,
+            "max_response_time": max_response_time,
+            "response_times": response_times,
         }
 
-    async def _inject_failure(
-        self, failure_type: FailureType, failure_rate: float
-    ):
+    async def _inject_failure(self, failure_type: FailureType, failure_rate: float):
         """Inject a specific type of failure."""
         logger.info(
-            f"Injecting failure: {failure_type.value} at {failure_rate*100}% rate"
+            f"Injecting failure: {failure_type.value} at {failure_rate * 100}% rate"
         )
 
         injection_result = FailureInjectionResult(
@@ -539,9 +505,7 @@ class StressTestingFramework:
             elif failure_type == FailureType.PARTIAL_FAILURE:
                 await self._inject_partial_failure(failure_rate)
             else:
-                logger.warning(
-                    f"Failure type {failure_type.value} not implemented"
-                )
+                logger.warning(f"Failure type {failure_type.value} not implemented")
 
             injection_result.system_response = "Failure injected successfully"
 
@@ -557,7 +521,7 @@ class StressTestingFramework:
         # For testing, we'll simulate by adding delays to some requests
         await asyncio.sleep(1)  # Simulate configuration time
         logger.debug(
-            f"Network timeout simulation configured at {failure_rate*100}% rate"
+            f"Network timeout simulation configured at {failure_rate * 100}% rate"
         )
 
     async def _inject_memory_exhaustion(self, failure_rate: float):
@@ -621,9 +585,7 @@ class StressTestingFramework:
             try:
                 timeout = aiohttp.ClientTimeout(total=5)
                 async with aiohttp.ClientSession(timeout=timeout) as session:
-                    async with session.get(
-                        f'{self.base_url}/health'
-                    ) as response:
+                    async with session.get(f"{self.base_url}/health") as response:
                         await response.read()
             except Exception:
                 pass  # Expected to fail under overload
@@ -641,15 +603,13 @@ class StressTestingFramework:
         failure_duration = 30  # 30 seconds of partial failure
 
         logger.debug(
-            f"Partial failure simulation: {failure_rate*100}% failure rate for {failure_duration}s"
+            f"Partial failure simulation: {failure_rate * 100}% failure rate for {failure_duration}s"
         )
 
         # In a real scenario, this would configure service to fail certain requests
         await asyncio.sleep(failure_duration)
 
-    async def _validate_recovery(
-        self, phase: StressTestPhase
-    ) -> Dict[str, Any]:
+    async def _validate_recovery(self, phase: StressTestPhase) -> Dict[str, Any]:
         """Validate system recovery after failure."""
         recovery_start = time.perf_counter()
         recovery_timeout = 60  # 60 seconds max recovery time
@@ -665,17 +625,13 @@ class StressTestingFramework:
 
             while time.perf_counter() < end_time:
                 try:
-                    async with session.get(
-                        f'{self.base_url}/health'
-                    ) as response:
+                    async with session.get(f"{self.base_url}/health") as response:
                         if response.status == 200:
                             recovery_time = (
                                 time.perf_counter() - recovery_start
                             ) * 1000
                             recovered = True
-                            logger.info(
-                                f"System recovered in {recovery_time:.1f}ms"
-                            )
+                            logger.info(f"System recovered in {recovery_time:.1f}ms")
                             break
                 except Exception:
                     pass
@@ -687,9 +643,9 @@ class StressTestingFramework:
             logger.error(f"System did not recover within {recovery_timeout}s")
 
         return {
-            'recovered': recovered,
-            'recovery_time': recovery_time,
-            'recovery_timeout': recovery_timeout,
+            "recovered": recovered,
+            "recovery_time": recovery_time,
+            "recovery_timeout": recovery_timeout,
         }
 
     def _calculate_degradation_rate(self) -> float:
@@ -701,28 +657,22 @@ class StressTestingFramework:
         degradation_factors = []
 
         # Memory degradation
-        baseline_memory = self.baseline_metrics.get('memory_mb', 0)
-        current_memory = self.current_metrics.get('memory_mb', 0)
+        baseline_memory = self.baseline_metrics.get("memory_mb", 0)
+        current_memory = self.current_metrics.get("memory_mb", 0)
         if baseline_memory > 0:
-            memory_degradation = (
-                current_memory - baseline_memory
-            ) / baseline_memory
+            memory_degradation = (current_memory - baseline_memory) / baseline_memory
             degradation_factors.append(memory_degradation)
 
         # CPU degradation
-        baseline_cpu = self.baseline_metrics.get('cpu_percent', 0)
-        current_cpu = self.current_metrics.get('cpu_percent', 0)
+        baseline_cpu = self.baseline_metrics.get("cpu_percent", 0)
+        current_cpu = self.current_metrics.get("cpu_percent", 0)
         if baseline_cpu > 0:
             cpu_degradation = (current_cpu - baseline_cpu) / baseline_cpu
             degradation_factors.append(cpu_degradation)
 
         # Network connections degradation
-        baseline_connections = self.baseline_metrics.get(
-            'network_connections', 0
-        )
-        current_connections = self.current_metrics.get(
-            'network_connections', 0
-        )
+        baseline_connections = self.baseline_metrics.get("network_connections", 0)
+        current_connections = self.current_metrics.get("network_connections", 0)
         if baseline_connections > 0:
             conn_degradation = (
                 current_connections - baseline_connections
@@ -731,102 +681,94 @@ class StressTestingFramework:
 
         # Return average degradation rate
         if degradation_factors:
-            return (
-                statistics.mean(degradation_factors) * 100
-            )  # Convert to percentage
+            return statistics.mean(degradation_factors) * 100  # Convert to percentage
         return 0
 
-    def generate_stress_test_report(
-        self, result: StressTestResult
-    ) -> Dict[str, Any]:
+    def generate_stress_test_report(self, result: StressTestResult) -> Dict[str, Any]:
         """Generate comprehensive stress test report."""
         report = {
-            'test_summary': {
-                'scenario_name': result.test_name,
-                'start_time': result.start_time.isoformat(),
-                'end_time': result.end_time.isoformat(),
-                'duration_seconds': (
+            "test_summary": {
+                "scenario_name": result.test_name,
+                "start_time": result.start_time.isoformat(),
+                "end_time": result.end_time.isoformat(),
+                "duration_seconds": (
                     result.end_time - result.start_time
                 ).total_seconds(),
-                'phases_completed': result.phases_completed,
+                "phases_completed": result.phases_completed,
             },
-            'breaking_point_analysis': {
-                'breaking_point_users': result.breaking_point_users,
-                'breaking_point_rps': result.breaking_point_rps,
-                'breaking_point_reached': result.breaking_point_users > 0,
-                'system_limits': {
-                    'max_concurrent_users': result.breaking_point_users
+            "breaking_point_analysis": {
+                "breaking_point_users": result.breaking_point_users,
+                "breaking_point_rps": result.breaking_point_rps,
+                "breaking_point_reached": result.breaking_point_users > 0,
+                "system_limits": {
+                    "max_concurrent_users": result.breaking_point_users
                     if result.breaking_point_users > 0
-                    else 'Not reached',
-                    'max_requests_per_second': result.breaking_point_rps
+                    else "Not reached",
+                    "max_requests_per_second": result.breaking_point_rps
                     if result.breaking_point_rps > 0
-                    else 'Not reached',
+                    else "Not reached",
                 },
             },
-            'failure_recovery_analysis': {
-                'recovery_time_ms': result.failure_recovery_time_ms,
-                'recovery_success': result.recovery_success,
-                'graceful_degradation': result.graceful_degradation,
-                'system_degradation_rate': result.system_degradation_rate,
-                'failure_injections': len(self.failure_injections),
+            "failure_recovery_analysis": {
+                "recovery_time_ms": result.failure_recovery_time_ms,
+                "recovery_success": result.recovery_success,
+                "graceful_degradation": result.graceful_degradation,
+                "system_degradation_rate": result.system_degradation_rate,
+                "failure_injections": len(self.failure_injections),
             },
-            'performance_metrics': {
-                'total_requests': result.total_requests,
-                'successful_requests': result.successful_requests,
-                'failed_requests': result.failed_requests,
-                'error_rate': result.error_rate,
-                'max_response_time_ms': result.max_response_time_ms,
-                'success_rate': (
+            "performance_metrics": {
+                "total_requests": result.total_requests,
+                "successful_requests": result.successful_requests,
+                "failed_requests": result.failed_requests,
+                "error_rate": result.error_rate,
+                "max_response_time_ms": result.max_response_time_ms,
+                "success_rate": (
                     (result.successful_requests / result.total_requests) * 100
                 )
                 if result.total_requests > 0
                 else 0,
             },
-            'resource_utilization': {
-                'memory_peak_mb': result.memory_peak_mb,
-                'cpu_peak_percent': result.cpu_peak_percent,
-                'baseline_comparison': {
-                    'memory_increase': result.memory_peak_mb
+            "resource_utilization": {
+                "memory_peak_mb": result.memory_peak_mb,
+                "cpu_peak_percent": result.cpu_peak_percent,
+                "baseline_comparison": {
+                    "memory_increase": result.memory_peak_mb
                     - (
-                        self.baseline_metrics.get('memory_mb', 0)
+                        self.baseline_metrics.get("memory_mb", 0)
                         if self.baseline_metrics
                         else 0
                     ),
-                    'cpu_increase': result.cpu_peak_percent
+                    "cpu_increase": result.cpu_peak_percent
                     - (
-                        self.baseline_metrics.get('cpu_percent', 0)
+                        self.baseline_metrics.get("cpu_percent", 0)
                         if self.baseline_metrics
                         else 0
                     ),
                 },
             },
-            'resilience_assessment': {
-                'system_resilience_score': self._calculate_resilience_score(
-                    result
-                ),
-                'failure_tolerance': 'High'
+            "resilience_assessment": {
+                "system_resilience_score": self._calculate_resilience_score(result),
+                "failure_tolerance": "High"
                 if result.recovery_success and result.graceful_degradation
-                else 'Medium'
+                else "Medium"
                 if result.recovery_success
-                else 'Low',
-                'recovery_capability': 'Excellent'
+                else "Low",
+                "recovery_capability": "Excellent"
                 if result.failure_recovery_time_ms < 5000
-                else 'Good'
+                else "Good"
                 if result.failure_recovery_time_ms < 30000
-                else 'Poor',
+                else "Poor",
             },
-            'recommendations': self._generate_stress_test_recommendations(
-                result
-            ),
-            'failure_details': [
+            "recommendations": self._generate_stress_test_recommendations(result),
+            "failure_details": [
                 {
-                    'failure_type': inj.failure_type.value,
-                    'injection_time': inj.injection_time.isoformat(),
-                    'recovery_time': inj.recovery_time.isoformat()
+                    "failure_type": inj.failure_type.value,
+                    "injection_time": inj.injection_time.isoformat(),
+                    "recovery_time": inj.recovery_time.isoformat()
                     if inj.recovery_time
                     else None,
-                    'system_response': inj.system_response,
-                    'recovery_successful': inj.recovery_successful,
+                    "system_response": inj.system_response,
+                    "recovery_successful": inj.recovery_successful,
                 }
                 for inj in self.failure_injections
             ],
@@ -928,42 +870,42 @@ class StressTestingFramework:
     def save_results(self, filename: str):
         """Save stress test results to file."""
         data = {
-            'timestamp': datetime.now().isoformat(),
-            'test_results': [
+            "timestamp": datetime.now().isoformat(),
+            "test_results": [
                 {
-                    'test_name': result.test_name,
-                    'start_time': result.start_time.isoformat(),
-                    'end_time': result.end_time.isoformat(),
-                    'phases_completed': result.phases_completed,
-                    'breaking_point_users': result.breaking_point_users,
-                    'breaking_point_rps': result.breaking_point_rps,
-                    'max_response_time_ms': result.max_response_time_ms,
-                    'failure_recovery_time_ms': result.failure_recovery_time_ms,
-                    'system_degradation_rate': result.system_degradation_rate,
-                    'total_requests': result.total_requests,
-                    'successful_requests': result.successful_requests,
-                    'failed_requests': result.failed_requests,
-                    'error_rate': result.error_rate,
-                    'memory_peak_mb': result.memory_peak_mb,
-                    'cpu_peak_percent': result.cpu_peak_percent,
-                    'recovery_success': result.recovery_success,
-                    'graceful_degradation': result.graceful_degradation,
-                    'test_metadata': result.test_metadata,
+                    "test_name": result.test_name,
+                    "start_time": result.start_time.isoformat(),
+                    "end_time": result.end_time.isoformat(),
+                    "phases_completed": result.phases_completed,
+                    "breaking_point_users": result.breaking_point_users,
+                    "breaking_point_rps": result.breaking_point_rps,
+                    "max_response_time_ms": result.max_response_time_ms,
+                    "failure_recovery_time_ms": result.failure_recovery_time_ms,
+                    "system_degradation_rate": result.system_degradation_rate,
+                    "total_requests": result.total_requests,
+                    "successful_requests": result.successful_requests,
+                    "failed_requests": result.failed_requests,
+                    "error_rate": result.error_rate,
+                    "memory_peak_mb": result.memory_peak_mb,
+                    "cpu_peak_percent": result.cpu_peak_percent,
+                    "recovery_success": result.recovery_success,
+                    "graceful_degradation": result.graceful_degradation,
+                    "test_metadata": result.test_metadata,
                 }
                 for result in self.test_results
             ],
-            'failure_injections': [
+            "failure_injections": [
                 {
-                    'failure_type': inj.failure_type.value,
-                    'injection_time': inj.injection_time.isoformat(),
-                    'system_response': inj.system_response,
-                    'recovery_successful': inj.recovery_successful,
+                    "failure_type": inj.failure_type.value,
+                    "injection_time": inj.injection_time.isoformat(),
+                    "system_response": inj.system_response,
+                    "recovery_successful": inj.recovery_successful,
                 }
                 for inj in self.failure_injections
             ],
         }
 
-        with open(filename, 'w') as f:
+        with open(filename, "w") as f:
             json.dump(data, f, indent=2)
 
         logger.info(f"Stress test results saved to {filename}")
@@ -980,13 +922,13 @@ async def run_stress_test_validation():
 
     # Test scenarios
     scenarios_to_test = [
-        'progressive_load',
-        'failure_recovery',
-        'resource_exhaustion',
+        "progressive_load",
+        "failure_recovery",
+        "resource_exhaustion",
     ]
 
     for scenario_name in scenarios_to_test:
-        print(f"\n{'='*20} {scenario_name.upper()} STRESS TEST {'='*20}")
+        print(f"\n{'=' * 20} {scenario_name.upper()} STRESS TEST {'=' * 20}")
 
         try:
             # Run stress test scenario
@@ -1004,9 +946,7 @@ async def run_stress_test_validation():
             print(f"Total requests: {result.total_requests}")
             print(f"Error rate: {result.error_rate:.1f}%")
             print(f"Max response time: {result.max_response_time_ms:.1f}ms")
-            print(
-                f"Recovery success: {'✓' if result.recovery_success else '✗'}"
-            )
+            print(f"Recovery success: {'✓' if result.recovery_success else '✗'}")
             print(
                 f"Graceful degradation: {'✓' if result.graceful_degradation else '✗'}"
             )
@@ -1014,16 +954,14 @@ async def run_stress_test_validation():
             print(f"CPU peak: {result.cpu_peak_percent:.1f}%")
 
             # Resilience assessment
-            resilience = report['resilience_assessment']
-            print(
-                f"Resilience score: {resilience['system_resilience_score']:.1f}/100"
-            )
+            resilience = report["resilience_assessment"]
+            print(f"Resilience score: {resilience['system_resilience_score']:.1f}/100")
             print(f"Failure tolerance: {resilience['failure_tolerance']}")
             print(f"Recovery capability: {resilience['recovery_capability']}")
 
             # Recommendations
             print("\nRecommendations:")
-            for rec in report['recommendations']:
+            for rec in report["recommendations"]:
                 print(f"  - {rec}")
 
         except Exception as e:

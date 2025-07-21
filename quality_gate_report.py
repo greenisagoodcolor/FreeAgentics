@@ -10,9 +10,7 @@ from pathlib import Path
 def run_command(cmd: list) -> tuple:
     """Run command and return (success, stdout, stderr)."""
     try:
-        result = subprocess.run(
-            cmd, capture_output=True, text=True, timeout=30
-        )
+        result = subprocess.run(cmd, capture_output=True, text=True, timeout=30)
         return result.returncode == 0, result.stdout, result.stderr
     except subprocess.TimeoutExpired:
         return False, "", "Command timed out"
@@ -23,9 +21,7 @@ def run_command(cmd: list) -> tuple:
 def get_flake8_status():
     """Get flake8 linting status."""
     # First get the raw output
-    success, stdout, stderr = run_command(
-        ["flake8", "--config=.flake8.minimal", "."]
-    )
+    success, stdout, stderr = run_command(["flake8", "--config=.flake8.minimal", "."])
     error_count = len(
         [line for line in stdout.split("\n") if line.strip() and ":" in line]
     )
@@ -51,9 +47,9 @@ def get_flake8_status():
         "passed": total_errors == 0,
         "total_errors": total_errors,
         "error_types": error_types,
-        "top_errors": sorted(
-            error_types.items(), key=lambda x: x[1], reverse=True
-        )[:10],
+        "top_errors": sorted(error_types.items(), key=lambda x: x[1], reverse=True)[
+            :10
+        ],
     }
 
 
@@ -63,9 +59,7 @@ def get_mypy_status():
         ["mypy", ".", "--ignore-missing-imports", "--no-error-summary"]
     )
 
-    error_count = len(
-        [line for line in stdout.split("\n") if "error:" in line]
-    )
+    error_count = len([line for line in stdout.split("\n") if "error:" in line])
 
     # Get error categories
     error_categories = {
@@ -98,9 +92,7 @@ def get_mypy_status():
 
 def get_test_status():
     """Get unit test status."""
-    success, stdout, stderr = run_command(
-        ["pytest", "tests/unit", "--tb=short", "-q"]
-    )
+    success, stdout, stderr = run_command(["pytest", "tests/unit", "--tb=short", "-q"])
 
     # Parse pytest output
     passed = failed = errors = 0
@@ -226,9 +218,7 @@ def generate_report():
         if not flake8_status["passed"]:
             print(f"  - Fix {flake8_status['total_errors']} linting errors")
         if not mypy_status["passed"]:
-            print(
-                f"  - Fix {mypy_status['total_errors']} type checking errors"
-            )
+            print(f"  - Fix {mypy_status['total_errors']} type checking errors")
         if not test_status["passed"]:
             print(
                 f"  - Fix {test_status['tests_failed']} failing tests and {test_status['collection_errors']} collection errors"

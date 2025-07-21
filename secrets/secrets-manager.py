@@ -18,7 +18,9 @@ from cryptography.fernet import Fernet
 from cryptography.hazmat.primitives import hashes
 
 # Configure logging
-logging.basicConfig(level=logging.INFO, format="%(asctime)s - %(levelname)s - %(message)s")
+logging.basicConfig(
+    level=logging.INFO, format="%(asctime)s - %(levelname)s - %(message)s"
+)
 logger = logging.getLogger(__name__)
 
 
@@ -133,7 +135,9 @@ class SecretsManager:
         logger.info(f"Saving Docker environment file to {env_file}")
 
         with open(env_file, "w") as f:
-            f.write(f"# FreeAgentics {self.environment.title()} Environment Variables\n")
+            f.write(
+                f"# FreeAgentics {self.environment.title()} Environment Variables\n"
+            )
             f.write(f"# Generated on {secrets.get('generated_at', 'unknown')}\n")
             f.write("# DO NOT COMMIT THIS FILE TO VERSION CONTROL\n\n")
 
@@ -274,7 +278,9 @@ def main():
         default="localhost",
         help="Domain for SSL certificate",
     )
-    parser.add_argument("--generate-ssl", action="store_true", help="Generate SSL certificate")
+    parser.add_argument(
+        "--generate-ssl", action="store_true", help="Generate SSL certificate"
+    )
 
     args = parser.parse_args()
 

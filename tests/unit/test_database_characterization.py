@@ -393,7 +393,9 @@ class TestDatabaseQueryPatternsCharacterization:
         all_agents = session.query(Agent).all()
 
         # Then - Must filter in Python for SQLite
-        high_lr_agents = [a for a in all_agents if a.parameters.get("learning_rate", 0) > 0.15]
+        high_lr_agents = [
+            a for a in all_agents if a.parameters.get("learning_rate", 0) > 0.15
+        ]
         assert len(high_lr_agents) == 1
         assert high_lr_agents[0].name == "JSON Agent 2"
 

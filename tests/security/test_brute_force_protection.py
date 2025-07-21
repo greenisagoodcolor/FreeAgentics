@@ -55,7 +55,9 @@ class TestAuthenticationBruteForce:
     @pytest.fixture
     async def redis_client(self):
         """Create Redis client for test verification."""
-        client = aioredis.Redis.from_url("redis://localhost:6379", decode_responses=True)
+        client = aioredis.Redis.from_url(
+            "redis://localhost:6379", decode_responses=True
+        )
 
         # Clear test keys
         keys = await client.keys("rate_limit:*")
@@ -143,7 +145,9 @@ class TestAuthenticationBruteForce:
             )
 
         # Verify protection activated
-        assert any(r["status"] == 429 for r in attack_results), "Rate limiting should activate"
+        assert any(r["status"] == 429 for r in attack_results), (
+            "Rate limiting should activate"
+        )
 
         # Check progressive delays are applied
         retry_after_headers = [
@@ -188,7 +192,9 @@ class TestAuthenticationBruteForce:
             failed_attempts += 1
 
         # Verify lockout triggered
-        assert lockout_triggered, "Account lockout should trigger after multiple failures"
+        assert lockout_triggered, (
+            "Account lockout should trigger after multiple failures"
+        )
         assert failed_attempts <= 5, "Lockout should trigger within 5 attempts"
 
         # Verify lockout persists even with correct password
@@ -268,7 +274,9 @@ class TestTokenBruteForce:
             modified_payload["user_id"] = str(user_id)
 
             # Create token with wrong signature
-            forged_token = jwt.encode(modified_payload, "wrong_secret_key", algorithm="HS256")
+            forged_token = jwt.encode(
+                modified_payload, "wrong_secret_key", algorithm="HS256"
+            )
 
             response = await client.get(
                 "/api/v1/users/profile",
@@ -286,7 +294,8 @@ class TestTokenBruteForce:
         """Test protection against API key enumeration attacks."""
         # Generate random API keys to test
         api_keys = [
-            "".join(random.choices(string.ascii_letters + string.digits, k=32)) for _ in range(50)
+            "".join(random.choices(string.ascii_letters + string.digits, k=32))
+            for _ in range(50)
         ]
 
         enumeration_results = []
@@ -309,7 +318,8 @@ class TestTokenBruteForce:
         # Check for timing attack protection (responses should have similar timing)
         if len(enumeration_results) > 2:
             timings = [
-                enumeration_results[i + 1]["timestamp"] - enumeration_results[i]["timestamp"]
+                enumeration_results[i + 1]["timestamp"]
+                - enumeration_results[i]["timestamp"]
                 for i in range(len(enumeration_results) - 1)
                 if enumeration_results[i]["status"] != 429
             ]
@@ -317,7 +327,9 @@ class TestTokenBruteForce:
             if timings:
                 avg_timing = sum(timings) / len(timings)
                 variance = sum((t - avg_timing) ** 2 for t in timings) / len(timings)
-                assert variance < 0.01, "Timing should be consistent to prevent timing attacks"
+                assert variance < 0.01, (
+                    "Timing should be consistent to prevent timing attacks"
+                )
 
     @pytest.mark.asyncio
     async def test_session_token_guessing(self, client, redis_client):
@@ -342,7 +354,9 @@ class TestTokenBruteForce:
                 f"session_{i}_{random.randint(1000, 9999)}".encode()
             ).decode()
 
-            response = await client.get("/api/v1/users/me", cookies={"session_id": fake_session})
+            response = await client.get(
+                "/api/v1/users/me", cookies={"session_id": fake_session}
+            )
 
             guessing_attempts.append(response)
 
@@ -405,11 +419,15 @@ class TestResourceEnumeration:
 
         for directory in common_dirs:
             response = await client.get(f"/{directory}/")
-            enumeration_results.append({"path": directory, "status": response.status_code})
+            enumeration_results.append(
+                {"path": directory, "status": response.status_code}
+            )
 
         # Should rate limit after initial attempts
         rate_limited = sum(1 for r in enumeration_results if r["status"] == 429)
-        assert rate_limited > len(common_dirs) // 2, "Directory enumeration should be rate limited"
+        assert rate_limited > len(common_dirs) // 2, (
+            "Directory enumeration should be rate limited"
+        )
 
     @pytest.mark.asyncio
     async def test_file_enumeration(self, client, redis_client):
@@ -539,7 +557,9 @@ class TestResourceEnumeration:
 
         # Verify fuzzing protection
         blocked = sum(1 for r in fuzzing_attempts if r["status"] == 429)
-        assert blocked > len(fuzzing_attempts) * 0.7, "Parameter fuzzing should trigger protection"
+        assert blocked > len(fuzzing_attempts) * 0.7, (
+            "Parameter fuzzing should trigger protection"
+        )
 
 
 class TestProtectionValidation:
@@ -618,7 +638,9 @@ class TestProtectionValidation:
         blocked_key = f"blocked:rate_limit:ip:{attack_ip}"
         ddos_key = f"ddos_blocked:{attack_ip}"
 
-        is_blocked = await redis_client.get(blocked_key) or await redis_client.get(ddos_key)
+        is_blocked = await redis_client.get(blocked_key) or await redis_client.get(
+            ddos_key
+        )
         assert is_blocked is not None, "Suspicious IP should be blocked"
 
         # Verify block persists
@@ -650,7 +672,9 @@ class TestProtectionValidation:
                 attack_results.append({"ip": ip, "status": response.status_code})
 
         # Analyze distributed attack handling
-        unique_ips_blocked = len(set(r["ip"] for r in attack_results if r["status"] == 429))
+        unique_ips_blocked = len(
+            set(r["ip"] for r in attack_results if r["status"] == 429)
+        )
 
         # Should detect pattern and block even distributed attacks
         assert unique_ips_blocked > 10, "Distributed attack pattern should be detected"
@@ -684,7 +708,9 @@ class TestPerformanceImpact:
 
         # Overhead should be minimal
         overhead = protected_avg - baseline_avg
-        assert overhead < 0.01, f"Protection overhead should be <10ms, got {overhead*1000}ms"
+        assert overhead < 0.01, (
+            f"Protection overhead should be <10ms, got {overhead * 1000}ms"
+        )
 
     @pytest.mark.asyncio
     async def test_memory_usage_under_attack(self, client, redis_client):
@@ -719,9 +745,9 @@ class TestPerformanceImpact:
         memory_increase = attack_memory - baseline_memory
 
         # Memory increase should be reasonable
-        assert (
-            memory_increase < 100
-        ), f"Memory increase during attack should be <100MB, got {memory_increase}MB"
+        assert memory_increase < 100, (
+            f"Memory increase during attack should be <100MB, got {memory_increase}MB"
+        )
 
     @pytest.mark.asyncio
     async def test_response_time_degradation(self, client, redis_client):
@@ -754,7 +780,9 @@ class TestPerformanceImpact:
 
         # Response time should not degrade significantly
         degradation = attack_avg / normal_avg
-        assert degradation < 2, f"Response time degradation should be <2x, got {degradation}x"
+        assert degradation < 2, (
+            f"Response time degradation should be <2x, got {degradation}x"
+        )
 
     @pytest.mark.asyncio
     async def test_system_resource_consumption(self, client, redis_client):
@@ -784,11 +812,15 @@ class TestPerformanceImpact:
         attack_cpu = psutil.cpu_percent(interval=1)
 
         # CPU usage should remain reasonable
-        assert attack_cpu < 80, f"CPU usage during attack should be <80%, got {attack_cpu}%"
+        assert attack_cpu < 80, (
+            f"CPU usage during attack should be <80%, got {attack_cpu}%"
+        )
 
         # Verify request throughput
         requests_per_second = request_count / attack_duration
-        assert requests_per_second > 10, "Should handle >10 requests/second even under attack"
+        assert requests_per_second > 10, (
+            "Should handle >10 requests/second even under attack"
+        )
 
     async def _background_attack(self, client):
         """Helper to run background attack."""
@@ -833,7 +865,9 @@ class TestAdvancedProtection:
 
         # Should detect pattern and block
         blocked = sum(1 for r in stuffing_results if r["status"] == 429)
-        assert blocked > len(stuffing_results) * 0.8, "Credential stuffing should be detected"
+        assert blocked > len(stuffing_results) * 0.8, (
+            "Credential stuffing should be detected"
+        )
 
     @pytest.mark.asyncio
     async def test_slow_brute_force_detection(self, client, redis_client):
@@ -912,7 +946,9 @@ class TestAdvancedProtection:
         async with asyncio.TaskGroup() as tg:
             for vector in attack_vectors * 25:
                 if vector["method"] == "POST":
-                    task = tg.create_task(client.post(vector["url"], json=vector.get("data", {})))
+                    task = tg.create_task(
+                        client.post(vector["url"], json=vector.get("data", {}))
+                    )
                 else:
                     task = tg.create_task(
                         client.get(vector["url"], headers=vector.get("headers", {}))
@@ -924,7 +960,9 @@ class TestAdvancedProtection:
         total_blocked = sum(1 for r in responses if r.status_code == 429)
 
         # Should detect and block multi-vector attack
-        assert total_blocked > len(responses) * 0.8, "Multi-vector attack should be blocked"
+        assert total_blocked > len(responses) * 0.8, (
+            "Multi-vector attack should be blocked"
+        )
 
     @pytest.mark.asyncio
     async def test_intelligent_pattern_detection(self, client, redis_client):
@@ -976,7 +1014,9 @@ def generate_random_user_agent():
     version = random.choice(versions)
     os = random.choice(os_list)
 
-    return f"Mozilla/5.0 ({os}) AppleWebKit/537.36 (KHTML, like Gecko) {browser}/{version}"
+    return (
+        f"Mozilla/5.0 ({os}) AppleWebKit/537.36 (KHTML, like Gecko) {browser}/{version}"
+    )
 
 
 if __name__ == "__main__":

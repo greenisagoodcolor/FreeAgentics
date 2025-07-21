@@ -9,21 +9,21 @@ import pytest
 
 # Mock complex dependencies
 mock_modules = {
-    'torch': MagicMock(),
-    'torch.nn': MagicMock(),
-    'torch.optim': MagicMock(),
-    'torch_geometric': MagicMock(),
-    'torch_geometric.nn': MagicMock(),
-    'torch_geometric.data': MagicMock(),
-    'pymdp': MagicMock(),
-    'pymdp.utils': MagicMock(),
-    'h3': MagicMock(),
-    'networkx': MagicMock(),
-    'spacy': MagicMock(),
-    'transformers': MagicMock(),
+    "torch": MagicMock(),
+    "torch.nn": MagicMock(),
+    "torch.optim": MagicMock(),
+    "torch_geometric": MagicMock(),
+    "torch_geometric.nn": MagicMock(),
+    "torch_geometric.data": MagicMock(),
+    "pymdp": MagicMock(),
+    "pymdp.utils": MagicMock(),
+    "h3": MagicMock(),
+    "networkx": MagicMock(),
+    "spacy": MagicMock(),
+    "transformers": MagicMock(),
 }
 
-with patch.dict('sys.modules', mock_modules):
+with patch.dict("sys.modules", mock_modules):
     from inference.active.gmn_parser import GMNParser
     from inference.active.gmn_validation import GMNValidator
     from inference.gnn.feature_extractor import FeatureExtractor
@@ -44,7 +44,7 @@ class TestGMNParser:
         """Test GMNParser initialization."""
         parser = GMNParser()
         assert parser is not None
-        assert hasattr(parser, 'parse')
+        assert hasattr(parser, "parse")
 
     def test_gmn_parser_basic_parsing(self):
         """Test basic GMN parsing functionality."""
@@ -127,7 +127,7 @@ class TestGMNValidator:
         """Test GMNValidator initialization."""
         validator = GMNValidator()
         assert validator is not None
-        assert hasattr(validator, 'validate')
+        assert hasattr(validator, "validate")
 
     def test_gmn_validator_basic_validation(self):
         """Test basic GMN validation."""
@@ -249,19 +249,13 @@ class TestFeatureExtractor:
         self.extractor.extract_node_features = mock_extract_node_features
 
         # Test different node types
-        entity_features = self.extractor.extract_node_features(
-            {"type": "entity"}
-        )
+        entity_features = self.extractor.extract_node_features({"type": "entity"})
         assert entity_features == [1, 0, 0]
 
-        relation_features = self.extractor.extract_node_features(
-            {"type": "relation"}
-        )
+        relation_features = self.extractor.extract_node_features({"type": "relation"})
         assert relation_features == [0, 1, 0]
 
-        unknown_features = self.extractor.extract_node_features(
-            {"type": "unknown"}
-        )
+        unknown_features = self.extractor.extract_node_features({"type": "unknown"})
         assert unknown_features == [0, 0, 0]
 
     def test_feature_extractor_edge_features(self):
@@ -389,10 +383,7 @@ class TestGNNValidator:
 
             # Check edge references
             for edge in graph_data["edges"]:
-                if (
-                    edge["source"] not in node_ids
-                    or edge["target"] not in node_ids
-                ):
+                if edge["source"] not in node_ids or edge["target"] not in node_ids:
                     return {"valid": False, "error": "Invalid edge reference"}
 
             return {"valid": True, "error": None}
@@ -584,9 +575,7 @@ class TestInferenceIntegration:
                         {"id": "n1", "type": "state"},
                         {"id": "n2", "type": "state"},
                     ],
-                    "edges": [
-                        {"source": "n1", "target": "n2", "type": "transition"}
-                    ],
+                    "edges": [{"source": "n1", "target": "n2", "type": "transition"}],
                 }
             }
 

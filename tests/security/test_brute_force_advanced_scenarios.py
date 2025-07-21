@@ -80,9 +80,9 @@ class TestTimingAttackPrevention:
         combined_std = np.sqrt((valid_std**2 + invalid_std**2) / 2)
 
         # Difference should be less than 2 standard deviations
-        assert (
-            timing_diff < 2 * combined_std
-        ), f"Timing difference {timing_diff} exceeds threshold {2 * combined_std}"
+        assert timing_diff < 2 * combined_std, (
+            f"Timing difference {timing_diff} exceeds threshold {2 * combined_std}"
+        )
 
     @pytest.mark.asyncio
     async def test_password_length_timing_protection(self, timing_client):
@@ -122,9 +122,9 @@ class TestTimingAttackPrevention:
         correlation = np.corrcoef(lengths, mean_timings)[0, 1]
 
         # Correlation should be near zero (no relationship)
-        assert (
-            abs(correlation) < 0.3
-        ), f"Password length correlation {correlation} indicates timing leak"
+        assert abs(correlation) < 0.3, (
+            f"Password length correlation {correlation} indicates timing leak"
+        )
 
     @pytest.mark.asyncio
     async def test_hash_computation_timing_protection(self, timing_client):
@@ -168,9 +168,9 @@ class TestTimingAttackPrevention:
         max_diff = max(means) - min(means)
         avg_std = np.mean([r["std"] for r in timing_results.values()])
 
-        assert (
-            max_diff < 3 * avg_std
-        ), "Hash computation timing varies too much with password complexity"
+        assert max_diff < 3 * avg_std, (
+            "Hash computation timing varies too much with password complexity"
+        )
 
 
 class TestDistributedCoordinatedAttacks:
@@ -181,7 +181,9 @@ class TestDistributedCoordinatedAttacks:
         """Test protection against botnet-style distributed attacks."""
         # Simulate botnet with multiple IPs
         botnet_size = 50
-        botnet_ips = [f"192.168.{i//256}.{i%256}" for i in range(1, botnet_size + 1)]
+        botnet_ips = [
+            f"192.168.{i // 256}.{i % 256}" for i in range(1, botnet_size + 1)
+        ]
 
         # Target account
         target_email = "botnet_target@example.com"
@@ -217,10 +219,14 @@ class TestDistributedCoordinatedAttacks:
 
         # Analyze attack detection
         blocked_ips = set(r["ip"] for r in attack_results if r["status"] == 429)
-        success_rate = sum(1 for r in attack_results if r["status"] != 429) / len(attack_results)
+        success_rate = sum(1 for r in attack_results if r["status"] != 429) / len(
+            attack_results
+        )
 
         # Should detect coordinated attack pattern
-        assert len(blocked_ips) > botnet_size * 0.5, "Should block majority of botnet IPs"
+        assert len(blocked_ips) > botnet_size * 0.5, (
+            "Should block majority of botnet IPs"
+        )
         assert success_rate < 0.2, "Botnet success rate should be low"
 
         # Check if target account is protected
@@ -240,7 +246,9 @@ class TestDistributedCoordinatedAttacks:
     async def test_rotating_proxy_attack(self, client, redis_client):
         """Test detection of attacks using rotating proxies."""
         # Simulate proxy rotation
-        proxy_pool = [{"ip": f"proxy-{i}.example.com", "port": 8000 + i} for i in range(20)]
+        proxy_pool = [
+            {"ip": f"proxy-{i}.example.com", "port": 8000 + i} for i in range(20)
+        ]
 
         # Attack parameters
         target_accounts = [
@@ -340,9 +348,9 @@ class TestDistributedCoordinatedAttacks:
 
         # Block rate should increase with each wave
         for i in range(1, len(block_rates)):
-            assert (
-                block_rates[i] >= block_rates[i - 1]
-            ), "Protection should strengthen with repeated waves"
+            assert block_rates[i] >= block_rates[i - 1], (
+                "Protection should strengthen with repeated waves"
+            )
 
 
 class TestAccountTakeoverProtection:
@@ -399,9 +407,9 @@ class TestAccountTakeoverProtection:
         blocked_attempts = sum(1 for r in spray_results if r["status"] == 429)
 
         # Should detect spray pattern
-        assert (
-            blocked_attempts > len(spray_results) * 0.5
-        ), "Password spray pattern should be detected"
+        assert blocked_attempts > len(spray_results) * 0.5, (
+            "Password spray pattern should be detected"
+        )
         assert successful_attempts == 0, "No spray attempts should succeed"
 
     @pytest.mark.asyncio
@@ -488,7 +496,9 @@ class TestAccountTakeoverProtection:
             actual_session = response.cookies.get("session_id")
 
             # Session ID should be different (regenerated)
-            assert actual_session != attacker_session_id, "Session should be regenerated on login"
+            assert actual_session != attacker_session_id, (
+                "Session should be regenerated on login"
+            )
 
         # Try to hijack with fixed session
         hijack_response = await client.get(
@@ -605,7 +615,9 @@ class TestZeroDayPatternDetection:
         for phase in attack_phases:
             phase_results = [r for r in ml_results if r["phase"] == phase]
             blocked = sum(1 for r in phase_results if r["status"] == 429)
-            phase_block_rates[phase] = blocked / len(phase_results) if phase_results else 0
+            phase_block_rates[phase] = (
+                blocked / len(phase_results) if phase_results else 0
+            )
 
         # Later phases should have higher block rates (adaptive learning)
         assert (
@@ -664,9 +676,9 @@ class TestAdaptiveProtectionMechanisms:
         for i, result in enumerate(threshold_results):
             if i > 0 and result["period"] != "low":
                 # Higher intensity should trigger more blocking
-                assert (
-                    result["block_rate"] > 0.5
-                ), f"Period {result['period']} should have high block rate"
+                assert result["block_rate"] > 0.5, (
+                    f"Period {result['period']} should have high block rate"
+                )
 
     @pytest.mark.asyncio
     async def test_reputation_based_filtering(self, client, redis_client):
@@ -726,9 +738,9 @@ class TestAdaptiveProtectionMechanisms:
         good_allowed = [t[2] for t in reputation_tests if t[0] == "good"]
         bad_allowed = [t[2] for t in reputation_tests if t[0] == "bad"]
 
-        assert (
-            np.mean(good_allowed) > np.mean(bad_allowed) * 2
-        ), "Good reputation IPs should have more lenient limits"
+        assert np.mean(good_allowed) > np.mean(bad_allowed) * 2, (
+            "Good reputation IPs should have more lenient limits"
+        )
 
     @pytest.mark.asyncio
     async def test_contextual_protection(self, client, redis_client):
@@ -797,7 +809,9 @@ class TestAdaptiveProtectionMechanisms:
         )
 
         # After hours should have stricter protection
-        assert after_hours_rate > business_hours_rate, "After hours should have stricter protection"
+        assert after_hours_rate > business_hours_rate, (
+            "After hours should have stricter protection"
+        )
 
 
 # Performance and stress testing utilities
@@ -857,13 +871,15 @@ class TestBruteForcePerformance:
         sum(1 for r in all_results if r["status"] != 429)
 
         # Performance assertions
-        assert (
-            np.percentile(response_times, 95) < 0.5
-        ), "95th percentile response time should be < 500ms"
-        assert (
-            np.percentile(response_times, 99) < 1.0
-        ), "99th percentile response time should be < 1s"
-        assert total_duration < 30, f"Total test should complete in < 30s, took {total_duration}s"
+        assert np.percentile(response_times, 95) < 0.5, (
+            "95th percentile response time should be < 500ms"
+        )
+        assert np.percentile(response_times, 99) < 1.0, (
+            "99th percentile response time should be < 1s"
+        )
+        assert total_duration < 30, (
+            f"Total test should complete in < 30s, took {total_duration}s"
+        )
 
     @pytest.mark.asyncio
     async def test_memory_stability_under_attack(self, client, redis_client):
@@ -921,9 +937,15 @@ class TestBruteForcePerformance:
         memory_variance = np.var(memory_samples)
 
         # Memory should remain stable
-        assert memory_increase < 50, f"Memory increase should be < 50MB, got {memory_increase}MB"
-        assert max_memory - baseline_memory < 100, "Peak memory should be < 100MB above baseline"
-        assert memory_variance < 100, f"Memory variance should be low, got {memory_variance}"
+        assert memory_increase < 50, (
+            f"Memory increase should be < 50MB, got {memory_increase}MB"
+        )
+        assert max_memory - baseline_memory < 100, (
+            "Peak memory should be < 100MB above baseline"
+        )
+        assert memory_variance < 100, (
+            f"Memory variance should be low, got {memory_variance}"
+        )
 
 
 if __name__ == "__main__":

@@ -153,7 +153,9 @@ class PerformanceHistory:
 
         self.save_history()
 
-    def get_trend(self, category: str, benchmark: str, metric: str) -> List[Tuple[str, float]]:
+    def get_trend(
+        self, category: str, benchmark: str, metric: str
+    ) -> List[Tuple[str, float]]:
         """Get performance trend for specific benchmark."""
         trend = []
         for entry in self.history_data:
@@ -184,7 +186,9 @@ class RegressionDetector:
         improvements = []
 
         for result in results:
-            baseline_data = self.baseline.get_baseline(result.category, result.benchmark_name)
+            baseline_data = self.baseline.get_baseline(
+                result.category, result.benchmark_name
+            )
             if not baseline_data:
                 continue
 
@@ -326,7 +330,9 @@ class CIIntegration:
         for category, benchmark in benchmarks:
             key = f"{category}.{benchmark}"
             trends[key] = {
-                "duration_ms": self.history.get_trend(category, benchmark, "duration_ms"),
+                "duration_ms": self.history.get_trend(
+                    category, benchmark, "duration_ms"
+                ),
                 "memory_mb": self.history.get_trend(category, benchmark, "memory_mb"),
             }
 
@@ -352,7 +358,9 @@ class CIIntegration:
                 self.baseline.update_baseline(results)
                 logger.info("Baseline updated (no regressions)")
             else:
-                logger.warning(f"Baseline not updated due to {len(regressions)} regressions")
+                logger.warning(
+                    f"Baseline not updated due to {len(regressions)} regressions"
+                )
 
     def generate_github_comment(self, report: Dict[str, Any]) -> str:
         """Generate GitHub PR comment from report."""
@@ -368,12 +376,18 @@ class CIIntegration:
         # Regressions
         if report["regressions"]:
             comment += "### ⚠️ Performance Regressions\n\n"
-            comment += "| Benchmark | Metric | Current | Baseline | Change | Severity |\n"
-            comment += "|-----------|--------|---------|----------|--------|----------|\n"
+            comment += (
+                "| Benchmark | Metric | Current | Baseline | Change | Severity |\n"
+            )
+            comment += (
+                "|-----------|--------|---------|----------|--------|----------|\n"
+            )
 
             for reg in report["regressions"]:
                 comment += f"| {reg['benchmark_name']} | {reg['metric']} | "
-                comment += f"{reg['current_value']:.2f} | {reg['baseline_value']:.2f} | "
+                comment += (
+                    f"{reg['current_value']:.2f} | {reg['baseline_value']:.2f} | "
+                )
                 comment += f"+{reg['regression_percent']:.1f}% | {reg['severity']} |\n"
 
             comment += "\n"
@@ -386,7 +400,9 @@ class CIIntegration:
 
             for imp in report["improvements"]:
                 comment += f"| {imp['benchmark_name']} | {imp['metric']} | "
-                comment += f"{imp['current_value']:.2f} | {imp['baseline_value']:.2f} | "
+                comment += (
+                    f"{imp['current_value']:.2f} | {imp['baseline_value']:.2f} | "
+                )
                 comment += f"{imp['regression_percent']:.1f}% |\n"
 
         return comment
@@ -394,7 +410,9 @@ class CIIntegration:
 
 def main():
     """Main CLI entry point."""
-    parser = argparse.ArgumentParser(description="CI/CD integration for performance benchmarks")
+    parser = argparse.ArgumentParser(
+        description="CI/CD integration for performance benchmarks"
+    )
 
     parser.add_argument(
         "--results-file",
@@ -466,7 +484,8 @@ def main():
 
     # Save report
     report_file = (
-        args.output_dir / f"regression_report_{datetime.now().strftime('%Y%m%d_%H%M%S')}.json"
+        args.output_dir
+        / f"regression_report_{datetime.now().strftime('%Y%m%d_%H%M%S')}.json"
     )
     with open(report_file, "w") as f:
         json.dump(report, f, indent=2)

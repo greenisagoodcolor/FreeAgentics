@@ -177,7 +177,7 @@ class ThreadingOptimizationAnalyzer:
 
             # Log CPU count for analysis context
             logger.debug(
-                f"System CPU count: {cpu_count}, analyzing {workload_name}" f" workload"
+                f"System CPU count: {cpu_count}, analyzing {workload_name} workload"
             )
             current_throughput = throughputs.get(current_default, 0)
             optimal_throughput = throughputs[optimal]

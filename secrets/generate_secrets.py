@@ -2,6 +2,7 @@
 """
 Generate secure production secrets for the FreeAgentics system.
 """
+
 import base64
 import os
 import secrets

@@ -129,9 +129,7 @@ class OllamaProvider(LLMProvider):
             async with session.post(
                 f"{self.base_url}/api/pull",
                 json=pull_data,
-                timeout=aiohttp.ClientTimeout(
-                    total=3600
-                ),  # 1 hour for large models
+                timeout=aiohttp.ClientTimeout(total=3600),  # 1 hour for large models
             ) as response:
                 if response.status != 200:
                     raise LLMError(f"Failed to pull model {model}")
@@ -165,9 +163,7 @@ class OllamaProvider(LLMProvider):
             ) as response:
                 if response.status == 200:
                     data = await response.json()
-                    self._available_models = [
-                        m["name"] for m in data.get("models", [])
-                    ]
+                    self._available_models = [m["name"] for m in data.get("models", [])]
                     self._models_last_check = datetime.now()
                     return self._available_models
         except:
@@ -181,19 +177,13 @@ class OllamaProvider(LLMProvider):
         prompt_parts = []
 
         # Add system messages first
-        system_messages = [
-            msg for msg in messages if msg.role == LLMRole.SYSTEM
-        ]
+        system_messages = [msg for msg in messages if msg.role == LLMRole.SYSTEM]
         if system_messages:
-            system_content = "\n\n".join(
-                msg.content for msg in system_messages
-            )
+            system_content = "\n\n".join(msg.content for msg in system_messages)
             prompt_parts.append(f"System: {system_content}")
 
         # Add conversation history
-        conversation_messages = [
-            msg for msg in messages if msg.role != LLMRole.SYSTEM
-        ]
+        conversation_messages = [msg for msg in messages if msg.role != LLMRole.SYSTEM]
         for msg in conversation_messages:
             role = "Human" if msg.role == LLMRole.USER else "Assistant"
             prompt_parts.append(f"{role}: {msg.content}")
@@ -270,9 +260,7 @@ class OllamaProvider(LLMProvider):
                     try:
                         response_json = json.loads(response_text)
                     except json.JSONDecodeError:
-                        raise LLMError(
-                            f"Invalid JSON response: {response_text[:200]}"
-                        )
+                        raise LLMError(f"Invalid JSON response: {response_text[:200]}")
 
                     if response.status != 200:
                         error_msg = response_json.get("error", "Unknown error")
@@ -285,15 +273,9 @@ class OllamaProvider(LLMProvider):
 
                     # Build usage information (Ollama provides different metrics)
                     usage = {
-                        "prompt_tokens": response_json.get(
-                            "prompt_eval_count", 0
-                        ),
-                        "completion_tokens": response_json.get(
-                            "eval_count", 0
-                        ),
-                        "total_tokens": response_json.get(
-                            "prompt_eval_count", 0
-                        )
+                        "prompt_tokens": response_json.get("prompt_eval_count", 0),
+                        "completion_tokens": response_json.get("eval_count", 0),
+                        "total_tokens": response_json.get("prompt_eval_count", 0)
                         + response_json.get("eval_count", 0),
                     }
 
@@ -312,10 +294,7 @@ class OllamaProvider(LLMProvider):
                     }
 
                     # Calculate tokens per second if timing info available
-                    if (
-                        metadata.get("eval_duration")
-                        and usage["completion_tokens"] > 0
-                    ):
+                    if metadata.get("eval_duration") and usage["completion_tokens"] > 0:
                         eval_duration_s = (
                             metadata["eval_duration"] / 1e9
                         )  # Convert nanoseconds to seconds
@@ -328,9 +307,7 @@ class OllamaProvider(LLMProvider):
                         model=response_json.get("model", self.model),
                         usage=usage,
                         metadata=metadata,
-                        finish_reason="stop"
-                        if response_json.get("done")
-                        else "length",
+                        finish_reason="stop" if response_json.get("done") else "length",
                     )
 
             except aiohttp.ClientError as e:
@@ -338,9 +315,7 @@ class OllamaProvider(LLMProvider):
             except json.JSONDecodeError as e:
                 last_error = LLMError(f"Invalid response format: {str(e)}")
             except KeyError as e:
-                last_error = LLMError(
-                    f"Unexpected response structure: {str(e)}"
-                )
+                last_error = LLMError(f"Unexpected response structure: {str(e)}")
             except LLMError as e:
                 last_error = e
             except Exception as e:
@@ -352,9 +327,7 @@ class OllamaProvider(LLMProvider):
                 await asyncio.sleep(wait_time)
 
         # All retries failed
-        raise last_error or LLMError(
-            "Failed to generate response after all retries"
-        )
+        raise last_error or LLMError("Failed to generate response after all retries")
 
     async def validate_model(self, model_name: str) -> bool:
         """Check if a model is available."""
@@ -391,9 +364,7 @@ class OllamaProvider(LLMProvider):
         result = []
         for model in models:
             model_base = model.split(":")[0]
-            config = self.MODEL_CONFIGS.get(
-                model_base, self.MODEL_CONFIGS["default"]
-            )
+            config = self.MODEL_CONFIGS.get(model_base, self.MODEL_CONFIGS["default"])
 
             result.append(
                 {

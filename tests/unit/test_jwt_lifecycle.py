@@ -95,7 +95,9 @@ class TestJWTLifecycle:
     def test_token_expiration_lifecycle(self):
         """Test token expiration behavior."""
         # Create token with very short expiration
-        with patch("auth.security_implementation.ACCESS_TOKEN_EXPIRE_MINUTES", 0.016):  # ~1 second
+        with patch(
+            "auth.security_implementation.ACCESS_TOKEN_EXPIRE_MINUTES", 0.016
+        ):  # ~1 second
             access_token = self.auth_manager.create_access_token(self.test_user)
 
         # Token should work immediately
@@ -122,7 +124,10 @@ class TestJWTLifecycle:
         # Create tokens concurrently
         with concurrent.futures.ThreadPoolExecutor(max_workers=10) as executor:
             future_tokens = [executor.submit(create_token, user) for user in users]
-            tokens = [future.result() for future in concurrent.futures.as_completed(future_tokens)]
+            tokens = [
+                future.result()
+                for future in concurrent.futures.as_completed(future_tokens)
+            ]
 
         # Verify all tokens are unique and valid
         assert len(set(tokens)) == len(tokens), "All tokens should be unique"
@@ -171,7 +176,9 @@ class TestJWTLifecycle:
         # Try to use refresh token concurrently
         with concurrent.futures.ThreadPoolExecutor(max_workers=5) as executor:
             futures = [executor.submit(refresh_token_concurrent) for _ in range(5)]
-            results = [future.result() for future in concurrent.futures.as_completed(futures)]
+            results = [
+                future.result() for future in concurrent.futures.as_completed(futures)
+            ]
 
         # Only one should succeed, others should fail
         successes = [r for r in results if r[0] == "success"]
@@ -179,12 +186,17 @@ class TestJWTLifecycle:
 
         assert len(successes) == 1, "Only one refresh should succeed"
         assert len(errors) == 4, "Four refreshes should fail"
-        assert all("blacklisted" in e[1].lower() or "already used" in e[1].lower() for e in errors)
+        assert all(
+            "blacklisted" in e[1].lower() or "already used" in e[1].lower()
+            for e in errors
+        )
 
     def test_token_revocation_lifecycle(self):
         """Test token revocation and blacklisting."""
         # Create multiple tokens for user
-        tokens = [self.auth_manager.create_access_token(self.test_user) for _ in range(3)]
+        tokens = [
+            self.auth_manager.create_access_token(self.test_user) for _ in range(3)
+        ]
 
         # All should work initially
         for token in tokens:
@@ -224,7 +236,9 @@ class TestJWTLifecycle:
 
         # Verify with wrong fingerprint fails
         with pytest.raises(HTTPException) as exc_info:
-            self.auth_manager.verify_token(access_token, client_fingerprint="wrong_fingerprint")
+            self.auth_manager.verify_token(
+                access_token, client_fingerprint="wrong_fingerprint"
+            )
         assert "binding" in exc_info.value.detail.lower()
 
         # Refresh with correct fingerprint
@@ -272,7 +286,7 @@ class TestJWTLifecycle:
                 severity="warning",
                 message=f"Invalid token attempt {i}",
                 user_id=self.test_user.user_id,
-                details={"ip_address": f"192.168.1.{100+i}"},
+                details={"ip_address": f"192.168.1.{100 + i}"},
             )
 
         # Token should still work but activity should be logged
@@ -318,9 +332,13 @@ class TestJWTLifecycle:
         """Test token operations performance."""
         # Measure token creation time
         start_time = time.time()
-        tokens = [self.auth_manager.create_access_token(self.test_user) for _ in range(100)]
+        tokens = [
+            self.auth_manager.create_access_token(self.test_user) for _ in range(100)
+        ]
         creation_time = time.time() - start_time
-        assert creation_time < 2.0, f"Token creation too slow: {creation_time}s for 100 tokens"
+        assert creation_time < 2.0, (
+            f"Token creation too slow: {creation_time}s for 100 tokens"
+        )
 
         # Measure token verification time
         token = tokens[0]
@@ -328,9 +346,9 @@ class TestJWTLifecycle:
         for _ in range(100):
             self.auth_manager.verify_token(token)
         verification_time = time.time() - start_time
-        assert (
-            verification_time < 1.0
-        ), f"Token verification too slow: {verification_time}s for 100 verifications"
+        assert verification_time < 1.0, (
+            f"Token verification too slow: {verification_time}s for 100 verifications"
+        )
 
     @pytest.mark.asyncio
     async def test_async_token_lifecycle(self):

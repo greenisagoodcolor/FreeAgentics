@@ -43,7 +43,9 @@ class TestErrorHandler:
 
         # Simulate multiple failures
         for i in range(4):  # Max retries is 3
-            recovery_info = handler.handle_error(PyMDPError(f"Failure {i}"), "pymdp_operation")
+            recovery_info = handler.handle_error(
+                PyMDPError(f"Failure {i}"), "pymdp_operation"
+            )
 
         # Should not be able to retry after max attempts
         assert recovery_info["can_retry"] is False
@@ -198,14 +200,19 @@ class TestAgentErrorHandling:
 
     def test_concurrent_error_handling(self):
         """Test error handling with multiple agents."""
-        agents = [BasicExplorerAgent(f"agent_{i}", f"Agent {i}", grid_size=3) for i in range(3)]
+        agents = [
+            BasicExplorerAgent(f"agent_{i}", f"Agent {i}", grid_size=3)
+            for i in range(3)
+        ]
 
         for agent in agents:
             agent.start()
 
             # Mock different failures for each agent
             mock_agent = MagicMock()
-            mock_agent.infer_policies.side_effect = Exception(f"Failure for {agent.agent_id}")
+            mock_agent.infer_policies.side_effect = Exception(
+                f"Failure for {agent.agent_id}"
+            )
             agent.pymdp_agent = mock_agent
 
         # All agents should handle errors independently

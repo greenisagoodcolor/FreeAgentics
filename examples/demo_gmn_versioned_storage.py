@@ -142,13 +142,19 @@ def demo_gmn_storage_with_real_data():
         spec2 = parsed_specifications[1]
 
         # Simple compatibility check based on node signatures
-        nodes1 = {(node.get("name"), node.get("type")) for node in spec1["parsed"]["nodes"]}
-        nodes2 = {(node.get("name"), node.get("type")) for node in spec2["parsed"]["nodes"]}
+        nodes1 = {
+            (node.get("name"), node.get("type")) for node in spec1["parsed"]["nodes"]
+        }
+        nodes2 = {
+            (node.get("name"), node.get("type")) for node in spec2["parsed"]["nodes"]
+        }
 
         compatible = nodes1 == nodes2
         print(f"  {spec1['name']} vs {spec2['name']}")
         print(f"  Compatible: {'✅' if compatible else '❌'}")
-        print(f"  Reason: {'Same node structure' if compatible else 'Different node structure'}")
+        print(
+            f"  Reason: {'Same node structure' if compatible else 'Different node structure'}"
+        )
 
     # Demonstrate data integrity checks
     print("\n🔍 Data Integrity Simulation")
@@ -172,15 +178,17 @@ def demo_gmn_storage_with_real_data():
 
     total_nodes = sum(spec["metrics"]["node_count"] for spec in parsed_specifications)
     total_edges = sum(spec["metrics"]["edge_count"] for spec in parsed_specifications)
-    avg_complexity = sum(spec["metrics"]["complexity"] for spec in parsed_specifications) / len(
-        parsed_specifications
-    )
+    avg_complexity = sum(
+        spec["metrics"]["complexity"] for spec in parsed_specifications
+    ) / len(parsed_specifications)
 
     print(f"  Total specifications: {len(parsed_specifications)}")
     print(f"  Total nodes: {total_nodes}")
     print(f"  Total edges: {total_edges}")
     print(f"  Average complexity: {avg_complexity:.3f}")
-    print(f"  Valid specifications: {sum(1 for spec in parsed_specifications if spec['valid'])}")
+    print(
+        f"  Valid specifications: {sum(1 for spec in parsed_specifications if spec['valid'])}"
+    )
 
     print("\n🎯 Performance Considerations")
     print("-" * 30)

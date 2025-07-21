@@ -180,7 +180,9 @@ class TestCoalitionMemberManagement:
 
     def test_add_member_basic(self, basic_coalition):
         """Test adding a member to coalition."""
-        success = basic_coalition.add_member("agent_001", CoalitionRole.MEMBER, ["skill_a"])
+        success = basic_coalition.add_member(
+            "agent_001", CoalitionRole.MEMBER, ["skill_a"]
+        )
 
         assert success is True
         assert "agent_001" in basic_coalition.members
@@ -191,7 +193,9 @@ class TestCoalitionMemberManagement:
 
     def test_add_first_member_becomes_leader(self, basic_coalition):
         """Test that first member automatically becomes leader."""
-        success = basic_coalition.add_member("agent_001", CoalitionRole.MEMBER, ["skill_a"])
+        success = basic_coalition.add_member(
+            "agent_001", CoalitionRole.MEMBER, ["skill_a"]
+        )
 
         assert success is True
         assert basic_coalition.leader_id == "agent_001"
@@ -199,7 +203,9 @@ class TestCoalitionMemberManagement:
 
     def test_add_member_explicit_leader(self, basic_coalition):
         """Test adding member with explicit leader role."""
-        success = basic_coalition.add_member("agent_001", CoalitionRole.LEADER, ["skill_a"])
+        success = basic_coalition.add_member(
+            "agent_001", CoalitionRole.LEADER, ["skill_a"]
+        )
 
         assert success is True
         assert basic_coalition.leader_id == "agent_001"
@@ -213,20 +219,33 @@ class TestCoalitionMemberManagement:
         coalition = Coalition("test_coalition", "Test Coalition", max_size=2)
 
         # Add two members successfully
-        assert coalition.add_member("agent_001", CoalitionRole.MEMBER, ["skill_a"]) is True
-        assert coalition.add_member("agent_002", CoalitionRole.MEMBER, ["skill_b"]) is True
+        assert (
+            coalition.add_member("agent_001", CoalitionRole.MEMBER, ["skill_a"]) is True
+        )
+        assert (
+            coalition.add_member("agent_002", CoalitionRole.MEMBER, ["skill_b"]) is True
+        )
 
         # Third member should fail
-        assert coalition.add_member("agent_003", CoalitionRole.MEMBER, ["skill_c"]) is False
+        assert (
+            coalition.add_member("agent_003", CoalitionRole.MEMBER, ["skill_c"])
+            is False
+        )
         assert len(coalition.members) == 2
 
     def test_add_duplicate_member(self, basic_coalition):
         """Test that duplicate member addition fails."""
         # Add member first time
-        assert basic_coalition.add_member("agent_001", CoalitionRole.MEMBER, ["skill_a"]) is True
+        assert (
+            basic_coalition.add_member("agent_001", CoalitionRole.MEMBER, ["skill_a"])
+            is True
+        )
 
         # Try to add same member again
-        assert basic_coalition.add_member("agent_001", CoalitionRole.MEMBER, ["skill_b"]) is False
+        assert (
+            basic_coalition.add_member("agent_001", CoalitionRole.MEMBER, ["skill_b"])
+            is False
+        )
         assert len(basic_coalition.members) == 1
 
     def test_remove_member_basic(self, basic_coalition):
@@ -360,7 +379,9 @@ class TestCoalitionObjectiveManagement:
 
     def test_update_nonexistent_objective(self, coalition_with_members):
         """Test updating progress on nonexistent objective."""
-        success = coalition_with_members.update_objective_progress("nonexistent_obj", 0.5)
+        success = coalition_with_members.update_objective_progress(
+            "nonexistent_obj", 0.5
+        )
 
         assert success is False
 
@@ -374,7 +395,9 @@ class TestCoalitionObjectiveManagement:
             priority=1.0,
         )
 
-        assert coalition_with_members.can_achieve_objective(achievable_objective) is True
+        assert (
+            coalition_with_members.can_achieve_objective(achievable_objective) is True
+        )
 
         # Test with unachievable objective
         unachievable_objective = CoalitionObjective(
@@ -384,7 +407,10 @@ class TestCoalitionObjectiveManagement:
             priority=1.0,
         )
 
-        assert coalition_with_members.can_achieve_objective(unachievable_objective) is False
+        assert (
+            coalition_with_members.can_achieve_objective(unachievable_objective)
+            is False
+        )
 
 
 class TestCoalitionStatusTransitions:
@@ -535,8 +561,12 @@ class TestCoalitionCapabilityManagement:
 
     def test_get_member_by_role(self, coalition_with_diverse_members):
         """Test getting members by role."""
-        leaders = coalition_with_diverse_members.get_member_by_role(CoalitionRole.LEADER)
-        members = coalition_with_diverse_members.get_member_by_role(CoalitionRole.MEMBER)
+        leaders = coalition_with_diverse_members.get_member_by_role(
+            CoalitionRole.LEADER
+        )
+        members = coalition_with_diverse_members.get_member_by_role(
+            CoalitionRole.MEMBER
+        )
 
         assert len(leaders) == 1
         assert leaders[0].agent_id == "agent_001"
@@ -547,7 +577,9 @@ class TestCoalitionCapabilityManagement:
 
     def test_get_member_by_nonexistent_role(self, coalition_with_diverse_members):
         """Test getting members by nonexistent role."""
-        observers = coalition_with_diverse_members.get_member_by_role(CoalitionRole.OBSERVER)
+        observers = coalition_with_diverse_members.get_member_by_role(
+            CoalitionRole.OBSERVER
+        )
 
         assert len(observers) == 0
 
@@ -581,7 +613,9 @@ class TestCoalitionCommunication:
 
     def test_add_communication_targeted(self, active_coalition):
         """Test adding targeted communication."""
-        active_coalition.add_communication("agent_001", "Private message", ["agent_002"])
+        active_coalition.add_communication(
+            "agent_001", "Private message", ["agent_002"]
+        )
 
         assert len(active_coalition.communication_history) == 1
 

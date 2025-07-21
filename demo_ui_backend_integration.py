@@ -17,7 +17,7 @@ from datetime import datetime
 from unittest.mock import patch
 
 # Add project root to path
-sys.path.insert(0, '.')
+sys.path.insert(0, ".")
 
 from fastapi.testclient import TestClient
 
@@ -77,7 +77,7 @@ def demo_agent_creation():
     print("   - Adds Active Inference parameters")
     print()
 
-    with patch('api.ui_compatibility.v1_create_agent') as mock_create:
+    with patch("api.ui_compatibility.v1_create_agent") as mock_create:
         mock_create.return_value = mock_agent
 
         # Make the API call
@@ -98,15 +98,9 @@ def demo_agent_creation():
             print("4. 🔍 Backend internal processing verification:")
             print(f"   ✓ Name extracted: '{config.name}'")
             print(f"   ✓ Template mapped: '{config.template}'")
-            print(
-                f"   ✓ Description preserved: '{config.parameters['description']}'"
-            )
-            print(
-                f"   ✓ Active Inference enabled: {config.parameters['use_pymdp']}"
-            )
-            print(
-                f"   ✓ Planning horizon set: {config.parameters['planning_horizon']}"
-            )
+            print(f"   ✓ Description preserved: '{config.parameters['description']}'")
+            print(f"   ✓ Active Inference enabled: {config.parameters['use_pymdp']}")
+            print(f"   ✓ Planning horizon set: {config.parameters['planning_horizon']}")
         else:
             print(f"   Error: {response.text}")
             return False
@@ -128,7 +122,7 @@ def demo_agent_creation():
         ),
     ]
 
-    with patch('api.ui_compatibility.v1_list_agents') as mock_list:
+    with patch("api.ui_compatibility.v1_list_agents") as mock_list:
         mock_list.return_value = mock_agents
 
         response = client.get("/api/agents", headers=headers)
@@ -140,7 +134,7 @@ def demo_agent_creation():
             data = response.json()
             print(f"   Found {len(data['agents'])} agents:")
 
-            for i, agent in enumerate(data['agents'], 1):
+            for i, agent in enumerate(data["agents"], 1):
                 print(
                     f"     {i}. {agent['name']} (Type: {agent['type']}, Status: {agent['status']})"
                 )
@@ -208,19 +202,11 @@ def demo_api_compatibility():
         print(f"Test Case {i}:")
         print(f"  Input: '{test_case['description']}'")
 
-        extracted_type = extract_agent_type_from_description(
-            test_case['description']
-        )
-        extracted_name = extract_agent_name_from_description(
-            test_case['description']
-        )
+        extracted_type = extract_agent_type_from_description(test_case["description"])
+        extracted_name = extract_agent_name_from_description(test_case["description"])
 
-        print(
-            f"  → Type: {extracted_type} (expected: {test_case['expected_type']})"
-        )
-        print(
-            f"  → Name: {extracted_name} (expected: {test_case['expected_name']})"
-        )
+        print(f"  → Type: {extracted_type} (expected: {test_case['expected_type']})")
+        print(f"  → Name: {extracted_name} (expected: {test_case['expected_name']})")
         print("  → Template: basic-explorer")
         print()
 
@@ -244,13 +230,9 @@ if __name__ == "__main__":
         print("You can now:")
         print("• Create agents from the UI with simple descriptions")
         print("• View agent lists in the UI")
-        print(
-            "• Have the backend handle all the complex Active Inference setup"
-        )
+        print("• Have the backend handle all the complex Active Inference setup")
         print()
-        print(
-            "Next: Connect the UI to this backend and see it work end-to-end!"
-        )
+        print("Next: Connect the UI to this backend and see it work end-to-end!")
     else:
         print("❌ Demo failed - check the logs above")
         sys.exit(1)

@@ -40,7 +40,9 @@ class TestDatabaseIsolation:
             schema_name = db_isolation.create_isolated_schema("test_suite")
 
             assert schema_name.startswith("test_suite_")
-            mock_cursor.execute.assert_any_call(f"CREATE SCHEMA IF NOT EXISTS {schema_name}")
+            mock_cursor.execute.assert_any_call(
+                f"CREATE SCHEMA IF NOT EXISTS {schema_name}"
+            )
             mock_cursor.execute.assert_any_call(f"SET search_path TO {schema_name}")
             mock_conn.commit.assert_called()
 
@@ -68,7 +70,9 @@ class TestDatabaseIsolation:
 
             db_isolation.cleanup_schema("test_schema")
 
-            mock_cursor.execute.assert_called_with("DROP SCHEMA IF EXISTS test_schema CASCADE")
+            mock_cursor.execute.assert_called_with(
+                "DROP SCHEMA IF EXISTS test_schema CASCADE"
+            )
             mock_conn.commit.assert_called()
 
     def test_cleanup_database(self, db_isolation):
@@ -245,7 +249,9 @@ class TestFilesystemIsolation:
             sandbox = fs_isolation.create_sandbox("test_suite")
 
             assert sandbox == Path("/tmp/test_sandbox_123")
-            mock_mkdtemp.assert_called_with(prefix="test_suite_", dir="/tmp/test_isolation")
+            mock_mkdtemp.assert_called_with(
+                prefix="test_suite_", dir="/tmp/test_isolation"
+            )
 
     def test_cleanup_sandbox(self, fs_isolation):
         """Test cleaning up a sandbox."""
@@ -253,7 +259,9 @@ class TestFilesystemIsolation:
             with patch("pathlib.Path.exists", return_value=True):
                 fs_isolation.cleanup_sandbox("/tmp/test_sandbox")
 
-                mock_rmtree.assert_called_with(Path("/tmp/test_sandbox"), ignore_errors=True)
+                mock_rmtree.assert_called_with(
+                    Path("/tmp/test_sandbox"), ignore_errors=True
+                )
 
     def test_context_manager(self, fs_isolation):
         """Test using filesystem isolation as context manager."""
@@ -308,7 +316,9 @@ class TestTestIsolation:
 
     def test_isolate_all(self, test_isolation):
         """Test isolating all resources."""
-        with patch.object(test_isolation.db_isolation, "create_isolated_schema") as mock_db:
+        with patch.object(
+            test_isolation.db_isolation, "create_isolated_schema"
+        ) as mock_db:
             mock_db.return_value = "test_schema"
 
             with patch.object(
@@ -316,10 +326,14 @@ class TestTestIsolation:
             ) as mock_redis:
                 mock_redis.return_value = "test:namespace"
 
-                with patch.object(test_isolation.mq_isolation, "create_virtual_host") as mock_mq:
+                with patch.object(
+                    test_isolation.mq_isolation, "create_virtual_host"
+                ) as mock_mq:
                     mock_mq.return_value = "test_vhost"
 
-                    with patch.object(test_isolation.fs_isolation, "create_sandbox") as mock_fs:
+                    with patch.object(
+                        test_isolation.fs_isolation, "create_sandbox"
+                    ) as mock_fs:
                         mock_fs.return_value = Path("/tmp/sandbox")
 
                         context = test_isolation.isolate_all("test_suite")
@@ -339,9 +353,15 @@ class TestTestIsolation:
         }
 
         with patch.object(test_isolation.db_isolation, "cleanup_schema") as mock_db:
-            with patch.object(test_isolation.redis_isolation, "cleanup_namespace") as mock_redis:
-                with patch.object(test_isolation.mq_isolation, "cleanup_virtual_host") as mock_mq:
-                    with patch.object(test_isolation.fs_isolation, "cleanup_sandbox") as mock_fs:
+            with patch.object(
+                test_isolation.redis_isolation, "cleanup_namespace"
+            ) as mock_redis:
+                with patch.object(
+                    test_isolation.mq_isolation, "cleanup_virtual_host"
+                ) as mock_mq:
+                    with patch.object(
+                        test_isolation.fs_isolation, "cleanup_sandbox"
+                    ) as mock_fs:
                         test_isolation.cleanup_all(context)
 
                         mock_db.assert_called_with("test_schema")

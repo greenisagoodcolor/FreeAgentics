@@ -98,7 +98,7 @@ except Exception as e:
 # Test 3: Agent creation
 print("\n3. TESTING AGENT CREATION...")
 try:
-    if 'model' in locals():
+    if "model" in locals():
         agent_factory = AgentFactory()
         is_valid, errors = agent_factory.validate_model(model)
         if is_valid:
@@ -143,9 +143,7 @@ try:
             results["components"]["frontend"] = "PARTIAL"
     else:
         print(f"❌ Frontend returned status {response.status_code}")
-        results["components"][
-            "frontend"
-        ] = f"FAIL: Status {response.status_code}"
+        results["components"]["frontend"] = f"FAIL: Status {response.status_code}"
 except Exception as e:
     print(f"❌ Frontend not accessible: {e}")
     results["components"]["frontend"] = f"FAIL: {str(e)}"
@@ -191,9 +189,7 @@ try:
     context = ConversationContext("test-conv-001")
 
     # Test iteration preparation
-    iteration_ctx = controller.prepare_iteration_context_sync(
-        context, "Test prompt"
-    )
+    iteration_ctx = controller.prepare_iteration_context_sync(context, "Test prompt")
 
     print("✅ Iterative controller functional")
     print(f"   - Iteration: {iteration_ctx['iteration_number']}")
@@ -224,17 +220,13 @@ core_functional = (
 print(
     f"\nCore Functionality: {'✅ OPERATIONAL' if core_functional else '❌ NOT READY'}"
 )
-print(
-    f"Claimed Feature: {'✅ VALIDATED' if passed >= 5 else '❌ NOT VALIDATED'}"
-)
+print(f"Claimed Feature: {'✅ VALIDATED' if passed >= 5 else '❌ NOT VALIDATED'}")
 
 # Set final verdict
 if failed > 2:
     results["verdict"] = "NO-GO: Too many component failures"
 elif core_functional and passed >= 5:
-    results[
-        "verdict"
-    ] = "GO: Core functionality operational (75% complete as claimed)"
+    results["verdict"] = "GO: Core functionality operational (75% complete as claimed)"
 else:
     results["verdict"] = "NO-GO: Core functionality incomplete"
 

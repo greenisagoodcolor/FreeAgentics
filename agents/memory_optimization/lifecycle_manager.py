@@ -206,8 +206,7 @@ class AgentMemoryLifecycleManager:
         with self._lock:
             if agent_id in self._profiles:
                 logger.warning(
-                    f"Agent {agent_id} already registered, returning existing"
-                    f" profile"
+                    f"Agent {agent_id} already registered, returning existing profile"
                 )
                 return self._profiles[agent_id]
 
@@ -236,7 +235,7 @@ class AgentMemoryLifecycleManager:
             self.stats["total_agents_created"] += 1
 
             logger.info(
-                f"Registered agent {agent_id} with {memory_limit_mb:.1f}MB" f" limit"
+                f"Registered agent {agent_id} with {memory_limit_mb:.1f}MB limit"
             )
             profile.record_lifecycle_event(
                 "registered",

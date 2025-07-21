@@ -43,9 +43,7 @@ class TestConversationContext:
         assert context.kg_node_ids == {"node-1", "node-2"}
         assert len(context.belief_history) == 1
         assert context.belief_history[0] == {"state": [0.5, 0.5]}
-        assert context.suggestion_history == [
-            ["Add goals", "Increase exploration"]
-        ]
+        assert context.suggestion_history == [["Add goals", "Increase exploration"]]
         assert context.prompt_history == ["Create an explorer agent"]
 
     def test_multiple_iterations(self):
@@ -243,9 +241,7 @@ class TestIterativeController:
         assert iteration_context["previous_suggestions"] == ["Add goals"]
 
     @pytest.mark.asyncio
-    async def test_generate_intelligent_suggestions_new_conversation(
-        self, controller
-    ):
+    async def test_generate_intelligent_suggestions_new_conversation(self, controller):
         """Test suggestion generation for new conversation."""
         context = ConversationContext("conv-1")
         mock_agent = Mock()
@@ -299,9 +295,7 @@ class TestIterativeController:
                 "avg_connectivity": 2,
             }
         )
-        controller._identify_capability_gaps = AsyncMock(
-            return_value=["learning"]
-        )
+        controller._identify_capability_gaps = AsyncMock(return_value=["learning"])
 
         suggestions = await controller.generate_intelligent_suggestions(
             "agent-6", mock_agent, context, {"state": [0.5, 0.5]}, mock_db
@@ -309,8 +303,7 @@ class TestIterativeController:
 
         # Should suggest meta-learning for mature conversation
         assert any(
-            "meta-learning" in s.lower() or "adapt" in s.lower()
-            for s in suggestions
+            "meta-learning" in s.lower() or "adapt" in s.lower() for s in suggestions
         )
         # Should notice low diversity
         assert any("different approach" in s.lower() for s in suggestions)
@@ -400,10 +393,7 @@ class TestIterativeController:
 
         assert constraints["maintain_consistency"] is True
         assert constraints["iteration_specific"]["increase_complexity"] is True
-        assert (
-            constraints["iteration_specific"]["preserve_core_structure"]
-            is True
-        )
+        assert constraints["iteration_specific"]["preserve_core_structure"] is True
         assert constraints["iteration_specific"]["focus"] == "optimization"
 
     @pytest.mark.asyncio
@@ -459,9 +449,7 @@ class TestIterativeController:
             ),
         ]
 
-        mock_db.execute.return_value.scalars.return_value.all.return_value = (
-            mock_agents
-        )
+        mock_db.execute.return_value.scalars.return_value.all.return_value = mock_agents
 
         gaps = await controller._identify_capability_gaps(
             ["agent-1", "agent-2"], mock_db

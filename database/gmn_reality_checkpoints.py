@@ -41,21 +41,21 @@ class GMNRealityCheckpoints:
         try:
             # Run individual checkpoints
             report["checkpoints"]["version_integrity"] = self.check_version_integrity()
-            report["checkpoints"][
-                "orphaned_references"
-            ] = self.check_orphaned_references()
-            report["checkpoints"][
-                "active_constraints"
-            ] = self.check_active_constraints()
-            report["checkpoints"][
-                "checksum_integrity"
-            ] = self.check_checksum_integrity()
-            report["checkpoints"][
-                "performance_metrics"
-            ] = self.check_performance_metrics()
-            report["checkpoints"][
-                "storage_efficiency"
-            ] = self.check_storage_efficiency()
+            report["checkpoints"]["orphaned_references"] = (
+                self.check_orphaned_references()
+            )
+            report["checkpoints"]["active_constraints"] = (
+                self.check_active_constraints()
+            )
+            report["checkpoints"]["checksum_integrity"] = (
+                self.check_checksum_integrity()
+            )
+            report["checkpoints"]["performance_metrics"] = (
+                self.check_performance_metrics()
+            )
+            report["checkpoints"]["storage_efficiency"] = (
+                self.check_storage_efficiency()
+            )
 
             # Determine overall health
             critical_count = sum(

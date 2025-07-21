@@ -30,9 +30,9 @@ class TestPyMDPImports:
             from pymdp.agent import Agent
 
             assert inspect.isclass(Agent), "Agent should be a class"
-            assert (
-                Agent.__module__ == "pymdp.agent"
-            ), f"Agent module should be 'pymdp.agent', got {Agent.__module__}"
+            assert Agent.__module__ == "pymdp.agent", (
+                f"Agent module should be 'pymdp.agent', got {Agent.__module__}"
+            )
         except ImportError as e:
             pytest.fail(f"Cannot import Agent from pymdp.agent: {e}")
 
@@ -41,7 +41,9 @@ class TestPyMDPImports:
         try:
             from pymdp import utils
 
-            assert hasattr(utils, "random_A_matrix"), "utils should have random_A_matrix function"
+            assert hasattr(utils, "random_A_matrix"), (
+                "utils should have random_A_matrix function"
+            )
         except ImportError as e:
             pytest.fail(f"Cannot import utils from pymdp: {e}")
 
@@ -144,7 +146,10 @@ class TestPyMDPImports:
                 for i, line in enumerate(lines):
                     if "try:" in line:
                         pass
-                    elif "except ImportError:" in line or "except ModuleNotFoundError:" in line:
+                    elif (
+                        "except ImportError:" in line
+                        or "except ModuleNotFoundError:" in line
+                    ):
                         # Look back in try block for PyMDP imports
                         for j in range(max(0, i - 10), i):
                             if "from pymdp" in lines[j] or "import pymdp" in lines[j]:
@@ -152,7 +157,11 @@ class TestPyMDPImports:
                                     f"Found PyMDP import in try/except block at line {j + 1} in {file_path}. "
                                     f"Hard failures required for PyMDP imports!"
                                 )
-                    elif "except" not in line and line.strip() and not line.strip().startswith("#"):
+                    elif (
+                        "except" not in line
+                        and line.strip()
+                        and not line.strip().startswith("#")
+                    ):
                         pass
 
     def test_all_pymdp_imports_use_correct_paths(self):
@@ -186,7 +195,9 @@ class TestPyMDPImports:
 
         # After fixes, this should be empty
         if found_issues:
-            pytest.fail("Found incorrect PyMDP import patterns:\n" + "\n".join(found_issues))
+            pytest.fail(
+                "Found incorrect PyMDP import patterns:\n" + "\n".join(found_issues)
+            )
 
     def test_pymdp_version_compatibility(self):
         """Test that the installed PyMDP version is compatible."""

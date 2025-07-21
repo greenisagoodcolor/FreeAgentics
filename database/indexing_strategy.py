@@ -302,8 +302,8 @@ class PartitioningStrategy:
             create_partition_sql = f"""
                 CREATE TABLE IF NOT EXISTS {partition_name}
                 PARTITION OF {table_name}_partitioned
-                FOR VALUES FROM ('{start_date.strftime('%Y-%m-%d')}')
-                TO ('{end_date.strftime('%Y-%m-%d')}')
+                FOR VALUES FROM ('{start_date.strftime("%Y-%m-%d")}')
+                TO ('{end_date.strftime("%Y-%m-%d")}')
             """
 
             try:
@@ -335,8 +335,8 @@ class PartitioningStrategy:
             create_partition_sql = f"""
                 CREATE TABLE IF NOT EXISTS {partition_name}
                 PARTITION OF {table_name}_partitioned
-                FOR VALUES FROM ('{start_date.strftime('%Y-%m-%d')}')
-                TO ('{end_date.strftime('%Y-%m-%d')}')
+                FOR VALUES FROM ('{start_date.strftime("%Y-%m-%d")}')
+                TO ('{end_date.strftime("%Y-%m-%d")}')
             """
 
             try:
@@ -364,8 +364,8 @@ class PartitioningStrategy:
             create_partition_sql = f"""
                 CREATE TABLE IF NOT EXISTS {partition_name}
                 PARTITION OF {table_name}_partitioned
-                FOR VALUES FROM ('{start_date.strftime('%Y-%m-%d')}')
-                TO ('{end_date.strftime('%Y-%m-%d')}')
+                FOR VALUES FROM ('{start_date.strftime("%Y-%m-%d")}')
+                TO ('{end_date.strftime("%Y-%m-%d")}')
             """
 
             try:

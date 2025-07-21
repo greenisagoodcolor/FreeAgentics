@@ -38,7 +38,9 @@ class TestNLPEntityExtraction:
         entity1 = Entity("Python", EntityType.TECHNOLOGY, 0, 6, 0.9)
         entity2 = Entity("programming", EntityType.CONCEPT, 10, 21, 0.85)
 
-        relationship = Relationship(source=entity1, target=entity2, type="used_for", confidence=0.8)
+        relationship = Relationship(
+            source=entity1, target=entity2, type="used_for", confidence=0.8
+        )
 
         assert relationship.source == entity1
         assert relationship.target == entity2
@@ -269,9 +271,9 @@ class TestNLPEntityExtraction:
             result = extractor.extract_entities(f"Let's talk about {text}.")
             entity = next((e for e in result.entities if text in e.text), None)
             assert entity is not None, f"Entity '{text}' not found"
-            assert (
-                entity.type == expected_type
-            ), f"Expected {expected_type} for '{text}', got {entity.type}"
+            assert entity.type == expected_type, (
+                f"Expected {expected_type} for '{text}', got {entity.type}"
+            )
 
     def test_empty_text_handling(self):
         """Test handling of empty or null text"""

@@ -200,7 +200,9 @@ def main():
     parser = argparse.ArgumentParser(description="Fix flake8 violations")
     parser.add_argument("paths", nargs="+", help="Files or directories to fix")
     parser.add_argument("--no-auto", action="store_true", help="Disable autopep8")
-    parser.add_argument("--dry-run", action="store_true", help="Show what would be fixed")
+    parser.add_argument(
+        "--dry-run", action="store_true", help="Show what would be fixed"
+    )
 
     args = parser.parse_args()
 

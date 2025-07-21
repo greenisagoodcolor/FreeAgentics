@@ -61,7 +61,9 @@ class ContainerSecurityAuditor:
         }
         reset = "\033[0m"
 
-        print(f"{color_map.get(severity, '')}{severity.upper()}{reset}: [{category}] {title}")
+        print(
+            f"{color_map.get(severity, '')}{severity.upper()}{reset}: [{category}] {title}"
+        )
         if description:
             print(f"  Description: {description}")
         if recommendation:
@@ -94,10 +96,14 @@ class ContainerSecurityAuditor:
             lines = content.split("\n")
 
             # Check for non-root user
-            has_user_instruction = any(line.strip().startswith("USER ") for line in lines)
+            has_user_instruction = any(
+                line.strip().startswith("USER ") for line in lines
+            )
             if has_user_instruction:
                 # Check if it's not root
-                user_lines = [line for line in lines if line.strip().startswith("USER ")]
+                user_lines = [
+                    line for line in lines if line.strip().startswith("USER ")
+                ]
                 latest_user = user_lines[-1].strip().split()[1] if user_lines else ""
 
                 if latest_user not in ["root", "0"]:
@@ -156,7 +162,9 @@ class ContainerSecurityAuditor:
                 )
 
             # Check for HEALTHCHECK
-            has_healthcheck = any(line.strip().startswith("HEALTHCHECK") for line in lines)
+            has_healthcheck = any(
+                line.strip().startswith("HEALTHCHECK") for line in lines
+            )
             if has_healthcheck:
                 self.add_finding(
                     "Container Security",
@@ -267,7 +275,9 @@ class ContainerSecurityAuditor:
                 )
 
             # Check for resource limits
-            if "deploy:" in content and ("limits:" in content or "reservations:" in content):
+            if "deploy:" in content and (
+                "limits:" in content or "reservations:" in content
+            ):
                 self.add_finding(
                     "Resource Security",
                     "info",
@@ -347,7 +357,10 @@ class ContainerSecurityAuditor:
                         var_value = var_value.strip()
 
                         # Check for sensitive variables with default/weak values
-                        if any(sensitive in var_name.upper() for sensitive in sensitive_vars):
+                        if any(
+                            sensitive in var_name.upper()
+                            for sensitive in sensitive_vars
+                        ):
                             if var_value in [
                                 "",
                                 "changeme",
@@ -401,7 +414,10 @@ class ContainerSecurityAuditor:
                     "Secrets directory accessible by others",
                     "Secrets directory has overly permissive permissions",
                     "Set restrictive permissions: chmod 700 secrets/",
-                    {"directory": str(secrets_dir), "permissions": oct(dir_stat.st_mode)},
+                    {
+                        "directory": str(secrets_dir),
+                        "permissions": oct(dir_stat.st_mode),
+                    },
                 )
 
             # Audit individual secret files
@@ -457,7 +473,9 @@ class ContainerSecurityAuditor:
 
             # Check permissions - private keys should be very restrictive
             if "private" in key_file.name.lower():
-                if file_stat.st_mode & (stat.S_IRGRP | stat.S_IWGRP | stat.S_IROTH | stat.S_IWOTH):
+                if file_stat.st_mode & (
+                    stat.S_IRGRP | stat.S_IWGRP | stat.S_IROTH | stat.S_IWOTH
+                ):
                     self.add_finding(
                         "Cryptography",
                         "critical",
@@ -499,7 +517,7 @@ class ContainerSecurityAuditor:
                         "Verify key file contains valid cryptographic material",
                         {"file": str(key_file)},
                     )
-            except:
+            except (OSError, IOError, PermissionError):
                 pass  # If we can't read the file, permissions are likely correct
 
         except Exception as e:
@@ -646,11 +664,15 @@ class ContainerSecurityAuditor:
         """Generate security recommendations."""
         recommendations = []
 
-        critical_findings = [f for f in self.results["audits"] if f["severity"] == "critical"]
+        critical_findings = [
+            f for f in self.results["audits"] if f["severity"] == "critical"
+        ]
         high_findings = [f for f in self.results["audits"] if f["severity"] == "high"]
 
         if critical_findings:
-            recommendations.append("🔴 CRITICAL: Address all critical security issues immediately")
+            recommendations.append(
+                "🔴 CRITICAL: Address all critical security issues immediately"
+            )
 
         if high_findings:
             recommendations.append("🟡 HIGH: Resolve high-priority security issues")
@@ -659,7 +681,9 @@ class ContainerSecurityAuditor:
         categories = set(f["category"] for f in self.results["audits"])
 
         if "Secrets Management" in categories:
-            recommendations.append("🔐 Review and strengthen secrets management practices")
+            recommendations.append(
+                "🔐 Review and strengthen secrets management practices"
+            )
 
         if "Container Security" in categories:
             recommendations.append("📦 Enhance container security configurations")
@@ -668,7 +692,9 @@ class ContainerSecurityAuditor:
             recommendations.append("🌐 Improve network security and SSL/TLS settings")
 
         if not critical_findings and not high_findings:
-            recommendations.append("✅ Security posture is strong - continue monitoring")
+            recommendations.append(
+                "✅ Security posture is strong - continue monitoring"
+            )
 
         return recommendations
 
@@ -691,9 +717,9 @@ def main():
     report = auditor.run_full_audit()
 
     # Print summary
-    print(f"\n{'='*50}")
+    print(f"\n{'=' * 50}")
     print(f"🔒 CONTAINER SECURITY AUDIT REPORT {report['status_indicator']}")
-    print(f"{'='*50}")
+    print(f"{'=' * 50}")
     print(f"Security Score: {report['security_score']:.1f}/100")
     print(f"Security Rating: {report['security_rating']}")
     print(f"Total Findings: {report['total_findings']}")

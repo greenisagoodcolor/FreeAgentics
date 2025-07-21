@@ -13,17 +13,12 @@ def extract_agent_type_from_description(description: str) -> str:
     description_lower = description.lower()
 
     if any(
-        word in description_lower
-        for word in ["explore", "search", "find", "discover"]
+        word in description_lower for word in ["explore", "search", "find", "discover"]
     ):
         return "explorer"
-    elif any(
-        word in description_lower for word in ["collect", "gather", "resource"]
-    ):
+    elif any(word in description_lower for word in ["collect", "gather", "resource"]):
         return "collector"
-    elif any(
-        word in description_lower for word in ["analyze", "study", "examine"]
-    ):
+    elif any(word in description_lower for word in ["analyze", "study", "examine"]):
         return "analyzer"
     else:
         return "explorer"  # Default to explorer
@@ -41,9 +36,7 @@ def demo_integration():
     print("🚀 FreeAgentics UI-Backend Integration Demo")
     print("=" * 60)
     print()
-    print(
-        "This demonstrates how we've successfully connected the UI to the backend!"
-    )
+    print("This demonstrates how we've successfully connected the UI to the backend!")
     print()
 
     # Simulate UI request
@@ -229,15 +222,13 @@ def demo_api_endpoints():
         print(f"{endpoint['method']} {endpoint['path']}")
         print(f"   {endpoint['description']}")
 
-        if endpoint['input']:
+        if endpoint["input"]:
             print(f"   Input: {json.dumps(endpoint['input'])}")
 
         print(f"   Output: {json.dumps(endpoint['output'])}")
         print()
 
-    print(
-        "All endpoints bridge UI's simple format with backend's complex structure!"
-    )
+    print("All endpoints bridge UI's simple format with backend's complex structure!")
     print()
 
 

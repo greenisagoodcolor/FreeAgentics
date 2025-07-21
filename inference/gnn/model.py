@@ -23,8 +23,7 @@ class GMNModel:
         """Build the model architecture."""
         # This would be implemented with actual PyTorch Geometric models
         logger.info(
-            f"Building {self.architecture} model with {len(self.layers)}"
-            f" layers"
+            f"Building {self.architecture} model with {len(self.layers)} layers"
         )
 
     def forward(self, x, edge_index):

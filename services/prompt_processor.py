@@ -90,9 +90,7 @@ class PromptProcessor:
         """
         start_time = time.time()
 
-        logger.info(
-            f"Processing prompt from user {user_id}: {prompt_text[:100]}..."
-        )
+        logger.info(f"Processing prompt from user {user_id}: {prompt_text[:100]}...")
 
         # Get or create conversation
         conversation = await self._get_or_create_conversation(
@@ -137,9 +135,7 @@ class PromptProcessor:
                     "stage": "initialization",
                     "total_stages": 6,
                     "iteration_number": iteration_context["iteration_number"],
-                    "conversation_summary": iteration_context[
-                        "conversation_summary"
-                    ],
+                    "conversation_summary": iteration_context["conversation_summary"],
                 },
             )
 
@@ -232,9 +228,7 @@ class PromptProcessor:
             )
 
             agent_id = str(uuid.uuid4())
-            pymdp_agent = await self._create_agent(
-                pymdp_model, agent_id, prompt_text
-            )
+            pymdp_agent = await self._create_agent(pymdp_model, agent_id, prompt_text)
 
             await self._send_websocket_update(
                 "agent_created",
@@ -300,17 +294,17 @@ class PromptProcessor:
             )
 
             # Extract current beliefs for context
-            current_beliefs = await self.belief_kg_bridge.extract_beliefs(
-                pymdp_agent
-            )
+            current_beliefs = await self.belief_kg_bridge.extract_beliefs(pymdp_agent)
 
             # Use iterative controller for intelligent suggestions
-            suggestions = await self.iterative_controller.generate_intelligent_suggestions(
-                agent_id,
-                pymdp_agent,
-                conversation_context,
-                current_beliefs,
-                db,
+            suggestions = (
+                await self.iterative_controller.generate_intelligent_suggestions(
+                    agent_id,
+                    pymdp_agent,
+                    conversation_context,
+                    current_beliefs,
+                    db,
+                )
             )
 
             # Update prompt record
@@ -328,9 +322,7 @@ class PromptProcessor:
             }
 
             # Update conversation
-            conversation.agent_ids = list(
-                set(conversation.agent_ids + [agent_id])
-            )
+            conversation.agent_ids = list(set(conversation.agent_ids + [agent_id]))
             conversation.updated_at = datetime.utcnow()
 
             # Update iterative controller context
@@ -346,9 +338,7 @@ class PromptProcessor:
 
             await db.commit()
 
-            logger.info(
-                f"Successfully processed prompt in {processing_time:.2f}ms"
-            )
+            logger.info(f"Successfully processed prompt in {processing_time:.2f}ms")
 
             # Send final success update with iteration info
             await self._send_websocket_update(
@@ -360,8 +350,7 @@ class PromptProcessor:
                     "suggestions": suggestions,
                     "kg_updates_count": len(kg_updates),
                     "status": "success",
-                    "iteration_number": conversation_context.iteration_count
-                    + 1,
+                    "iteration_number": conversation_context.iteration_count + 1,
                     "conversation_summary": conversation_context.get_context_summary(),
                 },
             )
@@ -450,9 +439,7 @@ class PromptProcessor:
                 return conversation
 
         # Create new conversation
-        conversation = Conversation(
-            user_id=user_id, status=ConversationStatus.ACTIVE
-        )
+        conversation = Conversation(user_id=user_id, status=ConversationStatus.ACTIVE)
         db.add(conversation)
         await db.flush()
         return conversation
@@ -538,9 +525,7 @@ class PromptProcessor:
             kg_updates = []
 
             # Extract belief state for node creation
-            belief_state = await self.belief_kg_bridge.extract_beliefs(
-                pymdp_agent
-            )
+            belief_state = await self.belief_kg_bridge.extract_beliefs(pymdp_agent)
             nodes = await self.belief_kg_bridge.belief_to_nodes(
                 belief_state, agent_id, context={"prompt_id": prompt_id}
             )
@@ -590,26 +575,19 @@ class PromptProcessor:
             suggestions.append("Add more observations to reduce uncertainty")
 
         # Check for unexplored actions
-        if (
-            hasattr(pymdp_agent, "action_hist")
-            and len(pymdp_agent.action_hist) < 5
-        ):
+        if hasattr(pymdp_agent, "action_hist") and len(pymdp_agent.action_hist) < 5:
             suggestions.append("Explore different action sequences")
 
         # Analyze GMN structure
         if "goal" not in [node.type for node in gmn_graph.nodes.values()]:
             suggestions.append("Add goal states to guide agent behavior")
 
-        if "preference" not in [
-            node.type for node in gmn_graph.nodes.values()
-        ]:
+        if "preference" not in [node.type for node in gmn_graph.nodes.values()]:
             suggestions.append("Define preferences to shape agent objectives")
 
         # Context-based suggestions
         if context.get("agent_count", 0) > 1:
-            suggestions.append(
-                "Consider coalition formation with other agents"
-            )
+            suggestions.append("Consider coalition formation with other agents")
 
         return suggestions[:3]  # Return top 3 suggestions
 
@@ -617,18 +595,11 @@ class PromptProcessor:
         """Infer agent type from prompt text."""
         prompt_lower = prompt_text.lower()
 
-        if any(
-            word in prompt_lower for word in ["explore", "discover", "search"]
-        ):
+        if any(word in prompt_lower for word in ["explore", "discover", "search"]):
             return "explorer"
-        elif any(
-            word in prompt_lower for word in ["trade", "exchange", "negotiate"]
-        ):
+        elif any(word in prompt_lower for word in ["trade", "exchange", "negotiate"]):
             return "trader"
-        elif any(
-            word in prompt_lower
-            for word in ["coordinate", "manage", "organize"]
-        ):
+        elif any(word in prompt_lower for word in ["coordinate", "manage", "organize"]):
             return "coordinator"
         else:
             return "general"
@@ -671,9 +642,7 @@ class PromptProcessor:
         # Normalize by number of factors
         return total_entropy / len(beliefs) if beliefs else 0.0
 
-    async def _send_websocket_update(
-        self, event_type: str, data: Dict[str, Any]
-    ):
+    async def _send_websocket_update(self, event_type: str, data: Dict[str, Any]):
         """Send WebSocket update if callback is available."""
         if self.websocket_callback:
             try:

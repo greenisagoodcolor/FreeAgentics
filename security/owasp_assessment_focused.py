@@ -84,7 +84,9 @@ class FocusedOWASPAssessment:
             return False
 
         # Skip test files for some checks
-        if any(test_dir in file_path.parts for test_dir in ["tests", "test", "__tests__"]):
+        if any(
+            test_dir in file_path.parts for test_dir in ["tests", "test", "__tests__"]
+        ):
             return True  # We want to analyze tests but with different criteria
 
         return True
@@ -335,7 +337,9 @@ class FocusedOWASPAssessment:
         rate_limit_files.extend(self.project_root.glob("**/*rate*limit*.py"))
 
         # Filter application files only
-        app_rate_limit_files = [f for f in rate_limit_files if self.should_analyze_file(f)]
+        app_rate_limit_files = [
+            f for f in rate_limit_files if self.should_analyze_file(f)
+        ]
 
         if not app_rate_limit_files:
             self.add_finding(
@@ -346,7 +350,9 @@ class FocusedOWASPAssessment:
                 remediation="Implement rate limiting for API endpoints",
             )
         else:
-            print(f"  ✓ Rate limiting implementation found ({len(app_rate_limit_files)} files)")
+            print(
+                f"  ✓ Rate limiting implementation found ({len(app_rate_limit_files)} files)"
+            )
 
         # Check for input validation
         validation_patterns = [
@@ -406,7 +412,9 @@ class FocusedOWASPAssessment:
 
                 # Check for debug mode
                 if re.search(r"DEBUG\s*=\s*True", content):
-                    line_number = content[: content.find("DEBUG = True")].count("\n") + 1
+                    line_number = (
+                        content[: content.find("DEBUG = True")].count("\n") + 1
+                    )
 
                     self.add_finding(
                         "A05: Security Misconfiguration",
@@ -708,7 +716,9 @@ class FocusedOWASPAssessment:
             category_counts[category] = category_counts.get(category, 0) + 1
 
             if finding.get("file_path"):
-                file_counts[finding["file_path"]] = file_counts.get(finding["file_path"], 0) + 1
+                file_counts[finding["file_path"]] = (
+                    file_counts.get(finding["file_path"], 0) + 1
+                )
 
         return {
             "assessment_date": datetime.now().isoformat(),
@@ -760,7 +770,9 @@ class FocusedOWASPAssessment:
             print(f"  {category}: {count}")
 
         # Save report
-        report_path = self.project_root / "security" / "owasp_focused_assessment_report.json"
+        report_path = (
+            self.project_root / "security" / "owasp_focused_assessment_report.json"
+        )
         with open(report_path, "w") as f:
             json.dump(report, f, indent=2)
 

@@ -209,8 +209,9 @@ class GMNParser:
             model_spec["num_states"].append(num_states)
 
         # Extract observations
-        obs_nodes = [n for n in graph.nodes.values() if
-            n.type == GMNNodeType.OBSERVATION]
+        obs_nodes = [
+            n for n in graph.nodes.values() if n.type == GMNNodeType.OBSERVATION
+        ]
         for obs in obs_nodes:
             num_obs = obs.properties.get("num_observations", 1)
             model_spec["num_obs"].append(num_obs)
@@ -220,27 +221,28 @@ class GMNParser:
         for action in action_nodes:
             num_actions = action.properties.get("num_actions", 1)
             model_spec["num_actions"].append(num_actions)
-            model_spec["num_controls"].append(
-                num_actions
-            )  # PyMDP uses num_controls
+            model_spec["num_controls"].append(num_actions)  # PyMDP uses num_controls
 
         # Build likelihood model (A)
-        likelihood_nodes = [n for n in graph.nodes.values() if
-            n.type == GMNNodeType.LIKELIHOOD]
+        likelihood_nodes = [
+            n for n in graph.nodes.values() if n.type == GMNNodeType.LIKELIHOOD
+        ]
         for likelihood in likelihood_nodes:
             A_matrix = self._build_likelihood_matrix(likelihood, graph)
             model_spec["A"].append(A_matrix)
 
         # Build transition model (B)
-        transition_nodes = [n for n in graph.nodes.values() if
-            n.type == GMNNodeType.TRANSITION]
+        transition_nodes = [
+            n for n in graph.nodes.values() if n.type == GMNNodeType.TRANSITION
+        ]
         for transition in transition_nodes:
             B_matrix = self._build_transition_matrix(transition, graph)
             model_spec["B"].append(B_matrix)
 
         # Build preference model (C)
-        pref_nodes = [n for n in graph.nodes.values() if
-            n.type == GMNNodeType.PREFERENCE]
+        pref_nodes = [
+            n for n in graph.nodes.values() if n.type == GMNNodeType.PREFERENCE
+        ]
         for pref in pref_nodes:
             C_vector = self._build_preference_vector(pref, graph)
             model_spec["C"].append(C_vector)
@@ -300,12 +302,15 @@ class GMNParser:
                             node_spec["properties"] = ast.literal_eval(props_str)
                         except (ValueError, SyntaxError):
                             # Fallback: simple key-value parsing
-                            node_spec["properties"] = self._parse_simple_properties(props_str)
+                            node_spec["properties"] = self._parse_simple_properties(
+                                props_str
+                            )
                     spec_dict["nodes"].append(node_spec)
 
             elif current_section == "edges":
-                edge_match = re.match(r"(\w+)\s*->\s*(\w+)\s*:\s*(\w+)\s*(\{.*\})?",
-                    line)
+                edge_match = re.match(
+                    r"(\w+)\s*->\s*(\w+)\s*:\s*(\w+)\s*(\{.*\})?", line
+                )
                 if edge_match:
                     source, target, edge_type, props_str = edge_match.groups()
                     edge_spec = {
@@ -317,14 +322,16 @@ class GMNParser:
                         try:
                             edge_spec["properties"] = ast.literal_eval(props_str)
                         except (ValueError, SyntaxError):
-                            edge_spec["properties"] = self._parse_simple_properties(props_str)
+                            edge_spec["properties"] = self._parse_simple_properties(
+                                props_str
+                            )
                     spec_dict["edges"].append(edge_spec)
 
         return spec_dict
 
     def _parse_simple_properties(self, props_str: str) -> Dict[str, Any]:
         """Parse simple key-value properties from string like {key: value,
-            key2: "string"}."""
+        key2: "string"}."""
         properties: Dict[str, Any] = {}
 
         # Remove braces
@@ -390,8 +397,9 @@ class GMNParser:
 
         properties = edge_spec.get("properties", {})
 
-        return GMNEdge(source=source, target=target, type=edge_type,
-            properties=properties)
+        return GMNEdge(
+            source=source, target=target, type=edge_type, properties=properties
+        )
 
     def _validate_graph(self, graph: GMNGraph) -> None:
         """Validate GMN graph structure."""
@@ -399,9 +407,13 @@ class GMNParser:
         node_ids = set(graph.nodes.keys())
         for edge in graph.edges:
             if edge.source not in node_ids:
-                self.validation_errors.append(f"Edge source '{edge.source}' not found in nodes")
+                self.validation_errors.append(
+                    f"Edge source '{edge.source}' not found in nodes"
+                )
             if edge.target not in node_ids:
-                self.validation_errors.append(f"Edge target '{edge.target}' not found in nodes")
+                self.validation_errors.append(
+                    f"Edge target '{edge.target}' not found in nodes"
+                )
 
         # Check required nodes
         has_state = any(n.type == GMNNodeType.STATE for n in graph.nodes.values())
@@ -415,19 +427,25 @@ class GMNParser:
         if not has_action:
             self.validation_errors.append("No action nodes found")
 
-    def _build_likelihood_matrix(self, likelihood_node: GMNNode,
-        graph: GMNGraph) -> np.ndarray:
+    def _build_likelihood_matrix(
+        self, likelihood_node: GMNNode, graph: GMNGraph
+    ) -> np.ndarray:
         """Build likelihood matrix from node specification."""
         # Find connected state and observation nodes
         state_dims = []
         obs_dim = 1
 
         for edge in graph.edges:
-            if edge.target == likelihood_node.id and edge.type == GMNEdgeType.DEPENDS_ON:
+            if (
+                edge.target == likelihood_node.id
+                and edge.type == GMNEdgeType.DEPENDS_ON
+            ):
                 source_node = graph.nodes.get(edge.source)
                 if source_node and source_node.type == GMNNodeType.STATE:
                     state_dims.append(source_node.properties.get("num_states", 1))
-            elif edge.source == likelihood_node.id and edge.type == GMNEdgeType.GENERATES:
+            elif (
+                edge.source == likelihood_node.id and edge.type == GMNEdgeType.GENERATES
+            ):
                 target_node = graph.nodes.get(edge.target)
                 if target_node and target_node.type == GMNNodeType.OBSERVATION:
                     obs_dim = target_node.properties.get("num_observations", 1)
@@ -446,8 +464,9 @@ class GMNParser:
         A = np.ones(shape) / obs_dim
         return A
 
-    def _build_transition_matrix(self, transition_node: GMNNode,
-        graph: GMNGraph) -> np.ndarray:
+    def _build_transition_matrix(
+        self, transition_node: GMNNode, graph: GMNGraph
+    ) -> np.ndarray:
         """Build transition matrix from node specification."""
         # Find connected state and action nodes
         state_dim = 1
@@ -477,8 +496,9 @@ class GMNParser:
             B[:, :, a] = np.eye(state_dim)
         return B
 
-    def _build_preference_vector(self, pref_node: GMNNode,
-        graph: GMNGraph) -> np.ndarray:
+    def _build_preference_vector(
+        self, pref_node: GMNNode, graph: GMNGraph
+    ) -> np.ndarray:
         """Build preference vector from node specification."""
         # Find connected observation node
         obs_dim = 1
@@ -519,13 +539,15 @@ class GMNParser:
         D = np.ones(state_dim) / state_dim
         return D
 
-    def _build_llm_integration(self, llm_node: GMNNode, graph: GMNGraph) -> Dict[str,
-        Any]:
+    def _build_llm_integration(
+        self, llm_node: GMNNode, graph: GMNGraph
+    ) -> Dict[str, Any]:
         """Build LLM integration specification."""
         integration = {
             "id": llm_node.id,
-            "trigger_condition": llm_node.properties.get("trigger_condition",
-                "on_observation"),
+            "trigger_condition": llm_node.properties.get(
+                "trigger_condition", "on_observation"
+            ),
             "prompt_template": llm_node.properties.get("prompt_template", ""),
             "response_parser": llm_node.properties.get("response_parser", "json"),
             "update_targets": [],

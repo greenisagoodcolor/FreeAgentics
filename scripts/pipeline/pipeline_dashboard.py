@@ -44,7 +44,9 @@ def print_status(status: str) -> str:
         "cancelled": f"{Colors.RED}🚫 CANCELLED{Colors.RESET}",
         "completed": f"{Colors.GREEN}✅ COMPLETED{Colors.RESET}",
     }
-    return status_map.get(status.lower(), f"{Colors.WHITE}{status.upper()}{Colors.RESET}")
+    return status_map.get(
+        status.lower(), f"{Colors.WHITE}{status.upper()}{Colors.RESET}"
+    )
 
 
 class PipelineDashboard:
@@ -68,7 +70,9 @@ class PipelineDashboard:
                     self.pipeline_data = json.load(f)
                 return True
             else:
-                print(f"{Colors.YELLOW}⚠️ Pipeline data file not found: {data_path}{Colors.RESET}")
+                print(
+                    f"{Colors.YELLOW}⚠️ Pipeline data file not found: {data_path}{Colors.RESET}"
+                )
                 return False
         except Exception as e:
             print(f"{Colors.RED}❌ Error loading pipeline data: {e}{Colors.RESET}")
@@ -85,7 +89,9 @@ class PipelineDashboard:
         dashboard.append(f"{Colors.RESET}")
 
         if not self.pipeline_data:
-            dashboard.append(f"{Colors.YELLOW}⚠️ No pipeline data available{Colors.RESET}")
+            dashboard.append(
+                f"{Colors.YELLOW}⚠️ No pipeline data available{Colors.RESET}"
+            )
             return "\n".join(dashboard)
 
         # Pipeline Overview
@@ -166,7 +172,7 @@ class PipelineDashboard:
         <head>
             <meta charset="UTF-8">
             <meta name="viewport" content="width=device-width, initial-scale=1.0">
-            <title>Pipeline Dashboard - {self.pipeline_data.get('pipeline_id', 'Unknown')}</title>
+            <title>Pipeline Dashboard - {self.pipeline_data.get("pipeline_id", "Unknown")}</title>
             <style>
                 body {{
                     font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
@@ -291,24 +297,24 @@ class PipelineDashboard:
             <div class="container">
                 <div class="header">
                     <h1>🚀 Pipeline Dashboard</h1>
-                    <div class="pipeline-id">Pipeline ID: {self.pipeline_data.get('pipeline_id', 'Unknown')}</div>
+                    <div class="pipeline-id">Pipeline ID: {self.pipeline_data.get("pipeline_id", "Unknown")}</div>
                 </div>
                 
                 <div class="content">
                     <div class="section">
                         <h2>📊 Overview</h2>
                         <div class="status-grid">
-                            <div class="status-card status-{'success' if self.pipeline_data.get('deployment_ready') else 'failure'}">
+                            <div class="status-card status-{"success" if self.pipeline_data.get("deployment_ready") else "failure"}">
                                 <h3>Pipeline Status</h3>
-                                <p><strong>{'✅ Ready for Deployment' if self.pipeline_data.get('deployment_ready') else '❌ Not Ready'}</strong></p>
-                                <p>Commit: {self.pipeline_data.get('commit_sha', 'Unknown')[:8]}</p>
-                                <p>Branch: {self.pipeline_data.get('branch', 'Unknown')}</p>
+                                <p><strong>{"✅ Ready for Deployment" if self.pipeline_data.get("deployment_ready") else "❌ Not Ready"}</strong></p>
+                                <p>Commit: {self.pipeline_data.get("commit_sha", "Unknown")[:8]}</p>
+                                <p>Branch: {self.pipeline_data.get("branch", "Unknown")}</p>
                             </div>
                             <div class="status-card status-info">
                                 <h3>Change Analysis</h3>
-                                <p><strong>Scope:</strong> {self.pipeline_data.get('change_scope', 'Unknown')}</p>
-                                <p><strong>Security Sensitive:</strong> {'Yes' if self.pipeline_data.get('security_sensitive') else 'No'}</p>
-                                <p><strong>Actor:</strong> {self.pipeline_data.get('actor', 'Unknown')}</p>
+                                <p><strong>Scope:</strong> {self.pipeline_data.get("change_scope", "Unknown")}</p>
+                                <p><strong>Security Sensitive:</strong> {"Yes" if self.pipeline_data.get("security_sensitive") else "No"}</p>
+                                <p><strong>Actor:</strong> {self.pipeline_data.get("actor", "Unknown")}</p>
                             </div>
                         </div>
                     </div>
@@ -329,14 +335,22 @@ class PipelineDashboard:
         # Add stage rows
         stages = self.pipeline_data.get("stages", {})
         stage_info = [
-            ("🔍 Pre-flight Checks", "pre_flight", "Code quality and security validation"),
+            (
+                "🔍 Pre-flight Checks",
+                "pre_flight",
+                "Code quality and security validation",
+            ),
             ("🏗️ Build & Package", "build", "Artifact creation and containerization"),
             ("🧪 Test Suite", "tests", "Unit and integration testing"),
             ("🔒 Security Validation", "security", "Security scanning and compliance"),
             ("⚡ Performance Tests", "performance", "Performance benchmarks"),
             ("🌐 E2E Tests", "e2e", "End-to-end system validation"),
             ("🎭 Staging Deploy", "staging_deploy", "Staging environment deployment"),
-            ("🚀 Production Deploy", "production_deploy", "Production environment deployment"),
+            (
+                "🚀 Production Deploy",
+                "production_deploy",
+                "Production environment deployment",
+            ),
         ]
 
         for stage_name, stage_key, stage_desc in stage_info:
@@ -344,12 +358,16 @@ class PipelineDashboard:
             status_class = (
                 "status-success"
                 if status == "success"
-                else "status-failure" if status == "failure" else "status-skipped"
+                else "status-failure"
+                if status == "failure"
+                else "status-skipped"
             )
             status_text = (
                 "✅ Success"
                 if status == "success"
-                else "❌ Failed" if status == "failure" else "⏭️ Skipped"
+                else "❌ Failed"
+                if status == "failure"
+                else "⏭️ Skipped"
             )
 
             html += f"""
@@ -369,19 +387,19 @@ class PipelineDashboard:
                         <h2>📈 Metrics</h2>
                         <div class="metrics-grid">
                             <div class="metric-card">
-                                <div class="metric-value">{len([s for s in stages.values() if s == 'success'])}</div>
+                                <div class="metric-value">{len([s for s in stages.values() if s == "success"])}</div>
                                 <div class="metric-label">Successful Stages</div>
                             </div>
                             <div class="metric-card">
-                                <div class="metric-value">{len([s for s in stages.values() if s == 'failure'])}</div>
+                                <div class="metric-value">{len([s for s in stages.values() if s == "failure"])}</div>
                                 <div class="metric-label">Failed Stages</div>
                             </div>
                             <div class="metric-card">
-                                <div class="metric-value">{len([s for s in stages.values() if s == 'skipped'])}</div>
+                                <div class="metric-value">{len([s for s in stages.values() if s == "skipped"])}</div>
                                 <div class="metric-label">Skipped Stages</div>
                             </div>
                             <div class="metric-card">
-                                <div class="metric-value">{self.pipeline_data.get('trigger', 'Unknown')}</div>
+                                <div class="metric-value">{self.pipeline_data.get("trigger", "Unknown")}</div>
                                 <div class="metric-label">Trigger Event</div>
                             </div>
                         </div>
@@ -389,7 +407,7 @@ class PipelineDashboard:
                 </div>
                 
                 <div class="footer">
-                    <p>Generated by PIPELINE-ARCHITECT • {datetime.now().strftime('%Y-%m-%d %H:%M:%S UTC')}</p>
+                    <p>Generated by PIPELINE-ARCHITECT • {datetime.now().strftime("%Y-%m-%d %H:%M:%S UTC")}</p>
                     <p>Martin Fowler + Jessica Kerr Principles • Zero-Tolerance Quality Gates</p>
                 </div>
             </div>
@@ -526,7 +544,9 @@ def main():
             print(f"{Colors.RED}❌ Failed to load pipeline data{Colors.RESET}")
             sys.exit(1)
     else:
-        print(f"{Colors.YELLOW}⚠️ No data source specified. Use --data or --sample{Colors.RESET}")
+        print(
+            f"{Colors.YELLOW}⚠️ No data source specified. Use --data or --sample{Colors.RESET}"
+        )
         sys.exit(1)
 
     # Generate report

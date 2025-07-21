@@ -59,7 +59,9 @@ class SecurityTestRunner:
                 results = json.load(f)
 
             high_severity = [
-                r for r in results.get("results", []) if r.get("issue_severity") == "HIGH"
+                r
+                for r in results.get("results", [])
+                if r.get("issue_severity") == "HIGH"
             ]
 
             if high_severity:
@@ -127,7 +129,9 @@ class SecurityTestRunner:
             findings = results.get("results", [])
 
             high_severity_findings = [
-                f for f in findings if f.get("extra", {}).get("severity") in ["ERROR", "HIGH"]
+                f
+                for f in findings
+                if f.get("extra", {}).get("severity") in ["ERROR", "HIGH"]
             ]
 
             if high_severity_findings:

@@ -140,7 +140,9 @@ class BeliefMonitor:
                     return total_entropy
 
                 # If beliefs are direct probability distributions
-                elif all(isinstance(v, (float, int, np.ndarray)) for v in beliefs.values()):
+                elif all(
+                    isinstance(v, (float, int, np.ndarray)) for v in beliefs.values()
+                ):
                     values = np.array(list(beliefs.values()))
                     if values.ndim == 1:
                         # Normalize
@@ -181,8 +183,12 @@ class BeliefMonitor:
             if isinstance(beliefs_new, dict) and "qs" in beliefs_new:
                 if isinstance(beliefs_old, dict) and "qs" in beliefs_old:
                     total_kl = 0.0
-                    for i, (qs_new, qs_old) in enumerate(zip(beliefs_new["qs"], beliefs_old["qs"])):
-                        if isinstance(qs_new, np.ndarray) and isinstance(qs_old, np.ndarray):
+                    for i, (qs_new, qs_old) in enumerate(
+                        zip(beliefs_new["qs"], beliefs_old["qs"])
+                    ):
+                        if isinstance(qs_new, np.ndarray) and isinstance(
+                            qs_old, np.ndarray
+                        ):
                             # Normalize distributions
                             p = qs_new / (qs_new.sum() + 1e-10)
                             q = qs_old / (qs_old.sum() + 1e-10)
@@ -192,7 +198,9 @@ class BeliefMonitor:
                     return total_kl
 
             # Handle direct numpy arrays
-            elif isinstance(beliefs_new, np.ndarray) and isinstance(beliefs_old, np.ndarray):
+            elif isinstance(beliefs_new, np.ndarray) and isinstance(
+                beliefs_old, np.ndarray
+            ):
                 p = beliefs_new / (beliefs_new.sum() + 1e-10)
                 q = beliefs_old / (beliefs_old.sum() + 1e-10)
                 return np.sum(p * np.log((p + 1e-10) / (q + 1e-10)))
@@ -217,7 +225,9 @@ class BeliefMonitor:
 
         # Get recent KL divergences
         recent_kls = [
-            s.kl_divergence for s in list(self.belief_history)[-10:] if s.kl_divergence is not None
+            s.kl_divergence
+            for s in list(self.belief_history)[-10:]
+            if s.kl_divergence is not None
         ]
 
         if not recent_kls or snapshot.kl_divergence is None:
@@ -328,13 +338,17 @@ class BeliefMonitor:
         kl_divergences = [
             s.kl_divergence for s in self.belief_history if s.kl_divergence is not None
         ]
-        free_energies = [s.free_energy for s in self.belief_history if s.free_energy is not None]
+        free_energies = [
+            s.free_energy for s in self.belief_history if s.free_energy is not None
+        ]
 
         stats = {
             "total_updates": self.total_updates,
             "anomaly_count": self.anomaly_count,
             "anomaly_rate": (
-                self.anomaly_count / self.total_updates if self.total_updates > 0 else 0.0
+                self.anomaly_count / self.total_updates
+                if self.total_updates > 0
+                else 0.0
             ),
             "entropy": {
                 "mean": np.mean(entropies) if entropies else 0.0,
@@ -432,7 +446,8 @@ class BeliefMonitoringHooks:
             Dictionary mapping agent IDs to their statistics
         """
         return {
-            agent_id: monitor.get_belief_statistics() for agent_id, monitor in self.monitors.items()
+            agent_id: monitor.get_belief_statistics()
+            for agent_id, monitor in self.monitors.items()
         }
 
     def reset_agent_monitor(self, agent_id: str) -> None:
@@ -473,7 +488,9 @@ async def monitor_belief_update(
     Returns:
         BeliefSnapshot if monitoring enabled
     """
-    return await belief_monitoring_hooks.on_belief_update(agent_id, beliefs, free_energy, metadata)
+    return await belief_monitoring_hooks.on_belief_update(
+        agent_id, beliefs, free_energy, metadata
+    )
 
 
 def get_belief_statistics(agent_id: str) -> Dict[str, Any]:

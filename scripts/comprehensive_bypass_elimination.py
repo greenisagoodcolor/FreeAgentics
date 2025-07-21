@@ -188,7 +188,9 @@ def detect_and_remove_bypasses(file_path: Path) -> List[Dict]:
             )
 
         # Apply replacement
-        content = re.sub(pattern, replacement, content, flags=re.MULTILINE | re.IGNORECASE)
+        content = re.sub(
+            pattern, replacement, content, flags=re.MULTILINE | re.IGNORECASE
+        )
 
     # Write back if changed
     if content != original_content:
@@ -339,7 +341,9 @@ All bypass directives have been **ELIMINATED** to ensure code quality and securi
             report_content += f"- **File:** `{violation.get('file', 'N/A')}`\n"
             report_content += f"  **Line:** {violation.get('line', 'N/A')}\n"
             report_content += f"  **Pattern:** `{violation.get('match', 'N/A')}`\n"
-            report_content += f"  **Status:** {violation.get('status', 'PROCESSED')}\n\n"
+            report_content += (
+                f"  **Status:** {violation.get('status', 'PROCESSED')}\n\n"
+            )
 
         if len(type_violations) > 10:
             report_content += f"... and {len(type_violations) - 10} more violations\n\n"
@@ -355,9 +359,7 @@ All bypass directives have been **ELIMINATED** to ensure code quality and securi
             report_content += f"**Violations:** {len(file_violations)}\n\n"
 
             for violation in file_violations[:5]:  # Show first 5 per file
-                report_content += (
-                    f"- Line {violation.get('line', 'N/A')}: {violation.get('type', 'N/A')}\n"
-                )
+                report_content += f"- Line {violation.get('line', 'N/A')}: {violation.get('type', 'N/A')}\n"
 
             if len(file_violations) > 5:
                 report_content += f"- ... and {len(file_violations) - 5} more\n"
@@ -458,7 +460,9 @@ def main():
     print(f"  • Report generated: {report_file}")
     print()
     print("🛡️  ZERO BYPASS TOLERANCE ENFORCED")
-    print("Michael Feathers: 'If a safety-net test is failing, fix the code—never snip the net.'")
+    print(
+        "Michael Feathers: 'If a safety-net test is failing, fix the code—never snip the net.'"
+    )
 
     return 0 if all_violations else 1
 

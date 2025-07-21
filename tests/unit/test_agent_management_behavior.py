@@ -294,9 +294,7 @@ class TestAgentCommunicationBehavior:
 
         # Mock agent with error handling
         agent = Mock(spec=BaseAgent)
-        agent.process_message = Mock(
-            side_effect=ValueError("Malformed message")
-        )
+        agent.process_message = Mock(side_effect=ValueError("Malformed message"))
 
         # Test malformed message handling
         malformed_message = {"invalid": "format"}

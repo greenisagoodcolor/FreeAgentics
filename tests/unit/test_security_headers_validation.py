@@ -71,10 +71,7 @@ class TestSecurityHeadersValidation:
 
         # Verify restrictive policies
         assert "'none'" in csp_header or "'self'" in csp_header
-        assert (
-            "'unsafe-inline'" not in csp_header
-            or "'unsafe-eval'" not in csp_header
-        )
+        assert "'unsafe-inline'" not in csp_header or "'unsafe-eval'" not in csp_header
 
     def test_strict_transport_security_header(self, client):
         """Test HTTP Strict Transport Security header is properly set."""
@@ -159,8 +156,7 @@ class TestSecurityHeadersValidation:
 
             # Should contain restrictive policies
             assert (
-                "camera=()" in permissions_policy
-                or "camera=self" in permissions_policy
+                "camera=()" in permissions_policy or "camera=self" in permissions_policy
             )
             assert (
                 "microphone=()" in permissions_policy
@@ -249,23 +245,19 @@ class TestSecurityHeadersValidation:
                 pass
             else:
                 # Should be specific domains
-                assert cors_origin.startswith(
-                    "http://"
-                ) or cors_origin.startswith("https://")
+                assert cors_origin.startswith("http://") or cors_origin.startswith(
+                    "https://"
+                )
 
         if "access-control-allow-credentials" in response.headers:
-            cors_credentials = response.headers[
-                "access-control-allow-credentials"
-            ]
+            cors_credentials = response.headers["access-control-allow-credentials"]
 
             # If credentials are allowed, origin should not be wildcard
             if cors_credentials.lower() == "true":
-                cors_origin = response.headers.get(
-                    "access-control-allow-origin", ""
+                cors_origin = response.headers.get("access-control-allow-origin", "")
+                assert cors_origin != "*", (
+                    "CORS credentials=true with origin=* is insecure"
                 )
-                assert (
-                    cors_origin != "*"
-                ), "CORS credentials=true with origin=* is insecure"
 
     def test_csp_header_validation_function(self):
         """Test CSP header validation function."""
@@ -386,9 +378,7 @@ class TestSecurityHeadersValidation:
         duration = end_time - start_time
 
         # Should be very fast
-        assert (
-            duration < 0.1
-        ), f"Security headers generation too slow: {duration:.3f}s"
+        assert duration < 0.1, f"Security headers generation too slow: {duration:.3f}s"
 
     def test_security_headers_thread_safety(self):
         """Test security headers are thread-safe."""
@@ -421,9 +411,7 @@ class TestSecurityHeadersValidation:
     def test_security_headers_customization(self):
         """Test security headers can be customized."""
         # Test with custom CSP
-        custom_csp = (
-            "default-src 'self'; script-src 'self' https://trusted.com"
-        )
+        custom_csp = "default-src 'self'; script-src 'self' https://trusted.com"
 
         try:
             headers = get_security_headers(custom_csp=custom_csp)
@@ -456,9 +444,9 @@ class TestSecurityHeadersValidation:
         ]
 
         for header in insecure_headers:
-            assert (
-                header not in response.headers
-            ), f"Insecure header {header} should not be present"
+            assert header not in response.headers, (
+                f"Insecure header {header} should not be present"
+            )
 
     def test_security_headers_edge_cases(self):
         """Test security headers handle edge cases."""
@@ -505,6 +493,6 @@ class TestSecurityHeadersValidation:
         ]
 
         for expected_header in expected_headers:
-            assert (
-                expected_header in headers
-            ), f"Expected header {expected_header} not found"
+            assert expected_header in headers, (
+                f"Expected header {expected_header} not found"
+            )

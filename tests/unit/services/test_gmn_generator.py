@@ -61,9 +61,7 @@ class TestGMNGenerator:
             await generator.prompt_to_gmn("   ")
 
     @pytest.mark.asyncio
-    async def test_prompt_to_gmn_empty_result(
-        self, generator, mock_llm_provider
-    ):
+    async def test_prompt_to_gmn_empty_result(self, generator, mock_llm_provider):
         """Test handling of empty GMN generation."""
         mock_llm_provider.generate_gmn.return_value = ""
 
@@ -73,9 +71,7 @@ class TestGMNGenerator:
     @pytest.mark.asyncio
     async def test_prompt_to_gmn_no_nodes(self, generator, mock_llm_provider):
         """Test handling of GMN without node definitions."""
-        mock_llm_provider.generate_gmn.return_value = (
-            "invalid gmn without nodes"
-        )
+        mock_llm_provider.generate_gmn.return_value = "invalid gmn without nodes"
 
         with pytest.raises(ValueError, match="no node definitions"):
             await generator.prompt_to_gmn("Test prompt")
@@ -100,9 +96,7 @@ class TestGMNGenerator:
         assert errors == []
 
     @pytest.mark.asyncio
-    async def test_validate_gmn_with_errors(
-        self, generator, mock_llm_provider
-    ):
+    async def test_validate_gmn_with_errors(self, generator, mock_llm_provider):
         """Test GMN validation with errors."""
         gmn_spec = "invalid gmn"
         mock_llm_provider.validate_gmn.return_value = (
@@ -116,9 +110,7 @@ class TestGMNGenerator:
         assert "Missing node definitions" in errors
 
     @pytest.mark.asyncio
-    async def test_validate_gmn_structural_errors(
-        self, generator, mock_llm_provider
-    ):
+    async def test_validate_gmn_structural_errors(self, generator, mock_llm_provider):
         """Test structural validation catches errors."""
         gmn_spec = """
         node state s1 {
@@ -139,9 +131,7 @@ class TestGMNGenerator:
         assert "undefined_node" in str(errors)
 
     @pytest.mark.asyncio
-    async def test_validate_gmn_unbalanced_braces(
-        self, generator, mock_llm_provider
-    ):
+    async def test_validate_gmn_unbalanced_braces(self, generator, mock_llm_provider):
         """Test detection of unbalanced braces."""
         gmn_spec = """
         node state s1 {
@@ -181,9 +171,7 @@ class TestGMNGenerator:
         mock_llm_provider.refine_gmn.return_value = refined_gmn
         mock_llm_provider.validate_gmn.return_value = (True, [])
 
-        result = await generator.refine_gmn(
-            original_gmn, "Add type specification"
-        )
+        result = await generator.refine_gmn(original_gmn, "Add type specification")
 
         assert result == refined_gmn
         mock_llm_provider.refine_gmn.assert_called_once_with(
@@ -193,9 +181,7 @@ class TestGMNGenerator:
     @pytest.mark.asyncio
     async def test_refine_gmn_empty_inputs(self, generator):
         """Test that empty inputs are rejected."""
-        with pytest.raises(
-            ValueError, match="GMN specification cannot be empty"
-        ):
+        with pytest.raises(ValueError, match="GMN specification cannot be empty"):
             await generator.refine_gmn("", "feedback")
 
         with pytest.raises(ValueError, match="Feedback cannot be empty"):
@@ -210,9 +196,7 @@ class TestGMNGenerator:
         node transition T1 { from: [s1, a1]; to: s1 }
         """
 
-        suggestions = await generator.suggest_improvements(
-            gmn_without_preferences
-        )
+        suggestions = await generator.suggest_improvements(gmn_without_preferences)
 
         assert any("preference" in s for s in suggestions)
         assert any("observation" in s for s in suggestions)
@@ -265,9 +249,7 @@ class TestGMNGenerator:
         """Test concurrent GMN operations."""
         import asyncio
 
-        mock_llm_provider.generate_gmn.return_value = (
-            "node state s1 { size: 4 }"
-        )
+        mock_llm_provider.generate_gmn.return_value = "node state s1 { size: 4 }"
         mock_llm_provider.validate_gmn.return_value = (True, [])
 
         # Run multiple operations concurrently

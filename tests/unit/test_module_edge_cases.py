@@ -358,9 +358,7 @@ class TestGMNParserEdgeCases:
         parser = GMNParser()
 
         # Test with unicode content
-        unicode_gmn = (
-            '{"nodes": [{"id": "节点_1", "名称": "测试节点", "description": "包含中文的节点"}]}'
-        )
+        unicode_gmn = '{"nodes": [{"id": "节点_1", "名称": "测试节点", "description": "包含中文的节点"}]}'
 
         try:
             result = parser.parse(unicode_gmn)

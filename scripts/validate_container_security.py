@@ -41,7 +41,9 @@ class ContainerSecurityValidator:
         """Log error message"""
         print(f"[ERROR] {message}")
 
-    def run_command(self, command: Sequence[str], timeout: int = 300) -> Tuple[int, str, str]:
+    def run_command(
+        self, command: Sequence[str], timeout: int = 300
+    ) -> Tuple[int, str, str]:
         """Run a command and return return code, stdout, stderr"""
         try:
             result = subprocess.run(
@@ -195,7 +197,9 @@ class ContainerSecurityValidator:
                                         elif severity == "CRITICAL":
                                             critical_vulns += 1
 
-                            self.security_results["vulnerabilities"][scanner["name"]] = {
+                            self.security_results["vulnerabilities"][
+                                scanner["name"]
+                            ] = {
                                 "total": total_vulns,
                                 "high": high_vulns,
                                 "critical": critical_vulns,
@@ -206,7 +210,9 @@ class ContainerSecurityValidator:
                             self.log_info(f"Critical severity: {critical_vulns}")
 
                             if critical_vulns > 0:
-                                self.log_error(f"Critical vulnerabilities found: {critical_vulns}")
+                                self.log_error(
+                                    f"Critical vulnerabilities found: {critical_vulns}"
+                                )
                                 vulnerability_found = True
                             elif high_vulns > 0:
                                 self.log_warning(
@@ -214,7 +220,9 @@ class ContainerSecurityValidator:
                                 )
                                 vulnerability_found = True
                             else:
-                                self.log_info("✓ No high or critical vulnerabilities found")
+                                self.log_info(
+                                    "✓ No high or critical vulnerabilities found"
+                                )
 
                     except json.JSONDecodeError:
                         self.log_warning(f"Could not parse {scanner['name']} output")
@@ -224,7 +232,9 @@ class ContainerSecurityValidator:
                 self.log_warning(f"{scanner['name']} scan failed: {stderr}")
 
         if not vulnerability_found:
-            self.log_info("No vulnerability scanner found or no vulnerabilities detected")
+            self.log_info(
+                "No vulnerability scanner found or no vulnerabilities detected"
+            )
 
         return True
 
@@ -413,7 +423,9 @@ class ContainerSecurityValidator:
 
                 if large_layers > 0:
                     self.log_warning(f"⚠ {large_layers} large layers (>100MB) found")
-                    self.security_results["image_security"]["large_layers"] = large_layers
+                    self.security_results["image_security"]["large_layers"] = (
+                        large_layers
+                    )
                 else:
                     self.log_info("✓ No excessively large layers found")
                     self.security_results["image_security"]["large_layers"] = 0
@@ -430,7 +442,9 @@ class ContainerSecurityValidator:
         dockerfile_security = self.security_results.get("dockerfile_security", {})
         for check_name, check_result in dockerfile_security.items():
             if check_result["required"] and not check_result["status"]:
-                recommendations.append(f"Fix Dockerfile security: {check_result['description']}")
+                recommendations.append(
+                    f"Fix Dockerfile security: {check_result['description']}"
+                )
 
         # Runtime security recommendations
         runtime_security = self.security_results.get("runtime_security", {})
@@ -450,9 +464,13 @@ class ContainerSecurityValidator:
         vulnerabilities = self.security_results.get("vulnerabilities", {})
         for scanner, vuln_data in vulnerabilities.items():
             if vuln_data.get("critical", 0) > 0:
-                recommendations.append(f"Fix {vuln_data['critical']} critical vulnerabilities")
+                recommendations.append(
+                    f"Fix {vuln_data['critical']} critical vulnerabilities"
+                )
             if vuln_data.get("high", 0) > 0:
-                recommendations.append(f"Fix {vuln_data['high']} high severity vulnerabilities")
+                recommendations.append(
+                    f"Fix {vuln_data['high']} high severity vulnerabilities"
+                )
 
         # Image security recommendations
         image_security = self.security_results.get("image_security", {})

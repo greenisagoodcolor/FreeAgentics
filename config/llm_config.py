@@ -74,7 +74,9 @@ class LLMConfig(BaseModel):
     default_max_tokens: int = 1000
 
     # Provider priority order for fallback
-    provider_priority: list[str] = Field(default_factory=lambda: ["openai", "anthropic"])
+    provider_priority: list[str] = Field(
+        default_factory=lambda: ["openai", "anthropic"]
+    )
 
     model_config = ConfigDict(extra="forbid")
 

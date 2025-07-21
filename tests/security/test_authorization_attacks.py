@@ -128,9 +128,9 @@ class TestIDORVulnerabilities:
                 if attempt["found"] and attempt["id"] not in created_ids
             ]
 
-            assert (
-                len(unauthorized_access) == 0
-            ), "Sequential ID enumeration allowed unauthorized access"
+            assert len(unauthorized_access) == 0, (
+                "Sequential ID enumeration allowed unauthorized access"
+            )
 
     def test_uuid_prediction_attacks(self, client, setup_idor_scenario):
         """Test resistance to UUID prediction and timing attacks."""
@@ -214,7 +214,9 @@ class TestIDORVulnerabilities:
             if response.status_code == status.HTTP_200_OK:
                 data = response.json()
                 # Verify no sensitive data is exposed
-                assert "parameters" not in data or "owner" not in data.get("parameters", {})
+                assert "parameters" not in data or "owner" not in data.get(
+                    "parameters", {}
+                )
 
             # Attempt 2: Array parameter pollution
             response = client.get(
@@ -316,9 +318,9 @@ class TestIDORVulnerabilities:
                     )
 
             # No operation should leak resource existence to unauthorized users
-            assert (
-                len(existence_indicators) == 0
-            ), f"Resource existence leaked through: {existence_indicators}"
+            assert len(existence_indicators) == 0, (
+                f"Resource existence leaked through: {existence_indicators}"
+            )
 
 
 class TestPrivilegeEscalationVectors:
@@ -358,16 +360,18 @@ class TestPrivilegeEscalationVectors:
         original_token = observer["token"]
 
         # Decode without verification
-        unverified_payload = jwt.decode(original_token, options={"verify_signature": False})
+        unverified_payload = jwt.decode(
+            original_token, options={"verify_signature": False}
+        )
 
         # Attempt 1: Change algorithm to none
         try:
             none_token = jwt.encode(unverified_payload, "", algorithm="none")
             headers = {"Authorization": f"Bearer {none_token}"}
             response = client.get("/api/v1/system/config", headers=headers)
-            assert (
-                response.status_code == status.HTTP_401_UNAUTHORIZED
-            ), "Algorithm 'none' attack succeeded"
+            assert response.status_code == status.HTTP_401_UNAUTHORIZED, (
+                "Algorithm 'none' attack succeeded"
+            )
         except jwt.InvalidAlgorithmError:
             pass  # Good - library prevents this
 
@@ -401,9 +405,9 @@ class TestPrivilegeEscalationVectors:
                     response = client.get("/api/v1/system/config", headers=headers)
 
                     # Should not authenticate with algorithm confusion
-                    assert (
-                        response.status_code == status.HTTP_401_UNAUTHORIZED
-                    ), f"Algorithm confusion with secret '{secret[:20]}...' succeeded"
+                    assert response.status_code == status.HTTP_401_UNAUTHORIZED, (
+                        f"Algorithm confusion with secret '{secret[:20]}...' succeeded"
+                    )
                 except Exception:
                     continue  # Expected to fail
         except Exception:
@@ -456,9 +460,9 @@ class TestPrivilegeEscalationVectors:
 
             # Try to access admin endpoint after each attempt
             response = client.get("/api/v1/system/config", headers=headers)
-            assert (
-                response.status_code == status.HTTP_403_FORBIDDEN
-            ), f"Role injection succeeded with payload: {payload}"
+            assert response.status_code == status.HTTP_403_FORBIDDEN, (
+                f"Role injection succeeded with payload: {payload}"
+            )
 
     def test_permission_bypass_chains(self, client, escalation_users):
         """Test chaining multiple vulnerabilities for permission bypass."""
@@ -488,7 +492,9 @@ class TestPrivilegeEscalationVectors:
         if response.status_code == status.HTTP_200_OK:
             coalitions = response.json()
             bypass_coalitions = [c for c in coalitions if "Bypass" in c.get("name", "")]
-            assert len(bypass_coalitions) == 0, "Coalition created through permission bypass"
+            assert len(bypass_coalitions) == 0, (
+                "Coalition created through permission bypass"
+            )
 
         # Chain 2: Exploit race condition with token refresh
         def attempt_privileged_action():
@@ -561,7 +567,9 @@ class TestPrivilegeEscalationVectors:
 
         # Try to extend expiration
         future_payload = payload.copy()
-        future_payload["exp"] = int((datetime.now(timezone.utc) + timedelta(days=365)).timestamp())
+        future_payload["exp"] = int(
+            (datetime.now(timezone.utc) + timedelta(days=365)).timestamp()
+        )
 
         # Try to reuse with modified non-signature fields
         modified_payloads = [
@@ -784,9 +792,9 @@ class TestAuthorizationBypassTechniques:
 
         # Timing attacks should not be viable
         # Allow up to 2x difference as reasonable threshold
-        assert (
-            timing_ratio < 2.0 or timing_ratio > 0.5
-        ), "Significant timing difference detected that could enable timing attacks"
+        assert timing_ratio < 2.0 or timing_ratio > 0.5, (
+            "Significant timing difference detected that could enable timing attacks"
+        )
 
     def test_cache_poisoning_authorization(self, client, bypass_setup):
         """Test cache poisoning for authorization bypass."""
@@ -822,7 +830,9 @@ class TestAuthorizationBypassTechniques:
         assert response.status_code == status.HTTP_403_FORBIDDEN
 
         # Attempt 3: Fragment identifier cache bypass
-        response = client.get("/api/v1/system/config#admin_view", headers=observer_headers)
+        response = client.get(
+            "/api/v1/system/config#admin_view", headers=observer_headers
+        )
         assert response.status_code == status.HTTP_403_FORBIDDEN
 
 
@@ -990,9 +1000,9 @@ class TestAuthorizationRaceConditions:
         # All same requests should have same result
         for endpoint, statuses in endpoint_results.items():
             unique_statuses = set(statuses)
-            assert (
-                len(unique_statuses) == 1
-            ), f"Inconsistent authorization for {endpoint}: {unique_statuses}"
+            assert len(unique_statuses) == 1, (
+                f"Inconsistent authorization for {endpoint}: {unique_statuses}"
+            )
 
     def test_token_refresh_race_condition(self, client, race_setup):
         """Test race conditions in token refresh flow."""
@@ -1004,11 +1014,15 @@ class TestAuthorizationRaceConditions:
         refresh_results = []
 
         def refresh_token_concurrent():
-            response = client.post("/api/v1/auth/refresh", json={"refresh_token": refresh_token})
+            response = client.post(
+                "/api/v1/auth/refresh", json={"refresh_token": refresh_token}
+            )
             refresh_results.append(
                 {
                     "status": response.status_code,
-                    "data": response.json() if response.status_code == status.HTTP_200_OK else None,
+                    "data": response.json()
+                    if response.status_code == status.HTTP_200_OK
+                    else None,
                 }
             )
 
@@ -1021,7 +1035,9 @@ class TestAuthorizationRaceConditions:
             t.join()
 
         # Analyze results
-        successful_refreshes = [r for r in refresh_results if r["status"] == status.HTTP_200_OK]
+        successful_refreshes = [
+            r for r in refresh_results if r["status"] == status.HTTP_200_OK
+        ]
 
         # Only one refresh should succeed (token rotation)
         # Or all should succeed with same new token (if no rotation)

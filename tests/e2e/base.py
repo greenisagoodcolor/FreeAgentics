@@ -65,8 +65,12 @@ class BaseE2ETest(ABC):
 
     async def teardown(self):
         """Teardown method called after each test."""
-        test_duration = time.time() - self.test_start_time if self.test_start_time else 0
-        logger.info(f"Finished E2E test: {self.__class__.__name__} in {test_duration:.2f}s")
+        test_duration = (
+            time.time() - self.test_start_time if self.test_start_time else 0
+        )
+        logger.info(
+            f"Finished E2E test: {self.__class__.__name__} in {test_duration:.2f}s"
+        )
 
         # Cleanup driver
         await self._cleanup_driver()
@@ -187,7 +191,9 @@ class BaseE2ETest(ABC):
                     return
 
             except Exception as e:
-                logger.debug(f"Service {service} not ready (attempt {attempt + 1}): {e}")
+                logger.debug(
+                    f"Service {service} not ready (attempt {attempt + 1}): {e}"
+                )
 
             if attempt < max_retries - 1:
                 await asyncio.sleep(retry_delay)
@@ -266,7 +272,9 @@ class BaseE2ETest(ABC):
         """Assert that API response is OK."""
         assert response.status_code == 200, f"Expected 200, got {response.status_code}"
 
-    def assert_api_response_json(self, response: httpx.Response, expected_keys: List[str]):
+    def assert_api_response_json(
+        self, response: httpx.Response, expected_keys: List[str]
+    ):
         """Assert that API response contains expected JSON keys."""
         data = response.json()
         for key in expected_keys:

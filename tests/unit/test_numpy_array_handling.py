@@ -107,7 +107,9 @@ class TestAgentArrayHandling:
         for action_idx in test_cases:
             converted_idx = safe_array_to_int(action_idx)
             action = action_map.get(converted_idx, "stay")
-            assert action == "left", f"Expected 'left', got '{action}' for input {action_idx}"
+            assert action == "left", (
+                f"Expected 'left', got '{action}' for input {action_idx}"
+            )
 
     def test_policy_indexing_with_arrays(self):
         """Test that policy indexing works with numpy arrays."""

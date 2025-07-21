@@ -50,7 +50,9 @@ class TestSafeArrayToInt:
     def test_empty_numpy_array(self):
         """Test empty numpy array raises ValueError."""
         value = np.array([])
-        with pytest.raises(ValueError, match="Empty array cannot be converted to integer"):
+        with pytest.raises(
+            ValueError, match="Empty array cannot be converted to integer"
+        ):
             safe_array_to_int(value)
 
     def test_list_input(self):
@@ -61,7 +63,9 @@ class TestSafeArrayToInt:
     def test_empty_list(self):
         """Test empty list raises ValueError."""
         value = []
-        with pytest.raises(ValueError, match="Empty array cannot be converted to integer"):
+        with pytest.raises(
+            ValueError, match="Empty array cannot be converted to integer"
+        ):
             safe_array_to_int(value)
 
     def test_tuple_input(self):

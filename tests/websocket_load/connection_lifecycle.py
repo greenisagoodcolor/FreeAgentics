@@ -100,7 +100,9 @@ class ConnectionLifecycleManager:
                     # Start activity if generator provided
                     if activity_generator:
                         activity_task = asyncio.create_task(
-                            self._generate_activity(client, activity_generator, activity_interval)
+                            self._generate_activity(
+                                client, activity_generator, activity_interval
+                            )
                         )
 
                     # Wait for disconnection
@@ -168,7 +170,9 @@ class ConnectionLifecycleManager:
                     # Start activity if generator provided
                     if activity_generator:
                         activity_task = asyncio.create_task(
-                            self._generate_activity(client, activity_generator, activity_interval)
+                            self._generate_activity(
+                                client, activity_generator, activity_interval
+                            )
                         )
 
                     # Wait for connection duration
@@ -282,7 +286,9 @@ class ConnectionLifecycleManager:
                 if consecutive_failures >= failover_threshold:
                     current_url_index = (current_url_index + 1) % len(urls)
                     consecutive_failures = 0
-                    logger.info(f"Failing over {client_id} to {urls[current_url_index]}")
+                    logger.info(
+                        f"Failing over {client_id} to {urls[current_url_index]}"
+                    )
 
                 # Update client URL
                 if current_url_index >= 0:
@@ -338,7 +344,9 @@ class ConnectionLifecycleManager:
             while client.is_connected:
                 message = generator.generate()
                 await client.send_message(message)
-                self.metrics.record_message_sent(message.get("type", "unknown"), len(str(message)))
+                self.metrics.record_message_sent(
+                    message.get("type", "unknown"), len(str(message))
+                )
                 await asyncio.sleep(interval)
 
         except asyncio.CancelledError:
@@ -367,7 +375,9 @@ class ConnectionLifecycleManager:
         tasks = []
 
         for client in clients:
-            task = asyncio.create_task(self.manage_connection_lifecycle(client, pattern, **kwargs))
+            task = asyncio.create_task(
+                self.manage_connection_lifecycle(client, pattern, **kwargs)
+            )
             self.lifecycle_tasks[client.client_id] = task
             tasks.append(task)
 
@@ -385,7 +395,10 @@ class ConnectionLifecycleManager:
 
     def get_connection_states(self) -> Dict[str, str]:
         """Get current connection states for all clients."""
-        return {client_id: state.value for client_id, state in self.connection_states.items()}
+        return {
+            client_id: state.value
+            for client_id, state in self.connection_states.items()
+        }
 
     def get_state_distribution(self) -> Dict[str, int]:
         """Get distribution of connection states."""
@@ -440,13 +453,17 @@ class ConnectionPool:
         self._running = True
         self._pool_task = asyncio.create_task(self._maintain_pool())
 
-        logger.info(f"Connection pool initialized with {self.available.qsize()} connections")
+        logger.info(
+            f"Connection pool initialized with {self.available.qsize()} connections"
+        )
 
     async def acquire(self) -> Optional[WebSocketClient]:
         """Acquire a connection from the pool."""
         try:
             # Try to get an available connection
-            client = await asyncio.wait_for(self.available.get(), timeout=self.acquire_timeout)
+            client = await asyncio.wait_for(
+                self.available.get(), timeout=self.acquire_timeout
+            )
 
             # Verify it's still connected
             if client.is_connected:

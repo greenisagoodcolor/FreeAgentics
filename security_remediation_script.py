@@ -63,7 +63,9 @@ def fix_jwt_verification():
             if matches:
                 # Replace verify=False with proper verification
                 new_content = re.sub(
-                    r"(jwt\.decode\([^,]+,[^,]+)(,\s*verify\s*=\s*False)([^)]*\))", r"\1\3", content
+                    r"(jwt\.decode\([^,]+,[^,]+)(,\s*verify\s*=\s*False)([^)]*\))",
+                    r"\1\3",
+                    content,
                 )
 
                 # Also ensure options are properly set
@@ -191,9 +193,7 @@ def secure_jwt_keys():
             if gitignore_path.exists():
                 content = gitignore_path.read_text()
                 if "auth/keys/" not in content:
-                    content += (
-                        "\n# JWT Keys - NEVER commit these!\nauth/keys/*.pem\nauth/keys/*.key\n"
-                    )
+                    content += "\n# JWT Keys - NEVER commit these!\nauth/keys/*.pem\nauth/keys/*.key\n"
                     gitignore_path.write_text(content)
                     print_success("Added JWT keys to .gitignore")
         except Exception as e:
@@ -368,7 +368,9 @@ def create_security_checklist():
 def main():
     """Run all security remediation tasks."""
     print_header("FreeAgentics Security Remediation Script")
-    print("This script addresses critical security issues identified by SECURITY-PALADIN\n")
+    print(
+        "This script addresses critical security issues identified by SECURITY-PALADIN\n"
+    )
 
     # Run remediation tasks
     fix_jwt_verification()

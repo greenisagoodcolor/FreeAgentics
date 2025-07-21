@@ -62,7 +62,9 @@ class MetricsPlugin:
         if flaky_tests:
             print(f"\\n⚠️  Flaky Tests Detected ({len(flaky_tests)}):")
             for test in flaky_tests[:5]:  # Show top 5
-                print(f"  - {test['test_name']} ({test['flaky_percentage']:.1f}% flaky)")
+                print(
+                    f"  - {test['test_name']} ({test['flaky_percentage']:.1f}% flaky)"
+                )
 
         # Show slow tests if any
         slow_tests = self.collector.get_slow_tests()
@@ -248,7 +250,8 @@ def pytest_terminal_summary(terminalreporter, exitstatus, config):
 
                 if slow_tests:
                     terminalreporter.write_line(
-                        f"🐌 {len(slow_tests)} slow tests detected - " f"consider optimization"
+                        f"🐌 {len(slow_tests)} slow tests detected - "
+                        f"consider optimization"
                     )
 
                 terminalreporter.write_line(
@@ -261,7 +264,9 @@ def pytest_configure(config):
     """Register custom markers for test categorization."""
     config.addinivalue_line("markers", "slow: mark test as slow running")
     config.addinivalue_line("markers", "flaky: mark test as potentially flaky")
-    config.addinivalue_line("markers", "critical: mark test as critical for system functionality")
+    config.addinivalue_line(
+        "markers", "critical: mark test as critical for system functionality"
+    )
     config.addinivalue_line("markers", "performance: mark test as performance test")
 
 
@@ -306,7 +311,9 @@ class TestRetryPlugin:
             except Exception:
                 self.retry_counts[test_id] += 1
                 if retry < max_retries - 1:
-                    print(f"\\n⚠️  Test {test_id} failed, retrying ({retry + 1}/{max_retries})...")
+                    print(
+                        f"\\n⚠️  Test {test_id} failed, retrying ({retry + 1}/{max_retries})..."
+                    )
                     continue
                 else:
                     raise

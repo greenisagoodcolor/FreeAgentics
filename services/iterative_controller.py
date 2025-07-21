@@ -81,15 +81,11 @@ class ConversationContext:
             # Compare belief structures
             common_keys = set(prev_beliefs.keys()) & set(curr_beliefs.keys())
             if common_keys:
-                stability = len(common_keys) / max(
-                    len(prev_beliefs), len(curr_beliefs)
-                )
+                stability = len(common_keys) / max(len(prev_beliefs), len(curr_beliefs))
                 stability_scores.append(stability)
 
         avg_stability = (
-            sum(stability_scores) / len(stability_scores)
-            if stability_scores
-            else 0.0
+            sum(stability_scores) / len(stability_scores) if stability_scores else 0.0
         )
 
         return {
@@ -115,9 +111,7 @@ class ConversationContext:
             word_counts[word] += 1
 
         # Return top themes
-        sorted_words = sorted(
-            word_counts.items(), key=lambda x: x[1], reverse=True
-        )
+        sorted_words = sorted(word_counts.items(), key=lambda x: x[1], reverse=True)
         return [word for word, count in sorted_words[:5] if count > 1]
 
     def _analyze_suggestion_patterns(self) -> Dict[str, Any]:
@@ -133,9 +127,7 @@ class ConversationContext:
         # Calculate diversity
         unique_suggestions = set(all_suggestions)
         diversity = (
-            len(unique_suggestions) / len(all_suggestions)
-            if all_suggestions
-            else 0.0
+            len(unique_suggestions) / len(all_suggestions) if all_suggestions else 0.0
         )
 
         # Find common suggestion themes
@@ -207,9 +199,7 @@ class IterativeController:
                     )
                 )
                 kg_updates = kg_result.scalars().all()
-                kg_nodes = [
-                    update.node_id for update in kg_updates if update.applied
-                ]
+                kg_nodes = [update.node_id for update in kg_updates if update.applied]
 
                 # Reconstruct context
                 context.add_iteration(
@@ -232,9 +222,7 @@ class IterativeController:
         context_summary = conversation_context.get_context_summary()
 
         # Get current KG state relevant to this conversation
-        kg_context = await self._get_kg_context(
-            conversation_context.kg_node_ids
-        )
+        kg_context = await self._get_kg_context(conversation_context.kg_node_ids)
 
         # Analyze prompt evolution
         prompt_analysis = self._analyze_prompt_evolution(
@@ -269,9 +257,7 @@ class IterativeController:
         suggestions = []
 
         # 1. Analyze belief convergence
-        belief_analysis = conversation_context.get_context_summary()[
-            "belief_evolution"
-        ]
+        belief_analysis = conversation_context.get_context_summary()["belief_evolution"]
 
         if belief_analysis["stability"] < 0.5:
             suggestions.append(
@@ -310,9 +296,7 @@ class IterativeController:
         )
 
         for gap in capability_gaps:
-            suggestions.append(
-                f"Add {gap} capability to enhance agent interactions"
-            )
+            suggestions.append(f"Add {gap} capability to enhance agent interactions")
 
         # 5. Suggest based on suggestion history patterns
         suggestion_patterns = conversation_context.get_context_summary()[
@@ -330,13 +314,9 @@ class IterativeController:
                 "Start with basic exploration to establish environmental understanding"
             )
         elif conversation_context.iteration_count < 3:
-            suggestions.append(
-                "Add goal-directed behavior to guide agent actions"
-            )
+            suggestions.append("Add goal-directed behavior to guide agent actions")
         elif conversation_context.iteration_count < 5:
-            suggestions.append(
-                "Introduce multi-agent coordination for complex tasks"
-            )
+            suggestions.append("Introduce multi-agent coordination for complex tasks")
         else:
             suggestions.append(
                 "Consider meta-learning - Let agents adapt their own models"
@@ -352,9 +332,7 @@ class IterativeController:
                 "Increase observation diversity to enrich knowledge representation"
             )
         elif kg_growth_rate > 20:
-            suggestions.append(
-                "Focus on knowledge consolidation rather than expansion"
-            )
+            suggestions.append("Focus on knowledge consolidation rather than expansion")
 
         # Prioritize and deduplicate suggestions
         unique_suggestions = []
@@ -392,9 +370,9 @@ class IterativeController:
         )
 
         # Update cache
-        self._conversation_contexts[
-            conversation_context.conversation_id
-        ] = conversation_context
+        self._conversation_contexts[conversation_context.conversation_id] = (
+            conversation_context
+        )
 
     async def _get_kg_context(self, node_ids: Set[str]) -> Dict[str, Any]:
         """Get relevant knowledge graph context for the conversation."""
@@ -441,14 +419,10 @@ class IterativeController:
         # Calculate similarity with previous prompts
         similarities = []
         for prev_prompt in prompt_history[-3:]:  # Last 3 prompts
-            similarity = self._calculate_prompt_similarity(
-                prev_prompt, current_prompt
-            )
+            similarity = self._calculate_prompt_similarity(prev_prompt, current_prompt)
             similarities.append(similarity)
 
-        avg_similarity = (
-            sum(similarities) / len(similarities) if similarities else 0.0
-        )
+        avg_similarity = sum(similarities) / len(similarities) if similarities else 0.0
 
         # Determine evolution pattern
         if avg_similarity > 0.8:
@@ -466,9 +440,7 @@ class IterativeController:
             "evolution": evolution,
             "similarity": avg_similarity,
             "direction": direction,
-            "theme_consistency": len(set(themes)) / len(themes)
-            if themes
-            else 0.0,
+            "theme_consistency": len(set(themes)) / len(themes) if themes else 0.0,
         }
 
     def _generate_iteration_constraints(
@@ -496,9 +468,7 @@ class IterativeController:
             constraints["iteration_specific"]["allow_minor_variations"] = True
         elif prompt_analysis["evolution"] == "pivoting":
             constraints["iteration_specific"]["allow_major_changes"] = True
-            constraints["iteration_specific"][
-                "suggest_novel_approaches"
-            ] = True
+            constraints["iteration_specific"]["suggest_novel_approaches"] = True
 
         # Iteration count specific
         iteration = context_summary["iteration_count"]
@@ -580,9 +550,7 @@ class IterativeController:
 
         # Get agents from database
         unique_ids = list(set(agent_ids))
-        result = await db.execute(
-            select(Agent).where(Agent.id.in_(unique_ids))
-        )
+        result = await db.execute(select(Agent).where(Agent.id.in_(unique_ids)))
         agents = result.scalars().all()
 
         # Analyze capabilities
@@ -652,9 +620,7 @@ class IterativeController:
 
         return dict(type_counts)
 
-    def _calculate_prompt_similarity(
-        self, prompt1: str, prompt2: str
-    ) -> float:
+    def _calculate_prompt_similarity(self, prompt1: str, prompt2: str) -> float:
         """Calculate similarity between two prompts (simplified)."""
         # Simple word overlap similarity
         words1 = set(prompt1.lower().split())

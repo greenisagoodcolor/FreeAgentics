@@ -84,7 +84,9 @@ class TestWebSocketAuth:
         token = "invalid.jwt.token"
 
         with patch("api.v1.websocket.auth_manager.verify_token") as mock_verify:
-            mock_verify.side_effect = HTTPException(status_code=401, detail="Invalid token")
+            mock_verify.side_effect = HTTPException(
+                status_code=401, detail="Invalid token"
+            )
 
             with pytest.raises(WebSocketDisconnect) as exc_info:
                 await websocket_auth(mock_websocket, token)
@@ -100,7 +102,9 @@ class TestWebSocketAuth:
         token = "expired.jwt.token"
 
         with patch("api.v1.websocket.auth_manager.verify_token") as mock_verify:
-            mock_verify.side_effect = HTTPException(status_code=401, detail="Token expired")
+            mock_verify.side_effect = HTTPException(
+                status_code=401, detail="Token expired"
+            )
 
             with pytest.raises(WebSocketDisconnect) as exc_info:
                 await websocket_auth(mock_websocket, token)

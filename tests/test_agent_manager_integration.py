@@ -40,11 +40,9 @@ class TestAgentManagerIntegration:
         )
         self.headers = {"Authorization": f"Bearer {self.token}"}
 
-    @patch('api.ui_compatibility.v1_create_agent')
-    @patch('api.ui_compatibility.broadcast_agent_created_event')
-    def test_agent_creation_creates_real_agent(
-        self, mock_broadcast, mock_create
-    ):
+    @patch("api.ui_compatibility.v1_create_agent")
+    @patch("api.ui_compatibility.broadcast_agent_created_event")
+    def test_agent_creation_creates_real_agent(self, mock_broadcast, mock_create):
         """Test that UI agent creation creates real agent in manager."""
         # Mock the V1 API response
         mock_agent = V1Agent(
@@ -60,8 +58,9 @@ class TestAgentManagerIntegration:
         mock_broadcast.return_value = None
 
         # Mock the agent manager
-        with patch('api.v1.agents.agent_manager') as mock_manager, patch(
-            'api.v1.agents.AGENT_MANAGER_AVAILABLE', True
+        with (
+            patch("api.v1.agents.agent_manager") as mock_manager,
+            patch("api.v1.agents.AGENT_MANAGER_AVAILABLE", True),
         ):
             mock_manager.create_agent.return_value = "real-agent-id"
             mock_manager.start_agent.return_value = True
@@ -95,12 +94,10 @@ class TestAgentManagerIntegration:
             # Verify WebSocket event was broadcasted
             mock_broadcast.assert_called_once()
 
-    @patch('api.ui_compatibility.v1_update_agent_status')
-    @patch('api.ui_compatibility.get_agent_ui')
-    @patch('api.ui_compatibility.broadcast_agent_updated_event')
-    def test_agent_status_updates_manager(
-        self, mock_broadcast, mock_get, mock_update
-    ):
+    @patch("api.ui_compatibility.v1_update_agent_status")
+    @patch("api.ui_compatibility.get_agent_ui")
+    @patch("api.ui_compatibility.broadcast_agent_updated_event")
+    def test_agent_status_updates_manager(self, mock_broadcast, mock_get, mock_update):
         """Test that status updates propagate to agent manager."""
         # Mock the responses
         mock_update.return_value = {
@@ -113,8 +110,9 @@ class TestAgentManagerIntegration:
         mock_broadcast.return_value = None
 
         # Mock the agent manager
-        with patch('api.v1.agents.agent_manager') as mock_manager, patch(
-            'api.v1.agents.AGENT_MANAGER_AVAILABLE', True
+        with (
+            patch("api.v1.agents.agent_manager") as mock_manager,
+            patch("api.v1.agents.AGENT_MANAGER_AVAILABLE", True),
         ):
             mock_manager.start_agent.return_value = True
             mock_manager.stop_agent.return_value = True
@@ -142,18 +140,17 @@ class TestAgentManagerIntegration:
             # Verify WebSocket events were broadcasted
             assert mock_broadcast.call_count == 2
 
-    @patch('api.ui_compatibility.v1_delete_agent')
-    @patch('api.ui_compatibility.broadcast_agent_deleted_event')
-    def test_agent_deletion_removes_from_manager(
-        self, mock_broadcast, mock_delete
-    ):
+    @patch("api.ui_compatibility.v1_delete_agent")
+    @patch("api.ui_compatibility.broadcast_agent_deleted_event")
+    def test_agent_deletion_removes_from_manager(self, mock_broadcast, mock_delete):
         """Test that agent deletion removes agent from manager."""
         mock_delete.return_value = {"message": "Agent deleted"}
         mock_broadcast.return_value = None
 
         # Mock the agent manager
-        with patch('api.v1.agents.agent_manager') as mock_manager, patch(
-            'api.v1.agents.AGENT_MANAGER_AVAILABLE', True
+        with (
+            patch("api.v1.agents.agent_manager") as mock_manager,
+            patch("api.v1.agents.AGENT_MANAGER_AVAILABLE", True),
         ):
             mock_manager.delete_agent.return_value = True
 
@@ -183,12 +180,12 @@ class TestAgentManagerIntegration:
             inference_count=0,
         )
 
-        with patch(
-            'api.ui_compatibility.v1_create_agent'
-        ) as mock_create, patch(
-            'api.ui_compatibility.broadcast_agent_created_event'
-        ) as mock_broadcast, patch(
-            'api.v1.agents.AGENT_MANAGER_AVAILABLE', False
+        with (
+            patch("api.ui_compatibility.v1_create_agent") as mock_create,
+            patch(
+                "api.ui_compatibility.broadcast_agent_created_event"
+            ) as mock_broadcast,
+            patch("api.v1.agents.AGENT_MANAGER_AVAILABLE", False),
         ):
             mock_create.return_value = mock_agent
             mock_broadcast.return_value = None
@@ -211,8 +208,8 @@ class TestAgentManagerIntegration:
             # Should still broadcast event
             mock_broadcast.assert_called_once()
 
-    @patch('api.ui_compatibility.v1_create_agent')
-    @patch('api.ui_compatibility.broadcast_agent_created_event')
+    @patch("api.ui_compatibility.v1_create_agent")
+    @patch("api.ui_compatibility.broadcast_agent_created_event")
     def test_agent_manager_error_handling(self, mock_broadcast, mock_create):
         """Test error handling when agent manager operations fail."""
         # Mock the V1 API response
@@ -229,8 +226,9 @@ class TestAgentManagerIntegration:
         mock_broadcast.return_value = None
 
         # Mock the agent manager to raise an exception
-        with patch('api.v1.agents.agent_manager') as mock_manager, patch(
-            'api.v1.agents.AGENT_MANAGER_AVAILABLE', True
+        with (
+            patch("api.v1.agents.agent_manager") as mock_manager,
+            patch("api.v1.agents.AGENT_MANAGER_AVAILABLE", True),
         ):
             mock_manager.create_agent.side_effect = Exception("Manager error")
 
@@ -270,7 +268,7 @@ class TestWebSocketEventIntegration:
         )
         self.headers = {"Authorization": f"Bearer {self.token}"}
 
-    @patch('api.v1.websocket.broadcast_agent_event')
+    @patch("api.v1.websocket.broadcast_agent_event")
     def test_agent_created_event_broadcast(self, mock_broadcast):
         """Test that agent creation broadcasts WebSocket event."""
         # Mock the broadcast function
@@ -287,10 +285,9 @@ class TestWebSocketEventIntegration:
             inference_count=0,
         )
 
-        with patch(
-            'api.ui_compatibility.v1_create_agent'
-        ) as mock_create, patch(
-            'api.v1.agents.AGENT_MANAGER_AVAILABLE', False
+        with (
+            patch("api.ui_compatibility.v1_create_agent") as mock_create,
+            patch("api.v1.agents.AGENT_MANAGER_AVAILABLE", False),
         ):
             mock_create.return_value = mock_agent
 
@@ -313,7 +310,7 @@ class TestWebSocketEventIntegration:
             assert "agent" in call_args.kwargs["data"]  # event data
             assert "timestamp" in call_args.kwargs["data"]
 
-    @patch('api.v1.websocket.broadcast_agent_event')
+    @patch("api.v1.websocket.broadcast_agent_event")
     def test_websocket_broadcast_error_handling(self, mock_broadcast):
         """Test graceful handling of WebSocket broadcast errors."""
         # Mock the broadcast function to raise an exception
@@ -330,10 +327,9 @@ class TestWebSocketEventIntegration:
             inference_count=0,
         )
 
-        with patch(
-            'api.ui_compatibility.v1_create_agent'
-        ) as mock_create, patch(
-            'api.v1.agents.AGENT_MANAGER_AVAILABLE', False
+        with (
+            patch("api.ui_compatibility.v1_create_agent") as mock_create,
+            patch("api.v1.agents.AGENT_MANAGER_AVAILABLE", False),
         ):
             mock_create.return_value = mock_agent
 

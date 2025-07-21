@@ -132,7 +132,9 @@ class SecureWebSocketClient:
         """Subscribe to specific event types."""
         await self.send_message("subscribe", {"event_types": event_types})
 
-    async def send_agent_command(self, agent_id: str, command: str, params: dict = None):
+    async def send_agent_command(
+        self, agent_id: str, command: str, params: dict = None
+    ):
         """Send a command to control an agent."""
         await self.send_message(
             "agent_command",
@@ -195,7 +197,9 @@ class SecureWebSocketClient:
         msg_type = message.get("type")
 
         if msg_type == "connection_established":
-            logger.info(f"Connected as {message.get('user')} with role {message.get('role')}")
+            logger.info(
+                f"Connected as {message.get('user')} with role {message.get('role')}"
+            )
 
         elif msg_type == "heartbeat_ack":
             self.last_heartbeat_ack = datetime.now()

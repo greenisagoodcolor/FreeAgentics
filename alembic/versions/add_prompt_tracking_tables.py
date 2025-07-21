@@ -154,9 +154,15 @@ def upgrade() -> None:
     )
 
     # Create indexes for knowledge_graph_updates
-    op.create_index("idx_kg_updates_prompt_id", "knowledge_graph_updates", ["prompt_id"])
-    op.create_index("idx_kg_updates_node_type", "knowledge_graph_updates", ["node_type"])
-    op.create_index("idx_kg_updates_created_at", "knowledge_graph_updates", ["created_at"])
+    op.create_index(
+        "idx_kg_updates_prompt_id", "knowledge_graph_updates", ["prompt_id"]
+    )
+    op.create_index(
+        "idx_kg_updates_node_type", "knowledge_graph_updates", ["node_type"]
+    )
+    op.create_index(
+        "idx_kg_updates_created_at", "knowledge_graph_updates", ["created_at"]
+    )
 
     # Create prompt_templates table
     op.create_table(

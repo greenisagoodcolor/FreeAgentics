@@ -221,7 +221,10 @@ class TestAgentMessageHandling:
         manager, agent_id = active_agent
 
         # Arrange
-        observation = {"type": "state_update", "data": {"sensor": "temperature", "value": 25.5}}
+        observation = {
+            "type": "state_update",
+            "data": {"sensor": "temperature", "value": 25.5},
+        }
 
         # Act
         result = manager.handle_observation(agent_id, observation)
@@ -344,7 +347,9 @@ class TestAgentErrorHandling:
 
         # Inject processing error
         agent = manager.get_agent(agent_id)
-        with patch.object(agent, "process_observation", side_effect=Exception("Process error")):
+        with patch.object(
+            agent, "process_observation", side_effect=Exception("Process error")
+        ):
             # Act - Should handle error gracefully
             manager.handle_observation(agent_id, {"type": "test", "data": {}})
 
@@ -394,7 +399,10 @@ class TestAgentSecurity:
         agent_id = secure_manager.create_agent(config)
 
         # Attempt to escalate privileges
-        malicious_obs = {"type": "update_config", "data": {"role": "admin", "permissions": ["all"]}}
+        malicious_obs = {
+            "type": "update_config",
+            "data": {"role": "admin", "permissions": ["all"]},
+        }
 
         # Act
         secure_manager.handle_observation(agent_id, malicious_obs)
@@ -412,7 +420,10 @@ class TestAgentSecurity:
         secure_manager.initialize_agent(agent_id)
 
         # Attempt to exhaust resources with large observation
-        huge_obs = {"type": "process", "data": {"array": [0] * 10_000_000}}  # 10M elements
+        huge_obs = {
+            "type": "process",
+            "data": {"array": [0] * 10_000_000},
+        }  # 10M elements
 
         # Act - Should handle without crashing
         try:

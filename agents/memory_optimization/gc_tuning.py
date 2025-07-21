@@ -76,9 +76,9 @@ class AdaptiveGCTuner:
 
         # GC statistics tracking
         self.stats = GCStats()
-        self._gc_history: List[Tuple[float, int, float]] = (
-            []
-        )  # (timestamp, gen, duration)
+        self._gc_history: List[
+            Tuple[float, int, float]
+        ] = []  # (timestamp, gen, duration)
         self._last_gc_time = 0.0
         self._lock = threading.RLock()
 
@@ -93,8 +93,7 @@ class AdaptiveGCTuner:
         gc.callbacks.append(self._gc_callback)
 
         logger.info(
-            f"Initialized adaptive GC tuner with thresholds:"
-            f" {self.current_thresholds}"
+            f"Initialized adaptive GC tuner with thresholds: {self.current_thresholds}"
         )
 
     def _apply_gc_settings(self):

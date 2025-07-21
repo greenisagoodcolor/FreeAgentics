@@ -12,6 +12,7 @@ from typing import Any, Dict, Optional
 try:
     import anthropic
     from anthropic import Anthropic
+
     ANTHROPIC_AVAILABLE = True
 except ImportError:
     ANTHROPIC_AVAILABLE = False
@@ -44,7 +45,9 @@ class AnthropicProvider(BaseProvider):
         }
 
         if not ANTHROPIC_AVAILABLE:
-            logger.warning("Anthropic library not available. Install with: pip install anthropic")
+            logger.warning(
+                "Anthropic library not available. Install with: pip install anthropic"
+            )
 
     def configure(self, credentials: ProviderCredentials, **kwargs: Any) -> bool:
         """Configure the Anthropic provider."""
@@ -73,12 +76,16 @@ class AnthropicProvider(BaseProvider):
 
             # Test connection
             health_result = self.test_connection()
-            if health_result.status in [ProviderStatus.HEALTHY,
-                ProviderStatus.DEGRADED]:
+            if health_result.status in [
+                ProviderStatus.HEALTHY,
+                ProviderStatus.DEGRADED,
+            ]:
                 logger.info("Anthropic provider configured successfully")
                 return True
             else:
-                logger.error(f"Anthropic provider unhealthy: {health_result.error_message}")
+                logger.error(
+                    f"Anthropic provider unhealthy: {health_result.error_message}"
+                )
                 return False
 
         except Exception as e:
@@ -93,7 +100,7 @@ class AnthropicProvider(BaseProvider):
             return HealthCheckResult(
                 status=ProviderStatus.OFFLINE,
                 latency_ms=0.0,
-                error_message="Anthropic client not configured"
+                error_message="Anthropic client not configured",
             )
 
         try:
@@ -104,20 +111,18 @@ class AnthropicProvider(BaseProvider):
             self.client.messages.create(
                 model="claude-3-haiku-20240307",  # Cheapest model
                 max_tokens=1,
-                messages=[{"role": "user", "content": "Hi"}]
+                messages=[{"role": "user", "content": "Hi"}],
             )
 
             latency_ms = (time.time() - start_time) * 1000
 
             # If we got here, the connection is working
-            available_models = {
-                model: True for model in self._model_pricing.keys()
-            }
+            available_models = {model: True for model in self._model_pricing.keys()}
 
             return HealthCheckResult(
                 status=ProviderStatus.HEALTHY,
                 latency_ms=latency_ms,
-                model_availability=available_models
+                model_availability=available_models,
             )
 
         except anthropic.AuthenticationError as e:
@@ -125,7 +130,7 @@ class AnthropicProvider(BaseProvider):
             return HealthCheckResult(
                 status=ProviderStatus.OFFLINE,
                 latency_ms=latency_ms,
-                error_message=f"Authentication failed: {str(e)}"
+                error_message=f"Authentication failed: {str(e)}",
             )
 
         except anthropic.RateLimitError as e:
@@ -134,7 +139,7 @@ class AnthropicProvider(BaseProvider):
                 status=ProviderStatus.DEGRADED,
                 latency_ms=latency_ms,
                 error_message=f"Rate limited: {str(e)}",
-                rate_limit_info={"status": "rate_limited"}
+                rate_limit_info={"status": "rate_limited"},
             )
 
         except Exception as e:
@@ -142,7 +147,7 @@ class AnthropicProvider(BaseProvider):
             return HealthCheckResult(
                 status=ProviderStatus.UNHEALTHY,
                 latency_ms=latency_ms,
-                error_message=f"Connection test failed: {str(e)}"
+                error_message=f"Connection test failed: {str(e)}",
             )
         finally:
             self._last_health_check = time.time()
@@ -184,7 +189,7 @@ class AnthropicProvider(BaseProvider):
             # Anthropic returns content as a list of content blocks
             text = ""
             for content_block in response.content:
-                if hasattr(content_block, 'text'):
+                if hasattr(content_block, "text"):
                     text += content_block.text
 
             # Extract usage information
@@ -200,7 +205,7 @@ class AnthropicProvider(BaseProvider):
                 input_tokens=input_tokens,
                 output_tokens=output_tokens,
                 cost=cost,
-                latency_ms=latency_ms
+                latency_ms=latency_ms,
             )
 
             return GenerationResponse(
@@ -211,7 +216,7 @@ class AnthropicProvider(BaseProvider):
                 output_tokens=output_tokens,
                 cost=cost,
                 latency_ms=latency_ms,
-                finish_reason=response.stop_reason
+                finish_reason=response.stop_reason,
             )
 
         except anthropic.AuthenticationError as e:
@@ -229,9 +234,7 @@ class AnthropicProvider(BaseProvider):
         except Exception as e:
             latency_ms = (time.time() - start_time) * 1000
             self._update_usage_metrics(
-                success=False,
-                latency_ms=latency_ms,
-                error_type="unknown"
+                success=False, latency_ms=latency_ms, error_type="unknown"
             )
             raise RuntimeError(f"Anthropic generation failed: {str(e)}")
 
@@ -239,8 +242,9 @@ class AnthropicProvider(BaseProvider):
         """Estimate cost for given token usage."""
         if model not in self._model_pricing:
             # Use Claude-3-haiku pricing as default (cheapest)
-            pricing = self._model_pricing.get("claude-3-haiku-20240307",
-                {"input": 0.00025, "output": 0.00125})
+            pricing = self._model_pricing.get(
+                "claude-3-haiku-20240307", {"input": 0.00025, "output": 0.00125}
+            )
         else:
             pricing = self._model_pricing[model]
 
@@ -257,27 +261,27 @@ class AnthropicProvider(BaseProvider):
                 "max_output_tokens": 4096,
                 "supports_function_calling": False,
                 "supports_streaming": True,
-                "pricing": self._model_pricing["claude-3-haiku-20240307"]
+                "pricing": self._model_pricing["claude-3-haiku-20240307"],
             },
             "claude-3-sonnet-20240229": {
                 "context_window": 200000,
                 "max_output_tokens": 4096,
                 "supports_function_calling": False,
                 "supports_streaming": True,
-                "pricing": self._model_pricing["claude-3-sonnet-20240229"]
+                "pricing": self._model_pricing["claude-3-sonnet-20240229"],
             },
             "claude-3-opus-20240229": {
                 "context_window": 200000,
                 "max_output_tokens": 4096,
                 "supports_function_calling": False,
                 "supports_streaming": True,
-                "pricing": self._model_pricing["claude-3-opus-20240229"]
+                "pricing": self._model_pricing["claude-3-opus-20240229"],
             },
             "claude-3-5-sonnet-20241022": {
                 "context_window": 200000,
                 "max_output_tokens": 8192,
                 "supports_function_calling": True,
                 "supports_streaming": True,
-                "pricing": self._model_pricing["claude-3-5-sonnet-20241022"]
-            }
+                "pricing": self._model_pricing["claude-3-5-sonnet-20241022"],
+            },
         }

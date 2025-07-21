@@ -121,7 +121,9 @@ class TestActiveInferenceReal:
 
         # Check C vector (preferences)
         assert agent.pymdp_agent.C[0].shape == (5,)  # 5 observation types
-        assert agent.pymdp_agent.C[0][2] > agent.pymdp_agent.C[0][0]  # Prefer goals over empty
+        assert (
+            agent.pymdp_agent.C[0][2] > agent.pymdp_agent.C[0][0]
+        )  # Prefer goals over empty
 
         # Check D vector (initial beliefs)
         assert agent.pymdp_agent.D[0].shape == (9,)  # 9 states
@@ -134,7 +136,9 @@ class TestActiveInferenceReal:
         # Create observation
         observation = {
             "position": [1, 1],
-            "surroundings": np.array([[0, 0, 0], [0, 0, 0], [0, 1, 0]]),  # Goal to the south
+            "surroundings": np.array(
+                [[0, 0, 0], [0, 0, 0], [0, 1, 0]]
+            ),  # Goal to the south
         }
 
         # Perceive
@@ -182,7 +186,9 @@ class TestActiveInferenceReal:
         # Set up observation
         observation = {
             "position": [1, 1],
-            "surroundings": np.array([[0, 0, 1], [0, 0, 0], [0, 0, 0]]),  # Goal to northeast
+            "surroundings": np.array(
+                [[0, 0, 1], [0, 0, 0], [0, 0, 0]]
+            ),  # Goal to northeast
         }
 
         agent.perceive(observation)
@@ -264,13 +270,15 @@ class TestActiveInferenceReal:
         set(actions)
 
         # Check that exploration occurred (should visit multiple positions)
-        assert (
-            len(unique_positions) > 1
-        ), f"Agent should explore multiple positions, visited: {unique_positions}"
+        assert len(unique_positions) > 1, (
+            f"Agent should explore multiple positions, visited: {unique_positions}"
+        )
 
         # Check that different actions were taken
         movement_actions = [a for a in actions if a in ["up", "down", "left", "right"]]
-        assert len(movement_actions) > 0, f"Agent should take movement actions, got: {actions}"
+        assert len(movement_actions) > 0, (
+            f"Agent should take movement actions, got: {actions}"
+        )
 
     def test_pragmatic_value_goal_seeking(self):
         """Test agent seeks goals (pragmatic value)."""

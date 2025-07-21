@@ -75,9 +75,7 @@ class TestPromptPipelineIntegration:
         processor.websocket_callback = capture_event
 
         # Mock conversation query
-        mock_db_session.execute.return_value.scalar_one_or_none.return_value = (
-            None
-        )
+        mock_db_session.execute.return_value.scalar_one_or_none.return_value = None
 
         # Create request
         request = PromptRequest(
@@ -86,10 +84,8 @@ class TestPromptPipelineIntegration:
         )
 
         # Process prompt
-        with patch('api.v1.prompts.get_db', return_value=mock_db_session):
-            with patch(
-                'api.v1.prompts.get_prompt_processor', return_value=processor
-            ):
+        with patch("api.v1.prompts.get_db", return_value=mock_db_session):
+            with patch("api.v1.prompts.get_prompt_processor", return_value=processor):
                 response = await process_prompt(
                     request=request,
                     current_user=mock_current_user,
@@ -145,18 +141,16 @@ class TestPromptPipelineIntegration:
         processor.gmn_generator.prompt_to_gmn = mock_generate_gmn
 
         # Mock conversation query
-        mock_db_session.execute.return_value.scalar_one_or_none.return_value = (
-            None
-        )
+        mock_db_session.execute.return_value.scalar_one_or_none.return_value = None
 
         # Create request
         request = PromptRequest(prompt="Create an invalid agent")
 
         # Process prompt and expect failure
         with pytest.raises(Exception):
-            with patch('api.v1.prompts.get_db', return_value=mock_db_session):
+            with patch("api.v1.prompts.get_db", return_value=mock_db_session):
                 with patch(
-                    'api.v1.prompts.get_prompt_processor',
+                    "api.v1.prompts.get_prompt_processor",
                     return_value=processor,
                 ):
                     await process_prompt(
@@ -169,10 +163,7 @@ class TestPromptPipelineIntegration:
         # Verify failure events
         event_types = [e["event_type"] for e in events_list]
         assert "pipeline_started" in event_types
-        assert (
-            "pipeline_failed" in event_types
-            or "validation_failed" in event_types
-        )
+        assert "pipeline_failed" in event_types or "validation_failed" in event_types
 
         # Verify no success events
         assert "pipeline_completed" not in event_types
@@ -205,10 +196,8 @@ class TestPromptPipelineIntegration:
         )
 
         # Process prompt
-        with patch('api.v1.prompts.get_db', return_value=mock_db_session):
-            with patch(
-                'api.v1.prompts.get_prompt_processor', return_value=processor
-            ):
+        with patch("api.v1.prompts.get_db", return_value=mock_db_session):
+            with patch("api.v1.prompts.get_prompt_processor", return_value=processor):
                 response = await process_prompt(
                     request=request,
                     current_user=mock_current_user,
@@ -240,9 +229,7 @@ class TestPromptPipelineIntegration:
         processor.websocket_callback = capture_event
 
         # Mock conversation query
-        mock_db_session.execute.return_value.scalar_one_or_none.return_value = (
-            None
-        )
+        mock_db_session.execute.return_value.scalar_one_or_none.return_value = None
 
         # Create request
         request = PromptRequest(prompt="Create a simple explorer agent")
@@ -250,10 +237,8 @@ class TestPromptPipelineIntegration:
         # Time the processing
         start_time = asyncio.get_event_loop().time()
 
-        with patch('api.v1.prompts.get_db', return_value=mock_db_session):
-            with patch(
-                'api.v1.prompts.get_prompt_processor', return_value=processor
-            ):
+        with patch("api.v1.prompts.get_db", return_value=mock_db_session):
+            with patch("api.v1.prompts.get_prompt_processor", return_value=processor):
                 response = await process_prompt(
                     request=request,
                     current_user=mock_current_user,
@@ -287,18 +272,14 @@ class TestPromptPipelineIntegration:
         processor.websocket_callback = capture_event
 
         # Mock conversation query
-        mock_db_session.execute.return_value.scalar_one_or_none.return_value = (
-            None
-        )
+        mock_db_session.execute.return_value.scalar_one_or_none.return_value = None
 
         # Create request
         request = PromptRequest(prompt="Create a trader agent")
 
         # Process prompt
-        with patch('api.v1.prompts.get_db', return_value=mock_db_session):
-            with patch(
-                'api.v1.prompts.get_prompt_processor', return_value=processor
-            ):
+        with patch("api.v1.prompts.get_db", return_value=mock_db_session):
+            with patch("api.v1.prompts.get_prompt_processor", return_value=processor):
                 await process_prompt(
                     request=request,
                     current_user=mock_current_user,
@@ -350,18 +331,14 @@ class TestPromptPipelineIntegration:
         processor._update_knowledge_graph = mock_update_kg
 
         # Mock conversation query
-        mock_db_session.execute.return_value.scalar_one_or_none.return_value = (
-            None
-        )
+        mock_db_session.execute.return_value.scalar_one_or_none.return_value = None
 
         # Create request
         request = PromptRequest(prompt="Create an agent with KG issues")
 
         # Process prompt
-        with patch('api.v1.prompts.get_db', return_value=mock_db_session):
-            with patch(
-                'api.v1.prompts.get_prompt_processor', return_value=processor
-            ):
+        with patch("api.v1.prompts.get_db", return_value=mock_db_session):
+            with patch("api.v1.prompts.get_prompt_processor", return_value=processor):
                 response = await process_prompt(
                     request=request,
                     current_user=mock_current_user,
@@ -372,15 +349,11 @@ class TestPromptPipelineIntegration:
         # Should still succeed despite KG update issues
         assert response.status == "success"
         assert response.agent_id
-        assert (
-            len(response.knowledge_graph_updates) == 0
-        )  # No updates due to failure
+        assert len(response.knowledge_graph_updates) == 0  # No updates due to failure
 
         # Verify events show KG update with 0 updates
         kg_event = next(
-            e
-            for e in events_list
-            if e["event_type"] == "knowledge_graph_updated"
+            e for e in events_list if e["event_type"] == "knowledge_graph_updated"
         )
         assert kg_event["data"]["updates_count"] == 0
         assert kg_event["data"]["nodes_added"] == 0
@@ -397,9 +370,7 @@ class TestPromptPipelineIntegration:
         processor = get_prompt_processor()
 
         # Mock conversation query
-        mock_db_session.execute.return_value.scalar_one_or_none.return_value = (
-            None
-        )
+        mock_db_session.execute.return_value.scalar_one_or_none.return_value = None
 
         # Create request
         request = PromptRequest(prompt="Create a monitored agent")
@@ -411,10 +382,8 @@ class TestPromptPipelineIntegration:
         )
 
         # Process prompt
-        with patch('api.v1.prompts.get_db', return_value=mock_db_session):
-            with patch(
-                'api.v1.prompts.get_prompt_processor', return_value=processor
-            ):
+        with patch("api.v1.prompts.get_db", return_value=mock_db_session):
+            with patch("api.v1.prompts.get_prompt_processor", return_value=processor):
                 await process_prompt(
                     request=request,
                     current_user=mock_current_user,
@@ -441,14 +410,10 @@ class TestPromptPipelineIntegration:
         processor.websocket_callback = capture_event
 
         # Mock conversation query
-        mock_db_session.execute.return_value.scalar_one_or_none.return_value = (
-            None
-        )
+        mock_db_session.execute.return_value.scalar_one_or_none.return_value = None
 
         # Create multiple requests
-        requests = [
-            PromptRequest(prompt=f"Create agent {i}") for i in range(3)
-        ]
+        requests = [PromptRequest(prompt=f"Create agent {i}") for i in range(3)]
 
         # Process concurrently
         tasks = []
@@ -461,10 +426,8 @@ class TestPromptPipelineIntegration:
             )
             tasks.append(task)
 
-        with patch('api.v1.prompts.get_db', return_value=mock_db_session):
-            with patch(
-                'api.v1.prompts.get_prompt_processor', return_value=processor
-            ):
+        with patch("api.v1.prompts.get_db", return_value=mock_db_session):
+            with patch("api.v1.prompts.get_prompt_processor", return_value=processor):
                 responses = await asyncio.gather(*tasks)
 
         # Verify all succeeded

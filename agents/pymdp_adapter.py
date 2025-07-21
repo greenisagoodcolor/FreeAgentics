@@ -278,7 +278,7 @@ class PyMDPCompatibilityAdapter:
         self._validate_beliefs_format(beliefs_list)
 
         logger.debug(
-            f"Validated infer_states return: {len(beliefs_list)} belief" f" arrays"
+            f"Validated infer_states return: {len(beliefs_list)} belief arrays"
         )
         return beliefs_list
 

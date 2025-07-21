@@ -161,10 +161,14 @@ class TestAuthenticationAttacks:
         for username_payload, password in nosql_payloads:
             # Convert payload to string for testing
             username = (
-                str(username_payload) if isinstance(username_payload, dict) else username_payload
+                str(username_payload)
+                if isinstance(username_payload, dict)
+                else username_payload
             )
             result = auth_manager.authenticate_user(username, password)
-            assert result is None, f"NoSQL injection successful with payload: {username_payload}"
+            assert result is None, (
+                f"NoSQL injection successful with payload: {username_payload}"
+            )
 
     def test_credential_stuffing_attack(self, auth_manager):
         """Test credential stuffing attack detection and prevention."""
@@ -187,9 +191,9 @@ class TestAuthenticationAttacks:
                 failed_attempts += 1
 
         # All attempts should fail
-        assert failed_attempts == len(
-            leaked_credentials
-        ), "Credential stuffing partially successful"
+        assert failed_attempts == len(leaked_credentials), (
+            "Credential stuffing partially successful"
+        )
 
     def test_password_spraying_attack(self, auth_manager):
         """Test password spraying attack detection."""
@@ -222,9 +226,9 @@ class TestAuthenticationAttacks:
                 if result is not None:
                     successful_attempts += 1
 
-        assert (
-            successful_attempts == 0
-        ), f"Password spraying successful: {successful_attempts} accounts compromised"
+        assert successful_attempts == 0, (
+            f"Password spraying successful: {successful_attempts} accounts compromised"
+        )
 
     def test_session_fixation_attack(self, auth_manager):
         """Test session fixation vulnerability."""
@@ -244,9 +248,9 @@ class TestAuthenticationAttacks:
         new_session = auth_manager.create_session("session_test")
 
         # Sessions should be different (regenerated after auth)
-        assert (
-            initial_session != new_session
-        ), "Session fixation vulnerability: session not regenerated"
+        assert initial_session != new_session, (
+            "Session fixation vulnerability: session not regenerated"
+        )
 
     def test_session_hijacking_prevention(self, auth_manager):
         """Test session hijacking prevention mechanisms."""
@@ -320,7 +324,9 @@ class TestAuthenticationAttacks:
 
         # Time difference should be minimal (< 10ms)
         time_diff = abs(avg_correct - avg_incorrect)
-        assert time_diff < 0.01, f"Timing attack possible: {time_diff*1000:.2f}ms difference"
+        assert time_diff < 0.01, (
+            f"Timing attack possible: {time_diff * 1000:.2f}ms difference"
+        )
 
     def test_brute_force_protection(self, auth_manager):
         """Test brute force attack protection."""
@@ -342,9 +348,9 @@ class TestAuthenticationAttacks:
                 failed_attempts += 1
 
             # Check if account gets locked after certain attempts
-            if hasattr(auth_manager, "is_account_locked") and auth_manager.is_account_locked(
-                "brute_target"
-            ):
+            if hasattr(
+                auth_manager, "is_account_locked"
+            ) and auth_manager.is_account_locked("brute_target"):
                 locked_out = True
                 break
 
@@ -394,7 +400,9 @@ class TestAuthenticationAttacks:
             # Attempt with None password
             lambda: auth_manager.authenticate_user("strong_auth_user", None),
             # Attempt to bypass password check
-            lambda: auth_manager.authenticate_user("strong_auth_user", {"bypass": True}),
+            lambda: auth_manager.authenticate_user(
+                "strong_auth_user", {"bypass": True}
+            ),
         ]
 
         for attempt in weak_attempts:
@@ -452,10 +460,12 @@ class TestAuthenticationAttacks:
                 assert auth_manager.validate_reset_token(reset_token) is True
 
                 # Test expired token (would need to mock time)
-                with patch("time.time", return_value=time.time() + 3700):  # 1 hour + later
-                    assert (
-                        auth_manager.validate_reset_token(reset_token) is False
-                    ), "Reset token doesn't expire"
+                with patch(
+                    "time.time", return_value=time.time() + 3700
+                ):  # 1 hour + later
+                    assert auth_manager.validate_reset_token(reset_token) is False, (
+                        "Reset token doesn't expire"
+                    )
 
     def test_concurrent_authentication_race_condition(self, auth_manager):
         """Test race conditions in concurrent authentication."""
@@ -482,7 +492,9 @@ class TestAuthenticationAttacks:
         # All attempts should succeed without errors
         assert len(errors) == 0, f"Race condition errors: {errors}"
         assert len(results) == 10, "Not all concurrent authentications completed"
-        assert all(r is not None for r in results), "Some concurrent authentications failed"
+        assert all(r is not None for r in results), (
+            "Some concurrent authentications failed"
+        )
 
     def test_authentication_state_manipulation(self, auth_manager):
         """Test authentication state manipulation attacks."""
@@ -526,7 +538,9 @@ class TestAuthenticationAttacks:
             # Test concurrent async authentication
             tasks = []
             for i in range(10):
-                task = auth_manager.authenticate_user_async("async_user", "AsyncPass123!")
+                task = auth_manager.authenticate_user_async(
+                    "async_user", "AsyncPass123!"
+                )
                 tasks.append(task)
 
             results = await asyncio.gather(*tasks, return_exceptions=True)

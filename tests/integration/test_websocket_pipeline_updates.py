@@ -60,21 +60,17 @@ class TestWebSocketPipelineUpdates:
     """Test WebSocket updates during pipeline processing."""
 
     @pytest.mark.asyncio
-    async def test_websocket_callback_broadcasts_events(
-        self, connection_manager
-    ):
+    async def test_websocket_callback_broadcasts_events(self, connection_manager):
         """Test that the WebSocket callback properly broadcasts pipeline events."""
         # Track broadcast calls
         broadcast_calls = []
 
         async def mock_broadcast(message, event_type=None):
-            broadcast_calls.append(
-                {"message": message, "event_type": event_type}
-            )
+            broadcast_calls.append({"message": message, "event_type": event_type})
 
         # Patch broadcast methods
-        with patch('api.v1.prompts.broadcast_system_event', mock_broadcast):
-            with patch('api.v1.prompts.broadcast_agent_event', mock_broadcast):
+        with patch("api.v1.prompts.broadcast_system_event", mock_broadcast):
+            with patch("api.v1.prompts.broadcast_agent_event", mock_broadcast):
                 # Test pipeline started event
                 await websocket_pipeline_callback(
                     "pipeline_started",
@@ -110,9 +106,7 @@ class TestWebSocketPipelineUpdates:
 
         # Check specific events
         event_types = [
-            call["event_type"]
-            for call in broadcast_calls
-            if call["event_type"]
+            call["event_type"] for call in broadcast_calls if call["event_type"]
         ]
         assert "pipeline:pipeline_started" in event_types
         assert any("knowledge_graph:updated" in et for et in event_types if et)
@@ -161,9 +155,7 @@ class TestWebSocketPipelineUpdates:
             ws = AsyncMock(spec=WebSocket)
             ws.send_json = AsyncMock()
             client_id = f"client{i}"
-            await connection_manager.connect(
-                ws, client_id, {"user_id": f"user{i}"}
-            )
+            await connection_manager.connect(ws, client_id, {"user_id": f"user{i}"})
             clients.append((client_id, ws))
 
         # Subscribe all to same pipeline event type
@@ -210,10 +202,7 @@ class TestWebSocketPipelineUpdates:
         )
 
         assert pipeline_info["prompt_id"] == prompt_id
-        assert (
-            pipeline_info["current_stage"]
-            == PipelineStage.INITIALIZATION.value
-        )
+        assert pipeline_info["current_stage"] == PipelineStage.INITIALIZATION.value
 
         # Update stages
         stage_updates = [
@@ -226,9 +215,7 @@ class TestWebSocketPipelineUpdates:
         ]
 
         for stage, message in stage_updates:
-            update_info = pipeline_monitor.update_stage(
-                prompt_id, stage, message
-            )
+            update_info = pipeline_monitor.update_stage(prompt_id, stage, message)
             assert update_info["current_stage"] == stage.value
 
         # Complete pipeline
@@ -267,9 +254,7 @@ class TestWebSocketPipelineUpdates:
             "validation_error",
         )
 
-        assert (
-            error_info["error"] == "GMN validation failed: missing state nodes"
-        )
+        assert error_info["error"] == "GMN validation failed: missing state nodes"
         assert error_info["stage"] == PipelineStage.GMN_VALIDATION.value
 
         # Verify pipeline marked as failed
@@ -321,9 +306,7 @@ class TestWebSocketPipelineUpdates:
         connection_manager.subscribe(client_id, "pipeline:updates")
 
         # Verify subscriptions
-        assert client_id in pipeline_monitor.get_pipeline_subscribers(
-            prompt_id
-        )
+        assert client_id in pipeline_monitor.get_pipeline_subscribers(prompt_id)
         assert client_id in connection_manager.subscriptions.get(
             "pipeline:updates", set()
         )
@@ -334,9 +317,7 @@ class TestWebSocketPipelineUpdates:
 
         # Verify cleanup
         assert client_id not in connection_manager.active_connections
-        assert client_id not in pipeline_monitor.get_pipeline_subscribers(
-            prompt_id
-        )
+        assert client_id not in pipeline_monitor.get_pipeline_subscribers(prompt_id)
 
     @pytest.mark.asyncio
     async def test_pipeline_stage_timing_calculation(self):

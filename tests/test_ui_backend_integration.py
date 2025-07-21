@@ -79,18 +79,15 @@ class TestUIBackendIntegration:
             template="basic-explorer",
             status="active",
             created_at=datetime.now(),
-            parameters={
-                "description": "An explorer agent that searches for resources"
-            },
+            parameters={"description": "An explorer agent that searches for resources"},
             inference_count=0,
         )
 
         # Mock the database operations
-        with patch(
-            'api.ui_compatibility.v1_create_agent'
-        ) as mock_create, patch(
-            'api.v1.agents.agent_manager'
-        ) as mock_agent_manager:
+        with (
+            patch("api.ui_compatibility.v1_create_agent") as mock_create,
+            patch("api.v1.agents.agent_manager") as mock_agent_manager,
+        ):
             # Configure the mock to return our test agent
             mock_create.return_value = mock_agent
             mock_agent_manager.agents = {}
@@ -114,9 +111,7 @@ class TestUIBackendIntegration:
             assert "name" in agent_data
             assert "type" in agent_data
             assert "status" in agent_data
-            assert (
-                agent_data["status"] == "active"
-            )  # Should be immediately active
+            assert agent_data["status"] == "active"  # Should be immediately active
 
             # Verify the backend was called with correct parameters
             assert mock_create.called
@@ -160,7 +155,7 @@ class TestUIBackendIntegration:
         ]
 
         # Mock the V1 list endpoint
-        with patch('api.ui_compatibility.v1_list_agents') as mock_list:
+        with patch("api.ui_compatibility.v1_list_agents") as mock_list:
             mock_list.return_value = mock_agents
 
             # UI calls simple endpoint
@@ -180,9 +175,7 @@ class TestUIBackendIntegration:
             assert "name" in agent
             assert "type" in agent
             assert "status" in agent
-            assert (
-                agent["type"] == "explorer"
-            )  # Should be derived from description
+            assert agent["type"] == "explorer"  # Should be derived from description
 
     @pytest.mark.asyncio
     async def test_websocket_agent_events(self):
@@ -192,14 +185,12 @@ class TestUIBackendIntegration:
         # This test is more complex, but shows the integration
         # For now, we'll use a mock WebSocket connection
 
-        with patch('api.v1.websocket.manager') as mock_manager:
+        with patch("api.v1.websocket.manager") as mock_manager:
             mock_manager.broadcast = AsyncMock()
 
             # Create agent via API
             ui_request = {"description": "Test agent"}
-            self.client.post(
-                "/api/agents", json=ui_request, headers=self.headers
-            )
+            self.client.post("/api/agents", json=ui_request, headers=self.headers)
 
             # Should broadcast agent creation event
             mock_manager.broadcast.assert_called_once()
@@ -237,9 +228,7 @@ class TestUIBackendIntegration:
         assert update_response.status_code == 200
 
         # Verify status changed
-        get_response = self.client.get(
-            f"/api/agents/{agent_id}", headers=self.headers
-        )
+        get_response = self.client.get(f"/api/agents/{agent_id}", headers=self.headers)
         assert get_response.status_code == 200
         assert get_response.json()["status"] == "idle"
 
@@ -264,9 +253,7 @@ class TestUIBackendIntegration:
         assert delete_response.status_code == 200
 
         # Verify agent is gone
-        get_response = self.client.get(
-            f"/api/agents/{agent_id}", headers=self.headers
-        )
+        get_response = self.client.get(f"/api/agents/{agent_id}", headers=self.headers)
         assert get_response.status_code == 404
 
         # Agent should be removed from agent manager
@@ -285,7 +272,7 @@ class TestAgentManagerIntegration:
         from api.v1.agents import agent_manager
 
         # Mock the agent manager to track calls
-        with patch.object(agent_manager, 'create_agent') as mock_create:
+        with patch.object(agent_manager, "create_agent") as mock_create:
             mock_create.return_value = "test_agent_id"
 
             client = TestClient(app)
@@ -307,9 +294,7 @@ class TestAgentManagerIntegration:
 
             # Call API
             ui_request = {"description": "Test explorer agent"}
-            client.post(
-                "/api/agents", json=ui_request, headers=headers
-            )
+            client.post("/api/agents", json=ui_request, headers=headers)
 
             # Should call agent manager with correct parameters
             mock_create.assert_called_once()
@@ -324,11 +309,10 @@ class TestAgentManagerIntegration:
 
         from api.v1.agents import agent_manager
 
-        with patch.object(
-            agent_manager, 'start_agent'
-        ) as mock_start, patch.object(
-            agent_manager, 'stop_agent'
-        ) as mock_stop:
+        with (
+            patch.object(agent_manager, "start_agent") as mock_start,
+            patch.object(agent_manager, "stop_agent") as mock_stop,
+        ):
             client = TestClient(app)
 
             # Create test token

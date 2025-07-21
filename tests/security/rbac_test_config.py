@@ -462,7 +462,11 @@ position_belief -> position: depends_on
     def should_have_access(cls, role: UserRole, operation: str) -> bool:
         """Check if a role should have access to an operation."""
         user_config = cls.TEST_USERS.get(role.value)
-        return user_config.should_have_access.get(operation, False) if user_config else False
+        return (
+            user_config.should_have_access.get(operation, False)
+            if user_config
+            else False
+        )
 
     @classmethod
     def get_agent_test_data(cls, agent_type: str) -> Dict:

@@ -66,7 +66,9 @@ class TestAgentManagerCreateAgentInterface:
         # Active inference type is now supported
         agent_id = self.manager.create_agent("active_inference", "TestAgent")
         assert agent_id is not None
-        assert agent_id.startswith("ai_agent_")  # Active inference agents get "ai_agent_" prefix
+        assert agent_id.startswith(
+            "ai_agent_"
+        )  # Active inference agents get "ai_agent_" prefix
 
     def test_create_agent_current_working_interface(self):
         """

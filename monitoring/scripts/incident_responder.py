@@ -23,7 +23,7 @@ import redis
 # Setup logging
 logging.basicConfig(
     level=logging.INFO,
-    format='%(asctime)s - %(name)s - %(levelname)s - %(message)s',
+    format="%(asctime)s - %(name)s - %(levelname)s - %(message)s",
 )
 logger = logging.getLogger(__name__)
 
@@ -34,7 +34,7 @@ class IncidentResponder:
     def __init__(self, config_path: str):
         self.config = self._load_config(config_path)
         self.redis_client = redis.Redis(
-            host=os.getenv('REDIS_HOST', 'localhost'),
+            host=os.getenv("REDIS_HOST", "localhost"),
             port=6379,
             decode_responses=True,
         )
@@ -50,7 +50,7 @@ class IncidentResponder:
 
     def _load_config(self, config_path: str) -> Dict[str, Any]:
         """Load incident response configuration."""
-        with open(config_path, 'r') as f:
+        with open(config_path, "r") as f:
             return yaml.safe_load(f)
 
     async def start(self):
@@ -61,12 +61,12 @@ class IncidentResponder:
         try:
             # Subscribe to alerts via Redis
             pubsub = self.redis_client.pubsub()
-            pubsub.subscribe('freeagentics:alerts')
+            pubsub.subscribe("freeagentics:alerts")
 
             # Process alerts
             for message in pubsub.listen():
-                if message['type'] == 'message':
-                    await self.handle_alert(json.loads(message['data']))
+                if message["type"] == "message":
+                    await self.handle_alert(json.loads(message["data"]))
 
         except KeyboardInterrupt:
             logger.info("Incident responder stopped by user")
@@ -82,8 +82,8 @@ class IncidentResponder:
 
     async def handle_alert(self, alert: Dict[str, Any]):
         """Handle incoming alert and execute appropriate playbook."""
-        alert_type = alert.get('labels', {}).get('alertname')
-        severity = alert.get('labels', {}).get('severity', 'warning')
+        alert_type = alert.get("labels", {}).get("alertname")
+        severity = alert.get("labels", {}).get("severity", "warning")
 
         logger.info(f"Received alert: {alert_type} (severity: {severity})")
 
@@ -101,12 +101,12 @@ class IncidentResponder:
 
         # Create incident
         incident = {
-            'id': f"INC-{int(time.time())}",
-            'alert': alert,
-            'playbook': playbook,
-            'started_at': datetime.utcnow(),
-            'status': 'active',
-            'steps_completed': [],
+            "id": f"INC-{int(time.time())}",
+            "alert": alert,
+            "playbook": playbook,
+            "started_at": datetime.utcnow(),
+            "status": "active",
+            "steps_completed": [],
         }
 
         self.active_incidents[incident_key] = incident
@@ -116,13 +116,13 @@ class IncidentResponder:
 
     def find_playbook(self, alert: Dict[str, Any]) -> Optional[Dict[str, Any]]:
         """Find matching playbook for alert."""
-        alert_name = alert.get('labels', {}).get('alertname')
+        alert_name = alert.get("labels", {}).get("alertname")
 
         # Match by alert name
-        for playbook_name, playbook in self.config['playbooks'].items():
-            triggers = playbook.get('triggers', [])
+        for playbook_name, playbook in self.config["playbooks"].items():
+            triggers = playbook.get("triggers", [])
             for trigger in triggers:
-                if 'alert' in trigger and trigger['alert'] == alert_name:
+                if "alert" in trigger and trigger["alert"] == alert_name:
                     return playbook
 
         # Match by metric conditions
@@ -132,18 +132,16 @@ class IncidentResponder:
 
     async def execute_playbook(self, incident: Dict[str, Any]):
         """Execute incident response playbook."""
-        playbook = incident['playbook']
+        playbook = incident["playbook"]
         logger.info(
             f"Executing playbook: {playbook['name']} for incident {incident['id']}"
         )
 
         try:
             # Execute each step
-            for step in playbook['steps']:
+            for step in playbook["steps"]:
                 if not await self.should_execute_step(step, incident):
-                    logger.info(
-                        f"Skipping step: {step['name']} (condition not met)"
-                    )
+                    logger.info(f"Skipping step: {step['name']} (condition not met)")
                     continue
 
                 logger.info(f"Executing step: {step['name']}")
@@ -151,31 +149,29 @@ class IncidentResponder:
                 success = await self.execute_step(step, incident)
 
                 if success:
-                    incident['steps_completed'].append(step['name'])
+                    incident["steps_completed"].append(step["name"])
                 else:
                     logger.error(f"Step failed: {step['name']}")
-                    if step.get('required', True):
-                        logger.error(
-                            "Required step failed, aborting playbook"
-                        )
+                    if step.get("required", True):
+                        logger.error("Required step failed, aborting playbook")
                         break
 
                 # Wait if specified
-                if 'wait' in step:
-                    wait_time = self.parse_duration(step['wait'])
+                if "wait" in step:
+                    wait_time = self.parse_duration(step["wait"])
                     logger.info(f"Waiting {wait_time}s before next step")
                     await asyncio.sleep(wait_time)
 
             # Mark incident as resolved
-            incident['status'] = 'resolved'
-            incident['resolved_at'] = datetime.utcnow()
+            incident["status"] = "resolved"
+            incident["resolved_at"] = datetime.utcnow()
 
             logger.info(f"Playbook completed for incident {incident['id']}")
 
         except Exception as e:
             logger.error(f"Error executing playbook: {e}")
-            incident['status'] = 'failed'
-            incident['error'] = str(e)
+            incident["status"] = "failed"
+            incident["error"] = str(e)
 
         finally:
             # Remove from active incidents
@@ -186,17 +182,17 @@ class IncidentResponder:
         self, step: Dict[str, Any], incident: Dict[str, Any]
     ) -> bool:
         """Check if step should be executed based on conditions."""
-        if 'condition' not in step:
+        if "condition" not in step:
             return True
 
-        condition = step['condition']
+        condition = step["condition"]
 
         # Simple condition evaluation
-        if condition == 'memory_still_high':
+        if condition == "memory_still_high":
             return await self.check_memory_still_high()
-        elif condition == 'primary_coordinator_unhealthy':
+        elif condition == "primary_coordinator_unhealthy":
             return await self.check_coordinator_health()
-        elif condition == 'recent_deployment < 30m':
+        elif condition == "recent_deployment < 30m":
             return await self.check_recent_deployment(30)
 
         return True
@@ -205,18 +201,18 @@ class IncidentResponder:
         self, step: Dict[str, Any], incident: Dict[str, Any]
     ) -> bool:
         """Execute a single playbook step."""
-        step_type = step['type']
+        step_type = step["type"]
 
         try:
-            if step_type == 'diagnostic':
+            if step_type == "diagnostic":
                 return await self.execute_diagnostic_step(step)
-            elif step_type == 'remediation':
+            elif step_type == "remediation":
                 return await self.execute_remediation_step(step)
-            elif step_type == 'scaling':
+            elif step_type == "scaling":
                 return await self.execute_scaling_step(step)
-            elif step_type == 'notification':
+            elif step_type == "notification":
                 return await self.execute_notification_step(step, incident)
-            elif step_type == 'protection':
+            elif step_type == "protection":
                 return await self.execute_protection_step(step)
             else:
                 logger.warning(f"Unknown step type: {step_type}")
@@ -228,12 +224,12 @@ class IncidentResponder:
 
     async def execute_diagnostic_step(self, step: Dict[str, Any]) -> bool:
         """Execute diagnostic actions."""
-        for action in step['actions']:
-            command = action['command']
+        for action in step["actions"]:
+            command = action["command"]
 
-            if command == 'collect_memory_profile':
+            if command == "collect_memory_profile":
                 await self.collect_memory_profile()
-            elif command == 'list_top_memory_consumers':
+            elif command == "list_top_memory_consumers":
                 await self.list_top_memory_consumers()
             else:
                 logger.warning(f"Unknown diagnostic command: {command}")
@@ -242,19 +238,19 @@ class IncidentResponder:
 
     async def execute_remediation_step(self, step: Dict[str, Any]) -> bool:
         """Execute remediation actions."""
-        for action in step['actions']:
-            command = action['command']
-            params = action.get('params', {})
+        for action in step["actions"]:
+            command = action["command"]
+            params = action.get("params", {})
 
-            if command == 'trigger_gc_all_agents':
+            if command == "trigger_gc_all_agents":
                 await self.trigger_gc_all_agents(params)
-            elif command == 'kill_agents_above_memory_threshold':
+            elif command == "kill_agents_above_memory_threshold":
                 await self.kill_high_memory_agents(params)
-            elif command == 'clear_redis_cache':
+            elif command == "clear_redis_cache":
                 await self.clear_redis_cache(params)
-            elif command == 'kill_idle_db_connections':
+            elif command == "kill_idle_db_connections":
                 await self.kill_idle_db_connections(params)
-            elif command == 'reset_connection_pool':
+            elif command == "reset_connection_pool":
                 await self.reset_connection_pool(params)
             else:
                 logger.warning(f"Unknown remediation command: {command}")
@@ -263,13 +259,13 @@ class IncidentResponder:
 
     async def execute_scaling_step(self, step: Dict[str, Any]) -> bool:
         """Execute scaling actions."""
-        for action in step['actions']:
-            command = action['command']
-            params = action.get('params', {})
+        for action in step["actions"]:
+            command = action["command"]
+            params = action.get("params", {})
 
-            if command == 'scale_out_agent_pool':
+            if command == "scale_out_agent_pool":
                 await self.scale_out_agents(params)
-            elif command == 'scale_api_servers':
+            elif command == "scale_api_servers":
                 await self.scale_api_servers(params)
             else:
                 logger.warning(f"Unknown scaling command: {command}")
@@ -278,15 +274,15 @@ class IncidentResponder:
 
     async def execute_protection_step(self, step: Dict[str, Any]) -> bool:
         """Execute protection actions."""
-        for action in step['actions']:
-            command = action['command']
-            params = action.get('params', {})
+        for action in step["actions"]:
+            command = action["command"]
+            params = action.get("params", {})
 
-            if command == 'enable_circuit_breaker':
+            if command == "enable_circuit_breaker":
                 await self.enable_circuit_breaker(params)
-            elif command == 'set_rate_limits':
+            elif command == "set_rate_limits":
                 await self.set_rate_limits(params)
-            elif command == 'cloudflare_under_attack_mode':
+            elif command == "cloudflare_under_attack_mode":
                 await self.enable_cloudflare_protection(params)
             else:
                 logger.warning(f"Unknown protection command: {command}")
@@ -297,17 +293,15 @@ class IncidentResponder:
         self, step: Dict[str, Any], incident: Dict[str, Any]
     ) -> bool:
         """Send notifications."""
-        for action in step['actions']:
-            if 'notify' in action:
-                notify_config = action['notify']
-                teams = notify_config.get('teams', [])
-                severity = notify_config.get('severity', 'info')
-                message = notify_config.get('message', 'Incident notification')
+        for action in step["actions"]:
+            if "notify" in action:
+                notify_config = action["notify"]
+                teams = notify_config.get("teams", [])
+                severity = notify_config.get("severity", "info")
+                message = notify_config.get("message", "Incident notification")
 
                 for team in teams:
-                    await self.send_notification(
-                        team, severity, message, incident
-                    )
+                    await self.send_notification(team, severity, message, incident)
 
         return True
 
@@ -320,8 +314,8 @@ class IncidentResponder:
         # Run memory profiling script
         result = subprocess.run(
             [
-                'python',
-                '/home/green/FreeAgentics/scripts/analyze_agent_memory.py',
+                "python",
+                "/home/green/FreeAgentics/scripts/analyze_agent_memory.py",
             ],
             capture_output=True,
             text=True,
@@ -331,7 +325,7 @@ class IncidentResponder:
             logger.info("Memory profile collected successfully")
             # Store results
             self.redis_client.set(
-                'incident:memory_profile:latest',
+                "incident:memory_profile:latest",
                 result.stdout,
                 ex=3600,  # Expire after 1 hour
             )
@@ -344,8 +338,8 @@ class IncidentResponder:
 
         # Send GC command via API
         async with self.session.post(
-            'http://localhost:8000/api/v1/agents/gc',
-            json={'mode': params.get('mode', 'normal')},
+            "http://localhost:8000/api/v1/agents/gc",
+            json={"mode": params.get("mode", "normal")},
         ) as response:
             if response.status == 200:
                 logger.info("GC triggered successfully")
@@ -354,25 +348,23 @@ class IncidentResponder:
 
     async def kill_high_memory_agents(self, params: Dict[str, Any]):
         """Kill agents exceeding memory threshold."""
-        threshold_mb = params.get('threshold_mb', 35)
-        preserve_critical = params.get('preserve_critical', True)
+        threshold_mb = params.get("threshold_mb", 35)
+        preserve_critical = params.get("preserve_critical", True)
 
         logger.info(f"Killing agents above {threshold_mb}MB...")
 
         # Get agent memory usage
         async with self.session.get(
-            'http://localhost:8000/api/v1/monitoring/metrics/agent_memory'
+            "http://localhost:8000/api/v1/monitoring/metrics/agent_memory"
         ) as response:
             if response.status == 200:
                 data = await response.json()
 
                 killed_count = 0
-                for agent in data.get('agents', []):
-                    if agent['memory_mb'] > threshold_mb:
-                        if preserve_critical and agent.get('critical', False):
-                            logger.info(
-                                f"Preserving critical agent: {agent['id']}"
-                            )
+                for agent in data.get("agents", []):
+                    if agent["memory_mb"] > threshold_mb:
+                        if preserve_critical and agent.get("critical", False):
+                            logger.info(f"Preserving critical agent: {agent['id']}")
                             continue
 
                         # Kill agent
@@ -387,12 +379,12 @@ class IncidentResponder:
 
     async def clear_redis_cache(self, params: Dict[str, Any]):
         """Clear Redis cache selectively."""
-        preserve = params.get('preserve', [])
+        preserve = params.get("preserve", [])
 
         logger.info(f"Clearing Redis cache (preserving: {preserve})...")
 
         # Get all keys
-        keys = self.redis_client.keys('*')
+        keys = self.redis_client.keys("*")
 
         deleted_count = 0
         for key in keys:
@@ -407,8 +399,8 @@ class IncidentResponder:
 
     async def kill_idle_db_connections(self, params: Dict[str, Any]):
         """Kill idle database connections."""
-        idle_time = params.get('idle_time_seconds', 300)
-        preserve_count = params.get('preserve_count', 50)
+        idle_time = params.get("idle_time_seconds", 300)
+        preserve_count = params.get("preserve_count", 50)
 
         logger.info(f"Killing connections idle for >{idle_time}s...")
 
@@ -427,7 +419,7 @@ class IncidentResponder:
                 LIMIT 1000
             """
                 ),
-                {'idle_time': idle_time},
+                {"idle_time": idle_time},
             )
 
             connections = list(result)
@@ -438,31 +430,27 @@ class IncidentResponder:
             killed_count = 0
             for connection in to_kill:
                 try:
-                    conn.execute(
-                        text(f"SELECT pg_terminate_backend({connection.pid})")
-                    )
+                    conn.execute(text(f"SELECT pg_terminate_backend({connection.pid})"))
                     killed_count += 1
                 except Exception as e:
-                    logger.error(
-                        f"Failed to kill connection {connection.pid}: {e}"
-                    )
+                    logger.error(f"Failed to kill connection {connection.pid}: {e}")
 
             logger.info(f"Killed {killed_count} idle connections")
 
     async def scale_out_agents(self, params: Dict[str, Any]):
         """Scale out agent pool."""
-        increment = params.get('increment', 2)
-        max_total = params.get('max_total', 50)
+        increment = params.get("increment", 2)
+        max_total = params.get("max_total", 50)
 
         logger.info(f"Scaling out agents by {increment}...")
 
         # Check current count
         async with self.session.get(
-            'http://localhost:8000/api/v1/agents/count'
+            "http://localhost:8000/api/v1/agents/count"
         ) as response:
             if response.status == 200:
                 data = await response.json()
-                current_count = data.get('count', 0)
+                current_count = data.get("count", 0)
 
                 new_count = min(current_count + increment, max_total)
                 to_create = new_count - current_count
@@ -471,16 +459,14 @@ class IncidentResponder:
                     # Create new agents
                     for i in range(to_create):
                         async with self.session.post(
-                            'http://localhost:8000/api/v1/agents',
+                            "http://localhost:8000/api/v1/agents",
                             json={
-                                'name': f'scaled-agent-{int(time.time())}-{i}',
-                                'type': 'explorer',
+                                "name": f"scaled-agent-{int(time.time())}-{i}",
+                                "type": "explorer",
                             },
                         ) as create_response:
                             if create_response.status == 201:
-                                logger.info(
-                                    f"Created new agent {i+1}/{to_create}"
-                                )
+                                logger.info(f"Created new agent {i + 1}/{to_create}")
 
                     logger.info(f"Scaled out to {new_count} agents")
                 else:
@@ -492,26 +478,20 @@ class IncidentResponder:
 
         # Configure circuit breaker via API
         async with self.session.post(
-            'http://localhost:8000/api/v1/circuit-breaker/enable', json=params
+            "http://localhost:8000/api/v1/circuit-breaker/enable", json=params
         ) as response:
             if response.status == 200:
                 logger.info("Circuit breaker enabled")
             else:
-                logger.error(
-                    f"Failed to enable circuit breaker: {response.status}"
-                )
+                logger.error(f"Failed to enable circuit breaker: {response.status}")
 
     async def set_rate_limits(self, params: Dict[str, Any]):
         """Update rate limiting configuration."""
         logger.info(f"Setting rate limits: {params}")
 
         # Update rate limits in Redis
-        self.redis_client.set(
-            'rate_limit:global', params.get('global_rps', 100)
-        )
-        self.redis_client.set(
-            'rate_limit:per_ip', params.get('per_ip_rps', 10)
-        )
+        self.redis_client.set("rate_limit:global", params.get("global_rps", 100))
+        self.redis_client.set("rate_limit:per_ip", params.get("per_ip_rps", 10))
 
         logger.info("Rate limits updated")
 
@@ -522,17 +502,13 @@ class IncidentResponder:
         logger.info(f"Notifying {team}: {message}")
 
         # Get team notification config
-        team_config = self.config.get('notification_channels', {}).get(
-            team, {}
-        )
+        team_config = self.config.get("notification_channels", {}).get(team, {})
 
         # Send to appropriate channels based on severity
-        if severity in ['critical', 'emergency']:
+        if severity in ["critical", "emergency"]:
             # Send to all channels
             await self.send_slack_notification(team_config, message, incident)
-            await self.send_pagerduty_notification(
-                team_config, message, incident
-            )
+            await self.send_pagerduty_notification(team_config, message, incident)
             await self.send_email_notification(team_config, message, incident)
         else:
             # Send only to Slack for warnings
@@ -542,25 +518,25 @@ class IncidentResponder:
         self, config: Dict[str, Any], message: str, incident: Dict[str, Any]
     ):
         """Send Slack notification."""
-        webhook_url = os.getenv('SLACK_WEBHOOK_URL')
+        webhook_url = os.getenv("SLACK_WEBHOOK_URL")
         if not webhook_url:
             return
 
         payload = {
-            'text': f"🚨 Incident {incident['id']}: {message}",
-            'attachments': [
+            "text": f"🚨 Incident {incident['id']}: {message}",
+            "attachments": [
                 {
-                    'color': '#ff0000',
-                    'fields': [
+                    "color": "#ff0000",
+                    "fields": [
                         {
-                            'title': 'Playbook',
-                            'value': incident['playbook']['name'],
-                            'short': True,
+                            "title": "Playbook",
+                            "value": incident["playbook"]["name"],
+                            "short": True,
                         },
                         {
-                            'title': 'Started',
-                            'value': incident['started_at'].isoformat(),
-                            'short': True,
+                            "title": "Started",
+                            "value": incident["started_at"].isoformat(),
+                            "short": True,
                         },
                     ],
                 }
@@ -568,9 +544,7 @@ class IncidentResponder:
         }
 
         try:
-            async with self.session.post(
-                webhook_url, json=payload
-            ) as response:
+            async with self.session.post(webhook_url, json=payload) as response:
                 if response.status != 200:
                     logger.error(
                         f"Failed to send Slack notification: {response.status}"
@@ -583,24 +557,24 @@ class IncidentResponder:
     async def check_memory_still_high(self) -> bool:
         """Check if memory usage is still high."""
         async with self.session.get(
-            'http://localhost:8000/api/v1/monitoring/metrics/memory'
+            "http://localhost:8000/api/v1/monitoring/metrics/memory"
         ) as response:
             if response.status == 200:
                 data = await response.json()
-                return data.get('memory_mb', 0) > 1800
+                return data.get("memory_mb", 0) > 1800
         return False
 
     async def check_coordinator_health(self) -> bool:
         """Check if coordinator is healthy."""
         async with self.session.get(
-            'http://localhost:8000/api/v1/coordination/health'
+            "http://localhost:8000/api/v1/coordination/health"
         ) as response:
             return response.status != 200
 
     async def check_recent_deployment(self, minutes: int) -> bool:
         """Check if there was a recent deployment."""
         # Check deployment timestamp in Redis
-        last_deployment = self.redis_client.get('deployment:last_timestamp')
+        last_deployment = self.redis_client.get("deployment:last_timestamp")
         if last_deployment:
             deployment_time = float(last_deployment)
             return (time.time() - deployment_time) < (minutes * 60)
@@ -608,11 +582,11 @@ class IncidentResponder:
 
     def parse_duration(self, duration: str) -> float:
         """Parse duration string to seconds."""
-        if duration.endswith('s'):
+        if duration.endswith("s"):
             return float(duration[:-1])
-        elif duration.endswith('m'):
+        elif duration.endswith("m"):
             return float(duration[:-1]) * 60
-        elif duration.endswith('h'):
+        elif duration.endswith("h"):
             return float(duration[:-1]) * 3600
         return float(duration)
 
@@ -620,8 +594,8 @@ class IncidentResponder:
 async def main():
     """Main entry point."""
     config_path = os.getenv(
-        'INCIDENT_RESPONSE_CONFIG',
-        '/home/green/FreeAgentics/monitoring/config/incident_response.yaml',
+        "INCIDENT_RESPONSE_CONFIG",
+        "/home/green/FreeAgentics/monitoring/config/incident_response.yaml",
     )
 
     responder = IncidentResponder(config_path)

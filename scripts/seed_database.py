@@ -126,13 +126,9 @@ class DatabaseSeeder:
         agents = []
         for agent_data in agents_data:
             # Check if agent already exists
-            existing = (
-                session.query(Agent).filter_by(name=agent_data["name"]).first()
-            )
+            existing = session.query(Agent).filter_by(name=agent_data["name"]).first()
             if existing:
-                print(
-                    f"  Agent '{agent_data['name']}' already exists, skipping..."
-                )
+                print(f"  Agent '{agent_data['name']}' already exists, skipping...")
                 agents.append(existing)
                 continue
 
@@ -234,9 +230,7 @@ class DatabaseSeeder:
 
             # Check if coalition already exists
             existing = (
-                session.query(Coalition)
-                .filter_by(name=coalition_data["name"])
-                .first()
+                session.query(Coalition).filter_by(name=coalition_data["name"]).first()
             )
             if existing:
                 print(
@@ -382,13 +376,9 @@ class DatabaseSeeder:
             source = edge_data.pop("source")
             target = edge_data.pop("target")
 
-            edge = KnowledgeEdge(
-                source_id=source.id, target_id=target.id, **edge_data
-            )
+            edge = KnowledgeEdge(source_id=source.id, target_id=target.id, **edge_data)
             session.add(edge)
-            print(
-                f"  Created edge: {source.label} -> {target.label} ({edge.type})"
-            )
+            print(f"  Created edge: {source.label} -> {target.label} ({edge.type})")
 
         session.commit()
 
@@ -411,15 +401,9 @@ class DatabaseSeeder:
             print(f"  Agents created: {len(agents)}")
             print(f"  Coalitions created: {len(coalitions)}")
             print(f"  Total agents in system: {session.query(Agent).count()}")
-            print(
-                f"  Total coalitions in system: {session.query(Coalition).count()}"
-            )
-            print(
-                f"  Total knowledge nodes: {session.query(KnowledgeNode).count()}"
-            )
-            print(
-                f"  Total knowledge edges: {session.query(KnowledgeEdge).count()}"
-            )
+            print(f"  Total coalitions in system: {session.query(Coalition).count()}")
+            print(f"  Total knowledge nodes: {session.query(KnowledgeNode).count()}")
+            print(f"  Total knowledge edges: {session.query(KnowledgeEdge).count()}")
 
             print("\n✓ Database seeding completed successfully!")
 
@@ -434,7 +418,7 @@ class DatabaseSeeder:
 def main():
     """Main function."""
     # Load environment variables
-    env_file = os.path.join(project_root, '.env.production')
+    env_file = os.path.join(project_root, ".env.production")
     if os.path.exists(env_file):
         load_dotenv(env_file)
         print(f"Loaded environment from: {env_file}")
@@ -443,7 +427,7 @@ def main():
         print("Using default .env file")
 
     # Get database URL
-    database_url = os.getenv('DATABASE_URL')
+    database_url = os.getenv("DATABASE_URL")
     if not database_url:
         print("✗ DATABASE_URL not found in environment")
         sys.exit(1)
@@ -453,10 +437,8 @@ def main():
         f"Database URL: {database_url.replace(database_url.split('@')[0].split('//')[1].split(':')[1], '***')}"
     )
 
-    response = input(
-        "\nThis will add seed data to the database. Continue? (y/N): "
-    )
-    if response.lower() != 'y':
+    response = input("\nThis will add seed data to the database. Continue? (y/N): ")
+    if response.lower() != "y":
         print("Seeding cancelled.")
         sys.exit(0)
 

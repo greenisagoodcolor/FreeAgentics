@@ -234,7 +234,9 @@ class NLPEntityExtractor:
             label = self.nlp.vocab.strings[match_id]
             span = doc[start:end]
 
-            entity_type = EntityType.TECHNOLOGY if label == "TECHNOLOGY" else EntityType.CONCEPT
+            entity_type = (
+                EntityType.TECHNOLOGY if label == "TECHNOLOGY" else EntityType.CONCEPT
+            )
             entity = Entity(
                 text=span.text,
                 type=entity_type,
@@ -250,7 +252,9 @@ class NLPEntityExtractor:
             entity_type = self._map_spacy_label_to_entity_type(ent.label_)
             if entity_type:
                 # Avoid duplicates with custom patterns
-                if not self._is_duplicate_entity(entities, ent.text, ent.start_char, ent.end_char):
+                if not self._is_duplicate_entity(
+                    entities, ent.text, ent.start_char, ent.end_char
+                ):
                     entity = Entity(
                         text=ent.text,
                         type=entity_type,
@@ -340,7 +344,11 @@ class NLPEntityExtractor:
         """Check if entity is duplicate."""
         for entity in entities:
             # Exact match
-            if entity.text == text and entity.start_pos == start_pos and entity.end_pos == end_pos:
+            if (
+                entity.text == text
+                and entity.start_pos == start_pos
+                and entity.end_pos == end_pos
+            ):
                 return True
 
             # Overlapping spans
@@ -374,7 +382,9 @@ class NLPEntityExtractor:
 
         return deduplicated
 
-    def _extract_relationships(self, entities: List[Entity], doc: Doc) -> List[Relationship]:
+    def _extract_relationships(
+        self, entities: List[Entity], doc: Doc
+    ) -> List[Relationship]:
         """Extract relationships between entities."""
         relationships: List[Relationship] = []
 
@@ -396,32 +406,50 @@ class NLPEntityExtractor:
 
         return relationships
 
-    def _infer_relationship_type(self, entity1: Entity, entity2: Entity, doc: Doc) -> Optional[str]:
+    def _infer_relationship_type(
+        self, entity1: Entity, entity2: Entity, doc: Doc
+    ) -> Optional[str]:
         """Infer relationship type between two entities."""
         # Technology + Concept relationships
         if entity1.type == EntityType.TECHNOLOGY and entity2.type == EntityType.CONCEPT:
             return "used_for"
-        elif entity1.type == EntityType.CONCEPT and entity2.type == EntityType.TECHNOLOGY:
+        elif (
+            entity1.type == EntityType.CONCEPT and entity2.type == EntityType.TECHNOLOGY
+        ):
             return "implemented_by"
 
         # Person + Organization relationships
-        if entity1.type == EntityType.PERSON and entity2.type == EntityType.ORGANIZATION:
+        if (
+            entity1.type == EntityType.PERSON
+            and entity2.type == EntityType.ORGANIZATION
+        ):
             return "works_at"
-        elif entity1.type == EntityType.ORGANIZATION and entity2.type == EntityType.PERSON:
+        elif (
+            entity1.type == EntityType.ORGANIZATION
+            and entity2.type == EntityType.PERSON
+        ):
             return "employs"
 
         # Technology + Technology relationships
-        if entity1.type == EntityType.TECHNOLOGY and entity2.type == EntityType.TECHNOLOGY:
+        if (
+            entity1.type == EntityType.TECHNOLOGY
+            and entity2.type == EntityType.TECHNOLOGY
+        ):
             # Look for relationship words in context
             text_between = self._get_text_between_entities(entity1, entity2, doc.text)
-            if any(word in text_between.lower() for word in ["built with", "uses", "based on"]):
+            if any(
+                word in text_between.lower()
+                for word in ["built with", "uses", "based on"]
+            ):
                 return "uses"
             elif any(word in text_between.lower() for word in ["and", ","]):
                 return "related_to"
 
         return None
 
-    def _get_text_between_entities(self, entity1: Entity, entity2: Entity, text: str) -> str:
+    def _get_text_between_entities(
+        self, entity1: Entity, entity2: Entity, text: str
+    ) -> str:
         """Get text between two entities."""
         start = min(entity1.end_pos, entity2.end_pos)
         end = max(entity1.start_pos, entity2.start_pos)

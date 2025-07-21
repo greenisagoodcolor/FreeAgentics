@@ -52,7 +52,9 @@ class TestAgentsAPI:
             "parameters": {"grid_size": 10},
         }
 
-        response = client.post("/api/v1/agents", json=agent_data, headers=get_auth_headers())
+        response = client.post(
+            "/api/v1/agents", json=agent_data, headers=get_auth_headers()
+        )
 
         if response.status_code != 201:
             print(f"Response status: {response.status_code}")
@@ -65,7 +67,9 @@ class TestAgentsAPI:
         assert "id" in data
 
         # Verify in database
-        db_agent = db_session.query(AgentModel).filter_by(id=uuid.UUID(data["id"])).first()
+        db_agent = (
+            db_session.query(AgentModel).filter_by(id=uuid.UUID(data["id"])).first()
+        )
         assert db_agent is not None
         assert db_agent.name == "Test Explorer"
 
@@ -73,7 +77,9 @@ class TestAgentsAPI:
         """Test retrieving an agent."""
         # Create agent first
         agent_data = {"name": "Test Agent", "template": "basic-explorer"}
-        create_response = client.post("/api/v1/agents", json=agent_data, headers=get_auth_headers())
+        create_response = client.post(
+            "/api/v1/agents", json=agent_data, headers=get_auth_headers()
+        )
         assert create_response.status_code == 201
         agent_id = create_response.json()["id"]
 
@@ -92,7 +98,9 @@ class TestAgentsAPI:
                 "name": f"Test Agent {i}",
                 "template": "basic-explorer",
             }
-            response = client.post("/api/v1/agents", json=agent_data, headers=get_auth_headers())
+            response = client.post(
+                "/api/v1/agents", json=agent_data, headers=get_auth_headers()
+            )
             assert response.status_code == 201
 
         # List agents
@@ -107,12 +115,15 @@ class TestAgentsAPI:
         """Test updating an agent."""
         # Create agent
         agent_data = {"name": "Original Name", "template": "basic-explorer"}
-        create_response = client.post("/api/v1/agents", json=agent_data, headers=get_auth_headers())
+        create_response = client.post(
+            "/api/v1/agents", json=agent_data, headers=get_auth_headers()
+        )
         agent_id = create_response.json()["id"]
 
         # Update agent status (API only supports PATCH for status)
         response = client.patch(
-            f"/api/v1/agents/{agent_id}/status?status=active", headers=get_auth_headers()
+            f"/api/v1/agents/{agent_id}/status?status=active",
+            headers=get_auth_headers(),
         )
 
         assert response.status_code == 200
@@ -124,17 +135,23 @@ class TestAgentsAPI:
         """Test deleting an agent."""
         # Create agent
         agent_data = {"name": "To Delete", "template": "basic-explorer"}
-        create_response = client.post("/api/v1/agents", json=agent_data, headers=get_auth_headers())
+        create_response = client.post(
+            "/api/v1/agents", json=agent_data, headers=get_auth_headers()
+        )
         agent_id = create_response.json()["id"]
 
         # Delete agent
-        response = client.delete(f"/api/v1/agents/{agent_id}", headers=get_auth_headers())
+        response = client.delete(
+            f"/api/v1/agents/{agent_id}", headers=get_auth_headers()
+        )
         assert response.status_code == 200  # API returns 200 with message, not 204
         data = response.json()
         assert "deleted successfully" in data["message"]
 
         # Verify deletion
-        get_response = client.get(f"/api/v1/agents/{agent_id}", headers=get_auth_headers())
+        get_response = client.get(
+            f"/api/v1/agents/{agent_id}", headers=get_auth_headers()
+        )
         assert get_response.status_code == 404
 
     def test_agent_not_found(self, client: TestClient):
@@ -152,10 +169,14 @@ class TestAgentsAPI:
 
         # Empty name (should fail min_length validation)
         invalid_data = {"name": "", "template": "basic-explorer"}
-        response = client.post("/api/v1/agents", json=invalid_data, headers=get_auth_headers())
+        response = client.post(
+            "/api/v1/agents", json=invalid_data, headers=get_auth_headers()
+        )
         assert response.status_code == 422
 
-    def test_agent_creation_with_parameters(self, client: TestClient, db_session: Session):
+    def test_agent_creation_with_parameters(
+        self, client: TestClient, db_session: Session
+    ):
         """Test agent creation with custom parameters."""
         # Create agent with parameters
         agent_data = {
@@ -163,7 +184,9 @@ class TestAgentsAPI:
             "template": "basic-explorer",
             "parameters": {"test": True, "exploration_rate": 0.5},
         }
-        response = client.post("/api/v1/agents", json=agent_data, headers=get_auth_headers())
+        response = client.post(
+            "/api/v1/agents", json=agent_data, headers=get_auth_headers()
+        )
 
         assert response.status_code == 201
         data = response.json()
@@ -176,7 +199,9 @@ class TestAgentsAPI:
         """Test agent status state machine."""
         # Create agent
         agent_data = {"name": "State Test", "template": "basic-explorer"}
-        create_response = client.post("/api/v1/agents", json=agent_data, headers=get_auth_headers())
+        create_response = client.post(
+            "/api/v1/agents", json=agent_data, headers=get_auth_headers()
+        )
         agent_id = create_response.json()["id"]
 
         # Valid transitions

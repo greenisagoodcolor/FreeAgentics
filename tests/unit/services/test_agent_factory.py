@@ -129,9 +129,7 @@ class TestAgentFactory:
         agent_id = "test_agent_123"
         metadata = {"created_by": "test"}
 
-        agent = await factory.create_from_gmn_model(
-            valid_model, agent_id, metadata
-        )
+        agent = await factory.create_from_gmn_model(valid_model, agent_id, metadata)
 
         assert agent is not None
         assert agent.id == agent_id
@@ -236,7 +234,7 @@ class TestAgentFactory:
         model = {"num_states": [4], "num_obs": [5], "num_controls": [3]}
 
         # Mock Agent class to raise an error
-        with patch('services.agent_factory.Agent') as MockAgent:
+        with patch("services.agent_factory.Agent") as MockAgent:
             MockAgent.side_effect = Exception("Creation failed")
 
             with pytest.raises(RuntimeError, match="Agent creation failed"):

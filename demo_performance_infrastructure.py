@@ -12,7 +12,7 @@ import logging
 
 # Configure logging
 logging.basicConfig(
-    level=logging.INFO, format='%(asctime)s - %(levelname)s - %(message)s'
+    level=logging.INFO, format="%(asctime)s - %(levelname)s - %(message)s"
 )
 logger = logging.getLogger(__name__)
 
@@ -25,9 +25,7 @@ def demo_performance_infrastructure():
     print("=" * 80)
 
     print("\nYou are now the Performance Testing Agent!")
-    print(
-        "Mission: Ensure system meets <3s response time with 100 concurrent users"
-    )
+    print("Mission: Ensure system meets <3s response time with 100 concurrent users")
 
     print("\n🎯 DELIVERABLES COMPLETED:")
     print("=" * 50)
@@ -149,7 +147,7 @@ def demo_performance_infrastructure():
         print(f"   📁 {component['file']}")
         print(f"   📝 {component['description']}")
         print("   ✨ Features:")
-        for feature in component['features']:
+        for feature in component["features"]:
             print(f"      • {feature}")
 
     print("\n" + "=" * 80)
@@ -268,9 +266,7 @@ def demo_performance_infrastructure():
     print("under production loads.")
 
     print("\n" + "=" * 80)
-    print(
-        "Thank you for using the FreeAgentics Performance Testing Infrastructure!"
-    )
+    print("Thank you for using the FreeAgentics Performance Testing Infrastructure!")
     print("=" * 80)
 
 

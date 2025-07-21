@@ -1,7 +1,6 @@
 """Tests for database.base module."""
 
 
-
 class TestDatabaseBase:
     """Test the database base module."""
 

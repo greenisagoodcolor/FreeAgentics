@@ -124,7 +124,9 @@ async def demo_websocket_authentication():
         else:
             print(f"❌ WebSocket connection closed: {e}")
     except ConnectionRefusedError:
-        print("❌ Connection refused. Make sure the server is running on localhost:8000")
+        print(
+            "❌ Connection refused. Make sure the server is running on localhost:8000"
+        )
     except Exception as e:
         print(f"❌ Error during WebSocket communication: {e}")
 
@@ -210,7 +212,10 @@ async def demo_permission_testing():
             error_response = await websocket.recv()
             error_data = json.loads(error_response)
 
-            if error_data["type"] == "error" and error_data["code"] == "PERMISSION_DENIED":
+            if (
+                error_data["type"] == "error"
+                and error_data["code"] == "PERMISSION_DENIED"
+            ):
                 print("✅ Permission denied as expected")
                 print(f"📝 Error message: {error_data['message']}")
             else:

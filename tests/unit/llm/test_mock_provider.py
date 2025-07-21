@@ -20,9 +20,7 @@ class TestMockLLMProvider:
     @pytest.mark.asyncio
     async def test_generate_basic(self, provider):
         """Test basic generation functionality."""
-        messages = [
-            LLMMessage(role=LLMRole.USER, content="Create an explorer agent")
-        ]
+        messages = [LLMMessage(role=LLMRole.USER, content="Create an explorer agent")]
 
         response = await provider.generate(messages)
 
@@ -139,9 +137,7 @@ class TestMockLLMProvider:
         provider = MockLLMProvider(delay=0.01, error_rate=1.0)  # Always error
 
         with pytest.raises(LLMError):
-            await provider.generate(
-                [LLMMessage(role=LLMRole.USER, content="Test")]
-            )
+            await provider.generate([LLMMessage(role=LLMRole.USER, content="Test")])
 
     @pytest.mark.asyncio
     async def test_cautious_preference_customization(self, provider):
@@ -185,9 +181,7 @@ class TestMockLLMProvider:
     @pytest.mark.asyncio
     async def test_no_user_message(self, provider):
         """Test handling of messages without user content."""
-        messages = [
-            LLMMessage(role=LLMRole.SYSTEM, content="System prompt only")
-        ]
+        messages = [LLMMessage(role=LLMRole.SYSTEM, content="System prompt only")]
 
         with pytest.raises(LLMError, match="No user message found"):
             await provider.generate(messages)

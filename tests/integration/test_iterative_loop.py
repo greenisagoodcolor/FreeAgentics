@@ -44,9 +44,7 @@ class TestIterativeLoop:
         processor.iterative_controller = Mock(spec=IterativeController)
         return processor
 
-    async def test_single_iteration(
-        self, db_session, mock_user, mock_prompt_processor
-    ):
+    async def test_single_iteration(self, db_session, mock_user, mock_prompt_processor):
         """Test a single iteration of the loop."""
         # Setup mock response
         mock_prompt_processor.process_prompt.return_value = {
@@ -79,7 +77,7 @@ class TestIterativeLoop:
 
         # Process prompt
         with patch(
-            'api.v1.prompts.get_prompt_processor',
+            "api.v1.prompts.get_prompt_processor",
             return_value=mock_prompt_processor,
         ):
             response = await process_prompt(
@@ -93,9 +91,7 @@ class TestIterativeLoop:
         assert response.iteration_context["iteration_number"] == 1
         assert response.status == "success"
 
-    async def test_multiple_iterations_same_conversation(
-        self, db_session, mock_user
-    ):
+    async def test_multiple_iterations_same_conversation(self, db_session, mock_user):
         """Test multiple iterations in the same conversation."""
         conversation_id = str(uuid.uuid4())
 
@@ -128,9 +124,7 @@ class TestIterativeLoop:
                     "conversation_summary": {
                         "iteration_count": iteration_num,
                         "belief_evolution": {
-                            "trend": "converging"
-                            if iteration_num > 2
-                            else "exploring",
+                            "trend": "converging" if iteration_num > 2 else "exploring",
                             "stability": min(0.2 * iteration_num, 0.8),
                         },
                     },
@@ -152,9 +146,7 @@ class TestIterativeLoop:
 
         responses = []
 
-        with patch(
-            'api.v1.prompts.get_prompt_processor', return_value=mock_processor
-        ):
+        with patch("api.v1.prompts.get_prompt_processor", return_value=mock_processor):
             for i, prompt_text in enumerate(prompts):
                 request = PromptRequest(
                     prompt=prompt_text,
@@ -178,23 +170,21 @@ class TestIterativeLoop:
 
         # Check belief evolution changes
         assert (
-            responses[0].iteration_context["conversation_summary"][
-                "belief_evolution"
-            ]["trend"]
+            responses[0].iteration_context["conversation_summary"]["belief_evolution"][
+                "trend"
+            ]
             == "exploring"
         )
         assert (
-            responses[3].iteration_context["conversation_summary"][
-                "belief_evolution"
-            ]["trend"]
+            responses[3].iteration_context["conversation_summary"]["belief_evolution"][
+                "trend"
+            ]
             == "converging"
         )
 
         # Verify stability increases
         stabilities = [
-            r.iteration_context["conversation_summary"]["belief_evolution"][
-                "stability"
-            ]
+            r.iteration_context["conversation_summary"]["belief_evolution"]["stability"]
             for r in responses
         ]
         assert stabilities == sorted(stabilities)  # Should be increasing
@@ -245,9 +235,7 @@ class TestIterativeLoop:
             prompt_text, user_id, db, conversation_id, iteration_count
         ):
             iteration = controller.iteration_count + 1
-            suggestions = await controller.generate_suggestions(
-                prompt_text, iteration
-            )
+            suggestions = await controller.generate_suggestions(prompt_text, iteration)
 
             return {
                 "agent_id": f"agent-{iteration}",
@@ -275,13 +263,9 @@ class TestIterativeLoop:
 
         all_suggestions = []
 
-        with patch(
-            'api.v1.prompts.get_prompt_processor', return_value=mock_processor
-        ):
+        with patch("api.v1.prompts.get_prompt_processor", return_value=mock_processor):
             for prompt in prompts:
-                request = PromptRequest(
-                    prompt=prompt, conversation_id=conversation_id
-                )
+                request = PromptRequest(prompt=prompt, conversation_id=conversation_id)
 
                 response = await process_prompt(
                     request=request, current_user=mock_user, db=db_session
@@ -311,13 +295,9 @@ class TestIterativeLoop:
             if iteration == 1:
                 gmn = "Basic explorer GMN with 3x3 grid"
             elif iteration == 2:
-                gmn = (
-                    "Enhanced GMN with goal states added to previous 3x3 grid"
-                )
+                gmn = "Enhanced GMN with goal states added to previous 3x3 grid"
             elif iteration == 3:
-                gmn = (
-                    "Advanced GMN with curiosity rewards and expanded 5x5 grid"
-                )
+                gmn = "Advanced GMN with curiosity rewards and expanded 5x5 grid"
             else:
                 gmn = "Multi-agent GMN with communication channels between explorers"
 
@@ -351,13 +331,9 @@ class TestIterativeLoop:
 
         responses = []
 
-        with patch(
-            'api.v1.prompts.get_prompt_processor', return_value=mock_processor
-        ):
+        with patch("api.v1.prompts.get_prompt_processor", return_value=mock_processor):
             for prompt in prompts:
-                request = PromptRequest(
-                    prompt=prompt, conversation_id=conversation_id
-                )
+                request = PromptRequest(prompt=prompt, conversation_id=conversation_id)
 
                 response = await process_prompt(
                     request=request, current_user=mock_user, db=db_session
@@ -367,12 +343,8 @@ class TestIterativeLoop:
 
         # Verify GMN evolution
         assert "Basic explorer" in responses[0].gmn_specification
-        assert (
-            "goal states added to previous" in responses[1].gmn_specification
-        )
-        assert (
-            "curiosity rewards and expanded" in responses[2].gmn_specification
-        )
+        assert "goal states added to previous" in responses[1].gmn_specification
+        assert "curiosity rewards and expanded" in responses[2].gmn_specification
         assert "Multi-agent" in responses[3].gmn_specification
 
     async def test_knowledge_graph_accumulation(self, db_session, mock_user):
@@ -397,7 +369,7 @@ class TestIterativeLoop:
                 kg_edges.append(
                     {
                         "source": f"node-{iteration}a",
-                        "target": f"node-{iteration-1}b",
+                        "target": f"node-{iteration - 1}b",
                     }
                 )
 
@@ -422,8 +394,7 @@ class TestIterativeLoop:
                     "iteration_number": iteration,
                     "kg_nodes": len(kg_nodes),
                     "conversation_summary": {
-                        "kg_connectivity": len(kg_edges)
-                        / max(len(kg_nodes) - 1, 1)
+                        "kg_connectivity": len(kg_edges) / max(len(kg_nodes) - 1, 1)
                     },
                 },
             }
@@ -434,12 +405,10 @@ class TestIterativeLoop:
         # Process iterations
         responses = []
 
-        with patch(
-            'api.v1.prompts.get_prompt_processor', return_value=mock_processor
-        ):
+        with patch("api.v1.prompts.get_prompt_processor", return_value=mock_processor):
             for i in range(4):
                 request = PromptRequest(
-                    prompt=f"Iteration {i+1} prompt",
+                    prompt=f"Iteration {i + 1} prompt",
                     conversation_id=conversation_id,
                 )
 
@@ -457,9 +426,7 @@ class TestIterativeLoop:
 
         # Verify connectivity increases
         assert (
-            responses[3].iteration_context["conversation_summary"][
-                "kg_connectivity"
-            ]
+            responses[3].iteration_context["conversation_summary"]["kg_connectivity"]
             > 0
         )
 
@@ -494,12 +461,10 @@ class TestIterativeLoop:
         responses = []
         errors = []
 
-        with patch(
-            'api.v1.prompts.get_prompt_processor', return_value=mock_processor
-        ):
+        with patch("api.v1.prompts.get_prompt_processor", return_value=mock_processor):
             for i in range(4):
                 request = PromptRequest(
-                    prompt=f"Prompt {i+1}", conversation_id=conversation_id
+                    prompt=f"Prompt {i + 1}", conversation_id=conversation_id
                 )
 
                 try:

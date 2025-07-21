@@ -51,7 +51,9 @@ class TechnicalSpikePOC:
         print("=== FreeAgentics Technical Spike ===\n")
 
         # Step 1: User Prompt
-        user_prompt = "Create an agent that explores a 4x4 grid world looking for rewards"
+        user_prompt = (
+            "Create an agent that explores a 4x4 grid world looking for rewards"
+        )
         print(f"1. User Prompt: {user_prompt}\n")
 
         # Step 2: LLM generates GMN specification
@@ -173,17 +175,17 @@ position_belief -> grid_position: depends_on
             from pymdp import Agent
 
             # Extract components from model
-            num_states = pymdp_model['num_states']
-            num_obs = pymdp_model['num_obs']
-            num_actions = pymdp_model['num_actions']
+            num_states = pymdp_model["num_states"]
+            num_obs = pymdp_model["num_obs"]
+            num_actions = pymdp_model["num_actions"]
 
             # ISSUE: Model provides lists, Agent expects integers for single factors
             if len(num_states) == 1:
                 # Single factor case
-                A = pymdp_model['A'][0] if pymdp_model['A'] else None
-                B = pymdp_model['B'][0] if pymdp_model['B'] else None
-                C = pymdp_model['C'][0] if pymdp_model['C'] else None
-                D = pymdp_model['D'][0] if pymdp_model['D'] else None
+                A = pymdp_model["A"][0] if pymdp_model["A"] else None
+                B = pymdp_model["B"][0] if pymdp_model["B"] else None
+                C = pymdp_model["C"][0] if pymdp_model["C"] else None
+                D = pymdp_model["D"][0] if pymdp_model["D"] else None
 
                 # This might work for simple cases
                 agent = Agent(
@@ -264,7 +266,7 @@ position_belief -> grid_position: depends_on
         self.knowledge_graph.add_node(obs_node)
         print(f"      - Added observation node: {obs_node.label}")
 
-        stats = self.knowledge_graph.to_dict()['statistics']
+        stats = self.knowledge_graph.to_dict()["statistics"]
         print(f"      - Total KG nodes: {stats['node_count']}")
 
 

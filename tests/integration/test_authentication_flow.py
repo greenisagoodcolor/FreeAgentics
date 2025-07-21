@@ -371,11 +371,17 @@ class TestAuthenticationFlow:
         refresh_exp = datetime.fromtimestamp(refresh_payload["exp"])
 
         # Access token should expire in ~30 minutes
-        assert (access_exp - datetime.utcnow()).total_seconds() < 1900  # Less than 32 minutes
-        assert (access_exp - datetime.utcnow()).total_seconds() > 1700  # More than 28 minutes
+        assert (
+            access_exp - datetime.utcnow()
+        ).total_seconds() < 1900  # Less than 32 minutes
+        assert (
+            access_exp - datetime.utcnow()
+        ).total_seconds() > 1700  # More than 28 minutes
 
         # Refresh token should expire in ~7 days
-        assert (refresh_exp - datetime.utcnow()).total_seconds() > 600000  # More than 6.9 days
+        assert (
+            refresh_exp - datetime.utcnow()
+        ).total_seconds() > 600000  # More than 6.9 days
 
     @patch("auth.security_logging.security_auditor.log_event")
     def test_security_event_logging(self, mock_log_event, client, test_user_data):
@@ -438,7 +444,9 @@ class TestAuthenticationFlow:
         mock_log_event.reset_mock()
 
         # Test logout logging
-        access_token = client.post("/api/v1/auth/login", json=login_data).json()["access_token"]
+        access_token = client.post("/api/v1/auth/login", json=login_data).json()[
+            "access_token"
+        ]
         headers = {"Authorization": f"Bearer {access_token}"}
         response = client.post("/api/v1/auth/logout", headers=headers)
         assert response.status_code == 200
@@ -446,7 +454,9 @@ class TestAuthenticationFlow:
         # Verify logout event was logged
         assert mock_log_event.called
         logout_call = [
-            call for call in mock_log_event.call_args_list if call[0][0] == SecurityEventType.LOGOUT
+            call
+            for call in mock_log_event.call_args_list
+            if call[0][0] == SecurityEventType.LOGOUT
         ][0]
         assert logout_call[0][1] == SecurityEventSeverity.INFO
 

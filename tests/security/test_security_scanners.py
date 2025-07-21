@@ -494,7 +494,9 @@ pandas==1.2.0
 
         with (
             patch.object(monitor.scanner, "scan_dependencies") as mock_scan,
-            patch.object(VulnerabilityDatabase, "check_vulnerabilities") as mock_check_vulns,
+            patch.object(
+                VulnerabilityDatabase, "check_vulnerabilities"
+            ) as mock_check_vulns,
             patch.object(monitor.update_manager, "check_updates") as mock_check_updates,
         ):
             mock_dependencies = [
