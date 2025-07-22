@@ -177,16 +177,28 @@ jobs:
           echo "🔍 Running SAST scan..."
           bandit -r . -f json -o bandit_report.json --severity-level high --confidence-level high --exclude .archive,web,tests
           
-          # Check if any high severity issues found
-          HIGH_ISSUES=$(jq '.results | length' bandit_report.json || echo 0)
+          # Committee Fix: Count only HIGH and CRITICAL severity issues, not all results
+          # Bandit may still report lower severity issues in results, we must filter them
+          HIGH_ISSUES=$(jq '[.results[] | select(.issue_severity == "HIGH" or .issue_severity == "CRITICAL")] | length' bandit_report.json || echo 0)
+          
+          echo "📊 Bandit SAST completed - found $HIGH_ISSUES critical/high severity issues"
           
           if [ "$HIGH_ISSUES" -gt 0 ]; then
-            echo "❌ Found $HIGH_ISSUES high severity security issues"
-            jq '.results[]' bandit_report.json
+            echo "❌ Found $HIGH_ISSUES critical/high severity security issues"
+            echo "🔴 High/Critical severity issues:"
+            jq '.results[] | select(.issue_severity == "HIGH" or .issue_severity == "CRITICAL")' bandit_report.json
             exit 1
           fi
           
-          echo "✅ No high severity security issues found"
+          # Show summary of any lower severity issues (for information only)
+          TOTAL_ISSUES=$(jq '.results | length' bandit_report.json || echo 0)
+          if [ "$TOTAL_ISSUES" -gt 0 ]; then
+            echo "ℹ️  Found $TOTAL_ISSUES lower severity findings (informational only)"
+            echo "📋 Issue breakdown:"
+            jq -r '.results | group_by(.issue_severity) | map({severity: .[0].issue_severity, count: length}) | .[] | "  \(.severity): \(.count)"' bandit_report.json || echo "  Unable to categorize issues"
+          fi
+          
+          echo "✅ No critical/high severity security issues found"
       
       - name: Secret scanning
         uses: trufflesecurity/trufflehog@main

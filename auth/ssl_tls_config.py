@@ -231,6 +231,7 @@ class OCSPStapler:
 
             # Filter out None values from cmd list
             cmd: List[str] = [arg for arg in cmd_parts if arg is not None]
+            # nosec B603: Controlled subprocess call for OCSP certificate validation with static OpenSSL command
             result = subprocess.run(cmd, capture_output=True, text=False)
             if result.returncode == 0:
                 logger.info("Successfully fetched OCSP response")

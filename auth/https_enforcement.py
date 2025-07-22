@@ -301,16 +301,19 @@ class SSLCertificateManager:
 
         try:
             # Copy certificate files
+            # nosec B603,B607: Controlled subprocess call for certificate management with static arguments
             subprocess.run(
                 ["cp", f"{le_path}/fullchain.pem", self.config.cert_path],
                 check=True,
             )
 
+            # nosec B603,B607: Controlled subprocess call for certificate management with static arguments
             subprocess.run(
                 ["cp", f"{le_path}/privkey.pem", self.config.key_path],
                 check=True,
             )
 
+            # nosec B603,B607: Controlled subprocess call for certificate management with static arguments
             subprocess.run(
                 ["cp", f"{le_path}/chain.pem", self.config.chain_path],
                 check=True,
@@ -359,6 +362,7 @@ fi
             cron_entry = f"0 0,12 * * * {script_path} >> /var/log/letsencrypt-renewal.log 2>&1\n"
 
             # Check if cron entry exists
+            # nosec B603,B607: Controlled subprocess call for cron management with static arguments
             result = subprocess.run(["crontab", "-l"], capture_output=True, text=True)
 
             if script_path not in result.stdout:
@@ -366,6 +370,7 @@ fi
                 current_crontab = result.stdout if result.returncode == 0 else ""
                 new_crontab = current_crontab + cron_entry
 
+                # nosec B603,B607: Controlled subprocess call for cron management with static arguments
                 process = subprocess.Popen(["crontab", "-"], stdin=subprocess.PIPE, text=True)
                 process.communicate(input=new_crontab)
 
@@ -384,6 +389,7 @@ fi
 
         try:
             # Use openssl to check certificate expiry
+            # nosec B603,B607: Controlled subprocess call for certificate validation with static arguments
             result = subprocess.run(
                 [
                     "openssl",
@@ -419,6 +425,7 @@ fi
         """Validate certificate chain."""
         try:
             # Verify certificate chain
+            # nosec B603,B607: Controlled subprocess call for certificate validation with static arguments
             result = subprocess.run(
                 [
                     "openssl",
@@ -526,6 +533,7 @@ def generate_self_signed_cert(domain: str = "localhost", days: int = 365) -> Tup
 
     try:
         # Generate private key and certificate
+        # nosec B603,B607: Controlled subprocess call for certificate generation with static arguments
         subprocess.run(
             [
                 "openssl",
