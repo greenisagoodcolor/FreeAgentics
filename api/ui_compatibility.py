@@ -60,9 +60,7 @@ def extract_agent_type_from_description(description: str) -> str:
     """Extract agent type from description using simple keyword matching."""
     description_lower = description.lower()
 
-    if any(
-        word in description_lower for word in ["explore", "search", "find", "discover"]
-    ):
+    if any(word in description_lower for word in ["explore", "search", "find", "discover"]):
         return "explorer"
     elif any(word in description_lower for word in ["collect", "gather", "resource"]):
         return "collector"
@@ -84,9 +82,7 @@ def v1_agent_to_ui_agent(v1_agent: V1Agent) -> UIAgent:
     return UIAgent(
         id=v1_agent.id,
         name=v1_agent.name,
-        type=extract_agent_type_from_description(
-            v1_agent.parameters.get("description", "")
-        ),
+        type=extract_agent_type_from_description(v1_agent.parameters.get("description", "")),
         status=v1_agent.status,
         description=v1_agent.parameters.get("description"),
         createdAt=v1_agent.created_at.isoformat() if v1_agent.created_at else None,

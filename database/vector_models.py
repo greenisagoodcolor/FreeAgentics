@@ -39,9 +39,7 @@ class VectorEmbedding(Base):
     # Metadata
     content = Column(Text, nullable=False)  # Original content
     content_type = Column(String(50), nullable=False)  # text, image, audio, etc.
-    source_type = Column(
-        String(50), nullable=False
-    )  # agent_memory, knowledge, observation
+    source_type = Column(String(50), nullable=False)  # agent_memory, knowledge, observation
     source_id = Column(String(100), nullable=True)  # Reference to source entity
 
     # Temporal information
@@ -68,16 +66,12 @@ class AgentMemory(Base):
     agent_id = Column(String(100), nullable=False, index=True)
 
     # Memory content
-    memory_type = Column(
-        String(50), nullable=False
-    )  # belief, observation, action, goal
+    memory_type = Column(String(50), nullable=False)  # belief, observation, action, goal
     content = Column(Text, nullable=False)
     confidence = Column(Float, default=1.0)
 
     # Vector embedding for similarity search
-    embedding_id = Column(
-        UUID(as_uuid=True), ForeignKey("vector_embeddings.id"), nullable=True
-    )
+    embedding_id = Column(UUID(as_uuid=True), ForeignKey("vector_embeddings.id"), nullable=True)
     embedding = relationship("VectorEmbedding", backref="agent_memories")
 
     # Temporal context
@@ -111,9 +105,7 @@ class KnowledgeVector(Base):
     node_type = Column(String(50), nullable=False)
 
     # Vector representation
-    embedding_id = Column(
-        UUID(as_uuid=True), ForeignKey("vector_embeddings.id"), nullable=False
-    )
+    embedding_id = Column(UUID(as_uuid=True), ForeignKey("vector_embeddings.id"), nullable=False)
     embedding = relationship("VectorEmbedding", backref="knowledge_vectors")
 
     # Knowledge metadata
@@ -173,9 +165,7 @@ class VectorSearchIndex(Base):
     dimension = Column(Integer, nullable=False)
 
     # Search parameters
-    similarity_metric = Column(
-        String(20), default="cosine"
-    )  # cosine, euclidean, inner_product
+    similarity_metric = Column(String(20), default="cosine")  # cosine, euclidean, inner_product
     search_k = Column(Integer, default=10)  # Number of results to return
 
     # Performance statistics

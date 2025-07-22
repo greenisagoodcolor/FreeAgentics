@@ -47,15 +47,9 @@ class WebSocketAuthConfig(BaseModel):
     max_connections_per_user: int = Field(
         default=5, description="Maximum concurrent connections per user"
     )
-    heartbeat_interval: int = Field(
-        default=30, description="Heartbeat interval in seconds"
-    )
-    heartbeat_timeout: int = Field(
-        default=60, description="Heartbeat timeout in seconds"
-    )
-    allow_query_token: bool = Field(
-        default=True, description="Allow token in query parameters"
-    )
+    heartbeat_interval: int = Field(default=30, description="Heartbeat interval in seconds")
+    heartbeat_timeout: int = Field(default=60, description="Heartbeat timeout in seconds")
+    allow_query_token: bool = Field(default=True, description="Allow token in query parameters")
     allow_header_token: bool = Field(default=True, description="Allow token in headers")
     origin_whitelist: Optional[Set[str]] = Field(
         default=None, description="Allowed origins (None = allow all)"
@@ -106,9 +100,7 @@ class WebSocketAuthHandler:
                 token = await self._extract_token(websocket)
 
             if not token:
-                logger.warning(
-                    f"No token provided for WebSocket connection: {client_id}"
-                )
+                logger.warning(f"No token provided for WebSocket connection: {client_id}")
                 await websocket.close(code=WebSocketErrorCode.AUTHENTICATION_FAILED)
                 raise WebSocketDisconnect(code=WebSocketErrorCode.AUTHENTICATION_FAILED)
 
@@ -120,9 +112,7 @@ class WebSocketAuthHandler:
 
             # Check rate limiting
             if not await self._check_rate_limit(websocket):
-                logger.warning(
-                    f"Rate limit exceeded for WebSocket connection: {client_id}"
-                )
+                logger.warning(f"Rate limit exceeded for WebSocket connection: {client_id}")
                 await websocket.close(code=WebSocketErrorCode.RATE_LIMITED)
                 raise WebSocketDisconnect(code=WebSocketErrorCode.RATE_LIMITED)
 
@@ -131,25 +121,17 @@ class WebSocketAuthHandler:
                 user_data = auth_manager.verify_token(token)
             except HTTPException as e:
                 if "expired" in str(e.detail).lower():
-                    logger.warning(
-                        f"Expired token for WebSocket connection: {client_id}"
-                    )
+                    logger.warning(f"Expired token for WebSocket connection: {client_id}")
                     await websocket.close(code=WebSocketErrorCode.TOKEN_EXPIRED)
                     raise WebSocketDisconnect(code=WebSocketErrorCode.TOKEN_EXPIRED)
                 else:
-                    logger.warning(
-                        f"Invalid token for WebSocket connection: {client_id}"
-                    )
+                    logger.warning(f"Invalid token for WebSocket connection: {client_id}")
                     await websocket.close(code=WebSocketErrorCode.AUTHENTICATION_FAILED)
-                    raise WebSocketDisconnect(
-                        code=WebSocketErrorCode.AUTHENTICATION_FAILED
-                    )
+                    raise WebSocketDisconnect(code=WebSocketErrorCode.AUTHENTICATION_FAILED)
 
             # Check concurrent connections limit
             if not await self._check_connection_limit(user_data.user_id, client_id):
-                logger.warning(
-                    f"Connection limit exceeded for user: {user_data.username}"
-                )
+                logger.warning(f"Connection limit exceeded for user: {user_data.username}")
                 await websocket.close(code=WebSocketErrorCode.RATE_LIMITED)
                 raise WebSocketDisconnect(code=WebSocketErrorCode.RATE_LIMITED)
 
@@ -221,9 +203,7 @@ class WebSocketAuthHandler:
             self.rate_limiter[ip] = []
 
         # Clean old entries (older than 1 minute)
-        self.rate_limiter[ip] = [
-            t for t in self.rate_limiter[ip] if (now - t).total_seconds() < 60
-        ]
+        self.rate_limiter[ip] = [t for t in self.rate_limiter[ip] if (now - t).total_seconds() < 60]
 
         # Check if too many connections in the last minute
         if len(self.rate_limiter[ip]) >= 10:  # Max 10 connections per minute per IP
@@ -257,9 +237,7 @@ class WebSocketAuthHandler:
 
         return "unknown"
 
-    async def refresh_token(
-        self, client_id: str, refresh_token: str
-    ) -> Tuple[str, TokenData]:
+    async def refresh_token(self, client_id: str, refresh_token: str) -> Tuple[str, TokenData]:
         """
         Refresh access token for a WebSocket connection.
 
@@ -294,9 +272,7 @@ class WebSocketAuthHandler:
             logger.error(f"Token refresh failed for client {client_id}: {e.detail}")
             raise
 
-    async def verify_permission(
-        self, client_id: str, required_permission: Permission
-    ) -> bool:
+    async def verify_permission(self, client_id: str, required_permission: Permission) -> bool:
         """
         Verify if a connection has the required permission.
 
@@ -346,10 +322,7 @@ class WebSocketAuthHandler:
         connection = self.connections[client_id]
 
         # Remove from user connections
-        if (
-            connection.user_data
-            and connection.user_data.user_id in self.user_connections
-        ):
+        if connection.user_data and connection.user_data.user_id in self.user_connections:
             self.user_connections[connection.user_data.user_id].discard(client_id)
             if not self.user_connections[connection.user_data.user_id]:
                 del self.user_connections[connection.user_data.user_id]
@@ -403,9 +376,7 @@ class WebSocketAuthHandler:
 ws_auth_handler = WebSocketAuthHandler()
 
 
-async def websocket_auth(
-    websocket: WebSocket, token: Optional[str] = None
-) -> TokenData:
+async def websocket_auth(websocket: WebSocket, token: Optional[str] = None) -> TokenData:
     """
     Authenticate a WebSocket connection.
 
@@ -419,9 +390,7 @@ async def websocket_auth(
 async def handle_token_refresh(client_id: str, refresh_token: str) -> Dict:
     """Handle token refresh request from WebSocket client."""
     try:
-        new_access_token, user_data = await ws_auth_handler.refresh_token(
-            client_id, refresh_token
-        )
+        new_access_token, user_data = await ws_auth_handler.refresh_token(client_id, refresh_token)
         return {
             "type": "token_refreshed",
             "access_token": new_access_token,

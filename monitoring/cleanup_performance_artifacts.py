@@ -12,9 +12,7 @@ from pathlib import Path
 from typing import Any, Dict, List
 
 # Setup logging
-logging.basicConfig(
-    level=logging.INFO, format="%(asctime)s - %(levelname)s - %(message)s"
-)
+logging.basicConfig(level=logging.INFO, format="%(asctime)s - %(levelname)s - %(message)s")
 logger = logging.getLogger(__name__)
 
 
@@ -159,9 +157,7 @@ class PerformanceArtifactCleaner:
                 try:
                     if dir_path.is_dir():
                         # Calculate directory size
-                        dir_size = sum(
-                            f.stat().st_size for f in dir_path.rglob("*") if f.is_file()
-                        )
+                        dir_size = sum(f.stat().st_size for f in dir_path.rglob("*") if f.is_file())
                         freed_space += dir_size
                         shutil.rmtree(dir_path)
                         self.cleanup_report["directories_removed"].append(str(dir_path))
@@ -197,9 +193,7 @@ class PerformanceArtifactCleaner:
             files = list(self.project_root.rglob(pattern))
             for file_path in files:
                 try:
-                    if file_path.is_file() and "monitoring/reports" not in str(
-                        file_path
-                    ):
+                    if file_path.is_file() and "monitoring/reports" not in str(file_path):
                         # Move to consolidated directory
                         new_path = consolidated_dir / file_path.name
                         if not new_path.exists():
@@ -252,9 +246,7 @@ class PerformanceArtifactCleaner:
                         removed_count += 1
                         logger.info(f"   Removed duplicate: {duplicate_file}")
                     except Exception as e:
-                        logger.warning(
-                            f"   Failed to remove duplicate {duplicate_file}: {e}"
-                        )
+                        logger.warning(f"   Failed to remove duplicate {duplicate_file}: {e}")
 
         self.cleanup_report["space_freed"] += freed_space
         logger.info(
@@ -291,9 +283,7 @@ class PerformanceArtifactCleaner:
                 logger.warning(f"   Failed to remove old report {report_file}: {e}")
 
         self.cleanup_report["space_freed"] += freed_space
-        logger.info(
-            f"✅ Removed {removed_count} old reports ({freed_space / 1024:.1f} KB freed)"
-        )
+        logger.info(f"✅ Removed {removed_count} old reports ({freed_space / 1024:.1f} KB freed)")
 
     def optimize_performance_configs(self) -> None:
         """Optimize and consolidate performance configuration files."""
@@ -341,9 +331,7 @@ class PerformanceArtifactCleaner:
                 json.dump(config_data, f, indent=2)
             logger.info(f"   Saved consolidated config: {config_path}")
 
-        logger.info(
-            f"✅ Optimized {len(consolidated_configs)} performance configurations"
-        )
+        logger.info(f"✅ Optimized {len(consolidated_configs)} performance configurations")
 
     def generate_cleanup_report(self) -> str:
         """Generate a comprehensive cleanup report."""
@@ -356,9 +344,7 @@ class PerformanceArtifactCleaner:
         }
 
         # Save report
-        report_path = (
-            self.project_root / "monitoring" / "reports" / "cleanup_report.json"
-        )
+        report_path = self.project_root / "monitoring" / "reports" / "cleanup_report.json"
         report_path.parent.mkdir(parents=True, exist_ok=True)
 
         with open(report_path, "w") as f:

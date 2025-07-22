@@ -96,9 +96,7 @@ class TestDependencyVerification:
 
             # Test that we can access core functionality
             assert hasattr(psycopg2, "connect"), "psycopg2.connect not available"
-            assert hasattr(psycopg2.extras, "RealDictCursor"), (
-                "RealDictCursor not available"
-            )
+            assert hasattr(psycopg2.extras, "RealDictCursor"), "RealDictCursor not available"
 
         except ImportError as e:
             pytest.fail(f"Failed to import psycopg2: {e}")
@@ -263,6 +261,7 @@ class TestDependencyVerification:
         # Check if PyJWT is installed (replaces python-jose)
         try:
             import jwt
+
             assert jwt  # Use the import to avoid F401
         except ImportError:
             missing_commands.append("pip install PyJWT")
@@ -284,18 +283,14 @@ class TestDatabaseConnectivity:
 
         # Validate URL format
         if not database_url.startswith("postgresql://"):
-            pytest.fail(
-                f"DATABASE_URL must start with postgresql://, got: {database_url[:20]}..."
-            )
+            pytest.fail(f"DATABASE_URL must start with postgresql://, got: {database_url[:20]}...")
 
         # Check for development credentials in production
         if os.getenv("PRODUCTION", "false").lower() == "true":
             dev_indicators = ["localhost", "127.0.0.1", "dev", "test"]
             for indicator in dev_indicators:
                 if indicator in database_url:
-                    pytest.fail(
-                        f"Production environment using development database: {indicator}"
-                    )
+                    pytest.fail(f"Production environment using development database: {indicator}")
 
     def test_database_connection_pool_creation(self):
         """Test that database connection pool can be created."""

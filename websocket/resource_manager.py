@@ -61,9 +61,7 @@ class ResourceConfig:
     agent_timeout: float = 3600.0  # 1 hour
     cleanup_interval: float = 60.0  # 1 minute
     enable_resource_limits: bool = True
-    connection_reuse_strategy: str = (
-        "least_loaded"  # least_loaded, round_robin, affinity
-    )
+    connection_reuse_strategy: str = "least_loaded"  # least_loaded, round_robin, affinity
 
     def __post_init__(self):
         """Validate configuration."""
@@ -172,9 +170,7 @@ class ResourceMetrics:
     def get_summary(self) -> Dict[str, Any]:
         """Get metrics summary."""
         total_attempts = self.total_allocations + self.allocation_failures
-        success_rate = (
-            self.total_allocations / total_attempts if total_attempts > 0 else 0.0
-        )
+        success_rate = self.total_allocations / total_attempts if total_attempts > 0 else 0.0
 
         return {
             "total_allocations": self.total_allocations,
@@ -245,9 +241,7 @@ class AgentResourceManager:
         async with self._lock:
             # Check if agent already has resources
             if agent_id in self._resources:
-                raise ResourceAllocationError(
-                    f"Agent {agent_id} already has allocated resources"
-                )
+                raise ResourceAllocationError(f"Agent {agent_id} already has allocated resources")
 
             try:
                 # Find or acquire a connection
@@ -386,9 +380,7 @@ class AgentResourceManager:
                     )
 
             resource.update_usage(memory=memory, cpu=cpu)
-            logger.debug(
-                f"Updated usage for agent {agent_id}: memory={memory}, cpu={cpu}"
-            )
+            logger.debug(f"Updated usage for agent {agent_id}: memory={memory}, cpu={cpu}")
 
     async def get_agent_connection(self, agent_id: str) -> Optional[PooledConnection]:
         """Get the connection assigned to an agent."""
@@ -431,9 +423,7 @@ class AgentResourceManager:
             for agent_id, resource in self._resources.items():
                 if resource.is_timed_out(self.config.agent_timeout):
                     agents_to_release.append(agent_id)
-                    logger.warning(
-                        f"Agent {agent_id} timed out after {self.config.agent_timeout}s"
-                    )
+                    logger.warning(f"Agent {agent_id} timed out after {self.config.agent_timeout}s")
 
             # Release timed-out agents
             for agent_id in agents_to_release:
@@ -454,9 +444,7 @@ class AgentResourceManager:
         total_memory = sum(r.memory_usage for r in self._resources.values())
         total_cpu = sum(r.cpu_usage for r in self._resources.values())
 
-        active_agents = sum(
-            1 for r in self._resources.values() if r.state == ResourceState.ACTIVE
-        )
+        active_agents = sum(1 for r in self._resources.values() if r.state == ResourceState.ACTIVE)
 
         metrics = self._metrics.get_summary()
         metrics.update(
@@ -487,9 +475,7 @@ class AgentResourceManager:
                     "state": resource.state.value,
                     "allocated_at": resource.allocated_at.isoformat(),
                     "activated_at": (
-                        resource.activated_at.isoformat()
-                        if resource.activated_at
-                        else None
+                        resource.activated_at.isoformat() if resource.activated_at else None
                     ),
                     "memory_usage": resource.memory_usage,
                     "cpu_usage": resource.cpu_usage,

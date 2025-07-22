@@ -84,15 +84,11 @@ async def test_metric_status_calculation(dashboard):
     # Test status calculation - use the global instance
     assert monitoring_dashboard._get_metric_status("inference_time_ms", 30) == "healthy"
     assert monitoring_dashboard._get_metric_status("inference_time_ms", 60) == "warning"
-    assert (
-        monitoring_dashboard._get_metric_status("inference_time_ms", 110) == "critical"
-    )
+    assert monitoring_dashboard._get_metric_status("inference_time_ms", 110) == "critical"
 
     assert monitoring_dashboard._get_metric_status("cpu_usage_percent", 50) == "healthy"
     assert monitoring_dashboard._get_metric_status("cpu_usage_percent", 75) == "warning"
-    assert (
-        monitoring_dashboard._get_metric_status("cpu_usage_percent", 95) == "critical"
-    )
+    assert monitoring_dashboard._get_metric_status("cpu_usage_percent", 95) == "critical"
 
 
 @pytest.mark.asyncio

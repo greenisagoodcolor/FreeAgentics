@@ -51,9 +51,7 @@ class WebSocketPipelineMonitor:
         self.active_pipelines: Dict[str, Dict[str, Any]] = {}
         self.pipeline_subscribers: Dict[str, Set[str]] = {}
 
-    def start_pipeline(
-        self, prompt_id: str, user_id: str, prompt_text: str
-    ) -> Dict[str, Any]:
+    def start_pipeline(self, prompt_id: str, user_id: str, prompt_text: str) -> Dict[str, Any]:
         """Record the start of a new pipeline processing.
 
         Args:
@@ -67,9 +65,7 @@ class WebSocketPipelineMonitor:
         pipeline_info = {
             "prompt_id": prompt_id,
             "user_id": user_id,
-            "prompt_text": prompt_text[:100] + "..."
-            if len(prompt_text) > 100
-            else prompt_text,
+            "prompt_text": prompt_text[:100] + "..." if len(prompt_text) > 100 else prompt_text,
             "start_time": datetime.utcnow(),
             "current_stage": PipelineStage.INITIALIZATION.value,
             "stages_completed": [],
@@ -113,17 +109,12 @@ class WebSocketPipelineMonitor:
         pipeline["last_update"] = datetime.utcnow()
 
         # Record completed stage
-        if (
-            previous_stage != stage.value
-            and previous_stage != PipelineStage.INITIALIZATION.value
-        ):
+        if previous_stage != stage.value and previous_stage != PipelineStage.INITIALIZATION.value:
             pipeline["stages_completed"].append(
                 {
                     "stage": previous_stage,
                     "completed_at": datetime.utcnow().isoformat(),
-                    "duration_ms": self._calculate_stage_duration(
-                        pipeline, previous_stage
-                    ),
+                    "duration_ms": self._calculate_stage_duration(pipeline, previous_stage),
                 }
             )
 
@@ -239,9 +230,7 @@ class WebSocketPipelineMonitor:
         """
         return self.active_pipelines.get(prompt_id)
 
-    def get_active_pipelines(
-        self, user_id: Optional[str] = None
-    ) -> List[Dict[str, Any]]:
+    def get_active_pipelines(self, user_id: Optional[str] = None) -> List[Dict[str, Any]]:
         """Get all active pipelines, optionally filtered by user.
 
         Args:
@@ -258,9 +247,11 @@ class WebSocketPipelineMonitor:
                         "prompt_id": prompt_id,
                         "user_id": pipeline.get("user_id"),
                         "current_stage": pipeline.get("current_stage"),
-                        "start_time": pipeline.get("start_time").isoformat()
-                        if pipeline.get("start_time")
-                        else None,
+                        "start_time": (
+                            pipeline.get("start_time").isoformat()
+                            if pipeline.get("start_time")
+                            else None
+                        ),
                         "errors_count": len(pipeline.get("errors", [])),
                         "stages_completed": len(pipeline.get("stages_completed", [])),
                     }
@@ -380,9 +371,7 @@ async def broadcast_pipeline_event(
             await websocket_manager.send_personal_message(event_data, client_id)
     elif websocket_manager:
         # Broadcast to all if no specific subscribers
-        await websocket_manager.broadcast(
-            event_data, event_type=f"pipeline:{prompt_id}"
-        )
+        await websocket_manager.broadcast(event_data, event_type=f"pipeline:{prompt_id}")
 
     logger.debug(f"Broadcasted {event_type.value} for pipeline {prompt_id}")
 

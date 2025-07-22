@@ -171,12 +171,8 @@ async def get_security_summary(
 @router.get("/security/events", response_model=List[SecurityEventResponse])
 @require_permission(Permission.ADMIN_SYSTEM)
 async def get_security_events(
-    event_type: Optional[SecurityEventType] = Query(
-        None, description="Filter by event type"
-    ),
-    severity: Optional[SecurityEventSeverity] = Query(
-        None, description="Filter by severity"
-    ),
+    event_type: Optional[SecurityEventType] = Query(None, description="Filter by event type"),
+    severity: Optional[SecurityEventSeverity] = Query(None, description="Filter by severity"),
     user_id: Optional[str] = Query(None, description="Filter by user ID"),
     ip_address: Optional[str] = Query(None, description="Filter by IP address"),
     hours: int = Query(24, ge=1, le=168, description="Hours to look back (max 7 days)"),
@@ -199,9 +195,7 @@ async def get_security_events(
         try:
             # Build query
             cutoff = datetime.utcnow() - timedelta(hours=hours)
-            query = audit_db.query(SecurityAuditLog).filter(
-                SecurityAuditLog.timestamp >= cutoff
-            )
+            query = audit_db.query(SecurityAuditLog).filter(SecurityAuditLog.timestamp >= cutoff)
 
             # Apply filters
             if event_type:
@@ -214,9 +208,7 @@ async def get_security_events(
                 query = query.filter(SecurityAuditLog.ip_address == ip_address)
 
             # Order by timestamp descending and limit
-            events = (
-                query.order_by(SecurityAuditLog.timestamp.desc()).limit(limit).all()
-            )
+            events = query.order_by(SecurityAuditLog.timestamp.desc()).limit(limit).all()
 
             # Convert to response models
             return [
@@ -259,12 +251,10 @@ async def get_suspicious_activity(
     return {
         "suspicious_ips": list(security_auditor.suspicious_ips),
         "failed_login_tracking": {
-            key: len(attempts)
-            for key, attempts in security_auditor.failed_login_attempts.items()
+            key: len(attempts) for key, attempts in security_auditor.failed_login_attempts.items()
         },
         "rate_limit_violations": {
-            ip: len(violations)
-            for ip, violations in security_auditor.rate_limit_violations.items()
+            ip: len(violations) for ip, violations in security_auditor.rate_limit_violations.items()
         },
     }
 
@@ -859,12 +849,8 @@ async def get_certificate_info(
         # Parse certificate information (simplified)
         subject = "CN=freeagentics.com"  # Would parse from cert_text
         issuer = "Let's Encrypt Authority X3"  # Would parse from cert_text
-        valid_from = datetime.utcnow() - timedelta(
-            days=10
-        )  # Would parse from cert_text
-        valid_until = datetime.utcnow() + timedelta(
-            days=80
-        )  # Would parse from cert_text
+        valid_from = datetime.utcnow() - timedelta(days=10)  # Would parse from cert_text
+        valid_until = datetime.utcnow() + timedelta(days=80)  # Would parse from cert_text
         days_until_expiry = (valid_until - datetime.utcnow()).days
 
         return CertificateInfoResponse(

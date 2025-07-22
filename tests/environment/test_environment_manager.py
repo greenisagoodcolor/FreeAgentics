@@ -263,9 +263,7 @@ class TestEnvironmentManager:
             with patch.object(env_manager.health_checker, "check_redis") as mock_redis:
                 mock_redis.return_value = True
 
-                with patch.object(
-                    env_manager.health_checker, "check_all_services"
-                ) as mock_all:
+                with patch.object(env_manager.health_checker, "check_all_services") as mock_all:
                     mock_all.return_value = {"postgres": True, "redis": True}
 
                     is_valid = env_manager.validate_state()
@@ -306,9 +304,7 @@ class TestEnvironmentManager:
     def test_get_logs(self, env_manager):
         """Test getting service logs."""
         with patch("subprocess.run") as mock_run:
-            mock_run.return_value = Mock(
-                returncode=0, stdout="Service logs here", stderr=""
-            )
+            mock_run.return_value = Mock(returncode=0, stdout="Service logs here", stderr="")
 
             logs = env_manager.get_logs("postgres", lines=100)
 

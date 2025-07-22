@@ -48,9 +48,7 @@ class PerformanceMetrics:
                 "p99": np.percentile(self.spawn_times, 99),
                 "min": min(self.spawn_times),
                 "max": max(self.spawn_times),
-                "stdev": statistics.stdev(self.spawn_times)
-                if len(self.spawn_times) > 1
-                else 0,
+                "stdev": statistics.stdev(self.spawn_times) if len(self.spawn_times) > 1 else 0,
             },
             "memory": {
                 "mean": statistics.mean(self.memory_usage),
@@ -162,9 +160,7 @@ class AgentSpawnBenchmarks:
             # Spawn agents
             agents = []
             for i in range(count):
-                agent = BaseAgent(
-                    agent_id=f"scaling-agent-{i}", model="gpt-4", temperature=0.7
-                )
+                agent = BaseAgent(agent_id=f"scaling-agent-{i}", model="gpt-4", temperature=0.7)
                 agents.append(agent)
 
             duration = time.perf_counter() - start_time
@@ -195,9 +191,7 @@ class AgentSpawnBenchmarks:
         base_time = scaling_results[0]["per_agent_time"]
         for result in scaling_results[1:]:
             efficiency = base_time / result["per_agent_time"] * 100
-            print(
-                f"  Scaling efficiency at {result['count']} agents: {efficiency:.1f}%"
-            )
+            print(f"  Scaling efficiency at {result['count']} agents: {efficiency:.1f}%")
 
     @pytest.mark.benchmark(group="agent-spawn", min_rounds=5)
     @pytest.mark.asyncio
@@ -281,9 +275,7 @@ class AgentSpawnBenchmarks:
                 self.agents = []
                 for i in range(size):
                     self.agents.append(
-                        BaseAgent(
-                            agent_id=f"pooled-{i}", model="gpt-4", temperature=0.7
-                        )
+                        BaseAgent(agent_id=f"pooled-{i}", model="gpt-4", temperature=0.7)
                     )
                 self.index = 0
 

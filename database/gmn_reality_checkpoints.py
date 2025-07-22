@@ -41,21 +41,11 @@ class GMNRealityCheckpoints:
         try:
             # Run individual checkpoints
             report["checkpoints"]["version_integrity"] = self.check_version_integrity()
-            report["checkpoints"]["orphaned_references"] = (
-                self.check_orphaned_references()
-            )
-            report["checkpoints"]["active_constraints"] = (
-                self.check_active_constraints()
-            )
-            report["checkpoints"]["checksum_integrity"] = (
-                self.check_checksum_integrity()
-            )
-            report["checkpoints"]["performance_metrics"] = (
-                self.check_performance_metrics()
-            )
-            report["checkpoints"]["storage_efficiency"] = (
-                self.check_storage_efficiency()
-            )
+            report["checkpoints"]["orphaned_references"] = self.check_orphaned_references()
+            report["checkpoints"]["active_constraints"] = self.check_active_constraints()
+            report["checkpoints"]["checksum_integrity"] = self.check_checksum_integrity()
+            report["checkpoints"]["performance_metrics"] = self.check_performance_metrics()
+            report["checkpoints"]["storage_efficiency"] = self.check_storage_efficiency()
 
             # Determine overall health
             critical_count = sum(
@@ -328,9 +318,7 @@ class GMNRealityCheckpoints:
 
             if no_active_result:
                 for row in no_active_result:
-                    result["warnings"].append(
-                        f"Agent {row.agent_id} has no active specification"
-                    )
+                    result["warnings"].append(f"Agent {row.agent_id} has no active specification")
 
             result["metrics"] = {
                 "agents_with_multiple_active": len(multiple_active_result),
@@ -376,9 +364,7 @@ class GMNRealityCheckpoints:
 
             result["metrics"] = {
                 "specifications_without_checksum": missing_checksum_count,
-                "total_specifications": self.db.query(
-                    GMNVersionedSpecification
-                ).count(),
+                "total_specifications": self.db.query(GMNVersionedSpecification).count(),
             }
 
         except Exception as e:
@@ -473,14 +459,10 @@ class GMNRealityCheckpoints:
                 "large_specifications_count": len(large_specs_result),
                 "agents_with_many_versions": len(high_version_result),
                 "avg_nodes": (
-                    float(complexity_result.avg_nodes)
-                    if complexity_result.avg_nodes
-                    else 0
+                    float(complexity_result.avg_nodes) if complexity_result.avg_nodes else 0
                 ),
                 "avg_edges": (
-                    float(complexity_result.avg_edges)
-                    if complexity_result.avg_edges
-                    else 0
+                    float(complexity_result.avg_edges) if complexity_result.avg_edges else 0
                 ),
                 "avg_complexity": (
                     float(complexity_result.avg_complexity)
@@ -527,9 +509,7 @@ class GMNRealityCheckpoints:
             duplicate_result = self.db.execute(duplicate_content_query).fetchall()
 
             if duplicate_result:
-                total_duplicates = sum(
-                    row.duplicate_count - 1 for row in duplicate_result
-                )
+                total_duplicates = sum(row.duplicate_count - 1 for row in duplicate_result)
                 result["warnings"].append(
                     f"Found {len(duplicate_result)} sets of duplicate content affecting {total_duplicates} specifications"
                 )
@@ -555,8 +535,7 @@ class GMNRealityCheckpoints:
             result["metrics"] = {
                 "duplicate_content_groups": len(duplicate_result),
                 "total_transitions": transition_result.total_transitions or 0,
-                "agents_with_transitions": transition_result.agents_with_transitions
-                or 0,
+                "agents_with_transitions": transition_result.agents_with_transitions or 0,
                 "avg_change_summary_size": (
                     float(transition_result.avg_change_summary_size)
                     if transition_result.avg_change_summary_size
@@ -575,9 +554,7 @@ class GMNRealityCheckpoints:
         try:
             summary = {
                 "timestamp": datetime.utcnow().isoformat(),
-                "total_specifications": self.db.query(
-                    GMNVersionedSpecification
-                ).count(),
+                "total_specifications": self.db.query(GMNVersionedSpecification).count(),
                 "active_specifications": (
                     self.db.query(GMNVersionedSpecification)
                     .filter(GMNVersionedSpecification.status == GMNVersionStatus.ACTIVE)

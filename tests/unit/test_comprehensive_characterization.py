@@ -130,9 +130,7 @@ class TestBaseAgentCharacterization:
         """Test BasicExplorerAgent can be created."""
         from agents.base_agent import BasicExplorerAgent
 
-        agent = BasicExplorerAgent(
-            agent_id="explorer_001", name="test_explorer", grid_size=5
-        )
+        agent = BasicExplorerAgent(agent_id="explorer_001", name="test_explorer", grid_size=5)
 
         assert agent.agent_id == "explorer_001"
         assert agent.name == "test_explorer"
@@ -148,9 +146,7 @@ class TestBaseAgentCharacterization:
 
         config = GridWorldConfig(width=5, height=5)
         world = GridWorld(config)
-        agent = BasicExplorerAgent(
-            agent_id="test_agent", name="test_agent", grid_size=5
-        )
+        agent = BasicExplorerAgent(agent_id="test_agent", name="test_agent", grid_size=5)
 
         # Add agent to world
         world.add_agent(agent)
@@ -395,9 +391,7 @@ class TestCoalitionCharacterization:
         """Test Coalition class can be created."""
         from coalitions.coalition import Coalition
 
-        coalition = Coalition(
-            coalition_id="test_coalition", member_ids=["agent_1", "agent_2"]
-        )
+        coalition = Coalition(coalition_id="test_coalition", member_ids=["agent_1", "agent_2"])
 
         assert coalition.coalition_id == "test_coalition"
         assert hasattr(coalition, "member_ids")

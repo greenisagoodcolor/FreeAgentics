@@ -61,9 +61,7 @@ class TestMetricDefinitions:
 
         # Test usage
         http_requests_total.labels(method="GET", endpoint="/health", status="200").inc()
-        http_request_duration_seconds.labels(method="GET", endpoint="/health").observe(
-            0.05
-        )
+        http_request_duration_seconds.labels(method="GET", endpoint="/health").observe(0.05)
 
         assert http_requests_total._name == "http_requests_total"
         assert http_request_duration_seconds._name == "http_request_duration_seconds"
@@ -261,12 +259,8 @@ class TestMetricsMiddleware:
 
             # Record metrics
             duration = time.time() - start_time
-            http_requests_total.labels(
-                method=method, endpoint=endpoint, status=status
-            ).inc()
-            http_request_duration_seconds.labels(
-                method=method, endpoint=endpoint
-            ).observe(duration)
+            http_requests_total.labels(method=method, endpoint=endpoint, status=status).inc()
+            http_request_duration_seconds.labels(method=method, endpoint=endpoint).observe(duration)
 
             return status
 

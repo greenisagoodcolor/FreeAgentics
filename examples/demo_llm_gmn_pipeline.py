@@ -54,9 +54,7 @@ def main():
         else:
             print(f"✅ Found {len(enabled_providers)} enabled providers:")
             for name, provider_config in enabled_providers.items():
-                print(
-                    f"   • {name.upper()}: {'✅' if provider_config.api_key else '❌'}"
-                )
+                print(f"   • {name.upper()}: {'✅' if provider_config.api_key else '❌'}")
             use_llm = any(p.api_key for p in enabled_providers.values())
 
     except ImportError as e:
@@ -146,9 +144,7 @@ Make it realistic and functional for active inference.
                 try:
                     response = manager.generate_with_fallback(request)
                     print(f"✅ Generated GMN using {response.provider.value}")
-                    print(
-                        f"   Tokens: {response.input_tokens}→{response.output_tokens}"
-                    )
+                    print(f"   Tokens: {response.input_tokens}→{response.output_tokens}")
                     print(f"   Cost: ${response.cost:.6f}")
                     print(f"   Latency: {response.latency_ms:.1f}ms")
 
@@ -184,9 +180,7 @@ Make it realistic and functional for active inference.
             print("📚 Using pre-defined GMN specification:")
             print("-" * 35)
             print(
-                EXAMPLE_GMN_SPEC[:300] + "..."
-                if len(EXAMPLE_GMN_SPEC) > 300
-                else EXAMPLE_GMN_SPEC
+                EXAMPLE_GMN_SPEC[:300] + "..." if len(EXAMPLE_GMN_SPEC) > 300 else EXAMPLE_GMN_SPEC
             )
 
         try:
@@ -234,9 +228,7 @@ Make it realistic and functional for active inference.
 
             # Show available matrices/arrays
             available_matrices = [
-                k
-                for k in pymdp_model.keys()
-                if k not in ["num_states", "num_obs", "num_actions"]
+                k for k in pymdp_model.keys() if k not in ["num_states", "num_obs", "num_actions"]
             ]
             if available_matrices:
                 print(f"   Available matrices: {', '.join(available_matrices)}")

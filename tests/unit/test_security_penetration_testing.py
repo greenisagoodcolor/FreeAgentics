@@ -62,9 +62,7 @@ class TestSecurityPenetrationTesting:
         payload["role"] = "admin"
 
         # Re-encode
-        modified_payload = (
-            base64.b64encode(json.dumps(payload).encode()).decode().rstrip("=")
-        )
+        modified_payload = base64.b64encode(json.dumps(payload).encode()).decode().rstrip("=")
         tampered_token = f"{token_parts[0]}.{modified_payload}.{token_parts[2]}"
 
         # Should fail signature verification
@@ -94,19 +92,13 @@ class TestSecurityPenetrationTesting:
             return time.time() - start_time
 
         # Test with valid user, correct password
-        correct_times = [
-            time_authentication("timing_user", "correct_password") for _ in range(5)
-        ]
+        correct_times = [time_authentication("timing_user", "correct_password") for _ in range(5)]
 
         # Test with valid user, wrong password
-        wrong_pass_times = [
-            time_authentication("timing_user", "wrong_password") for _ in range(5)
-        ]
+        wrong_pass_times = [time_authentication("timing_user", "wrong_password") for _ in range(5)]
 
         # Test with non-existent user
-        nonexistent_times = [
-            time_authentication("nonexistent", "any_password") for _ in range(5)
-        ]
+        nonexistent_times = [time_authentication("nonexistent", "any_password") for _ in range(5)]
 
         # Calculate averages
         avg_correct = sum(correct_times) / len(correct_times)
@@ -114,21 +106,19 @@ class TestSecurityPenetrationTesting:
         avg_nonexistent = sum(nonexistent_times) / len(nonexistent_times)
 
         # Time differences should be reasonable (within 50ms)
-        assert abs(avg_correct - avg_wrong) < 0.05, (
-            "Timing attack vulnerability: correct vs wrong password"
-        )
-        assert abs(avg_wrong - avg_nonexistent) < 0.05, (
-            "Timing attack vulnerability: wrong vs nonexistent user"
-        )
+        assert (
+            abs(avg_correct - avg_wrong) < 0.05
+        ), "Timing attack vulnerability: correct vs wrong password"
+        assert (
+            abs(avg_wrong - avg_nonexistent) < 0.05
+        ), "Timing attack vulnerability: wrong vs nonexistent user"
 
     def test_password_hashing_security(self, auth_manager):
         """Test password hashing and storage security."""
         password = "test_password_123"
 
         # Register user
-        auth_manager.register_user(
-            "hash_user", "hash@example.com", password, UserRole.OBSERVER
-        )
+        auth_manager.register_user("hash_user", "hash@example.com", password, UserRole.OBSERVER)
 
         # Get stored user data
         stored_user_data = auth_manager.users.get("hash_user")
@@ -226,9 +216,7 @@ class TestSecurityPenetrationTesting:
             # Test in username field
             try:
                 result = auth_manager.authenticate_user(payload, "password")
-                assert result is None, (
-                    f"SQL injection may be possible with payload: {payload}"
-                )
+                assert result is None, f"SQL injection may be possible with payload: {payload}"
             except Exception:
                 pass  # Exception is acceptable
 
@@ -311,13 +299,9 @@ class TestSecurityPenetrationTesting:
 
         for i in range(max_attempts):
             try:
-                result = auth_manager.authenticate_user(
-                    "brute_user", f"wrong_password_{i}"
-                )
+                result = auth_manager.authenticate_user("brute_user", f"wrong_password_{i}")
                 if result:
-                    pytest.fail(
-                        "Unexpected successful authentication with wrong password"
-                    )
+                    pytest.fail("Unexpected successful authentication with wrong password")
             except Exception:
                 pass
 
@@ -328,9 +312,7 @@ class TestSecurityPenetrationTesting:
 
         # Successful authentication should still work
         result = auth_manager.authenticate_user("brute_user", "correct_password")
-        assert result is not None, (
-            "Legitimate authentication failed after brute force attempts"
-        )
+        assert result is not None, "Legitimate authentication failed after brute force attempts"
 
     def test_token_blacklisting_functionality(self, auth_manager):
         """Test token blacklisting/logout functionality."""
@@ -388,9 +370,7 @@ class TestSecurityPenetrationTesting:
             assert new_refresh_token != refresh_token
 
             # New access token should be valid
-            new_payload = jwt.decode(
-                new_access_token, JWT_SECRET, algorithms=[ALGORITHM]
-            )
+            new_payload = jwt.decode(new_access_token, JWT_SECRET, algorithms=[ALGORITHM])
             assert new_payload["username"] == user.username
 
         except Exception:
@@ -473,9 +453,7 @@ class TestSecurityPenetrationTesting:
 
         def authenticate():
             try:
-                result = auth_manager.authenticate_user(
-                    "concurrent_user", "password123"
-                )
+                result = auth_manager.authenticate_user("concurrent_user", "password123")
                 results.append(result is not None)
             except Exception:
                 results.append(False)
@@ -492,9 +470,9 @@ class TestSecurityPenetrationTesting:
 
         # All authentications should succeed
         successful_auths = sum(results)
-        assert successful_auths == 10, (
-            f"Only {successful_auths}/10 concurrent authentications succeeded"
-        )
+        assert (
+            successful_auths == 10
+        ), f"Only {successful_auths}/10 concurrent authentications succeeded"
 
     def test_password_complexity_awareness(self, auth_manager):
         """Test password complexity awareness (not enforcement)."""
@@ -517,12 +495,8 @@ class TestSecurityPenetrationTesting:
                 )
 
                 # Test that authentication works
-                result = auth_manager.authenticate_user(
-                    f"complexity_user_{i}", password
-                )
-                assert result is not None, (
-                    f"Authentication failed for password: {password}"
-                )
+                result = auth_manager.authenticate_user(f"complexity_user_{i}", password)
+                assert result is not None, f"Authentication failed for password: {password}"
 
             except Exception:
                 # Some passwords might be rejected
@@ -544,13 +518,13 @@ class TestSecurityPenetrationTesting:
             )
 
             # Verify role assignment
-            assert user.role == role, (
-                f"Role not properly assigned: expected {role}, got {user.role}"
-            )
+            assert (
+                user.role == role
+            ), f"Role not properly assigned: expected {role}, got {user.role}"
 
             # Test token contains correct role
             token = auth_manager.create_access_token(user)
             payload = jwt.decode(token, JWT_SECRET, algorithms=[ALGORITHM])
-            assert payload["role"] == role, (
-                f"Token role mismatch: expected {role}, got {payload['role']}"
-            )
+            assert (
+                payload["role"] == role
+            ), f"Token role mismatch: expected {role}, got {payload['role']}"

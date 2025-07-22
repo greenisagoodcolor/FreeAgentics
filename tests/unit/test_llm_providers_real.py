@@ -40,9 +40,7 @@ except ImportError:
         OFFLINE = "offline"
 
     class GenerationRequest:
-        def __init__(
-            self, model, messages, temperature=0.7, max_tokens=None, stream=False
-        ):
+        def __init__(self, model, messages, temperature=0.7, max_tokens=None, stream=False):
             self.model = model
             self.messages = messages
             self.temperature = temperature
@@ -113,9 +111,7 @@ class TestOpenAIProvider:
             assert False, "Test bypass removed - must fix underlying issue"
 
         provider = OpenAIProvider()
-        credentials = ProviderCredentials(
-            api_key="test-api-key", organization_id="test-org"
-        )
+        credentials = ProviderCredentials(api_key="test-api-key", organization_id="test-org")
 
         # Mock the OpenAI client to avoid real API calls in tests
         with patch("openai.OpenAI") as mock_openai_class:
@@ -233,8 +229,8 @@ class TestOpenAIProvider:
             # Mock authentication error
             import openai
 
-            mock_client.chat.completions.create.side_effect = (
-                openai.AuthenticationError("Invalid API key")
+            mock_client.chat.completions.create.side_effect = openai.AuthenticationError(
+                "Invalid API key"
             )
 
             provider.configure(credentials)

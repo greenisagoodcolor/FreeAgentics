@@ -253,22 +253,16 @@ def with_error_handling(operation_name: str, fallback_result: Any = None) -> Cal
                 if recovery_info["can_retry"]:
                     try:
                         # Attempt retry with simplified parameters
-                        logger.info(
-                            f"Retrying {operation_name} for agent {self.agent_id}"
-                        )
+                        logger.info(f"Retrying {operation_name} for agent {self.agent_id}")
                         if hasattr(self, f"_fallback_{func.__name__}"):
                             # Use fallback method if available
-                            fallback_method = getattr(
-                                self, f"_fallback_{func.__name__}"
-                            )
+                            fallback_method = getattr(self, f"_fallback_{func.__name__}")
                             return fallback_method(*args, **kwargs)
                         else:
                             # Use default fallback result
                             return fallback_result
                     except Exception as retry_error:
-                        logger.error(
-                            f"Retry failed for {operation_name}: {retry_error}"
-                        )
+                        logger.error(f"Retry failed for {operation_name}: {retry_error}")
 
                 # Return fallback result
                 return fallback_result
@@ -353,9 +347,7 @@ def validate_observation(observation: Any) -> Dict[str, Any]:
 
         # Copy other valid fields
         for key, value in observation.items():
-            if key not in ["position"] and isinstance(
-                value, (int, float, str, list, dict)
-            ):
+            if key not in ["position"] and isinstance(value, (int, float, str, list, dict)):
                 sanitized[key] = value
 
         return sanitized

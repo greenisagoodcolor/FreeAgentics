@@ -151,15 +151,13 @@ class TestNemesisPyMDPValidation:
         and all mathematical structures are correctly initialized.
         """
         # Create agent - this MUST work without fallbacks
-        agent = BasicExplorerAgent(
-            agent_id="nemesis_agent_1", name="nemesis_agent", grid_size=5
-        )
+        agent = BasicExplorerAgent(agent_id="nemesis_agent_1", name="nemesis_agent", grid_size=5)
 
         # VALIDATION 1: PyMDP agent must exist
         assert agent.pymdp_agent is not None, "PyMDP agent MUST be initialized"
-        assert isinstance(agent.pymdp_agent, PyMDPAgent), (
-            f"Expected PyMDPAgent, got {type(agent.pymdp_agent)}"
-        )
+        assert isinstance(
+            agent.pymdp_agent, PyMDPAgent
+        ), f"Expected PyMDPAgent, got {type(agent.pymdp_agent)}"
 
         # VALIDATION 2: Check PyMDP agent has proper components
         assert hasattr(agent.pymdp_agent, "A"), "PyMDP agent missing observation model"
@@ -175,9 +173,9 @@ class TestNemesisPyMDPValidation:
                 # Each column should sum to 1 (proper likelihood)
                 for col_idx in range(A_factor.shape[-1]):
                     col_sum = A_factor[..., col_idx].sum()
-                    assert np.isclose(col_sum, 1.0, atol=1e-6), (
-                        f"A matrix column {col_idx} doesn't sum to 1: {col_sum}"
-                    )
+                    assert np.isclose(
+                        col_sum, 1.0, atol=1e-6
+                    ), f"A matrix column {col_idx} doesn't sum to 1: {col_sum}"
         else:
             A = agent.pymdp_agent.A
             assert isinstance(A, np.ndarray), "A must be numpy array"
@@ -190,9 +188,9 @@ class TestNemesisPyMDPValidation:
                 for action_idx in range(B_factor.shape[0]):
                     for col_idx in range(B_factor.shape[-1]):
                         col_sum = B_factor[action_idx, :, col_idx].sum()
-                        assert np.isclose(col_sum, 1.0, atol=1e-6), (
-                            f"B matrix action {action_idx} column {col_idx} doesn't sum to 1: {col_sum}"
-                        )
+                        assert np.isclose(
+                            col_sum, 1.0, atol=1e-6
+                        ), f"B matrix action {action_idx} column {col_idx} doesn't sum to 1: {col_sum}"
         else:
             B = agent.pymdp_agent.B
             assert isinstance(B, np.ndarray), "B must be numpy array"
@@ -200,9 +198,9 @@ class TestNemesisPyMDPValidation:
         # Check initial beliefs sum to 1
         if hasattr(agent.pymdp_agent, "qs") and agent.pymdp_agent.qs is not None:
             for qs_factor in agent.pymdp_agent.qs:
-                assert np.isclose(qs_factor.sum(), 1.0, atol=1e-6), (
-                    f"Initial beliefs don't sum to 1: {qs_factor.sum()}"
-                )
+                assert np.isclose(
+                    qs_factor.sum(), 1.0, atol=1e-6
+                ), f"Initial beliefs don't sum to 1: {qs_factor.sum()}"
                 assert np.all(qs_factor >= 0), "Negative probabilities in beliefs"
 
     def test_belief_updates_with_real_observations(self, real_observation_models):
@@ -230,9 +228,9 @@ class TestNemesisPyMDPValidation:
 
         # Initial beliefs should match D (PyMDP may renormalize)
         initial_beliefs = pymdp_agent.qs[0]
-        assert np.allclose(initial_beliefs, D, atol=1e-2), (
-            f"Initial beliefs {initial_beliefs} don't match prior {D}"
-        )
+        assert np.allclose(
+            initial_beliefs, D, atol=1e-2
+        ), f"Initial beliefs {initial_beliefs} don't match prior {D}"
         assert np.isclose(initial_beliefs.sum(), 1.0), "Initial beliefs don't sum to 1"
 
         # Observe state 0 (observation index 0)
@@ -242,12 +240,10 @@ class TestNemesisPyMDPValidation:
         # After observing state 0 with perfect observation model,
         # beliefs should strongly favor state 0
         posterior_beliefs = pymdp_agent.qs[0]
-        assert posterior_beliefs[0] > 0.9, (
-            f"Belief in state 0 should be high after observing it: {posterior_beliefs}"
-        )
-        assert np.isclose(posterior_beliefs.sum(), 1.0, atol=1e-6), (
-            "Posterior doesn't sum to 1"
-        )
+        assert (
+            posterior_beliefs[0] > 0.9
+        ), f"Belief in state 0 should be high after observing it: {posterior_beliefs}"
+        assert np.isclose(posterior_beliefs.sum(), 1.0, atol=1e-6), "Posterior doesn't sum to 1"
 
         # Observe state 1
         observation = [1]
@@ -255,16 +251,14 @@ class TestNemesisPyMDPValidation:
 
         # Beliefs should now favor state 1
         posterior_beliefs = pymdp_agent.qs[0]
-        assert posterior_beliefs[1] > 0.9, (
-            f"Belief in state 1 should be high after observing it: {posterior_beliefs}"
-        )
+        assert (
+            posterior_beliefs[1] > 0.9
+        ), f"Belief in state 1 should be high after observing it: {posterior_beliefs}"
 
         # Mathematical validation: beliefs are proper probability distribution
         assert np.all(posterior_beliefs >= 0), "Negative probabilities detected"
         assert np.all(posterior_beliefs <= 1), "Probabilities exceed 1"
-        assert np.isclose(posterior_beliefs.sum(), 1.0, atol=1e-6), (
-            "Probabilities don't sum to 1"
-        )
+        assert np.isclose(posterior_beliefs.sum(), 1.0, atol=1e-6), "Probabilities don't sum to 1"
 
     def test_action_sampling_return_types(self):
         """
@@ -291,21 +285,17 @@ class TestNemesisPyMDPValidation:
         action_idx = adapter.sample_action(agent.pymdp_agent)
 
         # CRITICAL VALIDATION: Must be exact Python int
-        assert isinstance(action_idx, int), (
-            f"Action must be Python int, got {type(action_idx)}"
-        )
-        assert not isinstance(action_idx, np.integer), (
-            "Action should not be numpy integer"
-        )
+        assert isinstance(action_idx, int), f"Action must be Python int, got {type(action_idx)}"
+        assert not isinstance(action_idx, np.integer), "Action should not be numpy integer"
         assert action_idx >= 0, f"Action index must be non-negative, got {action_idx}"
 
         # Test through agent's select_action method
         agent_action = agent.select_action()
 
         # Agent converts action index to action name
-        assert isinstance(agent_action, str), (
-            f"Agent action should be string, got {type(agent_action)}"
-        )
+        assert isinstance(
+            agent_action, str
+        ), f"Agent action should be string, got {type(agent_action)}"
         assert agent_action in [
             "up",
             "down",
@@ -318,9 +308,7 @@ class TestNemesisPyMDPValidation:
         for _ in range(10):
             action = adapter.sample_action(agent.pymdp_agent)
             assert isinstance(action, int), "All sampled actions must be int"
-            assert 0 <= action < len(agent.pymdp_agent.policies), (
-                f"Action {action} out of range"
-            )
+            assert 0 <= action < len(agent.pymdp_agent.policies), f"Action {action} out of range"
 
     def test_planning_and_inference_operations(self, real_transition_models):
         """
@@ -344,9 +332,9 @@ class TestNemesisPyMDPValidation:
 
         # VALIDATION 1: Policy posterior is proper distribution
         assert isinstance(q_pi, np.ndarray), "Policy posterior must be numpy array"
-        assert np.isclose(q_pi.sum(), 1.0, atol=1e-6), (
-            f"Policy posterior doesn't sum to 1: {q_pi.sum()}"
-        )
+        assert np.isclose(
+            q_pi.sum(), 1.0, atol=1e-6
+        ), f"Policy posterior doesn't sum to 1: {q_pi.sum()}"
         assert np.all(q_pi >= 0), "Negative policy probabilities"
 
         # VALIDATION 2: Expected free energy is finite
@@ -359,9 +347,9 @@ class TestNemesisPyMDPValidation:
 
         # Starting from state 2, best action should be "left" (action 2) to reach state 0
         first_action = best_policy[0, 0]  # First action of best policy
-        assert first_action == 2, (
-            f"Expected action 2 (left) to move towards goal, got {first_action}"
-        )
+        assert (
+            first_action == 2
+        ), f"Expected action 2 (left) to move towards goal, got {first_action}"
 
         # Sample action and verify it matches expected behavior
         action = pymdp_agent.sample_action()
@@ -385,9 +373,7 @@ class TestNemesisPyMDPValidation:
         # Process observation
         observation = {
             "position": (1, 1),
-            "surroundings": np.array(
-                [[0, 0, 0], [0, 1, 0], [0, 0, 0]]
-            ),  # Agent in center
+            "surroundings": np.array([[0, 0, 0], [0, 1, 0], [0, 0, 0]]),  # Agent in center
         }
 
         agent.perceive(observation)
@@ -399,9 +385,7 @@ class TestNemesisPyMDPValidation:
         # 1. Validate observation likelihoods
         if hasattr(pymdp_agent, "likelihood") and pymdp_agent.likelihood is not None:
             likelihood = pymdp_agent.likelihood
-            assert isinstance(likelihood, (np.ndarray, list)), (
-                "Likelihood must be array or list"
-            )
+            assert isinstance(likelihood, (np.ndarray, list)), "Likelihood must be array or list"
             if isinstance(likelihood, np.ndarray):
                 assert np.all(likelihood >= 0), "Negative likelihoods detected"
                 assert np.all(likelihood <= 1), "Likelihoods exceed 1"
@@ -410,30 +394,24 @@ class TestNemesisPyMDPValidation:
         if hasattr(pymdp_agent, "qs") and pymdp_agent.qs is not None:
             for factor_idx, qs_factor in enumerate(pymdp_agent.qs):
                 # Check it's a proper probability distribution
-                assert np.isclose(qs_factor.sum(), 1.0, atol=1e-6), (
-                    f"Factor {factor_idx} beliefs don't sum to 1"
-                )
-                assert np.all(qs_factor >= 0), (
-                    f"Factor {factor_idx} has negative probabilities"
-                )
-                assert np.all(qs_factor <= 1), (
-                    f"Factor {factor_idx} has probabilities > 1"
-                )
+                assert np.isclose(
+                    qs_factor.sum(), 1.0, atol=1e-6
+                ), f"Factor {factor_idx} beliefs don't sum to 1"
+                assert np.all(qs_factor >= 0), f"Factor {factor_idx} has negative probabilities"
+                assert np.all(qs_factor <= 1), f"Factor {factor_idx} has probabilities > 1"
 
                 # Check entropy is non-negative
                 # Avoid log(0) by adding small epsilon
                 epsilon = 1e-10
                 entropy = -np.sum(qs_factor * np.log(qs_factor + epsilon))
-                assert entropy >= -epsilon, (
-                    f"Factor {factor_idx} has negative entropy: {entropy}"
-                )
+                assert entropy >= -epsilon, f"Factor {factor_idx} has negative entropy: {entropy}"
 
         # 3. Validate free energy calculation if available
         if hasattr(pymdp_agent, "F") and pymdp_agent.F is not None:
             free_energy = pymdp_agent.F
-            assert isinstance(free_energy, (float, np.floating)), (
-                f"Free energy must be scalar, got {type(free_energy)}"
-            )
+            assert isinstance(
+                free_energy, (float, np.floating)
+            ), f"Free energy must be scalar, got {type(free_energy)}"
             assert np.isfinite(free_energy), f"Free energy is not finite: {free_energy}"
 
         # 4. Validate action selection produces valid results
@@ -441,9 +419,7 @@ class TestNemesisPyMDPValidation:
         assert action is not None, "Action selection returned None"
         assert isinstance(action, str), "Agent should return string action"
 
-    def test_performance_vs_baseline_pymdp(
-        self, real_observation_models, real_transition_models
-    ):
+    def test_performance_vs_baseline_pymdp(self, real_observation_models, real_transition_models):
         """
         NEMESIS TEST 6: Performance benchmarks vs baseline PyMDP.
 
@@ -495,9 +471,9 @@ class TestNemesisPyMDPValidation:
 
         # Our integration should not be more than 2x slower
         overhead_ratio = agent_avg / direct_avg
-        assert overhead_ratio < 2.0, (
-            f"Integration overhead too high: {overhead_ratio:.2f}x slower than direct PyMDP"
-        )
+        assert (
+            overhead_ratio < 2.0
+        ), f"Integration overhead too high: {overhead_ratio:.2f}x slower than direct PyMDP"
 
         logger.info(
             f"Performance benchmark: Direct PyMDP: {direct_avg:.4f}s, Agent: {agent_avg:.4f}s, Overhead: {overhead_ratio:.2f}x"
@@ -529,14 +505,14 @@ class TestNemesisPyMDPValidation:
         # This should work - PyMDP handles uninitialized policies
         try:
             action = adapter.sample_action(pymdp_agent)
-            assert isinstance(action, int), (
-                "Action should still be int even without explicit policy inference"
-            )
+            assert isinstance(
+                action, int
+            ), "Action should still be int even without explicit policy inference"
         except Exception as e:
             # If it fails, it should be with clear error
-            assert "q_pi" in str(e) or "policies" in str(e), (
-                f"Error should mention policies/q_pi: {e}"
-            )
+            assert "q_pi" in str(e) or "policies" in str(
+                e
+            ), f"Error should mention policies/q_pi: {e}"
 
         # Test 3: Numerical stability with extreme values
         A_extreme = np.array([[[0.99999, 0.00001], [0.00001, 0.99999]]])
@@ -550,12 +526,10 @@ class TestNemesisPyMDPValidation:
         pymdp_extreme.infer_states([0])
         q_pi, G = pymdp_extreme.infer_policies()
 
-        assert np.isfinite(q_pi).all(), (
-            "Policy posterior has non-finite values with extreme inputs"
-        )
-        assert np.isclose(q_pi.sum(), 1.0, atol=1e-5), (
-            "Policy posterior doesn't sum to 1 with extreme inputs"
-        )
+        assert np.isfinite(q_pi).all(), "Policy posterior has non-finite values with extreme inputs"
+        assert np.isclose(
+            q_pi.sum(), 1.0, atol=1e-5
+        ), "Policy posterior doesn't sum to 1 with extreme inputs"
 
     def test_multi_step_consistency(self):
         """
@@ -564,9 +538,7 @@ class TestNemesisPyMDPValidation:
         Tests that beliefs converge appropriately over multiple steps
         and maintain mathematical consistency throughout.
         """
-        agent = BasicExplorerAgent(
-            "consistency_test", "consistency_test_agent", grid_size=5
-        )
+        agent = BasicExplorerAgent("consistency_test", "consistency_test_agent", grid_size=5)
 
         # Track belief evolution
         belief_history = []
@@ -610,23 +582,21 @@ class TestNemesisPyMDPValidation:
             final_beliefs = belief_history[-1]
             penultimate_beliefs = belief_history[-2]
 
-            for factor_idx, (final, penult) in enumerate(
-                zip(final_beliefs, penultimate_beliefs)
-            ):
+            for factor_idx, (final, penult) in enumerate(zip(final_beliefs, penultimate_beliefs)):
                 belief_change = np.linalg.norm(final - penult)
-                assert belief_change < 0.1, (
-                    f"Factor {factor_idx} beliefs not converging: change = {belief_change}"
-                )
+                assert (
+                    belief_change < 0.1
+                ), f"Factor {factor_idx} beliefs not converging: change = {belief_change}"
 
         # Validation 2: All beliefs remain valid probability distributions
         for step_idx, beliefs in enumerate(belief_history):
             for factor_idx, factor_beliefs in enumerate(beliefs):
-                assert np.isclose(factor_beliefs.sum(), 1.0, atol=1e-6), (
-                    f"Step {step_idx}, factor {factor_idx}: beliefs don't sum to 1"
-                )
-                assert np.all(factor_beliefs >= 0), (
-                    f"Step {step_idx}, factor {factor_idx}: negative probabilities"
-                )
+                assert np.isclose(
+                    factor_beliefs.sum(), 1.0, atol=1e-6
+                ), f"Step {step_idx}, factor {factor_idx}: beliefs don't sum to 1"
+                assert np.all(
+                    factor_beliefs >= 0
+                ), f"Step {step_idx}, factor {factor_idx}: negative probabilities"
 
         # Validation 3: Actions remain valid throughout
         for action in action_history:
@@ -656,9 +626,7 @@ class TestNemesisPyMDPValidation:
         # Run comprehensive test sequence
         for agent in agents:
             # Initial state validation
-            assert agent.pymdp_agent is not None, (
-                f"Agent {agent.agent_id} has no PyMDP agent"
-            )
+            assert agent.pymdp_agent is not None, f"Agent {agent.agent_id} has no PyMDP agent"
 
             # Test observation processing
             for step in range(5):
@@ -675,9 +643,7 @@ class TestNemesisPyMDPValidation:
                 if hasattr(agent.pymdp_agent, "qs"):
                     for qs in agent.pymdp_agent.qs:
                         # Mathematical constraints
-                        assert np.isclose(qs.sum(), 1.0, atol=1e-6), (
-                            "Beliefs don't sum to 1"
-                        )
+                        assert np.isclose(qs.sum(), 1.0, atol=1e-6), "Beliefs don't sum to 1"
                         assert np.all(qs >= 0), "Negative beliefs"
                         assert np.all(qs <= 1), "Beliefs exceed 1"
 
@@ -689,16 +655,12 @@ class TestNemesisPyMDPValidation:
 
                         # KL divergence from uniform should be non-negative
                         uniform = np.ones_like(qs) / len(qs)
-                        kl_div = np.sum(
-                            qs * np.log((qs + epsilon) / (uniform + epsilon))
-                        )
+                        kl_div = np.sum(qs * np.log((qs + epsilon) / (uniform + epsilon)))
                         assert kl_div >= -epsilon, "Negative KL divergence"
 
                 # Test action selection
                 action = agent.select_action()
-                assert isinstance(action, str), (
-                    f"Action must be string, got {type(action)}"
-                )
+                assert isinstance(action, str), f"Action must be string, got {type(action)}"
                 assert action in [
                     "north",
                     "south",
@@ -710,9 +672,7 @@ class TestNemesisPyMDPValidation:
             # Final validation
             assert agent.total_steps == 5, f"Step count mismatch: {agent.total_steps}"
 
-        logger.info(
-            "✅ NEMESIS VALIDATION COMPLETE - All mathematical constraints satisfied"
-        )
+        logger.info("✅ NEMESIS VALIDATION COMPLETE - All mathematical constraints satisfied")
 
 
 class TestPyMDPPerformanceBenchmarks:
@@ -742,9 +702,7 @@ class TestPyMDPPerformanceBenchmarks:
         avg_time = total_time / len(observations)
 
         # Performance requirement: < 1ms per update for 10-state system
-        assert avg_time < 0.001, (
-            f"Belief update too slow: {avg_time * 1000:.2f}ms per update"
-        )
+        assert avg_time < 0.001, f"Belief update too slow: {avg_time * 1000:.2f}ms per update"
 
         return {
             "total_updates": len(observations),

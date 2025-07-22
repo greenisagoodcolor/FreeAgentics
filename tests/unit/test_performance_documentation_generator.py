@@ -241,9 +241,7 @@ class TestPerformanceDocumentationGenerator(unittest.TestCase):
 
     def test_generate_comprehensive_documentation(self):
         """Test generating complete performance documentation."""
-        doc_path = self.doc_generator.generate_comprehensive_documentation(
-            self.test_results
-        )
+        doc_path = self.doc_generator.generate_comprehensive_documentation(self.test_results)
 
         # Documentation file should be created
         self.assertTrue(os.path.exists(doc_path))
@@ -300,9 +298,7 @@ class TestPerformanceDocumentationGenerator(unittest.TestCase):
     def test_export_performance_data(self):
         """Test exporting performance data in various formats."""
         # Export as JSON
-        json_path = self.doc_generator.export_performance_data(
-            self.test_results, format="json"
-        )
+        json_path = self.doc_generator.export_performance_data(self.test_results, format="json")
         self.assertTrue(os.path.exists(json_path))
 
         # Verify JSON content
@@ -312,9 +308,7 @@ class TestPerformanceDocumentationGenerator(unittest.TestCase):
         self.assertIn("memory_analysis", data)
 
         # Export as CSV
-        csv_paths = self.doc_generator.export_performance_data(
-            self.test_results, format="csv"
-        )
+        csv_paths = self.doc_generator.export_performance_data(self.test_results, format="csv")
         self.assertIsInstance(csv_paths, list)
         self.assertGreater(len(csv_paths), 0)
 

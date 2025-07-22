@@ -291,13 +291,9 @@ class LogParser:
         data = json.loads(line)
 
         # Extract standard fields
-        timestamp = datetime.fromisoformat(
-            data.get("timestamp", datetime.now().isoformat())
-        )
+        timestamp = datetime.fromisoformat(data.get("timestamp", datetime.now().isoformat()))
         level = LogLevel(data.get("level", "INFO").upper())
-        source = LogSource(
-            data.get("source", source_hint.value if source_hint else "system")
-        )
+        source = LogSource(data.get("source", source_hint.value if source_hint else "system"))
         message = data.get("message", "")
         module = data.get("module", "unknown")
 
@@ -340,9 +336,7 @@ class LogParser:
             extra_fields=extra_fields,
         )
 
-    def _extract_log_entry(
-        self, match: re.Match, pattern: LogPattern, line: str
-    ) -> LogEntry:
+    def _extract_log_entry(self, match: re.Match, pattern: LogPattern, line: str) -> LogEntry:
         """Extract log entry from regex match."""
         groups = match.groups()
 
@@ -398,9 +392,7 @@ class LogParser:
         """Add a custom log pattern."""
         self.patterns.append(pattern)
 
-    def add_custom_extractor(
-        self, name: str, extractor: Callable[[str], Dict[str, Any]]
-    ):
+    def add_custom_extractor(self, name: str, extractor: Callable[[str], Dict[str, Any]]):
         """Add a custom field extractor."""
         self.custom_extractors[name] = extractor
 
@@ -478,15 +470,11 @@ class LogAggregator:
         )
 
         # Create indexes
-        cursor.execute(
-            "CREATE INDEX IF NOT EXISTS idx_logs_timestamp ON logs(timestamp)"
-        )
+        cursor.execute("CREATE INDEX IF NOT EXISTS idx_logs_timestamp ON logs(timestamp)")
         cursor.execute("CREATE INDEX IF NOT EXISTS idx_logs_level ON logs(level)")
         cursor.execute("CREATE INDEX IF NOT EXISTS idx_logs_source ON logs(source)")
         cursor.execute("CREATE INDEX IF NOT EXISTS idx_logs_agent_id ON logs(agent_id)")
-        cursor.execute(
-            "CREATE INDEX IF NOT EXISTS idx_logs_correlation_id ON logs(correlation_id)"
-        )
+        cursor.execute("CREATE INDEX IF NOT EXISTS idx_logs_correlation_id ON logs(correlation_id)")
 
         # Create alerts table
         cursor.execute(
@@ -891,9 +879,7 @@ class LogStreamingServer:
                 await ws.prepare(request)
 
                 self.clients.add(ws)
-                logger.info(
-                    f"📡 New log streaming client connected. Total: {len(self.clients)}"
-                )
+                logger.info(f"📡 New log streaming client connected. Total: {len(self.clients)}")
 
                 try:
                     async for msg in ws:
@@ -909,9 +895,7 @@ class LogStreamingServer:
                             break
                 finally:
                     self.clients.discard(ws)
-                    logger.info(
-                        f"📡 Log streaming client disconnected. Total: {len(self.clients)}"
-                    )
+                    logger.info(f"📡 Log streaming client disconnected. Total: {len(self.clients)}")
 
                 return ws
 
@@ -1022,9 +1006,7 @@ def create_structured_log_entry(
     )
 
 
-def log_agent_action(
-    agent_id: str, action: str, details: Optional[Dict[str, Any]] = None
-):
+def log_agent_action(agent_id: str, action: str, details: Optional[Dict[str, Any]] = None):
     """Log agent action."""
     entry = create_structured_log_entry(
         level=LogLevel.INFO,
@@ -1038,9 +1020,7 @@ def log_agent_action(
     log_aggregator.ingest_log_entry(entry)
 
 
-def log_api_request(
-    method: str, path: str, status_code: int, user_id: Optional[str] = None
-):
+def log_api_request(method: str, path: str, status_code: int, user_id: Optional[str] = None):
     """Log API request."""
     entry = create_structured_log_entry(
         level=LogLevel.INFO,

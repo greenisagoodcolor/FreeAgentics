@@ -216,9 +216,7 @@ class DatabaseSeeder:
                 ],
                 "performance_score": 0.72,
                 "cohesion_score": 0.70,
-                "agent_assignments": [
-                    (agents[2], AgentRole.LEADER)  # Analyzer Gamma
-                ],
+                "agent_assignments": [(agents[2], AgentRole.LEADER)],  # Analyzer Gamma
             },
         ]
 
@@ -228,13 +226,9 @@ class DatabaseSeeder:
             agent_assignments = coalition_data.pop("agent_assignments", [])
 
             # Check if coalition already exists
-            existing = (
-                session.query(Coalition).filter_by(name=coalition_data["name"]).first()
-            )
+            existing = session.query(Coalition).filter_by(name=coalition_data["name"]).first()
             if existing:
-                print(
-                    f"  Coalition '{coalition_data['name']}' already exists, skipping..."
-                )
+                print(f"  Coalition '{coalition_data['name']}' already exists, skipping...")
                 coalitions.append(existing)
                 continue
 
@@ -249,9 +243,7 @@ class DatabaseSeeder:
 
             session.add(coalition)
             coalitions.append(coalition)
-            print(
-                f"  Created coalition: {coalition.name} with {len(agent_assignments)} agents"
-            )
+            print(f"  Created coalition: {coalition.name} with {len(agent_assignments)} agents")
 
         session.commit()
         return coalitions

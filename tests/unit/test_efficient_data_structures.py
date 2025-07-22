@@ -237,9 +237,7 @@ class TestMemoryMappedBuffer(unittest.TestCase):
         """Test memory usage calculation."""
         buffer = MemoryMappedBuffer(self.shape, self.dtype)
 
-        expected_mb = (
-            np.prod(self.shape) * np.dtype(self.dtype).itemsize / (1024 * 1024)
-        )
+        expected_mb = np.prod(self.shape) * np.dtype(self.dtype).itemsize / (1024 * 1024)
         actual_mb = buffer.memory_usage()
 
         self.assertAlmostEqual(actual_mb, expected_mb, places=6)
@@ -285,9 +283,7 @@ class TestCompactActionHistory(unittest.TestCase):
         """Test circular buffer behavior."""
         # Fill beyond capacity
         for i in range(self.max_actions + 10):
-            self.history.add_action(
-                i % self.action_space_size, time.time() + i, i * 0.1
-            )
+            self.history.add_action(i % self.action_space_size, time.time() + i, i * 0.1)
 
         # Should have max_actions items
         self.assertEqual(self.history._size, self.max_actions)
@@ -340,9 +336,7 @@ class TestCompactActionHistory(unittest.TestCase):
         """Test memory usage calculation."""
         # Add some actions
         for i in range(50):
-            self.history.add_action(
-                i % self.action_space_size, time.time() + i, i * 0.1
-            )
+            self.history.add_action(i % self.action_space_size, time.time() + i, i * 0.1)
 
         memory_bytes = self.history.memory_usage_bytes()
 
@@ -354,9 +348,7 @@ class TestCompactActionHistory(unittest.TestCase):
         """Test compression of old entries."""
         # Fill with many actions
         for i in range(200):
-            self.history.add_action(
-                i % self.action_space_size, time.time() + i, i * 0.01
-            )
+            self.history.add_action(i % self.action_space_size, time.time() + i, i * 0.01)
 
         original_count = self.history._size
 
@@ -585,9 +577,7 @@ class TestCompactKnowledgeGraph(unittest.TestCase):
 
         self.assertIsNotNone(retrieved_features)
         # Note: features are stored as float16 and may have precision loss
-        np.testing.assert_array_almost_equal(
-            retrieved_features[:4], features, decimal=2
-        )
+        np.testing.assert_array_almost_equal(retrieved_features[:4], features, decimal=2)
 
     def test_compact_storage(self):
         """Test storage compaction."""
@@ -647,9 +637,7 @@ class TestFactoryFunctions(unittest.TestCase):
         shape = (10, 10)
         buffer_size = 5
 
-        buffer = create_efficient_belief_buffer(
-            shape, buffer_size, use_memory_mapping=False
-        )
+        buffer = create_efficient_belief_buffer(shape, buffer_size, use_memory_mapping=False)
 
         # Should return LazyBeliefArray for small buffers
         self.assertIsInstance(buffer, LazyBeliefArray)
@@ -660,9 +648,7 @@ class TestFactoryFunctions(unittest.TestCase):
         shape = (100, 100)
         buffer_size = 50
 
-        buffer = create_efficient_belief_buffer(
-            shape, buffer_size, use_memory_mapping=True
-        )
+        buffer = create_efficient_belief_buffer(shape, buffer_size, use_memory_mapping=True)
 
         # Should return MemoryMappedBuffer for large buffers
         self.assertIsInstance(buffer, MemoryMappedBuffer)

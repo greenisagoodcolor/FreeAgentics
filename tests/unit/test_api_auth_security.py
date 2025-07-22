@@ -174,9 +174,7 @@ class TestTokenRefreshSecurity:
         client, _, refresh_token, _ = authenticated_client
 
         # Act
-        response = client.post(
-            "/api/v1/auth/refresh", json={"refresh_token": refresh_token}
-        )
+        response = client.post("/api/v1/auth/refresh", json={"refresh_token": refresh_token})
 
         # Assert
         assert response.status_code == status.HTTP_200_OK
@@ -188,9 +186,7 @@ class TestTokenRefreshSecurity:
     def test_refresh_with_invalid_token_fails(self, client):
         """Test refresh with invalid token fails."""
         # Act
-        response = client.post(
-            "/api/v1/auth/refresh", json={"refresh_token": "invalid-token"}
-        )
+        response = client.post("/api/v1/auth/refresh", json={"refresh_token": "invalid-token"})
 
         # Assert
         assert response.status_code == status.HTTP_401_UNAUTHORIZED
@@ -200,22 +196,16 @@ class TestTokenRefreshSecurity:
         client, _, refresh_token, _ = authenticated_client
 
         # First refresh - should succeed
-        response1 = client.post(
-            "/api/v1/auth/refresh", json={"refresh_token": refresh_token}
-        )
+        response1 = client.post("/api/v1/auth/refresh", json={"refresh_token": refresh_token})
         assert response1.status_code == status.HTTP_200_OK
 
         # Attempt to reuse old token - should fail
-        response2 = client.post(
-            "/api/v1/auth/refresh", json={"refresh_token": refresh_token}
-        )
+        response2 = client.post("/api/v1/auth/refresh", json={"refresh_token": refresh_token})
         assert response2.status_code == status.HTTP_401_UNAUTHORIZED
 
         # New token from first refresh should also be invalidated
         new_refresh = response1.json()["refresh_token"]
-        response3 = client.post(
-            "/api/v1/auth/refresh", json={"refresh_token": new_refresh}
-        )
+        response3 = client.post("/api/v1/auth/refresh", json={"refresh_token": new_refresh})
         assert response3.status_code == status.HTTP_401_UNAUTHORIZED
 
     def test_refresh_validates_token_type(self, client):
@@ -226,9 +216,7 @@ class TestTokenRefreshSecurity:
         )
 
         # Act
-        response = client.post(
-            "/api/v1/auth/refresh", json={"refresh_token": access_token}
-        )
+        response = client.post("/api/v1/auth/refresh", json={"refresh_token": access_token})
 
         # Assert
         assert response.status_code == status.HTTP_401_UNAUTHORIZED
@@ -334,9 +322,7 @@ class TestSecurityHeaders:
 
     def test_security_headers_present(self, client):
         """Test that security headers are set."""
-        response = client.post(
-            "/api/v1/auth/login", json={"username": "test", "password": "test"}
-        )
+        response = client.post("/api/v1/auth/login", json={"username": "test", "password": "test"})
 
         # Check security headers
         headers = response.headers

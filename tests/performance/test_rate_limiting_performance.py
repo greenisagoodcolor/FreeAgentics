@@ -142,17 +142,13 @@ class RateLimitingPerformanceTester:
         # Create batches of requests
         batches = num_requests // num_concurrent
         for batch in range(batches):
-            tasks = [
-                make_request(batch * num_concurrent + i) for i in range(num_concurrent)
-            ]
+            tasks = [make_request(batch * num_concurrent + i) for i in range(num_concurrent)]
             await asyncio.gather(*tasks)
 
         # Handle remaining requests
         remaining = num_requests % num_concurrent
         if remaining:
-            tasks = [
-                make_request(batches * num_concurrent + i) for i in range(remaining)
-            ]
+            tasks = [make_request(batches * num_concurrent + i) for i in range(remaining)]
             await asyncio.gather(*tasks)
 
         test_end = time.time()
@@ -222,9 +218,7 @@ class RateLimitingPerformanceTester:
 
         return request
 
-    def generate_report(
-        self, output_file: str = "rate_limiting_performance_report.json"
-    ):
+    def generate_report(self, output_file: str = "rate_limiting_performance_report.json"):
         """Generate performance report."""
         report = {"timestamp": datetime.now().isoformat(), "tests": []}
 
@@ -474,9 +468,7 @@ class TestRateLimitingPerformance:
         avg_latencies = [m.average_latency_ms for m in metrics_over_time]
 
         # Performance should remain stable
-        throughput_cv = statistics.stdev(avg_throughputs) / statistics.mean(
-            avg_throughputs
-        )
+        throughput_cv = statistics.stdev(avg_throughputs) / statistics.mean(avg_throughputs)
         latency_cv = statistics.stdev(avg_latencies) / statistics.mean(avg_latencies)
 
         assert throughput_cv < 0.1  # Coefficient of variation < 10%
@@ -502,9 +494,7 @@ class TestRateLimitingPerformance:
 
         # Even with high block rate, performance should be good
         assert metrics.average_latency_ms < 5  # Blocking should be fast
-        assert (
-            metrics.throughput_rps > 5000
-        )  # Can handle many requests even if blocking
+        assert metrics.throughput_rps > 5000  # Can handle many requests even if blocking
 
     @pytest.mark.asyncio
     @pytest.mark.performance

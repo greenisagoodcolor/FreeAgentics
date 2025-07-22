@@ -224,9 +224,7 @@ class TestAuthorizationPenetration:
 
         # This should fail validation
         try:
-            decoded = jwt.decode(
-                escalated_token, JWT_SECRET, algorithms=[JWT_ALGORITHM]
-            )
+            decoded = jwt.decode(escalated_token, JWT_SECRET, algorithms=[JWT_ALGORITHM])
             assert False, "Token with wrong secret should not be accepted"
         except jwt.InvalidSignatureError:
             pass  # Expected
@@ -235,9 +233,7 @@ class TestAuthorizationPenetration:
         expired_token_data = original_token_data.copy()
         expired_token_data["exp"] = datetime.now(timezone.utc) - timedelta(hours=1)
 
-        expired_token = jwt.encode(
-            expired_token_data, JWT_SECRET, algorithm=JWT_ALGORITHM
-        )
+        expired_token = jwt.encode(expired_token_data, JWT_SECRET, algorithm=JWT_ALGORITHM)
 
         try:
             decoded = jwt.decode(expired_token, JWT_SECRET, algorithms=[JWT_ALGORITHM])
@@ -247,9 +243,7 @@ class TestAuthorizationPenetration:
 
         # Test 4: Token without required claims
         incomplete_token_data = {"username": "test_user"}
-        incomplete_token = jwt.encode(
-            incomplete_token_data, JWT_SECRET, algorithm=JWT_ALGORITHM
-        )
+        incomplete_token = jwt.encode(incomplete_token_data, JWT_SECRET, algorithm=JWT_ALGORITHM)
 
         # Decode works but creating TokenData should fail
         decoded = jwt.decode(incomplete_token, JWT_SECRET, algorithms=[JWT_ALGORITHM])
@@ -262,9 +256,7 @@ class TestAuthorizationPenetration:
                 permissions=[],  # Would need to be looked up
                 exp=decoded.get("exp"),  # Missing
             )
-            assert False, (
-                "Token without required claims should not create valid TokenData"
-            )
+            assert False, "Token without required claims should not create valid TokenData"
         except Exception:
             pass  # Expected
 
@@ -296,9 +288,7 @@ class TestAuthorizationPenetration:
                     result = ResourceAccessValidator.validate_agent_access(
                         user, sql_payload, "view", mock_db, None
                     )
-                    assert not result, (
-                        f"SQL injection '{sql_payload}' should be rejected"
-                    )
+                    assert not result, f"SQL injection '{sql_payload}' should be rejected"
                 except Exception:
                     pass  # Exception is also acceptable
 
@@ -386,9 +376,7 @@ class TestAuthorizationPenetration:
                 )
 
                 # Auto-approve (simulating race)
-                enhanced_rbac_manager.approve_role_request(
-                    request_id, "admin-001", "Auto"
-                )
+                enhanced_rbac_manager.approve_role_request(request_id, "admin-001", "Auto")
 
                 results.append((user_id, target_role, True))
             except Exception:
@@ -410,9 +398,9 @@ class TestAuthorizationPenetration:
 
         # Check that only one escalation succeeded (or none if properly protected)
         successful_escalations = sum(1 for _, _, success in results if success)
-        assert successful_escalations <= 1, (
-            f"Race condition allowed {successful_escalations} privilege escalations"
-        )
+        assert (
+            successful_escalations <= 1
+        ), f"Race condition allowed {successful_escalations} privilege escalations"
 
     def test_business_logic_flaws(self, mock_db):
         """Test business logic flaws in authorization."""
@@ -437,9 +425,7 @@ class TestAuthorizationPenetration:
         result = ResourceAccessValidator.validate_agent_access(
             user, str(agent.id), "modify", mock_db, None
         )
-        assert not result, (
-            "Should not allow modification of stopped agents by non-owners"
-        )
+        assert not result, "Should not allow modification of stopped agents by non-owners"
 
         # Test 2: Negative values
         negative_tests = [
@@ -520,9 +506,7 @@ class TestAuthorizationPenetration:
                 result = ResourceAccessValidator.validate_agent_access(
                     user, poisoned_id, "view", mock_db, None
                 )
-                assert not result, (
-                    f"Cache poisoning attempt '{poisoned_id}' should fail"
-                )
+                assert not result, f"Cache poisoning attempt '{poisoned_id}' should fail"
             except Exception:
                 pass  # Exception is acceptable
 
@@ -542,9 +526,7 @@ class TestAuthorizationPenetration:
             quote(admin_resource),  # URL encoding
             quote(quote(admin_resource)),  # Double URL encoding
             base64.b64encode(admin_resource.encode()).decode(),  # Base64
-            admin_resource.encode("utf-16").decode(
-                "latin-1", errors="ignore"
-            ),  # UTF-16
+            admin_resource.encode("utf-16").decode("latin-1", errors="ignore"),  # UTF-16
             "\\x61\\x64\\x6d\\x69\\x6e",  # Hex encoding
             "%61%64%6d%69%6e",  # Percent encoding
         ]
@@ -624,9 +606,7 @@ class TestAuthorizationPenetration:
         # Timing differences should be minimal to prevent enumeration
         # In practice, constant-time comparisons should be used
         time_diff = abs(valid_time - invalid_time)
-        assert time_diff < 0.1, (
-            f"Timing difference {time_diff}s could enable enumeration"
-        )
+        assert time_diff < 0.1, f"Timing difference {time_diff}s could enable enumeration"
 
 
 class TestAuthorizationSecurityReport:
@@ -679,9 +659,7 @@ class TestAuthorizationSecurityReport:
         print("\nCompliance Status:")
         print("  • OWASP Top 10 2021 - A01: Broken Access Control ✓")
         print("  • OWASP Top 10 2021 - A03: Injection ✓")
-        print(
-            "  • OWASP Top 10 2021 - A07: Identification and Authentication Failures ✓"
-        )
+        print("  • OWASP Top 10 2021 - A07: Identification and Authentication Failures ✓")
         print("  • CWE-285: Improper Authorization ✓")
         print("  • CWE-862: Missing Authorization ✓")
         print("  • CWE-863: Incorrect Authorization ✓")

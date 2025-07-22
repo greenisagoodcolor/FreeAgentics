@@ -208,12 +208,8 @@ class BruteForceTestRunner:
         summary_table.add_column("Value", style="green")
 
         summary_table.add_row("Total Tests", str(total_tests))
-        summary_table.add_row(
-            "Passed", f"{total_passed} ({total_passed / total_tests * 100:.1f}%)"
-        )
-        summary_table.add_row(
-            "Failed", f"{total_failed} ({total_failed / total_tests * 100:.1f}%)"
-        )
+        summary_table.add_row("Passed", f"{total_passed} ({total_passed / total_tests * 100:.1f}%)")
+        summary_table.add_row("Failed", f"{total_failed} ({total_failed / total_tests * 100:.1f}%)")
         summary_table.add_row("Duration", f"{total_duration:.2f} seconds")
         summary_table.add_row("Timestamp", datetime.now().strftime("%Y-%m-%d %H:%M:%S"))
 
@@ -299,9 +295,7 @@ class BruteForceTestRunner:
             },
         }
 
-        filename = (
-            f"brute_force_test_report_{datetime.now().strftime('%Y%m%d_%H%M%S')}.json"
-        )
+        filename = f"brute_force_test_report_{datetime.now().strftime('%Y%m%d_%H%M%S')}.json"
 
         with open(filename, "w") as f:
             json.dump(report, f, indent=2)

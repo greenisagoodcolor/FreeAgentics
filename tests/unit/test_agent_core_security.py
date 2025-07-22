@@ -109,9 +109,7 @@ class TestAgentManagerSecurity:
 
         def create_agent_thread(i):
             try:
-                agent_id = agent_manager.create_agent(
-                    agent_type="explorer", name="Test Agent"
-                )
+                agent_id = agent_manager.create_agent(agent_type="explorer", name="Test Agent")
                 created_agents.append(agent_id)
             except Exception as e:
                 errors.append(e)
@@ -187,9 +185,7 @@ class TestActiveInferenceAgentSecurity:
         """Test that agents cannot directly modify the world state."""
         # Arrange
         world = GridWorld(GridWorldConfig(width=5, height=5))
-        agent = BasicExplorerAgent(
-            agent_id="test-1", position=Position(0, 0), world=world
-        )
+        agent = BasicExplorerAgent(agent_id="test-1", position=Position(0, 0), world=world)
 
         # Act - Agent should not have direct world modification access
         # This tests the principle of least privilege
@@ -224,9 +220,7 @@ class TestActiveInferenceAgentSecurity:
         agent = BasicExplorerAgent("test", Position(0, 0), world)
 
         # Inject error in observation processing
-        with patch.object(
-            agent, "encode_observation", side_effect=Exception("Test error")
-        ):
+        with patch.object(agent, "encode_observation", side_effect=Exception("Test error")):
             # Act - Should handle error gracefully
             try:
                 obs = agent.get_observation()

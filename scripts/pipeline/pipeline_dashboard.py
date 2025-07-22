@@ -44,9 +44,7 @@ def print_status(status: str) -> str:
         "cancelled": f"{Colors.RED}🚫 CANCELLED{Colors.RESET}",
         "completed": f"{Colors.GREEN}✅ COMPLETED{Colors.RESET}",
     }
-    return status_map.get(
-        status.lower(), f"{Colors.WHITE}{status.upper()}{Colors.RESET}"
-    )
+    return status_map.get(status.lower(), f"{Colors.WHITE}{status.upper()}{Colors.RESET}")
 
 
 class PipelineDashboard:
@@ -70,9 +68,7 @@ class PipelineDashboard:
                     self.pipeline_data = json.load(f)
                 return True
             else:
-                print(
-                    f"{Colors.YELLOW}⚠️ Pipeline data file not found: {data_path}{Colors.RESET}"
-                )
+                print(f"{Colors.YELLOW}⚠️ Pipeline data file not found: {data_path}{Colors.RESET}")
                 return False
         except Exception as e:
             print(f"{Colors.RED}❌ Error loading pipeline data: {e}{Colors.RESET}")
@@ -89,9 +85,7 @@ class PipelineDashboard:
         dashboard.append(f"{Colors.RESET}")
 
         if not self.pipeline_data:
-            dashboard.append(
-                f"{Colors.YELLOW}⚠️ No pipeline data available{Colors.RESET}"
-            )
+            dashboard.append(f"{Colors.YELLOW}⚠️ No pipeline data available{Colors.RESET}")
             return "\n".join(dashboard)
 
         # Pipeline Overview
@@ -358,16 +352,12 @@ class PipelineDashboard:
             status_class = (
                 "status-success"
                 if status == "success"
-                else "status-failure"
-                if status == "failure"
-                else "status-skipped"
+                else "status-failure" if status == "failure" else "status-skipped"
             )
             status_text = (
                 "✅ Success"
                 if status == "success"
-                else "❌ Failed"
-                if status == "failure"
-                else "⏭️ Skipped"
+                else "❌ Failed" if status == "failure" else "⏭️ Skipped"
             )
 
             html += f"""
@@ -544,9 +534,7 @@ def main():
             print(f"{Colors.RED}❌ Failed to load pipeline data{Colors.RESET}")
             sys.exit(1)
     else:
-        print(
-            f"{Colors.YELLOW}⚠️ No data source specified. Use --data or --sample{Colors.RESET}"
-        )
+        print(f"{Colors.YELLOW}⚠️ No data source specified. Use --data or --sample{Colors.RESET}")
         sys.exit(1)
 
     # Generate report

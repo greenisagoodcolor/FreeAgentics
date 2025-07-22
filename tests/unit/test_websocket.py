@@ -135,9 +135,7 @@ class TestConnectionManager:
 
         # Check only subscribers received the message
         for client_id in [f"subscribed_{i}" for i in range(2)]:
-            manager.active_connections[client_id].send_json.assert_called_once_with(
-                message
-            )
+            manager.active_connections[client_id].send_json.assert_called_once_with(message)
 
         # Check non-subscriber didn't receive it
         other_websocket.send_json.assert_not_called()
@@ -252,9 +250,7 @@ class TestEventBroadcasting:
         from api.v1.websocket import manager
 
         # Mock the manager broadcast method
-        with patch.object(
-            manager, "broadcast", new_callable=AsyncMock
-        ) as mock_broadcast:
+        with patch.object(manager, "broadcast", new_callable=AsyncMock) as mock_broadcast:
             await broadcast_agent_event("agent_123", "created", {"name": "TestAgent"})
 
             # Check broadcast was called correctly

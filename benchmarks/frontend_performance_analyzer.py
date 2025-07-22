@@ -108,9 +108,7 @@ class FrontendPerformanceAnalyzer:
 
         total_size_kb = total_size / 1024
         total_gzipped_kb = sum(chunk["gzipped_kb"] for chunk in chunks)
-        compression_ratio = (
-            total_size_kb / total_gzipped_kb if total_gzipped_kb > 0 else 1.0
-        )
+        compression_ratio = total_size_kb / total_gzipped_kb if total_gzipped_kb > 0 else 1.0
 
         # Performance assessment
         if total_gzipped_kb <= self.BUNDLE_SIZE_BUDGET_KB:
@@ -123,9 +121,7 @@ class FrontendPerformanceAnalyzer:
             performance_impact = "poor"
 
         # Generate recommendations
-        recommendations = self._generate_bundle_recommendations(
-            chunks, total_gzipped_kb
-        )
+        recommendations = self._generate_bundle_recommendations(chunks, total_gzipped_kb)
 
         return BundleAnalysis(
             total_size_kb=total_size_kb,
@@ -208,9 +204,7 @@ class FrontendPerformanceAnalyzer:
         # Framework-specific recommendations
         framework_chunks = [c for c in chunks if "framework" in c["name"].lower()]
         if framework_chunks and framework_chunks[0]["gzipped_kb"] > 100:
-            recommendations.append(
-                "Large framework bundle - consider Next.js optimization"
-            )
+            recommendations.append("Large framework bundle - consider Next.js optimization")
 
         return recommendations
 
@@ -276,9 +270,7 @@ class FrontendPerformanceAnalyzer:
             audits = data.get("audits", {})
 
             return LighthouseMetrics(
-                performance_score=int(
-                    categories.get("performance", {}).get("score", 0) * 100
-                ),
+                performance_score=int(categories.get("performance", {}).get("score", 0) * 100),
                 fcp_ms=audits.get("first-contentful-paint", {}).get("numericValue"),
                 lcp_ms=audits.get("largest-contentful-paint", {}).get("numericValue"),
                 cls=audits.get("cumulative-layout-shift", {}).get("numericValue"),
@@ -319,9 +311,7 @@ class FrontendPerformanceAnalyzer:
         report.append(f"Gzipped Size: {bundle_analysis.gzipped_size_kb:.1f} KB")
         report.append(f"Compression Ratio: {bundle_analysis.compression_ratio:.1f}:1")
         report.append(f"Chunk Count: {bundle_analysis.chunk_count}")
-        report.append(
-            f"Performance Impact: {bundle_analysis.performance_impact.upper()}"
-        )
+        report.append(f"Performance Impact: {bundle_analysis.performance_impact.upper()}")
 
         budget_status = (
             "✅ WITHIN BUDGET"
@@ -335,9 +325,7 @@ class FrontendPerformanceAnalyzer:
         report.append("LARGEST CHUNKS")
         report.append("-" * 40)
         for i, chunk in enumerate(bundle_analysis.largest_chunks[:5], 1):
-            report.append(
-                f"{i}. {chunk['name']}: {chunk['gzipped_kb']:.1f}KB (gzipped)"
-            )
+            report.append(f"{i}. {chunk['name']}: {chunk['gzipped_kb']:.1f}KB (gzipped)")
         report.append("")
 
         # Lighthouse Metrics
@@ -345,8 +333,7 @@ class FrontendPerformanceAnalyzer:
         report.append("-" * 40)
         performance_status = (
             "✅ GOOD"
-            if lighthouse_metrics.performance_score
-            >= self.LIGHTHOUSE_PERFORMANCE_BUDGET
+            if lighthouse_metrics.performance_score >= self.LIGHTHOUSE_PERFORMANCE_BUDGET
             else "❌ NEEDS IMPROVEMENT"
         )
         report.append(
@@ -356,9 +343,7 @@ class FrontendPerformanceAnalyzer:
         if lighthouse_metrics.fcp_ms:
             report.append(f"First Contentful Paint: {lighthouse_metrics.fcp_ms:.0f}ms")
         if lighthouse_metrics.lcp_ms:
-            report.append(
-                f"Largest Contentful Paint: {lighthouse_metrics.lcp_ms:.0f}ms"
-            )
+            report.append(f"Largest Contentful Paint: {lighthouse_metrics.lcp_ms:.0f}ms")
         if lighthouse_metrics.cls:
             report.append(f"Cumulative Layout Shift: {lighthouse_metrics.cls:.3f}")
         if lighthouse_metrics.tbt_ms:
@@ -405,7 +390,9 @@ class FrontendPerformanceAnalyzer:
             },
         }
 
-        results_file = f"frontend_performance_analysis_{datetime.now().strftime('%Y%m%d_%H%M%S')}.json"
+        results_file = (
+            f"frontend_performance_analysis_{datetime.now().strftime('%Y%m%d_%H%M%S')}.json"
+        )
         with open(results_file, "w") as f:
             json.dump(results, f, indent=2)
 
@@ -421,10 +408,7 @@ def main():
 
     # Exit with error if budgets are exceeded
     compliance = results["performance_budget_compliance"]
-    if (
-        not compliance["bundle_size_compliant"]
-        or not compliance["lighthouse_compliant"]
-    ):
+    if not compliance["bundle_size_compliant"] or not compliance["lighthouse_compliant"]:
         sys.exit(1)
 
     sys.exit(0)

@@ -41,9 +41,7 @@ class TestMultiAgentCoordination:
         # Create different types of agents
         explorer = BasicExplorerAgent("explorer_1", "Explorer 1", grid_size=5)
         collector = ResourceCollectorAgent("collector_1", "Collector 1", grid_size=5)
-        coordinator = CoalitionCoordinatorAgent(
-            "coord_1", "Coordinator 1", max_agents=5
-        )
+        coordinator = CoalitionCoordinatorAgent("coord_1", "Coordinator 1", max_agents=5)
 
         agents = [explorer, collector, coordinator]
 
@@ -65,8 +63,7 @@ class TestMultiAgentCoordination:
         """Test basic multi-agent simulation with real PyMDP operations."""
         # Create a small multi-agent system
         agents = [
-            BasicExplorerAgent(f"explorer_{i}", f"Explorer {i}", grid_size=3)
-            for i in range(3)
+            BasicExplorerAgent(f"explorer_{i}", f"Explorer {i}", grid_size=3) for i in range(3)
         ]
 
         # Start all agents
@@ -75,8 +72,7 @@ class TestMultiAgentCoordination:
 
         # Run simulation steps
         observations = [
-            {"position": [i % 3, i // 3], "surroundings": np.zeros((3, 3))}
-            for i in range(3)
+            {"position": [i % 3, i // 3], "surroundings": np.zeros((3, 3))} for i in range(3)
         ]
 
         # Execute coordinated steps
@@ -107,9 +103,7 @@ class TestMultiAgentCoordination:
             ResourceCollectorAgent(f"collector_{i}", f"Collector {i}", grid_size=5)
             for i in range(2)
         ]
-        coordinator = CoalitionCoordinatorAgent(
-            "coord_main", "Main Coordinator", max_agents=5
-        )
+        coordinator = CoalitionCoordinatorAgent("coord_main", "Main Coordinator", max_agents=5)
 
         # Start all agents
         all_agents = collectors + [coordinator]
@@ -210,8 +204,7 @@ class TestMultiAgentCoordination:
         """Test integration with knowledge graph during multi-agent operations."""
         # Create agents that will generate knowledge
         agents = [
-            BasicExplorerAgent(f"kg_agent_{i}", f"KG Agent {i}", grid_size=3)
-            for i in range(2)
+            BasicExplorerAgent(f"kg_agent_{i}", f"KG Agent {i}", grid_size=3) for i in range(2)
         ]
 
         # Start agents
@@ -253,9 +246,7 @@ class TestMultiAgentCoordination:
                     "position": [i, step],
                     "surroundings": np.random.randint(0, 2, (3, 3)),
                     "visible_agents": (
-                        [{"id": f"kg_agent_{1 - i}", "position": [1 - i, step]}]
-                        if step > 0
-                        else []
+                        [{"id": f"kg_agent_{1 - i}", "position": [1 - i, step]}] if step > 0 else []
                     ),
                 }
 
@@ -279,22 +270,16 @@ class TestMultiAgentCoordination:
 
         # Check that nodes have been updated
         updated_nodes = [
-            node
-            for node in knowledge_graph.nodes.values()
-            if "last_action" in node.content
+            node for node in knowledge_graph.nodes.values() if "last_action" in node.content
         ]
         assert len(updated_nodes) == 2
 
     async def test_coalition_formation_scenario(self):
         """Test realistic coalition formation scenario."""
         # Create mixed agent types for coalition formation
-        explorers = [
-            BasicExplorerAgent(f"exp_{i}", f"Explorer {i}", grid_size=4)
-            for i in range(2)
-        ]
+        explorers = [BasicExplorerAgent(f"exp_{i}", f"Explorer {i}", grid_size=4) for i in range(2)]
         collectors = [
-            ResourceCollectorAgent(f"col_{i}", f"Collector {i}", grid_size=4)
-            for i in range(2)
+            ResourceCollectorAgent(f"col_{i}", f"Collector {i}", grid_size=4) for i in range(2)
         ]
         coordinator = CoalitionCoordinatorAgent(
             "coalition_coord", "Coalition Coordinator", max_agents=6
@@ -331,9 +316,7 @@ class TestMultiAgentCoordination:
                                 "id": visible_id,
                                 "position": [step, step % 2],
                                 "status": "active",
-                                "capabilities": ["explore"]
-                                if "exp" in visible_id
-                                else ["collect"],
+                                "capabilities": ["explore"] if "exp" in visible_id else ["collect"],
                             }
                         )
 
@@ -380,12 +363,9 @@ class TestMultiAgentCoordination:
         """Test that multi-agent coordination is resilient to individual agent failures."""
         # Create agents with some that will fail
         reliable_agents = [
-            BasicExplorerAgent(f"reliable_{i}", f"Reliable {i}", grid_size=3)
-            for i in range(2)
+            BasicExplorerAgent(f"reliable_{i}", f"Reliable {i}", grid_size=3) for i in range(2)
         ]
-        failing_agent = BasicExplorerAgent(
-            "failing_agent", "Failing Agent", grid_size=3
-        )
+        failing_agent = BasicExplorerAgent("failing_agent", "Failing Agent", grid_size=3)
 
         # Start all agents
         all_agents = reliable_agents + [failing_agent]
@@ -470,9 +450,7 @@ class TestMultiAgentCoordination:
                                 "id": f"load_agent_{(i + step) % num_agents}",
                                 "position": [i, step],
                             }
-                            for i in range(
-                                min(3, num_agents)
-                            )  # Each agent sees up to 3 others
+                            for i in range(min(3, num_agents))  # Each agent sees up to 3 others
                         ]
                         if step % 2 == 0
                         else []
@@ -524,9 +502,7 @@ class TestDatabaseIntegration:
         test_db.commit()
 
         # Verify persistence
-        retrieved = (
-            test_db.query(AgentModel).filter(AgentModel.id == agent.agent_id).first()
-        )
+        retrieved = test_db.query(AgentModel).filter(AgentModel.id == agent.agent_id).first()
         assert retrieved is not None
         assert retrieved.name == agent.name
         assert retrieved.status == "active"
@@ -546,9 +522,7 @@ class TestDatabaseIntegration:
         test_db.commit()
 
         # Verify persistence
-        retrieved = (
-            test_db.query(Coalition).filter(Coalition.name == "Test Coalition").first()
-        )
+        retrieved = test_db.query(Coalition).filter(Coalition.name == "Test Coalition").first()
         assert retrieved is not None
         assert retrieved.performance_score == 0.75
         assert retrieved.cohesion_score == 0.85
@@ -558,15 +532,10 @@ class TestDatabaseIntegration:
 class TestKnowledgeGraphIntegration:
     """Test knowledge graph integration in multi-agent scenarios."""
 
-    async def test_knowledge_node_creation_during_coordination(
-        self, knowledge_graph, test_db
-    ):
+    async def test_knowledge_node_creation_during_coordination(self, knowledge_graph, test_db):
         """Test that knowledge nodes are created during agent coordination."""
         # Create agents
-        agents = [
-            BasicExplorerAgent(f"kg_test_{i}", f"KG Test {i}", grid_size=3)
-            for i in range(2)
-        ]
+        agents = [BasicExplorerAgent(f"kg_test_{i}", f"KG Test {i}", grid_size=3) for i in range(2)]
 
         # Start agents
         for agent in agents:
@@ -600,15 +569,11 @@ class TestKnowledgeGraphIntegration:
                     )
 
         # Verify knowledge graph has been populated
-        assert (
-            len(knowledge_graph.nodes) >= 4
-        )  # At least 2 agents * 2 steps with discoveries
+        assert len(knowledge_graph.nodes) >= 4  # At least 2 agents * 2 steps with discoveries
 
         # Verify nodes contain meaningful data
         discovery_nodes = [
-            node
-            for node in knowledge_graph.nodes.values()
-            if node.node_type == "discovery"
+            node for node in knowledge_graph.nodes.values() if node.node_type == "discovery"
         ]
         assert len(discovery_nodes) >= 4
 

@@ -51,9 +51,7 @@ class TechnicalSpikePOC:
         print("=== FreeAgentics Technical Spike ===\n")
 
         # Step 1: User Prompt
-        user_prompt = (
-            "Create an agent that explores a 4x4 grid world looking for rewards"
-        )
+        user_prompt = "Create an agent that explores a 4x4 grid world looking for rewards"
         print(f"1. User Prompt: {user_prompt}\n")
 
         # Step 2: LLM generates GMN specification

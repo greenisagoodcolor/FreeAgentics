@@ -341,9 +341,7 @@ class TestJWTErrorHandlingBehavior:
         # Use the handler's secret key if available
         try:
             # Generate a token with incomplete payload
-            incomplete_token = jwt.encode(
-                incomplete_payload, "fake_secret", algorithm="HS256"
-            )
+            incomplete_token = jwt.encode(incomplete_payload, "fake_secret", algorithm="HS256")
 
             # Should reject token with missing claims
             with pytest.raises(Exception):

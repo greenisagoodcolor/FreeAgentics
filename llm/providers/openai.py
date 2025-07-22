@@ -50,9 +50,7 @@ class OpenAIProvider(LLMProvider):
         """
         self.api_key = api_key or os.getenv("OPENAI_API_KEY")
         if not self.api_key:
-            raise LLMError(
-                "OpenAI API key not provided. Set OPENAI_API_KEY environment variable."
-            )
+            raise LLMError("OpenAI API key not provided. Set OPENAI_API_KEY environment variable.")
 
         self.model = model
         self.organization = organization
@@ -88,13 +86,9 @@ class OpenAIProvider(LLMProvider):
         now = datetime.now()
 
         # Clean old request times (older than 1 minute)
-        self.request_times = [
-            t for t in self.request_times if now - t < timedelta(minutes=1)
-        ]
+        self.request_times = [t for t in self.request_times if now - t < timedelta(minutes=1)]
         self.token_usage = [
-            (t, tokens)
-            for t, tokens in self.token_usage
-            if now - t < timedelta(minutes=1)
+            (t, tokens) for t, tokens in self.token_usage if now - t < timedelta(minutes=1)
         ]
 
         # Check requests per minute
@@ -127,9 +121,7 @@ class OpenAIProvider(LLMProvider):
         await self._check_rate_limits(self.model)
 
         # Convert messages to OpenAI format
-        openai_messages = [
-            {"role": msg.role.value, "content": msg.content} for msg in messages
-        ]
+        openai_messages = [{"role": msg.role.value, "content": msg.content} for msg in messages]
 
         # Build request payload
         payload = {
@@ -166,12 +158,8 @@ class OpenAIProvider(LLMProvider):
                     response_json = await response.json()
 
                     if response.status != 200:
-                        error_msg = response_json.get("error", {}).get(
-                            "message", "Unknown error"
-                        )
-                        raise LLMError(
-                            f"OpenAI API error (status {response.status}): {error_msg}"
-                        )
+                        error_msg = response_json.get("error", {}).get("message", "Unknown error")
+                        raise LLMError(f"OpenAI API error (status {response.status}): {error_msg}")
 
                     # Extract response data
                     choice = response_json["choices"][0]

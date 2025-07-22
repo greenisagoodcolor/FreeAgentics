@@ -12,9 +12,7 @@ def extract_agent_type_from_description(description: str) -> str:
     """Extract agent type from description using simple keyword matching."""
     description_lower = description.lower()
 
-    if any(
-        word in description_lower for word in ["explore", "search", "find", "discover"]
-    ):
+    if any(word in description_lower for word in ["explore", "search", "find", "discover"]):
         return "explorer"
     elif any(word in description_lower for word in ["collect", "gather", "resource"]):
         return "collector"

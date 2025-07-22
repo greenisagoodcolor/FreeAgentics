@@ -343,9 +343,7 @@ class CICDIntegration:
 
         return deployment
 
-    async def validate_deployment(
-        self, deployment_id: str
-    ) -> Tuple[bool, Dict[str, Any]]:
+    async def validate_deployment(self, deployment_id: str) -> Tuple[bool, Dict[str, Any]]:
         """Validate deployment using performance gates."""
         if deployment_id not in self.deployments:
             return False, {"error": "Deployment not found"}
@@ -437,9 +435,7 @@ class CICDIntegration:
         )
         log_aggregator.ingest_log_entry(log_entry)
 
-        logger.info(
-            f"Deployment {'completed' if success else 'failed'}: {deployment_id}"
-        )
+        logger.info(f"Deployment {'completed' if success else 'failed'}: {deployment_id}")
 
     async def rollback_deployment(self, deployment_id: str, reason: str):
         """Rollback a deployment."""
@@ -508,9 +504,7 @@ class CICDIntegration:
                 {
                     "name": "System Resources",
                     "status": (
-                        "healthy"
-                        if cpu_percent < 90 and memory_percent < 90
-                        else "unhealthy"
+                        "healthy" if cpu_percent < 90 and memory_percent < 90 else "unhealthy"
                     ),
                     "details": {
                         "cpu_percent": cpu_percent,
@@ -567,9 +561,7 @@ class CICDIntegration:
 
         return health_checks
 
-    async def _detect_performance_regression(
-        self, deployment: DeploymentMetrics
-    ) -> bool:
+    async def _detect_performance_regression(self, deployment: DeploymentMetrics) -> bool:
         """Detect performance regression."""
         try:
             pre_metrics = deployment.pre_deployment_metrics
@@ -593,20 +585,17 @@ class CICDIntegration:
                     return True
 
             # Check inference time increase
-            if (
-                "avg_inference_time" in pre_metrics
-                and "avg_inference_time" in post_metrics
-            ):
-                if post_metrics["avg_inference_time"] > pre_metrics[
-                    "avg_inference_time"
-                ] * (1 + regression_threshold):
+            if "avg_inference_time" in pre_metrics and "avg_inference_time" in post_metrics:
+                if post_metrics["avg_inference_time"] > pre_metrics["avg_inference_time"] * (
+                    1 + regression_threshold
+                ):
                     return True
 
             # Check throughput decrease
             if "agent_throughput" in pre_metrics and "agent_throughput" in post_metrics:
-                if post_metrics["agent_throughput"] < pre_metrics[
-                    "agent_throughput"
-                ] * (1 - regression_threshold):
+                if post_metrics["agent_throughput"] < pre_metrics["agent_throughput"] * (
+                    1 - regression_threshold
+                ):
                     return True
 
             return False
@@ -646,20 +635,13 @@ class CICDIntegration:
         total = len(self.deployment_history)
         successful = len([d for d in self.deployment_history if d.status == "success"])
         failed = len([d for d in self.deployment_history if d.status == "failed"])
-        rolled_back = len(
-            [d for d in self.deployment_history if d.status == "rolled_back"]
-        )
+        rolled_back = len([d for d in self.deployment_history if d.status == "rolled_back"])
 
         # Calculate average duration
-        completed_deployments = [
-            d for d in self.deployment_history if d.end_time is not None
-        ]
+        completed_deployments = [d for d in self.deployment_history if d.end_time is not None]
         avg_duration = 0.0
         if completed_deployments:
-            durations = [
-                (d.end_time - d.start_time).total_seconds()
-                for d in completed_deployments
-            ]
+            durations = [(d.end_time - d.start_time).total_seconds() for d in completed_deployments]
             avg_duration = sum(durations) / len(durations)
 
         return {
@@ -689,9 +671,7 @@ async def run_performance_gates():
         await cicd.start_deployment(deployment_id, version, environment)
 
         # Validate deployment
-        validation_passed, validation_result = await cicd.validate_deployment(
-            deployment_id
-        )
+        validation_passed, validation_result = await cicd.validate_deployment(deployment_id)
 
         # Complete deployment
         await cicd.complete_deployment(deployment_id, validation_passed)

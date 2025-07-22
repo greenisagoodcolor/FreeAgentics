@@ -79,9 +79,7 @@ class TestPyMDPHardFailureIntegration:
             adapter.sample_action(mock_agent)
 
         # Test 3: Mock agent returns wrong shape
-        mock_agent.sample_action.return_value = np.array(
-            [[1, 2], [3, 4]]
-        )  # Wrong shape
+        mock_agent.sample_action.return_value = np.array([[1, 2], [3, 4]])  # Wrong shape
 
         with pytest.raises(RuntimeError, match="shape.*expected \\(1,\\)"):
             adapter.sample_action(mock_agent)
@@ -181,9 +179,9 @@ class TestPyMDPHardFailureIntegration:
         ]
 
         for pattern in forbidden_patterns:
-            assert pattern not in source, (
-                f"Found forbidden pattern '{pattern}' indicating graceful fallback"
-            )
+            assert (
+                pattern not in source
+            ), f"Found forbidden pattern '{pattern}' indicating graceful fallback"
 
     def test_resource_collector_hard_failures(self):
         """Test ResourceCollectorAgent fails hard on PyMDP errors."""
@@ -191,9 +189,7 @@ class TestPyMDPHardFailureIntegration:
 
         # Mock PyMDP to fail
         mock_pymdp_agent = MagicMock(spec=PyMDPAgent)
-        mock_pymdp_agent.sample_action.side_effect = RuntimeError(
-            "PyMDP internal error"
-        )
+        mock_pymdp_agent.sample_action.side_effect = RuntimeError("PyMDP internal error")
         agent.pymdp_agent = mock_pymdp_agent
 
         # Should propagate the error
@@ -206,9 +202,7 @@ class TestPyMDPHardFailureIntegration:
 
         # Mock PyMDP to fail during policy inference
         mock_pymdp_agent = MagicMock(spec=PyMDPAgent)
-        mock_pymdp_agent.infer_policies.side_effect = ValueError(
-            "Policy inference failed"
-        )
+        mock_pymdp_agent.infer_policies.side_effect = ValueError("Policy inference failed")
         agent.pymdp_agent = mock_pymdp_agent
 
         # Should propagate the error
@@ -250,9 +244,7 @@ class TestPyMDPHardFailureIntegration:
             agent.select_action({"time": 1})
 
         # Verify the original error message is preserved
-        assert "numerical instability" in str(exc_info.value) or "Deep PyMDP" in str(
-            exc_info.value
-        )
+        assert "numerical instability" in str(exc_info.value) or "Deep PyMDP" in str(exc_info.value)
 
 
 class TestPerformanceTheaterRemoval:
@@ -326,8 +318,7 @@ class TestPerformanceTheaterRemoval:
 
             # Check for decorator patterns that indicate graceful degradation
             assert (
-                "@safe_pymdp_operation" not in content
-                or "default_value=None" not in content
+                "@safe_pymdp_operation" not in content or "default_value=None" not in content
             ), f"Found safe_operation decorator with None default in {file_path}"
 
 

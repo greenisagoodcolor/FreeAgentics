@@ -295,9 +295,7 @@ class TestZeroTrustPolicyEngine:
         policy_engine.add_policy(policy)
 
         # Evaluate request
-        is_authorized, reason = policy_engine.evaluate_request(
-            "service-a", "service-b", "read", {}
-        )
+        is_authorized, reason = policy_engine.evaluate_request("service-a", "service-b", "read", {})
 
         assert is_authorized
         assert reason == "Request authorized"
@@ -329,9 +327,7 @@ class TestZeroTrustPolicyEngine:
         policy_engine.add_policy(policy)
 
         # Evaluate request
-        is_authorized, reason = policy_engine.evaluate_request(
-            "service-a", "service-b", "read", {}
-        )
+        is_authorized, reason = policy_engine.evaluate_request("service-a", "service-b", "read", {})
 
         assert not is_authorized
         assert "trust level" in reason.lower()
@@ -339,19 +335,13 @@ class TestZeroTrustPolicyEngine:
     def test_network_zone_access_control(self, policy_engine):
         """Test network zone access control."""
         # Test DMZ to Internal access (should be allowed)
-        assert policy_engine._check_network_zone_access(
-            NetworkZone.DMZ, NetworkZone.INTERNAL
-        )
+        assert policy_engine._check_network_zone_access(NetworkZone.DMZ, NetworkZone.INTERNAL)
 
         # Test Internal to DMZ access (should be denied)
-        assert not policy_engine._check_network_zone_access(
-            NetworkZone.INTERNAL, NetworkZone.DMZ
-        )
+        assert not policy_engine._check_network_zone_access(NetworkZone.INTERNAL, NetworkZone.DMZ)
 
         # Test Isolated zone access (should only access itself)
-        assert policy_engine._check_network_zone_access(
-            NetworkZone.ISOLATED, NetworkZone.ISOLATED
-        )
+        assert policy_engine._check_network_zone_access(NetworkZone.ISOLATED, NetworkZone.ISOLATED)
         assert not policy_engine._check_network_zone_access(
             NetworkZone.ISOLATED, NetworkZone.INTERNAL
         )
@@ -364,9 +354,7 @@ class TestZeroTrustPolicyEngine:
 
         # Lower trust level should not meet higher requirement
         assert not policy_engine._check_trust_level(TrustLevel.LOW, TrustLevel.HIGH)
-        assert not policy_engine._check_trust_level(
-            TrustLevel.MEDIUM, TrustLevel.TRUSTED
-        )
+        assert not policy_engine._check_trust_level(TrustLevel.MEDIUM, TrustLevel.TRUSTED)
 
         # Same trust level should meet requirement
         assert policy_engine._check_trust_level(TrustLevel.MEDIUM, TrustLevel.MEDIUM)
@@ -380,9 +368,7 @@ class TestZeroTrustPolicyEngine:
         )
 
         # Mock ML threat detector
-        with patch(
-            "auth.zero_trust_architecture.get_ml_threat_detector"
-        ) as mock_detector:
+        with patch("auth.zero_trust_architecture.get_ml_threat_detector") as mock_detector:
             mock_prediction = Mock()
             mock_prediction.risk_score = 0.3
             mock_prediction.threat_level = Mock()
@@ -402,9 +388,7 @@ class TestZeroTrustPolicyEngine:
                 "ip_address": "192.168.1.100",
             }
 
-            trust_level = await policy_engine.continuous_verification(
-                "session123", request_data
-            )
+            trust_level = await policy_engine.continuous_verification("session123", request_data)
 
             assert trust_level in [
                 TrustLevel.UNTRUSTED,
@@ -786,9 +770,7 @@ class TestErrorHandling:
     def test_certificate_manager_error_handling(self):
         """Test certificate manager error handling."""
         # Test with invalid paths
-        manager = CertificateManager(
-            ca_cert_path="/invalid/path", ca_key_path="/invalid/path"
-        )
+        manager = CertificateManager(ca_cert_path="/invalid/path", ca_key_path="/invalid/path")
 
         # Should still work by creating new certificates
         assert manager.ca_cert is not None
@@ -802,9 +784,7 @@ class TestErrorHandling:
         assert not manager.verify_certificate("invalid certificate")
 
         # Test with malformed PEM
-        malformed_pem = (
-            "-----BEGIN CERTIFICATE-----\nMALFORMED\n-----END CERTIFICATE-----"
-        )
+        malformed_pem = "-----BEGIN CERTIFICATE-----\nMALFORMED\n-----END CERTIFICATE-----"
         assert not manager.verify_certificate(malformed_pem)
 
     @pytest.mark.asyncio
@@ -812,9 +792,7 @@ class TestErrorHandling:
         """Test identity-aware proxy error handling."""
         # Create proxy with mock engine that raises exception
         mock_engine = Mock()
-        mock_engine.certificate_manager.verify_certificate.side_effect = Exception(
-            "Test error"
-        )
+        mock_engine.certificate_manager.verify_certificate.side_effect = Exception("Test error")
 
         proxy = IdentityAwareProxy(mock_engine)
 

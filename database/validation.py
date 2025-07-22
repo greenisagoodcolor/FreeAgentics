@@ -205,9 +205,7 @@ def test_session_type_annotations() -> Dict[str, bool]:
         agent_repo_hints = get_type_hints(AgentRepository.get_agent)
         if "return" in agent_repo_hints:
             results["repository_annotations"] = True
-            logger.info(
-                f"✓ AgentRepository.get_agent return type: {agent_repo_hints['return']}"
-            )
+            logger.info(f"✓ AgentRepository.get_agent return type: {agent_repo_hints['return']}")
         else:
             results["repository_annotations"] = False
             logger.error("✗ AgentRepository.get_agent missing return type annotation")
@@ -387,9 +385,7 @@ def _test_full_state_serialization() -> Tuple[bool, List[str]]:
     }
 
     serialized_state = PyMDPStateSerializer.serialize_pymdp_matrices(test_state)
-    deserialized_state = PyMDPStateSerializer.deserialize_pymdp_matrices(
-        serialized_state
-    )
+    deserialized_state = PyMDPStateSerializer.deserialize_pymdp_matrices(serialized_state)
 
     # Check if arrays are correctly deserialized
     deserialized_A = deserialized_state.get("A")
@@ -406,9 +402,7 @@ def _test_full_state_serialization() -> Tuple[bool, List[str]]:
             validation_errors.extend(errors)
 
         # Check beliefs
-        success, errors = _validate_deserialized_beliefs(
-            test_state, deserialized_beliefs
-        )
+        success, errors = _validate_deserialized_beliefs(test_state, deserialized_beliefs)
         if not success:
             validation_errors.extend(errors)
 
@@ -436,9 +430,7 @@ def test_serialization() -> Dict[str, Any]:
             logger.info("✓ Numpy array serialization works correctly")
         else:
             results["numpy_serialization"] = False
-            logger.error(
-                f"✗ Numpy array serialization failed: {'; '.join(numpy_errors)}"
-            )
+            logger.error(f"✗ Numpy array serialization failed: {'; '.join(numpy_errors)}")
 
         # Test full state serialization
         state_success, validation_errors = _test_full_state_serialization()
@@ -448,9 +440,7 @@ def test_serialization() -> Dict[str, Any]:
             logger.info("✓ PyMDP state serialization works correctly")
         else:
             results["state_serialization"] = False
-            logger.error(
-                f"✗ PyMDP state serialization failed: {'; '.join(validation_errors)}"
-            )
+            logger.error(f"✗ PyMDP state serialization failed: {'; '.join(validation_errors)}")
 
         return results
 

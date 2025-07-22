@@ -504,9 +504,7 @@ SCORING_WEIGHTS = {
 }
 
 
-def get_algorithm_standard(
-    algorithm_type: str, algorithm_name: str
-) -> Optional[AlgorithmStandard]:
+def get_algorithm_standard(algorithm_type: str, algorithm_name: str) -> Optional[AlgorithmStandard]:
     """Get algorithm standard by type and name."""
     standards_map = {
         "hash": CryptographyStandards.HASH_ALGORITHMS,

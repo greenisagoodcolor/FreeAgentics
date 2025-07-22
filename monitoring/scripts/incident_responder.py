@@ -133,9 +133,7 @@ class IncidentResponder:
     async def execute_playbook(self, incident: Dict[str, Any]):
         """Execute incident response playbook."""
         playbook = incident["playbook"]
-        logger.info(
-            f"Executing playbook: {playbook['name']} for incident {incident['id']}"
-        )
+        logger.info(f"Executing playbook: {playbook['name']} for incident {incident['id']}")
 
         try:
             # Execute each step
@@ -175,12 +173,12 @@ class IncidentResponder:
 
         finally:
             # Remove from active incidents
-            incident_key = f"{incident['alert']['labels']['alertname']}:{incident['alert']['labels']}"
+            incident_key = (
+                f"{incident['alert']['labels']['alertname']}:{incident['alert']['labels']}"
+            )
             self.active_incidents.pop(incident_key, None)
 
-    async def should_execute_step(
-        self, step: Dict[str, Any], incident: Dict[str, Any]
-    ) -> bool:
+    async def should_execute_step(self, step: Dict[str, Any], incident: Dict[str, Any]) -> bool:
         """Check if step should be executed based on conditions."""
         if "condition" not in step:
             return True
@@ -197,9 +195,7 @@ class IncidentResponder:
 
         return True
 
-    async def execute_step(
-        self, step: Dict[str, Any], incident: Dict[str, Any]
-    ) -> bool:
+    async def execute_step(self, step: Dict[str, Any], incident: Dict[str, Any]) -> bool:
         """Execute a single playbook step."""
         step_type = step["type"]
 
@@ -445,9 +441,7 @@ class IncidentResponder:
         logger.info(f"Scaling out agents by {increment}...")
 
         # Check current count
-        async with self.session.get(
-            "http://localhost:8000/api/v1/agents/count"
-        ) as response:
+        async with self.session.get("http://localhost:8000/api/v1/agents/count") as response:
             if response.status == 200:
                 data = await response.json()
                 current_count = data.get("count", 0)
@@ -546,9 +540,7 @@ class IncidentResponder:
         try:
             async with self.session.post(webhook_url, json=payload) as response:
                 if response.status != 200:
-                    logger.error(
-                        f"Failed to send Slack notification: {response.status}"
-                    )
+                    logger.error(f"Failed to send Slack notification: {response.status}")
         except Exception as e:
             logger.error(f"Error sending Slack notification: {e}")
 
@@ -566,9 +558,7 @@ class IncidentResponder:
 
     async def check_coordinator_health(self) -> bool:
         """Check if coordinator is healthy."""
-        async with self.session.get(
-            "http://localhost:8000/api/v1/coordination/health"
-        ) as response:
+        async with self.session.get("http://localhost:8000/api/v1/coordination/health") as response:
             return response.status != 200
 
     async def check_recent_deployment(self, minutes: int) -> bool:

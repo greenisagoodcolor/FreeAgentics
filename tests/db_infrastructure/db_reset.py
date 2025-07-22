@@ -40,9 +40,7 @@ class DatabaseReset:
     def _get_admin_engine(self) -> Engine:
         """Get an engine with admin privileges."""
         # Create engine with autocommit for DDL operations
-        engine = create_engine(
-            self.admin_url, isolation_level="AUTOCOMMIT", pool_pre_ping=True
-        )
+        engine = create_engine(self.admin_url, isolation_level="AUTOCOMMIT", pool_pre_ping=True)
         return engine
 
     def create_test_database(self, db_name: str = "freeagentics_test") -> bool:
@@ -320,9 +318,7 @@ class DatabaseReset:
 
                 # Get count for each table
                 for table in tables:
-                    result = session.execute(
-                        text(f"SELECT COUNT(*) as count FROM {table}")
-                    )
+                    result = session.execute(text(f"SELECT COUNT(*) as count FROM {table}"))
                     counts[table] = result.scalar()
 
             return counts

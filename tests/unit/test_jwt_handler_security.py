@@ -166,9 +166,7 @@ class TestJWTHandler:
 
         # Patch key paths
         with patch("auth.jwt_handler.PRIVATE_KEY_PATH", str(keys_dir / "private.pem")):
-            with patch(
-                "auth.jwt_handler.PUBLIC_KEY_PATH", str(keys_dir / "public.pem")
-            ):
+            with patch("auth.jwt_handler.PUBLIC_KEY_PATH", str(keys_dir / "public.pem")):
                 handler = JWTHandler()
                 yield handler
 
@@ -244,9 +242,7 @@ class TestJWTHandler:
             "jti": "test-jti",
         }
 
-        expired_token = jwt.encode(
-            expired_payload, jwt_handler.private_key, algorithm="RS256"
-        )
+        expired_token = jwt.encode(expired_payload, jwt_handler.private_key, algorithm="RS256")
 
         # Act & Assert
         with pytest.raises(HTTPException) as exc_info:

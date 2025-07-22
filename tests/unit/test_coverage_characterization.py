@@ -46,9 +46,7 @@ class TestAgentsModule:
 class TestAPIModule:
     """Characterization tests for API module."""
 
-    @patch.dict(
-        os.environ, {"DATABASE_URL": "sqlite:///test.db", "SECRET_KEY": "test-key"}
-    )
+    @patch.dict(os.environ, {"DATABASE_URL": "sqlite:///test.db", "SECRET_KEY": "test-key"})
     def test_api_main_imports_successfully(self):
         """Test that API main module imports successfully."""
         # Clear any cached imports to ensure fresh import
@@ -62,9 +60,7 @@ class TestAPIModule:
         assert hasattr(app, "router")
         assert hasattr(app, "middleware_stack")
 
-    @patch.dict(
-        os.environ, {"DATABASE_URL": "sqlite:///test.db", "SECRET_KEY": "test-key"}
-    )
+    @patch.dict(os.environ, {"DATABASE_URL": "sqlite:///test.db", "SECRET_KEY": "test-key"})
     def test_api_v1_agents_imports(self):
         """Test that v1 agents API imports."""
         from api.v1.agents import router
@@ -231,9 +227,7 @@ class TestWorldModule:
 class TestModuleIntegration:
     """Test module integration and cross-module dependencies."""
 
-    @patch.dict(
-        os.environ, {"DATABASE_URL": "sqlite:///test.db", "SECRET_KEY": "test-key"}
-    )
+    @patch.dict(os.environ, {"DATABASE_URL": "sqlite:///test.db", "SECRET_KEY": "test-key"})
     def test_agent_api_integration(self):
         """Test that agent manager integrates with API."""
         # This characterizes the existing integration

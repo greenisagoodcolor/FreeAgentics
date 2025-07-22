@@ -63,9 +63,7 @@ class RateLimitTester:
 
                         self.add_test_result(
                             "Rate Limit Headers Present",
-                            "passed"
-                            if retry_after and rate_limit_remaining
-                            else "failed",
+                            "passed" if retry_after and rate_limit_remaining else "failed",
                             {
                                 "retry_after": retry_after,
                                 "rate_limit_remaining": rate_limit_remaining,
@@ -114,9 +112,7 @@ class RateLimitTester:
             # Test rapid 404 pattern
             for i in range(15):
                 try:
-                    response = requests.get(
-                        f"{self.base_url}/nonexistent-path-{i}", timeout=2
-                    )
+                    response = requests.get(f"{self.base_url}/nonexistent-path-{i}", timeout=2)
                     if response.status_code == 403:  # Blocked for suspicious pattern
                         self.add_test_result(
                             "404 Pattern Detection",
@@ -262,10 +258,7 @@ class RateLimitTester:
             semaphore = asyncio.Semaphore(concurrent_requests)
 
             async with aiohttp.ClientSession() as session:
-                tasks = [
-                    make_request(session, semaphore, i)
-                    for i in range(concurrent_requests)
-                ]
+                tasks = [make_request(session, semaphore, i) for i in range(concurrent_requests)]
 
                 start_time = time.time()
                 results = await asyncio.gather(*tasks, return_exceptions=True)
@@ -277,15 +270,11 @@ class RateLimitTester:
                 rate_limited = sum(
                     1 for r in results if isinstance(r, dict) and r.get("status") == 429
                 )
-                errors = sum(
-                    1 for r in results if isinstance(r, Exception) or "error" in r
-                )
+                errors = sum(1 for r in results if isinstance(r, Exception) or "error" in r)
 
                 self.add_test_result(
                     test_name,
-                    "passed"
-                    if successful + rate_limited > concurrent_requests * 0.8
-                    else "failed",
+                    "passed" if successful + rate_limited > concurrent_requests * 0.8 else "failed",
                     {
                         "concurrent_requests": concurrent_requests,
                         "successful": successful,
@@ -411,9 +400,7 @@ class RateLimitTester:
             recommendations.append("Implement request size limits")
 
         if not recommendations:
-            recommendations.append(
-                "Security posture is excellent - maintain current controls"
-            )
+            recommendations.append("Security posture is excellent - maintain current controls")
 
         return recommendations
 

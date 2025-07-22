@@ -209,10 +209,7 @@ class BeliefUpdater(MutationOperator):
         for support in supports:
             if belief.label == support.get("belief_label"):
                 return True
-            if all(
-                belief.properties.get(k) == v
-                for k, v in support.get("properties", {}).items()
-            ):
+            if all(belief.properties.get(k) == v for k, v in support.get("properties", {}).items()):
                 return True
         return False
 
@@ -299,9 +296,7 @@ class ConceptGeneralizer(MutationOperator):
 
         return clusters
 
-    def _calculate_similarity(
-        self, node1: KnowledgeNode, node2: KnowledgeNode
-    ) -> float:
+    def _calculate_similarity(self, node1: KnowledgeNode, node2: KnowledgeNode) -> float:
         """Calculate similarity between two nodes."""
         # Property key overlap
         keys1 = set(node1.properties.keys())
@@ -376,9 +371,7 @@ class CausalLearner(MutationOperator):
             time_diff = event2["timestamp"] - event1["timestamp"]
             if time_diff < context.get("max_causal_delay", 10):
                 # Calculate causality confidence
-                confidence = self._calculate_causality_confidence(
-                    event1, event2, sorted_events
-                )
+                confidence = self._calculate_causality_confidence(event1, event2, sorted_events)
 
                 if confidence >= confidence_threshold:
                     # Create event nodes if needed
@@ -443,9 +436,7 @@ class CausalLearner(MutationOperator):
 
         return True
 
-    def _ensure_event_node(
-        self, graph: KnowledgeGraph, event: Dict[str, Any]
-    ) -> Optional[str]:
+    def _ensure_event_node(self, graph: KnowledgeGraph, event: Dict[str, Any]) -> Optional[str]:
         """Ensure event exists as node in graph."""
         # Check if event node already exists
         event_id_raw = event.get("id")
@@ -503,9 +494,7 @@ class ContradictionResolver(MutationOperator):
         for contradiction_set in contradictions:
             if resolution_strategy == "highest_confidence":
                 # Keep node with highest confidence
-                sorted_nodes = sorted(
-                    contradiction_set, key=lambda n: n.confidence, reverse=True
-                )
+                sorted_nodes = sorted(contradiction_set, key=lambda n: n.confidence, reverse=True)
                 keeper = sorted_nodes[0]
 
                 # Remove others
@@ -634,9 +623,7 @@ class EvolutionEngine:
         """
         self.operators.append(operator)
 
-    def evolve(
-        self, graph: KnowledgeGraph, context: Dict[str, Any]
-    ) -> EvolutionMetrics:
+    def evolve(self, graph: KnowledgeGraph, context: Dict[str, Any]) -> EvolutionMetrics:
         """Evolve the knowledge graph based on context.
 
         Args:
@@ -663,9 +650,7 @@ class EvolutionEngine:
                     total_metrics.edges_removed += metrics.edges_removed
                     total_metrics.confidence_changes += metrics.confidence_changes
                     total_metrics.communities_merged += metrics.communities_merged
-                    total_metrics.contradictions_resolved += (
-                        metrics.contradictions_resolved
-                    )
+                    total_metrics.contradictions_resolved += metrics.contradictions_resolved
 
                     applied_operators.append(operator.__class__.__name__)
 
@@ -686,9 +671,7 @@ class EvolutionEngine:
         logger.info(f"Evolution complete. Applied {len(applied_operators)} operators")
         return total_metrics
 
-    def suggest_evolution(
-        self, graph: KnowledgeGraph, context: Dict[str, Any]
-    ) -> List[str]:
+    def suggest_evolution(self, graph: KnowledgeGraph, context: Dict[str, Any]) -> List[str]:
         """Suggest which operators would be beneficial.
 
         Args:

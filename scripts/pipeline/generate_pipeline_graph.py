@@ -583,9 +583,7 @@ def main():
         help="Output format",
     )
     parser.add_argument("--output", type=str, help="Output file path")
-    parser.add_argument(
-        "--detailed", action="store_true", help="Generate detailed graph"
-    )
+    parser.add_argument("--detailed", action="store_true", help="Generate detailed graph")
 
     args = parser.parse_args()
 

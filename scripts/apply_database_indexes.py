@@ -175,9 +175,7 @@ def create_indexes(engine):
                 """
                 )
 
-                exists = conn.execute(
-                    check_query, {"index_name": index["name"]}
-                ).scalar()
+                exists = conn.execute(check_query, {"index_name": index["name"]}).scalar()
 
                 if exists:
                     print(f"⏭️  {index['name']} - Already exists")
@@ -268,9 +266,7 @@ def check_index_usage(engine):
             print("-" * 80)
 
             for idx in indexes:
-                print(
-                    f"{idx.indexname:<40} {idx.scans:>10,} {idx.tuples_read:>15,} {idx.size:>10}"
-                )
+                print(f"{idx.indexname:<40} {idx.scans:>10,} {idx.tuples_read:>15,} {idx.size:>10}")
         else:
             print("No index usage statistics available yet.")
 

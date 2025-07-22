@@ -191,9 +191,7 @@ class PerformanceRegressionDetector:
             prediction=prediction,
         )
 
-    def detect_regression(
-        self, current_results: Dict[str, Any]
-    ) -> List[RegressionAlert]:
+    def detect_regression(self, current_results: Dict[str, Any]) -> List[RegressionAlert]:
         """Detect performance regressions in current results."""
         alerts = []
 
@@ -274,9 +272,7 @@ class PerformanceRegressionDetector:
 
         return alerts
 
-    def _determine_severity(
-        self, regression_percent: float, trend: PerformanceTrend
-    ) -> str:
+    def _determine_severity(self, regression_percent: float, trend: PerformanceTrend) -> str:
         """Determine severity level of regression."""
         # Factor in trend direction
         if trend.trend_direction == "improving" and regression_percent < 0:
@@ -292,9 +288,7 @@ class PerformanceRegressionDetector:
         else:
             return "none"
 
-    def _calculate_confidence(
-        self, trend: PerformanceTrend, regression_percent: float
-    ) -> float:
+    def _calculate_confidence(self, trend: PerformanceTrend, regression_percent: float) -> float:
         """Calculate confidence level for the regression alert."""
         confidence = 0.5  # Base confidence
 
@@ -371,9 +365,7 @@ class PerformanceRegressionDetector:
             )
 
         if trend.volatility > 0.3:
-            recommendations.append(
-                "High performance volatility - check for environmental factors"
-            )
+            recommendations.append("High performance volatility - check for environmental factors")
 
         # Severity-based recommendations
         if regression_percent > 0.5:  # 50%+ regression
@@ -431,14 +423,10 @@ class PerformanceRegressionDetector:
         report.append(
             f"Change: {alert.regression_percent:+.1f}% (confidence: {alert.confidence:.1%})"
         )
-        report.append(
-            f"Current: {alert.current_value:.2f}, Baseline: {alert.baseline_value:.2f}"
-        )
+        report.append(f"Current: {alert.current_value:.2f}, Baseline: {alert.baseline_value:.2f}")
 
         trend = alert.trend_analysis
-        report.append(
-            f"Trend: {trend['direction']} (strength: {trend['strength']:.3f})"
-        )
+        report.append(f"Trend: {trend['direction']} (strength: {trend['strength']:.3f})")
 
         if alert.recommendations:
             report.append("Recommendations:")
@@ -450,9 +438,7 @@ class PerformanceRegressionDetector:
     def save_alerts(self, alerts: List[RegressionAlert], filename: str = None):
         """Save regression alerts to file."""
         if not filename:
-            filename = (
-                f"regression_alerts_{datetime.now().strftime('%Y%m%d_%H%M%S')}.json"
-            )
+            filename = f"regression_alerts_{datetime.now().strftime('%Y%m%d_%H%M%S')}.json"
 
         alerts_data = {
             "timestamp": datetime.now().isoformat(),

@@ -75,9 +75,7 @@ class PerformanceAnalyzer:
         # Analyze GIL contention
         throughputs = data.get("throughputs", [])
         if throughputs:
-            throughput_degradation = (
-                (throughputs[0] - throughputs[-1]) / throughputs[0] * 100
-            )
+            throughput_degradation = (throughputs[0] - throughputs[-1]) / throughputs[0] * 100
             bottlenecks["gil_contention"] = {
                 "severity": "high" if throughput_degradation > 60 else "medium",
                 "throughput_degradation_percent": throughput_degradation,
@@ -472,9 +470,7 @@ class PerformanceDocumentationGenerator:
         self.output_dir.mkdir(exist_ok=True)
 
         self.analyzer = PerformanceAnalyzer()
-        self.chart_generator = PerformanceChartGenerator(
-            output_dir=str(self.output_dir / "charts")
-        )
+        self.chart_generator = PerformanceChartGenerator(output_dir=str(self.output_dir / "charts"))
 
     def generate_comprehensive_documentation(self, test_results: Dict[str, Any]) -> str:
         """Generate complete performance documentation with all sections."""
@@ -674,12 +670,8 @@ However, these improvements require substantial engineering effort and potential
 
             for rec in items:
                 content.append(f"#### {rec['title']}")
-                content.append(
-                    f"- **Impact**: {rec['impact'].replace('_', ' ').title()}"
-                )
-                content.append(
-                    f"- **Effort**: {rec['effort'].replace('_', ' ').title()}"
-                )
+                content.append(f"- **Impact**: {rec['impact'].replace('_', ' ').title()}")
+                content.append(f"- **Effort**: {rec['effort'].replace('_', ' ').title()}")
                 content.append(f"- **Description**: {rec['description']}")
                 content.append(f"- **Expected Benefit**: {rec['expected_benefit']}")
                 content.append("")
@@ -747,9 +739,7 @@ However, these improvements require substantial engineering effort and potential
 
         return str(html_path)
 
-    def export_performance_data(
-        self, test_results: Dict[str, Any], format: str = "json"
-    ) -> Any:
+    def export_performance_data(self, test_results: Dict[str, Any], format: str = "json") -> Any:
         """Export performance data in various formats."""
         if format == "json":
             # Export as JSON

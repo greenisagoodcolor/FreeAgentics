@@ -241,9 +241,7 @@ class TestPromptsAPI:
         assert call_args[1]["conversation_id"] == conversation_id
 
     @pytest.mark.asyncio
-    async def test_gmn_validation_failure(
-        self, client: TestClient, mock_prompt_processor
-    ):
+    async def test_gmn_validation_failure(self, client: TestClient, mock_prompt_processor):
         """Test handling of GMN validation failures."""
         mock_prompt_processor.process_prompt.side_effect = ValueError(
             "GMN validation failed: Invalid state space dimensions"
@@ -261,9 +259,7 @@ class TestPromptsAPI:
         assert "GMN validation failed" in data["detail"]
 
     @pytest.mark.asyncio
-    async def test_agent_creation_failure(
-        self, client: TestClient, mock_prompt_processor
-    ):
+    async def test_agent_creation_failure(self, client: TestClient, mock_prompt_processor):
         """Test handling of agent creation failures."""
         mock_prompt_processor.process_prompt.side_effect = RuntimeError(
             "Agent creation failed: Incompatible belief dimensions"
@@ -281,9 +277,7 @@ class TestPromptsAPI:
         assert "Agent creation failed" in data["detail"]
 
     @pytest.mark.asyncio
-    async def test_knowledge_graph_update_failure(
-        self, client: TestClient, mock_prompt_processor
-    ):
+    async def test_knowledge_graph_update_failure(self, client: TestClient, mock_prompt_processor):
         """Test handling of knowledge graph update failures."""
         # Return partial success with KG warning
         mock_prompt_processor.process_prompt.return_value = {
@@ -309,9 +303,7 @@ class TestPromptsAPI:
         assert "Knowledge graph update failed" in data["warnings"][0]
 
     @pytest.mark.asyncio
-    async def test_response_time_constraint(
-        self, client: TestClient, mock_prompt_processor
-    ):
+    async def test_response_time_constraint(self, client: TestClient, mock_prompt_processor):
         """Test that response time is under 3 seconds."""
         import time
 
@@ -384,9 +376,7 @@ class TestPromptsAPI:
                 assert response.status_code == status.HTTP_200_OK
 
     @pytest.mark.asyncio
-    async def test_logging_and_monitoring(
-        self, client: TestClient, mock_prompt_processor, caplog
-    ):
+    async def test_logging_and_monitoring(self, client: TestClient, mock_prompt_processor, caplog):
         """Test that proper logging occurs."""
         agent_id = str(uuid.uuid4())
         mock_prompt_processor.process_prompt.return_value = {

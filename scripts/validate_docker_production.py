@@ -50,16 +50,12 @@ class DockerProductionValidator:
         print(f"[ERROR] {message}")
         self.results["errors"].append(message)
 
-    def run_command(
-        self, command: List[str], timeout: int = 300
-    ) -> Tuple[int, str, str]:
+    def run_command(self, command: List[str], timeout: int = 300) -> Tuple[int, str, str]:
         """
         Run a command and return return code, stdout, stderr
         """
         try:
-            result = subprocess.run(
-                command, capture_output=True, text=True, timeout=timeout
-            )
+            result = subprocess.run(command, capture_output=True, text=True, timeout=timeout)
             return result.returncode, result.stdout, result.stderr
         except subprocess.TimeoutExpired:
             return 1, "", f"Command timed out after {timeout} seconds"
@@ -109,9 +105,7 @@ class DockerProductionValidator:
                     "Single-stage build detected - consider multi-stage for optimization"
                 )
             else:
-                self.log_info(
-                    f"Multi-stage build detected ({len(from_statements)} stages)"
-                )
+                self.log_info(f"Multi-stage build detected ({len(from_statements)} stages)")
 
             # Check for production target
             if "as production" not in content.lower():
@@ -399,9 +393,7 @@ class DockerProductionValidator:
             self.log_info(f"Production image size: {prod_size / (1024 * 1024):.1f} MB")
             self.log_info(f"Size optimization: {optimization_ratio:.1f}%")
 
-            self.results["performance_results"]["size_optimization_percent"] = (
-                optimization_ratio
-            )
+            self.results["performance_results"]["size_optimization_percent"] = optimization_ratio
 
             if optimization_ratio > 0:
                 self.log_info("✓ Multi-stage build provides size optimization")
@@ -509,9 +501,7 @@ ENVIRONMENT=production
             if "/cleanup" in content:
                 self.log_info("✓ API cleanup endpoint already exists")
             else:
-                self.log_info(
-                    "API cleanup endpoint not found - would need to be implemented"
-                )
+                self.log_info("API cleanup endpoint not found - would need to be implemented")
 
         except Exception as e:
             self.log_error(f"Error checking API cleanup endpoint: {e}")
@@ -524,9 +514,9 @@ ENVIRONMENT=production
         total_checks = len(self.results["validation_results"]) + len(
             self.results["security_results"]
         )
-        passed_checks = sum(
-            1 for v in self.results["validation_results"].values() if v
-        ) + sum(1 for v in self.results["security_results"].values() if v)
+        passed_checks = sum(1 for v in self.results["validation_results"].values() if v) + sum(
+            1 for v in self.results["security_results"].values() if v
+        )
 
         if total_checks > 0:
             success_rate = (passed_checks / total_checks) * 100

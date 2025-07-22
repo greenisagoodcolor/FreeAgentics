@@ -46,9 +46,7 @@ class ProductionDeploymentTester:
         print(f"[ERROR] {message}")
         self.test_results["errors"].append(message)
 
-    def run_command(
-        self, command: List[str], timeout: int = 300
-    ) -> Tuple[int, str, str]:
+    def run_command(self, command: List[str], timeout: int = 300) -> Tuple[int, str, str]:
         """Run a command and return return code, stdout, stderr"""
         try:
             result = subprocess.run(
@@ -182,9 +180,7 @@ WORKERS=2
             self.run_command(["docker", "rmi", "freeagentics:single-test"])
             os.unlink(env_file)
 
-        return bool(
-            self.test_results["deployment_tests"].get("single_container", False)
-        )
+        return bool(self.test_results["deployment_tests"].get("single_container", False))
 
     def test_docker_compose_deployment(self) -> bool:
         """Test Docker Compose deployment"""
@@ -208,9 +204,7 @@ WORKERS=2
                 dst.write("REDIS_PASSWORD=test_redis_password\n")
 
             # Test compose file validation
-            returncode, stdout, stderr = self.run_command(
-                ["docker", "compose", "config"]
-            )
+            returncode, stdout, stderr = self.run_command(["docker", "compose", "config"])
 
             if returncode != 0:
                 self.log_error(f"Docker Compose config invalid: {stderr}")
@@ -219,9 +213,7 @@ WORKERS=2
             self.log_info("✓ Docker Compose configuration valid")
 
             # Test compose up (dry run)
-            returncode, stdout, stderr = self.run_command(
-                ["docker", "compose", "up", "--dry-run"]
-            )
+            returncode, stdout, stderr = self.run_command(["docker", "compose", "up", "--dry-run"])
 
             if returncode == 0:
                 self.log_info("✓ Docker Compose dry run successful")
@@ -292,9 +284,7 @@ WORKERS=2
                 if returncode == 0:
                     container_names.append(container_name)
                 else:
-                    self.log_error(
-                        f"Failed to start container {container_name}: {stderr}"
-                    )
+                    self.log_error(f"Failed to start container {container_name}: {stderr}")
 
             # Wait for containers to start
             time.sleep(20)

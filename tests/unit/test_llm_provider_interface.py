@@ -333,9 +333,7 @@ class TestBaseProvider:
         # Create a concrete implementation for testing
         class TestProvider(BaseProvider):
             def test_connection(self) -> HealthCheckResult:
-                return HealthCheckResult(
-                    status=ProviderStatus.HEALTHY, latency_ms=100.0
-                )
+                return HealthCheckResult(status=ProviderStatus.HEALTHY, latency_ms=100.0)
 
             def generate(self, request: GenerationRequest) -> GenerationResponse:
                 return GenerationResponse(
@@ -349,9 +347,7 @@ class TestBaseProvider:
                     finish_reason="stop",
                 )
 
-            def estimate_cost(
-                self, input_tokens: int, output_tokens: int, model: str
-            ) -> float:
+            def estimate_cost(self, input_tokens: int, output_tokens: int, model: str) -> float:
                 return (input_tokens * 0.01 + output_tokens * 0.02) / 1000
 
         return TestProvider(ProviderType.OPENAI)
@@ -628,9 +624,7 @@ class TestProviderManager:
     @pytest.fixture
     def temp_config_file(self):
         """Create a temporary config file."""
-        config = {
-            "providers": [{"type": "openai", "api_key": "test-key", "priority": 1}]
-        }
+        config = {"providers": [{"type": "openai", "api_key": "test-key", "priority": 1}]}
 
         with tempfile.NamedTemporaryFile(mode="w", suffix=".json", delete=False) as f:
             json.dump(config, f)
@@ -691,9 +685,7 @@ class TestProviderManager:
         manager.registry.register_provider(mock_provider)
 
         # Test generation
-        request = GenerationRequest(
-            model="gpt-4", messages=[{"role": "user", "content": "test"}]
-        )
+        request = GenerationRequest(model="gpt-4", messages=[{"role": "user", "content": "test"}])
 
         response = manager.generate_with_fallback(request)
 
@@ -732,9 +724,7 @@ class TestProviderManager:
         manager.registry.register_provider(working_provider, priority=2)
 
         # Test generation
-        request = GenerationRequest(
-            model="gpt-4", messages=[{"role": "user", "content": "test"}]
-        )
+        request = GenerationRequest(model="gpt-4", messages=[{"role": "user", "content": "test"}])
 
         response = manager.generate_with_fallback(request)
 
@@ -744,9 +734,7 @@ class TestProviderManager:
 
     def test_generate_with_fallback_no_providers(self, manager):
         """Test generation with no healthy providers."""
-        request = GenerationRequest(
-            model="gpt-4", messages=[{"role": "user", "content": "test"}]
-        )
+        request = GenerationRequest(model="gpt-4", messages=[{"role": "user", "content": "test"}])
 
         with pytest.raises(Exception, match="No healthy providers available"):
             manager.generate_with_fallback(request)
@@ -772,9 +760,7 @@ class TestProviderManager:
         # Create mock provider
         mock_provider = Mock(spec=ILLMProvider)
         mock_provider.get_provider_type.return_value = ProviderType.OPENAI
-        health_result = HealthCheckResult(
-            status=ProviderStatus.HEALTHY, latency_ms=150.0
-        )
+        health_result = HealthCheckResult(status=ProviderStatus.HEALTHY, latency_ms=150.0)
         mock_provider.test_connection.return_value = health_result
 
         manager.registry.register_provider(mock_provider)
@@ -821,9 +807,7 @@ class TestProviderManager:
 
         manager.registry.register_provider(mock_provider)
 
-        request = GenerationRequest(
-            model="gpt-4", messages=[{"role": "user", "content": "test"}]
-        )
+        request = GenerationRequest(model="gpt-4", messages=[{"role": "user", "content": "test"}])
 
         recommendations = manager.get_provider_recommendations(request)
 
@@ -840,9 +824,7 @@ class TestProviderManagerEdgeCases:
     @pytest.fixture
     def temp_config_file(self):
         """Create a temporary config file."""
-        config = {
-            "providers": [{"type": "openai", "api_key": "test-key", "priority": 1}]
-        }
+        config = {"providers": [{"type": "openai", "api_key": "test-key", "priority": 1}]}
 
         with tempfile.NamedTemporaryFile(mode="w", suffix=".json", delete=False) as f:
             json.dump(config, f)
@@ -878,9 +860,7 @@ class TestProviderManagerEdgeCases:
 
         manager.registry.register_provider(mock_provider)
 
-        request = GenerationRequest(
-            model="gpt-4", messages=[{"role": "user", "content": "test"}]
-        )
+        request = GenerationRequest(model="gpt-4", messages=[{"role": "user", "content": "test"}])
 
         recommendations = manager.get_provider_recommendations(request)
 
@@ -932,9 +912,7 @@ class TestIntegrationScenarios:
         mock_provider.generate.return_value = expected_response
 
         # Test generation
-        request = GenerationRequest(
-            model="gpt-4", messages=[{"role": "user", "content": "test"}]
-        )
+        request = GenerationRequest(model="gpt-4", messages=[{"role": "user", "content": "test"}])
         response = manager.generate_with_fallback(request)
         assert response == expected_response
 

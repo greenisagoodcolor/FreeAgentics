@@ -126,9 +126,7 @@ class TestSecurityImplementationComprehensive:
         mock_db.query().filter_by().first.return_value = Mock()  # Existing user
 
         with pytest.raises(HTTPException) as exc_info:
-            manager.register_user(
-                "existing", "email@test.com", "pass", UserRole.OBSERVER
-            )
+            manager.register_user("existing", "email@test.com", "pass", UserRole.OBSERVER)
 
         assert exc_info.value.status_code == 400
         assert "already exists" in exc_info.value.detail
@@ -226,17 +224,11 @@ class TestSecurityImplementationComprehensive:
         endpoint = "/test"
 
         # First requests should pass
-        assert limiter.check_rate_limit(
-            client_id, endpoint, max_requests=2, window_minutes=1
-        )
-        assert limiter.check_rate_limit(
-            client_id, endpoint, max_requests=2, window_minutes=1
-        )
+        assert limiter.check_rate_limit(client_id, endpoint, max_requests=2, window_minutes=1)
+        assert limiter.check_rate_limit(client_id, endpoint, max_requests=2, window_minutes=1)
 
         # Third request should fail
-        assert not limiter.check_rate_limit(
-            client_id, endpoint, max_requests=2, window_minutes=1
-        )
+        assert not limiter.check_rate_limit(client_id, endpoint, max_requests=2, window_minutes=1)
 
     def test_security_validator(self):
         """Test input validation."""

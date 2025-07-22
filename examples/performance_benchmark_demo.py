@@ -261,14 +261,10 @@ def demo_report_generation():
         output_dir = Path(tmpdir)
         report = PerformanceReportGenerator.generate_report(metrics, output_dir)
 
-        print(
-            f"Generated report for {report['summary']['total_benchmarks']} benchmarks"
-        )
+        print(f"Generated report for {report['summary']['total_benchmarks']} benchmarks")
         print(f"Categories: {', '.join(report['summary']['categories'])}")
         print(f"Total duration: {report['summary']['total_duration_ms']:.2f} ms")
-        print(
-            f"Average memory growth: {report['summary']['avg_memory_growth_mb']:.2f} MB"
-        )
+        print(f"Average memory growth: {report['summary']['avg_memory_growth_mb']:.2f} MB")
 
         # Show category breakdown
         print("\nCategory breakdown:")

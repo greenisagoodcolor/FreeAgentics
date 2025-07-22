@@ -30,9 +30,7 @@ except ImportError:
 
 # Create test database
 SQLALCHEMY_DATABASE_URL = "sqlite:///./test.db"
-engine = create_engine(
-    SQLALCHEMY_DATABASE_URL, connect_args={"check_same_thread": False}
-)
+engine = create_engine(SQLALCHEMY_DATABASE_URL, connect_args={"check_same_thread": False})
 TestingSessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engine)
 
 # Create tables
@@ -87,9 +85,7 @@ class TestAgentsAPI:
             "parameters": {"grid_size": 10},
         }
 
-        response = client.post(
-            "/api/v1/agents", json=agent_data, headers=get_auth_headers()
-        )
+        response = client.post("/api/v1/agents", json=agent_data, headers=get_auth_headers())
 
         assert response.status_code == 201
         data = response.json()
@@ -209,9 +205,7 @@ class TestAgentsAPI:
         agent_id = str(agent.id)
         db.close()
 
-        response = client.delete(
-            f"/api/v1/agents/{agent_id}", headers=get_auth_headers()
-        )
+        response = client.delete(f"/api/v1/agents/{agent_id}", headers=get_auth_headers())
 
         assert response.status_code == 200
         assert "deleted successfully" in response.json()["message"]
@@ -238,9 +232,7 @@ class TestAgentsAPI:
         agent_id = str(agent.id)
         db.close()
 
-        response = client.get(
-            f"/api/v1/agents/{agent_id}/metrics", headers=get_auth_headers()
-        )
+        response = client.get(f"/api/v1/agents/{agent_id}/metrics", headers=get_auth_headers())
 
         assert response.status_code == 200
         data = response.json()
@@ -261,9 +253,7 @@ class TestAgentsAPI:
         db.close()
 
         # Filter for active agents
-        response = client.get(
-            "/api/v1/agents?status=active", headers=get_auth_headers()
-        )
+        response = client.get("/api/v1/agents?status=active", headers=get_auth_headers())
 
         assert response.status_code == 200
         data = response.json()
@@ -279,7 +269,5 @@ class TestAgentsAPI:
             "template": "invalid-template",
         }
 
-        response = client.post(
-            "/api/v1/agents", json=invalid_data, headers=get_auth_headers()
-        )
+        response = client.post("/api/v1/agents", json=invalid_data, headers=get_auth_headers())
         assert response.status_code == 422  # Validation error

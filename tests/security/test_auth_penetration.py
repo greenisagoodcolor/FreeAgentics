@@ -164,9 +164,7 @@ class TestAuthenticationPenetration:
 
         # All SQL injection attempts should be blocked
         sql_attacks = [
-            a
-            for a in self.results.attempted_attacks
-            if a["attack_type"] == "SQL Injection"
+            a for a in self.results.attempted_attacks if a["attack_type"] == "SQL Injection"
         ]
         assert all(a["result"] == "blocked" for a in sql_attacks)
 
@@ -200,14 +198,10 @@ class TestAuthenticationPenetration:
                         "XSS", "input validation", payload, "blocked", "medium"
                     )
             except Exception:
-                self.results.add_attempt(
-                    "XSS", "input validation", payload, "blocked", "medium"
-                )
+                self.results.add_attempt("XSS", "input validation", payload, "blocked", "medium")
 
         # All XSS attempts should be blocked
-        xss_attacks = [
-            a for a in self.results.attempted_attacks if a["attack_type"] == "XSS"
-        ]
+        xss_attacks = [a for a in self.results.attempted_attacks if a["attack_type"] == "XSS"]
         assert all(a["result"] == "blocked" for a in xss_attacks)
 
     def test_brute_force_attack_simulation(self):
@@ -237,9 +231,7 @@ class TestAuthenticationPenetration:
 
         self.auth_manager.users[username] = {
             "user": target_user,
-            "password_hash": self.auth_manager.hash_password(
-                "ActualSecurePassword123!"
-            ),
+            "password_hash": self.auth_manager.hash_password("ActualSecurePassword123!"),
         }
 
         # Simulate brute force attempts
@@ -247,9 +239,7 @@ class TestAuthenticationPenetration:
             try:
                 # Attempt login
                 stored = self.auth_manager.users.get(username)
-                if stored and self.auth_manager.verify_password(
-                    password, stored["password_hash"]
-                ):
+                if stored and self.auth_manager.verify_password(password, stored["password_hash"]):
                     self.results.add_attempt(
                         "Brute Force",
                         "login",
@@ -286,9 +276,7 @@ class TestAuthenticationPenetration:
         # Attack 1: Algorithm confusion attack (try to use HS256 instead of RS256)
         try:
             # Decode token
-            unverified_payload = jwt.decode(
-                valid_token, options={"verify_signature": False}
-            )
+            unverified_payload = jwt.decode(valid_token, options={"verify_signature": False})
 
             # Try to create token with weak algorithm
             fake_token = jwt.encode(unverified_payload, "secret", algorithm="HS256")
@@ -316,16 +304,12 @@ class TestAuthenticationPenetration:
 
         # Attack 2: Expired token reuse
         expired_payload = jwt.decode(valid_token, options={"verify_signature": False})
-        expired_payload["exp"] = int(
-            (datetime.now(timezone.utc) - timedelta(hours=1)).timestamp()
-        )
+        expired_payload["exp"] = int((datetime.now(timezone.utc) - timedelta(hours=1)).timestamp())
 
         try:
             # Sign with actual private key (if we had it)
             # In real test, this would fail
-            self.auth_manager.verify_token(
-                valid_token
-            )  # Would fail if actually expired
+            self.auth_manager.verify_token(valid_token)  # Would fail if actually expired
         except Exception:
             self.results.add_attempt(
                 "Token Manipulation",
@@ -400,9 +384,7 @@ class TestAuthenticationPenetration:
         # Attack 1: Try to use observer token for admin actions
         observer_data = self.auth_manager.verify_token(observer_token)
 
-        admin_only_permissions = [
-            p for p in observer_data.permissions if p.value == "admin_system"
-        ]
+        admin_only_permissions = [p for p in observer_data.permissions if p.value == "admin_system"]
 
         if len(admin_only_permissions) > 0:
             self.results.add_attempt(
@@ -511,9 +493,7 @@ class TestAuthenticationPenetration:
             try:
                 stored = self.auth_manager.users.get("timinguser1")
                 if stored:
-                    self.auth_manager.verify_password(
-                        "wrongpass", stored["password_hash"]
-                    )
+                    self.auth_manager.verify_password("wrongpass", stored["password_hash"])
             except Exception:
                 pass
             valid_user_time = time.time() - start
@@ -523,9 +503,7 @@ class TestAuthenticationPenetration:
             try:
                 stored = self.auth_manager.users.get("nonexistentuser")
                 if stored:
-                    self.auth_manager.verify_password(
-                        "wrongpass", stored["password_hash"]
-                    )
+                    self.auth_manager.verify_password("wrongpass", stored["password_hash"])
             except Exception:
                 pass
             invalid_user_time = time.time() - start
@@ -539,9 +517,7 @@ class TestAuthenticationPenetration:
             )
 
         # Check if timing differences are significant
-        avg_difference = sum(r["difference"] for r in timing_results) / len(
-            timing_results
-        )
+        avg_difference = sum(r["difference"] for r in timing_results) / len(timing_results)
 
         if avg_difference > 0.001:  # 1ms difference
             self.results.add_attempt(
@@ -718,9 +694,7 @@ class TestAuthenticationPenetration:
 
         # All command injection attempts should be blocked
         cmd_attacks = [
-            a
-            for a in self.results.attempted_attacks
-            if a["attack_type"] == "Command Injection"
+            a for a in self.results.attempted_attacks if a["attack_type"] == "Command Injection"
         ]
         assert all(a["result"] == "blocked" for a in cmd_attacks)
 
@@ -735,13 +709,13 @@ class TestAuthenticationPenetration:
         report = self.results.generate_report()
 
         # Verify security posture
-        assert report["summary"]["successful_attacks"] == 0, (
-            f"Found {report['summary']['successful_attacks']} successful attacks!"
-        )
+        assert (
+            report["summary"]["successful_attacks"] == 0
+        ), f"Found {report['summary']['successful_attacks']} successful attacks!"
 
-        assert report["summary"]["vulnerabilities_found"] == 0, (
-            f"Found {report['summary']['vulnerabilities_found']} vulnerabilities!"
-        )
+        assert (
+            report["summary"]["vulnerabilities_found"] == 0
+        ), f"Found {report['summary']['vulnerabilities_found']} vulnerabilities!"
 
         # Print summary for visibility
         print("\n=== Penetration Test Report ===")
@@ -831,9 +805,7 @@ class TestAdvancedPenetration:
         # Launch concurrent threads
         threads = []
         for i in range(10):
-            thread = threading.Thread(
-                target=attempt_concurrent_login, args=(f"race-{i}",)
-            )
+            thread = threading.Thread(target=attempt_concurrent_login, args=(f"race-{i}",))
             threads.append(thread)
             thread.start()
 

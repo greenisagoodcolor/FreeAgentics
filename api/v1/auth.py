@@ -62,9 +62,7 @@ class TokenResponse(BaseModel):
 
 @router.post("/register", response_model=TokenResponse)
 @rate_limit(max_requests=5, window_minutes=10)  # Strict rate limit for registration
-async def register_user(
-    request: Request, response: Response, user_data: UserRegistration
-):
+async def register_user(request: Request, response: Response, user_data: UserRegistration):
     """Register a new user."""
     try:
         user = auth_manager.register_user(
@@ -81,9 +79,7 @@ async def register_user(
             else None
         )
 
-        access_token = auth_manager.create_access_token(
-            user, client_fingerprint=fingerprint
-        )
+        access_token = auth_manager.create_access_token(user, client_fingerprint=fingerprint)
         refresh_token = auth_manager.create_refresh_token(user)
 
         # Set secure cookies
@@ -175,9 +171,7 @@ async def login_user(request: Request, response: Response, login_data: UserLogin
             else None
         )
 
-        access_token = auth_manager.create_access_token(
-            user, client_fingerprint=fingerprint
-        )
+        access_token = auth_manager.create_access_token(user, client_fingerprint=fingerprint)
         refresh_token = auth_manager.create_refresh_token(user)
 
         # Set secure cookies

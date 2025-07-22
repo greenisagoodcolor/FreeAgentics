@@ -108,9 +108,7 @@ class CoalitionManager:
         self.agent_profiles[agent_id] = profile
         self._emit_event("agent_registered", "", {"agent_id": agent_id})
 
-        logger.info(
-            f"Registered agent {agent_id} with {len(capabilities)} capabilities"
-        )
+        logger.info(f"Registered agent {agent_id} with {len(capabilities)} capabilities")
         return True
 
     def unregister_agent(self, agent_id: str) -> bool:
@@ -168,9 +166,7 @@ class CoalitionManager:
 
         # Add to pending objectives for next formation round
         self.pending_objectives.append(objective)
-        self._emit_event(
-            "objective_added", "", {"objective_id": objective.objective_id}
-        )
+        self._emit_event("objective_added", "", {"objective_id": objective.objective_id})
 
         logger.info(f"Added objective {objective.objective_id} to pending list")
         return True
@@ -223,9 +219,7 @@ class CoalitionManager:
 
         # Perform formation
         start_time = datetime.now()
-        result = strategy.form_coalitions(
-            available_agents, objectives_to_form, constraints
-        )
+        result = strategy.form_coalitions(available_agents, objectives_to_form, constraints)
         formation_time = (datetime.now() - start_time).total_seconds()
 
         # Register new coalitions
@@ -303,9 +297,7 @@ class CoalitionManager:
 
         return coalitions
 
-    def dissolve_coalition(
-        self, coalition_id: str, reason: str = "Manual dissolution"
-    ) -> bool:
+    def dissolve_coalition(self, coalition_id: str, reason: str = "Manual dissolution") -> bool:
         """Dissolve a coalition.
 
         Args:
@@ -397,9 +389,7 @@ class CoalitionManager:
             0.0, min(1.0, preference)
         )
 
-        logger.info(
-            f"Set preference for {agent_id} -> {preferred_agent_id}: {preference:.2f}"
-        )
+        logger.info(f"Set preference for {agent_id} -> {preferred_agent_id}: {preference:.2f}")
         return True
 
     def start_monitoring(self) -> bool:
@@ -413,9 +403,7 @@ class CoalitionManager:
             return False
 
         self._monitoring_active = True
-        self._monitoring_thread = threading.Thread(
-            target=self._monitoring_loop, daemon=True
-        )
+        self._monitoring_thread = threading.Thread(target=self._monitoring_loop, daemon=True)
         self._monitoring_thread.start()
 
         logger.info("Started coalition monitoring")
@@ -459,23 +447,15 @@ class CoalitionManager:
 
             if time_since_modification > timedelta(hours=24):
                 if coalition.status == CoalitionStatus.ACTIVE:
-                    logger.warning(
-                        f"Coalition {coalition_id} has been inactive for 24 hours"
-                    )
+                    logger.warning(f"Coalition {coalition_id} has been inactive for 24 hours")
                     self._emit_event(
                         "coalition_inactive",
                         coalition_id,
-                        {
-                            "inactive_hours": time_since_modification.total_seconds()
-                            / 3600
-                        },
+                        {"inactive_hours": time_since_modification.total_seconds() / 3600},
                     )
 
             # Check for coalitions with completed objectives
-            if (
-                all(obj.completed for obj in coalition.objectives)
-                and coalition.objectives
-            ):
+            if all(obj.completed for obj in coalition.objectives) and coalition.objectives:
                 if coalition.status == CoalitionStatus.ACTIVE:
                     coalition.status = CoalitionStatus.DISBANDING
                     self._emit_event("coalition_objectives_completed", coalition_id, {})
@@ -502,9 +482,7 @@ class CoalitionManager:
             # Update coalition performance metrics
             coalition._update_performance_metrics()
 
-    def add_event_handler(
-        self, event_type: str, handler: Callable[[CoalitionEvent], None]
-    ):
+    def add_event_handler(self, event_type: str, handler: Callable[[CoalitionEvent], None]):
         """Add an event handler for coalition events.
 
         Args:

@@ -431,21 +431,17 @@ class APISecurityResponseTester:
                 headers = {"Content-Type": content_type}
 
                 if isinstance(payload, str):
-                    response = self.client.post(
-                        test_endpoint, data=payload, headers=headers
-                    )
+                    response = self.client.post(test_endpoint, data=payload, headers=headers)
                 else:
-                    response = self.client.post(
-                        test_endpoint, content=payload, headers=headers
-                    )
+                    response = self.client.post(test_endpoint, content=payload, headers=headers)
 
                 # Check response content type
                 response_content_type = response.headers.get("Content-Type", "")
 
                 # Responses should generally be JSON for API endpoints
-                if test_endpoint.startswith(
-                    "/api/"
-                ) and not response_content_type.startswith("application/json"):
+                if test_endpoint.startswith("/api/") and not response_content_type.startswith(
+                    "application/json"
+                ):
                     results["findings"].append(
                         {
                             "issue": "Non-JSON response from API endpoint",
@@ -670,9 +666,7 @@ class APISecurityResponseTester:
                             headers={"Content-Type": "application/json"},
                         )
                     else:
-                        response = self.client.post(
-                            endpoint, json={"data": data} if data else {}
-                        )
+                        response = self.client.post(endpoint, json={"data": data} if data else {})
                 elif method == "DELETE":
                     response = self.client.delete(endpoint)
                 elif method == "PATCH":
@@ -720,9 +714,7 @@ class APISecurityResponseTester:
                             "scenario": scenario_name,
                             "endpoint": endpoint,
                             "status_code": response.status_code,
-                            "content_type": response.headers.get(
-                                "Content-Type", "unknown"
-                            ),
+                            "content_type": response.headers.get("Content-Type", "unknown"),
                         }
                     )
 
@@ -907,9 +899,7 @@ class APISecurityResponseTester:
                 "total_tests": total_tests,
                 "passed_tests": passed_tests,
                 "failed_tests": failed_tests,
-                "pass_rate": (passed_tests / total_tests * 100)
-                if total_tests > 0
-                else 0,
+                "pass_rate": (passed_tests / total_tests * 100) if total_tests > 0 else 0,
                 "critical_findings": len(critical_findings),
                 "high_findings": len(high_findings),
                 "medium_findings": len(medium_findings),
@@ -997,14 +987,10 @@ class TestAPISecurityResponses:
 
             # Check for critical/high severity issues
             if summary["summary"]["critical_findings"] > 0:
-                failure_msg += (
-                    f"\nCRITICAL ISSUES: {summary['summary']['critical_findings']}\n"
-                )
+                failure_msg += f"\nCRITICAL ISSUES: {summary['summary']['critical_findings']}\n"
 
             if summary["summary"]["high_findings"] > 0:
-                failure_msg += (
-                    f"HIGH SEVERITY ISSUES: {summary['summary']['high_findings']}\n"
-                )
+                failure_msg += f"HIGH SEVERITY ISSUES: {summary['summary']['high_findings']}\n"
 
             if summary["recommendations"]:
                 failure_msg += "\nRecommendations:\n"
@@ -1045,7 +1031,9 @@ if __name__ == "__main__":
 
     # Save report
     timestamp = time.strftime("%Y%m%d_%H%M%S")
-    report_file = f"/home/green/FreeAgentics/tests/security/api_security_response_report_{timestamp}.json"
+    report_file = (
+        f"/home/green/FreeAgentics/tests/security/api_security_response_report_{timestamp}.json"
+    )
 
     try:
         with open(report_file, "w") as f:

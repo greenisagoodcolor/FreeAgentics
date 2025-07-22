@@ -85,9 +85,7 @@ class PreparedStatementManager:
                     "min_time": min(times),
                     "max_time": max(times),
                     "p95_time": (
-                        sorted(times)[int(len(times) * 0.95)]
-                        if len(times) > 1
-                        else times[0]
+                        sorted(times)[int(len(times) * 0.95)] if len(times) > 1 else times[0]
                     ),
                 }
         return stats
@@ -196,9 +194,7 @@ class QueryPlanAnalyzer:
 
         # Check for missing indexes
         if metrics["seq_scans"] > 0 and metrics["index_scans"] == 0:
-            suggestions.add(
-                "Consider adding indexes - query uses sequential scans only"
-            )
+            suggestions.add("Consider adding indexes - query uses sequential scans only")
 
         # Check for excessive nested loops
         if metrics["nested_loops"] > 3:
@@ -218,9 +214,7 @@ class QueryPlanAnalyzer:
                 )
 
         # Check execution time
-        if (
-            metrics["execution_time"] > self.slow_query_threshold * 1000
-        ):  # Convert to ms
+        if metrics["execution_time"] > self.slow_query_threshold * 1000:  # Convert to ms
             suggestions.add(f"Slow query detected ({metrics['execution_time']:.1f}ms)")
 
 
@@ -251,9 +245,7 @@ class BatchOperationManager:
         # Only allow alphanumeric characters, underscores, and dots for schema.table notation
         import re
 
-        if not re.match(
-            r"^[a-zA-Z_][a-zA-Z0-9_]*(\.[a-zA-Z_][a-zA-Z0-9_]*)?$", identifier
-        ):
+        if not re.match(r"^[a-zA-Z_][a-zA-Z0-9_]*(\.[a-zA-Z_][a-zA-Z0-9_]*)?$", identifier):
             raise ValueError(f"Invalid identifier: {identifier}")
         return f'"{identifier}"'
 
@@ -360,9 +352,7 @@ class BatchOperationManager:
                     escaped_col = self._escape_identifier(col)
                     case_clause = f"{escaped_col} = CASE {escaped_key_column}"
                     for update in group_updates:
-                        case_clause += (
-                            f" WHEN :{key_column}_{id(update)} THEN :{col}_{id(update)}"
-                        )
+                        case_clause += f" WHEN :{key_column}_{id(update)} THEN :{col}_{id(update)}"
                     case_clause += f" ELSE {escaped_col} END"
                     set_clauses.append(case_clause)
 
@@ -483,9 +473,7 @@ class EnhancedQueryOptimizer:
                 "pool_pre_ping": True,
                 "pool_recycle": 900,  # 15 minutes
                 "connect_args": {
-                    "server_settings": {
-                        "jit": "off"
-                    },  # Disable JIT for connection pooling
+                    "server_settings": {"jit": "off"},  # Disable JIT for connection pooling
                     "command_timeout": 60,
                     "prepared_statement_cache_size": 0,  # Disable with PgBouncer
                 },
@@ -518,9 +506,7 @@ class EnhancedQueryOptimizer:
             config = self.pool_config.copy()
             poolclass = config.pop("poolclass", QueuePool)
 
-            self._engine = create_engine(
-                self.database_url, poolclass=poolclass, **config
-            )
+            self._engine = create_engine(self.database_url, poolclass=poolclass, **config)
 
             # Add event listeners for monitoring
             self._setup_engine_monitoring(self._engine)
@@ -532,16 +518,12 @@ class EnhancedQueryOptimizer:
         """Get or create asynchronous engine."""
         if self._async_engine is None:
             # Convert to async URL
-            async_url = self.database_url.replace(
-                "postgresql://", "postgresql+asyncpg://"
-            )
+            async_url = self.database_url.replace("postgresql://", "postgresql+asyncpg://")
 
             config = self.pool_config.copy()
             poolclass = config.pop("poolclass", QueuePool)
 
-            self._async_engine = create_async_engine(
-                async_url, poolclass=poolclass, **config
-            )
+            self._async_engine = create_async_engine(async_url, poolclass=poolclass, **config)
 
         return self._async_engine
 
@@ -549,16 +531,12 @@ class EnhancedQueryOptimizer:
         """Set up event listeners for query monitoring."""
 
         @event.listens_for(engine, "before_cursor_execute")
-        def before_cursor_execute(
-            conn, cursor, statement, parameters, context, executemany
-        ):
+        def before_cursor_execute(conn, cursor, statement, parameters, context, executemany):
             conn.info.setdefault("query_start_time", []).append(time.time())
             conn.info.setdefault("current_query", []).append(statement[:100])
 
         @event.listens_for(engine, "after_cursor_execute")
-        def after_cursor_execute(
-            conn, cursor, statement, parameters, context, executemany
-        ):
+        def after_cursor_execute(conn, cursor, statement, parameters, context, executemany):
             total_time = time.time() - conn.info["query_start_time"].pop(-1)
             query_snippet = conn.info["current_query"].pop(-1)
 
@@ -696,9 +674,7 @@ class EnhancedQueryOptimizer:
             try:
                 await session.execute(text(index_sql))
                 await session.commit()
-                logger.info(
-                    f"Created index: {index_sql.split('idx_')[1].split(' ')[0]}"
-                )
+                logger.info(f"Created index: {index_sql.split('idx_')[1].split(' ')[0]}")
             except Exception as e:
                 await session.rollback()
                 logger.warning(f"Index creation failed (may already exist): {e}")
@@ -749,14 +725,14 @@ class EnhancedQueryOptimizer:
                 / max(sum(s["count"] for s in self.query_stats.values()), 1)
                 * 100,
             },
-            "optimization_suggestions": dict(
-                self.query_analyzer.optimization_suggestions
-            ),
+            "optimization_suggestions": dict(self.query_analyzer.optimization_suggestions),
             "slow_queries": [
                 query
                 for stats in self.query_stats.values()
                 for query in stats.get("slow_queries", [])
-            ][:20],  # Top 20 slow queries
+            ][
+                :20
+            ],  # Top 20 slow queries
         }
 
     async def setup_monitoring(self, session: AsyncSession):

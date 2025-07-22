@@ -292,8 +292,7 @@ class TestBatchOperationIDOR(IDORTestBase):
 
         # Try batch delete including unauthorized IDs
         batch_delete_payload = {
-            "ids": user1_agents
-            + [str(uuid.uuid4()), str(uuid.uuid4())]  # Mix owned and unowned
+            "ids": user1_agents + [str(uuid.uuid4()), str(uuid.uuid4())]  # Mix owned and unowned
         }
 
         response = self.client.post(
@@ -511,15 +510,11 @@ class TestComplexIDORScenarios(IDORTestBase):
             target_id.replace("-", ""),  # Without hyphens
             target_id.upper(),  # Uppercase
             f"0x{target_id.replace('-', '')}",  # Hex-like format
-            hashlib.md5(
-                target_id.encode(), usedforsecurity=False
-            ).hexdigest(),  # MD5 hash
+            hashlib.md5(target_id.encode(), usedforsecurity=False).hexdigest(),  # MD5 hash
         ]
 
         for encoded_id in encoded_ids:
-            response = self.client.get(
-                f"/api/v1/agents/{encoded_id}", headers=user1_headers
-            )
+            response = self.client.get(f"/api/v1/agents/{encoded_id}", headers=user1_headers)
             # Should not decode and allow access
             assert response.status_code != status.HTTP_200_OK
 
@@ -539,9 +534,7 @@ class TestComplexIDORScenarios(IDORTestBase):
             results = list(executor.map(make_idor_attempt, target_ids))
 
         # None should succeed
-        successful_attempts = [
-            r for r in results if r.status_code == status.HTTP_200_OK
-        ]
+        successful_attempts = [r for r in results if r.status_code == status.HTTP_200_OK]
         assert len(successful_attempts) == 0
 
     def _verify_no_unauthorized_access(self, data: dict, authorized_user_id: str):

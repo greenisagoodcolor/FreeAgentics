@@ -31,9 +31,7 @@ def upgrade() -> None:
         op.create_index("idx_coalitions_type_category", "coalitions", ["type"])
 
         # Agent-Coalition association indexes
-        op.create_index(
-            "idx_agent_coalition_agent_lookup", "agent_coalition", ["agent_id"]
-        )
+        op.create_index("idx_agent_coalition_agent_lookup", "agent_coalition", ["agent_id"])
         op.create_index(
             "idx_agent_coalition_coalition_lookup",
             "agent_coalition",
@@ -43,12 +41,8 @@ def upgrade() -> None:
         # Conversations table indexes (if exists)
         try:
             op.create_index("idx_conversations_agent_id", "conversations", ["agent_id"])
-            op.create_index(
-                "idx_conversations_session_id", "conversations", ["session_id"]
-            )
-            op.create_index(
-                "idx_conversations_created_at", "conversations", ["created_at"]
-            )
+            op.create_index("idx_conversations_session_id", "conversations", ["session_id"])
+            op.create_index("idx_conversations_created_at", "conversations", ["created_at"])
         except Exception:
             # Table might not exist in all environments
             pass

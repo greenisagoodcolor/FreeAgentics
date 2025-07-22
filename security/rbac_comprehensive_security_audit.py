@@ -377,16 +377,12 @@ class RBACSecurityAuditor:
         # Validate role-permission matrix structure
         for role, permissions in ROLE_PERMISSIONS.items():
             if not isinstance(permissions, list):
-                findings.append(
-                    f"Role {role} has invalid permissions type: {type(permissions)}"
-                )
+                findings.append(f"Role {role} has invalid permissions type: {type(permissions)}")
                 passed = False
 
             for permission in permissions:
                 if not isinstance(permission, Permission):
-                    findings.append(
-                        f"Role {role} has invalid permission type: {type(permission)}"
-                    )
+                    findings.append(f"Role {role} has invalid permission type: {type(permission)}")
                     passed = False
 
         # Check for permission overlap analysis
@@ -754,9 +750,7 @@ class RBACSecurityAuditor:
                     )
                     passed = False
 
-                findings.append(
-                    f"ABAC test '{context['name']}': {reason} (rules: {applied_rules})"
-                )
+                findings.append(f"ABAC test '{context['name']}': {reason} (rules: {applied_rules})")
 
             except Exception as e:
                 findings.append(f"ABAC evaluation error for {context['name']}: {e}")
@@ -769,10 +763,7 @@ class RBACSecurityAuditor:
         priority_conflicts = {}
         for rule in abac_rules:
             if rule.priority in priority_conflicts:
-                if (
-                    priority_conflicts[rule.priority].resource_type
-                    == rule.resource_type
-                ):
+                if priority_conflicts[rule.priority].resource_type == rule.resource_type:
                     findings.append(
                         f"Potential ABAC rule conflict: {rule.name} and {priority_conflicts[rule.priority].name}"
                     )
@@ -831,9 +822,7 @@ class RBACSecurityAuditor:
         # Test audit log integrity
         for log_entry in enhanced_rbac_manager.access_audit_log:
             required_fields = ["timestamp", "user_id", "decision", "reason"]
-            missing_fields = [
-                field for field in required_fields if field not in log_entry
-            ]
+            missing_fields = [field for field in required_fields if field not in log_entry]
 
             if missing_fields:
                 findings.append(f"Audit log entry missing fields: {missing_fields}")
@@ -905,11 +894,7 @@ class RBACSecurityAuditor:
 
                 # Check if request was auto-approved appropriately
                 request = next(
-                    (
-                        r
-                        for r in enhanced_rbac_manager.role_requests
-                        if r.id == request_id
-                    ),
+                    (r for r in enhanced_rbac_manager.role_requests if r.id == request_id),
                     None,
                 )
 
@@ -993,9 +978,7 @@ class RBACSecurityAuditor:
             accessible_resources = []
 
             for resource_id in scenario["id_range"]:
-                resource_identifier = scenario["resource_pattern"].format(
-                    id=resource_id
-                )
+                resource_identifier = scenario["resource_pattern"].format(id=resource_id)
 
                 # Simulate resource access attempt
                 # In a real implementation, this would test actual API endpoints
@@ -1024,7 +1007,9 @@ class RBACSecurityAuditor:
 
         # Test UUID vs sequential ID usage
         sequential_id_pattern = r"^[a-zA-Z_]+_\d+$"
-        uuid_pattern = r"^[a-fA-F0-9]{8}-[a-fA-F0-9]{4}-[a-fA-F0-9]{4}-[a-fA-F0-9]{4}-[a-fA-F0-9]{12}$"
+        uuid_pattern = (
+            r"^[a-fA-F0-9]{8}-[a-fA-F0-9]{4}-[a-fA-F0-9]{4}-[a-fA-F0-9]{4}-[a-fA-F0-9]{12}$"
+        )
 
         for resource_id in self.test_resources:
             import re
@@ -1037,9 +1022,7 @@ class RBACSecurityAuditor:
             elif re.match(uuid_pattern, resource_id):
                 findings.append(f"Resource uses UUID: {resource_id} (good)")
             else:
-                findings.append(
-                    f"Resource uses custom ID format: {resource_id} (review needed)"
-                )
+                findings.append(f"Resource uses custom ID format: {resource_id} (review needed)")
 
         self.results.append(
             SecurityTestResult(
@@ -1181,25 +1164,15 @@ class RBACSecurityAuditor:
 
         for test in token_expiry_tests:
             # In a real implementation, this would test actual token generation and validation
-            findings.append(
-                f"Token expiration test: {test['name']} - {test['max_lifetime']}"
-            )
+            findings.append(f"Token expiration test: {test['name']} - {test['max_lifetime']}")
 
             # Check if token lifetime is reasonable
-            if test["token_type"] == "access" and test["max_lifetime"] > timedelta(
-                hours=1
-            ):
-                findings.append(
-                    f"Access token lifetime too long: {test['max_lifetime']}"
-                )
+            if test["token_type"] == "access" and test["max_lifetime"] > timedelta(hours=1):
+                findings.append(f"Access token lifetime too long: {test['max_lifetime']}")
                 passed = False
 
-            if test["token_type"] == "refresh" and test["max_lifetime"] > timedelta(
-                days=30
-            ):
-                findings.append(
-                    f"Refresh token lifetime too long: {test['max_lifetime']}"
-                )
+            if test["token_type"] == "refresh" and test["max_lifetime"] > timedelta(days=30):
+                findings.append(f"Refresh token lifetime too long: {test['max_lifetime']}")
                 passed = False
 
         # Test session concurrency
@@ -1385,9 +1358,7 @@ class RBACSecurityAuditor:
         ]
 
         for scenario in deadlock_scenarios:
-            findings.append(
-                f"Deadlock scenario: {scenario['name']} - {scenario['mitigation']}"
-            )
+            findings.append(f"Deadlock scenario: {scenario['name']} - {scenario['mitigation']}")
 
         self.results.append(
             SecurityTestResult(
@@ -1421,12 +1392,10 @@ class RBACSecurityAuditor:
                     user_id == resource_owner  # Owner access
                     or role == UserRole.ADMIN  # Admin access
                     or (
-                        role == UserRole.RESEARCHER
-                        and resource["resource_type"] == "agent"
+                        role == UserRole.RESEARCHER and resource["resource_type"] == "agent"
                     )  # Researcher agent access
                     or (
-                        role == UserRole.AGENT_MANAGER
-                        and resource["resource_type"] == "agent"
+                        role == UserRole.AGENT_MANAGER and resource["resource_type"] == "agent"
                     )  # Manager agent access
                 )
 
@@ -1464,9 +1433,7 @@ class RBACSecurityAuditor:
 
                     # Check for unexpected access patterns
                     if not should_have_access and access_granted:
-                        findings.append(
-                            f"Unexpected access granted: {role} to {resource_id}"
-                        )
+                        findings.append(f"Unexpected access granted: {role} to {resource_id}")
                         passed = False
 
                 except Exception as e:
@@ -1587,9 +1554,7 @@ class RBACSecurityAuditor:
         ]
 
         for test in data_leakage_tests:
-            findings.append(
-                f"Data leakage prevention: {test['scenario']} - {test['mitigation']}"
-            )
+            findings.append(f"Data leakage prevention: {test['scenario']} - {test['mitigation']}")
 
         self.results.append(
             SecurityTestResult(
@@ -1642,9 +1607,7 @@ class RBACSecurityAuditor:
         ]
 
         for scenario in bypass_scenarios:
-            findings.append(
-                f"Bypass test: {scenario['name']} - {scenario['description']}"
-            )
+            findings.append(f"Bypass test: {scenario['name']} - {scenario['description']}")
 
             # In a real implementation, this would test actual bypass attempts
             if scenario["expected_result"] == "blocked":
@@ -1725,9 +1688,7 @@ class RBACSecurityAuditor:
         ]
 
         for test in boundary_tests:
-            findings.append(
-                f"Boundary test: {test['name']} - expected {test['expected_result']}"
-            )
+            findings.append(f"Boundary test: {test['name']} - expected {test['expected_result']}")
 
             # In a real implementation, this would test actual boundary conditions
 
@@ -1746,9 +1707,7 @@ class RBACSecurityAuditor:
         ]
 
         for test in performance_tests:
-            findings.append(
-                f"Performance test: {test['name']} - {test['expected_response_time']}"
-            )
+            findings.append(f"Performance test: {test['name']} - {test['expected_response_time']}")
 
         # Test memory and resource limits
         resource_limit_tests = [
@@ -1821,9 +1780,7 @@ class RBACSecurityAuditor:
                         if file_path.exists():
                             # Check if file is actually obsolete
                             if self._is_file_obsolete(file_path):
-                                cleanup_actions.append(
-                                    f"Identified obsolete file: {file_path}"
-                                )
+                                cleanup_actions.append(f"Identified obsolete file: {file_path}")
                                 # In a real implementation, this would actually remove the file
                                 # file_path.unlink()
 
@@ -1852,10 +1809,7 @@ class RBACSecurityAuditor:
     def _is_file_obsolete(self, file_path: Path) -> bool:
         """Check if a file is obsolete and safe to remove."""
         # Check file age
-        if (
-            file_path.stat().st_mtime
-            < (datetime.now() - timedelta(days=30)).timestamp()
-        ):
+        if file_path.stat().st_mtime < (datetime.now() - timedelta(days=30)).timestamp():
             # Check if it's a temporary or backup file
             if any(
                 keyword in file_path.name.lower()
@@ -1883,9 +1837,7 @@ class RBACSecurityAuditor:
         critical_vulnerabilities = sum(
             1 for vuln in self.vulnerabilities if vuln.severity == "critical"
         )
-        high_vulnerabilities = sum(
-            1 for vuln in self.vulnerabilities if vuln.severity == "high"
-        )
+        high_vulnerabilities = sum(1 for vuln in self.vulnerabilities if vuln.severity == "high")
         medium_vulnerabilities = sum(
             1 for vuln in self.vulnerabilities if vuln.severity == "medium"
         )
@@ -1920,9 +1872,7 @@ class RBACSecurityAuditor:
                 "critical": critical_vulnerabilities,
                 "high": high_vulnerabilities,
                 "medium": medium_vulnerabilities,
-                "low": sum(
-                    1 for vuln in self.vulnerabilities if vuln.severity == "low"
-                ),
+                "low": sum(1 for vuln in self.vulnerabilities if vuln.severity == "low"),
             },
             "key_findings": [
                 f"RBAC implementation is {'comprehensive' if passed_tests > failed_tests else 'incomplete'}",
@@ -1958,11 +1908,7 @@ class RBACSecurityAuditor:
             )
 
         # RBAC improvements
-        if any(
-            not result.passed
-            for result in self.results
-            if "rbac" in result.test_name.lower()
-        ):
+        if any(not result.passed for result in self.results if "rbac" in result.test_name.lower()):
             recommendations.append(
                 {
                     "priority": "HIGH",
@@ -2054,9 +2000,7 @@ async def main():
         print(
             f"Tests Passed: {summary['test_summary']['passed_tests']}/{summary['test_summary']['total_tests']}"
         )
-        print(
-            f"Vulnerabilities Found: {summary['vulnerability_summary']['total_vulnerabilities']}"
-        )
+        print(f"Vulnerabilities Found: {summary['vulnerability_summary']['total_vulnerabilities']}")
 
         # Display key findings
         print("\nKEY FINDINGS:")

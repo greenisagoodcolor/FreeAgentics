@@ -133,10 +133,7 @@ class TestConcurrentAccessScenarios:
             assert False, "Test bypass removed - must fix underlying issue"
         from agents.base_agent import BasicExplorerAgent
 
-        agents = [
-            BasicExplorerAgent(f"agent_{i}", f"Agent {i}", grid_size=3)
-            for i in range(5)
-        ]
+        agents = [BasicExplorerAgent(f"agent_{i}", f"Agent {i}", grid_size=3) for i in range(5)]
 
         for agent in agents:
             agent.start()
@@ -168,9 +165,7 @@ class TestConcurrentAccessScenarios:
                 time.sleep(0.001)  # Small delay to encourage race conditions
 
         # Run multiple threads concurrently
-        threads = [
-            threading.Thread(target=generate_errors, args=(i,)) for i in range(3)
-        ]
+        threads = [threading.Thread(target=generate_errors, args=(i,)) for i in range(3)]
 
         for thread in threads:
             thread.start()

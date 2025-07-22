@@ -28,9 +28,7 @@ async def test_belief_monitoring_basic(belief_monitor):
     beliefs = {"qs": [np.array([0.25, 0.25, 0.25, 0.25])]}  # Uniform beliefs
 
     # Record belief update
-    snapshot = await belief_monitor.record_belief_update(
-        beliefs=beliefs, free_energy=1.5
-    )
+    snapshot = await belief_monitor.record_belief_update(beliefs=beliefs, free_energy=1.5)
 
     assert snapshot.agent_id == "test-agent"
     assert snapshot.free_energy == 1.5

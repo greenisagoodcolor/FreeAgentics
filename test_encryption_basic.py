@@ -138,9 +138,7 @@ def test_incident_manager():
     )
 
     with tempfile.TemporaryDirectory() as tmpdir:
-        manager = IncidentManager(
-            data_dir=tmpdir, auto_triage=False, auto_playbook_execution=False
-        )
+        manager = IncidentManager(data_dir=tmpdir, auto_triage=False, auto_playbook_execution=False)
 
         # Create incident
         case = manager.create_incident(

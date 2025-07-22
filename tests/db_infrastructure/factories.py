@@ -171,9 +171,7 @@ class CoalitionFactory(BaseFactory):
     ]
 
     @classmethod
-    def create(
-        cls, session: Session, agents: Optional[List[Agent]] = None, **kwargs
-    ) -> Coalition:
+    def create(cls, session: Session, agents: Optional[List[Agent]] = None, **kwargs) -> Coalition:
         """Create a test coalition with agents.
 
         Args:
@@ -250,9 +248,7 @@ class KnowledgeGraphFactory(BaseFactory):
                 "source": f"agent_{cls.random_string(6)}",
                 "confidence": random.uniform(0.5, 1.0),
                 "timestamp": datetime.utcnow().isoformat(),
-                "tags": random.sample(
-                    ["physics", "behavior", "environment", "agent"], k=2
-                ),
+                "tags": random.sample(["physics", "behavior", "environment", "agent"], k=2),
             },
             "embedding": [random.random() for _ in range(128)],  # Mock embedding
             "created_at": cls.random_timestamp(days_ago=14),
@@ -543,9 +539,7 @@ if __name__ == "__main__":
         # Test coalition creation
         print("\nCreating coalition...")
         coalition = CoalitionFactory.create(session, agents=agents[:3])
-        print(
-            f"✅ Created coalition: {coalition.coalition_id} with {len(coalition.agents)} agents"
-        )
+        print(f"✅ Created coalition: {coalition.coalition_id} with {len(coalition.agents)} agents")
 
         # Test knowledge graph
         print("\nCreating knowledge graph...")

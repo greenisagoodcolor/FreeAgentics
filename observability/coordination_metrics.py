@@ -166,21 +166,15 @@ class CoordinationMetricsCollector:
 
         # Update agent statistics
         self.agent_coordination_stats[coordinator_id]["coordinations_initiated"] += 1
-        self.agent_coordination_stats[coordinator_id]["total_coordination_time_ms"] += (
-            duration_ms
-        )
+        self.agent_coordination_stats[coordinator_id]["total_coordination_time_ms"] += duration_ms
 
         if success:
-            self.agent_coordination_stats[coordinator_id][
-                "successful_coordinations"
-            ] += 1
+            self.agent_coordination_stats[coordinator_id]["successful_coordinations"] += 1
         else:
             self.agent_coordination_stats[coordinator_id]["failed_coordinations"] += 1
 
         for participant_id in participant_ids:
-            self.agent_coordination_stats[participant_id][
-                "coordinations_participated"
-            ] += 1
+            self.agent_coordination_stats[participant_id]["coordinations_participated"] += 1
 
         # Record metrics
         if MONITORING_AVAILABLE:
@@ -270,9 +264,7 @@ class CoordinationMetricsCollector:
         """
         if coalition_id in self.coalition_metrics:
             coalition = self.coalition_metrics[coalition_id]
-            lifetime_seconds = (
-                datetime.now() - coalition.formation_time
-            ).total_seconds()
+            lifetime_seconds = (datetime.now() - coalition.formation_time).total_seconds()
 
             if MONITORING_AVAILABLE:
                 await record_system_metric(
@@ -362,9 +354,7 @@ class CoordinationMetricsCollector:
 
         # Update coordination efficiency based on overhead
         if coordination_overhead_ms < self.thresholds["coordination_time_ms"]:
-            coalition.coordination_efficiency = min(
-                1.0, coalition.coordination_efficiency * 1.01
-            )
+            coalition.coordination_efficiency = min(1.0, coalition.coordination_efficiency * 1.01)
         else:
             coalition.coordination_efficiency *= 0.98
 
@@ -392,15 +382,11 @@ class CoordinationMetricsCollector:
         stats = self.agent_coordination_stats[agent_id]
 
         # Calculate derived metrics
-        total_coordinations = (
-            stats["coordinations_initiated"] + stats["coordinations_participated"]
-        )
+        total_coordinations = stats["coordinations_initiated"] + stats["coordinations_participated"]
 
         success_rate = 0.0
         if stats["coordinations_initiated"] > 0:
-            success_rate = (
-                stats["successful_coordinations"] / stats["coordinations_initiated"]
-            )
+            success_rate = stats["successful_coordinations"] / stats["coordinations_initiated"]
 
         avg_coordination_time = 0.0
         if stats["coordinations_initiated"] > 0:
@@ -434,12 +420,8 @@ class CoordinationMetricsCollector:
             }
 
         member_counts = [c.member_count for c in self.coalition_metrics.values()]
-        efficiencies = [
-            c.coordination_efficiency for c in self.coalition_metrics.values()
-        ]
-        completion_rates = [
-            c.task_completion_rate for c in self.coalition_metrics.values()
-        ]
+        efficiencies = [c.coordination_efficiency for c in self.coalition_metrics.values()]
+        completion_rates = [c.task_completion_rate for c in self.coalition_metrics.values()]
 
         return {
             "active_coalitions": len(self.coalition_metrics),
@@ -461,17 +443,14 @@ class CoordinationMetricsCollector:
             for s in self.agent_coordination_stats.values()
         )
 
-        total_messages = sum(
-            s["messages_sent"] for s in self.agent_coordination_stats.values()
-        )
+        total_messages = sum(s["messages_sent"] for s in self.agent_coordination_stats.values())
 
         # Calculate system-wide success rate
         total_initiated = sum(
             s["coordinations_initiated"] for s in self.agent_coordination_stats.values()
         )
         total_successful = sum(
-            s["successful_coordinations"]
-            for s in self.agent_coordination_stats.values()
+            s["successful_coordinations"] for s in self.agent_coordination_stats.values()
         )
 
         system_success_rate = 0.0
@@ -546,9 +525,7 @@ async def record_coalition_event(
             coalition_id, coordinator_id, member_ids, duration_ms, success
         )
     elif event_type == "dissolution":
-        await coordination_metrics.record_coalition_dissolution(
-            coalition_id, "requested", None
-        )
+        await coordination_metrics.record_coalition_dissolution(coalition_id, "requested", None)
 
 
 def get_agent_coordination_stats(agent_id: str) -> Dict[str, Any]:

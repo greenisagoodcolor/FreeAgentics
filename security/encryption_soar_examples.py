@@ -182,9 +182,7 @@ async def soar_playbook_example():
             "id": "ransomware_response",
             "name": "Ransomware Attack Response",
             "description": "Automated response to ransomware detection",
-            "triggers": [
-                {"type": "alert", "conditions": [{"alert_type": "ransomware"}]}
-            ],
+            "triggers": [{"type": "alert", "conditions": [{"alert_type": "ransomware"}]}],
             "actions": [
                 {
                     "id": "isolate_host",
@@ -259,9 +257,7 @@ Please begin manual investigation immediately.""",
 
         print(f"Playbook execution ID: {context.execution_id}")
         print(f"Status: {context.status.value}")
-        print(
-            f"Duration: {(context.end_time - context.start_time).total_seconds():.2f}s"
-        )
+        print(f"Duration: {(context.end_time - context.start_time).total_seconds():.2f}s")
         print("\nArtifacts collected:")
         for key, value in context.artifacts.items():
             print(f"  - {key}: {value}")

@@ -24,9 +24,7 @@ security_logger.setLevel(logging.INFO)
 # Ensure security logs go to separate file
 if not security_logger.handlers:
     handler = logging.FileHandler("logs/security_audit.log")
-    handler.setFormatter(
-        logging.Formatter("%(asctime)s - %(name)s - %(levelname)s - %(message)s")
-    )
+    handler.setFormatter(logging.Formatter("%(asctime)s - %(name)s - %(levelname)s - %(message)s"))
     security_logger.addHandler(handler)
 
 # Also log critical security events to main logger
@@ -130,9 +128,7 @@ if AUDIT_DB_URL:
     # Configure audit engine based on database dialect
     audit_engine_args: Dict[str, Any] = {}
 
-    if AUDIT_DB_URL.startswith("postgresql://") or AUDIT_DB_URL.startswith(
-        "postgres://"
-    ):
+    if AUDIT_DB_URL.startswith("postgresql://") or AUDIT_DB_URL.startswith("postgres://"):
         # PostgreSQL-specific configuration
         audit_engine_args.update(
             {
@@ -214,9 +210,7 @@ class SecurityAuditor:
         except Exception as e:
             critical_logger.error(f"Failed to log security event: {e}")
 
-    def _write_to_log(
-        self, log_entry: Dict[str, Any], severity: SecurityEventSeverity
-    ) -> None:
+    def _write_to_log(self, log_entry: Dict[str, Any], severity: SecurityEventSeverity) -> None:
         """Write security event to log file."""
         log_message = json.dumps(log_entry)
 
@@ -332,9 +326,7 @@ class SecurityAuditor:
         # Remove old violations (older than 1 hour)
         cutoff = now - timedelta(hours=1)
         self.rate_limit_violations[ip_address] = [
-            violation
-            for violation in self.rate_limit_violations[ip_address]
-            if violation > cutoff
+            violation for violation in self.rate_limit_violations[ip_address] if violation > cutoff
         ]
 
         # Add current violation
@@ -351,9 +343,7 @@ class SecurityAuditor:
                 },
             )
 
-    def _send_security_alert(
-        self, event_type: SecurityEventType, details: Dict[str, Any]
-    ) -> None:
+    def _send_security_alert(self, event_type: SecurityEventType, details: Dict[str, Any]) -> None:
         """Send immediate security alert (email, webhook, etc)."""
         # TODO: Implement actual alerting mechanism (email, Slack, PagerDuty, etc)
         critical_logger.critical(
@@ -380,9 +370,7 @@ class SecurityAuditor:
 
                 # Query recent events
                 events = (
-                    db.query(SecurityAuditLog)
-                    .filter(SecurityAuditLog.timestamp >= cutoff)
-                    .all()
+                    db.query(SecurityAuditLog).filter(SecurityAuditLog.timestamp >= cutoff).all()
                 )
 
                 # Aggregate by type and severity
@@ -398,15 +386,11 @@ class SecurityAuditor:
                 for event in events:
                     # Count by type
                     event_type = event.event_type
-                    summary["by_type"][event_type] = (
-                        summary["by_type"].get(event_type, 0) + 1
-                    )
+                    summary["by_type"][event_type] = summary["by_type"].get(event_type, 0) + 1
 
                     # Count by severity
                     severity = event.severity
-                    summary["by_severity"][severity] = (
-                        summary["by_severity"].get(severity, 0) + 1
-                    )
+                    summary["by_severity"][severity] = summary["by_severity"].get(severity, 0) + 1
 
                     # Count failed logins
                     if event.event_type == SecurityEventType.LOGIN_FAILURE:
@@ -454,9 +438,7 @@ def log_login_success(username: str, user_id: str, request: Request) -> None:
     )
 
 
-def log_login_failure(
-    username: str, request: Request, reason: str = "Invalid credentials"
-) -> None:
+def log_login_failure(username: str, request: Request, reason: str = "Invalid credentials") -> None:
     """Log failed login attempt."""
     security_auditor.log_event(
         SecurityEventType.LOGIN_FAILURE,

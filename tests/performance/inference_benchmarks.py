@@ -177,9 +177,7 @@ class BeliefPropagationBenchmark(PyMDPBenchmark):
         # Initialize messages
         self.messages = {}
         for edge in self.factor_graph["edges"]:
-            self.messages[edge] = np.random.rand(
-                self.factor_graph["node_dims"][edge[1]]
-            )
+            self.messages[edge] = np.random.rand(self.factor_graph["node_dims"][edge[1]])
             self.messages[edge] = self.messages[edge] / np.sum(self.messages[edge])
 
     def run_iteration(self) -> Dict[str, Any]:
@@ -209,9 +207,7 @@ class BeliefPropagationBenchmark(PyMDPBenchmark):
         return {
             "num_message_updates": num_updates,
             "max_message_delta": float(max_delta),
-            "avg_belief_entropy": float(
-                np.mean([self._entropy(b) for b in beliefs.values()])
-            ),
+            "avg_belief_entropy": float(np.mean([self._entropy(b) for b in beliefs.values()])),
         }
 
     def _create_factor_graph(self):
@@ -307,13 +303,9 @@ class MessagePassingBenchmark(PyMDPBenchmark):
             return
 
         # Initialize beliefs on grid
-        self.grid_beliefs = np.random.rand(
-            self.grid_size, self.grid_size, 4
-        )  # 4 states per cell
+        self.grid_beliefs = np.random.rand(self.grid_size, self.grid_size, 4)  # 4 states per cell
         # Normalize
-        self.grid_beliefs = self.grid_beliefs / np.sum(
-            self.grid_beliefs, axis=2, keepdims=True
-        )
+        self.grid_beliefs = self.grid_beliefs / np.sum(self.grid_beliefs, axis=2, keepdims=True)
 
     def run_iteration(self) -> Dict[str, Any]:
         """Run message passing iteration."""

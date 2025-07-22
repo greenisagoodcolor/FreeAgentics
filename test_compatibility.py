@@ -93,9 +93,7 @@ def check_version_compatibility():
             "status": "OK",
             "error": None,
         }
-        print(
-            f"✓ PyTorch Geometric {torch_geometric.__version__} imported successfully"
-        )
+        print(f"✓ PyTorch Geometric {torch_geometric.__version__} imported successfully")
 
     except Exception as e:
         compatibility_results["torch_geometric"] = {
@@ -110,9 +108,7 @@ def check_version_compatibility():
         import pymdp
 
         compatibility_results["pymdp"] = {
-            "version": pymdp.__version__
-            if hasattr(pymdp, "__version__")
-            else "unknown",
+            "version": pymdp.__version__ if hasattr(pymdp, "__version__") else "unknown",
             "status": "OK",
             "error": None,
         }

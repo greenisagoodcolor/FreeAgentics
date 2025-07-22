@@ -217,9 +217,7 @@ core_functional = (
     and results["components"].get("frontend", "") == "PASS"
 )
 
-print(
-    f"\nCore Functionality: {'✅ OPERATIONAL' if core_functional else '❌ NOT READY'}"
-)
+print(f"\nCore Functionality: {'✅ OPERATIONAL' if core_functional else '❌ NOT READY'}")
 print(f"Claimed Feature: {'✅ VALIDATED' if passed >= 5 else '❌ NOT VALIDATED'}")
 
 # Set final verdict

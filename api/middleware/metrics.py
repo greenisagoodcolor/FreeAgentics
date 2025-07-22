@@ -61,9 +61,7 @@ class MetricsMiddleware(BaseHTTPMiddleware):
 
             # Record metrics
             try:
-                record_http_request(
-                    method=method, endpoint=path, status=status, duration=duration
-                )
+                record_http_request(method=method, endpoint=path, status=status, duration=duration)
             except Exception as e:
                 # Never let metrics collection break the app
                 logger.error(f"Failed to record metrics: {e}")

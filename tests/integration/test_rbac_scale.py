@@ -41,12 +41,8 @@ class RBACTestMetrics:
     successful_checks: int = 0
     failed_checks: int = 0
     check_times: List[float] = field(default_factory=list)
-    role_check_times: Dict[str, List[float]] = field(
-        default_factory=lambda: defaultdict(list)
-    )
-    permission_type_times: Dict[str, List[float]] = field(
-        default_factory=lambda: defaultdict(list)
-    )
+    role_check_times: Dict[str, List[float]] = field(default_factory=lambda: defaultdict(list))
+    permission_type_times: Dict[str, List[float]] = field(default_factory=lambda: defaultdict(list))
     concurrent_checks: int = 0
     cache_hits: int = 0
     cache_misses: int = 0
@@ -68,12 +64,8 @@ class RBACTestMetrics:
                 if self.permission_checks > 0
                 else 0
             ),
-            "avg_check_time": statistics.mean(self.check_times)
-            if self.check_times
-            else 0,
-            "median_check_time": statistics.median(self.check_times)
-            if self.check_times
-            else 0,
+            "avg_check_time": statistics.mean(self.check_times) if self.check_times else 0,
+            "median_check_time": statistics.median(self.check_times) if self.check_times else 0,
             "p95_check_time": (
                 statistics.quantiles(self.check_times, n=20)[18]
                 if len(self.check_times) > 20
@@ -85,9 +77,7 @@ class RBACTestMetrics:
                 else max(self.check_times, default=0)
             ),
             "checks_per_second": (
-                self.permission_checks / sum(self.check_times)
-                if self.check_times
-                else 0
+                self.permission_checks / sum(self.check_times) if self.check_times else 0
             ),
             "cache_hit_rate": (
                 (self.cache_hits / (self.cache_hits + self.cache_misses) * 100)
@@ -151,9 +141,7 @@ class TestRBACScale:
 
         return users_by_role
 
-    def _check_permission(
-        self, user: User, permission: Permission
-    ) -> Tuple[bool, float]:
+    def _check_permission(self, user: User, permission: Permission) -> Tuple[bool, float]:
         """Check if user has permission and measure time."""
         start = time.time()
 
@@ -210,9 +198,7 @@ class TestRBACScale:
 
         # Run concurrent permission checks
         with concurrent.futures.ThreadPoolExecutor(max_workers=50) as executor:
-            futures = [
-                executor.submit(check_user_permissions, user) for user in all_users
-            ]
+            futures = [executor.submit(check_user_permissions, user) for user in all_users]
 
             all_results = []
             for future in concurrent.futures.as_completed(futures):
@@ -228,15 +214,15 @@ class TestRBACScale:
         stats = self.metrics.calculate_statistics()
 
         # Performance assertions
-        assert stats["avg_check_time"] < 0.01, (
-            f"Average permission check too slow: {stats['avg_check_time']}s"
-        )
-        assert stats["p95_check_time"] < 0.02, (
-            f"P95 permission check too slow: {stats['p95_check_time']}s"
-        )
-        assert stats["checks_per_second"] > 1000, (
-            f"Permission check throughput too low: {stats['checks_per_second']} checks/s"
-        )
+        assert (
+            stats["avg_check_time"] < 0.01
+        ), f"Average permission check too slow: {stats['avg_check_time']}s"
+        assert (
+            stats["p95_check_time"] < 0.02
+        ), f"P95 permission check too slow: {stats['p95_check_time']}s"
+        assert (
+            stats["checks_per_second"] > 1000
+        ), f"Permission check throughput too low: {stats['checks_per_second']} checks/s"
         assert total_time < 30, f"Total test time too high: {total_time}s"
 
     def test_role_hierarchy_at_scale(self):
@@ -279,32 +265,28 @@ class TestRBACScale:
 
         # All hierarchy checks should be correct
         incorrect_checks = [check for check in hierarchy_checks if not check["correct"]]
-        assert len(incorrect_checks) == 0, (
-            f"Role hierarchy violations found: {incorrect_checks}"
-        )
+        assert len(incorrect_checks) == 0, f"Role hierarchy violations found: {incorrect_checks}"
 
         # Verify admin has all permissions
         admin_checks = [
             check for check in hierarchy_checks if check["role"] == UserRole.ADMIN.value
         ]
         for check in admin_checks:
-            assert Permission.ADMIN_SYSTEM in check["actual"], (
-                "Admin should have ADMIN_SYSTEM permission"
-            )
+            assert (
+                Permission.ADMIN_SYSTEM in check["actual"]
+            ), "Admin should have ADMIN_SYSTEM permission"
 
         # Verify observer has limited permissions
         observer_checks = [
-            check
-            for check in hierarchy_checks
-            if check["role"] == UserRole.OBSERVER.value
+            check for check in hierarchy_checks if check["role"] == UserRole.OBSERVER.value
         ]
         for check in observer_checks:
-            assert Permission.ADMIN_SYSTEM not in check["actual"], (
-                "Observer should not have ADMIN_SYSTEM permission"
-            )
-            assert Permission.CREATE_AGENT not in check["actual"], (
-                "Observer should not have CREATE_AGENT permission"
-            )
+            assert (
+                Permission.ADMIN_SYSTEM not in check["actual"]
+            ), "Observer should not have ADMIN_SYSTEM permission"
+            assert (
+                Permission.CREATE_AGENT not in check["actual"]
+            ), "Observer should not have CREATE_AGENT permission"
 
     def test_permission_check_performance_by_role(self):
         """Test permission check performance for different roles."""
@@ -333,9 +315,9 @@ class TestRBACScale:
 
         # Admin role might be slightly slower due to more permissions
         for role, metrics in role_metrics.items():
-            assert metrics["avg_time"] < 0.01, (
-                f"Role {role} permission checks too slow: {metrics['avg_time']}s"
-            )
+            assert (
+                metrics["avg_time"] < 0.01
+            ), f"Role {role} permission checks too slow: {metrics['avg_time']}s"
 
     def test_complex_permission_scenarios(self):
         """Test complex permission scenarios at scale."""
@@ -392,9 +374,7 @@ class TestRBACScale:
 
         # Verify all scenarios passed
         failed_scenarios = [s for s in scenarios if not s["passed"]]
-        assert len(failed_scenarios) == 0, (
-            f"Failed permission scenarios: {failed_scenarios}"
-        )
+        assert len(failed_scenarios) == 0, f"Failed permission scenarios: {failed_scenarios}"
 
     def test_permission_validation_with_token_rotation(self):
         """Test permission checks during token refresh cycles."""
@@ -416,9 +396,9 @@ class TestRBACScale:
                     # Verify permissions are consistent
                     expected_perms = set(ROLE_PERMISSIONS.get(user.role, []))
                     actual_perms = set(token_data.permissions)
-                    assert expected_perms == actual_perms, (
-                        f"Permission mismatch after {cycle} refreshes"
-                    )
+                    assert (
+                        expected_perms == actual_perms
+                    ), f"Permission mismatch after {cycle} refreshes"
 
                     # Refresh token
                     try:
@@ -460,9 +440,7 @@ class TestRBACScale:
             user = users[user_index]
 
             # Randomly change role
-            new_role = random.choice(
-                [UserRole.RESEARCHER, UserRole.AGENT_MANAGER, UserRole.ADMIN]
-            )
+            new_role = random.choice([UserRole.RESEARCHER, UserRole.AGENT_MANAGER, UserRole.ADMIN])
             user.role = new_role
 
             # Create new token with new role
@@ -493,9 +471,7 @@ class TestRBACScale:
 
         # Verify all permission checks were correct
         mismatches = [r for r in results if not r["permissions_match"]]
-        assert len(mismatches) == 0, (
-            f"Permission mismatches after role changes: {mismatches}"
-        )
+        assert len(mismatches) == 0, f"Permission mismatches after role changes: {mismatches}"
 
     def test_resource_access_patterns_under_load(self):
         """Test different resource access patterns under load."""
@@ -568,9 +544,7 @@ class TestRBACScale:
         avg_access_time = statistics.mean([p["access_time"] for p in access_patterns])
 
         assert total_accesses >= 900, "Some access attempts failed"
-        assert avg_access_time < 0.01, (
-            f"Average access time too high: {avg_access_time}s"
-        )
+        assert avg_access_time < 0.01, f"Average access time too high: {avg_access_time}s"
 
     def test_permission_caching_effectiveness(self):
         """Test effectiveness of permission caching under load."""
@@ -605,9 +579,7 @@ class TestRBACScale:
 
         # Warm cache should be faster (though our implementation creates new tokens each time)
         # In a real implementation with proper caching, warm would be significantly faster
-        assert avg_warm <= avg_cold * 1.1, (
-            "Cache not providing expected performance benefit"
-        )
+        assert avg_warm <= avg_cold * 1.1, "Cache not providing expected performance benefit"
 
     @pytest.mark.parametrize(
         "num_users,num_permissions",
@@ -651,12 +623,12 @@ class TestRBACScale:
         checks_per_second = num_permissions / total_time
 
         # Performance should scale reasonably
-        assert avg_check_time < 0.02, (
-            f"Avg check time too high for {num_users} users: {avg_check_time}s"
-        )
-        assert checks_per_second > 50, (
-            f"Throughput too low for {num_users} users: {checks_per_second} checks/s"
-        )
+        assert (
+            avg_check_time < 0.02
+        ), f"Avg check time too high for {num_users} users: {avg_check_time}s"
+        assert (
+            checks_per_second > 50
+        ), f"Throughput too low for {num_users} users: {checks_per_second} checks/s"
 
         # Log performance for analysis
         print(f"\nLoad test with {num_users} users, {num_permissions} checks:")

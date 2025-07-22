@@ -64,9 +64,7 @@ class TestPerformanceReportGenerator:
         generator = PerformanceReportGenerator(str(tmp_path))
         metrics = generator.extract_metrics(test_results)
 
-        assert (
-            len(metrics) == 4
-        )  # mean_time, memory_usage, cache_hit_rate, total_operations
+        assert len(metrics) == 4  # mean_time, memory_usage, cache_hit_rate, total_operations
 
         # Check metric extraction
         metric_names = [m.name for m in metrics]
@@ -137,9 +135,7 @@ class TestPerformanceMonitor:
         }
 
         # Write test results (use proper naming pattern)
-        with open(
-            results_dir / "test_benchmark_results_20250704_120000.json", "w"
-        ) as f:
+        with open(results_dir / "test_benchmark_results_20250704_120000.json", "w") as f:
             json.dump([good_result, poor_result], f)
 
         monitor = PerformanceMonitor(regression_threshold=10.0)
@@ -296,9 +292,7 @@ class TestIntegrationBehavior:
         # Test severe time regression
         time_metrics = [
             PerformanceMetric("mean_time", 1.0, "ms", base_time, "test", {}),
-            PerformanceMetric(
-                "mean_time", 2.0, "ms", base_time, "test", {}
-            ),  # 100% regression
+            PerformanceMetric("mean_time", 2.0, "ms", base_time, "test", {}),  # 100% regression
         ]
 
         regressions = generator.detect_regressions(time_metrics, 10.0)
@@ -308,9 +302,7 @@ class TestIntegrationBehavior:
         # Test cache hit rate regression
         cache_metrics = [
             PerformanceMetric("cache_hit_rate", 0.8, "%", base_time, "test", {}),
-            PerformanceMetric(
-                "cache_hit_rate", 0.6, "%", base_time, "test", {}
-            ),  # 25% drop
+            PerformanceMetric("cache_hit_rate", 0.6, "%", base_time, "test", {}),  # 25% drop
         ]
 
         cache_regressions = generator.detect_regressions(cache_metrics, 10.0)

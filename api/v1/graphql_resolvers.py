@@ -38,9 +38,7 @@ class GraphQLResolvers:
         self.coalition_manager = coalition_manager if COMPONENTS_AVAILABLE else None
 
     # Agent resolvers
-    def get_agents(
-        self, status: Optional[str] = None, limit: int = 100
-    ) -> List[Dict[str, Any]]:
+    def get_agents(self, status: Optional[str] = None, limit: int = 100) -> List[Dict[str, Any]]:
         """Get list of agents."""
         if not self.agent_manager:
             return []
@@ -49,9 +47,7 @@ class GraphQLResolvers:
             agent_statuses = self.agent_manager.get_all_agents_status()
 
             if status:
-                agent_statuses = [
-                    a for a in agent_statuses if a.get("status") == status
-                ]
+                agent_statuses = [a for a in agent_statuses if a.get("status") == status]
 
             # Convert to GraphQL format
             agents = []
@@ -60,9 +56,7 @@ class GraphQLResolvers:
                     {
                         "id": agent_status.get("agent_id", ""),
                         "name": agent_status.get("name", "Unknown"),
-                        "status": (
-                            "active" if agent_status.get("is_active") else "inactive"
-                        ),
+                        "status": ("active" if agent_status.get("is_active") else "inactive"),
                         "created_at": datetime.fromisoformat(
                             agent_status.get("created_at", datetime.now().isoformat())
                         ),
@@ -110,9 +104,7 @@ class GraphQLResolvers:
                 ),
                 "total_steps": agent_status.get("total_steps", 0),
                 "capabilities": ["exploration", "navigation"],
-                "performance_score": agent_status.get("metrics", {}).get(
-                    "avg_free_energy", 0.0
-                ),
+                "performance_score": agent_status.get("metrics", {}).get("avg_free_energy", 0.0),
             }
 
         except Exception as e:
@@ -157,9 +149,7 @@ class GraphQLResolvers:
             logger.error(f"Error creating agent: {e}")
             raise Exception(f"Failed to create agent: {str(e)}")
 
-    def update_agent_status(
-        self, agent_id: str, status: str
-    ) -> Optional[Dict[str, Any]]:
+    def update_agent_status(self, agent_id: str, status: str) -> Optional[Dict[str, Any]]:
         """Update agent status."""
         if not self.agent_manager:
             return None
@@ -204,12 +194,8 @@ class GraphQLResolvers:
                         "member_count": coalition_data.get("member_count", 0),
                         "leader_id": coalition_data.get("leader_id"),
                         "objectives_count": coalition_data.get("objectives_count", 0),
-                        "completed_objectives": coalition_data.get(
-                            "completed_objectives", 0
-                        ),
-                        "performance_score": coalition_data.get(
-                            "performance_score", 0.0
-                        ),
+                        "completed_objectives": coalition_data.get("completed_objectives", 0),
+                        "performance_score": coalition_data.get("performance_score", 0.0),
                         "coordination_efficiency": coalition_data.get(
                             "coordination_efficiency", 0.0
                         ),
@@ -246,9 +232,7 @@ class GraphQLResolvers:
                 "objectives_count": coalition_data.get("objectives_count", 0),
                 "completed_objectives": coalition_data.get("completed_objectives", 0),
                 "performance_score": coalition_data.get("performance_score", 0.0),
-                "coordination_efficiency": coalition_data.get(
-                    "coordination_efficiency", 0.0
-                ),
+                "coordination_efficiency": coalition_data.get("coordination_efficiency", 0.0),
                 "created_at": datetime.fromisoformat(
                     coalition_data.get("created_at", datetime.now().isoformat())
                 ),
@@ -274,11 +258,7 @@ class GraphQLResolvers:
                 "step_count": world_state.get("step_count", 0),
                 "agent_count": world_state.get("num_agents", 0),
                 "active_agents": len(
-                    [
-                        a
-                        for a in self.agent_manager.get_all_agents_status()
-                        if a.get("is_active")
-                    ]
+                    [a for a in self.agent_manager.get_all_agents_status() if a.get("is_active")]
                 ),
             }
 

@@ -143,17 +143,13 @@ class TestRBACSecurityAudit:
 
         # Downgrade should be auto-approved
         should_approve = enhanced_rbac_manager._should_auto_approve(request)
-        assert should_approve, (
-            "Downgrade from admin to observer should be auto-approved"
-        )
+        assert should_approve, "Downgrade from admin to observer should be auto-approved"
 
         # Upgrade should not be auto-approved
         request.current_role = UserRole.OBSERVER
         request.requested_role = UserRole.ADMIN
         should_approve = enhanced_rbac_manager._should_auto_approve(request)
-        assert not should_approve, (
-            "Upgrade from observer to admin should not be auto-approved"
-        )
+        assert not should_approve, "Upgrade from observer to admin should not be auto-approved"
 
     def test_permission_inheritance_security(self, test_users):
         """Test permission inheritance doesn't create vulnerabilities."""
@@ -174,9 +170,9 @@ class TestRBACSecurityAudit:
         for role, perms in ROLE_PERMISSIONS.items():
             if role != UserRole.ADMIN:
                 role_perms = set(perms)
-                assert role_perms.issubset(admin_perms), (
-                    f"Role {role} has permissions not available to admin"
-                )
+                assert role_perms.issubset(
+                    admin_perms
+                ), f"Role {role} has permissions not available to admin"
 
     def test_privilege_escalation_prevention(self, test_users, mock_db, mock_request):
         """Test prevention of privilege escalation attacks."""
@@ -219,9 +215,7 @@ class TestRBACSecurityAudit:
 
         # Verify request was logged
         assert len(enhanced_rbac_manager.role_requests) > 0
-        request = next(
-            r for r in enhanced_rbac_manager.role_requests if r.id == request_id
-        )
+        request = next(r for r in enhanced_rbac_manager.role_requests if r.id == request_id)
         assert request is not None
         assert request.justification == "Project requirement"
 
@@ -232,9 +226,7 @@ class TestRBACSecurityAudit:
         assert success
 
         # Verify approval was logged
-        request = next(
-            r for r in enhanced_rbac_manager.role_requests if r.id == request_id
-        )
+        request = next(r for r in enhanced_rbac_manager.role_requests if r.id == request_id)
         assert request.status == RequestStatus.APPROVED
         assert request.reviewed_by == "admin-001"
         assert request.reviewer_notes == "Approved for research project"
@@ -277,9 +269,7 @@ class TestRBACSecurityAudit:
             # Mock current time (assuming test runs outside business hours)
             with patch("auth.rbac_enhancements.datetime") as mock_datetime:
                 # Test access during business hours
-                mock_datetime.now.return_value = datetime(
-                    2024, 1, 15, 14, 0
-                )  # Monday 2 PM
+                mock_datetime.now.return_value = datetime(2024, 1, 15, 14, 0)  # Monday 2 PM
                 mock_datetime.now.return_value = mock_datetime.now.return_value.replace(
                     tzinfo=timezone.utc
                 )
@@ -303,9 +293,7 @@ class TestRBACSecurityAudit:
                 assert granted, "Admin access should be granted during business hours"
 
                 # Test access outside business hours
-                mock_datetime.now.return_value = datetime(
-                    2024, 1, 15, 22, 0
-                )  # Monday 10 PM
+                mock_datetime.now.return_value = datetime(2024, 1, 15, 22, 0)  # Monday 10 PM
                 mock_datetime.now.return_value = mock_datetime.now.return_value.replace(
                     tzinfo=timezone.utc
                 )
@@ -317,9 +305,7 @@ class TestRBACSecurityAudit:
                 ) = enhanced_rbac_manager.evaluate_abac_access(
                     access_context, resource_context, "admin"
                 )
-                assert not granted, (
-                    "Admin access should be denied outside business hours"
-                )
+                assert not granted, "Admin access should be denied outside business hours"
         finally:
             # Restore original rules
             enhanced_rbac_manager.abac_rules = original_rules
@@ -548,18 +534,14 @@ class TestRBACSecurityAudit:
         # Approve some requests concurrently
         approved = 0
         for req_id in requests[:5]:
-            if enhanced_rbac_manager.approve_role_request(
-                req_id, "admin-001", "Batch approval"
-            ):
+            if enhanced_rbac_manager.approve_role_request(req_id, "admin-001", "Batch approval"):
                 approved += 1
 
         assert approved == 5, "All approval attempts should succeed"
 
         # Verify no duplicate approvals
         for req_id in requests[:5]:
-            request = next(
-                r for r in enhanced_rbac_manager.role_requests if r.id == req_id
-            )
+            request = next(r for r in enhanced_rbac_manager.role_requests if r.id == req_id)
             assert request.status == RequestStatus.APPROVED
 
     def test_session_hijacking_prevention(self, test_users, mock_request):
@@ -674,9 +656,9 @@ class TestRBACSecurityAudit:
         dangerous_patterns = ["*", "all", "any", "super"]
         for perm in all_permissions:
             for pattern in dangerous_patterns:
-                assert pattern not in perm.value.lower(), (
-                    f"Permission {perm.value} contains dangerous pattern '{pattern}'"
-                )
+                assert (
+                    pattern not in perm.value.lower()
+                ), f"Permission {perm.value} contains dangerous pattern '{pattern}'"
 
         # Verify permission naming follows principle of least privilege
         for perm in all_permissions:
@@ -734,9 +716,7 @@ class TestRBACSecurityAudit:
 
         # Expired tokens should be rejected regardless of role
         with patch("auth.security_implementation.datetime") as mock_datetime:
-            mock_datetime.now.return_value = datetime.now(timezone.utc) + timedelta(
-                hours=2
-            )
+            mock_datetime.now.return_value = datetime.now(timezone.utc) + timedelta(hours=2)
 
             # In real implementation, this should fail
             # This test demonstrates the need for token expiration checks

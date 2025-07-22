@@ -42,9 +42,7 @@ class OWASPZAPIntegration:
         self.target_url = target_url
 
         # Initialize ZAP client
-        self.zap = ZAPv2(
-            apikey=self.api_key, proxies={"http": zap_url, "https": zap_url}
-        )
+        self.zap = ZAPv2(apikey=self.api_key, proxies={"http": zap_url, "https": zap_url})
 
         self.scan_results = {
             "passive_scan": [],
@@ -254,9 +252,7 @@ class OWASPZAPIntegration:
 
         try:
             # Start active scan
-            scan_id = self.zap.ascan.scan(
-                self.target_url, scanpolicyname=self.scan_policy
-            )
+            scan_id = self.zap.ascan.scan(self.target_url, scanpolicyname=self.scan_policy)
 
             # Wait for active scan
             while int(self.zap.ascan.status(scan_id)) < 100:
@@ -398,9 +394,7 @@ class OWASPZAPIntegration:
         unique_alerts = {}
         for alert in all_alerts:
             key = f"{alert.get('alert')}_{alert.get('url')}"
-            if key not in unique_alerts or alert.get("risk") > unique_alerts[key].get(
-                "risk"
-            ):
+            if key not in unique_alerts or alert.get("risk") > unique_alerts[key].get("risk"):
                 unique_alerts[key] = alert
 
         # Categorize by risk

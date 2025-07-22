@@ -96,7 +96,9 @@ def run_coverage_analysis():
 
     # Run working tests with coverage
     print("\n📊 Running working tests with coverage...")
-    test_cmd = f"python -m coverage run --source={source_arg} -m pytest {' '.join(working_tests)} -v"
+    test_cmd = (
+        f"python -m coverage run --source={source_arg} -m pytest {' '.join(working_tests)} -v"
+    )
     stdout, stderr = run_command(test_cmd, "Working tests with coverage")
 
     if stdout is None:
@@ -256,9 +258,7 @@ def main():
         print("❌ Coverage analysis failed")
         sys.exit(1)
 
-    print(
-        f"\n✅ Coverage analysis completed at: {datetime.now().strftime('%Y-%m-%d %H:%M:%S')}"
-    )
+    print(f"\n✅ Coverage analysis completed at: {datetime.now().strftime('%Y-%m-%d %H:%M:%S')}")
     print("📂 Reports generated:")
     print("  - coverage.xml (for CI/CD)")
     print("  - htmlcov/index.html (interactive report)")

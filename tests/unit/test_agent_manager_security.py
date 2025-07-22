@@ -347,9 +347,7 @@ class TestAgentErrorHandling:
 
         # Inject processing error
         agent = manager.get_agent(agent_id)
-        with patch.object(
-            agent, "process_observation", side_effect=Exception("Process error")
-        ):
+        with patch.object(agent, "process_observation", side_effect=Exception("Process error")):
             # Act - Should handle error gracefully
             manager.handle_observation(agent_id, {"type": "test", "data": {}})
 

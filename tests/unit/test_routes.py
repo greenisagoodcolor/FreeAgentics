@@ -80,9 +80,7 @@ class TestRouteRegistration:
         """Test that agent routes are properly registered with /api/v1 prefix."""
         # List agents endpoint - should not return 404 (route not found)
         response = client.get("/api/v1/agents")
-        assert response.status_code != 404, (
-            f"Agents list route not found: {response.status_code}"
-        )
+        assert response.status_code != 404, f"Agents list route not found: {response.status_code}"
         assert response.status_code in [
             200,
             401,
@@ -91,9 +89,9 @@ class TestRouteRegistration:
 
         # Agent creation endpoint - should not return 404 (route not found)
         response = client.post("/api/v1/agents", json={"name": "test"})
-        assert response.status_code != 404, (
-            f"Agent creation route not found: {response.status_code}"
-        )
+        assert (
+            response.status_code != 404
+        ), f"Agent creation route not found: {response.status_code}"
         assert response.status_code in [
             201,
             400,
@@ -104,9 +102,9 @@ class TestRouteRegistration:
 
         # Single agent endpoint (with non-existent ID) - should not return 404 for route registration
         response = client.get("/api/v1/agents/nonexistent-id")
-        assert response.status_code != 405, (
-            f"Agent detail route has wrong method: {response.status_code}"
-        )
+        assert (
+            response.status_code != 405
+        ), f"Agent detail route has wrong method: {response.status_code}"
         # 404 is OK here because the agent doesn't exist, but not because route isn't registered
         assert response.status_code in [
             404,
@@ -117,22 +115,16 @@ class TestRouteRegistration:
     def test_agent_converse_endpoint_exists(self, client):
         """Test that the agent converse endpoint is registered."""
         # This is the critical endpoint mentioned in the validation target
-        response = client.post(
-            "/api/v1/agents/test-id/converse", json={"prompt": "test"}
-        )
+        response = client.post("/api/v1/agents/test-id/converse", json={"prompt": "test"})
         # Should NOT return 404 (route not found)
         # Valid responses: 401 (auth), 422 (validation), 400 (bad request), 403 (forbidden), 503 (service unavailable)
-        assert response.status_code != 404, (
-            f"Converse route not found! Got {response.status_code}"
-        )
+        assert response.status_code != 404, f"Converse route not found! Got {response.status_code}"
         assert response.status_code in [400, 401, 403, 422, 503]
 
     def test_gmn_routes_registered(self, client):
         """Test that GMN routes are registered."""
         response = client.get("/api/v1/gmn/examples")
-        assert response.status_code != 404, (
-            f"GMN examples route not found: {response.status_code}"
-        )
+        assert response.status_code != 404, f"GMN examples route not found: {response.status_code}"
         assert response.status_code in [
             200,
             401,
@@ -144,9 +136,9 @@ class TestRouteRegistration:
         # WebSocket routes typically don't respond to regular HTTP requests
         # but the route should be registered. Test the websocket info endpoint instead
         response = client.get("/api/v1/ws/connections")
-        assert response.status_code != 404, (
-            f"WebSocket connections route not found: {response.status_code}"
-        )
+        assert (
+            response.status_code != 404
+        ), f"WebSocket connections route not found: {response.status_code}"
         assert response.status_code in [
             200,
             401,
@@ -185,9 +177,7 @@ class TestRouteRegistration:
         response = client.get("/api/v1/agents")
         # Should not get 500 Internal Server Error from missing dependency injection
         # Service might be unavailable (503) but shouldn't be a server error from bad DI
-        assert response.status_code != 500, (
-            f"Dependency injection failed: {response.status_code}"
-        )
+        assert response.status_code != 500, f"Dependency injection failed: {response.status_code}"
         assert response.status_code in [
             200,
             401,
@@ -247,9 +237,7 @@ class TestRouteRegistration:
         ]
         for path in api_paths:
             if not path.startswith("/graphql"):  # GraphQL is an exception
-                assert path.startswith("/api/v1"), (
-                    f"Route {path} doesn't follow /api/v1 convention"
-                )
+                assert path.startswith("/api/v1"), f"Route {path} doesn't follow /api/v1 convention"
 
         # Check pluralization consistency (agents, not agent)
         agent_paths = [p for p in paths if "agent" in p and "/api/v1" in p]
@@ -279,7 +267,5 @@ class TestRouteRegistration:
 
         for router in expected_routers:
             # Each router should contribute at least one path
-            router_paths = [
-                p for p in paths if f"/api/v1/{router}" in p or f"/{router}" in p
-            ]
+            router_paths = [p for p in paths if f"/api/v1/{router}" in p or f"/{router}" in p]
             assert len(router_paths) > 0, f"No routes found for {router} router"

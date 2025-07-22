@@ -76,13 +76,9 @@ class RealDatabaseLoadTester(PerformanceTestCase):
                 session.flush()
 
                 # Verify they're in the database
-                count = (
-                    session.query(Agent).filter(Agent.agent_id.in_(agent_ids)).count()
-                )
+                count = session.query(Agent).filter(Agent.agent_id.in_(agent_ids)).count()
 
-                assert count == num_agents, (
-                    f"Expected {num_agents} agents, found {count}"
-                )
+                assert count == num_agents, f"Expected {num_agents} agents, found {count}"
 
                 self.operation_counts["agent_creates"] += num_agents
                 logger.info(f"✅ Created {num_agents} agents in database")
@@ -110,11 +106,7 @@ class RealDatabaseLoadTester(PerformanceTestCase):
             try:
                 for agent_id in batch_ids:
                     try:
-                        agent = (
-                            session.query(Agent)
-                            .filter(Agent.agent_id == agent_id)
-                            .first()
-                        )
+                        agent = session.query(Agent).filter(Agent.agent_id == agent_id).first()
                         if agent:
                             local_results["found"] += 1
                             # Simulate reading data
@@ -133,15 +125,10 @@ class RealDatabaseLoadTester(PerformanceTestCase):
         with self.time_operation("concurrent_agent_reads"):
             # Split agent IDs into batches
             batch_size = max(1, len(agent_ids) // num_threads)
-            batches = [
-                agent_ids[i : i + batch_size]
-                for i in range(0, len(agent_ids), batch_size)
-            ]
+            batches = [agent_ids[i : i + batch_size] for i in range(0, len(agent_ids), batch_size)]
 
             with ThreadPoolExecutor(max_workers=num_threads) as executor:
-                futures = [
-                    executor.submit(read_agent_batch, batch) for batch in batches
-                ]
+                futures = [executor.submit(read_agent_batch, batch) for batch in batches]
 
                 for future in as_completed(futures):
                     batch_result = future.result()
@@ -218,15 +205,10 @@ class RealDatabaseLoadTester(PerformanceTestCase):
         with self.time_operation("concurrent_agent_updates"):
             # Smaller batches for updates to reduce conflicts
             batch_size = max(1, len(agent_ids) // (num_threads * 2))
-            batches = [
-                agent_ids[i : i + batch_size]
-                for i in range(0, len(agent_ids), batch_size)
-            ]
+            batches = [agent_ids[i : i + batch_size] for i in range(0, len(agent_ids), batch_size)]
 
             with ThreadPoolExecutor(max_workers=num_threads) as executor:
-                futures = [
-                    executor.submit(update_agent_batch, batch) for batch in batches
-                ]
+                futures = [executor.submit(update_agent_batch, batch) for batch in batches]
 
                 for future in as_completed(futures):
                     batch_result = future.result()
@@ -263,9 +245,7 @@ class RealDatabaseLoadTester(PerformanceTestCase):
                 node_count = session.query(KnowledgeNode).count()
                 edge_count = session.query(KnowledgeEdge).count()
 
-                logger.info(
-                    f"✅ Created knowledge graph: {node_count} nodes, {edge_count} edges"
-                )
+                logger.info(f"✅ Created knowledge graph: {node_count} nodes, {edge_count} edges")
 
                 # Test graph traversal query
                 start_time = time.time()
@@ -455,10 +435,7 @@ class RealDatabaseLoadTester(PerformanceTestCase):
         analysis["operation_summary"] = self.operation_counts
 
         # Calculate throughput
-        if (
-            "create_agents_batch" in analysis
-            and self.operation_counts["agent_creates"] > 0
-        ):
+        if "create_agents_batch" in analysis and self.operation_counts["agent_creates"] > 0:
             create_stats = analysis["create_agents_batch"]
             analysis["create_agents_batch"]["throughput"] = (
                 self.operation_counts["agent_creates"] / create_stats["total"]
@@ -490,9 +467,9 @@ class TestRealDatabaseLoad:
             duration = time.time() - start_time
 
             assert len(agent_ids) == num_agents
-            assert duration < expected_time, (
-                f"Creation took {duration:.2f}s, expected < {expected_time}s"
-            )
+            assert (
+                duration < expected_time
+            ), f"Creation took {duration:.2f}s, expected < {expected_time}s"
 
             # Verify persistence
             from sqlalchemy.orm import sessionmaker
@@ -522,15 +499,11 @@ class TestRealDatabaseLoad:
 
             # Multiple read threads
             for _ in range(3):
-                tasks.append(
-                    tester.test_concurrent_agent_reads(agent_ids, num_threads=10)
-                )
+                tasks.append(tester.test_concurrent_agent_reads(agent_ids, num_threads=10))
 
             # Multiple update threads
             for _ in range(2):
-                tasks.append(
-                    tester.test_concurrent_agent_updates(agent_ids, num_threads=5)
-                )
+                tasks.append(tester.test_concurrent_agent_updates(agent_ids, num_threads=5))
 
             # Execute all concurrently
             results = await asyncio.gather(*tasks)
@@ -563,9 +536,7 @@ class TestRealDatabaseLoad:
 
             for num_nodes, num_edges in sizes:
                 start_time = time.time()
-                success = await tester.test_knowledge_graph_operations(
-                    num_nodes, num_edges
-                )
+                success = await tester.test_knowledge_graph_operations(num_nodes, num_edges)
                 duration = time.time() - start_time
 
                 assert success
@@ -602,12 +573,8 @@ class TestRealDatabaseLoad:
 
             # Phase 3: Concurrent operations
             logger.info("Phase 3: Concurrent read/write operations...")
-            read_task = tester.test_concurrent_agent_reads(
-                agent_ids[:250], num_threads=20
-            )
-            update_task = tester.test_concurrent_agent_updates(
-                agent_ids[250:], num_threads=10
-            )
+            read_task = tester.test_concurrent_agent_reads(agent_ids[:250], num_threads=20)
+            update_task = tester.test_concurrent_agent_updates(agent_ids[250:], num_threads=10)
 
             read_results, update_results = await asyncio.gather(read_task, update_task)
 
@@ -622,19 +589,13 @@ class TestRealDatabaseLoad:
             print("\n" + "=" * 60)
             print("LOAD TEST SUMMARY")
             print("=" * 60)
-            print(
-                f"Total agents created: {analysis['operation_summary']['agent_creates']}"
-            )
+            print(f"Total agents created: {analysis['operation_summary']['agent_creates']}")
             print(f"Total agent reads: {analysis['operation_summary']['agent_reads']}")
-            print(
-                f"Total agent updates: {analysis['operation_summary']['agent_updates']}"
-            )
+            print(f"Total agent updates: {analysis['operation_summary']['agent_updates']}")
             print(
                 f"Total knowledge operations: {analysis['operation_summary']['knowledge_creates']}"
             )
-            print(
-                f"Complex queries executed: {analysis['operation_summary']['complex_queries']}"
-            )
+            print(f"Complex queries executed: {analysis['operation_summary']['complex_queries']}")
 
             print("\nPerformance Metrics:")
             for operation, stats in analysis.items():

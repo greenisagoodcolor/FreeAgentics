@@ -37,9 +37,7 @@ class SecurityMonitoringDashboard:
             )
             if pip_audit.returncode == 0:
                 audit_data = json.loads(pip_audit.stdout)
-                vulnerable_deps = [
-                    d for d in audit_data.get("dependencies", []) if d.get("vulns")
-                ]
+                vulnerable_deps = [d for d in audit_data.get("dependencies", []) if d.get("vulns")]
                 results["dependencies"] = {
                     "total": len(audit_data.get("dependencies", [])),
                     "vulnerable": len(vulnerable_deps),
@@ -140,9 +138,7 @@ Generated: {datetime.now().strftime("%Y-%m-%d %H:%M:%S")}
 """
 
         if scan_results.get("secrets", {}).get("found"):
-            report += (
-                f"- Files with potential secrets: {scan_results['secrets']['count']}\n"
-            )
+            report += f"- Files with potential secrets: {scan_results['secrets']['count']}\n"
             for file in scan_results["secrets"].get("files", [])[:5]:
                 report += f"  - {file}\n"
 
@@ -199,17 +195,13 @@ Generated: {datetime.now().strftime("%Y-%m-%d %H:%M:%S")}
             recommendations.append("Update vulnerable dependencies immediately")
 
         if scan_results.get("secrets", {}).get("found"):
-            recommendations.append(
-                "Remove hardcoded secrets and use environment variables"
-            )
+            recommendations.append("Remove hardcoded secrets and use environment variables")
 
         if scan_results.get("headers", {}).get("missing"):
             recommendations.append("Implement missing security headers")
 
         if scan_results.get("authentication", {}).get("brute_force_detected"):
-            recommendations.append(
-                "Investigate brute force attempts and strengthen rate limiting"
-            )
+            recommendations.append("Investigate brute force attempts and strengthen rate limiting")
 
         if not recommendations:
             recommendations.append("Continue regular security monitoring")
@@ -218,9 +210,7 @@ Generated: {datetime.now().strftime("%Y-%m-%d %H:%M:%S")}
 
     def run_continuous_monitoring(self, interval_minutes: int = 60):
         """Run continuous security monitoring."""
-        print(
-            f"🛡️ Starting continuous security monitoring (interval: {interval_minutes} minutes)"
-        )
+        print(f"🛡️ Starting continuous security monitoring (interval: {interval_minutes} minutes)")
 
         try:
             while True:
@@ -241,9 +231,7 @@ Generated: {datetime.now().strftime("%Y-%m-%d %H:%M:%S")}
 
                 # Check for critical issues
                 if self._has_critical_issues(scan_results):
-                    print(
-                        "🚨 CRITICAL SECURITY ISSUES DETECTED! Immediate action required."
-                    )
+                    print("🚨 CRITICAL SECURITY ISSUES DETECTED! Immediate action required.")
 
                 # Wait for next scan
                 print(f"Next scan in {interval_minutes} minutes...")
@@ -277,9 +265,7 @@ def main():
         print(report)
 
         # Save report
-        report_path = Path(
-            f"security_report_{datetime.now().strftime('%Y%m%d_%H%M%S')}.md"
-        )
+        report_path = Path(f"security_report_{datetime.now().strftime('%Y%m%d_%H%M%S')}.md")
         report_path.write_text(report)
         print(f"\n📄 Report saved to: {report_path}")
 

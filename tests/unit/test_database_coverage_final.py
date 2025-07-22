@@ -77,9 +77,7 @@ def test_guid_type_with_dialect():
 def test_connection_manager_with_url():
     """Test DatabaseConnectionManager with URL."""
     with patch("database.connection_manager.create_engine", return_value=mock_engine):
-        manager = DatabaseConnectionManager(
-            "postgresql://test:test@localhost:5432/testdb"
-        )
+        manager = DatabaseConnectionManager("postgresql://test:test@localhost:5432/testdb")
         assert manager is not None
         assert hasattr(manager, "engine")
         assert hasattr(manager, "SessionLocal")
@@ -190,9 +188,7 @@ def test_model_creation_with_values():
     assert node.agent_id == agent.id
 
     # Create knowledge edge
-    edge = KnowledgeEdge(
-        id=uuid.uuid4(), source_id=node.id, target_id=node.id, weight=0.75
-    )
+    edge = KnowledgeEdge(id=uuid.uuid4(), source_id=node.id, target_id=node.id, weight=0.75)
     assert edge.weight == 0.75
 
 
@@ -210,9 +206,7 @@ def test_conversation_models():
     assert ValidationStatus.INVALID.value == "invalid"
 
     # Create conversation
-    conv = Conversation(
-        id=uuid.uuid4(), agent_id=uuid.uuid4(), title="Test Conversation"
-    )
+    conv = Conversation(id=uuid.uuid4(), agent_id=uuid.uuid4(), title="Test Conversation")
     assert conv.title == "Test Conversation"
 
     # Create message

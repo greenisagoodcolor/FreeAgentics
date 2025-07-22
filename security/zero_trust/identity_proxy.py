@@ -143,9 +143,7 @@ class IdentityAwareProxy:
 
             # Validate mTLS if enabled
             if self.config.enable_mtls:
-                cert_valid, cert_fingerprint = await self._validate_mtls(
-                    request, source_service
-                )
+                cert_valid, cert_fingerprint = await self._validate_mtls(request, source_service)
                 context.mtls_verified = cert_valid
                 context.certificate_fingerprint = cert_fingerprint
 
@@ -243,9 +241,7 @@ class IdentityAwareProxy:
             # Calculate fingerprint
             from cryptography.hazmat.primitives import serialization
 
-            fingerprint = hashlib.sha256(
-                cert.public_bytes(serialization.Encoding.DER)
-            ).hexdigest()
+            fingerprint = hashlib.sha256(cert.public_bytes(serialization.Encoding.DER)).hexdigest()
 
             return True, fingerprint
 
@@ -285,9 +281,7 @@ class IdentityAwareProxy:
 
         return False
 
-    def _evaluate_policy_conditions(
-        self, policy: ServicePolicy, context: RequestContext
-    ) -> bool:
+    def _evaluate_policy_conditions(self, policy: ServicePolicy, context: RequestContext) -> bool:
         """Evaluate policy conditions."""
         for condition_key, condition_value in policy.conditions.items():
             if condition_key == "time_window":
@@ -323,8 +317,7 @@ class IdentityAwareProxy:
         cached_score = self._risk_cache.get(session_id)
         if (
             cached_score
-            and (datetime.utcnow() - cached_score.timestamp).total_seconds()
-            < self._risk_cache_ttl
+            and (datetime.utcnow() - cached_score.timestamp).total_seconds() < self._risk_cache_ttl
         ):
             return cached_score
 
@@ -372,9 +365,7 @@ class IdentityAwareProxy:
 
         return risk_score
 
-    def _extract_risk_factors(
-        self, request: Request, context: RequestContext
-    ) -> Dict[str, Any]:
+    def _extract_risk_factors(self, request: Request, context: RequestContext) -> Dict[str, Any]:
         """Extract risk factors from request."""
         factors = {}
 
@@ -401,9 +392,7 @@ class IdentityAwareProxy:
 
         return factors
 
-    async def start_continuous_verification(
-        self, session_id: str, request: Request
-    ) -> None:
+    async def start_continuous_verification(self, session_id: str, request: Request) -> None:
         """Start continuous verification for a session."""
         async with self._session_lock:
             if session_id in self._sessions:
@@ -496,9 +485,7 @@ class IdentityAwareProxy:
 
     def add_service_policy(self, policy: ServicePolicy) -> None:
         """Add a service access policy."""
-        policy_id = (
-            f"{policy.source_service}-{policy.target_service}-{len(self._policies)}"
-        )
+        policy_id = f"{policy.source_service}-{policy.target_service}-{len(self._policies)}"
         self._policies[policy_id] = policy
 
         # Update index

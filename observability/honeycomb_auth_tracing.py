@@ -125,11 +125,7 @@ class HoneycombAuthTracer:
         @wraps(func)
         async def wrapper(*args, **kwargs):
             request = kwargs.get("request")
-            username = (
-                kwargs.get("login_data", {}).username
-                if "login_data" in kwargs
-                else None
-            )
+            username = kwargs.get("login_data", {}).username if "login_data" in kwargs else None
 
             async with self.trace_auth_operation(
                 "login", request=request, username=username, auth_type="password"
@@ -139,9 +135,7 @@ class HoneycombAuthTracer:
                     result = await func(*args, **kwargs)
                     if span:
                         span.add_tag("auth.success", True)
-                        span.add_tag(
-                            "auth.duration_ms", (time.time() - start_time) * 1000
-                        )
+                        span.add_tag("auth.duration_ms", (time.time() - start_time) * 1000)
                     return result
                 except Exception as e:
                     if span:
@@ -158,9 +152,7 @@ class HoneycombAuthTracer:
         async def wrapper(*args, **kwargs):
             token_type = kwargs.get("token_type", "access")
 
-            async with self.trace_auth_operation(
-                "token_validation", token_type=token_type
-            ) as span:
+            async with self.trace_auth_operation("token_validation", token_type=token_type) as span:
                 start_time = time.time()
                 try:
                     result = await func(*args, **kwargs)
@@ -195,9 +187,7 @@ class HoneycombAuthTracer:
                     result = await func(*args, **kwargs)
                     if span:
                         span.add_tag("auth.mfa_success", True)
-                        span.add_tag(
-                            "auth.mfa_duration_ms", (time.time() - start_time) * 1000
-                        )
+                        span.add_tag("auth.mfa_duration_ms", (time.time() - start_time) * 1000)
                     return result
                 except Exception as e:
                     if span:
@@ -224,9 +214,7 @@ class HoneycombAuthTracer:
                     result = await func(*args, **kwargs)
                     if span:
                         span.add_tag("auth.permission_granted", bool(result))
-                        span.add_tag(
-                            "auth.check_duration_ms", (time.time() - start_time) * 1000
-                        )
+                        span.add_tag("auth.check_duration_ms", (time.time() - start_time) * 1000)
                     return result
                 except Exception as e:
                     if span:

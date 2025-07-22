@@ -154,9 +154,7 @@ class RateLimiter:
 
         return False
 
-    async def _record_request(
-        self, client_key: str, config: RateLimitConfig
-    ) -> Tuple[int, int]:
+    async def _record_request(self, client_key: str, config: RateLimitConfig) -> Tuple[int, int]:
         """Record request and return current counts."""
         now = int(time.time())
         minute_key = f"{client_key}:minute:{now // 60}"
@@ -177,9 +175,7 @@ class RateLimiter:
 
         return minute_count, hour_count
 
-    async def _detect_ddos(
-        self, ip: str, minute_count: int, config: RateLimitConfig
-    ) -> bool:
+    async def _detect_ddos(self, ip: str, minute_count: int, config: RateLimitConfig) -> bool:
         """Detect potential DDoS attack."""
         if minute_count >= config.ddos_threshold:
             # Block IP for extended period
@@ -220,9 +216,7 @@ class RateLimiter:
         block_data = {
             "blocked_at": datetime.now().isoformat(),
             "reason": reason,
-            "expires_at": (
-                datetime.now() + timedelta(seconds=config.block_duration)
-            ).isoformat(),
+            "expires_at": (datetime.now() + timedelta(seconds=config.block_duration)).isoformat(),
         }
 
         await self.redis.setex(
@@ -287,9 +281,7 @@ class RateLimiter:
 
         # Check rate limits
         if minute_count > config.requests_per_minute:
-            await self._block_client(
-                client_key, ip, config, "REQUESTS_PER_MINUTE_EXCEEDED"
-            )
+            await self._block_client(client_key, ip, config, "REQUESTS_PER_MINUTE_EXCEEDED")
             return JSONResponse(
                 status_code=status.HTTP_429_TOO_MANY_REQUESTS,
                 content={
@@ -301,9 +293,7 @@ class RateLimiter:
             )
 
         if hour_count > config.requests_per_hour:
-            await self._block_client(
-                client_key, ip, config, "REQUESTS_PER_HOUR_EXCEEDED"
-            )
+            await self._block_client(client_key, ip, config, "REQUESTS_PER_HOUR_EXCEEDED")
             return JSONResponse(
                 status_code=status.HTTP_429_TOO_MANY_REQUESTS,
                 content={
@@ -318,12 +308,8 @@ class RateLimiter:
         response_headers = {
             "X-RateLimit-Limit-Minute": str(config.requests_per_minute),
             "X-RateLimit-Limit-Hour": str(config.requests_per_hour),
-            "X-RateLimit-Remaining-Minute": str(
-                max(0, config.requests_per_minute - minute_count)
-            ),
-            "X-RateLimit-Remaining-Hour": str(
-                max(0, config.requests_per_hour - hour_count)
-            ),
+            "X-RateLimit-Remaining-Minute": str(max(0, config.requests_per_minute - minute_count)),
+            "X-RateLimit-Remaining-Hour": str(max(0, config.requests_per_hour - hour_count)),
             "X-RateLimit-Reset": str(int(time.time()) + 60),
         }
 
@@ -363,9 +349,7 @@ class DDoSProtectionMiddleware(BaseHTTPMiddleware):
                     health_check_interval=30,
                 )
 
-                self.redis_client = aioredis.Redis(
-                    connection_pool=self._connection_pool
-                )
+                self.redis_client = aioredis.Redis(connection_pool=self._connection_pool)
 
                 # Test connection
                 if self.redis_client:

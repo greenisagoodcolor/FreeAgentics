@@ -81,9 +81,7 @@ class WebSocketMetrics:
         # Calculate throughput
         if self.duration_seconds > 0:
             self.messages_per_second_sent = self.messages_sent / self.duration_seconds
-            self.messages_per_second_received = (
-                self.messages_received / self.duration_seconds
-            )
+            self.messages_per_second_received = self.messages_received / self.duration_seconds
             self.bytes_per_second_sent = self.bytes_sent / self.duration_seconds
             self.bytes_per_second_received = self.bytes_received / self.duration_seconds
 
@@ -132,17 +130,13 @@ class WebSocketMetrics:
                 "receive_errors": self.receive_errors,
                 "timeout_errors": self.timeout_errors,
                 "error_rate": (
-                    self.total_errors / self.messages_sent
-                    if self.messages_sent > 0
-                    else 0.0
+                    self.total_errors / self.messages_sent if self.messages_sent > 0 else 0.0
                 ),
             },
             "test_info": {
                 "start_time": datetime.fromtimestamp(self.start_time).isoformat(),
                 "end_time": (
-                    datetime.fromtimestamp(self.end_time).isoformat()
-                    if self.end_time
-                    else None
+                    datetime.fromtimestamp(self.end_time).isoformat() if self.end_time else None
                 ),
                 "duration_seconds": self.duration_seconds,
             },
@@ -253,12 +247,8 @@ class MetricsCollector:
                 self.prom_errors_total.labels(error_type="connection").inc()
 
         # Update time series
-        self._record_time_series(
-            "connections_total", self.current_metrics.total_connections
-        )
-        self._record_time_series(
-            "active_connections", self.current_metrics.active_connections
-        )
+        self._record_time_series("connections_total", self.current_metrics.total_connections)
+        self._record_time_series("active_connections", self.current_metrics.active_connections)
 
     def record_connection_closed(self, duration_seconds: float):
         """Record a closed connection."""
@@ -270,9 +260,7 @@ class MetricsCollector:
         if self.enable_prometheus:
             self.prom_active_connections.dec()
 
-        self._record_time_series(
-            "active_connections", self.current_metrics.active_connections
-        )
+        self._record_time_series("active_connections", self.current_metrics.active_connections)
 
     def record_message_sent(
         self,
@@ -286,9 +274,7 @@ class MetricsCollector:
             self.current_metrics.bytes_sent += size_bytes
 
             if self.enable_prometheus:
-                self.prom_messages_total.labels(
-                    direction="sent", type=message_type
-                ).inc()
+                self.prom_messages_total.labels(direction="sent", type=message_type).inc()
                 self.prom_bytes_total.labels(direction="sent").inc(size_bytes)
         else:
             self.current_metrics.message_send_failures += 1
@@ -307,14 +293,10 @@ class MetricsCollector:
         self.current_metrics.bytes_received += size_bytes
 
         if self.enable_prometheus:
-            self.prom_messages_total.labels(
-                direction="received", type=message_type
-            ).inc()
+            self.prom_messages_total.labels(direction="received", type=message_type).inc()
             self.prom_bytes_total.labels(direction="received").inc(size_bytes)
 
-        self._record_time_series(
-            "messages_received", self.current_metrics.messages_received
-        )
+        self._record_time_series("messages_received", self.current_metrics.messages_received)
         self._record_time_series("bytes_received", self.current_metrics.bytes_received)
 
     def record_latency(self, latency_seconds: float):
@@ -353,18 +335,13 @@ class MetricsCollector:
 
         # Clean old data
         cutoff_time = timestamp - self.time_window_seconds
-        while (
-            self.time_series[metric_name]
-            and self.time_series[metric_name][0][0] < cutoff_time
-        ):
+        while self.time_series[metric_name] and self.time_series[metric_name][0][0] < cutoff_time:
             self.time_series[metric_name].popleft()
 
     async def start_real_time_stats(self, update_interval: float = 1.0):
         """Start calculating real-time statistics."""
         self._running = True
-        self._stats_task = asyncio.create_task(
-            self._update_real_time_stats(update_interval)
-        )
+        self._stats_task = asyncio.create_task(self._update_real_time_stats(update_interval))
 
     async def stop_real_time_stats(self):
         """Stop real-time statistics calculation."""
@@ -375,9 +352,7 @@ class MetricsCollector:
     async def _update_real_time_stats(self, update_interval: float):
         """Update real-time statistics periodically."""
         last_connections = self.current_metrics.total_connections
-        last_messages = (
-            self.current_metrics.messages_sent + self.current_metrics.messages_received
-        )
+        last_messages = self.current_metrics.messages_sent + self.current_metrics.messages_received
         last_errors = self.current_metrics.total_errors
 
         while self._running:
@@ -386,8 +361,7 @@ class MetricsCollector:
             # Calculate rates
             current_connections = self.current_metrics.total_connections
             current_messages = (
-                self.current_metrics.messages_sent
-                + self.current_metrics.messages_received
+                self.current_metrics.messages_sent + self.current_metrics.messages_received
             )
             current_errors = self.current_metrics.total_errors
 

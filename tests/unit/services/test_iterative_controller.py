@@ -267,9 +267,7 @@ class TestIterativeController:
         assert any("exploration" in s.lower() for s in suggestions)
 
     @pytest.mark.asyncio
-    async def test_generate_intelligent_suggestions_mature_conversation(
-        self, controller
-    ):
+    async def test_generate_intelligent_suggestions_mature_conversation(self, controller):
         """Test suggestions for mature conversation."""
         context = ConversationContext("conv-1")
 
@@ -302,9 +300,7 @@ class TestIterativeController:
         )
 
         # Should suggest meta-learning for mature conversation
-        assert any(
-            "meta-learning" in s.lower() or "adapt" in s.lower() for s in suggestions
-        )
+        assert any("meta-learning" in s.lower() or "adapt" in s.lower() for s in suggestions)
         # Should notice low diversity
         assert any("different approach" in s.lower() for s in suggestions)
 
@@ -406,9 +402,7 @@ class TestIterativeController:
             }
         )
 
-        analysis = await controller._analyze_kg_connectivity(
-            {"n1", "n2", "n3"}, "agent-1"
-        )
+        analysis = await controller._analyze_kg_connectivity({"n1", "n2", "n3"}, "agent-1")
 
         assert analysis["isolated_nodes"] == 1  # n3
         assert analysis["cluster_count"] == 2  # n1-n2 cluster and n3 alone
@@ -451,9 +445,7 @@ class TestIterativeController:
 
         mock_db.execute.return_value.scalars.return_value.all.return_value = mock_agents
 
-        gaps = await controller._identify_capability_gaps(
-            ["agent-1", "agent-2"], mock_db
-        )
+        gaps = await controller._identify_capability_gaps(["agent-1", "agent-2"], mock_db)
 
         # Should identify missing perception and learning
         assert "perception" in gaps

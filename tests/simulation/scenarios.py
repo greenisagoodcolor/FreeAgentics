@@ -456,23 +456,17 @@ class ScenarioScheduler:
             # Wait for delay
             if hasattr(scenario, "_delay_minutes") and scenario._delay_minutes > 0:
                 wait_time = scenario._delay_minutes * 60
-                print(
-                    f"Waiting {scenario._delay_minutes} minutes before next scenario..."
-                )
+                print(f"Waiting {scenario._delay_minutes} minutes before next scenario...")
                 await asyncio.sleep(wait_time)
 
             # Update results path for this scenario
             scenario.results_path = (
-                self.results_base_path
-                / scenario.name
-                / start_time.strftime("%Y%m%d_%H%M%S")
+                self.results_base_path / scenario.name / start_time.strftime("%Y%m%d_%H%M%S")
             )
 
             # Run scenario
             print(f"\n{'=' * 60}")
-            print(
-                f"Running scenario {i + 1}/{len(self.scheduled_scenarios)}: {scenario.name}"
-            )
+            print(f"Running scenario {i + 1}/{len(self.scheduled_scenarios)}: {scenario.name}")
             print(f"Description: {scenario.description}")
             print(f"Duration: {scenario.duration_seconds}s")
             print(f"Total users: {scenario.total_users}")
@@ -521,15 +515,9 @@ class ScenarioScheduler:
                     "schedule_start": datetime.now().isoformat(),
                     "total_scenarios": len(self.scheduled_scenarios),
                     "completed": len(
-                        [
-                            s
-                            for s in self.completed_scenarios
-                            if s["status"] == "completed"
-                        ]
+                        [s for s in self.completed_scenarios if s["status"] == "completed"]
                     ),
-                    "failed": len(
-                        [s for s in self.completed_scenarios if s["status"] == "failed"]
-                    ),
+                    "failed": len([s for s in self.completed_scenarios if s["status"] == "failed"]),
                     "scenarios": self.completed_scenarios,
                 },
                 f,

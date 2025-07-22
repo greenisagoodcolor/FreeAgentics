@@ -232,7 +232,5 @@ def test_service_health_model():
     assert health.details == {"version": "1.0", "uptime": 3600}
 
     # Test with empty details
-    health2 = ServiceHealth(
-        service="test-service2", status="degraded", last_check=datetime.now()
-    )
+    health2 = ServiceHealth(service="test-service2", status="degraded", last_check=datetime.now())
     assert health2.details == {}

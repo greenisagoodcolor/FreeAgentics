@@ -113,11 +113,7 @@ class MockQuery:
         """Mock all operation."""
         model_name = self.model.__name__
         if model_name in self.db.data:
-            return [
-                obj
-                for obj in self.db.data[model_name].values()
-                if self._matches_filters(obj)
-            ]
+            return [obj for obj in self.db.data[model_name].values() if self._matches_filters(obj)]
         return []
 
     def count(self):

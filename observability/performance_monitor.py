@@ -258,7 +258,9 @@ class PerformanceMonitor:
         severity: str,
     ):
         """Add a performance alert."""
-        message = f"{metric} is {current_value:.2f}, exceeding {severity} threshold of {threshold:.2f}"
+        message = (
+            f"{metric} is {current_value:.2f}, exceeding {severity} threshold of {threshold:.2f}"
+        )
 
         alert = PerformanceAlert(
             metric=metric,
@@ -435,9 +437,7 @@ class PerformanceMonitor:
             )
 
         # API response time insights
-        api_times = [
-            m.api_response_time_ms for m in metrics if m.api_response_time_ms > 0
-        ]
+        api_times = [m.api_response_time_ms for m in metrics if m.api_response_time_ms > 0]
         if api_times:
             avg_api_time = sum(api_times) / len(api_times)
             if avg_api_time > 200:

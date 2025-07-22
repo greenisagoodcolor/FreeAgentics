@@ -155,9 +155,7 @@ class TestAgentManagerIntegration:
             mock_manager.delete_agent.return_value = True
 
             # Delete agent via UI API
-            response = self.client.delete(
-                "/api/agents/test-agent-123", headers=self.headers
-            )
+            response = self.client.delete("/api/agents/test-agent-123", headers=self.headers)
 
             assert response.status_code == 200
 
@@ -182,9 +180,7 @@ class TestAgentManagerIntegration:
 
         with (
             patch("api.ui_compatibility.v1_create_agent") as mock_create,
-            patch(
-                "api.ui_compatibility.broadcast_agent_created_event"
-            ) as mock_broadcast,
+            patch("api.ui_compatibility.broadcast_agent_created_event") as mock_broadcast,
             patch("api.v1.agents.AGENT_MANAGER_AVAILABLE", False),
         ):
             mock_create.return_value = mock_agent
@@ -201,9 +197,7 @@ class TestAgentManagerIntegration:
             agent_data = response.json()
 
             # Should gracefully handle unavailable manager
-            assert (
-                agent_data["status"] == "pending"
-            )  # Not active since manager unavailable
+            assert agent_data["status"] == "pending"  # Not active since manager unavailable
 
             # Should still broadcast event
             mock_broadcast.assert_called_once()

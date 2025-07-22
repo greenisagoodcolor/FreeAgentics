@@ -135,9 +135,7 @@ class TestJWTSecurityIntegration:
         fingerprint = jwt_handler.generate_fingerprint()
 
         # Create token with fingerprint
-        token = auth_manager.create_access_token(
-            test_user, client_fingerprint=fingerprint
-        )
+        token = auth_manager.create_access_token(test_user, client_fingerprint=fingerprint)
 
         # Should succeed with correct fingerprint
         token_data = auth_manager.verify_token(token, client_fingerprint=fingerprint)

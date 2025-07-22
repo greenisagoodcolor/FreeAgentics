@@ -36,23 +36,17 @@ def test_belief_state_management():
         observations = [
             {
                 "position": [2, 2],
-                "surroundings": np.array(
-                    [[0, 0, 0], [0, 0, 1], [0, 0, 0]]
-                ),  # Goal to right
+                "surroundings": np.array([[0, 0, 0], [0, 0, 1], [0, 0, 0]]),  # Goal to right
                 "time_step": 1,
             },
             {
                 "position": [2, 3],
-                "surroundings": np.array(
-                    [[0, -1, 0], [0, 0, 0], [0, 0, 0]]
-                ),  # Obstacle above
+                "surroundings": np.array([[0, -1, 0], [0, 0, 0], [0, 0, 0]]),  # Obstacle above
                 "time_step": 2,
             },
             {
                 "position": [3, 3],
-                "surroundings": np.array(
-                    [[0, 0, 0], [0, 0, 0], [2, 0, 0]]
-                ),  # Another agent below
+                "surroundings": np.array([[0, 0, 0], [0, 0, 0], [2, 0, 0]]),  # Another agent below
                 "time_step": 3,
             },
         ]
@@ -78,22 +72,18 @@ def test_belief_state_management():
                 belief_distributions.append(beliefs)
 
                 # Check belief distribution properties
-                assert abs(np.sum(beliefs) - 1.0) < 1e-6, (
-                    f"Beliefs don't sum to 1: {np.sum(beliefs)}"
-                )
+                assert (
+                    abs(np.sum(beliefs) - 1.0) < 1e-6
+                ), f"Beliefs don't sum to 1: {np.sum(beliefs)}"
                 assert np.all(beliefs >= 0), "Negative beliefs detected"
 
-                print(
-                    f"  Step {i + 1}: entropy={entropy:.4f}, max_belief={np.max(beliefs):.4f}"
-                )
+                print(f"  Step {i + 1}: entropy={entropy:.4f}, max_belief={np.max(beliefs):.4f}")
 
         print("✓ Belief updates completed successfully")
 
         # Test belief consistency over time
         if len(belief_distributions) >= 2:
-            belief_change = np.linalg.norm(
-                belief_distributions[-1] - belief_distributions[0]
-            )
+            belief_change = np.linalg.norm(belief_distributions[-1] - belief_distributions[0])
             print(f"✓ Belief change magnitude: {belief_change:.4f}")
 
         # Test entropy calculation
@@ -148,9 +138,7 @@ def test_free_energy_computation():
         fe_components = agent.compute_free_energy()
 
         if "error" in fe_components:
-            print(
-                f"Note: Free energy computation returned error: {fe_components['error']}"
-            )
+            print(f"Note: Free energy computation returned error: {fe_components['error']}")
             if fe_components["error"] == "PyMDP not available":
                 print("⚠️  PyMDP not available - this is expected in some environments")
                 return True
@@ -169,16 +157,15 @@ def test_free_energy_computation():
                     print(f"    {component}: {value:.6f}")
 
                     # Validate component properties
-                    assert isinstance(value, (int, float)), (
-                        f"{component} is not numeric: {type(value)}"
-                    )
+                    assert isinstance(
+                        value, (int, float)
+                    ), f"{component} is not numeric: {type(value)}"
                     assert not np.isnan(value), f"{component} is NaN"
                     assert not np.isinf(value), f"{component} is infinite"
 
             # Test free energy decomposition: F = complexity - accuracy
             if all(
-                comp in fe_components
-                for comp in ["total_free_energy", "accuracy", "complexity"]
+                comp in fe_components for comp in ["total_free_energy", "accuracy", "complexity"]
             ):
                 expected_fe = fe_components["complexity"] - fe_components["accuracy"]
                 actual_fe = fe_components["total_free_energy"]
@@ -253,9 +240,7 @@ def test_action_selection_free_energy():
                 "name": "Goal nearby",
                 "obs": {
                     "position": [2, 2],
-                    "surroundings": np.array(
-                        [[0, 1, 0], [0, 0, 0], [0, 0, 0]]
-                    ),  # Goal above
+                    "surroundings": np.array([[0, 1, 0], [0, 0, 0], [0, 0, 0]]),  # Goal above
                     "time_step": 2,
                 },
             },
@@ -263,9 +248,7 @@ def test_action_selection_free_energy():
                 "name": "Obstacle nearby",
                 "obs": {
                     "position": [2, 2],
-                    "surroundings": np.array(
-                        [[0, 0, 0], [-1, 0, 0], [0, 0, 0]]
-                    ),  # Obstacle left
+                    "surroundings": np.array([[0, 0, 0], [-1, 0, 0], [0, 0, 0]]),  # Obstacle left
                     "time_step": 3,
                 },
             },
@@ -303,9 +286,7 @@ def test_action_selection_free_energy():
             if r["expected_free_energy"] is not None
         ]
         if efe_values:
-            print(
-                f"✓ Expected free energy values: {[f'{efe:.4f}' for efe in efe_values]}"
-            )
+            print(f"✓ Expected free energy values: {[f'{efe:.4f}' for efe in efe_values]}")
 
             # Check that EFE values are reasonable (typically negative)
             for efe in efe_values:

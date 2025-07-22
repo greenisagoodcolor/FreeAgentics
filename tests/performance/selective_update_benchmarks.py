@@ -55,9 +55,7 @@ class SparseObservationBenchmark(PyMDPBenchmark):
             sparsity_level: Fraction of observations that change
             selective_enabled: Whether to use selective updates
         """
-        super().__init__(
-            f"sparse_observation_{'selective' if selective_enabled else 'full'}"
-        )
+        super().__init__(f"sparse_observation_{'selective' if selective_enabled else 'full'}")
         self.state_size = state_size
         self.sparsity_level = sparsity_level  # Fraction of observations that change
         self.selective_enabled = selective_enabled
@@ -106,9 +104,7 @@ class SparseObservationBenchmark(PyMDPBenchmark):
             self._full_belief_update(new_observations)
             full_time = (time.perf_counter() - start_time) * 1000
 
-            computation_savings = (
-                1 - len(changed_modalities) / len(new_observations)
-            ) * 100
+            computation_savings = (1 - len(changed_modalities) / len(new_observations)) * 100
             speedup = full_time / selective_time if selective_time > 0 else 1.0
 
         else:
@@ -140,9 +136,7 @@ class SparseObservationBenchmark(PyMDPBenchmark):
 
         # Determine which modalities to change
         num_to_change = max(1, int(len(new_obs) * self.sparsity_level))
-        modalities_to_change = np.random.choice(
-            len(new_obs), num_to_change, replace=False
-        )
+        modalities_to_change = np.random.choice(len(new_obs), num_to_change, replace=False)
 
         # Change selected modalities
         for mod_idx in modalities_to_change:
@@ -153,16 +147,12 @@ class SparseObservationBenchmark(PyMDPBenchmark):
     def _detect_changes(self, new_observations: List[int]) -> Set[int]:
         """Detect which modalities changed from previous observations."""
         changed = set()
-        for i, (prev, new) in enumerate(
-            zip(self.previous_observations, new_observations)
-        ):
+        for i, (prev, new) in enumerate(zip(self.previous_observations, new_observations)):
             if prev != new:
                 changed.add(i)
         return changed
 
-    def _selective_belief_update(
-        self, observations: List[int], changed_modalities: Set[int]
-    ):
+    def _selective_belief_update(self, observations: List[int], changed_modalities: Set[int]):
         """Perform selective belief update only for changed modalities."""
         # Simplified selective update - in practice would integrate with PyMDP's internals
         if changed_modalities:
@@ -217,9 +207,7 @@ class PartialPolicyUpdateBenchmark(PyMDPBenchmark):
         super().__init__(f"partial_policy_update_{int(update_fraction * 100)}pct")
         self.state_size = state_size
         self.num_policies = num_policies
-        self.update_fraction = (
-            update_fraction  # Fraction of policies that need updating
-        )
+        self.update_fraction = update_fraction  # Fraction of policies that need updating
         self.agent = None
         self.policy_cache = {}
         self.state_hash_tracker = StateHashTracker()
@@ -259,9 +247,7 @@ class PartialPolicyUpdateBenchmark(PyMDPBenchmark):
 
         # Track state changes
         current_state_hash = self.state_hash_tracker.compute_state_hash(self.agent.qs)
-        changed_factors = self.state_hash_tracker.get_changed_factors(
-            current_state_hash
-        )
+        changed_factors = self.state_hash_tracker.get_changed_factors(current_state_hash)
 
         # Determine which policies need updating based on changed state factors
         policies_to_update = self._determine_policies_to_update(changed_factors)
@@ -385,9 +371,7 @@ class IncrementalFreeEnergyBenchmark(PyMDPBenchmark):
         if self.incremental_enabled and self.previous_beliefs is not None:
             # Incremental free energy calculation
             start_time = time.perf_counter()
-            incremental_fe = self._incremental_free_energy(
-                current_beliefs, observations
-            )
+            incremental_fe = self._incremental_free_energy(current_beliefs, observations)
             incremental_time = (time.perf_counter() - start_time) * 1000
 
             # For comparison, full calculation
@@ -396,9 +380,7 @@ class IncrementalFreeEnergyBenchmark(PyMDPBenchmark):
             full_time = (time.perf_counter() - start_time) * 1000
 
             # Calculate accuracy difference
-            accuracy_maintained = max(
-                0, 100 - abs(incremental_fe - full_fe) / abs(full_fe) * 100
-            )
+            accuracy_maintained = max(0, 100 - abs(incremental_fe - full_fe) / abs(full_fe) * 100)
             speedup = full_time / incremental_time if incremental_time > 0 else 1.0
 
         else:
@@ -424,9 +406,7 @@ class IncrementalFreeEnergyBenchmark(PyMDPBenchmark):
             "cache_entries": self.fe_cache.size(),
         }
 
-    def _incremental_free_energy(
-        self, beliefs: List[np.ndarray], observations: List[int]
-    ) -> float:
+    def _incremental_free_energy(self, beliefs: List[np.ndarray], observations: List[int]) -> float:
         """Calculate free energy incrementally using cached components."""
         # Identify which belief factors changed significantly
         changed_factors = self._detect_belief_changes(beliefs, self.previous_beliefs)
@@ -436,26 +416,20 @@ class IncrementalFreeEnergyBenchmark(PyMDPBenchmark):
         for factor_idx in range(len(beliefs)):
             if factor_idx in changed_factors:
                 # Recalculate for changed factor
-                component = self._calculate_fe_component(
-                    factor_idx, beliefs, observations
-                )
+                component = self._calculate_fe_component(factor_idx, beliefs, observations)
                 self.fe_cache.update(factor_idx, component)
             else:
                 # Use cached component
                 component = self.fe_cache.get(factor_idx)
                 if component is None:
-                    component = self._calculate_fe_component(
-                        factor_idx, beliefs, observations
-                    )
+                    component = self._calculate_fe_component(factor_idx, beliefs, observations)
                     self.fe_cache.update(factor_idx, component)
 
             fe_components.append(component)
 
         return sum(fe_components)
 
-    def _full_free_energy(
-        self, beliefs: List[np.ndarray], observations: List[int]
-    ) -> float:
+    def _full_free_energy(self, beliefs: List[np.ndarray], observations: List[int]) -> float:
         """Calculate full free energy without caching."""
         total_fe = 0.0
 
@@ -485,9 +459,7 @@ class IncrementalFreeEnergyBenchmark(PyMDPBenchmark):
                 A_matrix = self.agent.A[obs_idx]
                 if A_matrix.ndim > 2:  # Handle multi-factor case
                     # Simplified marginalization
-                    likelihood = np.mean(
-                        A_matrix[obs], axis=tuple(range(1, A_matrix.ndim - 1))
-                    )
+                    likelihood = np.mean(A_matrix[obs], axis=tuple(range(1, A_matrix.ndim - 1)))
                 else:
                     likelihood = A_matrix[obs]
                 expected_ll += np.sum(belief * log_stable(likelihood))
@@ -523,9 +495,7 @@ class IncrementalFreeEnergyBenchmark(PyMDPBenchmark):
 class HierarchicalUpdateBenchmark(PyMDPBenchmark):
     """Benchmark hierarchical model updates with selective optimization."""
 
-    def __init__(
-        self, hierarchy_levels: int = 3, update_propagation: str = "selective"
-    ):
+    def __init__(self, hierarchy_levels: int = 3, update_propagation: str = "selective"):
         """Initialize hierarchical update benchmark.
 
         Args:
@@ -556,9 +526,7 @@ class HierarchicalUpdateBenchmark(PyMDPBenchmark):
         if self.update_propagation == "selective":
             # Selective propagation
             start_time = time.perf_counter()
-            levels_updated = self.hierarchy.selective_update(
-                change_level, change_magnitude
-            )
+            levels_updated = self.hierarchy.selective_update(change_level, change_magnitude)
             selective_time = (time.perf_counter() - start_time) * 1000
 
             # For comparison, full propagation
@@ -646,10 +614,7 @@ class StateHashTracker:
     def get_changed_factors(self, current_hash: str) -> Set[int]:
         """Get indices of factors that changed."""
         # Simplified - in practice would track per-factor hashes
-        if (
-            "global" not in self.previous_hashes
-            or self.previous_hashes["global"] != current_hash
-        ):
+        if "global" not in self.previous_hashes or self.previous_hashes["global"] != current_hash:
             self.previous_hashes["global"] = current_hash
             return {0, 1}  # Assume factors 0 and 1 changed
         return set()
@@ -749,70 +714,44 @@ def run_selective_update_benchmarks():
 
     # Sparse observation benchmarks
     suite.add_benchmark(
-        SparseObservationBenchmark(
-            state_size=25, sparsity_level=0.1, selective_enabled=True
-        )
+        SparseObservationBenchmark(state_size=25, sparsity_level=0.1, selective_enabled=True)
     )
     suite.add_benchmark(
-        SparseObservationBenchmark(
-            state_size=25, sparsity_level=0.1, selective_enabled=False
-        )
+        SparseObservationBenchmark(state_size=25, sparsity_level=0.1, selective_enabled=False)
     )
     suite.add_benchmark(
-        SparseObservationBenchmark(
-            state_size=30, sparsity_level=0.3, selective_enabled=True
-        )
+        SparseObservationBenchmark(state_size=30, sparsity_level=0.3, selective_enabled=True)
     )
     suite.add_benchmark(
-        SparseObservationBenchmark(
-            state_size=30, sparsity_level=0.3, selective_enabled=False
-        )
+        SparseObservationBenchmark(state_size=30, sparsity_level=0.3, selective_enabled=False)
     )
 
     # Partial policy update benchmarks
     suite.add_benchmark(
-        PartialPolicyUpdateBenchmark(
-            state_size=20, num_policies=30, update_fraction=0.2
-        )
+        PartialPolicyUpdateBenchmark(state_size=20, num_policies=30, update_fraction=0.2)
     )
     suite.add_benchmark(
-        PartialPolicyUpdateBenchmark(
-            state_size=20, num_policies=30, update_fraction=0.5
-        )
+        PartialPolicyUpdateBenchmark(state_size=20, num_policies=30, update_fraction=0.5)
     )
     suite.add_benchmark(
-        PartialPolicyUpdateBenchmark(
-            state_size=25, num_policies=50, update_fraction=0.3
-        )
+        PartialPolicyUpdateBenchmark(state_size=25, num_policies=50, update_fraction=0.3)
     )
 
     # Incremental free energy benchmarks
-    suite.add_benchmark(
-        IncrementalFreeEnergyBenchmark(state_size=20, incremental_enabled=True)
-    )
-    suite.add_benchmark(
-        IncrementalFreeEnergyBenchmark(state_size=20, incremental_enabled=False)
-    )
-    suite.add_benchmark(
-        IncrementalFreeEnergyBenchmark(state_size=30, incremental_enabled=True)
-    )
-    suite.add_benchmark(
-        IncrementalFreeEnergyBenchmark(state_size=30, incremental_enabled=False)
-    )
+    suite.add_benchmark(IncrementalFreeEnergyBenchmark(state_size=20, incremental_enabled=True))
+    suite.add_benchmark(IncrementalFreeEnergyBenchmark(state_size=20, incremental_enabled=False))
+    suite.add_benchmark(IncrementalFreeEnergyBenchmark(state_size=30, incremental_enabled=True))
+    suite.add_benchmark(IncrementalFreeEnergyBenchmark(state_size=30, incremental_enabled=False))
 
     # Hierarchical update benchmarks
     suite.add_benchmark(
         HierarchicalUpdateBenchmark(hierarchy_levels=3, update_propagation="selective")
     )
-    suite.add_benchmark(
-        HierarchicalUpdateBenchmark(hierarchy_levels=3, update_propagation="full")
-    )
+    suite.add_benchmark(HierarchicalUpdateBenchmark(hierarchy_levels=3, update_propagation="full"))
     suite.add_benchmark(
         HierarchicalUpdateBenchmark(hierarchy_levels=5, update_propagation="selective")
     )
-    suite.add_benchmark(
-        HierarchicalUpdateBenchmark(hierarchy_levels=5, update_propagation="full")
-    )
+    suite.add_benchmark(HierarchicalUpdateBenchmark(hierarchy_levels=5, update_propagation="full"))
 
     # Run benchmarks
     results = suite.run_all(iterations=30)
@@ -841,9 +780,7 @@ def run_selective_update_benchmarks():
         if selective_sparse and full_sparse:
             avg_selective_time = np.mean([r.mean_time_ms for r in selective_sparse])
             avg_full_time = np.mean([r.mean_time_ms for r in full_sparse])
-            overall_speedup = (
-                avg_full_time / avg_selective_time if avg_selective_time > 0 else 1.0
-            )
+            overall_speedup = avg_full_time / avg_selective_time if avg_selective_time > 0 else 1.0
 
             print(f"  Average selective time: {avg_selective_time:.2f} ms")
             print(f"  Average full time: {avg_full_time:.2f} ms")
@@ -856,9 +793,7 @@ def run_selective_update_benchmarks():
                     result.additional_metrics
                     and "computation_savings_percent" in result.additional_metrics
                 ):
-                    savings.append(
-                        result.additional_metrics["computation_savings_percent"]
-                    )
+                    savings.append(result.additional_metrics["computation_savings_percent"])
 
             if savings:
                 avg_savings = np.mean(savings)
@@ -882,9 +817,7 @@ def run_selective_update_benchmarks():
         for result in policy_results:
             if result.additional_metrics:
                 speedup = result.additional_metrics.get("speedup_factor", 1.0)
-                efficiency = result.additional_metrics.get(
-                    "computation_savings_percent", 0.0
-                )
+                efficiency = result.additional_metrics.get("computation_savings_percent", 0.0)
                 speedups.append(speedup)
                 efficiencies.append(efficiency)
 
@@ -911,14 +844,10 @@ def run_selective_update_benchmarks():
         full_fe_results = [r for r in fe_results if "disabled" in r.name]
 
         if incremental_results and full_fe_results:
-            avg_incremental_time = np.mean(
-                [r.mean_time_ms for r in incremental_results]
-            )
+            avg_incremental_time = np.mean([r.mean_time_ms for r in incremental_results])
             avg_full_fe_time = np.mean([r.mean_time_ms for r in full_fe_results])
             fe_speedup = (
-                avg_full_fe_time / avg_incremental_time
-                if avg_incremental_time > 0
-                else 1.0
+                avg_full_fe_time / avg_incremental_time if avg_incremental_time > 0 else 1.0
             )
 
             print(f"  Average incremental time: {avg_incremental_time:.2f} ms")
@@ -932,9 +861,7 @@ def run_selective_update_benchmarks():
                     result.additional_metrics
                     and "accuracy_maintained_percent" in result.additional_metrics
                 ):
-                    accuracies.append(
-                        result.additional_metrics["accuracy_maintained_percent"]
-                    )
+                    accuracies.append(result.additional_metrics["accuracy_maintained_percent"])
 
             if accuracies:
                 avg_accuracy = np.mean(accuracies)
@@ -959,9 +886,7 @@ def run_selective_update_benchmarks():
             avg_selective_hier_time = np.mean([r.mean_time_ms for r in selective_hier])
             avg_full_hier_time = np.mean([r.mean_time_ms for r in full_hier])
             hier_speedup = (
-                avg_full_hier_time / avg_selective_hier_time
-                if avg_selective_hier_time > 0
-                else 1.0
+                avg_full_hier_time / avg_selective_hier_time if avg_selective_hier_time > 0 else 1.0
             )
 
             print(f"  Average selective time: {avg_selective_hier_time:.2f} ms")

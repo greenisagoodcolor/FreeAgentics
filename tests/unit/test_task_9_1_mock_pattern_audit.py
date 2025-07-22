@@ -42,16 +42,14 @@ class TestSystematicMockPatternAudit:
                                 content = f.read()
 
                             # Look for @safe_pymdp_operation with default_value
-                            pattern = (
-                                r"@safe_pymdp_operation\([^)]*default_value[^)]*\)"
-                            )
+                            pattern = r"@safe_pymdp_operation\([^)]*default_value[^)]*\)"
                             matches = re.findall(pattern, content, re.MULTILINE)
                             if matches:
                                 decorator_violations.append(f"{file_path}: {matches}")
 
-        assert not decorator_violations, (
-            f"Found @safe_pymdp_operation decorators with default_value (performance theater): {decorator_violations}"
-        )
+        assert (
+            not decorator_violations
+        ), f"Found @safe_pymdp_operation decorators with default_value (performance theater): {decorator_violations}"
 
     def test_base_agent_update_beliefs_hard_failure(self):
         """FAILING TEST: base_agent.update_beliefs should not use @safe_pymdp_operation with default_value."""
@@ -61,14 +59,14 @@ class TestSystematicMockPatternAudit:
         source = inspect.getsource(ActiveInferenceAgent.update_beliefs)
 
         # Should not have @safe_pymdp_operation with default_value
-        assert "@safe_pymdp_operation" not in source or "default_value" not in source, (
-            "update_beliefs method should not use @safe_pymdp_operation with default_value (performance theater)"
-        )
+        assert (
+            "@safe_pymdp_operation" not in source or "default_value" not in source
+        ), "update_beliefs method should not use @safe_pymdp_operation with default_value (performance theater)"
 
         # Should raise exceptions on error, not return None
-        assert "default_value=None" not in source, (
-            "update_beliefs should not have default_value=None fallback"
-        )
+        assert (
+            "default_value=None" not in source
+        ), "update_beliefs should not have default_value=None fallback"
 
     def test_base_agent_select_action_hard_failure(self):
         """FAILING TEST: base_agent.select_action should not use @safe_pymdp_operation with default_value."""
@@ -78,14 +76,14 @@ class TestSystematicMockPatternAudit:
         source = inspect.getsource(ActiveInferenceAgent.select_action)
 
         # Should not have @safe_pymdp_operation with default_value
-        assert "@safe_pymdp_operation" not in source or "default_value" not in source, (
-            "select_action method should not use @safe_pymdp_operation with default_value (performance theater)"
-        )
+        assert (
+            "@safe_pymdp_operation" not in source or "default_value" not in source
+        ), "select_action method should not use @safe_pymdp_operation with default_value (performance theater)"
 
         # Should raise exceptions on error, not return default action
-        assert "default_value=" not in source, (
-            "select_action should not have default_value fallback"
-        )
+        assert (
+            "default_value=" not in source
+        ), "select_action should not have default_value fallback"
 
     def test_no_fallback_methods_in_production_code(self):
         """FAILING TEST: Verify no _fallback_* methods exist in production code."""
@@ -117,9 +115,9 @@ class TestSystematicMockPatternAudit:
                             if matches:
                                 fallback_violations.append(f"{file_path}: {matches}")
 
-        assert not fallback_violations, (
-            f"Found _fallback_ methods in production code (performance theater): {fallback_violations}"
-        )
+        assert (
+            not fallback_violations
+        ), f"Found _fallback_ methods in production code (performance theater): {fallback_violations}"
 
     def test_no_mock_llm_responses_in_production(self):
         """FAILING TEST: Verify no mock LLM responses exist in production code."""
@@ -153,9 +151,9 @@ class TestSystematicMockPatternAudit:
                                         f"{file_path}: {pattern} -> {matches}"
                                     )
 
-        assert not mock_llm_violations, (
-            f"Found mock LLM responses in production code: {mock_llm_violations}"
-        )
+        assert (
+            not mock_llm_violations
+        ), f"Found mock LLM responses in production code: {mock_llm_violations}"
 
     def test_no_fake_data_returns_in_websocket_demo_mode(self):
         """FAILING TEST: WebSocket demo mode should not create fake user data."""
@@ -177,13 +175,11 @@ class TestSystematicMockPatternAudit:
                 for pattern in fake_patterns:
                     matches = re.findall(pattern, content, re.IGNORECASE)
                     if matches:
-                        fake_data_violations.append(
-                            f"{file_path}: {pattern} -> {matches}"
-                        )
+                        fake_data_violations.append(f"{file_path}: {pattern} -> {matches}")
 
-        assert not fake_data_violations, (
-            f"Found fake data creation in WebSocket demo mode: {fake_data_violations}"
-        )
+        assert (
+            not fake_data_violations
+        ), f"Found fake data creation in WebSocket demo mode: {fake_data_violations}"
 
     def test_gmn_belief_integration_no_mock_results(self):
         """FAILING TEST: GMN belief integration should not return mock results."""
@@ -207,9 +203,9 @@ class TestSystematicMockPatternAudit:
                 if matches:
                     mock_violations.append(f"{pattern} -> {matches}")
 
-            assert not mock_violations, (
-                f"Found mock results in GMN belief integration: {mock_violations}"
-            )
+            assert (
+                not mock_violations
+            ), f"Found mock results in GMN belief integration: {mock_violations}"
 
 
 class TestProductionPerformanceTheaterElimination:
@@ -249,9 +245,7 @@ class TestProductionPerformanceTheaterElimination:
                     for file in files:
                         if file.endswith(".py"):
                             file_path = os.path.join(root, file)
-                            relative_path = os.path.relpath(
-                                file_path, "/home/green/FreeAgentics"
-                            )
+                            relative_path = os.path.relpath(file_path, "/home/green/FreeAgentics")
 
                             # Skip allowed files
                             if relative_path in allowed_sleep_files:
@@ -266,9 +260,9 @@ class TestProductionPerformanceTheaterElimination:
                                     f"{relative_path}: {len(matches)} sleep calls"
                                 )
 
-        assert not sleep_violations, (
-            f"Found time.sleep() calls in production code (performance theater): {sleep_violations}"
-        )
+        assert (
+            not sleep_violations
+        ), f"Found time.sleep() calls in production code (performance theater): {sleep_violations}"
 
     def test_no_visibility_pauses_or_demo_delays(self):
         """FAILING TEST: Verify no visibility pauses or demo delays in production code."""
@@ -299,9 +293,7 @@ class TestProductionPerformanceTheaterElimination:
                     for file in files:
                         if file.endswith(".py"):
                             file_path = os.path.join(root, file)
-                            relative_path = os.path.relpath(
-                                file_path, "/home/green/FreeAgentics"
-                            )
+                            relative_path = os.path.relpath(file_path, "/home/green/FreeAgentics")
 
                             with open(file_path, "r") as f:
                                 content = f.read()
@@ -313,9 +305,9 @@ class TestProductionPerformanceTheaterElimination:
                                         f"{relative_path}: {pattern} -> {matches}"
                                     )
 
-        assert not visibility_violations, (
-            f"Found visibility/demo theater patterns in production code: {visibility_violations}"
-        )
+        assert (
+            not visibility_violations
+        ), f"Found visibility/demo theater patterns in production code: {visibility_violations}"
 
 
 class TestHardFailureEnforcement:
@@ -345,9 +337,9 @@ class TestHardFailureEnforcement:
             benchmarks = PyMDPBenchmarks()
 
             # Should not have _create_dummy_result method
-            assert not hasattr(benchmarks, "_create_dummy_result"), (
-                "_create_dummy_result method should not exist"
-            )
+            assert not hasattr(
+                benchmarks, "_create_dummy_result"
+            ), "_create_dummy_result method should not exist"
 
         except ImportError:
             # Expected if PyMDP not available
@@ -391,10 +383,8 @@ class TestHardFailureEnforcement:
                             )
 
         # Should be zero after systematic elimination
-        assert theater_count == 0, (
-            f"Task 9.1 incomplete: {theater_count} performance theater patterns still found"
-        )
+        assert (
+            theater_count == 0
+        ), f"Task 9.1 incomplete: {theater_count} performance theater patterns still found"
 
-        print(
-            "✅ Task 9.1 Systematic Mock Pattern Removal Audit: ALL patterns eliminated"
-        )
+        print("✅ Task 9.1 Systematic Mock Pattern Removal Audit: ALL patterns eliminated")

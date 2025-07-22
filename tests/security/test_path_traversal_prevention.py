@@ -340,10 +340,7 @@ class PathTraversalPreventionTester:
                                 )
 
                             # Look for private keys
-                            if (
-                                "-----begin" in content.lower()
-                                and "private key" in content.lower()
-                            ):
+                            if "-----begin" in content.lower() and "private key" in content.lower():
                                 results["passed"] = False
                                 results["findings"].append(
                                     {
@@ -897,9 +894,7 @@ class PathTraversalPreventionTester:
                 "total_tests": total_tests,
                 "passed_tests": passed_tests,
                 "failed_tests": failed_tests,
-                "pass_rate": (passed_tests / total_tests * 100)
-                if total_tests > 0
-                else 0,
+                "pass_rate": (passed_tests / total_tests * 100) if total_tests > 0 else 0,
                 "critical_findings": len(critical_findings),
                 "high_findings": len(high_findings),
                 "medium_findings": len(medium_findings),
@@ -976,14 +971,10 @@ class TestPathTraversalPrevention:
 
             # Check for critical/high severity issues
             if summary["summary"]["critical_findings"] > 0:
-                failure_msg += (
-                    f"\nCRITICAL ISSUES: {summary['summary']['critical_findings']}\n"
-                )
+                failure_msg += f"\nCRITICAL ISSUES: {summary['summary']['critical_findings']}\n"
 
             if summary["summary"]["high_findings"] > 0:
-                failure_msg += (
-                    f"HIGH SEVERITY ISSUES: {summary['summary']['high_findings']}\n"
-                )
+                failure_msg += f"HIGH SEVERITY ISSUES: {summary['summary']['high_findings']}\n"
 
             if summary["recommendations"]:
                 failure_msg += "\nRecommendations:\n"
@@ -1024,7 +1015,9 @@ if __name__ == "__main__":
 
     # Save report
     timestamp = time.strftime("%Y%m%d_%H%M%S")
-    report_file = f"/home/green/FreeAgentics/tests/security/path_traversal_prevention_report_{timestamp}.json"
+    report_file = (
+        f"/home/green/FreeAgentics/tests/security/path_traversal_prevention_report_{timestamp}.json"
+    )
 
     try:
         with open(report_file, "w") as f:

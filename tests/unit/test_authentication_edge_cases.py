@@ -159,9 +159,7 @@ class TestAuthenticationEdgeCases:
 
         # Test blacklist cleanup
         old_jti = "old-jti"
-        self.auth_manager.blacklist[old_jti] = datetime.now(timezone.utc) - timedelta(
-            days=30
-        )
+        self.auth_manager.blacklist[old_jti] = datetime.now(timezone.utc) - timedelta(days=30)
 
         recent_jti = "recent-jti"
         self.auth_manager.blacklist[recent_jti] = datetime.now(timezone.utc)
@@ -217,9 +215,7 @@ class TestAuthenticationEdgeCases:
 
         # Make requests rapidly
         for i in range(10):
-            limited = limiter.is_rate_limited(
-                identifier, max_requests=5, window_minutes=1
-            )
+            limited = limiter.is_rate_limited(identifier, max_requests=5, window_minutes=1)
             if i < 5:
                 assert not limited, f"Request {i} should not be rate limited"
             else:
@@ -229,15 +225,11 @@ class TestAuthenticationEdgeCases:
         limiter.clear_old_requests()
 
         # Test with zero limits
-        always_limited = limiter.is_rate_limited(
-            "test", max_requests=0, window_minutes=1
-        )
+        always_limited = limiter.is_rate_limited("test", max_requests=0, window_minutes=1)
         assert always_limited
 
         # Test with negative limits (should be treated as zero)
-        negative_limited = limiter.is_rate_limited(
-            "test", max_requests=-1, window_minutes=1
-        )
+        negative_limited = limiter.is_rate_limited("test", max_requests=-1, window_minutes=1)
         assert negative_limited
 
     def test_password_hashing_edge_cases(self):
@@ -493,9 +485,7 @@ class TestAuthenticationEdgeCases:
     def test_database_connectivity_simulation(self):
         """Test database connectivity edge cases."""
         # Simulate database connection issues
-        with patch.object(
-            self.auth_manager, "users", new_callable=lambda: {}
-        ) as mock_users:
+        with patch.object(self.auth_manager, "users", new_callable=lambda: {}) as mock_users:
             # Simulate database unavailable
             mock_users.side_effect = ConnectionError("Database unavailable")
 
@@ -568,9 +558,7 @@ class TestAuthenticationEdgeCases:
 
         for pattern in sql_patterns:
             result = self.security_validator.validate_sql_input(pattern)
-            assert result is False, (
-                f"SQL injection pattern should be blocked: {pattern}"
-            )
+            assert result is False, f"SQL injection pattern should be blocked: {pattern}"
 
         # Test XSS patterns
         xss_patterns = [
@@ -588,9 +576,7 @@ class TestAuthenticationEdgeCases:
 
         for pattern in cmd_patterns:
             result = self.security_validator.validate_command_injection(pattern)
-            assert result is False, (
-                f"Command injection pattern should be blocked: {pattern}"
-            )
+            assert result is False, f"Command injection pattern should be blocked: {pattern}"
 
     def test_edge_case_token_data(self):
         """Test TokenData edge cases."""

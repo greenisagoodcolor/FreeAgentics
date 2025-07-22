@@ -135,9 +135,7 @@ class TestFeatureExtractor:
 
     def test_features_to_array(self):
         """Test converting features to numpy array."""
-        features = ThreatFeatures(
-            request_frequency=0.5, request_size=100, endpoint_diversity=0.3
-        )
+        features = ThreatFeatures(request_frequency=0.5, request_size=100, endpoint_diversity=0.3)
 
         array = features.to_array()
         assert isinstance(array, np.ndarray)
@@ -294,18 +292,14 @@ class TestMLThreatDetector:
     def test_detect_attack_types(self, detector):
         """Test attack type detection."""
         # Create features indicating brute force
-        brute_force_features = ThreatFeatures(
-            failed_login_rate=0.8, request_frequency=0.9
-        )
+        brute_force_features = ThreatFeatures(failed_login_rate=0.8, request_frequency=0.9)
 
         brute_force_request = {
             "endpoint": "/api/v1/auth/login",
             "user_agent": "Mozilla/5.0",
         }
 
-        attacks = detector._detect_attack_types(
-            brute_force_features, brute_force_request
-        )
+        attacks = detector._detect_attack_types(brute_force_features, brute_force_request)
         assert AttackType.BRUTE_FORCE in attacks
 
         # Create features indicating SQL injection
@@ -315,9 +309,7 @@ class TestMLThreatDetector:
             "user_agent": "Mozilla/5.0",
         }
 
-        attacks = detector._detect_attack_types(
-            sql_injection_features, sql_injection_request
-        )
+        attacks = detector._detect_attack_types(sql_injection_features, sql_injection_request)
         assert AttackType.SQL_INJECTION in attacks
 
     def test_get_performance_metrics(self, detector):
@@ -398,9 +390,7 @@ class TestMLThreatDetector:
             assert new_detector.is_trained
 
     @pytest.mark.asyncio
-    async def test_performance_tracking(
-        self, detector, sample_training_data, sample_request
-    ):
+    async def test_performance_tracking(self, detector, sample_training_data, sample_request):
         """Test performance tracking."""
         # Train model
         detector.train_model(sample_training_data)
@@ -414,10 +404,7 @@ class TestMLThreatDetector:
         assert metrics["average_prediction_time_ms"] >= 0
 
         # Check latency target
-        assert (
-            metrics["latency_target_met"] is True
-            or metrics["latency_target_met"] is False
-        )
+        assert metrics["latency_target_met"] is True or metrics["latency_target_met"] is False
 
     def test_retrain_model(self, detector, sample_training_data):
         """Test model retraining."""

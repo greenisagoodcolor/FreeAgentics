@@ -42,9 +42,7 @@ class DatabasePool:
         )
 
         # Create session factory
-        self.SessionLocal = sessionmaker(
-            autocommit=False, autoflush=False, bind=self.engine
-        )
+        self.SessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=self.engine)
 
         self.min_connections = min_connections
         self.max_connections = max_connections
@@ -124,9 +122,7 @@ class DatabasePool:
             "checked_out_connections": pool_impl.checkedout(),
             "overflow": pool_impl.overflow(),
             "total": pool_impl.size() + pool_impl.overflow(),
-            "available": pool_impl.size()
-            + pool_impl.overflow()
-            - pool_impl.checkedout(),
+            "available": pool_impl.size() + pool_impl.overflow() - pool_impl.checkedout(),
         }
 
     def close(self):

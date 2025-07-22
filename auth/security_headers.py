@@ -235,8 +235,7 @@ class SecurityHeadersManager:
             # Default comprehensive CSP with nonce support
             csp_directives = [
                 "default-src 'self'",
-                "script-src 'self'"
-                + (f" 'nonce-{nonce}'" if nonce else " 'strict-dynamic'"),
+                "script-src 'self'" + (f" 'nonce-{nonce}'" if nonce else " 'strict-dynamic'"),
                 "style-src 'self'"
                 + (f" 'nonce-{nonce}'" if nonce else " 'unsafe-inline'")
                 + " https://fonts.googleapis.com",
@@ -326,9 +325,7 @@ class SecurityHeadersManager:
         websocket_patterns = ["/ws/", "/websocket/", "/socket.io/"]
         return any(pattern in path for pattern in websocket_patterns)
 
-    def get_security_headers(
-        self, request: Request, response: Response
-    ) -> Dict[str, str]:
+    def get_security_headers(self, request: Request, response: Response) -> Dict[str, str]:
         """Get all security headers for a request/response."""
         headers = {}
 
@@ -389,9 +386,7 @@ class SecurityHeadersManager:
 
         # Cache control based on endpoint type
         path = request.url.path
-        if any(
-            sensitive in path for sensitive in ["/auth/", "/api/", "/admin/", "/user/"]
-        ):
+        if any(sensitive in path for sensitive in ["/auth/", "/api/", "/admin/", "/user/"]):
             # Sensitive endpoints - no caching
             headers.update(
                 {
@@ -430,17 +425,13 @@ class SecurityHeadersMiddleware(BaseHTTPMiddleware):
             response = await call_next(request)
 
             # Apply security headers
-            security_headers = self.security_manager.get_security_headers(
-                request, response
-            )
+            security_headers = self.security_manager.get_security_headers(request, response)
 
             for header_name, header_value in security_headers.items():
                 response.headers[header_name] = header_value
 
             # Log security headers application
-            logger.debug(
-                f"Applied {len(security_headers)} security headers to {request.url.path}"
-            )
+            logger.debug(f"Applied {len(security_headers)} security headers to {request.url.path}")
 
             return response
 
@@ -456,18 +447,14 @@ class SecurityHeadersMiddleware(BaseHTTPMiddleware):
             )
 
             # Apply security headers to error response
-            security_headers = self.security_manager.get_security_headers(
-                request, error_response
-            )
+            security_headers = self.security_manager.get_security_headers(request, error_response)
             for header_name, header_value in security_headers.items():
                 error_response.headers[header_name] = header_value
 
             return error_response
 
 
-def setup_security_headers(
-    app, policy: Optional[SecurityPolicy] = None
-) -> SecurityHeadersManager:
+def setup_security_headers(app, policy: Optional[SecurityPolicy] = None) -> SecurityHeadersManager:
     """Convenience function to set up security headers middleware."""
     security_manager = SecurityHeadersManager(policy)
     app.add_middleware(SecurityHeadersMiddleware, security_manager=security_manager)
@@ -512,25 +499,19 @@ def get_security_headers(custom_csp: Optional[str] = None) -> Dict[str, str]:
     headers = {}
 
     # HSTS
-    headers["Strict-Transport-Security"] = (
-        _default_security_manager.generate_hsts_header()
-    )
+    headers["Strict-Transport-Security"] = _default_security_manager.generate_hsts_header()
 
     # CSP
     if custom_csp:
         headers["Content-Security-Policy"] = custom_csp
     else:
-        headers["Content-Security-Policy"] = (
-            _default_security_manager.generate_csp_header()
-        )
+        headers["Content-Security-Policy"] = _default_security_manager.generate_csp_header()
 
     # Frame Options
     headers["X-Frame-Options"] = _default_security_manager.policy.x_frame_options
 
     # Content Type Options
-    headers["X-Content-Type-Options"] = (
-        _default_security_manager.policy.x_content_type_options
-    )
+    headers["X-Content-Type-Options"] = _default_security_manager.policy.x_content_type_options
 
     # XSS Protection
     headers["X-XSS-Protection"] = _default_security_manager.policy.x_xss_protection
@@ -539,9 +520,7 @@ def get_security_headers(custom_csp: Optional[str] = None) -> Dict[str, str]:
     headers["Referrer-Policy"] = _default_security_manager.policy.referrer_policy
 
     # Permissions Policy
-    headers["Permissions-Policy"] = (
-        _default_security_manager.generate_permissions_policy()
-    )
+    headers["Permissions-Policy"] = _default_security_manager.generate_permissions_policy()
 
     # Expect-CT
     if expect_ct := _default_security_manager.generate_expect_ct_header():

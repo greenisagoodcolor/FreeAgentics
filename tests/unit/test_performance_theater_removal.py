@@ -30,21 +30,13 @@ class TestHardFailureRequirement:
         source = inspect.getsource(GoalOptimizerAgent._initialize_pymdp)
 
         # Verify performance theater patterns have been eliminated
-        assert "return None" not in source, (
-            "Method should not return None (performance theater)"
-        )
-        assert "try:" not in source or "except" not in source, (
-            "Should not use try/except fallbacks"
-        )
-        assert "raise ImportError" in source, (
-            "Should raise ImportError for hard failure"
-        )
+        assert "return None" not in source, "Method should not return None (performance theater)"
+        assert "try:" not in source or "except" not in source, "Should not use try/except fallbacks"
+        assert "raise ImportError" in source, "Should raise ImportError for hard failure"
         assert "PyMDP required" in source, "Should have proper error message"
         assert "pip install" in source, "Should mention pip install"
 
-        print(
-            "✅ GoalOptimizer._initialize_pymdp correctly implements hard failure pattern"
-        )
+        print("✅ GoalOptimizer._initialize_pymdp correctly implements hard failure pattern")
 
     def test_pattern_predictor_fails_hard_without_pymdp(self):
         """Test that PatternPredictor implementation raises ImportError (verifies our changes work)."""
@@ -57,21 +49,13 @@ class TestHardFailureRequirement:
         source = inspect.getsource(PatternPredictorAgent._initialize_pymdp)
 
         # Verify performance theater patterns have been eliminated
-        assert "return None" not in source, (
-            "Method should not return None (performance theater)"
-        )
-        assert "try:" not in source or "except" not in source, (
-            "Should not use try/except fallbacks"
-        )
-        assert "raise ImportError" in source, (
-            "Should raise ImportError for hard failure"
-        )
+        assert "return None" not in source, "Method should not return None (performance theater)"
+        assert "try:" not in source or "except" not in source, "Should not use try/except fallbacks"
+        assert "raise ImportError" in source, "Should raise ImportError for hard failure"
         assert "PyMDP required" in source, "Should have proper error message"
         assert "pip install" in source, "Should mention pip install"
 
-        print(
-            "✅ PatternPredictor._initialize_pymdp correctly implements hard failure pattern"
-        )
+        print("✅ PatternPredictor._initialize_pymdp correctly implements hard failure pattern")
 
     def test_pymdp_benchmarks_fail_hard_without_pymdp(self):
         """FAILING TEST: PyMDPBenchmarks should raise ImportError, not return dummy results."""
@@ -102,9 +86,9 @@ class TestHardFailureRequirement:
             benchmarks = PyMDPBenchmarks()
 
             # This method should not exist after we remove performance theater
-            assert not hasattr(benchmarks, "_create_dummy_result"), (
-                "_create_dummy_result method should be removed - it's performance theater"
-            )
+            assert not hasattr(
+                benchmarks, "_create_dummy_result"
+            ), "_create_dummy_result method should be removed - it's performance theater"
         except Exception:
             assert False, "Test bypass removed - must fix underlying issue"
 
@@ -151,9 +135,7 @@ class TestMockResponseElimination:
 
                 for pattern in mock_patterns:
                     matches = re.findall(pattern, content, re.IGNORECASE)
-                    assert not matches, (
-                        f"Found mock pattern '{pattern}' in {file_path}: {matches}"
-                    )
+                    assert not matches, f"Found mock pattern '{pattern}' in {file_path}: {matches}"
 
 
 class TestTimeDelayElimination:
@@ -193,9 +175,9 @@ class TestTimeDelayElimination:
 
                                 # Allow sleep only in very specific cases (like retry logic)
                                 if matches and "retry" not in file_path.lower():
-                                    assert False, (
-                                        f"Found time.sleep() in production code: {file_path}"
-                                    )
+                                    assert (
+                                        False
+                                    ), f"Found time.sleep() in production code: {file_path}"
 
     def test_no_progress_bar_theater(self):
         """FAILING TEST: Verify no fake progress indicators exist."""
@@ -221,9 +203,9 @@ class TestTimeDelayElimination:
 
                             for pattern in progress_patterns:
                                 matches = re.findall(pattern, content, re.IGNORECASE)
-                                assert not matches, (
-                                    f"Found progress theater '{pattern}' in {file_path}"
-                                )
+                                assert (
+                                    not matches
+                                ), f"Found progress theater '{pattern}' in {file_path}"
 
 
 class TestAssertionBasedValidation:
@@ -284,9 +266,7 @@ class TestRealityCheckpoint:
         with patch("agents.goal_optimizer.PYMDP_AVAILABLE", False):
             from agents.goal_optimizer import GoalOptimizerAgent
 
-            optimizer = GoalOptimizerAgent(
-                "test", "test", optimization_target="efficiency"
-            )
+            optimizer = GoalOptimizerAgent("test", "test", optimization_target="efficiency")
 
             # Should fail immediately, not gracefully degrade
             with pytest.raises(ImportError):
@@ -339,6 +319,6 @@ class TestRealityCheckpoint:
                                 if matches:
                                     # Allow specific exceptions for legitimate use cases
                                     if "retry" not in file_path.lower():
-                                        assert False, (
-                                            f"Found graceful degradation pattern '{pattern}' in {file_path}: {matches}"
-                                        )
+                                        assert (
+                                            False
+                                        ), f"Found graceful degradation pattern '{pattern}' in {file_path}: {matches}"

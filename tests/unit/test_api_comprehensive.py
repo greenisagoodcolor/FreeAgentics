@@ -57,9 +57,7 @@ class TestSecurityHeadersMiddleware:
             response.headers["X-Content-Type-Options"] = "nosniff"
             response.headers["X-Frame-Options"] = "DENY"
             response.headers["X-XSS-Protection"] = "1; mode=block"
-            response.headers["Strict-Transport-Security"] = (
-                "max-age=31536000; includeSubDomains"
-            )
+            response.headers["Strict-Transport-Security"] = "max-age=31536000; includeSubDomains"
             response.headers["Content-Security-Policy"] = "default-src 'self'"
             response.headers["Referrer-Policy"] = "strict-origin-when-cross-origin"
 
@@ -462,9 +460,7 @@ class TestAuthRouter:
     def test_login_invalid_credentials(self):
         """Test login with invalid credentials."""
         with patch("api.v1.auth.authenticate_user") as mock_auth:
-            mock_auth.side_effect = HTTPException(
-                status_code=401, detail="Invalid credentials"
-            )
+            mock_auth.side_effect = HTTPException(status_code=401, detail="Invalid credentials")
 
             login_data = {"username": "testuser", "password": "wrongpassword"}
 

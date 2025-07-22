@@ -27,9 +27,7 @@ with patch.dict(
 class ConcreteAgent(ActiveInferenceAgent):
     """Concrete implementation for testing."""
 
-    def __init__(
-        self, agent_id: str, name: str, config: Optional[Dict[str, Any]] = None
-    ):
+    def __init__(self, agent_id: str, name: str, config: Optional[Dict[str, Any]] = None):
         """Initialize concrete agent."""
         super().__init__(agent_id, name, config)
 
@@ -44,9 +42,7 @@ class ConcreteAgent(ActiveInferenceAgent):
         self.C = np.array([1.0, 0.0])
         self.D = np.array([0.5, 0.5])
 
-    def _compute_expected_free_energy(
-        self, qs: np.ndarray, actions: List[int]
-    ) -> np.ndarray:
+    def _compute_expected_free_energy(self, qs: np.ndarray, actions: List[int]) -> np.ndarray:
         """Compute expected free energy for actions."""
         return np.random.rand(len(actions))
 
@@ -114,9 +110,7 @@ class ConcreteAgent(ActiveInferenceAgent):
 
         state_data = {
             "state": self.state,
-            "beliefs": self.beliefs.tolist()
-            if hasattr(self.beliefs, "tolist")
-            else self.beliefs,
+            "beliefs": self.beliefs.tolist() if hasattr(self.beliefs, "tolist") else self.beliefs,
             "action_history": self.action_history,
             "observation_history": self.observation_history,
         }
@@ -141,9 +135,7 @@ class ConcreteAgent(ActiveInferenceAgent):
         return {
             "total_actions": len(self.action_history),
             "total_observations": len(self.observation_history),
-            "unique_actions": len(
-                set(record["action"] for record in self.action_history)
-            ),
+            "unique_actions": len(set(record["action"] for record in self.action_history)),
             "unique_observations": len(
                 set(str(record["observation"]) for record in self.observation_history)
             ),
@@ -467,9 +459,7 @@ class TestActiveInferenceAgent:
 
         # The step method has error handling that returns "stay" on failure
         # So we don't expect the exception to propagate
-        with patch.object(
-            agent, "update_beliefs", side_effect=Exception("Update failed")
-        ):
+        with patch.object(agent, "update_beliefs", side_effect=Exception("Update failed")):
             action = agent.step({"observation": 1})
             # Should return fallback action instead of raising
             assert action == "stay"

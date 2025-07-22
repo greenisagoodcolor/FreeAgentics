@@ -108,12 +108,8 @@ class TestMemoryHotspotAnalyzer(unittest.TestCase):
     def test_generate_hotspot_report(self):
         """Test report generation."""
         with patch.object(self.analyzer, "analyze_pymdp_matrices") as mock_matrix:
-            with patch.object(
-                self.analyzer, "analyze_belief_operations"
-            ) as mock_belief:
-                with patch.object(
-                    self.analyzer, "analyze_agent_lifecycle"
-                ) as mock_lifecycle:
+            with patch.object(self.analyzer, "analyze_belief_operations") as mock_belief:
+                with patch.object(self.analyzer, "analyze_agent_lifecycle") as mock_lifecycle:
                     with patch.object(
                         self.analyzer, "identify_optimization_opportunities"
                     ) as mock_opt:

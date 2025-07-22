@@ -34,9 +34,7 @@ class TestAgentEdgeCases:
             with patch("pymdp.Agent"):
                 # Test with zero states
                 try:
-                    agent = ActiveInferenceAgent(
-                        num_states=[0], num_controls=[1], num_obs=[1]
-                    )
+                    agent = ActiveInferenceAgent(num_states=[0], num_controls=[1], num_obs=[1])
                     # Document whether this succeeds or fails
                     assert agent is not None or agent is None
                 except Exception as inner_e:
@@ -55,9 +53,7 @@ class TestAgentEdgeCases:
                 mock_instance = Mock()
                 mock_pymdp.return_value = mock_instance
 
-                agent = ActiveInferenceAgent(
-                    num_states=[2, 2], num_controls=[2, 2], num_obs=[2, 2]
-                )
+                agent = ActiveInferenceAgent(num_states=[2, 2], num_controls=[2, 2], num_obs=[2, 2])
 
                 # Test None observation
                 try:
@@ -80,9 +76,7 @@ class TestAgentEdgeCases:
                 mock_instance = Mock()
                 mock_pymdp.return_value = mock_instance
 
-                agent = ActiveInferenceAgent(
-                    num_states=[2, 2], num_controls=[2, 2], num_obs=[2, 2]
-                )
+                agent = ActiveInferenceAgent(num_states=[2, 2], num_controls=[2, 2], num_obs=[2, 2])
 
                 # Test step without observation
                 try:

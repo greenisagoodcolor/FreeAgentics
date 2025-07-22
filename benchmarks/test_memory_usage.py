@@ -100,9 +100,7 @@ class MemoryUsageBenchmarks:
         agent_count = 100
 
         for i in range(agent_count):
-            agent = BaseAgent(
-                agent_id=f"memory-test-{i}", model="gpt-4", temperature=0.7
-            )
+            agent = BaseAgent(agent_id=f"memory-test-{i}", model="gpt-4", temperature=0.7)
             agents.append(agent)
 
             if i % 20 == 19:  # Snapshot every 20 agents
@@ -117,9 +115,7 @@ class MemoryUsageBenchmarks:
 
             print("\nAgent Memory Footprint:")
             print(f"  Single agent size: {agent_size / 1024:.1f} KB")
-            print(
-                f"  Total size ({agent_count} agents): {total_size / 1024 / 1024:.1f} MB"
-            )
+            print(f"  Total size ({agent_count} agents): {total_size / 1024 / 1024:.1f} MB")
             print(f"  Average per agent: {total_size / agent_count / 1024:.1f} KB")
 
         # Show memory growth
@@ -391,9 +387,7 @@ class MemoryUsageBenchmarks:
                 pass
 
         # Sort by size
-        sorted_types = sorted(
-            type_stats.items(), key=lambda x: x[1]["size"], reverse=True
-        )[:10]
+        sorted_types = sorted(type_stats.items(), key=lambda x: x[1]["size"], reverse=True)[:10]
 
         for type_name, stats in sorted_types:
             size_mb = stats["size"] / 1024 / 1024

@@ -58,8 +58,7 @@ class DatabaseMigrationVerifier:
         self.test_results = {}
         self.verification_report = {
             "timestamp": datetime.now().isoformat(),
-            "database_url_hash": hash(self.database_url)
-            % 10000,  # Partial hash for security
+            "database_url_hash": hash(self.database_url) % 10000,  # Partial hash for security
             "tests_run": 0,
             "tests_passed": 0,
             "tests_failed": 0,
@@ -129,9 +128,7 @@ class DatabaseMigrationVerifier:
                 )
                 logger.error(f"🚨 CRITICAL: {test_name}: {message}")
             else:
-                self.verification_report["warnings"].append(
-                    {"test": test_name, "message": message}
-                )
+                self.verification_report["warnings"].append({"test": test_name, "message": message})
                 logger.warning(f"⚠️ {test_name}: {message}")
 
     def verify_database_connection(self) -> bool:
@@ -217,16 +214,16 @@ class DatabaseMigrationVerifier:
             with self.get_connection() as conn:
                 with conn.cursor() as cur:
                     # Check installed extensions
-                    cur.execute("""
+                    cur.execute(
+                        """
                         SELECT extname, extversion 
                         FROM pg_extension 
                         ORDER BY extname
-                    """)
+                    """
+                    )
                     installed_extensions = {row[0]: row[1] for row in cur.fetchall()}
 
-                    logger.info(
-                        f"Installed extensions: {list(installed_extensions.keys())}"
-                    )
+                    logger.info(f"Installed extensions: {list(installed_extensions.keys())}")
 
                     # Verify required extensions
                     for ext_name, description in required_extensions.items():
@@ -320,9 +317,7 @@ class DatabaseMigrationVerifier:
 
             # Count migration files
             migration_files = list(versions_dir.glob("*.py"))
-            migration_count = len(
-                [f for f in migration_files if not f.name.startswith("__")]
-            )
+            migration_count = len([f for f in migration_files if not f.name.startswith("__")])
 
             self.log_test_result(
                 "alembic_configuration",
@@ -414,12 +409,14 @@ class DatabaseMigrationVerifier:
                             "mfa_audit_log",
                         ]
 
-                        cur.execute("""
+                        cur.execute(
+                            """
                             SELECT table_name 
                             FROM information_schema.tables 
                             WHERE table_schema = 'public'
                             AND table_type = 'BASE TABLE'
-                        """)
+                        """
+                        )
                         existing_tables = [row[0] for row in cur.fetchall()]
 
                         missing_tables = set(expected_tables) - set(existing_tables)
@@ -469,9 +466,7 @@ class DatabaseMigrationVerifier:
                             cur.execute(f"DROP DATABASE IF EXISTS {test_db_name}")
                     logger.info(f"Test database {test_db_name} cleaned up")
                 except Exception as e:
-                    logger.warning(
-                        f"Failed to clean up test database {test_db_name}: {e}"
-                    )
+                    logger.warning(f"Failed to clean up test database {test_db_name}: {e}")
 
         except Exception as e:
             self.log_test_result(
@@ -488,13 +483,15 @@ class DatabaseMigrationVerifier:
             with self.get_connection() as conn:
                 with conn.cursor() as cur:
                     # Test vector operations on a temporary table
-                    cur.execute("""
+                    cur.execute(
+                        """
                         CREATE TEMPORARY TABLE test_vectors (
                             id SERIAL PRIMARY KEY,
                             embedding vector(512),
                             content text
                         )
-                    """)
+                    """
+                    )
 
                     # Insert test vectors
                     import numpy as np
@@ -536,11 +533,13 @@ class DatabaseMigrationVerifier:
 
                     # Test vector indexing
                     try:
-                        cur.execute("""
+                        cur.execute(
+                            """
                             CREATE INDEX test_vector_idx ON test_vectors 
                             USING ivfflat (embedding vector_cosine_ops) 
                             WITH (lists = 1)
-                        """)
+                        """
+                        )
                         self.log_test_result(
                             "vector_indexing",
                             True,
@@ -583,9 +582,7 @@ class DatabaseMigrationVerifier:
                 session.commit()
 
                 # Verify the agent was stored correctly
-                retrieved_agent = (
-                    session.query(Agent).filter_by(name="test_agent").first()
-                )
+                retrieved_agent = session.query(Agent).filter_by(name="test_agent").first()
                 if not retrieved_agent:
                     self.log_test_result(
                         "active_inference_agent_storage",
@@ -630,9 +627,7 @@ class DatabaseMigrationVerifier:
                 session.commit()
 
                 # Verify many-to-many relationship
-                coalition_check = (
-                    session.query(Coalition).filter_by(name="test_coalition").first()
-                )
+                coalition_check = session.query(Coalition).filter_by(name="test_coalition").first()
                 if not coalition_check or len(coalition_check.agents) != 1:
                     self.log_test_result(
                         "coalition_agent_relationship",
@@ -670,13 +665,15 @@ class DatabaseMigrationVerifier:
             with self.get_connection() as conn:
                 with conn.cursor() as cur:
                     # Check for performance indexes
-                    cur.execute("""
+                    cur.execute(
+                        """
                         SELECT indexname, tablename 
                         FROM pg_indexes 
                         WHERE schemaname = 'public'
                         AND indexname LIKE 'idx_%'
                         ORDER BY tablename, indexname
-                    """)
+                    """
+                    )
 
                     indexes = cur.fetchall()
                     index_count = len(indexes)
@@ -755,13 +752,15 @@ class DatabaseMigrationVerifier:
                         )
 
                     # Check for MFA tables (security feature)
-                    cur.execute("""
+                    cur.execute(
+                        """
                         SELECT EXISTS (
                             SELECT FROM information_schema.tables 
                             WHERE table_schema = 'public' 
                             AND table_name = 'mfa_settings'
                         )
-                    """)
+                    """
+                    )
 
                     mfa_tables_exist = cur.fetchone()[0]
                     if mfa_tables_exist:
@@ -1023,9 +1022,7 @@ log ""
         print(f"❌ Tests Failed: {self.verification_report['tests_failed']}")
 
         if self.verification_report["critical_failures"]:
-            print(
-                f"\n🚨 CRITICAL FAILURES ({len(self.verification_report['critical_failures'])}):"
-            )
+            print(f"\n🚨 CRITICAL FAILURES ({len(self.verification_report['critical_failures'])}):")
             for failure in self.verification_report["critical_failures"]:
                 print(f"   - {failure['test']}: {failure['message']}")
 
@@ -1035,12 +1032,8 @@ log ""
                 print(f"   - {warning['test']}: {warning['message']}")
 
         if self.verification_report["recommendations"]:
-            print(
-                f"\n💡 RECOMMENDATIONS ({len(self.verification_report['recommendations'])}):"
-            )
-            for rec in self.verification_report["recommendations"][
-                :10
-            ]:  # Show first 10
+            print(f"\n💡 RECOMMENDATIONS ({len(self.verification_report['recommendations'])}):")
+            for rec in self.verification_report["recommendations"][:10]:  # Show first 10
                 print(f"   - {rec}")
 
         print("\n🏁 FINAL ASSESSMENT:")
@@ -1057,9 +1050,7 @@ def main():
     """Main function to run database migration verification."""
     import argparse
 
-    parser = argparse.ArgumentParser(
-        description="FreeAgentics Database Migration Verification"
-    )
+    parser = argparse.ArgumentParser(description="FreeAgentics Database Migration Verification")
     parser.add_argument(
         "--database-url",
         help="PostgreSQL database URL (overrides DATABASE_URL env var)",

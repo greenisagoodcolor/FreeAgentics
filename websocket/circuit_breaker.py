@@ -268,9 +268,7 @@ class CircuitBreaker:
         """Add a state change listener."""
         self._listeners.append(listener)
 
-    def remove_listener(
-        self, listener: Callable[[CircuitState, CircuitState, str], None]
-    ):
+    def remove_listener(self, listener: Callable[[CircuitState, CircuitState, str], None]):
         """Remove a state change listener."""
         if listener in self._listeners:
             self._listeners.remove(listener)

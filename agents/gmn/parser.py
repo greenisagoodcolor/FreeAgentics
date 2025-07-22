@@ -16,9 +16,7 @@ class GMNParser:
 
     def __init__(self):
         """Initialize the GMN parser."""
-        self._agent_pattern = re.compile(
-            r"agent\s+(\w+)\s*\{([^}]*)\}", re.DOTALL | re.MULTILINE
-        )
+        self._agent_pattern = re.compile(r"agent\s+(\w+)\s*\{([^}]*)\}", re.DOTALL | re.MULTILINE)
 
     def parse(self, gmn_spec: str) -> Dict[str, Any]:
         """

@@ -71,9 +71,7 @@ class MetricsDashboard:
         for route in list(self.app.router.routes()):
             cors.add(route)
 
-        logger.info(
-            f"Dashboard server initialized on {self.config.host}:{self.config.port}"
-        )
+        logger.info(f"Dashboard server initialized on {self.config.host}:{self.config.port}")
 
     def _setup_routes(self):
         """Setup HTTP routes."""
@@ -120,9 +118,7 @@ class MetricsDashboard:
         site = web.TCPSite(runner, self.config.host, self.config.port)
         await site.start()
 
-        logger.info(
-            f"Dashboard server started at http://{self.config.host}:{self.config.port}"
-        )
+        logger.info(f"Dashboard server started at http://{self.config.host}:{self.config.port}")
 
     async def stop(self):
         """Stop the dashboard server."""
@@ -191,27 +187,17 @@ class MetricsDashboard:
         if MetricSource.DATABASE.value in summary["sources"]:
             db_metrics = summary["sources"][MetricSource.DATABASE.value]
             update_data["charts"]["database"] = {
-                "query_latency": self._extract_chart_data(
-                    db_metrics, "query_latency_ms"
-                ),
-                "connection_pool": self._extract_chart_data(
-                    db_metrics, "connection_pool_size"
-                ),
-                "transaction_rate": self._extract_chart_data(
-                    db_metrics, "transaction_rate"
-                ),
+                "query_latency": self._extract_chart_data(db_metrics, "query_latency_ms"),
+                "connection_pool": self._extract_chart_data(db_metrics, "connection_pool_size"),
+                "transaction_rate": self._extract_chart_data(db_metrics, "transaction_rate"),
             }
 
         # WebSocket metrics
         if MetricSource.WEBSOCKET.value in summary["sources"]:
             ws_metrics = summary["sources"][MetricSource.WEBSOCKET.value]
             update_data["charts"]["websocket"] = {
-                "connections_rate": self._extract_chart_data(
-                    ws_metrics, "connections_per_second"
-                ),
-                "messages_rate": self._extract_chart_data(
-                    ws_metrics, "messages_per_second"
-                ),
+                "connections_rate": self._extract_chart_data(ws_metrics, "connections_per_second"),
+                "messages_rate": self._extract_chart_data(ws_metrics, "messages_per_second"),
                 "latency": self._extract_chart_data(ws_metrics, "current_latency_ms"),
                 "error_rate": self._extract_chart_data(ws_metrics, "error_rate"),
             }
@@ -220,18 +206,10 @@ class MetricsDashboard:
         if MetricSource.AGENT.value in summary["sources"]:
             agent_metrics = summary["sources"][MetricSource.AGENT.value]
             update_data["charts"]["agent"] = {
-                "inference_time": self._extract_chart_data(
-                    agent_metrics, "inference_time_ms"
-                ),
-                "active_agents": self._extract_chart_data(
-                    agent_metrics, "active_agents"
-                ),
-                "throughput": self._extract_chart_data(
-                    agent_metrics, "agent_throughput"
-                ),
-                "belief_updates": self._extract_chart_data(
-                    agent_metrics, "belief_updates_per_sec"
-                ),
+                "inference_time": self._extract_chart_data(agent_metrics, "inference_time_ms"),
+                "active_agents": self._extract_chart_data(agent_metrics, "active_agents"),
+                "throughput": self._extract_chart_data(agent_metrics, "agent_throughput"),
+                "belief_updates": self._extract_chart_data(agent_metrics, "belief_updates_per_sec"),
             }
 
         # System metrics
@@ -239,15 +217,9 @@ class MetricsDashboard:
             sys_metrics = summary["sources"][MetricSource.SYSTEM.value]
             update_data["charts"]["system"] = {
                 "cpu_usage": self._extract_chart_data(sys_metrics, "cpu_usage_percent"),
-                "memory_usage": self._extract_chart_data(
-                    sys_metrics, "memory_usage_percent"
-                ),
-                "disk_io_read": self._extract_chart_data(
-                    sys_metrics, "disk_read_mb_per_sec"
-                ),
-                "disk_io_write": self._extract_chart_data(
-                    sys_metrics, "disk_write_mb_per_sec"
-                ),
+                "memory_usage": self._extract_chart_data(sys_metrics, "memory_usage_percent"),
+                "disk_io_read": self._extract_chart_data(sys_metrics, "disk_read_mb_per_sec"),
+                "disk_io_write": self._extract_chart_data(sys_metrics, "disk_write_mb_per_sec"),
             }
 
         # Add alerts
@@ -255,9 +227,7 @@ class MetricsDashboard:
 
         return update_data
 
-    def _extract_chart_data(
-        self, metrics: Dict[str, Any], metric_name: str
-    ) -> Dict[str, Any]:
+    def _extract_chart_data(self, metrics: Dict[str, Any], metric_name: str) -> Dict[str, Any]:
         """Extract chart-ready data from metrics."""
         for key, data in metrics.items():
             if metric_name in key:
@@ -294,9 +264,7 @@ class MetricsDashboard:
             try:
                 source = MetricSource(source)
             except ValueError:
-                return web.json_response(
-                    {"error": f"Invalid source: {source}"}, status=400
-                )
+                return web.json_response({"error": f"Invalid source: {source}"}, status=400)
 
         summary = await self.metrics_collector.get_metrics_summary(
             source=source, window_seconds=window
@@ -315,9 +283,7 @@ class MetricsDashboard:
         except ValueError:
             return web.json_response({"error": f"Invalid source: {source}"}, status=400)
 
-        history = self.metrics_collector.get_metric_history(
-            metric, source_enum, duration
-        )
+        history = self.metrics_collector.get_metric_history(metric, source_enum, duration)
 
         # Convert to JSON-serializable format
         data = [{"timestamp": ts.isoformat(), "value": value} for ts, value in history]
@@ -400,9 +366,7 @@ class MetricsDashboard:
         format = request.match_info["format"]
 
         if format not in ["json", "prometheus"]:
-            return web.json_response(
-                {"error": f"Unsupported format: {format}"}, status=400
-            )
+            return web.json_response({"error": f"Unsupported format: {format}"}, status=400)
 
         try:
             export_data = await self.metrics_collector.export_metrics(format=format)

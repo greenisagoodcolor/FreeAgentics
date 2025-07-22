@@ -221,9 +221,7 @@ class TestAgentFactory:
         is_valid, errors = await factory.validate_model(multi_factor_model)
         assert is_valid is True
 
-        agent = await factory.create_from_gmn_model(
-            multi_factor_model, "multi_factor_agent"
-        )
+        agent = await factory.create_from_gmn_model(multi_factor_model, "multi_factor_agent")
 
         assert agent is not None
         assert len(agent.qs) == 2  # Two belief factors

@@ -67,9 +67,7 @@ class ServicePolicy:
     source_service: str
     target_service: str
     allowed_operations: List[str]
-    allowed_methods: List[str] = field(
-        default_factory=lambda: ["GET", "POST", "PUT", "DELETE"]
-    )
+    allowed_methods: List[str] = field(default_factory=lambda: ["GET", "POST", "PUT", "DELETE"])
     mtls_required: bool = True
     conditions: Dict[str, Any] = field(default_factory=dict)
 
@@ -125,9 +123,7 @@ class ServiceMeshConfig:
     def add_service_policy(self, policy: ServicePolicy) -> None:
         """Add a service access policy."""
         self.service_policies.append(policy)
-        logger.info(
-            f"Added service policy: {policy.source_service} -> {policy.target_service}"
-        )
+        logger.info(f"Added service policy: {policy.source_service} -> {policy.target_service}")
 
     def set_encryption_policy(
         self,

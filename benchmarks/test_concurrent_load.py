@@ -42,9 +42,7 @@ class ConcurrentLoadBenchmarks:
         self.cpu_count = psutil.cpu_count(logical=False)
         self.results_queue = queue.Queue()
 
-    def simulate_agent_work(
-        self, agent_id: int, iterations: int = 100
-    ) -> Dict[str, Any]:
+    def simulate_agent_work(self, agent_id: int, iterations: int = 100) -> Dict[str, Any]:
         """Simulate agent computational work."""
         start_time = time.perf_counter()
 
@@ -70,9 +68,7 @@ class ConcurrentLoadBenchmarks:
             "final_belief_sum": float(np.sum(beliefs)),
         }
 
-    def message_passing_work(
-        self, sender_id: int, receiver_id: int, message_count: int = 10
-    ):
+    def message_passing_work(self, sender_id: int, receiver_id: int, message_count: int = 10):
         """Simulate inter-agent message passing."""
         messages = []
 
@@ -137,11 +133,7 @@ class ConcurrentLoadBenchmarks:
 
         print("\nScaling Efficiency:")
         for result in scaling_results:
-            efficiency = (
-                (result["throughput"] / baseline_throughput)
-                / result["num_workers"]
-                * 100
-            )
+            efficiency = (result["throughput"] / baseline_throughput) / result["num_workers"] * 100
             print(f"  {result['num_workers']} workers: {efficiency:.1f}% efficiency")
 
     @pytest.mark.benchmark(group="concurrent-load")
@@ -173,9 +165,7 @@ class ConcurrentLoadBenchmarks:
 
                 # Control concurrency
                 if len(tasks) >= concurrency:
-                    done, tasks = await asyncio.wait(
-                        tasks, return_when=asyncio.FIRST_COMPLETED
-                    )
+                    done, tasks = await asyncio.wait(tasks, return_when=asyncio.FIRST_COMPLETED)
                     tasks = list(tasks)
 
             # Wait for remaining tasks
@@ -225,9 +215,7 @@ class ConcurrentLoadBenchmarks:
                 return operations
 
             @staticmethod
-            def burst_load(
-                duration: float, burst_size: int, burst_interval: float
-            ) -> List[float]:
+            def burst_load(duration: float, burst_size: int, burst_interval: float) -> List[float]:
                 """Generate burst load pattern."""
                 operations = []
                 current_time = 0
@@ -241,9 +229,7 @@ class ConcurrentLoadBenchmarks:
                 return operations
 
             @staticmethod
-            def ramp_load(
-                duration: float, start_ops: float, end_ops: float
-            ) -> List[float]:
+            def ramp_load(duration: float, start_ops: float, end_ops: float) -> List[float]:
                 """Generate ramping load pattern."""
                 operations = []
                 current_time = 0
@@ -376,8 +362,7 @@ class ConcurrentLoadBenchmarks:
 
                 with ThreadPoolExecutor(max_workers=workers) as executor:
                     futures = [
-                        executor.submit(work_func, iterations_per_worker)
-                        for _ in range(workers)
+                        executor.submit(work_func, iterations_per_worker) for _ in range(workers)
                     ]
 
                     for future in futures:
@@ -420,18 +405,12 @@ class ConcurrentLoadBenchmarks:
                 return items
 
             # Start producers and consumers
-            with ThreadPoolExecutor(
-                max_workers=num_producers + num_consumers
-            ) as executor:
+            with ThreadPoolExecutor(max_workers=num_producers + num_consumers) as executor:
                 # Start producers
-                producer_futures = [
-                    executor.submit(producer, i) for i in range(num_producers)
-                ]
+                producer_futures = [executor.submit(producer, i) for i in range(num_producers)]
 
                 # Start consumers
-                consumer_futures = [
-                    executor.submit(consumer, i) for i in range(num_consumers)
-                ]
+                consumer_futures = [executor.submit(consumer, i) for i in range(num_consumers)]
 
                 # Wait for producers
                 for future in producer_futures:

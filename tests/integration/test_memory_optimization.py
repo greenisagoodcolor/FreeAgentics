@@ -43,9 +43,7 @@ class MockAgent:
         self.transition_matrix = np.random.random((100, 100))
 
         # Cache structures
-        self.computation_cache = {
-            f"cache_{i}": np.random.random((100,)) for i in range(50)
-        }
+        self.computation_cache = {f"cache_{i}": np.random.random((100,)) for i in range(50)}
 
     def step(self, observation):
         """Mock step method."""

@@ -279,9 +279,7 @@ class TestAgentManagerCore:
 
         def create_agents():
             try:
-                with patch(
-                    "agents.agent_manager.BasicExplorerAgent"
-                ) as mock_agent_class:
+                with patch("agents.agent_manager.BasicExplorerAgent") as mock_agent_class:
                     mock_agent = Mock()
                     mock_agent.id = f"thread_agent_{threading.current_thread().ident}"
                     mock_agent_class.return_value = mock_agent
@@ -442,9 +440,7 @@ class TestAgentManagerErrorHandling:
 
         def create_and_remove_agent():
             try:
-                with patch(
-                    "agents.agent_manager.BasicExplorerAgent"
-                ) as mock_agent_class:
+                with patch("agents.agent_manager.BasicExplorerAgent") as mock_agent_class:
                     mock_agent = Mock()
                     mock_agent.id = f"concurrent_{threading.current_thread().ident}"
                     mock_agent_class.return_value = mock_agent

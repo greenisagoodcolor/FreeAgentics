@@ -113,9 +113,7 @@ class BackupConfig:
     grafana_api_key: str = ""
 
     @classmethod
-    def from_env_file(
-        cls, env_file: str = "/etc/freeagentics/backup.env"
-    ) -> "BackupConfig":
+    def from_env_file(cls, env_file: str = "/etc/freeagentics/backup.env") -> "BackupConfig":
         """Load configuration from environment file"""
         config = cls()
 
@@ -191,9 +189,7 @@ class BackupOrchestrator:
         ch.setLevel(logging.INFO)
 
         # Formatter
-        formatter = logging.Formatter(
-            "%(asctime)s - %(name)s - %(levelname)s - %(message)s"
-        )
+        formatter = logging.Formatter("%(asctime)s - %(name)s - %(levelname)s - %(message)s")
         fh.setFormatter(formatter)
         ch.setFormatter(formatter)
 
@@ -611,9 +607,7 @@ class BackupOrchestrator:
         """Get current system metrics"""
         return {
             "cpu_percent": psutil.cpu_percent() if "psutil" in sys.modules else 0,
-            "memory_percent": psutil.virtual_memory().percent
-            if "psutil" in sys.modules
-            else 0,
+            "memory_percent": psutil.virtual_memory().percent if "psutil" in sys.modules else 0,
             "disk_usage": shutil.disk_usage(self.config.backup_root)._asdict(),
         }
 
@@ -643,18 +637,12 @@ class BackupOrchestrator:
 
                     os.makedirs(os.path.join(secondary_root, dest_dir), exist_ok=True)
 
-                    dest_path = os.path.join(
-                        secondary_root, dest_dir, os.path.basename(file_path)
-                    )
+                    dest_path = os.path.join(secondary_root, dest_dir, os.path.basename(file_path))
                     shutil.copy2(file_path, dest_path)
 
                     # Verify copy
-                    if self._calculate_checksum(dest_path) != metadata.checksums.get(
-                        file_path
-                    ):
-                        raise Exception(
-                            f"Secondary copy verification failed for {file_path}"
-                        )
+                    if self._calculate_checksum(dest_path) != metadata.checksums.get(file_path):
+                        raise Exception(f"Secondary copy verification failed for {file_path}")
 
     def _sync_to_offsite(self, metadata: BackupMetadata):
         """Sync backups to offsite locations"""
@@ -695,9 +683,7 @@ class BackupOrchestrator:
                         },
                     )
 
-                    metadata.offsite_locations.append(
-                        f"s3://{self.config.s3_bucket}/{key}"
-                    )
+                    metadata.offsite_locations.append(f"s3://{self.config.s3_bucket}/{key}")
 
             # Set lifecycle policies
             self._configure_s3_lifecycle()
@@ -717,9 +703,7 @@ class BackupOrchestrator:
                 self.config.secondary_connection_string
             )
 
-            container_client = blob_service.get_container_client(
-                self.config.secondary_container
-            )
+            container_client = blob_service.get_container_client(self.config.secondary_container)
 
             for file_path in metadata.files:
                 if os.path.exists(file_path):
@@ -803,9 +787,7 @@ class BackupOrchestrator:
                             },
                         )
 
-                        metadata.offsite_locations.append(
-                            f"b2://{parts[2]}/{file_name}"
-                        )
+                        metadata.offsite_locations.append(f"b2://{parts[2]}/{file_name}")
 
         except Exception as e:
             self.logger.error(f"Backblaze sync failed: {str(e)}")
@@ -881,9 +863,7 @@ class BackupOrchestrator:
         """Test restore process"""
         self.logger.info("Testing backup restore...")
 
-        test_dir = (
-            f"{self.config.backup_root}/verification/test_restore_{metadata.backup_id}"
-        )
+        test_dir = f"{self.config.backup_root}/verification/test_restore_{metadata.backup_id}"
         os.makedirs(test_dir, exist_ok=True)
 
         try:
@@ -894,9 +874,7 @@ class BackupOrchestrator:
                     test_db = f"freeagentics_test_{metadata.backup_id[:8]}"
 
                     # Test restore command
-                    cmd = (
-                        f"gunzip -c {file_path} | pg_restore --create --dbname=postgres"
-                    )
+                    cmd = f"gunzip -c {file_path} | pg_restore --create --dbname=postgres"
                     result = subprocess.run(
                         cmd,
                         shell=True,
@@ -1219,9 +1197,7 @@ Status: {metadata.status.value}
         }
 
         try:
-            response = requests.post(
-                self.config.slack_webhook, json=payload, timeout=10
-            )
+            response = requests.post(self.config.slack_webhook, json=payload, timeout=10)
             response.raise_for_status()
         except Exception as e:
             self.logger.warning(f"Failed to send Slack notification: {str(e)}")
@@ -1247,9 +1223,7 @@ This is an automated message from FreeAgentics Backup System
 
             msg.attach(MIMEText(body, "plain"))
 
-            with smtplib.SMTP(
-                self.config.email_smtp_server, self.config.email_smtp_port
-            ) as server:
+            with smtplib.SMTP(self.config.email_smtp_server, self.config.email_smtp_port) as server:
                 server.starttls()
                 # Note: Add authentication if needed
                 server.send_message(msg)
@@ -1300,15 +1274,9 @@ def main():
         default="/etc/freeagentics/backup.env",
         help="Configuration file path",
     )
-    parser.add_argument(
-        "--run-now", action="store_true", help="Run full backup immediately"
-    )
-    parser.add_argument(
-        "--test-restore", action="store_true", help="Test disaster recovery"
-    )
-    parser.add_argument(
-        "--cleanup", action="store_true", help="Run cleanup of old backups"
-    )
+    parser.add_argument("--run-now", action="store_true", help="Run full backup immediately")
+    parser.add_argument("--test-restore", action="store_true", help="Test disaster recovery")
+    parser.add_argument("--cleanup", action="store_true", help="Run cleanup of old backups")
     parser.add_argument(
         "--daemon",
         action="store_true",

@@ -457,7 +457,5 @@ class TestDatabaseModels:
         assert "coalition_id" in [c.name for c in agent_coalition_association.columns]
         assert "role" in [c.name for c in agent_coalition_association.columns]
         assert "joined_at" in [c.name for c in agent_coalition_association.columns]
-        assert "contribution_score" in [
-            c.name for c in agent_coalition_association.columns
-        ]
+        assert "contribution_score" in [c.name for c in agent_coalition_association.columns]
         assert "trust_score" in [c.name for c in agent_coalition_association.columns]

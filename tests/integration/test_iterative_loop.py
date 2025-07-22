@@ -50,9 +50,7 @@ class TestIterativeLoop:
         mock_prompt_processor.process_prompt.return_value = {
             "agent_id": "agent-123",
             "gmn_specification": "GMN spec here",
-            "knowledge_graph_updates": [
-                {"node_id": "node-1", "type": "belief", "properties": {}}
-            ],
+            "knowledge_graph_updates": [{"node_id": "node-1", "type": "belief", "properties": {}}],
             "next_suggestions": [
                 "Add goal states to guide behavior",
                 "Increase observation diversity",
@@ -80,9 +78,7 @@ class TestIterativeLoop:
             "api.v1.prompts.get_prompt_processor",
             return_value=mock_prompt_processor,
         ):
-            response = await process_prompt(
-                request=request, current_user=mock_user, db=db_session
-            )
+            response = await process_prompt(request=request, current_user=mock_user, db=db_session)
 
         # Verify response
         assert response.agent_id == "agent-123"
@@ -98,9 +94,7 @@ class TestIterativeLoop:
         # Mock the prompt processor to track iterations
         iteration_results = []
 
-        async def mock_process_prompt(
-            prompt_text, user_id, db, conversation_id, iteration_count
-        ):
+        async def mock_process_prompt(prompt_text, user_id, db, conversation_id, iteration_count):
             iteration_num = len(iteration_results) + 1
             result = {
                 "agent_id": f"agent-{iteration_num}",
@@ -170,15 +164,11 @@ class TestIterativeLoop:
 
         # Check belief evolution changes
         assert (
-            responses[0].iteration_context["conversation_summary"]["belief_evolution"][
-                "trend"
-            ]
+            responses[0].iteration_context["conversation_summary"]["belief_evolution"]["trend"]
             == "exploring"
         )
         assert (
-            responses[3].iteration_context["conversation_summary"]["belief_evolution"][
-                "trend"
-            ]
+            responses[3].iteration_context["conversation_summary"]["belief_evolution"]["trend"]
             == "converging"
         )
 
@@ -425,10 +415,7 @@ class TestIterativeLoop:
         assert responses[3].iteration_context["kg_nodes"] == 8
 
         # Verify connectivity increases
-        assert (
-            responses[3].iteration_context["conversation_summary"]["kg_connectivity"]
-            > 0
-        )
+        assert responses[3].iteration_context["conversation_summary"]["kg_connectivity"] > 0
 
     async def test_error_handling_in_iteration(self, db_session, mock_user):
         """Test that errors in one iteration don't break the loop."""
@@ -436,9 +423,7 @@ class TestIterativeLoop:
 
         iteration_count = 0
 
-        async def mock_process_with_errors(
-            prompt_text, user_id, db, conversation_id, iter_count
-        ):
+        async def mock_process_with_errors(prompt_text, user_id, db, conversation_id, iter_count):
             nonlocal iteration_count
             iteration_count += 1
 
@@ -463,9 +448,7 @@ class TestIterativeLoop:
 
         with patch("api.v1.prompts.get_prompt_processor", return_value=mock_processor):
             for i in range(4):
-                request = PromptRequest(
-                    prompt=f"Prompt {i + 1}", conversation_id=conversation_id
-                )
+                request = PromptRequest(prompt=f"Prompt {i + 1}", conversation_id=conversation_id)
 
                 try:
                     response = await process_prompt(

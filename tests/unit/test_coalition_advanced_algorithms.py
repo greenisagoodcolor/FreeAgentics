@@ -144,12 +144,8 @@ class TestCoalitionStabilityCalculations:
         coalition = Coalition("test_coalition", "Test Coalition")
 
         # Add members with complementary capabilities
-        assert coalition.add_member(
-            "agent_1", CoalitionRole.LEADER, ["skill_a", "skill_b"]
-        )
-        assert coalition.add_member(
-            "agent_2", CoalitionRole.MEMBER, ["skill_c", "skill_d"]
-        )
+        assert coalition.add_member("agent_1", CoalitionRole.LEADER, ["skill_a", "skill_b"])
+        assert coalition.add_member("agent_2", CoalitionRole.MEMBER, ["skill_c", "skill_d"])
 
         # Coalition should be stable with complementary skills
         assert len(coalition.members) == 2
@@ -436,9 +432,7 @@ class TestFormationPerformanceBenchmarks:
             AgentProfile(
                 agent_id=f"agent_{i}",
                 capabilities=(
-                    [f"skill_{i % 10}", "coordination"]
-                    if i % 10 == 0
-                    else [f"skill_{i % 10}"]
+                    [f"skill_{i % 10}", "coordination"] if i % 10 == 0 else [f"skill_{i % 10}"]
                 ),
                 capacity=0.8,
                 reputation=0.9 if i % 10 == 0 else 0.7,  # Some leaders

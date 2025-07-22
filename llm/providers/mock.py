@@ -148,11 +148,11 @@ class MockLLMProvider(LLMProvider):
                 {
                     "valid": is_valid,
                     "errors": errors,
-                    "warnings": [
-                        "Consider adding preference nodes for goal-directed behavior"
-                    ]
-                    if is_valid
-                    else [],
+                    "warnings": (
+                        ["Consider adding preference nodes for goal-directed behavior"]
+                        if is_valid
+                        else []
+                    ),
                 }
             )
 
@@ -212,9 +212,7 @@ node emission E1 {
         """Detect agent type from prompt keywords."""
         prompt_lower = prompt.lower()
 
-        if any(
-            word in prompt_lower for word in ["explore", "discover", "search", "grid"]
-        ):
+        if any(word in prompt_lower for word in ["explore", "discover", "search", "grid"]):
             return "explorer"
         elif any(word in prompt_lower for word in ["trade", "market", "buy", "sell"]):
             return "trader"

@@ -61,9 +61,7 @@ class DependencySecurityRemediator:
             return True
 
         except Exception as e:
-            self.log_action(
-                "ERROR", f"Failed to fix cryptography vulnerability: {e}", "ERROR"
-            )
+            self.log_action("ERROR", f"Failed to fix cryptography vulnerability: {e}", "ERROR")
             return False
 
     def fix_starlette_vulnerability(self) -> bool:
@@ -90,16 +88,12 @@ class DependencySecurityRemediator:
                     )
                     if content != updated_content:
                         file_path.write_text(updated_content)
-                        self.log_action(
-                            "FILE_UPDATE", f"Updated starlette version in {req_file}"
-                        )
+                        self.log_action("FILE_UPDATE", f"Updated starlette version in {req_file}")
 
             return True
 
         except Exception as e:
-            self.log_action(
-                "ERROR", f"Failed to fix starlette vulnerability: {e}", "ERROR"
-            )
+            self.log_action("ERROR", f"Failed to fix starlette vulnerability: {e}", "ERROR")
             return False
 
     def remove_vulnerable_py_package(self) -> bool:
@@ -139,9 +133,7 @@ class DependencySecurityRemediator:
     def pin_unpinned_dependencies(self) -> bool:
         """Pin unpinned dependencies to exact versions"""
         try:
-            self.log_action(
-                "SECURITY_HARDENING", "Pinning unpinned dependencies to exact versions"
-            )
+            self.log_action("SECURITY_HARDENING", "Pinning unpinned dependencies to exact versions")
 
             req_file = self.project_root / "requirements.txt"
             content = req_file.read_text()
@@ -173,9 +165,7 @@ class DependencySecurityRemediator:
     def validate_requirements_consistency(self) -> bool:
         """Validate consistency across all requirements files"""
         try:
-            self.log_action(
-                "VALIDATION", "Validating consistency across requirements files"
-            )
+            self.log_action("VALIDATION", "Validating consistency across requirements files")
 
             core_deps = {}
             req_core_file = self.project_root / "requirements-core.txt"
@@ -210,9 +200,7 @@ class DependencySecurityRemediator:
                 )
                 return False
             else:
-                self.log_action(
-                    "VALIDATION_PASSED", "All requirements files are consistent"
-                )
+                self.log_action("VALIDATION_PASSED", "All requirements files are consistent")
                 return True
 
         except Exception as e:
@@ -368,9 +356,7 @@ For critical security vulnerabilities:
             # Fix identified vulnerabilities
             if self.fix_cryptography_vulnerability():
                 results["vulnerabilities_fixed"] += 1
-                results["remediation_steps"].append(
-                    "Fixed CVE-2024-12797 in cryptography"
-                )
+                results["remediation_steps"].append("Fixed CVE-2024-12797 in cryptography")
 
             if self.fix_starlette_vulnerability():
                 results["vulnerabilities_fixed"] += 1
@@ -385,25 +371,17 @@ For critical security vulnerabilities:
             # Pin unpinned dependencies
             if self.pin_unpinned_dependencies():
                 results["dependencies_pinned"] += 2
-                results["remediation_steps"].append(
-                    "Pinned openai and anthropic packages"
-                )
+                results["remediation_steps"].append("Pinned openai and anthropic packages")
 
             # Validation and policy creation
             if self.validate_requirements_consistency():
-                results["remediation_steps"].append(
-                    "Validated requirements consistency"
-                )
+                results["remediation_steps"].append("Validated requirements consistency")
 
             if self.generate_dependency_freeze():
-                results["remediation_steps"].append(
-                    "Created requirements freeze template"
-                )
+                results["remediation_steps"].append("Created requirements freeze template")
 
             if self.create_security_policy():
-                results["remediation_steps"].append(
-                    "Created dependency security policy"
-                )
+                results["remediation_steps"].append("Created dependency security policy")
 
             self.log_action(
                 "REMEDIATION_COMPLETE",

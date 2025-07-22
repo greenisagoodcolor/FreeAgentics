@@ -84,9 +84,7 @@ position_belief -> position: depends_on
     try:
         # Parse GMN specification
         gmn_graph = parser.parse(simple_gmn_spec)
-        print(
-            f"✅ Parsed GMN with {len(gmn_graph.nodes)} nodes and {len(gmn_graph.edges)} edges"
-        )
+        print(f"✅ Parsed GMN with {len(gmn_graph.nodes)} nodes and {len(gmn_graph.edges)} edges")
 
         # Show parsed components
         print("\n📋 GMN Components:")

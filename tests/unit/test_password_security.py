@@ -43,9 +43,7 @@ class PasswordValidator:
         errors = []
 
         if len(password) < self.min_length:
-            errors.append(
-                f"Password must be at least {self.min_length} characters long"
-            )
+            errors.append(f"Password must be at least {self.min_length} characters long")
 
         if REQUIRE_UPPERCASE and not self.patterns["uppercase"].search(password):
             errors.append("Password must contain at least one uppercase letter")
@@ -343,9 +341,7 @@ class TestPasswordHasher:
 
         # Simulate an old hash with fewer rounds
         old_hasher = PasswordHasher()
-        old_hasher.pwd_context = CryptContext(
-            schemes=["bcrypt"], bcrypt__rounds=10
-        )  # Fewer rounds
+        old_hasher.pwd_context = CryptContext(schemes=["bcrypt"], bcrypt__rounds=10)  # Fewer rounds
         old_hash = old_hasher.pwd_context.hash(password)
 
         # Act

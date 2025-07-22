@@ -211,34 +211,24 @@ class EnhancedMetricsExporter:
 
             # Memory health
             memory = psutil.virtual_memory()
-            memory_health = (
-                1.0 if memory.percent < 80 else 0.5 if memory.percent < 90 else 0.0
-            )
-            self.system_health_indicators.labels(indicator_type="memory_health").set(
-                memory_health
-            )
+            memory_health = 1.0 if memory.percent < 80 else 0.5 if memory.percent < 90 else 0.0
+            self.system_health_indicators.labels(indicator_type="memory_health").set(memory_health)
 
             # Disk health
             disk = psutil.disk_usage("/")
-            disk_health = (
-                1.0 if disk.percent < 80 else 0.5 if disk.percent < 90 else 0.0
-            )
-            self.system_health_indicators.labels(indicator_type="disk_health").set(
-                disk_health
-            )
+            disk_health = 1.0 if disk.percent < 80 else 0.5 if disk.percent < 90 else 0.0
+            self.system_health_indicators.labels(indicator_type="disk_health").set(disk_health)
 
             # Performance tracker health
             perf_snapshot = await performance_tracker.get_current_performance_snapshot()
             perf_health = (
                 1.0
                 if perf_snapshot.active_agents < 40
-                else 0.5
-                if perf_snapshot.active_agents < 50
-                else 0.0
+                else 0.5 if perf_snapshot.active_agents < 50 else 0.0
             )
-            self.system_health_indicators.labels(
-                indicator_type="performance_health"
-            ).set(perf_health)
+            self.system_health_indicators.labels(indicator_type="performance_health").set(
+                perf_health
+            )
 
         except Exception as e:
             logger.error(f"Error updating system health indicators: {e}")
@@ -282,9 +272,9 @@ class EnhancedMetricsExporter:
                 1.0,
                 snapshot.agent_throughput / max(1.0, snapshot.active_agents),
             )
-            self.business_value_metrics.labels(
-                metric_type="efficiency", category="system"
-            ).set(efficiency_score)
+            self.business_value_metrics.labels(metric_type="efficiency", category="system").set(
+                efficiency_score
+            )
 
             # Resource utilization score
             memory_utilization = snapshot.memory_usage_mb / 2048  # Assuming 2GB limit
@@ -328,9 +318,7 @@ class EnhancedMetricsExporter:
                 },
             }
 
-            logger.debug(
-                f"Exported metrics to time series: {json.dumps(metrics_data, indent=2)}"
-            )
+            logger.debug(f"Exported metrics to time series: {json.dumps(metrics_data, indent=2)}")
 
         except Exception as e:
             logger.error(f"Error exporting to time series: {e}")
@@ -361,9 +349,7 @@ class EnhancedMetricsExporter:
         except Exception as e:
             logger.error(f"Error exporting to logs: {e}")
 
-    def record_agent_lifecycle_event(
-        self, event_type: str, agent_id: str, success: bool
-    ):
+    def record_agent_lifecycle_event(self, event_type: str, agent_id: str, success: bool):
         """Record agent lifecycle event."""
         self.agent_lifecycle_events.labels(
             event_type=event_type,
@@ -371,9 +357,7 @@ class EnhancedMetricsExporter:
             success=str(success).lower(),
         ).inc()
 
-    def record_coalition_formation(
-        self, coalition_type: str, agent_count: int, duration: float
-    ):
+    def record_coalition_formation(self, coalition_type: str, agent_count: int, duration: float):
         """Record coalition formation metrics."""
         self.coalition_formation_metrics.labels(
             coalition_type=coalition_type, agent_count=str(agent_count)
@@ -399,17 +383,13 @@ class EnhancedMetricsExporter:
             complexity=complexity,
         ).observe(duration)
 
-    def record_custom_application_event(
-        self, event_type: str, component: str, status: str
-    ):
+    def record_custom_application_event(self, event_type: str, component: str, status: str):
         """Record custom application event."""
         self.custom_application_metrics.labels(
             event_type=event_type, component=component, status=status
         ).inc()
 
-    def get_metrics_summary(
-        self, metric_name: str, time_window: float = 300.0
-    ) -> MetricsSummary:
+    def get_metrics_summary(self, metric_name: str, time_window: float = 300.0) -> MetricsSummary:
         """Get metrics summary for a specific metric."""
         try:
             # This would query the metrics from the buffer or database
@@ -455,13 +435,10 @@ class EnhancedMetricsExporter:
         time_since_last_export = current_time - self.last_export_time
 
         return {
-            "total_exports": int(current_time - self.last_export_time)
-            // int(self.export_interval),
+            "total_exports": int(current_time - self.last_export_time) // int(self.export_interval),
             "time_since_last_export": time_since_last_export,
             "export_health": (
-                "healthy"
-                if time_since_last_export < self.export_interval * 2
-                else "unhealthy"
+                "healthy" if time_since_last_export < self.export_interval * 2 else "unhealthy"
             ),
             "buffer_utilization": len(self.metrics_buffer) / self.buffer_size,
             "export_interval": self.export_interval,
@@ -547,6 +524,4 @@ def record_inference_operation(
 ):
     """Record inference operation."""
     exporter = get_metrics_exporter()
-    exporter.record_inference_performance(
-        inference_type, agent_id, complexity, duration
-    )
+    exporter.record_inference_performance(inference_type, agent_id, complexity, duration)

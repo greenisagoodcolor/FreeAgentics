@@ -232,10 +232,7 @@ def demonstrate_pymdp_integration():
     print("\nPool efficiency for belief updates:")
     for pool_key, pool_stats in final_stats["pools"].items():
         initial_requests = (
-            initial_stats["pools"]
-            .get(pool_key, {})
-            .get("stats", {})
-            .get("total_requests", 0)
+            initial_stats["pools"].get(pool_key, {}).get("stats", {}).get("total_requests", 0)
         )
         final_requests = pool_stats["stats"]["total_requests"]
 
@@ -336,9 +333,7 @@ def main():
             print(f"  {shape} ({dtype}):")
             print(f"    - Requests: {requests}")
             print(f"    - Hit rate: {pool_stats['hit_rate']:.1%}")
-            print(
-                f"    - Memory: {pool_stats['stats']['total_memory_bytes'] / 1024 / 1024:.2f} MB"
-            )
+            print(f"    - Memory: {pool_stats['stats']['total_memory_bytes'] / 1024 / 1024:.2f} MB")
 
 
 if __name__ == "__main__":

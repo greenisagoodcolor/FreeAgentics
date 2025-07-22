@@ -146,9 +146,7 @@ class TestGMNGenerator:
         assert any("Unbalanced braces" in error for error in errors)
 
     @pytest.mark.asyncio
-    async def test_validate_gmn_missing_required_types(
-        self, generator, mock_llm_provider
-    ):
+    async def test_validate_gmn_missing_required_types(self, generator, mock_llm_provider):
         """Test detection of missing required node types."""
         gmn_spec = """
         node observation o1 {
@@ -174,9 +172,7 @@ class TestGMNGenerator:
         result = await generator.refine_gmn(original_gmn, "Add type specification")
 
         assert result == refined_gmn
-        mock_llm_provider.refine_gmn.assert_called_once_with(
-            original_gmn, "Add type specification"
-        )
+        mock_llm_provider.refine_gmn.assert_called_once_with(original_gmn, "Add type specification")
 
     @pytest.mark.asyncio
     async def test_refine_gmn_empty_inputs(self, generator):

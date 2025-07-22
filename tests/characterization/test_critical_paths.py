@@ -23,9 +23,7 @@ class TestAgentCriticalPaths:
             mock_pymdp_agent.return_value = mock_instance
 
             # Test basic initialization path
-            agent = ActiveInferenceAgent(
-                num_states=[2, 2], num_controls=[2, 2], num_obs=[2, 2]
-            )
+            agent = ActiveInferenceAgent(num_states=[2, 2], num_controls=[2, 2], num_obs=[2, 2])
 
             # Document critical attributes
             assert agent.num_states == [2, 2]
@@ -47,9 +45,7 @@ class TestAgentCriticalPaths:
                 mock_instance = Mock()
                 mock_pymdp.return_value = mock_instance
 
-                agent = ActiveInferenceAgent(
-                    num_states=[2, 2], num_controls=[2, 2], num_obs=[2, 2]
-                )
+                agent = ActiveInferenceAgent(num_states=[2, 2], num_controls=[2, 2], num_obs=[2, 2])
 
                 # Test observation processing
                 obs = [0, 1]  # Simple observation

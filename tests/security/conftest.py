@@ -82,9 +82,7 @@ def mock_auth_manager():
 @pytest.fixture
 def temporary_log_file():
     """Create a temporary log file for testing."""
-    with tempfile.NamedTemporaryFile(
-        mode="w+", suffix=".log", delete=False
-    ) as log_file:
+    with tempfile.NamedTemporaryFile(mode="w+", suffix=".log", delete=False) as log_file:
         yield log_file.name
 
     # Clean up

@@ -183,9 +183,7 @@ class TestAgentModel:
         ]
 
         # At least some relationships should exist
-        relationship_count = sum(
-            1 for rel in possible_relationships if rel in agent_attrs
-        )
+        relationship_count = sum(1 for rel in possible_relationships if rel in agent_attrs)
         assert relationship_count >= 1  # Should have at least one relationship
 
     def test_agent_defaults(self):
@@ -273,9 +271,7 @@ class TestCoalitionModel:
         possible_relationships = ["agents", "memberships"]
 
         # At least some relationships should exist
-        relationship_count = sum(
-            1 for rel in possible_relationships if rel in coalition_attrs
-        )
+        relationship_count = sum(1 for rel in possible_relationships if rel in coalition_attrs)
         assert relationship_count >= 0  # May or may not have explicit relationships
 
     @pytest.mark.parametrize(
@@ -345,12 +341,8 @@ class TestCoalitionMembershipModel:
         membership_attrs = dir(CoalitionMembership)
 
         # Check for foreign key attributes
-        assert "coalition_id" in membership_attrs or hasattr(
-            CoalitionMembership, "coalition_id"
-        )
-        assert "agent_id" in membership_attrs or hasattr(
-            CoalitionMembership, "agent_id"
-        )
+        assert "coalition_id" in membership_attrs or hasattr(CoalitionMembership, "coalition_id")
+        assert "agent_id" in membership_attrs or hasattr(CoalitionMembership, "agent_id")
 
 
 class TestConversationModel:
@@ -399,9 +391,7 @@ class TestConversationModel:
         possible_relationships = ["messages", "agent"]
 
         # At least some relationships should exist
-        relationship_count = sum(
-            1 for rel in possible_relationships if rel in conversation_attrs
-        )
+        relationship_count = sum(1 for rel in possible_relationships if rel in conversation_attrs)
         assert relationship_count >= 0  # May or may not have explicit relationships
 
 
@@ -444,9 +434,7 @@ class TestConversationMessageModel:
             assert False, "Test bypass removed - must fix underlying issue"
         # Should have foreign key to conversation
         message_attrs = dir(ConversationMessage)
-        assert "conversation_id" in message_attrs or hasattr(
-            ConversationMessage, "conversation_id"
-        )
+        assert "conversation_id" in message_attrs or hasattr(ConversationMessage, "conversation_id")
 
     @pytest.mark.parametrize("role", ["user", "assistant", "system"])
     def test_message_roles(self, role):

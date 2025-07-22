@@ -87,9 +87,7 @@ class OWASPAssessment:
                         remediation="Ensure all admin endpoints require authentication",
                     )
                 else:
-                    print(
-                        f"  ✓ {endpoint} properly secured (returned {resp.status_code})"
-                    )
+                    print(f"  ✓ {endpoint} properly secured (returned {resp.status_code})")
 
             except Exception as e:
                 print(f"  ! Error testing {endpoint}: {e}")
@@ -180,9 +178,7 @@ class OWASPAssessment:
                         remediation="Use parameterized queries and input validation",
                     )
                 else:
-                    print(
-                        f"  ✓ Login endpoint handled SQL payload safely: {payload[:20]}..."
-                    )
+                    print(f"  ✓ Login endpoint handled SQL payload safely: {payload[:20]}...")
 
             except Exception as e:
                 print(f"  ! Error testing SQL injection: {e}")
@@ -431,9 +427,7 @@ class OWASPAssessment:
 
         # SSRF payloads would be tested here in a real assessment
 
-        print(
-            "  ℹ SSRF testing requires identifying endpoints that make external requests"
-        )
+        print("  ℹ SSRF testing requires identifying endpoints that make external requests")
 
     def generate_report(self) -> Dict[str, Any]:
         """Generate assessment report."""

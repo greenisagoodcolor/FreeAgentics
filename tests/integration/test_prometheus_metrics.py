@@ -19,9 +19,7 @@ def client():
     import os
 
     # Add parent directory to path to import main
-    sys.path.insert(
-        0, os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
-    )
+    sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__)))))
     from main import app
 
     return TestClient(app)
@@ -70,9 +68,7 @@ class TestPrometheusMetrics:
 
             for counter in required_counters:
                 # Counter should be in HELP, TYPE, or metric line
-                assert counter in content, (
-                    f"Required counter {counter} not found in metrics"
-                )
+                assert counter in content, f"Required counter {counter} not found in metrics"
 
     def test_http_request_metrics_present(self, client):
         """Test that HTTP request metrics are present."""
@@ -162,9 +158,9 @@ class TestPrometheusMetrics:
 
                     # Check metric name format (alphanumeric with underscores)
                     metric_name = metric_part.split("{")[0]
-                    assert metric_name.replace("_", "").replace(":", "").isalnum(), (
-                        f"Invalid metric name format: {metric_name}"
-                    )
+                    assert (
+                        metric_name.replace("_", "").replace(":", "").isalnum()
+                    ), f"Invalid metric name format: {metric_name}"
 
     def test_metrics_endpoint_performance(self, client):
         """Test that metrics endpoint responds quickly."""

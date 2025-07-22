@@ -128,20 +128,14 @@ class RBACTestRunner:
     def _generate_summary(self) -> Dict:
         """Generate test summary."""
         total_tests = len(self.test_results)
-        passed_tests = len(
-            [r for r in self.test_results.values() if r.get("status") == "passed"]
-        )
-        failed_tests = len(
-            [r for r in self.test_results.values() if r.get("status") == "failed"]
-        )
+        passed_tests = len([r for r in self.test_results.values() if r.get("status") == "passed"])
+        failed_tests = len([r for r in self.test_results.values() if r.get("status") == "failed"])
 
         summary = {
             "total_test_files": total_tests,
             "passed_files": passed_tests,
             "failed_files": failed_tests,
-            "success_rate": (passed_tests / total_tests * 100)
-            if total_tests > 0
-            else 0,
+            "success_rate": (passed_tests / total_tests * 100) if total_tests > 0 else 0,
             "total_execution_time": sum(
                 r.get("execution_time", 0) for r in self.test_results.values()
             ),
@@ -182,10 +176,7 @@ class RBACTestRunner:
                         }
                     )
 
-                if (
-                    "sql injection" in stderr.lower()
-                    or "sql injection" in stdout.lower()
-                ):
+                if "sql injection" in stderr.lower() or "sql injection" in stdout.lower():
                     findings.append(
                         {
                             "type": "sql_injection_vulnerability",
@@ -214,9 +205,7 @@ class RBACTestRunner:
 
     def _calculate_performance_metrics(self) -> Dict:
         """Calculate performance metrics."""
-        execution_times = [
-            r.get("execution_time", 0) for r in self.test_results.values()
-        ]
+        execution_times = [r.get("execution_time", 0) for r in self.test_results.values()]
 
         if not execution_times:
             return {}
@@ -235,9 +224,7 @@ class RBACTestRunner:
         recommendations = []
 
         # Check for failed tests
-        failed_tests = [
-            f for f, r in self.test_results.items() if r.get("status") == "failed"
-        ]
+        failed_tests = [f for f, r in self.test_results.items() if r.get("status") == "failed"]
         if failed_tests:
             recommendations.append(
                 {
@@ -250,9 +237,7 @@ class RBACTestRunner:
             )
 
         # Check for security findings
-        critical_findings = [
-            f for f in self.security_findings if f.get("severity") == "critical"
-        ]
+        critical_findings = [f for f in self.security_findings if f.get("severity") == "critical"]
         if critical_findings:
             recommendations.append(
                 {
@@ -347,9 +332,7 @@ class RBACTestRunner:
                 priority_icon = (
                     "🔴"
                     if rec["priority"] == "critical"
-                    else "🟡"
-                    if rec["priority"] == "high"
-                    else "🟢"
+                    else "🟡" if rec["priority"] == "high" else "🟢"
                 )
                 print(f"  {priority_icon} {rec['title']}")
 
@@ -380,9 +363,7 @@ def main():
     runner.print_summary()
 
     # Exit with appropriate code
-    failed_tests = len(
-        [r for r in runner.test_results.values() if r.get("status") == "failed"]
-    )
+    failed_tests = len([r for r in runner.test_results.values() if r.get("status") == "failed"])
     sys.exit(1 if failed_tests > 0 else 0)
 
 

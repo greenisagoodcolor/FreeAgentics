@@ -49,9 +49,7 @@ class TestPyMDPAdapterStrictTypeChecking:
         # Must be EXACT int type, no numpy types allowed
         assert type(result) is int, f"Expected exact int type, got {type(result)}"
         assert result >= 0, "Action index must be non-negative"
-        assert result < num_controls[0], (
-            f"Action {result} exceeds max {num_controls[0] - 1}"
-        )
+        assert result < num_controls[0], f"Action {result} exceeds max {num_controls[0] - 1}"
 
     def test_adapter_sample_action_type_validation_fails_on_wrong_agent_type(
         self,
@@ -119,12 +117,10 @@ class TestPyMDPAdapterStrictTypeChecking:
         # Must return exactly tuple of two numpy arrays
         assert isinstance(q_pi, np.ndarray), f"q_pi must be ndarray, got {type(q_pi)}"
         assert isinstance(G, np.ndarray), f"G must be ndarray, got {type(G)}"
-        assert np.issubdtype(q_pi.dtype, np.floating), (
-            f"q_pi must be floating type, got {q_pi.dtype}"
-        )
-        assert np.issubdtype(G.dtype, np.floating), (
-            f"G must be floating type, got {G.dtype}"
-        )
+        assert np.issubdtype(
+            q_pi.dtype, np.floating
+        ), f"q_pi must be floating type, got {q_pi.dtype}"
+        assert np.issubdtype(G.dtype, np.floating), f"G must be floating type, got {G.dtype}"
 
     def test_adapter_infer_policies_validation_fails_on_wrong_return_types(
         self,
@@ -184,9 +180,7 @@ class TestPyMDPAdapterStrictTypeChecking:
             # Validate each belief array
             for i, belief in enumerate(result):
                 assert isinstance(belief, np.ndarray), f"Belief {i} must be ndarray"
-                assert np.issubdtype(belief.dtype, np.floating), (
-                    f"Belief {i} must be floating type"
-                )
+                assert np.issubdtype(belief.dtype, np.floating), f"Belief {i} must be floating type"
 
     def test_adapter_infer_states_rejects_invalid_observation_types(self):
         """Adapter must reject invalid observation types with TypeError."""

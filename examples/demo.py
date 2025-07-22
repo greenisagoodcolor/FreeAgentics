@@ -109,9 +109,7 @@ def main():
         # Explorer agent step
         explorer_obs = {
             "position": explorer.position.copy(),
-            "surroundings": world.get_observation(
-                explorer.position[0], explorer.position[1]
-            ),
+            "surroundings": world.get_observation(explorer.position[0], explorer.position[1]),
         }
 
         explorer_action = explorer.step(explorer_obs)
@@ -121,16 +119,12 @@ def main():
         if "belief_entropy" in explorer.metrics:
             print(f"    Belief entropy: {explorer.metrics['belief_entropy']:.3f}")
         if "expected_free_energy" in explorer.metrics:
-            print(
-                f"    Expected free energy: {explorer.metrics['expected_free_energy']:.3f}"
-            )
+            print(f"    Expected free energy: {explorer.metrics['expected_free_energy']:.3f}")
 
         # Resource collector step
         collector_obs = {
             "position": collector.position.copy(),
-            "surroundings": world.get_observation(
-                collector.position[0], collector.position[1]
-            ),
+            "surroundings": world.get_observation(collector.position[0], collector.position[1]),
             "resources": {},
             "current_load": collector.current_load,
         }

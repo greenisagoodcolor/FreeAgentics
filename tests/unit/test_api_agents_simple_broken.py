@@ -110,9 +110,7 @@ class TestAgentEndpoints:
 
     def test_get_agent_metrics_endpoint_exists(self, client):
         """Test that the agent metrics endpoint exists."""
-        response = client.get(
-            "/api/v1/agents/12345678-1234-1234-1234-123456789012/metrics"
-        )
+        response = client.get("/api/v1/agents/12345678-1234-1234-1234-123456789012/metrics")
 
         # The endpoint should exist (not 404)
         assert response.status_code != 404, "Agent metrics endpoint should exist"
@@ -126,9 +124,7 @@ class TestAgentEndpoints:
 
     def test_start_agent_endpoint_exists(self, client):
         """Test that the start agent endpoint exists."""
-        response = client.post(
-            "/api/v1/agents/12345678-1234-1234-1234-123456789012/start"
-        )
+        response = client.post("/api/v1/agents/12345678-1234-1234-1234-123456789012/start")
 
         # The endpoint should exist (not 404)
         assert response.status_code != 404, "Start agent endpoint should exist"
@@ -142,9 +138,7 @@ class TestAgentEndpoints:
 
     def test_stop_agent_endpoint_exists(self, client):
         """Test that the stop agent endpoint exists."""
-        response = client.post(
-            "/api/v1/agents/12345678-1234-1234-1234-123456789012/stop"
-        )
+        response = client.post("/api/v1/agents/12345678-1234-1234-1234-123456789012/stop")
 
         # The endpoint should exist (not 404)
         assert response.status_code != 404, "Stop agent endpoint should exist"
@@ -158,9 +152,7 @@ class TestAgentEndpoints:
 
     def test_agent_conversations_endpoint_exists(self, client):
         """Test that the agent conversations endpoint exists."""
-        response = client.get(
-            "/api/v1/agents/12345678-1234-1234-1234-123456789012/conversations"
-        )
+        response = client.get("/api/v1/agents/12345678-1234-1234-1234-123456789012/conversations")
 
         # The endpoint should exist (not 404)
         assert response.status_code != 404, "Agent conversations endpoint should exist"

@@ -83,9 +83,7 @@ class TestRBACBasics:
         assert user.is_active is True
 
         # Test authentication
-        authenticated_user = auth_manager.authenticate_user(
-            "test_user", "testpassword123"
-        )
+        authenticated_user = auth_manager.authenticate_user("test_user", "testpassword123")
         assert authenticated_user is not None
         assert authenticated_user.username == "test_user"
 
@@ -202,9 +200,7 @@ class TestABACFunctionality:
             admin_access,
             admin_reason,
             admin_rules,
-        ) = enhanced_rbac_manager.evaluate_abac_access(
-            admin_context, resource_context, "delete"
-        )
+        ) = enhanced_rbac_manager.evaluate_abac_access(admin_context, resource_context, "delete")
         assert admin_access is True  # Admin should have access
 
         # Test observer access to delete (should be denied)
@@ -212,9 +208,7 @@ class TestABACFunctionality:
             observer_access,
             observer_reason,
             observer_rules,
-        ) = enhanced_rbac_manager.evaluate_abac_access(
-            observer_context, resource_context, "delete"
-        )
+        ) = enhanced_rbac_manager.evaluate_abac_access(observer_context, resource_context, "delete")
         # Observer might be denied based on ABAC rules
         assert observer_reason is not None
 
@@ -387,9 +381,7 @@ class TestResourceAccessControl:
         mock_db.query.return_value.filter.return_value.first.return_value = mock_agent
 
         # Test successful access (user owns resource)
-        with patch(
-            "auth.resource_access_control.ResourceAccessValidator.validate_agent_access"
-        ):
+        with patch("auth.resource_access_control.ResourceAccessValidator.validate_agent_access"):
             result = await test_endpoint(str(mock_agent.id), user, db=mock_db)
             assert result["message"] == "success"
 
@@ -761,9 +753,7 @@ class TestAuditLogging:
         # Run cleanup
         import asyncio
 
-        cleaned_count = asyncio.run(
-            comprehensive_auditor.cleanup_old_logs(retention_days=30)
-        )
+        cleaned_count = asyncio.run(comprehensive_auditor.cleanup_old_logs(retention_days=30))
 
         assert cleaned_count > 0
         assert len(comprehensive_auditor.decision_log) == 1

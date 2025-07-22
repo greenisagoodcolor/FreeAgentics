@@ -79,9 +79,7 @@ class TestPyMDPErrorHandler:
         def fallback_op():
             return "fallback_result"
 
-        success, result, error = handler.safe_execute(
-            "test_op", failing_op, fallback_op
-        )
+        success, result, error = handler.safe_execute("test_op", failing_op, fallback_op)
 
         assert success is False
         assert result == "fallback_result"
@@ -101,9 +99,7 @@ class TestPyMDPErrorHandler:
         def failing_fallback():
             raise RuntimeError("Fallback failed")
 
-        success, result, error = handler.safe_execute(
-            "test_op", failing_op, failing_fallback
-        )
+        success, result, error = handler.safe_execute("test_op", failing_op, failing_fallback)
 
         assert success is False
         assert result is None
@@ -122,16 +118,12 @@ class TestPyMDPErrorHandler:
 
         # First two attempts should use fallback
         for i in range(2):
-            success, result, error = handler.safe_execute(
-                "test_op", failing_op, fallback_op
-            )
+            success, result, error = handler.safe_execute("test_op", failing_op, fallback_op)
             assert success is False
             assert result == "recovered"
 
         # Third attempt should not use fallback
-        success, result, error = handler.safe_execute(
-            "test_op", failing_op, fallback_op
-        )
+        success, result, error = handler.safe_execute("test_op", failing_op, fallback_op)
         assert success is False
         assert result is None
         assert handler.operation_failures["test_op"] == 3
@@ -168,9 +160,7 @@ class TestPyMDPErrorHandler:
         ]
 
         for error in errors:
-            assert (
-                handler._classify_error(error) == PyMDPErrorType.INFERENCE_CONVERGENCE
-            )
+            assert handler._classify_error(error) == PyMDPErrorType.INFERENCE_CONVERGENCE
 
     def test_classify_error_policy_sampling(self):
         """Test error classification for policy sampling errors."""
@@ -223,9 +213,7 @@ class TestPyMDPErrorHandler:
         ]
 
         for error in errors:
-            assert (
-                handler._classify_error(error) == PyMDPErrorType.NUMERICAL_INSTABILITY
-            )
+            assert handler._classify_error(error) == PyMDPErrorType.NUMERICAL_INSTABILITY
 
     def test_get_error_report(self):
         """Test error report generation."""
@@ -311,9 +299,7 @@ class TestSafeNumpyConversion:
         assert safe_numpy_conversion(3.14, float) == 3.14
         # Strings are treated as array-like, so it takes first character
         assert safe_numpy_conversion("hello", str) == "h"
-        assert (
-            safe_numpy_conversion(True, bool) is True
-        )  # Don't use 'is' for comparison
+        assert safe_numpy_conversion(True, bool) is True  # Don't use 'is' for comparison
 
     def test_none_conversion(self):
         """Test converting None values."""

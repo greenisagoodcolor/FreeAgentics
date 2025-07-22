@@ -254,9 +254,7 @@ class MultiAgentCoordinationBenchmark(PerformanceBenchmark):
 
         # Create agents
         agents = [
-            BasicExplorerAgent(
-                f"coord-agent-{i}", f"Coordination Agent {i}", grid_size=5
-            )
+            BasicExplorerAgent(f"coord-agent-{i}", f"Coordination Agent {i}", grid_size=5)
             for i in range(num_agents)
         ]
 
@@ -428,9 +426,7 @@ class CachePerformanceBenchmark(PerformanceBenchmark):
         agent.stop()
 
         # For comparison, create agent without caching optimizations
-        agent_no_cache = BasicExplorerAgent(
-            "no-cache-agent", "No Cache Agent", grid_size=10
-        )
+        agent_no_cache = BasicExplorerAgent("no-cache-agent", "No Cache Agent", grid_size=10)
         agent_no_cache.start()
 
         no_cache_times = []
@@ -493,9 +489,7 @@ class CachePerformanceBenchmark(PerformanceBenchmark):
         # Check cache hit rate regression
         baseline_hit_rate = PERFORMANCE_BASELINES["cache_hit_rate_percent"]
         actual_hit_rate = result["estimated_hit_rate_percent"]
-        hit_rate_regression = (
-            (baseline_hit_rate - actual_hit_rate) / baseline_hit_rate
-        ) * 100
+        hit_rate_regression = ((baseline_hit_rate - actual_hit_rate) / baseline_hit_rate) * 100
 
         if hit_rate_regression > REGRESSION_THRESHOLDS["critical"]:
             validation["status"] = "fail"
@@ -627,8 +621,7 @@ class MemoryRegressionBenchmark(PerformanceBenchmark):
         }
 
         logger.info(
-            f"Memory regression: {memory_growth:.2f}MB growth, "
-            f"{memory_slope:.4f}MB/cycle slope"
+            f"Memory regression: {memory_growth:.2f}MB growth, " f"{memory_slope:.4f}MB/cycle slope"
         )
 
         return result
@@ -651,8 +644,7 @@ class MemoryRegressionBenchmark(PerformanceBenchmark):
             validation["regressions"].append(
                 {
                     "metric": "memory_leak",
-                    "regression_percent": memory_slope
-                    * 100,  # Convert to percentage-like metric
+                    "regression_percent": memory_slope * 100,  # Convert to percentage-like metric
                     "severity": "critical",
                     "baseline": 0,
                     "actual": memory_slope,
@@ -778,12 +770,8 @@ class CIPerformanceBenchmarkSuite:
                     results["summary"]["failed"] += 1
                     results["overall_status"] = "fail"
 
-                results["summary"]["total_regressions"] += len(
-                    validation["regressions"]
-                )
-                results["summary"]["total_improvements"] += len(
-                    validation["improvements"]
-                )
+                results["summary"]["total_regressions"] += len(validation["regressions"])
+                results["summary"]["total_improvements"] += len(validation["improvements"])
 
                 logger.info(f"Completed {benchmark.name}: {validation['status']}")
 
@@ -808,8 +796,7 @@ class CIPerformanceBenchmarkSuite:
         self._save_results(results)
 
         logger.info(
-            f"Benchmark suite completed in {suite_duration:.2f}s: "
-            f"{results['overall_status']}"
+            f"Benchmark suite completed in {suite_duration:.2f}s: " f"{results['overall_status']}"
         )
 
         return results
@@ -861,9 +848,7 @@ class CIPerformanceBenchmarkSuite:
                 f.write(f"### {bench_name}\n\n")
                 f.write(f"**Description**: {bench_data.get('description', 'N/A')}\n")
                 f.write(f"**Status**: {status.upper()}\n")
-                f.write(
-                    f"**Duration**: {bench_data.get('duration_seconds', 0):.2f}s\n\n"
-                )
+                f.write(f"**Duration**: {bench_data.get('duration_seconds', 0):.2f}s\n\n")
 
                 # Regressions
                 regressions = validation.get("regressions", [])
@@ -892,9 +877,7 @@ class CIPerformanceBenchmarkSuite:
                 if result:
                     f.write("**Key Metrics**:\n")
                     for key, value in result.items():
-                        if isinstance(value, (int, float)) and not isinstance(
-                            value, bool
-                        ):
+                        if isinstance(value, (int, float)) and not isinstance(value, bool):
                             f.write(f"- {key}: {value:.2f}\n")
                     f.write("\n")
 

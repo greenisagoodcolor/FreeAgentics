@@ -58,12 +58,10 @@ class TestActionSamplingIssue:
         raw_action = pymdp_agent.sample_action()
 
         # Document the actual PyMDP behavior
-        assert isinstance(raw_action, np.ndarray), (
-            f"PyMDP returns {type(raw_action)}, expected np.ndarray"
-        )
-        assert raw_action.shape == (1,), (
-            f"PyMDP action has shape {raw_action.shape}, expected (1,)"
-        )
+        assert isinstance(
+            raw_action, np.ndarray
+        ), f"PyMDP returns {type(raw_action)}, expected np.ndarray"
+        assert raw_action.shape == (1,), f"PyMDP action has shape {raw_action.shape}, expected (1,)"
         assert raw_action.dtype in [
             np.float64,
             np.float32,
@@ -101,18 +99,14 @@ class TestActionSamplingIssue:
         converted_action = adapter.sample_action(pymdp_agent)
 
         # CRITICAL: Must be exact Python int, not numpy type
-        assert type(converted_action) is int, (
-            f"Expected exact Python int, got {type(converted_action)}"
-        )
-        assert not isinstance(converted_action, np.integer), (
-            "Should not be numpy integer type"
-        )
+        assert (
+            type(converted_action) is int
+        ), f"Expected exact Python int, got {type(converted_action)}"
+        assert not isinstance(converted_action, np.integer), "Should not be numpy integer type"
         assert isinstance(converted_action, int), "Should be Python int"
 
         # Value validation
-        assert 0 <= converted_action < 4, (
-            f"Action {converted_action} out of valid range"
-        )
+        assert 0 <= converted_action < 4, f"Action {converted_action} out of valid range"
 
     def test_adapter_handles_edge_cases(self):
         """Test adapter handles various edge cases in conversion."""
@@ -130,9 +124,7 @@ class TestActionSamplingIssue:
             single_action_agent.infer_policies()
 
             action = adapter.sample_action(single_action_agent)
-            assert action == 0, (
-                f"Single action agent should always return 0, got {action}"
-            )
+            assert action == 0, f"Single action agent should always return 0, got {action}"
             assert type(action) is int, "Must be Python int"
         except (TypeError, ValueError, AttributeError):
             # Handle PyMDP API compatibility issues with single-factor models
@@ -181,9 +173,7 @@ class TestActionSamplingIssue:
         action = agent.select_action()
 
         # Agent converts numeric action to string
-        assert isinstance(action, str), (
-            f"Agent should return string action, got {type(action)}"
-        )
+        assert isinstance(action, str), f"Agent should return string action, got {type(action)}"
         assert action in [
             "up",
             "down",
@@ -279,9 +269,7 @@ class TestActionSamplingIssue:
         avg_time = total_time / num_samples
 
         # Should be fast - less than 5ms per action (relaxed for complex agent processing)
-        assert avg_time < 0.005, (
-            f"Action sampling too slow: {avg_time * 1000:.3f}ms per action"
-        )
+        assert avg_time < 0.005, f"Action sampling too slow: {avg_time * 1000:.3f}ms per action"
 
         print(
             f"Action sampling performance: {avg_time * 1000:.3f}ms per action ({num_samples / total_time:.0f} actions/sec)"
@@ -307,9 +295,9 @@ class TestActionMappingConsistency:
         # Access the agent's action mapping if available
         if hasattr(agent, "action_names"):
             for idx, name in enumerate(agent.action_names):
-                assert name == expected_mapping.get(idx), (
-                    f"Action {idx} mapped to '{name}', expected '{expected_mapping.get(idx)}'"
-                )
+                assert name == expected_mapping.get(
+                    idx
+                ), f"Action {idx} mapped to '{name}', expected '{expected_mapping.get(idx)}'"
 
         # Test through actual action selection
         observations = [

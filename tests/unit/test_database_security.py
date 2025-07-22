@@ -147,9 +147,7 @@ class TestDatabaseTransactions:
         assert len(results) == 10
 
         with connection_manager.get_session() as session:
-            count = (
-                session.query(User).filter(User.username.like("concurrent_%")).count()
-            )
+            count = session.query(User).filter(User.username.like("concurrent_%")).count()
             assert count == 10
 
 
@@ -187,9 +185,7 @@ class TestSQLInjectionPrevention:
         for malicious_input in malicious_inputs:
             with secure_db.get_session() as session:
                 # Safe parameterized query
-                result = (
-                    session.query(User).filter(User.username == malicious_input).first()
-                )
+                result = session.query(User).filter(User.username == malicious_input).first()
 
                 # Assert - Should not find user or execute injection
                 assert result is None
@@ -205,9 +201,7 @@ class TestSQLInjectionPrevention:
 
         # Act
         with secure_db.get_session() as session:
-            user = User(
-                username=dangerous_inputs["username"], email=dangerous_inputs["email"]
-            )
+            user = User(username=dangerous_inputs["username"], email=dangerous_inputs["email"])
             session.add(user)
             session.commit()
             user_id = user.id
@@ -248,9 +242,7 @@ class TestConnectionPoolSecurity:
     @pytest.fixture
     def pool_manager(self):
         """Create connection pool manager."""
-        engine = create_engine(
-            "sqlite:///:memory:", pool_size=5, max_overflow=2, pool_timeout=30
-        )
+        engine = create_engine("sqlite:///:memory:", pool_size=5, max_overflow=2, pool_timeout=30)
         Base.metadata.create_all(engine)
 
         manager = ConnectionManager(engine)
@@ -416,9 +408,7 @@ class TestDatabaseSecurity:
         # Arrange
         from database.models import SensitiveData  # Hypothetical model
 
-        sensitive = SensitiveData(
-            user_id=1, ssn="123-45-6789", credit_card="4111-1111-1111-1111"
-        )
+        sensitive = SensitiveData(user_id=1, ssn="123-45-6789", credit_card="4111-1111-1111-1111")
 
         # Act - Save to database
         secure_session.add(sensitive)

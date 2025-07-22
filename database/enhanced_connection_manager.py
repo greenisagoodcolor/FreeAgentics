@@ -30,9 +30,7 @@ logger = logging.getLogger(__name__)
 class EnhancedDatabaseConnectionManager:
     """Enhanced database connection manager with connection pooling."""
 
-    def __init__(
-        self, database_url: str, config: Optional[ConnectionPoolConfig] = None
-    ):
+    def __init__(self, database_url: str, config: Optional[ConnectionPoolConfig] = None):
         """Initialize enhanced database connection manager."""
         self.database_url = database_url
         self.config = config or ConnectionPoolConfig()
@@ -55,9 +53,7 @@ class EnhancedDatabaseConnectionManager:
             "pool_misses": 0,
         }
 
-        logger.info(
-            f"Enhanced database connection manager initialized for {database_url}"
-        )
+        logger.info(f"Enhanced database connection manager initialized for {database_url}")
 
     async def initialize(self):
         """Initialize the enhanced connection manager."""
@@ -101,9 +97,7 @@ class EnhancedDatabaseConnectionManager:
         """Get asynchronous database engine with connection pooling."""
         if self._async_engine is None:
             # Convert to async URL format
-            async_url = self.database_url.replace(
-                "postgresql://", "postgresql+asyncpg://"
-            )
+            async_url = self.database_url.replace("postgresql://", "postgresql+asyncpg://")
 
             # Enhanced async pool configuration
             async_pool_config = {
@@ -134,9 +128,7 @@ class EnhancedDatabaseConnectionManager:
         """Get session factory for synchronous operations."""
         if self._session_factory is None:
             engine = self.get_sync_engine()
-            self._session_factory = sessionmaker(
-                autocommit=False, autoflush=False, bind=engine
-            )
+            self._session_factory = sessionmaker(autocommit=False, autoflush=False, bind=engine)
 
         return self._session_factory
 

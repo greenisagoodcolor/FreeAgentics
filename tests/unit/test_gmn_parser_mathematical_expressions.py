@@ -768,9 +768,7 @@ class TestNumericalValidation:
 
         # Should detect syntax error in mathematical expression
         assert is_valid is False
-        syntax_errors = [
-            e for e in errors if "syntax" in e.lower() or "formula" in e.lower()
-        ]
+        syntax_errors = [e for e in errors if "syntax" in e.lower() or "formula" in e.lower()]
         assert len(syntax_errors) > 0
 
     def test_validate_dimensional_consistency_in_operations(self):
@@ -824,7 +822,5 @@ class TestNumericalValidation:
 
         # Should detect probability constraint violation
         assert is_valid is False
-        prob_errors = [
-            e for e in errors if "probability" in e.lower() or "sum" in e.lower()
-        ]
+        prob_errors = [e for e in errors if "probability" in e.lower() or "sum" in e.lower()]
         assert len(prob_errors) > 0

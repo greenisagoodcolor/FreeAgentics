@@ -93,14 +93,10 @@ class TestUIBackendIntegration:
             mock_agent_manager.agents = {}
 
             # Step 1: UI attempts to create agent with simple description
-            ui_request = {
-                "description": "An explorer agent that searches for resources"
-            }
+            ui_request = {"description": "An explorer agent that searches for resources"}
 
             # Call the endpoint
-            response = self.client.post(
-                "/api/agents", json=ui_request, headers=self.headers
-            )
+            response = self.client.post("/api/agents", json=ui_request, headers=self.headers)
 
             # What the UI expects to receive
             assert response.status_code == 201
@@ -122,8 +118,7 @@ class TestUIBackendIntegration:
             assert config.name == "An Explorer Agent"
             assert config.template == "basic-explorer"
             assert (
-                config.parameters["description"]
-                == "An explorer agent that searches for resources"
+                config.parameters["description"] == "An explorer agent that searches for resources"
             )
 
     def test_agent_list_simple_format(self):
@@ -209,9 +204,7 @@ class TestUIBackendIntegration:
 
         # Create agent first
         ui_request = {"description": "Test agent"}
-        create_response = self.client.post(
-            "/api/agents", json=ui_request, headers=self.headers
-        )
+        create_response = self.client.post("/api/agents", json=ui_request, headers=self.headers)
         assert create_response.status_code == 201
 
         agent_data = create_response.json()
@@ -238,18 +231,14 @@ class TestUIBackendIntegration:
 
         # Create agent first
         ui_request = {"description": "Test agent"}
-        create_response = self.client.post(
-            "/api/agents", json=ui_request, headers=self.headers
-        )
+        create_response = self.client.post("/api/agents", json=ui_request, headers=self.headers)
         assert create_response.status_code == 201
 
         agent_data = create_response.json()
         agent_id = agent_data["id"]
 
         # Delete agent
-        delete_response = self.client.delete(
-            f"/api/agents/{agent_id}", headers=self.headers
-        )
+        delete_response = self.client.delete(f"/api/agents/{agent_id}", headers=self.headers)
         assert delete_response.status_code == 200
 
         # Verify agent is gone

@@ -268,9 +268,7 @@ class TestCoalitionObjectiveBehavior:
         # Handle objective failure
         coalition.handle_objective_failure("Insufficient resources")
 
-        coalition.handle_objective_failure.assert_called_once_with(
-            "Insufficient resources"
-        )
+        coalition.handle_objective_failure.assert_called_once_with("Insufficient resources")
 
 
 class TestCoalitionCommunicationBehavior:
@@ -302,9 +300,7 @@ class TestCoalitionCommunicationBehavior:
         coalition.send_message_to_member(agent_id, private_message)
 
         coalition.broadcast_message.assert_called_once_with(message)
-        coalition.send_message_to_member.assert_called_once_with(
-            agent_id, private_message
-        )
+        coalition.send_message_to_member.assert_called_once_with(agent_id, private_message)
 
     def test_coalition_maintains_communication_history(self):
         """

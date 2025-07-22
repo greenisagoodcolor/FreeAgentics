@@ -155,9 +155,7 @@ class MFAService:
         codes = []
         for _ in range(self.backup_codes_count):
             # Generate 8-character alphanumeric code
-            code = "".join(
-                secrets.choice("ABCDEFGHIJKLMNPQRSTUVWXYZ23456789") for _ in range(8)
-            )
+            code = "".join(secrets.choice("ABCDEFGHIJKLMNPQRSTUVWXYZ23456789") for _ in range(8))
             codes.append(code)
         return codes
 
@@ -232,9 +230,7 @@ class MFAService:
         """
         try:
             # Check if user already has MFA enabled
-            existing_mfa = (
-                self.db.query(MFASettings).filter_by(user_id=request.user_id).first()
-            )
+            existing_mfa = self.db.query(MFASettings).filter_by(user_id=request.user_id).first()
 
             if existing_mfa and existing_mfa.is_enabled:
                 return MFAResponse(
@@ -310,9 +306,7 @@ class MFAService:
         encrypted_backup_codes = self._encrypt_secret(json.dumps(hashed_backup_codes))
 
         # Store in database
-        mfa_settings = (
-            self.db.query(MFASettings).filter_by(user_id=request.user_id).first()
-        )
+        mfa_settings = self.db.query(MFASettings).filter_by(user_id=request.user_id).first()
 
         if mfa_settings:
             mfa_settings.totp_secret = encrypted_secret
@@ -372,22 +366,16 @@ class MFAService:
                 )
 
             # Get MFA settings
-            mfa_settings = (
-                self.db.query(MFASettings).filter_by(user_id=request.user_id).first()
-            )
+            mfa_settings = self.db.query(MFASettings).filter_by(user_id=request.user_id).first()
 
             if not mfa_settings:
-                return MFAResponse(
-                    success=False, message="MFA not configured for this user"
-                )
+                return MFAResponse(success=False, message="MFA not configured for this user")
 
             # Verify based on method
             if request.method == "totp":
                 success = await self._verify_totp(mfa_settings, request.token)
             elif request.method == "backup_code":
-                success = await self._verify_backup_code(
-                    mfa_settings, request.backup_code
-                )
+                success = await self._verify_backup_code(mfa_settings, request.backup_code)
             else:
                 return MFAResponse(
                     success=False,
@@ -429,9 +417,7 @@ class MFAService:
                 return MFAResponse(success=False, message="Invalid MFA token")
 
         except Exception as e:
-            logger.error(
-                f"MFA verification failed for user {request.user_id}: {str(e)}"
-            )
+            logger.error(f"MFA verification failed for user {request.user_id}: {str(e)}")
 
             # Log security event
             security_auditor.log_event(
@@ -457,9 +443,7 @@ class MFAService:
             secret = self._decrypt_secret(mfa_settings.totp_secret)
 
             # Create TOTP instance
-            totp = pyotp.TOTP(
-                secret, interval=self.totp_interval, digits=self.totp_digits
-            )
+            totp = pyotp.TOTP(secret, interval=self.totp_interval, digits=self.totp_digits)
 
             # Verify token with window of 1 (allows for clock skew)
             return totp.verify(token, valid_window=1)
@@ -468,9 +452,7 @@ class MFAService:
             logger.error(f"TOTP verification error: {str(e)}")
             return False
 
-    async def _verify_backup_code(
-        self, mfa_settings: MFASettings, backup_code: str
-    ) -> bool:
+    async def _verify_backup_code(self, mfa_settings: MFASettings, backup_code: str) -> bool:
         """Verify backup code."""
         if not mfa_settings.backup_codes or not backup_code:
             return False
@@ -490,9 +472,7 @@ class MFAService:
                 stored_codes.remove(code_hash)
 
                 # Update database
-                mfa_settings.backup_codes = self._encrypt_secret(
-                    json.dumps(stored_codes)
-                )
+                mfa_settings.backup_codes = self._encrypt_secret(json.dumps(stored_codes))
                 self.db.commit()
 
                 return True
@@ -517,9 +497,7 @@ class MFAService:
             mfa_settings = self.db.query(MFASettings).filter_by(user_id=user_id).first()
 
             if not mfa_settings:
-                return MFAResponse(
-                    success=False, message="MFA not configured for this user"
-                )
+                return MFAResponse(success=False, message="MFA not configured for this user")
 
             # Disable MFA
             mfa_settings.is_enabled = False
@@ -575,9 +553,7 @@ class MFAService:
                 backup_codes_remaining = len(stored_codes)
             except Exception as e:
                 # Log error but continue - MFA status should still be returned
-                logger.warning(
-                    f"Failed to decrypt backup codes for user {user_id}: {e}"
-                )
+                logger.warning(f"Failed to decrypt backup codes for user {user_id}: {e}")
 
         methods = []
         if mfa_settings.totp_secret:
@@ -590,14 +566,10 @@ class MFAService:
             "methods": methods,
             "backup_codes_remaining": backup_codes_remaining,
             "locked_until": (
-                mfa_settings.locked_until.isoformat()
-                if mfa_settings.locked_until
-                else None
+                mfa_settings.locked_until.isoformat() if mfa_settings.locked_until else None
             ),
             "failed_attempts": mfa_settings.failed_attempts,
-            "last_used": (
-                mfa_settings.last_used.isoformat() if mfa_settings.last_used else None
-            ),
+            "last_used": (mfa_settings.last_used.isoformat() if mfa_settings.last_used else None),
         }
 
     async def regenerate_backup_codes(self, user_id: str) -> MFAResponse:
@@ -614,18 +586,14 @@ class MFAService:
             mfa_settings = self.db.query(MFASettings).filter_by(user_id=user_id).first()
 
             if not mfa_settings or not mfa_settings.is_enabled:
-                return MFAResponse(
-                    success=False, message="MFA not enabled for this user"
-                )
+                return MFAResponse(success=False, message="MFA not enabled for this user")
 
             # Generate new backup codes
             backup_codes = self._generate_backup_codes()
             hashed_backup_codes = self._hash_backup_codes(backup_codes)
 
             # Update database
-            mfa_settings.backup_codes = self._encrypt_secret(
-                json.dumps(hashed_backup_codes)
-            )
+            mfa_settings.backup_codes = self._encrypt_secret(json.dumps(hashed_backup_codes))
             self.db.commit()
 
             # Log security event
@@ -644,9 +612,5 @@ class MFAService:
             )
 
         except Exception as e:
-            logger.error(
-                f"Backup code regeneration failed for user {user_id}: {str(e)}"
-            )
-            return MFAResponse(
-                success=False, message="Failed to regenerate backup codes"
-            )
+            logger.error(f"Backup code regeneration failed for user {user_id}: {str(e)}")
+            return MFAResponse(success=False, message="Failed to regenerate backup codes")

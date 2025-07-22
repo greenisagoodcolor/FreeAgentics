@@ -285,9 +285,7 @@ class LoadTestingFramework:
     async def run_load_test(self, scenario: LoadTestScenario) -> LoadTestResult:
         """Run a load test scenario."""
         logger.info(f"Starting load test: {scenario.name}")
-        logger.info(
-            f"Users: {scenario.user_count}, Duration: {scenario.duration_seconds}s"
-        )
+        logger.info(f"Users: {scenario.user_count}, Duration: {scenario.duration_seconds}s")
 
         # Start performance monitoring
         self.performance_monitor.start_monitoring()
@@ -405,18 +403,14 @@ class LoadTestingFramework:
             websocket_task = None
             if scenario.websocket_enabled:
                 websocket_task = asyncio.create_task(
-                    self._simulate_websocket_user(
-                        user_session, scenario.duration_seconds
-                    )
+                    self._simulate_websocket_user(user_session, scenario.duration_seconds)
                 )
 
             # Database load if enabled
             db_task = None
             if scenario.database_load_enabled:
                 db_task = asyncio.create_task(
-                    self._simulate_database_load(
-                        user_session, scenario.duration_seconds
-                    )
+                    self._simulate_database_load(user_session, scenario.duration_seconds)
                 )
 
             # Main request loop
@@ -428,9 +422,7 @@ class LoadTestingFramework:
                 await self._make_request(session, endpoint, user_session)
 
                 # Think time
-                think_time = random.uniform(
-                    scenario.think_time_min, scenario.think_time_max
-                )
+                think_time = random.uniform(scenario.think_time_min, scenario.think_time_max)
                 await asyncio.sleep(think_time)
 
                 user_session.last_activity = time.time()
@@ -560,11 +552,7 @@ class LoadTestingFramework:
             while time.time() < end_time:
                 # Collect metrics
                 active_users = len(
-                    [
-                        s
-                        for s in self.active_sessions.values()
-                        if s.current_state == "active"
-                    ]
+                    [s for s in self.active_sessions.values() if s.current_state == "active"]
                 )
 
                 # Calculate requests per second
@@ -572,11 +560,7 @@ class LoadTestingFramework:
                 recent_requests = []
                 for session in self.active_sessions.values():
                     recent_requests.extend(
-                        [
-                            t
-                            for t in session.response_times
-                            if current_time - t < 60  # Last minute
-                        ]
+                        [t for t in session.response_times if current_time - t < 60]  # Last minute
                     )
 
                 rps = len(recent_requests) / min(60, current_time - start_time)
@@ -586,20 +570,12 @@ class LoadTestingFramework:
                 for session in self.active_sessions.values():
                     all_response_times.extend(session.response_times)
 
-                avg_response_time = (
-                    np.mean(all_response_times) if all_response_times else 0
-                )
+                avg_response_time = np.mean(all_response_times) if all_response_times else 0
 
                 # Calculate error rate
-                total_requests = sum(
-                    s.requests_made for s in self.active_sessions.values()
-                )
-                total_errors = sum(
-                    s.errors_encountered for s in self.active_sessions.values()
-                )
-                error_rate = (
-                    (total_errors / total_requests * 100) if total_requests > 0 else 0
-                )
+                total_requests = sum(s.requests_made for s in self.active_sessions.values())
+                total_errors = sum(s.errors_encountered for s in self.active_sessions.values())
+                error_rate = (total_errors / total_requests * 100) if total_requests > 0 else 0
 
                 # System metrics
                 process = psutil.Process()
@@ -662,12 +638,8 @@ class LoadTestingFramework:
                 "max_ms": np.max(all_response_times) if all_response_times else 0,
                 "mean_ms": np.mean(all_response_times) if all_response_times else 0,
                 "median_ms": np.median(all_response_times) if all_response_times else 0,
-                "p95_ms": np.percentile(all_response_times, 95)
-                if all_response_times
-                else 0,
-                "p99_ms": np.percentile(all_response_times, 99)
-                if all_response_times
-                else 0,
+                "p95_ms": np.percentile(all_response_times, 95) if all_response_times else 0,
+                "p99_ms": np.percentile(all_response_times, 99) if all_response_times else 0,
                 "std_ms": np.std(all_response_times) if all_response_times else 0,
             },
             "throughput_stats": {
@@ -678,38 +650,22 @@ class LoadTestingFramework:
             "user_stats": {
                 "users_spawned": len(self.active_sessions),
                 "users_completed": len(
-                    [
-                        s
-                        for s in self.active_sessions.values()
-                        if s.current_state == "completed"
-                    ]
+                    [s for s in self.active_sessions.values() if s.current_state == "completed"]
                 ),
                 "users_cancelled": len(
-                    [
-                        s
-                        for s in self.active_sessions.values()
-                        if s.current_state == "cancelled"
-                    ]
+                    [s for s in self.active_sessions.values() if s.current_state == "cancelled"]
                 ),
                 "users_error": len(
-                    [
-                        s
-                        for s in self.active_sessions.values()
-                        if s.current_state == "error"
-                    ]
+                    [s for s in self.active_sessions.values() if s.current_state == "error"]
                 ),
             },
             "websocket_stats": {
                 "total_messages": total_websocket_messages,
-                "messages_per_second": total_websocket_messages / duration
-                if duration > 0
-                else 0,
+                "messages_per_second": total_websocket_messages / duration if duration > 0 else 0,
             },
             "database_stats": {
                 "total_queries": total_database_queries,
-                "queries_per_second": total_database_queries / duration
-                if duration > 0
-                else 0,
+                "queries_per_second": total_database_queries / duration if duration > 0 else 0,
             },
         }
 
@@ -839,10 +795,10 @@ class LoadTestingFramework:
                 "successful_requests": result.successful_requests,
                 "failed_requests": result.failed_requests,
                 "success_rate": (
-                    result.successful_requests / result.total_requests * 100
-                )
-                if result.total_requests > 0
-                else 0,
+                    (result.successful_requests / result.total_requests * 100)
+                    if result.total_requests > 0
+                    else 0
+                ),
                 "error_rate": result.error_rate,
                 "throughput_rps": result.throughput_rps,
             },
@@ -899,9 +855,7 @@ class LoadTestingFramework:
 
         # SLA violations
         if result.sla_violations:
-            critical_violations = [
-                v for v in result.sla_violations if v["severity"] == "critical"
-            ]
+            critical_violations = [v for v in result.sla_violations if v["severity"] == "critical"]
             if critical_violations:
                 recommendations.append(
                     f"Critical SLA violations detected. Immediate action required for: {', '.join([v['metric'] for v in critical_violations])}"
@@ -987,9 +941,7 @@ async def run_load_test_suite():
             scenario.duration_seconds = min(
                 scenario.duration_seconds, 60
             )  # Max 1 minute for testing
-            scenario.user_count = min(
-                scenario.user_count, 20
-            )  # Max 20 users for testing
+            scenario.user_count = min(scenario.user_count, 20)  # Max 20 users for testing
 
             result = await framework.run_load_test(scenario)
             report = framework.generate_load_test_report(result)

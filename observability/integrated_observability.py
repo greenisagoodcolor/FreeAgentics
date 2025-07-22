@@ -80,13 +80,9 @@ class IntegratedObservabilityManager:
 
         # Component status
         self.prometheus_enabled = self.config.get("prometheus", True)
-        self.performance_tracking_enabled = self.config.get(
-            "performance_tracking", True
-        )
+        self.performance_tracking_enabled = self.config.get("performance_tracking", True)
         self.belief_monitoring_enabled = self.config.get("belief_monitoring", True)
-        self.coordination_tracking_enabled = self.config.get(
-            "coordination_tracking", True
-        )
+        self.coordination_tracking_enabled = self.config.get("coordination_tracking", True)
         self.alerting_enabled = self.config.get("alerting", True)
 
         logger.info("Integrated observability manager initialized")
@@ -144,9 +140,7 @@ class IntegratedObservabilityManager:
 
         logger.info("🛑 Integrated observability systems stopped")
 
-    async def register_agent(
-        self, agent_id: str, agent_type: str, metadata: Optional[Dict] = None
-    ):
+    async def register_agent(self, agent_id: str, agent_type: str, metadata: Optional[Dict] = None):
         """Register an agent with observability systems.
 
         Args:
@@ -247,9 +241,7 @@ class IntegratedObservabilityManager:
 
             # Check for performance alerts
             if self.alerting_enabled:
-                await self._check_operation_alerts(
-                    agent_id, operation, duration_ms, success
-                )
+                await self._check_operation_alerts(agent_id, operation, duration_ms, success)
 
     async def monitor_belief_update_detailed(
         self,
@@ -558,9 +550,7 @@ async def unregister_agent_from_observability(agent_id: str, reason: str = "stop
     await observability_manager.unregister_agent(agent_id, reason)
 
 
-async def monitor_agent_operation(
-    agent_id: str, operation: str, metadata: Optional[Dict] = None
-):
+async def monitor_agent_operation(agent_id: str, operation: str, metadata: Optional[Dict] = None):
     """Context manager for monitoring agent operations."""
     return observability_manager.monitor_agent_operation(agent_id, operation, metadata)
 

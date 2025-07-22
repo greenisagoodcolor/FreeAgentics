@@ -148,9 +148,7 @@ class TDDStructureValidator:
         required_dirs = ["unit", "integration", "e2e"]
         for req_dir in required_dirs:
             if not (test_dir / req_dir).exists():
-                structure_issues["poor_organization"].append(
-                    f"Missing {req_dir} test directory"
-                )
+                structure_issues["poor_organization"].append(f"Missing {req_dir} test directory")
 
         return structure_issues
 
@@ -175,9 +173,7 @@ class TDDStructureValidator:
                 tree = ast.parse(content)
 
                 for node in ast.walk(tree):
-                    if isinstance(node, ast.FunctionDef) and node.name.startswith(
-                        "test_"
-                    ):
+                    if isinstance(node, ast.FunctionDef) and node.name.startswith("test_"):
                         # Check if test has assertions
                         has_assertion = False
                         for child in ast.walk(node):
@@ -190,15 +186,11 @@ class TDDStructureValidator:
                                 break
 
                         if not has_assertion:
-                            quality_issues["no_assertions"].append(
-                                f"{test_file}::{node.name}"
-                            )
+                            quality_issues["no_assertions"].append(f"{test_file}::{node.name}")
 
                         # Check naming convention
                         if len(node.name) < 10:  # Very short test names
-                            quality_issues["poor_naming"].append(
-                                f"{test_file}::{node.name}"
-                            )
+                            quality_issues["poor_naming"].append(f"{test_file}::{node.name}")
 
             except Exception as e:
                 self.warnings.append(f"Could not analyze {test_file}: {e}")
@@ -220,10 +212,7 @@ class TDDStructureValidator:
         missing_tests = self.check_test_coverage_existence()
         if missing_tests:
             self.errors.extend(
-                [
-                    f"Missing tests for production module: {module}"
-                    for module in missing_tests
-                ]
+                [f"Missing tests for production module: {module}" for module in missing_tests]
             )
 
         # Check for orphaned tests
@@ -240,21 +229,15 @@ class TDDStructureValidator:
         structure_issues = self.check_test_structure()
         for category, issues in structure_issues.items():
             if issues:
-                self.warnings.extend(
-                    [f"Structure issue ({category}): {issue}" for issue in issues]
-                )
+                self.warnings.extend([f"Structure issue ({category}): {issue}" for issue in issues])
 
         # Analyze test quality
         quality_issues = self.analyze_test_quality()
         for category, issues in quality_issues.items():
             if issues and category != "poor_naming":  # Treat poor naming as warning
-                self.errors.extend(
-                    [f"Quality issue ({category}): {issue}" for issue in issues]
-                )
+                self.errors.extend([f"Quality issue ({category}): {issue}" for issue in issues])
             elif issues:
-                self.warnings.extend(
-                    [f"Quality issue ({category}): {issue}" for issue in issues]
-                )
+                self.warnings.extend([f"Quality issue ({category}): {issue}" for issue in issues])
 
         return len(self.errors) == 0
 

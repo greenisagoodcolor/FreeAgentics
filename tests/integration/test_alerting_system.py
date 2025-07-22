@@ -80,9 +80,7 @@ async def test_performance_degradation_alert(setup_alerting):
 
     # Check alerts
     alerts = get_active_alerts()
-    perf_alerts = [
-        a for a in alerts if a["type"] == AlertType.PERFORMANCE_DEGRADATION.value
-    ]
+    perf_alerts = [a for a in alerts if a["type"] == AlertType.PERFORMANCE_DEGRADATION.value]
     assert len(perf_alerts) == 1
 
     alert = perf_alerts[0]
@@ -155,9 +153,7 @@ async def test_resource_exhaustion_alert(setup_alerting):
 
     # Check alerts
     alerts = get_active_alerts()
-    resource_alerts = [
-        a for a in alerts if a["type"] == AlertType.RESOURCE_EXHAUSTION.value
-    ]
+    resource_alerts = [a for a in alerts if a["type"] == AlertType.RESOURCE_EXHAUSTION.value]
     assert len(resource_alerts) == 1
 
     alert = resource_alerts[0]
@@ -239,9 +235,7 @@ async def test_alert_statistics(setup_alerting):
         {"agent_id": "agent-1", "agent_status": "failed", "error": "Error 1"},
     )
 
-    await check_agent_alert(
-        "agent-2", {"agent_id": "agent-2", "inference_time_ms": 150}
-    )
+    await check_agent_alert("agent-2", {"agent_id": "agent-2", "inference_time_ms": 150})
 
     await check_system_alert({"memory_usage_mb": 850})
 

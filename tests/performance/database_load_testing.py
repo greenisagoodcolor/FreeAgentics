@@ -217,9 +217,7 @@ class DatabaseLoadTester:
         except Exception as e:
             logger.error(f"Failed to cleanup test environment: {e}")
 
-    async def run_connection_pool_test(
-        self, max_connections: int = 50
-    ) -> DatabaseTestResult:
+    async def run_connection_pool_test(self, max_connections: int = 50) -> DatabaseTestResult:
         """Test database connection pool performance."""
         logger.info(f"Starting connection pool test with {max_connections} connections")
 
@@ -258,9 +256,7 @@ class DatabaseLoadTester:
 
         duration = time.perf_counter() - start_time
         success_rate = (
-            (successful_connections / max_connections * 100)
-            if max_connections > 0
-            else 0
+            (successful_connections / max_connections * 100) if max_connections > 0 else 0
         )
 
         # System metrics
@@ -275,18 +271,10 @@ class DatabaseLoadTester:
             failed_queries=failed_connections,
             duration_seconds=duration,
             queries_per_second=successful_connections / duration if duration > 0 else 0,
-            average_query_time_ms=statistics.mean(connection_times)
-            if connection_times
-            else 0,
-            p95_query_time_ms=np.percentile(connection_times, 95)
-            if connection_times
-            else 0,
-            p99_query_time_ms=np.percentile(connection_times, 99)
-            if connection_times
-            else 0,
-            connection_time_ms=statistics.mean(connection_times)
-            if connection_times
-            else 0,
+            average_query_time_ms=statistics.mean(connection_times) if connection_times else 0,
+            p95_query_time_ms=np.percentile(connection_times, 95) if connection_times else 0,
+            p99_query_time_ms=np.percentile(connection_times, 99) if connection_times else 0,
+            connection_time_ms=statistics.mean(connection_times) if connection_times else 0,
             memory_usage_mb=memory_usage,
             cpu_usage_percent=cpu_usage,
             connection_errors=failed_connections,
@@ -310,9 +298,7 @@ class DatabaseLoadTester:
         self, concurrent_users: int = 20, test_duration: int = 60
     ) -> DatabaseTestResult:
         """Run query benchmark test with various query types."""
-        logger.info(
-            f"Starting query benchmark test: {concurrent_users} users for {test_duration}s"
-        )
+        logger.info(f"Starting query benchmark test: {concurrent_users} users for {test_duration}s")
 
         start_time = time.perf_counter()
         end_time = start_time + test_duration
@@ -324,11 +310,7 @@ class DatabaseLoadTester:
         connection_errors = 0
 
         async def benchmark_user(user_id: int):
-            nonlocal \
-                total_queries, \
-                successful_queries, \
-                failed_queries, \
-                connection_errors
+            nonlocal total_queries, successful_queries, failed_queries, connection_errors
 
             try:
                 # Create connection for this user
@@ -337,18 +319,18 @@ class DatabaseLoadTester:
                 while time.perf_counter() < end_time:
                     # Choose random query benchmark
                     weights = [b.weight for b in self.query_benchmarks]
-                    benchmark = random.choices(self.query_benchmarks, weights=weights)[
-                        0
-                    ]
+                    benchmark = random.choices(self.query_benchmarks, weights=weights)[0]
 
                     query_start = time.perf_counter()
                     try:
                         if benchmark.parameters:
                             # Handle parameterized queries
                             params = [
-                                p
-                                if not isinstance(p, str) or "$" not in p
-                                else f"{p}_{user_id}_{total_queries}"
+                                (
+                                    p
+                                    if not isinstance(p, str) or "$" not in p
+                                    else f"{p}_{user_id}_{total_queries}"
+                                )
                                 for p in benchmark.parameters
                             ]
                             await conn.execute(benchmark.query, *params)
@@ -408,9 +390,9 @@ class DatabaseLoadTester:
                 "concurrent_users": concurrent_users,
                 "test_duration": test_duration,
                 "query_types": len(self.query_benchmarks),
-                "success_rate": (successful_queries / total_queries * 100)
-                if total_queries > 0
-                else 0,
+                "success_rate": (
+                    (successful_queries / total_queries * 100) if total_queries > 0 else 0
+                ),
                 "query_time_stats": {
                     "min_ms": min(query_times) if query_times else 0,
                     "max_ms": max(query_times) if query_times else 0,
@@ -443,11 +425,7 @@ class DatabaseLoadTester:
         connection_errors = 0
 
         async def transaction_user(user_id: int):
-            nonlocal \
-                total_transactions, \
-                successful_transactions, \
-                failed_transactions, \
-                connection_errors
+            nonlocal total_transactions, successful_transactions, failed_transactions, connection_errors
 
             try:
                 conn = await asyncpg.connect(**self.db_config)
@@ -518,15 +496,9 @@ class DatabaseLoadTester:
             failed_queries=failed_transactions,
             duration_seconds=duration,
             queries_per_second=tps,
-            average_query_time_ms=statistics.mean(transaction_times)
-            if transaction_times
-            else 0,
-            p95_query_time_ms=np.percentile(transaction_times, 95)
-            if transaction_times
-            else 0,
-            p99_query_time_ms=np.percentile(transaction_times, 99)
-            if transaction_times
-            else 0,
+            average_query_time_ms=statistics.mean(transaction_times) if transaction_times else 0,
+            p95_query_time_ms=np.percentile(transaction_times, 95) if transaction_times else 0,
+            p99_query_time_ms=np.percentile(transaction_times, 99) if transaction_times else 0,
             connection_time_ms=0,  # Not measured in this test
             memory_usage_mb=memory_usage,
             cpu_usage_percent=cpu_usage,
@@ -535,10 +507,10 @@ class DatabaseLoadTester:
                 "concurrent_users": concurrent_users,
                 "transactions_per_user": transactions_per_user,
                 "transaction_success_rate": (
-                    successful_transactions / total_transactions * 100
-                )
-                if total_transactions > 0
-                else 0,
+                    (successful_transactions / total_transactions * 100)
+                    if total_transactions > 0
+                    else 0
+                ),
                 "transaction_time_stats": {
                     "min_ms": min(transaction_times) if transaction_times else 0,
                     "max_ms": max(transaction_times) if transaction_times else 0,
@@ -573,12 +545,7 @@ class DatabaseLoadTester:
         active_connections = 0
 
         async def stress_connection(conn_id: int):
-            nonlocal \
-                total_queries, \
-                successful_queries, \
-                failed_queries, \
-                connection_errors, \
-                active_connections
+            nonlocal total_queries, successful_queries, failed_queries, connection_errors, active_connections
 
             try:
                 conn = await asyncpg.connect(**self.db_config)
@@ -620,9 +587,7 @@ class DatabaseLoadTester:
 
                     except Exception as e:
                         failed_queries += 1
-                        logger.debug(
-                            f"Stress query failed for connection {conn_id}: {e}"
-                        )
+                        logger.debug(f"Stress query failed for connection {conn_id}: {e}")
 
                     total_queries += 1
 
@@ -678,9 +643,9 @@ class DatabaseLoadTester:
                 "max_connections": max_connections,
                 "test_duration": test_duration,
                 "peak_active_connections": active_connections,
-                "query_success_rate": (successful_queries / total_queries * 100)
-                if total_queries > 0
-                else 0,
+                "query_success_rate": (
+                    (successful_queries / total_queries * 100) if total_queries > 0 else 0
+                ),
                 "query_distribution": {
                     "simple": 0.3,
                     "insert": 0.2,
@@ -750,20 +715,14 @@ class DatabaseLoadTester:
             except Exception as e:
                 logger.warning(f"Cleanup error: {e}")
 
-    def _generate_comprehensive_report(
-        self, test_results: Dict[str, Any]
-    ) -> Dict[str, Any]:
+    def _generate_comprehensive_report(self, test_results: Dict[str, Any]) -> Dict[str, Any]:
         """Generate comprehensive database performance report."""
         report = {
             "timestamp": datetime.now().isoformat(),
             "test_summary": {
                 "total_tests": len(test_results),
                 "tests_completed": len(
-                    [
-                        k
-                        for k, v in test_results.items()
-                        if isinstance(v, DatabaseTestResult)
-                    ]
+                    [k for k, v in test_results.items() if isinstance(v, DatabaseTestResult)]
                 ),
                 "database_config": {
                     "host": self.db_config.get("host", "localhost"),
@@ -787,10 +746,10 @@ class DatabaseLoadTester:
                     "p99_query_time_ms": result.p99_query_time_ms,
                     "connection_time_ms": result.connection_time_ms,
                     "success_rate": (
-                        result.successful_queries / result.total_queries * 100
-                    )
-                    if result.total_queries > 0
-                    else 0,
+                        (result.successful_queries / result.total_queries * 100)
+                        if result.total_queries > 0
+                        else 0
+                    ),
                     "memory_usage_mb": result.memory_usage_mb,
                     "cpu_usage_percent": result.cpu_usage_percent,
                     "connection_errors": result.connection_errors,

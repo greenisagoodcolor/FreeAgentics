@@ -75,9 +75,7 @@ class PenetrationTestRunner:
             if module_name in self.config["enabled_modules"]:
                 try:
                     # Initialize test module
-                    test_instance = module_class(
-                        self.framework.client, self.framework.auth_manager
-                    )
+                    test_instance = module_class(self.framework.client, self.framework.auth_manager)
                     self.framework.register_test_module(test_instance)
                     logger.info(f"Registered test module: {module_name}")
                 except Exception as e:
@@ -147,9 +145,7 @@ class PenetrationTestRunner:
             filtered_results = self._filter_by_severity(results)
 
             # Generate reports
-            report_files = await self._generate_reports(
-                filtered_results, suffix=f"_{module_name}"
-            )
+            report_files = await self._generate_reports(filtered_results, suffix=f"_{module_name}")
             filtered_results["execution_summary"] = {
                 "module": module_name,
                 "report_files": report_files,
@@ -195,16 +191,12 @@ class PenetrationTestRunner:
             if severity in severity_counts:
                 severity_counts[severity] += 1
 
-        filtered_results["executive_summary"]["total_vulnerabilities"] = len(
-            filtered_findings
-        )
+        filtered_results["executive_summary"]["total_vulnerabilities"] = len(filtered_findings)
         filtered_results["executive_summary"]["severity_distribution"] = severity_counts
 
         return filtered_results
 
-    async def _generate_reports(
-        self, results: Dict[str, Any], suffix: str = ""
-    ) -> List[str]:
+    async def _generate_reports(self, results: Dict[str, Any], suffix: str = "") -> List[str]:
         """Generate reports in multiple formats."""
         timestamp = datetime.now(timezone.utc).strftime("%Y%m%d_%H%M%S")
         report_files = []
@@ -374,17 +366,11 @@ class PenetrationTestRunner:
 
         if "prioritization" in remediation:
             for action in remediation["prioritization"].get("immediate", []):
-                immediate_actions += (
-                    f"<li>{action.get('title', 'Unknown vulnerability')}</li>"
-                )
+                immediate_actions += f"<li>{action.get('title', 'Unknown vulnerability')}</li>"
             for action in remediation["prioritization"].get("within_week", []):
-                short_term_actions += (
-                    f"<li>{action.get('title', 'Unknown vulnerability')}</li>"
-                )
+                short_term_actions += f"<li>{action.get('title', 'Unknown vulnerability')}</li>"
             for action in remediation["prioritization"].get("within_month", []):
-                medium_term_actions += (
-                    f"<li>{action.get('title', 'Unknown vulnerability')}</li>"
-                )
+                medium_term_actions += f"<li>{action.get('title', 'Unknown vulnerability')}</li>"
 
         # Fill template
         return html_template.format(
@@ -455,9 +441,7 @@ class PenetrationTestRunner:
 
 """
 
-            if self.config["include_proof_of_concept"] and finding.get(
-                "proof_of_concept"
-            ):
+            if self.config["include_proof_of_concept"] and finding.get("proof_of_concept"):
                 md_content += f"""**Proof of Concept:**
 ```
 {finding.get("proof_of_concept", "")}
@@ -552,13 +536,9 @@ def main():
         help="Minimum severity threshold (default: low)",
     )
 
-    parser.add_argument(
-        "--config", "-c", type=str, help="Configuration file path (JSON)"
-    )
+    parser.add_argument("--config", "-c", type=str, help="Configuration file path (JSON)")
 
-    parser.add_argument(
-        "--verbose", "-v", action="store_true", help="Enable verbose logging"
-    )
+    parser.add_argument("--verbose", "-v", action="store_true", help="Enable verbose logging")
 
     args = parser.parse_args()
 
@@ -620,9 +600,7 @@ def main():
         print(f"{'=' * 60}")
 
         # Exit with appropriate code
-        critical_high_count = severity_dist.get("critical", 0) + severity_dist.get(
-            "high", 0
-        )
+        critical_high_count = severity_dist.get("critical", 0) + severity_dist.get("high", 0)
         if critical_high_count > 0:
             sys.exit(1)  # Exit with error if critical/high vulnerabilities found
         else:

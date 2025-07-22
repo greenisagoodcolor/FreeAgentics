@@ -106,9 +106,7 @@ class TestCertificateValidator:
     @patch("auth.certificate_pinning.socket.create_connection")
     @patch("auth.certificate_pinning.ssl.create_default_context")
     @patch("auth.certificate_pinning.x509.load_der_x509_certificate")
-    def test_get_certificate_from_server(
-        self, mock_load_cert, mock_context, mock_socket
-    ):
+    def test_get_certificate_from_server(self, mock_load_cert, mock_context, mock_socket):
         """Test certificate retrieval from server."""
         # Mock certificate
         mock_cert = Mock()
@@ -167,10 +165,7 @@ class TestMobileCertificatePinner:
         self.pinner.add_domain_pins("example.com", config)
 
         assert "example.com" in self.pinner.domain_configs
-        assert (
-            self.pinner.domain_configs["example.com"].primary_pins
-            == config.primary_pins
-        )
+        assert self.pinner.domain_configs["example.com"].primary_pins == config.primary_pins
 
     def test_add_domain_pins_invalid_format(self):
         """Test adding domain pins with invalid format."""
@@ -327,12 +322,8 @@ class TestMobileCertificatePinner:
         # The _load_env_configuration method checks for freeagentics.com domains
         assert "freeagentics.com" in pinner.domain_configs
         config = pinner.domain_configs["freeagentics.com"]
-        assert (
-            "sha256-AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA=" in config.primary_pins
-        )
-        assert (
-            "sha256-BBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBB=" in config.backup_pins
-        )
+        assert "sha256-AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA=" in config.primary_pins
+        assert "sha256-BBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBB=" in config.backup_pins
 
     def test_load_file_configuration(self):
         """Test loading configuration from file."""

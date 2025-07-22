@@ -23,9 +23,7 @@ def run_command(cmd: str, description: str, timeout: int = 300) -> tuple[int, st
     start_time = time.time()
 
     try:
-        result = subprocess.run(
-            cmd, shell=True, capture_output=True, text=True, timeout=timeout
-        )
+        result = subprocess.run(cmd, shell=True, capture_output=True, text=True, timeout=timeout)
         duration = time.time() - start_time
 
         if result.returncode == 0:
@@ -52,9 +50,7 @@ def main():
     print(f"{BOLD}{'=' * 80}{RESET}")
     print(f"{BOLD}🎯 COMPREHENSIVE QUALITY CHECK - ZERO TOLERANCE MODE{RESET}")
     print(f"{BOLD}{'=' * 80}{RESET}")
-    print(
-        "\nFollowing CLAUDE.md: ALL automated checks must pass - everything must be ✅ GREEN!"
-    )
+    print("\nFollowing CLAUDE.md: ALL automated checks must pass - everything must be ✅ GREEN!")
     print("No errors. No formatting issues. No linting problems. Zero tolerance.\n")
 
     failed_checks = []
@@ -148,9 +144,7 @@ def main():
                 print(f"   Error: {check['stderr'][:200]}")
 
         print(f"\n{RED}{BOLD}⚠️  QUALITY GATE FAILED - ZERO TOLERANCE VIOLATED!{RESET}")
-        print(
-            f"{RED}Fix ALL issues before continuing. These are not suggestions.{RESET}"
-        )
+        print(f"{RED}Fix ALL issues before continuing. These are not suggestions.{RESET}")
         print(f"{RED}Following CLAUDE.md: Never ignore a failing check.{RESET}")
         return 1
     else:

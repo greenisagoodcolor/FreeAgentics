@@ -27,14 +27,10 @@ class ReleaseSecurityValidator:
                 with open(test_results_path) as f:
                     failed_tests = json.load(f)
                     security_failures = [
-                        test
-                        for test in failed_tests
-                        if "security" in test or "auth" in test
+                        test for test in failed_tests if "security" in test or "auth" in test
                     ]
                     if security_failures:
-                        self.errors.append(
-                            f"Security tests failed: {len(security_failures)} tests"
-                        )
+                        self.errors.append(f"Security tests failed: {len(security_failures)} tests")
                         return False
 
             self.checks_passed += 1
@@ -54,15 +50,11 @@ class ReleaseSecurityValidator:
                     results = json.load(f)
 
                 high_severity = sum(
-                    1
-                    for r in results.get("results", [])
-                    if r.get("issue_severity") == "HIGH"
+                    1 for r in results.get("results", []) if r.get("issue_severity") == "HIGH"
                 )
 
                 if high_severity > 0:
-                    self.errors.append(
-                        f"High severity vulnerabilities found: {high_severity}"
-                    )
+                    self.errors.append(f"High severity vulnerabilities found: {high_severity}")
                     return False
 
             # Check dependency vulnerabilities
@@ -71,9 +63,7 @@ class ReleaseSecurityValidator:
                 with open(safety_report) as f:
                     vulnerabilities = json.load(f)
                     if vulnerabilities:
-                        self.errors.append(
-                            f"Dependency vulnerabilities: {len(vulnerabilities)}"
-                        )
+                        self.errors.append(f"Dependency vulnerabilities: {len(vulnerabilities)}")
                         return False
 
             self.checks_passed += 1
@@ -111,9 +101,7 @@ class ReleaseSecurityValidator:
                     missing_headers.append(header)
 
             if missing_headers:
-                self.errors.append(
-                    f"Missing security headers: {', '.join(missing_headers)}"
-                )
+                self.errors.append(f"Missing security headers: {', '.join(missing_headers)}")
                 return False
 
             self.checks_passed += 1

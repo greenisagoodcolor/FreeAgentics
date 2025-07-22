@@ -75,21 +75,15 @@ class Conversation(Base):
 
     # Context tracking
     context: Column[dict] = Column(JSON, default=dict)
-    agent_ids: Column[list] = Column(
-        JSON, default=list
-    )  # List of agent IDs in conversation
+    agent_ids: Column[list] = Column(JSON, default=list)  # List of agent IDs in conversation
 
     # Timestamps
     created_at: Column[datetime] = Column(DateTime, server_default=func.now())
-    updated_at: Column[datetime] = Column(
-        DateTime, server_default=func.now(), onupdate=func.now()
-    )
+    updated_at: Column[datetime] = Column(DateTime, server_default=func.now(), onupdate=func.now())
     completed_at: Column[Optional[datetime]] = Column(DateTime, nullable=True)
 
     # Relationships
-    prompts = relationship(
-        "Prompt", back_populates="conversation", cascade="all, delete-orphan"
-    )
+    prompts = relationship("Prompt", back_populates="conversation", cascade="all, delete-orphan")
 
 
 class Prompt(Base):
@@ -116,9 +110,7 @@ class Prompt(Base):
     iteration_count: Column[int] = Column(Integer, default=1)
 
     # Processing results
-    agent_id: Column[Optional[uuid.UUID]] = Column(
-        GUID(), ForeignKey("agents.id"), nullable=True
-    )
+    agent_id: Column[Optional[uuid.UUID]] = Column(GUID(), ForeignKey("agents.id"), nullable=True)
     gmn_specification: Column[Optional[str]] = Column(Text, nullable=True)
     status: Column[PromptStatus] = Column(
         Enum(PromptStatus), default=PromptStatus.PENDING, nullable=False
@@ -161,9 +153,7 @@ class KnowledgeGraphUpdate(Base):
     id: Column[uuid.UUID] = Column(GUID(), primary_key=True, default=uuid.uuid4)
 
     # Prompt association
-    prompt_id: Column[uuid.UUID] = Column(
-        GUID(), ForeignKey("prompts.id"), nullable=False
-    )
+    prompt_id: Column[uuid.UUID] = Column(GUID(), ForeignKey("prompts.id"), nullable=False)
 
     # Update details
     node_id: Column[str] = Column(String(100), nullable=False)
@@ -216,6 +206,4 @@ class PromptTemplate(Base):
 
     # Timestamps
     created_at: Column[datetime] = Column(DateTime, server_default=func.now())
-    updated_at: Column[datetime] = Column(
-        DateTime, server_default=func.now(), onupdate=func.now()
-    )
+    updated_at: Column[datetime] = Column(DateTime, server_default=func.now(), onupdate=func.now())

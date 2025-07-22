@@ -247,9 +247,7 @@ class TestSecurityHeaders:
         manager = SecurityHeadersManager(policy)
 
         # Mock the certificate pinner
-        with patch.object(
-            manager.certificate_pinner, "generate_header"
-        ) as mock_generate:
+        with patch.object(manager.certificate_pinner, "generate_header") as mock_generate:
             mock_generate.return_value = 'pin-sha256="test123"; max-age=5184000'
 
             request = MagicMock()

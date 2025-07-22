@@ -292,9 +292,7 @@ class TestGreedyFormation:
         assert greedy_strategy.name == "Greedy Formation"
         assert hasattr(greedy_strategy, "form_coalitions")
 
-    def test_greedy_form_coalitions_basic(
-        self, greedy_strategy, sample_agents, sample_objectives
-    ):
+    def test_greedy_form_coalitions_basic(self, greedy_strategy, sample_agents, sample_objectives):
         """Test basic coalition formation with greedy strategy."""
         result = greedy_strategy.form_coalitions(sample_agents, sample_objectives)
 
@@ -308,9 +306,7 @@ class TestGreedyFormation:
         # Should have some coalitions formed
         assert len(result.coalitions) > 0
 
-    def test_greedy_form_coalitions_empty_agents(
-        self, greedy_strategy, sample_objectives
-    ):
+    def test_greedy_form_coalitions_empty_agents(self, greedy_strategy, sample_objectives):
         """Test coalition formation with empty agent list."""
         result = greedy_strategy.form_coalitions([], sample_objectives)
 
@@ -319,9 +315,7 @@ class TestGreedyFormation:
         assert len(result.unassigned_agents) == 0
         assert result.objective_coverage == 0.0
 
-    def test_greedy_form_coalitions_empty_objectives(
-        self, greedy_strategy, sample_agents
-    ):
+    def test_greedy_form_coalitions_empty_objectives(self, greedy_strategy, sample_agents):
         """Test coalition formation with empty objectives list."""
         result = greedy_strategy.form_coalitions(sample_agents, [])
 
@@ -330,9 +324,7 @@ class TestGreedyFormation:
         assert len(result.unassigned_agents) == len(sample_agents)
         assert result.objective_coverage == 1.0  # No objectives means 100% coverage
 
-    def test_greedy_formation_result(
-        self, greedy_strategy, sample_agents, sample_objectives
-    ):
+    def test_greedy_formation_result(self, greedy_strategy, sample_agents, sample_objectives):
         """Test formation result structure."""
         result = greedy_strategy.form_coalitions(sample_agents, sample_objectives)
 
@@ -360,9 +352,7 @@ class TestGreedyFormation:
         exploration_objective.required_capabilities = ["exploration"]
         exploration_objective.priority = 1.0
 
-        result = greedy_strategy.form_coalitions(
-            [exploration_agent], [exploration_objective]
-        )
+        result = greedy_strategy.form_coalitions([exploration_agent], [exploration_objective])
 
         # Should form exactly one coalition
         assert len(result.coalitions) == 1
@@ -509,9 +499,7 @@ class TestHierarchicalFormation:
         objective.required_capabilities = ["leadership"]
         objective.priority = 1.0
 
-        result = hierarchical_strategy.form_coalitions(
-            [high_rep_agent, low_rep_agent], [objective]
-        )
+        result = hierarchical_strategy.form_coalitions([high_rep_agent, low_rep_agent], [objective])
 
         # Should prefer high reputation agent
         assert len(result.coalitions) == 1

@@ -90,9 +90,7 @@ class ObsoleteArtifactCleaner:
                                     f"Error removing container {container.name}: {e}"
                                 )
                         else:
-                            self.logger.info(
-                                f"Would remove container: {container.name}"
-                            )
+                            self.logger.info(f"Would remove container: {container.name}")
                             removed_count += 1
 
         except Exception as e:
@@ -123,9 +121,7 @@ class ObsoleteArtifactCleaner:
                                 volume.remove()
                                 removed_count += 1
                                 size_freed += size
-                                self.logger.info(
-                                    f"Removed volume: {volume.name} ({size} bytes)"
-                                )
+                                self.logger.info(f"Removed volume: {volume.name} ({size} bytes)")
                             except Exception as e:
                                 self.stats.errors.append(
                                     f"Error removing volume {volume.name}: {e}"
@@ -147,9 +143,7 @@ class ObsoleteArtifactCleaner:
             networks = self.docker_client.networks.list()
 
             for network in networks:
-                if self._matches_patterns(
-                    network.name, patterns
-                ) and network.name not in [
+                if self._matches_patterns(network.name, patterns) and network.name not in [
                     "bridge",
                     "host",
                     "none",
@@ -196,16 +190,12 @@ class ObsoleteArtifactCleaner:
                         if created_time < self.cutoff_time:
                             if not self.dry_run:
                                 try:
-                                    self.docker_client.images.remove(
-                                        image.id, force=True
-                                    )
+                                    self.docker_client.images.remove(image.id, force=True)
                                     removed_count += 1
                                     self.logger.info(f"Removed image: {tag}")
                                     break
                                 except Exception as e:
-                                    self.stats.errors.append(
-                                        f"Error removing image {tag}: {e}"
-                                    )
+                                    self.stats.errors.append(f"Error removing image {tag}: {e}")
                             else:
                                 self.logger.info(f"Would remove image: {tag}")
                                 removed_count += 1
@@ -251,9 +241,7 @@ class ObsoleteArtifactCleaner:
                         removed_count += 1
                         self.logger.info(f"Removed schema: {schema_name}")
                     except Exception as e:
-                        self.stats.errors.append(
-                            f"Error removing schema {schema_name}: {e}"
-                        )
+                        self.stats.errors.append(f"Error removing schema {schema_name}: {e}")
                         conn.rollback()
                 else:
                     self.logger.info(f"Would remove schema: {schema_name}")
@@ -323,21 +311,15 @@ class ObsoleteArtifactCleaner:
 
                                 if delete_response.status_code in [204, 404]:
                                     removed_count += 1
-                                    self.logger.info(
-                                        f"Removed RabbitMQ vhost: {vhost_name}"
-                                    )
+                                    self.logger.info(f"Removed RabbitMQ vhost: {vhost_name}")
                                 else:
                                     self.stats.errors.append(
                                         f"Error removing vhost {vhost_name}: HTTP {delete_response.status_code}"
                                     )
                             except Exception as e:
-                                self.stats.errors.append(
-                                    f"Error removing vhost {vhost_name}: {e}"
-                                )
+                                self.stats.errors.append(f"Error removing vhost {vhost_name}: {e}")
                         else:
-                            self.logger.info(
-                                f"Would remove RabbitMQ vhost: {vhost_name}"
-                            )
+                            self.logger.info(f"Would remove RabbitMQ vhost: {vhost_name}")
                             removed_count += 1
 
         except Exception as e:
@@ -392,9 +374,7 @@ class ObsoleteArtifactCleaner:
                             except Exception as e:
                                 self.stats.errors.append(f"Error removing {path}: {e}")
                         else:
-                            self.logger.info(
-                                f"Would remove filesystem artifact: {path}"
-                            )
+                            self.logger.info(f"Would remove filesystem artifact: {path}")
                             removed_count += 1
 
         return removed_count
@@ -449,9 +429,7 @@ class ObsoleteArtifactCleaner:
 
         self.stats.volumes_removed = self.cleanup_docker_volumes(["test-*", "*_test_*"])
 
-        self.stats.networks_removed = self.cleanup_docker_networks(
-            ["test-*", "*_test_*"]
-        )
+        self.stats.networks_removed = self.cleanup_docker_networks(["test-*", "*_test_*"])
 
         self.stats.images_removed = self.cleanup_docker_images(["test-*", "*:test-*"])
 
@@ -488,9 +466,7 @@ class ObsoleteArtifactCleaner:
         print(f"Database schemas removed: {self.stats.schemas_removed}")
         print(f"Redis keys removed: {self.stats.redis_keys_removed}")
         print(f"RabbitMQ vhosts removed: {self.stats.rabbitmq_vhosts_removed}")
-        print(
-            f"Filesystem artifacts removed: {self.stats.filesystem_artifacts_removed}"
-        )
+        print(f"Filesystem artifacts removed: {self.stats.filesystem_artifacts_removed}")
         print(f"Total errors: {len(self.stats.errors)}")
 
         if self.stats.errors:
@@ -503,9 +479,7 @@ class ObsoleteArtifactCleaner:
 
 def main():
     """Main entry point."""
-    parser = argparse.ArgumentParser(
-        description="Clean up obsolete test environment artifacts"
-    )
+    parser = argparse.ArgumentParser(description="Clean up obsolete test environment artifacts")
     parser.add_argument(
         "--dry-run",
         action="store_true",
@@ -538,9 +512,7 @@ def main():
             print("Cleanup cancelled.")
             return
 
-    cleaner = ObsoleteArtifactCleaner(
-        dry_run=args.dry_run, max_age_hours=args.max_age_hours
-    )
+    cleaner = ObsoleteArtifactCleaner(dry_run=args.dry_run, max_age_hours=args.max_age_hours)
 
     stats = cleaner.run_cleanup()
 

@@ -88,9 +88,7 @@ class WebSocketPerformanceTester:
         self, max_connections: int = 100, connection_interval: float = 0.1
     ) -> WebSocketTestResult:
         """Test WebSocket connection establishment performance."""
-        logger.info(
-            f"Starting connection performance test with {max_connections} connections"
-        )
+        logger.info(f"Starting connection performance test with {max_connections} connections")
 
         start_time = time.perf_counter()
         connections = []
@@ -116,9 +114,7 @@ class WebSocketPerformanceTester:
                     connections.append(websocket)
                     successful_connections += 1
 
-                    logger.debug(
-                        f"Connection {i + 1} established in {connection_time:.1f}ms"
-                    )
+                    logger.debug(f"Connection {i + 1} established in {connection_time:.1f}ms")
 
                 except Exception as e:
                     failed_connections += 1
@@ -155,15 +151,9 @@ class WebSocketPerformanceTester:
             total_messages_sent=0,
             total_messages_received=0,
             message_loss_rate=0.0,
-            average_latency_ms=statistics.mean(connection_times)
-            if connection_times
-            else 0,
-            p95_latency_ms=np.percentile(connection_times, 95)
-            if connection_times
-            else 0,
-            p99_latency_ms=np.percentile(connection_times, 99)
-            if connection_times
-            else 0,
+            average_latency_ms=statistics.mean(connection_times) if connection_times else 0,
+            p95_latency_ms=np.percentile(connection_times, 95) if connection_times else 0,
+            p99_latency_ms=np.percentile(connection_times, 99) if connection_times else 0,
             throughput_messages_per_second=0.0,
             connection_success_rate=connection_success_rate,
             memory_usage_mb=memory_usage,
@@ -257,9 +247,7 @@ class WebSocketPerformanceTester:
 
                     except Exception as e:
                         message_errors += 1
-                        logger.debug(
-                            f"Message error on connection {connection_id}: {e}"
-                        )
+                        logger.debug(f"Message error on connection {connection_id}: {e}")
 
             # Run message sending tasks
             tasks = []
@@ -282,11 +270,7 @@ class WebSocketPerformanceTester:
         duration = time.perf_counter() - start_time
         throughput = total_messages_sent / duration if duration > 0 else 0
         message_loss_rate = (
-            (
-                (total_messages_sent - total_messages_received)
-                / total_messages_sent
-                * 100
-            )
+            ((total_messages_sent - total_messages_received) / total_messages_sent * 100)
             if total_messages_sent > 0
             else 0
         )
@@ -302,21 +286,13 @@ class WebSocketPerformanceTester:
             total_messages_sent=total_messages_sent,
             total_messages_received=total_messages_received,
             message_loss_rate=message_loss_rate,
-            average_latency_ms=statistics.mean(message_latencies)
-            if message_latencies
-            else 0,
-            p95_latency_ms=np.percentile(message_latencies, 95)
-            if message_latencies
-            else 0,
-            p99_latency_ms=np.percentile(message_latencies, 99)
-            if message_latencies
-            else 0,
+            average_latency_ms=statistics.mean(message_latencies) if message_latencies else 0,
+            p95_latency_ms=np.percentile(message_latencies, 95) if message_latencies else 0,
+            p99_latency_ms=np.percentile(message_latencies, 99) if message_latencies else 0,
             throughput_messages_per_second=throughput,
             connection_success_rate=(
-                (connections - connection_errors) / connections * 100
-            )
-            if connections > 0
-            else 0,
+                ((connections - connection_errors) / connections * 100) if connections > 0 else 0
+            ),
             memory_usage_mb=memory_usage,
             cpu_usage_percent=cpu_usage,
             errors_encountered=connection_errors + message_errors,
@@ -359,11 +335,7 @@ class WebSocketPerformanceTester:
         latencies = []
 
         async def stress_connection(connection_id):
-            nonlocal \
-                total_messages_sent, \
-                total_messages_received, \
-                connection_errors, \
-                message_errors
+            nonlocal total_messages_sent, total_messages_received, connection_errors, message_errors
 
             websocket = None
             try:
@@ -402,9 +374,7 @@ class WebSocketPerformanceTester:
 
                     except Exception as e:
                         message_errors += 1
-                        logger.debug(
-                            f"Message error on connection {connection_id}: {e}"
-                        )
+                        logger.debug(f"Message error on connection {connection_id}: {e}")
 
             except Exception as e:
                 connection_errors += 1
@@ -441,11 +411,7 @@ class WebSocketPerformanceTester:
         duration = time.perf_counter() - start_time
         throughput = total_messages_sent / duration if duration > 0 else 0
         message_loss_rate = (
-            (
-                (total_messages_sent - total_messages_received)
-                / total_messages_sent
-                * 100
-            )
+            ((total_messages_sent - total_messages_received) / total_messages_sent * 100)
             if total_messages_sent > 0
             else 0
         )
@@ -466,9 +432,9 @@ class WebSocketPerformanceTester:
             p95_latency_ms=np.percentile(latencies, 95) if latencies else 0,
             p99_latency_ms=np.percentile(latencies, 99) if latencies else 0,
             throughput_messages_per_second=throughput,
-            connection_success_rate=(successful_connections / max_connections * 100)
-            if max_connections > 0
-            else 0,
+            connection_success_rate=(
+                (successful_connections / max_connections * 100) if max_connections > 0 else 0
+            ),
             memory_usage_mb=memory_usage,
             cpu_usage_percent=cpu_usage,
             errors_encountered=connection_errors + message_errors,
@@ -509,11 +475,7 @@ class WebSocketPerformanceTester:
         latencies = []
 
         async def stability_connection(connection_id):
-            nonlocal \
-                stable_connections, \
-                connection_dropouts, \
-                reconnection_attempts, \
-                successful_reconnections
+            nonlocal stable_connections, connection_dropouts, reconnection_attempts, successful_reconnections
             nonlocal total_messages_sent, total_messages_received
 
             websocket = None
@@ -574,19 +536,13 @@ class WebSocketPerformanceTester:
                                 ping_timeout=15,
                             )
                             successful_reconnections += 1
-                            logger.info(
-                                f"Connection {connection_id} reconnected successfully"
-                            )
+                            logger.info(f"Connection {connection_id} reconnected successfully")
                         except Exception as e:
-                            logger.error(
-                                f"Reconnection failed for connection {connection_id}: {e}"
-                            )
+                            logger.error(f"Reconnection failed for connection {connection_id}: {e}")
                             break
 
                     except Exception as e:
-                        logger.debug(
-                            f"Stability test error on connection {connection_id}: {e}"
-                        )
+                        logger.debug(f"Stability test error on connection {connection_id}: {e}")
                         await asyncio.sleep(1)  # Wait before retrying
 
             except Exception as e:
@@ -620,11 +576,7 @@ class WebSocketPerformanceTester:
         duration = time.perf_counter() - start_time
         throughput = total_messages_sent / duration if duration > 0 else 0
         message_loss_rate = (
-            (
-                (total_messages_sent - total_messages_received)
-                / total_messages_sent
-                * 100
-            )
+            ((total_messages_sent - total_messages_received) / total_messages_sent * 100)
             if total_messages_sent > 0
             else 0
         )
@@ -680,9 +632,7 @@ class WebSocketPerformanceTester:
         try:
             # 1. Connection Performance Test
             logger.info("Running connection performance test...")
-            connection_result = await self.run_connection_performance_test(
-                max_connections=50
-            )
+            connection_result = await self.run_connection_performance_test(max_connections=50)
             test_results["connection_performance"] = connection_result
 
             # 2. Message Throughput Test
@@ -694,16 +644,12 @@ class WebSocketPerformanceTester:
 
             # 3. Stress Test
             logger.info("Running stress test...")
-            stress_result = await self.run_stress_test(
-                max_connections=100, test_duration=60
-            )
+            stress_result = await self.run_stress_test(max_connections=100, test_duration=60)
             test_results["stress_test"] = stress_result
 
             # 4. Stability Test
             logger.info("Running stability test...")
-            stability_result = await self.run_stability_test(
-                connections=25, test_duration=120
-            )
+            stability_result = await self.run_stability_test(connections=25, test_duration=120)
             test_results["stability_test"] = stability_result
 
         except Exception as e:
@@ -715,20 +661,14 @@ class WebSocketPerformanceTester:
 
         return report
 
-    def _generate_comprehensive_report(
-        self, test_results: Dict[str, Any]
-    ) -> Dict[str, Any]:
+    def _generate_comprehensive_report(self, test_results: Dict[str, Any]) -> Dict[str, Any]:
         """Generate comprehensive WebSocket performance report."""
         report = {
             "timestamp": datetime.now().isoformat(),
             "test_summary": {
                 "total_tests": len([k for k in test_results.keys() if k != "error"]),
                 "tests_completed": len(
-                    [
-                        k
-                        for k, v in test_results.items()
-                        if isinstance(v, WebSocketTestResult)
-                    ]
+                    [k for k, v in test_results.items() if isinstance(v, WebSocketTestResult)]
                 ),
                 "errors": test_results.get("error", None),
             },
@@ -764,9 +704,7 @@ class WebSocketPerformanceTester:
 
         return report
 
-    def _check_sla_violations(
-        self, result: WebSocketTestResult
-    ) -> List[Dict[str, Any]]:
+    def _check_sla_violations(self, result: WebSocketTestResult) -> List[Dict[str, Any]]:
         """Check for SLA violations in test results."""
         violations = []
 
@@ -795,10 +733,7 @@ class WebSocketPerformanceTester:
             )
 
         # Throughput
-        if (
-            result.throughput_messages_per_second
-            < self.thresholds["throughput_min_mps"]
-        ):
+        if result.throughput_messages_per_second < self.thresholds["throughput_min_mps"]:
             violations.append(
                 {
                     "metric": "throughput",

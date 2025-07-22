@@ -70,9 +70,7 @@ class AgentLifecycleManager:
         self._lock = threading.Lock()
         self._spawn_counter = 0
 
-    def spawn_agent(
-        self, agent_type: AgentType, config: Dict[str, Any]
-    ) -> ActiveInferenceAgent:
+    def spawn_agent(self, agent_type: AgentType, config: Dict[str, Any]) -> ActiveInferenceAgent:
         """Spawn a single agent with given configuration."""
         with self._lock:
             if len(self.agents) >= self.max_agents:
@@ -84,13 +82,9 @@ class AgentLifecycleManager:
 
         # Create agent based on type
         if agent_type == AgentType.EXPLORER:
-            agent = BasicExplorerAgent(
-                agent_id, name, grid_size=config.get("grid_size", 10)
-            )
+            agent = BasicExplorerAgent(agent_id, name, grid_size=config.get("grid_size", 10))
         elif agent_type == AgentType.COLLECTOR:
-            agent = ResourceCollectorAgent(
-                agent_id, name, grid_size=config.get("grid_size", 10)
-            )
+            agent = ResourceCollectorAgent(agent_id, name, grid_size=config.get("grid_size", 10))
         elif agent_type == AgentType.COORDINATOR:
             agent = CoalitionCoordinatorAgent(
                 agent_id, name, max_agents=config.get("max_agents", 10)
@@ -132,9 +126,7 @@ class AgentLifecycleManager:
             }
 
             # Set initial position if provided
-            if spawn_config.initial_positions and i < len(
-                spawn_config.initial_positions
-            ):
+            if spawn_config.initial_positions and i < len(spawn_config.initial_positions):
                 config["initial_position"] = spawn_config.initial_positions[i]
 
             # Spawn agent
@@ -175,10 +167,7 @@ class AgentLifecycleManager:
     def get_all_metrics(self) -> Dict[str, Dict[str, Any]]:
         """Get metrics for all agents."""
         with self._lock:
-            return {
-                agent_id: self.get_agent_metrics(agent_id)
-                for agent_id in self.agents.keys()
-            }
+            return {agent_id: self.get_agent_metrics(agent_id) for agent_id in self.agents.keys()}
 
     def terminate_agent(self, agent_id: str) -> bool:
         """Terminate a specific agent."""
@@ -346,10 +335,7 @@ class SimulationEnvironment:
         }
 
         try:
-            while (
-                self.running
-                and (time.time() - self.start_time) < config.duration_seconds
-            ):
+            while self.running and (time.time() - self.start_time) < config.duration_seconds:
                 tick_start = time.time()
 
                 # Run one tick
@@ -457,16 +443,14 @@ class ScalingTestScenario(LoadTestScenario):
 
             # Calculate metrics
             total_agent_steps = sum(
-                m["steps"]
-                for m in self.environment.lifecycle_manager.get_all_metrics().values()
+                m["steps"] for m in self.environment.lifecycle_manager.get_all_metrics().values()
             )
 
             phase_results.update(
                 {
                     "agent_count": agent_count,
                     "total_agent_steps": total_agent_steps,
-                    "steps_per_second": total_agent_steps
-                    / phase_results["duration_seconds"],
+                    "steps_per_second": total_agent_steps / phase_results["duration_seconds"],
                     "avg_steps_per_agent": total_agent_steps / agent_count,
                 }
             )
@@ -549,18 +533,14 @@ def run_agent_simulation_tests():
 
     # Test 2: Batch spawning
     print("\n2. Testing batch spawning...")
-    batch_config = AgentSpawnConfig(
-        agent_type=AgentType.EXPLORER, count=10, spawn_delay_ms=50
-    )
+    batch_config = AgentSpawnConfig(agent_type=AgentType.EXPLORER, count=10, spawn_delay_ms=50)
 
     start_time = time.time()
     batch_agents = lifecycle_mgr.spawn_batch(batch_config)
     spawn_duration = time.time() - start_time
 
     print(f"✅ Spawned {len(batch_agents)} agents in {spawn_duration:.2f}s")
-    print(
-        f"   Average spawn time: {spawn_duration / len(batch_agents) * 1000:.1f}ms per agent"
-    )
+    print(f"   Average spawn time: {spawn_duration / len(batch_agents) * 1000:.1f}ms per agent")
 
     # Test 3: Scaling scenario
     print("\n3. Running scaling test scenario...")

@@ -129,24 +129,18 @@ class MemoryProfiler:
         # Profile observation matrices
         self._create_observation_matrices()
         mem = self.measure("Observation matrices created")
-        component_memory["observations"] = mem["delta_mb"] - sum(
-            component_memory.values()
-        )
+        component_memory["observations"] = mem["delta_mb"] - sum(component_memory.values())
 
         # Profile preference matrices
         self._create_preference_matrices()
         mem = self.measure("Preference matrices created")
-        component_memory["preferences"] = mem["delta_mb"] - sum(
-            component_memory.values()
-        )
+        component_memory["preferences"] = mem["delta_mb"] - sum(component_memory.values())
 
         # Profile full PyMDP agent
         if self._pymdp_available():
             self._create_pymdp_agent()
             mem = self.measure("PyMDP agent created")
-            component_memory["pymdp_agent"] = mem["delta_mb"] - sum(
-                component_memory.values()
-            )
+            component_memory["pymdp_agent"] = mem["delta_mb"] - sum(component_memory.values())
 
         logger.info("\n=== Component Memory Usage ===")
         for component, memory in component_memory.items():
@@ -257,9 +251,7 @@ class MemoryProfiler:
         # Measurements timeline
         report.append("\nMEMORY TIMELINE:")
         for m in self.measurements:
-            report.append(
-                f"- {m['label']}: {m['rss_mb']:.2f} MB (Δ{m['delta_mb']:+.2f} MB)"
-            )
+            report.append(f"- {m['label']}: {m['rss_mb']:.2f} MB (Δ{m['delta_mb']:+.2f} MB)")
 
         return "\n".join(report)
 
@@ -269,9 +261,7 @@ class MemoryProfiler:
         world = GridWorld(config)
 
         # Use BasicExplorerAgent which is a concrete implementation
-        agent = BasicExplorerAgent(
-            agent_id=agent_id, initial_position=(0, 0), world=world
-        )
+        agent = BasicExplorerAgent(agent_id=agent_id, initial_position=(0, 0), world=world)
 
         return agent
 
@@ -299,18 +289,13 @@ class MemoryProfiler:
         num_controls = [4, 1]  # 4 movement actions
 
         # Create observation model (A matrices)
-        A = utils.obj_array_zeros(
-            [[num_obs[f], num_states[f]] for f in range(num_factors)]
-        )
+        A = utils.obj_array_zeros([[num_obs[f], num_states[f]] for f in range(num_factors)])
         for f in range(num_factors):
             A[f] = np.eye(num_obs[f], num_states[f])  # Identity mapping
 
         # Create transition model (B matrices)
         B = utils.obj_array_zeros(
-            [
-                [num_states[f], num_states[f], num_controls[f]]
-                for f in range(num_factors)
-            ]
+            [[num_states[f], num_states[f], num_controls[f]] for f in range(num_factors)]
         )
         for f in range(num_factors):
             for a in range(num_controls[f]):

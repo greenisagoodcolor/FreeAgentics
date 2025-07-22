@@ -313,9 +313,7 @@ class WebSocketConnectionPool:
                 return
 
             self._url = url
-            logger.info(
-                f"Initializing connection pool with min_size={self.config.min_size}"
-            )
+            logger.info(f"Initializing connection pool with min_size={self.config.min_size}")
 
         # Create initial connections (outside lock to avoid deadlock)
         tasks = []
@@ -390,8 +388,7 @@ class WebSocketConnectionPool:
                     if prefer_metadata and self._idle_connections:
                         for conn in self._idle_connections:
                             matches = all(
-                                conn.get_metadata(k) == v
-                                for k, v in prefer_metadata.items()
+                                conn.get_metadata(k) == v for k, v in prefer_metadata.items()
                             )
                             if matches:
                                 self._idle_connections.remove(conn)
@@ -424,9 +421,7 @@ class WebSocketConnectionPool:
                 self._acquire_semaphore.release()
                 wait_time = time.time() - start_time
                 self._metrics.record_acquisition(wait_time, False)
-                raise PoolExhaustedError(
-                    "No connections available and pool at max size"
-                )
+                raise PoolExhaustedError("No connections available and pool at max size")
 
             except Exception:
                 self._acquire_semaphore.release()
@@ -441,9 +436,7 @@ class WebSocketConnectionPool:
         """Release a connection back to the pool."""
         async with self._lock:
             if connection_id not in self._in_use_connections:
-                raise ConnectionNotFoundError(
-                    f"Connection {connection_id} not found in use"
-                )
+                raise ConnectionNotFoundError(f"Connection {connection_id} not found in use")
 
             conn = self._in_use_connections.pop(connection_id)
 
@@ -477,9 +470,7 @@ class WebSocketConnectionPool:
             conn.health_check_failures = 0
             return True
         except Exception as e:
-            logger.warning(
-                f"Health check failed for connection {conn.connection_id}: {e}"
-            )
+            logger.warning(f"Health check failed for connection {conn.connection_id}: {e}")
             conn.health_check_failures += 1
             self._metrics.record_health_check_failure()
             return False
@@ -494,9 +485,7 @@ class WebSocketConnectionPool:
         for conn in connections_to_check:
             # Skip recently checked connections
             if conn.last_health_check:
-                time_since_check = (
-                    datetime.utcnow() - conn.last_health_check
-                ).total_seconds()
+                time_since_check = (datetime.utcnow() - conn.last_health_check).total_seconds()
                 if time_since_check < self.config.health_check_interval / 2:
                     continue
 
@@ -561,14 +550,9 @@ class WebSocketConnectionPool:
             self.in_use_connections, self.available_connections, self.size
         )
 
-        if (
-            utilization > self.config.scale_up_threshold
-            and self.size < self.config.max_size
-        ):
+        if utilization > self.config.scale_up_threshold and self.size < self.config.max_size:
             # Scale up
-            target_size = min(
-                int(self.size * self.config.scale_factor), self.config.max_size
-            )
+            target_size = min(int(self.size * self.config.scale_factor), self.config.max_size)
             connections_to_add = target_size - self.size
 
             logger.info(
@@ -581,14 +565,9 @@ class WebSocketConnectionPool:
 
             await asyncio.gather(*tasks, return_exceptions=True)
 
-        elif (
-            utilization < self.config.scale_down_threshold
-            and self.size > self.config.min_size
-        ):
+        elif utilization < self.config.scale_down_threshold and self.size > self.config.min_size:
             # Scale down
-            target_size = max(
-                int(self.size / self.config.scale_factor), self.config.min_size
-            )
+            target_size = max(int(self.size / self.config.scale_factor), self.config.min_size)
             connections_to_remove = self.size - target_size
 
             logger.info(

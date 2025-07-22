@@ -186,9 +186,7 @@ class SessionManagementTests(BasePenetrationTest):
         token = self.get_auth_token(username, password)
 
         # Test 1: Session token exposure in logs/responses
-        response = self.client.get(
-            "/api/v1/auth/me", headers=self.get_auth_headers(token)
-        )
+        response = self.client.get("/api/v1/auth/me", headers=self.get_auth_headers(token))
 
         if self._check_token_exposure(response, token):
             self.add_vulnerability(
@@ -345,9 +343,7 @@ class SessionManagementTests(BasePenetrationTest):
         # Test if all tokens are still valid
         valid_tokens = 0
         for token in tokens:
-            response = self.client.get(
-                "/api/v1/auth/me", headers=self.get_auth_headers(token)
-            )
+            response = self.client.get("/api/v1/auth/me", headers=self.get_auth_headers(token))
             if response.status_code == 200:
                 valid_tokens += 1
 
@@ -504,9 +500,7 @@ class SessionManagementTests(BasePenetrationTest):
         token = self.get_auth_token(username, password)
 
         # Verify token works
-        response = self.client.get(
-            "/api/v1/auth/me", headers=self.get_auth_headers(token)
-        )
+        response = self.client.get("/api/v1/auth/me", headers=self.get_auth_headers(token))
 
         if response.status_code != 200:
             return
@@ -515,9 +509,7 @@ class SessionManagementTests(BasePenetrationTest):
         self.client.post("/api/v1/auth/logout", headers=self.get_auth_headers(token))
 
         # Test if token still works after logout
-        response = self.client.get(
-            "/api/v1/auth/me", headers=self.get_auth_headers(token)
-        )
+        response = self.client.get("/api/v1/auth/me", headers=self.get_auth_headers(token))
 
         if response.status_code == 200:
             self.add_vulnerability(
@@ -561,14 +553,10 @@ class SessionManagementTests(BasePenetrationTest):
         token = self.get_auth_token(username, password)
 
         # Perform an action
-        response1 = self.client.get(
-            "/api/v1/auth/me", headers=self.get_auth_headers(token)
-        )
+        response1 = self.client.get("/api/v1/auth/me", headers=self.get_auth_headers(token))
 
         # Replay the exact same request
-        response2 = self.client.get(
-            "/api/v1/auth/me", headers=self.get_auth_headers(token)
-        )
+        response2 = self.client.get("/api/v1/auth/me", headers=self.get_auth_headers(token))
 
         # Both should succeed (this is expected for GET)
         # But check for any anti-replay mechanisms
@@ -809,9 +797,7 @@ class SessionManagementTests(BasePenetrationTest):
         text1 = response1.text.lower()
         text2 = response2.text.lower()
 
-        return any(
-            indicator in text1 or indicator in text2 for indicator in replay_indicators
-        )
+        return any(indicator in text1 or indicator in text2 for indicator in replay_indicators)
 
     def _detect_token_patterns(self, tokens: List[str]) -> bool:
         """Detect patterns in session tokens."""
@@ -837,9 +823,7 @@ class SessionManagementTests(BasePenetrationTest):
             # Check for sequential hex values or timestamps
             try:
                 # Try to convert to integers and check for sequences
-                values = [
-                    int(jti, 16) if len(jti) > 10 else int(jti) for jti in jtis[:3]
-                ]
+                values = [int(jti, 16) if len(jti) > 10 else int(jti) for jti in jtis[:3]]
 
                 # Check if values are sequential
                 if values[1] - values[0] == values[2] - values[1]:

@@ -94,9 +94,7 @@ class KnowledgeEdge(Base):
     target_id = Column(BigInteger, ForeignKey("kg_nodes.id"), nullable=False)
 
     # Edge properties
-    relationship_type = Column(
-        String(50), nullable=False
-    )  # causes, implies, contradicts, etc.
+    relationship_type = Column(String(50), nullable=False)  # causes, implies, contradicts, etc.
     weight = Column(Float, default=1.0)
     properties = Column(JSON, default={})
 
@@ -104,12 +102,8 @@ class KnowledgeEdge(Base):
     created_at = Column(DateTime(timezone=True), server_default=func.now())
 
     # Relationships
-    source = relationship(
-        "KnowledgeNode", foreign_keys=[source_id], back_populates="edges_from"
-    )
-    target = relationship(
-        "KnowledgeNode", foreign_keys=[target_id], back_populates="edges_to"
-    )
+    source = relationship("KnowledgeNode", foreign_keys=[source_id], back_populates="edges_from")
+    target = relationship("KnowledgeNode", foreign_keys=[target_id], back_populates="edges_to")
 
     # Indexes
     __table_args__ = (

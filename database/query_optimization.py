@@ -160,9 +160,7 @@ class QueryOptimizer:
             query = query.where(Coalition.status == CoalitionStatus.ACTIVE)
 
         # Order by performance and creation time
-        query = query.order_by(
-            desc(Coalition.performance_score), desc(Coalition.created_at)
-        )
+        query = query.order_by(desc(Coalition.performance_score), desc(Coalition.created_at))
 
         result = await session.execute(query)
         coalitions = result.scalars().all()
@@ -221,9 +219,7 @@ class QueryOptimizer:
                     "agent_id": str(row.id),
                     "name": row.name,
                     "status": row.status.value,
-                    "last_active": (
-                        row.last_active.isoformat() if row.last_active else None
-                    ),
+                    "last_active": (row.last_active.isoformat() if row.last_active else None),
                     "inference_count": row.inference_count,
                     "total_steps": row.total_steps,
                     "role": row.role.value,
@@ -287,9 +283,7 @@ class QueryOptimizer:
         # Single query to get all stats
         query = (
             select(
-                func.count(agent_coalition_association.c.agent_id).label(
-                    "member_count"
-                ),
+                func.count(agent_coalition_association.c.agent_id).label("member_count"),
                 func.avg(agent_coalition_association.c.contribution_score).label(
                     "avg_contribution"
                 ),
@@ -327,8 +321,7 @@ class QueryOptimizer:
                 "min_contribution_score": float(row.min_contribution or 0),
                 "total_inferences": row.total_inferences or 0,
                 "total_steps": row.total_steps or 0,
-                "activity_ratio": (row.active_members or 0)
-                / max(row.member_count or 1, 1),
+                "activity_ratio": (row.active_members or 0) / max(row.member_count or 1, 1),
             }
         else:
             stats = {
@@ -370,8 +363,7 @@ class QueryOptimizer:
                     last_active=update_data.get("last_active", func.now()),
                     inference_count=Agent.inference_count
                     + update_data.get("inference_increment", 0),
-                    total_steps=Agent.total_steps
-                    + update_data.get("steps_increment", 0),
+                    total_steps=Agent.total_steps + update_data.get("steps_increment", 0),
                     updated_at=func.now(),
                 )
             )
@@ -417,18 +409,14 @@ class QueryOptimizer:
 
         return list(agents)
 
-    async def get_system_performance_metrics(
-        self, session: AsyncSession
-    ) -> Dict[str, Any]:
+    async def get_system_performance_metrics(self, session: AsyncSession) -> Dict[str, Any]:
         """Get system-wide performance metrics."""
         start_time = time.time()
 
         # Single query for multiple metrics
         query = select(
             func.count(Agent.id).label("total_agents"),
-            func.count(Agent.id)
-            .filter(Agent.status == AgentStatus.ACTIVE)
-            .label("active_agents"),
+            func.count(Agent.id).filter(Agent.status == AgentStatus.ACTIVE).label("active_agents"),
             func.count(Coalition.id).label("total_coalitions"),
             func.count(Coalition.id)
             .filter(Coalition.status == CoalitionStatus.ACTIVE)
@@ -437,9 +425,7 @@ class QueryOptimizer:
             func.sum(Agent.inference_count).label("total_inferences"),
             func.sum(Agent.total_steps).label("total_steps"),
             func.avg(Coalition.performance_score).label("avg_coalition_performance"),
-            func.count(agent_coalition_association.c.agent_id).label(
-                "total_memberships"
-            ),
+            func.count(agent_coalition_association.c.agent_id).label("total_memberships"),
         ).select_from(Agent.outerjoin(Coalition).outerjoin(agent_coalition_association))
 
         result = await session.execute(query)
@@ -455,8 +441,7 @@ class QueryOptimizer:
             "total_steps": row.total_steps or 0,
             "avg_coalition_performance": float(row.avg_coalition_performance or 0),
             "total_memberships": row.total_memberships or 0,
-            "agent_utilization": (row.active_agents or 0)
-            / max(row.total_agents or 1, 1),
+            "agent_utilization": (row.active_agents or 0) / max(row.total_agents or 1, 1),
             "coalition_utilization": (row.active_coalitions or 0)
             / max(row.total_coalitions or 1, 1),
         }
@@ -499,12 +484,9 @@ class QueryOptimizer:
             "total_queries": self.query_stats["total_queries"],
             "avg_query_time": self.query_stats["avg_query_time"],
             "slow_queries_count": len(self.query_stats["slow_queries"]),
-            "slow_queries": self.query_stats["slow_queries"][
-                -10:
-            ],  # Last 10 slow queries
+            "slow_queries": self.query_stats["slow_queries"][-10:],  # Last 10 slow queries
             "cache_hit_rate": (
-                self.query_stats["cache_hits"]
-                / max(self.query_stats["total_queries"], 1)
+                self.query_stats["cache_hits"] / max(self.query_stats["total_queries"], 1)
             )
             * 100,
         }

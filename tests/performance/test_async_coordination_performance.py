@@ -42,9 +42,7 @@ class SequentialCoordinator:
     def __init__(self, num_agents: int):
         self.agents = [MockAgent(f"seq-agent-{i}") for i in range(num_agents)]
 
-    def step_all_agents(
-        self, observations: Dict[str, Dict[str, Any]]
-    ) -> Dict[str, str]:
+    def step_all_agents(self, observations: Dict[str, Dict[str, Any]]) -> Dict[str, str]:
         """Step all agents sequentially."""
         results = {}
         for agent in self.agents:
@@ -60,9 +58,7 @@ class AsyncCoordinator:
         self.agents = [MockAgent(f"async-agent-{i}") for i in range(num_agents)]
         self.max_workers = max_workers or min(32, (len(self.agents) + 4))
 
-    async def async_agent_step(
-        self, agent: MockAgent, observation: Dict[str, Any]
-    ) -> tuple:
+    async def async_agent_step(self, agent: MockAgent, observation: Dict[str, Any]) -> tuple:
         """Async wrapper for agent step."""
         loop = asyncio.get_event_loop()
 
@@ -71,9 +67,7 @@ class AsyncCoordinator:
             result = await loop.run_in_executor(executor, agent.mock_step, observation)
             return agent.agent_id, result
 
-    async def step_all_agents(
-        self, observations: Dict[str, Dict[str, Any]]
-    ) -> Dict[str, str]:
+    async def step_all_agents(self, observations: Dict[str, Dict[str, Any]]) -> Dict[str, str]:
         """Step all agents concurrently using async/await."""
         # Create async tasks for all agents
         tasks = []
@@ -96,9 +90,7 @@ class ThreadPoolCoordinator:
         self.agents = [MockAgent(f"thread-agent-{i}") for i in range(num_agents)]
         self.max_workers = max_workers or min(32, (len(self.agents) + 4))
 
-    def step_all_agents(
-        self, observations: Dict[str, Dict[str, Any]]
-    ) -> Dict[str, str]:
+    def step_all_agents(self, observations: Dict[str, Dict[str, Any]]) -> Dict[str, str]:
         """Step all agents using thread pool."""
         with ThreadPoolExecutor(max_workers=self.max_workers) as executor:
             # Submit all agent steps
@@ -152,9 +144,7 @@ def run_coordination_benchmark():
             "throughput": num_agents / seq_avg,
             "times": seq_times,
         }
-        print(
-            f"  Sequential: {seq_avg:.4f}s avg, {num_agents / seq_avg:.1f} agents/sec"
-        )
+        print(f"  Sequential: {seq_avg:.4f}s avg, {num_agents / seq_avg:.1f} agents/sec")
 
         # Test Async Coordination
         async def test_async():
@@ -189,16 +179,12 @@ def run_coordination_benchmark():
             "throughput": num_agents / thread_avg,
             "times": thread_times,
         }
-        print(
-            f"  ThreadPool: {thread_avg:.4f}s avg, {num_agents / thread_avg:.1f} agents/sec"
-        )
+        print(f"  ThreadPool: {thread_avg:.4f}s avg, {num_agents / thread_avg:.1f} agents/sec")
 
         # Calculate efficiency improvements
         async_speedup = seq_avg / async_avg
         thread_speedup = seq_avg / thread_avg
-        print(
-            f"  Speedup: Async {async_speedup:.2f}x, ThreadPool {thread_speedup:.2f}x"
-        )
+        print(f"  Speedup: Async {async_speedup:.2f}x, ThreadPool {thread_speedup:.2f}x")
 
     return results
 
@@ -235,9 +221,9 @@ def analyze_results(results):
     print(f"Async coordination efficiency: {async_efficiency:.1%}")
 
     # Determine coordination overhead impact
-    coordination_overhead = (
-        async_result["avg_time"] - (seq_result["avg_time"] / max_agents)
-    ) / (seq_result["avg_time"] / max_agents)
+    coordination_overhead = (async_result["avg_time"] - (seq_result["avg_time"] / max_agents)) / (
+        seq_result["avg_time"] / max_agents
+    )
 
     print("\nCoordination Overhead Analysis:")
     print(f"Sequential per-agent time: {seq_result['avg_time'] / max_agents:.4f}s")

@@ -60,9 +60,7 @@ class TDDPlugin:
         missing_vars = [var for var in required_env_vars if not os.environ.get(var)]
 
         if missing_vars:
-            pytest.exit(
-                f"TDD setup incomplete. Missing environment variables: {missing_vars}"
-            )
+            pytest.exit(f"TDD setup incomplete. Missing environment variables: {missing_vars}")
 
         # Validate no production mocks
         self._validate_no_production_mocks()
@@ -77,13 +75,9 @@ class TDDPlugin:
                 self.skipped_tests.append(item.nodeid)
 
         if self.skipped_tests:
-            print(
-                f"⚠️  WARNING: {len(self.skipped_tests)} skipped tests found (TDD violation)"
-            )
+            print(f"⚠️  WARNING: {len(self.skipped_tests)} skipped tests found (TDD violation)")
             if os.environ.get("TDD_STRICT") == "true":
-                pytest.exit(
-                    "TDD violation: Skipped tests are not allowed in strict TDD mode"
-                )
+                pytest.exit("TDD violation: Skipped tests are not allowed in strict TDD mode")
 
         # Validate test naming follows TDD conventions
         self._validate_test_naming(items)
@@ -113,9 +107,7 @@ class TDDPlugin:
                     UserWarning,
                 )
 
-    def pytest_runtest_makereport(
-        self, item: Item, call: CallInfo
-    ) -> Optional[TestReport]:
+    def pytest_runtest_makereport(self, item: Item, call: CallInfo) -> Optional[TestReport]:
         """Generate test report with TDD compliance information."""
         if call.when == "call":
             if call.excinfo is not None:
@@ -194,9 +186,7 @@ class TDDPlugin:
         print("TDD COMPLIANCE REPORT")
         print("=" * 60)
 
-        total_tests = (
-            len(self.test_results) + len(self.failed_tests) + len(self.skipped_tests)
-        )
+        total_tests = len(self.test_results) + len(self.failed_tests) + len(self.skipped_tests)
         passed_tests = len([r for r in self.test_results.values() if r == "passed"])
 
         print("📊 TEST SUMMARY:")

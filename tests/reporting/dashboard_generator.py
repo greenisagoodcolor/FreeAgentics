@@ -21,9 +21,7 @@ class DashboardGenerator:
         self.metrics_db = Path(metrics_db)
         self.coverage_db = Path(coverage_db)
 
-    def generate_dashboard(
-        self, output_path: str = "tests/reporting/dashboard.html"
-    ) -> str:
+    def generate_dashboard(self, output_path: str = "tests/reporting/dashboard.html") -> str:
         """Generate complete dashboard HTML."""
         # Collect all data
         dashboard_data = self._collect_dashboard_data()
@@ -429,9 +427,7 @@ class DashboardGenerator:
         # Calculate coverage health
         coverage_summary = self._get_coverage_summary()
         if coverage_summary and "latest_run" in coverage_summary:
-            metrics["coverage_health"] = coverage_summary["latest_run"][
-                "total_coverage"
-            ]
+            metrics["coverage_health"] = coverage_summary["latest_run"]["total_coverage"]
 
         # Calculate performance score (based on slow tests)
         slow_tests = self._get_slow_tests()
@@ -993,9 +989,7 @@ class DashboardGenerator:
 
         return html_content
 
-    def generate_json_export(
-        self, output_path: str = "tests/reporting/dashboard_data.json"
-    ) -> str:
+    def generate_json_export(self, output_path: str = "tests/reporting/dashboard_data.json") -> str:
         """Export dashboard data as JSON."""
         data = self._collect_dashboard_data()
 

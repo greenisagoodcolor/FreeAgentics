@@ -121,12 +121,8 @@ class PerformanceRegressionDetector:
                             baseline_value=baseline_data["baseline_value"],
                             baseline_std=baseline_data["baseline_std"],
                             sample_count=baseline_data["sample_count"],
-                            confidence_interval=tuple(
-                                baseline_data["confidence_interval"]
-                            ),
-                            last_updated=datetime.fromisoformat(
-                                baseline_data["last_updated"]
-                            ),
+                            confidence_interval=tuple(baseline_data["confidence_interval"]),
+                            last_updated=datetime.fromisoformat(baseline_data["last_updated"]),
                             version=baseline_data.get("version", "unknown"),
                             environment=baseline_data.get("environment", "unknown"),
                             metadata=baseline_data.get("metadata", {}),
@@ -246,17 +242,13 @@ class PerformanceRegressionDetector:
         for metric_name, value in test_run.metrics.items():
             if metric_name not in self.baselines:
                 # Create new baseline
-                self._create_baseline(
-                    metric_name, test_run.environment, test_run.version
-                )
+                self._create_baseline(metric_name, test_run.environment, test_run.version)
             else:
                 # Check if baseline needs updating
                 baseline = self.baselines[metric_name]
 
                 # Get recent values for this metric
-                recent_values = self._get_recent_metric_values(
-                    metric_name, test_run.environment
-                )
+                recent_values = self._get_recent_metric_values(metric_name, test_run.environment)
 
                 if len(recent_values) >= self.regression_config["min_sample_size"]:
                     # Calculate new baseline statistics
@@ -267,18 +259,12 @@ class PerformanceRegressionDetector:
 
                     # Check if baseline should be updated
                     change_percentage = (
-                        abs(new_baseline_value - baseline.baseline_value)
-                        / baseline.baseline_value
+                        abs(new_baseline_value - baseline.baseline_value) / baseline.baseline_value
                     )
 
-                    if (
-                        change_percentage
-                        > self.regression_config["baseline_update_threshold"]
-                    ):
+                    if change_percentage > self.regression_config["baseline_update_threshold"]:
                         # Update baseline
-                        confidence_interval = self._calculate_confidence_interval(
-                            recent_values
-                        )
+                        confidence_interval = self._calculate_confidence_interval(recent_values)
 
                         self.baselines[metric_name] = PerformanceBaseline(
                             metric_name=metric_name,
@@ -303,9 +289,7 @@ class PerformanceRegressionDetector:
 
         if len(recent_values) >= self.regression_config["min_sample_size"]:
             baseline_value = statistics.mean(recent_values)
-            baseline_std = (
-                statistics.stdev(recent_values) if len(recent_values) > 1 else 0
-            )
+            baseline_std = statistics.stdev(recent_values) if len(recent_values) > 1 else 0
             confidence_interval = self._calculate_confidence_interval(recent_values)
 
             self.baselines[metric_name] = PerformanceBaseline(
@@ -322,9 +306,7 @@ class PerformanceRegressionDetector:
 
             logger.info(f"Created new baseline for {metric_name}: {baseline_value:.3f}")
 
-    def _get_recent_metric_values(
-        self, metric_name: str, environment: str
-    ) -> List[float]:
+    def _get_recent_metric_values(self, metric_name: str, environment: str) -> List[float]:
         """Get recent values for a metric."""
         cutoff_date = datetime.now() - timedelta(
             days=self.regression_config["lookback_window_days"]
@@ -416,15 +398,11 @@ class PerformanceRegressionDetector:
 
         # Determine if regression is detected
         abs_deviation = abs(deviation_percentage)
-        regression_detected = (
-            abs_deviation > self.regression_config["max_acceptable_deviation"]
-        )
+        regression_detected = abs_deviation > self.regression_config["max_acceptable_deviation"]
 
         # Calculate confidence score using statistical significance
         if baseline.baseline_std > 0:
-            z_score = (
-                abs(current_value - baseline.baseline_value) / baseline.baseline_std
-            )
+            z_score = abs(current_value - baseline.baseline_value) / baseline.baseline_std
             confidence_score = stats.norm.cdf(z_score)
         else:
             confidence_score = 0.5  # Neutral confidence if no std dev
@@ -443,13 +421,9 @@ class PerformanceRegressionDetector:
         # Calculate statistical significance
         if baseline.sample_count > 1:
             # Use t-test for small samples
-            recent_values = self._get_recent_metric_values(
-                metric_name, test_run.environment
-            )
+            recent_values = self._get_recent_metric_values(metric_name, test_run.environment)
             if len(recent_values) > 1:
-                t_stat, p_value = stats.ttest_1samp(
-                    recent_values, baseline.baseline_value
-                )
+                t_stat, p_value = stats.ttest_1samp(recent_values, baseline.baseline_value)
                 statistical_significance = 1 - p_value
             else:
                 statistical_significance = 0.5
@@ -545,9 +519,7 @@ class PerformanceRegressionDetector:
             return {"error": f"Test run not found: {test_run_id}"}
 
         # Detect regressions
-        regression_results = self.detect_regressions(
-            test_run_id, comparison_environment
-        )
+        regression_results = self.detect_regressions(test_run_id, comparison_environment)
 
         # Detect anomalies
         anomaly_results = self.detect_anomalies(test_run.metrics)
@@ -587,9 +559,7 @@ class PerformanceRegressionDetector:
             "regression_analysis": {
                 "overall_status": overall_status,
                 "total_metrics_analyzed": len(regression_results),
-                "regressions_detected": sum(
-                    1 for r in regression_results if r.regression_detected
-                ),
+                "regressions_detected": sum(1 for r in regression_results if r.regression_detected),
                 "regression_counts": regression_counts,
                 "detailed_results": [
                     {
@@ -634,9 +604,7 @@ class PerformanceRegressionDetector:
         recommendations = []
 
         # Critical regressions
-        critical_regressions = [
-            r for r in regression_results if r.severity == "critical"
-        ]
+        critical_regressions = [r for r in regression_results if r.severity == "critical"]
         if critical_regressions:
             recommendations.append(
                 f"CRITICAL: {len(critical_regressions)} critical performance regressions detected. "
@@ -742,9 +710,7 @@ class PerformanceRegressionDetector:
         timestamps = [point["timestamp"].timestamp() for point in data_points]
 
         # Linear regression for trend
-        slope, intercept, r_value, p_value, std_err = stats.linregress(
-            timestamps, values
-        )
+        slope, intercept, r_value, p_value, std_err = stats.linregress(timestamps, values)
 
         # Determine trend direction
         if abs(slope) < 0.001:  # Very small slope
@@ -819,11 +785,7 @@ class PerformanceRegressionDetector:
                 "total_baselines": len(self.baselines),
                 "environments": list(set(run.environment for run in self.test_runs)),
                 "metrics_tracked": list(
-                    set(
-                        metric
-                        for run in self.test_runs
-                        for metric in run.metrics.keys()
-                    )
+                    set(metric for run in self.test_runs for metric in run.metrics.keys())
                 ),
             },
         }
@@ -900,12 +862,8 @@ async def demo_regression_detection():
     # Display results
     print("\n--- REGRESSION ANALYSIS REPORT ---")
     print(f"Overall Status: {report['regression_analysis']['overall_status'].upper()}")
-    print(
-        f"Total Metrics Analyzed: {report['regression_analysis']['total_metrics_analyzed']}"
-    )
-    print(
-        f"Regressions Detected: {report['regression_analysis']['regressions_detected']}"
-    )
+    print(f"Total Metrics Analyzed: {report['regression_analysis']['total_metrics_analyzed']}")
+    print(f"Regressions Detected: {report['regression_analysis']['regressions_detected']}")
 
     print("\nRegression Counts:")
     for severity, count in report["regression_analysis"]["regression_counts"].items():

@@ -191,13 +191,11 @@ class TestAuthorizationMatrix:
 
             for permission, should_have in expected_permissions.items():
                 if should_have:
-                    assert permission in actual_permissions, (
-                        f"Role {role} should have {permission}"
-                    )
+                    assert permission in actual_permissions, f"Role {role} should have {permission}"
                 else:
-                    assert permission not in actual_permissions, (
-                        f"Role {role} should not have {permission}"
-                    )
+                    assert (
+                        permission not in actual_permissions
+                    ), f"Role {role} should not have {permission}"
 
     def test_resource_access_matrix(self, client, test_resources):
         """Test resource access against authorization matrix."""
@@ -264,13 +262,13 @@ class TestAuthorizationMatrix:
 
                     # Verify access
                     if should_have_access:
-                        assert response.status_code not in [403], (
-                            f"Role {role} should have access to {resource_type}.{operation}"
-                        )
+                        assert response.status_code not in [
+                            403
+                        ], f"Role {role} should have access to {resource_type}.{operation}"
                     else:
-                        assert response.status_code == 403, (
-                            f"Role {role} should not have access to {resource_type}.{operation}"
-                        )
+                        assert (
+                            response.status_code == 403
+                        ), f"Role {role} should not have access to {resource_type}.{operation}"
 
     def test_permission_boundary_enforcement(self, client):
         """Test that permission boundaries are strictly enforced."""
@@ -336,13 +334,13 @@ class TestAuthorizationMatrix:
                 response = client.delete(endpoint, headers=headers)
 
             if expected_status == 403:
-                assert response.status_code == 403, (
-                    f"Role {role} should be forbidden from {method} {endpoint}"
-                )
+                assert (
+                    response.status_code == 403
+                ), f"Role {role} should be forbidden from {method} {endpoint}"
             else:
-                assert response.status_code == expected_status, (
-                    f"Role {role} should be able to {method} {endpoint}"
-                )
+                assert (
+                    response.status_code == expected_status
+                ), f"Role {role} should be able to {method} {endpoint}"
 
     def test_cross_tenant_isolation(self, client):
         """Test that users cannot access resources from other tenants."""
@@ -386,9 +384,7 @@ class TestAuthorizationMatrix:
         # In current implementation, users can view each other's agents
         # This test documents the current behavior
         view_response = client.get(f"/api/v1/agents/{agent_id}", headers=headers2)
-        assert view_response.status_code == 200, (
-            "Current implementation allows cross-user viewing"
-        )
+        assert view_response.status_code == 200, "Current implementation allows cross-user viewing"
 
         # User2 tries to modify User1's agent
         modify_response = client.patch(
@@ -396,9 +392,9 @@ class TestAuthorizationMatrix:
             json={"status": "active"},
             headers=headers2,
         )
-        assert modify_response.status_code == 200, (
-            "Current implementation allows cross-user modification"
-        )
+        assert (
+            modify_response.status_code == 200
+        ), "Current implementation allows cross-user modification"
 
     def test_concurrent_authorization_access(self, client):
         """Test authorization under concurrent access scenarios."""
@@ -449,9 +445,7 @@ class TestAuthorizationMatrix:
 
         # Verify all requests succeeded
         for user_id, status in results:
-            assert status == 201, (
-                f"Concurrent request for user {user_id} failed: {status}"
-            )
+            assert status == 201, f"Concurrent request for user {user_id} failed: {status}"
 
     def test_authorization_performance_under_load(self, client):
         """Test authorization performance under load."""
@@ -481,9 +475,9 @@ class TestAuthorizationMatrix:
         avg_time_per_request = total_time / request_count
 
         # Authorization should be fast (under 100ms per request)
-        assert avg_time_per_request < 0.1, (
-            f"Authorization too slow: {avg_time_per_request:.3f}s per request"
-        )
+        assert (
+            avg_time_per_request < 0.1
+        ), f"Authorization too slow: {avg_time_per_request:.3f}s per request"
 
     def test_role_based_data_filtering(self, client):
         """Test that roles properly filter data access."""
@@ -536,9 +530,9 @@ class TestAuthorizationMatrix:
 
         # In current implementation, both see the same agents
         # This test documents the current behavior
-        assert len(admin_agents) == len(observer_agents), (
-            "Current implementation shows same data to all users"
-        )
+        assert len(admin_agents) == len(
+            observer_agents
+        ), "Current implementation shows same data to all users"
 
     def test_permission_inheritance_hierarchy(self, client):
         """Test that permission inheritance works correctly."""
@@ -613,9 +607,9 @@ class TestAuthorizationMatrix:
 
                 response = client.delete(endpoint, headers=headers)
 
-            assert response.status_code == expected_status, (
-                f"Role {role} hierarchy test failed for {method} {endpoint}"
-            )
+            assert (
+                response.status_code == expected_status
+            ), f"Role {role} hierarchy test failed for {method} {endpoint}"
 
 
 class TestAuthorizationAttackVectors:
@@ -676,9 +670,7 @@ class TestAuthorizationAttackVectors:
 
         # Current implementation allows this - documenting behavior
         response = client.get(f"/api/v1/agents/{agent_id}", headers=headers2)
-        assert response.status_code == 200, (
-            "Current implementation allows horizontal access"
-        )
+        assert response.status_code == 200, "Current implementation allows horizontal access"
 
         # User2 tries to modify User1's agent
         response = client.patch(
@@ -686,9 +678,7 @@ class TestAuthorizationAttackVectors:
             json={"status": "active"},
             headers=headers2,
         )
-        assert response.status_code == 200, (
-            "Current implementation allows horizontal modification"
-        )
+        assert response.status_code == 200, "Current implementation allows horizontal modification"
 
     def test_vertical_privilege_escalation(self, client):
         """Test protection against vertical privilege escalation."""
@@ -773,9 +763,9 @@ class TestAuthorizationAttackVectors:
                 headers = {"Authorization": f"Bearer {manipulated_token}"}
 
             response = client.get("/api/v1/agents", headers=headers)
-            assert response.status_code == expected_status, (
-                f"Token manipulation should be detected: {manipulated_token}"
-            )
+            assert (
+                response.status_code == expected_status
+            ), f"Token manipulation should be detected: {manipulated_token}"
 
     def test_session_fixation_protection(self, client):
         """Test protection against session fixation attacks."""
@@ -871,9 +861,7 @@ class TestAuthorizationAttackVectors:
         # Some requests might fail due to rate limiting (this is good)
         # But the system should remain stable
         error_count = len([r for r in results if isinstance(r[2], str)])
-        assert error_count == 0, (
-            "No system errors should occur during concurrent attacks"
-        )
+        assert error_count == 0, "No system errors should occur during concurrent attacks"
 
 
 # Cleanup functions

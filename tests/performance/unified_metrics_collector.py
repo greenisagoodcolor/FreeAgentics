@@ -378,9 +378,7 @@ class UnifiedMetricsCollector:
                     window_aggregations = {}
 
                     for metric_key, points in self._metrics.items():
-                        window_points = [
-                            p for p in points if p.timestamp >= cutoff_time
-                        ]
+                        window_points = [p for p in points if p.timestamp >= cutoff_time]
                         if window_points:
                             values = [p.value for p in window_points]
                             agg = self._calculate_aggregates(
@@ -499,9 +497,7 @@ class UnifiedMetricsCollector:
                 if triggered:
                     await self._emit_alert(rule, metric, value)
 
-    def _evaluate_condition(
-        self, value: float, condition: str, threshold: float
-    ) -> bool:
+    def _evaluate_condition(self, value: float, condition: str, threshold: float) -> bool:
         """Evaluate alert condition."""
         if ">" in condition:
             return value > threshold
@@ -515,9 +511,7 @@ class UnifiedMetricsCollector:
             return abs(value - threshold) < 0.001
         return False
 
-    async def _emit_alert(
-        self, rule: Dict[str, Any], metric: AggregatedMetric, value: float
-    ):
+    async def _emit_alert(self, rule: Dict[str, Any], metric: AggregatedMetric, value: float):
         """Emit an alert when rule is triggered."""
         alert = {
             "timestamp": datetime.now().isoformat(),
@@ -770,9 +764,7 @@ class UnifiedMetricsCollector:
                 return []
 
             return [
-                (p.timestamp, p.value)
-                for p in self._metrics[key]
-                if p.timestamp >= cutoff_time
+                (p.timestamp, p.value) for p in self._metrics[key] if p.timestamp >= cutoff_time
             ]
 
     async def export_metrics(

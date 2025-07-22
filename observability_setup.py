@@ -40,18 +40,12 @@ class SystemMetricsCollector:
             # Memory metrics
             memory = psutil.virtual_memory()
             await record_system_metric("memory_usage", memory.percent)
-            await record_system_metric(
-                "memory_available_gb", memory.available / (1024**3)
-            )
+            await record_system_metric("memory_available_gb", memory.available / (1024**3))
 
             # Process-specific metrics
             process_memory = self.process.memory_info()
-            await record_system_metric(
-                "process_memory_mb", process_memory.rss / (1024**2)
-            )
-            await record_system_metric(
-                "process_cpu_percent", self.process.cpu_percent()
-            )
+            await record_system_metric("process_memory_mb", process_memory.rss / (1024**2))
+            await record_system_metric("process_cpu_percent", self.process.cpu_percent())
 
             # Disk metrics
             disk = psutil.disk_usage("/")
@@ -279,9 +273,7 @@ class HealthChecker:
         # Check agent manager
         try:
             if self.agent_manager:
-                active_agents = len(
-                    [a for a in self.agent_manager.agents.values() if a.is_active]
-                )
+                active_agents = len([a for a in self.agent_manager.agents.values() if a.is_active])
                 health_status["components"]["agent_manager"] = {
                     "status": "healthy",
                     "active_agents": active_agents,

@@ -87,9 +87,7 @@ def remove_bypass_directives(file_path: Path) -> List[str]:
 
     # Apply patterns
     for pattern, replacement in PATTERNS_TO_REMOVE:
-        new_content = re.sub(
-            pattern, replacement, content, flags=re.MULTILINE | re.IGNORECASE
-        )
+        new_content = re.sub(pattern, replacement, content, flags=re.MULTILINE | re.IGNORECASE)
         if new_content != content:
             changes.append(f"Removed pattern '{pattern}' from {file_path}")
             content = new_content

@@ -117,9 +117,7 @@ class APISecurityTests(BasePenetrationTest):
                 if method == "GET":
                     response = self._test_query_pollution(endpoint, payload, token)
                 else:
-                    response = self._test_body_pollution(
-                        endpoint, method, payload, token
-                    )
+                    response = self._test_body_pollution(endpoint, method, payload, token)
 
                 if self._detect_pollution_success(response, payload):
                     self.add_vulnerability(
@@ -187,9 +185,7 @@ class APISecurityTests(BasePenetrationTest):
                     # Check if method override was accepted
                     if self._detect_method_override_success(response, method):
                         severity = (
-                            SeverityLevel.HIGH
-                            if method == "DELETE"
-                            else SeverityLevel.MEDIUM
+                            SeverityLevel.HIGH if method == "DELETE" else SeverityLevel.MEDIUM
                         )
 
                         self.add_vulnerability(
@@ -213,9 +209,7 @@ class APISecurityTests(BasePenetrationTest):
                                     "Validate HTTP methods server-side",
                                 ],
                                 cwe_id="CWE-436",
-                                cvss_score=7.5
-                                if severity == SeverityLevel.HIGH
-                                else 5.4,
+                                cvss_score=7.5 if severity == SeverityLevel.HIGH else 5.4,
                                 test_method="http_method_tampering",
                             )
                         )
@@ -334,9 +328,7 @@ class APISecurityTests(BasePenetrationTest):
 
                     time.sleep(0.05)  # Small delay between requests
 
-            bypass_ratio = (
-                successful_bypasses / total_attempts if total_attempts > 0 else 0
-            )
+            bypass_ratio = successful_bypasses / total_attempts if total_attempts > 0 else 0
 
             if bypass_ratio > 0.7:  # More than 70% bypass success
                 self.add_vulnerability(
@@ -416,9 +408,7 @@ class APISecurityTests(BasePenetrationTest):
                 headers = self.get_auth_headers(token)
                 headers["Content-Type"] = test_case["content_type"]
 
-                response = self.client.post(
-                    endpoint, data=test_case["data"], headers=headers
-                )
+                response = self.client.post(endpoint, data=test_case["data"], headers=headers)
 
                 if self._detect_content_type_success(response):
                     self.add_vulnerability(
@@ -572,9 +562,7 @@ class APISecurityTests(BasePenetrationTest):
                 accessible_endpoints.append((endpoint, "authenticated"))
 
         if accessible_endpoints:
-            endpoints_list = "\n".join(
-                [f"{ep} ({auth})" for ep, auth in accessible_endpoints]
-            )
+            endpoints_list = "\n".join([f"{ep} ({auth})" for ep, auth in accessible_endpoints])
 
             self.add_vulnerability(
                 VulnerabilityFinding(
@@ -839,9 +827,7 @@ class APISecurityTests(BasePenetrationTest):
 
         return self.client.get(full_url, headers=self.get_auth_headers(token))
 
-    def _test_body_pollution(
-        self, endpoint: str, method: str, payload: Dict, token: str
-    ):
+    def _test_body_pollution(self, endpoint: str, method: str, payload: Dict, token: str):
         """Test request body parameter pollution."""
         headers = self.get_auth_headers(token)
 
@@ -931,9 +917,7 @@ class APISecurityTests(BasePenetrationTest):
                         headers=self.get_auth_headers(token),
                     )
                 else:
-                    response = self.client.get(
-                        endpoint, headers=self.get_auth_headers(token)
-                    )
+                    response = self.client.get(endpoint, headers=self.get_auth_headers(token))
 
                 requests_sent += 1
 
@@ -1053,9 +1037,7 @@ class APISecurityTests(BasePenetrationTest):
 
         # Check for specific error messages that indicate processing
         processed_indicators = ["syntax error", "database", "query", "parse"]
-        return any(
-            indicator in response.text.lower() for indicator in processed_indicators
-        )
+        return any(indicator in response.text.lower() for indicator in processed_indicators)
 
     def _detect_response_manipulation(self, response, headers: Dict) -> bool:
         """Detect if response format was manipulated."""

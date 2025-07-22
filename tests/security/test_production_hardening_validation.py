@@ -115,9 +115,7 @@ class ProductionHardeningTester:
                 response_text = response.text.lower()
 
                 # Check for debug indicators in response content
-                for debug_pattern in self.production_requirements[
-                    "forbidden_debug_indicators"
-                ]:
+                for debug_pattern in self.production_requirements["forbidden_debug_indicators"]:
                     if re.search(debug_pattern, response_text, re.IGNORECASE):
                         results["passed"] = False
                         results["findings"].append(
@@ -135,15 +133,11 @@ class ProductionHardeningTester:
                     header_lower = header_name.lower()
                     value_lower = str(header_value).lower()
 
-                    if any(
-                        debug_word in header_lower
-                        for debug_word in ["debug", "dev", "test"]
-                    ):
+                    if any(debug_word in header_lower for debug_word in ["debug", "dev", "test"]):
                         debug_headers_found.append(f"{header_name}: {header_value}")
 
                     if any(
-                        debug_word in value_lower
-                        for debug_word in ["debug", "development", "test"]
+                        debug_word in value_lower for debug_word in ["debug", "development", "test"]
                     ):
                         debug_headers_found.append(f"{header_name}: {header_value}")
 
@@ -260,9 +254,7 @@ class ProductionHardeningTester:
                             {
                                 "variable": env_var,
                                 "issue": f"Potentially weak value matching pattern: {pattern}",
-                                "value_preview": value[:10] + "..."
-                                if len(value) > 10
-                                else value,
+                                "value_preview": value[:10] + "..." if len(value) > 10 else value,
                             }
                         )
 
@@ -322,9 +314,7 @@ class ProductionHardeningTester:
                             "issue": f"Development URL pattern in {env_var}",
                             "pattern": pattern,
                             "variable": env_var,
-                            "value_preview": value[:30] + "..."
-                            if len(value) > 30
-                            else value,
+                            "value_preview": value[:30] + "..." if len(value) > 30 else value,
                         }
                     )
 
@@ -365,9 +355,7 @@ class ProductionHardeningTester:
                 missing_headers = []
                 weak_headers = []
 
-                for required_header in self.production_requirements[
-                    "required_security_headers"
-                ]:
+                for required_header in self.production_requirements["required_security_headers"]:
                     if required_header not in response.headers:
                         # HSTS might not be present in non-HTTPS testing
                         if required_header != "Strict-Transport-Security":
@@ -398,10 +386,7 @@ class ProductionHardeningTester:
 
                         elif required_header == "Content-Security-Policy":
                             # Basic CSP validation
-                            if (
-                                "unsafe-eval" in header_value
-                                or "unsafe-inline" in header_value
-                            ):
+                            if "unsafe-eval" in header_value or "unsafe-inline" in header_value:
                                 weak_headers.append(
                                     {
                                         "header": required_header,
@@ -432,9 +417,7 @@ class ProductionHardeningTester:
 
                 # Check for forbidden headers
                 forbidden_found = []
-                for forbidden_header in self.production_requirements[
-                    "forbidden_headers"
-                ]:
+                for forbidden_header in self.production_requirements["forbidden_headers"]:
                     if forbidden_header in response.headers:
                         forbidden_found.append(
                             {
@@ -578,9 +561,7 @@ class ProductionHardeningTester:
                                 "issue": "Non-JSON error response",
                                 "scenario": scenario_name,
                                 "status_code": response.status_code,
-                                "content_type": response.headers.get(
-                                    "Content-Type", "unknown"
-                                ),
+                                "content_type": response.headers.get("Content-Type", "unknown"),
                             }
                         )
 
@@ -654,9 +635,7 @@ class ProductionHardeningTester:
         console_handlers = []
 
         for handler in root_logger.handlers:
-            if isinstance(handler, logging.StreamHandler) and hasattr(
-                handler, "stream"
-            ):
+            if isinstance(handler, logging.StreamHandler) and hasattr(handler, "stream"):
                 import sys
 
                 if handler.stream in [sys.stdout, sys.stderr]:
@@ -1133,15 +1112,11 @@ class ProductionHardeningTester:
         unique_recommendations = list(set(all_recommendations))
 
         # Calculate production readiness score
-        production_readiness = (
-            (passed_tests / total_tests * 100) if total_tests > 0 else 0
-        )
+        production_readiness = (passed_tests / total_tests * 100) if total_tests > 0 else 0
 
         # Adjust score based on critical findings
         if critical_findings:
-            production_readiness = max(
-                0, production_readiness - len(critical_findings) * 15
-            )
+            production_readiness = max(0, production_readiness - len(critical_findings) * 15)
 
         summary = {
             "timestamp": time.strftime("%Y-%m-%d %H:%M:%S"),
@@ -1149,9 +1124,7 @@ class ProductionHardeningTester:
                 "total_tests": total_tests,
                 "passed_tests": passed_tests,
                 "failed_tests": failed_tests,
-                "pass_rate": (passed_tests / total_tests * 100)
-                if total_tests > 0
-                else 0,
+                "pass_rate": (passed_tests / total_tests * 100) if total_tests > 0 else 0,
                 "production_readiness_score": production_readiness,
                 "critical_findings": len(critical_findings),
                 "high_findings": len(high_findings),
@@ -1244,19 +1217,13 @@ class TestProductionHardeningValidation:
         if summary["overall_status"] == "NOT_PRODUCTION_READY":
             failure_msg = "Application is NOT production ready!\n"
             failure_msg += f"Production Readiness Score: {summary['summary']['production_readiness_score']:.1f}%\n"
-            failure_msg += (
-                f"Critical Issues: {summary['summary']['critical_findings']}\n"
-            )
-            failure_msg += (
-                f"High Severity Issues: {summary['summary']['high_findings']}\n"
-            )
+            failure_msg += f"Critical Issues: {summary['summary']['critical_findings']}\n"
+            failure_msg += f"High Severity Issues: {summary['summary']['high_findings']}\n"
             failure_msg += f"Failed Tests: {summary['summary']['failed_tests']} out of {summary['summary']['total_tests']}\n"
 
             if summary["findings_by_severity"]["critical"]:
                 failure_msg += "\nCRITICAL ISSUES:\n"
-                for finding in summary["findings_by_severity"]["critical"][
-                    :5
-                ]:  # Limit to first 5
+                for finding in summary["findings_by_severity"]["critical"][:5]:  # Limit to first 5
                     failure_msg += f"  - {finding['issue']}\n"
 
             if summary["recommendations"]:
@@ -1291,9 +1258,7 @@ if __name__ == "__main__":
     print(f"Passed: {summary['summary']['passed_tests']}")
     print(f"Failed: {summary['summary']['failed_tests']}")
     print(f"Pass Rate: {summary['summary']['pass_rate']:.1f}%")
-    print(
-        f"Production Readiness Score: {summary['summary']['production_readiness_score']:.1f}%"
-    )
+    print(f"Production Readiness Score: {summary['summary']['production_readiness_score']:.1f}%")
     print(f"Overall Status: {summary['overall_status']}")
 
     print("\nFindings by Severity:")
@@ -1317,7 +1282,9 @@ if __name__ == "__main__":
 
     # Save report
     timestamp = time.strftime("%Y%m%d_%H%M%S")
-    report_file = f"/home/green/FreeAgentics/tests/security/production_hardening_report_{timestamp}.json"
+    report_file = (
+        f"/home/green/FreeAgentics/tests/security/production_hardening_report_{timestamp}.json"
+    )
 
     try:
         with open(report_file, "w") as f:

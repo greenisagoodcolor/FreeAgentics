@@ -15,8 +15,7 @@ def find_markdown_files(root_dir: str = ".") -> List[Path]:
         dirs[:] = [
             d
             for d in dirs
-            if not d.startswith(".")
-            and d not in ["node_modules", "venv", "__pycache__"]
+            if not d.startswith(".") and d not in ["node_modules", "venv", "__pycache__"]
         ]
 
         for file in files:

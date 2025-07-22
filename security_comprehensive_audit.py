@@ -41,9 +41,7 @@ class SecurityAudit:
 
     async def run_comprehensive_audit(self):
         """Run complete security audit."""
-        console.print(
-            "\n[bold blue]🛡️ FreeAgentics v1.0.0-alpha+ Security Audit[/bold blue]"
-        )
+        console.print("\n[bold blue]🛡️ FreeAgentics v1.0.0-alpha+ Security Audit[/bold blue]")
         console.print("Zero-Tolerance Security Assessment\n")
 
         with Progress(
@@ -54,62 +52,42 @@ class SecurityAudit:
             # 1. OWASP Top 10 Assessment
             task1 = progress.add_task("🔍 OWASP Top 10 Compliance Check...", total=None)
             owasp_score = await self.assess_owasp_top10()
-            progress.update(
-                task1, completed=100, description="✅ OWASP Assessment Complete"
-            )
+            progress.update(task1, completed=100, description="✅ OWASP Assessment Complete")
 
             # 2. Authentication & Authorization
-            task2 = progress.add_task(
-                "🔐 Authentication & Authorization Review...", total=None
-            )
+            task2 = progress.add_task("🔐 Authentication & Authorization Review...", total=None)
             auth_score = await self.assess_authentication()
-            progress.update(
-                task2, completed=100, description="✅ Auth Assessment Complete"
-            )
+            progress.update(task2, completed=100, description="✅ Auth Assessment Complete")
 
             # 3. Rate Limiting & DDoS Protection
-            task3 = progress.add_task(
-                "⚡ Rate Limiting & DDoS Assessment...", total=None
-            )
+            task3 = progress.add_task("⚡ Rate Limiting & DDoS Assessment...", total=None)
             rate_limit_score = await self.assess_rate_limiting()
-            progress.update(
-                task3, completed=100, description="✅ Rate Limiting Complete"
-            )
+            progress.update(task3, completed=100, description="✅ Rate Limiting Complete")
 
             # 4. Configuration Security
             task4 = progress.add_task("⚙️ Configuration Security Review...", total=None)
             config_score = await self.assess_configuration()
-            progress.update(
-                task4, completed=100, description="✅ Configuration Review Complete"
-            )
+            progress.update(task4, completed=100, description="✅ Configuration Review Complete")
 
             # 5. Dependency Vulnerabilities
             task5 = progress.add_task("📦 Dependency Vulnerability Scan...", total=None)
             dep_score = await self.assess_dependencies()
-            progress.update(
-                task5, completed=100, description="✅ Dependency Scan Complete"
-            )
+            progress.update(task5, completed=100, description="✅ Dependency Scan Complete")
 
             # 6. Docker & Container Security
             task6 = progress.add_task("🐳 Container Security Assessment...", total=None)
             container_score = await self.assess_container_security()
-            progress.update(
-                task6, completed=100, description="✅ Container Security Complete"
-            )
+            progress.update(task6, completed=100, description="✅ Container Security Complete")
 
             # 7. API Security
             task7 = progress.add_task("🌐 API Security Validation...", total=None)
             api_score = await self.assess_api_security()
-            progress.update(
-                task7, completed=100, description="✅ API Security Complete"
-            )
+            progress.update(task7, completed=100, description="✅ API Security Complete")
 
             # 8. Data Protection
             task8 = progress.add_task("🔒 Data Protection Assessment...", total=None)
             data_score = await self.assess_data_protection()
-            progress.update(
-                task8, completed=100, description="✅ Data Protection Complete"
-            )
+            progress.update(task8, completed=100, description="✅ Data Protection Complete")
 
         # Calculate final score
         total_score = (
@@ -350,9 +328,7 @@ class SecurityAudit:
             issues.append("Missing production environment template")
 
         # Secrets Management
-        if not self._grep_in_files(
-            "password.*=.*['\"][^'\"]*['\"]", ".", exclude_tests=True
-        ):
+        if not self._grep_in_files("password.*=.*['\"][^'\"]*['\"]", ".", exclude_tests=True):
             score += 2
         else:
             issues.append("Hardcoded passwords detected")
@@ -400,9 +376,7 @@ class SecurityAudit:
                 text=True,
             )
 
-            result = subprocess.run(
-                ["safety", "check", "--json"], capture_output=True, text=True
-            )
+            result = subprocess.run(["safety", "check", "--json"], capture_output=True, text=True)
 
             if result.returncode == 0:
                 vulnerabilities = json.loads(result.stdout) if result.stdout else []
@@ -410,9 +384,7 @@ class SecurityAudit:
                     score += 5
                 elif len(vulnerabilities) < 5:
                     score += 3
-                    issues.append(
-                        f"Found {len(vulnerabilities)} dependency vulnerabilities"
-                    )
+                    issues.append(f"Found {len(vulnerabilities)} dependency vulnerabilities")
                 else:
                     score += 1
                     issues.append(
@@ -666,9 +638,7 @@ class SecurityAudit:
             console.print("\n[bold red]⚠️ Security Issues Identified:[/bold red]")
             for category, data in self.results["categories"].items():
                 if data.get("issues"):
-                    console.print(
-                        f"\n[bold]{category.replace('_', ' ').title()}:[/bold]"
-                    )
+                    console.print(f"\n[bold]{category.replace('_', ' ').title()}:[/bold]")
                     for issue in data["issues"]:
                         console.print(f"  • {issue}")
 
@@ -680,9 +650,7 @@ class SecurityAudit:
                 console.print(f"  • {rec}")
 
         # Save JSON report
-        report_path = (
-            f"security_audit_report_{datetime.now().strftime('%Y%m%d_%H%M%S')}.json"
-        )
+        report_path = f"security_audit_report_{datetime.now().strftime('%Y%m%d_%H%M%S')}.json"
         with open(report_path, "w") as f:
             json.dump(self.results, f, indent=2)
 
@@ -703,9 +671,7 @@ class SecurityAudit:
         recommendations = []
 
         if self.results["score"] < 90:
-            recommendations.append(
-                "Implement comprehensive security logging and monitoring"
-            )
+            recommendations.append("Implement comprehensive security logging and monitoring")
             recommendations.append("Add automated security testing to CI/CD pipeline")
             recommendations.append("Conduct regular penetration testing")
 
@@ -733,9 +699,7 @@ class SecurityAudit:
         except (OSError, IOError, UnicodeDecodeError):
             return ""
 
-    def _grep_in_files(
-        self, pattern: str, path: str, exclude_tests: bool = False
-    ) -> bool:
+    def _grep_in_files(self, pattern: str, path: str, exclude_tests: bool = False) -> bool:
         """Search for pattern in files."""
         try:
             cmd = ["grep", "-r", pattern, path]
@@ -784,7 +748,7 @@ async def main():
 
 if __name__ == "__main__":
     import importlib.util
-    
+
     # Install required packages if not available
     if importlib.util.find_spec("rich") is None:
         subprocess.run([sys.executable, "-m", "pip", "install", "rich"])

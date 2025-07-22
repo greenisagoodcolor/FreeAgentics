@@ -660,11 +660,11 @@ class SecurityReportGenerator:
         if self.data["security_score"] >= 80:
             summary = "The security posture of FreeAgentics is GOOD. "
         elif self.data["security_score"] >= 60:
-            summary = (
-                "The security posture of FreeAgentics is FAIR and needs improvement. "
-            )
+            summary = "The security posture of FreeAgentics is FAIR and needs improvement. "
         else:
-            summary = "The security posture of FreeAgentics is POOR and requires immediate attention. "
+            summary = (
+                "The security posture of FreeAgentics is POOR and requires immediate attention. "
+            )
 
         summary += f"The overall security score is {self.data['security_score']}%. "
 
@@ -706,9 +706,7 @@ class SecurityReportGenerator:
             },
         }
 
-        self.data["cors_summary"] = (
-            "CORS is properly configured with whitelisted origins"
-        )
+        self.data["cors_summary"] = "CORS is properly configured with whitelisted origins"
 
     def add_trend_summary(self):
         """Add security trend summary."""

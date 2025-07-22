@@ -234,9 +234,7 @@ class LogAnalysisEngine:
 
     def _analyze_top_errors(self, logs: List[LogEntry]) -> List[Dict[str, Any]]:
         """Analyze top error messages."""
-        error_logs = [
-            log for log in logs if log.level in [LogLevel.ERROR, LogLevel.CRITICAL]
-        ]
+        error_logs = [log for log in logs if log.level in [LogLevel.ERROR, LogLevel.CRITICAL]]
 
         # Count error messages
         error_counts = Counter(log.message for log in error_logs)
@@ -315,14 +313,10 @@ class LogAnalysisEngine:
 
         return anomalies
 
-    def _detect_error_rate_anomaly(
-        self, logs: List[LogEntry]
-    ) -> Optional[Dict[str, Any]]:
+    def _detect_error_rate_anomaly(self, logs: List[LogEntry]) -> Optional[Dict[str, Any]]:
         """Detect error rate anomalies."""
         total_logs = len(logs)
-        error_logs = len(
-            [log for log in logs if log.level in [LogLevel.ERROR, LogLevel.CRITICAL]]
-        )
+        error_logs = len([log for log in logs if log.level in [LogLevel.ERROR, LogLevel.CRITICAL]])
 
         if total_logs == 0:
             return None
@@ -347,9 +341,7 @@ class LogAnalysisEngine:
 
         return None
 
-    def _detect_response_time_anomaly(
-        self, logs: List[LogEntry]
-    ) -> Optional[Dict[str, Any]]:
+    def _detect_response_time_anomaly(self, logs: List[LogEntry]) -> Optional[Dict[str, Any]]:
         """Detect response time anomalies."""
         # Look for response time patterns in log messages
         response_times = []
@@ -387,15 +379,11 @@ class LogAnalysisEngine:
 
         return None
 
-    def _detect_agent_failure_anomaly(
-        self, logs: List[LogEntry]
-    ) -> Optional[Dict[str, Any]]:
+    def _detect_agent_failure_anomaly(self, logs: List[LogEntry]) -> Optional[Dict[str, Any]]:
         """Detect agent failure anomalies."""
         agent_logs = [log for log in logs if log.agent_id]
         agent_errors = [
-            log
-            for log in agent_logs
-            if log.level in [LogLevel.ERROR, LogLevel.CRITICAL]
+            log for log in agent_logs if log.level in [LogLevel.ERROR, LogLevel.CRITICAL]
         ]
 
         if not agent_logs:
@@ -462,9 +450,7 @@ class LogAnalysisEngine:
         recommendations = []
 
         # Error rate recommendations
-        error_logs = [
-            log for log in logs if log.level in [LogLevel.ERROR, LogLevel.CRITICAL]
-        ]
+        error_logs = [log for log in logs if log.level in [LogLevel.ERROR, LogLevel.CRITICAL]]
         if error_logs:
             error_rate = len(error_logs) / len(logs)
             if error_rate > 0.05:
@@ -475,9 +461,7 @@ class LogAnalysisEngine:
         # Agent-specific recommendations
         agent_activity = self._analyze_agent_activity(logs)
         if agent_activity:
-            inactive_agents = [
-                agent_id for agent_id, count in agent_activity.items() if count < 10
-            ]
+            inactive_agents = [agent_id for agent_id, count in agent_activity.items() if count < 10]
             if inactive_agents:
                 recommendations.append(
                     f"Low activity detected for agents: {', '.join(inactive_agents[:5])}. Check agent health."
@@ -512,9 +496,7 @@ class LogAnalysisEngine:
         if not logs:
             return 0.0
 
-        error_count = len(
-            [log for log in logs if log.level in [LogLevel.ERROR, LogLevel.CRITICAL]]
-        )
+        error_count = len([log for log in logs if log.level in [LogLevel.ERROR, LogLevel.CRITICAL]])
         return error_count / len(logs)
 
     def _analyze_agent_timeline(self, logs: List[LogEntry]) -> List[Dict[str, Any]]:
@@ -569,8 +551,7 @@ class LogAnalysisEngine:
         """Analyze agent performance metrics."""
         metrics = {
             "error_rate": self._calculate_error_rate(logs),
-            "activity_rate": len(logs)
-            / 24.0,  # logs per hour (assuming 24-hour window)
+            "activity_rate": len(logs) / 24.0,  # logs per hour (assuming 24-hour window)
             "avg_response_time": 0.0,
             "success_rate": 0.0,
         }
@@ -585,9 +566,7 @@ class LogAnalysisEngine:
             metrics["avg_response_time"] = statistics.mean(response_times)
 
         # Calculate success rate
-        success_logs = [
-            log for log in logs if log.level in [LogLevel.INFO, LogLevel.DEBUG]
-        ]
+        success_logs = [log for log in logs if log.level in [LogLevel.INFO, LogLevel.DEBUG]]
         if logs:
             metrics["success_rate"] = len(success_logs) / len(logs)
 
@@ -610,14 +589,10 @@ class LogAnalysisEngine:
 
             # Analyze involved components
             involved_agents = set(
-                log.agent_id
-                for log in correlated_logs
-                if log.agent_id and log.agent_id != agent_id
+                log.agent_id for log in correlated_logs if log.agent_id and log.agent_id != agent_id
             )
             involved_sources = set(
-                log.source.value
-                for log in correlated_logs
-                if log.source.value != "agent"
+                log.source.value for log in correlated_logs if log.source.value != "agent"
             )
 
             if involved_agents or involved_sources:
@@ -629,8 +604,7 @@ class LogAnalysisEngine:
                         "total_logs": len(correlated_logs),
                         "time_span": (
                             (
-                                correlated_logs[0].timestamp
-                                - correlated_logs[-1].timestamp
+                                correlated_logs[0].timestamp - correlated_logs[-1].timestamp
                             ).total_seconds()
                             if len(correlated_logs) > 1
                             else 0
@@ -830,9 +804,7 @@ class LogDashboardGenerator:
 
         return html
 
-    def _generate_timeline_chart_script(
-        self, timeline_data: List[Dict[str, Any]]
-    ) -> str:
+    def _generate_timeline_chart_script(self, timeline_data: List[Dict[str, Any]]) -> str:
         """Generate timeline chart JavaScript."""
         labels = [item["timestamp"] for item in timeline_data]
         data = [item["total"] for item in timeline_data]

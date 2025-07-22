@@ -257,9 +257,7 @@ class DatabaseStorageBackend(StorageBackend):
             # Delete existing graph data
             session.query(NodeModel).filter_by(graph_id=graph.graph_id).delete()
             session.query(EdgeModel).filter_by(graph_id=graph.graph_id).delete()
-            session.query(GraphMetadataModel).filter_by(
-                graph_id=graph.graph_id
-            ).delete()
+            session.query(GraphMetadataModel).filter_by(graph_id=graph.graph_id).delete()
 
             # Save nodes
             for node in graph.nodes.values():
@@ -320,9 +318,7 @@ class DatabaseStorageBackend(StorageBackend):
         session = self.SessionLocal()
         try:
             # Check if graph exists
-            metadata = (
-                session.query(GraphMetadataModel).filter_by(graph_id=graph_id).first()
-            )
+            metadata = session.query(GraphMetadataModel).filter_by(graph_id=graph_id).first()
 
             if not metadata:
                 return None
@@ -370,9 +366,7 @@ class DatabaseStorageBackend(StorageBackend):
                     confidence=edge_model.confidence,
                 )
                 graph.edges[edge.id] = edge
-                graph.graph.add_edge(
-                    edge.source_id, edge.target_id, key=edge.id, data=edge
-                )
+                graph.graph.add_edge(edge.source_id, edge.target_id, key=edge.id, data=edge)
 
             # Restore metadata
             graph.version = metadata.version
@@ -436,10 +430,7 @@ class DatabaseStorageBackend(StorageBackend):
         """Check if graph exists in database."""
         session = self.SessionLocal()
         try:
-            exists = (
-                session.query(GraphMetadataModel).filter_by(graph_id=graph_id).count()
-                > 0
-            )
+            exists = session.query(GraphMetadataModel).filter_by(graph_id=graph_id).count() > 0
             return exists
 
         finally:

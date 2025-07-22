@@ -107,9 +107,7 @@ location_belief -> location: depends_on
     assert 0.0 <= expected_complexity <= 1.0
     assert len(expected_checksum) == 64  # SHA-256 produces 64-character hex string
 
-    print(
-        f"✓ Basic explorer GMN - Nodes: {expected_node_count}, Edges: {expected_edge_count}"
-    )
+    print(f"✓ Basic explorer GMN - Nodes: {expected_node_count}, Edges: {expected_edge_count}")
     print(f"✓ Complexity score: {expected_complexity:.3f}")
     print(f"✓ Checksum calculated: {expected_checksum[:16]}...")
 
@@ -276,9 +274,7 @@ def test_gmn_storage_performance_considerations():
     # Test common query patterns that would benefit from indexes
 
     # 1. Find active specification for agent (most common query)
-    active_specs = [
-        s for s in test_data if s["agent_id"] == "agent1" and s["status"] == "active"
-    ]
+    active_specs = [s for s in test_data if s["agent_id"] == "agent1" and s["status"] == "active"]
     assert len(active_specs) == 1
 
     # 2. Find all specifications for agent ordered by version

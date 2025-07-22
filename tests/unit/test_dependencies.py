@@ -36,9 +36,7 @@ class TestDependencyVerification:
             # Minimum version for proper async support
             assert version.parse(sqlalchemy.__version__) >= version.parse("2.0.0")
         except ImportError:
-            pytest.fail(
-                "SQLAlchemy is not installed - required for database operations"
-            )
+            pytest.fail("SQLAlchemy is not installed - required for database operations")
         except AttributeError:
             pytest.fail("SQLAlchemy installation is corrupted - no version attribute")
 
@@ -50,9 +48,7 @@ class TestDependencyVerification:
             # Verify it can create a connection string
             assert hasattr(psycopg2, "connect")
         except ImportError:
-            pytest.fail(
-                "psycopg2 is not installed - required for PostgreSQL connectivity"
-            )
+            pytest.fail("psycopg2 is not installed - required for PostgreSQL connectivity")
 
     def test_asyncpg_available(self):
         """Test asyncpg is available for async PostgreSQL operations."""
@@ -61,9 +57,7 @@ class TestDependencyVerification:
 
             assert hasattr(asyncpg, "connect")
         except ImportError:
-            pytest.fail(
-                "asyncpg is not installed - required for async database operations"
-            )
+            pytest.fail("asyncpg is not installed - required for async database operations")
 
     def test_passlib_available_with_bcrypt(self):
         """Test passlib is available with bcrypt support for password hashing."""
@@ -133,9 +127,7 @@ class TestDependencyVerification:
             assert decoded["test"] == "data"
 
         except ImportError:
-            pytest.fail(
-                "PyJWT is not installed - required for JWT RS256 (replaces python-jose)"
-            )
+            pytest.fail("PyJWT is not installed - required for JWT RS256 (replaces python-jose)")
         except Exception as e:
             pytest.fail(f"PyJWT cryptography functionality test failed: {e}")
 
@@ -147,9 +139,7 @@ class TestDependencyVerification:
             # Check version for security and performance fixes
             assert version.parse(uvicorn.__version__) >= version.parse("0.20.0")
         except ImportError:
-            pytest.fail(
-                "uvicorn is not installed - required for running FastAPI server"
-            )
+            pytest.fail("uvicorn is not installed - required for running FastAPI server")
         except AttributeError:
             pytest.fail("uvicorn installation is corrupted - no version attribute")
 
@@ -183,9 +173,7 @@ class TestDependencyVerification:
             client = redis.Redis()
             assert hasattr(client, "ping")
         except ImportError:
-            pytest.fail(
-                "redis is not installed - required for caching and real-time updates"
-            )
+            pytest.fail("redis is not installed - required for caching and real-time updates")
 
     def test_alembic_available_for_migrations(self):
         """Test Alembic is available for database migrations."""
@@ -199,9 +187,7 @@ class TestDependencyVerification:
             assert hasattr(alembic.command, "upgrade")
             assert hasattr(alembic.command, "downgrade")
         except ImportError as e:
-            pytest.fail(
-                f"alembic is not installed - required for database migrations: {e}"
-            )
+            pytest.fail(f"alembic is not installed - required for database migrations: {e}")
         except Exception as e:
             pytest.fail(f"alembic functionality test failed: {e}")
 

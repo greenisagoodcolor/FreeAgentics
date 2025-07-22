@@ -129,9 +129,7 @@ class LLMProviderFactory:
                     self._primary_provider = provider_type
                     self._fallback_chain = self._get_fallback_chain(provider_type)
             except ValueError:
-                logger.warning(
-                    f"Unknown provider type: {provider_pref}, using auto mode"
-                )
+                logger.warning(f"Unknown provider type: {provider_pref}, using auto mode")
                 self._setup_auto_providers()
 
     def _setup_auto_providers(self):
@@ -191,33 +189,19 @@ class LLMProviderFactory:
                 provider = provider_class(
                     api_key=provider_config.get("api_key", os.getenv("OPENAI_API_KEY")),
                     model=provider_config.get("model", "gpt-4o"),
-                    **{
-                        k: v
-                        for k, v in provider_config.items()
-                        if k not in ["api_key", "model"]
-                    },
+                    **{k: v for k, v in provider_config.items() if k not in ["api_key", "model"]},
                 )
             elif provider_type == ProviderType.ANTHROPIC:
                 provider = provider_class(
-                    api_key=provider_config.get(
-                        "api_key", os.getenv("ANTHROPIC_API_KEY")
-                    ),
+                    api_key=provider_config.get("api_key", os.getenv("ANTHROPIC_API_KEY")),
                     model=provider_config.get("model", "claude-3-5-sonnet-20241022"),
-                    **{
-                        k: v
-                        for k, v in provider_config.items()
-                        if k not in ["api_key", "model"]
-                    },
+                    **{k: v for k, v in provider_config.items() if k not in ["api_key", "model"]},
                 )
             elif provider_type == ProviderType.OLLAMA:
                 provider = provider_class(
                     model=provider_config.get("model", "llama3.2"),
                     base_url=provider_config.get("base_url", "http://localhost:11434"),
-                    **{
-                        k: v
-                        for k, v in provider_config.items()
-                        if k not in ["model", "base_url"]
-                    },
+                    **{k: v for k, v in provider_config.items() if k not in ["model", "base_url"]},
                 )
             else:
                 raise LLMError(f"Provider {provider_type} not implemented")
@@ -232,9 +216,7 @@ class LLMProviderFactory:
             logger.error(f"Failed to create provider {provider_type}: {str(e)}")
             raise LLMError(f"Failed to create provider {provider_type}: {str(e)}")
 
-    async def get_provider(
-        self, provider_type: Optional[ProviderType] = None
-    ) -> LLMProvider:
+    async def get_provider(self, provider_type: Optional[ProviderType] = None) -> LLMProvider:
         """Get a provider instance, creating if necessary.
 
         Args:
@@ -314,9 +296,7 @@ class LLMProviderFactory:
                 response.metadata["provider"] = provider_type.value
                 response.metadata["latency"] = latency
 
-                logger.info(
-                    f"Successfully generated response using {provider_type.value}"
-                )
+                logger.info(f"Successfully generated response using {provider_type.value}")
 
                 return response
 
@@ -394,12 +374,12 @@ class LLMProviderFactory:
                     "success_rate": health.get_success_rate(),
                     "average_latency": health.average_latency,
                     "consecutive_failures": health.consecutive_failures,
-                    "last_success": health.last_success.isoformat()
-                    if health.last_success
-                    else None,
-                    "last_failure": health.last_failure.isoformat()
-                    if health.last_failure
-                    else None,
+                    "last_success": (
+                        health.last_success.isoformat() if health.last_success else None
+                    ),
+                    "last_failure": (
+                        health.last_failure.isoformat() if health.last_failure else None
+                    ),
                 }
 
             except Exception as e:
@@ -410,9 +390,7 @@ class LLMProviderFactory:
                 }
 
         return {
-            "primary_provider": self._primary_provider.value
-            if self._primary_provider
-            else None,
+            "primary_provider": self._primary_provider.value if self._primary_provider else None,
             "fallback_chain": [p.value for p in self._fallback_chain],
             "providers": results,
         }

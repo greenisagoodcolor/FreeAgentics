@@ -158,17 +158,15 @@ class MasterPerformanceRunner:
                     scenario.duration_seconds = min(scenario.duration_seconds, 180)
 
                     scenario_result = await self.load_framework.run_load_test(scenario)
-                    load_results[scenario_name] = (
-                        self.load_framework.generate_load_test_report(scenario_result)
+                    load_results[scenario_name] = self.load_framework.generate_load_test_report(
+                        scenario_result
                     )
 
             results["test_results"]["load_testing"] = load_results
 
             # 3. Run WebSocket performance tests
             logger.info("Running WebSocket performance tests...")
-            websocket_results = (
-                await self.websocket_tester.run_comprehensive_websocket_test_suite()
-            )
+            websocket_results = await self.websocket_tester.run_comprehensive_websocket_test_suite()
             results["test_results"]["websocket_performance"] = websocket_results
 
             # 4. Run database load tests
@@ -179,9 +177,7 @@ class MasterPerformanceRunner:
                 )
                 results["test_results"]["database_load"] = database_results
             except Exception as e:
-                logger.warning(
-                    f"Database tests failed (expected if no DB running): {e}"
-                )
+                logger.warning(f"Database tests failed (expected if no DB running): {e}")
                 results["test_results"]["database_load"] = {"error": str(e)}
 
             # 5. Run stress tests
@@ -191,14 +187,10 @@ class MasterPerformanceRunner:
             # Run progressive load and failure recovery scenarios
             for scenario_name in ["progressive_load", "failure_recovery"]:
                 try:
-                    stress_result = (
-                        await self.stress_framework.run_stress_test_scenario(
-                            scenario_name
-                        )
+                    stress_result = await self.stress_framework.run_stress_test_scenario(
+                        scenario_name
                     )
-                    stress_report = self.stress_framework.generate_stress_test_report(
-                        stress_result
-                    )
+                    stress_report = self.stress_framework.generate_stress_test_report(stress_result)
                     stress_results[scenario_name] = stress_report
                 except Exception as e:
                     logger.warning(f"Stress test {scenario_name} failed: {e}")
@@ -246,9 +238,7 @@ class MasterPerformanceRunner:
             # Stop monitoring
             self.monitoring_dashboard.stop_monitoring()
 
-    def _validate_sla_requirements(
-        self, test_results: Dict[str, Any]
-    ) -> Dict[str, Any]:
+    def _validate_sla_requirements(self, test_results: Dict[str, Any]) -> Dict[str, Any]:
         """Validate test results against SLA requirements."""
         validation = {
             "overall_sla_met": True,
@@ -386,9 +376,7 @@ class MasterPerformanceRunner:
 
         if not sla_validation.get("overall_sla_met", False):
             critical_violations = [
-                v
-                for v in sla_validation.get("violations", [])
-                if v["severity"] == "critical"
+                v for v in sla_validation.get("violations", []) if v["severity"] == "critical"
             ]
             if critical_violations:
                 return "FAIL"
@@ -422,9 +410,7 @@ class MasterPerformanceRunner:
 
         # Response time recommendations
         response_time_violations = [
-            v
-            for v in sla_validation.get("violations", [])
-            if "Response Time" in v["requirement"]
+            v for v in sla_validation.get("violations", []) if "Response Time" in v["requirement"]
         ]
         if response_time_violations:
             recommendations.append(
@@ -434,9 +420,7 @@ class MasterPerformanceRunner:
 
         # Throughput recommendations
         throughput_violations = [
-            v
-            for v in sla_validation.get("violations", [])
-            if "Throughput" in v["requirement"]
+            v for v in sla_validation.get("violations", []) if "Throughput" in v["requirement"]
         ]
         if throughput_violations:
             recommendations.append(
@@ -446,9 +430,7 @@ class MasterPerformanceRunner:
 
         # Error rate recommendations
         error_rate_violations = [
-            v
-            for v in sla_validation.get("violations", [])
-            if "Error Rate" in v["requirement"]
+            v for v in sla_validation.get("violations", []) if "Error Rate" in v["requirement"]
         ]
         if error_rate_violations:
             recommendations.append(
@@ -500,22 +482,22 @@ class MasterPerformanceRunner:
                     perf_metrics = suite_results["performance_metrics"]
 
                     if "response_time" in perf_metrics:
-                        metrics["api_response_time_ms"] = perf_metrics[
-                            "response_time"
-                        ].get("average_ms", 0)
+                        metrics["api_response_time_ms"] = perf_metrics["response_time"].get(
+                            "average_ms", 0
+                        )
 
                     if "throughput" in perf_metrics:
-                        metrics["api_requests_per_second"] = perf_metrics[
-                            "throughput"
-                        ].get("average_ops_per_second", 0)
+                        metrics["api_requests_per_second"] = perf_metrics["throughput"].get(
+                            "average_ops_per_second", 0
+                        )
 
                     if "resource_usage" in perf_metrics:
                         metrics["memory_usage_mb"] = perf_metrics["resource_usage"].get(
                             "average_memory_mb", 0
                         )
-                        metrics["cpu_usage_percent"] = perf_metrics[
-                            "resource_usage"
-                        ].get("average_cpu_percent", 0)
+                        metrics["cpu_usage_percent"] = perf_metrics["resource_usage"].get(
+                            "average_cpu_percent", 0
+                        )
 
             # Add test run to regression detector
             run_id = self.regression_detector.add_performance_test_run(
@@ -528,9 +510,7 @@ class MasterPerformanceRunner:
             )
 
             # Generate regression report
-            regression_report = self.regression_detector.generate_regression_report(
-                run_id
-            )
+            regression_report = self.regression_detector.generate_regression_report(run_id)
 
             return regression_report
 
@@ -600,9 +580,7 @@ class MasterPerformanceRunner:
         regression_analysis = results.get("regression_analysis", {})
         if "error" not in regression_analysis:
             regression_summary = regression_analysis.get("regression_analysis", {})
-            overall_regression_status = regression_summary.get(
-                "overall_status", "unknown"
-            )
+            overall_regression_status = regression_summary.get("overall_status", "unknown")
             print(f"\nRegression Analysis: {overall_regression_status}")
 
             if overall_regression_status == "fail":

@@ -641,12 +641,8 @@ class ScalabilityAnalysisBenchmark(EnhancedPerformanceBenchmark):
         memory_data = results["memory_scaling"]
 
         # Find efficiency at key points
-        efficiency_10 = next(
-            (d["efficiency"] for d in efficiency_data if d["agents"] == 10), 0
-        )
-        efficiency_20 = next(
-            (d["efficiency"] for d in efficiency_data if d["agents"] == 20), 0
-        )
+        efficiency_10 = next((d["efficiency"] for d in efficiency_data if d["agents"] == 10), 0)
+        efficiency_20 = next((d["efficiency"] for d in efficiency_data if d["agents"] == 20), 0)
 
         # Calculate efficiency degradation
         if len(efficiency_data) > 1:
@@ -671,9 +667,7 @@ class ScalabilityAnalysisBenchmark(EnhancedPerformanceBenchmark):
             curr_agents = throughput_data[i]["agents"]
 
             if prev_throughput > 0:
-                scaling_factor = (curr_throughput / prev_throughput) / (
-                    curr_agents / prev_agents
-                )
+                scaling_factor = (curr_throughput / prev_throughput) / (curr_agents / prev_agents)
                 throughput_scaling.append(scaling_factor)
 
         avg_scaling_factor = np.mean(throughput_scaling) if throughput_scaling else 1.0
@@ -808,9 +802,7 @@ class EnhancedCIBenchmarkSuite:
                     "python_version": os.sys.version,
                     "cpu_count": os.cpu_count(),
                     "memory_total_gb": psutil.virtual_memory().total / (1024**3),
-                    "cpu_freq_max": psutil.cpu_freq().max
-                    if psutil.cpu_freq()
-                    else None,
+                    "cpu_freq_max": psutil.cpu_freq().max if psutil.cpu_freq() else None,
                 },
                 "baselines": PERFORMANCE_BASELINES,
                 "thresholds": REGRESSION_THRESHOLDS,
@@ -912,9 +904,7 @@ class EnhancedCIBenchmarkSuite:
             elif regression["severity"] == "warning":
                 results["summary"]["warning_regressions"] += 1
 
-        results["summary"]["total_improvements"] += len(
-            validation.get("improvements", [])
-        )
+        results["summary"]["total_improvements"] += len(validation.get("improvements", []))
 
     def _generate_performance_analysis(self, results: Dict[str, Any]) -> Dict[str, Any]:
         """Generate comprehensive performance analysis."""
@@ -1029,9 +1019,7 @@ class EnhancedCIBenchmarkSuite:
                 f.write(f"**Duration**: {bench_data.get('duration_seconds', 0):.2f}s\n")
 
                 validation = bench_data.get("validation", {})
-                f.write(
-                    f"**Status**: {validation.get('status', 'unknown').upper()}\n\n"
-                )
+                f.write(f"**Status**: {validation.get('status', 'unknown').upper()}\n\n")
 
                 # Performance metrics
                 result = bench_data.get("result", {})
@@ -1081,9 +1069,7 @@ def main():
     """Run the enhanced CI performance benchmark suite."""
     import argparse
 
-    parser = argparse.ArgumentParser(
-        description="Run enhanced CI performance benchmarks"
-    )
+    parser = argparse.ArgumentParser(description="Run enhanced CI performance benchmarks")
     parser.add_argument("--output-dir", type=Path, help="Output directory for results")
     parser.add_argument("--quick", action="store_true", help="Run in quick mode for CI")
     parser.add_argument("--verbose", "-v", action="store_true", help="Verbose logging")

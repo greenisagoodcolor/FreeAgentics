@@ -31,9 +31,7 @@ try:
             {
                 "id": "test_transition",
                 "type": "transition",
-                "properties": {
-                    "matrix": [[[0.8, 0.2], [0.2, 0.8]], [[0.7, 0.3], [0.3, 0.7]]]
-                },
+                "properties": {"matrix": [[[0.8, 0.2], [0.2, 0.8]], [[0.7, 0.3], [0.3, 0.7]]]},
             },
         ],
         "edges": [
@@ -67,9 +65,7 @@ try:
     from knowledge_graph.graph_engine import KnowledgeGraph, KnowledgeNode, NodeType
 
     kg = KnowledgeGraph()
-    node = KnowledgeNode(
-        type=NodeType.ENTITY, label="test_node", properties={"test": True}
-    )
+    node = KnowledgeNode(type=NodeType.ENTITY, label="test_node", properties={"test": True})
     kg.add_node(node)
     print("✅ Knowledge Graph works!")
     print(f"   - Nodes: {len(kg.nodes)}")

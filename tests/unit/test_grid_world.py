@@ -476,9 +476,7 @@ class TestGridWorld:
                     "properties": {},
                 }
             },
-            "grid": [
-                [{"type": "empty", "value": 0.0} for _ in range(5)] for _ in range(5)
-            ],
+            "grid": [[{"type": "empty", "value": 0.0} for _ in range(5)] for _ in range(5)],
             "step_count": 42,
         }
 

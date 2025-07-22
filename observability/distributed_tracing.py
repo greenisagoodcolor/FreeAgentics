@@ -103,11 +103,7 @@ class Trace:
 
     def get_child_spans(self, parent_span_id: str) -> List[TraceSpan]:
         """Get all child spans of a parent span."""
-        return [
-            span
-            for span in self.spans.values()
-            if span.parent_span_id == parent_span_id
-        ]
+        return [span for span in self.spans.values() if span.parent_span_id == parent_span_id]
 
     def finish(self):
         """Finish the trace by calculating total duration."""
@@ -175,9 +171,7 @@ class DistributedTracer:
 
         logger.info("🔍 Distributed tracer stopped")
 
-    def start_trace(
-        self, operation_name: str, service_name: Optional[str] = None
-    ) -> TraceSpan:
+    def start_trace(self, operation_name: str, service_name: Optional[str] = None) -> TraceSpan:
         """Start a new trace with a root span."""
         trace_id = str(uuid.uuid4())
         span_id = str(uuid.uuid4())
@@ -227,9 +221,7 @@ class DistributedTracer:
 
         return span
 
-    def finish_span(
-        self, span: TraceSpan, status: str = "ok", error: Optional[str] = None
-    ):
+    def finish_span(self, span: TraceSpan, status: str = "ok", error: Optional[str] = None):
         """Finish a span."""
         span.finish(status, error)
 
@@ -257,9 +249,7 @@ class DistributedTracer:
 
     def get_completed_traces(self, limit: int = 100) -> List[Trace]:
         """Get completed traces."""
-        completed = [
-            trace for trace in self.traces.values() if trace.end_time is not None
-        ]
+        completed = [trace for trace in self.traces.values() if trace.end_time is not None]
         return sorted(completed, key=lambda t: t.end_time or 0, reverse=True)[:limit]
 
     def get_trace_stats(self) -> Dict[str, Any]:
@@ -271,8 +261,7 @@ class DistributedTracer:
         # Calculate average duration for completed traces
         completed = [t for t in self.traces.values() if t.duration_ms is not None]
         avg_duration = (
-            sum(t.duration_ms for t in completed if t.duration_ms is not None)
-            / len(completed)
+            sum(t.duration_ms for t in completed if t.duration_ms is not None) / len(completed)
             if completed
             else 0
         )
@@ -283,12 +272,9 @@ class DistributedTracer:
             "completed_traces": completed_traces,
             "active_spans": len(self.active_spans),
             "avg_duration_ms": avg_duration,
-            "services": list(
-                set().union(*(t.service_names for t in self.traces.values()))
-            ),
+            "services": list(set().union(*(t.service_names for t in self.traces.values()))),
             "error_rate": (
-                sum(t.error_count for t in completed)
-                / sum(t.operation_count for t in completed)
+                sum(t.error_count for t in completed) / sum(t.operation_count for t in completed)
                 if completed
                 else 0
             ),
@@ -323,9 +309,7 @@ class DistributedTracer:
 
             # Remove associated active spans
             spans_to_remove = [
-                span_id
-                for span_id, span in self.active_spans.items()
-                if span.trace_id == trace_id
+                span_id for span_id, span in self.active_spans.items() if span.trace_id == trace_id
             ]
             for span_id in spans_to_remove:
                 del self.active_spans[span_id]
@@ -373,9 +357,7 @@ class AgentTracingMixin:
         """Set the distributed tracer for this agent."""
         self.tracer = tracer
 
-    async def trace_operation(
-        self, operation_name: str, operation_func, *args, **kwargs
-    ):
+    async def trace_operation(self, operation_name: str, operation_func, *args, **kwargs):
         """Trace an agent operation."""
         if not self.tracer:
             return await operation_func(*args, **kwargs)
@@ -442,9 +424,7 @@ async def trace_agent_coordination(
     """Trace agent coordination operations."""
     operation_name = f"coordination_{coordination_type}"
 
-    async with trace_span(
-        tracer, operation_name, service_name=f"agent-{agent_id}"
-    ) as span:
+    async with trace_span(tracer, operation_name, service_name=f"agent-{agent_id}") as span:
         span.add_tag("agent_id", agent_id)
         span.add_tag("coordination_type", coordination_type)
 
@@ -463,9 +443,7 @@ async def trace_belief_update(
     """Trace belief system updates."""
     operation_name = "belief_update"
 
-    async with trace_span(
-        tracer, operation_name, service_name=f"agent-{agent_id}"
-    ) as span:
+    async with trace_span(tracer, operation_name, service_name=f"agent-{agent_id}") as span:
         span.add_tag("agent_id", agent_id)
         span.add_tag("operation_type", "belief_update")
 
@@ -489,9 +467,7 @@ async def trace_inference_step(
     """Trace inference steps."""
     operation_name = f"inference_{step_type}"
 
-    async with trace_span(
-        tracer, operation_name, service_name=f"agent-{agent_id}"
-    ) as span:
+    async with trace_span(tracer, operation_name, service_name=f"agent-{agent_id}") as span:
         span.add_tag("agent_id", agent_id)
         span.add_tag("step_type", step_type)
 

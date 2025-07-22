@@ -63,9 +63,7 @@ def test_threading(num_agents: int = 5, num_steps: int = 10) -> Dict[str, Any]:
 
     # Run agents concurrently with threads
     with ThreadPoolExecutor(max_workers=num_agents) as executor:
-        futures = [
-            executor.submit(agent_step_workload, agent, num_steps) for agent in agents
-        ]
+        futures = [executor.submit(agent_step_workload, agent, num_steps) for agent in agents]
         results = [future.result() for future in futures]
 
     total_time = time.time() - start_time
@@ -106,8 +104,7 @@ def test_multiprocessing(num_agents: int = 5, num_steps: int = 10) -> Dict[str, 
     # Run agents in separate processes
     with ProcessPoolExecutor(max_workers=num_agents) as executor:
         futures = [
-            executor.submit(process_worker, f"proc_{i}", num_steps)
-            for i in range(num_agents)
+            executor.submit(process_worker, f"proc_{i}", num_steps) for i in range(num_agents)
         ]
         results = [future.result() for future in futures]
 
@@ -249,14 +246,10 @@ def main():
         # Quick comparison
         if thread_result["throughput_ops_sec"] > mp_result["throughput_ops_sec"]:
             winner = "Threading"
-            margin = (
-                thread_result["throughput_ops_sec"] / mp_result["throughput_ops_sec"]
-            )
+            margin = thread_result["throughput_ops_sec"] / mp_result["throughput_ops_sec"]
         else:
             winner = "Multiprocessing"
-            margin = (
-                mp_result["throughput_ops_sec"] / thread_result["throughput_ops_sec"]
-            )
+            margin = mp_result["throughput_ops_sec"] / thread_result["throughput_ops_sec"]
 
         print(f"\n  🏆 Winner: {winner} ({margin:.2f}x faster)")
         print(
@@ -278,9 +271,7 @@ def main():
         f"Multiprocessing: {comm_results['multiprocessing']['throughput_msg_sec']:.0f} msg/sec, "
         f"{comm_results['multiprocessing']['latency_per_msg_ms']:.3f}ms per message"
     )
-    print(
-        f"Overhead ratio: {comm_results['overhead_ratio']:.1f}x slower for multiprocessing"
-    )
+    print(f"Overhead ratio: {comm_results['overhead_ratio']:.1f}x slower for multiprocessing")
 
     # Summary
     print("\n" + "=" * 60)

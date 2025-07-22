@@ -94,9 +94,7 @@ class MockRateLimiter:
             # Check if limit exceeded
             if len(self.request_counts[key][limit_type]) >= max_requests:
                 # Block the key
-                self.blocked_until[key] = (
-                    current_time + self.config.block_duration_seconds
-                )
+                self.blocked_until[key] = current_time + self.config.block_duration_seconds
                 return False, f"{limit_type}_limit_exceeded"
 
         # Record this request
@@ -195,17 +193,13 @@ class TestAuthenticationRateLimiting:
 
         # Should allow up to limit
         for i in range(self.rate_limit_config.login_per_minute):
-            assert self._simulate_login_attempt(
-                username, ip_address, start_time + i * 0.1
-            )
+            assert self._simulate_login_attempt(username, ip_address, start_time + i * 0.1)
 
         # Next attempt should be rate limited
         assert not self._simulate_login_attempt(username, ip_address, start_time + 0.6)
 
         # Check metrics
-        assert (
-            self.metrics.successful_requests == self.rate_limit_config.login_per_minute
-        )
+        assert self.metrics.successful_requests == self.rate_limit_config.login_per_minute
         assert self.metrics.rate_limited_requests == 1
         assert self.metrics.rate_limit_hits["minute_limit_exceeded"] == 1
 
@@ -344,9 +338,7 @@ class TestAuthenticationRateLimiting:
         for i in range(self.rate_limit_config.registration_per_hour + 5):
             key = f"{ip_address}:registration"
             request_time = start_time + i * 60  # 1 minute apart
-            allowed, reason = self.rate_limiter.is_allowed(
-                key, "registration", request_time
-            )
+            allowed, reason = self.rate_limiter.is_allowed(key, "registration", request_time)
             registration_attempts.append((i, allowed, reason))
 
         # Count successful registrations
@@ -354,9 +346,7 @@ class TestAuthenticationRateLimiting:
         assert successful == self.rate_limit_config.registration_per_hour
 
         # Verify later attempts were rate limited
-        failed = [
-            (i, reason) for i, allowed, reason in registration_attempts if not allowed
-        ]
+        failed = [(i, reason) for i, allowed, reason in registration_attempts if not allowed]
         assert len(failed) == 5
         assert all(reason == "hour_limit_exceeded" for _, reason in failed)
 
@@ -403,9 +393,7 @@ class TestAuthenticationRateLimiting:
             local_results = []
 
             for _ in range(num_requests_per_user):
-                allowed = self._simulate_login_attempt(
-                    user_data["username"], user_data["ip"]
-                )
+                allowed = self._simulate_login_attempt(user_data["username"], user_data["ip"])
                 local_results.append(allowed)
                 time.sleep(0.01)  # Small delay between requests
 
@@ -487,9 +475,7 @@ class TestAuthenticationRateLimiting:
         }
 
         assert int(headers["X-RateLimit-Remaining"]) == 1
-        assert (
-            int(headers["X-RateLimit-Limit"]) == self.rate_limit_config.login_per_minute
-        )
+        assert int(headers["X-RateLimit-Limit"]) == self.rate_limit_config.login_per_minute
 
     def test_rate_limiting_with_authentication_flow(self):
         """Test rate limiting integrated with full authentication flow."""
@@ -523,8 +509,7 @@ class TestAuthenticationRateLimiting:
                     successful_logins.append(
                         {
                             "attempt": i,
-                            "access_token": access_token[:20]
-                            + "...",  # Truncated for display
+                            "access_token": access_token[:20] + "...",  # Truncated for display
                             "timestamp": time.time(),
                         }
                     )

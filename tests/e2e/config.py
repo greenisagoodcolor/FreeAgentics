@@ -177,9 +177,7 @@ class E2ETestConfig:
 
         # Performance settings
         if os.getenv("E2E_PERFORMANCE_ENABLED"):
-            config.performance_enabled = (
-                os.getenv("E2E_PERFORMANCE_ENABLED").lower() == "true"
-            )
+            config.performance_enabled = os.getenv("E2E_PERFORMANCE_ENABLED").lower() == "true"
 
         return config
 

@@ -104,9 +104,7 @@ class TestJWTHandlerCharacterization:
             algorithms=[JWT_ALGORITHM],
             audience=TOKEN_AUDIENCE,  # Must provide audience
             issuer=TOKEN_ISSUER,  # Must provide issuer
-            options={
-                "verify_exp": False
-            },  # Don't verify expiration for characterization
+            options={"verify_exp": False},  # Don't verify expiration for characterization
         )
 
         # Document actual payload structure
@@ -153,9 +151,7 @@ class TestJWTHandlerCharacterization:
         fingerprint = "test-fingerprint-12345"
 
         # When
-        token = handler.create_access_token(
-            "user", "username", "role", [], fingerprint=fingerprint
-        )
+        token = handler.create_access_token("user", "username", "role", [], fingerprint=fingerprint)
         decoded = jwt.decode(
             token,
             handler.public_key,
@@ -171,9 +167,7 @@ class TestJWTHandlerCharacterization:
         assert decoded["fingerprint"] != fingerprint
         # Verify it's SHA256 (64 hex chars)
         assert len(decoded["fingerprint"]) == 64
-        assert (
-            decoded["fingerprint"] == hashlib.sha256(fingerprint.encode()).hexdigest()
-        )
+        assert decoded["fingerprint"] == hashlib.sha256(fingerprint.encode()).hexdigest()
 
     def test_refresh_token_family_tracking(self, jwt_handler_with_temp_keys):
         """Characterize refresh token family behavior."""
@@ -223,9 +217,7 @@ class TestJWTHandlerCharacterization:
         fingerprint = "device-fingerprint-xyz"
 
         # When - Create token with fingerprint
-        token = handler.create_access_token(
-            "user", "username", "role", [], fingerprint=fingerprint
-        )
+        token = handler.create_access_token("user", "username", "role", [], fingerprint=fingerprint)
 
         # Then - Verification succeeds with correct fingerprint
         result = handler.verify_access_token(token, fingerprint=fingerprint)
@@ -270,9 +262,7 @@ class TestJWTHandlerCharacterization:
         refresh1, family_id = handler.create_refresh_token(user_id)
 
         # When - Rotate tokens
-        access2, refresh2, returned_family = handler.rotate_refresh_token(
-            refresh1, user_id
-        )
+        access2, refresh2, returned_family = handler.rotate_refresh_token(refresh1, user_id)
 
         # Then - Document rotation behavior
         assert isinstance(access2, str)
@@ -323,8 +313,7 @@ class TestJWTHandlerCharacterization:
             "permissions": [],
             "type": "access",
             "iat": past,
-            "exp": past
-            + timedelta(minutes=ACCESS_TOKEN_EXPIRE_MINUTES),  # Still expired
+            "exp": past + timedelta(minutes=ACCESS_TOKEN_EXPIRE_MINUTES),  # Still expired
             "nbf": past,
             "iss": TOKEN_ISSUER,
             "aud": TOKEN_AUDIENCE,
@@ -332,9 +321,7 @@ class TestJWTHandlerCharacterization:
         }
 
         # Encode with handler's key
-        expired_token = jwt.encode(
-            payload, handler.private_key, algorithm=JWT_ALGORITHM
-        )
+        expired_token = jwt.encode(payload, handler.private_key, algorithm=JWT_ALGORITHM)
 
         # Then - Verification fails with specific error
         with pytest.raises(HTTPException) as exc_info:
@@ -366,9 +353,7 @@ class TestJWTHandlerCharacterization:
         private_stat = missing_private.stat()
         assert oct(private_stat.st_mode)[-3:] == "600"  # Owner read/write only
 
-    def test_key_rotation_warnings(
-        self, jwt_handler_with_temp_keys, monkeypatch, caplog
-    ):
+    def test_key_rotation_warnings(self, jwt_handler_with_temp_keys, monkeypatch, caplog):
         """Characterize key rotation warning behavior."""
         # Given - Old key file
         handler = jwt_handler_with_temp_keys
@@ -495,9 +480,7 @@ class TestRefreshTokenStoreCharacterization:
 
         # Then - Document internal structure
         assert len(store._token_families[family_id]) == 3
-        assert all(
-            len(token_hash) == 64 for token_hash in store._token_families[family_id]
-        )
+        assert all(len(token_hash) == 64 for token_hash in store._token_families[family_id])
 
     def test_family_invalidation_cascade(self):
         """Characterize family invalidation behavior."""

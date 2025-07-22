@@ -194,9 +194,7 @@ class TestLLMManager:
     @patch("agents.base_agent.LLM_MANAGER", None)
     def test_get_llm_manager_import_error(self):
         """Test LLM manager import failure."""
-        with patch(
-            "agents.base_agent.importlib.import_module", side_effect=ImportError
-        ):
+        with patch("agents.base_agent.importlib.import_module", side_effect=ImportError):
             import agents.base_agent
 
             agents.base_agent.LLM_MANAGER = None
@@ -506,9 +504,7 @@ class TestActiveInferenceAgent:
         }
         agent.act(decision)
 
-        world.execute_action.assert_called_once_with(
-            "test", "down", {"reason": "exploration"}
-        )
+        world.execute_action.assert_called_once_with("test", "down", {"reason": "exploration"})
 
     def test_get_state(self):
         """Test get_state method."""

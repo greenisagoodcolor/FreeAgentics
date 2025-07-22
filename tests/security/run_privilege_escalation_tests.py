@@ -163,30 +163,24 @@ def run_privilege_escalation_tests():
 
     # Calculate security score
     if results["summary"]["total_tests"] > 0:
-        success_rate = (
-            results["summary"]["passed"] / results["summary"]["total_tests"]
-        ) * 100
+        success_rate = (results["summary"]["passed"] / results["summary"]["total_tests"]) * 100
         print(f"\nSecurity Score: {success_rate:.1f}%")
 
         if success_rate == 100:
-            print(
-                "\n✅ EXCELLENT: All privilege escalation attempts were properly blocked!"
-            )
+            print("\n✅ EXCELLENT: All privilege escalation attempts were properly blocked!")
         elif success_rate >= 95:
             print(
                 "\n⚠️  GOOD: Most privilege escalation attempts blocked, but some vulnerabilities may exist."
             )
         elif success_rate >= 80:
-            print(
-                "\n⚠️  CONCERNING: Several privilege escalation vulnerabilities detected."
-            )
+            print("\n⚠️  CONCERNING: Several privilege escalation vulnerabilities detected.")
         else:
-            print(
-                "\n❌ CRITICAL: Significant privilege escalation vulnerabilities found!"
-            )
+            print("\n❌ CRITICAL: Significant privilege escalation vulnerabilities found!")
 
     # Save detailed report
-    report_path = f"privilege_escalation_test_report_{datetime.now().strftime('%Y%m%d_%H%M%S')}.json"
+    report_path = (
+        f"privilege_escalation_test_report_{datetime.now().strftime('%Y%m%d_%H%M%S')}.json"
+    )
     with open(report_path, "w") as f:
         json.dump(results, f, indent=2)
 

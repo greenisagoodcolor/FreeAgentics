@@ -114,9 +114,7 @@ class TestConcurrentAuthenticationLoad:
         def authenticate_user(user):
             try:
                 start_time = time.time()
-                authenticated_user = auth_manager.authenticate_user(
-                    user.username, "password123"
-                )
+                authenticated_user = auth_manager.authenticate_user(user.username, "password123")
                 end_time = time.time()
 
                 return {
@@ -275,9 +273,7 @@ class TestConcurrentAuthenticationLoad:
         def make_request():
             try:
                 start_time = time.time()
-                is_limited = rate_limiter.is_rate_limited(
-                    identifier, rate_limit, window_minutes
-                )
+                is_limited = rate_limiter.is_rate_limited(identifier, rate_limit, window_minutes)
                 end_time = time.time()
 
                 return {
@@ -414,9 +410,7 @@ class TestConcurrentAuthenticationLoad:
                 "avg_duration": statistics.mean(durations),
                 "max_duration": max(durations),
                 "min_duration": min(durations),
-                "std_duration": statistics.stdev(durations)
-                if len(durations) > 1
-                else 0,
+                "std_duration": statistics.stdev(durations) if len(durations) > 1 else 0,
             }
 
         # Verify scalability - performance shouldn't degrade significantly
@@ -430,9 +424,7 @@ class TestConcurrentAuthenticationLoad:
         ratio_100_to_50 = results[100]["avg_duration"] / results[50]["avg_duration"]
 
         assert ratio_50_to_10 < 3.0  # 50 users shouldn't be more than 3x slower than 10
-        assert (
-            ratio_100_to_50 < 3.0
-        )  # 100 users shouldn't be more than 3x slower than 50
+        assert ratio_100_to_50 < 3.0  # 100 users shouldn't be more than 3x slower than 50
 
     def test_memory_usage_under_load(self, auth_manager, test_users):
         """Test memory usage doesn't grow excessively under load."""
@@ -582,9 +574,7 @@ class TestConcurrentAuthenticationLoad:
 
                 # Full authentication flow
                 # 1. Authenticate
-                authenticated_user = auth_manager.authenticate_user(
-                    user.username, "password123"
-                )
+                authenticated_user = auth_manager.authenticate_user(user.username, "password123")
                 assert authenticated_user is not None
 
                 # 2. Create tokens

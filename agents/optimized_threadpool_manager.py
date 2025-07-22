@@ -110,9 +110,7 @@ class OptimizedThreadPoolManager:
         self.active_futures: Dict[Future, AgentTask] = {}
         self._futures_lock = Lock()
 
-        logger.info(
-            f"Initialized OptimizedThreadPoolManager with {initial_workers} workers"
-        )
+        logger.info(f"Initialized OptimizedThreadPoolManager with {initial_workers} workers")
 
     def register_agent(self, agent_id: str, agent: Any) -> None:
         """Register an agent for thread pool management."""
@@ -129,10 +127,7 @@ class OptimizedThreadPoolManager:
 
     def _scale_workers(self, current_load: float) -> None:
         """Dynamically scale worker threads based on load."""
-        if (
-            current_load > self.scaling_threshold
-            and self.current_workers < self.max_workers
-        ):
+        if current_load > self.scaling_threshold and self.current_workers < self.max_workers:
             # Scale up
             new_workers = min(self.current_workers * 2, self.max_workers)
             self._resize_pool(new_workers)
@@ -260,9 +255,7 @@ class OptimizedThreadPoolManager:
         # Submit all agent steps
         for agent_id in self.agents:
             if agent_id in observations:
-                future = self.submit_task(
-                    agent_id, "step", {"observation": observations[agent_id]}
-                )
+                future = self.submit_task(agent_id, "step", {"observation": observations[agent_id]})
                 futures[agent_id] = future
 
         # Collect results
@@ -395,9 +388,7 @@ class OptimizedThreadPoolManager:
         return {
             "current_workers": self.current_workers,
             "active_tasks": active_tasks,
-            "load_factor": (
-                active_tasks / self.current_workers if self.current_workers > 0 else 0
-            ),
+            "load_factor": (active_tasks / self.current_workers if self.current_workers > 0 else 0),
             "total_agents": len(self.agents),
             "queue_size": self.priority_queue.qsize(),
         }
@@ -440,9 +431,7 @@ def benchmark_threadpool_manager():
     agent_counts = [10, 30, 50, 100]
     rounds = 5
 
-    manager = OptimizedThreadPoolManager(
-        initial_workers=16, max_workers=64, min_workers=4
-    )
+    manager = OptimizedThreadPoolManager(initial_workers=16, max_workers=64, min_workers=4)
 
     try:
         for num_agents in agent_counts:

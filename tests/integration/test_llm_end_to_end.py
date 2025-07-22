@@ -83,9 +83,7 @@ class TestLLMEndToEndIntegration:
         health_results = manager.perform_health_checks()
         assert len(health_results) > 0
 
-    @pytest.mark.parametrize(
-        "provider_type", [ProviderType.OPENAI, ProviderType.ANTHROPIC]
-    )
+    @pytest.mark.parametrize("provider_type", [ProviderType.OPENAI, ProviderType.ANTHROPIC])
     def test_mock_llm_generation(self, mock_llm_config, provider_type):
         """Test LLM generation with mocked API responses."""
         if not LLM_IMPORTS_SUCCESS:
@@ -110,9 +108,9 @@ class TestLLMEndToEndIntegration:
                 # Mock chat completion
                 mock_response = Mock()
                 mock_response.choices = [Mock()]
-                mock_response.choices[
-                    0
-                ].message.content = "Hello! This is a test response from OpenAI."
+                mock_response.choices[0].message.content = (
+                    "Hello! This is a test response from OpenAI."
+                )
                 mock_response.choices[0].finish_reason = "stop"
                 mock_response.model = "gpt-3.5-turbo"
                 mock_response.usage.prompt_tokens = 10
@@ -138,9 +136,7 @@ class TestLLMEndToEndIntegration:
                 assert response.latency_ms > 0
 
         elif provider_type == ProviderType.ANTHROPIC:
-            with patch(
-                "inference.llm.anthropic_provider.Anthropic"
-            ) as mock_anthropic_class:
+            with patch("inference.llm.anthropic_provider.Anthropic") as mock_anthropic_class:
                 mock_client = Mock()
                 mock_anthropic_class.return_value = mock_client
 
@@ -155,9 +151,7 @@ class TestLLMEndToEndIntegration:
                 # Mock actual generation
                 mock_response = Mock()
                 mock_response.content = [Mock()]
-                mock_response.content[
-                    0
-                ].text = "Hello! This is a test response from Claude."
+                mock_response.content[0].text = "Hello! This is a test response from Claude."
                 mock_response.model = "claude-3-sonnet-20240229"
                 mock_response.usage.input_tokens = 10
                 mock_response.usage.output_tokens = 12
@@ -205,9 +199,7 @@ class TestLLMEndToEndIntegration:
             mock_openai_client = Mock()
             mock_openai.return_value = mock_openai_client
             mock_openai_client.models.list.side_effect = Exception("OpenAI API Error")
-            mock_openai_client.chat.completions.create.side_effect = Exception(
-                "OpenAI API Error"
-            )
+            mock_openai_client.chat.completions.create.side_effect = Exception("OpenAI API Error")
 
             # Configure Anthropic to succeed
             mock_anthropic_client = Mock()

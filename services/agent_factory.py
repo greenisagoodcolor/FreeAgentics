@@ -155,9 +155,7 @@ class AgentFactory:
             D = self._create_D_matrix(model.get("D"), num_states)
 
             # Extract agent parameters
-            planning_horizon = model.get(
-                "planning_horizon", self.default_planning_horizon
-            )
+            planning_horizon = model.get("planning_horizon", self.default_planning_horizon)
             inference_algo = model.get("inference_algo", self.default_inference_algo)
             policy_len = model.get("policy_len", self.default_policy_len)
 
@@ -192,9 +190,7 @@ class AgentFactory:
             logger.error(f"Failed to create agent: {str(e)}")
             raise RuntimeError(f"Agent creation failed: {str(e)}")
 
-    def _validate_A_matrix(
-        self, A: Any, num_obs: List[int], num_states: List[int]
-    ) -> List[str]:
+    def _validate_A_matrix(self, A: Any, num_obs: List[int], num_states: List[int]) -> List[str]:
         """Validate observation model matrix."""
         errors = []
 
@@ -222,12 +218,8 @@ class AgentFactory:
                     errors.append(f"A must have {num_modalities} modalities")
 
             # Check normalization
-            if isinstance(A_array, np.ndarray) and not np.allclose(
-                A_array.sum(axis=0), 1.0
-            ):
-                errors.append(
-                    "A matrix columns must sum to 1 (normalized probabilities)"
-                )
+            if isinstance(A_array, np.ndarray) and not np.allclose(A_array.sum(axis=0), 1.0):
+                errors.append("A matrix columns must sum to 1 (normalized probabilities)")
 
         except Exception as e:
             errors.append(f"Error validating A matrix: {str(e)}")
@@ -335,9 +327,7 @@ class AgentFactory:
         """Create observation model matrix."""
         if A_spec is not None:
             # Use provided matrix
-            if isinstance(A_spec, list) and all(
-                isinstance(a, np.ndarray) for a in A_spec
-            ):
+            if isinstance(A_spec, list) and all(isinstance(a, np.ndarray) for a in A_spec):
                 return A_spec
             elif isinstance(A_spec, np.ndarray):
                 return [A_spec]
@@ -374,9 +364,7 @@ class AgentFactory:
         """Create transition model matrix."""
         if B_spec is not None:
             # Use provided matrix
-            if isinstance(B_spec, list) and all(
-                isinstance(b, np.ndarray) for b in B_spec
-            ):
+            if isinstance(B_spec, list) and all(isinstance(b, np.ndarray) for b in B_spec):
                 return B_spec
             elif isinstance(B_spec, np.ndarray):
                 return [B_spec]
@@ -418,9 +406,7 @@ class AgentFactory:
         """Create preference matrix."""
         if C_spec is not None:
             # Use provided matrix
-            if isinstance(C_spec, list) and all(
-                isinstance(c, np.ndarray) for c in C_spec
-            ):
+            if isinstance(C_spec, list) and all(isinstance(c, np.ndarray) for c in C_spec):
                 return C_spec
             elif isinstance(C_spec, np.ndarray):
                 return [C_spec]
@@ -440,9 +426,7 @@ class AgentFactory:
         """Create initial state distribution."""
         if D_spec is not None:
             # Use provided matrix
-            if isinstance(D_spec, list) and all(
-                isinstance(d, np.ndarray) for d in D_spec
-            ):
+            if isinstance(D_spec, list) and all(isinstance(d, np.ndarray) for d in D_spec):
                 return D_spec
             elif isinstance(D_spec, np.ndarray):
                 return [D_spec]

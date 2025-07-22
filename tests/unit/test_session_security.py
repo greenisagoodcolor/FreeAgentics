@@ -68,9 +68,7 @@ class SessionStore:
 
         return session_id
 
-    def validate_session(
-        self, session_id: str, ip_address: str = None
-    ) -> Optional[Dict]:
+    def validate_session(self, session_id: str, ip_address: str = None) -> Optional[Dict]:
         """Validate and retrieve session data.
 
         Args:

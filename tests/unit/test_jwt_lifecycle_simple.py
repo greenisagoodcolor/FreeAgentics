@@ -25,9 +25,7 @@ class TestJWTLifecycleSimple:
             created_at=datetime.now(),
         )
 
-    def _create_token(
-        self, user_id: str, role: str, expires_in_minutes: int = 15
-    ) -> str:
+    def _create_token(self, user_id: str, role: str, expires_in_minutes: int = 15) -> str:
         """Create a simple JWT token for testing."""
         payload = {
             "user_id": user_id,
@@ -51,9 +49,7 @@ class TestJWTLifecycleSimple:
     def test_token_creation_and_verification(self):
         """Test basic token creation and verification."""
         # Create token
-        token = self._create_token(
-            user_id=self.test_user.user_id, role=self.test_user.role.value
-        )
+        token = self._create_token(user_id=self.test_user.user_id, role=self.test_user.role.value)
 
         # Verify token
         payload = self._verify_token(token)
@@ -99,9 +95,7 @@ class TestJWTLifecycleSimple:
     def test_token_payload_integrity(self):
         """Test that token payload cannot be tampered with."""
         # Create valid token
-        token = self._create_token(
-            user_id=self.test_user.user_id, role=UserRole.OBSERVER.value
-        )
+        token = self._create_token(user_id=self.test_user.user_id, role=UserRole.OBSERVER.value)
 
         # Tamper with token by changing a character
         tampered_token = token[:-1] + "X"
@@ -112,9 +106,7 @@ class TestJWTLifecycleSimple:
 
     def test_token_claims_validation(self):
         """Test validation of token claims."""
-        token = self._create_token(
-            user_id=self.test_user.user_id, role=self.test_user.role.value
-        )
+        token = self._create_token(user_id=self.test_user.user_id, role=self.test_user.role.value)
 
         payload = self._verify_token(token)
 
@@ -155,9 +147,7 @@ class TestJWTLifecycleSimple:
             "iat": datetime.utcnow(),
             "type": "refresh",
         }
-        refresh_token = jwt.encode(
-            refresh_payload, self.secret_key, algorithm=self.algorithm
-        )
+        refresh_token = jwt.encode(refresh_payload, self.secret_key, algorithm=self.algorithm)
 
         # Verify refresh token
         payload = self._verify_token(refresh_token)

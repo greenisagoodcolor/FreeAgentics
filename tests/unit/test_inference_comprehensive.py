@@ -621,7 +621,9 @@ class TestInferenceIntegration:
         # Mock LLM to generate GMN
         def mock_llm_generate(prompt):
             if "generate GMN" in prompt:
-                return "states: [hungry, satisfied]; actions: [eat, wait]; observations: [food, empty]"
+                return (
+                    "states: [hungry, satisfied]; actions: [eat, wait]; observations: [food, empty]"
+                )
             return "No GMN generated"
 
         def mock_gmn_parse(gmn_string):

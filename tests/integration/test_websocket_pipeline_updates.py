@@ -105,9 +105,7 @@ class TestWebSocketPipelineUpdates:
         assert len(broadcast_calls) >= 3
 
         # Check specific events
-        event_types = [
-            call["event_type"] for call in broadcast_calls if call["event_type"]
-        ]
+        event_types = [call["event_type"] for call in broadcast_calls if call["event_type"]]
         assert "pipeline:pipeline_started" in event_types
         assert any("knowledge_graph:updated" in et for et in event_types if et)
 
@@ -120,9 +118,7 @@ class TestWebSocketPipelineUpdates:
         prompt_id = "prompt456"
 
         # Connect client
-        await connection_manager.connect(
-            mock_websocket, client_id, mock_client_metadata
-        )
+        await connection_manager.connect(mock_websocket, client_id, mock_client_metadata)
 
         # Subscribe to pipeline
         pipeline_monitor.subscribe_to_pipeline(prompt_id, client_id)
@@ -280,9 +276,7 @@ class TestWebSocketPipelineUpdates:
 
         # Complete some pipelines
         for i in range(2):
-            pipeline_monitor.complete_pipeline(
-                pipeline_ids[i], f"agent{i}", 1000.0 + i * 100, {}
-            )
+            pipeline_monitor.complete_pipeline(pipeline_ids[i], f"agent{i}", 1000.0 + i * 100, {})
 
         # Check remaining active
         remaining_active = [
@@ -293,9 +287,7 @@ class TestWebSocketPipelineUpdates:
         assert len(remaining_active) == 3
 
     @pytest.mark.asyncio
-    async def test_websocket_disconnection_cleanup(
-        self, connection_manager, mock_websocket
-    ):
+    async def test_websocket_disconnection_cleanup(self, connection_manager, mock_websocket):
         """Test cleanup when WebSocket client disconnects."""
         client_id = "client123"
         prompt_id = "prompt456"
@@ -307,9 +299,7 @@ class TestWebSocketPipelineUpdates:
 
         # Verify subscriptions
         assert client_id in pipeline_monitor.get_pipeline_subscribers(prompt_id)
-        assert client_id in connection_manager.subscriptions.get(
-            "pipeline:updates", set()
-        )
+        assert client_id in connection_manager.subscriptions.get("pipeline:updates", set())
 
         # Disconnect
         connection_manager.disconnect(client_id)
@@ -339,9 +329,7 @@ class TestWebSocketPipelineUpdates:
             await asyncio.sleep(0.1)  # Small delay to simulate processing
 
         # Complete pipeline
-        completion_info = pipeline_monitor.complete_pipeline(
-            prompt_id, "agent123", 600.0, {}
-        )
+        completion_info = pipeline_monitor.complete_pipeline(prompt_id, "agent123", 600.0, {})
 
         # Check stage timings
         assert "stage_timings" in completion_info

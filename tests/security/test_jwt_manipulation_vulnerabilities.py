@@ -55,9 +55,7 @@ class TestAlgorithmAttacks:
         )
 
         # Decode legitimate token to get payload
-        decoded_payload = jwt.decode(
-            legitimate_token, options={"verify_signature": False}
-        )
+        decoded_payload = jwt.decode(legitimate_token, options={"verify_signature": False})
 
         # Attempt 1: Create malicious token with HS256 using public key as secret
         header = {"alg": "HS256", "typ": "JWT"}
@@ -92,9 +90,7 @@ class TestAlgorithmAttacks:
         payload_json = json.dumps(decoded_payload, default=str)
 
         header_b64 = base64.urlsafe_b64encode(header_json.encode()).decode().rstrip("=")
-        payload_b64 = (
-            base64.urlsafe_b64encode(payload_json.encode()).decode().rstrip("=")
-        )
+        payload_b64 = base64.urlsafe_b64encode(payload_json.encode()).decode().rstrip("=")
 
         # Create HMAC signature using public key
         message = f"{header_b64}.{payload_b64}"
@@ -120,9 +116,7 @@ class TestAlgorithmAttacks:
 
         # Get legitimate token payload
         legitimate_token = auth_manager.create_access_token(user)
-        decoded_payload = jwt.decode(
-            legitimate_token, options={"verify_signature": False}
-        )
+        decoded_payload = jwt.decode(legitimate_token, options={"verify_signature": False})
 
         # Attempt 1: Create token with 'none' algorithm
         try:
@@ -144,9 +138,7 @@ class TestAlgorithmAttacks:
         payload_json = json.dumps(decoded_payload, default=str)
 
         header_b64 = base64.urlsafe_b64encode(header_json.encode()).decode().rstrip("=")
-        payload_b64 = (
-            base64.urlsafe_b64encode(payload_json.encode()).decode().rstrip("=")
-        )
+        payload_b64 = base64.urlsafe_b64encode(payload_json.encode()).decode().rstrip("=")
 
         # 'none' algorithm tokens have no signature
         none_token_manual = f"{header_b64}.{payload_b64}."
@@ -171,9 +163,7 @@ class TestAlgorithmAttacks:
         user = self._create_test_user()
 
         legitimate_token = auth_manager.create_access_token(user)
-        decoded_payload = jwt.decode(
-            legitimate_token, options={"verify_signature": False}
-        )
+        decoded_payload = jwt.decode(legitimate_token, options={"verify_signature": False})
 
         # List of weak algorithms to test
         weak_algorithms = ["HS256", "HS384", "HS512", "none", "RS256"]
@@ -195,9 +185,7 @@ class TestAlgorithmAttacks:
                         headers=header,
                     )
                 elif weak_alg == "none":
-                    weak_token = jwt.encode(
-                        decoded_payload, "", algorithm=weak_alg, headers=header
-                    )
+                    weak_token = jwt.encode(decoded_payload, "", algorithm=weak_alg, headers=header)
                 else:
                     continue
 
@@ -224,9 +212,7 @@ class TestAlgorithmAttacks:
 
         # Modify algorithm in header but keep RS256 signature
         header["alg"] = "HS256"
-        new_header_b64 = (
-            base64.urlsafe_b64encode(json.dumps(header).encode()).decode().rstrip("=")
-        )
+        new_header_b64 = base64.urlsafe_b64encode(json.dumps(header).encode()).decode().rstrip("=")
 
         # Create token with mismatched algorithm
         mixed_token = f"{new_header_b64}.{parts[1]}.{parts[2]}"
@@ -260,9 +246,7 @@ class TestSignatureAttacks:
         parts = token.split(".")
 
         # Test 1: Completely random signature
-        random_sig = (
-            base64.urlsafe_b64encode(secrets.token_bytes(32)).decode().rstrip("=")
-        )
+        random_sig = base64.urlsafe_b64encode(secrets.token_bytes(32)).decode().rstrip("=")
         invalid_token = f"{parts[0]}.{parts[1]}.{random_sig}"
 
         with pytest.raises(HTTPException) as exc_info:
@@ -273,9 +257,7 @@ class TestSignatureAttacks:
         original_sig = base64.urlsafe_b64decode(parts[2] + "==")
         modified_sig = bytearray(original_sig)
         modified_sig[0] ^= 0xFF  # Flip all bits in first byte
-        modified_sig_b64 = (
-            base64.urlsafe_b64encode(bytes(modified_sig)).decode().rstrip("=")
-        )
+        modified_sig_b64 = base64.urlsafe_b64encode(bytes(modified_sig)).decode().rstrip("=")
 
         modified_token = f"{parts[0]}.{parts[1]}.{modified_sig_b64}"
 
@@ -362,15 +344,11 @@ class TestSignatureAttacks:
         user = self._create_test_user()
 
         # Generate a different RSA key pair
-        fake_private_key = rsa.generate_private_key(
-            public_exponent=65537, key_size=2048
-        )
+        fake_private_key = rsa.generate_private_key(public_exponent=65537, key_size=2048)
 
         # Get legitimate token payload
         legitimate_token = auth_manager.create_access_token(user)
-        decoded_payload = jwt.decode(
-            legitimate_token, options={"verify_signature": False}
-        )
+        decoded_payload = jwt.decode(legitimate_token, options={"verify_signature": False})
 
         # Create token signed with different private key
         fake_token = jwt.encode(decoded_payload, fake_private_key, algorithm="RS256")
@@ -446,9 +424,7 @@ class TestClaimsManipulation:
         payload = json.loads(base64.urlsafe_b64decode(parts[1] + "=="))
 
         # Test 1: Extend expiration by 1 year
-        payload["exp"] = int(
-            (datetime.now(timezone.utc) + timedelta(days=365)).timestamp()
-        )
+        payload["exp"] = int((datetime.now(timezone.utc) + timedelta(days=365)).timestamp())
 
         modified_payload_b64 = (
             base64.urlsafe_b64encode(json.dumps(payload).encode()).decode().rstrip("=")
@@ -610,11 +586,7 @@ class TestTokenStructureAttacks:
         signature_part = parts[2]
 
         for header in malicious_headers:
-            header_b64 = (
-                base64.urlsafe_b64encode(json.dumps(header).encode())
-                .decode()
-                .rstrip("=")
-            )
+            header_b64 = base64.urlsafe_b64encode(json.dumps(header).encode()).decode().rstrip("=")
 
             malicious_token = f"{header_b64}.{payload_part}.{signature_part}"
 
@@ -648,9 +620,7 @@ class TestTokenStructureAttacks:
         for payload in malicious_payloads:
             try:
                 payload_b64 = (
-                    base64.urlsafe_b64encode(json.dumps(payload).encode())
-                    .decode()
-                    .rstrip("=")
+                    base64.urlsafe_b64encode(json.dumps(payload).encode()).decode().rstrip("=")
                 )
 
                 malicious_token = f"{header_part}.{payload_b64}.{signature_part}"
@@ -713,9 +683,7 @@ class TestTimingAndSideChannelAttacks:
             if i < len(modified_sig):
                 modified_sig[i] ^= 0x01
 
-            modified_sig_b64 = (
-                base64.urlsafe_b64encode(bytes(modified_sig)).decode().rstrip("=")
-            )
+            modified_sig_b64 = base64.urlsafe_b64encode(bytes(modified_sig)).decode().rstrip("=")
 
             invalid_token = f"{parts[0]}.{parts[1]}.{modified_sig_b64}"
 
@@ -735,9 +703,7 @@ class TestTimingAndSideChannelAttacks:
 
         # Timing should not vary significantly based on where the error occurs
         # Allow up to 10ms variance for system noise
-        assert max_deviation < 0.01, (
-            "Token verification may be vulnerable to timing attacks"
-        )
+        assert max_deviation < 0.01, "Token verification may be vulnerable to timing attacks"
 
     def test_token_enumeration_prevention(self):
         """Test protection against token enumeration attacks."""
@@ -820,9 +786,7 @@ class TestTimingAndSideChannelAttacks:
 
         # Rate limiting should prevent rapid attempts
         attempts_per_second = max_attempts / elapsed_time
-        assert attempts_per_second < 10000, (
-            "No rate limiting detected for brute force attempts"
-        )
+        assert attempts_per_second < 10000, "No rate limiting detected for brute force attempts"
 
     def test_statistical_analysis_attack_prevention(self):
         """Test protection against statistical analysis of tokens."""
@@ -926,22 +890,14 @@ class TestProductionReadiness:
 
         # This test serves as a checklist of protections
         protections = {
-            "algorithm_confusion": self._test_algorithm_confusion_protected(
-                auth_manager, user
-            ),
+            "algorithm_confusion": self._test_algorithm_confusion_protected(auth_manager, user),
             "none_algorithm": self._test_none_algorithm_protected(auth_manager, user),
-            "signature_stripping": self._test_signature_stripping_protected(
-                auth_manager, user
-            ),
+            "signature_stripping": self._test_signature_stripping_protected(auth_manager, user),
             "expired_token": self._test_expired_token_protected(auth_manager, user),
             "role_elevation": self._test_role_elevation_protected(auth_manager, user),
             "jti_blacklist": self._test_jti_blacklist_working(auth_manager, user),
-            "audience_validation": self._test_audience_validation_working(
-                auth_manager, user
-            ),
-            "issuer_validation": self._test_issuer_validation_working(
-                auth_manager, user
-            ),
+            "audience_validation": self._test_audience_validation_working(auth_manager, user),
+            "issuer_validation": self._test_issuer_validation_working(auth_manager, user),
         }
 
         # All protections should be in place
@@ -1042,9 +998,7 @@ class TestProductionReadiness:
             payload["role"] = UserRole.ADMIN.value
 
             modified_payload = (
-                base64.urlsafe_b64encode(json.dumps(payload).encode())
-                .decode()
-                .rstrip("=")
+                base64.urlsafe_b64encode(json.dumps(payload).encode()).decode().rstrip("=")
             )
 
             modified_token = f"{parts[0]}.{modified_payload}.{parts[2]}"

@@ -95,9 +95,7 @@ class BeliefKGBridge:
 
             for node in nodes:
                 if hasattr(knowledge_graph, "add_node"):
-                    result = await knowledge_graph.add_node(
-                        node.id, node.type, node.properties
-                    )
+                    result = await knowledge_graph.add_node(node.id, node.type, node.properties)
                     if result:
                         nodes_added += 1
                 else:
@@ -156,8 +154,7 @@ class BeliefKGBridge:
 
             # Ensure beliefs are numpy arrays
             factor_beliefs = [
-                np.array(b) if not isinstance(b, np.ndarray) else b
-                for b in factor_beliefs
+                np.array(b) if not isinstance(b, np.ndarray) else b for b in factor_beliefs
             ]
 
             # Calculate entropy for each factor
@@ -257,9 +254,7 @@ class BeliefKGBridge:
             # Create nodes for significant beliefs
             for state_idx, belief_prob in enumerate(beliefs):
                 if belief_prob > self.belief_threshold:
-                    state_node_id = (
-                        f"state_{agent_id}_f{factor_idx}_s{state_idx}_{timestamp}"
-                    )
+                    state_node_id = f"state_{agent_id}_f{factor_idx}_s{state_idx}_{timestamp}"
                     state_node = KGNode(
                         id=state_node_id,
                         type="belief_value",
@@ -324,9 +319,7 @@ class BeliefKGBridge:
 
         return nodes
 
-    async def create_belief_edges(
-        self, nodes: List[KGNode], agent_id: str
-    ) -> List[KGEdge]:
+    async def create_belief_edges(self, nodes: List[KGNode], agent_id: str) -> List[KGEdge]:
         """Create edges between belief-related nodes.
 
         Args:
@@ -387,9 +380,7 @@ class BeliefKGBridge:
             edges.append(edge)
 
         # Connect to uncertainty if present
-        uncertainty_node = next(
-            (n for n in nodes if n.type == "high_uncertainty"), None
-        )
+        uncertainty_node = next((n for n in nodes if n.type == "high_uncertainty"), None)
         if uncertainty_node:
             edge = KGEdge(
                 source=belief_node.id,

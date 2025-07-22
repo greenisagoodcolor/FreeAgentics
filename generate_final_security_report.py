@@ -18,9 +18,7 @@ def generate_report():
         semgrep_data = json.load(f)
 
     # Count issues
-    total_issues = len(bandit_data.get("results", [])) + len(
-        semgrep_data.get("results", [])
-    )
+    total_issues = len(bandit_data.get("results", [])) + len(semgrep_data.get("results", []))
 
     # Generate HTML report
     html_content = f"""

@@ -33,9 +33,7 @@ class TestPyMDPErrorScenarios:
             assert action in ["up", "down", "left", "right", "stay"]
 
         # Test single-element array action
-        with patch.object(
-            agent.pymdp_agent, "sample_action", return_value=np.array([3])
-        ):
+        with patch.object(agent.pymdp_agent, "sample_action", return_value=np.array([3])):
             action = agent.select_action()
             assert action in ["up", "down", "left", "right", "stay"]
 
@@ -78,9 +76,7 @@ class TestPyMDPErrorScenarios:
 
     def test_coalition_coordinator_state_errors(self):
         """Test CoalitionCoordinatorAgent handles state transition errors."""
-        agent = CoalitionCoordinatorAgent(
-            "test-coordinator", "Coordinator", max_agents=4
-        )
+        agent = CoalitionCoordinatorAgent("test-coordinator", "Coordinator", max_agents=4)
 
         # Test with invalid coalition state
         observation = {
@@ -114,9 +110,7 @@ class TestPyMDPErrorScenarios:
                     agent.update_beliefs()  # Should not crash
 
                 # Test belief update with NaN values
-                with patch.object(
-                    agent.pymdp_agent, "qs", [np.array([np.nan, 0.5, 0.5])]
-                ):
+                with patch.object(agent.pymdp_agent, "qs", [np.array([np.nan, 0.5, 0.5])]):
                     agent.update_beliefs()  # Should handle NaN gracefully
 
     def test_free_energy_computation_errors(self):
@@ -186,8 +180,7 @@ class TestPyMDPErrorScenarios:
 
         # Create agents with potential errors
         agents = [
-            BasicExplorerAgent(f"explorer-{i}", f"Explorer-{i}", grid_size=3)
-            for i in range(3)
+            BasicExplorerAgent(f"explorer-{i}", f"Explorer-{i}", grid_size=3) for i in range(3)
         ]
 
         # Register agents

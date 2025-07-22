@@ -45,9 +45,7 @@ class PlaywrightDriver(BrowserDriver):
         self.console_logs = []
 
         if not PLAYWRIGHT_AVAILABLE:
-            raise ImportError(
-                "Playwright is not available. Install with: pip install playwright"
-            )
+            raise ImportError("Playwright is not available. Install with: pip install playwright")
 
     async def start(self):
         """Start the Playwright browser"""

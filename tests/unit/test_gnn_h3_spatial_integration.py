@@ -195,9 +195,7 @@ class TestH3SpatialProcessor:
         with patch.object(processor, "get_h3_distance") as mock_distance:
             mock_distance.return_value = 1
 
-            edge_index, edge_weights = processor.create_h3_spatial_graph(
-                h3_indices, k=1
-            )
+            edge_index, edge_weights = processor.create_h3_spatial_graph(h3_indices, k=1)
 
             # Should create edges between valid indices only
             assert mock_torch.tensor.called
@@ -343,9 +341,7 @@ class TestGNNSpatialIntegration:
                 "h3_indices_7": ["index1", "index2"],
             }
 
-            with patch.object(
-                integration.h3_processor, "create_h3_spatial_graph"
-            ) as mock_graph:
+            with patch.object(integration.h3_processor, "create_h3_spatial_graph") as mock_graph:
                 with patch.object(
                     integration.multi_res_analyzer,
                     "compute_spatial_relationships",

@@ -24,9 +24,7 @@ class TestDatabaseModels:
     def test_coalition_model_creation(self):
         """Test Coalition model creation."""
         # Create a coalition instance
-        coalition = Coalition(
-            name="TestCoalition", description="A test coalition for coverage"
-        )
+        coalition = Coalition(name="TestCoalition", description="A test coalition for coverage")
 
         assert coalition.name == "TestCoalition"
         assert coalition.description == "A test coalition for coverage"

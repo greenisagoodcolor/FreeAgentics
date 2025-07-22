@@ -186,9 +186,7 @@ class TestConfigParser:
         result = parser.parse(config)
 
         # Find architecture node in AST
-        arch_nodes = [
-            child for child in result.ast.children if child.node_type == "architecture"
-        ]
+        arch_nodes = [child for child in result.ast.children if child.node_type == "architecture"]
         assert len(arch_nodes) == 1
         assert arch_nodes[0].attributes["name"] == "GAT"
 
@@ -203,9 +201,7 @@ class TestConfigParser:
         result = parser.parse(config)
 
         # Find layers node in AST
-        layer_nodes = [
-            child for child in result.ast.children if child.node_type == "layers"
-        ]
+        layer_nodes = [child for child in result.ast.children if child.node_type == "layers"]
         assert len(layer_nodes) == 1
 
         layers_node = layer_nodes[0]
@@ -230,9 +226,7 @@ class TestConfigParser:
 
         # Find hyperparameters node
         hyper_nodes = [
-            child
-            for child in result.ast.children
-            if child.node_type == "hyperparameters"
+            child for child in result.ast.children if child.node_type == "hyperparameters"
         ]
         assert len(hyper_nodes) == 1
         assert hyper_nodes[0].attributes == hyperparams
@@ -249,9 +243,7 @@ class TestConfigParser:
         result = parser.parse(config)
 
         # Find metadata node
-        meta_nodes = [
-            child for child in result.ast.children if child.node_type == "metadata"
-        ]
+        meta_nodes = [child for child in result.ast.children if child.node_type == "metadata"]
         assert len(meta_nodes) == 1
         assert meta_nodes[0].attributes == metadata
         assert result.metadata == metadata

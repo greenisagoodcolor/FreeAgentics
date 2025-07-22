@@ -55,9 +55,7 @@ class TestAgentWorkflowIntegration:
             return MockAgent(agent_id, name, config)
 
         # Patch factory method
-        with patch.object(
-            self.agent_factory, "create_agent", side_effect=mock_create_agent
-        ):
+        with patch.object(self.agent_factory, "create_agent", side_effect=mock_create_agent):
             # Create agent
             agent = self.agent_factory.create_agent(
                 agent_id="test_agent_001",
@@ -262,9 +260,7 @@ class TestAgentWorkflowIntegration:
                 # Simulate belief update work
                 self.beliefs = {"performance": "tracked"}
 
-                self.performance_metrics["belief_update_time"] += (
-                    time.time() - start_time
-                )
+                self.performance_metrics["belief_update_time"] += time.time() - start_time
 
             def select_action(self):
                 import time
@@ -274,9 +270,7 @@ class TestAgentWorkflowIntegration:
                 # Simulate action selection work
                 action = 0
 
-                self.performance_metrics["action_selection_time"] += (
-                    time.time() - start_time
-                )
+                self.performance_metrics["action_selection_time"] += time.time() - start_time
                 return action
 
         agent = PerformanceAgent(
@@ -420,9 +414,7 @@ class TestAgentWorkflowIntegration:
 
             def cleanup_resources(self):
                 """Clean up resources."""
-                self.resource_usage["memory"] = max(
-                    0, self.resource_usage["memory"] - 10
-                )
+                self.resource_usage["memory"] = max(0, self.resource_usage["memory"] - 10)
 
         agent = ResourceAgent(
             agent_id="resource_agent",

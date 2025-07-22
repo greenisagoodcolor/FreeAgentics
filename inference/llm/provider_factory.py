@@ -71,9 +71,7 @@ class LLMProviderFactory:
             self._provider_classes[ProviderType.ANTHROPIC] = AnthropicProvider
             logger.debug("Registered Anthropic provider")
         else:
-            logger.warning(
-                "Anthropic provider not available - install 'anthropic' package"
-            )
+            logger.warning("Anthropic provider not available - install 'anthropic' package")
 
     def get_available_providers(self) -> List[ProviderType]:
         """Get list of available provider types."""
@@ -105,9 +103,7 @@ class LLMProviderFactory:
 
         success = provider.configure(credentials, **config_kwargs)
         if not success:
-            raise ProviderConfigurationError(
-                f"Failed to configure {provider_type.value} provider"
-            )
+            raise ProviderConfigurationError(f"Failed to configure {provider_type.value} provider")
 
         return provider
 
@@ -128,9 +124,7 @@ class LLMProviderFactory:
             provider_type = ProviderType(provider_name)
 
             if not self.is_provider_available(provider_type):
-                logger.error(
-                    f"Provider {provider_name} is configured but not available"
-                )
+                logger.error(f"Provider {provider_name} is configured but not available")
                 continue
 
             try:
@@ -175,28 +169,20 @@ class ErrorHandler:
         error_str = str(error).lower()
 
         # Rate limit errors are retryable with backoff
-        if any(
-            phrase in error_str for phrase in ["rate limit", "too many requests", "429"]
-        ):
+        if any(phrase in error_str for phrase in ["rate limit", "too many requests", "429"]):
             return True
 
         # Timeout errors are retryable
-        if any(
-            phrase in error_str for phrase in ["timeout", "timed out", "connection"]
-        ):
+        if any(phrase in error_str for phrase in ["timeout", "timed out", "connection"]):
             return True
 
         # Server errors (5xx) are retryable
-        if any(
-            phrase in error_str
-            for phrase in ["500", "502", "503", "504", "server error"]
-        ):
+        if any(phrase in error_str for phrase in ["500", "502", "503", "504", "server error"]):
             return True
 
         # Authentication and client errors are not retryable
         if any(
-            phrase in error_str
-            for phrase in ["401", "403", "invalid api key", "authentication"]
+            phrase in error_str for phrase in ["401", "403", "invalid api key", "authentication"]
         ):
             return False
 
@@ -232,8 +218,7 @@ class ErrorHandler:
 
         # Always fallback for authentication errors
         if any(
-            phrase in error_str
-            for phrase in ["401", "403", "invalid api key", "authentication"]
+            phrase in error_str for phrase in ["401", "403", "invalid api key", "authentication"]
         ):
             return True
 
@@ -242,9 +227,7 @@ class ErrorHandler:
             return True
 
         # Fallback for service unavailable
-        if any(
-            phrase in error_str for phrase in ["503", "service unavailable", "offline"]
-        ):
+        if any(phrase in error_str for phrase in ["503", "service unavailable", "offline"]):
             return True
 
         # Don't fallback for client errors (user's fault)

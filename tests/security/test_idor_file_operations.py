@@ -43,9 +43,7 @@ class TestFileOperationIDOR:
         """Create test users with different roles."""
         users = {}
 
-        for i, role in enumerate(
-            [UserRole.RESEARCHER, UserRole.RESEARCHER, UserRole.OBSERVER]
-        ):
+        for i, role in enumerate([UserRole.RESEARCHER, UserRole.RESEARCHER, UserRole.OBSERVER]):
             username = f"file_user_{i}"
             user_id = str(uuid.uuid4())
 
@@ -136,9 +134,7 @@ class TestFileOperationIDOR:
 
         # Upload a file for user1
         files = {"file": ("test.txt", b"user1 data", "text/plain")}
-        response = self.client.post(
-            "/api/v1/files/upload", headers=user1_headers, files=files
-        )
+        response = self.client.post("/api/v1/files/upload", headers=user1_headers, files=files)
 
         if response.status_code == status.HTTP_201_CREATED:
             user1_file_id = response.json()["file_id"]
@@ -153,16 +149,11 @@ class TestFileOperationIDOR:
                 ]
 
                 for test_id in test_ids:
-                    response = self.client.get(
-                        f"/api/v1/files/{test_id}", headers=user1_headers
-                    )
+                    response = self.client.get(f"/api/v1/files/{test_id}", headers=user1_headers)
 
                     # Should not find files through enumeration
                     if response.status_code == status.HTTP_200_OK:
-                        assert (
-                            response.json().get("owner_id")
-                            == self.users["file_user_0"]["id"]
-                        )
+                        assert response.json().get("owner_id") == self.users["file_user_0"]["id"]
 
     def test_model_file_access_control(self):
         """Test IDOR for ML model file access."""
@@ -176,9 +167,7 @@ class TestFileOperationIDOR:
             "file_data": base64.b64encode(b"PRIVATE_MODEL_WEIGHTS").decode(),
         }
 
-        response = self.client.post(
-            "/api/v1/models/upload", headers=user1_headers, json=model_data
-        )
+        response = self.client.post("/api/v1/models/upload", headers=user1_headers, json=model_data)
 
         if response.status_code == status.HTTP_201_CREATED:
             model_id = response.json()["model_id"]
@@ -250,9 +239,7 @@ class TestFileOperationIDOR:
         # Try to get metadata for various file IDs
         for _ in range(20):
             random_id = str(uuid.uuid4())
-            response = self.client.get(
-                f"/api/v1/files/{random_id}/metadata", headers=user1_headers
-            )
+            response = self.client.get(f"/api/v1/files/{random_id}/metadata", headers=user1_headers)
 
             # Should not leak existence or metadata
             assert response.status_code == status.HTTP_404_NOT_FOUND
@@ -296,9 +283,7 @@ class TestFileOperationIDOR:
             ]
 
             for bad_id in manipulated_ids:
-                response = self.client.get(
-                    f"/api/v1/files/temp/{bad_id}", headers=user2_headers
-                )
+                response = self.client.get(f"/api/v1/files/temp/{bad_id}", headers=user2_headers)
                 assert response.status_code != status.HTTP_200_OK
 
     def test_file_sharing_idor(self):
@@ -308,9 +293,7 @@ class TestFileOperationIDOR:
 
         # User1 creates a file
         files = {"file": ("shared.txt", b"shared content", "text/plain")}
-        response = self.client.post(
-            "/api/v1/files/upload", headers=user1_headers, files=files
-        )
+        response = self.client.post("/api/v1/files/upload", headers=user1_headers, files=files)
 
         if response.status_code == status.HTTP_201_CREATED:
             file_id = response.json()["file_id"]
@@ -396,9 +379,7 @@ class TestFileOperationIDOR:
 
         if file_id:
             # User2 tries to access version history
-            response = self.client.get(
-                f"/api/v1/files/{file_id}/versions", headers=user2_headers
-            )
+            response = self.client.get(f"/api/v1/files/{file_id}/versions", headers=user2_headers)
 
             assert response.status_code in [
                 status.HTTP_403_FORBIDDEN,
@@ -406,9 +387,7 @@ class TestFileOperationIDOR:
             ]
 
             # Try to access specific version
-            response = self.client.get(
-                f"/api/v1/files/{file_id}/versions/1", headers=user2_headers
-            )
+            response = self.client.get(f"/api/v1/files/{file_id}/versions/1", headers=user2_headers)
 
             assert response.status_code in [
                 status.HTTP_403_FORBIDDEN,
@@ -505,18 +484,14 @@ class TestDocumentAccessIDOR:
         ]
 
         for report_req in report_requests:
-            response = client.post(
-                "/api/v1/reports/generate", headers=headers, json=report_req
-            )
+            response = client.post("/api/v1/reports/generate", headers=headers, json=report_req)
 
             # Should not generate reports for unauthorized resources
             if response.status_code == status.HTTP_202_ACCEPTED:
                 job_id = response.json().get("job_id")
 
                 # Check report status
-                response = client.get(
-                    f"/api/v1/reports/status/{job_id}", headers=headers
-                )
+                response = client.get(f"/api/v1/reports/status/{job_id}", headers=headers)
 
                 if response.status_code == status.HTTP_200_OK:
                     status_data = response.json()
@@ -649,9 +624,7 @@ class TestFileUploadIDOR:
                 file_id = response.json()["file_id"]
 
                 # Attempt to execute or render
-                response = client.get(
-                    f"/api/v1/files/{file_id}/execute", headers=headers
-                )
+                response = client.get(f"/api/v1/files/{file_id}/execute", headers=headers)
                 assert response.status_code != status.HTTP_200_OK
 
     def test_multipart_upload_idor(self, client):

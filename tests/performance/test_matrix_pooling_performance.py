@@ -111,13 +111,9 @@ class MatrixPoolingPerformanceTest(unittest.TestCase):
             b = np.random.rand(size, size).astype(np.float32)
 
             # Test dot product
-            numpy_dot_time = self.measure_operation_time(
-                lambda: np.dot(a, b), iterations=20
-            )
+            numpy_dot_time = self.measure_operation_time(lambda: np.dot(a, b), iterations=20)
 
-            pooled_dot_time = self.measure_operation_time(
-                lambda: pooled_dot(a, b), iterations=20
-            )
+            pooled_dot_time = self.measure_operation_time(lambda: pooled_dot(a, b), iterations=20)
 
             print("  Dot product:")
             print(f"    Numpy: {numpy_dot_time * 1000:.2f} ms")
@@ -136,9 +132,7 @@ class MatrixPoolingPerformanceTest(unittest.TestCase):
             print("  Einsum:")
             print(f"    Numpy: {numpy_einsum_time * 1000:.2f} ms")
             print(f"    Pooled: {pooled_einsum_time * 1000:.2f} ms")
-            print(
-                f"    Overhead: {(pooled_einsum_time / numpy_einsum_time - 1) * 100:.1f}%"
-            )
+            print(f"    Overhead: {(pooled_einsum_time / numpy_einsum_time - 1) * 100:.1f}%")
 
             # Overhead should be reasonable
             self.assertLess(

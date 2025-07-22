@@ -141,9 +141,7 @@ class TestHealthEndpoint:
 
         # Test with connection error
         mock_db = Mock(spec=Session)
-        mock_db.execute.side_effect = OperationalError(
-            "could not connect to server", None, None
-        )
+        mock_db.execute.side_effect = OperationalError("could not connect to server", None, None)
 
         def override_get_db():
             yield mock_db
@@ -190,9 +188,7 @@ class TestHealthEndpoint:
         assert "Simple error" in content
 
         # Test with complex error
-        exc = OperationalError(
-            "FATAL: password authentication failed for user", None, None
-        )
+        exc = OperationalError("FATAL: password authentication failed for user", None, None)
         response = database_exception_handler(mock_request, exc)
         content = response.body.decode()
         assert "password authentication failed" in content

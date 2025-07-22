@@ -41,9 +41,7 @@ class TestExponentialBackoffRetry:
 
     def test_calculate_delay(self):
         """Test delay calculation with exponential backoff."""
-        retry = ExponentialBackoffRetry(
-            base_delay=0.1, max_delay=2.0, backoff_factor=2.0
-        )
+        retry = ExponentialBackoffRetry(base_delay=0.1, max_delay=2.0, backoff_factor=2.0)
 
         # Test exponential growth
         assert retry.calculate_delay(0) == 0.1  # 0.1 * 2^0 = 0.1
@@ -154,9 +152,7 @@ class TestExponentialBackoffRetry:
             with pytest.raises(RuntimeError) as exc_info:
                 retry.execute_with_retry(lambda: None)
 
-            assert "Retry logic failed without capturing exception" in str(
-                exc_info.value
-            )
+            assert "Retry logic failed without capturing exception" in str(exc_info.value)
 
     def test_execute_with_retry_logging(self, caplog):
         """Test logging during retry attempts."""
@@ -240,25 +236,19 @@ class TestDatabaseConnectionManager:
             failed_engine1 = Mock()
             failed_conn1 = Mock()
             failed_conn1.execute.side_effect = OperationalError("Failed", None, None)
-            failed_engine1.connect.return_value.__enter__ = Mock(
-                return_value=failed_conn1
-            )
+            failed_engine1.connect.return_value.__enter__ = Mock(return_value=failed_conn1)
             failed_engine1.connect.return_value.__exit__ = Mock(return_value=None)
 
             failed_engine2 = Mock()
             failed_conn2 = Mock()
             failed_conn2.execute.side_effect = OperationalError("Failed", None, None)
-            failed_engine2.connect.return_value.__enter__ = Mock(
-                return_value=failed_conn2
-            )
+            failed_engine2.connect.return_value.__enter__ = Mock(return_value=failed_conn2)
             failed_engine2.connect.return_value.__exit__ = Mock(return_value=None)
 
             success_engine = Mock()
             success_conn = Mock()
             success_conn.execute.return_value = Mock()
-            success_engine.connect.return_value.__enter__ = Mock(
-                return_value=success_conn
-            )
+            success_engine.connect.return_value.__enter__ = Mock(return_value=success_conn)
             success_engine.connect.return_value.__exit__ = Mock(return_value=None)
 
             mock_create_engine.side_effect = [

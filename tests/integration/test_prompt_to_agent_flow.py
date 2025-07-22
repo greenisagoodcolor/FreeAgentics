@@ -81,9 +81,7 @@ class TestPromptToAgentFlow:
 
     @patch("api.v1.prompts.get_current_user")
     @patch("api.v1.prompts.llm_factory.create_from_config")
-    def test_create_agent_from_prompt(
-        self, mock_llm_factory, mock_auth, client, mock_llm_response
-    ):
+    def test_create_agent_from_prompt(self, mock_llm_factory, mock_auth, client, mock_llm_response):
         """Test creating an agent from a natural language prompt."""
         # Mock authentication
         mock_auth.return_value = Mock(user_id="test-user", permissions=["CREATE_AGENT"])

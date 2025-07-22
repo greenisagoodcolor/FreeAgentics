@@ -275,9 +275,7 @@ class TestEntityToNodeMapping:
 
         # ML should match to Machine Learning with context
         graph_engine.search_similar_nodes = AsyncMock(
-            side_effect=lambda name, context: [ml_node]
-            if name == "ML" and context
-            else []
+            side_effect=lambda name, context: [ml_node] if name == "ML" and context else []
         )
 
         mapper = EntityNodeMapper(graph_engine=graph_engine)

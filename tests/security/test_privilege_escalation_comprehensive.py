@@ -156,9 +156,7 @@ class TestVerticalPrivilegeEscalation:
             if response.status_code == status.HTTP_200_OK:
                 # Verify permissions haven't changed
                 current_user = auth_manager.get_current_user(observer["token"])
-                assert not auth_manager.has_permission(
-                    current_user, Permission.ADMIN_SYSTEM
-                )
+                assert not auth_manager.has_permission(current_user, Permission.ADMIN_SYSTEM)
 
     def test_administrative_function_access(self, client, setup_vertical_escalation):
         """Test accessing admin-only functions with lower privileges."""
@@ -221,9 +219,7 @@ class TestVerticalPrivilegeEscalation:
         ]
 
         for attack in system_attacks:
-            response = client.post(
-                "/api/v1/system/execute", headers=headers, json=attack
-            )
+            response = client.post("/api/v1/system/execute", headers=headers, json=attack)
 
             # Should be completely blocked
             assert response.status_code in [
@@ -314,9 +310,7 @@ class TestHorizontalPrivilegeEscalation:
             ]
 
             # Try to delete another user's agent
-            response = client.delete(
-                f"/api/v1/agents/{resource['id']}", headers=headers
-            )
+            response = client.delete(f"/api/v1/agents/{resource['id']}", headers=headers)
 
             assert response.status_code in [
                 status.HTTP_403_FORBIDDEN,
@@ -349,9 +343,7 @@ class TestHorizontalPrivilegeEscalation:
             # SQL-like patterns
             {"agent_id": f"{user_1['resources'][0]['id']}' OR '1'='1"},
             # Path traversal
-            {
-                "agent_id": f"../users/{user_1['user'].id}/agents/{user_1['resources'][0]['id']}"
-            },
+            {"agent_id": f"../users/{user_1['user'].id}/agents/{user_1['resources'][0]['id']}"},
         ]
 
         for attempt in bypass_attempts:
@@ -482,13 +474,9 @@ class TestTokenBasedEscalation:
             decoded = jwt.decode(original_token, options={"verify_signature": False})
             decoded["role"] = "admin"
             manipulation_attempts.append(
-                base64.urlsafe_b64encode(json.dumps(header).encode())
-                .decode()
-                .rstrip("=")
+                base64.urlsafe_b64encode(json.dumps(header).encode()).decode().rstrip("=")
                 + "."
-                + base64.urlsafe_b64encode(json.dumps(decoded).encode())
-                .decode()
-                .rstrip("=")
+                + base64.urlsafe_b64encode(json.dumps(decoded).encode()).decode().rstrip("=")
                 + "."
             )
         except Exception:
@@ -500,9 +488,7 @@ class TestTokenBasedEscalation:
             decoded["role"] = "admin"
             # Try to sign with a known/guessable secret
             for secret in ["secret", "key", "jwt_secret", "dev_jwt_secret"]:
-                manipulation_attempts.append(
-                    jwt.encode(decoded, secret, algorithm="HS256")
-                )
+                manipulation_attempts.append(jwt.encode(decoded, secret, algorithm="HS256"))
         except Exception:
             pass
 
@@ -514,9 +500,7 @@ class TestTokenBasedEscalation:
                 payload["role"] = "admin"
                 payload["permissions"] = ["admin_system"]
                 new_payload = (
-                    base64.urlsafe_b64encode(json.dumps(payload).encode())
-                    .decode()
-                    .rstrip("=")
+                    base64.urlsafe_b64encode(json.dumps(payload).encode()).decode().rstrip("=")
                 )
                 manipulation_attempts.append(f"{parts[0]}.{new_payload}.{parts[2]}")
         except Exception:
@@ -573,9 +557,7 @@ class TestTokenBasedEscalation:
         assert response.status_code == status.HTTP_401_UNAUTHORIZED
 
         # Try to use access token as refresh token
-        response = client.post(
-            "/api/v1/auth/refresh", json={"refresh_token": observer["token"]}
-        )
+        response = client.post("/api/v1/auth/refresh", json={"refresh_token": observer["token"]})
         assert response.status_code in [
             status.HTTP_401_UNAUTHORIZED,
             status.HTTP_400_BAD_REQUEST,
@@ -584,9 +566,7 @@ class TestTokenBasedEscalation:
         # Try to mix tokens from different users
         mixed_token_attempts = [
             # Observer token with admin's signature
-            observer["token"].rsplit(".", 1)[0]
-            + "."
-            + admin["token"].rsplit(".", 1)[1],
+            observer["token"].rsplit(".", 1)[0] + "." + admin["token"].rsplit(".", 1)[1],
             # Admin header with observer payload
             admin["token"].split(".", 1)[0] + "." + observer["token"].split(".", 1)[1],
         ]
@@ -609,9 +589,7 @@ class TestTokenBasedEscalation:
         used_tokens = set()
 
         for i in range(10):  # Try to refresh multiple times
-            response = client.post(
-                "/api/v1/auth/refresh", json={"refresh_token": refresh_token}
-            )
+            response = client.post("/api/v1/auth/refresh", json={"refresh_token": refresh_token})
 
             if response.status_code == status.HTTP_200_OK:
                 data = response.json()
@@ -891,9 +869,7 @@ class TestDatabaseLevelEscalation:
         # Test various endpoints with SQL injection
         for payload in sql_injections:
             # Search endpoint
-            response = client.get(
-                f"/api/v1/agents/search?query={payload}", headers=headers
-            )
+            response = client.get(f"/api/v1/agents/search?query={payload}", headers=headers)
 
             # Name field
             response = client.post(
@@ -975,9 +951,7 @@ class TestDatabaseLevelEscalation:
         ]
 
         for attack in proc_attacks:
-            response = client.post(
-                "/api/v1/database/execute", headers=headers, json=attack
-            )
+            response = client.post("/api/v1/database/execute", headers=headers, json=attack)
 
             # Should be blocked
             assert response.status_code in [
@@ -1008,9 +982,7 @@ class TestDatabaseLevelEscalation:
 
         for attack in connection_attacks:
             # Try to manipulate connection settings
-            response = client.post(
-                "/api/v1/database/connection", headers=headers, json=attack
-            )
+            response = client.post("/api/v1/database/connection", headers=headers, json=attack)
 
             # Should not allow connection manipulation
             assert response.status_code in [
@@ -1038,9 +1010,7 @@ class TestDatabaseLevelEscalation:
             response = client.post(
                 "/api/v1/database/raw",
                 headers=headers,
-                json={
-                    "query": "UPDATE users SET role='admin' WHERE username='db_observer'"
-                },
+                json={"query": "UPDATE users SET role='admin' WHERE username='db_observer'"},
             )
 
             assert response.status_code in [
@@ -1168,9 +1138,7 @@ class TestAdvancedEscalationScenarios:
         ]
 
         for username, email, password, role in users_to_test:
-            auth_manager.register_user(
-                username=username, email=email, password=password, role=role
-            )
+            auth_manager.register_user(username=username, email=email, password=password, role=role)
 
         # Measure login times
         timings = {}

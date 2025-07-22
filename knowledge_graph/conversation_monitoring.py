@@ -133,9 +133,7 @@ class ConversationMonitor:
         # This will be expanded to use NLP entity extraction
         logger.debug(f"Updating graph from message: {event.message_id}")
 
-    async def on_conversation_update(
-        self, conversation: Conversation, message: Message
-    ):
+    async def on_conversation_update(self, conversation: Conversation, message: Message):
         """Handle conversation update event."""
         try:
             await self.graph_engine.update_from_conversation(conversation, message)

@@ -56,15 +56,11 @@ class TestRuffRules:
 
         config = toml.load(config_path)
         assert "tool" in config, "pyproject.toml should have [tool] section"
-        assert "ruff" in config.get("tool", {}), (
-            "pyproject.toml should have [tool.ruff] section"
-        )
+        assert "ruff" in config.get("tool", {}), "pyproject.toml should have [tool.ruff] section"
 
         ruff_config = config["tool"]["ruff"]
         assert "line-length" in ruff_config, "Line length should be configured"
-        assert ruff_config["line-length"] == 100, (
-            "Line length should be 100 to match Black"
-        )
+        assert ruff_config["line-length"] == 100, "Line length should be 100 to match Black"
 
     def test_ruff_select_rules(self):
         """Test that appropriate rules are selected."""
@@ -125,9 +121,7 @@ def add(a: int, b: int) -> int:
             )
 
             os.unlink(f.name)
-            assert result.returncode == 0, (
-                f"Ruff should pass on clean file: {result.stderr}"
-            )
+            assert result.returncode == 0, f"Ruff should pass on clean file: {result.stderr}"
 
     def test_ruff_check_problematic_file(self):
         """Test that Ruff fails on a problematic Python file."""
@@ -152,9 +146,7 @@ def bad_function( ):
 
             os.unlink(f.name)
             assert result.returncode != 0, "Ruff should fail on problematic file"
-            assert "F401" in result.stdout or "F811" in result.stdout, (
-                "Should detect import issues"
-            )
+            assert "F401" in result.stdout or "F811" in result.stdout, "Should detect import issues"
 
     def test_ruff_format_check(self):
         """Test that Ruff format check works."""
@@ -173,9 +165,7 @@ def bad_function( ):
             )
 
             os.unlink(f.name)
-            assert result.returncode != 0, (
-                "Ruff format should fail on poorly formatted file"
-            )
+            assert result.returncode != 0, "Ruff format should fail on poorly formatted file"
 
 
 class TestRuffIntegration:
@@ -230,9 +220,7 @@ class TestRuffCompatibility:
         ruff_config = config.get("tool", {}).get("ruff", {})
 
         # Check line length matches Black
-        assert ruff_config.get("line-length") == 100, (
-            "Ruff line length should match Black"
-        )
+        assert ruff_config.get("line-length") == 100, "Ruff line length should match Black"
 
         # Check that conflicting rules are ignored
         ignored = ruff_config.get("lint", {}).get("ignore", [])
@@ -247,14 +235,12 @@ class TestRuffCompatibility:
             assert False, "Test bypass removed - must fix underlying issue"
 
         config = toml.load(config_path)
-        ruff_isort = (
-            config.get("tool", {}).get("ruff", {}).get("lint", {}).get("isort", {})
-        )
+        ruff_isort = config.get("tool", {}).get("ruff", {}).get("lint", {}).get("isort", {})
 
         # Should be configured to be compatible with Black (combine-as-imports)
-        assert ruff_isort.get("combine-as-imports") is True, (
-            "Should use combine-as-imports for Black compatibility"
-        )
+        assert (
+            ruff_isort.get("combine-as-imports") is True
+        ), "Should use combine-as-imports for Black compatibility"
 
 
 class TestRuffPerformance:
@@ -274,9 +260,7 @@ class TestRuffPerformance:
 
         duration = end_time - start_time
         # Ruff should be very fast, even on large codebases
-        assert duration < 10.0, (
-            f"Ruff should complete in under 10 seconds, took {duration:.2f}s"
-        )
+        assert duration < 10.0, f"Ruff should complete in under 10 seconds, took {duration:.2f}s"
 
 
 class TestRuffOutput:

@@ -15,15 +15,11 @@ class TestSecurityPaladinValidation:
     def test_no_dependency_vulnerabilities(self):
         """Verify all dependency vulnerabilities have been fixed."""
         # Run pip-audit
-        result = subprocess.run(
-            ["pip-audit", "--format", "json"], capture_output=True, text=True
-        )
+        result = subprocess.run(["pip-audit", "--format", "json"], capture_output=True, text=True)
 
         if result.returncode == 0:
             audit_data = json.loads(result.stdout)
-            vulnerable_deps = [
-                d for d in audit_data.get("dependencies", []) if d.get("vulns")
-            ]
+            vulnerable_deps = [d for d in audit_data.get("dependencies", []) if d.get("vulns")]
 
             assert len(vulnerable_deps) == 0, (
                 f"Found {len(vulnerable_deps)} vulnerable dependencies: "
@@ -36,8 +32,7 @@ class TestSecurityPaladinValidation:
         public_key_path = Path("auth/keys/jwt_public.pem")
 
         assert not private_key_path.exists(), (
-            "CRITICAL: JWT private key found in repository! "
-            "Remove immediately and rotate keys."
+            "CRITICAL: JWT private key found in repository! " "Remove immediately and rotate keys."
         )
 
         # Public key can exist but private key must not
@@ -53,12 +48,11 @@ class TestSecurityPaladinValidation:
             if Path(filepath).exists():
                 content = Path(filepath).read_text()
                 assert "verify=False" not in content, (
-                    f"Found verify=False in {filepath} - "
-                    "JWT verification must be enabled!"
+                    f"Found verify=False in {filepath} - " "JWT verification must be enabled!"
                 )
-                assert 'verify_signature": False' not in content, (
-                    f"Found disabled signature verification in {filepath}"
-                )
+                assert (
+                    'verify_signature": False' not in content
+                ), f"Found disabled signature verification in {filepath}"
 
     def test_password_validation_exists(self):
         """Verify password validation is implemented."""
@@ -122,9 +116,9 @@ class TestSecurityPaladinValidation:
         for filepath in critical_files:
             if Path(filepath).exists():
                 content = Path(filepath).read_text()
-                assert "pickle" not in content.lower(), (
-                    f"Found pickle usage in security-critical file: {filepath}"
-                )
+                assert (
+                    "pickle" not in content.lower()
+                ), f"Found pickle usage in security-critical file: {filepath}"
 
     def test_api_endpoints_protected(self):
         """Verify API endpoints have authentication."""
@@ -143,9 +137,7 @@ class TestSecurityPaladinValidation:
             routes = re.findall(r"@\w+\.(get|post|put|delete|patch)", content)
 
             # Count authentication decorators
-            auth_decorators = re.findall(
-                r"@require_permission|@require_auth|@protected", content
-            )
+            auth_decorators = re.findall(r"@require_permission|@require_auth|@protected", content)
 
             if len(routes) > len(auth_decorators):
                 unprotected_endpoints.append(
@@ -156,9 +148,9 @@ class TestSecurityPaladinValidation:
                     }
                 )
 
-        assert len(unprotected_endpoints) == 0, (
-            f"Found unprotected endpoints: {unprotected_endpoints}"
-        )
+        assert (
+            len(unprotected_endpoints) == 0
+        ), f"Found unprotected endpoints: {unprotected_endpoints}"
 
     def test_docker_security_best_practices(self):
         """Verify Docker security best practices."""
@@ -168,14 +160,12 @@ class TestSecurityPaladinValidation:
             content = dockerfile_path.read_text()
 
             # Check for non-root user
-            assert "USER" in content and "USER root" not in content, (
-                "Docker container should run as non-root user"
-            )
+            assert (
+                "USER" in content and "USER root" not in content
+            ), "Docker container should run as non-root user"
 
             # Check for minimal base image
-            assert "slim" in content or "alpine" in content, (
-                "Should use minimal base image"
-            )
+            assert "slim" in content or "alpine" in content, "Should use minimal base image"
 
             # Check for HEALTHCHECK
             assert "HEALTHCHECK" in content, "Missing HEALTHCHECK instruction"
@@ -188,9 +178,7 @@ class TestSecurityPaladinValidation:
             content = env_example.read_text()
 
             # Check for placeholder values
-            assert "your_secret_key_here" in content, (
-                "Example file should have placeholder values"
-            )
+            assert "your_secret_key_here" in content, "Example file should have placeholder values"
 
             # Ensure no real secrets
             assert not any(
@@ -207,9 +195,7 @@ class TestSecurityPaladinValidation:
             content = ssl_config_file.read_text()
 
             # Check for minimum TLS version
-            assert "TLSv1.2" in content or "TLSv1.3" in content, (
-                "Must enforce minimum TLS v1.2"
-            )
+            assert "TLSv1.2" in content or "TLSv1.3" in content, "Must enforce minimum TLS v1.2"
 
             # Check cipher configuration
             if "set_ciphers" in content:
@@ -229,8 +215,7 @@ class TestSecurityPaladinValidation:
 
                 # Check for rate limit configuration
                 assert any(
-                    keyword in content
-                    for keyword in ["RateLimiter", "rate_limit", "throttle"]
+                    keyword in content for keyword in ["RateLimiter", "rate_limit", "throttle"]
                 ), f"Rate limiting not properly configured in {filepath}"
 
                 rate_limiting_found = True

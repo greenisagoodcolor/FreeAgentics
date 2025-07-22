@@ -449,9 +449,7 @@ class TestIntegrationSSLTLS:
         app.add_middleware(SecurityHeadersMiddleware, security_manager=security_policy)
 
         # Add HTTPS enforcement
-        ssl_config = SSLConfiguration(
-            production_mode=True, hsts_enabled=True, secure_cookies=True
-        )
+        ssl_config = SSLConfiguration(production_mode=True, hsts_enabled=True, secure_cookies=True)
         app.add_middleware(HTTPSEnforcementMiddleware, config=ssl_config)
 
         @app.get("/api/data")

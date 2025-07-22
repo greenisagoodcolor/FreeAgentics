@@ -84,9 +84,7 @@ class ConversationContext:
                 stability = len(common_keys) / max(len(prev_beliefs), len(curr_beliefs))
                 stability_scores.append(stability)
 
-        avg_stability = (
-            sum(stability_scores) / len(stability_scores) if stability_scores else 0.0
-        )
+        avg_stability = sum(stability_scores) / len(stability_scores) if stability_scores else 0.0
 
         return {
             "trend": "converging" if avg_stability > 0.7 else "exploring",
@@ -126,9 +124,7 @@ class ConversationContext:
 
         # Calculate diversity
         unique_suggestions = set(all_suggestions)
-        diversity = (
-            len(unique_suggestions) / len(all_suggestions) if all_suggestions else 0.0
-        )
+        diversity = len(unique_suggestions) / len(all_suggestions) if all_suggestions else 0.0
 
         # Find common suggestion themes
         suggestion_counts = defaultdict(int)
@@ -146,9 +142,7 @@ class ConversationContext:
                 if phrase in suggestion.lower():
                     suggestion_counts[phrase] += 1
 
-        common_themes = sorted(
-            suggestion_counts.items(), key=lambda x: x[1], reverse=True
-        )[:3]
+        common_themes = sorted(suggestion_counts.items(), key=lambda x: x[1], reverse=True)[:3]
 
         return {
             "diversity": diversity,
@@ -194,9 +188,7 @@ class IterativeController:
             if prompt.agent_id and prompt.gmn_specification:
                 # Extract KG nodes
                 kg_result = await db.execute(
-                    select(KnowledgeGraphUpdate).where(
-                        KnowledgeGraphUpdate.prompt_id == prompt.id
-                    )
+                    select(KnowledgeGraphUpdate).where(KnowledgeGraphUpdate.prompt_id == prompt.id)
                 )
                 kg_updates = kg_result.scalars().all()
                 kg_nodes = [update.node_id for update in kg_updates if update.applied]
@@ -240,9 +232,11 @@ class IterativeController:
             "prompt_analysis": prompt_analysis,
             "constraints": constraints,
             "iteration_number": conversation_context.iteration_count + 1,
-            "previous_suggestions": conversation_context.suggestion_history[-1]
-            if conversation_context.suggestion_history
-            else [],
+            "previous_suggestions": (
+                conversation_context.suggestion_history[-1]
+                if conversation_context.suggestion_history
+                else []
+            ),
         }
 
     async def generate_intelligent_suggestions(
@@ -285,28 +279,20 @@ class IterativeController:
 
         # 3. Analyze prompt themes evolution
         themes = conversation_context.get_context_summary()["prompt_themes"]
-        theme_suggestions = self._generate_theme_based_suggestions(
-            themes, conversation_context
-        )
+        theme_suggestions = self._generate_theme_based_suggestions(themes, conversation_context)
         suggestions.extend(theme_suggestions)
 
         # 4. Check for missing agent capabilities
-        capability_gaps = await self._identify_capability_gaps(
-            conversation_context.agent_ids, db
-        )
+        capability_gaps = await self._identify_capability_gaps(conversation_context.agent_ids, db)
 
         for gap in capability_gaps:
             suggestions.append(f"Add {gap} capability to enhance agent interactions")
 
         # 5. Suggest based on suggestion history patterns
-        suggestion_patterns = conversation_context.get_context_summary()[
-            "suggestion_patterns"
-        ]
+        suggestion_patterns = conversation_context.get_context_summary()["suggestion_patterns"]
 
         if suggestion_patterns["diversity"] < 0.3:
-            suggestions.append(
-                "Try a different approach - Current iterations are too similar"
-            )
+            suggestions.append("Try a different approach - Current iterations are too similar")
 
         # 6. Context-specific suggestions based on iteration count
         if conversation_context.iteration_count == 0:
@@ -318,9 +304,7 @@ class IterativeController:
         elif conversation_context.iteration_count < 5:
             suggestions.append("Introduce multi-agent coordination for complex tasks")
         else:
-            suggestions.append(
-                "Consider meta-learning - Let agents adapt their own models"
-            )
+            suggestions.append("Consider meta-learning - Let agents adapt their own models")
 
         # 7. Knowledge graph growth suggestions
         kg_growth_rate = len(conversation_context.kg_node_ids) / max(
@@ -328,9 +312,7 @@ class IterativeController:
         )
 
         if kg_growth_rate < 5:
-            suggestions.append(
-                "Increase observation diversity to enrich knowledge representation"
-            )
+            suggestions.append("Increase observation diversity to enrich knowledge representation")
         elif kg_growth_rate > 20:
             suggestions.append("Focus on knowledge consolidation rather than expansion")
 
@@ -370,9 +352,7 @@ class IterativeController:
         )
 
         # Update cache
-        self._conversation_contexts[conversation_context.conversation_id] = (
-            conversation_context
-        )
+        self._conversation_contexts[conversation_context.conversation_id] = conversation_context
 
     async def _get_kg_context(self, node_ids: Set[str]) -> Dict[str, Any]:
         """Get relevant knowledge graph context for the conversation."""
@@ -481,9 +461,7 @@ class IterativeController:
 
         return constraints
 
-    async def _analyze_kg_connectivity(
-        self, node_ids: Set[str], agent_id: str
-    ) -> Dict[str, Any]:
+    async def _analyze_kg_connectivity(self, node_ids: Set[str], agent_id: str) -> Dict[str, Any]:
         """Analyze connectivity patterns in the knowledge graph."""
         try:
             # Get subgraph
@@ -507,9 +485,7 @@ class IterativeController:
             return {
                 "isolated_nodes": isolated_count,
                 "cluster_count": len(clusters),
-                "avg_connectivity": sum(node_edges.values()) / len(node_ids)
-                if node_ids
-                else 0,
+                "avg_connectivity": sum(node_edges.values()) / len(node_ids) if node_ids else 0,
             }
         except Exception as e:
             logger.warning(f"Failed to analyze KG connectivity: {str(e)}")
@@ -541,9 +517,7 @@ class IterativeController:
 
         return suggestions[:2]  # Limit theme-based suggestions
 
-    async def _identify_capability_gaps(
-        self, agent_ids: List[str], db: AsyncSession
-    ) -> List[str]:
+    async def _identify_capability_gaps(self, agent_ids: List[str], db: AsyncSession) -> List[str]:
         """Identify missing capabilities across agents."""
         if not agent_ids:
             return ["basic perception", "goal-directed planning"]

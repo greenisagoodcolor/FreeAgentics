@@ -89,33 +89,37 @@ class PerformanceMetrics:
             "agent_spawn_times": {
                 "min": min(self.agent_spawn_times) if self.agent_spawn_times else 0,
                 "max": max(self.agent_spawn_times) if self.agent_spawn_times else 0,
-                "avg": sum(self.agent_spawn_times) / len(self.agent_spawn_times)
-                if self.agent_spawn_times
-                else 0,
+                "avg": (
+                    sum(self.agent_spawn_times) / len(self.agent_spawn_times)
+                    if self.agent_spawn_times
+                    else 0
+                ),
                 "count": len(self.agent_spawn_times),
             },
             "message_throughput": {
                 "min": min(self.message_throughput) if self.message_throughput else 0,
                 "max": max(self.message_throughput) if self.message_throughput else 0,
-                "avg": sum(self.message_throughput) / len(self.message_throughput)
-                if self.message_throughput
-                else 0,
+                "avg": (
+                    sum(self.message_throughput) / len(self.message_throughput)
+                    if self.message_throughput
+                    else 0
+                ),
                 "count": len(self.message_throughput),
             },
             "memory_usage": {
                 "min": min(self.memory_usage) if self.memory_usage else 0,
                 "max": max(self.memory_usage) if self.memory_usage else 0,
-                "avg": sum(self.memory_usage) / len(self.memory_usage)
-                if self.memory_usage
-                else 0,
+                "avg": sum(self.memory_usage) / len(self.memory_usage) if self.memory_usage else 0,
                 "count": len(self.memory_usage),
             },
             "response_times": {
                 "min": min(self.response_times) if self.response_times else 0,
                 "max": max(self.response_times) if self.response_times else 0,
-                "avg": sum(self.response_times) / len(self.response_times)
-                if self.response_times
-                else 0,
+                "avg": (
+                    sum(self.response_times) / len(self.response_times)
+                    if self.response_times
+                    else 0
+                ),
                 "count": len(self.response_times),
             },
             "concurrent_agents": self.concurrent_agents,
@@ -150,9 +154,7 @@ class Month1PerformanceTestSuite:
         self.metrics.end_timer()
 
         # Verify performance targets
-        avg_spawn_time = sum(self.metrics.agent_spawn_times) / len(
-            self.metrics.agent_spawn_times
-        )
+        avg_spawn_time = sum(self.metrics.agent_spawn_times) / len(self.metrics.agent_spawn_times)
 
         result = {
             "test_name": "100_concurrent_agents",
@@ -191,9 +193,7 @@ class Month1PerformanceTestSuite:
             while time.time() < end_time:
                 # Send messages to random agents
                 agent = random.choice(self.agents[:10])  # Use first 10 agents
-                future = executor.submit(
-                    agent.process_message, f"Message {message_count}"
-                )
+                future = executor.submit(agent.process_message, f"Message {message_count}")
                 futures.append(future)
                 message_count += 1
 
@@ -263,9 +263,7 @@ class Month1PerformanceTestSuite:
 
             # Progress update every 1000 nodes
             if node_count % 1000 == 0:
-                print(
-                    f"📈 Created {node_count} nodes, size: {self.knowledge_graph.size_gb:.3f} GB"
-                )
+                print(f"📈 Created {node_count} nodes, size: {self.knowledge_graph.size_gb:.3f} GB")
 
         duration = time.time() - start_time
 
@@ -276,15 +274,11 @@ class Month1PerformanceTestSuite:
             "nodes_created": node_count,
             "edges_created": len(self.knowledge_graph.edges),
             "duration": duration,
-            "status": "PASS"
-            if self.knowledge_graph.size_gb >= target_size_gb
-            else "FAIL",
+            "status": "PASS" if self.knowledge_graph.size_gb >= target_size_gb else "FAIL",
         }
 
         print(f"✅ Created knowledge graph with {node_count} nodes")
-        print(
-            f"📊 Size: {self.knowledge_graph.size_gb:.3f} GB (target: {target_size_gb} GB)"
-        )
+        print(f"📊 Size: {self.knowledge_graph.size_gb:.3f} GB (target: {target_size_gb} GB)")
         print(f"🎯 Status: {result['status']}")
 
         return result
@@ -334,9 +328,7 @@ class Month1PerformanceTestSuite:
             "initial_memory_mb": initial_memory[0] / 1024 / 1024,
             "final_memory_mb": final_memory[0] / 1024 / 1024,
             "memory_growth_mb": memory_growth_mb,
-            "status": "PASS"
-            if memory_growth_mb < 100
-            else "FAIL",  # <100MB growth acceptable
+            "status": "PASS" if memory_growth_mb < 100 else "FAIL",  # <100MB growth acceptable
             "memory_usage_history": self.metrics.memory_usage,
         }
 

@@ -93,9 +93,7 @@ class PromptProcessor:
         logger.info(f"Processing prompt from user {user_id}: {prompt_text[:100]}...")
 
         # Get or create conversation
-        conversation = await self._get_or_create_conversation(
-            db, user_id, conversation_id
-        )
+        conversation = await self._get_or_create_conversation(db, user_id, conversation_id)
 
         # Create prompt record
         prompt_record = Prompt(
@@ -109,17 +107,13 @@ class PromptProcessor:
 
         try:
             # Get conversation context from iterative controller
-            conversation_context = (
-                await self.iterative_controller.get_or_create_context(
-                    str(conversation.id), db
-                )
+            conversation_context = await self.iterative_controller.get_or_create_context(
+                str(conversation.id), db
             )
 
             # Prepare iteration-specific context
-            iteration_context = (
-                await self.iterative_controller.prepare_iteration_context(
-                    conversation_context, prompt_text
-                )
+            iteration_context = await self.iterative_controller.prepare_iteration_context(
+                conversation_context, prompt_text
             )
 
             # Send initial WebSocket update with iteration info
@@ -127,9 +121,9 @@ class PromptProcessor:
                 "pipeline_started",
                 {
                     "prompt_id": str(prompt_record.id),
-                    "prompt_text": prompt_text[:100] + "..."
-                    if len(prompt_text) > 100
-                    else prompt_text,
+                    "prompt_text": (
+                        prompt_text[:100] + "..." if len(prompt_text) > 100 else prompt_text
+                    ),
                     "user_id": user_id,
                     "conversation_id": conversation.id,
                     "stage": "initialization",
@@ -150,9 +144,7 @@ class PromptProcessor:
                     "message": "Generating GMN specification from natural language...",
                     "iteration_context": {
                         "number": iteration_context["iteration_number"],
-                        "previous_suggestions": iteration_context[
-                            "previous_suggestions"
-                        ],
+                        "previous_suggestions": iteration_context["previous_suggestions"],
                     },
                 },
             )
@@ -160,18 +152,14 @@ class PromptProcessor:
             # Update conversation context with iteration-specific constraints
             conversation.context.update(iteration_context)
 
-            gmn_spec = await self._generate_gmn(
-                prompt_text, conversation.context, iteration_count
-            )
+            gmn_spec = await self._generate_gmn(prompt_text, conversation.context, iteration_count)
             prompt_record.gmn_specification = gmn_spec
 
             await self._send_websocket_update(
                 "gmn_generated",
                 {
                     "prompt_id": str(prompt_record.id),
-                    "gmn_preview": gmn_spec[:200] + "..."
-                    if len(gmn_spec) > 200
-                    else gmn_spec,
+                    "gmn_preview": gmn_spec[:200] + "..." if len(gmn_spec) > 200 else gmn_spec,
                     "gmn_length": len(gmn_spec),
                 },
             )
@@ -251,9 +239,7 @@ class PromptProcessor:
                 },
             )
 
-            db_agent = await self._store_agent(
-                db, agent_id, gmn_spec, pymdp_model, prompt_text
-            )
+            db_agent = await self._store_agent(db, agent_id, gmn_spec, pymdp_model, prompt_text)
             prompt_record.agent_id = db_agent.id
 
             # Step 5: Update knowledge graph
@@ -297,14 +283,12 @@ class PromptProcessor:
             current_beliefs = await self.belief_kg_bridge.extract_beliefs(pymdp_agent)
 
             # Use iterative controller for intelligent suggestions
-            suggestions = (
-                await self.iterative_controller.generate_intelligent_suggestions(
-                    agent_id,
-                    pymdp_agent,
-                    conversation_context,
-                    current_beliefs,
-                    db,
-                )
+            suggestions = await self.iterative_controller.generate_intelligent_suggestions(
+                agent_id,
+                pymdp_agent,
+                conversation_context,
+                current_beliefs,
+                db,
             )
 
             # Update prompt record
@@ -469,15 +453,11 @@ class PromptProcessor:
 
         return gmn_spec
 
-    async def _validate_model(
-        self, pymdp_model: Dict[str, Any]
-    ) -> Tuple[bool, List[str]]:
+    async def _validate_model(self, pymdp_model: Dict[str, Any]) -> Tuple[bool, List[str]]:
         """Validate PyMDP model before agent creation."""
         return await self.agent_factory.validate_model(pymdp_model)
 
-    async def _create_agent(
-        self, pymdp_model: Dict[str, Any], agent_id: str, prompt_text: str
-    ):
+    async def _create_agent(self, pymdp_model: Dict[str, Any], agent_id: str, prompt_text: str):
         """Create PyMDP agent from model."""
         metadata = {
             "created_from_prompt": prompt_text[:200],
@@ -611,9 +591,7 @@ class PromptProcessor:
         name = "_".join(w.lower() for w in words if len(w) > 3)
         return f"agent_{name[:30]}"
 
-    def _format_kg_updates(
-        self, kg_updates: List[KnowledgeGraphUpdate]
-    ) -> List[Dict[str, Any]]:
+    def _format_kg_updates(self, kg_updates: List[KnowledgeGraphUpdate]) -> List[Dict[str, Any]]:
         """Format knowledge graph updates for response."""
         return [
             {

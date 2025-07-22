@@ -109,9 +109,7 @@ def generate_recommendations(results):
         if not suite_results.get("success", True):
             # Analyze failures
             failed_tests = [
-                test
-                for test in suite_results.get("tests", [])
-                if test.get("outcome") == "failed"
+                test for test in suite_results.get("tests", []) if test.get("outcome") == "failed"
             ]
 
             for test in failed_tests:
@@ -127,9 +125,7 @@ def generate_recommendations(results):
                         "- Implement stronger JWT validation and consider token binding"
                     )
                 elif "cross_user" in test_name or "horizontal" in test_name:
-                    recommendations.append(
-                        "- Enhance resource ownership checks and user isolation"
-                    )
+                    recommendations.append("- Enhance resource ownership checks and user isolation")
                 elif "sql_injection" in test_name:
                     recommendations.append(
                         "- Implement parameterized queries and input sanitization"

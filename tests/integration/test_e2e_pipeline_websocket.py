@@ -139,9 +139,7 @@ class TestEndToEndPipelineWebSocket:
                     await asyncio.sleep(0.1)  # Allow async events to process
 
                     # Check event types received
-                    event_types = [
-                        e.get("type", e.get("event_type")) for e in received_events
-                    ]
+                    event_types = [e.get("type", e.get("event_type")) for e in received_events]
 
                     # Should have received pipeline events
                     expected_events = [
@@ -155,15 +153,13 @@ class TestEndToEndPipelineWebSocket:
                     ]
 
                     for expected in expected_events:
-                        assert any(expected in str(e) for e in event_types), (
-                            f"Missing event: {expected}"
-                        )
+                        assert any(
+                            expected in str(e) for e in event_types
+                        ), f"Missing event: {expected}"
 
                     # Verify event sequence and content
                     pipeline_events = [
-                        e
-                        for e in received_events
-                        if "pipeline" in str(e.get("type", ""))
+                        e for e in received_events if "pipeline" in str(e.get("type", ""))
                     ]
 
                     # Check pipeline started event
@@ -195,9 +191,7 @@ class TestEndToEndPipelineWebSocket:
                     )  # Under 3s requirement
 
     @pytest.mark.asyncio
-    async def test_realtime_progress_tracking(
-        self, test_client, mock_auth_token, mock_db_session
-    ):
+    async def test_realtime_progress_tracking(self, test_client, mock_auth_token, mock_db_session):
         """Test real-time progress tracking through WebSocket updates."""
         progress_updates = []
 
@@ -237,9 +231,7 @@ class TestEndToEndPipelineWebSocket:
 
                     # Verify stage progression
                     stage_numbers = [u["stage_number"] for u in progress_updates]
-                    assert sorted(stage_numbers) == list(
-                        range(1, len(stage_numbers) + 1)
-                    )
+                    assert sorted(stage_numbers) == list(range(1, len(stage_numbers) + 1))
 
                     # Verify each update has required fields
                     for update in progress_updates:
@@ -257,9 +249,7 @@ class TestEndToEndPipelineWebSocket:
 
         # Capture error events
         async def capture_errors(message: dict, client_id: str):
-            if "failed" in message.get("type", "") or "error" in message.get(
-                "type", ""
-            ):
+            if "failed" in message.get("type", "") or "error" in message.get("type", ""):
                 error_events.append(message)
 
         # Force an error in GMN generation
@@ -269,9 +259,7 @@ class TestEndToEndPipelineWebSocket:
                     "api.v1.websocket.manager.send_personal_message",
                     capture_errors,
                 ):
-                    with patch(
-                        "services.gmn_generator.GMNGenerator.prompt_to_gmn"
-                    ) as mock_gmn:
+                    with patch("services.gmn_generator.GMNGenerator.prompt_to_gmn") as mock_gmn:
                         # Setup user
                         mock_get_user.return_value = TokenData(
                             username="testuser",
@@ -281,9 +269,7 @@ class TestEndToEndPipelineWebSocket:
                         )
 
                         # Make GMN generation fail
-                        mock_gmn.side_effect = ValueError(
-                            "Invalid prompt: cannot generate GMN"
-                        )
+                        mock_gmn.side_effect = ValueError("Invalid prompt: cannot generate GMN")
 
                         # Process prompt
                         response = test_client.post(
@@ -301,9 +287,7 @@ class TestEndToEndPipelineWebSocket:
 
                         error_event = error_events[0]
                         assert "error" in error_event["data"]
-                        assert "validation_error" in str(
-                            error_event["data"].get("error_type", "")
-                        )
+                        assert "validation_error" in str(error_event["data"].get("error_type", ""))
 
     @pytest.mark.asyncio
     async def test_performance_monitoring_via_websocket(
@@ -413,9 +397,7 @@ class TestEndToEndPipelineWebSocket:
 
                         # Verify all clients received events
                         for client_id, events in client_events.items():
-                            assert len(events) > 0, (
-                                f"Client {client_id} received no events"
-                            )
+                            assert len(events) > 0, f"Client {client_id} received no events"
 
                             # Each client should receive similar events
                             event_types = [e.get("type", "") for e in events]

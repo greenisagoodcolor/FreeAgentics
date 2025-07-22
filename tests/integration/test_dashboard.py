@@ -94,9 +94,7 @@ class IntegrationTestDashboard:
         """Check if test environment is properly set up."""
         checks = {
             "venv_exists": os.path.exists(self.venv_python),
-            "env_test_exists": os.path.exists(
-                os.path.join(self.project_root, ".env.test")
-            ),
+            "env_test_exists": os.path.exists(os.path.join(self.project_root, ".env.test")),
             "docker_running": self._check_docker(),
             "containers_available": self._check_containers_available(),
         }
@@ -153,9 +151,7 @@ class IntegrationTestDashboard:
         ]
 
         try:
-            result = subprocess.run(
-                cmd, capture_output=True, text=True, env=env, timeout=60
-            )
+            result = subprocess.run(cmd, capture_output=True, text=True, env=env, timeout=60)
             success = result.returncode == 0
             output = result.stdout + result.stderr
             return success, output
@@ -164,9 +160,7 @@ class IntegrationTestDashboard:
         except Exception as e:
             return False, f"Error running test: {str(e)}"
 
-    def run_category(
-        self, category: str, verbose: bool = False
-    ) -> Dict[str, Tuple[bool, str]]:
+    def run_category(self, category: str, verbose: bool = False) -> Dict[str, Tuple[bool, str]]:
         """Run all tests in a category."""
         tests = self.list_tests(category)
         results = {}
@@ -206,9 +200,7 @@ Failed Tests:
                 lines = output.split("\n")
                 error_lines = [l for l in lines if "FAILED" in l or "ERROR" in l][:3]
                 error_summary = (
-                    "\n  ".join(error_lines)
-                    if error_lines
-                    else "Check output for details"
+                    "\n  ".join(error_lines) if error_lines else "Check output for details"
                 )
                 report += f"\n{test}:\n  {error_summary}\n"
 
@@ -238,9 +230,7 @@ Failed Tests:
 
 def main():
     """Main entry point for the dashboard."""
-    parser = argparse.ArgumentParser(
-        description="FreeAgentics Integration Test Dashboard"
-    )
+    parser = argparse.ArgumentParser(description="FreeAgentics Integration Test Dashboard")
     parser.add_argument(
         "command",
         choices=["check", "list", "run", "report"],
@@ -328,10 +318,7 @@ def main():
         with open(args.save) as f:
             data = json.load(f)
 
-        results = {
-            test: (res["success"], res["output"])
-            for test, res in data["results"].items()
-        }
+        results = {test: (res["success"], res["output"]) for test, res in data["results"].items()}
 
         report = dashboard.generate_report(results)
         print(report)

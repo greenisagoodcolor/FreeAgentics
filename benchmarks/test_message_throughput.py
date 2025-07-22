@@ -106,9 +106,7 @@ class MessageThroughputBenchmarks:
 
         print("\nSimple Message Routing:")
         print(f"  Throughput: {throughput:.1f} messages/second")
-        print(
-            f"  Average latency: {(router.total_latency / router.message_count) * 1000:.3f}ms"
-        )
+        print(f"  Average latency: {(router.total_latency / router.message_count) * 1000:.3f}ms")
 
     @pytest.mark.benchmark(group="message-throughput", min_rounds=5)
     def test_concurrent_message_routing(self, benchmark, router, sample_messages):
@@ -121,9 +119,7 @@ class MessageThroughputBenchmarks:
 
         # Register handlers
         for i in range(10):
-            router.register_handler(
-                f"agent-{i}", lambda msg: time.sleep(0.0001)
-            )  # Simulate work
+            router.register_handler(f"agent-{i}", lambda msg: time.sleep(0.0001))  # Simulate work
 
         def worker():
             while True:
@@ -441,17 +437,9 @@ class MessageThroughputBenchmarks:
         list_time = time.perf_counter() - start
 
         print(f"\nQueue Performance Comparison ({num_messages} operations):")
-        print(
-            f"  Queue: {queue_time * 1000:.1f}ms "
-            f"({num_messages / queue_time:.1f} ops/sec)"
-        )
-        print(
-            f"  Deque: {deque_time * 1000:.1f}ms "
-            f"({num_messages / deque_time:.1f} ops/sec)"
-        )
-        print(
-            f"  List: {list_time * 1000:.1f}ms ({num_messages / list_time:.1f} ops/sec)"
-        )
+        print(f"  Queue: {queue_time * 1000:.1f}ms " f"({num_messages / queue_time:.1f} ops/sec)")
+        print(f"  Deque: {deque_time * 1000:.1f}ms " f"({num_messages / deque_time:.1f} ops/sec)")
+        print(f"  List: {list_time * 1000:.1f}ms ({num_messages / list_time:.1f} ops/sec)")
 
 
 def run_throughput_benchmarks():

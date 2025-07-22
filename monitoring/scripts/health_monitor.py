@@ -64,17 +64,13 @@ class HealthMonitor:
         tasks = []
 
         # API health checks
-        for endpoint_name, endpoint_config in self.config["health_checks"][
-            "endpoints"
-        ].items():
+        for endpoint_name, endpoint_config in self.config["health_checks"]["endpoints"].items():
             task = self.check_endpoint(endpoint_name, endpoint_config)
             tasks.append(task)
 
         # Synthetic monitoring
         for journey in (
-            self.config["health_checks"]
-            .get("synthetic_monitoring", {})
-            .get("user_journey", [])
+            self.config["health_checks"].get("synthetic_monitoring", {}).get("user_journey", [])
         ):
             task = self.check_synthetic_journey(journey)
             tasks.append(task)
@@ -168,9 +164,7 @@ class HealthMonitor:
                     "status_code": response.status,
                     "latency_ms": round(latency, 2),
                     "success": 200 <= response.status < 300,
-                    "response": await response.json()
-                    if response.status == 200
-                    else None,
+                    "response": await response.json() if response.status == 200 else None,
                 }
 
         except Exception as e:
@@ -274,9 +268,7 @@ class HealthMonitor:
             await self.send_slack_notification(alert)
 
         # PagerDuty notification
-        if alert["level"] == "critical" and "pagerduty" in self.config.get(
-            "integrations", {}
-        ):
+        if alert["level"] == "critical" and "pagerduty" in self.config.get("integrations", {}):
             await self.send_pagerduty_notification(alert)
 
     async def send_slack_notification(self, alert: Dict[str, Any]):
@@ -313,9 +305,7 @@ class HealthMonitor:
         try:
             async with self.session.post(webhook_url, json=payload) as response:
                 if response.status != 200:
-                    logger.error(
-                        f"Failed to send Slack notification: {response.status}"
-                    )
+                    logger.error(f"Failed to send Slack notification: {response.status}")
         except Exception as e:
             logger.error(f"Error sending Slack notification: {e}")
 
@@ -342,9 +332,7 @@ class HealthMonitor:
                 "https://events.pagerduty.com/v2/enqueue", json=payload
             ) as response:
                 if response.status != 202:
-                    logger.error(
-                        f"Failed to send PagerDuty notification: {response.status}"
-                    )
+                    logger.error(f"Failed to send PagerDuty notification: {response.status}")
         except Exception as e:
             logger.error(f"Error sending PagerDuty notification: {e}")
 
@@ -370,9 +358,7 @@ class HealthMonitor:
             print("\nRecent Alerts:")
             print("-" * 80)
             for alert in self.alert_history[-5:]:
-                print(
-                    f"[{alert['timestamp']}] {alert['level'].upper()}: {alert['message']}"
-                )
+                print(f"[{alert['timestamp']}] {alert['level'].upper()}: {alert['message']}")
 
         print("=" * 80 + "\n")
 

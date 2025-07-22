@@ -16,10 +16,7 @@ class MockRedis:
         """Get a value from the mock store."""
         if key in self.data:
             # Check expiry
-            if (
-                key in self.expiry
-                and asyncio.get_event_loop().time() > self.expiry[key]
-            ):
+            if key in self.expiry and asyncio.get_event_loop().time() > self.expiry[key]:
                 del self.data[key]
                 del self.expiry[key]
                 return None
@@ -29,9 +26,7 @@ class MockRedis:
             return value
         return None
 
-    async def set(
-        self, key: str, value: Union[str, bytes], ex: Optional[int] = None
-    ) -> bool:
+    async def set(self, key: str, value: Union[str, bytes], ex: Optional[int] = None) -> bool:
         """Set a value in the mock store."""
         if isinstance(value, bytes):
             value = value.decode()

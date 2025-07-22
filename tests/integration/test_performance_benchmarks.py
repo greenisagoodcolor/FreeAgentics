@@ -38,9 +38,7 @@ class TestPerformanceBenchmarks:
         print(f"  Performance: {steps_per_second:.2f} steps/sec")
 
         # PyMDP Active Inference is computationally intensive, realistic expectation
-        assert steps_per_second > 5, (
-            f"Single agent too slow: {steps_per_second:.2f} steps/sec"
-        )
+        assert steps_per_second > 5, f"Single agent too slow: {steps_per_second:.2f} steps/sec"
 
     def test_multi_agent_scaling(self):
         """Test how performance scales with number of agents."""
@@ -88,9 +86,7 @@ class TestPerformanceBenchmarks:
             )
 
         # Verify that we can handle multiple agents
-        assert performance_results[10]["ops_per_second"] > 3, (
-            "10-agent performance too slow"
-        )
+        assert performance_results[10]["ops_per_second"] > 3, "10-agent performance too slow"
 
         return performance_results
 
@@ -117,9 +113,7 @@ class TestPerformanceBenchmarks:
         pymdp_steps_per_sec = num_steps / pymdp_duration
 
         # Test with fallback (mock PyMDP failure)
-        agent_fallback = BasicExplorerAgent(
-            "fallback_agent", "Fallback Agent", grid_size=3
-        )
+        agent_fallback = BasicExplorerAgent("fallback_agent", "Fallback Agent", grid_size=3)
         agent_fallback.start()
         agent_fallback.pymdp_agent = None  # Force fallback
 
@@ -137,17 +131,11 @@ class TestPerformanceBenchmarks:
 
         print("\nPyMDP vs Fallback Performance:")
         print(f"  PyMDP: {pymdp_steps_per_sec:.2f} steps/sec ({pymdp_duration:.2f}s)")
-        print(
-            f"  Fallback: {fallback_steps_per_sec:.2f} steps/sec ({fallback_duration:.2f}s)"
-        )
-        print(
-            f"  Speedup with fallback: {fallback_steps_per_sec / pymdp_steps_per_sec:.1f}x"
-        )
+        print(f"  Fallback: {fallback_steps_per_sec:.2f} steps/sec ({fallback_duration:.2f}s)")
+        print(f"  Speedup with fallback: {fallback_steps_per_sec / pymdp_steps_per_sec:.1f}x")
 
         # Fallback should be significantly faster
-        assert fallback_steps_per_sec > pymdp_steps_per_sec, (
-            "Fallback should be faster than PyMDP"
-        )
+        assert fallback_steps_per_sec > pymdp_steps_per_sec, "Fallback should be faster than PyMDP"
 
     def test_memory_usage_scaling(self):
         """Test memory usage as agents are added."""
@@ -163,9 +151,7 @@ class TestPerformanceBenchmarks:
 
         # Add agents incrementally and measure memory
         for i in range(20):
-            agent = BasicExplorerAgent(
-                f"memory_agent_{i}", f"Memory Agent {i}", grid_size=5
-            )
+            agent = BasicExplorerAgent(f"memory_agent_{i}", f"Memory Agent {i}", grid_size=5)
             agent.start()
             agents.append(agent)
 
@@ -190,19 +176,14 @@ class TestPerformanceBenchmarks:
         print(f"  Total agents: {len(agents)}")
 
         # Memory usage should be reasonable
-        assert memory_per_agent < 50, (
-            f"Memory per agent too high: {memory_per_agent:.1f} MB"
-        )
-        assert final_memory < 1000, (
-            f"Total memory usage too high: {final_memory:.1f} MB"
-        )
+        assert memory_per_agent < 50, f"Memory per agent too high: {memory_per_agent:.1f} MB"
+        assert final_memory < 1000, f"Total memory usage too high: {final_memory:.1f} MB"
 
     def test_coordination_overhead(self):
         """Test performance overhead of agent coordination."""
         # Test isolated agents (no coordination)
         isolated_agents = [
-            BasicExplorerAgent(f"isolated_{i}", f"Isolated {i}", grid_size=3)
-            for i in range(5)
+            BasicExplorerAgent(f"isolated_{i}", f"Isolated {i}", grid_size=3) for i in range(5)
         ]
 
         for agent in isolated_agents:
@@ -224,8 +205,7 @@ class TestPerformanceBenchmarks:
 
         # Test coordinating agents (with visibility)
         coordinating_agents = [
-            BasicExplorerAgent(f"coord_{i}", f"Coordinating {i}", grid_size=3)
-            for i in range(5)
+            BasicExplorerAgent(f"coord_{i}", f"Coordinating {i}", grid_size=3) for i in range(5)
         ]
 
         for agent in coordinating_agents:
@@ -247,27 +227,23 @@ class TestPerformanceBenchmarks:
                 _action = agent.step(observation)
 
         coordinating_duration = time.time() - start_time
-        coordinating_ops_per_sec = (
-            len(coordinating_agents) * num_steps
-        ) / coordinating_duration
+        coordinating_ops_per_sec = (len(coordinating_agents) * num_steps) / coordinating_duration
 
         coordination_overhead = (
             (coordinating_duration - isolated_duration) / isolated_duration * 100
         )
 
         print("\nCoordination Overhead Analysis:")
-        print(
-            f"  Isolated: {isolated_ops_per_sec:.2f} ops/sec ({isolated_duration:.2f}s)"
-        )
+        print(f"  Isolated: {isolated_ops_per_sec:.2f} ops/sec ({isolated_duration:.2f}s)")
         print(
             f"  Coordinating: {coordinating_ops_per_sec:.2f} ops/sec ({coordinating_duration:.2f}s)"
         )
         print(f"  Overhead: {coordination_overhead:.1f}%")
 
         # Coordination should add some overhead but not be excessive
-        assert coordination_overhead < 200, (
-            f"Coordination overhead too high: {coordination_overhead:.1f}%"
-        )
+        assert (
+            coordination_overhead < 200
+        ), f"Coordination overhead too high: {coordination_overhead:.1f}%"
 
     def test_resource_collection_performance(self):
         """Test performance of resource collection agents."""
@@ -311,9 +287,7 @@ class TestPerformanceBenchmarks:
         print(f"  Performance: {ops_per_second:.2f} ops/sec")
 
         # Should handle resource collection reasonably well
-        assert ops_per_second > 5, (
-            f"Resource collection too slow: {ops_per_second:.2f} ops/sec"
-        )
+        assert ops_per_second > 5, f"Resource collection too slow: {ops_per_second:.2f} ops/sec"
 
 
 class TestRealWorldScenarios:
@@ -322,17 +296,11 @@ class TestRealWorldScenarios:
     def test_mixed_agent_coordination(self):
         """Test performance with mixed agent types."""
         # Create realistic agent mix
-        explorers = [
-            BasicExplorerAgent(f"exp_{i}", f"Explorer {i}", grid_size=4)
-            for i in range(3)
-        ]
+        explorers = [BasicExplorerAgent(f"exp_{i}", f"Explorer {i}", grid_size=4) for i in range(3)]
         collectors = [
-            ResourceCollectorAgent(f"col_{i}", f"Collector {i}", grid_size=4)
-            for i in range(2)
+            ResourceCollectorAgent(f"col_{i}", f"Collector {i}", grid_size=4) for i in range(2)
         ]
-        coordinator = CoalitionCoordinatorAgent(
-            "coordinator", "Main Coordinator", max_agents=10
-        )
+        coordinator = CoalitionCoordinatorAgent("coordinator", "Main Coordinator", max_agents=10)
 
         all_agents = explorers + collectors + [coordinator]
 
@@ -389,17 +357,13 @@ class TestRealWorldScenarios:
         ops_per_second = total_operations / duration
 
         print("\nMixed Agent Coordination Performance:")
-        print(
-            f"  Total agents: {len(all_agents)} (3 explorers, 2 collectors, 1 coordinator)"
-        )
+        print(f"  Total agents: {len(all_agents)} (3 explorers, 2 collectors, 1 coordinator)")
         print(f"  Steps: {num_steps}")
         print(f"  Performance: {ops_per_second:.2f} ops/sec")
         print(f"  Duration: {duration:.2f}s")
 
         # Should handle mixed coordination
-        assert ops_per_second > 3, (
-            f"Mixed coordination too slow: {ops_per_second:.2f} ops/sec"
-        )
+        assert ops_per_second > 3, f"Mixed coordination too slow: {ops_per_second:.2f} ops/sec"
 
         # Verify all agents operated
         for agent in all_agents:

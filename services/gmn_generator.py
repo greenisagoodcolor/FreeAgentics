@@ -23,9 +23,7 @@ class GMNGenerator:
             llm_provider: LLM provider instance. Defaults to MockLLMProvider.
         """
         self.llm_provider = llm_provider or MockLLMProvider()
-        logger.info(
-            f"Initialized GMN generator with {type(self.llm_provider).__name__}"
-        )
+        logger.info(f"Initialized GMN generator with {type(self.llm_provider).__name__}")
 
     async def prompt_to_gmn(
         self,
@@ -50,9 +48,7 @@ class GMNGenerator:
         if not prompt or not prompt.strip():
             raise ValueError("Prompt cannot be empty")
 
-        logger.info(
-            f"Generating GMN for agent type '{agent_type}' from prompt: {prompt[:100]}..."
-        )
+        logger.info(f"Generating GMN for agent type '{agent_type}' from prompt: {prompt[:100]}...")
 
         try:
             # Use the provider's GMN generation method
@@ -205,12 +201,7 @@ class GMNGenerator:
                     else:
                         # Single node reference
                         ref = value_part.strip()
-                        if (
-                            ref
-                            and not ref.isdigit()
-                            and ref != "true"
-                            and ref != "false"
-                        ):
+                        if ref and not ref.isdigit() and ref != "true" and ref != "false":
                             referenced_nodes.add(ref)
 
         # Check for unbalanced braces
@@ -220,18 +211,14 @@ class GMNGenerator:
         # Check for undefined references
         undefined_refs = referenced_nodes - defined_nodes
         if undefined_refs:
-            errors.append(
-                f"Undefined node references: {', '.join(sorted(undefined_refs))}"
-            )
+            errors.append(f"Undefined node references: {', '.join(sorted(undefined_refs))}")
 
         # Check for required node types
         required_types = {"state", "action"}
         found_types = set(node_types.values())
         missing_types = required_types - found_types
         if missing_types:
-            errors.append(
-                f"Missing required node types: {', '.join(sorted(missing_types))}"
-            )
+            errors.append(f"Missing required node types: {', '.join(sorted(missing_types))}")
 
         # Check for transitions or emissions
         if "transition" not in found_types and "emission" not in found_types:
@@ -271,9 +258,7 @@ class GMNGenerator:
 
         # Check for deterministic vs stochastic
         if "stochastic:" not in lines and "deterministic:" not in lines:
-            suggestions.append(
-                "Specify whether transitions are deterministic or stochastic"
-            )
+            suggestions.append("Specify whether transitions are deterministic or stochastic")
 
         # Check for initial state distribution
         if "initial:" not in lines:

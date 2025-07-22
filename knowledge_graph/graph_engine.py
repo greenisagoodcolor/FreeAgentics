@@ -273,9 +273,7 @@ class KnowledgeGraph:
         """
         return self.nodes.get(node_id)
 
-    def get_neighbors(
-        self, node_id: str, edge_type: Optional[EdgeType] = None
-    ) -> List[str]:
+    def get_neighbors(self, node_id: str, edge_type: Optional[EdgeType] = None) -> List[str]:
         """Get neighboring nodes.
 
         Args:
@@ -339,9 +337,7 @@ class KnowledgeGraph:
         except nx.NetworkXNoPath:
             return None
 
-    def get_subgraph(
-        self, node_ids: List[str], include_edges: bool = True
-    ) -> "KnowledgeGraph":
+    def get_subgraph(self, node_ids: List[str], include_edges: bool = True) -> "KnowledgeGraph":
         """Extract a subgraph containing specified nodes.
 
         Args:
@@ -471,9 +467,7 @@ class KnowledgeGraph:
             "statistics": {
                 "node_count": len(self.nodes),
                 "edge_count": len(self.edges),
-                "node_types": {
-                    nt.value: len(self.type_index.get(nt, [])) for nt in NodeType
-                },
+                "node_types": {nt.value: len(self.type_index.get(nt, [])) for nt in NodeType},
             },
         }
 

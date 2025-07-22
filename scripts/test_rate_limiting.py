@@ -48,9 +48,7 @@ class RateLimitTester:
                 # Check for rate limit headers
                 rate_limit_headers = {
                     "X-RateLimit-Limit": response.headers.get("X-RateLimit-Limit"),
-                    "X-RateLimit-Remaining": response.headers.get(
-                        "X-RateLimit-Remaining"
-                    ),
+                    "X-RateLimit-Remaining": response.headers.get("X-RateLimit-Remaining"),
                     "X-RateLimit-Reset": response.headers.get("X-RateLimit-Reset"),
                     "Retry-After": response.headers.get("Retry-After"),
                 }
@@ -78,9 +76,7 @@ class RateLimitTester:
     ):
         """Test rate limiting for a specific endpoint."""
         print(f"\nTesting endpoint: {endpoint}")
-        print(
-            f"Making {requests_per_test} requests with {delay_between_requests}s delay..."
-        )
+        print(f"Making {requests_per_test} requests with {delay_between_requests}s delay...")
 
         for i in range(requests_per_test):
             success, status, headers = await self.make_request(endpoint)
@@ -137,9 +133,7 @@ class RateLimitTester:
             headers = {"Authorization": f"Bearer {auth_token}"}
 
             for i in range(10):
-                success, status, rate_headers = await self.make_request(
-                    endpoint, headers
-                )
+                success, status, rate_headers = await self.make_request(endpoint, headers)
                 if status == 429:
                     print(f"  Request {i + 1}: Rate limited!")
                 else:

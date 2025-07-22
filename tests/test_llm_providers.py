@@ -50,18 +50,14 @@ class TestLLMProviders:
         assert "state" in response.content
 
     @pytest.mark.asyncio
-    @pytest.mark.skipif(
-        not os.getenv("OPENAI_API_KEY"), reason="OpenAI API key not set"
-    )
+    @pytest.mark.skipif(not os.getenv("OPENAI_API_KEY"), reason="OpenAI API key not set")
     async def test_openai_provider(self):
         """Test OpenAI provider functionality."""
         provider = OpenAIProvider(model="gpt-4o-mini")  # Use cheaper model for tests
 
         try:
             # Test basic generation
-            messages = [
-                LLMMessage(role=LLMRole.USER, content="Say 'Hello, GMN world!'")
-            ]
+            messages = [LLMMessage(role=LLMRole.USER, content="Say 'Hello, GMN world!'")]
 
             response = await provider.generate(messages, max_tokens=50)
 
@@ -74,20 +70,14 @@ class TestLLMProviders:
             await provider.close()
 
     @pytest.mark.asyncio
-    @pytest.mark.skipif(
-        not os.getenv("ANTHROPIC_API_KEY"), reason="Anthropic API key not set"
-    )
+    @pytest.mark.skipif(not os.getenv("ANTHROPIC_API_KEY"), reason="Anthropic API key not set")
     async def test_anthropic_provider(self):
         """Test Anthropic provider functionality."""
-        provider = AnthropicProvider(
-            model="claude-3-haiku"
-        )  # Use cheaper model for tests
+        provider = AnthropicProvider(model="claude-3-haiku")  # Use cheaper model for tests
 
         try:
             # Test basic generation
-            messages = [
-                LLMMessage(role=LLMRole.USER, content="Say 'Hello, GMN world!'")
-            ]
+            messages = [LLMMessage(role=LLMRole.USER, content="Say 'Hello, GMN world!'")]
 
             response = await provider.generate(messages, max_tokens=50)
 
@@ -106,9 +96,7 @@ class TestLLMProviders:
         try:
             # Check if Ollama is running
             if not await provider._check_ollama_running():
-                assert False, (
-                    "Ollama service not running - configure Ollama for this test"
-                )
+                assert False, "Ollama service not running - configure Ollama for this test"
 
             # Test basic generation
             messages = [
@@ -176,9 +164,7 @@ class TestGMNGeneration:
         assert "25" in gmn or "5x5" in gmn, "Grid size not properly reflected"
 
     @pytest.mark.asyncio
-    @pytest.mark.skipif(
-        not os.getenv("OPENAI_API_KEY"), reason="OpenAI API key not set"
-    )
+    @pytest.mark.skipif(not os.getenv("OPENAI_API_KEY"), reason="OpenAI API key not set")
     async def test_gmn_generation_openai(self):
         """Test GMN generation with OpenAI."""
         provider = OpenAIProvider(model="gpt-4o-mini")
@@ -190,9 +176,7 @@ class TestGMNGeneration:
             )
 
             issues = self.validate_gmn_structure(gmn)
-            assert len(issues["errors"]) == 0, (
-                f"GMN validation errors: {issues['errors']}"
-            )
+            assert len(issues["errors"]) == 0, f"GMN validation errors: {issues['errors']}"
             assert any(word in gmn.lower() for word in ["buy", "sell", "hold", "trade"])
 
         finally:
@@ -302,9 +286,7 @@ class TestProviderFactory:
 class TestGMNConsistency:
     """Test consistency of GMN generation across providers."""
 
-    async def generate_gmn_all_providers(
-        self, prompt: str, agent_type: str
-    ) -> Dict[str, str]:
+    async def generate_gmn_all_providers(self, prompt: str, agent_type: str) -> Dict[str, str]:
         """Generate GMN using all available providers."""
         results = {}
 
@@ -351,9 +333,7 @@ class TestGMNConsistency:
         for provider, gmn in results.items():
             if not gmn.startswith("Error:"):
                 issues = self.validate_gmn_structure(gmn)
-                assert len(issues["errors"]) == 0, (
-                    f"{provider} GMN has errors: {issues['errors']}"
-                )
+                assert len(issues["errors"]) == 0, f"{provider} GMN has errors: {issues['errors']}"
 
 
 # Performance benchmarking
@@ -393,4 +373,5 @@ class TestPerformance:
 if __name__ == "__main__":
     # Run basic tests
     import pytest
+
     pytest.main([__file__, "-v"])

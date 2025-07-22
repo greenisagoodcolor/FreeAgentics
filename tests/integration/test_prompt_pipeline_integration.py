@@ -112,14 +112,10 @@ class TestPromptPipelineIntegration:
         assert "pipeline_completed" in event_types
 
         # Verify event sequence
-        start_event = next(
-            e for e in events_list if e["event_type"] == "pipeline_started"
-        )
+        start_event = next(e for e in events_list if e["event_type"] == "pipeline_started")
         assert start_event["data"]["total_stages"] == 6
 
-        completed_event = next(
-            e for e in events_list if e["event_type"] == "pipeline_completed"
-        )
+        completed_event = next(e for e in events_list if e["event_type"] == "pipeline_completed")
         assert completed_event["data"]["status"] == "success"
         assert completed_event["data"]["agent_id"] == response.agent_id
 
@@ -185,9 +181,7 @@ class TestPromptPipelineIntegration:
         mock_conversation.id = "conv123"
         mock_conversation.context = {"agent_count": 2}
         mock_conversation.agent_ids = ["agent1", "agent2"]
-        mock_db_session.execute.return_value.scalar_one_or_none.return_value = (
-            mock_conversation
-        )
+        mock_db_session.execute.return_value.scalar_one_or_none.return_value = mock_conversation
 
         # Create request with conversation ID
         request = PromptRequest(
@@ -212,9 +206,7 @@ class TestPromptPipelineIntegration:
         )  # Should suggest coalition
 
         # Verify conversation context was used
-        start_event = next(
-            e for e in events_list if e["event_type"] == "pipeline_started"
-        )
+        start_event = next(e for e in events_list if e["event_type"] == "pipeline_started")
         assert start_event["data"]["conversation_id"] == "conv123"
 
     @pytest.mark.asyncio
@@ -255,9 +247,7 @@ class TestPromptPipelineIntegration:
         assert response.processing_time_ms < 3000
 
         # Verify timing in events
-        completed_event = next(
-            e for e in events_list if e["event_type"] == "pipeline_completed"
-        )
+        completed_event = next(e for e in events_list if e["event_type"] == "pipeline_completed")
         assert completed_event["data"]["processing_time_ms"] < 3000
 
     @pytest.mark.asyncio
@@ -288,9 +278,7 @@ class TestPromptPipelineIntegration:
                 )
 
         # Extract progress events
-        progress_events = [
-            e for e in events_list if e["event_type"] == "pipeline_progress"
-        ]
+        progress_events = [e for e in events_list if e["event_type"] == "pipeline_progress"]
 
         # Verify all stages were processed
         stages_processed = [e["data"]["stage"] for e in progress_events]
@@ -352,16 +340,12 @@ class TestPromptPipelineIntegration:
         assert len(response.knowledge_graph_updates) == 0  # No updates due to failure
 
         # Verify events show KG update with 0 updates
-        kg_event = next(
-            e for e in events_list if e["event_type"] == "knowledge_graph_updated"
-        )
+        kg_event = next(e for e in events_list if e["event_type"] == "knowledge_graph_updated")
         assert kg_event["data"]["updates_count"] == 0
         assert kg_event["data"]["nodes_added"] == 0
 
     @pytest.mark.asyncio
-    async def test_pipeline_monitoring_integration(
-        self, mock_db_session, mock_current_user
-    ):
+    async def test_pipeline_monitoring_integration(self, mock_db_session, mock_current_user):
         """Test integration with pipeline monitoring system."""
         # Reset pipeline monitor
         pipeline_monitor.active_pipelines.clear()
@@ -377,9 +361,7 @@ class TestPromptPipelineIntegration:
 
         # Start monitoring
         prompt_id = str(uuid.uuid4())
-        pipeline_monitor.start_pipeline(
-            prompt_id, mock_current_user.user_id, request.prompt
-        )
+        pipeline_monitor.start_pipeline(prompt_id, mock_current_user.user_id, request.prompt)
 
         # Process prompt
         with patch("api.v1.prompts.get_db", return_value=mock_db_session):
@@ -392,9 +374,7 @@ class TestPromptPipelineIntegration:
                 )
 
         # Verify monitoring data
-        active_pipelines = pipeline_monitor.get_active_pipelines(
-            mock_current_user.user_id
-        )
+        active_pipelines = pipeline_monitor.get_active_pipelines(mock_current_user.user_id)
         assert len(active_pipelines) == 1
         assert active_pipelines[0]["user_id"] == mock_current_user.user_id
 
@@ -437,7 +417,5 @@ class TestPromptPipelineIntegration:
             assert response.agent_id
 
         # Verify events for all pipelines
-        completed_events = [
-            e for e in events_list if e["event_type"] == "pipeline_completed"
-        ]
+        completed_events = [e for e in events_list if e["event_type"] == "pipeline_completed"]
         assert len(completed_events) == 3

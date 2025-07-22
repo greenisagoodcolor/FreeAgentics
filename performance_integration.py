@@ -185,9 +185,7 @@ class PerformanceManager:
         config = self.configs["database"]
 
         # Set database URL (in production, get from environment)
-        database_url = os.getenv(
-            "DATABASE_URL", "postgresql://user:pass@localhost/freeagentics"
-        )
+        database_url = os.getenv("DATABASE_URL", "postgresql://user:pass@localhost/freeagentics")
         config.write_primary_url = database_url
 
         # Add read replicas if available
@@ -332,9 +330,7 @@ class PerformanceManager:
         # Check threading optimization
         if self.optimizations_enabled["threading"]:
             threading_stats = self.agent_manager.get_statistics()
-            validation_results["threading"] = (
-                threading_stats["thread_pool"]["workers"] > 0
-            )
+            validation_results["threading"] = threading_stats["thread_pool"]["workers"] > 0
 
         # Check database optimization
         if self.optimizations_enabled["database"]:
@@ -392,8 +388,7 @@ class PerformanceManager:
                 # Log summary
                 successful = [r for r in results if r.success]
                 avg_throughput = (
-                    sum(r.throughput_ops_per_second for r in successful)
-                    / len(successful)
+                    sum(r.throughput_ops_per_second for r in successful) / len(successful)
                     if successful
                     else 0
                 )
@@ -513,9 +508,7 @@ async def main():
         report = benchmark_results["comprehensive_report"]
         print("\nOverall Performance:")
         print(f"  Success rate: {report['overall_stats']['success_rate']:.1f}%")
-        print(
-            f"  Average throughput: {report['overall_stats']['avg_throughput']:.1f} ops/sec"
-        )
+        print(f"  Average throughput: {report['overall_stats']['avg_throughput']:.1f} ops/sec")
 
     except Exception as e:
         print(f"Benchmark failed: {e}")

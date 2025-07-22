@@ -36,9 +36,7 @@ class ScenarioConfig:
 
     # Client behavior
     connection_pattern: str = "persistent"  # persistent, intermittent, bursty, failover
-    message_generator_type: str = (
-        "mixed"  # event, command, query, monitoring, mixed, realistic
-    )
+    message_generator_type: str = "mixed"  # event, command, query, monitoring, mixed, realistic
     message_interval: float = 1.0  # seconds between messages
 
     # Connection parameters
@@ -69,9 +67,7 @@ class LoadScenario(ABC):
             base_url=config.base_url, client_prefix=f"{config.name}_client"
         )
         self.metrics = MetricsCollector(enable_prometheus=config.enable_prometheus)
-        self.lifecycle_manager = ConnectionLifecycleManager(
-            self.client_manager, self.metrics
-        )
+        self.lifecycle_manager = ConnectionLifecycleManager(self.client_manager, self.metrics)
 
         # Message callbacks
         self.client_manager.global_on_message = self._on_message
@@ -159,9 +155,7 @@ class LoadScenario(ABC):
 
     async def _on_message(self, client, message):
         """Handle incoming messages."""
-        self.metrics.record_message_received(
-            message.get("type", "unknown"), len(str(message))
-        )
+        self.metrics.record_message_received(message.get("type", "unknown"), len(str(message)))
 
         # Track latency if message has ID
         if "id" in message and message["id"] in client.pending_messages:
@@ -267,9 +261,7 @@ class BurstLoadScenario(LoadScenario):
     async def run(self):
         """Run burst load scenario."""
         # Create initial pool of clients
-        base_clients = await self.client_manager.create_clients(
-            self.config.total_clients // 2
-        )
+        base_clients = await self.client_manager.create_clients(self.config.total_clients // 2)
 
         # Connect base clients
         await self.client_manager.connect_clients(base_clients)
@@ -290,14 +282,10 @@ class BurstLoadScenario(LoadScenario):
 
         while total_duration < self.config.duration_seconds:
             # Burst phase
-            logger.info(
-                f"Starting burst phase with {self.burst_size} additional clients"
-            )
+            logger.info(f"Starting burst phase with {self.burst_size} additional clients")
 
             # Create burst clients
-            new_burst_clients = await self.client_manager.create_clients(
-                self.burst_size
-            )
+            new_burst_clients = await self.client_manager.create_clients(self.burst_size)
             burst_clients.extend(new_burst_clients)
 
             # Connect burst clients
@@ -406,9 +394,7 @@ class RampUpScenario(LoadScenario):
                 await asyncio.sleep(self.step_duration)
 
         # Continue running at peak load for remaining duration
-        remaining_time = self.config.duration_seconds - (
-            actual_steps * self.step_duration
-        )
+        remaining_time = self.config.duration_seconds - (actual_steps * self.step_duration)
         if remaining_time > 0:
             logger.info(
                 f"Running at peak load ({len(all_clients)} clients) for {remaining_time:.1f}s"

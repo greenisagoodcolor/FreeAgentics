@@ -133,9 +133,7 @@ async def test_observability_performance():
         )
     duration = time.time() - start_time
 
-    print(
-        f"✅ 100 belief updates recorded in {duration:.3f}s ({duration * 10:.1f}ms avg)"
-    )
+    print(f"✅ 100 belief updates recorded in {duration:.3f}s ({duration * 10:.1f}ms avg)")
 
     # Test 2: Monitoring decorator overhead
     @monitor_pymdp_inference("perf_test_agent")

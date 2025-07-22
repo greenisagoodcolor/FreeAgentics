@@ -138,9 +138,7 @@ class ReportingIntegration:
             - datetime.fromisoformat(results["start_time"])
         ).total_seconds()
 
-        self.logger.info(
-            f"Comprehensive reporting completed in {results['duration']:.2f} seconds"
-        )
+        self.logger.info(f"Comprehensive reporting completed in {results['duration']:.2f} seconds")
         return results
 
     def calculate_overall_quality_score(
@@ -275,9 +273,7 @@ class ReportingIntegration:
 
         if "quality_score" in results:
             for score_type, score in results["quality_score"].items():
-                css_class = (
-                    "good" if score >= 80 else "warning" if score >= 60 else "critical"
-                )
+                css_class = "good" if score >= 80 else "warning" if score >= 60 else "critical"
                 html_content += f"""
                 <div class="metric {css_class}">
                     <strong>{score_type.replace("_", " ").title()}: {score:.1f}%</strong>
@@ -422,9 +418,7 @@ def main():
     parser = argparse.ArgumentParser(description="Test reporting integration")
     parser.add_argument("--run-id", help="Test run ID")
     parser.add_argument("--health-check", action="store_true", help="Run health check")
-    parser.add_argument(
-        "--output-dir", default="tests/reporting", help="Output directory"
-    )
+    parser.add_argument("--output-dir", default="tests/reporting", help="Output directory")
 
     args = parser.parse_args()
 

@@ -301,9 +301,7 @@ class GridWorld:
 
         return neighbors
 
-    def get_observation(
-        self, agent_id: str, radius: int = 1
-    ) -> Optional[Dict[str, Any]]:
+    def get_observation(self, agent_id: str, radius: int = 1) -> Optional[Dict[str, Any]]:
         """Get observation for an agent.
 
         Args:

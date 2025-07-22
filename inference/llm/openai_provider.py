@@ -48,9 +48,7 @@ class OpenAIProvider(BaseProvider):
         }
 
         if not OPENAI_AVAILABLE:
-            logger.warning(
-                "OpenAI library not available. Install with: pip install openai"
-            )
+            logger.warning("OpenAI library not available. Install with: pip install openai")
 
     def configure(self, credentials: ProviderCredentials, **kwargs: Any) -> bool:
         """Configure the OpenAI provider."""
@@ -89,9 +87,7 @@ class OpenAIProvider(BaseProvider):
                 logger.info("OpenAI provider configured successfully")
                 return True
             else:
-                logger.error(
-                    f"OpenAI provider unhealthy: {health_result.error_message}"
-                )
+                logger.error(f"OpenAI provider unhealthy: {health_result.error_message}")
                 return False
 
         except Exception as e:
@@ -233,18 +229,14 @@ class OpenAIProvider(BaseProvider):
 
         except Exception as e:
             latency_ms = (time.time() - start_time) * 1000
-            self._update_usage_metrics(
-                success=False, latency_ms=latency_ms, error_type="unknown"
-            )
+            self._update_usage_metrics(success=False, latency_ms=latency_ms, error_type="unknown")
             raise RuntimeError(f"OpenAI generation failed: {str(e)}")
 
     def estimate_cost(self, input_tokens: int, output_tokens: int, model: str) -> float:
         """Estimate cost for given token usage."""
         if model not in self._model_pricing:
             # Use GPT-3.5-turbo pricing as default
-            pricing = self._model_pricing.get(
-                "gpt-3.5-turbo", {"input": 0.0005, "output": 0.0015}
-            )
+            pricing = self._model_pricing.get("gpt-3.5-turbo", {"input": 0.0005, "output": 0.0015})
         else:
             pricing = self._model_pricing[model]
 

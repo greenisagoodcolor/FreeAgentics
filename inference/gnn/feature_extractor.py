@@ -35,9 +35,7 @@ class NormalizationStrategy(Enum):
 class FeatureConfig:
     """Configuration for feature extraction."""
 
-    feature_types: List[FeatureType] = field(
-        default_factory=lambda: [FeatureType.NUMERICAL]
-    )
+    feature_types: List[FeatureType] = field(default_factory=lambda: [FeatureType.NUMERICAL])
     normalization_strategy: NormalizationStrategy = NormalizationStrategy.STANDARD
     handle_missing: bool = True
     temporal_window_size: int = 10
@@ -119,9 +117,7 @@ class NodeFeatureExtractor:
 
         return features
 
-    def _extract_spatial_features(
-        self, nodes: List[Dict[str, Any]]
-    ) -> Optional[Tensor]:
+    def _extract_spatial_features(self, nodes: List[Dict[str, Any]]) -> Optional[Tensor]:
         """Extract spatial features from nodes using H3 hexagonal indexing.
 
         This is a critical component of the PyMDP+GMN+GNN+H3+LLM innovation stack.
@@ -201,9 +197,7 @@ class NodeFeatureExtractor:
 
         return features
 
-    def _extract_temporal_features(
-        self, nodes: List[Dict[str, Any]]
-    ) -> Optional[Tensor]:
+    def _extract_temporal_features(self, nodes: List[Dict[str, Any]]) -> Optional[Tensor]:
         """Extract temporal features from nodes."""
         import datetime
 
@@ -255,9 +249,7 @@ class NodeFeatureExtractor:
 
         return features
 
-    def _extract_categorical_features(
-        self, nodes: List[Dict[str, Any]]
-    ) -> Optional[Tensor]:
+    def _extract_categorical_features(self, nodes: List[Dict[str, Any]]) -> Optional[Tensor]:
         """Extract categorical features from nodes."""
         # Collect all categories
         all_categories = set()
@@ -282,9 +274,7 @@ class NodeFeatureExtractor:
 
         return torch.tensor(categorical_data, dtype=torch.float32)
 
-    def _extract_numerical_features(
-        self, nodes: List[Dict[str, Any]]
-    ) -> Optional[Tensor]:
+    def _extract_numerical_features(self, nodes: List[Dict[str, Any]]) -> Optional[Tensor]:
         """Extract numerical features from nodes."""
         # Determine numerical fields from both node level and attributes
         numerical_fields = set()
@@ -324,9 +314,7 @@ class NodeFeatureExtractor:
                             try:
                                 values.append(float(value))
                             except (ValueError, TypeError):
-                                values.append(
-                                    0.0 if self.config.handle_missing else np.nan
-                                )
+                                values.append(0.0 if self.config.handle_missing else np.nan)
                     else:
                         values.append(0.0 if self.config.handle_missing else np.nan)
                 else:
@@ -339,9 +327,7 @@ class NodeFeatureExtractor:
                             try:
                                 values.append(float(value))
                             except (ValueError, TypeError):
-                                values.append(
-                                    0.0 if self.config.handle_missing else np.nan
-                                )
+                                values.append(0.0 if self.config.handle_missing else np.nan)
                     else:
                         values.append(0.0 if self.config.handle_missing else np.nan)
             numerical_data.append(values)
@@ -465,9 +451,7 @@ class NodeFeatureExtractor:
             min_val = features.min(dim=0, keepdim=True)[0]
             max_val = features.max(dim=0, keepdim=True)[0]
             range_val = max_val - min_val
-            range_val = torch.where(
-                range_val == 0, torch.ones_like(range_val), range_val
-            )
+            range_val = torch.where(range_val == 0, torch.ones_like(range_val), range_val)
             return (features - min_val) / range_val
 
         elif self.config.normalization_strategy == NormalizationStrategy.ROBUST:
@@ -475,9 +459,7 @@ class NodeFeatureExtractor:
             median = features.median(dim=0, keepdim=True)[0]
             mad = (features - median).abs().median(dim=0, keepdim=True)[0]
             mad = torch.where(mad == 0, torch.ones_like(mad), mad)
-            return (features - median) / (
-                1.4826 * mad
-            )  # 1.4826 is consistency constant
+            return (features - median) / (1.4826 * mad)  # 1.4826 is consistency constant
 
         return features
 
@@ -534,9 +516,7 @@ class NodeFeatureExtractor:
             }
             node_content.append(json.dumps(content, sort_keys=True))
 
-        key_str = (
-            f"{','.join(node_ids)}:{','.join(feature_types)}:{','.join(node_content)}"
-        )
+        key_str = f"{','.join(node_ids)}:{','.join(feature_types)}:{','.join(node_content)}"
         return str(hash(key_str))
 
     def compute_feature_importance(
@@ -548,9 +528,7 @@ class NodeFeatureExtractor:
         if targets is not None:
             # Compute correlation-based importance
             for i in range(features.shape[1]):
-                correlation = torch.corrcoef(torch.stack([features[:, i], targets]))[
-                    0, 1
-                ]
+                correlation = torch.corrcoef(torch.stack([features[:, i], targets]))[0, 1]
                 importance_scores.append(abs(correlation.item()))
         else:
             # Use variance as proxy for importance
@@ -559,9 +537,7 @@ class NodeFeatureExtractor:
                 importance_scores.append(variances[i].item())
 
         # Store in feature stats as dictionary for backward compatibility
-        importance_dict = {
-            f"feature_{i}": score for i, score in enumerate(importance_scores)
-        }
+        importance_dict = {f"feature_{i}": score for i, score in enumerate(importance_scores)}
         self.feature_stats["importance"] = importance_dict
 
         return importance_scores
@@ -635,9 +611,7 @@ class NodeFeatureExtractor:
 
         return transformed
 
-    def add_custom_extractor(
-        self, name: str, extractor: Callable[[Dict[str, Any]], Tensor]
-    ):
+    def add_custom_extractor(self, name: str, extractor: Callable[[Dict[str, Any]], Tensor]):
         """Add a custom feature extractor."""
         self._custom_extractors[name] = extractor
         logger.info(f"Added custom feature extractor: {name}")

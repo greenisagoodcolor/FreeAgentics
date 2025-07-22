@@ -54,9 +54,7 @@ class EnhancedAgentCoordinator:
         self.config = config or ConnectionPoolConfig()
 
         # Initialize connection pool manager
-        self.pool_manager = EnhancedConnectionPoolManager(
-            self.config, database_url or ""
-        )
+        self.pool_manager = EnhancedConnectionPoolManager(self.config, database_url or "")
 
         # Initialize optimized thread pool manager
         self.thread_pool_manager = OptimizedThreadPoolManager(
@@ -66,9 +64,7 @@ class EnhancedAgentCoordinator:
         )
 
         # Enhanced database connection manager
-        self.db_manager = (
-            get_enhanced_db_manager(database_url) if database_url else None
-        )
+        self.db_manager = get_enhanced_db_manager(database_url) if database_url else None
 
         # Resource monitoring
         self.resource_monitor = ResourceMonitor(self.config)
@@ -104,9 +100,7 @@ class EnhancedAgentCoordinator:
 
         logger.info("Enhanced agent coordinator fully initialized")
 
-    def register_agent(
-        self, agent_id: str, agent: Any, metadata: Optional[Dict] = None
-    ) -> bool:
+    def register_agent(self, agent_id: str, agent: Any, metadata: Optional[Dict] = None) -> bool:
         """Register an agent with enhanced coordination."""
         try:
             with self._agents_lock:
@@ -160,13 +154,9 @@ class EnhancedAgentCoordinator:
             logger.error(f"Failed to unregister agent {agent_id}: {e}")
             return False
 
-    async def coordinate_agents(
-        self, coordination_request: Dict[str, Any]
-    ) -> Dict[str, Any]:
+    async def coordinate_agents(self, coordination_request: Dict[str, Any]) -> Dict[str, Any]:
         """Coordinate multiple agents with enhanced resource management."""
-        coordination_id = coordination_request.get(
-            "coordination_id", f"coord_{int(time.time())}"
-        )
+        coordination_id = coordination_request.get("coordination_id", f"coord_{int(time.time())}")
         agent_ids = coordination_request.get("agent_ids", [])
         operation = coordination_request.get("operation", "step")
         coordination_data = coordination_request.get("data", {})
@@ -229,9 +219,7 @@ class EnhancedAgentCoordinator:
                         self.agent_states[agent_id]["status"] = "coordinating"
                         self.agent_states[agent_id]["last_activity"] = time.time()
                     else:
-                        logger.warning(
-                            f"Agent {agent_id} not registered for coordination"
-                        )
+                        logger.warning(f"Agent {agent_id} not registered for coordination")
 
             if not valid_agents:
                 raise ValueError("No valid agents for coordination")
@@ -278,9 +266,7 @@ class EnhancedAgentCoordinator:
                     # Update agent performance metrics
                     with self._agents_lock:
                         if agent_id in self.agent_states:
-                            self.agent_states[agent_id]["performance_metrics"][
-                                "failed_tasks"
-                            ] += 1
+                            self.agent_states[agent_id]["performance_metrics"]["failed_tasks"] += 1
                             self.agent_states[agent_id]["status"] = "error"
 
                     logger.error(f"Agent {agent_id} coordination failed: {e}")
@@ -294,9 +280,7 @@ class EnhancedAgentCoordinator:
             # Update metrics
             with self._metrics_lock:
                 self.coordination_metrics.successful_coordinations += 1
-                self.coordination_metrics.coordination_efficiency = (
-                    coordination_efficiency
-                )
+                self.coordination_metrics.coordination_efficiency = coordination_efficiency
 
             return {
                 "coordination_id": coordination_id,

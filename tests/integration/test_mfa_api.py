@@ -108,9 +108,7 @@ class TestMFAAPI:
 
             # Verify response
             assert response.status_code == 403
-            assert (
-                "Can only enroll MFA for your own account" in response.json()["detail"]
-            )
+            assert "Can only enroll MFA for your own account" in response.json()["detail"]
 
     def test_enroll_mfa_already_enabled(self, client, mock_user, auth_headers):
         """Test MFA enrollment when already enabled."""
@@ -363,9 +361,7 @@ class TestMFAAPI:
             mock_get_service.return_value = mock_service
 
             # Test regeneration
-            response = client.post(
-                "/api/v1/mfa/regenerate-backup-codes", headers=auth_headers
-            )
+            response = client.post("/api/v1/mfa/regenerate-backup-codes", headers=auth_headers)
 
             # Verify response
             assert response.status_code == 200
@@ -531,9 +527,7 @@ class TestMFAAPI:
             assert response.status_code == 403
 
     @pytest.mark.parametrize("method", ["totp", "sms", "email", "hardware_key"])
-    def test_enroll_mfa_method_validation(
-        self, client, mock_user, auth_headers, method
-    ):
+    def test_enroll_mfa_method_validation(self, client, mock_user, auth_headers, method):
         """Test MFA enrollment method validation."""
         with (
             patch("api.v1.mfa.get_current_user") as mock_get_user,

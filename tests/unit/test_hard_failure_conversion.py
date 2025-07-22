@@ -26,9 +26,7 @@ class TestErrorHandlerHardFailure:
         with pytest.raises(HardFailureError) as exc_info:
             handler.handle_error(original_error, "test_operation")
 
-        assert "Hard failure in test_operation for agent test_agent" in str(
-            exc_info.value
-        )
+        assert "Hard failure in test_operation for agent test_agent" in str(exc_info.value)
         assert exc_info.value.__cause__ is original_error
 
     def test_reset_strategy_raises_not_implemented(self):
@@ -38,9 +36,7 @@ class TestErrorHandlerHardFailure:
         with pytest.raises(NotImplementedError) as exc_info:
             handler.reset_strategy("test_strategy")
 
-        assert "Hard failure mode does not support recovery strategies" in str(
-            exc_info.value
-        )
+        assert "Hard failure mode does not support recovery strategies" in str(exc_info.value)
 
     def test_reset_all_strategies_raises_not_implemented(self):
         """Test that reset_all_strategies raises NotImplementedError."""
@@ -49,9 +45,7 @@ class TestErrorHandlerHardFailure:
         with pytest.raises(NotImplementedError) as exc_info:
             handler.reset_all_strategies()
 
-        assert "Hard failure mode does not support recovery strategies" in str(
-            exc_info.value
-        )
+        assert "Hard failure mode does not support recovery strategies" in str(exc_info.value)
 
     def test_get_error_statistics_minimal_info(self):
         """Test that error statistics indicate hard failure mode."""

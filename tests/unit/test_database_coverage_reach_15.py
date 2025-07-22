@@ -101,9 +101,7 @@ def test_drop_tables_in_test_mode():
 def test_connection_manager_context_manager():
     """Test DatabaseConnectionManager as context manager."""
     with patch("database.connection_manager.create_engine", return_value=mock_engine):
-        manager = DatabaseConnectionManager(
-            "postgresql://test:test@localhost:5432/testdb"
-        )
+        manager = DatabaseConnectionManager("postgresql://test:test@localhost:5432/testdb")
 
         # Test get_db_session if it exists
         if hasattr(manager, "get_db_session"):
@@ -123,9 +121,7 @@ def test_connection_manager_additional_coverage():
     """Additional connection manager tests."""
     with patch("database.connection_manager.create_engine", return_value=mock_engine):
         # Test __enter__ and __exit__ if implemented
-        manager = DatabaseConnectionManager(
-            "postgresql://test:test@localhost:5432/testdb"
-        )
+        manager = DatabaseConnectionManager("postgresql://test:test@localhost:5432/testdb")
 
         if hasattr(manager, "__enter__"):
             with manager as m:

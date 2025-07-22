@@ -148,12 +148,8 @@ def validate_performance_claims(results):
     max_agent_result = next(r for r in results if r["num_agents"] == max_agents)
 
     print(f"   Maximum tested: {max_agents} agents")
-    print(
-        f"   Average per-operation time: {max_agent_result['avg_operation_time_ms']:.1f}ms"
-    )
-    print(
-        f"   Total throughput: {max_agent_result['throughput_ops_per_sec']:.1f} ops/sec"
-    )
+    print(f"   Average per-operation time: {max_agent_result['avg_operation_time_ms']:.1f}ms")
+    print(f"   Total throughput: {max_agent_result['throughput_ops_per_sec']:.1f} ops/sec")
 
     # Calculate theoretical capability
     single_agent_throughput = single_agent_result["throughput_ops_per_sec"]
@@ -202,9 +198,7 @@ if __name__ == "__main__":
     print("=" * 60)
 
     if is_production_ready:
-        print(
-            "🎯 VALIDATED: Performance optimizations enable production multi-agent scenarios"
-        )
+        print("🎯 VALIDATED: Performance optimizations enable production multi-agent scenarios")
     else:
         print(
             "⚠️  PARTIALLY VALIDATED: Performance improved but may not meet all production requirements"

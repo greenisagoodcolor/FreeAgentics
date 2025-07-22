@@ -45,9 +45,7 @@ class AnthropicProvider(BaseProvider):
         }
 
         if not ANTHROPIC_AVAILABLE:
-            logger.warning(
-                "Anthropic library not available. Install with: pip install anthropic"
-            )
+            logger.warning("Anthropic library not available. Install with: pip install anthropic")
 
     def configure(self, credentials: ProviderCredentials, **kwargs: Any) -> bool:
         """Configure the Anthropic provider."""
@@ -83,9 +81,7 @@ class AnthropicProvider(BaseProvider):
                 logger.info("Anthropic provider configured successfully")
                 return True
             else:
-                logger.error(
-                    f"Anthropic provider unhealthy: {health_result.error_message}"
-                )
+                logger.error(f"Anthropic provider unhealthy: {health_result.error_message}")
                 return False
 
         except Exception as e:
@@ -233,9 +229,7 @@ class AnthropicProvider(BaseProvider):
 
         except Exception as e:
             latency_ms = (time.time() - start_time) * 1000
-            self._update_usage_metrics(
-                success=False, latency_ms=latency_ms, error_type="unknown"
-            )
+            self._update_usage_metrics(success=False, latency_ms=latency_ms, error_type="unknown")
             raise RuntimeError(f"Anthropic generation failed: {str(e)}")
 
     def estimate_cost(self, input_tokens: int, output_tokens: int, model: str) -> float:

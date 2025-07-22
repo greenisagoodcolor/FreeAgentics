@@ -291,6 +291,4 @@ async def test_performance_threshold_warnings(caplog):
         )
 
     # Check that warning was logged
-    assert any(
-        "Slow coordination detected" in record.message for record in caplog.records
-    )
+    assert any("Slow coordination detected" in record.message for record in caplog.records)

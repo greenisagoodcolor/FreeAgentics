@@ -137,7 +137,9 @@ class BanditScanner:
                 cmd.extend(["-x", excludes])
 
             # Run Bandit
-            result = subprocess.run(cmd, capture_output=True, text=True)  # nosec B603 # Safe bandit security scanner execution
+            result = subprocess.run(
+                cmd, capture_output=True, text=True
+            )  # nosec B603 # Safe bandit security scanner execution
 
             if result.returncode not in (
                 0,
@@ -211,10 +213,7 @@ class SemgrepScanner:
             ]
 
             # Add custom rules if specified
-            if (
-                self.config.custom_semgrep_rules
-                and self.config.custom_semgrep_rules.exists()
-            ):
+            if self.config.custom_semgrep_rules and self.config.custom_semgrep_rules.exists():
                 cmd.extend(["--config", str(self.config.custom_semgrep_rules)])
 
             # Add exclude patterns
@@ -222,7 +221,9 @@ class SemgrepScanner:
                 cmd.extend(["--exclude", pattern])
 
             # Run Semgrep
-            result = subprocess.run(cmd, capture_output=True, text=True)  # nosec B603 # Safe semgrep security scanner execution
+            result = subprocess.run(
+                cmd, capture_output=True, text=True
+            )  # nosec B603 # Safe semgrep security scanner execution
 
             if result.returncode != 0 and "No rules" not in result.stderr:
                 logger.error(f"Semgrep scan failed: {result.stderr}")
@@ -252,9 +253,7 @@ class SemgrepScanner:
                             "end_line": result_item["end"]["line"],
                             "column": result_item["start"]["col"],
                             "end_column": result_item["end"]["col"],
-                            "metavars": result_item.get("extra", {}).get(
-                                "metavars", {}
-                            ),
+                            "metavars": result_item.get("extra", {}).get("metavars", {}),
                         },
                     )
 
@@ -319,7 +318,9 @@ class SafetyScanner:
             for req_file in req_files:
                 # Run Safety check
                 cmd = ["safety", "check", "--json", "--file", str(req_file)]
-                result = subprocess.run(cmd, capture_output=True, text=True)  # nosec B603 # Safe safety security scanner execution
+                result = subprocess.run(
+                    cmd, capture_output=True, text=True
+                )  # nosec B603 # Safe safety security scanner execution
 
                 if result.returncode != 0 and result.stdout:
                     # Parse vulnerabilities
@@ -328,14 +329,10 @@ class SafetyScanner:
                         finding = Finding(
                             tool="safety",
                             rule_id=f"CVE-{vuln.get('cve', 'UNKNOWN')}",
-                            severity=self._map_severity(
-                                vuln.get("severity", "unknown")
-                            ),
+                            severity=self._map_severity(vuln.get("severity", "unknown")),
                             file_path=str(req_file),
                             line_number=0,  # Not applicable for dependencies
-                            message=vuln.get(
-                                "advisory", "Vulnerable dependency detected"
-                            ),
+                            message=vuln.get("advisory", "Vulnerable dependency detected"),
                             category="dependency-vulnerability",
                             confidence="high",
                             cwe_id=self._extract_cwe(vuln),
@@ -363,9 +360,7 @@ class SafetyScanner:
             return Severity.CRITICAL
         elif "high" in safety_severity.lower():
             return Severity.HIGH
-        elif (
-            "medium" in safety_severity.lower() or "moderate" in safety_severity.lower()
-        ):
+        elif "medium" in safety_severity.lower() or "moderate" in safety_severity.lower():
             return Severity.MEDIUM
         else:
             return Severity.LOW
@@ -403,9 +398,7 @@ class CustomSemgrepRules:
                     "severity": "ERROR",
                     "metadata": {
                         "category": "security",
-                        "owasp": [
-                            "A07:2021 - Identification and Authentication Failures"
-                        ],
+                        "owasp": ["A07:2021 - Identification and Authentication Failures"],
                     },
                 },
                 {
@@ -689,15 +682,9 @@ def main():
         default=Path("sast-findings.json"),
         help="Output file for findings",
     )
-    parser.add_argument(
-        "--no-bandit", action="store_true", help="Disable Bandit scanner"
-    )
-    parser.add_argument(
-        "--no-semgrep", action="store_true", help="Disable Semgrep scanner"
-    )
-    parser.add_argument(
-        "--no-safety", action="store_true", help="Disable Safety scanner"
-    )
+    parser.add_argument("--no-bandit", action="store_true", help="Disable Bandit scanner")
+    parser.add_argument("--no-semgrep", action="store_true", help="Disable Semgrep scanner")
+    parser.add_argument("--no-safety", action="store_true", help="Disable Safety scanner")
     parser.add_argument("--suppress-rules", nargs="+", help="Rules to suppress")
 
     args = parser.parse_args()

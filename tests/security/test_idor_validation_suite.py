@@ -311,9 +311,7 @@ class IDORSecurityValidator:
         report.append(
             "1. **Use UUIDs**: All resource identifiers should use UUIDs instead of sequential IDs"
         )
-        report.append(
-            "2. **Validate Ownership**: Every request must validate resource ownership"
-        )
+        report.append("2. **Validate Ownership**: Every request must validate resource ownership")
         report.append(
             "3. **Consistent Errors**: Return consistent error messages (404) for both non-existent and unauthorized resources"
         )
@@ -351,9 +349,7 @@ def main():
 
     # Exit with appropriate code
     if results["failed"] > 0:
-        print(
-            "\n❌ IDOR vulnerability tests failed! Security vulnerabilities may exist."
-        )
+        print("\n❌ IDOR vulnerability tests failed! Security vulnerabilities may exist.")
         sys.exit(1)
     elif not coverage_complete:
         print("\n⚠️  IDOR test coverage incomplete! Some attack patterns not tested.")

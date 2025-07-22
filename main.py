@@ -151,9 +151,7 @@ ssl_config = SSLConfiguration(
     enable_letsencrypt=is_production,
     letsencrypt_email=os.getenv("LETSENCRYPT_EMAIL", "admin@freeagentics.com"),
     letsencrypt_domains=(
-        os.getenv("LETSENCRYPT_DOMAINS", "").split(",")
-        if os.getenv("LETSENCRYPT_DOMAINS")
-        else []
+        os.getenv("LETSENCRYPT_DOMAINS", "").split(",") if os.getenv("LETSENCRYPT_DOMAINS") else []
     ),
     hsts_enabled=True,
     hsts_max_age=31536000,  # 1 year
@@ -194,9 +192,7 @@ if (
     and os.getenv("REDIS_ENABLED", "true").lower() == "true"
 ):
     redis_url = os.getenv("REDIS_URL", "redis://localhost:6379")
-    config_file = os.path.join(
-        os.path.dirname(__file__), "config", "rate_limiting.yaml"
-    )
+    config_file = os.path.join(os.path.dirname(__file__), "config", "rate_limiting.yaml")
 
     # Create rate limiter instance
     rate_limiter = create_rate_limiter(redis_url=redis_url, config_file=config_file)
@@ -339,15 +335,9 @@ try:
 
     # Protected API routes
     app.include_router(agents_router, prefix="/api/v1", tags=["agents"])
-    app.include_router(
-        system_router, prefix="/api/v1/system", tags=["system", "monitoring"]
-    )
-    app.include_router(
-        websocket_router, prefix="/api/v1", tags=["websocket", "real-time"]
-    )
-    app.include_router(
-        knowledge_router, prefix="/api/v1/knowledge", tags=["knowledge-graph"]
-    )
+    app.include_router(system_router, prefix="/api/v1/system", tags=["system", "monitoring"])
+    app.include_router(websocket_router, prefix="/api/v1", tags=["websocket", "real-time"])
+    app.include_router(knowledge_router, prefix="/api/v1/knowledge", tags=["knowledge-graph"])
 
     logger.info("✅ API v1 routers registered successfully (with authentication)")
 

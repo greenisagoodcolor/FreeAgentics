@@ -203,10 +203,8 @@ class EnhancedMemoryProfiler:
         # Compare memory_profiler data
         if snap1["memory_profiler"] and snap2["memory_profiler"]:
             comparison["memory_profiler_diff"] = {
-                "rss_diff": snap2["memory_profiler"]["rss_mb"]
-                - snap1["memory_profiler"]["rss_mb"],
-                "vms_diff": snap2["memory_profiler"]["vms_mb"]
-                - snap1["memory_profiler"]["vms_mb"],
+                "rss_diff": snap2["memory_profiler"]["rss_mb"] - snap1["memory_profiler"]["rss_mb"],
+                "vms_diff": snap2["memory_profiler"]["vms_mb"] - snap1["memory_profiler"]["vms_mb"],
             }
 
         # Compare pympler data
@@ -239,20 +237,14 @@ class EnhancedMemoryProfiler:
 
             if first["tracemalloc"] and last["tracemalloc"]:
                 total_growth = (
-                    last["tracemalloc"]["total_size"]
-                    - first["tracemalloc"]["total_size"]
+                    last["tracemalloc"]["total_size"] - first["tracemalloc"]["total_size"]
                 )
-                peak_growth = (
-                    last["tracemalloc"]["peak_size"] - first["tracemalloc"]["peak_size"]
-                )
+                peak_growth = last["tracemalloc"]["peak_size"] - first["tracemalloc"]["peak_size"]
                 report.append(f"Tracemalloc total growth: {total_growth:+.2f} MB")
                 report.append(f"Tracemalloc peak growth: {peak_growth:+.2f} MB")
 
             if first["memory_profiler"] and last["memory_profiler"]:
-                rss_growth = (
-                    last["memory_profiler"]["rss_mb"]
-                    - first["memory_profiler"]["rss_mb"]
-                )
+                rss_growth = last["memory_profiler"]["rss_mb"] - first["memory_profiler"]["rss_mb"]
                 report.append(f"RSS memory growth: {rss_growth:+.2f} MB")
 
             report.append("")
@@ -285,9 +277,7 @@ class EnhancedMemoryProfiler:
                 )
 
             if snap["pympler"]:
-                report.append(
-                    f"Pympler - Total objects: {snap['pympler']['total_objects']}"
-                )
+                report.append(f"Pympler - Total objects: {snap['pympler']['total_objects']}")
 
         return "\n".join(report)
 
@@ -446,9 +436,7 @@ class TestEnhancedMemoryProfiler(unittest.TestCase):
 
         if comparison["tracemalloc_diff"]:
             self.assertIn("total_size_diff", comparison["tracemalloc_diff"])
-            self.assertGreaterEqual(
-                comparison["tracemalloc_diff"]["total_size_diff"], 0
-            )
+            self.assertGreaterEqual(comparison["tracemalloc_diff"]["total_size_diff"], 0)
 
     def test_compare_snapshots_invalid_indices(self):
         """Test snapshot comparison with invalid indices."""

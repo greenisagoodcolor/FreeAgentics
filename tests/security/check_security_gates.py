@@ -213,25 +213,13 @@ class SecurityGateValidator:
 
             # Count issues by severity
             high_severity = len(
-                [
-                    r
-                    for r in report.get("results", [])
-                    if r.get("issue_severity") == "HIGH"
-                ]
+                [r for r in report.get("results", []) if r.get("issue_severity") == "HIGH"]
             )
             medium_severity = len(
-                [
-                    r
-                    for r in report.get("results", [])
-                    if r.get("issue_severity") == "MEDIUM"
-                ]
+                [r for r in report.get("results", []) if r.get("issue_severity") == "MEDIUM"]
             )
             low_severity = len(
-                [
-                    r
-                    for r in report.get("results", [])
-                    if r.get("issue_severity") == "LOW"
-                ]
+                [r for r in report.get("results", []) if r.get("issue_severity") == "LOW"]
             )
 
             # Validate
@@ -289,15 +277,9 @@ class SecurityGateValidator:
             if len(vulnerabilities) > 0:
                 # Check severity of vulnerabilities
                 critical_vulns = [
-                    v
-                    for v in vulnerabilities
-                    if "critical" in v.get("severity", "").lower()
+                    v for v in vulnerabilities if "critical" in v.get("severity", "").lower()
                 ]
-                high_vulns = [
-                    v
-                    for v in vulnerabilities
-                    if "high" in v.get("severity", "").lower()
-                ]
+                high_vulns = [v for v in vulnerabilities if "high" in v.get("severity", "").lower()]
 
                 if len(critical_vulns) > 0:
                     self.validation_results["failures"].append(
@@ -322,9 +304,7 @@ class SecurityGateValidator:
 
             self.validation_results["summary"]["safety"] = {
                 "total_vulnerabilities": len(vulnerabilities),
-                "packages_affected": list(
-                    set(v.get("package") for v in vulnerabilities)
-                ),
+                "packages_affected": list(set(v.get("package") for v in vulnerabilities)),
             }
 
             print("✓ Safety dependency check validated")
@@ -454,9 +434,7 @@ class SecurityGateValidator:
             for failure in self.validation_results["failures"]:
                 print(f"  - [{failure.get('severity')}] {failure.get('test')}")
                 if "found" in failure and "threshold" in failure:
-                    print(
-                        f"    Found: {failure['found']}, Threshold: {failure['threshold']}"
-                    )
+                    print(f"    Found: {failure['found']}, Threshold: {failure['threshold']}")
                 if "reason" in failure:
                     print(f"    Reason: {failure['reason']}")
 
@@ -465,9 +443,7 @@ class SecurityGateValidator:
             for warning in self.validation_results["warnings"]:
                 print(f"  - [{warning.get('severity')}] {warning.get('test')}")
                 if "found" in warning and "threshold" in warning:
-                    print(
-                        f"    Found: {warning['found']}, Threshold: {warning['threshold']}"
-                    )
+                    print(f"    Found: {warning['found']}, Threshold: {warning['threshold']}")
 
         # Save validation report
         report_path = "security_gate_validation_report.json"

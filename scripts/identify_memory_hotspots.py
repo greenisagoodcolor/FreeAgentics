@@ -84,9 +84,7 @@ class MemoryHotspotAnalyzer:
             num_factors = 2
 
             # Observation model (A matrices)
-            A = utils.obj_array_zeros(
-                [[num_obs[f], num_states[f]] for f in range(num_factors)]
-            )
+            A = utils.obj_array_zeros([[num_obs[f], num_states[f]] for f in range(num_factors)])
             for f in range(num_factors):
                 A[f] = np.eye(num_obs[f], num_states[f])
 
@@ -96,10 +94,7 @@ class MemoryHotspotAnalyzer:
 
             # Transition model (B matrices)
             B = utils.obj_array_zeros(
-                [
-                    [num_states[f], num_states[f], num_controls[f]]
-                    for f in range(num_factors)
-                ]
+                [[num_states[f], num_states[f], num_controls[f]] for f in range(num_factors)]
             )
             for f in range(num_factors):
                 for a in range(num_controls[f]):
@@ -119,12 +114,8 @@ class MemoryHotspotAnalyzer:
             # Check for inefficiencies
             if size > 10:
                 # Check if matrices are sparse but stored dense
-                sparsity_a = np.mean(
-                    [np.count_nonzero(A[f]) / A[f].size for f in range(len(A))]
-                )
-                sparsity_b = np.mean(
-                    [np.count_nonzero(B[f]) / B[f].size for f in range(len(B))]
-                )
+                sparsity_a = np.mean([np.count_nonzero(A[f]) / A[f].size for f in range(len(A))])
+                sparsity_b = np.mean([np.count_nonzero(B[f]) / B[f].size for f in range(len(B))])
 
                 if sparsity_a < 0.1:  # Less than 10% non-zero
                     results["inefficiencies"].append(
@@ -133,9 +124,7 @@ class MemoryHotspotAnalyzer:
                             "matrix": "A (observation)",
                             "size": f"{size}x{size}",
                             "sparsity": sparsity_a,
-                            "potential_savings_mb": (a_memory * (1 - sparsity_a))
-                            / 1024
-                            / 1024,
+                            "potential_savings_mb": (a_memory * (1 - sparsity_a)) / 1024 / 1024,
                         }
                     )
 
@@ -146,9 +135,7 @@ class MemoryHotspotAnalyzer:
                             "matrix": "B (transition)",
                             "size": f"{size}x{size}",
                             "sparsity": sparsity_b,
-                            "potential_savings_mb": (b_memory * (1 - sparsity_b))
-                            / 1024
-                            / 1024,
+                            "potential_savings_mb": (b_memory * (1 - sparsity_b)) / 1024 / 1024,
                         }
                     )
 
@@ -167,9 +154,7 @@ class MemoryHotspotAnalyzer:
         }
 
         # Create test agent
-        agent = BasicExplorerAgent(
-            agent_id="test_agent", name="Test Agent", grid_size=10
-        )
+        agent = BasicExplorerAgent(agent_id="test_agent", name="Test Agent", grid_size=10)
 
         # Track belief update memory
         self.start_tracing()
@@ -192,9 +177,7 @@ class MemoryHotspotAnalyzer:
             if i % 20 == 0:
                 snapshot = self.take_snapshot(f"After {i} belief updates")
                 memory_growth = self._calculate_memory_diff(initial_snapshot, snapshot)
-                results["operation_costs"][f"belief_updates_{i}"] = (
-                    memory_growth / 1024 / 1024
-                )
+                results["operation_costs"][f"belief_updates_{i}"] = memory_growth / 1024 / 1024
 
         # Check for memory leaks
         final_snapshot = self.take_snapshot("Final state")
@@ -234,9 +217,7 @@ class MemoryHotspotAnalyzer:
 
         agents = []
         for i in range(10):
-            agent = BasicExplorerAgent(
-                agent_id=f"agent_{i}", name=f"Agent {i}", grid_size=10
-            )
+            agent = BasicExplorerAgent(agent_id=f"agent_{i}", name=f"Agent {i}", grid_size=10)
             agents.append(agent)
 
         snapshot_created = self.take_snapshot("After creating 10 agents")
@@ -258,13 +239,9 @@ class MemoryHotspotAnalyzer:
                 agent.select_action()
 
         snapshot_operated = self.take_snapshot("After 100 operations per agent")
-        operation_memory = self._calculate_memory_diff(
-            snapshot_created, snapshot_operated
-        )
+        operation_memory = self._calculate_memory_diff(snapshot_created, snapshot_operated)
         results["operation_cost"]["100_operations_mb"] = operation_memory / 1024 / 1024
-        results["operation_cost"]["per_operation_kb"] = (
-            operation_memory / 1024 / (100 * 10)
-        )
+        results["operation_cost"]["per_operation_kb"] = operation_memory / 1024 / (100 * 10)
 
         # Measure cleanup
         del agents
@@ -272,9 +249,7 @@ class MemoryHotspotAnalyzer:
 
         snapshot_cleaned = self.take_snapshot("After cleanup")
         remaining_memory = self._calculate_memory_diff(snapshot_start, snapshot_cleaned)
-        cleanup_efficiency = (
-            1 - (remaining_memory / creation_memory) if creation_memory > 0 else 1
-        )
+        cleanup_efficiency = 1 - (remaining_memory / creation_memory) if creation_memory > 0 else 1
 
         results["cleanup_efficiency"]["efficiency_percent"] = cleanup_efficiency * 100
         results["cleanup_efficiency"]["leaked_mb"] = remaining_memory / 1024 / 1024
@@ -437,9 +412,7 @@ class MemoryHotspotAnalyzer:
             for ineff in matrix_results["inefficiencies"]:
                 report.append(f"\n- {ineff['matrix']} matrix ({ineff['size']}):")
                 report.append(f"  - Sparsity: {ineff['sparsity']:.1%}")
-                report.append(
-                    f"  - Potential savings: {ineff['potential_savings_mb']:.2f} MB"
-                )
+                report.append(f"  - Potential savings: {ineff['potential_savings_mb']:.2f} MB")
 
         # Belief operations
         belief_results = self.analyze_belief_operations()
@@ -475,9 +448,7 @@ class MemoryHotspotAnalyzer:
 
         report.append("\nMatrix Optimizations:")
         for opt in opportunities["matrix_optimizations"][:5]:  # Top 5
-            report.append(
-                f"- {opt['type']}: Save {opt.get('potential_savings_mb', 'N/A'):.2f} MB"
-            )
+            report.append(f"- {opt['type']}: Save {opt.get('potential_savings_mb', 'N/A'):.2f} MB")
 
         report.append("\nBelief Optimizations:")
         for opt in opportunities["belief_optimizations"]:

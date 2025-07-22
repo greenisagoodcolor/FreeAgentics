@@ -283,9 +283,7 @@ class ExpectedFreeEnergyBenchmark(PyMDPBenchmark):
         C = utils.obj_array_uniform(num_observations)
 
         # Create agent
-        self.agent = PyMDPAgent(
-            A, B, C=C, policy_len=self.policy_depth, inference_horizon=1
-        )
+        self.agent = PyMDPAgent(A, B, C=C, policy_len=self.policy_depth, inference_horizon=1)
 
     def run_iteration(self) -> Dict[str, Any]:
         """Calculate EFE for policies."""
@@ -453,9 +451,7 @@ class BenchmarkSuite:
         print(f"\n{'=' * 60}")
         print("PyMDP PERFORMANCE BENCHMARK SUITE")
         print(f"{'=' * 60}")
-        print(
-            f"Running {len(self.benchmarks)} benchmarks with {iterations} iterations each\n"
-        )
+        print(f"Running {len(self.benchmarks)} benchmarks with {iterations} iterations each\n")
 
         for benchmark in self.benchmarks:
             try:
@@ -506,13 +502,10 @@ class BenchmarkSuite:
 
         for result in self.results:
             # Find matching baseline
-            baseline = next(
-                (b for b in baseline_data if b["name"] == result.name), None
-            )
+            baseline = next((b for b in baseline_data if b["name"] == result.name), None)
             if baseline:
                 diff_percent = (
-                    (result.mean_time_ms - baseline["mean_time_ms"])
-                    / baseline["mean_time_ms"]
+                    (result.mean_time_ms - baseline["mean_time_ms"]) / baseline["mean_time_ms"]
                 ) * 100
                 print(f"\n{result.name}:")
                 print(f"  Baseline: {baseline['mean_time_ms']:.2f} ms")

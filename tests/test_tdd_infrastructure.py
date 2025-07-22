@@ -25,9 +25,7 @@ class TestTDDInfrastructure:
 
         required_vars = ["TESTING", "TDD_MODE"]
         for var in required_vars:
-            assert os.environ.get(var), (
-                f"Required TDD environment variable {var} not set"
-            )
+            assert os.environ.get(var), f"Required TDD environment variable {var} not set"
 
     def test_coverage_configuration_enforces_100_percent(self):
         """Test that coverage configuration enforces 100% coverage."""
@@ -39,9 +37,7 @@ class TestTDDInfrastructure:
         if coveragerc_path.exists():
             with open(coveragerc_path) as f:
                 content = f.read()
-                assert "fail_under = 80" in content, (
-                    "Coverage must be configured for 100%"
-                )
+                assert "fail_under = 80" in content, "Coverage must be configured for 100%"
 
     def test_pytest_configuration_has_strict_settings(self):
         """Test that pytest is configured with strict TDD settings."""
@@ -55,9 +51,7 @@ class TestTDDInfrastructure:
                 content = f.read()
                 assert "--strict-markers" in content, "pytest must have strict markers"
                 assert "--strict-config" in content, "pytest must have strict config"
-                assert "--cov-fail-under=100" in content, (
-                    "pytest must enforce 100% coverage"
-                )
+                assert "--cov-fail-under=100" in content, "pytest must enforce 100% coverage"
 
     def test_tdd_dependencies_are_installed(self):
         """Test that all required TDD dependencies are installed."""
@@ -95,9 +89,7 @@ class TestTDDInfrastructure:
             script_file = Path(script_path)
             if script_file.exists():
                 # Check if script is executable
-                assert os.access(script_file, os.X_OK), (
-                    f"TDD script {script_path} not executable"
-                )
+                assert os.access(script_file, os.X_OK), f"TDD script {script_path} not executable"
 
     def test_no_skipped_tests_allowed(self):
         """Test that no tests are marked as skipped (TDD violation)."""
@@ -151,9 +143,7 @@ class TestTDDInfrastructure:
         if pytest_ini_path.exists():
             with open(pytest_ini_path) as f:
                 content = f.read()
-                assert "tests.tdd_plugin" in content, (
-                    "TDD plugin not configured in pytest.ini"
-                )
+                assert "tests.tdd_plugin" in content, "TDD plugin not configured in pytest.ini"
 
     def test_ci_workflow_enforces_tdd_compliance(self):
         """Test that CI workflow enforces TDD compliance."""
@@ -210,9 +200,7 @@ class TestTDDInfrastructure:
         checkpoint_script = Path("scripts/tdd-checkpoint.sh")
         if checkpoint_script.exists():
             # Test script syntax (basic validation)
-            result = subprocess.run(
-                ["bash", "-n", str(checkpoint_script)], capture_output=True
-            )
+            result = subprocess.run(["bash", "-n", str(checkpoint_script)], capture_output=True)
 
             assert result.returncode == 0, "TDD checkpoint script has syntax errors"
 
@@ -227,9 +215,7 @@ class TestTDDInfrastructure:
             with open(ptw_config_path) as f:
                 content = f.read()
 
-            assert 'runner: "pytest"' in content, (
-                "pytest-watch not configured for pytest"
-            )
+            assert 'runner: "pytest"' in content, "pytest-watch not configured for pytest"
             assert "patterns:" in content, "pytest-watch missing file patterns"
             assert "*.py" in content, "pytest-watch not watching Python files"
 
@@ -244,9 +230,7 @@ class TestTDDWorkflowCompliance:
         # Then: Required features should be available
 
         # Fast test execution for quick feedback
-        assert Path("scripts/tdd-test-fast.sh").exists(), (
-            "Fast test execution not available"
-        )
+        assert Path("scripts/tdd-test-fast.sh").exists(), "Fast test execution not available"
 
         # Continuous testing for immediate feedback
         assert Path("scripts/tdd-watch.sh").exists(), "Continuous testing not available"

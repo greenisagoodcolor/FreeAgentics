@@ -51,9 +51,7 @@ class TestAgentError:
     def test_full_initialization(self):
         """Test error with all parameters."""
         context = {"key": "value", "agent_id": "test123"}
-        error = AgentError(
-            "Critical failure", severity=ErrorSeverity.CRITICAL, context=context
-        )
+        error = AgentError("Critical failure", severity=ErrorSeverity.CRITICAL, context=context)
         assert str(error) == "Critical failure"
         assert error.severity == ErrorSeverity.CRITICAL
         assert error.context == context

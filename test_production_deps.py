@@ -119,9 +119,7 @@ def check_python_version():
         print("✅ Python 3.12 detected - correct target version")
         return True
     else:
-        print(
-            f"⚠️  Running on Python {version.major}.{version.minor} (target is Python 3.12)"
-        )
+        print(f"⚠️  Running on Python {version.major}.{version.minor} (target is Python 3.12)")
         return True  # Still continue testing
 
 

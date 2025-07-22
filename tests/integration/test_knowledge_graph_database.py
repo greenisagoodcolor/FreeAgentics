@@ -37,9 +37,7 @@ class TestKnowledgeGraphDatabase(DatabaseTestCase):
 
         # Add various node types
         nodes = []
-        for i, node_type in enumerate(
-            [NodeType.ENTITY, NodeType.CONCEPT, NodeType.BELIEF]
-        ):
+        for i, node_type in enumerate([NodeType.ENTITY, NodeType.CONCEPT, NodeType.BELIEF]):
             node = graph.create_node(
                 type=node_type,
                 label=f"test_{node_type.value}_{i}",
@@ -92,9 +90,7 @@ class TestKnowledgeGraphDatabase(DatabaseTestCase):
             assert loaded.properties["confidence"] == original.properties["confidence"]
             assert loaded.properties["metadata"]["test"] is True
 
-    def test_agent_knowledge_graph_integration(
-        self, db_session: Session, storage_backend
-    ):
+    def test_agent_knowledge_graph_integration(self, db_session: Session, storage_backend):
         """Test integration between agents and their knowledge graphs."""
         # Create agents
         explorer = AgentFactory(name="Explorer Agent", template="explorer")
@@ -196,14 +192,10 @@ class TestKnowledgeGraphDatabase(DatabaseTestCase):
         storage_backend.save_graph(merged_graph)
 
         # Verify all graphs are in database
-        graph_count = db_session.execute(
-            text("SELECT COUNT(*) FROM knowledge_graphs")
-        ).scalar()
+        graph_count = db_session.execute(text("SELECT COUNT(*) FROM knowledge_graphs")).scalar()
         assert graph_count >= 3
 
-    def test_knowledge_graph_complex_queries(
-        self, db_session: Session, storage_backend
-    ):
+    def test_knowledge_graph_complex_queries(self, db_session: Session, storage_backend):
         """Test complex queries on knowledge graphs stored in PostgreSQL."""
         # Create a rich knowledge graph
         graph = KnowledgeGraph()
@@ -270,9 +262,7 @@ class TestKnowledgeGraphDatabase(DatabaseTestCase):
         """
         )
 
-        results = db_session.execute(
-            category_a_query, {"graph_id": str(graph.graph_id)}
-        ).all()
+        results = db_session.execute(category_a_query, {"graph_id": str(graph.graph_id)}).all()
 
         assert len(results) == 3  # entities 0, 2, 4
         assert results[0].label == "entity_0"
@@ -396,9 +386,7 @@ class TestKnowledgeGraphDatabase(DatabaseTestCase):
         storage_backend.save_graph(graph)
         save_time = time.time() - start_time
 
-        print(
-            f"Saved {node_count} nodes and {len(graph.edges)} edges in {save_time:.2f} seconds"
-        )
+        print(f"Saved {node_count} nodes and {len(graph.edges)} edges in {save_time:.2f} seconds")
 
         # Time the load operation
         start_time = time.time()
@@ -412,9 +400,7 @@ class TestKnowledgeGraphDatabase(DatabaseTestCase):
 
         # Test batch operations
         # Update all nodes in a batch
-        batch_3_nodes = [
-            n for n in loaded_graph.nodes.values() if n.properties.get("batch") == 3
-        ]
+        batch_3_nodes = [n for n in loaded_graph.nodes.values() if n.properties.get("batch") == 3]
 
         for node in batch_3_nodes:
             node.properties["batch_updated"] = True
@@ -432,9 +418,7 @@ class TestKnowledgeGraphDatabase(DatabaseTestCase):
         assert load_time < 3.0  # Should load in under 3 seconds
         assert update_time < 5.0  # Should update in under 5 seconds
 
-    def test_knowledge_graph_concurrent_access(
-        self, db_session: Session, storage_backend
-    ):
+    def test_knowledge_graph_concurrent_access(self, db_session: Session, storage_backend):
         """Test concurrent access to knowledge graphs."""
         import threading
         import time

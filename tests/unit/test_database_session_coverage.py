@@ -96,9 +96,7 @@ class TestDatabaseSession:
         """Test production security validations."""
         os.environ.clear()
         os.environ["PRODUCTION"] = "true"
-        os.environ["DATABASE_URL"] = (
-            "postgresql://freeagentics_dev_2025:pass@localhost/db"
-        )
+        os.environ["DATABASE_URL"] = "postgresql://freeagentics_dev_2025:pass@localhost/db"
 
         # Should reject dev credentials in production
         with pytest.raises(ValueError) as exc_info:
@@ -259,9 +257,7 @@ class TestDatabaseSession:
         # Mock Base.metadata
         with patch("database.base.Base.metadata") as mock_metadata:
             database.session.init_db()
-            mock_metadata.create_all.assert_called_once_with(
-                bind=database.session.engine
-            )
+            mock_metadata.create_all.assert_called_once_with(bind=database.session.engine)
 
     def test_drop_all_tables_development(self):
         """Test dropping tables in development mode."""

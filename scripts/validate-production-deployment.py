@@ -109,13 +109,8 @@ class ProductionValidator:
                 compose_data = yaml.safe_load(f)
 
             # Check resource limits
-            for service_name, service_config in compose_data.get(
-                "services", {}
-            ).items():
-                if (
-                    "deploy" in service_config
-                    and "resources" in service_config["deploy"]
-                ):
+            for service_name, service_config in compose_data.get("services", {}).items():
+                if "deploy" in service_config and "resources" in service_config["deploy"]:
                     results["resource_limits"] = True
                     self.log(
                         f"✓ Resource limits configured for {service_name}",
@@ -153,9 +148,7 @@ class ProductionValidator:
             with open(".env.production", "r") as f:
                 content = f.read()
                 if "dev_secret" in content or "your_" in content:
-                    self.errors.append(
-                        "Development secrets found in production environment"
-                    )
+                    self.errors.append("Development secrets found in production environment")
                     results["secure_secrets"] = False
                 else:
                     results["secure_secrets"] = True
@@ -184,9 +177,7 @@ class ProductionValidator:
             results["required_vars"] = True
             self.log("✓ All required environment variables configured", "SUCCESS")
         else:
-            self.warnings.append(
-                f"Missing environment variables: {', '.join(missing_vars)}"
-            )
+            self.warnings.append(f"Missing environment variables: {', '.join(missing_vars)}")
 
         return results
 
@@ -409,9 +400,7 @@ class ProductionValidator:
 
         # Test make docker-build (dry run)
         self.log("Testing 'make docker-build' (dry run)...", "INFO")
-        ret, stdout, stderr = self.run_command(
-            ["make", "-n", "docker-build"], check=False
-        )
+        ret, stdout, stderr = self.run_command(["make", "-n", "docker-build"], check=False)
         if ret == 0:
             results["make_docker_build"] = True
             self.log("✓ make docker-build command available", "SUCCESS")
@@ -450,18 +439,14 @@ class ProductionValidator:
         }
 
         # Save report
-        report_filename = (
-            f"production_validation_report_{self.validation_timestamp}.json"
-        )
+        report_filename = f"production_validation_report_{self.validation_timestamp}.json"
         with open(report_filename, "w") as f:
             json.dump(report, f, indent=2)
 
         self.log(f"\nValidation report saved to: {report_filename}", "INFO")
 
         # Print summary
-        print(
-            f"\n{Colors.BOLD}=== PRODUCTION DEPLOYMENT VALIDATION SUMMARY ==={Colors.RESET}"
-        )
+        print(f"\n{Colors.BOLD}=== PRODUCTION DEPLOYMENT VALIDATION SUMMARY ==={Colors.RESET}")
         print(f"Timestamp: {self.validation_timestamp}")
         print(f"Total Checks: {report['summary']['total_checks']}")
         print(f"{Colors.GREEN}Passed: {report['summary']['passed']}{Colors.RESET}")

@@ -226,11 +226,13 @@ class SSLCertificateManager:
     def _find_certbot(self) -> Optional[str]:
         """Find certbot executable."""
         try:
-            result = subprocess.run(  # nosec B607 B603 # Safe use of which command for certbot detection
-                ["which", "certbot"],
-                capture_output=True,
-                text=True,
-                check=True,
+            result = (
+                subprocess.run(  # nosec B607 B603 # Safe use of which command for certbot detection
+                    ["which", "certbot"],
+                    capture_output=True,
+                    text=True,
+                    check=True,
+                )
             )
             return result.stdout.strip()
         except subprocess.CalledProcessError:
@@ -278,7 +280,9 @@ class SSLCertificateManager:
             logger.info(
                 f"Obtaining Let's Encrypt certificate for domains: {self.config.letsencrypt_domains}"
             )
-            subprocess.run(cmd, capture_output=True, text=True, check=True)  # nosec B603 # Safe certbot command execution
+            subprocess.run(
+                cmd, capture_output=True, text=True, check=True
+            )  # nosec B603 # Safe certbot command execution
             logger.info("Let's Encrypt certificate obtained successfully")
 
             # Copy certificates to configured paths
@@ -352,9 +356,7 @@ fi
             os.chmod(script_path, 0o700)  # nosec B103
 
             # Add to crontab (runs twice daily)
-            cron_entry = (
-                f"0 0,12 * * * {script_path} >> /var/log/letsencrypt-renewal.log 2>&1\n"
-            )
+            cron_entry = f"0 0,12 * * * {script_path} >> /var/log/letsencrypt-renewal.log 2>&1\n"
 
             # Check if cron entry exists
             result = subprocess.run(["crontab", "-l"], capture_output=True, text=True)
@@ -364,9 +366,7 @@ fi
                 current_crontab = result.stdout if result.returncode == 0 else ""
                 new_crontab = current_crontab + cron_entry
 
-                process = subprocess.Popen(
-                    ["crontab", "-"], stdin=subprocess.PIPE, text=True
-                )
+                process = subprocess.Popen(["crontab", "-"], stdin=subprocess.PIPE, text=True)
                 process.communicate(input=new_crontab)
 
                 logger.info("Auto-renewal cron job added successfully")
@@ -451,9 +451,7 @@ class LoadBalancerSSLConfig:
             "Protocol": "HTTPS",
             "Port": 443,
             "SslPolicy": "ELBSecurityPolicy-TLS-1-2-2017-01",
-            "Certificates": [
-                {"CertificateArn": "arn:aws:acm:region:account:certificate/id"}
-            ],
+            "Certificates": [{"CertificateArn": "arn:aws:acm:region:account:certificate/id"}],
             "DefaultActions": [
                 {
                     "Type": "forward",
@@ -508,9 +506,7 @@ server {{
         return "; ".join(parts)
 
 
-def setup_https_enforcement(
-    app, config: Optional[SSLConfiguration] = None
-) -> SSLConfiguration:
+def setup_https_enforcement(app, config: Optional[SSLConfiguration] = None) -> SSLConfiguration:
     """Set up HTTPS enforcement middleware."""
     config = config or SSLConfiguration()
     app.add_middleware(HTTPSEnforcementMiddleware, config=config)
@@ -520,9 +516,7 @@ def setup_https_enforcement(
 
 
 # Development SSL setup helper
-def generate_self_signed_cert(
-    domain: str = "localhost", days: int = 365
-) -> Tuple[str, str]:
+def generate_self_signed_cert(domain: str = "localhost", days: int = 365) -> Tuple[str, str]:
     """Generate self-signed certificate for development."""
     cert_dir = Path("./ssl")
     cert_dir.mkdir(exist_ok=True)

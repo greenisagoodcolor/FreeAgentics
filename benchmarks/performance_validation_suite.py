@@ -34,9 +34,7 @@ import psutil
 sys.path.insert(0, str(Path(__file__).parent.parent))
 
 logger = logging.getLogger(__name__)
-logging.basicConfig(
-    level=logging.INFO, format="%(asctime)s - %(levelname)s - %(message)s"
-)
+logging.basicConfig(level=logging.INFO, format="%(asctime)s - %(levelname)s - %(message)s")
 
 
 @dataclass
@@ -158,10 +156,8 @@ class PerformanceValidator:
                 category="agent_spawning",
                 value=parallel_spawn_ms,
                 unit="ms",
-                target=self.PERFORMANCE_BUDGETS["agent_spawn_ms"]
-                * 2,  # Allow 2x for parallel
-                compliant=parallel_spawn_ms
-                <= self.PERFORMANCE_BUDGETS["agent_spawn_ms"] * 2,
+                target=self.PERFORMANCE_BUDGETS["agent_spawn_ms"] * 2,  # Allow 2x for parallel
+                compliant=parallel_spawn_ms <= self.PERFORMANCE_BUDGETS["agent_spawn_ms"] * 2,
                 timestamp=datetime.now(),
             )
         )
@@ -176,8 +172,7 @@ class PerformanceValidator:
                 value=memory_per_agent_mb,
                 unit="MB",
                 target=self.PERFORMANCE_BUDGETS["memory_per_agent_mb"],
-                compliant=memory_per_agent_mb
-                <= self.PERFORMANCE_BUDGETS["memory_per_agent_mb"],
+                compliant=memory_per_agent_mb <= self.PERFORMANCE_BUDGETS["memory_per_agent_mb"],
                 timestamp=datetime.now(),
             )
         )
@@ -238,8 +233,7 @@ class PerformanceValidator:
                 value=inference_time_ms,
                 unit="ms",
                 target=self.PERFORMANCE_BUDGETS["pymdp_inference_ms"],
-                compliant=inference_time_ms
-                <= self.PERFORMANCE_BUDGETS["pymdp_inference_ms"],
+                compliant=inference_time_ms <= self.PERFORMANCE_BUDGETS["pymdp_inference_ms"],
                 timestamp=datetime.now(),
                 metadata={"steps": 100},
             )
@@ -273,8 +267,7 @@ class PerformanceValidator:
                 value=memory_per_agent_mb,
                 unit="MB",
                 target=self.PERFORMANCE_BUDGETS["memory_per_agent_mb"],
-                compliant=memory_per_agent_mb
-                <= self.PERFORMANCE_BUDGETS["memory_per_agent_mb"],
+                compliant=memory_per_agent_mb <= self.PERFORMANCE_BUDGETS["memory_per_agent_mb"],
                 timestamp=datetime.now(),
                 metadata={"total_agents": 100, "total_memory_mb": memory_growth_mb},
             )
@@ -316,9 +309,7 @@ class PerformanceValidator:
             for _ in range(50):
                 # JSON serialization/deserialization
                 data = {
-                    "agents": [
-                        self._create_test_agent(f"api_agent_{i}") for i in range(5)
-                    ],
+                    "agents": [self._create_test_agent(f"api_agent_{i}") for i in range(5)],
                     "timestamp": datetime.now().isoformat(),
                     "status": "active",
                 }
@@ -342,8 +333,7 @@ class PerformanceValidator:
                 value=avg_response_time_ms,
                 unit="ms",
                 target=self.PERFORMANCE_BUDGETS["api_response_ms"],
-                compliant=avg_response_time_ms
-                <= self.PERFORMANCE_BUDGETS["api_response_ms"],
+                compliant=avg_response_time_ms <= self.PERFORMANCE_BUDGETS["api_response_ms"],
                 timestamp=datetime.now(),
                 metadata={"requests_tested": 50},
             )
@@ -396,8 +386,7 @@ class PerformanceValidator:
                 value=bundle_size_kb_gzip,
                 unit="KB",
                 target=self.PERFORMANCE_BUDGETS["bundle_size_kb_gzip"],
-                compliant=bundle_size_kb_gzip
-                <= self.PERFORMANCE_BUDGETS["bundle_size_kb_gzip"],
+                compliant=bundle_size_kb_gzip <= self.PERFORMANCE_BUDGETS["bundle_size_kb_gzip"],
                 timestamp=datetime.now(),
                 metadata={
                     "uncompressed_kb": bundle_size_kb,
@@ -482,9 +471,7 @@ class PerformanceValidator:
         # Calculate overall score
         compliant_count = sum(1 for m in all_metrics if m.compliant)
         total_count = len(all_metrics)
-        overall_score = (
-            int((compliant_count / total_count) * 100) if total_count > 0 else 0
-        )
+        overall_score = int((compliant_count / total_count) * 100) if total_count > 0 else 0
 
         # Determine if we passed (all critical metrics must be compliant)
         critical_metrics = [
@@ -610,9 +597,7 @@ def main():
     validator.save_baseline_data(result)
 
     # Save detailed results
-    results_file = (
-        f"performance_results_{datetime.now().strftime('%Y%m%d_%H%M%S')}.json"
-    )
+    results_file = f"performance_results_{datetime.now().strftime('%Y%m%d_%H%M%S')}.json"
     with open(results_file, "w") as f:
         json.dump(
             {

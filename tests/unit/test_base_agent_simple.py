@@ -52,9 +52,7 @@ class TestSafeArrayToInt:
     def test_empty_array_raises_error(self):
         """Test that empty array raises ValueError."""
         value = np.array([])
-        with pytest.raises(
-            ValueError, match="Empty array cannot be converted to integer"
-        ):
+        with pytest.raises(ValueError, match="Empty array cannot be converted to integer"):
             safe_array_to_int(value)
 
     def test_python_list(self):
@@ -291,9 +289,7 @@ class TestActiveInferenceAgentBasic:
             def select_action(self):
                 return 0
 
-        empty_agent = EmptyConfigAgent(
-            agent_id="empty_agent", name="Empty Agent", config={}
-        )
+        empty_agent = EmptyConfigAgent(agent_id="empty_agent", name="Empty Agent", config={})
 
         assert isinstance(empty_agent.config, dict)
         assert len(empty_agent.config) == 0

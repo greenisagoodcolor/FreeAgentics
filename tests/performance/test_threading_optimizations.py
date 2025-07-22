@@ -83,9 +83,7 @@ class TestThreadPoolOptimization(unittest.TestCase):
         futures = []
         for _ in range(50):
             for agent in self.test_agents:
-                future = manager.submit_task(
-                    agent.agent_id, "step", {"observation": {}}
-                )
+                future = manager.submit_task(agent.agent_id, "step", {"observation": {}})
                 futures.append(future)
 
         # Wait for some completion
@@ -123,9 +121,7 @@ class TestThreadPoolOptimization(unittest.TestCase):
 
             # Measure throughput
             start_time = time.time()
-            observations = {
-                agent.agent_id: {"data": i} for i, agent in enumerate(self.test_agents)
-            }
+            observations = {agent.agent_id: {"data": i} for i, agent in enumerate(self.test_agents)}
 
             for _ in range(10):
                 results = manager.step_all_agents(observations)
@@ -444,9 +440,7 @@ class TestLockFreeDataStructures(unittest.TestCase):
         duration = time.time() - start_time
 
         # Verify correctness
-        self.assertEqual(
-            counter.get(), 10000, "Atomic counter should maintain consistency"
-        )
+        self.assertEqual(counter.get(), 10000, "Atomic counter should maintain consistency")
 
         # Should be fast
         self.assertLess(duration, 0.5, "Atomic operations should be fast")
@@ -547,9 +541,7 @@ class TestWorkloadSpecificOptimizations(unittest.TestCase):
             np.testing.assert_allclose(v, s, rtol=1e-10)
 
         # Vectorized should be faster
-        self.assertLess(
-            vec_duration, seq_duration, "Vectorized updates should be faster"
-        )
+        self.assertLess(vec_duration, seq_duration, "Vectorized updates should be faster")
 
 
 class TestIntegrationPerformance(unittest.TestCase):

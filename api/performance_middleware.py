@@ -41,9 +41,7 @@ class CacheConfig:
     default_ttl: int = 300  # 5 minutes
 
     # Cache key settings
-    include_headers: List[str] = field(
-        default_factory=lambda: ["Authorization", "Accept-Language"]
-    )
+    include_headers: List[str] = field(default_factory=lambda: ["Authorization", "Accept-Language"])
     include_query_params: bool = True
 
     # Cache invalidation
@@ -116,9 +114,7 @@ class ResponseCache:
             config: Cache configuration settings.
         """
         self.config = config
-        self.cache = cachetools.TTLCache(
-            maxsize=config.max_size, ttl=config.default_ttl
-        )
+        self.cache = cachetools.TTLCache(maxsize=config.max_size, ttl=config.default_ttl)
         self.hit_count = 0
         self.miss_count = 0
         self.invalidation_count = 0
@@ -189,9 +185,7 @@ class ResponseCache:
             del self.cache[key]
             self.invalidation_count += 1
 
-        logger.info(
-            f"Invalidated {len(keys_to_remove)} cache entries for pattern: {pattern}"
-        )
+        logger.info(f"Invalidated {len(keys_to_remove)} cache entries for pattern: {pattern}")
 
     def clear(self):
         """Clear entire cache."""
@@ -243,9 +237,7 @@ class RequestDeduplicator:
         if hasattr(request, "_body_hash"):
             key_parts.append(request._body_hash)
 
-        return hashlib.md5(
-            "|".join(key_parts).encode(), usedforsecurity=False
-        ).hexdigest()
+        return hashlib.md5("|".join(key_parts).encode(), usedforsecurity=False).hexdigest()
 
     def _cleanup_expired(self):
         """Clean up expired requests."""
@@ -421,9 +413,7 @@ class PerformanceMiddleware(BaseHTTPMiddleware):
 
         # Initialize components
         self.cache = (
-            ResponseCache(self.config.cache_config)
-            if self.config.caching_enabled
-            else None
+            ResponseCache(self.config.cache_config) if self.config.caching_enabled else None
         )
         self.deduplicator = (
             RequestDeduplicator(self.config.deduplication_window)
@@ -488,9 +478,7 @@ class PerformanceMiddleware(BaseHTTPMiddleware):
         # Track slow requests
         if response_time > self.config.slow_request_threshold:
             self.slow_request_count += 1
-            logger.warning(
-                f"Slow request detected: {request.url.path} - {response_time:.3f}s"
-            )
+            logger.warning(f"Slow request detected: {request.url.path} - {response_time:.3f}s")
 
         # Update performance monitor
         with self.performance_monitor.time_api_request():
@@ -516,9 +504,7 @@ class PerformanceMiddleware(BaseHTTPMiddleware):
 
         # Add performance headers
         response.headers["X-Response-Time"] = f"{response_time:.3f}s"
-        response.headers["X-Cache-Status"] = (
-            "MISS"  # TODO: Update based on cache hit/miss
-        )
+        response.headers["X-Cache-Status"] = "MISS"  # TODO: Update based on cache hit/miss
 
         # Track response size
         content_length = response.headers.get("content-length")
@@ -540,14 +526,10 @@ class PerformanceMiddleware(BaseHTTPMiddleware):
     def get_statistics(self) -> Dict[str, Any]:
         """Get comprehensive middleware statistics."""
         avg_response_time = (
-            (self.total_response_time / self.request_count)
-            if self.request_count > 0
-            else 0
+            (self.total_response_time / self.request_count) if self.request_count > 0 else 0
         )
         avg_response_size = (
-            sum(self.response_sizes) / len(self.response_sizes)
-            if self.response_sizes
-            else 0
+            sum(self.response_sizes) / len(self.response_sizes) if self.response_sizes else 0
         )
 
         stats = {

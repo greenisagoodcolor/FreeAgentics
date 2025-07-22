@@ -279,9 +279,7 @@ Generated: {timestamp}
 """
 
         for check_name, check_data in gates.get("checks", {}).items():
-            status_emoji = {"pass": "✅", "fail": "❌", "warn": "⚠️"}.get(
-                check_data["status"], "❓"
-            )
+            status_emoji = {"pass": "✅", "fail": "❌", "warn": "⚠️"}.get(check_data["status"], "❓")
             summary += f"- **{check_name.replace('_', ' ').title()}**: {status_emoji} {check_data['status'].upper()}\n"
             if check_data["details"]:
                 for detail in check_data["details"][:3]:  # Show first 3
@@ -329,8 +327,7 @@ Generated: {timestamp}
 
         # Save summary
         summary_file = (
-            self.reports_dir
-            / f"ci_summary_{datetime.now().strftime('%Y%m%d_%H%M%S')}.md"
+            self.reports_dir / f"ci_summary_{datetime.now().strftime('%Y%m%d_%H%M%S')}.md"
         )
         with open(summary_file, "w") as f:
             f.write(summary)
@@ -354,9 +351,7 @@ Generated: {timestamp}
 
 def main():
     """Command line interface for automated performance monitoring."""
-    parser = argparse.ArgumentParser(
-        description="Automated Performance Monitoring for CI/CD"
-    )
+    parser = argparse.ArgumentParser(description="Automated Performance Monitoring for CI/CD")
     parser.add_argument(
         "--regression-threshold",
         type=float,

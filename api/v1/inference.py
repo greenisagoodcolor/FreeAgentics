@@ -25,9 +25,7 @@ class InferenceRequest(BaseModel):
 
     agent_id: str = Field(..., description="ID of the agent to perform inference")
     observation: Dict[str, Any] = Field(..., description="Observation data")
-    context: Optional[Dict[str, Any]] = Field(
-        default=None, description="Additional context"
-    )
+    context: Optional[Dict[str, Any]] = Field(default=None, description="Additional context")
 
 
 class InferenceResponse(BaseModel):
@@ -108,9 +106,7 @@ async def perform_batch_inference(
             # Continue with other agents even if one fails
             continue
 
-    logger.info(
-        f"Performed batch inference for {len(responses)}/{len(requests)} agents"
-    )
+    logger.info(f"Performed batch inference for {len(responses)}/{len(requests)} agents")
     return responses
 
 
@@ -130,9 +126,7 @@ async def update_beliefs(
         # In a full implementation, this would update the agent's beliefs
         # through the agent manager
 
-        update = BeliefUpdate(
-            agent_id=agent_id, new_beliefs=beliefs, timestamp=datetime.now()
-        )
+        update = BeliefUpdate(agent_id=agent_id, new_beliefs=beliefs, timestamp=datetime.now())
 
         logger.info(f"Updated beliefs for agent {agent_id}")
         return update

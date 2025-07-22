@@ -364,9 +364,7 @@ class TestSecurityMonitoringSystem:
         self.vulnerability_scanner.vulnerabilities[test_vuln.id] = test_vuln
 
         # Test suppression
-        self.vulnerability_scanner.suppress_vulnerability(
-            test_vuln.id, "False positive"
-        )
+        self.vulnerability_scanner.suppress_vulnerability(test_vuln.id, "False positive")
         assert test_vuln.id in self.vulnerability_scanner.suppressed_vulnerabilities
         assert test_vuln.suppressed
 
@@ -408,9 +406,7 @@ class TestSecurityMonitoringSystem:
         updated_incident = self.incident_response.get_incident(incident.id)
         assert updated_incident.status == IncidentStatus.RESOLVED
         assert updated_incident.resolved_at is not None
-        assert (
-            updated_incident.lesson_learned == "Attack blocked, vulnerability patched"
-        )
+        assert updated_incident.lesson_learned == "Attack blocked, vulnerability patched"
 
     @pytest.mark.asyncio
     async def test_security_monitoring_start_stop(self):
@@ -495,8 +491,7 @@ class TestSecurityMonitoringSystem:
 
         # Should detect both SQL injection and suspicious user agent
         assert (
-            AttackType.SQL_INJECTION in alert_types
-            or AttackType.SUSPICIOUS_ACTIVITY in alert_types
+            AttackType.SQL_INJECTION in alert_types or AttackType.SUSPICIOUS_ACTIVITY in alert_types
         )
 
 

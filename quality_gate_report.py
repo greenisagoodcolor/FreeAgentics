@@ -22,9 +22,7 @@ def get_flake8_status():
     """Get flake8 linting status."""
     # First get the raw output
     success, stdout, stderr = run_command(["flake8", "--config=.flake8.minimal", "."])
-    error_count = len(
-        [line for line in stdout.split("\n") if line.strip() and ":" in line]
-    )
+    error_count = len([line for line in stdout.split("\n") if line.strip() and ":" in line])
 
     # Then get statistics
     success2, stdout2, stderr2 = run_command(
@@ -47,9 +45,7 @@ def get_flake8_status():
         "passed": total_errors == 0,
         "total_errors": total_errors,
         "error_types": error_types,
-        "top_errors": sorted(error_types.items(), key=lambda x: x[1], reverse=True)[
-            :10
-        ],
+        "top_errors": sorted(error_types.items(), key=lambda x: x[1], reverse=True)[:10],
     }
 
 

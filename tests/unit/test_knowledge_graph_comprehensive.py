@@ -234,9 +234,7 @@ class TestFallbackClasses:
         # Add test nodes
         node1 = FallbackNode("node1", "person", {"name": "Alice", "age": 30})
         node2 = FallbackNode("node2", "person", {"name": "Bob", "age": 25})
-        node3 = FallbackNode(
-            "node3", "place", {"name": "New York", "population": 8000000}
-        )
+        node3 = FallbackNode("node3", "place", {"name": "New York", "population": 8000000})
 
         graph.add_node(node1)
         graph.add_node(node2)
@@ -342,9 +340,7 @@ class TestKnowledgeGraph:
 
         # Mock the add_node method
         def mock_add_node(node_id, node_type, properties):
-            node = KnowledgeNode(
-                node_id=node_id, node_type=node_type, properties=properties
-            )
+            node = KnowledgeNode(node_id=node_id, node_type=node_type, properties=properties)
             graph.nodes[node_id] = node
             return node
 
@@ -553,9 +549,7 @@ class TestKnowledgeGraphIntegration:
         assert len(a_neighbors) == 2  # B and D
 
         c_neighbors = query_engine.get_neighbors("C")
-        assert (
-            len(c_neighbors) == 0
-        )  # C has no outgoing edges (depends on implementation)
+        assert len(c_neighbors) == 0  # C has no outgoing edges (depends on implementation)
 
     def test_error_handling_in_graph_operations(self):
         """Test error handling in graph operations."""

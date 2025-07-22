@@ -77,9 +77,7 @@ class TestPyMDPMatrixPoolingIntegration(unittest.TestCase):
         # Pooled belief update
         start_time = time.time()
         for _ in range(100):
-            with self.pool.allocate_matrix(
-                (num_states,), np.float32
-            ) as pooled_posterior:
+            with self.pool.allocate_matrix((num_states,), np.float32) as pooled_posterior:
                 likelihood = A[observation, :]
                 np.multiply(likelihood, belief, out=pooled_posterior)
                 pooled_posterior /= pooled_posterior.sum()
@@ -159,9 +157,9 @@ class TestPyMDPMatrixPoolingIntegration(unittest.TestCase):
         belief = belief / belief.sum()
 
         # Transition tensor
-        transition = np.random.rand(
-            dims[0], dims[1], dims[2], dims[0], dims[1], dims[2], 4
-        ).astype(np.float32)
+        transition = np.random.rand(dims[0], dims[1], dims[2], dims[0], dims[1], dims[2], 4).astype(
+            np.float32
+        )
 
         # Action selection via tensor contraction
         iterations = 20
@@ -254,9 +252,7 @@ class TestPyMDPMatrixPoolingIntegration(unittest.TestCase):
 
         # Create compressor and pool
         compressor = BeliefCompressor(sparsity_threshold=0.8)
-        belief_pool = CompressedBeliefPool(
-            pool_size=10, belief_shape=(100,), dtype=np.float32
-        )
+        belief_pool = CompressedBeliefPool(pool_size=10, belief_shape=(100,), dtype=np.float32)
 
         # Simulate belief updates with both compression and matrix pooling
         num_updates = 50

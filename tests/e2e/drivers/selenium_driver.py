@@ -55,9 +55,7 @@ class SeleniumDriver(BrowserDriver):
         self.console_logs = []
 
         if not SELENIUM_AVAILABLE:
-            raise ImportError(
-                "Selenium is not available. Install with: pip install selenium"
-            )
+            raise ImportError("Selenium is not available. Install with: pip install selenium")
 
     async def start(self):
         """Start the Selenium browser"""
@@ -393,10 +391,7 @@ class SeleniumDriver(BrowserDriver):
 
         # Wait for document ready state
         wait = WebDriverWait(self.driver, timeout)
-        wait.until(
-            lambda driver: driver.execute_script("return document.readyState")
-            == "complete"
-        )
+        wait.until(lambda driver: driver.execute_script("return document.readyState") == "complete")
 
     async def wait_for_load_state(self, state: str = "load", timeout: float = 10.0):
         """Wait for specific load state"""

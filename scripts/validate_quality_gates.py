@@ -98,9 +98,7 @@ class QualityGateValidator:
             }
             return False
 
-        returncode, stdout, stderr = self.run_command(
-            ["npm", "run", "build"], timeout=300
-        )
+        returncode, stdout, stderr = self.run_command(["npm", "run", "build"], timeout=300)
 
         passed = returncode == 0
         self.results["gates"]["npm_build"] = {
@@ -112,9 +110,7 @@ class QualityGateValidator:
     def check_docker_build(self) -> bool:
         """Check if make docker-build succeeds."""
         print("🔍 Building Docker images...")
-        returncode, stdout, stderr = self.run_command(
-            ["make", "docker-build"], timeout=600
-        )
+        returncode, stdout, stderr = self.run_command(["make", "docker-build"], timeout=600)
 
         passed = returncode == 0
         self.results["gates"]["docker_build"] = {
@@ -174,9 +170,7 @@ class QualityGateValidator:
         )
 
         # Count errors
-        error_count = len(
-            [line for line in (stdout + stderr).split("\n") if "error:" in line]
-        )
+        error_count = len([line for line in (stdout + stderr).split("\n") if "error:" in line])
 
         passed = error_count == 0
         self.results["gates"]["mypy"] = {

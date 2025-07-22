@@ -120,19 +120,13 @@ class AnthropicProvider(LLMProvider):
                 base_model = key
                 break
 
-        config = self.MODEL_CONFIGS.get(
-            base_model, self.MODEL_CONFIGS["claude-3-sonnet"]
-        )
+        config = self.MODEL_CONFIGS.get(base_model, self.MODEL_CONFIGS["claude-3-sonnet"])
         now = datetime.now()
 
         # Clean old request times (older than 1 minute)
-        self.request_times = [
-            t for t in self.request_times if now - t < timedelta(minutes=1)
-        ]
+        self.request_times = [t for t in self.request_times if now - t < timedelta(minutes=1)]
         self.token_usage = [
-            (t, tokens)
-            for t, tokens in self.token_usage
-            if now - t < timedelta(minutes=1)
+            (t, tokens) for t, tokens in self.token_usage if now - t < timedelta(minutes=1)
         ]
 
         # Check requests per minute
@@ -235,12 +229,8 @@ class AnthropicProvider(LLMProvider):
                         raise LLMError(f"Invalid JSON response: {response_text[:200]}")
 
                     if response.status != 200:
-                        error_msg = response_json.get("error", {}).get(
-                            "message", "Unknown error"
-                        )
-                        error_type = response_json.get("error", {}).get(
-                            "type", "unknown"
-                        )
+                        error_msg = response_json.get("error", {}).get("message", "Unknown error")
+                        error_type = response_json.get("error", {}).get("type", "unknown")
 
                         # Handle specific error types
                         if error_type == "rate_limit_error":

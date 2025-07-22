@@ -44,7 +44,7 @@ class TestActiveInferenceProduction(unittest.TestCase):
             import pymdp
             from pymdp.agent import Agent as PyMDPAgent
             from pymdp import utils
-            
+
             # Verify imports loaded correctly
             assert pymdp is not None
             assert utils is not None
@@ -564,9 +564,7 @@ class TestActiveInferenceProduction(unittest.TestCase):
             adapted_model = adapt_gmn_to_pymdp(model_spec)
 
             # 3. Create agent with custom model
-            agent = BasicExplorerAgent(
-                "production_test", "Production Test Agent", grid_size=4
-            )
+            agent = BasicExplorerAgent("production_test", "Production Test Agent", grid_size=4)
 
             # Override with custom model (simulate GMN loading)
             from pymdp.agent import Agent as PyMDPAgent

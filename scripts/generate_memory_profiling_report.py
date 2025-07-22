@@ -62,9 +62,7 @@ class SimulatedAgent:
             self.transition_matrix = np.eye(1000, dtype=np.float32)
 
             # Computation cache
-            self.computation_cache = {
-                f"cache_{i}": np.random.rand(10, 10) for i in range(50)
-            }
+            self.computation_cache = {f"cache_{i}": np.random.rand(10, 10) for i in range(50)}
         else:
             # Smaller memory footprint for comparison
             self.beliefs = np.random.rand(100, 100).astype(np.float32)
@@ -76,9 +74,7 @@ class SimulatedAgent:
         # Update beliefs
         if hasattr(self, "beliefs"):
             self.beliefs *= 0.99
-            self.beliefs += (
-                np.random.rand(*self.beliefs.shape).astype(np.float32) * 0.01
-            )
+            self.beliefs += np.random.rand(*self.beliefs.shape).astype(np.float32) * 0.01
             self.beliefs /= self.beliefs.sum()
 
         # Add to history
@@ -87,9 +83,7 @@ class SimulatedAgent:
         # Simulate memory leak if not optimized
         if self.complexity == "high" and not hasattr(self, "_optimized"):
             # Keep growing cache (memory leak)
-            self.computation_cache[f"cache_{len(self.computation_cache)}"] = (
-                np.random.rand(20, 20)
-            )
+            self.computation_cache[f"cache_{len(self.computation_cache)}"] = np.random.rand(20, 20)
 
 
 def profile_memory_lifecycle():
@@ -151,15 +145,11 @@ def profile_memory_lifecycle():
                 "avg_memory_mb": float(avg_baseline),
                 "memory_per_agent": [float(m) for m in baseline_memory_per_agent],
                 "target_memory_mb": 34.5,
-                "status": "close_to_target"
-                if abs(avg_baseline - 34.5) < 5
-                else "off_target",
+                "status": "close_to_target" if abs(avg_baseline - 34.5) < 5 else "off_target",
             }
         )
 
-        logger.info(
-            f"Baseline memory: {avg_baseline:.1f} MB per agent (target: 34.5 MB)"
-        )
+        logger.info(f"Baseline memory: {avg_baseline:.1f} MB per agent (target: 34.5 MB)")
 
         # Phase 2: Memory Optimization
         logger.info("Phase 2: Applying memory optimizations")
@@ -191,16 +181,12 @@ def profile_memory_lifecycle():
                 "avg_memory_mb": float(avg_optimized),
                 "memory_per_agent": [float(m) for m in optimized_memory_per_agent],
                 "target_memory_mb": 10.0,
-                "reduction_percent": float(
-                    ((avg_baseline - avg_optimized) / avg_baseline) * 100
-                ),
+                "reduction_percent": float(((avg_baseline - avg_optimized) / avg_baseline) * 100),
                 "status": "success" if avg_optimized < 10.0 else "needs_improvement",
             }
         )
 
-        logger.info(
-            f"Optimized memory: {avg_optimized:.1f} MB per agent (target: <10 MB)"
-        )
+        logger.info(f"Optimized memory: {avg_optimized:.1f} MB per agent (target: <10 MB)")
         logger.info(
             f"Memory reduction: {((avg_baseline - avg_optimized) / avg_baseline) * 100:.1f}%"
         )
@@ -248,9 +234,7 @@ def profile_memory_lifecycle():
             }
         )
 
-        logger.info(
-            f"Scalability test: {len(scale_agents)} agents, {avg_scale:.1f} MB average"
-        )
+        logger.info(f"Scalability test: {len(scale_agents)} agents, {avg_scale:.1f} MB average")
 
         # Phase 4: Memory Leak Detection
         logger.info("Phase 4: Memory leak detection")
@@ -269,9 +253,7 @@ def profile_memory_lifecycle():
                 "suspected_leaks": len(enhanced_profiler._suspected_leaks),
                 "recommendations": len(recommendations),
                 "status": (
-                    "clean"
-                    if len(enhanced_profiler._suspected_leaks) == 0
-                    else "leaks_detected"
+                    "clean" if len(enhanced_profiler._suspected_leaks) == 0 else "leaks_detected"
                 ),
             }
         )
@@ -325,27 +307,18 @@ def profile_memory_lifecycle():
             f.write("=" * 60 + "\n")
             f.write("TASK 20.2 VALIDATION SUMMARY\n")
             f.write("=" * 60 + "\n")
-            f.write(
-                f"✓ Baseline memory identified: {avg_baseline:.1f} MB (target: 34.5 MB)\n"
-            )
+            f.write(f"✓ Baseline memory identified: {avg_baseline:.1f} MB (target: 34.5 MB)\n")
             f.write(f"✓ Memory optimized to: {avg_optimized:.1f} MB (target: <10 MB)\n")
-            f.write(
-                f"✓ Memory reduction: {results['summary']['memory_reduction_percent']:.1f}%\n"
-            )
+            f.write(f"✓ Memory reduction: {results['summary']['memory_reduction_percent']:.1f}%\n")
             f.write(
                 f"✓ Scalability test: {len(scale_agents)} agents at {avg_scale:.1f} MB average\n"
             )
-            leak_count = results['summary']['memory_leaks_detected']
-            leak_status = 'None detected' if leak_count == 0 else f'{leak_count} suspected'
-            f.write(
-                f"✓ Memory leaks: {leak_status}\n"
-            )
+            leak_count = results["summary"]["memory_leaks_detected"]
+            leak_status = "None detected" if leak_count == 0 else f"{leak_count} suspected"
+            f.write(f"✓ Memory leaks: {leak_status}\n")
             f.write("\n")
 
-            if (
-                results["summary"]["target_achieved"]
-                and results["summary"]["scalability_verified"]
-            ):
+            if results["summary"]["target_achieved"] and results["summary"]["scalability_verified"]:
                 f.write("✓ ALL TASK 20.2 REQUIREMENTS MET\n")
             else:
                 f.write("✗ Some requirements need attention\n")
@@ -397,10 +370,7 @@ def main():
     results = profile_memory_lifecycle()
 
     # Validate success
-    if (
-        results["summary"]["target_achieved"]
-        and results["summary"]["scalability_verified"]
-    ):
+    if results["summary"]["target_achieved"] and results["summary"]["scalability_verified"]:
         logger.info("Task 20.2 validation PASSED")
         return 0
     else:

@@ -206,9 +206,7 @@ class LogPatternMatcher:
             r"(?P<error_type>\w+Error): (?P<error_message>.*)",
             LogCategory.ERROR,
             LogLevel.ERROR,
-            extractor=lambda msg: {
-                "error_type": re.search(r"(\w+Error):", msg).group(1)
-            },
+            extractor=lambda msg: {"error_type": re.search(r"(\w+Error):", msg).group(1)},
         )
 
         self.add_pattern(
@@ -230,9 +228,11 @@ class LogPatternMatcher:
             "high_cpu_usage",
             r"CPU usage: (?P<cpu_percent>\d+(?:\.\d+)?)%",
             LogCategory.PERFORMANCE,
-            LogLevel.WARNING
-            if "90" in r"CPU usage: (?P<cpu_percent>\d+(?:\.\d+)?)%"
-            else LogLevel.INFO,
+            (
+                LogLevel.WARNING
+                if "90" in r"CPU usage: (?P<cpu_percent>\d+(?:\.\d+)?)%"
+                else LogLevel.INFO
+            ),
         )
 
         # Security patterns
@@ -363,15 +363,9 @@ class AnomalyDetector:
 
         # Detect anomalies for each component
         for component, component_logs in logs_by_component.items():
-            anomalies.extend(
-                self._detect_error_rate_anomalies(component, component_logs)
-            )
-            anomalies.extend(
-                self._detect_response_time_anomalies(component, component_logs)
-            )
-            anomalies.extend(
-                self._detect_log_volume_anomalies(component, component_logs)
-            )
+            anomalies.extend(self._detect_error_rate_anomalies(component, component_logs))
+            anomalies.extend(self._detect_response_time_anomalies(component, component_logs))
+            anomalies.extend(self._detect_log_volume_anomalies(component, component_logs))
             anomalies.extend(self._detect_pattern_anomalies(component, component_logs))
 
         # Detect cross-component anomalies
@@ -386,9 +380,7 @@ class AnomalyDetector:
         if len(logs) < self.min_samples:
             return []
 
-        error_logs = [
-            log for log in logs if log.level in [LogLevel.ERROR, LogLevel.CRITICAL]
-        ]
+        error_logs = [log for log in logs if log.level in [LogLevel.ERROR, LogLevel.CRITICAL]]
         current_error_rate = (len(error_logs) / len(logs)) * 100
 
         # Update history
@@ -398,16 +390,12 @@ class AnomalyDetector:
             return []
 
         # Calculate baseline
-        historical_rates = list(self.error_rate_history[component])[
-            :-1
-        ]  # Exclude current
+        historical_rates = list(self.error_rate_history[component])[:-1]  # Exclude current
         if not historical_rates:
             return []
 
         baseline_mean = statistics.mean(historical_rates)
-        baseline_std = (
-            statistics.stdev(historical_rates) if len(historical_rates) > 1 else 0
-        )
+        baseline_std = statistics.stdev(historical_rates) if len(historical_rates) > 1 else 0
 
         # Z-score anomaly detection
         if baseline_std > 0:
@@ -425,8 +413,7 @@ class AnomalyDetector:
                         anomaly_score=z_score,
                         baseline_value=baseline_mean,
                         actual_value=current_error_rate,
-                        threshold=baseline_mean
-                        + (self.z_score_threshold * baseline_std),
+                        threshold=baseline_mean + (self.z_score_threshold * baseline_std),
                         recommendation="Investigate recent changes, check error logs, verify external dependencies",
                     )
                 ]
@@ -437,9 +424,7 @@ class AnomalyDetector:
         self, component: str, logs: List[LogEntry]
     ) -> List[AnomalyDetectionResult]:
         """Detect response time anomalies."""
-        duration_logs = [
-            log for log in logs if log.duration_ms is not None and log.duration_ms > 0
-        ]
+        duration_logs = [log for log in logs if log.duration_ms is not None and log.duration_ms > 0]
 
         if len(duration_logs) < self.min_samples:
             return []
@@ -506,18 +491,14 @@ class AnomalyDetector:
             return []
 
         baseline_mean = statistics.mean(historical_volumes)
-        baseline_std = (
-            statistics.stdev(historical_volumes) if len(historical_volumes) > 1 else 0
-        )
+        baseline_std = statistics.stdev(historical_volumes) if len(historical_volumes) > 1 else 0
 
         if baseline_std > 0:
             z_score = abs(current_volume - baseline_mean) / baseline_std
 
             if z_score > self.z_score_threshold:
                 anomaly_type = (
-                    "log_volume_spike"
-                    if current_volume > baseline_mean
-                    else "log_volume_drop"
+                    "log_volume_spike" if current_volume > baseline_mean else "log_volume_drop"
                 )
                 severity = "high" if z_score > 4 else "medium"
 
@@ -532,8 +513,7 @@ class AnomalyDetector:
                         anomaly_score=z_score,
                         baseline_value=baseline_mean,
                         actual_value=current_volume,
-                        threshold=baseline_mean
-                        + (self.z_score_threshold * baseline_std),
+                        threshold=baseline_mean + (self.z_score_threshold * baseline_std),
                         recommendation="Check for application issues or configuration changes",
                     )
                 ]
@@ -547,9 +527,7 @@ class AnomalyDetector:
         anomalies = []
 
         # Look for unusual error patterns
-        error_logs = [
-            log for log in logs if log.level in [LogLevel.ERROR, LogLevel.CRITICAL]
-        ]
+        error_logs = [log for log in logs if log.level in [LogLevel.ERROR, LogLevel.CRITICAL]]
         if error_logs:
             error_types = [log.error_type for log in error_logs if log.error_type]
             error_counter = Counter(error_types)
@@ -565,9 +543,7 @@ class AnomalyDetector:
                             component=component,
                             description=f"Recurring error pattern: {error_type} ({count} occurrences)",
                             affected_logs=[
-                                log
-                                for log in error_logs
-                                if log.error_type == error_type
+                                log for log in error_logs if log.error_type == error_type
                             ],
                             anomaly_score=count,
                             actual_value=count,
@@ -590,11 +566,7 @@ class AnomalyDetector:
         components_with_errors = {}
         for component, logs in logs_by_component.items():
             error_count = len(
-                [
-                    log
-                    for log in logs
-                    if log.level in [LogLevel.ERROR, LogLevel.CRITICAL]
-                ]
+                [log for log in logs if log.level in [LogLevel.ERROR, LogLevel.CRITICAL]]
             )
             if error_count > 0:
                 error_rate = (error_count / len(logs)) * 100
@@ -647,9 +619,7 @@ class AdvancedLogAnalytics:
 
         # Components
         self.pattern_matcher = LogPatternMatcher()
-        self.anomaly_detector = AnomalyDetector(
-            self.config.get("anomaly_detection", {})
-        )
+        self.anomaly_detector = AnomalyDetector(self.config.get("anomaly_detection", {}))
 
         # In-memory log buffer for real-time analysis
         self.log_buffer: deque = deque(maxlen=self.buffer_size)
@@ -671,7 +641,8 @@ class AdvancedLogAnalytics:
             cursor = conn.cursor()
 
             # Create logs table
-            cursor.execute("""
+            cursor.execute(
+                """
                 CREATE TABLE IF NOT EXISTS logs (
                     id INTEGER PRIMARY KEY AUTOINCREMENT,
                     timestamp REAL NOT NULL,
@@ -693,10 +664,12 @@ class AdvancedLogAnalytics:
                     duration_ms REAL,
                     created_at DATETIME DEFAULT CURRENT_TIMESTAMP
                 )
-            """)
+            """
+            )
 
             # Create anomalies table
-            cursor.execute("""
+            cursor.execute(
+                """
                 CREATE TABLE IF NOT EXISTS anomalies (
                     id INTEGER PRIMARY KEY AUTOINCREMENT,
                     timestamp REAL NOT NULL,
@@ -712,19 +685,14 @@ class AdvancedLogAnalytics:
                     affected_log_count INTEGER,
                     created_at DATETIME DEFAULT CURRENT_TIMESTAMP
                 )
-            """)
+            """
+            )
 
             # Create indexes
-            cursor.execute(
-                "CREATE INDEX IF NOT EXISTS idx_logs_timestamp ON logs(timestamp)"
-            )
-            cursor.execute(
-                "CREATE INDEX IF NOT EXISTS idx_logs_component ON logs(component)"
-            )
+            cursor.execute("CREATE INDEX IF NOT EXISTS idx_logs_timestamp ON logs(timestamp)")
+            cursor.execute("CREATE INDEX IF NOT EXISTS idx_logs_component ON logs(component)")
             cursor.execute("CREATE INDEX IF NOT EXISTS idx_logs_level ON logs(level)")
-            cursor.execute(
-                "CREATE INDEX IF NOT EXISTS idx_logs_category ON logs(category)"
-            )
+            cursor.execute("CREATE INDEX IF NOT EXISTS idx_logs_category ON logs(category)")
             cursor.execute(
                 "CREATE INDEX IF NOT EXISTS idx_anomalies_timestamp ON anomalies(timestamp)"
             )
@@ -849,9 +817,7 @@ class AdvancedLogAnalytics:
                 unique_logs.append(log)
 
         # Detect anomalies
-        anomalies = self.anomaly_detector.detect_anomalies(
-            unique_logs, time_window_minutes
-        )
+        anomalies = self.anomaly_detector.detect_anomalies(unique_logs, time_window_minutes)
 
         # Store anomalies
         for anomaly in anomalies:
@@ -904,9 +870,7 @@ class AdvancedLogAnalytics:
 
                 # Log summary if anomalies found
                 if analysis["anomalies"]:
-                    logger.warning(
-                        f"Log analysis found {len(analysis['anomalies'])} anomalies"
-                    )
+                    logger.warning(f"Log analysis found {len(analysis['anomalies'])} anomalies")
                     for anomaly in analysis["anomalies"][:3]:  # Log top 3
                         logger.warning(
                             f"Anomaly: {anomaly['description']} (score: {anomaly['anomaly_score']:.2f})"
@@ -1051,9 +1015,7 @@ class AdvancedLogAnalytics:
         if not logs:
             return {"status": "no_data"}
 
-        error_logs = [
-            log for log in logs if log.level in [LogLevel.ERROR, LogLevel.CRITICAL]
-        ]
+        error_logs = [log for log in logs if log.level in [LogLevel.ERROR, LogLevel.CRITICAL]]
         error_rate = (len(error_logs) / len(logs)) * 100
 
         # Calculate health score
@@ -1065,22 +1027,18 @@ class AdvancedLogAnalytics:
         health_score = max(0, min(100, health_score))
 
         return {
-            "status": "healthy"
-            if health_score > 80
-            else "degraded"
-            if health_score > 50
-            else "critical",
+            "status": (
+                "healthy" if health_score > 80 else "degraded" if health_score > 50 else "critical"
+            ),
             "health_score": health_score,
             "error_rate": error_rate,
             "anomaly_count": len(anomalies),
-            "critical_anomalies": len(
-                [a for a in anomalies if a.severity == "critical"]
+            "critical_anomalies": len([a for a in anomalies if a.severity == "critical"]),
+            "most_active_component": (
+                max(Counter(log.component for log in logs).items(), key=lambda x: x[1])[0]
+                if logs
+                else "unknown"
             ),
-            "most_active_component": max(
-                Counter(log.component for log in logs).items(), key=lambda x: x[1]
-            )[0]
-            if logs
-            else "unknown",
             "recommendations": self._generate_recommendations(logs, anomalies),
         }
 
@@ -1093,27 +1051,17 @@ class AdvancedLogAnalytics:
         if anomalies:
             critical_anomalies = [a for a in anomalies if a.severity == "critical"]
             if critical_anomalies:
-                recommendations.append(
-                    "Immediate attention required: Critical anomalies detected"
-                )
+                recommendations.append("Immediate attention required: Critical anomalies detected")
 
-            error_rate_anomalies = [
-                a for a in anomalies if a.anomaly_type == "error_rate_spike"
-            ]
+            error_rate_anomalies = [a for a in anomalies if a.anomaly_type == "error_rate_spike"]
             if error_rate_anomalies:
-                recommendations.append(
-                    "Investigate recent deployments or configuration changes"
-                )
+                recommendations.append("Investigate recent deployments or configuration changes")
 
-        error_logs = [
-            log for log in logs if log.level in [LogLevel.ERROR, LogLevel.CRITICAL]
-        ]
+        error_logs = [log for log in logs if log.level in [LogLevel.ERROR, LogLevel.CRITICAL]]
         if error_logs:
             error_rate = (len(error_logs) / len(logs)) * 100
             if error_rate > 10:
-                recommendations.append(
-                    "High error rate detected - review application health"
-                )
+                recommendations.append("High error rate detected - review application health")
 
         if not recommendations:
             recommendations.append("System appears healthy - continue monitoring")
@@ -1134,14 +1082,12 @@ class AdvancedLogAnalytics:
         second_half = sorted_logs[mid_point:]
 
         first_half_rate = (
-            len(first_half)
-            / ((first_half[-1].timestamp - first_half[0].timestamp) / 60)
+            len(first_half) / ((first_half[-1].timestamp - first_half[0].timestamp) / 60)
             if len(first_half) > 1
             else 0
         )
         second_half_rate = (
-            len(second_half)
-            / ((second_half[-1].timestamp - second_half[0].timestamp) / 60)
+            len(second_half) / ((second_half[-1].timestamp - second_half[0].timestamp) / 60)
             if len(second_half) > 1
             else 0
         )
@@ -1155,9 +1101,7 @@ class AdvancedLogAnalytics:
 
     def _analyze_error_patterns(self, logs: List[LogEntry]) -> Dict[str, Any]:
         """Analyze error patterns in logs."""
-        error_logs = [
-            log for log in logs if log.level in [LogLevel.ERROR, LogLevel.CRITICAL]
-        ]
+        error_logs = [log for log in logs if log.level in [LogLevel.ERROR, LogLevel.CRITICAL]]
 
         if not error_logs:
             return {"total_errors": 0}
@@ -1205,14 +1149,10 @@ class AdvancedLogAnalytics:
         for component in set(log.component for log in logs):
             component_logs = [log for log in logs if log.component == component]
             error_logs = [
-                log
-                for log in component_logs
-                if log.level in [LogLevel.ERROR, LogLevel.CRITICAL]
+                log for log in component_logs if log.level in [LogLevel.ERROR, LogLevel.CRITICAL]
             ]
 
-            error_rate = (
-                (len(error_logs) / len(component_logs)) * 100 if component_logs else 0
-            )
+            error_rate = (len(error_logs) / len(component_logs)) * 100 if component_logs else 0
 
             # Calculate health score
             health_score = 100 - (error_rate * 2)
@@ -1223,11 +1163,11 @@ class AdvancedLogAnalytics:
                 "total_logs": len(component_logs),
                 "error_rate": error_rate,
                 "health_score": health_score,
-                "status": "healthy"
-                if health_score > 80
-                else "degraded"
-                if health_score > 50
-                else "critical",
+                "status": (
+                    "healthy"
+                    if health_score > 80
+                    else "degraded" if health_score > 50 else "critical"
+                ),
             }
 
         return components
@@ -1237,13 +1177,9 @@ class AdvancedLogAnalytics:
         issues = []
 
         # Error-based issues
-        error_logs = [
-            log for log in logs if log.level in [LogLevel.ERROR, LogLevel.CRITICAL]
-        ]
+        error_logs = [log for log in logs if log.level in [LogLevel.ERROR, LogLevel.CRITICAL]]
         if error_logs:
-            error_types = Counter(
-                log.error_type for log in error_logs if log.error_type
-            )
+            error_types = Counter(log.error_type for log in error_logs if log.error_type)
             for error_type, count in error_types.most_common(3):
                 issues.append(
                     {

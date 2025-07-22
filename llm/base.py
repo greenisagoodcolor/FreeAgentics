@@ -203,9 +203,7 @@ node preference C1 {
             for i, example in enumerate(examples[:3]):  # Limit to 3 examples
                 base_prompt += f"\nExample {i + 1}:\n{example}\n"
 
-        base_prompt += (
-            "\n\nGenerate a valid GMN specification based on the user's description."
-        )
+        base_prompt += "\n\nGenerate a valid GMN specification based on the user's description."
 
         return base_prompt
 

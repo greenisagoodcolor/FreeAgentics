@@ -122,8 +122,7 @@ class PipelineValidator:
             if isinstance(dispatch, dict) and "inputs" in dispatch:
                 for input_name, input_config in dispatch["inputs"].items():
                     if any(
-                        forbidden in input_name.lower()
-                        for forbidden in ["skip", "bypass", "force"]
+                        forbidden in input_name.lower() for forbidden in ["skip", "bypass", "force"]
                     ):
                         self.issues.append(
                             {
@@ -212,9 +211,7 @@ class PipelineValidator:
                     )
 
 
-def print_validation_results(
-    is_valid: bool, issues: List[Dict], warnings: List[Dict]
-) -> None:
+def print_validation_results(is_valid: bool, issues: List[Dict], warnings: List[Dict]) -> None:
     """Print validation results in a formatted way"""
     print("\n" + "=" * 80)
     print("PIPELINE VALIDATION RESULTS")

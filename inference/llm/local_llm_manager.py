@@ -543,9 +543,7 @@ class LocalLLMManager:
             logger.warning("All generation attempts failed, using fallback")
             return self.fallback_responder.get_fallback_response(prompt)
         else:
-            raise RuntimeError(
-                "All generation attempts failed and fallback is disabled"
-            )
+            raise RuntimeError("All generation attempts failed and fallback is disabled")
 
     def _try_generate(self, prompt: str, system_prompt: Optional[str]) -> LLMResponse:
         """Try to generate with available providers."""

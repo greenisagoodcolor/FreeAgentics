@@ -51,9 +51,7 @@ class QueryResult:
 
     def is_empty(self) -> bool:
         """Check if result is empty."""
-        return (
-            not self.nodes and not self.edges and not self.paths and not self.aggregates
-        )
+        return not self.nodes and not self.edges and not self.paths and not self.aggregates
 
     def node_count(self) -> int:
         """Get number of nodes in result."""
@@ -183,16 +181,12 @@ class QueryEngine:
         # Filter by properties
         if query.node_properties:
             candidates = [
-                n
-                for n in candidates
-                if self._match_properties(n.properties, query.node_properties)
+                n for n in candidates if self._match_properties(n.properties, query.node_properties)
             ]
 
         # Filter by confidence
         if query.confidence_threshold > 0:
-            candidates = [
-                n for n in candidates if n.confidence >= query.confidence_threshold
-            ]
+            candidates = [n for n in candidates if n.confidence >= query.confidence_threshold]
 
         # Filter by source
         if query.source_filter:
@@ -233,9 +227,7 @@ class QueryEngine:
 
                 # Check edge properties
                 if query.edge_properties:
-                    if not self._match_properties(
-                        edge.properties, query.edge_properties
-                    ):
+                    if not self._match_properties(edge.properties, query.edge_properties):
                         continue
 
                 edges.append(edge)
@@ -322,10 +314,7 @@ class QueryEngine:
             node = self.graph.get_node(node_id)
             if node:
                 # Apply filters
-                if (
-                    query.confidence_threshold > 0
-                    and node.confidence < query.confidence_threshold
-                ):
+                if query.confidence_threshold > 0 and node.confidence < query.confidence_threshold:
                     continue
                 if query.node_types and node.type not in query.node_types:
                     continue
@@ -396,10 +385,7 @@ class QueryEngine:
                 # Apply other filters
                 if query.node_types and node.type not in query.node_types:
                     continue
-                if (
-                    query.confidence_threshold > 0
-                    and node.confidence < query.confidence_threshold
-                ):
+                if query.confidence_threshold > 0 and node.confidence < query.confidence_threshold:
                     continue
 
                 result.nodes.append(node)
@@ -472,9 +458,7 @@ class QueryEngine:
 
         # Filter by confidence
         if query.confidence_threshold > 0:
-            belief_nodes = [
-                n for n in belief_nodes if n.confidence >= query.confidence_threshold
-            ]
+            belief_nodes = [n for n in belief_nodes if n.confidence >= query.confidence_threshold]
 
         # Filter by properties
         if query.node_properties:
@@ -496,9 +480,7 @@ class QueryEngine:
 
         return result
 
-    def _match_properties(
-        self, node_props: Dict[str, Any], filter_props: Dict[str, Any]
-    ) -> bool:
+    def _match_properties(self, node_props: Dict[str, Any], filter_props: Dict[str, Any]) -> bool:
         """Check if node properties match filter."""
         for key, value in filter_props.items():
             if key not in node_props:
@@ -579,9 +561,7 @@ class QueryEngine:
         query_dict = {
             "type": query.query_type.value,
             "node_ids": query.node_ids,
-            "node_types": [t.value for t in query.node_types]
-            if query.node_types
-            else None,
+            "node_types": [t.value for t in query.node_types] if query.node_types else None,
             "confidence": query.confidence_threshold,
             # Add other relevant fields
         }

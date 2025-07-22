@@ -34,17 +34,13 @@ class TestHealthEndpoint:
         # Assert response JSON structure
         data = response.json()
         assert "status" in data, "Response should contain 'status' field"
-        assert data["status"] == "healthy", (
-            f"Expected status 'healthy', got {data['status']}"
-        )
+        assert data["status"] == "healthy", f"Expected status 'healthy', got {data['status']}"
 
         assert "db" in data, "Response should contain 'db' field"
         assert data["db"] == "connected", f"Expected db 'connected', got {data['db']}"
 
         # Assert response time is under 100ms
-        assert response_time < 100, (
-            f"Response took {response_time:.2f}ms, expected < 100ms"
-        )
+        assert response_time < 100, f"Response took {response_time:.2f}ms, expected < 100ms"
 
     def test_health_endpoint_returns_503_when_database_disconnected(self):
         """Test that /health returns 503 Service Unavailable when database is down."""
@@ -69,25 +65,19 @@ class TestHealthEndpoint:
             response = client.get("/health")
 
             # Assert response status code
-            assert response.status_code == 503, (
-                f"Expected 503, got {response.status_code}"
-            )
+            assert response.status_code == 503, f"Expected 503, got {response.status_code}"
 
             # Assert response JSON structure
             data = response.json()
             assert "status" in data, "Response should contain 'status' field"
-            assert data["status"] == "unhealthy", (
-                f"Expected status 'unhealthy', got {data['status']}"
-            )
+            assert (
+                data["status"] == "unhealthy"
+            ), f"Expected status 'unhealthy', got {data['status']}"
 
             assert "db" in data, "Response should contain 'db' field"
-            assert data["db"] == "disconnected", (
-                f"Expected db 'disconnected', got {data['db']}"
-            )
+            assert data["db"] == "disconnected", f"Expected db 'disconnected', got {data['db']}"
 
-            assert "error" in data, (
-                "Response should contain 'error' field when unhealthy"
-            )
+            assert "error" in data, "Response should contain 'error' field when unhealthy"
 
         finally:
             # Clean up: remove the override
@@ -166,9 +156,7 @@ class TestHealthEndpoint:
 
         # Average should also be well under 100ms
         avg_time = sum(response_times) / len(response_times)
-        assert avg_time < 50, (
-            f"Average response time {avg_time:.2f}ms should be well under 100ms"
-        )
+        assert avg_time < 50, f"Average response time {avg_time:.2f}ms should be well under 100ms"
 
     def test_health_endpoint_uses_fastapi_exception_handlers(self):
         """Test that health endpoint doesn't use try/except, relies on FastAPI handlers."""

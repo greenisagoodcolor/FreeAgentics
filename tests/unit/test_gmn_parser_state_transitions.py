@@ -1090,9 +1090,7 @@ class TestTransitionValidation:
 
         # Should detect invalid transition probabilities
         assert is_valid is False
-        prob_errors = [
-            e for e in errors if "probability" in e.lower() or "sum" in e.lower()
-        ]
+        prob_errors = [e for e in errors if "probability" in e.lower() or "sum" in e.lower()]
         assert len(prob_errors) > 0
 
     def test_validate_temporal_consistency_constraints(self):
@@ -1133,9 +1131,7 @@ class TestTransitionValidation:
 
         # Should detect temporal overlap
         assert is_valid is False
-        temporal_errors = [
-            e for e in errors if "temporal" in e.lower() or "overlap" in e.lower()
-        ]
+        temporal_errors = [e for e in errors if "temporal" in e.lower() or "overlap" in e.lower()]
         assert len(temporal_errors) > 0
 
     def test_validate_hierarchical_consistency_constraints(self):

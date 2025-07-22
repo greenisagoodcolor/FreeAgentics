@@ -69,9 +69,7 @@ class TestPyMDPBaselineComparison:
             },
         }
 
-    def _measure_operation_time(
-        self, operation, num_iterations: int = 100
-    ) -> Dict[str, float]:
+    def _measure_operation_time(self, operation, num_iterations: int = 100) -> Dict[str, float]:
         """Measure operation timing statistics."""
         times = []
 
@@ -141,9 +139,9 @@ class TestPyMDPBaselineComparison:
             }
 
             # Assert performance is acceptable
-            assert overhead_ratio < 1.5, (
-                f"{model_name} model: Our implementation is {overhead_ratio:.2f}x slower than baseline"
-            )
+            assert (
+                overhead_ratio < 1.5
+            ), f"{model_name} model: Our implementation is {overhead_ratio:.2f}x slower than baseline"
 
         # Print results
         print("\nBelief Update Performance Comparison:")
@@ -198,14 +196,13 @@ class TestPyMDPBaselineComparison:
                 "baseline_mean": baseline_stats["mean"],
                 "our_mean": our_stats["mean"],
                 "overhead_ratio": overhead_ratio,
-                "acceptable": overhead_ratio
-                < 1.3,  # Max 30% overhead for action selection
+                "acceptable": overhead_ratio < 1.3,  # Max 30% overhead for action selection
             }
 
             # Assert performance is acceptable
-            assert overhead_ratio < 1.3, (
-                f"{model_name} model: Action selection is {overhead_ratio:.2f}x slower than baseline"
-            )
+            assert (
+                overhead_ratio < 1.3
+            ), f"{model_name} model: Action selection is {overhead_ratio:.2f}x slower than baseline"
 
         # Print results
         print("\nAction Selection Performance Comparison:")
@@ -276,9 +273,9 @@ class TestPyMDPBaselineComparison:
         )
 
         # Assert acceptable performance
-        assert overhead_ratio < 1.5, (
-            f"Full cycle overhead too high: {overhead_ratio:.2f}x slower than baseline"
-        )
+        assert (
+            overhead_ratio < 1.5
+        ), f"Full cycle overhead too high: {overhead_ratio:.2f}x slower than baseline"
 
         return results
 
@@ -329,9 +326,9 @@ class TestPyMDPBaselineComparison:
         print(f"Memory Overhead: {memory_overhead_ratio:.2f}x")
 
         # Memory overhead should be reasonable (less than 2x)
-        assert memory_overhead_ratio < 2.0, (
-            f"Memory overhead too high: {memory_overhead_ratio:.2f}x more than baseline"
-        )
+        assert (
+            memory_overhead_ratio < 2.0
+        ), f"Memory overhead too high: {memory_overhead_ratio:.2f}x more than baseline"
 
         return {
             "baseline_peak_mb": baseline_peak / 1024 / 1024,
@@ -374,9 +371,7 @@ class TestPyMDPBaselineComparison:
         print(f"Overhead: {overhead_ratio:.2f}x")
 
         # Adapter should add minimal overhead (less than 20%)
-        assert overhead_ratio < 1.2, (
-            f"Adapter overhead too high: {overhead_ratio:.2f}x slower"
-        )
+        assert overhead_ratio < 1.2, f"Adapter overhead too high: {overhead_ratio:.2f}x slower"
 
         return {
             "direct_mean_us": direct_stats["mean"] * 1000000,
@@ -426,9 +421,9 @@ class TestPyMDPBaselineComparison:
         size_ratio = results[-1]["num_states"] / results[0]["num_states"]
 
         # Time should scale sub-quadratically with state space size
-        assert time_ratio < size_ratio**2, (
-            f"Performance scaling too poor: {time_ratio:.1f}x time for {size_ratio:.1f}x states"
-        )
+        assert (
+            time_ratio < size_ratio**2
+        ), f"Performance scaling too poor: {time_ratio:.1f}x time for {size_ratio:.1f}x states"
 
         return results
 
@@ -466,17 +461,15 @@ class TestRealTimePerformanceRequirements:
         avg_time_per_update = total_time / total_updates
         updates_per_second = total_updates / total_time
 
-        print(
-            f"\nReal-time Performance ({num_agents} agents, {total_updates} updates):"
-        )
+        print(f"\nReal-time Performance ({num_agents} agents, {total_updates} updates):")
         print(f"Average time per update: {avg_time_per_update * 1000:.3f}ms")
         print(f"Updates per second: {updates_per_second:.1f}")
 
         # For real-time operation, need at least 10 updates/second per agent
         required_updates_per_second = num_agents * 10
-        assert updates_per_second > required_updates_per_second, (
-            f"Performance too low: {updates_per_second:.1f} updates/sec, need {required_updates_per_second}"
-        )
+        assert (
+            updates_per_second > required_updates_per_second
+        ), f"Performance too low: {updates_per_second:.1f} updates/sec, need {required_updates_per_second}"
 
     def test_latency_percentiles(self):
         """Test latency percentiles for consistent performance."""

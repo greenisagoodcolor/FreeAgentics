@@ -155,16 +155,10 @@ class TestSecurityHeadersValidation:
             permissions_policy = response.headers["permissions-policy"]
 
             # Should contain restrictive policies
+            assert "camera=()" in permissions_policy or "camera=self" in permissions_policy
+            assert "microphone=()" in permissions_policy or "microphone=self" in permissions_policy
             assert (
-                "camera=()" in permissions_policy or "camera=self" in permissions_policy
-            )
-            assert (
-                "microphone=()" in permissions_policy
-                or "microphone=self" in permissions_policy
-            )
-            assert (
-                "geolocation=()" in permissions_policy
-                or "geolocation=self" in permissions_policy
+                "geolocation=()" in permissions_policy or "geolocation=self" in permissions_policy
             )
 
     def test_server_header_removal(self, client):
@@ -245,9 +239,7 @@ class TestSecurityHeadersValidation:
                 pass
             else:
                 # Should be specific domains
-                assert cors_origin.startswith("http://") or cors_origin.startswith(
-                    "https://"
-                )
+                assert cors_origin.startswith("http://") or cors_origin.startswith("https://")
 
         if "access-control-allow-credentials" in response.headers:
             cors_credentials = response.headers["access-control-allow-credentials"]
@@ -255,9 +247,7 @@ class TestSecurityHeadersValidation:
             # If credentials are allowed, origin should not be wildcard
             if cors_credentials.lower() == "true":
                 cors_origin = response.headers.get("access-control-allow-origin", "")
-                assert cors_origin != "*", (
-                    "CORS credentials=true with origin=* is insecure"
-                )
+                assert cors_origin != "*", "CORS credentials=true with origin=* is insecure"
 
     def test_csp_header_validation_function(self):
         """Test CSP header validation function."""
@@ -444,9 +434,7 @@ class TestSecurityHeadersValidation:
         ]
 
         for header in insecure_headers:
-            assert header not in response.headers, (
-                f"Insecure header {header} should not be present"
-            )
+            assert header not in response.headers, f"Insecure header {header} should not be present"
 
     def test_security_headers_edge_cases(self):
         """Test security headers handle edge cases."""
@@ -493,6 +481,4 @@ class TestSecurityHeadersValidation:
         ]
 
         for expected_header in expected_headers:
-            assert expected_header in headers, (
-                f"Expected header {expected_header} not found"
-            )
+            assert expected_header in headers, f"Expected header {expected_header} not found"

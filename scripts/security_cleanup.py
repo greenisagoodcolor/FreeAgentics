@@ -92,19 +92,13 @@ class SecurityCleanup:
                 content = file_path.read_text()
 
                 # Replace old imports with new unified imports
-                old_import = (
-                    "from auth.security_implementation import SecurityMiddleware"
-                )
-                new_import = (
-                    "from auth.security_headers import SecurityHeadersMiddleware"
-                )
+                old_import = "from auth.security_implementation import SecurityMiddleware"
+                new_import = "from auth.security_headers import SecurityHeadersMiddleware"
 
                 if old_import in content:
                     self.backup_file(file_path)
                     content = content.replace(old_import, new_import)
-                    content = content.replace(
-                        "SecurityMiddleware", "SecurityHeadersMiddleware"
-                    )
+                    content = content.replace("SecurityMiddleware", "SecurityHeadersMiddleware")
                     file_path.write_text(content)
 
                     self.cleanup_actions.append(f"Updated imports in {file_path.name}")
@@ -182,9 +176,7 @@ class SecurityCleanup:
             if doc_path.exists():
                 self.backup_file(doc_path)
                 doc_path.unlink()
-                self.cleanup_actions.append(
-                    f"Removed obsolete documentation: {doc_file}"
-                )
+                self.cleanup_actions.append(f"Removed obsolete documentation: {doc_file}")
 
     def remove_redundant_security_configs(self):
         """Remove redundant security configuration files."""

@@ -268,9 +268,7 @@ class ComprehensiveSecurityValidator:
 
             # Test authentication with correct credentials
             try:
-                auth_result = auth_manager.authenticate_user(
-                    "test_user", "SecurePassword123!"
-                )
+                auth_result = auth_manager.authenticate_user("test_user", "SecurePassword123!")
                 if auth_result:
                     self.results.add_result(
                         "authentication",
@@ -297,9 +295,7 @@ class ComprehensiveSecurityValidator:
 
             # Test authentication with wrong credentials
             try:
-                auth_result = auth_manager.authenticate_user(
-                    "test_user", "WrongPassword"
-                )
+                auth_result = auth_manager.authenticate_user("test_user", "WrongPassword")
                 if not auth_result:
                     self.results.add_result(
                         "authentication",
@@ -498,13 +494,9 @@ class ComprehensiveSecurityValidator:
 
             # Test HSTS configuration
             if ssl_config.hsts_enabled:
-                self.results.add_result(
-                    "ssl_tls", "hsts_enabled", "PASS", "HSTS is enabled"
-                )
+                self.results.add_result("ssl_tls", "hsts_enabled", "PASS", "HSTS is enabled")
             else:
-                self.results.add_result(
-                    "ssl_tls", "hsts_enabled", "WARNING", "HSTS is disabled"
-                )
+                self.results.add_result("ssl_tls", "hsts_enabled", "WARNING", "HSTS is disabled")
 
             # Test HSTS max age
             if ssl_config.hsts_max_age >= 31536000:  # 1 year
@@ -985,11 +977,7 @@ class ComprehensiveSecurityValidator:
             for payload in xss_payloads:
                 # Test that XSS is blocked (basic detection)
                 try:
-                    if (
-                        "<script>" in payload
-                        or "javascript:" in payload
-                        or "onerror=" in payload
-                    ):
+                    if "<script>" in payload or "javascript:" in payload or "onerror=" in payload:
                         self.results.add_result(
                             "penetration_testing",
                             f"xss_{payload[:10]}",
@@ -1150,18 +1138,14 @@ class ComprehensiveSecurityValidator:
                 category,
                 results,
             ) in self.results.get_detailed_results().items():
-                critical_failures = [
-                    r for r in results if r.get("severity") == "critical"
-                ]
+                critical_failures = [r for r in results if r.get("severity") == "critical"]
                 if critical_failures:
                     if category == "authentication":
                         compliance["OWASP_Top_10"]["A07_Auth_Failures"] = "FAIL"
                     elif category == "authorization":
                         compliance["OWASP_Top_10"]["A01_Broken_Access_Control"] = "FAIL"
                     elif category == "ssl_tls":
-                        compliance["OWASP_Top_10"]["A02_Cryptographic_Failures"] = (
-                            "FAIL"
-                        )
+                        compliance["OWASP_Top_10"]["A02_Cryptographic_Failures"] = "FAIL"
                     elif category == "penetration_testing":
                         compliance["OWASP_Top_10"]["A03_Injection"] = "FAIL"
 
@@ -1214,9 +1198,7 @@ async def main():
         print(f"Security Score: {report['security_score']}/100")
 
         # Print compliance status
-        print(
-            f"\nCompliance Status: {report['compliance_status']['overall_compliance']}"
-        )
+        print(f"\nCompliance Status: {report['compliance_status']['overall_compliance']}")
 
         # Print critical recommendations
         critical_recommendations = [

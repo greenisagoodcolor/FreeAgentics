@@ -75,9 +75,7 @@ class TestPyMDPArrayIntegration:
 
     def test_coalition_coordinator_with_array_actions(self):
         """Test CoalitionCoordinatorAgent handles PyMDP array responses."""
-        agent = CoalitionCoordinatorAgent(
-            "test_coordinator", "Test Coordinator", max_agents=5
-        )
+        agent = CoalitionCoordinatorAgent("test_coordinator", "Test Coordinator", max_agents=5)
         agent.start()
 
         # Mock PyMDP agent
@@ -205,8 +203,7 @@ class TestEdgeCases:
     def test_concurrent_agent_operations(self):
         """Test that multiple agents can operate concurrently without array issues."""
         agents = [
-            BasicExplorerAgent(f"explorer_{i}", f"Explorer {i}", grid_size=3)
-            for i in range(3)
+            BasicExplorerAgent(f"explorer_{i}", f"Explorer {i}", grid_size=3) for i in range(3)
         ]
 
         for i, agent in enumerate(agents):

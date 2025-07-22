@@ -42,9 +42,7 @@ class ComprehensiveDockerValidator:
     def run_command(self, command, timeout=180):
         """Run command with timeout"""
         try:
-            result = subprocess.run(
-                command, capture_output=True, text=True, timeout=timeout
-            )
+            result = subprocess.run(command, capture_output=True, text=True, timeout=timeout)
             return result.returncode, result.stdout, result.stderr
         except subprocess.TimeoutExpired:
             return 1, "", f"Command timed out after {timeout} seconds"
@@ -195,9 +193,7 @@ class ComprehensiveDockerValidator:
             if dev_size > 0 and prod_size > 0:
                 if prod_size < dev_size:
                     reduction = (dev_size - prod_size) / dev_size * 100
-                    self.log_success(
-                        f"✅ Production optimization: {reduction:.1f}% size reduction"
-                    )
+                    self.log_success(f"✅ Production optimization: {reduction:.1f}% size reduction")
                     self.results["validation_results"]["size_optimization"] = reduction
                 else:
                     self.log_warning("⚠️  Production stage not optimized")
@@ -463,19 +459,13 @@ ENVIRONMENT=production
             self.results["recommendations"].append("Implement multi-stage Docker build")
 
         if not self.results["validation_results"].get("non_root_user", False):
-            self.results["recommendations"].append(
-                "Configure container to run as non-root user"
-            )
+            self.results["recommendations"].append("Configure container to run as non-root user")
 
         if not self.results["validation_results"].get("readonly_fs", False):
-            self.results["recommendations"].append(
-                "Enable read-only filesystem in production"
-            )
+            self.results["recommendations"].append("Enable read-only filesystem in production")
 
         if not self.results["validation_results"].get("health_check", False):
-            self.results["recommendations"].append(
-                "Add health check to Docker container"
-            )
+            self.results["recommendations"].append("Add health check to Docker container")
 
         if not self.results["validation_results"].get("api_cleanup", False):
             self.results["recommendations"].append("Implement API cleanup endpoints")
@@ -503,9 +493,7 @@ ENVIRONMENT=production
             "passed_checks": passed_checks,
             "success_rate": success_rate,
             "overall_status": (
-                "PASS"
-                if len(self.results["recommendations"]) == 0
-                else "PASS_WITH_RECOMMENDATIONS"
+                "PASS" if len(self.results["recommendations"]) == 0 else "PASS_WITH_RECOMMENDATIONS"
             ),
         }
 
@@ -564,14 +552,10 @@ def main():
     validator = ComprehensiveDockerValidator()
 
     if validator.run_validation():
-        print(
-            "\n✅ Docker Container Production Build Validation COMPLETED SUCCESSFULLY"
-        )
+        print("\n✅ Docker Container Production Build Validation COMPLETED SUCCESSFULLY")
         return 0
     else:
-        print(
-            "\n⚠️  Docker Container Production Build Validation COMPLETED WITH RECOMMENDATIONS"
-        )
+        print("\n⚠️  Docker Container Production Build Validation COMPLETED WITH RECOMMENDATIONS")
         return 1
 
 

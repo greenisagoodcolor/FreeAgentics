@@ -142,11 +142,7 @@ class MemoryProfiler:
         A = np.random.rand(size, size)
         B = np.random.rand(size, size)
 
-        start_mem = (
-            self.measurements[-1]["rss_mb"]
-            if self.measurements
-            else self.baseline_memory
-        )
+        start_mem = self.measurements[-1]["rss_mb"] if self.measurements else self.baseline_memory
 
         # Multiple matrix multiplications
         for i in range(100):
@@ -204,9 +200,7 @@ class MemoryProfiler:
                 )
 
             # Check for float64 arrays that could be float32
-            float64_arrays = [
-                a for a in hotspots["large_arrays"] if "float64" in a["dtype"]
-            ]
+            float64_arrays = [a for a in hotspots["large_arrays"] if "float64" in a["dtype"]]
             if float64_arrays:
                 potential_savings = sum(a["size_mb"] * 0.5 for a in float64_arrays)
                 hotspots["recommendations"].append(
@@ -296,17 +290,12 @@ class MemoryProfiler:
         num_factors = 2
 
         # Create generative model
-        A = utils.obj_array_zeros(
-            [[num_obs[f], num_states[f]] for f in range(num_factors)]
-        )
+        A = utils.obj_array_zeros([[num_obs[f], num_states[f]] for f in range(num_factors)])
         for f in range(num_factors):
             A[f] = np.eye(num_obs[f], num_states[f])
 
         B = utils.obj_array_zeros(
-            [
-                [num_states[f], num_states[f], num_controls[f]]
-                for f in range(num_factors)
-            ]
+            [[num_states[f], num_states[f], num_controls[f]] for f in range(num_factors)]
         )
         for f in range(num_factors):
             for a in range(num_controls[f]):
@@ -385,17 +374,13 @@ class MemoryProfiler:
             report.append(f"- Total increase: {total_delta:.2f} MB")
 
             report.append("\nKEY FINDINGS:")
-            report.append(
-                "- Current implementation shows significant memory usage per agent"
-            )
+            report.append("- Current implementation shows significant memory usage per agent")
             report.append("- Matrix operations are the primary memory consumers")
             report.append("- Belief state storage and updates require optimization")
 
         report.append("\nMEASUREMENTS:")
         for m in self.measurements[-10:]:  # Last 10 measurements
-            report.append(
-                f"- {m['label']}: {m['rss_mb']:.2f} MB (Δ{m['delta_mb']:+.2f} MB)"
-            )
+            report.append(f"- {m['label']}: {m['rss_mb']:.2f} MB (Δ{m['delta_mb']:+.2f} MB)")
 
         return "\n".join(report)
 
@@ -447,9 +432,7 @@ def main():
     # Print key findings
     print("\n=== KEY FINDINGS ===")
     print(f"Memory per agent: {agent_footprint['memory_per_agent_mb']:.2f} MB")
-    print(
-        f"Projected for 100 agents: {agent_footprint['extrapolated_100_agents_mb']:.2f} MB"
-    )
+    print(f"Projected for 100 agents: {agent_footprint['extrapolated_100_agents_mb']:.2f} MB")
 
     if hotspots["recommendations"]:
         print("\n=== RECOMMENDATIONS ===")

@@ -35,9 +35,7 @@ from agents.memory_optimization import (  # Belief compression; Matrix pooling; 
 )
 
 # Set up logging
-logging.basicConfig(
-    level=logging.INFO, format="%(asctime)s - %(levelname)s - %(message)s"
-)
+logging.basicConfig(level=logging.INFO, format="%(asctime)s - %(levelname)s - %(message)s")
 logger = logging.getLogger(__name__)
 
 
@@ -73,19 +71,11 @@ class MemoryBenchmarker:
         agents = {}
         for i in range(num_agents):
             agent_data = {
-                "beliefs": np.random.random((50, 50)).astype(
-                    np.float64
-                ),  # Dense float64
+                "beliefs": np.random.random((50, 50)).astype(np.float64),  # Dense float64
                 "action_history": list(np.random.randint(0, 10, 1000)),  # Python list
-                "temporal_states": [
-                    np.random.random(32) for _ in range(200)
-                ],  # List of arrays
-                "knowledge_nodes": {
-                    j: np.random.random(64) for j in range(100)
-                },  # Dict storage
-                "matrices": [
-                    np.random.random((20, 20)) for _ in range(10)
-                ],  # Multiple matrices
+                "temporal_states": [np.random.random(32) for _ in range(200)],  # List of arrays
+                "knowledge_nodes": {j: np.random.random(64) for j in range(100)},  # Dict storage
+                "matrices": [np.random.random((20, 20)) for _ in range(10)],  # Multiple matrices
             }
             agents[i] = agent_data
 
@@ -128,17 +118,11 @@ class MemoryBenchmarker:
                     # Compressed sparse beliefs (float32)
                     "beliefs": LazyBeliefArray((50, 50), dtype=np.float32),
                     # Compact action history
-                    "action_history": CompactActionHistory(
-                        max_actions=1000, action_space_size=10
-                    ),
+                    "action_history": CompactActionHistory(max_actions=1000, action_space_size=10),
                     # Efficient temporal sequence
-                    "temporal_states": EfficientTemporalSequence(
-                        max_length=200, feature_dim=32
-                    ),
+                    "temporal_states": EfficientTemporalSequence(max_length=200, feature_dim=32),
                     # Compact knowledge graph
-                    "knowledge_graph": CompactKnowledgeGraph(
-                        max_nodes=100, max_edges=300
-                    ),
+                    "knowledge_graph": CompactKnowledgeGraph(max_nodes=100, max_edges=300),
                     # Pooled matrices (reused)
                     "matrix_pool_refs": [],
                 }
@@ -164,9 +148,7 @@ class MemoryBenchmarker:
                 # Add knowledge graph data
                 for j in range(50):
                     features = np.zeros(64, dtype=np.float32)
-                    features[np.random.choice(64, 3, replace=False)] = np.random.random(
-                        3
-                    )
+                    features[np.random.choice(64, 3, replace=False)] = np.random.random(3)
                     agent_data["knowledge_graph"].add_node(j, features=features)
 
                 for j in range(100):
@@ -177,12 +159,8 @@ class MemoryBenchmarker:
 
                 # Update memory tracking
                 belief_mb = agent_data["beliefs"].memory_usage()
-                action_mb = agent_data["action_history"].memory_usage_bytes() / (
-                    1024 * 1024
-                )
-                temporal_mb = agent_data["temporal_states"].memory_usage_stats()[
-                    "total_mb"
-                ]
+                action_mb = agent_data["action_history"].memory_usage_bytes() / (1024 * 1024)
+                temporal_mb = agent_data["temporal_states"].memory_usage_stats()["total_mb"]
                 kg_mb = agent_data["knowledge_graph"].memory_usage_stats()["total_mb"]
 
                 lifecycle_manager.update_agent_memory(
@@ -238,16 +216,11 @@ class MemoryBenchmarker:
             "reduction_percent": reduction_percent,
             "improvement_factor": improvement_factor,
             "target_reduction_percent": target_reduction_percent,
-            "meets_target": reduction_percent
-            >= target_reduction_percent * 0.8,  # 80% of target
-            "memory_efficiency_rating": min(
-                10.0, improvement_factor * 2
-            ),  # Scale to 10
+            "meets_target": reduction_percent >= target_reduction_percent * 0.8,  # 80% of target
+            "memory_efficiency_rating": min(10.0, improvement_factor * 2),  # Scale to 10
         }
 
-        logger.info(
-            f"Memory reduction: {reduction_mb:.2f} MB ({reduction_percent:.1f}%)"
-        )
+        logger.info(f"Memory reduction: {reduction_mb:.2f} MB ({reduction_percent:.1f}%)")
         logger.info(f"Improvement factor: {improvement_factor:.2f}x")
         logger.info(f"Target achievement: {validation['meets_target']}")
 
@@ -274,9 +247,7 @@ class MemoryBenchmarker:
                 result = self.create_optimized_agent_simulation(count)
 
                 current_memory = self.get_memory_usage()
-                memory_pressure = current_memory / (
-                    psutil.virtual_memory().total / (1024 * 1024)
-                )
+                memory_pressure = current_memory / (psutil.virtual_memory().total / (1024 * 1024))
 
                 success = (
                     result["memory_per_agent_mb"] < 10.0  # Under 10MB per agent
@@ -372,9 +343,7 @@ class MemoryBenchmarker:
         return {
             "dense_time_sec": dense_time,
             "optimized_time_sec": optimized_time,
-            "speedup_factor": dense_time / optimized_time
-            if optimized_time > 0
-            else float("inf"),
+            "speedup_factor": dense_time / optimized_time if optimized_time > 0 else float("inf"),
             "dense_memory_mb": dense_belief.nbytes / (1024 * 1024),
             "optimized_memory_mb": lazy_belief.memory_usage(),
         }
@@ -404,9 +373,7 @@ class MemoryBenchmarker:
             "regular_time_sec": regular_time,
             "pooled_time_sec": pooled_time,
             "overhead_factor": pooled_time / regular_time,
-            "pool_hit_rate": pool_stats["pools"]
-            .get("(100, 100)_float32", {})
-            .get("hit_rate", 0),
+            "pool_hit_rate": pool_stats["pools"].get("(100, 100)_float32", {}).get("hit_rate", 0),
         }
 
     def _benchmark_action_operations(self) -> Dict:
@@ -443,9 +410,7 @@ class MemoryBenchmarker:
         return {
             "list_time_sec": list_time,
             "compact_time_sec": compact_time,
-            "speedup_factor": list_time / compact_time
-            if compact_time > 0
-            else float("inf"),
+            "speedup_factor": list_time / compact_time if compact_time > 0 else float("inf"),
             "list_memory_mb": list_memory,
             "compact_memory_mb": compact_memory,
             "memory_reduction_factor": list_memory / compact_memory,
@@ -487,9 +452,7 @@ def main():
         # 4. Validate memory reduction
         print("\n4. MEMORY REDUCTION VALIDATION")
         print("-" * 40)
-        validation = benchmarker.validate_memory_reduction(
-            baseline_result, optimized_result
-        )
+        validation = benchmarker.validate_memory_reduction(baseline_result, optimized_result)
 
         print("Validation Results:")
         print(
@@ -565,9 +528,7 @@ def main():
             and overall_score >= 7.0
         )
 
-        print(
-            f"\nProduction Readiness: {'✓ READY' if production_ready else '✗ NEEDS WORK'}"
-        )
+        print(f"\nProduction Readiness: {'✓ READY' if production_ready else '✗ NEEDS WORK'}")
 
         if production_ready:
             print("\n🎉 MEMORY OPTIMIZATION SUCCESSFUL!")

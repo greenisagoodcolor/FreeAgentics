@@ -69,9 +69,7 @@ class MetricsCollector:
         for metric in default_metrics:
             self.metrics[metric] = deque(maxlen=self.buffer_size)
 
-    def record_metric(
-        self, metric_type: str, value: float, agent_id: Optional[str] = None
-    ) -> None:
+    def record_metric(self, metric_type: str, value: float, agent_id: Optional[str] = None) -> None:
         """Record a metric value."""
         if metric_type not in self.metrics:
             self.metrics[metric_type] = deque(maxlen=self.buffer_size)
@@ -149,9 +147,7 @@ class MonitoringManager:
         self.sessions: Dict[str, MonitoringSession] = {}
         self.active_streams: Dict[str, asyncio.Task] = {}
 
-    async def start_session(
-        self, websocket: WebSocket, session: MonitoringSession
-    ) -> None:
+    async def start_session(self, websocket: WebSocket, session: MonitoringSession) -> None:
         """Start a monitoring session."""
         self.sessions[session.session_id] = session
 
@@ -179,9 +175,7 @@ class MonitoringManager:
 
         logger.info(f"Stopped monitoring session {session_id}")
 
-    async def _stream_metrics(
-        self, websocket: WebSocket, session: MonitoringSession
-    ) -> None:
+    async def _stream_metrics(self, websocket: WebSocket, session: MonitoringSession) -> None:
         """Stream metrics to a WebSocket client."""
         try:
             while True:

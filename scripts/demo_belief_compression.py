@@ -183,9 +183,7 @@ def demo_incremental_updates():
         update = update / update.sum()
 
         # Apply incremental update
-        compressed = compressor.incremental_update(
-            compressed, update, learning_rate=0.2
-        )
+        compressed = compressor.incremental_update(compressed, update, learning_rate=0.2)
 
         print(
             f"Step {step + 1}: non-zero values: {compressed.nnz}, "

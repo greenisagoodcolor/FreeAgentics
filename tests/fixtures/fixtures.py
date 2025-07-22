@@ -159,13 +159,7 @@ def agent_batch(db_session: Session) -> List[Agent]:
 @pytest.fixture
 def resource_collector_agent(db_session: Session) -> Agent:
     """Create a resource collector agent."""
-    agent = (
-        AgentBuilder()
-        .as_resource_collector()
-        .with_name("ResourceCollector01")
-        .active()
-        .build()
-    )
+    agent = AgentBuilder().as_resource_collector().with_name("ResourceCollector01").active().build()
 
     agent_data = agent.dict()
     # Ensure status is the string value, not the enum
@@ -246,11 +240,7 @@ def coalition_with_agents(db_session: Session, agent_batch: List[Agent]) -> Coal
 def resource_coalition(db_session: Session) -> Coalition:
     """Create a resource-focused coalition."""
     coalition = (
-        CoalitionBuilder()
-        .as_resource_coalition()
-        .with_name("ResourceOptimizers")
-        .active()
-        .build()
+        CoalitionBuilder().as_resource_coalition().with_name("ResourceOptimizers").active().build()
     )
 
     # Serialize datetime fields in objectives
@@ -280,11 +270,7 @@ def resource_coalition(db_session: Session) -> Coalition:
 def exploration_coalition(db_session: Session) -> Coalition:
     """Create an exploration-focused coalition."""
     coalition = (
-        CoalitionBuilder()
-        .as_exploration_coalition()
-        .with_name("Explorers")
-        .active()
-        .build()
+        CoalitionBuilder().as_exploration_coalition().with_name("Explorers").active().build()
     )
 
     # Serialize datetime fields in objectives
@@ -369,9 +355,7 @@ def large_knowledge_graph(db_session: Session) -> Dict[str, Any]:
 
 
 @pytest.fixture
-def agent_knowledge_scenario(
-    db_session: Session, active_agent: Agent
-) -> Dict[str, Any]:
+def agent_knowledge_scenario(db_session: Session, active_agent: Agent) -> Dict[str, Any]:
     """Create a knowledge scenario for an agent."""
     return KnowledgeGraphFactory.create_agent_knowledge_scenario(
         session=db_session,
@@ -446,9 +430,7 @@ def performance_test_scenario(db_session: Session) -> Dict[str, Any]:
         batch_size=50,
     )
 
-    return PerformanceDataFactory.create_performance_scenario(
-        session=db_session, config=config
-    )
+    return PerformanceDataFactory.create_performance_scenario(session=db_session, config=config)
 
 
 @pytest.fixture

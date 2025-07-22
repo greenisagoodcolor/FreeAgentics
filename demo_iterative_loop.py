@@ -61,12 +61,8 @@ async def demonstrate_iterative_loop():
 
         print("\nIteration Context:")
         print(f"  - Iteration Number: {iteration_context['iteration_number']}")
-        print(
-            f"  - Previous Suggestions: {iteration_context.get('previous_suggestions', [])}"
-        )
-        print(
-            f"  - Prompt Analysis: {iteration_context['prompt_analysis']['evolution']}"
-        )
+        print(f"  - Previous Suggestions: {iteration_context.get('previous_suggestions', [])}")
+        print(f"  - Prompt Analysis: {iteration_context['prompt_analysis']['evolution']}")
 
         # Simulate agent creation and belief extraction
         agent_id = f"agent-{i}"

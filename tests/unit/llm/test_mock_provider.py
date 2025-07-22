@@ -201,9 +201,7 @@ class TestMockLLMProvider:
         """Test concurrent generation requests."""
         tasks = []
         for i in range(5):
-            task = provider.generate(
-                [LLMMessage(role=LLMRole.USER, content=f"Test {i}")]
-            )
+            task = provider.generate([LLMMessage(role=LLMRole.USER, content=f"Test {i}")])
             tasks.append(task)
 
         responses = await asyncio.gather(*tasks)

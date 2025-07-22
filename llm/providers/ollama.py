@@ -205,9 +205,7 @@ class OllamaProvider(LLMProvider):
         """Generate a response using Ollama's API."""
         # Check if Ollama is running
         if not await self._check_ollama_running():
-            raise LLMError(
-                "Ollama service is not running. Start it with 'ollama serve'"
-            )
+            raise LLMError("Ollama service is not running. Start it with 'ollama serve'")
 
         # Ensure model is available
         await self._ensure_model_available(self.model)
@@ -264,9 +262,7 @@ class OllamaProvider(LLMProvider):
 
                     if response.status != 200:
                         error_msg = response_json.get("error", "Unknown error")
-                        raise LLMError(
-                            f"Ollama API error (status {response.status}): {error_msg}"
-                        )
+                        raise LLMError(f"Ollama API error (status {response.status}): {error_msg}")
 
                     # Extract response data
                     content = response_json["response"]
@@ -286,9 +282,7 @@ class OllamaProvider(LLMProvider):
                         "created_at": response_json.get("created_at"),
                         "total_duration": response_json.get("total_duration"),
                         "load_duration": response_json.get("load_duration"),
-                        "prompt_eval_duration": response_json.get(
-                            "prompt_eval_duration"
-                        ),
+                        "prompt_eval_duration": response_json.get("prompt_eval_duration"),
                         "eval_duration": response_json.get("eval_duration"),
                         "done": response_json.get("done", True),
                     }
@@ -298,9 +292,7 @@ class OllamaProvider(LLMProvider):
                         eval_duration_s = (
                             metadata["eval_duration"] / 1e9
                         )  # Convert nanoseconds to seconds
-                        metadata["tokens_per_second"] = (
-                            usage["completion_tokens"] / eval_duration_s
-                        )
+                        metadata["tokens_per_second"] = usage["completion_tokens"] / eval_duration_s
 
                     return LLMResponse(
                         content=content,

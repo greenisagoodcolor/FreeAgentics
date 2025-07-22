@@ -97,9 +97,7 @@ class SecurityTestResults:
                 "blocked_attacks": blocked_attacks,
                 "vulnerabilities_found": len(self.vulnerabilities),
                 "security_score": (
-                    (blocked_attacks / total_attacks * 100)
-                    if total_attacks > 0
-                    else 100
+                    (blocked_attacks / total_attacks * 100) if total_attacks > 0 else 100
                 ),
             },
             "vulnerabilities": self.vulnerabilities,
@@ -151,9 +149,7 @@ class SecurityTestResults:
             )
 
         if len(self.vulnerabilities) > 0:
-            recommendations.append(
-                "Implement additional input validation and sanitization"
-            )
+            recommendations.append("Implement additional input validation and sanitization")
 
         # Check timing attack vulnerability
         timing_variances = []
@@ -239,9 +235,9 @@ class TestAuthenticationSecuritySuite:
 
         # Verify overall security posture
         report = self.results.generate_report()
-        assert report["summary"]["successful_attacks"] == 0, (
-            f"Security vulnerabilities found: {report['vulnerabilities']}"
-        )
+        assert (
+            report["summary"]["successful_attacks"] == 0
+        ), f"Security vulnerabilities found: {report['vulnerabilities']}"
 
     def _test_registration_security(self):
         """Test registration endpoint security."""
@@ -340,9 +336,7 @@ class TestAuthenticationSecuritySuite:
         valid_login_time = time.time() - start_time
 
         assert response.status_code == 200
-        self.results.record_timing(
-            "valid_login", valid_login_time, "correct_credentials"
-        )
+        self.results.record_timing("valid_login", valid_login_time, "correct_credentials")
 
         # Test incorrect password
         start_time = time.time()
@@ -355,9 +349,7 @@ class TestAuthenticationSecuritySuite:
         )
         invalid_password_time = time.time() - start_time
 
-        self.results.record_timing(
-            "invalid_password", invalid_password_time, "wrong_password"
-        )
+        self.results.record_timing("invalid_password", invalid_password_time, "wrong_password")
 
         if response.status_code == 200:
             self.results.record_attack(
@@ -387,9 +379,7 @@ class TestAuthenticationSecuritySuite:
         )
         nonexistent_user_time = time.time() - start_time
 
-        self.results.record_timing(
-            "nonexistent_user", nonexistent_user_time, "user_not_found"
-        )
+        self.results.record_timing("nonexistent_user", nonexistent_user_time, "user_not_found")
 
         # Check for timing attack vulnerability
         timing_variance = abs(valid_login_time - nonexistent_user_time)
@@ -670,9 +660,7 @@ class TestAuthenticationSecuritySuite:
                     "role": "observer",
                 }
 
-                response = self.client.post(
-                    "/api/v1/auth/register", json=registration_data
-                )
+                response = self.client.post("/api/v1/auth/register", json=registration_data)
                 if response.status_code == 200:
                     self.results.record_attack(
                         attack_type,
@@ -805,9 +793,7 @@ class TestAuthenticationSecuritySuite:
         # Launch concurrent threads
         with concurrent.futures.ThreadPoolExecutor(max_workers=10) as executor:
             futures = [executor.submit(concurrent_login_attempt, i) for i in range(20)]
-            results = [
-                future.result() for future in concurrent.futures.as_completed(futures)
-            ]
+            results = [future.result() for future in concurrent.futures.as_completed(futures)]
 
         # Analyze results
         successful_logins = sum(1 for r in results if r.get("success", False))
@@ -893,9 +879,7 @@ class TestAuthenticationSecuritySuite:
             if token is None:
                 continue
 
-            response = self.client.post(
-                "/api/v1/auth/refresh", json={"refresh_token": token}
-            )
+            response = self.client.post("/api/v1/auth/refresh", json={"refresh_token": token})
 
             if response.status_code == 200:
                 self.results.record_attack(
@@ -953,17 +937,13 @@ class TestAuthenticationSecuritySuite:
                 print(f"  - {rec}")
 
         # Assert no critical vulnerabilities
-        critical_vulns = [
-            v for v in report["vulnerabilities"] if v["severity"] == "critical"
-        ]
-        assert len(critical_vulns) == 0, (
-            f"Critical vulnerabilities found: {critical_vulns}"
-        )
+        critical_vulns = [v for v in report["vulnerabilities"] if v["severity"] == "critical"]
+        assert len(critical_vulns) == 0, f"Critical vulnerabilities found: {critical_vulns}"
 
         # Assert security score is acceptable
-        assert report["summary"]["security_score"] >= 95, (
-            f"Security score too low: {report['summary']['security_score']:.1f}%"
-        )
+        assert (
+            report["summary"]["security_score"] >= 95
+        ), f"Security score too low: {report['summary']['security_score']:.1f}%"
 
         return report
 
@@ -987,9 +967,7 @@ class TestAuthenticationSecuritySuite:
         """Create expired token."""
         try:
             payload = jwt.decode(valid_token, options={"verify_signature": False})
-            payload["exp"] = int(
-                (datetime.now(timezone.utc) - timedelta(hours=1)).timestamp()
-            )
+            payload["exp"] = int((datetime.now(timezone.utc) - timedelta(hours=1)).timestamp())
             # Can't properly sign without private key, so return original for testing
             return valid_token
         except Exception:

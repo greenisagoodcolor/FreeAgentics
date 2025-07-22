@@ -41,9 +41,7 @@ class TestWebSocketPoolIntegration:
         manager = WebSocketPooledConnectionManager(pool_config, resource_config)
 
         # Mock the actual WebSocket creation
-        with patch(
-            "websocket.connection_pool.create_websocket_connection"
-        ) as mock_create:
+        with patch("websocket.connection_pool.create_websocket_connection") as mock_create:
             mock_ws = AsyncMock()
             mock_ws.connect = AsyncMock()
             mock_ws.ping = AsyncMock()
@@ -87,9 +85,7 @@ class TestWebSocketPoolIntegration:
 
         # Send messages
         for i in range(5):
-            await manager.send_agent_message(
-                agent_id, {"type": "test_message", "seq": i}
-            )
+            await manager.send_agent_message(agent_id, {"type": "test_message", "seq": i})
 
         # Get metrics
         pool_metrics = manager.get_pool_metrics()
@@ -124,9 +120,7 @@ class TestWebSocketPoolIntegration:
         # Check resource allocation
         resource_metrics = manager.get_resource_metrics()
         assert resource_metrics["total_agents"] == num_agents
-        assert (
-            resource_metrics["connections_in_use"] == 3
-        )  # 15 agents / 5 per connection
+        assert resource_metrics["connections_in_use"] == 3  # 15 agents / 5 per connection
 
         # Verify connection sharing
         unique_conn_ids = set(conn_ids)
@@ -205,9 +199,7 @@ class TestWebSocketPoolIntegration:
 
             # Send messages
             for i in range(operations_per_agent):
-                await manager.send_agent_message(
-                    agent_id, {"type": "concurrent_test", "seq": i}
-                )
+                await manager.send_agent_message(agent_id, {"type": "concurrent_test", "seq": i})
 
                 # Update usage
                 await manager.resource_manager.update_resource_usage(
@@ -369,17 +361,13 @@ class TestWebSocketPoolIntegration:
         for i in range(3):
             agent_id = f"us-agent-{i}"
             region_us_agents.append(agent_id)
-            await manager.allocate_agent_connection(
-                agent_id, metadata={"region": "us-east"}
-            )
+            await manager.allocate_agent_connection(agent_id, metadata={"region": "us-east"})
 
         # Allocate EU region agents
         for i in range(3):
             agent_id = f"eu-agent-{i}"
             region_eu_agents.append(agent_id)
-            await manager.allocate_agent_connection(
-                agent_id, metadata={"region": "eu-west"}
-            )
+            await manager.allocate_agent_connection(agent_id, metadata={"region": "eu-west"})
 
         # Verify agents are allocated
         resource_metrics = manager.get_resource_metrics()

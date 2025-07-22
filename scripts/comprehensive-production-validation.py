@@ -80,9 +80,7 @@ class ProductionValidator:
             self.passes.append(f"{category}: {test_name}")
             logger.info(f"PASS: {category} - {test_name}")
         else:
-            logger.info(
-                f"INFO: {category} - {test_name}: {result.get('message', 'No status')}"
-            )
+            logger.info(f"INFO: {category} - {test_name}: {result.get('message', 'No status')}")
 
     def check_environment_readiness(self) -> bool:
         """Check if environment is ready for testing."""
@@ -100,9 +98,7 @@ class ProductionValidator:
                 logger.info("API server is running")
                 return True
             else:
-                logger.error(
-                    f"API server not responding correctly: {response.status_code}"
-                )
+                logger.error(f"API server not responding correctly: {response.status_code}")
                 return False
         except Exception as e:
             logger.error(f"Cannot connect to API server: {e}")
@@ -329,9 +325,7 @@ class ProductionValidator:
                     cert = ssock.getpeercert()
 
                     # Check certificate expiry
-                    not_after = datetime.strptime(
-                        cert["notAfter"], "%b %d %H:%M:%S %Y %Z"
-                    )
+                    not_after = datetime.strptime(cert["notAfter"], "%b %d %H:%M:%S %Y %Z")
                     days_until_expiry = (not_after - datetime.now()).days
 
                     self.log_result(
@@ -420,9 +414,7 @@ class ProductionValidator:
                 "security",
                 "authentication_security",
                 {
-                    "status": "PASS"
-                    if response.status_code in [401, 403]
-                    else "WARNING",
+                    "status": "PASS" if response.status_code in [401, 403] else "WARNING",
                     "response_code": response.status_code,
                     "message": f"Authentication correctly rejected invalid credentials: {response.status_code}",
                 },
@@ -662,9 +654,7 @@ class ProductionValidator:
             "scripts/rollback-deployment.sh",
         ]
 
-        existing_scripts = [
-            script for script in recovery_scripts if os.path.exists(script)
-        ]
+        existing_scripts = [script for script in recovery_scripts if os.path.exists(script)]
 
         self.log_result(
             "disaster_recovery",
@@ -747,9 +737,7 @@ class ProductionValidator:
                     "process_resident_memory_bytes",
                 ]
 
-                found_metrics = [
-                    metric for metric in required_metrics if metric in metrics_text
-                ]
+                found_metrics = [metric for metric in required_metrics if metric in metrics_text]
 
                 self.log_result(
                     "monitoring",
@@ -826,9 +814,7 @@ class ProductionValidator:
                     "monitoring",
                     "alert_manager",
                     {
-                        "status": "PASS"
-                        if has_routing and has_receivers
-                        else "WARNING",
+                        "status": "PASS" if has_routing and has_receivers else "WARNING",
                         "has_routing": has_routing,
                         "has_receivers": has_receivers,
                         "message": f"Alert manager config: routing={has_routing}, receivers={has_receivers}",
@@ -930,9 +916,7 @@ class ProductionValidator:
             "scripts/deployment/deploy-production.sh",
         ]
 
-        existing_scripts = [
-            script for script in deployment_scripts if os.path.exists(script)
-        ]
+        existing_scripts = [script for script in deployment_scripts if os.path.exists(script)]
 
         self.log_result(
             "operational",
@@ -953,9 +937,7 @@ class ProductionValidator:
             "scripts/deployment/rollback.sh",
         ]
 
-        existing_scripts = [
-            script for script in rollback_scripts if os.path.exists(script)
-        ]
+        existing_scripts = [script for script in rollback_scripts if os.path.exists(script)]
 
         self.log_result(
             "operational",
@@ -1019,9 +1001,7 @@ class ProductionValidator:
         logger.info("Generating final comprehensive report...")
 
         # Calculate summary statistics
-        total_tests = (
-            len(self.passes) + len(self.warnings) + len(self.critical_failures)
-        )
+        total_tests = len(self.passes) + len(self.warnings) + len(self.critical_failures)
         pass_rate = (len(self.passes) / total_tests) * 100 if total_tests > 0 else 0
 
         self.results["summary"] = {

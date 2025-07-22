@@ -124,9 +124,7 @@ class BasePenetrationTest(ABC):
         self.vulnerabilities.append(vulnerability)
         logger.warning(f"Vulnerability discovered: {vulnerability.title}")
 
-    def create_test_user(
-        self, role: UserRole = UserRole.OBSERVER
-    ) -> Tuple[str, str, str]:
+    def create_test_user(self, role: UserRole = UserRole.OBSERVER) -> Tuple[str, str, str]:
         """Create a test user for testing purposes."""
         username = f"test_user_{int(time.time())}"
         password = "test_password_123"
@@ -242,9 +240,7 @@ class PenetrationTestingFramework:
 
         return report
 
-    def _calculate_risk_score(
-        self, vulnerabilities: List[VulnerabilityFinding]
-    ) -> float:
+    def _calculate_risk_score(self, vulnerabilities: List[VulnerabilityFinding]) -> float:
         """Calculate overall risk score (0-100)."""
         if not vulnerabilities:
             return 0.0
@@ -257,31 +253,21 @@ class PenetrationTestingFramework:
             SeverityLevel.INFO: 1,
         }
 
-        total_score = sum(
-            severity_weights.get(vuln.severity, 1) for vuln in vulnerabilities
-        )
-        max_possible_score = (
-            len(vulnerabilities) * severity_weights[SeverityLevel.CRITICAL]
-        )
+        total_score = sum(severity_weights.get(vuln.severity, 1) for vuln in vulnerabilities)
+        max_possible_score = len(vulnerabilities) * severity_weights[SeverityLevel.CRITICAL]
 
         return (
-            min(100.0, (total_score / max_possible_score) * 100)
-            if max_possible_score > 0
-            else 0.0
+            min(100.0, (total_score / max_possible_score) * 100) if max_possible_score > 0 else 0.0
         )
 
-    def _generate_recommendations(
-        self, vulnerabilities: List[VulnerabilityFinding]
-    ) -> List[str]:
+    def _generate_recommendations(self, vulnerabilities: List[VulnerabilityFinding]) -> List[str]:
         """Generate high-level security recommendations."""
         recommendations = []
 
         vuln_types = {vuln.vulnerability_type for vuln in vulnerabilities}
 
         if VulnerabilityType.AUTHENTICATION_BYPASS in vuln_types:
-            recommendations.append(
-                "Implement multi-factor authentication for all user accounts"
-            )
+            recommendations.append("Implement multi-factor authentication for all user accounts")
 
         if VulnerabilityType.SQL_INJECTION in vuln_types:
             recommendations.append(
@@ -294,22 +280,16 @@ class PenetrationTestingFramework:
             )
 
         if VulnerabilityType.PRIVILEGE_ESCALATION_VERTICAL in vuln_types:
-            recommendations.append(
-                "Review and strengthen role-based access control implementation"
-            )
+            recommendations.append("Review and strengthen role-based access control implementation")
 
         if VulnerabilityType.IDOR in vuln_types:
-            recommendations.append(
-                "Implement proper authorization checks for all resource access"
-            )
+            recommendations.append("Implement proper authorization checks for all resource access")
 
         critical_count = sum(
             1 for vuln in vulnerabilities if vuln.severity == SeverityLevel.CRITICAL
         )
         if critical_count > 0:
-            recommendations.append(
-                f"Immediately address {critical_count} critical vulnerabilities"
-            )
+            recommendations.append(f"Immediately address {critical_count} critical vulnerabilities")
 
         return recommendations
 
@@ -338,9 +318,7 @@ class PenetrationTestingFramework:
         return {
             "prioritization": timeline,
             "estimated_effort": self._estimate_remediation_effort(vulnerabilities),
-            "resource_requirements": self._estimate_resource_requirements(
-                vulnerabilities
-            ),
+            "resource_requirements": self._estimate_resource_requirements(vulnerabilities),
         }
 
     def _estimate_remediation_effort(
@@ -357,9 +335,7 @@ class PenetrationTestingFramework:
 
         vuln_types = {vuln.vulnerability_type for vuln in vulnerabilities}
         return {
-            vuln_type.value: effort_mapping.get(
-                vuln_type, "Medium - Requires investigation"
-            )
+            vuln_type.value: effort_mapping.get(vuln_type, "Medium - Requires investigation")
             for vuln_type in vuln_types
         }
 
@@ -400,13 +376,13 @@ class PenetrationTestingFramework:
 
         return list(requirements)
 
-    async def save_report(
-        self, report: Dict[str, Any], file_path: Optional[str] = None
-    ) -> str:
+    async def save_report(self, report: Dict[str, Any], file_path: Optional[str] = None) -> str:
         """Save penetration testing report to file."""
         if file_path is None:
             timestamp = datetime.now(timezone.utc).strftime("%Y%m%d_%H%M%S")
-            file_path = f"/home/green/FreeAgentics/tests/security/reports/pentest_report_{timestamp}.json"
+            file_path = (
+                f"/home/green/FreeAgentics/tests/security/reports/pentest_report_{timestamp}.json"
+            )
 
         # Ensure directory exists
         Path(file_path).parent.mkdir(parents=True, exist_ok=True)

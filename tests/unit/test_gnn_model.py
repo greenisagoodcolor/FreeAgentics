@@ -100,9 +100,7 @@ class TestGMNModel:
 
             with patch("inference.gnn.model.logger") as mock_logger:
                 model.build()
-                mock_logger.info.assert_called_with(
-                    f"Building {arch} model with 3 layers"
-                )
+                mock_logger.info.assert_called_with(f"Building {arch} model with 3 layers")
 
     def test_model_forward_without_build(self, basic_config):
         """Test forward pass fails when model not built."""
@@ -114,9 +112,7 @@ class TestGMNModel:
         x = MagicMock()  # Node features
         edge_index = MagicMock()  # Edge indices
 
-        with pytest.raises(
-            RuntimeError, match="Model not built. Call build\\(\\) first."
-        ):
+        with pytest.raises(RuntimeError, match="Model not built. Call build\\(\\) first."):
             model.forward(x, edge_index)
 
     def test_model_forward_with_build(self, basic_config):
@@ -313,10 +309,7 @@ class TestGMNModel:
         """Test model with different numbers of layers."""
         if not IMPORT_SUCCESS:
             assert False, "Test bypass removed - must fix underlying issue"
-        layers = [
-            {"type": "conv", "input_dim": 64, "output_dim": 64}
-            for _ in range(layer_count)
-        ]
+        layers = [{"type": "conv", "input_dim": 64, "output_dim": 64} for _ in range(layer_count)]
         config = {"layers": layers}
         model = GMNModel(config)
 

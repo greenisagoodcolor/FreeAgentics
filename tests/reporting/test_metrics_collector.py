@@ -170,18 +170,12 @@ class MetricsCollector:
         )
 
         # Create indexes
-        cursor.execute(
-            "CREATE INDEX IF NOT EXISTS idx_test_runs_timestamp ON test_runs(timestamp)"
-        )
-        cursor.execute(
-            "CREATE INDEX IF NOT EXISTS idx_test_metrics_run_id ON test_metrics(run_id)"
-        )
+        cursor.execute("CREATE INDEX IF NOT EXISTS idx_test_runs_timestamp ON test_runs(timestamp)")
+        cursor.execute("CREATE INDEX IF NOT EXISTS idx_test_metrics_run_id ON test_metrics(run_id)")
         cursor.execute(
             "CREATE INDEX IF NOT EXISTS idx_test_metrics_test_id ON test_metrics(test_id)"
         )
-        cursor.execute(
-            "CREATE INDEX IF NOT EXISTS idx_flaky_tests_test_id ON flaky_tests(test_id)"
-        )
+        cursor.execute("CREATE INDEX IF NOT EXISTS idx_flaky_tests_test_id ON flaky_tests(test_id)")
 
         conn.commit()
         conn.close()
@@ -455,9 +449,7 @@ class MetricsCollector:
         except ImportError:
             return None
 
-    def get_flaky_tests(
-        self, min_flaky_percentage: float = 10.0
-    ) -> List[Dict[str, Any]]:
+    def get_flaky_tests(self, min_flaky_percentage: float = 10.0) -> List[Dict[str, Any]]:
         """Get flaky tests above the minimum percentage."""
         conn = sqlite3.connect(self.db_path)
         cursor = conn.cursor()
@@ -590,9 +582,7 @@ class MetricsCollector:
             "duration_trends": duration_trends,
         }
 
-    def generate_metrics_report(
-        self, output_path: str = "tests/reporting/metrics_report.html"
-    ):
+    def generate_metrics_report(self, output_path: str = "tests/reporting/metrics_report.html"):
         """Generate HTML metrics report."""
         flaky_tests = self.get_flaky_tests()
         slow_tests = self.get_slow_tests()
@@ -752,9 +742,7 @@ class MetricsCollector:
         logger.info(f"HTML metrics report generated: {output_path}")
         return output_path
 
-    def export_metrics_json(
-        self, output_path: str = "tests/reporting/metrics_data.json"
-    ):
+    def export_metrics_json(self, output_path: str = "tests/reporting/metrics_data.json"):
         """Export metrics data as JSON."""
         data = {
             "flaky_tests": self.get_flaky_tests(),

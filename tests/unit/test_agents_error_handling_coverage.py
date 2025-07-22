@@ -36,9 +36,7 @@ class TestAgentError:
     def test_agent_error_creation(self):
         """Test AgentError creation with all fields."""
         context = {"agent_id": "123", "action": "update"}
-        error = AgentError(
-            message="Test error", severity=ErrorSeverity.HIGH, context=context
-        )
+        error = AgentError(message="Test error", severity=ErrorSeverity.HIGH, context=context)
 
         assert str(error) == "Test error"
         assert error.severity == ErrorSeverity.HIGH
@@ -130,9 +128,7 @@ class TestErrorRecoveryStrategy:
 
     def test_can_retry_cooldown(self):
         """Test can_retry respects cooldown period."""
-        strategy = ErrorRecoveryStrategy(
-            name="Test", max_retries=5, cooldown_seconds=60
-        )
+        strategy = ErrorRecoveryStrategy(name="Test", max_retries=5, cooldown_seconds=60)
 
         strategy.record_error()
 

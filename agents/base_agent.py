@@ -241,9 +241,7 @@ class ActiveInferenceAgent(ABC):
     4. Act in the environment
     """
 
-    def __init__(
-        self, agent_id: str, name: str, config: Optional[Dict[str, Any]] = None
-    ):
+    def __init__(self, agent_id: str, name: str, config: Optional[Dict[str, Any]] = None):
         """Initialize an Active Inference agent.
 
         Args:
@@ -277,9 +275,7 @@ class ActiveInferenceAgent(ABC):
         self.policies: list[Any] = []  # Available action policies
 
         # GMN and LLM integration (lazy-loaded for performance)
-        self.gmn_spec: Optional[Dict[str, Any]] = (
-            None  # GMN specification for the agent
-        )
+        self.gmn_spec: Optional[Dict[str, Any]] = None  # GMN specification for the agent
         self.llm_manager = None  # Will be lazy-loaded on first use
         self._llm_config_dict = self.config.get("llm_config", {})
 
@@ -462,9 +458,7 @@ class ActiveInferenceAgent(ABC):
 
             # Create default matrices if not provided
             if not A_matrices:
-                A = np.eye(
-                    num_obs[0], num_states[0]
-                )  # Default identity observation model
+                A = np.eye(num_obs[0], num_states[0])  # Default identity observation model
                 A_matrices = [A]
 
             if not B_matrices:
@@ -513,8 +507,7 @@ class ActiveInferenceAgent(ABC):
                 )
 
             logger.info(
-                f"Successfully initialized PyMDP agent from GMN spec for"
-                f" {self.agent_id}"
+                f"Successfully initialized PyMDP agent from GMN spec for" f" {self.agent_id}"
             )
 
         except Exception as e:
@@ -596,9 +589,7 @@ class ActiveInferenceAgent(ABC):
                 current_beliefs = None
                 if hasattr(self, "beliefs") and self.beliefs is not None:
                     current_beliefs = (
-                        self.beliefs.tolist()
-                        if hasattr(self.beliefs, "tolist")
-                        else self.beliefs
+                        self.beliefs.tolist() if hasattr(self.beliefs, "tolist") else self.beliefs
                     )
 
                 self.kg_integration.update_from_agent_step(
@@ -685,9 +676,7 @@ class ActiveInferenceAgent(ABC):
             "name": self.name,
             "is_active": self.is_active,
             "created_at": self.created_at.isoformat(),
-            "last_action_at": (
-                self.last_action_at.isoformat() if self.last_action_at else None
-            ),
+            "last_action_at": (self.last_action_at.isoformat() if self.last_action_at else None),
             "total_steps": self.total_steps,
             "metrics": self.metrics,
         }
@@ -716,9 +705,7 @@ class ActiveInferenceAgent(ABC):
 
             return belief_monitoring_hooks.get_agent_statistics(self.agent_id)
         except Exception as e:
-            logger.error(
-                f"Failed to get belief monitoring stats for agent {self.agent_id}: {e}"
-            )
+            logger.error(f"Failed to get belief monitoring stats for agent {self.agent_id}: {e}")
             return {"error": str(e)}
 
 
@@ -1018,9 +1005,7 @@ class BasicExplorerAgent(ActiveInferenceAgent):
                 factor = qs[0]
                 entropy = -np.sum(factor * np.log(factor + epsilon))
             else:  # Multiple factors
-                entropy = sum(
-                    -np.sum(factor * np.log(factor + epsilon)) for factor in qs
-                )
+                entropy = sum(-np.sum(factor * np.log(factor + epsilon)) for factor in qs)
             return float(entropy)
         except Exception as e:
             logger.warning(f"Entropy calculation failed: {e}")
@@ -1131,9 +1116,7 @@ class BasicExplorerAgent(ActiveInferenceAgent):
                     try:
                         self._process_belief_states(qs, beliefs_before)
                     except Exception as e:
-                        logger.warning(
-                            f"Fast belief processing failed: {e}, using fallback"
-                        )
+                        logger.warning(f"Fast belief processing failed: {e}, using fallback")
                         self.metrics["belief_entropy"] = 0.0
 
             except Exception as e:
@@ -1192,9 +1175,7 @@ class BasicExplorerAgent(ActiveInferenceAgent):
                         )
 
                 # Convert action index to string with safe indexing
-                selected_action = safe_array_index(
-                    self.action_map, action_idx_converted, "stay"
-                )
+                selected_action = safe_array_index(self.action_map, action_idx_converted, "stay")
 
                 # Store expected free energy for analysis
                 if G is not None:
@@ -1215,9 +1196,7 @@ class BasicExplorerAgent(ActiveInferenceAgent):
                     ) = self.pymdp_error_handler.safe_execute(
                         "policy_index_extraction",
                         lambda: (
-                            safe_array_to_int(np.argmax(q_pi))
-                            if hasattr(q_pi, "__len__")
-                            else 0
+                            safe_array_to_int(np.argmax(q_pi)) if hasattr(q_pi, "__len__") else 0
                         ),
                         lambda: 0,  # Default policy index
                     )
@@ -1272,9 +1251,7 @@ class BasicExplorerAgent(ActiveInferenceAgent):
         # Add some exploration noise
         if np.random.random() < self.exploration_rate:
             valid_actions = [a for a, v in action_values.items() if v >= 0]
-            selected_action = (
-                np.random.choice(valid_actions) if valid_actions else "stay"
-            )
+            selected_action = np.random.choice(valid_actions) if valid_actions else "stay"
         else:
             selected_action = max(action_values, key=action_values.get)
 

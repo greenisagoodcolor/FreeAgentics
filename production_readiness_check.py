@@ -43,9 +43,7 @@ class ProductionReadinessValidator:
                 missing_files.append(file)
 
         if missing_files:
-            self.results["blockers"].extend(
-                [f"Missing critical file: {f}" for f in missing_files]
-            )
+            self.results["blockers"].extend([f"Missing critical file: {f}" for f in missing_files])
             status = "FAILED"
         else:
             status = "PASSED"
@@ -131,9 +129,7 @@ class ProductionReadinessValidator:
             self.results["blockers"].append("Critical API main module missing")
 
         self.results["checks"]["api_endpoints"] = {
-            "status": "PASSED"
-            if len(present_modules) >= len(api_modules) * 0.8
-            else "FAILED",
+            "status": "PASSED" if len(present_modules) >= len(api_modules) * 0.8 else "FAILED",
             "present_modules": present_modules,
             "missing_modules": missing_modules,
             "api_coverage": f"{len(present_modules)}/{len(api_modules)}",
@@ -176,9 +172,7 @@ class ProductionReadinessValidator:
         total_tests = sum(test_coverage.values())
 
         if total_tests < 10:
-            self.results["warnings"].append(
-                f"Low test coverage: only {total_tests} test files"
-            )
+            self.results["warnings"].append(f"Low test coverage: only {total_tests} test files")
 
         self.results["checks"]["test_coverage"] = {
             "status": "PASSED" if total_tests >= 10 else "WARNING",
@@ -239,41 +233,24 @@ class ProductionReadinessValidator:
             recommendations.append("SECURITY: Implement additional security middleware")
 
         # Performance recommendations
-        if (
-            len(
-                self.results["checks"]["performance_configuration"][
-                    "performance_features"
-                ]
-            )
-            < 2
-        ):
-            recommendations.append(
-                "PERFORMANCE: Add more performance optimization features"
-            )
+        if len(self.results["checks"]["performance_configuration"]["performance_features"]) < 2:
+            recommendations.append("PERFORMANCE: Add more performance optimization features")
 
         # Observability recommendations
         if not self.results["checks"]["observability_setup"]["observability_features"]:
             recommendations.append("MONITORING: Set up comprehensive monitoring stack")
 
         # General recommendations
-        recommendations.append(
-            "DEPLOYMENT: Use production Docker configuration with health checks"
-        )
-        recommendations.append(
-            "SCALING: Implement horizontal scaling with load balancer"
-        )
+        recommendations.append("DEPLOYMENT: Use production Docker configuration with health checks")
+        recommendations.append("SCALING: Implement horizontal scaling with load balancer")
         recommendations.append("BACKUP: Set up automated database backup strategy")
 
         self.results["recommendations"] = recommendations
 
     def determine_overall_status(self):
         """Determine overall production readiness status."""
-        failed_checks = [
-            k for k, v in self.results["checks"].items() if v["status"] == "FAILED"
-        ]
-        warning_checks = [
-            k for k, v in self.results["checks"].items() if v["status"] == "WARNING"
-        ]
+        failed_checks = [k for k, v in self.results["checks"].items() if v["status"] == "FAILED"]
+        warning_checks = [k for k, v in self.results["checks"].items() if v["status"] == "WARNING"]
 
         if self.results["blockers"] or failed_checks:
             self.results["overall_status"] = "BLOCKED"
@@ -341,9 +318,7 @@ def main():
         print("\\n🚫 PRODUCTION DEPLOYMENT BLOCKED - Critical issues must be resolved")
         sys.exit(1)
     elif results["overall_status"] == "CONDITIONAL":
-        print(
-            "\\n⚠️ CONDITIONAL APPROVAL - Address warnings before production deployment"
-        )
+        print("\\n⚠️ CONDITIONAL APPROVAL - Address warnings before production deployment")
         sys.exit(0)
     else:
         print("\\n🎉 PRODUCTION READY - All critical validations passed")

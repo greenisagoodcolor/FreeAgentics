@@ -108,9 +108,7 @@ class ServiceTopology:
             (
                 e
                 for e in self.edges
-                if e["source"] == source
-                and e["target"] == target
-                and e["operation"] == operation
+                if e["source"] == source and e["target"] == target and e["operation"] == operation
             ),
             None,
         )
@@ -323,9 +321,7 @@ class ProductionAPM:
                             "threshold": self.thresholds["response_time_p95"],
                             "actual": p95,
                             "timestamp": now,
-                            "affected_operations": list(
-                                set(t.operation for t in recent_traces)
-                            ),
+                            "affected_operations": list(set(t.operation for t in recent_traces)),
                         }
                     )
 
@@ -377,9 +373,7 @@ class ProductionAPM:
 
         # Keep only recent violations
         cutoff = time.time() - 86400  # 24 hours
-        self.sla_violations = [
-            v for v in self.sla_violations if v["timestamp"] > cutoff
-        ]
+        self.sla_violations = [v for v in self.sla_violations if v["timestamp"] > cutoff]
 
         return violations
 
@@ -394,9 +388,7 @@ class ProductionAPM:
         """
         cutoff = time.time() - duration_seconds
         recent_traces = self._get_recent_traces(duration_seconds)
-        recent_snapshots = [
-            s for s in self.performance_snapshots if s.timestamp > cutoff
-        ]
+        recent_snapshots = [s for s in self.performance_snapshots if s.timestamp > cutoff]
 
         analytics = {
             "time_window": duration_seconds,
@@ -440,9 +432,7 @@ class ProductionAPM:
                 "cpu_percent": psutil.cpu_percent(),
                 "memory_percent": psutil.virtual_memory().percent,
                 "disk_usage": psutil.disk_usage("/").percent,
-                "load_average": psutil.getloadavg()
-                if hasattr(psutil, "getloadavg")
-                else (0, 0, 0),
+                "load_average": psutil.getloadavg() if hasattr(psutil, "getloadavg") else (0, 0, 0),
                 "process_count": len(psutil.pids()),
                 "timestamp": now,
             }
@@ -564,15 +554,11 @@ class ProductionAPM:
         if trace.duration_ms:
             current_avg = node["avg_response_time"]
             count = node["request_count"]
-            node["avg_response_time"] = (
-                (current_avg * (count - 1)) + trace.duration_ms
-            ) / count
+            node["avg_response_time"] = ((current_avg * (count - 1)) + trace.duration_ms) / count
 
         # Add edges for agent coordination
         if trace.agent_id and trace.parent_span_id:
-            self.service_topology.add_edge(
-                f"agent-{trace.agent_id}", service, trace.operation
-            )
+            self.service_topology.add_edge(f"agent-{trace.agent_id}", service, trace.operation)
 
     async def _collect_system_metrics(self):
         """Collect system performance metrics periodically."""
@@ -584,12 +570,12 @@ class ProductionAPM:
                     cpu_percent=psutil.cpu_percent(interval=1),
                     memory_percent=psutil.virtual_memory().percent,
                     memory_mb=psutil.virtual_memory().used / (1024 * 1024),
-                    disk_io_read=psutil.disk_io_counters().read_bytes
-                    if psutil.disk_io_counters()
-                    else 0,
-                    disk_io_write=psutil.disk_io_counters().write_bytes
-                    if psutil.disk_io_counters()
-                    else 0,
+                    disk_io_read=(
+                        psutil.disk_io_counters().read_bytes if psutil.disk_io_counters() else 0
+                    ),
+                    disk_io_write=(
+                        psutil.disk_io_counters().write_bytes if psutil.disk_io_counters() else 0
+                    ),
                     network_bytes_sent=psutil.net_io_counters().bytes_sent,
                     network_bytes_recv=psutil.net_io_counters().bytes_recv,
                     process_count=len(psutil.pids()),
@@ -598,12 +584,14 @@ class ProductionAPM:
                         for p in psutil.process_iter(["num_threads"])
                         if p.info["num_threads"]
                     ),
-                    open_files=len(psutil.Process().open_files())
-                    if hasattr(psutil.Process(), "open_files")
-                    else 0,
-                    load_average=psutil.getloadavg()
-                    if hasattr(psutil, "getloadavg")
-                    else (0, 0, 0),
+                    open_files=(
+                        len(psutil.Process().open_files())
+                        if hasattr(psutil.Process(), "open_files")
+                        else 0
+                    ),
+                    load_average=(
+                        psutil.getloadavg() if hasattr(psutil, "getloadavg") else (0, 0, 0)
+                    ),
                 )
 
                 self.performance_snapshots.append(snapshot)
@@ -676,14 +664,11 @@ class ProductionAPM:
                 "max": max(response_times) if response_times else 0,
             },
             "operation_breakdown": {
-                op: len([t for t in traces if t.operation == op])
-                for op in set(operations)
+                op: len([t for t in traces if t.operation == op]) for op in set(operations)
             },
         }
 
-    def _analyze_performance(
-        self, snapshots: List[PerformanceSnapshot]
-    ) -> Dict[str, Any]:
+    def _analyze_performance(self, snapshots: List[PerformanceSnapshot]) -> Dict[str, Any]:
         """Analyze system performance."""
         if not snapshots:
             return {"error": "No performance snapshots available"}
@@ -754,9 +739,7 @@ class ProductionAPM:
     def _analyze_sla_compliance(self) -> Dict[str, Any]:
         """Analyze SLA compliance."""
         recent_violations = [
-            v
-            for v in self.sla_violations
-            if v["timestamp"] > time.time() - 86400  # Last 24 hours
+            v for v in self.sla_violations if v["timestamp"] > time.time() - 86400  # Last 24 hours
         ]
 
         violation_types = {}
@@ -769,18 +752,11 @@ class ProductionAPM:
         return {
             "total_violations": len(recent_violations),
             "violation_types": {
-                v_type: len(violations)
-                for v_type, violations in violation_types.items()
+                v_type: len(violations) for v_type, violations in violation_types.items()
             },
-            "compliance_score": max(
-                0, 100 - (len(recent_violations) * 2)
-            ),  # Simple scoring
+            "compliance_score": max(0, 100 - (len(recent_violations) * 2)),  # Simple scoring
             "critical_violations": len(
-                [
-                    v
-                    for v in recent_violations
-                    if v["type"] in ["error_rate", "response_time_p95"]
-                ]
+                [v for v in recent_violations if v["type"] in ["error_rate", "response_time_p95"]]
             ),
         }
 
@@ -790,9 +766,7 @@ class ProductionAPM:
             return {}
 
         cutoff = time.time() - duration_seconds
-        recent_metrics = [
-            m for m in self.traces["business_metrics"] if m["timestamp"] > cutoff
-        ]
+        recent_metrics = [m for m in self.traces["business_metrics"] if m["timestamp"] > cutoff]
 
         metrics_by_name = {}
         for metric in recent_metrics:
@@ -822,19 +796,13 @@ class ProductionAPM:
 
         # Penalize based on response time
         p95_response = (
-            analytics.get("request_analytics", {})
-            .get("response_time_stats", {})
-            .get("p95", 0)
+            analytics.get("request_analytics", {}).get("response_time_stats", {}).get("p95", 0)
         )
         if p95_response > self.thresholds["response_time_p95"]:
             score -= (p95_response - self.thresholds["response_time_p95"]) / 10
 
         # Penalize based on resource usage
-        cpu_p95 = (
-            analytics.get("performance_analytics", {})
-            .get("cpu_stats", {})
-            .get("p95", 0)
-        )
+        cpu_p95 = analytics.get("performance_analytics", {}).get("cpu_stats", {}).get("p95", 0)
         if cpu_p95 > self.thresholds["cpu_usage"]:
             score -= (cpu_p95 - self.thresholds["cpu_usage"]) / 2
 
@@ -844,9 +812,7 @@ class ProductionAPM:
 
         return max(0.0, min(100.0, score))
 
-    async def _generate_recommendations(
-        self, analytics: Dict[str, Any]
-    ) -> List[Dict[str, Any]]:
+    async def _generate_recommendations(self, analytics: Dict[str, Any]) -> List[Dict[str, Any]]:
         """Generate performance recommendations based on analytics."""
         recommendations = []
 
@@ -870,9 +836,7 @@ class ProductionAPM:
 
         # High response time recommendation
         p95_response = (
-            analytics.get("request_analytics", {})
-            .get("response_time_stats", {})
-            .get("p95", 0)
+            analytics.get("request_analytics", {}).get("response_time_stats", {}).get("p95", 0)
         )
         if p95_response > 300:
             recommendations.append(
@@ -891,11 +855,7 @@ class ProductionAPM:
             )
 
         # High CPU usage recommendation
-        cpu_p95 = (
-            analytics.get("performance_analytics", {})
-            .get("cpu_stats", {})
-            .get("p95", 0)
-        )
+        cpu_p95 = analytics.get("performance_analytics", {}).get("cpu_stats", {}).get("p95", 0)
         if cpu_p95 > 70:
             recommendations.append(
                 {

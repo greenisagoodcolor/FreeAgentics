@@ -67,10 +67,7 @@ class TestBeliefKGBridge:
         assert len(belief_state.metadata["entropies"]) == 2
 
         # First factor has lower entropy (more certain)
-        assert (
-            belief_state.metadata["entropies"][0]
-            < belief_state.metadata["entropies"][1]
-        )
+        assert belief_state.metadata["entropies"][0] < belief_state.metadata["entropies"][1]
 
     @pytest.mark.asyncio
     async def test_extract_beliefs_fallback(self, bridge):
@@ -167,9 +164,7 @@ class TestBeliefKGBridge:
         """Test full KG update from agent."""
         agent_id = "test_agent_123"
 
-        result = await bridge.update_kg_from_agent(
-            mock_agent, agent_id, mock_knowledge_graph
-        )
+        result = await bridge.update_kg_from_agent(mock_agent, agent_id, mock_knowledge_graph)
 
         assert result["nodes_added"] > 0
         assert result["edges_added"] > 0

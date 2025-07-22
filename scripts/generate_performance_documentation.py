@@ -105,9 +105,7 @@ def main():
     performance_data = load_real_performance_data()
 
     # Create documentation generator
-    doc_generator = PerformanceDocumentationGenerator(
-        output_dir="performance_documentation"
-    )
+    doc_generator = PerformanceDocumentationGenerator(output_dir="performance_documentation")
 
     # Generate comprehensive documentation
     print("📝 Creating markdown documentation...")
@@ -133,9 +131,7 @@ def main():
     print(
         f"  - Efficiency at 50 agents: {performance_data['coordination_load_test']['efficiencies'][-1]}%"
     )
-    print(
-        f"  - Memory per agent: {performance_data['memory_analysis']['per_agent_mb']} MB"
-    )
+    print(f"  - Memory per agent: {performance_data['memory_analysis']['per_agent_mb']} MB")
     print(
         f"  - Threading advantage: {performance_data['threading_benchmark']['vs_multiprocessing']['speedup_single']:.1f}x"
     )

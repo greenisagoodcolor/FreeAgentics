@@ -18,9 +18,7 @@ from typing import Any, Dict
 import yaml
 
 # Configure logging
-logging.basicConfig(
-    level=logging.INFO, format="%(asctime)s - %(levelname)s - %(message)s"
-)
+logging.basicConfig(level=logging.INFO, format="%(asctime)s - %(levelname)s - %(message)s")
 logger = logging.getLogger(__name__)
 
 
@@ -149,9 +147,7 @@ class InfrastructureValidator:
                         "backend",
                         "nginx",
                     ]
-                    missing_services = [
-                        svc for svc in required_services if svc not in services
-                    ]
+                    missing_services = [svc for svc in required_services if svc not in services]
 
                     self.log_result(
                         "docker",
@@ -334,9 +330,7 @@ class InfrastructureValidator:
                 "status": "PASS" if not missing_keys else "CRITICAL",
                 "missing_keys": missing_keys,
                 "message": (
-                    f"Missing JWT keys: {missing_keys}"
-                    if missing_keys
-                    else "JWT keys present"
+                    f"Missing JWT keys: {missing_keys}" if missing_keys else "JWT keys present"
                 ),
             },
         )
@@ -375,9 +369,7 @@ class InfrastructureValidator:
             "monitoring/prometheus-production.yml",
         ]
 
-        prometheus_config = next(
-            (c for c in prometheus_configs if os.path.exists(c)), None
-        )
+        prometheus_config = next((c for c in prometheus_configs if os.path.exists(c)), None)
 
         if prometheus_config:
             with open(prometheus_config, "r") as f:
@@ -391,9 +383,7 @@ class InfrastructureValidator:
                         "monitoring",
                         "prometheus_config",
                         {
-                            "status": "PASS"
-                            if scrape_configs and rule_files
-                            else "WARNING",
+                            "status": "PASS" if scrape_configs and rule_files else "WARNING",
                             "scrape_configs": len(scrape_configs),
                             "rule_files": len(rule_files),
                             "message": f"Prometheus: {len(scrape_configs)} scrape configs, {len(rule_files)} rule files",
@@ -565,8 +555,7 @@ class InfrastructureValidator:
                 "health_checks": "health" in content.lower(),
                 "rollback_capability": "rollback" in content.lower(),
                 "zero_downtime": "zero" in content.lower() or "blue" in content.lower(),
-                "database_migration": "migrate" in content.lower()
-                or "alembic" in content.lower(),
+                "database_migration": "migrate" in content.lower() or "alembic" in content.lower(),
             }
 
             passed_features = sum(deployment_features.values())
@@ -646,9 +635,7 @@ class InfrastructureValidator:
         self.validate_test_coverage()
 
         # Calculate summary
-        total_tests = (
-            len(self.passes) + len(self.warnings) + len(self.critical_failures)
-        )
+        total_tests = len(self.passes) + len(self.warnings) + len(self.critical_failures)
         pass_rate = (len(self.passes) / total_tests) * 100 if total_tests > 0 else 0
 
         self.results["summary"] = {
@@ -680,9 +667,7 @@ class InfrastructureValidator:
         print(f"Warnings: {self.results['summary']['warnings']}")
         print(f"Critical Failures: {self.results['summary']['critical_failures']}")
         print(f"Pass Rate: {self.results['summary']['pass_rate']:.1f}%")
-        print(
-            f"Production Ready: {'YES' if self.results['summary']['production_ready'] else 'NO'}"
-        )
+        print(f"Production Ready: {'YES' if self.results['summary']['production_ready'] else 'NO'}")
         print("=" * 60)
 
         if self.results["summary"]["production_ready"]:

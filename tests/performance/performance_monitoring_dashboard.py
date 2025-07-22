@@ -201,9 +201,7 @@ class PerformanceMonitoringDashboard:
             return
 
         self.dashboard_running = True
-        self.dashboard_thread = threading.Thread(
-            target=self._monitoring_loop, daemon=True
-        )
+        self.dashboard_thread = threading.Thread(target=self._monitoring_loop, daemon=True)
         self.dashboard_thread.start()
 
         # Start the underlying performance monitor
@@ -298,9 +296,7 @@ class PerformanceMonitoringDashboard:
                 "disk_usage_percent": psutil.disk_usage("/").percent,
                 "network_io_bytes_sent": psutil.net_io_counters().bytes_sent,
                 "network_io_bytes_recv": psutil.net_io_counters().bytes_recv,
-                "load_average_1m": psutil.getloadavg()[0]
-                if hasattr(psutil, "getloadavg")
-                else 0,
+                "load_average_1m": psutil.getloadavg()[0] if hasattr(psutil, "getloadavg") else 0,
                 "swap_usage_percent": psutil.swap_memory().percent,
             }
             metrics.update(system_metrics)
@@ -463,9 +459,7 @@ class PerformanceMonitoringDashboard:
                 if rule_name in self.active_alerts:
                     self._resolve_alert(rule_name, metrics)
 
-    def _start_alert_tracking(
-        self, rule_name: str, rule: AlertRule, metric_value: float
-    ):
+    def _start_alert_tracking(self, rule_name: str, rule: AlertRule, metric_value: float):
         """Start tracking a potential alert."""
         alert = AlertNotification(
             id=str(uuid.uuid4()),
@@ -520,9 +514,7 @@ class PerformanceMonitoringDashboard:
 
     def _log_dashboard_status(self, snapshot: PerformanceSnapshot):
         """Log current dashboard status."""
-        if (
-            len(self.metrics_history) % 12 == 0
-        ):  # Log every 12 updates (1 minute at 5s intervals)
+        if len(self.metrics_history) % 12 == 0:  # Log every 12 updates (1 minute at 5s intervals)
             logger.info(
                 f"Dashboard Status - Health: {snapshot.system_health_score:.1f}%, "
                 f"Active Alerts: {snapshot.alerts_active}, "
@@ -621,9 +613,9 @@ class PerformanceMonitoringDashboard:
                         "timestamp": alert.timestamp.isoformat(),
                         "acknowledged": alert.acknowledged,
                         "resolved": alert.resolved,
-                        "resolution_time": alert.resolution_time.isoformat()
-                        if alert.resolution_time
-                        else None,
+                        "resolution_time": (
+                            alert.resolution_time.isoformat() if alert.resolution_time else None
+                        ),
                     }
                 )
 
@@ -639,15 +631,11 @@ class PerformanceMonitoringDashboard:
         # Calculate summary statistics
         recent_snapshots = list(self.metrics_history)[-50:]  # Last 50 snapshots
 
-        avg_health_score = statistics.mean(
-            [s.system_health_score for s in recent_snapshots]
-        )
+        avg_health_score = statistics.mean([s.system_health_score for s in recent_snapshots])
         avg_response_time = statistics.mean(
             [s.metrics.get("api_response_time_ms", 0) for s in recent_snapshots]
         )
-        avg_cpu_usage = statistics.mean(
-            [s.metrics.get("cpu_usage", 0) for s in recent_snapshots]
-        )
+        avg_cpu_usage = statistics.mean([s.metrics.get("cpu_usage", 0) for s in recent_snapshots])
         avg_memory_usage = statistics.mean(
             [s.metrics.get("memory_usage", 0) for s in recent_snapshots]
         )
@@ -672,22 +660,16 @@ class PerformanceMonitoringDashboard:
                 "average_health_score": avg_health_score,
                 "active_alerts": len(self.active_alerts),
                 "total_alerts_24h": len(self.get_alerts_history(24)),
-                "monitoring_uptime_hours": len(self.metrics_history)
-                * self.update_interval
-                / 3600,
+                "monitoring_uptime_hours": len(self.metrics_history) * self.update_interval / 3600,
             },
             "performance_summary": {
-                "current_response_time_ms": latest_snapshot.metrics.get(
-                    "api_response_time_ms", 0
-                ),
+                "current_response_time_ms": latest_snapshot.metrics.get("api_response_time_ms", 0),
                 "average_response_time_ms": avg_response_time,
                 "current_cpu_usage": latest_snapshot.metrics.get("cpu_usage", 0),
                 "average_cpu_usage": avg_cpu_usage,
                 "current_memory_usage": latest_snapshot.metrics.get("memory_usage", 0),
                 "average_memory_usage": avg_memory_usage,
-                "current_throughput": latest_snapshot.metrics.get(
-                    "api_requests_per_second", 0
-                ),
+                "current_throughput": latest_snapshot.metrics.get("api_requests_per_second", 0),
                 "error_rate": latest_snapshot.metrics.get("api_error_rate", 0),
             },
             "alert_summary": {
@@ -707,21 +689,15 @@ class PerformanceMonitoringDashboard:
                 "degrading_metrics": degrading_trends,
                 "improving_metrics": improving_trends,
                 "stable_metrics": [
-                    k
-                    for k, v in latest_snapshot.trend_indicators.items()
-                    if v == "stable"
+                    k for k, v in latest_snapshot.trend_indicators.items() if v == "stable"
                 ],
             },
-            "recommendations": self._generate_dashboard_recommendations(
-                latest_snapshot
-            ),
+            "recommendations": self._generate_dashboard_recommendations(latest_snapshot),
         }
 
         return report
 
-    def _generate_dashboard_recommendations(
-        self, snapshot: PerformanceSnapshot
-    ) -> List[str]:
+    def _generate_dashboard_recommendations(self, snapshot: PerformanceSnapshot) -> List[str]:
         """Generate recommendations based on current system state."""
         recommendations = []
 
@@ -759,9 +735,7 @@ class PerformanceMonitoringDashboard:
             )
 
         # Trend recommendations
-        degrading_trends = [
-            k for k, v in snapshot.trend_indicators.items() if v == "degrading"
-        ]
+        degrading_trends = [k for k, v in snapshot.trend_indicators.items() if v == "degrading"]
         if degrading_trends:
             recommendations.append(
                 f"Degrading trends detected in: {', '.join(degrading_trends)}. Monitor these metrics closely."
@@ -800,9 +774,9 @@ class PerformanceMonitoringDashboard:
                     "timestamp": alert.timestamp.isoformat(),
                     "acknowledged": alert.acknowledged,
                     "resolved": alert.resolved,
-                    "resolution_time": alert.resolution_time.isoformat()
-                    if alert.resolution_time
-                    else None,
+                    "resolution_time": (
+                        alert.resolution_time.isoformat() if alert.resolution_time else None
+                    ),
                 }
                 for alert in self.alerts_history
             ],
@@ -877,9 +851,7 @@ async def run_performance_dashboard_demo():
             print(f"Active Alerts: {status['active_alerts']}")
             print(f"CPU Usage: {status['metrics'].get('cpu_usage', 0):.1f}%")
             print(f"Memory Usage: {status['metrics'].get('memory_usage', 0):.1f}%")
-            print(
-                f"Response Time: {status['metrics'].get('api_response_time_ms', 0):.1f}ms"
-            )
+            print(f"Response Time: {status['metrics'].get('api_response_time_ms', 0):.1f}ms")
 
             if status["alerts"]:
                 print("Active Alerts:")
@@ -890,19 +862,13 @@ async def run_performance_dashboard_demo():
         print("\n--- FINAL REPORT ---")
         report = dashboard.generate_dashboard_report()
 
-        print(
-            f"Average Health Score: {report['dashboard_summary']['average_health_score']:.1f}%"
-        )
+        print(f"Average Health Score: {report['dashboard_summary']['average_health_score']:.1f}%")
         print(f"Total Alerts (24h): {report['dashboard_summary']['total_alerts_24h']}")
         print(
             f"Average Response Time: {report['performance_summary']['average_response_time_ms']:.1f}ms"
         )
-        print(
-            f"Average CPU Usage: {report['performance_summary']['average_cpu_usage']:.1f}%"
-        )
-        print(
-            f"Average Memory Usage: {report['performance_summary']['average_memory_usage']:.1f}%"
-        )
+        print(f"Average CPU Usage: {report['performance_summary']['average_cpu_usage']:.1f}%")
+        print(f"Average Memory Usage: {report['performance_summary']['average_memory_usage']:.1f}%")
 
         print("\nRecommendations:")
         for rec in report["recommendations"]:

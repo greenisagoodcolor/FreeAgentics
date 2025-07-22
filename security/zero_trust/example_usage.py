@@ -63,9 +63,7 @@ async def demonstrate_zero_trust_setup():
             validity_days=30,
         )
         certificates[service] = cert_info
-        print(
-            f"   ✅ Certificate generated (fingerprint: {cert_info.fingerprint[:16]}...)"
-        )
+        print(f"   ✅ Certificate generated (fingerprint: {cert_info.fingerprint[:16]}...)")
 
     # Step 2: Configure Certificate Rotation
     print("\n2️⃣ Setting up Certificate Rotation Policies")
@@ -210,18 +208,10 @@ async def demonstrate_zero_trust_setup():
         risk_level = (
             "🔴 HIGH"
             if risk_score.score > 0.7
-            else "🟡 MEDIUM"
-            if risk_score.score > 0.3
-            else "🟢 LOW"
+            else "🟡 MEDIUM" if risk_score.score > 0.3 else "🟢 LOW"
         )
-        reauth = (
-            " (requires re-authentication)"
-            if risk_score.requires_reauthentication
-            else ""
-        )
-        print(
-            f"   {risk_level} Risk Score: {risk_score.score:.2f} for {session_id}{reauth}"
-        )
+        reauth = " (requires re-authentication)" if risk_score.requires_reauthentication else ""
+        print(f"   {risk_level} Risk Score: {risk_score.score:.2f} for {session_id}{reauth}")
 
     # Step 6: Generate Service Mesh Configuration
     print("\n6️⃣ Generating Service Mesh Configuration")

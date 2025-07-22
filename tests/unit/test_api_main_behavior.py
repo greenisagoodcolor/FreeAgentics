@@ -97,9 +97,7 @@ class TestAPIMainBehavior:
         from api.main import app
 
         # Check that CORS middleware is configured
-        middleware_classes = [
-            middleware.cls.__name__ for middleware in app.user_middleware
-        ]
+        middleware_classes = [middleware.cls.__name__ for middleware in app.user_middleware]
         assert "CORSMiddleware" in middleware_classes
 
     def test_api_includes_security_middleware(self):
@@ -111,14 +109,10 @@ class TestAPIMainBehavior:
         from api.main import app
 
         # Check that security middleware is configured
-        middleware_classes = [
-            middleware.cls.__name__ for middleware in app.user_middleware
-        ]
+        middleware_classes = [middleware.cls.__name__ for middleware in app.user_middleware]
 
         # Should include security-related middleware
-        security_middleware_found = any(
-            "Security" in cls_name for cls_name in middleware_classes
-        )
+        security_middleware_found = any("Security" in cls_name for cls_name in middleware_classes)
         assert security_middleware_found, "API should include security middleware"
 
     def test_api_includes_agent_management_routes(self):
@@ -148,9 +142,7 @@ class TestAPIMainBehavior:
         route_paths = [route.path for route in app.routes]
 
         # Look for monitoring-related routes
-        monitoring_routes_exist = any(
-            "monitoring" in path.lower() for path in route_paths
-        )
+        monitoring_routes_exist = any("monitoring" in path.lower() for path in route_paths)
         assert monitoring_routes_exist, "API should include monitoring routes"
 
     def test_api_includes_websocket_routes(self):
@@ -165,9 +157,7 @@ class TestAPIMainBehavior:
         route_paths = [route.path for route in app.routes]
 
         # Look for WebSocket-related routes
-        websocket_routes_exist = any(
-            "websocket" in path.lower() for path in route_paths
-        )
+        websocket_routes_exist = any("websocket" in path.lower() for path in route_paths)
         assert websocket_routes_exist, "API should include WebSocket routes"
 
     def test_api_includes_inference_routes(self):
@@ -182,9 +172,7 @@ class TestAPIMainBehavior:
         route_paths = [route.path for route in app.routes]
 
         # Look for inference-related routes
-        inference_routes_exist = any(
-            "inference" in path.lower() for path in route_paths
-        )
+        inference_routes_exist = any("inference" in path.lower() for path in route_paths)
         assert inference_routes_exist, "API should include inference routes"
 
     def test_api_includes_system_routes(self):
@@ -296,7 +284,6 @@ class TestAPISecurityBehavior:
         assert response.status_code == 200
 
         # Basic security check - should not expose server details
-        assert (
-            "Server" not in response.headers
-            or "FastAPI" not in response.headers.get("Server", "")
+        assert "Server" not in response.headers or "FastAPI" not in response.headers.get(
+            "Server", ""
         )

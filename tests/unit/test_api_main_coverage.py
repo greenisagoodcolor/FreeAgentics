@@ -145,18 +145,12 @@ class TestAPIMain:
         response = client.options("/", headers={"Origin": "http://localhost:3000"})
 
         # Should allow localhost:3000
-        assert (
-            response.headers.get("access-control-allow-origin")
-            == "http://localhost:3000"
-        )
+        assert response.headers.get("access-control-allow-origin") == "http://localhost:3000"
 
         # Test with localhost:3001
         response = client.options("/", headers={"Origin": "http://localhost:3001"})
 
-        assert (
-            response.headers.get("access-control-allow-origin")
-            == "http://localhost:3001"
-        )
+        assert response.headers.get("access-control-allow-origin") == "http://localhost:3001"
 
     def test_cors_credentials_allowed(self, client):
         """Test CORS allows credentials."""

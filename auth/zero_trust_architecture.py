@@ -77,9 +77,7 @@ class ServiceIdentity:
     certificate_fingerprint: str
     allowed_operations: List[str] = field(default_factory=list)
     rate_limits: Dict[str, int] = field(default_factory=dict)
-    valid_until: datetime = field(
-        default_factory=lambda: datetime.utcnow() + timedelta(hours=24)
-    )
+    valid_until: datetime = field(default_factory=lambda: datetime.utcnow() + timedelta(hours=24))
 
     def is_valid(self) -> bool:
         """Check if service identity is still valid."""
@@ -122,9 +120,7 @@ class ZeroTrustPolicy:
 
         return True
 
-    def matches_request(
-        self, source_service: str, target_service: str, operation: str
-    ) -> bool:
+    def matches_request(self, source_service: str, target_service: str, operation: str) -> bool:
         """Check if policy matches a request."""
         return (
             self.is_active()
@@ -296,9 +292,7 @@ class CertificateManager:
                 x509.NameAttribute(NameOID.STATE_OR_PROVINCE_NAME, "CA"),
                 x509.NameAttribute(NameOID.LOCALITY_NAME, "San Francisco"),
                 x509.NameAttribute(NameOID.ORGANIZATION_NAME, "FreeAgentics"),
-                x509.NameAttribute(
-                    NameOID.ORGANIZATIONAL_UNIT_NAME, service_type.value
-                ),
+                x509.NameAttribute(NameOID.ORGANIZATIONAL_UNIT_NAME, service_type.value),
                 x509.NameAttribute(NameOID.COMMON_NAME, service_name),
             ]
         )
@@ -310,9 +304,7 @@ class CertificateManager:
             .public_key(private_key.public_key())
             .serial_number(x509.random_serial_number())
             .not_valid_before(datetime.utcnow())
-            .not_valid_after(
-                datetime.utcnow() + timedelta(days=30)
-            )  # Short-lived certificates
+            .not_valid_after(datetime.utcnow() + timedelta(days=30))  # Short-lived certificates
             .add_extension(
                 x509.SubjectAlternativeName(
                     [
@@ -344,9 +336,7 @@ class CertificateManager:
         ca_cert_pem = self.ca_cert.public_bytes(serialization.Encoding.PEM).decode()
 
         # Calculate fingerprint
-        fingerprint = hashlib.sha256(
-            cert.public_bytes(serialization.Encoding.DER)
-        ).hexdigest()
+        fingerprint = hashlib.sha256(cert.public_bytes(serialization.Encoding.DER)).hexdigest()
 
         # Store certificate info
         self.service_certificates[service_name] = {
@@ -399,9 +389,7 @@ class CertificateManager:
                 subject_info[attribute.oid._name] = attribute.value
 
             # Calculate fingerprint
-            fingerprint = hashlib.sha256(
-                cert.public_bytes(serialization.Encoding.DER)
-            ).hexdigest()
+            fingerprint = hashlib.sha256(cert.public_bytes(serialization.Encoding.DER)).hexdigest()
 
             return {
                 "subject": subject_info,
@@ -438,9 +426,7 @@ class ZeroTrustPolicyEngine:
     ) -> ServiceIdentity:
         """Register a service in the zero-trust architecture."""
         # Issue certificate for the service
-        cert_info = self.certificate_manager.issue_service_certificate(
-            service_name, service_type
-        )
+        cert_info = self.certificate_manager.issue_service_certificate(service_name, service_type)
 
         # Create service identity
         service_identity = ServiceIdentity(
@@ -576,9 +562,7 @@ class ZeroTrustPolicyEngine:
 
         # Check trust level requirements
         for policy in applicable_policies:
-            if not self._check_trust_level(
-                source_identity.trust_level, policy.minimum_trust_level
-            ):
+            if not self._check_trust_level(source_identity.trust_level, policy.minimum_trust_level):
                 return (
                     False,
                     f"Source service trust level {source_identity.trust_level} insufficient for policy {policy.name}",
@@ -604,9 +588,7 @@ class ZeroTrustPolicyEngine:
 
         return True, "Request authorized"
 
-    def _check_trust_level(
-        self, service_trust: TrustLevel, required_trust: TrustLevel
-    ) -> bool:
+    def _check_trust_level(self, service_trust: TrustLevel, required_trust: TrustLevel) -> bool:
         """Check if service trust level meets requirement."""
         trust_hierarchy = {
             TrustLevel.UNTRUSTED: 0,
@@ -802,9 +784,7 @@ class IdentityAwareProxy:
         self.policy_engine = policy_engine
         self.security = HTTPBearer()
 
-    async def validate_request(
-        self, request: Request, target_service: str, operation: str
-    ) -> bool:
+    async def validate_request(self, request: Request, target_service: str, operation: str) -> bool:
         """Validate request through identity-aware proxy."""
         try:
             # Extract client certificate (mTLS)
@@ -816,18 +796,14 @@ class IdentityAwareProxy:
                 )
 
             # Verify client certificate
-            if not self.policy_engine.certificate_manager.verify_certificate(
-                client_cert
-            ):
+            if not self.policy_engine.certificate_manager.verify_certificate(client_cert):
                 raise HTTPException(
                     status_code=status.HTTP_401_UNAUTHORIZED,
                     detail="Invalid client certificate",
                 )
 
             # Extract service identity from certificate
-            cert_info = self.policy_engine.certificate_manager.get_certificate_info(
-                client_cert
-            )
+            cert_info = self.policy_engine.certificate_manager.get_certificate_info(client_cert)
             source_service = cert_info.get("subject", {}).get("commonName", "unknown")
 
             # Prepare request context
@@ -925,9 +901,7 @@ class IdentityAwareProxy:
     def _generate_session_id(self, request: Request) -> str:
         """Generate session ID for continuous verification."""
         # Create session ID based on client certificate and request info
-        session_data = (
-            f"{request.client.host}:{request.headers.get('X-Client-Certificate', '')}"
-        )
+        session_data = f"{request.client.host}:{request.headers.get('X-Client-Certificate', '')}"
         return hashlib.sha256(session_data.encode()).hexdigest()
 
 
@@ -951,9 +925,7 @@ def configure_default_zero_trust_policies():
     engine = get_zero_trust_engine()
 
     # Register example services
-    engine.register_service(
-        "freeagentics-api", ServiceType.API, NetworkZone.DMZ, TrustLevel.MEDIUM
-    )
+    engine.register_service("freeagentics-api", ServiceType.API, NetworkZone.DMZ, TrustLevel.MEDIUM)
 
     engine.register_service(
         "freeagentics-db",
@@ -995,9 +967,7 @@ def configure_default_zero_trust_policies():
             allowed_operations=["read", "write", "admin"],
             network_zones=[NetworkZone.ADMIN],
             minimum_trust_level=TrustLevel.HIGH,
-            time_restrictions={
-                "allowed_hours": list(range(8, 18))
-            },  # Business hours only
+            time_restrictions={"allowed_hours": list(range(8, 18))},  # Business hours only
             conditions={"user_roles": ["admin", "super_admin"]},
         )
     )
