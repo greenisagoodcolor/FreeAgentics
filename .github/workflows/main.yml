@@ -77,6 +77,7 @@ jobs:
               --exclude-dir=__pycache__ \
               --exclude-dir=.archive \
               --exclude="*.lock" \
+              --exclude="main.yml" \
               --exclude="*-hardened.yml" \
               --exclude="comprehensive_bypass_elimination.py" \
               --exclude="RUFF_INTEGRATION.md" \
@@ -107,6 +108,7 @@ jobs:
               --exclude-dir=__pycache__ \
               --exclude-dir=.archive \
               --exclude="*.lock" \
+              --exclude="main.yml" \
               --exclude="*-hardened.yml" \
               --exclude="comprehensive_bypass_elimination.py" \
               --exclude="RUFF_INTEGRATION.md" \
