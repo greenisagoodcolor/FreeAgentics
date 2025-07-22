@@ -154,46 +154,12 @@ jobs:
           echo "🔒 Checking for CVEs..."
           pip install -r requirements-core.txt
           
-          # Run safety check
+          # Run safety check and generate JSON report
           safety check --json > safety_report.json
           
-          # Define allowlist for disputed/false positive CVEs
-          # Committee Decision: Disputed CVEs with technical justification
-          DISPUTED_CVE_ALLOWLIST=(
-            "51457"  # CVE-2022-42969 - py package ReDoS via SVN - DISPUTED by maintainers
-          )
-          
-          # Extract all vulnerabilities
-          ALL_VULNS=$(jq '.vulnerabilities[]' safety_report.json 2>/dev/null || echo "[]")
-          
-          # Filter out allowlisted CVEs
-          FILTERED_VULNS=""
-          if [ "$ALL_VULNS" != "[]" ] && [ -n "$ALL_VULNS" ]; then
-            while IFS= read -r vuln; do
-              vuln_id=$(echo "$vuln" | jq -r '.vulnerability_id')
-              if [[ ! " ${DISPUTED_CVE_ALLOWLIST[@]} " =~ " ${vuln_id} " ]]; then
-                FILTERED_VULNS="$FILTERED_VULNS$vuln"
-              else
-                echo "⚠️  Allowing disputed CVE: $vuln_id ($(echo "$vuln" | jq -r '.CVE // "No CVE"'))"
-              fi
-            done <<< "$(echo "$ALL_VULNS" | jq -c '.')"
-          fi
-          
-          # Check for critical/high vulnerabilities (excluding allowlisted)
-          CRITICAL=0
-          HIGH=0
-          if [ -n "$FILTERED_VULNS" ]; then
-            CRITICAL=$(echo "$FILTERED_VULNS" | jq -s '[.[] | select(.severity == "critical")] | length' || echo 0)
-            HIGH=$(echo "$FILTERED_VULNS" | jq -s '[.[] | select(.severity == "high")] | length' || echo 0)
-          fi
-          
-          if [ "$CRITICAL" -gt "$MAX_CRITICAL_VULNS" ] || [ "$HIGH" -gt "$MAX_HIGH_VULNS" ]; then
-            echo "❌ Found $CRITICAL critical and $HIGH high vulnerabilities (after allowlist filtering)"
-            echo "$FILTERED_VULNS" | jq -s '[.[] | select(.severity == "critical" or .severity == "high")]'
-            exit 1
-          fi
-          
-          echo "✅ No critical/high vulnerabilities found (disputed CVEs allowlisted)"
+          # Use Python script for reliable CVE filtering
+          # Committee Decision: Surgical allowlist for disputed/false positive CVEs
+          python .github/scripts/filter_cves.py safety_report.json
       
       - name: SAST with Bandit
         run: |
