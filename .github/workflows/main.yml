@@ -147,30 +147,30 @@ jobs:
       - name: Install dependencies
         run: |
           python -m pip install --upgrade pip
-          pip install safety bandit pip-audit
+          pip install pip-audit bandit
       
       - name: Dependency vulnerability scan
         run: |
-          echo "🔒 Checking for CVEs..."
+          echo "🔒 Checking for CVEs with pip-audit (safety tool abandoned due to reliability issues)..."
           pip install -r requirements-core.txt
           
-          # Committee Emergency Decision: Use NEW safety scan command to avoid deprecated output pollution
-          # The old 'safety check' mixes deprecation banners with JSON on stdout - UNUSABLE!
+          # Committee Nuclear Decision: Replace broken safety tool with reliable pip-audit
+          # pip-audit is actively maintained by PyPA and doesn't have the I/O issues of safety
           set +e  # Don't exit on non-zero
-          safety scan --output json --output-to safety_report.json 2> safety_warnings.log
-          SAFETY_EXIT_CODE=$?
+          pip-audit --format json --output pip_audit_report.json 2> pip_audit_warnings.log
+          AUDIT_EXIT_CODE=$?
           set -e  # Re-enable exit on error
           
-          # Always continue to filtering stage regardless of safety exit code
-          echo "📊 Safety scan completed (exit code: ${SAFETY_EXIT_CODE})"
-          echo "📝 Safety warnings (if any):"
-          cat safety_warnings.log || echo "No warnings"
+          # Always continue to filtering stage regardless of pip-audit exit code
+          echo "📊 pip-audit scan completed (exit code: ${AUDIT_EXIT_CODE})"
+          echo "📝 pip-audit warnings (if any):"
+          cat pip_audit_warnings.log || echo "No warnings"
           echo "📄 Checking JSON output:"
-          head -5 safety_report.json || echo "No JSON file or empty"
+          head -5 pip_audit_report.json || echo "No JSON file or empty"
           
-          # Use Python script for reliable CVE filtering
+          # Update Python script to handle pip-audit format
           # Committee Decision: Surgical allowlist for disputed/false positive CVEs
-          python .github/scripts/filter_cves.py safety_report.json
+          python .github/scripts/filter_cves.py pip_audit_report.json
       
       - name: SAST with Bandit
         run: |
