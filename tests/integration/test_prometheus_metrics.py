@@ -121,7 +121,8 @@ class TestPrometheusMetrics:
                     "/api/v1/agents",
                     json={"name": "test_agent", "agent_type": "active_inference"},
                 )
-            except:
+            except Exception:
+                # Ignore errors - just testing metrics increment
                 pass
 
             # Get metrics again

@@ -8,10 +8,6 @@ import os
 import sys
 from pathlib import Path
 
-# Add project root to path
-project_root = Path(__file__).parent.parent
-sys.path.insert(0, str(project_root))
-
 from dotenv import load_dotenv
 from sqlalchemy import create_engine, text
 from sqlalchemy.exc import ProgrammingError
@@ -282,8 +278,9 @@ def check_index_usage(engine):
 def main():
     """Main function."""
     # Load environment variables
-    env_file = os.path.join(project_root, ".env.production")
-    if os.path.exists(env_file):
+    project_root = Path(__file__).parent.parent
+    env_file = project_root / ".env.production"
+    if env_file.exists():
         load_dotenv(env_file)
         print(f"Loaded environment from: {env_file}")
     else:

@@ -22,6 +22,7 @@ from api.middleware.rate_limiter import (
     RateLimitMiddleware,
     create_rate_limiter,
 )
+from api.middleware.metrics import MetricsMiddleware
 
 # SECURITY: Import authentication and security components
 from auth import SecurityMiddleware
@@ -184,8 +185,6 @@ security_headers_manager = SecurityHeadersManager(security_policy)
 app.add_middleware(SecurityHeadersMiddleware, security_manager=security_headers_manager)
 
 # OBSERVABILITY: Add Prometheus metrics middleware (Per Charity Majors)
-from api.middleware.metrics import MetricsMiddleware
-
 app.add_middleware(MetricsMiddleware)
 
 # SECURITY: Add comprehensive rate limiting and DDoS protection

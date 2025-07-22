@@ -30,7 +30,6 @@ import psutil
 from observability.performance_monitor import get_performance_monitor
 
 try:
-    import pympler
     from pympler import muppy, summary, tracker
 
     PYMPLER_AVAILABLE = True

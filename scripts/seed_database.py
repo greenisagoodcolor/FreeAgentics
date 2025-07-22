@@ -10,12 +10,11 @@ from datetime import datetime, timedelta
 from pathlib import Path
 from typing import List
 
-# Add project root to path
-project_root = Path(__file__).parent.parent
-sys.path.insert(0, str(project_root))
-
 from dotenv import load_dotenv
 from sqlalchemy.orm import sessionmaker
+
+# Define project root for .env file location
+project_root = Path(__file__).parent.parent
 
 from database.connection_manager import DatabaseConnectionManager
 from database.models import (

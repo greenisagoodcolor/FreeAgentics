@@ -55,7 +55,7 @@ __all__ = [
     "agent_fixture",
     "coalition_fixture",
     "knowledge_graph_fixture",
-    "db_session_fixture",
+    "db_session",
     "clean_database",
     # Schemas
     "AgentSchema",

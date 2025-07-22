@@ -9,7 +9,7 @@ starlette==0.46.2  # Latest 0.46.x version, security fix for CVE-2024-47874
 
 # Scientific Computing
 numpy==2.2.1  # Compatible with scipy 1.14.1 requirement (<2.3)
-torch==2.5.1  # Compatible with Python 3.12, monitoring CVE-2025-3730
+torch==2.7.1  # Security fix for CVE-2025-32434 and CVE-2025-3730
 scipy==1.14.1  # Compatible with Python 3.12
 
 # Active Inference

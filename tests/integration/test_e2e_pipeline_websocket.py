@@ -15,7 +15,7 @@ from sqlalchemy.ext.asyncio import AsyncSession
 
 from api.main import app
 from auth.security_implementation import Permission, Role, TokenData
-from services.websocket_integration import pipeline_monitor
+from services.websocket_integration import pipeline_monitor, PipelineStage
 
 
 class MockWebSocketClient:

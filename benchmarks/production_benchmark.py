@@ -22,14 +22,14 @@ from concurrent.futures import ProcessPoolExecutor, ThreadPoolExecutor
 from dataclasses import asdict, dataclass
 from typing import Dict, List
 
-# Suppress warnings for cleaner output
-warnings.filterwarnings("ignore", category=RuntimeWarning)
-logging.getLogger("agents.base_agent").setLevel(logging.ERROR)
-
 # Add parent directory to path
 sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
 from agents.base_agent import BasicExplorerAgent
+
+# Suppress warnings for cleaner output
+warnings.filterwarnings("ignore", category=RuntimeWarning)
+logging.getLogger("agents.base_agent").setLevel(logging.ERROR)
 
 
 @dataclass
