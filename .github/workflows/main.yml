@@ -154,8 +154,12 @@ jobs:
           echo "🔒 Checking for CVEs..."
           pip install -r requirements-core.txt
           
-          # Run safety check and generate JSON report
-          safety check --json > safety_report.json
+          # Run safety check and capture exit code (safety returns 64 when vulnerabilities found)
+          # Committee Learning: Exit code 64 is NOT an error - it's safety's way of reporting findings
+          safety check --json > safety_report.json || SAFETY_EXIT_CODE=$?
+          
+          # Always continue to filtering stage regardless of safety exit code
+          echo "📊 Safety scan completed (exit code: ${SAFETY_EXIT_CODE:-0})"
           
           # Use Python script for reliable CVE filtering
           # Committee Decision: Surgical allowlist for disputed/false positive CVEs
