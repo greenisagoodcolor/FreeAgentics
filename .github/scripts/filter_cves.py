@@ -28,12 +28,27 @@ def load_safety_report(filename: str) -> Dict[str, Any]:
     """Load and parse Safety JSON report."""
     try:
         with open(filename, 'r') as f:
-            return json.load(f)
+            content = f.read()
+            
+        # Debug: Show first few lines if JSON parsing fails
+        if not content.strip():
+            print(f"❌ Safety report file is empty: {filename}")
+            sys.exit(1)
+            
+        return json.loads(content)
+        
     except FileNotFoundError:
         print(f"❌ Safety report file not found: {filename}")
         sys.exit(1)
     except json.JSONDecodeError as e:
         print(f"❌ Invalid JSON in safety report: {e}")
+        print(f"📝 First 200 characters of file:")
+        try:
+            with open(filename, 'r') as f:
+                preview = f.read(200)
+                print(repr(preview))
+        except Exception:
+            print("Could not read file for preview")
         sys.exit(1)
 
 def filter_vulnerabilities(vulnerabilities: List[Dict[str, Any]]) -> tuple[List[Dict[str, Any]], List[Dict[str, Any]]]:
