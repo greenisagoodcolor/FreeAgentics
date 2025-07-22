@@ -154,11 +154,10 @@ jobs:
           echo "🔒 Checking for CVEs..."
           pip install -r requirements-core.txt
           
-          # Run safety check and capture exit code (safety returns 64 when vulnerabilities found)
-          # Committee Learning: Exit code 64 is NOT an error - it's safety's way of reporting findings
-          # CRITICAL: Separate stderr (warnings) from stdout (JSON) to avoid JSON contamination
+          # Committee Emergency Decision: Use NEW safety scan command to avoid deprecated output pollution
+          # The old 'safety check' mixes deprecation banners with JSON on stdout - UNUSABLE!
           set +e  # Don't exit on non-zero
-          safety check --json > safety_report.json 2> safety_warnings.log
+          safety scan --output json --output-to safety_report.json 2> safety_warnings.log
           SAFETY_EXIT_CODE=$?
           set -e  # Re-enable exit on error
           
@@ -166,6 +165,8 @@ jobs:
           echo "📊 Safety scan completed (exit code: ${SAFETY_EXIT_CODE})"
           echo "📝 Safety warnings (if any):"
           cat safety_warnings.log || echo "No warnings"
+          echo "📄 Checking JSON output:"
+          head -5 safety_report.json || echo "No JSON file or empty"
           
           # Use Python script for reliable CVE filtering
           # Committee Decision: Surgical allowlist for disputed/false positive CVEs
