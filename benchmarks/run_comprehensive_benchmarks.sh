@@ -31,8 +31,12 @@ OVERALL_SUCCESS=true
 echo "🎯 Running Core Performance Validation Suite..."
 if python benchmarks/performance_validation_suite.py > "$RESULTS_DIR/validation_report.txt" 2>&1; then
     echo "✅ Performance validation completed successfully"
-    cp performance_baseline.json "$RESULTS_DIR/" || true
-    cp performance_results_*.json "$RESULTS_DIR/" || true
+    if [ -f performance_baseline.json ]; then
+        cp performance_baseline.json "$RESULTS_DIR/"
+    fi
+    if ls performance_results_*.json 1> /dev/null 2>&1; then
+        cp performance_results_*.json "$RESULTS_DIR/"
+    fi
 else
     echo "❌ Performance validation failed"
     OVERALL_SUCCESS=false
@@ -61,7 +65,9 @@ echo ""
 echo "📦 Running Frontend Performance Analysis..."
 if python benchmarks/frontend_performance_analyzer.py > "$RESULTS_DIR/frontend_report.txt" 2>&1; then
     echo "✅ Frontend analysis completed"
-    cp frontend_performance_analysis_*.json "$RESULTS_DIR/" || true
+    if ls frontend_performance_analysis_*.json 1> /dev/null 2>&1; then
+        cp frontend_performance_analysis_*.json "$RESULTS_DIR/"
+    fi
 else
     echo "❌ Frontend analysis failed or budgets exceeded"
     OVERALL_SUCCESS=false

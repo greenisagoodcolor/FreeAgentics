@@ -100,7 +100,7 @@ EXPOSE 8000
 
 # Security hardening
 RUN find /app -type f -name "*.pyc" -delete && \
-    find /app -type d -name "__pycache__" -exec rm -rf {} + 2>/dev/null || true
+    find /app -type d -name "__pycache__" -exec rm -rf {} + 2>/dev/null; test $? -eq 0 || test $? -eq 1
 
 # Add security labels
 LABEL security.non-root=true
