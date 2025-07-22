@@ -175,17 +175,26 @@ jobs:
       - name: SAST with Bandit
         run: |
           echo "🔍 Running SAST scan..."
-          # Committee Performance Solution: Focus on core security-critical directories only
-          # Scanning auth, api, agents (167 files) instead of entire codebase (thousands of files)
-          timeout 120 bandit -r auth api agents -f json -o bandit_report.json \
+          # NEMESIS ZERO-TOLERANCE: Full codebase scan with proper exclusions
+          # Root cause: Virtual environments with 127K line auto-generated files
+          # Solution: .bandit config file excludes venv/.venv/.llm_venv properly
+          
+          echo "📊 Scanning Python files in application code..."
+          # COMMITTEE NEMESIS SOLUTION: Focus on production security code only
+          # Exclude ALL non-production directories to avoid performance issues
+          bandit -r auth api agents llm database security infrastructure coalitions ui \
+            -f json -o bandit_report.json \
             --severity-level high --confidence-level high \
             || BANDIT_EXIT_CODE=$?
           
-          # Handle timeout gracefully (exit code 124 from timeout command)
+          # Handle timeout gracefully (exit code 124 from timeout command)  
           if [ "${BANDIT_EXIT_CODE:-0}" -eq 124 ]; then
-            echo "⚠️  Bandit scan timed out after 2 minutes - treating as informational"
-            echo "Creating empty report to continue pipeline..."
-            echo '{"errors": [], "results": [], "metrics": {"_totals": {"SEVERITY.HIGH": 0, "SEVERITY.CRITICAL": 0}}}' > bandit_report.json
+            echo "❌ Bandit scan timed out after 5 minutes"
+            echo "🔍 This indicates a performance issue in our exclusion patterns"
+            echo "📊 File count being scanned:"
+            find . -name "*.py" | wc -l
+            echo "📊 After exclusions should be ~371 files"
+            exit 1
           elif [ "${BANDIT_EXIT_CODE:-0}" -ne 0 ] && [ "${BANDIT_EXIT_CODE:-0}" -ne 1 ]; then
             echo "❌ Bandit failed with unexpected exit code: ${BANDIT_EXIT_CODE}"
             exit 1
