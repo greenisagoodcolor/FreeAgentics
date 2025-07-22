@@ -1,0 +1,54 @@
+# TruffleHog Configuration for FreeAgentics
+# Minimal configuration using only supported options
+
+# Global settings
+no_verification: false
+only_verified: true
+
+# Exclude paths from scanning
+exclude_paths:
+  # Development secrets (temporary exclusion - see security action plan)
+  - "secrets/*.txt"
+  - "secrets/docker-secrets.yml"
+  
+  # Build and dependency directories
+  - "node_modules/"
+  - "venv/"
+  - ".venv/"
+  - ".llm_venv/"
+  - "__pycache__/"
+  - ".pytest_cache/"
+  - ".ruff_cache/"
+  - ".mypy_cache/"
+  - "temp_security_venv/"
+  
+  # Archive and backup directories
+  - ".archive/"
+  - "archives/"
+  - "backups/"
+  
+  # Log files
+  - "*.log"
+  - "logs/"
+  
+  # Test and mock files
+  - "**/test/**/*mock*"
+  - "**/tests/**/*mock*"
+  - "**/fixtures/**"
+  
+  # Documentation
+  - "docs/examples/"
+  - "examples/"
+  - "*.md"
+
+# SECURITY NOTICE:
+# 
+# The 'secrets/*.txt' exclusion is TEMPORARY for development.
+# 
+# ACTION REQUIRED:
+# 1. Replace *.txt files in secrets/ with proper templates
+# 2. Move actual secrets to environment variables
+# 3. Remove the secrets/*.txt exclusion
+# 4. Implement proper secret rotation
+#
+# See SECURITY_ACTION_PLAN.md for complete remediation steps.

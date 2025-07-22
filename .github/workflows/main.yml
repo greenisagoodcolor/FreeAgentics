@@ -224,11 +224,109 @@ jobs:
           echo "✅ No critical/high severity security issues found"
       
       - name: Secret scanning
-        uses: trufflesecurity/trufflehog@main
-        with:
-          path: ./
-          base: main
-          head: HEAD
+        run: |
+          echo "🔍 Running TruffleHog secret scanning..."
+          
+          # Committee Best Practice: Context-aware secret scanning
+          # Different strategies for different trigger events
+          
+          if [ "${{ github.event_name }}" = "pull_request" ]; then
+            # For PRs: scan diff between base branch and PR branch
+            BASE_REF="${{ github.event.pull_request.base.sha }}"
+            HEAD_REF="${{ github.event.pull_request.head.sha }}"
+            echo "🔄 PR mode: scanning ${BASE_REF}..${HEAD_REF}"
+            
+          elif [ "${{ github.event_name }}" = "push" ]; then
+            # For pushes: scan the specific commits in the push
+            if [ "${{ github.event.before }}" = "0000000000000000000000000000000000000000" ]; then
+              # New branch - scan last commit only
+              BASE_REF=""
+              HEAD_REF="${{ github.sha }}"
+              echo "🆕 New branch: scanning single commit ${HEAD_REF}"
+            else
+              # Regular push - scan diff between before and after
+              BASE_REF="${{ github.event.before }}"
+              HEAD_REF="${{ github.sha }}"
+              echo "📤 Push mode: scanning ${BASE_REF}..${HEAD_REF}"
+            fi
+            
+          elif [ "${{ github.event_name }}" = "workflow_dispatch" ]; then
+            # Manual trigger: scan last 10 commits
+            BASE_REF=$(git rev-parse HEAD~10)
+            HEAD_REF="${{ github.sha }}"
+            echo "🔧 Manual trigger: scanning last 10 commits ${BASE_REF}..${HEAD_REF}"
+            
+          else
+            # Scheduled or other: scan last 5 commits
+            BASE_REF=$(git rev-parse HEAD~5)
+            HEAD_REF="${{ github.sha }}"
+            echo "⏰ Scheduled mode: scanning last 5 commits ${BASE_REF}..${HEAD_REF}"
+          fi
+          
+          # Run TruffleHog with exclusions file and appropriate parameters
+          docker run --rm -v "$(pwd):/workdir" -w /workdir \
+            ghcr.io/trufflesecurity/trufflehog:latest \
+            git file:///workdir \
+            --since-commit="${BASE_REF}" \
+            --branch="${HEAD_REF}" \
+            --exclude-paths=".trufflehogignore" \
+            --fail \
+            --no-update \
+            --github-actions \
+            --only-verified \
+            --json || SECRET_SCAN_EXIT_CODE=$?
+          
+          # Handle TruffleHog exit codes and generate security report
+          if [ "${SECRET_SCAN_EXIT_CODE:-0}" -eq 0 ]; then
+            echo "✅ No secrets detected in scanned commits"
+            echo "📊 Secret scanning summary:"
+            echo "  - Configuration: .trufflehog.yaml"
+            echo "  - Scan range: ${BASE_REF:-(full)}..${HEAD_REF}"
+            echo "  - Mode: ${{ github.event_name }}"
+            echo "  - Only verified secrets: enabled"
+            echo "  - Custom detectors: enabled"
+            
+          elif [ "${SECRET_SCAN_EXIT_CODE:-0}" -eq 183 ]; then
+            echo "❌ CRITICAL: Secrets detected in scanned commits!"
+            echo "🚫 Pipeline blocked for security compliance"
+            echo ""
+            echo "🔍 Security Action Required:"
+            echo "1. Review the TruffleHog output above"
+            echo "2. Remove or properly secure any detected secrets"
+            echo "3. If legitimate, add to .trufflehog.yaml exclusions with justification"
+            echo "4. Consider implementing secret rotation procedures"
+            echo ""
+            echo "📚 Security Resources:"
+            echo "- Secrets Management Guide: ./secrets/README.md"
+            echo "- TruffleHog Configuration: ./.trufflehog.yaml"
+            exit 1
+            
+          else
+            echo "⚠️  TruffleHog scan encountered an error (exit code: ${SECRET_SCAN_EXIT_CODE})"
+            echo "🔍 This could indicate:"
+            echo "- Configuration issues"
+            echo "- Repository access problems"
+            echo "- Resource constraints"
+            echo ""
+            echo "Committee Policy: Treat scan errors as security failures"
+            exit 1
+          fi
+          
+          # Additional security validation for development secrets
+          echo ""
+          echo "🔒 Development Secret Validation:"
+          if [ -d "secrets" ] && [ "$(ls -A secrets/*.txt 2>/dev/null | wc -l)" -gt 0 ]; then
+            echo "⚠️  WARNING: Development secret files detected"
+            echo "📋 Files in secrets/ directory:"
+            ls -la secrets/ || true
+            echo ""
+            echo "🎯 COMMITTEE RECOMMENDATION:"
+            echo "- Verify these are templates, not production secrets"
+            echo "- Consider moving to environment variables for production"
+            echo "- Implement proper secret rotation procedures"
+          else
+            echo "✅ No development secret files found"
+          fi
 
   # Stage 3: Code Quality
   code-quality:
