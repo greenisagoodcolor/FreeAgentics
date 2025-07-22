@@ -48,7 +48,7 @@ pipeline {
                             . venv/bin/activate
                             bandit -r . -f json -o results/bandit-report.json -x "./venv,./test_venv,./security_env"
                             semgrep --config=auto --json --output=results/semgrep-report.json .
-                            pylint **/*.py --output-format=json > results/pylint-report.json || true
+                            pylint **/*.py --output-format=json > results/pylint-report.json || { echo "Pylint scan failed with errors"; exit 1; }
                         '''
                     }
                 }
