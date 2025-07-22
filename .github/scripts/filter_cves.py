@@ -6,7 +6,10 @@ CVE Filtering Script for CI/CD Pipeline
 Committee-approved allowlist for disputed/false positive CVEs.
 Maintains zero-tolerance for legitimate vulnerabilities while handling edge cases.
 
-Usage: python filter_cves.py safety_report.json
+Usage: python filter_cves.py pip_audit_report.json
+
+Note: Switched from safety to pip-audit due to safety tool reliability issues.
+pip-audit provides cleaner JSON output and better maintenance.
 """
 
 import json
@@ -15,7 +18,7 @@ from typing import Dict, List, Any
 
 # Committee Decision: Disputed CVEs with technical justification
 DISPUTED_CVE_ALLOWLIST = {
-    "51457": {
+    "PYSEC-2022-42969": {
         "cve": "CVE-2022-42969",
         "package": "py",
         "reason": "ReDoS via SVN - DISPUTED by maintainers, not applicable to production use",
@@ -24,24 +27,24 @@ DISPUTED_CVE_ALLOWLIST = {
     }
 }
 
-def load_safety_report(filename: str) -> Dict[str, Any]:
-    """Load and parse Safety JSON report."""
+def load_audit_report(filename: str) -> Dict[str, Any]:
+    """Load and parse pip-audit JSON report."""
     try:
         with open(filename, 'r') as f:
             content = f.read()
             
         # Debug: Show first few lines if JSON parsing fails
         if not content.strip():
-            print(f"❌ Safety report file is empty: {filename}")
+            print(f"❌ pip-audit report file is empty: {filename}")
             sys.exit(1)
             
         return json.loads(content)
         
     except FileNotFoundError:
-        print(f"❌ Safety report file not found: {filename}")
+        print(f"❌ pip-audit report file not found: {filename}")
         sys.exit(1)
     except json.JSONDecodeError as e:
-        print(f"❌ Invalid JSON in safety report: {e}")
+        print(f"❌ Invalid JSON in pip-audit report: {e}")
         print(f"📝 First 200 characters of file:")
         try:
             with open(filename, 'r') as f:
@@ -62,7 +65,8 @@ def filter_vulnerabilities(vulnerabilities: List[Dict[str, Any]]) -> tuple[List[
     allowlisted = []
     
     for vuln in vulnerabilities:
-        vuln_id = vuln.get("vulnerability_id", "")
+        # pip-audit uses "id" field, safety used "vulnerability_id"
+        vuln_id = vuln.get("id", vuln.get("vulnerability_id", ""))
         
         if vuln_id in DISPUTED_CVE_ALLOWLIST:
             allowlist_entry = DISPUTED_CVE_ALLOWLIST[vuln_id]
@@ -91,19 +95,31 @@ def count_by_severity(vulnerabilities: List[Dict[str, Any]]) -> Dict[str, int]:
 def main():
     """Main CVE filtering logic."""
     if len(sys.argv) != 2:
-        print("Usage: python filter_cves.py safety_report.json")
+        print("Usage: python filter_cves.py pip_audit_report.json")
         sys.exit(1)
     
     report_file = sys.argv[1]
     
-    # Load safety report
-    safety_report = load_safety_report(report_file)
+    # Load pip-audit report
+    audit_report = load_audit_report(report_file)
     
-    # Extract vulnerabilities
-    all_vulnerabilities = safety_report.get("vulnerabilities", [])
+    # Extract vulnerabilities from pip-audit's nested format
+    # pip-audit format: {"dependencies": [{"name": "pkg", "vulns": [...]}]}
+    all_vulnerabilities = []
+    dependencies = audit_report.get("dependencies", [])
+    
+    for dep in dependencies:
+        package_name = dep.get("name", "unknown")
+        vulns = dep.get("vulns", [])
+        
+        # Add package name to each vulnerability for better reporting
+        for vuln in vulns:
+            vuln["package_name"] = package_name
+            all_vulnerabilities.append(vuln)
+    
     total_vulns = len(all_vulnerabilities)
     
-    print(f"🔍 Processing {total_vulns} vulnerabilities from safety scan...")
+    print(f"🔍 Processing {total_vulns} vulnerabilities from pip-audit scan...")
     
     # Filter vulnerabilities
     filtered_vulns, allowlisted_vulns = filter_vulnerabilities(all_vulnerabilities)
@@ -138,14 +154,17 @@ def main():
         if filtered_vulns:
             print(f"\n🔴 Blocking vulnerabilities:")
             for vuln in filtered_vulns:
-                severity = vuln.get("severity", "unknown")
-                if severity in ["critical", "high"]:
-                    cve = vuln.get("CVE", "No CVE")
-                    package = vuln.get("package_name", "unknown")
-                    advisory = vuln.get("advisory", "")[:100]
-                    print(f"   - {cve} in {package} [{severity.upper()}]")
-                    if advisory:
-                        print(f"     {advisory}...")
+                # pip-audit doesn't provide severity directly, so default to "high" for any vuln
+                severity = vuln.get("severity", "high")
+                vuln_id = vuln.get("id", "No ID")
+                package = vuln.get("package_name", "unknown")
+                description = vuln.get("description", "")[:100]
+                # pip-audit includes CVE in aliases array
+                aliases = vuln.get("aliases", [])
+                cve = next((alias for alias in aliases if alias.startswith("CVE-")), vuln_id)
+                print(f"   - {cve} in {package} [{severity.upper()}]")
+                if description:
+                    print(f"     {description}...")
         
         sys.exit(1)
     
