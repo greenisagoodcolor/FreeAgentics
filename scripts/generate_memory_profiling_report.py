@@ -20,9 +20,8 @@ from pathlib import Path
 
 import numpy as np
 
-# Add project root to path
+# Define project root for output directory
 project_root = Path(__file__).parent.parent
-sys.path.insert(0, str(project_root))
 
 from agents.memory_optimization.agent_memory_optimizer import (
     get_agent_optimizer,
@@ -336,8 +335,10 @@ def profile_memory_lifecycle():
             f.write(
                 f"✓ Scalability test: {len(scale_agents)} agents at {avg_scale:.1f} MB average\n"
             )
+            leak_count = results['summary']['memory_leaks_detected']
+            leak_status = 'None detected' if leak_count == 0 else f'{leak_count} suspected'
             f.write(
-                f"✓ Memory leaks: {'None detected' if results['summary']['memory_leaks_detected'] == 0 else f'{results["summary"]["memory_leaks_detected"]} suspected'}\n"
+                f"✓ Memory leaks: {leak_status}\n"
             )
             f.write("\n")
 

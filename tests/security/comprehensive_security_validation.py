@@ -51,10 +51,7 @@ except ImportError as e:
     security_modules["headers"] = False
 
 try:
-    from auth.https_enforcement import (
-        HTTPSEnforcementMiddleware,
-        SSLConfiguration,
-    )
+    from auth.https_enforcement import SSLConfiguration
 
     security_modules["ssl"] = True
     logger.info("SSL/TLS module imported successfully")

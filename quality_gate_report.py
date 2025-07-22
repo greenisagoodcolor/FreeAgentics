@@ -100,12 +100,12 @@ def get_test_status():
         if "passed" in line:
             try:
                 passed = int(line.split()[0])
-            except:
+            except (ValueError, IndexError):
                 pass
         elif "failed" in line:
             try:
                 failed = int(line.split()[0])
-            except:
+            except (ValueError, IndexError):
                 pass
         elif "error" in line.lower():
             errors += 1

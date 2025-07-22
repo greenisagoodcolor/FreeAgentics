@@ -263,6 +263,7 @@ class TestDependencyVerification:
         # Check if PyJWT is installed (replaces python-jose)
         try:
             import jwt
+            assert jwt  # Use the import to avoid F401
         except ImportError:
             missing_commands.append("pip install PyJWT")
 

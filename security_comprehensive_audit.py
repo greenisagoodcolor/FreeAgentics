@@ -19,7 +19,6 @@ from datetime import datetime
 from pathlib import Path
 from typing import List
 
-import requests
 from rich.console import Console
 from rich.panel import Panel
 from rich.progress import Progress, SpinnerColumn, TextColumn
@@ -731,7 +730,7 @@ class SecurityAudit:
         """Read file content safely."""
         try:
             return Path(filepath).read_text()
-        except:
+        except (OSError, IOError, UnicodeDecodeError):
             return ""
 
     def _grep_in_files(
@@ -745,7 +744,7 @@ class SecurityAudit:
 
             result = subprocess.run(cmd, capture_output=True, text=True)
             return result.returncode == 0
-        except:
+        except (subprocess.SubprocessError, OSError):
             return False
 
     def _check_environment_var(self, var_name: str) -> bool:
@@ -765,7 +764,7 @@ class SecurityAudit:
                 text=True,
             )
             return len(result.stdout.splitlines()) if result.returncode == 0 else 0
-        except:
+        except (subprocess.SubprocessError, OSError):
             return 0
 
 
@@ -784,15 +783,13 @@ async def main():
 
 
 if __name__ == "__main__":
+    import importlib.util
+    
     # Install required packages if not available
-    try:
-        import rich
-    except ImportError:
+    if importlib.util.find_spec("rich") is None:
         subprocess.run([sys.executable, "-m", "pip", "install", "rich"])
 
-    try:
-        import requests
-    except ImportError:
+    if importlib.util.find_spec("requests") is None:
         subprocess.run([sys.executable, "-m", "pip", "install", "requests"])
 
     asyncio.run(main())

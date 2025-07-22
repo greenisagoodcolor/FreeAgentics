@@ -22,6 +22,7 @@ from pathlib import Path
 from typing import Any, Dict, List, Optional
 
 import boto3
+import psutil
 import psycopg2
 import requests
 import schedule
@@ -129,15 +130,15 @@ class BackupConfig:
                         # Map environment variables to config attributes
                         if hasattr(config, key.lower()):
                             attr_type = type(getattr(config, key.lower()))
-                            if attr_type == bool:
+                            if attr_type is bool:
                                 setattr(
                                     config,
                                     key.lower(),
                                     value.lower() == "true",
                                 )
-                            elif attr_type == int:
+                            elif attr_type is int:
                                 setattr(config, key.lower(), int(value))
-                            elif attr_type == list:
+                            elif attr_type is list:
                                 setattr(config, key.lower(), value.split(","))
                             else:
                                 setattr(config, key.lower(), value)

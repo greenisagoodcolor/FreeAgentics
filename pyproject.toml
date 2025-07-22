@@ -436,6 +436,42 @@ title = "FreeAgentics Coverage Report"
 [tool.coverage.xml]
 output = "coverage.xml"
 
+[tool.ruff]
+# Committee Decision: Pragmatic approach to E402 violations
+line-length = 100
+target-version = "py311"
+src = ["agents", "api", "coalitions", "database", "inference", "world"]
+
+[tool.ruff.lint]
+# Focus only on the specific errors we're currently fixing
+select = ["E402", "E721", "E722", "F401", "F601", "F811", "F821"]
+ignore = []
+
+[tool.ruff.lint.per-file-ignores]
+# Legitimate E402 violations - mocking before imports
+"tests/unit/test_base_agent*.py" = ["E402"]
+"tests/unit/test_api_*.py" = ["E402"]
+"tests/unit/test_database_*.py" = ["E402"]
+"tests/security/test_*.py" = ["E402"]
+"tests/security/run_*.py" = ["E402"]
+"tests/security/comprehensive_*.py" = ["E402"]
+# Scripts often need setup before imports
+"scripts/*.py" = ["E402"]
+# Tests that check imports
+"tests/integration/test_active_inference_production.py" = ["F401"]
+"tests/performance/test_matrix_caching_benchmarks.py" = ["F401"]
+"tests/performance/matrix_caching_benchmarks.py" = ["F401"]
+"tests/performance/selective_update_benchmarks.py" = ["F401"]
+"tests/integration/test_llm_end_to_end.py" = ["F401"]
+"tests/performance/test_database_load.py" = ["F401"]
+"test_encryption_minimal.py" = ["F401"]
+# Init files re-exporting
+"tests/fixtures/__init__.py" = ["F401"]
+# Scripts with necessary E402
+"tests/performance/anomaly_detector.py" = ["E402"]
+"tests/performance/patch_time_sleep.py" = ["E402"]
+"tests/performance/test_agent_memory_optimization_validation.py" = ["E402"]
+
 # Expert Committee Standards
 # Robert C. Martin: "Clean code always looks like it was written by someone who cares"
 # Kent Beck: "Make it work, make it right, make it fast"

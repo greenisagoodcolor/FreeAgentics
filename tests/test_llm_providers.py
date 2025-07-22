@@ -7,7 +7,6 @@ This module tests all LLM providers to ensure they:
 4. Maintain consistent quality
 """
 
-import asyncio
 import os
 from typing import Dict, List
 
@@ -393,4 +392,5 @@ class TestPerformance:
 
 if __name__ == "__main__":
     # Run basic tests
-    asyncio.run(test_basic_functionality())
+    import pytest
+    pytest.main([__file__, "-v"])

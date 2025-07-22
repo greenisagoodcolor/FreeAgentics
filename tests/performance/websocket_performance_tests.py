@@ -414,7 +414,8 @@ class WebSocketPerformanceTester:
                 if websocket:
                     try:
                         await websocket.close()
-                    except:
+                    except Exception:
+                        # Suppress any errors during cleanup
                         pass
 
         try:
@@ -596,7 +597,8 @@ class WebSocketPerformanceTester:
                 if websocket:
                     try:
                         await websocket.close()
-                    except:
+                    except Exception:
+                        # Suppress any errors during cleanup
                         pass
 
         try:

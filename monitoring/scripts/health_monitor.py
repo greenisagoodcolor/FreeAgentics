@@ -6,6 +6,7 @@ Continuously monitors system health and triggers alerts when thresholds are exce
 """
 
 import asyncio
+import json
 import logging
 import os
 import sys
@@ -113,7 +114,7 @@ class HealthMonitor:
                     body = await response.json()
                     result["response"] = body
                     result["health_status"] = body.get("status", "unknown")
-                except:
+                except (json.JSONDecodeError, ValueError):
                     result["response"] = await response.text()
 
                 return result

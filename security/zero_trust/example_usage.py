@@ -10,14 +10,6 @@ import asyncio
 import logging
 import time
 
-# Configure logging
-logging.basicConfig(
-    level=logging.INFO,
-    format="%(asctime)s - %(name)s - %(levelname)s - %(message)s",
-)
-logger = logging.getLogger(__name__)
-
-# Import zero-trust components
 from security.zero_trust import (
     CertificateRotationPolicy,
     IdentityAwareProxy,
@@ -30,6 +22,13 @@ from security.zero_trust import (
     TrafficPolicy,
     generate_istio_config,
 )
+
+# Configure logging
+logging.basicConfig(
+    level=logging.INFO,
+    format="%(asctime)s - %(name)s - %(levelname)s - %(message)s",
+)
+logger = logging.getLogger(__name__)
 
 
 async def demonstrate_zero_trust_setup():

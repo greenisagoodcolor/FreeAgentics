@@ -60,12 +60,7 @@ def _process_agent_operation(
     start_time = time.time()
 
     try:
-        # Import here to avoid pickling issues
-        import sys
-
-        # Add the current working directory to the path so imports work
-        sys.path.append("/home/green/FreeAgentics")
-
+        # Import here to avoid pickling issues in thread pool
         from agents.base_agent import BasicExplorerAgent
 
         # Create agent from config

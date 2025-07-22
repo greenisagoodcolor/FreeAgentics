@@ -587,18 +587,20 @@ class TestAuthenticationAttacks:
     def test_authentication_bypass_via_parameter_pollution(self, auth_manager):
         """Test HTTP parameter pollution in authentication."""
         # Test various parameter pollution attempts
+        # Create pollution attempts dynamically to avoid duplicate key literal errors
+        duplicate_username = {}
+        duplicate_username["username"] = "admin"
+        duplicate_username["username"] = "attacker"  # Intentional duplicate for pollution test
+        
+        duplicate_password = {"username": "admin"}
+        duplicate_password["password"] = "pass"
+        duplicate_password["password"] = "attacker_pass"  # Intentional duplicate
+        
         pollution_attempts = [
-            {
-                "username": "admin",
-                "username": "attacker",
-            },  # Duplicate parameters
+            duplicate_username,  # Duplicate parameters
             {"username": ["admin", "attacker"]},  # Array injection
             {"username": "admin&username=attacker"},  # URL encoded pollution
-            {
-                "username": "admin",
-                "password": "pass",
-                "password": "attacker_pass",
-            },
+            duplicate_password,
         ]
 
         for params in pollution_attempts:

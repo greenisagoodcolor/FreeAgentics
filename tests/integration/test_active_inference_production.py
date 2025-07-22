@@ -44,6 +44,10 @@ class TestActiveInferenceProduction(unittest.TestCase):
             import pymdp
             from pymdp.agent import Agent as PyMDPAgent
             from pymdp import utils
+            
+            # Verify imports loaded correctly
+            assert pymdp is not None
+            assert utils is not None
 
             # Test basic agent creation
             A = np.eye(3)
