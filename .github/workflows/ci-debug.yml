@@ -325,4 +325,106 @@ jobs:
           name: unit-test-results-py${{ matrix.python-version }}-${{ github.run_id }}
           path: ${{ env.REPORT_DIR }}/
 
+  integration-tests:
+    name: "🔗 Integration Tests"
+    needs: unit-tests
+    runs-on: ubuntu-latest
+    services:
+      postgres:
+        image: postgres:${{ env.POSTGRES_VERSION }}
+        env:
+          POSTGRES_USER: postgres
+          POSTGRES_PASSWORD: testpass
+          POSTGRES_DB: freeagentics_test
+        options: >-
+          --health-cmd pg_isready
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+        ports:
+          - 5432:5432
+
+      redis:
+        image: redis:7-alpine
+        options: >-
+          --health-cmd "redis-cli ping"
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+        ports:
+          - 6379:6379
+
+    steps:
+      - name: "📥 Checkout Code"
+        uses: actions/checkout@v4
+
+      - name: "🔧 Setup Python"
+        uses: actions/setup-python@v5
+        with:
+          python-version: ${{ env.PYTHON_VERSION }}
+
+      - name: "📦 Install Dependencies"
+        run: |
+          python -m venv venv
+          source venv/bin/activate
+          pip install -r requirements-ci.txt
+
+      - name: "🔗 Run Integration Tests"
+        env:
+          DATABASE_URL: "postgresql://postgres:testpass@localhost:5432/freeagentics_test"
+          REDIS_URL: "redis://localhost:6379"
+        run: |
+          source venv/bin/activate
+          mkdir -p ${{ env.REPORT_DIR }}
+
+          PYTHONPATH="." pytest tests/integration/ \
+            --junit-xml=${{ env.REPORT_DIR }}/integration-junit.xml \
+            -v --tb=short
+
+      - name: "📊 Upload Integration Test Results"
+        uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: integration-test-results-${{ github.run_id }}
+          path: ${{ env.REPORT_DIR }}/
+
+  frontend-tests:
+    name: "⚛️ Frontend Tests"
+    needs: environment-check
+    runs-on: ubuntu-latest
+    steps:
+      - name: "📥 Checkout Code"
+        uses: actions/checkout@v4
+
+      - name: "📦 Setup Node.js"
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: npm
+          cache-dependency-path: web/package-lock.json
+
+      - name: "📦 Install Dependencies"
+        working-directory: ./web
+        run: npm ci
+
+      - name: "🧪 Run Frontend Tests"
+        working-directory: ./web
+        run: |
+          mkdir -p ../${{ env.REPORT_DIR }}/frontend
+          npm test -- \
+            --coverage \
+            --coverageDirectory=../${{ env.REPORT_DIR }}/frontend/coverage \
+            --watchAll=false \
+            --ci \
+            --reporters=default \
+            --reporters=jest-junit \
+            --outputFile=../${{ env.REPORT_DIR }}/frontend/junit.xml
+
+      - name: "📊 Upload Frontend Test Results"
+        uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: frontend-test-results-${{ github.run_id }}
+          path: ${{ env.REPORT_DIR }}/frontend/
+
 
