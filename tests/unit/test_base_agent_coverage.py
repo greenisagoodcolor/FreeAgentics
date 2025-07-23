@@ -1,17 +1,18 @@
 """Coverage tests for agents/base_agent.py focusing on untested code paths."""
 
-import pytest
-import numpy as np
-from unittest.mock import Mock, patch
 import importlib
+from unittest.mock import Mock, patch
+
+import numpy as np
+import pytest
 
 from agents.base_agent import (
-    safe_array_to_int,
-    _get_pymdp_components,
-    _get_llm_manager,
     ActiveInferenceAgent,
     AgentConfig,
     BasicExplorerAgent,
+    _get_llm_manager,
+    _get_pymdp_components,
+    safe_array_to_int,
 )
 
 

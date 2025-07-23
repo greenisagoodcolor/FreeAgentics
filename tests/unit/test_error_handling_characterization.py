@@ -6,23 +6,24 @@ Following Michael Feathers' principles from "Working Effectively with Legacy Cod
 - No changes to production code unless fixing bugs
 """
 
-import pytest
+import time
 from datetime import datetime
 from unittest.mock import Mock
-import time
+
+import pytest
 
 from agents.error_handling import (
-    ErrorSeverity,
-    AgentError,
-    PyMDPError,
-    InferenceError,
     ActionSelectionError,
-    ErrorRecoveryStrategy,
+    AgentError,
     ErrorHandler,
-    with_error_handling,
+    ErrorRecoveryStrategy,
+    ErrorSeverity,
+    InferenceError,
+    PyMDPError,
     safe_pymdp_operation,
-    validate_observation,
     validate_action,
+    validate_observation,
+    with_error_handling,
 )
 
 

@@ -1,8 +1,9 @@
 #!/usr/bin/env python3
 """Test belief state management and free energy computation."""
 
-import sys
 import os
+import sys
+
 import numpy as np
 
 # Add project root to path

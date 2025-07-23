@@ -11,10 +11,10 @@ This demo showcases the complete pipeline integration:
 This demonstrates the full advertised feature set working end-to-end.
 """
 
+import json
 import logging
 import os
 import sys
-import json
 from pathlib import Path
 
 # Add project root to path
@@ -37,9 +37,9 @@ def main():
     print("\n🔍 Checking LLM Provider Availability...")
 
     try:
+        from config.llm_config import get_llm_config
         from inference.llm.provider_factory import create_llm_manager
         from inference.llm.provider_interface import GenerationRequest
-        from config.llm_config import get_llm_config
 
         config = get_llm_config()
         enabled_providers = config.get_enabled_providers()
@@ -65,7 +65,7 @@ def main():
     # Check for GMN parser
     print("\n🔍 Checking GMN Parser Availability...")
     try:
-        from inference.active.gmn_parser import GMNParser, EXAMPLE_GMN_SPEC
+        from inference.active.gmn_parser import EXAMPLE_GMN_SPEC, GMNParser
 
         print("✅ GMN Parser Available")
         gmn_available = True

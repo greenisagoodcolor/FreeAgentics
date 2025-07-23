@@ -11,11 +11,11 @@ This script performs a comprehensive security assessment of:
 
 import json
 import os
+import re
 import stat
 import sys
 from pathlib import Path
-from typing import Dict, List, Any
-import re
+from typing import Any, Dict, List
 
 
 class ContainerSecurityAuditor:

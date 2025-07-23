@@ -118,7 +118,7 @@ export function usePromptProcessor() {
     };
   }, []);
 
-  // Handle WebSocket messages
+  // Handle WebSocket messages - defined outside useEffect to avoid dependency
   const handleWebSocketMessage = useCallback(
     (data: unknown) => {
       const message = data as Record<string, unknown>;

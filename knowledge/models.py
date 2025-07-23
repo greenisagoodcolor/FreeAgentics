@@ -1,16 +1,16 @@
 """Knowledge Graph models with pgvector and H3 support."""
 
 from sqlalchemy import (
+    JSON,
     BigInteger,
     Column,
     DateTime,
+    Float,
     ForeignKey,
+    Index,
+    Integer,
     String,
     Text,
-    Index,
-    JSON,
-    Integer,
-    Float,
 )
 from sqlalchemy.dialects.postgresql import UUID as PGUUID
 from sqlalchemy.orm import relationship

@@ -6,9 +6,9 @@ Fixes all identified security vulnerabilities in FreeAgentics dependencies
 
 import json
 import sys
-from pathlib import Path
 from datetime import datetime
-from typing import Dict, Any
+from pathlib import Path
+from typing import Any, Dict
 
 
 class DependencySecurityRemediator:

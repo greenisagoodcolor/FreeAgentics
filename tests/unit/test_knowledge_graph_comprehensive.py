@@ -5,7 +5,6 @@ Comprehensive test suite for Knowledge Graph modules
 from datetime import datetime
 from unittest.mock import MagicMock, patch
 
-
 # Mock complex dependencies
 mock_modules = {
     "sqlalchemy": MagicMock(),
@@ -22,13 +21,9 @@ mock_modules = {
 with patch.dict("sys.modules", mock_modules):
     from knowledge_graph.evolution import EvolutionEngine
     from knowledge_graph.fallback_classes import KnowledgeEdge as FallbackEdge
-    from knowledge_graph.fallback_classes import (
-        KnowledgeGraph as FallbackGraph,
-    )
+    from knowledge_graph.fallback_classes import KnowledgeGraph as FallbackGraph
     from knowledge_graph.fallback_classes import KnowledgeNode as FallbackNode
-    from knowledge_graph.fallback_classes import (
-        QueryEngine as FallbackQueryEngine,
-    )
+    from knowledge_graph.fallback_classes import QueryEngine as FallbackQueryEngine
     from knowledge_graph.graph_engine import (
         KnowledgeGraph,
         KnowledgeNode,

@@ -117,7 +117,8 @@ export function useSimulation(): SimulationState {
 
         // Step based on speed (steps per second)
         if (deltaTime >= 1000 / speed) {
-          stepSimulation();
+          // Call step simulation through WebSocket
+          sendMessage({ type: "step_simulation" });
           lastStepTimeRef.current = now;
 
           // Track step times for FPS calculation
@@ -150,7 +151,7 @@ export function useSimulation(): SimulationState {
         cancelAnimationFrame(animationFrameRef.current);
       }
     };
-  }, [isRunning, isPaused, speed, currentStep]);
+  }, [isRunning, isPaused, speed, currentStep, sendMessage]);
 
   const startSimulation = useCallback(async () => {
     try {

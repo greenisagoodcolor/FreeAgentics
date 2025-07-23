@@ -14,7 +14,7 @@ pip-audit provides cleaner JSON output and better maintenance.
 
 import json
 import sys
-from typing import Dict, List, Any
+from typing import Any, Dict, List
 
 # Committee Decision: Disputed CVEs with technical justification
 DISPUTED_CVE_ALLOWLIST = {

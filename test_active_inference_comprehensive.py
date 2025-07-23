@@ -1,10 +1,11 @@
 #!/usr/bin/env python3
 """Comprehensive Active Inference Integration Test Suite."""
 
-import sys
 import os
-import numpy as np
+import sys
 import time
+
+import numpy as np
 
 # Add project root to path
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
@@ -89,9 +90,10 @@ def test_gmn_pymdp_adapter():
     print("\n=== Test 3: GMN-PyMDP Adapter ===")
 
     try:
+        from pymdp.agent import Agent as PyMDPAgent
+
         from agents.gmn_pymdp_adapter import adapt_gmn_to_pymdp
         from inference.active.gmn_parser import parse_gmn_spec
-        from pymdp.agent import Agent as PyMDPAgent
 
         # Create and parse GMN
         gmn_spec = """

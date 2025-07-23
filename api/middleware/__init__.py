@@ -8,6 +8,8 @@ This package contains middleware components for the FreeAgentics API including:
 - Performance monitoring
 """
 
+from auth.security_headers import SecurityHeadersMiddleware
+
 from .ddos_protection import (
     DDoSProtectionMiddleware,
     EndpointRateLimits,
@@ -16,7 +18,6 @@ from .ddos_protection import (
     WebSocketRateLimiter,
 )
 from .security_monitoring import SecurityMonitoringMiddleware
-from auth.security_headers import SecurityHeadersMiddleware
 
 __all__ = [
     "DDoSProtectionMiddleware",

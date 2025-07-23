@@ -118,7 +118,7 @@ class TestDatabaseModule:
         """Test that database models can be imported."""
         # Mock the database URL to avoid connection issues
         with patch.dict(os.environ, {"DATABASE_URL": "sqlite:///test.db"}):
-            from database.models import Agent, User, Coalition
+            from database.models import Agent, Coalition, User
 
             # Verify model classes exist
             assert Agent is not None
@@ -150,8 +150,8 @@ class TestInferenceModule:
     def test_gnn_imports(self):
         """Test GNN module imports."""
         try:
-            from inference.gnn.model import GNNModel
             from inference.gnn.feature_extractor import FeatureExtractor
+            from inference.gnn.model import GNNModel
 
             # Verify classes exist
             assert GNNModel is not None
@@ -203,7 +203,7 @@ class TestWorldModule:
 
     def test_grid_world_imports(self):
         """Test grid world imports."""
-        from world.grid_world import GridWorld, Position, CellType
+        from world.grid_world import CellType, GridWorld, Position
 
         # Verify classes exist
         assert GridWorld is not None

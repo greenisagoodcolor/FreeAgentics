@@ -26,9 +26,7 @@ from tests.db_infrastructure.performance_monitor import (
 )
 
 # Import metrics from different subsystems
-from tests.websocket_load.metrics_collector import (
-    MetricsCollector as WSMetricsCollector,
-)
+from tests.websocket_load.metrics_collector import MetricsCollector as WSMetricsCollector
 
 logger = logging.getLogger(__name__)
 

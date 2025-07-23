@@ -5,7 +5,7 @@ This makes FreeAgentics a proper Python package that can be installed
 in development mode, eliminating the need for sys.path manipulation.
 """
 
-from setuptools import setup, find_packages
+from setuptools import find_packages, setup
 
 setup(
     name="freeagentics",

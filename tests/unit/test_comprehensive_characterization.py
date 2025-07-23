@@ -139,10 +139,9 @@ class TestBaseAgentCharacterization:
     def test_agent_step_execution(self):
         """Test agent step can be executed."""
         from agents.base_agent import BasicExplorerAgent
-        from world.grid_world import GridWorld
 
         # Create world and agent
-        from world.grid_world import GridWorldConfig
+        from world.grid_world import GridWorld, GridWorldConfig
 
         config = GridWorldConfig(width=5, height=5)
         world = GridWorld(config)
@@ -222,7 +221,7 @@ class TestDatabaseCharacterization:
     @patch.dict(os.environ, {"DATABASE_URL": "sqlite:///test_characterization.db"})
     def test_database_models_import(self):
         """Test database models can be imported."""
-        from database.models import Base, Agent, User, Coalition
+        from database.models import Agent, Base, Coalition, User
 
         # Verify models exist
         assert Base is not None
@@ -369,7 +368,7 @@ class TestInferenceCharacterization:
     def test_gnn_modules_import(self):
         """Test GNN modules can be imported."""
         try:
-            from inference.gnn import model, feature_extractor
+            from inference.gnn import feature_extractor, model
 
             assert model is not None
             assert feature_extractor is not None
@@ -479,6 +478,7 @@ class TestPerformanceCharacterization:
     def test_agent_creation_performance(self):
         """Test agent creation is reasonably fast."""
         import time
+
         from agents.agent_manager import AgentManager
 
         manager = AgentManager()
@@ -499,6 +499,7 @@ class TestPerformanceCharacterization:
     def test_world_creation_performance(self):
         """Test world creation performance."""
         import time
+
         from world.grid_world import GridWorld
 
         start_time = time.time()
@@ -527,8 +528,9 @@ class TestMemoryCharacterization:
 
     def test_agent_manager_memory_cleanup(self):
         """Test agent manager cleans up properly."""
-        from agents.agent_manager import AgentManager
         import gc
+
+        from agents.agent_manager import AgentManager
 
         manager = AgentManager()
         manager.create_world(5)
@@ -548,11 +550,10 @@ class TestMemoryCharacterization:
 
     def test_world_memory_usage(self):
         """Test world memory patterns."""
-        from world.grid_world import GridWorld
         import sys
 
         # Create world and check it has reasonable memory footprint
-        from world.grid_world import GridWorldConfig
+        from world.grid_world import GridWorld, GridWorldConfig
 
         config = GridWorldConfig(width=10, height=10)
         world = GridWorld(config)

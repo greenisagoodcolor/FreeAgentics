@@ -4,9 +4,10 @@ Following Michael Feathers' methodology - these tests target the most important
 business logic paths to achieve high coverage of critical functionality.
 """
 
-import pytest
 from unittest.mock import Mock, patch
+
 import numpy as np
+import pytest
 
 
 class TestAgentCriticalPaths:
@@ -60,7 +61,7 @@ class TestAgentCriticalPaths:
     def test_agent_error_handling_paths(self):
         """Characterize error handling in agent operations."""
         try:
-            from agents.error_handling import handle_agent_error, AgentError
+            from agents.error_handling import AgentError, handle_agent_error
 
             # Test error creation and handling
             error = AgentError("test error", {"context": "test"})

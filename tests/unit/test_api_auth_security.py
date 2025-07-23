@@ -17,8 +17,8 @@ from fastapi import Depends, status
 from fastapi.testclient import TestClient
 
 from api.main import app
-from auth.security_implementation import get_current_user
 from auth.jwt_handler import jwt_handler
+from auth.security_implementation import get_current_user
 
 
 class TestLoginEndpointSecurity:

@@ -3,7 +3,7 @@
 Tests individual metric components without full integration.
 """
 
-from prometheus_client import Counter, Gauge, Histogram, CollectorRegistry
+from prometheus_client import CollectorRegistry, Counter, Gauge, Histogram
 
 
 class TestMetricDefinitions:

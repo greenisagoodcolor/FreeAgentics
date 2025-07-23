@@ -4,9 +4,10 @@ These tests document how the system behaves under edge conditions,
 following Michael Feathers' characterization testing methodology.
 """
 
-import pytest
 from unittest.mock import Mock, patch
+
 import numpy as np
+import pytest
 
 
 class TestAgentEdgeCases:

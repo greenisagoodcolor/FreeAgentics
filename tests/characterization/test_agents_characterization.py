@@ -4,8 +4,8 @@ These tests document existing behavior as per Michael Feathers' methodology.
 They capture what the system actually does now, not what it should do.
 """
 
-import pytest
 import numpy as np
+import pytest
 
 
 # Test critical business logic paths
@@ -95,7 +95,7 @@ class TestTypeHelpersCharacterization:
     def test_type_helpers_import_successfully(self):
         """Document that type_helpers module imports."""
         try:
-            from agents.type_helpers import validate_agent_config, ensure_numpy_array
+            from agents.type_helpers import ensure_numpy_array, validate_agent_config
 
             assert validate_agent_config is not None
             assert ensure_numpy_array is not None
@@ -130,7 +130,7 @@ class TestErrorHandlingCharacterization:
     def test_error_handling_imports_successfully(self):
         """Document that error_handling module imports."""
         try:
-            from agents.error_handling import handle_agent_error, AgentError
+            from agents.error_handling import AgentError, handle_agent_error
 
             assert handle_agent_error is not None
             assert AgentError is not None

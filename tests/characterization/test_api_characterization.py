@@ -4,8 +4,9 @@ These tests document existing behavior as per Michael Feathers' methodology.
 They capture what the API system actually does now, not what it should do.
 """
 
-import pytest
 from unittest.mock import patch
+
+import pytest
 from fastapi.testclient import TestClient
 
 
@@ -24,8 +25,9 @@ class TestAPIMainCharacterization:
     def test_fastapi_app_structure(self):
         """Characterize FastAPI app structure."""
         try:
-            from api.main import app
             from fastapi import FastAPI
+
+            from api.main import app
 
             # Document that app is indeed a FastAPI instance
             assert isinstance(app, FastAPI)

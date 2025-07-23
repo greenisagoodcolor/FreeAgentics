@@ -4,8 +4,9 @@ These tests document existing behavior as per Michael Feathers' methodology.
 They capture what the inference system actually does now, not what it should do.
 """
 
-import pytest
 from unittest.mock import patch
+
+import pytest
 
 
 class TestLLMProvidersCharacterization:

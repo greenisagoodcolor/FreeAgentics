@@ -18,11 +18,11 @@ from fastapi.middleware.cors import CORSMiddleware
 from fastapi.middleware.gzip import GZipMiddleware
 from fastapi.responses import JSONResponse
 
+from api.middleware.metrics import MetricsMiddleware
 from api.middleware.rate_limiter import (
     RateLimitMiddleware,
     create_rate_limiter,
 )
-from api.middleware.metrics import MetricsMiddleware
 
 # SECURITY: Import authentication and security components
 from auth import SecurityMiddleware

@@ -20,11 +20,12 @@ from pathlib import Path
 from typing import Dict
 
 import psycopg2
-from alembic import command, script
-from alembic.config import Config
 from pgvector.psycopg2 import register_vector
 from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker
+
+from alembic import command, script
+from alembic.config import Config
 
 # Add project root to path
 PROJECT_ROOT = Path(__file__).parent.parent

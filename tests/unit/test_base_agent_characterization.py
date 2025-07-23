@@ -6,21 +6,22 @@ Following Michael Feathers' principles:
 - No production code changes unless fixing bugs
 """
 
-import pytest
-import numpy as np
-from unittest.mock import Mock, patch
-from datetime import datetime
 import logging
 from dataclasses import dataclass
+from datetime import datetime
 from typing import Any, Dict
+from unittest.mock import Mock, patch
+
+import numpy as np
+import pytest
 
 # Import functions and classes to test
 from agents.base_agent import (
-    safe_array_to_int,
-    _get_pymdp_components,
-    _get_llm_manager,
     ActiveInferenceAgent,
     AgentConfig,
+    _get_llm_manager,
+    _get_pymdp_components,
+    safe_array_to_int,
 )
 
 

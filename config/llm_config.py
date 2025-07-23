@@ -7,6 +7,7 @@ Provides optional environment variable loading with sensible defaults.
 
 import os
 from typing import Dict, Optional
+
 from pydantic import BaseModel, ConfigDict, Field
 
 

@@ -6,11 +6,16 @@ These tests verify actual LLM provider connections and integrations.
 """
 
 import os
-from unittest.mock import Mock, patch
-import pytest
 from datetime import datetime
+from unittest.mock import Mock, patch
+
+import pytest
 
 try:
+    from inference.llm.anthropic_provider import AnthropicProvider
+
+    # Import the actual providers we need to implement
+    from inference.llm.openai_provider import OpenAIProvider
     from inference.llm.provider_interface import (
         GenerationRequest,
         GenerationResponse,
@@ -19,10 +24,6 @@ try:
         ProviderStatus,
         ProviderType,
     )
-
-    # Import the actual providers we need to implement
-    from inference.llm.openai_provider import OpenAIProvider
-    from inference.llm.anthropic_provider import AnthropicProvider
 
     IMPORT_SUCCESS = True
 except ImportError:

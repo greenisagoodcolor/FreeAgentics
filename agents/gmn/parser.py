@@ -8,7 +8,7 @@ Following Clean Architecture principles:
 """
 
 import re
-from typing import Dict, Any
+from typing import Any, Dict
 
 
 class GMNParser:

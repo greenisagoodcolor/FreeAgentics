@@ -10,6 +10,7 @@ from uuid import uuid4
 
 from pgvector.sqlalchemy import Vector
 from sqlalchemy import (
+    Boolean,
     Column,
     DateTime,
     Float,
@@ -17,9 +18,8 @@ from sqlalchemy import (
     Integer,
     String,
     Text,
-    Boolean,
 )
-from sqlalchemy.dialects.postgresql import UUID, JSONB
+from sqlalchemy.dialects.postgresql import JSONB, UUID
 from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy.orm import relationship
 

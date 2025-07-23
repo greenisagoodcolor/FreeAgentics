@@ -15,11 +15,12 @@ This test suite validates ALL Active Inference functionality works in production
 Test results demonstrate core business value is functional.
 """
 
-import unittest
-import sys
 import os
-import numpy as np
+import sys
 import time
+import unittest
+
+import numpy as np
 
 # Add project root to path
 sys.path.insert(0, os.path.join(os.path.dirname(__file__), "..", ".."))
@@ -42,8 +43,8 @@ class TestActiveInferenceProduction(unittest.TestCase):
         """Test PyMDP is available and working in production."""
         try:
             import pymdp
-            from pymdp.agent import Agent as PyMDPAgent
             from pymdp import utils
+            from pymdp.agent import Agent as PyMDPAgent
 
             # Verify imports loaded correctly
             assert pymdp is not None
@@ -77,9 +78,9 @@ class TestActiveInferenceProduction(unittest.TestCase):
         """Test GMN parser with various specifications."""
         try:
             from inference.active.gmn_parser import (
+                EXAMPLE_GMN_SPEC,
                 GMNParser,
                 parse_gmn_spec,
-                EXAMPLE_GMN_SPEC,
             )
 
             # Test 1: Example specification
@@ -148,9 +149,10 @@ class TestActiveInferenceProduction(unittest.TestCase):
     def test_03_gmn_pymdp_adapter_integration(self):
         """Test GMN to PyMDP adapter produces working models."""
         try:
+            from pymdp.agent import Agent as PyMDPAgent
+
             from agents.gmn_pymdp_adapter import adapt_gmn_to_pymdp
             from inference.active.gmn_parser import parse_gmn_spec
-            from pymdp.agent import Agent as PyMDPAgent
 
             # Create test GMN model
             gmn_spec = """
@@ -536,11 +538,10 @@ class TestActiveInferenceProduction(unittest.TestCase):
         """End-to-end integration test simulating production usage."""
         try:
             from agents.base_agent import BasicExplorerAgent
-            from inference.active.gmn_parser import parse_gmn_spec
             from agents.gmn_pymdp_adapter import adapt_gmn_to_pymdp
+            from inference.active.gmn_parser import parse_gmn_spec
 
             # Complete pipeline: GMN -> PyMDP -> Agent -> Inference
-
             # 1. Create custom GMN model
             gmn_spec = """
             [nodes]

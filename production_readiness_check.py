@@ -4,8 +4,8 @@ Production Readiness Validation for FreeAgentics v1.0.0-alpha+
 PIPELINE-ARCHITECT: Final validation for Nemesis mandate
 """
 
-import sys
 import json
+import sys
 from datetime import datetime
 from pathlib import Path
 

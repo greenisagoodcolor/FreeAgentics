@@ -78,7 +78,7 @@ class TestDatabaseSessionCharacterization:
     def test_database_session_import(self):
         """Document database session import behavior."""
         try:
-            from database.session import get_db, SessionLocal
+            from database.session import SessionLocal, get_db
 
             assert get_db is not None
             assert SessionLocal is not None
@@ -99,10 +99,10 @@ class TestDatabaseSessionCharacterization:
     def test_get_db_function_structure(self):
         """Characterize get_db function behavior."""
         try:
-            from database.session import get_db
-
             # Document that it's a generator function
             import inspect
+
+            from database.session import get_db
 
             assert inspect.isgeneratorfunction(get_db)
 
@@ -199,8 +199,9 @@ class TestDatabaseUtilsCharacterization:
     def test_create_tables_function(self):
         """Characterize create_tables function."""
         try:
-            from database.utils import create_tables
             import inspect
+
+            from database.utils import create_tables
 
             # Document function signature
             sig = inspect.signature(create_tables)
@@ -225,8 +226,9 @@ class TestDatabaseValidationCharacterization:
     def test_validate_agent_data_structure(self):
         """Characterize validate_agent_data function."""
         try:
-            from database.validation import validate_agent_data
             import inspect
+
+            from database.validation import validate_agent_data
 
             # Document that it's callable
             assert callable(validate_agent_data)

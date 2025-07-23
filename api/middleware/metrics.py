@@ -4,8 +4,8 @@ This middleware collects metrics for every HTTP request following
 Charity Majors' observability principles.
 """
 
-import time
 import logging
+import time
 from typing import Callable
 
 from fastapi import Request, Response

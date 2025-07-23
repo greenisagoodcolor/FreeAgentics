@@ -6,14 +6,15 @@ Demonstrates complete LLM→GMN→PyMDP pipeline functionality.
 """
 
 import os
-import pytest
 from unittest.mock import Mock, patch
+
+import pytest
 
 # Import LLM components
 try:
+    from config.llm_config import LLMConfig, set_llm_config
     from inference.llm.provider_factory import create_llm_manager, get_provider_factory
     from inference.llm.provider_interface import GenerationRequest, ProviderType
-    from config.llm_config import LLMConfig, set_llm_config
 
     LLM_IMPORTS_SUCCESS = True
 except ImportError as e:
@@ -22,7 +23,7 @@ except ImportError as e:
 
 # Try to import GMN components
 try:
-    from inference.active.gmn_parser import GMNParser, EXAMPLE_GMN_SPEC
+    from inference.active.gmn_parser import EXAMPLE_GMN_SPEC, GMNParser
 
     GMN_AVAILABLE = True
 except ImportError:
@@ -379,8 +380,8 @@ class TestLLMErrorHandling:
         if not LLM_IMPORTS_SUCCESS:
             assert False, "Test bypass removed - must fix underlying issue"
 
-        from inference.llm.provider_interface import ProviderCredentials
         from inference.llm.openai_provider import OpenAIProvider
+        from inference.llm.provider_interface import ProviderCredentials
 
         provider = OpenAIProvider()
         invalid_credentials = ProviderCredentials(api_key="invalid-key")
