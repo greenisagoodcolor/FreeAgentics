@@ -1,16 +1,16 @@
 import React from "react";
-import { render, screen, fireEvent, waitFor, act } from "@testing-library/react";
+import { render, screen, waitFor, act } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { PromptInterface } from "../components/prompt-interface";
-import { getApiClient } from "../lib/api-client";
+import { apiClient } from "../lib/api-client";
 
 // Mock API client
 jest.mock("../lib/api-client", () => ({
-  getApiClient: jest.fn(() => ({
+  apiClient: {
     request: jest.fn(),
     submitPrompt: jest.fn(),
     getPromptSuggestions: jest.fn(),
-  })),
+  },
 }));
 
 // Mock WebSocket
@@ -22,11 +22,14 @@ const mockWebSocket = {
   readyState: 1, // OPEN
 };
 
-global.WebSocket = jest.fn(() => mockWebSocket) as any;
-(global.WebSocket as any).OPEN = 1;
+global.WebSocket = jest.fn(() => mockWebSocket) as typeof WebSocket & {
+  new (url: string | URL, protocols?: string | string[]): WebSocket;
+  OPEN: number;
+};
+global.WebSocket.OPEN = 1;
 
 describe("PromptInterface", () => {
-  const mockApiClient = getApiClient();
+  const mockApiClient = apiClient;
 
   beforeEach(() => {
     jest.clearAllMocks();
@@ -64,7 +67,7 @@ describe("PromptInterface", () => {
 
     it("should announce loading states to screen readers", async () => {
       // Create a delayed promise to ensure loading state is visible
-      let resolvePromise: any;
+      let resolvePromise: (value: unknown) => void;
       const delayedPromise = new Promise((resolve) => {
         resolvePromise = resolve;
       });
@@ -231,7 +234,12 @@ describe("PromptInterface", () => {
     });
 
     it("should handle loading state transitions", async () => {
-      let resolvePromise: (value: any) => void;
+      let resolvePromise: (value: {
+        id: string;
+        prompt: string;
+        status: string;
+        agents: Array<{ id: string; name: string; status: string }>;
+      }) => void;
       mockApiClient.submitPrompt = jest.fn().mockImplementation(
         () =>
           new Promise((resolve) => {

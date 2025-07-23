@@ -48,8 +48,6 @@ describe("SimulationGrid", () => {
       createAgent: jest.fn(),
       updateAgent: jest.fn(),
       deleteAgent: jest.fn(),
-      selectedAgentId: null,
-      selectAgent: jest.fn(),
     });
   });
 
@@ -178,7 +176,8 @@ describe("SimulationGrid", () => {
           name: "Test Agent",
           type: "explorer",
           description: "Test",
-          createdAt: Date.now(),
+          status: "idle",
+          createdAt: new Date().toISOString(),
         },
       ],
       isLoading: false,
@@ -186,8 +185,6 @@ describe("SimulationGrid", () => {
       createAgent: jest.fn(),
       updateAgent: jest.fn(),
       deleteAgent: jest.fn(),
-      selectedAgentId: null,
-      selectAgent: jest.fn(),
     });
 
     render(<SimulationGrid />);
@@ -263,7 +260,7 @@ describe("SimulationGrid", () => {
     // Or directly trigger the value change (this is more reliable in tests)
     const sliderParent = speedSlider.parentElement;
     if (sliderParent) {
-      const onValueChange = (sliderParent as any).__reactProps$?.onValueChange;
+      const onValueChange = (sliderParent as unknown as { __reactProps$?: { onValueChange?: (value: number[]) => void } }).__reactProps$?.onValueChange;
       if (onValueChange) {
         onValueChange([2]);
       }
@@ -294,7 +291,6 @@ describe("SimulationGrid", () => {
   });
 
   it.skip("shows agent details on hover", async () => {
-    const user = userEvent.setup();
     const agents = [
       {
         id: "agent-1",
@@ -380,7 +376,7 @@ describe("SimulationGrid", () => {
             y,
             type: x === 2 && y === 3 ? ("resource" as const) : ("empty" as const),
             occupant: null,
-            resource: x === 2 && y === 3 ? { type: "food", amount: 10 } : null,
+            resource: x === 2 && y === 3 ? { type: "food", amount: 10 } : undefined,
           })),
       );
 

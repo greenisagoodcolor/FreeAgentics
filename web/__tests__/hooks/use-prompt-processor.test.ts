@@ -1,6 +1,6 @@
 import { renderHook, act, waitFor } from "@testing-library/react";
 import { usePromptProcessor } from "@/hooks/use-prompt-processor";
-import { getApiClient } from "@/lib/api-client";
+import { apiClient } from "@/lib/api-client";
 
 // Mock dependencies
 jest.mock("@/lib/api-client");
@@ -10,7 +10,7 @@ const mockApiClient = {
   getPromptSuggestions: jest.fn(),
 };
 
-(getApiClient as jest.Mock).mockReturnValue(mockApiClient);
+(apiClient as unknown as typeof mockApiClient) = mockApiClient;
 
 // Mock WebSocket
 class MockWebSocket {
@@ -31,11 +31,13 @@ class MockWebSocket {
     }, 0);
   }
 
-  send(data: string) {}
+  send(_data: string) {}
   close() {}
 }
 
-global.WebSocket = MockWebSocket as any;
+global.WebSocket = MockWebSocket as typeof WebSocket & {
+  new (url: string | URL, protocols?: string | string[]): WebSocket;
+};
 
 describe("usePromptProcessor", () => {
   beforeEach(() => {
@@ -74,7 +76,7 @@ describe("usePromptProcessor", () => {
 
     expect(mockApiClient.submitPrompt).toHaveBeenCalledWith("Test prompt");
     expect(result.current.agents).toHaveLength(1);
-    expect(result.current.knowledgeGraph.nodes).toHaveLength(1);
+    expect(result.current.knowledgeGraph?.nodes).toHaveLength(1);
     expect(result.current.isLoading).toBe(false);
   });
 
@@ -191,8 +193,13 @@ describe("usePromptProcessor", () => {
 
     // Set some state first
     act(() => {
-      result.current.agents.push({ id: "agent-1", name: "Test" } as any);
-      result.current.knowledgeGraph.nodes.push({ id: "node-1", label: "Test", type: "concept" });
+      result.current.agents.push({ 
+        id: "agent-1", 
+        name: "Test",
+        type: "explorer",
+        status: "active"
+      });
+      result.current.knowledgeGraph?.nodes.push({ id: "node-1", label: "Test", type: "concept" });
     });
 
     // Reset
@@ -211,11 +218,11 @@ describe("usePromptProcessor", () => {
 
     // Wait for WebSocket connection
     await waitFor(() => {
-      const ws = (result.current as any).wsRef?.current;
+      const ws = (result.current as unknown as { wsRef?: { current?: MockWebSocket } }).wsRef?.current;
       expect(ws).toBeTruthy();
     });
 
-    const ws = (result.current as any).wsRef.current as MockWebSocket;
+    const ws = (result.current as unknown as { wsRef: { current: MockWebSocket } }).wsRef.current;
 
     // Simulate agent update message
     act(() => {
@@ -240,11 +247,11 @@ describe("usePromptProcessor", () => {
 
     // Wait for WebSocket connection
     await waitFor(() => {
-      const ws = (result.current as any).wsRef?.current;
+      const ws = (result.current as unknown as { wsRef?: { current?: MockWebSocket } }).wsRef?.current;
       expect(ws).toBeTruthy();
     });
 
-    const ws = (result.current as any).wsRef.current as MockWebSocket;
+    const ws = (result.current as unknown as { wsRef: { current: MockWebSocket } }).wsRef.current;
 
     // Simulate knowledge graph update
     act(() => {
@@ -263,14 +270,14 @@ describe("usePromptProcessor", () => {
       }
     });
 
-    expect(result.current.knowledgeGraph.nodes).toHaveLength(1);
-    expect(result.current.knowledgeGraph.edges).toHaveLength(1);
+    expect(result.current.knowledgeGraph?.nodes).toHaveLength(1);
+    expect(result.current.knowledgeGraph?.edges).toHaveLength(1);
   });
 
   it("should cleanup WebSocket on unmount", () => {
     const { result, unmount } = renderHook(() => usePromptProcessor());
 
-    const ws = (result.current as any).wsRef.current as MockWebSocket;
+    const ws = (result.current as unknown as { wsRef: { current: MockWebSocket } }).wsRef.current;
     const closeSpy = jest.spyOn(ws, "close");
 
     unmount();
