@@ -10,7 +10,7 @@ interface KnowledgeGraphNode {
   id: string;
   label: string;
   type: string;
-  properties?: Record<string, any>;
+  properties?: Record<string, unknown>;
   x?: number;
   y?: number;
   vx?: number;
@@ -40,7 +40,7 @@ export function KnowledgeGraphView({ graph, className = "" }: KnowledgeGraphView
   const [filteredGraph, setFilteredGraph] = useState<KnowledgeGraph>(graph);
   const [view, setView] = useState<"graph" | "list" | "stats">("graph");
   const animationRef = useRef<number>();
-  const simulationRef = useRef<any>(null);
+  const simulationRef = useRef<(() => void) | null>(null);
 
   // Filter graph based on search
   useEffect(() => {
@@ -299,7 +299,7 @@ export function KnowledgeGraphView({ graph, className = "" }: KnowledgeGraphView
         />
       </div>
 
-      <Tabs value={view} onValueChange={(v) => setView(v as any)}>
+      <Tabs value={view} onValueChange={(v) => setView(v as "graph" | "list" | "stats")}>
         <TabsList className="mb-4">
           <TabsTrigger value="graph">Graph View</TabsTrigger>
           <TabsTrigger value="list">Node List</TabsTrigger>

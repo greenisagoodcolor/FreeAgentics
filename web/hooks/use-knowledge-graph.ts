@@ -10,7 +10,7 @@ export interface GraphNode {
   type: NodeType;
   x?: number;
   y?: number;
-  metadata?: Record<string, any>;
+  metadata?: Record<string, unknown>;
 }
 
 export interface GraphEdge {
@@ -19,7 +19,7 @@ export interface GraphEdge {
   target: string;
   type: EdgeType;
   weight?: number;
-  metadata?: Record<string, any>;
+  metadata?: Record<string, unknown>;
 }
 
 export interface KnowledgeGraphState {

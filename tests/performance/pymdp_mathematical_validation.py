@@ -263,8 +263,10 @@ class PyMDPMathematicalValidator:
 def test_pymdp_mathematical_validation():
     """Run PyMDP mathematical validation tests."""
     if not PYMDP_AVAILABLE:
-        pytest.fail("PyMDP not available - test cannot proceed without PyMDP mathematical validation")
-    
+        pytest.fail(
+            "PyMDP not available - test cannot proceed without PyMDP mathematical validation"
+        )
+
     validator = PyMDPMathematicalValidator()
     results = validator.run_full_validation()
 

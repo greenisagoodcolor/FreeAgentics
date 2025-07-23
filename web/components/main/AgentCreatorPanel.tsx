@@ -15,7 +15,7 @@ import { useAgents, type Agent, type AgentStatus } from "@/hooks/use-agents";
 import { cn } from "@/lib/utils";
 
 export function AgentCreatorPanel() {
-  const { isConnected, connectionState } = useWebSocket();
+  const { isConnected } = useWebSocket();
   const { agents, createAgent, updateAgent, deleteAgent, isLoading, error } = useAgents();
 
   const [description, setDescription] = useState("");

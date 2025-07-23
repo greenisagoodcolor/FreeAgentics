@@ -30,7 +30,6 @@ export function PromptInterface({ className = "" }: PromptInterfaceProps) {
     submitPrompt,
     retry,
     fetchSuggestions,
-    conversationId: _conversationId,
     iterationContext,
     resetConversation,
   } = usePromptProcessor();

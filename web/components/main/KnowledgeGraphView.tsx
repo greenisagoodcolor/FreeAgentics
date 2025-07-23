@@ -26,7 +26,6 @@ import {
   type GraphNode,
   type GraphEdge,
 } from "@/hooks/use-knowledge-graph";
-import { useWebSocket } from "@/hooks/use-websocket";
 import { cn } from "@/lib/utils";
 
 type LayoutType = "force" | "hierarchical" | "circular";
@@ -43,7 +42,6 @@ const NODE_RADIUS = 20;
 
 export function KnowledgeGraphView() {
   const { nodes, edges, isLoading, error, clearGraph } = useKnowledgeGraph();
-  const { lastMessage } = useWebSocket();
 
   const svgRef = useRef<SVGSVGElement>(null);
   const containerRef = useRef<HTMLDivElement>(null);
@@ -178,10 +176,10 @@ export function KnowledgeGraphView() {
       // Update positions on tick
       simulation.on("tick", () => {
         link
-          .attr("x1", (d: any) => d.source.x)
-          .attr("y1", (d: any) => d.source.y)
-          .attr("x2", (d: any) => d.target.x)
-          .attr("y2", (d: any) => d.target.y);
+          .attr("x1", (d: GraphEdge & { source: GraphNode; target: GraphNode }) => d.source.x)
+          .attr("y1", (d: GraphEdge & { source: GraphNode; target: GraphNode }) => d.source.y)
+          .attr("x2", (d: GraphEdge & { source: GraphNode; target: GraphNode }) => d.target.x)
+          .attr("y2", (d: GraphEdge & { source: GraphNode; target: GraphNode }) => d.target.y);
 
         node.attr("cx", (d) => d.x!).attr("cy", (d) => d.y!);
 
@@ -189,18 +187,18 @@ export function KnowledgeGraphView() {
       });
 
       // Drag functions
-      function dragstarted(event: any, d: GraphNode) {
+      function dragstarted(event: d3.D3DragEvent<SVGCircleElement, GraphNode, GraphNode>, d: GraphNode) {
         if (!event.active) simulation.alphaTarget(0.3).restart();
         d.x = event.x;
         d.y = event.y;
       }
 
-      function dragged(event: any, d: GraphNode) {
+      function dragged(event: d3.D3DragEvent<SVGCircleElement, GraphNode, GraphNode>, d: GraphNode) {
         d.x = event.x;
         d.y = event.y;
       }
 
-      function dragended(event: any, d: GraphNode) {
+      function dragended(event: d3.D3DragEvent<SVGCircleElement, GraphNode, GraphNode>, _d: GraphNode) {
         if (!event.active) simulation.alphaTarget(0);
       }
 

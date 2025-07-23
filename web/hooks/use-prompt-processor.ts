@@ -1,5 +1,5 @@
 import { useState, useEffect, useCallback, useRef } from "react";
-import { getApiClient } from "../lib/api-client";
+import { apiClient } from "../lib/api-client";
 
 interface Agent {
   id: string;
@@ -13,7 +13,7 @@ interface KnowledgeGraphNode {
   id: string;
   label: string;
   type: string;
-  properties?: Record<string, any>;
+  properties?: Record<string, unknown>;
 }
 
 interface KnowledgeGraphEdge {
@@ -45,16 +45,6 @@ interface IterationContext {
   };
 }
 
-interface PromptResponse {
-  id: string;
-  prompt: string;
-  status: string;
-  agents: Agent[];
-  knowledge_graph?: KnowledgeGraph;
-  next_suggestions?: string[];
-  iteration_context?: IterationContext;
-}
-
 export function usePromptProcessor() {
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -65,7 +55,6 @@ export function usePromptProcessor() {
   const [conversationId, setConversationId] = useState<string | null>(null);
   const [iterationContext, setIterationContext] = useState<IterationContext | null>(null);
 
-  const apiClient = getApiClient();
   const wsRef = useRef<WebSocket | null>(null);
   const reconnectTimeoutRef = useRef<NodeJS.Timeout | null>(null);
   const suggestionTimeoutRef = useRef<NodeJS.Timeout | null>(null);
@@ -131,56 +120,59 @@ export function usePromptProcessor() {
 
   // Handle WebSocket messages
   const handleWebSocketMessage = useCallback(
-    (data: any) => {
-      switch (data.type) {
+    (data: unknown) => {
+      const message = data as Record<string, unknown>;
+      switch (message.type) {
         case "agent_update":
           setAgents((prev) => {
-            const index = prev.findIndex((a) => a.id === data.agent.id);
+            const agent = message.agent as Agent;
+            const index = prev.findIndex((a) => a.id === agent.id);
             if (index >= 0) {
               const updated = [...prev];
-              updated[index] = { ...updated[index], ...data.agent };
+              updated[index] = { ...updated[index], ...agent };
               return updated;
             }
-            return [...prev, data.agent];
+            return [...prev, agent];
           });
           break;
 
         case "knowledge_update":
-          if (data.knowledge_graph) {
-            setKnowledgeGraph(data.knowledge_graph);
+          if (message.knowledge_graph) {
+            setKnowledgeGraph(message.knowledge_graph as KnowledgeGraph);
           }
           break;
 
         case "prompt_complete":
-          if (data.prompt_id === currentPromptId) {
+          if (message.prompt_id === currentPromptId) {
             setIsLoading(false);
-            if (data.error) {
-              setError(data.error);
+            if (message.error) {
+              setError(message.error as string);
             }
           }
           break;
 
         case "pipeline:pipeline_completed":
-          if (data.suggestions) {
-            setSuggestions(data.suggestions);
+          if (message.suggestions) {
+            setSuggestions(message.suggestions as string[]);
           }
-          if (data.conversation_summary) {
+          if (message.conversation_summary) {
             setIterationContext((prev) => ({
-              iteration_number: data.iteration_number || (prev?.iteration_number || 0) + 1,
-              total_agents: data.total_agents || prev?.total_agents || 1,
-              kg_nodes: data.kg_nodes || prev?.kg_nodes || 0,
-              conversation_summary: data.conversation_summary,
+              iteration_number: (message.iteration_number as number) || (prev?.iteration_number || 0) + 1,
+              total_agents: (message.total_agents as number) || prev?.total_agents || 1,
+              kg_nodes: (message.kg_nodes as number) || prev?.kg_nodes || 0,
+              conversation_summary: message.conversation_summary as IterationContext['conversation_summary'],
             }));
           }
           break;
 
         case "pipeline:pipeline_started":
-          if (data.iteration_number && data.conversation_summary) {
+          if (message.iteration_number && message.conversation_summary) {
+            const summary = message.conversation_summary as Record<string, unknown>;
             setIterationContext({
-              iteration_number: data.iteration_number,
-              total_agents: data.conversation_summary.total_agents || 0,
-              kg_nodes: data.conversation_summary.kg_nodes || 0,
-              conversation_summary: data.conversation_summary,
+              iteration_number: message.iteration_number as number,
+              total_agents: (summary.total_agents as number) || 0,
+              kg_nodes: (summary.kg_nodes as number) || 0,
+              conversation_summary: summary as IterationContext['conversation_summary'],
             });
           }
           break;
@@ -231,12 +223,13 @@ export function usePromptProcessor() {
         if (response.status === "completed") {
           setIsLoading(false);
         }
-      } catch (err: any) {
-        setError(err.detail || "Failed to process prompt");
+      } catch (err) {
+        const error = err as { detail?: string };
+        setError(error.detail || "Failed to process prompt");
         setIsLoading(false);
       }
     },
-    [apiClient, conversationId],
+    [conversationId],
   );
 
   // Retry last prompt
@@ -274,7 +267,7 @@ export function usePromptProcessor() {
         }
       }, 300); // 300ms debounce
     },
-    [apiClient],
+    [],
   );
 
   // Reset conversation to start fresh

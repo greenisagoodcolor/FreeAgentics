@@ -184,7 +184,7 @@ export function AgentVisualization({ agents, className = "" }: AgentVisualizatio
 
   return (
     <div className={`h-full flex flex-col ${className}`}>
-      <Tabs value={view} onValueChange={(v) => setView(v as any)}>
+      <Tabs value={view} onValueChange={(v) => setView(v as "network" | "list" | "metrics")}>
         <TabsList className="mb-4">
           <TabsTrigger value="network">Network View</TabsTrigger>
           <TabsTrigger value="list">List View</TabsTrigger>

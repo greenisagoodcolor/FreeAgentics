@@ -54,7 +54,7 @@ class TestLLMProviders:
         """Test OpenAI provider functionality."""
         if not os.getenv("OPENAI_API_KEY"):
             pytest.fail("OpenAI API key not set - test cannot proceed")
-        
+
         provider = OpenAIProvider(model="gpt-4o-mini")  # Use cheaper model for tests
 
         try:
@@ -76,7 +76,7 @@ class TestLLMProviders:
         """Test Anthropic provider functionality."""
         if not os.getenv("ANTHROPIC_API_KEY"):
             pytest.fail("Anthropic API key not set - test cannot proceed")
-        
+
         provider = AnthropicProvider(model="claude-3-haiku")  # Use cheaper model for tests
 
         try:
@@ -96,7 +96,7 @@ class TestLLMProviders:
         """Test Ollama provider functionality."""
         if os.getenv("SKIP_OLLAMA_TESTS"):
             pytest.fail("Ollama tests explicitly skipped - test cannot proceed")
-        
+
         provider = OllamaProvider(model="llama3.2", timeout=30.0)
 
         try:
@@ -174,7 +174,7 @@ class TestGMNGeneration:
         """Test GMN generation with OpenAI."""
         if not os.getenv("OPENAI_API_KEY"):
             pytest.fail("OpenAI API key not set - test cannot proceed")
-        
+
         provider = OpenAIProvider(model="gpt-4o-mini")
 
         try:
@@ -330,8 +330,10 @@ class TestGMNConsistency:
     async def test_gmn_consistency(self):
         """Test that different providers generate structurally similar GMNs."""
         if not (os.getenv("OPENAI_API_KEY") or os.getenv("ANTHROPIC_API_KEY")):
-            pytest.fail("No API keys for comparison - test cannot proceed without at least one provider")
-        
+            pytest.fail(
+                "No API keys for comparison - test cannot proceed without at least one provider"
+            )
+
         prompt = "Create an agent that navigates a simple 3x3 grid to reach a goal"
 
         results = await self.generate_gmn_all_providers(prompt, "explorer")

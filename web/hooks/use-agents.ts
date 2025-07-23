@@ -12,7 +12,7 @@ export interface Agent {
   description?: string;
   createdAt?: string;
   lastActiveAt?: string;
-  beliefs?: Record<string, any>;
+  beliefs?: Record<string, unknown>;
   goals?: string[];
 }
 

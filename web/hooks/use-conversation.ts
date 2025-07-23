@@ -9,7 +9,7 @@ export interface Message {
   content: string;
   timestamp: string;
   isStreaming?: boolean;
-  metadata?: Record<string, any>;
+  metadata?: Record<string, unknown>;
 }
 
 export interface SendMessageParams {

@@ -21,7 +21,7 @@ export interface SimulationAgent {
   position: { x: number; y: number };
   state: "idle" | "exploring" | "collecting" | "returning";
   energy: number;
-  beliefs?: Record<string, any>;
+  beliefs?: Record<string, unknown>;
 }
 
 export interface SimulationMetrics {

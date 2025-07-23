@@ -29,7 +29,7 @@ interface SettingsDrawerProps {
 }
 
 export function SettingsDrawer({ open, onOpenChange }: SettingsDrawerProps) {
-  const { user, isAuthenticated, login, logout } = useAuth();
+  const { user, isAuthenticated, logout } = useAuth();
   const { settings, updateSettings, resetSettings } = useSettings();
 
   const handleProviderChange = (provider: LLMProvider) => {

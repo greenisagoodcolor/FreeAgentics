@@ -4,7 +4,7 @@ export type ConnectionState = "connecting" | "connected" | "disconnected" | "err
 
 export interface WebSocketMessage {
   type: string;
-  data: any;
+  data: unknown;
   timestamp?: number;
 }
 

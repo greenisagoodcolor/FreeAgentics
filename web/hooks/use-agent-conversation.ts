@@ -4,9 +4,17 @@
 
 import { useState, useCallback } from "react";
 
+interface ConversationMessage {
+  id: string;
+  message: string;
+  agentId?: string;
+  timestamp: string;
+  sender: 'user' | 'agent' | 'system';
+}
+
 export interface UseAgentConversationReturn {
   sendMessage: (message: string, agentId?: string) => Promise<void>;
-  getConversationHistory: (agentId?: string) => any[];
+  getConversationHistory: (agentId?: string) => ConversationMessage[];
   createSession: (agentId: string) => Promise<void>;
   isLoading: boolean;
   error: string | null;
@@ -15,7 +23,7 @@ export interface UseAgentConversationReturn {
 export const useAgentConversation = (): UseAgentConversationReturn => {
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
-  const [conversationHistory, setConversationHistory] = useState<any[]>([]);
+  const [conversationHistory, setConversationHistory] = useState<ConversationMessage[]>([]);
 
   const sendMessage = useCallback(async (message: string, agentId?: string) => {
     setIsLoading(true);

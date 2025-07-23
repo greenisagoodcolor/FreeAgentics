@@ -11,7 +11,6 @@ import { Badge } from "@/components/ui/badge";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 import { useSimulation } from "@/hooks/use-simulation";
 import { useAgents } from "@/hooks/use-agents";
-import { cn } from "@/lib/utils";
 
 const CELL_SIZE = 30;
 const CELL_COLORS = {
