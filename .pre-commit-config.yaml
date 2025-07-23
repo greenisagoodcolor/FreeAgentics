@@ -1,36 +1,273 @@
-# Simple pre-commit configuration for FreeAgentics
-# Run: pre-commit install
-# Note: This is a minimal setup focused on essential checks
+# Comprehensive pre-commit configuration for FreeAgentics
+# This configuration ensures all code quality issues are caught before commit
+# Run: pre-commit install --install-hooks
+# Run on all files: pre-commit run --all-files
+
+# Fail fast on first error
+fail_fast: false
+
+# Default stages to run
+default_stages: [pre-commit, pre-push]
 
 repos:
-  # Basic file hygiene
+  # ============================================================================
+  # General File Quality
+  # ============================================================================
   - repo: https://github.com/pre-commit/pre-commit-hooks
-    rev: v4.4.0
+    rev: v4.5.0
     hooks:
       - id: trailing-whitespace
+        name: Fix trailing whitespace
       - id: end-of-file-fixer
+        name: Fix missing EOF newline
       - id: check-merge-conflict
+        name: Check for merge conflicts
       - id: check-yaml
+        name: Validate YAML files
+        args: [--unsafe]
         exclude: ^(docker-compose.*\.yml|k8s/.*\.yaml)$
       - id: check-json
+        name: Validate JSON files
+      - id: check-toml
+        name: Validate TOML files
+      - id: check-xml
+        name: Validate XML files
+      - id: check-case-conflict
+        name: Check for case conflicts
+      - id: check-added-large-files
+        name: Prevent large files
+        args: [--maxkb=1000]
+      - id: check-executables-have-shebangs
+        name: Check executables have shebangs
+      - id: check-shebang-scripts-are-executable
+        name: Check shebang scripts are executable
       - id: debug-statements
+        name: Check for Python debug statements
+      - id: detect-private-key
+        name: Detect private keys
+      - id: mixed-line-ending
+        name: Fix mixed line endings
+        args: [--fix=lf]
+      - id: name-tests-test
+        name: Ensure test files are named correctly
+        args: [--pytest-test-first]
+      - id: requirements-txt-fixer
+        name: Sort requirements files
+      - id: fix-byte-order-marker
+        name:
+          Remove UTF-8 byte order marker
 
-  # Python formatting (using Ruff instead of multiple tools)
+          # ============================================================================
+          # Python Code Quality - Ruff (Fast All-in-One)
+          # ============================================================================
   - repo: https://github.com/astral-sh/ruff-pre-commit
-    rev: v0.1.6
+    rev: v0.1.15
     hooks:
       - id: ruff
-        args: [--fix]
+        name: Python linting with Ruff
+        args:
+          [--fix, --exit-non-zero-on-fix, --show-fixes, --config=pyproject.toml]
+        types_or: [python, pyi]
       - id: ruff-format
+        name: Python formatting with Ruff
+        args: [--config=pyproject.toml]
+        types_or:
+          [python, pyi]
 
-  # Simple type checking
+          # ============================================================================
+          # Python Type Checking
+          # ============================================================================
   - repo: https://github.com/pre-commit/mirrors-mypy
-    rev: v1.10.1
+    rev: v1.11.2
     hooks:
       - id: mypy
-        args: [--ignore-missing-imports, --no-strict-optional]
-        exclude: ^(web/|tests/|examples/|scripts/)
-        additional_dependencies: [types-requests]
+        name: Python type checking with mypy
+        args:
+          [
+            --strict,
+            --ignore-missing-imports,
+            --no-implicit-optional,
+            --warn-redundant-casts,
+            --warn-unused-ignores,
+            --show-error-codes,
+            --pretty,
+          ]
+        exclude: ^(web/|tests/mocks/|examples/|scripts/|\.archive/)
+        additional_dependencies:
+          [
+            types-requests,
+            types-redis,
+            types-PyYAML,
+            types-python-dateutil,
+            pydantic,
+          ]
+        require_serial:
+          true
+
+          # ============================================================================
+          # Python Security Checks
+          # ============================================================================
+  - repo: https://github.com/PyCQA/bandit
+    rev: 1.7.5
+    hooks:
+      - id: bandit
+        name: Python security check with Bandit
+        args: [-ll, -x, "tests,web,venv,.venv"]
+        files:
+          \.py$
+
+          # ============================================================================
+          # Secret Detection
+          # ============================================================================
+  - repo: https://github.com/Yelp/detect-secrets
+    rev: v1.4.0
+    hooks:
+      - id: detect-secrets
+        name: Detect secrets in code
+        args: [--baseline, .secrets.baseline]
+        exclude:
+          (\.lock|\.lockb|package-lock\.json)$
+
+          # ============================================================================
+          # JavaScript/TypeScript Quality
+          # ============================================================================
+  - repo: https://github.com/pre-commit/mirrors-eslint
+    rev: v8.56.0
+    hooks:
+      - id: eslint
+        name: JavaScript/TypeScript linting
+        files: \.(js|jsx|ts|tsx)$
+        args: [--fix, --max-warnings=0]
+        additional_dependencies:
+          [
+            eslint@8.56.0,
+            eslint-config-next@14.0.0,
+            eslint-plugin-react@7.33.2,
+            eslint-plugin-react-hooks@4.6.0,
+            "@typescript-eslint/parser@6.19.0",
+            "@typescript-eslint/eslint-plugin@6.19.0",
+            typescript@5.3.3,
+          ]
+        exclude:
+          ^(\.next/|node_modules/|build/|dist/)
+
+          # ============================================================================
+          # Prettier Formatting
+          # ============================================================================
+  - repo: https://github.com/pre-commit/mirrors-prettier
+    rev: v3.1.0
+    hooks:
+      - id: prettier
+        name: Format JS/TS/CSS/MD files
+        types_or: [javascript, jsx, ts, tsx, css, scss, json, markdown, yaml]
+        args: [--write, --ignore-path, .prettierignore]
+        exclude:
+          ^(\.next/|node_modules/|build/|dist/|pnpm-lock\.yaml)
+
+          # ============================================================================
+          # Markdown Quality (commented out - requires Ruby)
+          # ============================================================================
+          # - repo: https://github.com/markdownlint/markdownlint
+          #   rev: v0.13.0
+          #   hooks:
+          #     - id: markdownlint
+          #       name: "Markdown linting"
+          #       args: ['-r', '~MD013,~MD024,~MD033,~MD041']
+
+          # ============================================================================
+          # Shell Script Quality
+          # ============================================================================
+  - repo: https://github.com/shellcheck-py/shellcheck-py
+    rev: v0.9.0.6
+    hooks:
+      - id: shellcheck
+        name: Shell script linting
+        args:
+          [-x]
+
+          # ============================================================================
+          # Dockerfile Quality (commented out - requires Docker)
+          # ============================================================================
+          # - repo: https://github.com/hadolint/hadolint
+          #   rev: v2.12.0
+          #   hooks:
+          #     - id: hadolint-docker
+          #       name: "Dockerfile linting"
+          #       args: ['--ignore', 'DL3008', '--ignore', 'DL3009']
+
+          # ============================================================================
+          # YAML Formatting (commented out - causing issues)
+          # ============================================================================
+  # - repo: https://github.com/macisamuele/language-formatters-pre-commit-hooks
+  #   rev: v2.12.0
+  #   hooks:
+  #   - id: pretty-format-yaml
+  #     name: Format YAML files
+  #     args: [--autofix, --indent, '2']
+  #     exclude: ^(docker-compose.*\.yml|k8s/.*\.yaml|\.github/workflows/.*\.yml)$
+
+  # ============================================================================
+  # Git Commit Message
+  # ============================================================================
+  - repo: https://github.com/jorisroovers/gitlint
+    rev: v0.19.1
+    hooks:
+      - id: gitlint
+        name: Validate commit messages
+        stages:
+          [commit-msg]
+
+          # ============================================================================
+          # Python Import Sorting
+          # ============================================================================
+  - repo: https://github.com/pycqa/isort
+    rev: 5.13.2
+    hooks:
+      - id: isort
+        name: Sort Python imports
+        args:
+          [--profile, black, --line-length, "100"]
+
+          # ============================================================================
+          # TypeScript Type Checking
+          # ============================================================================
+  - repo: local
+    hooks:
+      - id: typescript
+        name: TypeScript type checking
+        entry: bash -c 'cd web && npm run type-check'
+        language: system
+        files: \.(ts|tsx)$
+        pass_filenames:
+          false
+
+          # ============================================================================
+          # Python Docstring Checking
+          # ============================================================================
+  - repo: https://github.com/pycqa/pydocstyle
+    rev: 6.3.0
+    hooks:
+      - id: pydocstyle
+        name: Check Python docstrings
+        exclude: ^(tests/|examples/|scripts/|web/)
+        args:
+          [--convention=google]
+
+          # ============================================================================
+          # License Headers (commented out - optional)
+          # ============================================================================
+          # - repo: https://github.com/Lucas-C/pre-commit-hooks
+          #   rev: v1.5.4
+          #   hooks:
+          #     - id: insert-license
+          #       name: "Ensure license headers"
+          #       files: '\.py$'
+          #       exclude: ^(__pycache__|\.venv|venv|tests/mocks)/
+          #       args:
+          #         - --license-filepath
+          #         - .license-header.txt
+          #         - --comment-style
+          #         - "#"
 
 # Global exclusions
 exclude: |
@@ -43,5 +280,29 @@ exclude: |
     __pycache__/.*|
     \.pytest_cache/.*|
     \.mypy_cache/.*|
-    \.archive/.*
+    \.ruff_cache/.*|
+    \.archive/.*|
+    build/.*|
+    dist/.*|
+    .*\.egg-info/.*|
+    htmlcov/.*|
+    \.coverage.*|
+    .*\.pyc|
+    .*\.pyo|
+    .*\.so|
+    .*\.dylib|
+    \.DS_Store|
+    Thumbs\.db
   )$
+
+# CI configuration
+ci:
+  autofix_commit_msg: |
+    [pre-commit.ci] auto fixes from pre-commit.com hooks
+
+    for more information, see https://pre-commit.ci
+  autofix_prs: true
+  autoupdate_branch: pre-commit-updates
+  autoupdate_commit_msg: "[pre-commit.ci] pre-commit autoupdate"
+  autoupdate_schedule: weekly
+  skip: [typescript, shellcheck]
