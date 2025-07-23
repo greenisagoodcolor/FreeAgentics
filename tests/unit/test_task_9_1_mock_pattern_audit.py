@@ -47,9 +47,7 @@ class TestSystematicMockPatternAudit:
                             if matches:
                                 decorator_violations.append(f"{file_path}: {matches}")
 
-        assert (
-            not decorator_violations
-        ), f"Found @safe_pymdp_operation decorators with default_value (performance theater): {decorator_violations}"
+        assert not decorator_violations, f"Found @safe_pymdp_operation decorators with default_value (performance theater): {decorator_violations}"
 
     def test_base_agent_update_beliefs_hard_failure(self):
         """FAILING TEST: base_agent.update_beliefs should not use @safe_pymdp_operation with default_value."""
@@ -115,9 +113,7 @@ class TestSystematicMockPatternAudit:
                             if matches:
                                 fallback_violations.append(f"{file_path}: {matches}")
 
-        assert (
-            not fallback_violations
-        ), f"Found _fallback_ methods in production code (performance theater): {fallback_violations}"
+        assert not fallback_violations, f"Found _fallback_ methods in production code (performance theater): {fallback_violations}"
 
     def test_no_mock_llm_responses_in_production(self):
         """FAILING TEST: Verify no mock LLM responses exist in production code."""

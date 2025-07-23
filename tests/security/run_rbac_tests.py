@@ -332,7 +332,9 @@ class RBACTestRunner:
                 priority_icon = (
                     "🔴"
                     if rec["priority"] == "critical"
-                    else "🟡" if rec["priority"] == "high" else "🟢"
+                    else "🟡"
+                    if rec["priority"] == "high"
+                    else "🟢"
                 )
                 print(f"  {priority_icon} {rec['title']}")
 

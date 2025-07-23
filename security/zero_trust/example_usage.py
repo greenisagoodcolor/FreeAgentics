@@ -208,7 +208,9 @@ async def demonstrate_zero_trust_setup():
         risk_level = (
             "🔴 HIGH"
             if risk_score.score > 0.7
-            else "🟡 MEDIUM" if risk_score.score > 0.3 else "🟢 LOW"
+            else "🟡 MEDIUM"
+            if risk_score.score > 0.3
+            else "🟢 LOW"
         )
         reauth = " (requires re-authentication)" if risk_score.requires_reauthentication else ""
         print(f"   {risk_level} Risk Score: {risk_score.score:.2f} for {session_id}{reauth}")

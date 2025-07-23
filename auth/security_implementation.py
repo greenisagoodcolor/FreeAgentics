@@ -452,9 +452,7 @@ class AuthenticationManager:
             # Decode without full verification just to get user_id
             # Security Note: This is safe because we're only extracting the user_id
             # for database lookup. The actual token verification happens later.
-            unverified = jwt.decode(
-                refresh_token, options={"verify_signature": False}
-            )  # nosec B608
+            unverified = jwt.decode(refresh_token, options={"verify_signature": False})  # nosec B608
             return str(unverified.get("user_id", ""))
         except Exception:
             raise HTTPException(
@@ -753,9 +751,7 @@ def require_csrf_token(func):
                     token = auth_header.split(" ")[1]
                     # Security Note: Unverified decode is safe here - we're only extracting
                     # the user_id for CSRF correlation, not for authentication
-                    unverified = jwt.decode(
-                        token, options={"verify_signature": False}
-                    )  # nosec B608
+                    unverified = jwt.decode(token, options={"verify_signature": False})  # nosec B608
                     session_id = unverified.get("user_id")
                 except Exception as e:
                     # Log failed token parsing for CSRF validation (non-critical)

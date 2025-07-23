@@ -250,9 +250,9 @@ class TestGMNValidator:
         """Test GNN layer configuration compatibility."""
         # Test incompatible layer configuration
         mock_parse_result.sections["architecture"]["type"] = "GCN"
-        mock_parse_result.sections["architecture"][
-            "edge_features"
-        ] = True  # GCN doesn't use edge features
+        mock_parse_result.sections["architecture"]["edge_features"] = (
+            True  # GCN doesn't use edge features
+        )
 
         result = validator.validate(mock_parse_result)
 

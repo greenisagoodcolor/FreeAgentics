@@ -435,9 +435,7 @@ async def mfa_health_check(
     """
     try:
         # Basic health check - ensure encryption key is available
-        test_secret = (
-            "test_secret_for_health_check"  # nosec B105 - Test string for health check only
-        )
+        test_secret = "test_secret_for_health_check"  # nosec B105 - Test string for health check only
         encrypted = mfa_service._encrypt_secret(test_secret)
         decrypted = mfa_service._decrypt_secret(encrypted)
 

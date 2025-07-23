@@ -433,9 +433,7 @@ class PrometheusMetricsCollector:
                     # Update histogram with average (approximation)
                     agent_inference_duration_seconds.labels(
                         agent_id=agent_id, operation_type="inference"
-                    ).observe(
-                        inference_stats["avg"] / 1000.0
-                    )  # Convert ms to seconds
+                    ).observe(inference_stats["avg"] / 1000.0)  # Convert ms to seconds
 
                 # Memory usage (approximation based on system metrics)
                 memory_estimate = (
