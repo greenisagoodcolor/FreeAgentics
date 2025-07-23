@@ -1,0 +1,281 @@
+name: "CI Debug - Binary Search"
+
+# Trigger on all pushes and pull requests
+on:
+  push:
+    branches: [main, develop, "release/*"]
+  pull_request:
+    branches: [main, develop]
+  schedule:
+    # Run security scans daily at 2 AM UTC
+    - cron: "0 2 * * *"
+
+# Environment configuration
+env:
+  PYTHON_VERSION: "3.12"
+  NODE_VERSION: "20"
+  POSTGRES_VERSION: "15"
+  REPORT_DIR: "test-reports/${{ github.run_id }}"
+  CACHE_VERSION: "v1"
+
+# Cancel in-progress runs when a new commit is pushed
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  # ============================================================================
+  # STAGE 1: Environment Setup and Validation
+  # ============================================================================
+
+  environment-check:
+    name: "🔍 Environment Validation"
+    runs-on: ubuntu-latest
+    outputs:
+      python-version: ${{ steps.versions.outputs.python }}
+      node-version: ${{ steps.versions.outputs.node }}
+    steps:
+      - name: "📥 Checkout Code"
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0 # Full history for better analysis
+
+      - name: "🔧 Setup Python"
+        uses: actions/setup-python@v5
+        with:
+          python-version: ${{ env.PYTHON_VERSION }}
+
+      - name: "📦 Setup Node.js"
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: npm
+          cache-dependency-path: web/package-lock.json
+
+      - name: "🔍 Validate Environment"
+        id: versions
+        run: |
+          echo "python=$(python --version)" >> $GITHUB_OUTPUT
+          echo "node=$(node --version)" >> $GITHUB_OUTPUT
+          make check
+
+      - name: "📊 System Information"
+        run: |
+          echo "### System Information" >> $GITHUB_STEP_SUMMARY
+          echo "- **OS**: $(uname -s) $(uname -r)" >> $GITHUB_STEP_SUMMARY
+          echo "- **Python**: $(python --version)" >> $GITHUB_STEP_SUMMARY
+          echo "- **Node.js**: $(node --version)" >> $GITHUB_STEP_SUMMARY
+          echo "- **CPU Cores**: $(nproc)" >> $GITHUB_STEP_SUMMARY
+          echo "- **Memory**: $(free -h | grep Mem | awk '{print $2}')" >> $GITHUB_STEP_SUMMARY
+
+  # ============================================================================
+  # STAGE 2: Code Quality and Static Analysis
+  # ============================================================================
+
+  code-quality:
+    name: "🎨 Code Quality Checks"
+    needs: environment-check
+    runs-on: ubuntu-latest
+    steps:
+      - name: "📥 Checkout Code"
+        uses: actions/checkout@v4
+
+      - name: "🔧 Setup Python"
+        uses: actions/setup-python@v5
+        with:
+          python-version: ${{ env.PYTHON_VERSION }}
+
+      - name: "📦 Setup Node.js"
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: npm
+          cache-dependency-path: web/package-lock.json
+
+      - name: "🔗 Restore Python Cache"
+        uses: actions/cache@v4
+        with:
+          path: |
+            ~/.cache/pip
+            venv
+          key: ${{ runner.os }}-pip-${{ env.CACHE_VERSION }}-${{ hashFiles('requirements*.txt') }}
+          restore-keys: |
+            ${{ runner.os }}-pip-${{ env.CACHE_VERSION }}-
+
+      - name: "📦 Install Dependencies"
+        run: |
+          python -m venv venv
+          source venv/bin/activate
+          pip install --upgrade pip
+          pip install -r requirements-ci.txt
+          pip install ruff black isort flake8 mypy bandit
+
+      - name: "🎨 Format Check (Python)"
+        run: |
+          source venv/bin/activate
+          echo "### Python Formatting" >> $GITHUB_STEP_SUMMARY
+          ruff format --check . || echo "❌ Formatting issues found" >> $GITHUB_STEP_SUMMARY
+          black --check . || echo "❌ Black formatting issues" >> $GITHUB_STEP_SUMMARY
+          isort --check-only . || echo "❌ Import sorting issues" >> $GITHUB_STEP_SUMMARY
+
+      - name: "🔍 Lint Python Code"
+        run: |
+          source venv/bin/activate
+          echo "### Python Linting" >> $GITHUB_STEP_SUMMARY
+          ruff check . --output-format=github
+          flake8 . --exclude=venv,node_modules,.git --statistics --format=html --htmldir=reports/flake8 || true
+
+      - name: "🔒 Type Checking (Python)"
+        run: |
+          source venv/bin/activate
+          mypy agents/ api/ coalitions/ --ignore-missing-imports --html-report reports/mypy || true
+
+      - name: "📦 Frontend Quality Checks"
+        working-directory: ./web
+        run: |
+          npm ci
+          echo "### Frontend Quality" >> $GITHUB_STEP_SUMMARY
+          npm run lint || echo "❌ ESLint issues found" >> $GITHUB_STEP_SUMMARY
+          npx tsc --noEmit || echo "❌ TypeScript issues found" >> $GITHUB_STEP_SUMMARY
+
+      - name: "📊 Upload Quality Reports"
+        uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: quality-reports-${{ github.run_id }}
+          path: |
+            reports/flake8/
+            reports/mypy/
+
+  # ============================================================================
+  # STAGE 3: Security Scanning
+  # ============================================================================
+
+  security-scan:
+    name: "🛡️ Security Analysis"
+    needs: environment-check
+    runs-on: ubuntu-latest
+    permissions:
+      security-events: write
+    steps:
+      - name: "📥 Checkout Code"
+        uses: actions/checkout@v4
+
+      - name: "🔧 Setup Python"
+        uses: actions/setup-python@v5
+        with:
+          python-version: ${{ env.PYTHON_VERSION }}
+
+      - name: "📦 Install Security Tools"
+        run: |
+          python -m venv venv
+          source venv/bin/activate
+          pip install bandit safety pip-audit semgrep trufflehog3
+
+      - name: "🔍 Secret Scanning"
+        run: |
+          echo "### Secret Scanning" >> $GITHUB_STEP_SUMMARY
+          # Check for hardcoded secrets
+          make check-secrets || echo "⚠️ Potential secrets found" >> $GITHUB_STEP_SUMMARY
+
+          # Run trufflehog for deep secret scanning
+          trufflehog3 --no-history --format json --output reports/trufflehog.json . || true
+
+      - name: "🛡️ Dependency Vulnerability Scan"
+        run: |
+          source venv/bin/activate
+          echo "### Dependency Security" >> $GITHUB_STEP_SUMMARY
+
+          # Python dependencies
+          pip-audit --format json --output reports/pip-audit.json || echo "⚠️ Python vulnerabilities found" >> $GITHUB_STEP_SUMMARY
+          safety check --json --output reports/safety.json || echo "⚠️ Known vulnerabilities in dependencies" >> $GITHUB_STEP_SUMMARY
+
+      - name: "🔒 Static Security Analysis"
+        run: |
+          source venv/bin/activate
+          echo "### Code Security Analysis" >> $GITHUB_STEP_SUMMARY
+
+          # Bandit security scan
+          bandit -r . -f json -o reports/bandit.json -ll -x './web,./tests,./venv' || echo "⚠️ Security issues found" >> $GITHUB_STEP_SUMMARY
+
+          # Semgrep scan
+          semgrep --config=auto --json --output=reports/semgrep.json . || true
+
+      - name: "📊 Frontend Security Scan"
+        working-directory: ./web
+        run: |
+          npm audit --json > ../reports/npm-audit.json || echo "⚠️ npm vulnerabilities found" >> $GITHUB_STEP_SUMMARY
+
+      - name: "📤 Upload Security Reports"
+        uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: security-reports-${{ github.run_id }}
+          path: reports/
+
+      - name: "🚨 Security Summary"
+        if: always()
+        run: |
+          make security-check
+          make security-scan || true
+
+  # ============================================================================
+  # STAGE 4: Build Verification
+  # ============================================================================
+
+  build-verification:
+    name: "🔨 Build Verification"
+    needs: [code-quality, security-scan]
+    runs-on: ubuntu-latest
+    steps:
+      - name: "📥 Checkout Code"
+        uses: actions/checkout@v4
+
+      - name: "🔧 Setup Build Environment"
+        uses: actions/setup-python@v5
+        with:
+          python-version: ${{ env.PYTHON_VERSION }}
+
+      - name: "📦 Setup Node.js"
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: npm
+          cache-dependency-path: web/package-lock.json
+
+      - name: "🔨 Backend Build Verification"
+        run: |
+          python -m venv venv
+          source venv/bin/activate
+          pip install -r requirements-ci.txt
+
+          # Compile Python files
+          python -m py_compile api/main.py
+          python -m compileall agents/ api/ coalitions/ -q
+
+      - name: "🎨 Frontend Production Build"
+        working-directory: ./web
+        run: |
+          npm ci
+          NODE_ENV=production npm run build
+
+          # Verify build output
+          test -d .next || exit 1
+          echo "✅ Frontend build successful" >> $GITHUB_STEP_SUMMARY
+
+      - name: "📦 Create Build Artifacts"
+        run: |
+          mkdir -p dist
+          # Package backend
+          tar -czf dist/backend.tar.gz --exclude=venv --exclude=node_modules --exclude=.git .
+          # Package frontend
+          cd web && tar -czf ../dist/frontend.tar.gz .next public package.json
+
+      - name: "📤 Upload Build Artifacts"
+        uses: actions/upload-artifact@v4
+        with:
+          name: build-artifacts-${{ github.run_id }}
+          path: dist/
+          retention-days: 7
+
+
