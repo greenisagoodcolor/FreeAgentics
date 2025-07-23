@@ -278,4 +278,51 @@ jobs:
           path: dist/
           retention-days: 7
 
+  # ============================================================================
+  # STAGE 5: Testing Suite - Adding back unit-tests
+  # ============================================================================
+
+  unit-tests:
+    name: "🧪 Unit Tests"
+    needs: environment-check
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        python-version: ["3.11", "3.12"]
+    steps:
+      - name: "📥 Checkout Code"
+        uses: actions/checkout@v4
+
+      - name: "🔧 Setup Python ${{ matrix.python-version }}"
+        uses: actions/setup-python@v5
+        with:
+          python-version: ${{ matrix.python-version }}
+
+      - name: "📦 Install Dependencies"
+        run: |
+          python -m venv venv
+          source venv/bin/activate
+          pip install -r requirements-ci.txt
+          pip install pytest-xdist  # For parallel testing
+
+      - name: "🧪 Run Unit Tests"
+        run: |
+          source venv/bin/activate
+          mkdir -p ${{ env.REPORT_DIR }}
+
+          PYTHONPATH="." pytest tests/unit/ \
+            --cov=agents --cov=api --cov=coalitions \
+            --cov-report=xml:${{ env.REPORT_DIR }}/coverage.xml \
+            --cov-report=html:${{ env.REPORT_DIR }}/coverage-html \
+            --junit-xml=${{ env.REPORT_DIR }}/junit.xml \
+            -n auto \
+            -v
+
+      - name: "📊 Upload Test Results"
+        uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: unit-test-results-py${{ matrix.python-version }}-${{ github.run_id }}
+          path: ${{ env.REPORT_DIR }}/
+
 
