@@ -246,17 +246,30 @@ jobs:
         run: |
           echo "### Container Security Scan Results" >> $GITHUB_STEP_SUMMARY
           echo "" >> $GITHUB_STEP_SUMMARY
-          
+
           if [ -f trivy-report.json ]; then
             # Parse and format Trivy results
-            python -c "
-import json
-with open('trivy-report.json') as f:
-    data = json.load(f)
-    if 'Results' in data:
-        for result in data['Results']:
-            if 'Vulnerabilities' in result and result['Vulnerabilities']:
-                print(f\"Found {len(result['Vulnerabilities'])} vulnerabilities in {result.get('Target', 'unknown')}\")"
+            cat > /tmp/parse_trivy.py << 'EOF'
+          import json
+          import sys
+          try:
+              with open('trivy-report.json') as f:
+                  data = json.load(f)
+                  if 'Results' in data:
+                      vuln_count = 0
+                      for result in data.get('Results', []):
+                          if 'Vulnerabilities' in result and result['Vulnerabilities']:
+                              target = result.get('Target', 'unknown')
+                              count = len(result['Vulnerabilities'])
+                              vuln_count += count
+                              print(f"Found {count} vulnerabilities in {target}")
+                      if vuln_count == 0:
+                          print("No vulnerabilities found")
+          except Exception as e:
+              print(f"Error parsing Trivy report: {e}")
+              sys.exit(0)
+          EOF
+            python /tmp/parse_trivy.py >> $GITHUB_STEP_SUMMARY || echo "Failed to parse Trivy report" >> $GITHUB_STEP_SUMMARY
           else
             echo "No Trivy report generated" >> $GITHUB_STEP_SUMMARY
           fi
