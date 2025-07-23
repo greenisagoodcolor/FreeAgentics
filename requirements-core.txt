@@ -51,6 +51,7 @@ pandas==2.2.3  # Compatible with numpy 2.2.1
 pytest==8.4.1
 pytest-asyncio==1.0.0
 pytest-cov==6.2.1
+faker==33.1.0
 
 # Type Checking (optional for production)
 mypy==1.16.1
