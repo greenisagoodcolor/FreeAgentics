@@ -9,14 +9,15 @@ starlette==0.46.2  # Latest 0.46.x version, security fix for CVE-2024-47874
 
 # Scientific Computing
 numpy==2.2.1  # Compatible with scipy 1.14.1 requirement (<2.3)
-torch==2.7.1  # Security fix for CVE-2025-32434 and CVE-2025-3730
+--find-links https://download.pytorch.org/whl/torch_stable.html
+torch==2.3.1+cpu  # CPU-only version for CI (2.7.1 not available yet)
 scipy==1.14.1  # Compatible with Python 3.12
 
-# Active Inference
-inferactively-pymdp==0.0.7.1
+# Active Inference (disabled for CI performance)
+# inferactively-pymdp==0.0.7.1
 
-# Graph Neural Networks
-torch-geometric==2.6.1
+# Graph Neural Networks (disabled for CI performance)
+# torch-geometric==2.6.1
 networkx==3.5
 
 # Web and API
