@@ -31,7 +31,7 @@ jobs:
         with: { python-version: "3.12" }
       - env: { DATABASE_URL: "postgresql://postgres:testpass@localhost:5432/freeagentics_test" }
         run: |
-          pip install -r requirements-core.txt && pip install -e .
+          pip install -r requirements-ci.txt && pip install -e .
           python -m pytest tests/ -x --tb=short
 
   ready:
