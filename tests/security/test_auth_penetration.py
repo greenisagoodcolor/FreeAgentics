@@ -709,13 +709,13 @@ class TestAuthenticationPenetration:
         report = self.results.generate_report()
 
         # Verify security posture
-        assert (
-            report["summary"]["successful_attacks"] == 0
-        ), f"Found {report['summary']['successful_attacks']} successful attacks!"
+        assert report["summary"]["successful_attacks"] == 0, (
+            f"Found {report['summary']['successful_attacks']} successful attacks!"
+        )
 
-        assert (
-            report["summary"]["vulnerabilities_found"] == 0
-        ), f"Found {report['summary']['vulnerabilities_found']} vulnerabilities!"
+        assert report["summary"]["vulnerabilities_found"] == 0, (
+            f"Found {report['summary']['vulnerabilities_found']} vulnerabilities!"
+        )
 
         # Print summary for visibility
         print("\n=== Penetration Test Report ===")

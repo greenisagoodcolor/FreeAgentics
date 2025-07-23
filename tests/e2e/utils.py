@@ -444,9 +444,9 @@ class E2ETestUtils:
             actual_text = actual_text.lower()
             expected_text = expected_text.lower()
 
-        assert (
-            expected_text in actual_text
-        ), f"Expected text '{expected_text}' not found in '{actual_text}'"
+        assert expected_text in actual_text, (
+            f"Expected text '{expected_text}' not found in '{actual_text}'"
+        )
 
     def assert_url_path_equals(self, actual_url: str, expected_path: str):
         """Assert that URL path equals expected path"""
@@ -459,9 +459,9 @@ class E2ETestUtils:
 
     def assert_memory_usage_under(self, memory_mb: float, threshold: float):
         """Assert that memory usage is under threshold"""
-        assert (
-            memory_mb < threshold
-        ), f"Memory usage {memory_mb:.2f}MB exceeds threshold {threshold}MB"
+        assert memory_mb < threshold, (
+            f"Memory usage {memory_mb:.2f}MB exceeds threshold {threshold}MB"
+        )
 
     # Debugging helpers
 

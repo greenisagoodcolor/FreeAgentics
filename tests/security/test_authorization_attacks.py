@@ -128,9 +128,9 @@ class TestIDORVulnerabilities:
                 if attempt["found"] and attempt["id"] not in created_ids
             ]
 
-            assert (
-                len(unauthorized_access) == 0
-            ), "Sequential ID enumeration allowed unauthorized access"
+            assert len(unauthorized_access) == 0, (
+                "Sequential ID enumeration allowed unauthorized access"
+            )
 
     def test_uuid_prediction_attacks(self, client, setup_idor_scenario):
         """Test resistance to UUID prediction and timing attacks."""
@@ -316,9 +316,9 @@ class TestIDORVulnerabilities:
                     )
 
             # No operation should leak resource existence to unauthorized users
-            assert (
-                len(existence_indicators) == 0
-            ), f"Resource existence leaked through: {existence_indicators}"
+            assert len(existence_indicators) == 0, (
+                f"Resource existence leaked through: {existence_indicators}"
+            )
 
 
 class TestPrivilegeEscalationVectors:
@@ -365,9 +365,9 @@ class TestPrivilegeEscalationVectors:
             none_token = jwt.encode(unverified_payload, "", algorithm="none")
             headers = {"Authorization": f"Bearer {none_token}"}
             response = client.get("/api/v1/system/config", headers=headers)
-            assert (
-                response.status_code == status.HTTP_401_UNAUTHORIZED
-            ), "Algorithm 'none' attack succeeded"
+            assert response.status_code == status.HTTP_401_UNAUTHORIZED, (
+                "Algorithm 'none' attack succeeded"
+            )
         except jwt.InvalidAlgorithmError:
             pass  # Good - library prevents this
 
@@ -401,9 +401,9 @@ class TestPrivilegeEscalationVectors:
                     response = client.get("/api/v1/system/config", headers=headers)
 
                     # Should not authenticate with algorithm confusion
-                    assert (
-                        response.status_code == status.HTTP_401_UNAUTHORIZED
-                    ), f"Algorithm confusion with secret '{secret[:20]}...' succeeded"
+                    assert response.status_code == status.HTTP_401_UNAUTHORIZED, (
+                        f"Algorithm confusion with secret '{secret[:20]}...' succeeded"
+                    )
                 except Exception:
                     continue  # Expected to fail
         except Exception:
@@ -456,9 +456,9 @@ class TestPrivilegeEscalationVectors:
 
             # Try to access admin endpoint after each attempt
             response = client.get("/api/v1/system/config", headers=headers)
-            assert (
-                response.status_code == status.HTTP_403_FORBIDDEN
-            ), f"Role injection succeeded with payload: {payload}"
+            assert response.status_code == status.HTTP_403_FORBIDDEN, (
+                f"Role injection succeeded with payload: {payload}"
+            )
 
     def test_permission_bypass_chains(self, client, escalation_users):
         """Test chaining multiple vulnerabilities for permission bypass."""
@@ -784,9 +784,9 @@ class TestAuthorizationBypassTechniques:
 
         # Timing attacks should not be viable
         # Allow up to 2x difference as reasonable threshold
-        assert (
-            timing_ratio < 2.0 or timing_ratio > 0.5
-        ), "Significant timing difference detected that could enable timing attacks"
+        assert timing_ratio < 2.0 or timing_ratio > 0.5, (
+            "Significant timing difference detected that could enable timing attacks"
+        )
 
     def test_cache_poisoning_authorization(self, client, bypass_setup):
         """Test cache poisoning for authorization bypass."""
@@ -990,9 +990,9 @@ class TestAuthorizationRaceConditions:
         # All same requests should have same result
         for endpoint, statuses in endpoint_results.items():
             unique_statuses = set(statuses)
-            assert (
-                len(unique_statuses) == 1
-            ), f"Inconsistent authorization for {endpoint}: {unique_statuses}"
+            assert len(unique_statuses) == 1, (
+                f"Inconsistent authorization for {endpoint}: {unique_statuses}"
+            )
 
     def test_token_refresh_race_condition(self, client, race_setup):
         """Test race conditions in token refresh flow."""
@@ -1031,9 +1031,9 @@ class TestAuthorizationRaceConditions:
             unique_tokens = set(access_tokens)
 
             # Should either be all same (no rotation) or all different (proper rotation)
-            assert len(unique_tokens) == 1 or len(unique_tokens) == len(
-                access_tokens
-            ), "Inconsistent token refresh behavior"
+            assert len(unique_tokens) == 1 or len(unique_tokens) == len(access_tokens), (
+                "Inconsistent token refresh behavior"
+            )
 
 
 # Helper function for testing

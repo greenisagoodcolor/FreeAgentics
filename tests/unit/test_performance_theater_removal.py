@@ -86,9 +86,9 @@ class TestHardFailureRequirement:
             benchmarks = PyMDPBenchmarks()
 
             # This method should not exist after we remove performance theater
-            assert not hasattr(
-                benchmarks, "_create_dummy_result"
-            ), "_create_dummy_result method should be removed - it's performance theater"
+            assert not hasattr(benchmarks, "_create_dummy_result"), (
+                "_create_dummy_result method should be removed - it's performance theater"
+            )
         except Exception:
             assert False, "Test bypass removed - must fix underlying issue"
 
@@ -175,9 +175,9 @@ class TestTimeDelayElimination:
 
                                 # Allow sleep only in very specific cases (like retry logic)
                                 if matches and "retry" not in file_path.lower():
-                                    assert (
-                                        False
-                                    ), f"Found time.sleep() in production code: {file_path}"
+                                    assert False, (
+                                        f"Found time.sleep() in production code: {file_path}"
+                                    )
 
     def test_no_progress_bar_theater(self):
         """FAILING TEST: Verify no fake progress indicators exist."""
@@ -203,9 +203,9 @@ class TestTimeDelayElimination:
 
                             for pattern in progress_patterns:
                                 matches = re.findall(pattern, content, re.IGNORECASE)
-                                assert (
-                                    not matches
-                                ), f"Found progress theater '{pattern}' in {file_path}"
+                                assert not matches, (
+                                    f"Found progress theater '{pattern}' in {file_path}"
+                                )
 
 
 class TestAssertionBasedValidation:
@@ -319,4 +319,6 @@ class TestRealityCheckpoint:
                                 if matches:
                                     # Allow specific exceptions for legitimate use cases
                                     if "retry" not in file_path.lower():
-                                        assert False, f"Found graceful degradation pattern '{pattern}' in {file_path}: {matches}"
+                                        assert False, (
+                                            f"Found graceful degradation pattern '{pattern}' in {file_path}: {matches}"
+                                        )

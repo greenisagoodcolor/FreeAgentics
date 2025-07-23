@@ -200,9 +200,9 @@ class TestRateLimiterIntegration:
             if i < 5:
                 assert block_reason is None, f"Should not detect DDoS on request {i + 1}"
             else:
-                assert (
-                    block_reason == BlockReason.SUSPICIOUS_PATTERN
-                ), "Should detect suspicious pattern"
+                assert block_reason == BlockReason.SUSPICIOUS_PATTERN, (
+                    "Should detect suspicious pattern"
+                )
 
     @pytest.mark.asyncio
     async def test_path_scanning_detection(self, rate_limiter, redis_client):
@@ -352,9 +352,9 @@ class TestRateLimiterIntegration:
         allowed_count = sum(1 for r in results if r)
 
         # Should allow exactly the rate limit amount
-        assert (
-            allowed_count <= max_allowed
-        ), f"Should allow at most {max_allowed} requests, got {allowed_count}"
+        assert allowed_count <= max_allowed, (
+            f"Should allow at most {max_allowed} requests, got {allowed_count}"
+        )
 
     @pytest.mark.asyncio
     async def test_rate_limit_reset(self, rate_limiter, redis_client):

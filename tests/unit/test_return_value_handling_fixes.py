@@ -111,9 +111,9 @@ class TestReturnValueHandlingFixes:
 
             position = agent.position
             # Position can be list or tuple - both are valid
-            assert isinstance(
-                position, (list, tuple)
-            ), f"Position should be list or tuple, got {type(position)}"
+            assert isinstance(position, (list, tuple)), (
+                f"Position should be list or tuple, got {type(position)}"
+            )
 
             metrics = agent.metrics
             assert isinstance(metrics, dict), f"Metrics should be dict, got {type(metrics)}"

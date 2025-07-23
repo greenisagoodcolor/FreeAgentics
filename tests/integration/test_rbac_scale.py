@@ -214,15 +214,15 @@ class TestRBACScale:
         stats = self.metrics.calculate_statistics()
 
         # Performance assertions
-        assert (
-            stats["avg_check_time"] < 0.01
-        ), f"Average permission check too slow: {stats['avg_check_time']}s"
-        assert (
-            stats["p95_check_time"] < 0.02
-        ), f"P95 permission check too slow: {stats['p95_check_time']}s"
-        assert (
-            stats["checks_per_second"] > 1000
-        ), f"Permission check throughput too low: {stats['checks_per_second']} checks/s"
+        assert stats["avg_check_time"] < 0.01, (
+            f"Average permission check too slow: {stats['avg_check_time']}s"
+        )
+        assert stats["p95_check_time"] < 0.02, (
+            f"P95 permission check too slow: {stats['p95_check_time']}s"
+        )
+        assert stats["checks_per_second"] > 1000, (
+            f"Permission check throughput too low: {stats['checks_per_second']} checks/s"
+        )
         assert total_time < 30, f"Total test time too high: {total_time}s"
 
     def test_role_hierarchy_at_scale(self):
@@ -272,21 +272,21 @@ class TestRBACScale:
             check for check in hierarchy_checks if check["role"] == UserRole.ADMIN.value
         ]
         for check in admin_checks:
-            assert (
-                Permission.ADMIN_SYSTEM in check["actual"]
-            ), "Admin should have ADMIN_SYSTEM permission"
+            assert Permission.ADMIN_SYSTEM in check["actual"], (
+                "Admin should have ADMIN_SYSTEM permission"
+            )
 
         # Verify observer has limited permissions
         observer_checks = [
             check for check in hierarchy_checks if check["role"] == UserRole.OBSERVER.value
         ]
         for check in observer_checks:
-            assert (
-                Permission.ADMIN_SYSTEM not in check["actual"]
-            ), "Observer should not have ADMIN_SYSTEM permission"
-            assert (
-                Permission.CREATE_AGENT not in check["actual"]
-            ), "Observer should not have CREATE_AGENT permission"
+            assert Permission.ADMIN_SYSTEM not in check["actual"], (
+                "Observer should not have ADMIN_SYSTEM permission"
+            )
+            assert Permission.CREATE_AGENT not in check["actual"], (
+                "Observer should not have CREATE_AGENT permission"
+            )
 
     def test_permission_check_performance_by_role(self):
         """Test permission check performance for different roles."""
@@ -315,9 +315,9 @@ class TestRBACScale:
 
         # Admin role might be slightly slower due to more permissions
         for role, metrics in role_metrics.items():
-            assert (
-                metrics["avg_time"] < 0.01
-            ), f"Role {role} permission checks too slow: {metrics['avg_time']}s"
+            assert metrics["avg_time"] < 0.01, (
+                f"Role {role} permission checks too slow: {metrics['avg_time']}s"
+            )
 
     def test_complex_permission_scenarios(self):
         """Test complex permission scenarios at scale."""
@@ -396,9 +396,9 @@ class TestRBACScale:
                     # Verify permissions are consistent
                     expected_perms = set(ROLE_PERMISSIONS.get(user.role, []))
                     actual_perms = set(token_data.permissions)
-                    assert (
-                        expected_perms == actual_perms
-                    ), f"Permission mismatch after {cycle} refreshes"
+                    assert expected_perms == actual_perms, (
+                        f"Permission mismatch after {cycle} refreshes"
+                    )
 
                     # Refresh token
                     try:
@@ -623,12 +623,12 @@ class TestRBACScale:
         checks_per_second = num_permissions / total_time
 
         # Performance should scale reasonably
-        assert (
-            avg_check_time < 0.02
-        ), f"Avg check time too high for {num_users} users: {avg_check_time}s"
-        assert (
-            checks_per_second > 50
-        ), f"Throughput too low for {num_users} users: {checks_per_second} checks/s"
+        assert avg_check_time < 0.02, (
+            f"Avg check time too high for {num_users} users: {avg_check_time}s"
+        )
+        assert checks_per_second > 50, (
+            f"Throughput too low for {num_users} users: {checks_per_second} checks/s"
+        )
 
         # Log performance for analysis
         print(f"\nLoad test with {num_users} users, {num_permissions} checks:")

@@ -176,14 +176,14 @@ def test_performance_tests_use_real_operations():
             content = f.read()
 
         # Should contain real operations, not theater
-        assert (
-            "pymdp" in content.lower() or "numpy" in content.lower()
-        ), f"Performance test {file_path} should use real libraries"
+        assert "pymdp" in content.lower() or "numpy" in content.lower(), (
+            f"Performance test {file_path} should use real libraries"
+        )
 
         # Should NOT contain theater patterns
-        assert (
-            "time.sleep(" not in content
-        ), f"Performance test {file_path} contains time.sleep() - THEATER!"
+        assert "time.sleep(" not in content, (
+            f"Performance test {file_path} contains time.sleep() - THEATER!"
+        )
 
 
 def test_mathematical_validation_exists():
@@ -239,9 +239,9 @@ def test_performance_benchmarks_produce_realistic_results():
         # Check that timings are realistic (not zero, not too large)
         for duration_str in duration_patterns:
             duration = float(duration_str)
-            assert (
-                0.001 < duration < 10.0
-            ), f"Unrealistic timing found: {duration}s (should be between 1ms and 10s)"
+            assert 0.001 < duration < 10.0, (
+                f"Unrealistic timing found: {duration}s (should be between 1ms and 10s)"
+            )
 
     except subprocess.TimeoutExpired:
         pytest.fail("Benchmark took too long - possible performance issue")

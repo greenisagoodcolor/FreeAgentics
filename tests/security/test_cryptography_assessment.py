@@ -1171,9 +1171,9 @@ class TestCryptographicVulnerabilities:
         assert len(results["passed"]) > 0, "No randomness tests passed"
 
         passed_messages = " ".join(results["passed"])
-        assert (
-            "duplicate" not in passed_messages or "No duplicate" in passed_messages
-        ), "Randomness quality issues"
+        assert "duplicate" not in passed_messages or "No duplicate" in passed_messages, (
+            "Randomness quality issues"
+        )
 
         for failure in results["failed"]:
             logger.error(f"Randomness test failure: {failure}")

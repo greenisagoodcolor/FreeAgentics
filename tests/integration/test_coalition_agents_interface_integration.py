@@ -597,12 +597,12 @@ class TestCoalitionAgentsInterfaceIntegration:
 
             # Validate execution context
             exec_context = action_spec["execution_context"]
-            assert (
-                "strategy" in exec_context
-            ), f"Missing strategy in execution_context for {strategy}"
-            assert (
-                "team_size" in exec_context
-            ), f"Missing team_size in execution_context for {strategy}"
+            assert "strategy" in exec_context, (
+                f"Missing strategy in execution_context for {strategy}"
+            )
+            assert "team_size" in exec_context, (
+                f"Missing team_size in execution_context for {strategy}"
+            )
 
             parsing_results[strategy] = action_spec
 
@@ -689,9 +689,9 @@ class TestCoalitionAgentsInterfaceIntegration:
                     "validation": validation_results,
                 }
 
-                assert validation_results[
-                    "overall_success"
-                ], f"Action execution failed for {strategy}"
+                assert validation_results["overall_success"], (
+                    f"Action execution failed for {strategy}"
+                )
 
                 logger.info(f"✓ Agent {i} executed {strategy} coordination successfully")
                 logger.info(f"  Strategy alignment: {validation_results['strategy_alignment']:.3f}")
@@ -747,9 +747,9 @@ class TestCoalitionAgentsInterfaceIntegration:
                 # Validate behavior metrics
                 assert "metrics" in behavior_result, f"Missing behavior metrics for agent {i}"
                 assert "validation" in behavior_result, f"Missing validation results for agent {i}"
-                assert (
-                    "overall_compliance" in behavior_result
-                ), f"Missing compliance score for agent {i}"
+                assert "overall_compliance" in behavior_result, (
+                    f"Missing compliance score for agent {i}"
+                )
 
                 compliance_score = behavior_result["overall_compliance"]
                 assert 0 <= compliance_score <= 1, f"Invalid compliance score: {compliance_score}"
@@ -832,15 +832,15 @@ class TestCoalitionAgentsInterfaceIntegration:
             }
 
             # Performance requirements
-            assert (
-                performance_results[strategy]["parse_time_avg"] < 0.01
-            ), f"Parsing too slow for {strategy}"
-            assert (
-                performance_results[strategy]["validation_time_avg"] < 0.01
-            ), f"Validation too slow for {strategy}"
-            assert (
-                performance_results[strategy]["total_time_avg"] < 0.02
-            ), f"Total processing too slow for {strategy}"
+            assert performance_results[strategy]["parse_time_avg"] < 0.01, (
+                f"Parsing too slow for {strategy}"
+            )
+            assert performance_results[strategy]["validation_time_avg"] < 0.01, (
+                f"Validation too slow for {strategy}"
+            )
+            assert performance_results[strategy]["total_time_avg"] < 0.02, (
+                f"Total processing too slow for {strategy}"
+            )
 
             logger.info(f"✓ Performance validation passed for {strategy}")
             logger.info(

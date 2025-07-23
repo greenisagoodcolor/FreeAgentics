@@ -590,9 +590,9 @@ class TestLLMCoalitionInterfaceIntegration:
                     "generation_success": True,
                 }
 
-                assert (
-                    strategy_quality["overall_score"] > 0.5
-                ), f"Low quality strategy for {scenario_name}: {strategy_quality['overall_score']}"
+                assert strategy_quality["overall_score"] > 0.5, (
+                    f"Low quality strategy for {scenario_name}: {strategy_quality['overall_score']}"
+                )
 
                 logger.info(
                     f"✓ LLM strategy generation for '{scenario_name}' successful (quality: {strategy_quality['overall_score']:.3f})"
@@ -611,9 +611,9 @@ class TestLLMCoalitionInterfaceIntegration:
         successful_scenarios = len(
             [r for r in strategy_results.values() if r["generation_success"]]
         )
-        assert (
-            successful_scenarios >= len(coordination_scenarios) / 2
-        ), "Too many LLM strategy generation failures"
+        assert successful_scenarios >= len(coordination_scenarios) / 2, (
+            "Too many LLM strategy generation failures"
+        )
 
         return strategy_results
 
@@ -710,12 +710,12 @@ class TestLLMCoalitionInterfaceIntegration:
                 }
 
                 # Validate parsing quality
-                assert validation_results[
-                    "overall_valid"
-                ], f"Invalid coordination parameters for {scenario_name}: {validation_results}"
-                assert (
-                    coordination_structure.get("confidence", 0) > 0.3
-                ), f"Low parsing confidence for {scenario_name}"
+                assert validation_results["overall_valid"], (
+                    f"Invalid coordination parameters for {scenario_name}: {validation_results}"
+                )
+                assert coordination_structure.get("confidence", 0) > 0.3, (
+                    f"Low parsing confidence for {scenario_name}"
+                )
 
                 logger.info(
                     f"✓ Strategy parsing for '{scenario_name}' successful (confidence: {coordination_structure.get('confidence', 0):.3f})"
@@ -796,12 +796,12 @@ class TestLLMCoalitionInterfaceIntegration:
                 }
 
                 # Validate execution success
-                assert execution_result.get(
-                    "execution_success", False
-                ), f"Coordination execution failed for {scenario_name}"
-                assert (
-                    effectiveness_analysis.get("overall_effectiveness", 0) > 0.5
-                ), f"Low coordination effectiveness for {scenario_name}"
+                assert execution_result.get("execution_success", False), (
+                    f"Coordination execution failed for {scenario_name}"
+                )
+                assert effectiveness_analysis.get("overall_effectiveness", 0) > 0.5, (
+                    f"Low coordination effectiveness for {scenario_name}"
+                )
 
                 coordination_rate = execution_result.get("coordination_metrics", {}).get(
                     "coordination_rate", 0
@@ -878,9 +878,9 @@ class TestLLMCoalitionInterfaceIntegration:
         validation_results = parser.validate_coordination_parameters(
             coordination_structure, integration_scenario["context"]
         )
-        assert validation_results[
-            "overall_valid"
-        ], f"Invalid coordination parameters: {validation_results}"
+        assert validation_results["overall_valid"], (
+            f"Invalid coordination parameters: {validation_results}"
+        )
 
         # Step 3: Coordination Execution
         executor = CoordinationExecutor()
@@ -931,12 +931,12 @@ class TestLLMCoalitionInterfaceIntegration:
         }
 
         # Performance requirements
-        assert (
-            integration_results["overall_pipeline"]["total_time"] < 60.0
-        ), "End-to-end pipeline too slow"
-        assert integration_results["overall_pipeline"][
-            "end_to_end_success"
-        ], "End-to-end integration failed"
+        assert integration_results["overall_pipeline"]["total_time"] < 60.0, (
+            "End-to-end pipeline too slow"
+        )
+        assert integration_results["overall_pipeline"]["end_to_end_success"], (
+            "End-to-end integration failed"
+        )
 
         logger.info("✓ End-to-end LLM→Coalition integration successful")
         logger.info(f"  LLM generation: {llm_time:.3f}s")
@@ -1021,15 +1021,15 @@ class TestLLMCoalitionInterfaceIntegration:
             logger.info(f"Edge case '{case_name}': {case_result}")
 
         # Basic edge cases should be handled without crashing
-        assert edge_case_results["ambiguous_strategy"][
-            "handles_ambiguity"
-        ], "Ambiguous strategy not handled"
-        assert edge_case_results["contradictory_strategy"][
-            "handles_contradiction"
-        ], "Contradictory strategy not handled"
-        assert edge_case_results["minimal_strategy"][
-            "fallback_handling"
-        ], "Minimal strategy not handled"
+        assert edge_case_results["ambiguous_strategy"]["handles_ambiguity"], (
+            "Ambiguous strategy not handled"
+        )
+        assert edge_case_results["contradictory_strategy"]["handles_contradiction"], (
+            "Contradictory strategy not handled"
+        )
+        assert edge_case_results["minimal_strategy"]["fallback_handling"], (
+            "Minimal strategy not handled"
+        )
         assert edge_case_results["no_agents"]["execution_completes"], "Empty agent list not handled"
 
         return edge_case_results

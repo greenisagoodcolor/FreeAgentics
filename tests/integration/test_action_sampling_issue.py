@@ -58,9 +58,9 @@ class TestActionSamplingIssue:
         raw_action = pymdp_agent.sample_action()
 
         # Document the actual PyMDP behavior
-        assert isinstance(
-            raw_action, np.ndarray
-        ), f"PyMDP returns {type(raw_action)}, expected np.ndarray"
+        assert isinstance(raw_action, np.ndarray), (
+            f"PyMDP returns {type(raw_action)}, expected np.ndarray"
+        )
         assert raw_action.shape == (1,), f"PyMDP action has shape {raw_action.shape}, expected (1,)"
         assert raw_action.dtype in [
             np.float64,
@@ -99,9 +99,9 @@ class TestActionSamplingIssue:
         converted_action = adapter.sample_action(pymdp_agent)
 
         # CRITICAL: Must be exact Python int, not numpy type
-        assert (
-            type(converted_action) is int
-        ), f"Expected exact Python int, got {type(converted_action)}"
+        assert type(converted_action) is int, (
+            f"Expected exact Python int, got {type(converted_action)}"
+        )
         assert not isinstance(converted_action, np.integer), "Should not be numpy integer type"
         assert isinstance(converted_action, int), "Should be Python int"
 
@@ -295,9 +295,9 @@ class TestActionMappingConsistency:
         # Access the agent's action mapping if available
         if hasattr(agent, "action_names"):
             for idx, name in enumerate(agent.action_names):
-                assert name == expected_mapping.get(
-                    idx
-                ), f"Action {idx} mapped to '{name}', expected '{expected_mapping.get(idx)}'"
+                assert name == expected_mapping.get(idx), (
+                    f"Action {idx} mapped to '{name}', expected '{expected_mapping.get(idx)}'"
+                )
 
         # Test through actual action selection
         observations = [

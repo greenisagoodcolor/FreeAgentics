@@ -139,9 +139,9 @@ class TestPyMDPBaselineComparison:
             }
 
             # Assert performance is acceptable
-            assert (
-                overhead_ratio < 1.5
-            ), f"{model_name} model: Our implementation is {overhead_ratio:.2f}x slower than baseline"
+            assert overhead_ratio < 1.5, (
+                f"{model_name} model: Our implementation is {overhead_ratio:.2f}x slower than baseline"
+            )
 
         # Print results
         print("\nBelief Update Performance Comparison:")
@@ -200,9 +200,9 @@ class TestPyMDPBaselineComparison:
             }
 
             # Assert performance is acceptable
-            assert (
-                overhead_ratio < 1.3
-            ), f"{model_name} model: Action selection is {overhead_ratio:.2f}x slower than baseline"
+            assert overhead_ratio < 1.3, (
+                f"{model_name} model: Action selection is {overhead_ratio:.2f}x slower than baseline"
+            )
 
         # Print results
         print("\nAction Selection Performance Comparison:")
@@ -273,9 +273,9 @@ class TestPyMDPBaselineComparison:
         )
 
         # Assert acceptable performance
-        assert (
-            overhead_ratio < 1.5
-        ), f"Full cycle overhead too high: {overhead_ratio:.2f}x slower than baseline"
+        assert overhead_ratio < 1.5, (
+            f"Full cycle overhead too high: {overhead_ratio:.2f}x slower than baseline"
+        )
 
         return results
 
@@ -326,9 +326,9 @@ class TestPyMDPBaselineComparison:
         print(f"Memory Overhead: {memory_overhead_ratio:.2f}x")
 
         # Memory overhead should be reasonable (less than 2x)
-        assert (
-            memory_overhead_ratio < 2.0
-        ), f"Memory overhead too high: {memory_overhead_ratio:.2f}x more than baseline"
+        assert memory_overhead_ratio < 2.0, (
+            f"Memory overhead too high: {memory_overhead_ratio:.2f}x more than baseline"
+        )
 
         return {
             "baseline_peak_mb": baseline_peak / 1024 / 1024,
@@ -421,9 +421,9 @@ class TestPyMDPBaselineComparison:
         size_ratio = results[-1]["num_states"] / results[0]["num_states"]
 
         # Time should scale sub-quadratically with state space size
-        assert (
-            time_ratio < size_ratio**2
-        ), f"Performance scaling too poor: {time_ratio:.1f}x time for {size_ratio:.1f}x states"
+        assert time_ratio < size_ratio**2, (
+            f"Performance scaling too poor: {time_ratio:.1f}x time for {size_ratio:.1f}x states"
+        )
 
         return results
 
@@ -467,9 +467,9 @@ class TestRealTimePerformanceRequirements:
 
         # For real-time operation, need at least 10 updates/second per agent
         required_updates_per_second = num_agents * 10
-        assert (
-            updates_per_second > required_updates_per_second
-        ), f"Performance too low: {updates_per_second:.1f} updates/sec, need {required_updates_per_second}"
+        assert updates_per_second > required_updates_per_second, (
+            f"Performance too low: {updates_per_second:.1f} updates/sec, need {required_updates_per_second}"
+        )
 
     def test_latency_percentiles(self):
         """Test latency percentiles for consistent performance."""

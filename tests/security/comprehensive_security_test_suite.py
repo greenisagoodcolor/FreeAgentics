@@ -1088,9 +1088,9 @@ class TestComprehensiveSecurity:
         await suite.test_authentication_bypass()
 
         vulnerabilities = [r for r in suite.test_results["auth_bypass"] if r.get("vulnerable")]
-        assert (
-            len(vulnerabilities) == 0
-        ), f"Authentication bypass vulnerabilities found: {vulnerabilities}"
+        assert len(vulnerabilities) == 0, (
+            f"Authentication bypass vulnerabilities found: {vulnerabilities}"
+        )
 
     async def test_jwt_security(self):
         """Test JWT security"""
@@ -1130,9 +1130,9 @@ class TestComprehensiveSecurity:
         report = await suite.run_all_tests()
 
         # Assert overall security score is acceptable
-        assert (
-            report["summary"]["security_score"] >= 95
-        ), f"Security score too low: {report['summary']['security_score']}"
+        assert report["summary"]["security_score"] >= 95, (
+            f"Security score too low: {report['summary']['security_score']}"
+        )
 
         # Save report for CI/CD integration
         with open("security_test_report.json", "w") as f:

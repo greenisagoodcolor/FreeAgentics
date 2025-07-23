@@ -21,12 +21,12 @@ export const SimpleSelect: React.FC<SimpleSelectProps> = ({ value, onValueChange
     <div className="relative">
       <div onClick={() => setIsOpen(!isOpen)}>
         {React.isValidElement(trigger) &&
-          React.cloneElement(trigger as React.ReactElement<any>, { value, isOpen })}
+          React.cloneElement(trigger as React.ReactElement<{ value?: string; isOpen?: boolean }>, { value, isOpen })}
       </div>
       {isOpen && (
         <div className="absolute top-full left-0 right-0 z-50 mt-1">
           {React.isValidElement(content) &&
-            React.cloneElement(content as React.ReactElement<any>, {
+            React.cloneElement(content as React.ReactElement<{ onSelect?: (val: string) => void }>, {
               onSelect: (val: string) => {
                 onValueChange(val);
                 setIsOpen(false);
@@ -55,7 +55,7 @@ export const SelectTrigger: React.FC<{
       type="button"
     >
       {React.isValidElement(valueElement) &&
-        React.cloneElement(valueElement as React.ReactElement<any>, { value })}
+        React.cloneElement(valueElement as React.ReactElement<{ value?: string }>, { value })}
       <svg
         className={`h-4 w-4 opacity-50 transition-transform ${isOpen ? 'rotate-180' : ''}`}
         fill="none"
@@ -81,7 +81,7 @@ export const SelectContent: React.FC<{
       <div className="w-full p-1">
         {React.Children.map(children, (child) => {
           if (React.isValidElement(child) && child.type === SelectItem) {
-            return React.cloneElement(child as React.ReactElement<any>, { onSelect });
+            return React.cloneElement(child as React.ReactElement<{ onSelect?: (value: string) => void }>, { onSelect });
           }
           return child;
         })}

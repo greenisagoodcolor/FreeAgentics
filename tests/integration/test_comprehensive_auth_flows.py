@@ -252,9 +252,9 @@ class TestCompleteAuthenticationFlows:
                 "/api/v1/auth/refresh",
                 json={"refresh_token": initial_refresh_token},
             )
-            assert (
-                old_refresh_response.status_code == 401
-            ), "Old refresh token should be invalidated"
+            assert old_refresh_response.status_code == 401, (
+                "Old refresh token should be invalidated"
+            )
 
             # Step 7: Verify new refresh token works
             newer_refresh_response = self.tester.client.post(
@@ -317,9 +317,9 @@ class TestCompleteAuthenticationFlows:
             refresh_response = self.tester.client.post(
                 "/api/v1/auth/refresh", json={"refresh_token": refresh_token}
             )
-            assert (
-                refresh_response.status_code == 401
-            ), "Refresh token should be invalidated after logout"
+            assert refresh_response.status_code == 401, (
+                "Refresh token should be invalidated after logout"
+            )
 
             self.tester.record_flow_result(flow_name, True)
 
@@ -377,9 +377,9 @@ class TestCompleteAuthenticationFlows:
                 "/api/v1/auth/refresh",
                 json={"refresh_token": sessions[0]["refresh_token"]},
             )
-            assert (
-                refresh_response.status_code == 401
-            ), "Logged out session's refresh token should be invalid"
+            assert refresh_response.status_code == 401, (
+                "Logged out session's refresh token should be invalid"
+            )
 
             self.tester.record_flow_result(flow_name, True)
 
@@ -549,9 +549,9 @@ class TestCompleteAuthenticationFlows:
 
                 # Only one refresh should succeed due to token rotation
                 successful_refreshes = [r for r in refresh_results if r["success"]]
-                assert (
-                    len(successful_refreshes) == 1
-                ), "Only one token refresh should succeed due to rotation"
+                assert len(successful_refreshes) == 1, (
+                    "Only one token refresh should succeed due to rotation"
+                )
 
             self.tester.record_flow_result(flow_name, True)
 
@@ -597,14 +597,14 @@ class TestCompleteAuthenticationFlows:
             refresh_expires_in = (refresh_exp - now).total_seconds()
 
             # Access token should expire in ~15 minutes
-            assert (
-                600 < access_expires_in < 1200
-            ), f"Access token expires in {access_expires_in}s, expected ~900s"
+            assert 600 < access_expires_in < 1200, (
+                f"Access token expires in {access_expires_in}s, expected ~900s"
+            )
 
             # Refresh token should expire in ~7 days
-            assert (
-                500000 < refresh_expires_in < 700000
-            ), f"Refresh token expires in {refresh_expires_in}s, expected ~604800s"
+            assert 500000 < refresh_expires_in < 700000, (
+                f"Refresh token expires in {refresh_expires_in}s, expected ~604800s"
+            )
 
             # Step 5: Test token refresh extends access token
             refresh_response = self.tester.client.post(
@@ -620,9 +620,9 @@ class TestCompleteAuthenticationFlows:
             new_access_exp = datetime.fromtimestamp(new_access_payload["exp"])
 
             new_access_expires_in = (new_access_exp - now).total_seconds()
-            assert (
-                new_access_expires_in > access_expires_in
-            ), "New access token should have later expiration"
+            assert new_access_expires_in > access_expires_in, (
+                "New access token should have later expiration"
+            )
 
             self.tester.record_flow_result(flow_name, True)
 
@@ -713,9 +713,9 @@ class TestCompleteAuthenticationFlows:
                     "/api/v1/auth/refresh",
                     json={"refresh_token": refresh_token},
                 )
-                assert (
-                    response.status_code == 401
-                ), f"Invalid refresh token should be rejected: {refresh_token}"
+                assert response.status_code == 401, (
+                    f"Invalid refresh token should be rejected: {refresh_token}"
+                )
 
             self.tester.record_flow_result(flow_name, True)
 
@@ -811,9 +811,9 @@ class TestCompleteAuthenticationFlows:
                 elif method == "POST":
                     response = self.tester.client.post(endpoint, headers=headers)
 
-                assert (
-                    response.status_code == 200
-                ), f"Authenticated request to {endpoint} should succeed"
+                assert response.status_code == 200, (
+                    f"Authenticated request to {endpoint} should succeed"
+                )
 
             # Step 3: Test unauthenticated requests
             for endpoint, method in authenticated_endpoints:
@@ -875,9 +875,9 @@ class TestCompleteAuthenticationFlows:
             print("\\nAll authentication flows passed successfully!")
 
         # Assert success
-        assert (
-            summary["summary"]["success_rate"] >= 90
-        ), f"Authentication flow success rate too low: {summary['summary']['success_rate']:.1f}%"
+        assert summary["summary"]["success_rate"] >= 90, (
+            f"Authentication flow success rate too low: {summary['summary']['success_rate']:.1f}%"
+        )
 
         return summary
 

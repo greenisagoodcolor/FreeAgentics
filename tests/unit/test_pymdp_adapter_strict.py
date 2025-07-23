@@ -117,9 +117,9 @@ class TestPyMDPAdapterStrictTypeChecking:
         # Must return exactly tuple of two numpy arrays
         assert isinstance(q_pi, np.ndarray), f"q_pi must be ndarray, got {type(q_pi)}"
         assert isinstance(G, np.ndarray), f"G must be ndarray, got {type(G)}"
-        assert np.issubdtype(
-            q_pi.dtype, np.floating
-        ), f"q_pi must be floating type, got {q_pi.dtype}"
+        assert np.issubdtype(q_pi.dtype, np.floating), (
+            f"q_pi must be floating type, got {q_pi.dtype}"
+        )
         assert np.issubdtype(G.dtype, np.floating), f"G must be floating type, got {G.dtype}"
 
     def test_adapter_infer_policies_validation_fails_on_wrong_return_types(

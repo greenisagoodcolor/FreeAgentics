@@ -89,9 +89,9 @@ class TestRealPyMDPOperations:
                 # For single-factor agents, beliefs_result contains the belief array
                 if beliefs_result.shape == (1,):
                     belief = beliefs_result[0]
-                    assert isinstance(
-                        belief, np.ndarray
-                    ), f"Cycle {i}: Expected belief to be ndarray"
+                    assert isinstance(belief, np.ndarray), (
+                        f"Cycle {i}: Expected belief to be ndarray"
+                    )
             else:
                 # Direct array return
                 belief = beliefs_result

@@ -170,9 +170,9 @@ class TestRBACSecurityAudit:
         for role, perms in ROLE_PERMISSIONS.items():
             if role != UserRole.ADMIN:
                 role_perms = set(perms)
-                assert role_perms.issubset(
-                    admin_perms
-                ), f"Role {role} has permissions not available to admin"
+                assert role_perms.issubset(admin_perms), (
+                    f"Role {role} has permissions not available to admin"
+                )
 
     def test_privilege_escalation_prevention(self, test_users, mock_db, mock_request):
         """Test prevention of privilege escalation attacks."""
@@ -656,15 +656,15 @@ class TestRBACSecurityAudit:
         dangerous_patterns = ["*", "all", "any", "super"]
         for perm in all_permissions:
             for pattern in dangerous_patterns:
-                assert (
-                    pattern not in perm.value.lower()
-                ), f"Permission {perm.value} contains dangerous pattern '{pattern}'"
+                assert pattern not in perm.value.lower(), (
+                    f"Permission {perm.value} contains dangerous pattern '{pattern}'"
+                )
 
         # Verify permission naming follows principle of least privilege
         for perm in all_permissions:
-            assert perm.value.startswith(
-                ("create_", "view_", "modify_", "delete_", "admin_")
-            ), f"Permission {perm.value} doesn't follow naming convention"
+            assert perm.value.startswith(("create_", "view_", "modify_", "delete_", "admin_")), (
+                f"Permission {perm.value} doesn't follow naming convention"
+            )
 
     def test_audit_log_integrity(self):
         """Test audit log cannot be tampered with."""

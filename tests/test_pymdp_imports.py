@@ -30,9 +30,9 @@ class TestPyMDPImports:
             from pymdp.agent import Agent
 
             assert inspect.isclass(Agent), "Agent should be a class"
-            assert (
-                Agent.__module__ == "pymdp.agent"
-            ), f"Agent module should be 'pymdp.agent', got {Agent.__module__}"
+            assert Agent.__module__ == "pymdp.agent", (
+                f"Agent module should be 'pymdp.agent', got {Agent.__module__}"
+            )
         except ImportError as e:
             pytest.fail(f"Cannot import Agent from pymdp.agent: {e}")
 

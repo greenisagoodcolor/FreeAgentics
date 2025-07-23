@@ -6,7 +6,7 @@ export interface SelectProps extends React.SelectHTMLAttributes<HTMLSelectElemen
 }
 
 const SelectComponent = React.forwardRef<HTMLSelectElement, SelectProps>(
-  ({ children, className, ...props }, ref) => {
+  ({ children, className: _className, ..._props }, _ref) => {
     return <div className="relative">{children}</div>;
   },
 );

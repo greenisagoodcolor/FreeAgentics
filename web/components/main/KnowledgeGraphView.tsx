@@ -192,10 +192,10 @@ export function KnowledgeGraphView() {
       // Update positions on tick
       simulation.on("tick", () => {
         link
-          .attr("x1", (d: any) => d.source.x)
-          .attr("y1", (d: any) => d.source.y)
-          .attr("x2", (d: any) => d.target.x)
-          .attr("y2", (d: any) => d.target.y);
+          .attr("x1", (d: d3.SimulationLinkDatum<GraphNode>) => (d.source as GraphNode).x!)
+          .attr("y1", (d: d3.SimulationLinkDatum<GraphNode>) => (d.source as GraphNode).y!)
+          .attr("x2", (d: d3.SimulationLinkDatum<GraphNode>) => (d.target as GraphNode).x!)
+          .attr("y2", (d: d3.SimulationLinkDatum<GraphNode>) => (d.target as GraphNode).y!);
 
         node.attr("cx", (d: GraphNode) => d.x!).attr("cy", (d: GraphNode) => d.y!);
 

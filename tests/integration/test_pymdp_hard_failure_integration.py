@@ -179,9 +179,9 @@ class TestPyMDPHardFailureIntegration:
         ]
 
         for pattern in forbidden_patterns:
-            assert (
-                pattern not in source
-            ), f"Found forbidden pattern '{pattern}' indicating graceful fallback"
+            assert pattern not in source, (
+                f"Found forbidden pattern '{pattern}' indicating graceful fallback"
+            )
 
     def test_resource_collector_hard_failures(self):
         """Test ResourceCollectorAgent fails hard on PyMDP errors."""
@@ -281,9 +281,9 @@ class TestPerformanceTheaterRemoval:
 
             # Check for progress bar theater
             assert "tqdm" not in content, f"Found tqdm progress bar in {file_path}"
-            assert (
-                "progress" not in content.lower() or "in progress" in content.lower()
-            ), f"Found progress indicator in {file_path}"
+            assert "progress" not in content.lower() or "in progress" in content.lower(), (
+                f"Found progress indicator in {file_path}"
+            )
 
     def test_no_mock_benchmark_data(self):
         """Test that benchmark code doesn't return fake timing or metrics."""
@@ -317,9 +317,9 @@ class TestPerformanceTheaterRemoval:
                 content = f.read()
 
             # Check for decorator patterns that indicate graceful degradation
-            assert (
-                "@safe_pymdp_operation" not in content or "default_value=None" not in content
-            ), f"Found safe_operation decorator with None default in {file_path}"
+            assert "@safe_pymdp_operation" not in content or "default_value=None" not in content, (
+                f"Found safe_operation decorator with None default in {file_path}"
+            )
 
 
 class TestNemesisLevelValidation:

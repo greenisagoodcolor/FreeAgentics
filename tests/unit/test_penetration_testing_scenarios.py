@@ -79,15 +79,15 @@ class TestPenetrationTestingScenarios:
             # Test in login endpoint
             response = client.post("/auth/login", json={"username": payload, "password": "test"})
             # Should not return 500 error (indicating SQL injection)
-            assert (
-                response.status_code != 500
-            ), f"SQL injection may be possible with payload: {payload}"
+            assert response.status_code != 500, (
+                f"SQL injection may be possible with payload: {payload}"
+            )
 
             # Test in search endpoint
             response = client.get(f"/search?q={payload}")
-            assert (
-                response.status_code != 500
-            ), f"SQL injection may be possible in search with payload: {payload}"
+            assert response.status_code != 500, (
+                f"SQL injection may be possible in search with payload: {payload}"
+            )
 
     def test_xss_prevention(self, client):
         """Test Cross-Site Scripting (XSS) prevention."""
@@ -127,9 +127,9 @@ class TestPenetrationTestingScenarios:
         headers = response.headers
 
         # Check for security headers that help prevent CSRF
-        assert (
-            "X-Frame-Options" in headers or "Content-Security-Policy" in headers
-        ), "Missing CSRF protection headers"
+        assert "X-Frame-Options" in headers or "Content-Security-Policy" in headers, (
+            "Missing CSRF protection headers"
+        )
 
     def test_authentication_bypass_attempts(self, client, auth_manager):
         """Test authentication bypass vulnerability attempts."""
@@ -147,9 +147,9 @@ class TestPenetrationTestingScenarios:
             response = client.post("/auth/login", json=payload)
 
             # Should not return successful authentication
-            assert (
-                response.status_code != 200 or "access_token" not in response.json()
-            ), f"Authentication bypass possible with payload: {payload}"
+            assert response.status_code != 200 or "access_token" not in response.json(), (
+                f"Authentication bypass possible with payload: {payload}"
+            )
 
     def test_session_fixation_prevention(self, auth_manager):
         """Test session fixation attack prevention."""
@@ -278,9 +278,9 @@ class TestPenetrationTestingScenarios:
 
         # Times should be similar (within reasonable variance)
         time_difference = abs(avg_correct - avg_incorrect)
-        assert (
-            time_difference < 0.1
-        ), f"Timing attack vulnerability detected: {time_difference:.3f}s difference"
+        assert time_difference < 0.1, (
+            f"Timing attack vulnerability detected: {time_difference:.3f}s difference"
+        )
 
     def test_brute_force_protection(self, client, auth_manager):
         """Test brute force attack protection."""
@@ -380,15 +380,15 @@ class TestPenetrationTestingScenarios:
 
         if set_cookie_headers:
             # Cookies should have security flags
-            assert (
-                "HttpOnly" in set_cookie_headers or "httponly" in set_cookie_headers.lower()
-            ), "Cookies missing HttpOnly flag"
-            assert (
-                "Secure" in set_cookie_headers or "secure" in set_cookie_headers.lower()
-            ), "Cookies missing Secure flag"
-            assert (
-                "SameSite" in set_cookie_headers or "samesite" in set_cookie_headers.lower()
-            ), "Cookies missing SameSite flag"
+            assert "HttpOnly" in set_cookie_headers or "httponly" in set_cookie_headers.lower(), (
+                "Cookies missing HttpOnly flag"
+            )
+            assert "Secure" in set_cookie_headers or "secure" in set_cookie_headers.lower(), (
+                "Cookies missing Secure flag"
+            )
+            assert "SameSite" in set_cookie_headers or "samesite" in set_cookie_headers.lower(), (
+                "Cookies missing SameSite flag"
+            )
 
     def test_input_validation_bypass(self, client):
         """Test input validation bypass attempts."""

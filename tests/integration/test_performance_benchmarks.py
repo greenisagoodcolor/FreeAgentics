@@ -241,9 +241,9 @@ class TestPerformanceBenchmarks:
         print(f"  Overhead: {coordination_overhead:.1f}%")
 
         # Coordination should add some overhead but not be excessive
-        assert (
-            coordination_overhead < 200
-        ), f"Coordination overhead too high: {coordination_overhead:.1f}%"
+        assert coordination_overhead < 200, (
+            f"Coordination overhead too high: {coordination_overhead:.1f}%"
+        )
 
     def test_resource_collection_performance(self):
         """Test performance of resource collection agents."""

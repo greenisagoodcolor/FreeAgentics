@@ -228,9 +228,9 @@ class TestOWASPValidation:
         # Filter application files
         app_rate_limit_files = [f for f in rate_limit_files if self._is_application_file(f)]
 
-        assert (
-            len(app_rate_limit_files) > 0
-        ), "No rate limiting implementation found in application code"
+        assert len(app_rate_limit_files) > 0, (
+            "No rate limiting implementation found in application code"
+        )
 
         # Check that rate limiting is actually used
         api_files = list(project_root.glob("api/**/*.py"))
@@ -295,9 +295,9 @@ class TestOWASPValidation:
             if (project_root / req_file).exists():
                 found_files.append(req_file)
 
-        assert (
-            len(found_files) >= 2
-        ), f"Insufficient dependency files found. Expected at least 2, found {len(found_files)}: {found_files}"
+        assert len(found_files) >= 2, (
+            f"Insufficient dependency files found. Expected at least 2, found {len(found_files)}: {found_files}"
+        )
 
         # Check for package.json
         package_json = project_root / "web" / "package.json"
@@ -343,9 +343,9 @@ class TestOWASPValidation:
                         }
                     )
 
-        assert (
-            secure_hashing_found
-        ), "No secure password hashing implementation found (bcrypt, scrypt, argon2, PBKDF2)"
+        assert secure_hashing_found, (
+            "No secure password hashing implementation found (bcrypt, scrypt, argon2, PBKDF2)"
+        )
 
         assert len(weak_hashing_found) == 0, (
             f"Found {len(weak_hashing_found)} weak password hashing patterns:\n"
@@ -506,9 +506,9 @@ class TestOWASPValidation:
             if (project_root / assessment_file).exists():
                 existing_files.append(assessment_file)
 
-        assert (
-            len(existing_files) >= 1
-        ), f"No security assessment reports found. Expected at least one of: {assessment_files}"
+        assert len(existing_files) >= 1, (
+            f"No security assessment reports found. Expected at least one of: {assessment_files}"
+        )
 
     def test_security_tools_available(self, project_root):
         """Test that security assessment tools are available."""
@@ -523,9 +523,9 @@ class TestOWASPValidation:
             if (project_root / tool).exists():
                 existing_tools.append(tool)
 
-        assert (
-            len(existing_tools) >= 1
-        ), f"No security assessment tools found. Expected at least one of: {security_tools}"
+        assert len(existing_tools) >= 1, (
+            f"No security assessment tools found. Expected at least one of: {security_tools}"
+        )
 
 
 class TestSecurityCompliance:

@@ -88,17 +88,17 @@ class TestComprehensivePyMDPPipeline:
 
         # NEMESIS VALIDATION: Action must be mathematically valid
         assert action is not None, "Action should not be None"
-        assert isinstance(
-            action, (int, str, dict)
-        ), f"Action should be int, str or dict, got {type(action)}"
+        assert isinstance(action, (int, str, dict)), (
+            f"Action should be int, str or dict, got {type(action)}"
+        )
 
         # Step 3: Validate PyMDP agent has proper state
         if hasattr(agent.pymdp_agent, "qs") and agent.pymdp_agent.qs is not None:
             # Check that beliefs are proper probability distributions
             for factor_beliefs in agent.pymdp_agent.qs:
-                assert np.isclose(
-                    factor_beliefs.sum(), 1.0, atol=1e-6
-                ), f"Beliefs don't sum to 1: {factor_beliefs.sum()}"
+                assert np.isclose(factor_beliefs.sum(), 1.0, atol=1e-6), (
+                    f"Beliefs don't sum to 1: {factor_beliefs.sum()}"
+                )
                 assert np.all(factor_beliefs >= 0), f"Negative beliefs detected: {factor_beliefs}"
                 assert np.all(factor_beliefs <= 1), f"Beliefs exceed 1: {factor_beliefs}"
 
@@ -145,9 +145,9 @@ class TestComprehensivePyMDPPipeline:
             if hasattr(agent.pymdp_agent, "qs") and agent.pymdp_agent.qs is not None:
                 for factor_beliefs in agent.pymdp_agent.qs:
                     # MATHEMATICAL VALIDATION: Beliefs are proper probability distribution
-                    assert np.isclose(
-                        factor_beliefs.sum(), 1.0, atol=1e-6
-                    ), f"Beliefs don't sum to 1: {factor_beliefs.sum()}"
+                    assert np.isclose(factor_beliefs.sum(), 1.0, atol=1e-6), (
+                        f"Beliefs don't sum to 1: {factor_beliefs.sum()}"
+                    )
                     assert np.all(factor_beliefs >= 0), f"Negative beliefs: {factor_beliefs}"
                     assert np.all(factor_beliefs <= 1), f"Beliefs exceed 1: {factor_beliefs}"
 
@@ -199,12 +199,12 @@ class TestComprehensivePyMDPPipeline:
                 agent_beliefs = []
                 for factor_beliefs in agent.pymdp_agent.qs:
                     # Validate each agent maintains proper probability distributions
-                    assert np.isclose(
-                        factor_beliefs.sum(), 1.0, atol=1e-6
-                    ), f"Agent {agent.agent_id} beliefs don't sum to 1"
-                    assert np.all(
-                        factor_beliefs >= 0
-                    ), f"Agent {agent.agent_id} has negative beliefs"
+                    assert np.isclose(factor_beliefs.sum(), 1.0, atol=1e-6), (
+                        f"Agent {agent.agent_id} beliefs don't sum to 1"
+                    )
+                    assert np.all(factor_beliefs >= 0), (
+                        f"Agent {agent.agent_id} has negative beliefs"
+                    )
                     assert np.all(factor_beliefs <= 1), f"Agent {agent.agent_id} beliefs exceed 1"
                     agent_beliefs.append(factor_beliefs.copy())
                 all_beliefs.append(agent_beliefs)
@@ -318,9 +318,9 @@ class TestPerformanceBenchmarksWithRealMeasurements:
         p95_selection_time = np.percentile(all_selection_times, 95)
 
         # The PRD mentions "<500ms" - validate this is realistic
-        assert (
-            mean_selection_time < 0.5
-        ), f"Mean selection time {mean_selection_time:.3f}s exceeds 500ms"
+        assert mean_selection_time < 0.5, (
+            f"Mean selection time {mean_selection_time:.3f}s exceeds 500ms"
+        )
         assert p95_selection_time < 1.0, f"95th percentile {p95_selection_time:.3f}s too slow"
 
         # Ensure we're measuring real work (variance indicates real measurements)
@@ -509,9 +509,9 @@ class TestNemesisLevelAuditAndValidation:
                 )
 
         # NEMESIS VALIDATION: No integration failures allowed
-        assert (
-            len(audit_results["integration_failures"]) == 0
-        ), f"Integration failures detected: {audit_results['integration_failures']}"
+        assert len(audit_results["integration_failures"]) == 0, (
+            f"Integration failures detected: {audit_results['integration_failures']}"
+        )
 
         # Store complete audit results
         self._audit_results = audit_results
@@ -633,12 +633,12 @@ class TestNemesisLevelAuditAndValidation:
         self._validation_report = validation_report
 
         # REALITY CHECKPOINT: This test serves as documentation for external validation
-        assert (
-            total_methods >= 8
-        ), f"Should have comprehensive test coverage: {total_methods} methods"
-        assert (
-            PYMDP_AVAILABLE or total_methods >= 2
-        ), "Should have fallback tests when PyMDP unavailable"
+        assert total_methods >= 8, (
+            f"Should have comprehensive test coverage: {total_methods} methods"
+        )
+        assert PYMDP_AVAILABLE or total_methods >= 2, (
+            "Should have fallback tests when PyMDP unavailable"
+        )
 
 
 # Test execution and reporting

@@ -269,9 +269,9 @@ class TestNLPEntityExtraction:
             result = extractor.extract_entities(f"Let's talk about {text}.")
             entity = next((e for e in result.entities if text in e.text), None)
             assert entity is not None, f"Entity '{text}' not found"
-            assert (
-                entity.type == expected_type
-            ), f"Expected {expected_type} for '{text}', got {entity.type}"
+            assert entity.type == expected_type, (
+                f"Expected {expected_type} for '{text}', got {entity.type}"
+            )
 
     def test_empty_text_handling(self):
         """Test handling of empty or null text"""

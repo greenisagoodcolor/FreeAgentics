@@ -153,9 +153,9 @@ class TestEndToEndPipelineWebSocket:
                     ]
 
                     for expected in expected_events:
-                        assert any(
-                            expected in str(e) for e in event_types
-                        ), f"Missing event: {expected}"
+                        assert any(expected in str(e) for e in event_types), (
+                            f"Missing event: {expected}"
+                        )
 
                     # Verify event sequence and content
                     pipeline_events = [

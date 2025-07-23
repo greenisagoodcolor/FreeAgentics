@@ -235,9 +235,9 @@ class TestAuthenticationSecuritySuite:
 
         # Verify overall security posture
         report = self.results.generate_report()
-        assert (
-            report["summary"]["successful_attacks"] == 0
-        ), f"Security vulnerabilities found: {report['vulnerabilities']}"
+        assert report["summary"]["successful_attacks"] == 0, (
+            f"Security vulnerabilities found: {report['vulnerabilities']}"
+        )
 
     def _test_registration_security(self):
         """Test registration endpoint security."""
@@ -941,9 +941,9 @@ class TestAuthenticationSecuritySuite:
         assert len(critical_vulns) == 0, f"Critical vulnerabilities found: {critical_vulns}"
 
         # Assert security score is acceptable
-        assert (
-            report["summary"]["security_score"] >= 95
-        ), f"Security score too low: {report['summary']['security_score']:.1f}%"
+        assert report["summary"]["security_score"] >= 95, (
+            f"Security score too low: {report['summary']['security_score']:.1f}%"
+        )
 
         return report
 

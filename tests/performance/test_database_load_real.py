@@ -467,9 +467,9 @@ class TestRealDatabaseLoad:
             duration = time.time() - start_time
 
             assert len(agent_ids) == num_agents
-            assert (
-                duration < expected_time
-            ), f"Creation took {duration:.2f}s, expected < {expected_time}s"
+            assert duration < expected_time, (
+                f"Creation took {duration:.2f}s, expected < {expected_time}s"
+            )
 
             # Verify persistence
             from sqlalchemy.orm import sessionmaker

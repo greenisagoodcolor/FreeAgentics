@@ -70,9 +70,9 @@ class TestHealthEndpoint:
             # Assert response JSON structure
             data = response.json()
             assert "status" in data, "Response should contain 'status' field"
-            assert (
-                data["status"] == "unhealthy"
-            ), f"Expected status 'unhealthy', got {data['status']}"
+            assert data["status"] == "unhealthy", (
+                f"Expected status 'unhealthy', got {data['status']}"
+            )
 
             assert "db" in data, "Response should contain 'db' field"
             assert data["db"] == "disconnected", f"Expected db 'disconnected', got {data['db']}"

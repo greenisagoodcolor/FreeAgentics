@@ -250,15 +250,15 @@ class TestAuthenticationLoadTesting:
 
         # Performance assertions
         assert stats["success_rate"] > 95, f"Success rate too low: {stats['success_rate']}%"
-        assert (
-            stats["avg_response_time"] < 0.1
-        ), f"Average response time too high: {stats['avg_response_time']}s"
-        assert (
-            stats["p95_response_time"] < 0.2
-        ), f"P95 response time too high: {stats['p95_response_time']}s"
-        assert (
-            stats["requests_per_second"] > 100
-        ), f"Throughput too low: {stats['requests_per_second']} req/s"
+        assert stats["avg_response_time"] < 0.1, (
+            f"Average response time too high: {stats['avg_response_time']}s"
+        )
+        assert stats["p95_response_time"] < 0.2, (
+            f"P95 response time too high: {stats['p95_response_time']}s"
+        )
+        assert stats["requests_per_second"] > 100, (
+            f"Throughput too low: {stats['requests_per_second']} req/s"
+        )
 
     def test_token_creation_under_load(self):
         """Test token creation performance under heavy load."""
@@ -304,12 +304,12 @@ class TestAuthenticationLoadTesting:
         stats = self.metrics.calculate_statistics()
 
         # Token creation should be fast even under load
-        assert (
-            stats["avg_response_time"] < 0.02
-        ), f"Token creation too slow: {stats['avg_response_time']}s"
-        assert (
-            stats["p99_response_time"] < 0.05
-        ), f"P99 token creation too slow: {stats['p99_response_time']}s"
+        assert stats["avg_response_time"] < 0.02, (
+            f"Token creation too slow: {stats['avg_response_time']}s"
+        )
+        assert stats["p99_response_time"] < 0.05, (
+            f"P99 token creation too slow: {stats['p99_response_time']}s"
+        )
 
     def test_token_verification_under_load(self):
         """Test token verification performance under load."""
@@ -361,15 +361,15 @@ class TestAuthenticationLoadTesting:
         stats = self.metrics.calculate_statistics()
 
         # Token verification should be very fast
-        assert (
-            stats["avg_response_time"] < 0.005
-        ), f"Token verification too slow: {stats['avg_response_time']}s"
-        assert (
-            stats["p99_response_time"] < 0.02
-        ), f"P99 verification too slow: {stats['p99_response_time']}s"
-        assert (
-            stats["requests_per_second"] > 1000
-        ), f"Verification throughput too low: {stats['requests_per_second']} req/s"
+        assert stats["avg_response_time"] < 0.005, (
+            f"Token verification too slow: {stats['avg_response_time']}s"
+        )
+        assert stats["p99_response_time"] < 0.02, (
+            f"P99 verification too slow: {stats['p99_response_time']}s"
+        )
+        assert stats["requests_per_second"] > 1000, (
+            f"Verification throughput too low: {stats['requests_per_second']} req/s"
+        )
 
     def test_refresh_token_rotation_under_load(self):
         """Test refresh token rotation under concurrent access."""
@@ -500,12 +500,12 @@ class TestAuthenticationLoadTesting:
         recovery_avg = statistics.mean(results["recovery"]) if results["recovery"] else 0
 
         # System should handle spike without severe degradation
-        assert (
-            spike_avg < base_avg * 5
-        ), f"Spike degradation too high: {spike_avg / base_avg}x slower"
-        assert (
-            recovery_avg < base_avg * 1.5
-        ), f"Recovery not achieved: {recovery_avg / base_avg}x slower"
+        assert spike_avg < base_avg * 5, (
+            f"Spike degradation too high: {spike_avg / base_avg}x slower"
+        )
+        assert recovery_avg < base_avg * 1.5, (
+            f"Recovery not achieved: {recovery_avg / base_avg}x slower"
+        )
 
     def test_memory_leak_during_extended_load(self):
         """Test for memory leaks during extended authentication operations."""

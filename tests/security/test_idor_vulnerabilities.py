@@ -157,9 +157,9 @@ class TestSequentialIDEnumeration(IDORTestBase):
                     accessed_resources.append((test_id, response.json()))
 
         # Should not have accessed any resources through enumeration
-        assert (
-            len(accessed_resources) == 0
-        ), f"Accessed {len(accessed_resources)} resources through ID enumeration"
+        assert len(accessed_resources) == 0, (
+            f"Accessed {len(accessed_resources)} resources through ID enumeration"
+        )
 
     def test_user_id_enumeration(self):
         """Test enumeration of user IDs to access profiles."""
@@ -494,9 +494,9 @@ class TestAdvancedIDORAttacks(IDORTestBase):
         avg_invalid = sum(invalid_times) / len(invalid_times)
 
         # Allow 50ms difference maximum
-        assert (
-            abs(avg_valid - avg_invalid) < 0.05
-        ), "Timing attack possible - different response times"
+        assert abs(avg_valid - avg_invalid) < 0.05, (
+            "Timing attack possible - different response times"
+        )
 
     def test_time_based_idor(self):
         """Test time-based IDOR attacks using timestamps."""

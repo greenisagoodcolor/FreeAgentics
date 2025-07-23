@@ -73,9 +73,9 @@ def test_belief_state_management():
                 belief_distributions.append(beliefs)
 
                 # Check belief distribution properties
-                assert (
-                    abs(np.sum(beliefs) - 1.0) < 1e-6
-                ), f"Beliefs don't sum to 1: {np.sum(beliefs)}"
+                assert abs(np.sum(beliefs) - 1.0) < 1e-6, (
+                    f"Beliefs don't sum to 1: {np.sum(beliefs)}"
+                )
                 assert np.all(beliefs >= 0), "Negative beliefs detected"
 
                 print(f"  Step {i + 1}: entropy={entropy:.4f}, max_belief={np.max(beliefs):.4f}")
@@ -158,9 +158,9 @@ def test_free_energy_computation():
                     print(f"    {component}: {value:.6f}")
 
                     # Validate component properties
-                    assert isinstance(
-                        value, (int, float)
-                    ), f"{component} is not numeric: {type(value)}"
+                    assert isinstance(value, (int, float)), (
+                        f"{component} is not numeric: {type(value)}"
+                    )
                     assert not np.isnan(value), f"{component} is NaN"
                     assert not np.isinf(value), f"{component} is infinite"
 

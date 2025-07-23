@@ -153,9 +153,9 @@ class TestAuthorizationWithSecurityHeaders:
 
         for headers in header_attacks:
             response = client.get("/api/v1/system/config", headers=headers)
-            assert (
-                response.status_code == status.HTTP_403_FORBIDDEN
-            ), f"Header manipulation bypassed auth: {headers}"
+            assert response.status_code == status.HTTP_403_FORBIDDEN, (
+                f"Header manipulation bypassed auth: {headers}"
+            )
 
 
 class TestAuthorizationWithRateLimiting:
@@ -908,9 +908,9 @@ class TestAuthorizationPerformance:
                     inconsistencies.append(result)
 
         # Should have no inconsistencies
-        assert (
-            len(inconsistencies) == 0
-        ), f"Authorization inconsistencies under load: {len(inconsistencies)}"
+        assert len(inconsistencies) == 0, (
+            f"Authorization inconsistencies under load: {len(inconsistencies)}"
+        )
 
 
 if __name__ == "__main__":

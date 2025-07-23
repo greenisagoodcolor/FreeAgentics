@@ -158,9 +158,9 @@ class TestPrometheusMetrics:
 
                     # Check metric name format (alphanumeric with underscores)
                     metric_name = metric_part.split("{")[0]
-                    assert (
-                        metric_name.replace("_", "").replace(":", "").isalnum()
-                    ), f"Invalid metric name format: {metric_name}"
+                    assert metric_name.replace("_", "").replace(":", "").isalnum(), (
+                        f"Invalid metric name format: {metric_name}"
+                    )
 
     def test_metrics_endpoint_performance(self, client):
         """Test that metrics endpoint responds quickly."""

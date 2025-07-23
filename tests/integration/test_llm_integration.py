@@ -298,9 +298,9 @@ class TestLLMIntegration:
             # Real LLM should mention at least one keyword
             text_lower = response.text.lower()
             found_keyword = any(kw in text_lower for kw in expected_keywords)
-            assert (
-                found_keyword
-            ), f"Expected keywords {expected_keywords} not found in: {response.text}"
+            assert found_keyword, (
+                f"Expected keywords {expected_keywords} not found in: {response.text}"
+            )
 
 
 if __name__ == "__main__":
