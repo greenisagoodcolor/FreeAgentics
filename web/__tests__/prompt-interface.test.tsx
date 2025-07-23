@@ -1,7 +1,7 @@
 import React from "react";
-import { render, screen, waitFor, act } from "@testing-library/react";
+import { render, screen, waitFor, act } from "./test-utils";
 import userEvent from "@testing-library/user-event";
-import { PromptInterface } from "../components/prompt-interface";
+import { PromptInterface } from "@/components/prompt-interface";
 import { apiClient } from "@/lib/api-client";
 
 // Mock API client
