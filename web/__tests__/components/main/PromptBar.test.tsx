@@ -1,5 +1,5 @@
 import React from "react";
-import { render, screen, waitFor } from "@testing-library/react";
+import { render, screen, waitFor, act } from "../../../__tests__/test-utils";
 import userEvent from "@testing-library/user-event";
 import { PromptBar } from "@/components/main/PromptBar";
 import { usePromptProcessor } from "@/hooks/use-prompt-processor";
@@ -18,7 +18,7 @@ describe("PromptBar", () => {
       isLoading: false,
       error: null,
       agents: [],
-      knowledgeGraph: null,
+      knowledgeGraph: { nodes: [], edges: [] },
       suggestions: [],
       retry: jest.fn(),
       fetchSuggestions: jest.fn(),
@@ -41,8 +41,11 @@ describe("PromptBar", () => {
     render(<PromptBar />);
 
     const input = screen.getByPlaceholderText(/enter your goal/i);
-    await user.type(input, "Find resources in the grid");
-    await user.keyboard("{Enter}");
+
+    await act(async () => {
+      await user.type(input, "Find resources in the grid");
+      await user.keyboard("{Enter}");
+    });
 
     expect(mockProcessPrompt).toHaveBeenCalledWith("Find resources in the grid");
   });
@@ -52,8 +55,11 @@ describe("PromptBar", () => {
     render(<PromptBar />);
 
     const input = screen.getByPlaceholderText(/enter your goal/i);
-    await user.type(input, "Explore the environment");
-    await user.keyboard("{Control>}{Enter}");
+
+    await act(async () => {
+      await user.type(input, "Explore the environment");
+      await user.keyboard("{Control>}{Enter}");
+    });
 
     expect(mockProcessPrompt).toHaveBeenCalledWith("Explore the environment");
   });
@@ -64,7 +70,7 @@ describe("PromptBar", () => {
       isLoading: true,
       error: null,
       agents: [],
-      knowledgeGraph: null,
+      knowledgeGraph: { nodes: [], edges: [] },
       suggestions: [],
       retry: jest.fn(),
       fetchSuggestions: jest.fn(),
@@ -87,7 +93,7 @@ describe("PromptBar", () => {
       isLoading: false,
       error: errorMessage,
       agents: [],
-      knowledgeGraph: null,
+      knowledgeGraph: { nodes: [], edges: [] },
       suggestions: [],
       retry: jest.fn(),
       fetchSuggestions: jest.fn(),
@@ -113,10 +119,13 @@ describe("PromptBar", () => {
     render(<PromptBar />);
 
     const settingsButton = screen.getByLabelText(/settings/i);
-    await user.click(settingsButton);
+
+    await act(async () => {
+      await user.click(settingsButton);
+    });
 
     await waitFor(() => {
-      expect(screen.getByRole("dialog")).toBeInTheDocument();
+      expect(screen.getByText("Settings")).toBeInTheDocument();
     });
   });
 
@@ -126,7 +135,7 @@ describe("PromptBar", () => {
       isLoading: false,
       error: null,
       agents: [],
-      knowledgeGraph: null,
+      knowledgeGraph: { nodes: [], edges: [] },
       suggestions: [],
       retry: jest.fn(),
       fetchSuggestions: jest.fn(),
@@ -138,6 +147,7 @@ describe("PromptBar", () => {
         conversation_summary: {
           iteration_count: 2,
           belief_evolution: { trend: "stable", stability: 0.8 },
+          prompt_themes: ["create an explorer agent", "add obstacle detection"],
         },
       },
       resetConversation: jest.fn(),
@@ -154,8 +164,11 @@ describe("PromptBar", () => {
     render(<PromptBar />);
 
     const input = screen.getByPlaceholderText(/enter your goal/i) as HTMLTextAreaElement;
-    await user.type(input, "Test prompt");
-    await user.keyboard("{Enter}");
+
+    await act(async () => {
+      await user.type(input, "Test prompt");
+      await user.keyboard("{Enter}");
+    });
 
     await waitFor(() => {
       expect(input.value).toBe("");
@@ -169,7 +182,10 @@ describe("PromptBar", () => {
     const input = screen.getByPlaceholderText(/enter your goal/i);
     expect(input).toHaveClass("h-10");
 
-    await user.click(input);
+    await act(async () => {
+      await user.click(input);
+    });
+
     expect(input).toHaveClass("h-20");
   });
 });

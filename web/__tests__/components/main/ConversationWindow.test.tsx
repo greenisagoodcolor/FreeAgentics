@@ -1,5 +1,5 @@
 import React from "react";
-import { render, screen } from "@testing-library/react";
+import { render, screen, act } from "../../../__tests__/test-utils";
 import userEvent from "@testing-library/user-event";
 import { ConversationWindow } from "@/components/main/ConversationWindow";
 import { useConversation } from "@/hooks/use-conversation";
@@ -35,7 +35,7 @@ describe("ConversationWindow", () => {
       isLoading: false,
       error: null,
       agents: [],
-      knowledgeGraph: null,
+      knowledgeGraph: { nodes: [], edges: [] },
       suggestions: [],
       retry: jest.fn(),
       fetchSuggestions: jest.fn(),
@@ -230,7 +230,7 @@ describe("ConversationWindow", () => {
       isLoading: false,
       error: null,
       agents: [],
-      knowledgeGraph: null,
+      knowledgeGraph: { nodes: [], edges: [] },
       suggestions: [
         "Add obstacle detection to the agent",
         "Create a resource collector agent",
@@ -257,7 +257,7 @@ describe("ConversationWindow", () => {
       isLoading: false,
       error: null,
       agents: [],
-      knowledgeGraph: null,
+      knowledgeGraph: { nodes: [], edges: [] },
       suggestions: ["Add obstacle detection"],
       retry: jest.fn(),
       fetchSuggestions: jest.fn(),

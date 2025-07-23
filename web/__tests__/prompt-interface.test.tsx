@@ -2,10 +2,10 @@ import React from "react";
 import { render, screen, waitFor, act } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { PromptInterface } from "../components/prompt-interface";
-import { apiClient } from "../lib/api-client";
+import { apiClient } from "@/lib/api-client";
 
 // Mock API client
-jest.mock("../lib/api-client", () => ({
+jest.mock("@/lib/api-client", () => ({
   apiClient: {
     request: jest.fn(),
     processPrompt: jest.fn(),

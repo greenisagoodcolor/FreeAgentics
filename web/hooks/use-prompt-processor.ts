@@ -1,5 +1,5 @@
 import { useState, useEffect, useCallback, useRef } from "react";
-import { apiClient } from "../lib/api-client";
+import { apiClient } from "@/lib/api-client";
 
 interface Agent {
   id: string;
@@ -49,7 +49,7 @@ export function usePromptProcessor() {
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [agents, setAgents] = useState<Agent[]>([]);
-  const [knowledgeGraph, setKnowledgeGraph] = useState<KnowledgeGraph | null>(null);
+  const [knowledgeGraph, setKnowledgeGraph] = useState<KnowledgeGraph>({ nodes: [], edges: [] });
   const [suggestions, setSuggestions] = useState<string[]>([]);
   const [currentPromptId, setCurrentPromptId] = useState<string | null>(null);
   const [conversationId, setConversationId] = useState<string | null>(null);
@@ -98,10 +98,12 @@ export function usePromptProcessor() {
           }
           if (message.conversation_summary) {
             setIterationContext((prev) => ({
-              iteration_number: (message.iteration_number as number) || (prev?.iteration_number || 0) + 1,
+              iteration_number:
+                (message.iteration_number as number) || (prev?.iteration_number || 0) + 1,
               total_agents: (message.total_agents as number) || prev?.total_agents || 1,
               kg_nodes: (message.kg_nodes as number) || prev?.kg_nodes || 0,
-              conversation_summary: message.conversation_summary as IterationContext['conversation_summary'],
+              conversation_summary:
+                message.conversation_summary as IterationContext["conversation_summary"],
             }));
           }
           break;
@@ -113,7 +115,7 @@ export function usePromptProcessor() {
               iteration_number: message.iteration_number as number,
               total_agents: (summary.total_agents as number) || 0,
               kg_nodes: (summary.kg_nodes as number) || 0,
-              conversation_summary: summary as IterationContext['conversation_summary'],
+              conversation_summary: summary as IterationContext["conversation_summary"],
             });
           }
           break;
@@ -190,14 +192,27 @@ export function usePromptProcessor() {
       try {
         const response = await apiClient.processPrompt({
           prompt,
-          conversationId: useConversation ? conversationId || undefined : undefined
+          conversationId: useConversation ? conversationId || undefined : undefined,
         });
 
-        if (!response.success || !response.data) {
-          throw new Error(response.error || "Failed to process prompt");
+        if (!response.success) {
+          setCurrentPromptId(`prompt-${Date.now()}`); // Set prompt ID so retry can work
+          setError(response.error || "Failed to process prompt");
+          setIsLoading(false);
+          return;
         }
 
-        const { agents: newAgents, knowledgeGraph: newKnowledgeGraph, conversationId: responseConvId } = response.data;
+        if (!response.data) {
+          setError("No data received from server");
+          setIsLoading(false);
+          return;
+        }
+
+        const {
+          agents: newAgents,
+          knowledgeGraph: newKnowledgeGraph,
+          conversationId: responseConvId,
+        } = response.data;
 
         // Update agents and knowledge graph
         if (newAgents) {
@@ -208,9 +223,10 @@ export function usePromptProcessor() {
           setKnowledgeGraph(newKnowledgeGraph);
         }
 
-        // Generate a conversation ID if needed and not already set
+        // Set current prompt ID and generate a conversation ID if needed and not already set
+        setCurrentPromptId(responseConvId || `prompt-${Date.now()}`);
         if (!conversationId && useConversation) {
-          const newConversationId = `conv-${Date.now()}`;
+          const newConversationId = responseConvId || `conv-${Date.now()}`;
           setConversationId(newConversationId);
         }
 
@@ -219,7 +235,7 @@ export function usePromptProcessor() {
           wsRef.current.send(
             JSON.stringify({
               type: "prompt_submitted",
-              prompt_id: responseConvId || 'unknown',
+              prompt_id: responseConvId || "unknown",
               prompt,
               conversation_id: conversationId,
             }),
@@ -229,8 +245,8 @@ export function usePromptProcessor() {
         // If we got a response, assume it's completed
         setIsLoading(false);
       } catch (err) {
-        const error = err as { detail?: string };
-        setError(error.detail || "Failed to process prompt");
+        const error = err as Error;
+        setError(`Failed to process prompt: ${error.message}`);
         setIsLoading(false);
       }
     },
@@ -246,43 +262,47 @@ export function usePromptProcessor() {
   }, [currentPromptId]);
 
   // Fetch suggestions (debounced)
-  const fetchSuggestions = useCallback(
-    (query: string) => {
-      // Clear previous timeout
-      if (suggestionTimeoutRef.current) {
-        clearTimeout(suggestionTimeoutRef.current);
-      }
+  const fetchSuggestions = useCallback((query: string) => {
+    // Clear previous timeout
+    if (suggestionTimeoutRef.current) {
+      clearTimeout(suggestionTimeoutRef.current);
+    }
 
-      // Debounce suggestions request
-      suggestionTimeoutRef.current = setTimeout(async () => {
-        try {
-          const response = await apiClient.getSuggestions(query);
-          if (response.success && response.data) {
-            setSuggestions(response.data);
-          }
-        } catch (err) {
-          // Fallback to local suggestions
-          const localSuggestions = [
-            "How can I optimize my agent's performance?",
-            "How do agents form coalitions?",
-            "How does active inference work?",
-            "Show me the current agent network",
-            "What is the free energy principle?",
-          ].filter((s) => s.toLowerCase().includes(query.toLowerCase()));
+    // Don't fetch suggestions for empty queries
+    if (!query.trim()) {
+      setSuggestions([]);
+      return;
+    }
 
-          setSuggestions(localSuggestions);
+    // Debounce suggestions request
+    suggestionTimeoutRef.current = setTimeout(async () => {
+      try {
+        const response = await apiClient.getSuggestions(query);
+        if (response.success && response.data) {
+          setSuggestions(response.data);
         }
-      }, 300); // 300ms debounce
-    },
-    [],
-  );
+      } catch (err) {
+        console.error("Error fetching suggestions:", err);
+        // Fallback to local suggestions
+        const localSuggestions = [
+          "How can I optimize my agent's performance?",
+          "How do agents form coalitions?",
+          "How does active inference work?",
+          "Show me the current agent network",
+          "What is the free energy principle?",
+        ].filter((s) => s.toLowerCase().includes(query.toLowerCase()));
+
+        setSuggestions(localSuggestions);
+      }
+    }, 300); // 300ms debounce
+  }, []);
 
   // Reset conversation to start fresh
   const resetConversation = useCallback(() => {
     setConversationId(null);
     setIterationContext(null);
     setAgents([]);
-    setKnowledgeGraph(null);
+    setKnowledgeGraph({ nodes: [], edges: [] });
     setSuggestions([]);
     setCurrentPromptId(null);
     setError(null);
