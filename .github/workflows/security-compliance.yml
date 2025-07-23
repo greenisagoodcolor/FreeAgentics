@@ -57,9 +57,7 @@ jobs:
         uses: trufflesecurity/trufflehog@main
         with:
           path: ./
-          base: ${{ github.event.repository.default_branch }}
-          head: HEAD
-          extra_args: --debug --json
+          extra_args: --debug --json --no-verification
 
       - name: "🔍 Gitleaks Scan"
         uses: gitleaks/gitleaks-action@v2
@@ -194,7 +192,6 @@ jobs:
             p/typescript
             p/dockerfile
             p/owasp-top-ten
-          generateSarif: true
 
       - name: "🔍 CodeQL Analysis"
         uses: github/codeql-action/analyze@v3
@@ -236,24 +233,33 @@ jobs:
           outputs: type=docker,dest=/tmp/image.tar
 
       - name: "🔍 Trivy Container Scan"
+        uses: aquasecurity/trivy-action@master
+        with:
+          input: /tmp/image.tar
+          format: 'json'
+          output: 'trivy-report.json'
+          severity: 'HIGH,CRITICAL'
+          exit-code: '0'
+
+      - name: "📊 Trivy Report Summary"
+        if: always()
         run: |
-          # Install Trivy
-          sudo apt-get update
-          sudo apt-get install -y wget apt-transport-https gnupg lsb-release
-          wget -qO - https://aquasecurity.github.io/trivy-repo/deb/public.key | sudo apt-key add -
-          echo "deb https://aquasecurity.github.io/trivy-repo/deb $(lsb_release -sc) main" | sudo tee -a /etc/apt/sources.list.d/trivy.list
-          sudo apt-get update
-          sudo apt-get install -y trivy
-
-          # Load and scan image
-          docker load -i /tmp/image.tar
-
           echo "### Container Security Scan Results" >> $GITHUB_STEP_SUMMARY
           echo "" >> $GITHUB_STEP_SUMMARY
-
-          # Scan for vulnerabilities
-          trivy image --severity HIGH,CRITICAL --format table freeagentics:security-scan >> $GITHUB_STEP_SUMMARY
-          trivy image --format json --output trivy-report.json freeagentics:security-scan
+          
+          if [ -f trivy-report.json ]; then
+            # Parse and format Trivy results
+            python -c "
+import json
+with open('trivy-report.json') as f:
+    data = json.load(f)
+    if 'Results' in data:
+        for result in data['Results']:
+            if 'Vulnerabilities' in result and result['Vulnerabilities']:
+                print(f\"Found {len(result['Vulnerabilities'])} vulnerabilities in {result.get('Target', 'unknown')}\")"
+          else
+            echo "No Trivy report generated" >> $GITHUB_STEP_SUMMARY
+          fi
 
       - name: "🔍 Dockerfile Best Practices"
         uses: hadolint/hadolint-action@v3.1.0
@@ -293,17 +299,19 @@ jobs:
         if: ${{ hashFiles('**/*.yaml', '**/*.yml') != '' }}
         run: |
           # Install kubesec
-          wget -O kubesec https://github.com/controlplaneio/kubesec/releases/download/v2.11.5/kubesec_linux_amd64
+          wget -qO kubesec https://github.com/controlplaneio/kubesec/releases/download/v2.13.0/kubesec_linux_amd64
           chmod +x kubesec
 
           echo "### Kubernetes Security Analysis" >> $GITHUB_STEP_SUMMARY
           echo "" >> $GITHUB_STEP_SUMMARY
 
-          # Scan all YAML files
-          find . -name "*.yaml" -o -name "*.yml" | grep -E "(k8s|kubernetes|deploy)" | while read -r file; do
-            echo "Scanning: $file" >> $GITHUB_STEP_SUMMARY
-            ./kubesec scan "$file" >> $GITHUB_STEP_SUMMARY || true
-            echo "" >> $GITHUB_STEP_SUMMARY
+          # Scan all YAML files that might be K8s manifests
+          for file in $(find . -name "*.yaml" -o -name "*.yml" | grep -E "(k8s|kubernetes|deploy)" || true); do
+            if [ -f "$file" ]; then
+              echo "Scanning: $file" >> $GITHUB_STEP_SUMMARY
+              ./kubesec scan "$file" >> $GITHUB_STEP_SUMMARY 2>&1 || true
+              echo "" >> $GITHUB_STEP_SUMMARY
+            fi
           done
 
       - name: "🔍 GitHub Actions Security"

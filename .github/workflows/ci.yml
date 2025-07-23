@@ -622,15 +622,7 @@ jobs:
 
   release-validation:
     name: "🏆 Release Validation"
-    needs:
-      [
-        unit-tests,
-        integration-tests,
-        frontend-tests,
-        e2e-tests,
-        performance-tests,
-        docker-build,
-      ]
+    needs: [unit-tests, integration-tests, frontend-tests, e2e-tests, performance-tests, docker-build]
     runs-on: ubuntu-latest
     if: github.event_name == 'push' && (github.ref == 'refs/heads/main' || startsWith(github.ref, 'refs/heads/release/'))
     steps:
@@ -682,17 +674,7 @@ jobs:
 
   pipeline-summary:
     name: "📊 Pipeline Summary"
-    needs:
-      [
-        code-quality,
-        security-scan,
-        unit-tests,
-        integration-tests,
-        frontend-tests,
-        e2e-tests,
-        performance-tests,
-        docker-build,
-      ]
+    needs: [code-quality, security-scan, unit-tests, integration-tests, frontend-tests, e2e-tests, performance-tests, docker-build]
     runs-on: ubuntu-latest
     if: always()
     steps:
