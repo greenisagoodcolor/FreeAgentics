@@ -1,5 +1,8 @@
 import { MetadataRoute } from "next";
 
+// Force dynamic generation for sitemap
+export const dynamic = 'force-dynamic';
+
 export default function sitemap(): MetadataRoute.Sitemap {
   const baseUrl = "https://freeagentics.com";
 

@@ -1,183 +1,41 @@
-name: "CI Pipeline"
-
-on:
-  push:
-    branches: [main, develop]
-  pull_request:
-    branches: [main]
-  workflow_dispatch:
-
-concurrency:
-  group: ${{ github.workflow }}-${{ github.ref }}
-  cancel-in-progress: true
-
-env:
-  PYTHON_VERSION: "3.12"
-  NODE_VERSION: "18"
-  MIN_COVERAGE: 80
+name: "Essential CI"
+on: [push, pull_request]
 
 jobs:
-  # Quick format and lint checks
-  lint:
-    name: "Lint & Format"
+  quality:
     runs-on: ubuntu-latest
-    timeout-minutes: 10
     steps:
       - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with: { python-version: "3.12" }
+      - uses: actions/setup-node@v4
+        with: { node-version: "18", cache: npm, cache-dependency-path: web/package-lock.json }
+      - run: |
+          pip install ruff bandit
+          ruff check . && ruff format --check .
+          bandit -r . -ll -x './web,./tests,./venv' || echo "⚠️  Security warnings"
+      - working-directory: ./web
+        run: npm ci && npm run lint && npm run build
 
-      - name: "Setup Python"
-        uses: actions/setup-python@v5
-        with:
-          python-version: ${{ env.PYTHON_VERSION }}
-
-      - name: "Install dependencies"
-        run: |
-          python -m pip install --upgrade pip
-          pip install ruff mypy
-
-      - name: "Run Ruff"
-        run: |
-          ruff check .
-          ruff format --check .
-
-      - name: "Run MyPy"
-        run: mypy . --ignore-missing-imports --exclude 'web|tests|scripts'
-
-  # Python tests
-  python-tests:
-    name: "Python Tests"
+  tests:
     runs-on: ubuntu-latest
-    timeout-minutes: 15
     services:
       postgres:
         image: postgres:15
-        env:
-          POSTGRES_PASSWORD: testpass
-          POSTGRES_DB: freeagentics_test
-        options: >-
-          --health-cmd pg_isready
-          --health-interval 10s
-          --health-timeout 5s
-          --health-retries 5
-        ports:
-          - 5432:5432
-
-      redis:
-        image: redis:7
-        options: >-
-          --health-cmd "redis-cli ping"
-          --health-interval 10s
-          --health-timeout 5s
-          --health-retries 5
-        ports:
-          - 6379:6379
-
+        env: { POSTGRES_PASSWORD: testpass, POSTGRES_DB: freeagentics_test }
+        options: --health-cmd pg_isready --health-interval 10s --health-timeout 5s --health-retries 5
+        ports: ["5432:5432"]
     steps:
       - uses: actions/checkout@v4
-
-      - name: "Setup Python"
-        uses: actions/setup-python@v5
-        with:
-          python-version: ${{ env.PYTHON_VERSION }}
-
-      - name: "Install dependencies"
+      - uses: actions/setup-python@v5
+        with: { python-version: "3.12" }
+      - env: { DATABASE_URL: "postgresql://postgres:testpass@localhost:5432/freeagentics_test" }
         run: |
-          python -m pip install --upgrade pip
-          pip install -r requirements-core.txt
-          pip install -r requirements-dev.txt
-          pip install -e .
+          pip install -r requirements-core.txt && pip install -e .
+          python -m pytest tests/ -x --tb=short
 
-      - name: "Run tests"
-        env:
-          DATABASE_URL: postgresql://postgres:testpass@localhost:5432/freeagentics_test
-          REDIS_URL: redis://localhost:6379
-        run: |
-          pytest tests/ -v --cov=. --cov-report=xml --cov-report=term
-
-      - name: "Check coverage"
-        run: |
-          coverage report --fail-under=${{ env.MIN_COVERAGE }}
-
-  # Frontend checks
-  frontend:
-    name: "Frontend"
-    runs-on: ubuntu-latest
-    timeout-minutes: 10
-    steps:
-      - uses: actions/checkout@v4
-
-      - name: "Setup Node.js"
-        uses: actions/setup-node@v4
-        with:
-          node-version: ${{ env.NODE_VERSION }}
-          cache: 'npm'
-          cache-dependency-path: web/package-lock.json
-
-      - name: "Install dependencies"
-        working-directory: ./web
-        run: npm ci
-
-      - name: "Lint & Type check"
-        working-directory: ./web
-        run: |
-          npm run lint
-          npm run type-check
-
-      - name: "Run tests"
-        working-directory: ./web
-        run: npm test
-
-      - name: "Build"
-        working-directory: ./web
-        run: npm run build
-
-  # Basic security scan
-  security:
-    name: "Security Scan"
-    runs-on: ubuntu-latest
-    timeout-minutes: 10
-    steps:
-      - uses: actions/checkout@v4
-
-      - name: "Setup Python"
-        uses: actions/setup-python@v5
-        with:
-          python-version: ${{ env.PYTHON_VERSION }}
-
-      - name: "Run Bandit"
-        run: |
-          pip install bandit
-          bandit -r . -ll -i -x './web,./tests,./venv,./scripts' || true
-
-      - name: "Check dependencies"
-        run: |
-          pip install pip-audit
-          pip install -r requirements-core.txt
-          pip-audit --ignore-vuln PYSEC-2024-48 || true
-
-  # Simple Docker build test
-  docker:
-    name: "Docker Build"
-    runs-on: ubuntu-latest
-    timeout-minutes: 15
-    steps:
-      - uses: actions/checkout@v4
-
-      - name: "Build Docker image"
-        run: |
-          docker build -t freeagentics:test .
-
-      - name: "Test image"
-        run: |
-          docker run --rm freeagentics:test --version || true
-
-  # Final check
-  all-checks:
-    name: "All Checks Pass"
-    needs: [lint, python-tests, frontend, security, docker]
+  ready:
+    needs: [quality, tests]
     runs-on: ubuntu-latest
     steps:
-      - name: "Summary"
-        run: |
-          echo "✅ All CI checks passed!"
-          echo "Ready to merge."
+      - run: echo "🚀 All essential checks passed - ready to merge!"

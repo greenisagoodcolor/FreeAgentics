@@ -8,9 +8,16 @@ const nextConfig = {
   output: "standalone", // Enable standalone output for Docker deployments
   swcMinify: true, // Use SWC minifier for better performance
 
+  // Skip build-time prerendering of API routes and sitemap for CI
+  skipTrailingSlashRedirect: true,
+  trailingSlash: false,
+
   // Performance optimizations
   experimental: {
     gzipSize: true,
+    outputFileTracingExcludes: {
+      '/api/**/*': ['**/*'],
+    },
   },
 
   // Compiler optimizations
@@ -86,6 +93,7 @@ const nextConfig = {
       // WebSocket proxy removed - handled by client-side connection
     ];
   },
+
 
   // CORS headers for development
   async headers() {

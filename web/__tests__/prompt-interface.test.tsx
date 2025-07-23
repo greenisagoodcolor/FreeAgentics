@@ -31,7 +31,7 @@ class MockWebSocket {
   }
 }
 
-global.WebSocket = MockWebSocket as any;
+global.WebSocket = MockWebSocket as unknown as typeof WebSocket;
 
 describe("PromptInterface", () => {
   const mockApiClient = apiClient;
