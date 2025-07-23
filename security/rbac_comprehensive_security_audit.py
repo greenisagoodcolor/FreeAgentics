@@ -55,7 +55,6 @@ try:
         TokenData,
         UserRole,
         create_access_token,
-        verify_token,
     )
     from auth.security_logging import (
         SecurityEventSeverity,
@@ -68,70 +67,81 @@ except ImportError as e:
     logger.warning(f"Import error: {e}")
     IMPORTS_AVAILABLE = False
 
-    # Create mock classes for testing
-    class UserRole:
-        ADMIN = "admin"
-        RESEARCHER = "researcher"
-        AGENT_MANAGER = "agent_manager"
-        OBSERVER = "observer"
+    # Create mock classes for testing only if not already imported
+    if "UserRole" not in locals():
 
-    class Permission:
-        CREATE_AGENT = "create_agent"
-        DELETE_AGENT = "delete_agent"
-        VIEW_AGENTS = "view_agents"
-        MODIFY_AGENT = "modify_agent"
-        CREATE_COALITION = "create_coalition"
-        VIEW_METRICS = "view_metrics"
-        ADMIN_SYSTEM = "admin_system"
+        class UserRole:
+            ADMIN = "admin"
+            RESEARCHER = "researcher"
+            AGENT_MANAGER = "agent_manager"
+            OBSERVER = "observer"
 
-    ROLE_PERMISSIONS = {
-        UserRole.ADMIN: [
-            Permission.CREATE_AGENT,
-            Permission.DELETE_AGENT,
-            Permission.VIEW_AGENTS,
-            Permission.MODIFY_AGENT,
-            Permission.CREATE_COALITION,
-            Permission.VIEW_METRICS,
-            Permission.ADMIN_SYSTEM,
-        ],
-        UserRole.RESEARCHER: [
-            Permission.CREATE_AGENT,
-            Permission.VIEW_AGENTS,
-            Permission.MODIFY_AGENT,
-            Permission.CREATE_COALITION,
-            Permission.VIEW_METRICS,
-        ],
-        UserRole.AGENT_MANAGER: [
-            Permission.CREATE_AGENT,
-            Permission.VIEW_AGENTS,
-            Permission.MODIFY_AGENT,
-            Permission.VIEW_METRICS,
-        ],
-        UserRole.OBSERVER: [Permission.VIEW_AGENTS, Permission.VIEW_METRICS],
-    }
+    if "Permission" not in locals():
 
-    class AccessContext:
-        def __init__(self, **kwargs):
-            for key, value in kwargs.items():
-                setattr(self, key, value)
+        class Permission:
+            CREATE_AGENT = "create_agent"
+            DELETE_AGENT = "delete_agent"
+            VIEW_AGENTS = "view_agents"
+            MODIFY_AGENT = "modify_agent"
+            CREATE_COALITION = "create_coalition"
+            VIEW_METRICS = "view_metrics"
+            ADMIN_SYSTEM = "admin_system"
 
-    class ResourceContext:
-        def __init__(self, **kwargs):
-            for key, value in kwargs.items():
-                setattr(self, key, value)
+    if "ROLE_PERMISSIONS" not in locals():
+        ROLE_PERMISSIONS = {
+            UserRole.ADMIN: [
+                Permission.CREATE_AGENT,
+                Permission.DELETE_AGENT,
+                Permission.VIEW_AGENTS,
+                Permission.MODIFY_AGENT,
+                Permission.CREATE_COALITION,
+                Permission.VIEW_METRICS,
+                Permission.ADMIN_SYSTEM,
+            ],
+            UserRole.RESEARCHER: [
+                Permission.CREATE_AGENT,
+                Permission.VIEW_AGENTS,
+                Permission.MODIFY_AGENT,
+                Permission.CREATE_COALITION,
+                Permission.VIEW_METRICS,
+            ],
+            UserRole.AGENT_MANAGER: [
+                Permission.CREATE_AGENT,
+                Permission.VIEW_AGENTS,
+                Permission.MODIFY_AGENT,
+                Permission.VIEW_METRICS,
+            ],
+            UserRole.OBSERVER: [Permission.VIEW_AGENTS, Permission.VIEW_METRICS],
+        }
 
-    class enhanced_rbac_manager:
-        access_audit_log: List[Any] = []
-        abac_rules: List[Any] = []
-        role_requests: List[Any] = []
+    if "AccessContext" not in locals():
 
-        @staticmethod
-        def evaluate_abac_access(access_context, resource_context, action):
-            return True, "Mock evaluation", ["mock_rule"]
+        class AccessContext:
+            def __init__(self, **kwargs):
+                for key, value in kwargs.items():
+                    setattr(self, key, value)
 
-        @staticmethod
-        def request_role_assignment(*args, **kwargs):
-            return "mock_request_id"
+    if "ResourceContext" not in locals():
+
+        class ResourceContext:
+            def __init__(self, **kwargs):
+                for key, value in kwargs.items():
+                    setattr(self, key, value)
+
+    if "enhanced_rbac_manager" not in locals():
+
+        class enhanced_rbac_manager:
+            access_audit_log: List[Any] = []
+            abac_rules: List[Any] = []
+            role_requests: List[Any] = []
+
+            @staticmethod
+            def evaluate_abac_access(access_context, resource_context, action):
+                return True, "Mock evaluation", ["mock_rule"]
+
+            @staticmethod
+            def request_role_assignment(*args, **kwargs):
+                return "mock_request_id"
 
     # Mock constants
     ACCESS_TOKEN_EXPIRE_MINUTES = 15
@@ -324,6 +334,7 @@ class RBACSecurityAuditor:
                         severity="high",
                         findings=[f"Test execution failed: {str(e)}"],
                         recommendations=["Investigate test execution failure"],
+                        metadata={"error": str(e)},
                     )
                 )
 

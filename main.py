@@ -206,7 +206,7 @@ if (
             authorization = request.headers.get("Authorization")
             if authorization and authorization.startswith("Bearer "):
                 token = authorization.split(" ")[1]
-                payload = auth_manager.decode_token(token)
+                payload = auth_manager.verify_token(token)
                 if payload and "sub" in payload:
                     return payload["sub"]
         except Exception as e:
@@ -379,9 +379,9 @@ except ImportError as e:
 try:
     from api.websocket.coalition_monitoring import router as coalition_ws_router
     from api.websocket.markov_blanket_monitoring import router as markov_ws_router
-    from api.websocket.real_time_updates import router as websocket_router
+    from api.websocket.real_time_updates import router as real_time_ws_router
 
-    app.include_router(websocket_router, prefix="/ws", tags=["websockets"])
+    app.include_router(real_time_ws_router, prefix="/ws", tags=["websockets"])
 
     app.include_router(
         coalition_ws_router,

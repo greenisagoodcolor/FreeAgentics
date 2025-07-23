@@ -129,9 +129,9 @@ async def create_agent(
         id=str(db_agent.id),
         name=db_agent.name,
         template=db_agent.template,
-        status=db_agent.status.value,
+        status=db_agent.status.value if hasattr(db_agent.status, "value") else str(db_agent.status),
         created_at=db_agent.created_at,
-        parameters=db_agent.parameters,
+        parameters=db_agent.parameters or {},
         inference_count=db_agent.inference_count,
     )
 
@@ -165,11 +165,11 @@ async def list_agents(
             id=str(agent.id),
             name=agent.name,
             template=agent.template,
-            status=agent.status.value,
+            status=agent.status.value if hasattr(agent.status, "value") else str(agent.status),
             created_at=agent.created_at,
             last_active=agent.last_active,
             inference_count=agent.inference_count,
-            parameters=agent.parameters,
+            parameters=agent.parameters or {},
         )
         for agent in db_agents
     ]
@@ -202,11 +202,11 @@ async def get_agent(
         id=str(db_agent.id),
         name=db_agent.name,
         template=db_agent.template,
-        status=db_agent.status.value,
+        status=db_agent.status.value if hasattr(db_agent.status, "value") else str(db_agent.status),
         created_at=db_agent.created_at,
         last_active=db_agent.last_active,
         inference_count=db_agent.inference_count,
-        parameters=db_agent.parameters,
+        parameters=db_agent.parameters or {},
     )
 
 
@@ -405,9 +405,11 @@ async def create_agent_from_gmn(
             id=str(db_agent.id),
             name=db_agent.name,
             template=db_agent.template,
-            status=db_agent.status.value,
+            status=db_agent.status.value
+            if hasattr(db_agent.status, "value")
+            else str(db_agent.status),
             created_at=db_agent.created_at,
-            parameters=db_agent.parameters,
+            parameters=db_agent.parameters or {},
             inference_count=db_agent.inference_count,
         )
 
@@ -479,7 +481,8 @@ async def update_agent_gmn_spec(
 
         # Update database record
         db_agent.gmn_spec = gmn_spec
-        db_agent.parameters = db_agent.parameters or {}
+        if db_agent.parameters is None:
+            db_agent.parameters = {}
         db_agent.parameters.update(
             {
                 "gmn_parsed": True,

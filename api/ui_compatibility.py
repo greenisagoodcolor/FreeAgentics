@@ -113,6 +113,7 @@ async def create_agent_ui(
         name=agent_name,
         template=template_map.get(agent_type, "basic-explorer"),
         parameters={"description": request.description},
+        gmn_spec=None,  # Optional field
         use_pymdp=True,
         planning_horizon=3,
     )
