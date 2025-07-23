@@ -422,13 +422,29 @@ jobs:
       - name: "🧪 Run Frontend Tests"
         working-directory: ./web
         run: |
-          # Verify Jest can find all required files before running tests
+          # Comprehensive file verification for Jest
           echo "📁 Verifying test environment..."
-          ls -la lib/utils.ts || echo "⚠️ lib/utils.ts not found for Jest"
-          ls -la components/main/ || echo "⚠️ components/main/ not found"
+          echo "Current directory: $(pwd)"
+          echo "Checking critical files for Jest module resolution:"
 
-          # Clear Jest cache to prevent stale module resolution
+          ls -la lib/ || echo "⚠️ lib/ directory not found"
+          ls -la lib/utils.ts || echo "⚠️ lib/utils.ts not found"
+          ls -la lib/api-client.ts || echo "⚠️ lib/api-client.ts not found"
+          ls -la lib/error-handling.ts || echo "⚠️ lib/error-handling.ts not found"
+          ls -la components/main/ || echo "⚠️ components/main/ directory not found"
+          ls -la hooks/ || echo "⚠️ hooks/ directory not found"
+
+          echo "Checking Jest configuration:"
+          ls -la jest.config.js || echo "⚠️ jest.config.js not found"
+
+          echo "Testing module resolution with node:"
+          node -e "try { require('./lib/utils.ts'); console.log('✅ lib/utils.ts accessible'); } catch(e) { console.log('❌ lib/utils.ts not accessible:', e.message); }"
+
+          # Clear Jest cache and Node modules cache
+          echo "🧹 Clearing caches..."
           npx jest --clearCache
+          rm -rf node_modules/.cache || true
+          rm -rf .next || true
 
           mkdir -p ../${{ env.REPORT_DIR }}/frontend
           npm test -- \

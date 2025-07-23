@@ -13,7 +13,7 @@ const customJestConfig = {
   testPathIgnorePatterns: [
     "<rootDir>/node_modules/",
     "<rootDir>/__tests__/test-utils.tsx", // Ignore test utility files
-    "<rootDir>/__tests__/__mocks__/", // Ignore mock files
+    "<rootDir>/__tests__/__mocks__/fileMock.js", // Ignore mock file but allow test
   ],
   reporters: [
     "default",
@@ -70,8 +70,15 @@ module.exports = async () => {
     jestConfig.verbose = true;
     jestConfig.forceExit = true;
     jestConfig.detectOpenHandles = true;
-    // Clear cache on CI runs to prevent stale module resolution
     jestConfig.clearMocks = true;
+    // Add cache directory clearing for CI
+    jestConfig.cacheDirectory = "/tmp/jest-cache";
+  }
+
+  // Debug: Log configuration in CI
+  if (process.env.CI) {
+    console.log("Jest moduleNameMapper:", JSON.stringify(jestConfig.moduleNameMapper, null, 2));
+    console.log("Jest rootDir:", jestConfig.rootDir);
   }
 
   return jestConfig;

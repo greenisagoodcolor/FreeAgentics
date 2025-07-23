@@ -1,8 +1,7 @@
-// Test file to prevent "no tests found" error for fileMock.js
+// Test for fileMock to prevent Jest "no tests found" warnings
 describe("fileMock", () => {
-  it("should export a string", () => {
+  it("should export test file stub", () => {
     const fileMock = require("./fileMock.js");
-    expect(typeof fileMock).toBe("string");
     expect(fileMock).toBe("test-file-stub");
   });
 });
