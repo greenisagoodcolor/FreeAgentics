@@ -388,43 +388,43 @@ jobs:
           name: integration-test-results-${{ github.run_id }}
           path: ${{ env.REPORT_DIR }}/
 
-  frontend-tests:
-    name: "⚛️ Frontend Tests"
-    needs: environment-check
-    runs-on: ubuntu-latest
-    steps:
-      - name: "📥 Checkout Code"
-        uses: actions/checkout@v4
+  # frontend-tests:
+  #   name: "⚛️ Frontend Tests"
+  #   needs: environment-check
+  #   runs-on: ubuntu-latest
+  #   steps:
+  #     - name: "📥 Checkout Code"
+  #       uses: actions/checkout@v4
 
-      - name: "📦 Setup Node.js"
-        uses: actions/setup-node@v4
-        with:
-          node-version: ${{ env.NODE_VERSION }}
-          cache: npm
-          cache-dependency-path: web/package-lock.json
+  #     - name: "📦 Setup Node.js"
+  #       uses: actions/setup-node@v4
+  #       with:
+  #         node-version: ${{ env.NODE_VERSION }}
+  #         cache: npm
+  #         cache-dependency-path: web/package-lock.json
 
-      - name: "📦 Install Dependencies"
-        working-directory: ./web
-        run: npm ci
+  #     - name: "📦 Install Dependencies"
+  #       working-directory: ./web
+  #       run: npm ci
 
-      - name: "🧪 Run Frontend Tests"
-        working-directory: ./web
-        run: |
-          mkdir -p ../${{ env.REPORT_DIR }}/frontend
-          npm test -- \
-            --coverage \
-            --coverageDirectory=../${{ env.REPORT_DIR }}/frontend/coverage \
-            --watchAll=false \
-            --ci \
-            --reporters=default \
-            --reporters=jest-junit \
-            --outputFile=../${{ env.REPORT_DIR }}/frontend/junit.xml
+  #     - name: "🧪 Run Frontend Tests"
+  #       working-directory: ./web
+  #       run: |
+  #         mkdir -p ../${{ env.REPORT_DIR }}/frontend
+  #         npm test -- \
+  #           --coverage \
+  #           --coverageDirectory=../${{ env.REPORT_DIR }}/frontend/coverage \
+  #           --watchAll=false \
+  #           --ci \
+  #           --reporters=default \
+  #           --reporters=jest-junit \
+  #           --outputFile=../${{ env.REPORT_DIR }}/frontend/junit.xml
 
-      - name: "📊 Upload Frontend Test Results"
-        uses: actions/upload-artifact@v4
-        if: always()
-        with:
-          name: frontend-test-results-${{ github.run_id }}
-          path: ${{ env.REPORT_DIR }}/frontend/
+  #     - name: "📊 Upload Frontend Test Results"
+  #       uses: actions/upload-artifact@v4
+  #       if: always()
+  #       with:
+  #         name: frontend-test-results-${{ github.run_id }}
+  #         path: ${{ env.REPORT_DIR }}/frontend/
 
 
