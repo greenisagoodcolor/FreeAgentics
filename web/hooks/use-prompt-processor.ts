@@ -59,66 +59,7 @@ export function usePromptProcessor() {
   const reconnectTimeoutRef = useRef<NodeJS.Timeout | null>(null);
   const suggestionTimeoutRef = useRef<NodeJS.Timeout | null>(null);
 
-  // Initialize WebSocket connection
-  useEffect(() => {
-    const initWebSocket = () => {
-      try {
-        const wsUrl = process.env.NEXT_PUBLIC_WS_URL || "ws://localhost:8000/ws";
-        const ws = new WebSocket(wsUrl);
-
-        ws.addEventListener("open", () => {
-          console.log("WebSocket connected");
-          if (reconnectTimeoutRef.current) {
-            clearTimeout(reconnectTimeoutRef.current);
-            reconnectTimeoutRef.current = null;
-          }
-        });
-
-        ws.addEventListener("message", (event) => {
-          try {
-            const data = JSON.parse(event.data);
-            handleWebSocketMessage(data);
-          } catch (err) {
-            console.error("Failed to parse WebSocket message:", err);
-          }
-        });
-
-        ws.addEventListener("close", () => {
-          console.log("WebSocket disconnected");
-          wsRef.current = null;
-
-          // Attempt reconnection after 3 seconds
-          reconnectTimeoutRef.current = setTimeout(() => {
-            initWebSocket();
-          }, 3000);
-        });
-
-        ws.addEventListener("error", (error) => {
-          console.error("WebSocket error:", error);
-        });
-
-        wsRef.current = ws;
-      } catch (err) {
-        console.error("Failed to initialize WebSocket:", err);
-      }
-    };
-
-    initWebSocket();
-
-    return () => {
-      if (wsRef.current) {
-        wsRef.current.close();
-      }
-      if (reconnectTimeoutRef.current) {
-        clearTimeout(reconnectTimeoutRef.current);
-      }
-      if (suggestionTimeoutRef.current) {
-        clearTimeout(suggestionTimeoutRef.current);
-      }
-    };
-  }, []);
-
-  // Handle WebSocket messages - defined outside useEffect to avoid dependency
+  // Handle WebSocket messages - defined before useEffect to avoid dependency issues
   const handleWebSocketMessage = useCallback(
     (data: unknown) => {
       const message = data as Record<string, unknown>;
@@ -180,6 +121,65 @@ export function usePromptProcessor() {
     },
     [currentPromptId],
   );
+
+  // Initialize WebSocket connection
+  useEffect(() => {
+    const initWebSocket = () => {
+      try {
+        const wsUrl = process.env.NEXT_PUBLIC_WS_URL || "ws://localhost:8000/ws";
+        const ws = new WebSocket(wsUrl);
+
+        ws.addEventListener("open", () => {
+          console.log("WebSocket connected");
+          if (reconnectTimeoutRef.current) {
+            clearTimeout(reconnectTimeoutRef.current);
+            reconnectTimeoutRef.current = null;
+          }
+        });
+
+        ws.addEventListener("message", (event) => {
+          try {
+            const data = JSON.parse(event.data);
+            handleWebSocketMessage(data);
+          } catch (err) {
+            console.error("Failed to parse WebSocket message:", err);
+          }
+        });
+
+        ws.addEventListener("close", () => {
+          console.log("WebSocket disconnected");
+          wsRef.current = null;
+
+          // Attempt reconnection after 3 seconds
+          reconnectTimeoutRef.current = setTimeout(() => {
+            initWebSocket();
+          }, 3000);
+        });
+
+        ws.addEventListener("error", (error) => {
+          console.error("WebSocket error:", error);
+        });
+
+        wsRef.current = ws;
+      } catch (err) {
+        console.error("Failed to initialize WebSocket:", err);
+      }
+    };
+
+    initWebSocket();
+
+    return () => {
+      if (wsRef.current) {
+        wsRef.current.close();
+      }
+      if (reconnectTimeoutRef.current) {
+        clearTimeout(reconnectTimeoutRef.current);
+      }
+      if (suggestionTimeoutRef.current) {
+        clearTimeout(suggestionTimeoutRef.current);
+      }
+    };
+  }, [handleWebSocketMessage]);
 
   // Submit prompt to API
   const submitPrompt = useCallback(

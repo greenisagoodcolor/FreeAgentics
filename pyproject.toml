@@ -188,6 +188,8 @@ use_parentheses = true
 ensure_newline_before_comments = true
 sections = ["FUTURE", "STDLIB", "THIRDPARTY", "FIRSTPARTY", "LOCALFOLDER"]
 known_first_party = ["agents", "inference", "coalitions", "world", "communication", "knowledge"]
+skip_glob = ["**/venv/*", "**/.venv/*", "**/node_modules/*", "**/.archive/*", "**/.llm_venv/*", "**/web/*"]
+extend_skip = [".venv", "venv", ".llm_venv", "node_modules", ".archive", "web"]
 
 [tool.mypy]
 # Conor Heins: "Type safety enables mathematical correctness"
