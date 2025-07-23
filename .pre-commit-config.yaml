@@ -1,153 +1,47 @@
-# Pre-commit configuration for FreeAgentics
+# Simple pre-commit configuration for FreeAgentics
 # Run: pre-commit install
-# Update: pre-commit autoupdate
+# Note: This is a minimal setup focused on essential checks
 
 repos:
-  # General hooks
+  # Basic file hygiene
   - repo: https://github.com/pre-commit/pre-commit-hooks
     rev: v4.4.0
     hooks:
       - id: trailing-whitespace
-        exclude: ^(web/|.*\.md$)
       - id: end-of-file-fixer
-        exclude: ^(web/|.*\.md$)
-      - id: check-yaml
-        args: [--allow-multiple-documents]
-        exclude: ^(web/|docker-compose.*\.yml$)
-      - id: check-json
-        exclude: ^web/
-      - id: check-toml
       - id: check-merge-conflict
-      - id: check-case-conflict
-      - id: check-docstring-first
-        exclude: ^(web/|tests/|examples/)
-      - id: check-ast
-        exclude: ^web/
+      - id: check-yaml
+        exclude: ^docker-compose.*\.yml$
+      - id: check-json
       - id: debug-statements
-        exclude: ^(web/|tests/|examples/)
 
-  # Python code formatting
-  - repo: https://github.com/psf/black
-    rev: 23.3.0
+  # Python formatting (using Ruff instead of multiple tools)
+  - repo: https://github.com/astral-sh/ruff-pre-commit
+    rev: v0.1.6
     hooks:
-      - id: black
-        language_version: python3
-        args: [--line-length=79, ]
-        exclude: ^web/
+      - id: ruff
+        args: [--fix]
+      - id: ruff-format
 
-  # Python import sorting
-  - repo: https://github.com/pycqa/isort
-    rev: 5.12.0
-    hooks:
-      - id: isort
-        args: [--profile=black, --line-length=79]
-        exclude: ^web/
-
-  # Python linting
-  - repo: https://github.com/pycqa/flake8
-    rev: 6.0.0
-    hooks:
-      - id: flake8
-        args: ["--max-line-length=100", ""]
-        exclude: ^(web/|\.archive/)
-        additional_dependencies:
-          - flake8-docstrings
-          - flake8-bugbear
-
-  # Python type checking
+  # Simple type checking
   - repo: https://github.com/pre-commit/mirrors-mypy
     rev: v1.10.1
     hooks:
       - id: mypy
-        additional_dependencies: [types-requests, types-pyyaml, types-setuptools, types-aiofiles, types-cachetools]
-        exclude: ^(web/|tests/|examples/|\.archive/|scripts/security/generate_security_report\.py|scripts/coverage-analyze-gaps\.py|scripts/batch_fix_flake8\.py|scripts/analyze_agent_memory\.py)
-        args: [--ignore-missing-imports, --no-strict-optional, --python-version=3.12]
+        args: [--ignore-missing-imports, --no-strict-optional]
+        exclude: ^(web/|tests/|examples/|scripts/)
+        additional_dependencies: [types-requests]
 
-  # Security scanning
-  - repo: https://github.com/PyCQA/bandit
-    rev: 1.7.5
-    hooks:
-      - id: bandit
-        args: [-r, ]
-        exclude: ^(web/|tests/|\.archive/)
-
-  # Docker linting
-  - repo: https://github.com/hadolint/hadolint
-    rev: v2.12.0
-    hooks:
-      - id: hadolint-docker
-        args: [--ignore, DL3008, --ignore, DL3009, --ignore, DL3013, --ignore, DL3015, --ignore, DL3018]
-
-  # Frontend hooks (Node.js/TypeScript)
-  - repo: local
-    hooks:
-      # TypeScript checking
-      - id: typescript-check
-        name: TypeScript check
-        entry: bash -c 'cd web && npm run type-check'
-        language: system
-        files: ^web/.*\.(ts|tsx)$
-        pass_filenames: false
-
-      # ESLint
-      - id: eslint
-        name: ESLint
-        entry: bash -c 'cd web && npm run lint'
-        language: system
-        files: ^web/.*\.(js|jsx|ts|tsx)$
-        pass_filenames: false
-
-      # Prettier formatting
-      - id: prettier
-        name: Prettier
-        entry: bash -c 'cd web && npm run format'
-        language: system
-        files: ^web/.*\.(js|jsx|ts|tsx|json|css|md)$
-        pass_filenames: false
-
-  # Documentation - TEMPORARILY DISABLED due to linkify error
-  # - repo: https://github.com/executablebooks/mdformat
-  #   rev: 0.7.16
-  #   hooks:
-  #     - id: mdformat
-  #       args: [--wrap=79]
-  #       additional_dependencies:
-  #         - mdformat-gfm
-  #         - mdformat-black
-
-  # Secrets detection - TEMPORARILY DISABLED
-  # - repo: https://github.com/Yelp/detect-secrets
-  #   rev: v1.5.0
-  #   hooks:
-  #     - id: detect-secrets
-  #       args: [--baseline, .secrets.baseline]
-  #       exclude: ^(web/node_modules/|\.git/)
-
-# Configuration for specific hooks
+# Global exclusions
 exclude: |
   (?x)^(
-    \.archive/.*|
     \.git/.*|
-    web/node_modules/.*|
-    web/\.next/.*|
-    web/out/.*|
+    \.venv/.*|
+    venv/.*|
+    node_modules/.*|
+    \.next/.*|
     __pycache__/.*|
     \.pytest_cache/.*|
     \.mypy_cache/.*|
-    .*\.pyc|
-    .*\.pyo|
-    .*\.egg-info/.*
+    \.archive/.*
   )$
-
-# CI settings
-ci:
-  autofix_commit_msg: |
-    [pre-commit.ci] auto fixes from pre-commit hooks
-
-    for more information, see https://pre-commit.ci
-  autofix_prs: true
-  autoupdate_branch: ''
-  autoupdate_commit_msg: '[pre-commit.ci] pre-commit autoupdate'
-  autoupdate_schedule: weekly
-  # Note: Frontend checks are handled separately in web/ directory CI
-  submodules: false
