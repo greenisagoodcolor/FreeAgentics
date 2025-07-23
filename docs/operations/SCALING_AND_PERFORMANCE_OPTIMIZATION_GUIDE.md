@@ -230,7 +230,7 @@ server {
         proxy_set_header X-Real-IP $remote_addr;
         proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
         proxy_set_header X-Forwarded-Proto $scheme;
-        
+
         # Health check
         proxy_next_upstream error timeout invalid_header http_500 http_502 http_503 http_504;
         proxy_connect_timeout 5s;
@@ -247,17 +247,17 @@ server {
 global
     daemon
     maxconn 4096
-    
+
 defaults
     mode http
     timeout connect 5000ms
     timeout client 50000ms
     timeout server 50000ms
-    
+
 frontend api_frontend
     bind *:80
     default_backend api_servers
-    
+
 backend api_servers
     balance roundrobin
     option httpchk GET /health
@@ -386,7 +386,7 @@ class DatabaseRouter:
     def __init__(self):
         self.write_db = create_connection("postgresql://user:pass@db-master:5432/db")
         self.read_db = create_connection("postgresql://user:pass@db-replica:5432/db")
-    
+
     def get_connection(self, operation='read'):
         if operation == 'write':
             return self.write_db
@@ -412,11 +412,11 @@ class ShardRouter:
             'shard2': create_connection("postgresql://user:pass@shard2:5432/db"),
             'shard3': create_connection("postgresql://user:pass@shard3:5432/db")
         }
-    
+
     def get_shard(self, key):
         shard_id = hash(key) % len(self.shards)
         return list(self.shards.values())[shard_id]
-    
+
     def execute_query(self, key, query):
         shard = self.get_shard(key)
         return shard.execute(query)
@@ -482,9 +482,9 @@ ACTIVE_CONNECTIONS = Gauge('freeagentics_active_connections', 'Active connection
 async def metrics_middleware(request: Request, call_next):
     start_time = time.time()
     REQUEST_COUNT.labels(method=request.method, endpoint=request.url.path).inc()
-    
+
     response = await call_next(request)
-    
+
     REQUEST_LATENCY.observe(time.time() - start_time)
     return response
 ```
@@ -563,11 +563,11 @@ netstat -an | grep :8000 | wc -l
 class OptimizedQueries:
     def __init__(self, db_connection):
         self.db = db_connection
-    
+
     def get_agents_with_stats(self, limit=100):
         # Use single query with joins instead of N+1 queries
         query = """
-        SELECT a.id, a.name, a.status, 
+        SELECT a.id, a.name, a.status,
                COUNT(t.id) as task_count,
                AVG(t.duration) as avg_duration
         FROM agents a
@@ -577,7 +577,7 @@ class OptimizedQueries:
         LIMIT %s
         """
         return self.db.execute(query, (limit,))
-    
+
     def get_agent_performance(self, agent_id):
         # Use prepared statement
         query = """
@@ -602,15 +602,15 @@ def cache_result(expiry=3600):
         @wraps(func)
         def wrapper(*args, **kwargs):
             cache_key = f"{func.__name__}:{hash(str(args) + str(kwargs))}"
-            
+
             # Check cache
             cached_result = redis_client.get(cache_key)
             if cached_result:
                 return json.loads(cached_result)
-            
+
             # Execute function
             result = func(*args, **kwargs)
-            
+
             # Cache result
             redis_client.setex(cache_key, expiry, json.dumps(result))
             return result
@@ -629,16 +629,16 @@ def get_agent_stats(agent_id):
 
 ```sql
 -- Create performance indexes
-CREATE INDEX CONCURRENTLY idx_agents_status_created 
+CREATE INDEX CONCURRENTLY idx_agents_status_created
 ON agents(status, created_at);
 
-CREATE INDEX CONCURRENTLY idx_tasks_agent_id_status 
-ON tasks(agent_id, status) 
+CREATE INDEX CONCURRENTLY idx_tasks_agent_id_status
+ON tasks(agent_id, status)
 WHERE status IN ('pending', 'processing');
 
 -- Partial index for active agents
-CREATE INDEX CONCURRENTLY idx_agents_active 
-ON agents(id, created_at) 
+CREATE INDEX CONCURRENTLY idx_agents_active
+ON agents(id, created_at)
 WHERE status = 'active';
 ```
 
@@ -650,7 +650,7 @@ EXPLAIN ANALYZE SELECT * FROM agents WHERE status = 'active';
 
 -- Use materialized views for complex aggregations
 CREATE MATERIALIZED VIEW agent_performance_summary AS
-SELECT 
+SELECT
     agent_id,
     COUNT(*) as total_tasks,
     AVG(duration) as avg_duration,
@@ -676,27 +676,27 @@ class MemoryOptimizer:
     def __init__(self):
         self.object_pool = weakref.WeakValueDictionary()
         self.memory_threshold = 0.8  # 80% memory usage
-    
+
     def get_pooled_object(self, key, factory):
         if key in self.object_pool:
             return self.object_pool[key]
-        
+
         obj = factory()
         self.object_pool[key] = obj
         return obj
-    
+
     def check_memory_usage(self):
         memory_percent = psutil.virtual_memory().percent / 100
         if memory_percent > self.memory_threshold:
             self.cleanup_memory()
-    
+
     def cleanup_memory(self):
         # Force garbage collection
         gc.collect()
-        
+
         # Clear object pool
         self.object_pool.clear()
-        
+
         # Clear application caches
         self.clear_caches()
 ```
@@ -729,34 +729,34 @@ from sklearn.linear_model import LinearRegression
 class CapacityPlanner:
     def __init__(self):
         self.models = {}
-    
+
     def analyze_trends(self, metric_data, days_ahead=30):
         # Prepare data
         df = pd.DataFrame(metric_data)
         df['timestamp'] = pd.to_datetime(df['timestamp'])
         df['hour'] = df['timestamp'].dt.hour
         df['day_of_week'] = df['timestamp'].dt.dayofweek
-        
+
         # Train model
         X = df[['hour', 'day_of_week']].values
         y = df['value'].values
-        
+
         model = LinearRegression()
         model.fit(X, y)
-        
+
         # Forecast
         future_hours = np.arange(0, days_ahead * 24)
         future_dow = np.repeat(np.arange(7), days_ahead * 24 // 7)
-        
+
         predictions = model.predict(np.column_stack([future_hours % 24, future_dow]))
-        
+
         return {
             'forecast': predictions,
             'max_predicted': np.max(predictions),
             'avg_predicted': np.mean(predictions),
             'recommendation': self.get_recommendation(predictions)
         }
-    
+
     def get_recommendation(self, predictions):
         max_utilization = np.max(predictions)
         if max_utilization > 0.8:
@@ -790,14 +790,14 @@ class ResourceOptimizer:
     def __init__(self):
         self.cpu_utilization_threshold = 0.7
         self.memory_utilization_threshold = 0.8
-    
+
     def analyze_resource_usage(self, metrics):
         recommendations = []
-        
+
         for service, data in metrics.items():
             cpu_avg = np.mean(data['cpu_usage'])
             memory_avg = np.mean(data['memory_usage'])
-            
+
             if cpu_avg < 0.3 and memory_avg < 0.4:
                 recommendations.append({
                     'service': service,
@@ -816,7 +816,7 @@ class ResourceOptimizer:
                     'current_memory': data['memory_limit'],
                     'recommended_memory': data['memory_limit'] * 1.3
                 })
-        
+
         return recommendations
 ```
 
@@ -891,13 +891,13 @@ class CustomAutoscaler:
         config.load_incluster_config()
         self.apps_v1 = client.AppsV1Api()
         self.metrics_api = client.CustomObjectsApi()
-    
+
     def get_queue_depth(self):
         # Get queue depth from Redis
         import redis
         redis_client = redis.Redis(host='redis-cluster')
         return redis_client.llen('task_queue')
-    
+
     def scale_workers(self, target_replicas):
         # Scale worker deployment
         body = {'spec': {'replicas': target_replicas}}
@@ -906,11 +906,11 @@ class CustomAutoscaler:
             namespace='freeagentics',
             body=body
         )
-    
+
     def autoscale_based_on_queue(self):
         queue_depth = self.get_queue_depth()
         current_replicas = self.get_current_replicas('worker-deployment')
-        
+
         # Scale based on queue depth
         if queue_depth > 100:
             target_replicas = min(current_replicas + 2, 20)
@@ -918,7 +918,7 @@ class CustomAutoscaler:
             target_replicas = max(current_replicas - 1, 2)
         else:
             target_replicas = current_replicas
-        
+
         if target_replicas != current_replicas:
             self.scale_workers(target_replicas)
 ```
@@ -950,19 +950,19 @@ scenarios:
     virtual_users: 100
     duration: 300s
     ramp_up: 60s
-    
+
   - name: peak_load
     description: "Peak traffic conditions"
     virtual_users: 500
     duration: 600s
     ramp_up: 120s
-    
+
   - name: stress_test
     description: "Stress testing to find breaking point"
     virtual_users: 1000
     duration: 1800s
     ramp_up: 300s
-    
+
   - name: spike_test
     description: "Sudden traffic spikes"
     virtual_users: 200
@@ -1102,11 +1102,11 @@ def profile_function(func):
         pr.enable()
         result = func(*args, **kwargs)
         pr.disable()
-        
+
         s = io.StringIO()
         ps = pstats.Stats(pr, stream=s).sort_stats('cumulative')
         ps.print_stats()
-        
+
         print(s.getvalue())
         return result
     return wrapper
@@ -1165,11 +1165,11 @@ class PerformanceCollector:
     def __init__(self):
         self.metrics = {}
         self.running = False
-    
+
     def start_collection(self):
         self.running = True
         threading.Thread(target=self._collect_metrics).start()
-    
+
     def _collect_metrics(self):
         while self.running:
             self.metrics = {
@@ -1181,7 +1181,7 @@ class PerformanceCollector:
                 'load_avg': psutil.getloadavg()
             }
             time.sleep(1)
-    
+
     def get_metrics(self):
         return self.metrics
 ```

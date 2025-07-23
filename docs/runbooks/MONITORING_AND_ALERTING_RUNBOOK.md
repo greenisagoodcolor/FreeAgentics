@@ -35,21 +35,21 @@ monitoring_stack:
     - node_exporter
     - blackbox_exporter
     - custom_exporters
-    
+
   visualization:
     - grafana
     - custom_dashboards
-    
+
   logging:
     - elasticsearch
     - logstash
     - kibana
     - fluentd
-    
+
   tracing:
     - jaeger
     - zipkin
-    
+
   alerting:
     - alertmanager
     - pagerduty
@@ -72,17 +72,17 @@ scrape_configs:
   - job_name: 'prometheus'
     static_configs:
       - targets: ['localhost:9090']
-      
+
   - job_name: 'node'
     static_configs:
       - targets: ['localhost:9100']
-      
+
   - job_name: 'freeagentics-api'
     static_configs:
       - targets: ['api:8000']
     metrics_path: '/metrics'
     scrape_interval: 10s
-    
+
   - job_name: 'freeagentics-workers'
     static_configs:
       - targets: ['workers:8001']
@@ -501,8 +501,8 @@ rate(freeagentics_requests_total{status=~"5.."}[5m]) / rate(freeagentics_request
 ./scripts/monitoring/create-agent-dashboard.sh
 
 # Agent coordination success rate
-rate(freeagentics_agent_coordination_success_total[5m]) / 
-(rate(freeagentics_agent_coordination_success_total[5m]) + 
+rate(freeagentics_agent_coordination_success_total[5m]) /
+(rate(freeagentics_agent_coordination_success_total[5m]) +
  rate(freeagentics_agent_coordination_failures_total[5m]))
 
 # Agent coordination latency
@@ -710,16 +710,16 @@ def forecast_capacity(metric_data, horizon_days=30):
     df = pd.DataFrame(metric_data)
     df['timestamp'] = pd.to_datetime(df['timestamp'])
     df['days_from_start'] = (df['timestamp'] - df['timestamp'].min()).dt.days
-    
+
     # Train model
     model = LinearRegression()
     model.fit(df[['days_from_start']], df['value'])
-    
+
     # Forecast
-    future_days = range(df['days_from_start'].max() + 1, 
+    future_days = range(df['days_from_start'].max() + 1,
                        df['days_from_start'].max() + horizon_days + 1)
     forecast = model.predict([[day] for day in future_days])
-    
+
     return forecast
 ```
 

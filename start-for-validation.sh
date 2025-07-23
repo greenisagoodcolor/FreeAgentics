@@ -22,5 +22,5 @@ for i in {1..30}; do
 done
 
 echo "Application failed to start within 30 seconds"
-kill $APP_PID 2>/dev/null 
+kill $APP_PID 2>/dev/null
 exit 1

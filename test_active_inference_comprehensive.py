@@ -59,7 +59,7 @@ def test_gmn_parser():
         movement: action {num_actions: 4}
         obs_model: likelihood
         trans_model: transition
-        
+
         [edges]
         location -> obs_model: depends_on
         obs_model -> observation: generates
@@ -104,7 +104,7 @@ def test_gmn_pymdp_adapter():
         obs_model: likelihood
         trans_model: transition
         pref: preference {preferred_observation: 1}
-        
+
         [edges]
         location -> obs_model: depends_on
         obs_model -> observation: generates

@@ -40,9 +40,17 @@ export function useConversation(): ConversationState {
     if (!lastMessage) return;
 
     if (lastMessage.type === "conversation_started") {
-      setConversationId(lastMessage.data.conversationId);
+      const data = lastMessage.data as { conversationId: string };
+      setConversationId(data.conversationId);
     } else if (lastMessage.type === "message") {
-      const { id, role, content, timestamp, isStreaming } = lastMessage.data;
+      const messageData = lastMessage.data as {
+        id: string;
+        role: MessageRole;
+        content: string;
+        timestamp: string;
+        isStreaming?: boolean;
+      };
+      const { id, role, content, timestamp, isStreaming } = messageData;
 
       setMessages((prev) => {
         const existingIndex = prev.findIndex((msg) => msg.id === id);
@@ -75,7 +83,8 @@ export function useConversation(): ConversationState {
         setIsLoading(false);
       }
     } else if (lastMessage.type === "error") {
-      setError(new Error(lastMessage.data.message || "An error occurred"));
+      const errorData = lastMessage.data as { message?: string };
+      setError(new Error(errorData.message || "An error occurred"));
       setIsLoading(false);
     }
   }, [lastMessage]);

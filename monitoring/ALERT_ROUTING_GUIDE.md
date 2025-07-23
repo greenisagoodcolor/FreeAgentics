@@ -263,6 +263,6 @@ curl -X POST http://localhost:9093/api/v1/alerts
 
 ---
 
-**Last Updated**: 2024-07-15  
-**Configuration Version**: 1.0  
+**Last Updated**: 2024-07-15
+**Configuration Version**: 1.0
 **Contact**: sre@freeagentics.com

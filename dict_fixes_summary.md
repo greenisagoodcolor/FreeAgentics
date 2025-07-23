@@ -11,7 +11,7 @@ Fixed mypy errors related to Dict type annotations across the FreeAgentics codeb
    - Fixed: `current_user: Dict = Depends(get_current_user)` → `Dict[str, Any]`
 
 2. `/home/green/FreeAgentics/api/v1/websocket.py`
-   - Added `Any` import  
+   - Added `Any` import
    - Fixed: `data: dict = Field(default_factory=dict)` → `Dict[str, Any]`
 
 3. `/home/green/FreeAgentics/api/v1/agents.py`

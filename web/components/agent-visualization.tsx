@@ -167,14 +167,14 @@ export function AgentVisualization({ agents, className = "" }: AgentVisualizatio
     }
   };
 
-  const getStatusBadgeVariant = (status: string) => {
+  const getStatusBadgeVariant = (status: string): "default" | "secondary" | "outline" | "destructive" => {
     switch (status) {
       case "active":
-        return "success";
+        return "default";
       case "thinking":
-        return "info";
+        return "secondary";
       case "idle":
-        return "warning";
+        return "outline";
       case "error":
         return "destructive";
       default:

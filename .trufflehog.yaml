@@ -10,7 +10,7 @@ exclude_paths:
   # Development secrets (temporary exclusion - see security action plan)
   - "secrets/*.txt"
   - "secrets/docker-secrets.yml"
-  
+
   # Build and dependency directories
   - "node_modules/"
   - "venv/"
@@ -21,30 +21,30 @@ exclude_paths:
   - ".ruff_cache/"
   - ".mypy_cache/"
   - "temp_security_venv/"
-  
+
   # Archive and backup directories
   - ".archive/"
   - "archives/"
   - "backups/"
-  
+
   # Log files
   - "*.log"
   - "logs/"
-  
+
   # Test and mock files
   - "**/test/**/*mock*"
   - "**/tests/**/*mock*"
   - "**/fixtures/**"
-  
+
   # Documentation
   - "docs/examples/"
   - "examples/"
   - "*.md"
 
 # SECURITY NOTICE:
-# 
+#
 # The 'secrets/*.txt' exclusion is TEMPORARY for development.
-# 
+#
 # ACTION REQUIRED:
 # 1. Replace *.txt files in secrets/ with proper templates
 # 2. Move actual secrets to environment variables

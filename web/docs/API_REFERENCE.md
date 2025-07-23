@@ -4,8 +4,8 @@
 
 The FreeAgentics API provides endpoints for creating and managing Active Inference agents through natural language prompts. This reference covers the prompt processing pipeline and related endpoints.
 
-**Base URL**: `http://localhost:8000/api/v1`  
-**Protocol**: HTTP/HTTPS  
+**Base URL**: `http://localhost:8000/api/v1`
+**Protocol**: HTTP/HTTPS
 **Authentication**: JWT Bearer tokens
 
 ## Table of Contents

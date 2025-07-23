@@ -139,7 +139,7 @@ A nemesis reviewer would look for:
 # Run nemesis-level validation
 pytest tests/integration/test_nemesis_pymdp_validation.py -v
 
-# Run action sampling specific tests  
+# Run action sampling specific tests
 pytest tests/integration/test_action_sampling_issue.py -v
 
 # Run performance benchmarks
@@ -151,7 +151,7 @@ pytest tests/integration/ -k "pymdp" -v
 
 ### Performance Monitoring
 - Baseline measurements captured for regression detection
-- Memory usage profiling for leak detection  
+- Memory usage profiling for leak detection
 - Latency percentile tracking for real-time requirements
 
 ## Success Criteria

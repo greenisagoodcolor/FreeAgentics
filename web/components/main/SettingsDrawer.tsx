@@ -17,7 +17,7 @@ import {
   SelectItem,
   SelectTrigger,
   SelectValue,
-} from "@/components/ui/select";
+} from "@/components/ui/simple-select";
 import { Switch } from "@/components/ui/switch";
 import { Separator } from "@/components/ui/separator";
 import { useAuth } from "@/hooks/use-auth";
@@ -32,8 +32,8 @@ export function SettingsDrawer({ open, onOpenChange }: SettingsDrawerProps) {
   const { user, isAuthenticated, logout } = useAuth();
   const { settings, updateSettings, resetSettings } = useSettings();
 
-  const handleProviderChange = (provider: LLMProvider) => {
-    updateSettings({ llmProvider: provider });
+  const handleProviderChange = (provider: string) => {
+    updateSettings({ llmProvider: provider as LLMProvider });
   };
 
   const handleModelChange = (model: string) => {

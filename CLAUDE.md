@@ -68,9 +68,9 @@ The agent should follow a strict workflow for each task, ensuring no step is ski
 - **Progress updates:** Share ongoing progress using checklist or status updates so the user (or team) can follow along. For example:
 
   ```text
-  ✓ Implemented authentication (all tests passing)  
-  ✓ Added rate limiting  
-  ✗ Found issue with token expiration – investigating now  
+  ✓ Implemented authentication (all tests passing)
+  ✓ Added rate limiting
+  ✗ Found issue with token expiration – investigating now
   ```
 
   This communicates what’s done, what’s in progress, and any blockers.
@@ -427,7 +427,7 @@ const processOrder = (order: Order): ProcessedOrder => {
 
   const getMockPaymentRequest = (overrides?: Partial<PostPaymentsRequestV3>): PostPaymentsRequestV3 => {
     const base: PostPaymentsRequestV3 = {
-      // ... required fields 
+      // ... required fields
     };
     const data = { ...base, ...overrides };
     return PostPaymentsRequestV3Schema.parse(data); // validate using the real schema
@@ -722,7 +722,7 @@ const processOrder = (order: Order): ProcessedOrder => {
   fetchCustomers(true, false, false); // What do these booleans correspond to?
 
   // ✅ Use options:
-  interface FetchCustomersOptions { 
+  interface FetchCustomersOptions {
     includeInactive?: boolean;
     includePending?: boolean;
     includeDeleted?: boolean;
@@ -777,8 +777,8 @@ const processOrder = (order: Order): ProcessedOrder => {
 - **Result type pattern:** Define a Result type that wraps either a success or a failure. This is common in Rust, Swift (as `Result` or `Either` types), and can be emulated in TypeScript:
 
   ```typescript
-  type Result<T, E = Error> = 
-    | { success: true; data: T } 
+  type Result<T, E = Error> =
+    | { success: true; data: T }
     | { success: false; error: E };
 
   function processPayment(payment: Payment): Result<ProcessedPayment, PaymentError> {

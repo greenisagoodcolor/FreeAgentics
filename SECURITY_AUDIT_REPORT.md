@@ -154,7 +154,7 @@ if not DATABASE_URL:
 # WebSocket endpoint with full security
 @router.websocket("/ws/{client_id}")
 async def websocket_endpoint(
-    websocket: WebSocket, 
+    websocket: WebSocket,
     client_id: str,
     token: Optional[str] = Query(None)
 ):
@@ -162,10 +162,10 @@ async def websocket_endpoint(
     if not await websocket_rate_limit_manager.check_connection_allowed(websocket):
         await websocket.close(code=WebSocketErrorCode.RATE_LIMITED)
         return
-    
+
     # Authenticate connection
     user_data = await ws_auth_handler.authenticate_connection(websocket, client_id, token)
-    
+
     # Connection accepted with full security context
     # All messages validated and permission-checked
 ```

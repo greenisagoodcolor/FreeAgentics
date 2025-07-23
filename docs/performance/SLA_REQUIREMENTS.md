@@ -238,8 +238,8 @@ Automated regression detection:
 
 ---
 
-**Document Version**: 1.0  
-**Last Updated**: 2025-07-18  
-**Next Review**: 2025-10-18  
-**Owner**: Performance Engineering Team  
+**Document Version**: 1.0
+**Last Updated**: 2025-07-18
+**Next Review**: 2025-10-18
+**Owner**: Performance Engineering Team
 **Approvers**: CTO, Engineering Manager, Operations Lead

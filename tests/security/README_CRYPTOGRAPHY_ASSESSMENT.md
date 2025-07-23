@@ -124,21 +124,21 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v3
-      
+
       - name: Setup Python
         uses: actions/setup-python@v4
         with:
           python-version: '3.11'
-      
+
       - name: Install dependencies
         run: |
           pip install -r requirements-production.txt
           pip install pytest cryptography
-      
+
       - name: Run Cryptographic Assessment
         run: |
           python tests/security/run_cryptography_assessment.py --output-dir ./crypto-reports
-      
+
       - name: Upload Assessment Reports
         uses: actions/upload-artifact@v3
         with:

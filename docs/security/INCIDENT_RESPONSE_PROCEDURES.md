@@ -62,11 +62,11 @@ graph TD
     B -->|P0-P1| C[Incident Commander]
     B -->|P2| D[Security Team Lead]
     B -->|P3| E[On-Call Engineer]
-    
+
     C --> F[Activate Full IRT]
     D --> G[Security Team Response]
     E --> H[Standard Remediation]
-    
+
     F --> I[Executive Notification]
     G --> J[Escalate if Needed]
 ```
@@ -92,7 +92,7 @@ graph TD
        condition: failed_logins > 50 AND unique_ips < 5
        severity: P1
        action: block_ip_and_alert
-       
+
      - name: DataExfiltration
        condition: data_transfer > 1GB AND time < 5min
        severity: P0
@@ -135,10 +135,10 @@ netstat -tuln | grep ESTABLISHED
    ```bash
    # Block suspicious IP immediately
    iptables -A INPUT -s $SUSPICIOUS_IP -j DROP
-   
+
    # Add to Redis blacklist
    redis-cli SADD blocked_ips $SUSPICIOUS_IP
-   
+
    # Update WAF rules
    curl -X POST https://waf.api/rules \
      -H "Authorization: Bearer $WAF_TOKEN" \
@@ -149,11 +149,11 @@ netstat -tuln | grep ESTABLISHED
    ```bash
    # Create incident directory
    mkdir -p /incident/$(date +%Y%m%d_%H%M%S)
-   
+
    # Capture system state
    ps aux > processes.txt
    netstat -tuln > connections.txt
-   
+
    # Backup logs
    cp /var/log/security_audit.log ./
    cp /var/log/nginx/access.log ./
@@ -170,13 +170,13 @@ netstat -tuln | grep ESTABLISHED
            start_time=incident.start_time - timedelta(hours=1),
            end_time=datetime.now()
        )
-       
+
        # Analyze patterns
        patterns = analyze_attack_patterns(logs)
-       
+
        # Check affected resources
        affected = identify_affected_resources(logs)
-       
+
        # Generate report
        return {
            "incident_id": incident_id,
@@ -198,11 +198,11 @@ netstat -tuln | grep ESTABLISHED
    ```bash
    # Isolate affected systems
    docker stop affected_container
-   
+
    # Revoke compromised credentials
-   UPDATE users SET password_reset_required = true 
+   UPDATE users SET password_reset_required = true
    WHERE last_login_ip IN (SELECT ip FROM suspicious_ips);
-   
+
    # Invalidate sessions
    redis-cli --scan --pattern "session:*" | xargs redis-cli DEL
    ```
@@ -214,7 +214,7 @@ netstat -tuln | grep ESTABLISHED
      - rule: enhanced_authentication
        require_mfa: true
        session_timeout: 30m
-       
+
      - rule: ip_restrictions
        whitelist_only: true
        allowed_ips: ["10.0.0.0/8"]
@@ -232,10 +232,10 @@ netstat -tuln | grep ESTABLISHED
    ```bash
    # Restore from clean backup
    kubectl apply -f deployment/clean-state.yaml
-   
+
    # Verify system integrity
    ./scripts/verify-integrity.sh
-   
+
    # Re-enable services gradually
    kubectl scale deployment api --replicas=1
    kubectl scale deployment api --replicas=3
@@ -261,28 +261,28 @@ netstat -tuln | grep ESTABLISHED
 1. **Incident Report Template**
    ```markdown
    # Incident Report: INC-2025-001
-   
+
    ## Executive Summary
    - Incident Type: Brute Force Attack
    - Severity: P1
    - Duration: 2 hours
    - Impact: 1000 failed login attempts, no breach
-   
+
    ## Timeline
    - 10:00 - Initial detection
    - 10:05 - IP blocked
    - 10:15 - Investigation started
    - 11:00 - Attack mitigated
    - 12:00 - Normal operations restored
-   
+
    ## Root Cause
    Insufficient rate limiting on login endpoint
-   
+
    ## Remediation
    1. Implemented stricter rate limits
    2. Added CAPTCHA for repeated failures
    3. Enhanced monitoring rules
-   
+
    ## Lessons Learned
    - Need better automated response
    - Rate limits were too permissive
@@ -311,37 +311,37 @@ class DDoSMitigator:
     def __init__(self):
         self.redis_client = redis.Redis()
         self.threshold = 1000  # requests per minute
-        
+
     def check_traffic_patterns(self):
         # Get request counts by IP
         pipe = self.redis_client.pipeline()
         for key in self.redis_client.scan_iter("rate_limit:*"):
             pipe.get(key)
-        
+
         results = pipe.execute()
-        
+
         # Identify attack sources
         attack_sources = []
         for ip, count in results:
             if int(count) > self.threshold:
                 attack_sources.append(ip)
-        
+
         return attack_sources
-    
+
     def mitigate_attack(self, attack_sources):
         for ip in attack_sources:
             # Block at firewall level
             subprocess.run([
-                "iptables", "-A", "INPUT", 
+                "iptables", "-A", "INPUT",
                 "-s", ip, "-j", "DROP"
             ])
-            
+
             # Add to permanent blacklist
             self.redis_client.sadd("permanent_blacklist", ip)
-            
+
             # Log incident
             self.log_incident(ip, "DDoS attack source")
-    
+
     def enable_cdn_protection(self):
         # Enable CDN DDoS protection
         cdn_api.update_security_level("under_attack")
@@ -360,38 +360,38 @@ class CredentialStuffingDefender:
     def __init__(self):
         self.failed_attempts = defaultdict(list)
         self.blocked_ips = set()
-        
+
     async def analyze_login_patterns(self, username, ip, success):
         if not success:
             self.failed_attempts[ip].append({
                 "username": username,
                 "timestamp": datetime.now()
             })
-            
+
             # Check for credential stuffing patterns
             if self.is_credential_stuffing(ip):
                 await self.block_attacker(ip)
-    
+
     def is_credential_stuffing(self, ip):
         attempts = self.failed_attempts[ip]
-        
+
         # Multiple usernames from same IP
         usernames = set(a["username"] for a in attempts)
         if len(usernames) > 5:
             return True
-        
+
         # Rapid attempts
-        recent = [a for a in attempts 
+        recent = [a for a in attempts
                  if a["timestamp"] > datetime.now() - timedelta(minutes=5)]
         if len(recent) > 10:
             return True
-        
+
         return False
-    
+
     async def block_attacker(self, ip):
         # Immediate IP block
         await redis_client.setex(f"blocked:{ip}", 3600, "credential_stuffing")
-        
+
         # Alert security team
         await send_security_alert({
             "type": "credential_stuffing",
@@ -428,7 +428,7 @@ Subject: Security Notification
 
 Dear Customer,
 
-We are currently investigating a security event that may affect our services. 
+We are currently investigating a security event that may affect our services.
 
 Impact:
 - Some users may experience slow response times
@@ -474,7 +474,7 @@ curl -s https://api.freeagentics.com/health | jq .
 
 # Database Connectivity
 echo "Checking database..."
-psql -c "SELECT COUNT(*) FROM users;" 
+psql -c "SELECT COUNT(*) FROM users;"
 
 # Redis Status
 echo "Checking Redis..."

@@ -20,7 +20,7 @@ quality_gates:
     type_checking: strict
     security_linting: mandatory
     pre_commit_hooks: mandatory
-    
+
   # Test Coverage Requirements
   test_coverage:
     minimum_coverage: 80
@@ -28,7 +28,7 @@ quality_gates:
     integration_test_coverage: 75
     fail_under_threshold: true
     coverage_delta_threshold: -5  # Allow max 5% decrease
-    
+
   # Security Requirements
   security:
     vulnerability_scan: mandatory
@@ -39,7 +39,7 @@ quality_gates:
     sast_required: true
     dast_required: true
     compliance_checks: ["OWASP_TOP_10", "CWE_TOP_25"]
-    
+
   # Performance Requirements
   performance:
     benchmark_regression_threshold: 10  # Max 10% regression
@@ -63,7 +63,7 @@ stages:
     success_criteria:
       - all_checks_pass: true
       - no_critical_issues: true
-    
+
   build:
     name: "Build & Package"
     description: "Artifact creation with multi-arch support"
@@ -78,9 +78,9 @@ stages:
       - linux/amd64
       - linux/arm64
     cache_strategy: "aggressive"
-    
+
   test:
-    name: "Comprehensive Test Suite" 
+    name: "Comprehensive Test Suite"
     description: "Multi-layered testing with parallel execution"
     timeout_minutes: 20
     depends_on: ["build"]
@@ -92,7 +92,7 @@ stages:
       - component_tests
     coverage_reporting: true
     failure_threshold: 0  # Zero tolerance for test failures
-    
+
   security:
     name: "Security Validation"
     description: "Comprehensive security testing"
@@ -107,7 +107,7 @@ stages:
       - compliance_validation
     severity_threshold: "medium"
     fail_on_high_severity: true
-    
+
   performance:
     name: "Performance Verification"
     description: "Performance testing with regression detection"
@@ -121,7 +121,7 @@ stages:
       - database_performance
     baseline_comparison: true
     regression_threshold: 10
-    
+
   e2e:
     name: "End-to-End Validation"
     description: "Full system integration testing"
@@ -133,7 +133,7 @@ stages:
       - kubernetes_local
     smoke_tests: true
     health_checks: true
-    
+
   deployment_readiness:
     name: "Deployment Readiness Check"
     description: "Final validation before deployment"
@@ -145,7 +145,7 @@ stages:
       - artifacts_signed
       - security_attestation
       - performance_baseline_met
-    
+
   deploy_staging:
     name: "Staging Deployment"
     description: "Deploy to staging environment"
@@ -156,7 +156,7 @@ stages:
     deployment_strategy: "rolling"
     smoke_tests: true
     rollback_on_failure: true
-    
+
   deploy_production:
     name: "Production Deployment"
     description: "Deploy to production with blue-green strategy"
@@ -176,7 +176,7 @@ environments:
     namespace: "freeagentics-staging"
     auto_deploy: true
     smoke_tests: true
-    
+
   production:
     url: "https://freeagentics.com"
     namespace: "freeagentics-prod"
@@ -192,24 +192,24 @@ observability:
     health_score_tracking: true
     performance_trending: true
     failure_analysis: true
-    
+
   logging:
     level: "INFO"
     structured: true
     correlation_ids: true
     sensitive_data_masking: true
-    
+
   tracing:
     enabled: true
     sample_rate: 1.0
     distributed_tracing: true
-    
+
   dashboards:
     pipeline_health: true
     stage_performance: true
     failure_trends: true
     deployment_frequency: true
-    
+
   alerts:
     failure_rate_threshold: 10  # Alert if >10% failures
     duration_threshold: 1800  # Alert if >30 minutes
@@ -225,12 +225,12 @@ artifacts:
     test_reports: 7  # days
     security_reports: 90  # days
     deployment_records: 365  # days
-    
+
   storage:
     backend: "github_actions"
     compression: true
     encryption: true
-    
+
   signing:
     enabled: true
     keyless: true
@@ -242,7 +242,7 @@ resources:
   memory_limit: "4Gi"
   disk_limit: "20Gi"
   timeout_global: 60  # minutes
-  
+
   parallel_jobs:
     max_concurrent: 5
     matrix_jobs: 10
@@ -253,13 +253,13 @@ notifications:
     enabled: true
     channels: ["slack"]
     template: "pipeline_success"
-    
+
   failure:
     enabled: true
     channels: ["slack", "email"]
     template: "pipeline_failure"
     include_logs: true
-    
+
   deployment:
     enabled: true
     channels: ["slack"]
@@ -272,17 +272,17 @@ integrations:
     status_checks: true
     pr_comments: true
     deployment_statuses: true
-    
+
   slack:
     webhook_url: "${{ secrets.SLACK_WEBHOOK }}"
     channel: "#ci-cd"
     mention_on_failure: true
-    
+
   codecov:
     enabled: true
     fail_ci_if_error: true
     target_coverage: 80
-    
+
   security_tools:
     trivy: true
     semgrep: true
@@ -300,14 +300,14 @@ branch_policies:
     dismiss_stale_reviews: true
     require_code_owner_reviews: true
     full_pipeline_required: true
-    
+
   develop:
     protection: moderate
     required_status_checks:
       - "unified-pipeline"
     required_reviews: 1
     full_pipeline_required: true
-    
+
   feature:
     protection: basic
     required_status_checks:
@@ -320,17 +320,17 @@ benchmarks:
     target_time: 50  # milliseconds
     threshold: 100  # milliseconds
     regression_threshold: 20  # percent
-    
+
   message_throughput:
     target_rate: 1000  # messages/second
     threshold: 500  # messages/second
     regression_threshold: 15  # percent
-    
+
   memory_usage:
     target_mb: 512
     threshold_mb: 1024
     regression_threshold: 25  # percent
-    
+
   build_time:
     target_seconds: 600  # 10 minutes
     threshold_seconds: 900  # 15 minutes
@@ -342,17 +342,17 @@ security:
     tools: ["trufflehog", "gitleaks"]
     verify_only: true
     fail_on_unverified: true
-    
+
   vulnerability_scanning:
     tools: ["trivy", "grype", "snyk"]
     severity_threshold: "medium"
     fail_on_high: true
-    
+
   compliance:
     frameworks: ["OWASP", "CWE", "NIST"]
     required_score: 85
     attestation_required: true
-    
+
   container_security:
     base_image_scanning: true
     runtime_scanning: true
@@ -362,14 +362,14 @@ security:
 migration:
   from_workflows:
     - "ci.yml"
-    - "security-ci.yml" 
+    - "security-ci.yml"
     - "performance.yml"
     - "coverage.yml"
     - "production-deployment.yml"
-  
+
   deprecation_date: "2025-08-01"
   migration_complete: false
-  
+
   compatibility_mode: false
   parallel_execution: false
 

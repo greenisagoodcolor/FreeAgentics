@@ -43,15 +43,15 @@ class OptimizedAgentManager:
         # Detect CPU topology
         cpu_count = mp.cpu_count()
         physical_cores = os.cpu_count() // 2  # Assume hyperthreading
-        
+
         # Optimal workers: 2x physical cores for I/O-bound tasks
         # But cap at reasonable limit to avoid context switching overhead
         optimal_workers = min(physical_cores * 2, 32)
-        
+
         # Use separate pools for CPU-bound vs I/O-bound operations
         self._cpu_executor = ThreadPoolExecutor(max_workers=physical_cores)
         self._io_executor = ThreadPoolExecutor(max_workers=optimal_workers)
-        
+
         # CPU affinity for reduced cache misses
         if hasattr(os, 'sched_setaffinity'):
             # Pin threads to specific CPU cores
@@ -80,15 +80,15 @@ class LockOptimizedAgentManager:
         # Replace simple locks with read-write locks for read-heavy operations
         self._agents_rwlock = RWLock()
         self._stats_rwlock = RWLock()
-        
+
         # Use lock-free structures where possible
         self._event_queue = queue.SimpleQueue()  # Lock-free
-        
+
     def get_agent_status(self, agent_id: str):
         # Multiple readers allowed simultaneously
         with self._agents_rwlock.read_lock():
             return self.agents[agent_id].get_status()
-    
+
     def update_agent(self, agent_id: str, updates: dict):
         # Exclusive write access
         with self._agents_rwlock.write_lock():
@@ -122,21 +122,21 @@ class AsyncOptimizedAgentManager:
         self._loop = asyncio.new_event_loop()
         self._async_thread = threading.Thread(target=self._run_event_loop)
         self._async_thread.start()
-        
+
     def _run_event_loop(self):
         """Dedicated thread for event loop"""
         asyncio.set_event_loop(self._loop)
         self._loop.run_forever()
-        
+
     async def _async_broadcast_batch(self, events: List[dict]):
         """Batch async operations for efficiency"""
         tasks = [self._broadcast_single(event) for event in events]
         await asyncio.gather(*tasks, return_exceptions=True)
-        
+
     def queue_event_batch(self, events: List[dict]):
         """Queue multiple events at once"""
         future = asyncio.run_coroutine_threadsafe(
-            self._async_broadcast_batch(events), 
+            self._async_broadcast_batch(events),
             self._loop
         )
         return future
@@ -164,16 +164,16 @@ class MemoryOptimizedAgentManager:
         # Use shared memory for agent states
         self._shared_beliefs = {}
         self._shared_observations = {}
-        
+
     def create_shared_agent_state(self, agent_id: str, state_size: int):
         """Create shared memory for agent state"""
         # Allocate shared memory block
         shm = shared_memory.SharedMemory(create=True, size=state_size)
         self._shared_beliefs[agent_id] = shm
-        
+
         # Return numpy array view (zero-copy)
         return np.ndarray((state_size,), dtype=np.float64, buffer=shm.buf)
-        
+
     def share_agent_beliefs(self, agent_id: str) -> np.ndarray:
         """Get zero-copy view of agent beliefs"""
         shm = self._shared_beliefs[agent_id]
@@ -202,17 +202,17 @@ class ThreadSafeStructures:
     def __init__(self):
         # Thread-local storage for frequently accessed data
         self._thread_local = local()
-        
+
         # Lock-free concurrent dict (Python 3.8+)
         self.agents = {}  # dict is thread-safe for reads in CPython
-        
+
         # LRU cache with TTL for computed values
         self._belief_cache = cachetools.TTLCache(maxsize=1000, ttl=60)
         self._cache_lock = threading.RLock()
-        
+
         # Copy-on-write for rarely modified data
         self._coalition_configs = ChainMap({})  # Immutable layers
-        
+
     def get_thread_local_cache(self):
         """Per-thread cache to avoid contention"""
         if not hasattr(self._thread_local, 'cache'):
@@ -245,7 +245,7 @@ class BatchedAgentManager:
         """Process agents in optimized batches"""
         # Group agents by state similarity for cache efficiency
         agent_groups = self._group_agents_by_state()
-        
+
         results = {}
         with ThreadPoolExecutor(max_workers=self._optimal_workers) as executor:
             # Submit batches instead of individual agents
@@ -253,14 +253,14 @@ class BatchedAgentManager:
             for group_id, agent_batch in agent_groups.items():
                 # Vectorize observations for the batch
                 batch_obs = self._vectorize_observations(agent_batch, observations)
-                
+
                 future = executor.submit(
                     self._process_agent_batch,
                     agent_batch,
                     batch_obs
                 )
                 futures[future] = agent_batch
-                
+
             # Collect results with timeout
             for future in as_completed(futures, timeout=5.0):
                 agent_batch = futures[future]
@@ -271,31 +271,31 @@ class BatchedAgentManager:
                         results[agent_id] = result
                 except Exception as e:
                     logger.error(f"Batch processing failed: {e}")
-                    
+
         return results
-        
+
     def _process_agent_batch(self, agents: List[str], observations: np.ndarray):
         """Process multiple agents in single thread for cache locality"""
         results = []
-        
+
         # Pre-fetch all agent states to warm cache
         agent_states = [self.agents[aid] for aid in agents]
-        
+
         # Vectorized belief updates
         if len(agents) > 1:
             # Stack beliefs for SIMD operations
             beliefs = np.stack([a.beliefs for a in agent_states])
             updated_beliefs = self._vectorized_belief_update(beliefs, observations)
-            
+
             # Apply updated beliefs
             for i, agent in enumerate(agent_states):
                 agent.beliefs = updated_beliefs[i]
-                
+
         # Process actions (still sequential but with hot cache)
         for agent in agent_states:
             action = agent.select_action()
             results.append(action)
-            
+
         return results
 ```
 
@@ -322,7 +322,7 @@ class GILAwareScheduler:
         # Separate CPU-bound and I/O-bound operations
         self._cpu_queue = queue.Queue()
         self._io_queue = queue.Queue()
-        
+
     def schedule_operation(self, operation):
         """Route operations based on GIL impact"""
         if operation.releases_gil:
@@ -331,23 +331,23 @@ class GILAwareScheduler:
         else:
             # Pure Python - serialize to avoid GIL contention
             self._cpu_queue.put(operation)
-            
+
     def process_with_gil_awareness(self):
         """Process operations with GIL-aware scheduling"""
         # Batch CPU-bound operations
         cpu_batch = []
         while not self._cpu_queue.empty() and len(cpu_batch) < 10:
             cpu_batch.append(self._cpu_queue.get())
-            
+
         # Process CPU batch in single thread
         if cpu_batch:
             self._process_cpu_batch(cpu_batch)
-            
+
         # Process I/O operations in parallel
         io_operations = []
         while not self._io_queue.empty():
             io_operations.append(self._io_queue.get())
-            
+
         if io_operations:
             # These release GIL, so parallelize
             with ThreadPoolExecutor(max_workers=self._io_workers) as executor:

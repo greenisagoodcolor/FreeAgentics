@@ -29,7 +29,7 @@ WORKDIR /app
 COPY requirements-core.txt requirements-dev.txt requirements.txt ./
 
 # Create requirements-docker.txt without git dependencies
-RUN grep -v "^-e git+" requirements.txt > requirements-docker.txt 
+RUN grep -v "^-e git+" requirements.txt > requirements-docker.txt
 
 # Install Python dependencies
 RUN pip install --no-cache-dir -r requirements-core.txt && \

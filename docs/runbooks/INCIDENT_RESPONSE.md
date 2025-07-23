@@ -153,10 +153,10 @@ A detailed post-mortem will follow. Thank you for your patience.
   ```bash
   # Recent errors
   docker-compose logs --tail=1000 api | grep ERROR
-  
+
   # Agent coordination issues
   docker-compose logs --tail=1000 api | grep -E "(coalition|coordination|agent)"
-  
+
   # Database issues
   docker-compose logs --tail=500 postgres
   ```

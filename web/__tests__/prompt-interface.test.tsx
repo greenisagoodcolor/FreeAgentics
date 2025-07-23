@@ -8,25 +8,30 @@ import { apiClient } from "../lib/api-client";
 jest.mock("../lib/api-client", () => ({
   apiClient: {
     request: jest.fn(),
-    submitPrompt: jest.fn(),
-    getPromptSuggestions: jest.fn(),
+    processPrompt: jest.fn(),
+    getSuggestions: jest.fn(),
   },
 }));
 
-// Mock WebSocket
-const mockWebSocket = {
-  send: jest.fn(),
-  close: jest.fn(),
-  addEventListener: jest.fn(),
-  removeEventListener: jest.fn(),
-  readyState: 1, // OPEN
-};
+// Mock WebSocket more properly
+class MockWebSocket {
+  static CONNECTING = 0;
+  static OPEN = 1;
+  static CLOSING = 2;
+  static CLOSED = 3;
 
-global.WebSocket = jest.fn(() => mockWebSocket) as typeof WebSocket & {
-  new (url: string | URL, protocols?: string | string[]): WebSocket;
-  OPEN: number;
-};
-global.WebSocket.OPEN = 1;
+  readyState = 1;
+  send = jest.fn();
+  close = jest.fn();
+  addEventListener = jest.fn();
+  removeEventListener = jest.fn();
+
+  constructor() {
+    this.readyState = MockWebSocket.OPEN;
+  }
+}
+
+global.WebSocket = MockWebSocket as any;
 
 describe("PromptInterface", () => {
   const mockApiClient = apiClient;
@@ -72,7 +77,7 @@ describe("PromptInterface", () => {
         resolvePromise = resolve;
       });
 
-      mockApiClient.submitPrompt = jest.fn().mockReturnValue(delayedPromise);
+      mockApiClient.processPrompt = jest.fn().mockReturnValue(delayedPromise);
 
       render(<PromptInterface />);
 
@@ -105,7 +110,7 @@ describe("PromptInterface", () => {
 
   describe("User Interactions", () => {
     it("should handle prompt submission", async () => {
-      mockApiClient.submitPrompt = jest.fn().mockResolvedValue({
+      mockApiClient.processPrompt = jest.fn().mockResolvedValue({
         id: "test-123",
         prompt: "Test prompt",
         status: "processing",
@@ -121,7 +126,7 @@ describe("PromptInterface", () => {
       await userEvent.click(button);
 
       await waitFor(() => {
-        expect(mockApiClient.submitPrompt).toHaveBeenCalledWith("Test prompt");
+        expect(mockApiClient.processPrompt).toHaveBeenCalledWith("Test prompt");
       });
 
       // Input should be cleared after submission
@@ -149,7 +154,7 @@ describe("PromptInterface", () => {
     });
 
     it("should submit on Enter key press", async () => {
-      mockApiClient.submitPrompt = jest.fn().mockResolvedValue({
+      mockApiClient.processPrompt = jest.fn().mockResolvedValue({
         id: "test-123",
         prompt: "Test prompt",
         status: "processing",
@@ -164,12 +169,12 @@ describe("PromptInterface", () => {
       await userEvent.keyboard("{Enter}");
 
       await waitFor(() => {
-        expect(mockApiClient.submitPrompt).toHaveBeenCalled();
+        expect(mockApiClient.processPrompt).toHaveBeenCalled();
       });
     });
 
     it("should show suggestion list when typing", async () => {
-      mockApiClient.getPromptSuggestions = jest.fn().mockResolvedValue({
+      mockApiClient.getSuggestions = jest.fn().mockResolvedValue({
         suggestions: ["How to create an agent?", "How does active inference work?"],
       });
 
@@ -188,7 +193,7 @@ describe("PromptInterface", () => {
     });
 
     it("should handle suggestion selection", async () => {
-      mockApiClient.getPromptSuggestions = jest.fn().mockResolvedValue({
+      mockApiClient.getSuggestions = jest.fn().mockResolvedValue({
         suggestions: ["How to create an agent?", "How does active inference work?"],
       });
 
@@ -215,7 +220,7 @@ describe("PromptInterface", () => {
 
   describe("Loading States", () => {
     it("should show loading indicator during processing", async () => {
-      mockApiClient.submitPrompt = jest
+      mockApiClient.processPrompt = jest
         .fn()
         .mockImplementation(() => new Promise((resolve) => setTimeout(resolve, 100)));
 
@@ -240,7 +245,7 @@ describe("PromptInterface", () => {
         status: string;
         agents: Array<{ id: string; name: string; status: string }>;
       }) => void;
-      mockApiClient.submitPrompt = jest.fn().mockImplementation(
+      mockApiClient.processPrompt = jest.fn().mockImplementation(
         () =>
           new Promise((resolve) => {
             resolvePromise = resolve;
@@ -278,7 +283,7 @@ describe("PromptInterface", () => {
 
   describe("Error Handling", () => {
     it("should display error message on API failure", async () => {
-      mockApiClient.submitPrompt = jest.fn().mockRejectedValue({
+      mockApiClient.processPrompt = jest.fn().mockRejectedValue({
         detail: "Internal server error",
         status: 500,
       });
@@ -297,7 +302,7 @@ describe("PromptInterface", () => {
     });
 
     it("should allow retry after error", async () => {
-      mockApiClient.submitPrompt = jest
+      mockApiClient.processPrompt = jest
         .fn()
         .mockRejectedValueOnce({ detail: "Network error", status: 0 })
         .mockResolvedValueOnce({
@@ -331,7 +336,7 @@ describe("PromptInterface", () => {
     });
 
     it("should handle network timeout gracefully", async () => {
-      mockApiClient.submitPrompt = jest.fn().mockRejectedValue({
+      mockApiClient.processPrompt = jest.fn().mockRejectedValue({
         detail: "Request timeout",
         status: 408,
       });
@@ -382,7 +387,7 @@ describe("PromptInterface", () => {
 
     it("should debounce suggestion requests", async () => {
       jest.useFakeTimers();
-      mockApiClient.getPromptSuggestions = jest.fn().mockResolvedValue({
+      mockApiClient.getSuggestions = jest.fn().mockResolvedValue({
         suggestions: ["How to test?"],
       });
 
@@ -395,7 +400,7 @@ describe("PromptInterface", () => {
       await user.type(input, "How");
 
       // Should not make requests immediately
-      expect(mockApiClient.getPromptSuggestions).not.toHaveBeenCalled();
+      expect(mockApiClient.getSuggestions).not.toHaveBeenCalled();
 
       // Fast-forward debounce timer
       await act(async () => {
@@ -404,7 +409,7 @@ describe("PromptInterface", () => {
 
       // Now should make request
       await waitFor(() => {
-        expect(mockApiClient.getPromptSuggestions).toHaveBeenCalledWith("How");
+        expect(mockApiClient.getSuggestions).toHaveBeenCalledWith("How");
       });
 
       jest.useRealTimers();

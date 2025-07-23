@@ -105,8 +105,8 @@ This guide provides comprehensive documentation for monitoring the FreeAgentics 
 
 ### 1. System Overview Dashboard
 
-**Purpose**: High-level system health monitoring  
-**URL**: `https://grafana.freeagentics.com/d/system-overview`  
+**Purpose**: High-level system health monitoring
+**URL**: `https://grafana.freeagentics.com/d/system-overview`
 **Refresh Rate**: 30 seconds
 
 **Key Panels**:
@@ -124,8 +124,8 @@ This guide provides comprehensive documentation for monitoring the FreeAgentics 
 
 ### 2. Agent Coordination Dashboard
 
-**Purpose**: Multi-agent system performance monitoring  
-**URL**: `https://grafana.freeagentics.com/d/agent-coordination`  
+**Purpose**: Multi-agent system performance monitoring
+**URL**: `https://grafana.freeagentics.com/d/agent-coordination`
 **Refresh Rate**: 10 seconds
 
 **Key Panels**:
@@ -147,8 +147,8 @@ This guide provides comprehensive documentation for monitoring the FreeAgentics 
 
 ### 3. Memory Usage Heatmap
 
-**Purpose**: Detailed memory usage analysis  
-**URL**: `https://grafana.freeagentics.com/d/memory-heatmap`  
+**Purpose**: Detailed memory usage analysis
+**URL**: `https://grafana.freeagentics.com/d/memory-heatmap`
 **Refresh Rate**: 30 seconds
 
 **Key Panels**:
@@ -165,8 +165,8 @@ This guide provides comprehensive documentation for monitoring the FreeAgentics 
 
 ### 4. API Performance Dashboard
 
-**Purpose**: API latency and throughput monitoring  
-**URL**: `https://grafana.freeagentics.com/d/api-performance`  
+**Purpose**: API latency and throughput monitoring
+**URL**: `https://grafana.freeagentics.com/d/api-performance`
 **Refresh Rate**: 10 seconds
 
 **Key Panels**:
@@ -187,8 +187,8 @@ This guide provides comprehensive documentation for monitoring the FreeAgentics 
 
 ### 5. Capacity Planning Dashboard
 
-**Purpose**: Resource utilization and forecasting  
-**URL**: `https://grafana.freeagentics.com/d/capacity-planning`  
+**Purpose**: Resource utilization and forecasting
+**URL**: `https://grafana.freeagentics.com/d/capacity-planning`
 **Refresh Rate**: 1 minute
 
 **Key Panels**:
@@ -344,7 +344,7 @@ level:ERROR AND component:agent AND timestamp:[now-1h TO now]
 
 #### Performance Analysis
 ```
-component:api AND duration:>500 
+component:api AND duration:>500
 | timechart avg(duration) by endpoint
 ```
 
@@ -359,7 +359,7 @@ component:security AND action:authentication
 ### Common Issues and Metrics
 
 #### 1. High Memory Usage
-**Symptoms**: Agent memory > 30MB  
+**Symptoms**: Agent memory > 30MB
 **Metrics to Check**:
 - `freeagentics_agent_memory_usage_bytes`
 - `freeagentics_agent_memory_growth_rate`
@@ -372,7 +372,7 @@ component:security AND action:authentication
 4. Check for memory leaks in logs
 
 #### 2. Coordination Timeouts
-**Symptoms**: Timeout rate > 5%  
+**Symptoms**: Timeout rate > 5%
 **Metrics to Check**:
 - `freeagentics_agent_coordination_errors_total{error_type="timeout"}`
 - `freeagentics_agent_coordination_duration_seconds`
@@ -385,7 +385,7 @@ component:security AND action:authentication
 4. Check for resource contention
 
 #### 3. API Performance Degradation
-**Symptoms**: P95 latency > 500ms  
+**Symptoms**: P95 latency > 500ms
 **Metrics to Check**:
 - `http_request_duration_seconds`
 - `http_requests_total`
@@ -398,7 +398,7 @@ component:security AND action:authentication
 4. Check external dependencies
 
 #### 4. Belief System Anomalies
-**Symptoms**: Free energy outside normal range  
+**Symptoms**: Free energy outside normal range
 **Metrics to Check**:
 - `freeagentics_belief_free_energy_current`
 - `freeagentics_belief_accuracy_ratio`
@@ -566,6 +566,6 @@ component:security AND action:authentication
 
 ---
 
-**Last Updated**: 2025-01-15  
-**Version**: 1.0  
+**Last Updated**: 2025-01-15
+**Version**: 1.0
 **Next Review**: 2025-02-15

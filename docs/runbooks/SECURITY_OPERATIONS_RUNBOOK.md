@@ -64,17 +64,17 @@ security_alerts:
     query: "failed_auth_attempts > 10 in 5m"
     severity: high
     action: block_ip
-    
+
   - name: privilege_escalation
     query: "role_change AND target_role = admin"
     severity: critical
     action: immediate_alert
-    
+
   - name: data_exfiltration
     query: "data_download_size > 100MB AND user_type = standard"
     severity: medium
     action: investigate
-    
+
   - name: suspicious_network_activity
     query: "network_connections > baseline * 3"
     severity: medium

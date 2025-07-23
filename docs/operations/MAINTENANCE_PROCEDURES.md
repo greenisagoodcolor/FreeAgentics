@@ -537,12 +537,12 @@ maintenance:
       schedule: "0 3 * * *"
       script: database-daily-maintenance.sh
       alert_on_failure: true
-    
+
     - name: log_rotation
       schedule: "0 0 * * *"
       script: rotate-logs.sh
       alert_on_failure: false
-    
+
     - name: certificate_check
       schedule: "0 2 * * *"
       script: check-certificates.sh
@@ -552,7 +552,7 @@ maintenance:
   notifications:
     slack_webhook: ${SLACK_WEBHOOK}
     email_list: ops@freeagentics.io
-    
+
   thresholds:
     disk_usage_percent: 80
     memory_usage_percent: 85

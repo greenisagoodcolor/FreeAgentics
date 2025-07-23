@@ -5,7 +5,7 @@
 set -euo pipefail
 
 # Load environment variables
-source /etc/freeagentics/backup.env 2>/dev/null 
+source /etc/freeagentics/backup.env 2>/dev/null
 
 # Configuration
 BACKUP_ROOT="${BACKUP_ROOT:-/var/backups/freeagentics}"
@@ -307,16 +307,16 @@ cleanup_old_backups() {
     log "INFO" "Cleaning up old backups..."
 
     # Clean database backups
-    find "$BACKUP_ROOT/daily" -name "postgres_*.sql.gz" -mtime +$DB_RETENTION_DAYS -delete 2>/dev/null 
+    find "$BACKUP_ROOT/daily" -name "postgres_*.sql.gz" -mtime +$DB_RETENTION_DAYS -delete 2>/dev/null
 
     # Clean Redis backups
-    find "$BACKUP_ROOT/redis" -name "redis_backup_*.tar.gz" -mtime +$REDIS_RETENTION_DAYS -delete 2>/dev/null 
+    find "$BACKUP_ROOT/redis" -name "redis_backup_*.tar.gz" -mtime +$REDIS_RETENTION_DAYS -delete 2>/dev/null
 
     # Clean configuration backups
-    find "$BACKUP_ROOT/config" -name "config_backup_*.tar.gz" -mtime +$CONFIG_RETENTION_DAYS -delete 2>/dev/null 
+    find "$BACKUP_ROOT/config" -name "config_backup_*.tar.gz" -mtime +$CONFIG_RETENTION_DAYS -delete 2>/dev/null
 
     # Clean old logs
-    find "$BACKUP_ROOT/logs" -name "*.log" -mtime +30 -delete 2>/dev/null 
+    find "$BACKUP_ROOT/logs" -name "*.log" -mtime +30 -delete 2>/dev/null
 
     log "INFO" "Cleanup completed"
 }

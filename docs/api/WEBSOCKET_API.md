@@ -586,44 +586,44 @@ class WebSocketClient {
         this.maxReconnectAttempts = 5;
         this.reconnectDelay = 1000;
     }
-    
+
     connect() {
         this.ws = new WebSocket(`${this.url}?token=${this.token}`);
-        
+
         this.ws.onopen = () => {
             console.log('Connected');
             this.reconnectAttempts = 0;
             this.startHeartbeat();
         };
-        
+
         this.ws.onclose = (event) => {
             console.log('Disconnected:', event.code, event.reason);
             this.stopHeartbeat();
-            
+
             if (this.reconnectAttempts < this.maxReconnectAttempts) {
                 this.scheduleReconnect();
             }
         };
-        
+
         this.ws.onerror = (error) => {
             console.error('WebSocket error:', error);
         };
-        
+
         this.ws.onmessage = (event) => {
             this.handleMessage(JSON.parse(event.data));
         };
     }
-    
+
     scheduleReconnect() {
         const delay = this.reconnectDelay * Math.pow(2, this.reconnectAttempts);
         this.reconnectAttempts++;
-        
+
         setTimeout(() => {
             console.log(`Reconnecting (attempt ${this.reconnectAttempts})...`);
             this.connect();
         }, delay);
     }
-    
+
     startHeartbeat() {
         this.heartbeatInterval = setInterval(() => {
             if (this.ws.readyState === WebSocket.OPEN) {
@@ -631,13 +631,13 @@ class WebSocketClient {
             }
         }, 30000); // 30 seconds
     }
-    
+
     stopHeartbeat() {
         if (this.heartbeatInterval) {
             clearInterval(this.heartbeatInterval);
         }
     }
-    
+
     handleMessage(message) {
         switch (message.type) {
             case 'pong':
@@ -677,8 +677,8 @@ Monitor token expiration and refresh as needed:
 // Monitor for authentication errors
 ws.onmessage = (event) => {
     const message = JSON.parse(event.data);
-    
-    if (message.type === 'connection_error' && 
+
+    if (message.type === 'connection_error' &&
         message.data.error_code === 'AUTHENTICATION_FAILED') {
         // Refresh token and reconnect
         refreshToken().then(newToken => {
@@ -697,13 +697,13 @@ function validateMessage(message) {
     if (!message.type || !message.timestamp) {
         throw new Error('Invalid message format');
     }
-    
+
     // Validate message type
     const validTypes = ['agent_status', 'metrics_update', 'system_alert'];
     if (!validTypes.includes(message.type)) {
         throw new Error('Unknown message type');
     }
-    
+
     return true;
 }
 ```
@@ -718,10 +718,10 @@ class AgentDashboard {
         this.agents = new Map();
         this.metrics = {};
     }
-    
+
     async start() {
         await this.ws.connect();
-        
+
         // Subscribe to all relevant events
         this.ws.send({
             type: 'subscribe',
@@ -731,26 +731,26 @@ class AgentDashboard {
             }
         });
     }
-    
+
     onAgentStatus(data) {
         this.agents.set(data.agent_id, {
             ...this.agents.get(data.agent_id),
             status: data.new_status,
             last_update: data.timestamp
         });
-        
+
         this.updateUI();
     }
-    
+
     onMetricsUpdate(data) {
         this.metrics = data;
         this.updateMetricsDisplay();
     }
-    
+
     updateUI() {
         // Update dashboard interface
         document.getElementById('agent-count').textContent = this.agents.size;
-        document.getElementById('active-agents').textContent = 
+        document.getElementById('active-agents').textContent =
             Array.from(this.agents.values()).filter(a => a.status === 'active').length;
     }
 }
@@ -764,10 +764,10 @@ class AgentMonitor {
         this.ws = new WebSocketClient('wss://api.freeagentics.com/api/v1/ws', token);
         this.inferences = [];
     }
-    
+
     async start() {
         await this.ws.connect();
-        
+
         // Subscribe to specific agent events
         this.ws.send({
             type: 'subscribe',
@@ -777,7 +777,7 @@ class AgentMonitor {
             }
         });
     }
-    
+
     onInferenceStarted(data) {
         this.inferences.push({
             id: data.inference_id,
@@ -785,10 +785,10 @@ class AgentMonitor {
             started: data.timestamp,
             progress: 0
         });
-        
+
         this.updateInferenceList();
     }
-    
+
     onInferenceProgress(data) {
         const inference = this.inferences.find(i => i.id === data.inference_id);
         if (inference) {
@@ -796,7 +796,7 @@ class AgentMonitor {
             this.updateProgressBar(data.inference_id, data.progress);
         }
     }
-    
+
     onInferenceCompleted(data) {
         const inference = this.inferences.find(i => i.id === data.inference_id);
         if (inference) {
@@ -804,7 +804,7 @@ class AgentMonitor {
             inference.completed = data.timestamp;
             inference.processing_time = data.processing_time;
         }
-        
+
         this.updateInferenceList();
     }
 }

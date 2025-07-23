@@ -266,10 +266,10 @@ def test_security_feature(self, client):
     """Test description."""
     # Arrange
     test_data = {...}
-    
+
     # Act
     response = client.post('/endpoint', json=test_data)
-    
+
     # Assert
     assert response.status_code == expected_status
     assert 'sensitive_info' not in response.text

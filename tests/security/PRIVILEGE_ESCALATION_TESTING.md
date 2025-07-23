@@ -67,7 +67,7 @@ Test individual escalation categories:
 # Vertical escalation only
 pytest test_privilege_escalation_comprehensive.py::TestVerticalPrivilegeEscalation -v
 
-# Horizontal escalation only  
+# Horizontal escalation only
 pytest test_privilege_escalation_comprehensive.py::TestHorizontalPrivilegeEscalation -v
 
 # Token-based attacks only
@@ -151,7 +151,7 @@ Add to your CI/CD pipeline:
 - name: Run Privilege Escalation Tests
   run: |
     python -m pytest tests/security/test_privilege_escalation_comprehensive.py -v
-    
+
 - name: Validate Security Defenses
   run: |
     ./tests/security/validate_privilege_escalation_defenses.py

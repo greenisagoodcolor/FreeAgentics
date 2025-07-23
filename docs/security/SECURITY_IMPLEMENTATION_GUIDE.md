@@ -22,7 +22,7 @@ This document provides comprehensive documentation of the security features impl
 The authentication system uses JWT (JSON Web Tokens) with the following features:
 
 - **Algorithm**: RS256 (RSA with SHA-256)
-- **Token Expiration**: 
+- **Token Expiration**:
   - Access tokens: 30 minutes
   - Refresh tokens: 7 days
 - **Key Rotation**: Automatic key rotation every 30 days
@@ -294,17 +294,17 @@ server {
     # SSL Configuration
     ssl_certificate /etc/ssl/certs/freeagentics.crt;
     ssl_certificate_key /etc/ssl/private/freeagentics.key;
-    
+
     # Strong protocols
     ssl_protocols TLSv1.2 TLSv1.3;
-    
+
     # Strong ciphers
     ssl_ciphers 'ECDHE-ECDSA-AES256-GCM-SHA384:ECDHE-RSA-AES256-GCM-SHA384';
-    
+
     # OCSP Stapling
     ssl_stapling on;
     ssl_stapling_verify on;
-    
+
     # Session settings
     ssl_session_timeout 1d;
     ssl_session_cache shared:SSL:50m;

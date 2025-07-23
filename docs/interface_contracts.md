@@ -41,23 +41,23 @@ class ILLMProvider(ABC):
 class IGMNGenerator(ABC):
     @abstractmethod
     def prompt_to_gmn(
-        self, 
+        self,
         user_prompt: str,
         agent_type: str = "explorer",
         constraints: Optional[Dict[str, Any]] = None
     ) -> str:
         """Convert natural language prompt to GMN specification"""
         pass
-    
+
     @abstractmethod
     def validate_gmn(self, gmn_spec: str) -> Tuple[bool, List[str]]:
         """Validate GMN specification, return (is_valid, errors)"""
         pass
-    
+
     @abstractmethod
     def refine_gmn(
-        self, 
-        gmn_spec: str, 
+        self,
+        gmn_spec: str,
         feedback: str
     ) -> str:
         """Refine GMN based on validation feedback"""
@@ -85,7 +85,7 @@ class GMNParser:
     def parse(self, gmn_spec: Union[str, Dict[str, Any]]) -> GMNGraph:
         """Parse GMN specification into graph"""
         pass
-    
+
     def to_pymdp_model(self, graph: GMNGraph) -> Dict[str, Any]:
         """Convert GMN graph to PyMDP model specification"""
         # Returns: {
@@ -118,12 +118,12 @@ class IAgentFactory(ABC):
     ) -> Agent:
         """Create PyMDP agent from GMN model output"""
         pass
-    
+
     @abstractmethod
     def validate_model(self, model: Dict[str, Any]) -> Tuple[bool, List[str]]:
         """Validate model before agent creation"""
         pass
-    
+
     @abstractmethod
     def create_from_arrays(
         self,
@@ -145,14 +145,14 @@ class PyMDPCompatibilityAdapter:
     def sample_action(self, pymdp_agent: Agent) -> int:
         """Convert numpy array action to int"""
         pass
-    
+
     def infer_policies(
-        self, 
+        self,
         pymdp_agent: Agent
     ) -> Tuple[NDArray[np.floating], NDArray[np.floating]]:
         """Get (q_pi, G) policy arrays"""
         pass
-    
+
     def infer_states(
         self,
         pymdp_agent: Agent,
@@ -179,10 +179,10 @@ class IBeliefExtractor(ABC):
     def extract_beliefs(self, agent: Agent) -> BeliefState:
         """Extract current belief state from agent"""
         pass
-    
+
     @abstractmethod
     def get_belief_trajectory(
-        self, 
+        self,
         agent: Agent,
         history_length: int = 10
     ) -> List[BeliefState]:
@@ -198,14 +198,14 @@ class KnowledgeGraph:
     def add_node(self, node: KnowledgeNode) -> bool:
         """Add node to graph"""
         pass
-    
+
     def update_node(self, node_id: str, properties: Dict[str, Any]) -> bool:
         """Update existing node"""
         pass
-    
+
     def get_neighbors(
-        self, 
-        node_id: str, 
+        self,
+        node_id: str,
         edge_type: Optional[EdgeType] = None
     ) -> List[str]:
         """Get neighboring nodes"""
@@ -224,7 +224,7 @@ class IBeliefKGBridge(ABC):
     ) -> List[KnowledgeNode]:
         """Convert belief state to knowledge nodes"""
         pass
-    
+
     @abstractmethod
     def observation_to_nodes(
         self,
@@ -234,7 +234,7 @@ class IBeliefKGBridge(ABC):
     ) -> List[KnowledgeNode]:
         """Convert observation to knowledge nodes"""
         pass
-    
+
     @abstractmethod
     def update_kg_from_agent(
         self,
@@ -265,7 +265,7 @@ class IPreferenceUpdater(ABC):
     ) -> Union[np.ndarray, List[np.ndarray]]:
         """Generate new preferences from KG insights"""
         pass
-    
+
     @abstractmethod
     def apply_preference_update(
         self,
@@ -391,10 +391,10 @@ Example:
 ```python
 class IAgentFactory_v1_0_0(ABC):
     # Initial version
-    
+
 class IAgentFactory_v1_1_0(IAgentFactory_v1_0_0):
     # Adds new methods, backward compatible
-    
+
 class IAgentFactory_v2_0_0(ABC):
     # Breaking changes to existing methods
 ```

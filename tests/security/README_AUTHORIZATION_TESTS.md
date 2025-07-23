@@ -119,10 +119,10 @@ def test_permission_boundary_validation(self, test_users):
     for role, permissions in ROLE_PERMISSIONS.items():
         user_data = test_users[role]
         token_data = auth_manager.verify_token(user_data["token"])
-        
+
         # Verify exact permission set
         assert set(token_data.permissions) == set(permissions)
-        
+
         # Verify no unauthorized permissions
         unauthorized = set(Permission) - set(permissions)
         for perm in unauthorized:
@@ -135,11 +135,11 @@ def test_idor_attack(self, client, users):
     """Test IDOR vulnerability defense."""
     # User 1 creates resource
     resource_id = create_resource(user1)
-    
+
     # User 2 attempts unauthorized access
-    response = client.get(f"/api/v1/resource/{resource_id}", 
+    response = client.get(f"/api/v1/resource/{resource_id}",
                          headers=user2_headers)
-    
+
     # Verify proper authorization
     assert response.status_code == status.HTTP_403_FORBIDDEN
 ```
@@ -155,16 +155,16 @@ def test_context_aware_authorization(self):
         ip_address="192.168.1.100",
         risk_score=0.2
     )
-    
+
     resource = ResourceContext(
         resource_type="sensitive_data",
         sensitivity_level="restricted"
     )
-    
+
     granted, reason, rules = enhanced_rbac_manager.evaluate_abac_access(
         context, resource, "view"
     )
-    
+
     # Verify decision based on context
     assert not granted if context.risk_score > 0.8 else True
 ```
@@ -249,20 +249,20 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v2
-      
+
       - name: Set up Python
         uses: actions/setup-python@v2
         with:
           python-version: '3.9'
-      
+
       - name: Install dependencies
         run: |
           pip install -r requirements.txt
           pip install pytest pytest-json-report
-      
+
       - name: Run Authorization Tests
         run: python tests/security/run_authorization_tests.py
-      
+
       - name: Upload Test Report
         if: always()
         uses: actions/upload-artifact@v2

@@ -41,17 +41,17 @@ save_current_state() {
     # Save container logs
     log "Collecting container logs..."
     for container in $(docker ps -a --format "{{.Names}}" | grep freeagentics); do
-        docker logs "$container" > "$STATE_DIR/${container}.log" 2>&1 
+        docker logs "$container" > "$STATE_DIR/${container}.log" 2>&1
     done
 
     # Save container states
     docker ps -a > "$STATE_DIR/container_states.txt"
 
     # Save environment info
-    cp "$PROJECT_ROOT/.env.production" "$STATE_DIR/" 2>/dev/null 
+    cp "$PROJECT_ROOT/.env.production" "$STATE_DIR/" 2>/dev/null
 
     # Save metrics snapshot
-    curl -s "http://localhost:9090/api/v1/query?query=up" > "$STATE_DIR/prometheus_snapshot.json" 2>/dev/null 
+    curl -s "http://localhost:9090/api/v1/query?query=up" > "$STATE_DIR/prometheus_snapshot.json" 2>/dev/null
 
     log "Current state saved to: $STATE_DIR"
 }
@@ -191,7 +191,7 @@ clear_corrupted_data() {
     # Clear temporary files
     log "Clearing temporary files..."
     docker-compose -f "$PROJECT_ROOT/docker-compose.production.yml" \
-        exec -T api rm -rf /tmp/* 
+        exec -T api rm -rf /tmp/*
 }
 
 # Update load balancer
@@ -240,12 +240,12 @@ send_notifications() {
                     ]
                 }]
             }" \
-            "$SLACK_WEBHOOK" 
+            "$SLACK_WEBHOOK"
     fi
 
     # Email notification
     if [[ -n "${ALERT_EMAIL:-}" ]]; then
-        echo "$message" | mail -s "FreeAgentics Rollback $status" "$ALERT_EMAIL" 
+        echo "$message" | mail -s "FreeAgentics Rollback $status" "$ALERT_EMAIL"
     fi
 
     # PagerDuty
@@ -264,7 +264,7 @@ send_notifications() {
                         \"environment\": \"production\"
                     }
                 }
-            }" 
+            }"
     fi
 }
 

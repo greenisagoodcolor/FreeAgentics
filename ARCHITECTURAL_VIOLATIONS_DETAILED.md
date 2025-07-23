@@ -20,7 +20,7 @@ class IAgentRepository(ABC):
     @abstractmethod
     async def save_agent(self, agent: Agent) -> None:
         pass
-    
+
     @abstractmethod
     async def get_agent(self, agent_id: str) -> Optional[Agent]:
         pass
@@ -32,7 +32,7 @@ class EnhancedAgentCoordinator:
 ```
 
 ### Violation 2: API Layer Direct Domain Implementation Import
-**Files**: 
+**Files**:
 - `/api/v1/agents.py:75`
 - `/api/v1/graphql_resolvers.py:12`
 
@@ -91,7 +91,7 @@ class ActiveInferenceAgent:
         self.name = name
         self.beliefs = Beliefs()
         self.preferences = Preferences()
-    
+
     def update_beliefs(self, observation: Observation) -> None:
         # Pure domain logic
         pass
@@ -100,7 +100,7 @@ class ActiveInferenceAgent:
 class PyMDPAdapter(IInferenceEngine):
     def __init__(self, pymdp_agent):
         self.pymdp_agent = pymdp_agent
-    
+
     def compute_beliefs(self, observation: Observation) -> Beliefs:
         # Adapt PyMDP to domain interface
         pass
@@ -140,15 +140,15 @@ class AgentService:
         self._repository = agent_repository
         self._publisher = event_publisher
         self._belief_engine = belief_engine
-    
+
     async def create_agent(self, command: CreateAgentCommand) -> AgentCreatedEvent:
         # Orchestrate domain logic
         agent = Agent.create(command.name, command.template)
-        
+
         # Use infrastructure through interfaces
         await self._repository.save(agent)
         await self._publisher.publish(AgentCreatedEvent(agent.id))
-        
+
         return agent
 ```
 
@@ -203,7 +203,7 @@ class ActiveInferenceAgent(ABC):
     def __init__(self, ...):
         # ...
         logger.info(f"Created agent {self.agent_id}")  # Infrastructure concern
-        
+
         # Performance monitoring in domain
         self.performance_optimizer = PerformanceOptimizer()
         self.performance_metrics: Dict[str, Any] = {}
@@ -225,11 +225,11 @@ def monitor_performance(func):
         start_time = time.time()
         result = func(*args, **kwargs)
         duration = time.time() - start_time
-        
+
         # Log and monitor at infrastructure level
         logger.info(f"Executed {func.__name__} in {duration}s")
         metrics.record(func.__name__, duration)
-        
+
         return result
     return wrapper
 
@@ -274,7 +274,7 @@ def test_agent_creation():
         agent_id=AgentId("123"),
         name=AgentName("TestAgent")
     )
-    
+
     assert agent.id.value == "123"
     assert agent.name.value == "TestAgent"
     assert agent.is_active is False
@@ -285,11 +285,11 @@ async def test_agent_service_creates_agent():
     # Integration test with real infrastructure
     repository = InMemoryAgentRepository()
     service = AgentService(repository)
-    
+
     agent = await service.create_agent(
         CreateAgentCommand(name="TestAgent", template="basic")
     )
-    
+
     assert await repository.exists(agent.id)
 ```
 
@@ -305,11 +305,11 @@ import os
 def test_no_database_imports_in_domain():
     """Domain layer should not import from database package."""
     domain_files = glob.glob("domain/**/*.py", recursive=True)
-    
+
     for file in domain_files:
         with open(file) as f:
             tree = ast.parse(f.read())
-            
+
         for node in ast.walk(tree):
             if isinstance(node, ast.Import):
                 for alias in node.names:
@@ -319,15 +319,15 @@ def test_no_database_imports_in_domain():
 def test_api_uses_interfaces_not_implementations():
     """API layer should depend on abstractions."""
     api_files = glob.glob("api/**/*.py", recursive=True)
-    
+
     for file in api_files:
         with open(file) as f:
             content = f.read()
-            
+
         # Should import from interfaces
         assert "from domain.interfaces" in content or \
                "from application.interfaces" in content
-        
+
         # Should not import concrete implementations
         assert "from agents.agent_manager import AgentManager" not in content
 ```

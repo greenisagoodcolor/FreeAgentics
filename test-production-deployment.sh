@@ -370,7 +370,7 @@ run_full_deployment_test() {
     info "Running full deployment test..."
 
     # Stop any existing services
-    docker-compose -f "$COMPOSE_FILE" down --remove-orphans 2>/dev/null 
+    docker-compose -f "$COMPOSE_FILE" down --remove-orphans 2>/dev/null
 
     # Build images
     info "Building images..."

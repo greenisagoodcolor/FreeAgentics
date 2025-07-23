@@ -57,7 +57,7 @@ class PyMDPCompatibilityAdapter:
         # Strict return type validation and conversion
         if not isinstance(action_result, np.ndarray):
             raise RuntimeError(
-                f"PyMDP sample_action() returned {type(action_result)}, " f"expected numpy.ndarray"
+                f"PyMDP sample_action() returned {type(action_result)}, expected numpy.ndarray"
             )
 
         if action_result.dtype not in [
@@ -72,7 +72,7 @@ class PyMDPCompatibilityAdapter:
 
         if action_result.shape != (1,):
             raise RuntimeError(
-                f"PyMDP sample_action() returned shape {action_result.shape}, " f"expected (1,)"
+                f"PyMDP sample_action() returned shape {action_result.shape}, expected (1,)"
             )
 
         # Convert to exact int type - no fallbacks on failure
@@ -116,7 +116,7 @@ class PyMDPCompatibilityAdapter:
         # Strict return type validation
         if not isinstance(policies_result, tuple):
             raise RuntimeError(
-                f"PyMDP infer_policies() returned {type(policies_result)}, " f"expected tuple"
+                f"PyMDP infer_policies() returned {type(policies_result)}, expected tuple"
             )
 
         if len(policies_result) != 2:
@@ -140,9 +140,7 @@ class PyMDPCompatibilityAdapter:
         if not np.issubdtype(G.dtype, np.floating):
             raise RuntimeError(f"G has dtype {G.dtype}, expected floating point")
 
-        logger.debug(
-            f"Validated infer_policies return: q_pi shape {q_pi.shape}, G" f" shape {G.shape}"
-        )
+        logger.debug(f"Validated infer_policies return: q_pi shape {q_pi.shape}, G shape {G.shape}")
         return q_pi, G
 
     def _validate_observation_format(
@@ -206,8 +204,7 @@ class PyMDPCompatibilityAdapter:
                 return [content]
             else:
                 raise RuntimeError(
-                    f"infer_states object array contains {type(content)}, "
-                    f"expected list or ndarray"
+                    f"infer_states object array contains {type(content)}, expected list or ndarray"
                 )
         else:
             # Multi-element object array - convert to list

@@ -56,7 +56,7 @@ check_buildx() {
 # Setup QEMU for cross-platform builds
 setup_qemu() {
     log_info "Setting up QEMU for cross-platform builds..."
-    
+
     # Check if running in CI environment
     if [ -n "${CI:-}" ]; then
         # GitHub Actions specific setup
@@ -68,20 +68,20 @@ setup_qemu() {
             docker run --rm --privileged tonistiigi/binfmt --install all
         fi
     fi
-    
+
     log_success "QEMU setup completed"
 }
 
 # Create or update buildx builder
 setup_builder() {
     log_info "Setting up Docker Buildx builder: ${BUILDER_NAME}"
-    
+
     # Check if builder already exists
     if docker buildx ls | grep -q "${BUILDER_NAME}"; then
         log_info "Builder ${BUILDER_NAME} already exists. Removing old builder..."
         docker buildx rm "${BUILDER_NAME}" || true
     fi
-    
+
     # Create new builder with proper configuration
     docker buildx create \
         --name "${BUILDER_NAME}" \
@@ -91,19 +91,19 @@ setup_builder() {
         --driver-opt env.BUILDKIT_STEP_LOG_MAX_SPEED=50000000 \
         --platform "${PLATFORMS}" \
         --use
-    
+
     # Bootstrap the builder
     docker buildx inspect --bootstrap
-    
+
     log_success "Builder ${BUILDER_NAME} created and ready"
 }
 
 # Verify multi-arch support
 verify_platforms() {
     log_info "Verifying platform support..."
-    
+
     local supported_platforms=$(docker buildx inspect --bootstrap | grep Platforms | cut -d: -f2)
-    
+
     for platform in ${PLATFORMS//,/ }; do
         if echo "$supported_platforms" | grep -q "$platform"; then
             log_success "Platform $platform is supported"
@@ -118,11 +118,11 @@ verify_platforms() {
 build_images() {
     local tag="${1:-latest}"
     local push="${2:-false}"
-    
+
     log_info "Building multi-architecture images..."
     log_info "Tag: ${tag}"
     log_info "Push to registry: ${push}"
-    
+
     # Build backend image
     log_info "Building backend image..."
     docker buildx build \
@@ -138,7 +138,7 @@ build_images() {
         --build-arg VERSION="${tag}" \
         $([ "$push" = "true" ] && echo "--push" || echo "--load") \
         .
-    
+
     # Build frontend image
     log_info "Building frontend image..."
     docker buildx build \
@@ -155,19 +155,19 @@ build_images() {
         --build-arg NEXT_PUBLIC_API_URL="${NEXT_PUBLIC_API_URL:-https://api.yourdomain.com}" \
         $([ "$push" = "true" ] && echo "--push" || echo "--load") \
         web/
-    
+
     log_success "Multi-architecture images built successfully"
 }
 
 # Main execution
 main() {
     log_info "Starting Docker Buildx setup for FreeAgentics..."
-    
+
     # Parse command line arguments
     local command="${1:-setup}"
     local tag="${2:-latest}"
     local push="${3:-false}"
-    
+
     case "$command" in
         setup)
             check_docker

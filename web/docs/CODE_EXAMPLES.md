@@ -180,7 +180,7 @@ const MultiAgentChat: React.FC = () => {
           </button>
         ))}
       </div>
-      
+
       <div className="lg:col-span-2">
         {selectedAgent ? (
           <ConversationPanel
@@ -517,7 +517,7 @@ const makeApiCall = async () => {
   } catch (error) {
     // Handle with error handler
     errorHandler.handleApiError(error);
-    
+
     // Or handle specific error types
     if (error.status === 401) {
       // Redirect to login
@@ -526,7 +526,7 @@ const makeApiCall = async () => {
       // Show user-friendly error
       toast.error('Server error. Please try again later.');
     }
-    
+
     throw error;
   }
 };

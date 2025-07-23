@@ -577,7 +577,7 @@ const ws = new WebSocket('wss://api.freeagentics.io/ws');
 
 ws.onopen = function(event) {
   console.log('Connected to WebSocket');
-  
+
   // Authenticate
   ws.send(JSON.stringify({
     type: 'auth',

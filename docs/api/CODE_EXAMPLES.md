@@ -30,14 +30,14 @@ class FreeAgenticsClient:
         self.access_token = None
         self.refresh_token = None
         self.token_expiry = None
-        
+
     def login(self, username, password):
         """Login and obtain tokens"""
         response = requests.post(
             f"{self.base_url}/api/v1/login",
             json={"username": username, "password": password}
         )
-        
+
         if response.status_code == 200:
             data = response.json()
             self.access_token = data["access_token"]
@@ -46,27 +46,27 @@ class FreeAgenticsClient:
             return True
         else:
             raise Exception(f"Login failed: {response.json()}")
-    
+
     def _get_headers(self):
         """Get authenticated headers"""
         if not self.access_token or datetime.now() >= self.token_expiry:
             self._refresh_token()
-        
+
         return {
             "Authorization": f"Bearer {self.access_token}",
             "Content-Type": "application/json"
         }
-    
+
     def _refresh_token(self):
         """Refresh access token"""
         if not self.refresh_token:
             raise Exception("No refresh token available")
-        
+
         response = requests.post(
             f"{self.base_url}/api/v1/refresh",
             json={"refresh_token": self.refresh_token}
         )
-        
+
         if response.status_code == 200:
             data = response.json()
             self.access_token = data["access_token"]
@@ -74,7 +74,7 @@ class FreeAgenticsClient:
             self.token_expiry = datetime.now() + timedelta(minutes=14)
         else:
             raise Exception(f"Token refresh failed: {response.json()}")
-    
+
     def create_agent(self, name, template, parameters=None):
         """Create a new agent"""
         data = {
@@ -84,18 +84,18 @@ class FreeAgenticsClient:
             "use_pymdp": True,
             "planning_horizon": 3
         }
-        
+
         response = requests.post(
             f"{self.base_url}/api/v1/agents",
             headers=self._get_headers(),
             json=data
         )
-        
+
         if response.status_code == 200:
             return response.json()
         else:
             raise Exception(f"Agent creation failed: {response.json()}")
-    
+
     def run_inference(self, agent_id, query, context=None, parameters=None):
         """Run inference with an agent"""
         data = {
@@ -104,53 +104,53 @@ class FreeAgenticsClient:
             "context": context or {},
             "parameters": parameters or {}
         }
-        
+
         response = requests.post(
             f"{self.base_url}/api/v1/inference",
             headers=self._get_headers(),
             json=data
         )
-        
+
         if response.status_code == 200:
             return response.json()
         else:
             raise Exception(f"Inference failed: {response.json()}")
-    
+
     def get_inference_result(self, inference_id):
         """Get inference result"""
         response = requests.get(
             f"{self.base_url}/api/v1/inference/{inference_id}",
             headers=self._get_headers()
         )
-        
+
         if response.status_code == 200:
             return response.json()
         else:
             raise Exception(f"Failed to get inference result: {response.json()}")
-    
+
     def wait_for_inference(self, inference_id, timeout=300):
         """Wait for inference to complete"""
         start_time = time.time()
-        
+
         while time.time() - start_time < timeout:
             result = self.get_inference_result(inference_id)
-            
+
             if result["status"] == "completed":
                 return result
             elif result["status"] == "failed":
                 raise Exception(f"Inference failed: {result.get('error', 'Unknown error')}")
-            
+
             time.sleep(1)
-        
+
         raise Exception(f"Inference timed out after {timeout} seconds")
 
 # Usage example
 if __name__ == "__main__":
     client = FreeAgenticsClient()
-    
+
     # Login
     client.login("your_username", "your_password")
-    
+
     # Create agent
     agent = client.create_agent(
         name="Research Assistant",
@@ -160,18 +160,18 @@ if __name__ == "__main__":
             "max_tokens": 2048
         }
     )
-    
+
     print(f"Created agent: {agent['id']}")
-    
+
     # Run inference
     inference = client.run_inference(
         agent_id=agent["id"],
         query="What are the latest trends in AI?",
         context={"focus": "machine learning", "year": "2024"}
     )
-    
+
     print(f"Started inference: {inference['inference_id']}")
-    
+
     # Wait for result
     result = client.wait_for_inference(inference["inference_id"])
     print(f"Analysis: {result['result']['analysis']}")
@@ -193,22 +193,22 @@ class WebSocketClient:
         self.subscriptions = set()
         self.message_handlers = {}
         self.running = False
-        
+
     async def connect(self):
         """Connect to WebSocket"""
         uri = f"{self.url}?token={self.token}"
-        
+
         try:
             self.websocket = await websockets.connect(uri)
             self.running = True
-            
+
             # Start message handling loop
             await self._handle_messages()
-            
+
         except Exception as e:
             print(f"Connection failed: {e}")
             raise
-    
+
     async def _handle_messages(self):
         """Handle incoming messages"""
         try:
@@ -219,21 +219,21 @@ class WebSocketClient:
             print("Connection closed")
         except Exception as e:
             print(f"Message handling error: {e}")
-    
+
     async def _process_message(self, message: Dict):
         """Process received message"""
         message_type = message.get("type")
-        
+
         if message_type in self.message_handlers:
             handler = self.message_handlers[message_type]
             await handler(message.get("data", {}))
         else:
             print(f"Unhandled message type: {message_type}")
-    
+
     def on_message(self, message_type: str, handler: Callable):
         """Register message handler"""
         self.message_handlers[message_type] = handler
-    
+
     async def subscribe(self, events: List[str], agents: Optional[List[str]] = None):
         """Subscribe to events"""
         message = {
@@ -243,10 +243,10 @@ class WebSocketClient:
                 "agents": agents or []
             }
         }
-        
+
         await self.websocket.send(json.dumps(message))
         self.subscriptions.update(events)
-    
+
     async def send_command(self, agent_id: str, command: str, parameters: Dict = None):
         """Send command to agent"""
         message = {
@@ -257,9 +257,9 @@ class WebSocketClient:
                 "parameters": parameters or {}
             }
         }
-        
+
         await self.websocket.send(json.dumps(message))
-    
+
     async def disconnect(self):
         """Disconnect from WebSocket"""
         self.running = False
@@ -269,22 +269,22 @@ class WebSocketClient:
 # Usage example
 async def main():
     client = WebSocketClient("wss://api.freeagentics.com/api/v1/ws", "your_token")
-    
+
     # Register handlers
     async def on_agent_status(data):
         print(f"Agent {data['agent_id']} status: {data['new_status']}")
-    
+
     async def on_metrics(data):
         print(f"CPU: {data['system']['cpu_usage']}%")
         print(f"Memory: {data['system']['memory_usage']}%")
-    
+
     client.on_message("agent_status", on_agent_status)
     client.on_message("metrics_update", on_metrics)
-    
+
     # Connect and subscribe
     await client.connect()
     await client.subscribe(["agent_status", "metrics_update"])
-    
+
     # Keep connection alive
     try:
         await asyncio.sleep(3600)  # 1 hour
@@ -303,24 +303,24 @@ async def main():
 class KnowledgeGraphClient:
     def __init__(self, client: FreeAgenticsClient):
         self.client = client
-    
+
     def search_entities(self, query: str, entity_type: str = None, limit: int = 20):
         """Search knowledge graph entities"""
         params = {"q": query, "limit": limit}
         if entity_type:
             params["type"] = entity_type
-        
+
         response = requests.get(
             f"{self.client.base_url}/api/v1/knowledge/search",
             headers=self.client._get_headers(),
             params=params
         )
-        
+
         if response.status_code == 200:
             return response.json()
         else:
             raise Exception(f"Search failed: {response.json()}")
-    
+
     def create_entity(self, entity_type: str, label: str, properties: Dict):
         """Create new entity"""
         data = {
@@ -328,19 +328,19 @@ class KnowledgeGraphClient:
             "label": label,
             "properties": properties
         }
-        
+
         response = requests.post(
             f"{self.client.base_url}/api/v1/knowledge/entities",
             headers=self.client._get_headers(),
             json=data
         )
-        
+
         if response.status_code == 201:
             return response.json()
         else:
             raise Exception(f"Entity creation failed: {response.json()}")
-    
-    def create_relationship(self, source_id: str, target_id: str, 
+
+    def create_relationship(self, source_id: str, target_id: str,
                           relationship_type: str, properties: Dict = None):
         """Create relationship between entities"""
         data = {
@@ -349,22 +349,22 @@ class KnowledgeGraphClient:
             "relationship_type": relationship_type,
             "properties": properties or {}
         }
-        
+
         response = requests.post(
             f"{self.client.base_url}/api/v1/knowledge/relationships",
             headers=self.client._get_headers(),
             json=data
         )
-        
+
         if response.status_code == 201:
             return response.json()
         else:
             raise Exception(f"Relationship creation failed: {response.json()}")
-    
+
     def build_knowledge_graph(self, entities_data: List[Dict], relationships_data: List[Dict]):
         """Build knowledge graph from structured data"""
         created_entities = {}
-        
+
         # Create entities
         for entity_data in entities_data:
             entity = self.create_entity(
@@ -373,19 +373,19 @@ class KnowledgeGraphClient:
                 properties=entity_data.get("properties", {})
             )
             created_entities[entity_data["id"]] = entity["id"]
-        
+
         # Create relationships
         for rel_data in relationships_data:
             source_id = created_entities[rel_data["source"]]
             target_id = created_entities[rel_data["target"]]
-            
+
             self.create_relationship(
                 source_id=source_id,
                 target_id=target_id,
                 relationship_type=rel_data["type"],
                 properties=rel_data.get("properties", {})
             )
-        
+
         return created_entities
 
 # Usage example
@@ -576,11 +576,11 @@ class FreeAgenticsClient {
 // Usage example
 async function main() {
   const client = new FreeAgenticsClient();
-  
+
   try {
     // Login
     await client.login('your_username', 'your_password');
-    
+
     // Create agent
     const agent = await client.createAgent({
       name: 'TypeScript Agent',
@@ -590,9 +590,9 @@ async function main() {
         max_tokens: 2048,
       },
     });
-    
+
     console.log(`Created agent: ${agent.id}`);
-    
+
     // Run inference
     const inference = await client.runInference({
       agent_id: agent.id,
@@ -602,13 +602,13 @@ async function main() {
         timeframe: '2024',
       },
     });
-    
+
     console.log(`Started inference: ${inference.inference_id}`);
-    
+
     // Wait for result
     const result = await client.waitForInference(inference.inference_id);
     console.log(`Analysis: ${result.result.analysis}`);
-    
+
   } catch (error) {
     console.error('Error:', error);
   }
@@ -758,7 +758,7 @@ const AgentDashboard: React.FC = () => {
     <div>
       <h1>Agent Dashboard</h1>
       <button onClick={handleCreateAgent}>Create Agent</button>
-      
+
       <div>
         {agents.map(agent => (
           <div key={agent.id}>
@@ -865,12 +865,12 @@ func (c *Client) Login(username, password string) error {
         Username: username,
         Password: password,
     }
-    
+
     jsonData, err := json.Marshal(loginReq)
     if err != nil {
         return err
     }
-    
+
     resp, err := c.HTTPClient.Post(
         c.BaseURL+"/api/v1/login",
         "application/json",
@@ -880,20 +880,20 @@ func (c *Client) Login(username, password string) error {
         return err
     }
     defer resp.Body.Close()
-    
+
     if resp.StatusCode != http.StatusOK {
         return fmt.Errorf("login failed with status: %d", resp.StatusCode)
     }
-    
+
     var tokenResp TokenResponse
     if err := json.NewDecoder(resp.Body).Decode(&tokenResp); err != nil {
         return err
     }
-    
+
     c.AccessToken = tokenResp.AccessToken
     c.RefreshToken = tokenResp.RefreshToken
     c.TokenExpiry = time.Now().Add(14 * time.Minute)
-    
+
     return nil
 }
 
@@ -901,12 +901,12 @@ func (c *Client) refreshToken() error {
     refreshReq := map[string]string{
         "refresh_token": c.RefreshToken,
     }
-    
+
     jsonData, err := json.Marshal(refreshReq)
     if err != nil {
         return err
     }
-    
+
     resp, err := c.HTTPClient.Post(
         c.BaseURL+"/api/v1/refresh",
         "application/json",
@@ -916,20 +916,20 @@ func (c *Client) refreshToken() error {
         return err
     }
     defer resp.Body.Close()
-    
+
     if resp.StatusCode != http.StatusOK {
         return fmt.Errorf("token refresh failed with status: %d", resp.StatusCode)
     }
-    
+
     var tokenResp TokenResponse
     if err := json.NewDecoder(resp.Body).Decode(&tokenResp); err != nil {
         return err
     }
-    
+
     c.AccessToken = tokenResp.AccessToken
     c.RefreshToken = tokenResp.RefreshToken
     c.TokenExpiry = time.Now().Add(14 * time.Minute)
-    
+
     return nil
 }
 
@@ -940,7 +940,7 @@ func (c *Client) makeRequest(method, path string, body interface{}) (*http.Respo
             return nil, err
         }
     }
-    
+
     var reqBody *bytes.Buffer
     if body != nil {
         jsonData, err := json.Marshal(body)
@@ -949,37 +949,37 @@ func (c *Client) makeRequest(method, path string, body interface{}) (*http.Respo
         }
         reqBody = bytes.NewBuffer(jsonData)
     }
-    
+
     req, err := http.NewRequest(method, c.BaseURL+path, reqBody)
     if err != nil {
         return nil, err
     }
-    
+
     req.Header.Set("Authorization", "Bearer "+c.AccessToken)
     req.Header.Set("Content-Type", "application/json")
-    
+
     return c.HTTPClient.Do(req)
 }
 
 func (c *Client) CreateAgent(config AgentConfig) (*Agent, error) {
     config.UsePyMDP = true
     config.PlanningHorizon = 3
-    
+
     resp, err := c.makeRequest("POST", "/api/v1/agents", config)
     if err != nil {
         return nil, err
     }
     defer resp.Body.Close()
-    
+
     if resp.StatusCode != http.StatusOK {
         return nil, fmt.Errorf("agent creation failed with status: %d", resp.StatusCode)
     }
-    
+
     var agent Agent
     if err := json.NewDecoder(resp.Body).Decode(&agent); err != nil {
         return nil, err
     }
-    
+
     return &agent, nil
 }
 
@@ -989,16 +989,16 @@ func (c *Client) RunInference(req InferenceRequest) (*InferenceResponse, error) 
         return nil, err
     }
     defer resp.Body.Close()
-    
+
     if resp.StatusCode != http.StatusOK {
         return nil, fmt.Errorf("inference failed with status: %d", resp.StatusCode)
     }
-    
+
     var inferenceResp InferenceResponse
     if err := json.NewDecoder(resp.Body).Decode(&inferenceResp); err != nil {
         return nil, err
     }
-    
+
     return &inferenceResp, nil
 }
 
@@ -1008,33 +1008,33 @@ func (c *Client) GetInferenceResult(inferenceID string) (map[string]interface{},
         return nil, err
     }
     defer resp.Body.Close()
-    
+
     if resp.StatusCode != http.StatusOK {
         return nil, fmt.Errorf("failed to get inference result with status: %d", resp.StatusCode)
     }
-    
+
     var result map[string]interface{}
     if err := json.NewDecoder(resp.Body).Decode(&result); err != nil {
         return nil, err
     }
-    
+
     return result, nil
 }
 
 func (c *Client) WaitForInference(inferenceID string, timeout time.Duration) (map[string]interface{}, error) {
     deadline := time.Now().Add(timeout)
-    
+
     for time.Now().Before(deadline) {
         result, err := c.GetInferenceResult(inferenceID)
         if err != nil {
             return nil, err
         }
-        
+
         status, ok := result["status"].(string)
         if !ok {
             return nil, fmt.Errorf("invalid response format")
         }
-        
+
         switch status {
         case "completed":
             return result, nil
@@ -1042,22 +1042,22 @@ func (c *Client) WaitForInference(inferenceID string, timeout time.Duration) (ma
             errorMsg, _ := result["error"].(string)
             return nil, fmt.Errorf("inference failed: %s", errorMsg)
         }
-        
+
         time.Sleep(1 * time.Second)
     }
-    
+
     return nil, fmt.Errorf("inference timed out after %v", timeout)
 }
 
 func main() {
     client := NewClient("https://api.freeagentics.com")
-    
+
     // Login
     if err := client.Login("your_username", "your_password"); err != nil {
         fmt.Printf("Login failed: %v\n", err)
         return
     }
-    
+
     // Create agent
     agent, err := client.CreateAgent(AgentConfig{
         Name:     "Go Agent",
@@ -1071,9 +1071,9 @@ func main() {
         fmt.Printf("Agent creation failed: %v\n", err)
         return
     }
-    
+
     fmt.Printf("Created agent: %s\n", agent.ID)
-    
+
     // Run inference
     inference, err := client.RunInference(InferenceRequest{
         AgentID: agent.ID,
@@ -1087,16 +1087,16 @@ func main() {
         fmt.Printf("Inference failed: %v\n", err)
         return
     }
-    
+
     fmt.Printf("Started inference: %s\n", inference.InferenceID)
-    
+
     // Wait for result
     result, err := client.WaitForInference(inference.InferenceID, 5*time.Minute)
     if err != nil {
         fmt.Printf("Failed to get result: %v\n", err)
         return
     }
-    
+
     if resultData, ok := result["result"].(map[string]interface{}); ok {
         if analysis, ok := resultData["analysis"].(string); ok {
             fmt.Printf("Analysis: %s\n", analysis)
@@ -1139,7 +1139,7 @@ class Config {
     public RestTemplate restTemplate() {
         return new RestTemplate();
     }
-    
+
     @Bean
     public ObjectMapper objectMapper() {
         return new ObjectMapper();
@@ -1151,32 +1151,32 @@ class FreeAgenticsService {
     private final RestTemplate restTemplate;
     private final ObjectMapper objectMapper;
     private final String baseUrl = "https://api.freeagentics.com";
-    
+
     private String accessToken;
     private String refreshToken;
     private LocalDateTime tokenExpiry;
-    
+
     public FreeAgenticsService(RestTemplate restTemplate, ObjectMapper objectMapper) {
         this.restTemplate = restTemplate;
         this.objectMapper = objectMapper;
     }
-    
+
     public void login(String username, String password) throws Exception {
         Map<String, String> loginData = new HashMap<>();
         loginData.put("username", username);
         loginData.put("password", password);
-        
+
         HttpHeaders headers = new HttpHeaders();
         headers.setContentType(MediaType.APPLICATION_JSON);
-        
+
         HttpEntity<Map<String, String>> entity = new HttpEntity<>(loginData, headers);
-        
+
         ResponseEntity<Map> response = restTemplate.postForEntity(
-            baseUrl + "/api/v1/login", 
-            entity, 
+            baseUrl + "/api/v1/login",
+            entity,
             Map.class
         );
-        
+
         if (response.getStatusCode() == HttpStatus.OK) {
             Map<String, Object> responseBody = response.getBody();
             this.accessToken = (String) responseBody.get("access_token");
@@ -1186,23 +1186,23 @@ class FreeAgenticsService {
             throw new RuntimeException("Login failed: " + response.getStatusCode());
         }
     }
-    
+
     private void refreshTokenIfNeeded() throws Exception {
         if (tokenExpiry != null && LocalDateTime.now().isAfter(tokenExpiry)) {
             Map<String, String> refreshData = new HashMap<>();
             refreshData.put("refresh_token", refreshToken);
-            
+
             HttpHeaders headers = new HttpHeaders();
             headers.setContentType(MediaType.APPLICATION_JSON);
-            
+
             HttpEntity<Map<String, String>> entity = new HttpEntity<>(refreshData, headers);
-            
+
             ResponseEntity<Map> response = restTemplate.postForEntity(
-                baseUrl + "/api/v1/refresh", 
-                entity, 
+                baseUrl + "/api/v1/refresh",
+                entity,
                 Map.class
             );
-            
+
             if (response.getStatusCode() == HttpStatus.OK) {
                 Map<String, Object> responseBody = response.getBody();
                 this.accessToken = (String) responseBody.get("access_token");
@@ -1213,85 +1213,85 @@ class FreeAgenticsService {
             }
         }
     }
-    
+
     private HttpHeaders getAuthHeaders() throws Exception {
         refreshTokenIfNeeded();
-        
+
         HttpHeaders headers = new HttpHeaders();
         headers.setContentType(MediaType.APPLICATION_JSON);
         headers.setBearerAuth(accessToken);
-        
+
         return headers;
     }
-    
+
     public Map<String, Object> createAgent(AgentConfig config) throws Exception {
         HttpHeaders headers = getAuthHeaders();
         HttpEntity<AgentConfig> entity = new HttpEntity<>(config, headers);
-        
+
         ResponseEntity<Map> response = restTemplate.postForEntity(
-            baseUrl + "/api/v1/agents", 
-            entity, 
+            baseUrl + "/api/v1/agents",
+            entity,
             Map.class
         );
-        
+
         if (response.getStatusCode() == HttpStatus.OK) {
             return response.getBody();
         } else {
             throw new RuntimeException("Agent creation failed: " + response.getStatusCode());
         }
     }
-    
+
     public Map<String, Object> runInference(InferenceRequest request) throws Exception {
         HttpHeaders headers = getAuthHeaders();
         HttpEntity<InferenceRequest> entity = new HttpEntity<>(request, headers);
-        
+
         ResponseEntity<Map> response = restTemplate.postForEntity(
-            baseUrl + "/api/v1/inference", 
-            entity, 
+            baseUrl + "/api/v1/inference",
+            entity,
             Map.class
         );
-        
+
         if (response.getStatusCode() == HttpStatus.OK) {
             return response.getBody();
         } else {
             throw new RuntimeException("Inference failed: " + response.getStatusCode());
         }
     }
-    
+
     public Map<String, Object> getInferenceResult(String inferenceId) throws Exception {
         HttpHeaders headers = getAuthHeaders();
         HttpEntity<?> entity = new HttpEntity<>(headers);
-        
+
         ResponseEntity<Map> response = restTemplate.exchange(
             baseUrl + "/api/v1/inference/" + inferenceId,
             HttpMethod.GET,
             entity,
             Map.class
         );
-        
+
         if (response.getStatusCode() == HttpStatus.OK) {
             return response.getBody();
         } else {
             throw new RuntimeException("Failed to get inference result: " + response.getStatusCode());
         }
     }
-    
+
     public CompletableFuture<Map<String, Object>> waitForInference(String inferenceId, int timeoutSeconds) {
         return CompletableFuture.supplyAsync(() -> {
             long startTime = System.currentTimeMillis();
             long timeout = timeoutSeconds * 1000L;
-            
+
             while (System.currentTimeMillis() - startTime < timeout) {
                 try {
                     Map<String, Object> result = getInferenceResult(inferenceId);
                     String status = (String) result.get("status");
-                    
+
                     if ("completed".equals(status)) {
                         return result;
                     } else if ("failed".equals(status)) {
                         throw new RuntimeException("Inference failed: " + result.get("error"));
                     }
-                    
+
                     Thread.sleep(1000);
                 } catch (InterruptedException e) {
                     Thread.currentThread().interrupt();
@@ -1300,7 +1300,7 @@ class FreeAgenticsService {
                     throw new RuntimeException("Error while waiting for inference", e);
                 }
             }
-            
+
             throw new RuntimeException("Inference timed out after " + timeoutSeconds + " seconds");
         });
     }
@@ -1314,23 +1314,23 @@ class AgentConfig {
     private String gmnSpec;
     private boolean usePymdp = true;
     private int planningHorizon = 3;
-    
+
     // Getters and setters
     public String getName() { return name; }
     public void setName(String name) { this.name = name; }
-    
+
     public String getTemplate() { return template; }
     public void setTemplate(String template) { this.template = template; }
-    
+
     public Map<String, Object> getParameters() { return parameters; }
     public void setParameters(Map<String, Object> parameters) { this.parameters = parameters; }
-    
+
     public String getGmnSpec() { return gmnSpec; }
     public void setGmnSpec(String gmnSpec) { this.gmnSpec = gmnSpec; }
-    
+
     public boolean isUsePymdp() { return usePymdp; }
     public void setUsePymdp(boolean usePymdp) { this.usePymdp = usePymdp; }
-    
+
     public int getPlanningHorizon() { return planningHorizon; }
     public void setPlanningHorizon(int planningHorizon) { this.planningHorizon = planningHorizon; }
 }
@@ -1340,17 +1340,17 @@ class InferenceRequest {
     private String query;
     private Map<String, Object> context;
     private Map<String, Object> parameters;
-    
+
     // Getters and setters
     public String getAgentId() { return agentId; }
     public void setAgentId(String agentId) { this.agentId = agentId; }
-    
+
     public String getQuery() { return query; }
     public void setQuery(String query) { this.query = query; }
-    
+
     public Map<String, Object> getContext() { return context; }
     public void setContext(Map<String, Object> context) { this.context = context; }
-    
+
     public Map<String, Object> getParameters() { return parameters; }
     public void setParameters(Map<String, Object> parameters) { this.parameters = parameters; }
 }
@@ -1359,11 +1359,11 @@ class InferenceRequest {
 @RequestMapping("/api/agents")
 class AgentController {
     private final FreeAgenticsService freeAgenticsService;
-    
+
     public AgentController(FreeAgenticsService freeAgenticsService) {
         this.freeAgenticsService = freeAgenticsService;
     }
-    
+
     @PostMapping
     public ResponseEntity<Map<String, Object>> createAgent(@RequestBody AgentConfig config) {
         try {
@@ -1374,7 +1374,7 @@ class AgentController {
                 .body(Map.of("error", e.getMessage()));
         }
     }
-    
+
     @PostMapping("/{agentId}/inference")
     public ResponseEntity<CompletableFuture<Map<String, Object>>> runInference(
             @PathVariable String agentId,
@@ -1385,13 +1385,13 @@ class AgentController {
             inferenceRequest.setQuery((String) request.get("query"));
             inferenceRequest.setContext((Map<String, Object>) request.get("context"));
             inferenceRequest.setParameters((Map<String, Object>) request.get("parameters"));
-            
+
             Map<String, Object> inference = freeAgenticsService.runInference(inferenceRequest);
             String inferenceId = (String) inference.get("inference_id");
-            
-            CompletableFuture<Map<String, Object>> result = 
+
+            CompletableFuture<Map<String, Object>> result =
                 freeAgenticsService.waitForInference(inferenceId, 300);
-            
+
             return ResponseEntity.ok(result);
         } catch (Exception e) {
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
@@ -1423,18 +1423,18 @@ namespace FreeAgentics.Client
         private readonly HttpClient _httpClient;
         private readonly ILogger<FreeAgenticsClient> _logger;
         private readonly string _baseUrl;
-        
+
         private string _accessToken;
         private string _refreshToken;
         private DateTime _tokenExpiry;
-        
+
         public FreeAgenticsClient(HttpClient httpClient, ILogger<FreeAgenticsClient> logger, string baseUrl = "https://api.freeagentics.com")
         {
             _httpClient = httpClient;
             _logger = logger;
             _baseUrl = baseUrl;
         }
-        
+
         public async Task<bool> LoginAsync(string username, string password)
         {
             try
@@ -1442,18 +1442,18 @@ namespace FreeAgentics.Client
                 var loginData = new { username, password };
                 var json = JsonSerializer.Serialize(loginData);
                 var content = new StringContent(json, Encoding.UTF8, "application/json");
-                
+
                 var response = await _httpClient.PostAsync($"{_baseUrl}/api/v1/login", content);
-                
+
                 if (response.IsSuccessStatusCode)
                 {
                     var responseData = await response.Content.ReadAsStringAsync();
                     var tokenResponse = JsonSerializer.Deserialize<TokenResponse>(responseData);
-                    
+
                     _accessToken = tokenResponse.AccessToken;
                     _refreshToken = tokenResponse.RefreshToken;
                     _tokenExpiry = DateTime.Now.AddMinutes(14);
-                    
+
                     _logger.LogInformation("Login successful");
                     return true;
                 }
@@ -1469,7 +1469,7 @@ namespace FreeAgentics.Client
                 return false;
             }
         }
-        
+
         private async Task RefreshTokenIfNeededAsync()
         {
             if (DateTime.Now >= _tokenExpiry)
@@ -1477,14 +1477,14 @@ namespace FreeAgentics.Client
                 var refreshData = new { refresh_token = _refreshToken };
                 var json = JsonSerializer.Serialize(refreshData);
                 var content = new StringContent(json, Encoding.UTF8, "application/json");
-                
+
                 var response = await _httpClient.PostAsync($"{_baseUrl}/api/v1/refresh", content);
-                
+
                 if (response.IsSuccessStatusCode)
                 {
                     var responseData = await response.Content.ReadAsStringAsync();
                     var tokenResponse = JsonSerializer.Deserialize<TokenResponse>(responseData);
-                    
+
                     _accessToken = tokenResponse.AccessToken;
                     _refreshToken = tokenResponse.RefreshToken;
                     _tokenExpiry = DateTime.Now.AddMinutes(14);
@@ -1495,35 +1495,35 @@ namespace FreeAgentics.Client
                 }
             }
         }
-        
+
         private async Task<HttpRequestMessage> CreateAuthenticatedRequestAsync(HttpMethod method, string path, object content = null)
         {
             await RefreshTokenIfNeededAsync();
-            
+
             var request = new HttpRequestMessage(method, $"{_baseUrl}{path}");
             request.Headers.Authorization = new System.Net.Http.Headers.AuthenticationHeaderValue("Bearer", _accessToken);
-            
+
             if (content != null)
             {
                 var json = JsonSerializer.Serialize(content);
                 request.Content = new StringContent(json, Encoding.UTF8, "application/json");
             }
-            
+
             return request;
         }
-        
+
         public async Task<Agent> CreateAgentAsync(AgentConfig config)
         {
             try
             {
                 var request = await CreateAuthenticatedRequestAsync(HttpMethod.Post, "/api/v1/agents", config);
                 var response = await _httpClient.SendAsync(request);
-                
+
                 if (response.IsSuccessStatusCode)
                 {
                     var responseData = await response.Content.ReadAsStringAsync();
                     var agent = JsonSerializer.Deserialize<Agent>(responseData);
-                    
+
                     _logger.LogInformation($"Agent created: {agent.Id}");
                     return agent;
                 }
@@ -1538,19 +1538,19 @@ namespace FreeAgentics.Client
                 throw;
             }
         }
-        
+
         public async Task<InferenceResponse> RunInferenceAsync(InferenceRequest request)
         {
             try
             {
                 var httpRequest = await CreateAuthenticatedRequestAsync(HttpMethod.Post, "/api/v1/inference", request);
                 var response = await _httpClient.SendAsync(httpRequest);
-                
+
                 if (response.IsSuccessStatusCode)
                 {
                     var responseData = await response.Content.ReadAsStringAsync();
                     var inferenceResponse = JsonSerializer.Deserialize<InferenceResponse>(responseData);
-                    
+
                     _logger.LogInformation($"Inference started: {inferenceResponse.InferenceId}");
                     return inferenceResponse;
                 }
@@ -1565,19 +1565,19 @@ namespace FreeAgentics.Client
                 throw;
             }
         }
-        
+
         public async Task<InferenceResult> GetInferenceResultAsync(string inferenceId)
         {
             try
             {
                 var request = await CreateAuthenticatedRequestAsync(HttpMethod.Get, $"/api/v1/inference/{inferenceId}");
                 var response = await _httpClient.SendAsync(request);
-                
+
                 if (response.IsSuccessStatusCode)
                 {
                     var responseData = await response.Content.ReadAsStringAsync();
                     var result = JsonSerializer.Deserialize<InferenceResult>(responseData);
-                    
+
                     return result;
                 }
                 else
@@ -1591,16 +1591,16 @@ namespace FreeAgentics.Client
                 throw;
             }
         }
-        
+
         public async Task<InferenceResult> WaitForInferenceAsync(string inferenceId, int timeoutSeconds = 300)
         {
             var startTime = DateTime.Now;
             var timeout = TimeSpan.FromSeconds(timeoutSeconds);
-            
+
             while (DateTime.Now - startTime < timeout)
             {
                 var result = await GetInferenceResultAsync(inferenceId);
-                
+
                 if (result.Status == "completed")
                 {
                     return result;
@@ -1609,14 +1609,14 @@ namespace FreeAgentics.Client
                 {
                     throw new Exception($"Inference failed: {result.Error}");
                 }
-                
+
                 await Task.Delay(1000);
             }
-            
+
             throw new TimeoutException($"Inference timed out after {timeoutSeconds} seconds");
         }
     }
-    
+
     // Data models
     public class TokenResponse
     {
@@ -1625,7 +1625,7 @@ namespace FreeAgentics.Client
         public string TokenType { get; set; }
         public User User { get; set; }
     }
-    
+
     public class User
     {
         public string UserId { get; set; }
@@ -1633,7 +1633,7 @@ namespace FreeAgentics.Client
         public string Role { get; set; }
         public string[] Permissions { get; set; }
     }
-    
+
     public class AgentConfig
     {
         public string Name { get; set; }
@@ -1643,7 +1643,7 @@ namespace FreeAgentics.Client
         public bool UsePymdp { get; set; } = true;
         public int PlanningHorizon { get; set; } = 3;
     }
-    
+
     public class Agent
     {
         public string Id { get; set; }
@@ -1655,7 +1655,7 @@ namespace FreeAgentics.Client
         public int InferenceCount { get; set; }
         public Dictionary<string, object> Parameters { get; set; }
     }
-    
+
     public class InferenceRequest
     {
         public string AgentId { get; set; }
@@ -1663,7 +1663,7 @@ namespace FreeAgentics.Client
         public Dictionary<string, object> Context { get; set; }
         public Dictionary<string, object> Parameters { get; set; }
     }
-    
+
     public class InferenceResponse
     {
         public string InferenceId { get; set; }
@@ -1672,7 +1672,7 @@ namespace FreeAgentics.Client
         public DateTime CreatedAt { get; set; }
         public DateTime? EstimatedCompletion { get; set; }
     }
-    
+
     public class InferenceResult
     {
         public string InferenceId { get; set; }
@@ -1682,7 +1682,7 @@ namespace FreeAgentics.Client
         public DateTime? CompletedAt { get; set; }
         public string Error { get; set; }
     }
-    
+
     // ASP.NET Core service registration
     public static class ServiceCollectionExtensions
     {
@@ -1692,18 +1692,18 @@ namespace FreeAgentics.Client
             {
                 client.Timeout = TimeSpan.FromSeconds(30);
             });
-            
+
             services.AddSingleton<FreeAgenticsClient>(provider =>
             {
                 var httpClient = provider.GetRequiredService<HttpClient>();
                 var logger = provider.GetRequiredService<ILogger<FreeAgenticsClient>>();
                 return new FreeAgenticsClient(httpClient, logger, baseUrl);
             });
-            
+
             return services;
         }
     }
-    
+
     // Usage example
     public class Program
     {
@@ -1715,9 +1715,9 @@ namespace FreeAgentics.Client
                     services.AddFreeAgentics();
                 })
                 .Build();
-            
+
             var client = host.Services.GetRequiredService<FreeAgenticsClient>();
-            
+
             // Login
             if (await client.LoginAsync("your_username", "your_password"))
             {
@@ -1732,9 +1732,9 @@ namespace FreeAgentics.Client
                         ["max_tokens"] = 2048
                     }
                 });
-                
+
                 Console.WriteLine($"Created agent: {agent.Id}");
-                
+
                 // Run inference
                 var inference = await client.RunInferenceAsync(new InferenceRequest
                 {
@@ -1746,12 +1746,12 @@ namespace FreeAgentics.Client
                         ["year"] = "2024"
                     }
                 });
-                
+
                 Console.WriteLine($"Started inference: {inference.InferenceId}");
-                
+
                 // Wait for result
                 var result = await client.WaitForInferenceAsync(inference.InferenceId);
-                
+
                 if (result.Result.ContainsKey("analysis"))
                 {
                     Console.WriteLine($"Analysis: {result.Result["analysis"]}");
@@ -1846,9 +1846,9 @@ echo "Waiting for inference completion..."
 while true; do
   RESULT_RESPONSE=$(curl -s -X GET "$BASE_URL/api/v1/inference/$INFERENCE_ID" \
     -H "Authorization: Bearer $ACCESS_TOKEN")
-  
+
   STATUS=$(echo "$RESULT_RESPONSE" | jq -r '.status')
-  
+
   if [ "$STATUS" == "completed" ]; then
     echo "Inference completed!"
     ANALYSIS=$(echo "$RESULT_RESPONSE" | jq -r '.result.analysis')
@@ -2001,10 +2001,10 @@ refresh_token() {
   REFRESH_RESPONSE=$(curl -s -X POST "$BASE_URL/api/v1/refresh" \
     -H "Content-Type: application/json" \
     -d "{\"refresh_token\": \"$REFRESH_TOKEN\"}")
-  
+
   NEW_ACCESS_TOKEN=$(echo "$REFRESH_RESPONSE" | jq -r '.access_token')
   NEW_REFRESH_TOKEN=$(echo "$REFRESH_RESPONSE" | jq -r '.refresh_token')
-  
+
   if [ "$NEW_ACCESS_TOKEN" != "null" ]; then
     ACCESS_TOKEN="$NEW_ACCESS_TOKEN"
     REFRESH_TOKEN="$NEW_REFRESH_TOKEN"

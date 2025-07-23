@@ -53,7 +53,7 @@ Run these commands to verify compliance:
 # CVE scanning
 pip-audit -f json -o pip_audit_report.json
 
-# Vulnerability scanning  
+# Vulnerability scanning
 safety scan --json --output safety_report.json
 
 # Version consistency check

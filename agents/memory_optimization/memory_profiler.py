@@ -215,8 +215,7 @@ class AdvancedMemoryProfiler:
                 for stat in top_stats[:10]:
                     if stat.size_diff > self.allocation_threshold:
                         logger.info(
-                            f"{operation_name} allocation: {stat} "
-                            f"(+{stat.size_diff / 1024:.1f} KB)"
+                            f"{operation_name} allocation: {stat} (+{stat.size_diff / 1024:.1f} KB)"
                         )
 
             # Calculate memory delta
@@ -441,8 +440,7 @@ class AdvancedMemoryProfiler:
                         {
                             "type": "belief_compression",
                             "reason": f"Large belief state: {belief_size_mb:.1f}MB",
-                            "suggestion": "Enable belief compression or "
-                            "use sparse representations",
+                            "suggestion": "Enable belief compression or use sparse representations",
                         }
                     )
 

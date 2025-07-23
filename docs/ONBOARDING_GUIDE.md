@@ -111,7 +111,7 @@ sequenceDiagram
     participant AgentManager
     participant Database
     participant Redis
-    
+
     Client->>API: Request with JWT
     API->>Auth: Validate Token
     Auth->>Redis: Check Token Status
@@ -161,7 +161,7 @@ sequenceDiagram
    ```bash
    # Use development configuration (includes SQLite fallback)
    cp .env.development .env
-   
+
    # Optional: Edit configuration for custom setup
    vim .env
    ```
@@ -181,7 +181,7 @@ sequenceDiagram
    ```bash
    # Option 1: Use SQLite (automatic with DEVELOPMENT_MODE=true)
    # No setup needed - database file created automatically
-   
+
    # Option 2: Use PostgreSQL (if DATABASE_URL is set)
    # Run database migrations
    alembic upgrade head
@@ -191,7 +191,7 @@ sequenceDiagram
    ```bash
    # Start both backend (8000) and frontend (3000)
    make dev
-   
+
    # Or start separately:
    make dev-backend   # API at http://localhost:8000
    make dev-frontend  # UI at http://localhost:3000
@@ -201,10 +201,10 @@ sequenceDiagram
    ```bash
    # Run tests
    make test
-   
+
    # Check API health
    curl http://localhost:8000/health
-   
+
    # View API docs
    open http://localhost:8000/docs
    ```
@@ -227,13 +227,13 @@ sequenceDiagram
    ```bash
    # Code formatting
    black .
-   
+
    # Linting
    flake8 .
-   
+
    # Type checking
    mypy .
-   
+
    # Security scanning
    bandit -r .
    ```
@@ -242,7 +242,7 @@ sequenceDiagram
    ```bash
    # Install pre-commit hooks
    pre-commit install
-   
+
    # Run hooks manually
    pre-commit run --all-files
    ```
@@ -255,11 +255,11 @@ sequenceDiagram
    ```bash
    # Create feature branch
    git checkout -b feature/your-feature-name
-   
+
    # Work on feature
    git add .
    git commit -m "feat: add new feature"
-   
+
    # Push to remote
    git push origin feature/your-feature-name
    ```
@@ -267,12 +267,12 @@ sequenceDiagram
 2. **Commit Message Format**
    ```
    type(scope): description
-   
+
    [optional body]
-   
+
    [optional footer]
    ```
-   
+
    Types: `feat`, `fix`, `docs`, `style`, `refactor`, `test`, `chore`
 
 3. **Pull Request Process**
@@ -289,13 +289,13 @@ sequenceDiagram
    # tests/unit/test_agent_manager.py
    def test_create_agent_success():
        manager = AgentManager()
-       
+
        agent = manager.create_agent(
            name="Test Agent",
            template="research_v2",
            user_id="user123"
        )
-       
+
        assert agent.name == "Test Agent"
        assert agent.template == "research_v2"
        assert agent.status == "active"
@@ -322,7 +322,7 @@ sequenceDiagram
        # Validate input
        if not name or not template:
            raise ValueError("Name and template are required")
-       
+
        # Create agent with proper initialization
        agent = Agent(
            name=name,
@@ -331,11 +331,11 @@ sequenceDiagram
            status="active",
            created_at=datetime.utcnow()
        )
-       
+
        # Save to database
        self.db.add(agent)
        self.db.commit()
-       
+
        return agent
    ```
 
@@ -387,11 +387,11 @@ sequenceDiagram
 1. **Input Validation**
    ```python
    from pydantic import BaseModel, validator
-   
+
    class AgentRequest(BaseModel):
        name: str
        template: str
-       
+
        @validator('name')
        def validate_name(cls, v):
            if not v or len(v) < 3:
@@ -405,9 +405,9 @@ sequenceDiagram
    ```python
    from fastapi import Depends, HTTPException, status
    from fastapi.security import HTTPBearer
-   
+
    security = HTTPBearer()
-   
+
    def get_current_user(token: str = Depends(security)):
        try:
            payload = verify_jwt_token(token.credentials)
@@ -432,7 +432,7 @@ sequenceDiagram
                return func(current_user)
            return wrapper
        return decorator
-   
+
    @app.post("/api/v1/agents")
    @require_permission("create_agent")
    def create_agent(request: AgentRequest, current_user: User):
@@ -448,22 +448,22 @@ sequenceDiagram
    def test_unauthenticated_access_denied():
        response = client.get("/api/v1/agents")
        assert response.status_code == 401
-   
+
    # Test authorization
    def test_insufficient_permissions():
        token = create_user_token(role="viewer")
        headers = {"Authorization": f"Bearer {token}"}
-       
-       response = client.post("/api/v1/agents", 
+
+       response = client.post("/api/v1/agents",
                             json={"name": "test", "template": "research_v2"},
                             headers=headers)
        assert response.status_code == 403
-   
+
    # Test input validation
    def test_malicious_input_rejected():
        token = create_admin_token()
        headers = {"Authorization": f"Bearer {token}"}
-       
+
        response = client.post("/api/v1/agents",
                             json={"name": "<script>alert('xss')</script>"},
                             headers=headers)
@@ -474,10 +474,10 @@ sequenceDiagram
    ```bash
    # Run security tests
    pytest tests/security/ -v
-   
+
    # Security scanning
    bandit -r .
-   
+
    # Dependency vulnerability check
    pip-audit
    ```
@@ -508,7 +508,7 @@ sequenceDiagram
    # Good: Descriptive test name
    def test_create_agent_with_valid_data_returns_active_agent():
        pass
-   
+
    # Bad: Vague test name
    def test_create_agent():
        pass
@@ -520,10 +520,10 @@ sequenceDiagram
        # Arrange
        agent = Agent(template="research_v2")
        observation = {"type": "text", "content": "What is AI?"}
-       
+
        # Act
        result = agent.process_observation(observation)
-       
+
        # Assert
        assert result["status"] == "processed"
        assert "confidence" in result
@@ -539,9 +539,9 @@ sequenceDiagram
            "name": "Test Agent",
            "template": "research_v2"
        }
-       
+
        agent = create_agent(user, agent_data)
-       
+
        assert agent.user_id == user.id
        assert agent.name == "Test Agent"
    ```
@@ -574,19 +574,19 @@ pytest -m "not slow"
    def create_agent(name: str, template: str, user_id: str) -> Agent:
        """
        Create a new agent with the specified configuration.
-       
+
        Args:
            name: Human-readable name for the agent
            template: Agent template type (e.g., 'research_v2')
            user_id: ID of the user creating the agent
-           
+
        Returns:
            Agent: The created agent instance
-           
+
        Raises:
            ValueError: If name or template is invalid
            PermissionError: If user doesn't have create permissions
-           
+
        Example:
            >>> agent = create_agent("My Agent", "research_v2", "user123")
            >>> agent.name
@@ -599,15 +599,15 @@ pytest -m "not slow"
    class AgentManager:
        """
        Manages the lifecycle and coordination of AI agents.
-       
+
        The AgentManager handles agent creation, destruction, and state
        management. It provides thread-safe operations and implements
        performance optimizations for multi-agent scenarios.
-       
+
        Attributes:
            agents: Dict mapping agent IDs to Agent instances
            thread_pool: ThreadPoolExecutor for parallel processing
-           
+
        Example:
            >>> manager = AgentManager()
            >>> agent = manager.create_agent("Research Agent", "research_v2")
@@ -627,14 +627,14 @@ pytest -m "not slow"
    ):
        """
        Create a new AI agent.
-       
+
        Creates a new agent with the specified configuration and assigns
        it to the current user.
-       
+
        - **name**: Human-readable name for the agent
        - **template**: Agent template type (research_v2, analysis_v1, etc.)
        - **parameters**: Optional configuration parameters
-       
+
        Returns the created agent with its unique ID and initial status.
        """
    ```
@@ -644,7 +644,7 @@ pytest -m "not slow"
    class AgentRequest(BaseModel):
        """
        Request model for creating a new agent.
-       
+
        Attributes:
            name: Human-readable name (3-50 characters)
            template: Agent template identifier
@@ -660,37 +660,37 @@ pytest -m "not slow"
 1. **Component README Structure**
    ```markdown
    # Component Name
-   
+
    Brief description of what this component does.
-   
+
    ## Overview
-   
+
    More detailed explanation of the component's purpose and functionality.
-   
+
    ## Architecture
-   
+
    Description of the component's architecture and key classes.
-   
+
    ## Usage
-   
+
    ```python
    # Example usage
    from agents.agent_manager import AgentManager
-   
+
    manager = AgentManager()
    agent = manager.create_agent("My Agent", "research_v2")
    ```
-   
+
    ## Configuration
-   
+
    Environment variables and configuration options.
-   
+
    ## Testing
-   
+
    How to run tests for this component.
-   
+
    ## Contributing
-   
+
    Guidelines for contributing to this component.
    ```
 
@@ -851,7 +851,7 @@ pytest -m "not slow"
    ```bash
    # Run all tests
    pytest
-   
+
    # Run specific test file
    pytest tests/unit/test_agent_manager.py
    ```
@@ -860,7 +860,7 @@ pytest -m "not slow"
    ```bash
    # Check JWT token
    python -c "import jwt; print(jwt.decode('TOKEN', verify=False))"
-   
+
    # Check logs
    tail -f logs/security_audit.log
    ```

@@ -7,7 +7,7 @@
 ```
 Benchmark Suite
 ├── test_agent_spawning.py     # Agent creation performance
-├── test_message_throughput.py # Message routing efficiency  
+├── test_message_throughput.py # Message routing efficiency
 ├── test_memory_usage.py       # Memory profiling & leak detection
 ├── test_database_queries.py   # Database performance (TBD)
 ├── test_concurrent_load.py    # Concurrency & scalability (TBD)
@@ -96,7 +96,7 @@ performance-verification:
         python -m pytest benchmarks/ \
           --benchmark-only \
           --benchmark-json=benchmark_results.json
-    
+
     - name: Check for regressions
       run: python benchmarks/ci_integration.py --check-regression
 ```
@@ -378,7 +378,7 @@ Based on initial testing on a 20-core Linux system:
 ```ini
 # pytest.ini
 [tool:pytest]
-addopts = 
+addopts =
     --benchmark-columns=min,max,mean,stddev,median,iqr,outliers
     --benchmark-sort=mean
     --benchmark-group-by=group

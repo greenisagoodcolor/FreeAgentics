@@ -82,7 +82,7 @@ export function KnowledgeGraphView() {
       const zoom = d3
         .zoom<SVGSVGElement, unknown>()
         .scaleExtent([0.1, 4])
-        .on("zoom", (event) => {
+        .on("zoom", (event: d3.D3ZoomEvent<SVGSVGElement, unknown>) => {
           g.attr("transform", event.transform.toString());
         });
 
@@ -126,6 +126,22 @@ export function KnowledgeGraphView() {
         .force("collision", d3.forceCollide().radius(NODE_RADIUS + 10));
 
       simulationRef.current = simulation;
+
+      // Drag functions
+      const dragstarted = (event: d3.D3DragEvent<SVGCircleElement, GraphNode, GraphNode>, d: GraphNode) => {
+        if (!event.active) simulation.alphaTarget(0.3).restart();
+        d.x = event.x;
+        d.y = event.y;
+      };
+
+      const dragged = (event: d3.D3DragEvent<SVGCircleElement, GraphNode, GraphNode>, d: GraphNode) => {
+        d.x = event.x;
+        d.y = event.y;
+      };
+
+      const dragended = (event: d3.D3DragEvent<SVGCircleElement, GraphNode, GraphNode>, _d: GraphNode) => {
+        if (!event.active) simulation.alphaTarget(0);
+      };
 
       // Create edges
       const link = g
@@ -176,31 +192,15 @@ export function KnowledgeGraphView() {
       // Update positions on tick
       simulation.on("tick", () => {
         link
-          .attr("x1", (d: GraphEdge & { source: GraphNode; target: GraphNode }) => d.source.x)
-          .attr("y1", (d: GraphEdge & { source: GraphNode; target: GraphNode }) => d.source.y)
-          .attr("x2", (d: GraphEdge & { source: GraphNode; target: GraphNode }) => d.target.x)
-          .attr("y2", (d: GraphEdge & { source: GraphNode; target: GraphNode }) => d.target.y);
+          .attr("x1", (d: any) => d.source.x)
+          .attr("y1", (d: any) => d.source.y)
+          .attr("x2", (d: any) => d.target.x)
+          .attr("y2", (d: any) => d.target.y);
 
-        node.attr("cx", (d) => d.x!).attr("cy", (d) => d.y!);
+        node.attr("cx", (d: GraphNode) => d.x!).attr("cy", (d: GraphNode) => d.y!);
 
-        label.attr("x", (d) => d.x!).attr("y", (d) => d.y!);
+        label.attr("x", (d: GraphNode) => d.x!).attr("y", (d: GraphNode) => d.y!);
       });
-
-      // Drag functions
-      function dragstarted(event: d3.D3DragEvent<SVGCircleElement, GraphNode, GraphNode>, d: GraphNode) {
-        if (!event.active) simulation.alphaTarget(0.3).restart();
-        d.x = event.x;
-        d.y = event.y;
-      }
-
-      function dragged(event: d3.D3DragEvent<SVGCircleElement, GraphNode, GraphNode>, d: GraphNode) {
-        d.x = event.x;
-        d.y = event.y;
-      }
-
-      function dragended(event: d3.D3DragEvent<SVGCircleElement, GraphNode, GraphNode>, _d: GraphNode) {
-        if (!event.active) simulation.alphaTarget(0);
-      }
 
       // Apply layout
       if (selectedLayout === "hierarchical") {

@@ -42,7 +42,7 @@ def test_token_validation_endpoint():
         "password": "testpass"
     })
     token = login_response.json()["access_token"]
-    
+
     # Then validate it
     response = client.get("/v1/auth/validate", headers={
         "Authorization": f"Bearer {token}"
@@ -72,7 +72,7 @@ def test_get_agent_status():
         "name": "test_agent", "type": "base"
     })
     agent_id = create_response.json()["agent_id"]
-    
+
     # Get status
     response = client.get(f"/v1/agents/{agent_id}/status")
     assert response.status_code == 200
@@ -128,11 +128,11 @@ def test_agent_initialization():
 def test_agent_lifecycle_start_stop():
     """Test agent can be started and stopped"""
     agent = BaseAgent(agent_id="test_001")
-    
+
     # Start agent
     agent.start()
     assert agent.is_active is True
-    
+
     # Stop agent
     agent.stop()
     assert agent.is_active is False
@@ -141,7 +141,7 @@ def test_agent_message_processing():
     """Test agent can process messages"""
     agent = BaseAgent(agent_id="test_001")
     agent.start()
-    
+
     result = agent.process_message({
         "type": "test_message",
         "content": "test_content"
@@ -168,7 +168,7 @@ def test_create_agent():
     """Test creating a new agent"""
     manager = AgentManager()
     agent_id = manager.create_agent("base", {"name": "test"})
-    
+
     assert agent_id is not None
     assert agent_id in manager.agents
     assert manager.agents[agent_id].config["name"] == "test"
@@ -177,7 +177,7 @@ def test_remove_agent():
     """Test removing an agent"""
     manager = AgentManager()
     agent_id = manager.create_agent("base", {"name": "test"})
-    
+
     result = manager.remove_agent(agent_id)
     assert result is True
     assert agent_id not in manager.agents
@@ -186,7 +186,7 @@ def test_get_agent_status():
     """Test getting agent status"""
     manager = AgentManager()
     agent_id = manager.create_agent("base", {"name": "test"})
-    
+
     status = manager.get_agent_status(agent_id)
     assert status["agent_id"] == agent_id
     assert "is_active" in status
@@ -214,7 +214,7 @@ def test_create_coalition():
         name="test_coalition",
         agents=["agent_001", "agent_002"]
     )
-    
+
     assert coalition_id is not None
     assert coalition_id in coordinator.coalitions
     assert len(coordinator.coalitions[coalition_id].agents) == 2
@@ -226,7 +226,7 @@ def test_add_agent_to_coalition():
         name="test_coalition",
         agents=["agent_001"]
     )
-    
+
     result = coordinator.add_agent_to_coalition(coalition_id, "agent_002")
     assert result is True
     assert len(coordinator.coalitions[coalition_id].agents) == 2
@@ -256,13 +256,13 @@ def test_gnn_model_initialization():
 def test_gnn_model_forward_pass():
     """Test GNN model forward pass"""
     model = GNNModel(input_dim=10, hidden_dim=20, output_dim=5)
-    
+
     # Mock input data
     input_data = {
         "node_features": [[1, 2, 3, 4, 5, 6, 7, 8, 9, 10]],
         "edge_indices": [[0, 1], [1, 0]]
     }
-    
+
     output = model.forward(input_data)
     assert output is not None
     assert len(output) == 5  # output_dim
@@ -291,7 +291,7 @@ def test_llm_generate_response():
         provider_type="mock",
         config={"model": "test_model"}
     )
-    
+
     response = provider.generate_response(
         prompt="Test prompt",
         max_tokens=100
@@ -320,12 +320,12 @@ def test_coalition_manager_initialization():
 def test_form_coalition():
     """Test coalition formation"""
     manager = CoalitionManager()
-    
+
     coalition_id = manager.form_coalition(
         agents=["agent_001", "agent_002", "agent_003"],
         task="test_task"
     )
-    
+
     assert coalition_id is not None
     assert coalition_id in manager.coalitions
     assert manager.coalitions[coalition_id].task == "test_task"
@@ -333,12 +333,12 @@ def test_form_coalition():
 def test_dissolve_coalition():
     """Test coalition dissolution"""
     manager = CoalitionManager()
-    
+
     coalition_id = manager.form_coalition(
         agents=["agent_001", "agent_002"],
         task="test_task"
     )
-    
+
     result = manager.dissolve_coalition(coalition_id)
     assert result is True
     assert coalition_id not in manager.coalitions
@@ -359,10 +359,10 @@ from coalitions.formation_strategies import (
 def test_random_formation_strategy():
     """Test random coalition formation"""
     strategy = RandomFormationStrategy()
-    
+
     agents = ["agent_001", "agent_002", "agent_003", "agent_004"]
     task = {"type": "test", "size": 2}
-    
+
     coalition = strategy.form_coalition(agents, task)
     assert len(coalition) == 2
     assert all(agent in agents for agent in coalition)
@@ -370,14 +370,14 @@ def test_random_formation_strategy():
 def test_skill_based_formation_strategy():
     """Test skill-based coalition formation"""
     strategy = SkillBasedFormationStrategy()
-    
+
     agents = [
         {"id": "agent_001", "skills": ["python", "ml"]},
         {"id": "agent_002", "skills": ["python", "web"]},
         {"id": "agent_003", "skills": ["ml", "data"]}
     ]
     task = {"required_skills": ["python", "ml"]}
-    
+
     coalition = strategy.form_coalition(agents, task)
     assert len(coalition) > 0
     # Should include agents with required skills

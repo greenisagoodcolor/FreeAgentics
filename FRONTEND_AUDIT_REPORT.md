@@ -57,7 +57,7 @@ export class ErrorBoundary extends Component<ErrorBoundaryProps, ErrorBoundarySt
   componentDidCatch(error: Error, errorInfo: ErrorInfo) {
     // Log to monitoring service
     console.error('Error caught by boundary:', error, errorInfo);
-    
+
     // Send to error tracking service
     if (typeof window !== 'undefined' && window.errorTracker) {
       window.errorTracker.logError(error, errorInfo);
@@ -108,11 +108,11 @@ const chatReducer = (state: ChatState, action: ChatAction): ChatState => {
     case 'SEND_MESSAGE':
       return { ...state, isLoading: true, error: null };
     case 'MESSAGE_SENT':
-      return { 
-        ...state, 
-        isLoading: false, 
-        input: '', 
-        messages: [...state.messages, action.payload] 
+      return {
+        ...state,
+        isLoading: false,
+        input: '',
+        messages: [...state.messages, action.payload]
       };
     case 'MESSAGE_ERROR':
       return { ...state, isLoading: false, error: action.payload };
@@ -141,7 +141,7 @@ export const GraphRenderer = React.memo(({ data, config }: GraphRendererProps) =
   // Component implementation
 }, (prevProps, nextProps) => {
   // Custom comparison for re-render optimization
-  return prevProps.data === nextProps.data && 
+  return prevProps.data === nextProps.data &&
          prevProps.config === nextProps.config;
 });
 ```
@@ -194,15 +194,15 @@ describe('Button Component', () => {
   <div className="chat-header" role="heading" aria-level={3}>
     <h3>{agent.name}</h3>
   </div>
-  <div 
-    className="chat-messages" 
-    role="log" 
+  <div
+    className="chat-messages"
+    role="log"
     aria-live="polite"
     aria-label="Chat messages"
   >
     {messages.map((msg) => (
-      <div 
-        key={msg.id} 
+      <div
+        key={msg.id}
         className={`message ${msg.role}`}
         role="article"
         aria-label={`${msg.role} message`}
@@ -262,11 +262,11 @@ const colors = {
   // Current: May not meet contrast requirements
   primary: '#3b82f6',
   primaryForeground: '#ffffff',
-  
+
   // Fixed: Meets WCAG AA standards
   primary: '#2563eb', // Darker blue for better contrast
   primaryForeground: '#ffffff',
-  
+
   // Add high contrast mode support
   '@media (prefers-contrast: high)': {
     primary: '#1e40af',
@@ -283,8 +283,8 @@ const colors = {
 
 ```typescript
 // Problem: Creates new object on every render
-<AgentChat 
-  agent={agent} 
+<AgentChat
+  agent={agent}
   messages={messages}
   onSendMessage={(msg) => handleSend(msg)} // Creates new function
 />
@@ -294,8 +294,8 @@ const handleSendMessage = useCallback((msg: string) => {
   handleSend(msg);
 }, [handleSend]);
 
-<AgentChat 
-  agent={agent} 
+<AgentChat
+  agent={agent}
   messages={messages}
   onSendMessage={handleSendMessage}
 />
@@ -309,9 +309,9 @@ const handleSendMessage = useCallback((msg: string) => {
 // Dynamic imports for code splitting
 const GraphRenderer = dynamic(
   () => import('@/lib/graph-rendering/rendering-engine').then(mod => mod.GraphRenderer),
-  { 
+  {
     loading: () => <GraphSkeleton />,
-    ssr: false 
+    ssr: false
   }
 );
 
@@ -329,23 +329,23 @@ destroy(): void {
   // Remove event listeners
   this.canvas.removeEventListener('click', this.handleClick);
   this.canvas.removeEventListener('mousemove', this.handleMouseMove);
-  
+
   // Clear animation frames
   if (this.animationFrameId) {
     cancelAnimationFrame(this.animationFrameId);
   }
-  
+
   // Clear WebGL resources
   if (this.gl) {
     // Delete buffers, shaders, programs
     this.gl.deleteProgram(this.program);
     this.gl.deleteBuffer(this.vertexBuffer);
   }
-  
+
   // Clear references
   this.data = { nodes: [], edges: [] };
   this.eventHandlers.clear();
-  
+
   // Remove DOM element
   this.canvas.remove();
 }

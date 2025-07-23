@@ -9,7 +9,7 @@ All critical and high-severity security issues have been resolved. The remaining
 1. **B602** - subprocess with shell=True in `validate_cleanup.py`
    - Fixed by implementing conditional shell usage with proper validation
    - Added nosec comment for legitimate shell usage with piped commands
-   
+
 2. **B324** - MD5 hash usage (6 occurrences)
    - Added `usedforsecurity=False` parameter to all MD5 usage
    - These are used for caching/hashing, not security
@@ -23,7 +23,7 @@ All critical and high-severity security issues have been resolved. The remaining
    - Fixed critical instances by adding proper logging
    - Examples: `auth/mfa_service.py`, `main.py`, `agents/memory_optimization/memory_profiler.py`
 
-2. **B112** - try/except continue blocks  
+2. **B112** - try/except continue blocks
    - Fixed by adding debug logging in `security/testing/dast_integration.py`
 
 3. **B311** - random module usage in demos

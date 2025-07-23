@@ -19,7 +19,7 @@ The FreeAgentics Automated Backup System provides comprehensive data protection 
 ### 3-2-1 Strategy Implementation
 1. **Primary Copy**: Live production data
 2. **Local Backup**: High-speed local storage with fast recovery
-3. **Offsite Backups**: 
+3. **Offsite Backups**:
    - Primary: AWS S3 with lifecycle policies
    - Secondary: Azure/GCP/Backblaze for redundancy
 
@@ -278,7 +278,7 @@ curl localhost:9090/metrics | grep freeagentics_backup
    # Check logs
    tail -f /var/log/freeagentics/backup.log
    journalctl -u freeagentics-backup -n 100
-   
+
    # Verify credentials
    pg_isready -h localhost -U freeagentics
    redis-cli ping
@@ -288,7 +288,7 @@ curl localhost:9090/metrics | grep freeagentics_backup
    ```bash
    # Check disk space
    df -h /var/backups/freeagentics
-   
+
    # Clean up old backups
    ./cleanup-old-backups.sh
    ```
@@ -297,7 +297,7 @@ curl localhost:9090/metrics | grep freeagentics_backup
    ```bash
    # Test S3 connectivity
    aws s3 ls s3://freeagentics-backups-prod
-   
+
    # Check credentials
    aws sts get-caller-identity
    ```

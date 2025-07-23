@@ -54,14 +54,17 @@ export function useAgents(): AgentsState {
     if (!lastMessage) return;
 
     if (lastMessage.type === "agent_update") {
-      const { agentId, ...updates } = lastMessage.data;
+      const data = lastMessage.data as { agentId: string } & Partial<Agent>;
+      const { agentId, ...updates } = data;
       setAgents((prev) =>
         prev.map((agent) => (agent.id === agentId ? { ...agent, ...updates } : agent)),
       );
     } else if (lastMessage.type === "agent_created") {
-      setAgents((prev) => [...prev, lastMessage.data]);
+      const newAgent = lastMessage.data as Agent;
+      setAgents((prev) => [...prev, newAgent]);
     } else if (lastMessage.type === "agent_deleted") {
-      setAgents((prev) => prev.filter((agent) => agent.id !== lastMessage.data.agentId));
+      const data = lastMessage.data as { agentId: string };
+      setAgents((prev) => prev.filter((agent) => agent.id !== data.agentId));
     }
   }, [lastMessage]);
 

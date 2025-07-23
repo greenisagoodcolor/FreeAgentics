@@ -100,7 +100,7 @@ class TestActiveInferenceProduction(unittest.TestCase):
             obs_model: likelihood
             trans_model: transition
             pref: preference {preferred_observation: 2}
-            
+
             [edges]
             location -> obs_model: depends_on
             obs_model -> observation: generates
@@ -163,7 +163,7 @@ class TestActiveInferenceProduction(unittest.TestCase):
             obs_model: likelihood
             trans_model: transition
             pref: preference {preferred_observation: 1}
-            
+
             [edges]
             location -> obs_model: depends_on
             obs_model -> observation: generates
@@ -551,7 +551,7 @@ class TestActiveInferenceProduction(unittest.TestCase):
             obs_model: likelihood
             trans_model: transition
             pref: preference {preferred_observation: 2}
-            
+
             [edges]
             location -> obs_model: depends_on
             obs_model -> observation: generates

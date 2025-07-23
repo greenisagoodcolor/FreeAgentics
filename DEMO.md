@@ -1,7 +1,7 @@
 # FreeAgentics v1.0.0-alpha+ Demo Guide
 
 > **Living Multi-Agent AI Platform with Active Inference**
-> 
+>
 > This guide demonstrates the complete end-to-end flow:
 > **Goal Prompt → LLM → GMN → PyMDP → Agent → Knowledge Graph → Visualization**
 
@@ -19,7 +19,7 @@
    ```bash
    # Development mode
    docker-compose up -d
-   
+
    # Or production mode
    docker-compose -f docker-compose.production.yml up -d
    ```
@@ -28,7 +28,7 @@
    ```bash
    # Check health
    curl http://localhost:8000/health
-   
+
    # Check metrics
    curl http://localhost:8000/api/v1/metrics
    ```
@@ -79,7 +79,7 @@ ws.onopen = () => {
     type: 'auth',
     data: { token: AUTH_TOKEN }
   }));
-  
+
   // Subscribe to agent events
   ws.send(JSON.stringify({
     type: 'subscribe',
@@ -196,7 +196,7 @@ import_knowledge_graph(new_agent['agent_id'], expert_kg)
 
 ### Prometheus Metrics
 - `freeagentics_agent_inference_duration_seconds`: Time per inference step
-- `freeagentics_agent_free_energy`: Current free energy per agent  
+- `freeagentics_agent_free_energy`: Current free energy per agent
 - `freeagentics_kg_nodes_total`: Total knowledge graph nodes
 - `freeagentics_llm_requests_total`: LLM API calls
 - `freeagentics_websocket_connections`: Active WebSocket connections

@@ -126,7 +126,7 @@ def test_login_security():
     })
     assert response.status_code == 200
     assert "access_token" in response.json()
-    
+
     # Invalid login
     response = client.post("/api/v1/auth/login", json={
         "username": "testuser",
@@ -141,7 +141,7 @@ def test_rbac_enforcement():
     # Admin user should access admin endpoints
     admin_response = admin_client.get("/api/v1/admin/users")
     assert admin_response.status_code == 200
-    
+
     # Regular user should be denied
     user_response = user_client.get("/api/v1/admin/users")
     assert user_response.status_code == 403
@@ -152,10 +152,10 @@ def test_rbac_enforcement():
 def test_sql_injection_prevention():
     malicious_input = "'; DROP TABLE users; --"
     response = client.get(f"/api/v1/search?query={malicious_input}")
-    
+
     # Should not cause server error
     assert response.status_code in [200, 400]
-    
+
     # Should not leak sensitive data
     assert "password" not in response.text.lower()
 ```
@@ -173,7 +173,7 @@ def test_sql_injection_prevention():
    ```bash
    # Check database is running
    pg_isready -h localhost -p 5432
-   
+
    # Create test database if needed
    createdb freeagentics_security
    ```
@@ -182,7 +182,7 @@ def test_sql_injection_prevention():
    ```bash
    # Check Redis is running
    redis-cli ping
-   
+
    # Start Redis if needed
    redis-server
    ```

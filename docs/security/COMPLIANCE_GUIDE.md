@@ -187,25 +187,25 @@ pip-audit --format=json --output=vulnerabilities.json
 ```python
 class GDPRDataProcessor:
     """GDPR-compliant data processing."""
-    
+
     def __init__(self):
         self.data_purposes = {
             'user_authentication': ['email', 'hashed_password'],
             'user_profile': ['name', 'preferences'],
             'analytics': ['anonymized_usage_data']
         }
-    
+
     def process_data(self, data: dict, purpose: str):
         """Process data according to GDPR principles."""
         if purpose not in self.data_purposes:
             raise ValueError(f"Unknown purpose: {purpose}")
-        
+
         allowed_fields = self.data_purposes[purpose]
         filtered_data = {k: v for k, v in data.items() if k in allowed_fields}
-        
+
         # Log data processing for audit trail
         self._log_data_processing(purpose, list(filtered_data.keys()))
-        
+
         return filtered_data
 ```
 
@@ -223,7 +223,7 @@ class GDPRDataProcessor:
 ```python
 class DataErasureService:
     """GDPR Article 17 implementation."""
-    
+
     async def erase_user_data(self, user_id: str) -> dict:
         """Completely erase user data."""
         erasure_log = {
@@ -231,25 +231,25 @@ class DataErasureService:
             'timestamp': datetime.now(timezone.utc),
             'erased_data': []
         }
-        
+
         # Erase from all systems
         tables_to_clean = [
             'users', 'user_profiles', 'user_sessions',
             'user_preferences', 'user_activity_logs'
         ]
-        
+
         for table in tables_to_clean:
             deleted_count = await self._delete_user_data(table, user_id)
             erasure_log['erased_data'].append({
                 'table': table,
                 'records_deleted': deleted_count
             })
-        
+
         # Verify complete erasure
         remaining_data = await self._verify_complete_erasure(user_id)
         if remaining_data:
             raise Exception(f"Incomplete erasure: {remaining_data}")
-        
+
         return erasure_log
 ```
 
@@ -264,7 +264,7 @@ class DataErasureService:
 ```python
 class DataPortabilityService:
     """GDPR Article 20 implementation."""
-    
+
     async def export_user_data(self, user_id: str) -> dict:
         """Export user data in portable format."""
         export_data = {
@@ -278,10 +278,10 @@ class DataPortabilityService:
             'preferences': await self._collect_user_preferences(user_id),
             'activity_history': await self._collect_activity_history(user_id)
         }
-        
+
         # Calculate checksum for integrity
         export_data['export_metadata']['checksum'] = self._calculate_checksum(export_data)
-        
+
         return export_data
 ```
 
@@ -309,14 +309,14 @@ class DataPortabilityService:
 ```python
 class DataBreachNotificationService:
     """GDPR Article 33 implementation."""
-    
+
     def __init__(self):
         self.breach_detection_threshold = timedelta(hours=72)
-        
+
     async def detect_and_notify_breach(self, incident: dict):
         """Detect and handle data breaches."""
         breach_assessment = await self._assess_breach_risk(incident)
-        
+
         if breach_assessment['is_personal_data_breach']:
             breach_record = {
                 'incident_id': incident['id'],
@@ -326,14 +326,14 @@ class DataBreachNotificationService:
                 'risk_level': breach_assessment['risk_level'],
                 'notification_required': breach_assessment['notification_required']
             }
-            
+
             # Log breach for regulatory reporting
             await self._log_breach(breach_record)
-            
+
             # Notify if required
             if breach_record['notification_required']:
                 await self._notify_supervisory_authority(breach_record)
-                
+
             return breach_record
 ```
 
@@ -356,7 +356,7 @@ class DataBreachNotificationService:
 ```python
 class SOC2SecurityValidator:
     """SOC 2 Security criteria validation."""
-    
+
     def validate_security_controls(self) -> dict:
         """Validate SOC 2 security controls."""
         return {
@@ -366,7 +366,7 @@ class SOC2SecurityValidator:
             'encryption': self._validate_encryption(),
             'system_monitoring': self._validate_monitoring()
         }
-    
+
     def _validate_access_controls(self) -> dict:
         """Validate access control implementation."""
         return {
@@ -515,7 +515,7 @@ python scripts/security/generate_compliance_report.py
 ```python
 class ComplianceReportGenerator:
     """Generate compliance reports for various frameworks."""
-    
+
     def __init__(self):
         self.compliance_frameworks = {
             'owasp_top_10': OWASPTop10Validator(),
@@ -523,7 +523,7 @@ class ComplianceReportGenerator:
             'soc2': SOC2ComplianceValidator(),
             'pci_dss': PCIDSSValidator()
         }
-    
+
     def generate_comprehensive_report(self) -> dict:
         """Generate comprehensive compliance report."""
         report = {
@@ -540,32 +540,32 @@ class ComplianceReportGenerator:
             'recommendations': [],
             'action_items': []
         }
-        
+
         total_score = 0
         framework_count = 0
-        
+
         for framework_name, validator in self.compliance_frameworks.items():
             try:
                 compliance_result = validator.validate_compliance()
                 report['compliance_status'][framework_name] = compliance_result
-                
+
                 framework_score = self._calculate_framework_score(compliance_result)
                 total_score += framework_score
                 framework_count += 1
-                
+
                 # Add recommendations for non-compliant items
                 if framework_score < 100:
                     recommendations = self._generate_recommendations(framework_name, compliance_result)
                     report['recommendations'].extend(recommendations)
-                    
+
             except Exception as e:
                 report['compliance_status'][framework_name] = {
                     'status': 'error',
                     'message': str(e)
                 }
-        
+
         report['overall_compliance_score'] = total_score / framework_count if framework_count > 0 else 0
-        
+
         return report
 ```
 
@@ -612,32 +612,32 @@ COMPLIANCE_METRICS = {
 ```python
 class ComplianceMonitor:
     """Monitor compliance status in real-time."""
-    
+
     def __init__(self):
         self.compliance_thresholds = {
             'owasp_top_10': 95,
             'gdpr': 98,
             'soc2': 90
         }
-        
+
     async def monitor_compliance(self):
         """Continuously monitor compliance status."""
         while True:
             try:
                 compliance_status = await self._check_compliance_status()
-                
+
                 for framework, score in compliance_status.items():
                     threshold = self.compliance_thresholds.get(framework, 90)
-                    
+
                     if score < threshold:
                         await self._send_compliance_alert(framework, score, threshold)
-                
+
                 await asyncio.sleep(3600)  # Check hourly
-                
+
             except Exception as e:
                 logger.error(f"Compliance monitoring error: {e}")
                 await asyncio.sleep(300)  # Retry in 5 minutes
-    
+
     async def _send_compliance_alert(self, framework: str, score: int, threshold: int):
         """Send compliance alert."""
         alert = {
@@ -648,7 +648,7 @@ class ComplianceMonitor:
             'severity': 'high' if score < threshold - 10 else 'medium',
             'timestamp': datetime.now(timezone.utc).isoformat()
         }
-        
+
         # Send to alerting system
         await self._send_alert(alert)
 ```
@@ -668,7 +668,7 @@ groups:
         annotations:
           summary: OWASP compliance score below threshold
           description: "OWASP compliance score is {{ $value }}, below required 95%"
-      
+
       - alert: GDPRComplianceBelow98
         expr: gdpr_compliance_score < 98
         for: 1m
@@ -677,7 +677,7 @@ groups:
         annotations:
           summary: GDPR compliance score below threshold
           description: "GDPR compliance score is {{ $value }}, below required 98%"
-      
+
       - alert: SOC2ComplianceBelow90
         expr: soc2_compliance_score < 90
         for: 10m

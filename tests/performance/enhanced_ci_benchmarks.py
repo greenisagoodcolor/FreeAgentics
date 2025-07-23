@@ -1057,8 +1057,7 @@ class EnhancedCIBenchmarkSuite:
                     f.write("**Improvements**:\n")
                     for imp in validation["improvements"]:
                         f.write(
-                            f"- {imp['metric']}: {imp['improvement_percent']:.1f}% "
-                            f"improvement\n"
+                            f"- {imp['metric']}: {imp['improvement_percent']:.1f}% improvement\n"
                         )
                     f.write("\n")
 

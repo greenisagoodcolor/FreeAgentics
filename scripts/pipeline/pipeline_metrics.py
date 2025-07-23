@@ -118,9 +118,9 @@ class PipelineMetrics:
             # Insert pipeline run
             cursor.execute(
                 """
-                INSERT OR REPLACE INTO pipeline_runs 
-                (pipeline_id, commit_sha, branch, trigger_event, actor, started_at, 
-                 completed_at, duration_seconds, status, change_scope, 
+                INSERT OR REPLACE INTO pipeline_runs
+                (pipeline_id, commit_sha, branch, trigger_event, actor, started_at,
+                 completed_at, duration_seconds, status, change_scope,
                  security_sensitive, deployment_ready)
                 VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
             """,
@@ -145,7 +145,7 @@ class PipelineMetrics:
             for stage_name, stage_status in stages.items():
                 cursor.execute(
                     """
-                    INSERT INTO stage_metrics 
+                    INSERT INTO stage_metrics
                     (pipeline_id, stage_name, status)
                     VALUES (?, ?, ?)
                 """,
@@ -169,7 +169,7 @@ class PipelineMetrics:
 
         query = """
             SELECT status, COUNT(*) as count
-            FROM pipeline_runs 
+            FROM pipeline_runs
             WHERE started_at >= ?
         """
         params = [since_date.isoformat()]
@@ -200,7 +200,7 @@ class PipelineMetrics:
 
         query = """
             SELECT duration_seconds
-            FROM pipeline_runs 
+            FROM pipeline_runs
             WHERE started_at >= ? AND duration_seconds IS NOT NULL
         """
         params = [since_date.isoformat()]
@@ -229,7 +229,7 @@ class PipelineMetrics:
         # Get stage failure rates
         cursor.execute(
             """
-            SELECT stage_name, 
+            SELECT stage_name,
                    COUNT(*) as total,
                    SUM(CASE WHEN status = 'failure' THEN 1 ELSE 0 END) as failures
             FROM stage_metrics sm
@@ -256,7 +256,7 @@ class PipelineMetrics:
         # Get daily failure counts
         cursor.execute(
             """
-            SELECT DATE(started_at) as date, 
+            SELECT DATE(started_at) as date,
                    COUNT(*) as total,
                    SUM(CASE WHEN status != 'success' THEN 1 ELSE 0 END) as failures
             FROM pipeline_runs
@@ -411,8 +411,8 @@ class PipelineMetrics:
 
         markdown = f"""# Pipeline Metrics Report
 
-**Generated:** {data["generated_at"]}  
-**Health Score:** {health["health_score"]}/100 (Grade: {data["summary"]["health_grade"]})  
+**Generated:** {data["generated_at"]}
+**Health Score:** {health["health_score"]}/100 (Grade: {data["summary"]["health_grade"]})
 **Trend:** {health["trend_direction"].title()}
 
 ## 📊 Key Metrics

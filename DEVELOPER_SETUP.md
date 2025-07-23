@@ -431,5 +431,5 @@ npm install
 
 **Happy coding! 🚀**
 
-The FreeAgentics development environment is designed to be productive and enjoyable. 
+The FreeAgentics development environment is designed to be productive and enjoyable.
 If you encounter any issues or have suggestions for improvement, please let us know!

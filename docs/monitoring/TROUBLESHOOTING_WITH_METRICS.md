@@ -65,9 +65,9 @@ This guide provides systematic approaches to troubleshooting FreeAgentics issues
    ```promql
    # System memory usage
    freeagentics_system_memory_usage_bytes / (1024*1024*1024)
-   
+
    # Agent memory distribution
-   histogram_quantile(0.95, 
+   histogram_quantile(0.95,
      rate(freeagentics_agent_memory_usage_bytes[5m])
    ) / (1024*1024)
    ```
@@ -184,7 +184,7 @@ kubectl logs -f api-deployment | grep "slow_query"
    ```promql
    # Active agents by type
    sum by (agent_type) (freeagentics_agent_active{state="running"})
-   
+
    # Agent coordination queue
    freeagentics_agent_coordination_queue_size
    ```
@@ -630,6 +630,6 @@ Database deadlock caused by concurrent schema migration
 
 ---
 
-**Last Updated**: 2025-01-15  
-**Version**: 1.0  
+**Last Updated**: 2025-01-15
+**Version**: 1.0
 **Contact**: sre@freeagentics.com

@@ -150,7 +150,7 @@ class DatabaseBenchmarks:
             cursor = test_db.cursor()
             cursor.execute(
                 """
-                SELECT 
+                SELECT
                     agent_id,
                     COUNT(*) as msg_count,
                     MIN(timestamp) as first_msg,

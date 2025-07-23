@@ -7,17 +7,17 @@ const nextConfig = {
   reactStrictMode: true,
   output: "standalone", // Enable standalone output for Docker deployments
   swcMinify: true, // Use SWC minifier for better performance
-  
-  // Performance optimizations  
+
+  // Performance optimizations
   experimental: {
     gzipSize: true,
   },
-  
+
   // Compiler optimizations
   compiler: {
     removeConsole: process.env.NODE_ENV === "production",
   },
-  
+
   // Bundle optimization
   webpack: (config, { isServer }) => {
     // Bundle analyzer configuration
@@ -33,7 +33,7 @@ const nextConfig = {
         },
       };
     }
-    
+
     // Aggressive optimization for production
     config.optimization = {
       ...config.optimization,
@@ -47,7 +47,7 @@ const nextConfig = {
         maxSize: 50000,
       },
     };
-    
+
     // Reduce bundle size with specific optimizations
     if (!isServer) {
       config.resolve.fallback = {
@@ -61,18 +61,18 @@ const nextConfig = {
         buffer: false,
         process: false,
       };
-      
+
       // Use production builds
       if (process.env.NODE_ENV === 'production') {
         config.resolve.alias = {
           ...config.resolve.alias,
         };
       }
-      
+
       // Module concatenation for better compression
       config.optimization.concatenateModules = true;
     }
-    
+
     return config;
   },
 

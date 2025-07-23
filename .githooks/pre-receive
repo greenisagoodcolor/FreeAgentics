@@ -39,27 +39,27 @@ echo -e "${YELLOW}[POLICY-GUARD]${NC} Checking for bypass directives..."
 while read oldrev newrev refname; do
     # Get list of changed files
     changed_files=$(git diff --name-only "$oldrev" "$newrev")
-    
+
     violations_found=false
-    
+
     for file in $changed_files; do
         # Skip checking hook files and workflows that implement the checks
         if [[ "$file" == ".githooks/pre-receive" ]] || [[ "$file" == *"-hardened.yml" ]]; then
             continue
         fi
-        
+
         # Skip binary files and virtual environments
         if [[ "$file" == *.pyc ]] || [[ "$file" == */.venv/* ]] || [[ "$file" == */.llm_venv/* ]]; then
             continue
         fi
-        
+
         # Get file content from the new revision
         file_content=$(git show "$newrev:$file" 2>/dev/null || true)
-        
+
         if [[ -z "$file_content" ]]; then
             continue
         fi
-        
+
         # Check each bypass pattern
         for pattern in "${BYPASS_PATTERNS[@]}"; do
             if echo "$file_content" | grep -E "$pattern" > /dev/null 2>&1; then
@@ -70,7 +70,7 @@ while read oldrev newrev refname; do
             fi
         done
     done
-    
+
     if [[ "$violations_found" == "true" ]]; then
         echo -e "${RED}[REJECTED]${NC} Push rejected due to bypass directives"
         echo -e "${YELLOW}[POLICY]${NC} Zero-tolerance policy enforced"

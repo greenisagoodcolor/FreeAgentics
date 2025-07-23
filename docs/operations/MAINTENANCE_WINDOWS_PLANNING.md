@@ -253,7 +253,7 @@ graph TD
    ```bash
    # Run planned maintenance
    ./scripts/maintenance/run-maintenance.sh --plan monthly
-   
+
    # Monitor progress
    tail -f /var/log/freeagentics/maintenance.log
    ```
@@ -262,7 +262,7 @@ graph TD
    ```bash
    # System health check
    ./scripts/maintenance/verify-health.sh
-   
+
    # Performance baseline
    ./scripts/maintenance/performance-check.sh
    ```
@@ -563,6 +563,6 @@ Next Review: [Date]
 
 ---
 
-**Last Updated**: January 2024  
-**Next Review**: April 2024  
+**Last Updated**: January 2024
+**Next Review**: April 2024
 **Version**: 1.0

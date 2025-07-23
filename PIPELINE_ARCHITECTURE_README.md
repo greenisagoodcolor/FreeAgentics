@@ -13,10 +13,10 @@ graph LR
     E --> F[⚡ Performance]
     F --> G[🌐 E2E]
     G --> H[🚀 Deploy]
-    
+
     classDef success fill:#d4edda,stroke:#28a745
     classDef active fill:#cce5ff,stroke:#007bff
-    
+
     class A,B,C,D,E,F,G,H success
 ```
 
@@ -221,14 +221,14 @@ Safety Measures:
 
 ### Health Scoring
 ```
-Health Score = (Success Rate × 0.4) + 
-               (Duration Score × 0.2) + 
-               (Trend Score × 0.2) + 
+Health Score = (Success Rate × 0.4) +
+               (Duration Score × 0.2) +
+               (Trend Score × 0.2) +
                (Stability Score × 0.2)
 
 Grades:
 ├── A (90-100): Excellent health
-├── B (80-89):  Good health  
+├── B (80-89):  Good health
 ├── C (70-79):  Needs improvement
 ├── D (60-69):  Poor health
 └── F (0-59):   Critical issues
@@ -411,7 +411,7 @@ scripts/pipeline/
 
 ### Alert Thresholds
 - **Failure Rate** > 10%: Immediate alert
-- **Duration** > 60 min: Performance alert  
+- **Duration** > 60 min: Performance alert
 - **Security Score** < 80: Security alert
 - **Production Issues**: Immediate escalation
 
@@ -440,8 +440,8 @@ For pipeline issues or questions:
 3. **Review recent reports** in `pipeline_reports/`
 4. **Contact the team** via `#ci-cd` Slack channel
 
-**Pipeline Health Dashboard**: Available in GitHub Actions artifacts  
-**Real-time Metrics**: `./scripts/pipeline/pipeline_dashboard.py --sample`  
+**Pipeline Health Dashboard**: Available in GitHub Actions artifacts
+**Real-time Metrics**: `./scripts/pipeline/pipeline_dashboard.py --sample`
 **Emergency Contacts**: See `.pipeline-config/contacts.yml`
 
 ---

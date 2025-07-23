@@ -196,9 +196,7 @@ class MobileCertificatePinner:
                 )
                 self.domain_configs[domain] = config
 
-            logger.info(
-                f"Loaded certificate pinning configuration for " f"{len(config_data)} domains"
-            )
+            logger.info(f"Loaded certificate pinning configuration for {len(config_data)} domains")
 
         except Exception as e:
             logger.error(f"Failed to load certificate pinning configuration: {e}")
@@ -325,7 +323,7 @@ class MobileCertificatePinner:
             config.emergency_bypass = True
             config.emergency_bypass_until = datetime.now() + timedelta(hours=duration_hours)
             logger.warning(
-                f"Emergency bypass activated for {domain} until " f"{config.emergency_bypass_until}"
+                f"Emergency bypass activated for {domain} until {config.emergency_bypass_until}"
             )
 
     def get_mobile_pinning_config(self, domain: str) -> Optional[Dict[str, Any]]:

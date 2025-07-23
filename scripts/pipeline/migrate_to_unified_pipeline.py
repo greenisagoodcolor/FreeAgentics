@@ -368,8 +368,8 @@ class PipelineMigrator:
 
         report = f"""# Pipeline Migration Report
 
-**Date:** {datetime.now().strftime("%Y-%m-%d %H:%M:%S")}  
-**Tool:** PIPELINE-ARCHITECT Migration Tool  
+**Date:** {datetime.now().strftime("%Y-%m-%d %H:%M:%S")}
+**Tool:** PIPELINE-ARCHITECT Migration Tool
 **Methodology:** Martin Fowler + Jessica Kerr Principles
 
 ## Migration Summary

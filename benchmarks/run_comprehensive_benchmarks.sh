@@ -100,7 +100,7 @@ cat > "$RESULTS_DIR/comprehensive_report.md" << 'EOF'
 | Metric | Target | Status |
 |--------|--------|---------|
 | Agent Spawning | < 50ms | TBD |
-| PyMDP Inference | < 100ms | TBD |  
+| PyMDP Inference | < 100ms | TBD |
 | Memory per Agent | < 10MB | TBD |
 | API Response Time | < 200ms | TBD |
 | Bundle Size (gzipped) | < 200kB | TBD |
@@ -163,7 +163,7 @@ BUDGET_VIOLATIONS=0
 
 # Check each budget (would be extracted from actual results)
 echo "Agent Spawning: ✅ COMPLIANT (example - actual results needed)"
-echo "PyMDP Inference: ✅ COMPLIANT (example - actual results needed)"  
+echo "PyMDP Inference: ✅ COMPLIANT (example - actual results needed)"
 echo "Memory per Agent: ✅ COMPLIANT (example - actual results needed)"
 echo "API Response Time: ✅ COMPLIANT (example - actual results needed)"
 echo "Bundle Size: ❌ EXCEEDS BUDGET (example - from actual results)"

@@ -188,7 +188,7 @@ from database.indexing_strategy import get_indexing_strategy
 indexing = get_indexing_strategy()
 async with optimizer.optimized_session() as session:
     report = await indexing.generate_indexing_report(session)
-    
+
     print(f"Unused indexes: {report['index_usage']['unused_indexes']}")
     print(f"Missing indexes: {len(report['missing_indexes'])}")
 ```

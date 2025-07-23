@@ -621,7 +621,7 @@ class MemoryRegressionBenchmark(PerformanceBenchmark):
         }
 
         logger.info(
-            f"Memory regression: {memory_growth:.2f}MB growth, " f"{memory_slope:.4f}MB/cycle slope"
+            f"Memory regression: {memory_growth:.2f}MB growth, {memory_slope:.4f}MB/cycle slope"
         )
 
         return result
@@ -796,7 +796,7 @@ class CIPerformanceBenchmarkSuite:
         self._save_results(results)
 
         logger.info(
-            f"Benchmark suite completed in {suite_duration:.2f}s: " f"{results['overall_status']}"
+            f"Benchmark suite completed in {suite_duration:.2f}s: {results['overall_status']}"
         )
 
         return results

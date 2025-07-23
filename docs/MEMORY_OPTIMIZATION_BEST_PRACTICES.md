@@ -63,7 +63,7 @@ gc_context = gc_tuner.GCContextManager(gc_tuner)
 with gc_context.batch_operation(disable_gc=True):
     # Process many agents without GC interruption
     results = process_all_agents(agents)
-    
+
 # For low-latency operations
 with gc_context.low_latency():
     # Defer GC during time-sensitive operations
@@ -230,13 +230,13 @@ class OptimizedAgent:
     def __init__(self, agent_id: str):
         self.id = agent_id
         self.position = np.array([0.0, 0.0], dtype=np.float32)
-        
+
         # Use lazy loading for beliefs
         self.beliefs = LazyBeliefArray((100, 100), sparsity_threshold=0.9)
-        
+
         # Use compressed history
         self.action_history = CompressedHistory(max_size=1000)
-        
+
         # Use shared parameters
         optimizer = get_agent_optimizer()
         self.shared_params = optimizer.shared_params

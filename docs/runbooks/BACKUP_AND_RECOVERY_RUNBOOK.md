@@ -212,7 +212,7 @@ pg_restore -h localhost -U ${DB_USER} -d ${TEST_DB} \
 
 # Verify data integrity
 psql -h localhost -U ${DB_USER} -d ${TEST_DB} -c "
-SELECT 
+SELECT
   schemaname,
   tablename,
   n_tup_ins,
@@ -515,12 +515,12 @@ disaster_recovery:
     location: "Primary Data Center"
     capacity: "100%"
     services: ["api", "web", "database", "monitoring"]
-    
+
   secondary_site:
     location: "Secondary Data Center"
     capacity: "80%"
     services: ["api", "web", "database"]
-    
+
   cloud_backup:
     provider: "AWS"
     region: "us-east-1"

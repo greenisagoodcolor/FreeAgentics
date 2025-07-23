@@ -111,15 +111,15 @@ curl -s http://localhost:8000/api/v1/monitoring/endpoints/stats | jq '.endpoints
 
 # Database slow queries
 docker exec freeagentics-postgres psql -U postgres -d freeagentics -c "
-SELECT 
+SELECT
   query,
   calls,
   mean_exec_time::numeric(10,2) as avg_ms,
   max_exec_time::numeric(10,2) as max_ms,
   total_exec_time::numeric(10,2) as total_ms
-FROM pg_stat_statements 
+FROM pg_stat_statements
 WHERE mean_exec_time > 100
-ORDER BY mean_exec_time DESC 
+ORDER BY mean_exec_time DESC
 LIMIT 20;"
 
 # Redis slow log
@@ -133,11 +133,11 @@ docker stats --no-stream
 
 # Database connections
 docker exec freeagentics-postgres psql -U postgres -d freeagentics -c "
-SELECT 
+SELECT
   state,
   count(*) as connections,
   max(now() - state_change) as max_duration
-FROM pg_stat_activity 
+FROM pg_stat_activity
 GROUP BY state;"
 
 # Thread pool status
@@ -164,7 +164,7 @@ curl -s http://localhost:8000/api/v1/monitoring/traces?min_duration_ms=1000 | jq
 ```bash
 # Analyze query plans
 docker exec freeagentics-postgres psql -U postgres -d freeagentics -c "
-EXPLAIN ANALYZE 
+EXPLAIN ANALYZE
 SELECT * FROM your_slow_query_here;"
 
 # Update statistics
@@ -172,22 +172,22 @@ docker exec freeagentics-postgres psql -U postgres -d freeagentics -c "ANALYZE;"
 
 # Check missing indexes
 docker exec freeagentics-postgres psql -U postgres -d freeagentics -c "
-SELECT 
+SELECT
   schemaname,
   tablename,
   attname,
   n_distinct,
   correlation
-FROM pg_stats 
-WHERE schemaname = 'public' 
-  AND n_distinct > 100 
+FROM pg_stats
+WHERE schemaname = 'public'
+  AND n_distinct > 100
   AND correlation < 0.1
 ORDER BY n_distinct DESC;"
 
 # Add missing index (example)
 docker exec freeagentics-postgres psql -U postgres -d freeagentics -c "
-CREATE INDEX CONCURRENTLY idx_agents_status_updated 
-ON agents(status, updated_at) 
+CREATE INDEX CONCURRENTLY idx_agents_status_updated
+ON agents(status, updated_at)
 WHERE status = 'active';"
 ```
 
@@ -271,14 +271,14 @@ cur = conn.cursor()
 
 # Get slow queries
 cur.execute("""
-    SELECT 
+    SELECT
         query,
         calls,
         mean_exec_time,
         total_exec_time
-    FROM pg_stat_statements 
+    FROM pg_stat_statements
     WHERE mean_exec_time > 100
-    ORDER BY mean_exec_time DESC 
+    ORDER BY mean_exec_time DESC
     LIMIT 20
 """)
 
@@ -288,13 +288,13 @@ for query, calls, mean_time, total_time in slow_queries:
     print(f"\n{'='*60}")
     print(f"Query: {query[:100]}...")
     print(f"Calls: {calls}, Avg: {mean_time:.2f}ms, Total: {total_time:.2f}ms")
-    
+
     # Get query plan
     try:
         cur.execute(f"EXPLAIN (FORMAT JSON) {query}")
         plan = cur.fetchone()[0]
         print(f"Cost: {plan[0]['Plan']['Total Cost']}")
-        
+
         # Check for sequential scans
         if 'Seq Scan' in json.dumps(plan):
             print("WARNING: Sequential scan detected - consider adding index")
@@ -332,7 +332,7 @@ LOW_LATENCY_COUNT=$(grep "low_count" $STATE_FILE | cut -d= -f2 || echo 0)
 if (( $(echo "$CURRENT_LATENCY > $LATENCY_THRESHOLD" | bc -l) )); then
     HIGH_LATENCY_COUNT=$((HIGH_LATENCY_COUNT + 1))
     LOW_LATENCY_COUNT=0
-    
+
     if [ $HIGH_LATENCY_COUNT -ge $SCALE_UP_THRESHOLD ] && [ $CURRENT_INSTANCES -lt $MAX_INSTANCES ]; then
         NEW_INSTANCES=$((CURRENT_INSTANCES + 1))
         echo "[$(date)] Scaling up to $NEW_INSTANCES instances (latency: ${CURRENT_LATENCY}ms)"
@@ -342,7 +342,7 @@ if (( $(echo "$CURRENT_LATENCY > $LATENCY_THRESHOLD" | bc -l) )); then
 else
     LOW_LATENCY_COUNT=$((LOW_LATENCY_COUNT + 1))
     HIGH_LATENCY_COUNT=0
-    
+
     if [ $LOW_LATENCY_COUNT -ge $SCALE_DOWN_THRESHOLD ] && [ $CURRENT_INSTANCES -gt $MIN_INSTANCES ]; then
         NEW_INSTANCES=$((CURRENT_INSTANCES - 1))
         echo "[$(date)] Scaling down to $NEW_INSTANCES instances (latency: ${CURRENT_LATENCY}ms)"
@@ -361,7 +361,7 @@ echo "low_count=$LOW_LATENCY_COUNT" >> $STATE_FILE
 ### Performance Tracking
 ```sql
 -- Endpoint performance over time
-SELECT 
+SELECT
     date_trunc('minute', timestamp) as minute,
     endpoint,
     percentile_cont(0.5) WITHIN GROUP (ORDER BY latency_ms) as p50,
@@ -374,7 +374,7 @@ GROUP BY minute, endpoint
 ORDER BY minute DESC, p95 DESC;
 
 -- Error rate by endpoint
-SELECT 
+SELECT
     endpoint,
     COUNT(CASE WHEN status_code >= 500 THEN 1 END)::float / COUNT(*) * 100 as error_rate,
     COUNT(*) as total_requests

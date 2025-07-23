@@ -11,7 +11,7 @@ This report provides a comprehensive analysis of the FreeAgentics repository str
 - **Total Markdown Files**: 2,340 (indicating extensive documentation fragmentation)
 - **Python Cache Directories**: 1,897 `__pycache__` directories
 - **Log Files**: 74 log files scattered throughout the repository
-- **Build Artifacts**: 
+- **Build Artifacts**:
   - `htmlcov/`: 14MB (HTML coverage reports)
   - `node_modules/`: 404MB (JavaScript dependencies)
   - `venv/`: 6.0GB (Python virtual environment)
@@ -97,10 +97,10 @@ project/
    # Remove Python cache files
    find . -type d -name "__pycache__" -exec rm -rf {} +
    find . -name "*.pyc" -delete
-   
+
    # Remove build artifacts
    rm -rf htmlcov/ dist/ build/ *.egg-info/
-   
+
    # Remove node modules (can be regenerated)
    rm -rf node_modules/
    ```
@@ -109,7 +109,7 @@ project/
    ```bash
    # Remove timestamped artifacts older than 30 days
    find . -name "*_[0-9][0-9][0-9][0-9][0-9][0-9][0-9][0-9]_*" -type f -mtime +30 -delete
-   
+
    # Clean test reports (keep only latest)
    find test-reports/ -type d -name "202*" | sort | head -n -3 | xargs rm -rf
    ```
@@ -138,7 +138,7 @@ project/
    ```bash
    # Remove merged branches
    git branch --merged | grep -v "master\|main" | xargs -n 1 git branch -d
-   
+
    # Remove remote tracking branches
    git remote prune origin
    ```

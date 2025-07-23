@@ -230,7 +230,7 @@ from typing import Dict, Any
 
 class TestNewIntegration:
     """Test new integration point with nemesis-level rigor."""
-    
+
     @pytest.fixture
     def test_context(self):
         """Provide test context with all dependencies."""
@@ -239,28 +239,28 @@ class TestNewIntegration:
             "validators": self.create_validators(),
             "timeout": 30
         }
-    
+
     async def test_semantic_preservation(self, test_context):
         """Validate data transformation preserves semantic meaning."""
         # Arrange
         input_data = self.create_test_input()
         expected_semantics = self.extract_semantics(input_data)
-        
+
         # Act
         result = await self.transform_data(input_data, test_context)
-        
+
         # Assert
         actual_semantics = self.extract_semantics(result)
         assert self.semantics_equal(expected_semantics, actual_semantics)
-    
+
     async def test_partial_failure_handling(self, test_context):
         """Test graceful degradation under component failures."""
         # Inject failure
         test_context["failure_mode"] = "component_timeout"
-        
+
         # Should not raise, but degrade gracefully
         result = await self.transform_data_with_failures(test_context)
-        
+
         # Validate degraded but functional
         assert result["status"] == "degraded"
         assert result["core_functionality"] == "preserved"

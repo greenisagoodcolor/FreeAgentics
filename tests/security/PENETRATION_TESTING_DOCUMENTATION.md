@@ -221,11 +221,11 @@ def validate_file_path(filename: str, allowed_dir: str) -> str:
     # Resolve the path and check if it's within allowed directory
     safe_path = Path(allowed_dir) / filename
     resolved_path = safe_path.resolve()
-    
+
     # Ensure the resolved path is within the allowed directory
     if not str(resolved_path).startswith(str(Path(allowed_dir).resolve())):
         raise ValueError("Path traversal attempt detected")
-    
+
     return str(resolved_path)
 ```
 
@@ -257,16 +257,16 @@ def validate_upload(file: UploadFile) -> bool:
     file_ext = Path(file.filename).suffix.lower()
     if file_ext not in ALLOWED_EXTENSIONS:
         raise ValueError(f"File type {file_ext} not allowed")
-    
+
     # Check file size
     if file.size > MAX_FILE_SIZE:
         raise ValueError("File too large")
-    
+
     # Validate MIME type matches extension
     expected_mime = get_expected_mime_type(file_ext)
     if file.content_type != expected_mime:
         raise ValueError("MIME type mismatch")
-    
+
     return True
 ```
 
@@ -283,7 +283,7 @@ curl "http://localhost:8000/api/v1/users/'; DROP TABLE users; --"
 # Vulnerable response (should NOT happen)
 HTTP/1.1 500 Internal Server Error
 {
-  "detail": "psycopg2.errors.SyntaxError: syntax error at or near \"DROP\" 
+  "detail": "psycopg2.errors.SyntaxError: syntax error at or near \"DROP\"
   LINE 1: SELECT * FROM users WHERE id = ''; DROP TABLE users; --'
   Connection: host=localhost port=5432 dbname=freeagentics user=dbuser"
 }
@@ -296,7 +296,7 @@ def handle_database_error(e: Exception) -> HTTPException:
     """Safely handle database errors without information disclosure."""
     # Log the actual error for debugging
     logger.error(f"Database error: {str(e)}")
-    
+
     # Return generic error to user
     return HTTPException(
         status_code=500,
@@ -320,7 +320,7 @@ def handle_database_error(e: Exception) -> HTTPException:
 
    class FileRequest(BaseModel):
        filename: str
-       
+
        @validator('filename')
        def validate_filename(cls, v):
            if '..' in v or '/' in v or '\\' in v:
@@ -335,7 +335,7 @@ def handle_database_error(e: Exception) -> HTTPException:
    async def global_exception_handler(request: Request, exc: Exception):
        # Log detailed error
        logger.error(f"Unhandled exception: {exc}", exc_info=True)
-       
+
        # Return generic response
        return JSONResponse(
            status_code=500,
@@ -383,15 +383,15 @@ def handle_database_error(e: Exception) -> HTTPException:
    async def upload_file(file: UploadFile):
        # Validate file
        validate_upload(file)
-       
+
        # Generate safe filename
        safe_filename = f"{uuid4()}_{secure_filename(file.filename)}"
        file_path = os.path.join(UPLOAD_DIR, safe_filename)
-       
+
        # Save file
        with open(file_path, "wb") as buffer:
            shutil.copyfileobj(file.file, buffer)
-       
+
        return {"filename": safe_filename}
    ```
 
@@ -527,17 +527,17 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v3
-      
+
       - name: Setup Python
         uses: actions/setup-python@v4
         with:
           python-version: '3.9'
-      
+
       - name: Install dependencies
         run: |
           pip install -r requirements.txt
           pip install pytest
-      
+
       - name: Run penetration tests
         run: |
           python tests/security/run_comprehensive_penetration_tests.py --quiet
@@ -545,7 +545,7 @@ jobs:
           PRODUCTION: true
           SECRET_KEY: ${{ secrets.SECRET_KEY }}
           JWT_SECRET: ${{ secrets.JWT_SECRET }}
-      
+
       - name: Upload security reports
         uses: actions/upload-artifact@v3
         if: always()

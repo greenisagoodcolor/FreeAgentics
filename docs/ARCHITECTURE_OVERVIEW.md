@@ -15,14 +15,14 @@ graph TB
         API[API Clients]
         WS[WebSocket Clients]
     end
-    
+
     subgraph "API Gateway"
         NGINX[Nginx Reverse Proxy]
         SSL[SSL/TLS Termination]
         RATE[Rate Limiting]
         SEC[Security Headers]
     end
-    
+
     subgraph "Application Layer"
         AUTH[Authentication Service]
         AGENT[Agent Manager]
@@ -30,35 +30,35 @@ graph TB
         INFER[Inference Engine]
         KG[Knowledge Graph]
     end
-    
+
     subgraph "Data Layer"
         POSTGRES[(PostgreSQL)]
         REDIS[(Redis)]
         SHARED[Shared Memory]
     end
-    
+
     subgraph "Infrastructure"
         MONITOR[Monitoring Stack]
         LOGS[Log Aggregation]
         ALERTS[Alert Manager]
     end
-    
+
     WEB --> NGINX
     API --> NGINX
     WS --> NGINX
-    
+
     NGINX --> AUTH
     NGINX --> AGENT
     NGINX --> INFER
     NGINX --> KG
-    
+
     AUTH --> REDIS
     AGENT --> POSTGRES
     AGENT --> SHARED
     COORD --> REDIS
     INFER --> POSTGRES
     KG --> POSTGRES
-    
+
     AGENT --> MONITOR
     COORD --> MONITOR
     INFER --> MONITOR
@@ -110,7 +110,7 @@ sequenceDiagram
     participant Auth Service
     participant Redis
     participant Application
-    
+
     Client->>API Gateway: Request with JWT
     API Gateway->>Auth Service: Validate Token
     Auth Service->>Redis: Check Token Status
@@ -162,7 +162,7 @@ class OptimizedAgentManager:
         # CPU topology-aware thread pool sizing
         cpu_count = multiprocessing.cpu_count()
         physical_cores = cpu_count // 2
-        
+
         # Separate pools for different workload types
         self._cpu_executor = ThreadPoolExecutor(
             max_workers=physical_cores,
@@ -182,10 +182,10 @@ class MemoryOptimizedAgent:
     def __init__(self):
         # Shared memory for agent states
         self._shared_beliefs = SharedMemoryManager()
-        
+
         # Compressed belief representation
         self._belief_compressor = BeliefCompressor()
-        
+
         # Object pooling for frequent allocations
         self._matrix_pool = MatrixPool()
 ```
@@ -256,38 +256,38 @@ flowchart LR
         API[API Request]
         WS[WebSocket Message]
     end
-    
+
     subgraph "Processing"
         VALIDATE[Input Validation]
         AUTH[Authentication]
         ROUTE[Request Routing]
         PROCESS[Business Logic]
     end
-    
+
     subgraph "Storage"
         CACHE[Redis Cache]
         DB[PostgreSQL]
         MEMORY[Shared Memory]
     end
-    
+
     subgraph "Output"
         RESPONSE[API Response]
         BROADCAST[WebSocket Broadcast]
         METRICS[Metrics Collection]
     end
-    
+
     USER --> VALIDATE
     API --> VALIDATE
     WS --> VALIDATE
-    
+
     VALIDATE --> AUTH
     AUTH --> ROUTE
     ROUTE --> PROCESS
-    
+
     PROCESS --> CACHE
     PROCESS --> DB
     PROCESS --> MEMORY
-    
+
     PROCESS --> RESPONSE
     PROCESS --> BROADCAST
     PROCESS --> METRICS
@@ -390,8 +390,8 @@ spec:
 from prometheus_client import Counter, Histogram, Gauge
 
 # Business metrics
-agent_operations = Counter('agent_operations_total', 
-                          'Total agent operations', 
+agent_operations = Counter('agent_operations_total',
+                          'Total agent operations',
                           ['operation_type', 'status'])
 
 inference_duration = Histogram('inference_duration_seconds',
@@ -427,7 +427,7 @@ groups:
     annotations:
       summary: High error rate detected
       description: Error rate is {{ $value }} requests per second
-      
+
   - alert: HighMemoryUsage
     expr: memory_usage_bytes / memory_limit_bytes > 0.8
     for: 10m
@@ -518,7 +518,7 @@ POST   /api/v1/agents/{id}/inference  # Run inference
 class EventPublisher:
     def __init__(self):
         self.redis_client = redis.Redis()
-        
+
     def publish_event(self, event_type: str, data: dict):
         event = {
             "type": event_type,
@@ -526,10 +526,10 @@ class EventPublisher:
             "timestamp": datetime.utcnow().isoformat(),
             "id": str(uuid.uuid4())
         }
-        
+
         # Publish to Redis pub/sub
         self.redis_client.publish(f"events:{event_type}", json.dumps(event))
-        
+
         # Store in event log
         self.store_event(event)
 ```
@@ -550,7 +550,7 @@ socket.onopen = function(event) {
 
 socket.onmessage = function(event) {
     const message = JSON.parse(event.data);
-    
+
     switch(message.type) {
         case 'agent_status_update':
             updateAgentStatus(message.data);

@@ -19,11 +19,11 @@ This document outlines comprehensive testing procedures and quality assurance pr
 
 ```
         /\        E2E Tests (10%)
-       /  \       
+       /  \
       /    \      Integration Tests (20%)
-     /      \     
+     /      \
     /        \    Unit Tests (70%)
-   /          \   
+   /          \
   /__________\
 ```
 
@@ -63,9 +63,9 @@ tests/unit/
 def test_agent_processes_observation_correctly():
     agent = Agent(template="research_v2")
     observation = {"type": "text", "content": "What is AI?"}
-    
+
     result = agent.process_observation(observation)
-    
+
     assert result["status"] == "processed"
     assert "confidence" in result
     assert 0.0 <= result["confidence"] <= 1.0
@@ -74,7 +74,7 @@ def test_agent_processes_observation_correctly():
 def test_agent_calls_internal_method():
     agent = Agent(template="research_v2")
     observation = {"type": "text", "content": "What is AI?"}
-    
+
     with patch.object(agent, '_internal_process') as mock_process:
         agent.process_observation(observation)
         mock_process.assert_called_once()
@@ -125,7 +125,7 @@ def test_complete_authentication_flow():
         "email": "test@example.com"
     })
     assert response.status_code == 201
-    
+
     # Login
     response = client.post("/api/v1/auth/login", json={
         "username": "testuser",
@@ -133,12 +133,12 @@ def test_complete_authentication_flow():
     })
     assert response.status_code == 200
     tokens = response.json()
-    
+
     # Use access token
     headers = {"Authorization": f"Bearer {tokens['access_token']}"}
     response = client.get("/api/v1/agents", headers=headers)
     assert response.status_code == 200
-    
+
     # Refresh token
     response = client.post("/api/v1/auth/refresh", json={
         "refresh_token": tokens["refresh_token"]
@@ -150,16 +150,16 @@ def test_multi_agent_coordination():
     # Create multiple agents
     agent1 = create_test_agent("researcher")
     agent2 = create_test_agent("analyzer")
-    
+
     # Create coalition
     coalition = CoalitionCoordinator()
     coalition.add_agent(agent1)
     coalition.add_agent(agent2)
-    
+
     # Test coordination
     task = {"type": "research", "query": "AI trends 2025"}
     result = coalition.coordinate_task(task)
-    
+
     assert result["status"] == "completed"
     assert len(result["contributions"]) == 2
     assert result["synthesis"] is not None
@@ -203,12 +203,12 @@ tests/security/
 def test_jwt_manipulation_resistance():
     # Get valid token
     token = get_valid_jwt_token()
-    
+
     # Try to manipulate token
     manipulated_token = manipulate_jwt_claims(token, {"role": "admin"})
-    
+
     # Verify manipulation is detected
-    response = client.get("/api/v1/admin/users", 
+    response = client.get("/api/v1/admin/users",
                          headers={"Authorization": f"Bearer {manipulated_token}"})
     assert response.status_code == 401
     assert "Invalid token" in response.json()["error"]["message"]
@@ -219,7 +219,7 @@ def test_rate_limiting_enforcement():
     for i in range(60):  # Rate limit is 60/minute
         response = client.get("/api/v1/health")
         assert response.status_code == 200
-    
+
     # Next request should be rate limited
     response = client.get("/api/v1/health")
     assert response.status_code == 429
@@ -228,15 +228,15 @@ def test_rate_limiting_enforcement():
 # Test SQL injection prevention
 def test_sql_injection_prevention():
     malicious_input = "'; DROP TABLE users; --"
-    
+
     response = client.post("/api/v1/agents", json={
         "name": malicious_input,
         "template": "research_v2"
     })
-    
+
     # Should not cause SQL injection
     assert response.status_code in [400, 422]  # Validation error
-    
+
     # Verify tables still exist
     with get_db_connection() as conn:
         result = conn.execute("SELECT name FROM sqlite_master WHERE type='table';")
@@ -286,14 +286,14 @@ tests/performance/
 def test_single_agent_performance():
     agent = Agent(template="research_v2")
     observation = {"type": "text", "content": "Test query"}
-    
+
     # Measure response time
     start_time = time.time()
     result = agent.process_observation(observation)
     end_time = time.time()
-    
+
     response_time = end_time - start_time
-    
+
     # Performance target: < 2 seconds
     assert response_time < 2.0
     assert result["status"] == "processed"
@@ -302,20 +302,20 @@ def test_single_agent_performance():
 def test_concurrent_agent_performance():
     num_agents = 10
     agents = [Agent(template="research_v2") for _ in range(num_agents)]
-    
+
     def process_observation(agent):
         observation = {"type": "text", "content": "Test query"}
         return agent.process_observation(observation)
-    
+
     # Measure concurrent processing
     start_time = time.time()
     with ThreadPoolExecutor(max_workers=num_agents) as executor:
         futures = [executor.submit(process_observation, agent) for agent in agents]
         results = [future.result() for future in futures]
     end_time = time.time()
-    
+
     total_time = end_time - start_time
-    
+
     # Should complete within 5 seconds for 10 agents
     assert total_time < 5.0
     assert all(result["status"] == "processed" for result in results)
@@ -324,20 +324,20 @@ def test_concurrent_agent_performance():
 def test_memory_usage():
     import psutil
     import os
-    
+
     process = psutil.Process(os.getpid())
     initial_memory = process.memory_info().rss
-    
+
     # Create many agents
     agents = [Agent(template="research_v2") for _ in range(100)]
-    
+
     # Process observations
     for agent in agents:
         agent.process_observation({"type": "text", "content": "Test"})
-    
+
     final_memory = process.memory_info().rss
     memory_increase = final_memory - initial_memory
-    
+
     # Memory increase should be reasonable (< 500MB)
     assert memory_increase < 500 * 1024 * 1024
 ```
@@ -379,7 +379,7 @@ def test_complete_user_workflow():
     user_client = TestClient()
     user_client.register("testuser", "password123")
     user_client.login("testuser", "password123")
-    
+
     # Create agent
     agent_response = user_client.post("/api/v1/agents", json={
         "name": "My Research Agent",
@@ -388,20 +388,20 @@ def test_complete_user_workflow():
     })
     assert agent_response.status_code == 201
     agent_id = agent_response.json()["id"]
-    
+
     # Run inference
     inference_response = user_client.post("/api/v1/inference", json={
         "agent_id": agent_id,
         "query": "What are the latest AI trends?"
     })
     assert inference_response.status_code == 200
-    
+
     # Check results
     result = inference_response.json()
     assert result["status"] == "completed"
     assert "response" in result
     assert len(result["response"]) > 0
-    
+
     # Clean up
     user_client.delete(f"/api/v1/agents/{agent_id}")
 
@@ -411,24 +411,24 @@ def test_websocket_workflow():
         # Connect and authenticate
         ws_client.connect()
         ws_client.authenticate("testuser", "password123")
-        
+
         # Subscribe to agent events
         ws_client.send({
             "type": "subscribe",
             "channels": ["agent_events"]
         })
-        
+
         # Create agent (should trigger event)
         agent_id = create_test_agent("research_v2")
-        
+
         # Wait for event
         event = ws_client.wait_for_message(timeout=5)
         assert event["type"] == "agent_created"
         assert event["data"]["agent_id"] == agent_id
-        
+
         # Run inference (should trigger progress events)
         run_inference(agent_id, "Test query")
-        
+
         # Wait for completion event
         completion_event = ws_client.wait_for_message(timeout=10)
         assert completion_event["type"] == "inference_completed"
@@ -462,7 +462,7 @@ class UserFactory(SQLAlchemyModelFactory):
     class Meta:
         model = User
         sqlalchemy_session_persistence = "commit"
-    
+
     username = Faker("user_name")
     email = Faker("email")
     password_hash = "$2b$12$test_hash"
@@ -473,7 +473,7 @@ class AgentFactory(SQLAlchemyModelFactory):
     class Meta:
         model = Agent
         sqlalchemy_session_persistence = "commit"
-    
+
     name = Faker("name")
     template = "research_v2"
     status = "active"
@@ -484,7 +484,7 @@ class CoalitionFactory(SQLAlchemyModelFactory):
     class Meta:
         model = Coalition
         sqlalchemy_session_persistence = "commit"
-    
+
     name = Faker("company")
     strategy = "collaborative"
     status = "active"
@@ -505,11 +505,11 @@ def test_db():
     # Create test database
     engine = create_engine("sqlite:///:memory:")
     Base.metadata.create_all(engine)
-    
+
     TestingSessionLocal = sessionmaker(bind=engine)
-    
+
     yield TestingSessionLocal
-    
+
     # Cleanup
     Base.metadata.drop_all(engine)
 
@@ -554,7 +554,7 @@ on:
 jobs:
   test:
     runs-on: ubuntu-latest
-    
+
     services:
       postgres:
         image: postgres:13
@@ -565,7 +565,7 @@ jobs:
           --health-interval 10s
           --health-timeout 5s
           --health-retries 5
-      
+
       redis:
         image: redis:6
         options: >-
@@ -573,43 +573,43 @@ jobs:
           --health-interval 10s
           --health-timeout 5s
           --health-retries 5
-    
+
     steps:
     - uses: actions/checkout@v3
-    
+
     - name: Set up Python
       uses: actions/setup-python@v4
       with:
         python-version: '3.9'
-    
+
     - name: Install dependencies
       run: |
         python -m pip install --upgrade pip
         pip install -r requirements.txt
         pip install -r requirements-dev.txt
-    
+
     - name: Run linting
       run: |
         flake8 .
         black --check .
         mypy .
-    
+
     - name: Run unit tests
       run: |
         pytest tests/unit/ -v --cov=. --cov-report=xml
-    
+
     - name: Run integration tests
       run: |
         pytest tests/integration/ -v
-    
+
     - name: Run security tests
       run: |
         pytest tests/security/ -v
-    
+
     - name: Run performance tests
       run: |
         pytest tests/performance/ -v
-    
+
     - name: Upload coverage to Codecov
       uses: codecov/codecov-action@v3
       with:
@@ -690,10 +690,10 @@ def collect_test_metrics():
     result = subprocess.run([
         "pytest", "--json-report", "--json-report-file=test_report.json"
     ], capture_output=True, text=True)
-    
+
     with open("test_report.json", "r") as f:
         report = json.load(f)
-    
+
     metrics = {
         "timestamp": datetime.now().isoformat(),
         "total_tests": report["summary"]["total"],
@@ -703,14 +703,14 @@ def collect_test_metrics():
         "duration": report["duration"],
         "coverage": get_coverage_percentage()
     }
-    
+
     return metrics
 
 def get_coverage_percentage():
     result = subprocess.run([
         "coverage", "report", "--format=json"
     ], capture_output=True, text=True)
-    
+
     if result.returncode == 0:
         coverage_data = json.loads(result.stdout)
         return coverage_data["totals"]["percent_covered"]
@@ -781,13 +781,13 @@ import tracemalloc
 
 def test_memory_usage():
     tracemalloc.start()
-    
+
     # Run test logic
     run_test_logic()
-    
+
     current, peak = tracemalloc.get_traced_memory()
     tracemalloc.stop()
-    
+
     assert current < 100 * 1024 * 1024  # Less than 100MB
 ```
 

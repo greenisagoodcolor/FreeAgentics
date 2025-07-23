@@ -248,7 +248,7 @@ filter {
         "[parsed][memory_mb]" => "memory_mb"
       }
     }
-    
+
     # Add memory alert
     if [memory_mb] > 30 {
       mutate {
@@ -263,7 +263,7 @@ filter {
       source => "[parsed][ip]"
       target => "geoip"
     }
-    
+
     # Flag suspicious activity
     if [parsed][outcome] == "failure" {
       ruby {

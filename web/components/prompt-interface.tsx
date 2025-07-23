@@ -9,7 +9,6 @@ import { Button } from "./ui/button";
 import { Textarea } from "./ui/textarea";
 import { Alert } from "./ui/alert";
 import { Card } from "./ui/card";
-import { LoadingState } from "./LoadingState";
 
 interface PromptInterfaceProps {
   className?: string;
@@ -94,8 +93,8 @@ export function PromptInterface({ className = "" }: PromptInterfaceProps) {
   );
 
   const containerClasses = `
-    flex ${isMobile ? "flex-col" : "flex-row"} 
-    gap-4 p-4 min-h-screen bg-gray-50 
+    flex ${isMobile ? "flex-col" : "flex-row"}
+    gap-4 p-4 min-h-screen bg-gray-50
     ${className}
   `;
 
@@ -195,7 +194,12 @@ export function PromptInterface({ className = "" }: PromptInterfaceProps) {
           {/* Loading State */}
           {isLoading && (
             <div role="status" aria-live="polite" className="mt-4">
-              <LoadingState message="Processing your prompt..." />
+              <div className="flex items-center justify-center p-8">
+                <div className="text-center">
+                  <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary mx-auto mb-4"></div>
+                  <p className="text-sm text-muted-foreground">Processing your prompt...</p>
+                </div>
+              </div>
             </div>
           )}
         </Card>

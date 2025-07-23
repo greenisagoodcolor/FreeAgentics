@@ -17,7 +17,7 @@ __pycache__/
 \.mypy_cache/
 temp_security_venv/
 
-# Archive and backup directories  
+# Archive and backup directories
 \.archive/
 archives/
 backups/

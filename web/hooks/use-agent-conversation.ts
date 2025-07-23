@@ -34,12 +34,12 @@ export const useAgentConversation = (): UseAgentConversationReturn => {
       await new Promise((resolve) => setTimeout(resolve, 100));
 
       // Add message to history
-      const newMessage = {
+      const newMessage: ConversationMessage = {
         id: Date.now().toString(),
         message,
         agentId,
         timestamp: new Date().toISOString(),
-        sender: "user",
+        sender: "user" as const,
       };
 
       setConversationHistory((prev) => [...prev, newMessage]);
@@ -69,12 +69,12 @@ export const useAgentConversation = (): UseAgentConversationReturn => {
       await new Promise((resolve) => setTimeout(resolve, 50));
 
       // Initialize session
-      const sessionMessage = {
+      const sessionMessage: ConversationMessage = {
         id: Date.now().toString(),
         message: `Session created for agent ${agentId}`,
         agentId,
         timestamp: new Date().toISOString(),
-        sender: "system",
+        sender: "system" as const,
       };
 
       setConversationHistory((prev) => [...prev, sessionMessage]);

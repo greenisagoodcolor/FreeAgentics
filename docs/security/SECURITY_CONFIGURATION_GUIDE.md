@@ -92,7 +92,7 @@ PROMETHEUS_ENABLED=true
 server {
     listen 80;
     server_name api.freeagentics.com;
-    
+
     # Redirect HTTP to HTTPS
     return 301 https://$server_name$request_uri;
 }
@@ -104,48 +104,48 @@ server {
     # SSL Certificate
     ssl_certificate /etc/ssl/certs/freeagentics.crt;
     ssl_certificate_key /etc/ssl/private/freeagentics.key;
-    
+
     # SSL Configuration
     ssl_protocols TLSv1.2 TLSv1.3;
     ssl_ciphers 'ECDHE-ECDSA-AES256-GCM-SHA384:ECDHE-RSA-AES256-GCM-SHA384:ECDHE-ECDSA-CHACHA20-POLY1305:ECDHE-RSA-CHACHA20-POLY1305:ECDHE-ECDSA-AES128-GCM-SHA256:ECDHE-RSA-AES128-GCM-SHA256';
     ssl_prefer_server_ciphers off;
-    
+
     # OCSP Stapling
     ssl_stapling on;
     ssl_stapling_verify on;
     ssl_trusted_certificate /etc/ssl/certs/freeagentics-chain.crt;
-    
+
     # SSL Session Cache
     ssl_session_timeout 1d;
     ssl_session_cache shared:SSL:50m;
     ssl_session_tickets off;
-    
+
     # HSTS
     add_header Strict-Transport-Security "max-age=31536000; includeSubDomains; preload" always;
-    
+
     # Security Headers
     add_header X-Frame-Options "DENY" always;
     add_header X-Content-Type-Options "nosniff" always;
     add_header X-XSS-Protection "1; mode=block" always;
     add_header Referrer-Policy "strict-origin-when-cross-origin" always;
     add_header Content-Security-Policy "default-src 'self'; script-src 'self' 'unsafe-inline' 'unsafe-eval'; style-src 'self' 'unsafe-inline';" always;
-    
+
     # Rate Limiting
     limit_req_zone $binary_remote_addr zone=api:10m rate=10r/s;
     limit_req zone=api burst=20 nodelay;
-    
+
     # Request Size Limits
     client_max_body_size 10M;
     client_body_buffer_size 128k;
     client_header_buffer_size 1k;
     large_client_header_buffers 4 4k;
-    
+
     # Timeouts
     client_body_timeout 12;
     client_header_timeout 12;
     keepalive_timeout 15;
     send_timeout 10;
-    
+
     # Proxy to Application
     location / {
         proxy_pass http://localhost:8000;
@@ -157,23 +157,23 @@ server {
         proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
         proxy_set_header X-Forwarded-Proto $scheme;
         proxy_cache_bypass $http_upgrade;
-        
+
         # Security
         proxy_set_header X-Frame-Options "DENY";
         proxy_hide_header X-Powered-By;
-        
+
         # Timeouts
         proxy_connect_timeout 60s;
         proxy_send_timeout 60s;
         proxy_read_timeout 60s;
     }
-    
+
     # Health Check Endpoint (No Auth Required)
     location /health {
         proxy_pass http://localhost:8000/health;
         access_log off;
     }
-    
+
     # Metrics Endpoint (Restricted)
     location /metrics {
         allow 10.0.0.0/8;  # Internal network only
@@ -250,7 +250,7 @@ ALTER TABLE agents ENABLE ROW LEVEL SECURITY;
 CREATE POLICY agent_isolation ON agents
     FOR ALL
     TO freeagentics_app
-    USING (created_by = current_setting('app.current_user_id')::uuid 
+    USING (created_by = current_setting('app.current_user_id')::uuid
            OR current_setting('app.current_user_role') = 'admin');
 
 -- SSL Configuration
@@ -322,7 +322,7 @@ services:
     image: freeagentics-api:latest
     container_name: freeagentics-api
     restart: unless-stopped
-    
+
     # Security options
     security_opt:
       - no-new-privileges:true
@@ -331,7 +331,7 @@ services:
     cap_add:
       - NET_BIND_SERVICE
     read_only: true
-    
+
     # Resource limits
     deploy:
       resources:
@@ -341,24 +341,24 @@ services:
         reservations:
           cpus: '1'
           memory: 1G
-    
+
     # Environment variables from secrets
     env_file:
       - .env.production
-    
+
     # Volumes
     volumes:
       - type: tmpfs
         target: /tmp
       - type: tmpfs
         target: /app/logs
-    
+
     # Network
     networks:
       - internal
       - redis
       - postgres
-    
+
     # Health check
     healthcheck:
       test: ["CMD", "curl", "-f", "http://localhost:8000/health"]
@@ -372,19 +372,19 @@ services:
     container_name: freeagentics-redis
     restart: unless-stopped
     command: redis-server /etc/redis/redis.conf
-    
+
     # Security
     security_opt:
       - no-new-privileges:true
     read_only: true
-    
+
     # Volumes
     volumes:
       - ./redis.conf:/etc/redis/redis.conf:ro
       - redis-data:/data
       - type: tmpfs
         target: /tmp
-    
+
     # Network
     networks:
       - redis
@@ -393,26 +393,26 @@ services:
     image: postgres:15-alpine
     container_name: freeagentics-postgres
     restart: unless-stopped
-    
+
     # Security
     security_opt:
       - no-new-privileges:true
-    
+
     # Environment
     environment:
       POSTGRES_PASSWORD_FILE: /run/secrets/db_password
       POSTGRES_USER: freeagentics
       POSTGRES_DB: freeagentics
-    
+
     # Secrets
     secrets:
       - db_password
-    
+
     # Volumes
     volumes:
       - postgres-data:/var/lib/postgresql/data
       - ./postgresql.conf:/etc/postgresql/postgresql.conf:ro
-    
+
     # Network
     networks:
       - postgres
@@ -532,7 +532,7 @@ groups:
           severity: warning
         annotations:
           summary: High rate of failed login attempts
-          
+
       - alert: RateLimitViolations
         expr: rate(rate_limit_exceeded_total[5m]) > 50
         for: 5m
@@ -540,7 +540,7 @@ groups:
           severity: warning
         annotations:
           summary: High rate of rate limit violations
-          
+
       - alert: SuspiciousActivity
         expr: security_suspicious_activity_total > 0
         for: 1m

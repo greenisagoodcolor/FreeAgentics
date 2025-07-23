@@ -506,9 +506,7 @@ class ActiveInferenceAgent(ABC):
                     inference_horizon=self.config.get("planning_horizon", 3),
                 )
 
-            logger.info(
-                f"Successfully initialized PyMDP agent from GMN spec for" f" {self.agent_id}"
-            )
+            logger.info(f"Successfully initialized PyMDP agent from GMN spec for {self.agent_id}")
 
         except Exception as e:
             logger.error(f"Failed to initialize PyMDP from GMN: {e}")

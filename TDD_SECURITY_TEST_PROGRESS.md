@@ -85,7 +85,7 @@ Need comprehensive tests for:
 - Data encryption at rest
 - Audit logging
 
-### 3. API Endpoints (0.71% Coverage)  
+### 3. API Endpoints (0.71% Coverage)
 Critical endpoints without tests:
 - `/api/v1/auth/*` - Authentication flows
 - `/api/v1/agents/*` - Agent management

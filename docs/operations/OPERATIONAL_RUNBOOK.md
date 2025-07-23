@@ -28,10 +28,10 @@ This runbook provides comprehensive operational procedures for managing, monitor
    ```bash
    # Check API health
    curl -s http://localhost:8000/health | jq
-   
+
    # Check database connectivity
    psql -h localhost -U freeagentics -d freeagentics -c "SELECT 1;"
-   
+
    # Check Redis connectivity
    redis-cli ping
    ```
@@ -40,10 +40,10 @@ This runbook provides comprehensive operational procedures for managing, monitor
    ```bash
    # Check error logs
    tail -100 /var/log/freeagentics/error.log
-   
+
    # Check security audit logs
    tail -100 /var/log/freeagentics/security_audit.log
-   
+
    # Check performance metrics
    curl -s http://localhost:9090/api/v1/query?query=up | jq
    ```
@@ -62,12 +62,12 @@ This runbook provides comprehensive operational procedures for managing, monitor
    ```bash
    # Generate daily performance report
    python scripts/monitoring/generate_daily_report.py
-   
+
    # Check slow queries
    psql -h localhost -U freeagentics -d freeagentics -c "
-   SELECT query, mean_time, calls 
-   FROM pg_stat_statements 
-   ORDER BY mean_time DESC 
+   SELECT query, mean_time, calls
+   FROM pg_stat_statements
+   ORDER BY mean_time DESC
    LIMIT 10;"
    ```
 
@@ -75,10 +75,10 @@ This runbook provides comprehensive operational procedures for managing, monitor
    ```bash
    # Check authentication failures
    grep "authentication_failed" /var/log/freeagentics/security_audit.log | wc -l
-   
+
    # Check rate limiting violations
    grep "rate_limit_exceeded" /var/log/freeagentics/security_audit.log | wc -l
-   
+
    # Run security validation
    python scripts/security/validate_security_posture.py
    ```
@@ -87,7 +87,7 @@ This runbook provides comprehensive operational procedures for managing, monitor
    ```bash
    # Verify database backup
    ls -la /backups/postgresql/$(date +%Y%m%d)*
-   
+
    # Test backup restoration (on staging)
    ./scripts/backup/test_backup_restoration.sh
    ```
@@ -100,13 +100,13 @@ This runbook provides comprehensive operational procedures for managing, monitor
    ```bash
    # Run all tests
    pytest --cov=. --cov-report=html
-   
+
    # Security tests
    pytest tests/security/ -v
-   
+
    # Performance tests
    pytest tests/performance/ -v
-   
+
    # Linting and formatting
    flake8 .
    black --check .
@@ -117,10 +117,10 @@ This runbook provides comprehensive operational procedures for managing, monitor
    ```bash
    # Update environment variables
    source .env.production
-   
+
    # Check dependencies
    pip-audit
-   
+
    # Validate configuration
    python scripts/validate_config.py
    ```
@@ -131,10 +131,10 @@ This runbook provides comprehensive operational procedures for managing, monitor
    ```bash
    # Deploy to green environment
    ./scripts/deployment/deploy-production.sh green
-   
+
    # Run smoke tests
    ./scripts/deployment/smoke-tests.sh green
-   
+
    # Verify health
    curl -s http://green.freeagentics.com/health
    ```
@@ -143,7 +143,7 @@ This runbook provides comprehensive operational procedures for managing, monitor
    ```bash
    # Update load balancer
    ./scripts/deployment/switch-traffic.sh green
-   
+
    # Monitor during switch
    watch -n 1 'curl -s http://api.freeagentics.com/health | jq .status'
    ```
@@ -152,7 +152,7 @@ This runbook provides comprehensive operational procedures for managing, monitor
    ```bash
    # Verify all endpoints
    ./scripts/deployment/verify-deployment.sh
-   
+
    # Check error rates
    curl -s http://localhost:9090/api/v1/query?query=rate(http_requests_total{status=~"5.."}[5m])
    ```
@@ -163,7 +163,7 @@ This runbook provides comprehensive operational procedures for managing, monitor
    ```bash
    # Switch traffic back to blue
    ./scripts/deployment/switch-traffic.sh blue
-   
+
    # Verify rollback
    curl -s http://api.freeagentics.com/health
    ```
@@ -172,7 +172,7 @@ This runbook provides comprehensive operational procedures for managing, monitor
    ```bash
    # Restore database from backup
    ./scripts/backup/restore-database.sh $(date -d "1 hour ago" +%Y%m%d_%H%M%S)
-   
+
    # Verify data integrity
    python scripts/verify_data_integrity.py
    ```
@@ -269,9 +269,9 @@ curl -X POST http://localhost:8000/api/v1/agents/<agent_id>/restart
 ```bash
 # Check database performance
 psql -h localhost -U freeagentics -d freeagentics -c "
-SELECT query, mean_time, calls 
-FROM pg_stat_statements 
-ORDER BY mean_time DESC 
+SELECT query, mean_time, calls
+FROM pg_stat_statements
+ORDER BY mean_time DESC
 LIMIT 10;"
 
 # Check Redis performance
@@ -311,14 +311,14 @@ sudo systemctl reload freeagentics
 #### Database Optimization
 ```sql
 -- Check for missing indexes
-SELECT schemaname, tablename, attname, n_distinct, correlation 
-FROM pg_stats 
-WHERE schemaname = 'public' 
+SELECT schemaname, tablename, attname, n_distinct, correlation
+FROM pg_stats
+WHERE schemaname = 'public'
 ORDER BY n_distinct DESC;
 
 -- Check for unused indexes
-SELECT schemaname, tablename, indexname, idx_scan, idx_tup_read, idx_tup_fetch 
-FROM pg_stat_user_indexes 
+SELECT schemaname, tablename, indexname, idx_scan, idx_tup_read, idx_tup_fetch
+FROM pg_stat_user_indexes
 WHERE idx_scan = 0;
 
 -- Analyze table statistics
@@ -358,10 +358,10 @@ sudo systemctl restart freeagentics
    ```bash
    # Block suspicious IPs
    sudo iptables -A INPUT -s <malicious_ip> -j DROP
-   
+
    # Check current attacks
    grep "security_event" /var/log/freeagentics/security_audit.log | tail -50
-   
+
    # Scale down if under attack
    kubectl scale deployment freeagentics-api --replicas=1
    ```
@@ -370,10 +370,10 @@ sudo systemctl restart freeagentics
    ```bash
    # Generate security report
    python scripts/security/generate_incident_report.py
-   
+
    # Check authentication patterns
    python scripts/security/analyze_auth_patterns.py
-   
+
    # Review access logs
    grep "$(date +%Y-%m-%d)" /var/log/nginx/access.log | grep "40[0-9]\|50[0-9]"
    ```
@@ -382,10 +382,10 @@ sudo systemctl restart freeagentics
    ```bash
    # Update security rules
    vim /etc/freeagentics/security_rules.yaml
-   
+
    # Rotate JWT keys
    python scripts/security/rotate_jwt_keys.py
-   
+
    # Update rate limiting
    vim /etc/freeagentics/rate_limiting.yaml
    ```
@@ -449,10 +449,10 @@ tar -czf /backups/logs/freeagentics_logs_$(date +%Y%m%d).tar.gz /var/log/freeage
    ```bash
    # Restore from backup
    ./scripts/backup/full_system_restore.sh
-   
+
    # Verify system integrity
    python scripts/verify_system_integrity.py
-   
+
    # Update DNS if needed
    # (Update DNS records to point to recovery site)
    ```
@@ -461,11 +461,11 @@ tar -czf /backups/logs/freeagentics_logs_$(date +%Y%m%d).tar.gz /var/log/freeage
    ```bash
    # Stop application
    sudo systemctl stop freeagentics
-   
+
    # Restore database
    gunzip -c /backups/postgresql/freeagentics_backup.sql.gz | \
      psql -h localhost -U freeagentics -d freeagentics
-   
+
    # Start application
    sudo systemctl start freeagentics
    ```
@@ -512,8 +512,8 @@ iostat -x 1 10
 ANALYZE;
 
 -- Check for long-running queries
-SELECT pid, now() - pg_stat_activity.query_start AS duration, query 
-FROM pg_stat_activity 
+SELECT pid, now() - pg_stat_activity.query_start AS duration, query
+FROM pg_stat_activity
 WHERE (now() - pg_stat_activity.query_start) > interval '5 minutes';
 
 -- Optimize configuration

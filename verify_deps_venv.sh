@@ -29,7 +29,7 @@ echo "Installing from requirements-production.txt..."
 
 if pip install -r requirements-production.txt; then
     echo "✅ All dependencies installed successfully!"
-    
+
     # Test imports
     echo "🧪 Testing critical imports..."
     python3 -c "
@@ -95,11 +95,11 @@ print('🚀 Dependencies are compatible with Python 3.12!')
     echo ""
     echo "📋 Installed package versions:"
     pip list | grep -E "(numpy|torch|scipy|pandas|torch-geometric|inferactively-pymdp|networkx)"
-    
+
     echo ""
     echo "✅ VERIFICATION COMPLETE: All dependencies compatible!"
     echo "🎯 Production deployment ready for Python 3.12"
-    
+
 else
     echo "❌ Dependency installation failed!"
     echo "Check error messages above for details"

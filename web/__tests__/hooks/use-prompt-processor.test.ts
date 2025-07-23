@@ -193,8 +193,8 @@ describe("usePromptProcessor", () => {
 
     // Set some state first
     act(() => {
-      result.current.agents.push({ 
-        id: "agent-1", 
+      result.current.agents.push({
+        id: "agent-1",
         name: "Test",
         type: "explorer",
         status: "active"

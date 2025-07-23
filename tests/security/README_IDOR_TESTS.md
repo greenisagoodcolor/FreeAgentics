@@ -98,14 +98,14 @@ Each test module follows this structure:
 ```python
 class TestCategoryName(IDORTestBase):
     """Test specific IDOR category."""
-    
+
     @pytest.fixture(autouse=True)
     def setup(self, db: Session):
         """Set up test environment."""
         # Create test users with different roles
         # Create test resources
         # Establish relationships
-    
+
     def test_specific_vulnerability(self):
         """Test specific IDOR attack pattern."""
         # Attempt unauthorized access

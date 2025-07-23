@@ -152,7 +152,7 @@ graph TD
     N --> P[🏥 Health Checks]
     P --> Q[✅ Complete]
     K --> R[📧 Notify Team]
-    
+
     classDef triggerClass fill:#e1f5fe,stroke:#01579b,stroke-width:2px
     classDef validationClass fill:#f3e5f5,stroke:#4a148c,stroke-width:2px
     classDef buildClass fill:#e8f5e8,stroke:#1b5e20,stroke-width:2px
@@ -162,7 +162,7 @@ graph TD
     classDef gateClass fill:#fce4ec,stroke:#880e4f,stroke-width:2px
     classDef failureClass fill:#ffcdd2,stroke:#d32f2f,stroke-width:3px
     classDef successClass fill:#c8e6c9,stroke:#388e3c,stroke-width:2px
-    
+
     class A triggerClass
     class B validationClass
     class C buildClass
@@ -183,7 +183,7 @@ graph TD
         mermaid = """```mermaid
 graph TD
     A[💻 Commit] --> B[🔍 Pre-flight Checks]
-    
+
     %% Pre-flight substages
     B --> B1[🎯 Code Quality Gate]
     B --> B2[🔐 Secret Scanning]
@@ -191,13 +191,13 @@ graph TD
     B1 --> C[🏗️ Build & Package]
     B2 --> C
     B3 --> C
-    
+
     %% Build substages
     C --> C1[🏗️ Backend Build]
     C --> C2[🎨 Frontend Build]
     C1 --> D[🧪 Test Suite]
     C2 --> D
-    
+
     %% Test substages
     D --> D1[🧪 Unit Tests]
     D --> D2[🔗 Integration Tests]
@@ -205,7 +205,7 @@ graph TD
     D1 --> E[🔒 Security Validation]
     D2 --> E
     D3 --> E
-    
+
     %% Security substages
     E --> E1[🔒 SAST Analysis]
     E --> E2[🐳 Container Security]
@@ -213,42 +213,42 @@ graph TD
     E1 --> F[⚡ Performance Tests]
     E2 --> F
     E3 --> F
-    
+
     %% Performance substages
     F --> F1[⚡ Benchmarks]
     F --> F2[📊 Regression Analysis]
     F1 --> G[🌐 E2E Tests]
     F2 --> G
-    
+
     %% E2E substages
     G --> G1[🌐 E2E Scenarios]
     G --> G2[🧪 Smoke Tests]
     G1 --> H[🚀 Deployment Readiness]
     G2 --> H
-    
+
     %% Deployment flow
     H --> I{All Gates Passed?}
     I -->|✅ Yes| J[🎭 Staging Deploy]
     I -->|❌ No| K[🛑 Pipeline Failed]
-    
+
     J --> J1[📦 Deploy Artifacts]
     J1 --> J2[🧪 Staging Smoke Tests]
     J2 --> M{Production Branch?}
-    
+
     M -->|✅ Main Branch| N[🚀 Production Deploy]
     M -->|❌ Feature Branch| O[✅ Pipeline Complete]
-    
+
     N --> N1[🔵 Blue Environment]
     N1 --> N2[🏥 Health Checks]
     N2 --> N3[🔄 Traffic Switch]
     N3 --> N4[🟢 Green Cleanup]
     N4 --> Q[✅ Production Complete]
-    
+
     %% Failure handling
     K --> K1[📧 Notify Team]
     K1 --> K2[📊 Generate Report]
     K2 --> K3[🔄 Manual Review]
-    
+
     %% Quality gates
     H --> H1[📊 Metrics Check]
     H --> H2[🔒 Security Score]
@@ -256,7 +256,7 @@ graph TD
     H1 --> I
     H2 --> I
     H3 --> I
-    
+
     classDef triggerClass fill:#e1f5fe,stroke:#01579b,stroke-width:2px
     classDef preflightClass fill:#f3e5f5,stroke:#4a148c,stroke-width:2px
     classDef buildClass fill:#e8f5e8,stroke:#1b5e20,stroke-width:2px
@@ -268,7 +268,7 @@ graph TD
     classDef gateClass fill:#fff8e1,stroke:#ff6f00,stroke-width:2px
     classDef failureClass fill:#ffcdd2,stroke:#d32f2f,stroke-width:3px
     classDef successClass fill:#c8e6c9,stroke:#388e3c,stroke-width:2px
-    
+
     class A triggerClass
     class B,B1,B2,B3 preflightClass
     class C,C1,C2 buildClass
@@ -445,125 +445,125 @@ graph TD
     rankdir=TB;
     node [fontname="Arial", fontsize=10];
     edge [fontname="Arial", fontsize=8];
-    
+
     // Define node styles
     node [shape=box, style=filled];
-    
+
     // Trigger nodes
     commit [label="💻 Commit", fillcolor="#e1f5fe", shape=ellipse];
-    
-    // Validation nodes  
+
+    // Validation nodes
     preflight [label="🔍 Pre-flight\\nChecks", fillcolor="#f3e5f5"];
     quality_gate [label="🎯 Code Quality\\nGate", fillcolor="#f3e5f5"];
     secret_scan [label="🔐 Secret\\nScanning", fillcolor="#f3e5f5"];
     dependency_sec [label="🛡️ Dependency\\nSecurity", fillcolor="#f3e5f5"];
-    
+
     // Build nodes
     build [label="🏗️ Build &\\nPackage", fillcolor="#e8f5e8"];
     backend_build [label="🏗️ Backend\\nBuild", fillcolor="#e8f5e8"];
     frontend_build [label="🎨 Frontend\\nBuild", fillcolor="#e8f5e8"];
-    
+
     // Test nodes
     test_suite [label="🧪 Test\\nSuite", fillcolor="#fff3e0"];
     unit_tests [label="🧪 Unit\\nTests", fillcolor="#fff3e0"];
     integration_tests [label="🔗 Integration\\nTests", fillcolor="#fff3e0"];
     frontend_tests [label="🎨 Frontend\\nTests", fillcolor="#fff3e0"];
-    
+
     // Security nodes
     security [label="🔒 Security\\nValidation", fillcolor="#ffebee"];
     sast [label="🔒 SAST\\nAnalysis", fillcolor="#ffebee"];
     container_sec [label="🐳 Container\\nSecurity", fillcolor="#ffebee"];
     compliance [label="📋 Compliance\\nCheck", fillcolor="#ffebee"];
-    
+
     // Performance nodes
     performance [label="⚡ Performance\\nTests", fillcolor="#e0f7fa"];
-    
+
     // E2E nodes
     e2e [label="🌐 E2E\\nTests", fillcolor="#fce4ec"];
-    
+
     // Deployment nodes
     readiness [label="🚀 Deployment\\nReadiness", fillcolor="#fff8e1", shape=diamond];
     staging [label="🎭 Staging\\nDeploy", fillcolor="#e0f2f1"];
     production [label="🚀 Production\\nDeploy", fillcolor="#e0f2f1"];
-    
+
     // Decision nodes
     gates_passed [label="All Gates\\nPassed?", fillcolor="#fff8e1", shape=diamond];
     main_branch [label="Main\\nBranch?", fillcolor="#fff8e1", shape=diamond];
-    
+
     // End nodes
     complete [label="✅ Complete", fillcolor="#c8e6c9", shape=ellipse];
     failed [label="🛑 Failed", fillcolor="#ffcdd2", shape=ellipse];
-    
+
     // Define connections
     commit -> preflight;
     preflight -> quality_gate;
     preflight -> secret_scan;
     preflight -> dependency_sec;
-    
+
     quality_gate -> build;
     secret_scan -> build;
     dependency_sec -> build;
-    
+
     build -> backend_build;
     build -> frontend_build;
-    
+
     backend_build -> test_suite;
     frontend_build -> test_suite;
-    
+
     test_suite -> unit_tests;
     test_suite -> integration_tests;
     test_suite -> frontend_tests;
-    
+
     unit_tests -> security;
     integration_tests -> security;
     frontend_tests -> security;
-    
+
     security -> sast;
     security -> container_sec;
     security -> compliance;
-    
+
     sast -> performance;
     container_sec -> performance;
     compliance -> performance;
-    
+
     performance -> e2e;
     e2e -> readiness;
     readiness -> gates_passed;
-    
+
     gates_passed -> staging [label="✅ Yes"];
     gates_passed -> failed [label="❌ No"];
-    
+
     staging -> main_branch;
     main_branch -> production [label="✅ Main"];
     main_branch -> complete [label="❌ Other"];
-    
+
     production -> complete;
-    
+
     // Clustering
     subgraph cluster_preflight {
         label="Pre-flight Stage";
         color=purple;
         quality_gate; secret_scan; dependency_sec;
     }
-    
+
     subgraph cluster_build {
         label="Build Stage";
         color=green;
         backend_build; frontend_build;
     }
-    
+
     subgraph cluster_test {
         label="Test Stage";
         color=orange;
         unit_tests; integration_tests; frontend_tests;
     }
-    
+
     subgraph cluster_security {
         label="Security Stage";
         color=red;
         sast; container_sec; compliance;
     }
-    
+
     subgraph cluster_deploy {
         label="Deployment Stage";
         color=teal;

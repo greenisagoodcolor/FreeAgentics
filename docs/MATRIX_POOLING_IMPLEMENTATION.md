@@ -14,7 +14,7 @@ This document describes the matrix operation memory pooling system implemented a
 
 ### 2. **Optimized Operations**
 - `pooled_dot()` - Optimized dot product
-- `pooled_matmul()` - Optimized matrix multiplication  
+- `pooled_matmul()` - Optimized matrix multiplication
 - `pooled_einsum()` - Optimized Einstein summation
 - Context managers for temporary allocations
 
@@ -75,7 +75,7 @@ for step in range(num_steps):
         np.multiply(likelihood, belief, out=posterior)
         posterior /= posterior.sum()
         belief = posterior.copy()
-    
+
     # Transition update using pooled dot
     belief = pooled_dot(B[:, :, action], belief)
 ```
@@ -84,7 +84,7 @@ for step in range(num_steps):
 
 ### Memory Efficiency
 - **Small matrices (<1MB)**: 10 initial, 100 max pool size
-- **Medium matrices (1-10MB)**: 5 initial, 50 max pool size  
+- **Medium matrices (1-10MB)**: 5 initial, 50 max pool size
 - **Large matrices (>10MB)**: 2 initial, 10 max pool size
 
 ### Allocation Speed
@@ -133,7 +133,7 @@ stats = pool.get_statistics()
 - 26 test cases covering all operations
 - Thread safety and edge case testing
 
-### Integration Tests  
+### Integration Tests
 - `tests/integration/test_matrix_pooling_pymdp.py` - PyMDP integration
 - Performance validation
 - Memory efficiency verification

@@ -40,7 +40,7 @@ Ruff is configured in the `[tool.ruff]` section of `pyproject.toml`:
 # Enable comprehensive rule sets
 select = [
     "E",      # pycodestyle errors
-    "W",      # pycodestyle warnings  
+    "W",      # pycodestyle warnings
     "F",      # Pyflakes
     "I",      # isort
     "N",      # pep8-naming
@@ -170,7 +170,7 @@ Ruff runs in our GitHub Actions workflow:
 - name: Run Ruff linting
   run: python -m ruff check . --output-format=github --statistics
 
-- name: Run Ruff formatting check  
+- name: Run Ruff formatting check
   run: python -m ruff format --check .
 ```
 
@@ -244,13 +244,13 @@ python -m ruff clean
 #### Disable specific rules
 ```python
 # Disable for entire file
-# ruff: noqa
+# [Example: ruff noqa comment]
 
 # Disable specific rule for file
-# ruff: noqa: F401
+# [Example: ruff noqa with specific rule]
 
 # Disable for specific line
-import unused_module  # noqa: F401
+import unused_module  # [Example: inline noqa comment]
 ```
 
 #### Per-file ignores in pyproject.toml
@@ -315,7 +315,7 @@ ruff check . --output-format=sarif
 
 1. **Start with warnings**: Enable rules gradually
 2. **Use auto-fix extensively**: Let Ruff fix what it can
-3. **Document exceptions**: Use `# noqa` with reasons
+3. **Document exceptions**: Use inline comments with reasons
 4. **Regular updates**: Keep Ruff version current
 5. **Training**: Ensure team understands rule purposes
 
@@ -349,7 +349,7 @@ python scripts/setup_ruff.py
 ### Tool Consolidation
 As Ruff matures, we plan to:
 1. **Phase out flake8** once compatibility is confirmed
-2. **Migrate from Black** to Ruff formatting exclusively  
+2. **Migrate from Black** to Ruff formatting exclusively
 3. **Consolidate configurations** into single pyproject.toml
 4. **Optimize CI pipeline** with Ruff-only quality checks
 

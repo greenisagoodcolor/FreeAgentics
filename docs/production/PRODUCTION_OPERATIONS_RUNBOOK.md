@@ -314,9 +314,9 @@ curl -s https://freeagentics.com/prometheus/api/v1/query?query=histogram_quantil
 
 # Check database performance
 kubectl exec -n freeagentics-prod deployment/backend -- psql -c "
-SELECT query, calls, total_time, mean_time 
-FROM pg_stat_statements 
-ORDER BY total_time DESC 
+SELECT query, calls, total_time, mean_time
+FROM pg_stat_statements
+ORDER BY total_time DESC
 LIMIT 10;
 "
 
@@ -336,7 +336,7 @@ kubectl top pods -n freeagentics-prod
    from database.query_optimizer import suggest_indexes
    suggest_indexes()
    "
-   
+
    # Analyze query plans
    kubectl exec -n freeagentics-prod deployment/backend -- psql -c "
    EXPLAIN ANALYZE SELECT * FROM agents WHERE status = 'active';
@@ -347,7 +347,7 @@ kubectl top pods -n freeagentics-prod
    ```bash
    # Horizontal scaling
    kubectl scale deployment/backend --replicas=6 -n freeagentics-prod
-   
+
    # Vertical scaling (update resource limits)
    kubectl patch deployment backend -n freeagentics-prod -p '
    {
@@ -380,7 +380,7 @@ kubectl top pods -n freeagentics-prod
    ```bash
    # Check cache hit rate
    kubectl exec -n freeagentics-prod deployment/redis -- redis-cli info stats | grep keyspace
-   
+
    # Clear cache if needed
    kubectl exec -n freeagentics-prod deployment/redis -- redis-cli flushdb
    ```
@@ -426,7 +426,7 @@ print(get_connection_pool_status())
 3. **Verify Database Configuration:**
    ```bash
    kubectl exec -n freeagentics-prod deployment/postgres -- psql -c "
-   SELECT name, setting FROM pg_settings 
+   SELECT name, setting FROM pg_settings
    WHERE name IN ('max_connections', 'shared_buffers', 'work_mem');
    "
    ```
@@ -487,7 +487,7 @@ print(f'Peak memory usage: {peak / 1024 / 1024:.2f} MB')
    ```bash
    # Enable Python memory optimization
    kubectl set env deployment/backend PYTHONMALLOC=malloc -n freeagentics-prod
-   
+
    # Enable agent memory optimization
    kubectl set env deployment/backend AGENT_MEMORY_OPTIMIZATION=true -n freeagentics-prod
    ```
@@ -517,7 +517,7 @@ kubectl describe certificate freeagentics-tls -n freeagentics-prod
    ```bash
    # If using cert-manager
    kubectl annotate certificate freeagentics-tls -n freeagentics-prod cert-manager.io/force-renew=true
-   
+
    # If using Let's Encrypt manually
    certbot renew --dry-run
    certbot renew
@@ -709,7 +709,7 @@ kubectl exec -n freeagentics-prod deployment/postgres -- psql -c "VACUUM FULL;"
 
 # Check database health
 kubectl exec -n freeagentics-prod deployment/postgres -- psql -c "
-SELECT 
+SELECT
   schemaname,
   tablename,
   n_tup_ins,

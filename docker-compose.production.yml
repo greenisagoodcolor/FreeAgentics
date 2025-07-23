@@ -36,7 +36,7 @@ services:
           memory: 1G
           cpus: "0.5"
     command: >
-      postgres 
+      postgres
       -c config_file=/etc/postgresql/postgresql.conf
       -c shared_preload_libraries=pg_stat_statements
       -c log_statement=all
@@ -117,7 +117,7 @@ services:
       - ENVIRONMENT=production
       - PRODUCTION=true
       - LOG_LEVEL=${LOG_LEVEL:-INFO}
-      
+
       # Security Configuration
       - SECRET_KEY=${SECRET_KEY:?SECRET_KEY is required in production}
       - JWT_SECRET=${JWT_SECRET:?JWT_SECRET is required in production}
@@ -126,7 +126,7 @@ services:
       - HTTPS_ONLY=${HTTPS_ONLY:-true}
       - SECURE_COOKIES=${SECURE_COOKIES:-true}
       - RATE_LIMIT_PER_MINUTE=${RATE_LIMIT_PER_MINUTE:-100}
-      
+
       # Performance Configuration
       - WORKERS=${WORKERS:-4}
       - WORKER_CONNECTIONS=${WORKER_CONNECTIONS:-1000}
@@ -135,17 +135,17 @@ services:
       - KEEP_ALIVE=${KEEP_ALIVE:-2}
       - TIMEOUT=${TIMEOUT:-60}
       - GRACEFUL_TIMEOUT=${GRACEFUL_TIMEOUT:-30}
-      
+
       # Monitoring & Observability
       - ENABLE_METRICS=${ENABLE_METRICS:-true}
       - METRICS_PORT=${METRICS_PORT:-9090}
       - JAEGER_ENDPOINT=${JAEGER_ENDPOINT:-http://jaeger:14268/api/traces}
       - PROMETHEUS_MULTIPROC_DIR=/tmp/prometheus_multiproc
-    
+
     ports:
       - "127.0.0.1:8000:8000"  # Internal only
       - "127.0.0.1:9090:9090"  # Metrics endpoint
-    
+
     depends_on:
       postgres:
         condition: service_healthy
@@ -153,17 +153,17 @@ services:
         condition: service_healthy
       migration:
         condition: service_completed_successfully
-    
+
     restart: unless-stopped
     user: "1000:1000"
     read_only: true
     tmpfs:
       - /tmp:exec,size=256m
       - /app/logs:size=128m
-    
+
     networks:
       - freeagentics-network
-    
+
     deploy:
       resources:
         limits:
@@ -186,21 +186,21 @@ services:
         delay: 5s
         max_attempts: 3
         window: 120s
-    
+
     healthcheck:
       test: ["CMD", "curl", "-f", "http://localhost:8000/health"]
       interval: 30s
       timeout: 10s
       retries: 3
       start_period: 60s
-    
+
     security_opt:
       - no-new-privileges:true
     cap_drop:
       - ALL
     cap_add:
       - NET_BIND_SERVICE
-    
+
     ulimits:
       nofile:
         soft: 65536
@@ -208,7 +208,7 @@ services:
       nproc:
         soft: 4096
         hard: 4096
-    
+
     logging:
       driver: "json-file"
       options:
@@ -451,7 +451,7 @@ services:
         tag: "freeagentics-ssl-monitor"
 
   # =================== COMPREHENSIVE MONITORING STACK ===================
-  
+
   # Prometheus - Metrics Collection & Storage
   prometheus:
     image: prom/prometheus:v2.47.0
@@ -982,7 +982,7 @@ volumes:
     labels:
       - "com.freeagentics.volume=database"
       - "backup.enable=true"
-  
+
   redis_data:
     driver: local
     driver_opts:
@@ -1003,7 +1003,7 @@ volumes:
     labels:
       - "com.freeagentics.volume=metrics"
       - "backup.enable=true"
-  
+
   grafana_data:
     driver: local
     driver_opts:
@@ -1013,7 +1013,7 @@ volumes:
     labels:
       - "com.freeagentics.volume=dashboards"
       - "backup.enable=true"
-  
+
   alertmanager_data:
     driver: local
     driver_opts:
@@ -1023,7 +1023,7 @@ volumes:
     labels:
       - "com.freeagentics.volume=alerts"
       - "backup.enable=true"
-  
+
   jaeger_data:
     driver: local
     driver_opts:
@@ -1033,7 +1033,7 @@ volumes:
     labels:
       - "com.freeagentics.volume=tracing"
       - "backup.enable=false"
-  
+
   loki_data:
     driver: local
     driver_opts:
@@ -1053,7 +1053,7 @@ volumes:
       device: ${BACKUP_PATH:-./backups}/postgres
     labels:
       - "com.freeagentics.volume=backup-database"
-  
+
   file_backups:
     driver: local
     driver_opts:
@@ -1072,7 +1072,7 @@ volumes:
       o: size=256m,uid=101,gid=101
     labels:
       - "com.freeagentics.volume=cache-web"
-  
+
   nginx_logs:
     driver: local
     driver_opts:

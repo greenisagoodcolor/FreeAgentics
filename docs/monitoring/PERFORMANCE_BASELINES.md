@@ -132,7 +132,7 @@ sum by (agent_type) (freeagentics_agent_active{state="running"})
 
 ```promql
 # Coordination duration percentiles
-histogram_quantile(0.95, 
+histogram_quantile(0.95,
   rate(freeagentics_agent_coordination_duration_seconds_bucket[5m])
 )
 ```
@@ -461,7 +461,7 @@ baselines:
       p90: 1800
       p95: 2000
       critical: 2500
-  
+
   agents:
     active_count:
       normal: 15
@@ -472,7 +472,7 @@ baselines:
       p90: 28
       p95: 30
       critical: 34.5
-  
+
   api:
     latency:
       p50: 100  # ms
@@ -495,14 +495,14 @@ import yaml
 
 def update_baselines():
     prom = PrometheusConnect(url="http://prometheus:9090")
-    
+
     # Fetch 30-day metrics
     metrics = {
         'cpu': 'avg(rate(node_cpu_seconds_total[5m]))',
         'memory': 'freeagentics_system_memory_usage_bytes',
         'latency': 'http_request_duration_seconds'
     }
-    
+
     baselines = {}
     for name, query in metrics.items():
         data = prom.custom_query_range(
@@ -511,7 +511,7 @@ def update_baselines():
             end_time=datetime.now(),
             step='5m'
         )
-        
+
         values = [float(v[1]) for v in data[0]['values']]
         baselines[name] = {
             'p50': np.percentile(values, 50),
@@ -519,11 +519,11 @@ def update_baselines():
             'p95': np.percentile(values, 95),
             'p99': np.percentile(values, 99)
         }
-    
+
     # Save updated baselines
     with open('baseline-config.yaml', 'w') as f:
         yaml.dump(baselines, f)
-    
+
     return baselines
 ```
 

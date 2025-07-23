@@ -143,7 +143,7 @@ Our backup strategy follows the industry-standard 3-2-1 rule:
 #### 1. Database Backup
 ```yaml
 Type: PostgreSQL Custom Format
-Schedule: 
+Schedule:
   - Full: Daily at 2:00 AM
   - Incremental: Every 6 hours
 Retention:

@@ -256,10 +256,10 @@ For complete disaster recovery:
    ```bash
    # Test database restoration
    ./scripts/testing/test-db-restore.sh
-   
+
    # Test Redis restoration
    ./scripts/testing/test-redis-restore.sh
-   
+
    # Test configuration restoration
    ./scripts/testing/test-config-restore.sh
    ```

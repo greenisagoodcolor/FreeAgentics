@@ -31,16 +31,16 @@ async def validate_token(token: str):
     try:
         # Decode and validate JWT
         token_data = decode_access_token(token)
-        
+
         # Check token expiration
         if token_data.exp < datetime.utcnow():
             raise HTTPException(401, "Token expired")
-            
+
         # Verify user still exists and is active
         user = await get_user(token_data.user_id)
         if not user or not user.is_active:
             raise HTTPException(401, "Invalid user")
-            
+
         return token_data
     except JWTError:
         raise HTTPException(401, "Invalid token")
@@ -54,18 +54,18 @@ For service-to-service communication:
 async def validate_api_key(api_key: str = Header(alias="X-API-Key")):
     # Validate against hashed API keys in database
     key_hash = hashlib.sha256(api_key.encode()).hexdigest()
-    
+
     service = await db.query(ServiceAccount).filter(
         ServiceAccount.api_key_hash == key_hash
     ).first()
-    
+
     if not service or not service.is_active:
         raise HTTPException(401, "Invalid API key")
-        
+
     # Check rate limits for service
     if not await check_service_rate_limit(service.id):
         raise HTTPException(429, "Rate limit exceeded")
-        
+
     return service
 ```
 
@@ -85,14 +85,14 @@ class CreateAgentRequest(BaseModel):
     template: constr(regex="^[a-zA-Z0-9_-]+$")
     description: Optional[constr(max_length=1000)]
     max_iterations: conint(ge=1, le=100)
-    
+
     @validator('name')
     def validate_name(cls, v):
         # Prevent XSS in agent names
         if re.search(r'[<>\"\'&]', v):
             raise ValueError("Invalid characters in name")
         return v
-    
+
     @validator('template')
     def validate_template(cls, v):
         # Ensure template exists and is allowed
@@ -138,21 +138,21 @@ async def validate_upload(file: UploadFile):
     contents = await file.read()
     if len(contents) > MAX_FILE_SIZE:
         raise HTTPException(413, "File too large")
-    
+
     # Validate file type by content
     file_type = magic.from_buffer(contents, mime=True)
     if file_type not in ['text/plain', 'application/json', 'text/csv']:
         raise HTTPException(400, "Invalid file type")
-    
+
     # Check extension
     extension = Path(file.filename).suffix.lower()
     if extension not in ALLOWED_EXTENSIONS:
         raise HTTPException(400, "Invalid file extension")
-    
+
     # Generate secure filename
     file_hash = hashlib.sha256(contents).hexdigest()
     secure_filename = f"{file_hash}{extension}"
-    
+
     return contents, secure_filename
 ```
 
@@ -167,7 +167,7 @@ import bleach
 def sanitize_output(data: dict) -> dict:
     """Sanitize user-generated content in responses."""
     sanitized = {}
-    
+
     for key, value in data.items():
         if isinstance(value, str):
             # Escape HTML entities
@@ -176,14 +176,14 @@ def sanitize_output(data: dict) -> dict:
             sanitized[key] = sanitize_output(value)
         elif isinstance(value, list):
             sanitized[key] = [
-                sanitize_output(item) if isinstance(item, dict) 
-                else escape(item) if isinstance(item, str) 
-                else item 
+                sanitize_output(item) if isinstance(item, dict)
+                else escape(item) if isinstance(item, str)
+                else item
                 for item in value
             ]
         else:
             sanitized[key] = value
-    
+
     return sanitized
 ```
 
@@ -205,10 +205,10 @@ def create_error_response(
     details: Optional[str] = None
 ) -> JSONResponse:
     """Create standardized error response without leaking sensitive info."""
-    
+
     # Log full error details internally
     logger.error(f"Error {code}: {details}")
-    
+
     # Return sanitized error to client
     return JSONResponse(
         status_code=status_code,
@@ -262,11 +262,11 @@ def rate_limit(
                 identifier = await key_func(request)
             else:
                 identifier = get_client_ip(request)
-            
+
             # Check rate limit
             limiter = request.app.state.rate_limiter
             config = RateLimitConfig(max_requests, window_seconds)
-            
+
             allowed, info = await limiter.check_rate_limit(identifier, config)
             if not allowed:
                 raise HTTPException(
@@ -274,7 +274,7 @@ def rate_limit(
                     detail="Rate limit exceeded",
                     headers={"Retry-After": str(info["retry_after"])}
                 )
-            
+
             return await func(request, *args, **kwargs)
         return wrapper
     return decorator
@@ -306,12 +306,12 @@ async def get_api_version(
     # Check explicit version header
     if api_version:
         return api_version
-    
+
     # Check Accept header
     if accept and "version=" in accept:
         version = accept.split("version=")[1].split(";")[0]
         return version
-    
+
     # Default to latest stable
     return "v1"
 ```
@@ -334,12 +334,12 @@ class TestAPISecurity:
             "admin'--",
             "1' UNION SELECT * FROM users--"
         ]
-        
+
         for payload in malicious_inputs:
             response = await client.get(f"/api/v1/agents/{payload}")
             assert response.status_code in [400, 404]
             assert "error" in response.json()
-    
+
     @pytest.mark.asyncio
     async def test_xss_prevention(self, client: AsyncClient):
         """Test XSS attack prevention."""
@@ -349,14 +349,14 @@ class TestAPISecurity:
             "javascript:alert('XSS')",
             "<svg/onload=alert('XSS')>"
         ]
-        
+
         for payload in xss_payloads:
             response = await client.post(
                 "/api/v1/agents",
                 json={"name": payload, "template": "basic"}
             )
             assert response.status_code == 422  # Validation error
-    
+
     @pytest.mark.asyncio
     async def test_authentication_required(self, client: AsyncClient):
         """Test endpoints require authentication."""
@@ -365,7 +365,7 @@ class TestAPISecurity:
             "/api/v1/users/profile",
             "/api/v1/metrics"
         ]
-        
+
         for endpoint in protected_endpoints:
             response = await client.get(endpoint)
             assert response.status_code == 401
@@ -407,7 +407,7 @@ async def protect_docs(request: Request, call_next):
             auth = request.headers.get("Authorization")
             if not auth or not validate_admin_token(auth):
                 return JSONResponse(status_code=401, content={"detail": "Unauthorized"})
-    
+
     return await call_next(request)
 ```
 
@@ -446,17 +446,17 @@ request_duration = Histogram(
 @app.middleware("http")
 async def track_metrics(request: Request, call_next):
     start_time = time.time()
-    
+
     try:
         response = await call_next(request)
-        
+
         # Track request duration
         duration = time.time() - start_time
         request_duration.labels(
             endpoint=request.url.path,
             method=request.method
         ).observe(duration)
-        
+
         # Track errors
         if response.status_code >= 400:
             api_errors.labels(
@@ -464,9 +464,9 @@ async def track_metrics(request: Request, call_next):
                 status_code=response.status_code,
                 error_type="client_error" if response.status_code < 500 else "server_error"
             ).inc()
-        
+
         return response
-        
+
     except Exception as e:
         api_errors.labels(
             endpoint=request.url.path,

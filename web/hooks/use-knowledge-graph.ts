@@ -22,6 +22,10 @@ export interface GraphEdge {
   metadata?: Record<string, unknown>;
 }
 
+// Aliases for consistency with the rest of the codebase
+export type KnowledgeGraphNode = GraphNode;
+export type KnowledgeGraphEdge = GraphEdge;
+
 export interface KnowledgeGraphState {
   nodes: GraphNode[];
   edges: GraphEdge[];
@@ -50,7 +54,14 @@ export function useKnowledgeGraph(): KnowledgeGraphState {
     if (!lastMessage) return;
 
     if (lastMessage.type === "knowledge_graph_update") {
-      const { nodes: newNodes, edges: newEdges, operation } = lastMessage.data;
+      const graphData = lastMessage.data as {
+        nodes?: KnowledgeGraphNode[];
+        edges?: KnowledgeGraphEdge[];
+        operation?: string;
+        nodeId?: string;
+        edgeId?: string;
+      };
+      const { nodes: newNodes, edges: newEdges, operation } = graphData;
 
       if (operation === "replace") {
         setNodes(newNodes || []);
@@ -63,13 +74,13 @@ export function useKnowledgeGraph(): KnowledgeGraphState {
           prev.map((node) => (node.id === updatedNode.id ? { ...node, ...updatedNode } : node)),
         );
       } else if (operation === "remove_node") {
-        const nodeId = lastMessage.data.nodeId;
+        const nodeId = graphData.nodeId;
         setNodes((prev) => prev.filter((node) => node.id !== nodeId));
         setEdges((prev) => prev.filter((edge) => edge.source !== nodeId && edge.target !== nodeId));
       } else if (operation === "add_edge" && newEdges?.[0]) {
         setEdges((prev) => [...prev, newEdges[0]]);
       } else if (operation === "remove_edge") {
-        const edgeId = lastMessage.data.edgeId;
+        const edgeId = graphData.edgeId;
         setEdges((prev) => prev.filter((edge) => edge.id !== edgeId));
       }
     }

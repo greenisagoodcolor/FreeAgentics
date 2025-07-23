@@ -30,6 +30,8 @@ export interface SimulationMetrics {
   totalSteps: number;
 }
 
+export type SimulationGrid = GridCell[][];
+
 export interface SimulationState {
   isRunning: boolean;
   isPaused: boolean;
@@ -90,7 +92,13 @@ export function useSimulation(): SimulationState {
     if (!lastMessage) return;
 
     if (lastMessage.type === "simulation_update") {
-      const { step, grid: newGrid, agents: newAgents, metrics: newMetrics } = lastMessage.data;
+      const simData = lastMessage.data as {
+        step: number;
+        grid?: SimulationGrid;
+        agents?: SimulationAgent[];
+        metrics?: SimulationMetrics;
+      };
+      const { step, grid: newGrid, agents: newAgents, metrics: newMetrics } = simData;
       setCurrentStep(step);
       if (newGrid) setGrid(newGrid);
       if (newAgents) setAgents(newAgents);
@@ -118,7 +126,7 @@ export function useSimulation(): SimulationState {
         // Step based on speed (steps per second)
         if (deltaTime >= 1000 / speed) {
           // Call step simulation through WebSocket
-          sendMessage({ type: "step_simulation" });
+          sendMessage({ type: "step_simulation", data: {} });
           lastStepTimeRef.current = now;
 
           // Track step times for FPS calculation
@@ -171,7 +179,7 @@ export function useSimulation(): SimulationState {
       if (response.ok) {
         setIsRunning(true);
         setIsPaused(false);
-        sendMessage({ type: "simulation_started" });
+        sendMessage({ type: "simulation_started", data: {} });
       }
     } catch (error) {
       console.error("Failed to start simulation:", error);
@@ -181,21 +189,21 @@ export function useSimulation(): SimulationState {
   const stopSimulation = useCallback(() => {
     setIsRunning(false);
     setIsPaused(false);
-    sendMessage({ type: "stop_simulation" });
+    sendMessage({ type: "stop_simulation", data: {} });
   }, [sendMessage]);
 
   const pauseSimulation = useCallback(() => {
     setIsPaused(true);
-    sendMessage({ type: "pause_simulation" });
+    sendMessage({ type: "pause_simulation", data: {} });
   }, [sendMessage]);
 
   const resumeSimulation = useCallback(() => {
     setIsPaused(false);
-    sendMessage({ type: "resume_simulation" });
+    sendMessage({ type: "resume_simulation", data: {} });
   }, [sendMessage]);
 
   const stepSimulation = useCallback(() => {
-    sendMessage({ type: "step_simulation" });
+    sendMessage({ type: "step_simulation", data: {} });
   }, [sendMessage]);
 
   const resetSimulation = useCallback(() => {
@@ -220,7 +228,7 @@ export function useSimulation(): SimulationState {
       );
     setGrid(newGrid);
 
-    sendMessage({ type: "reset_simulation" });
+    sendMessage({ type: "reset_simulation", data: {} });
   }, [gridSize, sendMessage]);
 
   const handleSetGridSize = useCallback(

@@ -498,7 +498,7 @@ if __name__ == "__main__":
     max_agents = max(results.keys())
     max_agent_result = results[max_agents]
 
-    print(f"Single agent async performance:" f" {single_agent['avg_time_per_operation']:.1f}ms")
+    print(f"Single agent async performance: {single_agent['avg_time_per_operation']:.1f}ms")
     print(f"Max agents tested: {max_agents}")
     print(f"Max agent performance: {max_agent_result['avg_time_per_operation']:.1f}ms")
     print(f"Throughput scaling: {max_agent_result['throughput_ops_per_sec']:.1f} ops/sec")

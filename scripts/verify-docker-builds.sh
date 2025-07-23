@@ -69,7 +69,7 @@ EOF
 # Test Docker environment
 test_docker_environment() {
     log_test "Testing Docker environment..."
-    
+
     # Check Docker daemon
     if docker info &> /dev/null; then
         log_success "Docker daemon is running"
@@ -79,7 +79,7 @@ test_docker_environment() {
         test_results["docker_daemon"]="FAIL"
         return 1
     fi
-    
+
     # Check Docker Buildx
     if docker buildx version &> /dev/null; then
         log_success "Docker Buildx is available"
@@ -89,7 +89,7 @@ test_docker_environment() {
         test_results["docker_buildx"]="FAIL"
         return 1
     fi
-    
+
     # Check QEMU for multi-arch
     if docker run --rm --platform linux/arm64 alpine uname -m 2>/dev/null | grep -q aarch64; then
         log_success "Multi-architecture support is enabled"
@@ -105,15 +105,15 @@ build_images() {
     local service=$1
     local dockerfile=$2
     local context=$3
-    
+
     log_test "Building $service for all platforms..."
-    
+
     for platform in "${PLATFORMS[@]}"; do
         local tag="freeagentics-${service}:test-${platform//\//-}"
         local start_time=$(date +%s)
-        
+
         log_info "Building $service for $platform..."
-        
+
         if docker buildx build \
             --platform "$platform" \
             --file "$dockerfile" \
@@ -122,22 +122,22 @@ build_images() {
             --load \
             --progress plain \
             "$context" 2>&1 | tee "/tmp/build-${service}-${platform//\//-}.log"; then
-            
+
             local end_time=$(date +%s)
             local build_time=$((end_time - start_time))
-            
+
             build_times["${service}_${platform}"]=$build_time
             test_results["build_${service}_${platform}"]="PASS"
             log_success "Built $service for $platform in ${build_time}s"
-            
+
             # Get image size
             local size=$(docker images --format "{{.Size}}" "$tag")
             image_sizes["${service}_${platform}"]=$size
-            
+
             # Count layers
             local layers=$(docker history "$tag" --no-trunc | grep -v "IMAGE" | wc -l)
             layer_counts["${service}_${platform}"]=$layers
-            
+
         else
             test_results["build_${service}_${platform}"]="FAIL"
             log_error "Failed to build $service for $platform"
@@ -150,12 +150,12 @@ test_image() {
     local service=$1
     local platform=$2
     local tag="freeagentics-${service}:test-${platform//\//-}"
-    
+
     log_test "Testing $service image for $platform..."
-    
+
     # Start container
     local container_name="test-${service}-${platform//\//-}"
-    
+
     if [ "$service" = "backend" ]; then
         # Test backend container
         if docker run -d \
@@ -167,9 +167,9 @@ test_image() {
             -e JWT_SECRET="test_jwt" \
             -p 8001:8000 \
             "$tag" 2>/dev/null; then
-            
+
             sleep 10
-            
+
             # Test health endpoint
             if docker exec "$container_name" curl -f http://localhost:8000/health 2>/dev/null; then
                 test_results["health_${service}_${platform}"]="PASS"
@@ -178,7 +178,7 @@ test_image() {
                 test_results["health_${service}_${platform}"]="FAIL"
                 log_error "Health check failed for $service on $platform"
             fi
-            
+
             # Cleanup
             docker stop "$container_name" &>/dev/null
             docker rm "$container_name" &>/dev/null
@@ -186,7 +186,7 @@ test_image() {
             test_results["run_${service}_${platform}"]="FAIL"
             log_error "Failed to start $service container on $platform"
         fi
-        
+
     elif [ "$service" = "frontend" ]; then
         # Test frontend container
         if docker run -d \
@@ -195,9 +195,9 @@ test_image() {
             -e NEXT_PUBLIC_API_URL="http://localhost:8000" \
             -p 3001:3000 \
             "$tag" 2>/dev/null; then
-            
+
             sleep 15
-            
+
             # Test health endpoint
             if docker exec "$container_name" wget --spider http://localhost:3000 2>/dev/null; then
                 test_results["health_${service}_${platform}"]="PASS"
@@ -206,7 +206,7 @@ test_image() {
                 test_results["health_${service}_${platform}"]="FAIL"
                 log_error "Health check failed for $service on $platform"
             fi
-            
+
             # Cleanup
             docker stop "$container_name" &>/dev/null
             docker rm "$container_name" &>/dev/null
@@ -222,9 +222,9 @@ security_scan() {
     local service=$1
     local platform=$2
     local tag="freeagentics-${service}:test-${platform//\//-}"
-    
+
     log_test "Running security scan for $service on $platform..."
-    
+
     # Check if Trivy is installed
     if command -v trivy &> /dev/null; then
         if trivy image --severity HIGH,CRITICAL "$tag" --format json > "/tmp/trivy-${service}-${platform//\//-}.json" 2>/dev/null; then
@@ -249,10 +249,10 @@ security_scan() {
 # Performance benchmarks
 benchmark_performance() {
     log_test "Running performance benchmarks..."
-    
+
     # Test build cache effectiveness
     log_info "Testing build cache effectiveness..."
-    
+
     # First build (cold cache)
     local cold_start=$(date +%s)
     docker buildx build \
@@ -263,7 +263,7 @@ benchmark_performance() {
         . &>/dev/null
     local cold_end=$(date +%s)
     local cold_time=$((cold_end - cold_start))
-    
+
     # Second build (warm cache)
     local warm_start=$(date +%s)
     docker buildx build \
@@ -273,10 +273,10 @@ benchmark_performance() {
         . &>/dev/null
     local warm_end=$(date +%s)
     local warm_time=$((warm_end - warm_start))
-    
+
     local cache_improvement=$(( (cold_time - warm_time) * 100 / cold_time ))
     test_results["cache_effectiveness"]="${cache_improvement}%"
-    
+
     if [ "$cache_improvement" -gt 50 ]; then
         log_success "Cache effectiveness: ${cache_improvement}% improvement"
     else
@@ -287,7 +287,7 @@ benchmark_performance() {
 # Generate report
 generate_report() {
     log_info "Generating verification report..."
-    
+
     # Test results summary
     cat >> "$REPORT_FILE" << EOF
 
@@ -395,15 +395,15 @@ EOF
 # Main execution
 main() {
     cd "$PROJECT_ROOT"
-    
+
     log_info "Starting Docker build verification..."
-    
+
     # Initialize report
     init_report
-    
+
     # Test environment
     test_docker_environment
-    
+
     # Build and test each service
     for service in "${SERVICES[@]}"; do
         if [ "$service" = "backend" ]; then
@@ -411,33 +411,33 @@ main() {
         else
             build_images "frontend" "web/Dockerfile.multiarch" "web"
         fi
-        
+
         # Test each platform
         for platform in "${PLATFORMS[@]}"; do
             test_image "$service" "$platform"
             security_scan "$service" "$platform"
         done
     done
-    
+
     # Run performance benchmarks
     benchmark_performance
-    
+
     # Generate report
     generate_report
-    
+
     # Summary
     echo ""
     log_success "Build verification completed!"
     echo ""
     echo "Report: $REPORT_FILE"
-    
+
     # Exit with appropriate code
     for result in "${test_results[@]}"; do
         if [ "$result" = "FAIL" ]; then
             exit 1
         fi
     done
-    
+
     exit 0
 }
 

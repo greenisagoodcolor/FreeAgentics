@@ -35,7 +35,7 @@ make security-test
 # Authentication tests
 pytest tests/security/test_comprehensive_auth_security.py -v
 
-# Authorization tests  
+# Authorization tests
 pytest tests/security/test_rbac_authorization_matrix.py -v
 
 # Input validation tests
@@ -69,7 +69,7 @@ Manual Reviews & Penetration Testing
          ↓
 Dynamic Application Security Testing (DAST)
          ↓
-Interactive Application Security Testing (IAST)  
+Interactive Application Security Testing (IAST)
          ↓
 Static Application Security Testing (SAST)
          ↓

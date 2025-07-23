@@ -86,10 +86,10 @@ The work-stealing algorithm balances load across threads:
 class WorkStealingQueue:
     def push(self, item):
         # Add to local end (LIFO for cache locality)
-        
+
     def pop(self):
         # Remove from local end
-        
+
     def steal(self):
         # Steal from remote end (FIFO)
 ```
@@ -108,7 +108,7 @@ class LockFreeAgentRegistry:
     def __init__(self, num_shards=16):
         self.shards = [dict() for _ in range(num_shards)]
         self.shard_locks = [threading.RLock() for _ in range(num_shards)]
-    
+
     def _get_shard(self, agent_id):
         return hash(agent_id) % self.num_shards
 ```
@@ -650,10 +650,10 @@ class CustomMetrics:
     def __init__(self):
         self.custom_counter = 0
         self.custom_timing = deque(maxlen=100)
-    
+
     def increment_counter(self):
         self.custom_counter += 1
-    
+
     def record_timing(self, duration):
         self.custom_timing.append(duration)
 
@@ -686,7 +686,7 @@ def optimize_for_workload(workload_type):
             memory_pooling_enabled=True,
             batch_size=10
         )
-    
+
     return config
 ```
 

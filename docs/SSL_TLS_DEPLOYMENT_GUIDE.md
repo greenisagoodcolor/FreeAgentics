@@ -142,12 +142,12 @@ The production nginx configuration is in `/nginx/conf.d/ssl-freeagentics.conf`:
 server {
     listen 80;
     server_name _;
-    
+
     # Let's Encrypt challenge
     location /.well-known/acme-challenge/ {
         root /var/www/certbot;
     }
-    
+
     # Redirect all HTTP to HTTPS
     location / {
         return 301 https://$server_name$request_uri;
@@ -158,25 +158,25 @@ server {
     listen 443 ssl http2;
     listen [::]:443 ssl http2;
     server_name freeagentics.com;
-    
+
     # SSL Configuration
     ssl_certificate /etc/nginx/ssl/cert.pem;
     ssl_certificate_key /etc/nginx/ssl/key.pem;
-    
+
     # SSL Protocols
     ssl_protocols TLSv1.2 TLSv1.3;
     ssl_prefer_server_ciphers off;
-    
+
     # Strong cipher suites
     ssl_ciphers ECDHE-ECDSA-AES128-GCM-SHA256:ECDHE-RSA-AES128-GCM-SHA256:ECDHE-ECDSA-AES256-GCM-SHA384:ECDHE-RSA-AES256-GCM-SHA384:ECDHE-ECDSA-CHACHA20-POLY1305:ECDHE-RSA-CHACHA20-POLY1305:DHE-RSA-AES128-GCM-SHA256:DHE-RSA-AES256-GCM-SHA384;
-    
+
     # OCSP Stapling
     ssl_stapling on;
     ssl_stapling_verify on;
-    
+
     # Security Headers
     add_header Strict-Transport-Security "max-age=31536000; includeSubDomains; preload" always;
-    
+
     # ... rest of configuration
 }
 ```
@@ -285,11 +285,11 @@ upstream backend {
 
 server {
     listen 443 ssl http2;
-    
+
     # SSL termination at load balancer
     ssl_certificate /etc/nginx/ssl/cert.pem;
     ssl_certificate_key /etc/nginx/ssl/key.pem;
-    
+
     location / {
         proxy_pass http://backend;
         proxy_set_header X-Forwarded-Proto $scheme;

@@ -279,7 +279,7 @@ The CI/CD pipeline enforces performance requirements:
    ```bash
    # Check logs
    gh run view RUN_ID --log
-   
+
    # Re-run failed jobs
    gh run rerun RUN_ID --failed
    ```

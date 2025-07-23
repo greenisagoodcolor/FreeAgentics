@@ -330,7 +330,7 @@ def test_agent_inference():
              .with_uniform_beliefs(num_states=9)
              .active()
              .build())
-    
+
     # Test inference logic
     assert agent.beliefs.state_beliefs is not None
     assert len(agent.beliefs.state_beliefs) == 9
@@ -346,7 +346,7 @@ def test_coalition_persistence(db_session):
         num_agents=3,
         name="PersistenceTest"
     )
-    
+
     # Verify persistence
     assert db_session.query(Coalition).count() == 1
     assert db_session.query(Agent).count() == 3
@@ -361,10 +361,10 @@ def test_large_scale_processing(db_session):
         num_agents=1000,
         num_coalitions=50
     )
-    
+
     generator = PerformanceDataGenerator()
     results = generator.generate_to_database(db_session, config)
-    
+
     # Verify performance
     assert results['timing']['agent_creation'] < 10.0  # seconds
     assert results['counts']['agents'] == 1000

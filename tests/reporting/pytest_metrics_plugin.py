@@ -244,7 +244,7 @@ def pytest_terminal_summary(terminalreporter, exitstatus, config):
 
                 if slow_tests:
                     terminalreporter.write_line(
-                        f"🐌 {len(slow_tests)} slow tests detected - " f"consider optimization"
+                        f"🐌 {len(slow_tests)} slow tests detected - consider optimization"
                     )
 
                 terminalreporter.write_line(

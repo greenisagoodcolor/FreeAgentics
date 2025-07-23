@@ -11,7 +11,7 @@ graph TD
     A[Admin] --> B[Manager]
     B --> C[User]
     C --> D[Viewer]
-    
+
     A --> E[All Permissions]
     B --> F[Team Management]
     C --> G[Personal Resources]

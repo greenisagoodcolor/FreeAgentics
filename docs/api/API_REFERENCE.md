@@ -4,9 +4,9 @@
 
 The FreeAgentics API provides a comprehensive interface for managing multi-agent AI systems with Active Inference capabilities. This reference documents all available endpoints, authentication procedures, and integration patterns.
 
-**Base URL**: `https://api.freeagentics.com`  
-**API Version**: `v1`  
-**Protocol**: HTTPS  
+**Base URL**: `https://api.freeagentics.com`
+**API Version**: `v1`
+**Protocol**: HTTPS
 
 ## Table of Contents
 
@@ -742,11 +742,11 @@ type Query {
     limit: Int = 100
     offset: Int = 0
   ): AgentConnection!
-  
+
   # Metrics queries
   systemMetrics: SystemMetrics!
   agentMetrics(agentId: ID!): AgentMetrics
-  
+
   # Knowledge graph queries
   searchKnowledge(
     query: String!
@@ -759,11 +759,11 @@ type Mutation {
   createAgent(input: CreateAgentInput!): Agent!
   updateAgent(id: ID!, input: UpdateAgentInput!): Agent!
   deleteAgent(id: ID!): Boolean!
-  
+
   # Agent control
   startAgent(id: ID!): Agent!
   stopAgent(id: ID!): Agent!
-  
+
   # Knowledge mutations
   createEntity(input: CreateEntityInput!): KnowledgeEntity!
   createRelationship(input: CreateRelationshipInput!): Relationship!

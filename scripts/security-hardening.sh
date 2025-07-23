@@ -44,8 +44,8 @@ check_env_security() {
     fi
 
     # Ensure proper permissions on env files
-    chmod 600 .env.production 2>/dev/null 
-    chmod 600 .env 2>/dev/null 
+    chmod 600 .env.production 2>/dev/null
+    chmod 600 .env 2>/dev/null
 
     # Check for dangerous default values
     local dangerous_values=("change_me" "dev_password" "dev_secret" "secret" "password" "admin" "test" "default" "example" "placeholder" "CHANGE_ME")

@@ -59,7 +59,7 @@ For production or multi-agent testing, use PostgreSQL:
    ```bash
    # Ubuntu/Debian
    sudo apt-get install postgresql postgresql-contrib
-   
+
    # macOS
    brew install postgresql
    ```
@@ -183,7 +183,7 @@ make demo
    ```bash
    # Generate SECRET_KEY
    openssl rand -hex 32
-   
+
    # Generate JWT_SECRET
    openssl rand -hex 32
    ```
@@ -196,7 +196,7 @@ make demo
    DATABASE_URL=postgresql://user:pass@host:port/dbname
    SECRET_KEY=<your-generated-key>
    JWT_SECRET=<your-generated-jwt-key>
-   
+
    # Recommended
    REDIS_URL=redis://user:pass@host:6379/0
    DEBUG=false

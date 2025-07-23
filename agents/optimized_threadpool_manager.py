@@ -457,10 +457,7 @@ def benchmark_threadpool_manager():
 
                 # Count successes
                 successes = sum(1 for r in results.values() if r.success)
-                print(
-                    f"  Round {round_num + 1}: {duration:.3f}s,"
-                    f" {successes}/{num_agents} success"
-                )
+                print(f"  Round {round_num + 1}: {duration:.3f}s, {successes}/{num_agents} success")
 
             avg_time = sum(times) / len(times)
             throughput = num_agents / avg_time

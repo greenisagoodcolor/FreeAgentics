@@ -406,7 +406,7 @@ mkdir -p ${BACKUP_DIR}
 # Export all dashboards
 for dashboard in $(curl -s -u ${GRAFANA_USER}:${GRAFANA_PASSWORD} \
   ${GRAFANA_URL}/api/search?folderIds=1 | jq -r '.[] | .uid'); do
-  
+
   curl -s -u ${GRAFANA_USER}:${GRAFANA_PASSWORD} \
     ${GRAFANA_URL}/api/dashboards/uid/${dashboard} \
     | jq '.dashboard' > ${BACKUP_DIR}/${dashboard}.json
@@ -541,7 +541,7 @@ journalctl -u grafana -f
    ```promql
    # Bad: unbounded query
    http_requests_total
-   
+
    # Good: time-bounded rate
    rate(http_requests_total[5m])
    ```
@@ -592,7 +592,7 @@ deploy-dashboards:
 for dashboard in monitoring/grafana/dashboards/*.json; do
   # Check JSON syntax
   jq . ${dashboard} > /dev/null || exit 1
-  
+
   # Check required fields
   jq -e '.title' ${dashboard} > /dev/null || exit 1
   jq -e '.panels' ${dashboard} > /dev/null || exit 1
@@ -601,6 +601,6 @@ done
 
 ---
 
-**Last Updated**: 2025-01-15  
-**Version**: 1.0  
+**Last Updated**: 2025-01-15
+**Version**: 1.0
 **Next Review**: 2025-02-15

@@ -256,7 +256,7 @@ The performance test suite includes:
    ```bash
    # Ensure all dependencies are installed
    pip install -r requirements.txt
-   
+
    # Set required environment variables
    export SECRET_KEY="test_secret_key"
    export JWT_SECRET="test_jwt_secret"
@@ -273,7 +273,7 @@ The performance test suite includes:
    ```bash
    # Run with --quick flag for faster tests
    python tests/run_comprehensive_auth_tests.py --quick
-   
+
    # Check system resources
    # Adjust performance thresholds if needed
    ```
@@ -282,7 +282,7 @@ The performance test suite includes:
    ```bash
    # Run with --verbose for detailed error information
    python tests/run_comprehensive_auth_tests.py --security-only --verbose
-   
+
    # Review security implementation
    # Check input validation logic
    ```
@@ -314,26 +314,26 @@ on:
 jobs:
   auth-tests:
     runs-on: ubuntu-latest
-    
+
     steps:
     - uses: actions/checkout@v3
-    
+
     - name: Set up Python
       uses: actions/setup-python@v4
       with:
         python-version: '3.9'
-        
+
     - name: Install dependencies
       run: |
         pip install -r requirements.txt
         pip install pytest memory-profiler psutil
-        
+
     - name: Run authentication tests
       run: |
         export SECRET_KEY="test_secret_key"
         export JWT_SECRET="test_jwt_secret"
         python tests/run_comprehensive_auth_tests.py --quick
-        
+
     - name: Upload test report
       uses: actions/upload-artifact@v3
       with:

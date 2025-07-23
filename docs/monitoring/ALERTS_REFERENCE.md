@@ -27,10 +27,10 @@ This document provides a comprehensive reference for all alerts configured in th
 
 ### FreeAgenticsSystemDown
 
-**Description**: The FreeAgentics backend service is completely unavailable  
-**Severity**: Critical  
-**Threshold**: `up{job="freeagentics-backend"} == 0` for 30 seconds  
-**Team**: SRE  
+**Description**: The FreeAgentics backend service is completely unavailable
+**Severity**: Critical
+**Threshold**: `up{job="freeagentics-backend"} == 0` for 30 seconds
+**Team**: SRE
 **Runbook**: https://docs.freeagentics.com/runbooks/system-down
 
 **Impact**:
@@ -53,10 +53,10 @@ This document provides a comprehensive reference for all alerts configured in th
 
 ### SystemMemoryUsageCritical
 
-**Description**: System memory usage exceeds critical threshold  
-**Severity**: Critical  
-**Threshold**: Memory usage > 2GB for 5 minutes  
-**Team**: SRE  
+**Description**: System memory usage exceeds critical threshold
+**Severity**: Critical
+**Threshold**: Memory usage > 2GB for 5 minutes
+**Team**: SRE
 **Runbook**: https://docs.freeagentics.com/runbooks/memory-usage
 
 **Impact**:
@@ -79,10 +79,10 @@ This document provides a comprehensive reference for all alerts configured in th
 
 ### AgentCoordinationFailure
 
-**Description**: Active agent count exceeds coordination limit  
-**Severity**: Critical  
-**Threshold**: Active agents > 50 for 1 minute  
-**Team**: Agents  
+**Description**: Active agent count exceeds coordination limit
+**Severity**: Critical
+**Threshold**: Active agents > 50 for 1 minute
+**Team**: Agents
 **Runbook**: https://docs.freeagentics.com/runbooks/agent-coordination
 
 **Impact**:
@@ -108,10 +108,10 @@ This document provides a comprehensive reference for all alerts configured in th
 
 ### HighAPIResponseTime
 
-**Description**: API response time exceeds acceptable threshold  
-**Severity**: High  
-**Threshold**: P95 response time > 500ms for 3 minutes  
-**Team**: Backend  
+**Description**: API response time exceeds acceptable threshold
+**Severity**: High
+**Threshold**: P95 response time > 500ms for 3 minutes
+**Team**: Backend
 **Runbook**: https://docs.freeagentics.com/runbooks/api-performance
 
 **Impact**:
@@ -128,17 +128,17 @@ This document provides a comprehensive reference for all alerts configured in th
 
 **Metrics to Check**:
 ```promql
-histogram_quantile(0.95, 
+histogram_quantile(0.95,
   rate(http_request_duration_seconds_bucket[5m])
 )
 ```
 
 ### HighAgentErrorRate
 
-**Description**: Agent error rate exceeds threshold  
-**Severity**: High  
-**Threshold**: Error rate > 5% for 2 minutes  
-**Team**: Agents  
+**Description**: Agent error rate exceeds threshold
+**Severity**: High
+**Threshold**: Error rate > 5% for 2 minutes
+**Team**: Agents
 **Runbook**: https://docs.freeagentics.com/runbooks/agent-errors
 
 **Impact**:
@@ -155,16 +155,16 @@ histogram_quantile(0.95,
 
 **Query for Investigation**:
 ```promql
-rate(freeagentics_agent_errors_total[5m]) 
+rate(freeagentics_agent_errors_total[5m])
 / rate(freeagentics_agent_operations_total[5m])
 ```
 
 ### HighDatabaseConnections
 
-**Description**: Database connection count approaching limit  
-**Severity**: High  
-**Threshold**: Connections > 80 for 5 minutes  
-**Team**: Database  
+**Description**: Database connection count approaching limit
+**Severity**: High
+**Threshold**: Connections > 80 for 5 minutes
+**Team**: Database
 **Runbook**: https://docs.freeagentics.com/runbooks/database-connections
 
 **Impact**:
@@ -181,10 +181,10 @@ rate(freeagentics_agent_errors_total[5m])
 
 ### FreeEnergyAnomaly
 
-**Description**: Belief system free energy outside normal range  
-**Severity**: High  
-**Threshold**: Free energy < 0.1 or > 10 for 5 minutes  
-**Team**: Agents  
+**Description**: Belief system free energy outside normal range
+**Severity**: High
+**Threshold**: Free energy < 0.1 or > 10 for 5 minutes
+**Team**: Agents
 **Runbook**: https://docs.freeagentics.com/runbooks/belief-system
 
 **Impact**:
@@ -203,10 +203,10 @@ rate(freeagentics_agent_errors_total[5m])
 
 ### AgentMemoryUsageWarning
 
-**Description**: Individual agent memory usage elevated  
-**Severity**: Medium  
-**Threshold**: Agent memory > 30MB for 10 minutes  
-**Team**: Agents  
+**Description**: Individual agent memory usage elevated
+**Severity**: Medium
+**Threshold**: Agent memory > 30MB for 10 minutes
+**Team**: Agents
 **Runbook**: https://docs.freeagentics.com/runbooks/agent-memory
 
 **Impact**:
@@ -228,10 +228,10 @@ topk(10, freeagentics_agent_memory_usage_bytes / (1024*1024))
 
 ### SlowCoalitionFormation
 
-**Description**: Coalition formation taking longer than expected  
-**Severity**: Medium  
-**Threshold**: P90 coordination time > 2s for 5 minutes  
-**Team**: Agents  
+**Description**: Coalition formation taking longer than expected
+**Severity**: Medium
+**Threshold**: P90 coordination time > 2s for 5 minutes
+**Team**: Agents
 **Runbook**: https://docs.freeagentics.com/runbooks/coalition-formation
 
 **Impact**:
@@ -248,10 +248,10 @@ topk(10, freeagentics_agent_memory_usage_bytes / (1024*1024))
 
 ### KnowledgeGraphGrowthRate
 
-**Description**: Knowledge graph growing faster than expected  
-**Severity**: Medium  
-**Threshold**: Growth > 1000 nodes/hour for 15 minutes  
-**Team**: Backend  
+**Description**: Knowledge graph growing faster than expected
+**Severity**: Medium
+**Threshold**: Growth > 1000 nodes/hour for 15 minutes
+**Team**: Backend
 **Runbook**: https://docs.freeagentics.com/runbooks/knowledge-graph
 
 **Impact**:
@@ -268,10 +268,10 @@ topk(10, freeagentics_agent_memory_usage_bytes / (1024*1024))
 
 ### LowUserInteractionRate
 
-**Description**: User interaction rate below expected threshold  
-**Severity**: Medium  
-**Threshold**: Interactions < 0.01/hour for 30 minutes  
-**Team**: Product  
+**Description**: User interaction rate below expected threshold
+**Severity**: Medium
+**Threshold**: Interactions < 0.01/hour for 30 minutes
+**Team**: Product
 **Runbook**: https://docs.freeagentics.com/runbooks/user-interactions
 
 **Impact**:
@@ -288,10 +288,10 @@ topk(10, freeagentics_agent_memory_usage_bytes / (1024*1024))
 
 ### ResponseQualityDegradation
 
-**Description**: Response quality score below acceptable level  
-**Severity**: Medium  
-**Threshold**: Quality score < 70% for 10 minutes  
-**Team**: Product  
+**Description**: Response quality score below acceptable level
+**Severity**: Medium
+**Threshold**: Quality score < 70% for 10 minutes
+**Team**: Product
 **Runbook**: https://docs.freeagentics.com/runbooks/response-quality
 
 **Impact**:
@@ -310,10 +310,10 @@ topk(10, freeagentics_agent_memory_usage_bytes / (1024*1024))
 
 ### SecurityAnomalyDetected
 
-**Description**: Security anomaly detected by monitoring system  
-**Severity**: Critical  
-**Threshold**: Any anomaly detection (immediate)  
-**Team**: Security  
+**Description**: Security anomaly detected by monitoring system
+**Severity**: Critical
+**Threshold**: Any anomaly detection (immediate)
+**Team**: Security
 **Runbook**: https://docs.freeagentics.com/runbooks/security-anomaly
 
 **Impact**:
@@ -330,10 +330,10 @@ topk(10, freeagentics_agent_memory_usage_bytes / (1024*1024))
 
 ### HighAuthenticationFailures
 
-**Description**: Elevated authentication failure rate  
-**Severity**: High  
-**Threshold**: Failure rate > 0.5/sec for 1 minute  
-**Team**: Security  
+**Description**: Elevated authentication failure rate
+**Severity**: High
+**Threshold**: Failure rate > 0.5/sec for 1 minute
+**Team**: Security
 **Runbook**: https://docs.freeagentics.com/runbooks/authentication-failures
 
 **Impact**:
@@ -350,10 +350,10 @@ topk(10, freeagentics_agent_memory_usage_bytes / (1024*1024))
 
 ### AccessViolationDetected
 
-**Description**: Unauthorized access attempt detected  
-**Severity**: High  
-**Threshold**: Any access violation (immediate)  
-**Team**: Security  
+**Description**: Unauthorized access attempt detected
+**Severity**: High
+**Threshold**: Any access violation (immediate)
+**Team**: Security
 **Runbook**: https://docs.freeagentics.com/runbooks/access-violations
 
 **Impact**:
@@ -393,10 +393,10 @@ topk(10, freeagentics_agent_memory_usage_bytes / (1024*1024))
    ```bash
    # Check recent deployments
    kubectl get deployments -n freeagentics --sort-by=.metadata.creationTimestamp
-   
+
    # View recent logs
    kubectl logs -n freeagentics -l app=freeagentics --tail=100
-   
+
    # Check metrics
    curl -s http://prometheus:9090/api/v1/query?query=up
    ```
@@ -411,7 +411,7 @@ topk(10, freeagentics_agent_memory_usage_bytes / (1024*1024))
    ```bash
    # Search error logs
    grep ERROR /var/log/freeagentics/*.log | tail -50
-   
+
    # Check specific component
    grep -A 5 -B 5 "agent_id=agent-123" /var/log/freeagentics/agents.log
    ```
@@ -474,7 +474,7 @@ kubectl rollout status deployment/freeagentics-backend -n freeagentics
    ```promql
    # Alert firing frequency
    count_over_time(ALERTS{alertname="HighAPIResponseTime"}[7d])
-   
+
    # Actual impact correlation
    count_over_time(http_requests_total{status=~"5.."}[7d])
    ```
@@ -489,7 +489,7 @@ kubectl rollout status deployment/freeagentics-backend -n freeagentics
    ```yaml
    # Before
    expr: rate(errors_total[5m]) > 0.1
-   
+
    # After (more specific)
    expr: rate(errors_total[5m]) > 0.1 AND rate(requests_total[5m]) > 10
    ```
@@ -552,7 +552,7 @@ freeagentics_system_active_agents_total
 topk(10, freeagentics_agent_memory_usage_bytes / (1024*1024))
 
 # Coordination success rate
-rate(freeagentics_agent_coordination_requests_total{status="success"}[5m]) 
+rate(freeagentics_agent_coordination_requests_total{status="success"}[5m])
 / rate(freeagentics_agent_coordination_requests_total[5m])
 ```
 
@@ -570,6 +570,6 @@ rate(freeagentics_business_inference_operations_total[5m])
 
 ---
 
-**Last Updated**: 2025-01-15  
-**Version**: 1.0  
+**Last Updated**: 2025-01-15
+**Version**: 1.0
 **Contact**: sre@freeagentics.com

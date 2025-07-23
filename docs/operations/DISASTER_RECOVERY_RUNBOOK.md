@@ -311,8 +311,8 @@ curl -I http://api.freeagentics.io/health
 
 # Database integrity check
 psql -h postgres -U freeagentics -d freeagentics -c "
-  SELECT schemaname, tablename, n_tup_ins, n_tup_upd, n_tup_del 
-  FROM pg_stat_user_tables 
+  SELECT schemaname, tablename, n_tup_ins, n_tup_upd, n_tup_del
+  FROM pg_stat_user_tables
   ORDER BY n_tup_ins + n_tup_upd + n_tup_del DESC LIMIT 10;"
 
 # Application health check
@@ -420,7 +420,7 @@ Impact: [Customer-facing description]
 Duration: [Start time] - [End time]
 Resolution: Issue has been resolved
 
-We apologize for any inconvenience. Our team is conducting a thorough review 
+We apologize for any inconvenience. Our team is conducting a thorough review
 to prevent similar issues in the future.
 
 For questions: support@freeagentics.io
@@ -500,8 +500,8 @@ For questions: support@freeagentics.io
 
 ---
 
-**Last Updated**: January 2024  
-**Next Review**: April 2024  
+**Last Updated**: January 2024
+**Next Review**: April 2024
 **Version**: 1.0
 
 **Remember**: In an emergency, stay calm, follow procedures, and communicate clearly. When in doubt, escalate immediately.

@@ -24,22 +24,22 @@ jobs:
     timeout-minutes: 10
     steps:
       - uses: actions/checkout@v4
-      
+
       - name: "Setup Python"
         uses: actions/setup-python@v5
         with:
           python-version: ${{ env.PYTHON_VERSION }}
-      
+
       - name: "Install dependencies"
         run: |
           python -m pip install --upgrade pip
           pip install ruff mypy
-      
+
       - name: "Run Ruff"
         run: |
           ruff check .
           ruff format --check .
-      
+
       - name: "Run MyPy"
         run: mypy . --ignore-missing-imports --exclude 'web|tests|scripts'
 
@@ -61,7 +61,7 @@ jobs:
           --health-retries 5
         ports:
           - 5432:5432
-      
+
       redis:
         image: redis:7
         options: >-
@@ -71,29 +71,29 @@ jobs:
           --health-retries 5
         ports:
           - 6379:6379
-    
+
     steps:
       - uses: actions/checkout@v4
-      
+
       - name: "Setup Python"
         uses: actions/setup-python@v5
         with:
           python-version: ${{ env.PYTHON_VERSION }}
-      
+
       - name: "Install dependencies"
         run: |
           python -m pip install --upgrade pip
           pip install -r requirements-core.txt
           pip install -r requirements-dev.txt
           pip install -e .
-      
+
       - name: "Run tests"
         env:
           DATABASE_URL: postgresql://postgres:testpass@localhost:5432/freeagentics_test
           REDIS_URL: redis://localhost:6379
         run: |
           pytest tests/ -v --cov=. --cov-report=xml --cov-report=term
-      
+
       - name: "Check coverage"
         run: |
           coverage report --fail-under=${{ env.MIN_COVERAGE }}
@@ -105,28 +105,28 @@ jobs:
     timeout-minutes: 10
     steps:
       - uses: actions/checkout@v4
-      
+
       - name: "Setup Node.js"
         uses: actions/setup-node@v4
         with:
           node-version: ${{ env.NODE_VERSION }}
           cache: 'npm'
           cache-dependency-path: web/package-lock.json
-      
+
       - name: "Install dependencies"
         working-directory: ./web
         run: npm ci
-      
+
       - name: "Lint & Type check"
         working-directory: ./web
         run: |
           npm run lint
           npm run type-check
-      
+
       - name: "Run tests"
         working-directory: ./web
         run: npm test
-      
+
       - name: "Build"
         working-directory: ./web
         run: npm run build
@@ -138,17 +138,17 @@ jobs:
     timeout-minutes: 10
     steps:
       - uses: actions/checkout@v4
-      
+
       - name: "Setup Python"
         uses: actions/setup-python@v5
         with:
           python-version: ${{ env.PYTHON_VERSION }}
-      
+
       - name: "Run Bandit"
         run: |
           pip install bandit
           bandit -r . -ll -i -x './web,./tests,./venv,./scripts' || true
-      
+
       - name: "Check dependencies"
         run: |
           pip install pip-audit
@@ -162,11 +162,11 @@ jobs:
     timeout-minutes: 15
     steps:
       - uses: actions/checkout@v4
-      
+
       - name: "Build Docker image"
         run: |
           docker build -t freeagentics:test .
-      
+
       - name: "Test image"
         run: |
           docker run --rm freeagentics:test --version || true

@@ -9,7 +9,7 @@ This document outlines a systematic cleanup process designed to be applied to ea
 ```bash
 # MANDATORY: Re-read all 1159 lines of CLAUDE.md before starting
 cat CLAUDE.md | head -50  # Review first 50 lines
-cat CLAUDE.md | tail -100  # Review last 100 lines  
+cat CLAUDE.md | tail -100  # Review last 100 lines
 grep -n "MANDATORY\|BLOCKING\|NON-NEGOTIABLE\|ZERO TOLERANCE" CLAUDE.md
 ```
 
@@ -48,7 +48,7 @@ cat > CLEANUP_PLAN_$(date +%Y%m%d_%H%M%S).md << 'EOF'
 
 ## Pre-Cleanup Assessment
 - [ ] Repository files count: [COUNT]
-- [ ] Documentation files count: [COUNT]  
+- [ ] Documentation files count: [COUNT]
 - [ ] Test files count: [COUNT]
 - [ ] Open TODO/FIXME items: [COUNT]
 - [ ] Current test coverage: [PERCENTAGE]
@@ -146,20 +146,20 @@ find . -type d -name "*util*" | head -10
 # Example consolidation commands (adjust based on findings)
 # Consolidate test directories
 if [ -d "test" ] && [ -d "tests" ]; then
-    mv test/* tests/ 2>/dev/null 
-    rmdir test 2>/dev/null 
+    mv test/* tests/ 2>/dev/null
+    rmdir test 2>/dev/null
 fi
 
 # Consolidate documentation directories
 if [ -d "doc" ] && [ -d "docs" ]; then
-    mv doc/* docs/ 2>/dev/null 
-    rmdir doc 2>/dev/null 
+    mv doc/* docs/ 2>/dev/null
+    rmdir doc 2>/dev/null
 fi
 
 # Consolidate utility directories
 if [ -d "util" ] && [ -d "utils" ]; then
-    mv util/* utils/ 2>/dev/null 
-    rmdir util 2>/dev/null 
+    mv util/* utils/ 2>/dev/null
+    rmdir util 2>/dev/null
 fi
 ```
 
@@ -171,7 +171,7 @@ fi
 autoflake --check --recursive --remove-all-unused-imports --remove-unused-variables . > unused_imports.txt
 
 # For TypeScript files (if applicable)
-npx ts-unused-exports tsconfig.json > unused_exports.txt 2>/dev/null 
+npx ts-unused-exports tsconfig.json > unused_exports.txt 2>/dev/null
 ```
 
 #### 2.3.2 Remove Unused Code
@@ -295,7 +295,7 @@ EOF
 mypy . --ignore-missing-imports --show-error-codes > type_errors.txt 2>&1
 
 # For TypeScript
-npx tsc --noEmit --skipLibCheck > ts_type_errors.txt 2>&1 
+npx tsc --noEmit --skipLibCheck > ts_type_errors.txt 2>&1
 
 # Count and categorize errors
 echo "=== Type Error Summary ===" > type_error_summary.txt
@@ -325,7 +325,7 @@ import sys
 def get_type_errors():
     """Get all type errors from mypy."""
     try:
-        result = subprocess.run(['mypy', '.', '--ignore-missing-imports'], 
+        result = subprocess.run(['mypy', '.', '--ignore-missing-imports'],
                               capture_output=True, text=True)
         return result.stdout.split('\n')
     except Exception as e:
@@ -366,7 +366,7 @@ pip install pre-commit
 pre-commit install
 
 # Run all hooks on all files
-pre-commit run --all-files > precommit_results.txt 2>&1 
+pre-commit run --all-files > precommit_results.txt 2>&1
 
 # Analyze results
 echo "=== Pre-commit Hook Results ===" > precommit_analysis.txt
@@ -390,26 +390,26 @@ fi
 fix_precommit_issues() {
     local max_attempts=10
     local attempt=1
-    
+
     while [ $attempt -le $max_attempts ]; do
         echo "=== Pre-commit Fix Attempt $attempt ==="
-        
+
         # Run pre-commit hooks
         if pre-commit run --all-files; then
             echo "✅ ALL PRE-COMMIT HOOKS PASSED"
             break
         else
             echo "❌ Pre-commit hooks failed - fixing issues..."
-            
+
             # Auto-fix common issues
             black . --check --diff || black .
             isort . --check-only --diff || isort .
             flake8 .   # Report issues but continue
-            
+
             attempt=$((attempt + 1))
         fi
     done
-    
+
     if [ $attempt -gt $max_attempts ]; then
         echo "❌ FAILED TO FIX PRE-COMMIT ISSUES AFTER $max_attempts ATTEMPTS"
         echo "MANUAL INTERVENTION REQUIRED"
@@ -427,28 +427,28 @@ fix_precommit_issues
 # The mandatory check sequence from CLAUDE.md
 run_complete_checks() {
     echo "=== Running Complete Check Suite ==="
-    
+
     # Format check
     echo "Running format check..."
     if ! make format; then
         echo "❌ FORMAT CHECK FAILED"
         return 1
     fi
-    
+
     # Test check
     echo "Running test check..."
     if ! make test; then
         echo "❌ TEST CHECK FAILED"
         return 1
     fi
-    
+
     # Lint check
     echo "Running lint check..."
     if ! make lint; then
         echo "❌ LINT CHECK FAILED"
         return 1
     fi
-    
+
     echo "✅ ALL CHECKS PASSED"
     return 0
 }
@@ -502,7 +502,7 @@ cat > RED_FLAGS_REPORT.md << 'EOF'
 EOF
 
 # Run security scan
-bandit -r . -f json -o security_scan.json 2>/dev/null 
+bandit -r . -f json -o security_scan.json 2>/dev/null
 if [ -f security_scan.json ]; then
     echo "Security scan completed. Review security_scan.json"
 fi
@@ -518,23 +518,23 @@ fi
 commit_cleanup_phase() {
     local phase="$1"
     local description="$2"
-    
+
     # Add changes
     git add -A
-    
+
     # Check if there are changes to commit
     if git diff --cached --quiet; then
         echo "No changes to commit for phase: $phase"
         return 0
     fi
-    
+
     # Create commit message following conventional format
     local commit_msg="cleanup: $description
 
 🤖 Generated with [Claude Code](https://claude.ai/code)
 
 Co-Authored-By: Claude <noreply@anthropic.com>"
-    
+
     # Commit with proper message
     if git commit -m "$commit_msg"; then
         echo "✅ Committed phase: $phase"
@@ -558,24 +558,24 @@ commit_cleanup_phase "automated-checks" "ensure all automated checks pass"
 # Final validation before push
 final_validation() {
     echo "=== Final Validation Before Push ==="
-    
+
     # Run all checks one final time
     if ! run_complete_checks; then
         echo "❌ FINAL VALIDATION FAILED - CANNOT PUSH"
         return 1
     fi
-    
+
     # Verify git status is clean
     if ! git diff --quiet && ! git diff --cached --quiet; then
         echo "❌ Git working directory is not clean"
         return 1
     fi
-    
+
     # Verify all commits follow conventional format
     if ! git log --oneline -10 | grep -E "^[a-f0-9]+ (feat|fix|docs|style|refactor|test|chore|cleanup):"; then
         echo "⚠️  Some commits may not follow conventional format"
     fi
-    
+
     echo "✅ Final validation passed"
     return 0
 }
@@ -606,26 +606,26 @@ create_commit_message() {
     local scope="$2"       # optional scope
     local description="$3" # brief description
     local body="$4"        # optional body
-    
+
     local message="$type"
     if [ -n "$scope" ]; then
         message="$message($scope)"
     fi
     message="$message: $description"
-    
+
     if [ -n "$body" ]; then
         message="$message
 
 $body"
     fi
-    
+
     # Add standard footer
     message="$message
 
 🤖 Generated with [Claude Code](https://claude.ai/code)
 
 Co-Authored-By: Claude <noreply@anthropic.com>"
-    
+
     echo "$message"
 }
 
@@ -651,7 +651,7 @@ echo "$commit_message"
 ### Post-Cleanup Validation
 - [ ] All automated checks pass: `make format && make test && make lint`
 - [ ] Zero failing tests
-- [ ] Zero linting issues  
+- [ ] Zero linting issues
 - [ ] Zero type errors
 - [ ] No obsolete files remain
 - [ ] Documentation consolidated and organized
@@ -663,9 +663,9 @@ echo "$commit_message"
 # Final quality gate check
 quality_gate_check() {
     local issues=0
-    
+
     echo "=== Quality Gate Verification ==="
-    
+
     # Check automated tests
     if ! make test > /dev/null 2>&1; then
         echo "❌ Tests failing"
@@ -673,7 +673,7 @@ quality_gate_check() {
     else
         echo "✅ All tests passing"
     fi
-    
+
     # Check linting
     if ! make lint > /dev/null 2>&1; then
         echo "❌ Linting issues found"
@@ -681,7 +681,7 @@ quality_gate_check() {
     else
         echo "✅ No linting issues"
     fi
-    
+
     # Check formatting
     if ! make format > /dev/null 2>&1; then
         echo "❌ Formatting issues found"
@@ -689,7 +689,7 @@ quality_gate_check() {
     else
         echo "✅ Code properly formatted"
     fi
-    
+
     # Check type errors
     if ! mypy . --ignore-missing-imports > /dev/null 2>&1; then
         echo "❌ Type errors found"
@@ -697,7 +697,7 @@ quality_gate_check() {
     else
         echo "✅ No type errors"
     fi
-    
+
     # Check git status
     if ! git diff --quiet && ! git diff --cached --quiet; then
         echo "❌ Git working directory not clean"
@@ -705,7 +705,7 @@ quality_gate_check() {
     else
         echo "✅ Git working directory clean"
     fi
-    
+
     if [ $issues -eq 0 ]; then
         echo "✅ ALL QUALITY GATES PASSED"
         return 0
@@ -726,13 +726,13 @@ quality_gate_check
 # Emergency rollback procedure
 emergency_rollback() {
     echo "=== EMERGENCY ROLLBACK PROCEDURE ==="
-    
+
     # Stash any uncommitted changes
     git stash push -m "Emergency stash before rollback"
-    
+
     # Reset to last known good state
     git reset --hard HEAD~1
-    
+
     # Verify system is working
     if run_complete_checks; then
         echo "✅ Rollback successful - system restored"
@@ -753,7 +753,7 @@ handle_check_failure() {
     echo "3. VERIFY THE FIX – re-run the failed command to confirm it's fixed"
     echo "4. CONTINUE ORIGINAL TASK – return to what you were doing"
     echo "5. NEVER IGNORE – There are NO warnings, only requirements"
-    
+
     exit 1  # Stop immediately as per protocol
 }
 ```

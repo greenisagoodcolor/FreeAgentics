@@ -371,7 +371,7 @@ class GMNSemanticValidator:
                 if from_type != "state" and from_type != "likelihood":
                     result.add_error(
                         "SemanticValidator",
-                        "Invalid generation: only states and " "likelihood nodes can generate",
+                        "Invalid generation: only states and likelihood nodes can generate",
                         edge_index=i,
                     )
 
@@ -727,7 +727,7 @@ class GMNMathematicalValidator:
                     if not np.allclose(col_sums, 1.0, atol=self.tolerance):
                         result.add_error(
                             "MathematicalValidator",
-                            f"Transition matrix columns must sum to 1, " f"got sums: {col_sums}",
+                            f"Transition matrix columns must sum to 1, got sums: {col_sums}",
                             node_name=node_name,
                         )
 

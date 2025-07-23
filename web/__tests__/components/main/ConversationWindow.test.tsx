@@ -31,13 +31,14 @@ describe("ConversationWindow", () => {
 
     // Default prompt processor state
     mockUsePromptProcessor.mockReturnValue({
-      processPrompt: mockProcessPrompt,
-      isProcessing: false,
+      submitPrompt: mockProcessPrompt,
+      isLoading: false,
       error: null,
-      results: null,
-      suggestions: [],
       agents: [],
-      knowledgeGraphUpdates: [],
+      knowledgeGraph: null,
+      suggestions: [],
+      retry: jest.fn(),
+      fetchSuggestions: jest.fn(),
       conversationId: "test-conv-id",
       iterationContext: null,
       resetConversation: jest.fn(),
@@ -225,17 +226,18 @@ describe("ConversationWindow", () => {
 
   it("shows suggestions from prompt processor", () => {
     mockUsePromptProcessor.mockReturnValue({
-      processPrompt: mockProcessPrompt,
-      isProcessing: false,
+      submitPrompt: mockProcessPrompt,
+      isLoading: false,
       error: null,
-      results: null,
+      agents: [],
+      knowledgeGraph: null,
       suggestions: [
         "Add obstacle detection to the agent",
         "Create a resource collector agent",
         "Implement path planning algorithm",
       ],
-      agents: [],
-      knowledgeGraphUpdates: [],
+      retry: jest.fn(),
+      fetchSuggestions: jest.fn(),
       conversationId: "test-conv-id",
       iterationContext: null,
       resetConversation: jest.fn(),
@@ -251,13 +253,14 @@ describe("ConversationWindow", () => {
   it("applies suggestion when clicked", async () => {
     const user = userEvent.setup();
     mockUsePromptProcessor.mockReturnValue({
-      processPrompt: mockProcessPrompt,
-      isProcessing: false,
+      submitPrompt: mockProcessPrompt,
+      isLoading: false,
       error: null,
-      results: null,
-      suggestions: ["Add obstacle detection"],
       agents: [],
-      knowledgeGraphUpdates: [],
+      knowledgeGraph: null,
+      suggestions: ["Add obstacle detection"],
+      retry: jest.fn(),
+      fetchSuggestions: jest.fn(),
       conversationId: "test-conv-id",
       iterationContext: null,
       resetConversation: jest.fn(),

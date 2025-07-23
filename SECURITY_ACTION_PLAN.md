@@ -15,7 +15,7 @@
 - `secrets/postgres_password.txt` - Contains database credentials
 - `secrets/redis_password.txt` - Contains cache credentials
 
-**Impact**: 
+**Impact**:
 - Secrets exposed in Git history
 - Potential unauthorized access to production systems
 - Compliance violations (GDPR, SOC2, etc.)
@@ -104,7 +104,7 @@ Our new `.trufflehog.yaml` configuration provides:
 The updated workflow provides:
 
 1. **Context-Aware Scanning**: Different strategies for push/PR/manual triggers
-2. **Comprehensive Reporting**: Detailed security summaries and action guidance  
+2. **Comprehensive Reporting**: Detailed security summaries and action guidance
 3. **Development Warnings**: Alerts about potential development secret issues
 4. **Zero-Tolerance Policy**: Treats any scan errors as security failures
 
@@ -125,7 +125,7 @@ Following industry standards:
 - Enhanced CI/CD security pipeline
 - Development secret validation
 
-### 🔄 In Progress  
+### 🔄 In Progress
 - Secret template creation
 - Environment variable migration
 - Developer documentation updates
@@ -140,7 +140,7 @@ Following industry standards:
 For security-related questions or incident reporting:
 
 - **Security Team**: [security@freeagentics.com]
-- **Emergency Contact**: [on-call@freeagentics.com]  
+- **Emergency Contact**: [on-call@freeagentics.com]
 - **Security Documentation**: `./secrets/README.md`
 - **TruffleHog Configuration**: `./.trufflehog.yaml`
 
@@ -153,7 +153,7 @@ For security-related questions or incident reporting:
 
 ---
 
-**Committee Approval**: Nemesis Security Committee  
-**Document Version**: 1.0  
-**Last Updated**: January 22, 2025  
+**Committee Approval**: Nemesis Security Committee
+**Document Version**: 1.0
+**Last Updated**: January 22, 2025
 **Next Review**: February 22, 2025

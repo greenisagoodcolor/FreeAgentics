@@ -277,12 +277,12 @@ alerts:
     metric: "agent_inference_time_ms"
     threshold: 100
     severity: "warning"
-    
+
   - name: "Low Coordination Efficiency"
     metric: "coordination_efficiency_percent"
     threshold: 50
     severity: "critical"
-    
+
   - name: "High Memory Usage"
     metric: "memory_per_agent_mb"
     threshold: 40
@@ -352,7 +352,7 @@ make test-performance
 
 # Run specific performance tests
 make test-performance-agents
-make test-performance-coordination  
+make test-performance-coordination
 make test-performance-memory
 ```
 

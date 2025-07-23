@@ -695,8 +695,7 @@ class RegressionAnalyzer:
             )
             if regression.source == MetricSource.AGENT:
                 recommendations.append(
-                    "Consider reducing agent belief state size or implementing "
-                    "state compression."
+                    "Consider reducing agent belief state size or implementing state compression."
                 )
 
         elif regression.regression_type == RegressionType.THROUGHPUT:
@@ -720,7 +719,7 @@ class RegressionAnalyzer:
 
         elif regression.source == MetricSource.WEBSOCKET:
             recommendations.append(
-                "WebSocket performance issue. Check message queue sizes " "and connection handling."
+                "WebSocket performance issue. Check message queue sizes and connection handling."
             )
 
         # Severity-based recommendations

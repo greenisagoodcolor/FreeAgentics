@@ -486,7 +486,7 @@ class AgentMemoryOptimizer:
         self.gc_tuner = get_gc_tuner()
 
         logger.info(
-            f"Initialized agent memory optimizer " f"(target: {target_memory_per_agent_mb}MB/agent)"
+            f"Initialized agent memory optimizer (target: {target_memory_per_agent_mb}MB/agent)"
         )
 
     def optimize_agent(self, agent: Any) -> OptimizedAgentMemory:

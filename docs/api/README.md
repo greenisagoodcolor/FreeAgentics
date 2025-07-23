@@ -77,7 +77,7 @@ FreeAgentics uses JWT tokens for authentication:
 import requests
 
 # Login
-response = requests.post('https://api.freeagentics.com/api/v1/login', 
+response = requests.post('https://api.freeagentics.com/api/v1/login',
                         json={'username': 'your_username', 'password': 'your_password'})
 tokens = response.json()
 access_token = tokens['access_token']
@@ -235,7 +235,7 @@ from freeagentics import FreeAgenticsClient
 
 async def process_batch(items):
     client = FreeAgenticsClient()
-    
+
     # Process items concurrently
     tasks = [
         client.inference.run_async(
@@ -245,7 +245,7 @@ async def process_batch(items):
         )
         for item in items
     ]
-    
+
     results = await asyncio.gather(*tasks)
     return results
 ```
@@ -266,7 +266,7 @@ async def process_batch(items):
 async def monitor_system():
     async with client.websocket() as ws:
         await ws.subscribe(['system_metrics', 'agent_status'])
-        
+
         async for message in ws:
             if message.type == 'system_metrics':
                 update_dashboard(message.data)
@@ -395,16 +395,16 @@ from unittest.mock import Mock, patch
 class TestFreeAgenticsIntegration(unittest.TestCase):
     def setUp(self):
         self.client = FreeAgenticsClient()
-    
+
     @patch('freeagentics.client.requests.post')
     def test_create_agent(self, mock_post):
         mock_post.return_value.json.return_value = {'id': 'test_agent'}
-        
+
         agent = self.client.agents.create(
             name='Test Agent',
             template='research_v2'
         )
-        
+
         self.assertEqual(agent['id'], 'test_agent')
 ```
 
@@ -415,19 +415,19 @@ class TestFreeAgenticsIntegration(unittest.TestCase):
 def test_full_inference_flow():
     client = FreeAgenticsClient()
     client.login('test_user', 'test_pass')
-    
+
     # Create agent
     agent = client.agents.create(
         name='Integration Test Agent',
         template='research_v2'
     )
-    
+
     # Run inference
     result = client.inference.run(
         agent_id=agent['id'],
         query='Test query'
     )
-    
+
     # Verify result
     assert result['status'] == 'processing'
 ```
@@ -480,22 +480,22 @@ async def coordinate_agents():
     # Create specialized agents
     analyst = client.agents.create(name='Analyst', template='analysis_v1')
     researcher = client.agents.create(name='Researcher', template='research_v2')
-    
+
     # Parallel processing
     analysis_task = client.inference.run_async(
         agent_id=analyst['id'],
         query='Analyze data trends'
     )
-    
+
     research_task = client.inference.run_async(
         agent_id=researcher['id'],
         query='Research market conditions'
     )
-    
+
     # Combine results
     analysis_result = await analysis_task
     research_result = await research_task
-    
+
     # Synthesize with coordinator agent
     coordinator = client.agents.create(name='Coordinator', template='synthesis_v1')
     final_result = await client.inference.run_async(
@@ -506,7 +506,7 @@ async def coordinate_agents():
             'research': research_result
         }
     )
-    
+
     return final_result
 ```
 

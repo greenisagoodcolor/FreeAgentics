@@ -26,7 +26,7 @@ send_alert() {
 
         curl -X POST -H 'Content-type: application/json' \
             --data "{\"text\":\"$emoji Redis Monitor: $message\"}" \
-            "$SLACK_WEBHOOK" 
+            "$SLACK_WEBHOOK"
     fi
 }
 

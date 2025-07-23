@@ -1,7 +1,7 @@
 # NEMESIS AUDIT: Performance Recovery Claims Analysis
 
-**Auditor**: Senior Performance Engineer (Adversarial Review)  
-**Date**: 2025-07-04  
+**Auditor**: Senior Performance Engineer (Adversarial Review)
+**Date**: 2025-07-04
 **Subject**: Critical examination of FreeAgentics "performance recovery" claims
 
 ---
@@ -152,7 +152,7 @@ To be fair, some improvements are real:
 
 ## Production Readiness Assessment
 
-**Their claim**: 85% production ready  
+**Their claim**: 85% production ready
 **Reality**: 25% production ready
 
 **Why**:
@@ -203,15 +203,15 @@ They couldn't get process pools working because their agent design requires shar
 
 This is a classic case of **performance theater** - impressive-sounding numbers backed by broken tests and theoretical calculations. The team has done some real optimization work, but buried it under layers of misleading claims and architectural band-aids.
 
-**Real achievement**: ~10x single-agent improvement  
-**Real capacity**: ~50 agents with degraded performance  
-**Real efficiency**: Still losing 70%+ to overhead  
+**Real achievement**: ~10x single-agent improvement
+**Real capacity**: ~50 agents with degraded performance
+**Real efficiency**: Still losing 70%+ to overhead
 **Real readiness**: Prototype, not production
 
 The junior developer tendency to declare victory while the building burns continues.
 
 ---
 
-_Nemesis Performance Audit Complete_  
-_Finding: Claims substantially overstated_  
+_Nemesis Performance Audit Complete_
+_Finding: Claims substantially overstated_
 _Recommendation: Return to drawing board_

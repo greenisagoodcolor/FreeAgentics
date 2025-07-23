@@ -173,7 +173,7 @@ check_redis() {
         "docker-compose -f '$PROJECT_ROOT/docker-compose.production.yml' exec -T redis redis-cli set test_key 'test_value' && docker-compose -f '$PROJECT_ROOT/docker-compose.production.yml' exec -T redis redis-cli get test_key | grep -q 'test_value'"
 
     # Cleanup test key
-    docker-compose -f "$PROJECT_ROOT/docker-compose.production.yml" exec -T redis redis-cli del test_key >/dev/null 2>&1 
+    docker-compose -f "$PROJECT_ROOT/docker-compose.production.yml" exec -T redis redis-cli del test_key >/dev/null 2>&1
 }
 
 # Security checks
@@ -326,7 +326,7 @@ check_load_balancer() {
         "false"
 
     # Cleanup cookies
-    rm -f /tmp/cookies1 2>/dev/null 
+    rm -f /tmp/cookies1 2>/dev/null
 }
 
 # Generate deployment report

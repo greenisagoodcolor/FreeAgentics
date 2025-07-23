@@ -165,7 +165,7 @@ curl -X PUT http://localhost:8000/api/v1/system/logging \
 async def compress_belief_state(agent_id: str):
     """Compress agent belief state to reduce memory"""
     agent = await get_agent(agent_id)
-    
+
     # Implement belief pruning
     if agent.belief_state.size > BELIEF_SIZE_LIMIT:
         # Keep only recent and high-value beliefs
@@ -174,7 +174,7 @@ async def compress_belief_state(agent_id: str):
             max_size=BELIEF_SIZE_LIMIT,
             strategy="recency_and_value"
         )
-    
+
     # Enable compression
     agent.belief_state = compress_beliefs(agent.belief_state)
     await save_agent(agent)
@@ -196,12 +196,12 @@ class CoordinationManager:
         """Detect coordination deadlocks using wait-for graph"""
         wait_graph = await self.build_wait_graph()
         cycles = find_cycles(wait_graph)
-        
+
         for cycle in cycles:
             # Break deadlock by timing out oldest coordination
             oldest = min(cycle, key=lambda c: c.start_time)
             await self.timeout_coordination(oldest.id)
-            
+
     async def coordinate_with_timeout(self, agents, timeout_ms=5000):
         """Coordination with automatic timeout"""
         try:
@@ -253,12 +253,12 @@ class AdaptiveCoalitionFormation:
         """Adaptively form coalitions based on current conditions"""
         # Start with optimal size
         ideal_size = self.calculate_ideal_size(objective)
-        
+
         # Try formation with backoff
         for attempt in range(3):
             try:
                 coalition = await self._try_form(
-                    agents[:ideal_size], 
+                    agents[:ideal_size],
                     objective,
                     timeout=5000 * (attempt + 1)
                 )
@@ -266,7 +266,7 @@ class AdaptiveCoalitionFormation:
             except CoalitionFormationError:
                 # Reduce size and retry
                 ideal_size = max(2, ideal_size - 1)
-                
+
         # Fallback to pairs
         return await self.form_pair_coalition(agents[:2], objective)
 ```
@@ -313,28 +313,28 @@ while true; do
     METRICS=$(curl -s http://localhost:8000/api/v1/monitoring/coordination/stats)
     SUCCESS_RATE=$(echo $METRICS | jq -r '.success_rate')
     TIMEOUT_RATE=$(echo $METRICS | jq -r '.timeout_rate')
-    
+
     # Check if intervention needed
     if (( $(echo "$SUCCESS_RATE < $SUCCESS_THRESHOLD" | bc -l) )); then
         echo "[$(date)] Low success rate: ${SUCCESS_RATE}%, applying remediation"
-        
+
         # Clear stuck coordinations
         curl -X POST http://localhost:8000/api/v1/system/coordination/reset
-        
+
         # Reduce complexity
         curl -X PUT http://localhost:8000/api/v1/system/config \
           -H "Content-Type: application/json" \
           -d '{"max_coalition_size": 3, "coordination_timeout_ms": 10000}'
-        
+
     elif (( $(echo "$TIMEOUT_RATE > $TIMEOUT_THRESHOLD" | bc -l) )); then
         echo "[$(date)] High timeout rate: ${TIMEOUT_RATE}%, increasing timeouts"
-        
+
         # Increase timeouts
         curl -X PUT http://localhost:8000/api/v1/system/config \
           -H "Content-Type: application/json" \
           -d '{"coordination_timeout_ms": 15000}'
     fi
-    
+
     sleep $CHECK_INTERVAL
 done
 ```
@@ -343,7 +343,7 @@ done
 ```sql
 -- Coordination performance analysis
 WITH coordination_stats AS (
-    SELECT 
+    SELECT
         date_trunc('minute', started_at) as minute,
         COUNT(*) as total,
         COUNT(CASE WHEN status = 'success' THEN 1 END) as successful,
@@ -355,7 +355,7 @@ WITH coordination_stats AS (
     WHERE started_at > NOW() - INTERVAL '1 hour'
     GROUP BY minute
 )
-SELECT 
+SELECT
     minute,
     total,
     ROUND(successful::numeric / total * 100, 2) as success_rate,
@@ -366,7 +366,7 @@ FROM coordination_stats
 ORDER BY minute DESC;
 
 -- Agent performance in coordinations
-SELECT 
+SELECT
     a.agent_id,
     a.agent_type,
     COUNT(DISTINCT ce.coordination_id) as coordinations,
@@ -394,18 +394,18 @@ async def test_coordination_under_load():
         {"agents": 50, "coalition_size": 5, "concurrent": 10},
         {"agents": 100, "coalition_size": 10, "concurrent": 20}
     ]
-    
+
     for scenario in test_scenarios:
         agents = await create_test_agents(scenario["agents"])
         tasks = []
-        
+
         for _ in range(scenario["concurrent"]):
             coalition = random.sample(agents, scenario["coalition_size"])
             tasks.append(coordinate_agents(coalition))
-        
+
         results = await asyncio.gather(*tasks, return_exceptions=True)
         success_rate = sum(1 for r in results if not isinstance(r, Exception)) / len(results)
-        
+
         print(f"Scenario {scenario}: Success rate {success_rate:.2%}")
 ```
 
@@ -416,18 +416,18 @@ COORDINATION_CONFIG = {
     # Size limits
     "max_coalition_size": 5,  # Keep small for reliability
     "min_coalition_size": 2,
-    
+
     # Timeouts
     "coordination_timeout_ms": 5000,
     "message_timeout_ms": 1000,
     "lock_timeout_ms": 30000,
-    
+
     # Performance
     "parallel_coordination": True,
     "max_concurrent_coordinations": 50,
     "belief_compression": True,
     "belief_size_limit_mb": 10,
-    
+
     # Resilience
     "retry_attempts": 3,
     "retry_backoff_ms": 1000,
@@ -449,7 +449,7 @@ COORDINATION_CONFIG = {
 
 # Remove old coordination records
 docker exec freeagentics-postgres psql -U postgres -d freeagentics -c "
-DELETE FROM coordination_events 
+DELETE FROM coordination_events
 WHERE started_at < NOW() - INTERVAL '7 days'
   AND status IN ('success', 'failed');"
 

@@ -69,7 +69,7 @@ For Docker environments:
 
 ```bash
 # Set your domain and email
-export DOMAIN="yourdomain.com"  
+export DOMAIN="yourdomain.com"
 export EMAIL="admin@yourdomain.com"
 
 # Run Docker-based setup

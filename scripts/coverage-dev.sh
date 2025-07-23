@@ -67,7 +67,7 @@ pytest \
     --tb=short \
     --maxfail=5 \
     -v \
-    ${@:-tests/unit} 
+    ${@:-tests/unit}
 
 # Generate reports
 print_status "Generating coverage reports..."

@@ -103,7 +103,7 @@ class TokenManager:
         self.access_token = None
         self.refresh_token = None
         self.token_expiry = None
-        
+
     def login(self):
         response = requests.post(
             "https://api.freeagentics.com/api/v1/login",
@@ -114,12 +114,12 @@ class TokenManager:
         self.refresh_token = data["refresh_token"]
         # Token expires in 15 minutes
         self.token_expiry = datetime.now() + timedelta(minutes=14)
-        
+
     def get_token(self):
         if not self.access_token or datetime.now() >= self.token_expiry:
             self.refresh()
         return self.access_token
-        
+
     def refresh(self):
         response = requests.post(
             "https://api.freeagentics.com/api/v1/refresh",
@@ -144,7 +144,7 @@ class SecureClient {
         // Generate unique client fingerprint
         this.fingerprint = crypto.randomBytes(32).toString('hex');
     }
-    
+
     async makeRequest(endpoint, options = {}) {
         const response = await fetch(`https://api.freeagentics.com/api/v1${endpoint}`, {
             ...options,
@@ -155,7 +155,7 @@ class SecureClient {
                 'X-Client-Version': '1.0.0'
             }
         });
-        
+
         return response.json();
     }
 }
@@ -330,7 +330,7 @@ async def monitor_agents():
             events=["agent_status", "metrics"],
             agents=[agent.id]
         )
-        
+
         # Handle messages
         async for message in ws:
             if message.type == "agent_status":
@@ -384,7 +384,7 @@ async function analyzeMarket(): Promise<void> {
                 temperature: 0.7
             }
         });
-        
+
         // Run inference
         const result: InferenceResult = await client.inference.run({
             agentId: agent.id,
@@ -394,10 +394,10 @@ async function analyzeMarket(): Promise<void> {
                 sectors: ['software', 'hardware']
             }
         });
-        
+
         console.log('Analysis:', result.analysis);
         console.log('Confidence:', result.confidence);
-        
+
     } catch (error) {
         if (error.code === 'RATE_LIMITED') {
             console.log(`Rate limited. Retry after ${error.retryAfter}s`);
@@ -438,20 +438,20 @@ import { WebSocketClient, Message } from '@freeagentics/sdk';
 
 class AgentMonitor {
     private ws: WebSocketClient;
-    
+
     constructor(private token: string) {
         this.ws = new WebSocketClient(token);
     }
-    
+
     async start(): Promise<void> {
         await this.ws.connect();
-        
+
         // Subscribe to events
         await this.ws.subscribe({
             events: ['agent_status', 'metrics'],
             agents: ['agent_123', 'agent_456']
         });
-        
+
         // Handle messages
         this.ws.on('message', (message: Message) => {
             switch (message.type) {
@@ -466,17 +466,17 @@ class AgentMonitor {
                     break;
             }
         });
-        
+
         // Handle connection events
         this.ws.on('disconnect', () => {
             console.log('Disconnected, attempting reconnect...');
         });
     }
-    
+
     private handleStatusChange(data: any): void {
         console.log(`Agent ${data.agent_id} changed to ${data.status}`);
     }
-    
+
     private updateDashboard(data: any): void {
         // Update UI with metrics
         document.getElementById('cpu-usage').textContent = `${data.cpu_usage}%`;
@@ -501,7 +501,7 @@ import (
     "context"
     "fmt"
     "log"
-    
+
     "github.com/freeagentics/go-sdk"
 )
 
@@ -514,9 +514,9 @@ func main() {
     if err != nil {
         log.Fatal(err)
     }
-    
+
     ctx := context.Background()
-    
+
     // Create agent
     agent, err := client.Agents.Create(ctx, &freeagentics.CreateAgentRequest{
         Name:     "Go Agent",
@@ -528,7 +528,7 @@ func main() {
     if err != nil {
         log.Fatal(err)
     }
-    
+
     // Run inference
     result, err := client.Inference.Run(ctx, &freeagentics.InferenceRequest{
         AgentID: agent.ID,
@@ -537,7 +537,7 @@ func main() {
     if err != nil {
         log.Fatal(err)
     }
-    
+
     fmt.Printf("Analysis: %s\n", result.Analysis)
 }
 ```
@@ -550,7 +550,7 @@ func runConcurrentInferences(client *freeagentics.Client, agentID string, querie
     ctx := context.Background()
     results := make(chan *freeagentics.InferenceResult, len(queries))
     errors := make(chan error, len(queries))
-    
+
     // Launch goroutines
     for _, query := range queries {
         go func(q string) {
@@ -565,7 +565,7 @@ func runConcurrentInferences(client *freeagentics.Client, agentID string, querie
             results <- result
         }(query)
     }
-    
+
     // Collect results
     for i := 0; i < len(queries); i++ {
         select {
@@ -605,7 +605,7 @@ public class Example {
             .password("your_password")
             .timeout(30)
             .build();
-        
+
         try {
             // Create agent
             Agent agent = client.agents().create(
@@ -615,7 +615,7 @@ public class Example {
                     .parameter("temperature", 0.7)
                     .build()
             );
-            
+
             // Run inference
             InferenceResult result = client.inference().run(
                 InferenceRequest.builder()
@@ -623,9 +623,9 @@ public class Example {
                     .query("Analyze Java ecosystem")
                     .build()
             );
-            
+
             System.out.println("Result: " + result.getAnalysis());
-            
+
         } catch (RateLimitException e) {
             System.err.println("Rate limited: " + e.getRetryAfter());
         } catch (FreeAgenticsException e) {
@@ -687,7 +687,7 @@ class Program
                 Timeout = TimeSpan.FromSeconds(30)
             }
         );
-        
+
         try
         {
             // Create agent
@@ -700,14 +700,14 @@ class Program
                     ["temperature"] = 0.7
                 }
             });
-            
+
             // Run inference
             var result = await client.Inference.RunAsync(new InferenceRequest
             {
                 AgentId = agent.Id,
                 Query = "Analyze .NET ecosystem"
             });
-            
+
             Console.WriteLine($"Analysis: {result.Analysis}");
             Console.WriteLine($"Confidence: {result.Confidence}");
         }
@@ -734,7 +734,7 @@ var activeAgents = await client.Agents
     .ToListAsync();
 
 // Process results
-var tasks = activeAgents.Select(agent => 
+var tasks = activeAgents.Select(agent =>
     client.Inference.RunAsync(new InferenceRequest
     {
         AgentId = agent.Id,
@@ -764,7 +764,7 @@ client = FreeAgenticsClient(
 @app.route('/analyze', methods=['POST'])
 async def analyze():
     data = request.json
-    
+
     try:
         # Use FreeAgentics for analysis
         result = await client.inference.run(
@@ -772,13 +772,13 @@ async def analyze():
             query=data['query'],
             context=data.get('context', {})
         )
-        
+
         return jsonify({
             'success': True,
             'analysis': result.analysis,
             'confidence': result.confidence
         })
-        
+
     except Exception as e:
         return jsonify({
             'success': False,
@@ -800,32 +800,32 @@ class InferenceProcessor {
             password: process.env.FREEAGENTICS_PASS
         });
     }
-    
+
     async start() {
         const connection = await amqp.connect('amqp://localhost');
         const channel = await connection.createChannel();
-        
+
         await channel.assertQueue('inference_requests');
-        
+
         // Process messages
         channel.consume('inference_requests', async (msg) => {
             const request = JSON.parse(msg.content.toString());
-            
+
             try {
                 // Run inference
                 const result = await this.client.inference.run({
                     agentId: request.agentId,
                     query: request.query
                 });
-                
+
                 // Publish result
-                await channel.publish('', 'inference_results', 
+                await channel.publish('', 'inference_results',
                     Buffer.from(JSON.stringify({
                         requestId: request.id,
                         result: result
                     }))
                 );
-                
+
                 channel.ack(msg);
             } catch (error) {
                 console.error('Processing error:', error);
@@ -848,52 +848,52 @@ class BatchProcessor:
     def __init__(self, client: FreeAgenticsClient):
         self.client = client
         self.progress = {}
-        
-    async def process_batch(self, 
-                          agent_id: str, 
-                          items: List[Dict], 
+
+    async def process_batch(self,
+                          agent_id: str,
+                          items: List[Dict],
                           concurrent_limit: int = 5):
         """Process items in batches with concurrency control."""
-        
+
         semaphore = asyncio.Semaphore(concurrent_limit)
         tasks = []
-        
+
         for i, item in enumerate(items):
             task = self._process_item(agent_id, item, i, semaphore)
             tasks.append(task)
-        
+
         results = await asyncio.gather(*tasks, return_exceptions=True)
-        
+
         return {
             'successful': sum(1 for r in results if not isinstance(r, Exception)),
             'failed': sum(1 for r in results if isinstance(r, Exception)),
             'results': results
         }
-    
-    async def _process_item(self, agent_id: str, item: Dict, 
+
+    async def _process_item(self, agent_id: str, item: Dict,
                           index: int, semaphore: asyncio.Semaphore):
         async with semaphore:
             try:
                 # Update progress
                 self.progress[index] = 'processing'
-                
+
                 result = await self.client.inference.run_async(
                     agent_id=agent_id,
                     query=item['query'],
                     context=item.get('context', {})
                 )
-                
+
                 self.progress[index] = 'completed'
                 return result
-                
+
             except Exception as e:
                 self.progress[index] = 'failed'
                 return e
-    
+
     def get_progress(self):
         """Get current batch processing progress."""
         total = len(self.progress)
-        completed = sum(1 for status in self.progress.values() 
+        completed = sum(1 for status in self.progress.values()
                        if status == 'completed')
         return {
             'total': total,
@@ -920,7 +920,7 @@ function verifySignature(payload: Buffer, signature: string, timestamp: string):
         .createHmac('sha256', WEBHOOK_SECRET)
         .update(message)
         .digest('hex');
-    
+
     return crypto.timingSafeEqual(
         Buffer.from(expected),
         Buffer.from(signature)
@@ -930,22 +930,22 @@ function verifySignature(payload: Buffer, signature: string, timestamp: string):
 app.post('/webhook', (req, res) => {
     const signature = req.headers['x-freeagentics-signature'] as string;
     const timestamp = req.headers['x-freeagentics-timestamp'] as string;
-    
+
     // Verify signature
     if (!verifySignature(req.body, signature, timestamp)) {
         return res.status(401).send('Invalid signature');
     }
-    
+
     // Check timestamp (prevent replay attacks)
     const requestTime = parseInt(timestamp);
     const currentTime = Math.floor(Date.now() / 1000);
     if (Math.abs(currentTime - requestTime) > 300) { // 5 minutes
         return res.status(401).send('Request too old');
     }
-    
+
     // Process webhook
     const event = JSON.parse(req.body.toString());
-    
+
     switch (event.event) {
         case 'agent.created':
             handleAgentCreated(event.data);
@@ -955,7 +955,7 @@ app.post('/webhook', (req, res) => {
             break;
         // ... handle other events
     }
-    
+
     res.status(200).send('OK');
 });
 ```
@@ -977,35 +977,35 @@ import time
 
 def robust_inference(client, agent_id, query, max_retries=3):
     """Run inference with automatic retry logic."""
-    
+
     for attempt in range(max_retries):
         try:
             return client.inference.run(
                 agent_id=agent_id,
                 query=query
             )
-            
+
         except RateLimitError as e:
             # Wait for rate limit to reset
             wait_time = e.retry_after or 60
             print(f"Rate limited. Waiting {wait_time}s...")
             time.sleep(wait_time)
-            
+
         except NetworkError as e:
             # Exponential backoff for network errors
             wait_time = 2 ** attempt
             print(f"Network error. Retrying in {wait_time}s...")
             time.sleep(wait_time)
-            
+
         except ValidationError as e:
             # Don't retry validation errors
             print(f"Validation error: {e}")
             raise
-            
+
         except AuthenticationError:
             # Re-authenticate and retry
             client.authenticate()
-            
+
     raise Exception(f"Failed after {max_retries} attempts")
 ```
 
@@ -1053,28 +1053,28 @@ Implement intelligent caching:
 class CachedClient {
     private cache = new Map<string, { data: any, expires: number }>();
     private client: FreeAgenticsClient;
-    
+
     constructor(client: FreeAgenticsClient) {
         this.client = client;
     }
-    
+
     async getAgent(agentId: string, ttl: number = 300000): Promise<Agent> {
         const cacheKey = `agent:${agentId}`;
         const cached = this.cache.get(cacheKey);
-        
+
         if (cached && cached.expires > Date.now()) {
             return cached.data;
         }
-        
+
         const agent = await this.client.agents.get(agentId);
         this.cache.set(cacheKey, {
             data: agent,
             expires: Date.now() + ttl
         });
-        
+
         return agent;
     }
-    
+
     invalidateAgent(agentId: string): void {
         this.cache.delete(`agent:${agentId}`);
     }
@@ -1102,19 +1102,19 @@ def log_performance(func):
     @wraps(func)
     def wrapper(*args, **kwargs):
         start_time = time.time()
-        
+
         try:
             result = func(*args, **kwargs)
             duration = time.time() - start_time
-            
+
             logger.info(f"{func.__name__} completed in {duration:.2f}s")
             return result
-            
+
         except Exception as e:
             duration = time.time() - start_time
             logger.error(f"{func.__name__} failed after {duration:.2f}s: {e}")
             raise
-    
+
     return wrapper
 
 @log_performance
@@ -1139,27 +1139,27 @@ class SecureCredentials:
         key = os.environ.get('ENCRYPTION_KEY')
         if not key:
             raise ValueError("ENCRYPTION_KEY not set")
-        
+
         self.cipher = Fernet(key.encode())
-    
+
     def encrypt_password(self, password: str) -> bytes:
         """Encrypt password for storage."""
         return self.cipher.encrypt(password.encode())
-    
+
     def decrypt_password(self, encrypted: bytes) -> str:
         """Decrypt password for use."""
         return self.cipher.decrypt(encrypted).decode()
-    
+
     @staticmethod
     def get_client():
         """Get client with secure credentials."""
         # Never hardcode credentials
         username = os.environ.get('FREEAGENTICS_USER')
         password = os.environ.get('FREEAGENTICS_PASS')
-        
+
         if not username or not password:
             raise ValueError("Credentials not configured")
-        
+
         return FreeAgenticsClient(
             username=username,
             password=password,
@@ -1178,7 +1178,7 @@ class ResearchAssistant:
     def __init__(self, client: FreeAgenticsClient):
         self.client = client
         self.agent_id = None
-        
+
     async def setup(self):
         """Create and configure research agent."""
         agent = await self.client.agents.create(
@@ -1191,14 +1191,14 @@ class ResearchAssistant:
         )
         self.agent_id = agent.id
         await self.client.agents.start(agent.id)
-        
+
     async def research_topic(self, topic: str, depth: str = "comprehensive"):
         """Research a topic with specified depth."""
-        
+
         # Build research query
         query = f"""
         Research the topic: {topic}
-        
+
         Depth: {depth}
         Include:
         - Current state and trends
@@ -1206,7 +1206,7 @@ class ResearchAssistant:
         - Future predictions
         - Relevant statistics
         """
-        
+
         result = await self.client.inference.run(
             agent_id=self.agent_id,
             query=query,
@@ -1214,7 +1214,7 @@ class ResearchAssistant:
                 "max_tokens": 4096 if depth == "comprehensive" else 2048
             }
         )
-        
+
         return {
             "topic": topic,
             "research": result.analysis,
@@ -1231,25 +1231,25 @@ class DataAnalysisPipeline {
         this.client = client;
         this.agents = {};
     }
-    
+
     async initialize() {
         // Create specialized agents
         this.agents.preprocessor = await this.client.agents.create({
             name: 'Data Preprocessor',
             template: 'data_processing_v1'
         });
-        
+
         this.agents.analyzer = await this.client.agents.create({
             name: 'Data Analyzer',
             template: 'analysis_v2'
         });
-        
+
         this.agents.reporter = await this.client.agents.create({
             name: 'Report Generator',
             template: 'reporting_v1'
         });
     }
-    
+
     async processDataStream(dataStream) {
         const pipeline = new Stream.Transform({
             objectMode: true,
@@ -1261,28 +1261,28 @@ class DataAnalysisPipeline {
                         query: 'Clean and normalize data',
                         context: { data: chunk }
                     });
-                    
+
                     // Analyze
                     const analysis = await this.client.inference.run({
                         agentId: this.agents.analyzer.id,
                         query: 'Analyze patterns and anomalies',
                         context: { data: preprocessed.result }
                     });
-                    
+
                     // Generate report
                     const report = await this.client.inference.run({
                         agentId: this.agents.reporter.id,
                         query: 'Generate executive summary',
                         context: { analysis: analysis.result }
                     });
-                    
+
                     callback(null, report.result);
                 } catch (error) {
                     callback(error);
                 }
             }.bind(this)
         });
-        
+
         return dataStream.pipe(pipeline);
     }
 }
@@ -1296,10 +1296,10 @@ class CollaborationSystem:
         self.client = client
         self.agents = {}
         self.knowledge_base = {}
-        
+
     async def create_team(self, team_config):
         """Create a team of specialized agents."""
-        
+
         for role, config in team_config.items():
             agent = await self.client.agents.create(
                 name=f"{role} Agent",
@@ -1308,16 +1308,16 @@ class CollaborationSystem:
                 gmn_spec=config.get('gmn_spec')
             )
             self.agents[role] = agent
-            
+
     async def collaborative_task(self, task_description):
         """Execute task using multiple agents collaboratively."""
-        
+
         # Phase 1: Understanding
         understanding = await self.client.inference.run(
             agent_id=self.agents['analyst'].id,
             query=f"Break down this task: {task_description}"
         )
-        
+
         # Phase 2: Planning
         plan = await self.client.inference.run(
             agent_id=self.agents['planner'].id,
@@ -1327,29 +1327,29 @@ class CollaborationSystem:
                 "available_agents": list(self.agents.keys())
             }
         )
-        
+
         # Phase 3: Parallel execution
         subtasks = plan.result.get('subtasks', [])
         results = await asyncio.gather(*[
             self._execute_subtask(subtask)
             for subtask in subtasks
         ])
-        
+
         # Phase 4: Integration
         final_result = await self.client.inference.run(
             agent_id=self.agents['integrator'].id,
             query="Integrate results into cohesive output",
             context={"subtask_results": results}
         )
-        
+
         return final_result
-        
+
     async def _execute_subtask(self, subtask):
         """Execute individual subtask with appropriate agent."""
-        
+
         agent_role = subtask.get('assigned_to')
         agent_id = self.agents[agent_role].id
-        
+
         return await self.client.inference.run(
             agent_id=agent_id,
             query=subtask['description'],
@@ -1426,10 +1426,10 @@ class ResilientClient {
             }
         };
     }
-    
+
     async makeRequest(endpoint, options) {
         const operation = retry.operation(this.config.retryOptions);
-        
+
         return new Promise((resolve, reject) => {
             operation.attempt(async (currentAttempt) => {
                 try {
@@ -1457,7 +1457,7 @@ class ResilientClient {
 # Stream large responses
 async def stream_large_inference(client, agent_id, query):
     """Handle large inference responses with streaming."""
-    
+
     # Use streaming endpoint
     async with client.inference.stream(
         agent_id=agent_id,
@@ -1465,19 +1465,19 @@ async def stream_large_inference(client, agent_id, query):
         stream=True
     ) as response:
         full_result = []
-        
+
         async for chunk in response:
             # Process chunk immediately
             process_chunk(chunk)
-            
+
             # Store if needed
             full_result.append(chunk)
-            
+
             # Free memory periodically
             if len(full_result) > 100:
                 await flush_to_storage(full_result)
                 full_result = []
-        
+
         return full_result
 ```
 
@@ -1494,16 +1494,16 @@ class DebugWebSocket {
         this.token = token;
         this.reconnectAttempts = 0;
     }
-    
+
     connect() {
         console.log(`Connecting to ${this.url}`);
-        
+
         this.ws = new WebSocket(`${this.url}?token=${this.token}`);
-        
+
         this.ws.onopen = () => {
             console.log('WebSocket connected');
             this.reconnectAttempts = 0;
-            
+
             // Send ping every 30 seconds
             this.pingInterval = setInterval(() => {
                 if (this.ws.readyState === WebSocket.OPEN) {
@@ -1511,7 +1511,7 @@ class DebugWebSocket {
                 }
             }, 30000);
         };
-        
+
         this.ws.onmessage = (event) => {
             console.log('Received:', event.data);
             try {
@@ -1521,15 +1521,15 @@ class DebugWebSocket {
                 console.error('Parse error:', e);
             }
         };
-        
+
         this.ws.onerror = (error) => {
             console.error('WebSocket error:', error);
         };
-        
+
         this.ws.onclose = (event) => {
             console.log(`WebSocket closed: ${event.code} - ${event.reason}`);
             clearInterval(this.pingInterval);
-            
+
             // Reconnect with backoff
             if (this.reconnectAttempts < 5) {
                 const delay = Math.min(1000 * Math.pow(2, this.reconnectAttempts), 30000);
@@ -1554,7 +1554,7 @@ import threading
 class ConnectionPool:
     _instance = None
     _lock = threading.Lock()
-    
+
     def __new__(cls):
         if cls._instance is None:
             with cls._lock:
@@ -1562,11 +1562,11 @@ class ConnectionPool:
                     cls._instance = super().__new__(cls)
                     cls._instance.initialize()
         return cls._instance
-    
+
     def initialize(self):
         self.clients = []
         self.executor = ThreadPoolExecutor(max_workers=10)
-        
+
         # Pre-create clients
         for _ in range(5):
             client = FreeAgenticsClient(
@@ -1574,11 +1574,11 @@ class ConnectionPool:
                 password=os.getenv('FREEAGENTICS_PASS')
             )
             self.clients.append(client)
-    
+
     def get_client(self):
         """Get available client from pool."""
         return self.clients.pop() if self.clients else self._create_client()
-    
+
     def return_client(self, client):
         """Return client to pool."""
         if len(self.clients) < 10:
@@ -1596,45 +1596,45 @@ class BatchOptimizer {
         this.queue = [];
         this.processing = false;
     }
-    
+
     async addRequest(request) {
         return new Promise((resolve, reject) => {
             this.queue.push({ request, resolve, reject });
-            
+
             if (!this.processing) {
                 this.processQueue();
             }
         });
     }
-    
+
     async processQueue() {
         this.processing = true;
-        
+
         while (this.queue.length > 0) {
             // Take batch
             const batch = this.queue.splice(0, this.batchSize);
-            
+
             try {
                 // Process batch in parallel
                 const results = await this.client.inference.batch(
                     batch.map(item => item.request),
                     { parallel: true }
                 );
-                
+
                 // Resolve promises
                 batch.forEach((item, index) => {
                     item.resolve(results[index]);
                 });
-                
+
             } catch (error) {
                 // Reject all in batch
                 batch.forEach(item => item.reject(error));
             }
-            
+
             // Brief pause between batches
             await new Promise(resolve => setTimeout(resolve, 100));
         }
-        
+
         this.processing = false;
     }
 }
@@ -1652,10 +1652,10 @@ from datetime import datetime
 class RequestLogger:
     def __init__(self, log_file='freeagentics_requests.log'):
         self.log_file = log_file
-        
+
     def log_request(self, method, endpoint, data, response, duration):
         """Log API request details."""
-        
+
         log_entry = {
             'timestamp': datetime.now().isoformat(),
             'method': method,
@@ -1666,7 +1666,7 @@ class RequestLogger:
             'duration_ms': duration * 1000,
             'success': response.status_code < 400
         }
-        
+
         # Log rate limit info
         if 'X-RateLimit-Remaining' in response.headers:
             log_entry['rate_limit'] = {
@@ -1674,7 +1674,7 @@ class RequestLogger:
                 'limit': response.headers.get('X-RateLimit-Limit'),
                 'reset': response.headers.get('X-RateLimit-Reset')
             }
-        
+
         with open(self.log_file, 'a') as f:
             f.write(json.dumps(log_entry) + '\n')
 ```
@@ -1685,30 +1685,30 @@ class RequestLogger:
 // Performance monitoring
 class PerformanceMonitor {
     private metrics: Map<string, number[]> = new Map();
-    
+
     recordMetric(name: string, value: number): void {
         if (!this.metrics.has(name)) {
             this.metrics.set(name, []);
         }
-        
+
         const values = this.metrics.get(name)!;
         values.push(value);
-        
+
         // Keep last 1000 values
         if (values.length > 1000) {
             values.shift();
         }
     }
-    
+
     getStats(name: string): object {
         const values = this.metrics.get(name) || [];
-        
+
         if (values.length === 0) {
             return { count: 0 };
         }
-        
+
         const sorted = [...values].sort((a, b) => a - b);
-        
+
         return {
             count: values.length,
             min: sorted[0],
@@ -1719,25 +1719,25 @@ class PerformanceMonitor {
             p99: sorted[Math.floor(values.length * 0.99)]
         };
     }
-    
+
     // Use with client
     async monitoredRequest(client: any, operation: string, fn: Function) {
         const start = Date.now();
-        
+
         try {
             const result = await fn();
             const duration = Date.now() - start;
-            
+
             this.recordMetric(`${operation}_duration`, duration);
             this.recordMetric(`${operation}_success`, 1);
-            
+
             return result;
         } catch (error) {
             const duration = Date.now() - start;
-            
+
             this.recordMetric(`${operation}_duration`, duration);
             this.recordMetric(`${operation}_error`, 1);
-            
+
             throw error;
         }
     }

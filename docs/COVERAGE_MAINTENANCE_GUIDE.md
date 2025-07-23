@@ -201,7 +201,7 @@ RECOMMENDATIONS:
 - name: Run Coverage
   run: |
     ./scripts/coverage-ci.sh
-    
+
 - name: Upload Coverage Reports
   uses: actions/upload-artifact@v3
   with:

@@ -31,9 +31,9 @@ class TestSecurityPaladinValidation:
         private_key_path = Path("auth/keys/jwt_private.pem")
         public_key_path = Path("auth/keys/jwt_public.pem")
 
-        assert not private_key_path.exists(), (
-            "CRITICAL: JWT private key found in repository! " "Remove immediately and rotate keys."
-        )
+        assert (
+            not private_key_path.exists()
+        ), "CRITICAL: JWT private key found in repository! Remove immediately and rotate keys."
 
         # Public key can exist but private key must not
         if public_key_path.exists():
@@ -47,9 +47,9 @@ class TestSecurityPaladinValidation:
         for filepath in files_to_check:
             if Path(filepath).exists():
                 content = Path(filepath).read_text()
-                assert "verify=False" not in content, (
-                    f"Found verify=False in {filepath} - " "JWT verification must be enabled!"
-                )
+                assert (
+                    "verify=False" not in content
+                ), f"Found verify=False in {filepath} - JWT verification must be enabled!"
                 assert (
                     'verify_signature": False' not in content
                 ), f"Found disabled signature verification in {filepath}"

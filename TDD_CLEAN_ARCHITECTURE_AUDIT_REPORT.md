@@ -166,10 +166,10 @@ from database.enhanced_connection_manager import get_enhanced_db_manager
    def test_agent_creation_with_valid_config():
        # Arrange
        config = AgentConfig(name="test", template="basic")
-       
+
        # Act
        agent = ActiveInferenceAgent(config)
-       
+
        # Assert
        assert agent.name == "test"
        assert agent.status == AgentStatus.PENDING
@@ -184,7 +184,7 @@ from database.enhanced_connection_manager import get_enhanced_db_manager
      /interfaces (ports)
    /application
      /use_cases
-     /services  
+     /services
    /infrastructure
      /api (adapters)
      /database (adapters)

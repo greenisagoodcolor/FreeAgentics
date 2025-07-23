@@ -420,9 +420,7 @@ class EnhancedMemoryProfiler:
                 peak_memory_mb=initial_memory,
             )
 
-            logger.info(
-                f"Registered agent {agent_id} with baseline memory" f" {initial_memory:.2f} MB"
-            )
+            logger.info(f"Registered agent {agent_id} with baseline memory {initial_memory:.2f} MB")
 
     def update_agent_memory(self, agent_id: str, agent_obj: Any):
         """Update memory tracking for an agent.
@@ -705,15 +703,13 @@ class EnhancedMemoryProfiler:
             if snap["tracemalloc"]:
                 tm = snap["tracemalloc"]
                 report.append(
-                    f"  Tracemalloc: {tm['current_mb']:.2f} MB current, "
-                    f"{tm['peak_mb']:.2f} MB peak"
+                    f"  Tracemalloc: {tm['current_mb']:.2f} MB current, {tm['peak_mb']:.2f} MB peak"
                 )
 
             if snap["memory_profiler"]:
                 mp = snap["memory_profiler"]
                 report.append(
-                    f"  Memory Profiler: {mp['rss_mb']:.2f} MB RSS, "
-                    f"{mp['percent']:.1f}% of total"
+                    f"  Memory Profiler: {mp['rss_mb']:.2f} MB RSS, {mp['percent']:.1f}% of total"
                 )
 
             if snap["pympler"]:

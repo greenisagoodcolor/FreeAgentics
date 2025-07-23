@@ -588,6 +588,6 @@ make support-bundle
 
 ---
 
-**Version**: v1.0.0-alpha  
-**Last Updated**: 2025-07-17  
+**Version**: v1.0.0-alpha
+**Last Updated**: 2025-07-17
 **Status**: ALPHA - Not for production use without careful evaluation

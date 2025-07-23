@@ -323,8 +323,7 @@ class MessageThroughputBenchmarks:
         for batch_size, throughput in results.items():
             improvement = (throughput / baseline - 1) * 100
             print(
-                f"  Batch size {batch_size}: {throughput:.1f} msg/s "
-                f"({improvement:+.1f}% vs single)"
+                f"  Batch size {batch_size}: {throughput:.1f} msg/s ({improvement:+.1f}% vs single)"
             )
 
     @pytest.mark.benchmark(group="message-throughput")
@@ -395,8 +394,7 @@ class MessageThroughputBenchmarks:
             f"({num_messages / linear_time:.1f} routes/sec)"
         )
         print(
-            f"  Hash lookup: {hash_time * 1000:.1f}ms "
-            f"({num_messages / hash_time:.1f} routes/sec)"
+            f"  Hash lookup: {hash_time * 1000:.1f}ms ({num_messages / hash_time:.1f} routes/sec)"
         )
         print(f"  Speedup: {linear_time / hash_time:.1f}x")
 
@@ -437,8 +435,8 @@ class MessageThroughputBenchmarks:
         list_time = time.perf_counter() - start
 
         print(f"\nQueue Performance Comparison ({num_messages} operations):")
-        print(f"  Queue: {queue_time * 1000:.1f}ms " f"({num_messages / queue_time:.1f} ops/sec)")
-        print(f"  Deque: {deque_time * 1000:.1f}ms " f"({num_messages / deque_time:.1f} ops/sec)")
+        print(f"  Queue: {queue_time * 1000:.1f}ms ({num_messages / queue_time:.1f} ops/sec)")
+        print(f"  Deque: {deque_time * 1000:.1f}ms ({num_messages / deque_time:.1f} ops/sec)")
         print(f"  List: {list_time * 1000:.1f}ms ({num_messages / list_time:.1f} ops/sec)")
 
 

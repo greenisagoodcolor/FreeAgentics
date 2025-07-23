@@ -18,9 +18,9 @@ docker exec freeagentics-postgres psql -U postgres -d freeagentics -c "SELECT 1;
 
 # Check connection count
 docker exec freeagentics-postgres psql -U postgres -d freeagentics -c "
-SELECT count(*), state, application_name 
-FROM pg_stat_activity 
-GROUP BY state, application_name 
+SELECT count(*), state, application_name
+FROM pg_stat_activity
+GROUP BY state, application_name
 ORDER BY count DESC;"
 ```
 
@@ -74,9 +74,9 @@ Database Connection Issues
 ```bash
 # Force close idle connections
 docker exec freeagentics-postgres psql -U postgres -d freeagentics -c "
-SELECT pg_terminate_backend(pid) 
-FROM pg_stat_activity 
-WHERE state = 'idle' 
+SELECT pg_terminate_backend(pid)
+FROM pg_stat_activity
+WHERE state = 'idle'
   AND state_change < NOW() - INTERVAL '5 minutes'
   AND application_name = 'freeagentics-api';"
 
@@ -106,8 +106,8 @@ curl -X PUT http://localhost:8000/api/v1/system/config \
 ```bash
 # Kill all non-essential connections
 docker exec freeagentics-postgres psql -U postgres -d freeagentics -c "
-SELECT pg_terminate_backend(pid) 
-FROM pg_stat_activity 
+SELECT pg_terminate_backend(pid)
+FROM pg_stat_activity
 WHERE pid <> pg_backend_pid()
   AND state IN ('idle', 'idle in transaction')
   AND query NOT LIKE '%pg_stat_activity%';"
@@ -122,7 +122,7 @@ docker exec freeagentics-postgres psql -U postgres -d freeagentics -c "VACUUM;"
 ```bash
 # Detailed connection analysis
 docker exec freeagentics-postgres psql -U postgres -d freeagentics -c "
-SELECT 
+SELECT
     application_name,
     client_addr,
     state,
@@ -131,13 +131,13 @@ SELECT
     wait_event_type,
     wait_event,
     query
-FROM pg_stat_activity 
+FROM pg_stat_activity
 WHERE state != 'idle'
 ORDER BY query_start;"
 
 # Connection duration analysis
 docker exec freeagentics-postgres psql -U postgres -d freeagentics -c "
-SELECT 
+SELECT
     state,
     COUNT(*) as connections,
     AVG(NOW() - state_change) as avg_duration,
@@ -154,7 +154,7 @@ curl -s http://localhost:8000/api/v1/monitoring/database/leaks | jq
 ```bash
 # Find blocking queries
 docker exec freeagentics-postgres psql -U postgres -d freeagentics -c "
-SELECT 
+SELECT
     blocked_locks.pid AS blocked_pid,
     blocked_activity.usename AS blocked_user,
     blocking_locks.pid AS blocking_pid,
@@ -184,11 +184,11 @@ WHERE NOT blocked_locks.granted;"
 ```bash
 # Database resource usage
 docker exec freeagentics-postgres psql -U postgres -c "
-SELECT 
+SELECT
     setting AS max_connections,
     (SELECT count(*) FROM pg_stat_activity) AS current_connections,
     (SELECT count(*) FROM pg_stat_activity)::float / setting::float * 100 AS percentage_used
-FROM pg_settings 
+FROM pg_settings
 WHERE name = 'max_connections';"
 
 # Disk space
@@ -223,9 +223,9 @@ async def cleanup_db_connections():
     """Regular cleanup of idle connections"""
     async with get_db() as db:
         await db.execute("""
-            SELECT pg_terminate_backend(pid) 
-            FROM pg_stat_activity 
-            WHERE state = 'idle' 
+            SELECT pg_terminate_backend(pid)
+            FROM pg_stat_activity
+            WHERE state = 'idle'
             AND state_change < NOW() - INTERVAL '10 minutes'
             AND application_name = %s
         """, [APP_NAME])
@@ -250,7 +250,7 @@ async def tracked_db_connection():
         'start': datetime.now(),
         'stack': traceback.extract_stack()
     }
-    
+
     try:
         async with get_db() as db:
             yield db
@@ -371,10 +371,10 @@ CRITICAL_THRESHOLD=90
 
 # Get connection stats
 STATS=$(docker exec freeagentics-postgres psql -U postgres -d freeagentics -t -c "
-SELECT 
+SELECT
     setting::int as max_conn,
     (SELECT count(*) FROM pg_stat_activity)::int as current_conn
-FROM pg_settings 
+FROM pg_settings
 WHERE name = 'max_connections';")
 
 MAX_CONN=$(echo $STATS | awk '{print $1}')
@@ -405,7 +405,7 @@ fi
 ```sql
 -- Query to run periodically
 CREATE OR REPLACE VIEW connection_analysis AS
-SELECT 
+SELECT
     application_name,
     client_addr,
     state,
@@ -420,7 +420,7 @@ HAVING COUNT(*) > 1 OR MAX(EXTRACT(EPOCH FROM (NOW() - state_change))) > 300
 ORDER BY connection_count DESC, max_age_seconds DESC;
 
 -- Alert on potential leaks
-SELECT * FROM connection_analysis 
+SELECT * FROM connection_analysis
 WHERE state = 'idle' AND max_age_seconds > 600;
 ```
 
@@ -435,8 +435,8 @@ echo "[$(date)] Starting database connection recovery"
 
 # 1. Kill idle connections
 docker exec freeagentics-postgres psql -U postgres -d freeagentics -c "
-SELECT pg_terminate_backend(pid) 
-FROM pg_stat_activity 
+SELECT pg_terminate_backend(pid)
+FROM pg_stat_activity
 WHERE state = 'idle' AND state_change < NOW() - INTERVAL '2 minutes';"
 
 # 2. Reset application pools

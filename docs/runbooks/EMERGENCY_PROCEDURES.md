@@ -145,19 +145,19 @@ docker-compose start backend frontend
 ```bash
 # 1. Check current connections
 docker exec postgres psql -U freeagentics -c "
-SELECT count(*) as connections, 
-       usename, 
-       application_name, 
-       state 
-FROM pg_stat_activity 
-GROUP BY usename, application_name, state 
+SELECT count(*) as connections,
+       usename,
+       application_name,
+       state
+FROM pg_stat_activity
+GROUP BY usename, application_name, state
 ORDER BY connections DESC;"
 
 # 2. Kill idle connections
 docker exec postgres psql -U freeagentics -c "
-SELECT pg_terminate_backend(pid) 
-FROM pg_stat_activity 
-WHERE state = 'idle' 
+SELECT pg_terminate_backend(pid)
+FROM pg_stat_activity
+WHERE state = 'idle'
 AND query_start < now() - interval '5 minutes';"
 
 # 3. Restart application if needed
@@ -183,9 +183,9 @@ grep -r "failed.*login" logs/
 
 # 4. Check for unauthorized access
 docker exec postgres psql -U freeagentics -c "
-SELECT * FROM auth_logs 
-WHERE success = false 
-AND created_at > now() - interval '24 hours' 
+SELECT * FROM auth_logs
+WHERE success = false
+AND created_at > now() - interval '24 hours'
 ORDER BY created_at DESC;"
 
 # 5. Contact security team immediately

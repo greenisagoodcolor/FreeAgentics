@@ -61,7 +61,7 @@ Primary Database:
   - vCPUs: 8
   - Memory: 64 GB
   - Storage: 1 TB GP3 SSD (10,000 IOPS)
-  
+
 Read Replicas (2):
   - Instance Type: r5.xlarge
   - vCPUs: 4
@@ -130,7 +130,7 @@ Internet
 Public Subnet A (us-east-1a):
   - CIDR: 10.0.1.0/24
   - Purpose: Load Balancers, NAT Gateways
-  
+
 Public Subnet B (us-east-1b):
   - CIDR: 10.0.2.0/24
   - Purpose: Load Balancers, NAT Gateways
@@ -141,15 +141,15 @@ Public Subnet B (us-east-1b):
 Private App Subnet A (us-east-1a):
   - CIDR: 10.0.10.0/24
   - Purpose: Application Servers
-  
+
 Private App Subnet B (us-east-1b):
   - CIDR: 10.0.11.0/24
   - Purpose: Application Servers
-  
+
 Private Data Subnet A (us-east-1a):
   - CIDR: 10.0.20.0/24
   - Purpose: Database Primary
-  
+
 Private Data Subnet B (us-east-1b):
   - CIDR: 10.0.21.0/24
   - Purpose: Database Replicas
@@ -162,7 +162,7 @@ Private Data Subnet B (us-east-1b):
 Inbound Rules:
   - Port 80 (HTTP) from 0.0.0.0/0
   - Port 443 (HTTPS) from 0.0.0.0/0
-  
+
 Outbound Rules:
   - Port 8000 to App Security Group
 ```
@@ -172,7 +172,7 @@ Outbound Rules:
 Inbound Rules:
   - Port 8000 from Load Balancer SG
   - Port 22 from Bastion SG
-  
+
 Outbound Rules:
   - Port 5432 to Database SG
   - Port 6379 to Redis SG
@@ -184,7 +184,7 @@ Outbound Rules:
 Inbound Rules:
   - Port 5432 from App SG
   - Port 22 from Bastion SG
-  
+
 Outbound Rules:
   - None (Restricted)
 ```
@@ -193,7 +193,7 @@ Outbound Rules:
 ```yaml
 Inbound Rules:
   - Port 6379 from App SG
-  
+
 Outbound Rules:
   - None (Restricted)
 ```
@@ -229,7 +229,7 @@ global
     chroot /var/lib/haproxy
     maxconn 4000
     tune.ssl.default-dh-param 2048
-    
+
 defaults
     mode http
     log global
@@ -238,54 +238,54 @@ defaults
     timeout connect 5000ms
     timeout client 50000ms
     timeout server 50000ms
-    
+
 frontend https_front
     bind *:443 ssl crt /etc/ssl/certs/freeagentics.pem
     redirect scheme https if !{ ssl_fc }
-    
+
     # Security headers
     http-response set-header Strict-Transport-Security "max-age=63072000"
     http-response set-header X-Frame-Options "DENY"
     http-response set-header X-Content-Type-Options "nosniff"
-    
+
     # Rate limiting
     stick-table type ip size 100k expire 30s store http_req_rate(10s)
     http-request track-sc0 src
     http-request deny if { sc_http_req_rate(0) gt 100 }
-    
+
     # ACLs
     acl is_api path_beg /api /v1
     acl is_websocket hdr(Upgrade) -i WebSocket
-    
+
     # Use backends
     use_backend websocket_back if is_websocket
     use_backend api_back if is_api
     default_backend web_back
-    
+
 backend api_back
     balance roundrobin
     option httpchk GET /health
-    
+
     # Sticky sessions for stateful operations
     cookie SERVERID insert indirect nocache
-    
+
     server api1 10.0.10.10:8000 check cookie api1
     server api2 10.0.10.11:8000 check cookie api2
     server api3 10.0.11.10:8000 check cookie api3
-    
+
 backend websocket_back
     balance source
     option http-server-close
     option forceclose
-    
+
     server ws1 10.0.10.10:8000 check
     server ws2 10.0.10.11:8000 check
     server ws3 10.0.11.10:8000 check
-    
+
 backend web_back
     balance roundrobin
     option httpchk GET /
-    
+
     server web1 10.0.10.20:3000 check
     server web2 10.0.10.21:3000 check
 ```
@@ -298,7 +298,7 @@ upstream api_backend {
     server 10.0.10.10:8000 max_fails=3 fail_timeout=30s;
     server 10.0.10.11:8000 max_fails=3 fail_timeout=30s;
     server 10.0.11.10:8000 max_fails=3 fail_timeout=30s;
-    
+
     keepalive 32;
 }
 
@@ -316,51 +316,51 @@ limit_req_zone $binary_remote_addr zone=auth_limit:10m rate=20r/m;
 server {
     listen 443 ssl http2;
     server_name api.freeagentics.com;
-    
+
     ssl_certificate /etc/nginx/ssl/cert.pem;
     ssl_certificate_key /etc/nginx/ssl/key.pem;
-    
+
     # SSL configuration
     ssl_protocols TLSv1.2 TLSv1.3;
     ssl_ciphers HIGH:!aNULL:!MD5;
     ssl_prefer_server_ciphers on;
     ssl_session_cache shared:SSL:10m;
     ssl_session_timeout 10m;
-    
+
     # Security headers
     add_header Strict-Transport-Security "max-age=31536000; includeSubDomains" always;
     add_header X-Frame-Options "DENY" always;
     add_header X-Content-Type-Options "nosniff" always;
     add_header X-XSS-Protection "1; mode=block" always;
     add_header Referrer-Policy "strict-origin-when-cross-origin" always;
-    
+
     # API endpoints
     location /api/ {
         limit_req zone=api_limit burst=20 nodelay;
-        
+
         proxy_pass http://api_backend;
         proxy_http_version 1.1;
         proxy_set_header Connection "";
-        
+
         proxy_set_header Host $host;
         proxy_set_header X-Real-IP $remote_addr;
         proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
         proxy_set_header X-Forwarded-Proto $scheme;
-        
+
         # Timeouts
         proxy_connect_timeout 10s;
         proxy_send_timeout 30s;
         proxy_read_timeout 30s;
     }
-    
+
     # Auth endpoints (stricter rate limiting)
     location /api/v1/auth/ {
         limit_req zone=auth_limit burst=5 nodelay;
-        
+
         proxy_pass http://api_backend;
         # ... (same proxy settings)
     }
-    
+
     # WebSocket endpoints
     location /ws/ {
         proxy_pass http://websocket_backend;
@@ -370,13 +370,13 @@ server {
         proxy_set_header Host $host;
         proxy_set_header X-Real-IP $remote_addr;
         proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
-        
+
         # WebSocket timeouts
         proxy_connect_timeout 7d;
         proxy_send_timeout 7d;
         proxy_read_timeout 7d;
     }
-    
+
     # Health check endpoint (no rate limiting)
     location /health {
         proxy_pass http://api_backend;
@@ -419,7 +419,7 @@ TargetGroup:
     HealthyThresholdCount: 3
     UnhealthyThresholdCount: 2
     TargetType: ip
-    
+
 HTTPSListener:
   Type: AWS::ElasticLoadBalancingV2::Listener
   Properties:
@@ -445,14 +445,14 @@ Page Rules:
       - SSL: Full (Strict)
       - Cache Level: Bypass
       - Security Level: High
-      
+
   - URL: app.freeagentics.com/*
     Settings:
       - SSL: Full (Strict)
       - Cache Level: Standard
       - Browser Cache TTL: 4 hours
       - Edge Cache TTL: 1 hour
-      
+
   - URL: *.freeagentics.com/static/*
     Settings:
       - Cache Level: Cache Everything
@@ -463,11 +463,11 @@ Firewall Rules:
   - Name: Block Bad Bots
     Expression: (cf.client.bot) and not (cf.verified_bot)
     Action: Block
-    
+
   - Name: Rate Limit API
     Expression: (http.request.uri.path contains "/api/")
     Action: Rate Limit (100 requests per minute)
-    
+
   - Name: Challenge Suspicious
     Expression: (cf.threat_score gt 30)
     Action: Challenge
@@ -490,7 +490,7 @@ CloudFrontDistribution:
     DistributionConfig:
       Enabled: true
       Comment: FreeAgentics CDN
-      
+
       Origins:
         - Id: APIOrigin
           DomainName: !GetAtt ApplicationLoadBalancer.DNSName
@@ -498,12 +498,12 @@ CloudFrontDistribution:
             HTTPPort: 80
             HTTPSPort: 443
             OriginProtocolPolicy: https-only
-            
+
         - Id: S3Origin
           DomainName: !GetAtt StaticBucket.RegionalDomainName
           S3OriginConfig:
             OriginAccessIdentity: !Sub origin-access-identity/cloudfront/${CloudFrontOAI}
-      
+
       DefaultCacheBehavior:
         TargetOriginId: APIOrigin
         ViewerProtocolPolicy: redirect-to-https
@@ -528,7 +528,7 @@ CloudFrontDistribution:
             - Referer
           Cookies:
             Forward: all
-            
+
       CacheBehaviors:
         - PathPattern: /static/*
           TargetOriginId: S3Origin
@@ -542,7 +542,7 @@ CloudFrontDistribution:
           Compress: true
           DefaultTTL: 86400
           MaxTTL: 31536000
-          
+
         - PathPattern: /ws/*
           TargetOriginId: APIOrigin
           ViewerProtocolPolicy: https-only
@@ -562,9 +562,9 @@ CloudFrontDistribution:
               - Sec-WebSocket-Version
               - Sec-WebSocket-Protocol
               - Sec-WebSocket-Accept
-          
+
       WebACLId: !Ref WebACL
-      
+
       ViewerCertificate:
         AcmCertificateArn: !Ref SSLCertificate
         SslSupportMethod: sni-only
@@ -584,7 +584,7 @@ Auto Scaling Configuration:
     - CPU Utilization < 30% for 10 minutes → Remove 1 instance
     - Request count > 1000 req/s → Add 3 instances
     - Response time > 500ms for 5 minutes → Add 2 instances
-    
+
   Scaling Policy:
     - Min Instances: 3
     - Max Instances: 20
@@ -600,11 +600,11 @@ Read Replica Scaling:
   Triggers:
     - Read Query Load > 80% → Add read replica
     - Connection count > 80% of max → Add read replica
-    
+
   Limits:
     - Max Read Replicas: 5
     - Replication Lag Threshold: 1 second
-    
+
 Vertical Scaling Thresholds:
   - CPU > 80% sustained → Upgrade instance class
   - Memory > 90% → Upgrade instance class
@@ -618,7 +618,7 @@ Redis Cluster Scaling:
   Shard Addition Triggers:
     - Memory usage > 75% → Add shard
     - Network throughput > 80% → Add shard
-    
+
   Node Addition Triggers:
     - CPU > 70% → Add replica nodes
     - Connection count > 10000 → Add replica nodes
@@ -630,10 +630,10 @@ Redis Cluster Scaling:
 Instance Upgrade Path:
   Application Servers:
     - t3.medium → t3.large → t3.xlarge → c5.xlarge → c5.2xlarge
-    
+
   Database Servers:
     - db.t3.large → db.r5.xlarge → db.r5.2xlarge → db.r5.4xlarge
-    
+
   Cache Servers:
     - cache.t3.medium → cache.r6g.large → cache.r6g.xlarge → cache.r6g.2xlarge
 ```
@@ -646,12 +646,12 @@ Target Metrics:
     - p50: < 100ms
     - p95: < 300ms
     - p99: < 500ms
-    
+
   Throughput:
     - Minimum: 1000 req/s
     - Target: 5000 req/s
     - Peak: 10000 req/s
-    
+
   Concurrent Users:
     - Normal: 1000
     - Peak: 5000
@@ -668,13 +668,13 @@ Primary Region (us-east-1):
   - Primary database
   - Primary Redis cluster
   - Active traffic serving
-  
+
 Secondary Region (us-west-2):
   - Full application stack
   - Read replica database
   - Standby Redis cluster
   - Ready for failover
-  
+
 Database Replication:
   - Type: Asynchronous
   - Lag Target: < 1 second
@@ -715,23 +715,23 @@ Prometheus Servers:
     - Instance: t3.large
     - Storage: 500 GB
     - Retention: 30 days
-    
+
   Secondary:
     - Instance: t3.medium
     - Storage: 200 GB
     - Retention: 7 days
-    
+
 Scrape Configs:
   - job_name: 'api-servers'
     scrape_interval: 15s
     static_configs:
       - targets: ['api1:9090', 'api2:9090', 'api3:9090']
-      
+
   - job_name: 'database'
     scrape_interval: 30s
     static_configs:
       - targets: ['postgres-exporter:9187']
-      
+
   - job_name: 'redis'
     scrape_interval: 15s
     static_configs:
@@ -758,7 +758,7 @@ Critical Alerts:
   - Database Down: Immediate page
   - Disk > 90%: Immediate page
   - Security Breach: Immediate page
-  
+
 Warning Alerts:
   - CPU > 80%: Email + Slack
   - Memory > 85%: Email + Slack
@@ -776,25 +776,25 @@ Database Backups:
     - Frequency: Daily at 2 AM UTC
     - Retention: 7 days local, 30 days S3
     - Type: pg_dump with compression
-    
+
   Incremental Backup:
     - Frequency: Every 6 hours
     - Retention: 48 hours
     - Type: WAL archiving
-    
+
   Point-in-Time Recovery:
     - Available for: Last 7 days
     - RPO: 5 minutes
-    
+
 Application Data:
   Code Repositories:
     - Mirror to secondary Git server
     - Backup to S3 daily
-    
+
   User Uploads:
     - Real-time sync to S3
     - Cross-region replication enabled
-    
+
   Configuration:
     - Stored in version control
     - Encrypted backups to S3
@@ -806,23 +806,23 @@ Application Data:
 RTO/RPO Targets:
   - Recovery Time Objective (RTO): 1 hour
   - Recovery Point Objective (RPO): 15 minutes
-  
+
 DR Scenarios:
   1. Single Server Failure:
      - Detection: < 1 minute
      - Failover: Automatic via load balancer
      - Data Loss: None
-     
+
   2. Database Failure:
      - Detection: < 1 minute
      - Failover: 5-10 minutes to promote replica
      - Data Loss: < 1 minute
-     
+
   3. Region Failure:
      - Detection: < 5 minutes
      - Failover: 15-30 minutes to secondary region
      - Data Loss: < 5 minutes
-     
+
   4. Complete Infrastructure Loss:
      - Recovery: 2-4 hours from backups
      - Data Loss: < 1 hour

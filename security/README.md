@@ -211,12 +211,12 @@ actions:
     type: block_ip
     ip_addresses: ["{{infected_host_ip}}"]
     duration_hours: 24
-    
+
   - id: collect_evidence
     type: collect_forensics
     targets: ["{{infected_host}}"]
     data_types: ["memory", "processes", "network"]
-    
+
   - id: notify_team
     type: send_notification
     recipients: ["security@company.com"]

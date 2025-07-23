@@ -112,9 +112,7 @@ class OllamaProvider:
                             status = json.loads(line)
                             if status.get("status") == "error":
                                 logger.error(
-                                    f"Failed to pull model: {
-                                        status.get('error', 'Unknown error')
-                                    }"
+                                    f"Failed to pull model: {status.get('error', 'Unknown error')}"
                                 )
                                 return False
                         except json.JSONDecodeError:

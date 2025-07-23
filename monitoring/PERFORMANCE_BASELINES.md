@@ -391,6 +391,6 @@ This document establishes performance baselines for FreeAgentics production moni
 
 ---
 
-**Last Updated**: 2024-07-15  
-**Version**: 1.0  
+**Last Updated**: 2024-07-15
+**Version**: 1.0
 **Contact**: sre@freeagentics.com

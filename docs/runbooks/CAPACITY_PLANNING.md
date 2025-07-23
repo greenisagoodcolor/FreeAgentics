@@ -114,7 +114,7 @@ Resource Utilization:
   CPU: <30% for 30 minutes
   Memory: <50% for 30 minutes
   Network: <20% for 30 minutes
-  
+
 Performance Indicators:
   Response time: 95th percentile <200ms for 1 hour
   Error rate: <0.5% for 1 hour
@@ -131,12 +131,12 @@ Year 1:
   Users: 60 (current: 50)
   Agents: 600 (current: 500)
   Requests/sec: 120 (current: 100)
-  
+
 Year 2:
   Users: 72
   Agents: 720
   Requests/sec: 144
-  
+
 Year 3:
   Users: 86
   Agents: 860
@@ -149,12 +149,12 @@ Year 1:
   Users: 75
   Agents: 750
   Requests/sec: 150
-  
+
 Year 2:
   Users: 113
   Agents: 1125
   Requests/sec: 225
-  
+
 Year 3:
   Users: 169
   Agents: 1688
@@ -167,12 +167,12 @@ Year 1:
   Users: 100
   Agents: 1000
   Requests/sec: 200
-  
+
 Year 2:
   Users: 200
   Agents: 2000
   Requests/sec: 400
-  
+
 Year 3:
   Users: 400
   Agents: 4000
@@ -258,11 +258,11 @@ docker-compose up -d
 def calculate_backend_capacity(target_rps, current_rps_per_instance=50):
     """
     Calculate number of backend instances needed
-    
+
     Args:
         target_rps: Target requests per second
         current_rps_per_instance: Current capacity per instance
-    
+
     Returns:
         Number of instances needed (with 20% buffer)
     """
@@ -282,18 +282,18 @@ print(f"Required backend instances: {required_instances}")
 def calculate_db_capacity(num_agents, growth_factor=1.5):
     """
     Calculate database capacity requirements
-    
+
     Args:
         num_agents: Number of agents in system
         growth_factor: Growth buffer factor
-    
+
     Returns:
         Dictionary with resource requirements
     """
     base_storage_gb = num_agents * 0.001  # 1MB per agent
     base_memory_gb = max(4, num_agents * 0.002)  # 2MB per agent, min 4GB
     base_connections = max(20, num_agents * 0.1)  # 0.1 connections per agent
-    
+
     return {
         'storage_gb': base_storage_gb * growth_factor,
         'memory_gb': base_memory_gb * growth_factor,
@@ -312,11 +312,11 @@ print(f"Database requirements: {db_requirements}")
 def calculate_redis_capacity(concurrent_users, session_size_kb=100):
     """
     Calculate Redis memory requirements
-    
+
     Args:
         concurrent_users: Peak concurrent users
         session_size_kb: Average session data size in KB
-    
+
     Returns:
         Required memory in GB
     """
@@ -404,12 +404,12 @@ Results:
     95th: 450ms
     99th: 800ms
   Error Rate: 0.2%
-  
+
 Resource Usage:
   CPU: 65%
   Memory: 72%
   Network: 15%
-  
+
 Bottlenecks:
   - Database connection pool saturation at 85%
   - Memory allocation spikes during peak load

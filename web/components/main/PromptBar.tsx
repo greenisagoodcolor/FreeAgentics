@@ -16,13 +16,13 @@ export function PromptBar() {
   const [showSettings, setShowSettings] = useState(false);
   const textareaRef = useRef<HTMLTextAreaElement>(null);
 
-  const { processPrompt, isProcessing, error, iterationContext, conversationId } =
+  const { submitPrompt, isLoading, error, iterationContext, conversationId } =
     usePromptProcessor();
 
   const handleSubmit = async () => {
-    if (!prompt.trim() || isProcessing) return;
+    if (!prompt.trim() || isLoading) return;
 
-    await processPrompt(prompt.trim());
+    await submitPrompt(prompt.trim());
     setPrompt("");
     setIsExpanded(false);
   };
@@ -38,13 +38,13 @@ export function PromptBar() {
     <div className="flex items-center gap-2 p-2 h-full">
       {/* History snippets */}
       {conversationId &&
-        iterationContext?.previousPrompts &&
-        iterationContext.previousPrompts.length > 0 && (
+        iterationContext?.conversation_summary?.prompt_themes &&
+        iterationContext.conversation_summary.prompt_themes.length > 0 && (
           <ScrollArea className="flex-1 max-w-xs">
             <div className="flex gap-2 text-xs text-muted-foreground">
-              {iterationContext.previousPrompts.map((prevPrompt, idx) => (
+              {iterationContext.conversation_summary.prompt_themes.map((theme, idx) => (
                 <div key={idx} className="whitespace-nowrap">
-                  {prevPrompt}
+                  {theme}
                 </div>
               ))}
             </div>
@@ -61,7 +61,7 @@ export function PromptBar() {
           onFocus={() => setIsExpanded(true)}
           onBlur={() => !prompt && setIsExpanded(false)}
           placeholder="Enter your goal or prompt..."
-          disabled={isProcessing}
+          disabled={isLoading}
           className={cn(
             "resize-none transition-all duration-200 pr-20",
             isExpanded ? "h-20" : "h-10",
@@ -69,7 +69,7 @@ export function PromptBar() {
           )}
         />
 
-        {isProcessing && (
+        {isLoading && (
           <div className="absolute right-2 top-2 text-sm text-muted-foreground">Processing...</div>
         )}
       </div>
@@ -87,7 +87,7 @@ export function PromptBar() {
       {/* Error display */}
       {error && (
         <Alert variant="destructive" className="absolute top-full left-0 right-0 mt-2">
-          <AlertDescription>{error.message}</AlertDescription>
+          <AlertDescription>{error}</AlertDescription>
         </Alert>
       )}
 

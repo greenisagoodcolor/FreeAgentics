@@ -90,7 +90,7 @@ phase_1_research_planning() {
 
     # Extract key principles
     log_info "Extracting key mandatory principles..."
-    grep -n "MANDATORY\|BLOCKING\|NON-NEGOTIABLE\|ZERO TOLERANCE" CLAUDE.md > mandatory_principles.txt 
+    grep -n "MANDATORY\|BLOCKING\|NON-NEGOTIABLE\|ZERO TOLERANCE" CLAUDE.md > mandatory_principles.txt
 
     # Step 1.2: Repository state analysis
     log_info "Step 1.2: Analyzing repository state..."
@@ -152,32 +152,32 @@ phase_2_repository_cleanup() {
 
     # Remove build artifacts
     log_info "Removing build artifacts..."
-    rm -rf build/ dist/ *.egg-info/ .pytest_cache/ 
-    rm -rf node_modules/ .npm/ .yarn/ 
-    rm -rf .coverage htmlcov/ .nyc_output/ 
+    rm -rf build/ dist/ *.egg-info/ .pytest_cache/
+    rm -rf node_modules/ .npm/ .yarn/
+    rm -rf .coverage htmlcov/ .nyc_output/
 
     # Remove IDE files
     log_info "Removing IDE files..."
-    find . -name ".vscode" -type d -exec rm -rf {} + 
-    find . -name ".idea" -type d -exec rm -rf {} + 
-    find . -name "*.swp" -o -name "*.swo" -exec rm -f {} + 
+    find . -name ".vscode" -type d -exec rm -rf {} +
+    find . -name ".idea" -type d -exec rm -rf {} +
+    find . -name "*.swp" -o -name "*.swo" -exec rm -f {} +
 
     # Remove OS-specific files
     log_info "Removing OS-specific files..."
-    find . -name ".DS_Store" -exec rm -f {} + 
-    find . -name "Thumbs.db" -exec rm -f {} + 
+    find . -name ".DS_Store" -exec rm -f {} +
+    find . -name "Thumbs.db" -exec rm -f {} +
 
     # Remove temporary files
     log_info "Removing temporary files..."
-    find . -name "*.bak" -o -name "*.tmp" -o -name "*.old" -o -name "*~" -exec rm -f {} + 
+    find . -name "*.bak" -o -name "*.tmp" -o -name "*.old" -o -name "*~" -exec rm -f {} +
 
     # Step 2.2: Clean up test reports
     log_info "Step 2.2: Cleaning up test reports and artifacts..."
-    find . -name "test-results" -type d -exec rm -rf {} + 
-    find . -name "test-reports" -type d -exec rm -rf {} + 
-    find . -name "coverage-reports" -type d -exec rm -rf {} + 
-    find . -name "*.benchmark" -exec rm -f {} + 
-    find . -name "*.prof" -o -name "*.pstats" -exec rm -f {} + 
+    find . -name "test-results" -type d -exec rm -rf {} +
+    find . -name "test-reports" -type d -exec rm -rf {} +
+    find . -name "coverage-reports" -type d -exec rm -rf {} +
+    find . -name "*.benchmark" -exec rm -f {} +
+    find . -name "*.prof" -o -name "*.pstats" -exec rm -f {} +
 
     # Step 2.3: Directory consolidation
     log_info "Step 2.3: Consolidating directories..."
@@ -185,15 +185,15 @@ phase_2_repository_cleanup() {
     # Consolidate test directories
     if [ -d "test" ] && [ -d "tests" ]; then
         log_info "Consolidating test directories..."
-        mv test/* tests/ 2>/dev/null 
-        rmdir test 2>/dev/null 
+        mv test/* tests/ 2>/dev/null
+        rmdir test 2>/dev/null
     fi
 
     # Consolidate documentation directories
     if [ -d "doc" ] && [ -d "docs" ]; then
         log_info "Consolidating documentation directories..."
-        mv doc/* docs/ 2>/dev/null 
-        rmdir doc 2>/dev/null 
+        mv doc/* docs/ 2>/dev/null
+        rmdir doc 2>/dev/null
     fi
 
     # Step 2.4: Remove unused code
@@ -202,7 +202,7 @@ phase_2_repository_cleanup() {
     # Check if autoflake is available
     if command -v autoflake &> /dev/null; then
         log_info "Removing unused imports with autoflake..."
-        autoflake --in-place --recursive --remove-all-unused-imports --remove-unused-variables . 
+        autoflake --in-place --recursive --remove-all-unused-imports --remove-unused-variables .
     else
         log_warning "autoflake not available - skipping unused import removal"
     fi
@@ -228,7 +228,7 @@ phase_3_documentation_consolidation() {
     log_info "Step 3.1: Analyzing documentation structure..."
 
     # List all documentation files
-    find . -name "*.md" -o -name "*.rst" -o -name "*.txt" | grep -E "(README|GUIDE|DOC)" > doc_inventory.txt 
+    find . -name "*.md" -o -name "*.rst" -o -name "*.txt" | grep -E "(README|GUIDE|DOC)" > doc_inventory.txt
 
     # Count documentation files
     local doc_count=$(find . -name "*.md" -type f | wc -l)
@@ -246,7 +246,7 @@ phase_3_documentation_consolidation() {
             local line_count=$(wc -l < "$doc_file")
             if [ "$line_count" -lt 20 ]; then
                 log_info "Archiving small doc file: $doc_file ($line_count lines)"
-                mv "$doc_file" docs/archive/ 
+                mv "$doc_file" docs/archive/
             fi
         fi
     done
@@ -304,7 +304,7 @@ phase_4_code_quality_resolution() {
         log_info "Running mypy type checking..."
         if ! mypy . --ignore-missing-imports > type_errors.txt 2>&1; then
             log_warning "Type errors found - manual review required"
-            head -20 type_errors.txt 
+            head -20 type_errors.txt
         else
             log_success "No type errors found"
         fi
@@ -318,7 +318,7 @@ phase_4_code_quality_resolution() {
     # Check if pre-commit is available
     if command -v pre-commit &> /dev/null; then
         log_info "Installing pre-commit hooks..."
-        pre-commit install 
+        pre-commit install
 
         log_info "Running pre-commit hooks..."
         local max_attempts=5
@@ -335,10 +335,10 @@ phase_4_code_quality_resolution() {
 
                 # Auto-fix common issues
                 if command -v black &> /dev/null; then
-                    black . 
+                    black .
                 fi
                 if command -v isort &> /dev/null; then
-                    isort . 
+                    isort .
                 fi
 
                 attempt=$((attempt + 1))

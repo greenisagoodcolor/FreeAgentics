@@ -125,7 +125,7 @@ curl -s http://localhost:8000/api/v1/monitoring/websocket/stats | jq
    ```bash
    # Check agent lifecycle
    curl -s http://localhost:8000/api/v1/monitoring/agents/lifecycle | jq
-   
+
    # Force cleanup of orphaned agents
    curl -X POST http://localhost:8000/api/v1/system/agents/cleanup
    ```
@@ -136,7 +136,7 @@ curl -s http://localhost:8000/api/v1/monitoring/websocket/stats | jq
    curl -X PUT http://localhost:8000/api/v1/system/config \
      -H "Content-Type: application/json" \
      -d '{"belief_compression": true, "belief_size_limit_mb": 10}'
-   
+
    # Clear oversized beliefs
    curl -X POST http://localhost:8000/api/v1/system/agents/beliefs/compact
    ```
@@ -146,7 +146,7 @@ curl -s http://localhost:8000/api/v1/monitoring/websocket/stats | jq
    # Check connection count
    docker exec freeagentics-postgres psql -U postgres -d freeagentics \
      -c "SELECT count(*), state FROM pg_stat_activity GROUP BY state;"
-   
+
    # Reset connection pool
    curl -X POST http://localhost:8000/api/v1/system/db/pool/reset
    ```
@@ -155,10 +155,10 @@ curl -s http://localhost:8000/api/v1/monitoring/websocket/stats | jq
    ```bash
    # Check Redis memory
    docker exec freeagentics-redis redis-cli INFO memory | grep used_memory_human
-   
+
    # Analyze key patterns
    docker exec freeagentics-redis redis-cli --bigkeys
-   
+
    # Clean expired keys
    docker exec freeagentics-redis redis-cli EVAL "return redis.call('del', unpack(redis.call('keys', 'exp:*')))" 0
    ```
@@ -182,7 +182,7 @@ API_GC_THRESHOLD_MB=3072
 ### Monitoring Queries
 ```sql
 -- Track memory growth patterns
-SELECT 
+SELECT
     date_trunc('hour', timestamp) as hour,
     avg(memory_used_mb) as avg_memory,
     max(memory_used_mb) as max_memory,
@@ -194,7 +194,7 @@ GROUP BY hour
 ORDER BY hour DESC;
 
 -- Identify memory-intensive operations
-SELECT 
+SELECT
     operation_type,
     avg(memory_delta_mb) as avg_memory_increase,
     max(memory_delta_mb) as max_memory_increase,
@@ -218,14 +218,14 @@ CURRENT_MEMORY=$(docker stats --no-stream --format "{{.MemPerc}}" freeagentics-a
 
 if (( $(echo "$CURRENT_MEMORY > $MEMORY_THRESHOLD" | bc -l) )); then
     echo "[$(date)] High memory detected: ${CURRENT_MEMORY}%"
-    
+
     # Try conservative cleanup first
     curl -X POST http://localhost:8000/api/v1/system/cache/cleanup
     sleep 10
-    
+
     # Check again
     NEW_MEMORY=$(docker stats --no-stream --format "{{.MemPerc}}" freeagentics-api | sed 's/%//')
-    
+
     if (( $(echo "$NEW_MEMORY > $MEMORY_THRESHOLD" | bc -l) )); then
         echo "[$(date)] Memory still high after cleanup: ${NEW_MEMORY}%, performing restart"
         docker-compose restart api

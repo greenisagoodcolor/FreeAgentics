@@ -125,7 +125,7 @@ check_migration_status() {
 
         # Show revision details
         docker-compose -f "$COMPOSE_FILE" run --rm api \
-            alembic show "$CURRENT_REV" 2>/dev/null 
+            alembic show "$CURRENT_REV" 2>/dev/null
     fi
 
     # Check for pending migrations

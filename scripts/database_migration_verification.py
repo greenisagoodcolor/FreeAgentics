@@ -217,8 +217,8 @@ class DatabaseMigrationVerifier:
                     # Check installed extensions
                     cur.execute(
                         """
-                        SELECT extname, extversion 
-                        FROM pg_extension 
+                        SELECT extname, extversion
+                        FROM pg_extension
                         ORDER BY extname
                     """
                     )
@@ -412,8 +412,8 @@ class DatabaseMigrationVerifier:
 
                         cur.execute(
                             """
-                            SELECT table_name 
-                            FROM information_schema.tables 
+                            SELECT table_name
+                            FROM information_schema.tables
                             WHERE table_schema = 'public'
                             AND table_type = 'BASE TABLE'
                         """
@@ -536,8 +536,8 @@ class DatabaseMigrationVerifier:
                     try:
                         cur.execute(
                             """
-                            CREATE INDEX test_vector_idx ON test_vectors 
-                            USING ivfflat (embedding vector_cosine_ops) 
+                            CREATE INDEX test_vector_idx ON test_vectors
+                            USING ivfflat (embedding vector_cosine_ops)
                             WITH (lists = 1)
                         """
                         )
@@ -668,8 +668,8 @@ class DatabaseMigrationVerifier:
                     # Check for performance indexes
                     cur.execute(
                         """
-                        SELECT indexname, tablename 
-                        FROM pg_indexes 
+                        SELECT indexname, tablename
+                        FROM pg_indexes
                         WHERE schemaname = 'public'
                         AND indexname LIKE 'idx_%'
                         ORDER BY tablename, indexname
@@ -756,8 +756,8 @@ class DatabaseMigrationVerifier:
                     cur.execute(
                         """
                         SELECT EXISTS (
-                            SELECT FROM information_schema.tables 
-                            WHERE table_schema = 'public' 
+                            SELECT FROM information_schema.tables
+                            WHERE table_schema = 'public'
                             AND table_name = 'mfa_settings'
                         )
                     """

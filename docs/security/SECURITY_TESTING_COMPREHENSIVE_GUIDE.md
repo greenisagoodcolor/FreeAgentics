@@ -367,13 +367,13 @@ echo "DAST testing completed."
 ```python
 class SecurityTestResultAnalyzer:
     """Analyze and categorize security test results."""
-    
+
     def __init__(self):
         self.critical_issues = []
         self.high_issues = []
         self.medium_issues = []
         self.low_issues = []
-        
+
     def analyze_result(self, test_name: str, result: dict):
         """Analyze individual test result."""
         severity = self._calculate_severity(result)
@@ -385,7 +385,7 @@ class SecurityTestResultAnalyzer:
             'cve_references': result.get('cve_references', []),
             'owasp_category': result.get('owasp_category', '')
         }
-        
+
         if severity == 'critical':
             self.critical_issues.append(issue)
         elif severity == 'high':
@@ -394,16 +394,16 @@ class SecurityTestResultAnalyzer:
             self.medium_issues.append(issue)
         else:
             self.low_issues.append(issue)
-    
+
     def _calculate_severity(self, result: dict) -> str:
         """Calculate issue severity based on multiple factors."""
         # Implementation would include complex severity calculation
         pass
-    
+
     def generate_summary(self) -> dict:
         """Generate security test summary."""
         return {
-            'total_issues': len(self.critical_issues + self.high_issues + 
+            'total_issues': len(self.critical_issues + self.high_issues +
                               self.medium_issues + self.low_issues),
             'critical_count': len(self.critical_issues),
             'high_count': len(self.high_issues),
@@ -411,7 +411,7 @@ class SecurityTestResultAnalyzer:
             'low_count': len(self.low_issues),
             'security_score': self._calculate_security_score()
         }
-    
+
     def _calculate_security_score(self) -> int:
         """Calculate overall security score (0-100)."""
         # Weighted scoring based on issue severity
@@ -419,14 +419,14 @@ class SecurityTestResultAnalyzer:
         high_weight = 10
         medium_weight = 5
         low_weight = 1
-        
+
         total_deductions = (
             len(self.critical_issues) * critical_weight +
             len(self.high_issues) * high_weight +
             len(self.medium_issues) * medium_weight +
             len(self.low_issues) * low_weight
         )
-        
+
         return max(0, 100 - total_deductions)
 ```
 
@@ -494,7 +494,7 @@ security_gates:
   security_score_minimum: 70
   dependency_risk_threshold: medium
   container_vulnerability_threshold: high
-  
+
   blocking_conditions:
     - critical_vulnerabilities_present
     - security_score_below_threshold
@@ -508,10 +508,10 @@ security_gates:
 ```python
 class SecurityGateValidator:
     """Validate security gates in CI/CD pipeline."""
-    
+
     def __init__(self, config: dict):
         self.config = config
-        
+
     def validate_security_gates(self, test_results: dict) -> bool:
         """Validate all security gates."""
         gate_results = {
@@ -521,20 +521,20 @@ class SecurityGateValidator:
             'authorization_tests': self._check_authorization_tests(test_results),
             'dependency_security': self._check_dependency_security(test_results)
         }
-        
+
         failed_gates = [gate for gate, passed in gate_results.items() if not passed]
-        
+
         if failed_gates:
             self._log_gate_failures(failed_gates)
             return False
-            
+
         return True
-    
+
     def _check_critical_vulnerabilities(self, results: dict) -> bool:
         """Check for critical vulnerabilities."""
         critical_count = results.get('critical_vulnerability_count', 0)
         return critical_count <= self.config['critical_vulnerability_threshold']
-    
+
     def _check_security_score(self, results: dict) -> bool:
         """Check minimum security score."""
         score = results.get('security_score', 0)
@@ -558,7 +558,7 @@ groups:
         annotations:
           summary: Security tests are failing
           description: "{{ $value }} security tests have failed"
-      
+
       - alert: HighVulnerabilityCount
         expr: security_vulnerabilities{severity="high"} > 5
         for: 5m
@@ -567,7 +567,7 @@ groups:
         annotations:
           summary: High vulnerability count detected
           description: "{{ $value }} high-severity vulnerabilities found"
-      
+
       - alert: SecurityScoreBelow70
         expr: security_score < 70
         for: 1m
@@ -583,7 +583,7 @@ groups:
 ```python
 class SecurityAlertManager:
     """Manage security alerts and notifications."""
-    
+
     def __init__(self, config: dict):
         self.config = config
         self.alert_channels = {
@@ -591,11 +591,11 @@ class SecurityAlertManager:
             'email': EmailNotifier(config['email_settings']),
             'pagerduty': PagerDutyNotifier(config['pagerduty_key'])
         }
-    
+
     def send_security_alert(self, alert_type: str, severity: str, details: dict):
         """Send security alert through configured channels."""
         message = self._format_alert_message(alert_type, severity, details)
-        
+
         if severity == 'critical':
             # Send to all channels for critical alerts
             for channel in self.alert_channels.values():
@@ -667,15 +667,15 @@ class SecurityAlertManager:
 ```python
 class SecurityTestDebugger:
     """Debug security test failures."""
-    
+
     def __init__(self):
         self.debug_enabled = os.getenv('SECURITY_DEBUG', 'false').lower() == 'true'
-    
+
     def debug_auth_test_failure(self, test_name: str, error: Exception):
         """Debug authentication test failures."""
         if not self.debug_enabled:
             return
-            
+
         debug_info = {
             'test_name': test_name,
             'error_type': type(error).__name__,
@@ -687,10 +687,10 @@ class SecurityTestDebugger:
                 'JWT_SECRET_KEY': 'set' if os.getenv('JWT_SECRET_KEY') else 'not_set'
             }
         }
-        
+
         print(f"DEBUG: Auth test failure details:")
         print(json.dumps(debug_info, indent=2))
-    
+
     def debug_database_connection(self):
         """Debug database connection issues."""
         try:
@@ -701,7 +701,7 @@ class SecurityTestDebugger:
             print("DEBUG: Database connection successful")
         except Exception as e:
             print(f"DEBUG: Database connection failed: {e}")
-    
+
     def debug_redis_connection(self):
         """Debug Redis connection issues."""
         try:
@@ -756,22 +756,22 @@ ______________________________________________________________________
 ```python
 class TestAuthenticationSecurity:
     """Comprehensive authentication security tests."""
-    
+
     async def test_login_timing_attack_prevention(self, test_client):
         """Test that login timing doesn't leak information."""
-        
+
         # Valid user credentials
         valid_user = {
             "username": "testuser",
             "password": "SecurePassword123!"
         }
-        
+
         # Invalid user credentials
         invalid_user = {
             "username": "nonexistentuser",
             "password": "WrongPassword123!"
         }
-        
+
         # Measure timing for valid user with wrong password
         start_time = time.time()
         response1 = test_client.post("/api/v1/auth/login", json={
@@ -779,32 +779,32 @@ class TestAuthenticationSecurity:
             "password": "WrongPassword"
         })
         valid_user_time = time.time() - start_time
-        
+
         # Measure timing for invalid user
         start_time = time.time()
         response2 = test_client.post("/api/v1/auth/login", json=invalid_user)
         invalid_user_time = time.time() - start_time
-        
+
         # Both should fail
         assert response1.status_code == 401
         assert response2.status_code == 401
-        
+
         # Timing difference should be minimal (within 10ms)
         timing_difference = abs(valid_user_time - invalid_user_time)
         assert timing_difference < 0.01, f"Timing difference too large: {timing_difference}s"
-    
+
     async def test_account_lockout_protection(self, test_client):
         """Test account lockout after failed attempts."""
-        
+
         failed_credentials = {
             "username": "testuser",
             "password": "WrongPassword"
         }
-        
+
         # Attempt failed logins
         for attempt in range(6):  # Assuming 5 attempts trigger lockout
             response = test_client.post("/api/v1/auth/login", json=failed_credentials)
-            
+
             if attempt < 5:
                 assert response.status_code == 401
                 assert "Invalid credentials" in response.json()["detail"]
@@ -812,24 +812,24 @@ class TestAuthenticationSecurity:
                 # Account should be locked
                 assert response.status_code == 429
                 assert "Account locked" in response.json()["detail"]
-    
+
     async def test_jwt_token_security(self, test_client, test_user):
         """Test JWT token security measures."""
-        
+
         # Get valid token
         login_response = test_client.post("/api/v1/auth/login", json={
             "username": test_user["username"],
             "password": test_user["password"]
         })
         token = login_response.json()["access_token"]
-        
+
         # Test token manipulation
         manipulated_token = token[:-10] + "XXXXXXXXXX"
-        
+
         response = test_client.get("/api/v1/auth/protected", headers={
             "Authorization": f"Bearer {manipulated_token}"
         })
-        
+
         assert response.status_code == 401
         assert "Invalid token" in response.json()["detail"]
 ```
@@ -863,46 +863,46 @@ class TestAuthenticationSecurity:
 ```python
 class TestAuthorizationSecurity:
     """Authorization security test suite."""
-    
+
     async def test_idor_prevention(self, test_client, admin_user, regular_user):
         """Test IDOR vulnerability prevention."""
-        
+
         # Admin creates a resource
         admin_token = self._get_auth_token(test_client, admin_user)
-        resource_response = test_client.post("/api/v1/resources", 
+        resource_response = test_client.post("/api/v1/resources",
             json={"name": "admin_resource", "data": "sensitive_data"},
             headers={"Authorization": f"Bearer {admin_token}"}
         )
         resource_id = resource_response.json()["id"]
-        
+
         # Regular user attempts to access admin's resource
         user_token = self._get_auth_token(test_client, regular_user)
         unauthorized_response = test_client.get(f"/api/v1/resources/{resource_id}",
             headers={"Authorization": f"Bearer {user_token}"}
         )
-        
+
         # Should be forbidden
         assert unauthorized_response.status_code == 403
         assert "Access denied" in unauthorized_response.json()["detail"]
-    
+
     async def test_privilege_escalation_prevention(self, test_client, regular_user):
         """Test privilege escalation prevention."""
-        
+
         user_token = self._get_auth_token(test_client, regular_user)
-        
+
         # Attempt to access admin-only endpoint
         admin_response = test_client.get("/api/v1/admin/users",
             headers={"Authorization": f"Bearer {user_token}"}
         )
-        
+
         assert admin_response.status_code == 403
-        
+
         # Attempt to modify user role
         role_modification = test_client.patch(f"/api/v1/users/{regular_user['id']}/role",
             json={"role": "admin"},
             headers={"Authorization": f"Bearer {user_token}"}
         )
-        
+
         assert role_modification.status_code == 403
 ```
 
@@ -945,7 +945,7 @@ class TestAuthorizationSecurity:
 ```python
 class TestInputValidationSecurity:
     """Input validation security tests."""
-    
+
     @pytest.mark.parametrize("malicious_input", [
         "'; DROP TABLE users; --",
         "1' OR '1'='1",
@@ -954,20 +954,20 @@ class TestInputValidationSecurity:
     ])
     async def test_sql_injection_prevention(self, test_client, malicious_input):
         """Test SQL injection prevention."""
-        
+
         # Attempt SQL injection in search parameter
         response = test_client.get(f"/api/v1/search?query={malicious_input}")
-        
+
         # Should not return sensitive data or cause server error
         assert response.status_code in [200, 400]  # Either sanitized or rejected
-        
+
         if response.status_code == 200:
             # Ensure no sensitive data leaked
             response_text = response.text.lower()
             assert "password" not in response_text
             assert "hash" not in response_text
             assert "secret" not in response_text
-    
+
     @pytest.mark.parametrize("xss_payload", [
         "<script>alert('XSS')</script>",
         "javascript:alert('XSS')",
@@ -976,16 +976,16 @@ class TestInputValidationSecurity:
     ])
     async def test_xss_prevention(self, test_client, xss_payload):
         """Test XSS prevention in user inputs."""
-        
+
         # Submit XSS payload in user profile
         response = test_client.patch("/api/v1/profile", json={
             "name": xss_payload,
             "bio": f"User bio with {xss_payload}"
         })
-        
+
         # Either rejected or sanitized
         assert response.status_code in [200, 400]
-        
+
         if response.status_code == 200:
             # Check that dangerous content is escaped
             profile_data = response.json()
@@ -1022,34 +1022,34 @@ class TestInputValidationSecurity:
 ```python
 class TestSecurityPerformance:
     """Security performance benchmark tests."""
-    
+
     @pytest.mark.benchmark
     async def test_password_hashing_performance(self, benchmark):
         """Benchmark password hashing performance."""
-        
+
         def hash_password():
             from passlib.context import CryptContext
             pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
             return pwd_context.hash("TestPassword123!")
-        
+
         # Benchmark password hashing
         result = benchmark(hash_password)
-        
+
         # Ensure hashing takes reasonable time (not too fast, not too slow)
         assert benchmark.stats.mean > 0.05  # At least 50ms to prevent brute force
         assert benchmark.stats.mean < 2.0   # Less than 2s for usability
-    
+
     @pytest.mark.benchmark
     async def test_jwt_validation_performance(self, benchmark, sample_jwt_token):
         """Benchmark JWT token validation performance."""
-        
+
         def validate_token():
             import jwt
             return jwt.decode(sample_jwt_token, "secret", algorithms=["HS256"])
-        
+
         # Benchmark token validation
         result = benchmark(validate_token)
-        
+
         # Ensure validation is fast enough for high throughput
         assert benchmark.stats.mean < 0.001  # Less than 1ms per validation
 ```
@@ -1129,7 +1129,7 @@ Our security testing covers all OWASP Top 10 2021 categories:
 ```python
 class GDPRComplianceValidator:
     """Validate GDPR compliance requirements."""
-    
+
     def __init__(self):
         self.compliance_checks = {
             'data_encryption': self._check_data_encryption,
@@ -1139,7 +1139,7 @@ class GDPRComplianceValidator:
             'breach_notification': self._check_breach_procedures,
             'privacy_by_design': self._check_privacy_controls
         }
-    
+
     def validate_compliance(self) -> dict:
         """Run all GDPR compliance checks."""
         results = {}
@@ -1151,9 +1151,9 @@ class GDPRComplianceValidator:
                     'status': 'error',
                     'message': str(e)
                 }
-        
+
         return results
-    
+
     def _check_data_encryption(self) -> dict:
         """Validate data encryption compliance."""
         # Check database encryption
@@ -1167,7 +1167,7 @@ class GDPRComplianceValidator:
 ```python
 class SOC2ComplianceValidator:
     """Validate SOC 2 Type II compliance."""
-    
+
     def __init__(self):
         self.trust_service_criteria = {
             'security': self._validate_security_controls,
@@ -1176,13 +1176,13 @@ class SOC2ComplianceValidator:
             'confidentiality': self._validate_confidentiality_controls,
             'privacy': self._validate_privacy_controls
         }
-    
+
     def validate_soc2_compliance(self) -> dict:
         """Validate SOC 2 compliance."""
         results = {}
         for criteria, validator in self.trust_service_criteria.items():
             results[criteria] = validator()
-        
+
         return results
 ```
 
@@ -1242,7 +1242,7 @@ class SOC2ComplianceValidator:
    ```python
    def calculate_security_score(metrics: dict) -> int:
        """Calculate overall security score (0-100)."""
-       
+
        # Vulnerability score (40% weight)
        vuln_score = 100 - (
            metrics['critical'] * 25 +
@@ -1250,16 +1250,16 @@ class SOC2ComplianceValidator:
            metrics['medium'] * 5 +
            metrics['low'] * 1
        )
-       
+
        # Test coverage score (30% weight)
        coverage_score = metrics['test_coverage']['overall']
-       
+
        # Compliance score (20% weight)
        compliance_score = metrics['compliance_percentage']
-       
+
        # Security posture score (10% weight)
        posture_score = metrics['security_controls_effectiveness']
-       
+
        # Weighted average
        total_score = (
            vuln_score * 0.4 +
@@ -1267,7 +1267,7 @@ class SOC2ComplianceValidator:
            compliance_score * 0.2 +
            posture_score * 0.1
        )
-       
+
        return max(0, min(100, int(total_score)))
    ```
 
@@ -1278,7 +1278,7 @@ class SOC2ComplianceValidator:
 ```python
 class SecurityReportGenerator:
     """Generate comprehensive security reports."""
-    
+
     def __init__(self, config: dict):
         self.config = config
         self.report_templates = {
@@ -1286,10 +1286,10 @@ class SecurityReportGenerator:
             'technical': 'templates/technical_security_report.html',
             'compliance': 'templates/compliance_report.html'
         }
-    
+
     def generate_comprehensive_report(self, test_results: dict) -> dict:
         """Generate comprehensive security report."""
-        
+
         # Aggregate data from all security tests
         aggregated_data = {
             'executive_summary': self._generate_executive_summary(test_results),
@@ -1299,22 +1299,22 @@ class SecurityReportGenerator:
             'metrics': self._calculate_security_metrics(test_results),
             'trends': self._analyze_security_trends(test_results)
         }
-        
+
         # Generate reports for different audiences
         reports = {}
         for report_type, template_path in self.report_templates.items():
             reports[report_type] = self._render_report(
-                template_path, 
-                aggregated_data, 
+                template_path,
+                aggregated_data,
                 report_type
             )
-        
+
         return reports
-    
+
     def _generate_executive_summary(self, results: dict) -> dict:
         """Generate executive summary."""
         security_score = self._calculate_security_score(results)
-        
+
         return {
             'security_score': security_score,
             'risk_level': self._determine_risk_level(security_score),
@@ -1322,16 +1322,16 @@ class SecurityReportGenerator:
             'improvement_priorities': self._identify_priorities(results),
             'compliance_status': self._summarize_compliance(results)
         }
-    
+
     def _analyze_vulnerabilities(self, results: dict) -> dict:
         """Analyze vulnerability findings."""
         vulnerabilities = []
-        
+
         for test_category, test_results in results.items():
             for test_name, test_result in test_results.items():
                 if test_result.get('vulnerabilities'):
                     vulnerabilities.extend(test_result['vulnerabilities'])
-        
+
         return {
             'total_count': len(vulnerabilities),
             'by_severity': self._group_by_severity(vulnerabilities),
@@ -1358,19 +1358,19 @@ class SecurityReportGenerator:
    </head>
    <body>
        <h1>Security Posture Report</h1>
-       
+
        <div class="executive-summary">
            <h2>Executive Summary</h2>
            <div class="security-score">Security Score: {{ security_score }}/100</div>
            <div class="risk-indicator">Risk Level: {{ risk_level }}</div>
-           
+
            <h3>Key Findings</h3>
            <ul>
                {% for finding in critical_findings %}
                <li>{{ finding.description }}</li>
                {% endfor %}
            </ul>
-           
+
            <h3>Recommendations</h3>
            <ol>
                {% for recommendation in top_recommendations %}
@@ -1378,7 +1378,7 @@ class SecurityReportGenerator:
                {% endfor %}
            </ol>
        </div>
-       
+
        <div class="metrics-overview">
            <h2>Security Metrics</h2>
            <div class="metrics-grid">
@@ -1429,7 +1429,7 @@ class SecurityReportGenerator:
    </head>
    <body>
        <h1>Technical Security Analysis Report</h1>
-       
+
        <div class="test-results">
            <h2>Security Test Results</h2>
            {% for category, tests in test_results.items() %}
@@ -1451,7 +1451,7 @@ class SecurityReportGenerator:
            </table>
            {% endfor %}
        </div>
-       
+
        <div class="vulnerability-details">
            <h2>Vulnerability Analysis</h2>
            {% for vulnerability in vulnerabilities %}
@@ -1461,15 +1461,15 @@ class SecurityReportGenerator:
                <p><strong>Category:</strong> {{ vulnerability.category }}</p>
                <p><strong>Description:</strong> {{ vulnerability.description }}</p>
                <p><strong>Location:</strong> {{ vulnerability.location }}</p>
-               
+
                {% if vulnerability.code_sample %}
                <h4>Code Sample:</h4>
                <div class="code-block">{{ vulnerability.code_sample }}</div>
                {% endif %}
-               
+
                <h4>Remediation:</h4>
                <p>{{ vulnerability.remediation }}</p>
-               
+
                {% if vulnerability.references %}
                <h4>References:</h4>
                <ul>
@@ -1492,14 +1492,14 @@ class SecurityReportGenerator:
 ```python
 class SecurityAuditLogger:
     """Comprehensive security audit logging."""
-    
+
     def __init__(self, config: dict):
         self.config = config
         self.log_handlers = self._setup_log_handlers()
-    
+
     def log_security_event(self, event_type: str, details: dict, severity: str = "info"):
         """Log security events with full context."""
-        
+
         audit_record = {
             'timestamp': datetime.now(timezone.utc).isoformat(),
             'event_type': event_type,
@@ -1512,15 +1512,15 @@ class SecurityAuditLogger:
             'request_id': details.get('request_id'),
             'correlation_id': self._generate_correlation_id()
         }
-        
+
         # Log to multiple destinations
         for handler in self.log_handlers:
             handler.log(audit_record)
-    
-    def log_authentication_event(self, user_id: str, event_type: str, 
+
+    def log_authentication_event(self, user_id: str, event_type: str,
                                 success: bool, details: dict):
         """Log authentication-specific events."""
-        
+
         auth_event = {
             'user_id': user_id,
             'event_type': f"auth_{event_type}",
@@ -1528,14 +1528,14 @@ class SecurityAuditLogger:
             'details': details,
             'timestamp': datetime.now(timezone.utc).isoformat()
         }
-        
+
         severity = "info" if success else "warning"
         self.log_security_event("authentication", auth_event, severity)
-    
-    def log_authorization_event(self, user_id: str, resource: str, 
+
+    def log_authorization_event(self, user_id: str, resource: str,
                                action: str, granted: bool, details: dict):
         """Log authorization decisions."""
-        
+
         authz_event = {
             'user_id': user_id,
             'resource': resource,
@@ -1544,7 +1544,7 @@ class SecurityAuditLogger:
             'details': details,
             'timestamp': datetime.now(timezone.utc).isoformat()
         }
-        
+
         severity = "info" if granted else "warning"
         self.log_security_event("authorization", authz_event, severity)
 ```
@@ -1554,18 +1554,18 @@ class SecurityAuditLogger:
 ```python
 class SecurityAuditAnalyzer:
     """Analyze security audit trails for patterns and anomalies."""
-    
+
     def __init__(self, audit_log_source: str):
         self.audit_log_source = audit_log_source
-        
+
     def analyze_authentication_patterns(self, time_window: timedelta) -> dict:
         """Analyze authentication patterns for anomalies."""
-        
+
         end_time = datetime.now(timezone.utc)
         start_time = end_time - time_window
-        
+
         auth_events = self._get_auth_events(start_time, end_time)
-        
+
         analysis = {
             'total_attempts': len(auth_events),
             'successful_logins': len([e for e in auth_events if e['success']]),
@@ -1576,13 +1576,13 @@ class SecurityAuditAnalyzer:
             'brute_force_attempts': self._detect_brute_force(auth_events),
             'account_takeover_indicators': self._detect_takeover_patterns(auth_events)
         }
-        
+
         return analysis
-    
+
     def _identify_suspicious_patterns(self, events: list) -> list:
         """Identify suspicious authentication patterns."""
         suspicious = []
-        
+
         # Group by IP address
         ip_groups = {}
         for event in events:
@@ -1590,7 +1590,7 @@ class SecurityAuditAnalyzer:
             if ip not in ip_groups:
                 ip_groups[ip] = []
             ip_groups[ip].append(event)
-        
+
         # Check for suspicious patterns
         for ip, ip_events in ip_groups.items():
             # Multiple failed attempts from same IP
@@ -1602,7 +1602,7 @@ class SecurityAuditAnalyzer:
                     'failed_count': failed_count,
                     'severity': 'high'
                 })
-            
+
             # Multiple different users from same IP
             unique_users = len(set(e['user_id'] for e in ip_events))
             if unique_users > 5:
@@ -1612,7 +1612,7 @@ class SecurityAuditAnalyzer:
                     'user_count': unique_users,
                     'severity': 'medium'
                 })
-        
+
         return suspicious
 ```
 

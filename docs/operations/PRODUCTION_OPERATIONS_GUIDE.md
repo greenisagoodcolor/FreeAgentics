@@ -232,7 +232,7 @@ alerts:
     actions:
       - type: pagerduty
         service: production-critical
-        
+
   - name: application-error-alert
     conditions:
       - metric: error_rate

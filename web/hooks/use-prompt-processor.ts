@@ -188,17 +188,24 @@ export function usePromptProcessor() {
       setError(null);
 
       try {
-        const response = await apiClient.submitPrompt(prompt);
+        const response = await apiClient.processPrompt({
+          prompt,
+          conversationId: useConversation ? conversationId || undefined : undefined
+        });
 
-        setCurrentPromptId(response.id);
-
-        // Update agents and knowledge graph
-        if (response.agents) {
-          setAgents(response.agents);
+        if (!response.success || !response.data) {
+          throw new Error(response.error || "Failed to process prompt");
         }
 
-        if (response.knowledge_graph) {
-          setKnowledgeGraph(response.knowledge_graph);
+        const { agents: newAgents, knowledgeGraph: newKnowledgeGraph, conversationId: responseConvId } = response.data;
+
+        // Update agents and knowledge graph
+        if (newAgents) {
+          setAgents(newAgents);
+        }
+
+        if (newKnowledgeGraph) {
+          setKnowledgeGraph(newKnowledgeGraph);
         }
 
         // Generate a conversation ID if needed and not already set
@@ -212,17 +219,15 @@ export function usePromptProcessor() {
           wsRef.current.send(
             JSON.stringify({
               type: "prompt_submitted",
-              prompt_id: response.id,
+              prompt_id: responseConvId || 'unknown',
               prompt,
               conversation_id: conversationId,
             }),
           );
         }
 
-        // If status is not completed, we'll wait for WebSocket updates
-        if (response.status === "completed") {
-          setIsLoading(false);
-        }
+        // If we got a response, assume it's completed
+        setIsLoading(false);
       } catch (err) {
         const error = err as { detail?: string };
         setError(error.detail || "Failed to process prompt");
@@ -251,8 +256,10 @@ export function usePromptProcessor() {
       // Debounce suggestions request
       suggestionTimeoutRef.current = setTimeout(async () => {
         try {
-          const response = await apiClient.getPromptSuggestions(query);
-          setSuggestions(response.suggestions || []);
+          const response = await apiClient.getSuggestions(query);
+          if (response.success && response.data) {
+            setSuggestions(response.data);
+          }
         } catch (err) {
           // Fallback to local suggestions
           const localSuggestions = [

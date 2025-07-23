@@ -43,7 +43,7 @@ passlib[bcrypt]==1.7.4
 pyjwt==2.10.1
 cryptography==45.0.5  # Compatible with Python 3.12, security fix for CVE-2024-12797
 
-# Data Processing  
+# Data Processing
 pandas==2.2.3  # Compatible with numpy 2.2.1
 
 # System Monitoring

@@ -70,7 +70,7 @@ gmn_spec = """[nodes]...[edges]..."""
     "num_obs": [5],
     "num_actions": [5],
     "A": np.array(...),  # Observation model
-    "B": np.array(...),  # Transition model  
+    "B": np.array(...),  # Transition model
     "C": np.array(...),  # Preferences
     "D": np.array(...),  # Initial beliefs
 }
@@ -132,7 +132,7 @@ nodes = BeliefKGBridge.convert_beliefs_to_nodes(beliefs)
 
 # Output: KG nodes
 [
-    KnowledgeNode(type=BELIEF, label="position_2", 
+    KnowledgeNode(type=BELIEF, label="position_2",
                   properties={"probability": 0.5})
 ]
 ```
@@ -198,7 +198,7 @@ class BeliefKGBridge:
     def beliefs_to_nodes(self, beliefs: list) -> List[KnowledgeNode]:
         """Convert agent beliefs to KG nodes"""
         pass
-        
+
     def observations_to_nodes(self, obs: Any) -> List[KnowledgeNode]:
         """Convert observations to KG nodes"""
         pass

@@ -1,11 +1,11 @@
 # TASK-001: Fix numpy import errors blocking test suite
 
-**Status**: TODO  
-**Priority**: HIGH  
-**Category**: Critical Blockers  
-**Complexity**: Medium  
-**Estimated Hours**: 16  
-**Assignee**: test-engineer  
+**Status**: TODO
+**Priority**: HIGH
+**Category**: Critical Blockers
+**Complexity**: Medium
+**Estimated Hours**: 16
+**Assignee**: test-engineer
 **Milestone**: test-infrastructure-recovery
 
 ## Description
