@@ -1,5 +1,5 @@
 import React from "react";
-import { render, screen, act } from "../../../__tests__/test-utils";
+import { render, screen, act } from "../../test-utils";
 import userEvent from "@testing-library/user-event";
 import { ConversationWindow } from "@/components/main/ConversationWindow";
 import { useConversation } from "@/hooks/use-conversation";

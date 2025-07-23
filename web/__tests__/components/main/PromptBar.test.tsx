@@ -1,5 +1,5 @@
 import React from "react";
-import { render, screen, waitFor, act } from "../../../__tests__/test-utils";
+import { render, screen, waitFor, act } from "../../test-utils";
 import userEvent from "@testing-library/user-event";
 import { PromptBar } from "@/components/main/PromptBar";
 import { usePromptProcessor } from "@/hooks/use-prompt-processor";

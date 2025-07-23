@@ -10,6 +10,11 @@ const customJestConfig = {
   rootDir: ".",
   setupFilesAfterEnv: ["<rootDir>/jest.setup.js"],
   testEnvironment: "jest-environment-jsdom",
+  testPathIgnorePatterns: [
+    "<rootDir>/node_modules/",
+    "<rootDir>/__tests__/test-utils.tsx", // Ignore test utility files
+    "<rootDir>/__tests__/__mocks__/", // Ignore mock files
+  ],
   reporters: [
     "default",
     // Only add jest-junit reporter if running in CI
@@ -46,18 +51,28 @@ module.exports = async () => {
     "^.+\\.(css|sass|scss)$": "identity-obj-proxy",
     "^.+\\.(png|jpg|jpeg|gif|webp|avif|ico|bmp|svg)$": `__tests__/__mocks__/fileMock.js`,
 
-    // Then our custom path mappings
+    // Then our custom path mappings - be explicit about rootDir resolution
     "^@/components/(.*)$": "<rootDir>/components/$1",
     "^@/lib/(.*)$": "<rootDir>/lib/$1",
     "^@/hooks/(.*)$": "<rootDir>/hooks/$1",
     "^@/utils/(.*)$": "<rootDir>/utils/$1",
     "^@/types/(.*)$": "<rootDir>/types/$1",
+    "^@/(.*)$": "<rootDir>/$1", // Catch-all for any @/ imports
 
     // Keep any existing Next.js moduleNameMapper entries that don't conflict
     ...Object.fromEntries(
       Object.entries(jestConfig.moduleNameMapper || {}).filter(([key]) => !key.startsWith("^@/")),
     ),
   };
+
+  // Add additional CI-specific configuration
+  if (process.env.CI) {
+    jestConfig.verbose = true;
+    jestConfig.forceExit = true;
+    jestConfig.detectOpenHandles = true;
+    // Clear cache on CI runs to prevent stale module resolution
+    jestConfig.clearMocks = true;
+  }
 
   return jestConfig;
 };

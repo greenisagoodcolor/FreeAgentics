@@ -134,9 +134,21 @@ jobs:
         working-directory: ./web
         run: |
           npm ci
+
+          # Verify file structure exists (CI diagnostic)
+          echo "📁 Verifying project structure..."
+          ls -la lib/ || echo "⚠️ lib/ directory not found"
+          ls -la lib/utils.ts || echo "⚠️ lib/utils.ts not found"
+
+          # Clear any potential cache issues
+          rm -rf .next/ node_modules/.cache/ || true
+
           echo "### Frontend Quality" >> $GITHUB_STEP_SUMMARY
           npm run lint || echo "❌ ESLint issues found" >> $GITHUB_STEP_SUMMARY
-          npx tsc --noEmit || echo "❌ TypeScript issues found" >> $GITHUB_STEP_SUMMARY
+
+          # Run TypeScript check with explicit baseUrl to ensure path resolution
+          echo "🔍 Running TypeScript compilation check..."
+          npx tsc --noEmit --skipLibCheck false --verbose || echo "❌ TypeScript issues found" >> $GITHUB_STEP_SUMMARY
 
       - name: "📊 Upload Quality Reports"
         uses: actions/upload-artifact@v4
@@ -410,12 +422,22 @@ jobs:
       - name: "🧪 Run Frontend Tests"
         working-directory: ./web
         run: |
+          # Verify Jest can find all required files before running tests
+          echo "📁 Verifying test environment..."
+          ls -la lib/utils.ts || echo "⚠️ lib/utils.ts not found for Jest"
+          ls -la components/main/ || echo "⚠️ components/main/ not found"
+
+          # Clear Jest cache to prevent stale module resolution
+          npx jest --clearCache
+
           mkdir -p ../${{ env.REPORT_DIR }}/frontend
           npm test -- \
             --coverage \
             --coverageDirectory=../${{ env.REPORT_DIR }}/frontend/coverage \
             --watchAll=false \
             --ci \
+            --no-cache \
+            --verbose \
             --reporters=default \
             --reporters=jest-junit \
             --outputFile=../${{ env.REPORT_DIR }}/frontend/junit.xml
@@ -622,7 +644,15 @@ jobs:
 
   release-validation:
     name: "🏆 Release Validation"
-    needs: [unit-tests, integration-tests, frontend-tests, e2e-tests, performance-tests, docker-build]
+    needs:
+      [
+        unit-tests,
+        integration-tests,
+        frontend-tests,
+        e2e-tests,
+        performance-tests,
+        docker-build,
+      ]
     runs-on: ubuntu-latest
     if: github.event_name == 'push' && (github.ref == 'refs/heads/main' || startsWith(github.ref, 'refs/heads/release/'))
     steps:
@@ -674,7 +704,17 @@ jobs:
 
   pipeline-summary:
     name: "📊 Pipeline Summary"
-    needs: [code-quality, security-scan, unit-tests, integration-tests, frontend-tests, e2e-tests, performance-tests, docker-build]
+    needs:
+      [
+        code-quality,
+        security-scan,
+        unit-tests,
+        integration-tests,
+        frontend-tests,
+        e2e-tests,
+        performance-tests,
+        docker-build,
+      ]
     runs-on: ubuntu-latest
     if: always()
     steps:
