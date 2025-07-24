@@ -54,6 +54,7 @@ export function usePromptProcessor() {
   const [currentPromptId, setCurrentPromptId] = useState<string | null>(null);
   const [conversationId, setConversationId] = useState<string | null>(null);
   const [iterationContext, setIterationContext] = useState<IterationContext | null>(null);
+  const [lastPrompt, setLastPrompt] = useState<string>("");
 
   const wsRef = useRef<WebSocket | null>(null);
   const reconnectTimeoutRef = useRef<NodeJS.Timeout | null>(null);
@@ -188,6 +189,7 @@ export function usePromptProcessor() {
     async (prompt: string, useConversation: boolean = true) => {
       setIsLoading(true);
       setError(null);
+      setLastPrompt(prompt); // Store prompt for retry functionality
 
       try {
         const response = await apiClient.processPrompt({
@@ -255,11 +257,12 @@ export function usePromptProcessor() {
 
   // Retry last prompt
   const retry = useCallback(() => {
-    if (currentPromptId) {
-      // Implementation would retry the last prompt
+    if (lastPrompt && !isLoading) {
+      // Clear error and retry the last prompt
       setError(null);
+      submitPrompt(lastPrompt);
     }
-  }, [currentPromptId]);
+  }, [lastPrompt, isLoading, submitPrompt]);
 
   // Fetch suggestions (debounced)
   const fetchSuggestions = useCallback((query: string) => {
