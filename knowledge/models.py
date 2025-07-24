@@ -69,6 +69,7 @@ class KnowledgeNode(Base):
         Index("idx_kg_nodes_agent_graph", "agent_id", "graph_id"),
         Index("idx_kg_nodes_h3", "h3_index"),
         Index("idx_kg_nodes_type", "node_type"),
+        {'extend_existing': True},  # TODO: ARCHITECTURAL DEBT - Resolve duplicate kg_nodes table (see NEMESIS Committee findings)
     )
 
     if PGVECTOR_AVAILABLE:
@@ -109,6 +110,7 @@ class KnowledgeEdge(Base):
     __table_args__ = (
         Index("idx_kg_edges_source_target", "source_id", "target_id"),
         Index("idx_kg_edges_type", "relationship_type"),
+        {'extend_existing': True},  # TODO: ARCHITECTURAL DEBT - Resolve duplicate kg_edges table (see NEMESIS Committee findings)
     )
 
 
@@ -141,6 +143,7 @@ class AgentBeliefSnapshot(Base):
     __table_args__ = (
         Index("idx_belief_snapshots_agent_step", "agent_id", "inference_step"),
         Index("idx_belief_snapshots_h3", "h3_index"),
+        {'extend_existing': True},  # TODO: ARCHITECTURAL DEBT - Prevent table redefinition conflicts (see NEMESIS Committee findings)
     )
 
     if PGVECTOR_AVAILABLE:
