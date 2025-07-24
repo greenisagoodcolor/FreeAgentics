@@ -16,7 +16,7 @@ flake8==7.3.0
 httpx==0.28.1
 inferactively-pymdp==0.0.7.1  # CRITICAL: Core Active Inference functionality (imports as 'pymdp')
 isort==6.0.1
-lxml==5.4.1  # Required for mypy HTML reports
+lxml==5.4.0  # Required for mypy HTML reports (5.4.1 doesn't exist)
 mypy==1.16.1
 
 # Basic Scientific Computing (minimal)
