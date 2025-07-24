@@ -23,6 +23,9 @@ security_logger.setLevel(logging.INFO)
 
 # Ensure security logs go to separate file
 if not security_logger.handlers:
+    # Create logs directory if it doesn't exist
+    import os
+    os.makedirs("logs", exist_ok=True)
     handler = logging.FileHandler("logs/security_audit.log")
     handler.setFormatter(logging.Formatter("%(asctime)s - %(name)s - %(levelname)s - %(message)s"))
     security_logger.addHandler(handler)
