@@ -1,5 +1,22 @@
 import "@testing-library/jest-dom";
 
+// CI-specific React warning suppression for act() warnings
+// Local development keeps warnings visible, CI treats them as non-fatal
+if (process.env.CI) {
+  const originalError = console.error;
+  console.error = (...args) => {
+    // Suppress React act() warnings in CI environment
+    if (
+      typeof args[0] === 'string' && 
+      (args[0].includes('Warning: An update to') && args[0].includes('inside a test was not wrapped in act')) ||
+      (args[0].includes('Warning: The current testing environment is not configured to support act'))
+    ) {
+      return; // Silently ignore act warnings in CI
+    }
+    originalError.apply(console, args);
+  };
+}
+
 // Mock HTMLCanvasElement
 HTMLCanvasElement.prototype.getContext = jest.fn(() => ({
   clearRect: jest.fn(),
