@@ -30,6 +30,22 @@ export function middleware(request: NextRequest) {
     "Cross-Origin-Opener-Policy": "same-origin",
     "Cross-Origin-Resource-Policy": "same-origin",
     "Origin-Agent-Cluster": "?1",
+    // Content Security Policy - CRITICAL SECURITY ENHANCEMENT
+    "Content-Security-Policy": `
+      default-src 'self';
+      script-src 'self' 'unsafe-eval' 'unsafe-inline';
+      style-src 'self' 'unsafe-inline';
+      img-src 'self' data: blob:;
+      font-src 'self';
+      connect-src 'self' ${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000'} ${process.env.NEXT_PUBLIC_WS_URL || 'ws://localhost:8000'};
+      media-src 'self';
+      object-src 'none';
+      child-src 'self';
+      frame-ancestors 'none';
+      base-uri 'self';
+      form-action 'self';
+      upgrade-insecure-requests;
+    `.replace(/\s+/g, ' ').trim(),
   };
 
   // Apply security headers
