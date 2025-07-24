@@ -95,14 +95,18 @@ const nextConfig = {
   },
 
 
-  // CORS headers for development
+  // CORS headers - SECURITY HARDENED: Restricted to specific origins
   async headers() {
+    const allowedOrigin = process.env.NODE_ENV === 'production' 
+      ? process.env.ALLOWED_ORIGINS || "https://yourdomain.com"
+      : "http://localhost:3000";
+      
     return [
       {
         source: "/api/:path*",
         headers: [
           { key: "Access-Control-Allow-Credentials", value: "true" },
-          { key: "Access-Control-Allow-Origin", value: "*" },
+          { key: "Access-Control-Allow-Origin", value: allowedOrigin },
           {
             key: "Access-Control-Allow-Methods",
             value: "GET,OPTIONS,PATCH,DELETE,POST,PUT",
