@@ -78,6 +78,11 @@ global.WebSocket = MockWebSocket as unknown as {
 describe("usePromptProcessor", () => {
   beforeEach(() => {
     jest.clearAllMocks();
+    jest.useRealTimers(); // Ensure real timers before each test
+  });
+
+  afterEach(() => {
+    jest.useRealTimers(); // Clean up timers after each test
   });
 
   it("should initialize with default state", () => {
@@ -195,10 +200,14 @@ describe("usePromptProcessor", () => {
       result.current.fetchSuggestions("test");
     });
 
+    // Advance timers and flush promises
     await act(async () => {
       jest.advanceTimersByTime(300);
-      // Wait for the promise to resolve
-      await new Promise((resolve) => setTimeout(resolve, 0));
+    });
+
+    // Flush all pending promises
+    await act(async () => {
+      await Promise.resolve();
     });
 
     await waitFor(() => {
@@ -208,14 +217,8 @@ describe("usePromptProcessor", () => {
       );
     });
 
-    // Should fallback to local suggestions
-    expect(result.current.suggestions).toEqual([
-      "How can I optimize my agent's performance?",
-      "How do agents form coalitions?",
-      "How does active inference work?",
-      "Show me the current agent network",
-      "What is the free energy principle?",
-    ].filter((s) => s.toLowerCase().includes("test".toLowerCase())));
+    // Should have no suggestions since "test" doesn't match any fallback suggestions
+    expect(result.current.suggestions).toEqual([]);
 
     consoleErrorSpy.mockRestore();
     jest.useRealTimers();
