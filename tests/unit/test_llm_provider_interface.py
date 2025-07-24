@@ -15,72 +15,21 @@ from unittest.mock import Mock, patch
 import pytest
 
 # Import the module under test
-try:
-    from inference.llm.provider_interface import (
-        BaseProvider,
-        GenerationRequest,
-        GenerationResponse,
-        HealthCheckResult,
-        ILLMProvider,
-        ModelCapability,
-        ModelInfo,
-        ProviderCredentials,
-        ProviderManager,
-        ProviderRegistry,
-        ProviderStatus,
-        ProviderType,
-        UsageMetrics,
-    )
-
-    IMPORT_SUCCESS = True
-except ImportError:
-    IMPORT_SUCCESS = False
-
-    # Mock classes for testing when imports fail
-    class ProviderType:
-        OPENAI = "openai"
-        ANTHROPIC = "anthropic"
-        OLLAMA = "ollama"
-
-    class ProviderStatus:
-        HEALTHY = "healthy"
-        DEGRADED = "degraded"
-        UNHEALTHY = "unhealthy"
-        OFFLINE = "offline"
-
-    class ModelCapability:
-        TEXT_GENERATION = "text_generation"
-        CHAT_COMPLETION = "chat_completion"
-
-    class ProviderCredentials:
-        pass
-
-    class ModelInfo:
-        pass
-
-    class UsageMetrics:
-        pass
-
-    class HealthCheckResult:
-        pass
-
-    class GenerationRequest:
-        pass
-
-    class GenerationResponse:
-        pass
-
-    class ILLMProvider:
-        pass
-
-    class BaseProvider:
-        pass
-
-    class ProviderRegistry:
-        pass
-
-    class ProviderManager:
-        pass
+from inference.llm.provider_interface import (
+    BaseProvider,
+    GenerationRequest,
+    GenerationResponse,
+    HealthCheckResult,
+    ILLMProvider,
+    ModelCapability,
+    ModelInfo,
+    ProviderCredentials,
+    ProviderManager,
+    ProviderRegistry,
+    ProviderStatus,
+    ProviderType,
+    UsageMetrics,
+)
 
 
 class TestProviderCredentials:
@@ -88,8 +37,6 @@ class TestProviderCredentials:
 
     def test_credentials_creation_basic(self):
         """Test basic credentials creation."""
-        if not IMPORT_SUCCESS:
-            pytest.skip("Required imports not available")
         credentials = ProviderCredentials(
             api_key="test-key",
             organization_id="test-org",
@@ -103,22 +50,16 @@ class TestProviderCredentials:
 
     def test_credentials_is_complete_with_api_key(self):
         """Test credentials completeness check with API key."""
-        if not IMPORT_SUCCESS:
-            pytest.skip("Required imports not available")
         credentials = ProviderCredentials(api_key="test-key")
         assert credentials.is_complete() is True
 
     def test_credentials_is_complete_with_encrypted_id(self):
         """Test credentials completeness check with encrypted ID."""
-        if not IMPORT_SUCCESS:
-            pytest.skip("Required imports not available")
         credentials = ProviderCredentials(encrypted_credential_id="encrypted-123")
         assert credentials.is_complete() is True
 
     def test_credentials_is_complete_empty(self):
         """Test credentials completeness check when empty."""
-        if not IMPORT_SUCCESS:
-            pytest.skip("Required imports not available")
         credentials = ProviderCredentials()
         assert credentials.is_complete() is False
 
@@ -128,8 +69,6 @@ class TestModelInfo:
 
     def test_model_info_creation(self):
         """Test model info creation."""
-        if not IMPORT_SUCCESS:
-            pytest.skip("Required imports not available")
         model = ModelInfo(
             id="gpt-4",
             name="GPT-4",
@@ -159,8 +98,6 @@ class TestUsageMetrics:
 
     def test_usage_metrics_initialization(self):
         """Test usage metrics initialization."""
-        if not IMPORT_SUCCESS:
-            pytest.skip("Required imports not available")
         metrics = UsageMetrics()
 
         assert metrics.total_requests == 0
@@ -176,8 +113,6 @@ class TestUsageMetrics:
 
     def test_update_request_success(self):
         """Test updating metrics with successful request."""
-        if not IMPORT_SUCCESS:
-            pytest.skip("Required imports not available")
         metrics = UsageMetrics()
 
         with patch("inference.llm.provider_interface.datetime") as mock_datetime:
@@ -205,8 +140,6 @@ class TestUsageMetrics:
 
     def test_update_request_failure(self):
         """Test updating metrics with failed request."""
-        if not IMPORT_SUCCESS:
-            pytest.skip("Required imports not available")
         metrics = UsageMetrics()
 
         with patch("inference.llm.provider_interface.datetime") as mock_datetime:
@@ -230,8 +163,6 @@ class TestUsageMetrics:
 
     def test_average_latency_calculation(self):
         """Test average latency calculation with multiple requests."""
-        if not IMPORT_SUCCESS:
-            pytest.skip("Required imports not available")
         metrics = UsageMetrics()
 
         with patch("inference.llm.provider_interface.datetime") as mock_datetime:
@@ -252,8 +183,6 @@ class TestHealthCheckResult:
 
     def test_health_check_result_creation(self):
         """Test health check result creation."""
-        if not IMPORT_SUCCESS:
-            pytest.skip("Required imports not available")
         result = HealthCheckResult(
             status=ProviderStatus.HEALTHY,
             latency_ms=150.0,
@@ -275,8 +204,6 @@ class TestGenerationRequest:
 
     def test_generation_request_creation(self):
         """Test generation request creation."""
-        if not IMPORT_SUCCESS:
-            pytest.skip("Required imports not available")
         request = GenerationRequest(
             model="gpt-4",
             messages=[{"role": "user", "content": "Hello, world!"}],
@@ -298,8 +225,6 @@ class TestGenerationResponse:
 
     def test_generation_response_creation(self):
         """Test generation response creation."""
-        if not IMPORT_SUCCESS:
-            pytest.skip("Required imports not available")
         response = GenerationResponse(
             text="Hello! How can I help you today?",
             model="gpt-4",
@@ -327,8 +252,6 @@ class TestBaseProvider:
     @pytest.fixture
     def base_provider(self):
         """Create a base provider instance."""
-        if not IMPORT_SUCCESS:
-            pytest.skip("Required imports not available")
 
         # Create a concrete implementation for testing
         class TestProvider(BaseProvider):
@@ -491,8 +414,6 @@ class TestProviderRegistry:
     @pytest.fixture
     def registry(self):
         """Create a provider registry instance."""
-        if not IMPORT_SUCCESS:
-            pytest.skip("Required imports not available")
         return ProviderRegistry()
 
     @pytest.fixture
@@ -521,8 +442,6 @@ class TestProviderRegistry:
 
     def test_register_provider_with_priority(self, registry):
         """Test registering providers with different priorities."""
-        if not IMPORT_SUCCESS:
-            pytest.skip("Required imports not available")
         # Create mock providers
         high_priority_provider = Mock(spec=ILLMProvider)
         high_priority_provider.get_provider_type.return_value = ProviderType.OPENAI
@@ -571,8 +490,6 @@ class TestProviderRegistry:
 
     def test_get_healthy_providers_excludes_unhealthy(self, registry):
         """Test that unhealthy providers are excluded."""
-        if not IMPORT_SUCCESS:
-            pytest.skip("Required imports not available")
         unhealthy_provider = Mock(spec=ILLMProvider)
         unhealthy_provider.get_provider_type.return_value = ProviderType.OPENAI
         unhealthy_provider.test_connection.return_value = HealthCheckResult(
@@ -585,8 +502,6 @@ class TestProviderRegistry:
 
     def test_reorder_providers(self, registry):
         """Test reordering provider priorities."""
-        if not IMPORT_SUCCESS:
-            pytest.skip("Required imports not available")
         # Create and register multiple providers
         provider1 = Mock(spec=ILLMProvider)
         provider1.get_provider_type.return_value = ProviderType.OPENAI
@@ -633,8 +548,6 @@ class TestProviderManager:
     @pytest.fixture
     def manager(self, temp_config_file):
         """Create a provider manager instance."""
-        if not IMPORT_SUCCESS:
-            pytest.skip("Required imports not available")
         return ProviderManager(config_path=temp_config_file)
 
     def test_manager_initialization(self, manager):
@@ -644,16 +557,12 @@ class TestProviderManager:
 
     def test_manager_initialization_no_config(self):
         """Test manager initialization without config file."""
-        if not IMPORT_SUCCESS:
-            pytest.skip("Required imports not available")
         manager = ProviderManager()
         assert isinstance(manager.registry, ProviderRegistry)
         assert manager._config_path is None
 
     def test_load_configuration_file_not_exists(self):
         """Test loading configuration when file doesn't exist."""
-        if not IMPORT_SUCCESS:
-            pytest.skip("Required imports not available")
         non_existent_path = Path("/non/existent/config.json")
         manager = ProviderManager(config_path=non_existent_path)
         # Should not raise exception
@@ -832,8 +741,6 @@ class TestProviderManagerEdgeCases:
 
     def test_manager_with_corrupted_config(self):
         """Test manager with corrupted config file."""
-        if not IMPORT_SUCCESS:
-            pytest.skip("Required imports not available")
         # Create corrupted config file
         with tempfile.NamedTemporaryFile(mode="w", suffix=".json", delete=False) as f:
             f.write("invalid json content")
@@ -845,8 +752,6 @@ class TestProviderManagerEdgeCases:
 
     def test_provider_recommendations_no_metrics(self, temp_config_file):
         """Test provider recommendations with no usage metrics."""
-        if not IMPORT_SUCCESS:
-            pytest.skip("Required imports not available")
         manager = ProviderManager(config_path=temp_config_file)
 
         # Create mock provider with no usage history
@@ -876,8 +781,6 @@ class TestIntegrationScenarios:
 
     def test_full_provider_lifecycle(self):
         """Test complete provider lifecycle."""
-        if not IMPORT_SUCCESS:
-            pytest.skip("Required imports not available")
         # Create manager
         manager = ProviderManager()
 
@@ -922,8 +825,6 @@ class TestIntegrationScenarios:
 
     def test_multiple_provider_fallback_chain(self):
         """Test fallback chain with multiple providers."""
-        if not IMPORT_SUCCESS:
-            pytest.skip("Required imports not available")
         manager = ProviderManager()
 
         # Create multiple providers with different behaviors
