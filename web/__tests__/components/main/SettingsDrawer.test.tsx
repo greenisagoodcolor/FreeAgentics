@@ -1,17 +1,7 @@
 import React from "react";
-import { render, screen, act } from "../../test-utils";
+import { render, screen, act, mockAuthContext, mockSettingsContext } from "../../test-utils";
 import userEvent from "@testing-library/user-event";
 import { SettingsDrawer } from "@/components/main/SettingsDrawer";
-
-// Enable manual mocks
-jest.doMock("@/hooks/use-auth");
-jest.doMock("@/hooks/use-settings");
-
-import { useAuth } from "@/hooks/use-auth";
-import { useSettings } from "@/hooks/use-settings";
-
-const mockUseAuth = useAuth as jest.MockedFunction<typeof useAuth>;
-const mockUseSettings = useSettings as jest.MockedFunction<typeof useSettings>;
 
 describe("SettingsDrawer", () => {
   const mockOnOpenChange = jest.fn();
@@ -21,21 +11,20 @@ describe("SettingsDrawer", () => {
     // Mock window.confirm for tests
     global.confirm = jest.fn(() => true);
 
-    // Default auth state
-    mockUseAuth.mockReturnValue({
+    // Reset mock objects to default state
+    Object.assign(mockAuthContext, {
       user: null,
       isAuthenticated: false,
+      isLoading: false,
       login: jest.fn(),
       logout: jest.fn(),
-      isLoading: false,
     });
 
-    // Default settings
-    mockUseSettings.mockReturnValue({
+    Object.assign(mockSettingsContext, {
       settings: {
         llmProvider: "openai",
         llmModel: "gpt-4",
-        gnnEnabled: true,
+        gnnEnabled: true, // Override the test-utils default for this test suite
         debugLogs: false,
         autoSuggest: true,
       },
@@ -89,7 +78,7 @@ describe("SettingsDrawer", () => {
 
     it("shows provider in select trigger", () => {
       const mockUpdateSettings = jest.fn();
-      mockUseSettings.mockReturnValue({
+      Object.assign(mockSettingsContext, {
         settings: {
           llmProvider: "anthropic",
           llmModel: "claude-3-opus",
@@ -121,7 +110,7 @@ describe("SettingsDrawer", () => {
     });
 
     it("shows user info and logout button when authenticated", () => {
-      mockUseAuth.mockReturnValue({
+      Object.assign(mockAuthContext, {
         user: { id: "1", email: "test@example.com", name: "Test User" },
         isAuthenticated: true,
         login: jest.fn(),
@@ -138,7 +127,7 @@ describe("SettingsDrawer", () => {
     it("calls logout when logout button is clicked", async () => {
       const user = userEvent.setup();
       const mockLogout = jest.fn();
-      mockUseAuth.mockReturnValue({
+      Object.assign(mockAuthContext, {
         user: { id: "1", email: "test@example.com", name: "Test User" },
         isAuthenticated: true,
         login: jest.fn(),
@@ -183,7 +172,7 @@ describe("SettingsDrawer", () => {
     it("updates feature flag when toggled", async () => {
       const user = userEvent.setup();
       const mockUpdateSettings = jest.fn();
-      mockUseSettings.mockReturnValue({
+      Object.assign(mockSettingsContext, {
         settings: {
           llmProvider: "openai",
           llmModel: "gpt-4",
@@ -207,7 +196,7 @@ describe("SettingsDrawer", () => {
   it("persists settings to localStorage", async () => {
     const user = userEvent.setup();
     const mockUpdateSettings = jest.fn();
-    mockUseSettings.mockReturnValue({
+    Object.assign(mockSettingsContext, {
       settings: {
         llmProvider: "openai",
         llmModel: "gpt-4",
@@ -236,7 +225,7 @@ describe("SettingsDrawer", () => {
   it("resets settings when reset button is clicked", async () => {
     const user = userEvent.setup();
     const mockResetSettings = jest.fn();
-    mockUseSettings.mockReturnValue({
+    Object.assign(mockSettingsContext, {
       settings: {
         llmProvider: "anthropic",
         llmModel: "claude-3",
