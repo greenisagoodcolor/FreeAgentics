@@ -38,6 +38,7 @@ python-multipart==0.0.20
 
 # Configuration
 pyyaml==6.0.2
+redis==6.2.0  # CRITICAL: Required for caching and session management in tests
 scipy==1.16.0  # CRITICAL: Required for agents/memory_optimization/
 
 # Database (minimal)
