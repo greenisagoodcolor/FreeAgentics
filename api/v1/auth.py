@@ -60,6 +60,12 @@ class TokenResponse(BaseModel):
     user: Dict[str, Any]
 
 
+class RefreshTokenRequest(BaseModel):
+    """Refresh token request."""
+
+    refresh_token: str
+
+
 @router.post("/register", response_model=TokenResponse)
 @rate_limit(max_requests=5, window_minutes=10)  # Strict rate limit for registration
 async def register_user(request: Request, response: Response, user_data: UserRegistration):
@@ -264,14 +270,14 @@ async def logout_user(
 
 @router.post("/refresh")
 @rate_limit(max_requests=5, window_minutes=1)  # Rate limit refresh attempts
-async def refresh_token(request: Request, response: Response, refresh_token: str):
+async def refresh_token(request: Request, response: Response, refresh_request: RefreshTokenRequest):
     """Refresh access token using refresh token."""
     try:
         # Rotate tokens
         (
             new_access_token,
             new_refresh_token,
-        ) = auth_manager.refresh_access_token(refresh_token)
+        ) = auth_manager.refresh_access_token(refresh_request.refresh_token)
 
         # Set new access token cookie
         is_production = os.getenv("PRODUCTION", "false").lower() == "true"

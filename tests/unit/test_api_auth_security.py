@@ -176,6 +176,11 @@ class TestTokenRefreshSecurity:
     """Test token refresh endpoint security."""
 
     @pytest.fixture
+    def client(self):
+        """Create test client."""
+        return TestClient(app)
+
+    @pytest.fixture
     def authenticated_client(self, client):
         """Create client with valid tokens."""
         # Generate valid tokens
@@ -244,6 +249,11 @@ class TestLogoutSecurity:
     """Test logout endpoint security."""
 
     @pytest.fixture
+    def client(self):
+        """Create test client."""
+        return TestClient(app)
+
+    @pytest.fixture
     def auth_headers(self):
         """Create authorization headers."""
         access_token = jwt_handler.create_access_token(
@@ -283,6 +293,11 @@ class TestLogoutSecurity:
 
 class TestAuthorizationHeaders:
     """Test authorization header security."""
+
+    @pytest.fixture
+    def client(self):
+        """Create test client."""
+        return TestClient(app)
 
     @pytest.fixture
     def protected_endpoint(self, client):
@@ -337,6 +352,11 @@ class TestAuthorizationHeaders:
 
 class TestSecurityHeaders:
     """Test security headers on auth endpoints."""
+
+    @pytest.fixture
+    def client(self):
+        """Create test client."""
+        return TestClient(app)
 
     def test_security_headers_present(self, client):
         """Test that security headers are set."""
