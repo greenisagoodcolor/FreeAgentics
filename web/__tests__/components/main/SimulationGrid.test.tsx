@@ -466,7 +466,7 @@ describe("SimulationGrid", () => {
 
     render(<SimulationGrid />);
 
-    expect(screen.getByLabelText(/^Width$/i)).toBeDisabled();
+    expect(screen.getByLabelText(/Grid Width/i)).toBeDisabled();
     expect(screen.getByLabelText(/^Height$/i)).toBeDisabled();
   });
 
@@ -496,7 +496,15 @@ describe("SimulationGrid", () => {
 
     render(<SimulationGrid />);
 
-    expect(screen.getByText(/30 FPS/i)).toBeInTheDocument();
-    expect(screen.getByText(/15ms\/step/i)).toBeInTheDocument();
+    // Performance metrics should appear in the controls section as badges
+    const fpsBadge = screen.getAllByText(/30 FPS/i).find(
+      (element) => element.classList.contains("inline-flex"), // Badge component class
+    );
+    const stepTimeBadge = screen.getAllByText(/15ms\/step/i).find(
+      (element) => element.classList.contains("inline-flex"), // Badge component class
+    );
+
+    expect(fpsBadge).toBeInTheDocument();
+    expect(stepTimeBadge).toBeInTheDocument();
   });
 });
