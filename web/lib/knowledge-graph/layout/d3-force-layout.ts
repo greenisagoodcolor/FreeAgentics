@@ -15,7 +15,7 @@ export class D3ForceLayoutEngine implements LayoutEngine {
   private nodes: RenderableGraphNode[] = [];
   private edges: RenderableGraphEdge[] = [];
   private config: RenderingConfig;
-  private simulation: any = null; // Would be d3.Simulation in a real D3 implementation
+  private simulation: unknown = null; // Would be d3.Simulation in a real D3 implementation
   private isRunning = false;
 
   constructor() {
@@ -37,7 +37,7 @@ export class D3ForceLayoutEngine implements LayoutEngine {
     this.config = { ...this.config, ...config };
 
     // Initialize node positions if not set
-    this.nodes.forEach((node, index) => {
+    this.nodes.forEach((node, _index) => {
       if (node.x === undefined || node.y === undefined) {
         // Start with random positions
         node.x = Math.random() * this.config.width;

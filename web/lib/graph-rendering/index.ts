@@ -8,7 +8,6 @@ import {
   GraphRenderingManager as IGraphRenderingManager,
   RenderingConfig,
   GraphNode,
-  GraphEdge,
 } from "./types";
 
 /**
@@ -273,10 +272,12 @@ export function createGraphRenderer(options: GraphRenderingOptions): GraphRender
 export type {
   GraphData,
   GraphNode,
-  GraphEdge,
   RenderingConfig,
   GraphRenderingOptions,
   GraphRenderingManager as IGraphRenderingManager,
 } from "./types";
+
+// Re-export GraphEdge separately to satisfy linter
+export type { GraphEdge } from "./types";
 
 export { GraphRenderingManager };
