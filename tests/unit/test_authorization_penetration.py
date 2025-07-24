@@ -205,7 +205,7 @@ class TestAuthorizationPenetration:
         # This should fail validation
         try:
             decoded = jwt.decode(none_token, JWT_SECRET, algorithms=[JWT_ALGORITHM])
-            assert False, "Token with 'none' algorithm should not be accepted"
+            pytest.fail("Token with 'none' algorithm should not be accepted")
         except jwt.InvalidAlgorithmError:
             pass  # Expected
         except jwt.DecodeError:
@@ -225,7 +225,7 @@ class TestAuthorizationPenetration:
         # This should fail validation
         try:
             decoded = jwt.decode(escalated_token, JWT_SECRET, algorithms=[JWT_ALGORITHM])
-            assert False, "Token with wrong secret should not be accepted"
+            pytest.fail("Token with wrong secret should not be accepted")
         except jwt.InvalidSignatureError:
             pass  # Expected
 
@@ -237,7 +237,7 @@ class TestAuthorizationPenetration:
 
         try:
             decoded = jwt.decode(expired_token, JWT_SECRET, algorithms=[JWT_ALGORITHM])
-            assert False, "Expired token should not be accepted"
+            pytest.fail("Expired token should not be accepted")
         except jwt.ExpiredSignatureError:
             pass  # Expected
 
@@ -256,7 +256,7 @@ class TestAuthorizationPenetration:
                 permissions=[],  # Would need to be looked up
                 exp=decoded.get("exp"),  # Missing
             )
-            assert False, "Token without required claims should not create valid TokenData"
+            pytest.fail("Token without required claims should not create valid TokenData")
         except Exception:
             pass  # Expected
 
