@@ -12,7 +12,7 @@ from typing import Any, Dict, Generator, Optional
 
 from sqlalchemy import create_engine, text
 from sqlalchemy.orm import Session, sessionmaker
-from sqlalchemy.exc import OperationalError, DatabaseError
+from sqlalchemy.exc import OperationalError
 
 from database.base import Base
 from websocket.circuit_breaker import CircuitBreaker, CircuitBreakerConfig, CircuitOpenException
