@@ -126,7 +126,7 @@ describe("PromptInterface", () => {
       const button = screen.getByRole("button", { name: /send prompt/i });
 
       await userEvent.type(input, "Test prompt");
-      
+
       await act(async () => {
         await userEvent.click(button);
       });
@@ -180,7 +180,7 @@ describe("PromptInterface", () => {
       const input = screen.getByRole("textbox", { name: /enter your prompt/i });
 
       await userEvent.type(input, "Test prompt");
-      
+
       await act(async () => {
         await userEvent.keyboard("{Enter}");
       });
@@ -408,7 +408,7 @@ describe("PromptInterface", () => {
       const button = screen.getByRole("button", { name: /send prompt/i });
 
       await userEvent.type(input, "Test prompt");
-      
+
       await act(async () => {
         await userEvent.click(button);
       });
