@@ -337,3 +337,13 @@ class CircuitBreakerRegistry:
 
 # Global registry instance
 circuit_breaker_registry = CircuitBreakerRegistry()
+
+
+# Export for database module
+__all__ = [
+    "CircuitBreaker",
+    "CircuitBreakerConfig", 
+    "CircuitOpenException",
+    "CircuitState",
+    "circuit_breaker_registry"
+]
