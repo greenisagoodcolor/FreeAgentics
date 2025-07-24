@@ -16,17 +16,12 @@ import pytest
 from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker
 
+# Import the app from the API module
+from api.main import app
 from database.base import Base
 from database.models import Agent as AgentModel
 from database.models import AgentStatus
 from database.session import get_db
-
-# Import the app from the correct location
-try:
-    from main import app
-except ImportError:
-    # Fallback if main.py is not in the root
-    from api.main import app
 
 # Create test database
 SQLALCHEMY_DATABASE_URL = "sqlite:///./test.db"

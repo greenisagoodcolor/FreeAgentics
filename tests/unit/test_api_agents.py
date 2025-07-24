@@ -10,17 +10,12 @@ import uuid
 import pytest
 from sqlalchemy.orm import Session
 
+# Import the app from the API module
+from api.main import app
 from database.models import Agent as AgentModel
 from database.session import get_db
 from tests.helpers import get_auth_headers
 from tests.test_client_compat import TestClient
-
-# Import the app from the correct location
-try:
-    from main import app
-except ImportError:
-    # Fallback if main.py is not in the root
-    from api.main import app
 
 
 class TestAgentsAPI:
