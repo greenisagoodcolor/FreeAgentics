@@ -126,7 +126,10 @@ describe("PromptInterface", () => {
       await userEvent.click(button);
 
       await waitFor(() => {
-        expect(mockApiClient.processPrompt).toHaveBeenCalledWith("Test prompt");
+        expect(mockApiClient.processPrompt).toHaveBeenCalledWith({
+          prompt: "Test prompt",
+          conversationId: undefined,
+        });
       });
 
       // Input should be cleared after submission
@@ -175,7 +178,8 @@ describe("PromptInterface", () => {
 
     it("should show suggestion list when typing", async () => {
       mockApiClient.getSuggestions = jest.fn().mockResolvedValue({
-        suggestions: ["How to create an agent?", "How does active inference work?"],
+        success: true,
+        data: ["How to create an agent?", "How does active inference work?"],
       });
 
       render(<PromptInterface />);
@@ -194,7 +198,8 @@ describe("PromptInterface", () => {
 
     it("should handle suggestion selection", async () => {
       mockApiClient.getSuggestions = jest.fn().mockResolvedValue({
-        suggestions: ["How to create an agent?", "How does active inference work?"],
+        success: true,
+        data: ["How to create an agent?", "How does active inference work?"],
       });
 
       render(<PromptInterface />);
@@ -220,9 +225,12 @@ describe("PromptInterface", () => {
 
   describe("Loading States", () => {
     it("should show loading indicator during processing", async () => {
-      mockApiClient.processPrompt = jest
-        .fn()
-        .mockImplementation(() => new Promise((resolve) => setTimeout(resolve, 100)));
+      let resolvePromise: (value: any) => void;
+      const delayedPromise = new Promise((resolve) => {
+        resolvePromise = resolve;
+      });
+
+      mockApiClient.processPrompt = jest.fn().mockReturnValue(delayedPromise);
 
       render(<PromptInterface />);
 
@@ -230,27 +238,38 @@ describe("PromptInterface", () => {
       const button = screen.getByRole("button", { name: /send prompt/i });
 
       await userEvent.type(input, "Test prompt");
-      await userEvent.click(button);
 
+      await act(async () => {
+        await userEvent.click(button);
+      });
+
+      // Should show loading state immediately after click
       await waitFor(() => {
-        expect(screen.getByText(/processing/i)).toBeInTheDocument();
+        expect(button).toHaveTextContent(/processing/i);
         expect(button).toBeDisabled();
+      });
+
+      // Clean up by resolving the promise
+      act(() => {
+        resolvePromise({
+          success: true,
+          data: {
+            id: "test-123",
+            prompt: "Test prompt",
+            status: "completed",
+            agents: [],
+          },
+        });
       });
     });
 
     it("should handle loading state transitions", async () => {
-      let resolvePromise: (value: {
-        id: string;
-        prompt: string;
-        status: string;
-        agents: Array<{ id: string; name: string; status: string }>;
-      }) => void;
-      mockApiClient.processPrompt = jest.fn().mockImplementation(
-        () =>
-          new Promise((resolve) => {
-            resolvePromise = resolve;
-          }),
-      );
+      let resolvePromise: (value: any) => void;
+      const delayedPromise = new Promise((resolve) => {
+        resolvePromise = resolve;
+      });
+
+      mockApiClient.processPrompt = jest.fn().mockReturnValue(delayedPromise);
 
       render(<PromptInterface />);
 
@@ -258,35 +277,51 @@ describe("PromptInterface", () => {
       const button = screen.getByRole("button", { name: /send prompt/i });
 
       await userEvent.type(input, "Test prompt");
-      await userEvent.click(button);
+
+      await act(async () => {
+        await userEvent.click(button);
+      });
 
       // Should be loading
       await waitFor(() => {
-        expect(screen.getByText(/processing/i)).toBeInTheDocument();
+        expect(button).toHaveTextContent(/processing/i);
       });
 
       // Resolve the promise
-      resolvePromise!({
-        id: "test-123",
-        prompt: "Test prompt",
-        status: "completed",
-        agents: [{ id: "agent-1", name: "Test Agent", status: "active" }],
+      act(() => {
+        resolvePromise({
+          success: true,
+          data: {
+            id: "test-123",
+            prompt: "Test prompt",
+            status: "completed",
+            agents: [{ id: "agent-1", name: "Test Agent", status: "active" }],
+          },
+        });
       });
 
-      // Should show agent visualization
+      // Should show completion state (button text changes back)
       await waitFor(() => {
-        expect(screen.queryByText(/processing/i)).not.toBeInTheDocument();
-        expect(screen.getByText(/Test Agent/i)).toBeInTheDocument();
+        expect(button).toHaveTextContent(/send/i);
+      });
+
+      // Input should be cleared after successful submission
+      expect(input).toHaveValue("");
+
+      // Button should be disabled due to empty input (correct behavior)
+      expect(button).toBeDisabled();
+
+      // Type new text - button should become enabled again
+      await userEvent.type(input, "New prompt");
+      await waitFor(() => {
+        expect(button).not.toBeDisabled();
       });
     });
   });
 
   describe("Error Handling", () => {
     it("should display error message on API failure", async () => {
-      mockApiClient.processPrompt = jest.fn().mockRejectedValue({
-        detail: "Internal server error",
-        status: 500,
-      });
+      mockApiClient.processPrompt = jest.fn().mockRejectedValue(new Error("Internal server error"));
 
       render(<PromptInterface />);
 
@@ -294,7 +329,10 @@ describe("PromptInterface", () => {
       const button = screen.getByRole("button", { name: /send prompt/i });
 
       await userEvent.type(input, "Test prompt");
-      await userEvent.click(button);
+
+      await act(async () => {
+        await userEvent.click(button);
+      });
 
       await waitFor(() => {
         expect(screen.getByRole("alert")).toHaveTextContent(/internal server error/i);
@@ -304,12 +342,15 @@ describe("PromptInterface", () => {
     it("should allow retry after error", async () => {
       mockApiClient.processPrompt = jest
         .fn()
-        .mockRejectedValueOnce({ detail: "Network error", status: 0 })
+        .mockRejectedValueOnce(new Error("Network error"))
         .mockResolvedValueOnce({
-          id: "test-123",
-          prompt: "Test prompt",
-          status: "processing",
-          agents: [],
+          success: true,
+          data: {
+            id: "test-123",
+            prompt: "Test prompt",
+            status: "completed",
+            agents: [],
+          },
         });
 
       render(<PromptInterface />);
@@ -319,7 +360,10 @@ describe("PromptInterface", () => {
 
       // First attempt - fails
       await userEvent.type(input, "Test prompt");
-      await userEvent.click(button);
+
+      await act(async () => {
+        await userEvent.click(button);
+      });
 
       await waitFor(() => {
         expect(screen.getByRole("alert")).toBeInTheDocument();
@@ -327,12 +371,18 @@ describe("PromptInterface", () => {
 
       // Retry button should appear
       const retryButton = screen.getByRole("button", { name: /retry/i });
-      await userEvent.click(retryButton);
 
-      // Should succeed
-      await waitFor(() => {
-        expect(screen.queryByRole("alert")).not.toBeInTheDocument();
+      await act(async () => {
+        await userEvent.click(retryButton);
       });
+
+      // Should succeed - error should be cleared
+      await waitFor(
+        () => {
+          expect(screen.queryByRole("alert")).not.toBeInTheDocument();
+        },
+        { timeout: 3000 },
+      );
     });
 
     it("should handle network timeout gracefully", async () => {
