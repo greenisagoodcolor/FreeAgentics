@@ -121,13 +121,15 @@ jobs:
       - name: "🔍 Lint Python Code"
         run: |
           source venv/bin/activate
+          mkdir -p reports/flake8
           echo "### Python Linting" >> $GITHUB_STEP_SUMMARY
           ruff check . --output-format=github
-          flake8 . --exclude=venv,node_modules,.git --statistics --format=html --htmldir=reports/flake8 || true
+          flake8 . --exclude=venv,node_modules,.git --statistics --format=default || true
 
       - name: "🔒 Type Checking (Python)"
         run: |
           source venv/bin/activate
+          mkdir -p reports/mypy
           mypy agents/ api/ coalitions/ --ignore-missing-imports --html-report reports/mypy || true
 
       - name: "📦 Frontend Quality Checks"
@@ -148,7 +150,7 @@ jobs:
 
           # Run TypeScript check with explicit baseUrl to ensure path resolution
           echo "🔍 Running TypeScript compilation check..."
-          npx tsc --noEmit --skipLibCheck false --verbose || echo "❌ TypeScript issues found" >> $GITHUB_STEP_SUMMARY
+          npx tsc --noEmit --skipLibCheck false || echo "❌ TypeScript issues found" >> $GITHUB_STEP_SUMMARY
 
       - name: "📊 Upload Quality Reports"
         uses: actions/upload-artifact@v4
@@ -186,6 +188,7 @@ jobs:
 
       - name: "🔍 Secret Scanning"
         run: |
+          mkdir -p reports
           echo "### Secret Scanning" >> $GITHUB_STEP_SUMMARY
           # Check for hardcoded secrets
           make check-secrets || echo "⚠️ Potential secrets found" >> $GITHUB_STEP_SUMMARY
@@ -196,15 +199,17 @@ jobs:
       - name: "🛡️ Dependency Vulnerability Scan"
         run: |
           source venv/bin/activate
+          mkdir -p reports
           echo "### Dependency Security" >> $GITHUB_STEP_SUMMARY
 
           # Python dependencies
           pip-audit --format json --output reports/pip-audit.json || echo "⚠️ Python vulnerabilities found" >> $GITHUB_STEP_SUMMARY
-          safety check --json --output reports/safety.json || echo "⚠️ Known vulnerabilities in dependencies" >> $GITHUB_STEP_SUMMARY
+          safety check --json || echo "⚠️ Known vulnerabilities in dependencies" >> $GITHUB_STEP_SUMMARY
 
       - name: "🔒 Static Security Analysis"
         run: |
           source venv/bin/activate
+          mkdir -p reports
           echo "### Code Security Analysis" >> $GITHUB_STEP_SUMMARY
 
           # Bandit security scan
