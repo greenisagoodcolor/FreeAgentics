@@ -15,6 +15,7 @@ from unittest.mock import Mock, patch
 
 import numpy as np
 import pytest
+
 from auth.ml_threat_detection import (
     FeatureExtractor,
     MLThreatDetector,

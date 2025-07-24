@@ -9,10 +9,11 @@ import time
 
 import jwt
 import pytest
-from auth.security_headers import SecurityHeadersManager
-from auth.security_implementation import AuthenticationManager
 from fastapi import FastAPI, HTTPException
 from fastapi.testclient import TestClient
+
+from auth.security_headers import SecurityHeadersManager
+from auth.security_implementation import AuthenticationManager
 
 
 class TestPenetrationTestingScenarios:

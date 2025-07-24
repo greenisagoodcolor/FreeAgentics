@@ -18,10 +18,11 @@ from typing import Dict, List
 from unittest.mock import patch
 
 import pytest
-from auth.security_headers import SecurityHeadersManager
-from auth.security_implementation import AuthenticationManager
 from fastapi import FastAPI, Request, Response
 from fastapi.testclient import TestClient
+
+from auth.security_headers import SecurityHeadersManager
+from auth.security_implementation import AuthenticationManager
 
 
 class MockAuthAPI:

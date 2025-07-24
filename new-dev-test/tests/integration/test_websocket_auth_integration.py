@@ -9,11 +9,11 @@ from datetime import datetime, timedelta, timezone
 from unittest.mock import AsyncMock, patch
 
 import pytest
-from api.v1.websocket import handle_agent_command, handle_query, manager
-from auth.security_implementation import AuthenticationManager, Permission, TokenData, UserRole
 from fastapi import HTTPException, WebSocket
 from fastapi.websockets import WebSocketDisconnect
 
+from api.v1.websocket import handle_agent_command, handle_query, manager
+from auth.security_implementation import AuthenticationManager, Permission, TokenData, UserRole
 from websocket.auth_handler import websocket_auth
 
 

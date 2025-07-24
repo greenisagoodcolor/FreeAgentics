@@ -15,9 +15,10 @@ from datetime import datetime, timedelta, timezone
 from unittest.mock import patch
 
 import pytest
+from fastapi import HTTPException
+
 from auth.security_implementation import AuthenticationManager, User, UserRole
 from auth.security_logging import SecurityEventSeverity, SecurityEventType, security_auditor
-from fastapi import HTTPException
 
 
 class TestJWTSuspiciousPatternDetection:

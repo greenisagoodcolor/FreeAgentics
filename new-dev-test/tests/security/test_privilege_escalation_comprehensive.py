@@ -18,10 +18,11 @@ from unittest.mock import MagicMock, patch
 
 import jwt
 import pytest
-from api.main import app
-from auth.security_implementation import Permission, UserRole, auth_manager
 from fastapi import status
 from fastapi.testclient import TestClient
+
+from api.main import app
+from auth.security_implementation import Permission, UserRole, auth_manager
 
 
 class TestVerticalPrivilegeEscalation:

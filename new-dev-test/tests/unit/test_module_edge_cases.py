@@ -16,15 +16,14 @@ import pytest
 
 # Import modules under test
 try:
-    from api.middleware.security_monitoring import SecurityMonitoringMiddleware
-    from auth.security_implementation import SecurityManager
-    from knowledge_graph.evolution import EvolutionEngine
-    from knowledge_graph.storage import GraphStorage
-
     from agents.memory_optimization.belief_compression import BeliefCompressor
     from agents.memory_optimization.matrix_pooling import MatrixPool
+    from api.middleware.security_monitoring import SecurityMonitoringMiddleware
+    from auth.security_implementation import SecurityManager
     from inference.active.gmn_parser import GMNParser
     from inference.gnn.model import GMNModel as GNNModel
+    from knowledge_graph.evolution import EvolutionEngine
+    from knowledge_graph.storage import GraphStorage
 
     IMPORT_SUCCESS = True
 except ImportError as e:

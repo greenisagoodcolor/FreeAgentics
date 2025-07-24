@@ -16,9 +16,10 @@ from datetime import datetime, timezone
 from typing import Dict
 
 import jwt
+from fastapi.testclient import TestClient
+
 from api.main import app
 from auth.security_implementation import AuthenticationManager, rate_limiter
-from fastapi.testclient import TestClient
 
 
 class AuthenticationFlowTester:

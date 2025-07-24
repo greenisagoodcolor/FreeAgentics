@@ -17,9 +17,10 @@ from datetime import datetime
 from unittest.mock import AsyncMock, patch
 
 import pytest
+from fastapi.testclient import TestClient
+
 from api.main import app
 from auth.jwt_handler import jwt_handler
-from fastapi.testclient import TestClient
 
 
 class TestUIBackendIntegration:

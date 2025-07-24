@@ -8,11 +8,10 @@ and real Active Inference implementation.
 import uuid
 
 import pytest
+from sqlalchemy.orm import Session
 
 # Import the app from the API module
 from api.main import app
-from sqlalchemy.orm import Session
-
 from database.models import Agent as AgentModel
 from database.session import get_db
 from tests.helpers import get_auth_headers

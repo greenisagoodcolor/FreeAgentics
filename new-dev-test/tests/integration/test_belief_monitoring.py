@@ -2,6 +2,8 @@
 
 import numpy as np
 import pytest
+
+from agents.base_agent import BasicExplorerAgent
 from observability.belief_monitoring import (
     BeliefMonitor,
     belief_monitoring_hooks,
@@ -9,8 +11,6 @@ from observability.belief_monitoring import (
     get_belief_statistics,
     monitor_belief_update,
 )
-
-from agents.base_agent import BasicExplorerAgent
 
 
 @pytest.fixture

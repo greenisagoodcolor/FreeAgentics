@@ -5,6 +5,8 @@ import logging
 import time
 
 import pytest
+
+from agents.coalition_coordinator import CoalitionCoordinatorAgent
 from observability.coordination_metrics import (
     coordination_metrics,
     get_agent_coordination_stats,
@@ -12,8 +14,6 @@ from observability.coordination_metrics import (
     record_coalition_event,
     record_coordination,
 )
-
-from agents.coalition_coordinator import CoalitionCoordinatorAgent
 
 
 @pytest.fixture

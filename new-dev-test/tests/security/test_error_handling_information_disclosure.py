@@ -25,8 +25,9 @@ import time
 from typing import Any, Dict, List
 
 import pytest
-from api.main import app
 from fastapi.testclient import TestClient
+
+from api.main import app
 
 
 class ErrorDisclosureTestCase:

@@ -4,9 +4,9 @@ import json
 from unittest.mock import Mock, patch
 
 import pytest
-from api.main import app
 from fastapi.testclient import TestClient
 
+from api.main import app
 from inference.llm.provider_interface import GenerationResponse, ProviderStatus
 
 

@@ -7,10 +7,10 @@ import uuid
 from unittest.mock import Mock, patch
 
 import pytest
-from api.main import app
 from fastapi import status
 from fastapi.testclient import TestClient
 
+from api.main import app
 from database.conversation_models import ValidationStatus
 
 

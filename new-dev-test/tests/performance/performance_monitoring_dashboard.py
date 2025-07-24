@@ -26,6 +26,7 @@ from typing import Any, Callable, Dict, List, Optional
 
 import numpy as np
 import psutil
+
 from observability.performance_monitor import get_performance_monitor
 
 logger = logging.getLogger(__name__)

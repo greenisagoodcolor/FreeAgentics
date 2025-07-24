@@ -11,6 +11,7 @@ from unittest.mock import patch
 
 import jwt
 import pytest
+
 from auth.security_implementation import (
     ACCESS_TOKEN_EXPIRE_MINUTES,
     ALGORITHM,

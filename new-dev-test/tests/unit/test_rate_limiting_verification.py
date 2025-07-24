@@ -10,6 +10,7 @@ from concurrent.futures import ThreadPoolExecutor, as_completed
 from unittest.mock import Mock, patch
 
 import pytest
+
 from auth.security_implementation import RateLimiter, get_client_ip, rate_limit
 
 

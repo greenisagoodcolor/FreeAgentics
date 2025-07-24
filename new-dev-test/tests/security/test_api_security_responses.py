@@ -22,8 +22,9 @@ from typing import Any, Dict
 from urllib.parse import quote
 
 import pytest
-from api.main import app
 from fastapi.testclient import TestClient
+
+from api.main import app
 
 
 class APISecurityResponseTester:

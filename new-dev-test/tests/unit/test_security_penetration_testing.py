@@ -9,8 +9,9 @@ import time
 
 import jwt
 import pytest
-from auth.security_implementation import ALGORITHM, JWT_SECRET, AuthenticationManager, UserRole
 from fastapi import HTTPException
+
+from auth.security_implementation import ALGORITHM, JWT_SECRET, AuthenticationManager, UserRole
 
 
 class TestSecurityPenetrationTesting:

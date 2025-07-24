@@ -12,9 +12,8 @@ from pathlib import Path
 # Add parent directory to path
 sys.path.insert(0, str(Path(__file__).parent))
 
-from knowledge_graph.graph_engine import KnowledgeGraph
-
 from agents.pymdp_adapter import PyMDPCompatibilityAdapter
+from knowledge_graph.graph_engine import KnowledgeGraph
 from services.belief_kg_bridge import BeliefKGBridge
 from services.iterative_controller import ConversationContext, IterativeController
 

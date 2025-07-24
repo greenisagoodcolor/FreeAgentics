@@ -6,7 +6,6 @@ from unittest.mock import MagicMock
 
 import numpy as np
 import pytest
-from knowledge_graph.graph_engine import KnowledgeGraph
 
 from agents.base_agent import BasicExplorerAgent
 from agents.coalition_coordinator import CoalitionCoordinatorAgent
@@ -14,6 +13,7 @@ from agents.resource_collector import ResourceCollectorAgent
 from database.models import Agent as AgentModel
 from database.models import Coalition
 from database.session import get_db
+from knowledge_graph.graph_engine import KnowledgeGraph
 
 
 @pytest.fixture

@@ -11,9 +11,10 @@ from datetime import datetime
 from typing import Dict, Optional, Set, Tuple
 from urllib.parse import parse_qs, urlparse
 
-from auth.security_implementation import AuthenticationManager, Permission, TokenData
 from fastapi import HTTPException, WebSocket, WebSocketDisconnect
 from pydantic import BaseModel, Field
+
+from auth.security_implementation import AuthenticationManager, Permission, TokenData
 
 logger = logging.getLogger(__name__)
 

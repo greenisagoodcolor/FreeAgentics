@@ -27,6 +27,7 @@ from urllib.parse import quote
 import httpx
 import jwt
 import pytest
+
 from auth.jwt_handler import JWTHandler
 from auth.security_implementation import SecurityImplementation
 

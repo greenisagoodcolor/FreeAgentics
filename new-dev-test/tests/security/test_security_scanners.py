@@ -9,6 +9,7 @@ from datetime import datetime
 from unittest.mock import AsyncMock, MagicMock, Mock, patch
 
 import pytest
+
 from security.testing.dast_integration import (
     Alert,
     APIScanner,

@@ -16,13 +16,12 @@ from typing import Any, Dict
 # Add project root to path
 sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
-from knowledge_graph.graph_engine import KnowledgeGraph, KnowledgeNode, NodeType
-
 from agents.pymdp_adapter import PyMDPCompatibilityAdapter
 
 # Component imports (these exist)
 from inference.active.gmn_parser import GMNParser
 from inference.llm.provider_interface import ProviderManager
+from knowledge_graph.graph_engine import KnowledgeGraph, KnowledgeNode, NodeType
 
 # Missing imports (these need to be created)
 # from agents.agent_factory import AgentFactory

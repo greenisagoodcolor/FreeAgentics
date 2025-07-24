@@ -14,9 +14,10 @@ from datetime import datetime, timedelta
 
 import jwt
 import pytest
+from fastapi.testclient import TestClient
+
 from api.main import app
 from auth import AuthenticationManager, auth_manager
-from fastapi.testclient import TestClient
 
 
 class TestSessionManagement:

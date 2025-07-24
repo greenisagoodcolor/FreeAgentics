@@ -13,6 +13,11 @@ import sys
 from contextlib import asynccontextmanager
 from typing import AsyncGenerator
 
+from fastapi import FastAPI, Request
+from fastapi.middleware.cors import CORSMiddleware
+from fastapi.middleware.gzip import GZipMiddleware
+from fastapi.responses import JSONResponse
+
 from api.middleware.metrics import MetricsMiddleware
 from api.middleware.rate_limiter import RateLimitMiddleware, create_rate_limiter
 
@@ -20,10 +25,6 @@ from api.middleware.rate_limiter import RateLimitMiddleware, create_rate_limiter
 from auth import SecurityMiddleware
 from auth.https_enforcement import HTTPSEnforcementMiddleware, SSLConfiguration
 from auth.security_headers import SecurityHeadersManager, SecurityHeadersMiddleware, SecurityPolicy
-from fastapi import FastAPI, Request
-from fastapi.middleware.cors import CORSMiddleware
-from fastapi.middleware.gzip import GZipMiddleware
-from fastapi.responses import JSONResponse
 
 # Configure logging
 logging.basicConfig(
@@ -262,6 +263,7 @@ async def get_metrics():
     """Prometheus metrics endpoint for monitoring."""
     try:
         from fastapi import Response
+
         from observability.prometheus_metrics import (
             get_prometheus_content_type,
             get_prometheus_metrics,

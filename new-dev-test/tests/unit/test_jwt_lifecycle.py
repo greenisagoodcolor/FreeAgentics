@@ -20,9 +20,10 @@ from unittest.mock import patch
 
 import jwt
 import pytest
+from fastapi import HTTPException
+
 from auth.security_implementation import ALGORITHM, AuthenticationManager, User, UserRole
 from auth.security_logging import SecurityEventType, security_auditor
-from fastapi import HTTPException
 
 
 class TestJWTLifecycle:

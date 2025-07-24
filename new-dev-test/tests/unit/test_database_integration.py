@@ -7,11 +7,11 @@ Tests that the API endpoints actually use PostgreSQL and not in-memory storage.
 import os
 
 import pytest
-from api.main import app
 from fastapi.testclient import TestClient
 from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker
 
+from api.main import app
 from database.base import Base
 from database.models import Agent as AgentModel
 from database.models import AgentStatus

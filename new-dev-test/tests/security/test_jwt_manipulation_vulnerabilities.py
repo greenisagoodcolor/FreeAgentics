@@ -21,10 +21,11 @@ from datetime import datetime, timedelta, timezone
 
 import jwt
 import pytest
-from auth.security_implementation import ALGORITHM, AuthenticationManager, User, UserRole
 from cryptography.hazmat.primitives import serialization
 from cryptography.hazmat.primitives.asymmetric import rsa
 from fastapi import HTTPException
+
+from auth.security_implementation import ALGORITHM, AuthenticationManager, User, UserRole
 
 
 class TestAlgorithmAttacks:

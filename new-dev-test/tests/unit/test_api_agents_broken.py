@@ -13,12 +13,11 @@ os.environ["TESTING"] = "true"
 os.environ["DATABASE_URL"] = "sqlite:///./test.db"
 
 import pytest
-
-# Import the app from the API module
-from api.main import app
 from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker
 
+# Import the app from the API module
+from api.main import app
 from database.base import Base
 from database.models import Agent as AgentModel
 from database.models import AgentStatus

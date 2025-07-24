@@ -6,6 +6,7 @@ Following TDD principles - write tests first, then implementation
 from unittest.mock import AsyncMock, Mock
 
 import pytest
+
 from knowledge_graph.entity_node_mapper import (
     Edge,
     EntityNodeMapper,

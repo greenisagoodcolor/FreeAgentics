@@ -11,6 +11,7 @@ from concurrent.futures import ThreadPoolExecutor, as_completed
 from datetime import datetime, timezone
 
 import pytest
+
 from auth.security_implementation import AuthenticationManager, RateLimiter, User, UserRole
 
 

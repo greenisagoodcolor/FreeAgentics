@@ -10,6 +10,9 @@ from datetime import datetime, timedelta
 from unittest.mock import MagicMock, patch
 
 import pytest
+from fastapi import FastAPI, Response
+from fastapi.testclient import TestClient
+
 from auth.https_enforcement import (
     HTTPSEnforcementMiddleware,
     LoadBalancerSSLConfig,
@@ -18,8 +21,6 @@ from auth.https_enforcement import (
     generate_self_signed_cert,
 )
 from auth.security_headers import SecurityHeadersMiddleware, SecurityPolicy
-from fastapi import FastAPI, Response
-from fastapi.testclient import TestClient
 
 
 class TestSSLConfiguration:

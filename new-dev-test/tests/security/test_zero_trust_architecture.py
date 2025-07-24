@@ -19,6 +19,7 @@ from cryptography import x509
 from cryptography.hazmat.primitives import hashes, serialization
 from cryptography.hazmat.primitives.asymmetric import rsa
 from cryptography.x509.oid import NameOID
+
 from security.zero_trust.identity_proxy import (
     IdentityAwareProxy,
     ProxyConfig,

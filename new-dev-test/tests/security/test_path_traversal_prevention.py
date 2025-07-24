@@ -23,8 +23,9 @@ import urllib.parse
 from typing import Any, Dict
 
 import pytest
-from api.main import app
 from fastapi.testclient import TestClient
+
+from api.main import app
 
 
 class PathTraversalPreventionTester:

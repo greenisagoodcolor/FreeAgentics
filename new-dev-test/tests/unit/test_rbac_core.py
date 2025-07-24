@@ -7,6 +7,7 @@ without requiring complex setup or integration dependencies.
 from datetime import datetime, timedelta, timezone
 
 import pytest
+
 from auth.comprehensive_audit_logger import AccessDecisionAuditor
 from auth.rbac_enhancements import (
     ABACEffect,

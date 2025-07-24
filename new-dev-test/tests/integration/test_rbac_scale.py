@@ -23,6 +23,7 @@ from datetime import datetime, timezone
 from typing import Dict, List, Tuple
 
 import pytest
+
 from auth.security_implementation import (
     ROLE_PERMISSIONS,
     AuthenticationManager,

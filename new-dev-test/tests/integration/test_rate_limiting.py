@@ -5,6 +5,8 @@ import time
 from unittest.mock import AsyncMock, MagicMock, patch
 
 import pytest
+from fastapi import Request
+
 from api.middleware.ddos_protection import (
     DDoSProtectionMiddleware,
     EndpointRateLimits,
@@ -12,7 +14,6 @@ from api.middleware.ddos_protection import (
     RateLimiter,
 )
 from api.middleware.websocket_rate_limiting import WebSocketRateLimitManager
-from fastapi import Request
 
 
 class TestRateLimitConfig:

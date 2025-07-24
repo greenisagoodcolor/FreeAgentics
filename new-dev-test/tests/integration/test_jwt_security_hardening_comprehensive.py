@@ -19,12 +19,12 @@ from unittest.mock import patch
 
 import jwt
 import pytest
-from auth import UserRole, auth_manager
-from auth.jwt_handler import jwt_handler
 from cryptography.hazmat.primitives.asymmetric import rsa
 from fastapi import HTTPException, status
 from fastapi.testclient import TestClient
 
+from auth import UserRole, auth_manager
+from auth.jwt_handler import jwt_handler
 from main import app
 
 

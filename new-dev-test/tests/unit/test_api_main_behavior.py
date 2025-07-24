@@ -201,8 +201,9 @@ class TestAPILifecycleBehavior:
         WHEN: The lifespan context manager is used
         THEN: It should handle startup and shutdown gracefully
         """
-        from api.main import lifespan
         from fastapi import FastAPI
+
+        from api.main import lifespan
 
         app = FastAPI()
 

@@ -20,10 +20,9 @@ results = {
 # Test 1: Core imports
 print("1. TESTING CORE IMPORTS...")
 try:
-    from knowledge_graph.graph_engine import KnowledgeGraph
-
     from agents.pymdp_adapter import PyMDPCompatibilityAdapter
     from inference.active.gmn_parser import GMNParser
+    from knowledge_graph.graph_engine import KnowledgeGraph
     from services.agent_factory import AgentFactory
     from services.belief_kg_bridge import BeliefKGBridge
     from services.iterative_controller import IterativeController

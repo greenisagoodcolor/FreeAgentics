@@ -19,10 +19,11 @@ from unittest.mock import patch
 # Add project root to path
 sys.path.insert(0, ".")
 
+from fastapi.testclient import TestClient
+
 from api.main import app
 from api.v1.agents import Agent as V1Agent
 from auth.jwt_handler import jwt_handler
-from fastapi.testclient import TestClient
 
 
 def create_test_token():

@@ -8,9 +8,9 @@ import uuid
 from datetime import datetime
 
 import pytest
-from knowledge_graph.conversation_auto_updater import ConversationAutoUpdater
 
 from database.conversation_models import Conversation, Message
+from knowledge_graph.conversation_auto_updater import ConversationAutoUpdater
 
 
 class TestKnowledgeGraphAutoUpdates:

@@ -8,11 +8,11 @@ for knowledge graph persistence and querying.
 from datetime import datetime
 
 import pytest
-from knowledge_graph.graph_engine import EdgeType, KnowledgeGraph, NodeType
-from knowledge_graph.storage import DatabaseStorageBackend
 from sqlalchemy import text
 from sqlalchemy.orm import Session
 
+from knowledge_graph.graph_engine import EdgeType, KnowledgeGraph, NodeType
+from knowledge_graph.storage import DatabaseStorageBackend
 from tests.db_infrastructure.factories import AgentFactory
 from tests.db_infrastructure.fixtures import DatabaseTestCase
 from tests.db_infrastructure.test_config import TEST_DATABASE_URL

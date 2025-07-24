@@ -6,11 +6,11 @@ Following TDD: tests fail first, then we implement minimal code to make them pas
 """
 
 import pytest
-from api.main import app
-from auth.security_implementation import get_current_user
 from fastapi.testclient import TestClient
 from sqlalchemy.orm import Session
 
+from api.main import app
+from auth.security_implementation import get_current_user
 from database.session import get_db
 from tests.test_helpers.auth_helpers import mock_auth_dependency
 

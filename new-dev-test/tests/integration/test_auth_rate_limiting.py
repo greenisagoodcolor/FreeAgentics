@@ -21,6 +21,7 @@ from datetime import datetime, timezone
 from typing import Dict, List, Optional, Tuple
 
 import pytest
+
 from auth.security_implementation import AuthenticationManager, User, UserRole
 from auth.security_logging import SecurityEventType, security_auditor
 

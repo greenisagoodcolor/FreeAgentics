@@ -7,9 +7,10 @@ Tests the WebSocket endpoints, connection management, and event broadcasting.
 from unittest.mock import AsyncMock, MagicMock, patch
 
 import pytest
-from api.v1.websocket import ConnectionManager, WebSocketMessage, broadcast_agent_event
 from fastapi import WebSocket
 from fastapi.testclient import TestClient
+
+from api.v1.websocket import ConnectionManager, WebSocketMessage, broadcast_agent_event
 
 
 class TestConnectionManager:

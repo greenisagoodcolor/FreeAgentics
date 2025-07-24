@@ -9,10 +9,10 @@ import tempfile
 from unittest.mock import patch
 
 import pytest
+from fastapi.testclient import TestClient
 
 # Import the main app
 from api.main import app
-from fastapi.testclient import TestClient
 
 
 @pytest.fixture(scope="session")

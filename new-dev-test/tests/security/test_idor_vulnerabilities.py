@@ -18,11 +18,12 @@ from datetime import datetime
 from typing import Dict, Optional, Tuple
 
 import pytest
-from api.main import app
-from auth.security_implementation import AuthenticationManager, UserRole
 from fastapi import status
 from fastapi.testclient import TestClient
 from sqlalchemy.orm import Session
+
+from api.main import app
+from auth.security_implementation import AuthenticationManager, UserRole
 
 
 # Mock create_access_token for testing

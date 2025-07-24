@@ -11,10 +11,10 @@ from typing import Any, Dict
 from unittest.mock import AsyncMock, MagicMock, patch
 
 import pytest
-from api.v1.prompts import PromptRequest, get_prompt_processor, process_prompt
-from auth.security_implementation import Permission, Role, TokenData
 from sqlalchemy.ext.asyncio import AsyncSession
 
+from api.v1.prompts import PromptRequest, get_prompt_processor, process_prompt
+from auth.security_implementation import Permission, Role, TokenData
 from database.prompt_models import Conversation
 from services.websocket_integration import pipeline_monitor
 

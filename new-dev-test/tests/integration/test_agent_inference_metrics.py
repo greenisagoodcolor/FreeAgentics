@@ -5,6 +5,8 @@ import time
 
 import numpy as np
 import pytest
+
+from agents.base_agent import BasicExplorerAgent
 from observability.performance_metrics import (
     get_agent_report,
     get_performance_report,
@@ -15,8 +17,6 @@ from observability.performance_metrics import (
     start_performance_tracking,
     stop_performance_tracking,
 )
-
-from agents.base_agent import BasicExplorerAgent
 
 
 @pytest.fixture

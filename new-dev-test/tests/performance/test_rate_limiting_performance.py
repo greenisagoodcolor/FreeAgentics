@@ -21,8 +21,9 @@ from unittest.mock import MagicMock
 import psutil
 import pytest
 import redis.asyncio as aioredis
-from api.middleware.ddos_protection import RateLimitConfig, RateLimiter
 from fastapi import Request
+
+from api.middleware.ddos_protection import RateLimitConfig, RateLimiter
 
 
 @dataclass

@@ -21,6 +21,7 @@ from datetime import datetime, timedelta, timezone
 from typing import Dict
 
 import jwt
+
 from api.models.security_validators import SecureInputModel as InputValidator
 from auth.security_implementation import AuthenticationManager, UserRole
 

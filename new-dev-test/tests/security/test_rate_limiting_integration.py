@@ -16,6 +16,9 @@ from unittest.mock import MagicMock
 
 import pytest
 import redis.asyncio as redis
+from fastapi import FastAPI
+from fastapi.testclient import TestClient
+
 from api.middleware.rate_limiter import (
     BlockReason,
     EndpointConfig,
@@ -25,8 +28,6 @@ from api.middleware.rate_limiter import (
     RateLimitMiddleware,
     create_rate_limiter,
 )
-from fastapi import FastAPI
-from fastapi.testclient import TestClient
 
 
 class TestRateLimiterIntegration:

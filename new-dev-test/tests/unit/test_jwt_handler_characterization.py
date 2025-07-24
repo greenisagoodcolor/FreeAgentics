@@ -21,6 +21,10 @@ from unittest.mock import Mock
 
 import jwt
 import pytest
+from cryptography.hazmat.primitives import serialization
+from cryptography.hazmat.primitives.asymmetric import rsa
+from fastapi import HTTPException
+
 from auth.jwt_handler import (
     ACCESS_TOKEN_EXPIRE_MINUTES,
     JWT_ALGORITHM,
@@ -30,9 +34,6 @@ from auth.jwt_handler import (
     RefreshTokenStore,
     TokenBlacklist,
 )
-from cryptography.hazmat.primitives import serialization
-from cryptography.hazmat.primitives.asymmetric import rsa
-from fastapi import HTTPException
 
 
 @pytest.fixture

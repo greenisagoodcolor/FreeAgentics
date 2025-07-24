@@ -14,6 +14,7 @@ from datetime import datetime, timedelta
 from unittest.mock import Mock, patch
 
 import pytest
+
 from auth.mfa_service import MFAEnrollmentRequest, MFAService, MFASettings, MFAVerificationRequest
 from auth.security_logging import SecurityEventType
 

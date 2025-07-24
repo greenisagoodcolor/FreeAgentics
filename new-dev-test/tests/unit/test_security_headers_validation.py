@@ -8,6 +8,9 @@ according to OWASP recommendations and security best practices.
 from unittest.mock import Mock, patch
 
 import pytest
+from fastapi import FastAPI
+from fastapi.testclient import TestClient
+
 from auth.security_headers import (
     SecurityHeadersMiddleware,
     add_security_headers,
@@ -15,8 +18,6 @@ from auth.security_headers import (
     validate_csp_header,
     validate_hsts_header,
 )
-from fastapi import FastAPI
-from fastapi.testclient import TestClient
 
 
 class TestSecurityHeadersValidation:

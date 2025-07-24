@@ -9,12 +9,12 @@ import uuid
 from typing import Dict
 
 import pytest
-from api.main import app
-from auth.security_implementation import UserRole, create_access_token
 from fastapi import status
 from fastapi.testclient import TestClient
 from sqlalchemy.orm import Session
 
+from api.main import app
+from auth.security_implementation import UserRole, create_access_token
 from database.models import Agent, AgentStatus, Coalition, CoalitionStatus
 
 

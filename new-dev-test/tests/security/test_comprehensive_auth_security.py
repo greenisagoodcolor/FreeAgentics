@@ -17,9 +17,10 @@ from datetime import datetime, timedelta, timezone
 from typing import Dict, List
 
 import jwt
+from fastapi.testclient import TestClient
+
 from api.main import app
 from auth.security_implementation import AuthenticationManager, User, UserRole, rate_limiter
-from fastapi.testclient import TestClient
 
 
 class SecurityTestResults:

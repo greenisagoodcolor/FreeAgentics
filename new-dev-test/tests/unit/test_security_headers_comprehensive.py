@@ -8,6 +8,8 @@ import ssl
 from unittest.mock import MagicMock, patch
 
 import pytest
+from fastapi.testclient import TestClient
+
 from auth.security_headers import (
     SecurityHeadersManager,
     SecurityHeadersMiddleware,
@@ -22,7 +24,6 @@ from auth.ssl_tls_config import (
     create_production_ssl_context,
     validate_ssl_configuration,
 )
-from fastapi.testclient import TestClient
 
 
 class TestSecurityHeaders:

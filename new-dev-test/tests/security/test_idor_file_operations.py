@@ -17,10 +17,11 @@ import uuid
 from typing import Dict, List
 
 import pytest
-from api.main import app
-from auth.security_implementation import UserRole, create_access_token
 from fastapi import status
 from fastapi.testclient import TestClient
+
+from api.main import app
+from auth.security_implementation import UserRole, create_access_token
 
 
 class TestFileOperationIDOR:

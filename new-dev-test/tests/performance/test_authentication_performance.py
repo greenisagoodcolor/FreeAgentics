@@ -24,10 +24,10 @@ from typing import Any, Dict, List
 
 import psutil
 import pytest
-from api.main import app
-from auth.security_implementation import AuthenticationManager, User, UserRole, rate_limiter
 from fastapi.testclient import TestClient
 
+from api.main import app
+from auth.security_implementation import AuthenticationManager, User, UserRole, rate_limiter
 from tests.performance.performance_utils import replace_sleep
 
 

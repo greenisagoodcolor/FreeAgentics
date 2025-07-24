@@ -3,6 +3,8 @@
 import asyncio
 
 import pytest
+
+from agents.base_agent import BasicExplorerAgent
 from observability.alerting_system import (
     AlertLevel,
     AlertType,
@@ -18,8 +20,6 @@ from observability.performance_metrics import (
     start_performance_tracking,
     stop_performance_tracking,
 )
-
-from agents.base_agent import BasicExplorerAgent
 
 
 @pytest.fixture

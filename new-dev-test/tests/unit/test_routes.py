@@ -24,7 +24,6 @@ with patch.dict(os.environ, test_env, clear=False):
     # These imports will be available after implementation
     try:
         from api.main import app
-
         from database.session import get_db_context
     except ImportError:
         # Temporary to make tests syntactically valid

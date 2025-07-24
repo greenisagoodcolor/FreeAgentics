@@ -11,6 +11,9 @@ from datetime import datetime, timedelta, timezone
 from unittest.mock import Mock, patch
 
 import pytest
+from fastapi import HTTPException, Request
+from sqlalchemy.orm import Session
+
 from auth.rbac_enhancements import (
     ABACEffect,
     ABACRule,
@@ -33,9 +36,6 @@ from auth.security_implementation import (
     TokenData,
     UserRole,
 )
-from fastapi import HTTPException, Request
-from sqlalchemy.orm import Session
-
 from database.models import Agent as AgentModel
 from database.models import AgentStatus
 

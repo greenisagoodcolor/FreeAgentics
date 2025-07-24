@@ -20,6 +20,8 @@ from unittest.mock import Mock
 
 import jwt
 import pytest
+from fastapi import HTTPException
+
 from auth.security_implementation import (
     ACCESS_TOKEN_EXPIRE_MINUTES,
     ALGORITHM,
@@ -29,7 +31,6 @@ from auth.security_implementation import (
     UserRole,
 )
 from auth.security_logging import security_auditor
-from fastapi import HTTPException
 
 
 class TestJWTComprehensiveValidation:

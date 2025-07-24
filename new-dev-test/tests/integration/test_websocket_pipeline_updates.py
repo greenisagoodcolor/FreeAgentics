@@ -9,10 +9,10 @@ import uuid
 from unittest.mock import AsyncMock, patch
 
 import pytest
-from api.v1.prompts import websocket_pipeline_callback
-from api.v1.websocket import ConnectionManager
 from fastapi import WebSocket
 
+from api.v1.prompts import websocket_pipeline_callback
+from api.v1.websocket import ConnectionManager
 from services.websocket_integration import (
     PipelineEventType,
     PipelineStage,

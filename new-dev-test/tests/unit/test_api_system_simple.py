@@ -4,6 +4,7 @@ from datetime import datetime
 from unittest.mock import Mock, patch
 
 import pytest
+
 from api.v1.system import (
     ServiceHealth,
     SystemMetrics,

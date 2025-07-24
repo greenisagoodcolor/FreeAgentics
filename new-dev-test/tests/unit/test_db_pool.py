@@ -10,6 +10,7 @@ from unittest.mock import patch
 
 import asyncpg
 import pytest
+
 from api.resilient_db import (
     MAX_RETRIES,
     RETRY_DELAY,

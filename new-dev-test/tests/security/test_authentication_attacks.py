@@ -19,6 +19,7 @@ from unittest.mock import patch
 
 import jwt
 import pytest
+
 from auth.security_headers import SecurityHeadersManager
 from auth.security_implementation import AuthenticationManager, UserRole
 

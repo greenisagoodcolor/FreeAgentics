@@ -14,8 +14,9 @@ from datetime import datetime, timedelta, timezone
 
 import jwt
 import pytest
-from auth.security_implementation import AuthenticationManager, User, UserRole
 from fastapi import HTTPException
+
+from auth.security_implementation import AuthenticationManager, User, UserRole
 
 
 class TestRefreshTokenRotation:

@@ -20,12 +20,13 @@ from datetime import datetime, timedelta
 import jwt
 import pytest
 import redis.asyncio as aioredis
+from fastapi import FastAPI
+from httpx import AsyncClient
+
 from api.middleware.ddos_protection import DDoSProtectionMiddleware
 from api.middleware.security_monitoring import SecurityMonitoringMiddleware
 from api.v1.auth import router as auth_router
 from auth.jwt_handler import jwt_handler as JWTHandler
-from fastapi import FastAPI
-from httpx import AsyncClient
 
 
 class TestAuthenticationBruteForce:

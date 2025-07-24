@@ -9,9 +9,10 @@ from datetime import datetime, timedelta, timezone
 from unittest.mock import AsyncMock, patch
 
 import pytest
+from fastapi import HTTPException, WebSocket
+
 from api.v1.websocket import handle_agent_command, handle_query, websocket_auth
 from auth.security_implementation import Permission, TokenData, UserRole
-from fastapi import HTTPException, WebSocket
 
 
 class TestWebSocketAuth:

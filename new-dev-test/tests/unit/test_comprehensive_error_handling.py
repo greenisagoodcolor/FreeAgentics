@@ -18,14 +18,13 @@ import pytest
 
 # Import modules under test
 try:
-    from knowledge_graph.graph_engine import KnowledgeGraph as GraphEngine
-    from knowledge_graph.query import QueryEngine
-
     from agents.agent_manager import AgentManager
     from agents.base_agent import BasicExplorerAgent
     from agents.coalition_coordinator import CoalitionCoordinator
     from agents.error_handling import ActionSelectionError, ErrorHandler, InferenceError, PyMDPError
     from inference.llm.local_llm_manager import LocalLLMManager
+    from knowledge_graph.graph_engine import KnowledgeGraph as GraphEngine
+    from knowledge_graph.query import QueryEngine
 
     IMPORT_SUCCESS = True
 except ImportError as e:

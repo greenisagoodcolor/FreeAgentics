@@ -24,10 +24,6 @@ from typing import Any, Dict
 
 import bcrypt
 import pytest
-from auth.certificate_pinning import CertificateValidator, MobileCertificatePinner, PinConfiguration
-
-# Import platform components
-from auth.security_implementation import JWT_SECRET, SECRET_KEY, AuthenticationManager
 from cryptography.exceptions import InvalidSignature
 from cryptography.hazmat.backends import default_backend
 from cryptography.hazmat.primitives import hashes
@@ -37,6 +33,11 @@ from cryptography.hazmat.primitives.asymmetric import rsa
 from cryptography.hazmat.primitives.ciphers import Cipher, algorithms, modes
 from cryptography.hazmat.primitives.kdf.pbkdf2 import PBKDF2HMAC
 from cryptography.hazmat.primitives.kdf.scrypt import Scrypt
+
+from auth.certificate_pinning import CertificateValidator, MobileCertificatePinner, PinConfiguration
+
+# Import platform components
+from auth.security_implementation import JWT_SECRET, SECRET_KEY, AuthenticationManager
 
 logger = logging.getLogger(__name__)
 

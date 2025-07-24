@@ -10,7 +10,6 @@ import uuid
 from datetime import datetime
 from typing import Any, Callable, Dict, List, Optional, Tuple
 
-from knowledge_graph.graph_engine import KnowledgeGraph
 from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 
@@ -25,6 +24,7 @@ from database.prompt_models import (
     PromptStatus,
 )
 from inference.active.gmn_parser import GMNParser
+from knowledge_graph.graph_engine import KnowledgeGraph
 from services.iterative_controller import IterativeController
 
 logger = logging.getLogger(__name__)

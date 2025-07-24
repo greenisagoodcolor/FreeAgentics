@@ -8,8 +8,9 @@ from datetime import datetime, timezone
 from unittest.mock import MagicMock
 
 import pytest
-from auth import TokenData, UserRole, auth_manager, require_csrf_token
 from fastapi import HTTPException, Request
+
+from auth import TokenData, UserRole, auth_manager, require_csrf_token
 
 
 class TestCSRFProtection:

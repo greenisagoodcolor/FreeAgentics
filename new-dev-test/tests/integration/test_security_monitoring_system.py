@@ -10,10 +10,11 @@ from datetime import datetime
 from unittest.mock import Mock, patch
 
 import pytest
-from api.main import app
-from auth.security_logging import SecurityEventSeverity, SecurityEventType
 from fastapi import status
 from fastapi.testclient import TestClient
+
+from api.main import app
+from auth.security_logging import SecurityEventSeverity, SecurityEventType
 from observability.incident_response import IncidentResponseSystem, IncidentSeverity, IncidentStatus
 from observability.security_monitoring import AttackType, SecurityMonitoringSystem, ThreatLevel
 from observability.vulnerability_scanner import (

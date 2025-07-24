@@ -26,15 +26,15 @@ import logging
 import os
 from typing import Any, Dict
 
-from api.performance_middleware import PerformanceConfig, setup_performance_middleware
-from benchmarks.performance_benchmark_suite import PerformanceBenchmarkRunner
 from fastapi import FastAPI
-from observability.memory_optimizer import get_memory_optimizer, start_memory_optimization
-from observability.performance_monitor import get_performance_monitor, start_performance_monitoring
 
 # Import all optimization modules
 from agents.optimized_agent_manager import OptimizationConfig, OptimizedAgentManager
+from api.performance_middleware import PerformanceConfig, setup_performance_middleware
+from benchmarks.performance_benchmark_suite import PerformanceBenchmarkRunner
 from database.optimized_db import DatabaseConfig, initialize_optimized_db
+from observability.memory_optimizer import get_memory_optimizer, start_memory_optimization
+from observability.performance_monitor import get_performance_monitor, start_performance_monitoring
 
 logger = logging.getLogger(__name__)
 

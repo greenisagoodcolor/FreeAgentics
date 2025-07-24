@@ -10,6 +10,7 @@ from datetime import datetime, timedelta
 from unittest.mock import Mock, mock_open, patch
 
 import pytest
+
 from auth.certificate_pinning import (
     CertificateValidator,
     MobileCertificatePinner,

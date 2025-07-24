@@ -8,6 +8,8 @@ from datetime import datetime
 from unittest.mock import Mock, patch
 
 import pytest
+from fastapi import HTTPException, Request, Response
+from sqlalchemy.orm import Session
 
 # Import auth components without JWT (to avoid import issues)
 from auth.security_implementation import (
@@ -26,8 +28,6 @@ from auth.security_implementation import (
     require_role,
     secure_database_query,
 )
-from fastapi import HTTPException, Request, Response
-from sqlalchemy.orm import Session
 
 
 class TestSecurityImplementationComprehensive:

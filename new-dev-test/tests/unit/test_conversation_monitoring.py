@@ -9,14 +9,14 @@ from datetime import datetime
 from unittest.mock import AsyncMock, Mock
 
 import pytest
+
+from database.conversation_models import Conversation, Message
 from knowledge_graph.conversation_monitoring import (
     ConversationEvent,
     ConversationEventType,
     ConversationMonitor,
 )
 from knowledge_graph.graph_engine import KnowledgeGraph as GraphEngine
-
-from database.conversation_models import Conversation, Message
 
 
 class TestConversationMonitoring:

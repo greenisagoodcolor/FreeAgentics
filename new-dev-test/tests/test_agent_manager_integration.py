@@ -14,10 +14,11 @@ from datetime import datetime
 from unittest.mock import MagicMock, patch
 
 import pytest
+from fastapi.testclient import TestClient
+
 from api.main import app
 from api.v1.agents import Agent as V1Agent
 from auth.jwt_handler import jwt_handler
-from fastapi.testclient import TestClient
 
 
 class TestAgentManagerIntegration:

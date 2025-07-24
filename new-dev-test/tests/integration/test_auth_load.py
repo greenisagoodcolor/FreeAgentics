@@ -25,9 +25,10 @@ from typing import Dict, List, Tuple
 
 import psutil
 import pytest
+from fastapi import HTTPException
+
 from auth.security_implementation import AuthenticationManager, User, UserRole
 from auth.security_logging import security_auditor
-from fastapi import HTTPException
 
 
 @dataclass

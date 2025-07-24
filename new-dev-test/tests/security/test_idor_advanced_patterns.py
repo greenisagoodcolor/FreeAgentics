@@ -16,9 +16,9 @@ from concurrent.futures import ThreadPoolExecutor
 
 import pytest
 import websockets
-from auth.security_implementation import UserRole
 from fastapi import status
 
+from auth.security_implementation import UserRole
 from tests.security.test_idor_vulnerabilities import IDORTestBase
 
 

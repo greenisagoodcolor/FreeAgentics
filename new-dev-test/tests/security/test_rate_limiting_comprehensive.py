@@ -17,14 +17,15 @@ from unittest.mock import MagicMock, patch
 
 import pytest
 import redis.asyncio as aioredis
+from fastapi import FastAPI, Request, status
+from fastapi.testclient import TestClient
+
 from api.middleware.ddos_protection import (
     DDoSProtectionMiddleware,
     RateLimitConfig,
     RateLimiter,
     WebSocketRateLimiter,
 )
-from fastapi import FastAPI, Request, status
-from fastapi.testclient import TestClient
 
 
 class TestBasicRateLimiting:

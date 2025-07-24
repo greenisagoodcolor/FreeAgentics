@@ -23,12 +23,11 @@ from datetime import datetime
 sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
 
-from knowledge_graph.evolution import EvolutionEngine
-from knowledge_graph.graph_engine import KnowledgeGraph
-
 from agents.base_agent import PYMDP_AVAILABLE, BasicExplorerAgent
 from agents.resource_collector import ResourceCollectorAgent
 from database.session import init_db
+from knowledge_graph.evolution import EvolutionEngine
+from knowledge_graph.graph_engine import KnowledgeGraph
 from world.grid_world import GridWorld, GridWorldConfig, Position
 
 # Setup logging

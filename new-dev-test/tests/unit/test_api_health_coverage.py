@@ -3,11 +3,12 @@
 from unittest.mock import Mock
 
 import pytest
-from api.v1.health import database_exception_handler, health_check, router
 from fastapi import FastAPI
 from fastapi.testclient import TestClient
 from sqlalchemy.exc import OperationalError
 from sqlalchemy.orm import Session
+
+from api.v1.health import database_exception_handler, health_check, router
 
 
 class TestHealthEndpoint:

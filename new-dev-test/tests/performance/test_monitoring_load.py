@@ -6,6 +6,9 @@ import time
 
 import numpy as np
 import pytest
+
+from agents.base_agent import BasicExplorerAgent
+from agents.coalition_coordinator import CoalitionCoordinatorAgent
 from observability.alerting_system import get_active_alerts, get_alert_stats
 from observability.belief_monitoring import get_all_belief_statistics, monitor_belief_update
 from observability.coordination_metrics import (
@@ -26,9 +29,6 @@ from observability.performance_metrics import (
     start_performance_tracking,
     stop_performance_tracking,
 )
-
-from agents.base_agent import BasicExplorerAgent
-from agents.coalition_coordinator import CoalitionCoordinatorAgent
 
 
 @pytest.fixture(scope="module")

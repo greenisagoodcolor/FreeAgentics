@@ -8,11 +8,11 @@ REFACTOR: Improve code while keeping tests passing
 
 import time
 
-from api.main import app
 from fastapi.testclient import TestClient
 from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker
 
+from api.main import app
 from database.session import get_db
 
 

@@ -4,6 +4,8 @@ import asyncio
 from datetime import datetime
 
 import pytest
+
+from agents.base_agent import BasicExplorerAgent
 from observability.monitoring_dashboard import (
     MonitoringDashboard,
     get_dashboard_data,
@@ -18,8 +20,6 @@ from observability.performance_metrics import (
     start_performance_tracking,
     stop_performance_tracking,
 )
-
-from agents.base_agent import BasicExplorerAgent
 
 
 @pytest.fixture

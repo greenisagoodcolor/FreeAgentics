@@ -13,6 +13,7 @@ import logging
 import os
 
 import websockets
+
 from auth.security_implementation import AuthenticationManager, UserRole
 
 # Configure logging

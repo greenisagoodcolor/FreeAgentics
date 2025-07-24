@@ -1,13 +1,6 @@
 import { useState, useEffect, useCallback, useRef } from "react";
 import { apiClient } from "@/lib/api-client";
-
-interface Agent {
-  id: string;
-  name: string;
-  status: string;
-  type?: string;
-  thinking?: boolean;
-}
+import { PromptAgent } from "@/types/agent";
 
 interface KnowledgeGraphNode {
   id: string;
@@ -48,7 +41,7 @@ interface IterationContext {
 export function usePromptProcessor() {
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
-  const [agents, setAgents] = useState<Agent[]>([]);
+  const [agents, setAgents] = useState<PromptAgent[]>([]);
   const [knowledgeGraph, setKnowledgeGraph] = useState<KnowledgeGraph>({ nodes: [], edges: [] });
   const [suggestions, setSuggestions] = useState<string[]>([]);
   const [currentPromptId, setCurrentPromptId] = useState<string | null>(null);
@@ -67,7 +60,7 @@ export function usePromptProcessor() {
       switch (message.type) {
         case "agent_update":
           setAgents((prev) => {
-            const agent = message.agent as Agent;
+            const agent = message.agent as PromptAgent;
             const index = prev.findIndex((a) => a.id === agent.id);
             if (index >= 0) {
               const updated = [...prev];

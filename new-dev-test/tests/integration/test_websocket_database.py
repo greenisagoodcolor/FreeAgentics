@@ -10,11 +10,11 @@ from datetime import datetime, timedelta
 from typing import Optional
 
 import pytest
-from api.v1.websocket import ConnectionManager
 from fastapi import WebSocket
 from sqlalchemy import JSON, Boolean, Column, DateTime, ForeignKey, String
 from sqlalchemy.orm import Session, relationship
 
+from api.v1.websocket import ConnectionManager
 from database.base import Base
 from database.types import GUID
 from tests.db_infrastructure.fixtures import DatabaseTestCase

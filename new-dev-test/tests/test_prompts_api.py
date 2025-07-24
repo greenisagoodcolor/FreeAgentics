@@ -9,11 +9,11 @@ import uuid
 from unittest.mock import AsyncMock, MagicMock, patch
 
 import pytest
-from api.main import app
 from fastapi import status
 from fastapi.testclient import TestClient
 from sqlalchemy.orm import Session
 
+from api.main import app
 from database.models import Agent, AgentStatus
 
 

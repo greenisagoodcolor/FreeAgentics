@@ -13,8 +13,9 @@ class TestHighCoverageAPIPaths:
     def test_api_main_app_initialization_paths(self):
         """Characterize FastAPI app initialization paths."""
         try:
-            from api.main import app, create_app
             from fastapi import FastAPI
+
+            from api.main import app, create_app
 
             # Test app instance
             assert isinstance(app, FastAPI)

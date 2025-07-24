@@ -12,9 +12,9 @@ from datetime import datetime, timedelta, timezone
 from unittest.mock import MagicMock, patch
 
 import pytest
-from auth.security_implementation import AuthenticationManager, Permission, TokenData, UserRole
 from fastapi import WebSocketDisconnect
 
+from auth.security_implementation import AuthenticationManager, Permission, TokenData, UserRole
 from websocket.auth_handler import WebSocketAuthHandler, WebSocketErrorCode
 
 

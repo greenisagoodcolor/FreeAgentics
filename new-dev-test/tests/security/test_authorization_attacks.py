@@ -14,11 +14,12 @@ from typing import Any, Dict
 
 import jwt
 import pytest
-from api.main import app
-from auth.security_implementation import ROLE_PERMISSIONS, Permission, UserRole, auth_manager
 from cryptography.hazmat.primitives import serialization
 from fastapi import status
 from fastapi.testclient import TestClient
+
+from api.main import app
+from auth.security_implementation import ROLE_PERMISSIONS, Permission, UserRole, auth_manager
 
 
 class TestIDORVulnerabilities:

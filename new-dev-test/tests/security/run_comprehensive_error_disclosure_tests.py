@@ -25,7 +25,6 @@ from typing import Any, Dict, List
 # Add the project root to the path
 sys.path.insert(0, "/home/green/FreeAgentics")
 
-from api.main import app
 from fastapi.testclient import TestClient
 from test_api_security_responses import APISecurityResponseTester
 from test_authentication_error_disclosure import AuthenticationErrorTester
@@ -33,6 +32,8 @@ from test_authentication_error_disclosure import AuthenticationErrorTester
 # Import our test classes
 from test_error_handling_information_disclosure import ErrorHandlingTester
 from test_production_hardening_validation import ProductionHardeningTester
+
+from api.main import app
 
 
 class ComprehensiveErrorDisclosureTestRunner:

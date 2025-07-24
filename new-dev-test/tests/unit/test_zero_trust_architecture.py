@@ -14,6 +14,8 @@ from datetime import datetime, timedelta
 from unittest.mock import Mock, patch
 
 import pytest
+from fastapi import HTTPException, Request
+
 from auth.zero_trust_architecture import (
     CertificateManager,
     ContinuousVerificationContext,
@@ -27,7 +29,6 @@ from auth.zero_trust_architecture import (
     configure_default_zero_trust_policies,
     get_zero_trust_engine,
 )
-from fastapi import HTTPException, Request
 
 
 @pytest.mark.slow

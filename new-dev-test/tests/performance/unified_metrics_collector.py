@@ -17,8 +17,8 @@ from pathlib import Path
 from typing import Any, Deque, Dict, List, Optional, Tuple, Union
 
 import numpy as np
-from observability.performance_metrics import RealTimePerformanceTracker
 
+from observability.performance_metrics import RealTimePerformanceTracker
 from tests.db_infrastructure.performance_monitor import DatabasePerformanceMonitor
 
 # Import metrics from different subsystems

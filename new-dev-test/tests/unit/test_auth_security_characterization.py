@@ -14,6 +14,8 @@ from datetime import datetime
 from unittest.mock import Mock
 
 import pytest
+from fastapi import HTTPException, Response
+
 from auth.security_implementation import (
     CSRF_TOKEN_LENGTH,
     ROLE_PERMISSIONS,
@@ -26,7 +28,6 @@ from auth.security_implementation import (
     UserRole,
     pwd_context,
 )
-from fastapi import HTTPException, Response
 
 
 class TestPasswordHashingCharacterization:

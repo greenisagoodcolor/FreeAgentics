@@ -11,9 +11,10 @@ from concurrent.futures import ThreadPoolExecutor
 from datetime import datetime, timezone
 
 import pytest
+from fastapi.testclient import TestClient
+
 from api.main import app
 from auth.security_implementation import UserRole, auth_manager
-from fastapi.testclient import TestClient
 
 
 # Mock User class for testing

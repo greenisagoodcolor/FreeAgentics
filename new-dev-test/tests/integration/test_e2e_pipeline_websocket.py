@@ -10,11 +10,11 @@ from typing import Any, Dict, List
 from unittest.mock import AsyncMock, MagicMock, patch
 
 import pytest
-from api.main import app
-from auth.security_implementation import Permission, Role, TokenData
 from fastapi.testclient import TestClient
 from sqlalchemy.ext.asyncio import AsyncSession
 
+from api.main import app
+from auth.security_implementation import Permission, Role, TokenData
 from services.websocket_integration import PipelineStage, pipeline_monitor
 
 

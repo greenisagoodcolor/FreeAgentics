@@ -13,9 +13,10 @@ Tests cover:
 from unittest.mock import Mock, patch
 
 import pytest
+from fastapi.testclient import TestClient
+
 from api.main import app
 from auth.mfa_service import MFAResponse
-from fastapi.testclient import TestClient
 
 
 class TestMFAAPI:

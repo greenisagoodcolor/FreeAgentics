@@ -17,10 +17,11 @@ from datetime import datetime, timedelta, timezone
 
 import jwt
 import pytest
-from auth import UserRole, auth_manager
-from auth.jwt_handler import jwt_handler
 from cryptography.hazmat.primitives.asymmetric import rsa
 from fastapi import HTTPException
+
+from auth import UserRole, auth_manager
+from auth.jwt_handler import jwt_handler
 
 
 @pytest.mark.slow

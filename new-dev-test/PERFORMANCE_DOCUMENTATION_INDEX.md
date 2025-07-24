@@ -80,7 +80,7 @@ This index provides a comprehensive guide to all performance-related documentati
 
 ### Archived Documents (Reference Only)
 
-- .archive/old_docs/_PERFORMANCE_.md
+- .archive/old*docs/\_PERFORMANCE*.md
 
 ### Deprecated (Consider Removal)
 

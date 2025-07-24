@@ -1,17 +1,9 @@
+import { PromptAgent } from "@/types/agent";
+
 export interface ApiResponse<T = unknown> {
   success: boolean;
   data?: T;
   error?: string;
-}
-
-export interface Agent {
-  id: string;
-  name: string;
-  description: string;
-  status: string;
-  type?: string;
-  created_at?: string;
-  updated_at?: string;
 }
 
 export interface KnowledgeGraph {
@@ -72,19 +64,19 @@ export class ApiClient {
   }
 
   // Agent endpoints
-  async getAgents(): Promise<ApiResponse<Agent[]>> {
-    return this.request<Agent[]>("/agents");
+  async getAgents(): Promise<ApiResponse<PromptAgent[]>> {
+    return this.request<PromptAgent[]>("/agents");
   }
 
-  async createAgent(data: { description: string }): Promise<ApiResponse<Agent>> {
-    return this.request<Agent>("/agents", {
+  async createAgent(data: { description: string }): Promise<ApiResponse<PromptAgent>> {
+    return this.request<PromptAgent>("/agents", {
       method: "POST",
       body: JSON.stringify(data),
     });
   }
 
-  async updateAgent(id: string, data: Partial<Agent>): Promise<ApiResponse<Agent>> {
-    return this.request<Agent>(`/agents/${id}`, {
+  async updateAgent(id: string, data: Partial<PromptAgent>): Promise<ApiResponse<PromptAgent>> {
+    return this.request<PromptAgent>(`/agents/${id}`, {
       method: "PUT",
       body: JSON.stringify(data),
     });
@@ -99,7 +91,7 @@ export class ApiClient {
   // Prompt processing
   async processPrompt(data: { prompt: string; conversationId?: string }): Promise<
     ApiResponse<{
-      agents: Agent[];
+      agents: PromptAgent[];
       knowledgeGraph: KnowledgeGraph;
       suggestions: string[];
       conversationId: string;

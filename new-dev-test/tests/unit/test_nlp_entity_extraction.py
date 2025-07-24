@@ -4,6 +4,7 @@ Following TDD principles - write tests first, then implementation
 """
 
 import spacy
+
 from knowledge_graph.nlp_entity_extractor import (
     Entity,
     EntityType,

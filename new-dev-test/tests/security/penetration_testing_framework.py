@@ -23,9 +23,10 @@ from enum import Enum
 from pathlib import Path
 from typing import Any, Dict, List, Optional, Tuple
 
+from fastapi.testclient import TestClient
+
 from api.main import app
 from auth.security_implementation import AuthenticationManager, UserRole
-from fastapi.testclient import TestClient
 
 # Configure logging for penetration testing
 logging.basicConfig(level=logging.INFO)

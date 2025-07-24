@@ -20,13 +20,12 @@ class TestPackageStructure:
         # These imports should work without sys.path manipulation
         # if the package is properly installed
         try:
+            import agents
             import api
             import auth
-            import observability
-
-            import agents
             import database
             import inference
+            import observability
             import world
 
             # Verify modules have expected attributes

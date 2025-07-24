@@ -26,6 +26,15 @@ from typing import Any, Dict
 
 import numpy as np
 import pytest
+
+# Core components for integration testing
+from agents.base_agent import PYMDP_AVAILABLE, BasicExplorerAgent
+from agents.coalition_coordinator import CoalitionCoordinatorAgent
+from agents.resource_collector import ResourceCollectorAgent
+from coalitions.coordination_types import CoordinationStrategy, CoordinationTask
+from inference.active.gmn_parser import GMNParser
+from inference.gnn.model import GMNModel
+from inference.llm.local_llm_manager import LocalLLMConfig, LocalLLMManager
 from knowledge_graph.graph_engine import (
     EdgeType,
     KnowledgeEdge,
@@ -36,15 +45,6 @@ from knowledge_graph.graph_engine import (
 
 # from knowledge_graph.storage import StorageManager  # Skip storage for integration tests
 from observability.performance_metrics import RealTimePerformanceTracker
-
-# Core components for integration testing
-from agents.base_agent import PYMDP_AVAILABLE, BasicExplorerAgent
-from agents.coalition_coordinator import CoalitionCoordinatorAgent
-from agents.resource_collector import ResourceCollectorAgent
-from coalitions.coordination_types import CoordinationStrategy, CoordinationTask
-from inference.active.gmn_parser import GMNParser
-from inference.gnn.model import GMNModel
-from inference.llm.local_llm_manager import LocalLLMConfig, LocalLLMManager
 
 
 # Mock StorageManager for testing

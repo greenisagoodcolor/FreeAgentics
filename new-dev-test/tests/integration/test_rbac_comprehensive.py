@@ -14,6 +14,8 @@ from datetime import datetime, timedelta, timezone
 from unittest.mock import Mock, patch
 
 import pytest
+from fastapi import HTTPException, status
+
 from auth.comprehensive_audit_logger import comprehensive_auditor
 from auth.rbac_enhancements import (
     ABACEffect,
@@ -36,7 +38,6 @@ from auth.security_implementation import (
     UserRole,
     auth_manager,
 )
-from fastapi import HTTPException, status
 
 
 class TestRBACBasics:

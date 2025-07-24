@@ -24,6 +24,7 @@ from typing import Any, Dict, List, Optional
 import aiohttp
 import numpy as np
 import psutil
+
 from observability.performance_monitor import get_performance_monitor
 
 logger = logging.getLogger(__name__)

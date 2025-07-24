@@ -74,5 +74,5 @@ export interface IterationContext {
   };
 }
 
-// Re-export from api-client for compatibility
-export type { Agent as AgentConfig } from "./api-client";
+// Re-export from unified type system for compatibility
+export type { PromptAgent as AgentConfig } from "@/types/agent";

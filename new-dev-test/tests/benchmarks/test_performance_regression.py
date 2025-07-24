@@ -14,6 +14,7 @@ from pathlib import Path
 
 import numpy as np
 import pytest
+
 from benchmarks.ci_integration import (
     CIIntegration,
     PerformanceBaseline,

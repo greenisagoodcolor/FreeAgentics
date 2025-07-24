@@ -15,6 +15,8 @@ from urllib.parse import quote
 
 import jwt
 import pytest
+from sqlalchemy.orm import Session
+
 from auth.rbac_enhancements import enhanced_rbac_manager
 from auth.resource_access_control import ResourceAccessValidator
 from auth.security_implementation import ALGORITHM as JWT_ALGORITHM
@@ -25,8 +27,6 @@ from auth.security_implementation import (
     TokenData,
     UserRole,
 )
-from sqlalchemy.orm import Session
-
 from database.models import Agent as AgentModel
 from database.models import AgentStatus
 

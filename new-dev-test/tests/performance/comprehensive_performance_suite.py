@@ -25,6 +25,7 @@ import aiohttp
 import numpy as np
 import psutil
 import pytest
+
 from observability.performance_monitor import get_performance_monitor
 
 logger = logging.getLogger(__name__)

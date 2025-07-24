@@ -1,6 +1,7 @@
 import { renderHook, act, waitFor } from "@testing-library/react";
 import { usePromptProcessor } from "@/hooks/use-prompt-processor";
 import { apiClient } from "@/lib/api-client";
+import { AgentFactories } from "@/types/agent";
 
 // Mock dependencies
 jest.mock("@/lib/api-client", () => ({
@@ -102,7 +103,11 @@ describe("usePromptProcessor", () => {
       success: true,
       data: {
         agents: [
-          { id: "agent-1", name: "Test Agent", description: "Test description", status: "active" },
+          AgentFactories.createPromptAgent({
+            id: "agent-1",
+            name: "Test Agent",
+            status: "active",
+          }),
         ],
         knowledgeGraph: {
           nodes: [{ id: "node-1", label: "Test Node", type: "concept" }],
@@ -235,6 +240,7 @@ describe("usePromptProcessor", () => {
         data: {
           agents: [],
           knowledgeGraph: { nodes: [], edges: [] },
+          suggestions: [], // Fix: Add missing suggestions property
           conversationId: "conv-123",
         },
       });
@@ -264,11 +270,18 @@ describe("usePromptProcessor", () => {
     mockApiClient.processPrompt.mockResolvedValueOnce({
       success: true,
       data: {
-        agents: [{ id: "agent-1", name: "Test", status: "active" }],
+        agents: [
+          AgentFactories.createPromptAgent({
+            id: "agent-1",
+            name: "Test",
+            status: "active",
+          })
+        ],
         knowledgeGraph: {
           nodes: [{ id: "node-1", label: "Test", type: "concept" }],
           edges: [],
         },
+        suggestions: [], // Fix: Add missing suggestions property
         conversationId: "conv-123",
       },
     });

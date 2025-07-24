@@ -10,9 +10,9 @@ import logging
 from contextlib import asynccontextmanager
 from typing import Any, Dict, Optional
 
-from api.v1.websocket import manager as websocket_manager
 from fastapi import FastAPI
 
+from api.v1.websocket import manager as websocket_manager
 from websocket.connection_pool import PoolConfig, WebSocketConnectionPool
 from websocket.monitoring import initialize_monitor
 from websocket.monitoring import router as monitoring_router

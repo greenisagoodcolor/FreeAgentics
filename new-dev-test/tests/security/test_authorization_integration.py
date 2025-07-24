@@ -11,6 +11,10 @@ from datetime import datetime, timezone
 from unittest.mock import patch
 
 import pytest
+from fastapi import status
+from fastapi.testclient import TestClient
+from sqlalchemy.orm import Session
+
 from api.main import app
 from auth.rbac_enhancements import (
     ABACEffect,
@@ -27,10 +31,6 @@ from auth.security_implementation import (
     rate_limiter,
 )
 from auth.security_logging import SecurityEventSeverity, SecurityEventType, security_auditor
-from fastapi import status
-from fastapi.testclient import TestClient
-from sqlalchemy.orm import Session
-
 from database.session import get_db
 
 

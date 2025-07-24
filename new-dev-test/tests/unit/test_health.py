@@ -36,7 +36,6 @@ class TestHealthCheckEndpoint:
         """Create test client with mocked environment."""
         with patch.dict(os.environ, test_env, clear=False):
             from api.main import app
-
             from database.session import get_db
 
             # Override the get_db dependency with a mock
@@ -62,7 +61,6 @@ class TestHealthCheckEndpoint:
         # The client fixture already has a mocked database that simulates success
         # Override it to simulate a successful connection
         from api.main import app
-
         from database.session import get_db
 
         def mock_db_success():
@@ -87,7 +85,6 @@ class TestHealthCheckEndpoint:
         """Test that health returns 503 when database is down."""
         # Mock database to raise OperationalError
         from api.main import app
-
         from database.session import get_db
 
         def mock_db_failure():
@@ -112,7 +109,6 @@ class TestHealthCheckEndpoint:
     def test_health_performs_actual_db_query(self, client):
         """Test that health check performs actual SELECT 1 query."""
         from api.main import app
-
         from database.session import get_db
 
         # Create a mock that we can inspect after the call
@@ -195,7 +191,6 @@ class TestHealthCheckEndpoint:
         """Test that health endpoint uses FastAPI exception handlers."""
         # Mock database to raise an unexpected exception
         from api.main import app
-
         from database.session import get_db
 
         def mock_db_runtime_error():

@@ -28,11 +28,7 @@ interface SettingsDrawerProps {
   onOpenChange: (open: boolean) => void;
 }
 
-const PROVIDER_DISPLAY_NAMES = {
-  openai: "OpenAI",
-  anthropic: "Anthropic",
-  ollama: "Ollama",
-} as const;
+// Removed unused PROVIDER_DISPLAY_NAMES constant
 
 export function SettingsDrawer({ open, onOpenChange }: SettingsDrawerProps) {
   const { user, isAuthenticated, logout } = useAuth();

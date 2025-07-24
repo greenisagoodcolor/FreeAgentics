@@ -16,8 +16,9 @@ from unittest.mock import AsyncMock, MagicMock, patch
 
 import pytest
 import redis.asyncio as aioredis
-from api.middleware.ddos_protection import RateLimitConfig, RateLimiter
 from fastapi import Request, status
+
+from api.middleware.ddos_protection import RateLimitConfig, RateLimiter
 
 
 class TestComplexAttackScenarios:

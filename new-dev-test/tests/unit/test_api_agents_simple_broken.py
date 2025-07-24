@@ -8,10 +8,10 @@ Following TDD: tests fail first, then we implement minimal code to make them pas
 import os
 
 import pytest
-from api.main import app
-from auth.security_implementation import get_current_user
 from fastapi.testclient import TestClient
 
+from api.main import app
+from auth.security_implementation import get_current_user
 from database.session import init_db
 from tests.test_helpers.auth_helpers import mock_auth_dependency
 

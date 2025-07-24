@@ -16,8 +16,9 @@ from unittest.mock import Mock, patch
 
 import jwt
 import pytest
-from auth.jwt_handler import JWTHandler, RefreshTokenStore, TokenBlacklist
 from fastapi import HTTPException
+
+from auth.jwt_handler import JWTHandler, RefreshTokenStore, TokenBlacklist
 
 
 class TestTokenBlacklist:

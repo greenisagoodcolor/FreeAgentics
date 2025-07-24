@@ -20,6 +20,9 @@ from unittest.mock import patch
 
 import jwt
 import pytest
+from fastapi import status
+from fastapi.testclient import TestClient
+
 from api.main import app
 from auth.rbac_enhancements import (
     ABACEffect,
@@ -36,8 +39,6 @@ from auth.security_implementation import (
     UserRole,
     auth_manager,
 )
-from fastapi import status
-from fastapi.testclient import TestClient
 
 
 class TestRoleBasedAuthorizationBoundaries:
