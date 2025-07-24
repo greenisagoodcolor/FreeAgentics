@@ -1,0 +1,12 @@
+{
+  "timestamp": "2025-07-21T01:58:02.567154",
+  "import_time_ms": 1227.0584106445312,
+  "spawn_time_ms": 999000.0,
+  "memory_per_agent_mb": 999.0,
+  "targets": {
+    "spawn_time_target_ms": 50,
+    "memory_target_mb": 10,
+    "spawn_compliant": false,
+    "memory_compliant": false
+  }
+}

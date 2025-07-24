@@ -1,0 +1,114 @@
+# LLM Provider Configuration Example
+# This file demonstrates how to configure LLM providers for FreeAgentics
+
+# Provider selection mode
+# Options: auto, openai, anthropic, ollama, mock
+provider: auto # 'auto' will detect available providers based on API keys
+
+# OpenAI Configuration
+openai:
+  # API key - can also use OPENAI_API_KEY environment variable
+  api_key: null # Set to your OpenAI API key or use env var
+
+  # Model selection
+  # Options: gpt-4, gpt-4-turbo, gpt-4o, gpt-4o-mini, gpt-3.5-turbo
+  model: gpt-4o
+
+  # Optional organization ID
+  organization: null
+
+  # API endpoint (useful for proxies or Azure OpenAI)
+  base_url: https://api.openai.com/v1
+
+  # Request timeout in seconds
+  timeout: 60.0
+
+  # Retry configuration
+  max_retries: 3
+  retry_delay: 1.0
+
+# Anthropic Configuration
+anthropic:
+  # API key - can also use ANTHROPIC_API_KEY environment variable
+  api_key: null # Set to your Anthropic API key or use env var
+
+  # Model selection
+  # Options: claude-3-opus, claude-3-sonnet, claude-3-haiku, claude-3.5-sonnet
+  model: claude-3-5-sonnet-20241022
+
+  # API endpoint
+  base_url: https://api.anthropic.com
+
+  # Request timeout in seconds
+  timeout: 60.0
+
+  # Retry configuration
+  max_retries: 3
+  retry_delay: 1.0
+
+  # API version
+  anthropic_version: "2023-06-01"
+
+# Ollama Configuration (Local Models)
+ollama:
+  # Model selection
+  # Popular options: llama3.2, mistral, mixtral, codellama, phi3
+  model: llama3.2
+
+  # Ollama server URL
+  base_url: http://localhost:11434
+
+  # Request timeout (longer for local models)
+  timeout: 120.0
+
+  # Model memory management
+  keep_alive: 5m # How long to keep model loaded
+
+  # Context window size (null uses model default)
+  num_ctx: null
+
+  # Max tokens to generate (null for unlimited)
+  num_predict: null
+
+  # GPU layers to offload (null for auto)
+  num_gpu: null
+
+# Mock Provider Configuration (Testing)
+mock:
+  # Simulated response delay in seconds
+  delay: 0.1
+
+  # Error rate for testing error handling (0.0 to 1.0)
+  error_rate: 0.0
+
+# GMN Generation Specific Settings
+gmn_generation:
+  # Temperature for GMN generation (lower = more consistent)
+  temperature: 0.3
+
+  # Maximum tokens for GMN output
+  max_tokens: 2000
+
+  # Stop sequences for GMN
+  stop_sequences:
+    - "```"
+    - "---"
+
+# Provider Fallback Chain
+# If primary provider fails, try these in order
+fallback_priority:
+  - openai
+  - anthropic
+  - ollama
+  - mock
+
+# Health Check Settings
+health_check:
+  # Seconds before retrying unhealthy provider
+  retry_after: 300
+
+  # Consecutive failures before marking unhealthy
+  failure_threshold: 3
+
+  # Keep last N latency measurements
+  latency_window: 100

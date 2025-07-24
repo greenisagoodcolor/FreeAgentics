@@ -1,0 +1,89 @@
+{
+  "enabled_modules": [
+    "authentication_bypass",
+    "session_management",
+    "authorization",
+    "api_security",
+    "business_logic"
+  ],
+  "output_formats": ["json", "html", "markdown"],
+  "severity_threshold": "low",
+  "concurrent_tests": false,
+  "detailed_reporting": true,
+  "include_proof_of_concept": true,
+  "generate_remediation_plan": true,
+  "test_settings": {
+    "max_test_users": 50,
+    "concurrent_requests": 10,
+    "request_timeout": 30,
+    "rate_limit_test_count": 20,
+    "race_condition_threads": 10
+  },
+  "reporting": {
+    "include_metadata": true,
+    "include_executive_summary": true,
+    "include_technical_details": true,
+    "include_remediation_timeline": true,
+    "group_by_severity": true
+  },
+  "vulnerability_types": {
+    "authentication_bypass": {
+      "enabled": true,
+      "sql_injection": true,
+      "nosql_injection": true,
+      "ldap_injection": true,
+      "jwt_manipulation": true,
+      "session_fixation": true,
+      "brute_force_bypass": true,
+      "timing_attacks": true
+    },
+    "session_management": {
+      "enabled": true,
+      "session_fixation": true,
+      "session_hijacking": true,
+      "csrf_testing": true,
+      "cookie_security": true,
+      "session_timeout": true,
+      "concurrent_sessions": true
+    },
+    "authorization": {
+      "enabled": true,
+      "horizontal_privilege_escalation": true,
+      "vertical_privilege_escalation": true,
+      "idor_testing": true,
+      "role_bypass": true,
+      "resource_ownership": true,
+      "permission_boundaries": true,
+      "mass_assignment": true
+    },
+    "api_security": {
+      "enabled": true,
+      "parameter_pollution": true,
+      "http_method_tampering": true,
+      "api_versioning": true,
+      "rate_limiting_bypass": true,
+      "content_type_confusion": true,
+      "input_validation_bypass": true,
+      "endpoint_enumeration": true
+    },
+    "business_logic": {
+      "enabled": true,
+      "workflow_bypass": true,
+      "state_manipulation": true,
+      "race_conditions": true,
+      "multi_step_processes": true,
+      "resource_allocation": true,
+      "transaction_logic": true
+    }
+  },
+  "exclusions": {
+    "endpoints": ["/api/v1/health", "/api/v1/status"],
+    "vulnerability_types": [],
+    "test_methods": []
+  },
+  "customization": {
+    "additional_headers": {},
+    "custom_payloads": {},
+    "environment_specific_tests": {}
+  }
+}

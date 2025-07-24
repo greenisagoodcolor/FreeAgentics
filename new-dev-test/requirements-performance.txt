@@ -1,0 +1,26 @@
+# Performance Testing Requirements
+# Add these to your main requirements.txt or install separately
+
+# HTTP client for load testing
+aiohttp>=3.8.0
+
+# Database drivers for database testing
+asyncpg>=0.28.0
+
+# Scientific computing for performance analysis
+numpy>=1.21.0
+
+# System monitoring
+psutil>=5.8.0
+psycopg2-binary>=2.9.0
+
+# Additional utilities
+pytest>=7.0.0
+pytest-asyncio>=0.21.0
+
+# Machine learning for anomaly detection
+scikit-learn>=1.0.0
+scipy>=1.7.0
+
+# WebSocket client for WebSocket testing
+websockets>=10.0

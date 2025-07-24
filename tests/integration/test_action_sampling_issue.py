@@ -99,7 +99,7 @@ class TestActionSamplingIssue:
         converted_action = adapter.sample_action(pymdp_agent)
 
         # CRITICAL: Must be exact Python int, not numpy type
-        assert type(converted_action) is int, (
+        assert type(converted_action) is int, (  # noqa: E721
             f"Expected exact Python int, got {type(converted_action)}"
         )
         assert not isinstance(converted_action, np.integer), "Should not be numpy integer type"
@@ -125,7 +125,7 @@ class TestActionSamplingIssue:
 
             action = adapter.sample_action(single_action_agent)
             assert action == 0, f"Single action agent should always return 0, got {action}"
-            assert type(action) is int, "Must be Python int"
+            assert type(action) is int, "Must be Python int"  # noqa: E721
         except (TypeError, ValueError, AttributeError):
             # Handle PyMDP API compatibility issues with single-factor models
             pass
@@ -147,7 +147,7 @@ class TestActionSamplingIssue:
 
             for _ in range(10):
                 action = adapter.sample_action(many_action_agent)
-                assert type(action) is int, "Must be Python int"
+                assert type(action) is int, "Must be Python int"  # noqa: E721
                 assert 0 <= action < num_actions, f"Action {action} out of range"
         except (TypeError, ValueError, AttributeError):
             # Handle PyMDP API compatibility issues

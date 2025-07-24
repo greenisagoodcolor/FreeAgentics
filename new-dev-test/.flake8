@@ -1,0 +1,53 @@
+[flake8]
+# Maximum line length
+max-line-length = 100
+
+# Error codes to ignore
+extend-ignore =
+    # E203: whitespace before ':' (conflicts with black)
+    E203,
+    # W503: line break before binary operator (conflicts with black)
+    W503,
+    # E501: line too long (we'll handle this gradually)
+    E501,
+    # F401: imported but unused (will clean up gradually)
+    F401,
+    # E231: missing whitespace after ':'
+    E231,
+    # W293: blank line contains whitespace
+    W293
+
+# Exclude directories
+exclude =
+    .git,
+    __pycache__,
+    venv,
+    .venv,
+    migrations,
+    .archive,
+    build,
+    dist,
+    *.egg-info,
+    .mypy_cache,
+    .pytest_cache
+
+# Per-file ignores
+per-file-ignores =
+    # F401: Allow unused imports in __init__.py files
+    __init__.py:F401
+    # Allow longer lines in test files
+    tests/*.py:E501
+    # Allow print statements in scripts
+    scripts/*.py:T201
+
+# Complexity settings
+max-complexity = 15
+
+# Format for output
+format = %(path)s:%(row)d:%(col)d: %(code)s %(text)s
+
+# Show source code for errors
+show-source = True
+
+# Count errors
+statistics = True

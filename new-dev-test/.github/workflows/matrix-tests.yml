@@ -1,0 +1,378 @@
+name: "Matrix Test Strategy"
+
+# This workflow runs comprehensive tests across multiple configurations
+on:
+  workflow_dispatch:
+    inputs:
+      test-scope:
+        description: "Test scope to run"
+        required: true
+        default: "all"
+        type: choice
+        options:
+          - all
+          - unit
+          - integration
+          - security
+          - performance
+  pull_request:
+    paths:
+      - "**.py"
+      - "**.ts"
+      - "**.tsx"
+      - "requirements*.txt"
+      - "package*.json"
+
+jobs:
+  # ============================================================================
+  # Python Version Matrix Testing
+  # ============================================================================
+
+  python-compatibility:
+    name: "🐍 Python ${{ matrix.python-version }} on ${{ matrix.os }}"
+    runs-on: ${{ matrix.os }}
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [ubuntu-latest, macos-latest, windows-latest]
+        python-version: ["3.10", "3.11", "3.12"]
+        exclude:
+          # Exclude certain combinations if needed
+          - os: windows-latest
+            python-version: "3.10"
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up Python ${{ matrix.python-version }}
+        uses: actions/setup-python@v5
+        with:
+          python-version: ${{ matrix.python-version }}
+
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install -r requirements-ci.txt
+
+      - name: Run tests
+        run: |
+          python -m pytest tests/unit/ -v --tb=short
+
+      - name: Type checking
+        run: |
+          pip install mypy
+          mypy agents/ api/ --ignore-missing-imports || true
+
+  # ============================================================================
+  # Database Compatibility Testing
+  # ============================================================================
+
+  database-compatibility:
+    name: "🗄️ Database Tests - ${{ matrix.database }}"
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        database:
+          - postgres:13
+          - postgres:14
+          - postgres:15
+          - postgres:16
+        include:
+          - database: postgres:13
+            db_port: 5432
+          - database: postgres:14
+            db_port: 5433
+          - database: postgres:15
+            db_port: 5434
+          - database: postgres:16
+            db_port: 5435
+
+    services:
+      postgres:
+        image: ${{ matrix.database }}
+        env:
+          POSTGRES_USER: test
+          POSTGRES_PASSWORD: test
+          POSTGRES_DB: freeagentics_test
+        options: >-
+          --health-cmd pg_isready
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+        ports:
+          - ${{ matrix.db_port }}:5432
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Install dependencies
+        run: |
+          python -m venv venv
+          source venv/bin/activate
+          pip install -r requirements-ci.txt
+
+      - name: Run database tests
+        env:
+          DATABASE_URL: postgresql://test:test@localhost:${{ matrix.db_port }}/freeagentics_test
+        run: |
+          source venv/bin/activate
+          python -m pytest tests/integration/test_database.py -v
+
+  # ============================================================================
+  # Node.js Version Matrix Testing
+  # ============================================================================
+
+  node-compatibility:
+    name: "📦 Node.js ${{ matrix.node-version }}"
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        node-version: [18, 20, 21]
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: ${{ matrix.node-version }}
+          cache: npm
+          cache-dependency-path: web/package-lock.json
+
+      - name: Install and test
+        working-directory: ./web
+        run: |
+          npm ci
+          npm run lint
+          npm test -- --watchAll=false
+          npm run build
+
+  # ============================================================================
+  # Browser Compatibility Testing
+  # ============================================================================
+
+  browser-tests:
+    name: "🌐 Browser Tests - ${{ matrix.browser }}"
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        browser: [chromium, firefox, webkit]
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: npm
+          cache-dependency-path: web/package-lock.json
+
+      - name: Install dependencies
+        working-directory: ./web
+        run: |
+          npm ci
+          npx playwright install --with-deps ${{ matrix.browser }}
+
+      - name: Run browser tests
+        working-directory: ./web
+        run: |
+          npx playwright test --browser=${{ matrix.browser }}
+
+  # ============================================================================
+  # Security Testing Matrix
+  # ============================================================================
+
+  security-matrix:
+    name: "🔒 Security - ${{ matrix.tool }}"
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - tool: bandit
+            command: "bandit -r . -f json -o security-report.json"
+          - tool: safety
+            command: "safety check --json"
+          - tool: pip-audit
+            command: "pip-audit --format json"
+          - tool: semgrep
+            command: "semgrep --config=auto --json"
+          - tool: trufflehog
+            command: "trufflehog3 --no-history ."
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Install security tools
+        run: |
+          python -m venv venv
+          source venv/bin/activate
+          pip install -r requirements-ci.txt
+          pip install ${{ matrix.tool }}
+
+      - name: Run ${{ matrix.tool }}
+        run: |
+          source venv/bin/activate
+          ${{ matrix.command }} || true
+
+      - name: Upload results
+        uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: security-${{ matrix.tool }}-${{ github.run_id }}
+          path: security-report.json
+
+  # ============================================================================
+  # Performance Testing Matrix
+  # ============================================================================
+
+  performance-matrix:
+    name: "⚡ Performance - ${{ matrix.scenario }}"
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        scenario:
+          - name: "API Load Test"
+            script: "tests/performance/test_api_load.py"
+            users: 100
+            duration: 60
+          - name: "WebSocket Stress"
+            script: "tests/performance/test_websocket.py"
+            users: 500
+            duration: 120
+          - name: "Database Queries"
+            script: "tests/performance/test_db_performance.py"
+            users: 50
+            duration: 30
+
+    services:
+      postgres:
+        image: postgres:15
+        env:
+          POSTGRES_USER: test
+          POSTGRES_PASSWORD: test
+          POSTGRES_DB: freeagentics_test
+        options: >-
+          --health-cmd pg_isready
+          --health-interval 10s
+        ports:
+          - 5432:5432
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Install dependencies
+        run: |
+          python -m venv venv
+          source venv/bin/activate
+          pip install -r requirements-ci.txt
+          pip install locust pytest-benchmark
+
+      - name: Run performance test - ${{ matrix.scenario.name }}
+        env:
+          DATABASE_URL: postgresql://test:test@localhost:5432/freeagentics_test
+        run: |
+          source venv/bin/activate
+          echo "Running ${{ matrix.scenario.name }} with ${{ matrix.scenario.users }} users for ${{ matrix.scenario.duration }}s"
+          python -m pytest ${{ matrix.scenario.script }} \
+            --benchmark-only \
+            --benchmark-autosave \
+            -v || true
+
+  # ============================================================================
+  # Chaos Testing Matrix
+  # ============================================================================
+
+  chaos-tests:
+    name: "🌪️ Chaos Test - ${{ matrix.failure }}"
+    runs-on: ubuntu-latest
+    if: github.event.inputs.test-scope == 'all' || github.event.inputs.test-scope == 'chaos'
+    strategy:
+      fail-fast: false
+      matrix:
+        failure:
+          - name: "Database Failure"
+            type: "db-disconnect"
+          - name: "Redis Failure"
+            type: "cache-failure"
+          - name: "High Memory"
+            type: "memory-pressure"
+          - name: "CPU Stress"
+            type: "cpu-stress"
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Setup chaos environment
+        run: |
+          python -m venv venv
+          source venv/bin/activate
+          pip install -r requirements-ci.txt
+          pip install chaos-monkey pytest-chaos
+
+      - name: Run chaos test - ${{ matrix.failure.name }}
+        run: |
+          source venv/bin/activate
+          python -m pytest tests/chaos/test_${{ matrix.failure.type }}.py -v || true
+
+  # ============================================================================
+  # Summary Job
+  # ============================================================================
+
+  matrix-summary:
+    name: "📊 Matrix Test Summary"
+    needs:
+      [
+        python-compatibility,
+        database-compatibility,
+        node-compatibility,
+        browser-tests,
+        security-matrix,
+        performance-matrix,
+      ]
+    runs-on: ubuntu-latest
+    if: always()
+    steps:
+      - name: Generate summary
+        run: |
+          echo "# Matrix Test Results" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "## Test Matrix Coverage" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "| Matrix | Status |" >> $GITHUB_STEP_SUMMARY
+          echo "|--------|--------|" >> $GITHUB_STEP_SUMMARY
+          echo "| Python Compatibility | ${{ needs.python-compatibility.result }} |" >> $GITHUB_STEP_SUMMARY
+          echo "| Database Compatibility | ${{ needs.database-compatibility.result }} |" >> $GITHUB_STEP_SUMMARY
+          echo "| Node.js Compatibility | ${{ needs.node-compatibility.result }} |" >> $GITHUB_STEP_SUMMARY
+          echo "| Browser Tests | ${{ needs.browser-tests.result }} |" >> $GITHUB_STEP_SUMMARY
+          echo "| Security Tools | ${{ needs.security-matrix.result }} |" >> $GITHUB_STEP_SUMMARY
+          echo "| Performance Scenarios | ${{ needs.performance-matrix.result }} |" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+
+          # Configuration tested
+          echo "## Configurations Tested" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "- **Python**: 3.10, 3.11, 3.12 on Ubuntu, macOS, Windows" >> $GITHUB_STEP_SUMMARY
+          echo "- **PostgreSQL**: 13, 14, 15, 16" >> $GITHUB_STEP_SUMMARY
+          echo "- **Node.js**: 18, 20, 21" >> $GITHUB_STEP_SUMMARY
+          echo "- **Browsers**: Chromium, Firefox, WebKit" >> $GITHUB_STEP_SUMMARY
+          echo "- **Security Tools**: Bandit, Safety, pip-audit, Semgrep, Trufflehog" >> $GITHUB_STEP_SUMMARY

@@ -1,0 +1,63 @@
+# Core dependencies for FreeAgentics v0.1-alpha
+# Active Inference and Multi-Agent AI Platform
+
+--find-links https://download.pytorch.org/whl/torch_stable.html
+aiofiles==24.1.0
+alembic==1.16.2
+
+# Code Quality (optional for production)
+black==25.1.0
+cryptography==45.0.5  # Compatible with Python 3.12, security fix for CVE-2024-12797
+faker==33.1.0
+# Core Framework
+fastapi==0.115.14
+flake8==7.3.0
+h3==4.1.1
+
+# Web and API
+httpx==0.28.1
+isort==6.0.1
+
+# Type Checking (optional for production)
+mypy==1.16.1
+
+# Active Inference (disabled for CI performance)
+# inferactively-pymdp==0.0.7.1
+
+# Graph Neural Networks (disabled for CI performance)
+# torch-geometric==2.6.1
+networkx==3.5
+
+# Scientific Computing
+numpy==2.2.1  # Compatible with scipy 1.14.1 requirement (<2.3)
+
+# Data Processing
+pandas==2.2.3  # Compatible with numpy 2.2.1
+
+# Authentication and Security
+passlib==1.7.4
+pgvector==0.3.2
+psycopg2-binary==2.9.10
+pydantic==2.9.2
+pyjwt==2.10.1
+
+# Testing (optional for production)
+pytest==8.4.1
+pytest-asyncio==1.0.0
+pytest-cov==6.2.1
+
+# Configuration and Environment
+python-dotenv==1.1.1
+python-multipart==0.0.20
+pyyaml==6.0.2
+scipy==1.14.1  # Compatible with Python 3.12
+
+# Database with Vector Extensions
+sqlalchemy==2.0.41
+starlette==0.46.2  # Latest 0.46.x version, security fix for CVE-2024-47874
+
+# Logging and Monitoring
+structlog==24.4.0
+toml==0.10.2
+torch==2.3.1+cpu  # CPU-only version for CI (2.7.1 not available yet)
+uvicorn==0.35.0

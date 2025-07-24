@@ -1,0 +1,10 @@
+{
+  "service_name": "service-94",
+  "fingerprint": "35ce4ea4412658589c873df68a4ecd8ea860a7eb085c98193cba96fdc2b7c782",
+  "serial_number": 18037945061254841963010213528055989204456233383,
+  "issued_at": "2025-07-16T21:27:57",
+  "expires_at": "2025-08-15T21:27:57",
+  "dns_names": ["service-94", "service-94.local", "service-94.cluster.local"],
+  "revoked": false,
+  "revocation_reason": null
+}

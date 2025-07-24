@@ -1,0 +1,10 @@
+{
+  "service_name": "service-21",
+  "fingerprint": "0d3fbd470b942fff958a41d7f2af8bb837513b1fb131b96dd37b6e4a44b9fe02",
+  "serial_number": 550374024813888285959240326823774990253493558307,
+  "issued_at": "2025-07-16T21:28:23",
+  "expires_at": "2025-08-15T21:28:23",
+  "dns_names": ["service-21", "service-21.local", "service-21.cluster.local"],
+  "revoked": false,
+  "revocation_reason": null
+}

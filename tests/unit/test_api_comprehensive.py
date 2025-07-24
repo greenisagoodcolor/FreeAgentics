@@ -27,10 +27,10 @@ mock_modules = {
 
 with patch.dict("sys.modules", mock_modules):
     from api.middleware.rate_limiter import RateLimitMiddleware
-    from api.middleware.security_headers import SecurityHeadersMiddleware
     from api.v1.agents import router as agents_router
     from api.v1.auth import router as auth_router
     from api.v1.health import router as health_router
+    from auth.security_headers import SecurityHeadersMiddleware
 
 
 class TestSecurityHeadersMiddleware:

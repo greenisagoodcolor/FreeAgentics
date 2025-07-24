@@ -1,0 +1,1021 @@
+"""
+Comprehensive test suite for Local LLM Manager module - Meta Quality Standards.
+
+This test suite provides comprehensive coverage for local LLM management including
+Ollama, llama.cpp providers, caching, and edge deployment optimization.
+Coverage target: 95%+
+"""
+
+import json
+import subprocess
+import tempfile
+import threading
+import time
+from pathlib import Path
+from typing import Any, Dict, List, Optional
+from unittest.mock import MagicMock, Mock, call, mock_open, patch
+
+import httpx
+import pytest
+import requests
+
+# Import the module under test
+try:
+    from inference.llm.local_llm_manager import (
+        FallbackResponder,
+        LlamaCppProvider,
+        LLMResponse,
+        LocalLLMConfig,
+        LocalLLMManager,
+    )
+    from inference.llm.local_llm_manager import LocalLLMProvider
+    from inference.llm.local_llm_manager import LocalLLMProvider as LocalLLMProviderABC
+    from inference.llm.local_llm_manager import (
+        OllamaProvider,
+        QuantizationLevel,
+        ResponseCache,
+    )
+
+    IMPORT_SUCCESS = True
+except ImportError:
+    IMPORT_SUCCESS = False
+
+    # Mock classes for testing when imports fail
+    class LocalLLMProvider:
+        OLLAMA = "ollama"
+        LLAMA_CPP = "llama_cpp"
+
+    class QuantizationLevel:
+        INT4 = "q4_K_M"
+        INT8 = "q8_0"
+
+    class LocalLLMConfig:
+        pass
+
+    class LLMResponse:
+        pass
+
+    class LocalLLMProviderABC:
+        pass
+
+    class OllamaProvider:
+        pass
+
+    class LlamaCppProvider:
+        pass
+
+    class ResponseCache:
+        pass
+
+    class FallbackResponder:
+        pass
+
+    class LocalLLMManager:
+        pass
+
+
+class TestLocalLLMConfig:
+    """Test LocalLLMConfig class."""
+
+    def test_config_creation_defaults(self):
+        """Test config creation with defaults."""
+        if not IMPORT_SUCCESS:
+            pytest.skip("LLM modules not available")
+
+        config = LocalLLMConfig(provider=LocalLLMProvider.OLLAMA, model_name="llama2:7b")
+
+        assert config.provider == LocalLLMProvider.OLLAMA
+        assert config.model_name == "llama2:7b"
+        assert config.quantization == QuantizationLevel.INT4
+        assert config.context_size == 2048
+        assert config.max_tokens == 512
+        assert config.temperature == 0.7
+        assert config.threads == 4
+        assert config.gpu_layers == 0
+        assert config.ollama_host == "http://localhost:11434"
+        assert config.enable_fallback is True
+
+    def test_config_creation_custom(self):
+        """Test config creation with custom values."""
+        if not IMPORT_SUCCESS:
+            pytest.skip("LLM modules not available")
+
+        config = LocalLLMConfig(
+            provider=LocalLLMProvider.LLAMA_CPP,
+            model_name="mistral:7b",
+            quantization=QuantizationLevel.INT8,
+            context_size=4096,
+            max_tokens=1024,
+            temperature=0.3,
+            threads=8,
+            gpu_layers=20,
+            ollama_host="http://custom:11434",
+            enable_fallback=False,
+        )
+
+        assert config.provider == LocalLLMProvider.LLAMA_CPP
+        assert config.model_name == "mistral:7b"
+        assert config.quantization == QuantizationLevel.INT8
+        assert config.context_size == 4096
+        assert config.max_tokens == 1024
+        assert config.temperature == 0.3
+        assert config.threads == 8
+        assert config.gpu_layers == 20
+        assert config.ollama_host == "http://custom:11434"
+        assert config.enable_fallback is False
+
+
+class TestLLMResponse:
+    """Test LLMResponse class."""
+
+    def test_response_creation(self):
+        """Test response creation."""
+        if not IMPORT_SUCCESS:
+            pytest.skip("LLM modules not available")
+
+        response = LLMResponse(
+            text="This is a test response",
+            tokens_used=25,
+            generation_time=1.5,
+            provider=LocalLLMProvider.OLLAMA,
+            cached=False,
+            fallback_used=False,
+            metadata={"model": "llama2:7b"},
+        )
+
+        assert response.text == "This is a test response"
+        assert response.tokens_used == 25
+        assert response.generation_time == 1.5
+        assert response.provider == LocalLLMProvider.OLLAMA
+        assert response.cached is False
+        assert response.fallback_used is False
+        assert response.metadata["model"] == "llama2:7b"
+
+
+class TestOllamaProvider:
+    """Test OllamaProvider class."""
+
+    @pytest.fixture
+    def config(self):
+        """Create test configuration."""
+        if not IMPORT_SUCCESS:
+            return Mock()
+        return LocalLLMConfig(
+            provider=LocalLLMProvider.OLLAMA,
+            model_name="llama2:7b",
+            ollama_host="http://localhost:11434",
+        )
+
+    @pytest.fixture
+    def ollama_provider(self, config):
+        """Create Ollama provider instance."""
+        if not IMPORT_SUCCESS:
+            pytest.skip("LLM modules not available")
+        return OllamaProvider(config)
+
+    def test_ollama_provider_initialization(self, ollama_provider, config):
+        """Test Ollama provider initialization."""
+        assert ollama_provider.config == config
+        assert ollama_provider.base_url == config.ollama_host
+        assert isinstance(ollama_provider.session, httpx.Client)
+
+    def test_is_available_success(self, ollama_provider):
+        """Test Ollama availability check when available."""
+        with patch.object(ollama_provider.session, "get") as mock_get:
+            mock_response = Mock()
+            mock_response.status_code = 200
+            mock_get.return_value = mock_response
+
+            assert ollama_provider.is_available() is True
+            mock_get.assert_called_once_with(f"{ollama_provider.base_url}/api/tags", timeout=2)
+
+    def test_is_available_failure(self, ollama_provider):
+        """Test Ollama availability check when unavailable."""
+        with patch.object(ollama_provider.session, "get") as mock_get:
+            mock_get.side_effect = requests.RequestException("Connection failed")
+
+            assert ollama_provider.is_available() is False
+
+    def test_load_model_already_exists(self, ollama_provider, config):
+        """Test loading model that already exists."""
+        with patch.object(ollama_provider.session, "get") as mock_get:
+            mock_response = Mock()
+            mock_response.status_code = 200
+            mock_response.json.return_value = {"models": [{"name": config.model_name}]}
+            mock_get.return_value = mock_response
+
+            result = ollama_provider.load_model()
+
+            assert result is True
+            mock_get.assert_called_once()
+
+    def test_load_model_pull_required(self, ollama_provider, config):
+        """Test loading model that requires pulling."""
+        with (
+            patch.object(ollama_provider.session, "get") as mock_get,
+            patch.object(ollama_provider.session, "post") as mock_post,
+        ):
+
+            # First call: model doesn't exist
+            mock_get_response = Mock()
+            mock_get_response.status_code = 200
+            mock_get_response.json.return_value = {"models": []}
+            mock_get.return_value = mock_get_response
+
+            # Post call: successful pull
+            mock_post_response = Mock()
+            mock_post_response.status_code = 200
+            mock_post_response.iter_lines.return_value = [
+                b'{"status": "downloading"}',
+                b'{"status": "complete"}',
+            ]
+            mock_post.return_value = mock_post_response
+
+            result = ollama_provider.load_model()
+
+            assert result is True
+            mock_post.assert_called_once()
+
+    def test_load_model_pull_failure(self, ollama_provider, config):
+        """Test loading model with pull failure."""
+        with patch.object(ollama_provider.session, "get") as mock_get:
+            mock_get.side_effect = Exception("Network error")
+
+            result = ollama_provider.load_model()
+
+            assert result is False
+
+    def test_generate_success(self, ollama_provider):
+        """Test successful generation."""
+        with patch.object(ollama_provider.session, "post") as mock_post:
+            mock_response = Mock()
+            mock_response.status_code = 200
+            mock_response.json.return_value = {
+                "response": "Generated text response",
+                "eval_count": 25,
+                "model": "llama2:7b",
+                "total_duration": 1500000000,
+                "load_duration": 100000000,
+                "eval_duration": 1400000000,
+            }
+            mock_post.return_value = mock_response
+
+            response = ollama_provider.generate("Test prompt")
+
+            assert isinstance(response, LLMResponse)
+            assert response.text == "Generated text response"
+            assert response.tokens_used == 25
+            assert response.provider == LocalLLMProvider.OLLAMA
+            assert response.metadata["model"] == "llama2:7b"
+
+    def test_generate_failure(self, ollama_provider):
+        """Test generation failure."""
+        with patch.object(ollama_provider.session, "post") as mock_post:
+            mock_response = Mock()
+            mock_response.status_code = 500
+            mock_response.raise_for_status.side_effect = Exception("Ollama API error: 500")
+            mock_post.return_value = mock_response
+
+            with pytest.raises(Exception, match="Ollama API error: 500"):
+                ollama_provider.generate("Test prompt")
+
+    def test_generate_with_custom_parameters(self, ollama_provider):
+        """Test generation with custom parameters."""
+        with patch.object(ollama_provider.session, "post") as mock_post:
+            mock_response = Mock()
+            mock_response.status_code = 200
+            mock_response.json.return_value = {"response": "Custom response", "eval_count": 30}
+            mock_post.return_value = mock_response
+
+            response = ollama_provider.generate("Test prompt")
+
+            # Verify parameters were passed correctly
+            call_args = mock_post.call_args
+            assert call_args[1]["json"]["options"]["temperature"] == ollama_provider.config.temperature
+            assert call_args[1]["json"]["options"]["num_predict"] == ollama_provider.config.max_tokens
+
+
+class TestLlamaCppProvider:
+    """Test LlamaCppProvider class."""
+
+    @pytest.fixture
+    def config(self):
+        """Create test configuration."""
+        if not IMPORT_SUCCESS:
+            return Mock()
+        return LocalLLMConfig(
+            provider=LocalLLMProvider.LLAMA_CPP,
+            model_name="llama2:7b",
+            llama_cpp_binary="llama.cpp/main",
+        )
+
+    @pytest.fixture
+    def llama_cpp_provider(self, config):
+        """Create llama.cpp provider instance."""
+        if not IMPORT_SUCCESS:
+            pytest.skip("LLM modules not available")
+        return LlamaCppProvider(config)
+
+    def test_llama_cpp_provider_initialization(self, llama_cpp_provider, config):
+        """Test llama.cpp provider initialization."""
+        assert llama_cpp_provider.config == config
+        assert llama_cpp_provider.process is None
+        assert llama_cpp_provider.model_loaded is False
+
+    def test_is_available_binary_exists(self, llama_cpp_provider):
+        """Test availability check when binary exists."""
+        with patch("subprocess.run") as mock_run:
+            mock_result = Mock()
+            mock_result.returncode = 0
+            mock_run.return_value = mock_result
+
+            assert llama_cpp_provider.is_available() is True
+            mock_run.assert_called_once_with(
+                [llama_cpp_provider.binary_path, "--version"],
+                capture_output=True,
+                text=True,
+                timeout=5
+            )
+
+    def test_is_available_binary_missing(self, llama_cpp_provider):
+        """Test availability check when binary missing."""
+        with patch("subprocess.run") as mock_run:
+            mock_run.side_effect = FileNotFoundError("Binary not found")
+
+            assert llama_cpp_provider.is_available() is False
+
+    def test_load_model_success(self, llama_cpp_provider, config):
+        """Test successful model loading."""
+        model_path = "/test/model.gguf"
+        llama_cpp_provider.config.model_path = model_path
+
+        with patch("os.path.exists") as mock_exists:
+            mock_exists.return_value = True
+
+            result = llama_cpp_provider.load_model()
+
+            assert result is True
+            assert llama_cpp_provider.model_loaded is True
+            assert llama_cpp_provider.config.model_path == model_path
+
+    def test_load_model_file_not_found(self, llama_cpp_provider, config):
+        """Test model loading with missing file."""
+        model_path = "/test/nonexistent.gguf"
+        llama_cpp_provider.config.model_path = model_path
+
+        with patch("os.path.exists") as mock_exists:
+            mock_exists.return_value = False
+
+            result = llama_cpp_provider.load_model()
+
+            assert result is False
+            assert llama_cpp_provider.model_loaded is False
+
+    def test_generate_success(self, llama_cpp_provider, config):
+        """Test successful generation."""
+        # Setup model as loaded
+        llama_cpp_provider.model_loaded = True
+        llama_cpp_provider.config.model_path = Path("/test/model.gguf")
+
+        with patch("subprocess.run") as mock_run:
+            mock_result = Mock()
+            mock_result.returncode = 0
+            mock_result.stdout = "Test prompt\n\nGenerated response text"
+            mock_run.return_value = mock_result
+
+            response = llama_cpp_provider.generate("Test prompt")
+
+            assert isinstance(response, LLMResponse)
+            assert "Generated response text" in response.text
+            assert response.provider == LocalLLMProvider.LLAMA_CPP
+            assert response.tokens_used > 0
+
+    def test_generate_model_not_loaded(self, llama_cpp_provider):
+        """Test generation with model not loaded."""
+        with pytest.raises(Exception, match="Model not loaded"):
+            llama_cpp_provider.generate("Test prompt")
+
+    def test_generate_subprocess_failure(self, llama_cpp_provider):
+        """Test generation with subprocess failure."""
+        llama_cpp_provider.model_loaded = True
+        llama_cpp_provider.config.model_path = Path("/test/model.gguf")
+
+        with patch("subprocess.run") as mock_run:
+            mock_result = Mock()
+            mock_result.returncode = 1
+            mock_result.stderr = "Model loading failed"
+            mock_run.return_value = mock_result
+
+            with pytest.raises(Exception, match="llama.cpp error"):
+                llama_cpp_provider.generate("Test prompt")
+
+    def test_generate_timeout(self, llama_cpp_provider):
+        """Test generation timeout."""
+        llama_cpp_provider.model_loaded = True
+        llama_cpp_provider.config.model_path = Path("/test/model.gguf")
+
+        with patch("subprocess.run") as mock_run:
+            mock_run.side_effect = subprocess.TimeoutExpired(cmd=["test"], timeout=30)
+
+            with pytest.raises(Exception, match="llama.cpp generation timeout"):
+                llama_cpp_provider.generate("Test prompt")
+
+    def test_generate_with_gpu_layers(self, llama_cpp_provider):
+        """Test generation with GPU layers configuration."""
+        llama_cpp_provider.model_loaded = True
+        llama_cpp_provider.config.model_path = Path("/test/model.gguf")
+        llama_cpp_provider.config.gpu_layers = 20
+
+        with patch("subprocess.run") as mock_run:
+            mock_result = Mock()
+            mock_result.returncode = 0
+            mock_result.stdout = "Test response"
+            mock_run.return_value = mock_result
+
+            llama_cpp_provider.generate("Test prompt")
+
+            # Verify GPU layers parameter was included
+            call_args = mock_run.call_args[0][0]
+            assert "-ngl" in call_args
+            assert "20" in call_args
+
+
+class TestResponseCache:
+    """Test ResponseCache class."""
+
+    @pytest.fixture
+    def temp_dir(self):
+        """Create temporary directory for cache."""
+        with tempfile.TemporaryDirectory() as temp_dir:
+            yield Path(temp_dir)
+
+    @pytest.fixture
+    def cache(self, temp_dir):
+        """Create response cache instance."""
+        if not IMPORT_SUCCESS:
+            pytest.skip("LLM modules not available")
+        return ResponseCache(max_size_bytes=10 * 1024 * 1024)  # 10MB
+
+    def test_cache_initialization(self, cache):
+        """Test cache initialization."""
+        assert cache.max_size_bytes == 10 * 1024 * 1024
+        assert cache.cache == {}
+        assert cache.cache_hits == 0
+        assert cache.cache_misses == 0
+        assert hasattr(cache.lock, "acquire") and hasattr(cache.lock, "release")
+
+    def test_get_cache_key_generation(self, cache):
+        """Test cache key generation."""
+        key1 = cache._get_cache_key("test prompt", temperature=0.7, max_tokens=100)
+        key2 = cache._get_cache_key("test prompt", temperature=0.7, max_tokens=100)
+        key3 = cache._get_cache_key("test prompt", temperature=0.8, max_tokens=100)
+
+        assert key1 == key2  # Same inputs should produce same key
+        assert key1 != key3  # Different inputs should produce different keys
+        assert len(key1) == 64  # SHA256 hash length
+
+    def test_cache_miss(self, cache):
+        """Test cache miss scenario."""
+        result = cache.get("test prompt", temperature=0.7)
+
+        assert result is None
+        assert cache.cache_misses == 1
+        assert cache.cache_hits == 0
+
+    def test_cache_put_and_get(self, cache):
+        """Test putting and getting from cache."""
+        if not IMPORT_SUCCESS:
+            pytest.skip("LLM modules not available")
+
+        response = LLMResponse(
+            text="Cached response",
+            tokens_used=20,
+            generation_time=0.5,
+            provider=LocalLLMProvider.OLLAMA,
+        )
+
+        # Put in cache
+        cache.put("test prompt", response, temperature=0.7)
+
+        # Get from cache
+        cached_response = cache.get("test prompt", temperature=0.7)
+
+        assert cached_response is not None
+        assert cached_response.text == "Cached response"
+        assert cached_response.cached is True
+        assert cache.cache_hits == 1
+
+    def test_cache_expiration(self, cache):
+        """Test cache entry expiration."""
+        if not IMPORT_SUCCESS:
+            pytest.skip("LLM modules not available")
+
+        response = LLMResponse(
+            text="Expired response",
+            tokens_used=20,
+            generation_time=0.5,
+            provider=LocalLLMProvider.OLLAMA,
+        )
+
+        # Mock time to simulate expiration
+        with patch("time.time") as mock_time:
+            # Put entry at time 0
+            mock_time.return_value = 0
+            cache.put("test prompt", response)
+
+            # Try to get after expiration (1 hour + 1 second)
+            mock_time.return_value = 3601
+            result = cache.get("test prompt")
+
+            assert result is None
+            assert cache.cache_misses == 1
+
+    def test_cache_size_limit(self, cache):
+        """Test cache size limit enforcement."""
+        if not IMPORT_SUCCESS:
+            pytest.skip("LLM modules not available")
+
+        # Add many entries to exceed limit
+        for i in range(1005):  # Exceeds max_memory_entries of 1000
+            response = LLMResponse(
+                text=f"Response {i}",
+                tokens_used=20,
+                generation_time=0.5,
+                provider=LocalLLMProvider.OLLAMA,
+            )
+            cache.put(f"prompt {i}", response)
+
+        # Cache should be limited to max_memory_entries
+        assert len(cache.cache) <= cache.max_memory_entries
+
+    def test_cache_statistics(self, cache):
+        """Test cache statistics."""
+        if not IMPORT_SUCCESS:
+            pytest.skip("LLM modules not available")
+
+        response = LLMResponse(
+            text="Test response",
+            tokens_used=20,
+            generation_time=0.5,
+            provider=LocalLLMProvider.OLLAMA,
+        )
+
+        # Generate some cache activity
+        cache.put("prompt1", response)
+        cache.get("prompt1")  # Hit
+        cache.get("prompt2")  # Miss
+
+        stats = cache.get_stats()
+
+        assert stats["cache_hits"] == 1
+        assert stats["cache_misses"] == 1
+        assert stats["hit_rate"] == 0.5
+        assert stats["entries"] == 1
+
+
+class TestFallbackResponder:
+    """Test FallbackResponder class."""
+
+    @pytest.fixture
+    def fallback_responder(self):
+        """Create fallback responder instance."""
+        if not IMPORT_SUCCESS:
+            pytest.skip("LLM modules not available")
+        return FallbackResponder()
+
+    def test_fallback_responder_initialization(self, fallback_responder):
+        """Test fallback responder initialization."""
+        assert isinstance(fallback_responder.templates, dict)
+        assert "greeting" in fallback_responder.templates
+        assert "exploration" in fallback_responder.templates
+        assert "trading" in fallback_responder.templates
+        assert "error" in fallback_responder.templates
+
+    def test_get_fallback_response_greeting(self, fallback_responder):
+        """Test fallback response for greeting."""
+        response = fallback_responder.get_fallback_response("Hello there!")
+
+        assert isinstance(response, str)
+        assert len(response) > 0
+        # Should be one of the greeting templates
+        greeting_templates = fallback_responder.templates["greeting"]
+        assert response in greeting_templates
+
+    def test_get_fallback_response_exploration(self, fallback_responder):
+        """Test fallback response for exploration."""
+        response = fallback_responder.get_fallback_response("explore the area")
+
+        assert isinstance(response, str)
+        exploration_templates = fallback_responder.templates["exploration"]
+        assert response in exploration_templates
+
+    def test_get_fallback_response_trading(self, fallback_responder):
+        """Test fallback response for trading."""
+        response = fallback_responder.get_fallback_response("trade some resources")
+
+        assert isinstance(response, str)
+        trading_templates = fallback_responder.templates["trading"]
+        assert response in trading_templates
+
+    def test_get_fallback_response_default(self, fallback_responder):
+        """Test fallback response for unrecognized input."""
+        response = fallback_responder.get_fallback_response("unknown command")
+
+        assert isinstance(response, str)
+        error_templates = fallback_responder.templates["error"]
+        assert response in error_templates
+
+
+class TestLocalLLMManager:
+    """Test LocalLLMManager class."""
+
+    @pytest.fixture
+    def config(self):
+        """Create test configuration."""
+        if not IMPORT_SUCCESS:
+            return Mock()
+        return LocalLLMConfig(provider=LocalLLMProvider.OLLAMA, model_name="llama2:7b")
+
+    @pytest.fixture
+    def llm_manager(self, config):
+        """Create LLM manager instance."""
+        if not IMPORT_SUCCESS:
+            pytest.skip("LLM modules not available")
+        return LocalLLMManager(config)
+
+    def test_manager_initialization(self, llm_manager, config):
+        """Test manager initialization."""
+        assert llm_manager.config == config
+        assert isinstance(llm_manager.providers, dict)
+        assert isinstance(llm_manager.cache, ResponseCache)
+        assert isinstance(llm_manager.fallback_responder, FallbackResponder)
+
+    def test_initialize_providers_ollama_available(self, config):
+        """Test provider initialization with Ollama available."""
+        if not IMPORT_SUCCESS:
+            pytest.skip("LLM modules not available")
+
+        with patch("inference.llm.local_llm_manager.OllamaProvider") as mock_ollama:
+            mock_provider = Mock()
+            mock_provider.is_available.return_value = True
+            mock_ollama.return_value = mock_provider
+
+            manager = LocalLLMManager(config)
+
+            assert LocalLLMProvider.OLLAMA in manager.providers
+            assert manager.current_provider == mock_provider
+
+    def test_initialize_providers_ollama_unavailable(self, config):
+        """Test provider initialization with Ollama unavailable."""
+        if not IMPORT_SUCCESS:
+            pytest.skip("LLM modules not available")
+
+        with (
+            patch("inference.llm.local_llm_manager.OllamaProvider") as mock_ollama,
+            patch("inference.llm.local_llm_manager.LlamaCppProvider") as mock_llama_cpp,
+        ):
+
+            # Ollama unavailable
+            mock_ollama_provider = Mock()
+            mock_ollama_provider.is_available.return_value = False
+            mock_ollama.return_value = mock_ollama_provider
+
+            # llama.cpp available
+            mock_llama_provider = Mock()
+            mock_llama_provider.is_available.return_value = True
+            mock_llama_cpp.return_value = mock_llama_provider
+
+            # Set config to try llama.cpp as fallback
+            config.provider = LocalLLMProvider.LLAMA_CPP
+            manager = LocalLLMManager(config)
+
+            assert LocalLLMProvider.LLAMA_CPP in manager.providers
+            assert manager.current_provider == mock_llama_provider
+
+    def test_load_model_success(self, llm_manager):
+        """Test successful model loading."""
+        mock_provider = Mock()
+        mock_provider.load_model.return_value = True
+        llm_manager.current_provider = mock_provider
+
+        result = llm_manager.load_model(Path("/test/model.gguf"))
+
+        assert result is True
+        mock_provider.load_model.assert_called_once()
+
+    def test_load_model_no_provider(self, llm_manager):
+        """Test model loading with no provider."""
+        llm_manager.current_provider = None
+
+        result = llm_manager.load_model(Path("/test/model.gguf"))
+
+        assert result is False
+
+    def test_generate_with_cache_hit(self, llm_manager):
+        """Test generation with cache hit."""
+        if not IMPORT_SUCCESS:
+            pytest.skip("LLM modules not available")
+
+        # Setup cached response
+        cached_response = LLMResponse(
+            text="Cached response",
+            tokens_used=20,
+            generation_time=0.1,
+            provider=LocalLLMProvider.OLLAMA,
+            cached=True,
+        )
+
+        with patch.object(llm_manager.cache, "get") as mock_cache_get:
+            mock_cache_get.return_value = cached_response
+
+            response = llm_manager.generate("test prompt")
+
+            assert response == cached_response
+            assert response.cached is True
+
+    def test_generate_with_primary_provider_success(self, llm_manager):
+        """Test successful generation with primary provider."""
+        if not IMPORT_SUCCESS:
+            pytest.skip("LLM modules not available")
+
+        # Setup provider
+        mock_provider = Mock()
+        expected_response = LLMResponse(
+            text="Generated response",
+            tokens_used=25,
+            generation_time=1.5,
+            provider=LocalLLMProvider.OLLAMA,
+        )
+        mock_provider.generate.return_value = expected_response
+        llm_manager.current_provider = mock_provider
+
+        # Mock cache miss
+        with (
+            patch.object(llm_manager.cache, "get") as mock_cache_get,
+            patch.object(llm_manager.cache, "put") as mock_cache_put,
+        ):
+            mock_cache_get.return_value = None
+
+            response = llm_manager.generate("test prompt")
+
+            assert response == expected_response
+            mock_provider.generate.assert_called_once()
+            mock_cache_put.assert_called_once()
+
+    def test_generate_with_fallback_provider(self, llm_manager):
+        """Test generation with fallback to secondary provider."""
+        if not IMPORT_SUCCESS:
+            pytest.skip("LLM modules not available")
+
+        # Setup failing primary provider
+        failing_provider = Mock()
+        failing_provider.generate.side_effect = Exception("Primary failed")
+        llm_manager.current_provider = failing_provider
+
+        # Setup working fallback provider
+        working_provider = Mock()
+        expected_response = LLMResponse(
+            text="Fallback response",
+            tokens_used=20,
+            generation_time=1.0,
+            provider=LocalLLMProvider.LLAMA_CPP,
+        )
+        working_provider.generate.return_value = expected_response
+        llm_manager.providers[LocalLLMProvider.LLAMA_CPP] = working_provider
+
+        # Mock cache miss
+        with patch.object(llm_manager.cache, "get") as mock_cache_get:
+            mock_cache_get.return_value = None
+
+            response = llm_manager.generate("test prompt")
+
+            assert response == expected_response
+            failing_provider.generate.assert_called_once()
+            working_provider.generate.assert_called_once()
+
+    def test_generate_with_fallback_responder(self, llm_manager):
+        """Test generation falling back to fallback responder."""
+        if not IMPORT_SUCCESS:
+            pytest.skip("LLM modules not available")
+
+        # No providers available
+        llm_manager.current_provider = None
+        llm_manager.providers = {}
+
+        # Mock cache miss
+        with patch.object(llm_manager.cache, "get") as mock_cache_get:
+            mock_cache_get.return_value = None
+
+            response = llm_manager.generate("hello there")
+
+            assert isinstance(response, LLMResponse)
+            assert response.fallback_used is True
+            assert len(response.text) > 0
+
+    def test_generate_all_providers_fail_no_fallback(self, llm_manager):
+        """Test generation when all providers fail and fallback disabled."""
+        # Disable fallback
+        llm_manager.config.enable_fallback = False
+
+        # Setup failing provider
+        failing_provider = Mock()
+        failing_provider.generate.side_effect = Exception("Provider failed")
+        llm_manager.current_provider = failing_provider
+
+        # Mock cache miss
+        with patch.object(llm_manager.cache, "get") as mock_cache_get:
+            mock_cache_get.return_value = None
+
+            with pytest.raises(Exception, match="All LLM providers failed"):
+                llm_manager.generate("test prompt")
+
+    def test_try_generate_with_retries(self, llm_manager):
+        """Test generation with retry mechanism."""
+        mock_provider = Mock()
+
+        # Fail first two attempts, succeed on third
+        mock_provider.generate.side_effect = [
+            Exception("Attempt 1 failed"),
+            Exception("Attempt 2 failed"),
+            LLMResponse(
+                text="Success on retry",
+                tokens_used=15,
+                generation_time=0.8,
+                provider=LocalLLMProvider.OLLAMA,
+            ),
+        ]
+
+        with patch("time.sleep"):  # Speed up test
+            response = llm_manager._try_generate(mock_provider, "test prompt")
+
+            assert response.text == "Success on retry"
+            assert mock_provider.generate.call_count == 3
+
+    def test_try_generate_max_retries_exceeded(self, llm_manager):
+        """Test generation when max retries exceeded."""
+        mock_provider = Mock()
+        mock_provider.generate.side_effect = Exception("Always fails")
+
+        with patch("time.sleep"):  # Speed up test
+            with pytest.raises(Exception, match="Always fails"):
+                llm_manager._try_generate(mock_provider, "test prompt")
+
+            # Should retry according to config
+            assert mock_provider.generate.call_count == llm_manager.config.retry_attempts
+
+    def test_get_status(self, llm_manager):
+        """Test getting manager status."""
+        mock_provider = Mock()
+        mock_provider.__class__.__name__ = "OllamaProvider"
+        llm_manager.current_provider = mock_provider
+        llm_manager.providers[LocalLLMProvider.OLLAMA] = mock_provider
+
+        status = llm_manager.get_status()
+
+        assert status["current_provider"] == "OllamaProvider"
+        assert LocalLLMProvider.OLLAMA in status["available_providers"]
+        assert status["model_loaded"] is True
+        assert "cache_stats" in status
+        assert "config" in status
+        assert status["config"]["model"] == llm_manager.config.model_name
+
+    def test_optimize_for_hardware_low_memory(self, llm_manager):
+        """Test hardware optimization for low memory device."""
+        optimized_config = llm_manager.optimize_for_hardware(ram_gb=2.0, cpu_cores=2, has_gpu=False)
+
+        assert optimized_config.quantization == QuantizationLevel.INT3
+        assert optimized_config.context_size == 512
+        assert optimized_config.cache_size_mb == 50
+        assert optimized_config.threads == 1  # cpu_cores - 1
+        assert optimized_config.gpu_layers == 0
+        assert optimized_config.use_mmap is True
+        assert optimized_config.use_mlock is False
+
+    def test_optimize_for_hardware_high_memory(self, llm_manager):
+        """Test hardware optimization for high memory device."""
+        optimized_config = llm_manager.optimize_for_hardware(
+            ram_gb=32.0, cpu_cores=16, has_gpu=True
+        )
+
+        assert optimized_config.quantization == QuantizationLevel.HALF
+        assert optimized_config.context_size == 4096
+        assert optimized_config.cache_size_mb == 500
+        assert optimized_config.threads == 8  # Min of cpu_cores-1 and 8
+        assert optimized_config.gpu_layers == 12  # GPU available
+        assert optimized_config.use_mmap is True
+        assert optimized_config.use_mlock is True  # Plenty of RAM
+
+
+class TestLocalLLMManagerEdgeCases:
+    """Test edge cases and error handling."""
+
+    def test_manager_no_providers_available(self):
+        """Test manager when no providers are available."""
+        if not IMPORT_SUCCESS:
+            pytest.skip("LLM modules not available")
+
+        config = LocalLLMConfig(provider=LocalLLMProvider.OLLAMA, model_name="llama2:7b")
+
+        with (
+            patch("inference.llm.local_llm_manager.OllamaProvider") as mock_ollama,
+            patch("inference.llm.local_llm_manager.LlamaCppProvider") as mock_llama_cpp,
+        ):
+
+            # Both providers unavailable
+            mock_ollama_provider = Mock()
+            mock_ollama_provider.is_available.return_value = False
+            mock_ollama.return_value = mock_ollama_provider
+
+            mock_llama_provider = Mock()
+            mock_llama_provider.is_available.return_value = False
+            mock_llama_cpp.return_value = mock_llama_provider
+
+            manager = LocalLLMManager(config)
+
+            assert manager.current_provider is None
+            assert len(manager.providers) == 0
+
+    def test_cache_thread_safety(self):
+        """Test cache thread safety."""
+        if not IMPORT_SUCCESS:
+            pytest.skip("LLM modules not available")
+
+        cache = ResponseCache(max_size_mb=10)
+        results = []
+        errors = []
+
+        def cache_operation(i):
+            try:
+                response = LLMResponse(
+                    text=f"Response {i}",
+                    tokens_used=10,
+                    generation_time=0.1,
+                    provider=LocalLLMProvider.OLLAMA,
+                )
+                cache.put(f"prompt_{i}", response)
+
+                # Try to get it back
+                cached = cache.get(f"prompt_{i}")
+                if cached:
+                    results.append(cached)
+            except Exception as e:
+                errors.append(e)
+
+        # Run multiple threads
+        threads = []
+        for i in range(10):
+            t = threading.Thread(target=cache_operation, args=(i,))
+            threads.append(t)
+            t.start()
+
+        for t in threads:
+            t.join()
+
+        assert len(errors) == 0
+        assert len(results) > 0
+
+
+class TestIntegrationScenarios:
+    """Test integration scenarios combining multiple components."""
+
+    def test_full_llm_workflow(self):
+        """Test complete LLM workflow from initialization to generation."""
+        if not IMPORT_SUCCESS:
+            pytest.skip("LLM modules not available")
+
+        config = LocalLLMConfig(provider=LocalLLMProvider.OLLAMA, model_name="llama2:7b")
+
+        with patch("inference.llm.local_llm_manager.OllamaProvider") as mock_ollama:
+            # Setup mock provider
+            mock_provider = Mock()
+            mock_provider.is_available.return_value = True
+            mock_provider.load_model.return_value = True
+            mock_provider.generate.return_value = LLMResponse(
+                text="Integration test response",
+                tokens_used=30,
+                generation_time=2.0,
+                provider=LocalLLMProvider.OLLAMA,
+            )
+            mock_ollama.return_value = mock_provider
+
+            # Create manager and test workflow
+            manager = LocalLLMManager(config)
+
+            # Load model
+            load_success = manager.load_model()
+            assert load_success is True
+
+            # Generate response
+            response = manager.generate("Test integration prompt")
+
+            assert response.text == "Integration test response"
+            assert response.provider == LocalLLMProvider.OLLAMA
+
+            # Check status
+            status = manager.get_status()
+            assert status["model_loaded"] is True
+            assert status["current_provider"] == "Mock"
+
+
+if __name__ == "__main__":
+    pytest.main([__file__, "-v", "--cov=inference.llm.local_llm_manager", "--cov-report=html"])

@@ -1,0 +1,10 @@
+{
+  "service_name": "service-87",
+  "fingerprint": "9f170fc615fd554cd9cde98e06b381ef2cc9926b404ad8a207607e9311addf05",
+  "serial_number": 41528614453341461565285415467550165245446728419,
+  "issued_at": "2025-07-16T21:27:57",
+  "expires_at": "2025-08-15T21:27:57",
+  "dns_names": ["service-87", "service-87.local", "service-87.cluster.local"],
+  "revoked": false,
+  "revocation_reason": null
+}

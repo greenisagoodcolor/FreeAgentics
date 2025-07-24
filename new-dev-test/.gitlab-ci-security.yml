@@ -1,0 +1,70 @@
+cache:
+  paths:
+    - .cache/pip
+container-scanning:
+  artifacts:
+    reports:
+      container_scanning: gl-container-scanning-report.json
+  image: registry.gitlab.com/gitlab-org/security-products/analyzers/container-scanning:latest
+  script:
+    - /analyzer run
+  stage: security
+  variables:
+    CI_APPLICATION_REPOSITORY: $CI_REGISTRY_IMAGE
+    CI_APPLICATION_TAG: $CI_COMMIT_SHA
+dependency-scanning:
+  artifacts:
+    paths:
+      - dependency-check-report.*
+  image:
+    entrypoint:
+      - ""
+    name: owasp/dependency-check:latest
+  script:
+    - /usr/share/dependency-check/bin/dependency-check.sh --scan . --format ALL --project
+      FreeAgentics
+  stage: security
+sast:
+  artifacts:
+    reports:
+      sast: gl-sast-report.json
+  image: registry.gitlab.com/gitlab-org/security-products/analyzers/semgrep:latest
+  script:
+    - /analyzer run
+  stage: security
+security-tests:
+  allow_failure: false
+  artifacts:
+    paths:
+      - security_test_report.json
+      - bandit-report.json
+      - safety-report.json
+    reports:
+      junit: security-report.xml
+    when: always
+  before_script:
+    - pip install --upgrade pip
+    - pip install -r requirements.txt
+    - pip install -r requirements-dev.txt
+  image: python:3.10
+  script:
+    - python -m pytest tests/security/ -v --junitxml=security-report.xml
+    - python tests/security/run_comprehensive_penetration_tests.py
+    - bandit -r . -f json -o bandit-report.json
+    - safety check --json > safety-report.json
+    - python tests/security/check_security_gates.py
+  services:
+    - postgres:14
+    - redis:latest
+  stage: security
+  variables:
+    DATABASE_URL: postgresql://postgres:postgres@postgres/freeagentics_test
+    POSTGRES_DB: freeagentics_test
+    POSTGRES_PASSWORD: postgres
+    POSTGRES_USER: postgres
+stages:
+  - test
+  - security
+  - deploy
+variables:
+  PIP_CACHE_DIR: $CI_PROJECT_DIR/.cache/pip

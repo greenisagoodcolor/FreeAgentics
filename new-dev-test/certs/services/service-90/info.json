@@ -1,0 +1,10 @@
+{
+  "service_name": "service-90",
+  "fingerprint": "87b82af1fa4a41ca2e1141b6e8daf5647ca319f3d65f059a5fd872cddfaaed06",
+  "serial_number": 450906900884236045002370096795934743466060701276,
+  "issued_at": "2025-07-16T21:27:57",
+  "expires_at": "2025-08-15T21:27:57",
+  "dns_names": ["service-90", "service-90.local", "service-90.cluster.local"],
+  "revoked": false,
+  "revocation_reason": null
+}

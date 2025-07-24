@@ -1,0 +1,10 @@
+{
+  "service_name": "service-45",
+  "fingerprint": "cb4b7eee839e413ef3723492a929387417e40d05c4eb44b355964f7b05caccad",
+  "serial_number": 68613100733988018672832755064135669875573511549,
+  "issued_at": "2025-07-16T21:28:24",
+  "expires_at": "2025-08-15T21:28:24",
+  "dns_names": ["service-45", "service-45.local", "service-45.cluster.local"],
+  "revoked": false,
+  "revocation_reason": null
+}

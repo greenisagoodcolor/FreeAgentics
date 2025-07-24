@@ -1,0 +1,1100 @@
+version: "3.8"
+
+services:
+  # PostgreSQL Database - Production Optimized
+  postgres:
+    image: pgvector/pgvector:pg15
+    container_name: freeagentics-postgres
+    environment:
+      POSTGRES_DB: freeagentics
+      POSTGRES_USER: freeagentics
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:?POSTGRES_PASSWORD is required}
+      # Performance optimizations
+      POSTGRES_INITDB_ARGS: "--data-checksums --locale=en_US.utf8"
+      PGUSER: freeagentics
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+      - ./postgres/init:/docker-entrypoint-initdb.d:ro
+      - ./postgres/postgresql-production.conf:/etc/postgresql/postgresql.conf:ro
+    ports:
+      - "127.0.0.1:5432:5432" # Bind to localhost only for security
+    healthcheck:
+      test:
+        ["CMD-SHELL", "pg_isready -U freeagentics -d freeagentics -h localhost"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 30s
+    restart: unless-stopped
+    networks:
+      - freeagentics-network
+    deploy:
+      resources:
+        limits:
+          memory: 2G
+          cpus: "1.5"
+        reservations:
+          memory: 1G
+          cpus: "0.5"
+    command: >
+      postgres
+      -c config_file=/etc/postgresql/postgresql.conf
+      -c shared_preload_libraries=pg_stat_statements
+      -c log_statement=all
+      -c log_duration=on
+      -c log_min_duration_statement=1000
+    security_opt:
+      - no-new-privileges:true
+    cap_drop:
+      - ALL
+    cap_add:
+      - SETUID
+      - SETGID
+      - DAC_OVERRIDE
+    user: postgres:postgres
+
+  # Redis Cache - Production Optimized
+  redis:
+    image: redis:7-alpine
+    container_name: freeagentics-redis
+    command: >
+      redis-server
+      --appendonly yes
+      --requirepass ${REDIS_PASSWORD:?REDIS_PASSWORD is required}
+      --maxmemory 512mb
+      --maxmemory-policy allkeys-lru
+      --tcp-keepalive 300
+      --timeout 300
+      --save 900 1
+      --save 300 10
+      --save 60 10000
+      --rdbcompression yes
+      --rdbchecksum yes
+      --stop-writes-on-bgsave-error yes
+    volumes:
+      - redis_data:/data
+      - ./redis/conf/redis-production.conf:/usr/local/etc/redis/redis.conf:ro
+    ports:
+      - "127.0.0.1:6379:6379" # Bind to localhost only for security
+    healthcheck:
+      test: ["CMD", "redis-cli", "-a", "${REDIS_PASSWORD}", "ping"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 20s
+    restart: unless-stopped
+    networks:
+      - freeagentics-network
+    deploy:
+      resources:
+        limits:
+          memory: 768M
+          cpus: "0.5"
+        reservations:
+          memory: 256M
+          cpus: "0.1"
+    security_opt:
+      - no-new-privileges:true
+    cap_drop:
+      - ALL
+    user: "999:999" # Redis user
+
+  # FreeAgentics Backend (Production) - High Performance
+  backend:
+    build:
+      context: .
+      target: production
+      dockerfile: Dockerfile.production
+      args:
+        - VERSION=${VERSION:-v1.0.0-alpha}
+        - BUILD_DATE=${BUILD_DATE}
+        - GIT_COMMIT=${GIT_COMMIT}
+    image: freeagentics/backend:${VERSION:-v1.0.0-alpha}
+    container_name: freeagentics-backend
+    environment:
+      # Core Configuration
+      - DATABASE_URL=${DATABASE_URL:?DATABASE_URL is required}
+      - REDIS_URL=redis://:${REDIS_PASSWORD:?REDIS_PASSWORD is required}@redis:6379
+      - ENVIRONMENT=production
+      - PRODUCTION=true
+      - LOG_LEVEL=${LOG_LEVEL:-INFO}
+
+      # Security Configuration
+      - SECRET_KEY=${SECRET_KEY:?SECRET_KEY is required in production}
+      - JWT_SECRET=${JWT_SECRET:?JWT_SECRET is required in production}
+      - ACCESS_TOKEN_EXPIRE_MINUTES=${ACCESS_TOKEN_EXPIRE_MINUTES:-30}
+      - REFRESH_TOKEN_EXPIRE_DAYS=${REFRESH_TOKEN_EXPIRE_DAYS:-7}
+      - HTTPS_ONLY=${HTTPS_ONLY:-true}
+      - SECURE_COOKIES=${SECURE_COOKIES:-true}
+      - RATE_LIMIT_PER_MINUTE=${RATE_LIMIT_PER_MINUTE:-100}
+
+      # Performance Configuration
+      - WORKERS=${WORKERS:-4}
+      - WORKER_CONNECTIONS=${WORKER_CONNECTIONS:-1000}
+      - MAX_REQUESTS=${MAX_REQUESTS:-10000}
+      - MAX_REQUESTS_JITTER=${MAX_REQUESTS_JITTER:-1000}
+      - KEEP_ALIVE=${KEEP_ALIVE:-2}
+      - TIMEOUT=${TIMEOUT:-60}
+      - GRACEFUL_TIMEOUT=${GRACEFUL_TIMEOUT:-30}
+
+      # Monitoring & Observability
+      - ENABLE_METRICS=${ENABLE_METRICS:-true}
+      - METRICS_PORT=${METRICS_PORT:-9090}
+      - JAEGER_ENDPOINT=${JAEGER_ENDPOINT:-http://jaeger:14268/api/traces}
+      - PROMETHEUS_MULTIPROC_DIR=/tmp/prometheus_multiproc
+
+    ports:
+      - "127.0.0.1:8000:8000" # Internal only
+      - "127.0.0.1:9090:9090" # Metrics endpoint
+
+    depends_on:
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+      migration:
+        condition: service_completed_successfully
+
+    restart: unless-stopped
+    user: "1000:1000"
+    read_only: true
+    tmpfs:
+      - /tmp:exec,size=256m
+      - /app/logs:size=128m
+
+    networks:
+      - freeagentics-network
+
+    deploy:
+      resources:
+        limits:
+          memory: 1.5G
+          cpus: "2.0"
+        reservations:
+          memory: 512M
+          cpus: "0.5"
+      replicas: 2
+      update_config:
+        parallelism: 1
+        delay: 30s
+        failure_action: rollback
+        monitor: 60s
+      rollback_config:
+        parallelism: 1
+        delay: 30s
+      restart_policy:
+        condition: on-failure
+        delay: 5s
+        max_attempts: 3
+        window: 120s
+
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8000/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 60s
+
+    security_opt:
+      - no-new-privileges:true
+    cap_drop:
+      - ALL
+    cap_add:
+      - NET_BIND_SERVICE
+
+    ulimits:
+      nofile:
+        soft: 65536
+        hard: 65536
+      nproc:
+        soft: 4096
+        hard: 4096
+
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "100m"
+        max-file: "5"
+        tag: "freeagentics-backend"
+
+  # Frontend (Next.js) Production - Optimized
+  frontend:
+    build:
+      context: ./web
+      dockerfile: Dockerfile.production
+      args:
+        - VERSION=${VERSION:-v1.0.0-alpha}
+        - BUILD_DATE=${BUILD_DATE}
+        - GIT_COMMIT=${GIT_COMMIT}
+    image: freeagentics/frontend:${VERSION:-v1.0.0-alpha}
+    container_name: freeagentics-frontend
+    environment:
+      - NEXT_PUBLIC_API_URL=https://${DOMAIN}/api
+      - NEXT_PUBLIC_WS_URL=wss://${DOMAIN}/ws
+      - NODE_ENV=production
+      - HTTPS_ONLY=${HTTPS_ONLY:-true}
+      - NEXT_TELEMETRY_DISABLED=1
+      - PORT=3000
+    ports:
+      - "127.0.0.1:3000:3000" # Internal only
+    depends_on:
+      - backend
+    restart: unless-stopped
+    user: "1000:1000"
+    read_only: true
+    tmpfs:
+      - /tmp:size=128m
+      - /app/.next/cache:size=256m
+      - /app/public/sw.js:size=1m
+    networks:
+      - freeagentics-network
+    deploy:
+      resources:
+        limits:
+          memory: 512M
+          cpus: "1.0"
+        reservations:
+          memory: 256M
+          cpus: "0.25"
+      replicas: 1
+      update_config:
+        parallelism: 1
+        delay: 15s
+        failure_action: rollback
+        monitor: 30s
+      restart_policy:
+        condition: on-failure
+        delay: 3s
+        max_attempts: 3
+        window: 60s
+    healthcheck:
+      test:
+        [
+          "CMD",
+          "wget",
+          "--no-verbose",
+          "--tries=1",
+          "--spider",
+          "http://localhost:3000/health",
+        ]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 45s
+    security_opt:
+      - no-new-privileges:true
+    cap_drop:
+      - ALL
+    cap_add:
+      - NET_BIND_SERVICE
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "50m"
+        max-file: "3"
+        tag: "freeagentics-frontend"
+
+  # Nginx Reverse Proxy with SSL - High Performance & Security
+  nginx:
+    image: nginx:1.25-alpine
+    container_name: freeagentics-nginx
+    volumes:
+      - ./nginx/nginx.conf:/etc/nginx/nginx.conf:ro
+      - ./nginx/conf.d:/etc/nginx/conf.d:ro
+      - ./nginx/snippets:/etc/nginx/snippets:ro
+      - ./nginx/ssl:/etc/nginx/ssl:ro
+      - ./nginx/dhparam.pem:/etc/nginx/dhparam.pem:ro
+      - nginx_cache:/var/cache/nginx:rw
+      - nginx_logs:/var/log/nginx:rw
+    ports:
+      - "80:80"
+      - "443:443"
+    depends_on:
+      backend:
+        condition: service_healthy
+      frontend:
+        condition: service_healthy
+    restart: unless-stopped
+    user: "101:101"
+    networks:
+      - freeagentics-network
+    deploy:
+      resources:
+        limits:
+          memory: 256M
+          cpus: "0.5"
+        reservations:
+          memory: 128M
+          cpus: "0.1"
+      update_config:
+        parallelism: 1
+        delay: 10s
+        failure_action: rollback
+        monitor: 30s
+      restart_policy:
+        condition: on-failure
+        delay: 5s
+        max_attempts: 3
+        window: 60s
+    healthcheck:
+      test:
+        [
+          "CMD",
+          "wget",
+          "--no-verbose",
+          "--tries=1",
+          "--spider",
+          "http://localhost:80/health",
+        ]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 40s
+    security_opt:
+      - no-new-privileges:true
+    cap_drop:
+      - ALL
+    cap_add:
+      - NET_BIND_SERVICE
+      - CHOWN
+      - SETUID
+      - SETGID
+    ulimits:
+      nofile:
+        soft: 65536
+        hard: 65536
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "100m"
+        max-file: "3"
+        tag: "freeagentics-nginx"
+
+  # Database Migration Service - Enhanced
+  migration:
+    build:
+      context: .
+      target: production
+      dockerfile: Dockerfile.production
+    container_name: freeagentics-migration
+    environment:
+      - DATABASE_URL=${DATABASE_URL:?DATABASE_URL is required}
+      - LOG_LEVEL=INFO
+    command: >
+      sh -c "
+        echo 'Starting database migration...' &&
+        alembic current &&
+        alembic upgrade head &&
+        echo 'Database migration completed successfully'
+      "
+    depends_on:
+      postgres:
+        condition: service_healthy
+    networks:
+      - freeagentics-network
+    restart: "no" # Don't restart migration on failure
+    deploy:
+      resources:
+        limits:
+          memory: 256M
+          cpus: "0.25"
+        reservations:
+          memory: 128M
+          cpus: "0.1"
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "10m"
+        max-file: "2"
+        tag: "freeagentics-migration"
+
+  # Certbot for SSL certificates
+  certbot:
+    image: certbot/certbot
+    container_name: freeagentics-certbot
+    volumes:
+      - ./certbot/conf:/etc/letsencrypt
+      - ./certbot/www:/var/www/certbot
+      - ./nginx/ssl:/etc/nginx/ssl
+    command: echo "Certbot service ready"
+    networks:
+      - freeagentics-network
+
+  # SSL Certificate Monitor - Enhanced
+  ssl-monitor:
+    image: alpine:3.18
+    container_name: freeagentics-ssl-monitor
+    environment:
+      - DOMAIN=${DOMAIN:?DOMAIN is required}
+      - SLACK_WEBHOOK=${SLACK_WEBHOOK:-}
+      - EMAIL_TO=${EMAIL_TO:-}
+      - WARNING_DAYS=${WARNING_DAYS:-30}
+      - CRITICAL_DAYS=${CRITICAL_DAYS:-7}
+      - CHECK_INTERVAL=${CHECK_INTERVAL:-3600}
+    volumes:
+      - ./nginx/monitor-ssl.sh:/usr/local/bin/monitor-ssl.sh:ro
+      - ./nginx/ssl:/etc/nginx/ssl:ro
+    command: >
+      sh -c "
+        apk add --no-cache openssl curl ca-certificates &&
+        chmod +x /usr/local/bin/monitor-ssl.sh &&
+        while true; do
+          /usr/local/bin/monitor-ssl.sh health-check || echo 'SSL check failed';
+          sleep ${CHECK_INTERVAL:-3600};
+        done
+      "
+    depends_on:
+      - nginx
+    restart: unless-stopped
+    networks:
+      - freeagentics-network
+    deploy:
+      resources:
+        limits:
+          memory: 32M
+          cpus: "0.05"
+        reservations:
+          memory: 16M
+          cpus: "0.01"
+    security_opt:
+      - no-new-privileges:true
+    cap_drop:
+      - ALL
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "10m"
+        max-file: "2"
+        tag: "freeagentics-ssl-monitor"
+
+  # =================== COMPREHENSIVE MONITORING STACK ===================
+
+  # Prometheus - Metrics Collection & Storage
+  prometheus:
+    image: prom/prometheus:v2.47.0
+    container_name: freeagentics-prometheus
+    ports:
+      - "127.0.0.1:9090:9090" # Internal access only
+    volumes:
+      - ./monitoring/prometheus-production.yml:/etc/prometheus/prometheus.yml:ro
+      - ./monitoring/rules:/etc/prometheus/rules:ro
+      - prometheus_data:/prometheus
+    command:
+      - "--config.file=/etc/prometheus/prometheus.yml"
+      - "--storage.tsdb.path=/prometheus"
+      - "--web.console.libraries=/etc/prometheus/console_libraries"
+      - "--web.console.templates=/etc/prometheus/consoles"
+      - "--storage.tsdb.retention.time=30d"
+      - "--storage.tsdb.retention.size=10GB"
+      - "--web.enable-lifecycle"
+      - "--web.enable-admin-api"
+      - "--storage.tsdb.wal-compression"
+      - "--query.max-concurrency=20"
+      - "--query.max-samples=50000000"
+    networks:
+      - freeagentics-network
+    restart: unless-stopped
+    deploy:
+      resources:
+        limits:
+          memory: 2G
+          cpus: "1.0"
+        reservations:
+          memory: 512M
+          cpus: "0.25"
+    security_opt:
+      - no-new-privileges:true
+    user: "65534:65534" # nobody user
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "100m"
+        max-file: "3"
+        tag: "prometheus"
+
+  # Grafana - Metrics Visualization & Dashboards
+  grafana:
+    image: grafana/grafana:10.1.2
+    container_name: freeagentics-grafana
+    ports:
+      - "127.0.0.1:3001:3000" # Internal access only
+    environment:
+      - GF_SECURITY_ADMIN_USER=admin
+      - GF_SECURITY_ADMIN_PASSWORD=${GRAFANA_ADMIN_PASSWORD:?GRAFANA_ADMIN_PASSWORD is required}
+      - GF_USERS_ALLOW_SIGN_UP=false
+      - GF_SECURITY_SECRET_KEY=${GRAFANA_SECRET_KEY:?GRAFANA_SECRET_KEY is required}
+      - GF_SECURITY_DISABLE_GRAVATAR=true
+      - GF_ANALYTICS_REPORTING_ENABLED=false
+      - GF_ANALYTICS_CHECK_FOR_UPDATES=false
+      - GF_SECURITY_COOKIE_SECURE=true
+      - GF_SECURITY_COOKIE_SAMESITE=strict
+      - GF_SERVER_ROOT_URL=https://${DOMAIN}/grafana/
+      - GF_SERVER_SERVE_FROM_SUB_PATH=true
+      - GF_DATABASE_TYPE=postgres
+      - GF_DATABASE_HOST=postgres:5432
+      - GF_DATABASE_NAME=grafana
+      - GF_DATABASE_USER=grafana
+      - GF_DATABASE_PASSWORD=${GRAFANA_DB_PASSWORD:?GRAFANA_DB_PASSWORD is required}
+    volumes:
+      - grafana_data:/var/lib/grafana
+      - ./monitoring/grafana/provisioning:/etc/grafana/provisioning:ro
+      - ./monitoring/dashboards:/var/lib/grafana/dashboards:ro
+    networks:
+      - freeagentics-network
+    depends_on:
+      prometheus:
+        condition: service_started
+      postgres:
+        condition: service_healthy
+    restart: unless-stopped
+    deploy:
+      resources:
+        limits:
+          memory: 512M
+          cpus: "0.5"
+        reservations:
+          memory: 256M
+          cpus: "0.1"
+    security_opt:
+      - no-new-privileges:true
+    user: "472:472" # grafana user
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "100m"
+        max-file: "3"
+        tag: "grafana"
+
+  # AlertManager - Alert Routing & Management
+  alertmanager:
+    image: prom/alertmanager:v0.26.0
+    container_name: freeagentics-alertmanager
+    ports:
+      - "127.0.0.1:9093:9093" # Internal access only
+    volumes:
+      - ./monitoring/alertmanager-production.yml:/etc/alertmanager/alertmanager.yml:ro
+      - alertmanager_data:/alertmanager
+    command:
+      - "--config.file=/etc/alertmanager/alertmanager.yml"
+      - "--storage.path=/alertmanager"
+      - "--web.external-url=https://${DOMAIN}/alertmanager/"
+      - "--web.route-prefix=/"
+      - "--cluster.listen-address=0.0.0.0:9094"
+    networks:
+      - freeagentics-network
+    restart: unless-stopped
+    depends_on:
+      - prometheus
+    deploy:
+      resources:
+        limits:
+          memory: 256M
+          cpus: "0.25"
+        reservations:
+          memory: 128M
+          cpus: "0.05"
+    security_opt:
+      - no-new-privileges:true
+    user: "65534:65534" # nobody user
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "50m"
+        max-file: "3"
+        tag: "alertmanager"
+
+  # Jaeger - Distributed Tracing
+  jaeger:
+    image: jaegertracing/all-in-one:1.49.0
+    container_name: freeagentics-jaeger
+    ports:
+      - "127.0.0.1:16686:16686" # UI
+      - "127.0.0.1:14268:14268" # HTTP collector
+    environment:
+      - COLLECTOR_OTLP_ENABLED=true
+      - SPAN_STORAGE_TYPE=badger
+      - BADGER_EPHEMERAL=false
+      - BADGER_DIRECTORY_VALUE=/badger/data
+      - BADGER_DIRECTORY_KEY=/badger/key
+      - QUERY_MAX_CLOCK_SKEW_ADJUSTMENT=0
+    volumes:
+      - jaeger_data:/badger
+    networks:
+      - freeagentics-network
+    restart: unless-stopped
+    deploy:
+      resources:
+        limits:
+          memory: 512M
+          cpus: "0.5"
+        reservations:
+          memory: 256M
+          cpus: "0.1"
+    security_opt:
+      - no-new-privileges:true
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "100m"
+        max-file: "3"
+        tag: "jaeger"
+
+  # Node Exporter - System Metrics
+  node-exporter:
+    image: prom/node-exporter:v1.6.1
+    container_name: freeagentics-node-exporter
+    ports:
+      - "127.0.0.1:9100:9100"
+    volumes:
+      - /proc:/host/proc:ro
+      - /sys:/host/sys:ro
+      - /:/rootfs:ro
+    command:
+      - "--path.procfs=/host/proc"
+      - "--path.sysfs=/host/sys"
+      - "--path.rootfs=/rootfs"
+      - "--collector.filesystem.mount-points-exclude=^/(sys|proc|dev|host|etc)($$|/)"
+      - "--collector.netdev.device-exclude=^lo$$"
+      - "--collector.diskstats.ignored-devices=^(ram|loop|fd|(h|s|v)d[a-z]|nvme\\d+n\\d+p)\\d+$$"
+    networks:
+      - freeagentics-network
+    restart: unless-stopped
+    pid: host
+    deploy:
+      resources:
+        limits:
+          memory: 128M
+          cpus: "0.25"
+        reservations:
+          memory: 64M
+          cpus: "0.05"
+    security_opt:
+      - no-new-privileges:true
+    user: "65534:65534" # nobody user
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "50m"
+        max-file: "2"
+        tag: "node-exporter"
+
+  # cAdvisor - Container Metrics
+  cadvisor:
+    image: gcr.io/cadvisor/cadvisor:v0.47.2
+    container_name: freeagentics-cadvisor
+    ports:
+      - "127.0.0.1:8080:8080"
+    volumes:
+      - /:/rootfs:ro
+      - /var/run:/var/run:ro
+      - /sys:/sys:ro
+      - /var/lib/docker/:/var/lib/docker:ro
+      - /dev/disk/:/dev/disk:ro
+    command:
+      - "--housekeeping_interval=30s"
+      - "--max_housekeeping_interval=35s"
+      - "--event_storage_event_limit=default=0"
+      - "--event_storage_age_limit=default=0"
+      - "--disable_metrics=percpu,sched,tcp,udp,disk,diskIO,accelerator,hugetlb,memory_numa,cpuset,advtcp,memory_numa,process"
+      - "--docker_only"
+    networks:
+      - freeagentics-network
+    restart: unless-stopped
+    privileged: false
+    devices:
+      - /dev/kmsg:/dev/kmsg
+    deploy:
+      resources:
+        limits:
+          memory: 256M
+          cpus: "0.25"
+        reservations:
+          memory: 128M
+          cpus: "0.05"
+    security_opt:
+      - no-new-privileges:true
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "50m"
+        max-file: "2"
+        tag: "cadvisor"
+
+  # PostgreSQL Exporter - Database Metrics
+  postgres-exporter:
+    image: prometheuscommunity/postgres-exporter:v0.13.2
+    container_name: freeagentics-postgres-exporter
+    ports:
+      - "127.0.0.1:9187:9187"
+    environment:
+      DATA_SOURCE_NAME: "postgresql://postgres_exporter:${POSTGRES_EXPORTER_PASSWORD:?POSTGRES_EXPORTER_PASSWORD is required}@postgres:5432/freeagentics?sslmode=disable"
+      PG_EXPORTER_EXTEND_QUERY_PATH: "/etc/postgres_exporter/queries.yaml"
+    volumes:
+      - ./monitoring/postgres-queries.yaml:/etc/postgres_exporter/queries.yaml:ro
+    networks:
+      - freeagentics-network
+    depends_on:
+      postgres:
+        condition: service_healthy
+    restart: unless-stopped
+    deploy:
+      resources:
+        limits:
+          memory: 128M
+          cpus: "0.1"
+        reservations:
+          memory: 64M
+          cpus: "0.05"
+    security_opt:
+      - no-new-privileges:true
+    user: "65534:65534" # nobody user
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "50m"
+        max-file: "2"
+        tag: "postgres-exporter"
+
+  # Redis Exporter - Cache Metrics
+  redis-exporter:
+    image: oliver006/redis_exporter:v1.53.0
+    container_name: freeagentics-redis-exporter
+    ports:
+      - "127.0.0.1:9121:9121"
+    environment:
+      REDIS_ADDR: "redis://redis:6379"
+      REDIS_PASSWORD: "${REDIS_PASSWORD}"
+      REDIS_EXPORTER_LOG_FORMAT: "json"
+    networks:
+      - freeagentics-network
+    depends_on:
+      redis:
+        condition: service_healthy
+    restart: unless-stopped
+    deploy:
+      resources:
+        limits:
+          memory: 64M
+          cpus: "0.1"
+        reservations:
+          memory: 32M
+          cpus: "0.05"
+    security_opt:
+      - no-new-privileges:true
+    user: "59000:59000" # redis_exporter user
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "25m"
+        max-file: "2"
+        tag: "redis-exporter"
+
+  # Nginx Log Exporter - Web Server Metrics
+  nginx-exporter:
+    image: nginx/nginx-prometheus-exporter:0.10.0
+    container_name: freeagentics-nginx-exporter
+    ports:
+      - "127.0.0.1:9113:9113"
+    command:
+      - "-nginx.scrape-uri=http://nginx:80/nginx_status"
+      - "-web.listen-address=0.0.0.0:9113"
+    networks:
+      - freeagentics-network
+    depends_on:
+      - nginx
+    restart: unless-stopped
+    deploy:
+      resources:
+        limits:
+          memory: 32M
+          cpus: "0.05"
+        reservations:
+          memory: 16M
+          cpus: "0.01"
+    security_opt:
+      - no-new-privileges:true
+    user: "65534:65534" # nobody user
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "25m"
+        max-file: "2"
+        tag: "nginx-exporter"
+
+  # =================== BACKUP & DISASTER RECOVERY ===================
+
+  # Database Backup Service
+  postgres-backup:
+    image: prodrigestivill/postgres-backup-local:14
+    container_name: freeagentics-postgres-backup
+    environment:
+      POSTGRES_HOST: postgres
+      POSTGRES_DB: freeagentics
+      POSTGRES_USER: freeagentics
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+      POSTGRES_EXTRA_OPTS: "-Z9 --schema=public --blobs"
+      SCHEDULE: "${BACKUP_SCHEDULE:-@daily}"
+      BACKUP_KEEP_DAYS: "${BACKUP_KEEP_DAYS:-30}"
+      BACKUP_KEEP_WEEKS: "${BACKUP_KEEP_WEEKS:-4}"
+      BACKUP_KEEP_MONTHS: "${BACKUP_KEEP_MONTHS:-12}"
+      HEALTHCHECK_PORT: "8080"
+    volumes:
+      - postgres_backups:/backups
+    networks:
+      - freeagentics-network
+    depends_on:
+      postgres:
+        condition: service_healthy
+    restart: unless-stopped
+    deploy:
+      resources:
+        limits:
+          memory: 256M
+          cpus: "0.25"
+        reservations:
+          memory: 128M
+          cpus: "0.05"
+    security_opt:
+      - no-new-privileges:true
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "50m"
+        max-file: "2"
+        tag: "postgres-backup"
+
+  # File System Backup Service
+  backup-agent:
+    image: alpine:3.18
+    container_name: freeagentics-backup-agent
+    environment:
+      - BACKUP_SCHEDULE=${BACKUP_SCHEDULE:-0 2 * * *}
+      - RETENTION_DAYS=${RETENTION_DAYS:-30}
+      - S3_BUCKET=${BACKUP_S3_BUCKET:-}
+      - AWS_ACCESS_KEY_ID=${AWS_ACCESS_KEY_ID:-}
+      - AWS_SECRET_ACCESS_KEY=${AWS_SECRET_ACCESS_KEY:-}
+    volumes:
+      - postgres_data:/data/postgres:ro
+      - redis_data:/data/redis:ro
+      - grafana_data:/data/grafana:ro
+      - prometheus_data:/data/prometheus:ro
+      - file_backups:/backups
+      - ./scripts/backup:/usr/local/bin/backup:ro
+    command: >
+      sh -c "
+        apk add --no-cache dcron aws-cli tar gzip &&
+        echo '${BACKUP_SCHEDULE:-0 2 * * *} /usr/local/bin/backup/full-backup.sh' | crontab - &&
+        crond -f -d 8
+      "
+    networks:
+      - freeagentics-network
+    restart: unless-stopped
+    deploy:
+      resources:
+        limits:
+          memory: 128M
+          cpus: "0.1"
+        reservations:
+          memory: 64M
+          cpus: "0.05"
+    security_opt:
+      - no-new-privileges:true
+    cap_drop:
+      - ALL
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "50m"
+        max-file: "2"
+        tag: "backup-agent"
+
+  # Log Aggregation Service
+  loki:
+    image: grafana/loki:2.9.0
+    container_name: freeagentics-loki
+    ports:
+      - "127.0.0.1:3100:3100"
+    command: -config.file=/etc/loki/local-config.yaml
+    volumes:
+      - ./monitoring/loki-config.yaml:/etc/loki/local-config.yaml:ro
+      - loki_data:/loki
+    networks:
+      - freeagentics-network
+    restart: unless-stopped
+    deploy:
+      resources:
+        limits:
+          memory: 512M
+          cpus: "0.5"
+        reservations:
+          memory: 256M
+          cpus: "0.1"
+    security_opt:
+      - no-new-privileges:true
+    user: "10001:10001" # loki user
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "100m"
+        max-file: "3"
+        tag: "loki"
+
+  # Log Collection Agent
+  promtail:
+    image: grafana/promtail:2.9.0
+    container_name: freeagentics-promtail
+    volumes:
+      - ./monitoring/promtail-config.yaml:/etc/promtail/config.yml:ro
+      - /var/log:/var/log:ro
+      - /var/lib/docker/containers:/var/lib/docker/containers:ro
+    command: -config.file=/etc/promtail/config.yml
+    networks:
+      - freeagentics-network
+    depends_on:
+      - loki
+    restart: unless-stopped
+    deploy:
+      resources:
+        limits:
+          memory: 128M
+          cpus: "0.1"
+        reservations:
+          memory: 64M
+          cpus: "0.05"
+    security_opt:
+      - no-new-privileges:true
+    user: "10001:10001" # promtail user
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "50m"
+        max-file: "2"
+        tag: "promtail"
+
+# =================== NETWORK & VOLUMES CONFIGURATION ===================
+
+networks:
+  freeagentics-network:
+    driver: bridge
+    labels:
+      - "com.freeagentics.network=production"
+    ipam:
+      driver: default
+      config:
+        - subnet: 172.20.0.0/16
+    driver_opts:
+      com.docker.network.bridge.name: freeagentics-br0
+      com.docker.network.bridge.enable_ip_masquerade: "true"
+      com.docker.network.bridge.enable_icc: "true"
+      com.docker.network.bridge.host_binding_ipv4: "0.0.0.0"
+
+volumes:
+  # Application Data Volumes
+  postgres_data:
+    driver: local
+    driver_opts:
+      type: none
+      o: bind
+      device: ${DATA_PATH:-./data}/postgres
+    labels:
+      - "com.freeagentics.volume=database"
+      - "backup.enable=true"
+
+  redis_data:
+    driver: local
+    driver_opts:
+      type: none
+      o: bind
+      device: ${DATA_PATH:-./data}/redis
+    labels:
+      - "com.freeagentics.volume=cache"
+      - "backup.enable=true"
+
+  # Monitoring Data Volumes
+  prometheus_data:
+    driver: local
+    driver_opts:
+      type: none
+      o: bind
+      device: ${DATA_PATH:-./data}/prometheus
+    labels:
+      - "com.freeagentics.volume=metrics"
+      - "backup.enable=true"
+
+  grafana_data:
+    driver: local
+    driver_opts:
+      type: none
+      o: bind
+      device: ${DATA_PATH:-./data}/grafana
+    labels:
+      - "com.freeagentics.volume=dashboards"
+      - "backup.enable=true"
+
+  alertmanager_data:
+    driver: local
+    driver_opts:
+      type: none
+      o: bind
+      device: ${DATA_PATH:-./data}/alertmanager
+    labels:
+      - "com.freeagentics.volume=alerts"
+      - "backup.enable=true"
+
+  jaeger_data:
+    driver: local
+    driver_opts:
+      type: none
+      o: bind
+      device: ${DATA_PATH:-./data}/jaeger
+    labels:
+      - "com.freeagentics.volume=tracing"
+      - "backup.enable=false"
+
+  loki_data:
+    driver: local
+    driver_opts:
+      type: none
+      o: bind
+      device: ${DATA_PATH:-./data}/loki
+    labels:
+      - "com.freeagentics.volume=logs"
+      - "backup.enable=true"
+
+  # Backup Volumes
+  postgres_backups:
+    driver: local
+    driver_opts:
+      type: none
+      o: bind
+      device: ${BACKUP_PATH:-./backups}/postgres
+    labels:
+      - "com.freeagentics.volume=backup-database"
+
+  file_backups:
+    driver: local
+    driver_opts:
+      type: none
+      o: bind
+      device: ${BACKUP_PATH:-./backups}/files
+    labels:
+      - "com.freeagentics.volume=backup-files"
+
+  # Temporary & Cache Volumes
+  nginx_cache:
+    driver: local
+    driver_opts:
+      type: tmpfs
+      device: tmpfs
+      o: size=256m,uid=101,gid=101
+    labels:
+      - "com.freeagentics.volume=cache-web"
+
+  nginx_logs:
+    driver: local
+    driver_opts:
+      type: none
+      o: bind
+      device: ${LOG_PATH:-./logs}/nginx
+    labels:
+      - "com.freeagentics.volume=logs-web"

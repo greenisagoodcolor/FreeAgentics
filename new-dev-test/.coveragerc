@@ -1,0 +1,105 @@
+[run]
+branch = True
+source = .
+omit =
+    */tests/*
+    */test_*
+    *_test.py
+    */venv/*
+    */test_venv/*
+    */lint_env/*
+    */security_env/*
+    */pipeline_test_env/*
+    */security_audit_env/*
+    */security_scan_env/*
+    */__pycache__/*
+    */.pytest_cache/*
+    */node_modules/*
+    */htmlcov*/*
+    */test-reports/*
+    */coverage/*
+    */build/*
+    */dist/*
+    */.eggs/*
+    */.git/*
+    */migrations/*
+    */alembic/*
+    */scripts/*
+    */examples/*
+    */stubs/*
+    */web/*
+    */nginx/*
+    */monitoring/*
+    */observability/*
+    */security/*
+    */docs/*
+    */k8s/*
+    */deploy/*
+    */deployment/*
+    */postgres/*
+    */redis/*
+    */secrets/*
+    */ssl/*
+    */certs/*
+    */logs/*
+    */performance_documentation/*
+    */memory_profiling_reports/*
+    */benchmarks/*
+    */cleanup_scripts/*
+    */taskmaster_tasks/*
+    */knowledge_graphs/*
+    */site-packages/*
+    setup.py
+    */setup.py
+
+# Include core modules only
+include =
+    agents/*
+    api/*
+    coalitions/*
+    database/*
+    inference/*
+    llm/*
+    services/*
+    world/*
+    knowledge_graph/*
+    auth/*
+    websocket/*
+
+parallel = True
+data_file = .coverage
+concurrency = thread,multiprocessing
+
+[report]
+exclude_lines =
+    pragma: no cover
+    def __repr__
+    if self.debug:
+    if settings.DEBUG
+    raise AssertionError
+    raise NotImplementedError
+    if 0:
+    if __name__ == .__main__.:
+    class .*\bProtocol\):
+    @(abc\.)?abstractmethod
+    except.*ImportError.*:
+    except.*RuntimeError.*:
+    if.*not.*TORCH_AVAILABLE
+    if.*not.*PYMDP_AVAILABLE
+    print.*Warning.*not available
+
+precision = 2
+show_missing = True
+skip_empty = True
+skip_covered = False
+fail_under = 90
+
+[html]
+directory = htmlcov
+
+[xml]
+output = coverage.xml
+
+[json]
+output = coverage.json
+pretty_print = True

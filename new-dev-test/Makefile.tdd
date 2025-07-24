@@ -1,0 +1,86 @@
+# TDD-specific Makefile for Test-Driven Development workflow
+# Based on CLAUDE.MD requirements for strict TDD practices
+
+.PHONY: tdd-help tdd-watch tdd-test tdd-fast tdd-checkpoint tdd-format tdd-lint tdd-coverage tdd-all
+
+# Default target
+tdd-help:
+	@echo "TDD Commands (Test-Driven Development):"
+	@echo "  tdd-watch      - Start continuous testing (pytest-watch)"
+	@echo "  tdd-test       - Run all tests with 100% coverage requirement"
+	@echo "  tdd-fast       - Fast parallel test execution for TDD cycles"
+	@echo "  tdd-checkpoint - Run complete TDD reality checkpoint"
+	@echo "  tdd-format     - Format code (strict)"
+	@echo "  tdd-lint       - Lint code (strict)"
+	@echo "  tdd-coverage   - Generate coverage reports"
+	@echo "  tdd-all        - Run complete TDD validation pipeline"
+	@echo ""
+	@echo "TDD Workflow:"
+	@echo "  1. Start watch mode: make tdd-watch"
+	@echo "  2. Write failing test (RED)"
+	@echo "  3. Write minimum code to pass (GREEN)"
+	@echo "  4. Refactor while keeping tests green (REFACTOR)"
+	@echo "  5. Run checkpoint before commits: make tdd-checkpoint"
+
+# Start pytest-watch for continuous testing
+tdd-watch:
+	@echo "🔄 Starting TDD Watch Mode..."
+	@./scripts/tdd-watch.sh
+
+# Run all tests with strict TDD requirements
+tdd-test:
+	@echo "🧪 Running TDD Test Suite..."
+	@source .venv/bin/activate && pytest \
+		--cov-fail-under=100 \
+		--cov-branch \
+		--strict-markers \
+		--strict-config \
+		--tb=short \
+		--maxfail=1 \
+		--cov-report=term-missing \
+		--cov-report=html \
+		--cov-report=xml
+
+# Fast parallel tests for TDD cycles
+tdd-fast:
+	@echo "⚡ Running Fast TDD Tests..."
+	@./scripts/tdd-test-fast.sh
+
+# TDD Reality Checkpoint (as required by CLAUDE.MD)
+tdd-checkpoint:
+	@echo "✅ Running TDD Reality Checkpoint..."
+	@./scripts/tdd-checkpoint.sh
+
+# Strict code formatting
+tdd-format:
+	@echo "🎨 Formatting code (strict)..."
+	@source .venv/bin/activate && ruff format .
+	@source .venv/bin/activate && ruff check --fix .
+
+# Strict linting
+tdd-lint:
+	@echo "🔍 Linting code (strict)..."
+	@source .venv/bin/activate && ruff check .
+	@source .venv/bin/activate && mypy . --ignore-missing-imports
+
+# Generate coverage reports
+tdd-coverage:
+	@echo "📊 Generating coverage reports..."
+	@source .venv/bin/activate && coverage report --show-missing
+	@source .venv/bin/activate && coverage html
+	@echo "HTML coverage report: htmlcov/index.html"
+
+# Complete TDD validation pipeline
+tdd-all: tdd-format tdd-lint tdd-test tdd-coverage
+	@echo "🎉 Complete TDD validation passed!"
+	@echo "✅ Code is ready for production"
+
+# Clean up generated files
+tdd-clean:
+	@echo "🧹 Cleaning TDD artifacts..."
+	@rm -rf htmlcov/
+	@rm -rf .coverage
+	@rm -rf coverage.xml
+	@rm -rf .pytest_cache/
+	@find . -name "*.pyc" -delete
+	@find . -name "__pycache__" -type d -exec rm -rf {} + 2>/dev/null; test $$? -eq 0 || test $$? -eq 1

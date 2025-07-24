@@ -1,0 +1,115 @@
+# Optimized Multi-stage build for FreeAgentics
+FROM python:3.11.9-slim AS base
+
+# Set environment variables
+ENV PYTHONUNBUFFERED=1 \
+    PYTHONDONTWRITEBYTECODE=1 \
+    PIP_NO_CACHE_DIR=1 \
+    PIP_DISABLE_PIP_VERSION_CHECK=1 \
+    DEBIAN_FRONTEND=noninteractive
+
+# Install system dependencies in a single layer
+RUN apt-get update && apt-get install -y --no-install-recommends \
+    gcc \
+    g++ \
+    curl \
+    && apt-get clean \
+    && rm -rf /var/lib/apt/lists/*
+
+# Create app user with specific UID/GID
+RUN groupadd -g 1001 app && \
+    useradd -r -u 1001 -g app --create-home --shell /bin/bash app
+
+# Builder stage for dependencies
+FROM base AS builder
+
+WORKDIR /app
+
+# Copy requirements first for better caching
+COPY requirements-production.txt ./
+
+# Install Python dependencies to /install
+RUN pip install --user --no-cache-dir -r requirements-production.txt
+
+# Development stage
+FROM base AS development
+
+WORKDIR /app
+
+# Copy requirements files
+COPY requirements-core.txt requirements-dev.txt ./
+
+# Install Python dependencies
+RUN pip install --no-cache-dir -r requirements-core.txt && \
+    pip install --no-cache-dir -r requirements-dev.txt
+
+# Copy source code
+COPY . .
+
+# Change ownership to app user
+RUN chown -R app:app /app
+USER app
+
+# Expose port
+EXPOSE 8000
+
+# Development command
+CMD ["uvicorn", "main:app", "--host", "0.0.0.0", "--port", "8000", "--reload"]
+
+# Production stage - optimized
+FROM base AS production
+
+WORKDIR /app
+
+# Copy pre-built dependencies from builder stage
+COPY --from=builder /root/.local /home/app/.local
+
+# Update PATH to include user site-packages
+ENV PATH="/home/app/.local/bin:$PATH"
+
+# Copy only necessary application files
+COPY --chown=app:app agents/ ./agents/
+COPY --chown=app:app api/ ./api/
+COPY --chown=app:app inference/ ./inference/
+COPY --chown=app:app world/ ./world/
+COPY --chown=app:app coalitions/ ./coalitions/
+COPY --chown=app:app knowledge_graph/ ./knowledge_graph/
+COPY --chown=app:app database/ ./database/
+COPY --chown=app:app auth/ ./auth/
+COPY --chown=app:app config/ ./config/
+COPY --chown=app:app observability/ ./observability/
+COPY --chown=app:app main.py ./
+COPY --chown=app:app pyproject.toml ./
+COPY --chown=app:app alembic.ini ./
+COPY --chown=app:app alembic/ ./alembic/
+
+# Remove development packages to reduce size
+RUN apt-get remove -y gcc g++ && \
+    apt-get autoremove -y && \
+    apt-get clean && \
+    rm -rf /var/lib/apt/lists/* && \
+    rm -rf /tmp/* && \
+    rm -rf /var/tmp/* && \
+    find /usr/local -name "*.pyc" -delete && \
+    find /usr/local -name "__pycache__" -delete
+
+# Switch to non-root user
+USER app
+
+# Health check
+HEALTHCHECK --interval=30s --timeout=10s --start-period=5s --retries=3 \
+    CMD curl -f http://localhost:8000/health || exit 1
+
+# Expose port
+EXPOSE 8000
+
+# Production command with optimized settings
+CMD ["gunicorn", "main:app", \
+     "-w", "4", \
+     "-k", "uvicorn.workers.UvicornWorker", \
+     "--bind", "0.0.0.0:8000", \
+     "--preload", \
+     "--max-requests", "1000", \
+     "--max-requests-jitter", "50", \
+     "--timeout", "30", \
+     "--keep-alive", "5"]

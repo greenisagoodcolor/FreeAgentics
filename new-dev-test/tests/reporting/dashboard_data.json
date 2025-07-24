@@ -1,0 +1,40 @@
+{
+  "generated_at": "2025-07-15T13:58:50.032311",
+  "metrics_summary": {},
+  "coverage_summary": {
+    "latest_run": {
+      "test_run_id": "run_20250715_135849",
+      "timestamp": "2025-07-15T13:58:50.011946",
+      "total_statements": 928,
+      "total_missing": 151,
+      "total_coverage": 83.72844827586206
+    },
+    "trends": [["2025-07-15", 83.72844827586206]]
+  },
+  "test_trends": [],
+  "coverage_trends": [
+    {
+      "date": "2025-07-15",
+      "avg_coverage": 83.72844827586206,
+      "runs": 1
+    }
+  ],
+  "flaky_tests": [],
+  "slow_tests": [],
+  "zero_coverage_files": [],
+  "coverage_gaps": [
+    {
+      "file_path": "/home/green/FreeAgentics/inference/gnn/validator.py",
+      "coverage_percent": 76.02523659305994,
+      "missing_lines": 76,
+      "total_statements": 317
+    }
+  ],
+  "test_execution_history": [],
+  "quality_metrics": {
+    "test_reliability": 0.0,
+    "coverage_health": 83.72844827586206,
+    "performance_score": 0.0,
+    "overall_score": 83.72844827586206
+  }
+}

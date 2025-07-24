@@ -1,0 +1,112 @@
+{
+  "timestamp": "2025-07-21T17:25:02.992637",
+  "overall_score": 83,
+  "passed": true,
+  "metrics": {
+    "agent_spawning.single_agent_spawn": {
+      "value": 29.41171801649034,
+      "unit": "ms",
+      "target": 50,
+      "compliant": true,
+      "metadata": {
+        "memory_used_mb": 6.71875
+      }
+    },
+    "agent_spawning.parallel_agent_spawn_10": {
+      "value": 12.05103105166927,
+      "unit": "ms",
+      "target": 100,
+      "compliant": true,
+      "metadata": {}
+    },
+    "agent_spawning.memory_per_agent": {
+      "value": 6.71875,
+      "unit": "MB",
+      "target": 10,
+      "compliant": true,
+      "metadata": {}
+    },
+    "pymdp_inference.pymdp_inference_100_steps": {
+      "value": 5.892044981010258,
+      "unit": "ms",
+      "target": 100,
+      "compliant": true,
+      "metadata": {
+        "steps": 100
+      }
+    },
+    "memory_usage.memory_per_agent_100_agents": {
+      "value": 0.0,
+      "unit": "MB",
+      "target": 10,
+      "compliant": true,
+      "metadata": {
+        "total_agents": 100,
+        "total_memory_mb": 0.0
+      }
+    },
+    "memory_usage.memory_leak_after_cleanup": {
+      "value": 0.0,
+      "unit": "MB",
+      "target": 5.0,
+      "compliant": true,
+      "metadata": {}
+    },
+    "api_performance.api_avg_response_time": {
+      "value": 7.555267079733312,
+      "unit": "ms",
+      "target": 200,
+      "compliant": true,
+      "metadata": {
+        "requests_tested": 50
+      }
+    },
+    "frontend_performance.bundle_size_gzipped": {
+      "value": 386.6578776041667,
+      "unit": "KB",
+      "target": 200,
+      "compliant": false,
+      "metadata": {
+        "uncompressed_kb": 1159.9736328125,
+        "js_files_count": 87,
+        "compression_ratio": 3.0
+      }
+    },
+    "lighthouse.lighthouse_performance": {
+      "value": 85,
+      "unit": "score",
+      "target": 90,
+      "compliant": false,
+      "metadata": {
+        "audit_type": "mock"
+      }
+    },
+    "lighthouse.lighthouse_accessibility": {
+      "value": 95,
+      "unit": "score",
+      "target": 85,
+      "compliant": true,
+      "metadata": {
+        "audit_type": "mock"
+      }
+    },
+    "lighthouse.lighthouse_best_practices": {
+      "value": 90,
+      "unit": "score",
+      "target": 85,
+      "compliant": true,
+      "metadata": {
+        "audit_type": "mock"
+      }
+    },
+    "lighthouse.lighthouse_seo": {
+      "value": 88,
+      "unit": "score",
+      "target": 85,
+      "compliant": true,
+      "metadata": {
+        "audit_type": "mock"
+      }
+    }
+  }
+}

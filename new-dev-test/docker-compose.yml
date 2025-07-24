@@ -1,0 +1,182 @@
+version: "3.8"
+
+services:
+  # PostgreSQL Database
+  postgres:
+    image: pgvector/pgvector:pg15
+    container_name: freeagentics-postgres
+    environment:
+      POSTGRES_DB: freeagentics
+      POSTGRES_USER: freeagentics
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:?POSTGRES_PASSWORD is required}
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    ports:
+      - "5432:5432"
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U freeagentics"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    # Security: Use custom network instead of default
+    networks:
+      - freeagentics-network
+
+  # Redis Cache
+  redis:
+    image: redis:7-alpine
+    container_name: freeagentics-redis
+    # Security: Require password for Redis
+    command: redis-server --appendonly yes --requirepass ${REDIS_PASSWORD:?REDIS_PASSWORD is required}
+    volumes:
+      - redis_data:/data
+    ports:
+      - "6379:6379"
+    healthcheck:
+      test: ["CMD", "redis-cli", "-a", "${REDIS_PASSWORD}", "ping"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    networks:
+      - freeagentics-network
+
+  # FreeAgentics Backend (Development)
+  backend-dev:
+    build:
+      context: .
+      target: development
+    container_name: freeagentics-backend-dev
+    environment:
+      - DATABASE_URL=${DATABASE_URL:?DATABASE_URL is required}
+      - REDIS_URL=redis://:${REDIS_PASSWORD:?REDIS_PASSWORD is required}@redis:6379
+      - ENVIRONMENT=development
+      - LOG_LEVEL=DEBUG
+      - SECRET_KEY=${SECRET_KEY:-dev_secret_key_2025_not_for_production}
+      - JWT_SECRET=${JWT_SECRET:-dev_jwt_secret_2025_not_for_production}
+    volumes:
+      - .:/app
+      - /app/venv
+    ports:
+      - "8000:8000"
+    depends_on:
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    restart: unless-stopped
+    profiles:
+      - dev
+    networks:
+      - freeagentics-network
+
+  # FreeAgentics Backend (Production)
+  backend:
+    build:
+      context: .
+      target: production
+    container_name: freeagentics-backend
+    environment:
+      - DATABASE_URL=${DATABASE_URL:?DATABASE_URL is required}
+      - REDIS_URL=redis://:${REDIS_PASSWORD:?REDIS_PASSWORD is required}@redis:6379
+      - ENVIRONMENT=production
+      - PRODUCTION=true
+      - LOG_LEVEL=INFO
+      - SECRET_KEY=${SECRET_KEY:?SECRET_KEY is required in production}
+      - JWT_SECRET=${JWT_SECRET:?JWT_SECRET is required in production}
+      - ACCESS_TOKEN_EXPIRE_MINUTES=${ACCESS_TOKEN_EXPIRE_MINUTES:-30}
+      - REFRESH_TOKEN_EXPIRE_DAYS=${REFRESH_TOKEN_EXPIRE_DAYS:-7}
+    ports:
+      - "8000:8000"
+    depends_on:
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    restart: unless-stopped
+    # Security: Run as non-root user
+    user: "1000:1000"
+    # Security: Read-only root filesystem
+    read_only: true
+    tmpfs:
+      - /tmp
+    profiles:
+      - prod
+    networks:
+      - freeagentics-network
+
+  # Frontend (Next.js)
+  frontend:
+    build:
+      context: ./web
+      dockerfile: Dockerfile
+    container_name: freeagentics-frontend
+    environment:
+      - NEXT_PUBLIC_API_URL=${NEXT_PUBLIC_API_URL:-https://api.yourdomain.com}
+      - NODE_ENV=production
+    ports:
+      - "3000:3000"
+    depends_on:
+      - backend
+    restart: unless-stopped
+    # Security: Run as non-root user
+    user: "1000:1000"
+    profiles:
+      - prod
+    networks:
+      - freeagentics-network
+
+  # Nginx Reverse Proxy
+  nginx:
+    image: nginx:alpine
+    container_name: freeagentics-nginx
+    volumes:
+      - ./nginx/nginx.conf:/etc/nginx/nginx.conf:ro
+      - ./nginx/ssl:/etc/nginx/ssl:ro
+      - ./nginx/dhparam.pem:/etc/nginx/dhparam.pem:ro
+    ports:
+      - "80:80"
+      - "443:443"
+    depends_on:
+      - backend
+      - frontend
+    restart: unless-stopped
+    # Security: Run as non-root user
+    user: "101:101"
+    profiles:
+      - prod
+    networks:
+      - freeagentics-network
+
+  # Database Migration Service
+  migration:
+    build:
+      context: .
+      target: production
+    container_name: freeagentics-migration
+    environment:
+      - DATABASE_URL=${DATABASE_URL:?DATABASE_URL is required}
+    command: ["alembic", "upgrade", "head"]
+    depends_on:
+      postgres:
+        condition: service_healthy
+    profiles:
+      - migrate
+    networks:
+      - freeagentics-network
+
+# Security: Use custom network with encryption
+networks:
+  freeagentics-network:
+    driver: bridge
+    driver_opts:
+      com.docker.network.bridge.name: br-freeagentics
+    ipam:
+      driver: default
+      config:
+        - subnet: 172.20.0.0/16
+
+volumes:
+  postgres_data:
+    driver: local
+  redis_data:
+    driver: local

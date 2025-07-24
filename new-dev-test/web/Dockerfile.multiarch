@@ -1,0 +1,197 @@
+# Multi-architecture optimized Dockerfile for FreeAgentics Next.js Frontend
+# Supports linux/amd64 and linux/arm64 with build caching optimization
+# Following Evan You & Rich Harris principles: Fast, reliable, bulletproof builds
+
+# syntax=docker/dockerfile:1.5
+
+# ==============================================================================
+# Base stage - Node.js with multi-arch support
+# ==============================================================================
+FROM --platform=$BUILDPLATFORM node:18.20.4-alpine AS base
+
+# Build arguments for multi-arch support
+ARG TARGETPLATFORM
+ARG BUILDPLATFORM
+ARG TARGETOS
+ARG TARGETARCH
+
+# Environment variables
+ENV NODE_ENV=production \
+    NEXT_TELEMETRY_DISABLED=1 \
+    # Optimize Node.js for production
+    NODE_OPTIONS="--max-old-space-size=2048"
+
+# Install system dependencies with proper caching
+RUN --mount=type=cache,target=/var/cache/apk \
+    apk add --no-cache \
+    libc6-compat \
+    ca-certificates \
+    # Architecture-specific optimizations
+    $([ "$TARGETARCH" = "arm64" ] && echo "python3 make g++" || echo "") \
+    && rm -rf /var/cache/apk/*
+
+# ==============================================================================
+# Dependencies stage - Install node modules with caching
+# ==============================================================================
+FROM base AS deps
+
+WORKDIR /app
+
+# Copy package files for dependency installation
+COPY package.json package-lock.json* yarn.lock* pnpm-lock.yaml* ./
+
+# Install dependencies with optimal caching
+RUN --mount=type=cache,target=/root/.npm \
+    --mount=type=cache,target=/root/.yarn \
+    --mount=type=cache,target=/root/.pnpm-store \
+    if [ -f yarn.lock ]; then \
+        yarn install --frozen-lockfile --production=false; \
+    elif [ -f package-lock.json ]; then \
+        npm ci; \
+    elif [ -f pnpm-lock.yaml ]; then \
+        corepack enable pnpm && pnpm install --frozen-lockfile; \
+    else \
+        echo "No lockfile found, installing with npm" && \
+        npm install; \
+    fi
+
+# ==============================================================================
+# Builder stage - Build Next.js application
+# ==============================================================================
+FROM base AS builder
+
+WORKDIR /app
+
+# Copy dependencies from deps stage
+COPY --from=deps /app/node_modules ./node_modules
+
+# Copy source code
+COPY . .
+
+# Build arguments for runtime configuration
+ARG NEXT_PUBLIC_API_URL
+ARG BUILD_DATE
+ARG VCS_REF
+ARG VERSION
+
+# Set build-time environment variables
+ENV NEXT_PUBLIC_API_URL=${NEXT_PUBLIC_API_URL} \
+    NEXT_PUBLIC_BUILD_DATE=${BUILD_DATE} \
+    NEXT_PUBLIC_VERSION=${VERSION}
+
+# Build the application with caching and architecture optimization
+RUN --mount=type=cache,target=/app/.next/cache \
+    # Architecture-specific build optimizations
+    if [ "$TARGETARCH" = "arm64" ]; then \
+        export NODE_OPTIONS="--max-old-space-size=1536"; \
+    else \
+        export NODE_OPTIONS="--max-old-space-size=2048"; \
+    fi && \
+    # Build Next.js application
+    npm run build && \
+    # Prune dev dependencies
+    npm prune --production
+
+# ==============================================================================
+# Production stage - Minimal runtime image
+# ==============================================================================
+FROM node:18.20.4-alpine AS production
+
+# Import build arguments
+ARG TARGETARCH
+ARG BUILD_DATE
+ARG VCS_REF
+ARG VERSION
+
+# Labels for image metadata
+LABEL org.opencontainers.image.created=$BUILD_DATE \
+      org.opencontainers.image.url="https://github.com/yourusername/freeagentics" \
+      org.opencontainers.image.source="https://github.com/yourusername/freeagentics" \
+      org.opencontainers.image.version=$VERSION \
+      org.opencontainers.image.revision=$VCS_REF \
+      org.opencontainers.image.vendor="FreeAgentics" \
+      org.opencontainers.image.title="FreeAgentics Frontend" \
+      org.opencontainers.image.description="Next.js frontend for FreeAgentics multi-agent platform" \
+      org.opencontainers.image.architecture=$TARGETARCH
+
+# Production environment
+ENV NODE_ENV=production \
+    NEXT_TELEMETRY_DISABLED=1 \
+    PORT=3000 \
+    HOSTNAME="0.0.0.0"
+
+# Install only production runtime dependencies
+RUN --mount=type=cache,target=/var/cache/apk \
+    apk add --no-cache \
+    libc6-compat \
+    ca-certificates \
+    && rm -rf /var/cache/apk/*
+
+# Create non-root user
+RUN addgroup -g 1001 -S nodejs && \
+    adduser -S -u 1001 -G nodejs nextjs
+
+WORKDIR /app
+
+# Copy built application with proper ownership
+# Next.js standalone output includes all necessary files
+COPY --from=builder --chown=nextjs:nodejs /app/.next/standalone ./
+COPY --from=builder --chown=nextjs:nodejs /app/.next/static ./.next/static
+COPY --from=builder --chown=nextjs:nodejs /app/public ./public
+
+# Create necessary directories with proper permissions
+RUN mkdir -p /app/.next/cache && \
+    chown -R nextjs:nodejs /app/.next
+
+# Security: Switch to non-root user
+USER nextjs
+
+# Health check for production monitoring
+HEALTHCHECK --interval=30s --timeout=10s --start-period=40s --retries=3 \
+    CMD node -e "require('http').get('http://localhost:3000/api/health', (res) => { \
+        if (res.statusCode !== 200) process.exit(1); \
+        res.on('data', () => {}); \
+        res.on('end', () => process.exit(0)); \
+    }).on('error', () => process.exit(1))"
+
+# Expose port
+EXPOSE 3000
+
+# Production command - Next.js standalone server
+CMD ["node", "server.js"]
+
+# ==============================================================================
+# Development stage - For local development with hot reload
+# ==============================================================================
+FROM deps AS development
+
+WORKDIR /app
+
+# Copy source code
+COPY . .
+
+# Development health check
+HEALTHCHECK --interval=30s --timeout=10s --start-period=40s --retries=3 \
+    CMD node -e "require('http').get('http://localhost:3000/api/health', (res) => { \
+        if (res.statusCode !== 200) process.exit(1); \
+        res.on('data', () => {}); \
+        res.on('end', () => process.exit(0)); \
+    }).on('error', () => process.exit(1))"
+
+EXPOSE 3000
+
+# Development command with hot reload
+CMD ["npm", "run", "dev"]
+
+# ==============================================================================
+# Test stage - For running tests in CI/CD
+# ==============================================================================
+FROM deps AS test
+
+WORKDIR /app
+
+# Copy all files including test configurations
+COPY . .
+
+# Run tests by default
+CMD ["npm", "test"]

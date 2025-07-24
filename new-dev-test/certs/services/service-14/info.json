@@ -1,0 +1,10 @@
+{
+  "service_name": "service-14",
+  "fingerprint": "65cdd878eebc97c0e61b4907abe453e5bf16ccf7fc4dd2a9ca04fb8bcb43cc67",
+  "serial_number": 461171202622672043745425404970950637228429117678,
+  "issued_at": "2025-07-16T21:28:22",
+  "expires_at": "2025-08-15T21:28:22",
+  "dns_names": ["service-14", "service-14.local", "service-14.cluster.local"],
+  "revoked": false,
+  "revocation_reason": null
+}

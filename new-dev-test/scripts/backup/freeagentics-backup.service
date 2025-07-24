@@ -1,0 +1,47 @@
+[Unit]
+Description=FreeAgentics Automated Backup System
+Documentation=https://docs.freeagentics.io/operations/backup
+After=network.target postgresql.service redis.service
+Wants=postgresql.service redis.service
+
+[Service]
+Type=simple
+User=freeagentics
+Group=freeagentics
+WorkingDirectory=/home/green/FreeAgentics
+
+# Environment
+EnvironmentFile=/etc/freeagentics/backup.env
+Environment="PYTHONPATH=/home/green/FreeAgentics"
+
+# Main process
+ExecStart=/usr/bin/python3 /home/green/FreeAgentics/scripts/backup/automated-backup-system.py --daemon
+
+# Pre-start checks
+ExecStartPre=/bin/bash -c 'mkdir -p /var/backups/freeagentics/{daily,incremental,redis,config,knowledge_graph,app_state,logs,metadata,verification}'
+ExecStartPre=/bin/bash -c 'chown -R freeagentics:freeagentics /var/backups/freeagentics'
+
+# Restart policy
+Restart=always
+RestartSec=30
+
+# Resource limits
+LimitNOFILE=65536
+MemoryLimit=2G
+CPUQuota=50%
+
+# Security hardening
+NoNewPrivileges=true
+PrivateTmp=true
+ProtectSystem=strict
+ProtectHome=true
+ReadWritePaths=/var/backups/freeagentics /tmp/freeagentics-backup
+ReadOnlyPaths=/home/green/FreeAgentics
+
+# Logging
+StandardOutput=journal
+StandardError=journal
+SyslogIdentifier=freeagentics-backup
+
+[Install]
+WantedBy=multi-user.target

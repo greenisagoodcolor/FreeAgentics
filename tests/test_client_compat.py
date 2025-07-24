@@ -17,6 +17,9 @@ class TestClient(httpx.Client):
                 yield portal
 
         transport = _TestClientTransport(
-            app=app, portal_factory=portal_factory, app_state={"app": app}
+            app=app,
+            portal_factory=portal_factory,
+            app_state={"app": app},
+            client=None,  # Required for httpx 0.28+ compatibility
         )
         super().__init__(transport=transport, base_url=base_url, **kwargs)

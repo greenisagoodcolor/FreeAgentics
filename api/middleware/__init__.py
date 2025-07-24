@@ -17,11 +17,13 @@ from .ddos_protection import (
     RateLimiter,
     WebSocketRateLimiter,
 )
+from .metrics import MetricsMiddleware
 from .security_monitoring import SecurityMonitoringMiddleware
 
 __all__ = [
     "DDoSProtectionMiddleware",
     "EndpointRateLimits",
+    "MetricsMiddleware",
     "RateLimitConfig",
     "RateLimiter",
     "WebSocketRateLimiter",

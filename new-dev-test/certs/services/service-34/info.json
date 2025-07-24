@@ -1,0 +1,10 @@
+{
+  "service_name": "service-34",
+  "fingerprint": "8dc0215fbfc61b73e1df68415580e0023e00e76aa79e445427b8d18565c47ae8",
+  "serial_number": 322070359747025044124209638113292570046414523354,
+  "issued_at": "2025-07-16T21:28:23",
+  "expires_at": "2025-08-15T21:28:23",
+  "dns_names": ["service-34", "service-34.local", "service-34.cluster.local"],
+  "revoked": false,
+  "revocation_reason": null
+}

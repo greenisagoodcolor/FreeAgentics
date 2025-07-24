@@ -1,0 +1,27 @@
+# Additional requirements for observability and monitoring
+# These extend the base requirements.txt for production monitoring
+
+# System metrics collection
+psutil>=5.9.0
+
+# Optional: OpenTelemetry for distributed tracing (recommended for production)
+# opentelemetry-api>=1.20.0
+# opentelemetry-sdk>=1.20.0
+# opentelemetry-instrumentation-fastapi>=0.41b0
+# opentelemetry-instrumentation-sqlalchemy>=0.41b0
+# opentelemetry-instrumentation-psycopg2>=0.41b0
+# opentelemetry-exporter-prometheus>=1.12.0
+# opentelemetry-exporter-jaeger>=1.20.0
+
+# Optional: Prometheus client for metrics export
+# prometheus-client>=0.18.0
+
+# Optional: Grafana client for dashboard automation
+# grafana-api>=1.0.3
+
+# Optional: Advanced alerting
+# requests>=2.31.0  # For webhook alerts
+# slack-sdk>=3.21.3  # For Slack notifications
+
+# Log structured output
+structlog>=23.1.0

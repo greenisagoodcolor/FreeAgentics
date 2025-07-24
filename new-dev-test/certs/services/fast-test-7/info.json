@@ -1,0 +1,14 @@
+{
+  "service_name": "fast-test-7",
+  "fingerprint": "4d2fbc3191a1290c344acc05c406afaba26c3782baedd291e6ed8189d150a522",
+  "serial_number": 700806125558807894691731818303340344218638155907,
+  "issued_at": "2025-07-16T21:28:24",
+  "expires_at": "2025-08-15T21:28:24",
+  "dns_names": [
+    "fast-test-7",
+    "fast-test-7.local",
+    "fast-test-7.cluster.local"
+  ],
+  "revoked": false,
+  "revocation_reason": null
+}
