@@ -208,8 +208,8 @@ class TestSecurityHeadersManager:
         try:
             decoded = base64.b64decode(nonce)
             assert len(decoded) == 16
-        except Exception:
-            assert False, "Nonce should be valid base64"
+        except Exception as e:
+            pytest.fail(f"Nonce should be valid base64: {e}")
 
     def test_get_secure_cookie_config_production(self):
         """Test secure cookie config in production."""
