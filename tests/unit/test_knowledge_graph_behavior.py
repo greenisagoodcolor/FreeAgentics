@@ -401,7 +401,7 @@ class TestKnowledgeGraphStorageBehavior:
             # Attempt to save node
             try:
                 storage.save_node(node_data)
-                assert False, "Expected exception"
+                pytest.fail("Expected exception")
             except Exception as e:
                 assert "Storage error" in str(e)
 
