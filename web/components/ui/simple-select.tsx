@@ -10,28 +10,34 @@ export const SimpleSelect: React.FC<SimpleSelectProps> = ({ value, onValueChange
   const [isOpen, setIsOpen] = React.useState(false);
 
   const childrenArray = React.Children.toArray(children);
-  const trigger = childrenArray.find((child) =>
-    React.isValidElement(child) && child.type === SelectTrigger
+  const trigger = childrenArray.find(
+    (child) => React.isValidElement(child) && child.type === SelectTrigger,
   );
-  const content = childrenArray.find((child) =>
-    React.isValidElement(child) && child.type === SelectContent
+  const content = childrenArray.find(
+    (child) => React.isValidElement(child) && child.type === SelectContent,
   );
 
   return (
     <div className="relative">
       <div onClick={() => setIsOpen(!isOpen)}>
         {React.isValidElement(trigger) &&
-          React.cloneElement(trigger as React.ReactElement<{ value?: string; isOpen?: boolean }>, { value, isOpen })}
+          React.cloneElement(trigger as React.ReactElement<{ value?: string; isOpen?: boolean }>, {
+            value,
+            isOpen,
+          })}
       </div>
       {isOpen && (
         <div className="absolute top-full left-0 right-0 z-50 mt-1">
           {React.isValidElement(content) &&
-            React.cloneElement(content as React.ReactElement<{ onSelect?: (val: string) => void }>, {
-              onSelect: (val: string) => {
-                onValueChange(val);
-                setIsOpen(false);
-              }
-            })}
+            React.cloneElement(
+              content as React.ReactElement<{ onSelect?: (val: string) => void }>,
+              {
+                onSelect: (val: string) => {
+                  onValueChange(val);
+                  setIsOpen(false);
+                },
+              },
+            )}
         </div>
       )}
     </div>
@@ -45,19 +51,22 @@ export const SelectTrigger: React.FC<{
   id?: string;
 }> = ({ children, value, isOpen, id }) => {
   const valueElement = React.Children.toArray(children).find(
-    (child) => React.isValidElement(child) && child.type === SelectValue
+    (child) => React.isValidElement(child) && child.type === SelectValue,
   );
 
   return (
     <button
       id={id}
+      role="combobox"
+      aria-expanded={isOpen}
+      aria-haspopup="listbox"
       className="flex h-10 w-full items-center justify-between rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
       type="button"
     >
       {React.isValidElement(valueElement) &&
         React.cloneElement(valueElement as React.ReactElement<{ value?: string }>, { value })}
       <svg
-        className={`h-4 w-4 opacity-50 transition-transform ${isOpen ? 'rotate-180' : ''}`}
+        className={`h-4 w-4 opacity-50 transition-transform ${isOpen ? "rotate-180" : ""}`}
         fill="none"
         stroke="currentColor"
         viewBox="0 0 24 24"
@@ -68,8 +77,26 @@ export const SelectTrigger: React.FC<{
   );
 };
 
-export const SelectValue: React.FC<{ value?: string; placeholder?: string }> = ({ value, placeholder }) => {
-  return <span>{value || placeholder || 'Select...'}</span>;
+export const SelectValue: React.FC<{ value?: string; placeholder?: string }> = ({
+  value,
+  placeholder,
+}) => {
+  // Find the display text from the parent SelectContent if available
+  const displayText = React.useMemo(() => {
+    // If there's a specific placeholder, use it
+    if (placeholder) return placeholder;
+
+    // For LLM providers, provide proper capitalization
+    const providerNames: Record<string, string> = {
+      openai: "OpenAI",
+      anthropic: "Anthropic",
+      ollama: "Ollama",
+    };
+
+    return providerNames[value || ""] || value || "Select...";
+  }, [value, placeholder]);
+
+  return <span>{displayText}</span>;
 };
 
 export const SelectContent: React.FC<{
@@ -81,7 +108,10 @@ export const SelectContent: React.FC<{
       <div className="w-full p-1">
         {React.Children.map(children, (child) => {
           if (React.isValidElement(child) && child.type === SelectItem) {
-            return React.cloneElement(child as React.ReactElement<{ onSelect?: (value: string) => void }>, { onSelect });
+            return React.cloneElement(
+              child as React.ReactElement<{ onSelect?: (value: string) => void }>,
+              { onSelect },
+            );
           }
           return child;
         })}
