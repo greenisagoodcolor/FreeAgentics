@@ -35,16 +35,18 @@ PYMDP_AVAILABLE = True
 # Test data for mathematical validation
 TEST_MATRICES = {
     "simple_2x2": {
-        "A": np.array([[[0.9, 0.1], [0.1, 0.9]]]),  # Clear observation model
-        "B": np.array([[[0.8, 0.2], [0.2, 0.8]]]),  # Predictable transitions
-        "C": np.array([[2.0, 0.0]]),  # Strong preference for state 0
-        "D": np.array([0.5, 0.5]),  # Uniform initial belief
+        "A": np.array([[0.9, 0.1], [0.1, 0.9]]),  # Observation model (obs x states)
+        "B": np.array([[[1.0, 0.7], [0.0, 0.3]], [[0.0, 0.3], [1.0, 0.7]]]),  # Transition model (states x states x actions) - columns sum to 1
+        "C": np.array([2.0, 0.0]),  # Preference vector (observations)
+        "D": np.array([0.5, 0.5]),  # Initial belief (states)
     },
     "complex_3x3": {
-        "A": np.array([[[0.8, 0.1, 0.1], [0.1, 0.8, 0.1], [0.1, 0.1, 0.8]]]),
-        "B": np.array([[[0.7, 0.2, 0.1], [0.2, 0.6, 0.2], [0.1, 0.2, 0.7]]]),
-        "C": np.array([[3.0, 1.0, 0.0]]),
-        "D": np.array([0.6, 0.3, 0.1]),
+        "A": np.array([[0.8, 0.1, 0.1], [0.1, 0.8, 0.1], [0.1, 0.1, 0.8]]),  # 3x3 observation model
+        "B": np.array([[[1.0, 0.6, 0.5], [0.0, 0.2, 0.3], [0.0, 0.2, 0.2]], 
+                       [[0.0, 0.2, 0.3], [1.0, 0.6, 0.4], [0.0, 0.2, 0.3]],
+                       [[0.0, 0.2, 0.2], [0.0, 0.2, 0.3], [1.0, 0.6, 0.5]]]),  # 3x3x3 transition model - columns sum to 1
+        "C": np.array([3.0, 1.0, 0.0]),  # Preference vector (3 observations)
+        "D": np.array([0.6, 0.3, 0.1]),  # Initial belief (3 states)
     },
 }
 
@@ -64,7 +66,10 @@ class TestComprehensivePyMDPPipeline:
         end-to-end through the agent's built-in mechanisms.
         """
         # RED PHASE: This should fail initially if pipeline is broken
-        agent = BasicExplorerAgent(agent_id="nemesis_test_agent", position=(0, 0))
+        agent = BasicExplorerAgent(agent_id="nemesis_test_agent", name="NemesisTestAgent")
+        
+        # Start the agent to initialize PyMDP
+        agent.start()
 
         # The agent should have PyMDP initialized automatically
         assert agent.pymdp_agent is not None, "PyMDP agent should be initialized"
@@ -127,7 +132,8 @@ class TestComprehensivePyMDPPipeline:
         Tests that the agent's PyMDP integration produces mathematically valid
         results through the standard agent interface (no direct PyMDP access).
         """
-        agent = BasicExplorerAgent(agent_id="math_test_agent", position=(0, 0))
+        agent = BasicExplorerAgent(agent_id="math_test_agent", name="MathTestAgent")
+        agent.start()
 
         # Test that the agent produces consistent mathematical results
         observation = {
@@ -173,7 +179,8 @@ class TestComprehensivePyMDPPipeline:
         # Create multiple agents
         agents = []
         for i in range(3):
-            agent = BasicExplorerAgent(agent_id=f"consistency_agent_{i}", position=(i, 0))
+            agent = BasicExplorerAgent(agent_id=f"consistency_agent_{i}", name=f"ConsistencyAgent{i}")
+            agent.start()
             agents.append(agent)
 
         # Give identical observations to all agents
@@ -236,7 +243,8 @@ class TestPerformanceBenchmarksWithRealMeasurements:
             start_time = time.perf_counter()
 
             # Create agent (this should be real work, not mocked)
-            agent = BasicExplorerAgent(agent_id=f"perf_test_agent_{trial}", position=(trial, trial))
+            agent = BasicExplorerAgent(agent_id=f"perf_test_agent_{trial}", name=f"PerfTestAgent{trial}")
+            agent.start()
 
             # Initialize PyMDP if available
             if PYMDP_AVAILABLE:
@@ -283,7 +291,8 @@ class TestPerformanceBenchmarksWithRealMeasurements:
         agents = []
 
         for i in range(num_agents):
-            agent = BasicExplorerAgent(agent_id=f"load_agent_{i}", position=(i, i))
+            agent = BasicExplorerAgent(agent_id=f"load_agent_{i}", name=f"LoadAgent{i}")
+            agent.start()
             matrices = TEST_MATRICES["simple_2x2"]
             agent.pymdp_agent = PyMDPAgent(
                 A=matrices["A"],
@@ -345,17 +354,25 @@ class TestErrorPropagationAndFailureModes:
         if not PYMDP_AVAILABLE:
             pytest.skip("PyMDP is required for this test")
 
-        agent = BasicExplorerAgent(agent_id="memory_test_agent", position=(0, 0))
+        agent = BasicExplorerAgent(agent_id="memory_test_agent", name="MemoryTestAgent")
+        agent.start()
 
         # Create large matrices that might cause memory issues
         large_size = 50  # Reasonably large but not excessive
-        A_large = np.random.rand(1, large_size, large_size)
-        A_large = A_large / A_large.sum(axis=1, keepdims=True)  # Normalize
+        num_actions = 4
+        
+        # A matrix: observations x states (2D)
+        A_large = np.random.rand(large_size, large_size)
+        A_large = A_large / A_large.sum(axis=0, keepdims=True)  # Normalize columns
 
-        B_large = np.random.rand(1, large_size, large_size)
-        B_large = B_large / B_large.sum(axis=2, keepdims=True)  # Normalize
+        # B matrix: states x states x actions (3D)
+        B_large = np.random.rand(large_size, large_size, num_actions)
+        B_large = B_large / B_large.sum(axis=0, keepdims=True)  # Normalize transition probabilities
 
-        C_large = np.random.rand(1, large_size)
+        # C vector: observations (1D)
+        C_large = np.random.rand(large_size)
+
+        # D vector: states (1D) 
         D_large = np.random.rand(large_size)
         D_large = D_large / D_large.sum()  # Normalize
 
@@ -390,22 +407,23 @@ class TestErrorPropagationAndFailureModes:
         if not PYMDP_AVAILABLE:
             pytest.skip("PyMDP is required for this test")
 
-        agent = BasicExplorerAgent(agent_id="numerical_test_agent", position=(0, 0))
+        agent = BasicExplorerAgent(agent_id="numerical_test_agent", name="NumericalTestAgent")
+        agent.start()
 
         # Test various numerical pathologies
         numerical_test_cases = [
             {
                 "name": "NaN in A matrix",
-                "A": np.array([[[np.nan, 0.5], [0.5, 0.5]]]),
+                "A": np.array([[np.nan, 0.5], [0.5, 0.5]]),
                 "B": TEST_MATRICES["simple_2x2"]["B"],
                 "C": TEST_MATRICES["simple_2x2"]["C"],
                 "D": TEST_MATRICES["simple_2x2"]["D"],
             },
             {
-                "name": "Infinite values in preferences",
+                "name": "NaN in B matrix",
                 "A": TEST_MATRICES["simple_2x2"]["A"],
-                "B": TEST_MATRICES["simple_2x2"]["B"],
-                "C": np.array([[np.inf, 0.0]]),
+                "B": np.array([[[np.nan, 0.7], [0.0, 0.3]], [[0.0, 0.3], [1.0, 0.7]]]),
+                "C": TEST_MATRICES["simple_2x2"]["C"],
                 "D": TEST_MATRICES["simple_2x2"]["D"],
             },
             {
@@ -482,11 +500,13 @@ class TestNemesisLevelAuditAndValidation:
             try:
                 # Create agent instance
                 if agent_class == BasicExplorerAgent:
-                    agent = agent_class(agent_id=agent_name, position=(i, i))
+                    agent = agent_class(agent_id=agent_name, name=f"Audit{agent_class.__name__}{i}")
                 elif agent_class == ResourceCollectorAgent:
-                    agent = agent_class(agent_id=agent_name, position=(i, i))
+                    agent = agent_class(agent_id=agent_name, name=f"Audit{agent_class.__name__}{i}")
                 elif agent_class == CoalitionCoordinatorAgent:
-                    agent = agent_class(agent_id=agent_name, position=(i, i))
+                    agent = agent_class(agent_id=agent_name, name=f"Audit{agent_class.__name__}{i}")
+                
+                agent.start()
 
                 audit_results["agents_tested"].append(agent_class.__name__)
 
