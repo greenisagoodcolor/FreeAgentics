@@ -284,7 +284,7 @@ jobs:
         run: |
           mkdir -p dist
           # Package backend
-          tar -czf dist/backend.tar.gz --exclude=venv --exclude=node_modules --exclude=.git .
+          tar -czf dist/backend.tar.gz --exclude=venv --exclude=node_modules --exclude=.git --exclude=dist .
           # Package frontend
           cd web && tar -czf ../dist/frontend.tar.gz .next public package.json
 

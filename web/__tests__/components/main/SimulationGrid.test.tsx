@@ -260,7 +260,9 @@ describe("SimulationGrid", () => {
     // Or directly trigger the value change (this is more reliable in tests)
     const sliderParent = speedSlider.parentElement;
     if (sliderParent) {
-      const onValueChange = (sliderParent as unknown as { __reactProps$?: { onValueChange?: (value: number[]) => void } }).__reactProps$?.onValueChange;
+      const onValueChange = (
+        sliderParent as unknown as { __reactProps$?: { onValueChange?: (value: number[]) => void } }
+      ).__reactProps$?.onValueChange;
       if (onValueChange) {
         onValueChange([2]);
       }
@@ -406,8 +408,8 @@ describe("SimulationGrid", () => {
   it("allows grid size adjustment", () => {
     render(<SimulationGrid />);
 
-    expect(screen.getByLabelText(/grid width/i)).toBeInTheDocument();
-    expect(screen.getByLabelText(/height/i)).toBeInTheDocument();
+    expect(screen.getByLabelText(/^Grid Width$/i)).toBeInTheDocument();
+    expect(screen.getByLabelText(/^Height$/i)).toBeInTheDocument();
   });
 
   it.skip("changes grid size", async () => {
@@ -434,7 +436,7 @@ describe("SimulationGrid", () => {
 
     render(<SimulationGrid />);
 
-    const widthInput = screen.getByLabelText(/grid width/i);
+    const widthInput = screen.getByLabelText(/^Grid Width$/i);
     await user.clear(widthInput);
     await user.type(widthInput, "30");
 
@@ -464,8 +466,8 @@ describe("SimulationGrid", () => {
 
     render(<SimulationGrid />);
 
-    expect(screen.getByLabelText(/grid width/i)).toBeDisabled();
-    expect(screen.getByLabelText(/grid height/i)).toBeDisabled();
+    expect(screen.getByLabelText(/^Width$/i)).toBeDisabled();
+    expect(screen.getByLabelText(/^Height$/i)).toBeDisabled();
   });
 
   it("shows performance metrics", () => {

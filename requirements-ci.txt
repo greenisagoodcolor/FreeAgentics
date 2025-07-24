@@ -6,6 +6,9 @@ black==25.1.0
 
 # Test Infrastructure Dependencies
 boto3>=1.35.0,<2.0.0  # For MinIO S3 compatibility testing
+
+# Authentication (required for tests)
+cryptography==44.0.0  # CRITICAL: Required for auth/jwt_handler.py and security operations
 faker==33.1.0
 # Minimal CI requirements for fast pipeline feedback
 # Core Framework (required for API)
@@ -20,11 +23,10 @@ lxml==5.4.0  # Required for mypy HTML reports (5.4.1 doesn't exist)
 mypy==1.16.1
 
 # Basic Scientific Computing (minimal)
+networkx==3.4.2  # CRITICAL: Required for knowledge_graph/graph_engine.py
 numpy==2.2.1
 passlib==1.7.4  # CRITICAL: Required for auth/security_implementation.py
 pydantic==2.9.2
-
-# Authentication (required for tests)
 pyjwt==2.10.1
 
 # Testing
