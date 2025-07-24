@@ -2,12 +2,13 @@ import React from "react";
 import { render, screen, act } from "../../test-utils";
 import userEvent from "@testing-library/user-event";
 import { SettingsDrawer } from "@/components/main/SettingsDrawer";
+
+// Enable manual mocks
+jest.doMock("@/hooks/use-auth");
+jest.doMock("@/hooks/use-settings");
+
 import { useAuth } from "@/hooks/use-auth";
 import { useSettings } from "@/hooks/use-settings";
-
-// Mock the hooks
-jest.mock("@/hooks/use-auth");
-jest.mock("@/hooks/use-settings");
 
 const mockUseAuth = useAuth as jest.MockedFunction<typeof useAuth>;
 const mockUseSettings = useSettings as jest.MockedFunction<typeof useSettings>;

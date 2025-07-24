@@ -93,3 +93,25 @@ jest.mock("next/router", () => ({
     };
   },
 }));
+
+// Mock next/navigation (Next.js 13+ app router)
+jest.mock("next/navigation", () => ({
+  useRouter() {
+    return {
+      push: jest.fn(),
+      pop: jest.fn(),
+      reload: jest.fn(),
+      back: jest.fn(),
+      forward: jest.fn(),
+      refresh: jest.fn(),
+      replace: jest.fn(),
+      prefetch: jest.fn().mockResolvedValue(undefined),
+    };
+  },
+  usePathname() {
+    return "/";
+  },
+  useSearchParams() {
+    return new URLSearchParams();
+  },
+}));
