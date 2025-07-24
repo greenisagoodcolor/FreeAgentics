@@ -323,6 +323,12 @@ jobs:
           pip install pytest-xdist  # For parallel testing
 
       - name: "🧪 Run Unit Tests"
+        env:
+          DATABASE_URL: "sqlite:///test.db"
+          TESTING: "true"
+          API_KEY: "test_api_key"
+          SECRET_KEY: "test_secret_key_with_32_characters_or_more"
+          DEVELOPMENT_MODE: "false"
         run: |
           source venv/bin/activate
           mkdir -p ${{ env.REPORT_DIR }}
