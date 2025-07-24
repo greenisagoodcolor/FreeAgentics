@@ -146,7 +146,13 @@ if AUDIT_DB_URL:
 
     audit_engine = create_engine(AUDIT_DB_URL, **audit_engine_args)
     AuditSessionLocal = sessionmaker(bind=audit_engine)
-    Base.metadata.create_all(bind=audit_engine)
+    # Create tables only if they don't exist
+    try:
+        Base.metadata.create_all(bind=audit_engine)
+    except Exception as e:
+        # Table might already exist in tests or concurrent scenarios
+        if "already exists" not in str(e):
+            raise
 else:
     audit_engine = None
     AuditSessionLocal = None
