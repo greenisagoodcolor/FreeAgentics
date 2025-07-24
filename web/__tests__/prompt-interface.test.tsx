@@ -111,10 +111,13 @@ describe("PromptInterface", () => {
   describe("User Interactions", () => {
     it("should handle prompt submission", async () => {
       mockApiClient.processPrompt = jest.fn().mockResolvedValue({
-        id: "test-123",
-        prompt: "Test prompt",
-        status: "processing",
-        agents: [],
+        success: true,
+        data: {
+          id: "test-123",
+          prompt: "Test prompt",
+          status: "processing",
+          agents: [],
+        },
       });
 
       render(<PromptInterface />);
@@ -123,7 +126,10 @@ describe("PromptInterface", () => {
       const button = screen.getByRole("button", { name: /send prompt/i });
 
       await userEvent.type(input, "Test prompt");
-      await userEvent.click(button);
+      
+      await act(async () => {
+        await userEvent.click(button);
+      });
 
       await waitFor(() => {
         expect(mockApiClient.processPrompt).toHaveBeenCalledWith({
@@ -133,7 +139,9 @@ describe("PromptInterface", () => {
       });
 
       // Input should be cleared after submission
-      expect(input).toHaveValue("");
+      await waitFor(() => {
+        expect(input).toHaveValue("");
+      });
     });
 
     it("should disable submit button when prompt is empty", () => {
@@ -158,10 +166,13 @@ describe("PromptInterface", () => {
 
     it("should submit on Enter key press", async () => {
       mockApiClient.processPrompt = jest.fn().mockResolvedValue({
-        id: "test-123",
-        prompt: "Test prompt",
-        status: "processing",
-        agents: [],
+        success: true,
+        data: {
+          id: "test-123",
+          prompt: "Test prompt",
+          status: "processing",
+          agents: [],
+        },
       });
 
       render(<PromptInterface />);
@@ -169,7 +180,10 @@ describe("PromptInterface", () => {
       const input = screen.getByRole("textbox", { name: /enter your prompt/i });
 
       await userEvent.type(input, "Test prompt");
-      await userEvent.keyboard("{Enter}");
+      
+      await act(async () => {
+        await userEvent.keyboard("{Enter}");
+      });
 
       await waitFor(() => {
         expect(mockApiClient.processPrompt).toHaveBeenCalled();
@@ -386,10 +400,7 @@ describe("PromptInterface", () => {
     });
 
     it("should handle network timeout gracefully", async () => {
-      mockApiClient.processPrompt = jest.fn().mockRejectedValue({
-        detail: "Request timeout",
-        status: 408,
-      });
+      mockApiClient.processPrompt = jest.fn().mockRejectedValue(new Error("Request timeout"));
 
       render(<PromptInterface />);
 
@@ -397,7 +408,10 @@ describe("PromptInterface", () => {
       const button = screen.getByRole("button", { name: /send prompt/i });
 
       await userEvent.type(input, "Test prompt");
-      await userEvent.click(button);
+      
+      await act(async () => {
+        await userEvent.click(button);
+      });
 
       await waitFor(() => {
         const alert = screen.getByRole("alert");
