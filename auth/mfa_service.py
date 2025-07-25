@@ -31,12 +31,10 @@ from auth.security_logging import (
     SecurityEventType,
     security_auditor,
 )
+from database.base import Base
 from observability.security_monitoring import SecurityMonitoringSystem
 
 logger = logging.getLogger(__name__)
-
-# Database model for MFA settings
-Base = declarative_base()
 
 
 class MFASettings(Base):

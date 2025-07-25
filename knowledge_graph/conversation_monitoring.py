@@ -88,7 +88,7 @@ class ConversationMonitor:
             conversation_id=str(message.conversation_id),
             message_id=str(message.id),
             content=message.content,
-            timestamp=message.created_at,
+            timestamp=message.timestamp,
         )
 
         self.event_queue.put(event)

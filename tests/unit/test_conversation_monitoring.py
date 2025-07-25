@@ -79,8 +79,8 @@ class TestConversationMonitoring:
             id=message_id,
             conversation_id=conversation_id,
             content="I need help with Python programming",
-            role="user",
-            created_at=datetime.utcnow(),
+            sender_type="user",
+            timestamp=datetime.utcnow(),
         )
 
         # Process the message
@@ -107,8 +107,8 @@ class TestConversationMonitoring:
                 id=uuid.uuid4(),
                 conversation_id=conversation_id,
                 content=f"Message {i}",
-                role="user" if i % 2 == 0 else "assistant",
-                created_at=datetime.utcnow(),
+                sender_type="user" if i % 2 == 0 else "assistant",
+                timestamp=datetime.utcnow(),
             )
             for i in range(5)
         ]
@@ -145,8 +145,8 @@ class TestConversationMonitoring:
             id=message_id,
             conversation_id=conversation_id,
             content="What are Python decorators?",
-            role="user",
-            created_at=datetime.utcnow(),
+            sender_type="user",
+            timestamp=datetime.utcnow(),
         )
 
         # Process the conversation update
@@ -175,8 +175,8 @@ class TestConversationMonitoring:
             id=message_id,
             conversation_id=conversation_id,
             content="Test message",
-            role="user",
-            created_at=datetime.utcnow(),
+            sender_type="user",
+            timestamp=datetime.utcnow(),
         )
 
         # Process should not raise exception
@@ -210,8 +210,8 @@ class TestConversationMonitoring:
             id=message_id,
             conversation_id=conversation_id,
             content="Test subscription",
-            role="user",
-            created_at=datetime.utcnow(),
+            sender_type="user",
+            timestamp=datetime.utcnow(),
         )
 
         await monitor.process_message(message)
@@ -244,8 +244,8 @@ class TestConversationMonitoring:
                 id=uuid.uuid4(),
                 conversation_id=conversation_id,
                 content=f"Concurrent message {i}",
-                role="user",
-                created_at=datetime.utcnow(),
+                sender_type="user",
+                timestamp=datetime.utcnow(),
             )
             tasks.append(monitor.process_message(message))
 
