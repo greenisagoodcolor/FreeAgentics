@@ -47,7 +47,7 @@ class TestPyMDPAdapterStrictTypeChecking:
         result = adapter.sample_action(agent)
 
         # Must be EXACT int type, no numpy types allowed
-        assert type(result) is int, f"Expected exact int type, got {type(result)}"
+        assert type(result) is int  # noqa: E721, f"Expected exact int type, got {type(result)}"  # noqa: E721
         assert result >= 0, "Action index must be non-negative"
         assert result < num_controls[0], f"Action {result} exceeds max {num_controls[0] - 1}"
 
@@ -246,7 +246,7 @@ class TestPyMDPAdapterStrictTypeChecking:
 
         for value, target_type, expected in test_cases:
             result = adapter.safe_array_conversion(value, target_type)
-            assert type(result) is target_type, f"Wrong type for {value}"
+            assert type(result) is target_type, f"Wrong type for {value}"  # noqa: E721
             assert result == expected, f"Wrong value for {value}"
 
     def test_adapter_safe_array_conversion_fails_on_invalid_inputs(self):
@@ -286,19 +286,19 @@ class TestPyMDPAdapterStrictTypeChecking:
         # Test case 1: PyMDP returns numpy array with single value (current behavior)
         mock_agent.sample_action.return_value = np.array([2], dtype=np.float64)
         result = adapter.sample_action(mock_agent)
-        assert type(result) is int
+        assert type(result) is int  # noqa: E721
         assert result == 2
 
         # Test case 2: PyMDP returns int64 array
         mock_agent.sample_action.return_value = np.array([1], dtype=np.int64)
         result = adapter.sample_action(mock_agent)
-        assert type(result) is int
+        assert type(result) is int  # noqa: E721
         assert result == 1
 
         # Test case 3: PyMDP returns float32 array
         mock_agent.sample_action.return_value = np.array([3], dtype=np.float32)
         result = adapter.sample_action(mock_agent)
-        assert type(result) is int
+        assert type(result) is int  # noqa: E721
         assert result == 3
 
         # Test case 4: Verify it rejects tuples (not expected from PyMDP)
@@ -375,7 +375,7 @@ class TestPyMDPAdapterRealIntegration:
 
         # Step 3: Sample action
         action = adapter.sample_action(agent)
-        assert type(action) is int
+        assert type(action) is int  # noqa: E721
         assert 0 <= action < num_controls[0]
 
     def test_adapter_handles_different_agent_configurations(self):
@@ -472,7 +472,7 @@ class TestPyMDPAdapterRealIntegration:
         assert elapsed < 1.0, f"Adapter too slow: {elapsed:.3f}s for 10 operations"
 
         # Validate last results
-        assert type(action) is int
+        assert type(action) is int  # noqa: E721
         assert len(beliefs) > 0
         assert isinstance(q_pi, np.ndarray)
         assert isinstance(G, np.ndarray)
@@ -520,12 +520,12 @@ class TestPyMDPAdapterDesignDecisions:
         mock_agent.sample_action.return_value = np.array([5.9])
 
         result = adapter.sample_action(mock_agent)
-        assert type(result) is int  # Not np.int64 or float
+        assert type(result) is int  # noqa: E721  # Not np.int64 or float
         assert result == 5  # Truncated, not rounded
 
         # safe_array_conversion enforces target types
-        assert type(adapter.safe_array_conversion(5.9, int)) is int
-        assert type(adapter.safe_array_conversion(5, float)) is float
+        assert type(adapter.safe_array_conversion(5.9, int)) is int  # noqa: E721
+        assert type(adapter.safe_array_conversion(5, float)) is float  # noqa: E721
 
     def test_adapter_design_clear_errors(self):
         """Document that errors are clear and specific."""

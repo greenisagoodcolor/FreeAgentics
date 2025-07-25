@@ -149,7 +149,7 @@ class TestPyMDPAPICompatibility:
         result = adapter.sample_action(agent)
 
         # Must be exact int type, no numpy types allowed
-        assert type(result) is int, f"Expected int, got {type(result)}"
+        assert type(result) is int, f"Expected int, got {type(result)}"  # noqa: E721
         assert isinstance(result, int), "Result must be int instance"
         assert result >= 0, "Action index must be non-negative"
 
@@ -174,7 +174,7 @@ class TestPyMDPAPICompatibility:
 
         for test_input, expected in test_cases:
             result = adapter.safe_array_conversion(test_input, int)
-            assert type(result) is int, f"Failed for input {test_input} (type: {type(test_input)})"
+            assert type(result) is int, f"Failed for input {test_input} (type: {type(test_input)})"  # noqa: E721
             assert result == expected, f"Expected {expected}, got {result} for input {test_input}"
 
     def test_real_pymdp_agent_return_types_documentation(self):
