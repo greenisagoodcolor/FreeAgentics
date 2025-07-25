@@ -3,7 +3,12 @@ Test NLP Entity Extraction with real libraries (spaCy/NLTK)
 Following TDD principles - write tests first, then implementation
 """
 
-import spacy
+try:
+    import spacy
+except ImportError:
+    spacy = None
+
+import pytest
 
 from knowledge_graph.nlp_entity_extractor import (
     Entity,
@@ -14,6 +19,7 @@ from knowledge_graph.nlp_entity_extractor import (
 )
 
 
+@pytest.mark.skipif(spacy is None, reason="spaCy not available")
 class TestNLPEntityExtraction:
     """Test suite for NLP entity extraction"""
 

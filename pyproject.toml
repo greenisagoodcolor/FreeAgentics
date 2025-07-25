@@ -443,6 +443,8 @@ output = "coverage.xml"
 line-length = 100
 target-version = "py311"
 src = ["agents", "api", "coalitions", "database", "inference", "world"]
+exclude = ["new-dev-test/**/*"]
+extend-exclude = ["new-dev-test"]
 
 [tool.ruff.lint]
 # Focus only on the specific errors we're currently fixing

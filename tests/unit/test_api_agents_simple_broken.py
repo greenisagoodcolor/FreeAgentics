@@ -12,7 +12,6 @@ from fastapi.testclient import TestClient
 
 from api.main import app
 from auth.security_implementation import get_current_user
-from database.session import init_db
 from tests.test_helpers.auth_helpers import mock_auth_dependency
 
 # Set testing environment before using app
@@ -22,15 +21,12 @@ os.environ["API_KEY"] = "test_api_key_for_testing"
 os.environ["SECRET_KEY"] = "this_is_a_test_secret_key_with_enough_characters"
 os.environ["DEVELOPMENT_MODE"] = "false"
 
-# Initialize database tables for testing
-init_db()
-
 
 class TestAgentEndpoints:
     """Test class for agent API endpoints."""
 
     @pytest.fixture
-    def client(self):
+    def client(self, setup_test_database):
         """Create test client with mocked authentication."""
         # Override the auth dependency to bypass authentication for testing
         app.dependency_overrides[get_current_user] = mock_auth_dependency

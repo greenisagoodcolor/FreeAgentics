@@ -18,7 +18,6 @@ from sqlalchemy.orm import sessionmaker
 
 # Import the app from the API module
 from api.main import app
-from database.base import Base
 from database.models import Agent as AgentModel
 from database.models import AgentStatus
 from database.session import get_db

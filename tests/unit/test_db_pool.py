@@ -8,8 +8,12 @@ import os
 import time
 from unittest.mock import patch
 
-import asyncpg
 import pytest
+
+try:
+    import asyncpg
+except ImportError:
+    asyncpg = None
 
 from api.resilient_db import (
     MAX_RETRIES,
@@ -27,6 +31,7 @@ TEST_DB_URL = os.getenv(
 )
 
 
+@pytest.mark.skipif(asyncpg is None, reason="asyncpg not available")
 class TestDatabaseConnectionPool:
     """Test suite for database connection pool with retry logic"""
 

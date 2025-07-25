@@ -25,7 +25,7 @@ mock_modules = {
 
 with patch.dict("sys.modules", mock_modules):
     from inference.active.gmn_parser import GMNParser
-    from inference.active.gmn_validation import GMNValidator
+    from inference.active.gmn_validation import GMNValidationFramework
     from inference.gnn.feature_extractor import FeatureExtractor
     from inference.gnn.parser import GNNParser
     from inference.gnn.validator import GNNValidator
@@ -116,16 +116,16 @@ class TestGMNParser:
         assert len(result["policy"]["actions"]) == 2
 
 
-class TestGMNValidator:
+class TestGMNValidationFramework:
     """Test GMN Validator functionality."""
 
     def setup_method(self):
         """Set up test fixtures."""
-        self.validator = GMNValidator()
+        self.validator = GMNValidationFramework()
 
     def test_gmn_validator_initialization(self):
-        """Test GMNValidator initialization."""
-        validator = GMNValidator()
+        """Test GMNValidationFramework initialization."""
+        validator = GMNValidationFramework()
         assert validator is not None
         assert hasattr(validator, "validate")
 
@@ -653,7 +653,7 @@ class TestInferenceIntegration:
         """Test error propagation in inference pipeline."""
         # Create components
         parser = GMNParser()
-        validator = GMNValidator()
+        validator = GMNValidationFramework()
 
         # Mock parser that can fail
         def mock_parse_with_error(gmn_string):
