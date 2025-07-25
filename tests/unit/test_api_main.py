@@ -175,8 +175,8 @@ class TestLifespan:
 
                     async with lifespan(mock_app):
                         # Verify failure is logged as warning
-                        mock_logger.warning.assert_any_call(
-                            "⚠️ Failed to start Prometheus metrics collection: Prometheus connection failed"
+                        mock_logger.error.assert_any_call(
+                            "Failed to start Prometheus metrics: Prometheus connection failed"
                         )
 
                         # Verify performance tracking still starts
@@ -227,7 +227,7 @@ class TestLifespan:
                             # Verify shutdown logging
                             mock_logger.info.assert_any_call("Shutting down FreeAgentics API...")
                             mock_logger.info.assert_any_call(
-                                "✅ Prometheus metrics collection stopped"
+                                "📊 Prometheus metrics collection stopped"
                             )
                             mock_logger.info.assert_any_call("✅ Performance tracking stopped")
 
@@ -283,7 +283,7 @@ class TestLifespan:
                             # Verify Prometheus still stops
                             mock_stop_prometheus.assert_called_once()
                             mock_logger.info.assert_any_call(
-                                "✅ Prometheus metrics collection stopped"
+                                "📊 Prometheus metrics collection stopped"
                             )
 
                             # Verify failure is logged as warning
@@ -306,8 +306,8 @@ class TestLifespan:
 
                     async with lifespan(mock_app):
                         # Verify both failures are logged
-                        mock_logger.warning.assert_any_call(
-                            "⚠️ Failed to start Prometheus metrics collection: Prometheus failed"
+                        mock_logger.error.assert_any_call(
+                            "Failed to start Prometheus metrics: Prometheus failed"
                         )
                         mock_logger.warning.assert_any_call(
                             "⚠️ Failed to start performance tracking: Performance failed"

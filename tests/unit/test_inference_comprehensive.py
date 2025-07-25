@@ -27,7 +27,7 @@ with patch.dict("sys.modules", mock_modules):
     from inference.active.gmn_parser import GMNParser
     from inference.active.gmn_validation import GMNValidationFramework
     from inference.gnn.feature_extractor import NodeFeatureExtractor, FeatureConfig
-    from inference.gnn.parser import GNNParser
+    from inference.gnn.parser import ConfigParser
     from inference.gnn.validator import GNNValidator
     from inference.llm.local_llm_manager import LocalLLMManager
     from inference.llm.provider_interface import LLMProviderInterface
@@ -282,16 +282,16 @@ class TestNodeFeatureExtractor:
         assert features2 == [0.5, 2]
 
 
-class TestGNNParser:
+class TestConfigParser:
     """Test GNN Parser functionality."""
 
     def setup_method(self):
         """Set up test fixtures."""
-        self.parser = GNNParser()
+        self.parser = ConfigParser()
 
     def test_gnn_parser_initialization(self):
-        """Test GNNParser initialization."""
-        parser = GNNParser()
+        """Test ConfigParser initialization."""
+        parser = ConfigParser()
         assert parser is not None
 
     def test_gnn_parser_graph_parsing(self):
@@ -564,7 +564,7 @@ class TestInferenceIntegration:
         """Test integration between GMN and GNN components."""
         # Create components
         gmn_parser = GMNParser()
-        gnn_parser = GNNParser()
+        gnn_parser = ConfigParser()
         feature_extractor = NodeFeatureExtractor(FeatureConfig())
 
         # Mock methods for integration test

@@ -347,8 +347,11 @@ class AgentFactory:
                 else:
                     # Random but structured
                     A = utils.random_A_matrix(no, ns)
-                    # Add some structure
-                    A = A + 2 * np.eye(min(no, ns), max(no, ns))[:no, :ns]
+                    # Add some structure - create identity-like matrix with correct shape
+                    identity_like = np.zeros((no, ns))
+                    min_dim = min(no, ns)
+                    identity_like[:min_dim, :min_dim] = np.eye(min_dim)
+                    A = A + 2 * identity_like
                     A = A / A.sum(axis=0, keepdims=True)
             else:
                 # Multi-factor case

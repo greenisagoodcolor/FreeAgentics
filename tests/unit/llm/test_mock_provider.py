@@ -159,10 +159,11 @@ class TestMockLLMProvider:
         assert "preference" in gmn
         assert "exploration" in gmn.lower() or "information_gain" in gmn
 
-    def test_validate_model(self, provider):
+    @pytest.mark.asyncio
+    async def test_validate_model(self, provider):
         """Test model validation."""
-        assert provider.validate_model("mock-gpt-4") is True
-        assert provider.validate_model("gpt-4") is False
+        assert await provider.validate_model("mock-gpt-4") is True
+        assert await provider.validate_model("gpt-4") is False
 
     def test_get_token_limit(self, provider):
         """Test token limit retrieval."""
