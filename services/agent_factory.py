@@ -15,8 +15,16 @@ except ImportError:
     # Mock for development if PyMDP not installed
     class Agent:
         def __init__(self, *args, **kwargs):
-            self.qs = [np.ones(4) / 4]  # Mock beliefs
+            # Initialize beliefs based on D matrices if provided
+            if 'D' in kwargs and isinstance(kwargs['D'], list):
+                self.qs = [np.copy(d) for d in kwargs['D']]
+            else:
+                self.qs = [np.ones(4) / 4]  # Default mock beliefs
             self.action = None
+            # Store other attributes
+            for key, value in kwargs.items():
+                if not hasattr(self, key):
+                    setattr(self, key, value)
 
         def step(self, obs):
             self.action = 0
@@ -387,12 +395,16 @@ class AgentFactory:
             for a in range(nc):
                 if nc == 4:  # Assume cardinal directions
                     # Up, Down, Left, Right
-                    if a == 0:  # Up
-                        B[:-1, 1:, a] = np.eye(ns - 1)
-                        B[-1, -1, a] = 1  # Stay at boundary
-                    elif a == 1:  # Down
-                        B[1:, :-1, a] = np.eye(ns - 1)
-                        B[0, 0, a] = 1  # Stay at boundary
+                    if a == 0:  # Up - move to lower index
+                        # Each state i transitions to state i-1
+                        for i in range(1, ns):
+                            B[i-1, i, a] = 1  # Move up
+                        B[0, 0, a] = 1  # Stay at top boundary
+                    elif a == 1:  # Down - move to higher index
+                        # Each state i transitions to state i+1
+                        for i in range(ns-1):
+                            B[i+1, i, a] = 1  # Move down
+                        B[ns-1, ns-1, a] = 1  # Stay at bottom boundary
                     elif a == 2:  # Left (cyclic)
                         B[:, :, a] = np.roll(np.eye(ns), 1, axis=1)
                     elif a == 3:  # Right (cyclic)

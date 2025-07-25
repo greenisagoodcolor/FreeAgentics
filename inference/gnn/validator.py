@@ -677,3 +677,7 @@ class GMNValidator:
                     errors.append(f"Circular dependency detected in definitions involving {node}")
 
         return errors
+
+
+# Create an alias for backward compatibility
+GNNValidator = GMNValidator

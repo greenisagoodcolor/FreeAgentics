@@ -65,15 +65,15 @@ class TestGMNGenerator:
         """Test handling of empty GMN generation."""
         mock_llm_provider.generate_gmn.return_value = ""
 
-        with pytest.raises(ValueError, match="Generated empty GMN"):
+        with pytest.raises(LLMError, match="Generated empty GMN"):
             await generator.prompt_to_gmn("Test prompt")
 
     @pytest.mark.asyncio
     async def test_prompt_to_gmn_no_nodes(self, generator, mock_llm_provider):
         """Test handling of GMN without node definitions."""
-        mock_llm_provider.generate_gmn.return_value = "invalid gmn without nodes"
+        mock_llm_provider.generate_gmn.return_value = "invalid gmn specification"
 
-        with pytest.raises(ValueError, match="no node definitions"):
+        with pytest.raises(LLMError, match="no node definitions"):
             await generator.prompt_to_gmn("Test prompt")
 
     @pytest.mark.asyncio

@@ -82,7 +82,7 @@ class TestAgentFactory:
             "num_states": [4],
             "num_obs": [5],
             "num_controls": [3],
-            "A": np.ones((5, 4)) / 4,  # Valid A matrix
+            "A": np.ones((5, 4)) / 5,  # Valid A matrix - columns sum to 1
             "B": np.ones((4, 4, 3)) / 4,  # Valid B matrix
             "C": np.zeros(5),  # Valid C matrix
             "D": np.ones(4) / 4,  # Valid D matrix

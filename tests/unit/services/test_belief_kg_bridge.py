@@ -16,7 +16,9 @@ class MockAgent:
     """Mock PyMDP agent for testing."""
 
     def __init__(self):
-        self.qs = [np.array([0.7, 0.2, 0.05, 0.05]), np.array([0.1, 0.8, 0.1])]
+        # First belief: highly concentrated (low entropy)
+        # Second belief: more spread out (high entropy)
+        self.qs = [np.array([0.9, 0.05, 0.03, 0.02]), np.array([0.4, 0.3, 0.3])]
         self.action = 2
         self.action_hist = [0, 1, 2, 1, 0]
         self.action_precision = 1.5
@@ -51,7 +53,7 @@ class TestBeliefKGBridge:
 
         assert isinstance(belief_state, BeliefState)
         assert len(belief_state.factor_beliefs) == 2
-        assert belief_state.most_likely_states == [0, 1]  # Argmax of beliefs
+        assert belief_state.most_likely_states == [0, 0]  # Argmax of beliefs
         assert belief_state.metadata["num_factors"] == 2
         assert belief_state.metadata["last_action"] == 2
         assert belief_state.metadata["action_history"] == [0, 1, 2, 1, 0]

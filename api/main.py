@@ -32,6 +32,7 @@ from observability.prometheus_metrics import (
     get_prometheus_metrics,
     start_prometheus_metrics_collection,
 )
+from observability.performance_metrics import start_performance_tracking
 
 # Configure logging
 logging.basicConfig(level=logging.INFO)
@@ -55,7 +56,18 @@ async def lifespan(app: FastAPI):
     logger.info("Starting FreeAgentics API...")
 
     # Start Prometheus metrics collection
-    await start_prometheus_metrics_collection()
+    try:
+        await start_prometheus_metrics_collection()
+        logger.info("📊 Prometheus metrics collection started")
+    except Exception as e:
+        logger.error(f"Failed to start Prometheus metrics: {e}")
+
+    # Start performance tracking
+    try:
+        await start_performance_tracking()
+        logger.info("✅ Performance tracking started")
+    except Exception as e:
+        logger.error(f"Failed to start performance tracking: {e}")
 
     # Initialize database if in development mode
     from database.session import DATABASE_URL, init_db

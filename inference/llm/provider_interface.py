@@ -441,3 +441,7 @@ class ProviderManager:
         """Load provider configuration from file."""
         # Implementation would load from JSON/YAML file
         logger.info(f"Loading configuration from {config_path}")
+
+
+# Create an alias for backward compatibility
+LLMProviderInterface = ILLMProvider
