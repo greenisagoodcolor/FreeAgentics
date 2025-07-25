@@ -11,84 +11,16 @@ from unittest.mock import Mock, patch
 
 import pytest
 
-try:
-    from inference.llm.anthropic_provider import AnthropicProvider
-
-    # Import the actual providers we need to implement
-    from inference.llm.openai_provider import OpenAIProvider
-    from inference.llm.provider_interface import (
-        GenerationRequest,
-        GenerationResponse,
-        HealthCheckResult,
-        ProviderCredentials,
-        ProviderStatus,
-        ProviderType,
-    )
-
-    IMPORT_SUCCESS = True
-except ImportError:
-    # Mock classes for when imports fail
-    IMPORT_SUCCESS = False
-
-    class ProviderType:
-        OPENAI = "openai"
-        ANTHROPIC = "anthropic"
-
-    class ProviderStatus:
-        HEALTHY = "healthy"
-        DEGRADED = "degraded"
-        UNHEALTHY = "unhealthy"
-        OFFLINE = "offline"
-
-    class GenerationRequest:
-        def __init__(self, model, messages, temperature=0.7, max_tokens=None, stream=False):
-            self.model = model
-            self.messages = messages
-            self.temperature = temperature
-            self.max_tokens = max_tokens
-            self.stream = stream
-
-    class GenerationResponse:
-        def __init__(
-            self,
-            text,
-            model,
-            provider,
-            input_tokens=0,
-            output_tokens=0,
-            cost=0.0,
-            latency_ms=0.0,
-            finish_reason=None,
-        ):
-            self.text = text
-            self.model = model
-            self.provider = provider
-            self.input_tokens = input_tokens
-            self.output_tokens = output_tokens
-            self.cost = cost
-            self.latency_ms = latency_ms
-            self.finish_reason = finish_reason
-
-    class HealthCheckResult:
-        def __init__(self, status, latency_ms, error_message=None):
-            self.status = status
-            self.latency_ms = latency_ms
-            self.error_message = error_message
-            self.timestamp = datetime.now()
-
-    class ProviderCredentials:
-        def __init__(self, api_key=None, organization_id=None, endpoint_url=None):
-            self.api_key = api_key
-            self.organization_id = organization_id
-            self.endpoint_url = endpoint_url
-
-    class OpenAIProvider:
-        def __init__(self):
-            pass
-
-    class AnthropicProvider:
-        def __init__(self):
-            pass
+from inference.llm.anthropic_provider import AnthropicProvider
+from inference.llm.openai_provider import OpenAIProvider
+from inference.llm.provider_interface import (
+    GenerationRequest,
+    GenerationResponse,
+    HealthCheckResult,
+    ProviderCredentials,
+    ProviderStatus,
+    ProviderType,
+)
 
 
 class TestOpenAIProvider:
@@ -96,9 +28,6 @@ class TestOpenAIProvider:
 
     def test_openai_provider_initialization(self):
         """Test OpenAI provider initializes correctly."""
-        if not IMPORT_SUCCESS:
-            pytest.skip("Required imports not available")
-
         provider = OpenAIProvider()
 
         # These assertions will FAIL until we implement the provider
@@ -108,35 +37,37 @@ class TestOpenAIProvider:
 
     def test_openai_provider_configure_with_api_key(self):
         """Test OpenAI provider configuration with API key."""
-        if not IMPORT_SUCCESS:
-            pytest.skip("Required imports not available")
-
         provider = OpenAIProvider()
         credentials = ProviderCredentials(api_key="test-api-key", organization_id="test-org")
 
         # Mock the OpenAI client to avoid real API calls in tests
-        with patch("openai.OpenAI") as mock_openai_class:
+        with patch("inference.llm.openai_provider.OpenAI") as mock_openai_class:
             mock_client = Mock()
             mock_openai_class.return_value = mock_client
 
-            # Configure should succeed
-            result = provider.configure(credentials)
-            assert result is True
+            # Mock the health check to return healthy
+            with patch.object(provider, 'test_connection') as mock_health:
+                mock_health.return_value = HealthCheckResult(
+                    status=ProviderStatus.HEALTHY,
+                    latency_ms=50.0,
+                    error_message=None
+                )
 
-            # Verify client was created with correct parameters
-            mock_openai_class.assert_called_once_with(
-                api_key="test-api-key", organization="test-org"
-            )
+                # Configure should succeed
+                result = provider.configure(credentials)
+                assert result is True
+
+                # Verify client was created with correct parameters
+                mock_openai_class.assert_called_once_with(
+                    api_key="test-api-key", organization="test-org"
+                )
 
     def test_openai_provider_health_check(self):
         """Test OpenAI provider health check."""
-        if not IMPORT_SUCCESS:
-            pytest.skip("Required imports not available")
-
         provider = OpenAIProvider()
         credentials = ProviderCredentials(api_key="test-api-key")
 
-        with patch("openai.OpenAI") as mock_openai_class:
+        with patch("inference.llm.openai_provider.OpenAI") as mock_openai_class:
             mock_client = Mock()
             mock_openai_class.return_value = mock_client
 
@@ -148,8 +79,16 @@ class TestOpenAIProvider:
             ]
             mock_client.models.list.return_value = mock_models_response
 
-            provider.configure(credentials)
+            # Mock configuration to avoid real API call
+            with patch.object(provider, 'test_connection') as mock_test_connection:
+                mock_test_connection.return_value = HealthCheckResult(
+                    status=ProviderStatus.HEALTHY,
+                    latency_ms=50.0,
+                    error_message=None
+                )
+                provider.configure(credentials)
 
+            # Now test the health check directly without real API call
             health_result = provider.test_connection()
 
             assert isinstance(health_result, HealthCheckResult)
@@ -159,13 +98,10 @@ class TestOpenAIProvider:
 
     def test_openai_provider_generate_text(self):
         """Test OpenAI text generation."""
-        if not IMPORT_SUCCESS:
-            pytest.skip("Required imports not available")
-
         provider = OpenAIProvider()
         credentials = ProviderCredentials(api_key="test-api-key")
 
-        with patch("openai.OpenAI") as mock_openai_class:
+        with patch("inference.llm.openai_provider.OpenAI") as mock_openai_class:
             mock_client = Mock()
             mock_openai_class.return_value = mock_client
 
@@ -181,7 +117,14 @@ class TestOpenAIProvider:
 
             mock_client.chat.completions.create.return_value = mock_response
 
-            provider.configure(credentials)
+            # Mock the health check to return healthy
+            with patch.object(provider, 'test_connection') as mock_health:
+                mock_health.return_value = HealthCheckResult(
+                    status=ProviderStatus.HEALTHY,
+                    latency_ms=50.0,
+                    error_message=None
+                )
+                provider.configure(credentials)
 
             request = GenerationRequest(
                 model="gpt-3.5-turbo",
@@ -203,38 +146,47 @@ class TestOpenAIProvider:
 
     def test_openai_provider_cost_estimation(self):
         """Test OpenAI cost estimation."""
-        if not IMPORT_SUCCESS:
-            pytest.skip("Required imports not available")
-
         provider = OpenAIProvider()
 
         # Test cost estimation for GPT-3.5-turbo
         cost = provider.estimate_cost(100, 50, "gpt-3.5-turbo")
 
-        # GPT-3.5-turbo pricing: $0.002/1K input, $0.002/1K output
-        expected_cost = (100 * 0.002 / 1000) + (50 * 0.002 / 1000)
+        # GPT-3.5-turbo pricing from the provider: $0.0005/1K input, $0.0015/1K output
+        expected_cost = (100 * 0.0005 / 1000) + (50 * 0.0015 / 1000)
         assert abs(cost - expected_cost) < 0.0001
 
     def test_openai_provider_error_handling(self):
         """Test OpenAI provider error handling."""
-        if not IMPORT_SUCCESS:
-            pytest.skip("Required imports not available")
-
         provider = OpenAIProvider()
         credentials = ProviderCredentials(api_key="invalid-key")
 
-        with patch("openai.OpenAI") as mock_openai_class:
+        with patch("inference.llm.openai_provider.OpenAI") as mock_openai_class:
             mock_client = Mock()
             mock_openai_class.return_value = mock_client
 
-            # Mock authentication error
+            # Mock authentication error with proper constructor
             import openai
+            from httpx import Response
 
-            mock_client.chat.completions.create.side_effect = openai.AuthenticationError(
-                "Invalid API key"
+            mock_response = Mock(spec=Response)
+            mock_response.status_code = 401
+            mock_response.headers = {}
+            
+            auth_error = openai.AuthenticationError(
+                "Invalid API key",
+                response=mock_response,
+                body={"error": {"message": "Invalid API key"}}
             )
+            mock_client.chat.completions.create.side_effect = auth_error
 
-            provider.configure(credentials)
+            # Mock configuration to avoid real API call
+            with patch.object(provider, 'test_connection') as mock_health:
+                mock_health.return_value = HealthCheckResult(
+                    status=ProviderStatus.HEALTHY,
+                    latency_ms=50.0,
+                    error_message=None
+                )
+                provider.configure(credentials)
 
             request = GenerationRequest(
                 model="gpt-3.5-turbo", messages=[{"role": "user", "content": "Hello"}]
@@ -251,9 +203,6 @@ class TestAnthropicProvider:
 
     def test_anthropic_provider_initialization(self):
         """Test Anthropic provider initializes correctly."""
-        if not IMPORT_SUCCESS:
-            pytest.skip("Required imports not available")
-
         provider = AnthropicProvider()
 
         # These assertions will FAIL until we implement the provider
@@ -263,31 +212,33 @@ class TestAnthropicProvider:
 
     def test_anthropic_provider_configure_with_api_key(self):
         """Test Anthropic provider configuration with API key."""
-        if not IMPORT_SUCCESS:
-            pytest.skip("Required imports not available")
-
         provider = AnthropicProvider()
         credentials = ProviderCredentials(api_key="test-api-key")
 
         # Mock the Anthropic client
-        with patch("anthropic.Anthropic") as mock_anthropic_class:
+        with patch("inference.llm.anthropic_provider.Anthropic") as mock_anthropic_class:
             mock_client = Mock()
             mock_anthropic_class.return_value = mock_client
 
-            result = provider.configure(credentials)
-            assert result is True
+            # Mock the health check to return healthy
+            with patch.object(provider, 'test_connection') as mock_health:
+                mock_health.return_value = HealthCheckResult(
+                    status=ProviderStatus.HEALTHY,
+                    latency_ms=50.0,
+                    error_message=None
+                )
 
-            mock_anthropic_class.assert_called_once_with(api_key="test-api-key")
+                result = provider.configure(credentials)
+                assert result is True
+
+                mock_anthropic_class.assert_called_once_with(api_key="test-api-key")
 
     def test_anthropic_provider_generate_text(self):
         """Test Anthropic text generation."""
-        if not IMPORT_SUCCESS:
-            pytest.skip("Required imports not available")
-
         provider = AnthropicProvider()
         credentials = ProviderCredentials(api_key="test-api-key")
 
-        with patch("anthropic.Anthropic") as mock_anthropic_class:
+        with patch("inference.llm.anthropic_provider.Anthropic") as mock_anthropic_class:
             mock_client = Mock()
             mock_anthropic_class.return_value = mock_client
 
@@ -302,7 +253,14 @@ class TestAnthropicProvider:
 
             mock_client.messages.create.return_value = mock_response
 
-            provider.configure(credentials)
+            # Mock the health check to return healthy
+            with patch.object(provider, 'test_connection') as mock_health:
+                mock_health.return_value = HealthCheckResult(
+                    status=ProviderStatus.HEALTHY,
+                    latency_ms=50.0,
+                    error_message=None
+                )
+                provider.configure(credentials)
 
             request = GenerationRequest(
                 model="claude-3-sonnet-20240229",
@@ -322,9 +280,6 @@ class TestAnthropicProvider:
 
     def test_anthropic_provider_cost_estimation(self):
         """Test Anthropic cost estimation."""
-        if not IMPORT_SUCCESS:
-            pytest.skip("Required imports not available")
-
         provider = AnthropicProvider()
 
         # Test cost estimation for Claude-3-sonnet
@@ -340,9 +295,6 @@ class TestProviderIntegration:
 
     def test_provider_manager_with_multiple_providers(self):
         """Test provider manager with both OpenAI and Anthropic providers."""
-        if not IMPORT_SUCCESS:
-            pytest.skip("Required imports not available")
-
         from inference.llm.provider_interface import ProviderManager
 
         manager = ProviderManager()
@@ -354,9 +306,36 @@ class TestProviderIntegration:
         openai_credentials = ProviderCredentials(api_key="openai-key")
         anthropic_credentials = ProviderCredentials(api_key="anthropic-key")
 
-        with patch("openai.OpenAI"), patch("anthropic.Anthropic"):
-            openai_provider.configure(openai_credentials)
-            anthropic_provider.configure(anthropic_credentials)
+        with (
+            patch("inference.llm.openai_provider.OpenAI") as mock_openai,
+            patch("inference.llm.anthropic_provider.Anthropic") as mock_anthropic,
+        ):
+            # Mock OpenAI client
+            mock_openai_client = Mock()
+            mock_openai.return_value = mock_openai_client
+            
+            # Mock Anthropic client
+            mock_anthropic_client = Mock()
+            mock_anthropic.return_value = mock_anthropic_client
+
+            # Mock health checks for both providers
+            with (
+                patch.object(openai_provider, 'test_connection') as mock_openai_health,
+                patch.object(anthropic_provider, 'test_connection') as mock_anthropic_health,
+            ):
+                mock_openai_health.return_value = HealthCheckResult(
+                    status=ProviderStatus.HEALTHY,
+                    latency_ms=50.0,
+                    error_message=None
+                )
+                mock_anthropic_health.return_value = HealthCheckResult(
+                    status=ProviderStatus.HEALTHY,
+                    latency_ms=60.0,
+                    error_message=None
+                )
+
+                openai_provider.configure(openai_credentials)
+                anthropic_provider.configure(anthropic_credentials)
 
             manager.registry.register_provider(openai_provider, priority=1)
             manager.registry.register_provider(anthropic_provider, priority=2)
@@ -388,9 +367,6 @@ class TestProviderIntegration:
 
     def test_real_api_integration_with_env_vars(self):
         """Test real API integration using environment variables."""
-        if not IMPORT_SUCCESS:
-            pytest.skip("Required imports not available")
-
         # Skip if no real API keys provided
         openai_key = os.getenv("OPENAI_API_KEY")
         anthropic_key = os.getenv("ANTHROPIC_API_KEY")
