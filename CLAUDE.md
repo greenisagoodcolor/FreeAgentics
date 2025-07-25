@@ -1480,4 +1480,29 @@ Based on advanced encryption and SOAR implementation:
 - **Concurrent Execution**: Parallel playbook execution with configurable limits
 - **Indicator Tracking**: Global threat intelligence with deduplication
 
+### SQLAlchemy Integration Learnings (July 2025)
+
+Based on fixing critical integration issues in FreeAgentics:
+
+#### Model Definition Best Practices
+
+- **Single Base Class**: Always use a shared Base class from database.base for all models
+- **Avoid Duplicate Bases**: Never create separate declarative_base() instances in different modules
+- **Table Extension**: Use __table_args__ = {"extend_existing": True} to handle reimports gracefully
+- **Consistent Field Names**: Ensure model fields match across code and tests (e.g., sender_type vs role)
+
+#### Test Isolation Strategies
+
+- **Foreign Key Enforcement**: Enable SQLite foreign keys with PRAGMA foreign_keys=ON in tests
+- **Import-Time Issues**: Table redefinition errors indicate poor test isolation - fix at model level
+- **Fixture Design**: Create test engines per test class, not globally, to ensure clean state
+- **Clear Error Types**: Use specific exceptions (IntegrityError) instead of generic Exception
+
+#### Integration Testing Patterns
+
+- **Test Model Contracts**: Write tests that verify the actual database behavior, not mocked behavior
+- **Cross-Module Testing**: Always have tests that import multiple modules together to catch conflicts
+- **Field Name Validation**: Test both model creation and actual database operations to catch mismatches
+- **Migration Safety**: Changes to model field names must be coordinated across all consumers
+
 By adhering to these principles – which reflect the wisdom of industry experts and successful project patterns – we ensure that software projects are maintainable, reliable, and efficient. The end result is code that not only works correctly (fully functional and robust) but is also **elegant in its simplicity** and clarity, making it a pleasure to work with for any developer or AI agent in the partnership.
