@@ -28,9 +28,6 @@ SQLALCHEMY_DATABASE_URL = "sqlite:///./test.db"
 engine = create_engine(SQLALCHEMY_DATABASE_URL, connect_args={"check_same_thread": False})
 TestingSessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engine)
 
-# Create tables
-Base.metadata.create_all(bind=engine)
-
 
 def override_get_db():
     """Override database dependency for testing."""
@@ -58,7 +55,7 @@ class TestAgentsAPI:
     """Test agents API endpoints with real database."""
 
     @pytest.fixture(autouse=True)
-    def setup(self):
+    def setup(self, setup_test_database):
         """Setup test database before each test."""
         # Clear all data before each test
         db = TestingSessionLocal()

@@ -58,3 +58,24 @@ def _clear_tables_fixture():
     import the same models by ensuring clean imports at the module level.
     """
     yield
+
+
+@pytest.fixture(scope="session")
+def setup_test_database():
+    """Session-scoped fixture to create database tables once per test session."""
+    from sqlalchemy import create_engine
+    from database.base import Base
+    
+    # Create test database engine
+    engine = create_engine(os.environ["DATABASE_URL"])
+    
+    # Drop all tables first to ensure clean state
+    Base.metadata.drop_all(bind=engine)
+    
+    # Create all tables
+    Base.metadata.create_all(bind=engine)
+    
+    yield engine
+    
+    # Cleanup after all tests
+    Base.metadata.drop_all(bind=engine)

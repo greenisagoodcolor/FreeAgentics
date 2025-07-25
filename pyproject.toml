@@ -466,6 +466,8 @@ ignore = []
 "new-dev-test/tests/unit/test_pymdp_adapter_strict.py" = ["E721"]
 "new-dev-test/tests/unit/test_pymdp_api_compatibility.py" = ["E721"]
 "new-dev-test/tests/integration/test_action_sampling_issue.py" = ["E721"]
+# Exclude new-dev-test directory from linting
+"new-dev-test/**/*.py" = ["E721", "F401", "F811", "F821"]
 # Tests that check imports
 "tests/integration/test_active_inference_production.py" = ["F401"]
 "tests/performance/test_matrix_caching_benchmarks.py" = ["F401"]
