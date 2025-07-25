@@ -230,7 +230,7 @@ sphinxcontrib-qthelp==2.0.0
 sphinxcontrib-serializinghtml==2.0.0
 SQLAlchemy==2.0.41
 stack-data==0.6.3
-starlette>=0.37.2,<0.39.0  # Compatible with fastapi 0.115.14
+starlette>=0.40.0,<0.47.0  # Compatible with fastapi 0.115.14
 stevedore==5.4.1
 strawberry-graphql==0.275.5
 sympy==1.14.0

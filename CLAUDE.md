@@ -1505,4 +1505,60 @@ Based on fixing critical integration issues in FreeAgentics:
 - **Field Name Validation**: Test both model creation and actual database operations to catch mismatches
 - **Migration Safety**: Changes to model field names must be coordinated across all consumers
 
+### CI/CD Pipeline Learnings (July 2025)
+
+Based on resolving critical CI/CD failures in FreeAgentics:
+
+#### Dependency Management Best Practices
+
+- **Version Validation**: Always verify package versions exist before committing (pip index versions <package>)
+- **Compatibility Testing**: Test dependency combinations locally before pushing
+- **Version Ranges vs Pinning**: Use ranges for compatibility (e.g., starlette>=0.37.2,<0.39.0) when conflicts arise
+- **Security vs Stability**: Document why specific versions are chosen (security fixes vs latest stable)
+
+#### CI/CD Debugging Strategies
+
+- **Essential GitHub CLI Commands**:
+  ```bash
+  gh run list --limit 5                    # View recent runs
+  gh run view <id> --log-failed           # See failure logs
+  gh run watch <id> --exit-status         # Monitor in progress
+  gh run view <id> --job <job-id> --log   # Detailed job logs
+  ```
+
+- **Error Pattern Recognition**:
+  - "No matching distribution found" = Version doesn't exist
+  - "ResolutionImpossible" = Dependency conflict
+  - "Process completed with exit code" = Check logs above for actual error
+
+#### Pre-Push Validation Checklist
+
+1. **File Existence**: Verify all files referenced in CI workflows exist
+2. **Version Validation**: Run `pip install --dry-run -r requirements.txt`
+3. **Linting Locally**: Run `ruff check .` before pushing
+4. **Test Subset**: Run at least smoke tests locally
+5. **Dependency Tree**: Check with `pip-tree` for conflicts
+
+#### Local CI Testing Procedures
+
+- **Simulate CI Environment**:
+  ```bash
+  python -m venv ci-test
+  source ci-test/bin/activate
+  pip install -r requirements-ci.txt
+  make format && make lint && make test
+  ```
+
+- **Docker-based CI Testing**:
+  ```bash
+  docker run -v $(pwd):/app python:3.12 bash -c "cd /app && pip install -r requirements-ci.txt && pytest"
+  ```
+
+#### Version Conflict Resolution
+
+- **Identify Conflicts**: Use `pip install --dry-run` to see conflicts
+- **Check Compatibility**: Research package changelogs for breaking changes
+- **Test Combinations**: Create isolated venvs to test version combinations
+- **Document Decisions**: Always comment why specific versions are chosen
+
 By adhering to these principles – which reflect the wisdom of industry experts and successful project patterns – we ensure that software projects are maintainable, reliable, and efficient. The end result is code that not only works correctly (fully functional and robust) but is also **elegant in its simplicity** and clarity, making it a pleasure to work with for any developer or AI agent in the partnership.
