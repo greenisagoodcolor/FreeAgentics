@@ -3,6 +3,7 @@
 import os
 
 import pytest
+from sqlalchemy import MetaData
 
 # Set development mode to enable SQLite fallback for tests
 os.environ["DEVELOPMENT_MODE"] = "true"
@@ -48,3 +49,13 @@ def mock_redis_client():
     from tests.mocks.mock_redis import create_mock_redis_client
 
     return create_mock_redis_client()
+
+
+@pytest.fixture(scope="module")
+def _clear_tables_fixture():
+    """Module-level fixture to handle SQLAlchemy table definitions.
+    
+    This helps prevent "Table already defined" errors when multiple test modules
+    import the same models by ensuring clean imports at the module level.
+    """
+    yield

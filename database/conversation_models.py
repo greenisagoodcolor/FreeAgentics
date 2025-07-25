@@ -37,6 +37,7 @@ class Conversation(Base):
     """Model representing a conversation."""
 
     __tablename__ = "conversations"
+    __table_args__ = {"extend_existing": True}
 
     id = Column(Integer, primary_key=True, index=True)
     user_id = Column(String, nullable=False, index=True)
@@ -56,6 +57,7 @@ class Message(Base):
     """Message model for storing individual messages in conversations."""
 
     __tablename__ = "messages"
+    __table_args__ = {"extend_existing": True}
 
     id = Column(Integer, primary_key=True, index=True)
     conversation_id = Column(Integer, ForeignKey("conversations.id"), nullable=False)
