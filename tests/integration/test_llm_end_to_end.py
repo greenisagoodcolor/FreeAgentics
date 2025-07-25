@@ -11,31 +11,15 @@ from unittest.mock import Mock, patch
 import pytest
 
 # Import LLM components
-try:
-    from config.llm_config import LLMConfig, set_llm_config
-    from inference.llm.provider_factory import create_llm_manager, get_provider_factory
-    from inference.llm.provider_interface import GenerationRequest, ProviderType
+from config.llm_config import LLMConfig, set_llm_config
+from inference.llm.provider_factory import create_llm_manager, get_provider_factory
+from inference.llm.provider_interface import GenerationRequest, ProviderType
 
-    LLM_IMPORTS_SUCCESS = True
-except ImportError as e:
-    print(f"LLM imports failed: {e}")
-    LLM_IMPORTS_SUCCESS = False
+# Import GMN components
+from inference.active.gmn_parser import EXAMPLE_GMN_SPEC, GMNParser
 
-# Try to import GMN components
-try:
-    from inference.active.gmn_parser import EXAMPLE_GMN_SPEC, GMNParser
-
-    GMN_AVAILABLE = True
-except ImportError:
-    GMN_AVAILABLE = False
-
-# Try to import PyMDP
-try:
-    import pymdp
-
-    PYMDP_AVAILABLE = True
-except ImportError:
-    PYMDP_AVAILABLE = False
+# Import PyMDP
+import pymdp
 
 
 @pytest.mark.integration
@@ -45,8 +29,6 @@ class TestLLMEndToEndIntegration:
     @pytest.fixture
     def mock_llm_config(self):
         """Create a mock LLM configuration."""
-        if not LLM_IMPORTS_SUCCESS:
-            pytest.skip("LLM imports failed")
 
         config = LLMConfig()
         config.openai.api_key = "test-openai-key"
@@ -87,8 +69,6 @@ class TestLLMEndToEndIntegration:
     @pytest.mark.parametrize("provider_type", [ProviderType.OPENAI, ProviderType.ANTHROPIC])
     def test_mock_llm_generation(self, mock_llm_config, provider_type):
         """Test LLM generation with mocked API responses."""
-        if not LLM_IMPORTS_SUCCESS:
-            pytest.skip("LLM imports failed")
 
         factory = get_provider_factory()
 
@@ -183,8 +163,6 @@ class TestLLMEndToEndIntegration:
 
     def test_llm_fallback_behavior(self, mock_llm_config):
         """Test LLM fallback when primary provider fails."""
-        if not LLM_IMPORTS_SUCCESS:
-            pytest.skip("LLM imports failed")
 
         factory = get_provider_factory()
         available = factory.get_available_providers()
@@ -239,8 +217,6 @@ class TestLLMEndToEndIntegration:
 
     def test_cost_estimation(self, mock_llm_config):
         """Test cost estimation across providers."""
-        if not LLM_IMPORTS_SUCCESS:
-            pytest.skip("LLM imports failed")
 
         factory = get_provider_factory()
 
@@ -260,8 +236,6 @@ class TestLLMEndToEndIntegration:
     def test_llm_to_gmn_integration(self, mock_llm_config):
         pytest.skip("GMN not available")
         """Test LLM→GMN integration pipeline."""
-        if not LLM_IMPORTS_SUCCESS:
-            pytest.skip("LLM imports failed")
 
         # Mock LLM to return a GMN specification
         with patch("inference.llm.openai_provider.OpenAI") as mock_openai:
@@ -321,8 +295,6 @@ class TestLLMEndToEndIntegration:
 
     def test_real_api_integration_with_env_keys(self):
         """Test with real API keys if provided in environment."""
-        if not LLM_IMPORTS_SUCCESS:
-            pytest.skip("LLM imports failed")
 
         # Check for real API keys
         has_openai = bool(os.getenv("OPENAI_API_KEY"))
@@ -377,8 +349,6 @@ class TestLLMErrorHandling:
 
     def test_authentication_error_handling(self):
         """Test handling of authentication errors."""
-        if not LLM_IMPORTS_SUCCESS:
-            pytest.skip("LLM imports failed")
 
         from inference.llm.openai_provider import OpenAIProvider
         from inference.llm.provider_interface import ProviderCredentials
@@ -401,8 +371,6 @@ class TestLLMErrorHandling:
 
     def test_rate_limit_error_handling(self):
         """Test handling of rate limit errors."""
-        if not LLM_IMPORTS_SUCCESS:
-            pytest.skip("LLM imports failed")
 
         from inference.llm.provider_factory import ErrorHandler
 
@@ -419,8 +387,6 @@ class TestLLMErrorHandling:
 
     def test_provider_not_available_error(self):
         """Test error when provider library is not available."""
-        if not LLM_IMPORTS_SUCCESS:
-            pytest.skip("LLM imports failed")
 
         from inference.llm.provider_factory import ProviderNotAvailableError
 
