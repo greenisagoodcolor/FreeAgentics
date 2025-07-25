@@ -2,7 +2,7 @@
 
 import logging
 from datetime import datetime
-from typing import Any, List, Optional, Type
+from typing import Any, AsyncGenerator, List, Optional, Type
 
 try:
     import strawberry
@@ -500,7 +500,7 @@ def _create_subscription_resolvers(
         """GraphQL subscription root."""
 
         @strawberry.subscription
-        async def agent_updates(self, agent_id: Optional[str] = None):
+        async def agent_updates(self, agent_id: Optional[str] = None) -> AsyncGenerator[Agent, None]:
             """Subscribe to agent status updates."""
             # Mock implementation - in practice would yield real-time updates
             import asyncio
@@ -519,7 +519,7 @@ def _create_subscription_resolvers(
                 )
 
         @strawberry.subscription
-        async def coalition_updates(self, coalition_id: Optional[str] = None):
+        async def coalition_updates(self, coalition_id: Optional[str] = None) -> AsyncGenerator[Coalition, None]:
             """Subscribe to coalition status updates."""
             import asyncio
 
@@ -539,7 +539,7 @@ def _create_subscription_resolvers(
                 )
 
         @strawberry.subscription
-        async def system_metrics_stream(self):
+        async def system_metrics_stream(self) -> AsyncGenerator[SystemMetrics, None]:
             """Subscribe to system metrics updates."""
             import asyncio
 
