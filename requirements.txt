@@ -4,6 +4,7 @@ aiohttp==3.12.14
 # LLM Providers
 openai==1.97.0  # Pinned for reproducible builds
 anthropic==0.58.0  # Pinned for reproducible builds
+asyncpg==0.30.0  # For PostgreSQL async operations
 aiosignal==1.4.0
 alabaster==1.0.0
 alembic==1.16.2
@@ -219,6 +220,7 @@ six==1.17.0
 sniffio==1.3.1
 snowballstemmer==3.0.1
 sortedcontainers==2.4.0
+spacy==3.8.5  # For NLP operations
 Sphinx==8.2.3
 sphinx-rtd-theme==3.0.2
 sphinxcontrib-applehelp==2.0.0

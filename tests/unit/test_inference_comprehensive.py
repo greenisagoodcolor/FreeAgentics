@@ -26,7 +26,7 @@ mock_modules = {
 with patch.dict("sys.modules", mock_modules):
     from inference.active.gmn_parser import GMNParser
     from inference.active.gmn_validation import GMNValidationFramework
-    from inference.gnn.feature_extractor import FeatureExtractor
+    from inference.gnn.feature_extractor import NodeFeatureExtractor, FeatureConfig
     from inference.gnn.parser import GNNParser
     from inference.gnn.validator import GNNValidator
     from inference.llm.local_llm_manager import LocalLLMManager
@@ -195,16 +195,16 @@ class TestGMNValidationFramework:
         assert result["valid"] is False
 
 
-class TestFeatureExtractor:
+class TestNodeFeatureExtractor:
     """Test GNN Feature Extractor functionality."""
 
     def setup_method(self):
         """Set up test fixtures."""
-        self.extractor = FeatureExtractor()
+        self.extractor = NodeFeatureExtractor(FeatureConfig())
 
     def test_feature_extractor_initialization(self):
-        """Test FeatureExtractor initialization."""
-        extractor = FeatureExtractor()
+        """Test NodeFeatureExtractor initialization."""
+        extractor = NodeFeatureExtractor(FeatureConfig())
         assert extractor is not None
 
     def test_feature_extractor_basic_extraction(self):
@@ -565,7 +565,7 @@ class TestInferenceIntegration:
         # Create components
         gmn_parser = GMNParser()
         gnn_parser = GNNParser()
-        feature_extractor = FeatureExtractor()
+        feature_extractor = NodeFeatureExtractor(FeatureConfig())
 
         # Mock methods for integration test
         def mock_gmn_parse(gmn_string):

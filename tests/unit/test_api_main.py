@@ -153,7 +153,7 @@ class TestLifespan:
                     async with lifespan(mock_app):
                         # Verify startup logging
                         mock_logger.info.assert_any_call("Starting FreeAgentics API...")
-                        mock_logger.info.assert_any_call("✅ Prometheus metrics collection started")
+                        mock_logger.info.assert_any_call("📊 Prometheus metrics collection started")
                         mock_logger.info.assert_any_call("✅ Performance tracking started")
 
                         # Verify services were started
@@ -199,7 +199,7 @@ class TestLifespan:
                     async with lifespan(mock_app):
                         # Verify Prometheus still starts
                         mock_prometheus.assert_called_once()
-                        mock_logger.info.assert_any_call("✅ Prometheus metrics collection started")
+                        mock_logger.info.assert_any_call("📊 Prometheus metrics collection started")
 
                         # Verify failure is logged as warning
                         mock_logger.warning.assert_any_call(

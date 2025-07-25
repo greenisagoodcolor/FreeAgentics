@@ -47,7 +47,7 @@ class TestPyMDPAdapterStrictTypeChecking:
         result = adapter.sample_action(agent)
 
         # Must be EXACT int type, no numpy types allowed
-        assert type(result) is int  # noqa: E721, f"Expected exact int type, got {type(result)}"
+        assert type(result) is int, f"Expected exact int type, got {type(result)}"  # noqa: E721
         assert result >= 0, "Action index must be non-negative"
         assert result < num_controls[0], f"Action {result} exceeds max {num_controls[0] - 1}"
 

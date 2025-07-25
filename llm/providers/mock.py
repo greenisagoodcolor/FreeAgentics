@@ -8,7 +8,7 @@ import asyncio
 import json
 import random
 import re
-from typing import List, Optional
+from typing import Any, Dict, List, Optional
 
 from llm.base import LLMError, LLMMessage, LLMProvider, LLMResponse, LLMRole
 
@@ -95,6 +95,45 @@ class MockLLMProvider(LLMProvider):
     def get_token_limit(self, model_name: str) -> int:
         """Get token limit for model."""
         return self.token_limit if model_name == self.model_name else 0
+
+    async def generate_gmn(
+        self,
+        prompt: str,
+        agent_type: str = "general",
+        constraints: Optional[Dict[str, Any]] = None,
+        examples: Optional[List[str]] = None,
+    ) -> str:
+        """Generate GMN specification using the specified agent type.
+        
+        Override the base class method to use the agent_type parameter directly
+        instead of trying to detect it from the prompt.
+        """
+        # Simulate processing delay
+        await asyncio.sleep(self.delay)
+
+        # Simulate errors
+        if random.random() < self.error_rate:
+            raise LLMError("Mock provider simulated error")
+
+        # Use the specified agent_type directly instead of detecting from prompt
+        if agent_type in self.gmn_templates:
+            template = self.gmn_templates[agent_type]
+        else:
+            template = self.gmn_templates["general"]
+
+        # Apply customizations based on prompt keywords
+        if "grid" in prompt.lower():
+            template = self._customize_for_grid(template, prompt)
+        elif "market" in prompt.lower() or "trade" in prompt.lower():
+            template = self._customize_for_market(template, prompt)
+
+        # Add preferences based on prompt
+        if "cautious" in prompt.lower():
+            template = self._add_cautious_preferences(template)
+        elif "curious" in prompt.lower() or "explore" in prompt.lower():
+            template = self._add_exploration_preferences(template)
+
+        return template
 
     def _generate_gmn_response(self, prompt: str) -> str:
         """Generate a GMN specification based on the prompt."""
