@@ -459,6 +459,13 @@ ignore = []
 "tests/security/comprehensive_*.py" = ["E402"]
 # Scripts often need setup before imports
 "scripts/*.py" = ["E402"]
+# Intentional exact type checks for numpy vs Python types
+"tests/unit/test_pymdp_adapter_strict.py" = ["E721"]
+"tests/unit/test_pymdp_api_compatibility.py" = ["E721"]
+"tests/integration/test_action_sampling_issue.py" = ["E721"]
+"new-dev-test/tests/unit/test_pymdp_adapter_strict.py" = ["E721"]
+"new-dev-test/tests/unit/test_pymdp_api_compatibility.py" = ["E721"]
+"new-dev-test/tests/integration/test_action_sampling_issue.py" = ["E721"]
 # Tests that check imports
 "tests/integration/test_active_inference_production.py" = ["F401"]
 "tests/performance/test_matrix_caching_benchmarks.py" = ["F401"]

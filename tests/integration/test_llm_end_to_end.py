@@ -19,7 +19,11 @@ from inference.llm.provider_interface import GenerationRequest, ProviderType
 from inference.active.gmn_parser import EXAMPLE_GMN_SPEC, GMNParser
 
 # Import PyMDP
-import pymdp
+try:
+    import pymdp
+    PYMDP_AVAILABLE = True
+except ImportError:
+    PYMDP_AVAILABLE = False
 
 
 @pytest.mark.integration

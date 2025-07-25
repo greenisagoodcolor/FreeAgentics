@@ -8,6 +8,8 @@ import gc
 import time
 import unittest
 
+import pytest
+
 try:
     import psutil
 

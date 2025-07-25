@@ -6,7 +6,6 @@ These tests verify actual LLM provider connections and integrations.
 """
 
 import os
-from datetime import datetime
 from unittest.mock import Mock, patch
 
 import pytest

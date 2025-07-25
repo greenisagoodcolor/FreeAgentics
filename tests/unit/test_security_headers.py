@@ -7,6 +7,8 @@ Tests for Task #14.5 - Security Headers and SSL/TLS Configuration
 import os
 from unittest.mock import Mock, patch
 
+import pytest
+
 from auth.security_headers import (
     PRODUCTION_SECURITY_POLICY,
     CertificatePinner,

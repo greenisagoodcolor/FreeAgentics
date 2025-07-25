@@ -3,7 +3,6 @@
 import os
 
 import pytest
-from sqlalchemy import MetaData
 
 # Set development mode to enable SQLite fallback for tests
 os.environ["DEVELOPMENT_MODE"] = "true"

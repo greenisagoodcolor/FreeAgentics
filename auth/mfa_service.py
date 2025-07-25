@@ -23,7 +23,6 @@ import qrcode
 from cryptography.fernet import Fernet
 from pydantic import BaseModel, validator
 from sqlalchemy import Boolean, Column, DateTime, Integer, String, Text
-from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy.orm import Session
 
 from auth.security_logging import (

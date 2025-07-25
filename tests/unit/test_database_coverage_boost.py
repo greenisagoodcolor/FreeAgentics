@@ -102,7 +102,7 @@ def test_all_model_enums():
     assert hasattr(AgentRole, "MEMBER")
 
 
-def test_model_relationships():
+def test_model_relationships_comprehensive():
     """Test model relationship definitions."""
     # Agent relationships
     assert hasattr(Agent, "coalition")

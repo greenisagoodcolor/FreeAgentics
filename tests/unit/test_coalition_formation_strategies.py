@@ -15,7 +15,6 @@ import pytest
 from coalitions.coalition import (
     Coalition,
     CoalitionObjective,
-    CoalitionRole,
 )
 from coalitions.formation_strategies import (
     AgentProfile,
