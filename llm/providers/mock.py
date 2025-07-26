@@ -63,7 +63,9 @@ class MockLLMProvider(LLMProvider):
             raise LLMError("No user message found")
 
         # Check if this is a validation request
-        if "validate" in user_message.lower() and ("json" in user_message.lower() or "gmn" in user_message.lower()):
+        if "validate" in user_message.lower() and (
+            "json" in user_message.lower() or "gmn" in user_message.lower()
+        ):
             content = self._generate_validation_response(user_message)
         # Check if this is a refinement request
         elif "refine" in user_message.lower() and "feedback" in user_message.lower():
@@ -104,7 +106,7 @@ class MockLLMProvider(LLMProvider):
         examples: Optional[List[str]] = None,
     ) -> str:
         """Generate GMN specification using the specified agent type.
-        
+
         Override the base class method to use the agent_type parameter directly
         instead of trying to detect it from the prompt.
         """

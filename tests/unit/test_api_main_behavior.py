@@ -143,8 +143,7 @@ class TestAPIMainBehavior:
 
         # Look for monitoring-related routes or metrics endpoint
         monitoring_routes_exist = any(
-            "monitoring" in path.lower() or "metrics" in path.lower() 
-            for path in route_paths
+            "monitoring" in path.lower() or "metrics" in path.lower() for path in route_paths
         )
         assert monitoring_routes_exist, "API should include monitoring routes"
 

@@ -730,7 +730,9 @@ class EnhancedQueryOptimizer:
                 query
                 for stats in self.query_stats.values()
                 for query in stats.get("slow_queries", [])
-            ][:20],  # Top 20 slow queries
+            ][
+                :20
+            ],  # Top 20 slow queries
         }
 
     async def setup_monitoring(self, session: AsyncSession):

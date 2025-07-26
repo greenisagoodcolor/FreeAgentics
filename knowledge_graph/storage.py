@@ -40,7 +40,9 @@ class NodeModel(Base):
     """SQLAlchemy model for knowledge nodes."""
 
     __tablename__ = "kg_nodes"
-    __table_args__ = {'extend_existing': True}  # TODO: ARCHITECTURAL DEBT - CRITICAL: Duplicate kg_nodes table name with knowledge/models.py (see NEMESIS Committee findings)
+    __table_args__ = {
+        "extend_existing": True
+    }  # TODO: ARCHITECTURAL DEBT - CRITICAL: Duplicate kg_nodes table name with knowledge/models.py (see NEMESIS Committee findings)
 
     id = Column(String(36), primary_key=True)
     graph_id = Column(String(36), index=True)
@@ -58,7 +60,9 @@ class EdgeModel(Base):
     """SQLAlchemy model for knowledge edges."""
 
     __tablename__ = "kg_edges"
-    __table_args__ = {'extend_existing': True}  # TODO: ARCHITECTURAL DEBT - CRITICAL: Duplicate kg_edges table name with knowledge/models.py (see NEMESIS Committee findings)
+    __table_args__ = {
+        "extend_existing": True
+    }  # TODO: ARCHITECTURAL DEBT - CRITICAL: Duplicate kg_edges table name with knowledge/models.py (see NEMESIS Committee findings)
 
     id = Column(String(36), primary_key=True)
     graph_id = Column(String(36), index=True)
@@ -74,7 +78,9 @@ class GraphMetadataModel(Base):
     """SQLAlchemy model for graph metadata."""
 
     __tablename__ = "graph_metadata"
-    __table_args__ = {'extend_existing': True}  # TODO: ARCHITECTURAL DEBT - Prevent table redefinition conflicts (see NEMESIS Committee findings)
+    __table_args__ = {
+        "extend_existing": True
+    }  # TODO: ARCHITECTURAL DEBT - Prevent table redefinition conflicts (see NEMESIS Committee findings)
 
     graph_id = Column(String(36), primary_key=True)
     version = Column(Integer, default=1)

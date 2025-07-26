@@ -138,7 +138,9 @@ def demo_memory_pressure_cleanup():
         # Set agent to active state and old access time for some
         if random.random() > 0.5:  # nosec B311 - Demo simulation only
             profile.state = AgentLifecycleState.ACTIVE
-            profile.last_accessed = time.time() - random.uniform(70, 150)  # nosec B311 - Demo simulation only  # Old access
+            profile.last_accessed = time.time() - random.uniform(
+                70, 150
+            )  # nosec B311 - Demo simulation only  # Old access
 
     # Check memory pressure
     stats = get_memory_statistics()
@@ -242,7 +244,9 @@ def demo_agent_pool_simulation():
         print(f"\n   Round {round_num + 1}:")
 
         # Some agents do work (update memory)
-        working_agents = random.sample(active_agents, random.randint(3, 6))  # nosec B311 - Demo simulation only
+        working_agents = random.sample(
+            active_agents, random.randint(3, 6)
+        )  # nosec B311 - Demo simulation only
         for agent_id in working_agents:
             profile = manager.get_agent_profile(agent_id)
             if profile and profile.state == AgentLifecycleState.ACTIVE:
@@ -261,11 +265,15 @@ def demo_agent_pool_simulation():
                 )
 
         # Some agents become idle (simulate old access time)
-        idle_agents = random.sample(active_agents, random.randint(1, 3))  # nosec B311 - Demo simulation only
+        idle_agents = random.sample(
+            active_agents, random.randint(1, 3)
+        )  # nosec B311 - Demo simulation only
         for agent_id in idle_agents:
             profile = manager.get_agent_profile(agent_id)
             if profile:
-                profile.last_accessed = time.time() - random.uniform(70, 200)  # nosec B311 - Demo simulation only
+                profile.last_accessed = time.time() - random.uniform(
+                    70, 200
+                )  # nosec B311 - Demo simulation only
 
         # Run cleanup
         cleanup_stats = manager.cleanup_idle_agents()

@@ -595,7 +595,9 @@ class ResourceDiscoveryAndCoalitionScenario(IntegrationTestScenario):
         # GNN Analysis Validation
         gnn_valid = (
             results["gnn_analysis"]["success"] or results["gnn_analysis"]["nodes_processed"] > 0
-        ) and results["gnn_analysis"]["execution_time"] < 30.0  # Should complete within 30 seconds
+        ) and results["gnn_analysis"][
+            "execution_time"
+        ] < 30.0  # Should complete within 30 seconds
         validations.append(("GNN Analysis", gnn_valid))
 
         # LLM Analysis Validation (optional but should not crash)

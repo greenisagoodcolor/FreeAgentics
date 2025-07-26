@@ -188,7 +188,7 @@ class TestMemoryOptimization(unittest.TestCase):
     def test_memory_usage_reduction_benchmark(self):
         if not PSUTIL_AVAILABLE:
             pytest.skip("psutil not available for memory benchmarking")
-            
+
         pytest.skip("Memory optimization test requires specific hardware configuration")
         """Test that memory optimizations actually reduce memory usage."""
         # Get initial memory usage

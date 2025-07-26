@@ -1151,13 +1151,13 @@ class BasicExplorerAgent(ActiveInferenceAgent):
             try:
                 # Use PyMDP to infer optimal policy
                 infer_result = self.pymdp_agent.infer_policies()
-                
+
                 # Handle different return formats from PyMDP
                 if infer_result is None or len(infer_result) == 0:
                     # PyMDP might not have initialized properly
                     logger.warning("PyMDP infer_policies returned empty result, using fallback")
                     raise ActionSelectionError("PyMDP not properly initialized")
-                
+
                 if len(infer_result) == 2:
                     q_pi, G = infer_result
                 else:

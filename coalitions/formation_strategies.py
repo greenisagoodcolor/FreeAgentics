@@ -230,7 +230,9 @@ class GreedyFormation(FormationStrategy):
 
                 if (
                     new_capabilities and not required_capabilities.issubset(covered_capabilities)
-                ) or len(coalition.members) == 0:  # Always add at least one agent
+                ) or len(
+                    coalition.members
+                ) == 0:  # Always add at least one agent
                     role = (
                         CoalitionRole.LEADER
                         if len(coalition.members) == 0

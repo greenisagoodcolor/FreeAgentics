@@ -312,9 +312,9 @@ class TestRBACAuthorizationMatrix:
         for role in forbidden_roles:
             headers = {"Authorization": f"Bearer {authenticated_tokens[role]}"}
             response = client.post("/api/v1/agents/from-gmn", json=gmn_config, headers=headers)
-            assert response.status_code == 403, (
-                f"Role {role} should NOT be able to create GMN agents"
-            )
+            assert (
+                response.status_code == 403
+            ), f"Role {role} should NOT be able to create GMN agents"
 
     def test_cross_user_resource_access(self, client, test_users):
         """Test that users cannot access resources they don't own."""
@@ -351,9 +351,9 @@ class TestRBACAuthorizationMatrix:
         # User2 should be able to view the agent (current implementation)
         headers2 = {"Authorization": f"Bearer {token2}"}
         response = client.get(f"/api/v1/agents/{agent_id}", headers=headers2)
-        assert response.status_code == 200, (
-            "Users can view each other's agents in current implementation"
-        )
+        assert (
+            response.status_code == 200
+        ), "Users can view each other's agents in current implementation"
 
         # User2 should be able to modify the agent (current implementation)
         response = client.patch(
@@ -361,9 +361,9 @@ class TestRBACAuthorizationMatrix:
             json={"status": "active"},
             headers=headers2,
         )
-        assert response.status_code == 200, (
-            "Users can modify each other's agents in current implementation"
-        )
+        assert (
+            response.status_code == 200
+        ), "Users can modify each other's agents in current implementation"
 
     def test_concurrent_access_authorization(self, client, authenticated_tokens):
         """Test concurrent access scenarios with different roles."""
@@ -541,9 +541,9 @@ class TestRBACAuthorizationMatrix:
                     },
                     headers=headers,
                 )
-                assert response.status_code == 403, (
-                    f"Role {role} should NOT be able to create agents"
-                )
+                assert (
+                    response.status_code == 403
+                ), f"Role {role} should NOT be able to create agents"
 
                 # Create agent as admin for other tests
                 admin_headers = {"Authorization": f"Bearer {authenticated_tokens['admin']}"}
@@ -580,9 +580,9 @@ class TestRBACAuthorizationMatrix:
                     json={"status": "active"},
                     headers=headers,
                 )
-                assert response.status_code == 403, (
-                    f"Role {role} should NOT be able to modify agents"
-                )
+                assert (
+                    response.status_code == 403
+                ), f"Role {role} should NOT be able to modify agents"
 
             # Test view_metrics
             if permissions["view_metrics"]:
@@ -590,9 +590,9 @@ class TestRBACAuthorizationMatrix:
                 assert response.status_code == 200, f"Role {role} should be able to view metrics"
             else:
                 response = client.get(f"/api/v1/agents/{agent_id}/metrics", headers=headers)
-                assert response.status_code == 403, (
-                    f"Role {role} should NOT be able to view metrics"
-                )
+                assert (
+                    response.status_code == 403
+                ), f"Role {role} should NOT be able to view metrics"
 
             # Test delete_agent
             if permissions["delete_agent"]:
@@ -600,9 +600,9 @@ class TestRBACAuthorizationMatrix:
                 assert response.status_code == 200, f"Role {role} should be able to delete agents"
             else:
                 response = client.delete(f"/api/v1/agents/{agent_id}", headers=headers)
-                assert response.status_code == 403, (
-                    f"Role {role} should NOT be able to delete agents"
-                )
+                assert (
+                    response.status_code == 403
+                ), f"Role {role} should NOT be able to delete agents"
 
     def test_permission_validation_edge_cases(self, client, authenticated_tokens):
         """Test edge cases in permission validation."""

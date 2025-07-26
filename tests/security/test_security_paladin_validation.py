@@ -31,9 +31,9 @@ class TestSecurityPaladinValidation:
         private_key_path = Path("auth/keys/jwt_private.pem")
         public_key_path = Path("auth/keys/jwt_public.pem")
 
-        assert not private_key_path.exists(), (
-            "CRITICAL: JWT private key found in repository! Remove immediately and rotate keys."
-        )
+        assert (
+            not private_key_path.exists()
+        ), "CRITICAL: JWT private key found in repository! Remove immediately and rotate keys."
 
         # Public key can exist but private key must not
         if public_key_path.exists():
@@ -47,12 +47,12 @@ class TestSecurityPaladinValidation:
         for filepath in files_to_check:
             if Path(filepath).exists():
                 content = Path(filepath).read_text()
-                assert "verify=False" not in content, (
-                    f"Found verify=False in {filepath} - JWT verification must be enabled!"
-                )
-                assert 'verify_signature": False' not in content, (
-                    f"Found disabled signature verification in {filepath}"
-                )
+                assert (
+                    "verify=False" not in content
+                ), f"Found verify=False in {filepath} - JWT verification must be enabled!"
+                assert (
+                    'verify_signature": False' not in content
+                ), f"Found disabled signature verification in {filepath}"
 
     def test_password_validation_exists(self):
         """Verify password validation is implemented."""
@@ -116,9 +116,9 @@ class TestSecurityPaladinValidation:
         for filepath in critical_files:
             if Path(filepath).exists():
                 content = Path(filepath).read_text()
-                assert "pickle" not in content.lower(), (
-                    f"Found pickle usage in security-critical file: {filepath}"
-                )
+                assert (
+                    "pickle" not in content.lower()
+                ), f"Found pickle usage in security-critical file: {filepath}"
 
     def test_api_endpoints_protected(self):
         """Verify API endpoints have authentication."""
@@ -148,9 +148,9 @@ class TestSecurityPaladinValidation:
                     }
                 )
 
-        assert len(unprotected_endpoints) == 0, (
-            f"Found unprotected endpoints: {unprotected_endpoints}"
-        )
+        assert (
+            len(unprotected_endpoints) == 0
+        ), f"Found unprotected endpoints: {unprotected_endpoints}"
 
     def test_docker_security_best_practices(self):
         """Verify Docker security best practices."""
@@ -160,9 +160,9 @@ class TestSecurityPaladinValidation:
             content = dockerfile_path.read_text()
 
             # Check for non-root user
-            assert "USER" in content and "USER root" not in content, (
-                "Docker container should run as non-root user"
-            )
+            assert (
+                "USER" in content and "USER root" not in content
+            ), "Docker container should run as non-root user"
 
             # Check for minimal base image
             assert "slim" in content or "alpine" in content, "Should use minimal base image"

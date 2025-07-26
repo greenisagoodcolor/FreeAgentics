@@ -559,9 +559,7 @@ class CoverageAnalyzer:
             css_class = (
                 "zero-coverage"
                 if file_stats.coverage_percent == 0
-                else "low-coverage"
-                if file_stats.coverage_percent < 80
-                else "good-coverage"
+                else "low-coverage" if file_stats.coverage_percent < 80 else "good-coverage"
             )
 
             html_content += f"""

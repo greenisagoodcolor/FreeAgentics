@@ -109,14 +109,11 @@ class TestLoginEndpointSecurity:
             response = client.post("/api/v1/login", json=invalid_input)
 
             # Assert
-            assert (
-                response.status_code
-                in [
-                    status.HTTP_422_UNPROCESSABLE_ENTITY,
-                    status.HTTP_400_BAD_REQUEST,
-                    status.HTTP_401_UNAUTHORIZED,  # Empty username/password may pass validation but fail auth
-                ]
-            )
+            assert response.status_code in [
+                status.HTTP_422_UNPROCESSABLE_ENTITY,
+                status.HTTP_400_BAD_REQUEST,
+                status.HTTP_401_UNAUTHORIZED,  # Empty username/password may pass validation but fail auth
+            ]
 
     def test_login_prevents_timing_attacks(self, client, mock_auth_manager):
         """Test constant-time comparison prevents timing attacks."""

@@ -226,11 +226,13 @@ class SSLCertificateManager:
     def _find_certbot(self) -> Optional[str]:
         """Find certbot executable."""
         try:
-            result = subprocess.run(  # nosec B607 B603 # Safe use of which command for certbot detection
-                ["which", "certbot"],
-                capture_output=True,
-                text=True,
-                check=True,
+            result = (
+                subprocess.run(  # nosec B607 B603 # Safe use of which command for certbot detection
+                    ["which", "certbot"],
+                    capture_output=True,
+                    text=True,
+                    check=True,
+                )
             )
             return result.stdout.strip()
         except subprocess.CalledProcessError:
@@ -278,7 +280,9 @@ class SSLCertificateManager:
             logger.info(
                 f"Obtaining Let's Encrypt certificate for domains: {self.config.letsencrypt_domains}"
             )
-            subprocess.run(cmd, capture_output=True, text=True, check=True)  # nosec B603 # Safe certbot command execution
+            subprocess.run(
+                cmd, capture_output=True, text=True, check=True
+            )  # nosec B603 # Safe certbot command execution
             logger.info("Let's Encrypt certificate obtained successfully")
 
             # Copy certificates to configured paths

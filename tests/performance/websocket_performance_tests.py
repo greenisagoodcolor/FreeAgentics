@@ -475,11 +475,7 @@ class WebSocketPerformanceTester:
         latencies = []
 
         async def stability_connection(connection_id):
-            nonlocal \
-                stable_connections, \
-                connection_dropouts, \
-                reconnection_attempts, \
-                successful_reconnections
+            nonlocal stable_connections, connection_dropouts, reconnection_attempts, successful_reconnections
             nonlocal total_messages_sent, total_messages_received
 
             websocket = None

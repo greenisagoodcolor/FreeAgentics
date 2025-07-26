@@ -40,7 +40,9 @@ class MFASettings(Base):
     """Database model for user MFA settings."""
 
     __tablename__ = "mfa_settings"
-    __table_args__ = {'extend_existing': True}  # TODO: ARCHITECTURAL DEBT - Resolve duplicate Base classes (see NEMESIS Committee findings)
+    __table_args__ = {
+        "extend_existing": True
+    }  # TODO: ARCHITECTURAL DEBT - Resolve duplicate Base classes (see NEMESIS Committee findings)
 
     id = Column(Integer, primary_key=True)
     user_id = Column(String(255), unique=True, nullable=False, index=True)

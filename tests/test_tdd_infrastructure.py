@@ -164,9 +164,9 @@ class TestTDDInfrastructure:
             ]
 
             for check in tdd_checks:
-                assert check.lower().replace(" ", "") in content.lower().replace(" ", ""), (
-                    f"CI workflow missing TDD check: {check}"
-                )
+                assert check.lower().replace(" ", "") in content.lower().replace(
+                    " ", ""
+                ), f"CI workflow missing TDD check: {check}"
 
     def test_tdd_isolation_fixtures_work(self):
         """Test that TDD isolation fixtures function correctly."""

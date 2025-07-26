@@ -85,18 +85,20 @@ async def lifespan(app: FastAPI):
     yield
     # Shutdown
     logger.info("Shutting down FreeAgentics API...")
-    
+
     # Stop Prometheus metrics collection
     try:
         from observability.prometheus_metrics import stop_prometheus_metrics_collection
+
         await stop_prometheus_metrics_collection()
         logger.info("📊 Prometheus metrics collection stopped")
     except Exception as e:
         logger.warning(f"⚠️ Failed to stop Prometheus metrics collection: {e}")
-    
+
     # Stop performance tracking
     try:
         from observability.performance_metrics import stop_performance_tracking
+
         await stop_performance_tracking()
         logger.info("✅ Performance tracking stopped")
     except Exception as e:
@@ -114,10 +116,23 @@ app = FastAPI(
 # Configure CORS
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["http://localhost:3000", "http://localhost:3001", "https://freeagentics.com", "https://www.freeagentics.com"],
+    allow_origins=[
+        "http://localhost:3000",
+        "http://localhost:3001",
+        "https://freeagentics.com",
+        "https://www.freeagentics.com",
+    ],
     allow_credentials=True,
     allow_methods=["GET", "POST", "PUT", "DELETE", "OPTIONS", "PATCH"],
-    allow_headers=["accept", "authorization", "content-type", "origin", "x-requested-with", "x-api-key", "x-client-version"],
+    allow_headers=[
+        "accept",
+        "authorization",
+        "content-type",
+        "origin",
+        "x-requested-with",
+        "x-api-key",
+        "x-client-version",
+    ],
     expose_headers=["x-total-count", "x-rate-limit-remaining", "x-rate-limit-reset"],
     max_age=86400,
 )

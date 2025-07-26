@@ -517,11 +517,7 @@ class ComprehensivePenetrationTestRunner:
                 "level": (
                     "CRITICAL"
                     if critical > 2
-                    else "HIGH"
-                    if critical > 0
-                    else "MEDIUM"
-                    if high > 3
-                    else "LOW"
+                    else "HIGH" if critical > 0 else "MEDIUM" if high > 3 else "LOW"
                 ),
                 "description": "Risk of complete system compromise",
             },

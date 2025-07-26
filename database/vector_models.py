@@ -30,7 +30,9 @@ class VectorEmbedding(Base):
     """Base model for storing vector embeddings with metadata."""
 
     __tablename__ = "vector_embeddings"
-    __table_args__ = {'extend_existing': True}  # TODO: ARCHITECTURAL DEBT - Resolve duplicate Base classes (see NEMESIS Committee findings)
+    __table_args__ = {
+        "extend_existing": True
+    }  # TODO: ARCHITECTURAL DEBT - Resolve duplicate Base classes (see NEMESIS Committee findings)
 
     id = Column(UUID(as_uuid=True), primary_key=True, default=uuid4)
 
@@ -62,7 +64,9 @@ class AgentMemory(Base):
     """Vector-enhanced agent memory storage."""
 
     __tablename__ = "agent_memories"
-    __table_args__ = {'extend_existing': True}  # TODO: ARCHITECTURAL DEBT - Resolve duplicate Base classes (see NEMESIS Committee findings)
+    __table_args__ = {
+        "extend_existing": True
+    }  # TODO: ARCHITECTURAL DEBT - Resolve duplicate Base classes (see NEMESIS Committee findings)
 
     id = Column(UUID(as_uuid=True), primary_key=True, default=uuid4)
     agent_id = Column(String(100), nullable=False, index=True)
@@ -99,7 +103,9 @@ class KnowledgeVector(Base):
     """Vector storage for knowledge graph entities."""
 
     __tablename__ = "knowledge_vectors"
-    __table_args__ = {'extend_existing': True}  # TODO: ARCHITECTURAL DEBT - Resolve duplicate Base classes (see NEMESIS Committee findings)
+    __table_args__ = {
+        "extend_existing": True
+    }  # TODO: ARCHITECTURAL DEBT - Resolve duplicate Base classes (see NEMESIS Committee findings)
 
     id = Column(UUID(as_uuid=True), primary_key=True, default=uuid4)
 
@@ -128,7 +134,9 @@ class SemanticCluster(Base):
     """Clusters of semantically similar vectors."""
 
     __tablename__ = "semantic_clusters"
-    __table_args__ = {'extend_existing': True}  # TODO: ARCHITECTURAL DEBT - Resolve duplicate Base classes (see NEMESIS Committee findings)
+    __table_args__ = {
+        "extend_existing": True
+    }  # TODO: ARCHITECTURAL DEBT - Resolve duplicate Base classes (see NEMESIS Committee findings)
 
     id = Column(UUID(as_uuid=True), primary_key=True, default=uuid4)
 
@@ -160,7 +168,9 @@ class VectorSearchIndex(Base):
     """Optimized indexes for vector similarity search."""
 
     __tablename__ = "vector_search_indexes"
-    __table_args__ = {'extend_existing': True}  # TODO: ARCHITECTURAL DEBT - Resolve duplicate Base classes (see NEMESIS Committee findings)
+    __table_args__ = {
+        "extend_existing": True
+    }  # TODO: ARCHITECTURAL DEBT - Resolve duplicate Base classes (see NEMESIS Committee findings)
 
     id = Column(UUID(as_uuid=True), primary_key=True, default=uuid4)
 

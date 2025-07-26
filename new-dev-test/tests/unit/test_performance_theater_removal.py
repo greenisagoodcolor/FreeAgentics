@@ -319,4 +319,6 @@ class TestRealityCheckpoint:
                                 if matches:
                                     # Allow specific exceptions for legitimate use cases
                                     if "retry" not in file_path.lower():
-                                        assert False, f"Found graceful degradation pattern '{pattern}' in {file_path}: {matches}"
+                                        assert (
+                                            False
+                                        ), f"Found graceful degradation pattern '{pattern}' in {file_path}: {matches}"

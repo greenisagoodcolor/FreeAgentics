@@ -128,9 +128,9 @@ def test_multiple_agents_coordination():
         if agent_id in world.agents:
             grid_agent = world.agents[agent_id]
             pos = (grid_agent.position.x, grid_agent.position.y)
-            assert pos not in positions, (
-                f"Agents should have unique positions, but {agent_id} has duplicate position {pos}"
-            )
+            assert (
+                pos not in positions
+            ), f"Agents should have unique positions, but {agent_id} has duplicate position {pos}"
             positions.add(pos)
 
     # Clean up

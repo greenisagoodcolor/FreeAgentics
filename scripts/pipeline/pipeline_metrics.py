@@ -446,9 +446,7 @@ class PipelineMetrics:
             status_emoji = (
                 "✅"
                 if pipeline["status"] == "success"
-                else "❌"
-                if pipeline["status"] == "failure"
-                else "⏭️"
+                else "❌" if pipeline["status"] == "failure" else "⏭️"
             )
             duration = f"{pipeline['duration_minutes']}m" if pipeline["duration_minutes"] else "N/A"
             markdown += f"| {pipeline['pipeline_id'][:12]}... | {pipeline['branch']} | {status_emoji} {pipeline['status']} | {duration} |\n"

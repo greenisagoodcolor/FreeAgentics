@@ -1166,9 +1166,7 @@ class AdvancedLogAnalytics:
                 "status": (
                     "healthy"
                     if health_score > 80
-                    else "degraded"
-                    if health_score > 50
-                    else "critical"
+                    else "degraded" if health_score > 50 else "critical"
                 ),
             }
 

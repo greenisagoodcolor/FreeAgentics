@@ -224,9 +224,7 @@ class EnhancedMetricsExporter:
             perf_health = (
                 1.0
                 if perf_snapshot.active_agents < 40
-                else 0.5
-                if perf_snapshot.active_agents < 50
-                else 0.0
+                else 0.5 if perf_snapshot.active_agents < 50 else 0.0
             )
             self.system_health_indicators.labels(indicator_type="performance_health").set(
                 perf_health

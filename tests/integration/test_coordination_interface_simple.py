@@ -174,9 +174,9 @@ class TestCoordinationInterfaceSimple:
             }
 
             # Basic assertions
-            assert validation["overall_valid"], (
-                f"Invalid action spec for {strategy_name}: {validation}"
-            )
+            assert validation[
+                "overall_valid"
+            ], f"Invalid action spec for {strategy_name}: {validation}"
             assert action_spec["strategy"] == strategy_name
             assert action_spec["parameters"]["agent_id"] == agent_context["agent_id"]
 
@@ -219,12 +219,12 @@ class TestCoordinationInterfaceSimple:
             }
 
             # Performance requirements
-            assert performance_results[strategy_name]["avg_process_time"] < 0.001, (
-                f"Processing too slow for {strategy_name}: {performance_results[strategy_name]['avg_process_time']:.6f}s"
-            )
-            assert performance_results[strategy_name]["avg_validation_time"] < 0.001, (
-                f"Validation too slow for {strategy_name}: {performance_results[strategy_name]['avg_validation_time']:.6f}s"
-            )
+            assert (
+                performance_results[strategy_name]["avg_process_time"] < 0.001
+            ), f"Processing too slow for {strategy_name}: {performance_results[strategy_name]['avg_process_time']:.6f}s"
+            assert (
+                performance_results[strategy_name]["avg_validation_time"] < 0.001
+            ), f"Validation too slow for {strategy_name}: {performance_results[strategy_name]['avg_validation_time']:.6f}s"
 
             logger.info(f"✓ {strategy_name} performance requirements met")
             logger.info(

@@ -719,9 +719,9 @@ class TestPerformanceImpact:
         memory_increase = attack_memory - baseline_memory
 
         # Memory increase should be reasonable
-        assert memory_increase < 100, (
-            f"Memory increase during attack should be <100MB, got {memory_increase}MB"
-        )
+        assert (
+            memory_increase < 100
+        ), f"Memory increase during attack should be <100MB, got {memory_increase}MB"
 
     @pytest.mark.asyncio
     async def test_response_time_degradation(self, client, redis_client):

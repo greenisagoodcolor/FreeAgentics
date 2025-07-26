@@ -54,12 +54,12 @@ class TestMultiAgentPerformance:
         results = benchmark_inference(agent, num_steps=50)
 
         # Validate performance targets
-        assert results["ms_per_step"] < 40, (
-            f"Single agent too slow: {results['ms_per_step']:.1f}ms > 40ms target"
-        )
-        assert results["steps_per_second"] > 25, (
-            f"Single agent throughput too low: {results['steps_per_second']:.1f} < 25 steps/sec"
-        )
+        assert (
+            results["ms_per_step"] < 40
+        ), f"Single agent too slow: {results['ms_per_step']:.1f}ms > 40ms target"
+        assert (
+            results["steps_per_second"] > 25
+        ), f"Single agent throughput too low: {results['steps_per_second']:.1f} < 25 steps/sec"
 
         print(f"✅ Single agent performance: {results['ms_per_step']:.1f}ms per step")
 
@@ -81,9 +81,9 @@ class TestMultiAgentPerformance:
         agents_per_second = 10 / total_time
 
         assert time_per_agent < 100, f"Average time per agent too high: {time_per_agent:.1f}ms"
-        assert agents_per_second > 10, (
-            f"Agent throughput too low: {agents_per_second:.1f} agents/sec"
-        )
+        assert (
+            agents_per_second > 10
+        ), f"Agent throughput too low: {agents_per_second:.1f} agents/sec"
 
         print(f"✅ 10 agents: {time_per_agent:.1f}ms per agent, {agents_per_second:.1f} agents/sec")
 
@@ -110,9 +110,9 @@ class TestMultiAgentPerformance:
 
         # Relaxed constraints for larger scale
         assert time_per_agent < 200, f"Average time per agent too high: {time_per_agent:.1f}ms"
-        assert agents_per_second > 10, (
-            f"Agent throughput too low: {agents_per_second:.1f} agents/sec"
-        )
+        assert (
+            agents_per_second > 10
+        ), f"Agent throughput too low: {agents_per_second:.1f} agents/sec"
 
         print(f"✅ 50 agents: {time_per_agent:.1f}ms per agent, {agents_per_second:.1f} agents/sec")
 
@@ -159,13 +159,13 @@ class TestMultiAgentPerformance:
 
         # Realistic production validation
         assert time_per_agent < 800, f"Average time per agent too high: {time_per_agent:.1f}ms"
-        assert agents_per_second > 5, (
-            f"Agent throughput too low: {agents_per_second:.1f} agents/sec"
-        )
+        assert (
+            agents_per_second > 5
+        ), f"Agent throughput too low: {agents_per_second:.1f} agents/sec"
         assert memory_per_agent < 50, f"Memory per agent too high: {memory_per_agent:.1f}MB"
-        assert actual_efficiency >= expected_efficiency, (
-            f"Efficiency {actual_efficiency:.2f} below expected {expected_efficiency:.2f}"
-        )
+        assert (
+            actual_efficiency >= expected_efficiency
+        ), f"Efficiency {actual_efficiency:.2f} below expected {expected_efficiency:.2f}"
 
         print(
             f"✅ {agent_count} agents: {time_per_agent:.1f}ms per agent, {agents_per_second:.1f} agents/sec"

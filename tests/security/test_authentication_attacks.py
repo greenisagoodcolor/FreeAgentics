@@ -187,9 +187,9 @@ class TestAuthenticationAttacks:
                 failed_attempts += 1
 
         # All attempts should fail
-        assert failed_attempts == len(leaked_credentials), (
-            "Credential stuffing partially successful"
-        )
+        assert failed_attempts == len(
+            leaked_credentials
+        ), "Credential stuffing partially successful"
 
     def test_password_spraying_attack(self, auth_manager):
         """Test password spraying attack detection."""
@@ -222,9 +222,9 @@ class TestAuthenticationAttacks:
                 if result is not None:
                     successful_attempts += 1
 
-        assert successful_attempts == 0, (
-            f"Password spraying successful: {successful_attempts} accounts compromised"
-        )
+        assert (
+            successful_attempts == 0
+        ), f"Password spraying successful: {successful_attempts} accounts compromised"
 
     def test_session_fixation_attack(self, auth_manager):
         """Test session fixation vulnerability."""
@@ -244,9 +244,9 @@ class TestAuthenticationAttacks:
         new_session = auth_manager.create_session("session_test")
 
         # Sessions should be different (regenerated after auth)
-        assert initial_session != new_session, (
-            "Session fixation vulnerability: session not regenerated"
-        )
+        assert (
+            initial_session != new_session
+        ), "Session fixation vulnerability: session not regenerated"
 
     def test_session_hijacking_prevention(self, auth_manager):
         """Test session hijacking prevention mechanisms."""
@@ -453,9 +453,9 @@ class TestAuthenticationAttacks:
 
                 # Test expired token (would need to mock time)
                 with patch("time.time", return_value=time.time() + 3700):  # 1 hour + later
-                    assert auth_manager.validate_reset_token(reset_token) is False, (
-                        "Reset token doesn't expire"
-                    )
+                    assert (
+                        auth_manager.validate_reset_token(reset_token) is False
+                    ), "Reset token doesn't expire"
 
     def test_concurrent_authentication_race_condition(self, auth_manager):
         """Test race conditions in concurrent authentication."""

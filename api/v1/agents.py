@@ -405,9 +405,9 @@ async def create_agent_from_gmn(
             id=str(db_agent.id),
             name=db_agent.name,
             template=db_agent.template,
-            status=db_agent.status.value
-            if hasattr(db_agent.status, "value")
-            else str(db_agent.status),
+            status=(
+                db_agent.status.value if hasattr(db_agent.status, "value") else str(db_agent.status)
+            ),
             created_at=db_agent.created_at,
             parameters=db_agent.parameters or {},
             inference_count=db_agent.inference_count,

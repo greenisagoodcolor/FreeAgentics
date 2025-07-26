@@ -423,12 +423,12 @@ class TestGNNLLMInterfaceIntegration:
             embeddings, text_description
         )
 
-        assert text_description is not None and len(text_description) > 0, (
-            "Text transformation failed"
-        )
-        assert validation_results["overall_quality"] > 0.7, (
-            f"Transformation quality too low: {validation_results}"
-        )
+        assert (
+            text_description is not None and len(text_description) > 0
+        ), "Text transformation failed"
+        assert (
+            validation_results["overall_quality"] > 0.7
+        ), f"Transformation quality too low: {validation_results}"
 
         # Validate specific content preservation
         assert str(len(embeddings)) in text_description, "Node count not preserved in text"
@@ -470,9 +470,9 @@ class TestGNNLLMInterfaceIntegration:
             reasoning_results[reasoning_type] = result
 
             if result["success"]:
-                assert result["reasoning_quality"] > 0.5, (
-                    f"Low quality reasoning for {reasoning_type}: {result['reasoning_quality']}"
-                )
+                assert (
+                    result["reasoning_quality"] > 0.5
+                ), f"Low quality reasoning for {reasoning_type}: {result['reasoning_quality']}"
                 logger.info(
                     f"✓ LLM {reasoning_type} reasoning successful (quality: {result['reasoning_quality']:.3f})"
                 )
@@ -544,9 +544,9 @@ class TestGNNLLMInterfaceIntegration:
 
                 semantic_preservation_score = sum(semantic_checks.values()) / len(semantic_checks)
 
-                assert semantic_preservation_score > 0.6, (
-                    f"Poor semantic preservation: {semantic_preservation_score}"
-                )
+                assert (
+                    semantic_preservation_score > 0.6
+                ), f"Poor semantic preservation: {semantic_preservation_score}"
 
                 logger.info("✓ Round-trip semantic preservation successful")
                 logger.info(f"  Semantic preservation score: {semantic_preservation_score:.3f}")
@@ -566,9 +566,9 @@ class TestGNNLLMInterfaceIntegration:
         validation_results = transformer.validate_transformation_quality(
             embeddings, text_description
         )
-        assert validation_results["overall_quality"] > 0.7, (
-            "Text transformation quality insufficient"
-        )
+        assert (
+            validation_results["overall_quality"] > 0.7
+        ), "Text transformation quality insufficient"
 
         return {
             "embeddings": embeddings,

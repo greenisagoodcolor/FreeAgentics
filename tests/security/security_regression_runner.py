@@ -686,9 +686,9 @@ class SecurityRegressionRunner:
 
                 compliance["OWASP_Top_10"]["score"] = (passed_checks / max(total_checks, 1)) * 100
                 compliance["OWASP_Top_10"]["status"] = "PASSED" if passed_checks >= 9 else "FAILED"
-                compliance["OWASP_Top_10"]["details"] = (
-                    f"Passed {passed_checks}/{total_checks} checks"
-                )
+                compliance["OWASP_Top_10"][
+                    "details"
+                ] = f"Passed {passed_checks}/{total_checks} checks"
 
         return compliance
 

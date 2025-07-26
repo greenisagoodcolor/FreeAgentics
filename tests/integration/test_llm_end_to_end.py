@@ -21,6 +21,7 @@ from inference.active.gmn_parser import EXAMPLE_GMN_SPEC, GMNParser
 # Import PyMDP
 try:
     import pymdp
+
     PYMDP_AVAILABLE = True
 except ImportError:
     PYMDP_AVAILABLE = False
@@ -93,9 +94,9 @@ class TestLLMEndToEndIntegration:
                 # Mock chat completion
                 mock_response = Mock()
                 mock_response.choices = [Mock()]
-                mock_response.choices[
-                    0
-                ].message.content = "Hello! This is a test response from OpenAI."
+                mock_response.choices[0].message.content = (
+                    "Hello! This is a test response from OpenAI."
+                )
                 mock_response.choices[0].finish_reason = "stop"
                 mock_response.model = "gpt-3.5-turbo"
                 mock_response.usage.prompt_tokens = 10

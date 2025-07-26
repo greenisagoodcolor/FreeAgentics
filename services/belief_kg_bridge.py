@@ -145,12 +145,16 @@ class BeliefKGBridge:
         try:
             # Extract beliefs (qs) from agent
             factor_beliefs = None
-            
+
             if hasattr(agent, "qs") and isinstance(agent.qs, list) and len(agent.qs) > 0:
                 factor_beliefs = agent.qs
-            elif hasattr(agent, "beliefs") and isinstance(agent.beliefs, list) and len(agent.beliefs) > 0:
+            elif (
+                hasattr(agent, "beliefs")
+                and isinstance(agent.beliefs, list)
+                and len(agent.beliefs) > 0
+            ):
                 factor_beliefs = agent.beliefs
-            
+
             # Use fallback if no valid beliefs found
             if factor_beliefs is None or len(factor_beliefs) == 0:
                 # Fallback for mock or minimal agent

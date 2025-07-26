@@ -86,17 +86,17 @@ class TestRoleBasedAuthorizationBoundaries:
             token_data = auth_manager.verify_token(user_data["token"])
 
             # Check that user has all expected permissions
-            assert set(token_data.permissions) == set(permissions), (
-                f"Role {role} has incorrect permissions"
-            )
+            assert set(token_data.permissions) == set(
+                permissions
+            ), f"Role {role} has incorrect permissions"
 
             # Verify no extra permissions
             all_permissions = set(Permission)
             unauthorized_permissions = all_permissions - set(permissions)
             for perm in unauthorized_permissions:
-                assert perm not in token_data.permissions, (
-                    f"Role {role} should not have permission {perm}"
-                )
+                assert (
+                    perm not in token_data.permissions
+                ), f"Role {role} should not have permission {perm}"
 
     def test_role_hierarchy_enforcement(self, client, test_users):
         """Test that role hierarchy is properly enforced."""
@@ -130,14 +130,14 @@ class TestRoleBasedAuthorizationBoundaries:
 
                 if user_level >= required_level:
                     # Should have access (or get 404/422 for missing data, not 403)
-                    assert response.status_code != status.HTTP_403_FORBIDDEN, (
-                        f"Role {role} should have access to {endpoint}"
-                    )
+                    assert (
+                        response.status_code != status.HTTP_403_FORBIDDEN
+                    ), f"Role {role} should have access to {endpoint}"
                 else:
                     # Should be forbidden
-                    assert response.status_code == status.HTTP_403_FORBIDDEN, (
-                        f"Role {role} should not have access to {endpoint}"
-                    )
+                    assert (
+                        response.status_code == status.HTTP_403_FORBIDDEN
+                    ), f"Role {role} should not have access to {endpoint}"
 
     def test_permission_inheritance(self, test_users):
         """Test that permission inheritance works correctly."""
@@ -154,15 +154,15 @@ class TestRoleBasedAuthorizationBoundaries:
         observer_perms = set(ROLE_PERMISSIONS[UserRole.OBSERVER])
 
         # Observer permissions should be subset of all higher roles
-        assert observer_perms.issubset(agent_manager_perms), (
-            "Observer permissions should be subset of Agent Manager"
-        )
-        assert observer_perms.issubset(researcher_perms), (
-            "Observer permissions should be subset of Researcher"
-        )
-        assert observer_perms.issubset(admin_perms), (
-            "Observer permissions should be subset of Admin"
-        )
+        assert observer_perms.issubset(
+            agent_manager_perms
+        ), "Observer permissions should be subset of Agent Manager"
+        assert observer_perms.issubset(
+            researcher_perms
+        ), "Observer permissions should be subset of Researcher"
+        assert observer_perms.issubset(
+            admin_perms
+        ), "Observer permissions should be subset of Admin"
 
     def test_cross_role_access_attempts(self, client, test_users):
         """Test attempts to access resources across role boundaries."""
@@ -244,9 +244,9 @@ class TestRoleBasedAuthorizationBoundaries:
             t.join()
 
         # All attempts should fail with 403
-        assert all(code == status.HTTP_403_FORBIDDEN for code in elevation_attempts), (
-            "Race condition allowed privilege elevation"
-        )
+        assert all(
+            code == status.HTTP_403_FORBIDDEN for code in elevation_attempts
+        ), "Race condition allowed privilege elevation"
 
 
 class TestResourceLevelAuthorization:
@@ -327,9 +327,9 @@ class TestResourceLevelAuthorization:
 
             # Should be forbidden unless admin
             if user2["user"].role != UserRole.ADMIN:
-                assert response.status_code == status.HTTP_403_FORBIDDEN, (
-                    "Non-owner should not be able to modify resource"
-                )
+                assert (
+                    response.status_code == status.HTTP_403_FORBIDDEN
+                ), "Non-owner should not be able to modify resource"
 
     def test_resource_access_controls(self, test_resources):
         """Test fine-grained resource access controls."""
@@ -410,9 +410,9 @@ class TestResourceLevelAuthorization:
         )
 
         # Should be denied due to department/tenant isolation
-        assert not granted or tenant1_context.department != tenant2_context.department, (
-            "Cross-tenant access should be isolated"
-        )
+        assert (
+            not granted or tenant1_context.department != tenant2_context.department
+        ), "Cross-tenant access should be isolated"
 
     def test_resource_hierarchy_permissions(self, test_resources):
         """Test permissions across resource hierarchies."""
@@ -456,9 +456,9 @@ class TestResourceLevelAuthorization:
         )
 
         # Access patterns should be consistent within hierarchy
-        assert parent_granted == child_granted or user_context.role == UserRole.ADMIN, (
-            "Hierarchical permissions should be consistent"
-        )
+        assert (
+            parent_granted == child_granted or user_context.role == UserRole.ADMIN
+        ), "Hierarchical permissions should be consistent"
 
     def test_resource_specific_policies(self):
         """Test resource-specific access policies."""
@@ -612,14 +612,14 @@ class TestAPIEndpointAuthorization:
 
                     if has_permission:
                         # Should not get 403 (might get other errors)
-                        assert response.status_code != status.HTTP_403_FORBIDDEN, (
-                            f"{role} should have access to {method} {endpoint}"
-                        )
+                        assert (
+                            response.status_code != status.HTTP_403_FORBIDDEN
+                        ), f"{role} should have access to {method} {endpoint}"
                     else:
                         # Should get 403
-                        assert response.status_code == status.HTTP_403_FORBIDDEN, (
-                            f"{role} should not have access to {method} {endpoint}"
-                        )
+                        assert (
+                            response.status_code == status.HTTP_403_FORBIDDEN
+                        ), f"{role} should not have access to {method} {endpoint}"
 
     def test_http_method_based_access(self, client, test_users):
         """Test that different HTTP methods have appropriate access controls."""
@@ -1127,9 +1127,9 @@ class TestAuthorizationAttackVectors:
 
         for endpoint in admin_endpoints:
             response = client.get(endpoint, headers=headers)
-            assert response.status_code == status.HTTP_403_FORBIDDEN, (
-                f"Attacker should not access {endpoint}"
-            )
+            assert (
+                response.status_code == status.HTTP_403_FORBIDDEN
+            ), f"Attacker should not access {endpoint}"
 
         # Attempt 2: Exploit role checking logic
         # Try to confuse the system with role-like values
@@ -1147,9 +1147,9 @@ class TestAuthorizationAttackVectors:
                 headers=headers,
                 json={"name": "ExploitAgent", "template": "basic", **payload},
             )
-            assert response.status_code == status.HTTP_403_FORBIDDEN, (
-                f"Role exploitation attempt should fail: {payload}"
-            )
+            assert (
+                response.status_code == status.HTTP_403_FORBIDDEN
+            ), f"Role exploitation attempt should fail: {payload}"
 
         # Attempt 3: Chain multiple vulnerabilities
         # First, try to create a coalition (shouldn't work)

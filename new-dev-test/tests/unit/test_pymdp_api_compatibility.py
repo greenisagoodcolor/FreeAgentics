@@ -174,7 +174,9 @@ class TestPyMDPAPICompatibility:
 
         for test_input, expected in test_cases:
             result = adapter.safe_array_conversion(test_input, int)
-            assert type(result) is int, f"Failed for input {test_input} (type: {type(test_input)})"  # noqa: E721
+            assert (
+                type(result) is int
+            ), f"Failed for input {test_input} (type: {type(test_input)})"  # noqa: E721
             assert result == expected, f"Expected {expected}, got {result} for input {test_input}"
 
     def test_real_pymdp_agent_return_types_documentation(self):

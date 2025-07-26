@@ -57,7 +57,9 @@ class Conversation(Base):
         Index("idx_conversations_user_id", "user_id"),
         Index("idx_conversations_status", "status"),
         Index("idx_conversations_created_at", "created_at"),
-        {'extend_existing': True},  # TODO: ARCHITECTURAL DEBT - CRITICAL: Duplicate conversations table with conversation_models.py (see NEMESIS Committee findings)
+        {
+            "extend_existing": True
+        },  # TODO: ARCHITECTURAL DEBT - CRITICAL: Duplicate conversations table with conversation_models.py (see NEMESIS Committee findings)
     )
 
     # Primary key
@@ -96,7 +98,9 @@ class Prompt(Base):
         Index("idx_prompts_agent_id", "agent_id"),
         Index("idx_prompts_status", "status"),
         Index("idx_prompts_created_at", "created_at"),
-        {'extend_existing': True},  # TODO: ARCHITECTURAL DEBT - Prevent table redefinition conflicts (see NEMESIS Committee findings)
+        {
+            "extend_existing": True
+        },  # TODO: ARCHITECTURAL DEBT - Prevent table redefinition conflicts (see NEMESIS Committee findings)
     )
 
     # Primary key
@@ -149,7 +153,9 @@ class KnowledgeGraphUpdate(Base):
         Index("idx_kg_updates_prompt_id", "prompt_id"),
         Index("idx_kg_updates_node_type", "node_type"),
         Index("idx_kg_updates_created_at", "created_at"),
-        {'extend_existing': True},  # TODO: ARCHITECTURAL DEBT - Prevent table redefinition conflicts (see NEMESIS Committee findings)
+        {
+            "extend_existing": True
+        },  # TODO: ARCHITECTURAL DEBT - Prevent table redefinition conflicts (see NEMESIS Committee findings)
     )
 
     # Primary key
@@ -183,7 +189,9 @@ class PromptTemplate(Base):
         UniqueConstraint("name", name="uq_prompt_templates_name"),
         Index("idx_prompt_templates_category", "category"),
         Index("idx_prompt_templates_is_active", "is_active"),
-        {'extend_existing': True},  # TODO: ARCHITECTURAL DEBT - Prevent table redefinition conflicts (see NEMESIS Committee findings)
+        {
+            "extend_existing": True
+        },  # TODO: ARCHITECTURAL DEBT - Prevent table redefinition conflicts (see NEMESIS Committee findings)
     )
 
     # Primary key

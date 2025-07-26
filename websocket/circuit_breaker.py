@@ -342,8 +342,8 @@ circuit_breaker_registry = CircuitBreakerRegistry()
 # Export for database module
 __all__ = [
     "CircuitBreaker",
-    "CircuitBreakerConfig", 
+    "CircuitBreakerConfig",
     "CircuitOpenException",
     "CircuitState",
-    "circuit_breaker_registry"
+    "circuit_breaker_registry",
 ]

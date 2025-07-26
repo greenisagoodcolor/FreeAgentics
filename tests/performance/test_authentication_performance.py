@@ -413,9 +413,9 @@ class TestAuthenticationPerformance:
             # Performance assertions
             success_rate = successful_logins / len(results)
             assert success_rate >= 0.95, f"Success rate too low: {success_rate:.2f}"
-            assert avg_response_time < 1.0, (
-                f"Average response time too slow: {avg_response_time:.3f}s"
-            )
+            assert (
+                avg_response_time < 1.0
+            ), f"Average response time too slow: {avg_response_time:.3f}s"
 
         self.monitor.stop_monitoring()
 
@@ -539,9 +539,9 @@ class TestAuthenticationPerformance:
 
         # Should have rate limiting active
         assert rate_limited_requests > 0, "Rate limiting should be active"
-        assert rate_limited_requests <= 10, (
-            "Rate limiting should not block all requests immediately"
-        )
+        assert (
+            rate_limited_requests <= 10
+        ), "Rate limiting should not block all requests immediately"
 
     def test_memory_usage_under_load(self):
         """Test memory usage under authentication load."""
@@ -642,9 +642,9 @@ class TestAuthenticationPerformance:
         print(f"  Operations per second: {200 / sum(connection_times):.1f}")
 
         # Performance assertions
-        assert avg_connection_time < 0.01, (
-            f"Database operations too slow: {avg_connection_time:.6f}s"
-        )
+        assert (
+            avg_connection_time < 0.01
+        ), f"Database operations too slow: {avg_connection_time:.6f}s"
 
     def test_stress_test_authentication_system(self):
         """Comprehensive stress test of the authentication system."""
@@ -844,18 +844,18 @@ class TestAuthenticationPerformance:
             print(f"  Peak: {report['memory_usage']['max']:.1f} MB")
 
         # Performance assertions
-        assert report["summary"]["success_rate"] >= 90, (
-            f"Overall success rate too low: {report['summary']['success_rate']:.1f}%"
-        )
-        assert report["response_times"]["avg"] < 1.0, (
-            f"Average response time too slow: {report['response_times']['avg']:.3f}s"
-        )
-        assert report["token_generation"]["avg"] < 0.01, (
-            f"Token generation too slow: {report['token_generation']['avg']:.6f}s"
-        )
-        assert report["token_validation"]["avg"] < 0.01, (
-            f"Token validation too slow: {report['token_validation']['avg']:.6f}s"
-        )
+        assert (
+            report["summary"]["success_rate"] >= 90
+        ), f"Overall success rate too low: {report['summary']['success_rate']:.1f}%"
+        assert (
+            report["response_times"]["avg"] < 1.0
+        ), f"Average response time too slow: {report['response_times']['avg']:.3f}s"
+        assert (
+            report["token_generation"]["avg"] < 0.01
+        ), f"Token generation too slow: {report['token_generation']['avg']:.6f}s"
+        assert (
+            report["token_validation"]["avg"] < 0.01
+        ), f"Token validation too slow: {report['token_validation']['avg']:.6f}s"
 
         print("\\nPERFORMANCE TESTING COMPLETED SUCCESSFULLY!")
         return report

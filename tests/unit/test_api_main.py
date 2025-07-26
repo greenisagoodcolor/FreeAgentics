@@ -44,7 +44,9 @@ with patch.dict(
 ):
     # Mock the middleware classes in the API middleware module
     with patch("api.middleware.ddos_protection.DDoSProtectionMiddleware", MockMiddleware):
-        with patch("api.middleware.security_monitoring.SecurityMonitoringMiddleware", MockMiddleware):
+        with patch(
+            "api.middleware.security_monitoring.SecurityMonitoringMiddleware", MockMiddleware
+        ):
             with patch(
                 "auth.security_headers.SecurityHeadersMiddleware",
                 MockMiddleware,
@@ -80,10 +82,21 @@ with patch.dict(
                                                     "api.v1.graphql_schema.graphql_app",
                                                     mock_router.router,
                                                 ):
-                                                    with patch("api.v1.health.router", mock_router.router):
-                                                        with patch("api.v1.health_extended.router", mock_router.router):
-                                                            with patch("api.v1.mfa.router", mock_router.router):
-                                                                with patch("api.v1.prompts.router", mock_router.router):
+                                                    with patch(
+                                                        "api.v1.health.router", mock_router.router
+                                                    ):
+                                                        with patch(
+                                                            "api.v1.health_extended.router",
+                                                            mock_router.router,
+                                                        ):
+                                                            with patch(
+                                                                "api.v1.mfa.router",
+                                                                mock_router.router,
+                                                            ):
+                                                                with patch(
+                                                                    "api.v1.prompts.router",
+                                                                    mock_router.router,
+                                                                ):
                                                                     from api.main import app
 
 
@@ -148,20 +161,24 @@ class TestLifespan:
         """Test successful startup sequence."""
         # Import lifespan directly to avoid module-level mocking issues
         from api.main import lifespan as test_lifespan
-        
+
         with patch("api.main.logger") as mock_logger:
             # Patch at the module level where they're used within lifespan
-            with patch("api.main.start_prometheus_metrics_collection", new_callable=AsyncMock) as mock_prometheus:
-                with patch("api.main.start_performance_tracking", new_callable=AsyncMock) as mock_perf:
+            with patch(
+                "api.main.start_prometheus_metrics_collection", new_callable=AsyncMock
+            ) as mock_prometheus:
+                with patch(
+                    "api.main.start_performance_tracking", new_callable=AsyncMock
+                ) as mock_perf:
                     # Mock database initialization
                     with patch("database.session.init_db"):
                         async with test_lifespan(mock_app):
                             pass
-                        
+
                         # After context exits, verify services were started
                         mock_prometheus.assert_called_once()
                         mock_perf.assert_called_once()
-                        
+
                         # Verify startup was logged
                         assert mock_logger.info.called
 
@@ -169,16 +186,20 @@ class TestLifespan:
     async def test_lifespan_startup_prometheus_failure(self, mock_app):
         """Test startup with Prometheus failure."""
         from api.main import lifespan as test_lifespan
-        
+
         with patch("api.main.logger") as mock_logger:
-            with patch("api.main.start_prometheus_metrics_collection", new_callable=AsyncMock) as mock_prometheus:
-                with patch("api.main.start_performance_tracking", new_callable=AsyncMock) as mock_perf:
+            with patch(
+                "api.main.start_prometheus_metrics_collection", new_callable=AsyncMock
+            ) as mock_prometheus:
+                with patch(
+                    "api.main.start_performance_tracking", new_callable=AsyncMock
+                ) as mock_perf:
                     mock_prometheus.side_effect = Exception("Prometheus connection failed")
-                    
+
                     with patch("database.session.init_db"):
                         async with test_lifespan(mock_app):
                             pass
-                        
+
                         # Verify performance tracking still starts
                         mock_perf.assert_called_once()
                         # Verify error was logged
@@ -188,19 +209,23 @@ class TestLifespan:
     async def test_lifespan_startup_performance_failure(self, mock_app):
         """Test startup with performance tracking failure."""
         from api.main import lifespan as test_lifespan
-        
+
         with patch("api.main.logger") as mock_logger:
-            with patch("api.main.start_prometheus_metrics_collection", new_callable=AsyncMock) as mock_prometheus:
-                with patch("api.main.start_performance_tracking", new_callable=AsyncMock) as mock_perf:
+            with patch(
+                "api.main.start_prometheus_metrics_collection", new_callable=AsyncMock
+            ) as mock_prometheus:
+                with patch(
+                    "api.main.start_performance_tracking", new_callable=AsyncMock
+                ) as mock_perf:
                     mock_perf.side_effect = Exception("Performance tracking failed")
 
                     with patch("database.session.init_db"):
                         async with test_lifespan(mock_app):
                             pass
-                        
+
                         # Verify Prometheus still starts
                         mock_prometheus.assert_called_once()
-                        
+
                         # Verify error was logged for performance tracking
                         assert mock_logger.error.called
 
@@ -208,15 +233,20 @@ class TestLifespan:
     async def test_lifespan_both_services_fail(self, mock_app):
         """Test lifespan with both services failing."""
         with patch("api.main.logger") as mock_logger:
-            with patch("api.main.start_prometheus_metrics_collection", new_callable=AsyncMock) as mock_prometheus:
-                with patch("api.main.start_performance_tracking", new_callable=AsyncMock) as mock_perf:
+            with patch(
+                "api.main.start_prometheus_metrics_collection", new_callable=AsyncMock
+            ) as mock_prometheus:
+                with patch(
+                    "api.main.start_performance_tracking", new_callable=AsyncMock
+                ) as mock_perf:
                     mock_prometheus.side_effect = Exception("Prometheus failed")
                     mock_perf.side_effect = Exception("Performance failed")
 
                     from api.main import lifespan
+
                     async with lifespan(mock_app):
                         pass
-                    
+
                     # Verify both failures are logged after context
                     assert mock_logger.error.call_count >= 2
 
@@ -332,7 +362,7 @@ class TestLoggingConfiguration:
         # It should be INFO by default unless LOG_LEVEL env var is set
         expected_level = os.environ.get("LOG_LEVEL", "INFO").upper()
         expected_level_int = getattr(logging, expected_level, logging.INFO)
-        
+
         root_logger = logging.getLogger()
         # Accept either the expected level or WARNING (pytest may set it)
         assert root_logger.level in [expected_level_int, logging.WARNING]

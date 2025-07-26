@@ -713,16 +713,12 @@ class StressTestingFramework:
                 "failure_tolerance": (
                     "High"
                     if result.recovery_success and result.graceful_degradation
-                    else "Medium"
-                    if result.recovery_success
-                    else "Low"
+                    else "Medium" if result.recovery_success else "Low"
                 ),
                 "recovery_capability": (
                     "Excellent"
                     if result.failure_recovery_time_ms < 5000
-                    else "Good"
-                    if result.failure_recovery_time_ms < 30000
-                    else "Poor"
+                    else "Good" if result.failure_recovery_time_ms < 30000 else "Poor"
                 ),
             },
             "recommendations": self._generate_stress_test_recommendations(result),

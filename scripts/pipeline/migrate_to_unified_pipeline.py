@@ -407,9 +407,7 @@ class PipelineMigrator:
                 severity_emoji = (
                     "🚨"
                     if issue["severity"] == "high"
-                    else "⚠️"
-                    if issue["severity"] == "medium"
-                    else "ℹ️"
+                    else "⚠️" if issue["severity"] == "medium" else "ℹ️"
                 )
                 report += f"- {severity_emoji} **{issue['severity'].upper()}**: "
 

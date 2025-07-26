@@ -91,9 +91,9 @@ class RefreshTokenStore:
 
     def __init__(self) -> None:
         """Initialize refresh token store with token family tracking."""
-        self._tokens: Dict[
-            str, Dict[str, Any]
-        ] = {}  # user_id -> {token_hash, family_id, created_at}
+        self._tokens: Dict[str, Dict[str, Any]] = (
+            {}
+        )  # user_id -> {token_hash, family_id, created_at}
         self._token_families: Dict[str, List[str]] = {}  # family_id -> [token_hashes]
 
     def store(self, user_id: str, token: str, family_id: Optional[str] = None) -> str:

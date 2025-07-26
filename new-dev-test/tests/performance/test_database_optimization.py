@@ -537,9 +537,9 @@ class DatabaseOptimizationBenchmark:
 
             # Run prepared statements benchmark
             logger.info("Running prepared statements benchmark...")
-            all_results["benchmarks"][
-                "prepared_statements"
-            ] = await self.benchmark_prepared_statements(session)
+            all_results["benchmarks"]["prepared_statements"] = (
+                await self.benchmark_prepared_statements(session)
+            )
 
         # Run connection pooling benchmark
         logger.info("Running connection pooling benchmark...")

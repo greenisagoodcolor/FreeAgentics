@@ -53,7 +53,7 @@ def mock_redis_client():
 @pytest.fixture(scope="module")
 def _clear_tables_fixture():
     """Module-level fixture to handle SQLAlchemy table definitions.
-    
+
     This helps prevent "Table already defined" errors when multiple test modules
     import the same models by ensuring clean imports at the module level.
     """
@@ -65,17 +65,17 @@ def setup_test_database():
     """Session-scoped fixture to create database tables once per test session."""
     from sqlalchemy import create_engine
     from database.base import Base
-    
+
     # Create test database engine
     engine = create_engine(os.environ["DATABASE_URL"])
-    
+
     # Drop all tables first to ensure clean state
     Base.metadata.drop_all(bind=engine)
-    
+
     # Create all tables
     Base.metadata.create_all(bind=engine)
-    
+
     yield engine
-    
+
     # Cleanup after all tests
     Base.metadata.drop_all(bind=engine)

@@ -32,6 +32,9 @@ class TestActiveInferenceReal:
         assert agent.grid_size == 5
         assert agent.position == [2, 2]  # Center of 5x5 grid
 
+        # Start the agent to initialize PyMDP
+        agent.start()
+
         # Verify PyMDP agent is created
         assert agent.pymdp_agent is not None
         assert hasattr(agent.pymdp_agent, "infer_states")
@@ -42,6 +45,7 @@ class TestActiveInferenceReal:
     def test_pymdp_matrices_structure(self):
         """Test PyMDP matrices are properly structured."""
         agent = BasicExplorerAgent("test_id", "Test Explorer", grid_size=3)
+        agent.start()  # Initialize PyMDP agent
 
         # Check A matrix (observations)
         assert agent.pymdp_agent.A[0].shape == (
@@ -188,16 +192,16 @@ class TestActiveInferenceReal:
             actions.append(action)
 
             # Simulate movement
-            if action == "up" and agent.position[0] > 0:
-                agent.position[0] -= 1
-            elif action == "down" and agent.position[0] < 4:
-                agent.position[0] += 1
-            elif action == "left" and agent.position[1] > 0:
-                agent.position[1] -= 1
-            elif action == "right" and agent.position[1] < 4:
-                agent.position[1] += 1
+            if action == "up" and agent.position.x > 0:
+                agent.position.x -= 1
+            elif action == "down" and agent.position.x < 4:
+                agent.position.x += 1
+            elif action == "left" and agent.position.y > 0:
+                agent.position.y -= 1
+            elif action == "right" and agent.position.y < 4:
+                agent.position.y += 1
 
-            positions.append(tuple(agent.position))
+            positions.append((agent.position.x, agent.position.y))
 
         # Restore PyMDP agent
         agent.pymdp_agent = original_pymdp
