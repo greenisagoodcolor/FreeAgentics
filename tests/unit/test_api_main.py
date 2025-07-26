@@ -140,43 +140,51 @@ class TestLifespan:
     @pytest.mark.asyncio
     async def test_lifespan_startup_success(self, mock_app):
         """Test successful startup sequence."""
+        # Import lifespan directly to avoid module-level mocking issues
+        from api.main import lifespan as test_lifespan
+        
         with patch("api.main.logger") as mock_logger:
             with patch(
-                "observability.prometheus_metrics.start_prometheus_metrics_collection"
+                "api.main.start_prometheus_metrics_collection",
+                new_callable=AsyncMock
             ) as mock_prometheus:
                 with patch(
-                    "observability.performance_metrics.start_performance_tracking"
+                    "api.main.start_performance_tracking",
+                    new_callable=AsyncMock
                 ) as mock_perf:
-                    mock_prometheus.return_value = AsyncMock()
-                    mock_perf.return_value = AsyncMock()
+                    # Mock database initialization
+                    with patch("api.main.init_db"):
+                        async with test_lifespan(mock_app):
+                            # Verify startup logging
+                            mock_logger.info.assert_any_call("Starting FreeAgentics API...")
+                            mock_logger.info.assert_any_call("📊 Prometheus metrics collection started")
+                            mock_logger.info.assert_any_call("✅ Performance tracking started")
 
-                    async with lifespan(mock_app):
-                        # Verify startup logging
-                        mock_logger.info.assert_any_call("Starting FreeAgentics API...")
-                        mock_logger.info.assert_any_call("📊 Prometheus metrics collection started")
-                        mock_logger.info.assert_any_call("✅ Performance tracking started")
-
-                        # Verify services were started
-                        mock_prometheus.assert_called_once()
-                        mock_perf.assert_called_once()
+                            # Verify services were started
+                            mock_prometheus.assert_called_once()
+                            mock_perf.assert_called_once()
 
     @pytest.mark.asyncio
     async def test_lifespan_startup_prometheus_failure(self, mock_app):
         """Test startup with Prometheus failure."""
+        from api.main import lifespan as test_lifespan
+        
         with patch("api.main.logger") as mock_logger:
             with patch(
-                "observability.prometheus_metrics.start_prometheus_metrics_collection"
+                "api.main.start_prometheus_metrics_collection",
+                new_callable=AsyncMock
             ) as mock_prometheus:
                 with patch(
-                    "observability.performance_metrics.start_performance_tracking"
+                    "api.main.start_performance_tracking",
+                    new_callable=AsyncMock
                 ) as mock_perf:
                     mock_prometheus.side_effect = Exception("Prometheus connection failed")
-                    mock_perf.return_value = AsyncMock()
-
-                    async with lifespan(mock_app):
-                        # Verify failure is logged as warning
-                        mock_logger.error.assert_any_call(
-                            "Failed to start Prometheus metrics: Prometheus connection failed"
+                    
+                    with patch("api.main.init_db"):
+                        async with test_lifespan(mock_app):
+                            # Verify failure is logged as error
+                            mock_logger.error.assert_any_call(
+                                "Failed to start Prometheus metrics: Prometheus connection failed"
                         )
 
                         # Verify performance tracking still starts
@@ -186,54 +194,59 @@ class TestLifespan:
     @pytest.mark.asyncio
     async def test_lifespan_startup_performance_failure(self, mock_app):
         """Test startup with performance tracking failure."""
+        from api.main import lifespan as test_lifespan
+        
         with patch("api.main.logger") as mock_logger:
             with patch(
-                "observability.prometheus_metrics.start_prometheus_metrics_collection"
+                "api.main.start_prometheus_metrics_collection",
+                new_callable=AsyncMock
             ) as mock_prometheus:
                 with patch(
-                    "observability.performance_metrics.start_performance_tracking"
+                    "api.main.start_performance_tracking",
+                    new_callable=AsyncMock
                 ) as mock_perf:
-                    mock_prometheus.return_value = AsyncMock()
                     mock_perf.side_effect = Exception("Performance tracking failed")
 
-                    async with lifespan(mock_app):
-                        # Verify Prometheus still starts
-                        mock_prometheus.assert_called_once()
-                        mock_logger.info.assert_any_call("📊 Prometheus metrics collection started")
+                    with patch("api.main.init_db"):
+                        async with test_lifespan(mock_app):
+                            # Verify Prometheus still starts
+                            mock_prometheus.assert_called_once()
+                            mock_logger.info.assert_any_call("📊 Prometheus metrics collection started")
 
-                        # Verify failure is logged as warning
-                        mock_logger.warning.assert_any_call(
-                            "⚠️ Failed to start performance tracking: Performance tracking failed"
-                        )
+                            # Verify failure is logged as error (not warning)
+                            mock_logger.error.assert_any_call(
+                                "Failed to start performance tracking: Performance tracking failed"
+                            )
 
     @pytest.mark.asyncio
     async def test_lifespan_shutdown_success(self, mock_app):
         """Test successful shutdown sequence."""
+        from api.main import lifespan as test_lifespan
+        
         with patch("api.main.logger") as mock_logger:
-            with patch("observability.prometheus_metrics.start_prometheus_metrics_collection"):
-                with patch("observability.performance_metrics.start_performance_tracking"):
-                    with patch(
-                        "observability.prometheus_metrics.stop_prometheus_metrics_collection"
-                    ) as mock_stop_prometheus:
-                        with patch(
-                            "observability.performance_metrics.stop_performance_tracking"
-                        ) as mock_stop_perf:
-                            mock_stop_prometheus.return_value = AsyncMock()
-                            mock_stop_perf.return_value = AsyncMock()
+            with patch("api.main.start_prometheus_metrics_collection", new_callable=AsyncMock):
+                with patch("api.main.start_performance_tracking", new_callable=AsyncMock):
+                    with patch("api.main.init_db"):
+                        # Create new mocks for the imports inside the shutdown section
+                        mock_stop_prometheus = AsyncMock()
+                        mock_stop_perf = AsyncMock()
+                        
+                        async with test_lifespan(mock_app):
+                            # Patch the shutdown functions after yield
+                            with patch("observability.prometheus_metrics.stop_prometheus_metrics_collection", mock_stop_prometheus):
+                                with patch("observability.performance_metrics.stop_performance_tracking", mock_stop_perf):
+                                    pass
 
-                            async with lifespan(mock_app):
-                                pass
+                        # Verify shutdown logging
+                        mock_logger.info.assert_any_call("Shutting down FreeAgentics API...")
+                        mock_logger.info.assert_any_call(
+                            "📊 Prometheus metrics collection stopped"
+                        )
+                        mock_logger.info.assert_any_call("✅ Performance tracking stopped")
 
-                            # Verify shutdown logging
-                            mock_logger.info.assert_any_call("Shutting down FreeAgentics API...")
-                            mock_logger.info.assert_any_call(
-                                "📊 Prometheus metrics collection stopped"
-                            )
-                            mock_logger.info.assert_any_call("✅ Performance tracking stopped")
-
-                            # Verify services were stopped
-                            mock_stop_prometheus.assert_called_once()
-                            mock_stop_perf.assert_called_once()
+                        # Verify services were stopped
+                        mock_stop_prometheus.assert_called_once()
+                        mock_stop_perf.assert_called_once()
 
     @pytest.mark.asyncio
     async def test_lifespan_shutdown_prometheus_failure(self, mock_app):

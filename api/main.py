@@ -82,6 +82,22 @@ async def lifespan(app: FastAPI):
     yield
     # Shutdown
     logger.info("Shutting down FreeAgentics API...")
+    
+    # Stop Prometheus metrics collection
+    try:
+        from observability.prometheus_metrics import stop_prometheus_metrics_collection
+        await stop_prometheus_metrics_collection()
+        logger.info("📊 Prometheus metrics collection stopped")
+    except Exception as e:
+        logger.warning(f"⚠️ Failed to stop Prometheus metrics collection: {e}")
+    
+    # Stop performance tracking
+    try:
+        from observability.performance_metrics import stop_performance_tracking
+        await stop_performance_tracking()
+        logger.info("✅ Performance tracking stopped")
+    except Exception as e:
+        logger.warning(f"⚠️ Failed to stop performance tracking: {e}")
 
 
 # Create FastAPI app

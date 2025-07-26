@@ -186,8 +186,12 @@ class TestIterativeController:
     async def test_get_or_create_context_new(self, controller):
         """Test creating new context."""
         mock_db = AsyncMock()
-        mock_db.execute = AsyncMock()
-        mock_db.execute.return_value.scalars.return_value.all.return_value = []
+        # Create proper mock chain for SQLAlchemy results
+        mock_result = MagicMock()
+        mock_scalars = MagicMock()
+        mock_scalars.all.return_value = []
+        mock_result.scalars.return_value = mock_scalars
+        mock_db.execute.return_value = mock_result
 
         context = await controller.get_or_create_context("conv-1", mock_db)
 
@@ -443,7 +447,12 @@ class TestIterativeController:
             ),
         ]
 
-        mock_db.execute.return_value.scalars.return_value.all.return_value = mock_agents
+        # Create proper mock chain for SQLAlchemy results
+        mock_result = MagicMock()
+        mock_scalars = MagicMock()
+        mock_scalars.all.return_value = mock_agents
+        mock_result.scalars.return_value = mock_scalars
+        mock_db.execute.return_value = mock_result
 
         gaps = await controller._identify_capability_gaps(["agent-1", "agent-2"], mock_db)
 
