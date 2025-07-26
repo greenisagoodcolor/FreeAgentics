@@ -39,3 +39,16 @@ class GMNModel:
             "hyperparameters": self.hyperparameters,
             "metadata": self.metadata,
         }
+
+
+def create_gnn_model(config: Dict[str, Any]) -> GMNModel:
+    """Create a GNN model for test compatibility.
+    
+    Args:
+        config: Model configuration dictionary
+        
+    Returns:
+        GMNModel instance
+    """
+    logger.info(f"Creating GNN model with config: {config}")
+    return GMNModel(config)

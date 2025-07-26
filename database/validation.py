@@ -527,3 +527,43 @@ if __name__ == "__main__":
 
     # Exit with appropriate code
     sys.exit(0 if success else 1)
+
+
+def validate_agent_config(config: Dict[str, Any]) -> bool:
+    """Validate agent configuration for test compatibility.
+    
+    Args:
+        config: Agent configuration dictionary
+        
+    Returns:
+        True if config is valid, False otherwise
+    """
+    try:
+        # Basic validation checks
+        required_fields = ["agent_id", "name"]
+        
+        for field in required_fields:
+            if field not in config:
+                logger.error(f"Missing required field: {field}")
+                return False
+                
+        # Validate field types
+        if not isinstance(config.get("agent_id"), str):
+            logger.error("agent_id must be a string")
+            return False
+            
+        if not isinstance(config.get("name"), str):
+            logger.error("name must be a string")
+            return False
+            
+        # Optional field validation
+        if "grid_size" in config and not isinstance(config["grid_size"], int):
+            logger.error("grid_size must be an integer")
+            return False
+            
+        logger.info(f"Agent config validation successful for: {config.get('agent_id')}")
+        return True
+        
+    except Exception as e:
+        logger.error(f"Agent config validation failed: {e}")
+        return False

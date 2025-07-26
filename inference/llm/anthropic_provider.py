@@ -33,10 +33,19 @@ logger = logging.getLogger(__name__)
 class AnthropicProvider(BaseProvider):
     """Anthropic provider implementation with real API integration."""
 
-    def __init__(self):
-        """Initialize Anthropic provider."""
+    def __init__(self, api_key: Optional[str] = None):
+        """Initialize Anthropic provider.
+        
+        Args:
+            api_key: Optional API key for test compatibility. If provided, will configure the provider.
+        """
         super().__init__(ProviderType.ANTHROPIC)
         self.client: Optional[Anthropic] = None
+        
+        # Auto-configure if api_key is provided (for test compatibility)
+        if api_key:
+            credentials = ProviderCredentials(api_key=api_key)
+            self.configure(credentials)
         self._model_pricing: Dict[str, Dict[str, float]] = {
             "claude-3-sonnet-20240229": {"input": 0.015, "output": 0.075},
             "claude-3-opus-20240229": {"input": 0.075, "output": 0.225},
