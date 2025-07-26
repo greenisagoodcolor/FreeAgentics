@@ -13,23 +13,23 @@ import pytest
 class TestAgentCriticalPaths:
     """Test critical paths in agent functionality."""
 
-    @patch("pymdp.Agent")
+    @patch("pymdp.agent.Agent")
     def test_active_inference_agent_initialization(self, mock_pymdp_agent):
         """Characterize ActiveInferenceAgent initialization paths."""
         try:
-            from agents.base_agent import ActiveInferenceAgent
+            from agents.base_agent import BasicExplorerAgent
 
             # Mock pymdp Agent to prevent import issues
             mock_instance = Mock()
             mock_pymdp_agent.return_value = mock_instance
 
-            # Test basic initialization path
-            agent = ActiveInferenceAgent(num_states=[2, 2], num_controls=[2, 2], num_obs=[2, 2])
+            # Test basic initialization path - use concrete implementation
+            agent = BasicExplorerAgent(agent_id="test-agent", name="Test Explorer", grid_size=3)
 
             # Document critical attributes
-            assert agent.num_states == [2, 2]
-            assert agent.num_controls == [2, 2]
-            assert agent.num_obs == [2, 2]
+            assert agent.agent_id == "test-agent"
+            assert agent.grid_size == 3
+            assert hasattr(agent, 'num_states')
 
         except Exception:
             pytest.fail("Test needs implementation")
@@ -38,19 +38,19 @@ class TestAgentCriticalPaths:
     def test_agent_observation_processing(self, mock_rand):
         """Characterize agent observation processing paths."""
         try:
-            from agents.base_agent import ActiveInferenceAgent
+            from agents.base_agent import BasicExplorerAgent
 
             mock_rand.return_value = np.array([0.5, 0.5])
 
-            with patch("pymdp.Agent") as mock_pymdp:
+            with patch("pymdp.agent.Agent") as mock_pymdp:
                 mock_instance = Mock()
                 mock_pymdp.return_value = mock_instance
 
-                agent = ActiveInferenceAgent(num_states=[2, 2], num_controls=[2, 2], num_obs=[2, 2])
+                agent = BasicExplorerAgent(agent_id="test-agent", name="Test Explorer", grid_size=3)
 
                 # Test observation processing
-                obs = [0, 1]  # Simple observation
-                result = agent.observe(obs)
+                obs = {"position": [1, 1], "objects": []}  # Structured observation
+                result = agent.perceive(obs)  # Use perceive method which is abstract method
 
                 # Document that observe method returns something
                 assert result is not None or result is None  # Document actual behavior
@@ -115,8 +115,10 @@ class TestAPICriticalPaths:
 
             sig = inspect.signature(create_agent)
 
-            # Document function signature
-            assert isinstance(sig.parameters, dict)
+            # Document function signature - parameters is a mappingproxy, not dict
+            from collections.abc import Mapping
+            assert isinstance(sig.parameters, Mapping)
+            assert len(sig.parameters) > 0  # Should have parameters
 
         except Exception:
             pytest.fail("Test needs implementation")
