@@ -611,3 +611,7 @@ async def list_agent_templates(
     ]
 
     return templates
+
+
+# Alias for test compatibility
+create_agent_endpoint = create_agent

@@ -41,6 +41,7 @@ class AnthropicProvider(BaseProvider):
         """
         super().__init__(ProviderType.ANTHROPIC)
         self.client: Optional[Anthropic] = None
+        self.api_key = api_key  # Store for test compatibility
         
         # Auto-configure if api_key is provided (for test compatibility)
         if api_key:
