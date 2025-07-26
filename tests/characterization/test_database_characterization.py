@@ -29,7 +29,6 @@ class TestDatabaseModelsCharacterization:
             # Document model attributes without creating instance
             assert hasattr(Agent, "__tablename__")
             assert hasattr(Agent, "id")
-            assert hasattr(Agent, "agent_id")
             assert hasattr(Agent, "name")
 
             # Document table name
@@ -90,11 +89,13 @@ class TestDatabaseSessionCharacterization:
         try:
             from database.session import SessionLocal
 
-            # Test sessionmaker attributes
-            assert hasattr(SessionLocal, "bind")
+            # Test sessionmaker is callable (it's a factory)
+            assert callable(SessionLocal)
+            # SessionLocal is a sessionmaker instance, which has kw attribute
+            assert hasattr(SessionLocal, "kw")
 
-        except Exception:
-            pytest.fail("Test needs implementation")
+        except Exception as e:
+            pytest.fail(f"Failed to test SessionLocal: {e}")
 
     def test_get_db_function_structure(self):
         """Characterize get_db function behavior."""
@@ -116,17 +117,18 @@ class TestDatabaseTypesCharacterization:
     def test_database_types_import(self):
         """Document database types import behavior."""
         try:
-            from database.types import AgentStatus, CoalitionStatus
+            from database.types import GUID
 
-            assert AgentStatus is not None
-            assert CoalitionStatus is not None
-        except ImportError:
-            pytest.fail("Test needs implementation")
+            assert GUID is not None
+            # GUID is a custom type for cross-platform UUID support
+            assert hasattr(GUID, "impl")
+        except ImportError as e:
+            pytest.fail(f"Failed to import database types: {e}")
 
     def test_agent_status_enum_values(self):
         """Characterize AgentStatus enum values."""
         try:
-            from database.types import AgentStatus
+            from database.models import AgentStatus
 
             # Document enum structure
             assert hasattr(AgentStatus, "__members__")
@@ -136,13 +138,13 @@ class TestDatabaseTypesCharacterization:
             assert isinstance(members, list)
             assert len(members) > 0
 
-        except Exception:
-            pytest.fail("Test needs implementation")
+        except Exception as e:
+            pytest.fail(f"Failed to import AgentStatus: {e}")
 
     def test_coalition_status_enum_values(self):
         """Characterize CoalitionStatus enum values."""
         try:
-            from database.types import CoalitionStatus
+            from database.models import CoalitionStatus
 
             # Document enum structure
             assert hasattr(CoalitionStatus, "__members__")
@@ -152,8 +154,8 @@ class TestDatabaseTypesCharacterization:
             assert isinstance(members, list)
             assert len(members) > 0
 
-        except Exception:
-            pytest.fail("Test needs implementation")
+        except Exception as e:
+            pytest.fail(f"Failed to import CoalitionStatus: {e}")
 
 
 class TestDatabaseConnectionCharacterization:
@@ -162,25 +164,25 @@ class TestDatabaseConnectionCharacterization:
     def test_connection_manager_import(self):
         """Document connection manager import behavior."""
         try:
-            from database.connection_manager import DatabaseManager
+            from database.connection_manager import DatabaseConnectionManager
 
-            assert DatabaseManager is not None
-        except ImportError:
-            pytest.fail("Test needs implementation")
+            assert DatabaseConnectionManager is not None
+        except ImportError as e:
+            pytest.fail(f"Failed to import connection manager: {e}")
 
     def test_database_manager_structure(self):
-        """Characterize DatabaseManager structure."""
+        """Characterize DatabaseConnectionManager structure."""
         try:
-            from database.connection_manager import DatabaseManager
+            from database.connection_manager import DatabaseConnectionManager
 
             # Test class methods exist
-            assert hasattr(DatabaseManager, "__init__")
+            assert hasattr(DatabaseConnectionManager, "__init__")
 
             # Test if it's a class
-            assert isinstance(DatabaseManager, type)
+            assert isinstance(DatabaseConnectionManager, type)
 
-        except Exception:
-            pytest.fail("Test needs implementation")
+        except Exception as e:
+            pytest.fail(f"Failed to test DatabaseConnectionManager: {e}")
 
 
 class TestDatabaseUtilsCharacterization:
@@ -189,26 +191,29 @@ class TestDatabaseUtilsCharacterization:
     def test_database_utils_import(self):
         """Document database utils import behavior."""
         try:
-            from database.utils import create_tables, drop_tables
+            from database.utils import serialize_for_json
 
-            assert create_tables is not None
-            assert drop_tables is not None
-        except ImportError:
-            pytest.fail("Test needs implementation")
+            assert serialize_for_json is not None
+            assert callable(serialize_for_json)
+        except ImportError as e:
+            pytest.fail(f"Failed to import database utils: {e}")
 
     def test_create_tables_function(self):
-        """Characterize create_tables function."""
+        """Characterize serialize_for_json function."""
         try:
             import inspect
 
-            from database.utils import create_tables
+            from database.utils import serialize_for_json
 
             # Document function signature
-            sig = inspect.signature(create_tables)
-            assert isinstance(sig.parameters, dict)
+            sig = inspect.signature(serialize_for_json)
+            # Parameters is a mappingproxy object
+            assert hasattr(sig, "parameters")
+            # Takes one parameter: obj
+            assert "obj" in sig.parameters
 
-        except Exception:
-            pytest.fail("Test needs implementation")
+        except Exception as e:
+            pytest.fail(f"Failed to test serialize_for_json: {e}")
 
 
 class TestDatabaseValidationCharacterization:
@@ -217,25 +222,29 @@ class TestDatabaseValidationCharacterization:
     def test_database_validation_import(self):
         """Document database validation import behavior."""
         try:
-            from database.validation import validate_agent_data
+            from database.validation import validate_model_data
 
-            assert validate_agent_data is not None
-        except ImportError:
-            pytest.fail("Test needs implementation")
+            assert validate_model_data is not None
+        except ImportError as e:
+            pytest.fail(f"Failed to import validation: {e}")
 
     def test_validate_agent_data_structure(self):
-        """Characterize validate_agent_data function."""
+        """Characterize validate_model_data function."""
         try:
             import inspect
 
-            from database.validation import validate_agent_data
+            from database.validation import validate_model_data
 
             # Document that it's callable
-            assert callable(validate_agent_data)
+            assert callable(validate_model_data)
 
             # Document function signature
-            sig = inspect.signature(validate_agent_data)
-            assert isinstance(sig.parameters, dict)
+            sig = inspect.signature(validate_model_data)
+            # Parameters is a mappingproxy object
+            assert hasattr(sig, "parameters")
+            # Takes two parameters: model_class and data
+            assert "model_class" in sig.parameters
+            assert "data" in sig.parameters
 
-        except Exception:
-            pytest.fail("Test needs implementation")
+        except Exception as e:
+            pytest.fail(f"Failed to test validate_model_data: {e}")

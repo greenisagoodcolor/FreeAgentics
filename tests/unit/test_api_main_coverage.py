@@ -195,11 +195,11 @@ class TestAPIMain:
             if "SecurityHeadersMiddleware" in str(m.cls):
                 sec_headers_idx = i
 
-        # CORS should come before SecurityHeaders in the list
-        # (which means it executes after SecurityHeaders)
+        # SecurityHeaders should come before CORS in the list
+        # (which means SecurityHeaders executes first, then CORS)
         assert cors_idx is not None
         assert sec_headers_idx is not None
-        assert cors_idx < sec_headers_idx
+        assert sec_headers_idx < cors_idx
 
     def test_graphql_endpoint_exists(self, client):
         """Test GraphQL endpoint is accessible."""

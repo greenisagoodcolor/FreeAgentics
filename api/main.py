@@ -8,6 +8,7 @@ from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import Response
 
 from api.middleware.security_monitoring import SecurityMonitoringMiddleware
+from api import ui_compatibility
 from api.v1 import (
     agents,
     auth,
@@ -170,8 +171,7 @@ app.include_router(health.router, prefix="/api/v1", tags=["health"])
 app.include_router(health_extended.router, prefix="/api/v1", tags=["health"])
 
 # Include UI compatibility router (no prefix - direct /api/agents)
-# TODO: Define ui_router or remove this line
-# app.include_router(ui_router, prefix="/api", tags=["ui-compatibility"])
+app.include_router(ui_compatibility.router, prefix="/api", tags=["ui-compatibility"])
 
 # Include GraphQL router
 app.include_router(graphql_app, prefix="/api/v1/graphql", tags=["graphql"])
