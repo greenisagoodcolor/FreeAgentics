@@ -16,7 +16,7 @@ import pytest
 
 from agents.agent_manager import AgentManager
 from agents.base_agent import BasicExplorerAgent
-from world.grid_world import GridWorld, GridWorldConfig, Position
+from world.grid_world import GridWorldConfig, Position
 
 
 class TestAgentManagerSecurity:
