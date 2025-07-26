@@ -35,7 +35,10 @@ from observability.prometheus_metrics import (
 from observability.performance_metrics import start_performance_tracking
 
 # Configure logging
-logging.basicConfig(level=logging.INFO)
+import os
+
+log_level = os.environ.get("LOG_LEVEL", "INFO").upper()
+logging.basicConfig(level=getattr(logging, log_level, logging.INFO))
 logger = logging.getLogger(__name__)
 
 
@@ -113,8 +116,10 @@ app.add_middleware(
     CORSMiddleware,
     allow_origins=["http://localhost:3000", "http://localhost:3001"],
     allow_credentials=True,
-    allow_methods=["*"],
-    allow_headers=["*"],
+    allow_methods=["GET", "POST", "PUT", "DELETE", "OPTIONS", "PATCH"],
+    allow_headers=["accept", "authorization", "content-type", "origin", "x-requested-with", "x-api-key", "x-client-version"],
+    expose_headers=["x-total-count", "x-rate-limit-remaining", "x-rate-limit-reset"],
+    max_age=86400,
 )
 
 # Add security middleware

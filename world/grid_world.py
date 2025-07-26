@@ -34,9 +34,11 @@ class Position:
     y: int
 
     def __eq__(self, other) -> bool:
-        if not isinstance(other, Position):
-            return False
-        return self.x == other.x and self.y == other.y
+        if isinstance(other, Position):
+            return self.x == other.x and self.y == other.y
+        elif isinstance(other, (list, tuple)) and len(other) == 2:
+            return self.x == other[0] and self.y == other[1]
+        return False
 
     def __hash__(self) -> int:
         return hash((self.x, self.y))
@@ -45,6 +47,10 @@ class Position:
         if not isinstance(other, Position):
             return NotImplemented
         return (self.x, self.y) < (other.x, other.y)
+
+    def copy(self) -> "Position":
+        """Create a copy of this position."""
+        return Position(self.x, self.y)
 
     def distance_to(self, other: "Position") -> float:
         """Calculate Euclidean distance to another position."""

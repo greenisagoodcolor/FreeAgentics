@@ -755,6 +755,9 @@ class BasicExplorerAgent(ActiveInferenceAgent):
         # Now call parent constructor - this will call _initialize_pymdp()
         super().__init__(agent_id, name, config)
 
+        # Initialize current observation (required by tests)
+        self.current_observation = [0]  # Default to "empty" observation
+
         # Simplified belief state (also maintained for non-PyMDP fallback)
         self.uncertainty_map = np.ones((grid_size, grid_size))
         # Handle both Position object and list formats
@@ -1147,7 +1150,20 @@ class BasicExplorerAgent(ActiveInferenceAgent):
         if self.pymdp_agent and PYMDP_AVAILABLE:
             try:
                 # Use PyMDP to infer optimal policy
-                q_pi, G = self.pymdp_agent.infer_policies()
+                infer_result = self.pymdp_agent.infer_policies()
+                
+                # Handle different return formats from PyMDP
+                if infer_result is None or len(infer_result) == 0:
+                    # PyMDP might not have initialized properly
+                    logger.warning("PyMDP infer_policies returned empty result, using fallback")
+                    raise ActionSelectionError("PyMDP not properly initialized")
+                
+                if len(infer_result) == 2:
+                    q_pi, G = infer_result
+                else:
+                    # Single return value case
+                    q_pi = infer_result
+                    G = None
 
                 # Sample action from the posterior over policies
                 action_idx = self.pymdp_agent.sample_action()

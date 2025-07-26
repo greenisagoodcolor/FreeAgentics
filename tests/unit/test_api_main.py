@@ -24,7 +24,8 @@ with patch.dict(
     {
         "observability.prometheus_metrics": MagicMock(),
         "observability.performance_metrics": MagicMock(),
-        "api.middleware": MagicMock(),
+        "api.middleware.ddos_protection": MagicMock(),
+        "api.middleware.security_monitoring": MagicMock(),
         "api.v1.agents": MagicMock(),
         "api.v1.auth": MagicMock(),
         "api.v1.inference": MagicMock(),
@@ -33,13 +34,17 @@ with patch.dict(
         "api.v1.system": MagicMock(),
         "api.v1.websocket": MagicMock(),
         "api.v1.graphql_schema": MagicMock(),
+        "api.v1.health": MagicMock(),
+        "api.v1.health_extended": MagicMock(),
+        "api.v1.mfa": MagicMock(),
+        "api.v1.prompts": MagicMock(),
         "auth.security_headers": MagicMock(),
         "api.middleware.security_headers": MagicMock(),
     },
 ):
     # Mock the middleware classes in the API middleware module
-    with patch("api.middleware.DDoSProtectionMiddleware", MockMiddleware):
-        with patch("api.middleware.SecurityMonitoringMiddleware", MockMiddleware):
+    with patch("api.middleware.ddos_protection.DDoSProtectionMiddleware", MockMiddleware):
+        with patch("api.middleware.security_monitoring.SecurityMonitoringMiddleware", MockMiddleware):
             with patch(
                 "auth.security_headers.SecurityHeadersMiddleware",
                 MockMiddleware,
@@ -75,7 +80,11 @@ with patch.dict(
                                                     "api.v1.graphql_schema.graphql_app",
                                                     mock_router.router,
                                                 ):
-                                                    from api.main import app
+                                                    with patch("api.v1.health.router", mock_router.router):
+                                                        with patch("api.v1.health_extended.router", mock_router.router):
+                                                            with patch("api.v1.mfa.router", mock_router.router):
+                                                                with patch("api.v1.prompts.router", mock_router.router):
+                                                                    from api.main import app
 
 
 class TestAPIMain:
