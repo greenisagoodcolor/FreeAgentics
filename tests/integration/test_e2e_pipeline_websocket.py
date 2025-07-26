@@ -14,7 +14,7 @@ from fastapi.testclient import TestClient
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from api.main import app
-from auth.security_implementation import Permission, Role, TokenData
+from auth.security_implementation import Permission, UserRole, TokenData
 from services.websocket_integration import PipelineStage, pipeline_monitor
 
 
@@ -103,7 +103,7 @@ class TestEndToEndPipelineWebSocket:
                     mock_get_user.return_value = TokenData(
                         username="testuser",
                         user_id="user123",
-                        role=Role.USER,
+                        role=UserRole.RESEARCHER,
                         permissions=[
                             Permission.CREATE_AGENT,
                             Permission.VIEW_AGENTS,
@@ -210,7 +210,7 @@ class TestEndToEndPipelineWebSocket:
                     mock_get_user.return_value = TokenData(
                         username="testuser",
                         user_id="user123",
-                        role=Role.USER,
+                        role=UserRole.RESEARCHER,
                         permissions=[Permission.CREATE_AGENT],
                     )
 
@@ -264,7 +264,7 @@ class TestEndToEndPipelineWebSocket:
                         mock_get_user.return_value = TokenData(
                             username="testuser",
                             user_id="user123",
-                            role=Role.USER,
+                            role=UserRole.RESEARCHER,
                             permissions=[Permission.CREATE_AGENT],
                         )
 
@@ -310,7 +310,7 @@ class TestEndToEndPipelineWebSocket:
                     mock_get_user.return_value = TokenData(
                         username="testuser",
                         user_id="user123",
-                        role=Role.USER,
+                        role=UserRole.RESEARCHER,
                         permissions=[Permission.CREATE_AGENT],
                     )
 
@@ -379,7 +379,7 @@ class TestEndToEndPipelineWebSocket:
                         mock_get_user.return_value = TokenData(
                             username="testuser",
                             user_id="user123",
-                            role=Role.USER,
+                            role=UserRole.RESEARCHER,
                             permissions=[Permission.CREATE_AGENT],
                         )
 

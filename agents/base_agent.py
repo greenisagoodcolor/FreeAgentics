@@ -1350,3 +1350,7 @@ class BasicExplorerAgent(ActiveInferenceAgent):
         except Exception as e:
             logger.error(f"Failed to compute free energy: {e}")
             return {"error": str(e)}
+
+
+# Alias for backward compatibility and tests
+BaseAgent = ActiveInferenceAgent

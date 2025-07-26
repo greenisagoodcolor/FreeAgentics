@@ -14,7 +14,7 @@ import pytest
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from api.v1.prompts import PromptRequest, get_prompt_processor, process_prompt
-from auth.security_implementation import Permission, Role, TokenData
+from auth.security_implementation import Permission, UserRole, TokenData
 from database.prompt_models import Conversation
 from services.websocket_integration import (
     pipeline_monitor,
@@ -38,7 +38,7 @@ def mock_current_user():
     return TokenData(
         username="testuser",
         user_id="user123",
-        role=Role.USER,
+        role=UserRole.RESEARCHER,
         permissions=[Permission.CREATE_AGENT, Permission.VIEW_AGENTS],
     )
 

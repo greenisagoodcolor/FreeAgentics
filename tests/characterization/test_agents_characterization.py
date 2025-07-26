@@ -23,29 +23,44 @@ class TestBaseAgentCharacterization:
         from agents.base_agent import BaseAgent
 
         # Test what happens during basic initialization
-        try:
-            # Create minimal agent to understand structure
+        # BaseAgent is an abstract class and cannot be instantiated directly
+        with pytest.raises(TypeError, match="Can't instantiate abstract class"):
             agent = BaseAgent(agent_id="test-001", num_states=2)
 
-            # Document actual attributes that exist
-            assert hasattr(agent, "agent_id")
-            assert hasattr(agent, "num_states")
-            assert agent.agent_id == "test-001"
-            assert agent.num_states == 2
-
-        except Exception:
-            # Document the actual failure mode
-            # Test needs implementation - marking as expected failure
-            pytest.fail("Test needs implementation")
+        # Document that BaseAgent is abstract and requires implementation
+        # of abstract methods: _initialize_pymdp, perceive, select_action, update_beliefs
+        import inspect
+        assert inspect.isabstract(BaseAgent)
+        
+        # Document that concrete implementation exists: BasicExplorerAgent
+        from agents.base_agent import BasicExplorerAgent
+        assert issubclass(BasicExplorerAgent, BaseAgent)
+        assert not inspect.isabstract(BasicExplorerAgent)
 
     def test_base_agent_methods_exist(self):
         """Document which methods exist on BaseAgent."""
         from agents.base_agent import BaseAgent
 
-        # Test method existence without calling them
-        methods = ["step", "reset", "infer_states", "infer_policies", "observe"]
-        for method_name in methods:
+        # Document the actual methods that exist on BaseAgent
+        actual_methods = [
+            "get_belief_monitoring_stats", 
+            "get_status", 
+            "load_gmn_spec", 
+            "perceive", 
+            "select_action", 
+            "start", 
+            "step", 
+            "stop", 
+            "update_beliefs"
+        ]
+        
+        for method_name in actual_methods:
             assert hasattr(BaseAgent, method_name), f"Method {method_name} should exist"
+            
+        # Document that abstract methods exist but require implementation
+        abstract_methods = ["perceive", "select_action", "update_beliefs"]
+        for method_name in abstract_methods:
+            assert hasattr(BaseAgent, method_name), f"Abstract method {method_name} should exist"
 
 
 class TestAgentManagerCharacterization:
