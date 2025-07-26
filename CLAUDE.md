@@ -1248,6 +1248,30 @@ In summary, these guidelines emphasize writing **clean, simple, and well-tested 
 - **Performance awareness** – optimize for performance based on actual measurements, not assumptions. Use profiling and benchmarking to guide optimization efforts.
 - **Operational excellence** – implement comprehensive monitoring, logging, and incident response procedures from the start.
 
+## CI/CD Test Failure Resolution Patterns (Cycle 5)
+
+### Common Test Failure Patterns and Solutions
+
+1. **Configuration Mismatch**: Tests expecting specific configurations (CORS, logging) that differ from implementation
+   - Solution: Either align implementation with security best practices OR update tests to check behavior not configuration
+   - Example: CORS ["*"] → ["GET", "POST", "PUT", "DELETE", "OPTIONS", "PATCH"]
+
+2. **Value Object Migration**: Introducing value objects (like Position) breaks existing tests
+   - Solution: Add backwards compatibility in __eq__ method to support legacy formats
+   - Example: Position.__eq__ now accepts both Position objects and [x,y] lists
+
+3. **External Library Integration**: PyMDP or other libraries returning unexpected formats
+   - Solution: Defensive programming with explicit checks for None/empty returns
+   - Pattern: Check result, handle edge cases, provide meaningful fallbacks
+
+4. **Mock Complexity**: Deeply nested mock contexts indicate poor module structure
+   - Solution: Simplify module dependencies and use proper dependency injection
+   - Anti-pattern: 8+ levels of nested with statements for mocking
+
+5. **Implementation vs Behavior Tests**: Tests checking internal details rather than user-visible behavior
+   - Solution: Refactor tests to check outcomes, not internal state
+   - Example: Don't test if logger level is INFO, test if appropriate messages are logged
+
 ## Memory Optimization Learnings (Task 20.2)
 
 ### Key Insights from Memory Profiling
