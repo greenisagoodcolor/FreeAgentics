@@ -333,5 +333,6 @@ class TestConversationModels:
         # Note: SQLite doesn't enforce foreign keys by default, so we need to enable it
         test_session.execute("PRAGMA foreign_keys=ON")
         from sqlalchemy.exc import IntegrityError
+
         with pytest.raises(IntegrityError):
             test_session.commit()

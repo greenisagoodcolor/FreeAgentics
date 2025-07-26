@@ -398,9 +398,9 @@ class TestAuthorizationPenetration:
 
         # Check that only one escalation succeeded (or none if properly protected)
         successful_escalations = sum(1 for _, _, success in results if success)
-        assert successful_escalations <= 1, (
-            f"Race condition allowed {successful_escalations} privilege escalations"
-        )
+        assert (
+            successful_escalations <= 1
+        ), f"Race condition allowed {successful_escalations} privilege escalations"
 
     def test_business_logic_flaws(self, mock_db):
         """Test business logic flaws in authorization."""

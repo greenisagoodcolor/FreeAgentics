@@ -328,9 +328,9 @@ class TestJWTLifecycle:
         for _ in range(100):
             self.auth_manager.verify_token(token)
         verification_time = time.time() - start_time
-        assert verification_time < 1.0, (
-            f"Token verification too slow: {verification_time}s for 100 verifications"
-        )
+        assert (
+            verification_time < 1.0
+        ), f"Token verification too slow: {verification_time}s for 100 verifications"
 
     @pytest.mark.asyncio
     async def test_async_token_lifecycle(self):

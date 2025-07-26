@@ -45,11 +45,9 @@ class TestOpenAIProvider:
             mock_openai_class.return_value = mock_client
 
             # Mock the health check to return healthy
-            with patch.object(provider, 'test_connection') as mock_health:
+            with patch.object(provider, "test_connection") as mock_health:
                 mock_health.return_value = HealthCheckResult(
-                    status=ProviderStatus.HEALTHY,
-                    latency_ms=50.0,
-                    error_message=None
+                    status=ProviderStatus.HEALTHY, latency_ms=50.0, error_message=None
                 )
 
                 # Configure should succeed
@@ -79,11 +77,9 @@ class TestOpenAIProvider:
             mock_client.models.list.return_value = mock_models_response
 
             # Mock configuration to avoid real API call
-            with patch.object(provider, 'test_connection') as mock_test_connection:
+            with patch.object(provider, "test_connection") as mock_test_connection:
                 mock_test_connection.return_value = HealthCheckResult(
-                    status=ProviderStatus.HEALTHY,
-                    latency_ms=50.0,
-                    error_message=None
+                    status=ProviderStatus.HEALTHY, latency_ms=50.0, error_message=None
                 )
                 provider.configure(credentials)
 
@@ -117,11 +113,9 @@ class TestOpenAIProvider:
             mock_client.chat.completions.create.return_value = mock_response
 
             # Mock the health check to return healthy
-            with patch.object(provider, 'test_connection') as mock_health:
+            with patch.object(provider, "test_connection") as mock_health:
                 mock_health.return_value = HealthCheckResult(
-                    status=ProviderStatus.HEALTHY,
-                    latency_ms=50.0,
-                    error_message=None
+                    status=ProviderStatus.HEALTHY, latency_ms=50.0, error_message=None
                 )
                 provider.configure(credentials)
 
@@ -170,20 +164,18 @@ class TestOpenAIProvider:
             mock_response = Mock(spec=Response)
             mock_response.status_code = 401
             mock_response.headers = {}
-            
+
             auth_error = openai.AuthenticationError(
                 "Invalid API key",
                 response=mock_response,
-                body={"error": {"message": "Invalid API key"}}
+                body={"error": {"message": "Invalid API key"}},
             )
             mock_client.chat.completions.create.side_effect = auth_error
 
             # Mock configuration to avoid real API call
-            with patch.object(provider, 'test_connection') as mock_health:
+            with patch.object(provider, "test_connection") as mock_health:
                 mock_health.return_value = HealthCheckResult(
-                    status=ProviderStatus.HEALTHY,
-                    latency_ms=50.0,
-                    error_message=None
+                    status=ProviderStatus.HEALTHY, latency_ms=50.0, error_message=None
                 )
                 provider.configure(credentials)
 
@@ -220,11 +212,9 @@ class TestAnthropicProvider:
             mock_anthropic_class.return_value = mock_client
 
             # Mock the health check to return healthy
-            with patch.object(provider, 'test_connection') as mock_health:
+            with patch.object(provider, "test_connection") as mock_health:
                 mock_health.return_value = HealthCheckResult(
-                    status=ProviderStatus.HEALTHY,
-                    latency_ms=50.0,
-                    error_message=None
+                    status=ProviderStatus.HEALTHY, latency_ms=50.0, error_message=None
                 )
 
                 result = provider.configure(credentials)
@@ -253,11 +243,9 @@ class TestAnthropicProvider:
             mock_client.messages.create.return_value = mock_response
 
             # Mock the health check to return healthy
-            with patch.object(provider, 'test_connection') as mock_health:
+            with patch.object(provider, "test_connection") as mock_health:
                 mock_health.return_value = HealthCheckResult(
-                    status=ProviderStatus.HEALTHY,
-                    latency_ms=50.0,
-                    error_message=None
+                    status=ProviderStatus.HEALTHY, latency_ms=50.0, error_message=None
                 )
                 provider.configure(credentials)
 
@@ -312,25 +300,21 @@ class TestProviderIntegration:
             # Mock OpenAI client
             mock_openai_client = Mock()
             mock_openai.return_value = mock_openai_client
-            
+
             # Mock Anthropic client
             mock_anthropic_client = Mock()
             mock_anthropic.return_value = mock_anthropic_client
 
             # Mock health checks for both providers
             with (
-                patch.object(openai_provider, 'test_connection') as mock_openai_health,
-                patch.object(anthropic_provider, 'test_connection') as mock_anthropic_health,
+                patch.object(openai_provider, "test_connection") as mock_openai_health,
+                patch.object(anthropic_provider, "test_connection") as mock_anthropic_health,
             ):
                 mock_openai_health.return_value = HealthCheckResult(
-                    status=ProviderStatus.HEALTHY,
-                    latency_ms=50.0,
-                    error_message=None
+                    status=ProviderStatus.HEALTHY, latency_ms=50.0, error_message=None
                 )
                 mock_anthropic_health.return_value = HealthCheckResult(
-                    status=ProviderStatus.HEALTHY,
-                    latency_ms=60.0,
-                    error_message=None
+                    status=ProviderStatus.HEALTHY, latency_ms=60.0, error_message=None
                 )
 
                 openai_provider.configure(openai_credentials)

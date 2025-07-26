@@ -127,12 +127,12 @@ class TestRateLimitingVerification:
         limited_count = sum(1 for r in results if r)
 
         # Should allow up to max_requests and limit the rest
-        assert allowed_count <= max_requests, (
-            f"Too many requests allowed: {allowed_count} > {max_requests}"
-        )
-        assert limited_count >= (total_requests - max_requests), (
-            f"Too few requests limited: {limited_count}"
-        )
+        assert (
+            allowed_count <= max_requests
+        ), f"Too many requests allowed: {allowed_count} > {max_requests}"
+        assert limited_count >= (
+            total_requests - max_requests
+        ), f"Too few requests limited: {limited_count}"
 
         # Total should equal total_requests
         assert allowed_count + limited_count == total_requests
@@ -359,19 +359,19 @@ class TestRateLimitingVerification:
             limited = sum(1 for r in client_results if r["limited"])
 
             # Should allow up to max_requests per client
-            assert allowed <= max_requests, (
-                f"Client {client_id} had too many allowed requests: {allowed}"
-            )
-            assert limited >= (requests_per_client - max_requests), (
-                f"Client {client_id} had too few limited requests: {limited}"
-            )
+            assert (
+                allowed <= max_requests
+            ), f"Client {client_id} had too many allowed requests: {allowed}"
+            assert limited >= (
+                requests_per_client - max_requests
+            ), f"Client {client_id} had too few limited requests: {limited}"
 
             # Performance should be good
             durations = [r["duration"] for r in client_results]
             avg_duration = sum(durations) / len(durations)
-            assert avg_duration < 0.01, (
-                f"Client {client_id} had slow rate limiting: {avg_duration:.6f}s"
-            )
+            assert (
+                avg_duration < 0.01
+            ), f"Client {client_id} had slow rate limiting: {avg_duration:.6f}s"
 
     def test_rate_limiting_with_bursty_traffic(self, rate_limiter):
         """Test rate limiting with bursty traffic patterns."""

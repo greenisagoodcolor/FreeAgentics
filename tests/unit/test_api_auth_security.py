@@ -39,6 +39,7 @@ class TestLoginEndpointSecurity:
         """Test successful login returns tokens."""
         # Arrange
         from unittest.mock import MagicMock
+
         mock_user = MagicMock()
         mock_user.user_id = "user-123"
         mock_user.username = "testuser"
@@ -46,19 +47,19 @@ class TestLoginEndpointSecurity:
         mock_user.permissions = ["read"]
         mock_user.dict.return_value = {
             "user_id": "user-123",
-            "username": "testuser", 
+            "username": "testuser",
             "role": "user",
-            "permissions": ["read"]
+            "permissions": ["read"],
         }
         mock_auth_manager.authenticate_user.return_value = mock_user
         mock_auth_manager.create_access_token.return_value = "test_access_token"
         mock_auth_manager.create_refresh_token.return_value = "test_refresh_token"
         mock_auth_manager.set_token_cookie.return_value = None
         mock_auth_manager.set_csrf_cookie.return_value = None
-        
+
         # Mock jwt_handler for fingerprint generation
         mock_auth_manager.jwt_handler.generate_fingerprint.return_value = "test_fingerprint"
-        
+
         # Mock csrf_protection
         mock_auth_manager.csrf_protection.generate_csrf_token.return_value = "test_csrf_token"
 
@@ -108,11 +109,14 @@ class TestLoginEndpointSecurity:
             response = client.post("/api/v1/login", json=invalid_input)
 
             # Assert
-            assert response.status_code in [
-                status.HTTP_422_UNPROCESSABLE_ENTITY,
-                status.HTTP_400_BAD_REQUEST,
-                status.HTTP_401_UNAUTHORIZED,  # Empty username/password may pass validation but fail auth
-            ]
+            assert (
+                response.status_code
+                in [
+                    status.HTTP_422_UNPROCESSABLE_ENTITY,
+                    status.HTTP_400_BAD_REQUEST,
+                    status.HTTP_401_UNAUTHORIZED,  # Empty username/password may pass validation but fail auth
+                ]
+            )
 
     def test_login_prevents_timing_attacks(self, client, mock_auth_manager):
         """Test constant-time comparison prevents timing attacks."""

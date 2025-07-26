@@ -238,9 +238,9 @@ class TestRuffCompatibility:
         ruff_isort = config.get("tool", {}).get("ruff", {}).get("lint", {}).get("isort", {})
 
         # Should be configured to be compatible with Black (combine-as-imports)
-        assert ruff_isort.get("combine-as-imports") is True, (
-            "Should use combine-as-imports for Black compatibility"
-        )
+        assert (
+            ruff_isort.get("combine-as-imports") is True
+        ), "Should use combine-as-imports for Black compatibility"
 
 
 class TestRuffPerformance:

@@ -89,9 +89,9 @@ class TestRouteRegistration:
 
         # Agent creation endpoint - should not return 404 (route not found)
         response = client.post("/api/v1/agents", json={"name": "test"})
-        assert response.status_code != 404, (
-            f"Agent creation route not found: {response.status_code}"
-        )
+        assert (
+            response.status_code != 404
+        ), f"Agent creation route not found: {response.status_code}"
         assert response.status_code in [
             201,
             400,
@@ -102,9 +102,9 @@ class TestRouteRegistration:
 
         # Single agent endpoint (with non-existent ID) - should not return 404 for route registration
         response = client.get("/api/v1/agents/nonexistent-id")
-        assert response.status_code != 405, (
-            f"Agent detail route has wrong method: {response.status_code}"
-        )
+        assert (
+            response.status_code != 405
+        ), f"Agent detail route has wrong method: {response.status_code}"
         # 404 is OK here because the agent doesn't exist, but not because route isn't registered
         assert response.status_code in [
             404,
@@ -136,9 +136,9 @@ class TestRouteRegistration:
         # WebSocket routes typically don't respond to regular HTTP requests
         # but the route should be registered. Test the websocket info endpoint instead
         response = client.get("/api/v1/ws/connections")
-        assert response.status_code != 404, (
-            f"WebSocket connections route not found: {response.status_code}"
-        )
+        assert (
+            response.status_code != 404
+        ), f"WebSocket connections route not found: {response.status_code}"
         assert response.status_code in [
             200,
             401,

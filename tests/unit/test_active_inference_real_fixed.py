@@ -207,9 +207,9 @@ class TestActiveInferenceReal:
         set(actions)
 
         # Check that exploration occurred (should visit multiple positions)
-        assert len(unique_positions) > 1, (
-            f"Agent should explore multiple positions, visited: {unique_positions}"
-        )
+        assert (
+            len(unique_positions) > 1
+        ), f"Agent should explore multiple positions, visited: {unique_positions}"
 
         # Check that different actions were taken
         movement_actions = [a for a in actions if a in ["up", "down", "left", "right"]]

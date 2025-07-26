@@ -111,9 +111,9 @@ class TestReturnValueHandlingFixes:
 
             position = agent.position
             # Position can be list or tuple - both are valid
-            assert isinstance(position, (list, tuple)), (
-                f"Position should be list or tuple, got {type(position)}"
-            )
+            assert isinstance(
+                position, (list, tuple)
+            ), f"Position should be list or tuple, got {type(position)}"
 
             metrics = agent.metrics
             assert isinstance(metrics, dict), f"Metrics should be dict, got {type(metrics)}"
@@ -234,7 +234,7 @@ class TestReturnValueHandlingFixes:
         # Test requires PyMDP agent to be properly initialized
         if agent.pymdp_agent is None:
             pytest.skip("PyMDP agent not initialized - likely PyMDP not available")
-        
+
         try:
             # Direct access - should work without None checks
             A = agent.pymdp_agent.A

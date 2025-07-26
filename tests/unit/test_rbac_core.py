@@ -79,9 +79,9 @@ class TestRolePermissionMatrix:
 
         for perm in admin_only_perms:
             roles_with_perm = [role for role, perms in ROLE_PERMISSIONS.items() if perm in perms]
-            assert roles_with_perm == [UserRole.ADMIN], (
-                f"Permission {perm} should only be granted to admin"
-            )
+            assert roles_with_perm == [
+                UserRole.ADMIN
+            ], f"Permission {perm} should only be granted to admin"
 
 
 class TestUserModel:

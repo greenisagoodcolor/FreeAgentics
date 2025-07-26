@@ -135,9 +135,9 @@ class TestTokenLifecycleManagement:
 
         # Should be 7 days
         expected_seconds = 7 * 24 * 60 * 60  # 7 days in seconds
-        assert abs(duration.total_seconds() - expected_seconds) < 3600, (
-            "Refresh token should expire in 7 days"
-        )
+        assert (
+            abs(duration.total_seconds() - expected_seconds) < 3600
+        ), "Refresh token should expire in 7 days"
 
     def _create_test_user(self) -> User:
         """Helper to create test user."""

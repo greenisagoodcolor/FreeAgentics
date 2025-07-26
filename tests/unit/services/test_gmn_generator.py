@@ -86,15 +86,30 @@ class TestGMNGenerator:
 
     @pytest.mark.asyncio
     async def test_validate_gmn_success(self, generator, mock_llm_provider):
-        """Test successful GMN validation."""
+        """Test successful GMN validation with properly formed spec."""
         gmn_spec = """
-        node state s1 { size: 4 }
-        node action a1 { size: 3 }
-        node transition t1 {
+        node state s1 {
+            type: discrete
+            size: 4
+        }
+        node action a1 {
+            type: discrete
+            size: 3
+        }
+        node observation o1 {
+            type: discrete
+            size: 5
+        }
+        node transition T1 {
             from: [s1, a1]
             to: s1
         }
+        node emission E1 {
+            from: s1
+            to: o1
+        }
         """
+        # Mock returns True for valid GMN
         mock_llm_provider.validate_gmn.return_value = (True, [])
 
         is_valid, errors = await generator.validate_gmn(gmn_spec)

@@ -106,12 +106,12 @@ class TestSecurityPenetrationTesting:
         avg_nonexistent = sum(nonexistent_times) / len(nonexistent_times)
 
         # Time differences should be reasonable (within 50ms)
-        assert abs(avg_correct - avg_wrong) < 0.05, (
-            "Timing attack vulnerability: correct vs wrong password"
-        )
-        assert abs(avg_wrong - avg_nonexistent) < 0.05, (
-            "Timing attack vulnerability: wrong vs nonexistent user"
-        )
+        assert (
+            abs(avg_correct - avg_wrong) < 0.05
+        ), "Timing attack vulnerability: correct vs wrong password"
+        assert (
+            abs(avg_wrong - avg_nonexistent) < 0.05
+        ), "Timing attack vulnerability: wrong vs nonexistent user"
 
     def test_password_hashing_security(self, auth_manager):
         """Test password hashing and storage security."""
@@ -470,9 +470,9 @@ class TestSecurityPenetrationTesting:
 
         # All authentications should succeed
         successful_auths = sum(results)
-        assert successful_auths == 10, (
-            f"Only {successful_auths}/10 concurrent authentications succeeded"
-        )
+        assert (
+            successful_auths == 10
+        ), f"Only {successful_auths}/10 concurrent authentications succeeded"
 
     def test_password_complexity_awareness(self, auth_manager):
         """Test password complexity awareness (not enforcement)."""
@@ -518,13 +518,13 @@ class TestSecurityPenetrationTesting:
             )
 
             # Verify role assignment
-            assert user.role == role, (
-                f"Role not properly assigned: expected {role}, got {user.role}"
-            )
+            assert (
+                user.role == role
+            ), f"Role not properly assigned: expected {role}, got {user.role}"
 
             # Test token contains correct role
             token = auth_manager.create_access_token(user)
             payload = jwt.decode(token, JWT_SECRET, algorithms=[ALGORITHM])
-            assert payload["role"] == role, (
-                f"Token role mismatch: expected {role}, got {payload['role']}"
-            )
+            assert (
+                payload["role"] == role
+            ), f"Token role mismatch: expected {role}, got {payload['role']}"
