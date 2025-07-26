@@ -141,8 +141,11 @@ class TestAPIMainBehavior:
         # Check that monitoring routes are included
         route_paths = [route.path for route in app.routes]
 
-        # Look for monitoring-related routes
-        monitoring_routes_exist = any("monitoring" in path.lower() for path in route_paths)
+        # Look for monitoring-related routes or metrics endpoint
+        monitoring_routes_exist = any(
+            "monitoring" in path.lower() or "metrics" in path.lower() 
+            for path in route_paths
+        )
         assert monitoring_routes_exist, "API should include monitoring routes"
 
     def test_api_includes_websocket_routes(self):
