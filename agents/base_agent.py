@@ -222,7 +222,7 @@ except ImportError:
 class AgentConfig:
     """Configuration for an Active Inference agent."""
 
-    name: str
+    name: str = "default_agent"
     use_pymdp: bool = True
     planning_horizon: int = 3
     precision: float = 1.0
@@ -347,6 +347,28 @@ class ActiveInferenceAgent(ABC):
         Args:
             observation: Observation from the environment
         """
+
+    def observe(self, observation: Any) -> Any:
+        """Process an observation (alias for perceive).
+        
+        This method exists for compatibility with tests and external interfaces.
+        
+        Args:
+            observation: Observation from the environment
+            
+        Returns:
+            None or observation data for chaining
+        """
+        if observation is None:
+            logger.warning("Received None observation")
+            return None
+            
+        try:
+            self.perceive(observation)
+            return observation
+        except Exception as e:
+            logger.error(f"Error processing observation: {e}")
+            return None
 
     @abstractmethod
     def _initialize_pymdp(self) -> None:

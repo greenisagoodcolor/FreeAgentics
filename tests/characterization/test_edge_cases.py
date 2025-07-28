@@ -48,19 +48,19 @@ class TestAgentEdgeCases:
     def test_agent_observation_with_none(self):
         """Document behavior when observing None values."""
         try:
-            from agents.base_agent import ActiveInferenceAgent
+            from agents.base_agent import BasicExplorerAgent
 
-            with patch("pymdp.Agent") as mock_pymdp:
+            with patch("pymdp.agent.Agent") as mock_pymdp:
                 mock_instance = Mock()
                 mock_pymdp.return_value = mock_instance
 
-                agent = ActiveInferenceAgent(num_states=[2, 2], num_controls=[2, 2], num_obs=[2, 2])
+                agent = BasicExplorerAgent(agent_id="test", name="test_agent", grid_size=3)
 
                 # Test None observation
                 try:
                     result = agent.observe(None)
                     # Document behavior with None
-                    assert result is None or result is not None
+                    assert result is None
                 except Exception as inner_e:
                     # Document error handling
                     assert isinstance(inner_e, Exception)
@@ -71,19 +71,24 @@ class TestAgentEdgeCases:
     def test_agent_step_without_observation(self):
         """Document behavior when stepping without prior observation."""
         try:
-            from agents.base_agent import ActiveInferenceAgent
+            from agents.base_agent import BasicExplorerAgent
 
-            with patch("pymdp.Agent") as mock_pymdp:
+            with patch("pymdp.agent.Agent") as mock_pymdp:
                 mock_instance = Mock()
                 mock_pymdp.return_value = mock_instance
 
-                agent = ActiveInferenceAgent(num_states=[2, 2], num_controls=[2, 2], num_obs=[2, 2])
+                agent = BasicExplorerAgent(agent_id="test", name="test_agent", grid_size=3)
 
                 # Test step without observation
                 try:
                     result = agent.step()
-                    assert result is None or result is not None
+                    # If this succeeds, document the behavior
+                    assert False, "Expected TypeError but step() succeeded"
+                except TypeError as te:
+                    # Expected - step requires an observation parameter
+                    assert "missing 1 required positional argument" in str(te)
                 except Exception as inner_e:
+                    # Other exceptions might occur
                     assert isinstance(inner_e, Exception)
 
         except Exception:

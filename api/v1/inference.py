@@ -1,228 +1,170 @@
-"""Inference API endpoints for FreeAgentics platform."""
+"""Inference API endpoints for Active Inference agents.
+
+This module provides REST API endpoints for inference operations,
+including belief updates, action selection, and model queries.
+"""
 
 import logging
-from datetime import datetime
 from typing import Any, Dict, List, Optional
 
-from fastapi import APIRouter, Depends, HTTPException
-from pydantic import BaseModel, Field
+from fastapi import APIRouter, Depends, HTTPException, status
+from pydantic import BaseModel
 
-# Security imports
-from auth.security_implementation import (
-    Permission,
-    TokenData,
-    get_current_user,
-    require_permission,
-)
+from auth.security_implementation import get_current_user
 
 logger = logging.getLogger(__name__)
 
-router = APIRouter()
+# Create router instance
+router = APIRouter(
+    prefix="/inference",
+    tags=["inference"],
+    responses={404: {"description": "Not found"}},
+)
 
 
 class InferenceRequest(BaseModel):
     """Request model for inference operations."""
-
-    agent_id: str = Field(..., description="ID of the agent to perform inference")
-    observation: Dict[str, Any] = Field(..., description="Observation data")
-    context: Optional[Dict[str, Any]] = Field(default=None, description="Additional context")
+    agent_id: str
+    observation: Optional[Any] = None
+    context: Optional[Dict[str, Any]] = None
 
 
 class InferenceResponse(BaseModel):
     """Response model for inference operations."""
-
     agent_id: str
-    action: Any
+    action: Optional[Any] = None
     beliefs: Optional[Dict[str, Any]] = None
-    free_energy: Optional[float] = None
-    timestamp: datetime
-    execution_time_ms: Optional[float] = None
+    confidence: float = 0.0
+    metadata: Optional[Dict[str, Any]] = None
 
 
-class BeliefUpdate(BaseModel):
-    """Model for belief state updates."""
-
+class ModelQueryRequest(BaseModel):
+    """Request model for querying agent models."""
     agent_id: str
-    new_beliefs: Dict[str, Any]
-    timestamp: datetime
+    query_type: str
+    parameters: Optional[Dict[str, Any]] = None
 
 
-@router.post("/inference", response_model=InferenceResponse)
-@require_permission(Permission.MODIFY_AGENT)
-async def perform_inference(
-    request: InferenceRequest,
-    current_user: TokenData = Depends(get_current_user),
-) -> InferenceResponse:
-    """Perform Active Inference for an agent.
-
-    This endpoint processes an observation through an agent's Active Inference
-    system and returns the selected action along with updated beliefs.
-    """
-    try:
-        start_time = datetime.now()
-
-        # For now, return a placeholder response
-        # In a full implementation, this would:
-        # 1. Get the agent from the agent manager
-        # 2. Process the observation through the agent's inference system
-        # 3. Return the selected action and updated beliefs
-
-        response = InferenceResponse(
-            agent_id=request.agent_id,
-            action="stay",  # Placeholder action
-            beliefs={"uncertainty": 0.5, "position": [0, 0]},
-            free_energy=1.23,
-            timestamp=datetime.now(),
-            execution_time_ms=(datetime.now() - start_time).total_seconds() * 1000,
-        )
-
-        logger.info(f"Performed inference for agent {request.agent_id}")
-        return response
-
-    except Exception as e:
-        logger.error(f"Inference failed for agent {request.agent_id}: {e}")
-        raise HTTPException(status_code=500, detail=f"Inference failed: {str(e)}")
+class ModelQueryResponse(BaseModel):
+    """Response model for model queries."""
+    agent_id: str
+    query_type: str
+    result: Any
+    metadata: Optional[Dict[str, Any]] = None
 
 
-@router.post("/inference/batch", response_model=List[InferenceResponse])
-@require_permission(Permission.MODIFY_AGENT)
-async def perform_batch_inference(
-    requests: List[InferenceRequest],
-    current_user: TokenData = Depends(get_current_user),
-) -> List[InferenceResponse]:
-    """Perform batch inference for multiple agents.
-
-    This endpoint allows processing multiple observations simultaneously
-    for improved throughput in multi-agent scenarios.
-    """
-    responses = []
-
-    for request in requests:
-        try:
-            response = await perform_inference(request)
-            responses.append(response)
-        except Exception as e:
-            logger.error(f"Batch inference failed for agent {request.agent_id}: {e}")
-            # Continue with other agents even if one fails
-            continue
-
-    logger.info(f"Performed batch inference for {len(responses)}/{len(requests)} agents")
-    return responses
-
-
-@router.put("/beliefs/{agent_id}", response_model=BeliefUpdate)
-@require_permission(Permission.MODIFY_AGENT)
+@router.post("/update_beliefs", response_model=InferenceResponse)
 async def update_beliefs(
-    agent_id: str,
-    beliefs: Dict[str, Any],
-    current_user: TokenData = Depends(get_current_user),
-) -> BeliefUpdate:
-    """Manually update an agent's belief state.
-
-    This endpoint allows direct manipulation of an agent's beliefs,
-    useful for testing or manual intervention scenarios.
+    request: InferenceRequest,
+    current_user: Dict = Depends(get_current_user)
+) -> InferenceResponse:
+    """Update agent beliefs based on new observation.
+    
+    Args:
+        request: Inference request with agent ID and observation
+        current_user: Authenticated user from JWT
+        
+    Returns:
+        InferenceResponse with updated beliefs
     """
-    try:
-        # In a full implementation, this would update the agent's beliefs
-        # through the agent manager
+    logger.info(f"Updating beliefs for agent {request.agent_id}")
+    
+    # TODO: Implement actual belief update logic with PyMDP
+    # For now, return mock response for demo
+    return InferenceResponse(
+        agent_id=request.agent_id,
+        beliefs={
+            "location": {"x": 0, "y": 0, "confidence": 0.8},
+            "environment": {"explored": 0.2, "objects_found": 0}
+        },
+        confidence=0.8,
+        metadata={"method": "active_inference", "timestamp": "2024-01-01T00:00:00Z"}
+    )
 
-        update = BeliefUpdate(agent_id=agent_id, new_beliefs=beliefs, timestamp=datetime.now())
 
-        logger.info(f"Updated beliefs for agent {agent_id}")
-        return update
-
-    except Exception as e:
-        logger.error(f"Failed to update beliefs for agent {agent_id}: {e}")
-        raise HTTPException(status_code=500, detail=f"Belief update failed: {str(e)}")
-
-
-@router.get("/beliefs/{agent_id}")
-@require_permission(Permission.VIEW_AGENTS)
-async def get_beliefs(
-    agent_id: str, current_user: TokenData = Depends(get_current_user)
-) -> Dict[str, Any]:
-    """Get current belief state for an agent.
-
-    Returns the agent's current beliefs about hidden states
-    and other internal representations.
+@router.post("/select_action", response_model=InferenceResponse)
+async def select_action(
+    request: InferenceRequest,
+    current_user: Dict = Depends(get_current_user)
+) -> InferenceResponse:
+    """Select next action based on current beliefs and preferences.
+    
+    Args:
+        request: Inference request with agent ID and context
+        current_user: Authenticated user from JWT
+        
+    Returns:
+        InferenceResponse with selected action
     """
-    try:
-        # In a full implementation, this would query the agent's current beliefs
-        # from the agent manager
-
-        beliefs = {
-            "agent_id": agent_id,
-            "beliefs": {
-                "position_uncertainty": 0.3,
-                "goal_location": None,
-                "explored_area": 0.25,
-            },
-            "last_updated": datetime.now().isoformat(),
-            "inference_step": 42,
+    logger.info(f"Selecting action for agent {request.agent_id}")
+    
+    # TODO: Implement actual action selection with expected free energy
+    # For now, return mock response for demo
+    return InferenceResponse(
+        agent_id=request.agent_id,
+        action={"type": "move", "direction": "north", "distance": 1},
+        confidence=0.75,
+        metadata={
+            "expected_free_energy": -2.5,
+            "alternative_actions": [
+                {"type": "explore", "confidence": 0.6},
+                {"type": "wait", "confidence": 0.4}
+            ]
         }
-
-        logger.info(f"Retrieved beliefs for agent {agent_id}")
-        return beliefs
-
-    except Exception as e:
-        logger.error(f"Failed to get beliefs for agent {agent_id}: {e}")
-        raise HTTPException(status_code=404, detail=f"Agent {agent_id} not found")
+    )
 
 
-@router.get("/inference/status")
-@require_permission(Permission.VIEW_METRICS)
-async def get_inference_status(
-    current_user: TokenData = Depends(get_current_user),
-) -> Dict[str, Any]:
-    """Get status of the inference system.
-
-    Returns information about the current state of the inference engine,
-    including available models and system resources.
+@router.post("/query_model", response_model=ModelQueryResponse)
+async def query_model(
+    request: ModelQueryRequest,
+    current_user: Dict = Depends(get_current_user)
+) -> ModelQueryResponse:
+    """Query agent's generative model.
+    
+    Args:
+        request: Model query request
+        current_user: Authenticated user from JWT
+        
+    Returns:
+        ModelQueryResponse with query results
     """
+    logger.info(f"Querying model for agent {request.agent_id}, type: {request.query_type}")
+    
+    # TODO: Implement actual model query logic
+    # For now, return mock response based on query type
+    result = {}
+    if request.query_type == "parameters":
+        result = {
+            "A_matrix_shape": [10, 10],
+            "B_matrix_shape": [10, 10, 4],
+            "C_vector": [0.0] * 10,
+            "D_vector": [0.25, 0.25, 0.25, 0.25]
+        }
+    elif request.query_type == "free_energy":
+        result = {"variational_free_energy": -3.14, "expected_free_energy": -2.71}
+    
+    return ModelQueryResponse(
+        agent_id=request.agent_id,
+        query_type=request.query_type,
+        result=result,
+        metadata={"model_version": "1.0.0", "pymdp_version": "0.0.1"}
+    )
+
+
+@router.get("/health")
+async def inference_health() -> Dict[str, str]:
+    """Health check endpoint for inference service.
+    
+    Returns:
+        Dictionary with health status
+    """
+    logger.debug("Inference health check")
     return {
-        "status": "ready",
-        "inference_engine": "PyMDP",
-        "available_models": ["active_inference", "belief_propagation"],
-        "active_agents": 0,
-        "total_inferences": 0,
-        "avg_inference_time_ms": 0.0,
-        "last_updated": datetime.now().isoformat(),
+        "status": "healthy",
+        "service": "inference",
+        "pymdp_available": "true"  # TODO: Actually check PyMDP availability
     }
 
 
-@router.get("/inference/capabilities")
-@require_permission(Permission.VIEW_AGENTS)
-async def get_inference_capabilities(
-    current_user: TokenData = Depends(get_current_user),
-) -> Dict[str, Any]:
-    """Get capabilities of the inference system.
-
-    Returns detailed information about what inference methods
-    and algorithms are available.
-    """
-    return {
-        "algorithms": {
-            "active_inference": {
-                "available": True,
-                "methods": ["variational_message_passing", "mean_field"],
-                "planning_horizons": [1, 2, 3, 5, 10],
-            },
-            "belief_propagation": {
-                "available": False,
-                "reason": "Not implemented yet",
-            },
-            "particle_filtering": {
-                "available": False,
-                "reason": "Not implemented yet",
-            },
-        },
-        "generative_models": {
-            "gmn_format": {"supported": True, "parser_version": "0.1.0"},
-            "pymdp_format": {"supported": True, "version": "0.1.0"},
-        },
-        "integration": {
-            "llm_providers": ["ollama", "llamacpp"],
-            "gnn_frameworks": ["torch_geometric"],
-            "world_types": ["grid_world", "continuous_space"],
-        },
-    }
+# Export router and routes for testing
+__all__ = ["router"]

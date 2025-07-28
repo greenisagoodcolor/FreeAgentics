@@ -1,0 +1,917 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>FreeAgentics - Active Inference Demo</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: #0a0a0a;
+            color: #ffffff;
+            overflow: hidden;
+        }
+        
+        #header {
+            background: linear-gradient(135deg, #1e3c72 0%, #2a5298 100%);
+            padding: 20px;
+            text-align: center;
+            box-shadow: 0 2px 20px rgba(0,0,0,0.5);
+        }
+        
+        h1 {
+            font-size: 2.5em;
+            margin-bottom: 10px;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.3);
+        }
+        
+        .subtitle {
+            font-size: 1.2em;
+            color: #b8d4f1;
+        }
+        
+        #main-container {
+            display: flex;
+            height: calc(100vh - 120px);
+            gap: 20px;
+            padding: 20px;
+        }
+        
+        #world-container {
+            flex: 2;
+            background: #1a1a1a;
+            border-radius: 10px;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.3);
+            position: relative;
+            overflow: hidden;
+        }
+        
+        #world-canvas {
+            width: 100%;
+            height: 100%;
+            cursor: crosshair;
+        }
+        
+        #sidebar {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+        }
+        
+        .panel {
+            background: #1a1a1a;
+            border-radius: 10px;
+            padding: 20px;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.3);
+        }
+        
+        .panel h2 {
+            margin-bottom: 15px;
+            color: #4a9eff;
+            font-size: 1.4em;
+        }
+        
+        #controls {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 15px;
+        }
+        
+        button {
+            background: #4a9eff;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 16px;
+            transition: all 0.3s ease;
+        }
+        
+        button:hover {
+            background: #357abd;
+            transform: translateY(-2px);
+            box-shadow: 0 4px 10px rgba(74, 158, 255, 0.3);
+        }
+        
+        button:active {
+            transform: translateY(0);
+        }
+        
+        button:disabled {
+            background: #555;
+            cursor: not-allowed;
+        }
+        
+        .agent-list {
+            max-height: 300px;
+            overflow-y: auto;
+        }
+        
+        .agent-item {
+            background: #2a2a2a;
+            border-radius: 5px;
+            padding: 10px;
+            margin-bottom: 10px;
+            border-left: 4px solid #4a9eff;
+            transition: all 0.3s ease;
+        }
+        
+        .agent-item:hover {
+            background: #3a3a3a;
+            transform: translateX(5px);
+        }
+        
+        .agent-name {
+            font-weight: bold;
+            margin-bottom: 5px;
+        }
+        
+        .agent-stats {
+            font-size: 0.9em;
+            color: #aaa;
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 5px;
+        }
+        
+        .stat {
+            display: flex;
+            justify-content: space-between;
+        }
+        
+        .stat-value {
+            color: #4a9eff;
+            font-weight: bold;
+        }
+        
+        #stats-panel {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 15px;
+        }
+        
+        .global-stat {
+            background: #2a2a2a;
+            padding: 15px;
+            border-radius: 5px;
+            text-align: center;
+        }
+        
+        .global-stat-value {
+            font-size: 2em;
+            font-weight: bold;
+            color: #4a9eff;
+            margin-top: 5px;
+        }
+        
+        .global-stat-label {
+            color: #888;
+            font-size: 0.9em;
+        }
+        
+        /* Loading animation */
+        .loading {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            font-size: 1.5em;
+            color: #4a9eff;
+        }
+        
+        .loading::after {
+            content: '';
+            animation: dots 1.5s infinite;
+        }
+        
+        @keyframes dots {
+            0%, 20% { content: '.'; }
+            40% { content: '..'; }
+            60%, 100% { content: '...'; }
+        }
+        
+        /* Particle effects */
+        .particle {
+            position: absolute;
+            width: 4px;
+            height: 4px;
+            background: #4a9eff;
+            border-radius: 50%;
+            pointer-events: none;
+            animation: particle-float 2s ease-out forwards;
+        }
+        
+        @keyframes particle-float {
+            0% {
+                opacity: 1;
+                transform: translate(0, 0) scale(1);
+            }
+            100% {
+                opacity: 0;
+                transform: translate(var(--tx), var(--ty)) scale(0.5);
+            }
+        }
+        
+        /* Agent colors */
+        .agent-explorer { border-left-color: #4a9eff !important; }
+        .agent-collector { border-left-color: #4ade80 !important; }
+        .agent-analyzer { border-left-color: #a855f7 !important; }
+        .agent-scout { border-left-color: #fb923c !important; }
+        
+        /* Tooltips */
+        .tooltip {
+            position: absolute;
+            background: rgba(0, 0, 0, 0.9);
+            color: white;
+            padding: 8px 12px;
+            border-radius: 5px;
+            font-size: 0.9em;
+            pointer-events: none;
+            z-index: 1000;
+            opacity: 0;
+            transition: opacity 0.3s ease;
+        }
+        
+        .tooltip.show {
+            opacity: 1;
+        }
+    </style>
+</head>
+<body>
+    <div id="header">
+        <h1>🧠 FreeAgentics Active Inference Demo</h1>
+        <div class="subtitle">Watch autonomous agents explore, learn, and minimize free energy</div>
+    </div>
+    
+    <div id="main-container">
+        <div id="world-container">
+            <canvas id="world-canvas"></canvas>
+            <div class="loading" id="loading">Initializing world</div>
+        </div>
+        
+        <div id="sidebar">
+            <div class="panel">
+                <h2>🎮 Controls</h2>
+                <div id="controls">
+                    <button id="start-btn">Start</button>
+                    <button id="pause-btn" disabled>Pause</button>
+                    <button id="reset-btn">Reset</button>
+                </div>
+                <div id="controls">
+                    <button id="add-agent-btn">Add Agent</button>
+                    <button id="speed-btn">Speed: 1x</button>
+                </div>
+            </div>
+            
+            <div class="panel">
+                <h2>📊 Global Statistics</h2>
+                <div id="stats-panel">
+                    <div class="global-stat">
+                        <div class="global-stat-label">Resources</div>
+                        <div class="global-stat-value" id="total-resources">0</div>
+                    </div>
+                    <div class="global-stat">
+                        <div class="global-stat-label">Goals</div>
+                        <div class="global-stat-value" id="total-goals">0</div>
+                    </div>
+                    <div class="global-stat">
+                        <div class="global-stat-label">Agents</div>
+                        <div class="global-stat-value" id="total-agents">0</div>
+                    </div>
+                    <div class="global-stat">
+                        <div class="global-stat-label">Tick</div>
+                        <div class="global-stat-value" id="tick-count">0</div>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="panel" style="flex: 1; overflow: hidden;">
+                <h2>🤖 Active Agents</h2>
+                <div class="agent-list" id="agent-list">
+                    <!-- Agents will be added here dynamically -->
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <div class="tooltip" id="tooltip"></div>
+    
+    <script>
+        // Constants
+        const CELL_SIZE = 20;
+        const AGENT_RADIUS = 8;
+        const RESOURCE_RADIUS = 6;
+        const GOAL_RADIUS = 10;
+        
+        // Colors
+        const COLORS = {
+            empty: '#2a2a2a',
+            wall: '#000000',
+            resource: '#fbbf24',
+            danger: '#ef4444',
+            goal: '#84cc16',
+            grid: '#333333',
+            agents: {
+                explorer: '#4a9eff',
+                collector: '#4ade80',
+                analyzer: '#a855f7',
+                scout: '#fb923c'
+            }
+        };
+        
+        // State
+        let world = null;
+        let agents = [];
+        let running = false;
+        let speed = 1;
+        let tick = 0;
+        let animationId = null;
+        
+        // Canvas setup
+        const canvas = document.getElementById('world-canvas');
+        const ctx = canvas.getContext('2d');
+        const tooltip = document.getElementById('tooltip');
+        
+        // Resize canvas
+        function resizeCanvas() {
+            const container = document.getElementById('world-container');
+            canvas.width = container.clientWidth;
+            canvas.height = container.clientHeight;
+            if (world) drawWorld();
+        }
+        
+        window.addEventListener('resize', resizeCanvas);
+        
+        // Initialize world
+        async function initializeWorld() {
+            try {
+                // For demo, create a simple world
+                world = {
+                    width: 25,
+                    height: 20,
+                    grid: [],
+                    resources: [],
+                    dangers: [],
+                    goals: []
+                };
+                
+                // Initialize grid
+                for (let y = 0; y < world.height; y++) {
+                    world.grid[y] = [];
+                    for (let x = 0; x < world.width; x++) {
+                        world.grid[y][x] = 'empty';
+                    }
+                }
+                
+                // Add some walls
+                createRooms();
+                
+                // Add features
+                placeFeatures('resource', 20, world.resources);
+                placeFeatures('danger', 10, world.dangers);
+                placeFeatures('goal', 4, world.goals);
+                
+                // Create initial agents
+                await createInitialAgents();
+                
+                // Hide loading
+                document.getElementById('loading').style.display = 'none';
+                
+                // Initial draw
+                resizeCanvas();
+                updateUI();
+                
+            } catch (error) {
+                console.error('Failed to initialize world:', error);
+            }
+        }
+        
+        function createRooms() {
+            // Create some interesting rooms
+            for (let i = 0; i < 3; i++) {
+                const x = Math.floor(Math.random() * (world.width - 10)) + 3;
+                const y = Math.floor(Math.random() * (world.height - 10)) + 3;
+                const w = Math.floor(Math.random() * 5) + 5;
+                const h = Math.floor(Math.random() * 5) + 5;
+                
+                // Create walls with doors
+                for (let dx = 0; dx < w; dx++) {
+                    if (dx !== Math.floor(w/2)) {
+                        world.grid[y][x + dx] = 'wall';
+                        world.grid[y + h - 1][x + dx] = 'wall';
+                    }
+                }
+                
+                for (let dy = 0; dy < h; dy++) {
+                    if (dy !== Math.floor(h/2)) {
+                        world.grid[y + dy][x] = 'wall';
+                        world.grid[y + dy][x + w - 1] = 'wall';
+                    }
+                }
+            }
+        }
+        
+        function placeFeatures(type, count, storage) {
+            let placed = 0;
+            let attempts = 0;
+            
+            while (placed < count && attempts < count * 10) {
+                const x = Math.floor(Math.random() * world.width);
+                const y = Math.floor(Math.random() * world.height);
+                
+                if (world.grid[y][x] === 'empty') {
+                    world.grid[y][x] = type;
+                    storage.push({x, y});
+                    placed++;
+                }
+                attempts++;
+            }
+        }
+        
+        async function createInitialAgents() {
+            const agentTypes = ['explorer', 'collector', 'analyzer', 'scout'];
+            const names = ['Alpha', 'Beta', 'Gamma', 'Delta'];
+            
+            for (let i = 0; i < 4; i++) {
+                const agent = {
+                    id: `agent_${i}`,
+                    name: `${names[i]} ${agentTypes[i].charAt(0).toUpperCase() + agentTypes[i].slice(1)}`,
+                    type: agentTypes[i],
+                    position: findEmptyPosition(),
+                    resources: 0,
+                    goals: 0,
+                    steps: 0,
+                    freeEnergy: 0,
+                    path: [],
+                    beliefs: createBeliefMap()
+                };
+                
+                agents.push(agent);
+            }
+            
+            updateAgentList();
+        }
+        
+        function findEmptyPosition() {
+            let attempts = 0;
+            while (attempts < 100) {
+                const x = Math.floor(Math.random() * world.width);
+                const y = Math.floor(Math.random() * world.height);
+                
+                if (world.grid[y][x] === 'empty') {
+                    return {x, y};
+                }
+                attempts++;
+            }
+            return {x: 1, y: 1};
+        }
+        
+        function createBeliefMap() {
+            // Simple belief representation
+            const beliefs = [];
+            for (let y = 0; y < world.height; y++) {
+                beliefs[y] = [];
+                for (let x = 0; x < world.width; x++) {
+                    beliefs[y][x] = 0.1; // Initial uncertainty
+                }
+            }
+            return beliefs;
+        }
+        
+        // Drawing functions
+        function drawWorld() {
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+            
+            // Calculate offset to center the world
+            const worldWidth = world.width * CELL_SIZE;
+            const worldHeight = world.height * CELL_SIZE;
+            const offsetX = (canvas.width - worldWidth) / 2;
+            const offsetY = (canvas.height - worldHeight) / 2;
+            
+            // Draw grid
+            ctx.strokeStyle = COLORS.grid;
+            ctx.lineWidth = 0.5;
+            
+            for (let x = 0; x <= world.width; x++) {
+                ctx.beginPath();
+                ctx.moveTo(offsetX + x * CELL_SIZE, offsetY);
+                ctx.lineTo(offsetX + x * CELL_SIZE, offsetY + worldHeight);
+                ctx.stroke();
+            }
+            
+            for (let y = 0; y <= world.height; y++) {
+                ctx.beginPath();
+                ctx.moveTo(offsetX, offsetY + y * CELL_SIZE);
+                ctx.lineTo(offsetX + worldWidth, offsetY + y * CELL_SIZE);
+                ctx.stroke();
+            }
+            
+            // Draw cells
+            for (let y = 0; y < world.height; y++) {
+                for (let x = 0; x < world.width; x++) {
+                    const cellType = world.grid[y][x];
+                    const cellX = offsetX + x * CELL_SIZE;
+                    const cellY = offsetY + y * CELL_SIZE;
+                    
+                    if (cellType === 'wall') {
+                        ctx.fillStyle = COLORS.wall;
+                        ctx.fillRect(cellX, cellY, CELL_SIZE, CELL_SIZE);
+                    } else if (cellType === 'resource') {
+                        ctx.fillStyle = COLORS.resource;
+                        ctx.beginPath();
+                        ctx.arc(cellX + CELL_SIZE/2, cellY + CELL_SIZE/2, RESOURCE_RADIUS, 0, Math.PI * 2);
+                        ctx.fill();
+                    } else if (cellType === 'danger') {
+                        ctx.fillStyle = COLORS.danger;
+                        ctx.fillRect(cellX + 4, cellY + 4, CELL_SIZE - 8, CELL_SIZE - 8);
+                    } else if (cellType === 'goal') {
+                        ctx.fillStyle = COLORS.goal;
+                        ctx.strokeStyle = '#65a30d';
+                        ctx.lineWidth = 2;
+                        ctx.beginPath();
+                        ctx.arc(cellX + CELL_SIZE/2, cellY + CELL_SIZE/2, GOAL_RADIUS, 0, Math.PI * 2);
+                        ctx.fill();
+                        ctx.stroke();
+                    }
+                }
+            }
+            
+            // Draw agent beliefs (as transparency overlay)
+            ctx.globalAlpha = 0.3;
+            agents.forEach(agent => {
+                ctx.fillStyle = COLORS.agents[agent.type];
+                for (let y = 0; y < world.height; y++) {
+                    for (let x = 0; x < world.width; x++) {
+                        const belief = agent.beliefs[y][x];
+                        if (belief > 0.5) {
+                            const cellX = offsetX + x * CELL_SIZE;
+                            const cellY = offsetY + y * CELL_SIZE;
+                            ctx.globalAlpha = belief * 0.3;
+                            ctx.fillRect(cellX, cellY, CELL_SIZE, CELL_SIZE);
+                        }
+                    }
+                }
+            });
+            ctx.globalAlpha = 1;
+            
+            // Draw agents
+            agents.forEach((agent, index) => {
+                const agentX = offsetX + agent.position.x * CELL_SIZE + CELL_SIZE/2;
+                const agentY = offsetY + agent.position.y * CELL_SIZE + CELL_SIZE/2;
+                
+                // Draw agent circle
+                ctx.fillStyle = COLORS.agents[agent.type];
+                ctx.strokeStyle = '#000';
+                ctx.lineWidth = 2;
+                ctx.beginPath();
+                ctx.arc(agentX, agentY, AGENT_RADIUS, 0, Math.PI * 2);
+                ctx.fill();
+                ctx.stroke();
+                
+                // Draw agent ID
+                ctx.fillStyle = '#fff';
+                ctx.font = 'bold 10px Arial';
+                ctx.textAlign = 'center';
+                ctx.textBaseline = 'middle';
+                ctx.fillText(index + 1, agentX, agentY);
+                
+                // Animate agent (pulse effect)
+                if (running) {
+                    ctx.strokeStyle = COLORS.agents[agent.type];
+                    ctx.globalAlpha = 0.3 + Math.sin(Date.now() / 500 + index) * 0.2;
+                    ctx.lineWidth = 3;
+                    ctx.beginPath();
+                    ctx.arc(agentX, agentY, AGENT_RADIUS + 5, 0, Math.PI * 2);
+                    ctx.stroke();
+                    ctx.globalAlpha = 1;
+                }
+            });
+        }
+        
+        // Simulation
+        function simulationStep() {
+            if (!running) return;
+            
+            tick++;
+            
+            // Update each agent
+            agents.forEach(agent => {
+                // Simple Active Inference simulation
+                updateBeliefs(agent);
+                const action = selectAction(agent);
+                executeAction(agent, action);
+            });
+            
+            // Update UI
+            updateUI();
+            drawWorld();
+            
+            // Schedule next step
+            const delay = 1000 / speed;
+            animationId = setTimeout(() => {
+                requestAnimationFrame(simulationStep);
+            }, delay);
+        }
+        
+        function updateBeliefs(agent) {
+            // Update beliefs based on current observation
+            const {x, y} = agent.position;
+            
+            // Mark current position as explored
+            agent.beliefs[y][x] = 1.0;
+            
+            // Update nearby beliefs
+            for (let dy = -1; dy <= 1; dy++) {
+                for (let dx = -1; dx <= 1; dx++) {
+                    const nx = x + dx;
+                    const ny = y + dy;
+                    
+                    if (nx >= 0 && nx < world.width && ny >= 0 && ny < world.height) {
+                        agent.beliefs[ny][nx] = Math.min(1.0, agent.beliefs[ny][nx] + 0.3);
+                    }
+                }
+            }
+            
+            // Decay distant beliefs (forgetting)
+            for (let by = 0; by < world.height; by++) {
+                for (let bx = 0; bx < world.width; bx++) {
+                    const distance = Math.abs(bx - x) + Math.abs(by - y);
+                    if (distance > 3) {
+                        agent.beliefs[by][bx] *= 0.98;
+                    }
+                }
+            }
+        }
+        
+        function selectAction(agent) {
+            // Simple Active Inference action selection
+            const actions = [
+                {dx: 0, dy: -1, name: 'north'},
+                {dx: 0, dy: 1, name: 'south'},
+                {dx: 1, dy: 0, name: 'east'},
+                {dx: -1, dy: 0, name: 'west'},
+                {dx: 0, dy: 0, name: 'stay'}
+            ];
+            
+            let bestAction = actions[4]; // Default: stay
+            let bestValue = -Infinity;
+            
+            actions.forEach(action => {
+                const newX = agent.position.x + action.dx;
+                const newY = agent.position.y + action.dy;
+                
+                if (newX >= 0 && newX < world.width && newY >= 0 && newY < world.height) {
+                    if (world.grid[newY][newX] !== 'wall') {
+                        // Calculate expected free energy (simplified)
+                        let value = 0;
+                        
+                        // Exploration bonus
+                        const uncertainty = 1 - agent.beliefs[newY][newX];
+                        value += uncertainty * (agent.type === 'explorer' ? 2.0 : 0.5);
+                        
+                        // Resource attraction
+                        if (world.grid[newY][newX] === 'resource') {
+                            value += agent.type === 'collector' ? 5.0 : 2.0;
+                        }
+                        
+                        // Goal attraction
+                        if (world.grid[newY][newX] === 'goal') {
+                            value += 10.0;
+                        }
+                        
+                        // Danger avoidance
+                        if (world.grid[newY][newX] === 'danger') {
+                            value -= 10.0;
+                        }
+                        
+                        // Add noise for stochasticity
+                        value += Math.random() * 0.5;
+                        
+                        if (value > bestValue) {
+                            bestValue = value;
+                            bestAction = action;
+                        }
+                    }
+                }
+            });
+            
+            // Update free energy estimate
+            agent.freeEnergy = agent.freeEnergy * 0.9 + Math.abs(bestValue) * 0.1;
+            
+            return bestAction;
+        }
+        
+        function executeAction(agent, action) {
+            const newX = agent.position.x + action.dx;
+            const newY = agent.position.y + action.dy;
+            
+            if (newX >= 0 && newX < world.width && newY >= 0 && newY < world.height) {
+                if (world.grid[newY][newX] !== 'wall') {
+                    // Move agent
+                    agent.position.x = newX;
+                    agent.position.y = newY;
+                    agent.steps++;
+                    
+                    // Collect resource
+                    if (world.grid[newY][newX] === 'resource') {
+                        agent.resources++;
+                        world.grid[newY][newX] = 'empty';
+                        createParticles(newX, newY, COLORS.resource);
+                    }
+                    
+                    // Reach goal
+                    if (world.grid[newY][newX] === 'goal') {
+                        agent.goals++;
+                        createParticles(newX, newY, COLORS.goal);
+                    }
+                }
+            }
+        }
+        
+        function createParticles(x, y, color) {
+            // Create particle effect
+            const container = document.getElementById('world-container');
+            const worldWidth = world.width * CELL_SIZE;
+            const worldHeight = world.height * CELL_SIZE;
+            const offsetX = (canvas.width - worldWidth) / 2;
+            const offsetY = (canvas.height - worldHeight) / 2;
+            
+            for (let i = 0; i < 10; i++) {
+                const particle = document.createElement('div');
+                particle.className = 'particle';
+                particle.style.backgroundColor = color;
+                particle.style.left = (offsetX + x * CELL_SIZE + CELL_SIZE/2) + 'px';
+                particle.style.top = (offsetY + y * CELL_SIZE + CELL_SIZE/2) + 'px';
+                particle.style.setProperty('--tx', (Math.random() - 0.5) * 50 + 'px');
+                particle.style.setProperty('--ty', (Math.random() - 0.5) * 50 + 'px');
+                container.appendChild(particle);
+                
+                setTimeout(() => particle.remove(), 2000);
+            }
+        }
+        
+        // UI Updates
+        function updateUI() {
+            // Update global stats
+            const totalResources = agents.reduce((sum, a) => sum + a.resources, 0);
+            const totalGoals = agents.reduce((sum, a) => sum + a.goals, 0);
+            
+            document.getElementById('total-resources').textContent = totalResources;
+            document.getElementById('total-goals').textContent = totalGoals;
+            document.getElementById('total-agents').textContent = agents.length;
+            document.getElementById('tick-count').textContent = tick;
+            
+            // Update agent list
+            updateAgentList();
+        }
+        
+        function updateAgentList() {
+            const list = document.getElementById('agent-list');
+            list.innerHTML = '';
+            
+            agents.forEach((agent, index) => {
+                const item = document.createElement('div');
+                item.className = `agent-item agent-${agent.type}`;
+                
+                item.innerHTML = `
+                    <div class="agent-name">${index + 1}. ${agent.name}</div>
+                    <div class="agent-stats">
+                        <div class="stat">
+                            <span>Resources:</span>
+                            <span class="stat-value">${agent.resources}</span>
+                        </div>
+                        <div class="stat">
+                            <span>Goals:</span>
+                            <span class="stat-value">${agent.goals}</span>
+                        </div>
+                        <div class="stat">
+                            <span>Steps:</span>
+                            <span class="stat-value">${agent.steps}</span>
+                        </div>
+                        <div class="stat">
+                            <span>Free Energy:</span>
+                            <span class="stat-value">${agent.freeEnergy.toFixed(2)}</span>
+                        </div>
+                    </div>
+                `;
+                
+                list.appendChild(item);
+            });
+        }
+        
+        // Event handlers
+        document.getElementById('start-btn').addEventListener('click', () => {
+            running = true;
+            document.getElementById('start-btn').disabled = true;
+            document.getElementById('pause-btn').disabled = false;
+            simulationStep();
+        });
+        
+        document.getElementById('pause-btn').addEventListener('click', () => {
+            running = false;
+            if (animationId) {
+                clearTimeout(animationId);
+                animationId = null;
+            }
+            document.getElementById('start-btn').disabled = false;
+            document.getElementById('pause-btn').disabled = true;
+        });
+        
+        document.getElementById('reset-btn').addEventListener('click', () => {
+            running = false;
+            if (animationId) {
+                clearTimeout(animationId);
+                animationId = null;
+            }
+            tick = 0;
+            agents = [];
+            initializeWorld();
+            document.getElementById('start-btn').disabled = false;
+            document.getElementById('pause-btn').disabled = true;
+        });
+        
+        document.getElementById('add-agent-btn').addEventListener('click', () => {
+            const types = ['explorer', 'collector', 'analyzer', 'scout'];
+            const type = types[agents.length % types.length];
+            const names = ['Epsilon', 'Zeta', 'Eta', 'Theta', 'Iota', 'Kappa'];
+            const name = names[agents.length % names.length];
+            
+            const agent = {
+                id: `agent_${agents.length}`,
+                name: `${name} ${type.charAt(0).toUpperCase() + type.slice(1)}`,
+                type: type,
+                position: findEmptyPosition(),
+                resources: 0,
+                goals: 0,
+                steps: 0,
+                freeEnergy: 0,
+                path: [],
+                beliefs: createBeliefMap()
+            };
+            
+            agents.push(agent);
+            updateUI();
+            drawWorld();
+        });
+        
+        document.getElementById('speed-btn').addEventListener('click', () => {
+            const speeds = [1, 2, 5, 10];
+            const currentIndex = speeds.indexOf(speed);
+            speed = speeds[(currentIndex + 1) % speeds.length];
+            document.getElementById('speed-btn').textContent = `Speed: ${speed}x`;
+        });
+        
+        // Canvas interaction
+        canvas.addEventListener('mousemove', (e) => {
+            const rect = canvas.getBoundingClientRect();
+            const x = e.clientX - rect.left;
+            const y = e.clientY - rect.top;
+            
+            const worldWidth = world.width * CELL_SIZE;
+            const worldHeight = world.height * CELL_SIZE;
+            const offsetX = (canvas.width - worldWidth) / 2;
+            const offsetY = (canvas.height - worldHeight) / 2;
+            
+            const cellX = Math.floor((x - offsetX) / CELL_SIZE);
+            const cellY = Math.floor((y - offsetY) / CELL_SIZE);
+            
+            if (cellX >= 0 && cellX < world.width && cellY >= 0 && cellY < world.height) {
+                const cellType = world.grid[cellY][cellX];
+                let text = `Position: (${cellX}, ${cellY})`;
+                
+                if (cellType !== 'empty') {
+                    text += ` - ${cellType.charAt(0).toUpperCase() + cellType.slice(1)}`;
+                }
+                
+                // Check for agents
+                const agentHere = agents.find(a => a.position.x === cellX && a.position.y === cellY);
+                if (agentHere) {
+                    text = `${agentHere.name} - ${text}`;
+                }
+                
+                tooltip.textContent = text;
+                tooltip.style.left = e.clientX + 10 + 'px';
+                tooltip.style.top = e.clientY - 30 + 'px';
+                tooltip.classList.add('show');
+            } else {
+                tooltip.classList.remove('show');
+            }
+        });
+        
+        canvas.addEventListener('mouseleave', () => {
+            tooltip.classList.remove('show');
+        });
+        
+        // Initialize on load
+        window.addEventListener('load', initializeWorld);
+    </script>
+</body>
+</html>

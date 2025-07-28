@@ -5,7 +5,8 @@ from contextlib import asynccontextmanager
 
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
-from fastapi.responses import Response
+from fastapi.responses import Response, FileResponse
+from fastapi.staticfiles import StaticFiles
 
 from api.middleware.security_monitoring import SecurityMonitoringMiddleware
 from api import ui_compatibility
@@ -176,6 +177,20 @@ app.include_router(ui_compatibility.router, prefix="/api", tags=["ui-compatibili
 # Include GraphQL router
 app.include_router(graphql_app, prefix="/api/v1/graphql", tags=["graphql"])
 
+# Serve static files
+try:
+    app.mount("/static", StaticFiles(directory="static"), name="static")
+except RuntimeError:
+    # Directory might not exist in some environments
+    pass
+
+@app.get("/demo")
+async def demo():
+    """Serve the Active Inference demo."""
+    try:
+        return FileResponse("static/demo.html")
+    except FileNotFoundError:
+        return {"message": "Demo not available - static files not found"}
 
 @app.get("/")
 async def root():
