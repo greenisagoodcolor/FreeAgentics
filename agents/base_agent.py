@@ -505,6 +505,9 @@ class ActiveInferenceAgent(ABC):
                     use_param_info_gain=False,
                     inference_horizon=self.config.get("planning_horizon", 3),
                 )
+                # Add F attribute if missing (for newer PyMDP versions)
+                if not hasattr(self.pymdp_agent, 'F'):
+                    self.pymdp_agent.F = 0.0
 
             logger.info(f"Successfully initialized PyMDP agent from GMN spec for {self.agent_id}")
 
@@ -901,6 +904,9 @@ class BasicExplorerAgent(ActiveInferenceAgent):
                     control_fac_idx=None,  # All factors are controllable
                     save_belief_hist=False,  # PERFORMANCE: Disable history for speed
                 )
+                # Add F attribute if missing (for newer PyMDP versions)
+                if not hasattr(self.pymdp_agent, 'F'):
+                    self.pymdp_agent.F = 0.0
 
             logger.info(f"Initialized PyMDP agent for {self.agent_id}")
 
