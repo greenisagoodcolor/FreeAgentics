@@ -10,7 +10,7 @@ Building on work from John Clippinger, Andrea Pashea, and Daniel Friedman as wel
 
 **This is a production-quality foundation** for developers interested in Active Inference and multi-agent systems. **85% of functionality is fully implemented and tested.** Ready for serious development and testing.
 
-📋 **Status Update (2025-07-28)**: ALL CRITICAL FEATURES WORKING! Complete pipeline (Prompt→LLM→GMN→PyMDP→KG→D3) FULLY INTEGRATED. Run `python examples/demo_full_pipeline.py` to see it in action!
+📋 **Status Update (2025-07-28)**: Complete pipeline (Prompt→LLM→GMN→PyMDP→KG→D3) FULLY INTEGRATED. Run `python examples/demo_full_pipeline.py` to see it in action!
 
 [![Python](https://img.shields.io/badge/python-3.9+-blue.svg)](https://www.python.org/)
 [![Node.js](https://img.shields.io/badge/node-18+-green.svg)](https://nodejs.org/)
@@ -23,11 +23,9 @@ Building on work from John Clippinger, Andrea Pashea, and Daniel Friedman as wel
 
 FreeAgentics creates **AI agents** using **Active Inference** - a mathematical framework from cognitive science. Unlike chatbots or scripted AI, our agents make decisions by minimizing free energy, leading to emergent, intelligent behavior.
 
-## 🎉 BREAKING NEWS: All Critical Features Now Working!
-
 **As of July 28, 2025**, the three most critical features are fully implemented:
 
-1. **GMN Parser** ✅ - Converts natural language specifications to PyMDP models
+1. **Generalized Notation Notation (referred to as GMN, generalized model notation) Parser** ✅ - Converts natural language specifications to PyMDP models
 2. **Knowledge Graph Backend** ✅ - Stores and evolves agent knowledge over time  
 3. **End-to-End Pipeline** ✅ - Complete integration: Prompt → LLM → GMN → PyMDP → KG → D3
 
@@ -40,17 +38,43 @@ FreeAgentics creates **AI agents** using **Active Inference** - a mathematical f
 ### What's Done ✅
 - **Core Engine**: Complete Active Inference implementation with PyMDP
 - **Multi-Agent System**: Full coordination, messaging, and state management  
-- **GMN Parser**: 100% complete natural language to model conversion
+- **Generalized Notation Notation Parser**: 100% complete natural language to model conversion. Referred to as Genearlized Model Notation (GMN, to avoid confusion with Graph Neural Network).
 - **Knowledge Graph**: Full RDF/OWL semantic reasoning system
 - **Security**: Enterprise-grade JWT auth, rate limiting, zero-trust patterns
 - **Testing**: 723 security tests, comprehensive integration coverage
 - **CI/CD**: Complete GitHub Actions pipeline with security scanning
+
+- #### ✅ Recently Implemented & Working
+
+- **Active Inference Engine**:  PyMDP integration with `inferactively-pymdp` library
+- **Agent System**: `BasicExplorerAgent` with real variational inference and belief updates
+- **Database Integration**: PostgreSQL backend with proper data persistence (no in-memory fallbacks)
+- **API Endpoints**: CRUD operations for agents with real database storage
+- **Testing Infrastructure**: Comprehensive test suite with 18+ tests covering core functionality
+- **Demo System**: Interactive Active Inference demonstration with real PyMDP agents
+- **World Simulation**: Grid world environment for agents with observation processing
 
 ### What Remains (15%)
 - **Production Deployment**: Container orchestration and service mesh config
 - **Advanced Features**: Quantum-resistant crypto, SOAR automation
 - **Performance Tuning**: Final optimizations for scale
 - **Multi-Cloud**: Support for AWS/GCP/Azure deployment
+
+#### 🚧 Partially Implemented
+
+- **Frontend Dashboard**: Next.js setup with basic UI (TypeScript compilation working)
+- **Graph Neural Network (GNN) Feature Extraction**: Implementation exists but needs integration testing
+- **LLM Integration**: Local LLM manager structure in place but not fully integrated
+- **Coalition Formation**: Framework exists but coordination logic needs implementation
+- **GMN Parser**: Generalized Notation Notation infrastructure partially complete
+
+#### ❌ Not Started
+
+- Knowledge Graph Evolution and Learning
+- Hardware Deployment Pipeline
+- Production Monitoring & Observability
+- Authentication & Authorization
+- Advanced Multi-Agent Coordination Algorithms
 
 **Next Release**: v1.0.0-production (August 2025)  
 **See [review.md](review.md) for the complete Nemesis Committee evaluation.**
@@ -63,7 +87,7 @@ FreeAgentics creates **AI agents** using **Active Inference** - a mathematical f
 - 🤖 **Multi-Agent System**: Coalition formation, shared state, messaging - **100% complete**
 - 🌐 **API Server**: FastAPI with JWT auth, rate limiting, WebSockets - **100% complete**
 - 🏗️ **Docker & CI/CD**: Multi-arch builds, GitHub Actions, security scanning - **100% complete**
-- 📝 **GMN Parser**: Natural language to PyMDP model conversion - **100% complete**
+- 📝 **GMN Parser (GNN, Friedman)**: Natural language to PyMDP model conversion - **100% complete**
 - 🔗 **End-to-End Pipeline**: Prompt→LLM→GMN→PyMDP→KG→D3 - **100% complete**
 - 📊 **Knowledge Graph**: RDF/OWL semantic reasoning with SPARQL - **100% complete**
 - 🧪 **Test Suite**: 723 security tests, integration tests, benchmarks - **95% complete**
@@ -79,7 +103,7 @@ FreeAgentics creates **AI agents** using **Active Inference** - a mathematical f
 
 ## 🚀 Quick Start & Developer Setup
 
-### **2-Minute Start** (Development Setup)
+### **Development Start**
 
 ```bash
 git clone https://github.com/greenisagoodcolor/freeagentics.git
@@ -198,34 +222,6 @@ The `make install` command handles all dependencies automatically:
    - **Python version mismatch**: Ensure Python 3.9+ is installed
    - **Node version issues**: Requires Node.js 18+
    - **Permission errors**: Don't use `sudo` with `make install`
-
-## 📊 Implementation Status
-
-### ✅ Recently Implemented & Working
-
-- **Active Inference Engine**: Full PyMDP integration with `inferactively-pymdp` library
-- **Agent System**: `BasicExplorerAgent` with real variational inference and belief updates
-- **Database Integration**: PostgreSQL backend with proper data persistence (no in-memory fallbacks)
-- **API Endpoints**: CRUD operations for agents with real database storage
-- **Testing Infrastructure**: Comprehensive test suite with 18+ tests covering core functionality
-- **Demo System**: Interactive Active Inference demonstration with real PyMDP agents
-- **World Simulation**: Grid world environment for agents with observation processing
-
-### 🚧 Partially Implemented
-
-- **Frontend Dashboard**: Next.js setup with basic UI (TypeScript compilation working)
-- **GNN Feature Extraction**: Implementation exists but needs integration testing
-- **LLM Integration**: Local LLM manager structure in place but not fully integrated
-- **Coalition Formation**: Framework exists but coordination logic needs implementation
-- **GMN Parser**: Generalized Notation Notation infrastructure partially complete
-
-### ❌ Not Started
-
-- Knowledge Graph Evolution and Learning
-- Hardware Deployment Pipeline
-- Production Monitoring & Observability
-- Authentication & Authorization
-- Advanced Multi-Agent Coordination Algorithms
 
 ## 🏗️ Codebase Architecture
 
@@ -424,7 +420,7 @@ Comprehensive documentation is available in the `/docs` directory:
 **Testing** (`/tests/`): Comprehensive unit and integration tests\
 **Examples** (`/examples/`): Demonstrations of Active Inference agents
 
-### **Perfect For**
+### **Intended For**
 
 ✅ Researchers exploring Active Inference and multi-agent systems\
 ✅ Developers learning mathematical foundations of AI\
