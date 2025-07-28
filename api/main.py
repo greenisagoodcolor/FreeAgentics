@@ -16,6 +16,7 @@ from api.v1 import (
     health,
     health_extended,
     inference,
+    knowledge,
     mfa,
     monitoring,
     prompts,
@@ -164,6 +165,7 @@ app.include_router(mfa.router, tags=["mfa"])  # MFA router has its own prefix
 app.include_router(agents.router, prefix="/api/v1", tags=["agents"])
 app.include_router(prompts.router, prefix="/api/v1", tags=["prompts"])
 app.include_router(inference.router, prefix="/api/v1", tags=["inference"])
+app.include_router(knowledge.router, prefix="/api/v1/knowledge", tags=["knowledge"])
 app.include_router(system.router, prefix="/api/v1", tags=["system"])
 app.include_router(websocket.router, prefix="/api/v1", tags=["websocket"])
 app.include_router(monitoring.router, prefix="/api/v1", tags=["monitoring"])
@@ -188,7 +190,7 @@ except RuntimeError:
 async def demo():
     """Serve the Active Inference demo."""
     try:
-        return FileResponse("static/demo.html")
+        return FileResponse("static/demo.html", media_type="text/html")
     except FileNotFoundError:
         return {"message": "Demo not available - static files not found"}
 

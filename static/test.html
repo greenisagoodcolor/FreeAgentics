@@ -1,0 +1,31 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>API Test</title>
+</head>
+<body>
+    <h1>API Integration Test</h1>
+    <div id="status">Testing...</div>
+    
+    <script>
+        async function testAPI() {
+            const statusDiv = document.getElementById('status');
+            
+            try {
+                // Test health endpoint
+                const response = await fetch('/api/v1/health');
+                if (response.ok) {
+                    const data = await response.json();
+                    statusDiv.innerHTML = '<span style="color: green;">✓ API Connected</span><br>' + JSON.stringify(data, null, 2);
+                } else {
+                    throw new Error('API not available');
+                }
+            } catch (error) {
+                statusDiv.innerHTML = '<span style="color: orange;">⚠ Demo Mode Active</span><br>Backend not available: ' + error.message;
+            }
+        }
+        
+        window.addEventListener('load', testAPI);
+    </script>
+</body>
+</html>

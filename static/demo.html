@@ -243,6 +243,160 @@
         .tooltip.show {
             opacity: 1;
         }
+        
+        /* New UI Components */
+        .mode-indicator {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: 15px;
+            padding: 10px;
+            background: #2a2a2a;
+            border-radius: 5px;
+            font-size: 0.9em;
+        }
+        
+        .status-dot {
+            width: 12px;
+            height: 12px;
+            border-radius: 50%;
+            background: #ef4444;
+            transition: background-color 0.3s ease;
+        }
+        
+        .status-dot.online {
+            background: #4ade80;
+        }
+        
+        .status-dot.offline {
+            background: #ef4444;
+        }
+        
+        .prompt-bar {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 10px;
+        }
+        
+        .prompt-bar input {
+            flex: 1;
+            padding: 10px;
+            border: 1px solid #555;
+            border-radius: 5px;
+            background: #2a2a2a;
+            color: white;
+            font-size: 14px;
+        }
+        
+        .prompt-bar input:focus {
+            outline: none;
+            border-color: #4a9eff;
+        }
+        
+        .prompt-bar button {
+            padding: 10px 15px;
+            white-space: nowrap;
+        }
+        
+        .status-message {
+            font-size: 0.9em;
+            color: #aaa;
+            min-height: 20px;
+        }
+        
+        .status-message.loading {
+            color: #4a9eff;
+        }
+        
+        .status-message.success {
+            color: #4ade80;
+        }
+        
+        .status-message.error {
+            color: #ef4444;
+        }
+        
+        .conversation-cycle {
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+        }
+        
+        .conversation-step {
+            background: #2a2a2a;
+            padding: 12px;
+            border-radius: 5px;
+            border-left: 3px solid #4a9eff;
+        }
+        
+        .conversation-step h4 {
+            margin-bottom: 8px;
+            color: #4a9eff;
+            font-size: 0.9em;
+        }
+        
+        .conversation-content {
+            font-size: 0.85em;
+            line-height: 1.4;
+            color: #ddd;
+        }
+        
+        .conversation-content.code {
+            font-family: 'Courier New', monospace;
+            background: #1a1a1a;
+            padding: 8px;
+            border-radius: 3px;
+            font-size: 0.8em;
+            white-space: pre-wrap;
+            max-height: 120px;
+            overflow-y: auto;
+        }
+        
+        .knowledge-graph-container {
+            background: #1a1a1a;
+            border-radius: 8px;
+            padding: 15px;
+            margin-top: 10px;
+        }
+        
+        .kg-node {
+            display: inline-block;
+            background: #2a2a2a;
+            border: 2px solid #4a9eff;
+            border-radius: 15px;
+            padding: 8px 12px;
+            margin: 5px;
+            font-size: 0.8em;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+        
+        .kg-node:hover {
+            background: #4a9eff;
+            color: #0a0a0a;
+            transform: translateY(-2px);
+        }
+        
+        .kg-node.concept { border-color: #4a9eff; }
+        .kg-node.action { border-color: #4ade80; }
+        .kg-node.observation { border-color: #a855f7; }
+        .kg-node.belief { border-color: #fb923c; }
+        .kg-node.goal { border-color: #ef4444; }
+        
+        .loading-spinner {
+            display: inline-block;
+            width: 12px;
+            height: 12px;
+            border: 2px solid #333;
+            border-top: 2px solid #4a9eff;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+        }
+        
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
     </style>
 </head>
 <body>
@@ -260,6 +414,10 @@
         <div id="sidebar">
             <div class="panel">
                 <h2>🎮 Controls</h2>
+                <div id="mode-indicator" class="mode-indicator">
+                    <span id="mode-text">Demo Mode</span>
+                    <div id="api-status" class="status-dot offline"></div>
+                </div>
                 <div id="controls">
                     <button id="start-btn">Start</button>
                     <button id="pause-btn" disabled>Pause</button>
@@ -268,6 +426,33 @@
                 <div id="controls">
                     <button id="add-agent-btn">Add Agent</button>
                     <button id="speed-btn">Speed: 1x</button>
+                </div>
+            </div>
+            
+            <div class="panel">
+                <h2>💬 Create Agent from Prompt</h2>
+                <div class="prompt-bar">
+                    <input type="text" id="prompt-input" placeholder="Describe what your agent should do..." />
+                    <button id="process-prompt-btn" disabled>Create Agent</button>
+                </div>
+                <div id="prompt-status" class="status-message"></div>
+            </div>
+            
+            <div class="panel" id="conversation-panel" style="display: none;">
+                <h2>🧠 Agent Conversation</h2>
+                <div class="conversation-cycle">
+                    <div class="conversation-step">
+                        <h4>1. Goal</h4>
+                        <div id="conversation-goal" class="conversation-content"></div>
+                    </div>
+                    <div class="conversation-step">
+                        <h4>2. GMN Specification</h4>
+                        <div id="conversation-gmn" class="conversation-content code"></div>
+                    </div>
+                    <div class="conversation-step">
+                        <h4>3. Inference Result</h4>
+                        <div id="conversation-inference" class="conversation-content"></div>
+                    </div>
                 </div>
             </div>
             
@@ -299,6 +484,13 @@
                     <!-- Agents will be added here dynamically -->
                 </div>
             </div>
+            
+            <div class="panel">
+                <h2>🧩 Knowledge Graph</h2>
+                <div class="knowledge-graph-container" id="knowledge-graph">
+                    <div class="status-message" id="kg-status">Loading knowledge graph...</div>
+                </div>
+            </div>
         </div>
     </div>
     
@@ -310,6 +502,11 @@
         const AGENT_RADIUS = 8;
         const RESOURCE_RADIUS = 6;
         const GOAL_RADIUS = 10;
+        
+        // Configuration - detect if backend is available
+        const API_BASE_URL = window.location.origin;
+        let USE_REAL_API = false;
+        let currentMode = 'demo';
         
         // Colors
         const COLORS = {
@@ -334,11 +531,372 @@
         let speed = 1;
         let tick = 0;
         let animationId = null;
+        let wsConnection = null;
+        let serviceManager = null;
+        let promptProcessor = null;
+        let knowledgeGraph = null;
         
         // Canvas setup
         const canvas = document.getElementById('world-canvas');
         const ctx = canvas.getContext('2d');
         const tooltip = document.getElementById('tooltip');
+        
+        // Service Manager - Strategy Pattern Implementation
+        class ServiceManager {
+            constructor() {
+                this.promptService = null;
+                this.agentService = null;
+                this.knowledgeService = null;
+                this.inferenceService = null;
+                this.metricsService = null;
+                this.websocketService = null;
+                this.mode = 'demo';
+            }
+            
+            async initialize() {
+                try {
+                    // Check if real API is available
+                    const healthResponse = await fetch(`${API_BASE_URL}/health`, {
+                        method: 'GET',
+                        timeout: 3000
+                    });
+                    
+                    if (healthResponse.ok) {
+                        USE_REAL_API = true;
+                        this.mode = 'real';
+                        console.log('✅ Backend detected - using real API');
+                        this.initializeRealServices();
+                    } else {
+                        throw new Error('Backend not available');
+                    }
+                } catch (error) {
+                    console.log('⚠️ Backend not available - using demo mode');
+                    this.initializeDemoServices();
+                }
+            }
+            
+            initializeRealServices() {
+                this.promptService = new RealPromptService();
+                this.agentService = new RealAgentService();
+                this.knowledgeService = new RealKnowledgeService();
+                this.inferenceService = new RealInferenceService();
+                this.metricsService = new RealMetricsService();
+                this.websocketService = new RealWebSocketService();
+            }
+            
+            initializeDemoServices() {
+                this.promptService = new DemoPromptService();
+                this.agentService = new DemoAgentService();
+                this.knowledgeService = new DemoKnowledgeService();
+                this.inferenceService = new DemoInferenceService();
+                this.metricsService = new DemoMetricsService();
+                this.websocketService = new DemoWebSocketService();
+            }
+        }
+        
+        // Prompt Service Implementations
+        class RealPromptService {
+            async processPrompt(prompt, agentName = null) {
+                try {
+                    const response = await fetch(`${API_BASE_URL}/api/v1/prompts`, {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                        },
+                        body: JSON.stringify({
+                            prompt: prompt,
+                            agent_name: agentName
+                        })
+                    });
+                    
+                    if (!response.ok) {
+                        throw new Error(`HTTP error! status: ${response.status}`);
+                    }
+                    
+                    const result = await response.json();
+                    return {
+                        agentId: result.agent_id,
+                        agentName: result.agent_name,
+                        gmnSpec: result.gmn_spec,
+                        status: result.status,
+                        conversationCycle: {
+                            goal: prompt,
+                            gmn: JSON.stringify(result.gmn_spec, null, 2),
+                            inference: `Agent created with ${result.status} status`
+                        }
+                    };
+                } catch (error) {
+                    console.error('Prompt processing failed:', error);
+                    // Fallback to demo mode
+                    return serviceManager.promptService = new DemoPromptService().processPrompt(prompt, agentName);
+                }
+            }
+        }
+        
+        class DemoPromptService {
+            async processPrompt(prompt, agentName = null) {
+                // Simulate API delay
+                await new Promise(resolve => setTimeout(resolve, 1500));
+                
+                const agentId = `demo_agent_${Date.now()}`;
+                const name = agentName || `Agent-${Math.floor(Math.random() * 1000)}`;
+                
+                return {
+                    agentId: agentId,
+                    agentName: name,
+                    gmnSpec: {
+                        name: name,
+                        description: `Agent created from: ${prompt.substring(0, 50)}...`,
+                        states: ['idle', 'exploring', 'collecting'],
+                        actions: ['move_up', 'move_down', 'move_left', 'move_right', 'collect']
+                    },
+                    status: 'active',
+                    conversationCycle: {
+                        goal: prompt,
+                        gmn: `Generated GMN for agent focused on: ${prompt.split(' ').slice(0, 5).join(' ')}`,
+                        inference: 'Demo mode - agent behavior simulated'
+                    }
+                };
+            }
+        }
+        
+        // Agent Service Implementations
+        class RealAgentService {
+            async createAgent(config) {
+                try {
+                    const response = await fetch(`${API_BASE_URL}/api/v1/agents`, {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                        },
+                        body: JSON.stringify(config)
+                    });
+                    
+                    if (!response.ok) {
+                        throw new Error(`HTTP error! status: ${response.status}`);
+                    }
+                    
+                    return await response.json();
+                } catch (error) {
+                    console.error('Agent creation failed:', error);
+                    // Fallback to demo
+                    return new DemoAgentService().createAgent(config);
+                }
+            }
+            
+            async listAgents() {
+                try {
+                    const response = await fetch(`${API_BASE_URL}/api/v1/agents`);
+                    if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
+                    return await response.json();
+                } catch (error) {
+                    console.error('Failed to list agents:', error);
+                    return [];
+                }
+            }
+        }
+        
+        class DemoAgentService {
+            constructor() {
+                this.demoAgents = [];
+            }
+            
+            async createAgent(config) {
+                const agent = {
+                    id: `demo_${Date.now()}`,
+                    name: config.name,
+                    template: config.template,
+                    status: 'active',
+                    created_at: new Date().toISOString(),
+                    position: findEmptyPosition(),
+                    resources: 0,
+                    goals: 0,
+                    steps: 0,
+                    freeEnergy: 0,
+                    beliefs: createBeliefMap()
+                };
+                
+                this.demoAgents.push(agent);
+                return agent;
+            }
+            
+            async listAgents() {
+                return this.demoAgents;
+            }
+        }
+        
+        // Knowledge Service Implementations
+        class RealKnowledgeService {
+            async getKnowledgeGraph(graphId = 'default') {
+                try {
+                    const response = await fetch(`${API_BASE_URL}/api/v1/knowledge/graphs/${graphId}`);
+                    if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
+                    return await response.json();
+                } catch (error) {
+                    console.error('Failed to get knowledge graph:', error);
+                    return new DemoKnowledgeService().getKnowledgeGraph();
+                }
+            }
+            
+            async getNodes(graphId = 'default') {
+                try {
+                    const response = await fetch(`${API_BASE_URL}/api/v1/knowledge/graphs/${graphId}/nodes`);
+                    if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
+                    return await response.json();
+                } catch (error) {
+                    console.error('Failed to get nodes:', error);
+                    return [];
+                }
+            }
+        }
+        
+        class DemoKnowledgeService {
+            async getKnowledgeGraph() {
+                return {
+                    graph_id: 'demo-graph',
+                    node_count: 15,
+                    edge_count: 23,
+                    version: 1
+                };
+            }
+            
+            async getNodes() {
+                return [
+                    { id: 'n1', type: 'concept', label: 'exploration', properties: { importance: 0.8 } },
+                    { id: 'n2', type: 'action', label: 'move_north', properties: { frequency: 0.6 } },
+                    { id: 'n3', type: 'observation', label: 'resource_found', properties: { confidence: 0.9 } },
+                    { id: 'n4', type: 'belief', label: 'safe_zone', properties: { certainty: 0.7 } },
+                    { id: 'n5', type: 'goal', label: 'collect_resources', properties: { priority: 0.9 } }
+                ];
+            }
+        }
+        
+        // WebSocket Service Implementations
+        class RealWebSocketService {
+            constructor() {
+                this.connection = null;
+                this.subscribers = new Map();
+            }
+            
+            async connect() {
+                try {
+                    const wsUrl = `ws://${window.location.host}/api/v1/ws/demo-client`;
+                    this.connection = new WebSocket(wsUrl);
+                    
+                    this.connection.onopen = () => {
+                        console.log('✅ WebSocket connected');
+                        this.subscribe(['agent_event', 'system_event', 'world_event']);
+                    };
+                    
+                    this.connection.onmessage = (event) => {
+                        const data = JSON.parse(event.data);
+                        this.handleMessage(data);
+                    };
+                    
+                    this.connection.onerror = (error) => {
+                        console.error('WebSocket error:', error);
+                    };
+                    
+                    this.connection.onclose = () => {
+                        console.log('WebSocket disconnected');
+                        // Attempt reconnection
+                        setTimeout(() => this.connect(), 5000);
+                    };
+                } catch (error) {
+                    console.error('Failed to connect WebSocket:', error);
+                }
+            }
+            
+            subscribe(eventTypes) {
+                if (this.connection && this.connection.readyState === WebSocket.OPEN) {
+                    this.connection.send(JSON.stringify({
+                        type: 'subscribe',
+                        event_types: eventTypes
+                    }));
+                }
+            }
+            
+            handleMessage(data) {
+                // Broadcast to subscribers
+                const eventType = data.type || data.event_type;
+                if (this.subscribers.has(eventType)) {
+                    this.subscribers.get(eventType).forEach(callback => callback(data));
+                }
+            }
+            
+            onEvent(eventType, callback) {
+                if (!this.subscribers.has(eventType)) {
+                    this.subscribers.set(eventType, new Set());
+                }
+                this.subscribers.get(eventType).add(callback);
+            }
+        }
+        
+        class DemoWebSocketService {
+            constructor() {
+                this.subscribers = new Map();
+                this.connected = true;
+            }
+            
+            async connect() {
+                console.log('📡 Demo WebSocket service active');
+                // Simulate periodic events
+                setInterval(() => {
+                    this.simulateEvent();
+                }, 5000);
+            }
+            
+            simulateEvent() {
+                const events = [
+                    { type: 'agent_event', data: { action: 'moved', agent_id: 'demo-agent-1' }},
+                    { type: 'world_event', data: { change: 'resource_collected', position: { x: 5, y: 3 }}},
+                    { type: 'system_event', data: { status: 'healthy', timestamp: new Date().toISOString() }}
+                ];
+                
+                const event = events[Math.floor(Math.random() * events.length)];
+                this.handleMessage(event);
+            }
+            
+            handleMessage(data) {
+                const eventType = data.type;
+                if (this.subscribers.has(eventType)) {
+                    this.subscribers.get(eventType).forEach(callback => callback(data));
+                }
+            }
+            
+            onEvent(eventType, callback) {
+                if (!this.subscribers.has(eventType)) {
+                    this.subscribers.set(eventType, new Set());
+                }
+                this.subscribers.get(eventType).add(callback);
+            }
+        }
+        
+        // Metrics Service Implementations
+        class RealMetricsService {
+            async getMetrics() {
+                try {
+                    const response = await fetch(`${API_BASE_URL}/metrics`);
+                    if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
+                    return await response.text(); // Prometheus format
+                } catch (error) {
+                    console.error('Failed to get metrics:', error);
+                    return new DemoMetricsService().getMetrics();
+                }
+            }
+        }
+        
+        class DemoMetricsService {
+            async getMetrics() {
+                return {
+                    active_agents: agents.length,
+                    total_resources: agents.reduce((sum, a) => sum + a.resources, 0),
+                    total_goals: agents.reduce((sum, a) => sum + a.goals, 0),
+                    tick_count: tick,
+                    uptime: Math.floor(performance.now() / 1000)
+                };
+            }
+        }
         
         // Resize canvas
         function resizeCanvas() {
@@ -353,6 +911,19 @@
         // Initialize world
         async function initializeWorld() {
             try {
+                // Initialize services first
+                serviceManager = new ServiceManager();
+                await serviceManager.initialize();
+                
+                // Update UI to show current mode
+                updateModeIndicator();
+                
+                // Connect WebSocket if available
+                if (serviceManager.websocketService) {
+                    await serviceManager.websocketService.connect();
+                    setupWebSocketListeners();
+                }
+                
                 // For demo, create a simple world
                 world = {
                     width: 25,
@@ -382,6 +953,12 @@
                 // Create initial agents
                 await createInitialAgents();
                 
+                // Load knowledge graph
+                await loadKnowledgeGraph();
+                
+                // Set up prompt processing
+                setupPromptProcessor();
+                
                 // Hide loading
                 document.getElementById('loading').style.display = 'none';
                 
@@ -391,7 +968,213 @@
                 
             } catch (error) {
                 console.error('Failed to initialize world:', error);
+                showError('Failed to initialize application');
             }
+        }
+        
+        function updateModeIndicator() {
+            const modeText = document.getElementById('mode-text');
+            const statusDot = document.getElementById('api-status');
+            
+            if (serviceManager.mode === 'real') {
+                modeText.textContent = 'Live API Mode';
+                statusDot.className = 'status-dot online';
+            } else {
+                modeText.textContent = 'Demo Mode';
+                statusDot.className = 'status-dot offline';
+            }
+        }
+        
+        function setupWebSocketListeners() {
+            serviceManager.websocketService.onEvent('agent_event', (data) => {
+                console.log('Agent event:', data);
+                // Update agent state in real-time
+                updateAgentFromEvent(data);
+            });
+            
+            serviceManager.websocketService.onEvent('world_event', (data) => {
+                console.log('World event:', data);
+                // Update world state
+                updateWorldFromEvent(data);
+            });
+            
+            serviceManager.websocketService.onEvent('system_event', (data) => {
+                console.log('System event:', data);
+                // Update system status
+                updateSystemStatus(data);
+            });
+        }
+        
+        function setupPromptProcessor() {
+            const promptInput = document.getElementById('prompt-input');
+            const processBtn = document.getElementById('process-prompt-btn');
+            const statusDiv = document.getElementById('prompt-status');
+            
+            // Enable prompt input
+            processBtn.disabled = false;
+            
+            promptInput.addEventListener('input', () => {
+                processBtn.disabled = promptInput.value.trim().length === 0;
+            });
+            
+            promptInput.addEventListener('keypress', (e) => {
+                if (e.key === 'Enter' && !processBtn.disabled) {
+                    processPrompt();
+                }
+            });
+            
+            processBtn.addEventListener('click', processPrompt);
+        }
+        
+        async function processPrompt() {
+            const promptInput = document.getElementById('prompt-input');
+            const processBtn = document.getElementById('process-prompt-btn');
+            const statusDiv = document.getElementById('prompt-status');
+            const conversationPanel = document.getElementById('conversation-panel');
+            
+            const prompt = promptInput.value.trim();
+            if (!prompt) return;
+            
+            // Update UI for processing state
+            processBtn.disabled = true;
+            statusDiv.innerHTML = '<span class="loading-spinner"></span> Processing prompt...';
+            statusDiv.className = 'status-message loading';
+            
+            try {
+                // Process the prompt
+                const result = await serviceManager.promptService.processPrompt(prompt);
+                
+                // Update conversation display
+                updateConversationDisplay(result.conversationCycle);
+                conversationPanel.style.display = 'block';
+                
+                // Create agent in the world
+                const agent = {
+                    id: result.agentId,
+                    name: result.agentName,
+                    type: 'custom',
+                    position: findEmptyPosition(),
+                    resources: 0,
+                    goals: 0,
+                    steps: 0,
+                    freeEnergy: 0,
+                    path: [],
+                    beliefs: createBeliefMap(),
+                    gmnSpec: result.gmnSpec
+                };
+                
+                agents.push(agent);
+                updateAgentList();
+                drawWorld();
+                
+                // Show success
+                statusDiv.textContent = `✓ Created agent: ${result.agentName}`;
+                statusDiv.className = 'status-message success';
+                
+                // Clear input
+                promptInput.value = '';
+                
+            } catch (error) {
+                console.error('Prompt processing error:', error);
+                statusDiv.textContent = `✗ Error: ${error.message}`;
+                statusDiv.className = 'status-message error';
+            } finally {
+                processBtn.disabled = false;
+            }
+        }
+        
+        function updateConversationDisplay(cycle) {
+            document.getElementById('conversation-goal').textContent = cycle.goal;
+            document.getElementById('conversation-gmn').textContent = cycle.gmn;
+            document.getElementById('conversation-inference').textContent = cycle.inference;
+        }
+        
+        async function loadKnowledgeGraph() {
+            const kgContainer = document.getElementById('knowledge-graph');
+            const statusDiv = document.getElementById('kg-status');
+            
+            try {
+                const nodes = await serviceManager.knowledgeService.getNodes();
+                
+                if (nodes.length === 0) {
+                    statusDiv.textContent = 'No knowledge nodes available';
+                    statusDiv.className = 'status-message';
+                    return;
+                }
+                
+                // Clear status and render nodes
+                statusDiv.style.display = 'none';
+                
+                const nodesHTML = nodes.map(node => `
+                    <div class="kg-node ${node.type}" data-node-id="${node.id}" title="${node.label}">
+                        ${node.label}
+                    </div>
+                `).join('');
+                
+                kgContainer.innerHTML = nodesHTML;
+                
+                // Add click handlers for nodes
+                kgContainer.querySelectorAll('.kg-node').forEach(nodeEl => {
+                    nodeEl.addEventListener('click', () => {
+                        const nodeId = nodeEl.dataset.nodeId;
+                        showNodeDetails(nodeId, nodes.find(n => n.id === nodeId));
+                    });
+                });
+                
+            } catch (error) {
+                console.error('Failed to load knowledge graph:', error);
+                statusDiv.textContent = 'Failed to load knowledge graph';
+                statusDiv.className = 'status-message error';
+            }
+        }
+        
+        function showNodeDetails(nodeId, node) {
+            // Create a simple modal or tooltip with node details
+            const details = `
+                Node: ${node.label}
+                Type: ${node.type}
+                Properties: ${JSON.stringify(node.properties, null, 2)}
+            `;
+            
+            // For now, just alert - in production would show a proper modal
+            alert(details);
+        }
+        
+        function updateAgentFromEvent(eventData) {
+            const agent = agents.find(a => a.id === eventData.agent_id);
+            if (agent && eventData.data) {
+                // Update agent based on event data
+                if (eventData.data.position) {
+                    agent.position = eventData.data.position;
+                }
+                if (eventData.data.status) {
+                    agent.status = eventData.data.status;
+                }
+                updateAgentList();
+                drawWorld();
+            }
+        }
+        
+        function updateWorldFromEvent(eventData) {
+            // Handle world state changes from WebSocket
+            if (eventData.data.change === 'resource_collected') {
+                const pos = eventData.data.position;
+                if (world.grid[pos.y] && world.grid[pos.y][pos.x] === 'resource') {
+                    world.grid[pos.y][pos.x] = 'empty';
+                    drawWorld();
+                }
+            }
+        }
+        
+        function updateSystemStatus(eventData) {
+            // Update system status indicators
+            console.log('System status:', eventData);
+        }
+        
+        function showError(message) {
+            const statusDiv = document.getElementById('prompt-status');
+            statusDiv.textContent = `✗ ${message}`;
+            statusDiv.className = 'status-message error';
         }
         
         function createRooms() {
@@ -441,20 +1224,51 @@
             const names = ['Alpha', 'Beta', 'Gamma', 'Delta'];
             
             for (let i = 0; i < 4; i++) {
-                const agent = {
-                    id: `agent_${i}`,
-                    name: `${names[i]} ${agentTypes[i].charAt(0).toUpperCase() + agentTypes[i].slice(1)}`,
-                    type: agentTypes[i],
-                    position: findEmptyPosition(),
-                    resources: 0,
-                    goals: 0,
-                    steps: 0,
-                    freeEnergy: 0,
-                    path: [],
-                    beliefs: createBeliefMap()
-                };
-                
-                agents.push(agent);
+                try {
+                    // Use service manager to create agents
+                    const agentConfig = {
+                        name: `${names[i]} ${agentTypes[i].charAt(0).toUpperCase() + agentTypes[i].slice(1)}`,
+                        template: agentTypes[i],
+                        parameters: {
+                            exploration_rate: 0.3,
+                            planning_horizon: 5
+                        }
+                    };
+                    
+                    const createdAgent = await serviceManager.agentService.createAgent(agentConfig);
+                    
+                    // Add demo-specific properties for visualization
+                    const agent = {
+                        ...createdAgent,
+                        type: agentTypes[i],
+                        position: findEmptyPosition(),
+                        resources: 0,
+                        goals: 0,
+                        steps: 0,
+                        freeEnergy: 0,
+                        path: [],
+                        beliefs: createBeliefMap()
+                    };
+                    
+                    agents.push(agent);
+                } catch (error) {
+                    console.error(`Failed to create agent ${i}:`, error);
+                    // Fallback to demo agent
+                    const agent = {
+                        id: `agent_${i}`,
+                        name: `${names[i]} ${agentTypes[i].charAt(0).toUpperCase() + agentTypes[i].slice(1)}`,
+                        type: agentTypes[i],
+                        position: findEmptyPosition(),
+                        resources: 0,
+                        goals: 0,
+                        steps: 0,
+                        freeEnergy: 0,
+                        path: [],
+                        beliefs: createBeliefMap()
+                    };
+                    
+                    agents.push(agent);
+                }
             }
             
             updateAgentList();
@@ -759,15 +1573,38 @@
         }
         
         // UI Updates
-        function updateUI() {
-            // Update global stats
-            const totalResources = agents.reduce((sum, a) => sum + a.resources, 0);
-            const totalGoals = agents.reduce((sum, a) => sum + a.goals, 0);
-            
-            document.getElementById('total-resources').textContent = totalResources;
-            document.getElementById('total-goals').textContent = totalGoals;
-            document.getElementById('total-agents').textContent = agents.length;
-            document.getElementById('tick-count').textContent = tick;
+        async function updateUI() {
+            try {
+                // Get metrics from service
+                const metrics = await serviceManager.metricsService.getMetrics();
+                
+                if (typeof metrics === 'object') {
+                    // Structured metrics from demo service
+                    document.getElementById('total-resources').textContent = metrics.total_resources || 0;
+                    document.getElementById('total-goals').textContent = metrics.total_goals || 0;
+                    document.getElementById('total-agents').textContent = metrics.active_agents || agents.length;
+                    document.getElementById('tick-count').textContent = metrics.tick_count || tick;
+                } else {
+                    // Fallback to local calculation
+                    const totalResources = agents.reduce((sum, a) => sum + a.resources, 0);
+                    const totalGoals = agents.reduce((sum, a) => sum + a.goals, 0);
+                    
+                    document.getElementById('total-resources').textContent = totalResources;
+                    document.getElementById('total-goals').textContent = totalGoals;
+                    document.getElementById('total-agents').textContent = agents.length;
+                    document.getElementById('tick-count').textContent = tick;
+                }
+            } catch (error) {
+                console.error('Failed to update metrics:', error);
+                // Fallback to local calculation
+                const totalResources = agents.reduce((sum, a) => sum + a.resources, 0);
+                const totalGoals = agents.reduce((sum, a) => sum + a.goals, 0);
+                
+                document.getElementById('total-resources').textContent = totalResources;
+                document.getElementById('total-goals').textContent = totalGoals;
+                document.getElementById('total-agents').textContent = agents.length;
+                document.getElementById('tick-count').textContent = tick;
+            }
             
             // Update agent list
             updateAgentList();
@@ -838,28 +1675,53 @@
             document.getElementById('pause-btn').disabled = true;
         });
         
-        document.getElementById('add-agent-btn').addEventListener('click', () => {
-            const types = ['explorer', 'collector', 'analyzer', 'scout'];
-            const type = types[agents.length % types.length];
-            const names = ['Epsilon', 'Zeta', 'Eta', 'Theta', 'Iota', 'Kappa'];
-            const name = names[agents.length % names.length];
+        document.getElementById('add-agent-btn').addEventListener('click', async () => {
+            const addBtn = document.getElementById('add-agent-btn');
+            const originalText = addBtn.textContent;
             
-            const agent = {
-                id: `agent_${agents.length}`,
-                name: `${name} ${type.charAt(0).toUpperCase() + type.slice(1)}`,
-                type: type,
-                position: findEmptyPosition(),
-                resources: 0,
-                goals: 0,
-                steps: 0,
-                freeEnergy: 0,
-                path: [],
-                beliefs: createBeliefMap()
-            };
-            
-            agents.push(agent);
-            updateUI();
-            drawWorld();
+            try {
+                addBtn.disabled = true;
+                addBtn.textContent = 'Creating...';
+                
+                const types = ['explorer', 'collector', 'analyzer', 'scout'];
+                const type = types[agents.length % types.length];
+                const names = ['Epsilon', 'Zeta', 'Eta', 'Theta', 'Iota', 'Kappa'];
+                const name = names[agents.length % names.length];
+                
+                const agentConfig = {
+                    name: `${name} ${type.charAt(0).toUpperCase() + type.slice(1)}`,
+                    template: type,
+                    parameters: {
+                        exploration_rate: Math.random() * 0.5 + 0.2,
+                        planning_horizon: Math.floor(Math.random() * 5) + 3
+                    }
+                };
+                
+                const createdAgent = await serviceManager.agentService.createAgent(agentConfig);
+                
+                const agent = {
+                    ...createdAgent,
+                    type: type,
+                    position: findEmptyPosition(),
+                    resources: 0,
+                    goals: 0,
+                    steps: 0,
+                    freeEnergy: 0,
+                    path: [],
+                    beliefs: createBeliefMap()
+                };
+                
+                agents.push(agent);
+                updateUI();
+                drawWorld();
+                
+            } catch (error) {
+                console.error('Failed to create agent:', error);
+                showError('Failed to create agent');
+            } finally {
+                addBtn.disabled = false;
+                addBtn.textContent = originalText;
+            }
         });
         
         document.getElementById('speed-btn').addEventListener('click', () => {
