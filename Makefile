@@ -271,11 +271,12 @@ dev: ## 🚀 Start development servers (frontend + backend)
 	fi
 	@# Clear any existing processes on our ports
 	@printf "$(CYAN)🔧 Clearing port conflicts...$(RESET)\n"
-	@lsof -ti:3000 >/dev/null 2>&1 && (printf "  → Stopping process on port 3000\n" && $(MAKE) kill-ports)
+	@(lsof -ti:3000 >/dev/null 2>&1 && (printf "  → Stopping process on port 3000\n" && $(MAKE) kill-ports)) || true
 	@printf "\n"
 	@printf "$(CYAN)🔥 Starting Backend (FastAPI on :8000)...$(RESET)\n"
 	@if [ -d "$(VENV_DIR)" ]; then \
 		. $(VENV_DIR)/bin/activate && \
+		export $$(cat .env | grep -v '^#' | xargs) && \
 		PYTHONPATH="." $(PYTHON) -m uvicorn api.main:app --reload --host 0.0.0.0 --port 8000 & \
 		printf "  $(GREEN)✅ Backend started$(RESET)\n"; \
 	fi
@@ -310,8 +311,8 @@ stop: ## 🛑 Stop all development servers and clear ports
 kill-ports: ## 🔧 Clear processes on development ports (3000, 8000)
 	@echo -e "$(YELLOW)🔧 Clearing Port Conflicts$(RESET)"
 	@echo "Stopping processes on ports 3000, 8000..."
-	@lsof -ti:3000 | xargs kill -9 2>/dev/null
-	@lsof -ti:8000 | xargs kill -9 2>/dev/null
+	@lsof -ti:3000 | xargs kill -9 2>/dev/null || true
+	@lsof -ti:8000 | xargs kill -9 2>/dev/null || true
 	@echo -e "$(GREEN)✅ Ports cleared$(RESET)"
 
 start: dev ## 🚀 Alias for 'make dev'

@@ -98,6 +98,26 @@ class LLMProviderFactory:
         ProviderType.ANTHROPIC: AnthropicProvider,
         ProviderType.OLLAMA: OllamaProvider,
     }
+    
+    @classmethod
+    def create_provider(cls, provider_name: str = "auto") -> LLMProvider:
+        """Create a provider directly (convenience method).
+        
+        Args:
+            provider_name: Provider name or "auto" for automatic selection
+            
+        Returns:
+            LLMProvider instance
+        """
+        factory = create_llm_factory()
+        if provider_name == "auto":
+            # Get the primary provider from factory
+            provider = factory._create_provider(factory._primary_provider)
+        else:
+            # Create specific provider
+            provider_type = ProviderType(provider_name.lower())
+            provider = factory._create_provider(provider_type)
+        return provider
 
     def __init__(self, config: Optional[Dict[str, Any]] = None):
         """Initialize the provider factory.
@@ -143,19 +163,16 @@ class LLMProviderFactory:
         if os.getenv("ANTHROPIC_API_KEY"):
             available_providers.append(ProviderType.ANTHROPIC)
 
-        # Always include Ollama as it doesn't need API keys
-        available_providers.append(ProviderType.OLLAMA)
-
-        # Always include mock as final fallback
-        available_providers.append(ProviderType.MOCK)
-
-        if available_providers:
-            self._primary_provider = available_providers[0]
-            self._fallback_chain = available_providers[1:]
-        else:
-            # Default to mock if nothing else available
+        # For demo mode - prioritize mock provider
+        if not available_providers:
+            # No API keys - use mock as primary
             self._primary_provider = ProviderType.MOCK
-            self._fallback_chain = []
+            self._fallback_chain = [ProviderType.OLLAMA]  # Ollama as backup
+        else:
+            # API keys available - use them
+            self._primary_provider = available_providers[0]
+            # Add Ollama and Mock as fallbacks
+            self._fallback_chain = available_providers[1:] + [ProviderType.OLLAMA, ProviderType.MOCK]
 
     def _get_fallback_chain(self, primary: ProviderType) -> List[ProviderType]:
         """Get fallback chain for a primary provider."""

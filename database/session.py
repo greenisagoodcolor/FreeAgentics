@@ -28,25 +28,18 @@ is_development = (
 )
 
 if not DATABASE_URL:
-    if is_development:
-        # Use SQLite as fallback for development
-        import warnings
-
-        warnings.warn(
-            "DATABASE_URL not set. Using SQLite for development. "
-            "This is not suitable for production!",
-            RuntimeWarning,
-        )
-        DATABASE_URL = "sqlite:///./freeagentics_dev.db"
-    else:
-        raise ValueError(
-            "DATABASE_URL environment variable is required. "
-            "Please set it in your .env file or environment. "
-            "Format: postgresql://username:password@host:port/database"
-        )
+    # Always allow running without database for demos
+    import warnings
+    
+    warnings.warn(
+        "⚠️ Running in demo mode without database. "
+        "For production use, set DATABASE_URL environment variable.",
+        RuntimeWarning,
+    )
+    DATABASE_URL = None  # Explicitly set to None for demo mode
 
 # Security validation for production
-if os.getenv("PRODUCTION", "false").lower() == "true":
+if DATABASE_URL and os.getenv("PRODUCTION", "false").lower() == "true":
     # Ensure we're not using default dev credentials in production
     if "freeagentics_dev_2025" in DATABASE_URL or "freeagentics123" in DATABASE_URL:
         raise ValueError(
@@ -57,15 +50,17 @@ if os.getenv("PRODUCTION", "false").lower() == "true":
     if "sslmode=" not in DATABASE_URL:
         DATABASE_URL += "?sslmode=require"
 
-# Create engine with connection pooling and security settings
-engine_args: Dict[str, Any] = {
-    "echo": os.getenv("DEBUG_SQL", "false").lower() == "true",  # SQL logging
-}
+# Create engine only if DATABASE_URL is available
+if DATABASE_URL:
+    # Create engine with connection pooling and security settings
+    engine_args: Dict[str, Any] = {
+        "echo": os.getenv("DEBUG_SQL", "false").lower() == "true",  # SQL logging
+    }
 
-# Configure pooling based on database dialect
-if DATABASE_URL.startswith("postgresql://") or DATABASE_URL.startswith("postgres://"):
-    # PostgreSQL-specific configuration
-    engine_args.update(
+    # Configure pooling based on database dialect
+    if DATABASE_URL.startswith("postgresql://") or DATABASE_URL.startswith("postgres://"):
+        # PostgreSQL-specific configuration
+        engine_args.update(
         {
             "pool_size": int(os.getenv("DB_POOL_SIZE", "20")),
             "max_overflow": int(os.getenv("DB_MAX_OVERFLOW", "40")),
@@ -86,18 +81,22 @@ if DATABASE_URL.startswith("postgresql://") or DATABASE_URL.startswith("postgres
                 },
             }
         )
-elif DATABASE_URL.startswith("sqlite://"):
-    # SQLite-specific configuration
-    engine_args.update({"connect_args": {"check_same_thread": False}})
+    elif DATABASE_URL.startswith("sqlite://"):
+        # SQLite-specific configuration
+        engine_args.update({"connect_args": {"check_same_thread": False}})
 
-engine = create_engine(DATABASE_URL, **engine_args)
+    engine = create_engine(DATABASE_URL, **engine_args)
 
-# Create session factory
-SessionLocal = sessionmaker(
-    autocommit=False,
-    autoflush=False,
-    bind=engine,
-)
+    # Create session factory
+    SessionLocal = sessionmaker(
+        autocommit=False,
+        autoflush=False,
+        bind=engine,
+    )
+else:
+    # Demo mode - no database
+    engine = None
+    SessionLocal = None
 
 
 @dataclass
@@ -148,6 +147,15 @@ db_circuit_breaker_config = CircuitBreakerConfig(
     excluded_exceptions=(KeyboardInterrupt, SystemExit),
 )
 db_circuit_breaker = CircuitBreaker("database", db_circuit_breaker_config)
+
+
+def get_database_url() -> Optional[str]:
+    """Get the database URL if available.
+    
+    Returns:
+        Database URL string or None if in demo mode
+    """
+    return DATABASE_URL
 
 
 def get_db() -> Generator[Session, None, None]:

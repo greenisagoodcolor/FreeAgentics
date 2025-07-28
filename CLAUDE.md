@@ -1540,6 +1540,47 @@ Based on resolving critical CI/CD failures in FreeAgentics:
 - **Version Ranges vs Pinning**: Use ranges for compatibility (e.g., starlette>=0.37.2,<0.39.0) when conflicts arise
 - **Security vs Stability**: Document why specific versions are chosen (security fixes vs latest stable)
 
+### Critical Demo Mode Implementation (July 2025)
+
+Based on fixing three business-critical blockers that almost shut down the company:
+
+#### Database Dependency Resolution
+
+- **Optional Database Pattern**: Make database_url optional in config to support demo mode
+- **Graceful Degradation**: System should run without PostgreSQL for demonstrations
+- **Clear Messaging**: Show "⚠️ Running in demo mode without database" warnings
+- **Implementation**: Check for database_url presence before requiring it:
+  ```python
+  database_url = get_database_url()
+  if not database_url:
+      logger.warning("⚠️ Running in demo mode without database")
+      return None
+  ```
+
+#### PyMDP API Compatibility Fixes
+
+- **Version-Aware Integration**: Handle PyMDP API changes between versions gracefully
+- **Parameter Validation**: Remove unsupported parameters (e.g., 'control_fns') for newer versions
+- **Attribute Initialization**: Add missing attributes (e.g., 'F') that newer versions expect
+- **Defensive Programming**: Check PyMDP version and adapt API calls accordingly
+- **Action Inference**: Handle edge cases where PyMDP returns None for action selection
+
+#### Mock LLM Provider Strategy
+
+- **Zero-Configuration Demo**: Implement mock LLM provider that works without API keys
+- **Deterministic Responses**: Mock provider generates reasonable GMN models for demos
+- **Type-Based Templates**: Different templates for explorer, trader, coordinator agents
+- **Embedding Support**: Mock embeddings that return consistent vectors for demo flow
+- **Seamless Fallback**: System automatically uses mock when no API keys configured
+
+#### Key Learnings
+
+1. **Demo-First Development**: Always ensure the system can run in demo mode without external dependencies
+2. **Graceful Feature Degradation**: Missing components should warn but not crash
+3. **Business Impact**: These three fixes saved the company by enabling immediate demos
+4. **Testing Strategy**: Create comprehensive demo tests that verify full flow without dependencies
+5. **Documentation**: Update README to clearly show system works out-of-box
+
 #### CI/CD Debugging Strategies
 
 - **Essential GitHub CLI Commands**:
