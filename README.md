@@ -4,6 +4,16 @@
 
 🛑 **v0.0.1-prototype - NOT READY FOR INVESTMENT** 🛑
 
+## 🚨 CRITICAL: Directory Structure Warning 🚨
+
+**NEW DEVELOPERS: The directory structure is currently VERY CONFUSING!**
+
+👉 **[Click here for URGENT_DIRECTORY_STRUCTURE_README.md](URGENT_DIRECTORY_STRUCTURE_README.md)** 👈
+
+**TL;DR: All active code is in `./freeagentics2-nemesis/` - use that directory for everything!**
+
+---
+
 Building on work from John Clippinger, Andrea Pashea, and Daniel Friedman as well as the Active Inference Institute and many others.
 
 This is an early prototype for developers interested in Active Inference and multi-agent systems. **Only ~20% of advertised functionality is actually working.** Not ready for production use or investment evaluation.
@@ -64,6 +74,9 @@ Based on honest assessment of current state:
 ```bash
 git clone https://github.com/your-org/freeagentics.git
 cd freeagentics
+
+# ⚠️ CRITICAL: Navigate to the actual code directory!
+cd freeagentics2-nemesis
 
 # Option 1: Use SQLite fallback (no PostgreSQL required)
 cp .env.development .env
