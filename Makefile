@@ -216,9 +216,12 @@ install: ## 📦 Install/update all project dependencies
 	@printf "$(BOLD)$(GREEN)🎉 Installation Process Complete!$(RESET)\n"
 	@printf "\n"
 	@printf "$(CYAN)📝 Next Steps:$(RESET)\n"
-	@printf "  1. Run $(GREEN)make status$(RESET) to verify installation\n"
-	@printf "  2. Run $(GREEN)make test-dev$(RESET) to run quick tests\n"
-	@printf "  3. Run $(GREEN)make dev$(RESET) to start development servers\n"
+	@printf "  1. $(YELLOW)Optional:$(RESET) Activate venv with $(GREEN)source venv/bin/activate$(RESET)\n"
+	@printf "  2. Run $(GREEN)make status$(RESET) to verify installation\n"
+	@printf "  3. Run $(GREEN)make test-dev$(RESET) to run quick tests\n"
+	@printf "  4. Run $(GREEN)make dev$(RESET) to start development servers\n"
+	@printf "\n"
+	@printf "$(CYAN)💡 Note:$(RESET) The Makefile automatically uses the venv, manual activation is optional\n"
 
 status: ## 📊 Show detailed environment and service status
 	@echo -e "$(BOLD)$(BLUE)📊 FreeAgentics Environment Status$(RESET)"
@@ -257,13 +260,18 @@ status: ## 📊 Show detailed environment and service status
 # ============================================================================
 
 dev: ## 🚀 Start development servers (frontend + backend)
-	@# Ensure venv exists
+	@# Ensure venv exists and is activated
 	@if [ ! -d "$(VENV_DIR)" ]; then \
 		printf "$(YELLOW)⚠️  Python environment not found. Please run 'make install' first$(RESET)\n"; \
 		exit 1; \
 	fi
-	@# Use the unified dev script
-	@$(PYTHON) scripts/dev.py
+	@# Check if we're in venv
+	@if [ -z "$$VIRTUAL_ENV" ] && [ "$$0" != "-bash" ]; then \
+		printf "$(YELLOW)📦 Activating virtual environment...$(RESET)\n"; \
+		. $(VENV_DIR)/bin/activate; \
+	fi
+	@# Use the unified dev script with venv python
+	@. $(VENV_DIR)/bin/activate && $(PYTHON) scripts/dev.py
 
 stop: ## 🛑 Stop all development servers and clear ports
 	@echo -e "$(YELLOW)🛑 Stopping Development Servers...$(RESET)"

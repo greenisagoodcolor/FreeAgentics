@@ -94,11 +94,6 @@ async def lifespan(app: FastAPI):
     except Exception as e:
         logger.warning(f"Database initialization skipped: {e}")
     
-    # In dev mode, inject auth middleware
-    if os.getenv("PRODUCTION", "false").lower() != "true" and not os.getenv("DATABASE_URL"):
-        from auth.dev_auth import inject_dev_auth_middleware
-        inject_dev_auth_middleware(app)
-        logger.info("🔑 Dev auth middleware enabled")
     yield
     # Shutdown
     logger.info("Shutting down FreeAgentics API...")
@@ -129,6 +124,12 @@ app = FastAPI(
     version="0.1.0",
     lifespan=lifespan,
 )
+
+# In dev mode, inject auth middleware (must be before other middleware)
+if os.getenv("PRODUCTION", "false").lower() != "true" and not os.getenv("DATABASE_URL"):
+    from auth.dev_auth import inject_dev_auth_middleware
+    inject_dev_auth_middleware(app)
+    logger.info("🔑 Dev auth middleware enabled")
 
 # Configure CORS
 app.add_middleware(

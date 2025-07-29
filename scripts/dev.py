@@ -68,8 +68,10 @@ def setup_environment():
     project_root = Path(__file__).parent.parent
     os.chdir(project_root)
     
-    # Set Python path
-    os.environ["PYTHONPATH"] = str(project_root)
+    # Set Python path to include project root
+    python_path = os.environ.get("PYTHONPATH", "")
+    if str(project_root) not in python_path:
+        os.environ["PYTHONPATH"] = f"{project_root}:{python_path}" if python_path else str(project_root)
     
     # Load .env if exists
     env_file = project_root / ".env"
@@ -97,8 +99,15 @@ def start_backend():
         kill_port(8000)
         time.sleep(1)
     
+    # Ensure we use the venv Python
+    project_root = Path(__file__).parent.parent
+    venv_python = project_root / "venv" / "bin" / "python"
+    
+    # Use venv python if it exists, otherwise current python
+    python_exe = str(venv_python) if venv_python.exists() else sys.executable
+    
     cmd = [
-        sys.executable,
+        python_exe,
         "-m", "uvicorn",
         "api.main:app",
         "--reload",
