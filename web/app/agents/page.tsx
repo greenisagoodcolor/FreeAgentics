@@ -153,7 +153,7 @@ export default function AgentsPage() {
       {/* Development Notice */}
       <div className="mt-8 bg-yellow-50 border border-yellow-200 rounded-lg p-4">
         <p className="text-sm text-yellow-800">
-          <strong>Note:</strong> Agent creation is currently in demo mode. Active Inference engine
+          <strong>Note:</strong> Agent creation is currently in dev mode. Active Inference engine
           integration is in progress.
         </p>
       </div>

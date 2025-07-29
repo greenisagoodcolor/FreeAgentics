@@ -1,4 +1,4 @@
-// Safe import for optional bundle analyzer (demo mode support)
+// Safe import for optional bundle analyzer (dev mode support)
 let withBundleAnalyzer;
 try {
   withBundleAnalyzer = require('@next/bundle-analyzer')({

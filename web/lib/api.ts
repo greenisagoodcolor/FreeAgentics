@@ -10,6 +10,46 @@ export class ApiError extends Error {
   }
 }
 
+export async function api<T>(
+  input: RequestInfo,
+  init: RequestInit = {}
+): Promise<T> {
+  const token = typeof window !== 'undefined' ? localStorage.getItem("fa.jwt") : null;
+  const headers = new Headers(init.headers);
+  headers.set('Content-Type', 'application/json');
+  if (token) {
+    headers.set("Authorization", `Bearer ${token}`);
+  }
+  
+  try {
+    const response = await fetch(input, { ...init, headers, credentials: "include" });
+    
+    if (response.status === 401) {
+      if (typeof window !== 'undefined') {
+        localStorage.removeItem("fa.jwt");
+        location.reload();
+      }
+      throw new ApiError("Unauthenticated", 401);
+    }
+    
+    if (!response.ok) {
+      throw new ApiError(
+        `HTTP ${response.status}: ${response.statusText}`,
+        response.status,
+        response.statusText
+      );
+    }
+    
+    return response.json();
+  } catch (error) {
+    console.error('API request failed:', error);
+    if (error instanceof ApiError) {
+      throw error;
+    }
+    throw new ApiError(error instanceof Error ? error.message : 'Unknown error');
+  }
+}
+
 function getAuthHeaders(): HeadersInit {
   const token = typeof window !== 'undefined' ? localStorage.getItem("fa.jwt") : null;
   return token ? { Authorization: `Bearer ${token}` } : {};

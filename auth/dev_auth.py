@@ -31,7 +31,8 @@ class DevAuthManager:
 
     def is_dev_mode(self) -> bool:
         """Check if we're in development mode."""
-        return os.getenv("PRODUCTION", "false").lower() != "true"
+        from core.environment import is_development
+        return is_development()
 
     def get_or_create_dev_token(self) -> Dict[str, str]:
         """Get existing or create new dev token."""

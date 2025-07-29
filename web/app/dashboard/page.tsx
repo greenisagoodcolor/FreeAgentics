@@ -91,7 +91,7 @@ export default function DashboardPage() {
       {/* Development Notice */}
       <div className="mt-8 bg-yellow-50 border border-yellow-200 rounded-lg p-4">
         <p className="text-sm text-yellow-800">
-          <strong>Note:</strong> The dashboard is currently showing demo data. Agent functionality
+          <strong>Note:</strong> The dashboard is currently showing dev data. Agent functionality
           is being implemented.
         </p>
       </div>

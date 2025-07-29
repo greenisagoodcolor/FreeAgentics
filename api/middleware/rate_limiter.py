@@ -526,7 +526,8 @@ class RateLimiter:
     ) -> Tuple[bool, Optional[Response]]:
         """Process request through rate limiter."""
         # Skip rate limiting in dev mode
-        if os.getenv("PRODUCTION", "false").lower() != "true":
+        from core.environment import should_enable_rate_limiting
+        if not should_enable_rate_limiting():
             return True, None
 
         ip = self.get_client_ip(request)

@@ -23,7 +23,8 @@ async def get_dev_config() -> Dict[str, Any]:
     Frontend can call this to get necessary configuration for local development.
     """
     # Ensure not in production
-    if os.getenv("PRODUCTION", "false").lower() == "true":
+    from core.environment import environment
+    if environment.is_production:
         raise HTTPException(
             status_code=status.HTTP_404_NOT_FOUND,
             detail="This endpoint is not available in production",
@@ -35,17 +36,17 @@ async def get_dev_config() -> Dict[str, Any]:
     token_info = get_dev_token()
 
     config = {
-        "mode": "dev",
+        "mode": environment.config.type,
         "features": {
-            "database": False,
+            "database": environment.config.database_required,
             "redis": bool(os.getenv("REDIS_URL")),
             "real_llm": bool(os.getenv("OPENAI_API_KEY")),
             "websocket": True,
-            "auth_required": False,
+            "auth_required": environment.config.auth_required,
         },
         "endpoints": {
             "api": "/api",
-            "websocket": "/api/v1/ws/dev",
+            "websocket": environment.config.websocket_endpoint,
             "graphql": "/graphql",
             "docs": "/docs",
         },
