@@ -4,7 +4,7 @@
   "description": "FreeAgentics - Multi-Agent Active Inference Platform",
   "private": true,
   "scripts": {
-    "dev": "next dev",
+    "dev": "next dev -p 3000 --turbo",
     "build": "next build",
     "start": "next start",
     "lint": "next lint",

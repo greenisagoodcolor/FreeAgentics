@@ -32,9 +32,9 @@ export default function MainPage() {
       {/* Main content area */}
       <div className="flex-1 flex flex-col overflow-hidden">
         {/* Top Row - 3 columns with explanations */}
-        <div className="main-row grid grid-cols-1 lg:grid-cols-3 gap-4 p-4 flex-1 overflow-hidden">
-          {/* Agent Creator Panel */}
-          <div className="h-full overflow-hidden">
+        <div className="main-row grid gap-4 p-4 flex-1 overflow-hidden auto-rows-max grid-cols-1 lg:grid-cols-12">
+          {/* Agent Creator Panel - lg: span 3 */}
+          <div className="h-full overflow-hidden lg:col-span-3">
             <div className="mb-2">
               <p className="text-sm text-muted-foreground">
                 Create Active Inference agents that minimize free energy through belief updates and action selection
@@ -43,8 +43,8 @@ export default function MainPage() {
             <AgentCreatorPanel />
           </div>
 
-          {/* Knowledge Graph View */}
-          <div className="h-full overflow-hidden">
+          {/* Knowledge Graph View - lg: span 5 */}
+          <div className="h-full overflow-hidden lg:col-span-5">
             <div className="mb-2">
               <p className="text-sm text-muted-foreground">
                 Semantic knowledge representation showing agent beliefs and world model relationships
@@ -53,8 +53,8 @@ export default function MainPage() {
             <KnowledgeGraphView />
           </div>
 
-          {/* Simulation Grid */}
-          <div className="h-full overflow-hidden">
+          {/* Simulation Grid - lg: span 4 */}
+          <div className="h-full overflow-hidden lg:col-span-4">
             <div className="mb-2">
               <p className="text-sm text-muted-foreground">
                 Grid world environment where agents demonstrate emergent behavior through variational inference
