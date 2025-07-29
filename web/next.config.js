@@ -100,18 +100,20 @@ const nextConfig = {
   },
 
 
-  // CORS headers - SECURITY HARDENED: Restricted to specific origins
+  // CORS headers - SECURITY HARDENED: Restricted to specific origins  
   async headers() {
-    const allowedOrigin = process.env.NODE_ENV === 'production' 
-      ? process.env.ALLOWED_ORIGINS || "https://yourdomain.com"
-      : "http://localhost:3000";
-      
+    const isDev = process.env.NODE_ENV !== 'production';
+    
     return [
       {
         source: "/api/:path*",
         headers: [
-          { key: "Access-Control-Allow-Credentials", value: "true" },
-          { key: "Access-Control-Allow-Origin", value: allowedOrigin },
+          // Only require credentials in production
+          ...(isDev ? [] : [{ key: "Access-Control-Allow-Credentials", value: "true" }]),
+          { 
+            key: "Access-Control-Allow-Origin", 
+            value: isDev ? "*" : (process.env.ALLOWED_ORIGINS || "https://yourdomain.com")
+          },
           {
             key: "Access-Control-Allow-Methods",
             value: "GET,OPTIONS,PATCH,DELETE,POST,PUT",
