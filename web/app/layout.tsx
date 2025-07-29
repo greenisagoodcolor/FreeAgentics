@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import "./globals.css";
+import { AuthProvider } from "@/components/auth-provider";
 
 // Temporarily use system fonts due to network issues
 const fontClassName = "font-sans";
@@ -13,7 +14,9 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
   return (
     <html lang="en">
       <body className={fontClassName}>
-        <div className="min-h-screen bg-gray-50">{children}</div>
+        <AuthProvider>
+          <div className="min-h-screen bg-gray-50">{children}</div>
+        </AuthProvider>
       </body>
     </html>
   );

@@ -43,7 +43,15 @@ export class WebSocketClient {
     this.setState("connecting");
 
     try {
-      this.ws = new WebSocket(this.url);
+      // Append token to WebSocket URL if available
+      let wsUrl = this.url;
+      const token = localStorage.getItem("freeagentics_auth_token");
+      if (token) {
+        const separator = this.url.includes('?') ? '&' : '?';
+        wsUrl = `${this.url}${separator}token=${encodeURIComponent(token)}`;
+      }
+      
+      this.ws = new WebSocket(wsUrl);
 
       this.ws.onopen = () => {
         this.reconnectAttempts = 0;

@@ -11,6 +11,7 @@ export interface AuthState {
   user: User | null;
   isAuthenticated: boolean;
   isLoading: boolean;
+  token: string | null;
   login: (email: string, password: string) => Promise<void>;
   logout: () => Promise<void>;
 }
@@ -20,18 +21,46 @@ const USER_KEY = "freeagentics_user";
 
 export function useAuth(): AuthState {
   const [user, setUser] = useState<User | null>(null);
+  const [token, setToken] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const router = useRouter();
 
-  // Load auth state from localStorage on mount
+  // Load auth state from localStorage and fetch dev token if needed
   useEffect(() => {
-    const loadAuthState = () => {
+    const loadAuthState = async () => {
       try {
-        const token = localStorage.getItem(AUTH_TOKEN_KEY);
+        const storedToken = localStorage.getItem(AUTH_TOKEN_KEY);
         const storedUser = localStorage.getItem(USER_KEY);
 
-        if (token && storedUser) {
+        if (storedToken && storedUser) {
+          setToken(storedToken);
           setUser(JSON.parse(storedUser));
+          setIsLoading(false);
+          return;
+        }
+
+        // Try to fetch dev-config for automatic token in demo mode
+        try {
+          const response = await fetch("/api/v1/dev-config");
+          if (response.ok) {
+            const config = await response.json();
+            if (config.auth && config.auth.token) {
+              const devToken = config.auth.token;
+              const devUser = {
+                id: "dev-user",
+                email: "developer@freeagentics.dev",
+                name: "Developer"
+              };
+              
+              localStorage.setItem(AUTH_TOKEN_KEY, devToken);
+              localStorage.setItem(USER_KEY, JSON.stringify(devUser));
+              
+              setToken(devToken);
+              setUser(devUser);
+            }
+          }
+        } catch (devConfigError) {
+          console.log("Dev config not available, continuing without auto-auth");
         }
       } catch (error) {
         console.error("Failed to load auth state:", error);
@@ -64,6 +93,7 @@ export function useAuth(): AuthState {
       localStorage.setItem(AUTH_TOKEN_KEY, token);
       localStorage.setItem(USER_KEY, JSON.stringify(userData));
 
+      setToken(token);
       setUser(userData);
     } catch (error) {
       console.error("Login error:", error);
@@ -89,6 +119,7 @@ export function useAuth(): AuthState {
       // Clear auth data regardless of API call result
       localStorage.removeItem(AUTH_TOKEN_KEY);
       localStorage.removeItem(USER_KEY);
+      setToken(null);
       setUser(null);
       setIsLoading(false);
 
@@ -101,6 +132,7 @@ export function useAuth(): AuthState {
     user,
     isAuthenticated: !!user,
     isLoading,
+    token,
     login,
     logout,
   };

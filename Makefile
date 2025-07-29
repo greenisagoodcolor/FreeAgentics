@@ -82,7 +82,7 @@ endif
 
 # Define all phony targets (targets that don't create files)
 .PHONY: help check install deps-check build clean lint format type-check test-dev test-commit test-release coverage
-.PHONY: dev demo start stop kill-ports status reset docs docker docker-build docker-up docker-down
+.PHONY: dev start stop kill-ports status reset docs docker docker-build docker-up docker-down
 .PHONY: test-unit test-integration test-e2e test-security test-chaos test-compliance ci-setup
 .PHONY: security-check security-scan security-audit prod-env dev-env check-secrets
 
@@ -139,7 +139,6 @@ help: ## 📖 Show this help and all available commands
 	@printf "  $(GREEN)clean$(RESET)            Remove test artifacts and caches\n"
 	@printf "  $(GREEN)stop$(RESET)             Stop all development servers\n"
 	@printf "  $(GREEN)reset$(RESET)            Clean environment reset\n"
-	@printf "  $(GREEN)demo$(RESET)             Run demo (placeholder)\n"
 	@printf "  $(GREEN)dev-env$(RESET)          Set up development environment\n"
 	@printf "  $(GREEN)prod-env$(RESET)         Validate production environment\n"
 	@printf "\n"
@@ -259,7 +258,7 @@ status: ## 📊 Show detailed environment and service status
 # 3. DEVELOPMENT COMMANDS
 # ============================================================================
 
-dev: kill-ports ## 🚀 Start development servers (frontend + backend)
+dev: kill-ports ## 🚀 Start development servers (auto-detects demo/dev mode)
 	@# Ensure venv exists
 	@if [ ! -d "$(VENV_DIR)" ]; then \
 		printf "$(YELLOW)⚠️  Python environment not found. Please run 'make install' first$(RESET)\n"; \
@@ -283,9 +282,6 @@ kill-ports: ## 🔧 Clear processes on development ports (3000, 8000)
 
 start: dev ## 🚀 Alias for 'make dev'
 
-demo: ## 🎯 Run FreeAgentics demo - Full Web UI in demo mode (no database required)
-	@# Demo is now the same as dev - the system auto-detects mode
-	@$(MAKE) dev
 
 # ============================================================================
 # 4. TESTING COMMANDS (Three-Tier Strategy)

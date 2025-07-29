@@ -13,7 +13,16 @@ export default function HomePage() {
     <div className="main-layout flex flex-col h-screen bg-background">
       {/* Top Bar - height ≤ 64px, sticky */}
       <div className="top-bar sticky top-0 z-50 max-h-16 border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
-        <PromptBar />
+        <div className="flex items-center justify-between px-4 h-full">
+          <div className="flex items-center space-x-4">
+            <h1 className="text-xl font-bold text-foreground">FreeAgentics</h1>
+            <span className="text-sm text-muted-foreground">Active Inference Platform</span>
+          </div>
+          <div className="flex-1 max-w-2xl mx-4">
+            <PromptBar />
+          </div>
+          <div className="w-32"></div> {/* Spacer for balance */}
+        </div>
       </div>
 
       {/* Main content area */}
