@@ -38,12 +38,18 @@ export class ApiClient {
     };
   }
 
+  private getAuthHeaders(): HeadersInit {
+    const token = typeof window !== 'undefined' ? localStorage.getItem("freeagentics_auth_token") : null;
+    return token ? { Authorization: `Bearer ${token}` } : {};
+  }
+
   private async request<T>(path: string, options: RequestInit = {}): Promise<ApiResponse<T>> {
     try {
       const response = await fetch(`${this.baseUrl}${path}`, {
         ...options,
         headers: {
           ...this.headers,
+          ...this.getAuthHeaders(),
           ...options.headers,
         },
       });

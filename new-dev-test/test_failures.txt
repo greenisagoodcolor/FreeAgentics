@@ -1,5 +1,0 @@
-ERROR tests/integration/test_multi_agent_coordination.py
-ERROR tests/unit/test_api_agents.py
-ERROR tests/unit/test_api_system.py
-ERROR tests/unit/test_database_integration.py
-ERROR tests/unit/test_knowledge_graph.py

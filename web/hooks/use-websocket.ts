@@ -36,7 +36,17 @@ export function useWebSocket(): WebSocketState {
       setConnectionState("connecting");
       setError(null);
 
-      const ws = new WebSocket(WS_URL);
+      // Append token to WebSocket URL if available
+      let wsUrl = WS_URL;
+      if (typeof window !== 'undefined') {
+        const token = localStorage.getItem("freeagentics_auth_token");
+        if (token) {
+          const separator = WS_URL.includes('?') ? '&' : '?';
+          wsUrl = `${WS_URL}${separator}token=${encodeURIComponent(token)}`;
+        }
+      }
+
+      const ws = new WebSocket(wsUrl);
 
       ws.onopen = () => {
         console.log("WebSocket connected");
