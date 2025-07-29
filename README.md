@@ -172,7 +172,6 @@ make dev
 ```bash
 # See real Active Inference in action!
 make demo             # Interactive demo with PyMDP agents
-# Or run directly: make demo-ai
 
 # 🚨 NEW: Run the FULL PIPELINE demo showing all features!
 python examples/demo_full_pipeline.py
