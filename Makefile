@@ -259,19 +259,14 @@ status: ## 📊 Show detailed environment and service status
 # 3. DEVELOPMENT COMMANDS
 # ============================================================================
 
-dev: ## 🚀 Start development servers (frontend + backend)
-	@# Ensure venv exists and is activated
+dev: kill-ports ## 🚀 Start development servers (frontend + backend)
+	@# Ensure venv exists
 	@if [ ! -d "$(VENV_DIR)" ]; then \
 		printf "$(YELLOW)⚠️  Python environment not found. Please run 'make install' first$(RESET)\n"; \
 		exit 1; \
 	fi
-	@# Check if we're in venv
-	@if [ -z "$$VIRTUAL_ENV" ] && [ "$$0" != "-bash" ]; then \
-		printf "$(YELLOW)📦 Activating virtual environment...$(RESET)\n"; \
-		. $(VENV_DIR)/bin/activate; \
-	fi
-	@# Use the unified dev script with venv python
-	@. $(VENV_DIR)/bin/activate && $(PYTHON) scripts/dev.py
+	@# Always use venv python directly, no need to check VIRTUAL_ENV
+	@$(PYTHON) scripts/dev.py
 
 stop: ## 🛑 Stop all development servers and clear ports
 	@echo -e "$(YELLOW)🛑 Stopping Development Servers...$(RESET)"
@@ -279,11 +274,12 @@ stop: ## 🛑 Stop all development servers and clear ports
 	@echo -e "$(GREEN)✅ All servers stopped$(RESET)"
 
 kill-ports: ## 🔧 Clear processes on development ports (3000, 8000)
-	@echo -e "$(YELLOW)🔧 Clearing Port Conflicts$(RESET)"
-	@echo "Stopping processes on ports 3000, 8000..."
+	@# Silently kill processes on common ports
 	@lsof -ti:3000 | xargs kill -9 2>/dev/null || true
+	@lsof -ti:3001 | xargs kill -9 2>/dev/null || true
+	@lsof -ti:3002 | xargs kill -9 2>/dev/null || true
+	@lsof -ti:3003 | xargs kill -9 2>/dev/null || true
 	@lsof -ti:8000 | xargs kill -9 2>/dev/null || true
-	@echo -e "$(GREEN)✅ Ports cleared$(RESET)"
 
 start: dev ## 🚀 Alias for 'make dev'
 
