@@ -18,27 +18,27 @@ export default function MainPage() {
 
       {/* Main content area */}
       <div className="flex-1 flex flex-col overflow-hidden">
-        {/* Main Row - 3 equal columns on large screens */}
+        {/* Top Row - 3 columns: Agent Creator, Knowledge Graph, Simulation Grid */}
         <div className="main-row grid grid-cols-1 lg:grid-cols-3 gap-4 p-4 flex-1 overflow-hidden">
           {/* Agent Creator Panel */}
           <div className="h-full overflow-hidden">
             <AgentCreatorPanel />
           </div>
 
-          {/* Conversation Window */}
-          <div className="h-full overflow-hidden">
-            <ConversationWindow />
-          </div>
-
           {/* Knowledge Graph View */}
           <div className="h-full overflow-hidden">
             <KnowledgeGraphView />
           </div>
+
+          {/* Simulation Grid */}
+          <div className="h-full overflow-hidden">
+            <SimulationGrid />
+          </div>
         </div>
 
-        {/* Second Row - Simulation Grid (100% width) */}
-        <div className="simulation-row w-full p-4">
-          <SimulationGrid />
+        {/* Bottom Row - Conversation Window (bottom third) */}
+        <div className="conversation-row w-full p-4 h-1/3">
+          <ConversationWindow />
         </div>
       </div>
 

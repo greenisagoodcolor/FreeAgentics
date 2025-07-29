@@ -12,7 +12,7 @@ import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/comp
 import { useSimulation } from "@/hooks/use-simulation";
 import { useAgents } from "@/hooks/use-agents";
 
-const CELL_SIZE = 30;
+const CELL_SIZE = 25;
 const CELL_COLORS = {
   empty: "#f3f4f6",
   wall: "#374151",
@@ -58,7 +58,7 @@ export function SimulationGrid() {
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const containerRef = useRef<HTMLDivElement>(null);
   const [tooltip, setTooltip] = useState<TooltipData | null>(null);
-  const [gridDimensions, setGridDimensions] = useState({ width: 20, height: 20 });
+  const [gridDimensions, setGridDimensions] = useState({ width: 10, height: 10 });
 
   // Draw grid on canvas
   useEffect(() => {
@@ -206,12 +206,17 @@ export function SimulationGrid() {
       <CardHeader className="pb-3">
         <div className="flex items-center justify-between">
           <div>
-            <CardTitle>Simulation Grid</CardTitle>
+            <CardTitle>🎮 Agent Simulation (10×10 Grid)</CardTitle>
             <CardDescription>
-              Step: {currentStep} • {agents.length} agents
-              {metrics && (
-                <span className="ml-2">
-                  • {metrics.fps} FPS • {metrics.avgStepTime}ms/step
+              Watch agents move, explore, and interact in real-time
+              {hasSimulation && (
+                <span className="block mt-1">
+                  Step: {currentStep} • {agents.length} agents active
+                  {metrics && (
+                    <span className="ml-2">
+                      • {metrics.fps} FPS • {metrics.avgStepTime}ms/step
+                    </span>
+                  )}
                 </span>
               )}
             </CardDescription>
@@ -235,7 +240,9 @@ export function SimulationGrid() {
                     )}
                   </Button>
                 </TooltipTrigger>
-                <TooltipContent>{isRunning && !isPaused ? "Pause" : "Start"}</TooltipContent>
+                <TooltipContent>
+                  {isRunning && !isPaused ? "Pause simulation" : "Start simulation"}
+                </TooltipContent>
               </Tooltip>
             </TooltipProvider>
 
@@ -252,7 +259,7 @@ export function SimulationGrid() {
                     <SkipForward className="h-4 w-4" />
                   </Button>
                 </TooltipTrigger>
-                <TooltipContent>Step</TooltipContent>
+                <TooltipContent>Step forward one frame</TooltipContent>
               </Tooltip>
             </TooltipProvider>
 
@@ -268,13 +275,13 @@ export function SimulationGrid() {
                     <RotateCcw className="h-4 w-4" />
                   </Button>
                 </TooltipTrigger>
-                <TooltipContent>Reset</TooltipContent>
+                <TooltipContent>Reset simulation to start</TooltipContent>
               </Tooltip>
             </TooltipProvider>
 
             {isRunning && (
               <Button variant="destructive" size="sm" onClick={stopSimulation}>
-                Stop
+                🛑 Stop Simulation
               </Button>
             )}
           </div>
@@ -347,10 +354,18 @@ export function SimulationGrid() {
         {/* Grid Display */}
         <div className="flex-1 relative">
           {!hasSimulation ? (
-            <div className="h-full flex items-center justify-center text-center">
-              <div className="text-muted-foreground">
-                <p className="text-sm font-medium">No active simulation</p>
-                <p className="text-xs mt-1">Create agents and start a simulation</p>
+            <div className="h-full flex items-center justify-center text-center p-4">
+              <div className="text-gray-600">
+                <div className="text-4xl mb-3">🎯</div>
+                <p className="text-lg font-semibold text-gray-900 mb-2">Ready to Simulate</p>
+                <p className="text-sm mb-3">
+                  1. Create agents in the left panel<br/>
+                  2. Click the ▶️ Play button to start<br/>
+                  3. Watch agents explore the 10×10 grid
+                </p>
+                <div className="text-xs text-gray-500">
+                  Agents will move, collect resources, and demonstrate AI behaviors
+                </div>
               </div>
             </div>
           ) : (
