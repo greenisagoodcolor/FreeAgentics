@@ -90,7 +90,7 @@ export async function apiGet(endpoint: string, opts: RequestInit = {}) {
   return response.json();
 }
 
-export async function apiPost(endpoint: string, data?: any, opts: RequestInit = {}) {
+export async function apiPost(endpoint: string, data?: unknown, opts: RequestInit = {}) {
   const response = await fetchJson(`${getBaseUrl()}${endpoint}`, {
     method: 'POST',
     body: data ? JSON.stringify(data) : undefined,
@@ -99,7 +99,7 @@ export async function apiPost(endpoint: string, data?: any, opts: RequestInit = 
   return response.json();
 }
 
-export async function apiPut(endpoint: string, data?: any, opts: RequestInit = {}) {
+export async function apiPut(endpoint: string, data?: unknown, opts: RequestInit = {}) {
   const response = await fetchJson(`${getBaseUrl()}${endpoint}`, {
     method: 'PUT',
     body: data ? JSON.stringify(data) : undefined,

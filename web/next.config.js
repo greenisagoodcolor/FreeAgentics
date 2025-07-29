@@ -18,12 +18,6 @@ const nextConfig = {
   skipTrailingSlashRedirect: true,
   trailingSlash: false,
 
-  // Output file tracing configuration
-  experimental: {
-    outputFileTracingExcludes: {
-      '/api/**/*': ['**/*'],
-    },
-  },
 
   // Compiler optimizations
   compiler: {
