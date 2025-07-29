@@ -1,5 +1,6 @@
 import { useState, useCallback, useEffect } from "react";
 import { useWebSocket } from "./use-websocket";
+import { apiGet, ApiError } from "../lib/api";
 
 export type NodeType = "agent" | "belief" | "goal" | "observation" | "action";
 export type EdgeType = "has_belief" | "has_goal" | "observes" | "performs" | "influences";
@@ -96,16 +97,15 @@ export function useKnowledgeGraph(): KnowledgeGraphState {
       setIsLoading(true);
       setError(null);
 
-      const response = await fetch(`${API_BASE_URL}/api/knowledge-graph`);
-      if (!response.ok) {
-        throw new Error("Failed to fetch knowledge graph");
-      }
-
-      const data = await response.json();
+      const data = await apiGet("/api/knowledge-graph");
       setNodes(data.nodes || []);
       setEdges(data.edges || []);
     } catch (err) {
-      setError(err as Error);
+      if (err instanceof ApiError) {
+        setError(err);
+      } else {
+        setError(new Error(err instanceof Error ? err.message : "Failed to fetch knowledge graph"));
+      }
       console.error("Failed to fetch knowledge graph:", err);
     } finally {
       setIsLoading(false);

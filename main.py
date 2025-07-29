@@ -326,12 +326,14 @@ async def root() -> dict:
 try:
     from api.v1.agents import router as agents_router
     from api.v1.auth import router as auth_router
+    from api.v1.dev_config import router as dev_config_router
     from api.v1.knowledge import router as knowledge_router
     from api.v1.system import router as system_router
     from api.v1.websocket import router as websocket_router
 
     # SECURITY: Auth routes (no authentication required)
     app.include_router(auth_router, prefix="/api/v1/auth", tags=["authentication"])
+    app.include_router(dev_config_router, prefix="/api/v1", tags=["development"])
 
     # Protected API routes
     app.include_router(agents_router, prefix="/api/v1", tags=["agents"])

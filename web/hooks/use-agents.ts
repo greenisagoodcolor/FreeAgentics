@@ -1,5 +1,6 @@
 import { useState, useCallback, useEffect } from "react";
 import { useWebSocket } from "./use-websocket";
+import { apiGet, apiPost, apiDelete, ApiError } from "../lib/api";
 
 export type AgentStatus = "active" | "idle" | "error";
 export type AgentType = "explorer" | "collector" | "analyzer" | "custom";
@@ -73,15 +74,14 @@ export function useAgents(): AgentsState {
       setIsLoading(true);
       setError(null);
 
-      const response = await fetch(`${API_BASE_URL}/api/agents`);
-      if (!response.ok) {
-        throw new Error("Failed to fetch agents");
-      }
-
-      const data = await response.json();
+      const data = await apiGet("/api/agents");
       setAgents(data.agents || []);
     } catch (err) {
-      setError(err as Error);
+      if (err instanceof ApiError) {
+        setError(err);
+      } else {
+        setError(new Error(err instanceof Error ? err.message : "Failed to fetch agents"));
+      }
       console.error("Failed to fetch agents:", err);
     } finally {
       setIsLoading(false);
@@ -93,19 +93,7 @@ export function useAgents(): AgentsState {
       setIsLoading(true);
       setError(null);
 
-      const response = await fetch(`${API_BASE_URL}/api/agents`, {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify(params),
-      });
-
-      if (!response.ok) {
-        throw new Error("Failed to create agent");
-      }
-
-      const newAgent = await response.json();
+      const newAgent = await apiPost("/api/agents", params);
 
       // Optimistically add to state (WebSocket will confirm)
       setAgents((prev) => [...prev, newAgent]);
@@ -124,10 +112,14 @@ export function useAgents(): AgentsState {
       setIsLoading(true);
       setError(null);
 
+      // Using POST instead of PATCH as apiPatch is not available
       const response = await fetch(`${API_BASE_URL}/api/agents/${id}`, {
         method: "PATCH",
         headers: {
           "Content-Type": "application/json",
+          ...(typeof window !== "undefined" && localStorage.getItem("fa.jwt")
+            ? { Authorization: `Bearer ${localStorage.getItem("fa.jwt")}` }
+            : {}),
         },
         body: JSON.stringify(params),
       });
@@ -151,13 +143,7 @@ export function useAgents(): AgentsState {
       setIsLoading(true);
       setError(null);
 
-      const response = await fetch(`${API_BASE_URL}/api/agents/${id}`, {
-        method: "DELETE",
-      });
-
-      if (!response.ok) {
-        throw new Error("Failed to delete agent");
-      }
+      await apiDelete(`/api/agents/${id}`);
 
       // Optimistically remove from state (WebSocket will confirm)
       setAgents((prev) => prev.filter((agent) => agent.id !== id));
