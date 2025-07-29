@@ -41,10 +41,18 @@ export function useAuth(): AuthState {
 
         // DevToken bootstrap for dev mode
         try {
-          const config = await fetch("/api/v1/dev-config").then(r => r.json());
+          const backendUrl = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8000";
+          const response = await fetch(`${backendUrl}/api/v1/dev-config`);
+          
+          if (!response.ok) {
+            throw new Error(`Dev config request failed: ${response.status}`);
+          }
+          
+          const config = await response.json();
           const token = config.auth?.token;
+          
           if (token) {
-            localStorage.setItem("fa.jwt", token);
+            localStorage.setItem(AUTH_TOKEN_KEY, token);
             const devUser = {
               id: "dev-user",
               email: "developer@freeagentics.dev",
@@ -53,9 +61,13 @@ export function useAuth(): AuthState {
             localStorage.setItem(USER_KEY, JSON.stringify(devUser));
             setToken(token);
             setUser(devUser);
+            console.log("✅ Dev token loaded successfully");
+          } else {
+            console.warn("No token found in dev config response");
           }
         } catch (devConfigError) {
-          console.log("Dev config not available, continuing without auto-auth");
+          console.error("Dev config error:", devConfigError);
+          console.log("Continuing without auto-auth");
         }
       } catch (error) {
         console.error("Failed to load auth state:", error);
