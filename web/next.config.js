@@ -13,17 +13,14 @@ try {
 const nextConfig = {
   reactStrictMode: true,
   output: "standalone", // Enable standalone output for Docker deployments
-  swcMinify: true, // Use SWC minifier for better performance
 
   // Skip build-time prerendering of API routes and sitemap for CI
   skipTrailingSlashRedirect: true,
   trailingSlash: false,
 
-  // Performance optimizations
-  experimental: {
-    outputFileTracingExcludes: {
-      '/api/**/*': ['**/*'],
-    },
+  // Output file tracing configuration (moved from experimental)
+  outputFileTracingExcludes: {
+    '/api/**/*': ['**/*'],
   },
 
   // Compiler optimizations

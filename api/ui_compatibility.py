@@ -22,6 +22,7 @@ from api.v1.agents import delete_agent as v1_delete_agent
 from api.v1.agents import get_agent as v1_get_agent
 from api.v1.agents import list_agents as v1_list_agents
 from api.v1.agents import update_agent_status as v1_update_agent_status
+from api.v1.knowledge_graph import get_knowledge_graph
 from auth.security_implementation import TokenData, get_current_user
 from database.session import get_db
 
@@ -313,3 +314,12 @@ async def broadcast_agent_deleted_event(agent_id: str):
         logger.info(f"Broadcasted agent deletion event for {agent_id}")
     except Exception as e:
         logger.error(f"Failed to broadcast agent deletion event: {e}")
+
+
+# Knowledge graph endpoint
+@router.get("/knowledge-graph")
+async def get_knowledge_graph_ui(
+    current_user: TokenData = Depends(get_current_user),
+):
+    """Get knowledge graph - UI compatibility endpoint."""
+    return await get_knowledge_graph(current_user)

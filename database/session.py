@@ -161,59 +161,17 @@ def get_database_url() -> Optional[str]:
 def get_db() -> Generator[Session, None, None]:
     """Get database session for dependency injection.
 
+    This function now delegates to the unified provider system.
+
     Yields:
         Database session that auto-closes after use
 
     Raises:
-        RuntimeError: If database is not available or circuit breaker is open
+        RuntimeError: If database is not available
     """
-    # Check if SessionLocal is initialized
-    if SessionLocal is None:
-        raise RuntimeError("Database session factory not initialized")
-
-    # Check database availability
-    if not db_state.is_available and not db_state.should_retry():
-        raise RuntimeError(f"Database is not available: {db_state.last_error}")
-
-    # Check circuit breaker
-    if db_circuit_breaker:
-        # Check using both methods for compatibility with tests
-        if hasattr(db_circuit_breaker, "is_request_allowed"):
-            allowed = db_circuit_breaker.is_request_allowed()
-        else:
-            allowed = db_circuit_breaker.should_allow_request()
-
-        if not allowed:
-            raise CircuitOpenException("database", db_circuit_breaker.last_failure_time)
-
-    def create_session():
-        """Create and verify database session."""
-        db = SessionLocal()
-        try:
-            # Verify connection with a simple query
-            db.execute(text("SELECT 1"))
-            db_state.record_success()
-            return db
-        except OperationalError as e:
-            db.close()
-            db_state.record_failure(str(e))
-            raise RuntimeError(f"Database connection failed: {e}")
-
-    # Use circuit breaker if available
-    if db_circuit_breaker:
-        try:
-            db = db_circuit_breaker.call(create_session)
-        except CircuitOpenException:
-            raise
-        except Exception as e:
-            raise RuntimeError(f"Database connection failed: {e}")
-    else:
-        db = create_session()
-
-    try:
-        yield db
-    finally:
-        db.close()
+    # Use the new provider system
+    from core.providers import get_db as get_provider_db
+    yield from get_provider_db()
 
 
 def init_db() -> None:

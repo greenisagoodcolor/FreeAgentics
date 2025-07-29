@@ -257,51 +257,13 @@ status: ## 📊 Show detailed environment and service status
 # ============================================================================
 
 dev: ## 🚀 Start development servers (frontend + backend)
-	@printf "$(BOLD)$(BLUE)🚀 Starting Development Environment$(RESET)\n"
-	@printf "\n"
-	@# Verify environment is ready
-	@if [ ! -d "$(VENV_DIR)" ] || [ ! -f "$(VENV_DIR)/bin/uvicorn" ]; then \
-		printf "$(YELLOW)⚠️  Python dependencies not installed. Please run 'make install' first$(RESET)\n"; \
+	@# Ensure venv exists
+	@if [ ! -d "$(VENV_DIR)" ]; then \
+		printf "$(YELLOW)⚠️  Python environment not found. Please run 'make install' first$(RESET)\n"; \
 		exit 1; \
 	fi
-	@if [ ! -d "node_modules" ] && [ -f "package.json" ]; then \
-		printf "$(YELLOW)⚠️  Node modules not installed. Running npm install...$(RESET)\n"; \
-		npm install; \
-		printf "\n"; \
-	fi
-	@# Clear any existing processes on our ports
-	@printf "$(CYAN)🔧 Clearing port conflicts...$(RESET)\n"
-	@(lsof -ti:3000 >/dev/null 2>&1 && (printf "  → Stopping process on port 3000\n" && $(MAKE) kill-ports)) || true
-	@printf "\n"
-	@printf "$(CYAN)🔥 Starting Backend (FastAPI on :8000)...$(RESET)\n"
-	@if [ -d "$(VENV_DIR)" ]; then \
-		. $(VENV_DIR)/bin/activate && \
-		export $$(cat .env | grep -v '^#' | xargs) && \
-		PYTHONPATH="." $(PYTHON) -m uvicorn api.main:app --reload --host 0.0.0.0 --port 8000 & \
-		printf "  $(GREEN)✅ Backend started$(RESET)\n"; \
-	fi
-	@printf "\n"
-	@printf "$(CYAN)⚛️  Starting Frontend (Next.js on :3000)...$(RESET)\n"
-	@if [ -f "$(WEB_DIR)/package.json" ]; then \
-		cd $(WEB_DIR) && npm run dev & \
-		printf "  $(GREEN)✅ Frontend started$(RESET)\n"; \
-	else \
-		printf "  $(YELLOW)⚠️  No web/package.json found$(RESET)\n"; \
-	fi
-	@sleep 3
-	@printf "\n"
-	@printf "$(BOLD)$(GREEN)🎉 Development Environment Ready!$(RESET)\n"
-	@printf "\n"
-	@printf "$(YELLOW)🌐 Access Points:$(RESET)\n"
-	@printf "  Backend API:  $(BLUE)http://localhost:8000$(RESET)\n"
-	@printf "  API Docs:     $(BLUE)http://localhost:8000/docs$(RESET)\n"
-	@printf "  GraphQL:      $(BLUE)http://localhost:8000/graphql$(RESET)\n"
-	@printf "\n"
-	@printf "$(YELLOW)💡 Development Tips:$(RESET)\n"
-	@printf "  • Run $(GREEN)make test-dev$(RESET) for fast testing during development\n"
-	@printf "  • Run $(GREEN)make format$(RESET) to auto-format your code\n"
-	@printf "  • Run $(GREEN)make stop$(RESET) to stop all servers\n"
-	@printf "  • Press Ctrl+C to stop the servers\n"
+	@# Use the unified dev script
+	@$(PYTHON) scripts/dev.py
 
 stop: ## 🛑 Stop all development servers and clear ports
 	@echo -e "$(YELLOW)🛑 Stopping Development Servers...$(RESET)"
@@ -318,10 +280,8 @@ kill-ports: ## 🔧 Clear processes on development ports (3000, 8000)
 start: dev ## 🚀 Alias for 'make dev'
 
 demo: ## 🎯 Run FreeAgentics demo - Full Web UI in demo mode (no database required)
-	@echo -e "$(BOLD)$(MAGENTA)🧠 FreeAgentics Web Demo$(RESET)"
-	@echo -e "$(CYAN)Starting full UI in demo mode - no database or API keys required!$(RESET)\n"
-	@# Ensure DATABASE_URL is not set to trigger demo mode
-	@unset DATABASE_URL && $(MAKE) dev
+	@# Demo is now the same as dev - the system auto-detects mode
+	@$(MAKE) dev
 
 # ============================================================================
 # 4. TESTING COMMANDS (Three-Tier Strategy)

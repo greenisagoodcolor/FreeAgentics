@@ -13,10 +13,12 @@ from api import ui_compatibility
 from api.v1 import (
     agents,
     auth,
+    dev_config,
     health,
     health_extended,
     inference,
     knowledge,
+    knowledge_graph,
     mfa,
     monitoring,
     prompts,
@@ -75,16 +77,28 @@ async def lifespan(app: FastAPI):
     except Exception as e:
         logger.error(f"Failed to start performance tracking: {e}")
 
-    # Initialize database if in development mode
-    from database.session import DATABASE_URL, init_db
-
-    logger.info(f"Database URL: {DATABASE_URL}")
-
+    # Initialize providers
+    from core.providers import init_providers, get_database
+    
     try:
-        init_db()
-        logger.info("Database initialized successfully")
+        init_providers()
+        logger.info("✅ Providers initialized successfully")
     except Exception as e:
-        logger.warning(f"Database initialization skipped (may already exist): {e}")
+        logger.error(f"Failed to initialize providers: {e}")
+    
+    # Initialize database schema
+    try:
+        db_provider = get_database()
+        db_provider.init_db()
+        logger.info("✅ Database schema initialized")
+    except Exception as e:
+        logger.warning(f"Database initialization skipped: {e}")
+    
+    # In dev mode, inject auth middleware
+    if os.getenv("PRODUCTION", "false").lower() != "true" and not os.getenv("DATABASE_URL"):
+        from auth.dev_auth import inject_dev_auth_middleware
+        inject_dev_auth_middleware(app)
+        logger.info("🔑 Dev auth middleware enabled")
     yield
     # Shutdown
     logger.info("Shutting down FreeAgentics API...")
@@ -162,6 +176,7 @@ app.add_middleware(SecurityHeadersMiddleware, security_manager=security_manager)
 # Include routers
 app.include_router(auth.router, prefix="/api/v1", tags=["auth"])  # Auth must be first
 app.include_router(mfa.router, tags=["mfa"])  # MFA router has its own prefix
+app.include_router(dev_config.router, prefix="/api/v1", tags=["dev"])  # Dev config
 app.include_router(agents.router, prefix="/api/v1", tags=["agents"])
 app.include_router(prompts.router, prefix="/api/v1", tags=["prompts"])
 app.include_router(inference.router, prefix="/api/v1", tags=["inference"])
