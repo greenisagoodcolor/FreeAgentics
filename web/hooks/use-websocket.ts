@@ -16,8 +16,8 @@ export interface WebSocketState {
   error: Error | null;
 }
 
-// Use demo endpoint when no auth is available
-const WS_URL = process.env.NEXT_PUBLIC_WS_URL || "ws://localhost:8000/api/v1/ws/demo";
+// Use dev endpoint for development
+const WS_URL = process.env.NEXT_PUBLIC_WS_URL || "ws://localhost:8000/api/v1/ws/dev";
 const RECONNECT_DELAY = 3000;
 const MAX_RECONNECT_ATTEMPTS = 5;
 
@@ -39,7 +39,7 @@ export function useWebSocket(): WebSocketState {
       // Append token to WebSocket URL if available
       let wsUrl = WS_URL;
       if (typeof window !== 'undefined') {
-        const token = localStorage.getItem("freeagentics_auth_token");
+        const token = localStorage.getItem("fa.jwt");
         if (token) {
           const separator = WS_URL.includes('?') ? '&' : '?';
           wsUrl = `${WS_URL}${separator}token=${encodeURIComponent(token)}`;

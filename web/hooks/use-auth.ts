@@ -19,6 +19,17 @@ export interface AuthState {
 const AUTH_TOKEN_KEY = "fa.jwt";
 const USER_KEY = "fa.user";
 
+// Helper function to check if JWT token is expired
+function isTokenExpired(token: string): boolean {
+  try {
+    const payload = JSON.parse(atob(token.split('.')[1]));
+    const now = Math.floor(Date.now() / 1000);
+    return payload.exp < now;
+  } catch {
+    return true; // If we can't parse it, consider it expired
+  }
+}
+
 export function useAuth(): AuthState {
   const [user, setUser] = useState<User | null>(null);
   const [token, setToken] = useState<string | null>(null);
@@ -32,11 +43,20 @@ export function useAuth(): AuthState {
         const storedToken = localStorage.getItem(AUTH_TOKEN_KEY);
         const storedUser = localStorage.getItem(USER_KEY);
 
-        if (storedToken && storedUser) {
+        // Check if stored token exists and is not expired
+        if (storedToken && storedUser && !isTokenExpired(storedToken)) {
+          console.log("✅ Using valid cached token");
           setToken(storedToken);
           setUser(JSON.parse(storedUser));
           setIsLoading(false);
           return;
+        }
+
+        // Clear expired/invalid tokens
+        if (storedToken) {
+          console.log("🔄 Clearing expired token from localStorage");
+          localStorage.removeItem(AUTH_TOKEN_KEY);
+          localStorage.removeItem(USER_KEY);
         }
 
         // DevToken bootstrap for dev mode

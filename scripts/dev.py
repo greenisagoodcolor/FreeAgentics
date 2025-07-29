@@ -39,11 +39,8 @@ def print_banner():
     print("🚀 FreeAgentics Development Environment")
     print("="*60)
     
-    # Detect mode
-    if os.getenv("DATABASE_URL"):
-        print("📦 Mode: Development (with database)")
-    else:
-        print("🎯 Mode: Demo (no database required)")
+    # Always dev mode
+    print("🔥 Mode: Dev")
     
     # Show configuration
     print("\n📋 Configuration:")
@@ -52,12 +49,11 @@ def print_banner():
     print(f"  • API Docs: http://localhost:8000/docs")
     print(f"  • GraphQL:  http://localhost:8000/graphql")
     
-    if not os.getenv("DATABASE_URL"):
-        print("\n💡 Demo Mode Features:")
-        print("  • SQLite in-memory database")
-        print("  • Auto-generated dev token")
-        print("  • Mock LLM responses")
-        print("  • No external dependencies")
+    print("\n💡 Dev Mode Features:")
+    print("  • SQLite in-memory database")
+    print("  • Auto-generated dev token")
+    print("  • Mock LLM responses (unless OPENAI_KEY set)")
+    print("  • No external dependencies")
     
     print("\n" + "="*60 + "\n")
 
@@ -174,9 +170,8 @@ def wait_for_services():
         print("  ⚠️  Frontend may not be running")
     
     # Show dev config endpoint
-    if not os.getenv("DATABASE_URL"):
-        print("\n🔑 Dev Configuration:")
-        print("  Get auth token: curl http://localhost:8000/api/v1/dev-config")
+    print("\n🔑 Dev Configuration:")
+    print("  Get auth token: curl http://localhost:8000/api/v1/dev-config")
 
 
 def main():

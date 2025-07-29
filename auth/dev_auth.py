@@ -31,64 +31,56 @@ class DevAuthManager:
 
     def is_dev_mode(self) -> bool:
         """Check if we're in development mode."""
-        return os.getenv("PRODUCTION", "false").lower() != "true" and not os.getenv("DATABASE_URL")
+        return os.getenv("PRODUCTION", "false").lower() != "true"
 
     def get_or_create_dev_token(self) -> Dict[str, str]:
         """Get existing or create new dev token."""
         if not self.is_dev_mode():
             raise RuntimeError("Dev tokens only available in development mode")
 
-        # Reuse token if still valid (within 24 hours)
-        if self._dev_token and self._generated_at:
-            age = datetime.now(timezone.utc) - self._generated_at
-            if age < timedelta(hours=24):
-                return {
-                    "access_token": self._dev_token,
-                    "token_type": "bearer",
-                    "expires_in": int((timedelta(hours=24) - age).total_seconds()),
-                    "info": "Reusing existing dev token",
-                }
+        # cache so it never expires during a dev session
+        if not hasattr(self, "_cached_token"):
+            # Generate new token
+            user_id = f"dev_{secrets.token_urlsafe(8)}"
+            username = "dev_user"
+            role = UserRole.ADMIN  # Give admin access for easy development
 
-        # Generate new token
-        user_id = f"dev_{secrets.token_urlsafe(8)}"
-        username = "dev_user"
-        role = UserRole.ADMIN  # Give admin access for easy development
+            # Create token data with all permissions
+            token_data = {
+                "sub": user_id,
+                "username": username,
+                "role": role.value,
+                "permissions": [p.value for p in ROLE_PERMISSIONS[role]],
+                "fingerprint": "dev_fingerprint",  # Static fingerprint for dev
+            }
 
-        # Create token data with all permissions
-        token_data = {
-            "sub": user_id,
-            "username": username,
-            "role": role.value,
-            "permissions": [p.value for p in ROLE_PERMISSIONS[role]],
-            "fingerprint": "dev_fingerprint",  # Static fingerprint for dev
-        }
+            # Create JWT token with 1-year expiry for dev sessions
+            self._cached_token = create_access_token(data=token_data, expires_delta=timedelta(days=365))
+            self._generated_at = datetime.now(timezone.utc)
 
-        # Create JWT token (15 minutes for security, but we'll cache it)
-        self._dev_token = create_access_token(data=token_data, expires_delta=timedelta(minutes=15))
-
-        self._generated_at = datetime.now(timezone.utc)
-
-        # Log for visibility
-        logger.info("🔑 Generated new development JWT token")
-        logger.info(f"   User: {username} (role: {role.value})")
-        logger.info(f"   Permissions: {', '.join(token_data['permissions'])}")
-
-        return {
-            "access_token": self._dev_token,
-            "token_type": "bearer",
-            "expires_in": 900,  # 15 minutes
-            "info": "New dev token generated",
-            "user": {
+            # Log for visibility
+            logger.info("🔑 Generated new development JWT token")
+            logger.info(f"   User: {username} (role: {role.value})")
+            logger.info(f"   Permissions: {', '.join(token_data['permissions'])}")
+            
+            self._user_data = {
                 "id": user_id,
                 "username": username,
                 "role": role.value,
                 "permissions": token_data["permissions"],
-            },
+            }
+
+        return {
+            "access_token": self._cached_token,
+            "token_type": "bearer",
+            "expires_in": 365*24*60*60,  # 1 year
+            "info": "Cached dev token (1-year expiry)",
+            "user": self._user_data,
         }
 
     def validate_dev_token(self, token: str) -> bool:
         """Check if token is our dev token."""
-        return self.is_dev_mode() and token == self._dev_token
+        return self.is_dev_mode() and hasattr(self, "_cached_token") and token == self._cached_token
 
 
 # Global instance

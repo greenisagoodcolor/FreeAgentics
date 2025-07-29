@@ -12,6 +12,7 @@ This module implements:
 import ipaddress
 import json
 import logging
+import os
 import time
 from collections import defaultdict
 from datetime import datetime, timedelta
@@ -525,7 +526,7 @@ class RateLimiter:
     ) -> Tuple[bool, Optional[Response]]:
         """Process request through rate limiter."""
         # Skip rate limiting in dev mode
-        if not os.getenv("DATABASE_URL"):
+        if os.getenv("PRODUCTION", "false").lower() != "true":
             return True, None
 
         ip = self.get_client_ip(request)
