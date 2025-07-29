@@ -82,12 +82,13 @@ class WebSocketRateLimitManager:
 
     async def check_connection_allowed(self, websocket: WebSocket) -> bool:
         """Check if WebSocket connection is allowed based on rate limits."""
+        # Skip rate limiting entirely in demo mode
+        if DEMO_MODE:
+            return True
+            
         rate_limiter = await self._get_rate_limiter()
         if not rate_limiter:
-            if not DEMO_MODE:
-                logger.warning("WebSocket rate limiting disabled - Redis not available")
-            else:
-                logger.debug("WebSocket rate limiting disabled in demo mode")
+            logger.warning("WebSocket rate limiting disabled - Redis not available")
             return True
 
         client_ip = self._get_client_ip(websocket)
@@ -125,6 +126,10 @@ class WebSocketRateLimitManager:
 
     async def check_message_allowed(self, websocket: WebSocket, message: str) -> bool:
         """Check if WebSocket message is allowed based on rate limits."""
+        # Skip rate limiting entirely in demo mode
+        if DEMO_MODE:
+            return True
+            
         rate_limiter = await self._get_rate_limiter()
         if not rate_limiter:
             return True
@@ -191,10 +196,12 @@ class WebSocketRateLimitManager:
         message_handler: Callable,
     ):
         """Handle WebSocket connection with rate limiting."""
-        # Check if connection is allowed
-        if not await self.check_connection_allowed(websocket):
-            await websocket.close(code=1008, reason="Rate limit exceeded")
-            return
+        # Skip rate limiting entirely in demo mode
+        if not DEMO_MODE:
+            # Check if connection is allowed
+            if not await self.check_connection_allowed(websocket):
+                await websocket.close(code=1008, reason="Rate limit exceeded")
+                return
 
         try:
             # Accept connection
@@ -207,8 +214,8 @@ class WebSocketRateLimitManager:
                     # Receive message
                     message = await websocket.receive_text()
 
-                    # Check if message is allowed
-                    if not await self.check_message_allowed(websocket, message):
+                    # Check if message is allowed (skip in demo mode)
+                    if not DEMO_MODE and not await self.check_message_allowed(websocket, message):
                         # Send warning but don't close connection
                         await websocket.send_json(
                             {

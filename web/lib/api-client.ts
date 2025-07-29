@@ -1,4 +1,5 @@
 import { PromptAgent } from "@/types/agent";
+import { apiGet, apiPost, apiPut, apiDelete, ApiError } from "./api";
 
 export interface ApiResponse<T = unknown> {
   success: boolean;
@@ -29,69 +30,38 @@ export interface ConversationMessage {
 
 export class ApiClient {
   private baseUrl: string;
-  private headers: HeadersInit;
 
   constructor(baseUrl = "/api") {
     this.baseUrl = baseUrl;
-    this.headers = {
-      "Content-Type": "application/json",
-    };
   }
 
-  private getAuthHeaders(): HeadersInit {
-    const token = typeof window !== 'undefined' ? localStorage.getItem("freeagentics_auth_token") : null;
-    return token ? { Authorization: `Bearer ${token}` } : {};
-  }
-
-  private async request<T>(path: string, options: RequestInit = {}): Promise<ApiResponse<T>> {
+  private async request<T>(apiCall: () => Promise<T>): Promise<ApiResponse<T>> {
     try {
-      const response = await fetch(`${this.baseUrl}${path}`, {
-        ...options,
-        headers: {
-          ...this.headers,
-          ...this.getAuthHeaders(),
-          ...options.headers,
-        },
-      });
-
-      const data = await response.json();
-
-      if (!response.ok) {
-        throw new Error(data.error || "Request failed");
-      }
-
+      const data = await apiCall();
       return { success: true, data };
     } catch (error) {
       return {
         success: false,
-        error: error instanceof Error ? error.message : "Unknown error",
+        error: error instanceof ApiError ? error.message : error instanceof Error ? error.message : "Unknown error",
       };
     }
   }
 
   // Agent endpoints
   async getAgents(): Promise<ApiResponse<PromptAgent[]>> {
-    return this.request<PromptAgent[]>("/agents");
+    return this.request<PromptAgent[]>(() => apiGet(`${this.baseUrl}/agents`));
   }
 
   async createAgent(data: { description: string }): Promise<ApiResponse<PromptAgent>> {
-    return this.request<PromptAgent>("/agents", {
-      method: "POST",
-      body: JSON.stringify(data),
-    });
+    return this.request<PromptAgent>(() => apiPost(`${this.baseUrl}/agents`, data));
   }
 
   async updateAgent(id: string, data: Partial<PromptAgent>): Promise<ApiResponse<PromptAgent>> {
-    return this.request<PromptAgent>(`/agents/${id}`, {
-      method: "PUT",
-      body: JSON.stringify(data),
-    });
+    return this.request<PromptAgent>(() => apiPut(`${this.baseUrl}/agents/${id}`, data));
   }
 
   async deleteAgent(id: string): Promise<ApiResponse<void>> {
-    return this.request<void>(`/agents/${id}`, {
-      method: "DELETE",
-    });
+    return this.request<void>(() => apiDelete(`${this.baseUrl}/agents/${id}`));
   }
 
   // Prompt processing
@@ -103,34 +73,26 @@ export class ApiClient {
       conversationId: string;
     }>
   > {
-    return this.request("/process-prompt", {
-      method: "POST",
-      body: JSON.stringify(data),
-    });
+    return this.request(() => apiPost(`${this.baseUrl}/process-prompt`, data));
   }
 
   // Knowledge graph
   async getKnowledgeGraph(): Promise<ApiResponse<KnowledgeGraph>> {
-    return this.request<KnowledgeGraph>("/knowledge-graph");
+    return this.request<KnowledgeGraph>(() => apiGet(`${this.baseUrl}/knowledge-graph`));
   }
 
   // Suggestions
   async getSuggestions(prompt: string): Promise<ApiResponse<string[]>> {
-    return this.request<string[]>("/suggestions", {
-      method: "POST",
-      body: JSON.stringify({ prompt }),
-    });
+    return this.request<string[]>(() => apiPost(`${this.baseUrl}/suggestions`, { prompt }));
   }
 
   // Conversation
   async getConversation(id: string): Promise<ApiResponse<ConversationMessage[]>> {
-    return this.request<ConversationMessage[]>(`/conversations/${id}`);
+    return this.request<ConversationMessage[]>(() => apiGet(`${this.baseUrl}/conversations/${id}`));
   }
 
   async clearConversation(id: string): Promise<ApiResponse<void>> {
-    return this.request<void>(`/conversations/${id}`, {
-      method: "DELETE",
-    });
+    return this.request<void>(() => apiDelete(`${this.baseUrl}/conversations/${id}`));
   }
 }
 

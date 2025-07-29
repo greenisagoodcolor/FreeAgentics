@@ -334,10 +334,8 @@ class ProcessPromptRequest(BaseModel):
 
 class ProcessPromptResponse(BaseModel):
     """Response model for prompt processing."""
-    agents: List[UIAgent] = Field(default_factory=list)
-    knowledgeGraph: Dict = Field(default_factory=dict)
-    suggestions: List[str] = Field(default_factory=list)
-    conversationId: str
+    response: str
+    knowledgeGraph: Optional[Dict] = None
 
 
 @router.post("/process-prompt")
@@ -346,25 +344,18 @@ async def process_prompt_ui(
     current_user: TokenData = Depends(get_current_user),
     db: Session = Depends(get_db),
 ) -> ProcessPromptResponse:
-    """Process a prompt - UI compatibility endpoint that creates an agent."""
-    # Create agent from the prompt
-    agent_request = UIAgentCreateRequest(description=request.prompt)
-    new_agent = await create_agent_ui(agent_request, current_user, db)
+    """Process a prompt - demo echo back with optional KG."""
+    # For demo, echo back the prompt
+    response_text = f"You said: {request.prompt}"
     
-    # Get current knowledge graph
-    kg_data = await get_knowledge_graph_ui(current_user)
+    # Get current knowledge graph (optional)
+    try:
+        kg_data = await get_knowledge_graph_ui(current_user)
+    except Exception as e:
+        logger.warning(f"Failed to get knowledge graph: {e}")
+        kg_data = None
     
-    # Generate some basic suggestions
-    suggestions = [
-        "Try asking the agent to explore a specific area",
-        "Ask the agent to explain its current state",
-        "Request the agent to analyze its environment",
-    ]
-    
-    # Return response with created agent
     return ProcessPromptResponse(
-        agents=[new_agent],
-        knowledgeGraph=kg_data,
-        suggestions=suggestions,
-        conversationId=request.conversationId or f"conv_{datetime.now().timestamp()}"
+        response=response_text,
+        knowledgeGraph=kg_data
     )
