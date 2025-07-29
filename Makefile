@@ -181,7 +181,7 @@ install: ## 📦 Install/update all project dependencies
 	@printf "$(CYAN)🐍 Python Dependencies...$(RESET)\n"
 	@if [ ! -d "$(VENV_DIR)" ]; then \
 		printf "  $(YELLOW)→ Creating virtual environment...$(RESET)\n"; \
-		$(PYTHON) -m venv $(VENV_DIR); \
+		python3 -m venv $(VENV_DIR); \
 	fi
 	@printf "  $(YELLOW)→ Upgrading pip...$(RESET)\n"
 	@. $(VENV_DIR)/bin/activate && pip install --upgrade pip --quiet
