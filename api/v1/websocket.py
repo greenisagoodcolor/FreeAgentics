@@ -13,7 +13,7 @@ from pydantic import BaseModel, Field, validator
 
 from api.middleware.websocket_rate_limiting import websocket_rate_limit_manager
 from auth.security_implementation import Permission
-from websocket.auth_handler import (
+from websocket_server.auth_handler import (
     WebSocketErrorCode,
     handle_token_refresh,
     ws_auth_handler,

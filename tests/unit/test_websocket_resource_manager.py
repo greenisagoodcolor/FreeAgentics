@@ -10,8 +10,8 @@ from unittest.mock import AsyncMock, Mock
 
 import pytest
 
-from websocket.connection_pool import WebSocketConnectionPool
-from websocket.resource_manager import (
+from websocket_server.connection_pool import WebSocketConnectionPool
+from websocket_server.resource_manager import (
     AgentResource,
     AgentResourceManager,
     ResourceAllocationError,

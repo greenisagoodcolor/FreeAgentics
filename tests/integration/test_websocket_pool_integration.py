@@ -10,13 +10,13 @@ from unittest.mock import AsyncMock, patch
 
 import pytest
 
-from websocket.connection_pool import PoolConfig
-from websocket.monitoring import ConnectionPoolMonitor
-from websocket.pool_integration import (
+from websocket_server.connection_pool import PoolConfig
+from websocket_server.monitoring import ConnectionPoolMonitor
+from websocket_server.pool_integration import (
     WebSocketPooledConnectionManager,
     run_performance_comparison,
 )
-from websocket.resource_manager import ResourceConfig, ResourceState
+from websocket_server.resource_manager import ResourceConfig, ResourceState
 
 
 @pytest.mark.asyncio
@@ -257,7 +257,7 @@ class TestWebSocketPoolIntegration:
     async def test_monitoring_integration(self, manager):
         """Test that monitoring is properly integrated."""
         # Monitoring should be initialized
-        from websocket.monitoring import monitor
+        from websocket_server.monitoring import monitor
 
         assert monitor is not None
         assert isinstance(monitor, ConnectionPoolMonitor)

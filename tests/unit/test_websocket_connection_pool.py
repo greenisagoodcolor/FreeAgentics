@@ -11,7 +11,7 @@ from unittest.mock import AsyncMock, Mock, patch
 
 import pytest
 
-from websocket.connection_pool import (
+from websocket_server.connection_pool import (
     ConnectionHealthMonitor,
     ConnectionMetrics,
     ConnectionState,

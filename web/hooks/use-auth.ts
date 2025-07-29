@@ -60,8 +60,10 @@ export function useAuth(): AuthState {
         }
 
         // DevToken bootstrap for dev mode
+        console.log("[Auth] No valid token in storage, fetching dev token...");
         try {
           const backendUrl = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8000";
+          console.log(`[Auth] Fetching dev config from: ${backendUrl}/api/v1/dev-config`);
           const response = await fetch(`${backendUrl}/api/v1/dev-config`);
           
           if (!response.ok) {
@@ -72,6 +74,7 @@ export function useAuth(): AuthState {
           const token = config.auth?.token;
           
           if (token) {
+            console.log("[Auth] Received dev token, storing...");
             localStorage.setItem(AUTH_TOKEN_KEY, token);
             const devUser = {
               id: "dev-user",
@@ -81,13 +84,13 @@ export function useAuth(): AuthState {
             localStorage.setItem(USER_KEY, JSON.stringify(devUser));
             setToken(token);
             setUser(devUser);
-            console.log("✅ Dev token loaded successfully");
+            console.log("[Auth] ✅ Dev token loaded and auth state updated");
           } else {
-            console.warn("No token found in dev config response");
+            console.warn("[Auth] No token found in dev config response");
           }
         } catch (devConfigError) {
-          console.error("Dev config error:", devConfigError);
-          console.log("Continuing without auto-auth");
+          console.error("[Auth] Dev config error:", devConfigError);
+          console.log("[Auth] Continuing without auto-auth");
         }
       } catch (error) {
         console.error("Failed to load auth state:", error);

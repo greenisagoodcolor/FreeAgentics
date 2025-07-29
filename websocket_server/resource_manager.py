@@ -18,7 +18,7 @@ from datetime import datetime
 from enum import Enum
 from typing import Any, Dict, List, Optional, Set
 
-from websocket.connection_pool import PooledConnection, WebSocketConnectionPool
+from websocket_server.connection_pool import PooledConnection, WebSocketConnectionPool
 
 logger = logging.getLogger(__name__)
 

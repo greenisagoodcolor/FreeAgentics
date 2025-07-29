@@ -20,7 +20,7 @@ from auth.security_implementation import (
     TokenData,
     UserRole,
 )
-from websocket.auth_handler import (
+from websocket_server.auth_handler import (
     WebSocketAuthHandler,
     WebSocketErrorCode,
 )
@@ -541,7 +541,7 @@ class TestWebSocketMonitoring:
         handler = WebSocketAuthHandler()
 
         # Setup connection
-        from websocket.auth_handler import ConnectionState
+        from websocket_server.auth_handler import ConnectionState
 
         handler.connections["test_client"] = ConnectionState(
             client_id="test_client",

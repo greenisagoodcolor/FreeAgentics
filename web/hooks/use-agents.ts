@@ -1,6 +1,7 @@
 import { useState, useCallback, useEffect } from "react";
 import { useWebSocket } from "./use-websocket";
 import { apiGet, apiPost, apiDelete, ApiError } from "../lib/api";
+import { useAuth } from "./use-auth";
 
 export type AgentStatus = "active" | "idle" | "error";
 export type AgentType = "explorer" | "collector" | "analyzer" | "custom";
@@ -44,11 +45,24 @@ export function useAgents(): AgentsState {
   const [error, setError] = useState<Error | null>(null);
 
   const { lastMessage } = useWebSocket();
+  const { isAuthenticated, isLoading: isAuthLoading } = useAuth();
 
-  // Fetch agents on mount
+  // Fetch agents only after authentication is ready
   useEffect(() => {
-    fetchAgents();
-  }, []);
+    // Don't fetch if auth is still loading
+    if (isAuthLoading) {
+      console.log("[useAgents] Waiting for auth to complete...");
+      return;
+    }
+
+    // Only fetch if authenticated
+    if (isAuthenticated) {
+      console.log("[useAgents] Auth ready, fetching agents...");
+      fetchAgents();
+    } else {
+      console.log("[useAgents] Not authenticated, skipping fetch");
+    }
+  }, [isAuthenticated, isAuthLoading]);
 
   // Handle WebSocket updates
   useEffect(() => {
@@ -74,7 +88,9 @@ export function useAgents(): AgentsState {
       setIsLoading(true);
       setError(null);
 
+      console.log("[useAgents] Fetching agents from API...");
       const data = await apiGet("/api/agents");
+      console.log("[useAgents] Fetched agents:", data.agents?.length || 0);
       setAgents(data.agents || []);
     } catch (err) {
       if (err instanceof ApiError) {

@@ -9,7 +9,7 @@ import pytest
 
 sys.path.append("/home/green/FreeAgentics")
 
-from websocket.circuit_breaker import (
+from websocket_server.circuit_breaker import (
     CircuitBreaker,
     CircuitBreakerConfig,
     CircuitOpenException,

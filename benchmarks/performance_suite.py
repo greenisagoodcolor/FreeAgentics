@@ -429,7 +429,7 @@ class WebSocketConnectionBenchmarks:
     @staticmethod
     def benchmark_connection_setup(benchmark):
         """Benchmark WebSocket connection setup time."""
-        from websocket.connection_pool import ConnectionPool
+        from websocket_server.connection_pool import ConnectionPool
 
         def setup_connection():
             pool = ConnectionPool(max_connections=10)
@@ -443,7 +443,7 @@ class WebSocketConnectionBenchmarks:
     @staticmethod
     def benchmark_concurrent_connections(benchmark):
         """Benchmark concurrent WebSocket connections."""
-        from websocket.connection_pool import ConnectionPool
+        from websocket_server.connection_pool import ConnectionPool
 
         def handle_concurrent_connections(count=50):
             pool = ConnectionPool(max_connections=20)

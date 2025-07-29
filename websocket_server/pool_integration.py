@@ -13,10 +13,10 @@ from typing import Any, Dict, Optional
 from fastapi import FastAPI
 
 from api.v1.websocket import manager as websocket_manager
-from websocket.connection_pool import PoolConfig, WebSocketConnectionPool
-from websocket.monitoring import initialize_monitor
-from websocket.monitoring import router as monitoring_router
-from websocket.resource_manager import AgentResourceManager, ResourceConfig
+from websocket_server.connection_pool import PoolConfig, WebSocketConnectionPool
+from websocket_server.monitoring import initialize_monitor
+from websocket_server.monitoring import router as monitoring_router
+from websocket_server.resource_manager import AgentResourceManager, ResourceConfig
 
 logger = logging.getLogger(__name__)
 

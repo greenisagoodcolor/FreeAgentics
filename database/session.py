@@ -15,7 +15,7 @@ from sqlalchemy.orm import Session, sessionmaker
 from sqlalchemy.exc import OperationalError
 
 from database.base import Base
-from websocket.circuit_breaker import CircuitBreaker, CircuitBreakerConfig, CircuitOpenException
+from websocket_server.circuit_breaker import CircuitBreaker, CircuitBreakerConfig, CircuitOpenException
 
 # Get database URL from environment with SQLite fallback for development
 DATABASE_URL = os.getenv("DATABASE_URL")

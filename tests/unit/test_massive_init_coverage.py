@@ -185,27 +185,27 @@ def test_tools_submodules():
 def test_websocket_submodules():
     """Test websocket submodule imports."""
     # Test auth_handler
-    import websocket.auth_handler
+    import websocket_server.auth_handler
 
     assert websocket.auth_handler is not None
 
     # Test connection_pool
-    import websocket.connection_pool
+    import websocket_server.connection_pool
 
     assert websocket.connection_pool is not None
 
     # Test monitoring
-    import websocket.monitoring
+    import websocket_server.monitoring
 
     assert websocket.monitoring is not None
 
     # Test resource_manager
-    import websocket.resource_manager
+    import websocket_server.resource_manager
 
     assert websocket.resource_manager is not None
 
     # Test circuit_breaker
-    import websocket.circuit_breaker
+    import websocket_server.circuit_breaker
 
     assert websocket.circuit_breaker is not None
 

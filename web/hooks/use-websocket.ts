@@ -1,4 +1,5 @@
 import { useState, useEffect, useCallback, useRef } from "react";
+import { useAuth } from "./use-auth";
 
 export type ConnectionState = "connecting" | "connected" | "disconnected" | "error";
 
@@ -30,26 +31,36 @@ export function useWebSocket(): WebSocketState {
   const wsRef = useRef<WebSocket | null>(null);
   const reconnectTimeoutRef = useRef<NodeJS.Timeout | null>(null);
   const reconnectAttemptsRef = useRef(0);
+  
+  const { isAuthenticated, isLoading: isAuthLoading, token } = useAuth();
 
   const connect = useCallback(() => {
+    // Don't connect if auth is not ready
+    if (isAuthLoading || !isAuthenticated || !token) {
+      console.log("[WebSocket] Waiting for auth before connecting...", {
+        isAuthLoading,
+        isAuthenticated,
+        hasToken: !!token
+      });
+      return;
+    }
+
     try {
       setConnectionState("connecting");
       setError(null);
 
       // Append token to WebSocket URL if available
       let wsUrl = WS_URL;
-      if (typeof window !== 'undefined') {
-        const token = localStorage.getItem("fa.jwt");
-        if (token) {
-          const separator = WS_URL.includes('?') ? '&' : '?';
-          wsUrl = `${WS_URL}${separator}token=${encodeURIComponent(token)}`;
-        }
+      if (token) {
+        const separator = WS_URL.includes('?') ? '&' : '?';
+        wsUrl = `${WS_URL}${separator}token=${encodeURIComponent(token)}`;
+        console.log("[WebSocket] Connecting with auth token...");
       }
 
       const ws = new WebSocket(wsUrl);
 
       ws.onopen = () => {
-        console.log("WebSocket connected");
+        console.log("[WebSocket] Connected successfully");
         setIsConnected(true);
         setConnectionState("connected");
         reconnectAttemptsRef.current = 0;
@@ -74,7 +85,7 @@ export function useWebSocket(): WebSocketState {
       };
 
       ws.onclose = () => {
-        console.log("WebSocket disconnected");
+        console.log("[WebSocket] Disconnected");
         setIsConnected(false);
         setConnectionState("disconnected");
         wsRef.current = null;
@@ -84,7 +95,7 @@ export function useWebSocket(): WebSocketState {
           reconnectAttemptsRef.current++;
           reconnectTimeoutRef.current = setTimeout(() => {
             console.log(
-              `Attempting to reconnect (${reconnectAttemptsRef.current}/${MAX_RECONNECT_ATTEMPTS})...`,
+              `[WebSocket] Attempting to reconnect (${reconnectAttemptsRef.current}/${MAX_RECONNECT_ATTEMPTS})...`,
             );
             connect();
           }, RECONNECT_DELAY);
@@ -93,11 +104,11 @@ export function useWebSocket(): WebSocketState {
 
       wsRef.current = ws;
     } catch (err) {
-      console.error("Failed to create WebSocket:", err);
+      console.error("[WebSocket] Failed to create connection:", err);
       setError(err as Error);
       setConnectionState("error");
     }
-  }, []);
+  }, [isAuthLoading, isAuthenticated, token]);
 
   const disconnect = useCallback(() => {
     if (reconnectTimeoutRef.current) {
@@ -123,19 +134,22 @@ export function useWebSocket(): WebSocketState {
         }),
       );
     } else {
-      console.warn("Cannot send message: WebSocket is not connected");
+      console.warn("[WebSocket] Cannot send message: Not connected");
       setError(new Error("WebSocket is not connected"));
     }
   }, []);
 
-  // Connect on mount, disconnect on unmount
+  // Connect when auth is ready, disconnect on unmount
   useEffect(() => {
-    connect();
+    if (!isAuthLoading && isAuthenticated && token) {
+      console.log("[WebSocket] Auth ready, initiating connection...");
+      connect();
+    }
 
     return () => {
       disconnect();
     };
-  }, [connect, disconnect]);
+  }, [connect, disconnect, isAuthLoading, isAuthenticated, token]);
 
   return {
     isConnected,

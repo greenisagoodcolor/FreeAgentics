@@ -125,7 +125,7 @@ def test_database_models():
 
 def test_websocket_classes():
     """Test websocket module classes."""
-    from websocket.circuit_breaker import CircuitState
+    from websocket_server.circuit_breaker import CircuitState
 
     assert CircuitState.CLOSED.value == "closed"
     assert CircuitState.OPEN.value == "open"

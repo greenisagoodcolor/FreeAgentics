@@ -23,7 +23,7 @@ from auth.security_implementation import (
     TokenData,
     UserRole,
 )
-from websocket.auth_handler import websocket_auth
+from websocket_server.auth_handler import websocket_auth
 
 
 @pytest.fixture

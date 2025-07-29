@@ -15,8 +15,8 @@ from typing import Any, Dict, List, Optional
 from fastapi import APIRouter, HTTPException
 from pydantic import BaseModel, Field
 
-from websocket.connection_pool import WebSocketConnectionPool
-from websocket.resource_manager import AgentResourceManager
+from websocket_server.connection_pool import WebSocketConnectionPool
+from websocket_server.resource_manager import AgentResourceManager
 
 logger = logging.getLogger(__name__)
 
