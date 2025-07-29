@@ -4,7 +4,7 @@
   "description": "FreeAgentics - Multi-Agent Active Inference Platform",
   "private": true,
   "scripts": {
-    "dev": "next dev -p 3000 --turbo",
+    "dev": "next dev -p 3000",
     "build": "next build",
     "start": "next start",
     "lint": "next lint",
@@ -35,7 +35,7 @@
     "@testing-library/user-event": "^14.6.1",
     "@types/jest": "^30.0.0",
     "@types/node": "^20.0.0",
-    "@types/react": "^18.3.23",
+    "@types/react": "18.3.23",
     "@types/react-dom": "^18.2.0",
     "@typescript-eslint/eslint-plugin": "^6.0.0",
     "@typescript-eslint/parser": "^6.0.0",
