@@ -15,7 +15,7 @@ Changes:
 - Remove demo-specific bypass code in favor of proper abstraction
 
 Breaking changes:
-- `make demo` now just calls `make dev` (behavior unchanged)
+- `make demo` still exists but just calls `make dev` (behavior unchanged)
 - DEMO_MODE checks replaced with ProviderMode.get_mode()
 - WebSocket demo endpoint remains at /api/v1/ws/demo for compatibility
 

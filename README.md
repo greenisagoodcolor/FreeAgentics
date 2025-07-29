@@ -10,12 +10,23 @@ Building on work from John Clippinger, Andrea Pashea, and Daniel Friedman as wel
 
 **This is a production-quality foundation** for developers interested in Active Inference and multi-agent systems. **85% of functionality is fully implemented and tested.** Ready for serious development and testing.
 
-📋 **Status Update (2025-07-28)**: Complete pipeline (Prompt→LLM→GMN→PyMDP→KG→D3) FULLY INTEGRATED. Run `make demo` to see it in action!
+## 🚀 Quick Start
+
+```bash
+git clone https://github.com/greenisagoodcolor/FreeAgentics.git
+cd FreeAgentics
+make install && make dev
+```
+
+✅ **That's it!** The system auto-detects your environment and starts with appropriate providers:
+- No database? → SQLite in-memory + mock LLM + auto-generated auth tokens
+- Database configured? → Real PostgreSQL + standard authentication
+- Everything just works out of the box!
 
 [![Python](https://img.shields.io/badge/python-3.9+-blue.svg)](https://www.python.org/)
 [![Node.js](https://img.shields.io/badge/node-18+-green.svg)](https://nodejs.org/)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
-[![Documentation](https://img.shields.io/badge/docs-85%25-green.svg)](docs/)
+[![Quick Start](https://img.shields.io/badge/quick%20start-make%20dev-brightgreen.svg)](#-quick-start)
 [![Status](https://img.shields.io/badge/status-beta-green.svg)](#implementation-status)
 [![Development Ready](https://img.shields.io/badge/development-READY-green.svg)](review.md)
 
@@ -29,7 +40,7 @@ FreeAgentics creates **AI agents** using **Active Inference** - a mathematical f
 2. **Knowledge Graph Backend** ✅ - Stores and evolves agent knowledge over time  
 3. **End-to-End Pipeline** ✅ - Complete integration: Prompt → LLM → GMN → PyMDP → KG → D3
 
-**Run the demo:** `make demo`
+**Run the system:** `make dev` (auto-detects demo vs development mode)
 
 ## ⏰ Project Timeline
 
