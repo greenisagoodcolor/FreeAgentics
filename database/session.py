@@ -28,7 +28,7 @@ is_development = (
 )
 
 if not DATABASE_URL:
-    # Always allow running without database for demos
+    # Always allow running without database for dev mode
     import warnings
     
     warnings.warn(
@@ -94,7 +94,7 @@ if DATABASE_URL:
         bind=engine,
     )
 else:
-    # Demo mode - no database
+    # Dev mode - no database
     engine = None
     SessionLocal = None
 
@@ -153,7 +153,7 @@ def get_database_url() -> Optional[str]:
     """Get the database URL if available.
     
     Returns:
-        Database URL string or None if in demo mode
+        Database URL string or None if in dev mode
     """
     return DATABASE_URL
 

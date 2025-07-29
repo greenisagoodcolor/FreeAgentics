@@ -24,8 +24,8 @@ from auth.security_logging import (
 
 logger = logging.getLogger(__name__)
 
-# Check if we're in demo mode (no database)
-DEMO_MODE = os.getenv("DATABASE_URL") is None
+# Check if we're in dev mode (no database)
+DEV_MODE = os.getenv("DATABASE_URL") is None
 
 
 class RateLimitConfig:
@@ -361,7 +361,7 @@ class DDoSProtectionMiddleware(BaseHTTPMiddleware):
                     logger.info("Connected to Redis for rate limiting")
 
             except Exception as e:
-                if not DEMO_MODE:
+                if not DEV_MODE:
                     logger.error(f"Failed to connect to Redis: {e}")
                 else:
                     logger.debug(f"Redis not available in demo mode: {e}")
@@ -395,10 +395,10 @@ class DDoSProtectionMiddleware(BaseHTTPMiddleware):
                 return rate_limit_response
         else:
             # Log warning if Redis is not available (only in production)
-            if not DEMO_MODE:
+            if not DEV_MODE:
                 logger.warning("Rate limiting disabled - Redis not available")
             else:
-                logger.debug("Rate limiting disabled in demo mode")
+                logger.debug("Rate limiting disabled in dev mode")
 
         # Process request
         response = await call_next(request)

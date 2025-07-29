@@ -6,6 +6,8 @@ export type LLMModel = string;
 export interface Settings {
   llmProvider: LLMProvider;
   llmModel: LLMModel;
+  openaiApiKey: string;
+  anthropicApiKey: string;
   gnnEnabled: boolean;
   debugLogs: boolean;
   autoSuggest: boolean;
@@ -22,6 +24,8 @@ const SETTINGS_KEY = "freeagentics_settings";
 const DEFAULT_SETTINGS: Settings = {
   llmProvider: "openai",
   llmModel: "gpt-4",
+  openaiApiKey: "",
+  anthropicApiKey: "",
   gnnEnabled: true,
   debugLogs: false,
   autoSuggest: true,

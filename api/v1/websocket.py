@@ -141,8 +141,8 @@ class ConnectionManager:
 # Global connection manager instance
 manager = ConnectionManager()
 
-# Demo mode flag
-DEMO_MODE = os.getenv("DATABASE_URL") is None
+# Dev mode flag
+DEV_MODE = os.getenv("DATABASE_URL") is None
 
 
 @router.websocket("/ws/{client_id}")
@@ -584,43 +584,43 @@ async def get_subscriptions():
     }
 
 
-@router.websocket("/ws/demo")
-async def websocket_demo_endpoint(websocket: WebSocket):
-    """Demo WebSocket endpoint without authentication for development/demo mode.
+@router.websocket("/ws/dev")
+async def websocket_dev_endpoint(websocket: WebSocket):
+    """Dev WebSocket endpoint without authentication for development mode.
     
-    This endpoint is only available when running in demo mode (no DATABASE_URL).
+    This endpoint is only available when running in dev mode (no DATABASE_URL).
     It provides basic WebSocket functionality for UI development and testing.
     """
-    if not DEMO_MODE:
+    if not DEV_MODE:
         await websocket.close(
             code=4003,
-            reason="Demo endpoint only available in demo mode"
+            reason="Dev endpoint only available in dev mode"
         )
         return
     
-    # Generate a demo client ID
-    client_id = f"demo_{datetime.now().timestamp()}"
+    # Generate a dev client ID
+    client_id = f"dev_{datetime.now().timestamp()}"
     
     try:
         # Accept connection immediately (no auth required)
         await websocket.accept()
         
-        # Connect to manager with demo metadata
+        # Connect to manager with dev metadata
         await manager.connect(
             websocket,
             client_id,
             metadata={
-                "username": "demo_user",
-                "role": "demo",
-                "demo_mode": True
+                "username": "dev_user",
+                "role": "dev",
+                "dev_mode": True
             }
         )
         
-        # Send initial demo data
+        # Send initial dev data
         await manager.send_personal_message(
             {
-                "type": "demo_welcome",
-                "message": "Connected to FreeAgentics demo WebSocket",
+                "type": "dev_welcome",
+                "message": "Connected to FreeAgentics dev WebSocket",
                 "features": [
                     "Agent creation simulation",
                     "Real-time updates",
@@ -652,8 +652,8 @@ async def websocket_demo_endpoint(websocket: WebSocket):
                         {
                             "type": "agent_created",
                             "agent": {
-                                "id": f"demo_agent_{datetime.now().timestamp()}",
-                                "name": message.get("data", {}).get("name", "Demo Agent"),
+                                "id": f"dev_agent_{datetime.now().timestamp()}",
+                                "name": message.get("data", {}).get("name", "Dev Agent"),
                                 "type": message.get("data", {}).get("type", "explorer"),
                                 "status": "active",
                                 "created_at": datetime.now().isoformat()
@@ -662,12 +662,12 @@ async def websocket_demo_endpoint(websocket: WebSocket):
                         client_id
                     )
                     
-                    # Broadcast to all demo connections
+                    # Broadcast to all dev connections
                     await manager.broadcast(
                         {
                             "type": "agent_update",
                             "action": "created",
-                            "agent_id": f"demo_agent_{datetime.now().timestamp()}"
+                            "agent_id": f"dev_agent_{datetime.now().timestamp()}"
                         }
                     )
                 else:
@@ -692,7 +692,7 @@ async def websocket_demo_endpoint(websocket: WebSocket):
             except WebSocketDisconnect:
                 break
             except Exception as e:
-                logger.error(f"Demo WebSocket error: {e}")
+                logger.error(f"Dev WebSocket error: {e}")
                 await manager.send_personal_message(
                     {
                         "type": "error",
@@ -702,6 +702,6 @@ async def websocket_demo_endpoint(websocket: WebSocket):
                 )
                 
     except Exception as e:
-        logger.error(f"Demo WebSocket connection error: {e}")
+        logger.error(f"Dev WebSocket connection error: {e}")
     finally:
         manager.disconnect(client_id)

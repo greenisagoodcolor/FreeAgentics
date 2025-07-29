@@ -22,8 +22,8 @@ from .ddos_protection import WebSocketRateLimiter
 
 logger = logging.getLogger(__name__)
 
-# Check if we're in demo mode (no database)
-DEMO_MODE = os.getenv("DATABASE_URL") is None
+# Check if we're in dev mode (no database)
+DEV_MODE = os.getenv("DATABASE_URL") is None
 
 
 class WebSocketRateLimitManager:
@@ -47,7 +47,7 @@ class WebSocketRateLimitManager:
                     await self.redis_client.ping()
                     logger.info("WebSocket rate limiter connected to Redis")
             except Exception as e:
-                if not DEMO_MODE:
+                if not DEV_MODE:
                     logger.error(f"Failed to connect to Redis for WebSocket rate limiting: {e}")
                 else:
                     logger.debug(f"Redis not available in demo mode for WebSocket rate limiting: {e}")
@@ -83,7 +83,7 @@ class WebSocketRateLimitManager:
     async def check_connection_allowed(self, websocket: WebSocket) -> bool:
         """Check if WebSocket connection is allowed based on rate limits."""
         # Skip rate limiting entirely in demo mode
-        if DEMO_MODE:
+        if DEV_MODE:
             return True
             
         rate_limiter = await self._get_rate_limiter()
@@ -127,7 +127,7 @@ class WebSocketRateLimitManager:
     async def check_message_allowed(self, websocket: WebSocket, message: str) -> bool:
         """Check if WebSocket message is allowed based on rate limits."""
         # Skip rate limiting entirely in demo mode
-        if DEMO_MODE:
+        if DEV_MODE:
             return True
             
         rate_limiter = await self._get_rate_limiter()
@@ -197,7 +197,7 @@ class WebSocketRateLimitManager:
     ):
         """Handle WebSocket connection with rate limiting."""
         # Skip rate limiting entirely in demo mode
-        if not DEMO_MODE:
+        if not DEV_MODE:
             # Check if connection is allowed
             if not await self.check_connection_allowed(websocket):
                 await websocket.close(code=1008, reason="Rate limit exceeded")
@@ -215,7 +215,7 @@ class WebSocketRateLimitManager:
                     message = await websocket.receive_text()
 
                     # Check if message is allowed (skip in demo mode)
-                    if not DEMO_MODE and not await self.check_message_allowed(websocket, message):
+                    if not DEV_MODE and not await self.check_message_allowed(websocket, message):
                         # Send warning but don't close connection
                         await websocket.send_json(
                             {

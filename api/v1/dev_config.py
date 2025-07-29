@@ -31,21 +31,21 @@ async def get_dev_config() -> Dict[str, Any]:
 
     mode = ProviderMode.get_mode()
 
-    # Get dev token if in demo mode
-    token_info = get_dev_token() if mode == "demo" else None
+    # Get dev token if in dev mode
+    token_info = get_dev_token() if mode == "dev" else None
 
     config = {
         "mode": mode,
         "features": {
-            "database": mode != "demo",
+            "database": mode != "dev",
             "redis": bool(os.getenv("REDIS_URL")),
             "real_llm": bool(os.getenv("OPENAI_API_KEY")),
             "websocket": True,
-            "auth_required": mode != "demo",
+            "auth_required": mode != "dev",
         },
         "endpoints": {
             "api": "/api",
-            "websocket": "/api/v1/ws" if mode != "demo" else "/api/v1/ws/demo",
+            "websocket": "/api/v1/ws" if mode != "dev" else "/api/v1/ws/dev",
             "graphql": "/graphql",
             "docs": "/docs",
         },
@@ -62,9 +62,9 @@ async def get_dev_config() -> Dict[str, Any]:
         }
 
     # Add helpful messages
-    if mode == "demo":
+    if mode == "dev":
         config["message"] = (
-            "🎯 Running in demo mode. Database and auth are mocked. "
+            "🎯 Running in dev mode. Database and auth are mocked. "
             "To use real services, set DATABASE_URL environment variable."
         )
     elif mode == "development":

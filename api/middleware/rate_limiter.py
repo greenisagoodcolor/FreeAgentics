@@ -524,6 +524,10 @@ class RateLimiter:
         self, request: Request, user_id: Optional[str] = None
     ) -> Tuple[bool, Optional[Response]]:
         """Process request through rate limiter."""
+        # Skip rate limiting in dev mode
+        if not os.getenv("DATABASE_URL"):
+            return True, None
+
         ip = self.get_client_ip(request)
 
         # Check whitelist

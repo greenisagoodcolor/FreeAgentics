@@ -38,14 +38,14 @@ class DevAuthManager:
         if not self.is_dev_mode():
             raise RuntimeError("Dev tokens only available in development mode")
 
-        # Reuse token if still valid (within 12 hours)
+        # Reuse token if still valid (within 24 hours)
         if self._dev_token and self._generated_at:
             age = datetime.now(timezone.utc) - self._generated_at
-            if age < timedelta(hours=12):
+            if age < timedelta(hours=24):
                 return {
                     "access_token": self._dev_token,
                     "token_type": "bearer",
-                    "expires_in": int((timedelta(hours=12) - age).total_seconds()),
+                    "expires_in": int((timedelta(hours=24) - age).total_seconds()),
                     "info": "Reusing existing dev token",
                 }
 

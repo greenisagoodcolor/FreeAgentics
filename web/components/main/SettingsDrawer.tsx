@@ -11,6 +11,7 @@ import {
 } from "@/components/ui/sheet";
 import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
+import { Input } from "@/components/ui/input";
 import {
   Select,
   SelectContent,
@@ -89,6 +90,26 @@ export function SettingsDrawer({ open, onOpenChange }: SettingsDrawerProps) {
                     ))}
                   </SelectContent>
                 </Select>
+              </div>
+
+              {/* API Key Configuration */}
+              <div className="space-y-2">
+                <Label htmlFor="api-key">
+                  {settings.llmProvider === "openai" ? "OpenAI API Key" : "Anthropic API Key"}
+                </Label>
+                <Input
+                  id="api-key"
+                  type="password"
+                  placeholder={`Enter your ${settings.llmProvider === "openai" ? "OpenAI" : "Anthropic"} API key`}
+                  value={settings.llmProvider === "openai" ? settings.openaiApiKey : settings.anthropicApiKey}
+                  onChange={(e) => {
+                    const key = settings.llmProvider === "openai" ? "openaiApiKey" : "anthropicApiKey";
+                    updateSettings({ [key]: e.target.value });
+                  }}
+                />
+                <p className="text-xs text-muted-foreground">
+                  Your API key is stored locally and never sent to our servers
+                </p>
               </div>
             </div>
           </div>

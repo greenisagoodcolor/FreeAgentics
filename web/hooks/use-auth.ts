@@ -39,9 +39,10 @@ export function useAuth(): AuthState {
           return;
         }
 
-        // DevToken bootstrap for demo mode
+        // DevToken bootstrap for dev mode
         try {
-          const { token } = await fetch("/api/v1/dev-config").then(r => r.json());
+          const config = await fetch("/api/v1/dev-config").then(r => r.json());
+          const token = config.auth?.token;
           if (token) {
             localStorage.setItem("fa.jwt", token);
             const devUser = {
