@@ -48,7 +48,7 @@ async def get_knowledge_graph(
     In demo mode, returns a mock knowledge graph.
     In production, would query the actual knowledge base.
     """
-    # For now, return a mock knowledge graph
+    # For now, return a mock knowledge graph (5-node fixture)
     nodes = [
         KnowledgeNode(
             id="agent-1", label="Main Agent", type="agent", properties={"status": "active"}
@@ -60,6 +60,7 @@ async def get_knowledge_graph(
             id="goal-1", label="Explore Area", type="goal", properties={"priority": "high"}
         ),
         KnowledgeNode(id="action-1", label="Move Forward", type="action", properties={"cost": 1.0}),
+        KnowledgeNode(id="observation-1", label="Sensor Data", type="observation", properties={"timestamp": "2025-07-29T12:00:00Z"}),
     ]
 
     edges = [

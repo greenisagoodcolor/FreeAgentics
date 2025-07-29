@@ -24,8 +24,8 @@ export class WebSocketClient {
     this.url = url;
     this.options = {
       reconnect: true,
-      reconnectInterval: 3000,
-      maxReconnectAttempts: 5,
+      reconnectInterval: 250,
+      maxReconnectAttempts: 10,
       ...options,
     };
   }
@@ -43,13 +43,10 @@ export class WebSocketClient {
     this.setState("connecting");
 
     try {
-      // Append token to WebSocket URL if available
-      let wsUrl = this.url;
-      const token = localStorage.getItem("freeagentics_auth_token");
-      if (token) {
-        const separator = this.url.includes('?') ? '&' : '?';
-        wsUrl = `${this.url}${separator}token=${encodeURIComponent(token)}`;
-      }
+      // Always include token in WebSocket URL
+      const token = localStorage.getItem("fa.jwt");
+      const separator = this.url.includes('?') ? '&' : '?';
+      const wsUrl = `${this.url}${separator}token=${encodeURIComponent(token || "")}`;
       
       this.ws = new WebSocket(wsUrl);
 

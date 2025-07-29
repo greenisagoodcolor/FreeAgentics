@@ -39,18 +39,18 @@ class ProviderMode:
         if os.getenv("DATABASE_URL"):
             return "development"
 
-        # No database = demo/local mode
-        return "demo"
+        # No database = dev/local mode
+        return "dev"
 
     @staticmethod
     def log_mode():
         """Log current provider mode for visibility."""
         mode = ProviderMode.get_mode()
-        emoji = {"production": "🏭", "development": "🔧", "demo": "🎯"}.get(mode, "❓")
+        emoji = {"production": "🏭", "development": "🔧", "dev": "🎯"}.get(mode, "❓")
 
         logger.info(f"{emoji} Provider Mode: {mode.upper()}")
 
-        if mode == "demo":
+        if mode == "dev":
             logger.info("  📦 Database: SQLite (in-memory)")
             logger.info("  💾 Cache: In-memory dictionary")
             logger.info("  🤖 LLM: Mock responses")
@@ -318,9 +318,9 @@ def get_database() -> DatabaseProvider:
                 _db_provider = SQLiteProvider(database_url)
                 logger.info(f"Using SQLite database: {database_url}")
         else:
-            # Demo mode - in-memory SQLite
+            # Dev mode - in-memory SQLite
             _db_provider = SQLiteProvider(":memory:")
-            logger.info("Using in-memory SQLite (demo mode)")
+            logger.info("Using in-memory SQLite (dev mode)")
 
     return _db_provider
 

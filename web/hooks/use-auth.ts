@@ -16,8 +16,8 @@ export interface AuthState {
   logout: () => Promise<void>;
 }
 
-const AUTH_TOKEN_KEY = "freeagentics_auth_token";
-const USER_KEY = "freeagentics_user";
+const AUTH_TOKEN_KEY = "fa.jwt";
+const USER_KEY = "fa.user";
 
 export function useAuth(): AuthState {
   const [user, setUser] = useState<User | null>(null);
@@ -39,25 +39,19 @@ export function useAuth(): AuthState {
           return;
         }
 
-        // Try to fetch dev-config for automatic token in demo mode
+        // DevToken bootstrap for demo mode
         try {
-          const response = await fetch("/api/v1/dev-config");
-          if (response.ok) {
-            const config = await response.json();
-            if (config.auth && config.auth.token) {
-              const devToken = config.auth.token;
-              const devUser = {
-                id: "dev-user",
-                email: "developer@freeagentics.dev",
-                name: "Developer"
-              };
-              
-              localStorage.setItem(AUTH_TOKEN_KEY, devToken);
-              localStorage.setItem(USER_KEY, JSON.stringify(devUser));
-              
-              setToken(devToken);
-              setUser(devUser);
-            }
+          const { token } = await fetch("/api/v1/dev-config").then(r => r.json());
+          if (token) {
+            localStorage.setItem("fa.jwt", token);
+            const devUser = {
+              id: "dev-user",
+              email: "developer@freeagentics.dev",
+              name: "Developer"
+            };
+            localStorage.setItem(USER_KEY, JSON.stringify(devUser));
+            setToken(token);
+            setUser(devUser);
           }
         } catch (devConfigError) {
           console.log("Dev config not available, continuing without auto-auth");

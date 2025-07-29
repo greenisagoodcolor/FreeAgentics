@@ -32,11 +32,11 @@ if not DATABASE_URL:
     import warnings
     
     warnings.warn(
-        "⚠️ Running in demo mode without database. "
+        "⚠️ Running in dev mode without database. "
         "For production use, set DATABASE_URL environment variable.",
         RuntimeWarning,
     )
-    DATABASE_URL = None  # Explicitly set to None for demo mode
+    DATABASE_URL = None  # Explicitly set to None for dev mode
 
 # Security validation for production
 if DATABASE_URL and os.getenv("PRODUCTION", "false").lower() == "true":
