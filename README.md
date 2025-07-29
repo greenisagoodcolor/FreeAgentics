@@ -8,15 +8,17 @@
 git clone https://github.com/greenisagoodcolor/FreeAgentics.git
 cd FreeAgentics
 make install
-make dev
+make dev        # This will start servers and keep running - press Ctrl+C to stop
 ```
 
-✅ **That's it!** You should see:
+✅ **That's it!** After running `make dev`, you'll see:
 - Backend API running at http://localhost:8000
 - Frontend app running at http://localhost:3000
-- Auto-configured database (SQLite if no PostgreSQL found)
+- The terminal will show logs from both servers (this is normal)
 
-If you encounter any issues, run `make status` to diagnose.
+**Note**: `make dev` keeps running to serve your application. Open a new terminal for other commands.
+
+If you encounter any issues, run `make status` in a new terminal to diagnose.
 
 [![Python](https://img.shields.io/badge/python-3.9+-blue.svg)](https://www.python.org/)
 [![Node.js](https://img.shields.io/badge/node-18+-green.svg)](https://nodejs.org/)
