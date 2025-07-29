@@ -14,7 +14,6 @@ const nextConfig = {
 
   // Performance optimizations
   experimental: {
-    gzipSize: true,
     outputFileTracingExcludes: {
       '/api/**/*': ['**/*'],
     },
@@ -41,19 +40,19 @@ const nextConfig = {
       };
     }
 
-    // Aggressive optimization for production
-    config.optimization = {
-      ...config.optimization,
-      usedExports: true,
-      sideEffects: false,
-      minimize: true,
-      // More aggressive chunk splitting
-      splitChunks: {
-        ...config.optimization.splitChunks,
-        minSize: 10000,
-        maxSize: 50000,
-      },
-    };
+    // Optimization for production (simplified per CLAUDE.md KISS principle)
+    if (process.env.NODE_ENV === 'production') {
+      config.optimization = {
+        ...config.optimization,
+        minimize: true,
+        // Standard chunk splitting
+        splitChunks: {
+          chunks: 'all',
+          minSize: 10000,
+          maxSize: 50000,
+        },
+      };
+    }
 
     // Reduce bundle size with specific optimizations
     if (!isServer) {

@@ -20,6 +20,7 @@ import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Badge } from "@/components/ui/badge";
 import { Label } from "@/components/ui/label";
 import { Switch } from "@/components/ui/switch";
+import { Sheet, SheetContent, SheetDescription, SheetHeader, SheetTitle } from "@/components/ui/sheet";
 import {
   useKnowledgeGraph,
   type NodeType,
@@ -48,6 +49,8 @@ export function KnowledgeGraphView() {
   const simulationRef = useRef<d3.Simulation<GraphNode, GraphEdge> | null>(null);
 
   const [selectedLayout, setSelectedLayout] = useState<LayoutType>("force");
+  const [selectedNode, setSelectedNode] = useState<GraphNode | null>(null);
+  const [isSheetOpen, setIsSheetOpen] = useState(false);
   const [filters, setFilters] = useState<Record<NodeType, boolean>>({
     agent: true,
     belief: true,
@@ -166,6 +169,12 @@ export function KnowledgeGraphView() {
         .attr("fill", (d) => NODE_COLORS[d.type])
         .attr("stroke", "#fff")
         .attr("stroke-width", 2)
+        .style("cursor", "pointer")
+        .on("click", (event: MouseEvent, d: GraphNode) => {
+          event.stopPropagation();
+          setSelectedNode(d);
+          setIsSheetOpen(true);
+        })
         .call(
           d3
             .drag<SVGCircleElement, GraphNode>()
@@ -432,6 +441,49 @@ export function KnowledgeGraphView() {
           )}
         </div>
       </CardContent>
+
+      {/* Node Details Sheet */}
+      <Sheet open={isSheetOpen} onOpenChange={setIsSheetOpen}>
+        <SheetContent side="right" data-testid="node-details-sheet">
+          <SheetHeader>
+            <SheetTitle>Node Details</SheetTitle>
+            <SheetDescription>
+              Details for {selectedNode?.type} node
+            </SheetDescription>
+          </SheetHeader>
+          {selectedNode && (
+            <div className="mt-6 space-y-4">
+              <div>
+                <Label className="text-sm font-medium">Type</Label>
+                <Badge 
+                  variant="outline" 
+                  style={{ backgroundColor: NODE_COLORS[selectedNode.type] }}
+                  className="ml-2"
+                >
+                  {selectedNode.type}
+                </Badge>
+              </div>
+              <div>
+                <Label className="text-sm font-medium">Label</Label>
+                <p className="text-sm mt-1">{selectedNode.label}</p>
+              </div>
+              <div>
+                <Label className="text-sm font-medium">ID</Label>
+                <p className="text-sm mt-1 font-mono">{selectedNode.id}</p>
+              </div>
+              {selectedNode.x && selectedNode.y && (
+                <div>
+                  <Label className="text-sm font-medium">Position</Label>
+                  <p className="text-sm mt-1">
+                    X: {Math.round(selectedNode.x)}, Y: {Math.round(selectedNode.y)}
+                  </p>
+                </div>
+              )}
+              {/* Additional node properties can be displayed here */}
+            </div>
+          )}
+        </SheetContent>
+      </Sheet>
     </Card>
   );
 }

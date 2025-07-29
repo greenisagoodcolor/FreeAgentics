@@ -68,7 +68,7 @@ class FullPipelineDemo:
         
         # 6. Initialize supporting services
         self.gmn_generator = GMNGenerator(self.llm_provider)
-        self.agent_factory = AgentFactory(self.pymdp_adapter, self.agent_manager)
+        self.agent_factory = AgentFactory()
         self.belief_kg_bridge = BeliefKGBridge()
         
         logger.info("✅ All components initialized successfully!")

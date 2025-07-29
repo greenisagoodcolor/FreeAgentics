@@ -3,6 +3,7 @@
 import asyncio
 import json
 import logging
+import os
 import re
 from datetime import datetime
 from typing import Any, Dict, Optional, Set
@@ -139,6 +140,9 @@ class ConnectionManager:
 
 # Global connection manager instance
 manager = ConnectionManager()
+
+# Demo mode flag
+DEMO_MODE = os.getenv("DATABASE_URL") is None
 
 
 @router.websocket("/ws/{client_id}")
@@ -578,3 +582,126 @@ async def get_subscriptions():
             for event_type, subscribers in manager.subscriptions.items()
         }
     }
+
+
+@router.websocket("/ws/demo")
+async def websocket_demo_endpoint(websocket: WebSocket):
+    """Demo WebSocket endpoint without authentication for development/demo mode.
+    
+    This endpoint is only available when running in demo mode (no DATABASE_URL).
+    It provides basic WebSocket functionality for UI development and testing.
+    """
+    if not DEMO_MODE:
+        await websocket.close(
+            code=4003,
+            reason="Demo endpoint only available in demo mode"
+        )
+        return
+    
+    # Generate a demo client ID
+    client_id = f"demo_{datetime.now().timestamp()}"
+    
+    try:
+        # Accept connection immediately (no auth required)
+        await websocket.accept()
+        
+        # Connect to manager with demo metadata
+        await manager.connect(
+            websocket,
+            client_id,
+            metadata={
+                "username": "demo_user",
+                "role": "demo",
+                "demo_mode": True
+            }
+        )
+        
+        # Send initial demo data
+        await manager.send_personal_message(
+            {
+                "type": "demo_welcome",
+                "message": "Connected to FreeAgentics demo WebSocket",
+                "features": [
+                    "Agent creation simulation",
+                    "Real-time updates",
+                    "Knowledge graph visualization"
+                ],
+                "timestamp": datetime.now().isoformat()
+            },
+            client_id
+        )
+        
+        # Handle messages
+        while True:
+            try:
+                data = await websocket.receive_text()
+                message = json.loads(data)
+                
+                # Handle demo-specific message types
+                if message.get("type") == "ping":
+                    await manager.send_personal_message(
+                        {
+                            "type": "pong",
+                            "timestamp": datetime.now().isoformat()
+                        },
+                        client_id
+                    )
+                elif message.get("type") == "agent_create":
+                    # Simulate agent creation
+                    await manager.send_personal_message(
+                        {
+                            "type": "agent_created",
+                            "agent": {
+                                "id": f"demo_agent_{datetime.now().timestamp()}",
+                                "name": message.get("data", {}).get("name", "Demo Agent"),
+                                "type": message.get("data", {}).get("type", "explorer"),
+                                "status": "active",
+                                "created_at": datetime.now().isoformat()
+                            }
+                        },
+                        client_id
+                    )
+                    
+                    # Broadcast to all demo connections
+                    await manager.broadcast(
+                        {
+                            "type": "agent_update",
+                            "action": "created",
+                            "agent_id": f"demo_agent_{datetime.now().timestamp()}"
+                        }
+                    )
+                else:
+                    # Echo back for demo purposes
+                    await manager.send_personal_message(
+                        {
+                            "type": "echo",
+                            "original": message,
+                            "timestamp": datetime.now().isoformat()
+                        },
+                        client_id
+                    )
+                    
+            except json.JSONDecodeError:
+                await manager.send_personal_message(
+                    {
+                        "type": "error",
+                        "message": "Invalid JSON format"
+                    },
+                    client_id
+                )
+            except WebSocketDisconnect:
+                break
+            except Exception as e:
+                logger.error(f"Demo WebSocket error: {e}")
+                await manager.send_personal_message(
+                    {
+                        "type": "error",
+                        "message": "Internal error occurred"
+                    },
+                    client_id
+                )
+                
+    except Exception as e:
+        logger.error(f"Demo WebSocket connection error: {e}")
+    finally:
+        manager.disconnect(client_id)

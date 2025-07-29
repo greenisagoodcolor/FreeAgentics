@@ -57,7 +57,7 @@ class SecurityEventResponse(BaseModel):
     details: Optional[Dict[str, Any]]
 
     class Config:
-        orm_mode = True
+        from_attributes = True
 
 
 class SecuritySummaryResponse(BaseModel):

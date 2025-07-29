@@ -167,6 +167,8 @@ Memory budget per agent = 34.5 MB hard cap; alert at 80 %.
 
 * If `DATABASE_URL` absent ⇒ log ⚠️ *demo mode*; use in‑mem store.
 * Mock LLM provider returns deterministic small embeddings + canned GMN prompts.
+* Demo WebSocket at `/api/v1/ws/demo` - no auth required, simulates agent ops.
+* Frontend auto-connects to demo endpoint when `NEXT_PUBLIC_WS_URL` not set.
 * Ensure *full happy path* passes e2e tests w/o secrets.
 
 ---

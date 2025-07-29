@@ -122,7 +122,7 @@ export function usePromptProcessor() {
   useEffect(() => {
     const initWebSocket = () => {
       try {
-        const wsUrl = process.env.NEXT_PUBLIC_WS_URL || "ws://localhost:8000/ws";
+        const wsUrl = process.env.NEXT_PUBLIC_WS_URL || "ws://localhost:8000/api/v1/ws/demo";
         const ws = new WebSocket(wsUrl);
 
         ws.addEventListener("open", () => {
