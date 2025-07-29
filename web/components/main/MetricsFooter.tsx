@@ -1,7 +1,7 @@
 "use client";
 
 import React from "react";
-import { Cpu, MemoryStick, Users, MessageSquare, Clock, AlertCircle, Loader2 } from "lucide-react";
+import { Cpu, MemoryStick, Users, MessageSquare, Clock, AlertCircle, Loader2, Activity } from "lucide-react";
 import { useMetrics } from "@/hooks/use-metrics";
 import { cn } from "@/lib/utils";
 
@@ -128,6 +128,18 @@ export function MetricsFooter() {
             label="Uptime"
             value={formatUptime(metrics.uptime)}
           />
+
+          {metrics.avgFreeEnergy !== undefined && (
+            <>
+              <div className="h-6 w-px bg-border" />
+              <MetricItem
+                icon={<Activity className="h-3 w-3" />}
+                label="Free Energy"
+                value={metrics.avgFreeEnergy.toFixed(3)}
+                className="text-primary"
+              />
+            </>
+          )}
         </div>
 
         <div className="text-xs text-muted-foreground">v{metrics.version}</div>

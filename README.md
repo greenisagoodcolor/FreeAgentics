@@ -10,7 +10,7 @@ Building on work from John Clippinger, Andrea Pashea, and Daniel Friedman as wel
 
 **This is a production-quality foundation** for developers interested in Active Inference and multi-agent systems. **85% of functionality is fully implemented and tested.** Ready for serious development and testing.
 
-📋 **Status Update (2025-07-28)**: Complete pipeline (Prompt→LLM→GMN→PyMDP→KG→D3) FULLY INTEGRATED. Run `python examples/demo_full_pipeline.py` to see it in action!
+📋 **Status Update (2025-07-28)**: Complete pipeline (Prompt→LLM→GMN→PyMDP→KG→D3) FULLY INTEGRATED. Run `make demo` to see it in action!
 
 [![Python](https://img.shields.io/badge/python-3.9+-blue.svg)](https://www.python.org/)
 [![Node.js](https://img.shields.io/badge/node-18+-green.svg)](https://nodejs.org/)
@@ -29,7 +29,7 @@ FreeAgentics creates **AI agents** using **Active Inference** - a mathematical f
 2. **Knowledge Graph Backend** ✅ - Stores and evolves agent knowledge over time  
 3. **End-to-End Pipeline** ✅ - Complete integration: Prompt → LLM → GMN → PyMDP → KG → D3
 
-**Run the demo:** `python examples/demo_full_pipeline.py`
+**Run the demo:** `make demo`
 
 ## ⏰ Project Timeline
 
@@ -101,21 +101,47 @@ FreeAgentics creates **AI agents** using **Active Inference** - a mathematical f
 
 **Overall Project Completion: 85%** - Production-quality foundation ready for development!
 
-## 🚀 Quick Start & Developer Setup
-
-### **Development Start**
+## 🚀 Quick Start - Demo in 2 Minutes
 
 ```bash
+# Clone and setup
 git clone https://github.com/greenisagoodcolor/freeagentics.git
 cd freeagentics
-
-# Option 1: Use SQLite fallback (no PostgreSQL required)
-cp .env.development .env
 make install
-make dev
 
-# Option 2: Use PostgreSQL (recommended for production-like testing)
-# Set DATABASE_URL in .env first:
+# Run demo (no database or API keys needed!)
+make demo
+```
+
+That's it! Open http://localhost:3000 in your browser.
+
+### What You'll See
+
+- **Single Page UI** with all components visible:
+  - PromptBar at top for entering commands
+  - Agent Creator, Conversation, and Knowledge Graph panels
+  - Simulation Grid showing agent movements
+  - Metrics footer
+- **Demo Mode Features**:
+  - No authentication required
+  - Mock LLM responses 
+  - In-memory storage
+  - WebSocket at `/api/v1/ws/demo`
+
+### Try These Actions
+
+1. **Create an Agent**: Click "Create Agent" and give it a name
+2. **Submit a Prompt**: Type "Explore the grid" in the prompt bar
+3. **Click Knowledge Graph Nodes**: See node details in side panel
+4. **Start Simulation**: Press play button to see agents move
+
+### For Production Setup
+
+```bash
+# Copy environment template
+cp .env.development .env
+
+# Add PostgreSQL URL to .env:
 # DATABASE_URL=postgresql://postgres:postgres@localhost:5432/freeagentics_dev
 make install
 make dev
@@ -165,16 +191,6 @@ make dev
 # Check which database is being used
 # Look for log message: "Using SQLite database: freeagentics_dev.db"
 # or "Connected to PostgreSQL database"
-```
-
-### **Try the Active Inference Demo**
-
-```bash
-# See real Active Inference in action!
-make demo             # Interactive demo with PyMDP agents
-
-# 🚨 NEW: Run the FULL PIPELINE demo showing all features!
-python examples/demo_full_pipeline.py
 ```
 
 ### **Essential Commands**
@@ -426,19 +442,13 @@ Comprehensive documentation is available in the `/docs` directory:
 ✅ Open-source contributors interested in cognitive science applications\
 ✅ Prototype development and experimentation
 
-### **Getting Started Quickly**
-
-1. **Run Demo**: `make demo` - See Active Inference in action
-2. **Check Tests**: `make test` - Validate core functionality
-3. **Explore Code**: Start with `/agents/base_agent.py` for Active Inference implementation
-4. **Review Docs**: Browse `/docs` directory for detailed documentation
 
 ## 📚 Resources
 
 - **Active Inference Theory**: [Active Inference Institute](https://www.activeinference.org/)
 - **PyMDP Documentation**: [inferactively-pymdp](https://github.com/infer-actively/pymdp)
-- **Live Demo**: [localhost:3000](http://localhost:3000) after `make dev`
-- **API Documentation**: [localhost:8000/docs](http://localhost:8000/docs) after `make dev`
+- **Live Demo**: [localhost:3000](http://localhost:3000) after `make demo`
+- **API Documentation**: [localhost:8000/docs](http://localhost:8000/docs) after `make demo`
 - **Research**: Designed for cognitive science, AI research, and education
 
 ## 📄 License

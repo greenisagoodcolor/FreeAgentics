@@ -6,6 +6,7 @@ for distributed storage and FastAPI middleware for request processing.
 
 import json
 import logging
+import os
 import time
 from datetime import datetime, timedelta
 from typing import Callable, Dict, Optional, Set, Tuple
@@ -22,6 +23,9 @@ from auth.security_logging import (
 )
 
 logger = logging.getLogger(__name__)
+
+# Check if we're in demo mode (no database)
+DEMO_MODE = os.getenv("DATABASE_URL") is None
 
 
 class RateLimitConfig:
@@ -357,7 +361,10 @@ class DDoSProtectionMiddleware(BaseHTTPMiddleware):
                     logger.info("Connected to Redis for rate limiting")
 
             except Exception as e:
-                logger.error(f"Failed to connect to Redis: {e}")
+                if not DEMO_MODE:
+                    logger.error(f"Failed to connect to Redis: {e}")
+                else:
+                    logger.debug(f"Redis not available in demo mode: {e}")
                 # Fallback to in-memory (not recommended for production)
                 self.redis_client = None
 
@@ -387,8 +394,11 @@ class DDoSProtectionMiddleware(BaseHTTPMiddleware):
             if rate_limit_response:
                 return rate_limit_response
         else:
-            # Log warning if Redis is not available
-            logger.warning("Rate limiting disabled - Redis not available")
+            # Log warning if Redis is not available (only in production)
+            if not DEMO_MODE:
+                logger.warning("Rate limiting disabled - Redis not available")
+            else:
+                logger.debug("Rate limiting disabled in demo mode")
 
         # Process request
         response = await call_next(request)

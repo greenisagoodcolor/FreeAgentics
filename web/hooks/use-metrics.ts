@@ -7,6 +7,7 @@ export interface SystemMetrics {
   messages: number; // Total message count
   uptime: number; // Uptime in seconds
   version: string; // System version
+  avgFreeEnergy?: number; // Average free energy across agents
 }
 
 export interface MetricsState {
@@ -28,7 +29,7 @@ export function useMetrics(): MetricsState {
     try {
       setError(null);
 
-      const response = await fetch(`${API_BASE_URL}/api/metrics`, {
+      const response = await fetch(`${API_BASE_URL}/api/v1/metrics`, {
         headers: {
           "Content-Type": "application/json",
         },
@@ -42,12 +43,13 @@ export function useMetrics(): MetricsState {
       const data = await response.json();
 
       setMetrics({
-        cpu: data.cpu || 0,
-        memory: data.memory || 0,
-        agents: data.agents || 0,
-        messages: data.messages || 0,
+        cpu: data.cpu_usage || data.cpu || 0,
+        memory: data.memory_usage || data.memory || 0,
+        agents: data.active_agents || data.agents || 0,
+        messages: data.total_inferences || data.messages || 0,
         uptime: data.uptime || 0,
         version: data.version || "1.0.0-alpha",
+        avgFreeEnergy: data.avg_free_energy !== undefined ? data.avg_free_energy : undefined,
       });
 
       setIsLoading(false);

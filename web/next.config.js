@@ -1,6 +1,13 @@
-const withBundleAnalyzer = require('@next/bundle-analyzer')({
-  enabled: process.env.ANALYZE === 'true'
-});
+// Safe import for optional bundle analyzer (demo mode support)
+let withBundleAnalyzer;
+try {
+  withBundleAnalyzer = require('@next/bundle-analyzer')({
+    enabled: process.env.ANALYZE === 'true'
+  });
+} catch (e) {
+  // Bundle analyzer is optional - skip if not installed
+  withBundleAnalyzer = (config) => config;
+}
 
 /** @type {import('next').NextConfig} */
 const nextConfig = {

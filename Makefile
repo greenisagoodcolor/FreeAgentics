@@ -317,10 +317,11 @@ kill-ports: ## 🔧 Clear processes on development ports (3000, 8000)
 
 start: dev ## 🚀 Alias for 'make dev'
 
-demo: ## 🎯 Run FreeAgentics demo - Active Inference multi-agent system
-	@echo -e "$(BOLD)$(MAGENTA)🧠 FreeAgentics Active Inference Demo$(RESET)"
-	@echo -e "$(CYAN)Demonstrates PyMDP-powered agents with variational inference$(RESET)\n"
-	@source $(VENV_DIR)/bin/activate && cd examples && $(PYTHON) demo.py
+demo: ## 🎯 Run FreeAgentics demo - Full Web UI in demo mode (no database required)
+	@echo -e "$(BOLD)$(MAGENTA)🧠 FreeAgentics Web Demo$(RESET)"
+	@echo -e "$(CYAN)Starting full UI in demo mode - no database or API keys required!$(RESET)\n"
+	@# Ensure DATABASE_URL is not set to trigger demo mode
+	@unset DATABASE_URL && $(MAKE) dev
 
 # ============================================================================
 # 4. TESTING COMMANDS (Three-Tier Strategy)

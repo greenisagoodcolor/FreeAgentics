@@ -5,6 +5,7 @@ to prevent abuse of real-time communication endpoints.
 """
 
 import logging
+import os
 from typing import Callable, Dict, Optional
 
 import redis.asyncio as aioredis
@@ -20,6 +21,9 @@ from auth.security_logging import (
 from .ddos_protection import WebSocketRateLimiter
 
 logger = logging.getLogger(__name__)
+
+# Check if we're in demo mode (no database)
+DEMO_MODE = os.getenv("DATABASE_URL") is None
 
 
 class WebSocketRateLimitManager:
@@ -43,7 +47,10 @@ class WebSocketRateLimitManager:
                     await self.redis_client.ping()
                     logger.info("WebSocket rate limiter connected to Redis")
             except Exception as e:
-                logger.error(f"Failed to connect to Redis for WebSocket rate limiting: {e}")
+                if not DEMO_MODE:
+                    logger.error(f"Failed to connect to Redis for WebSocket rate limiting: {e}")
+                else:
+                    logger.debug(f"Redis not available in demo mode for WebSocket rate limiting: {e}")
                 self.redis_client = None
 
         return self.redis_client
@@ -77,7 +84,10 @@ class WebSocketRateLimitManager:
         """Check if WebSocket connection is allowed based on rate limits."""
         rate_limiter = await self._get_rate_limiter()
         if not rate_limiter:
-            logger.warning("WebSocket rate limiting disabled - Redis not available")
+            if not DEMO_MODE:
+                logger.warning("WebSocket rate limiting disabled - Redis not available")
+            else:
+                logger.debug("WebSocket rate limiting disabled in demo mode")
             return True
 
         client_ip = self._get_client_ip(websocket)
