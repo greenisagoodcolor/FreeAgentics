@@ -28,65 +28,75 @@ export function PromptBar() {
   };
 
   const handleKeyDown = (e: KeyboardEvent<HTMLTextAreaElement>) => {
-    if ((e.key === "Enter" && !e.shiftKey) || (e.key === "Enter" && e.ctrlKey)) {
+    if (e.key === "Enter" && !e.shiftKey) {
       e.preventDefault();
       handleSubmit();
     }
   };
 
   return (
-    <div className="flex items-center gap-2 p-2 h-full">
-      {/* History snippets */}
+    <div className="w-full">
+      {/* History snippets - moved to top */}
       {conversationId &&
         iterationContext?.conversation_summary?.prompt_themes &&
         iterationContext.conversation_summary.prompt_themes.length > 0 && (
-          <ScrollArea className="flex-1 max-w-xs">
-            <div className="flex gap-2 text-xs text-muted-foreground">
-              {iterationContext.conversation_summary.prompt_themes.map((theme, idx) => (
-                <div key={idx} className="whitespace-nowrap">
-                  {theme}
-                </div>
-              ))}
-            </div>
-          </ScrollArea>
+          <div className="mb-3">
+            <ScrollArea className="max-w-full">
+              <div className="flex gap-2 text-xs text-muted-foreground">
+                {iterationContext.conversation_summary.prompt_themes.map((theme, idx) => (
+                  <div key={idx} className="whitespace-nowrap">
+                    {theme}
+                  </div>
+                ))}
+              </div>
+            </ScrollArea>
+          </div>
         )}
 
-      {/* Main prompt input */}
-      <div className="flex-1 relative">
-        <Textarea
-          ref={textareaRef}
-          value={prompt}
-          onChange={(e) => setPrompt(e.target.value)}
-          onKeyDown={handleKeyDown}
-          onFocus={() => setIsExpanded(true)}
-          onBlur={() => !prompt && setIsExpanded(false)}
-          placeholder="Enter your goal or prompt..."
-          disabled={isLoading}
-          className={cn(
-            "resize-none transition-all duration-200 pr-20",
-            isExpanded ? "h-20" : "h-10",
-            "min-h-10",
+      {/* Main prompt input - now full width and bigger */}
+      <div className="flex gap-3 items-start">
+        <div className="flex-1 relative">
+          <Textarea
+            ref={textareaRef}
+            value={prompt}
+            onChange={(e) => setPrompt(e.target.value)}
+            onKeyDown={handleKeyDown}
+            onFocus={() => setIsExpanded(true)}
+            onBlur={() => !prompt && setIsExpanded(false)}
+            placeholder="Describe your goal or task in detail. You can write multiple paragraphs here to explain what you want the agents to do..."
+            disabled={isLoading}
+            className={cn(
+              "resize-none transition-all duration-200 text-base",
+              isExpanded || prompt ? "h-32" : "h-20",
+              "min-h-20",
+            )}
+          />
+
+          {isLoading && (
+            <div className="absolute right-3 top-3 text-sm text-muted-foreground">Processing...</div>
           )}
-        />
+        </div>
 
-        {isLoading && (
-          <div className="absolute right-2 top-2 text-sm text-muted-foreground">Processing...</div>
-        )}
+        {/* Settings button */}
+        <Button
+          variant="outline"
+          size="icon"
+          onClick={() => setShowSettings(true)}
+          aria-label="Settings"
+          className="mt-1"
+        >
+          <Settings className="h-4 w-4" />
+        </Button>
       </div>
 
-      {/* Settings button */}
-      <Button
-        variant="outline"
-        size="icon"
-        onClick={() => setShowSettings(true)}
-        aria-label="Settings"
-      >
-        <Settings className="h-4 w-4" />
-      </Button>
+      {/* Submit hint */}
+      <div className="mt-2 text-xs text-muted-foreground">
+        Press Enter to submit, or Shift+Enter for new line
+      </div>
 
       {/* Error display */}
       {error && (
-        <Alert variant="destructive" className="absolute top-full left-0 right-0 mt-2">
+        <Alert variant="destructive" className="mt-3">
           <AlertDescription>{error}</AlertDescription>
         </Alert>
       )}

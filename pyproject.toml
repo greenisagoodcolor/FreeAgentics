@@ -90,7 +90,7 @@ dependencies = [
 ]
 
 [tool.setuptools.packages.find]
-include = ["agents*", "inference*", "coalitions*", "world*", "api*", "infrastructure*"]
+include = ["agents*", "inference*", "coalitions*", "world*", "api*", "infrastructure*", "core*"]
 exclude = ["web*", "node_modules*", ".*"]
 
 [project.optional-dependencies]
