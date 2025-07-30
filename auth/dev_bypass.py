@@ -23,7 +23,7 @@ _DEV_USER = TokenData(
     role=UserRole.ADMIN,
     permissions=[p.value for p in ROLE_PERMISSIONS[UserRole.ADMIN]],
     fingerprint="dev_fingerprint",
-    exp=int((datetime.utcnow() + timedelta(days=365)).timestamp())
+    exp=datetime.utcnow() + timedelta(days=365)
 )
 
 async def get_current_user_optional(
