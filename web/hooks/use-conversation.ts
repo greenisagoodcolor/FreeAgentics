@@ -42,6 +42,11 @@ export function useConversation(): ConversationState {
     if (lastMessage.type === "conversation_started") {
       const data = lastMessage.data as { conversationId: string };
       setConversationId(data.conversationId);
+    } else if (lastMessage.type === "connection_established") {
+      // Initialize conversation ID if not set
+      if (!conversationId) {
+        setConversationId("default-" + Date.now());
+      }
     } else if (lastMessage.type === "message") {
       const messageData = lastMessage.data as {
         id: string;
@@ -82,6 +87,18 @@ export function useConversation(): ConversationState {
       if (!isStreaming) {
         setIsLoading(false);
       }
+    } else if (lastMessage.type === "agent_created") {
+      // Handle agent creation notifications
+      const data = lastMessage.data as { agent: any; message: string };
+      console.log("[Conversation] Agent created:", data);
+      // Optionally add a system message about the agent creation
+      const agentMessage = {
+        id: `system-${Date.now()}`,
+        role: "system" as MessageRole,
+        content: data.message,
+        timestamp: new Date().toISOString(),
+      };
+      setMessages((prev) => [...prev, agentMessage]);
     } else if (lastMessage.type === "error") {
       const errorData = lastMessage.data as { message?: string };
       setError(new Error(errorData.message || "An error occurred"));
@@ -120,16 +137,43 @@ export function useConversation(): ConversationState {
         ]);
       }
 
-      // Send via WebSocket
-      sendWebSocketMessage({
-        type: "message",
-        data: {
-          conversationId,
-          content,
-          role,
-          timestamp,
-        },
-      });
+      // For HTTP-based flow, we'll use the process-prompt endpoint
+      // The backend will send the response via WebSocket
+      if (role === "user") {
+        fetch("/api/process-prompt", {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${localStorage.getItem("fa.jwt")}`,
+          },
+          body: JSON.stringify({
+            prompt: content,
+            conversationId: conversationId || "default",
+          }),
+        })
+          .then((response) => {
+            if (!response.ok) {
+              throw new Error("Failed to process prompt");
+            }
+            return response.json();
+          })
+          .catch((error) => {
+            console.error("Failed to send prompt:", error);
+            setError(error);
+            setIsLoading(false);
+          });
+      } else {
+        // For non-user messages, still use WebSocket directly
+        sendWebSocketMessage({
+          type: "message",
+          data: {
+            conversationId,
+            content,
+            role,
+            timestamp,
+          },
+        });
+      }
     },
     [isConnected, conversationId, sendWebSocketMessage],
   );

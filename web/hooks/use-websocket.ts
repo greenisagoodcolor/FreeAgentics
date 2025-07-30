@@ -31,10 +31,18 @@ export function useWebSocket(): WebSocketState {
   const wsRef = useRef<WebSocket | null>(null);
   const reconnectTimeoutRef = useRef<NodeJS.Timeout | null>(null);
   const reconnectAttemptsRef = useRef(0);
+  const connectionTimeoutRef = useRef<NodeJS.Timeout | null>(null);
+  const isConnectingRef = useRef(false);
   
   const { isAuthenticated, isLoading: isAuthLoading, token } = useAuth();
 
   const connect = useCallback(() => {
+    // Prevent multiple simultaneous connection attempts
+    if (isConnectingRef.current || wsRef.current?.readyState === WebSocket.CONNECTING) {
+      console.log("[WebSocket] Connection already in progress, skipping...");
+      return;
+    }
+
     // Don't connect if auth is not ready
     if (isAuthLoading || !isAuthenticated || !token) {
       console.log("[WebSocket] Waiting for auth before connecting...", {
@@ -44,6 +52,8 @@ export function useWebSocket(): WebSocketState {
       });
       return;
     }
+
+    isConnectingRef.current = true;
 
     try {
       setConnectionState("connecting");
@@ -64,6 +74,7 @@ export function useWebSocket(): WebSocketState {
         setIsConnected(true);
         setConnectionState("connected");
         reconnectAttemptsRef.current = 0;
+        isConnectingRef.current = false;
       };
 
       ws.onmessage = (event) => {
@@ -89,9 +100,10 @@ export function useWebSocket(): WebSocketState {
         setIsConnected(false);
         setConnectionState("disconnected");
         wsRef.current = null;
+        isConnectingRef.current = false;
 
-        // Attempt to reconnect
-        if (reconnectAttemptsRef.current < MAX_RECONNECT_ATTEMPTS) {
+        // Attempt to reconnect only if we're still authenticated
+        if (isAuthenticated && reconnectAttemptsRef.current < MAX_RECONNECT_ATTEMPTS) {
           reconnectAttemptsRef.current++;
           reconnectTimeoutRef.current = setTimeout(() => {
             console.log(
@@ -107,10 +119,17 @@ export function useWebSocket(): WebSocketState {
       console.error("[WebSocket] Failed to create connection:", err);
       setError(err as Error);
       setConnectionState("error");
+      isConnectingRef.current = false;
     }
   }, [isAuthLoading, isAuthenticated, token]);
 
   const disconnect = useCallback(() => {
+    // Clear any pending connection attempts
+    if (connectionTimeoutRef.current) {
+      clearTimeout(connectionTimeoutRef.current);
+      connectionTimeoutRef.current = null;
+    }
+
     if (reconnectTimeoutRef.current) {
       clearTimeout(reconnectTimeoutRef.current);
       reconnectTimeoutRef.current = null;
@@ -121,6 +140,7 @@ export function useWebSocket(): WebSocketState {
       wsRef.current = null;
     }
 
+    isConnectingRef.current = false;
     setIsConnected(false);
     setConnectionState("disconnected");
   }, []);
@@ -141,25 +161,35 @@ export function useWebSocket(): WebSocketState {
 
   // Connect when auth is ready, disconnect on unmount
   useEffect(() => {
-    // Small delay to ensure token is fully propagated after auth state changes
-    let connectionTimeout: NodeJS.Timeout | null = null;
+    // Clear any existing connection timeout
+    if (connectionTimeoutRef.current) {
+      clearTimeout(connectionTimeoutRef.current);
+      connectionTimeoutRef.current = null;
+    }
 
-    if (!isAuthLoading && isAuthenticated && token) {
+    if (!isAuthLoading && isAuthenticated && token && !wsRef.current) {
       console.log("[WebSocket] Auth ready, scheduling connection...");
-      // Add 500ms delay to ensure token propagation and prevent 403 spam
-      connectionTimeout = setTimeout(() => {
+      // Add small delay to ensure token propagation
+      connectionTimeoutRef.current = setTimeout(() => {
         console.log("[WebSocket] Initiating connection after auth stabilization...");
         connect();
-      }, 500);
+      }, 100); // Reduced delay since we now prevent duplicate connections
     }
 
     return () => {
-      if (connectionTimeout) {
-        clearTimeout(connectionTimeout);
+      if (connectionTimeoutRef.current) {
+        clearTimeout(connectionTimeoutRef.current);
+        connectionTimeoutRef.current = null;
       }
+    };
+  }, [connect, isAuthLoading, isAuthenticated, token]);
+
+  // Cleanup on unmount
+  useEffect(() => {
+    return () => {
       disconnect();
     };
-  }, [connect, disconnect, isAuthLoading, isAuthenticated, token]);
+  }, [disconnect]);
 
   return {
     isConnected,

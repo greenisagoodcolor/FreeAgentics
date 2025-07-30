@@ -344,9 +344,82 @@ async def process_prompt_ui(
     current_user: TokenData = Depends(get_current_user),
     db: Session = Depends(get_db),
 ) -> ProcessPromptResponse:
-    """Process a prompt - demo echo back with optional KG."""
-    # For demo, echo back the prompt
-    response_text = f"You said: {request.prompt}"
+    """Process a prompt and send response via WebSocket."""
+    # Generate a unique message ID
+    import uuid
+    message_id = str(uuid.uuid4())
+    
+    # Send the response via WebSocket to all connected clients
+    try:
+        from api.v1.websocket import manager
+        
+        # Send user message echo via WebSocket
+        await manager.broadcast({
+            "type": "message",
+            "data": {
+                "id": f"user-{message_id}",
+                "role": "user",
+                "content": request.prompt,
+                "timestamp": datetime.now().isoformat(),
+                "conversationId": request.conversationId
+            }
+        })
+        
+        # Simulate processing delay
+        import asyncio
+        await asyncio.sleep(0.5)
+        
+        # Send assistant response via WebSocket
+        response_text = f"I received your message: '{request.prompt}'. This is a demo response from FreeAgentics."
+        
+        await manager.broadcast({
+            "type": "message",
+            "data": {
+                "id": f"assistant-{message_id}",
+                "role": "assistant",
+                "content": response_text,
+                "timestamp": datetime.now().isoformat(),
+                "conversationId": request.conversationId,
+                "isStreaming": False
+            }
+        })
+        
+        # Also check if we should create an agent based on the prompt
+        prompt_lower = request.prompt.lower()
+        if any(word in prompt_lower for word in ["create", "make", "build", "add", "new"]):
+            if any(word in prompt_lower for word in ["agent", "assistant", "helper"]):
+                # Create an agent
+                agent_request = UIAgentCreateRequest(description=request.prompt)
+                agent = await create_agent_ui(agent_request, current_user, db)
+                
+                # Send agent creation notification
+                await manager.broadcast({
+                    "type": "agent_created",
+                    "data": {
+                        "agent": agent.dict(),
+                        "message": f"Created new agent: {agent.name}",
+                        "timestamp": datetime.now().isoformat()
+                    }
+                })
+                
+                response_text = f"I've created a new agent for you: {agent.name} ({agent.type})"
+                
+                # Send updated response
+                await manager.broadcast({
+                    "type": "message",
+                    "data": {
+                        "id": f"assistant-{message_id}-update",
+                        "role": "assistant",
+                        "content": response_text,
+                        "timestamp": datetime.now().isoformat(),
+                        "conversationId": request.conversationId,
+                        "isStreaming": False
+                    }
+                })
+        
+    except Exception as e:
+        logger.error(f"Failed to send WebSocket message: {e}")
+        # Continue with HTTP response even if WebSocket fails
     
     # Get current knowledge graph (optional)
     try:

@@ -47,7 +47,7 @@ export function SettingsDrawer({ open, onOpenChange }: SettingsDrawerProps) {
 
   return (
     <Sheet open={open} onOpenChange={onOpenChange}>
-      <SheetContent side="right" className="w-[400px] sm:w-[540px]">
+      <SheetContent side="right" className="w-[400px] sm:w-[540px] overflow-y-auto">
         <SheetHeader>
           <SheetTitle className="flex items-center gap-2">
             <Settings2 className="h-5 w-5" />
@@ -56,7 +56,7 @@ export function SettingsDrawer({ open, onOpenChange }: SettingsDrawerProps) {
           <SheetDescription>Configure your FreeAgentics experience</SheetDescription>
         </SheetHeader>
 
-        <div className="mt-8 space-y-8">
+        <div className="mt-8 space-y-8 pb-6">
           {/* LLM Configuration */}
           <div className="space-y-4">
             <h3 className="text-sm font-medium">Language Model</h3>
@@ -93,24 +93,50 @@ export function SettingsDrawer({ open, onOpenChange }: SettingsDrawerProps) {
               </div>
 
               {/* API Key Configuration */}
-              <div className="space-y-2">
-                <Label htmlFor="api-key">
-                  {settings.llmProvider === "openai" ? "OpenAI API Key" : "Anthropic API Key"}
-                </Label>
-                <Input
-                  id="api-key"
-                  type="password"
-                  placeholder={`Enter your ${settings.llmProvider === "openai" ? "OpenAI" : "Anthropic"} API key`}
-                  value={settings.llmProvider === "openai" ? settings.openaiApiKey : settings.anthropicApiKey}
-                  onChange={(e) => {
-                    const key = settings.llmProvider === "openai" ? "openaiApiKey" : "anthropicApiKey";
-                    updateSettings({ [key]: e.target.value });
-                  }}
-                />
-                <p className="text-xs text-muted-foreground">
-                  Your API key is stored locally and never sent to our servers
-                </p>
-              </div>
+              {settings.llmProvider !== "ollama" && (
+                <div className="space-y-2">
+                  <Label htmlFor="api-key">
+                    {settings.llmProvider === "openai" ? "OpenAI API Key" : "Anthropic API Key"}
+                  </Label>
+                  <div className="flex gap-2">
+                    <Input
+                      id="api-key"
+                      type="password"
+                      placeholder={`Enter your ${settings.llmProvider === "openai" ? "OpenAI" : "Anthropic"} API key`}
+                      value={settings.llmProvider === "openai" ? settings.openaiApiKey : settings.anthropicApiKey}
+                      onChange={(e) => {
+                        const key = settings.llmProvider === "openai" ? "openaiApiKey" : "anthropicApiKey";
+                        updateSettings({ [key]: e.target.value });
+                      }}
+                      className="flex-1"
+                    />
+                    <Button
+                      type="button"
+                      size="sm"
+                      onClick={() => {
+                        // API key is already saved on change
+                        const key = settings.llmProvider === "openai" ? settings.openaiApiKey : settings.anthropicApiKey;
+                        if (key) {
+                          // Visual feedback that key is saved
+                          const input = document.getElementById("api-key") as HTMLInputElement;
+                          if (input) {
+                            const originalPlaceholder = input.placeholder;
+                            input.placeholder = "API key saved!";
+                            setTimeout(() => {
+                              input.placeholder = originalPlaceholder;
+                            }, 2000);
+                          }
+                        }
+                      }}
+                    >
+                      Save
+                    </Button>
+                  </div>
+                  <p className="text-xs text-muted-foreground">
+                    Your API key is stored locally and never sent to our servers
+                  </p>
+                </div>
+              )}
             </div>
           </div>
 
