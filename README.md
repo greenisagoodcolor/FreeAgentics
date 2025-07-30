@@ -4,17 +4,38 @@
 
 ## Quick Start
 
+### 1. Clone and Install
 ```bash
 git clone https://github.com/greenisagoodcolor/FreeAgentics.git
 cd FreeAgentics
 make install
+```
+
+### 2. Start Development Servers
+```bash
 make dev        # This will start servers and keep running - press Ctrl+C to stop
 ```
 
-✅ **That's it!** After running `make dev`, you'll see:
+✅ **Almost there!** After running `make dev`, you'll see:
 - Backend API running at http://localhost:8000
 - Frontend app running at http://localhost:3000
 - The terminal will show logs from both servers (this is normal)
+
+### 3. Enable Agent Conversations (Required)
+🔑 **Critical Step**: To enable AI agents to converse with each other, you must add your OpenAI API key:
+
+1. Open http://localhost:3000 in your browser
+2. Click the **Settings** button (gear icon) in the top-right corner
+3. Paste your OpenAI API key (get one at https://platform.openai.com/api-keys)
+4. Click **Save**
+
+**Without an API key, agents cannot communicate!** The system will show errors if you try to use it without configuring your key first.
+
+### 4. Test Agent Conversations
+Once your API key is saved, try these prompts:
+- "Help me create a sustainable coffee shop business plan"
+- "Can my agents talk to each other about active inference?"
+- "Design an AI-powered learning platform"
 
 **Note**: `make dev` keeps running to serve your application. Open a new terminal for other commands.
 

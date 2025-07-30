@@ -1,14 +1,17 @@
 "use client";
 
-import React from "react";
+import React, { useState } from "react";
 import { PromptBar } from "@/components/main/PromptBar";
 import { AgentCreatorPanel } from "@/components/main/AgentCreatorPanel";
 import { ConversationWindow } from "@/components/main/ConversationWindow";
 import { KnowledgeGraphView } from "@/components/main/KnowledgeGraphView";
 import { SimulationGrid } from "@/components/main/SimulationGrid";
 import { MetricsFooter } from "@/components/main/MetricsFooter";
+import { ApiKeyBanner } from "@/components/main/ApiKeyBanner";
+import { SettingsModal } from "@/components/modals/SettingsModal";
 
 export default function HomePage() {
+  const [isSettingsOpen, setIsSettingsOpen] = useState(false);
   return (
     <div className="main-layout flex flex-col h-screen bg-background">
       {/* Header Section with Title and Prompt */}
@@ -31,6 +34,10 @@ export default function HomePage() {
 
       {/* Main content area */}
       <div className="flex-1 flex flex-col overflow-hidden">
+        {/* API Key Banner */}
+        <div className="px-4 pt-4">
+          <ApiKeyBanner onSettingsClick={() => setIsSettingsOpen(true)} />
+        </div>
         {/* Top Row - 3 columns with explanations */}
         <div className="main-row grid grid-cols-1 lg:grid-cols-3 gap-4 p-4 flex-1 overflow-hidden">
           {/* Agent Creator Panel */}
@@ -79,6 +86,9 @@ export default function HomePage() {
       <div className="footer-bar h-12 border-t bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
         <MetricsFooter />
       </div>
+
+      {/* Settings Modal */}
+      <SettingsModal open={isSettingsOpen} onOpenChange={setIsSettingsOpen} />
     </div>
   );
 }

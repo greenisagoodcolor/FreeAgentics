@@ -10,6 +10,7 @@ import { ScrollArea } from "@/components/ui/scroll-area";
 import { Badge } from "@/components/ui/badge";
 import { useConversation, type MessageRole } from "@/hooks/use-conversation";
 import { usePromptProcessor } from "@/hooks/use-prompt-processor";
+import { useSettings } from "@/hooks/use-settings";
 import { cn } from "@/lib/utils";
 
 interface MessageBubbleProps {
@@ -86,10 +87,14 @@ export function ConversationWindow() {
   const { messages, sendMessage, isLoading, error, conversationId, clearConversation, goalPrompt } =
     useConversation();
   const { suggestions } = usePromptProcessor();
+  const { settings } = useSettings();
 
   const [input, setInput] = useState("");
   const scrollAreaRef = useRef<HTMLDivElement>(null);
   const textareaRef = useRef<HTMLTextAreaElement>(null);
+
+  // Check if API key is configured
+  const hasApiKey = settings.openaiApiKey || settings.anthropicApiKey;
 
   // Auto-scroll to bottom when new messages arrive
   useEffect(() => {
@@ -167,8 +172,22 @@ export function ConversationWindow() {
           {messages.length === 0 ? (
             <div className="h-full flex items-center justify-center text-center">
               <div className="text-muted-foreground">
-                <p className="text-sm font-medium">Start a conversation</p>
-                <p className="text-xs mt-1">Type a message below to begin</p>
+                {!hasApiKey ? (
+                  <>
+                    <AlertCircle className="h-8 w-8 mx-auto mb-2 text-yellow-500" />
+                    <p className="text-sm font-medium text-yellow-600 dark:text-yellow-400">
+                      Add your API key to enable agent conversations
+                    </p>
+                    <p className="text-xs mt-1">
+                      Click the Settings button in the top-right corner
+                    </p>
+                  </>
+                ) : (
+                  <>
+                    <p className="text-sm font-medium">Start a conversation</p>
+                    <p className="text-xs mt-1">Type a message below to begin</p>
+                  </>
+                )}
               </div>
             </div>
           ) : (
