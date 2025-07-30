@@ -23,6 +23,7 @@ from api.v1 import (
     monitoring,
     prompts,
     security,
+    settings,
     system,
     websocket,
 )
@@ -187,6 +188,7 @@ app.include_router(system.router, prefix="/api/v1", tags=["system"])
 app.include_router(websocket.router, prefix="/api/v1", tags=["websocket"])
 app.include_router(monitoring.router, prefix="/api/v1", tags=["monitoring"])
 app.include_router(security.router, prefix="/api/v1", tags=["security"])
+app.include_router(settings.router, prefix="/api/v1", tags=["settings"])
 app.include_router(health.router, prefix="/api/v1", tags=["health"])
 app.include_router(health_extended.router, prefix="/api/v1", tags=["health"])
 
