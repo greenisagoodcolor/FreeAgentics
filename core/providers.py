@@ -22,6 +22,11 @@ from sqlalchemy.pool import StaticPool
 
 from database.base import Base
 
+# Import for type hints only
+from typing import TYPE_CHECKING
+if TYPE_CHECKING:
+    from auth.security_implementation import TokenData
+
 logger = logging.getLogger(__name__)
 
 
@@ -346,17 +351,50 @@ def get_rate_limiter() -> RateLimiterProvider:
     return _rate_limiter
 
 
-def get_llm() -> LLMProvider:
-    """Get LLM provider based on environment."""
+def get_llm(user_id: Optional[str] = None) -> LLMProvider:
+    """Get LLM provider based on user settings or environment.
+    
+    Args:
+        user_id: Optional user ID to load user-specific settings
+        
+    Returns:
+        LLMProvider instance configured for the user
+    """
     global _llm_provider
+    
+    # If user_id provided, check user settings first
+    if user_id:
+        try:
+            from database.session import SessionLocal
+            from api.v1.settings import UserSettings
+            
+            db = SessionLocal()
+            try:
+                user_settings = db.query(UserSettings).filter(UserSettings.user_id == user_id).first()
+                if user_settings:
+                    # Check user's provider preference
+                    if user_settings.llm_provider == "openai" and user_settings.get_openai_key():
+                        try:
+                            provider = OpenAIProvider(user_settings.get_openai_key())
+                            logger.info(f"Using OpenAI LLM provider for user {user_id}")
+                            return provider
+                        except Exception as e:
+                            logger.warning(f"Failed to create OpenAI provider for user {user_id}: {e}")
+                    elif user_settings.llm_provider == "anthropic" and user_settings.get_anthropic_key():
+                        logger.info(f"Would use Anthropic for user {user_id}, but provider not implemented")
+            finally:
+                db.close()
+        except Exception as e:
+            logger.warning(f"Failed to load user settings for LLM: {e}")
 
+    # Fall back to environment-based provider
     if _llm_provider is None:
         openai_key = os.getenv("OPENAI_API_KEY")
 
         if openai_key:
             try:
                 _llm_provider = OpenAIProvider(openai_key)
-                logger.info("Using OpenAI LLM provider")
+                logger.info("Using OpenAI LLM provider from environment")
             except ImportError:
                 logger.warning("OpenAI library not installed, using mock")
                 _llm_provider = MockLLMProvider()
@@ -379,8 +417,23 @@ async def get_rate_limit_checker() -> RateLimiterProvider:
     return get_rate_limiter()
 
 
-async def get_llm_client() -> LLMProvider:
-    """FastAPI dependency for LLM client."""
+async def get_llm_client(
+    current_user: Optional["TokenData"] = None
+) -> LLMProvider:
+    """FastAPI dependency for LLM client.
+    
+    Args:
+        current_user: Optional current user for user-specific settings
+        
+    Returns:
+        LLMProvider configured for the user or environment
+    """
+    if current_user:
+        # Import here to avoid circular dependency
+        from auth.dev_bypass import get_current_user_optional
+        
+        # If we have a user, use their settings
+        return get_llm(user_id=current_user.user_id)
     return get_llm()
 
 

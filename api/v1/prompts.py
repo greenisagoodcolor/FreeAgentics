@@ -73,15 +73,15 @@ async def create_agent_from_prompt(
         # Step 1: Generate GMN from prompt using LLM
         logger.info(f"Processing prompt: {request.prompt[:100]}...")
 
-        # Get LLM provider using configuration
+        # Get LLM provider using user-specific configuration
         try:
-            config = llm_factory.create_from_config()
+            config = llm_factory.create_from_config(user_id=current_user.user_id)
             provider = config.get_best_available_provider()
         except Exception as e:
-            logger.error(f"Failed to get LLM provider: {e}")
+            logger.error(f"Failed to get LLM provider for user {current_user.user_id}: {e}")
             raise HTTPException(
                 status_code=503,
-                detail="No LLM providers available. Please configure API keys.",
+                detail="No LLM providers available. Please configure API keys in settings.",
             )
 
         if not provider:

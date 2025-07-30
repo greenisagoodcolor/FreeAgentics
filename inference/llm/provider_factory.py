@@ -108,9 +108,13 @@ class LLMProviderFactory:
 
         return provider
 
-    def create_from_config(self) -> ProviderManager:
-        """Create a ProviderManager with providers from configuration."""
-        config = get_llm_config()
+    def create_from_config(self, user_id: Optional[str] = None) -> ProviderManager:
+        """Create a ProviderManager with providers from configuration.
+        
+        Args:
+            user_id: Optional user ID to load user-specific settings
+        """
+        config = get_llm_config(user_id)
         manager = ProviderManager()
 
         # Validate configuration
@@ -251,7 +255,11 @@ def get_provider_factory() -> LLMProviderFactory:
     return _factory_instance
 
 
-def create_llm_manager() -> ProviderManager:
-    """Create a fully configured LLM provider manager."""
+def create_llm_manager(user_id: Optional[str] = None) -> ProviderManager:
+    """Create a fully configured LLM provider manager.
+    
+    Args:
+        user_id: Optional user ID to load user-specific settings
+    """
     factory = get_provider_factory()
-    return factory.create_from_config()
+    return factory.create_from_config(user_id)

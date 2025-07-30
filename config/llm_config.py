@@ -80,10 +80,46 @@ class LLMConfig(BaseModel):
     model_config = ConfigDict(extra="forbid")
 
     @classmethod
-    def from_environment(cls) -> "LLMConfig":
-        """Load configuration from environment variables."""
+    def from_environment(cls, user_id: Optional[str] = None) -> "LLMConfig":
+        """Load configuration from user settings or environment variables.
+        
+        Args:
+            user_id: Optional user ID to load user-specific settings
+        """
         config = cls()
+        
+        # First check user settings if user_id is provided
+        if user_id:
+            try:
+                from database.session import SessionLocal
+                from api.v1.settings import UserSettings
+                
+                db = SessionLocal()
+                try:
+                    user_settings = db.query(UserSettings).filter(UserSettings.user_id == user_id).first()
+                    if user_settings:
+                        # Use user's provider preference
+                        provider = user_settings.llm_provider
+                        
+                        if provider == "openai" and user_settings.get_openai_key():
+                            config.openai.api_key = user_settings.get_openai_key()
+                            config.openai.enabled = True
+                            config.openai.default_model = user_settings.llm_model
+                            config.provider_priority = ["openai"]
+                            return config
+                        elif provider == "anthropic" and user_settings.get_anthropic_key():
+                            config.anthropic.api_key = user_settings.get_anthropic_key()
+                            config.anthropic.enabled = True
+                            config.anthropic.default_model = user_settings.llm_model
+                            config.provider_priority = ["anthropic"]
+                            return config
+                finally:
+                    db.close()
+            except Exception as e:
+                # Fall through to environment variables
+                pass
 
+        # Fall back to environment variables
         # Load OpenAI configuration
         if openai_key := os.getenv("OPENAI_API_KEY"):
             config.openai.api_key = openai_key
@@ -159,10 +195,18 @@ class LLMConfig(BaseModel):
 _global_config: Optional[LLMConfig] = None
 
 
-def get_llm_config() -> LLMConfig:
-    """Get global LLM configuration instance."""
+def get_llm_config(user_id: Optional[str] = None) -> LLMConfig:
+    """Get LLM configuration instance.
+    
+    Args:
+        user_id: Optional user ID to load user-specific settings
+    """
+    # For user-specific config, always create fresh instance
+    if user_id:
+        return LLMConfig.from_environment(user_id)
+    
+    # For global config, use singleton
     global _global_config
-
     if _global_config is None:
         _global_config = LLMConfig.from_environment()
 

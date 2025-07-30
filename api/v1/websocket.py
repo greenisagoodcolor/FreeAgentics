@@ -404,7 +404,7 @@ async def handle_client_message_with_auth(client_id: str, message: dict):
         await handle_query(client_id, message.get("data", {}))
 
     elif msg_type == "prompt_submitted":
-        # Handle prompt submission notifications
+        # Handle prompt submission and create agent
         prompt_id = message.get("prompt_id")
         prompt_text = message.get("prompt")
         conversation_id = message.get("conversation_id")
@@ -425,6 +425,62 @@ async def handle_client_message_with_auth(client_id: str, message: dict):
             },
             client_id,
         )
+        
+        # Process the prompt to create an agent
+        try:
+            from api.v1.prompts import PromptRequest, create_agent_from_prompt
+            
+            # Get current user from WebSocket auth
+            user_data = await ws_auth_handler.get_user_data(client_id)
+            if not user_data:
+                await manager.send_personal_message(
+                    {
+                        "type": "error",
+                        "code": "AUTH_REQUIRED",
+                        "message": "Authentication required to process prompts",
+                        "prompt_id": prompt_id,
+                    },
+                    client_id,
+                )
+                return
+            
+            # Create prompt request
+            prompt_request = PromptRequest(
+                prompt=prompt_text,
+                agent_name=message.get("agent_name"),
+                llm_provider=message.get("llm_provider", "openai"),
+                model=message.get("model"),
+            )
+            
+            # Process the prompt
+            response = await create_agent_from_prompt(prompt_request, user_data)
+            
+            # Send success response
+            await manager.send_personal_message(
+                {
+                    "type": "agent_created",
+                    "prompt_id": prompt_id,
+                    "conversation_id": conversation_id,
+                    "agent_id": response.agent_id,
+                    "agent_name": response.agent_name,
+                    "status": response.status,
+                    "gmn_spec": response.gmn_spec,
+                    "timestamp": response.timestamp.isoformat(),
+                },
+                client_id,
+            )
+            
+        except Exception as e:
+            logger.error(f"Failed to process prompt {prompt_id}: {e}")
+            await manager.send_personal_message(
+                {
+                    "type": "error",
+                    "code": "PROMPT_PROCESSING_FAILED",
+                    "message": str(e),
+                    "prompt_id": prompt_id,
+                },
+                client_id,
+            )
         
         # Broadcast to other clients if needed
         await broadcast_agent_event(
@@ -755,6 +811,57 @@ async def websocket_dev_endpoint(websocket: WebSocket):
                         },
                         client_id
                     )
+                    
+                    # Process the prompt in dev mode
+                    try:
+                        from api.v1.prompts import PromptRequest, create_agent_from_prompt
+                        from auth.security_implementation import TokenData
+                        
+                        # Create dev user token
+                        dev_user = TokenData(
+                            user_id="dev_user",
+                            email="dev@example.com",
+                            exp=datetime.now().timestamp() + 3600,
+                            permissions=["create_agent", "view_agents"],
+                        )
+                        
+                        # Create prompt request
+                        prompt_request = PromptRequest(
+                            prompt=prompt_text,
+                            agent_name=message.get("agent_name"),
+                            llm_provider=message.get("llm_provider", "openai"),
+                            model=message.get("model"),
+                        )
+                        
+                        # Process the prompt
+                        response = await create_agent_from_prompt(prompt_request, dev_user)
+                        
+                        # Send success response
+                        await manager.send_personal_message(
+                            {
+                                "type": "agent_created",
+                                "prompt_id": prompt_id,
+                                "conversation_id": conversation_id,
+                                "agent_id": response.agent_id,
+                                "agent_name": response.agent_name,
+                                "status": response.status,
+                                "gmn_spec": response.gmn_spec,
+                                "timestamp": response.timestamp.isoformat(),
+                            },
+                            client_id,
+                        )
+                        
+                    except Exception as e:
+                        logger.error(f"[Dev] Failed to process prompt {prompt_id}: {e}")
+                        await manager.send_personal_message(
+                            {
+                                "type": "error",
+                                "code": "PROMPT_PROCESSING_FAILED",
+                                "message": str(e),
+                                "prompt_id": prompt_id,
+                            },
+                            client_id,
+                        )
                 elif message.get("type") == "clear_conversation":
                     # Handle conversation clearing in dev mode
                     conversation_data = message.get("data", {})
