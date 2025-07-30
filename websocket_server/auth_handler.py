@@ -362,6 +362,21 @@ class WebSocketAuthHandler:
     def get_user_connections(self, user_id: str) -> Set[str]:
         """Get all connection IDs for a specific user."""
         return self.user_connections.get(user_id, set()).copy()
+    
+    def get_user_data(self, client_id: str) -> Optional[TokenData]:
+        """Get user data for a specific connection.
+        
+        Args:
+            client_id: The client connection ID
+            
+        Returns:
+            TokenData if connection exists and is authenticated, None otherwise
+        """
+        if client_id not in self.connections:
+            return None
+            
+        connection = self.connections[client_id]
+        return connection.user_data
 
     async def broadcast_to_user(self, user_id: str, message: Dict) -> int:
         """

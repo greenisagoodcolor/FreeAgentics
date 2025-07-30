@@ -12,11 +12,13 @@ import { ScrollArea } from "@/components/ui/scroll-area";
 import { Badge } from "@/components/ui/badge";
 import { useWebSocket } from "@/hooks/use-websocket";
 import { useAgents, type Agent, type AgentStatus } from "@/hooks/use-agents";
+import { useConversation } from "@/hooks/use-conversation";
 import { cn } from "@/lib/utils";
 
 export function AgentCreatorPanel() {
   const { isConnected } = useWebSocket();
   const { agents, createAgent, updateAgent, deleteAgent, isLoading, error } = useAgents();
+  const { setGoalPrompt } = useConversation();
 
   const [description, setDescription] = useState("");
   const [isCreating, setIsCreating] = useState(false);
@@ -34,6 +36,8 @@ export function AgentCreatorPanel() {
 
     try {
       await createAgent({ description: description.trim() });
+      // Set the goal prompt so it's visible in the conversation
+      setGoalPrompt(description.trim());
       setDescription("");
     } catch (err) {
       setCreateError(err instanceof Error ? err.message : "Failed to create agent");

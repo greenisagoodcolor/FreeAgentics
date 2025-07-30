@@ -24,6 +24,8 @@ export interface ConversationState {
   error: Error | null;
   conversationId: string | null;
   clearConversation: () => void;
+  goalPrompt: string | null;
+  setGoalPrompt: (prompt: string | null) => void;
 }
 
 export function useConversation(): ConversationState {
@@ -31,6 +33,7 @@ export function useConversation(): ConversationState {
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<Error | null>(null);
   const [conversationId, setConversationId] = useState<string | null>(null);
+  const [goalPrompt, setGoalPrompt] = useState<string | null>(null);
 
   const { sendMessage: sendWebSocketMessage, lastMessage, isConnected } = useWebSocket();
   const messageIdCounter = useRef(0);
@@ -182,6 +185,7 @@ export function useConversation(): ConversationState {
     setMessages([]);
     setConversationId(null);
     setError(null);
+    setGoalPrompt(null);
 
     // Notify server
     if (isConnected && conversationId) {
@@ -199,5 +203,7 @@ export function useConversation(): ConversationState {
     error,
     conversationId,
     clearConversation,
+    goalPrompt,
+    setGoalPrompt,
   };
 }

@@ -34,6 +34,7 @@ interface SettingsDrawerProps {
 export function SettingsDrawer({ open, onOpenChange }: SettingsDrawerProps) {
   const { user, isAuthenticated, logout } = useAuth();
   const { settings, updateSettings, resetSettings, isSaving, saveError, isLoading } = useSettings();
+  const [pendingChanges, setPendingChanges] = React.useState<Partial<typeof settings>>({});
 
   const handleProviderChange = (provider: string) => {
     updateSettings({ llmProvider: provider as LLMProvider });
@@ -42,6 +43,19 @@ export function SettingsDrawer({ open, onOpenChange }: SettingsDrawerProps) {
   const handleModelChange = (model: string) => {
     updateSettings({ llmModel: model });
   };
+
+  const handleApiKeyChange = (key: string, value: string) => {
+    setPendingChanges(prev => ({ ...prev, [key]: value }));
+  };
+
+  const handleSavePendingChanges = () => {
+    if (Object.keys(pendingChanges).length > 0) {
+      updateSettings(pendingChanges);
+      setPendingChanges({});
+    }
+  };
+
+  const hasPendingChanges = Object.keys(pendingChanges).length > 0;
 
   const availableModels = LLM_MODELS[settings.llmProvider] || [];
 
@@ -119,16 +133,42 @@ export function SettingsDrawer({ open, onOpenChange }: SettingsDrawerProps) {
                     id="api-key"
                     type="password"
                     placeholder={`Enter your ${settings.llmProvider === "openai" ? "OpenAI" : "Anthropic"} API key`}
-                    value={settings.llmProvider === "openai" ? settings.openaiApiKey : settings.anthropicApiKey}
+                    value={
+                      settings.llmProvider === "openai" 
+                        ? (pendingChanges.openaiApiKey ?? settings.openaiApiKey)
+                        : (pendingChanges.anthropicApiKey ?? settings.anthropicApiKey)
+                    }
                     onChange={(e) => {
                       const key = settings.llmProvider === "openai" ? "openaiApiKey" : "anthropicApiKey";
-                      updateSettings({ [key]: e.target.value });
+                      handleApiKeyChange(key, e.target.value);
                     }}
                     disabled={isSaving || isLoading}
                   />
-                  <p className="text-xs text-muted-foreground">
-                    Your API key is encrypted and securely stored
-                  </p>
+                  <div className="flex items-center justify-between">
+                    <p className="text-xs text-muted-foreground">
+                      Your API key is encrypted and securely stored
+                    </p>
+                    {hasPendingChanges && (
+                      <Button
+                        size="sm"
+                        onClick={handleSavePendingChanges}
+                        disabled={isSaving}
+                        className="gap-2"
+                      >
+                        {isSaving ? (
+                          <>
+                            <Loader2 className="h-3 w-3 animate-spin" />
+                            Saving...
+                          </>
+                        ) : (
+                          <>
+                            <CheckCircle className="h-3 w-3" />
+                            Save
+                          </>
+                        )}
+                      </Button>
+                    )}
+                  </div>
                 </div>
               )}
             </div>

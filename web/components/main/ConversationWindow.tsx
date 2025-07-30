@@ -83,7 +83,7 @@ function MessageBubble({ role, content, timestamp, isStreaming }: MessageBubbleP
 }
 
 export function ConversationWindow() {
-  const { messages, sendMessage, isLoading, error, conversationId, clearConversation } =
+  const { messages, sendMessage, isLoading, error, conversationId, clearConversation, goalPrompt } =
     useConversation();
   const { suggestions } = usePromptProcessor();
 
@@ -149,6 +149,19 @@ export function ConversationWindow() {
       </CardHeader>
 
       <CardContent className="flex-1 flex flex-col gap-4 overflow-hidden">
+        {/* Goal Prompt Banner */}
+        {goalPrompt && (
+          <div className="bg-primary/10 border border-primary/20 rounded-lg p-3">
+            <div className="flex items-start gap-2">
+              <Sparkles className="h-4 w-4 text-primary mt-0.5" />
+              <div className="flex-1">
+                <p className="text-sm font-medium text-primary mb-1">Active Goal</p>
+                <p className="text-sm text-primary/80">{goalPrompt}</p>
+              </div>
+            </div>
+          </div>
+        )}
+
         {/* Messages Area */}
         <div className="flex-1 overflow-hidden">
           {messages.length === 0 ? (

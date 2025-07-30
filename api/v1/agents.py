@@ -53,6 +53,15 @@ class Agent(BaseModel):
     parameters: Dict[str, Any] = Field(default_factory=dict)
 
 
+class AgentUpdate(BaseModel):
+    """Agent update request for PATCH operations."""
+
+    name: Optional[str] = Field(None, min_length=1, max_length=100)
+    template: Optional[str] = None
+    parameters: Optional[dict] = None
+    gmn_spec: Optional[str] = None
+
+
 class AgentMetrics(BaseModel):
     """Metrics for an individual agent."""
 
@@ -197,6 +206,52 @@ async def get_agent(
     db_agent = db.query(AgentModel).filter(AgentModel.id == agent_uuid).first()
     if not db_agent:
         raise HTTPException(status_code=404, detail=f"Agent {agent_id} not found")
+
+    return Agent(
+        id=str(db_agent.id),
+        name=db_agent.name,
+        template=db_agent.template,
+        status=db_agent.status.value if hasattr(db_agent.status, "value") else str(db_agent.status),
+        created_at=db_agent.created_at,
+        last_active=db_agent.last_active,
+        inference_count=db_agent.inference_count,
+        parameters=db_agent.parameters or {},
+    )
+
+
+@router.patch("/agents/{agent_id}", response_model=Agent)
+@require_permission(Permission.MODIFY_AGENT)
+async def update_agent(
+    agent_id: str,
+    patch: AgentUpdate,
+    current_user: TokenData = Depends(get_current_user),
+    db: Session = Depends(get_db),
+) -> Agent:
+    """Update mutable agent fields."""
+    try:
+        from uuid import UUID
+
+        agent_uuid = UUID(agent_id)
+    except ValueError:
+        raise HTTPException(status_code=400, detail=f"Invalid agent ID format: {agent_id}")
+
+    db_agent = db.query(AgentModel).filter(AgentModel.id == agent_uuid).first()
+    if not db_agent:
+        raise HTTPException(status_code=404, detail=f"Agent {agent_id} not found")
+
+    # Update fields from patch
+    patch_data = patch.model_dump(exclude_unset=True)
+    
+    for field, value in patch_data.items():
+        if hasattr(db_agent, field):
+            setattr(db_agent, field, value)
+
+    # Update timestamp
+    db_agent.updated_at = datetime.now()
+    db.commit()
+    db.refresh(db_agent)
+
+    logger.info(f"Updated agent {agent_id} - fields: {list(patch_data.keys())}")
 
     return Agent(
         id=str(db_agent.id),

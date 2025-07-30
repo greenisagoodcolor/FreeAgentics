@@ -58,7 +58,7 @@ export class ApiClient {
   }
 
   async updateAgent(id: string, data: Partial<PromptAgent>): Promise<ApiResponse<PromptAgent>> {
-    return this.request<PromptAgent>(() => apiPut(`${this.baseUrl}/agents/${id}`, data));
+    return this.request<PromptAgent>(() => apiPatch(`${this.baseUrl}/v1/agents/${id}`, data));
   }
 
   async deleteAgent(id: string): Promise<ApiResponse<void>> {
