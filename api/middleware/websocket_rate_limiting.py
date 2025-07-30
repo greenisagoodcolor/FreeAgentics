@@ -31,14 +31,14 @@ class WebSocketRateLimitManager:
 
     def __init__(self, redis_url: Optional[str] = None):
         """Initialize WebSocket rate limit manager."""
-        self.redis_url = redis_url or "redis://localhost:6379"
+        self.redis_url = redis_url  # Don't default to localhost if not provided
         self.redis_client: Optional[aioredis.Redis] = None
         self.rate_limiter: Optional["WebSocketRateLimiter"] = None
         self.active_connections: Dict[str, WebSocket] = {}
 
     async def _get_redis_client(self) -> Optional[aioredis.Redis]:
         """Get or create Redis client."""
-        if self.redis_client is None:
+        if self.redis_client is None and self.redis_url:
             try:
                 self.redis_client = aioredis.from_url(
                     self.redis_url, max_connections=20, retry_on_timeout=True
@@ -52,6 +52,8 @@ class WebSocketRateLimitManager:
                 else:
                     logger.debug(f"Redis not available in demo mode for WebSocket rate limiting: {e}")
                 self.redis_client = None
+        elif not self.redis_url:
+            logger.debug("No Redis URL configured for WebSocket rate limiting")
 
         return self.redis_client
 
@@ -264,7 +266,8 @@ class WebSocketRateLimitManager:
 
 
 # Global instance for use across the application
-websocket_rate_limit_manager = WebSocketRateLimitManager()
+# Only pass REDIS_URL if it's set in environment
+websocket_rate_limit_manager = WebSocketRateLimitManager(redis_url=os.getenv("REDIS_URL"))
 
 
 def get_websocket_rate_limit_manager() -> WebSocketRateLimitManager:

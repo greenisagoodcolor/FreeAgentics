@@ -350,7 +350,9 @@ async def process_prompt_ui(
     
     # Get current knowledge graph (optional)
     try:
-        kg_data = await get_knowledge_graph_ui(current_user)
+        kg_response = await get_knowledge_graph_ui(current_user)
+        # Convert Pydantic model to dict for v2 compatibility
+        kg_data = kg_response.model_dump() if hasattr(kg_response, 'model_dump') else kg_response.dict()
     except Exception as e:
         logger.warning(f"Failed to get knowledge graph: {e}")
         kg_data = None

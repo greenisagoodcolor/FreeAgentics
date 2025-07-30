@@ -141,12 +141,22 @@ export function useWebSocket(): WebSocketState {
 
   // Connect when auth is ready, disconnect on unmount
   useEffect(() => {
+    // Small delay to ensure token is fully propagated after auth state changes
+    let connectionTimeout: NodeJS.Timeout | null = null;
+
     if (!isAuthLoading && isAuthenticated && token) {
-      console.log("[WebSocket] Auth ready, initiating connection...");
-      connect();
+      console.log("[WebSocket] Auth ready, scheduling connection...");
+      // Add 500ms delay to ensure token propagation and prevent 403 spam
+      connectionTimeout = setTimeout(() => {
+        console.log("[WebSocket] Initiating connection after auth stabilization...");
+        connect();
+      }, 500);
     }
 
     return () => {
+      if (connectionTimeout) {
+        clearTimeout(connectionTimeout);
+      }
       disconnect();
     };
   }, [connect, disconnect, isAuthLoading, isAuthenticated, token]);

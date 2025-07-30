@@ -1,5 +1,6 @@
 import { useState, useCallback, useEffect } from "react";
 import { useWebSocket } from "./use-websocket";
+import { useAuth } from "./use-auth";
 import { apiGet, ApiError } from "../lib/api";
 
 export type NodeType = "agent" | "belief" | "goal" | "observation" | "action";
@@ -48,6 +49,7 @@ export function useKnowledgeGraph(): KnowledgeGraphState {
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<Error | null>(null);
 
+  const { isAuthenticated, isLoading: isAuthLoading, token } = useAuth();
   const { lastMessage, sendMessage } = useWebSocket();
 
   // Handle WebSocket updates
@@ -87,12 +89,24 @@ export function useKnowledgeGraph(): KnowledgeGraphState {
     }
   }, [lastMessage]);
 
-  // Fetch initial graph data
+  // Fetch initial graph data when auth is ready
   useEffect(() => {
-    fetchGraph();
-  }, []);
+    if (!isAuthLoading && isAuthenticated && token) {
+      fetchGraph();
+    }
+  }, [isAuthLoading, isAuthenticated, token]);
 
   const fetchGraph = async () => {
+    // Don't fetch if auth is not ready
+    if (isAuthLoading || !isAuthenticated || !token) {
+      console.log("[KnowledgeGraph] Skipping fetch - auth not ready", {
+        isAuthLoading,
+        isAuthenticated,
+        hasToken: !!token
+      });
+      return;
+    }
+
     try {
       setIsLoading(true);
       setError(null);
