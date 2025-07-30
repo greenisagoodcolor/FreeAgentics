@@ -46,8 +46,8 @@ class TestConnectionManager:
         assert manager.active_connections[client_id] == mock_websocket
         assert manager.connection_metadata[client_id] == metadata
 
-        # Check accept was called
-        mock_websocket.accept.assert_called_once()
+        # Note: accept() is called by the endpoint, not the manager
+        # The manager only manages already-accepted connections
 
         # Check connection acknowledgment was sent
         mock_websocket.send_json.assert_called_once()
