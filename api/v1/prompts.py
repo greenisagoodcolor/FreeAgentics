@@ -75,19 +75,21 @@ async def create_agent_from_prompt(
 
         # Get LLM provider using user-specific configuration
         try:
-            config = llm_factory.create_from_config(user_id=current_user.user_id)
-            provider = config.get_best_available_provider()
+            provider_manager = llm_factory.create_from_config(user_id=current_user.user_id)
+            
+            # Check if any providers are available
+            healthy_providers = provider_manager.registry.get_healthy_providers()
+            if not healthy_providers:
+                raise HTTPException(
+                    status_code=503,
+                    detail="No LLM providers available. Please configure API keys in settings.",
+                )
+            
         except Exception as e:
             logger.error(f"Failed to get LLM provider for user {current_user.user_id}: {e}")
             raise HTTPException(
                 status_code=503,
                 detail="No LLM providers available. Please configure API keys in settings.",
-            )
-
-        if not provider:
-            raise HTTPException(
-                status_code=503,
-                detail=f"LLM provider {request.llm_provider} not available",
             )
 
         # Construct GMN generation prompt
@@ -125,7 +127,7 @@ Ensure all probability distributions sum to 1.0."""
             response_format="json",
         )
 
-        gmn_response = provider.generate(generation_request)
+        gmn_response = provider_manager.generate_with_fallback(generation_request)
 
         # Parse the generated GMN
         try:
@@ -198,7 +200,7 @@ Ensure all probability distributions sum to 1.0."""
             pymdp_model=pymdp_model,
             status="active",
             timestamp=datetime.now(),
-            llm_provider_used=provider.get_provider_type().value,
+            llm_provider_used=request.llm_provider,
             generation_time_ms=generation_time,
         )
 

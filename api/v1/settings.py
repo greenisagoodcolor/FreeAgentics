@@ -176,6 +176,28 @@ def apply_settings_to_environment(settings: UserSettings):
         os.environ["LLM_PROVIDER"] = settings.llm_provider
         logger.info(f"Applied {settings.llm_provider} settings for user {settings.user_id}")
     
+    # In dev mode, also save to temporary file for persistence across requests
+    try:
+        from core.environment import environment
+        if environment.is_development:
+            import tempfile
+            settings_file = os.path.join(tempfile.gettempdir(), f"fa_settings_{settings.user_id}.json")
+            settings_data = {
+                "llm_provider": settings.llm_provider,
+                "llm_model": settings.llm_model,
+                "openai_api_key": settings.get_openai_key(),
+                "anthropic_api_key": settings.get_anthropic_key(),
+                "gnn_enabled": settings.gnn_enabled,
+                "debug_logs": settings.debug_logs,
+                "auto_suggest": settings.auto_suggest,
+                "updated_at": settings.updated_at.isoformat() if settings.updated_at else None
+            }
+            with open(settings_file, 'w') as f:
+                json.dump(settings_data, f)
+            logger.info(f"Saved dev mode settings to {settings_file}")
+    except Exception as e:
+        logger.warning(f"Failed to save dev mode settings: {e}")
+    
     # Reset providers to pick up new configuration
     reset_providers()
 

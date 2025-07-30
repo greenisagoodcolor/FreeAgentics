@@ -93,6 +93,32 @@ class LLMConfig(BaseModel):
             try:
                 from database.session import SessionLocal
                 from api.v1.settings import UserSettings
+                from core.environment import environment
+                
+                # In dev mode, check the in-memory settings store first
+                if environment.is_development:
+                    try:
+                        import tempfile
+                        settings_file = os.path.join(tempfile.gettempdir(), f"fa_settings_{user_id}.json")
+                        if os.path.exists(settings_file):
+                            import json
+                            with open(settings_file, 'r') as f:
+                                saved_settings = json.load(f)
+                                
+                            if saved_settings.get('openai_api_key'):
+                                config.openai.api_key = saved_settings['openai_api_key']
+                                config.openai.enabled = True
+                                config.openai.default_model = saved_settings.get('llm_model', 'gpt-4')
+                                config.provider_priority = ["openai"]
+                                return config
+                            elif saved_settings.get('anthropic_api_key'):
+                                config.anthropic.api_key = saved_settings['anthropic_api_key']
+                                config.anthropic.enabled = True
+                                config.anthropic.default_model = saved_settings.get('llm_model', 'claude-3-sonnet-20240229')
+                                config.provider_priority = ["anthropic"]
+                                return config
+                    except Exception as dev_e:
+                        pass  # Fall through to database check
                 
                 db = SessionLocal()
                 try:
