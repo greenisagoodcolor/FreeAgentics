@@ -327,16 +327,22 @@ try:
     from api.v1.agents import router as agents_router
     from api.v1.auth import router as auth_router
     from api.v1.dev_config import router as dev_config_router
+    from api.v1.health import router as health_router
     from api.v1.knowledge import router as knowledge_router
+    from api.v1.prompts import router as prompts_router
+    from api.v1.settings import router as settings_router
     from api.v1.system import router as system_router
     from api.v1.websocket import router as websocket_router
 
     # SECURITY: Auth routes (no authentication required)
     app.include_router(auth_router, prefix="/api/v1/auth", tags=["authentication"])
     app.include_router(dev_config_router, prefix="/api/v1", tags=["development"])
+    app.include_router(health_router, prefix="/api/v1", tags=["health", "monitoring"])
 
     # Protected API routes
     app.include_router(agents_router, prefix="/api/v1", tags=["agents"])
+    app.include_router(prompts_router, prefix="/api/v1", tags=["prompts", "llm"])
+    app.include_router(settings_router, prefix="/api/v1", tags=["settings", "configuration"])
     app.include_router(system_router, prefix="/api/v1/system", tags=["system", "monitoring"])
     app.include_router(websocket_router, prefix="/api/v1", tags=["websocket", "real-time"])
     app.include_router(knowledge_router, prefix="/api/v1/knowledge", tags=["knowledge-graph"])
