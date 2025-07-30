@@ -403,6 +403,70 @@ async def handle_client_message_with_auth(client_id: str, message: dict):
         # Handle real-time queries
         await handle_query(client_id, message.get("data", {}))
 
+    elif msg_type == "prompt_submitted":
+        # Handle prompt submission notifications
+        prompt_id = message.get("prompt_id")
+        prompt_text = message.get("prompt")
+        conversation_id = message.get("conversation_id")
+        
+        logger.info(
+            f"Prompt submitted via WebSocket - client: {client_id}, "
+            f"prompt_id: {prompt_id}, conversation_id: {conversation_id}"
+        )
+        
+        # Acknowledge receipt
+        await manager.send_personal_message(
+            {
+                "type": "prompt_acknowledged",
+                "prompt_id": prompt_id,
+                "conversation_id": conversation_id,
+                "timestamp": datetime.now().isoformat(),
+                "message": "Prompt received and processing started"
+            },
+            client_id,
+        )
+        
+        # Broadcast to other clients if needed
+        await broadcast_agent_event(
+            agent_id="system",
+            event_type="prompt_processing",
+            data={
+                "prompt_id": prompt_id,
+                "conversation_id": conversation_id,
+                "status": "processing"
+            }
+        )
+
+    elif msg_type == "clear_conversation":
+        # Handle conversation clearing
+        conversation_data = message.get("data", {})
+        conversation_id = conversation_data.get("conversationId")
+        
+        logger.info(
+            f"Clear conversation request - client: {client_id}, "
+            f"conversation_id: {conversation_id}"
+        )
+        
+        # Acknowledge clearing
+        await manager.send_personal_message(
+            {
+                "type": "conversation_cleared",
+                "conversation_id": conversation_id,
+                "timestamp": datetime.now().isoformat(),
+                "message": "Conversation history cleared"
+            },
+            client_id,
+        )
+        
+        # Notify other components if needed
+        await broadcast_system_event(
+            event_type="conversation_cleared",
+            data={
+                "conversation_id": conversation_id,
+                "cleared_by": client_id
+            }
+        )
+
     else:
         await manager.send_personal_message(
             {
@@ -669,6 +733,43 @@ async def websocket_dev_endpoint(websocket: WebSocket):
                             "action": "created",
                             "agent_id": f"dev_agent_{datetime.now().timestamp()}"
                         }
+                    )
+                elif message.get("type") == "prompt_submitted":
+                    # Handle prompt submission in dev mode
+                    prompt_id = message.get("prompt_id")
+                    prompt_text = message.get("prompt")
+                    conversation_id = message.get("conversation_id")
+                    
+                    logger.info(
+                        f"[Dev] Prompt submitted - prompt_id: {prompt_id}, "
+                        f"conversation_id: {conversation_id}"
+                    )
+                    
+                    await manager.send_personal_message(
+                        {
+                            "type": "prompt_acknowledged",
+                            "prompt_id": prompt_id,
+                            "conversation_id": conversation_id,
+                            "timestamp": datetime.now().isoformat(),
+                            "message": "Dev mode: Prompt received"
+                        },
+                        client_id
+                    )
+                elif message.get("type") == "clear_conversation":
+                    # Handle conversation clearing in dev mode
+                    conversation_data = message.get("data", {})
+                    conversation_id = conversation_data.get("conversationId")
+                    
+                    logger.info(f"[Dev] Clear conversation - id: {conversation_id}")
+                    
+                    await manager.send_personal_message(
+                        {
+                            "type": "conversation_cleared",
+                            "conversation_id": conversation_id,
+                            "timestamp": datetime.now().isoformat(),
+                            "message": "Dev mode: Conversation cleared"
+                        },
+                        client_id
                     )
                 else:
                     # Echo back for demo purposes
