@@ -25,7 +25,7 @@ def kill_port(port: int):
     """Kill process on a port."""
     try:
         # Try multiple methods to ensure port is freed
-        # Method 1: lsof
+        # Method 1: lsof (most reliable on macOS/Linux)
         result = subprocess.run(
             f"lsof -ti:{port}",
             shell=True,
@@ -36,22 +36,55 @@ def kill_port(port: int):
             pids = result.stdout.strip().split('\n')
             for pid in pids:
                 try:
-                    subprocess.run(f"kill -9 {pid}", shell=True)
+                    # Use SIGTERM first, then SIGKILL if needed
+                    subprocess.run(f"kill -15 {pid}", shell=True)
+                    time.sleep(0.5)
+                    # Check if still running
+                    check_result = subprocess.run(f"kill -0 {pid}", shell=True, capture_output=True)
+                    if check_result.returncode == 0:
+                        # Still running, force kill
+                        subprocess.run(f"kill -9 {pid}", shell=True)
                 except:
                     pass
         
-        # Method 2: fuser (backup)
-        subprocess.run(
-            f"fuser -k {port}/tcp",
-            shell=True,
-            capture_output=True,
-            stderr=subprocess.DEVNULL
-        )
+        # Method 2: fuser (backup, works on Linux)
+        try:
+            subprocess.run(
+                f"fuser -k {port}/tcp",
+                shell=True,
+                capture_output=True,
+                stderr=subprocess.DEVNULL
+            )
+        except:
+            pass
+        
+        # Method 3: netstat + kill (works on more systems)
+        try:
+            # Find process using netstat
+            result = subprocess.run(
+                f"netstat -tlnp 2>/dev/null | grep :{port}",
+                shell=True,
+                capture_output=True,
+                text=True
+            )
+            if result.stdout:
+                # Extract PID from netstat output
+                lines = result.stdout.strip().split('\n')
+                for line in lines:
+                    parts = line.split()
+                    if len(parts) > 6 and '/' in parts[6]:
+                        pid = parts[6].split('/')[0]
+                        try:
+                            subprocess.run(f"kill -9 {pid}", shell=True)
+                        except:
+                            pass
+        except:
+            pass
         
         # Give OS time to release the port
         time.sleep(2)
-    except:
-        pass
+    except Exception as e:
+        print(f"  ⚠️  Error killing port {port}: {e}")
 
 
 # Removed print_banner - now inline in main with dynamic port
@@ -134,16 +167,28 @@ def start_frontend():
         print(f"  → Clearing port {frontend_port}...")
         kill_port(frontend_port)
         
+        # Wait a bit more after killing
+        time.sleep(1)
+        
         # If port is still in use after killing, try alternative ports
         if check_port(frontend_port):
-            for alt_port in [3001, 3002, 3003]:
+            print(f"  → Port {frontend_port} still in use, trying alternatives...")
+            for alt_port in [3001, 3002, 3003, 3004, 3005]:
                 if not check_port(alt_port):
                     frontend_port = alt_port
                     print(f"  → Using alternative port {frontend_port}")
                     break
             else:
-                print("  ❌ Could not find available port for frontend")
-                return None, None
+                # Try to find any available port in a wider range
+                import socket
+                try:
+                    with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as s:
+                        s.bind(('', 0))
+                        frontend_port = s.getsockname()[1]
+                        print(f"  → Using dynamically allocated port {frontend_port}")
+                except:
+                    print("  ❌ Could not find available port for frontend")
+                    return None, None
     
     # Install dependencies if needed
     if not (web_dir / "node_modules").exists():
@@ -180,14 +225,17 @@ def wait_for_services(frontend_port=3000):
     else:
         print("  ⚠️  Backend failed to start")
     
-    # Wait for frontend
-    for i in range(30):
-        if check_port(frontend_port):
-            print(f"  ✅ Frontend ready on port {frontend_port}")
-            break
-        time.sleep(1)
+    # Wait for frontend (only if frontend_port is not None)
+    if frontend_port is not None:
+        for i in range(30):
+            if check_port(frontend_port):
+                print(f"  ✅ Frontend ready on port {frontend_port}")
+                break
+            time.sleep(1)
+        else:
+            print("  ⚠️  Frontend may not be running")
     else:
-        print("  ⚠️  Frontend may not be running")
+        print("  ⚠️  Frontend not started")
     
     # Show dev config endpoint
     print("\n🔑 Dev Configuration:")
@@ -202,10 +250,19 @@ def main():
     # Initialize providers
     print("🔧 Initializing providers...")
     try:
+        # Ensure the project root is in sys.path
+        project_root = Path(__file__).parent.parent
+        if str(project_root) not in sys.path:
+            sys.path.insert(0, str(project_root))
+        
         from core.providers import init_providers
         init_providers()
+    except ImportError as e:
+        print(f"  ⚠️  Provider initialization warning (import error): {e}")
+        print("  ℹ️  Continuing without provider initialization...")
     except Exception as e:
         print(f"  ⚠️  Provider initialization warning: {e}")
+        print("  ℹ️  Continuing without provider initialization...")
     
     # Start services
     processes = []
@@ -230,7 +287,10 @@ def main():
     print("🔥 Mode: Dev")
     print("\n📋 Configuration:")
     print(f"  • Backend:  http://localhost:8000")
-    print(f"  • Frontend: http://localhost:{frontend_port}")
+    if frontend_port is not None:
+        print(f"  • Frontend: http://localhost:{frontend_port}")
+    else:
+        print(f"  • Frontend: Not started (check web/ directory)")
     print(f"  • API Docs: http://localhost:8000/docs")
     print(f"  • GraphQL:  http://localhost:8000/graphql")
     print("\n💡 Dev Mode Features:")
