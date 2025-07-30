@@ -1,6 +1,6 @@
 "use client";
 
-import useDevAuth from "@/lib/useDevAuth";
+import useDevAuth from "@/hooks/use-dev-auth";
 
 export default function DevAuthBootstrap() {
   useDevAuth();
