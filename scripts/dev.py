@@ -24,38 +24,37 @@ def check_port(port: int) -> bool:
 def kill_port(port: int):
     """Kill process on a port."""
     try:
-        subprocess.run(
-            f"lsof -ti:{port} | xargs kill -9",
+        # Try multiple methods to ensure port is freed
+        # Method 1: lsof
+        result = subprocess.run(
+            f"lsof -ti:{port}",
             shell=True,
-            capture_output=True
+            capture_output=True,
+            text=True
         )
+        if result.stdout.strip():
+            pids = result.stdout.strip().split('\n')
+            for pid in pids:
+                try:
+                    subprocess.run(f"kill -9 {pid}", shell=True)
+                except:
+                    pass
+        
+        # Method 2: fuser (backup)
+        subprocess.run(
+            f"fuser -k {port}/tcp",
+            shell=True,
+            capture_output=True,
+            stderr=subprocess.DEVNULL
+        )
+        
+        # Give OS time to release the port
+        time.sleep(2)
     except:
         pass
 
 
-def print_banner():
-    """Print startup banner with configuration."""
-    print("\n" + "="*60)
-    print("🚀 FreeAgentics Development Environment")
-    print("="*60)
-    
-    # Always dev mode
-    print("🔥 Mode: Dev")
-    
-    # Show configuration
-    print("\n📋 Configuration:")
-    print(f"  • Backend:  http://localhost:8000")
-    print(f"  • Frontend: http://localhost:3000")
-    print(f"  • API Docs: http://localhost:8000/docs")
-    print(f"  • GraphQL:  http://localhost:8000/graphql")
-    
-    print("\n💡 Dev Mode Features:")
-    print("  • SQLite in-memory database")
-    print("  • Auto-generated dev token")
-    print("  • Mock LLM responses (unless OPENAI_KEY set)")
-    print("  • No external dependencies")
-    
-    print("\n" + "="*60 + "\n")
+# Removed print_banner - now inline in main with dynamic port
 
 
 def setup_environment():
@@ -122,32 +121,53 @@ def start_frontend():
     web_dir = Path.cwd() / "web"
     if not web_dir.exists():
         print("  ⚠️  No web directory found")
-        return None
+        return None, None
     
     # Check package.json
     if not (web_dir / "package.json").exists():
         print("  ⚠️  No package.json found in web/")
-        return None
+        return None, None
     
     # Clear port conflicts
-    if check_port(3000):
-        print("  → Clearing port 3000...")
-        kill_port(3000)
-        time.sleep(1)
+    frontend_port = 3000
+    if check_port(frontend_port):
+        print(f"  → Clearing port {frontend_port}...")
+        kill_port(frontend_port)
+        
+        # If port is still in use after killing, try alternative ports
+        if check_port(frontend_port):
+            for alt_port in [3001, 3002, 3003]:
+                if not check_port(alt_port):
+                    frontend_port = alt_port
+                    print(f"  → Using alternative port {frontend_port}")
+                    break
+            else:
+                print("  ❌ Could not find available port for frontend")
+                return None, None
     
     # Install dependencies if needed
     if not (web_dir / "node_modules").exists():
         print("  → Installing Node.js dependencies...")
         subprocess.run(["npm", "install"], cwd=web_dir, check=True)
     
-    return subprocess.Popen(
-        ["npm", "run", "dev"],
-        cwd=web_dir,
-        env={**os.environ, "NEXT_TELEMETRY_DISABLED": "1"}
-    )
+    # Update the dev script in package.json if using alt port
+    if frontend_port != 3000:
+        process = subprocess.Popen(
+            ["npm", "run", "dev", "--", "-p", str(frontend_port)],
+            cwd=web_dir,
+            env={**os.environ, "NEXT_TELEMETRY_DISABLED": "1", "PORT": str(frontend_port)}
+        )
+    else:
+        process = subprocess.Popen(
+            ["npm", "run", "dev"],
+            cwd=web_dir,
+            env={**os.environ, "NEXT_TELEMETRY_DISABLED": "1"}
+        )
+    
+    return process, frontend_port
 
 
-def wait_for_services():
+def wait_for_services(frontend_port=3000):
     """Wait for services to be ready."""
     print("\n⏳ Waiting for services to start...")
     
@@ -162,8 +182,8 @@ def wait_for_services():
     
     # Wait for frontend
     for i in range(30):
-        if check_port(3000):
-            print("  ✅ Frontend ready")
+        if check_port(frontend_port):
+            print(f"  ✅ Frontend ready on port {frontend_port}")
             break
         time.sleep(1)
     else:
@@ -178,7 +198,6 @@ def main():
     """Main entry point."""
     # Setup
     setup_environment()
-    print_banner()
     
     # Initialize providers
     print("🔧 Initializing providers...")
@@ -190,12 +209,13 @@ def main():
     
     # Start services
     processes = []
+    frontend_port = 3000
     
     backend = start_backend()
     if backend:
         processes.append(backend)
     
-    frontend = start_frontend()
+    frontend, frontend_port = start_frontend()
     if frontend:
         processes.append(frontend)
     
@@ -203,8 +223,25 @@ def main():
         print("\n❌ No services started!")
         sys.exit(1)
     
+    # Print banner with actual ports
+    print("\n" + "="*60)
+    print("🚀 FreeAgentics Development Environment")
+    print("="*60)
+    print("🔥 Mode: Dev")
+    print("\n📋 Configuration:")
+    print(f"  • Backend:  http://localhost:8000")
+    print(f"  • Frontend: http://localhost:{frontend_port}")
+    print(f"  • API Docs: http://localhost:8000/docs")
+    print(f"  • GraphQL:  http://localhost:8000/graphql")
+    print("\n💡 Dev Mode Features:")
+    print("  • SQLite in-memory database")
+    print("  • Auto-generated dev token")
+    print("  • Mock LLM responses (unless OPENAI_KEY set)")
+    print("  • No external dependencies")
+    print("\n" + "="*60 + "\n")
+    
     # Wait for services
-    wait_for_services()
+    wait_for_services(frontend_port)
     
     print("\n✨ Development environment ready!")
     print("Press Ctrl+C to stop all services\n")

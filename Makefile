@@ -95,9 +95,13 @@ stop: ## Stop all servers
 	@echo "All servers stopped."
 
 kill-ports: ## Kill processes on ports 3000 and 8000
+	@echo "Killing processes on development ports..."
 	@lsof -ti:3000 | xargs kill -9 2>/dev/null || true
 	@lsof -ti:3001 | xargs kill -9 2>/dev/null || true
+	@lsof -ti:3002 | xargs kill -9 2>/dev/null || true
+	@lsof -ti:3003 | xargs kill -9 2>/dev/null || true
 	@lsof -ti:8000 | xargs kill -9 2>/dev/null || true
+	@sleep 2
 
 
 test: ## Run tests
