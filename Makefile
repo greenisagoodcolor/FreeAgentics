@@ -7,7 +7,7 @@ SHELL := bash
 
 # Configuration
 VENV_DIR := venv
-PYTHON := $(VENV_DIR)/bin/python3
+PYTHON := $(VENV_DIR)/bin/python
 PYTEST := $(VENV_DIR)/bin/pytest
 WEB_DIR := web
 
