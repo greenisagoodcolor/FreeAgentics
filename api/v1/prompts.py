@@ -121,10 +121,9 @@ Ensure all probability distributions sum to 1.0."""
                 {"role": "system", "content": system_prompt},
                 {"role": "user", "content": user_prompt},
             ],
-            model=request.model,
+            model=request.model or "gpt-4",
             temperature=0.7,
             max_tokens=2000,
-            response_format="json",
         )
 
         gmn_response = provider_manager.generate_with_fallback(generation_request)
@@ -133,7 +132,15 @@ Ensure all probability distributions sum to 1.0."""
         try:
             import json
 
-            gmn_spec = json.loads(gmn_response.content)
+            # Handle different response formats
+            if hasattr(gmn_response, 'content'):
+                response_text = gmn_response.content
+            elif hasattr(gmn_response, 'text'):
+                response_text = gmn_response.text
+            else:
+                response_text = str(gmn_response)
+                
+            gmn_spec = json.loads(response_text)
         except json.JSONDecodeError as e:
             logger.error(f"Failed to parse LLM response as JSON: {e}")
             raise HTTPException(status_code=422, detail="LLM generated invalid JSON for GMN spec")

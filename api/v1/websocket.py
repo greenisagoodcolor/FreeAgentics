@@ -5,7 +5,7 @@ import json
 import logging
 import os
 import re
-from datetime import datetime
+from datetime import datetime, timedelta
 from typing import Any, Dict, Optional, Set
 
 from fastapi import APIRouter, Query, WebSocket, WebSocketDisconnect
@@ -818,11 +818,13 @@ async def websocket_dev_endpoint(websocket: WebSocket):
                         from auth.security_implementation import TokenData
                         
                         # Create dev user token
+                        from auth.security_implementation import UserRole
                         dev_user = TokenData(
                             user_id="dev_user",
-                            email="dev@example.com",
-                            exp=datetime.now().timestamp() + 3600,
-                            permissions=["create_agent", "view_agents"],
+                            username="dev_user",
+                            role=UserRole.DEVELOPER,
+                            permissions=[Permission.CREATE_AGENT, Permission.VIEW_AGENTS],
+                            exp=datetime.now() + timedelta(hours=1),
                         )
                         
                         # Create prompt request

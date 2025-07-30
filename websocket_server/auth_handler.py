@@ -123,7 +123,7 @@ class WebSocketAuthHandler:
             # Check rate limiting
             if not await self._check_rate_limit(websocket):
                 logger.warning(f"Rate limit exceeded for WebSocket connection: {client_id}")
-                await websocket.close(code=WebSocketErrorCode.RATE_LIMITED)
+                await websocket.close(code=WebSocketErrorCode.RATE_LIMITED, reason="Rate limit exceeded")
                 raise WebSocketDisconnect(code=WebSocketErrorCode.RATE_LIMITED)
 
             # Verify JWT token
@@ -206,6 +206,12 @@ class WebSocketAuthHandler:
 
     async def _check_rate_limit(self, websocket: WebSocket) -> bool:
         """Check rate limiting for the connection."""
+        # Skip rate limiting in dev mode without auth
+        from core.environment import environment
+        if environment.is_development and not environment.config.auth_required:
+            logger.debug("Skipping rate limit check in dev mode")
+            return True
+            
         ip = self._get_client_ip(websocket)
         now = datetime.utcnow()
 

@@ -143,12 +143,20 @@ export function useConversation(): ConversationState {
       // For HTTP-based flow, we'll use the process-prompt endpoint
       // The backend will send the response via WebSocket
       if (role === "user") {
+        // Get the auth token
+        const token = localStorage.getItem("fa.jwt");
+        const headers: HeadersInit = {
+          "Content-Type": "application/json",
+        };
+        
+        // Only add auth header if token exists
+        if (token) {
+          headers.Authorization = `Bearer ${token}`;
+        }
+        
         fetch("/api/process-prompt", {
           method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-            Authorization: `Bearer ${localStorage.getItem("fa.jwt")}`,
-          },
+          headers,
           body: JSON.stringify({
             prompt: content,
             conversationId: conversationId || "default",
@@ -156,12 +164,17 @@ export function useConversation(): ConversationState {
         })
           .then((response) => {
             if (!response.ok) {
-              throw new Error("Failed to process prompt");
+              return response.text().then(text => {
+                throw new Error(`Failed to process prompt: ${text}`);
+              });
             }
             return response.json();
           })
+          .then((data) => {
+            console.log("[Conversation] Prompt processed:", data);
+          })
           .catch((error) => {
-            console.error("Failed to send prompt:", error);
+            console.error("[Conversation] Failed to send prompt:", error);
             setError(error);
             setIsLoading(false);
           });

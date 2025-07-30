@@ -31,6 +31,12 @@ try:
 except ImportError:
     ANTHROPIC_PROVIDER_AVAILABLE = False
 
+try:
+    from .mock_provider import MockLLMProvider
+    MOCK_PROVIDER_AVAILABLE = True
+except ImportError:
+    MOCK_PROVIDER_AVAILABLE = False
+
 logger = logging.getLogger(__name__)
 
 
@@ -124,6 +130,7 @@ class LLMProviderFactory:
 
         # Create and register enabled providers
         enabled_providers = config.get_enabled_providers()
+        providers_configured = False
 
         for provider_name, provider_config in enabled_providers.items():
             provider_type = ProviderType(provider_name)
@@ -157,10 +164,23 @@ class LLMProviderFactory:
                 manager.registry.register_provider(provider, priority)
 
                 logger.info(f"Successfully configured {provider_name} provider")
+                providers_configured = True
 
             except Exception as e:
                 logger.error(f"Failed to configure {provider_name} provider: {e}")
                 continue
+        
+        # If no providers were configured and we're in dev mode, add mock provider
+        from core.environment import environment
+        if not providers_configured and environment.is_development and MOCK_PROVIDER_AVAILABLE:
+            logger.info("No LLM providers configured in dev mode, adding mock provider")
+            try:
+                mock_provider = MockLLMProvider()
+                mock_provider.configure()
+                manager.registry.register_provider(mock_provider, priority=100)  # Lowest priority
+                logger.info("Successfully added mock provider for dev mode")
+            except Exception as e:
+                logger.error(f"Failed to add mock provider: {e}")
 
         return manager
 
