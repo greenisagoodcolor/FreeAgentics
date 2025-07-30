@@ -112,3 +112,12 @@ export async function apiDelete(endpoint: string, opts: RequestInit = {}) {
   const response = await fetchJson(`${getBaseUrl()}${endpoint}`, { method: 'DELETE', ...opts });
   return response.json();
 }
+
+export async function apiPatch(endpoint: string, data?: unknown, opts: RequestInit = {}) {
+  const response = await fetchJson(`${getBaseUrl()}${endpoint}`, {
+    method: 'PATCH',
+    body: data ? JSON.stringify(data) : undefined,
+    ...opts
+  });
+  return response.json();
+}

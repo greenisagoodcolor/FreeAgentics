@@ -1,7 +1,7 @@
 "use client";
 
 import React from "react";
-import { Settings2, LogOut, LogIn, RotateCcw } from "lucide-react";
+import { Settings2, LogOut, LogIn, RotateCcw, Loader2, CheckCircle, AlertCircle } from "lucide-react";
 import {
   Sheet,
   SheetContent,
@@ -33,7 +33,7 @@ interface SettingsDrawerProps {
 
 export function SettingsDrawer({ open, onOpenChange }: SettingsDrawerProps) {
   const { user, isAuthenticated, logout } = useAuth();
-  const { settings, updateSettings, resetSettings } = useSettings();
+  const { settings, updateSettings, resetSettings, isSaving, saveError, isLoading } = useSettings();
 
   const handleProviderChange = (provider: string) => {
     updateSettings({ llmProvider: provider as LLMProvider });
@@ -56,6 +56,23 @@ export function SettingsDrawer({ open, onOpenChange }: SettingsDrawerProps) {
           <SheetDescription>Configure your FreeAgentics experience</SheetDescription>
         </SheetHeader>
 
+        {/* Save status indicator */}
+        {(isSaving || saveError) && (
+          <div className="mt-4 p-3 rounded-md flex items-center gap-2 text-sm">
+            {isSaving ? (
+              <>
+                <Loader2 className="h-4 w-4 animate-spin" />
+                <span>Saving settings...</span>
+              </>
+            ) : saveError ? (
+              <>
+                <AlertCircle className="h-4 w-4 text-destructive" />
+                <span className="text-destructive">{saveError}</span>
+              </>
+            ) : null}
+          </div>
+        )}
+
         <div className="mt-8 space-y-8 pb-20">
           {/* LLM Configuration */}
           <div className="space-y-4">
@@ -64,7 +81,7 @@ export function SettingsDrawer({ open, onOpenChange }: SettingsDrawerProps) {
             <div className="space-y-3">
               <div className="space-y-2">
                 <Label htmlFor="llm-provider">LLM Provider</Label>
-                <Select value={settings.llmProvider} onValueChange={handleProviderChange}>
+                <Select value={settings.llmProvider} onValueChange={handleProviderChange} disabled={isSaving || isLoading}>
                   <SelectTrigger id="llm-provider">
                     <SelectValue />
                   </SelectTrigger>
@@ -78,7 +95,7 @@ export function SettingsDrawer({ open, onOpenChange }: SettingsDrawerProps) {
 
               <div className="space-y-2">
                 <Label htmlFor="llm-model">Model</Label>
-                <Select value={settings.llmModel} onValueChange={handleModelChange}>
+                <Select value={settings.llmModel} onValueChange={handleModelChange} disabled={isSaving || isLoading}>
                   <SelectTrigger id="llm-model">
                     <SelectValue />
                   </SelectTrigger>
@@ -98,42 +115,19 @@ export function SettingsDrawer({ open, onOpenChange }: SettingsDrawerProps) {
                   <Label htmlFor="api-key">
                     {settings.llmProvider === "openai" ? "OpenAI API Key" : "Anthropic API Key"}
                   </Label>
-                  <div className="flex gap-2">
-                    <Input
-                      id="api-key"
-                      type="password"
-                      placeholder={`Enter your ${settings.llmProvider === "openai" ? "OpenAI" : "Anthropic"} API key`}
-                      value={settings.llmProvider === "openai" ? settings.openaiApiKey : settings.anthropicApiKey}
-                      onChange={(e) => {
-                        const key = settings.llmProvider === "openai" ? "openaiApiKey" : "anthropicApiKey";
-                        updateSettings({ [key]: e.target.value });
-                      }}
-                      className="flex-1"
-                    />
-                    <Button
-                      type="button"
-                      size="sm"
-                      onClick={() => {
-                        // API key is already saved on change
-                        const key = settings.llmProvider === "openai" ? settings.openaiApiKey : settings.anthropicApiKey;
-                        if (key) {
-                          // Visual feedback that key is saved
-                          const input = document.getElementById("api-key") as HTMLInputElement;
-                          if (input) {
-                            const originalPlaceholder = input.placeholder;
-                            input.placeholder = "API key saved!";
-                            setTimeout(() => {
-                              input.placeholder = originalPlaceholder;
-                            }, 2000);
-                          }
-                        }
-                      }}
-                    >
-                      Save
-                    </Button>
-                  </div>
+                  <Input
+                    id="api-key"
+                    type="password"
+                    placeholder={`Enter your ${settings.llmProvider === "openai" ? "OpenAI" : "Anthropic"} API key`}
+                    value={settings.llmProvider === "openai" ? settings.openaiApiKey : settings.anthropicApiKey}
+                    onChange={(e) => {
+                      const key = settings.llmProvider === "openai" ? "openaiApiKey" : "anthropicApiKey";
+                      updateSettings({ [key]: e.target.value });
+                    }}
+                    disabled={isSaving || isLoading}
+                  />
                   <p className="text-xs text-muted-foreground">
-                    Your API key is stored locally and never sent to our servers
+                    Your API key is encrypted and securely stored
                   </p>
                 </div>
               )}
@@ -194,6 +188,7 @@ export function SettingsDrawer({ open, onOpenChange }: SettingsDrawerProps) {
                   checked={settings.gnnEnabled}
                   onCheckedChange={(checked) => updateSettings({ gnnEnabled: checked })}
                   aria-label="GNN Enabled"
+                  disabled={isSaving || isLoading}
                 />
               </div>
 
@@ -207,6 +202,7 @@ export function SettingsDrawer({ open, onOpenChange }: SettingsDrawerProps) {
                   checked={settings.debugLogs}
                   onCheckedChange={(checked) => updateSettings({ debugLogs: checked })}
                   aria-label="Debug Logs"
+                  disabled={isSaving || isLoading}
                 />
               </div>
 
@@ -222,6 +218,7 @@ export function SettingsDrawer({ open, onOpenChange }: SettingsDrawerProps) {
                   checked={settings.autoSuggest}
                   onCheckedChange={(checked) => updateSettings({ autoSuggest: checked })}
                   aria-label="Auto-Suggest"
+                  disabled={isSaving || isLoading}
                 />
               </div>
             </div>
@@ -245,6 +242,7 @@ export function SettingsDrawer({ open, onOpenChange }: SettingsDrawerProps) {
                 }
               }}
               className="w-full gap-2"
+              disabled={isSaving || isLoading}
             >
               <RotateCcw className="h-4 w-4" />
               Reset to Defaults

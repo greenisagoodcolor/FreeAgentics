@@ -1,5 +1,6 @@
 import { PromptAgent } from "@/types/agent";
-import { apiGet, apiPost, apiPut, apiDelete, ApiError } from "./api";
+import { apiGet, apiPost, apiPut, apiDelete, ApiError, apiPatch } from "./api";
+import type { Settings } from "@/hooks/use-settings";
 
 export interface ApiResponse<T = unknown> {
   success: boolean;
@@ -93,6 +94,31 @@ export class ApiClient {
 
   async clearConversation(id: string): Promise<ApiResponse<void>> {
     return this.request<void>(() => apiDelete(`${this.baseUrl}/conversations/${id}`));
+  }
+
+  // Settings endpoints
+  async getSettings(): Promise<ApiResponse<Settings & { updated_at: string }>> {
+    return this.request<Settings & { updated_at: string }>(() => apiGet("/api/v1/settings"));
+  }
+
+  async updateSettings(settings: Partial<Settings>): Promise<ApiResponse<Settings & { updated_at: string }>> {
+    return this.request<Settings & { updated_at: string }>(() => apiPatch("/api/v1/settings", settings));
+  }
+
+  async updateAllSettings(settings: Settings): Promise<ApiResponse<Settings & { updated_at: string }>> {
+    return this.request<Settings & { updated_at: string }>(() => apiPut("/api/v1/settings", settings));
+  }
+
+  async validateApiKey(provider: string, apiKey: string): Promise<ApiResponse<{
+    valid: boolean;
+    message: string;
+    models_available?: number;
+  }>> {
+    return this.request(() => apiPost("/api/v1/settings/validate-key", { provider, api_key: apiKey }));
+  }
+
+  async clearApiKeys(): Promise<ApiResponse<{ message: string }>> {
+    return this.request(() => apiDelete("/api/v1/settings/api-keys"));
   }
 }
 
