@@ -1,61 +1,58 @@
 """Development mode authentication bypass.
 
-Provides conditional authentication that skips validation in dev mode.
+This module provides a unified authentication bypass for development mode,
+handling both REST endpoints and WebSocket connections.
 """
 
 import logging
+from datetime import datetime, timedelta
 from typing import Optional
 
 from fastapi import Depends, Request
-from fastapi.security import HTTPAuthorizationCredentials, HTTPBearer
-from auth.security_implementation import TokenData, UserRole, Permission, ROLE_PERMISSIONS, get_current_user as prod_get_current_user
-from auth.dev_auth import dev_auth_manager
+from fastapi.security import HTTPBearer, HTTPAuthorizationCredentials
+
+from auth.security_implementation import TokenData, UserRole, ROLE_PERMISSIONS
 from core.environment import environment
 
 logger = logging.getLogger(__name__)
 
+# Development user constant - used for all dev mode requests
+_DEV_USER = TokenData(
+    user_id="dev_user",
+    username="dev_user",
+    role=UserRole.ADMIN,
+    permissions=[p.value for p in ROLE_PERMISSIONS[UserRole.ADMIN]],
+    fingerprint="dev_fingerprint",
+    exp=int((datetime.utcnow() + timedelta(days=365)).timestamp())
+)
 
 async def get_current_user_optional(
     request: Request,
-    credentials: Optional[HTTPAuthorizationCredentials] = Depends(HTTPBearer(auto_error=False))
+    credentials: HTTPAuthorizationCredentials | None = Depends(HTTPBearer(auto_error=False))
 ) -> TokenData:
     """Get current user with dev mode bypass.
     
-    In development mode with auth_required=False, returns a default dev user.
-    In production or when auth is required, delegates to normal auth flow.
+    In development mode when auth is not required, this returns a dev user.
+    Otherwise, it delegates to the real authentication system.
     """
-    # Check if we're in dev mode with auth disabled
     if environment.is_development and not environment.config.auth_required:
-        # Return default dev user
-        logger.debug("Auth bypassed in dev mode")
-        return TokenData(
-            user_id="dev_user",
-            username="dev_user", 
-            role=UserRole.ADMIN,
-            permissions=[p.value for p in ROLE_PERMISSIONS[UserRole.ADMIN]],
-            fingerprint="dev_fingerprint"
-        )
+        logger.debug("Dev mode: bypassing auth, returning dev user")
+        return _DEV_USER
     
-    # Otherwise use normal auth if credentials provided
-    if credentials:
-        try:
-            return await prod_get_current_user(request, credentials)
-        except Exception as e:
-            logger.debug(f"Auth validation failed: {e}")
+    # In production or when auth is required, use real authentication
+    from auth.security_implementation import get_current_user
+    return await get_current_user(request, credentials)
+
+def get_dev_user() -> TokenData:
+    """Get the development user directly.
     
-    # In dev mode, still return dev user even if auth fails
+    This is used by WebSocket endpoints that need synchronous auth.
+    """
     if environment.is_development and not environment.config.auth_required:
-        return TokenData(
-            user_id="dev_user",
-            username="dev_user",
-            role=UserRole.ADMIN, 
-            permissions=[p.value for p in Permission],
-            fingerprint="dev_fingerprint"
-        )
+        return _DEV_USER
     
-    # In production, raise the exception
-    raise
+    raise RuntimeError("Dev user only available in development mode without auth")
 
-
-# Alias for compatibility
-get_current_user_dev = get_current_user_optional
+def is_dev_token(token: str) -> bool:
+    """Check if the provided token is the special 'dev' token."""
+    return token == "dev" and environment.is_development and not environment.config.auth_required

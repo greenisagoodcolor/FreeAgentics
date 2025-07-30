@@ -141,8 +141,8 @@ class ConnectionManager:
 # Global connection manager instance
 manager = ConnectionManager()
 
-# Dev mode flag
-DEV_MODE = os.getenv("DATABASE_URL") is None
+# Import environment for dev mode check
+from core.environment import environment
 
 
 @router.websocket("/ws/{client_id}")
@@ -591,7 +591,7 @@ async def websocket_dev_endpoint(websocket: WebSocket):
     This endpoint is only available when running in dev mode (no DATABASE_URL).
     It provides basic WebSocket functionality for UI development and testing.
     """
-    if not DEV_MODE:
+    if not (environment.is_development and not environment.config.auth_required):
         await websocket.close(
             code=4003,
             reason="Dev endpoint only available in dev mode"

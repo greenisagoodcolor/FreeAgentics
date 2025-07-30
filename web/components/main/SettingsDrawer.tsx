@@ -47,7 +47,7 @@ export function SettingsDrawer({ open, onOpenChange }: SettingsDrawerProps) {
 
   return (
     <Sheet open={open} onOpenChange={onOpenChange}>
-      <SheetContent side="right" className="w-[400px] sm:w-[540px] overflow-y-auto">
+      <SheetContent side="right" className="w-[400px] sm:w-[540px] max-h-screen overflow-y-auto">
         <SheetHeader>
           <SheetTitle className="flex items-center gap-2">
             <Settings2 className="h-5 w-5" />
@@ -56,7 +56,7 @@ export function SettingsDrawer({ open, onOpenChange }: SettingsDrawerProps) {
           <SheetDescription>Configure your FreeAgentics experience</SheetDescription>
         </SheetHeader>
 
-        <div className="mt-8 space-y-8 pb-6">
+        <div className="mt-8 space-y-8 pb-20">
           {/* LLM Configuration */}
           <div className="space-y-4">
             <h3 className="text-sm font-medium">Language Model</h3>

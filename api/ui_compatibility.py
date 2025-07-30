@@ -24,7 +24,7 @@ from api.v1.agents import list_agents as v1_list_agents
 from api.v1.agents import update_agent_status as v1_update_agent_status
 from api.v1.knowledge_graph import get_knowledge_graph
 from auth.security_implementation import TokenData
-from auth.dev_auth_simple import get_dev_user as get_current_user
+from auth.dev_bypass import get_current_user_optional as get_current_user
 from database.session import get_db
 
 logger = logging.getLogger(__name__)

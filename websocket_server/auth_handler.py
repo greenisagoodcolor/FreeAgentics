@@ -95,9 +95,19 @@ class WebSocketAuthHandler:
             WebSocketDisconnect with appropriate error code
         """
         try:
+            # Check if we're in dev mode first
+            from core.environment import environment
+            from auth.dev_bypass import get_dev_user, is_dev_token
+            
             # Extract token if not provided
             if not token:
                 token = await self._extract_token(websocket)
+            
+            # In dev mode without auth, accept special "dev" token
+            if environment.is_development and not environment.config.auth_required:
+                if token == "dev" or not token:
+                    logger.info(f"Dev mode: accepting WebSocket connection for {client_id}")
+                    return get_dev_user()
 
             if not token:
                 logger.warning(f"No token provided for WebSocket connection: {client_id}")

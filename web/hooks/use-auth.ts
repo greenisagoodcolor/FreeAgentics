@@ -85,6 +85,20 @@ export function useAuth(): AuthState {
             setToken(token);
             setUser(devUser);
             console.log("[Auth] ✅ Dev token loaded and auth state updated");
+          } else if (config.mode === "dev" && !config.features?.auth_required) {
+            // In dev mode without auth, use a simple "dev" token
+            console.log("[Auth] Dev mode without auth, using simple dev token");
+            const devToken = "dev";
+            localStorage.setItem(AUTH_TOKEN_KEY, devToken);
+            const devUser = {
+              id: "dev-user",
+              email: "developer@freeagentics.dev",
+              name: "Developer"
+            };
+            localStorage.setItem(USER_KEY, JSON.stringify(devUser));
+            setToken(devToken);
+            setUser(devUser);
+            console.log("[Auth] ✅ Simple dev token set for auth-free dev mode");
           } else {
             console.warn("[Auth] No token found in dev config response");
           }
