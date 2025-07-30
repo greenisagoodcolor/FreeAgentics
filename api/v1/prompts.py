@@ -75,10 +75,13 @@ async def create_agent_from_prompt(
 
         # Get LLM provider using user-specific configuration
         try:
+            logger.info(f"Creating LLM provider for user {current_user.user_id}")
             provider_manager = llm_factory.create_from_config(user_id=current_user.user_id)
             
             # Check if any providers are available
             healthy_providers = provider_manager.registry.get_healthy_providers()
+            logger.info(f"Available healthy providers: {[p.provider_type.value for p in healthy_providers]}")
+            
             if not healthy_providers:
                 raise HTTPException(
                     status_code=503,
@@ -86,7 +89,7 @@ async def create_agent_from_prompt(
                 )
             
         except Exception as e:
-            logger.error(f"Failed to get LLM provider for user {current_user.user_id}: {e}")
+            logger.error(f"Failed to get LLM provider for user {current_user.user_id}: {e}", exc_info=True)
             raise HTTPException(
                 status_code=503,
                 detail="No LLM providers available. Please configure API keys in settings.",
@@ -126,7 +129,16 @@ Ensure all probability distributions sum to 1.0."""
             max_tokens=2000,
         )
 
-        gmn_response = provider_manager.generate_with_fallback(generation_request)
+        logger.info(f"Sending generation request to LLM - model: {generation_request.model}")
+        try:
+            gmn_response = provider_manager.generate_with_fallback(generation_request)
+            logger.info(f"Received GMN response from LLM")
+        except Exception as e:
+            logger.error(f"LLM generation failed: {e}", exc_info=True)
+            raise HTTPException(
+                status_code=503,
+                detail=f"Failed to generate GMN: {str(e)}"
+            )
 
         # Parse the generated GMN
         try:

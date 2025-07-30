@@ -1,6 +1,7 @@
 """Provider interface for LLM integrations."""
 
 import logging
+import time
 from abc import ABC, abstractmethod
 from dataclasses import dataclass, field
 from datetime import datetime
@@ -366,17 +367,29 @@ class ProviderManager:
         if not providers:
             raise Exception("No healthy providers available")
 
+        logger.info(f"Attempting generation with {len(providers)} healthy providers")
+        errors = []
+        
         for provider in providers:
+            provider_type = provider.get_provider_type().value
+            logger.info(f"Trying provider: {provider_type}")
+            
             try:
                 # Try to generate
+                start_time = time.time()
                 response = provider.generate(request)
+                elapsed = time.time() - start_time
+                logger.info(f"Provider {provider_type} succeeded in {elapsed:.2f}s")
                 return response
 
             except Exception as e:
-                logger.error(f"Provider {provider.get_provider_type().value} failed: {str(e)}")
+                elapsed = time.time() - start_time
+                error_msg = f"Provider {provider_type} failed after {elapsed:.2f}s: {str(e)}"
+                logger.error(error_msg, exc_info=True)
+                errors.append(error_msg)
                 continue
 
-        raise Exception("All LLM providers failed to generate response")
+        raise Exception(f"All LLM providers failed to generate response. Errors: {'; '.join(errors)}")
 
     def get_all_usage_metrics(self) -> Dict[ProviderType, UsageMetrics]:
         """Get usage metrics for all providers."""

@@ -854,12 +854,25 @@ async def websocket_dev_endpoint(websocket: WebSocket):
                         )
                         
                     except Exception as e:
-                        logger.error(f"[Dev] Failed to process prompt {prompt_id}: {e}")
+                        logger.error(f"[Dev] Failed to process prompt {prompt_id}: {e}", exc_info=True)
+                        
+                        # Provide user-friendly error message
+                        error_message = str(e)
+                        if "timeout" in error_message.lower():
+                            error_message = "Request timed out. Please check your API key and try again."
+                        elif "authentication" in error_message.lower() or "api key" in error_message.lower():
+                            error_message = "Invalid API key. Please check your OpenAI API key in settings."
+                        elif "rate limit" in error_message.lower():
+                            error_message = "Rate limit exceeded. Please wait a moment and try again."
+                        elif "no llm providers available" in error_message.lower():
+                            error_message = "No API keys configured. Please add your OpenAI API key in settings."
+                        
                         await manager.send_personal_message(
                             {
                                 "type": "error",
                                 "code": "PROMPT_PROCESSING_FAILED",
-                                "message": str(e),
+                                "message": error_message,
+                                "details": str(e),
                                 "prompt_id": prompt_id,
                             },
                             client_id,

@@ -5,6 +5,7 @@ Implements the ILLMProvider interface for OpenAI GPT models.
 Follows Clean Architecture principles with proper error handling and monitoring.
 """
 
+import asyncio
 import logging
 import time
 from typing import Any, Dict, Optional
@@ -73,7 +74,13 @@ class OpenAIProvider(BaseProvider):
             # Add additional configuration
             if "timeout" in kwargs:
                 client_kwargs["timeout"] = kwargs["timeout"]
+                logger.info(f"Configuring OpenAI client with timeout: {kwargs['timeout']}s")
+            else:
+                # Default timeout if not specified
+                client_kwargs["timeout"] = 30.0
+                logger.info("Using default timeout of 30s for OpenAI client")
 
+            logger.info(f"Creating OpenAI client with config: api_key=sk-..., timeout={client_kwargs.get('timeout')}")
             self.client = OpenAI(**client_kwargs)
             self.credentials = credentials
             self._configuration.update(kwargs)
@@ -174,8 +181,21 @@ class OpenAIProvider(BaseProvider):
             if request.max_tokens:
                 api_request["max_tokens"] = request.max_tokens
 
-            # Make API call
-            response = self.client.chat.completions.create(**api_request)
+            # Make API call with timeout
+            logger.info(f"Making OpenAI API call with model {api_request['model']}")
+            
+            # Get timeout from configuration or use default
+            timeout = self._configuration.get("timeout", 30.0)
+            logger.info(f"Using timeout of {timeout} seconds")
+            
+            try:
+                # For synchronous client, we need to handle timeout differently
+                # The OpenAI client should respect the timeout set during initialization
+                response = self.client.chat.completions.create(**api_request)
+            except Exception as api_error:
+                # Log the specific error
+                logger.error(f"OpenAI API call failed: {type(api_error).__name__}: {str(api_error)}")
+                raise
 
             latency_ms = (time.time() - start_time) * 1000
 

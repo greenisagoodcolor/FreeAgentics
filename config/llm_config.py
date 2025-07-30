@@ -5,10 +5,13 @@ Handles configuration and secrets for LLM providers following Clean Architecture
 Provides optional environment variable loading with sensible defaults.
 """
 
+import logging
 import os
 from typing import Dict, Optional
 
 from pydantic import BaseModel, ConfigDict, Field
+
+logger = logging.getLogger(__name__)
 
 
 class LLMProviderConfig(BaseModel):
@@ -110,6 +113,7 @@ class LLMConfig(BaseModel):
                                 config.openai.enabled = True
                                 config.openai.default_model = saved_settings.get('llm_model', 'gpt-4')
                                 config.provider_priority = ["openai"]
+                                logger.info(f"Loaded OpenAI config from dev settings for user {user_id}")
                                 return config
                             elif saved_settings.get('anthropic_api_key'):
                                 config.anthropic.api_key = saved_settings['anthropic_api_key']
