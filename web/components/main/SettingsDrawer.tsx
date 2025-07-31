@@ -57,9 +57,13 @@ export function SettingsDrawer({ open, onOpenChange }: SettingsDrawerProps) {
   };
 
   const handleSavePendingChanges = () => {
+    console.log("handleSavePendingChanges called with:", pendingChanges);
     if (Object.keys(pendingChanges).length > 0) {
+      console.log("Calling updateSettings with:", pendingChanges);
       updateSettings(pendingChanges);
       setPendingChanges({});
+    } else {
+      console.log("No pending changes in handleSavePendingChanges");
     }
   };
 
@@ -165,8 +169,8 @@ export function SettingsDrawer({ open, onOpenChange }: SettingsDrawerProps) {
                     } API key`}
                     value={
                       settings.llmProvider === "openai"
-                        ? pendingChanges.openaiApiKey ?? settings.openaiApiKey
-                        : pendingChanges.anthropicApiKey ?? settings.anthropicApiKey
+                        ? pendingChanges.openaiApiKey ?? settings.openaiApiKey ?? ""
+                        : pendingChanges.anthropicApiKey ?? settings.anthropicApiKey ?? ""
                     }
                     onChange={(e) => {
                       const key =
@@ -301,13 +305,23 @@ export function SettingsDrawer({ open, onOpenChange }: SettingsDrawerProps) {
           <div className="pt-4 space-y-3">
             <Button
               onClick={() => {
+                console.log("Save Settings button clicked");
+                console.log("Has pending changes:", hasPendingChanges);
+                console.log("Pending changes:", pendingChanges);
+
                 // Force save any pending changes and close drawer on success
                 if (hasPendingChanges) {
+                  console.log("Calling handleSavePendingChanges...");
                   handleSavePendingChanges();
+                } else {
+                  console.log("No pending changes to save");
                 }
+
                 // Show success feedback and close drawer
                 setTimeout(() => {
+                  console.log("Timeout callback - saveError:", saveError);
                   if (!saveError) {
+                    console.log("Closing drawer...");
                     onOpenChange(false);
                   }
                 }, 1000);

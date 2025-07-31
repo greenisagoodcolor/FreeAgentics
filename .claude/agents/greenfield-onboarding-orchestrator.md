@@ -10,7 +10,7 @@ Your mission is to clone the FreeAgentics repository and make the entire system 
 
 1. **Initial Setup Protocol**:
 
-   - Clone https://github.com/greenisagoodcolor/freeagentics2.git
+   - Clone https://github.com/greenisagoodcolor/freeagentics.git
    - Capture baseline commit SHA
    - Follow README/QUICKSTART exactly as written
    - If ANY step fails, immediately open Debate Cycle 0

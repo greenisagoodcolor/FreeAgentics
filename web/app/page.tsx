@@ -8,7 +8,7 @@ import { KnowledgeGraphView } from "@/components/main/KnowledgeGraphView";
 import { SimulationGrid } from "@/components/main/SimulationGrid";
 import { MetricsFooter } from "@/components/main/MetricsFooter";
 import { ApiKeyBanner } from "@/components/main/ApiKeyBanner";
-import { SettingsModal } from "@/components/modals/SettingsModal";
+import { SettingsDrawer } from "@/components/main/SettingsDrawer";
 
 export default function HomePage() {
   const [isSettingsOpen, setIsSettingsOpen] = useState(false);
@@ -91,7 +91,7 @@ export default function HomePage() {
       </div>
 
       {/* Settings Modal */}
-      <SettingsModal open={isSettingsOpen} onOpenChange={setIsSettingsOpen} />
+      <SettingsDrawer open={isSettingsOpen} onOpenChange={setIsSettingsOpen} />
     </div>
   );
 }

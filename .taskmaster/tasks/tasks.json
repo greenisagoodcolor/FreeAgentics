@@ -1646,11 +1646,518 @@
             "testStrategy": "Validate diagrams against actual implementation by tracing real connection flows and comparing with documented sequences"
           }
         ]
+      },
+      {
+        "id": 28,
+        "title": "Create Unified Agent Service API",
+        "description": "Implement the core orchestration service that manages the complete agent lifecycle from prompt to conversation",
+        "details": "Create a new FastAPI service at /api/v1/agent-conversations that handles the complete flow: prompt → agent creation → GMN generation → PyMDP initialization → conversation start. Implement proper request/response models using Pydantic. Service should coordinate between existing components (LLM provider, GMN parser, PyMDP, database) and return structured responses with conversation_id, agent details, and status updates. Use dependency injection for service components. Implement async handlers for non-blocking operations.",
+        "testStrategy": "Write integration tests that verify end-to-end flow from prompt submission to agent creation response. Mock external dependencies (LLM, database) for unit tests. Test error scenarios including invalid prompts, missing API keys, and service failures. Verify response schema compliance and WebSocket notification triggers.",
+        "priority": "high",
+        "dependencies": [],
+        "status": "done",
+        "subtasks": [
+          {
+            "id": 1,
+            "title": "Define FastAPI Request/Response Models",
+            "description": "Create Pydantic models for agent conversation API requests and responses",
+            "dependencies": [],
+            "details": "Create models in api/v1/models/agent_conversation.py: 1) AgentConversationRequest with fields: prompt (str), config (optional dict for agent parameters), metadata (optional dict). 2) AgentConversationResponse with fields: conversation_id (UUID), agent_id (UUID), status (enum: initializing, ready, error), gmn_structure (dict), websocket_url (str), created_at (datetime). 3) AgentStatus enum with values: initializing, generating_gmn, initializing_pymdp, ready, error. 4) ErrorResponse model for standardized error handling with code, message, and details fields.",
+            "status": "done",
+            "testStrategy": "Write unit tests to validate model serialization/deserialization, field validation, and proper error handling for invalid inputs"
+          },
+          {
+            "id": 2,
+            "title": "Implement Dependency Injection Services",
+            "description": "Create service classes for LLM provider, GMN parser, PyMDP initializer, and database operations with dependency injection",
+            "dependencies": ["28.1"],
+            "details": "Create service classes in api/v1/services/: 1) LLMService class wrapping existing LLM provider with async generate_gmn method. 2) GMNParserService for parsing GMN structure from LLM output. 3) PyMDPService for initializing PyMDP agents with parsed GMN. 4) ConversationService for managing conversation lifecycle and database operations. 5) Implement FastAPI dependency injection using Depends() for each service. 6) Create service factory functions that handle configuration and initialization based on environment variables (mock vs real providers).",
+            "status": "done",
+            "testStrategy": "Create unit tests with mocked dependencies for each service. Test service initialization, method calls, and error handling scenarios"
+          },
+          {
+            "id": 3,
+            "title": "Create Agent Conversation API Endpoint",
+            "description": "Implement the main FastAPI endpoint that orchestrates the agent creation flow",
+            "dependencies": ["28.1", "28.2"],
+            "details": "Create endpoint in api/v1/routers/agent_conversations.py: 1) POST /api/v1/agent-conversations endpoint with async handler. 2) Accept AgentConversationRequest, inject service dependencies. 3) Implement orchestration flow: validate request → generate conversation_id → call LLM service for GMN generation → parse GMN structure → initialize PyMDP agent → store in database → return AgentConversationResponse. 4) Use background tasks for long-running operations. 5) Implement proper error handling with try/except blocks returning appropriate HTTP status codes.",
+            "status": "done",
+            "testStrategy": "Write integration tests using TestClient to verify end-to-end flow, test various request scenarios, validate response schemas"
+          },
+          {
+            "id": 4,
+            "title": "Implement WebSocket Connection Handler",
+            "description": "Create WebSocket endpoint for real-time agent conversation updates and status notifications",
+            "dependencies": ["28.3"],
+            "details": "Create WebSocket handler in api/v1/websockets/agent_conversation.py: 1) WebSocket endpoint at /api/v1/ws/agent/{conversation_id}. 2) Implement connection manager for tracking active connections. 3) Create message protocol for status updates: {type: 'status', data: {status: 'generating_gmn', progress: 50}}. 4) Send real-time updates during agent initialization phases. 5) Handle connection lifecycle: authentication, heartbeat, graceful disconnection. 6) Integrate with conversation service to push updates when agent state changes.",
+            "status": "done",
+            "testStrategy": "Write WebSocket client tests using pytest-asyncio, test connection lifecycle, message flow, and error scenarios"
+          },
+          {
+            "id": 5,
+            "title": "Add Monitoring and Error Recovery",
+            "description": "Implement comprehensive monitoring, logging, and error recovery mechanisms for the agent service",
+            "dependencies": ["28.3", "28.4"],
+            "details": "Implement monitoring and resilience: 1) Add structured logging using existing observability framework for all service operations. 2) Implement circuit breaker pattern for LLM service calls with fallback to mock responses. 3) Add retry logic with exponential backoff for transient failures. 4) Create health check endpoint /api/v1/agent-conversations/health that validates all service dependencies. 5) Implement graceful degradation: if LLM fails, return cached/default GMN structures. 6) Add metrics collection for: request latency, success/failure rates, agent creation time, WebSocket connection count.",
+            "status": "done",
+            "testStrategy": "Test circuit breaker behavior by simulating service failures, verify retry logic with mock failures, validate health endpoint responses under various conditions"
+          }
+        ]
+      },
+      {
+        "id": 29,
+        "title": "Fix Agent Persistence Pipeline",
+        "description": "Ensure agents created through the API persist to both database and runtime systems correctly",
+        "details": "Debug why 'Fetched agents: 0' occurs after agent creation. Implement proper database transactions for agent creation including conversation_id linking. Create agent registry service that maintains runtime agent instances. Ensure agents persist with: unique IDs, conversation associations, GMN specifications, initial PyMDP belief states, and role-specific configurations. Add database migrations for conversation tracking table and agent schema updates. Implement agent lifecycle management (create, activate, deactivate, cleanup).",
+        "testStrategy": "Test database persistence by creating agents and verifying retrieval. Test runtime registry by checking agent availability after creation. Verify transaction rollback on failures. Test concurrent agent creation. Validate foreign key constraints and data integrity.",
+        "priority": "high",
+        "dependencies": [28],
+        "status": "done",
+        "subtasks": []
+      },
+      {
+        "id": 30,
+        "title": "Implement LLM Provider Connection",
+        "description": "Create robust LLM provider initialization with proper error handling and fallback mechanisms",
+        "details": "Implement LLM provider factory that validates API keys on first use. Support multiple providers (OpenAI, Anthropic, local models) with unified interface. Add retry logic with exponential backoff for transient failures. Implement proper error messages that guide users on API key configuration. Create demo mode fallback that returns deterministic responses for testing. Use environment-specific configuration for provider selection. Cache provider instances for performance.",
+        "testStrategy": "Test API key validation with valid/invalid keys. Test provider initialization for each supported LLM. Verify retry behavior on network failures. Test fallback to demo mode when no API key present. Measure initialization performance and connection pooling.",
+        "priority": "high",
+        "dependencies": [28],
+        "status": "done",
+        "subtasks": []
+      },
+      {
+        "id": 31,
+        "title": "Enable Agent-to-Agent Messaging",
+        "description": "Implement the core conversation engine that enables agents to exchange messages with proper turn-taking",
+        "details": "Create conversation manager that orchestrates agent interactions. Implement message queue for each conversation with proper ordering. Add turn-taking protocol that ensures agents respond sequentially. Create message types: user_prompt, agent_thought, agent_response, belief_update. Integrate with LLM provider to generate responses based on agent role and conversation history. Store conversation history in database with proper indexing. Emit WebSocket events for each message exchange.",
+        "testStrategy": "Test message ordering and delivery guarantees. Verify turn-taking prevents race conditions. Test conversation history persistence and retrieval. Validate WebSocket event emission for UI updates. Test with multiple concurrent conversations.",
+        "priority": "high",
+        "dependencies": [29, 30],
+        "status": "done",
+        "subtasks": []
+      },
+      {
+        "id": 32,
+        "title": "Implement GMN Generation from Prompts",
+        "description": "Create system to parse user prompts into formal GMN specifications for Active Inference",
+        "details": "Implement prompt analyzer that extracts goals, constraints, and domain context. Create GMN template library for common agent roles (analyst, strategist, implementer). Use LLM to generate domain-specific state spaces, observation models, and preference specifications. Map user goals to mathematical preference functions. Generate transition dynamics based on domain knowledge. Validate GMN specs against PyMDP requirements. Store generated GMNs with conversations for reproducibility.",
+        "testStrategy": "Test GMN generation for various prompt types and domains. Validate generated GMNs pass PyMDP initialization. Test template selection logic. Verify preference functions align with stated goals. Test edge cases like ambiguous or conflicting goals.",
+        "priority": "high",
+        "dependencies": [31],
+        "status": "done",
+        "subtasks": []
+      },
+      {
+        "id": 33,
+        "title": "Integrate PyMDP Belief Updates",
+        "description": "Connect PyMDP Active Inference engine to process observations and update agent beliefs during conversations",
+        "details": "Create belief manager service that maintains PyMDP agent instances. Implement observation processor that converts conversation messages to PyMDP observations. Add belief update loop that runs after each agent turn. Calculate expected free energy for action selection. Generate next actions based on Active Inference principles. Expose belief states through API for visualization. Implement belief persistence for conversation resumption. Add performance monitoring for inference calculations.",
+        "testStrategy": "Test belief initialization from GMN specs. Verify belief updates converge over conversation turns. Test action selection produces contextually appropriate responses. Validate free energy calculations. Test belief state serialization and restoration.",
+        "priority": "medium",
+        "dependencies": [32],
+        "status": "pending",
+        "subtasks": [
+          {
+            "id": 1,
+            "title": "Create PyMDP Belief Manager Service",
+            "description": "Build a service that creates and manages PyMDP agent instances for each conversation",
+            "dependencies": [],
+            "details": "Implement BeliefManager class that instantiates PyMDP agents with GMN-defined parameters. Create agent factory pattern that builds agents based on conversation context and GMN specifications. Implement agent lifecycle management (create, update, destroy). Add agent registry to track active PyMDP instances per conversation. Configure agent parameters including state/observation/action spaces from GMN specs.",
+            "status": "pending",
+            "testStrategy": "Unit tests for agent instantiation with various GMN configurations. Test agent registry operations (add, get, remove). Verify memory cleanup on agent destruction. Test concurrent agent management for multiple conversations."
+          },
+          {
+            "id": 2,
+            "title": "Implement Observation Processor",
+            "description": "Convert conversation messages and context into PyMDP-compatible observation format",
+            "dependencies": ["33.1"],
+            "details": "Create ObservationProcessor class that transforms raw conversation data into PyMDP observation vectors. Map message types, content, and metadata to observation modalities defined in GMN. Implement tokenization and encoding strategies for text observations. Handle multi-modal observations (text, tone, context). Create observation history buffer for temporal context. Ensure observations align with agent's defined observation space.",
+            "status": "pending",
+            "testStrategy": "Test observation encoding for various message types. Verify observation vector dimensions match agent configuration. Test handling of incomplete or malformed messages. Validate observation history management and buffer limits."
+          },
+          {
+            "id": 3,
+            "title": "Build Belief Update Loop",
+            "description": "Implement the core active inference loop that updates beliefs after each agent turn",
+            "dependencies": ["33.1", "33.2"],
+            "details": "Create BeliefUpdateEngine that orchestrates the active inference cycle. Implement belief update using PyMDP's variational inference methods. Calculate posterior beliefs given new observations. Compute expected free energy (EFE) for available policies. Select actions based on EFE minimization and precision parameters. Add hooks for belief state inspection and debugging. Implement update scheduling to run after each agent response.",
+            "status": "pending",
+            "testStrategy": "Test belief convergence over multiple update cycles. Verify EFE calculations match expected values. Test action selection distribution based on beliefs. Validate update timing and synchronization with conversation flow."
+          },
+          {
+            "id": 4,
+            "title": "Add Belief State Persistence",
+            "description": "Implement serialization and storage of PyMDP belief states for conversation resumption",
+            "dependencies": ["33.3"],
+            "details": "Create belief state serializer that converts PyMDP internal states to storable format. Implement efficient storage using sparse matrix representations where applicable. Add belief state versioning for backward compatibility. Create restore mechanism that reconstructs PyMDP agents from saved states. Implement periodic checkpointing during long conversations. Integrate with existing conversation persistence layer.",
+            "status": "pending",
+            "testStrategy": "Test serialization/deserialization cycle preserves belief accuracy. Verify restored agents produce consistent behavior. Test storage efficiency for various belief state sizes. Validate checkpoint recovery after interruptions."
+          },
+          {
+            "id": 5,
+            "title": "Create Belief Monitoring API",
+            "description": "Expose belief states and inference metrics through API endpoints for visualization and monitoring",
+            "dependencies": ["33.3", "33.4"],
+            "details": "Implement REST endpoints to query current belief states for active conversations. Add WebSocket support for real-time belief state streaming. Create belief state formatter that converts internal representations to visualization-friendly format. Expose inference metrics (EFE, entropy, prediction errors). Add performance metrics (inference time, memory usage). Implement access control and rate limiting for monitoring endpoints.",
+            "status": "pending",
+            "testStrategy": "Test API response formats and data accuracy. Verify WebSocket streaming performance under load. Test metric calculation correctness. Validate access control and rate limiting. Test integration with monitoring dashboards."
+          }
+        ]
+      },
+      {
+        "id": 34,
+        "title": "Build Knowledge Graph Integration",
+        "description": "Extract entities and relationships from conversations to build and update knowledge graph in real-time",
+        "details": "Implement entity extraction pipeline using NER and relation extraction. Create knowledge graph service with Neo4j or similar graph database. Define ontology for agent conversations (entities: concepts, goals, constraints; relations: requires, conflicts_with, enables). Process each agent message to extract knowledge triples. Update graph incrementally with proper conflict resolution. Link knowledge nodes to belief states and conversation context. Expose graph queries through API for visualization.",
+        "testStrategy": "Test entity extraction accuracy on sample conversations. Verify graph updates are atomic and consistent. Test query performance for common patterns. Validate ontology coverage for different domains. Test concurrent graph updates from multiple conversations.",
+        "priority": "medium",
+        "dependencies": [31],
+        "status": "pending",
+        "subtasks": [
+          {
+            "id": 1,
+            "title": "Design Knowledge Graph Schema and Ontology",
+            "description": "Define the data model, entity types, and relationship types for agent conversation knowledge graphs",
+            "dependencies": [],
+            "details": "Create comprehensive ontology defining entity types (concepts, goals, constraints, agents, tasks, beliefs) and relationship types (requires, conflicts_with, enables, relates_to, depends_on). Design graph schema supporting temporal aspects, confidence scores, and provenance tracking. Define property schemas for each entity type including metadata like source conversation ID, timestamp, and extraction confidence. Document schema evolution strategy for future extensions.",
+            "status": "pending",
+            "testStrategy": "Validate schema completeness against sample conversations from different domains. Test schema flexibility for edge cases and complex relationships. Verify temporal and provenance tracking capabilities."
+          },
+          {
+            "id": 2,
+            "title": "Implement Entity and Relation Extraction Pipeline",
+            "description": "Build NLP pipeline to extract entities and relationships from agent conversation messages",
+            "dependencies": ["34.1"],
+            "details": "Implement NER system using spaCy or similar for entity extraction. Build relation extraction using dependency parsing and pattern matching. Create LLM-based extraction for complex semantic relationships not captured by rules. Implement confidence scoring for extracted entities and relations. Add context-aware extraction considering conversation history and agent roles. Handle co-reference resolution across messages.",
+            "status": "pending",
+            "testStrategy": "Test extraction accuracy on annotated conversation corpus. Measure precision/recall for different entity and relation types. Validate confidence scoring accuracy. Test handling of ambiguous or incomplete utterances."
+          },
+          {
+            "id": 3,
+            "title": "Create Graph Database Service and Storage Layer",
+            "description": "Implement graph database integration with PostgreSQL for storing and querying knowledge graphs",
+            "dependencies": ["34.1"],
+            "details": "Implement graph storage using PostgreSQL with kg_nodes and kg_edges tables as defined in task 45. Create service layer with CRUD operations for nodes and edges. Implement atomic graph update transactions with rollback support. Add indexing strategies for efficient graph traversal and pattern matching. Create connection pooling and query optimization. Implement graph versioning for tracking changes over time.",
+            "status": "pending",
+            "testStrategy": "Test CRUD operations with concurrent access patterns. Verify transaction atomicity and rollback behavior. Benchmark query performance for common graph patterns. Test scalability with graphs up to 10,000 nodes."
+          },
+          {
+            "id": 4,
+            "title": "Build Real-time Graph Update and Conflict Resolution System",
+            "description": "Implement system for processing conversation messages and updating knowledge graph in real-time",
+            "dependencies": ["34.2", "34.3"],
+            "details": "Create message processing pipeline that extracts knowledge triples from each agent message. Implement conflict detection when new information contradicts existing graph data. Build resolution strategies (timestamp-based, confidence-based, source authority). Add incremental update mechanism to avoid full graph rebuilds. Link extracted knowledge to belief states and conversation contexts. Implement event streaming for graph changes.",
+            "status": "pending",
+            "testStrategy": "Test real-time update latency under load. Verify conflict resolution strategies with contradictory information. Test incremental updates maintain graph consistency. Validate event streaming reliability."
+          },
+          {
+            "id": 5,
+            "title": "Develop Graph Query API and Visualization Interface",
+            "description": "Create REST/GraphQL API for querying knowledge graphs and supporting visualization",
+            "dependencies": ["34.3", "34.4"],
+            "details": "Build RESTful API endpoints for graph queries (find nodes, traverse relationships, pattern matching). Implement GraphQL schema for flexible graph querying. Add semantic search capabilities using embeddings. Create path-finding algorithms for relationship discovery. Build aggregation queries for graph analytics. Design response formats optimized for visualization libraries. Add caching layer for frequently accessed subgraphs.",
+            "status": "pending",
+            "testStrategy": "Test API response times for various query complexities. Validate GraphQL query performance and response sizes. Test semantic search accuracy. Verify visualization data format compatibility."
+          }
+        ]
+      },
+      {
+        "id": 35,
+        "title": "Implement Observability and Monitoring",
+        "description": "Add comprehensive logging, metrics, and tracing for the conversation pipeline",
+        "details": "Implement structured logging using Python logging with JSON formatter. Add OpenTelemetry tracing for request flow through services. Create custom metrics: agent_spawn_time, conversation_latency, belief_update_duration, knowledge_extraction_time. Add health check endpoints for each service component. Implement request correlation IDs for debugging. Create Grafana dashboards for key metrics. Add alerting rules for performance degradation and errors.",
+        "testStrategy": "Verify all critical paths have appropriate logging. Test trace propagation across service boundaries. Validate metrics collection under load. Test dashboard accuracy and alert triggering. Verify log aggregation and searchability.",
+        "priority": "medium",
+        "dependencies": [31, 33, 34],
+        "status": "pending",
+        "subtasks": [
+          {
+            "id": 1,
+            "title": "Implement Structured JSON Logging Framework",
+            "description": "Set up Python logging with JSON formatter for structured logs across all services",
+            "dependencies": [],
+            "details": "Configure Python logging module with custom JSON formatter that includes timestamp (ISO-8601), service name, trace_id, span_id, user_id, operation, and log level. Create logging configuration that outputs to stdout for container environments. Implement log context injection for request-scoped data. Add logging decorators for automatic function entry/exit logging. Configure different log levels per module (DEBUG for development, INFO for production). Ensure all logs include correlation IDs for request tracing.",
+            "status": "pending",
+            "testStrategy": "Verify JSON log format with schema validation. Test log context propagation across function calls. Validate correlation ID presence in all logs. Test log level filtering. Verify performance impact is <1ms per log statement."
+          },
+          {
+            "id": 2,
+            "title": "Add OpenTelemetry Tracing Infrastructure",
+            "description": "Implement distributed tracing using OpenTelemetry for request flow visualization",
+            "dependencies": ["35.1"],
+            "details": "Install and configure OpenTelemetry Python SDK with OTLP exporter. Instrument FastAPI endpoints with automatic span creation. Add manual spans for key operations: agent spawning, belief updates, GMN generation, LLM calls. Configure trace sampling (100% for errors, 1% for normal traffic). Set up context propagation for WebSocket connections. Add span attributes for user_id, agent_id, conversation_id. Configure trace export to Jaeger or similar backend. Implement baggage propagation for cross-service metadata.",
+            "status": "pending",
+            "testStrategy": "Verify spans are created for all API endpoints. Test trace context propagation across service boundaries. Validate span attributes contain required fields. Test sampling rules work correctly. Measure tracing overhead (<5% latency increase)."
+          },
+          {
+            "id": 3,
+            "title": "Create Custom Performance Metrics Collection",
+            "description": "Implement Prometheus metrics for key performance indicators and resource usage",
+            "dependencies": ["35.1"],
+            "details": "Set up Prometheus Python client with /metrics endpoint. Create custom metrics: agent_spawn_time_seconds (histogram), conversation_latency_seconds (histogram), belief_update_duration_seconds (histogram), knowledge_extraction_time_seconds (histogram), active_agents_count (gauge), websocket_connections (gauge), llm_api_calls_total (counter with provider label), database_query_duration_seconds (histogram). Add metric labels for service, operation, status. Implement metric collection decorators for easy instrumentation. Configure metric buckets appropriate for each operation.",
+            "status": "pending",
+            "testStrategy": "Verify /metrics endpoint returns valid Prometheus format. Test metric increments for each operation. Validate histogram buckets capture appropriate ranges. Test gauge updates for connection counts. Verify no memory leaks from metric collection."
+          },
+          {
+            "id": 4,
+            "title": "Implement Health Check Endpoints and Monitoring",
+            "description": "Create comprehensive health check system for all service components",
+            "dependencies": ["35.1", "35.3"],
+            "details": "Implement /health endpoint that checks: database connectivity, Redis availability, LLM provider status, disk space, memory usage. Create /ready endpoint for Kubernetes readiness probes. Add component-specific health checks: WebSocket server status, background task queues, external API connectivity. Implement health check caching (5-second TTL) to prevent overload. Return detailed status JSON with component breakdown. Add health metrics to Prometheus exports. Configure automatic service degradation based on health status.",
+            "status": "pending",
+            "testStrategy": "Test health endpoints return correct status codes. Verify component failures are detected. Test health check timeout handling. Validate caching prevents repeated checks. Test graceful degradation when components unhealthy."
+          },
+          {
+            "id": 5,
+            "title": "Create Grafana Dashboards and Alerting Rules",
+            "description": "Build monitoring dashboards and configure proactive alerting for system issues",
+            "dependencies": ["35.2", "35.3", "35.4"],
+            "details": "Create Grafana dashboards: System Overview (request rate, error rate, latency P50/P95/P99), Agent Performance (spawn time, active agents, belief update frequency), Resource Usage (CPU, memory, connections), LLM Operations (API latency by provider, token usage, error rates). Configure alerts: P95 latency >200ms, error rate >1%, agent spawn time >50ms, memory usage >80%, database connection pool exhaustion. Set up PagerDuty integration for critical alerts. Create runbook links in alert descriptions. Implement dashboard variables for filtering by service/user.",
+            "status": "pending",
+            "testStrategy": "Verify dashboards display accurate real-time data. Test alert rules trigger at correct thresholds. Validate PagerDuty integration delivers alerts. Test dashboard performance with high cardinality data. Verify runbook links are accessible."
+          }
+        ]
+      },
+      {
+        "id": 36,
+        "title": "Add Error Recovery and Graceful Degradation",
+        "description": "Implement comprehensive error handling with user-friendly messages and fallback mechanisms",
+        "details": "Create error handler middleware that catches and categorizes exceptions. Implement fallback strategies: LLM failure → demo mode, PyMDP error → simple response generation, database error → in-memory operation. Add circuit breakers for external service calls. Create user-facing error messages that suggest solutions (e.g., 'API key invalid. Please check your settings.'). Implement conversation state checkpointing for recovery. Add automatic retry with backoff for transient failures.",
+        "testStrategy": "Test each fallback path with service failures. Verify error messages are helpful and actionable. Test circuit breaker behavior under sustained failures. Validate conversation recovery from checkpoints. Test graceful degradation maintains core functionality.",
+        "priority": "medium",
+        "dependencies": [35],
+        "status": "pending",
+        "subtasks": [
+          {
+            "id": 1,
+            "title": "Create Error Handler Middleware and Exception Categorization",
+            "description": "Implement centralized error handling middleware that catches, categorizes, and processes all exceptions in the conversation pipeline",
+            "dependencies": [],
+            "details": "Create a comprehensive error handler middleware that intercepts all exceptions. Implement error categorization system with classes: AuthenticationError (invalid API keys, expired tokens), ServiceError (LLM/PyMDP failures), DatabaseError (connection/query failures), ValidationError (invalid input), NetworkError (timeouts, connection failures), and InternalError (unexpected failures). Each category should have specific handling logic and user-facing messages. Add error context enrichment with request IDs, timestamps, and relevant metadata for debugging.",
+            "status": "pending",
+            "testStrategy": "Create unit tests for each error category with mock exceptions. Test middleware integration with FastAPI exception handlers. Verify error context is properly captured and logged. Test that sensitive information is not exposed in error responses."
+          },
+          {
+            "id": 2,
+            "title": "Implement Service-Specific Fallback Strategies",
+            "description": "Create fallback mechanisms for each external service failure to maintain core functionality during outages",
+            "dependencies": ["36.1"],
+            "details": "Implement LLM fallback: detect API failures and switch to demo mode with pre-configured responses. Create PyMDP fallback: on active inference errors, use simple rule-based response generation. Add database fallback: switch to in-memory SQLite for transient PostgreSQL failures, with data sync on recovery. Implement WebSocket fallback: queue messages during connection failures and replay on reconnect. Each fallback should log activation/deactivation and maintain service state.",
+            "status": "pending",
+            "testStrategy": "Test each fallback path by simulating service failures. Verify seamless transition between primary and fallback modes. Test data consistency when switching between database modes. Validate that fallback modes provide adequate functionality."
+          },
+          {
+            "id": 3,
+            "title": "Add Circuit Breakers and Retry Logic",
+            "description": "Implement circuit breaker pattern for external services with automatic retry and backoff strategies",
+            "dependencies": ["36.1"],
+            "details": "Implement circuit breaker with three states: CLOSED (normal operation), OPEN (failures exceed threshold), HALF_OPEN (testing recovery). Configure thresholds: 5 failures in 30 seconds triggers OPEN state, 60-second cooldown before HALF_OPEN. Add exponential backoff retry: initial 100ms, max 5 seconds, with jitter to prevent thundering herd. Track metrics: failure rate, recovery time, circuit state transitions. Apply to LLM calls, database connections, and external API requests.",
+            "status": "pending",
+            "testStrategy": "Test circuit breaker state transitions with controlled failures. Verify retry logic with different failure patterns. Test recovery behavior when services return to normal. Validate metric collection and alerting on circuit breaker activations."
+          },
+          {
+            "id": 4,
+            "title": "Create User-Friendly Error Messages and Solution Suggestions",
+            "description": "Design and implement helpful error messages that guide users toward solutions without exposing technical details",
+            "dependencies": ["36.1", "36.2"],
+            "details": "Create error message templates for each category with clear, actionable guidance. Examples: 'API key invalid. Please check your OpenAI API key in Settings → API Configuration', 'Service temporarily unavailable. We've switched to demo mode - your work is saved', 'Connection lost. Attempting to reconnect... (attempt 3/5)'. Add contextual help links and troubleshooting steps. Implement progressive disclosure: brief message initially, detailed help on request. Support internationalization for error messages.",
+            "status": "pending",
+            "testStrategy": "User test error messages for clarity and helpfulness. Verify technical details are not exposed to end users. Test message localization and formatting. Validate that suggested solutions actually resolve the issues."
+          },
+          {
+            "id": 5,
+            "title": "Implement Conversation State Checkpointing and Recovery",
+            "description": "Create automatic checkpointing system for conversation state to enable recovery from failures",
+            "dependencies": ["36.2", "36.3"],
+            "details": "Implement checkpoint creation after each significant state change: message sent, belief updated, context modified. Store checkpoints in persistent storage with versioning and TTL. Create recovery mechanism that detects incomplete operations and restores from last checkpoint. Add checkpoint validation to ensure state consistency. Implement cleanup for old checkpoints. Include WebSocket reconnection with state replay from checkpoint. Add user notification when recovering from checkpoint.",
+            "status": "pending",
+            "testStrategy": "Test checkpoint creation and restoration with various failure scenarios. Verify state consistency after recovery. Test checkpoint storage limits and cleanup. Validate user experience during recovery process."
+          }
+        ]
+      },
+      {
+        "id": 37,
+        "title": "Optimize Performance and Implement Caching",
+        "description": "Achieve performance targets: agent spawn <50ms, conversation latency <200ms, knowledge updates <100ms",
+        "details": "Implement agent pooling to pre-initialize PyMDP instances. Add Redis caching for GMN templates and common belief states. Use async processing for non-critical paths (knowledge extraction, belief persistence). Optimize database queries with proper indexing and query planning. Implement request batching for LLM calls. Add response streaming for long agent messages. Profile critical paths and optimize bottlenecks. Implement lazy loading for conversation history.",
+        "testStrategy": "Benchmark all performance targets under load. Test cache hit rates and invalidation logic. Verify async processing doesn't lose messages. Test system behavior at scale (100+ concurrent conversations). Profile memory usage and prevent leaks.",
+        "priority": "low",
+        "dependencies": [36],
+        "status": "pending",
+        "subtasks": []
+      },
+      {
+        "id": 38,
+        "title": "Implement GMN Parser Service to validate and parse GMN specifications from LLM responses",
+        "description": "Create a robust service that validates and parses Generative Model Network (GMN) specifications generated by LLMs, ensuring they conform to PyMDP requirements and can be properly instantiated",
+        "details": "Implement a GMN parser service with the following components:\n\n1. **GMN Schema Validation**:\n   - Define comprehensive JSON schema for GMN specifications using jsonschema library\n   - Include validation for required fields: state_spaces, observation_models, transition_dynamics, preference_specifications\n   - Validate mathematical constraints: probability distributions sum to 1, matrix dimensions match\n   - Check for valid PyMDP data types and tensor shapes\n\n2. **Parser Implementation**:\n   - Create GMNParser class that accepts raw LLM output (JSON or structured text)\n   - Implement error recovery for common LLM formatting issues (trailing commas, incorrect quotes)\n   - Parse nested structures for multi-factor state spaces and hierarchical preferences\n   - Handle both discrete and continuous state representations\n\n3. **Validation Rules Engine**:\n   - Implement domain-specific validation rules beyond schema validation\n   - Check for logical consistency in transition dynamics\n   - Validate observation model plausibility\n   - Ensure preference specifications align with stated goals\n   - Detect and flag potentially harmful or nonsensical specifications\n\n4. **Error Handling and Feedback**:\n   - Create detailed error messages that pinpoint exact validation failures\n   - Implement suggestion system for common errors (e.g., 'Did you mean to use softmax normalization?')\n   - Provide LLM-friendly error format for iterative refinement\n   - Log all validation failures with context for debugging\n\n5. **Integration with GMN Generation**:\n   - Create feedback loop where validation errors are sent back to LLM for correction\n   - Implement retry mechanism with progressively more specific prompts\n   - Cache successful GMN templates for future reference\n   - Track validation success rates per LLM provider\n\n6. **Performance Optimization**:\n   - Use NumPy for efficient matrix validation operations\n   - Implement lazy validation for large state spaces\n   - Cache compiled JSON schemas for repeated validations\n   - Add async validation for non-blocking operation\n\n7. **PyMDP Compatibility Layer**:\n   - Ensure parsed GMNs can be directly instantiated as PyMDP agents\n   - Convert between LLM-friendly and PyMDP-native representations\n   - Validate against PyMDP version-specific requirements\n   - Test with actual PyMDP instantiation as final validation step",
+        "testStrategy": "Comprehensive testing approach:\n\n1. **Unit Tests for Parser Components**:\n   - Test JSON schema validation with valid and invalid GMN examples\n   - Test parser error recovery with malformed LLM outputs\n   - Validate mathematical constraint checking (probability sums, matrix dimensions)\n   - Test each validation rule in isolation\n\n2. **Integration Tests**:\n   - Test full parsing pipeline from raw LLM output to validated GMN\n   - Verify integration with GMN generation service (Task 32)\n   - Test feedback loop with mock LLM responses\n   - Validate PyMDP instantiation of parsed GMNs\n\n3. **Edge Case Testing**:\n   - Test with extremely large state spaces (>1000 states)\n   - Test with minimal valid GMNs (single state, single observation)\n   - Test with adversarial inputs (attempting to break parser)\n   - Test Unicode and special character handling\n\n4. **Performance Testing**:\n   - Benchmark parsing speed for various GMN sizes\n   - Measure memory usage during validation\n   - Test concurrent validation requests\n   - Validate caching effectiveness\n\n5. **Error Message Testing**:\n   - Verify error messages are clear and actionable\n   - Test that suggestions accurately address the root cause\n   - Validate error message formatting for LLM consumption\n\n6. **Regression Testing**:\n   - Create test suite of previously successful GMN specifications\n   - Ensure parser updates don't break existing functionality\n   - Test backward compatibility with older GMN formats",
+        "status": "pending",
+        "dependencies": [32, 30],
+        "priority": "medium",
+        "subtasks": []
+      },
+      {
+        "id": 39,
+        "title": "Setup Agent Conversation Database Schema",
+        "description": "Create database tables for agents, conversations, and messages to support multi-agent conversation system",
+        "details": "Create PostgreSQL tables: agents (id UUID, name VARCHAR(255), type VARCHAR(50), gmn_spec JSONB, belief_state JSONB, created_at TIMESTAMP, updated_at TIMESTAMP), conversations (id UUID, prompt TEXT, agent_ids UUID[], message_count INT, status VARCHAR(50), started_at TIMESTAMP, completed_at TIMESTAMP), messages (id UUID, conversation_id UUID, agent_id UUID, content TEXT, message_order INT, created_at TIMESTAMP). Add appropriate indexes and foreign key constraints. Use SQLAlchemy models with Pydantic schemas for validation.",
+        "testStrategy": "Unit tests for model creation, validation, and relationships. Integration tests for database operations including agent creation, conversation initialization, and message storage/retrieval.",
+        "priority": "high",
+        "dependencies": [],
+        "status": "done",
+        "subtasks": [
+          {
+            "id": 1,
+            "title": "Create SQLAlchemy Base Models for Agent Conversation System",
+            "description": "Define SQLAlchemy ORM models for agents, conversations, and messages tables with proper relationships and constraints",
+            "dependencies": [],
+            "details": "Create models in api/models/agent_conversation.py: 1) Agent model with UUID primary key, name, type, gmn_spec (JSONB), belief_state (JSONB), timestamps. 2) Conversation model with UUID primary key, prompt, agent_ids (PostgreSQL ARRAY of UUIDs), message_count, status enum (pending/active/completed/cancelled), timestamps. 3) Message model with UUID primary key, foreign keys to conversation and agent, content, message_order, created_at. Define relationships: Conversation has many Messages, Agent has many Messages, many-to-many between Agents and Conversations through agent_ids array.",
+            "status": "done",
+            "testStrategy": "Unit tests to verify model creation, field types, constraints, and relationships. Test UUID generation, JSONB field serialization, and timestamp auto-population."
+          },
+          {
+            "id": 2,
+            "title": "Implement Pydantic Schemas for Request/Response Validation",
+            "description": "Create Pydantic schemas for API request/response validation and serialization of agent conversation data",
+            "dependencies": ["39.1"],
+            "details": "Define schemas in api/schemas/agent_conversation.py: 1) AgentCreate/AgentResponse schemas with validation for name (max 255 chars), type (enum values), gmn_spec (dict), belief_state (dict). 2) ConversationCreate schema with agent_ids (list of UUIDs, min 2, max 5), prompt (min 1 char), turns (int between 5-20). 3) ConversationResponse with all fields plus computed properties. 4) MessageResponse schema. Implement custom validators for UUID formats, JSONB field structures, and business rules.",
+            "status": "done",
+            "testStrategy": "Test schema validation with valid/invalid inputs, edge cases for field constraints, serialization/deserialization of JSONB fields, and error message clarity."
+          },
+          {
+            "id": 3,
+            "title": "Create Database Migration Scripts with Alembic",
+            "description": "Generate and configure Alembic migration scripts to create the agent conversation tables with proper indexes and constraints",
+            "dependencies": ["39.1"],
+            "details": "Generate Alembic migration using SQLAlchemy models: 1) Create agents table with btree index on (type, created_at), GIN index on gmn_spec and belief_state JSONB fields. 2) Create conversations table with btree index on status, GIN index on agent_ids array, composite index on (status, started_at). 3) Create messages table with composite index on (conversation_id, message_order), foreign key constraints with CASCADE delete. Add check constraints: message_order > 0, array_length(agent_ids) >= 2. Include rollback logic in migration.",
+            "status": "done",
+            "testStrategy": "Test migration up/down on test database, verify indexes exist with correct types, test foreign key constraints and cascading deletes, validate JSONB and array column functionality."
+          },
+          {
+            "id": 4,
+            "title": "Implement Repository Pattern for Database Operations",
+            "description": "Create repository classes with methods for CRUD operations on agents, conversations, and messages with proper transaction handling",
+            "dependencies": ["39.1", "39.2"],
+            "details": "Create repositories in api/repositories/: 1) AgentRepository with create_agent(), get_agent(), update_belief_state(), list_agents_by_type(). 2) ConversationRepository with create_conversation(), get_conversation_with_messages(), update_status(), add_message(). 3) Implement transaction management using SQLAlchemy sessions, bulk operations for message insertion, optimistic locking for concurrent updates. Add query optimization with eager loading for related entities.",
+            "status": "done",
+            "testStrategy": "Integration tests with test database for all CRUD operations, transaction rollback scenarios, concurrent update handling, and query performance verification."
+          },
+          {
+            "id": 5,
+            "title": "Setup Database Connection Pool and Configuration",
+            "description": "Configure SQLAlchemy engine with connection pooling optimized for PostgreSQL and integrate with FastAPI dependency injection",
+            "dependencies": ["39.3", "39.4"],
+            "details": "Configure in api/database.py: 1) Set up SQLAlchemy engine with PostgreSQL connection URL from environment, connection pool size (min=5, max=20), pool_pre_ping=True for connection health checks. 2) Create SessionLocal with autocommit=False, autoflush=False. 3) Implement get_db() dependency for FastAPI endpoints. 4) Add database health check endpoint. 5) Configure proper connection timeout and statement timeout. Handle both PostgreSQL for production and SQLite for demo mode based on DATABASE_URL.",
+            "status": "done",
+            "testStrategy": "Test connection pool behavior under load, verify connection recycling, test failover scenarios, validate demo mode with SQLite, and ensure proper session cleanup in FastAPI requests."
+          }
+        ]
+      },
+      {
+        "id": 40,
+        "title": "Implement Agent Creation from Natural Language Prompts",
+        "description": "Build LLM-powered system to analyze user prompts and create specialized agents with unique roles and personalities",
+        "details": "Create agent factory service that uses LLM to analyze user prompts and determine optimal agent roles (Advocate, Analyst, Critic, Creative, Moderator). Generate unique system prompts and personalities for each agent. Implement agent types enum and role-specific prompt templates. Use structured LLM outputs to ensure consistent agent creation. Store agent configurations in database with JSONB fields for flexibility.",
+        "testStrategy": "Test prompt analysis with various input types. Verify agent role distribution and uniqueness. Mock LLM responses for consistent testing. Validate agent system prompt generation and personality traits.",
+        "priority": "high",
+        "dependencies": [39],
+        "status": "pending",
+        "subtasks": []
+      },
+      {
+        "id": 41,
+        "title": "Build Multi-Turn Agent Conversation Engine",
+        "description": "Implement conversation orchestration system where agents take turns responding to prompts and each other",
+        "details": "Create conversation orchestrator that manages turn-based agent interactions. Implement conversation context management to provide each agent with full conversation history. Build agent response generation using LLM providers (OpenAI, Anthropic) with role-specific system prompts. Add conversation flow control (start, pause, stop). Implement configurable turn limits (5-20) and conversation completion logic.",
+        "testStrategy": "Test conversation flow with multiple agents. Verify context preservation across turns. Test conversation controls and completion conditions. Mock LLM responses for deterministic testing.",
+        "priority": "high",
+        "dependencies": [40],
+        "status": "pending",
+        "subtasks": []
+      },
+      {
+        "id": 42,
+        "title": "Create Real-time WebSocket Communication System",
+        "description": "Implement WebSocket infrastructure for broadcasting agent messages and conversation updates in real-time",
+        "details": "Setup FastAPI WebSocket endpoints for real-time communication. Implement WebSocket connection management with client tracking. Create message broadcasting system for conversation events (conversation_message, agent_created, conversation_completed). Add connection authentication and session management. Implement error handling and reconnection logic. Use WebSocket groups for conversation-specific broadcasting.",
+        "testStrategy": "Test WebSocket connections and message broadcasting. Verify real-time message delivery. Test connection handling with multiple clients. Mock conversation events for WebSocket testing.",
+        "priority": "medium",
+        "dependencies": [41],
+        "status": "pending",
+        "subtasks": []
+      },
+      {
+        "id": 43,
+        "title": "Implement GMN Generation from Natural Language",
+        "description": "Build system to convert user prompts into formal Generative Model Network specifications using LLM analysis",
+        "details": "Create GMN generator service that uses LLM to translate natural language prompts into formal GMN JSON specifications. Define GMN schema with states, observations, actions, and parameters (A: observation_model, B: transition_model, C: preferences, D: initial_beliefs). Implement structured LLM prompts for consistent GMN generation. Add validation for probability distributions summing to 1.0. Create fallback templates for common scenarios (explorer, analyst, creative agent types).",
+        "testStrategy": "Test GMN generation with various prompt types. Validate JSON structure and probability distributions. Test fallback template usage. Verify GMN semantic correctness and completeness.",
+        "priority": "high",
+        "dependencies": [40],
+        "status": "pending",
+        "subtasks": []
+      },
+      {
+        "id": 44,
+        "title": "Integrate PyMDP Active Inference Engine",
+        "description": "Implement PyMDP-based active inference system for agent belief state management and policy selection",
+        "details": "Install and configure PyMDP library. Implement belief state management using Bayesian inference with GMN parameters. Create policy selection algorithm using Expected Free Energy minimization. Implement active inference loop: observe state → update beliefs → calculate EFE → select action → execute. Add support for multi-factor beliefs and complex state spaces. Configure planning horizon (3-10 steps) and probabilistic action selection.",
+        "testStrategy": "Unit tests for belief state updates and policy selection. Test active inference loop with mock observations. Verify EFE calculations and action selection probabilities. Integration tests with GMN specifications.",
+        "priority": "high",
+        "dependencies": [43],
+        "status": "pending",
+        "subtasks": []
+      },
+      {
+        "id": 45,
+        "title": "Create Knowledge Graph Database Schema and Operations",
+        "description": "Build knowledge graph storage system with nodes, edges, and LLM-powered entity extraction",
+        "details": "Create knowledge graph tables: kg_nodes (id UUID, label VARCHAR(255), type VARCHAR(50), properties JSONB, created_by UUID, created_at TIMESTAMP), kg_edges (id UUID, source_id UUID, target_id UUID, relationship VARCHAR(255), weight FLOAT, properties JSONB). Implement graph operations (create, read, update, delete nodes/edges). Add semantic search and path finding algorithms. Create LLM-powered entity extraction from agent conversations. Implement graph enrichment with properties and metadata.",
+        "testStrategy": "Test graph CRUD operations and relationship management. Verify entity extraction from conversation text. Test semantic search and path finding algorithms. Performance tests for large graphs (up to 10,000 nodes).",
+        "priority": "medium",
+        "dependencies": [39],
+        "status": "pending",
+        "subtasks": []
+      },
+      {
+        "id": 46,
+        "title": "Build Agent Conversation API Endpoints",
+        "description": "Create REST API endpoints for managing agent conversations with full CRUD operations and conversation controls",
+        "details": "Implement FastAPI endpoints: POST /api/v1/agent-conversations (create new conversation), GET /api/v1/agent-conversations/{id} (retrieve conversation), PUT /api/v1/agent-conversations/{id}/control (start/pause/stop). Add request/response models with Pydantic schemas. Implement conversation parameter validation (agent_count: 2-5, conversation_turns: 5-20, llm_provider selection). Add error handling and proper HTTP status codes. Integrate with WebSocket broadcasting for real-time updates.",
+        "testStrategy": "API endpoint testing with various input parameters. Test conversation lifecycle (create, start, pause, stop). Verify request/response schemas and error handling. Integration tests with WebSocket broadcasting.",
+        "priority": "high",
+        "dependencies": [42, 44],
+        "status": "pending",
+        "subtasks": []
+      },
+      {
+        "id": 47,
+        "title": "Implement Continuous Planning and Multi-Agent Coordination",
+        "description": "Build planning cycle system with coalition formation, task delegation, and consensus building between agents",
+        "details": "Create planning cycle orchestrator: analyze knowledge graph → identify gaps → formulate strategies → execute through conversation → observe outcomes → update knowledge. Implement coalition formation algorithm for complementary agent skills. Add task delegation system based on agent capabilities. Create consensus building through structured debate resolution. Implement success metrics tracking and strategy evolution. Add adaptive strategy refinement based on feedback.",
+        "testStrategy": "Test planning cycle execution and knowledge graph integration. Verify coalition formation and task delegation logic. Test consensus building algorithms. Mock agent capabilities and strategy outcomes for testing.",
+        "priority": "medium",
+        "dependencies": [45, 46],
+        "status": "pending",
+        "subtasks": []
+      },
+      {
+        "id": 48,
+        "title": "Create Frontend React Interface with Real-time Updates",
+        "description": "Build React-based UI for agent conversations with WebSocket integration and knowledge graph visualization",
+        "details": "Create React components for conversation interface, agent management, and knowledge graph visualization. Implement WebSocket client for real-time message updates. Add conversation controls (start, pause, stop, replay). Create agent creation form with prompt input and configuration options. Implement message history display with agent avatars and role indicators. Add knowledge graph visualization using D3.js or similar library. Implement responsive design for desktop and mobile.",
+        "testStrategy": "Component testing with React Testing Library. Test WebSocket connection and real-time updates. Verify conversation controls and agent interaction. Test knowledge graph visualization rendering. End-to-end testing of complete user workflows.",
+        "priority": "medium",
+        "dependencies": [42, 47],
+        "status": "pending",
+        "subtasks": []
       }
     ],
     "metadata": {
       "created": "2025-07-04T12:52:30.518Z",
-      "updated": "2025-07-31T13:10:30.419Z",
+      "updated": "2025-07-31T23:19:14.625Z",
       "description": "Tasks for master context"
     }
   }

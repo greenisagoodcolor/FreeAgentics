@@ -11,7 +11,7 @@
 
 ### Key Achievements
 
-- ✅ **README Fixed**: Removed incorrect `freeagentics2-nemesis` directory references
+- ✅ **README Fixed**: Removed incorrect `freeagentics-nemesis` directory references
 - ✅ **Complete Pipeline Verified**: LLM → GMN → PyMDP → H3 Grid → Knowledge Graph all functional
 - ✅ **Active Inference Working**: Real PyMDP agents with free energy minimization (F=0.260, H=4.153)
 - ✅ **Automated Validation**: Created `test_readme_validation.py` for continuous verification
@@ -23,8 +23,8 @@
 
 The README.md contained **incorrect directory references** that would cause **100% failure** for new developers:
 
-- **Line 13**: Referenced non-existent `./freeagentics2-nemesis/` directory
-- **Line 79**: Git clone instructions included `cd freeagentics2-nemesis` step
+- **Line 13**: Referenced non-existent `./freeagentics-nemesis/` directory
+- **Line 79**: Git clone instructions included `cd freeagentics-nemesis` step
 - **Result**: Any new developer following the README would fail immediately
 
 ### Impact Assessment
@@ -88,8 +88,8 @@ The README.md contained **incorrect directory references** that would cause **10
 
 **Fixed Issues**:
 
-- Line 13: `./freeagentics2-nemesis/` → `current directory - you're already in the right place!`
-- Line 79: Removed `cd freeagentics2-nemesis` step entirely
+- Line 13: `./freeagentics-nemesis/` → `current directory - you're already in the right place!`
+- Line 79: Removed `cd freeagentics-nemesis` step entirely
 - Updated Git clone URL to correct `https://github.com/greenisagoodcolor/freeagentics.git`
 - Removed confusing directory warning section
 

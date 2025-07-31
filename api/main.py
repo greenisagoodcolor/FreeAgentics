@@ -31,6 +31,8 @@ from api.v1 import (
     websocket,
 )
 from api.v1.graphql_schema import graphql_app
+from api.v1.routers import agent_conversations_router
+from api.v1.websockets import agent_conversation_ws_router
 from auth.security_headers import SecurityHeadersManager, SecurityHeadersMiddleware, SecurityPolicy
 from observability.performance_metrics import start_performance_tracking
 from observability.prometheus_metrics import (
@@ -177,12 +179,16 @@ app.include_router(auth.router, prefix="/api/v1", tags=["auth"])  # Auth must be
 app.include_router(mfa.router, tags=["mfa"])  # MFA router has its own prefix
 app.include_router(dev_config.router, prefix="/api/v1", tags=["dev"])  # Dev config
 app.include_router(agents.router, prefix="/api/v1", tags=["agents"])
+app.include_router(agent_conversations_router, prefix="/api/v1", tags=["agent-conversations"])
 app.include_router(prompts.router, prefix="/api/v1", tags=["prompts"])
 app.include_router(inference.router, prefix="/api/v1", tags=["inference"])
 app.include_router(knowledge.router, prefix="/api/v1/knowledge", tags=["knowledge"])
 app.include_router(knowledge_graph.router, prefix="/api/v1", tags=["knowledge-graph"])
 app.include_router(system.router, prefix="/api/v1", tags=["system"])
 app.include_router(websocket.router, prefix="/api/v1", tags=["websocket"])
+app.include_router(
+    agent_conversation_ws_router, prefix="/api/v1", tags=["agent-conversation-websocket"]
+)
 app.include_router(monitoring.router, prefix="/api/v1", tags=["monitoring"])
 app.include_router(security.router, prefix="/api/v1", tags=["security"])
 app.include_router(settings.router, prefix="/api/v1", tags=["settings"])

@@ -9,7 +9,7 @@ Following TDD Green phase: minimal implementation to make tests pass.
 
 import logging
 from datetime import datetime
-from typing import Dict, List, Optional
+from typing import Any, Dict, List, Optional
 
 from fastapi import APIRouter, Depends, HTTPException, Query
 from pydantic import BaseModel, Field
@@ -337,8 +337,10 @@ class ProcessPromptRequest(BaseModel):
 class ProcessPromptResponse(BaseModel):
     """Response model for prompt processing."""
 
-    response: str
-    knowledgeGraph: Optional[Dict] = None
+    agents: List[Dict[str, Any]] = Field(default_factory=list)
+    knowledgeGraph: Dict[str, Any] = Field(default_factory=lambda: {"nodes": [], "edges": []})
+    suggestions: List[str] = Field(default_factory=list)
+    conversationId: str
 
 
 @router.post("/process-prompt")
@@ -347,10 +349,10 @@ async def process_prompt_ui(
     current_user: TokenData = Depends(get_current_user),
     db: Session = Depends(get_db),
 ) -> ProcessPromptResponse:
-    """Process a prompt through the real agent creation pipeline and enable agent conversations."""
+    """Process a prompt through the agent conversation pipeline to enable multi-agent conversations."""
     import uuid
 
-    from api.v1.prompts import PromptRequest, create_agent_from_prompt
+    from api.v1.agent_conversations import ConversationRequest, start_agent_conversation
 
     message_id = str(uuid.uuid4())
     conversation_id = request.conversationId or f"conv_{uuid.uuid4().hex[:8]}"
@@ -387,24 +389,26 @@ async def process_prompt_ui(
             }
         )
 
-        # Create agent from the prompt using the real pipeline
-        logger.info(f"Creating agent from prompt: {request.prompt[:100]}...")
+        # Create multiple agents and start a conversation
+        logger.info(f"Starting agent conversation from prompt: {request.prompt[:100]}...")
 
-        prompt_request = PromptRequest(
+        # Use the agent conversation service to create multiple agents and run a conversation
+        conversation_request = ConversationRequest(
             prompt=request.prompt,
-            agent_name=None,  # Let the system generate a name
-            llm_provider="openai",  # Use OpenAI as configured by user
-            model=None,  # Use default model
-            max_retries=3,
+            agent_count=2,  # Create 2 agents for conversation
+            conversation_turns=5,  # 5 turns of conversation
+            llm_provider="openai",
+            model="gpt-3.5-turbo",
         )
 
-        # Call the real agent creation pipeline
-        agent_response = await create_agent_from_prompt(prompt_request, current_user)
-
-        # Generate intelligent analysis based on the prompt
-        analysis_response = await _generate_agent_analysis(
-            request.prompt, agent_response, current_user
+        # Call the agent conversation endpoint
+        conversation_response = await start_agent_conversation(
+            request=conversation_request, current_user=current_user, db=db
         )
+
+        # The conversation messages are already broadcast by the service
+        # Just send a summary response
+        analysis_response = f"Started agent conversation with {len(conversation_response.agents)} agents discussing: {request.prompt}"
 
         # Send the analysis response via WebSocket
         await manager.broadcast(
@@ -421,27 +425,58 @@ async def process_prompt_ui(
             }
         )
 
-        # Send agent creation notification
-        await manager.broadcast(
-            {
-                "type": "agent_created",
-                "data": {
-                    "agent_id": agent_response.agent_id,
-                    "agent_name": agent_response.agent_name,
-                    "message": f"Created active inference agent: {agent_response.agent_name}",
-                    "timestamp": datetime.now().isoformat(),
-                    "gmn_spec": agent_response.gmn_spec,
-                    "status": agent_response.status,
-                },
-            }
-        )
+        # Send agent creation notifications for all agents
+        for agent in conversation_response.agents:
+            await manager.broadcast(
+                {
+                    "type": "agent_created",
+                    "data": {
+                        "agent_id": agent["id"],
+                        "agent_name": agent["name"],
+                        "message": f"Created active inference agent: {agent['name']}",
+                        "timestamp": datetime.now().isoformat(),
+                        "status": agent.get("status", "active"),
+                    },
+                }
+            )
 
-        # Create additional collaborative agents if the prompt suggests business/project planning
-        await _create_collaborative_agents_if_needed(
-            request.prompt, conversation_id, current_user, manager
-        )
+        # Format agents for frontend
+        agents_for_frontend = []
+        for agent in conversation_response.agents:
+            agents_for_frontend.append(
+                {
+                    "id": agent["id"],
+                    "name": agent["name"],
+                    "type": agent.get("role", "explorer"),
+                    "status": agent.get("status", "active"),
+                    "description": f"{agent['name']} - {agent.get('personality', '')}",
+                    "createdAt": datetime.now().isoformat(),
+                    "lastActiveAt": datetime.now().isoformat(),
+                }
+            )
 
-        response_text = analysis_response
+        # Get knowledge graph
+        try:
+            kg_response = await get_knowledge_graph_ui(current_user)
+            kg_data = (
+                kg_response.model_dump()
+                if hasattr(kg_response, "model_dump")
+                else kg_response.dict()
+            )
+        except Exception as e:
+            logger.warning(f"Failed to get knowledge graph: {e}")
+            kg_data = {"nodes": [], "edges": []}
+
+        return ProcessPromptResponse(
+            agents=agents_for_frontend,
+            knowledgeGraph=kg_data,
+            suggestions=[
+                "How can agents collaborate on complex problems?",
+                "What strategies emerge from agent conversations?",
+                "How do belief systems evolve during agent interactions?",
+            ],
+            conversationId=conversation_id,
+        )
 
     except Exception as e:
         logger.error(f"Failed to process prompt through real pipeline: {e}")
@@ -480,19 +515,13 @@ The infrastructure is now in place for real agent-to-agent conversations. Just a
         except Exception as ws_error:
             logger.error(f"Failed to send error via WebSocket: {ws_error}")
 
-        response_text = error_response
-
-    # Get current knowledge graph
-    try:
-        kg_response = await get_knowledge_graph_ui(current_user)
-        kg_data = (
-            kg_response.model_dump() if hasattr(kg_response, "model_dump") else kg_response.dict()
+        # Return error response
+        return ProcessPromptResponse(
+            agents=[],
+            knowledgeGraph={"nodes": [], "edges": []},
+            suggestions=[],
+            conversationId=conversation_id,
         )
-    except Exception as e:
-        logger.warning(f"Failed to get knowledge graph: {e}")
-        kg_data = None
-
-    return ProcessPromptResponse(response=response_text, knowledgeGraph=kg_data)
 
 
 async def _generate_agent_analysis(prompt: str, agent_response, current_user: TokenData) -> str:

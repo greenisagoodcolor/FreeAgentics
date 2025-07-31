@@ -1,0 +1,228 @@
+# FreeAgentics Agent Conversation System - Complete Implementation PRD
+
+## Executive Summary
+
+The FreeAgentics multi-agent AI platform currently has all necessary components (LLM integration, GMN parser, PyMDP, WebSocket infrastructure) but lacks the critical orchestration layer that enables agents to actually converse and collaborate. This PRD specifies the implementation of a Unified Agent Conversation Pipeline that transforms the existing infrastructure into a working end-to-end system.
+
+## Problem Statement
+
+Despite successful API key storage and individual component functionality, the system fails to deliver its core promise: autonomous agents that converse, reason using Active Inference, and collaboratively solve problems. The logs show "Fetched agents: 0" even after agent creation attempts, and no LLM responses or agent conversations occur.
+
+## Current State Analysis
+
+### Working Components
+- API key storage and encryption ✓
+- WebSocket connections ✓
+- Individual service endpoints ✓
+- GMN parser (isolated) ✓
+- PyMDP integration (isolated) ✓
+
+### Broken Integration Points
+1. Agent creation doesn't persist to conversation system
+2. Prompt processing doesn't trigger agent creation
+3. LLM provider initialization fails silently
+4. No GMN generation from prompts
+5. No PyMDP belief updates
+6. Knowledge graph shows only mock data
+7. WebSocket messages don't reach agents
+
+## Proposed Solution: Unified Agent Conversation Pipeline
+
+### Core Architecture
+
+Implement a single orchestration service that manages the complete flow:
+```
+User Prompt → Agent Creation → GMN Generation → PyMDP Processing → Agent Activation → LLM Conversations → Knowledge Updates → Iteration
+```
+
+### Implementation Requirements
+
+#### Phase 1: Foundation Repair (Critical Path)
+
+1. **Create Unified Agent Service** (`/api/v1/agent-conversations`)
+   - Single endpoint for complete agent lifecycle
+   - Handles prompt → agent → conversation flow
+   - Returns actionable status updates via WebSocket
+
+2. **Fix Agent Creation Pipeline**
+   - Ensure agents persist to both database AND runtime systems
+   - Generate default GMN specs for each agent role
+   - Initialize PyMDP belief states
+
+3. **Connect LLM Provider**
+   - Validate API key on first use
+   - Implement proper error handling with user guidance
+   - Support fallback to demo mode
+
+4. **Enable Basic Conversations**
+   - Agent-to-agent message passing
+   - Simple turn-taking protocol
+   - Visible conversation history
+
+#### Phase 2: Active Inference Integration
+
+1. **GMN Generation from Prompts**
+   - Parse user goals into formal GMN specifications
+   - Map goals to agent preferences
+   - Generate belief priors based on domain
+
+2. **PyMDP Belief Updates**
+   - Process observations through Active Inference
+   - Update agent beliefs based on conversation
+   - Generate next actions from free energy minimization
+
+3. **Knowledge Graph Integration**
+   - Extract entities/relationships from conversations
+   - Update graph in real-time
+   - Show belief evolution visually
+
+#### Phase 3: Production Readiness
+
+1. **Observability & Monitoring**
+   - Structured logging for conversation flow
+   - Metrics on inference time and accuracy
+   - User-facing status indicators
+
+2. **Error Recovery**
+   - Graceful degradation to demo mode
+   - Clear error messages with solutions
+   - Conversation state persistence
+
+3. **Performance Optimization**
+   - Agent spawn time < 50ms
+   - Conversation latency < 200ms
+   - Knowledge graph updates < 100ms
+
+## Technical Specifications
+
+### API Endpoints
+
+```python
+POST /api/v1/agent-conversations
+{
+  "prompt": "create a jakarta accelerator for green chemistry",
+  "agent_count": 2,
+  "conversation_mode": "collaborative"
+}
+
+Response:
+{
+  "conversation_id": "conv_123",
+  "agents": [
+    {
+      "id": "agent_1",
+      "name": "Research Analyst",
+      "gmn_spec": {...},
+      "initial_beliefs": {...}
+    },
+    {
+      "id": "agent_2",
+      "name": "Implementation Strategist",
+      "gmn_spec": {...},
+      "initial_beliefs": {...}
+    }
+  ],
+  "status": "agents_created",
+  "next_action": "starting_conversation"
+}
+```
+
+### WebSocket Message Flow
+
+```javascript
+// Client → Server
+{
+  "type": "start_conversation",
+  "conversation_id": "conv_123",
+  "initial_message": "Let's design a Jakarta accelerator for green chemistry"
+}
+
+// Server → Client (Agent Response)
+{
+  "type": "agent_message",
+  "agent_id": "agent_1",
+  "content": "I'll analyze the requirements for a green chemistry accelerator...",
+  "beliefs_updated": true,
+  "knowledge_nodes_added": 3
+}
+```
+
+### Database Schema Updates
+
+```sql
+-- Add conversation tracking
+CREATE TABLE conversations (
+  id UUID PRIMARY KEY,
+  prompt TEXT NOT NULL,
+  status VARCHAR(50),
+  gmn_spec JSONB,
+  created_at TIMESTAMP DEFAULT NOW()
+);
+
+-- Link agents to conversations
+ALTER TABLE agents ADD COLUMN conversation_id UUID REFERENCES conversations(id);
+```
+
+## Success Metrics
+
+1. **User Experience**
+   - Time to first agent response < 3 seconds
+   - Visible conversation flow
+   - Clear progress indicators
+
+2. **Technical Performance**
+   - 100% of prompts generate agents
+   - 100% of agents produce conversations
+   - 0% silent failures
+
+3. **Active Inference Integration**
+   - GMN specs generated for all agents
+   - Beliefs update with each turn
+   - Free energy minimization drives responses
+
+## Implementation Timeline
+
+- Week 1: Unified Agent Service + Basic Conversations
+- Week 2: GMN Generation + PyMDP Integration
+- Week 3: Knowledge Graph Updates + UI Polish
+- Week 4: Error Handling + Performance Optimization
+
+## Testing Strategy
+
+1. **Integration Tests**
+   - End-to-end prompt → conversation flow
+   - WebSocket message delivery
+   - Database persistence
+
+2. **Active Inference Validation**
+   - GMN spec correctness
+   - Belief update convergence
+   - Action selection optimality
+
+3. **User Acceptance**
+   - Demo scenario walkthroughs
+   - Error recovery paths
+   - Performance benchmarks
+
+## Risk Mitigation
+
+1. **LLM Provider Failures**
+   - Implement retry with exponential backoff
+   - Fallback to alternative providers
+   - Demo mode for development
+
+2. **WebSocket Disconnections**
+   - Automatic reconnection
+   - Message queue persistence
+   - State synchronization
+
+3. **Performance Bottlenecks**
+   - Agent pooling
+   - Caching of GMN specs
+   - Async belief updates
+
+## Conclusion
+
+This implementation will transform FreeAgentics from a collection of sophisticated but disconnected components into a cohesive multi-agent AI platform. By focusing on the user experience flow first and building proper orchestration, we can deliver on the promise of autonomous agents that truly converse, reason, and collaborate using Active Inference principles.
+
+The implementation follows CLAUDE.md standards for TDD, observability, security, and performance while maintaining architectural simplicity through the Unified Agent Service pattern.

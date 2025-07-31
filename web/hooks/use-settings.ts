@@ -96,10 +96,12 @@ export function useSettings(): SettingsState {
   }, []);
 
   const updateSettings = useCallback((updates: Partial<Settings>) => {
+    console.log("updateSettings called with:", updates);
     setSaveError(null);
 
     setSettings((current) => {
       const newSettings = { ...current, ...updates };
+      console.log("New settings will be:", newSettings);
 
       // Validate model for provider
       if (updates.llmProvider && !updates.llmModel) {
@@ -130,14 +132,21 @@ export function useSettings(): SettingsState {
           const backendUpdates: Record<string, any> = {};
           if ("llmProvider" in updates) backendUpdates.llm_provider = updates.llmProvider;
           if ("llmModel" in updates) backendUpdates.llm_model = updates.llmModel;
-          if ("openaiApiKey" in updates) backendUpdates.openai_api_key = updates.openaiApiKey;
-          if ("anthropicApiKey" in updates)
+          if ("openaiApiKey" in updates) {
+            backendUpdates.openai_api_key = updates.openaiApiKey;
+            console.log("Sending OpenAI API key to backend");
+          }
+          if ("anthropicApiKey" in updates) {
             backendUpdates.anthropic_api_key = updates.anthropicApiKey;
+            console.log("Sending Anthropic API key to backend");
+          }
           if ("gnnEnabled" in updates) backendUpdates.gnn_enabled = updates.gnnEnabled;
           if ("debugLogs" in updates) backendUpdates.debug_logs = updates.debugLogs;
           if ("autoSuggest" in updates) backendUpdates.auto_suggest = updates.autoSuggest;
 
+          console.log("Sending PATCH request with:", backendUpdates);
           const response = await apiClient.updateSettings(backendUpdates);
+          console.log("PATCH response:", response);
           if (!response.success) {
             setSaveError(response.error || "Failed to save settings");
             console.error("Failed to save settings to backend:", response.error);
@@ -145,6 +154,7 @@ export function useSettings(): SettingsState {
             // Clear any previous save errors on successful save
             setSaveError(null);
             console.log("✅ Settings saved successfully to backend");
+            console.log("Response data:", response.data);
           }
         } catch (error) {
           setSaveError("Failed to save settings. Please try again.");

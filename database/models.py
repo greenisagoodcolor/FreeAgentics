@@ -86,6 +86,20 @@ agent_coalition_association = Table(
     Column("trust_score", Float, default=1.0),
 )
 
+# Association table for many-to-many relationship between agents and conversations
+agent_conversation_association = Table(
+    "agent_conversations",
+    Base.metadata,
+    Column("agent_id", GUID(), ForeignKey("agents.id"), primary_key=True),
+    Column(
+        "conversation_id", GUID(), ForeignKey("agent_conversation_sessions.id"), primary_key=True
+    ),
+    Column("role", String(50), default="participant"),
+    Column("joined_at", DateTime, server_default=func.now()),
+    Column("left_at", DateTime, nullable=True),
+    Column("message_count", Integer, default=0),
+)
+
 
 class Agent(Base):
     """Agent model representing an Active Inference agent.
@@ -136,6 +150,14 @@ class Agent(Base):
 
     # Knowledge graph nodes created by this agent
     knowledge_nodes = relationship("KnowledgeNode", back_populates="creator_agent", lazy="select")
+
+    # Agent conversation sessions this agent participates in
+    conversation_sessions = relationship(
+        "AgentConversationSession",
+        secondary=agent_conversation_association,
+        back_populates="agents",
+        lazy="select",
+    )
 
     def to_dict(self) -> dict:
         """Convert agent to dictionary for API responses."""
@@ -375,3 +397,151 @@ class KnowledgeEdge(Base):
         foreign_keys=[target_id],
         back_populates="incoming_edges",
     )
+
+
+# Enums for agent conversation system
+class ConversationStatus(PyEnum):
+    """Status of an agent conversation."""
+
+    PENDING = "pending"
+    ACTIVE = "active"
+    COMPLETED = "completed"
+    FAILED = "failed"
+    CANCELLED = "cancelled"
+
+
+class AgentConversationSession(Base):
+    """Agent conversation session model.
+
+    Represents a multi-agent conversation with persistent storage.
+    """
+
+    __tablename__ = "agent_conversation_sessions"
+
+    # Primary key
+    id: Column[str] = Column(GUID(), primary_key=True, default=uuid.uuid4)
+
+    # Basic properties
+    prompt = Column(Text, nullable=False)
+    title = Column(String(255), nullable=True)
+    description = Column(Text, nullable=True)
+
+    # Status and lifecycle
+    status: Column[ConversationStatus] = Column(
+        Enum(ConversationStatus, values_callable=lambda x: [e.value for e in x]),
+        default=ConversationStatus.PENDING.value,
+    )
+
+    # Conversation metrics
+    message_count = Column(Integer, default=0)
+    agent_count = Column(Integer, default=0)
+    max_turns = Column(Integer, default=5)
+    current_turn = Column(Integer, default=0)
+
+    # Configuration
+    llm_provider = Column(String(50), nullable=True)
+    llm_model = Column(String(100), nullable=True)
+    config = Column(JSON, default=dict)
+
+    # Timestamps
+    created_at = Column(DateTime, server_default=func.now())
+    started_at = Column(DateTime, nullable=True)
+    completed_at = Column(DateTime, nullable=True)
+    updated_at = Column(DateTime, server_default=func.now(), onupdate=func.now())
+
+    # User who created the conversation
+    user_id = Column(String(255), nullable=True, index=True)
+
+    # Relationships
+    agents = relationship(
+        "Agent",
+        secondary=agent_conversation_association,
+        back_populates="conversation_sessions",
+        lazy="select",
+    )
+
+    messages = relationship(
+        "AgentConversationMessage",
+        back_populates="conversation",
+        cascade="all, delete-orphan",
+        order_by="AgentConversationMessage.message_order",
+    )
+
+    def to_dict(self) -> dict:
+        """Convert conversation to dictionary for API responses."""
+        return {
+            "id": str(self.id),
+            "prompt": self.prompt,
+            "title": self.title,
+            "description": self.description,
+            "status": self.status.value if hasattr(self.status, "value") else str(self.status),
+            "message_count": self.message_count,
+            "agent_count": self.agent_count,
+            "max_turns": self.max_turns,
+            "current_turn": self.current_turn,
+            "llm_provider": self.llm_provider,
+            "llm_model": self.llm_model,
+            "config": self.config,
+            "created_at": self.created_at.isoformat() if self.created_at else None,
+            "started_at": self.started_at.isoformat() if self.started_at else None,
+            "completed_at": self.completed_at.isoformat() if self.completed_at else None,
+            "user_id": self.user_id,
+        }
+
+
+class AgentConversationMessage(Base):
+    """Message in an agent conversation.
+
+    Represents individual messages exchanged during agent conversations.
+    """
+
+    __tablename__ = "agent_conversation_messages"
+
+    # Primary key
+    id: Column[str] = Column(GUID(), primary_key=True, default=uuid.uuid4)
+
+    # Foreign keys
+    conversation_id: Column[str] = Column(
+        GUID(), ForeignKey("agent_conversation_sessions.id"), nullable=False, index=True
+    )
+    agent_id: Column[str] = Column(GUID(), ForeignKey("agents.id"), nullable=False, index=True)
+
+    # Message content
+    content = Column(Text, nullable=False)
+    message_order = Column(Integer, nullable=False)
+    turn_number = Column(Integer, nullable=False, default=1)
+
+    # Message metadata
+    role = Column(String(50), default="assistant")  # 'system', 'user', 'assistant'
+    message_type = Column(String(50), default="text")  # 'text', 'system', 'error'
+    message_metadata = Column(JSON, default=dict)
+
+    # Processing status
+    is_processed = Column(Boolean, default=False)
+    processing_time_ms = Column(Integer, nullable=True)
+
+    # Timestamps
+    created_at = Column(DateTime, server_default=func.now(), index=True)
+    updated_at = Column(DateTime, server_default=func.now(), onupdate=func.now())
+
+    # Relationships
+    conversation = relationship("AgentConversationSession", back_populates="messages")
+    agent = relationship("Agent", lazy="select")
+
+    def to_dict(self) -> dict:
+        """Convert message to dictionary for API responses."""
+        return {
+            "id": str(self.id),
+            "conversation_id": str(self.conversation_id),
+            "agent_id": str(self.agent_id),
+            "content": self.content,
+            "message_order": self.message_order,
+            "turn_number": self.turn_number,
+            "role": self.role,
+            "message_type": self.message_type,
+            "metadata": self.message_metadata,
+            "is_processed": self.is_processed,
+            "processing_time_ms": self.processing_time_ms,
+            "created_at": self.created_at.isoformat() if self.created_at else None,
+            "updated_at": self.updated_at.isoformat() if self.updated_at else None,
+        }

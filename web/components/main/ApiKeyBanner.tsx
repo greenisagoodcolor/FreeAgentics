@@ -14,8 +14,10 @@ export function ApiKeyBanner({ onSettingsClick }: ApiKeyBannerProps) {
   const { settings, isLoading } = useSettings();
   const [isDismissed, setIsDismissed] = useState(false);
 
-  // Check if any API key is configured
-  const hasApiKey = settings.openaiApiKey || settings.anthropicApiKey;
+  // Check if any API key is configured (not just masked values)
+  const hasApiKey =
+    (settings.openaiApiKey && !settings.openaiApiKey.includes("****")) ||
+    (settings.anthropicApiKey && !settings.anthropicApiKey.includes("****"));
 
   // Reset dismissed state when API key status changes
   useEffect(() => {
@@ -39,11 +41,7 @@ export function ApiKeyBanner({ onSettingsClick }: ApiKeyBannerProps) {
             Without it, agents cannot communicate or collaborate.
           </p>
           <div className="flex gap-2 mt-3">
-            <Button
-              size="sm"
-              onClick={onSettingsClick}
-              className="gap-2"
-            >
+            <Button size="sm" onClick={onSettingsClick} className="gap-2">
               <Settings className="h-4 w-4" />
               Add API Key in Settings
             </Button>
