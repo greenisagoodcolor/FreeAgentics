@@ -14,6 +14,7 @@ from fastapi.staticfiles import StaticFiles
 from api import ui_compatibility
 from api.middleware.security_monitoring import SecurityMonitoringMiddleware
 from api.v1 import (
+    agent_creation,
     agents,
     auth,
     dev_config,
@@ -179,6 +180,7 @@ app.include_router(auth.router, prefix="/api/v1", tags=["auth"])  # Auth must be
 app.include_router(mfa.router, tags=["mfa"])  # MFA router has its own prefix
 app.include_router(dev_config.router, prefix="/api/v1", tags=["dev"])  # Dev config
 app.include_router(agents.router, prefix="/api/v1", tags=["agents"])
+app.include_router(agent_creation.router, prefix="/api/v1/agents", tags=["agent-creation"])
 app.include_router(agent_conversations_router, prefix="/api/v1", tags=["agent-conversations"])
 app.include_router(prompts.router, prefix="/api/v1", tags=["prompts"])
 app.include_router(inference.router, prefix="/api/v1", tags=["inference"])

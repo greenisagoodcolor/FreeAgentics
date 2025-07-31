@@ -5,13 +5,17 @@ following TDD principles as recommended by Kent Beck.
 """
 
 import uuid
-from datetime import datetime
-from unittest.mock import Mock, patch
+from unittest.mock import Mock
 
 import pytest
 from sqlalchemy.orm import Session
 
-from database.models import Agent, AgentConversationSession, AgentConversationMessage, ConversationStatus
+from database.models import (
+    Agent,
+    AgentConversationMessage,
+    AgentConversationSession,
+    ConversationStatus,
+)
 from database.repositories.agent_conversation_repository import AgentConversationRepository
 
 
@@ -37,7 +41,7 @@ class TestAgentConversationRepository:
             template="test_template",
             gmn_spec='{"test": "spec"}',
             beliefs={"initial": "belief"},
-            preferences={"test": "preference"}
+            preferences={"test": "preference"},
         )
 
     @pytest.fixture
@@ -50,7 +54,7 @@ class TestAgentConversationRepository:
             status=ConversationStatus.PENDING,
             message_count=0,
             agent_count=1,
-            config={"test": "config"}
+            config={"test": "config"},
         )
 
     @pytest.mark.asyncio
@@ -81,7 +85,7 @@ class TestAgentConversationRepository:
         # Act & Assert
         with pytest.raises(Exception, match="Database error"):
             repository.create_conversation(sample_conversation)
-        
+
         mock_db.rollback.assert_called_once()
 
     def test_get_conversation_by_id_exists(self, repository, mock_db, sample_conversation):
@@ -122,7 +126,7 @@ class TestAgentConversationRepository:
             conversation_id=sample_conversation.id,
             agent_id=uuid.uuid4(),
             content="Test message",
-            message_order=1
+            message_order=1,
         )
         mock_db.add = Mock()
         mock_db.commit = Mock()
@@ -137,7 +141,9 @@ class TestAgentConversationRepository:
         mock_db.refresh.assert_called_once_with(message)
         assert result == message
 
-    def test_get_conversation_messages_with_pagination(self, repository, mock_db, sample_conversation):
+    def test_get_conversation_messages_with_pagination(
+        self, repository, mock_db, sample_conversation
+    ):
         """Test retrieving conversation messages with pagination."""
         # Arrange
         messages = [
@@ -146,10 +152,11 @@ class TestAgentConversationRepository:
                 conversation_id=sample_conversation.id,
                 agent_id=uuid.uuid4(),
                 content=f"Message {i}",
-                message_order=i
-            ) for i in range(1, 6)
+                message_order=i,
+            )
+            for i in range(1, 6)
         ]
-        
+
         mock_query = Mock()
         mock_db.query.return_value = mock_query
         mock_query.filter.return_value = mock_query
@@ -159,11 +166,7 @@ class TestAgentConversationRepository:
         mock_query.all.return_value = messages[:3]  # First 3 messages
 
         # Act
-        result = repository.get_conversation_messages(
-            sample_conversation.id, 
-            skip=0, 
-            limit=3
-        )
+        result = repository.get_conversation_messages(sample_conversation.id, skip=0, limit=3)
 
         # Assert
         mock_db.query.assert_called_once_with(AgentConversationMessage)
@@ -196,10 +199,11 @@ class TestAgentConversationRepository:
                 id=uuid.uuid4(),
                 prompt=f"Conversation {i}",
                 user_id=user_id,
-                status=ConversationStatus.ACTIVE
-            ) for i in range(3)
+                status=ConversationStatus.ACTIVE,
+            )
+            for i in range(3)
         ]
-        
+
         mock_query = Mock()
         mock_db.query.return_value = mock_query
         mock_query.filter.return_value = mock_query
@@ -262,7 +266,7 @@ class TestAgentConversationRepository:
             "total_conversations": 10,
             "active_conversations": 5,
             "completed_conversations": 3,
-            "failed_conversations": 2
+            "failed_conversations": 2,
         }
         assert result == expected
 
@@ -270,38 +274,38 @@ class TestAgentConversationRepository:
     async def test_conversation_lifecycle_integration(self, repository, mock_db):
         """Integration test for complete conversation lifecycle."""
         # This tests the interaction between multiple repository methods
-        
+
         # Arrange
         conversation_id = uuid.uuid4()
         agent_id = uuid.uuid4()
-        
+
         conversation = AgentConversationSession(
             id=conversation_id,
             prompt="Integration test conversation",
-            status=ConversationStatus.PENDING
+            status=ConversationStatus.PENDING,
         )
-        
+
         message1 = AgentConversationMessage(
             id=uuid.uuid4(),
             conversation_id=conversation_id,
             agent_id=agent_id,
             content="First message",
-            message_order=1
+            message_order=1,
         )
-        
+
         message2 = AgentConversationMessage(
             id=uuid.uuid4(),
             conversation_id=conversation_id,
             agent_id=agent_id,
-            content="Second message", 
-            message_order=2
+            content="Second message",
+            message_order=2,
         )
 
         # Mock database operations
         mock_db.add = Mock()
         mock_db.commit = Mock()
         mock_db.refresh = Mock()
-        
+
         # Mock queries
         mock_query = Mock()
         mock_db.query.return_value = mock_query
@@ -314,19 +318,21 @@ class TestAgentConversationRepository:
         # 1. Create conversation
         created_conv = repository.create_conversation(conversation)
         assert created_conv == conversation
-        
+
         # 2. Add messages
         repository.add_message_to_conversation(conversation_id, message1)
         repository.add_message_to_conversation(conversation_id, message2)
-        
+
         # 3. Update status
-        updated_conv = repository.update_conversation_status(conversation_id, ConversationStatus.ACTIVE)
+        updated_conv = repository.update_conversation_status(
+            conversation_id, ConversationStatus.ACTIVE
+        )
         assert updated_conv.status == ConversationStatus.ACTIVE
-        
+
         # 4. Retrieve messages
         messages = repository.get_conversation_messages(conversation_id)
         assert len(messages) == 2
-        
+
         # Verify all database operations were called
         assert mock_db.add.call_count == 3  # 1 conversation + 2 messages
         assert mock_db.commit.call_count == 4  # 3 creates + 1 update

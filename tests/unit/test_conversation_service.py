@@ -5,16 +5,14 @@ and separation of concerns as recommended by Robert C. Martin.
 """
 
 import uuid
-from datetime import datetime
-from unittest.mock import AsyncMock, Mock, patch
+from unittest.mock import AsyncMock, Mock
 
 import pytest
 
 from api.v1.models.agent_conversation import (
     AgentConversationRequest,
     AgentStatus,
-    LLMConfig,
-    ConversationConfig
+    ConversationConfig,
 )
 from api.v1.services.conversation_service import ConversationService
 from database.models import Agent, AgentConversationSession, ConversationStatus
@@ -50,7 +48,7 @@ class TestConversationService:
             repository=mock_repository,
             llm_service=mock_llm_service,
             gmn_parser=mock_gmn_parser,
-            pymdp_service=mock_pymdp_service
+            pymdp_service=mock_pymdp_service,
         )
 
     @pytest.fixture
@@ -58,11 +56,8 @@ class TestConversationService:
         """Sample conversation request."""
         return AgentConversationRequest(
             prompt="Create agents to discuss sustainable energy",
-            config={
-                "agent_count": 2,
-                "conversation_turns": 5
-            },
-            metadata={"session_type": "exploration"}
+            config={"agent_count": 2, "conversation_turns": 5},
+            metadata={"session_type": "exploration"},
         )
 
     @pytest.fixture
@@ -75,7 +70,7 @@ class TestConversationService:
             status="ready",
             gmn_spec='{"states": ["listening", "thinking"], "actions": ["respond"]}',
             beliefs={"sustainability": 0.8},
-            preferences={"energy_type": "renewable"}
+            preferences={"energy_type": "renewable"},
         )
 
     @pytest.fixture
@@ -87,43 +82,48 @@ class TestConversationService:
             title="Test Conversation",
             status=ConversationStatus.PENDING,
             message_count=0,
-            agent_count=1
+            agent_count=1,
         )
 
     @pytest.mark.asyncio
     async def test_create_conversation_success(
-        self, service, mock_repository, mock_llm_service, 
-        mock_gmn_parser, sample_request, sample_agent
+        self,
+        service,
+        mock_repository,
+        mock_llm_service,
+        mock_gmn_parser,
+        sample_request,
+        sample_agent,
     ):
         """Test successful conversation creation."""
         # Arrange
         conversation_id = uuid.uuid4()
         agent_id = uuid.uuid4()
-        
+
         # Mock GMN generation
         mock_gmn_spec = {
             "name": "advocate_agent",
             "states": ["listening", "thinking", "responding"],
-            "actions": ["listen", "respond", "question"]
+            "actions": ["listen", "respond", "question"],
         }
         mock_gmn_parser.generate_gmn_from_prompt.return_value = mock_gmn_spec
-        
+
         # Mock agent creation
         created_agent = Agent(
             id=agent_id,
             name="Advocate Agent",
             template="advocate",
             gmn_spec=str(mock_gmn_spec),
-            beliefs={"sustainability": 0.8}
+            beliefs={"sustainability": 0.8},
         )
         mock_repository.create_agent.return_value = created_agent
-        
+
         # Mock conversation creation
         created_conversation = AgentConversationSession(
             id=conversation_id,
             prompt=sample_request.prompt,
             status=ConversationStatus.PENDING,
-            agent_count=1
+            agent_count=1,
         )
         mock_repository.create_conversation.return_value = created_conversation
 
@@ -135,16 +135,14 @@ class TestConversationService:
         assert result.agent_id == agent_id
         assert result.status == AgentStatus.READY
         assert result.gmn_structure == mock_gmn_spec
-        
+
         # Verify service calls
         mock_gmn_parser.generate_gmn_from_prompt.assert_called_once_with(sample_request.prompt)
         mock_repository.create_agent.assert_called_once()
         mock_repository.create_conversation.assert_called_once()
 
     @pytest.mark.asyncio
-    async def test_create_conversation_llm_failure(
-        self, service, mock_gmn_parser, sample_request
-    ):
+    async def test_create_conversation_llm_failure(self, service, mock_gmn_parser, sample_request):
         """Test conversation creation when LLM service fails."""
         # Arrange
         mock_gmn_parser.generate_gmn_from_prompt.side_effect = Exception("LLM service unavailable")
@@ -168,9 +166,7 @@ class TestConversationService:
             await service.create_conversation(sample_request)
 
     @pytest.mark.asyncio
-    async def test_get_conversation_success(
-        self, service, mock_repository, sample_conversation
-    ):
+    async def test_get_conversation_success(self, service, mock_repository, sample_conversation):
         """Test successful conversation retrieval."""
         # Arrange
         mock_repository.get_conversation_by_id.return_value = sample_conversation
@@ -183,9 +179,7 @@ class TestConversationService:
         mock_repository.get_conversation_by_id.assert_called_once_with(sample_conversation.id)
 
     @pytest.mark.asyncio
-    async def test_get_conversation_not_found(
-        self, service, mock_repository
-    ):
+    async def test_get_conversation_not_found(self, service, mock_repository):
         """Test conversation retrieval when conversation doesn't exist."""
         # Arrange
         conversation_id = uuid.uuid4()
@@ -217,15 +211,11 @@ class TestConversationService:
         )
 
     @pytest.mark.asyncio
-    async def test_start_conversation_already_active(
-        self, service, mock_repository
-    ):
+    async def test_start_conversation_already_active(self, service, mock_repository):
         """Test starting a conversation that's already active."""
         # Arrange
         active_conversation = AgentConversationSession(
-            id=uuid.uuid4(),
-            prompt="Test",
-            status=ConversationStatus.ACTIVE
+            id=uuid.uuid4(), prompt="Test", status=ConversationStatus.ACTIVE
         )
         mock_repository.get_conversation_by_id.return_value = active_conversation
 
@@ -242,18 +232,11 @@ class TestConversationService:
         message_content = "This is a test message"
         mock_repository.get_conversation_by_id.return_value = sample_conversation
         mock_repository.add_message_to_conversation.return_value = Mock(
-            id=uuid.uuid4(),
-            content=message_content,
-            agent_id=sample_agent.id,
-            message_order=1
+            id=uuid.uuid4(), content=message_content, agent_id=sample_agent.id, message_order=1
         )
 
         # Act
-        result = await service.add_message(
-            sample_conversation.id,
-            sample_agent.id,
-            message_content
-        )
+        result = await service.add_message(sample_conversation.id, sample_agent.id, message_content)
 
         # Assert
         assert result.content == message_content
@@ -261,9 +244,7 @@ class TestConversationService:
         mock_repository.add_message_to_conversation.assert_called_once()
 
     @pytest.mark.asyncio
-    async def test_add_message_conversation_not_found(
-        self, service, mock_repository
-    ):
+    async def test_add_message_conversation_not_found(self, service, mock_repository):
         """Test adding message to non-existent conversation."""
         # Arrange
         conversation_id = uuid.uuid4()
@@ -281,17 +262,12 @@ class TestConversationService:
         """Test retrieving conversation messages with pagination."""
         # Arrange
         mock_messages = [
-            Mock(id=uuid.uuid4(), content=f"Message {i}", message_order=i)
-            for i in range(1, 6)
+            Mock(id=uuid.uuid4(), content=f"Message {i}", message_order=i) for i in range(1, 6)
         ]
         mock_repository.get_conversation_messages.return_value = mock_messages[:3]
 
         # Act
-        result = await service.get_conversation_messages(
-            sample_conversation.id,
-            skip=0,
-            limit=3
-        )
+        result = await service.get_conversation_messages(sample_conversation.id, skip=0, limit=3)
 
         # Assert
         assert len(result) == 3
@@ -309,7 +285,7 @@ class TestConversationService:
             id=sample_conversation.id,
             prompt=sample_conversation.prompt,
             status=ConversationStatus.ACTIVE,
-            message_count=5
+            message_count=5,
         )
         mock_repository.get_conversation_by_id.return_value = active_conversation
         mock_repository.update_conversation_status.return_value = active_conversation
@@ -336,9 +312,7 @@ class TestConversationService:
             await service.complete_conversation(sample_conversation.id)
 
     @pytest.mark.asyncio
-    async def test_conversation_error_handling(
-        self, service, mock_repository, sample_conversation
-    ):
+    async def test_conversation_error_handling(self, service, mock_repository, sample_conversation):
         """Test error handling and rollback on conversation failure."""
         # Arrange
         mock_repository.get_conversation_by_id.return_value = sample_conversation
@@ -355,20 +329,20 @@ class TestConversationService:
         """Test handling concurrent access to the same conversation."""
         # This test would verify that the service handles concurrent modifications properly
         # In a real implementation, this might involve locking or optimistic concurrency control
-        
+
         # Arrange
         mock_repository.get_conversation_by_id.return_value = sample_conversation
-        
+
         # Simulate concurrent modification by having the status change between calls
         def side_effect(*args, **kwargs):
             sample_conversation.status = ConversationStatus.ACTIVE
             return sample_conversation
-            
+
         mock_repository.update_conversation_status.side_effect = side_effect
 
         # Act
         result1 = await service.start_conversation(sample_conversation.id)
-        
+
         # The second call should detect the conversation is already active
         with pytest.raises(ValueError, match="Conversation is already active"):
             await service.start_conversation(sample_conversation.id)
@@ -380,7 +354,7 @@ class TestConversationService:
     async def test_service_initialization_validation(self):
         """Test that service properly validates its dependencies on initialization."""
         # This tests the service constructor validation
-        
+
         # Act & Assert - should raise error if required dependencies are None
         with pytest.raises(ValueError, match="Repository is required"):
             ConversationService(repository=None)
@@ -390,7 +364,7 @@ class TestConversationService:
         # Arrange
         invalid_config = ConversationConfig(
             agent_count=0,  # Invalid: must be >= 1
-            max_turns=-1    # Invalid: must be >= 1
+            max_turns=-1,  # Invalid: must be >= 1
         )
 
         # Act & Assert
@@ -404,17 +378,17 @@ class TestConversationService:
         """Test that service properly cleans up resources on error."""
         # Arrange
         mock_gmn_parser.generate_gmn_from_prompt.return_value = {"name": "test"}
-        
+
         # Create agent succeeds
         created_agent = Mock(id=uuid.uuid4())
         mock_repository.create_agent.return_value = created_agent
-        
+
         # But conversation creation fails
         mock_repository.create_conversation.side_effect = Exception("DB error")
-        
+
         # Act & Assert
         with pytest.raises(Exception, match="DB error"):
             await service.create_conversation(sample_request)
-        
+
         # Verify cleanup - agent should be deleted if conversation creation fails
         mock_repository.delete_agent.assert_called_once_with(created_agent.id)

@@ -2063,8 +2063,54 @@
         "testStrategy": "Test prompt analysis with various input types. Verify agent role distribution and uniqueness. Mock LLM responses for consistent testing. Validate agent system prompt generation and personality traits.",
         "priority": "high",
         "dependencies": [39],
-        "status": "pending",
-        "subtasks": []
+        "status": "done",
+        "subtasks": [
+          {
+            "id": 1,
+            "title": "Design Agent Factory Service Architecture",
+            "description": "Create the core service architecture for agent creation from natural language prompts",
+            "dependencies": [],
+            "details": "Design AgentFactory class with methods for prompt analysis, role determination, and agent instantiation. Define interfaces for IAgentFactory, IPromptAnalyzer, and IAgentBuilder. Create data models for AgentConfiguration, AgentRole enum (Advocate, Analyst, Critic, Creative, Moderator), and PersonalityTraits. Design database schema with JSONB fields for flexible agent metadata storage. Implement dependency injection for LLM providers to support multiple backends.",
+            "status": "done",
+            "testStrategy": "Unit test service initialization and interface contracts. Test data model serialization/deserialization. Verify database schema creation and JSONB field operations. Test dependency injection mechanism with mock LLM providers."
+          },
+          {
+            "id": 2,
+            "title": "Implement Prompt Analysis and Role Extraction",
+            "description": "Build LLM-powered prompt analyzer to extract agent requirements and determine optimal roles",
+            "dependencies": ["40.1"],
+            "details": "Create PromptAnalyzer class that uses structured LLM outputs (JSON mode) to analyze user prompts. Implement prompt templates for role extraction that identify keywords, context, and user intent. Build role scoring algorithm that maps prompt characteristics to agent roles (e.g., 'debate' → Advocate/Critic, 'research' → Analyst). Add support for multi-agent scenarios where prompts require multiple specialized agents. Implement confidence scoring for role assignments.",
+            "status": "done",
+            "testStrategy": "Test with diverse prompt types (debate, analysis, creative tasks). Mock LLM responses for consistent testing. Verify role extraction accuracy and confidence scores. Test multi-agent detection logic. Validate structured output parsing and error handling."
+          },
+          {
+            "id": 3,
+            "title": "Create Role-Specific Prompt Templates and Personality Generation",
+            "description": "Develop system prompts and personality traits for each agent role type",
+            "dependencies": ["40.1"],
+            "details": "Create base prompt templates for each role: Advocate (persuasive, supportive), Analyst (data-driven, objective), Critic (questioning, thorough), Creative (innovative, exploratory), Moderator (balanced, facilitating). Implement PersonalityGenerator that adds unique traits, communication styles, and domain expertise based on user context. Build prompt composition system that combines role template, personality traits, and user-specific requirements. Add variability to ensure agents have distinct personalities even within same role.",
+            "status": "done",
+            "testStrategy": "Test prompt template generation for each role. Verify personality trait diversity and consistency. Test prompt composition with various user contexts. Validate that generated prompts produce appropriate agent behaviors. Test uniqueness across multiple agents of same role."
+          },
+          {
+            "id": 4,
+            "title": "Build Agent Instantiation and Configuration Storage",
+            "description": "Implement agent creation workflow and persistent storage of agent configurations",
+            "dependencies": ["40.2", "40.3"],
+            "details": "Create AgentBuilder that combines analyzed prompts, selected roles, and generated personalities into complete agent configurations. Implement agent instantiation with proper initialization of GMN specs, system prompts, and metadata. Build repository pattern for storing agent configurations in PostgreSQL with JSONB fields for flexibility. Add agent versioning to track configuration changes over time. Implement agent lifecycle management (create, update, archive). Create agent configuration validation against PyMDP requirements.",
+            "status": "done",
+            "testStrategy": "Test end-to-end agent creation from prompt to instantiation. Verify database storage and retrieval of complex JSONB configurations. Test agent versioning and update mechanisms. Validate GMN spec generation compatibility with PyMDP. Test concurrent agent creation and unique ID generation."
+          },
+          {
+            "id": 5,
+            "title": "Integrate with Conversation Service and Add Monitoring",
+            "description": "Connect agent factory to conversation pipeline and implement observability",
+            "dependencies": ["40.4"],
+            "details": "Integrate AgentFactory with ConversationService to enable dynamic agent creation during conversations. Add API endpoints for agent creation, listing, and management. Implement caching layer for frequently used agent configurations. Add comprehensive logging for prompt analysis, role selection, and agent creation steps. Create metrics for agent creation latency, role distribution, and reuse rates. Implement agent creation rate limiting to prevent abuse. Add telemetry for tracking which agent types are most effective for different tasks.",
+            "status": "done",
+            "testStrategy": "Test integration with conversation flow and dynamic agent spawning. Verify API endpoint functionality and error handling. Test caching behavior and performance improvements. Validate logging output and metric collection. Test rate limiting under load. Verify telemetry data accuracy."
+          }
+        ]
       },
       {
         "id": 41,
@@ -2157,7 +2203,7 @@
     ],
     "metadata": {
       "created": "2025-07-04T12:52:30.518Z",
-      "updated": "2025-07-31T23:19:14.625Z",
+      "updated": "2025-07-31T23:45:44.981Z",
       "description": "Tasks for master context"
     }
   }

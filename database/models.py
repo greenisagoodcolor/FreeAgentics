@@ -70,6 +70,16 @@ class AgentRole(PyEnum):
     OBSERVER = "observer"
 
 
+class AgentType(PyEnum):
+    """Type/personality of an agent for natural language creation."""
+
+    ADVOCATE = "advocate"  # Argues for specific positions, builds cases
+    ANALYST = "analyst"  # Breaks down problems, provides data-driven insights
+    CRITIC = "critic"  # Identifies flaws, challenges assumptions
+    CREATIVE = "creative"  # Generates novel ideas, thinks outside the box
+    MODERATOR = "moderator"  # Facilitates discussions, maintains balance
+
+
 # Association table for many-to-many relationship between agents and coalitions
 agent_coalition_association = Table(
     "agent_coalition",
@@ -120,6 +130,18 @@ class Agent(Base):
         default=AgentStatus.PENDING.value,
     )
 
+    # Agent type for natural language created agents
+    agent_type: Column[Optional[AgentType]] = Column(
+        Enum(AgentType, values_callable=lambda x: [e.value for e in x]),
+        nullable=True,
+    )
+
+    # AI-generated properties
+    system_prompt = Column(Text, nullable=True)  # Generated system prompt
+    personality_traits = Column(JSON, default=dict)  # Generated personality profile
+    creation_source = Column(String(50), default="manual")  # "manual", "ai_generated", "template"
+    source_prompt = Column(Text, nullable=True)  # Original user prompt for AI-generated agents
+
     # Active Inference specific
     gmn_spec = Column(Text, nullable=True)
     pymdp_config = Column(JSON, default=dict)
@@ -166,6 +188,11 @@ class Agent(Base):
             "name": self.name,
             "template": self.template,
             "status": self.status.value,
+            "agent_type": self.agent_type.value if self.agent_type else None,
+            "system_prompt": self.system_prompt,
+            "personality_traits": self.personality_traits,
+            "creation_source": self.creation_source,
+            "source_prompt": self.source_prompt,
             "created_at": self.created_at.isoformat(),
             "last_active": self.last_active.isoformat() if self.last_active else None,
             "inference_count": self.inference_count,

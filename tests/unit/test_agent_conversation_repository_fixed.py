@@ -5,17 +5,21 @@ following TDD principles as recommended by Kent Beck.
 """
 
 import uuid
-from datetime import datetime
-from unittest.mock import AsyncMock, Mock, patch
-from uuid import UUID
+from unittest.mock import Mock
 
 import pytest
 from sqlalchemy.exc import SQLAlchemyError
 from sqlalchemy.orm import Session
 
-from api.v1.schemas.agent_conversation_schemas import ConversationQueryParams, ConversationStatusEnum
-from database.models import Agent, AgentConversationSession, AgentConversationMessage, ConversationStatus
-from database.repositories.agent_conversation_repository import AgentConversationRepository, AgentConversationMessageRepository
+from api.v1.schemas.agent_conversation_schemas import (
+    ConversationQueryParams,
+    ConversationStatusEnum,
+)
+from database.models import AgentConversationMessage, AgentConversationSession, ConversationStatus
+from database.repositories.agent_conversation_repository import (
+    AgentConversationMessageRepository,
+    AgentConversationRepository,
+)
 
 
 class TestAgentConversationRepository:
@@ -57,11 +61,7 @@ class TestAgentConversationRepository:
         mock_db.refresh = Mock()
 
         # Act
-        result = await repository.create_conversation(
-            prompt=prompt,
-            title=title,
-            max_turns=5
-        )
+        result = await repository.create_conversation(prompt=prompt, title=title, max_turns=5)
 
         # Assert
         mock_db.add.assert_called_once()
@@ -83,7 +83,7 @@ class TestAgentConversationRepository:
         # Act & Assert
         with pytest.raises(Exception, match="Failed to create conversation"):
             await repository.create_conversation(prompt=prompt)
-        
+
         mock_db.rollback.assert_called_once()
 
     @pytest.mark.asyncio
@@ -91,11 +91,9 @@ class TestAgentConversationRepository:
         """Test retrieving existing conversation by ID."""
         # Arrange
         expected_conversation = AgentConversationSession(
-            id=sample_conversation_id,
-            prompt="Test prompt",
-            status=ConversationStatus.PENDING
+            id=sample_conversation_id, prompt="Test prompt", status=ConversationStatus.PENDING
         )
-        
+
         mock_query = Mock()
         mock_db.query.return_value = mock_query
         mock_query.filter.return_value = mock_query
@@ -109,7 +107,9 @@ class TestAgentConversationRepository:
         assert result == expected_conversation
 
     @pytest.mark.asyncio
-    async def test_get_conversation_by_id_not_exists(self, repository, mock_db, sample_conversation_id):
+    async def test_get_conversation_by_id_not_exists(
+        self, repository, mock_db, sample_conversation_id
+    ):
         """Test retrieving non-existent conversation by ID."""
         # Arrange
         mock_query = Mock()
@@ -129,21 +129,19 @@ class TestAgentConversationRepository:
         # Arrange
         user_id = "test_user_123"
         query_params = ConversationQueryParams(
-            user_id=user_id,
-            status=ConversationStatusEnum.ACTIVE,
-            page=1,
-            page_size=10
+            user_id=user_id, status=ConversationStatusEnum.ACTIVE, page=1, page_size=10
         )
-        
+
         mock_conversations = [
             AgentConversationSession(
                 id=uuid.uuid4(),
                 prompt=f"Conversation {i}",
                 user_id=user_id,
-                status=ConversationStatus.ACTIVE
-            ) for i in range(3)
+                status=ConversationStatus.ACTIVE,
+            )
+            for i in range(3)
         ]
-        
+
         mock_query = Mock()
         mock_db.query.return_value = mock_query
         mock_query.filter.return_value = mock_query
@@ -162,15 +160,15 @@ class TestAgentConversationRepository:
         assert all(conv.user_id == user_id for conv in conversations)
 
     @pytest.mark.asyncio
-    async def test_update_conversation_status_success(self, repository, mock_db, sample_conversation_id):
+    async def test_update_conversation_status_success(
+        self, repository, mock_db, sample_conversation_id
+    ):
         """Test successfully updating conversation status."""
         # Arrange
         conversation = AgentConversationSession(
-            id=sample_conversation_id,
-            prompt="Test",
-            status=ConversationStatus.PENDING
+            id=sample_conversation_id, prompt="Test", status=ConversationStatus.PENDING
         )
-        
+
         mock_query = Mock()
         mock_db.query.return_value = mock_query
         mock_query.filter.return_value = mock_query
@@ -180,8 +178,7 @@ class TestAgentConversationRepository:
 
         # Act
         result = await repository.update_conversation_status(
-            sample_conversation_id,
-            ConversationStatusEnum.ACTIVE
+            sample_conversation_id, ConversationStatusEnum.ACTIVE
         )
 
         # Assert
@@ -191,30 +188,31 @@ class TestAgentConversationRepository:
         mock_db.refresh.assert_called_once()
 
     @pytest.mark.asyncio
-    async def test_add_agent_to_conversation_success(self, repository, mock_db, sample_conversation_id, sample_agent_id):
+    async def test_add_agent_to_conversation_success(
+        self, repository, mock_db, sample_conversation_id, sample_agent_id
+    ):
         """Test successfully adding agent to conversation."""
         # Arrange
         conversation = AgentConversationSession(
-            id=sample_conversation_id,
-            prompt="Test",
-            agent_count=0
+            id=sample_conversation_id, prompt="Test", agent_count=0
         )
-        
+
         # Mock existing agent check (returns None = no existing agent)
         mock_query = Mock()
         mock_db.query.return_value = mock_query
         mock_query.filter.return_value = mock_query
-        mock_query.first.side_effect = [None, conversation]  # First call: no existing, second: get conversation
+        mock_query.first.side_effect = [
+            None,
+            conversation,
+        ]  # First call: no existing, second: get conversation
         mock_query.count.return_value = 1  # New agent count
-        
+
         mock_db.execute = Mock()
         mock_db.commit = Mock()
 
         # Act
         result = await repository.add_agent_to_conversation(
-            sample_conversation_id,
-            sample_agent_id,
-            role="participant"
+            sample_conversation_id, sample_agent_id, role="participant"
         )
 
         # Assert
@@ -223,21 +221,20 @@ class TestAgentConversationRepository:
         mock_db.commit.assert_called_once()
 
     @pytest.mark.asyncio
-    async def test_add_agent_to_conversation_already_exists(self, repository, mock_db, sample_conversation_id, sample_agent_id):
+    async def test_add_agent_to_conversation_already_exists(
+        self, repository, mock_db, sample_conversation_id, sample_agent_id
+    ):
         """Test adding agent that's already in conversation."""
         # Arrange
         existing_association = Mock()  # Non-None return means agent already exists
-        
+
         mock_query = Mock()
         mock_db.query.return_value = mock_query
         mock_query.filter.return_value = mock_query
         mock_query.first.return_value = existing_association
 
         # Act
-        result = await repository.add_agent_to_conversation(
-            sample_conversation_id,
-            sample_agent_id
-        )
+        result = await repository.add_agent_to_conversation(sample_conversation_id, sample_agent_id)
 
         # Assert
         assert result is False
@@ -246,11 +243,8 @@ class TestAgentConversationRepository:
     async def test_delete_conversation_success(self, repository, mock_db, sample_conversation_id):
         """Test successful conversation deletion."""
         # Arrange
-        conversation = AgentConversationSession(
-            id=sample_conversation_id,
-            prompt="Test"
-        )
-        
+        conversation = AgentConversationSession(id=sample_conversation_id, prompt="Test")
+
         mock_query = Mock()
         mock_db.query.return_value = mock_query
         mock_query.filter.return_value = mock_query
@@ -318,17 +312,15 @@ class TestAgentConversationMessageRepository:
         # Arrange
         content = "Test message content"
         conversation = AgentConversationSession(
-            id=sample_conversation_id,
-            current_turn=0,
-            message_count=0
+            id=sample_conversation_id, current_turn=0, message_count=0
         )
-        
+
         mock_query = Mock()
         mock_db.query.return_value = mock_query
         mock_query.filter.return_value = mock_query
         mock_query.scalar.return_value = 0  # No existing messages
         mock_query.first.return_value = conversation
-        
+
         mock_db.add = Mock()
         mock_db.execute = Mock()
         mock_db.commit = Mock()
@@ -336,9 +328,7 @@ class TestAgentConversationMessageRepository:
 
         # Act
         result = await message_repository.create_message(
-            conversation_id=sample_conversation_id,
-            agent_id=sample_agent_id,
-            content=content
+            conversation_id=sample_conversation_id, agent_id=sample_agent_id, content=content
         )
 
         # Assert
@@ -367,7 +357,7 @@ class TestAgentConversationMessageRepository:
             await message_repository.create_message(
                 conversation_id=sample_conversation_id,
                 agent_id=sample_agent_id,
-                content="Test message"
+                content="Test message",
             )
 
     @pytest.mark.asyncio
@@ -375,11 +365,9 @@ class TestAgentConversationMessageRepository:
         """Test retrieving existing message by ID."""
         # Arrange
         expected_message = AgentConversationMessage(
-            id=sample_message_id,
-            content="Test message",
-            message_order=1
+            id=sample_message_id, content="Test message", message_order=1
         )
-        
+
         mock_query = Mock()
         mock_db.query.return_value = mock_query
         mock_query.filter.return_value = mock_query
@@ -392,7 +380,9 @@ class TestAgentConversationMessageRepository:
         assert result == expected_message
 
     @pytest.mark.asyncio
-    async def test_get_message_by_id_not_exists(self, message_repository, mock_db, sample_message_id):
+    async def test_get_message_by_id_not_exists(
+        self, message_repository, mock_db, sample_message_id
+    ):
         """Test retrieving non-existent message by ID."""
         # Arrange
         mock_query = Mock()
@@ -415,15 +405,15 @@ class TestAgentConversationMessageRepository:
         conversation = AgentConversationSession(
             id=sample_conversation_id,
             current_turn=0,
-            message_count=0  # Initialize message_count to avoid NoneType error
+            message_count=0,  # Initialize message_count to avoid NoneType error
         )
-        
+
         mock_query = Mock()
         mock_db.query.return_value = mock_query
         mock_query.filter.return_value = mock_query
         mock_query.scalar.return_value = 0
         mock_query.first.return_value = conversation
-        
+
         mock_db.add = Mock()
         mock_db.commit = Mock(side_effect=SQLAlchemyError("Database error"))
         mock_db.rollback = Mock()
@@ -433,8 +423,7 @@ class TestAgentConversationMessageRepository:
             await message_repository.create_message(
                 conversation_id=sample_conversation_id,
                 agent_id=sample_agent_id,
-                content="Test message"
+                content="Test message",
             )
-        
-        mock_db.rollback.assert_called_once()
 
+        mock_db.rollback.assert_called_once()
