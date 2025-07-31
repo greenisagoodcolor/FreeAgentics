@@ -1,0 +1,46 @@
+FreeAgentics Developer Release Critical Fixes
+
+## Executive Summary
+Current onboarding success rate: 15%
+Target: 80%+ success rate
+Time estimate: 2-4 hours of focused fixes
+
+## P0 - Critical Blockers (Must Fix Today)
+
+### 1. Environment Configuration
+- Create working .env.example with mock mode enabled by default
+- Ensure demo mode works without any external dependencies
+- Add clear comments explaining each environment variable
+
+### 2. README Accuracy
+- Update quick start instructions to match actual commands
+- Ensure 'make install' and 'make dev' work on fresh clone
+- Add prerequisite check section
+
+### 3. TypeScript Build Errors
+- Fix auth.ts errors blocking Docker builds
+- Resolve type mismatches in web components
+- Ensure all TypeScript files compile without errors
+
+### 4. Documentation
+- Add comprehensive troubleshooting section
+- Include common error messages and solutions
+- Add verification steps for successful setup
+
+## P1 - Important Improvements (This Week)
+
+### 5. Database Setup
+- Document PostgreSQL and pgvector installation
+- Provide Docker alternatives for database
+- Add migration instructions
+
+### 6. WebSocket Configuration
+- Fix connection configuration issues
+- Document required environment variables
+- Add connection debugging tips
+
+## Success Criteria
+- Fresh clone to running app in < 5 minutes
+- All make commands work without errors
+- TypeScript builds pass
+- Demo mode fully functional without external dependencies

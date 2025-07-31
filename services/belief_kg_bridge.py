@@ -13,7 +13,7 @@ from typing import Any, Dict, List, Optional
 import numpy as np
 
 # PyMDP is a required dependency - no fallbacks allowed
-from pymdp import Agent
+from pymdp.agent import Agent
 
 
 logger = logging.getLogger(__name__)

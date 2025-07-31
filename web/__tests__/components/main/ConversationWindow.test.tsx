@@ -27,6 +27,8 @@ describe("ConversationWindow", () => {
       error: null,
       conversationId: "test-conv-id",
       clearConversation: jest.fn(),
+      goalPrompt: null,
+      setGoalPrompt: jest.fn(),
     });
 
     // Default prompt processor state
@@ -79,6 +81,8 @@ describe("ConversationWindow", () => {
       error: null,
       conversationId: "test-conv-id",
       clearConversation: jest.fn(),
+      goalPrompt: null,
+      setGoalPrompt: jest.fn(),
     });
 
     render(<ConversationWindow />);
@@ -103,6 +107,8 @@ describe("ConversationWindow", () => {
       error: null,
       conversationId: "test-conv-id",
       clearConversation: jest.fn(),
+      goalPrompt: null,
+      setGoalPrompt: jest.fn(),
     });
 
     render(<ConversationWindow />);
@@ -175,6 +181,8 @@ describe("ConversationWindow", () => {
       error: null,
       conversationId: "test-conv-id",
       clearConversation: jest.fn(),
+      goalPrompt: null,
+      setGoalPrompt: jest.fn(),
     });
 
     render(<ConversationWindow />);
@@ -202,6 +210,8 @@ describe("ConversationWindow", () => {
       error: null,
       conversationId: "test-conv-id",
       clearConversation: jest.fn(),
+      goalPrompt: null,
+      setGoalPrompt: jest.fn(),
     });
 
     render(<ConversationWindow />);
@@ -217,6 +227,8 @@ describe("ConversationWindow", () => {
       error: new Error("Failed to send message"),
       conversationId: "test-conv-id",
       clearConversation: jest.fn(),
+      goalPrompt: null,
+      setGoalPrompt: jest.fn(),
     });
 
     render(<ConversationWindow />);
@@ -282,6 +294,8 @@ describe("ConversationWindow", () => {
       error: null,
       conversationId: "test-conv-id",
       clearConversation: jest.fn(),
+      goalPrompt: null,
+      setGoalPrompt: jest.fn(),
     });
 
     render(<ConversationWindow />);
@@ -300,6 +314,8 @@ describe("ConversationWindow", () => {
       error: null,
       conversationId: "test-conv-id",
       clearConversation: mockClear,
+      goalPrompt: null,
+      setGoalPrompt: jest.fn(),
     });
 
     render(<ConversationWindow />);
@@ -322,6 +338,8 @@ describe("ConversationWindow", () => {
       error: null,
       conversationId: "test-conv-id",
       clearConversation: jest.fn(),
+      goalPrompt: null,
+      setGoalPrompt: jest.fn(),
     });
 
     rerender(<ConversationWindow />);
@@ -352,6 +370,8 @@ describe("ConversationWindow", () => {
       error: null,
       conversationId: "test-conv-id",
       clearConversation: jest.fn(),
+      goalPrompt: null,
+      setGoalPrompt: jest.fn(),
     });
 
     render(<ConversationWindow />);

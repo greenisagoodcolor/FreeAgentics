@@ -23,8 +23,8 @@ from agents.performance_optimizer import (
 )
 from agents.pymdp_error_handling import (
     PyMDPErrorHandler,
-    safe_array_index,
-    safe_numpy_conversion,
+    strict_array_index,
+    strict_numpy_conversion,
     validate_pymdp_matrices,
 )
 

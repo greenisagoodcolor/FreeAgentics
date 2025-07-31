@@ -22,8 +22,8 @@ WORKDIR /app
 # Copy package files
 COPY package.json package-lock.json* ./
 
-# Install dependencies with production optimizations
-RUN npm ci --only=production --ignore-scripts \
+# Install all dependencies for build (will prune later)
+RUN npm ci --ignore-scripts \
     && npm cache clean --force
 
 # Builder stage
@@ -31,8 +31,9 @@ FROM base AS builder
 
 WORKDIR /app
 
-# Copy dependencies from previous stage
-COPY --from=deps /app/node_modules ./node_modules
+# Copy package files and install ALL dependencies for build
+COPY package.json package-lock.json* ./
+RUN npm ci --ignore-scripts
 
 # Copy source code
 COPY . .
@@ -42,8 +43,7 @@ ENV NEXT_PUBLIC_API_URL=${NEXT_PUBLIC_API_URL}
 ENV NODE_ENV=production
 
 # Build the application with optimizations
-RUN npm run build \
-    && npm prune --production
+RUN npm run build
 
 # Production runtime stage
 FROM base AS production

@@ -209,10 +209,6 @@ logs
 .vscode
 # OS specific
 
-# Task files
-# tasks.json
-# tasks/
-
 # Security audit logs
 logs/*.log
 !logs/.gitkeep
@@ -221,3 +217,7 @@ security_scan_env/
 .archive/
 .llm_venv/
 temp_security_venv/
+
+# Task files
+# tasks.json
+# tasks/ 

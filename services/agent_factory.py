@@ -10,7 +10,8 @@ from typing import Any, Dict, List, Optional, Tuple
 import numpy as np
 
 # PyMDP is a required dependency - no fallbacks allowed
-from pymdp import Agent, utils
+from pymdp.agent import Agent
+from pymdp import utils
 
 
 logger = logging.getLogger(__name__)

@@ -312,3 +312,7 @@ Each review cycle, at least three voices critique the change before merge.
 * **Always shorter than 35 000 characters** to fit Claude context budget.
 * Every substantive project lesson → add/adjust section and commit.
 * Remove stale or duplicated info aggressively – clarity over nostalgia.
+
+## Task Master AI Instructions
+**Import Task Master's development workflow commands and guidelines, treat as if import is in the main CLAUDE.md file.**
+@./.taskmaster/CLAUDE.md

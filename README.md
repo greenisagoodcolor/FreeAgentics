@@ -4,42 +4,52 @@
 
 ## Quick Start
 
-### 1. Clone and Install
+### Option 1: Demo Mode (Zero Setup - Recommended)
+Experience FreeAgentics immediately without any configuration:
+
 ```bash
 git clone https://github.com/greenisagoodcolor/FreeAgentics.git
 cd FreeAgentics
 make install
+make dev
 ```
 
-### 2. Start Development Servers
+🎯 **That's it!** Open http://localhost:3000 and start exploring:
+- **Mock AI responses** - No API keys needed
+- **In-memory database** - No setup required  
+- **Real-time updates** - Full WebSocket functionality
+- **Agent communication** - See multi-agent conversations
+
+**Demo Features Ready:**
+- Create and manage Active Inference agents
+- Watch agents explore the grid world
+- View the knowledge graph build in real-time
+- Test the conversation interface
+- Explore all UI components
+
+### Option 2: Development Mode (Real AI)
+For real OpenAI responses and persistent data:
+
 ```bash
-make dev        # This will start servers and keep running - press Ctrl+C to stop
+# After running the demo mode steps above
+cp .env.example .env
+# Edit .env and add your OpenAI API key:
+# OPENAI_API_KEY=sk-your-key-here
+# Optionally set DATABASE_URL for PostgreSQL
+
+make dev  # Restart with real providers
 ```
 
-✅ **Almost there!** After running `make dev`, you'll see:
-- Backend API running at http://localhost:8000
-- Frontend app running at http://localhost:3000
-- The terminal will show logs from both servers (this is normal)
+### 3. Test the System
+Try these example prompts in the UI:
+- **Demo Mode**: "Create an agent to explore the environment"
+- **With API Key**: "Help me create a sustainable business plan"
+- **Multi-Agent**: "Have two agents discuss active inference theory"
 
-### 3. Enable Agent Conversations (Required)
-🔑 **Critical Step**: To enable AI agents to converse with each other, you must add your OpenAI API key:
-
-1. Open http://localhost:3000 in your browser
-2. Click the **Settings** button (gear icon) in the top-right corner
-3. Paste your OpenAI API key (get one at https://platform.openai.com/api-keys)
-4. Click **Save**
-
-**Without an API key, agents cannot communicate!** The system will show errors if you try to use it without configuring your key first.
-
-### 4. Test Agent Conversations
-Once your API key is saved, try these prompts:
-- "Help me create a sustainable coffee shop business plan"
-- "Can my agents talk to each other about active inference?"
-- "Design an AI-powered learning platform"
-
-**Note**: `make dev` keeps running to serve your application. Open a new terminal for other commands.
-
-If you encounter any issues, run `make status` in a new terminal to diagnose.
+### Troubleshooting
+- **Port conflicts**: Run `make kill-ports` then `make dev`
+- **Dependencies missing**: Run `make clean && make install`
+- **Not working**: Check `make status` for diagnostics
 
 [![Python](https://img.shields.io/badge/python-3.9+-blue.svg)](https://www.python.org/)
 [![Node.js](https://img.shields.io/badge/node-18+-green.svg)](https://nodejs.org/)
@@ -69,19 +79,37 @@ make reset      # Full reset (removes dependencies)
 
 ## Configuration
 
-The system auto-configures for demo mode:
-- Uses SQLite if no PostgreSQL is configured
-- Mock LLM providers work without API keys
-- Demo WebSocket connections for real-time updates
-- Creates `.env` from `.env.development` if missing
+### Zero-Setup Demo Mode (Default)
+FreeAgentics automatically detects when no configuration is provided and switches to demo mode:
 
-**🎯 Zero Setup Required**: The app works immediately with mock data and providers.
+- **SQLite in-memory database** - No installation needed
+- **Demo WebSocket endpoint** - Auto-connects to `/api/v1/ws/demo`
+- **Mock LLM providers** - Realistic AI responses without API keys
+- **In-memory caching** - No Redis required
+- **Auto-generated auth tokens** - Skip complex authentication setup
+- **Real-time WebSocket** - Full functionality including live updates
 
-For production with real APIs:
+### Custom Configuration
+Copy the comprehensive example file and customize as needed:
+
 ```bash
 cp .env.example .env
-# Edit .env and add your API keys and database URL
+# Edit .env with your preferences
 ```
+
+**Key Settings:**
+```bash
+# For real AI responses
+OPENAI_API_KEY=sk-your-key-here
+
+# For persistent data
+DATABASE_URL=postgresql://user:pass@host:port/database
+
+# For production caching
+REDIS_URL=redis://localhost:6379/0
+```
+
+The `.env.example` file includes detailed documentation for all 100+ available settings.
 
 ### PostgreSQL + pgvector Setup (Optional)
 
@@ -115,22 +143,57 @@ DATABASE_URL=postgresql://username:password@localhost:5432/freeagentics
 
 ## Troubleshooting
 
-**Common Issues:**
-- **Port conflicts**: Run `make kill-ports` then `make dev`
-- **Dependencies missing**: Run `make clean && make install`
-- **Build errors**: Check TypeScript compilation with `cd web && npm run build`
-- **Frontend won't load**: Verify backend is running at http://localhost:8000/health
-- **Agent errors**: App works in demo mode without API keys - add real keys in Settings
-
-**Quick Fixes:**
+### Quick Diagnostics
 ```bash
-make kill-ports    # Stop all services
-make clean         # Clean build artifacts  
+make status        # Check environment and service status
+make kill-ports    # Stop conflicting processes
+make clean         # Remove build artifacts
 make install       # Reinstall dependencies
-make dev          # Restart everything
+make dev          # Start fresh
 ```
 
-If you're still having issues, the demo mode should work immediately without any external dependencies.
+### WebSocket Connection Issues
+- **Connection refused**: Check `NEXT_PUBLIC_WS_URL` in `.env` (leave empty for demo mode)
+- **Authentication errors**: Demo mode doesn't require auth. For dev mode, ensure valid JWT token
+- **Connection drops**: Check browser console, enable debug logging with `ENABLE_WEBSOCKET_LOGGING=true`
+- **Testing WebSocket**: `wscat -c ws://localhost:8000/api/v1/ws/demo`
+
+See [WebSocket API Documentation](docs/api/WEBSOCKET_API.md#debugging-websocket-connections) and [WebSocket Testing Guide](docs/WEBSOCKET_TESTING_GUIDE.md) for detailed debugging.
+
+### Common Issues
+
+**Service Won't Start:**
+```bash
+# Check if ports are in use
+make kill-ports && make dev
+
+# Verify dependencies
+make status
+
+# Full reset if needed
+make reset && make install && make dev
+```
+
+**Frontend Not Loading:**
+- Ensure backend is running: http://localhost:8000/health
+- Check frontend port: usually http://localhost:3000
+- Look for port conflicts in terminal output
+
+**API/Database Errors:**
+- Demo mode should work without any setup
+- If using custom config, verify `.env` file settings
+- Check logs in terminal for specific error messages
+
+**Performance Issues:**
+- Demo mode uses in-memory database (data resets on restart)
+- For persistent data, set `DATABASE_URL` in `.env` file
+- Reduce `MAX_AGENTS_PER_USER` in `.env` if needed
+
+### Getting Help
+1. Check `make status` output
+2. Look for error messages in terminal
+3. Verify http://localhost:8000/health returns OK
+4. Try demo mode first (no configuration needed)
 
 
 ## Documentation

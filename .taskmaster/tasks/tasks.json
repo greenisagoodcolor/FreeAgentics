@@ -1623,11 +1623,371 @@
             "testStrategy": "Test field-level encryption doesn't break data queries, verify quantum-resistant algorithms interoperate correctly, validate automated incident response triggers appropriately, ensure key rotation maintains service availability, and benchmark encryption performance impact"
           }
         ]
+      },
+      {
+        "id": 23,
+        "title": "Create working .env.example with mock mode defaults",
+        "description": "Create a comprehensive .env.example file with sensible defaults that enable demo mode without external dependencies, allowing new developers to run the application immediately",
+        "details": "1. **Create .env.example with mock defaults**:\n   - Set DATABASE_URL to use SQLite for zero-dependency database: `DATABASE_URL=sqlite:///./demo.db`\n   - Configure mock LLM provider: `LLM_PROVIDER=mock` with `MOCK_LLM_RESPONSE_DELAY=100`\n   - Set WebSocket to demo mode: `NEXT_PUBLIC_WS_URL=` (empty triggers demo endpoint)\n   - Configure mock authentication: `AUTH_SECRET=demo-secret-change-in-production`\n   - Set monitoring to console mode: `MONITORING_PROVIDER=console`\n\n2. **Mock Service Configuration**:\n   - `REDIS_URL=` (empty triggers in-memory cache)\n   - `PYTORCH_BACKEND=cpu` (avoid GPU requirements)\n   - `MAX_AGENTS=10` (reasonable demo limit)\n   - `AGENT_MEMORY_LIMIT_MB=50` (conservative for demos)\n   - `API_RATE_LIMIT=100` (prevent demo abuse)\n\n3. **Feature Flags for Demo Mode**:\n   - `ENABLE_MULTI_FACTOR_AUTH=false`\n   - `ENABLE_ML_THREAT_DETECTION=false`\n   - `ENABLE_ADVANCED_MONITORING=false`\n   - `DEMO_MODE=true` (master flag)\n   - `DEMO_AUTO_LOGIN=true` (skip auth in demo)\n\n4. **Documentation Comments**:\n   - Add inline comments explaining each variable\n   - Include warnings about production values\n   - Provide examples of real service URLs\n   - Document minimum requirements for each service\n\n5. **Validation Script**:\n   - Create `scripts/validate-env.js` to check configuration\n   - Warn if demo values are used with `NODE_ENV=production`\n   - Suggest production-ready alternatives\n   - Check for missing required variables",
+        "testStrategy": "1. **Clean Install Test**: Clone repository, copy .env.example to .env, run `npm install && npm run dev` - should start without errors. 2. **Demo Mode Validation**: Verify application runs with mock providers, check console for 'Demo Mode' warnings, test basic functionality without external services. 3. **Production Warning Test**: Set NODE_ENV=production with demo values, verify validation script warns about unsafe configuration. 4. **Documentation Test**: Have new developer follow README using only .env.example, measure time to first successful run (target <5 minutes). 5. **Mock Provider Test**: Verify mock LLM returns deterministic responses, WebSocket demo endpoint connects, in-memory cache functions correctly",
+        "status": "done",
+        "dependencies": [
+          1,
+          3,
+          10,
+          21
+        ],
+        "priority": "high",
+        "subtasks": [
+          {
+            "id": 1,
+            "title": "Create .env.example with database and core service defaults",
+            "description": "Create the initial .env.example file with mock database configuration and core service settings that enable zero-dependency startup",
+            "dependencies": [],
+            "details": "Create .env.example file in project root with: DATABASE_URL=sqlite:///./demo.db for SQLite database, REDIS_URL= (empty for in-memory cache), AUTH_SECRET=demo-secret-change-in-production, NODE_ENV=development, PORT=3000, and API_URL=http://localhost:3000. Add clear inline comments explaining each variable's purpose and production alternatives.",
+            "status": "done",
+            "testStrategy": "Copy .env.example to .env and verify application can connect to SQLite database. Test that empty REDIS_URL triggers in-memory cache fallback. Ensure all core services start without external dependencies."
+          },
+          {
+            "id": 2,
+            "title": "Configure mock LLM and AI service providers",
+            "description": "Add mock provider configurations for all LLM and AI services to enable demo mode without API keys",
+            "dependencies": [
+              "23.1"
+            ],
+            "details": "Add to .env.example: LLM_PROVIDER=mock, MOCK_LLM_RESPONSE_DELAY=100, OPENAI_API_KEY=mock-key-for-demo, ANTHROPIC_API_KEY=mock-key-for-demo, PYTORCH_BACKEND=cpu, MAX_AGENTS=10, AGENT_MEMORY_LIMIT_MB=50. Include comments explaining mock provider behavior and real provider configuration examples.",
+            "status": "done",
+            "testStrategy": "Verify mock LLM provider returns deterministic responses. Test that agent creation works with CPU backend. Confirm memory limits are enforced for demo agents."
+          },
+          {
+            "id": 3,
+            "title": "Add WebSocket and frontend configuration for demo mode",
+            "description": "Configure WebSocket and frontend settings to enable automatic demo mode detection and connection",
+            "dependencies": [
+              "23.1"
+            ],
+            "details": "Add to .env.example: NEXT_PUBLIC_WS_URL= (empty triggers demo endpoint), NEXT_PUBLIC_API_URL=http://localhost:3000, NEXT_PUBLIC_DEMO_MODE=true, DEMO_AUTO_LOGIN=true, SESSION_SECRET=demo-session-secret. Add monitoring configuration: MONITORING_PROVIDER=console, LOG_LEVEL=info.",
+            "status": "done",
+            "testStrategy": "Verify frontend automatically connects to demo WebSocket when NEXT_PUBLIC_WS_URL is empty. Test auto-login functionality in demo mode. Confirm console logging works without external monitoring services."
+          },
+          {
+            "id": 4,
+            "title": "Implement feature flags and rate limiting for demo safety",
+            "description": "Add comprehensive feature flags to disable advanced features in demo mode and implement rate limiting to prevent abuse",
+            "dependencies": [
+              "23.1",
+              "23.2",
+              "23.3"
+            ],
+            "details": "Add feature flags: ENABLE_MULTI_FACTOR_AUTH=false, ENABLE_ML_THREAT_DETECTION=false, ENABLE_ADVANCED_MONITORING=false, ENABLE_EXTERNAL_INTEGRATIONS=false, DEMO_MODE=true. Add rate limiting: API_RATE_LIMIT=100, WEBSOCKET_RATE_LIMIT=50, MAX_DEMO_SESSIONS=20. Include detailed comments about security implications and production recommendations.",
+            "status": "done",
+            "testStrategy": "Verify all advanced features are disabled when DEMO_MODE=true. Test rate limiting prevents excessive API calls. Confirm demo session limits are enforced."
+          },
+          {
+            "id": 5,
+            "title": "Create environment validation script with production warnings",
+            "description": "Develop a validation script that checks environment configuration and warns about demo values in production",
+            "dependencies": [
+              "23.1",
+              "23.2",
+              "23.3",
+              "23.4"
+            ],
+            "details": "Create scripts/validate-env.js that: reads .env file and validates all required variables, warns if demo values (mock providers, demo secrets) are used with NODE_ENV=production, suggests production-ready alternatives for each demo setting, checks for missing required variables and provides helpful error messages, validates format of URLs and connection strings, and outputs a summary report of configuration status.",
+            "status": "done",
+            "testStrategy": "Run validation script with demo configuration and verify warnings appear. Test with production NODE_ENV and demo values to ensure critical warnings. Verify script catches missing required variables and invalid formats."
+          }
+        ]
+      },
+      {
+        "id": 24,
+        "title": "Update README with accurate quick start instructions",
+        "description": "Fix 'make install' and 'make dev' commands in README to ensure they work correctly on a fresh clone, updating documentation to reflect actual working setup process",
+        "details": "1. **Analyze Current README Issues**:\n   - Review existing README.md to identify broken or outdated quick start instructions\n   - Test 'make install' and 'make dev' commands on a fresh clone to document failures\n   - Identify missing prerequisites or setup steps not mentioned in current documentation\n\n2. **Fix Makefile Commands**:\n   - Update Makefile to ensure 'make install' correctly installs all dependencies\n   - Verify 'make install' handles both Python and Node.js dependencies\n   - Ensure 'make dev' properly starts development servers without errors\n   - Add error handling and helpful messages for common failure scenarios\n   - Include .env setup step in make install if not present\n\n3. **Update README Quick Start Section**:\n   - Rewrite quick start instructions with accurate, tested commands\n   - Add prerequisites section listing required tools (Python version, Node.js version, etc.)\n   - Include step to copy .env.example to .env as part of setup\n   - Document the correct sequence: clone → copy .env.example → make install → make dev\n   - Add troubleshooting section for common setup issues\n\n4. **Enhance Documentation Clarity**:\n   - Add expected output examples for each command\n   - Include time estimates for installation steps\n   - Document which ports will be used by development servers\n   - Add section explaining demo mode vs full setup options\n   - Include links to more detailed setup guides for production configuration",
+        "testStrategy": "1. **Fresh Clone Test**: Clone repository to a new directory, follow only the README instructions exactly as written, verify all commands work without additional steps or knowledge. 2. **Multiple OS Test**: Test setup process on macOS, Ubuntu, and Windows (WSL) to ensure cross-platform compatibility. 3. **Dependency Verification**: Confirm all required dependencies are installed after 'make install' by running 'make test' successfully. 4. **Dev Server Test**: Verify 'make dev' starts all necessary services and the application is accessible at documented URLs. 5. **New Developer Test**: Have someone unfamiliar with the project follow the README to set up the application, documenting any confusion or issues encountered",
+        "status": "done",
+        "dependencies": [
+          1,
+          23
+        ],
+        "priority": "high",
+        "subtasks": [
+          {
+            "id": 1,
+            "title": "Audit and Document Current Setup Issues",
+            "description": "Perform comprehensive testing of current README instructions on fresh clones across different environments to identify all setup failures and missing steps",
+            "dependencies": [],
+            "details": "Clone the repository to a clean directory and follow README instructions exactly as written. Document each failure point, error message, and missing prerequisite. Test on macOS, Ubuntu 22.04, and Windows WSL2. Check if 'make install' correctly handles Python virtual environment creation, pip dependencies, Node.js package installation, and database setup. Verify if 'make dev' starts all required services (backend API, frontend dev server, database connections). Create a detailed report of all issues found, including missing environment variable documentation, undocumented port requirements, and any assumed knowledge not explicitly stated.",
+            "status": "done",
+            "testStrategy": "Use fresh VMs or Docker containers to ensure truly clean environments. Record terminal sessions showing exact commands and errors. Create checklist of every step a new developer would need to successfully run the project."
+          },
+          {
+            "id": 2,
+            "title": "Fix Makefile Installation Commands",
+            "description": "Update Makefile to ensure 'make install' reliably sets up all dependencies and prerequisites for both Python and Node.js components",
+            "dependencies": [
+              "24.1"
+            ],
+            "details": "Modify the 'install' target in Makefile to: create Python virtual environment if not exists, upgrade pip to latest version, install Python dependencies from requirements.txt with proper error handling, check Node.js version compatibility before npm install, run 'npm ci' instead of 'npm install' for reproducible builds, automatically copy .env.example to .env if .env doesn't exist, create necessary directories (logs, temp, uploads) if missing, run database migrations or initialization if needed, display clear success message with next steps. Add helpful error messages for common failures like missing Python/Node.js, incompatible versions, or permission issues. Ensure idempotency so running 'make install' multiple times is safe.",
+            "status": "done",
+            "testStrategy": "Test updated Makefile on fresh clones in all target environments. Verify it handles cases like existing virtual environments, missing .env file, and various Python/Node.js versions. Ensure error messages guide users to solutions."
+          },
+          {
+            "id": 3,
+            "title": "Update Makefile Development Commands",
+            "description": "Ensure 'make dev' starts all development services correctly with proper error handling and helpful output",
+            "dependencies": [
+              "24.2"
+            ],
+            "details": "Update the 'dev' target in Makefile to: verify all dependencies are installed (run install check first), check that .env file exists and contains required variables, start backend API server with proper environment activation, start frontend development server in parallel, ensure database is running and accessible before starting services, use process managers (like honcho or foreman) for coordinated startup if available, display clear output showing which services are running on which ports, handle Ctrl+C gracefully to stop all services cleanly, add 'make dev-backend' and 'make dev-frontend' targets for running services individually. Include automatic port conflict detection and helpful messages if default ports are already in use.",
+            "status": "done",
+            "testStrategy": "Verify 'make dev' starts all services successfully after fresh install. Test graceful shutdown, port conflict handling, and individual service targets. Ensure output clearly shows service URLs and status."
+          },
+          {
+            "id": 4,
+            "title": "Rewrite README Quick Start Section",
+            "description": "Create clear, accurate, and tested quick start instructions that work reliably for new developers",
+            "dependencies": [
+              "24.2",
+              "24.3"
+            ],
+            "details": "Rewrite the Quick Start section with: Prerequisites section listing exact versions (Python >=3.8, Node.js >=16, PostgreSQL >=12), clear OS-specific installation instructions for prerequisites, numbered steps starting with 'git clone [repo-url]', explicit instruction to 'cp .env.example .env' with explanation, 'make install' command with expected output and duration (~2-5 minutes), brief explanation of what each command does, 'make dev' command with expected output showing service URLs, example of accessing the application (http://localhost:3000), common next steps (creating first user, running tests). Add troubleshooting subsection for common issues like Python version conflicts, npm permission errors, database connection failures. Include note about demo mode for quick exploration without full setup.",
+            "status": "done",
+            "testStrategy": "Have team members who haven't seen the project follow only the new README instructions. Time how long setup takes and note any confusion points. Verify instructions work on fresh systems."
+          },
+          {
+            "id": 5,
+            "title": "Add Comprehensive Setup Documentation",
+            "description": "Enhance README with detailed setup information, troubleshooting guides, and production deployment instructions",
+            "dependencies": [
+              "24.4"
+            ],
+            "details": "Add the following sections to README: 'Demo Mode' explaining how to run without database for quick testing, 'Detailed Setup' with in-depth explanations of each component, 'Environment Variables' documenting all .env options with examples and defaults, 'Port Configuration' listing all services and their default ports, 'Development Workflow' explaining common tasks (running tests, linting, building), 'Troubleshooting' with solutions for frequent setup issues, 'Production Deployment' linking to detailed deployment guides, 'Architecture Overview' with simple diagram showing system components. Add collapsible sections for verbose output examples and detailed explanations. Include links to documentation for database setup, API documentation, and frontend development guide. Ensure README remains scannable with clear headers and concise main content.",
+            "status": "done",
+            "testStrategy": "Review documentation with fresh eyes, ensuring a new developer can understand system architecture and successfully troubleshoot issues. Verify all links work and examples are accurate."
+          }
+        ]
+      },
+      {
+        "id": 25,
+        "title": "Fix critical TypeScript errors in auth.ts blocking Docker builds",
+        "description": "Resolve TypeScript compilation errors in auth.ts that are preventing successful Docker image builds and blocking production deployment",
+        "details": "1. **Identify TypeScript Errors**:\n   - Run `npm run typecheck` locally to reproduce the Docker build failures\n   - Document all TypeScript errors in auth.ts file\n   - Check for type mismatches, missing type definitions, and incorrect imports\n   - Verify if errors are related to JWT types, user interfaces, or authentication middleware\n\n2. **Fix Type Definitions**:\n   - Update or create proper TypeScript interfaces for authentication objects\n   - Ensure JWT payload types match actual usage\n   - Fix any any-type usage with proper type annotations\n   - Resolve issues with async/await type inference\n   - Add missing type imports from @types packages if needed\n\n3. **Update Dependencies**:\n   - Check if @types/jsonwebtoken or other auth-related type packages need updating\n   - Ensure compatibility between runtime packages and their type definitions\n   - Update tsconfig.json if necessary to resolve module resolution issues\n\n4. **Docker Build Integration**:\n   - Verify TypeScript compilation works in Docker build context\n   - Ensure all type definition files are included in Docker image\n   - Check that NODE_ENV and build flags are correctly set\n   - Update Dockerfile if type checking steps need adjustment\n\n5. **Integration with Mock Auth**:\n   - Ensure auth.ts works correctly with mock mode configuration from .env.example\n   - Verify type safety when AUTH_SECRET=demo-secret-change-in-production\n   - Test that authentication middleware types align with mock provider expectations",
+        "testStrategy": "1. **Local TypeScript Validation**: Run `npm run typecheck` and ensure zero errors in auth.ts file. 2. **Docker Build Test**: Execute `docker build -t test-auth .` and verify build completes successfully without TypeScript errors. 3. **Unit Tests**: Run auth-specific unit tests with `npm test auth` to ensure functionality remains intact after type fixes. 4. **Integration Test**: Start application with mock auth configuration and verify authentication flow works end-to-end. 5. **CI/CD Validation**: Push changes and verify GitHub Actions or CI pipeline passes all TypeScript checks",
+        "status": "done",
+        "dependencies": [
+          1,
+          23
+        ],
+        "priority": "high",
+        "subtasks": [
+          {
+            "id": 1,
+            "title": "Analyze and Document TypeScript Compilation Errors",
+            "description": "Run TypeScript compiler locally to identify all compilation errors in auth.ts and document them systematically for resolution",
+            "dependencies": [],
+            "details": "Execute 'npm run typecheck' command and capture all TypeScript errors specific to auth.ts file. Document each error with line numbers, error codes, and descriptions. Categorize errors by type (missing types, incorrect interfaces, import issues, etc.). Check if errors are related to JWT token handling, user authentication interfaces, or middleware type definitions. Create a comprehensive error log that will guide the fixing process.",
+            "status": "done",
+            "testStrategy": "Verify that all TypeScript errors are accurately captured by running typecheck multiple times. Cross-reference errors with Docker build logs to ensure consistency. Document any environment-specific differences between local and Docker compilation."
+          },
+          {
+            "id": 2,
+            "title": "Fix Authentication Type Definitions and Interfaces",
+            "description": "Resolve type definition issues by creating or updating TypeScript interfaces for authentication objects, JWT payloads, and user models",
+            "dependencies": [
+              "25.1"
+            ],
+            "details": "Based on documented errors, create or update TypeScript interfaces for User, AuthRequest, AuthResponse, and JWTPayload types. Replace any 'any' type usage with proper type annotations. Ensure JWT payload types match the actual data structure used in the application. Fix async/await return type inference issues in authentication functions. Add proper type imports from @types packages where needed. Ensure all authentication middleware functions have correct type signatures.",
+            "status": "done",
+            "testStrategy": "Run 'npm run typecheck' after each type fix to verify errors are resolved incrementally. Create unit tests that validate type safety of authentication functions. Test type compatibility with mock authentication mode."
+          },
+          {
+            "id": 3,
+            "title": "Update Authentication Dependencies and Type Packages",
+            "description": "Update @types/jsonwebtoken and related authentication type definition packages to resolve version compatibility issues",
+            "dependencies": [
+              "25.2"
+            ],
+            "details": "Review package.json for authentication-related dependencies and their corresponding @types packages. Update @types/jsonwebtoken to match the installed jsonwebtoken version. Check for compatibility issues between bcrypt, passport, or other auth libraries and their type definitions. Update tsconfig.json if module resolution settings need adjustment for proper type discovery. Ensure all peer dependencies are correctly installed. Document any breaking changes from dependency updates.",
+            "status": "done",
+            "testStrategy": "After updating dependencies, run 'npm install' followed by 'npm run typecheck' to verify no new errors are introduced. Test that authentication still works correctly with updated packages. Run existing auth-related unit tests to ensure no regressions."
+          },
+          {
+            "id": 4,
+            "title": "Validate Docker Build TypeScript Compilation",
+            "description": "Ensure TypeScript compilation works correctly within Docker build context and all necessary files are included",
+            "dependencies": [
+              "25.3"
+            ],
+            "details": "Review Dockerfile to ensure TypeScript compilation step is properly configured. Verify that all type definition files (.d.ts) are included in the Docker build context and not excluded by .dockerignore. Check that NODE_ENV is correctly set during build phase. Ensure build-time environment variables don't affect type checking. Update Dockerfile if necessary to include proper TypeScript build flags. Test multi-stage build process to ensure types are available during compilation stage.",
+            "status": "done",
+            "testStrategy": "Execute 'docker build -t auth-test .' and verify build completes without TypeScript errors. Run the built container to ensure runtime behavior matches expectations. Compare Docker build output with local typecheck results for consistency."
+          },
+          {
+            "id": 5,
+            "title": "Integrate Auth Types with Mock Authentication System",
+            "description": "Ensure type safety and proper integration between auth.ts and the mock authentication system configured in .env.example",
+            "dependencies": [
+              "25.4"
+            ],
+            "details": "Verify that auth.ts types correctly handle mock mode when AUTH_SECRET=demo-secret-change-in-production. Ensure authentication middleware types align with mock provider expectations from .env.example. Add type guards or conditional types to handle both production and mock authentication modes. Test that type inference works correctly when switching between real and mock authentication. Document any type differences between production and development modes. Ensure mock user objects conform to the same TypeScript interfaces as production users.",
+            "status": "done",
+            "testStrategy": "Create integration tests that validate auth.ts works with mock configuration. Test type safety by attempting to pass incorrectly typed data to authentication functions in mock mode. Verify that TypeScript catches any type mismatches between mock and production auth implementations."
+          }
+        ]
+      },
+      {
+        "id": 26,
+        "title": "Document PostgreSQL and pgvector setup clearly - Provide Docker alternatives for database setup",
+        "description": "Create comprehensive documentation for PostgreSQL and pgvector setup, including both local installation and Docker-based alternatives for simplified database deployment",
+        "details": "1. **PostgreSQL Setup Documentation**:\n   - Document manual PostgreSQL installation steps for major OS (macOS, Ubuntu, Windows)\n   - Include version requirements (PostgreSQL 14+ for pgvector compatibility)\n   - Document configuration settings for development vs production\n   - Include connection string examples and troubleshooting common issues\n   - Document required PostgreSQL extensions and how to enable them\n\n2. **pgvector Extension Documentation**:\n   - Explain what pgvector is and why it's needed for the project\n   - Document manual pgvector installation from source and package managers\n   - Include version compatibility matrix with PostgreSQL versions\n   - Provide examples of vector operations and queries used in the project\n   - Document performance tuning for vector similarity searches\n\n3. **Docker Alternative Setup**:\n   - Create docker-compose.yml with PostgreSQL + pgvector pre-configured\n   - Use official pgvector Docker image: pgvector/pgvector:pg16\n   - Include volume mapping for data persistence\n   - Set up proper environment variables for database configuration\n   - Document Docker commands for starting, stopping, and managing the database\n\n4. **Development Environment Options**:\n   - Provide clear choice between local install and Docker approaches\n   - Include pros/cons of each approach (Docker: easier setup, consistent environment; Local: better performance, IDE integration)\n   - Create setup scripts for both approaches (setup-db-local.sh, setup-db-docker.sh)\n   - Document how to switch between local and Docker databases\n\n5. **Integration with Project**:\n   - Update .env.example with both local and Docker DATABASE_URL examples\n   - Document how to verify pgvector is properly installed and working\n   - Include sample queries to test vector functionality\n   - Update Makefile with database setup commands for both options\n   - Document migration procedures for both setups\n\n6. **Troubleshooting Guide**:\n   - Common pgvector installation errors and solutions\n   - PostgreSQL connection issues and debugging steps\n   - Docker networking issues and fixes\n   - Performance optimization tips for vector searches\n   - Backup and restore procedures for both setups",
+        "testStrategy": "1. **Documentation Validation**: Have a team member with no PostgreSQL experience follow the documentation to set up both local and Docker environments, ensuring instructions are clear and complete. 2. **Docker Setup Test**: Run `docker-compose up -d` with the provided configuration and verify PostgreSQL + pgvector start correctly, test vector operations with sample queries. 3. **Local Setup Test**: Follow manual installation steps on a fresh VM/machine, verify pgvector extension loads and functions correctly. 4. **Integration Test**: Switch between local and Docker databases using only the documented procedures, ensure application connects and operates correctly with both. 5. **Migration Test**: Run database migrations on both local and Docker setups, verify schema and extensions are properly created. 6. **Performance Comparison**: Run vector similarity queries on both setups to document performance differences and help users choose appropriate option",
+        "status": "done",
+        "dependencies": [
+          10,
+          15,
+          23,
+          24
+        ],
+        "priority": "medium",
+        "subtasks": [
+          {
+            "id": 1,
+            "title": "Create PostgreSQL installation documentation for all platforms",
+            "description": "Document manual PostgreSQL installation steps for macOS, Ubuntu, and Windows, including version requirements and configuration settings",
+            "dependencies": [],
+            "details": "Create comprehensive installation guides for PostgreSQL 14+ on each major operating system. Include package manager commands (Homebrew for macOS, apt for Ubuntu, installer for Windows), version compatibility requirements, initial configuration steps, user creation, and database initialization. Document development vs production configuration differences, including memory settings, connection pools, and security configurations. Provide clear connection string examples for each platform and common troubleshooting steps for installation issues.",
+            "status": "done",
+            "testStrategy": "Have team members on different operating systems follow the installation guide from scratch. Verify successful PostgreSQL installation, ability to connect using provided connection strings, and proper configuration settings. Document any unclear steps or missing information encountered during testing."
+          },
+          {
+            "id": 2,
+            "title": "Document pgvector extension installation and usage",
+            "description": "Create detailed documentation for pgvector installation, configuration, and usage within the project context",
+            "dependencies": [
+              "26.1"
+            ],
+            "details": "Explain pgvector's role in enabling vector similarity search for AI/ML applications. Document installation methods including building from source, using package managers (apt, brew), and pre-built packages. Create a compatibility matrix showing pgvector versions vs PostgreSQL versions. Include SQL examples for creating vector columns, inserting vector data, and performing similarity searches (cosine, L2, inner product). Document index creation for performance optimization and query planning considerations. Provide project-specific examples showing how pgvector is used for agent belief states or embeddings.",
+            "status": "done",
+            "testStrategy": "Install pgvector following the documentation on a fresh PostgreSQL installation. Execute all SQL examples to verify syntax and functionality. Run performance tests with different index types and document results. Verify vector operations work correctly with project-specific use cases."
+          },
+          {
+            "id": 3,
+            "title": "Create Docker-based database setup with docker-compose",
+            "description": "Develop docker-compose configuration and documentation for PostgreSQL with pgvector pre-installed",
+            "dependencies": [],
+            "details": "Create docker-compose.yml using pgvector/pgvector:pg16 image with proper service configuration, health checks, and restart policies. Configure volume mapping for data persistence in ./postgres-data directory. Set up environment variables for POSTGRES_USER, POSTGRES_PASSWORD, and POSTGRES_DB with secure defaults. Include network configuration for both internal Docker networking and host access. Document Docker commands for starting (docker-compose up -d), stopping (docker-compose down), viewing logs, and accessing psql console. Create .env.docker file with example configurations and document how to override default settings.",
+            "status": "done",
+            "testStrategy": "Run docker-compose up on clean system to verify container starts correctly. Test data persistence by creating tables, restarting container, and verifying data remains. Verify pgvector extension is pre-installed and functional. Test connection from host machine and other Docker containers."
+          },
+          {
+            "id": 4,
+            "title": "Implement setup scripts and update project configuration",
+            "description": "Create automated setup scripts for both local and Docker installations, and update project files accordingly",
+            "dependencies": [
+              "26.1",
+              "26.2",
+              "26.3"
+            ],
+            "details": "Create setup-db-local.sh script that checks for PostgreSQL installation, installs if missing, creates database and user, installs pgvector extension, and runs initial migrations. Create setup-db-docker.sh that validates Docker installation, pulls required images, starts docker-compose services, waits for database readiness, and runs migrations. Update .env.example with DATABASE_URL examples for both local (postgresql://user:password@localhost:5432/dbname) and Docker (postgresql://user:password@localhost:5433/dbname) setups. Modify Makefile to include db-setup-local, db-setup-docker, db-start, db-stop, and db-migrate targets. Add database readiness check scripts that verify both PostgreSQL and pgvector functionality.",
+            "status": "done",
+            "testStrategy": "Run setup scripts on fresh systems to verify automated installation works correctly. Test Makefile targets for all database operations. Verify .env.example values work when copied to .env. Test switching between local and Docker databases by changing DATABASE_URL."
+          },
+          {
+            "id": 5,
+            "title": "Create comprehensive troubleshooting guide and migration procedures",
+            "description": "Document common issues, solutions, and procedures for database backup, restore, and migration",
+            "dependencies": [
+              "26.1",
+              "26.2",
+              "26.3",
+              "26.4"
+            ],
+            "details": "Document common pgvector installation errors (missing headers, incompatible versions) with step-by-step solutions. Address PostgreSQL connection issues including firewall settings, authentication failures, and SSL requirements. Cover Docker-specific problems like port conflicts, volume permissions, and network connectivity. Include performance optimization guide for vector searches covering index types (IVFFlat, HNSW), index parameters, and query optimization. Create backup procedures using pg_dump with pgvector data handling. Document restore procedures ensuring pgvector extension is properly configured. Provide migration scripts for moving between local and Docker setups, including data export/import commands.",
+            "status": "done",
+            "testStrategy": "Intentionally create each documented error condition and verify the provided solution resolves it. Test backup and restore procedures with databases containing vector data. Verify migration between local and Docker preserves all data including vectors. Measure query performance before and after applying optimization recommendations."
+          }
+        ]
+      },
+      {
+        "id": 27,
+        "title": "Fix WebSocket connection configuration issues",
+        "description": "Document required environment variables for WebSocket connections and add comprehensive debugging tips to help developers troubleshoot connection issues",
+        "details": "1. **Document WebSocket Environment Variables**:\n   - Create clear documentation for `NEXT_PUBLIC_WS_URL` variable and its format\n   - Document fallback behavior when `NEXT_PUBLIC_WS_URL` is not set (demo mode)\n   - Explain WebSocket authentication requirements and `AUTH_SECRET` usage\n   - Document `WS_PORT` and `WS_HOST` variables for backend configuration\n   - Include examples for development, staging, and production environments\n\n2. **Add Connection Debugging Section**:\n   - Document common WebSocket connection errors and their solutions\n   - Add browser console debugging commands for WebSocket inspection\n   - Include network tab analysis instructions for WebSocket frames\n   - Document how to enable verbose WebSocket logging\n   - Add troubleshooting for CORS issues with WebSocket connections\n\n3. **Create WebSocket Testing Guide**:\n   - Provide curl/wscat commands for testing WebSocket endpoints\n   - Document how to test authentication flow with WebSocket\n   - Include examples of valid and invalid connection attempts\n   - Add performance debugging tips for connection latency\n\n4. **Integration with Existing Docs**:\n   - Update .env.example with WebSocket configuration comments\n   - Add WebSocket section to main README troubleshooting\n   - Link to WebSocket docs from quick start guide\n   - Include WebSocket health check endpoint documentation",
+        "testStrategy": "1. **Documentation Clarity Test**: Have a developer unfamiliar with the WebSocket implementation follow the documentation to successfully establish a connection in both development and production modes. 2. **Debugging Guide Validation**: Intentionally misconfigure WebSocket settings and verify the debugging guide helps identify and fix each issue. 3. **Environment Variable Test**: Test that all documented environment variables work as described and fallback behavior functions correctly. 4. **Connection Test Scripts**: Run all provided testing commands (curl, wscat) to ensure they work and produce expected results",
+        "status": "done",
+        "dependencies": [
+          20,
+          23,
+          24
+        ],
+        "priority": "medium",
+        "subtasks": [
+          {
+            "id": 1,
+            "title": "Document WebSocket Environment Variables",
+            "description": "Create comprehensive documentation for all WebSocket-related environment variables including NEXT_PUBLIC_WS_URL, WS_PORT, WS_HOST, and AUTH_SECRET",
+            "dependencies": [],
+            "details": "Document NEXT_PUBLIC_WS_URL format (ws://localhost:8001 for dev, wss://domain.com for prod), explain demo mode fallback behavior when undefined, detail AUTH_SECRET requirements for JWT validation, document WS_PORT/WS_HOST for backend configuration, provide examples for development (ws://localhost:8001), staging (wss://staging.example.com), and production (wss://api.example.com) environments",
+            "status": "done",
+            "testStrategy": "Verify documentation accuracy by setting up fresh development environment following only the documented instructions, test all example configurations work as described"
+          },
+          {
+            "id": 2,
+            "title": "Create WebSocket Connection Debugging Guide",
+            "description": "Develop comprehensive debugging documentation covering common WebSocket connection errors, browser console commands, network analysis, and troubleshooting techniques",
+            "dependencies": [
+              "27.1"
+            ],
+            "details": "Document common errors (ECONNREFUSED, 403 Forbidden, CORS issues), provide browser console commands for WebSocket inspection (checking readyState, viewing frames), explain Chrome/Firefox DevTools Network tab WebSocket frame analysis, document enabling verbose logging with DEBUG=ws:* environment variable, include CORS troubleshooting for cross-origin WebSocket connections",
+            "status": "done",
+            "testStrategy": "Intentionally introduce each documented error type and verify the debugging steps successfully identify and resolve the issue"
+          },
+          {
+            "id": 3,
+            "title": "Develop WebSocket Testing Documentation",
+            "description": "Create practical testing guide with command-line tools and examples for validating WebSocket endpoints and authentication flows",
+            "dependencies": [
+              "27.1",
+              "27.2"
+            ],
+            "details": "Provide wscat installation and usage examples for testing connections, document curl commands for initial HTTP upgrade requests, create test scripts for authenticated vs unauthenticated connections, include performance testing with artillery or similar tools for connection latency analysis, document expected responses for successful and failed connection attempts",
+            "status": "done",
+            "testStrategy": "Execute all documented test commands against both development and production environments to ensure accuracy and completeness"
+          },
+          {
+            "id": 4,
+            "title": "Update Existing Documentation with WebSocket Information",
+            "description": "Integrate WebSocket documentation into existing project files including .env.example, README.md, and quick start guides",
+            "dependencies": [
+              "27.1",
+              "27.2",
+              "27.3"
+            ],
+            "details": "Add detailed WebSocket configuration comments to .env.example with example values, create WebSocket troubleshooting section in main README.md, add WebSocket setup steps to quick start guide, document /health/ws endpoint for monitoring WebSocket server status, ensure all cross-references between documents are accurate and helpful",
+            "status": "done",
+            "testStrategy": "Review updated documentation with team member unfamiliar with WebSocket setup to validate clarity and completeness"
+          },
+          {
+            "id": 5,
+            "title": "Create WebSocket Architecture and Flow Diagrams",
+            "description": "Develop visual documentation showing WebSocket connection flow, authentication sequence, and error handling paths",
+            "dependencies": [
+              "27.1",
+              "27.2",
+              "27.3",
+              "27.4"
+            ],
+            "details": "Create connection establishment flow diagram showing client-server handshake, document JWT authentication flow for WebSocket connections, illustrate reconnection logic and exponential backoff strategy, diagram error handling and recovery mechanisms, include sequence diagrams for common operations (connect, authenticate, disconnect)",
+            "status": "done",
+            "testStrategy": "Validate diagrams against actual implementation by tracing real connection flows and comparing with documented sequences"
+          }
+        ]
       }
     ],
     "metadata": {
       "created": "2025-07-04T12:52:30.518Z",
-      "updated": "2025-07-16T21:34:58.259Z",
+      "updated": "2025-07-31T09:53:32.892Z",
       "description": "Tasks for master context"
     }
   }

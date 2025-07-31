@@ -56,7 +56,12 @@ describe("SimulationGrid", () => {
     jest.clearAllMocks();
     
     // Mock canvas getContext
-    HTMLCanvasElement.prototype.getContext = jest.fn(() => mockCanvasContext);
+    HTMLCanvasElement.prototype.getContext = jest.fn().mockImplementation((contextId) => {
+      if (contextId === '2d') {
+        return mockCanvasContext;
+      }
+      return null;
+    }) as any;
 
     (useSimulation as jest.Mock).mockReturnValue({
       isRunning: false,

@@ -1,0 +1,28 @@
+# PostgreSQL + pgvector setup for FreeAgentics
+# Usage: docker-compose -f docker-compose.db.yml up -d
+
+version: "3.8"
+
+services:
+  postgres:
+    image: pgvector/pgvector:pg16
+    container_name: freeagentics-postgres
+    environment:
+      POSTGRES_DB: freeagentics
+      POSTGRES_USER: freeagentics
+      POSTGRES_PASSWORD: freeagentics_dev  # Change in production!
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+      - ./postgres/init:/docker-entrypoint-initdb.d:ro
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U freeagentics"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    restart: unless-stopped
+
+volumes:
+  postgres_data:
+    name: freeagentics_postgres_data

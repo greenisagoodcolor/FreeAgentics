@@ -920,6 +920,202 @@ ws.onmessage = (event) => {
 
 Monitor your usage and implement appropriate throttling to avoid hitting limits.
 
+## Debugging WebSocket Connections
+
+### Common Connection Issues
+
+#### 1. Connection Refused
+**Symptoms**: WebSocket connection immediately fails with error 1006
+**Causes & Solutions**:
+- **Wrong URL**: Verify `NEXT_PUBLIC_WS_URL` in your environment
+  ```bash
+  # Check current value
+  echo $NEXT_PUBLIC_WS_URL
+  # Demo mode (empty = auto-detect)
+  export NEXT_PUBLIC_WS_URL=""
+  # Development
+  export NEXT_PUBLIC_WS_URL="ws://localhost:8000/api/v1/ws/dev"
+  ```
+- **Server not running**: Ensure backend is running on expected port
+  ```bash
+  # Check if server is listening
+  lsof -i :8000
+  # or
+  netstat -an | grep 8000
+  ```
+
+#### 2. Authentication Failures
+**Symptoms**: Connection closes with code 1008 (Policy Violation)
+**Debug Steps**:
+```javascript
+// Enable verbose logging
+localStorage.setItem('DEBUG', 'websocket:*');
+
+// Check token in browser console
+const token = localStorage.getItem('auth_token');
+console.log('Auth token:', token);
+console.log('Token expiry:', new Date(JSON.parse(atob(token.split('.')[1])).exp * 1000));
+```
+
+#### 3. CORS Issues
+**Symptoms**: Browser blocks WebSocket upgrade
+**Solutions**:
+- Check browser console for CORS errors
+- Verify allowed origins in backend configuration
+- For development, use same origin: `http://localhost:3000` → `ws://localhost:8000`
+
+### Browser Debugging Tools
+
+#### Chrome DevTools
+1. **Network Tab**:
+   - Filter by "WS" to see WebSocket connections
+   - Click connection to see frames
+   - Check "Messages" tab for real-time data
+   
+2. **Console Commands**:
+   ```javascript
+   // List all WebSocket connections
+   console.table(Array.from(document.querySelectorAll('*')).map(e => e.__ws).filter(Boolean));
+   
+   // Monitor WebSocket events
+   window.addEventListener('error', (e) => {
+     if (e.target instanceof WebSocket) {
+       console.error('WebSocket error:', e);
+     }
+   });
+   ```
+
+#### Firefox Developer Tools
+1. **Network Tab** → Filter "Other" → Look for "101 Switching Protocols"
+2. **Web Console** → Filter "Net" messages
+
+### Logging and Monitoring
+
+#### Enable Verbose Logging
+```javascript
+// Frontend (add to your WebSocket client)
+const ws = new WebSocket(url);
+
+// Log all events
+['open', 'close', 'error', 'message'].forEach(event => {
+  ws.addEventListener(event, (e) => {
+    console.log(`WebSocket ${event}:`, {
+      type: e.type,
+      data: e.data || e.code || e.reason,
+      timestamp: new Date().toISOString(),
+      readyState: ws.readyState,
+      url: ws.url
+    });
+  });
+});
+```
+
+#### Backend Logging
+```bash
+# Enable WebSocket debug logs
+export ENABLE_WEBSOCKET_LOGGING=true
+export LOG_LEVEL=DEBUG
+
+# Watch logs in real-time
+tail -f logs/websocket.log | grep -E "(connect|disconnect|error)"
+```
+
+### Connection Testing Tools
+
+#### Using wscat
+```bash
+# Install wscat
+npm install -g wscat
+
+# Test connection (demo mode - no auth)
+wscat -c ws://localhost:8000/api/v1/ws/demo
+
+# Test with authentication
+wscat -c "ws://localhost:8000/api/v1/ws?token=YOUR_JWT_TOKEN"
+
+# Send test message
+> {"type":"ping","timestamp":"2024-01-01T00:00:00Z"}
+```
+
+#### Using curl (for debugging headers)
+```bash
+# Check if WebSocket endpoint is accessible
+curl -i -N \
+  -H "Connection: Upgrade" \
+  -H "Upgrade: websocket" \
+  -H "Sec-WebSocket-Version: 13" \
+  -H "Sec-WebSocket-Key: x3JJHMbDL1EzLkh9GBhXDw==" \
+  http://localhost:8000/api/v1/ws/demo
+```
+
+### Performance Debugging
+
+#### Monitor Connection Metrics
+```javascript
+// Track message latency
+let messageCount = 0;
+let totalLatency = 0;
+
+ws.send(JSON.stringify({
+  type: 'ping',
+  timestamp: Date.now()
+}));
+
+ws.onmessage = (event) => {
+  const data = JSON.parse(event.data);
+  if (data.type === 'pong') {
+    const latency = Date.now() - data.timestamp;
+    totalLatency += latency;
+    messageCount++;
+    console.log(`Latency: ${latency}ms (avg: ${totalLatency/messageCount}ms)`);
+  }
+};
+```
+
+#### Identify Connection Issues
+```javascript
+// Monitor connection stability
+let reconnectCount = 0;
+const startTime = Date.now();
+
+function connectWithMonitoring() {
+  const ws = new WebSocket(url);
+  
+  ws.onclose = (e) => {
+    reconnectCount++;
+    const uptime = Date.now() - startTime;
+    console.warn(`Connection closed after ${uptime}ms. Reconnect #${reconnectCount}`);
+    
+    // Exponential backoff
+    setTimeout(connectWithMonitoring, Math.min(1000 * Math.pow(2, reconnectCount), 30000));
+  };
+  
+  return ws;
+}
+```
+
+### Troubleshooting Checklist
+
+1. **Environment Variables**:
+   - [ ] `NEXT_PUBLIC_WS_URL` is correctly set (or empty for demo)
+   - [ ] `WS_AUTH_REQUIRED` matches your authentication setup
+   - [ ] `WS_PING_INTERVAL` and `WS_PING_TIMEOUT` are reasonable
+
+2. **Network**:
+   - [ ] No firewall blocking WebSocket connections
+   - [ ] Proxy/reverse proxy configured for WebSocket upgrade
+   - [ ] SSL certificates valid (for wss:// connections)
+
+3. **Client**:
+   - [ ] Using correct WebSocket URL format
+   - [ ] Handling reconnection properly
+   - [ ] Not exceeding rate limits
+
+4. **Server**:
+   - [ ] WebSocket handler registered at expected path
+   - [ ] Authentication middleware not blocking connections
+   - [ ] Connection pool not exhausted
+
 ## Support
 
 - **Documentation**: [Full API documentation](API_REFERENCE.md)
