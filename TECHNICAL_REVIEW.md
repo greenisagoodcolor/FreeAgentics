@@ -1,7 +1,7 @@
 # FreeAgentics: An Honest Technical Review
 
-**Date**: July 30, 2025  
-**Reviewers**: The Nemesis Committee (11 software engineering experts)  
+**Date**: July 30, 2025
+**Reviewers**: The Nemesis Committee (11 software engineering experts)
 **Methodology**: Actual testing of claims, not documentation review
 
 ## Executive Summary
@@ -13,9 +13,11 @@ FreeAgentics is an ambitious Active Inference framework that **does not work as 
 After testing multiple examples, here's what we found:
 
 ### ✅ Working (1 out of 4 tested)
+
 - `examples/simple_demo.py` - A basic grid world simulation with two agents exploring and collecting resources. This is the ONLY main demo that runs successfully.
 
-### ❌ Broken 
+### ❌ Broken
+
 - `examples/demo_full_pipeline.py` - **CRASHES** with `TypeError: MockLLMProvider.generate() missing 1 required positional argument: 'messages'`
 - `examples/demo.py` - **CRASHES** with database initialization error: `AttributeError: 'NoneType' object has no attribute '_run_ddl_visitor'`
 - `examples/demo_simple.py` - **CRASHES** with type error: `AttributeError: 'int' object has no attribute 'x'`
@@ -40,20 +42,25 @@ The previous review claimed:
 ## Technical Analysis
 
 ### 1. API Drift
+
 The `MockLLMProvider` hasn't been updated to match the actual LLM interface. This suggests rapid development without maintaining test coverage for examples.
 
 ### 2. Type Safety Violations
+
 Multiple demos fail with type errors (`'int' object has no attribute 'x'`), indicating the codebase doesn't enforce its own type contracts.
 
 ### 3. Database Initialization Issues
+
 The system claims to gracefully fall back to "dev mode without database" but actually crashes when trying to use this mode.
 
 ### 4. No Example Testing
+
 There's clearly no continuous integration that runs the example files, allowing them to drift into a broken state.
 
 ## What a Developer Can Actually Do Today
 
 ### Option 1: Run the One Working Demo
+
 ```bash
 git clone https://github.com/yourusername/freeagentics
 cd freeagentics
@@ -64,14 +71,18 @@ python examples/simple_demo.py
 You'll see a basic grid simulation with agents moving around. That's it.
 
 ### Option 2: Try to Fix the Broken Demos
+
 The codebase has interesting ideas but needs significant repair work:
+
 - Update `MockLLMProvider` to match the expected interface
 - Fix type safety issues in the demos
 - Implement proper database initialization fallbacks
 - Add CI/CD that actually runs all examples
 
 ### Option 3: Explore the Codebase
+
 The code shows evidence of thoughtful design:
+
 - Clean separation of concerns
 - Attempt at dependency injection
 - WebSocket infrastructure for real-time updates
@@ -97,11 +108,13 @@ Based on what actually runs:
 If you're considering contributing to FreeAgentics:
 
 ### What Works
+
 - Basic grid world simulation (`simple_demo.py`)
 - Some infrastructure pieces (based on code inspection)
 - Good architectural intentions
 
 ### What's Broken
+
 - Main pipeline demo
 - Database initialization
 - LLM provider interfaces
@@ -109,6 +122,7 @@ If you're considering contributing to FreeAgentics:
 - Developer setup flow
 
 ### What You'll Need
+
 - Python debugging skills to fix the demos
 - Patience to understand undocumented components
 - Willingness to write missing tests
@@ -124,14 +138,14 @@ If you're considering contributing to FreeAgentics:
 
 ## The Bottom Line
 
-FreeAgentics appears to be an early-stage project with interesting ideas but poor execution. The documentation makes grand claims that are immediately falsified by running the examples. 
+FreeAgentics appears to be an early-stage project with interesting ideas but poor execution. The documentation makes grand claims that are immediately falsified by running the examples.
 
-**For researchers**: This is not ready for Active Inference experiments.  
-**For developers**: Expect to spend significant time fixing basic functionality.  
+**For researchers**: This is not ready for Active Inference experiments.
+**For developers**: Expect to spend significant time fixing basic functionality.
 **For production use**: Absolutely not ready.
 
 The project needs to focus on getting one complete path working - from user input through the entire pipeline - before claiming percentages of completion or production readiness.
 
 ---
 
-*This review is based on actual testing of the codebase, not aspirational documentation.*
+_This review is based on actual testing of the codebase, not aspirational documentation._

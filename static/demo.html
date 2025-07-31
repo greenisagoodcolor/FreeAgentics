@@ -10,39 +10,39 @@
             padding: 0;
             box-sizing: border-box;
         }
-        
+
         body {
             font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
             background: #0a0a0a;
             color: #ffffff;
             overflow: hidden;
         }
-        
+
         #header {
             background: linear-gradient(135deg, #1e3c72 0%, #2a5298 100%);
             padding: 20px;
             text-align: center;
             box-shadow: 0 2px 20px rgba(0,0,0,0.5);
         }
-        
+
         h1 {
             font-size: 2.5em;
             margin-bottom: 10px;
             text-shadow: 2px 2px 4px rgba(0,0,0,0.3);
         }
-        
+
         .subtitle {
             font-size: 1.2em;
             color: #b8d4f1;
         }
-        
+
         #main-container {
             display: flex;
             height: calc(100vh - 120px);
             gap: 20px;
             padding: 20px;
         }
-        
+
         #world-container {
             flex: 2;
             background: #1a1a1a;
@@ -51,39 +51,39 @@
             position: relative;
             overflow: hidden;
         }
-        
+
         #world-canvas {
             width: 100%;
             height: 100%;
             cursor: crosshair;
         }
-        
+
         #sidebar {
             flex: 1;
             display: flex;
             flex-direction: column;
             gap: 20px;
         }
-        
+
         .panel {
             background: #1a1a1a;
             border-radius: 10px;
             padding: 20px;
             box-shadow: 0 4px 20px rgba(0,0,0,0.3);
         }
-        
+
         .panel h2 {
             margin-bottom: 15px;
             color: #4a9eff;
             font-size: 1.4em;
         }
-        
+
         #controls {
             display: flex;
             gap: 10px;
             margin-bottom: 15px;
         }
-        
+
         button {
             background: #4a9eff;
             color: white;
@@ -94,27 +94,27 @@
             font-size: 16px;
             transition: all 0.3s ease;
         }
-        
+
         button:hover {
             background: #357abd;
             transform: translateY(-2px);
             box-shadow: 0 4px 10px rgba(74, 158, 255, 0.3);
         }
-        
+
         button:active {
             transform: translateY(0);
         }
-        
+
         button:disabled {
             background: #555;
             cursor: not-allowed;
         }
-        
+
         .agent-list {
             max-height: 300px;
             overflow-y: auto;
         }
-        
+
         .agent-item {
             background: #2a2a2a;
             border-radius: 5px;
@@ -123,17 +123,17 @@
             border-left: 4px solid #4a9eff;
             transition: all 0.3s ease;
         }
-        
+
         .agent-item:hover {
             background: #3a3a3a;
             transform: translateX(5px);
         }
-        
+
         .agent-name {
             font-weight: bold;
             margin-bottom: 5px;
         }
-        
+
         .agent-stats {
             font-size: 0.9em;
             color: #aaa;
@@ -141,42 +141,42 @@
             grid-template-columns: 1fr 1fr;
             gap: 5px;
         }
-        
+
         .stat {
             display: flex;
             justify-content: space-between;
         }
-        
+
         .stat-value {
             color: #4a9eff;
             font-weight: bold;
         }
-        
+
         #stats-panel {
             display: grid;
             grid-template-columns: 1fr 1fr;
             gap: 15px;
         }
-        
+
         .global-stat {
             background: #2a2a2a;
             padding: 15px;
             border-radius: 5px;
             text-align: center;
         }
-        
+
         .global-stat-value {
             font-size: 2em;
             font-weight: bold;
             color: #4a9eff;
             margin-top: 5px;
         }
-        
+
         .global-stat-label {
             color: #888;
             font-size: 0.9em;
         }
-        
+
         /* Loading animation */
         .loading {
             position: absolute;
@@ -186,18 +186,18 @@
             font-size: 1.5em;
             color: #4a9eff;
         }
-        
+
         .loading::after {
             content: '';
             animation: dots 1.5s infinite;
         }
-        
+
         @keyframes dots {
             0%, 20% { content: '.'; }
             40% { content: '..'; }
             60%, 100% { content: '...'; }
         }
-        
+
         /* Particle effects */
         .particle {
             position: absolute;
@@ -208,7 +208,7 @@
             pointer-events: none;
             animation: particle-float 2s ease-out forwards;
         }
-        
+
         @keyframes particle-float {
             0% {
                 opacity: 1;
@@ -219,13 +219,13 @@
                 transform: translate(var(--tx), var(--ty)) scale(0.5);
             }
         }
-        
+
         /* Agent colors */
         .agent-explorer { border-left-color: #4a9eff !important; }
         .agent-collector { border-left-color: #4ade80 !important; }
         .agent-analyzer { border-left-color: #a855f7 !important; }
         .agent-scout { border-left-color: #fb923c !important; }
-        
+
         /* Tooltips */
         .tooltip {
             position: absolute;
@@ -239,11 +239,11 @@
             opacity: 0;
             transition: opacity 0.3s ease;
         }
-        
+
         .tooltip.show {
             opacity: 1;
         }
-        
+
         /* New UI Components */
         .mode-indicator {
             display: flex;
@@ -255,7 +255,7 @@
             border-radius: 5px;
             font-size: 0.9em;
         }
-        
+
         .status-dot {
             width: 12px;
             height: 12px;
@@ -263,21 +263,21 @@
             background: #ef4444;
             transition: background-color 0.3s ease;
         }
-        
+
         .status-dot.online {
             background: #4ade80;
         }
-        
+
         .status-dot.offline {
             background: #ef4444;
         }
-        
+
         .prompt-bar {
             display: flex;
             gap: 10px;
             margin-bottom: 10px;
         }
-        
+
         .prompt-bar input {
             flex: 1;
             padding: 10px;
@@ -287,60 +287,60 @@
             color: white;
             font-size: 14px;
         }
-        
+
         .prompt-bar input:focus {
             outline: none;
             border-color: #4a9eff;
         }
-        
+
         .prompt-bar button {
             padding: 10px 15px;
             white-space: nowrap;
         }
-        
+
         .status-message {
             font-size: 0.9em;
             color: #aaa;
             min-height: 20px;
         }
-        
+
         .status-message.loading {
             color: #4a9eff;
         }
-        
+
         .status-message.success {
             color: #4ade80;
         }
-        
+
         .status-message.error {
             color: #ef4444;
         }
-        
+
         .conversation-cycle {
             display: flex;
             flex-direction: column;
             gap: 15px;
         }
-        
+
         .conversation-step {
             background: #2a2a2a;
             padding: 12px;
             border-radius: 5px;
             border-left: 3px solid #4a9eff;
         }
-        
+
         .conversation-step h4 {
             margin-bottom: 8px;
             color: #4a9eff;
             font-size: 0.9em;
         }
-        
+
         .conversation-content {
             font-size: 0.85em;
             line-height: 1.4;
             color: #ddd;
         }
-        
+
         .conversation-content.code {
             font-family: 'Courier New', monospace;
             background: #1a1a1a;
@@ -351,14 +351,14 @@
             max-height: 120px;
             overflow-y: auto;
         }
-        
+
         .knowledge-graph-container {
             background: #1a1a1a;
             border-radius: 8px;
             padding: 15px;
             margin-top: 10px;
         }
-        
+
         .kg-node {
             display: inline-block;
             background: #2a2a2a;
@@ -370,19 +370,19 @@
             cursor: pointer;
             transition: all 0.3s ease;
         }
-        
+
         .kg-node:hover {
             background: #4a9eff;
             color: #0a0a0a;
             transform: translateY(-2px);
         }
-        
+
         .kg-node.concept { border-color: #4a9eff; }
         .kg-node.action { border-color: #4ade80; }
         .kg-node.observation { border-color: #a855f7; }
         .kg-node.belief { border-color: #fb923c; }
         .kg-node.goal { border-color: #ef4444; }
-        
+
         .loading-spinner {
             display: inline-block;
             width: 12px;
@@ -392,7 +392,7 @@
             border-radius: 50%;
             animation: spin 1s linear infinite;
         }
-        
+
         @keyframes spin {
             0% { transform: rotate(0deg); }
             100% { transform: rotate(360deg); }
@@ -404,13 +404,13 @@
         <h1>🧠 FreeAgentics Active Inference Demo</h1>
         <div class="subtitle">Watch autonomous agents explore, learn, and minimize free energy</div>
     </div>
-    
+
     <div id="main-container">
         <div id="world-container">
             <canvas id="world-canvas"></canvas>
             <div class="loading" id="loading">Initializing world</div>
         </div>
-        
+
         <div id="sidebar">
             <div class="panel">
                 <h2>🎮 Controls</h2>
@@ -428,7 +428,7 @@
                     <button id="speed-btn">Speed: 1x</button>
                 </div>
             </div>
-            
+
             <div class="panel">
                 <h2>💬 Create Agent from Prompt</h2>
                 <div class="prompt-bar">
@@ -437,7 +437,7 @@
                 </div>
                 <div id="prompt-status" class="status-message"></div>
             </div>
-            
+
             <div class="panel" id="conversation-panel" style="display: none;">
                 <h2>🧠 Agent Conversation</h2>
                 <div class="conversation-cycle">
@@ -455,7 +455,7 @@
                     </div>
                 </div>
             </div>
-            
+
             <div class="panel">
                 <h2>📊 Global Statistics</h2>
                 <div id="stats-panel">
@@ -477,14 +477,14 @@
                     </div>
                 </div>
             </div>
-            
+
             <div class="panel" style="flex: 1; overflow: hidden;">
                 <h2>🤖 Active Agents</h2>
                 <div class="agent-list" id="agent-list">
                     <!-- Agents will be added here dynamically -->
                 </div>
             </div>
-            
+
             <div class="panel">
                 <h2>🧩 Knowledge Graph</h2>
                 <div class="knowledge-graph-container" id="knowledge-graph">
@@ -493,21 +493,21 @@
             </div>
         </div>
     </div>
-    
+
     <div class="tooltip" id="tooltip"></div>
-    
+
     <script>
         // Constants
         const CELL_SIZE = 20;
         const AGENT_RADIUS = 8;
         const RESOURCE_RADIUS = 6;
         const GOAL_RADIUS = 10;
-        
+
         // Configuration - detect if backend is available
         const API_BASE_URL = window.location.origin;
         let USE_REAL_API = false;
         let currentMode = 'demo';
-        
+
         // Colors
         const COLORS = {
             empty: '#2a2a2a',
@@ -523,7 +523,7 @@
                 scout: '#fb923c'
             }
         };
-        
+
         // State
         let world = null;
         let agents = [];
@@ -535,12 +535,12 @@
         let serviceManager = null;
         let promptProcessor = null;
         let knowledgeGraph = null;
-        
+
         // Canvas setup
         const canvas = document.getElementById('world-canvas');
         const ctx = canvas.getContext('2d');
         const tooltip = document.getElementById('tooltip');
-        
+
         // Service Manager - Strategy Pattern Implementation
         class ServiceManager {
             constructor() {
@@ -552,7 +552,7 @@
                 this.websocketService = null;
                 this.mode = 'demo';
             }
-            
+
             async initialize() {
                 try {
                     // Check if real API is available
@@ -560,7 +560,7 @@
                         method: 'GET',
                         timeout: 3000
                     });
-                    
+
                     if (healthResponse.ok) {
                         USE_REAL_API = true;
                         this.mode = 'real';
@@ -574,7 +574,7 @@
                     this.initializeDemoServices();
                 }
             }
-            
+
             initializeRealServices() {
                 this.promptService = new RealPromptService();
                 this.agentService = new RealAgentService();
@@ -583,7 +583,7 @@
                 this.metricsService = new RealMetricsService();
                 this.websocketService = new RealWebSocketService();
             }
-            
+
             initializeDemoServices() {
                 this.promptService = new DemoPromptService();
                 this.agentService = new DemoAgentService();
@@ -593,7 +593,7 @@
                 this.websocketService = new DemoWebSocketService();
             }
         }
-        
+
         // Prompt Service Implementations
         class RealPromptService {
             async processPrompt(prompt, agentName = null) {
@@ -608,11 +608,11 @@
                             agent_name: agentName
                         })
                     });
-                    
+
                     if (!response.ok) {
                         throw new Error(`HTTP error! status: ${response.status}`);
                     }
-                    
+
                     const result = await response.json();
                     return {
                         agentId: result.agent_id,
@@ -632,15 +632,15 @@
                 }
             }
         }
-        
+
         class DemoPromptService {
             async processPrompt(prompt, agentName = null) {
                 // Simulate API delay
                 await new Promise(resolve => setTimeout(resolve, 1500));
-                
+
                 const agentId = `demo_agent_${Date.now()}`;
                 const name = agentName || `Agent-${Math.floor(Math.random() * 1000)}`;
-                
+
                 return {
                     agentId: agentId,
                     agentName: name,
@@ -659,7 +659,7 @@
                 };
             }
         }
-        
+
         // Agent Service Implementations
         class RealAgentService {
             async createAgent(config) {
@@ -671,11 +671,11 @@
                         },
                         body: JSON.stringify(config)
                     });
-                    
+
                     if (!response.ok) {
                         throw new Error(`HTTP error! status: ${response.status}`);
                     }
-                    
+
                     return await response.json();
                 } catch (error) {
                     console.error('Agent creation failed:', error);
@@ -683,7 +683,7 @@
                     return new DemoAgentService().createAgent(config);
                 }
             }
-            
+
             async listAgents() {
                 try {
                     const response = await fetch(`${API_BASE_URL}/api/v1/agents`);
@@ -695,12 +695,12 @@
                 }
             }
         }
-        
+
         class DemoAgentService {
             constructor() {
                 this.demoAgents = [];
             }
-            
+
             async createAgent(config) {
                 const agent = {
                     id: `demo_${Date.now()}`,
@@ -715,16 +715,16 @@
                     freeEnergy: 0,
                     beliefs: createBeliefMap()
                 };
-                
+
                 this.demoAgents.push(agent);
                 return agent;
             }
-            
+
             async listAgents() {
                 return this.demoAgents;
             }
         }
-        
+
         // Knowledge Service Implementations
         class RealKnowledgeService {
             async getKnowledgeGraph(graphId = 'default') {
@@ -737,7 +737,7 @@
                     return new DemoKnowledgeService().getKnowledgeGraph();
                 }
             }
-            
+
             async getNodes(graphId = 'default') {
                 try {
                     const response = await fetch(`${API_BASE_URL}/api/v1/knowledge/graphs/${graphId}/nodes`);
@@ -749,7 +749,7 @@
                 }
             }
         }
-        
+
         class DemoKnowledgeService {
             async getKnowledgeGraph() {
                 return {
@@ -759,7 +759,7 @@
                     version: 1
                 };
             }
-            
+
             async getNodes() {
                 return [
                     { id: 'n1', type: 'concept', label: 'exploration', properties: { importance: 0.8 } },
@@ -770,33 +770,33 @@
                 ];
             }
         }
-        
+
         // WebSocket Service Implementations
         class RealWebSocketService {
             constructor() {
                 this.connection = null;
                 this.subscribers = new Map();
             }
-            
+
             async connect() {
                 try {
                     const wsUrl = `ws://${window.location.host}/api/v1/ws/demo-client`;
                     this.connection = new WebSocket(wsUrl);
-                    
+
                     this.connection.onopen = () => {
                         console.log('✅ WebSocket connected');
                         this.subscribe(['agent_event', 'system_event', 'world_event']);
                     };
-                    
+
                     this.connection.onmessage = (event) => {
                         const data = JSON.parse(event.data);
                         this.handleMessage(data);
                     };
-                    
+
                     this.connection.onerror = (error) => {
                         console.error('WebSocket error:', error);
                     };
-                    
+
                     this.connection.onclose = () => {
                         console.log('WebSocket disconnected');
                         // Attempt reconnection
@@ -806,7 +806,7 @@
                     console.error('Failed to connect WebSocket:', error);
                 }
             }
-            
+
             subscribe(eventTypes) {
                 if (this.connection && this.connection.readyState === WebSocket.OPEN) {
                     this.connection.send(JSON.stringify({
@@ -815,7 +815,7 @@
                     }));
                 }
             }
-            
+
             handleMessage(data) {
                 // Broadcast to subscribers
                 const eventType = data.type || data.event_type;
@@ -823,7 +823,7 @@
                     this.subscribers.get(eventType).forEach(callback => callback(data));
                 }
             }
-            
+
             onEvent(eventType, callback) {
                 if (!this.subscribers.has(eventType)) {
                     this.subscribers.set(eventType, new Set());
@@ -831,13 +831,13 @@
                 this.subscribers.get(eventType).add(callback);
             }
         }
-        
+
         class DemoWebSocketService {
             constructor() {
                 this.subscribers = new Map();
                 this.connected = true;
             }
-            
+
             async connect() {
                 console.log('📡 Demo WebSocket service active');
                 // Simulate periodic events
@@ -845,25 +845,25 @@
                     this.simulateEvent();
                 }, 5000);
             }
-            
+
             simulateEvent() {
                 const events = [
                     { type: 'agent_event', data: { action: 'moved', agent_id: 'demo-agent-1' }},
                     { type: 'world_event', data: { change: 'resource_collected', position: { x: 5, y: 3 }}},
                     { type: 'system_event', data: { status: 'healthy', timestamp: new Date().toISOString() }}
                 ];
-                
+
                 const event = events[Math.floor(Math.random() * events.length)];
                 this.handleMessage(event);
             }
-            
+
             handleMessage(data) {
                 const eventType = data.type;
                 if (this.subscribers.has(eventType)) {
                     this.subscribers.get(eventType).forEach(callback => callback(data));
                 }
             }
-            
+
             onEvent(eventType, callback) {
                 if (!this.subscribers.has(eventType)) {
                     this.subscribers.set(eventType, new Set());
@@ -871,7 +871,7 @@
                 this.subscribers.get(eventType).add(callback);
             }
         }
-        
+
         // Metrics Service Implementations
         class RealMetricsService {
             async getMetrics() {
@@ -885,7 +885,7 @@
                 }
             }
         }
-        
+
         class DemoMetricsService {
             async getMetrics() {
                 return {
@@ -897,7 +897,7 @@
                 };
             }
         }
-        
+
         // Resize canvas
         function resizeCanvas() {
             const container = document.getElementById('world-container');
@@ -905,25 +905,25 @@
             canvas.height = container.clientHeight;
             if (world) drawWorld();
         }
-        
+
         window.addEventListener('resize', resizeCanvas);
-        
+
         // Initialize world
         async function initializeWorld() {
             try {
                 // Initialize services first
                 serviceManager = new ServiceManager();
                 await serviceManager.initialize();
-                
+
                 // Update UI to show current mode
                 updateModeIndicator();
-                
+
                 // Connect WebSocket if available
                 if (serviceManager.websocketService) {
                     await serviceManager.websocketService.connect();
                     setupWebSocketListeners();
                 }
-                
+
                 // For demo, create a simple world
                 world = {
                     width: 25,
@@ -933,7 +933,7 @@
                     dangers: [],
                     goals: []
                 };
-                
+
                 // Initialize grid
                 for (let y = 0; y < world.height; y++) {
                     world.grid[y] = [];
@@ -941,41 +941,41 @@
                         world.grid[y][x] = 'empty';
                     }
                 }
-                
+
                 // Add some walls
                 createRooms();
-                
+
                 // Add features
                 placeFeatures('resource', 20, world.resources);
                 placeFeatures('danger', 10, world.dangers);
                 placeFeatures('goal', 4, world.goals);
-                
+
                 // Create initial agents
                 await createInitialAgents();
-                
+
                 // Load knowledge graph
                 await loadKnowledgeGraph();
-                
+
                 // Set up prompt processing
                 setupPromptProcessor();
-                
+
                 // Hide loading
                 document.getElementById('loading').style.display = 'none';
-                
+
                 // Initial draw
                 resizeCanvas();
                 updateUI();
-                
+
             } catch (error) {
                 console.error('Failed to initialize world:', error);
                 showError('Failed to initialize application');
             }
         }
-        
+
         function updateModeIndicator() {
             const modeText = document.getElementById('mode-text');
             const statusDot = document.getElementById('api-status');
-            
+
             if (serviceManager.mode === 'real') {
                 modeText.textContent = 'Live API Mode';
                 statusDot.className = 'status-dot online';
@@ -984,70 +984,70 @@
                 statusDot.className = 'status-dot offline';
             }
         }
-        
+
         function setupWebSocketListeners() {
             serviceManager.websocketService.onEvent('agent_event', (data) => {
                 console.log('Agent event:', data);
                 // Update agent state in real-time
                 updateAgentFromEvent(data);
             });
-            
+
             serviceManager.websocketService.onEvent('world_event', (data) => {
                 console.log('World event:', data);
                 // Update world state
                 updateWorldFromEvent(data);
             });
-            
+
             serviceManager.websocketService.onEvent('system_event', (data) => {
                 console.log('System event:', data);
                 // Update system status
                 updateSystemStatus(data);
             });
         }
-        
+
         function setupPromptProcessor() {
             const promptInput = document.getElementById('prompt-input');
             const processBtn = document.getElementById('process-prompt-btn');
             const statusDiv = document.getElementById('prompt-status');
-            
+
             // Enable prompt input
             processBtn.disabled = false;
-            
+
             promptInput.addEventListener('input', () => {
                 processBtn.disabled = promptInput.value.trim().length === 0;
             });
-            
+
             promptInput.addEventListener('keypress', (e) => {
                 if (e.key === 'Enter' && !processBtn.disabled) {
                     processPrompt();
                 }
             });
-            
+
             processBtn.addEventListener('click', processPrompt);
         }
-        
+
         async function processPrompt() {
             const promptInput = document.getElementById('prompt-input');
             const processBtn = document.getElementById('process-prompt-btn');
             const statusDiv = document.getElementById('prompt-status');
             const conversationPanel = document.getElementById('conversation-panel');
-            
+
             const prompt = promptInput.value.trim();
             if (!prompt) return;
-            
+
             // Update UI for processing state
             processBtn.disabled = true;
             statusDiv.innerHTML = '<span class="loading-spinner"></span> Processing prompt...';
             statusDiv.className = 'status-message loading';
-            
+
             try {
                 // Process the prompt
                 const result = await serviceManager.promptService.processPrompt(prompt);
-                
+
                 // Update conversation display
                 updateConversationDisplay(result.conversationCycle);
                 conversationPanel.style.display = 'block';
-                
+
                 // Create agent in the world
                 const agent = {
                     id: result.agentId,
@@ -1062,18 +1062,18 @@
                     beliefs: createBeliefMap(),
                     gmnSpec: result.gmnSpec
                 };
-                
+
                 agents.push(agent);
                 updateAgentList();
                 drawWorld();
-                
+
                 // Show success
                 statusDiv.textContent = `✓ Created agent: ${result.agentName}`;
                 statusDiv.className = 'status-message success';
-                
+
                 // Clear input
                 promptInput.value = '';
-                
+
             } catch (error) {
                 console.error('Prompt processing error:', error);
                 statusDiv.textContent = `✗ Error: ${error.message}`;
@@ -1082,37 +1082,37 @@
                 processBtn.disabled = false;
             }
         }
-        
+
         function updateConversationDisplay(cycle) {
             document.getElementById('conversation-goal').textContent = cycle.goal;
             document.getElementById('conversation-gmn').textContent = cycle.gmn;
             document.getElementById('conversation-inference').textContent = cycle.inference;
         }
-        
+
         async function loadKnowledgeGraph() {
             const kgContainer = document.getElementById('knowledge-graph');
             const statusDiv = document.getElementById('kg-status');
-            
+
             try {
                 const nodes = await serviceManager.knowledgeService.getNodes();
-                
+
                 if (nodes.length === 0) {
                     statusDiv.textContent = 'No knowledge nodes available';
                     statusDiv.className = 'status-message';
                     return;
                 }
-                
+
                 // Clear status and render nodes
                 statusDiv.style.display = 'none';
-                
+
                 const nodesHTML = nodes.map(node => `
                     <div class="kg-node ${node.type}" data-node-id="${node.id}" title="${node.label}">
                         ${node.label}
                     </div>
                 `).join('');
-                
+
                 kgContainer.innerHTML = nodesHTML;
-                
+
                 // Add click handlers for nodes
                 kgContainer.querySelectorAll('.kg-node').forEach(nodeEl => {
                     nodeEl.addEventListener('click', () => {
@@ -1120,14 +1120,14 @@
                         showNodeDetails(nodeId, nodes.find(n => n.id === nodeId));
                     });
                 });
-                
+
             } catch (error) {
                 console.error('Failed to load knowledge graph:', error);
                 statusDiv.textContent = 'Failed to load knowledge graph';
                 statusDiv.className = 'status-message error';
             }
         }
-        
+
         function showNodeDetails(nodeId, node) {
             // Create a simple modal or tooltip with node details
             const details = `
@@ -1135,11 +1135,11 @@
                 Type: ${node.type}
                 Properties: ${JSON.stringify(node.properties, null, 2)}
             `;
-            
+
             // For now, just alert - in production would show a proper modal
             alert(details);
         }
-        
+
         function updateAgentFromEvent(eventData) {
             const agent = agents.find(a => a.id === eventData.agent_id);
             if (agent && eventData.data) {
@@ -1154,7 +1154,7 @@
                 drawWorld();
             }
         }
-        
+
         function updateWorldFromEvent(eventData) {
             // Handle world state changes from WebSocket
             if (eventData.data.change === 'resource_collected') {
@@ -1165,18 +1165,18 @@
                 }
             }
         }
-        
+
         function updateSystemStatus(eventData) {
             // Update system status indicators
             console.log('System status:', eventData);
         }
-        
+
         function showError(message) {
             const statusDiv = document.getElementById('prompt-status');
             statusDiv.textContent = `✗ ${message}`;
             statusDiv.className = 'status-message error';
         }
-        
+
         function createRooms() {
             // Create some interesting rooms
             for (let i = 0; i < 3; i++) {
@@ -1184,7 +1184,7 @@
                 const y = Math.floor(Math.random() * (world.height - 10)) + 3;
                 const w = Math.floor(Math.random() * 5) + 5;
                 const h = Math.floor(Math.random() * 5) + 5;
-                
+
                 // Create walls with doors
                 for (let dx = 0; dx < w; dx++) {
                     if (dx !== Math.floor(w/2)) {
@@ -1192,7 +1192,7 @@
                         world.grid[y + h - 1][x + dx] = 'wall';
                     }
                 }
-                
+
                 for (let dy = 0; dy < h; dy++) {
                     if (dy !== Math.floor(h/2)) {
                         world.grid[y + dy][x] = 'wall';
@@ -1201,15 +1201,15 @@
                 }
             }
         }
-        
+
         function placeFeatures(type, count, storage) {
             let placed = 0;
             let attempts = 0;
-            
+
             while (placed < count && attempts < count * 10) {
                 const x = Math.floor(Math.random() * world.width);
                 const y = Math.floor(Math.random() * world.height);
-                
+
                 if (world.grid[y][x] === 'empty') {
                     world.grid[y][x] = type;
                     storage.push({x, y});
@@ -1218,11 +1218,11 @@
                 attempts++;
             }
         }
-        
+
         async function createInitialAgents() {
             const agentTypes = ['explorer', 'collector', 'analyzer', 'scout'];
             const names = ['Alpha', 'Beta', 'Gamma', 'Delta'];
-            
+
             for (let i = 0; i < 4; i++) {
                 try {
                     // Use service manager to create agents
@@ -1234,9 +1234,9 @@
                             planning_horizon: 5
                         }
                     };
-                    
+
                     const createdAgent = await serviceManager.agentService.createAgent(agentConfig);
-                    
+
                     // Add demo-specific properties for visualization
                     const agent = {
                         ...createdAgent,
@@ -1249,7 +1249,7 @@
                         path: [],
                         beliefs: createBeliefMap()
                     };
-                    
+
                     agents.push(agent);
                 } catch (error) {
                     console.error(`Failed to create agent ${i}:`, error);
@@ -1266,20 +1266,20 @@
                         path: [],
                         beliefs: createBeliefMap()
                     };
-                    
+
                     agents.push(agent);
                 }
             }
-            
+
             updateAgentList();
         }
-        
+
         function findEmptyPosition() {
             let attempts = 0;
             while (attempts < 100) {
                 const x = Math.floor(Math.random() * world.width);
                 const y = Math.floor(Math.random() * world.height);
-                
+
                 if (world.grid[y][x] === 'empty') {
                     return {x, y};
                 }
@@ -1287,7 +1287,7 @@
             }
             return {x: 1, y: 1};
         }
-        
+
         function createBeliefMap() {
             // Simple belief representation
             const beliefs = [];
@@ -1299,42 +1299,42 @@
             }
             return beliefs;
         }
-        
+
         // Drawing functions
         function drawWorld() {
             ctx.clearRect(0, 0, canvas.width, canvas.height);
-            
+
             // Calculate offset to center the world
             const worldWidth = world.width * CELL_SIZE;
             const worldHeight = world.height * CELL_SIZE;
             const offsetX = (canvas.width - worldWidth) / 2;
             const offsetY = (canvas.height - worldHeight) / 2;
-            
+
             // Draw grid
             ctx.strokeStyle = COLORS.grid;
             ctx.lineWidth = 0.5;
-            
+
             for (let x = 0; x <= world.width; x++) {
                 ctx.beginPath();
                 ctx.moveTo(offsetX + x * CELL_SIZE, offsetY);
                 ctx.lineTo(offsetX + x * CELL_SIZE, offsetY + worldHeight);
                 ctx.stroke();
             }
-            
+
             for (let y = 0; y <= world.height; y++) {
                 ctx.beginPath();
                 ctx.moveTo(offsetX, offsetY + y * CELL_SIZE);
                 ctx.lineTo(offsetX + worldWidth, offsetY + y * CELL_SIZE);
                 ctx.stroke();
             }
-            
+
             // Draw cells
             for (let y = 0; y < world.height; y++) {
                 for (let x = 0; x < world.width; x++) {
                     const cellType = world.grid[y][x];
                     const cellX = offsetX + x * CELL_SIZE;
                     const cellY = offsetY + y * CELL_SIZE;
-                    
+
                     if (cellType === 'wall') {
                         ctx.fillStyle = COLORS.wall;
                         ctx.fillRect(cellX, cellY, CELL_SIZE, CELL_SIZE);
@@ -1357,7 +1357,7 @@
                     }
                 }
             }
-            
+
             // Draw agent beliefs (as transparency overlay)
             ctx.globalAlpha = 0.3;
             agents.forEach(agent => {
@@ -1375,12 +1375,12 @@
                 }
             });
             ctx.globalAlpha = 1;
-            
+
             // Draw agents
             agents.forEach((agent, index) => {
                 const agentX = offsetX + agent.position.x * CELL_SIZE + CELL_SIZE/2;
                 const agentY = offsetY + agent.position.y * CELL_SIZE + CELL_SIZE/2;
-                
+
                 // Draw agent circle
                 ctx.fillStyle = COLORS.agents[agent.type];
                 ctx.strokeStyle = '#000';
@@ -1389,14 +1389,14 @@
                 ctx.arc(agentX, agentY, AGENT_RADIUS, 0, Math.PI * 2);
                 ctx.fill();
                 ctx.stroke();
-                
+
                 // Draw agent ID
                 ctx.fillStyle = '#fff';
                 ctx.font = 'bold 10px Arial';
                 ctx.textAlign = 'center';
                 ctx.textBaseline = 'middle';
                 ctx.fillText(index + 1, agentX, agentY);
-                
+
                 // Animate agent (pulse effect)
                 if (running) {
                     ctx.strokeStyle = COLORS.agents[agent.type];
@@ -1409,13 +1409,13 @@
                 }
             });
         }
-        
+
         // Simulation
         function simulationStep() {
             if (!running) return;
-            
+
             tick++;
-            
+
             // Update each agent
             agents.forEach(agent => {
                 // Simple Active Inference simulation
@@ -1423,37 +1423,37 @@
                 const action = selectAction(agent);
                 executeAction(agent, action);
             });
-            
+
             // Update UI
             updateUI();
             drawWorld();
-            
+
             // Schedule next step
             const delay = 1000 / speed;
             animationId = setTimeout(() => {
                 requestAnimationFrame(simulationStep);
             }, delay);
         }
-        
+
         function updateBeliefs(agent) {
             // Update beliefs based on current observation
             const {x, y} = agent.position;
-            
+
             // Mark current position as explored
             agent.beliefs[y][x] = 1.0;
-            
+
             // Update nearby beliefs
             for (let dy = -1; dy <= 1; dy++) {
                 for (let dx = -1; dx <= 1; dx++) {
                     const nx = x + dx;
                     const ny = y + dy;
-                    
+
                     if (nx >= 0 && nx < world.width && ny >= 0 && ny < world.height) {
                         agent.beliefs[ny][nx] = Math.min(1.0, agent.beliefs[ny][nx] + 0.3);
                     }
                 }
             }
-            
+
             // Decay distant beliefs (forgetting)
             for (let by = 0; by < world.height; by++) {
                 for (let bx = 0; bx < world.width; bx++) {
@@ -1464,7 +1464,7 @@
                 }
             }
         }
-        
+
         function selectAction(agent) {
             // Simple Active Inference action selection
             const actions = [
@@ -1474,41 +1474,41 @@
                 {dx: -1, dy: 0, name: 'west'},
                 {dx: 0, dy: 0, name: 'stay'}
             ];
-            
+
             let bestAction = actions[4]; // Default: stay
             let bestValue = -Infinity;
-            
+
             actions.forEach(action => {
                 const newX = agent.position.x + action.dx;
                 const newY = agent.position.y + action.dy;
-                
+
                 if (newX >= 0 && newX < world.width && newY >= 0 && newY < world.height) {
                     if (world.grid[newY][newX] !== 'wall') {
                         // Calculate expected free energy (simplified)
                         let value = 0;
-                        
+
                         // Exploration bonus
                         const uncertainty = 1 - agent.beliefs[newY][newX];
                         value += uncertainty * (agent.type === 'explorer' ? 2.0 : 0.5);
-                        
+
                         // Resource attraction
                         if (world.grid[newY][newX] === 'resource') {
                             value += agent.type === 'collector' ? 5.0 : 2.0;
                         }
-                        
+
                         // Goal attraction
                         if (world.grid[newY][newX] === 'goal') {
                             value += 10.0;
                         }
-                        
+
                         // Danger avoidance
                         if (world.grid[newY][newX] === 'danger') {
                             value -= 10.0;
                         }
-                        
+
                         // Add noise for stochasticity
                         value += Math.random() * 0.5;
-                        
+
                         if (value > bestValue) {
                             bestValue = value;
                             bestAction = action;
@@ -1516,31 +1516,31 @@
                     }
                 }
             });
-            
+
             // Update free energy estimate
             agent.freeEnergy = agent.freeEnergy * 0.9 + Math.abs(bestValue) * 0.1;
-            
+
             return bestAction;
         }
-        
+
         function executeAction(agent, action) {
             const newX = agent.position.x + action.dx;
             const newY = agent.position.y + action.dy;
-            
+
             if (newX >= 0 && newX < world.width && newY >= 0 && newY < world.height) {
                 if (world.grid[newY][newX] !== 'wall') {
                     // Move agent
                     agent.position.x = newX;
                     agent.position.y = newY;
                     agent.steps++;
-                    
+
                     // Collect resource
                     if (world.grid[newY][newX] === 'resource') {
                         agent.resources++;
                         world.grid[newY][newX] = 'empty';
                         createParticles(newX, newY, COLORS.resource);
                     }
-                    
+
                     // Reach goal
                     if (world.grid[newY][newX] === 'goal') {
                         agent.goals++;
@@ -1549,7 +1549,7 @@
                 }
             }
         }
-        
+
         function createParticles(x, y, color) {
             // Create particle effect
             const container = document.getElementById('world-container');
@@ -1557,7 +1557,7 @@
             const worldHeight = world.height * CELL_SIZE;
             const offsetX = (canvas.width - worldWidth) / 2;
             const offsetY = (canvas.height - worldHeight) / 2;
-            
+
             for (let i = 0; i < 10; i++) {
                 const particle = document.createElement('div');
                 particle.className = 'particle';
@@ -1567,17 +1567,17 @@
                 particle.style.setProperty('--tx', (Math.random() - 0.5) * 50 + 'px');
                 particle.style.setProperty('--ty', (Math.random() - 0.5) * 50 + 'px');
                 container.appendChild(particle);
-                
+
                 setTimeout(() => particle.remove(), 2000);
             }
         }
-        
+
         // UI Updates
         async function updateUI() {
             try {
                 // Get metrics from service
                 const metrics = await serviceManager.metricsService.getMetrics();
-                
+
                 if (typeof metrics === 'object') {
                     // Structured metrics from demo service
                     document.getElementById('total-resources').textContent = metrics.total_resources || 0;
@@ -1588,7 +1588,7 @@
                     // Fallback to local calculation
                     const totalResources = agents.reduce((sum, a) => sum + a.resources, 0);
                     const totalGoals = agents.reduce((sum, a) => sum + a.goals, 0);
-                    
+
                     document.getElementById('total-resources').textContent = totalResources;
                     document.getElementById('total-goals').textContent = totalGoals;
                     document.getElementById('total-agents').textContent = agents.length;
@@ -1599,25 +1599,25 @@
                 // Fallback to local calculation
                 const totalResources = agents.reduce((sum, a) => sum + a.resources, 0);
                 const totalGoals = agents.reduce((sum, a) => sum + a.goals, 0);
-                
+
                 document.getElementById('total-resources').textContent = totalResources;
                 document.getElementById('total-goals').textContent = totalGoals;
                 document.getElementById('total-agents').textContent = agents.length;
                 document.getElementById('tick-count').textContent = tick;
             }
-            
+
             // Update agent list
             updateAgentList();
         }
-        
+
         function updateAgentList() {
             const list = document.getElementById('agent-list');
             list.innerHTML = '';
-            
+
             agents.forEach((agent, index) => {
                 const item = document.createElement('div');
                 item.className = `agent-item agent-${agent.type}`;
-                
+
                 item.innerHTML = `
                     <div class="agent-name">${index + 1}. ${agent.name}</div>
                     <div class="agent-stats">
@@ -1639,11 +1639,11 @@
                         </div>
                     </div>
                 `;
-                
+
                 list.appendChild(item);
             });
         }
-        
+
         // Event handlers
         document.getElementById('start-btn').addEventListener('click', () => {
             running = true;
@@ -1651,7 +1651,7 @@
             document.getElementById('pause-btn').disabled = false;
             simulationStep();
         });
-        
+
         document.getElementById('pause-btn').addEventListener('click', () => {
             running = false;
             if (animationId) {
@@ -1661,7 +1661,7 @@
             document.getElementById('start-btn').disabled = false;
             document.getElementById('pause-btn').disabled = true;
         });
-        
+
         document.getElementById('reset-btn').addEventListener('click', () => {
             running = false;
             if (animationId) {
@@ -1674,20 +1674,20 @@
             document.getElementById('start-btn').disabled = false;
             document.getElementById('pause-btn').disabled = true;
         });
-        
+
         document.getElementById('add-agent-btn').addEventListener('click', async () => {
             const addBtn = document.getElementById('add-agent-btn');
             const originalText = addBtn.textContent;
-            
+
             try {
                 addBtn.disabled = true;
                 addBtn.textContent = 'Creating...';
-                
+
                 const types = ['explorer', 'collector', 'analyzer', 'scout'];
                 const type = types[agents.length % types.length];
                 const names = ['Epsilon', 'Zeta', 'Eta', 'Theta', 'Iota', 'Kappa'];
                 const name = names[agents.length % names.length];
-                
+
                 const agentConfig = {
                     name: `${name} ${type.charAt(0).toUpperCase() + type.slice(1)}`,
                     template: type,
@@ -1696,9 +1696,9 @@
                         planning_horizon: Math.floor(Math.random() * 5) + 3
                     }
                 };
-                
+
                 const createdAgent = await serviceManager.agentService.createAgent(agentConfig);
-                
+
                 const agent = {
                     ...createdAgent,
                     type: type,
@@ -1710,11 +1710,11 @@
                     path: [],
                     beliefs: createBeliefMap()
                 };
-                
+
                 agents.push(agent);
                 updateUI();
                 drawWorld();
-                
+
             } catch (error) {
                 console.error('Failed to create agent:', error);
                 showError('Failed to create agent');
@@ -1723,42 +1723,42 @@
                 addBtn.textContent = originalText;
             }
         });
-        
+
         document.getElementById('speed-btn').addEventListener('click', () => {
             const speeds = [1, 2, 5, 10];
             const currentIndex = speeds.indexOf(speed);
             speed = speeds[(currentIndex + 1) % speeds.length];
             document.getElementById('speed-btn').textContent = `Speed: ${speed}x`;
         });
-        
+
         // Canvas interaction
         canvas.addEventListener('mousemove', (e) => {
             const rect = canvas.getBoundingClientRect();
             const x = e.clientX - rect.left;
             const y = e.clientY - rect.top;
-            
+
             const worldWidth = world.width * CELL_SIZE;
             const worldHeight = world.height * CELL_SIZE;
             const offsetX = (canvas.width - worldWidth) / 2;
             const offsetY = (canvas.height - worldHeight) / 2;
-            
+
             const cellX = Math.floor((x - offsetX) / CELL_SIZE);
             const cellY = Math.floor((y - offsetY) / CELL_SIZE);
-            
+
             if (cellX >= 0 && cellX < world.width && cellY >= 0 && cellY < world.height) {
                 const cellType = world.grid[cellY][cellX];
                 let text = `Position: (${cellX}, ${cellY})`;
-                
+
                 if (cellType !== 'empty') {
                     text += ` - ${cellType.charAt(0).toUpperCase() + cellType.slice(1)}`;
                 }
-                
+
                 // Check for agents
                 const agentHere = agents.find(a => a.position.x === cellX && a.position.y === cellY);
                 if (agentHere) {
                     text = `${agentHere.name} - ${text}`;
                 }
-                
+
                 tooltip.textContent = text;
                 tooltip.style.left = e.clientX + 10 + 'px';
                 tooltip.style.top = e.clientY - 30 + 'px';
@@ -1767,11 +1767,11 @@
                 tooltip.classList.remove('show');
             }
         });
-        
+
         canvas.addEventListener('mouseleave', () => {
             tooltip.classList.remove('show');
         });
-        
+
         // Initialize on load
         window.addEventListener('load', initializeWorld);
     </script>

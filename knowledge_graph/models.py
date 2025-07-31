@@ -1,5 +1,6 @@
 # knowledge_graph/models.py
-from typing import List, Dict, Any, Optional
+from typing import Any, Dict, List
+
 from pydantic import BaseModel
 
 
@@ -26,5 +27,5 @@ class KnowledgeGraphResponse(BaseModel):
         return {
             "nodes": [node.model_dump() for node in self.nodes],
             "edges": [edge.model_dump() for edge in self.edges],
-            "metadata": self.metadata
+            "metadata": self.metadata,
         }

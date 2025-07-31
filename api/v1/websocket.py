@@ -3,7 +3,6 @@
 import asyncio
 import json
 import logging
-import os
 import re
 from datetime import datetime, timedelta
 from typing import Any, Dict, Optional, Set
@@ -13,11 +12,7 @@ from pydantic import BaseModel, Field, validator
 
 from api.middleware.websocket_rate_limiting import websocket_rate_limit_manager
 from auth.security_implementation import Permission
-from websocket_server.auth_handler import (
-    WebSocketErrorCode,
-    handle_token_refresh,
-    ws_auth_handler,
-)
+from websocket_server.auth_handler import WebSocketErrorCode, handle_token_refresh, ws_auth_handler
 
 logger = logging.getLogger(__name__)
 
@@ -142,7 +137,7 @@ class ConnectionManager:
 manager = ConnectionManager()
 
 # Import environment for dev mode check
-from core.environment import environment
+from core.environment import environment  # noqa: E402
 
 
 @router.websocket("/ws/{client_id}")
@@ -408,12 +403,12 @@ async def handle_client_message_with_auth(client_id: str, message: dict):
         prompt_id = message.get("prompt_id")
         prompt_text = message.get("prompt")
         conversation_id = message.get("conversation_id")
-        
+
         logger.info(
             f"Prompt submitted via WebSocket - client: {client_id}, "
             f"prompt_id: {prompt_id}, conversation_id: {conversation_id}"
         )
-        
+
         # Acknowledge receipt
         await manager.send_personal_message(
             {
@@ -421,15 +416,15 @@ async def handle_client_message_with_auth(client_id: str, message: dict):
                 "prompt_id": prompt_id,
                 "conversation_id": conversation_id,
                 "timestamp": datetime.now().isoformat(),
-                "message": "Prompt received and processing started"
+                "message": "Prompt received and processing started",
             },
             client_id,
         )
-        
+
         # Process the prompt to create an agent
         try:
             from api.v1.prompts import PromptRequest, create_agent_from_prompt
-            
+
             # Get current user from WebSocket auth
             user_data = await ws_auth_handler.get_user_data(client_id)
             if not user_data:
@@ -443,7 +438,7 @@ async def handle_client_message_with_auth(client_id: str, message: dict):
                     client_id,
                 )
                 return
-            
+
             # Create prompt request
             prompt_request = PromptRequest(
                 prompt=prompt_text,
@@ -451,10 +446,10 @@ async def handle_client_message_with_auth(client_id: str, message: dict):
                 llm_provider=message.get("llm_provider", "openai"),
                 model=message.get("model"),
             )
-            
+
             # Process the prompt
             response = await create_agent_from_prompt(prompt_request, user_data)
-            
+
             # Send success response
             await manager.send_personal_message(
                 {
@@ -469,7 +464,7 @@ async def handle_client_message_with_auth(client_id: str, message: dict):
                 },
                 client_id,
             )
-            
+
         except Exception as e:
             logger.error(f"Failed to process prompt {prompt_id}: {e}")
             await manager.send_personal_message(
@@ -481,7 +476,7 @@ async def handle_client_message_with_auth(client_id: str, message: dict):
                 },
                 client_id,
             )
-        
+
         # Broadcast to other clients if needed
         await broadcast_agent_event(
             agent_id="system",
@@ -489,38 +484,35 @@ async def handle_client_message_with_auth(client_id: str, message: dict):
             data={
                 "prompt_id": prompt_id,
                 "conversation_id": conversation_id,
-                "status": "processing"
-            }
+                "status": "processing",
+            },
         )
 
     elif msg_type == "clear_conversation":
         # Handle conversation clearing
         conversation_data = message.get("data", {})
         conversation_id = conversation_data.get("conversationId")
-        
+
         logger.info(
             f"Clear conversation request - client: {client_id}, "
             f"conversation_id: {conversation_id}"
         )
-        
+
         # Acknowledge clearing
         await manager.send_personal_message(
             {
                 "type": "conversation_cleared",
                 "conversation_id": conversation_id,
                 "timestamp": datetime.now().isoformat(),
-                "message": "Conversation history cleared"
+                "message": "Conversation history cleared",
             },
             client_id,
         )
-        
+
         # Notify other components if needed
         await broadcast_system_event(
             event_type="conversation_cleared",
-            data={
-                "conversation_id": conversation_id,
-                "cleared_by": client_id
-            }
+            data={"conversation_id": conversation_id, "cleared_by": client_id},
         )
 
     else:
@@ -707,35 +699,26 @@ async def get_subscriptions():
 @router.websocket("/ws/dev")
 async def websocket_dev_endpoint(websocket: WebSocket):
     """Dev WebSocket endpoint without authentication for development mode.
-    
+
     This endpoint is only available when running in dev mode (no DATABASE_URL).
     It provides basic WebSocket functionality for UI development and testing.
     """
     if not (environment.is_development and not environment.config.auth_required):
-        await websocket.close(
-            code=4003,
-            reason="Dev endpoint only available in dev mode"
-        )
+        await websocket.close(code=4003, reason="Dev endpoint only available in dev mode")
         return
-    
+
     # Generate a dev client ID
     client_id = f"dev_{datetime.now().timestamp()}"
-    
+
     try:
         # Accept connection immediately (no auth required)
         await websocket.accept()
-        
+
         # Connect to manager with dev metadata
         await manager.connect(
-            websocket,
-            client_id,
-            metadata={
-                "username": "dev_user",
-                "role": "dev",
-                "dev_mode": True
-            }
+            websocket, client_id, metadata={"username": "dev_user", "role": "dev", "dev_mode": True}
         )
-        
+
         # Send initial dev data
         await manager.send_personal_message(
             {
@@ -744,27 +727,23 @@ async def websocket_dev_endpoint(websocket: WebSocket):
                 "features": [
                     "Agent creation simulation",
                     "Real-time updates",
-                    "Knowledge graph visualization"
+                    "Knowledge graph visualization",
                 ],
-                "timestamp": datetime.now().isoformat()
+                "timestamp": datetime.now().isoformat(),
             },
-            client_id
+            client_id,
         )
-        
+
         # Handle messages
         while True:
             try:
                 data = await websocket.receive_text()
                 message = json.loads(data)
-                
+
                 # Handle demo-specific message types
                 if message.get("type") == "ping":
                     await manager.send_personal_message(
-                        {
-                            "type": "pong",
-                            "timestamp": datetime.now().isoformat()
-                        },
-                        client_id
+                        {"type": "pong", "timestamp": datetime.now().isoformat()}, client_id
                     )
                 elif message.get("type") == "agent_create":
                     # Simulate agent creation
@@ -776,18 +755,18 @@ async def websocket_dev_endpoint(websocket: WebSocket):
                                 "name": message.get("data", {}).get("name", "Dev Agent"),
                                 "type": message.get("data", {}).get("type", "explorer"),
                                 "status": "active",
-                                "created_at": datetime.now().isoformat()
-                            }
+                                "created_at": datetime.now().isoformat(),
+                            },
                         },
-                        client_id
+                        client_id,
                     )
-                    
+
                     # Broadcast to all dev connections
                     await manager.broadcast(
                         {
                             "type": "agent_update",
                             "action": "created",
-                            "agent_id": f"dev_agent_{datetime.now().timestamp()}"
+                            "agent_id": f"dev_agent_{datetime.now().timestamp()}",
                         }
                     )
                 elif message.get("type") == "prompt_submitted":
@@ -795,30 +774,30 @@ async def websocket_dev_endpoint(websocket: WebSocket):
                     prompt_id = message.get("prompt_id")
                     prompt_text = message.get("prompt")
                     conversation_id = message.get("conversation_id")
-                    
+
                     logger.info(
                         f"[Dev] Prompt submitted - prompt_id: {prompt_id}, "
                         f"conversation_id: {conversation_id}"
                     )
-                    
+
                     await manager.send_personal_message(
                         {
                             "type": "prompt_acknowledged",
                             "prompt_id": prompt_id,
                             "conversation_id": conversation_id,
                             "timestamp": datetime.now().isoformat(),
-                            "message": "Dev mode: Prompt received"
+                            "message": "Dev mode: Prompt received",
                         },
-                        client_id
+                        client_id,
                     )
-                    
+
                     # Process the prompt in dev mode
                     try:
                         from api.v1.prompts import PromptRequest, create_agent_from_prompt
-                        from auth.security_implementation import TokenData
-                        
+
                         # Create dev user token
-                        from auth.security_implementation import UserRole
+                        from auth.security_implementation import TokenData, UserRole
+
                         dev_user = TokenData(
                             user_id="dev_user",
                             username="dev_user",
@@ -826,7 +805,7 @@ async def websocket_dev_endpoint(websocket: WebSocket):
                             permissions=[Permission.CREATE_AGENT, Permission.VIEW_AGENTS],
                             exp=datetime.now() + timedelta(hours=1),
                         )
-                        
+
                         # Create prompt request
                         prompt_request = PromptRequest(
                             prompt=prompt_text,
@@ -834,10 +813,10 @@ async def websocket_dev_endpoint(websocket: WebSocket):
                             llm_provider=message.get("llm_provider", "openai"),
                             model=message.get("model"),
                         )
-                        
+
                         # Process the prompt
                         response = await create_agent_from_prompt(prompt_request, dev_user)
-                        
+
                         # Send success response
                         await manager.send_personal_message(
                             {
@@ -852,21 +831,32 @@ async def websocket_dev_endpoint(websocket: WebSocket):
                             },
                             client_id,
                         )
-                        
+
                     except Exception as e:
-                        logger.error(f"[Dev] Failed to process prompt {prompt_id}: {e}", exc_info=True)
-                        
+                        logger.error(
+                            f"[Dev] Failed to process prompt {prompt_id}: {e}", exc_info=True
+                        )
+
                         # Provide user-friendly error message
                         error_message = str(e)
                         if "timeout" in error_message.lower():
-                            error_message = "Request timed out. Please check your API key and try again."
-                        elif "authentication" in error_message.lower() or "api key" in error_message.lower():
-                            error_message = "Invalid API key. Please check your OpenAI API key in settings."
+                            error_message = (
+                                "Request timed out. Please check your API key and try again."
+                            )
+                        elif (
+                            "authentication" in error_message.lower()
+                            or "api key" in error_message.lower()
+                        ):
+                            error_message = (
+                                "Invalid API key. Please check your OpenAI API key in settings."
+                            )
                         elif "rate limit" in error_message.lower():
-                            error_message = "Rate limit exceeded. Please wait a moment and try again."
+                            error_message = (
+                                "Rate limit exceeded. Please wait a moment and try again."
+                            )
                         elif "no llm providers available" in error_message.lower():
                             error_message = "No API keys configured. Please add your OpenAI API key in settings."
-                        
+
                         await manager.send_personal_message(
                             {
                                 "type": "error",
@@ -881,17 +871,17 @@ async def websocket_dev_endpoint(websocket: WebSocket):
                     # Handle conversation clearing in dev mode
                     conversation_data = message.get("data", {})
                     conversation_id = conversation_data.get("conversationId")
-                    
+
                     logger.info(f"[Dev] Clear conversation - id: {conversation_id}")
-                    
+
                     await manager.send_personal_message(
                         {
                             "type": "conversation_cleared",
                             "conversation_id": conversation_id,
                             "timestamp": datetime.now().isoformat(),
-                            "message": "Dev mode: Conversation cleared"
+                            "message": "Dev mode: Conversation cleared",
                         },
-                        client_id
+                        client_id,
                     )
                 else:
                     # Echo back for demo purposes
@@ -899,31 +889,23 @@ async def websocket_dev_endpoint(websocket: WebSocket):
                         {
                             "type": "echo",
                             "original": message,
-                            "timestamp": datetime.now().isoformat()
+                            "timestamp": datetime.now().isoformat(),
                         },
-                        client_id
+                        client_id,
                     )
-                    
+
             except json.JSONDecodeError:
                 await manager.send_personal_message(
-                    {
-                        "type": "error",
-                        "message": "Invalid JSON format"
-                    },
-                    client_id
+                    {"type": "error", "message": "Invalid JSON format"}, client_id
                 )
             except WebSocketDisconnect:
                 break
             except Exception as e:
                 logger.error(f"Dev WebSocket error: {e}")
                 await manager.send_personal_message(
-                    {
-                        "type": "error",
-                        "message": "Internal error occurred"
-                    },
-                    client_id
+                    {"type": "error", "message": "Internal error occurred"}, client_id
                 )
-                
+
     except Exception as e:
         logger.error(f"Dev WebSocket connection error: {e}")
     finally:

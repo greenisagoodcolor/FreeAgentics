@@ -7,18 +7,23 @@ The FreeAgentics WebSocket API provides real-time bidirectional communication fo
 ## Connection Details
 
 ### WebSocket URL
+
 ```
 wss://api.freeagentics.com/api/v1/ws
 ```
 
 ### Authentication
+
 Include your JWT access token as a query parameter:
+
 ```
 wss://api.freeagentics.com/api/v1/ws?token=<access_token>
 ```
 
 ### Connection Headers
+
 Optional headers for enhanced security:
+
 ```
 X-Client-Fingerprint: <unique_client_identifier>
 X-Client-Version: <client_version>
@@ -27,16 +32,21 @@ X-Client-Version: <client_version>
 ## Connection Flow
 
 ### 1. Initial Connection
-```javascript
-const ws = new WebSocket('wss://api.freeagentics.com/api/v1/ws?token=your_access_token');
 
-ws.onopen = function(event) {
-    console.log('Connected to FreeAgentics WebSocket');
+```javascript
+const ws = new WebSocket(
+  "wss://api.freeagentics.com/api/v1/ws?token=your_access_token",
+);
+
+ws.onopen = function (event) {
+  console.log("Connected to FreeAgentics WebSocket");
 };
 ```
 
 ### 2. Connection Acknowledgment
+
 Upon successful connection, the server sends:
+
 ```json
 {
   "type": "connection_established",
@@ -50,14 +60,17 @@ Upon successful connection, the server sends:
 ```
 
 ### 3. Subscribe to Events
+
 ```javascript
-ws.send(JSON.stringify({
-  "type": "subscribe",
-  "data": {
-    "events": ["agent_status", "metrics", "system_alerts"],
-    "agents": ["agent_123", "agent_456"]
-  }
-}));
+ws.send(
+  JSON.stringify({
+    type: "subscribe",
+    data: {
+      events: ["agent_status", "metrics", "system_alerts"],
+      agents: ["agent_123", "agent_456"],
+    },
+  }),
+);
 ```
 
 ## Message Format
@@ -77,13 +90,19 @@ All WebSocket messages follow this structure:
 ## Client → Server Messages
 
 ### Subscribe to Events
+
 Subscribe to specific event types and agents:
 
 ```json
 {
   "type": "subscribe",
   "data": {
-    "events": ["agent_status", "metrics", "inference_completed", "system_alerts"],
+    "events": [
+      "agent_status",
+      "metrics",
+      "inference_completed",
+      "system_alerts"
+    ],
     "agents": ["agent_123", "agent_456"],
     "filters": {
       "severity": ["warning", "error"],
@@ -94,11 +113,13 @@ Subscribe to specific event types and agents:
 ```
 
 **Parameters:**
+
 - `events`: Array of event types to subscribe to
 - `agents`: Array of specific agent IDs (optional, omit for all agents)
 - `filters`: Additional filtering criteria (optional)
 
 ### Unsubscribe from Events
+
 ```json
 {
   "type": "unsubscribe",
@@ -110,7 +131,9 @@ Subscribe to specific event types and agents:
 ```
 
 ### Send Commands
+
 Execute commands on agents:
+
 ```json
 {
   "type": "command",
@@ -125,6 +148,7 @@ Execute commands on agents:
 ```
 
 **Available Commands:**
+
 - `start`: Start agent processing
 - `stop`: Stop agent processing
 - `restart`: Restart agent
@@ -132,7 +156,9 @@ Execute commands on agents:
 - `get_status`: Request immediate status update
 
 ### Ping/Pong
+
 Keep connection alive:
+
 ```json
 {
   "type": "ping"
@@ -140,7 +166,9 @@ Keep connection alive:
 ```
 
 ### Configuration Updates
+
 Update subscription configuration:
+
 ```json
 {
   "type": "configure",
@@ -157,6 +185,7 @@ Update subscription configuration:
 ### Connection Events
 
 #### Connection Established
+
 ```json
 {
   "type": "connection_established",
@@ -171,6 +200,7 @@ Update subscription configuration:
 ```
 
 #### Subscription Confirmed
+
 ```json
 {
   "type": "subscription_confirmed",
@@ -186,6 +216,7 @@ Update subscription configuration:
 ### Agent Events
 
 #### Agent Status Update
+
 ```json
 {
   "type": "agent_status",
@@ -202,6 +233,7 @@ Update subscription configuration:
 ```
 
 #### Agent Created
+
 ```json
 {
   "type": "agent_created",
@@ -217,6 +249,7 @@ Update subscription configuration:
 ```
 
 #### Agent Deleted
+
 ```json
 {
   "type": "agent_deleted",
@@ -233,6 +266,7 @@ Update subscription configuration:
 ### Inference Events
 
 #### Inference Started
+
 ```json
 {
   "type": "inference_started",
@@ -248,6 +282,7 @@ Update subscription configuration:
 ```
 
 #### Inference Progress
+
 ```json
 {
   "type": "inference_progress",
@@ -263,6 +298,7 @@ Update subscription configuration:
 ```
 
 #### Inference Completed
+
 ```json
 {
   "type": "inference_completed",
@@ -281,6 +317,7 @@ Update subscription configuration:
 ```
 
 #### Inference Failed
+
 ```json
 {
   "type": "inference_failed",
@@ -298,6 +335,7 @@ Update subscription configuration:
 ### Metrics Events
 
 #### Real-time Metrics
+
 ```json
 {
   "type": "metrics_update",
@@ -330,6 +368,7 @@ Update subscription configuration:
 ```
 
 #### Performance Alert
+
 ```json
 {
   "type": "performance_alert",
@@ -350,6 +389,7 @@ Update subscription configuration:
 ### System Events
 
 #### System Alert
+
 ```json
 {
   "type": "system_alert",
@@ -367,6 +407,7 @@ Update subscription configuration:
 ```
 
 #### System Status Change
+
 ```json
 {
   "type": "system_status",
@@ -387,6 +428,7 @@ Update subscription configuration:
 ### Knowledge Graph Events
 
 #### Entity Created
+
 ```json
 {
   "type": "entity_created",
@@ -405,6 +447,7 @@ Update subscription configuration:
 ```
 
 #### Relationship Created
+
 ```json
 {
   "type": "relationship_created",
@@ -423,6 +466,7 @@ Update subscription configuration:
 ### Error Events
 
 #### Command Error
+
 ```json
 {
   "type": "command_error",
@@ -438,6 +482,7 @@ Update subscription configuration:
 ```
 
 #### Subscription Error
+
 ```json
 {
   "type": "subscription_error",
@@ -451,6 +496,7 @@ Update subscription configuration:
 ```
 
 ### Heartbeat
+
 ```json
 {
   "type": "pong",
@@ -465,27 +511,32 @@ Update subscription configuration:
 ## Event Types Reference
 
 ### Agent Events
+
 - `agent_status`: Agent status changes
 - `agent_created`: New agent created
 - `agent_deleted`: Agent deleted
 - `agent_updated`: Agent configuration updated
 
 ### Inference Events
+
 - `inference_started`: Inference request started
 - `inference_progress`: Inference progress updates
 - `inference_completed`: Inference completed successfully
 - `inference_failed`: Inference failed
 
 ### Metrics Events
+
 - `metrics_update`: Real-time system and agent metrics
 - `performance_alert`: Performance-related alerts
 
 ### System Events
+
 - `system_alert`: System-wide alerts
 - `system_status`: System status changes
 - `maintenance_mode`: Maintenance mode notifications
 
 ### Knowledge Graph Events
+
 - `entity_created`: New entity created
 - `entity_updated`: Entity modified
 - `entity_deleted`: Entity deleted
@@ -494,6 +545,7 @@ Update subscription configuration:
 - `relationship_deleted`: Relationship deleted
 
 ### Connection Events
+
 - `connection_established`: Connection confirmed
 - `subscription_confirmed`: Subscription confirmed
 - `subscription_error`: Subscription failed
@@ -506,17 +558,21 @@ Update subscription configuration:
 WebSocket connections are subject to rate limiting:
 
 ### Connection Limits
+
 - Maximum concurrent connections per user: 5
 - Maximum connections per IP: 20
 - Connection rate: 10 per minute
 
 ### Message Limits
+
 - Messages per minute: 100
 - Message size limit: 64KB
 - Subscription limit: 20 event types per connection
 
 ### Rate Limit Headers
+
 Rate limit information is included in error responses:
+
 ```json
 {
   "type": "rate_limit_warning",
@@ -534,6 +590,7 @@ Rate limit information is included in error responses:
 ## Error Handling
 
 ### Connection Errors
+
 ```json
 {
   "type": "connection_error",
@@ -548,6 +605,7 @@ Rate limit information is included in error responses:
 ```
 
 ### Common Error Codes
+
 - `AUTHENTICATION_FAILED`: Invalid or expired token
 - `RATE_LIMIT_EXCEEDED`: Too many requests
 - `INVALID_MESSAGE_FORMAT`: Malformed message
@@ -559,6 +617,7 @@ Rate limit information is included in error responses:
 ## Connection Management
 
 ### Connection Pooling
+
 The WebSocket API uses connection pooling for efficiency:
 
 ```json
@@ -575,268 +634,294 @@ The WebSocket API uses connection pooling for efficiency:
 ```
 
 ### Automatic Reconnection
+
 Implement reconnection logic in your client:
 
 ```javascript
 class WebSocketClient {
-    constructor(url, token) {
-        this.url = url;
-        this.token = token;
-        this.reconnectAttempts = 0;
-        this.maxReconnectAttempts = 5;
-        this.reconnectDelay = 1000;
+  constructor(url, token) {
+    this.url = url;
+    this.token = token;
+    this.reconnectAttempts = 0;
+    this.maxReconnectAttempts = 5;
+    this.reconnectDelay = 1000;
+  }
+
+  connect() {
+    this.ws = new WebSocket(`${this.url}?token=${this.token}`);
+
+    this.ws.onopen = () => {
+      console.log("Connected");
+      this.reconnectAttempts = 0;
+      this.startHeartbeat();
+    };
+
+    this.ws.onclose = (event) => {
+      console.log("Disconnected:", event.code, event.reason);
+      this.stopHeartbeat();
+
+      if (this.reconnectAttempts < this.maxReconnectAttempts) {
+        this.scheduleReconnect();
+      }
+    };
+
+    this.ws.onerror = (error) => {
+      console.error("WebSocket error:", error);
+    };
+
+    this.ws.onmessage = (event) => {
+      this.handleMessage(JSON.parse(event.data));
+    };
+  }
+
+  scheduleReconnect() {
+    const delay = this.reconnectDelay * Math.pow(2, this.reconnectAttempts);
+    this.reconnectAttempts++;
+
+    setTimeout(() => {
+      console.log(`Reconnecting (attempt ${this.reconnectAttempts})...`);
+      this.connect();
+    }, delay);
+  }
+
+  startHeartbeat() {
+    this.heartbeatInterval = setInterval(() => {
+      if (this.ws.readyState === WebSocket.OPEN) {
+        this.ws.send(JSON.stringify({ type: "ping" }));
+      }
+    }, 30000); // 30 seconds
+  }
+
+  stopHeartbeat() {
+    if (this.heartbeatInterval) {
+      clearInterval(this.heartbeatInterval);
     }
+  }
 
-    connect() {
-        this.ws = new WebSocket(`${this.url}?token=${this.token}`);
-
-        this.ws.onopen = () => {
-            console.log('Connected');
-            this.reconnectAttempts = 0;
-            this.startHeartbeat();
-        };
-
-        this.ws.onclose = (event) => {
-            console.log('Disconnected:', event.code, event.reason);
-            this.stopHeartbeat();
-
-            if (this.reconnectAttempts < this.maxReconnectAttempts) {
-                this.scheduleReconnect();
-            }
-        };
-
-        this.ws.onerror = (error) => {
-            console.error('WebSocket error:', error);
-        };
-
-        this.ws.onmessage = (event) => {
-            this.handleMessage(JSON.parse(event.data));
-        };
+  handleMessage(message) {
+    switch (message.type) {
+      case "pong":
+        console.log("Heartbeat received");
+        break;
+      case "agent_status":
+        this.onAgentStatus(message.data);
+        break;
+      case "metrics_update":
+        this.onMetricsUpdate(message.data);
+        break;
+      // Handle other message types
     }
-
-    scheduleReconnect() {
-        const delay = this.reconnectDelay * Math.pow(2, this.reconnectAttempts);
-        this.reconnectAttempts++;
-
-        setTimeout(() => {
-            console.log(`Reconnecting (attempt ${this.reconnectAttempts})...`);
-            this.connect();
-        }, delay);
-    }
-
-    startHeartbeat() {
-        this.heartbeatInterval = setInterval(() => {
-            if (this.ws.readyState === WebSocket.OPEN) {
-                this.ws.send(JSON.stringify({ type: 'ping' }));
-            }
-        }, 30000); // 30 seconds
-    }
-
-    stopHeartbeat() {
-        if (this.heartbeatInterval) {
-            clearInterval(this.heartbeatInterval);
-        }
-    }
-
-    handleMessage(message) {
-        switch (message.type) {
-            case 'pong':
-                console.log('Heartbeat received');
-                break;
-            case 'agent_status':
-                this.onAgentStatus(message.data);
-                break;
-            case 'metrics_update':
-                this.onMetricsUpdate(message.data);
-                break;
-            // Handle other message types
-        }
-    }
+  }
 }
 ```
 
 ### Graceful Disconnection
+
 ```javascript
 // Clean disconnect
-ws.send(JSON.stringify({
-    type: 'disconnect',
+ws.send(
+  JSON.stringify({
+    type: "disconnect",
     data: {
-        reason: 'user_initiated'
-    }
-}));
+      reason: "user_initiated",
+    },
+  }),
+);
 
-ws.close(1000, 'Normal closure');
+ws.close(1000, "Normal closure");
 ```
 
 ## Security Considerations
 
 ### Token Refresh
+
 Monitor token expiration and refresh as needed:
 
 ```javascript
 // Monitor for authentication errors
 ws.onmessage = (event) => {
-    const message = JSON.parse(event.data);
+  const message = JSON.parse(event.data);
 
-    if (message.type === 'connection_error' &&
-        message.data.error_code === 'AUTHENTICATION_FAILED') {
-        // Refresh token and reconnect
-        refreshToken().then(newToken => {
-            this.token = newToken;
-            this.connect();
-        });
-    }
+  if (
+    message.type === "connection_error" &&
+    message.data.error_code === "AUTHENTICATION_FAILED"
+  ) {
+    // Refresh token and reconnect
+    refreshToken().then((newToken) => {
+      this.token = newToken;
+      this.connect();
+    });
+  }
 };
 ```
 
 ### Message Validation
+
 Always validate incoming messages:
 
 ```javascript
 function validateMessage(message) {
-    if (!message.type || !message.timestamp) {
-        throw new Error('Invalid message format');
-    }
+  if (!message.type || !message.timestamp) {
+    throw new Error("Invalid message format");
+  }
 
-    // Validate message type
-    const validTypes = ['agent_status', 'metrics_update', 'system_alert'];
-    if (!validTypes.includes(message.type)) {
-        throw new Error('Unknown message type');
-    }
+  // Validate message type
+  const validTypes = ["agent_status", "metrics_update", "system_alert"];
+  if (!validTypes.includes(message.type)) {
+    throw new Error("Unknown message type");
+  }
 
-    return true;
+  return true;
 }
 ```
 
 ## Usage Examples
 
 ### Real-time Dashboard
+
 ```javascript
 class AgentDashboard {
-    constructor() {
-        this.ws = new WebSocketClient('wss://api.freeagentics.com/api/v1/ws', token);
-        this.agents = new Map();
-        this.metrics = {};
-    }
+  constructor() {
+    this.ws = new WebSocketClient(
+      "wss://api.freeagentics.com/api/v1/ws",
+      token,
+    );
+    this.agents = new Map();
+    this.metrics = {};
+  }
 
-    async start() {
-        await this.ws.connect();
+  async start() {
+    await this.ws.connect();
 
-        // Subscribe to all relevant events
-        this.ws.send({
-            type: 'subscribe',
-            data: {
-                events: ['agent_status', 'metrics_update', 'inference_completed'],
-                agents: [] // All agents
-            }
-        });
-    }
+    // Subscribe to all relevant events
+    this.ws.send({
+      type: "subscribe",
+      data: {
+        events: ["agent_status", "metrics_update", "inference_completed"],
+        agents: [], // All agents
+      },
+    });
+  }
 
-    onAgentStatus(data) {
-        this.agents.set(data.agent_id, {
-            ...this.agents.get(data.agent_id),
-            status: data.new_status,
-            last_update: data.timestamp
-        });
+  onAgentStatus(data) {
+    this.agents.set(data.agent_id, {
+      ...this.agents.get(data.agent_id),
+      status: data.new_status,
+      last_update: data.timestamp,
+    });
 
-        this.updateUI();
-    }
+    this.updateUI();
+  }
 
-    onMetricsUpdate(data) {
-        this.metrics = data;
-        this.updateMetricsDisplay();
-    }
+  onMetricsUpdate(data) {
+    this.metrics = data;
+    this.updateMetricsDisplay();
+  }
 
-    updateUI() {
-        // Update dashboard interface
-        document.getElementById('agent-count').textContent = this.agents.size;
-        document.getElementById('active-agents').textContent =
-            Array.from(this.agents.values()).filter(a => a.status === 'active').length;
-    }
+  updateUI() {
+    // Update dashboard interface
+    document.getElementById("agent-count").textContent = this.agents.size;
+    document.getElementById("active-agents").textContent = Array.from(
+      this.agents.values(),
+    ).filter((a) => a.status === "active").length;
+  }
 }
 ```
 
 ### Agent Monitor
+
 ```javascript
 class AgentMonitor {
-    constructor(agentId) {
-        this.agentId = agentId;
-        this.ws = new WebSocketClient('wss://api.freeagentics.com/api/v1/ws', token);
-        this.inferences = [];
+  constructor(agentId) {
+    this.agentId = agentId;
+    this.ws = new WebSocketClient(
+      "wss://api.freeagentics.com/api/v1/ws",
+      token,
+    );
+    this.inferences = [];
+  }
+
+  async start() {
+    await this.ws.connect();
+
+    // Subscribe to specific agent events
+    this.ws.send({
+      type: "subscribe",
+      data: {
+        events: [
+          "inference_started",
+          "inference_progress",
+          "inference_completed",
+        ],
+        agents: [this.agentId],
+      },
+    });
+  }
+
+  onInferenceStarted(data) {
+    this.inferences.push({
+      id: data.inference_id,
+      status: "running",
+      started: data.timestamp,
+      progress: 0,
+    });
+
+    this.updateInferenceList();
+  }
+
+  onInferenceProgress(data) {
+    const inference = this.inferences.find((i) => i.id === data.inference_id);
+    if (inference) {
+      inference.progress = data.progress;
+      this.updateProgressBar(data.inference_id, data.progress);
+    }
+  }
+
+  onInferenceCompleted(data) {
+    const inference = this.inferences.find((i) => i.id === data.inference_id);
+    if (inference) {
+      inference.status = "completed";
+      inference.completed = data.timestamp;
+      inference.processing_time = data.processing_time;
     }
 
-    async start() {
-        await this.ws.connect();
-
-        // Subscribe to specific agent events
-        this.ws.send({
-            type: 'subscribe',
-            data: {
-                events: ['inference_started', 'inference_progress', 'inference_completed'],
-                agents: [this.agentId]
-            }
-        });
-    }
-
-    onInferenceStarted(data) {
-        this.inferences.push({
-            id: data.inference_id,
-            status: 'running',
-            started: data.timestamp,
-            progress: 0
-        });
-
-        this.updateInferenceList();
-    }
-
-    onInferenceProgress(data) {
-        const inference = this.inferences.find(i => i.id === data.inference_id);
-        if (inference) {
-            inference.progress = data.progress;
-            this.updateProgressBar(data.inference_id, data.progress);
-        }
-    }
-
-    onInferenceCompleted(data) {
-        const inference = this.inferences.find(i => i.id === data.inference_id);
-        if (inference) {
-            inference.status = 'completed';
-            inference.completed = data.timestamp;
-            inference.processing_time = data.processing_time;
-        }
-
-        this.updateInferenceList();
-    }
+    this.updateInferenceList();
+  }
 }
 ```
 
 ## Best Practices
 
 ### 1. Connection Management
+
 - Implement exponential backoff for reconnection
 - Monitor connection health with heartbeats
 - Handle network failures gracefully
 - Limit concurrent connections
 
 ### 2. Message Handling
+
 - Always validate incoming messages
 - Handle unknown message types gracefully
 - Implement message deduplication
 - Use structured error handling
 
 ### 3. Performance Optimization
+
 - Subscribe only to needed events
 - Implement client-side filtering
 - Use connection pooling
 - Batch UI updates
 
 ### 4. Security
+
 - Validate all incoming data
 - Use secure WebSocket connections (wss://)
 - Implement token refresh logic
 - Monitor for security events
 
 ### 5. Error Recovery
+
 - Implement retry logic
 - Handle partial failures
 - Provide user feedback
@@ -847,53 +932,59 @@ class AgentMonitor {
 ### Common Issues
 
 #### Connection Refused
+
 ```javascript
 // Check token validity
 if (error.code === 1008) {
-    console.log('Authentication failed - refresh token');
-    // Implement token refresh
+  console.log("Authentication failed - refresh token");
+  // Implement token refresh
 }
 ```
 
 #### Message Delivery Issues
+
 ```javascript
 // Check connection state before sending
 if (ws.readyState === WebSocket.OPEN) {
-    ws.send(JSON.stringify(message));
+  ws.send(JSON.stringify(message));
 } else {
-    console.log('Connection not ready, queuing message');
-    messageQueue.push(message);
+  console.log("Connection not ready, queuing message");
+  messageQueue.push(message);
 }
 ```
 
 #### High Latency
+
 ```javascript
 // Monitor round-trip time
 const pingTime = Date.now();
-ws.send(JSON.stringify({ type: 'ping' }));
+ws.send(JSON.stringify({ type: "ping" }));
 
 ws.onmessage = (event) => {
-    const message = JSON.parse(event.data);
-    if (message.type === 'pong') {
-        const latency = Date.now() - pingTime;
-        console.log(`Latency: ${latency}ms`);
-    }
+  const message = JSON.parse(event.data);
+  if (message.type === "pong") {
+    const latency = Date.now() - pingTime;
+    console.log(`Latency: ${latency}ms`);
+  }
 };
 ```
 
 ### Debugging Tips
 
 1. **Enable Debug Logging**
+
    - Log all incoming/outgoing messages
    - Monitor connection state changes
    - Track subscription status
 
 2. **Monitor Network**
+
    - Check for network interruptions
    - Monitor bandwidth usage
    - Track message delivery rates
 
 3. **Validate Messages**
+
    - Ensure proper JSON format
    - Check required fields
    - Validate data types
@@ -907,12 +998,14 @@ ws.onmessage = (event) => {
 ## Rate Limiting and Quotas
 
 ### Production Limits
+
 - **Connections**: 5 per user, 20 per IP
 - **Messages**: 100 per minute per connection
 - **Subscriptions**: 20 event types per connection
 - **Message Size**: 64KB maximum
 
 ### Development Limits
+
 - **Connections**: 10 per user, 50 per IP
 - **Messages**: 200 per minute per connection
 - **Subscriptions**: 50 event types per connection
@@ -925,8 +1018,10 @@ Monitor your usage and implement appropriate throttling to avoid hitting limits.
 ### Common Connection Issues
 
 #### 1. Connection Refused
+
 **Symptoms**: WebSocket connection immediately fails with error 1006
 **Causes & Solutions**:
+
 - **Wrong URL**: Verify `NEXT_PUBLIC_WS_URL` in your environment
   ```bash
   # Check current value
@@ -945,21 +1040,28 @@ Monitor your usage and implement appropriate throttling to avoid hitting limits.
   ```
 
 #### 2. Authentication Failures
+
 **Symptoms**: Connection closes with code 1008 (Policy Violation)
 **Debug Steps**:
+
 ```javascript
 // Enable verbose logging
-localStorage.setItem('DEBUG', 'websocket:*');
+localStorage.setItem("DEBUG", "websocket:*");
 
 // Check token in browser console
-const token = localStorage.getItem('auth_token');
-console.log('Auth token:', token);
-console.log('Token expiry:', new Date(JSON.parse(atob(token.split('.')[1])).exp * 1000));
+const token = localStorage.getItem("auth_token");
+console.log("Auth token:", token);
+console.log(
+  "Token expiry:",
+  new Date(JSON.parse(atob(token.split(".")[1])).exp * 1000),
+);
 ```
 
 #### 3. CORS Issues
+
 **Symptoms**: Browser blocks WebSocket upgrade
 **Solutions**:
+
 - Check browser console for CORS errors
 - Verify allowed origins in backend configuration
 - For development, use same origin: `http://localhost:3000` → `ws://localhost:8000`
@@ -967,50 +1069,60 @@ console.log('Token expiry:', new Date(JSON.parse(atob(token.split('.')[1])).exp 
 ### Browser Debugging Tools
 
 #### Chrome DevTools
+
 1. **Network Tab**:
+
    - Filter by "WS" to see WebSocket connections
    - Click connection to see frames
    - Check "Messages" tab for real-time data
-   
+
 2. **Console Commands**:
+
    ```javascript
    // List all WebSocket connections
-   console.table(Array.from(document.querySelectorAll('*')).map(e => e.__ws).filter(Boolean));
-   
+   console.table(
+     Array.from(document.querySelectorAll("*"))
+       .map((e) => e.__ws)
+       .filter(Boolean),
+   );
+
    // Monitor WebSocket events
-   window.addEventListener('error', (e) => {
+   window.addEventListener("error", (e) => {
      if (e.target instanceof WebSocket) {
-       console.error('WebSocket error:', e);
+       console.error("WebSocket error:", e);
      }
    });
    ```
 
 #### Firefox Developer Tools
+
 1. **Network Tab** → Filter "Other" → Look for "101 Switching Protocols"
 2. **Web Console** → Filter "Net" messages
 
 ### Logging and Monitoring
 
 #### Enable Verbose Logging
+
 ```javascript
 // Frontend (add to your WebSocket client)
 const ws = new WebSocket(url);
 
 // Log all events
-['open', 'close', 'error', 'message'].forEach(event => {
+["open", "close", "error", "message"].forEach((event) => {
   ws.addEventListener(event, (e) => {
     console.log(`WebSocket ${event}:`, {
       type: e.type,
       data: e.data || e.code || e.reason,
       timestamp: new Date().toISOString(),
       readyState: ws.readyState,
-      url: ws.url
+      url: ws.url,
     });
   });
 });
 ```
 
 #### Backend Logging
+
 ```bash
 # Enable WebSocket debug logs
 export ENABLE_WEBSOCKET_LOGGING=true
@@ -1023,6 +1135,7 @@ tail -f logs/websocket.log | grep -E "(connect|disconnect|error)"
 ### Connection Testing Tools
 
 #### Using wscat
+
 ```bash
 # Install wscat
 npm install -g wscat
@@ -1038,6 +1151,7 @@ wscat -c "ws://localhost:8000/api/v1/ws?token=YOUR_JWT_TOKEN"
 ```
 
 #### Using curl (for debugging headers)
+
 ```bash
 # Check if WebSocket endpoint is accessible
 curl -i -N \
@@ -1051,28 +1165,34 @@ curl -i -N \
 ### Performance Debugging
 
 #### Monitor Connection Metrics
+
 ```javascript
 // Track message latency
 let messageCount = 0;
 let totalLatency = 0;
 
-ws.send(JSON.stringify({
-  type: 'ping',
-  timestamp: Date.now()
-}));
+ws.send(
+  JSON.stringify({
+    type: "ping",
+    timestamp: Date.now(),
+  }),
+);
 
 ws.onmessage = (event) => {
   const data = JSON.parse(event.data);
-  if (data.type === 'pong') {
+  if (data.type === "pong") {
     const latency = Date.now() - data.timestamp;
     totalLatency += latency;
     messageCount++;
-    console.log(`Latency: ${latency}ms (avg: ${totalLatency/messageCount}ms)`);
+    console.log(
+      `Latency: ${latency}ms (avg: ${totalLatency / messageCount}ms)`,
+    );
   }
 };
 ```
 
 #### Identify Connection Issues
+
 ```javascript
 // Monitor connection stability
 let reconnectCount = 0;
@@ -1080,16 +1200,21 @@ const startTime = Date.now();
 
 function connectWithMonitoring() {
   const ws = new WebSocket(url);
-  
+
   ws.onclose = (e) => {
     reconnectCount++;
     const uptime = Date.now() - startTime;
-    console.warn(`Connection closed after ${uptime}ms. Reconnect #${reconnectCount}`);
-    
+    console.warn(
+      `Connection closed after ${uptime}ms. Reconnect #${reconnectCount}`,
+    );
+
     // Exponential backoff
-    setTimeout(connectWithMonitoring, Math.min(1000 * Math.pow(2, reconnectCount), 30000));
+    setTimeout(
+      connectWithMonitoring,
+      Math.min(1000 * Math.pow(2, reconnectCount), 30000),
+    );
   };
-  
+
   return ws;
 }
 ```
@@ -1097,16 +1222,19 @@ function connectWithMonitoring() {
 ### Troubleshooting Checklist
 
 1. **Environment Variables**:
+
    - [ ] `NEXT_PUBLIC_WS_URL` is correctly set (or empty for demo)
    - [ ] `WS_AUTH_REQUIRED` matches your authentication setup
    - [ ] `WS_PING_INTERVAL` and `WS_PING_TIMEOUT` are reasonable
 
 2. **Network**:
+
    - [ ] No firewall blocking WebSocket connections
    - [ ] Proxy/reverse proxy configured for WebSocket upgrade
    - [ ] SSL certificates valid (for wss:// connections)
 
 3. **Client**:
+
    - [ ] Using correct WebSocket URL format
    - [ ] Handling reconnection properly
    - [ ] Not exceeding rate limits

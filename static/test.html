@@ -6,11 +6,11 @@
 <body>
     <h1>API Integration Test</h1>
     <div id="status">Testing...</div>
-    
+
     <script>
         async function testAPI() {
             const statusDiv = document.getElementById('status');
-            
+
             try {
                 // Test health endpoint
                 const response = await fetch('/api/v1/health');
@@ -24,7 +24,7 @@
                 statusDiv.innerHTML = '<span style="color: orange;">⚠ Demo Mode Active</span><br>Backend not available: ' + error.message;
             }
         }
-        
+
         window.addEventListener('load', testAPI);
     </script>
 </body>

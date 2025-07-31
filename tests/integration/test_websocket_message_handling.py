@@ -1,11 +1,9 @@
 """Integration tests for WebSocket message handling.
 
-This test captures the current behavior where prompt_submitted and 
+This test captures the current behavior where prompt_submitted and
 clear_conversation messages return UNKNOWN_MESSAGE_TYPE errors.
 """
 
-import asyncio
-import json
 import pytest
 from fastapi.testclient import TestClient
 
@@ -33,10 +31,10 @@ class TestWebSocketMessageHandling:
                 "type": "prompt_submitted",
                 "prompt_id": "test-prompt-123",
                 "prompt": "Test prompt",
-                "conversation_id": "test-conv-456"
+                "conversation_id": "test-conv-456",
             }
             websocket.send_json(message)
-            
+
             # Skip initial connection messages and find acknowledgment
             ack_received = False
             for _ in range(5):  # Check up to 5 messages
@@ -49,21 +47,16 @@ class TestWebSocketMessageHandling:
                     assert "timestamp" in response
                     assert "message" in response
                     break
-            
+
             assert ack_received, "Expected prompt_acknowledged response"
 
     def test_clear_conversation_message_is_acknowledged(self, client):
         """Test that clear_conversation messages are properly acknowledged."""
         with client.websocket_connect("/api/v1/ws/dev") as websocket:
             # Send clear_conversation message
-            message = {
-                "type": "clear_conversation",
-                "data": {
-                    "conversationId": "test-conv-789"
-                }
-            }
+            message = {"type": "clear_conversation", "data": {"conversationId": "test-conv-789"}}
             websocket.send_json(message)
-            
+
             # Skip initial connection messages and find acknowledgment
             clear_received = False
             for _ in range(5):  # Check up to 5 messages
@@ -75,7 +68,7 @@ class TestWebSocketMessageHandling:
                     assert "timestamp" in response
                     assert "message" in response
                     break
-            
+
             assert clear_received, "Expected conversation_cleared response"
 
     def test_existing_ping_message_works(self, client):
@@ -84,7 +77,7 @@ class TestWebSocketMessageHandling:
             # Send ping message
             message = {"type": "ping"}
             websocket.send_json(message)
-            
+
             # Skip initial connection messages and find pong
             pong_received = False
             for _ in range(5):  # Check up to 5 messages
@@ -92,13 +85,13 @@ class TestWebSocketMessageHandling:
                 if response.get("type") == "pong":
                     pong_received = True
                     break
-            
+
             assert pong_received, "Expected pong response to ping message"
 
     @pytest.mark.asyncio
     async def test_websocket_with_settings_context(self):
         """Test that WebSocket messages can include settings context.
-        
+
         This test is forward-looking for when we add settings support.
         Currently it just verifies the message is received.
         """

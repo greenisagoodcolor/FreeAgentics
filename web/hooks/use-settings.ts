@@ -56,10 +56,10 @@ export function useSettings(): SettingsState {
         const response = await apiClient.getSettings();
         if (response.success && response.data) {
           const backendSettings = {
-            llmProvider: response.data.llmProvider as Settings['llmProvider'],
+            llmProvider: response.data.llmProvider as Settings["llmProvider"],
             llmModel: response.data.llmModel,
-            openaiApiKey: response.data.openaiApiKey || '',
-            anthropicApiKey: response.data.anthropicApiKey || '',
+            openaiApiKey: response.data.openaiApiKey || "",
+            anthropicApiKey: response.data.anthropicApiKey || "",
             gnnEnabled: response.data.gnnEnabled,
             debugLogs: response.data.debugLogs,
             autoSuggest: response.data.autoSuggest,
@@ -97,7 +97,7 @@ export function useSettings(): SettingsState {
 
   const updateSettings = useCallback((updates: Partial<Settings>) => {
     setSaveError(null);
-    
+
     setSettings((current) => {
       const newSettings = { ...current, ...updates };
 
@@ -128,22 +128,23 @@ export function useSettings(): SettingsState {
         try {
           // Map frontend key names to backend format
           const backendUpdates: Record<string, any> = {};
-          if ('llmProvider' in updates) backendUpdates.llm_provider = updates.llmProvider;
-          if ('llmModel' in updates) backendUpdates.llm_model = updates.llmModel;
-          if ('openaiApiKey' in updates) backendUpdates.openai_api_key = updates.openaiApiKey;
-          if ('anthropicApiKey' in updates) backendUpdates.anthropic_api_key = updates.anthropicApiKey;
-          if ('gnnEnabled' in updates) backendUpdates.gnn_enabled = updates.gnnEnabled;
-          if ('debugLogs' in updates) backendUpdates.debug_logs = updates.debugLogs;
-          if ('autoSuggest' in updates) backendUpdates.auto_suggest = updates.autoSuggest;
+          if ("llmProvider" in updates) backendUpdates.llm_provider = updates.llmProvider;
+          if ("llmModel" in updates) backendUpdates.llm_model = updates.llmModel;
+          if ("openaiApiKey" in updates) backendUpdates.openai_api_key = updates.openaiApiKey;
+          if ("anthropicApiKey" in updates)
+            backendUpdates.anthropic_api_key = updates.anthropicApiKey;
+          if ("gnnEnabled" in updates) backendUpdates.gnn_enabled = updates.gnnEnabled;
+          if ("debugLogs" in updates) backendUpdates.debug_logs = updates.debugLogs;
+          if ("autoSuggest" in updates) backendUpdates.auto_suggest = updates.autoSuggest;
 
           const response = await apiClient.updateSettings(backendUpdates);
           if (!response.success) {
-            setSaveError(response.error || 'Failed to save settings');
-            console.error('Failed to save settings to backend:', response.error);
+            setSaveError(response.error || "Failed to save settings");
+            console.error("Failed to save settings to backend:", response.error);
           }
         } catch (error) {
-          setSaveError('Failed to save settings. Please try again.');
-          console.error('Error saving settings to backend:', error);
+          setSaveError("Failed to save settings. Please try again.");
+          console.error("Error saving settings to backend:", error);
         } finally {
           setIsSaving(false);
         }
@@ -156,7 +157,7 @@ export function useSettings(): SettingsState {
   const resetSettings = useCallback(async () => {
     setSaveError(null);
     setSettings(DEFAULT_SETTINGS);
-    
+
     try {
       localStorage.setItem(SETTINGS_KEY, JSON.stringify(DEFAULT_SETTINGS));
     } catch (error) {
@@ -171,15 +172,15 @@ export function useSettings(): SettingsState {
       await apiClient.updateAllSettings({
         llmProvider: DEFAULT_SETTINGS.llmProvider,
         llmModel: DEFAULT_SETTINGS.llmModel,
-        openaiApiKey: '',
-        anthropicApiKey: '',
+        openaiApiKey: "",
+        anthropicApiKey: "",
         gnnEnabled: DEFAULT_SETTINGS.gnnEnabled,
         debugLogs: DEFAULT_SETTINGS.debugLogs,
         autoSuggest: DEFAULT_SETTINGS.autoSuggest,
       });
     } catch (error) {
-      setSaveError('Failed to reset settings on server');
-      console.error('Error resetting settings on backend:', error);
+      setSaveError("Failed to reset settings on server");
+      console.error("Error resetting settings on backend:", error);
     } finally {
       setIsSaving(false);
     }

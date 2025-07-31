@@ -69,12 +69,12 @@ version_ge() {
 show_banner() {
     echo -e "${CYAN}"
     cat << "EOF"
-    ___               _                    _   _         
-   / __\_ __ ___  ___/_\   __ _  ___ _ __ | |_(_) ___ ___ 
+    ___               _                    _   _
+   / __\_ __ ___  ___/_\   __ _  ___ _ __ | |_(_) ___ ___
   / _\| '__/ _ \/ _ //_\\ / _` |/ _ \ '_ \| __| |/ __/ __|
  / /  | | |  __/  __/  _  \ (_| |  __/ | | | |_| | (__\__ \
  \/   |_|  \___|\___\_/ \_/\__, |\___|_| |_|\__|_|\___|___/
-                           |___/                            
+                           |___/
      🤖 Active Inference Multi-Agent System 🧠
 EOF
     echo -e "${NC}"
@@ -86,19 +86,19 @@ run_diagnostics() {
     log "OS: $(uname -s)"
     log "Architecture: $(uname -m)"
     log "Hostname: $(hostname)"
-    
+
     if command_exists python3; then
         log "Python: $(python3 --version)"
     fi
-    
+
     if command_exists node; then
         log "Node.js: $(node --version)"
     fi
-    
+
     if command_exists docker; then
         log "Docker: $(docker --version)"
     fi
-    
+
     log "Available memory: $(free -h 2>/dev/null | grep Mem | awk '{print $7}' || echo 'N/A')"
     log "Available disk: $(df -h . | tail -1 | awk '{print $4}')"
 }
@@ -106,7 +106,7 @@ run_diagnostics() {
 # Step 1: Check Python
 check_python() {
     progress "Checking Python installation..."
-    
+
     if ! command_exists python3; then
         error "Python 3 is not installed"
         info "Please install Python 3.10 or higher:"
@@ -115,33 +115,33 @@ check_python() {
         info "  Windows: Download from https://python.org"
         return 1
     fi
-    
+
     local python_version=$(python3 -c 'import sys; print(f"{sys.version_info.major}.{sys.version_info.minor}")')
-    
+
     if ! version_ge "$python_version" "$PYTHON_MIN_VERSION"; then
         error "Python $python_version found, but $PYTHON_MIN_VERSION+ is required"
         return 1
     fi
-    
+
     success "Python $python_version found"
-    
+
     # Check for venv module
     if ! python3 -c "import venv" 2>/dev/null; then
         error "Python venv module not found"
         info "Install with: sudo apt-get install python3-venv"
         return 1
     fi
-    
+
     return 0
 }
 
 # Step 2: Setup Python virtual environment
 setup_venv() {
     progress "Setting up Python virtual environment..."
-    
+
     if [ -d "$VENV_DIR" ]; then
         warning "Virtual environment already exists"
-        
+
         # Activate and verify
         source "$VENV_DIR/bin/activate" 2>/dev/null || source "$VENV_DIR/Scripts/activate" 2>/dev/null || {
             error "Failed to activate existing virtual environment"
@@ -153,10 +153,10 @@ setup_venv() {
         python3 -m venv "$VENV_DIR"
         success "Created virtual environment"
     fi
-    
+
     # Activate venv
     source "$VENV_DIR/bin/activate" 2>/dev/null || source "$VENV_DIR/Scripts/activate" 2>/dev/null
-    
+
     # Upgrade pip
     pip install --quiet --upgrade pip
     success "Virtual environment ready"
@@ -165,24 +165,24 @@ setup_venv() {
 # Step 3: Install Python dependencies
 install_python_deps() {
     progress "Installing Python dependencies..."
-    
+
     if [ ! -f "requirements.txt" ]; then
         error "requirements.txt not found"
         return 1
     fi
-    
+
     # Install in chunks to show progress
     local total_deps=$(wc -l < requirements.txt)
     info "Installing $total_deps dependencies..."
-    
+
     # First install critical dependencies
     pip install --quiet fastapi uvicorn pydantic sqlalchemy psycopg2-binary redis
     echo -n "."
-    
+
     # Install PyMDP separately as it can be problematic
     pip install --quiet pymdp || warning "PyMDP installation failed - continuing without it"
     echo -n "."
-    
+
     # Install remaining dependencies
     pip install --quiet -r requirements.txt || {
         warning "Some dependencies failed to install"
@@ -190,24 +190,24 @@ install_python_deps() {
         pip install --quiet fastapi uvicorn pydantic sqlalchemy
     }
     echo ""
-    
+
     success "Python dependencies installed"
 }
 
 # Step 4: Check/Install PostgreSQL
 setup_postgres() {
     progress "Setting up PostgreSQL..."
-    
+
     if command_exists psql; then
         success "PostgreSQL is installed"
-        
+
         # Check if PostgreSQL is running
         if pg_isready -q 2>/dev/null; then
             success "PostgreSQL is running"
         else
             warning "PostgreSQL is not running"
             info "Attempting to start PostgreSQL..."
-            
+
             if [[ "$OSTYPE" == "linux-gnu"* ]]; then
                 sudo service postgresql start 2>/dev/null || systemctl start postgresql 2>/dev/null || {
                     warning "Could not start PostgreSQL automatically"
@@ -220,14 +220,14 @@ setup_postgres() {
                 }
             fi
         fi
-        
+
         # Create database
         info "Creating database '$POSTGRES_DB'..."
         createdb "$POSTGRES_DB" 2>/dev/null || {
             warning "Database might already exist or creation failed"
             info "Continuing with existing database"
         }
-        
+
     else
         warning "PostgreSQL is not installed"
         info "For full functionality, install PostgreSQL:"
@@ -241,17 +241,17 @@ setup_postgres() {
 # Step 5: Check/Install Redis
 setup_redis() {
     progress "Setting up Redis..."
-    
+
     if command_exists redis-cli; then
         success "Redis is installed"
-        
+
         # Check if Redis is running
         if redis-cli ping >/dev/null 2>&1; then
             success "Redis is running"
         else
             warning "Redis is not running"
             info "Attempting to start Redis..."
-            
+
             if [[ "$OSTYPE" == "linux-gnu"* ]]; then
                 sudo service redis-server start 2>/dev/null || systemctl start redis 2>/dev/null || {
                     warning "Could not start Redis automatically"
@@ -275,7 +275,7 @@ setup_redis() {
 # Step 6: Setup Node.js dependencies (for frontend)
 setup_nodejs() {
     progress "Setting up Node.js environment..."
-    
+
     if ! command_exists node; then
         warning "Node.js is not installed"
         info "Frontend will not be available"
@@ -283,9 +283,9 @@ setup_nodejs() {
         export SKIP_FRONTEND=true
         return 0
     fi
-    
+
     success "Node.js $(node --version) found"
-    
+
     # Install frontend dependencies
     if [ -d "web" ] && [ -f "web/package.json" ]; then
         info "Installing frontend dependencies..."
@@ -305,7 +305,7 @@ setup_nodejs() {
 # Step 7: Initialize database
 init_database() {
     progress "Initializing database..."
-    
+
     # Run Alembic migrations
     if command_exists alembic; then
         info "Running database migrations..."
@@ -314,7 +314,7 @@ init_database() {
             info "Will create tables on first run"
         }
     fi
-    
+
     # Create initial data
     if [ -f "scripts/seed_database.py" ]; then
         python scripts/seed_database.py 2>/dev/null || {
@@ -322,14 +322,14 @@ init_database() {
             info "Will start with empty database"
         }
     fi
-    
+
     success "Database initialized"
 }
 
 # Step 8: Generate configuration files
 generate_configs() {
     progress "Generating configuration files..."
-    
+
     # Create .env file if it doesn't exist
     if [ ! -f ".env" ]; then
         cat > .env << EOF
@@ -361,7 +361,7 @@ EOF
 # Step 9: Create demo data
 create_demo_data() {
     progress "Creating demo agents and data..."
-    
+
     # Create a simple Python script to generate demo data
     cat > create_demo.py << 'EOF'
 import os
@@ -376,16 +376,16 @@ try:
     from agents.base_agent import BasicExplorerAgent
     from database.models import Agent
     from database.session import SessionLocal
-    
+
     print("Creating demo agents...")
-    
+
     # Create some demo agents in memory
     demo_agents = [
         {"name": "Explorer Alpha", "type": "explorer", "position": [2, 3]},
         {"name": "Collector Beta", "type": "collector", "position": [5, 7]},
         {"name": "Analyzer Gamma", "type": "analyzer", "position": [8, 2]},
     ]
-    
+
     # Save demo configuration
     with open("demo_config.json", "w") as f:
         json.dump({
@@ -393,34 +393,34 @@ try:
             "grid_size": 10,
             "created_at": datetime.now().isoformat()
         }, f, indent=2)
-    
+
     print("✓ Created demo configuration")
-    
+
 except Exception as e:
     print(f"Note: Could not create full demo data: {e}")
     print("The system will create agents on first run")
 EOF
-    
+
     python create_demo.py 2>/dev/null || info "Demo data will be created on first run"
     rm -f create_demo.py
-    
+
     success "Demo environment prepared"
 }
 
 # Step 10: Start services
 start_services() {
     progress "Starting FreeAgentics services..."
-    
+
     # Kill any existing services on our ports
     lsof -ti:$API_PORT | xargs kill -9 2>/dev/null || true
     lsof -ti:$WEB_PORT | xargs kill -9 2>/dev/null || true
-    
+
     # Start API server
     info "Starting API server on port $API_PORT..."
     nohup python -m uvicorn api.main:app --host 0.0.0.0 --port $API_PORT --reload > api.log 2>&1 &
     API_PID=$!
     sleep 3
-    
+
     # Check if API started
     if kill -0 $API_PID 2>/dev/null; then
         success "API server started (PID: $API_PID)"
@@ -429,7 +429,7 @@ start_services() {
         cat api.log
         return 1
     fi
-    
+
     # Start frontend if available
     if [ -z "$SKIP_FRONTEND" ]; then
         info "Starting frontend on port $WEB_PORT..."
@@ -438,7 +438,7 @@ start_services() {
         FRONTEND_PID=$!
         cd ..
         sleep 5
-        
+
         if kill -0 $FRONTEND_PID 2>/dev/null; then
             success "Frontend started (PID: $FRONTEND_PID)"
         else
@@ -446,25 +446,25 @@ start_services() {
             SKIP_FRONTEND=true
         fi
     fi
-    
+
     # Save PIDs for cleanup
     echo "$API_PID" > .api.pid
     [ -n "${FRONTEND_PID:-}" ] && echo "$FRONTEND_PID" > .frontend.pid
-    
+
     success "Services are running!"
 }
 
 # Health check
 health_check() {
     info "Running health checks..."
-    
+
     # Check API health
     if curl -s http://localhost:$API_PORT/health >/dev/null 2>&1; then
         success "API health check passed"
     else
         warning "API health check failed"
     fi
-    
+
     # Check frontend
     if [ -z "$SKIP_FRONTEND" ] && curl -s http://localhost:$WEB_PORT >/dev/null 2>&1; then
         success "Frontend health check passed"
@@ -522,7 +522,7 @@ EOF
 main() {
     show_banner
     run_diagnostics
-    
+
     # Run all setup steps
     check_python || exit 1
     setup_venv || exit 1
@@ -534,12 +534,12 @@ main() {
     generate_configs
     create_demo_data
     start_services || exit 1
-    
+
     # Final steps
     create_stop_script
     health_check
     show_success
-    
+
     # Log completion
     echo "Setup completed successfully at $(date)" >> "$LOG_FILE"
 }

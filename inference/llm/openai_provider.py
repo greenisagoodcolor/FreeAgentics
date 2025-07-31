@@ -5,7 +5,6 @@ Implements the ILLMProvider interface for OpenAI GPT models.
 Follows Clean Architecture principles with proper error handling and monitoring.
 """
 
-import asyncio
 import logging
 import time
 from typing import Any, Dict, Optional
@@ -80,7 +79,9 @@ class OpenAIProvider(BaseProvider):
                 client_kwargs["timeout"] = 60.0
                 logger.info("Using default timeout of 60s for OpenAI client")
 
-            logger.info(f"Creating OpenAI client with config: api_key=sk-..., timeout={client_kwargs.get('timeout')}")
+            logger.info(
+                f"Creating OpenAI client with config: api_key=sk-..., timeout={client_kwargs.get('timeout')}"
+            )
             self.client = OpenAI(**client_kwargs)
             self.credentials = credentials
             self._configuration.update(kwargs)
@@ -191,18 +192,20 @@ class OpenAIProvider(BaseProvider):
 
             # Make API call with timeout
             logger.info(f"Making OpenAI API call with model {api_request['model']}")
-            
+
             # Get timeout from configuration or use default
             timeout = self._configuration.get("timeout", 30.0)
             logger.info(f"Using timeout of {timeout} seconds")
-            
+
             try:
                 # For synchronous client, we need to handle timeout differently
                 # The OpenAI client should respect the timeout set during initialization
                 response = self.client.chat.completions.create(**api_request)
             except Exception as api_error:
                 # Log the specific error
-                logger.error(f"OpenAI API call failed: {type(api_error).__name__}: {str(api_error)}")
+                logger.error(
+                    f"OpenAI API call failed: {type(api_error).__name__}: {str(api_error)}"
+                )
                 raise
 
             latency_ms = (time.time() - start_time) * 1000
@@ -258,8 +261,12 @@ class OpenAIProvider(BaseProvider):
         except openai.APITimeoutError as e:
             latency_ms = (time.time() - start_time) * 1000
             self._update_usage_metrics(success=False, error_type="timeout", latency_ms=latency_ms)
-            logger.warning(f"OpenAI request timed out after {latency_ms:.0f}ms for model {request.model}")
-            raise RuntimeError(f"OpenAI request timed out. Try using a faster model like gpt-3.5-turbo or increase timeout.")
+            logger.warning(
+                f"OpenAI request timed out after {latency_ms:.0f}ms for model {request.model}"
+            )
+            raise RuntimeError(
+                f"OpenAI request timed out. Try using a faster model like gpt-3.5-turbo or increase timeout."
+            )
 
         except Exception as e:
             latency_ms = (time.time() - start_time) * 1000

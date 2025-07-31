@@ -350,7 +350,10 @@ class TestNemesisLevelValidation:
                 isinstance(action, np.ndarray) and action.shape == (1,)
             ), "Action must be integer or single-element array"
 
-        except ImportError:    def test_error_messages_contain_actionable_information(self):
+        except ImportError:
+            pass
+
+    def test_error_messages_contain_actionable_information(self):
         """Test that all error messages provide clear instructions for resolution."""
         agent = BasicExplorerAgent(agent_id="test_agent", name="test_agent")
 

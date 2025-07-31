@@ -12,11 +12,7 @@ import redis.asyncio as aioredis
 from fastapi import WebSocket, WebSocketDisconnect
 from fastapi.websockets import WebSocketState
 
-from auth.security_logging import (
-    SecurityEventSeverity,
-    SecurityEventType,
-    security_auditor,
-)
+from auth.security_logging import SecurityEventSeverity, SecurityEventType, security_auditor
 
 from .ddos_protection import WebSocketRateLimiter
 
@@ -50,7 +46,9 @@ class WebSocketRateLimitManager:
                 if not DEV_MODE:
                     logger.error(f"Failed to connect to Redis for WebSocket rate limiting: {e}")
                 else:
-                    logger.debug(f"Redis not available in demo mode for WebSocket rate limiting: {e}")
+                    logger.debug(
+                        f"Redis not available in demo mode for WebSocket rate limiting: {e}"
+                    )
                 self.redis_client = None
         elif not self.redis_url:
             logger.debug("No Redis URL configured for WebSocket rate limiting")
@@ -87,7 +85,7 @@ class WebSocketRateLimitManager:
         # Skip rate limiting entirely in demo mode
         if DEV_MODE:
             return True
-            
+
         rate_limiter = await self._get_rate_limiter()
         if not rate_limiter:
             logger.warning("WebSocket rate limiting disabled - Redis not available")
@@ -131,7 +129,7 @@ class WebSocketRateLimitManager:
         # Skip rate limiting entirely in demo mode
         if DEV_MODE:
             return True
-            
+
         rate_limiter = await self._get_rate_limiter()
         if not rate_limiter:
             return True

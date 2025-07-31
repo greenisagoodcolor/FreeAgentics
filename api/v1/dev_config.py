@@ -5,7 +5,7 @@ Only available when not in production.
 """
 
 import os
-from typing import Dict, Any
+from typing import Any, Dict
 
 from fastapi import APIRouter, HTTPException, status
 
@@ -24,6 +24,7 @@ async def get_dev_config() -> Dict[str, Any]:
     """
     # Ensure not in production
     from core.environment import environment
+
     if environment.is_production:
         raise HTTPException(
             status_code=status.HTTP_404_NOT_FOUND,
@@ -32,7 +33,7 @@ async def get_dev_config() -> Dict[str, Any]:
 
     mode = ProviderMode.get_mode()
 
-    # Get dev token if in dev mode  
+    # Get dev token if in dev mode
     token_info = get_dev_token()
 
     config = {

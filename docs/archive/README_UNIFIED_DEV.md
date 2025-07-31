@@ -27,7 +27,7 @@ When you run `make dev`, the unified provider system:
 1. **Detects Mode** - Checks environment variables to determine demo/dev/prod mode
 2. **Selects Providers** - Automatically configures:
    - Database: PostgreSQL → SQLite → In-memory
-   - Cache: Redis → In-memory dictionary  
+   - Cache: Redis → In-memory dictionary
    - LLM: OpenAI/Anthropic → Mock responses
    - Auth: Standard JWT → Auto-generated dev token
 3. **Starts Services** - Launches backend (port 8000) and frontend (port 3000)
@@ -138,14 +138,17 @@ make test-dev
 ## 🚨 Common Issues
 
 ### "403 Forbidden" Errors
+
 - **Cause**: Missing or invalid authentication token
 - **Fix**: In demo mode, tokens are auto-injected. Check `/api/v1/dev-config`
 
 ### "Database not available"
+
 - **Cause**: No DATABASE_URL and SQLite initialization failed
 - **Fix**: The system should auto-fallback to in-memory SQLite. Check logs.
 
 ### "Rate limit exceeded"
+
 - **Cause**: Too many requests to an endpoint
 - **Fix**: Demo mode has lenient limits. Wait a moment or restart.
 

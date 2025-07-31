@@ -85,52 +85,64 @@ class LLMConfig(BaseModel):
     @classmethod
     def from_environment(cls, user_id: Optional[str] = None) -> "LLMConfig":
         """Load configuration from user settings or environment variables.
-        
+
         Args:
             user_id: Optional user ID to load user-specific settings
         """
         config = cls()
-        
+
         # First check user settings if user_id is provided
         if user_id:
             try:
-                from database.session import SessionLocal
                 from api.v1.settings import UserSettings
                 from core.environment import environment
-                
+                from database.session import SessionLocal
+
                 # In dev mode, check the in-memory settings store first
                 if environment.is_development:
                     try:
                         import tempfile
-                        settings_file = os.path.join(tempfile.gettempdir(), f"fa_settings_{user_id}.json")
+
+                        settings_file = os.path.join(
+                            tempfile.gettempdir(), f"fa_settings_{user_id}.json"
+                        )
                         if os.path.exists(settings_file):
                             import json
-                            with open(settings_file, 'r') as f:
+
+                            with open(settings_file, "r") as f:
                                 saved_settings = json.load(f)
-                                
-                            if saved_settings.get('openai_api_key'):
-                                config.openai.api_key = saved_settings['openai_api_key']
+
+                            if saved_settings.get("openai_api_key"):
+                                config.openai.api_key = saved_settings["openai_api_key"]
                                 config.openai.enabled = True
-                                config.openai.default_model = saved_settings.get('llm_model', 'gpt-4')
+                                config.openai.default_model = saved_settings.get(
+                                    "llm_model", "gpt-4"
+                                )
                                 config.provider_priority = ["openai"]
-                                logger.info(f"Loaded OpenAI config from dev settings for user {user_id}")
+                                logger.info(
+                                    f"Loaded OpenAI config from dev settings for user {user_id}"
+                                )
                                 return config
-                            elif saved_settings.get('anthropic_api_key'):
-                                config.anthropic.api_key = saved_settings['anthropic_api_key']
+                            elif saved_settings.get("anthropic_api_key"):
+                                config.anthropic.api_key = saved_settings["anthropic_api_key"]
                                 config.anthropic.enabled = True
-                                config.anthropic.default_model = saved_settings.get('llm_model', 'claude-3-sonnet-20240229')
+                                config.anthropic.default_model = saved_settings.get(
+                                    "llm_model", "claude-3-sonnet-20240229"
+                                )
                                 config.provider_priority = ["anthropic"]
                                 return config
                     except Exception as dev_e:
                         pass  # Fall through to database check
-                
+
                 db = SessionLocal()
                 try:
-                    user_settings = db.query(UserSettings).filter(UserSettings.user_id == user_id).first()
+                    user_settings = (
+                        db.query(UserSettings).filter(UserSettings.user_id == user_id).first()
+                    )
                     if user_settings:
                         # Use user's provider preference
                         provider = user_settings.llm_provider
-                        
+
                         if provider == "openai" and user_settings.get_openai_key():
                             config.openai.api_key = user_settings.get_openai_key()
                             config.openai.enabled = True
@@ -227,14 +239,14 @@ _global_config: Optional[LLMConfig] = None
 
 def get_llm_config(user_id: Optional[str] = None) -> LLMConfig:
     """Get LLM configuration instance.
-    
+
     Args:
         user_id: Optional user ID to load user-specific settings
     """
     # For user-specific config, always create fresh instance
     if user_id:
         return LLMConfig.from_environment(user_id)
-    
+
     # For global config, use singleton
     global _global_config
     if _global_config is None:

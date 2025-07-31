@@ -35,14 +35,14 @@ class AnthropicProvider(BaseProvider):
 
     def __init__(self, api_key: Optional[str] = None):
         """Initialize Anthropic provider.
-        
+
         Args:
             api_key: Optional API key for test compatibility. If provided, will configure the provider.
         """
         super().__init__(ProviderType.ANTHROPIC)
         self.client: Optional[Anthropic] = None
         self.api_key = api_key  # Store for test compatibility
-        
+
         # Auto-configure if api_key is provided (for test compatibility)
         if api_key:
             credentials = ProviderCredentials(api_key=api_key)

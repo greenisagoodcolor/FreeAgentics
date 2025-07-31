@@ -1,15 +1,18 @@
 """Main FastAPI application module for FreeAgentics API."""
 
 import logging
+
+# Configure logging
+import os
 from contextlib import asynccontextmanager
 
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
-from fastapi.responses import Response, FileResponse
+from fastapi.responses import FileResponse, Response
 from fastapi.staticfiles import StaticFiles
 
-from api.middleware.security_monitoring import SecurityMonitoringMiddleware
 from api import ui_compatibility
+from api.middleware.security_monitoring import SecurityMonitoringMiddleware
 from api.v1 import (
     agents,
     auth,
@@ -28,20 +31,13 @@ from api.v1 import (
     websocket,
 )
 from api.v1.graphql_schema import graphql_app
-from auth.security_headers import (
-    SecurityHeadersManager,
-    SecurityHeadersMiddleware,
-    SecurityPolicy,
-)
+from auth.security_headers import SecurityHeadersManager, SecurityHeadersMiddleware, SecurityPolicy
+from observability.performance_metrics import start_performance_tracking
 from observability.prometheus_metrics import (
     get_prometheus_content_type,
     get_prometheus_metrics,
     start_prometheus_metrics_collection,
 )
-from observability.performance_metrics import start_performance_tracking
-
-# Configure logging
-import os
 
 log_level = os.environ.get("LOG_LEVEL", "INFO").upper()
 logging.basicConfig(level=getattr(logging, log_level, logging.INFO))
@@ -79,14 +75,14 @@ async def lifespan(app: FastAPI):
         logger.error(f"Failed to start performance tracking: {e}")
 
     # Initialize providers
-    from core.providers import init_providers, get_database
-    
+    from core.providers import get_database, init_providers
+
     try:
         init_providers()
         logger.info("✅ Providers initialized successfully")
     except Exception as e:
         logger.error(f"Failed to initialize providers: {e}")
-    
+
     # Initialize database schema
     try:
         db_provider = get_database()
@@ -94,7 +90,7 @@ async def lifespan(app: FastAPI):
         logger.info("✅ Database schema initialized")
     except Exception as e:
         logger.warning(f"Database initialization skipped: {e}")
-    
+
     yield
     # Shutdown
     logger.info("Shutting down FreeAgentics API...")
@@ -129,6 +125,7 @@ app = FastAPI(
 # In dev mode, inject auth middleware (must be before other middleware)
 if os.getenv("PRODUCTION", "false").lower() != "true" and not os.getenv("DATABASE_URL"):
     from auth.dev_auth import inject_dev_auth_middleware
+
     inject_dev_auth_middleware(app)
     logger.info("🔑 Dev auth middleware enabled")
 
@@ -205,6 +202,7 @@ except RuntimeError:
     # Directory might not exist in some environments
     pass
 
+
 @app.get("/demo")
 async def demo():
     """Serve the Active Inference demo."""
@@ -212,6 +210,7 @@ async def demo():
         return FileResponse("static/demo.html", media_type="text/html")
     except FileNotFoundError:
         return {"message": "Demo not available - static files not found"}
+
 
 @app.get("/")
 async def root():

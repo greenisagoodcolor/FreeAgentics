@@ -80,15 +80,13 @@ jest.mock("d3", () => ({
 
 describe("KnowledgeGraphView", () => {
   const mockClearGraph = jest.fn();
-  
+
   const mockNodes = [
     { id: "1", label: "Agent 1", type: "agent" as const, x: 100, y: 100 },
     { id: "2", label: "Belief 1", type: "belief" as const, x: 200, y: 200 },
   ];
-  
-  const mockEdges = [
-    { source: "1", target: "2" },
-  ];
+
+  const mockEdges = [{ source: "1", target: "2" }];
 
   beforeEach(() => {
     jest.clearAllMocks();
@@ -134,21 +132,21 @@ describe("KnowledgeGraphView", () => {
 
   it("should open a details side-sheet when clicking a node", () => {
     render(<KnowledgeGraphView />);
-    
+
     // Find the graph container
     const graphContainer = screen.getByTestId("graph-container");
     expect(graphContainer).toBeInTheDocument();
-    
+
     // Since D3 creates SVG elements dynamically, we need to simulate a node click
     // In a real implementation, this would trigger opening a side sheet
     // For now, this test will fail as the feature isn't implemented
     const nodeDetailsSheet = screen.queryByTestId("node-details-sheet");
     expect(nodeDetailsSheet).not.toBeInTheDocument();
-    
+
     // Simulate clicking on a node (this would be done via D3 in the actual implementation)
     // This test expects a side sheet to appear after clicking
     fireEvent.click(graphContainer);
-    
+
     // This assertion will fail until we implement the feature
     expect(screen.getByTestId("node-details-sheet")).toBeInTheDocument();
     expect(screen.getByText("Node Details")).toBeInTheDocument();

@@ -5,36 +5,36 @@
 # Base dependencies needed by some tools
 -r requirements.txt
 
+# Security Scanning
+bandit==1.8.5
+
 # Code Formatting Tools
 black==25.1.0
-ruff==0.4.10
-isort==6.0.1
 
-# Linting Tools  
+# Linting Tools
 flake8==7.3.0
 flake8-bugbear==24.12.12
 flake8-comprehensions==3.16.0
 flake8-docstrings==1.7.0
 flake8_simplify==0.22.0
+isort==6.0.1
 
 # Type Checking
 mypy==1.16.1
 mypy_extensions==1.1.0
-types-requests==2.32.4.20250611
-types-redis==4.6.0.20241004
-
-# Security Scanning
-bandit==1.8.5
-safety==3.5.2
 pip-audit==2.9.0
 
 # Testing Framework (needed for test stage)
 pytest==8.4.1
 pytest-asyncio==1.0.0
 pytest-cov==6.2.1
-pytest-xdist==3.8.0
 pytest-timeout==2.4.0
+pytest-xdist==3.8.0
 
 # Additional static analysis
 radon==6.0.1
+ruff==0.4.10
+safety==3.5.2
+types-redis==4.6.0.20241004
+types-requests==2.32.4.20250611
 xenon==0.9.3

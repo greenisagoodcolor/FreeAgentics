@@ -369,11 +369,11 @@ class ProviderManager:
 
         logger.info(f"Attempting generation with {len(providers)} healthy providers")
         errors = []
-        
+
         for provider in providers:
             provider_type = provider.get_provider_type().value
             logger.info(f"Trying provider: {provider_type}")
-            
+
             try:
                 # Try to generate
                 start_time = time.time()
@@ -389,7 +389,9 @@ class ProviderManager:
                 errors.append(error_msg)
                 continue
 
-        raise Exception(f"All LLM providers failed to generate response. Errors: {'; '.join(errors)}")
+        raise Exception(
+            f"All LLM providers failed to generate response. Errors: {'; '.join(errors)}"
+        )
 
     def get_all_usage_metrics(self) -> Dict[ProviderType, UsageMetrics]:
         """Get usage metrics for all providers."""

@@ -20,7 +20,13 @@ import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Badge } from "@/components/ui/badge";
 import { Label } from "@/components/ui/label";
 import { Switch } from "@/components/ui/switch";
-import { Sheet, SheetContent, SheetDescription, SheetHeader, SheetTitle } from "@/components/ui/sheet";
+import {
+  Sheet,
+  SheetContent,
+  SheetDescription,
+  SheetHeader,
+  SheetTitle,
+} from "@/components/ui/sheet";
 import {
   useKnowledgeGraph,
   type NodeType,
@@ -131,18 +137,27 @@ export function KnowledgeGraphView() {
       simulationRef.current = simulation;
 
       // Drag functions
-      const dragstarted = (event: d3.D3DragEvent<SVGCircleElement, GraphNode, GraphNode>, d: GraphNode) => {
+      const dragstarted = (
+        event: d3.D3DragEvent<SVGCircleElement, GraphNode, GraphNode>,
+        d: GraphNode,
+      ) => {
         if (!event.active) simulation.alphaTarget(0.3).restart();
         d.x = event.x;
         d.y = event.y;
       };
 
-      const dragged = (event: d3.D3DragEvent<SVGCircleElement, GraphNode, GraphNode>, d: GraphNode) => {
+      const dragged = (
+        event: d3.D3DragEvent<SVGCircleElement, GraphNode, GraphNode>,
+        d: GraphNode,
+      ) => {
         d.x = event.x;
         d.y = event.y;
       };
 
-      const dragended = (event: d3.D3DragEvent<SVGCircleElement, GraphNode, GraphNode>, _d: GraphNode) => {
+      const dragended = (
+        event: d3.D3DragEvent<SVGCircleElement, GraphNode, GraphNode>,
+        _d: GraphNode,
+      ) => {
         if (!event.active) simulation.alphaTarget(0);
       };
 
@@ -447,16 +462,14 @@ export function KnowledgeGraphView() {
         <SheetContent side="right" data-testid="node-details-sheet">
           <SheetHeader>
             <SheetTitle>Node Details</SheetTitle>
-            <SheetDescription>
-              Details for {selectedNode?.type} node
-            </SheetDescription>
+            <SheetDescription>Details for {selectedNode?.type} node</SheetDescription>
           </SheetHeader>
           {selectedNode && (
             <div className="mt-6 space-y-4">
               <div>
                 <Label className="text-sm font-medium">Type</Label>
-                <Badge 
-                  variant="outline" 
+                <Badge
+                  variant="outline"
                   style={{ backgroundColor: NODE_COLORS[selectedNode.type] }}
                   className="ml-2"
                 >

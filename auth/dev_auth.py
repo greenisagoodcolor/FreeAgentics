@@ -5,18 +5,11 @@ to enable quick onboarding without manual token creation.
 """
 
 import logging
-import os
 import secrets
 from datetime import datetime, timedelta, timezone
 from typing import Dict, Optional
 
-from auth.security_implementation import (
-    Permission,
-    TokenData,
-    UserRole,
-    ROLE_PERMISSIONS,
-    create_access_token,
-)
+from auth.security_implementation import ROLE_PERMISSIONS, TokenData, UserRole, create_access_token
 
 logger = logging.getLogger(__name__)
 
@@ -32,6 +25,7 @@ class DevAuthManager:
     def is_dev_mode(self) -> bool:
         """Check if we're in development mode."""
         from core.environment import is_development
+
         return is_development()
 
     def get_or_create_dev_token(self) -> Dict[str, str]:
@@ -56,14 +50,16 @@ class DevAuthManager:
             }
 
             # Create JWT token with 1-year expiry for dev sessions
-            self._cached_token = create_access_token(data=token_data, expires_delta=timedelta(days=365))
+            self._cached_token = create_access_token(
+                data=token_data, expires_delta=timedelta(days=365)
+            )
             self._generated_at = datetime.now(timezone.utc)
 
             # Log for visibility
             logger.info("🔑 Generated new development JWT token")
             logger.info(f"   User: {username} (role: {role.value})")
             logger.info(f"   Permissions: {', '.join(token_data['permissions'])}")
-            
+
             self._user_data = {
                 "id": user_id,
                 "username": username,
@@ -74,7 +70,7 @@ class DevAuthManager:
         return {
             "access_token": self._cached_token,
             "token_type": "bearer",
-            "expires_in": 365*24*60*60,  # 1 year
+            "expires_in": 365 * 24 * 60 * 60,  # 1 year
             "info": "Cached dev token (1-year expiry)",
             "user": self._user_data,
         }

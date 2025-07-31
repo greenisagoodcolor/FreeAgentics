@@ -98,14 +98,14 @@ class LLMProviderFactory:
         ProviderType.ANTHROPIC: AnthropicProvider,
         ProviderType.OLLAMA: OllamaProvider,
     }
-    
+
     @classmethod
     def create_provider(cls, provider_name: str = "auto") -> LLMProvider:
         """Create a provider directly (convenience method).
-        
+
         Args:
             provider_name: Provider name or "auto" for automatic selection
-            
+
         Returns:
             LLMProvider instance
         """
@@ -172,7 +172,10 @@ class LLMProviderFactory:
             # API keys available - use them
             self._primary_provider = available_providers[0]
             # Add Ollama and Mock as fallbacks
-            self._fallback_chain = available_providers[1:] + [ProviderType.OLLAMA, ProviderType.MOCK]
+            self._fallback_chain = available_providers[1:] + [
+                ProviderType.OLLAMA,
+                ProviderType.MOCK,
+            ]
 
     def _get_fallback_chain(self, primary: ProviderType) -> List[ProviderType]:
         """Get fallback chain for a primary provider."""

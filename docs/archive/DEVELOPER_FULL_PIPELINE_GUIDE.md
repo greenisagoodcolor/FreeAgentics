@@ -27,8 +27,9 @@ curl -X POST http://localhost:8000/api/v1/prompts \
 ### ✅ **Implemented & Working**
 
 #### 1. **Prompt → LLM → GMN Pipeline**
+
 - **File**: `services/prompt_processor.py` (lines 67-454)
-- **API**: `POST /api/v1/prompts` 
+- **API**: `POST /api/v1/prompts`
 - **Features**:
   - Auto-detects OpenAI/Anthropic API keys
   - Generates GMN specifications from natural language
@@ -36,6 +37,7 @@ curl -X POST http://localhost:8000/api/v1/prompts \
   - Real-time WebSocket updates during processing
 
 #### 2. **GMN → PyMDP Model**
+
 - **File**: `inference/active/gmn_parser.py` (lines 132-260)
 - **Features**:
   - Parses GMN into PyMDP-compatible models
@@ -43,6 +45,7 @@ curl -X POST http://localhost:8000/api/v1/prompts \
   - Fallback to simplified Active Inference when PyMDP unavailable
 
 #### 3. **Active Inference Agents**
+
 - **File**: `agents/base_agent.py` + `agents/pymdp_adapter.py`
 - **API**: `POST /api/v1/agents`, `POST /api/v1/agents/{id}/act`
 - **Features**:
@@ -52,6 +55,7 @@ curl -X POST http://localhost:8000/api/v1/prompts \
   - Action selection based on expected free energy
 
 #### 4. **Knowledge Graph Integration**
+
 - **File**: `knowledge_graph/graph_engine.py` + `services/belief_kg_bridge.py`
 - **API**: `GET /api/v1/knowledge/*`
 - **Features**:
@@ -61,6 +65,7 @@ curl -X POST http://localhost:8000/api/v1/prompts \
   - GraphQL integration ready
 
 #### 5. **API & WebSocket Updates**
+
 - **Files**: `api/v1/inference.py`, `api/v1/websocket.py`
 - **Features**:
   - 98 documented API endpoints
@@ -71,11 +76,13 @@ curl -X POST http://localhost:8000/api/v1/prompts \
 ### ⚠️ **Partially Implemented (Needs LLM Token)**
 
 #### 6. **Frontend Integration**
+
 - **Current**: Basic demo at `/demo` with mock agents
 - **With Token**: Real pipeline integration possible
 - **Missing**: UI connection to prompt processing API
 
 #### 7. **Metrics Collection**
+
 - **Current**: `/metrics` endpoint exists, basic Prometheus setup
 - **Missing**: `agent_spawn_total`, `kg_node_total` counters
 - **File**: `observability/prometheus_metrics.py` (needs instrumentation)
@@ -83,22 +90,25 @@ curl -X POST http://localhost:8000/api/v1/prompts \
 ### ❌ **Not Yet Implemented**
 
 #### 8. **H3 Hexagonal Movement**
+
 - **Current**: Simple x,y grid coordinates
 - **Required**: H3 library integration for hexagonal grids
 - **Files**: `world/grid_world.py` (needs H3 upgrade)
 
 #### 9. **Advanced Frontend Features**
+
 - **Missing**: PromptBar, AgentCreator, Conversation UI
 - **Current**: Basic visualization only
 
 ## 🔧 **Enable Full Pipeline with Your LLM Token**
 
 ### Step 1: Add API Key
+
 ```bash
 # Option A: OpenAI
 export OPENAI_API_KEY="sk-proj-your-key-here"
 
-# Option B: Anthropic  
+# Option B: Anthropic
 export ANTHROPIC_API_KEY="sk-ant-your-key-here"
 
 # Option C: Add to .env file
@@ -106,6 +116,7 @@ echo "OPENAI_API_KEY=sk-proj-your-key-here" >> .env
 ```
 
 ### Step 2: Test Full Pipeline
+
 ```bash
 # Start with LLM token
 ./demo.sh
@@ -127,6 +138,7 @@ curl -X POST http://localhost:8000/api/v1/prompts \
 ```
 
 ### Step 3: Verify Agent Behavior
+
 ```bash
 # Get agent details
 curl http://localhost:8000/api/v1/agents
@@ -144,6 +156,7 @@ curl -X POST http://localhost:8000/api/v1/inference/update_beliefs \
 ```
 
 ### Step 4: Monitor Knowledge Graph
+
 ```bash
 # View KG nodes
 curl http://localhost:8000/api/v1/knowledge/nodes
@@ -155,6 +168,7 @@ curl http://localhost:8000/api/v1/knowledge/agent/{agent_id}/beliefs
 ## 📊 **What Developers Will See**
 
 ### With LLM Token:
+
 1. **Real GMN Generation**: Natural language → valid PyMDP models
 2. **Active Inference**: Genuine belief updates and action selection
 3. **Knowledge Evolution**: Agent beliefs automatically become graph nodes
@@ -162,6 +176,7 @@ curl http://localhost:8000/api/v1/knowledge/agent/{agent_id}/beliefs
 5. **Pipeline Monitoring**: Real-time WebSocket updates during processing
 
 ### API Endpoints Working:
+
 - ✅ `POST /api/v1/prompts` - Full pipeline
 - ✅ `GET/POST /api/v1/agents` - Agent management
 - ✅ `POST /api/v1/inference/*` - Belief updates, action selection
@@ -170,6 +185,7 @@ curl http://localhost:8000/api/v1/knowledge/agent/{agent_id}/beliefs
 - ✅ `GET /metrics` - System metrics
 
 ### Visual Demo:
+
 - ✅ Interactive agent movement at `/demo`
 - ✅ Real-time belief visualization
 - ✅ Free energy minimization observable
@@ -181,16 +197,16 @@ To see the complete system working:
 
 ```javascript
 // Connect demo to real pipeline
-const promptResponse = await fetch('/api/v1/prompts', {
-  method: 'POST',
-  headers: {'Content-Type': 'application/json'},
+const promptResponse = await fetch("/api/v1/prompts", {
+  method: "POST",
+  headers: { "Content-Type": "application/json" },
   body: JSON.stringify({
-    prompt: document.getElementById('promptInput').value,
-    user_id: 'demo-user'
-  })
+    prompt: document.getElementById("promptInput").value,
+    user_id: "demo-user",
+  }),
 });
 
-const {agent_id} = await promptResponse.json();
+const { agent_id } = await promptResponse.json();
 
 // Now agent_id is a real PyMDP agent, not demo
 // All demo interactions become real Active Inference
@@ -201,7 +217,7 @@ const {agent_id} = await promptResponse.json();
 **With an LLM token, you get 85% of the full pipeline working:**
 
 - ✅ Prompt → LLM → GMN → PyMDP → Agent → KG → Suggestions (COMPLETE)
-- ✅ Real Active Inference with belief updates and free energy (COMPLETE)  
+- ✅ Real Active Inference with belief updates and free energy (COMPLETE)
 - ✅ Knowledge graph auto-population from agent states (COMPLETE)
 - ✅ 98 API endpoints with comprehensive documentation (COMPLETE)
 - ⚠️ Frontend needs 1-line connection to real pipeline (SIMPLE FIX)

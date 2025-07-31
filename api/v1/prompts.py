@@ -10,12 +10,7 @@ from pydantic import BaseModel, Field
 
 from agents.agent_manager import AgentManager
 from agents.gmn_pymdp_adapter import adapt_gmn_to_pymdp
-from auth.security_implementation import (
-    Permission,
-    TokenData,
-    get_current_user,
-    require_permission,
-)
+from auth.security_implementation import Permission, TokenData, get_current_user, require_permission
 from inference.active.gmn_parser import parse_gmn_spec
 from inference.llm.provider_factory import LLMProviderFactory
 from inference.llm.provider_interface import GenerationRequest
@@ -77,19 +72,23 @@ async def create_agent_from_prompt(
         try:
             logger.info(f"Creating LLM provider for user {current_user.user_id}")
             provider_manager = llm_factory.create_from_config(user_id=current_user.user_id)
-            
+
             # Check if any providers are available
             healthy_providers = provider_manager.registry.get_healthy_providers()
-            logger.info(f"Available healthy providers: {[p.provider_type.value for p in healthy_providers]}")
-            
+            logger.info(
+                f"Available healthy providers: {[p.provider_type.value for p in healthy_providers]}"
+            )
+
             if not healthy_providers:
                 raise HTTPException(
                     status_code=503,
                     detail="No LLM providers available. Please configure API keys in settings.",
                 )
-            
+
         except Exception as e:
-            logger.error(f"Failed to get LLM provider for user {current_user.user_id}: {e}", exc_info=True)
+            logger.error(
+                f"Failed to get LLM provider for user {current_user.user_id}: {e}", exc_info=True
+            )
             raise HTTPException(
                 status_code=503,
                 detail="No LLM providers available. Please configure API keys in settings.",
@@ -135,23 +134,20 @@ Ensure all probability distributions sum to 1.0."""
             logger.info(f"Received GMN response from LLM")
         except Exception as e:
             logger.error(f"LLM generation failed: {e}", exc_info=True)
-            raise HTTPException(
-                status_code=503,
-                detail=f"Failed to generate GMN: {str(e)}"
-            )
+            raise HTTPException(status_code=503, detail=f"Failed to generate GMN: {str(e)}")
 
         # Parse the generated GMN
         try:
             import json
 
             # Handle different response formats
-            if hasattr(gmn_response, 'content'):
+            if hasattr(gmn_response, "content"):
                 response_text = gmn_response.content
-            elif hasattr(gmn_response, 'text'):
+            elif hasattr(gmn_response, "text"):
                 response_text = gmn_response.text
             else:
                 response_text = str(gmn_response)
-                
+
             gmn_spec = json.loads(response_text)
         except json.JSONDecodeError as e:
             logger.error(f"Failed to parse LLM response as JSON: {e}")
@@ -244,10 +240,10 @@ async def process_prompt(
 
 class PromptProcessor:
     """Simple prompt processor for test compatibility."""
-    
+
     def __init__(self):
         self.websocket_callback = None
-    
+
     async def process_prompt(self, *args, **kwargs):
         """Mock process_prompt method for test compatibility."""
         # This is a basic implementation for tests

@@ -1,7 +1,15 @@
 "use client";
 
 import React from "react";
-import { Settings2, LogOut, LogIn, RotateCcw, Loader2, CheckCircle, AlertCircle } from "lucide-react";
+import {
+  Settings2,
+  LogOut,
+  LogIn,
+  RotateCcw,
+  Loader2,
+  CheckCircle,
+  AlertCircle,
+} from "lucide-react";
 import {
   Sheet,
   SheetContent,
@@ -45,7 +53,7 @@ export function SettingsDrawer({ open, onOpenChange }: SettingsDrawerProps) {
   };
 
   const handleApiKeyChange = (key: string, value: string) => {
-    setPendingChanges(prev => ({ ...prev, [key]: value }));
+    setPendingChanges((prev) => ({ ...prev, [key]: value }));
   };
 
   const handleSavePendingChanges = () => {
@@ -109,7 +117,11 @@ export function SettingsDrawer({ open, onOpenChange }: SettingsDrawerProps) {
 
               <div className="space-y-2">
                 <Label htmlFor="llm-model">Model</Label>
-                <Select value={settings.llmModel} onValueChange={handleModelChange} disabled={isSaving || isLoading}>
+                <Select
+                  value={settings.llmModel}
+                  onValueChange={handleModelChange}
+                  disabled={isSaving || isLoading}
+                >
                   <SelectTrigger id="llm-model">
                     <SelectValue />
                   </SelectTrigger>
@@ -132,14 +144,17 @@ export function SettingsDrawer({ open, onOpenChange }: SettingsDrawerProps) {
                   <Input
                     id="api-key"
                     type="password"
-                    placeholder={`Enter your ${settings.llmProvider === "openai" ? "OpenAI" : "Anthropic"} API key`}
+                    placeholder={`Enter your ${
+                      settings.llmProvider === "openai" ? "OpenAI" : "Anthropic"
+                    } API key`}
                     value={
-                      settings.llmProvider === "openai" 
-                        ? (pendingChanges.openaiApiKey ?? settings.openaiApiKey)
-                        : (pendingChanges.anthropicApiKey ?? settings.anthropicApiKey)
+                      settings.llmProvider === "openai"
+                        ? pendingChanges.openaiApiKey ?? settings.openaiApiKey
+                        : pendingChanges.anthropicApiKey ?? settings.anthropicApiKey
                     }
                     onChange={(e) => {
-                      const key = settings.llmProvider === "openai" ? "openaiApiKey" : "anthropicApiKey";
+                      const key =
+                        settings.llmProvider === "openai" ? "openaiApiKey" : "anthropicApiKey";
                       handleApiKeyChange(key, e.target.value);
                     }}
                     disabled={isSaving || isLoading}

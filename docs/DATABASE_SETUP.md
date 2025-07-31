@@ -15,6 +15,7 @@ docker-compose up -d postgres
 ## Option 1: Docker Setup (Recommended)
 
 ### Prerequisites
+
 - Docker and Docker Compose installed
 - 2GB free disk space
 
@@ -23,7 +24,7 @@ docker-compose up -d postgres
 Create or use the existing `docker-compose.yml`:
 
 ```yaml
-version: '3.8'
+version: "3.8"
 
 services:
   postgres:
@@ -49,6 +50,7 @@ volumes:
 ```
 
 ### Quick Commands
+
 ```bash
 # Start PostgreSQL
 docker-compose up -d postgres
@@ -119,13 +121,16 @@ sudo -u postgres psql -d freeagentics -c "CREATE EXTENSION vector;"
 ## pgvector Extension Setup
 
 ### What is pgvector?
+
 pgvector adds vector similarity search to PostgreSQL, enabling:
+
 - Semantic search capabilities
 - Efficient k-nearest neighbor queries
 - Embedding storage and retrieval
 - Cosine similarity, L2 distance, and inner product operations
 
 ### Enable pgvector
+
 ```sql
 -- Connect to your database
 psql -U freeagentics -d freeagentics
@@ -138,11 +143,12 @@ SELECT * FROM pg_extension WHERE extname = 'vector';
 ```
 
 ### Version Compatibility
-| PostgreSQL | pgvector | Status |
-|------------|----------|---------|
-| 16.x       | 0.5.x+   | ✅ Recommended |
-| 15.x       | 0.5.x+   | ✅ Supported |
-| 14.x       | 0.4.x+   | ⚠️ Minimum |
+
+| PostgreSQL | pgvector | Status           |
+| ---------- | -------- | ---------------- |
+| 16.x       | 0.5.x+   | ✅ Recommended   |
+| 15.x       | 0.5.x+   | ✅ Supported     |
+| 14.x       | 0.4.x+   | ⚠️ Minimum       |
 | < 14       | -        | ❌ Not supported |
 
 ## Database Configuration
@@ -163,6 +169,7 @@ DATABASE_URL=postgresql://user:pass@host:5432/freeagentics?sslmode=require
 ```
 
 ### Verify Connection
+
 ```bash
 # Test connection
 psql $DATABASE_URL -c "SELECT version();"
@@ -196,9 +203,9 @@ CREATE TABLE items (
 );
 
 -- Insert test data
-INSERT INTO items (embedding) VALUES 
-    ('[1,2,3]'), 
-    ('[4,5,6]'), 
+INSERT INTO items (embedding) VALUES
+    ('[1,2,3]'),
+    ('[4,5,6]'),
     ('[7,8,9]');
 
 -- Find nearest neighbors
@@ -217,6 +224,7 @@ LIMIT 2;
 ## Performance Tuning
 
 ### PostgreSQL Configuration
+
 Add to `postgresql.conf`:
 
 ```ini
@@ -233,6 +241,7 @@ ivfflat.probes = 10
 ```
 
 ### Index Creation
+
 ```sql
 -- Create index for vector similarity search
 CREATE INDEX ON embeddings USING ivfflat (embedding vector_cosine_ops)
@@ -246,18 +255,21 @@ WITH (lists = 100);
 ## Switching Between Docker and Local
 
 ### Export from Docker
+
 ```bash
 # Backup Docker database
 docker-compose exec postgres pg_dump -U freeagentics freeagentics > backup.sql
 ```
 
 ### Import to Local
+
 ```bash
 # Restore to local PostgreSQL
 psql -U your_user -d freeagentics < backup.sql
 ```
 
 ### Update .env
+
 ```bash
 # Switch DATABASE_URL between:
 # Docker: postgresql://freeagentics:freeagentics_dev@localhost:5432/freeagentics
@@ -294,6 +306,7 @@ ping localhost                              # Basic network test
 ```
 
 **Container not running:**
+
 ```bash
 # Start PostgreSQL
 docker-compose -f docker-compose.db.yml up -d
@@ -303,6 +316,7 @@ docker-compose -f docker-compose.db.yml logs -f postgres
 ```
 
 **Port conflict (5432 already in use):**
+
 ```bash
 # Find what's using port 5432
 sudo lsof -i :5432
@@ -310,6 +324,7 @@ sudo lsof -i :5432
 ```
 
 **Network/firewall issues:**
+
 ```bash
 # Test with host networking
 docker run --rm --network host pgvector/pgvector:pg16 \
@@ -330,6 +345,7 @@ psql $DATABASE_URL -c "SELECT vector_version();"  # Should work if installed
 ```
 
 **Extension not available:**
+
 ```bash
 # For Docker setup - rebuild with correct image
 docker-compose -f docker-compose.db.yml down -v
@@ -342,6 +358,7 @@ docker-compose -f docker-compose.db.yml up -d
 ```
 
 **Extension not enabled in database:**
+
 ```sql
 -- Connect as superuser and enable
 psql $DATABASE_URL -c "CREATE EXTENSION IF NOT EXISTS vector;"
@@ -364,6 +381,7 @@ psql $DATABASE_URL -c "\l"   # List databases and owners
 ```
 
 **Authentication failures:**
+
 ```bash
 # Reset password in Docker setup
 docker-compose -f docker-compose.db.yml exec postgres \
@@ -375,6 +393,7 @@ sudo -u postgres psql -c "ALTER USER freeagentics PASSWORD 'your_password';"
 ```
 
 **Permission denied on database/tables:**
+
 ```sql
 -- Grant database access
 GRANT ALL PRIVILEGES ON DATABASE freeagentics TO freeagentics;
@@ -403,6 +422,7 @@ alembic show current
 ```
 
 **Schema out of sync:**
+
 ```bash
 # Mark current state as baseline (DESTRUCTIVE - use carefully)
 alembic stamp head
@@ -413,6 +433,7 @@ alembic upgrade head
 ```
 
 **Migration conflicts:**
+
 ```bash
 # Generate new migration from current model state
 alembic revision --autogenerate -m "sync_schema"
@@ -433,6 +454,7 @@ docker volume ls | grep postgres
 ```
 
 **Initialization failures:**
+
 ```bash
 # Clean restart (DESTRUCTIVE - removes all data)
 docker-compose -f docker-compose.db.yml down -v
@@ -444,6 +466,7 @@ docker-compose -f docker-compose.db.yml logs -f postgres
 ```
 
 **Volume permission issues:**
+
 ```bash
 # Fix volume ownership
 docker-compose -f docker-compose.db.yml exec postgres chown -R postgres:postgres /var/lib/postgresql/data
@@ -468,6 +491,7 @@ psql $DATABASE_URL -c "SELECT * FROM pg_stat_database WHERE datname = 'freeagent
 ```
 
 **Too many connections:**
+
 ```sql
 -- Check connection limit
 SHOW max_connections;
@@ -476,11 +500,12 @@ SHOW max_connections;
 SELECT count(*) FROM pg_stat_activity;
 
 -- Kill idle connections (if needed)
-SELECT pg_terminate_backend(pid) FROM pg_stat_activity 
+SELECT pg_terminate_backend(pid) FROM pg_stat_activity
 WHERE state = 'idle' AND state_change < now() - interval '1 hour';
 ```
 
 **Slow vector operations:**
+
 ```sql
 -- Check if vector indexes exist
 \d+ embeddings
@@ -498,11 +523,13 @@ ANALYZE embeddings;
 #### Windows Issues
 
 **Docker Desktop not starting:**
+
 - Enable WSL2 integration
 - Ensure Hyper-V is enabled
 - Check Windows Subsystem for Linux is installed
 
 **psql command not found:**
+
 ```powershell
 # Install psql via chocolatey
 choco install postgresql
@@ -514,6 +541,7 @@ docker run --rm -it postgres:16 psql postgresql://user:pass@host:port/db
 #### macOS Issues
 
 **Homebrew PostgreSQL conflicts:**
+
 ```bash
 # Stop system PostgreSQL if running
 brew services stop postgresql@16
@@ -523,6 +551,7 @@ docker-compose -f docker-compose.db.yml up -d
 ```
 
 **M1/ARM compatibility:**
+
 ```bash
 # Use ARM-compatible image
 docker pull --platform linux/arm64 pgvector/pgvector:pg16
@@ -531,6 +560,7 @@ docker pull --platform linux/arm64 pgvector/pgvector:pg16
 #### Linux Issues
 
 **Systemd PostgreSQL conflicts:**
+
 ```bash
 # Stop system PostgreSQL
 sudo systemctl stop postgresql
@@ -540,6 +570,7 @@ sudo systemctl disable postgresql
 ```
 
 **SELinux restrictions:**
+
 ```bash
 # Temporarily disable SELinux
 sudo setenforce 0
@@ -553,6 +584,7 @@ sudo setsebool -P container_manage_cgroup on
 #### Complete Database Reset
 
 **DESTRUCTIVE - removes all data:**
+
 ```bash
 # Stop services
 make stop
@@ -597,6 +629,7 @@ psql $DATABASE_URL -c "SELECT count(*) FROM agents;"
 ### Automated Troubleshooting Script
 
 Create `scripts/db-troubleshoot.sh`:
+
 ```bash
 #!/bin/bash
 # Comprehensive database diagnostics
@@ -698,6 +731,7 @@ make db-check
 #### 3. Data Migration (if preserving existing data)
 
 **Option A: Fresh Start (Recommended for demo -> production)**
+
 ```bash
 # Update .env to use PostgreSQL
 cp .env .env.backup
@@ -711,6 +745,7 @@ psql $DATABASE_URL -c "\dt"
 ```
 
 **Option B: Preserve Existing SQLite Data**
+
 ```bash
 # 1. Export data from SQLite (if using file mode)
 sqlite3 freeagentics.db ".output agents_export.csv" ".mode csv" "SELECT * FROM agents;"
@@ -960,6 +995,7 @@ alembic downgrade 1b4306802749  # Go back to specific revision
 ## Backup and Restore
 
 ### Backup
+
 ```bash
 # Full backup
 pg_dump -U freeagentics -h localhost freeagentics > freeagentics_backup.sql
@@ -969,6 +1005,7 @@ pg_dump -U freeagentics -h localhost -Fc freeagentics > freeagentics_backup.dump
 ```
 
 ### Restore
+
 ```bash
 # From SQL file
 psql -U freeagentics -h localhost freeagentics < freeagentics_backup.sql

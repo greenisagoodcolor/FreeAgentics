@@ -52,22 +52,26 @@ The frontend should start on `http://localhost:3001`
 ### 3. Test Each Component
 
 #### A. Test Metrics Endpoint
+
 ```bash
 # In a new terminal
 curl http://localhost:8000/metrics
 ```
 
 You should see Prometheus-formatted metrics including:
+
 - `agent_spawn_total`
 - `kg_node_total`
 - Other system metrics
 
 #### B. Test WebSocket Demo Connection
+
 1. Open browser console at http://localhost:3001
 2. You should see "WebSocket connected" message
 3. The demo endpoint doesn't require authentication
 
 #### C. Test PromptBar
+
 1. Go to http://localhost:3001/main
 2. Type "Explore grid" in the prompt bar
 3. Verify:
@@ -75,12 +79,14 @@ You should see Prometheus-formatted metrics including:
    - Settings drawer opens (if implemented)
 
 #### D. Test AgentCreator
+
 1. Click "Create Agent" button
 2. Fill in agent details
 3. Verify agent appears in list
 4. Try deleting an agent
 
 #### E. Test KnowledgeGraph (New Feature!)
+
 1. Create some agents or interact with the system
 2. Look for the Knowledge Graph panel
 3. When nodes appear, **click on a node**
@@ -91,6 +97,7 @@ You should see Prometheus-formatted metrics including:
    - Position (if available)
 
 #### F. Test SimulationGrid
+
 1. Create at least one agent
 2. Start simulation with play button
 3. Verify:
@@ -100,6 +107,7 @@ You should see Prometheus-formatted metrics including:
    - Hover over agent shows tooltip
 
 #### G. Test Conversation Window
+
 1. Submit prompts
 2. Verify 3-message cycle appears:
    - Goal message
@@ -109,12 +117,14 @@ You should see Prometheus-formatted metrics including:
 ### 4. Run Tests
 
 #### Backend Tests
+
 ```bash
 # From project root
 pytest tests/unit/test_metrics_endpoint.py -v
 ```
 
 #### Frontend Tests
+
 ```bash
 # From web directory
 cd web
@@ -161,7 +171,7 @@ git commit -m "feat: wire KnowledgeGraph node click for details sheet (demo happ
 - Verify /metrics endpoint returns Prometheus format
 
 Kent: Tests are minimal and behavior-focused
-Martin: Clear separation between viz and UI logic  
+Martin: Clear separation between viz and UI logic
 Charity: D3 errors logged, interaction errors need enhancement"
 
 # Push to remote

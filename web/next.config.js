@@ -1,8 +1,8 @@
 // Safe import for optional bundle analyzer (dev mode support)
 let withBundleAnalyzer;
 try {
-  withBundleAnalyzer = require('@next/bundle-analyzer')({
-    enabled: process.env.ANALYZE === 'true'
+  withBundleAnalyzer = require("@next/bundle-analyzer")({
+    enabled: process.env.ANALYZE === "true",
   });
 } catch (e) {
   // Bundle analyzer is optional - skip if not installed
@@ -18,7 +18,6 @@ const nextConfig = {
   skipTrailingSlashRedirect: true,
   trailingSlash: false,
 
-
   // Compiler optimizations
   compiler: {
     removeConsole: process.env.NODE_ENV === "production",
@@ -27,27 +26,27 @@ const nextConfig = {
   // Bundle optimization
   webpack: (config, { isServer }) => {
     // Bundle analyzer configuration
-    if (process.env.ANALYZE === 'true') {
+    if (process.env.ANALYZE === "true") {
       config.optimization.splitChunks = {
-        chunks: 'all',
+        chunks: "all",
         cacheGroups: {
           vendor: {
             test: /[\\/]node_modules[\\/]/,
-            name: 'vendors',
-            chunks: 'all',
+            name: "vendors",
+            chunks: "all",
           },
         },
       };
     }
 
     // Optimization for production (simplified per CLAUDE.md KISS principle)
-    if (process.env.NODE_ENV === 'production') {
+    if (process.env.NODE_ENV === "production") {
       config.optimization = {
         ...config.optimization,
         minimize: true,
         // Standard chunk splitting
         splitChunks: {
-          chunks: 'all',
+          chunks: "all",
           minSize: 10000,
           maxSize: 50000,
         },
@@ -69,7 +68,7 @@ const nextConfig = {
       };
 
       // Use production builds
-      if (process.env.NODE_ENV === 'production') {
+      if (process.env.NODE_ENV === "production") {
         config.resolve.alias = {
           ...config.resolve.alias,
         };
@@ -93,20 +92,19 @@ const nextConfig = {
     ];
   },
 
-
-  // CORS headers - SECURITY HARDENED: Restricted to specific origins  
+  // CORS headers - SECURITY HARDENED: Restricted to specific origins
   async headers() {
-    const isDev = process.env.NODE_ENV !== 'production';
-    
+    const isDev = process.env.NODE_ENV !== "production";
+
     return [
       {
         source: "/api/:path*",
         headers: [
           // Only require credentials in production
           ...(isDev ? [] : [{ key: "Access-Control-Allow-Credentials", value: "true" }]),
-          { 
-            key: "Access-Control-Allow-Origin", 
-            value: isDev ? "*" : (process.env.ALLOWED_ORIGINS || "https://yourdomain.com")
+          {
+            key: "Access-Control-Allow-Origin",
+            value: isDev ? "*" : process.env.ALLOWED_ORIGINS || "https://yourdomain.com",
           },
           {
             key: "Access-Control-Allow-Methods",

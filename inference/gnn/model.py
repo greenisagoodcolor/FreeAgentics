@@ -43,10 +43,10 @@ class GMNModel:
 
 def create_gnn_model(config: Dict[str, Any]) -> GMNModel:
     """Create a GNN model for test compatibility.
-    
+
     Args:
         config: Model configuration dictionary
-        
+
     Returns:
         GMNModel instance
     """

@@ -22,7 +22,7 @@ const USER_KEY = "fa.user";
 // Helper function to check if JWT token is expired
 function isTokenExpired(token: string): boolean {
   try {
-    const payload = JSON.parse(atob(token.split('.')[1]));
+    const payload = JSON.parse(atob(token.split(".")[1]));
     const now = Math.floor(Date.now() / 1000);
     return payload.exp < now;
   } catch {
@@ -65,21 +65,21 @@ export function useAuth(): AuthState {
           const backendUrl = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8000";
           console.log(`[Auth] Fetching dev config from: ${backendUrl}/api/v1/dev-config`);
           const response = await fetch(`${backendUrl}/api/v1/dev-config`);
-          
+
           if (!response.ok) {
             throw new Error(`Dev config request failed: ${response.status}`);
           }
-          
+
           const config = await response.json();
           const token = config.auth?.token;
-          
+
           if (token) {
             console.log("[Auth] Received dev token, storing...");
             localStorage.setItem(AUTH_TOKEN_KEY, token);
             const devUser = {
               id: "dev-user",
               email: "developer@freeagentics.dev",
-              name: "Developer"
+              name: "Developer",
             };
             localStorage.setItem(USER_KEY, JSON.stringify(devUser));
             setToken(token);
@@ -93,7 +93,7 @@ export function useAuth(): AuthState {
             const devUser = {
               id: "dev-user",
               email: "developer@freeagentics.dev",
-              name: "Developer"
+              name: "Developer",
             };
             localStorage.setItem(USER_KEY, JSON.stringify(devUser));
             setToken(devToken);

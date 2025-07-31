@@ -30,40 +30,40 @@ case $OS in
             echo "   Visit: https://brew.sh"
             exit 1
         fi
-        
+
         # Install PostgreSQL if not installed
         if ! brew list postgresql@16 &> /dev/null; then
             brew install postgresql@16
         fi
-        
+
         # Install pgvector
         if ! brew list pgvector &> /dev/null; then
             brew install pgvector
         fi
-        
+
         # Start PostgreSQL
         brew services start postgresql@16
-        
+
         # Set PostgreSQL path
         export PATH="/opt/homebrew/opt/postgresql@16/bin:$PATH"
         ;;
-        
+
     debian)
         echo "📦 Installing PostgreSQL and pgvector using apt..."
-        
+
         # Add PostgreSQL APT repository
         sudo sh -c 'echo "deb https://apt.postgresql.org/pub/repos/apt $(lsb_release -cs)-pgdg main" > /etc/apt/sources.list.d/pgdg.list'
         wget --quiet -O - https://www.postgresql.org/media/keys/ACCC4CF8.asc | sudo apt-key add -
         sudo apt-get update
-        
+
         # Install PostgreSQL and pgvector
         sudo apt-get install -y postgresql-16 postgresql-client-16 postgresql-16-pgvector
-        
+
         # Start PostgreSQL
         sudo systemctl start postgresql
         sudo systemctl enable postgresql
         ;;
-        
+
     *)
         echo "❌ Unsupported OS: $OS"
         echo "   Please install PostgreSQL 16 and pgvector manually."
@@ -93,7 +93,7 @@ else
     # Linux: use postgres user
     sudo -u postgres createdb freeagentics 2>/dev/null || echo "Database 'freeagentics' already exists"
     sudo -u postgres psql -d freeagentics -c "CREATE EXTENSION IF NOT EXISTS vector;"
-    
+
     # Create user with same name as current user
     sudo -u postgres createuser -s $(whoami) 2>/dev/null || echo "User '$(whoami)' already exists"
 fi

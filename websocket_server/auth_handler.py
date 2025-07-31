@@ -14,11 +14,7 @@ from urllib.parse import parse_qs, urlparse
 from fastapi import HTTPException, WebSocket, WebSocketDisconnect
 from pydantic import BaseModel, Field
 
-from auth.security_implementation import (
-    AuthenticationManager,
-    Permission,
-    TokenData,
-)
+from auth.security_implementation import AuthenticationManager, Permission, TokenData
 
 logger = logging.getLogger(__name__)
 
@@ -96,13 +92,13 @@ class WebSocketAuthHandler:
         """
         try:
             # Check if we're in dev mode first
+            from auth.dev_bypass import get_dev_user
             from core.environment import environment
-            from auth.dev_bypass import get_dev_user, is_dev_token
-            
+
             # Extract token if not provided
             if not token:
                 token = await self._extract_token(websocket)
-            
+
             # In dev mode without auth, accept special "dev" token
             if environment.is_development and not environment.config.auth_required:
                 if token == "dev" or not token:
@@ -123,7 +119,9 @@ class WebSocketAuthHandler:
             # Check rate limiting
             if not await self._check_rate_limit(websocket):
                 logger.warning(f"Rate limit exceeded for WebSocket connection: {client_id}")
-                await websocket.close(code=WebSocketErrorCode.RATE_LIMITED, reason="Rate limit exceeded")
+                await websocket.close(
+                    code=WebSocketErrorCode.RATE_LIMITED, reason="Rate limit exceeded"
+                )
                 raise WebSocketDisconnect(code=WebSocketErrorCode.RATE_LIMITED)
 
             # Verify JWT token
@@ -208,10 +206,11 @@ class WebSocketAuthHandler:
         """Check rate limiting for the connection."""
         # Skip rate limiting in dev mode without auth
         from core.environment import environment
+
         if environment.is_development and not environment.config.auth_required:
             logger.debug("Skipping rate limit check in dev mode")
             return True
-            
+
         ip = self._get_client_ip(websocket)
         now = datetime.utcnow()
 
@@ -368,19 +367,19 @@ class WebSocketAuthHandler:
     def get_user_connections(self, user_id: str) -> Set[str]:
         """Get all connection IDs for a specific user."""
         return self.user_connections.get(user_id, set()).copy()
-    
+
     def get_user_data(self, client_id: str) -> Optional[TokenData]:
         """Get user data for a specific connection.
-        
+
         Args:
             client_id: The client connection ID
-            
+
         Returns:
             TokenData if connection exists and is authenticated, None otherwise
         """
         if client_id not in self.connections:
             return None
-            
+
         connection = self.connections[client_id]
         return connection.user_data
 

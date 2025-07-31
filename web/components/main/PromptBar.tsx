@@ -17,8 +17,7 @@ export function PromptBar() {
   const [showSettings, setShowSettings] = useState(false);
   const textareaRef = useRef<HTMLTextAreaElement>(null);
 
-  const { submitPrompt, isLoading, error, iterationContext, conversationId } =
-    usePromptProcessor();
+  const { submitPrompt, isLoading, error, iterationContext, conversationId } = usePromptProcessor();
 
   const handleSubmit = async () => {
     if (!prompt.trim() || isLoading) return;
@@ -57,7 +56,7 @@ export function PromptBar() {
           </Button>
         </div>
       </CardHeader>
-      
+
       <CardContent className="space-y-4">
         {/* History snippets */}
         {conversationId &&
@@ -96,7 +95,9 @@ export function PromptBar() {
             />
 
             {isLoading && (
-              <div className="absolute right-3 top-3 text-sm text-muted-foreground">Processing...</div>
+              <div className="absolute right-3 top-3 text-sm text-muted-foreground">
+                Processing...
+              </div>
             )}
           </div>
         </div>

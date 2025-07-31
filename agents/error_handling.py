@@ -374,7 +374,7 @@ def validate_action(action: Any, valid_actions: list) -> str:
 
 def handle_agent_error(error: AgentError, context: Optional[Dict[str, Any]] = None) -> None:
     """Handle agent errors with logging and optional context.
-    
+
     Args:
         error: The AgentError to handle
         context: Optional context dict for additional error information
@@ -385,8 +385,8 @@ def handle_agent_error(error: AgentError, context: Optional[Dict[str, Any]] = No
         "context": context or {},
         "timestamp": datetime.now().isoformat(),
     }
-    
+
     logger.error(f"Agent error handled: {error}", extra=error_info)
-    
+
     # For compatibility with tests, return None
     return None

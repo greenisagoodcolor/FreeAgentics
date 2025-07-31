@@ -7,7 +7,7 @@ echo "🔍 Checking for forbidden 'demo' references..."
 
 # Exclude certain files and directories from the check
 EXCLUSIONS=(
-    "CHANGELOG.md" 
+    "CHANGELOG.md"
     "README.md"
     "CLAUDE.md"
     "scripts/no_demo_guard.sh"

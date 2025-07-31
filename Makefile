@@ -35,6 +35,13 @@ help: ## Show available commands
 	@echo "  make db-restore          Restore from backup"
 	@echo "  make db-reset            Reset database (DESTRUCTIVE)"
 	@echo ""
+	@echo "Quality Gates:"
+	@echo "  make lint                Run code linting (Ruff)"
+	@echo "  make typecheck           Run type checking (mypy)"
+	@echo "  make complexity          Check code complexity (Radon)"
+	@echo "  make security            Security vulnerability scan (Safety)"
+	@echo "  make quality             Run all quality checks"
+	@echo ""
 	@echo "Run 'make install' then 'make dev' to get started."
 
 
@@ -267,3 +274,24 @@ db-restore:
 		echo "Invalid or missing backup file."; \
 	fi
 
+# Quality Gates Commands
+.PHONY: lint typecheck complexity security quality
+
+lint: ## Run code linting
+	@echo "Running Ruff linting..."
+	@. $(VENV_DIR)/bin/activate && python -m ruff check --config=pyproject.toml
+
+typecheck: ## Run type checking
+	@echo "Running mypy type checking..."
+	@. $(VENV_DIR)/bin/activate && python -m mypy --config-file=pyproject.toml
+
+complexity: ## Check code complexity with Radon
+	@echo "Running Radon complexity analysis..."
+	@. $(VENV_DIR)/bin/activate && radon cc --min=C . --exclude="node_modules,venv,.git,.next,__pycache__,test-onboarding" || true
+
+security: ## Run security vulnerability scan
+	@echo "Running Safety security scan..."
+	@. $(VENV_DIR)/bin/activate && safety scan || true
+
+quality: lint typecheck complexity security ## Run all quality checks
+	@echo "All quality checks completed."

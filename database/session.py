@@ -12,10 +12,13 @@ from typing import Any, Dict, Generator, Optional
 
 from sqlalchemy import create_engine, text
 from sqlalchemy.orm import Session, sessionmaker
-from sqlalchemy.exc import OperationalError
 
 from database.base import Base
-from websocket_server.circuit_breaker import CircuitBreaker, CircuitBreakerConfig, CircuitOpenException
+from websocket_server.circuit_breaker import (
+    CircuitBreaker,
+    CircuitBreakerConfig,
+    CircuitOpenException,
+)
 
 # Get database URL from environment with SQLite fallback for development
 DATABASE_URL = os.getenv("DATABASE_URL")
@@ -30,7 +33,7 @@ is_development = (
 if not DATABASE_URL:
     # Always allow running without database for dev mode
     import warnings
-    
+
     warnings.warn(
         "⚠️ Running in dev mode without database. "
         "For production use, set DATABASE_URL environment variable.",
@@ -61,13 +64,13 @@ if DATABASE_URL:
     if DATABASE_URL.startswith("postgresql://") or DATABASE_URL.startswith("postgres://"):
         # PostgreSQL-specific configuration
         engine_args.update(
-        {
-            "pool_size": int(os.getenv("DB_POOL_SIZE", "20")),
-            "max_overflow": int(os.getenv("DB_MAX_OVERFLOW", "40")),
-            "pool_timeout": int(os.getenv("DB_POOL_TIMEOUT", "30")),
-            "pool_pre_ping": True,  # Verify connections before using
-        }
-    )
+            {
+                "pool_size": int(os.getenv("DB_POOL_SIZE", "20")),
+                "max_overflow": int(os.getenv("DB_MAX_OVERFLOW", "40")),
+                "pool_timeout": int(os.getenv("DB_POOL_TIMEOUT", "30")),
+                "pool_pre_ping": True,  # Verify connections before using
+            }
+        )
 
     # Additional production settings for PostgreSQL
     if os.getenv("PRODUCTION", "false").lower() == "true":
@@ -151,7 +154,7 @@ db_circuit_breaker = CircuitBreaker("database", db_circuit_breaker_config)
 
 def get_database_url() -> Optional[str]:
     """Get the database URL if available.
-    
+
     Returns:
         Database URL string or None if in dev mode
     """
@@ -171,6 +174,7 @@ def get_db() -> Generator[Session, None, None]:
     """
     # Use the new provider system
     from core.providers import get_db as get_provider_db
+
     yield from get_provider_db()
 
 

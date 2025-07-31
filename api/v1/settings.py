@@ -4,23 +4,22 @@ This module provides endpoints for synchronizing frontend settings with the back
 including LLM provider configuration, API keys, and feature flags.
 """
 
+import json
 import logging
+import os
 from datetime import datetime
-from typing import Any, Dict, Optional
+from typing import Optional
 
 from cryptography.fernet import Fernet
 from fastapi import APIRouter, Depends, HTTPException, status
 from pydantic import BaseModel, Field, field_validator
+from sqlalchemy import Boolean, Column, DateTime, ForeignKey, Integer, String, Text
 from sqlalchemy.orm import Session
 
 from auth.dev_bypass import get_current_user_optional
 from auth.security_implementation import TokenData
-from database.models import User
 from core.providers import get_db, reset_providers
 from database.base import Base
-from sqlalchemy import Column, String, Text, DateTime, Integer, ForeignKey, Boolean
-import json
-import os
 
 logger = logging.getLogger(__name__)
 
@@ -29,9 +28,13 @@ ENCRYPTION_KEY = os.getenv("SETTINGS_ENCRYPTION_KEY")
 if not ENCRYPTION_KEY:
     # Generate a new key for development
     ENCRYPTION_KEY = Fernet.generate_key().decode()
-    logger.warning("Generated new encryption key for settings. Set SETTINGS_ENCRYPTION_KEY in production!")
+    logger.warning(
+        "Generated new encryption key for settings. Set SETTINGS_ENCRYPTION_KEY in production!"
+    )
 
-cipher_suite = Fernet(ENCRYPTION_KEY.encode() if isinstance(ENCRYPTION_KEY, str) else ENCRYPTION_KEY)
+cipher_suite = Fernet(
+    ENCRYPTION_KEY.encode() if isinstance(ENCRYPTION_KEY, str) else ENCRYPTION_KEY
+)
 
 router = APIRouter()
 
@@ -39,34 +42,34 @@ router = APIRouter()
 # Database Models
 class UserSettings(Base):
     """Store user-specific settings securely."""
-    
+
     __tablename__ = "user_settings"
-    
+
     id = Column(Integer, primary_key=True, index=True)
     user_id = Column(String, ForeignKey("users.id"), unique=True, index=True)
-    
+
     # LLM Configuration (encrypted)
     llm_provider = Column(String, default="openai")
     llm_model = Column(String, default="gpt-3.5-turbo")
     encrypted_openai_key = Column(Text, nullable=True)
     encrypted_anthropic_key = Column(Text, nullable=True)
-    
+
     # Feature flags
     gnn_enabled = Column(Boolean, default=True)
     debug_logs = Column(Boolean, default=False)
     auto_suggest = Column(Boolean, default=True)
-    
+
     # Metadata
     created_at = Column(DateTime, default=datetime.now)
     updated_at = Column(DateTime, default=datetime.now, onupdate=datetime.now)
-    
+
     def set_openai_key(self, key: Optional[str]):
         """Encrypt and store OpenAI API key."""
         if key:
             self.encrypted_openai_key = cipher_suite.encrypt(key.encode()).decode()
         else:
             self.encrypted_openai_key = None
-    
+
     def get_openai_key(self) -> Optional[str]:
         """Decrypt and return OpenAI API key."""
         if self.encrypted_openai_key:
@@ -76,14 +79,14 @@ class UserSettings(Base):
                 logger.error(f"Failed to decrypt OpenAI key: {e}")
                 return None
         return None
-    
+
     def set_anthropic_key(self, key: Optional[str]):
         """Encrypt and store Anthropic API key."""
         if key:
             self.encrypted_anthropic_key = cipher_suite.encrypt(key.encode()).decode()
         else:
             self.encrypted_anthropic_key = None
-    
+
     def get_anthropic_key(self) -> Optional[str]:
         """Decrypt and return Anthropic API key."""
         if self.encrypted_anthropic_key:
@@ -98,7 +101,7 @@ class UserSettings(Base):
 # Pydantic Models
 class SettingsUpdate(BaseModel):
     """Settings update request."""
-    
+
     llm_provider: Optional[str] = Field(None, pattern="^(openai|anthropic|ollama)$")
     llm_model: Optional[str] = None
     openai_api_key: Optional[str] = None
@@ -106,14 +109,14 @@ class SettingsUpdate(BaseModel):
     gnn_enabled: Optional[bool] = None
     debug_logs: Optional[bool] = None
     auto_suggest: Optional[bool] = None
-    
+
     @field_validator("openai_api_key")
     def validate_openai_key(cls, v):
         """Validate OpenAI API key format."""
         if v and not v.startswith("sk-"):
             raise ValueError("OpenAI API key must start with 'sk-'")
         return v
-    
+
     @field_validator("anthropic_api_key")
     def validate_anthropic_key(cls, v):
         """Validate Anthropic API key format."""
@@ -124,7 +127,7 @@ class SettingsUpdate(BaseModel):
 
 class SettingsResponse(BaseModel):
     """Settings response with masked sensitive data."""
-    
+
     llm_provider: str
     llm_model: str
     openai_api_key: Optional[str] = None
@@ -133,7 +136,7 @@ class SettingsResponse(BaseModel):
     debug_logs: bool
     auto_suggest: bool
     updated_at: datetime
-    
+
     @classmethod
     def from_db_model(cls, settings: UserSettings) -> "SettingsResponse":
         """Create response from database model with masked keys."""
@@ -145,7 +148,7 @@ class SettingsResponse(BaseModel):
             gnn_enabled=settings.gnn_enabled,
             debug_logs=settings.debug_logs,
             auto_suggest=settings.auto_suggest,
-            updated_at=settings.updated_at
+            updated_at=settings.updated_at,
         )
 
 
@@ -175,13 +178,17 @@ def apply_settings_to_environment(settings: UserSettings):
     else:
         os.environ["LLM_PROVIDER"] = settings.llm_provider
         logger.info(f"Applied {settings.llm_provider} settings for user {settings.user_id}")
-    
+
     # In dev mode, also save to temporary file for persistence across requests
     try:
         from core.environment import environment
+
         if environment.is_development:
             import tempfile
-            settings_file = os.path.join(tempfile.gettempdir(), f"fa_settings_{settings.user_id}.json")
+
+            settings_file = os.path.join(
+                tempfile.gettempdir(), f"fa_settings_{settings.user_id}.json"
+            )
             settings_data = {
                 "llm_provider": settings.llm_provider,
                 "llm_model": settings.llm_model,
@@ -190,14 +197,14 @@ def apply_settings_to_environment(settings: UserSettings):
                 "gnn_enabled": settings.gnn_enabled,
                 "debug_logs": settings.debug_logs,
                 "auto_suggest": settings.auto_suggest,
-                "updated_at": settings.updated_at.isoformat() if settings.updated_at else None
+                "updated_at": settings.updated_at.isoformat() if settings.updated_at else None,
             }
-            with open(settings_file, 'w') as f:
+            with open(settings_file, "w") as f:
                 json.dump(settings_data, f)
             logger.info(f"Saved dev mode settings to {settings_file}")
     except Exception as e:
         logger.warning(f"Failed to save dev mode settings: {e}")
-    
+
     # Reset providers to pick up new configuration
     reset_providers()
 
@@ -205,17 +212,16 @@ def apply_settings_to_environment(settings: UserSettings):
 # API Endpoints
 @router.get("/settings", response_model=SettingsResponse)
 async def get_settings(
-    current_user: TokenData = Depends(get_current_user_optional),
-    db: Session = Depends(get_db)
+    current_user: TokenData = Depends(get_current_user_optional), db: Session = Depends(get_db)
 ):
     """Get current user settings."""
     settings = get_or_create_settings(db, current_user.user_id)
-    
+
     logger.info(
         f"Retrieved settings for user {current_user.user_id} - "
         f"provider: {settings.llm_provider}, model: {settings.llm_model}"
     )
-    
+
     return SettingsResponse.from_db_model(settings)
 
 
@@ -223,11 +229,11 @@ async def get_settings(
 async def update_settings(
     settings_update: SettingsUpdate,
     current_user: TokenData = Depends(get_current_user_optional),
-    db: Session = Depends(get_db)
+    db: Session = Depends(get_db),
 ):
     """Update user settings (full replacement)."""
     settings = get_or_create_settings(db, current_user.user_id)
-    
+
     # Update all fields
     if settings_update.llm_provider is not None:
         settings.llm_provider = settings_update.llm_provider
@@ -243,20 +249,20 @@ async def update_settings(
         settings.debug_logs = settings_update.debug_logs
     if settings_update.auto_suggest is not None:
         settings.auto_suggest = settings_update.auto_suggest
-    
+
     settings.updated_at = datetime.now()
     db.commit()
     db.refresh(settings)
-    
+
     # Apply settings to environment
     apply_settings_to_environment(settings)
-    
+
     logger.info(
         f"Updated settings for user {current_user.user_id} - "
         f"provider: {settings.llm_provider}, model: {settings.llm_model}, "
         f"keys_configured: {bool(settings.encrypted_openai_key or settings.encrypted_anthropic_key)}"
     )
-    
+
     return SettingsResponse.from_db_model(settings)
 
 
@@ -264,14 +270,14 @@ async def update_settings(
 async def patch_settings(
     settings_update: SettingsUpdate,
     current_user: TokenData = Depends(get_current_user_optional),
-    db: Session = Depends(get_db)
+    db: Session = Depends(get_db),
 ):
     """Partially update user settings."""
     settings = get_or_create_settings(db, current_user.user_id)
-    
+
     # Update only provided fields
     update_data = settings_update.model_dump(exclude_unset=True)
-    
+
     for field, value in update_data.items():
         if field == "openai_api_key":
             settings.set_openai_key(value)
@@ -279,91 +285,83 @@ async def patch_settings(
             settings.set_anthropic_key(value)
         else:
             setattr(settings, field, value)
-    
+
     settings.updated_at = datetime.now()
     db.commit()
     db.refresh(settings)
-    
+
     # Apply settings to environment
     apply_settings_to_environment(settings)
-    
+
     logger.info(
         f"Patched settings for user {current_user.user_id} - "
         f"updated fields: {list(update_data.keys())}"
     )
-    
+
     return SettingsResponse.from_db_model(settings)
 
 
 @router.post("/settings/validate-key")
 async def validate_api_key(
-    provider: str,
-    api_key: str,
-    current_user: TokenData = Depends(get_current_user_optional)
+    provider: str, api_key: str, current_user: TokenData = Depends(get_current_user_optional)
 ):
     """Validate an API key before saving."""
     try:
         if provider == "openai":
             # Try a simple API call to validate
             import openai
+
             client = openai.OpenAI(api_key=api_key)
             # List models as a validation check
             models = client.models.list()
             return {
                 "valid": True,
                 "message": "OpenAI API key is valid",
-                "models_available": len(list(models))
+                "models_available": len(list(models)),
             }
-        
+
         elif provider == "anthropic":
             # Try a simple API call to validate
             import anthropic
+
             client = anthropic.Anthropic(api_key=api_key)
             # Try a minimal completion
             response = client.messages.create(
                 model="claude-3-haiku-20240307",
                 max_tokens=1,
-                messages=[{"role": "user", "content": "Hi"}]
+                messages=[{"role": "user", "content": "Hi"}],
             )
-            return {
-                "valid": True,
-                "message": "Anthropic API key is valid"
-            }
-        
+            return {"valid": True, "message": "Anthropic API key is valid"}
+
         else:
             raise HTTPException(
-                status_code=status.HTTP_400_BAD_REQUEST,
-                detail=f"Unknown provider: {provider}"
+                status_code=status.HTTP_400_BAD_REQUEST, detail=f"Unknown provider: {provider}"
             )
-            
+
     except Exception as e:
         logger.warning(f"API key validation failed for {provider}: {str(e)}")
-        return {
-            "valid": False,
-            "message": f"API key validation failed: {str(e)}"
-        }
+        return {"valid": False, "message": f"API key validation failed: {str(e)}"}
 
 
 @router.delete("/settings/api-keys")
 async def clear_api_keys(
-    current_user: TokenData = Depends(get_current_user_optional),
-    db: Session = Depends(get_db)
+    current_user: TokenData = Depends(get_current_user_optional), db: Session = Depends(get_db)
 ):
     """Clear all stored API keys."""
     settings = get_or_create_settings(db, current_user.user_id)
-    
+
     settings.set_openai_key(None)
     settings.set_anthropic_key(None)
-    
+
     db.commit()
-    
+
     # Clear from environment
     os.environ.pop("OPENAI_API_KEY", None)
     os.environ.pop("ANTHROPIC_API_KEY", None)
-    
+
     # Reset providers
     reset_providers()
-    
+
     logger.info(f"Cleared all API keys for user {current_user.user_id}")
-    
+
     return {"message": "All API keys cleared successfully"}

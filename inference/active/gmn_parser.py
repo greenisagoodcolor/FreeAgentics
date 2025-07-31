@@ -577,10 +577,10 @@ llm_policy -> move: updates
 
 def parse_gmn_expression(expression: str) -> Dict[str, Any]:
     """Parse a GMN expression for test compatibility.
-    
+
     Args:
         expression: GMN expression string to parse
-        
+
     Returns:
         Parsed GMN specification dictionary
     """

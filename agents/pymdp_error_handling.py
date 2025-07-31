@@ -211,7 +211,7 @@ class PyMDPErrorHandler:
 def strict_numpy_conversion(value: Any, target_type: type = int) -> Any:
     """Strictly convert numpy arrays/scalars to Python primitives with no fallbacks.
 
-    This function provides strict conversion for PyMDP return values that might be 
+    This function provides strict conversion for PyMDP return values that might be
     numpy arrays instead of scalars. Failures raise exceptions rather than returning defaults.
 
     Args:

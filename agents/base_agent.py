@@ -8,6 +8,10 @@ from typing import Any, Callable, Dict, Optional, Tuple
 
 import numpy as np
 
+# PyMDP is a required dependency - no fallbacks allowed
+from pymdp import utils as _pymdp_utils
+from pymdp.agent import Agent as _PyMDPAgent
+
 from agents.error_handling import (
     ActionSelectionError,
     ErrorHandler,
@@ -17,18 +21,46 @@ from agents.error_handling import (
     validate_observation,
     with_error_handling,
 )
-from agents.performance_optimizer import (
-    PerformanceOptimizer,
-    performance_monitor,
-)
-from agents.pymdp_error_handling import (
-    PyMDPErrorHandler,
-    strict_array_index,
-    strict_numpy_conversion,
-    validate_pymdp_matrices,
-)
+from agents.performance_optimizer import PerformanceOptimizer, performance_monitor
+from agents.pymdp_error_handling import PyMDPErrorHandler, validate_pymdp_matrices
 
 logger = logging.getLogger(__name__)
+
+
+def safe_numpy_conversion(value, target_type, default_value):
+    """Safely convert value to target type with fallback.
+
+    Args:
+        value: Value to convert
+        target_type: Target type (e.g., int, float)
+        default_value: Default value if conversion fails
+
+    Returns:
+        Converted value or default_value
+    """
+    try:
+        if hasattr(value, "item"):
+            return target_type(value.item())
+        return target_type(value)
+    except (ValueError, TypeError, AttributeError):
+        return default_value
+
+
+def safe_array_index(array, index, default_value):
+    """Safely index array with fallback.
+
+    Args:
+        array: Array or list to index
+        index: Index to use
+        default_value: Default value if indexing fails
+
+    Returns:
+        Indexed value or default_value
+    """
+    try:
+        return array[index]
+    except (IndexError, KeyError, TypeError):
+        return default_value
 
 
 def safe_array_to_int(value):
@@ -77,10 +109,6 @@ def safe_array_to_int(value):
     except (TypeError, ValueError, IndexError) as e:
         raise ValueError(f"Cannot convert {type(value)} value {value} to integer: {e}")
 
-
-# PyMDP is a required dependency - no fallbacks allowed
-from pymdp import utils as _pymdp_utils
-from pymdp.agent import Agent as _PyMDPAgent
 
 logger.debug("PyMDP components loaded successfully")
 
@@ -327,19 +355,19 @@ class ActiveInferenceAgent(ABC):
 
     def observe(self, observation: Any) -> Any:
         """Process an observation (alias for perceive).
-        
+
         This method exists for compatibility with tests and external interfaces.
-        
+
         Args:
             observation: Observation from the environment
-            
+
         Returns:
             None or observation data for chaining
         """
         if observation is None:
             logger.warning("Received None observation")
             return None
-            
+
         try:
             self.perceive(observation)
             return observation
@@ -498,7 +526,7 @@ class ActiveInferenceAgent(ABC):
                 inference_horizon=self.config.get("planning_horizon", 3),
             )
             # Add F attribute if missing (for newer PyMDP versions)
-            if not hasattr(self.pymdp_agent, 'F'):
+            if not hasattr(self.pymdp_agent, "F"):
                 self.pymdp_agent.F = 0.0
 
             logger.info(f"Successfully initialized PyMDP agent from GMN spec for {self.agent_id}")
@@ -645,9 +673,7 @@ class ActiveInferenceAgent(ABC):
         # Cleanup belief monitoring
         if self.belief_monitoring_enabled:
             try:
-                from observability.belief_monitoring import (
-                    belief_monitoring_hooks,
-                )
+                from observability.belief_monitoring import belief_monitoring_hooks
 
                 belief_monitoring_hooks.reset_agent_monitor(self.agent_id)
                 logger.debug(f"Cleaned up belief monitoring for agent {self.agent_id}")
@@ -889,7 +915,7 @@ class BasicExplorerAgent(ActiveInferenceAgent):
                 save_belief_hist=False,  # PERFORMANCE: Disable history for speed
             )
             # Add F attribute if missing (for newer PyMDP versions)
-            if not hasattr(self.pymdp_agent, 'F'):
+            if not hasattr(self.pymdp_agent, "F"):
                 self.pymdp_agent.F = 0.0
 
             logger.info(f"Initialized PyMDP agent for {self.agent_id}")

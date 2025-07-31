@@ -4,7 +4,7 @@ North Star User Journey Test Suite - Active Inference Production Validation
 
 This test validates the complete developer experience described in the README:
 1. Clone repo
-2. make install 
+2. make install
 3. make dev
 4. Add API key
 5. Experience full Active Inference functionality:
@@ -79,11 +79,7 @@ class TestActiveInferenceProduction(unittest.TestCase):
     def test_02_gmn_parser_comprehensive(self):
         """Test GMN parser with various specifications."""
         try:
-            from inference.active.gmn_parser import (
-                EXAMPLE_GMN_SPEC,
-                GMNParser,
-                parse_gmn_spec,
-            )
+            from inference.active.gmn_parser import EXAMPLE_GMN_SPEC, GMNParser, parse_gmn_spec
 
             # Test 1: Example specification
             model_spec = parse_gmn_spec(EXAMPLE_GMN_SPEC)

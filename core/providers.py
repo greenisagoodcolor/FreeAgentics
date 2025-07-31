@@ -12,9 +12,10 @@ while allowing graceful fallbacks for local development.
 
 import logging
 import os
-import warnings
 from abc import ABC, abstractmethod
-from typing import Any, Dict, Generator, Optional
+
+# Import for type hints only
+from typing import TYPE_CHECKING, Any, Dict, Generator, Optional
 
 from sqlalchemy import create_engine
 from sqlalchemy.orm import Session, sessionmaker
@@ -22,8 +23,6 @@ from sqlalchemy.pool import StaticPool
 
 from database.base import Base
 
-# Import for type hints only
-from typing import TYPE_CHECKING
 if TYPE_CHECKING:
     from auth.security_implementation import TokenData
 
@@ -353,24 +352,26 @@ def get_rate_limiter() -> RateLimiterProvider:
 
 def get_llm(user_id: Optional[str] = None) -> LLMProvider:
     """Get LLM provider based on user settings or environment.
-    
+
     Args:
         user_id: Optional user ID to load user-specific settings
-        
+
     Returns:
         LLMProvider instance configured for the user
     """
     global _llm_provider
-    
+
     # If user_id provided, check user settings first
     if user_id:
         try:
-            from database.session import SessionLocal
             from api.v1.settings import UserSettings
-            
+            from database.session import SessionLocal
+
             db = SessionLocal()
             try:
-                user_settings = db.query(UserSettings).filter(UserSettings.user_id == user_id).first()
+                user_settings = (
+                    db.query(UserSettings).filter(UserSettings.user_id == user_id).first()
+                )
                 if user_settings:
                     # Check user's provider preference
                     if user_settings.llm_provider == "openai" and user_settings.get_openai_key():
@@ -379,9 +380,16 @@ def get_llm(user_id: Optional[str] = None) -> LLMProvider:
                             logger.info(f"Using OpenAI LLM provider for user {user_id}")
                             return provider
                         except Exception as e:
-                            logger.warning(f"Failed to create OpenAI provider for user {user_id}: {e}")
-                    elif user_settings.llm_provider == "anthropic" and user_settings.get_anthropic_key():
-                        logger.info(f"Would use Anthropic for user {user_id}, but provider not implemented")
+                            logger.warning(
+                                f"Failed to create OpenAI provider for user {user_id}: {e}"
+                            )
+                    elif (
+                        user_settings.llm_provider == "anthropic"
+                        and user_settings.get_anthropic_key()
+                    ):
+                        logger.info(
+                            f"Would use Anthropic for user {user_id}, but provider not implemented"
+                        )
             finally:
                 db.close()
         except Exception as e:
@@ -417,21 +425,18 @@ async def get_rate_limit_checker() -> RateLimiterProvider:
     return get_rate_limiter()
 
 
-async def get_llm_client(
-    current_user: Optional["TokenData"] = None
-) -> LLMProvider:
+async def get_llm_client(current_user: Optional["TokenData"] = None) -> LLMProvider:
     """FastAPI dependency for LLM client.
-    
+
     Args:
         current_user: Optional current user for user-specific settings
-        
+
     Returns:
         LLMProvider configured for the user or environment
     """
     if current_user:
         # Import here to avoid circular dependency
-        from auth.dev_bypass import get_current_user_optional
-        
+
         # If we have a user, use their settings
         return get_llm(user_id=current_user.user_id)
     return get_llm()

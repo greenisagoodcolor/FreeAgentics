@@ -394,7 +394,7 @@ describe("KnowledgeGraphView", () => {
 
   it("opens node details sheet when clicking a node", async () => {
     const user = userEvent.setup();
-    
+
     mockUseKnowledgeGraph.mockReturnValue({
       nodes: [
         { id: "agent-1", label: "Explorer Agent", type: "agent", x: 100, y: 100 },

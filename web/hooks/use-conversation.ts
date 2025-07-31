@@ -148,12 +148,12 @@ export function useConversation(): ConversationState {
         const headers: HeadersInit = {
           "Content-Type": "application/json",
         };
-        
+
         // Only add auth header if token exists
         if (token) {
           headers.Authorization = `Bearer ${token}`;
         }
-        
+
         fetch("/api/process-prompt", {
           method: "POST",
           headers,
@@ -164,7 +164,7 @@ export function useConversation(): ConversationState {
         })
           .then((response) => {
             if (!response.ok) {
-              return response.text().then(text => {
+              return response.text().then((text) => {
                 throw new Error(`Failed to process prompt: ${text}`);
               });
             }

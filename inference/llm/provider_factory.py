@@ -10,12 +10,7 @@ from typing import Dict, List, Optional, Type
 
 from config.llm_config import get_llm_config
 
-from .provider_interface import (
-    ILLMProvider,
-    ProviderCredentials,
-    ProviderManager,
-    ProviderType,
-)
+from .provider_interface import ILLMProvider, ProviderCredentials, ProviderManager, ProviderType
 
 try:
     from .openai_provider import OpenAIProvider
@@ -33,6 +28,7 @@ except ImportError:
 
 try:
     from .mock_provider import MockLLMProvider
+
     MOCK_PROVIDER_AVAILABLE = True
 except ImportError:
     MOCK_PROVIDER_AVAILABLE = False
@@ -116,7 +112,7 @@ class LLMProviderFactory:
 
     def create_from_config(self, user_id: Optional[str] = None) -> ProviderManager:
         """Create a ProviderManager with providers from configuration.
-        
+
         Args:
             user_id: Optional user ID to load user-specific settings
         """
@@ -169,9 +165,10 @@ class LLMProviderFactory:
             except Exception as e:
                 logger.error(f"Failed to configure {provider_name} provider: {e}")
                 continue
-        
+
         # If no providers were configured and we're in dev mode, add mock provider
         from core.environment import environment
+
         if not providers_configured and environment.is_development and MOCK_PROVIDER_AVAILABLE:
             logger.info("No LLM providers configured in dev mode, adding mock provider")
             try:
@@ -277,7 +274,7 @@ def get_provider_factory() -> LLMProviderFactory:
 
 def create_llm_manager(user_id: Optional[str] = None) -> ProviderManager:
     """Create a fully configured LLM provider manager.
-    
+
     Args:
         user_id: Optional user ID to load user-specific settings
     """

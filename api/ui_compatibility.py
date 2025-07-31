@@ -23,8 +23,8 @@ from api.v1.agents import get_agent as v1_get_agent
 from api.v1.agents import list_agents as v1_list_agents
 from api.v1.agents import update_agent_status as v1_update_agent_status
 from api.v1.knowledge_graph import get_knowledge_graph
-from auth.security_implementation import TokenData
 from auth.dev_bypass import get_current_user_optional as get_current_user
+from auth.security_implementation import TokenData
 from database.session import get_db
 
 logger = logging.getLogger(__name__)
@@ -329,12 +329,14 @@ async def get_knowledge_graph_ui(
 # Prompt processing endpoint
 class ProcessPromptRequest(BaseModel):
     """Request model for processing prompts."""
+
     prompt: str = Field(..., description="The prompt to process")
     conversationId: Optional[str] = Field(None, description="Optional conversation ID")
 
 
 class ProcessPromptResponse(BaseModel):
     """Response model for prompt processing."""
+
     response: str
     knowledgeGraph: Optional[Dict] = None
 
@@ -347,94 +349,107 @@ async def process_prompt_ui(
 ) -> ProcessPromptResponse:
     """Process a prompt through the real agent creation pipeline and enable agent conversations."""
     import uuid
+
     from api.v1.prompts import PromptRequest, create_agent_from_prompt
-    
+
     message_id = str(uuid.uuid4())
     conversation_id = request.conversationId or f"conv_{uuid.uuid4().hex[:8]}"
-    
+
     try:
         from api.v1.websocket import manager
-        
+
         # Send user message echo via WebSocket
-        await manager.broadcast({
-            "type": "message",
-            "data": {
-                "id": f"user-{message_id}",
-                "role": "user",
-                "content": request.prompt,
-                "timestamp": datetime.now().isoformat(),
-                "conversationId": conversation_id
+        await manager.broadcast(
+            {
+                "type": "message",
+                "data": {
+                    "id": f"user-{message_id}",
+                    "role": "user",
+                    "content": request.prompt,
+                    "timestamp": datetime.now().isoformat(),
+                    "conversationId": conversation_id,
+                },
             }
-        })
-        
+        )
+
         # Send processing notification
-        await manager.broadcast({
-            "type": "message",
-            "data": {
-                "id": f"system-{message_id}-start",
-                "role": "system",
-                "content": "Processing your request and creating agents for collaborative analysis...",
-                "timestamp": datetime.now().isoformat(),
-                "conversationId": conversation_id,
-                "isStreaming": True
+        await manager.broadcast(
+            {
+                "type": "message",
+                "data": {
+                    "id": f"system-{message_id}-start",
+                    "role": "system",
+                    "content": "Processing your request and creating agents for collaborative analysis...",
+                    "timestamp": datetime.now().isoformat(),
+                    "conversationId": conversation_id,
+                    "isStreaming": True,
+                },
             }
-        })
-        
+        )
+
         # Create agent from the prompt using the real pipeline
         logger.info(f"Creating agent from prompt: {request.prompt[:100]}...")
-        
+
         prompt_request = PromptRequest(
             prompt=request.prompt,
             agent_name=None,  # Let the system generate a name
             llm_provider="openai",  # Use OpenAI as configured by user
             model=None,  # Use default model
-            max_retries=3
+            max_retries=3,
         )
-        
+
         # Call the real agent creation pipeline
         agent_response = await create_agent_from_prompt(prompt_request, current_user)
-        
+
         # Generate intelligent analysis based on the prompt
-        analysis_response = await _generate_agent_analysis(request.prompt, agent_response, current_user)
-        
+        analysis_response = await _generate_agent_analysis(
+            request.prompt, agent_response, current_user
+        )
+
         # Send the analysis response via WebSocket
-        await manager.broadcast({
-            "type": "message", 
-            "data": {
-                "id": f"assistant-{message_id}",
-                "role": "assistant",
-                "content": analysis_response,
-                "timestamp": datetime.now().isoformat(),
-                "conversationId": conversation_id,
-                "isStreaming": False
+        await manager.broadcast(
+            {
+                "type": "message",
+                "data": {
+                    "id": f"assistant-{message_id}",
+                    "role": "assistant",
+                    "content": analysis_response,
+                    "timestamp": datetime.now().isoformat(),
+                    "conversationId": conversation_id,
+                    "isStreaming": False,
+                },
             }
-        })
-        
+        )
+
         # Send agent creation notification
-        await manager.broadcast({
-            "type": "agent_created",
-            "data": {
-                "agent_id": agent_response.agent_id,
-                "agent_name": agent_response.agent_name,
-                "message": f"Created active inference agent: {agent_response.agent_name}",
-                "timestamp": datetime.now().isoformat(),
-                "gmn_spec": agent_response.gmn_spec,
-                "status": agent_response.status
+        await manager.broadcast(
+            {
+                "type": "agent_created",
+                "data": {
+                    "agent_id": agent_response.agent_id,
+                    "agent_name": agent_response.agent_name,
+                    "message": f"Created active inference agent: {agent_response.agent_name}",
+                    "timestamp": datetime.now().isoformat(),
+                    "gmn_spec": agent_response.gmn_spec,
+                    "status": agent_response.status,
+                },
             }
-        })
-        
+        )
+
         # Create additional collaborative agents if the prompt suggests business/project planning
-        await _create_collaborative_agents_if_needed(request.prompt, conversation_id, current_user, manager)
-        
+        await _create_collaborative_agents_if_needed(
+            request.prompt, conversation_id, current_user, manager
+        )
+
         response_text = analysis_response
-        
+
     except Exception as e:
         logger.error(f"Failed to process prompt through real pipeline: {e}")
-        
+
         # Check if this is an API key issue
         error_str = str(e).lower()
         if "no llm providers available" in error_str or "api key" in error_str:
-            error_response = f"""I've successfully updated the conversation system to use real agent creation instead of demo responses! 
+            error_response = f"""I've successfully updated the conversation system to use real agent creation instead of demo responses!
 
 🎉 **Key Achievement**: The conversation pipeline now calls the real agent creation API and would create actual PyMDP active inference agents.
 
@@ -447,36 +462,37 @@ async def process_prompt_ui(
 The infrastructure is now in place for real agent-to-agent conversations. Just add your API key and watch the agents come to life! 🚀"""
         else:
             error_response = f"I encountered an issue while creating your agents: {str(e)}. However, I can still provide basic assistance."
-        
+
         try:
-            await manager.broadcast({
-                "type": "message",
-                "data": {
-                    "id": f"assistant-{message_id}-error",
-                    "role": "assistant", 
-                    "content": error_response,
-                    "timestamp": datetime.now().isoformat(),
-                    "conversationId": conversation_id,
-                    "isStreaming": False
+            await manager.broadcast(
+                {
+                    "type": "message",
+                    "data": {
+                        "id": f"assistant-{message_id}-error",
+                        "role": "assistant",
+                        "content": error_response,
+                        "timestamp": datetime.now().isoformat(),
+                        "conversationId": conversation_id,
+                        "isStreaming": False,
+                    },
                 }
-            })
+            )
         except Exception as ws_error:
             logger.error(f"Failed to send error via WebSocket: {ws_error}")
-        
+
         response_text = error_response
-    
+
     # Get current knowledge graph
     try:
         kg_response = await get_knowledge_graph_ui(current_user)
-        kg_data = kg_response.model_dump() if hasattr(kg_response, 'model_dump') else kg_response.dict()
+        kg_data = (
+            kg_response.model_dump() if hasattr(kg_response, "model_dump") else kg_response.dict()
+        )
     except Exception as e:
         logger.warning(f"Failed to get knowledge graph: {e}")
         kg_data = None
-    
-    return ProcessPromptResponse(
-        response=response_text,
-        knowledgeGraph=kg_data
-    )
+
+    return ProcessPromptResponse(response=response_text, knowledgeGraph=kg_data)
 
 
 async def _generate_agent_analysis(prompt: str, agent_response, current_user: TokenData) -> str:
@@ -485,14 +501,14 @@ async def _generate_agent_analysis(prompt: str, agent_response, current_user: To
         # Use the LLM to generate a collaborative analysis response
         from inference.llm.provider_factory import LLMProviderFactory
         from inference.llm.provider_interface import GenerationRequest
-        
+
         llm_factory = LLMProviderFactory()
         provider_manager = llm_factory.create_from_config(user_id=current_user.user_id)
-        
+
         # Check if any providers are available
         healthy_providers = provider_manager.registry.get_healthy_providers()
         if healthy_providers:
-            system_prompt = """You are an AI agent coordinator for FreeAgentics. You've just created an active inference agent to help with the user's request. 
+            system_prompt = """You are an AI agent coordinator for FreeAgentics. You've just created an active inference agent to help with the user's request.
 
 Provide a brief, intelligent response that:
 1. Acknowledges the successful agent creation
@@ -515,65 +531,82 @@ The agent has been equipped with active inference capabilities and is ready to c
                 temperature=0.7,
                 max_tokens=200,
             )
-            
+
             response = provider_manager.generate_with_fallback(generation_request)
             return response.content.strip()
-    
+
     except Exception as e:
         logger.warning(f"Failed to generate intelligent analysis: {e}")
-    
+
     # Fallback to structured response
     return f"I've successfully created an active inference agent named '{agent_response.agent_name}' to help with your request: '{prompt}'. This agent is now ready to collaborate and can engage in multi-agent coordination to provide intelligent solutions. What would you like the agents to work on next?"
 
 
-async def _create_collaborative_agents_if_needed(prompt: str, conversation_id: str, current_user: TokenData, manager) -> None:
+async def _create_collaborative_agents_if_needed(
+    prompt: str, conversation_id: str, current_user: TokenData, manager
+) -> None:
     """Create additional agents for collaborative scenarios like business planning."""
     prompt_lower = prompt.lower()
-    
+
     # Check if this is a business/planning scenario that would benefit from multiple agents
-    business_keywords = ["company", "business", "startup", "plan", "strategy", "market", "analysis", "proposal"]
+    business_keywords = [
+        "company",
+        "business",
+        "startup",
+        "plan",
+        "strategy",
+        "market",
+        "analysis",
+        "proposal",
+    ]
     if any(keyword in prompt_lower for keyword in business_keywords):
         try:
             from api.v1.prompts import PromptRequest, create_agent_from_prompt
-            
+
             # Create a market analysis agent
-            market_prompt = f"Create a market analysis agent to research and analyze the market for: {prompt}"
+            market_prompt = (
+                f"Create a market analysis agent to research and analyze the market for: {prompt}"
+            )
             market_agent_request = PromptRequest(
                 prompt=market_prompt,
                 agent_name="Market_Analyst",
                 llm_provider="openai",
                 model=None,
-                max_retries=2
+                max_retries=2,
             )
-            
+
             market_agent = await create_agent_from_prompt(market_agent_request, current_user)
-            
+
             # Notify about the market analysis agent
-            await manager.broadcast({
-                "type": "agent_created",
-                "data": {
-                    "agent_id": market_agent.agent_id,
-                    "agent_name": market_agent.agent_name,
-                    "message": f"Created collaborative agent: {market_agent.agent_name} for market analysis",
-                    "timestamp": datetime.now().isoformat(),
-                    "gmn_spec": market_agent.gmn_spec,
-                    "status": market_agent.status
+            await manager.broadcast(
+                {
+                    "type": "agent_created",
+                    "data": {
+                        "agent_id": market_agent.agent_id,
+                        "agent_name": market_agent.agent_name,
+                        "message": f"Created collaborative agent: {market_agent.agent_name} for market analysis",
+                        "timestamp": datetime.now().isoformat(),
+                        "gmn_spec": market_agent.gmn_spec,
+                        "status": market_agent.status,
+                    },
                 }
-            })
-            
+            )
+
             # Send collaboration message
-            await manager.broadcast({
-                "type": "message",
-                "data": {
-                    "id": f"system-collab-{datetime.now().timestamp()}",
-                    "role": "system",
-                    "content": f"Agents are now collaborating on your request. {market_agent.agent_name} is analyzing market opportunities while the primary agent handles strategic planning.",
-                    "timestamp": datetime.now().isoformat(),
-                    "conversationId": conversation_id,
-                    "isStreaming": False
+            await manager.broadcast(
+                {
+                    "type": "message",
+                    "data": {
+                        "id": f"system-collab-{datetime.now().timestamp()}",
+                        "role": "system",
+                        "content": f"Agents are now collaborating on your request. {market_agent.agent_name} is analyzing market opportunities while the primary agent handles strategic planning.",
+                        "timestamp": datetime.now().isoformat(),
+                        "conversationId": conversation_id,
+                        "isStreaming": False,
+                    },
                 }
-            })
-            
+            )
+
         except Exception as e:
             logger.warning(f"Failed to create collaborative agents: {e}")
             # Don't fail the main request if collaborative agents fail

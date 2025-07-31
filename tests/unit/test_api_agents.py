@@ -14,7 +14,6 @@ from sqlalchemy.orm import Session
 from api.main import app
 from database.models import Agent as AgentModel
 from database.session import get_db
-from tests.fixtures.fixtures import db_session, test_engine
 from tests.helpers import get_auth_headers
 from tests.test_client_compat import TestClient
 

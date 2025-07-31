@@ -12,15 +12,9 @@ from typing import Dict, List
 
 import pytest
 
-from inference.llm.provider_interface import (
-    GenerationRequest,
-    GenerationResponse,
-    ILLMProvider,
-    ProviderType,
-)
-from inference.llm.provider_factory import LLMProviderFactory
-from inference.llm.openai_provider import OpenAIProvider
 from inference.llm.anthropic_provider import AnthropicProvider
+from inference.llm.openai_provider import OpenAIProvider
+from inference.llm.provider_factory import LLMProviderFactory
 
 
 class TestLLMProviders:

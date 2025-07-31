@@ -10,11 +10,12 @@ from typing import Any, Dict, List, Optional, Tuple
 
 import numpy as np
 
+# PyMDP is now a required dependency
+from pymdp import utils
+from pymdp.agent import Agent as PyMDPAgent
+
 from agents.base_agent import ActiveInferenceAgent
-from agents.error_handling import (
-    PyMDPError,
-    safe_pymdp_operation,
-)
+from agents.error_handling import PyMDPError, safe_pymdp_operation
 from agents.pymdp_error_handling import (
     PyMDPErrorHandler,
     strict_array_index,
@@ -76,13 +77,6 @@ except ImportError:
             Dictionary with error message
         """
         return {"error": "Coordination metrics not available"}
-
-
-# PyMDP is now a required dependency
-from pymdp import utils
-from pymdp.agent import Agent as PyMDPAgent
-
-logger = logging.getLogger(__name__)
 
 
 class CoalitionCoordinatorAgent(ActiveInferenceAgent):

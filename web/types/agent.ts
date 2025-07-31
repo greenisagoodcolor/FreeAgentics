@@ -1,15 +1,15 @@
 /**
  * UNIFIED AGENT TYPE SYSTEM
- * 
+ *
  * This module implements the Nemesis Committee's consensus approach to resolving
  * Agent interface contract violations through systematic type unification.
- * 
+ *
  * DESIGN PRINCIPLES:
  * - Interface Segregation Principle (Robert Martin)
- * - Bounded Context Pattern (Martin Fowler) 
+ * - Bounded Context Pattern (Martin Fowler)
  * - Composition over Inheritance (Kent Beck)
  * - Backward Compatibility (Michael Feathers)
- * 
+ *
  * ARCHITECTURE:
  * 1. Core Agent Interface - minimal shared contract
  * 2. Domain-Specific Extensions - compose additional properties as needed
@@ -24,7 +24,7 @@
 /**
  * Core Agent properties shared across ALL contexts.
  * This represents the absolute minimum contract that every agent must satisfy.
- * 
+ *
  * Following Interface Segregation Principle - only essential properties.
  */
 export interface CoreAgent {
@@ -115,19 +115,19 @@ export interface HasSimulationState {
  * Standard agent status enumeration
  * Used across all contexts that implement HasStatus
  */
-export type AgentStatus = 'active' | 'idle' | 'error';
+export type AgentStatus = "active" | "idle" | "error";
 
 /**
- * Standard agent type enumeration  
+ * Standard agent type enumeration
  * Used across all contexts that implement HasType
  */
-export type AgentType = 'explorer' | 'collector' | 'analyzer' | 'custom';
+export type AgentType = "explorer" | "collector" | "analyzer" | "custom";
 
 /**
  * Simulation-specific state enumeration
  * Used only in simulation contexts
  */
-export type SimulationState = 'idle' | 'exploring' | 'collecting' | 'returning';
+export type SimulationState = "idle" | "exploring" | "collecting" | "returning";
 
 // =============================================================================
 // BOUNDED CONTEXT INTERFACES (Domain-Specific Compositions)
@@ -136,45 +136,43 @@ export type SimulationState = 'idle' | 'exploring' | 'collecting' | 'returning';
 /**
  * MANAGEMENT CONTEXT: Agent interface for agent management operations
  * Used in: use-agents.ts, AgentCreatorPanel.tsx, etc.
- * 
+ *
  * Comprehensive interface for full agent lifecycle management
  */
-export interface ManagementAgent extends 
-  CoreAgent, 
-  HasStatus, 
-  HasType, 
-  HasDescription, 
-  HasTimestamps, 
-  HasBeliefs, 
-  HasGoals {}
+export interface ManagementAgent
+  extends CoreAgent,
+    HasStatus,
+    HasType,
+    HasDescription,
+    HasTimestamps,
+    HasBeliefs,
+    HasGoals {}
 
 /**
  * PROMPT PROCESSING CONTEXT: Agent interface for prompt processing operations
  * Used in: use-prompt-processor.ts, prompt-interface.tsx, etc.
- * 
+ *
  * Minimal interface focused on prompt processing needs
  */
-export interface PromptAgent extends 
-  CoreAgent, 
-  HasThinking {
+export interface PromptAgent extends CoreAgent, HasThinking {
   // Note: status and type are intentionally string to maintain current behavior
   // This preserves backward compatibility during migration
-  readonly status: string;  // Generic string for flexibility in prompt context
-  readonly type?: string;   // Optional generic string
+  readonly status: string; // Generic string for flexibility in prompt context
+  readonly type?: string; // Optional generic string
 }
 
 /**
- * SIMULATION CONTEXT: Agent interface for simulation operations  
+ * SIMULATION CONTEXT: Agent interface for simulation operations
  * Used in: use-simulation.ts, SimulationGrid.tsx, etc.
- * 
+ *
  * Spatial interface focused on simulation environment needs
  */
-export interface SimulationAgent extends 
-  CoreAgent, 
-  HasPosition, 
-  HasEnergy, 
-  HasSimulationState, 
-  HasBeliefs {}
+export interface SimulationAgent
+  extends CoreAgent,
+    HasPosition,
+    HasEnergy,
+    HasSimulationState,
+    HasBeliefs {}
 
 // =============================================================================
 // BACKWARD COMPATIBILITY ALIASES (Migration Support)
@@ -195,30 +193,36 @@ export type Agent = ManagementAgent;
  */
 export const AgentTypeGuards = {
   isManagementAgent: (agent: unknown): agent is ManagementAgent => {
-    return typeof agent === 'object' && 
-           agent !== null && 
-           'id' in agent && 
-           'name' in agent && 
-           'status' in agent && 
-           'type' in agent;
+    return (
+      typeof agent === "object" &&
+      agent !== null &&
+      "id" in agent &&
+      "name" in agent &&
+      "status" in agent &&
+      "type" in agent
+    );
   },
 
   isPromptAgent: (agent: unknown): agent is PromptAgent => {
-    return typeof agent === 'object' && 
-           agent !== null && 
-           'id' in agent && 
-           'name' in agent && 
-           'status' in agent;
+    return (
+      typeof agent === "object" &&
+      agent !== null &&
+      "id" in agent &&
+      "name" in agent &&
+      "status" in agent
+    );
   },
 
   isSimulationAgent: (agent: unknown): agent is SimulationAgent => {
-    return typeof agent === 'object' && 
-           agent !== null && 
-           'id' in agent && 
-           'name' in agent && 
-           'position' in agent && 
-           'state' in agent && 
-           'energy' in agent;
+    return (
+      typeof agent === "object" &&
+      agent !== null &&
+      "id" in agent &&
+      "name" in agent &&
+      "position" in agent &&
+      "state" in agent &&
+      "energy" in agent
+    );
   },
 } as const;
 
@@ -234,8 +238,8 @@ export const AgentTranslators = {
     id: agent.id,
     name: agent.name,
     status: agent.status, // Convert enum to string
-    type: agent.type,     // Convert enum to string
-    thinking: false,      // Default value for prompt context
+    type: agent.type, // Convert enum to string
+    thinking: false, // Default value for prompt context
   }),
 
   /**
@@ -243,7 +247,7 @@ export const AgentTranslators = {
    */
   managementToSimulationFormat: (agent: ManagementAgent) => ({
     id: agent.id,
-    name: agent.name,  
+    name: agent.name,
     type: agent.type,
   }),
 
@@ -254,7 +258,7 @@ export const AgentTranslators = {
     id: agent.id,
     name: agent.name,
     status: agent.status as AgentStatus, // Attempt safe conversion
-    type: agent.type as AgentType,       // Attempt safe conversion
+    type: agent.type as AgentType, // Attempt safe conversion
     description: undefined,
     createdAt: undefined,
     lastActiveAt: undefined,
@@ -263,14 +267,14 @@ export const AgentTranslators = {
   }),
 
   /**
-   * Convert SimulationAgent to partial ManagementAgent  
+   * Convert SimulationAgent to partial ManagementAgent
    */
   simulationToManagement: (agent: SimulationAgent): Partial<ManagementAgent> => ({
     id: agent.id,
     name: agent.name,
     beliefs: agent.beliefs,
-    status: 'active' as AgentStatus, // Default status for simulation agents
-    type: 'explorer' as AgentType,   // Default type for simulation agents
+    status: "active" as AgentStatus, // Default status for simulation agents
+    type: "explorer" as AgentType, // Default type for simulation agents
   }),
 } as const;
 
@@ -296,7 +300,7 @@ export const AgentFactories = {
     id: params.id,
     name: params.name,
     type: params.type,
-    status: params.status ?? 'idle',
+    status: params.status ?? "idle",
     description: params.description,
     createdAt: new Date().toISOString(),
     lastActiveAt: new Date().toISOString(),
@@ -315,7 +319,7 @@ export const AgentFactories = {
   }): PromptAgent => ({
     id: params.id,
     name: params.name,
-    status: params.status ?? 'idle',
+    status: params.status ?? "idle",
     type: params.type,
     thinking: false,
   }),
@@ -334,7 +338,7 @@ export const AgentFactories = {
     name: params.name,
     position: params.position ?? { x: 0, y: 0 },
     energy: params.energy ?? 100,
-    state: params.state ?? 'idle',
+    state: params.state ?? "idle",
     beliefs: {},
   }),
 } as const;
@@ -352,7 +356,7 @@ export const AgentValidators = {
    */
   validateManagementAgent: (obj: unknown): ManagementAgent => {
     if (!AgentTypeGuards.isManagementAgent(obj)) {
-      throw new Error('Invalid ManagementAgent object');
+      throw new Error("Invalid ManagementAgent object");
     }
     return obj;
   },
@@ -362,7 +366,7 @@ export const AgentValidators = {
    */
   validatePromptAgent: (obj: unknown): PromptAgent => {
     if (!AgentTypeGuards.isPromptAgent(obj)) {
-      throw new Error('Invalid PromptAgent object');  
+      throw new Error("Invalid PromptAgent object");
     }
     return obj;
   },
@@ -372,7 +376,7 @@ export const AgentValidators = {
    */
   validateSimulationAgent: (obj: unknown): SimulationAgent => {
     if (!AgentTypeGuards.isSimulationAgent(obj)) {
-      throw new Error('Invalid SimulationAgent object');
+      throw new Error("Invalid SimulationAgent object");
     }
     return obj;
   },

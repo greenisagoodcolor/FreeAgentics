@@ -59,15 +59,15 @@ run_test() {
     local test_name="$1"
     local test_command="$2"
     local fix_command="${3:-}"
-    
+
     echo -n "Testing $test_name... "
-    
+
     if eval "$test_command" >/dev/null 2>&1; then
         log_success "$test_name OK"
         return 0
     else
         log_error "$test_name FAILED"
-        
+
         if [ "$FIX_MODE" = true ] && [ -n "$fix_command" ]; then
             log_info "Attempting to fix $test_name..."
             if eval "$fix_command"; then
@@ -115,7 +115,7 @@ if docker-compose -f docker-compose.db.yml ps | grep -q "Up"; then
 else
     log_error "PostgreSQL container is not running"
     CONTAINER_RUNNING=false
-    
+
     if [ "$FIX_MODE" = true ]; then
         log_info "Starting PostgreSQL container..."
         docker-compose -f docker-compose.db.yml up -d
@@ -145,7 +145,7 @@ if psql "$DATABASE_URL" -c "SELECT 1;" >/dev/null 2>&1; then
 else
     log_error "Database connection failed"
     CONNECTION_OK=false
-    
+
     if [ "$VERBOSE" = true ]; then
         echo "Connection error details:"
         psql "$DATABASE_URL" -c "SELECT 1;" 2>&1 || true
@@ -155,14 +155,14 @@ fi
 # Test 5: PostgreSQL version and health
 if [ "$CONNECTION_OK" = true ]; then
     log_info "5. Checking PostgreSQL version and health..."
-    
+
     PG_VERSION=$(psql "$DATABASE_URL" -t -c "SELECT version();" 2>/dev/null | head -1)
     if [ -n "$PG_VERSION" ]; then
         log_success "PostgreSQL version: $(echo $PG_VERSION | cut -d' ' -f1-2)"
     else
         log_error "Could not retrieve PostgreSQL version"
     fi
-    
+
     # Check if database is accepting connections
     if psql "$DATABASE_URL" -c "SELECT pg_is_in_recovery();" >/dev/null 2>&1; then
         log_success "PostgreSQL is healthy and accepting connections"
@@ -176,15 +176,15 @@ fi
 # Test 6: pgvector extension
 if [ "$CONNECTION_OK" = true ]; then
     log_info "6. Checking pgvector extension..."
-    
+
     # Check if extension is available
     if psql "$DATABASE_URL" -t -c "SELECT count(*) FROM pg_available_extensions WHERE name = 'vector';" 2>/dev/null | grep -q "1"; then
         log_success "pgvector extension is available"
-        
+
         # Check if extension is installed
         if psql "$DATABASE_URL" -t -c "SELECT count(*) FROM pg_extension WHERE extname = 'vector';" 2>/dev/null | grep -q "1"; then
             log_success "pgvector extension is installed"
-            
+
             # Test vector functionality
             if psql "$DATABASE_URL" -c "SELECT '[1,2,3]'::vector;" >/dev/null 2>&1; then
                 log_success "pgvector functionality is working"
@@ -193,7 +193,7 @@ if [ "$CONNECTION_OK" = true ]; then
             fi
         else
             log_error "pgvector extension is not installed"
-            
+
             if [ "$FIX_MODE" = true ]; then
                 log_info "Installing pgvector extension..."
                 if psql "$DATABASE_URL" -c "CREATE EXTENSION IF NOT EXISTS vector;" >/dev/null 2>&1; then
@@ -217,7 +217,7 @@ if check_command alembic; then
     CURRENT_REVISION=$(alembic current 2>/dev/null | grep -o '[a-f0-9]\{12\}' | head -1)
     if [ -n "$CURRENT_REVISION" ]; then
         log_success "Current migration revision: $CURRENT_REVISION"
-        
+
         # Check if migrations are up to date
         HEAD_REVISION=$(alembic heads 2>/dev/null | grep -o '[a-f0-9]\{12\}' | head -1)
         if [ "$CURRENT_REVISION" = "$HEAD_REVISION" ]; then
@@ -225,7 +225,7 @@ if check_command alembic; then
         else
             log_warning "Database migrations are not up to date"
             log_info "Current: $CURRENT_REVISION, Head: $HEAD_REVISION"
-            
+
             if [ "$FIX_MODE" = true ]; then
                 log_info "Running database migrations..."
                 if alembic upgrade head >/dev/null 2>&1; then
@@ -245,11 +245,11 @@ fi
 # Test 8: Database schema
 if [ "$CONNECTION_OK" = true ]; then
     log_info "8. Checking database schema..."
-    
+
     TABLES=$(psql "$DATABASE_URL" -t -c "\dt" 2>/dev/null | wc -l)
     if [ "$TABLES" -gt 0 ]; then
         log_success "Database tables exist ($TABLES tables found)"
-        
+
         # Check key tables
         for table in agents coalitions knowledge_nodes knowledge_edges; do
             if psql "$DATABASE_URL" -c "\d $table" >/dev/null 2>&1; then
@@ -260,7 +260,7 @@ if [ "$CONNECTION_OK" = true ]; then
         done
     else
         log_error "No database tables found"
-        
+
         if [ "$FIX_MODE" = true ]; then
             log_info "Creating database schema..."
             if alembic upgrade head >/dev/null 2>&1; then
@@ -277,16 +277,16 @@ fi
 # Test 9: Database permissions
 if [ "$CONNECTION_OK" = true ]; then
     log_info "9. Checking database permissions..."
-    
+
     # Test basic operations
     TEST_TABLE="test_permissions_$(date +%s)"
-    
+
     if psql "$DATABASE_URL" -c "CREATE TABLE $TEST_TABLE (id SERIAL PRIMARY KEY);" >/dev/null 2>&1; then
         log_success "CREATE permission OK"
-        
+
         if psql "$DATABASE_URL" -c "INSERT INTO $TEST_TABLE DEFAULT VALUES;" >/dev/null 2>&1; then
             log_success "INSERT permission OK"
-            
+
             if psql "$DATABASE_URL" -c "SELECT * FROM $TEST_TABLE;" >/dev/null 2>&1; then
                 log_success "SELECT permission OK"
             else
@@ -295,7 +295,7 @@ if [ "$CONNECTION_OK" = true ]; then
         else
             log_error "INSERT permission failed"
         fi
-        
+
         # Clean up test table
         psql "$DATABASE_URL" -c "DROP TABLE $TEST_TABLE;" >/dev/null 2>&1
     else
@@ -308,29 +308,29 @@ fi
 # Test 10: Performance check
 if [ "$CONNECTION_OK" = true ]; then
     log_info "10. Checking database performance..."
-    
+
     # Check active connections
     ACTIVE_CONNECTIONS=$(psql "$DATABASE_URL" -t -c "SELECT count(*) FROM pg_stat_activity;" 2>/dev/null)
     if [ -n "$ACTIVE_CONNECTIONS" ]; then
         log_success "Active connections: $ACTIVE_CONNECTIONS"
-        
+
         if [ "$ACTIVE_CONNECTIONS" -gt 50 ]; then
             log_warning "High number of active connections"
         fi
     fi
-    
+
     # Check database size
     DB_SIZE=$(psql "$DATABASE_URL" -t -c "SELECT pg_size_pretty(pg_database_size('freeagentics'));" 2>/dev/null)
     if [ -n "$DB_SIZE" ]; then
         log_success "Database size: $(echo $DB_SIZE | xargs)"
     fi
-    
+
     # Simple performance test
     START_TIME=$(date +%s%N)
     psql "$DATABASE_URL" -c "SELECT count(*) FROM pg_stat_activity;" >/dev/null 2>&1
     END_TIME=$(date +%s%N)
     QUERY_TIME=$(( (END_TIME - START_TIME) / 1000000 ))
-    
+
     if [ "$QUERY_TIME" -lt 100 ]; then
         log_success "Query performance: ${QUERY_TIME}ms (good)"
     elif [ "$QUERY_TIME" -lt 500 ]; then
@@ -346,7 +346,7 @@ fi
 if [ "$VERBOSE" = true ]; then
     echo ""
     log_info "=== Verbose Diagnostics ==="
-    
+
     if [ "$CONTAINER_RUNNING" = true ]; then
         echo ""
         echo "Docker container details:"
@@ -355,16 +355,16 @@ if [ "$VERBOSE" = true ]; then
         echo "Recent container logs:"
         docker-compose -f docker-compose.db.yml logs --tail=20 postgres
     fi
-    
+
     if [ "$CONNECTION_OK" = true ]; then
         echo ""
         echo "Database configuration:"
         psql "$DATABASE_URL" -c "SHOW shared_buffers; SHOW work_mem; SHOW max_connections;" 2>/dev/null
-        
+
         echo ""
         echo "Database statistics:"
         psql "$DATABASE_URL" -c "SELECT * FROM pg_stat_database WHERE datname = 'freeagentics';" 2>/dev/null
-        
+
         echo ""
         echo "Installed extensions:"
         psql "$DATABASE_URL" -c "SELECT extname, extversion FROM pg_extension ORDER BY extname;" 2>/dev/null

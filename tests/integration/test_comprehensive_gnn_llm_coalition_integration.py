@@ -28,13 +28,10 @@ import numpy as np
 import pytest
 
 # Core components for integration testing
-from agents.base_agent import PYMDP_AVAILABLE, BasicExplorerAgent
+from agents.base_agent import BasicExplorerAgent
 from agents.coalition_coordinator import CoalitionCoordinatorAgent
 from agents.resource_collector import ResourceCollectorAgent
-from coalitions.coordination_types import (
-    CoordinationStrategy,
-    CoordinationTask,
-)
+from coalitions.coordination_types import CoordinationStrategy, CoordinationTask
 from inference.active.gmn_parser import GMNParser
 from inference.gnn.model import GMNModel
 from inference.llm.local_llm_manager import LocalLLMConfig, LocalLLMManager
@@ -598,9 +595,7 @@ class ResourceDiscoveryAndCoalitionScenario(IntegrationTestScenario):
         # GNN Analysis Validation
         gnn_valid = (
             results["gnn_analysis"]["success"] or results["gnn_analysis"]["nodes_processed"] > 0
-        ) and results["gnn_analysis"][
-            "execution_time"
-        ] < 30.0  # Should complete within 30 seconds
+        ) and results["gnn_analysis"]["execution_time"] < 30.0  # Should complete within 30 seconds
         validations.append(("GNN Analysis", gnn_valid))
 
         # LLM Analysis Validation (optional but should not crash)

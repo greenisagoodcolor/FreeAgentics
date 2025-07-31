@@ -5,6 +5,7 @@
 ## Quick Start
 
 ### Option 1: Demo Mode (Zero Setup - Recommended)
+
 Experience FreeAgentics immediately without any configuration:
 
 ```bash
@@ -15,12 +16,14 @@ make dev
 ```
 
 🎯 **That's it!** Open http://localhost:3000 and start exploring:
+
 - **Mock AI responses** - No API keys needed
-- **In-memory database** - No setup required  
+- **In-memory database** - No setup required
 - **Real-time updates** - Full WebSocket functionality
 - **Agent communication** - See multi-agent conversations
 
 **Demo Features Ready:**
+
 - Create and manage Active Inference agents
 - Watch agents explore the grid world
 - View the knowledge graph build in real-time
@@ -28,6 +31,7 @@ make dev
 - Explore all UI components
 
 ### Option 2: Development Mode (Real AI)
+
 For real OpenAI responses and persistent data:
 
 ```bash
@@ -41,12 +45,15 @@ make dev  # Restart with real providers
 ```
 
 ### 3. Test the System
+
 Try these example prompts in the UI:
+
 - **Demo Mode**: "Create an agent to explore the environment"
 - **With API Key**: "Help me create a sustainable business plan"
 - **Multi-Agent**: "Have two agents discuss active inference theory"
 
 ### Troubleshooting
+
 - **Port conflicts**: Run `make kill-ports` then `make dev`
 - **Dependencies missing**: Run `make clean && make install`
 - **Not working**: Check `make status` for diagnostics
@@ -80,6 +87,7 @@ make reset      # Full reset (removes dependencies)
 ## Configuration
 
 ### Zero-Setup Demo Mode (Default)
+
 FreeAgentics automatically detects when no configuration is provided and switches to demo mode:
 
 - **SQLite in-memory database** - No installation needed
@@ -90,6 +98,7 @@ FreeAgentics automatically detects when no configuration is provided and switche
 - **Real-time WebSocket** - Full functionality including live updates
 
 ### Custom Configuration
+
 Copy the comprehensive example file and customize as needed:
 
 ```bash
@@ -98,6 +107,7 @@ cp .env.example .env
 ```
 
 **Key Settings:**
+
 ```bash
 # For real AI responses
 OPENAI_API_KEY=sk-your-key-here
@@ -114,6 +124,7 @@ The `.env.example` file includes detailed documentation for all 100+ available s
 ### PostgreSQL + pgvector Setup (Optional)
 
 For production with vector storage:
+
 ```bash
 # Install PostgreSQL with pgvector extension
 # Ubuntu/Debian:
@@ -138,12 +149,10 @@ DATABASE_URL=postgresql://username:password@localhost:5432/freeagentics
 └── tests/           # Test suite
 ```
 
-
-
-
 ## Troubleshooting
 
 ### Quick Diagnostics
+
 ```bash
 make status        # Check environment and service status
 make kill-ports    # Stop conflicting processes
@@ -153,6 +162,7 @@ make dev          # Start fresh
 ```
 
 ### WebSocket Connection Issues
+
 - **Connection refused**: Check `NEXT_PUBLIC_WS_URL` in `.env` (leave empty for demo mode)
 - **Authentication errors**: Demo mode doesn't require auth. For dev mode, ensure valid JWT token
 - **Connection drops**: Check browser console, enable debug logging with `ENABLE_WEBSOCKET_LOGGING=true`
@@ -163,6 +173,7 @@ See [WebSocket API Documentation](docs/api/WEBSOCKET_API.md#debugging-websocket-
 ### Common Issues
 
 **Service Won't Start:**
+
 ```bash
 # Check if ports are in use
 make kill-ports && make dev
@@ -175,26 +186,29 @@ make reset && make install && make dev
 ```
 
 **Frontend Not Loading:**
+
 - Ensure backend is running: http://localhost:8000/health
 - Check frontend port: usually http://localhost:3000
 - Look for port conflicts in terminal output
 
 **API/Database Errors:**
+
 - Demo mode should work without any setup
 - If using custom config, verify `.env` file settings
 - Check logs in terminal for specific error messages
 
 **Performance Issues:**
+
 - Demo mode uses in-memory database (data resets on restart)
 - For persistent data, set `DATABASE_URL` in `.env` file
 - Reduce `MAX_AGENTS_PER_USER` in `.env` if needed
 
 ### Getting Help
+
 1. Check `make status` output
 2. Look for error messages in terminal
 3. Verify http://localhost:8000/health returns OK
 4. Try demo mode first (no configuration needed)
-
 
 ## Documentation
 
@@ -202,8 +216,6 @@ make reset && make install && make dev
 - [API Reference](docs/api/API_REFERENCE.md)
 - [Environment Setup](ENVIRONMENT_SETUP.md)
 - [Contributing Guide](CONTRIBUTING.md)
-
-
 
 ## License
 

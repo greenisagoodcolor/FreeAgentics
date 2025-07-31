@@ -46,21 +46,22 @@ async def get_system_metrics() -> SystemMetrics:
     # Try to get free energy from agent manager if available
     avg_free_energy = 0.0
     active_agent_count = 0
-    
+
     try:
         from agents.agent_manager import AgentManager
+
         agent_manager = AgentManager()
-        if hasattr(agent_manager, 'agents'):
+        if hasattr(agent_manager, "agents"):
             free_energy_values = []
             for agent_id, agent in agent_manager.agents.items():
-                if hasattr(agent, 'metrics') and 'avg_free_energy' in agent.metrics:
-                    free_energy_values.append(agent.metrics['avg_free_energy'])
+                if hasattr(agent, "metrics") and "avg_free_energy" in agent.metrics:
+                    free_energy_values.append(agent.metrics["avg_free_energy"])
             if free_energy_values:
                 avg_free_energy = sum(free_energy_values) / len(free_energy_values)
                 active_agent_count = len(free_energy_values)
     except Exception as e:
         logger.debug(f"Could not get free energy metrics: {e}")
-    
+
     metrics = SystemMetrics(
         timestamp=datetime.now(),
         cpu_usage=cpu_percent,

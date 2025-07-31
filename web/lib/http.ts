@@ -6,7 +6,7 @@ async function ensureDevToken(): Promise<string | null> {
   if (stored && stored !== "dev") {
     // Basic JWT expiration check
     try {
-      const payload = JSON.parse(atob(stored.split('.')[1]));
+      const payload = JSON.parse(atob(stored.split(".")[1]));
       const now = Math.floor(Date.now() / 1000);
       if (payload.exp > now) {
         return stored;
@@ -29,7 +29,7 @@ async function ensureDevToken(): Promise<string | null> {
       }
     }
   } catch (error) {
-    console.error('Failed to fetch dev token:', error);
+    console.error("Failed to fetch dev token:", error);
   }
 
   // Fallback to "dev" token for development
@@ -41,9 +41,9 @@ async function ensureDevToken(): Promise<string | null> {
 export async function api(path: string, opts: RequestInit = {}) {
   const token = await ensureDevToken();
   if (!token) {
-    throw new Error('No authentication token available');
+    throw new Error("No authentication token available");
   }
-  
+
   const doFetch = (tok: string) =>
     fetch(path, {
       ...opts,
@@ -54,7 +54,7 @@ export async function api(path: string, opts: RequestInit = {}) {
   if (res.status === 401) {
     const fresh = await ensureDevToken(); // renews & caches
     if (!fresh) {
-      throw new Error('Failed to refresh authentication token');
+      throw new Error("Failed to refresh authentication token");
     }
     res = await doFetch(fresh);
   }

@@ -18,14 +18,13 @@ export default function HomePage() {
       <div className="header-section border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
         {/* Title and Subtitle */}
         <div className="px-6 pt-6 pb-4">
-          <h1 className="text-3xl font-bold text-foreground mb-2">
-            FreeAgentics
-          </h1>
+          <h1 className="text-3xl font-bold text-foreground mb-2">FreeAgentics</h1>
           <p className="text-lg text-muted-foreground mb-4">
-            Multi-agent AI platform implementing Active Inference for autonomous, mathematically-principled intelligent systems
+            Multi-agent AI platform implementing Active Inference for autonomous,
+            mathematically-principled intelligent systems
           </p>
         </div>
-        
+
         {/* Prompt Input - Now bigger and more prominent */}
         <div className="px-6 pb-4">
           <PromptBar />
@@ -44,7 +43,8 @@ export default function HomePage() {
           <div className="h-full overflow-hidden">
             <div className="mb-2">
               <p className="text-sm text-muted-foreground">
-                Create Active Inference agents that minimize free energy through belief updates and action selection
+                Create Active Inference agents that minimize free energy through belief updates and
+                action selection
               </p>
             </div>
             <AgentCreatorPanel />
@@ -54,7 +54,8 @@ export default function HomePage() {
           <div className="h-full overflow-hidden">
             <div className="mb-2">
               <p className="text-sm text-muted-foreground">
-                Semantic knowledge representation showing agent beliefs and world model relationships
+                Semantic knowledge representation showing agent beliefs and world model
+                relationships
               </p>
             </div>
             <KnowledgeGraphView />
@@ -64,7 +65,8 @@ export default function HomePage() {
           <div className="h-full overflow-hidden">
             <div className="mb-2">
               <p className="text-sm text-muted-foreground">
-                Grid world environment where agents demonstrate emergent behavior through variational inference
+                Grid world environment where agents demonstrate emergent behavior through
+                variational inference
               </p>
             </div>
             <SimulationGrid />
@@ -75,7 +77,8 @@ export default function HomePage() {
         <div className="conversation-row w-full p-4 h-1/3">
           <div className="mb-2">
             <p className="text-sm text-muted-foreground">
-              Real-time conversation with agents showing their reasoning process and decision-making via PyMDP
+              Real-time conversation with agents showing their reasoning process and decision-making
+              via PyMDP
             </p>
           </div>
           <ConversationWindow />

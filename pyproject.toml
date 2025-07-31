@@ -59,17 +59,17 @@ dependencies = [
     # ASYNC SUPPORT
     "aiofiles>=23.0.0",
     "httpx>=0.24.0",
-    
+
     # LLM PROVIDERS
     "openai>=1.97.0",
     "anthropic>=0.58.0",
-    
+
     # NLP
     "spacy>=3.8.0",
-    
+
     # MONITORING (Charity Majors requirement)
     "prometheus-client>=0.20.0",
-    
+
     # SECURITY
     "cryptography>=45.0.0",
     "PyJWT>=2.10.0",
@@ -78,7 +78,7 @@ dependencies = [
     "qrcode>=7.4.0",
     "email-validator>=2.2.0",
     "Authlib>=1.6.0",
-    
+
     # API
     "strawberry-graphql>=0.275.0",
     "graphql-core>=3.2.0",

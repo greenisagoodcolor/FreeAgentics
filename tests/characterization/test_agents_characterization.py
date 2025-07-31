@@ -4,7 +4,6 @@ These tests document existing behavior as per Michael Feathers' methodology.
 They capture what the system actually does now, not what it should do.
 """
 
-import numpy as np
 import pytest
 
 
@@ -30,10 +29,12 @@ class TestBaseAgentCharacterization:
         # Document that BaseAgent is abstract and requires implementation
         # of abstract methods: _initialize_pymdp, perceive, select_action, update_beliefs
         import inspect
+
         assert inspect.isabstract(BaseAgent)
-        
+
         # Document that concrete implementation exists: BasicExplorerAgent
         from agents.base_agent import BasicExplorerAgent
+
         assert issubclass(BasicExplorerAgent, BaseAgent)
         assert not inspect.isabstract(BasicExplorerAgent)
 
@@ -43,20 +44,20 @@ class TestBaseAgentCharacterization:
 
         # Document the actual methods that exist on BaseAgent
         actual_methods = [
-            "get_belief_monitoring_stats", 
-            "get_status", 
-            "load_gmn_spec", 
-            "perceive", 
-            "select_action", 
-            "start", 
-            "step", 
-            "stop", 
-            "update_beliefs"
+            "get_belief_monitoring_stats",
+            "get_status",
+            "load_gmn_spec",
+            "perceive",
+            "select_action",
+            "start",
+            "step",
+            "stop",
+            "update_beliefs",
         ]
-        
+
         for method_name in actual_methods:
             assert hasattr(BaseAgent, method_name), f"Method {method_name} should exist"
-            
+
         # Document that abstract methods exist but require implementation
         abstract_methods = ["perceive", "select_action", "update_beliefs"]
         for method_name in abstract_methods:
@@ -111,15 +112,15 @@ class TestTypeHelpersCharacterization:
         """Document that type_helpers module imports."""
         # Document the actual functions that exist in type_helpers
         from agents.type_helpers import (
-            safe_get_agent_id,
-            safe_get_coalition_id,
+            AgentTypeAdapter,
+            CoalitionTypeAdapter,
             ensure_string_id,
             get_agent_attribute,
             get_coalition_attribute,
             match_agent_id,
             match_coalition_id,
-            AgentTypeAdapter,
-            CoalitionTypeAdapter,
+            safe_get_agent_id,
+            safe_get_coalition_id,
         )
 
         # All functions should be callable
@@ -130,7 +131,7 @@ class TestTypeHelpersCharacterization:
         assert callable(get_coalition_attribute)
         assert callable(match_agent_id)
         assert callable(match_coalition_id)
-        
+
         # Type adapters should be classes
         assert AgentTypeAdapter is not None
         assert CoalitionTypeAdapter is not None
@@ -145,12 +146,12 @@ class TestTypeHelpersCharacterization:
         # Document behavior: may return None if implementation looks for specific attributes
         # This characterizes actual behavior without assuming the implementation
         assert result is None or isinstance(result, str)
-        
+
         # Test with object having agent_id attribute
         class MockAgent:
             def __init__(self, agent_id):
                 self.agent_id = agent_id
-        
+
         mock_agent = MockAgent("mock-456")
         result = safe_get_agent_id(mock_agent)
         # Document actual behavior
@@ -164,13 +165,13 @@ class TestErrorHandlingCharacterization:
         """Document that error_handling module imports."""
         # Document the actual classes and functions that exist in error_handling
         from agents.error_handling import (
-            AgentError,
             ActionSelectionError,
+            AgentError,
+            ErrorHandler,
+            ErrorRecoveryStrategy,
+            ErrorSeverity,
             InferenceError,
             PyMDPError,
-            ErrorHandler,
-            ErrorSeverity,
-            ErrorRecoveryStrategy,
             safe_pymdp_operation,
             validate_action,
             validate_observation,
@@ -182,17 +183,18 @@ class TestErrorHandlingCharacterization:
         assert issubclass(ActionSelectionError, Exception)
         assert issubclass(InferenceError, Exception)
         assert issubclass(PyMDPError, Exception)
-        
+
         # ErrorHandler should be a class
         assert ErrorHandler is not None
-        
+
         # ErrorSeverity should be an enum
         from enum import Enum
+
         assert issubclass(ErrorSeverity, Enum)
-        
+
         # ErrorRecoveryStrategy should be a class (not enum)
         assert ErrorRecoveryStrategy is not None
-        
+
         # Functions should be callable
         assert callable(safe_pymdp_operation)
         assert callable(validate_action)
@@ -243,16 +245,16 @@ class TestMemoryOptimizationCharacterization:
         assert hasattr(pool, "release")
         assert hasattr(pool, "clear")
         assert hasattr(pool, "stats")
-        
+
         # Verify shape is set correctly
         assert pool.shape == (4, 4)
-        
+
         # Methods should be callable
         assert callable(pool.acquire)
         assert callable(pool.release)
         assert callable(pool.clear)
-        
+
         # Stats should be a property that returns statistics
         stats = pool.stats
         assert stats is not None
-        assert hasattr(stats, 'total_allocated')  # Document PoolStatistics structure
+        assert hasattr(stats, "total_allocated")  # Document PoolStatistics structure

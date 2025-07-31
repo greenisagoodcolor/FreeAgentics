@@ -9,12 +9,7 @@ from pydantic import BaseModel, Field
 from sqlalchemy.orm import Session
 
 # Security imports
-from auth.security_implementation import (
-    Permission,
-    TokenData,
-    get_current_user,
-    require_permission,
-)
+from auth.security_implementation import Permission, TokenData, get_current_user, require_permission
 
 # Database imports - NO IN-MEMORY STORAGE
 from database.models import Agent as AgentModel
@@ -241,7 +236,7 @@ async def update_agent(
 
     # Update fields from patch
     patch_data = patch.model_dump(exclude_unset=True)
-    
+
     for field, value in patch_data.items():
         if hasattr(db_agent, field):
             setattr(db_agent, field, value)

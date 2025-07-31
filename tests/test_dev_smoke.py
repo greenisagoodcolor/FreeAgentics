@@ -1,8 +1,7 @@
 """Smoke test for development environment setup."""
 
-import subprocess
 import os
-import pytest
+import subprocess
 from pathlib import Path
 
 
@@ -47,7 +46,10 @@ class TestDevSmoke:
 
         # Just check if make dev --dry-run works (won't actually start servers)
         result = subprocess.run(
-            ["make", "-n", "dev"], env=env, capture_output=True, text=True  # -n is dry run
+            ["make", "-n", "dev"],
+            env=env,
+            capture_output=True,
+            text=True,  # -n is dry run
         )
 
         # Should not have bash errors about unbound variables

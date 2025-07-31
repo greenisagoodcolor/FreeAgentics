@@ -54,10 +54,10 @@ describe("SimulationGrid", () => {
 
   beforeEach(() => {
     jest.clearAllMocks();
-    
+
     // Mock canvas getContext
     HTMLCanvasElement.prototype.getContext = jest.fn().mockImplementation((contextId) => {
-      if (contextId === '2d') {
+      if (contextId === "2d") {
         return mockCanvasContext;
       }
       return null;
@@ -118,46 +118,49 @@ describe("SimulationGrid", () => {
     });
 
     const { rerender } = render(<SimulationGrid />);
-    
+
     // Verify canvas is rendered
     const canvas = screen.getByTestId("simulation-canvas");
     expect(canvas).toBeInTheDocument();
-    
+
     // Verify agent is drawn (arc method called for agent body)
     expect(mockCanvasContext.arc).toHaveBeenCalled();
-    
+
     // Clear mocks before simulating movement
     jest.clearAllMocks();
-    
+
     // Simulate agent movement after 2 seconds
-    await waitFor(() => {
-      // Update agent position
-      const movedAgents = [
-        {
-          ...mockAgents[0],
-          position: { x: 1, y: 1 }, // Agent moved to new position
-        },
-      ];
-      
-      (useSimulation as jest.Mock).mockReturnValue({
-        ...mockSimulationControls,
-        isRunning: true,
-        isPaused: false,
-        currentStep: 10,
-        grid: mockGrid,
-        agents: movedAgents,
-        speed: 1,
-        gridSize: { width: 2, height: 2 },
-        metrics: { fps: 60, avgStepTime: 16 },
-      });
-      
-      rerender(<SimulationGrid />);
-    }, { timeout: 2000 });
-    
+    await waitFor(
+      () => {
+        // Update agent position
+        const movedAgents = [
+          {
+            ...mockAgents[0],
+            position: { x: 1, y: 1 }, // Agent moved to new position
+          },
+        ];
+
+        (useSimulation as jest.Mock).mockReturnValue({
+          ...mockSimulationControls,
+          isRunning: true,
+          isPaused: false,
+          currentStep: 10,
+          grid: mockGrid,
+          agents: movedAgents,
+          speed: 1,
+          gridSize: { width: 2, height: 2 },
+          metrics: { fps: 60, avgStepTime: 16 },
+        });
+
+        rerender(<SimulationGrid />);
+      },
+      { timeout: 2000 },
+    );
+
     // Verify agent is drawn at new position
     // Arc should be called for the agent at the new position
     expect(mockCanvasContext.arc).toHaveBeenCalled();
-    
+
     // This test expects smooth movement animation
     // In real implementation, this would be verified visually
     // For now, we're just checking that the canvas is redrawn

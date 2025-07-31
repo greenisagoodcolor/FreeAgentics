@@ -98,8 +98,9 @@ class TestAPIMain:
     async def test_lifespan_startup_success(self, mock_environment, caplog):
         """Test lifespan startup with successful database init."""
         import logging
+
         caplog.set_level(logging.INFO)
-        
+
         from api.main import lifespan
 
         mock_app = Mock()
@@ -112,7 +113,7 @@ class TestAPIMain:
 
             # Check init_db was called
             mock_init_db.assert_called_once()
-            
+
             # Check logs - relaxed check since logging setup might vary
             logs = caplog.text
             assert "FreeAgentics API" in logs or mock_init_db.called
@@ -214,16 +215,7 @@ class TestAPIMain:
         """Test all router imports are successful."""
         # This test ensures all imports work
         try:
-            from api.v1 import (
-                agents,
-                auth,
-                inference,
-                mfa,
-                monitoring,
-                security,
-                system,
-                websocket,
-            )
+            from api.v1 import agents, auth, inference, mfa, monitoring, security, system, websocket
             from api.v1.graphql_schema import graphql_app
 
             # All imports should succeed

@@ -35,12 +35,9 @@ sys.path.insert(
 )
 
 # Core components for Coalition-Agents integration
-from agents.base_agent import PYMDP_AVAILABLE, BasicExplorerAgent
+from agents.base_agent import BasicExplorerAgent
 from agents.resource_collector import ResourceCollectorAgent
-from coalitions.coordination_types import (
-    CoalitionFormationStrategy,
-    CoordinationMessage,
-)
+from coalitions.coordination_types import CoalitionFormationStrategy, CoordinationMessage
 
 logger = logging.getLogger(__name__)
 
@@ -513,7 +510,9 @@ class TestCoalitionAgentsInterfaceIntegration:
                 "initial_resources": 10,
             }
 
-            try:                    agent = BasicExplorerAgent(**agent_config)
+            try:
+                if i % 2 == 0:
+                    agent = BasicExplorerAgent(**agent_config)
                 else:
                     agent = ResourceCollectorAgent(**agent_config)
                 agents.append(agent)
@@ -982,7 +981,9 @@ if __name__ == "__main__":
                     "agent_id": f"test_agent_{i}",
                     "position": [i * 10, i * 5],
                     "capabilities": ["explore", "collect"],
-                }                    agent = BasicExplorerAgent(**agent_config)
+                }
+                if i % 2 == 0:
+                    agent = BasicExplorerAgent(**agent_config)
                 else:
                     agent = ResourceCollectorAgent(**agent_config)
                 test_agents.append(agent)

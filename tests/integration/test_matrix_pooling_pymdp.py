@@ -20,8 +20,9 @@ from agents.memory_optimization.matrix_pooling import (
 )
 
 # Only import PyMDP if available
-from pymdp.agent import Agent as PyMDPAgent
-
+try:
+    from pymdp.agent import Agent as PyMDPAgent
+except ImportError:
     PyMDPAgent = None
 
 
@@ -42,7 +43,9 @@ class TestPyMDPMatrixPoolingIntegration(unittest.TestCase):
         gc.collect()
 
     def test_pymdp_matrix_operations(self):
-        """Test pooling with actual PyMDP matrix operations."""            self.skipTest("PyMDP not available")
+        """Test pooling with actual PyMDP matrix operations."""
+        if PyMDPAgent is None:
+            self.skipTest("PyMDP not available")
         # Create simple PyMDP matrices
         num_obs = 5
         num_states = 10
@@ -180,7 +183,9 @@ class TestPyMDPMatrixPoolingIntegration(unittest.TestCase):
         self.assertGreater(stats["global"]["operation_counts"]["einsum"], 0)
 
     def test_concurrent_pymdp_agents(self):
-        """Test pooling with multiple concurrent agents."""            self.skipTest("PyMDP not available")
+        """Test pooling with multiple concurrent agents."""
+        if PyMDPAgent is None:
+            self.skipTest("PyMDP not available")
 
         num_agents = 5
         num_steps = 10

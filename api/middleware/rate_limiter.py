@@ -12,7 +12,6 @@ This module implements:
 import ipaddress
 import json
 import logging
-import os
 import time
 from collections import defaultdict
 from datetime import datetime, timedelta
@@ -527,6 +526,7 @@ class RateLimiter:
         """Process request through rate limiter."""
         # Skip rate limiting in dev mode
         from core.environment import should_enable_rate_limiting
+
         if not should_enable_rate_limiting():
             return True, None
 

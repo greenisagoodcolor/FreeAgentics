@@ -33,7 +33,7 @@ export function useWebSocket(): WebSocketState {
   const reconnectAttemptsRef = useRef(0);
   const connectionTimeoutRef = useRef<NodeJS.Timeout | null>(null);
   const isConnectingRef = useRef(false);
-  
+
   const { isAuthenticated, isLoading: isAuthLoading, token } = useAuth();
 
   const connect = useCallback(() => {
@@ -48,7 +48,7 @@ export function useWebSocket(): WebSocketState {
       console.log("[WebSocket] Waiting for auth before connecting...", {
         isAuthLoading,
         isAuthenticated,
-        hasToken: !!token
+        hasToken: !!token,
       });
       return;
     }
@@ -62,7 +62,7 @@ export function useWebSocket(): WebSocketState {
       // Append token to WebSocket URL if available
       let wsUrl = WS_URL;
       if (token) {
-        const separator = WS_URL.includes('?') ? '&' : '?';
+        const separator = WS_URL.includes("?") ? "&" : "?";
         wsUrl = `${WS_URL}${separator}token=${encodeURIComponent(token)}`;
         console.log("[WebSocket] Connecting with auth token...");
       }

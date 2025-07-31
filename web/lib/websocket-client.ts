@@ -45,9 +45,9 @@ export class WebSocketClient {
     try {
       // Use raw token without URL encoding for WebSocket auth
       const token = localStorage.getItem("fa.jwt");
-      const separator = this.url.includes('?') ? '&' : '?';
+      const separator = this.url.includes("?") ? "&" : "?";
       const wsUrl = `${this.url}${separator}token=${token || ""}`;
-      
+
       this.ws = new WebSocket(wsUrl);
 
       this.ws.onopen = () => {

@@ -9,11 +9,7 @@ from .agent_memory_optimizer import (
     SharedObservationBuffer,
     get_agent_optimizer,
 )
-from .belief_compression import (
-    BeliefCompressor,
-    CompressedBeliefPool,
-    SparseBeliefState,
-)
+from .belief_compression import BeliefCompressor, CompressedBeliefPool, SparseBeliefState
 from .efficient_structures import (
     CompactActionHistory,
     CompactKnowledgeGraph,

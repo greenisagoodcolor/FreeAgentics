@@ -7,7 +7,6 @@ Used in dev mode to avoid API key requirements and costs.
 import json
 import logging
 import time
-from typing import Any, Dict, List, Optional
 
 from .provider_interface import (
     BaseProvider,
@@ -76,14 +75,14 @@ class MockLLMProvider(BaseProvider):
     def generate(self, request: GenerationRequest) -> GenerationResponse:
         """Generate mock response based on the request."""
         start_time = time.time()
-        
+
         # Extract the prompt from messages
         prompt = ""
         for msg in request.messages:
             if msg.get("role") == "user":
                 prompt = msg.get("content", "")
                 break
-        
+
         # Generate appropriate mock response based on prompt content
         if "GMN specification" in prompt or "active inference" in prompt.lower():
             # Return a valid GMN specification for agent creation
@@ -91,12 +90,12 @@ class MockLLMProvider(BaseProvider):
         else:
             # Return a generic response
             response_content = self._generate_generic_response(prompt)
-        
+
         # Calculate mock metrics
         latency_ms = (time.time() - start_time) * 1000 + 50  # Add some fake processing time
         input_tokens = len(prompt.split())
         output_tokens = len(response_content.split())
-        
+
         # Update usage metrics
         self._update_usage_metrics(
             success=True,
@@ -105,7 +104,7 @@ class MockLLMProvider(BaseProvider):
             cost=0.0,
             latency_ms=latency_ms,
         )
-        
+
         # Create response with proper attribute
         response = GenerationResponse(
             text=response_content,
@@ -117,10 +116,10 @@ class MockLLMProvider(BaseProvider):
             latency_ms=latency_ms,
             finish_reason="stop",
         )
-        
+
         # Add content attribute for compatibility
         response.content = response_content
-        
+
         return response
 
     def estimate_cost(self, input_tokens: int, output_tokens: int, model: str) -> float:
@@ -137,7 +136,7 @@ class MockLLMProvider(BaseProvider):
             agent_type = "trader"
         elif "guard" in prompt.lower() or "patrol" in prompt.lower():
             agent_type = "guardian"
-        
+
         # Create a simple but valid GMN spec
         gmn_spec = {
             "name": f"mock_{agent_type}_agent",
@@ -195,7 +194,7 @@ class MockLLMProvider(BaseProvider):
                 "D": [[0.8, 0.2, 0.0]],  # Initial belief - mostly idle
             },
         }
-        
+
         return json.dumps(gmn_spec, indent=2)
 
     def _generate_generic_response(self, prompt: str) -> str:
@@ -205,7 +204,7 @@ class MockLLMProvider(BaseProvider):
             "I understand your request. In a real scenario, I would provide a detailed response.",
             "Mock mode active: Returning a test response for development purposes.",
         ]
-        
+
         # Pick a response based on prompt length (deterministic)
         index = len(prompt) % len(responses)
         return responses[index]
@@ -213,4 +212,5 @@ class MockLLMProvider(BaseProvider):
 
 class MockProvider(MockLLMProvider):
     """Alias for backward compatibility."""
+
     pass

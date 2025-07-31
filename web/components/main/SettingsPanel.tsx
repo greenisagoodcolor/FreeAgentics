@@ -9,7 +9,7 @@ export function SettingsPanel() {
           Configure your API settings and authentication
         </p>
       </div>
-      
+
       <div className="space-y-4">
         <div>
           <label className="text-sm font-medium">API Key</label>
@@ -19,7 +19,7 @@ export function SettingsPanel() {
             className="w-full mt-1 px-3 py-2 border rounded-md"
           />
         </div>
-        
+
         <div>
           <label className="text-sm font-medium">API URL</label>
           <input
@@ -29,7 +29,7 @@ export function SettingsPanel() {
           />
         </div>
       </div>
-      
+
       <div className="pt-6">
         <button className="px-4 py-2 bg-primary text-white rounded-md hover:bg-primary/90">
           Save Settings
