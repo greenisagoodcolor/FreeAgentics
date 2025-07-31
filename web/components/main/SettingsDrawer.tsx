@@ -95,8 +95,8 @@ export function SettingsDrawer({ open, onOpenChange }: SettingsDrawerProps) {
             <div className="space-y-3">
               <div className="space-y-2">
                 <Label htmlFor="llm-provider">LLM Provider</Label>
-                <Select value={settings.llmProvider} onValueChange={handleProviderChange} disabled={isSaving || isLoading}>
-                  <SelectTrigger id="llm-provider">
+                <Select value={settings.llmProvider} onValueChange={handleProviderChange}>
+                  <SelectTrigger id="llm-provider" disabled={isSaving || isLoading}>
                     <SelectValue />
                   </SelectTrigger>
                   <SelectContent>

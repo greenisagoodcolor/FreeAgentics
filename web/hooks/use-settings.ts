@@ -169,13 +169,13 @@ export function useSettings(): SettingsState {
       await apiClient.clearApiKeys();
       // Update backend with default settings
       await apiClient.updateAllSettings({
-        llm_provider: DEFAULT_SETTINGS.llmProvider,
-        llm_model: DEFAULT_SETTINGS.llmModel,
-        openai_api_key: '',
-        anthropic_api_key: '',
-        gnn_enabled: DEFAULT_SETTINGS.gnnEnabled,
-        debug_logs: DEFAULT_SETTINGS.debugLogs,
-        auto_suggest: DEFAULT_SETTINGS.autoSuggest,
+        llmProvider: DEFAULT_SETTINGS.llmProvider,
+        llmModel: DEFAULT_SETTINGS.llmModel,
+        openaiApiKey: '',
+        anthropicApiKey: '',
+        gnnEnabled: DEFAULT_SETTINGS.gnnEnabled,
+        debugLogs: DEFAULT_SETTINGS.debugLogs,
+        autoSuggest: DEFAULT_SETTINGS.autoSuggest,
       });
     } catch (error) {
       setSaveError('Failed to reset settings on server');

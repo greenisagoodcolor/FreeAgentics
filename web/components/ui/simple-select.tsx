@@ -4,9 +4,10 @@ interface SimpleSelectProps {
   value: string;
   onValueChange: (value: string) => void;
   children: React.ReactNode;
+  disabled?: boolean;
 }
 
-export const SimpleSelect: React.FC<SimpleSelectProps> = ({ value, onValueChange, children }) => {
+export const SimpleSelect: React.FC<SimpleSelectProps> = ({ value, onValueChange, children, disabled }) => {
   const [isOpen, setIsOpen] = React.useState(false);
 
   const childrenArray = React.Children.toArray(children);
@@ -17,13 +18,18 @@ export const SimpleSelect: React.FC<SimpleSelectProps> = ({ value, onValueChange
     (child) => React.isValidElement(child) && child.type === SelectContent,
   );
 
+  // Check if the trigger is disabled (either from prop or trigger itself)
+  const triggerDisabled = React.isValidElement(trigger) && trigger.props.disabled;
+  const isDisabled = disabled || triggerDisabled;
+
   return (
     <div className="relative">
-      <div onClick={() => setIsOpen(!isOpen)}>
+      <div onClick={() => !isDisabled && setIsOpen(!isOpen)}>
         {React.isValidElement(trigger) &&
-          React.cloneElement(trigger as React.ReactElement<{ value?: string; isOpen?: boolean }>, {
+          React.cloneElement(trigger as React.ReactElement<{ value?: string; isOpen?: boolean; disabled?: boolean }>, {
             value,
             isOpen,
+            disabled: isDisabled,
           })}
       </div>
       {isOpen && (
@@ -49,7 +55,8 @@ export const SelectTrigger: React.FC<{
   value?: string;
   isOpen?: boolean;
   id?: string;
-}> = ({ children, value, isOpen, id }) => {
+  disabled?: boolean;
+}> = ({ children, value, isOpen, id, disabled }) => {
   const valueElement = React.Children.toArray(children).find(
     (child) => React.isValidElement(child) && child.type === SelectValue,
   );
@@ -63,6 +70,7 @@ export const SelectTrigger: React.FC<{
       aria-controls={`${id}-listbox`}
       className="flex h-10 w-full items-center justify-between rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
       type="button"
+      disabled={disabled}
     >
       {React.isValidElement(valueElement) &&
         React.cloneElement(valueElement as React.ReactElement<{ value?: string }>, { value })}
