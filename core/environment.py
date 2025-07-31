@@ -83,7 +83,7 @@ class DevelopmentEnvironment:
             database_required=False,
             auth_required=False,
             rate_limiting_enabled=False,
-            websocket_endpoint="/api/v1/ws/dev",
+            websocket_endpoint="/api/v1/ws/connections",
             observability_enabled=True,
         )
 
