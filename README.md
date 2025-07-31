@@ -69,16 +69,34 @@ make reset      # Full reset (removes dependencies)
 
 ## Configuration
 
-The system auto-configures on first run:
+The system auto-configures for demo mode:
 - Uses SQLite if no PostgreSQL is configured
-- Creates `.env` from `.env.development` template
-- Generates development auth tokens
+- Mock LLM providers work without API keys
+- Demo WebSocket connections for real-time updates
+- Creates `.env` from `.env.development` if missing
 
-For production setup with PostgreSQL:
+**🎯 Zero Setup Required**: The app works immediately with mock data and providers.
+
+For production with real APIs:
 ```bash
-cp .env.development .env
-# Edit .env and set DATABASE_URL
+cp .env.example .env
+# Edit .env and add your API keys and database URL
 ```
+
+### PostgreSQL + pgvector Setup (Optional)
+
+For production with vector storage:
+```bash
+# Install PostgreSQL with pgvector extension
+# Ubuntu/Debian:
+sudo apt install postgresql postgresql-contrib
+sudo -u postgres psql -c "CREATE EXTENSION IF NOT EXISTS vector;"
+
+# Set DATABASE_URL in .env:
+DATABASE_URL=postgresql://username:password@localhost:5432/freeagentics
+```
+
+**Note**: SQLite works fine for development and small deployments.
 
 ## Project Structure
 
@@ -97,10 +115,22 @@ cp .env.development .env
 
 ## Troubleshooting
 
-- **Port already in use**: Run `make kill-ports`
-- **Module not found**: Run `make clean && make install`
-- **Database issues**: Check `make status` output
-- **Frontend not loading**: Check console for errors at http://localhost:3000
+**Common Issues:**
+- **Port conflicts**: Run `make kill-ports` then `make dev`
+- **Dependencies missing**: Run `make clean && make install`
+- **Build errors**: Check TypeScript compilation with `cd web && npm run build`
+- **Frontend won't load**: Verify backend is running at http://localhost:8000/health
+- **Agent errors**: App works in demo mode without API keys - add real keys in Settings
+
+**Quick Fixes:**
+```bash
+make kill-ports    # Stop all services
+make clean         # Clean build artifacts  
+make install       # Reinstall dependencies
+make dev          # Restart everything
+```
+
+If you're still having issues, the demo mode should work immediately without any external dependencies.
 
 
 ## Documentation
