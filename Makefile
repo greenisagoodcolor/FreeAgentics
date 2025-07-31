@@ -11,7 +11,7 @@ PYTHON := $(VENV_DIR)/bin/python
 PYTEST := $(VENV_DIR)/bin/pytest
 WEB_DIR := web
 
-.PHONY: help install dev test stop kill-ports status clean reset
+.PHONY: help check install dev test stop kill-ports status clean reset
 
 help: ## Show available commands
 	@echo "FreeAgentics - Quick Start:"
@@ -44,6 +44,12 @@ help: ## Show available commands
 	@echo ""
 	@echo "Run 'make install' then 'make dev' to get started."
 
+check: ## Check environment prerequisites
+	@echo "✓ Checking Python..."
+	@python --version
+	@echo "✓ Checking pip..."
+	@pip --version
+	@echo "✓ Environment check passed!"
 
 install: ## Install all dependencies
 	@echo "Installing dependencies..."
