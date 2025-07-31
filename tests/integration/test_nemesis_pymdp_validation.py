@@ -22,13 +22,8 @@ import time
 import numpy as np
 import pytest
 
-# Core PyMDP imports - HARD FAILURE REQUIRED
-try:
-    from pymdp.agent import Agent as PyMDPAgent
-
-    PYMDP_AVAILABLE = True
-except ImportError:
-    PYMDP_AVAILABLE = False
+# Core PyMDP imports - HARD FAILURE REQUIRED (no fallbacks)
+from pymdp.agent import Agent as PyMDPAgent
 
 # Agent imports
 from agents.base_agent import BasicExplorerAgent

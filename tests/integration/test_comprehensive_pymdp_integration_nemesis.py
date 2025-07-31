@@ -30,7 +30,7 @@ from agents.base_agent import BasicExplorerAgent
 from agents.coalition_coordinator import CoalitionCoordinatorAgent
 from agents.resource_collector import ResourceCollectorAgent
 
-PYMDP_AVAILABLE = True
+# PyMDP is now a hard requirement - no PYMDP_AVAILABLE checks needed
 
 # Test data for mathematical validation
 TEST_MATRICES = {
@@ -256,10 +256,9 @@ class TestPerformanceBenchmarksWithRealMeasurements:
             )
             agent.start()
 
-            # Initialize PyMDP if available
-            if PYMDP_AVAILABLE:
-                matrices = TEST_MATRICES["simple_2x2"]
-                agent.pymdp_agent = PyMDPAgent(
+            # Initialize PyMDP (required)
+            matrices = TEST_MATRICES["simple_2x2"]
+            agent.pymdp_agent = PyMDPAgent(
                     A=matrices["A"],
                     B=matrices["B"],
                     C=matrices["C"],
@@ -292,9 +291,7 @@ class TestPerformanceBenchmarksWithRealMeasurements:
         Measures action selection time for multiple agents making concurrent decisions.
         This validates the "<500ms latency" claim from PRD requirements.
         """
-        # Skip test if PyMDP is not available
-        if not PYMDP_AVAILABLE:
-            pytest.skip("PyMDP is required for this test")
+        # PyMDP is required for this test (no longer skipped)
 
         # Create multiple agents for load testing
         num_agents = 5  # Realistic load
@@ -360,9 +357,7 @@ class TestErrorPropagationAndFailureModes:
         Tests how agents handle situations that might cause memory issues
         or numerical instability in PyMDP calculations.
         """
-        # Skip test if PyMDP is not available
-        if not PYMDP_AVAILABLE:
-            pytest.skip("PyMDP is required for this test")
+        # PyMDP is required for this test (no longer skipped)
 
         agent = BasicExplorerAgent(agent_id="memory_test_agent", name="MemoryTestAgent")
         agent.start()
@@ -413,9 +408,7 @@ class TestErrorPropagationAndFailureModes:
         Tests agent behavior when PyMDP encounters numerical issues
         like NaN values, infinite values, or ill-conditioned matrices.
         """
-        # Skip test if PyMDP is not available
-        if not PYMDP_AVAILABLE:
-            pytest.skip("PyMDP is required for this test")
+        # PyMDP is required for this test (no longer skipped)
 
         agent = BasicExplorerAgent(agent_id="numerical_test_agent", name="NumericalTestAgent")
         agent.start()
@@ -520,21 +513,20 @@ class TestNemesisLevelAuditAndValidation:
 
                 audit_results["agents_tested"].append(agent_class.__name__)
 
-                # Test PyMDP integration if available
-                if PYMDP_AVAILABLE:
-                    matrices = TEST_MATRICES["simple_2x2"]
-                    agent.pymdp_agent = PyMDPAgent(
+                # Test PyMDP integration (required)
+                matrices = TEST_MATRICES["simple_2x2"]
+                agent.pymdp_agent = PyMDPAgent(
                         A=matrices["A"],
                         B=matrices["B"],
                         C=matrices["C"],
                         D=matrices["D"],
-                    )
+                )
 
-                    # Audit mathematical properties
-                    self._audit_mathematical_properties(agent, audit_results)
+                # Audit mathematical properties
+                self._audit_mathematical_properties(agent, audit_results)
 
-                    # Audit performance
-                    self._audit_performance(agent, audit_results)
+                # Audit performance
+                self._audit_performance(agent, audit_results)
 
             except Exception as e:
                 audit_results["integration_failures"].append(
@@ -669,9 +661,7 @@ class TestNemesisLevelAuditAndValidation:
         assert (
             total_methods >= 8
         ), f"Should have comprehensive test coverage: {total_methods} methods"
-        assert (
-            PYMDP_AVAILABLE or total_methods >= 2
-        ), "Should have fallback tests when PyMDP unavailable"
+        # PyMDP is now a hard requirement - no fallback tests needed
 
 
 # Test execution and reporting

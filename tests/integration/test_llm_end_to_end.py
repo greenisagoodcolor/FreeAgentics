@@ -18,13 +18,8 @@ from inference.llm.provider_interface import GenerationRequest, ProviderType
 # Import GMN components
 from inference.active.gmn_parser import EXAMPLE_GMN_SPEC, GMNParser
 
-# Import PyMDP
-try:
-    import pymdp
-
-    PYMDP_AVAILABLE = True
-except ImportError:
-    PYMDP_AVAILABLE = False
+# Import PyMDP - required for full functionality
+import pymdp
 
 
 @pytest.mark.integration
@@ -287,11 +282,10 @@ class TestLLMEndToEndIntegration:
                 assert gmn_graph is not None
                 assert len(gmn_graph.nodes) > 0
 
-                # Convert to PyMDP if available
-                if PYMDP_AVAILABLE:
-                    pymdp_model = parser.to_pymdp_model(gmn_graph)
-                    assert pymdp_model is not None
-                    assert "num_states" in pymdp_model or "num_obs" in pymdp_model
+                # Convert to PyMDP (required)
+                pymdp_model = parser.to_pymdp_model(gmn_graph)
+                assert pymdp_model is not None
+                assert "num_states" in pymdp_model or "num_obs" in pymdp_model
 
             except Exception as e:
                 # If parsing fails, at least verify LLM returned content

@@ -1373,7 +1373,7 @@ class ConcurrentOperationsPerformanceScenario(IntegrationTestScenario):
 
                 elif op_type == "update_belief":
                     # Update beliefs based on observation
-                    if PYMDP_AVAILABLE and hasattr(agent, "update_beliefs"):
+                    if hasattr(agent, "update_beliefs"):
                         agent.perceive({"grid_observation": np.random.randint(0, 5)})
                         agent.update_beliefs()
 

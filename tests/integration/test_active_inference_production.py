@@ -1,18 +1,20 @@
 #!/usr/bin/env python3
 """
-Comprehensive Active Inference Integration Test Suite for Production.
+North Star User Journey Test Suite - Active Inference Production Validation
 
-This test suite validates ALL Active Inference functionality works in production:
-- PyMDP integration and compatibility
-- GMN parser functionality
-- Agent creation and lifecycle
-- Belief state management
-- Action selection and expected free energy
-- Multi-agent coordination
-- Error handling and fallbacks
-- Performance optimizations
+This test validates the complete developer experience described in the README:
+1. Clone repo
+2. make install 
+3. make dev
+4. Add API key
+5. Experience full Active Inference functionality:
+   - Agent creation through creator panel
+   - Agents converse using GMN
+   - Knowledge graphs are built
+   - Conversations display in UI
 
-Test results demonstrate core business value is functional.
+Validates PyMDP Active Inference works end-to-end for the core user experience.
+Following Task 12.3: Create North Star Functionality Tests.
 """
 
 import os

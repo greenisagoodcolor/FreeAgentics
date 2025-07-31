@@ -10,18 +10,15 @@ from typing import Any, Dict, List, Optional, Tuple
 
 import numpy as np
 
-from agents.base_agent import (
-    PYMDP_AVAILABLE,
-    ActiveInferenceAgent,
-    safe_array_to_int,
-)
+from agents.base_agent import ActiveInferenceAgent
 from agents.error_handling import (
     PyMDPError,
     safe_pymdp_operation,
 )
 from agents.pymdp_error_handling import (
     PyMDPErrorHandler,
-    safe_array_index,
+    strict_array_index,
+    strict_array_to_int,
     validate_pymdp_matrices,
 )
 
@@ -81,9 +78,9 @@ except ImportError:
         return {"error": "Coordination metrics not available"}
 
 
-if PYMDP_AVAILABLE:
-    from pymdp import utils
-    from pymdp.agent import Agent as PyMDPAgent
+# PyMDP is now a required dependency
+from pymdp import utils
+from pymdp.agent import Agent as PyMDPAgent
 
 logger = logging.getLogger(__name__)
 
@@ -120,7 +117,7 @@ class CoalitionCoordinatorAgent(ActiveInferenceAgent):
         )
 
         config = {
-            "use_pymdp": PYMDP_AVAILABLE,
+            "use_pymdp": True,
             "use_llm": True,  # Use LLM for coordination strategy
             "max_agents": max_agents,
             "agent_type": "coalition_coordinator",
@@ -267,8 +264,6 @@ class CoalitionCoordinatorAgent(ActiveInferenceAgent):
     @safe_pymdp_operation("pymdp_init", default_value=None)
     def _initialize_pymdp(self) -> None:
         """Initialize PyMDP agent for coalition coordination with comprehensive error handling."""
-        if not PYMDP_AVAILABLE:
-            return
 
         try:
             # Create matrices
@@ -513,8 +508,8 @@ class CoalitionCoordinatorAgent(ActiveInferenceAgent):
 
                     if success:
                         # Convert numpy array to scalar for dictionary lookup
-                        action_idx = safe_array_to_int(action_idx)
-                        action = safe_array_index(self.action_map, action_idx, "coordinate")
+                        action_idx = strict_array_to_int(action_idx)
+                        action = strict_array_index(self.action_map, action_idx)
                     else:
                         logger.warning(f"Action sampling failed: {error}")
                         action = self._fallback_action_selection()

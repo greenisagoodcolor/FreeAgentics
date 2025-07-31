@@ -15,15 +15,7 @@ import numpy as np
 import pytest
 
 # PyMDP imports
-try:
-    from pymdp.agent import Agent as PyMDPAgent
-
-    PYMDP_AVAILABLE = True
-except ImportError:
-    PYMDP_AVAILABLE = False
-    pytest.skip("PyMDP not available for baseline comparison tests")
-
-# FreeAgentics imports
+from pymdp.agent import Agent as PyMDPAgent# FreeAgentics imports
 from agents.base_agent import BasicExplorerAgent
 from agents.pymdp_adapter import PyMDPCompatibilityAdapter
 

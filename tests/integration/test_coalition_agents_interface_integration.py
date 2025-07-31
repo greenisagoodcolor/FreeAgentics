@@ -513,9 +513,7 @@ class TestCoalitionAgentsInterfaceIntegration:
                 "initial_resources": 10,
             }
 
-            try:
-                if PYMDP_AVAILABLE:
-                    agent = BasicExplorerAgent(**agent_config)
+            try:                    agent = BasicExplorerAgent(**agent_config)
                 else:
                     agent = ResourceCollectorAgent(**agent_config)
                 agents.append(agent)
@@ -984,9 +982,7 @@ if __name__ == "__main__":
                     "agent_id": f"test_agent_{i}",
                     "position": [i * 10, i * 5],
                     "capabilities": ["explore", "collect"],
-                }
-                if PYMDP_AVAILABLE:
-                    agent = BasicExplorerAgent(**agent_config)
+                }                    agent = BasicExplorerAgent(**agent_config)
                 else:
                     agent = ResourceCollectorAgent(**agent_config)
                 test_agents.append(agent)
