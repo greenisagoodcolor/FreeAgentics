@@ -39,7 +39,7 @@ def kill_port(port: int):
                     if check_result.returncode == 0:
                         # Still running, force kill
                         subprocess.run(f"kill -9 {pid}", shell=True)
-                except:
+                except Exception:
                     pass
 
         # Method 2: fuser (backup, works on Linux)
@@ -47,7 +47,7 @@ def kill_port(port: int):
             subprocess.run(
                 f"fuser -k {port}/tcp", shell=True, capture_output=True, stderr=subprocess.DEVNULL
             )
-        except:
+        except Exception:
             pass
 
         # Method 3: netstat + kill (works on more systems)
@@ -68,9 +68,9 @@ def kill_port(port: int):
                         pid = parts[6].split("/")[0]
                         try:
                             subprocess.run(f"kill -9 {pid}", shell=True)
-                        except:
+                        except Exception:
                             pass
-        except:
+        except Exception:
             pass
 
         # Give OS time to release the port
@@ -185,7 +185,7 @@ def start_frontend():
                         s.bind(("", 0))
                         frontend_port = s.getsockname()[1]
                         print(f"  → Using dynamically allocated port {frontend_port}")
-                except:
+                except Exception:
                     print("  ❌ Could not find available port for frontend")
                     return None, None
 

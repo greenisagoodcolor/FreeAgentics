@@ -481,5 +481,5 @@ async def create_agent_websocket(websocket: WebSocket):
         logger.error(f"WebSocket error: {e}")
         try:
             await websocket.send_json({"status": "error", "message": f"Connection error: {str(e)}"})
-        except:
+        except Exception:
             pass  # Connection already closed

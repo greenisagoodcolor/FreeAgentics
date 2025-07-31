@@ -4,18 +4,22 @@
 import os
 import sys
 
+from sqlalchemy import inspect
+
 # Add project root to path
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 
 # Set database URL for SQLite
 os.environ["DATABASE_URL"] = "sqlite:///freeagentics.db"
 
-from database.base import Base
-from database.session import engine
+# Import database components after path setup
+sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
+from database.base import Base  # noqa: E402
+from database.session import engine  # noqa: E402
 
-# Import other models to ensure they're registered
+# Import models to ensure they're registered with Base.metadata
 try:
-    from database.models import Agent, Coalition, KnowledgeUnit, Observation
+    import database.models  # noqa: E402 F401 - Required for model registration
 except ImportError:
     pass
 
@@ -30,8 +34,6 @@ def main():
     print("Tables created successfully!")
 
     # List tables
-    from sqlalchemy import inspect
-
     inspector = inspect(engine)
     tables = inspector.get_table_names()
     print(f"\nCreated tables: {', '.join(tables)}")
