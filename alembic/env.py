@@ -11,6 +11,9 @@ sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
 # Import our database models and configuration
 from database.base import Base
+
+# Import all models so they are available for autogenerate
+from database.models import *
 from database.session import DATABASE_URL
 
 # this is the Alembic Config object, which provides
@@ -18,7 +21,11 @@ from database.session import DATABASE_URL
 config = context.config
 
 # Override database URL from environment
-config.set_main_option("sqlalchemy.url", DATABASE_URL)
+if DATABASE_URL:
+    config.set_main_option("sqlalchemy.url", DATABASE_URL)
+else:
+    # Use default SQLite URL for migrations when no DATABASE_URL is set
+    config.set_main_option("sqlalchemy.url", "sqlite:///./freeagentics.db")
 
 # Interpret the config file for Python logging.
 # This line sets up loggers basically.

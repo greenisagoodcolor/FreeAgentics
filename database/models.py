@@ -4,10 +4,13 @@ This module defines all database models using modern SQLAlchemy 2.0 patterns.
 NO IN-MEMORY STORAGE - everything must persist to PostgreSQL.
 """
 
+import os
 import uuid
+from datetime import datetime
 from enum import Enum as PyEnum
 from typing import Optional
 
+from cryptography.fernet import Fernet
 from sqlalchemy import (
     JSON,
     Boolean,
@@ -26,6 +29,16 @@ from sqlalchemy.sql import func
 
 from database.base import Base
 from database.types import GUID
+
+# Encryption setup for UserSettings
+ENCRYPTION_KEY = os.getenv("SETTINGS_ENCRYPTION_KEY")
+if not ENCRYPTION_KEY:
+    # Generate a new key for development
+    ENCRYPTION_KEY = Fernet.generate_key().decode()
+
+cipher_suite = Fernet(
+    ENCRYPTION_KEY.encode() if isinstance(ENCRYPTION_KEY, str) else ENCRYPTION_KEY
+)
 
 
 # Enums for database columns
@@ -264,6 +277,68 @@ class User(Base):
     # Timestamps
     created_at = Column(DateTime, server_default=func.now())
     updated_at = Column(DateTime, server_default=func.now(), onupdate=func.now())
+
+    # Relationships
+    settings = relationship("UserSettings", back_populates="user", uselist=False)
+
+
+class UserSettings(Base):
+    """Store user-specific settings securely."""
+
+    __tablename__ = "user_settings"
+
+    id = Column(Integer, primary_key=True, index=True)
+    user_id = Column(String, ForeignKey("users.id"), unique=True, index=True)
+
+    # LLM Configuration (encrypted)
+    llm_provider = Column(String, default="openai")
+    llm_model = Column(String, default="gpt-3.5-turbo")
+    encrypted_openai_key = Column(Text, nullable=True)
+    encrypted_anthropic_key = Column(Text, nullable=True)
+
+    # Feature flags
+    gnn_enabled = Column(Boolean, default=True)
+    debug_logs = Column(Boolean, default=False)
+    auto_suggest = Column(Boolean, default=True)
+
+    # Metadata
+    created_at = Column(DateTime, default=datetime.now)
+    updated_at = Column(DateTime, default=datetime.now, onupdate=datetime.now)
+
+    # Relationships
+    user = relationship("User", back_populates="settings")
+
+    def set_openai_key(self, key: Optional[str]):
+        """Encrypt and store OpenAI API key."""
+        if key:
+            self.encrypted_openai_key = cipher_suite.encrypt(key.encode()).decode()
+        else:
+            self.encrypted_openai_key = None
+
+    def get_openai_key(self) -> Optional[str]:
+        """Decrypt and return OpenAI API key."""
+        if self.encrypted_openai_key:
+            try:
+                return cipher_suite.decrypt(self.encrypted_openai_key.encode()).decode()
+            except Exception:
+                return None
+        return None
+
+    def set_anthropic_key(self, key: Optional[str]):
+        """Encrypt and store Anthropic API key."""
+        if key:
+            self.encrypted_anthropic_key = cipher_suite.encrypt(key.encode()).decode()
+        else:
+            self.encrypted_anthropic_key = None
+
+    def get_anthropic_key(self) -> Optional[str]:
+        """Decrypt and return Anthropic API key."""
+        if self.encrypted_anthropic_key:
+            try:
+                return cipher_suite.decrypt(self.encrypted_anthropic_key.encode()).decode()
+            except Exception:
+                return None
+        return None
 
 
 class KnowledgeEdge(Base):

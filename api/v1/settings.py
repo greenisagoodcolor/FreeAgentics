@@ -10,92 +10,18 @@ import os
 from datetime import datetime
 from typing import Optional
 
-from cryptography.fernet import Fernet
 from fastapi import APIRouter, Depends, HTTPException, status
 from pydantic import BaseModel, Field, field_validator
-from sqlalchemy import Boolean, Column, DateTime, ForeignKey, Integer, String, Text
 from sqlalchemy.orm import Session
 
 from auth.dev_bypass import get_current_user_optional
 from auth.security_implementation import TokenData
 from core.providers import get_db, reset_providers
-from database.base import Base
+from database.models import UserSettings
 
 logger = logging.getLogger(__name__)
 
-# Generate or load encryption key
-ENCRYPTION_KEY = os.getenv("SETTINGS_ENCRYPTION_KEY")
-if not ENCRYPTION_KEY:
-    # Generate a new key for development
-    ENCRYPTION_KEY = Fernet.generate_key().decode()
-    logger.warning(
-        "Generated new encryption key for settings. Set SETTINGS_ENCRYPTION_KEY in production!"
-    )
-
-cipher_suite = Fernet(
-    ENCRYPTION_KEY.encode() if isinstance(ENCRYPTION_KEY, str) else ENCRYPTION_KEY
-)
-
 router = APIRouter()
-
-
-# Database Models
-class UserSettings(Base):
-    """Store user-specific settings securely."""
-
-    __tablename__ = "user_settings"
-
-    id = Column(Integer, primary_key=True, index=True)
-    user_id = Column(String, ForeignKey("users.id"), unique=True, index=True)
-
-    # LLM Configuration (encrypted)
-    llm_provider = Column(String, default="openai")
-    llm_model = Column(String, default="gpt-3.5-turbo")
-    encrypted_openai_key = Column(Text, nullable=True)
-    encrypted_anthropic_key = Column(Text, nullable=True)
-
-    # Feature flags
-    gnn_enabled = Column(Boolean, default=True)
-    debug_logs = Column(Boolean, default=False)
-    auto_suggest = Column(Boolean, default=True)
-
-    # Metadata
-    created_at = Column(DateTime, default=datetime.now)
-    updated_at = Column(DateTime, default=datetime.now, onupdate=datetime.now)
-
-    def set_openai_key(self, key: Optional[str]):
-        """Encrypt and store OpenAI API key."""
-        if key:
-            self.encrypted_openai_key = cipher_suite.encrypt(key.encode()).decode()
-        else:
-            self.encrypted_openai_key = None
-
-    def get_openai_key(self) -> Optional[str]:
-        """Decrypt and return OpenAI API key."""
-        if self.encrypted_openai_key:
-            try:
-                return cipher_suite.decrypt(self.encrypted_openai_key.encode()).decode()
-            except Exception as e:
-                logger.error(f"Failed to decrypt OpenAI key: {e}")
-                return None
-        return None
-
-    def set_anthropic_key(self, key: Optional[str]):
-        """Encrypt and store Anthropic API key."""
-        if key:
-            self.encrypted_anthropic_key = cipher_suite.encrypt(key.encode()).decode()
-        else:
-            self.encrypted_anthropic_key = None
-
-    def get_anthropic_key(self) -> Optional[str]:
-        """Decrypt and return Anthropic API key."""
-        if self.encrypted_anthropic_key:
-            try:
-                return cipher_suite.decrypt(self.encrypted_anthropic_key.encode()).decode()
-            except Exception as e:
-                logger.error(f"Failed to decrypt Anthropic key: {e}")
-                return None
-        return None
 
 
 # Pydantic Models
@@ -273,32 +199,55 @@ async def patch_settings(
     db: Session = Depends(get_db),
 ):
     """Partially update user settings."""
-    settings = get_or_create_settings(db, current_user.user_id)
+    try:
+        settings = get_or_create_settings(db, current_user.user_id)
 
-    # Update only provided fields
-    update_data = settings_update.model_dump(exclude_unset=True)
+        # Update only provided fields
+        update_data = settings_update.model_dump(exclude_unset=True)
 
-    for field, value in update_data.items():
-        if field == "openai_api_key":
-            settings.set_openai_key(value)
-        elif field == "anthropic_api_key":
-            settings.set_anthropic_key(value)
-        else:
-            setattr(settings, field, value)
+        for field, value in update_data.items():
+            if field == "openai_api_key":
+                settings.set_openai_key(value)
+            elif field == "anthropic_api_key":
+                settings.set_anthropic_key(value)
+            else:
+                setattr(settings, field, value)
 
-    settings.updated_at = datetime.now()
-    db.commit()
-    db.refresh(settings)
+        settings.updated_at = datetime.now()
+        db.commit()
+        db.refresh(settings)
 
-    # Apply settings to environment
-    apply_settings_to_environment(settings)
+        # Verify persistence by attempting to read back the settings
+        verification_settings = (
+            db.query(UserSettings).filter(UserSettings.user_id == current_user.user_id).first()
+        )
 
-    logger.info(
-        f"Patched settings for user {current_user.user_id} - "
-        f"updated fields: {list(update_data.keys())}"
-    )
+        if not verification_settings:
+            logger.error(
+                f"Settings persistence verification failed for user {current_user.user_id}"
+            )
+            raise HTTPException(
+                status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+                detail="Settings save failed - unable to verify persistence",
+            )
 
-    return SettingsResponse.from_db_model(settings)
+        # Apply settings to environment
+        apply_settings_to_environment(settings)
+
+        logger.info(
+            f"Successfully patched and verified settings for user {current_user.user_id} - "
+            f"updated fields: {list(update_data.keys())}"
+        )
+
+        return SettingsResponse.from_db_model(settings)
+
+    except Exception as e:
+        logger.error(f"Failed to update settings for user {current_user.user_id}: {str(e)}")
+        db.rollback()
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail=f"Failed to save settings: {str(e)}",
+        )
 
 
 @router.post("/settings/validate-key")
