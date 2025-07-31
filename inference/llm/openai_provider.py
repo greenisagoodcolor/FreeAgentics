@@ -152,6 +152,14 @@ class OpenAIProvider(BaseProvider):
                 rate_limit_info={"status": "rate_limited"},
             )
 
+        except openai.APITimeoutError as e:
+            latency_ms = (time.time() - start_time) * 1000
+            return HealthCheckResult(
+                status=ProviderStatus.UNHEALTHY,
+                latency_ms=latency_ms,
+                error_message=f"Connection timeout: {str(e)}",
+            )
+
         except Exception as e:
             latency_ms = (time.time() - start_time) * 1000
             return HealthCheckResult(
@@ -246,6 +254,12 @@ class OpenAIProvider(BaseProvider):
         except openai.BadRequestError as e:
             self._update_usage_metrics(success=False, error_type="bad_request")
             raise RuntimeError(f"OpenAI bad request: {str(e)}")
+
+        except openai.APITimeoutError as e:
+            latency_ms = (time.time() - start_time) * 1000
+            self._update_usage_metrics(success=False, error_type="timeout", latency_ms=latency_ms)
+            logger.warning(f"OpenAI request timed out after {latency_ms:.0f}ms for model {request.model}")
+            raise RuntimeError(f"OpenAI request timed out. Try using a faster model like gpt-3.5-turbo or increase timeout.")
 
         except Exception as e:
             latency_ms = (time.time() - start_time) * 1000

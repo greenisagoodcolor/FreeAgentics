@@ -47,7 +47,7 @@ class UserSettings(Base):
     
     # LLM Configuration (encrypted)
     llm_provider = Column(String, default="openai")
-    llm_model = Column(String, default="gpt-4")
+    llm_model = Column(String, default="gpt-3.5-turbo")
     encrypted_openai_key = Column(Text, nullable=True)
     encrypted_anthropic_key = Column(Text, nullable=True)
     
