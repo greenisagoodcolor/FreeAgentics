@@ -24,6 +24,17 @@ help: ## Show available commands
 	@echo "  make clean      Clean build artifacts"
 	@echo "  make reset      Full reset (removes dependencies)"
 	@echo ""
+	@echo "Database Commands:"
+	@echo "  make db-setup-docker     Setup PostgreSQL with Docker"
+	@echo "  make db-setup-local      Setup PostgreSQL locally"
+	@echo "  make db-migrate          Run database migrations"
+	@echo "  make db-check            Test database connection"
+	@echo "  make db-status           Show database health status"
+	@echo "  make db-troubleshoot     Run comprehensive diagnostics"
+	@echo "  make db-backup           Create database backup"
+	@echo "  make db-restore          Restore from backup"
+	@echo "  make db-reset            Reset database (DESTRUCTIVE)"
+	@echo ""
 	@echo "Run 'make install' then 'make dev' to get started."
 
 
@@ -146,5 +157,113 @@ reset: ## Full reset (removes dependencies)
 		if [ -d "$(WEB_DIR)" ]; then rm -rf $(WEB_DIR)/node_modules; fi; \
 		rm -f .env; \
 		echo "Reset complete. Run 'make install' to start fresh."; \
+	fi
+
+# Database setup commands
+.PHONY: db-setup-docker db-setup-local db-migrate db-check db-troubleshoot db-status db-reset db-backup db-restore
+
+## Setup PostgreSQL with Docker
+db-setup-docker:
+	@echo "Setting up PostgreSQL with pgvector using Docker..."
+	@bash scripts/setup-db-docker.sh
+
+## Setup PostgreSQL locally
+db-setup-local:
+	@echo "Setting up PostgreSQL with pgvector locally..."
+	@bash scripts/setup-db-local.sh
+
+## Run database migrations
+db-migrate:
+	@echo "Running database migrations..."
+	@if command -v alembic &> /dev/null; then \
+		alembic upgrade head; \
+	else \
+		echo "Alembic not found. Please install dependencies first: make install"; \
+		exit 1; \
+	fi
+
+## Check database connection
+db-check:
+	@echo "Checking database connection..."
+	@python -c "import os, psycopg2; conn = psycopg2.connect(os.getenv('DATABASE_URL', 'postgresql://freeagentics:freeagentics_dev@localhost:5432/freeagentics')); print('✅ Database connection successful!'); conn.close()" 2>/dev/null || echo "❌ Database connection failed. Check your DATABASE_URL in .env"
+
+## Run comprehensive database diagnostics
+db-troubleshoot:
+	@echo "Running database troubleshooting diagnostics..."
+	@bash scripts/db-troubleshoot.sh
+
+## Show database status and health
+db-status:
+	@echo "=== Database Status ==="
+	@echo "Container Status:"
+	@docker-compose -f docker-compose.db.yml ps 2>/dev/null || echo "❌ Docker Compose not available"
+	@echo ""
+	@echo "Connection Test:"
+	@$(MAKE) db-check
+	@echo ""
+	@echo "Migration Status:"
+	@if command -v alembic &> /dev/null; then \
+		alembic current 2>/dev/null || echo "❌ Migration status unavailable"; \
+	else \
+		echo "❌ Alembic not installed"; \
+	fi
+	@echo ""
+	@echo "Quick Diagnostics:"
+	@bash scripts/db-troubleshoot.sh 2>/dev/null | head -20 || echo "❌ Troubleshoot script failed"
+
+## Reset database (DESTRUCTIVE - removes all data)
+db-reset:
+	@echo "⚠️  This will remove ALL database data!"
+	@read -p "Are you sure? Type 'yes' to continue: " confirm; \
+	if [ "$$confirm" = "yes" ]; then \
+		echo "Stopping services..."; \
+		$(MAKE) stop; \
+		echo "Removing database..."; \
+		docker-compose -f docker-compose.db.yml down -v; \
+		docker volume rm freeagentics_postgres_data 2>/dev/null || true; \
+		echo "Restarting database..."; \
+		$(MAKE) db-setup-docker; \
+		echo "Running migrations..."; \
+		$(MAKE) db-migrate; \
+		echo "✅ Database reset complete!"; \
+	else \
+		echo "Reset cancelled."; \
+	fi
+
+## Backup database
+db-backup:
+	@echo "Creating database backup..."
+	@timestamp=$$(date +%Y%m%d_%H%M%S); \
+	backup_file="backup_$${timestamp}.sql"; \
+	database_url=$${DATABASE_URL:-"postgresql://freeagentics:freeagentics_dev@localhost:5432/freeagentics"}; \
+	if pg_dump "$$database_url" > "$$backup_file"; then \
+		echo "✅ Backup created: $$backup_file"; \
+	else \
+		echo "❌ Backup failed"; \
+		exit 1; \
+	fi
+
+## Restore database from backup
+db-restore:
+	@echo "Available backup files:"
+	@ls -la backup_*.sql 2>/dev/null || echo "No backup files found"
+	@echo ""
+	@read -p "Enter backup filename (or press Enter to cancel): " backup_file; \
+	if [ -n "$$backup_file" ] && [ -f "$$backup_file" ]; then \
+		echo "⚠️  This will replace all current database data!"; \
+		read -p "Continue? Type 'yes' to proceed: " confirm; \
+		if [ "$$confirm" = "yes" ]; then \
+			database_url=$${DATABASE_URL:-"postgresql://freeagentics:freeagentics_dev@localhost:5432/freeagentics"}; \
+			if psql "$$database_url" < "$$backup_file"; then \
+				echo "✅ Database restored from $$backup_file"; \
+			else \
+				echo "❌ Restore failed"; \
+				exit 1; \
+			fi; \
+		else \
+			echo "Restore cancelled."; \
+		fi; \
+	else \
+		echo "Invalid or missing backup file."; \
 	fi
 
