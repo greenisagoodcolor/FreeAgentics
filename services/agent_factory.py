@@ -9,37 +9,8 @@ from typing import Any, Dict, List, Optional, Tuple
 
 import numpy as np
 
-try:
-    from pymdp import Agent, utils
-except ImportError:
-    # Mock for development if PyMDP not installed
-    class Agent:
-        def __init__(self, *args, **kwargs):
-            # Initialize beliefs based on D matrices if provided
-            if "D" in kwargs and isinstance(kwargs["D"], list):
-                self.qs = [np.copy(d) for d in kwargs["D"]]
-            else:
-                self.qs = [np.ones(4) / 4]  # Default mock beliefs
-            self.action = None
-            # Store other attributes
-            for key, value in kwargs.items():
-                if not hasattr(self, key):
-                    setattr(self, key, value)
-
-        def step(self, obs):
-            self.action = 0
-            return self.qs
-
-    class utils:
-        @staticmethod
-        def random_A_matrix(num_obs, num_states):
-            A = np.random.rand(num_obs, num_states)
-            return A / A.sum(axis=0, keepdims=True)
-
-        @staticmethod
-        def random_B_matrix(num_states, num_controls):
-            B = np.random.rand(num_states, num_states, num_controls)
-            return B / B.sum(axis=0, keepdims=True)
+# PyMDP is a required dependency - no fallbacks allowed
+from pymdp import Agent, utils
 
 
 logger = logging.getLogger(__name__)

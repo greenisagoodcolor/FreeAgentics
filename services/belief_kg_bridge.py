@@ -12,12 +12,8 @@ from typing import Any, Dict, List, Optional
 
 import numpy as np
 
-try:
-    from pymdp import Agent
-except ImportError:
-    # Mock for development
-    class Agent:
-        pass
+# PyMDP is a required dependency - no fallbacks allowed
+from pymdp import Agent
 
 
 logger = logging.getLogger(__name__)
@@ -155,10 +151,9 @@ class BeliefKGBridge:
             ):
                 factor_beliefs = agent.beliefs
 
-            # Use fallback if no valid beliefs found
+            # Require valid beliefs - no fallbacks allowed
             if factor_beliefs is None or len(factor_beliefs) == 0:
-                # Fallback for mock or minimal agent
-                factor_beliefs = [np.array([0.25, 0.25, 0.25, 0.25])]
+                raise ValueError("Agent has no valid belief state (qs or beliefs attributes)")
 
             # Ensure beliefs are numpy arrays
             factor_beliefs = [

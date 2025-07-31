@@ -65,27 +65,24 @@ class PyMDPErrorHandler:
         self.operation_failures: Dict[str, int] = {}
         self.recovery_stats: Dict[str, Any] = {}
 
-    def safe_execute(
+    def execute_with_error_context(
         self,
         operation_name: str,
         operation_func: Callable,
-        fallback_func: Optional[Callable] = None,
         context: Optional[Dict[str, Any]] = None,
-    ) -> Tuple[bool, Any, Optional[PyMDPError]]:
-        """Execute PyMDP operation with comprehensive error handling.
+    ) -> Any:
+        """Execute PyMDP operation with error context but no fallbacks.
 
         Args:
             operation_name: Name of the operation for logging/tracking
             operation_func: Primary operation to execute
-            fallback_func: Fallback function if primary operation fails
             context: Additional context for error analysis
 
         Returns:
-            Tuple of (success: bool, result: Any, error: Optional[PyMDPError])
-            - success: True if primary operation succeeded, False if fallback used or
-                failed
-            - result: Operation result or None if both primary and fallback failed
-            - error: PyMDPError instance if any error occurred, None otherwise
+            Operation result - raises exception on failure
+
+        Raises:
+            PyMDPError: If operation fails with detailed context
         """
         context = context or {}
         context["agent_id"] = self.agent_id
@@ -95,14 +92,14 @@ class PyMDPErrorHandler:
         self.operation_failures[operation_name] = attempt_count
 
         try:
-            # Execute primary operation
+            # Execute operation
             result = operation_func()
 
             # Success - reset failure count for this operation
             if operation_name in self.operation_failures:
                 self.operation_failures[operation_name] = 0
 
-            return True, result, None
+            return result
 
         except Exception as e:
             self.error_count += 1
@@ -119,37 +116,12 @@ class PyMDPErrorHandler:
 
             pymdp_error = PyMDPError(error_type, e, error_context)
 
-            # Log error with appropriate severity
-            if attempt_count <= self.max_recovery_attempts:
-                logger.warning(
-                    f"PyMDP operation '{operation_name}' failed (attempt {attempt_count}): {pymdp_error}"
-                )
-            else:
-                logger.error(
-                    f"PyMDP operation '{operation_name}' exceeded max recovery attempts: {pymdp_error}"
-                )
+            logger.error(
+                f"PyMDP operation '{operation_name}' failed (attempt {attempt_count}): {pymdp_error}"
+            )
 
-            # Attempt recovery if within limits and fallback available
-            if attempt_count <= self.max_recovery_attempts and fallback_func:
-                try:
-                    fallback_result = fallback_func()
-
-                    # Track successful recovery
-                    self.recovery_stats[operation_name] = (
-                        self.recovery_stats.get(operation_name, 0) + 1
-                    )
-
-                    logger.info(
-                        f"Fallback succeeded for '{operation_name}' in agent {self.agent_id}"
-                    )
-                    return False, fallback_result, pymdp_error
-
-                except Exception as fallback_error:
-                    # Fallback also failed
-                    pymdp_error.context["fallback_error"] = str(fallback_error)
-                    logger.error(f"Fallback also failed for '{operation_name}': {fallback_error}")
-
-            return False, None, pymdp_error
+            # Hard failure - raise exception with context
+            raise pymdp_error
 
     def _classify_error(self, error: Exception) -> PyMDPErrorType:
         """Classify PyMDP errors for appropriate handling strategies."""
@@ -236,23 +208,22 @@ class PyMDPErrorHandler:
         self.recovery_stats.clear()
 
 
-def safe_numpy_conversion(value: Any, target_type: type = int, default: Any = None) -> Any:
-    """Safely convert numpy arrays/scalars to Python primitives.
+def strict_numpy_conversion(value: Any, target_type: type = int) -> Any:
+    """Strictly convert numpy arrays/scalars to Python primitives with no fallbacks.
 
-    This is the most robust solution for the common PyMDP issue where operations
-    return numpy arrays instead of scalars, causing 'unhashable type' errors.
+    This function provides strict conversion for PyMDP return values that might be 
+    numpy arrays instead of scalars. Failures raise exceptions rather than returning defaults.
 
     Args:
         value: Value to convert (numpy array, scalar, or other)
         target_type: Target Python type (int, float, str, bool)
-        default: Default value if conversion fails
 
     Returns:
-        Converted value or default
-    """
-    if default is None:
-        default = target_type()
+        Converted value
 
+    Raises:
+        ValueError: If conversion fails or value format is invalid
+    """
     try:
         # Handle numpy scalars and 0-d arrays
         if hasattr(value, "item"):
@@ -261,7 +232,7 @@ def safe_numpy_conversion(value: Any, target_type: type = int, default: Any = No
         # Handle numpy arrays and array-like objects
         elif hasattr(value, "__getitem__") and hasattr(value, "__len__"):
             if len(value) == 0:
-                return default
+                raise ValueError(f"Empty array cannot be converted to {target_type.__name__}")
             elif len(value) == 1:
                 # Single element - extract properly
                 if hasattr(value, "item"):
@@ -269,63 +240,56 @@ def safe_numpy_conversion(value: Any, target_type: type = int, default: Any = No
                 else:
                     return target_type(value[0])
             else:
-                # Multi-element array - take first element with warning
-                logger.warning(
-                    f"Converting multi-element array {value} to scalar, taking first element"
+                # Multi-element array - this is likely an error in PyMDP usage
+                raise ValueError(
+                    f"Multi-element array {value} cannot be converted to scalar {target_type.__name__}. "
+                    f"This may indicate incorrect PyMDP API usage."
                 )
-                try:
-                    first_elem = value.flat[0] if hasattr(value, "flat") else value[0]
-                    if hasattr(first_elem, "item"):
-                        return target_type(first_elem.item())
-                    else:
-                        return target_type(first_elem)
-                except Exception:
-                    # Fallback to default if element extraction fails
-                    return default
 
         # Handle regular Python types
         elif isinstance(value, (int, float, str, bool, np.number)):
             return target_type(value)
 
-        # Handle None
+        # Handle None - not allowed
         elif value is None:
-            return default
+            raise ValueError(f"None value cannot be converted to {target_type.__name__}")
 
-        # Unknown type - attempt conversion
+        # Unknown type - attempt conversion with strict error handling
         else:
             return target_type(value)
 
     except (ValueError, TypeError, IndexError, OverflowError) as e:
-        logger.warning(
+        raise ValueError(
             f"Failed to convert {type(value)} value {value} to {target_type.__name__}: {e}"
         )
-        return default
 
 
-def safe_array_index(array: Any, index: Any, default: Any = None) -> Any:
-    """Safely index into arrays that might be numpy objects.
+def strict_array_index(array: Any, index: Any) -> Any:
+    """Strictly index into arrays with no fallbacks.
 
     Args:
         array: Array-like object to index
         index: Index (may be numpy array)
-        default: Default value if indexing fails
 
     Returns:
-        Indexed value or default
+        Indexed value
+
+    Raises:
+        ValueError: If indexing fails or array is not indexable
+        IndexError: If index is out of bounds
     """
     try:
         # Convert index to Python int if it's a numpy type
-        safe_index = safe_numpy_conversion(index, int, 0)
+        safe_index = strict_numpy_conversion(index, int)
 
         # Perform indexing
         if hasattr(array, "__getitem__"):
             return array[safe_index]
         else:
-            return default
+            raise ValueError(f"Object of type {type(array)} is not indexable")
 
     except (IndexError, KeyError, TypeError) as e:
-        logger.warning(f"Failed to index array {type(array)} with index {index}: {e}")
-        return default
+        raise IndexError(f"Failed to index array {type(array)} with index {index}: {e}")
 
 
 def validate_pymdp_matrices(A: Any, B: Any, C: Any, D: Any) -> Tuple[bool, str]:
@@ -400,8 +364,7 @@ def validate_pymdp_matrices(A: Any, B: Any, C: Any, D: Any) -> Tuple[bool, str]:
         return False, f"Matrix validation failed: {e}"
 
 
-# Convenience function for backward compatibility
-def safe_array_to_int(value: Any, default: int = 0) -> int:
-    """Legacy function - use safe_numpy_conversion instead."""
-    result = safe_numpy_conversion(value, int, default)
-    return int(result) if result is not None else default
+# Strict conversion function for backward compatibility
+def strict_array_to_int(value: Any) -> int:
+    """Convert array/scalar to int with no fallbacks."""
+    return strict_numpy_conversion(value, int)
