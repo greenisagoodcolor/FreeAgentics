@@ -37,7 +37,8 @@ describe("SettingsDrawer", () => {
     render(<SettingsDrawer open={true} onOpenChange={mockOnOpenChange} />);
 
     expect(screen.getByRole("dialog")).toBeInTheDocument();
-    expect(screen.getByText(/settings/i)).toBeInTheDocument();
+    expect(screen.getByText(/configure your freeagentics experience/i)).toBeInTheDocument();
+    expect(screen.getByRole("button", { name: /save settings/i })).toBeInTheDocument();
   });
 
   it("does not render when closed", () => {
@@ -61,7 +62,7 @@ describe("SettingsDrawer", () => {
       render(<SettingsDrawer open={true} onOpenChange={mockOnOpenChange} />);
 
       expect(screen.getByLabelText(/llm provider/i)).toBeInTheDocument();
-      expect(screen.getByText(/openai/i)).toBeInTheDocument();
+      expect(screen.getByRole("combobox", { name: /llm provider/i })).toBeInTheDocument();
     });
 
     it("shows available LLM models based on provider", () => {

@@ -15,6 +15,7 @@ from database.base import Base
 # Import all models so they are available for autogenerate
 from database.models import *
 from database.session import DATABASE_URL
+from database.types import GUID
 
 # this is the Alembic Config object, which provides
 # access to the values within the .ini file in use.
@@ -66,6 +67,15 @@ def run_migrations_offline() -> None:
         context.run_migrations()
 
 
+def render_item(type_, obj, autogen_context):
+    """Custom rendering for UUID type in migrations."""
+    if type_ == "type" and isinstance(obj, type(GUID)):
+        # Import the custom GUID type in the migration
+        autogen_context.imports.add("from database.types import GUID")
+        return "GUID()"
+    return False
+
+
 def run_migrations_online() -> None:
     """Run migrations in 'online' mode.
 
@@ -80,7 +90,12 @@ def run_migrations_online() -> None:
     )
 
     with connectable.connect() as connection:
-        context.configure(connection=connection, target_metadata=target_metadata)
+        context.configure(
+            connection=connection,
+            target_metadata=target_metadata,
+            render_item=render_item,
+            compare_type=True,
+        )
 
         with context.begin_transaction():
             context.run_migrations()

@@ -15,7 +15,7 @@ from alembic import op
 
 # revision identifiers, used by Alembic.
 revision = "add_prompt_tracking"
-down_revision = "performance_optimization_indexes"
+down_revision = "database_agnostic_001"
 branch_labels = None
 depends_on = None
 

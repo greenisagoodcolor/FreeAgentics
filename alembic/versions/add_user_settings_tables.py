@@ -1,7 +1,7 @@
 """Add users and user_settings tables for settings persistence
 
 Revision ID: add_user_settings_001
-Revises: 1b4306802749
+Revises: add_prompt_tracking
 Create Date: 2025-07-31 15:55:00.000000
 
 """
@@ -13,7 +13,7 @@ from alembic import op
 
 # revision identifiers, used by Alembic.
 revision: str = "add_user_settings_001"
-down_revision: Union[str, None] = "1b4306802749"
+down_revision: Union[str, None] = "add_prompt_tracking"
 branch_labels: Union[str, Sequence[str], None] = None
 depends_on: Union[str, Sequence[str], None] = None
 

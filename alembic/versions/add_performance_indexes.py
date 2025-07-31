@@ -1,7 +1,7 @@
 """Add performance indexes for common queries.
 
 Revision ID: performance_indexes_001
-Revises: 2a8b9c3d4e5f
+Revises: add_mfa_support
 Create Date: 2025-01-13 12:00:00.000000
 
 """
@@ -12,7 +12,7 @@ from alembic import op
 
 # revision identifiers, used by Alembic.
 revision: str = "performance_indexes_001"
-down_revision: Optional[str] = "2a8b9c3d4e5f"
+down_revision: Optional[str] = "add_mfa_support"
 branch_labels: Optional[Union[str, Sequence[str]]] = None
 depends_on: Optional[Union[str, Sequence[str]]] = None
 

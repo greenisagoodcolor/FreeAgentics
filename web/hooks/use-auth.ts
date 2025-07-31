@@ -21,11 +21,22 @@ const USER_KEY = "fa.user";
 
 // Helper function to check if JWT token is expired
 function isTokenExpired(token: string): boolean {
+  // Handle dev tokens that might not be JWTs
+  if (token === "dev" || token.startsWith("dev_")) {
+    console.log("✅ Dev token detected, never expires");
+    return false;
+  }
+
   try {
     const payload = JSON.parse(atob(token.split(".")[1]));
     const now = Math.floor(Date.now() / 1000);
-    return payload.exp < now;
-  } catch {
+    const isExpired = payload.exp < now;
+    if (isExpired) {
+      console.log("🔄 JWT token expired, needs refresh");
+    }
+    return isExpired;
+  } catch (error) {
+    console.warn("⚠️ Token validation failed, treating as expired:", error);
     return true; // If we can't parse it, consider it expired
   }
 }

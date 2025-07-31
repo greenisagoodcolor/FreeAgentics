@@ -141,6 +141,10 @@ export function useSettings(): SettingsState {
           if (!response.success) {
             setSaveError(response.error || "Failed to save settings");
             console.error("Failed to save settings to backend:", response.error);
+          } else {
+            // Clear any previous save errors on successful save
+            setSaveError(null);
+            console.log("✅ Settings saved successfully to backend");
           }
         } catch (error) {
           setSaveError("Failed to save settings. Please try again.");

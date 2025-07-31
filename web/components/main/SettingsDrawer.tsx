@@ -80,7 +80,11 @@ export function SettingsDrawer({ open, onOpenChange }: SettingsDrawerProps) {
 
         {/* Save status indicator */}
         {(isSaving || saveError) && (
-          <div className="mt-4 p-3 rounded-md flex items-center gap-2 text-sm">
+          <div
+            className={`mt-4 p-3 rounded-md flex items-center gap-2 text-sm ${
+              saveError ? "bg-destructive/10 border border-destructive/20" : "bg-muted"
+            }`}
+          >
             {isSaving ? (
               <>
                 <Loader2 className="h-4 w-4 animate-spin" />
@@ -90,6 +94,18 @@ export function SettingsDrawer({ open, onOpenChange }: SettingsDrawerProps) {
               <>
                 <AlertCircle className="h-4 w-4 text-destructive" />
                 <span className="text-destructive">{saveError}</span>
+                <Button
+                  size="sm"
+                  variant="outline"
+                  className="ml-auto"
+                  onClick={() => {
+                    if (hasPendingChanges) {
+                      handleSavePendingChanges();
+                    }
+                  }}
+                >
+                  Retry
+                </Button>
               </>
             ) : null}
           </div>
@@ -281,8 +297,37 @@ export function SettingsDrawer({ open, onOpenChange }: SettingsDrawerProps) {
 
           <Separator />
 
-          {/* Reset Settings */}
-          <div className="pt-4">
+          {/* Save All Settings Button */}
+          <div className="pt-4 space-y-3">
+            <Button
+              onClick={() => {
+                // Force save any pending changes and close drawer on success
+                if (hasPendingChanges) {
+                  handleSavePendingChanges();
+                }
+                // Show success feedback and close drawer
+                setTimeout(() => {
+                  if (!saveError) {
+                    onOpenChange(false);
+                  }
+                }, 1000);
+              }}
+              className="w-full gap-2"
+              disabled={isSaving || isLoading}
+            >
+              {isSaving ? (
+                <>
+                  <Loader2 className="h-4 w-4 animate-spin" />
+                  Saving Settings...
+                </>
+              ) : (
+                <>
+                  <CheckCircle className="h-4 w-4" />
+                  Save Settings
+                </>
+              )}
+            </Button>
+
             <Button
               variant="outline"
               onClick={() => {
