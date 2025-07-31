@@ -21,7 +21,7 @@ class LLMProviderConfig(BaseModel):
     organization_id: Optional[str] = None
     endpoint_url: Optional[str] = None
     max_retries: int = 3
-    timeout_seconds: int = 30
+    timeout_seconds: int = 60  # Increased for GPT-4 requests
     rate_limit_requests_per_minute: Optional[int] = None
     enabled: bool = True
 

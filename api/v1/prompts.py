@@ -124,7 +124,7 @@ Ensure all probability distributions sum to 1.0."""
                 {"role": "system", "content": system_prompt},
                 {"role": "user", "content": user_prompt},
             ],
-            model=request.model or "gpt-4",
+            model=request.model or "gpt-3.5-turbo",  # Use faster model by default
             temperature=0.7,
             max_tokens=2000,
         )

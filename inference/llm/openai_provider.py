@@ -76,9 +76,9 @@ class OpenAIProvider(BaseProvider):
                 client_kwargs["timeout"] = kwargs["timeout"]
                 logger.info(f"Configuring OpenAI client with timeout: {kwargs['timeout']}s")
             else:
-                # Default timeout if not specified
-                client_kwargs["timeout"] = 30.0
-                logger.info("Using default timeout of 30s for OpenAI client")
+                # Default timeout if not specified (longer for GPT-4)
+                client_kwargs["timeout"] = 60.0
+                logger.info("Using default timeout of 60s for OpenAI client")
 
             logger.info(f"Creating OpenAI client with config: api_key=sk-..., timeout={client_kwargs.get('timeout')}")
             self.client = OpenAI(**client_kwargs)
