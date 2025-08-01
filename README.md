@@ -66,6 +66,25 @@ Try these example prompts in the UI:
 
 FreeAgentics creates AI agents using Active Inference - a mathematical framework from cognitive science. Unlike chatbots or scripted AI, our agents make decisions by minimizing free energy, leading to emergent, intelligent behavior.
 
+### 🚀 Complete LLM→GMN→PyMDP→Knowledge Graph Cycle
+
+FreeAgentics implements a complete cognitive architecture where:
+
+1. **Natural language goals** are converted to **GMN specifications** via LLMs
+2. **GMN specs** create **PyMDP Active Inference agents**
+3. **PyMDP agents** take actions and update their **beliefs**
+4. **Agent actions** update the **knowledge graph**
+5. **Knowledge graph** provides context for the **next LLM generation**
+
+### 🎯 Key Features
+
+- **Multi-Agent Conversations**: Watch AI agents discuss and collaborate in real-time
+- **Active Inference**: Agents use PyMDP for probabilistic reasoning and decision-making
+- **Knowledge Graph**: Live visualization of agent beliefs, goals, and relationships
+- **GMN Generation**: Convert natural language into formal agent specifications
+- **Real-time Updates**: WebSocket integration for instant feedback
+- **Zero Setup Demo**: Experience everything without API keys or configuration
+
 ## Requirements
 
 - Python 3.9+
@@ -83,6 +102,65 @@ make status     # Check environment status
 make clean      # Clean build artifacts
 make reset      # Full reset (removes dependencies)
 ```
+
+## 🔄 The Complete Cognitive Cycle
+
+### 1. Create Agents from Natural Language
+
+**Demo Mode (No API Key)**:
+
+```bash
+curl -X POST "http://localhost:8000/api/v1/prompts/demo" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "prompt": "Create an agent that explores unknown environments",
+    "agent_name": "Explorer"
+  }'
+```
+
+**With LLM (Requires API Key)**:
+
+```bash
+curl -X POST "http://localhost:8000/api/v1/prompts" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "prompt": "Create an agent that balances exploration and exploitation",
+    "agent_name": "Optimizer",
+    "llm_provider": "openai"
+  }'
+```
+
+### 2. Multi-Agent Conversations
+
+Start a conversation between multiple Active Inference agents:
+
+```bash
+curl -X POST "http://localhost:8000/api/v1/agent-conversations" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "prompt": "Discuss strategies for sustainable energy",
+    "agent_count": 3,
+    "conversation_turns": 5
+  }'
+```
+
+### 3. View the Knowledge Graph
+
+The knowledge graph automatically updates as agents interact:
+
+```bash
+curl "http://localhost:8000/api/knowledge-graph"
+```
+
+### 4. The Feedback Loop
+
+1. **Goal Prompt** → LLM generates GMN specification
+2. **GMN** → Creates PyMDP Active Inference model
+3. **PyMDP** → Agent takes actions based on beliefs
+4. **Actions** → Update knowledge graph
+5. **Knowledge Graph** → Provides context for next iteration
+
+This creates a continuous learning loop where agents become more intelligent over time!
 
 ## Configuration
 
