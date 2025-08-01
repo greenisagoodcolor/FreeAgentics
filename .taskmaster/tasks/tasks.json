@@ -2205,7 +2205,7 @@
             "description": "Design and implement structured prompts that guide LLMs to generate consistent, valid GMN specifications from natural language",
             "dependencies": ["43.1"],
             "details": "Create prompt templates with clear instructions for GMN component generation. Include few-shot examples demonstrating proper GMN JSON structure. Implement chain-of-thought prompting to extract: domain identification, state space enumeration, action space definition, observation mapping, transition dynamics modeling, and preference function specification. Add prompt variations for different agent types (explorer, analyst, creative). Include system prompts that enforce JSON formatting and probability constraints. Implement prompt versioning for A/B testing.",
-            "status": "pending",
+            "status": "done",
             "testStrategy": "Test prompt effectiveness across multiple LLM providers. Validate generated GMNs against schema. Measure consistency of outputs for same input. Test handling of ambiguous or incomplete user prompts. Verify prompt injection resistance."
           },
           {
@@ -2295,7 +2295,7 @@
     ],
     "metadata": {
       "created": "2025-07-04T12:52:30.518Z",
-      "updated": "2025-08-01T00:50:00.458Z",
+      "updated": "2025-08-01T00:56:21.974Z",
       "description": "Tasks for master context"
     }
   }
