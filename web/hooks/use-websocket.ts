@@ -1,5 +1,6 @@
 import { useState, useEffect, useCallback, useRef } from "react";
 import { useAuth } from "./use-auth";
+import { getWebSocketURL, validateWebSocketURL } from "../utils/websocket-url";
 
 export type ConnectionState = "connecting" | "connected" | "disconnected" | "error";
 
@@ -18,11 +19,6 @@ export interface WebSocketState {
 }
 
 // Use dev endpoint for development (matches backend dev mode)
-const getWebSocketURL = () => {
-  return process.env.NEXT_PUBLIC_WS_URL
-    ? `${process.env.NEXT_PUBLIC_WS_URL}/api/v1/ws/dev`
-    : "ws://localhost:8000/api/v1/ws/dev";
-};
 const RECONNECT_DELAY = 3000;
 const MAX_RECONNECT_ATTEMPTS = 5;
 
@@ -48,7 +44,7 @@ export function useWebSocket(): WebSocketState {
     }
 
     // For dev endpoint, don't require authentication in dev mode
-    const WS_URL = getWebSocketURL();
+    const WS_URL = getWebSocketURL('dev');
     const isDevEndpoint = WS_URL.includes("/ws/dev");
     if (!isDevEndpoint && (isAuthLoading || !isAuthenticated || !token)) {
       console.log("[WebSocket] Waiting for auth before connecting...", {
@@ -65,7 +61,11 @@ export function useWebSocket(): WebSocketState {
       setConnectionState("connecting");
       setError(null);
 
-      // Use native URL API to construct WebSocket URL with proper path preservation
+      // Validate and construct WebSocket URL
+      if (!validateWebSocketURL(WS_URL)) {
+        throw new Error(`Invalid WebSocket URL: ${WS_URL}`);
+      }
+
       const wsUrl = new URL(WS_URL);
       
       if (token && !isDevEndpoint) {
@@ -178,7 +178,7 @@ export function useWebSocket(): WebSocketState {
       connectionTimeoutRef.current = null;
     }
 
-    const isDevEndpoint = getWebSocketURL().includes("/ws/dev");
+    const isDevEndpoint = getWebSocketURL('dev').includes("/ws/dev");
 
     // Connect immediately for dev endpoint, or wait for auth for other endpoints
     if (isDevEndpoint && !wsRef.current) {

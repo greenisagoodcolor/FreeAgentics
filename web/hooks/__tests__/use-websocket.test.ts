@@ -91,18 +91,18 @@ describe('useWebSocket URL Construction', () => {
   });
 
   test('preserves path when constructing WebSocket URL', async () => {
-    // Set an environment variable with existing path
-    (process.env as any).NEXT_PUBLIC_WS_URL = 'ws://server:8080/custom/path';
+    // Set an environment variable with complete dev endpoint URL
+    (process.env as any).NEXT_PUBLIC_WS_URL = 'ws://server:8080/api/v1/ws/dev';
     
     const { result } = renderHook(() => useWebSocket());
 
     // Wait for connection attempt
     await new Promise(resolve => setTimeout(resolve, 150));
 
-    // Should properly combine paths
+    // Should use the complete URL as-is since it contains the API path
     expect(consoleSpy).toHaveBeenCalledWith(
       '[WebSocket] Final URL:',
-      'ws://server:8080/custom/path/api/v1/ws/dev'
+      'ws://server:8080/api/v1/ws/dev'
     );
   });
 
