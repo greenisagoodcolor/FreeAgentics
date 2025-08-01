@@ -1,4 +1,4 @@
-import { useState, useCallback, useEffect } from "react";
+import { useState, useCallback, useEffect, useRef } from "react";
 import { useRouter } from "next/navigation";
 
 export interface User {
@@ -46,10 +46,31 @@ export function useAuth(): AuthState {
   const [token, setToken] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const router = useRouter();
+  
+  // Prevent infinite loops and race conditions
+  const isInitializingRef = useRef(false);
+  const lastFetchAttemptRef = useRef<number>(0);
+  const FETCH_DEBOUNCE_MS = 1000; // Prevent rapid successive fetches
 
   // Load auth state from localStorage and fetch dev token if needed
   useEffect(() => {
     const loadAuthState = async () => {
+      // Prevent multiple simultaneous initialization attempts
+      if (isInitializingRef.current) {
+        console.log("[Auth] Initialization already in progress, skipping...");
+        return;
+      }
+      
+      // Debounce rapid successive calls
+      const now = Date.now();
+      if (now - lastFetchAttemptRef.current < FETCH_DEBOUNCE_MS) {
+        console.log("[Auth] Debouncing rapid auth initialization");
+        return;
+      }
+      
+      isInitializingRef.current = true;
+      lastFetchAttemptRef.current = now;
+      
       try {
         const storedToken = localStorage.getItem(AUTH_TOKEN_KEY);
         const storedUser = localStorage.getItem(USER_KEY);
@@ -70,7 +91,7 @@ export function useAuth(): AuthState {
           localStorage.removeItem(USER_KEY);
         }
 
-        // DevToken bootstrap for dev mode
+        // DevToken bootstrap for dev mode - only attempt once per session
         console.log("[Auth] No valid token in storage, fetching dev token...");
         try {
           const backendUrl = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8000";
@@ -121,6 +142,7 @@ export function useAuth(): AuthState {
         console.error("Failed to load auth state:", error);
       } finally {
         setIsLoading(false);
+        isInitializingRef.current = false;
       }
     };
 
