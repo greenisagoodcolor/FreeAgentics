@@ -178,6 +178,181 @@ class PyMDPService:
 
         return None
 
+    async def get_multi_factor_beliefs(self, agent_id: str) -> Optional[Dict[str, Any]]:
+        """Get multi-factor beliefs for an agent using advanced belief management.
+
+        Args:
+            agent_id: Agent identifier
+
+        Returns:
+            Dictionary containing factorized belief state information or None
+        """
+        agent_config = self.get_agent_config(agent_id)
+        if not agent_config or not agent_config.get("pymdp_enabled"):
+            return None
+
+        try:
+            from services.multi_factor_belief_manager import create_multi_factor_belief_manager
+
+            agent_instance = agent_config.get("agent_instance")
+            if not agent_instance:
+                return None
+
+            # Create multi-factor belief manager components
+            extractor, updater, validator = create_multi_factor_belief_manager()
+
+            # Extract factorized beliefs
+            belief_state = await extractor.extract_factorized_beliefs(
+                agent_instance, agent_id, include_correlations=True
+            )
+
+            # Validate consistency
+            validation = await validator.validate_factorized_state(belief_state)
+
+            # Convert to serializable format
+            result = {
+                "agent_id": belief_state.agent_id,
+                "timestamp": belief_state.timestamp.isoformat(),
+                "num_factors": belief_state.num_factors,
+                "overall_entropy": belief_state.overall_entropy,
+                "overall_confidence": belief_state.overall_confidence,
+                "factors": [
+                    {
+                        "index": factor.index,
+                        "name": factor.name,
+                        "beliefs": factor.beliefs.tolist(),
+                        "factor_type": factor.factor_type.value,
+                        "entropy": factor.entropy,
+                        "confidence": factor.confidence,
+                        "most_likely_state": factor.most_likely_state,
+                        "dependencies": [
+                            {
+                                "parent_factor": dep.parent_factor,
+                                "child_factor": dep.child_factor,
+                                "dependency_type": dep.dependency_type,
+                                "strength": dep.strength,
+                            }
+                            for dep in factor.dependencies
+                        ],
+                        "metadata": factor.metadata,
+                    }
+                    for factor in belief_state.factors
+                ],
+                "correlations": [
+                    {
+                        "factor_a": corr.factor_a,
+                        "factor_b": corr.factor_b,
+                        "correlation_strength": corr.correlation_strength,
+                        "timestamp": corr.timestamp.isoformat(),
+                    }
+                    for corr in belief_state.correlations
+                ],
+                "hierarchy": belief_state.hierarchy,
+                "validation": validation,
+                "metadata": belief_state.metadata,
+            }
+
+            logger.info(
+                f"Retrieved multi-factor beliefs for agent {agent_id}: "
+                f"{belief_state.num_factors} factors, "
+                f"{len(belief_state.correlations)} correlations"
+            )
+
+            return result
+
+        except ImportError as e:
+            logger.warning(f"Multi-factor belief manager not available: {e}")
+            return None
+        except Exception as e:
+            logger.error(f"Failed to get multi-factor beliefs for agent {agent_id}: {e}")
+            return None
+
+    async def update_agent_beliefs(
+        self, agent_id: str, observations: Optional[Dict[int, int]] = None
+    ) -> Optional[Dict[str, Any]]:
+        """Update agent beliefs using hierarchical belief propagation.
+
+        Args:
+            agent_id: Agent identifier
+            observations: Optional observations for specific factors {factor_index: state_value}
+
+        Returns:
+            Updated belief state information or None
+        """
+        agent_config = self.get_agent_config(agent_id)
+        if not agent_config or not agent_config.get("pymdp_enabled"):
+            return None
+
+        try:
+            from services.multi_factor_belief_manager import create_multi_factor_belief_manager
+
+            agent_instance = agent_config.get("agent_instance")
+            if not agent_instance:
+                return None
+
+            # Create multi-factor belief manager components
+            extractor, updater, validator = create_multi_factor_belief_manager()
+
+            # Extract current beliefs
+            current_state = await extractor.extract_factorized_beliefs(
+                agent_instance, agent_id, include_correlations=True
+            )
+
+            # Propagate beliefs with observations
+            updated_state = await updater.propagate_beliefs(current_state, observations)
+
+            # Validate updated state
+            validation = await validator.validate_factorized_state(updated_state)
+
+            if not validation["is_valid"]:
+                logger.warning(
+                    f"Belief update validation failed for agent {agent_id}: "
+                    f"{validation['errors']}"
+                )
+
+            # Convert to serializable format (similar to get_multi_factor_beliefs)
+            result = {
+                "agent_id": updated_state.agent_id,
+                "timestamp": updated_state.timestamp.isoformat(),
+                "num_factors": updated_state.num_factors,
+                "overall_entropy": updated_state.overall_entropy,
+                "overall_confidence": updated_state.overall_confidence,
+                "observations_applied": observations if observations else {},
+                "propagation_info": {
+                    "iterations": updated_state.metadata.get("propagation_iterations", 0),
+                    "converged": updated_state.metadata.get("converged", False),
+                    "observations_applied": updated_state.metadata.get("observations_applied", 0),
+                },
+                "validation": validation,
+                "factors": [
+                    {
+                        "index": factor.index,
+                        "name": factor.name,
+                        "beliefs": factor.beliefs.tolist(),
+                        "factor_type": factor.factor_type.value,
+                        "entropy": factor.entropy,
+                        "confidence": factor.confidence,
+                        "most_likely_state": factor.most_likely_state,
+                    }
+                    for factor in updated_state.factors
+                ],
+            }
+
+            logger.info(
+                f"Updated beliefs for agent {agent_id}: "
+                f"{updated_state.metadata.get('propagation_iterations', 0)} iterations, "
+                f"converged: {updated_state.metadata.get('converged', False)}"
+            )
+
+            return result
+
+        except ImportError as e:
+            logger.warning(f"Multi-factor belief manager not available: {e}")
+            return None
+        except Exception as e:
+            logger.error(f"Failed to update beliefs for agent {agent_id}: {e}")
+            return None
+
 
 # Dependency injection factory function
 def get_pymdp_service() -> PyMDPService:
