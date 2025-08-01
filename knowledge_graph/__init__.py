@@ -6,9 +6,9 @@ to build, query, and evolve their understanding of the world.
 
 from knowledge_graph.evolution import EvolutionEngine, MutationOperator
 from knowledge_graph.extraction import (
+    ContextAwareExtractor,
     ConversationExtractor,
     ConversationMessage,
-    ContextAwareExtractor,
     CoReferenceResolver,
     EntityExtractionStrategy,
     ExtractionContext,
@@ -21,6 +21,26 @@ from knowledge_graph.extraction import (
 )
 from knowledge_graph.graph_engine import KnowledgeEdge, KnowledgeGraph, KnowledgeNode
 from knowledge_graph.query import GraphQuery, QueryResult
+
+# Task 34.5 - Graph Query API
+from knowledge_graph.query_api import (
+    GraphQueryEngine,
+    InMemoryQueryCache,
+    QueryComplexityAnalyzer,
+    QueryFilter,
+    QueryOptions,
+)
+from knowledge_graph.query_api import QueryResult as QueryAPIResult
+from knowledge_graph.query_api import QueryType, RedisQueryCache
+
+# Task 34.4 - Real-time Graph Updates
+from knowledge_graph.realtime_updater import (
+    DefaultConflictResolver,
+    GraphUpdateEvent,
+    RealtimeGraphUpdater,
+    UpdateEventType,
+    WebSocketEventStreamer,
+)
 from knowledge_graph.schema import (
     ConflictResolutionStrategy,
     ConversationEntity,
@@ -36,6 +56,7 @@ from knowledge_graph.schema import (
 )
 
 __all__ = [
+    # Core graph components
     "KnowledgeGraph",
     "KnowledgeNode",
     "KnowledgeEdge",
@@ -43,6 +64,7 @@ __all__ = [
     "MutationOperator",
     "GraphQuery",
     "QueryResult",
+    # Schema and ontology
     "ConversationEntity",
     "ConversationOntology",
     "ConversationRelation",
@@ -67,4 +89,19 @@ __all__ = [
     "PatternRelationExtractor",
     "RelationExtractionStrategy",
     "SpacyEntityExtractor",
+    # Task 34.4 - Real-time updates
+    "DefaultConflictResolver",
+    "GraphUpdateEvent",
+    "RealtimeGraphUpdater",
+    "UpdateEventType",
+    "WebSocketEventStreamer",
+    # Task 34.5 - Query API
+    "GraphQueryEngine",
+    "InMemoryQueryCache",
+    "QueryComplexityAnalyzer",
+    "QueryFilter",
+    "QueryOptions",
+    "QueryAPIResult",
+    "QueryType",
+    "RedisQueryCache",
 ]
