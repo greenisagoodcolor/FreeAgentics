@@ -1813,7 +1813,7 @@
         "testStrategy": "Test entity extraction accuracy on sample conversations. Verify graph updates are atomic and consistent. Test query performance for common patterns. Validate ontology coverage for different domains. Test concurrent graph updates from multiple conversations.",
         "priority": "medium",
         "dependencies": [31],
-        "status": "pending",
+        "status": "in-progress",
         "subtasks": [
           {
             "id": 1,
@@ -1821,7 +1821,7 @@
             "description": "Define the data model, entity types, and relationship types for agent conversation knowledge graphs",
             "dependencies": [],
             "details": "Create comprehensive ontology defining entity types (concepts, goals, constraints, agents, tasks, beliefs) and relationship types (requires, conflicts_with, enables, relates_to, depends_on). Design graph schema supporting temporal aspects, confidence scores, and provenance tracking. Define property schemas for each entity type including metadata like source conversation ID, timestamp, and extraction confidence. Document schema evolution strategy for future extensions.",
-            "status": "pending",
+            "status": "done",
             "testStrategy": "Validate schema completeness against sample conversations from different domains. Test schema flexibility for edge cases and complex relationships. Verify temporal and provenance tracking capabilities."
           },
           {
@@ -2341,7 +2341,7 @@
     ],
     "metadata": {
       "created": "2025-07-04T12:52:30.518Z",
-      "updated": "2025-08-01T06:30:32.865Z",
+      "updated": "2025-08-01T06:38:08.590Z",
       "description": "Tasks for master context"
     }
   }
