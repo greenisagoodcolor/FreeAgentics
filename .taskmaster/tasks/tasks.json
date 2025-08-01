@@ -2188,7 +2188,7 @@
         "testStrategy": "Test GMN generation with various prompt types. Validate JSON structure and probability distributions. Test fallback template usage. Verify GMN semantic correctness and completeness.",
         "priority": "high",
         "dependencies": [40],
-        "status": "in-progress",
+        "status": "done",
         "subtasks": [
           {
             "id": 1,
@@ -2214,7 +2214,7 @@
             "description": "Create the core service that orchestrates GMN generation from prompts with comprehensive validation and error handling",
             "dependencies": ["43.1", "43.2"],
             "details": "Implement GmnGeneratorService class that accepts natural language prompts and returns validated GMN specifications. Integrate with LLM providers using established connection patterns from task 30. Add multi-stage generation: initial GMN creation, structural validation, probability distribution normalization, semantic consistency checking. Implement retry logic for malformed LLM outputs. Add caching layer for repeated similar prompts. Create detailed error messages for validation failures. Support both synchronous and asynchronous generation modes.",
-            "status": "pending",
+            "status": "done",
             "testStrategy": "Integration test full generation pipeline. Test error handling for invalid LLM responses. Verify probability normalization works correctly. Test caching behavior and performance. Measure generation latency under load."
           },
           {
@@ -2223,7 +2223,7 @@
             "description": "Develop a library of pre-defined GMN templates for common agent scenarios to ensure reliable fallback options",
             "dependencies": ["43.1"],
             "details": "Implement template system with parameterized GMN specifications for standard agent types: Explorer (high entropy preferences, broad state space), Analyst (information-seeking, hypothesis testing), Creative (novelty-seeking, diverse action space), Goal-oriented (specific target states, optimization focus), and Conversational (dialogue states, turn-taking dynamics). Create template selection logic based on keyword matching and prompt classification. Allow template customization through parameter injection. Store templates in easily maintainable JSON/YAML format. Version templates for backward compatibility.",
-            "status": "pending",
+            "status": "done",
             "testStrategy": "Test each template initializes valid PyMDP agents. Verify template selection accuracy. Test parameter customization maintains validity. Ensure templates cover documented use cases. Performance test template instantiation."
           },
           {
@@ -2232,7 +2232,7 @@
             "description": "Connect the GMN generator to the existing conversation system enabling dynamic agent creation from user prompts",
             "dependencies": ["43.3", "43.4"],
             "details": "Modify conversation initialization to detect GMN generation requests in user prompts. Implement middleware that intercepts prompts requiring new agent creation. Add GMN generation as a pre-processing step before agent spawning. Store generated GMNs in conversation metadata for debugging and reproducibility. Create API endpoints for explicit GMN generation requests. Add telemetry for GMN generation success rates and latency. Implement graceful degradation to template fallbacks on generation failure. Ensure generated GMNs are compatible with existing PyMDP agent initialization.",
-            "status": "pending",
+            "status": "done",
             "testStrategy": "End-to-end test conversation flows with GMN generation. Test fallback behavior on generation failures. Verify GMN storage and retrieval. Load test concurrent GMN generation requests. Test compatibility with existing agent infrastructure."
           }
         ]
@@ -2245,8 +2245,54 @@
         "testStrategy": "Unit tests for belief state updates and policy selection. Test active inference loop with mock observations. Verify EFE calculations and action selection probabilities. Integration tests with GMN specifications.",
         "priority": "high",
         "dependencies": [43],
-        "status": "pending",
-        "subtasks": []
+        "status": "in-progress",
+        "subtasks": [
+          {
+            "id": 1,
+            "title": "Install and Configure PyMDP Library",
+            "description": "Set up PyMDP library with proper dependencies and verify compatibility with existing FreeAgentics infrastructure",
+            "dependencies": [],
+            "details": "Install PyMDP via pip with version pinning. Configure PyMDP settings for optimal performance with FreeAgentics agent requirements. Verify numpy/scipy dependencies are compatible. Create PyMDP configuration module with default parameters for belief state dimensions, planning horizons, and inference precision. Test basic PyMDP functionality with simple examples.",
+            "status": "done",
+            "testStrategy": "Unit tests to verify PyMDP installation and basic operations. Test matrix operations and belief state initialization. Verify compatibility with existing numpy/scipy versions."
+          },
+          {
+            "id": 2,
+            "title": "Implement Belief State Management System",
+            "description": "Create belief state manager that maintains and updates agent beliefs using Bayesian inference with GMN parameters",
+            "dependencies": ["44.1"],
+            "details": "Design belief state data structures compatible with PyMDP's factor graph representations. Implement belief initialization from GMN specifications (priors, likelihood mappings). Create belief update methods using PyMDP's variational inference algorithms. Support multi-factor beliefs for complex state spaces (e.g., separate factors for goals, context, emotional states). Implement belief state serialization for persistence and debugging.",
+            "status": "done",
+            "testStrategy": "Test belief initialization from various GMN configurations. Verify Bayesian updates produce correct posterior distributions. Test multi-factor belief updates maintain consistency. Validate serialization/deserialization preserves belief states accurately."
+          },
+          {
+            "id": 3,
+            "title": "Develop Expected Free Energy (EFE) Policy Selection",
+            "description": "Implement policy selection algorithm using Expected Free Energy minimization for optimal action selection",
+            "dependencies": ["44.2"],
+            "details": "Implement EFE calculation following active inference principles (epistemic + pragmatic value). Create policy evaluation system that considers multiple action sequences up to configured planning horizon (3-10 steps). Implement probabilistic action selection with temperature parameter for exploration/exploitation balance. Add support for preference specifications from GMN to guide pragmatic value calculations. Optimize EFE computations for real-time performance.",
+            "status": "done",
+            "testStrategy": "Unit tests for EFE calculation components (epistemic value, pragmatic value). Test policy ranking produces expected orderings. Verify probabilistic selection follows correct distributions. Benchmark EFE calculations for performance targets."
+          },
+          {
+            "id": 4,
+            "title": "Build Active Inference Loop Integration",
+            "description": "Create the core active inference loop that connects observations, belief updates, policy selection, and action execution",
+            "dependencies": ["44.2", "44.3"],
+            "details": "Design observation processor that converts conversation context and agent messages into PyMDP observation format. Implement belief update trigger that processes new observations and updates posterior beliefs. Create action execution pipeline that translates selected policies into agent behaviors. Add loop coordination to ensure proper sequencing: observe → update beliefs → calculate EFE → select action → execute. Implement async/await patterns for non-blocking inference operations.",
+            "status": "pending",
+            "testStrategy": "Integration tests for complete inference loop with mock observations. Test belief convergence over multiple loop iterations. Verify action selection responds appropriately to different observation patterns. Test async operation handling and error recovery."
+          },
+          {
+            "id": 5,
+            "title": "Add Advanced Features and Performance Optimization",
+            "description": "Implement advanced active inference features and optimize for production performance requirements",
+            "dependencies": ["44.4"],
+            "details": "Implement adaptive planning horizon that adjusts based on uncertainty levels. Add support for hierarchical active inference for nested goal structures. Create belief state caching and incremental update strategies to reduce computation. Implement parallel EFE calculations for multiple policy evaluations. Add monitoring hooks for belief entropy, EFE values, and inference timing. Configure memory-efficient sparse matrix representations for large state spaces.",
+            "status": "pending",
+            "testStrategy": "Performance benchmarks comparing optimized vs baseline implementations. Test adaptive planning horizon adjustments. Verify hierarchical inference maintains consistency. Test memory usage stays within limits for large state spaces. Validate monitoring metrics accuracy."
+          }
+        ]
       },
       {
         "id": 45,
@@ -2295,7 +2341,7 @@
     ],
     "metadata": {
       "created": "2025-07-04T12:52:30.518Z",
-      "updated": "2025-08-01T00:56:21.974Z",
+      "updated": "2025-08-01T01:24:41.097Z",
       "description": "Tasks for master context"
     }
   }
