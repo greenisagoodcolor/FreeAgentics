@@ -18,9 +18,11 @@ export interface WebSocketState {
 }
 
 // Use dev endpoint for development (matches backend dev mode)
-const WS_URL = process.env.NEXT_PUBLIC_WS_URL
-  ? `${process.env.NEXT_PUBLIC_WS_URL}/api/v1/ws/dev`
-  : "ws://localhost:8000/api/v1/ws/dev";
+const getWebSocketURL = () => {
+  return process.env.NEXT_PUBLIC_WS_URL
+    ? `${process.env.NEXT_PUBLIC_WS_URL}/api/v1/ws/dev`
+    : "ws://localhost:8000/api/v1/ws/dev";
+};
 const RECONNECT_DELAY = 3000;
 const MAX_RECONNECT_ATTEMPTS = 5;
 
@@ -46,6 +48,7 @@ export function useWebSocket(): WebSocketState {
     }
 
     // For dev endpoint, don't require authentication in dev mode
+    const WS_URL = getWebSocketURL();
     const isDevEndpoint = WS_URL.includes("/ws/dev");
     if (!isDevEndpoint && (isAuthLoading || !isAuthenticated || !token)) {
       console.log("[WebSocket] Waiting for auth before connecting...", {
@@ -62,17 +65,20 @@ export function useWebSocket(): WebSocketState {
       setConnectionState("connecting");
       setError(null);
 
-      // Append token to WebSocket URL if available and not dev endpoint
-      let wsUrl = WS_URL;
+      // Use native URL API to construct WebSocket URL with proper path preservation
+      const wsUrl = new URL(WS_URL);
+      
       if (token && !isDevEndpoint) {
-        const separator = WS_URL.includes("?") ? "&" : "?";
-        wsUrl = `${WS_URL}${separator}token=${encodeURIComponent(token)}`;
+        wsUrl.searchParams.set('token', token);
         console.log("[WebSocket] Connecting with auth token...");
       } else if (isDevEndpoint) {
         console.log("[WebSocket] Connecting to dev endpoint without auth...");
       }
+      
+      const finalUrl = wsUrl.toString();
+      console.log('[WebSocket] Final URL:', finalUrl);
 
-      const ws = new WebSocket(wsUrl);
+      const ws = new WebSocket(finalUrl);
 
       ws.onopen = () => {
         console.log("[WebSocket] Connected successfully");
@@ -172,7 +178,7 @@ export function useWebSocket(): WebSocketState {
       connectionTimeoutRef.current = null;
     }
 
-    const isDevEndpoint = WS_URL.includes("/ws/dev");
+    const isDevEndpoint = getWebSocketURL().includes("/ws/dev");
 
     // Connect immediately for dev endpoint, or wait for auth for other endpoints
     if (isDevEndpoint && !wsRef.current) {

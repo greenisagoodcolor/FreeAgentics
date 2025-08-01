@@ -43,12 +43,18 @@ export class WebSocketClient {
     this.setState("connecting");
 
     try {
-      // Use raw token without URL encoding for WebSocket auth
+      // Use native URL API to preserve path and handle query parameters correctly
+      const wsUrl = new URL(this.url);
       const token = localStorage.getItem("fa.jwt");
-      const separator = this.url.includes("?") ? "&" : "?";
-      const wsUrl = `${this.url}${separator}token=${token || ""}`;
-
-      this.ws = new WebSocket(wsUrl);
+      
+      if (token) {
+        wsUrl.searchParams.set('token', token);
+      }
+      
+      const finalUrl = wsUrl.toString();
+      console.log('[WebSocketClient] Connecting to:', finalUrl);
+      
+      this.ws = new WebSocket(finalUrl);
 
       this.ws.onopen = () => {
         this.reconnectAttempts = 0;
