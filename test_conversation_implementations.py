@@ -23,9 +23,11 @@ from api.v1.models.agent_conversation import (
 from api.v1.services.conversation_implementations import (
     ConsensusCompletionDetector,
     ConversationEventPublisher,
+    ConversationSummarizer,
     ConversationTurnController,
     TurnLimitPolicy,
     create_completion_detector,
+    create_conversation_summarizer,
     create_event_publisher,
     create_turn_controller,
     create_turn_limit_policy,
@@ -743,6 +745,287 @@ class TestConsensusCompletionDetector:
         assert no_completion_detected is False
 
 
+class TestConversationSummarizer:
+    """Test suite for ConversationSummarizer."""
+
+    @pytest.fixture
+    def test_conversation_with_turns(self):
+        """Create test conversation with multiple turns."""
+        agent1 = AgentRole(
+            agent_id="agent-1",
+            name="Alice",
+            role="analyst",
+            system_prompt="You analyze data and provide insights.",
+        )
+
+        agent2 = AgentRole(
+            agent_id="agent-2",
+            name="Bob",
+            role="explorer",
+            system_prompt="You explore new ideas and ask questions.",
+        )
+
+        conversation = ConversationAggregate(
+            user_id="test-user",
+            topic="Artificial Intelligence Ethics",
+            participants=[agent1, agent2],
+        )
+
+        # Set conversation timing
+        conversation.started_at = datetime.now() - timedelta(minutes=10)
+        conversation.completed_at = datetime.now()
+        conversation.completion_reason = CompletionReason.CONSENSUS_REACHED
+
+        # Add turns
+        turn1 = ConversationTurnDomain(
+            turn_number=1,
+            agent_id="agent-1",
+            agent_name="Alice",
+            prompt="Analyze AI ethics",
+        )
+        turn1.mark_completed(
+            "AI ethics involves complex considerations about fairness, transparency, and accountability."
+        )
+
+        turn2 = ConversationTurnDomain(
+            turn_number=2,
+            agent_id="agent-2",
+            agent_name="Bob",
+            prompt="Explore ethical implications",
+        )
+        turn2.mark_completed(
+            "What specific areas of AI ethics should we focus on? Privacy seems crucial."
+        )
+
+        turn3 = ConversationTurnDomain(
+            turn_number=3,
+            agent_id="agent-1",
+            agent_name="Alice",
+            prompt="Provide analysis",
+        )
+        turn3.mark_completed(
+            "I agree that privacy is fundamental. We also need algorithmic transparency."
+        )
+
+        conversation.turns = [turn1, turn2, turn3]
+        return conversation
+
+    def test_summarizer_initialization(self):
+        """Test conversation summarizer initialization."""
+        summarizer = ConversationSummarizer(enable_detailed_analysis=True)
+
+        assert summarizer.enable_detailed_analysis is True
+        assert summarizer.metrics["summaries_generated"] == 0
+        assert summarizer.metrics["outcomes_classified"] == 0
+
+    def test_generate_final_summary(self, test_conversation_with_turns):
+        """Test comprehensive final summary generation."""
+        summarizer = ConversationSummarizer()
+
+        summary = summarizer.generate_final_summary(test_conversation_with_turns)
+
+        # Verify summary structure
+        assert "conversation_id" in summary
+        assert "topic" in summary
+        assert "statistics" in summary
+        assert "coherence_score" in summary
+        assert "outcome_classification" in summary
+        assert "participant_analysis" in summary
+        assert "key_insights" in summary
+
+        # Verify statistics
+        stats = summary["statistics"]
+        assert stats["total_turns"] == 3
+        assert stats["successful_turns"] == 3
+        assert stats["failed_turns"] == 0
+        assert stats["participant_count"] == 2
+
+        # Verify outcome classification
+        outcome = summary["outcome_classification"]
+        assert outcome["category"] == "successful_consensus"
+        assert outcome["completion_reason"] == "consensus_reached"
+        assert "quality_score" in outcome
+
+        # Verify participant analysis
+        participants = summary["participant_analysis"]
+        assert "Alice" in participants
+        assert "Bob" in participants
+        assert participants["Alice"]["turns_taken"] == 2
+        assert participants["Bob"]["turns_taken"] == 1
+
+    def test_measure_conversation_coherence(self, test_conversation_with_turns):
+        """Test conversation coherence measurement."""
+        summarizer = ConversationSummarizer()
+
+        coherence_score = summarizer.measure_conversation_coherence(test_conversation_with_turns)
+
+        # Should be positive since all turns completed successfully
+        assert 0.0 <= coherence_score <= 1.0
+        assert coherence_score > 0.5  # Should be decent coherence
+
+        # Test with empty conversation (minimal valid conversation)
+        empty_agent = AgentRole(
+            agent_id="empty-agent",
+            name="EmptyAgent",
+            role="test",
+            system_prompt="Empty test agent",
+        )
+        empty_conversation = ConversationAggregate(
+            user_id="test",
+            topic="Empty",
+            participants=[empty_agent],
+        )
+
+        empty_coherence = summarizer.measure_conversation_coherence(empty_conversation)
+        assert empty_coherence == 0.0
+
+    def test_classify_conversation_outcome(self, test_conversation_with_turns):
+        """Test conversation outcome classification."""
+        summarizer = ConversationSummarizer()
+
+        # Test successful consensus outcome
+        outcome = summarizer.classify_conversation_outcome(test_conversation_with_turns)
+
+        assert outcome["category"] == "successful_consensus"
+        assert (
+            outcome["description"] == "Conversation reached successful consensus among participants"
+        )
+        assert outcome["quality_score"] > 0.5
+        assert len(outcome["recommendations"]) > 0
+
+        # Test different completion reasons
+        test_conversation_with_turns.completion_reason = CompletionReason.TURN_LIMIT_REACHED
+
+        outcome_limit = summarizer.classify_conversation_outcome(test_conversation_with_turns)
+        assert outcome_limit["category"] in ["productive_completion", "inconclusive"]
+
+        # Test timeout outcome
+        test_conversation_with_turns.completion_reason = CompletionReason.TIMEOUT
+
+        outcome_timeout = summarizer.classify_conversation_outcome(test_conversation_with_turns)
+        assert outcome_timeout["category"] == "timeout"
+
+    def test_participant_analysis(self, test_conversation_with_turns):
+        """Test participant contribution analysis."""
+        summarizer = ConversationSummarizer()
+
+        analysis = summarizer._analyze_participant_contributions(test_conversation_with_turns)
+
+        # Verify Alice's analysis (2 turns)
+        alice_analysis = analysis["Alice"]
+        assert alice_analysis["turns_taken"] == 2
+        assert alice_analysis["role"] == "analyst"
+        assert alice_analysis["contribution_percentage"] > 50  # More than 50% of turns
+
+        # Verify Bob's analysis (1 turn)
+        bob_analysis = analysis["Bob"]
+        assert bob_analysis["turns_taken"] == 1
+        assert bob_analysis["role"] == "explorer"
+        assert bob_analysis["contribution_percentage"] < 50  # Less than 50% of turns
+
+    def test_extract_key_insights(self, test_conversation_with_turns):
+        """Test key insights extraction."""
+        summarizer = ConversationSummarizer()
+
+        insights = summarizer._extract_key_insights(test_conversation_with_turns)
+
+        assert isinstance(insights, list)
+        assert len(insights) > 0
+
+        # Should identify Alice as more active
+        participation_insight = next(
+            (insight for insight in insights if "Most active participant" in insight), None
+        )
+        if participation_insight:
+            assert "Alice" in participation_insight
+
+    def test_topic_relevance_measurement(self):
+        """Test topic relevance measurement."""
+        summarizer = ConversationSummarizer()
+
+        # Create turns with topic relevance
+        topic = "artificial intelligence ethics"
+
+        relevant_turn = ConversationTurnDomain(
+            turn_number=1,
+            agent_id="test-agent",
+            agent_name="TestAgent",
+            prompt="test",
+        )
+        relevant_turn.mark_completed(
+            "Artificial intelligence ethics requires careful consideration of fairness."
+        )
+
+        irrelevant_turn = ConversationTurnDomain(
+            turn_number=2,
+            agent_id="test-agent",
+            agent_name="TestAgent",
+            prompt="test",
+        )
+        irrelevant_turn.mark_completed("The weather is nice today and I like pizza.")
+
+        # Test with relevant turns
+        relevance_high = summarizer._measure_topic_relevance(topic, [relevant_turn])
+        assert relevance_high > 0.5
+
+        # Test with irrelevant turns
+        relevance_low = summarizer._measure_topic_relevance(topic, [irrelevant_turn])
+        assert relevance_low < 0.5
+
+        # Test with mixed turns
+        relevance_mixed = summarizer._measure_topic_relevance(
+            topic, [relevant_turn, irrelevant_turn]
+        )
+        assert 0.0 <= relevance_mixed <= 1.0
+
+    def test_outcome_recommendations(self):
+        """Test outcome recommendation generation."""
+        summarizer = ConversationSummarizer()
+
+        # Test recommendations for different categories and quality scores
+        recommendations_success = summarizer._generate_outcome_recommendations(
+            "successful_consensus", 0.8
+        )
+        assert any("successfully" in rec.lower() for rec in recommendations_success)
+
+        recommendations_failure = summarizer._generate_outcome_recommendations(
+            "technical_failure", 0.3
+        )
+        assert any("logs" in rec.lower() for rec in recommendations_failure)
+
+        recommendations_timeout = summarizer._generate_outcome_recommendations("timeout", 0.4)
+        assert any("time" in rec.lower() for rec in recommendations_timeout)
+
+    def test_summarizer_metrics(self):
+        """Test summarizer metrics tracking."""
+        summarizer = ConversationSummarizer()
+
+        # Initial metrics
+        initial_metrics = summarizer.get_metrics()
+        assert initial_metrics["summaries_generated"] == 0
+
+        # Create test conversation and generate summary
+        agent = AgentRole(
+            agent_id="test-agent",
+            name="TestAgent",
+            role="test",
+            system_prompt="Test agent",
+        )
+
+        conversation = ConversationAggregate(
+            user_id="test",
+            topic="Test topic",
+            participants=[agent],
+        )
+
+        # Generate summary and classification to update metrics
+        summarizer.generate_final_summary(conversation)
+
+        updated_metrics = summarizer.get_metrics()
+        assert updated_metrics["summaries_generated"] == 1
+        assert updated_metrics["outcomes_classified"] == 1
+
+
 class TestFactoryFunctions:
     """Test suite for factory functions."""
 
@@ -781,6 +1064,13 @@ class TestFactoryFunctions:
 
         assert isinstance(detector, ConsensusCompletionDetector)
         assert detector.enable_consensus_detection is False
+
+    def test_create_conversation_summarizer(self):
+        """Test conversation summarizer factory function."""
+        summarizer = create_conversation_summarizer(enable_detailed_analysis=False)
+
+        assert isinstance(summarizer, ConversationSummarizer)
+        assert summarizer.enable_detailed_analysis is False
 
 
 if __name__ == "__main__":

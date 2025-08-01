@@ -11,6 +11,7 @@ error handling, and production-ready observability.
 import asyncio
 import logging
 import time
+from datetime import datetime
 from typing import Any, Dict, List, Optional
 
 from api.v1.models.agent_conversation import (
@@ -630,6 +631,405 @@ class ConsensusCompletionDetector(ICompletionDetector):
         return self.detections.copy()
 
 
+class ConversationSummarizer:
+    """
+    Generates final summaries and outcome classifications for completed conversations.
+
+    Provides conversation coherence measurement, outcome classification, and
+    final summary generation for conversation completion.
+    """
+
+    def __init__(self, enable_detailed_analysis: bool = True):
+        """Initialize conversation summarizer."""
+        self.enable_detailed_analysis = enable_detailed_analysis
+
+        # Summary generation metrics
+        self.metrics = {
+            "summaries_generated": 0,
+            "outcomes_classified": 0,
+            "coherence_measured": 0,
+        }
+
+        logger.info("ConversationSummarizer initialized")
+
+    def generate_final_summary(self, conversation: ConversationAggregate) -> Dict[str, Any]:
+        """
+        Generate comprehensive final summary for completed conversation.
+
+        Args:
+            conversation: Completed conversation aggregate
+
+        Returns:
+            Summary dictionary with analysis and outcomes
+        """
+        self.metrics["summaries_generated"] += 1
+
+        # Basic conversation statistics
+        total_turns = len(conversation.turns)
+        successful_turns = len([t for t in conversation.turns if t.status == TurnStatus.COMPLETED])
+
+        # Calculate conversation duration
+        duration_minutes = 0.0
+        if conversation.started_at and conversation.completed_at:
+            duration_minutes = (
+                conversation.completed_at - conversation.started_at
+            ).total_seconds() / 60
+
+        # Measure conversation coherence
+        coherence_score = self.measure_conversation_coherence(conversation)
+
+        # Classify conversation outcome
+        outcome_classification = self.classify_conversation_outcome(conversation)
+
+        # Generate participant analysis
+        participant_analysis = self._analyze_participant_contributions(conversation)
+
+        # Generate key insights from conversation
+        key_insights = self._extract_key_insights(conversation)
+
+        summary = {
+            "conversation_id": conversation.conversation_id,
+            "topic": conversation.topic,
+            "summary_generated_at": datetime.now().isoformat(),
+            "statistics": {
+                "total_turns": total_turns,
+                "successful_turns": successful_turns,
+                "failed_turns": total_turns - successful_turns,
+                "duration_minutes": round(duration_minutes, 2),
+                "participant_count": len(conversation.participants),
+            },
+            "coherence_score": round(coherence_score, 3),
+            "outcome_classification": outcome_classification,
+            "participant_analysis": participant_analysis,
+            "key_insights": key_insights,
+            "completion_reason": conversation.completion_reason.value
+            if conversation.completion_reason
+            else "unknown",
+            "final_status": conversation.status.value,
+        }
+
+        logger.info(
+            f"Generated summary for conversation {conversation.conversation_id}: "
+            f"{outcome_classification['category']} outcome, coherence: {coherence_score:.2f}"
+        )
+
+        return summary
+
+    def measure_conversation_coherence(self, conversation: ConversationAggregate) -> float:
+        """
+        Measure overall conversation coherence based on turn quality and flow.
+
+        Args:
+            conversation: Conversation to analyze
+
+        Returns:
+            Coherence score from 0.0 to 1.0
+        """
+        self.metrics["coherence_measured"] += 1
+
+        if not conversation.turns:
+            return 0.0
+
+        completed_turns = [
+            t for t in conversation.turns if t.status == TurnStatus.COMPLETED and t.response
+        ]
+
+        if len(completed_turns) < 2:
+            return 0.5  # Not enough data for coherence measurement
+
+        coherence_factors = []
+
+        # 1. Turn success rate (conversations with many failed turns are less coherent)
+        success_rate = len(completed_turns) / len(conversation.turns)
+        coherence_factors.append(success_rate)
+
+        # 2. Response length consistency (wildly varying lengths indicate poor coherence)
+        response_lengths = [len(turn.response) for turn in completed_turns]
+        avg_length = sum(response_lengths) / len(response_lengths)
+        length_variance = sum((length - avg_length) ** 2 for length in response_lengths) / len(
+            response_lengths
+        )
+        length_consistency = max(
+            0, 1 - (length_variance / (avg_length**2)) if avg_length > 0 else 0
+        )
+        coherence_factors.append(min(length_consistency, 1.0))
+
+        # 3. Turn timing consistency (regular turn intervals suggest better flow)
+        if len(completed_turns) >= 3:
+            turn_intervals = []
+            for i in range(1, len(completed_turns)):
+                if completed_turns[i].started_at and completed_turns[i - 1].completed_at:
+                    interval = (
+                        completed_turns[i].started_at - completed_turns[i - 1].completed_at
+                    ).total_seconds()
+                    turn_intervals.append(interval)
+
+            if turn_intervals:
+                avg_interval = sum(turn_intervals) / len(turn_intervals)
+                interval_variance = sum(
+                    (interval - avg_interval) ** 2 for interval in turn_intervals
+                ) / len(turn_intervals)
+                timing_consistency = max(
+                    0, 1 - (interval_variance / (avg_interval**2)) if avg_interval > 0 else 0
+                )
+                coherence_factors.append(min(timing_consistency, 1.0))
+
+        # 4. Topic relevance (responses that stay on topic indicate coherence)
+        topic_relevance = self._measure_topic_relevance(conversation.topic, completed_turns)
+        coherence_factors.append(topic_relevance)
+
+        # Calculate weighted average coherence score
+        weights = [
+            0.3,
+            0.2,
+            0.2,
+            0.3,
+        ]  # success_rate, length_consistency, timing_consistency, topic_relevance
+        weights = weights[: len(coherence_factors)]  # Adjust if timing data unavailable
+
+        # Normalize weights
+        weight_sum = sum(weights)
+        normalized_weights = [w / weight_sum for w in weights]
+
+        coherence_score = sum(
+            factor * weight for factor, weight in zip(coherence_factors, normalized_weights)
+        )
+
+        return min(max(coherence_score, 0.0), 1.0)
+
+    def classify_conversation_outcome(self, conversation: ConversationAggregate) -> Dict[str, Any]:
+        """
+        Classify the outcome of a completed conversation.
+
+        Args:
+            conversation: Completed conversation
+
+        Returns:
+            Outcome classification with category and details
+        """
+        self.metrics["outcomes_classified"] += 1
+
+        # Determine outcome category based on completion reason and conversation analysis
+        completion_reason = conversation.completion_reason
+
+        if completion_reason == CompletionReason.CONSENSUS_REACHED:
+            category = "successful_consensus"
+            description = "Conversation reached successful consensus among participants"
+        elif completion_reason == CompletionReason.TASK_COMPLETED:
+            category = "task_completion"
+            description = "Conversation successfully completed its assigned task"
+        elif completion_reason == CompletionReason.TURN_LIMIT_REACHED:
+            # Analyze if turn limit was reached productively
+            coherence = self.measure_conversation_coherence(conversation)
+            if coherence >= 0.7:
+                category = "productive_completion"
+                description = "Conversation reached turn limit with high coherence and productivity"
+            else:
+                category = "inconclusive"
+                description = "Conversation reached turn limit without clear resolution"
+        elif completion_reason == CompletionReason.TIMEOUT:
+            category = "timeout"
+            description = "Conversation exceeded time limit"
+        elif completion_reason == CompletionReason.AGENT_FAILURE:
+            category = "technical_failure"
+            description = "Conversation ended due to agent or system failures"
+        elif completion_reason == CompletionReason.MANUAL_STOP:
+            category = "manually_stopped"
+            description = "Conversation was manually stopped by user"
+        else:
+            category = "unknown"
+            description = "Conversation outcome could not be determined"
+
+        # Calculate outcome quality score
+        quality_factors = []
+
+        # Factor 1: Completion rate (how many turns were successful)
+        if conversation.turns:
+            successful_turns = len(
+                [t for t in conversation.turns if t.status == TurnStatus.COMPLETED]
+            )
+            completion_rate = successful_turns / len(conversation.turns)
+            quality_factors.append(completion_rate)
+
+        # Factor 2: Coherence score
+        coherence = self.measure_conversation_coherence(conversation)
+        quality_factors.append(coherence)
+
+        # Factor 3: Outcome type bonus/penalty
+        outcome_bonuses = {
+            "successful_consensus": 0.2,
+            "task_completion": 0.2,
+            "productive_completion": 0.1,
+            "inconclusive": -0.1,
+            "timeout": -0.2,
+            "technical_failure": -0.3,
+            "manually_stopped": 0.0,
+            "unknown": -0.1,
+        }
+
+        base_quality = sum(quality_factors) / len(quality_factors) if quality_factors else 0.5
+        quality_score = base_quality + outcome_bonuses.get(category, 0)
+        quality_score = min(max(quality_score, 0.0), 1.0)
+
+        return {
+            "category": category,
+            "description": description,
+            "quality_score": round(quality_score, 3),
+            "completion_reason": completion_reason.value if completion_reason else "unknown",
+            "recommendations": self._generate_outcome_recommendations(category, quality_score),
+        }
+
+    def _analyze_participant_contributions(
+        self, conversation: ConversationAggregate
+    ) -> Dict[str, Any]:
+        """Analyze individual participant contributions to the conversation."""
+        analysis = {}
+
+        for participant in conversation.participants:
+            participant_turns = [
+                t
+                for t in conversation.turns
+                if t.agent_id == participant.agent_id and t.status == TurnStatus.COMPLETED
+            ]
+
+            if participant_turns:
+                total_response_length = sum(len(t.response or "") for t in participant_turns)
+                avg_response_length = total_response_length / len(participant_turns)
+
+                # Calculate average turn duration
+                turn_durations = []
+                for turn in participant_turns:
+                    if turn.duration_seconds:
+                        turn_durations.append(turn.duration_seconds)
+
+                avg_duration = sum(turn_durations) / len(turn_durations) if turn_durations else 0
+
+                analysis[participant.name] = {
+                    "turns_taken": len(participant_turns),
+                    "total_response_length": total_response_length,
+                    "avg_response_length": round(avg_response_length, 1),
+                    "avg_turn_duration_seconds": round(avg_duration, 2),
+                    "role": participant.role,
+                    "contribution_percentage": round(
+                        (len(participant_turns) / len(conversation.turns)) * 100, 1
+                    )
+                    if conversation.turns
+                    else 0,
+                }
+
+        return analysis
+
+    def _extract_key_insights(self, conversation: ConversationAggregate) -> List[str]:
+        """Extract key insights from conversation content."""
+        insights = []
+
+        completed_turns = [
+            t for t in conversation.turns if t.status == TurnStatus.COMPLETED and t.response
+        ]
+
+        if not completed_turns:
+            return ["No successful turns to analyze"]
+
+        # Insight 1: Conversation participation pattern
+        participant_counts = {}
+        for turn in completed_turns:
+            participant_counts[turn.agent_name] = participant_counts.get(turn.agent_name, 0) + 1
+
+        if participant_counts:
+            most_active = max(participant_counts, key=participant_counts.get)
+            least_active = min(participant_counts, key=participant_counts.get)
+
+            if most_active != least_active:
+                insights.append(
+                    f"Most active participant: {most_active} ({participant_counts[most_active]} turns), "
+                    f"least active: {least_active} ({participant_counts[least_active]} turns)"
+                )
+
+        # Insight 2: Response length trends
+        response_lengths = [len(turn.response) for turn in completed_turns[-5:]]  # Last 5 turns
+        if len(response_lengths) >= 3:
+            if response_lengths[-1] > response_lengths[0] * 1.5:
+                insights.append("Response length increased significantly toward the end")
+            elif response_lengths[-1] < response_lengths[0] * 0.7:
+                insights.append("Response length decreased significantly toward the end")
+
+        # Insight 3: Conversation momentum
+        if len(completed_turns) >= 5:
+            early_avg_length = sum(len(t.response) for t in completed_turns[:3]) / 3
+            late_avg_length = sum(len(t.response) for t in completed_turns[-3:]) / 3
+
+            if late_avg_length > early_avg_length * 1.3:
+                insights.append("Conversation gained momentum and depth over time")
+            elif late_avg_length < early_avg_length * 0.7:
+                insights.append("Conversation appeared to lose momentum toward the end")
+
+        # Insight 4: Topic coherence
+        topic_relevance = self._measure_topic_relevance(conversation.topic, completed_turns)
+        if topic_relevance >= 0.8:
+            insights.append("Conversation maintained strong focus on the main topic")
+        elif topic_relevance <= 0.4:
+            insights.append("Conversation frequently diverged from the main topic")
+
+        return insights if insights else ["Conversation completed with standard patterns"]
+
+    def _measure_topic_relevance(self, topic: str, turns: List[ConversationTurnDomain]) -> float:
+        """Measure how well conversation turns stayed relevant to the topic."""
+        if not turns or not topic:
+            return 0.5
+
+        # Simple keyword-based relevance (could be enhanced with embeddings)
+        topic_keywords = set(word.lower().strip(".,!?") for word in topic.split() if len(word) > 2)
+
+        if not topic_keywords:
+            return 0.5
+
+        relevance_scores = []
+        for turn in turns:
+            if not turn.response:
+                continue
+
+            response_words = set(word.lower().strip(".,!?") for word in turn.response.split())
+            common_words = topic_keywords.intersection(response_words)
+            relevance = len(common_words) / len(topic_keywords) if topic_keywords else 0
+            relevance_scores.append(min(relevance, 1.0))
+
+        return sum(relevance_scores) / len(relevance_scores) if relevance_scores else 0.5
+
+    def _generate_outcome_recommendations(self, category: str, quality_score: float) -> List[str]:
+        """Generate recommendations based on conversation outcome."""
+        recommendations = []
+
+        if quality_score < 0.5:
+            recommendations.append("Consider adjusting conversation parameters for better outcomes")
+
+        if category == "inconclusive":
+            recommendations.append("Try extending turn limits or improving completion detection")
+
+        elif category == "technical_failure":
+            recommendations.append("Review system logs for agent or infrastructure issues")
+
+        elif category == "timeout":
+            recommendations.append(
+                "Consider extending time limits or improving agent response times"
+            )
+
+        elif category in ["successful_consensus", "task_completion"]:
+            recommendations.append(
+                "Conversation completed successfully - consider similar parameters for future conversations"
+            )
+
+        elif category == "productive_completion":
+            recommendations.append(
+                "Good conversation flow - outcomes could be enhanced with better completion detection"
+            )
+
+        return recommendations if recommendations else ["No specific recommendations"]
+
+    def get_metrics(self) -> Dict[str, Any]:
+        """Get summarizer metrics."""
+        return self.metrics.copy()
+
+
 # Factory functions for dependency injection
 
 
@@ -669,3 +1069,8 @@ def create_completion_detector(enable_consensus: bool = True) -> ConsensusComple
         consensus_threshold=0.7,
         min_turns_for_consensus=3,
     )
+
+
+def create_conversation_summarizer(enable_detailed_analysis: bool = True) -> ConversationSummarizer:
+    """Factory function to create configured conversation summarizer."""
+    return ConversationSummarizer(enable_detailed_analysis=enable_detailed_analysis)
