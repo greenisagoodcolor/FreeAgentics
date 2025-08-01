@@ -5,6 +5,20 @@ to build, query, and evolve their understanding of the world.
 """
 
 from knowledge_graph.evolution import EvolutionEngine, MutationOperator
+from knowledge_graph.extraction import (
+    ConversationExtractor,
+    ConversationMessage,
+    ContextAwareExtractor,
+    CoReferenceResolver,
+    EntityExtractionStrategy,
+    ExtractionContext,
+    ExtractionPipeline,
+    ExtractionResult,
+    LLMFallbackExtractor,
+    PatternRelationExtractor,
+    RelationExtractionStrategy,
+    SpacyEntityExtractor,
+)
 from knowledge_graph.graph_engine import KnowledgeEdge, KnowledgeGraph, KnowledgeNode
 from knowledge_graph.query import GraphQuery, QueryResult
 from knowledge_graph.schema import (
@@ -40,4 +54,17 @@ __all__ = [
     "SchemaEvolutionManager",
     "SchemaValidator",
     "TemporalMetadata",
+    # Extraction pipeline components
+    "ConversationExtractor",
+    "ConversationMessage",
+    "ContextAwareExtractor",
+    "CoReferenceResolver",
+    "EntityExtractionStrategy",
+    "ExtractionContext",
+    "ExtractionPipeline",
+    "ExtractionResult",
+    "LLMFallbackExtractor",
+    "PatternRelationExtractor",
+    "RelationExtractionStrategy",
+    "SpacyEntityExtractor",
 ]
