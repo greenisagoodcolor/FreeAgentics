@@ -114,8 +114,8 @@ def inject_dev_auth_middleware(app):
                     (b"authorization", f"Bearer {token_info['access_token']}".encode())
                 )
 
-                # Add fingerprint for token validation
-                request.headers.__dict__["_list"].append((b"x-fingerprint", b"dev_fingerprint"))
+                # Add fingerprint for token validation (capitalize to match get_current_user)
+                request.headers.__dict__["_list"].append((b"X-Fingerprint", b"dev_fingerprint"))
 
         response = await call_next(request)
         return response

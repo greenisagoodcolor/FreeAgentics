@@ -280,7 +280,7 @@ class TestGraphQueryEngine:
             id="edge1",
             source_id="node1",
             target_id="node2",
-            type=EdgeType.RELATES_TO,
+            type=EdgeType.RELATED_TO,
             confidence=0.8,
             created_at=datetime.now(timezone.utc),
             properties={},
@@ -524,8 +524,8 @@ class TestGraphQueryEngine:
         """Test query timeout handling."""
         mock_cache.get.return_value = None
 
-        # Mock slow execution
-        with patch("asyncio.wait_for", side_effect=asyncio.TimeoutError):
+        # Mock the actual method that might timeout
+        with patch.object(engine, '_execute_node_lookup', side_effect=asyncio.TimeoutError):
             with pytest.raises(HTTPException) as exc_info:
                 await engine.execute_query(QueryType.NODE_LOOKUP, QueryOptions(timeout_seconds=0.1))
 

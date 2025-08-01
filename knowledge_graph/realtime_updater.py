@@ -22,7 +22,12 @@ from knowledge_graph.schema import (
     ConversationEntity,
     ConversationRelation,
 )
-from observability.prometheus_metrics import PrometheusMetricsCollector as PrometheusMetrics
+from observability.prometheus_metrics import (
+    PrometheusMetricsCollector,
+    kg_node_total,
+    business_inference_operations_total,
+    agent_inference_duration_seconds,
+)
 
 logger = logging.getLogger(__name__)
 
@@ -127,7 +132,7 @@ class DefaultConflictResolver(IConflictResolver):
             similarity_threshold: Minimum similarity to consider entities conflicting
         """
         self.similarity_threshold = similarity_threshold
-        self.metrics = PrometheusMetrics()
+        self.metrics = PrometheusMetricsCollector()
 
     async def detect_conflicts(
         self, new_entity: ConversationEntity, existing_entities: List[ConversationEntity]
@@ -226,7 +231,7 @@ class WebSocketEventStreamer(IEventStreamer):
         self.is_streaming = False
         self.connected_clients: Set[Any] = set()  # WebSocket connections
         self.event_queue = asyncio.Queue()
-        self.metrics = PrometheusMetrics()
+        self.metrics = PrometheusMetricsCollector()
 
     async def stream_event(self, event: GraphUpdateEvent) -> bool:
         """Stream event to all connected clients."""
@@ -235,12 +240,12 @@ class WebSocketEventStreamer(IEventStreamer):
 
         try:
             await self.event_queue.put(event)
-            self.metrics.increment_counter("kg_events_queued_total")
+            business_inference_operations_total.labels(operation_type="kg_event_queue", success="true").inc()
             return True
 
         except Exception as e:
             logger.error(f"Failed to queue event {event.event_id}: {e}")
-            self.metrics.increment_counter("kg_event_streaming_errors_total")
+            business_inference_operations_total.labels(operation_type="kg_event_queue", success="false").inc()
             return False
 
     async def start_streaming(self) -> None:
@@ -285,7 +290,7 @@ class WebSocketEventStreamer(IEventStreamer):
         for client in self.connected_clients:
             try:
                 await client.send_json(event_data)
-                self.metrics.increment_counter("kg_events_broadcasted_total")
+                business_inference_operations_total.labels(operation_type="kg_event_broadcast", success="true").inc()
             except Exception as e:
                 logger.warning(f"Failed to send event to client: {e}")
                 disconnected_clients.add(client)
@@ -325,7 +330,7 @@ class RealtimeGraphUpdater:
         self.active_updates: Dict[str, asyncio.Task] = {}
 
         # Monitoring
-        self.metrics = PrometheusMetrics()
+        self.metrics = PrometheusMetricsCollector()
         self.is_running = False
 
         logger.info("Initialized RealtimeGraphUpdater")
@@ -401,14 +406,14 @@ class RealtimeGraphUpdater:
 
             # Process relations
             relation_events = await self._process_relations(
-                extraction_result.relationships, conversation_id, message_id, trace_id
+                extraction_result.relations, conversation_id, message_id, trace_id
             )
             events.extend(relation_events)
 
             # Record processing metrics
             processing_time = (datetime.now(timezone.utc) - start_time).total_seconds()
-            self.metrics.record_histogram("kg_update_processing_duration_seconds", processing_time)
-            self.metrics.increment_counter("kg_updates_processed_total")
+            agent_inference_duration_seconds.labels(agent_id="realtime_updater", operation_type="kg_update").observe(processing_time)
+            business_inference_operations_total.labels(operation_type="kg_update", success="true").inc()
 
             logger.info(
                 f"Processed extraction result in {processing_time:.3f}s",
@@ -416,7 +421,7 @@ class RealtimeGraphUpdater:
                     "conversation_id": conversation_id,
                     "message_id": message_id,
                     "entities_processed": len(extraction_result.entities),
-                    "relations_processed": len(extraction_result.relationships),
+                    "relations_processed": len(extraction_result.relations),
                     "events_generated": len(events),
                     "trace_id": trace_id,
                 },
@@ -445,7 +450,7 @@ class RealtimeGraphUpdater:
             )
 
             await self.event_streamer.stream_event(failure_event)
-            self.metrics.increment_counter("kg_update_failures_total")
+            business_inference_operations_total.labels(operation_type="kg_update", success="false").inc()
 
             raise
 
@@ -512,7 +517,7 @@ class RealtimeGraphUpdater:
 
             except Exception as e:
                 logger.error(f"Failed to process entity {entity.entity_id}: {e}")
-                self.metrics.increment_counter("kg_entity_processing_errors_total")
+                business_inference_operations_total.labels(operation_type="kg_entity_process", success="false").inc()
                 continue
 
         return events
@@ -549,7 +554,7 @@ class RealtimeGraphUpdater:
 
             except Exception as e:
                 logger.error(f"Failed to process relation {relation.relation_id}: {e}")
-                self.metrics.increment_counter("kg_relation_processing_errors_total")
+                business_inference_operations_total.labels(operation_type="kg_relation_process", success="false").inc()
                 continue
 
         return events
