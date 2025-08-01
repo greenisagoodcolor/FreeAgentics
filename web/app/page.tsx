@@ -36,7 +36,7 @@ export default function HomePage() {
         <div className="px-4 pt-4">
           <ApiKeyBanner onSettingsClick={() => setIsSettingsOpen(true)} />
         </div>
-        {/* Top Row - 2 columns with explanations */}
+        {/* Main grid - 2 columns */}
         <div className="main-row grid grid-cols-1 lg:grid-cols-2 gap-4 p-4 flex-1 overflow-hidden">
           {/* Agent Creator Panel */}
           <div className="h-full overflow-hidden">
@@ -49,27 +49,26 @@ export default function HomePage() {
             <AgentCreatorPanel />
           </div>
 
-          {/* Knowledge Graph View */}
+          {/* Conversation Window - takes full height */}
           <div className="h-full overflow-hidden">
             <div className="mb-2">
               <p className="text-sm text-muted-foreground">
-                Semantic knowledge representation showing agent beliefs and world model
-                relationships
+                Real-time conversation with agents showing their reasoning process and
+                decision-making via PyMDP
               </p>
             </div>
-            <KnowledgeGraphView />
+            <ConversationWindow />
           </div>
         </div>
 
-        {/* Bottom Row - Expanded Conversation Window (bottom half) */}
-        <div className="conversation-row w-full p-4 h-1/2">
+        {/* Knowledge Graph - bottom row, full width */}
+        <div className="knowledge-graph-row w-full p-4 h-1/2">
           <div className="mb-2">
             <p className="text-sm text-muted-foreground">
-              Real-time conversation with agents showing their reasoning process and decision-making
-              via PyMDP
+              Semantic knowledge representation showing agent beliefs and world model relationships
             </p>
           </div>
-          <ConversationWindow />
+          <KnowledgeGraphView />
         </div>
       </div>
 
