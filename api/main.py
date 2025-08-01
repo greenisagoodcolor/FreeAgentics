@@ -33,6 +33,7 @@ from api.v1 import (
 )
 from api.v1.graphql_schema import graphql_app
 from api.v1.routers import agent_conversations_router
+from api.v1.routers.gmn_generation import router as gmn_generation_router
 from api.v1.websockets import agent_conversation_ws_router
 from auth.security_headers import SecurityHeadersManager, SecurityHeadersMiddleware, SecurityPolicy
 from observability.performance_metrics import start_performance_tracking
@@ -182,6 +183,7 @@ app.include_router(dev_config.router, prefix="/api/v1", tags=["dev"])  # Dev con
 app.include_router(agents.router, prefix="/api/v1", tags=["agents"])
 app.include_router(agent_creation.router, prefix="/api/v1/agents", tags=["agent-creation"])
 app.include_router(agent_conversations_router, prefix="/api/v1", tags=["agent-conversations"])
+app.include_router(gmn_generation_router, prefix="/api/v1", tags=["gmn-generation"])
 app.include_router(prompts.router, prefix="/api/v1", tags=["prompts"])
 app.include_router(inference.router, prefix="/api/v1", tags=["inference"])
 app.include_router(knowledge.router, prefix="/api/v1/knowledge", tags=["knowledge"])
