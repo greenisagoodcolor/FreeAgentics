@@ -21,6 +21,7 @@ from fastapi import APIRouter, Depends, HTTPException
 from pydantic import BaseModel, Field
 from sqlalchemy.orm import Session
 
+from agents.kg_integration import AgentKnowledgeGraphIntegration
 from auth.security_implementation import Permission, TokenData, get_current_user, require_permission
 from database.models import Agent as AgentModel
 from database.models import AgentStatus as DBAgentStatus
@@ -81,6 +82,7 @@ class AgentConversationService:
     def __init__(self):
         self.llm_factory = LLMProviderFactory()
         self.active_conversations: Dict[str, Dict] = {}
+        self.kg_integration = AgentKnowledgeGraphIntegration()
 
     def create_agent_roles(self, prompt: str, agent_count: int) -> List[AgentRole]:
         """Create agent roles based on the conversation prompt."""
@@ -149,7 +151,7 @@ class AgentConversationService:
             }
 
             agent_parameters = {
-                "use_pymdp": False,  # Simplified for conversations
+                "use_pymdp": True,  # Enable PyMDP for full active inference
                 "role": role.role,
                 "personality": role.personality,
                 "conversation_mode": True,
@@ -180,8 +182,8 @@ class AgentConversationService:
         prompt: str,
         turns: int,
         user_id: str,
-        llm_provider: str = "openai",
-        model: str = "gpt-3.5-turbo",
+        llm_provider: Optional[str] = "openai",
+        model: Optional[str] = "gpt-3.5-turbo",
     ) -> List[ConversationMessage]:
         """Run the actual conversation between agents."""
 
@@ -213,6 +215,20 @@ class AgentConversationService:
                         # Build conversation context
                         context_messages = [{"role": "system", "content": system_prompt}]
 
+                        # Add knowledge graph context for informed responses
+                        try:
+                            agent_history = self.kg_integration.get_agent_history(
+                                str(agent.id), limit=10
+                            )
+                            if agent_history.get("events"):
+                                kg_context = f"\n\nKnowledge Graph Context:\n"
+                                for event in agent_history["events"][-3:]:  # Last 3 events
+                                    kg_context += f"- {event['type']}: {event.get('properties', {}).get('response_content', 'action taken')}\n"
+                                system_prompt += kg_context
+                                context_messages[0]["content"] = system_prompt
+                        except Exception as kg_error:
+                            logger.debug(f"Could not add KG context: {kg_error}")
+
                         # Add recent conversation history (last 6 messages to keep context manageable)
                         recent_history = conversation_history[-6:] if conversation_history else []
                         if recent_history:
@@ -235,7 +251,7 @@ class AgentConversationService:
                         # Generate response
                         generation_request = GenerationRequest(
                             messages=context_messages,
-                            model=model,
+                            model=model or "gpt-3.5-turbo",
                             temperature=0.8,  # Higher temperature for more varied responses
                             max_tokens=150,  # Keep responses concise
                         )
@@ -267,6 +283,49 @@ class AgentConversationService:
 
                         messages.append(message)
                         conversation_history.append(f"{agent.name}: {content}")
+
+                        # Update knowledge graph with agent action
+                        try:
+                            self.kg_integration.update_from_agent_step(
+                                agent_id=str(agent.id),
+                                observation=f"conversation_turn_{turn + 1}",
+                                action="respond",
+                                beliefs={
+                                    "response_content": content,
+                                    "role": agent.parameters.get("role"),
+                                },
+                                free_energy=None,  # Could be calculated from LLM confidence
+                            )
+
+                            # Broadcast KG update via WebSocket
+                            try:
+                                from api.v1.websocket import manager
+
+                                await manager.broadcast(
+                                    {
+                                        "type": "knowledge_graph_update",
+                                        "data": {
+                                            "operation": "add_node",
+                                            "nodes": [
+                                                {
+                                                    "id": f"agent_{agent.id}_turn_{turn + 1}",
+                                                    "label": f"{agent.name} Response",
+                                                    "type": "action",
+                                                    "metadata": {
+                                                        "agent_id": str(agent.id),
+                                                        "content": content[:100],
+                                                        "turn": turn + 1,
+                                                    },
+                                                }
+                                            ],
+                                        },
+                                    }
+                                )
+                            except Exception as ws_error:
+                                logger.debug(f"Failed to broadcast KG update: {ws_error}")
+
+                        except Exception as kg_error:
+                            logger.warning(f"Failed to update knowledge graph: {kg_error}")
 
                         logger.info(f"Turn {turn + 1} - {agent.name}: {content[:100]}...")
 
@@ -452,7 +511,7 @@ async def get_conversation(
     """Get a conversation by ID."""
 
     # Get conversation from service
-    conversation_data = conversation_service.get_conversation(conversation_id)
+    conversation_data = conversation_service.active_conversations.get(conversation_id)
 
     if not conversation_data:
         raise HTTPException(status_code=404, detail=f"Conversation {conversation_id} not found")
@@ -488,7 +547,7 @@ async def list_conversations(
                 "message_count": len(conv_data.get("messages", [])),
                 "started_at": conv_data["started_at"].isoformat(),
                 "completed_at": conv_data.get("completed_at").isoformat()
-                if conv_data.get("completed_at")
+                if conv_data.get("completed_at") is not None
                 else None,
             }
         )
