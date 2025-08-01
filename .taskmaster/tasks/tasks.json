@@ -2120,8 +2120,54 @@
         "testStrategy": "Test conversation flow with multiple agents. Verify context preservation across turns. Test conversation controls and completion conditions. Mock LLM responses for deterministic testing.",
         "priority": "high",
         "dependencies": [40],
-        "status": "pending",
-        "subtasks": []
+        "status": "in-progress",
+        "subtasks": [
+          {
+            "id": 1,
+            "title": "Design Conversation Orchestrator Architecture",
+            "description": "Design the core conversation orchestrator system with turn management, state tracking, and agent coordination capabilities",
+            "dependencies": [],
+            "details": "Define ConversationOrchestrator class with methods for: initializing conversations with selected agents, managing turn order and transitions, tracking conversation state (active, paused, completed), handling agent timeouts and failures. Design interfaces for: IConversationManager, IAgentCoordinator, ITurnController. Create data structures for: ConversationState, AgentTurn, ConversationConfig. Define event system for conversation lifecycle events (started, turn_completed, paused, resumed, completed).",
+            "status": "done",
+            "testStrategy": "Unit test orchestrator initialization with various agent configurations. Test state transitions and turn management logic. Verify event emission for all conversation lifecycle events. Test timeout handling and graceful degradation."
+          },
+          {
+            "id": 2,
+            "title": "Implement Conversation Context Management",
+            "description": "Build comprehensive context management system to maintain conversation history and provide contextual information to agents",
+            "dependencies": ["41.1"],
+            "details": "Create ConversationContext class to store: full message history with agent attribution, conversation metadata (start time, turn count, participants), shared context variables accessible to all agents. Implement context serialization for persistence and recovery. Build context windowing for managing large conversations (sliding window, importance-based selection). Add context enrichment with: timestamp information, agent metadata, conversation summary generation. Implement thread-safe context updates for concurrent agent responses.",
+            "status": "pending",
+            "testStrategy": "Test context accumulation across multiple turns. Verify context serialization and deserialization. Test windowing strategies with large conversation histories. Validate thread-safe operations under concurrent access. Test context recovery after system failures."
+          },
+          {
+            "id": 3,
+            "title": "Build LLM Integration for Agent Responses",
+            "description": "Implement LLM provider integration supporting multiple providers with role-specific prompting and response generation",
+            "dependencies": ["41.2"],
+            "details": "Create LLMProvider abstract base class with implementations for: OpenAI (GPT-4, GPT-3.5), Anthropic (Claude 3), extensible provider framework. Implement agent-specific system prompts based on: agent GMN specification, conversation context, role-specific instructions. Build response generation pipeline: prompt construction with conversation history, token budget management, streaming response support, retry logic with exponential backoff. Add provider fallback mechanism for reliability. Implement response caching for development/testing.",
+            "status": "pending",
+            "testStrategy": "Mock LLM API responses for deterministic testing. Test prompt construction with various agent configurations. Verify token counting and budget enforcement. Test provider fallback and retry mechanisms. Validate streaming response handling."
+          },
+          {
+            "id": 4,
+            "title": "Implement Conversation Flow Control",
+            "description": "Build conversation control mechanisms for starting, pausing, resuming, and stopping multi-agent conversations",
+            "dependencies": ["41.3"],
+            "details": "Implement conversation state machine with states: INITIALIZED, RUNNING, PAUSED, STOPPED, COMPLETED. Build control endpoints: start_conversation() to begin agent interactions, pause_conversation() to temporarily halt with state preservation, resume_conversation() to continue from pause point, stop_conversation() for graceful termination. Add conversation queue management for handling multiple concurrent conversations. Implement conversation persistence for pause/resume across service restarts. Build conversation cleanup for completed/abandoned conversations.",
+            "status": "pending",
+            "testStrategy": "Test all state transitions and control operations. Verify pause/resume maintains conversation continuity. Test concurrent conversation handling. Validate persistence across service restarts. Test cleanup of completed conversations."
+          },
+          {
+            "id": 5,
+            "title": "Add Turn Limits and Completion Logic",
+            "description": "Implement configurable turn limits and intelligent conversation completion detection",
+            "dependencies": ["41.4"],
+            "details": "Implement configurable turn limits: min 5, max 20 turns per conversation, per-agent turn limits, dynamic adjustment based on conversation progress. Build completion detection logic: natural conversation conclusion detection, goal achievement tracking from agent beliefs, stalemate detection (repeated similar responses), consensus detection among agents. Add conversation metrics: turn duration tracking, response quality scoring, conversation coherence measurement. Implement graceful completion with: final summary generation, conversation outcome classification, participant feedback collection.",
+            "status": "pending",
+            "testStrategy": "Test turn limit enforcement at boundaries (5, 20). Verify completion detection for various scenarios. Test metric collection accuracy. Validate graceful completion flow. Test edge cases like single-turn completions."
+          }
+        ]
       },
       {
         "id": 42,
@@ -2203,7 +2249,7 @@
     ],
     "metadata": {
       "created": "2025-07-04T12:52:30.518Z",
-      "updated": "2025-07-31T23:45:44.981Z",
+      "updated": "2025-08-01T00:08:53.223Z",
       "description": "Tasks for master context"
     }
   }
