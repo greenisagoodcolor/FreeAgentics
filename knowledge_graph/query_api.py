@@ -20,8 +20,8 @@ from pydantic import BaseModel, Field
 
 from knowledge_graph.graph_engine import KnowledgeEdge, KnowledgeGraph, KnowledgeNode
 from knowledge_graph.schema import EntityType, RelationType
+from observability.prometheus_metrics import PrometheusMetricsCollector as PrometheusMetrics
 from observability.prometheus_metrics import (
-    PrometheusMetricsCollector as PrometheusMetrics,
     agent_inference_duration_seconds,
     business_inference_operations_total,
 )
@@ -175,7 +175,9 @@ class QueryComplexityAnalyzer:
                 reasons.append("Query lacks selective filters")
 
         # Record complexity metrics
-        agent_inference_duration_seconds.labels(agent_id="query_analyzer", operation_type="complexity_check").observe(complexity_score / 10.0)
+        agent_inference_duration_seconds.labels(
+            agent_id="query_analyzer", operation_type="complexity_check"
+        ).observe(complexity_score / 10.0)
 
         rejection_reason = "; ".join(reasons) if complexity_score > 10 else ""
         return complexity_score, rejection_reason
@@ -245,15 +247,21 @@ class RedisQueryCache(IQueryCache):
                 result = QueryResult(**result_dict)
                 result.cache_hit = True
 
-                business_inference_operations_total.labels(operation_type="kg_cache_hit", success="true").inc()
+                business_inference_operations_total.labels(
+                    operation_type="kg_cache_hit", success="true"
+                ).inc()
                 return result
 
-            business_inference_operations_total.labels(operation_type="kg_cache_miss", success="true").inc()
+            business_inference_operations_total.labels(
+                operation_type="kg_cache_miss", success="true"
+            ).inc()
             return None
 
         except Exception as e:
             logger.error(f"Cache get error: {e}")
-            business_inference_operations_total.labels(operation_type="kg_cache_error", success="false").inc()
+            business_inference_operations_total.labels(
+                operation_type="kg_cache_error", success="false"
+            ).inc()
             return None
 
     async def set(self, cache_key: str, result: QueryResult, ttl_seconds: int = 300) -> bool:
@@ -269,12 +277,16 @@ class RedisQueryCache(IQueryCache):
 
             await self.redis.setex(f"kg_query:{cache_key}", ttl_seconds, json.dumps(result_dict))
 
-            business_inference_operations_total.labels(operation_type="kg_cache_set", success="true").inc()
+            business_inference_operations_total.labels(
+                operation_type="kg_cache_set", success="true"
+            ).inc()
             return True
 
         except Exception as e:
             logger.error(f"Cache set error: {e}")
-            business_inference_operations_total.labels(operation_type="kg_cache_error", success="false").inc()
+            business_inference_operations_total.labels(
+                operation_type="kg_cache_error", success="false"
+            ).inc()
             return False
 
     async def invalidate_pattern(self, pattern: str) -> int:
@@ -286,13 +298,17 @@ class RedisQueryCache(IQueryCache):
             keys = await self.redis.keys(f"kg_query:{pattern}")
             if keys:
                 deleted = await self.redis.delete(*keys)
-                business_inference_operations_total.labels(operation_type="kg_cache_invalidate", success="true").inc(deleted)
+                business_inference_operations_total.labels(
+                    operation_type="kg_cache_invalidate", success="true"
+                ).inc(deleted)
                 return deleted
             return 0
 
         except Exception as e:
             logger.error(f"Cache invalidation error: {e}")
-            business_inference_operations_total.labels(operation_type="kg_cache_error", success="false").inc()
+            business_inference_operations_total.labels(
+                operation_type="kg_cache_error", success="false"
+            ).inc()
             return 0
 
     async def clear(self) -> bool:
@@ -321,12 +337,16 @@ class InMemoryQueryCache(IQueryCache):
             # Simple TTL check (5 minutes)
             if (datetime.now(timezone.utc) - cached_at).seconds < 300:
                 result.cache_hit = True
-                business_inference_operations_total.labels(operation_type="kg_cache_hit", success="true").inc()
+                business_inference_operations_total.labels(
+                    operation_type="kg_cache_hit", success="true"
+                ).inc()
                 return result
             else:
                 del self.cache[cache_key]
 
-        business_inference_operations_total.labels(operation_type="kg_cache_miss", success="true").inc()
+        business_inference_operations_total.labels(
+            operation_type="kg_cache_miss", success="true"
+        ).inc()
         return None
 
     async def set(self, cache_key: str, result: QueryResult, ttl_seconds: int = 300) -> bool:
@@ -338,7 +358,9 @@ class InMemoryQueryCache(IQueryCache):
 
         result.cache_hit = False  # Reset for caching
         self.cache[cache_key] = (result, datetime.now(timezone.utc))
-        business_inference_operations_total.labels(operation_type="kg_cache_set", success="true").inc()
+        business_inference_operations_total.labels(
+            operation_type="kg_cache_set", success="true"
+        ).inc()
         return True
 
     async def invalidate_pattern(self, pattern: str) -> int:
@@ -350,14 +372,18 @@ class InMemoryQueryCache(IQueryCache):
         for key in keys_to_delete:
             del self.cache[key]
 
-        business_inference_operations_total.labels(operation_type="kg_cache_invalidate", success="true").inc(len(keys_to_delete))
+        business_inference_operations_total.labels(
+            operation_type="kg_cache_invalidate", success="true"
+        ).inc(len(keys_to_delete))
         return len(keys_to_delete)
 
     async def clear(self) -> bool:
         """Clear all cached results."""
         count = len(self.cache)
         self.cache.clear()
-        business_inference_operations_total.labels(operation_type="kg_cache_clear", success="true").inc(count)
+        business_inference_operations_total.labels(
+            operation_type="kg_cache_clear", success="true"
+        ).inc(count)
         return True
 
 
@@ -414,7 +440,9 @@ class GraphQueryEngine:
             )
 
             if rejection_reason:
-                business_inference_operations_total.labels(operation_type="kg_query_rejected", success="false").inc()
+                business_inference_operations_total.labels(
+                    operation_type="kg_query_rejected", success="false"
+                ).inc()
                 raise HTTPException(
                     status_code=400, detail=f"Query too complex: {rejection_reason}"
                 )
@@ -455,8 +483,12 @@ class GraphQueryEngine:
             await self.cache.set(cache_key, result, ttl_seconds=300)
 
             # Record metrics
-            agent_inference_duration_seconds.labels(agent_id="query_engine", operation_type=query_type.value).observe(execution_time / 1000.0)
-            business_inference_operations_total.labels(operation_type=f"kg_query_{query_type.value}", success="true").inc()
+            agent_inference_duration_seconds.labels(
+                agent_id="query_engine", operation_type=query_type.value
+            ).observe(execution_time / 1000.0)
+            business_inference_operations_total.labels(
+                operation_type=f"kg_query_{query_type.value}", success="true"
+            ).inc()
 
             logger.info(
                 f"Executed {query_type.value} query in {execution_time:.2f}ms",
@@ -471,10 +503,14 @@ class GraphQueryEngine:
             return result
 
         except asyncio.TimeoutError:
-            business_inference_operations_total.labels(operation_type="kg_query_timeout", success="false").inc()
+            business_inference_operations_total.labels(
+                operation_type="kg_query_timeout", success="false"
+            ).inc()
             raise HTTPException(status_code=408, detail="Query timeout exceeded")
         except Exception as e:
-            business_inference_operations_total.labels(operation_type="kg_query_failed", success="false").inc()
+            business_inference_operations_total.labels(
+                operation_type="kg_query_failed", success="false"
+            ).inc()
             logger.error(f"Query execution failed: {e}", exc_info=True)
             raise HTTPException(status_code=500, detail=f"Query execution failed: {str(e)}")
 

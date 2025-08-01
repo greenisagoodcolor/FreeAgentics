@@ -463,7 +463,7 @@ class TestRealtimeGraphUpdater:
 
         # Processing should continue despite entity errors (they are logged and handled gracefully)
         result = await updater.process_extraction_result(sample_extraction, "conv_123", "msg_456")
-        
+
         # Should still return result even if some entities failed
         assert isinstance(result, list)
 

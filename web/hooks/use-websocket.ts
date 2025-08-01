@@ -17,8 +17,10 @@ export interface WebSocketState {
   error: Error | null;
 }
 
-// Use dev endpoint for development
-const WS_URL = process.env.NEXT_PUBLIC_WS_URL || "ws://localhost:8000/api/v1/ws/dev";
+// Use demo endpoint for development (matches backend demo mode)
+const WS_URL = process.env.NEXT_PUBLIC_WS_URL
+  ? `${process.env.NEXT_PUBLIC_WS_URL}/api/v1/ws/demo`
+  : "ws://localhost:8000/api/v1/ws/demo";
 const RECONNECT_DELAY = 3000;
 const MAX_RECONNECT_ATTEMPTS = 5;
 
@@ -43,8 +45,9 @@ export function useWebSocket(): WebSocketState {
       return;
     }
 
-    // Don't connect if auth is not ready
-    if (isAuthLoading || !isAuthenticated || !token) {
+    // For demo endpoint, don't require authentication
+    const isDemoEndpoint = WS_URL.includes("/ws/demo");
+    if (!isDemoEndpoint && (isAuthLoading || !isAuthenticated || !token)) {
       console.log("[WebSocket] Waiting for auth before connecting...", {
         isAuthLoading,
         isAuthenticated,
@@ -59,12 +62,14 @@ export function useWebSocket(): WebSocketState {
       setConnectionState("connecting");
       setError(null);
 
-      // Append token to WebSocket URL if available
+      // Append token to WebSocket URL if available and not demo endpoint
       let wsUrl = WS_URL;
-      if (token) {
+      if (token && !isDemoEndpoint) {
         const separator = WS_URL.includes("?") ? "&" : "?";
         wsUrl = `${WS_URL}${separator}token=${encodeURIComponent(token)}`;
         console.log("[WebSocket] Connecting with auth token...");
+      } else if (isDemoEndpoint) {
+        console.log("[WebSocket] Connecting to demo endpoint without auth...");
       }
 
       const ws = new WebSocket(wsUrl);
@@ -167,13 +172,21 @@ export function useWebSocket(): WebSocketState {
       connectionTimeoutRef.current = null;
     }
 
-    if (!isAuthLoading && isAuthenticated && token && !wsRef.current) {
+    const isDemoEndpoint = WS_URL.includes("/ws/demo");
+
+    // Connect immediately for demo endpoint, or wait for auth for other endpoints
+    if (isDemoEndpoint && !wsRef.current) {
+      console.log("[WebSocket] Demo endpoint ready, scheduling connection...");
+      connectionTimeoutRef.current = setTimeout(() => {
+        console.log("[WebSocket] Initiating demo connection...");
+        connect();
+      }, 100);
+    } else if (!isDemoEndpoint && !isAuthLoading && isAuthenticated && token && !wsRef.current) {
       console.log("[WebSocket] Auth ready, scheduling connection...");
-      // Add small delay to ensure token propagation
       connectionTimeoutRef.current = setTimeout(() => {
         console.log("[WebSocket] Initiating connection after auth stabilization...");
         connect();
-      }, 100); // Reduced delay since we now prevent duplicate connections
+      }, 100);
     }
 
     return () => {

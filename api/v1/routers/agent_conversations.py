@@ -91,6 +91,9 @@ async def create_agent_conversation(
             config=config,
         )
 
+        # Use the actual conversation ID from the service
+        conversation_id = conversation_data.get("conversation_id", conversation_id)
+
         # Step 3: Start background task for conversation execution
         background_tasks.add_task(
             run_conversation_background,

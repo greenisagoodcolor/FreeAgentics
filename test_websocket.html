@@ -1,0 +1,38 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>FreeAgentics WebSocket Test</title>
+</head>
+<body>
+    <h1>WebSocket Connection Test</h1>
+    <div id="status">Connecting...</div>
+    <div id="messages"></div>
+
+    <script>
+        const wsUrl = 'ws://localhost:8000/api/v1/ws/dev';
+        const ws = new WebSocket(wsUrl);
+
+        ws.onopen = function() {
+            document.getElementById('status').innerHTML = '✅ Connected to ' + wsUrl;
+            console.log('WebSocket connected');
+        };
+
+        ws.onmessage = function(event) {
+            console.log('Message received:', event.data);
+            const msg = document.createElement('div');
+            msg.textContent = new Date().toISOString() + ': ' + event.data;
+            document.getElementById('messages').appendChild(msg);
+        };
+
+        ws.onerror = function(error) {
+            document.getElementById('status').innerHTML = '❌ Error: ' + error;
+            console.error('WebSocket error:', error);
+        };
+
+        ws.onclose = function(event) {
+            document.getElementById('status').innerHTML = '❌ Disconnected: ' + event.reason;
+            console.log('WebSocket closed:', event);
+        };
+    </script>
+</body>
+</html>

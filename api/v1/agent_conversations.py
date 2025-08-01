@@ -451,10 +451,11 @@ async def get_conversation(
 ) -> ConversationResponse:
     """Get a conversation by ID."""
 
-    if conversation_id not in conversation_service.active_conversations:
-        raise HTTPException(status_code=404, detail="Conversation not found")
+    # Get conversation from service
+    conversation_data = conversation_service.get_conversation(conversation_id)
 
-    conversation_data = conversation_service.active_conversations[conversation_id]
+    if not conversation_data:
+        raise HTTPException(status_code=404, detail=f"Conversation {conversation_id} not found")
 
     # Convert stored message dicts back to ConversationMessage objects
     messages = [ConversationMessage(**msg_data) for msg_data in conversation_data["messages"]]

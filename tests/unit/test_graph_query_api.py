@@ -525,7 +525,7 @@ class TestGraphQueryEngine:
         mock_cache.get.return_value = None
 
         # Mock the actual method that might timeout
-        with patch.object(engine, '_execute_node_lookup', side_effect=asyncio.TimeoutError):
+        with patch.object(engine, "_execute_node_lookup", side_effect=asyncio.TimeoutError):
             with pytest.raises(HTTPException) as exc_info:
                 await engine.execute_query(QueryType.NODE_LOOKUP, QueryOptions(timeout_seconds=0.1))
 

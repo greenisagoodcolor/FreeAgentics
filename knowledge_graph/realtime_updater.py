@@ -24,9 +24,8 @@ from knowledge_graph.schema import (
 )
 from observability.prometheus_metrics import (
     PrometheusMetricsCollector,
-    kg_node_total,
-    business_inference_operations_total,
     agent_inference_duration_seconds,
+    business_inference_operations_total,
 )
 
 logger = logging.getLogger(__name__)
@@ -240,12 +239,16 @@ class WebSocketEventStreamer(IEventStreamer):
 
         try:
             await self.event_queue.put(event)
-            business_inference_operations_total.labels(operation_type="kg_event_queue", success="true").inc()
+            business_inference_operations_total.labels(
+                operation_type="kg_event_queue", success="true"
+            ).inc()
             return True
 
         except Exception as e:
             logger.error(f"Failed to queue event {event.event_id}: {e}")
-            business_inference_operations_total.labels(operation_type="kg_event_queue", success="false").inc()
+            business_inference_operations_total.labels(
+                operation_type="kg_event_queue", success="false"
+            ).inc()
             return False
 
     async def start_streaming(self) -> None:
@@ -290,7 +293,9 @@ class WebSocketEventStreamer(IEventStreamer):
         for client in self.connected_clients:
             try:
                 await client.send_json(event_data)
-                business_inference_operations_total.labels(operation_type="kg_event_broadcast", success="true").inc()
+                business_inference_operations_total.labels(
+                    operation_type="kg_event_broadcast", success="true"
+                ).inc()
             except Exception as e:
                 logger.warning(f"Failed to send event to client: {e}")
                 disconnected_clients.add(client)
@@ -412,8 +417,12 @@ class RealtimeGraphUpdater:
 
             # Record processing metrics
             processing_time = (datetime.now(timezone.utc) - start_time).total_seconds()
-            agent_inference_duration_seconds.labels(agent_id="realtime_updater", operation_type="kg_update").observe(processing_time)
-            business_inference_operations_total.labels(operation_type="kg_update", success="true").inc()
+            agent_inference_duration_seconds.labels(
+                agent_id="realtime_updater", operation_type="kg_update"
+            ).observe(processing_time)
+            business_inference_operations_total.labels(
+                operation_type="kg_update", success="true"
+            ).inc()
 
             logger.info(
                 f"Processed extraction result in {processing_time:.3f}s",
@@ -450,7 +459,9 @@ class RealtimeGraphUpdater:
             )
 
             await self.event_streamer.stream_event(failure_event)
-            business_inference_operations_total.labels(operation_type="kg_update", success="false").inc()
+            business_inference_operations_total.labels(
+                operation_type="kg_update", success="false"
+            ).inc()
 
             raise
 
@@ -517,7 +528,9 @@ class RealtimeGraphUpdater:
 
             except Exception as e:
                 logger.error(f"Failed to process entity {entity.entity_id}: {e}")
-                business_inference_operations_total.labels(operation_type="kg_entity_process", success="false").inc()
+                business_inference_operations_total.labels(
+                    operation_type="kg_entity_process", success="false"
+                ).inc()
                 continue
 
         return events
@@ -554,7 +567,9 @@ class RealtimeGraphUpdater:
 
             except Exception as e:
                 logger.error(f"Failed to process relation {relation.relation_id}: {e}")
-                business_inference_operations_total.labels(operation_type="kg_relation_process", success="false").inc()
+                business_inference_operations_total.labels(
+                    operation_type="kg_relation_process", success="false"
+                ).inc()
                 continue
 
         return events
