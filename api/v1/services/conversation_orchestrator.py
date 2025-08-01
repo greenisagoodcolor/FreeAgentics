@@ -11,7 +11,7 @@ to provide sophisticated conversation management capabilities.
 import asyncio
 import logging
 from datetime import datetime, timedelta
-from typing import Dict, List, Optional
+from typing import Any, Dict, List, Optional
 
 from api.v1.models.agent_conversation import (
     AgentRole,
@@ -28,6 +28,8 @@ from api.v1.models.agent_conversation import (
     ITurnController,
     ITurnLimitPolicy,
 )
+from api.v1.services.observation_processor import ObservationProcessor
+from api.v1.services.pymdp_belief_manager import get_belief_manager
 
 logger = logging.getLogger(__name__)
 
@@ -60,6 +62,9 @@ class ConversationOrchestrator:
         # Active conversation tracking for lifecycle management
         self._active_conversations: Dict[str, ConversationAggregate] = {}
         self._conversation_tasks: Dict[str, asyncio.Task] = {}
+
+        # Belief integration components (initialized lazily)
+        self._observation_processor = None
 
         logger.info("ConversationOrchestrator initialized with dependencies")
 
@@ -284,6 +289,118 @@ class ConversationOrchestrator:
     async def list_active_conversations(self, user_id: str) -> List[ConversationAggregate]:
         """List active conversations for a user."""
         return await self.repository.list_active_conversations(user_id)
+
+    async def process_message(
+        self,
+        conversation_id: str,
+        agent_id: str,
+        message: Dict[str, Any],
+        update_beliefs: bool = False,
+    ) -> Dict[str, Any]:
+        """
+        Process a message within a conversation context with optional belief updates.
+
+        This method integrates PyMDP belief updates with conversation processing,
+        following the Nemesis Committee's consensus for clean integration.
+
+        Args:
+            conversation_id: ID of the conversation
+            agent_id: ID of the agent processing the message
+            message: Message to process with content, role, etc.
+            update_beliefs: Whether to update agent beliefs based on message
+
+        Returns:
+            Dictionary with response and belief integration results
+        """
+        try:
+            # Initialize observation processor if needed
+            if not self._observation_processor:
+                self._observation_processor = ObservationProcessor()
+
+            # Base response structure
+            response = {
+                "conversation_id": conversation_id,
+                "agent_id": agent_id,
+                "belief_influenced": False,
+                "processed_at": datetime.now().isoformat(),
+            }
+
+            # Get conversation context
+            conversation = await self._get_conversation(conversation_id)
+            conversation_context = {
+                "recent_messages": [
+                    turn.response for turn in conversation.turns[-5:] if turn.response
+                ],
+                "turn_count": len(conversation.turns),
+                "topic": conversation.topic,
+            }
+
+            # Update beliefs if requested and available
+            if update_beliefs:
+                belief_manager = get_belief_manager(agent_id)
+                if belief_manager:
+                    try:
+                        # Update beliefs based on message
+                        belief_result = await belief_manager.update_beliefs_from_message(
+                            message, conversation_context
+                        )
+
+                        # Merge belief results into response
+                        response.update(belief_result)
+
+                        # Get belief context for response generation
+                        belief_context = belief_manager.get_current_belief_context()
+                        response.update(belief_context)
+
+                        logger.info(
+                            f"Updated beliefs for agent {agent_id} in conversation {conversation_id}"
+                        )
+
+                    except Exception as e:
+                        logger.error(
+                            f"Belief update failed for agent {agent_id}: {e}", exc_info=True
+                        )
+                        # Graceful fallback - don't break conversation
+                        response.update(
+                            {
+                                "belief_influenced": False,
+                                "belief_status": "failed",
+                                "belief_error": str(e),
+                            }
+                        )
+                else:
+                    # No belief manager available
+                    response.update({"belief_influenced": False, "belief_status": "no_manager"})
+            else:
+                # Belief updates disabled
+                response.update({"belief_influenced": False, "belief_status": "disabled"})
+
+            # Generate actual response (simplified for this integration)
+            # In full implementation, this would call the response generator
+            response_text = "I understand your message."
+            if response.get("confidence_level") == "high":
+                response_text = "I'm confident in my understanding of your message."
+            elif response.get("confidence_level") == "low":
+                response_text = "I'm still processing and learning from your message."
+
+            response["response_text"] = response_text
+            response["status"] = "success"
+
+            return response
+
+        except Exception as e:
+            logger.error(
+                f"Message processing failed for conversation {conversation_id}, agent {agent_id}: {e}",
+                exc_info=True,
+            )
+            return {
+                "conversation_id": conversation_id,
+                "agent_id": agent_id,
+                "belief_influenced": False,
+                "status": "error",
+                "error": str(e),
+                "processed_at": datetime.now().isoformat(),
+            }
 
     async def _execute_conversation(self, conversation: ConversationAggregate) -> None:
         """

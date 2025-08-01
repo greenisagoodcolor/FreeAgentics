@@ -17,6 +17,7 @@ from api.v1 import (
     agent_creation,
     agents,
     auth,
+    belief_monitoring,
     dev_config,
     health,
     health_extended,
@@ -184,6 +185,7 @@ app.include_router(agents.router, prefix="/api/v1", tags=["agents"])
 app.include_router(agent_creation.router, prefix="/api/v1/agents", tags=["agent-creation"])
 app.include_router(agent_conversations_router, prefix="/api/v1", tags=["agent-conversations"])
 app.include_router(gmn_generation_router, prefix="/api/v1", tags=["gmn-generation"])
+app.include_router(belief_monitoring.router, tags=["belief-monitoring"])
 app.include_router(prompts.router, prefix="/api/v1", tags=["prompts"])
 app.include_router(inference.router, prefix="/api/v1", tags=["inference"])
 app.include_router(knowledge.router, prefix="/api/v1/knowledge", tags=["knowledge"])
