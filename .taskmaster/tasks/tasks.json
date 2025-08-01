@@ -2120,7 +2120,7 @@
         "testStrategy": "Test conversation flow with multiple agents. Verify context preservation across turns. Test conversation controls and completion conditions. Mock LLM responses for deterministic testing.",
         "priority": "high",
         "dependencies": [40],
-        "status": "in-progress",
+        "status": "done",
         "subtasks": [
           {
             "id": 1,
@@ -2164,7 +2164,7 @@
             "description": "Implement configurable turn limits and intelligent conversation completion detection",
             "dependencies": ["41.4"],
             "details": "Implement configurable turn limits: min 5, max 20 turns per conversation, per-agent turn limits, dynamic adjustment based on conversation progress. Build completion detection logic: natural conversation conclusion detection, goal achievement tracking from agent beliefs, stalemate detection (repeated similar responses), consensus detection among agents. Add conversation metrics: turn duration tracking, response quality scoring, conversation coherence measurement. Implement graceful completion with: final summary generation, conversation outcome classification, participant feedback collection.",
-            "status": "in-progress",
+            "status": "done",
             "testStrategy": "Test turn limit enforcement at boundaries (5, 20). Verify completion detection for various scenarios. Test metric collection accuracy. Validate graceful completion flow. Test edge cases like single-turn completions."
           }
         ]
@@ -2188,8 +2188,54 @@
         "testStrategy": "Test GMN generation with various prompt types. Validate JSON structure and probability distributions. Test fallback template usage. Verify GMN semantic correctness and completeness.",
         "priority": "high",
         "dependencies": [40],
-        "status": "pending",
-        "subtasks": []
+        "status": "in-progress",
+        "subtasks": [
+          {
+            "id": 1,
+            "title": "Define GMN Schema and Data Models",
+            "description": "Create comprehensive schema definitions for Generative Model Networks including all required components and validation rules",
+            "dependencies": [],
+            "details": "Define TypeScript/Python data models for GMN structure including states (hidden and observable), observations, actions, and core parameters (A: observation_model, B: transition_model, C: preferences, D: initial_beliefs). Create Zod/Pydantic schemas for runtime validation. Ensure all probability distributions have proper constraints (sum to 1.0, non-negative values). Define metadata fields for GMN versioning, creation timestamp, and source prompt tracking. Include support for both discrete and continuous state spaces.",
+            "status": "done",
+            "testStrategy": "Unit test schema validation with valid and invalid GMN specifications. Test probability distribution constraints. Verify all required fields are properly validated. Test edge cases like empty state spaces or single-state GMNs."
+          },
+          {
+            "id": 2,
+            "title": "Implement LLM Prompt Engineering for GMN Generation",
+            "description": "Design and implement structured prompts that guide LLMs to generate consistent, valid GMN specifications from natural language",
+            "dependencies": ["43.1"],
+            "details": "Create prompt templates with clear instructions for GMN component generation. Include few-shot examples demonstrating proper GMN JSON structure. Implement chain-of-thought prompting to extract: domain identification, state space enumeration, action space definition, observation mapping, transition dynamics modeling, and preference function specification. Add prompt variations for different agent types (explorer, analyst, creative). Include system prompts that enforce JSON formatting and probability constraints. Implement prompt versioning for A/B testing.",
+            "status": "pending",
+            "testStrategy": "Test prompt effectiveness across multiple LLM providers. Validate generated GMNs against schema. Measure consistency of outputs for same input. Test handling of ambiguous or incomplete user prompts. Verify prompt injection resistance."
+          },
+          {
+            "id": 3,
+            "title": "Build GMN Generator Service with Validation",
+            "description": "Create the core service that orchestrates GMN generation from prompts with comprehensive validation and error handling",
+            "dependencies": ["43.1", "43.2"],
+            "details": "Implement GmnGeneratorService class that accepts natural language prompts and returns validated GMN specifications. Integrate with LLM providers using established connection patterns from task 30. Add multi-stage generation: initial GMN creation, structural validation, probability distribution normalization, semantic consistency checking. Implement retry logic for malformed LLM outputs. Add caching layer for repeated similar prompts. Create detailed error messages for validation failures. Support both synchronous and asynchronous generation modes.",
+            "status": "pending",
+            "testStrategy": "Integration test full generation pipeline. Test error handling for invalid LLM responses. Verify probability normalization works correctly. Test caching behavior and performance. Measure generation latency under load."
+          },
+          {
+            "id": 4,
+            "title": "Create Fallback Template Library",
+            "description": "Develop a library of pre-defined GMN templates for common agent scenarios to ensure reliable fallback options",
+            "dependencies": ["43.1"],
+            "details": "Implement template system with parameterized GMN specifications for standard agent types: Explorer (high entropy preferences, broad state space), Analyst (information-seeking, hypothesis testing), Creative (novelty-seeking, diverse action space), Goal-oriented (specific target states, optimization focus), and Conversational (dialogue states, turn-taking dynamics). Create template selection logic based on keyword matching and prompt classification. Allow template customization through parameter injection. Store templates in easily maintainable JSON/YAML format. Version templates for backward compatibility.",
+            "status": "pending",
+            "testStrategy": "Test each template initializes valid PyMDP agents. Verify template selection accuracy. Test parameter customization maintains validity. Ensure templates cover documented use cases. Performance test template instantiation."
+          },
+          {
+            "id": 5,
+            "title": "Integrate GMN Generation with Conversation Pipeline",
+            "description": "Connect the GMN generator to the existing conversation system enabling dynamic agent creation from user prompts",
+            "dependencies": ["43.3", "43.4"],
+            "details": "Modify conversation initialization to detect GMN generation requests in user prompts. Implement middleware that intercepts prompts requiring new agent creation. Add GMN generation as a pre-processing step before agent spawning. Store generated GMNs in conversation metadata for debugging and reproducibility. Create API endpoints for explicit GMN generation requests. Add telemetry for GMN generation success rates and latency. Implement graceful degradation to template fallbacks on generation failure. Ensure generated GMNs are compatible with existing PyMDP agent initialization.",
+            "status": "pending",
+            "testStrategy": "End-to-end test conversation flows with GMN generation. Test fallback behavior on generation failures. Verify GMN storage and retrieval. Load test concurrent GMN generation requests. Test compatibility with existing agent infrastructure."
+          }
+        ]
       },
       {
         "id": 44,
@@ -2249,7 +2295,7 @@
     ],
     "metadata": {
       "created": "2025-07-04T12:52:30.518Z",
-      "updated": "2025-08-01T00:35:15.784Z",
+      "updated": "2025-08-01T00:50:00.458Z",
       "description": "Tasks for master context"
     }
   }
