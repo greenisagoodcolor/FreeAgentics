@@ -324,6 +324,24 @@ class PrometheusMetricsCollector:
 
         logger.info("🎯 Prometheus metrics collector initialized")
 
+    def increment_counter(self, metric_name: str, labels: dict = None):
+        """Increment a counter metric with optional labels."""
+        labels = labels or {}
+        try:
+            if metric_name == "kg_api_requests_total":
+                http_requests_total.labels(
+                    method="GET", endpoint=labels.get("endpoint", "unknown"), status="success"
+                ).inc()
+            elif metric_name == "agent_spawn_total":
+                agent_spawn_total.labels(agent_type=labels.get("agent_type", "default")).inc()
+            elif metric_name == "kg_node_total":
+                kg_node_total.labels(node_type=labels.get("node_type", "entity")).inc()
+            else:
+                # Generic counter increment for unknown metrics
+                logger.debug(f"Unknown counter metric: {metric_name}")
+        except Exception as e:
+            logger.error(f"Failed to increment counter {metric_name}: {e}")
+
     def _initialize_build_info(self):
         """Initialize build and deployment information."""
         try:
@@ -433,9 +451,7 @@ class PrometheusMetricsCollector:
                     # Update histogram with average (approximation)
                     agent_inference_duration_seconds.labels(
                         agent_id=agent_id, operation_type="inference"
-                    ).observe(
-                        inference_stats["avg"] / 1000.0
-                    )  # Convert ms to seconds
+                    ).observe(inference_stats["avg"] / 1000.0)  # Convert ms to seconds
 
                 # Memory usage (approximation based on system metrics)
                 memory_estimate = (

@@ -5,7 +5,6 @@ import { PromptBar } from "@/components/main/PromptBar";
 import { AgentCreatorPanel } from "@/components/main/AgentCreatorPanel";
 import { ConversationWindow } from "@/components/main/ConversationWindow";
 import { KnowledgeGraphView } from "@/components/main/KnowledgeGraphView";
-import { SimulationGrid } from "@/components/main/SimulationGrid";
 import { MetricsFooter } from "@/components/main/MetricsFooter";
 import { ApiKeyBanner } from "@/components/main/ApiKeyBanner";
 import { SettingsDrawer } from "@/components/main/SettingsDrawer";
@@ -37,8 +36,8 @@ export default function HomePage() {
         <div className="px-4 pt-4">
           <ApiKeyBanner onSettingsClick={() => setIsSettingsOpen(true)} />
         </div>
-        {/* Top Row - 3 columns with explanations */}
-        <div className="main-row grid grid-cols-1 lg:grid-cols-3 gap-4 p-4 flex-1 overflow-hidden">
+        {/* Top Row - 2 columns with explanations */}
+        <div className="main-row grid grid-cols-1 lg:grid-cols-2 gap-4 p-4 flex-1 overflow-hidden">
           {/* Agent Creator Panel */}
           <div className="h-full overflow-hidden">
             <div className="mb-2">
@@ -60,21 +59,10 @@ export default function HomePage() {
             </div>
             <KnowledgeGraphView />
           </div>
-
-          {/* Simulation Grid */}
-          <div className="h-full overflow-hidden">
-            <div className="mb-2">
-              <p className="text-sm text-muted-foreground">
-                Grid world environment where agents demonstrate emergent behavior through
-                variational inference
-              </p>
-            </div>
-            <SimulationGrid />
-          </div>
         </div>
 
-        {/* Bottom Row - Conversation Window (bottom third) */}
-        <div className="conversation-row w-full p-4 h-1/3">
+        {/* Bottom Row - Expanded Conversation Window (bottom half) */}
+        <div className="conversation-row w-full p-4 h-1/2">
           <div className="mb-2">
             <p className="text-sm text-muted-foreground">
               Real-time conversation with agents showing their reasoning process and decision-making
