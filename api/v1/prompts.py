@@ -95,25 +95,46 @@ async def create_agent_from_prompt(
             )
 
         # Construct GMN generation prompt
-        system_prompt = """You are an expert in Active Inference and the GMN (Generalized Notation) format.
-Convert the user's goal description into a valid GMN specification.
+        system_prompt = """You are an expert in Active Inference and the GMN (Generalized Model Notation) graph format.
+Convert the user's goal description into a valid GMN specification with nodes and edges.
 
-GMN format structure:
+GMN graph format structure:
 {
-  "name": "agent_name",
-  "description": "what the agent does",
-  "states": ["state1", "state2", ...],
-  "observations": ["obs1", "obs2", ...],
-  "actions": ["action1", "action2", ...],
-  "parameters": {
-    "A": [[probability_matrix]],  // P(o|s) observation model
-    "B": [[[transition_tensor]]],  // P(s'|s,a) transition model
-    "C": [[preferences]],  // Observation preferences
-    "D": [[initial_beliefs]]  // Initial state distribution
+  "nodes": [
+    {"id": "s1", "type": "state", "properties": {"name": "exploring", "value": 0}},
+    {"id": "s2", "type": "state", "properties": {"name": "exploiting", "value": 1}},
+    {"id": "o1", "type": "observation", "properties": {"name": "low_reward", "value": 0}},
+    {"id": "o2", "type": "observation", "properties": {"name": "high_reward", "value": 1}},
+    {"id": "a1", "type": "action", "properties": {"name": "explore", "value": 0}},
+    {"id": "a2", "type": "action", "properties": {"name": "exploit", "value": 1}},
+    {"id": "b1", "type": "belief", "properties": {"name": "initial_belief", "distribution": [0.5, 0.5]}},
+    {"id": "p1", "type": "preference", "properties": {"name": "reward_seeking", "values": [0.0, 1.0]}}
+  ],
+  "edges": [
+    {"source": "s1", "target": "o1", "type": "influences", "properties": {"probability": 0.8}},
+    {"source": "s1", "target": "o2", "type": "influences", "properties": {"probability": 0.2}},
+    {"source": "s2", "target": "o1", "type": "influences", "properties": {"probability": 0.1}},
+    {"source": "s2", "target": "o2", "type": "influences", "properties": {"probability": 0.9}},
+    {"source": "a1", "target": "s1", "type": "influences", "properties": {"probability": 0.7}},
+    {"source": "a2", "target": "s2", "type": "influences", "properties": {"probability": 0.8}}
+  ],
+  "metadata": {
+    "name": "agent_name",
+    "description": "what the agent does",
+    "parameters": {
+      "learning_rate": 0.1,
+      "discount_factor": 0.95
+    }
   }
 }
 
-Ensure all probability distributions sum to 1.0."""
+Requirements:
+1. Include at least 2 state nodes, 2 observation nodes, and 2 action nodes
+2. Connect states to observations with "influences" edges (observation model)
+3. Connect actions to states with "influences" edges (transition model)
+4. Include belief and preference nodes for Active Inference
+5. All node IDs must be unique
+6. Edge probabilities should be realistic for the scenario"""
 
         user_prompt = f"Create a GMN specification for an agent that: {request.prompt}"
 
@@ -293,3 +314,112 @@ async def get_prompt_examples() -> Dict[str, Any]:
             },
         ]
     }
+
+
+@router.post("/prompts/demo", response_model=PromptResponse)
+@require_permission(Permission.CREATE_AGENT)
+async def create_agent_from_prompt_demo(
+    request: PromptRequest,
+    current_user: TokenData = Depends(get_current_user),
+) -> PromptResponse:
+    """Create an agent from prompt with simplified GMN for demo purposes."""
+    start_time = datetime.now()
+
+    try:
+        # Create a simple but valid GMN spec based on the prompt
+        agent_name = request.agent_name or f"Agent_{uuid4().hex[:8]}"
+
+        # Generate a basic GMN that will pass validation
+        gmn_spec = {
+            "nodes": [
+                {"id": "s1", "type": "state", "properties": {"name": "idle", "value": 0}},
+                {"id": "s2", "type": "state", "properties": {"name": "active", "value": 1}},
+                {"id": "o1", "type": "observation", "properties": {"name": "nothing", "value": 0}},
+                {"id": "o2", "type": "observation", "properties": {"name": "target", "value": 1}},
+                {"id": "a1", "type": "action", "properties": {"name": "wait", "value": 0}},
+                {"id": "a2", "type": "action", "properties": {"name": "act", "value": 1}},
+                {
+                    "id": "b1",
+                    "type": "belief",
+                    "properties": {"name": "initial", "distribution": [0.5, 0.5]},
+                },
+                {
+                    "id": "p1",
+                    "type": "preference",
+                    "properties": {"name": "goal", "values": [0.0, 1.0]},
+                },
+            ],
+            "edges": [
+                {
+                    "source": "s1",
+                    "target": "o1",
+                    "type": "influences",
+                    "properties": {"probability": 0.9},
+                },
+                {
+                    "source": "s1",
+                    "target": "o2",
+                    "type": "influences",
+                    "properties": {"probability": 0.1},
+                },
+                {
+                    "source": "s2",
+                    "target": "o1",
+                    "type": "influences",
+                    "properties": {"probability": 0.2},
+                },
+                {
+                    "source": "s2",
+                    "target": "o2",
+                    "type": "influences",
+                    "properties": {"probability": 0.8},
+                },
+                {
+                    "source": "a1",
+                    "target": "s1",
+                    "type": "influences",
+                    "properties": {"probability": 0.8},
+                },
+                {
+                    "source": "a2",
+                    "target": "s2",
+                    "type": "influences",
+                    "properties": {"probability": 0.9},
+                },
+            ],
+            "metadata": {"name": agent_name, "description": request.prompt, "demo_mode": True},
+        }
+
+        # Create a simple PyMDP model
+        pymdp_model = {
+            "num_states": [2],
+            "num_observations": [2],
+            "num_actions": [2],
+            "A": [[[0.9, 0.1], [0.2, 0.8]]],  # Observation model
+            "B": [[[[0.8, 0.2], [0.1, 0.9]], [[0.3, 0.7], [0.1, 0.9]]]],  # Transition model
+            "C": [[0.0, 1.0]],  # Preferences
+            "D": [[0.5, 0.5]],  # Initial beliefs
+            "demo_mode": True,
+        }
+
+        # Create agent
+        agent_id = str(uuid4())
+        logger.info(f"Created demo agent {agent_id} from prompt")
+
+        # Calculate timing
+        generation_time = (datetime.now() - start_time).total_seconds() * 1000
+
+        return PromptResponse(
+            agent_id=agent_id,
+            agent_name=agent_name,
+            gmn_spec=gmn_spec,
+            pymdp_model=pymdp_model,
+            status="active",
+            timestamp=datetime.now(),
+            llm_provider_used="demo",
+            generation_time_ms=generation_time,
+        )
+
+    except Exception as e:
+        logger.error(f"Failed to create demo agent: {e}")
+        raise HTTPException(status_code=500, detail=f"Agent creation failed: {str(e)}")
