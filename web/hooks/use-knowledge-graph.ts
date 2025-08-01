@@ -102,7 +102,7 @@ export function useKnowledgeGraph(): KnowledgeGraphState {
       console.log("[KnowledgeGraph] Skipping fetch - auth not ready", {
         isAuthLoading,
         isAuthenticated,
-        hasToken: !!token
+        hasToken: !!token,
       });
       return;
     }
@@ -111,7 +111,7 @@ export function useKnowledgeGraph(): KnowledgeGraphState {
       setIsLoading(true);
       setError(null);
 
-      const data = await apiGet("/api/knowledge-graph");
+      const data = await apiGet("/api/v1/knowledge-graph");
       setNodes(data.nodes || []);
       setEdges(data.edges || []);
     } catch (err) {

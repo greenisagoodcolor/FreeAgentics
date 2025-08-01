@@ -1,5 +1,4 @@
-"""
-UI Compatibility Layer - Bridge between UI and backend API.
+"""UI Compatibility Layer - Bridge between UI and backend API.
 
 This module provides API endpoints that match what the UI expects,
 while internally calling the existing v1 API endpoints.
@@ -22,7 +21,6 @@ from api.v1.agents import delete_agent as v1_delete_agent
 from api.v1.agents import get_agent as v1_get_agent
 from api.v1.agents import list_agents as v1_list_agents
 from api.v1.agents import update_agent_status as v1_update_agent_status
-from api.v1.knowledge_graph import get_knowledge_graph
 from auth.dev_bypass import get_current_user_optional as get_current_user
 from auth.security_implementation import TokenData
 from database.session import get_db
@@ -323,7 +321,51 @@ async def get_knowledge_graph_ui(
     current_user: TokenData = Depends(get_current_user),
 ):
     """Get knowledge graph - UI compatibility endpoint."""
-    return await get_knowledge_graph(current_user)
+    # Return demo data for now
+    return {
+        "nodes": [
+            {
+                "id": "agent-1",
+                "label": "Main Agent",
+                "type": "agent",
+                "x": 0,
+                "y": 0,
+                "metadata": {"status": "active"},
+            },
+            {
+                "id": "belief-1",
+                "label": "Environment State",
+                "type": "belief",
+                "x": 100,
+                "y": 50,
+                "metadata": {"confidence": 0.8},
+            },
+            {
+                "id": "goal-1",
+                "label": "Explore Area",
+                "type": "goal",
+                "x": -100,
+                "y": 50,
+                "metadata": {"priority": "high"},
+            },
+        ],
+        "edges": [
+            {
+                "id": "edge-1",
+                "source": "agent-1",
+                "target": "belief-1",
+                "type": "has_belief",
+                "weight": 0.9,
+            },
+            {
+                "id": "edge-2",
+                "source": "agent-1",
+                "target": "goal-1",
+                "type": "pursues",
+                "weight": 0.95,
+            },
+        ],
+    }
 
 
 # Prompt processing endpoint
@@ -458,11 +500,7 @@ async def process_prompt_ui(
         # Get knowledge graph
         try:
             kg_response = await get_knowledge_graph_ui(current_user)
-            kg_data = (
-                kg_response.model_dump()
-                if hasattr(kg_response, "model_dump")
-                else kg_response.dict()
-            )
+            kg_data = kg_response if isinstance(kg_response, dict) else {"nodes": [], "edges": []}
         except Exception as e:
             logger.warning(f"Failed to get knowledge graph: {e}")
             kg_data = {"nodes": [], "edges": []}
