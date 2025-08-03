@@ -1,7 +1,7 @@
 import { useState, useEffect, useCallback, useRef } from "react";
 import { apiClient } from "@/lib/api-client";
 import { PromptAgent } from "@/types/agent";
-import { getWebSocketURL } from "../utils/websocket-url";
+import { getWebSocketUrl } from "../utils/websocket-url";
 
 interface KnowledgeGraphNode {
   id: string;
@@ -124,7 +124,7 @@ export function usePromptProcessor() {
     const initWebSocket = () => {
       try {
         // Use centralized WebSocket URL construction
-        const wsUrl = getWebSocketURL('dev');
+        const wsUrl = getWebSocketUrl('dev');
         const ws = new WebSocket(wsUrl);
 
         ws.addEventListener("open", () => {

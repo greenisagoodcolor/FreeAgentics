@@ -1,6 +1,6 @@
 import { useState, useEffect, useCallback, useRef } from "react";
 import { useAuth } from "./use-auth";
-import { getWebSocketURL, validateWebSocketURL } from "../utils/websocket-url";
+import { getWebSocketUrl, getAuthenticatedWebSocketUrl, isValidWebSocketUrl } from "../utils/websocket-url";
 
 export type ConnectionState = "connecting" | "connected" | "disconnected" | "error";
 
@@ -44,7 +44,7 @@ export function useWebSocket(): WebSocketState {
     }
 
     // For dev endpoint, don't require authentication in dev mode
-    const WS_URL = getWebSocketURL('dev');
+    const WS_URL = getWebSocketUrl('dev');
     const isDevEndpoint = WS_URL.includes("/ws/dev");
     if (!isDevEndpoint && (isAuthLoading || !isAuthenticated || !token)) {
       console.log("[WebSocket] Waiting for auth before connecting...", {
@@ -62,20 +62,20 @@ export function useWebSocket(): WebSocketState {
       setError(null);
 
       // Validate and construct WebSocket URL
-      if (!validateWebSocketURL(WS_URL)) {
+      if (!isValidWebSocketUrl(WS_URL)) {
         throw new Error(`Invalid WebSocket URL: ${WS_URL}`);
       }
 
-      const wsUrl = new URL(WS_URL);
+      // Use the authenticated URL function if we have a token
+      const finalUrl = token && !isDevEndpoint 
+        ? getAuthenticatedWebSocketUrl('dev', token)
+        : WS_URL;
       
       if (token && !isDevEndpoint) {
-        wsUrl.searchParams.set('token', token);
         console.log("[WebSocket] Connecting with auth token...");
       } else if (isDevEndpoint) {
         console.log("[WebSocket] Connecting to dev endpoint without auth...");
       }
-      
-      const finalUrl = wsUrl.toString();
       console.log('[WebSocket] Final URL:', finalUrl);
 
       const ws = new WebSocket(finalUrl);
@@ -178,7 +178,7 @@ export function useWebSocket(): WebSocketState {
       connectionTimeoutRef.current = null;
     }
 
-    const isDevEndpoint = getWebSocketURL('dev').includes("/ws/dev");
+    const isDevEndpoint = getWebSocketUrl('dev').includes("/ws/dev");
 
     // Connect immediately for dev endpoint, or wait for auth for other endpoints
     if (isDevEndpoint && !wsRef.current) {

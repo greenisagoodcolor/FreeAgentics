@@ -14,6 +14,29 @@ jest.mock('../use-auth', () => ({
   }),
 }));
 
+// Mock websocket-url utility
+jest.mock('../../utils/websocket-url', () => ({
+  getWebSocketUrl: (endpoint: string) => {
+    const envUrl = process.env.NEXT_PUBLIC_WS_URL;
+    if (envUrl) {
+      return envUrl.includes('/api/v1/ws/') ? envUrl : `${envUrl}/api/v1/ws/${endpoint}`;
+    }
+    return `ws://localhost:8000/api/v1/ws/${endpoint}`;
+  },
+  getAuthenticatedWebSocketUrl: (endpoint: string, token?: string) => {
+    const baseUrl = process.env.NEXT_PUBLIC_WS_URL || `ws://localhost:8000/api/v1/ws/${endpoint}`;
+    return token ? `${baseUrl}?token=${token}` : baseUrl;
+  },
+  isValidWebSocketUrl: (url: string) => {
+    try {
+      const parsed = new URL(url);
+      return parsed.protocol === 'ws:' || parsed.protocol === 'wss:';
+    } catch {
+      return false;
+    }
+  },
+}));
+
 // Mock WebSocket
 class MockWebSocket {
   static CONNECTING = 0;
