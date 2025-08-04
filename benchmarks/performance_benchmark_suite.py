@@ -1,15 +1,12 @@
 """
-Comprehensive Performance Benchmarking and Monitoring Suite.
+Simplified Performance Benchmarking Suite for Developer Release.
 
-This module provides a unified benchmarking system that tests all performance optimizations:
-1. Threading performance benchmarks
-2. Database query performance tests
-3. API response time benchmarks
-4. Memory usage optimization validation
-5. Agent coordination performance tests
-6. End-to-end system performance validation
-7. Performance regression detection
-8. Automated performance reporting
+Focused on core metrics required for developer release:
+1. Agent spawn time benchmarks
+2. Memory usage validation
+3. PyMDP integration performance
+4. Basic API response time tests
+5. Simple JSON output for CI gates
 """
 
 import asyncio

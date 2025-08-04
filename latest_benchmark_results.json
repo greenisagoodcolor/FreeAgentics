@@ -1,0 +1,30 @@
+{
+  "timestamp": "2025-08-04T23:23:12.336785",
+  "version": "1.0.0-dev-simple",
+  "metrics": {
+    "agent_spawning": {
+      "average_ms": 0.17032386003847932,
+      "p95_ms": 0.22950300262891687,
+      "max_ms": 0.31094900259631686
+    },
+    "memory_usage": {
+      "per_agent_mb": 0.003125,
+      "total_increase_mb": 0.3125
+    },
+    "pymdp_inference": {
+      "average_ms": 0.383877660278813,
+      "p95_ms": 0.005270998371997848,
+      "available": true
+    },
+    "api_performance": {
+      "average_ms": 1.1947431001317455,
+      "p95_ms": 1.4414340002986137
+    }
+  },
+  "summary": {
+    "total_duration_ms": 219.55700000000002,
+    "benchmarks_run": 4,
+    "agent_spawn_passed": true,
+    "memory_passed": true
+  }
+}

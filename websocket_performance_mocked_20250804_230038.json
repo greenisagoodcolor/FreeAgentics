@@ -1,0 +1,38 @@
+{
+  "multi_agent_conversation": {
+    "connections_established": 5,
+    "throughput_mps": 26.947870880230496,
+    "avg_latency_ms": 4.476417250022196,
+    "p95_latency_ms": 4.7987789985199925,
+    "conversations_completed": 5,
+    "kg_updates_processed": 50,
+    "coordination_messages": 5,
+    "memory_per_connection_mb": 2.5136,
+    "business_impact_score": 11.526064559884752,
+    "sla_violations": [
+      "Throughput 26.9 msg/s below 50.0 msg/s"
+    ]
+  },
+  "connection_stability": {
+    "connections_established": 15,
+    "connection_dropouts": 0,
+    "reconnections_successful": 0,
+    "messages_sent": 135,
+    "throughput_mps": 13.378850705925931,
+    "business_impact_score": 18.310574647037036,
+    "sla_violations": [
+      "Throughput 13.4 msg/s below 50.0 msg/s"
+    ]
+  },
+  "high_throughput_burst": {
+    "connections_established": 8,
+    "peak_throughput_mps": 69.36700050034416,
+    "avg_latency_ms": 4.783652077349691,
+    "p95_latency_ms": 5.1530380005715415,
+    "p99_latency_ms": 5.269230001431424,
+    "memory_per_connection_mb": 4.5,
+    "memory_budget_violations": 0,
+    "business_impact_score": 0.0,
+    "sla_violations": []
+  }
+}
