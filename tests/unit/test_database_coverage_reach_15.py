@@ -2,7 +2,7 @@
 
 import os
 
-os.environ["DATABASE_URL"] = "postgresql://test:test@localhost:5432/testdb"
+# os.environ["DATABASE_URL"] = "postgresql://test:test@localhost:5432/testdb"  # REMOVED: Tests must use in-memory database from conftest.py
 os.environ["TESTING"] = "true"  # Enable testing mode
 
 from unittest.mock import MagicMock, patch

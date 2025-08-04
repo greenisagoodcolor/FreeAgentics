@@ -30,38 +30,35 @@ def pytest_configure(config: pytest.Config) -> None:
     project_root = Path(__file__).parent
     test_env_path = project_root / ".env.test"
     
+    # Clear any existing DATABASE_URL first
+    if "DATABASE_URL" in os.environ:
+        del os.environ["DATABASE_URL"]
+    
     if test_env_path.exists():
         # Load test environment variables
         load_dotenv(test_env_path, override=True)
-        
-        # Ensure we're in test mode
-        os.environ["TESTING"] = "true"
-        os.environ["ENVIRONMENT"] = "test"
-        
-        # Force in-memory database
-        os.environ["DATABASE_URL"] = "sqlite:///:memory:"
-        os.environ["TEST_DATABASE_URL"] = "sqlite:///:memory:"
-        
-        # Force mock LLM provider
-        os.environ["LLM_PROVIDER"] = "mock"
-        os.environ["OPENAI_API_KEY"] = ""
-        os.environ["ANTHROPIC_API_KEY"] = ""
-        
-        # Disable external services
-        os.environ["REDIS_URL"] = ""
-        os.environ["ENABLE_REAL_LLM_CALLS"] = "false"
-        
-        print("✓ Test environment loaded from .env.test")
-        print(f"✓ Database: {os.environ.get('DATABASE_URL', 'not set')}")
-        print(f"✓ LLM Provider: {os.environ.get('LLM_PROVIDER', 'not set')}")
-        print(f"✓ Environment: {os.environ.get('ENVIRONMENT', 'not set')}")
-    else:
-        print("⚠️  Warning: .env.test not found, using default test settings")
-        # Set minimal test defaults
-        os.environ["TESTING"] = "true"
-        os.environ["ENVIRONMENT"] = "test"
-        os.environ["DATABASE_URL"] = "sqlite:///:memory:"
-        os.environ["LLM_PROVIDER"] = "mock"
+    
+    # Always force test settings, regardless of what .env.test contains
+    os.environ["TESTING"] = "true"
+    os.environ["ENVIRONMENT"] = "test"
+    
+    # Force in-memory database - MUST override any existing value
+    os.environ["DATABASE_URL"] = "sqlite:///:memory:"
+    os.environ["TEST_DATABASE_URL"] = "sqlite:///:memory:"
+    
+    # Force mock LLM provider
+    os.environ["LLM_PROVIDER"] = "mock"
+    os.environ["OPENAI_API_KEY"] = ""
+    os.environ["ANTHROPIC_API_KEY"] = ""
+    
+    # Disable external services
+    os.environ["REDIS_URL"] = ""
+    os.environ["ENABLE_REAL_LLM_CALLS"] = "false"
+    
+    print("✓ Test environment loaded")
+    print(f"✓ Database: {os.environ.get('DATABASE_URL', 'not set')}")
+    print(f"✓ LLM Provider: {os.environ.get('LLM_PROVIDER', 'not set')}")
+    print(f"✓ Environment: {os.environ.get('ENVIRONMENT', 'not set')}")
 
 
 def pytest_sessionstart(session: pytest.Session) -> None:
