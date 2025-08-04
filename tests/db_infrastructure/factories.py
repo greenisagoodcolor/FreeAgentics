@@ -78,11 +78,10 @@ class AgentFactory(BaseFactory):
             Created agent instance
         """
         defaults = {
-            "agent_id": f"agent_{cls.random_uuid()}",
             "name": f"Agent_{cls.random_string(6)}",
-            "agent_type": random.choice(cls.AGENT_TYPES),
+            "template": random.choice(cls.AGENT_TYPES),
             "status": AgentStatus.ACTIVE,
-            "belief_state": {
+            "beliefs": {
                 "initialized": True,
                 "last_update": datetime.utcnow().isoformat(),
                 "confidence": random.uniform(0.5, 1.0),
@@ -93,19 +92,17 @@ class AgentFactory(BaseFactory):
                 "lon": -122.4194 + random.uniform(-0.1, 0.1),
                 "elevation": random.uniform(0, 100),
             },
-            "capabilities": random.sample(cls.CAPABILITIES, k=random.randint(2, 5)),
             "parameters": {
                 "speed": random.uniform(0.5, 2.0),
                 "range": random.uniform(10, 100),
                 "energy": random.uniform(50, 100),
+                "capabilities": random.sample(cls.CAPABILITIES, k=random.randint(2, 5)),
             },
             "metrics": {
                 "total_actions": random.randint(0, 1000),
                 "success_rate": random.uniform(0.7, 0.95),
                 "avg_response_time": random.uniform(10, 100),
             },
-            "created_at": cls.random_timestamp(days_ago=7),
-            "updated_at": datetime.utcnow(),
         }
         defaults.update(kwargs)
 
@@ -130,7 +127,6 @@ class AgentFactory(BaseFactory):
         agents = []
         for i in range(count):
             agent_kwargs = kwargs.copy()
-            agent_kwargs["agent_id"] = f"batch_agent_{i}_{cls.random_uuid()}"
             agent_kwargs["name"] = f"BatchAgent_{i}"
             agents.append(Agent(**cls._get_defaults(**agent_kwargs)))
 
@@ -146,14 +142,12 @@ class AgentFactory(BaseFactory):
     def _get_defaults(cls, **kwargs) -> Dict[str, Any]:
         """Get default values with overrides."""
         defaults = {
-            "agent_id": f"agent_{cls.random_uuid()}",
             "name": f"Agent_{cls.random_string(6)}",
-            "agent_type": random.choice(cls.AGENT_TYPES),
+            "template": random.choice(cls.AGENT_TYPES),
             "status": AgentStatus.ACTIVE,
-            "belief_state": {"initialized": True},
+            "beliefs": {"initialized": True},
             "position": {"lat": 37.7749, "lon": -122.4194},
-            "capabilities": random.sample(cls.CAPABILITIES, k=3),
-            "created_at": datetime.utcnow(),
+            "parameters": {"capabilities": random.sample(cls.CAPABILITIES, k=3)},
         }
         defaults.update(kwargs)
         return defaults

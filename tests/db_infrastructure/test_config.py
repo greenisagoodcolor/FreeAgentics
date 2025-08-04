@@ -52,15 +52,21 @@ class DatabaseTestConfig:
 
     def create_engine(self) -> Engine:
         """Create database engine with test configuration."""
-        return create_engine(
-            self.database_url,
-            poolclass=self.pool_class,
-            pool_size=self.pool_size,
-            max_overflow=self.max_overflow,
-            pool_pre_ping=self.pool_pre_ping,
-            echo=self.echo,
-            connect_args=self.connect_args,
-        )
+        engine_kwargs = {
+            "poolclass": self.pool_class,
+            "echo": self.echo,
+            "connect_args": self.connect_args,
+        }
+        
+        # Only add pool parameters for non-SQLite databases
+        if self.pool_class != NullPool:
+            engine_kwargs.update({
+                "pool_size": self.pool_size,
+                "max_overflow": self.max_overflow,
+                "pool_pre_ping": self.pool_pre_ping,
+            })
+        
+        return create_engine(self.database_url, **engine_kwargs)
 
 
 def create_test_engine(use_sqlite: bool = False) -> Engine:
