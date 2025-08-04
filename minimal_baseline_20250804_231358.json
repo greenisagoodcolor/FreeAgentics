@@ -1,0 +1,16 @@
+{
+  "timestamp": "2025-08-04T23:13:58.317797",
+  "version": "1.0.0-dev-minimal",
+  "metrics": {
+    "agent_spawn_avg_ms": 0.2969220997329103,
+    "agent_spawn_p95_ms": 1.9878849998349324,
+    "agent_spawn_max_ms": 1.9878849998349324,
+    "baseline_memory_mb": 184.22265625,
+    "peak_memory_mb": 184.22265625,
+    "memory_used_mb": 0.0,
+    "memory_per_agent_mb": 0.0,
+    "pymdp_spawn_p95_ms": 0.19355680051376112,
+    "pymdp_spawn_avg_ms": 0.17785320014809258
+  },
+  "status": "PASS"
+}
