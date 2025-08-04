@@ -65,6 +65,81 @@ class PyMDPErrorHandler:
         self.operation_failures: Dict[str, int] = {}
         self.recovery_stats: Dict[str, Any] = {}
 
+    def safe_execute(
+        self,
+        operation_name: str,
+        operation_func: Callable,
+        fallback_func: Optional[Callable] = None,
+        context: Optional[Dict[str, Any]] = None,
+    ) -> Tuple[bool, Any, Optional[PyMDPError]]:
+        """Execute PyMDP operation with optional fallback and return status.
+
+        Args:
+            operation_name: Name of the operation for logging/tracking
+            operation_func: Primary operation to execute
+            fallback_func: Optional fallback operation to try on primary failure
+            context: Additional context for error analysis
+
+        Returns:
+            Tuple of (success: bool, result: Any, error: Optional[PyMDPError])
+            - success: True if primary succeeded, False if fallback used or both failed
+            - result: Operation result or None if both failed
+            - error: PyMDPError if primary failed, None if primary succeeded
+        """
+        context = context or {}
+        context["agent_id"] = self.agent_id
+
+        # Track operation attempts
+        current_failures = self.operation_failures.get(operation_name, 0)
+        self.operation_failures[operation_name] = current_failures + 1
+
+        try:
+            # Execute primary operation
+            result = operation_func()
+
+            # Success - reset failure count for this operation
+            self.operation_failures[operation_name] = 0
+
+            return True, result, None
+
+        except Exception as e:
+            self.error_count += 1
+            error_type = self._classify_error(e)
+
+            # Create detailed error context
+            error_context = {
+                **context,
+                "operation": operation_name,
+                "attempt_number": current_failures + 1,
+                "total_errors": self.error_count,
+                "error_type": error_type.value,
+            }
+
+            pymdp_error = PyMDPError(error_type, e, error_context)
+
+            logger.warning(
+                f"PyMDP operation '{operation_name}' failed (attempt {current_failures + 1}): {pymdp_error}"
+            )
+
+            # Try fallback if available and we haven't exceeded max attempts
+            if fallback_func is not None and current_failures < self.max_recovery_attempts:
+                try:
+                    fallback_result = fallback_func()
+                    
+                    # Track successful recovery
+                    self.recovery_stats[operation_name] = self.recovery_stats.get(operation_name, 0) + 1
+                    
+                    logger.info(f"Fallback successful for operation '{operation_name}'")
+                    return False, fallback_result, pymdp_error
+
+                except Exception as fallback_error:
+                    # Fallback also failed - add to error context
+                    pymdp_error.context["fallback_error"] = str(fallback_error)
+                    logger.error(f"Fallback also failed for operation '{operation_name}': {fallback_error}")
+
+            # No fallback or fallback failed
+            return False, None, pymdp_error
+
     def execute_with_error_context(
         self,
         operation_name: str,
@@ -350,7 +425,9 @@ def validate_pymdp_matrices(A: Any, B: Any, C: Any, D: Any) -> Tuple[bool, str]:
                 False,
                 "A matrix columns must sum to 1 (observation probabilities)",
             )
-        if not np.allclose(B.sum(axis=0), 1.0, rtol=1e-3):
+        # B matrix should have transitions from each state summing to 1 for each action
+        # B[action, from_state, to_state] -> sum over to_state (axis=2) should be 1
+        if not np.allclose(B.sum(axis=2), 1.0, rtol=1e-3):
             return (
                 False,
                 "B matrix must have transition probabilities summing to 1",
@@ -362,6 +439,133 @@ def validate_pymdp_matrices(A: Any, B: Any, C: Any, D: Any) -> Tuple[bool, str]:
 
     except Exception as e:
         return False, f"Matrix validation failed: {e}"
+
+
+# Safe functions with fallback defaults - required by test suite
+def safe_numpy_conversion(value: Any, target_type: type, default: Any = None) -> Any:
+    """Safely convert numpy arrays/scalars to Python primitives with fallback defaults.
+    
+    This function provides safe conversion for PyMDP return values that might be
+    numpy arrays instead of scalars. For array-like objects, it takes the first element.
+    
+    Args:
+        value: Value to convert (numpy array, scalar, or other)
+        target_type: Target Python type (int, float, str, bool)
+        default: Default value to return on conversion failure
+        
+    Returns:
+        Converted value or default value
+    """
+    # Set appropriate defaults if none provided
+    if default is None:
+        if target_type == int:
+            default = 0
+        elif target_type == float:
+            default = 0.0
+        elif target_type == str:
+            default = ""
+        elif target_type == bool:
+            default = False
+        else:
+            default = None
+    
+    try:
+        # Handle numpy scalars and 0-d arrays first
+        if hasattr(value, "item"):
+            return target_type(value.item())
+
+        # Handle array-like objects 
+        elif hasattr(value, "__getitem__") and hasattr(value, "__len__"):
+            if len(value) == 0:
+                logger.warning(f"Empty array cannot be converted to {target_type.__name__}, using default {default}")
+                return default
+            elif len(value) == 1:
+                # Single element - extract properly
+                if hasattr(value, "item"):
+                    return target_type(value.item())
+                else:
+                    return target_type(value[0])
+            else:
+                # Multi-element array - behavior depends on type
+                if isinstance(value, str):
+                    # Strings: take first character
+                    logger.warning(
+                        f"Multi-element array-like {type(value)} converted to {target_type.__name__} using first element"
+                    )
+                    return target_type(value[0])
+                elif hasattr(value, "item") and hasattr(value, "flat"):
+                    # Numpy arrays: take first element  
+                    logger.warning(
+                        f"Multi-element array-like {type(value)} converted to {target_type.__name__} using first element"
+                    )
+                    return target_type(value.flat[0])
+                else:
+                    # Regular Python lists/tuples: fail and return default
+                    logger.warning(
+                        f"Multi-element {type(value)} cannot be converted to scalar {target_type.__name__}, using default {default}"
+                    )
+                    return default
+
+        # Handle regular Python types and numpy scalars
+        elif isinstance(value, (int, float, str, bool, np.number)):
+            return target_type(value)
+
+        # Handle None
+        elif value is None:
+            logger.warning(f"None value converted to {target_type.__name__} using default {default}")
+            return default
+
+        # Unknown type - attempt direct conversion
+        else:
+            return target_type(value)
+
+    except (ValueError, TypeError, IndexError, OverflowError) as e:
+        logger.warning(
+            f"Safe numpy conversion fallback: {type(value)} value {value} "
+            f"to {target_type.__name__} failed ({e}), using default {default}"
+        )
+        return default
+
+
+def safe_array_index(array: Any, index: Any, default: Any = None) -> Any:
+    """Safely index into arrays with fallback default.
+    
+    Args:
+        array: Array-like object to index
+        index: Index (may be numpy array)
+        default: Default value to return on indexing failure
+        
+    Returns:
+        Indexed value or default value
+    """
+    try:
+        return strict_array_index(array, index)
+    except (ValueError, IndexError) as e:
+        logger.warning(
+            f"Safe array indexing fallback: indexing {type(array)} with {index} "
+            f"failed ({e}), using default {default}"
+        )
+        return default
+
+
+def safe_array_to_int(value: Any, default: int = 0) -> int:
+    """Safely convert array/scalar to int with fallback default.
+    
+    Args:
+        value: Value to convert to integer
+        default: Default value to return on conversion failure
+        
+    Returns:
+        Integer value or default
+    """
+    try:
+        return strict_numpy_conversion(value, int)
+    except (ValueError, TypeError) as e:
+        logger.warning(
+            f"Safe array to int conversion fallback: {type(value)} value {value} "
+            f"conversion failed ({e}), using default {default}"
+        )
+        return default
 
 
 # Strict conversion function for backward compatibility
