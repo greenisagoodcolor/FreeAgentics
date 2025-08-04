@@ -244,16 +244,26 @@ def main():
     # Setup
     setup_environment()
 
-    # Initialize providers
-    print("🔧 Initializing providers...")
+    # Run 3-agent demo (for developer education)
+    print("🎭 Running 3-Agent Conversation Demo...")
     try:
         # Ensure the project root is in sys.path
         project_root = Path(__file__).parent.parent
         if str(project_root) not in sys.path:
             sys.path.insert(0, str(project_root))
 
-        from core.providers import init_providers
+        from examples.three_agent_conversation_demo import run_demo
+        run_demo()
+        print("\n" + "=" * 60)
+    except ImportError as e:
+        print(f"  ⚠️  Demo unavailable (import error): {e}")
+    except Exception as e:
+        print(f"  ⚠️  Demo warning: {e}")
 
+    # Initialize providers
+    print("🔧 Initializing providers...")
+    try:
+        from core.providers import init_providers
         init_providers()
     except ImportError as e:
         print(f"  ⚠️  Provider initialization warning (import error): {e}")

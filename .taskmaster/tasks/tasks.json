@@ -2989,67 +2989,44 @@
       {
         "id": 51,
         "title": "Fix Multi-Agent Architecture for GIL Limitations",
-        "description": "Redesign multi-agent system to work within Python GIL constraints for demo and development purposes",
+        "description": "Create a minimal 'Hello World' multi-agent demo that shows 3 agents having a simple conversation when running 'make dev'",
         "status": "in-progress",
         "dependencies": [
           50
         ],
         "priority": "high",
-        "details": "Accept single-threaded agent execution with simple coordination mechanisms. Focus on basic multi-agent functionality that works reliably for development and demo environments. Implement lightweight coordination without complex multiprocessing overhead. Target functional multi-agent behavior over performance optimization.",
-        "testStrategy": "Test basic multi-agent coordination in single-threaded mode. Validate agent communication and state management. Ensure demo scenarios work reliably without performance bottlenecks.",
+        "details": "Create the simplest possible multi-agent demo - just 3 agents taking turns in a conversation. No GIL optimization, no performance concerns, no complex coordination. Pure sequential execution in a single thread. Think 'Hello World' level simplicity that demonstrates basic multi-agent interaction for developers.",
+        "testStrategy": "Verify 'make dev' shows 3 agents having a simple conversation. Test that demo runs without errors. Ensure conversation is visible and understandable.",
         "subtasks": [
           {
             "id": 1,
-            "title": "Simplify agent coordination for single-threaded execution",
-            "description": "Redesign coordination to work efficiently within GIL constraints using sequential agent processing",
-            "status": "pending",
+            "title": "Create minimal 3-agent conversation demo",
+            "description": "Implement the simplest possible demo with 3 agents taking turns talking",
+            "status": "in-progress",
             "dependencies": [],
-            "details": "Replace concurrent coordination with sequential agent turn-based processing. Implement simple state sharing through in-memory objects. Use basic synchronization with threading.Lock for critical sections. Focus on correctness over performance for demo scenarios.",
+            "details": "Create 3 hardcoded agents (Agent A, Agent B, Agent C) that take sequential turns. Each agent says one simple message per turn. No complex logic - just a basic conversation loop. Display output to console so developers can see it working.",
             "testStrategy": ""
           },
           {
             "id": 2,
-            "title": "Implement lightweight agent communication",
-            "description": "Create simple message passing between agents without complex IPC",
+            "title": "Wire demo into 'make dev' command",
+            "description": "Ensure the multi-agent demo runs when developer types 'make dev'",
             "status": "pending",
             "dependencies": [
               1
             ],
-            "details": "Use in-memory queues for agent-to-agent messaging. Implement basic event broadcasting for coordination. Create simple agent registry for discovery. Avoid complex serialization - use direct object references where possible.",
+            "details": "Add the multi-agent demo to the development startup sequence. Make it visible and obvious that multi-agent functionality is working. Keep it short (5-10 exchanges) so it doesn't slow down development workflow.",
             "testStrategy": ""
           },
           {
             "id": 3,
-            "title": "Design basic agent lifecycle management",
-            "description": "Create simple agent creation, execution, and cleanup for development use",
+            "title": "Add basic logging to show agent interactions",
+            "description": "Make agent conversation visible with simple console output",
             "status": "pending",
             "dependencies": [
               1
             ],
-            "details": "Implement basic agent factory for creating demo agents. Create simple start/stop lifecycle. Handle basic error recovery without complex fault tolerance. Focus on clean resource cleanup and predictable behavior.",
-            "testStrategy": ""
-          },
-          {
-            "id": 4,
-            "title": "Create demo-friendly multi-agent scenarios",
-            "description": "Implement simple multi-agent use cases that demonstrate functionality",
-            "status": "pending",
-            "dependencies": [
-              2,
-              3
-            ],
-            "details": "Create 2-3 agent demo scenarios (collaborative problem solving, simple negotiation). Implement basic belief sharing between agents. Create observable agent interactions for debugging. Keep scenarios simple and deterministic for reliable demos.",
-            "testStrategy": ""
-          },
-          {
-            "id": 5,
-            "title": "Validate basic multi-agent functionality",
-            "description": "Test simplified architecture meets development and demo requirements",
-            "status": "pending",
-            "dependencies": [
-              4
-            ],
-            "details": "Test agent creation and basic coordination. Validate message passing works reliably. Ensure demo scenarios execute consistently. Verify memory usage stays reasonable for development. Test basic error handling and recovery.",
+            "details": "Add clear console output showing which agent is speaking and what they're saying. Use simple print statements or basic logging. Make it obvious that multiple agents are working together.",
             "testStrategy": ""
           }
         ]
@@ -3620,7 +3597,7 @@
     ],
     "metadata": {
       "created": "2025-07-04T12:52:30.518Z",
-      "updated": "2025-08-04T21:25:51.012Z",
+      "updated": "2025-08-04T21:45:53.647Z",
       "description": "Tasks for master context"
     }
   }
