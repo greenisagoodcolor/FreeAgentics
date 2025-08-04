@@ -55,10 +55,14 @@ def pytest_configure(config: pytest.Config) -> None:
     os.environ["REDIS_URL"] = ""
     os.environ["ENABLE_REAL_LLM_CALLS"] = "false"
     
+    # Force CPU-only mode for consistent testing
+    os.environ["CUDA_VISIBLE_DEVICES"] = ""
+    
     print("✓ Test environment loaded")
     print(f"✓ Database: {os.environ.get('DATABASE_URL', 'not set')}")
     print(f"✓ LLM Provider: {os.environ.get('LLM_PROVIDER', 'not set')}")
     print(f"✓ Environment: {os.environ.get('ENVIRONMENT', 'not set')}")
+    print(f"✓ Device: CPU-only (CUDA_VISIBLE_DEVICES='')")
 
 
 def pytest_sessionstart(session: pytest.Session) -> None:
@@ -201,3 +205,15 @@ def sample_user_data():
         "email": "test@example.com",
         "password": "test_password_123"
     }
+
+
+@pytest.fixture(scope="session", autouse=True)
+def configure_device_for_tests():
+    """Configure device settings for consistent testing."""
+    # Import safe device config that won't crash during testing
+    from utils.safe_device_config import get_safe_device_info
+    
+    device_info = get_safe_device_info()
+    print(f"✓ Safe device config: {device_info}")
+    
+    yield

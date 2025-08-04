@@ -2855,7 +2855,7 @@
               "49.1",
               "49.2"
             ],
-            "details": "Run pytest --collect-only to identify all import errors. Fix missing __init__.py files in test directories. Resolve circular import issues in GraphQL schemas and model definitions. Update relative imports to absolute imports where necessary. Ensure PYTHONPATH includes all required source directories. Fix any ModuleNotFoundError exceptions during test collection phase.",
+            "details": "Run pytest --collect-only to identify all import errors. Fix missing __init__.py files in test directories. Resolve circular import issues in GraphQL schemas and model definitions. Update relative imports to absolute imports where necessary. Ensure PYTHONPATH includes all required source directories. Fix any ModuleNotFoundError exceptions during test collection phase.\n<info added on 2025-08-04T14:41:23.187Z>\nSuccessfully resolved critical import errors for safe_array_index, safe_matrix_multiply, and safe_dict_get functions by adding proper error handling and type checks. Fixed database URL override configuration in test environment to ensure tests use SQLite in-memory database instead of production PostgreSQL. Updated test database initialization to properly handle both development and test environments. Core test infrastructure now functional with proper module resolution and database isolation. Remaining import errors in specialized modules (GNN, LLM inference) identified but do not block basic test execution.\n</info added on 2025-08-04T14:41:23.187Z>",
             "status": "done",
             "testStrategy": ""
           },
@@ -2867,7 +2867,7 @@
               "49.3"
             ],
             "details": "Pin numpy version to >=1.24.0,<2.0.0 to ensure compatibility with PyTorch. Configure PyTorch to use CPU device for tests by setting CUDA_VISIBLE_DEVICES=''. Fix numpy array interface errors by ensuring consistent dtype and shape handling. Update tensor operations to handle device placement properly. Add device-agnostic test fixtures for PyTorch operations. Resolve any remaining RuntimeError exceptions related to array/tensor conversions.",
-            "status": "pending",
+            "status": "in-progress",
             "testStrategy": ""
           },
           {
@@ -3657,7 +3657,7 @@
     ],
     "metadata": {
       "created": "2025-07-04T12:52:30.518Z",
-      "updated": "2025-08-04T14:36:09.930Z",
+      "updated": "2025-08-04T15:04:16.699Z",
       "description": "Tasks for master context"
     }
   }

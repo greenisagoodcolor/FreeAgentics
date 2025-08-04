@@ -1,0 +1,7 @@
+✓ Test environment loaded
+✓ Database: sqlite:///:memory:
+✓ LLM Provider: mock
+✓ Environment: test
+🧪 Starting test session
+❌ Tests failed with exit status 4
+
