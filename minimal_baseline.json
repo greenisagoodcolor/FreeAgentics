@@ -1,0 +1,20 @@
+{
+  "timestamp": "2025-08-04T23:13:58.317797",
+  "version": "1.0.0-dev-minimal",
+  "metrics": {
+    "agent_spawning": {
+      "average_ms": 0.2969220997329103,
+      "p95_ms": 1.9878849998349324,
+      "max_ms": 1.9878849998349324
+    },
+    "memory_usage": {
+      "per_agent_mb": 0.0,
+      "total_increase_mb": 0.0
+    },
+    "pymdp_inference": {
+      "average_ms": 0.17785320014809258,
+      "p95_ms": 0.19355680051376112
+    }
+  },
+  "status": "PASS"
+}

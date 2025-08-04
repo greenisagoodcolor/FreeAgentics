@@ -338,3 +338,22 @@ coverage-clean: ## Clean coverage artifacts
 	@echo "Cleaning coverage artifacts..."
 	@rm -rf htmlcov* coverage*.json coverage*.xml .coverage* coverage-data.json
 	@echo "Coverage artifacts cleaned."
+
+# Performance Benchmarking Commands
+.PHONY: bench bench-gate bench-baseline
+
+bench: ## Run performance benchmarks
+	@echo "Running performance benchmarks..."
+	@. $(VENV_DIR)/bin/activate && python benchmarks/simple_benchmark_runner.py
+
+bench-gate: ## Check performance against gates (for CI)
+	@echo "Checking performance gates..."
+	@if [ ! -f "latest_benchmark_results.json" ]; then \
+		echo "No benchmark results found. Run 'make bench' first."; \
+		exit 1; \
+	fi
+	@. $(VENV_DIR)/bin/activate && python benchmarks/performance_gate.py latest_benchmark_results.json
+
+bench-baseline: ## Update performance baseline
+	@echo "Updating performance baseline..."
+	@. $(VENV_DIR)/bin/activate && python performance_baseline_establishment.py
