@@ -2912,7 +2912,7 @@
             "description": "Identify and remove all time.sleep() mocks and synthetic delays from existing performance test files",
             "dependencies": [],
             "details": "Audit all test files in tests/performance/ directory to identify mocked operations. Remove time.sleep() calls, hardcoded delays, and synthetic load generation. Document which tests need real implementations. Create a migration checklist for converting each mock to real benchmark. Ensure tests fail appropriately until real implementations are added.",
-            "status": "in-progress",
+            "status": "done",
             "testStrategy": ""
           },
           {
@@ -2923,7 +2923,7 @@
               "50.1"
             ],
             "details": "Implement benchmark runner using pytest-benchmark or similar tool. Create realistic PyMDP agent configurations based on actual use cases (analyst, strategist, implementer). Set up parameterized tests for different state space sizes, policy depths, and belief update complexities. Implement warm-up cycles to avoid JIT compilation effects. Create utilities for generating deterministic test data.",
-            "status": "pending",
+            "status": "done",
             "testStrategy": ""
           },
           {
@@ -3657,7 +3657,7 @@
     ],
     "metadata": {
       "created": "2025-07-04T12:52:30.518Z",
-      "updated": "2025-08-04T15:54:01.880Z",
+      "updated": "2025-08-04T16:18:40.270Z",
       "description": "Tasks for master context"
     }
   }
