@@ -72,7 +72,15 @@ class TestMemoryTracker:
         # Clear memory
         data.clear()
         gc.collect()  # Force garbage collection
-        time.sleep(0.1)  # Give time for memory to be released
+        
+        # Wait for memory to stabilize with actual monitoring
+        initial_memory = tracker.sample()
+        for _ in range(10):  # Max 10 iterations to prevent infinite loops
+            gc.collect()
+            current_memory = tracker.sample()
+            if current_memory <= initial_memory * 1.1:  # Within 10% of initial
+                break
+            initial_memory = current_memory
 
         start, end, peak = tracker.stop()
 
@@ -128,9 +136,11 @@ class TestPerformanceTracking:
     def test_track_performance_context(self):
         """Test performance tracking context manager."""
         with track_performance("test_op", "test_category") as metrics:
-            # Simulate some work
-            time.sleep(0.01)
+            # Perform real computational work instead of sleep
             data = np.random.rand(1000, 1000)
+            # Force CPU work with mathematical operations
+            result = np.fft.fft2(data).real.sum()
+            assert result != 0  # Ensure computation actually occurred
 
             # Update metrics during operation
             metrics.metadata["data_size"] = data.shape
@@ -640,9 +650,11 @@ class TestEndToEndPerformance:
             metrics = []
 
             with track_performance("e2e_test", "integration") as metric:
-                # Simulate some work
-                np.random.rand(100, 100)
-                time.sleep(0.01)
+                # Perform real computational work
+                data = np.random.rand(100, 100)
+                # Execute meaningful operations that consume CPU cycles
+                result = np.linalg.svd(data, compute_uv=False)  # SVD decomposition
+                metric.metadata["svd_result_shape"] = result.shape
                 metrics.append(metric)
 
             # Generate report

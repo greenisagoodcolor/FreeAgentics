@@ -2904,7 +2904,7 @@
         "dependencies": [
           49
         ],
-        "status": "pending",
+        "status": "in-progress",
         "subtasks": [
           {
             "id": 1,
@@ -2912,7 +2912,7 @@
             "description": "Identify and remove all time.sleep() mocks and synthetic delays from existing performance test files",
             "dependencies": [],
             "details": "Audit all test files in tests/performance/ directory to identify mocked operations. Remove time.sleep() calls, hardcoded delays, and synthetic load generation. Document which tests need real implementations. Create a migration checklist for converting each mock to real benchmark. Ensure tests fail appropriately until real implementations are added.",
-            "status": "pending",
+            "status": "in-progress",
             "testStrategy": ""
           },
           {
@@ -3657,7 +3657,7 @@
     ],
     "metadata": {
       "created": "2025-07-04T12:52:30.518Z",
-      "updated": "2025-08-04T15:50:54.263Z",
+      "updated": "2025-08-04T15:54:01.880Z",
       "description": "Tasks for master context"
     }
   }

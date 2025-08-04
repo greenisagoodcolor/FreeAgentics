@@ -85,9 +85,9 @@ class PerformanceTheaterDetector:
 
         # Focus on performance test directories
         performance_dirs = [
-            Path("/home/green/FreeAgentics/tests/performance"),
-            Path("/home/green/FreeAgentics/benchmarks"),
-            Path("/home/green/FreeAgentics/tests/integration"),
+            Path("/home/green/freeagentics/tests/performance"),
+            Path("/home/green/freeagentics/benchmarks"),
+            Path("/home/green/freeagentics/tests/integration"),
         ]
 
         for perf_dir in performance_dirs:
@@ -163,9 +163,9 @@ def test_performance_tests_use_real_operations():
     # This test validates that key performance files exist and are not disabled
 
     performance_files = [
-        Path("/home/green/FreeAgentics/tests/performance/pymdp_benchmarks.py"),
-        Path("/home/green/FreeAgentics/tests/performance/performance_regression_tests.py"),
-        Path("/home/green/FreeAgentics/tests/performance/pymdp_mathematical_validation.py"),
+        Path("/home/green/freeagentics/tests/performance/pymdp_benchmarks.py"),
+        Path("/home/green/freeagentics/tests/benchmarks/test_performance_regression.py"),
+        Path("/home/green/freeagentics/tests/performance/pymdp_mathematical_validation.py"),
     ]
 
     for file_path in performance_files:
@@ -189,7 +189,7 @@ def test_performance_tests_use_real_operations():
 def test_mathematical_validation_exists():
     """Test that mathematical validation is in place."""
     validation_file = Path(
-        "/home/green/FreeAgentics/tests/performance/pymdp_mathematical_validation.py"
+        "/home/green/freeagentics/tests/performance/pymdp_mathematical_validation.py"
     )
     assert validation_file.exists(), "Mathematical validation suite is missing!"
 
@@ -223,7 +223,7 @@ def test_performance_benchmarks_produce_realistic_results():
             capture_output=True,
             text=True,
             timeout=30,
-            cwd="/home/green/FreeAgentics",
+            cwd="/home/green/freeagentics",
         )
 
         assert result.returncode == 0, f"Benchmark failed: {result.stderr}"
