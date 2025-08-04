@@ -1,0 +1,85 @@
+# CI Coverage Profile - Comprehensive validation for merge gates
+
+[run]
+branch = True
+source = .
+
+# Full inclusion of production code
+include =
+    agents/*
+    api/*
+    coalitions/*
+    database/*
+    services/*
+    auth/*
+    websocket/*
+    inference/*
+    llm/*
+    world/*
+    knowledge_graph/*
+    core/*
+
+# Minimal exclusions - only non-code artifacts
+omit =
+    */tests/*
+    */test_*
+    *_test.py
+    test_*.py
+    conftest.py
+    main.py
+    */examples/*
+    */docs/*
+    */benchmarks/*
+    */scripts/*
+    */alembic/versions/*
+    */migrations/*
+    */__pycache__/*
+    */build/*
+    */dist/*
+
+parallel = True
+data_file = .coverage.ci
+concurrency = thread,multiprocessing
+
+[report]
+exclude_lines =
+    pragma: no cover
+    pragma: no coverage
+    def __repr__
+    def __str__
+    if self.debug:
+    if settings.DEBUG
+    raise AssertionError
+    raise NotImplementedError
+    if 0:
+    if False:
+    if __name__ == .__main__.:
+    class .*\bProtocol\):
+    class .*\bAbstract.*\):
+    @(abc\.)?abstractmethod
+    except.*ImportError.*:
+    except.*ModuleNotFoundError.*:
+    except.*RuntimeError.*:
+    if.*not.*TORCH_AVAILABLE
+    if.*not.*PYMDP_AVAILABLE
+    if.*not.*CUDA_AVAILABLE
+    if.*SKIP_ML_IMPORTS
+    if TYPE_CHECKING:
+    if typing.TYPE_CHECKING:
+
+precision = 2
+show_missing = True
+skip_empty = True
+skip_covered = False
+fail_under = 75  # CI gate threshold
+
+[html]
+directory = htmlcov-ci
+title = CI Coverage Report
+
+[xml]
+output = coverage-ci.xml
+
+[json]
+output = coverage-ci.json
+pretty_print = True

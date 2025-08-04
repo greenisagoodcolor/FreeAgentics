@@ -1,0 +1,28 @@
+{
+  "timestamp": "2025-08-04T17:42:01.014239",
+  "profile": "dev",
+  "total_coverage": 0,
+  "module_results": [],
+  "threshold_violations": [
+    "Module api has no coverage data",
+    "Module auth has no coverage data",
+    "Module database has no coverage data",
+    "Module agents has no coverage data",
+    "Module coalitions has no coverage data",
+    "Module services has no coverage data",
+    "Module knowledge_graph has no coverage data",
+    "Module inference has no coverage data",
+    "Module llm has no coverage data",
+    "Module world has no coverage data",
+    "Module websocket has no coverage data"
+  ],
+  "coverage_debt": {},
+  "performance_metrics": {
+    "total_collection_time": 1.2636184692382812e-05,
+    "modules_analyzed": 0,
+    "avg_time_per_module": 0
+  },
+  "next_actions": [
+    "\ud83d\udccb Run coverage collection first: python scripts/coverage-check.py"
+  ]
+}

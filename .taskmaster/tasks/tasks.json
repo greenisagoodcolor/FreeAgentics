@@ -2867,7 +2867,7 @@
               "49.3"
             ],
             "details": "Pin numpy version to >=1.24.0,<2.0.0 to ensure compatibility with PyTorch. Configure PyTorch to use CPU device for tests by setting CUDA_VISIBLE_DEVICES=''. Fix numpy array interface errors by ensuring consistent dtype and shape handling. Update tensor operations to handle device placement properly. Add device-agnostic test fixtures for PyTorch operations. Resolve any remaining RuntimeError exceptions related to array/tensor conversions.",
-            "status": "in-progress",
+            "status": "done",
             "testStrategy": ""
           },
           {
@@ -2878,7 +2878,7 @@
               "49.4"
             ],
             "details": "Execute pytest with verbose output to track test execution. Document any remaining test failures and categorize by error type. Ensure test collection phase completes without import errors. Verify that at least 380 out of 400 tests execute (95% success rate). Generate test execution report showing passed/failed/skipped counts. Identify any flaky tests that fail intermittently.",
-            "status": "pending",
+            "status": "done",
             "testStrategy": ""
           },
           {
@@ -2889,7 +2889,7 @@
               "49.5"
             ],
             "details": "Install and configure pytest-cov plugin. Update pytest.ini with coverage settings including source paths and omit patterns. Configure coverage to generate both terminal and HTML reports. Set up .coveragerc file with proper exclusions for test files and generated code. Run initial coverage report to establish baseline metrics. Document coverage percentages for each module, particularly focusing on zero-coverage modules identified in Task 54.",
-            "status": "pending",
+            "status": "in-progress",
             "testStrategy": ""
           }
         ]
@@ -3657,7 +3657,7 @@
     ],
     "metadata": {
       "created": "2025-07-04T12:52:30.518Z",
-      "updated": "2025-08-04T15:04:16.699Z",
+      "updated": "2025-08-04T15:33:33.761Z",
       "description": "Tasks for master context"
     }
   }

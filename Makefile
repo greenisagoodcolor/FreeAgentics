@@ -42,6 +42,13 @@ help: ## Show available commands
 	@echo "  make security            Security vulnerability scan (Safety)"
 	@echo "  make quality             Run all quality checks"
 	@echo ""
+	@echo "Coverage Analysis:"
+	@echo "  make coverage-dev        Fast development coverage"
+	@echo "  make coverage-ci         Comprehensive CI coverage"
+	@echo "  make coverage-baseline   Establish coverage baseline"
+	@echo "  make coverage-report     Generate coverage report"
+	@echo "  make coverage-clean      Clean coverage artifacts"
+	@echo ""
 	@echo "Run 'make install' then 'make dev' to get started."
 
 check: ## Check environment prerequisites
@@ -147,7 +154,9 @@ test: ## Run tests
 
 clean: ## Clean build artifacts
 	@echo "Cleaning build artifacts..."
-	@rm -rf test-reports/ .pytest_cache/ .coverage htmlcov/ .mypy_cache/
+	@rm -rf test-reports/ .pytest_cache/ .mypy_cache/
+	@# Clean coverage artifacts
+	@rm -rf htmlcov* coverage*.json coverage*.xml .coverage* coverage-data.json
 	@find . -name "*.pyc" -delete
 	@find . -name "__pycache__" -type d -exec rm -rf {} + 2>/dev/null || true
 	@if [ -d "$(WEB_DIR)" ]; then \
@@ -301,3 +310,31 @@ security: ## Run security vulnerability scan
 
 quality: lint typecheck complexity security ## Run all quality checks
 	@echo "All quality checks completed."
+
+# Coverage Analysis Commands
+.PHONY: coverage-dev coverage-ci coverage-baseline coverage-report coverage-clean
+
+coverage-dev: ## Fast development coverage analysis
+	@echo "Running development coverage analysis..."
+	@. $(VENV_DIR)/bin/activate && ./scripts/coverage-dev.sh
+
+coverage-ci: ## Comprehensive CI coverage validation
+	@echo "Running CI coverage validation..."
+	@. $(VENV_DIR)/bin/activate && ./scripts/coverage-ci.sh
+
+coverage-baseline: ## Establish or update coverage baseline
+	@echo "Updating coverage baseline..."
+	@. $(VENV_DIR)/bin/activate && python scripts/coverage-baseline.py --compare
+
+coverage-report: ## Generate detailed coverage report
+	@echo "Generating coverage report..."
+	@. $(VENV_DIR)/bin/activate && python scripts/coverage-check.py --output=coverage-detailed.json
+	@echo "📄 Detailed report: coverage-detailed.json"
+	@if [ -f "htmlcov/index.html" ]; then \
+		echo "🌐 HTML report: htmlcov/index.html"; \
+	fi
+
+coverage-clean: ## Clean coverage artifacts
+	@echo "Cleaning coverage artifacts..."
+	@rm -rf htmlcov* coverage*.json coverage*.xml .coverage* coverage-data.json
+	@echo "Coverage artifacts cleaned."

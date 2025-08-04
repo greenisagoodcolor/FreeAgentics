@@ -1,0 +1,56 @@
+# Development Coverage Profile - Fast feedback for active development
+
+[run]
+branch = False  # Disable branch coverage for speed
+source = .
+
+# Focused inclusion - only modules being actively developed
+include =
+    agents/*
+    api/*
+    database/*
+    services/*
+
+# Aggressive exclusions for development speed
+omit =
+    */tests/*
+    */test_*
+    *_test.py
+    test_*.py
+    conftest.py
+    main.py
+    */examples/*
+    */docs/*
+    */benchmarks/*
+    */monitoring/*
+    */observability/*
+    */security/*
+    */scripts/*
+    */alembic/*
+    */migrations/*
+
+parallel = False  # Disable for faster collection
+data_file = .coverage.dev
+
+[report]
+exclude_lines =
+    pragma: no cover
+    def __repr__
+    def __str__
+    if self.debug:
+    if settings.DEBUG
+    raise AssertionError
+    raise NotImplementedError
+    if 0:
+    if False:
+    if __name__ == .__main__.:
+
+precision = 1
+show_missing = True
+skip_empty = True
+skip_covered = True  # Hide fully covered files for focus
+fail_under = 50      # Low threshold for development
+
+[html]
+directory = htmlcov-dev
+title = Development Coverage Report
