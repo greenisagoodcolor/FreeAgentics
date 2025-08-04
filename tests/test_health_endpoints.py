@@ -36,7 +36,7 @@ def test_llm_health_check_unauthenticated(client):
     assert data["provider"] in ["mock", "openai", "anthropic"]
 
 
-@patch("auth.security_implementation.get_current_user_optional")
+@patch("auth.dev_bypass.get_current_user_optional")
 @patch("core.providers.get_llm")
 def test_llm_health_check_authenticated(mock_get_llm, mock_auth, client):
     """Test LLM health check with authenticated user."""
@@ -112,7 +112,7 @@ def test_detailed_health_check(client):
     assert "status" in llm_check
 
 
-@patch("auth.security_implementation.get_current_user_optional")
+@patch("auth.dev_bypass.get_current_user_optional")
 def test_detailed_health_check_authenticated(mock_auth, client):
     """Test detailed health check with authenticated user."""
     from datetime import datetime, timedelta
