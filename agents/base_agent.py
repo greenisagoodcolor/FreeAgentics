@@ -9,8 +9,14 @@ from typing import Any, Callable, Dict, Optional, Tuple
 import numpy as np
 
 # PyMDP is a required dependency - no fallbacks allowed
-from pymdp import utils as _pymdp_utils
-from pymdp.agent import Agent as _PyMDPAgent
+try:
+    from pymdp import utils as _pymdp_utils
+    from pymdp.agent import Agent as _PyMDPAgent
+    PYMDP_AVAILABLE = True
+except ImportError:
+    _pymdp_utils = None
+    _PyMDPAgent = None
+    PYMDP_AVAILABLE = False
 
 from agents.error_handling import (
     ActionSelectionError,
@@ -44,6 +50,14 @@ def safe_numpy_conversion(value, target_type, default_value):
         return target_type(value)
     except (ValueError, TypeError, AttributeError):
         return default_value
+
+
+def _get_pymdp_components():
+    """Get PyMDP components with availability check."""
+    if PYMDP_AVAILABLE:
+        return True, _pymdp_utils, _PyMDPAgent
+    else:
+        return False, None, None
 
 
 def safe_array_index(array, index, default_value):

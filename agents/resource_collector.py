@@ -14,6 +14,7 @@ from agents.base_agent import (
     PYMDP_AVAILABLE,
     ActiveInferenceAgent,
     safe_array_to_int,
+    safe_array_index,
 )
 from agents.error_handling import (
     PyMDPError,
@@ -21,7 +22,6 @@ from agents.error_handling import (
 )
 from agents.pymdp_error_handling import (
     PyMDPErrorHandler,
-    safe_array_index,
     validate_pymdp_matrices,
 )
 
