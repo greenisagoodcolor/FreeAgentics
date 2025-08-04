@@ -1,17 +1,15 @@
 # Development Coverage Profile - Fast feedback for active development
 
 [run]
-branch = False  # Disable branch coverage for speed
+branch = False
 source = .
 
-# Focused inclusion - only modules being actively developed
 include =
     agents/*
     api/*
     database/*
     services/*
 
-# Aggressive exclusions for development speed
 omit =
     */tests/*
     */test_*
@@ -29,7 +27,7 @@ omit =
     */alembic/*
     */migrations/*
 
-parallel = False  # Disable for faster collection
+parallel = False
 data_file = .coverage.dev
 
 [report]
@@ -48,8 +46,8 @@ exclude_lines =
 precision = 1
 show_missing = True
 skip_empty = True
-skip_covered = True  # Hide fully covered files for focus
-fail_under = 50      # Low threshold for development
+skip_covered = True
+fail_under = 50
 
 [html]
 directory = htmlcov-dev

@@ -4,7 +4,6 @@
 branch = True
 source = .
 
-# Full inclusion of production code
 include =
     agents/*
     api/*
@@ -19,7 +18,6 @@ include =
     knowledge_graph/*
     core/*
 
-# Minimal exclusions - only non-code artifacts
 omit =
     */tests/*
     */test_*
@@ -71,7 +69,7 @@ precision = 2
 show_missing = True
 skip_empty = True
 skip_covered = False
-fail_under = 75  # CI gate threshold
+fail_under = 75
 
 [html]
 directory = htmlcov-ci
