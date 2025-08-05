@@ -390,50 +390,101 @@ class KnowledgeGraphUpdateStep(PipelineStep):
 
 
 class ResponseGenerationStep(PipelineStep):
-    """Generate final response for user."""
+    """Generate final response for user using the ResponseGenerator system."""
     
-    def __init__(self):
+    def __init__(self, response_generator=None):
         super().__init__(
             name="response_generation",
-            timeout_ms=3000,
-            max_retries=1,
+            timeout_ms=5000,  # Increased timeout for enhanced response generation
+            max_retries=2,
             required=True,
         )
+        # Lazy import to avoid circular dependencies
+        self.response_generator = response_generator
     
     async def execute(self, context: PipelineContext) -> Dict[str, Any]:
-        """Generate response based on inference results."""
+        """Generate response using the production ResponseGenerator."""
         inference_data = context.get_data("inference")
         inference_result = inference_data["inference_result"]
         
         request_data = context.get_data("request")
         original_prompt = request_data["prompt"]
         
-        # Generate a simple response based on the inference
-        if inference_result and inference_result.action is not None:
-            action = inference_result.action
-            confidence = inference_result.confidence
+        try:
+            # Initialize response generator if not provided
+            if self.response_generator is None:
+                from response_generation import ProductionResponseGenerator
+                self.response_generator = ProductionResponseGenerator(
+                    enable_monitoring=True,
+                )
             
-            response = (
-                f"Based on your prompt '{original_prompt}', the Active Inference agent "
-                f"selected action {action} with confidence {confidence:.2f}. "
-                f"The agent's beliefs were updated through Bayesian inference, "
-                f"demonstrating adaptive decision-making under uncertainty."
+            # Create response options from context
+            from response_generation import ResponseOptions
+            options = ResponseOptions(
+                narrative_style=True,
+                use_natural_language=True,
+                include_technical_details=False,
+                include_alternatives=True,
+                include_knowledge_graph=True,
+                enable_caching=True,
+                enable_llm_enhancement=True,
+                enable_streaming=False,  # Disable streaming in orchestrator
+                trace_id=context.trace_id,
+                conversation_id=context.conversation_id,
             )
-        else:
-            response = (
-                f"I processed your prompt '{original_prompt}' through an Active Inference "
-                f"framework, but was unable to generate a specific action recommendation. "
-                f"The system successfully created and ran a PyMDP agent for analysis."
+            
+            # Generate enhanced response
+            response_data = await self.response_generator.generate_response(
+                inference_result=inference_result,
+                original_prompt=original_prompt,
+                options=options,
             )
-        
-        return {
-            "response": response,
-            "response_metadata": {
-                "based_on_inference": inference_result is not None,
-                "action": inference_result.action if inference_result else None,
-                "confidence": inference_result.confidence if inference_result else 0.0,
+            
+            return {
+                "response": response_data.message,
+                "response_data": response_data.to_dict(),
+                "response_metadata": {
+                    "based_on_inference": inference_result is not None,
+                    "action": inference_result.action if inference_result else None,
+                    "confidence": inference_result.confidence if inference_result else 0.0,
+                    "generation_time_ms": response_data.metadata.generation_time_ms,
+                    "enhanced": response_data.metadata.nlg_enhanced,
+                    "cached": response_data.metadata.cached,
+                    "response_type": response_data.response_type.value,
+                }
             }
-        }
+            
+        except Exception as e:
+            logger.error(f"Enhanced response generation failed: {e}")
+            
+            # Fallback to simple response generation
+            if inference_result and inference_result.action is not None:
+                action = inference_result.action
+                confidence = inference_result.confidence
+                
+                response = (
+                    f"Based on your prompt '{original_prompt}', the Active Inference agent "
+                    f"selected action {action} with confidence {confidence:.2f}. "
+                    f"The agent's beliefs were updated through Bayesian inference, "
+                    f"demonstrating adaptive decision-making under uncertainty."
+                )
+            else:
+                response = (
+                    f"I processed your prompt '{original_prompt}' through an Active Inference "
+                    f"framework, but was unable to generate a specific action recommendation. "
+                    f"The system successfully created and ran a PyMDP agent for analysis."
+                )
+            
+            return {
+                "response": response,
+                "response_metadata": {
+                    "based_on_inference": inference_result is not None,
+                    "action": inference_result.action if inference_result else None,
+                    "confidence": inference_result.confidence if inference_result else 0.0,
+                    "fallback_used": True,
+                    "error": str(e),
+                }
+            }
 
 
 class ConversationOrchestrator:
