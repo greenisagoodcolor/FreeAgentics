@@ -3570,11 +3570,84 @@
             "testStrategy": ""
           }
         ]
+      },
+      {
+        "id": 59,
+        "title": "Create Full Conversation Loop with Real PyMDP Agents",
+        "description": "Implement complete end-to-end conversation flow from user prompt to agent response using real PyMDP agents without mocks, establishing the core north star functionality.",
+        "details": "1. **Complete Flow Integration**: Build the full pipeline that connects user prompt → LLM GMN generation → GMN parsing → PyMDP agent creation → agent inference execution → knowledge graph updates → structured response back to user. 2. **Real PyMDP Integration**: Replace all mock PyMDP components with actual PyMDP library calls. Implement proper belief state initialization, action selection, and state updates using PyMDP's POMDP solver. Handle PyMDP's observation and reward models correctly. 3. **Knowledge Graph Updates**: Integrate real-time knowledge graph updates during agent inference. Extract entities and relationships from agent decisions and conversation context. Update graph nodes and edges based on agent beliefs and actions. 4. **Error Handling**: Implement comprehensive error handling for PyMDP failures, invalid GMN specifications, and inference timeouts. Add fallback mechanisms for agent creation failures. 5. **Performance Optimization**: Optimize PyMDP agent initialization and inference performance. Implement caching for frequently used belief states and action policies. 6. **Response Generation**: Create structured response format that includes agent decisions, confidence scores, updated knowledge graph elements, and natural language explanations of agent reasoning.",
+        "testStrategy": "Create integration tests that verify complete end-to-end flow from user prompt to final response. Test with various GMN specifications to ensure PyMDP agent creation works correctly. Verify knowledge graph updates occur during agent inference. Test error scenarios including invalid GMN, PyMDP failures, and timeout conditions. Performance tests to ensure reasonable response times (< 5 seconds for simple conversations). Unit tests for PyMDP integration components including belief state management and action selection. Verify response format contains all required elements (agent decisions, knowledge updates, explanations).",
+        "status": "in-progress",
+        "dependencies": [
+          28,
+          39,
+          45,
+          46,
+          51
+        ],
+        "priority": "high",
+        "subtasks": [
+          {
+            "id": 1,
+            "title": "Implement PyMDP Agent Factory with Real PyMDP Integration",
+            "description": "Create factory class that converts parsed GMN specifications into real PyMDP agents with proper POMDP components",
+            "dependencies": [],
+            "details": "Build PyMDPAgentFactory class that takes GMNSpec objects and creates PyMDP agents. Implement methods to construct transition matrices (A), observation matrices (B), preference matrices (C), and initial beliefs (D) from GMN specifications. Handle PyMDP's specific matrix format requirements and sparse matrix optimizations. Create agent configuration with proper inference parameters (num_iter, inference_type). Implement belief state initialization from GMN prior distributions. Add validation for matrix dimensions and stochasticity constraints.",
+            "status": "in-progress",
+            "testStrategy": "Unit test factory methods with various GMN specifications. Verify correct matrix construction and PyMDP agent initialization. Test edge cases like single-state agents and maximum complexity agents. Validate that created agents can perform inference without errors."
+          },
+          {
+            "id": 2,
+            "title": "Build Agent Inference Engine with Action Selection",
+            "description": "Implement the core inference loop that executes PyMDP agent decision-making and handles observations",
+            "dependencies": [
+              "59.1"
+            ],
+            "details": "Create InferenceEngine class that manages PyMDP agent execution. Implement run_inference method that performs belief updates, action selection via active inference, and state transitions. Handle PyMDP's infer_states and infer_policies methods correctly. Implement observation processing to update agent beliefs based on environment feedback. Add support for multi-step inference with configurable horizons. Create result objects containing selected actions, updated beliefs, free energy values, and confidence scores. Implement inference timeout handling and cancellation support.",
+            "status": "pending",
+            "testStrategy": "Integration tests with real PyMDP agents performing inference over multiple timesteps. Test belief updates with various observation sequences. Verify action selection follows expected policies. Test timeout and cancellation mechanisms."
+          },
+          {
+            "id": 3,
+            "title": "Implement Knowledge Graph Update Pipeline",
+            "description": "Create system to extract and update knowledge graph based on agent inference results and conversation context",
+            "dependencies": [
+              "59.2"
+            ],
+            "details": "Build KnowledgeGraphUpdater that processes inference results to extract entities and relationships. Implement entity extraction from agent states, observations, and selected actions. Create relationship inference based on belief transitions and action outcomes. Integrate with existing knowledge graph service to persist updates. Implement graph update batching for performance. Add support for confidence-weighted edges based on agent belief strengths. Create update events for real-time graph visualization updates via WebSocket.",
+            "status": "pending",
+            "testStrategy": "Test entity and relationship extraction from various inference scenarios. Verify graph updates are persisted correctly. Test batch update performance. Validate WebSocket events are emitted for graph changes."
+          },
+          {
+            "id": 4,
+            "title": "Create Conversation Orchestrator with Error Handling",
+            "description": "Build main orchestration service that manages the complete conversation flow with comprehensive error handling",
+            "dependencies": [
+              "59.1",
+              "59.2",
+              "59.3"
+            ],
+            "details": "Implement ConversationOrchestrator that coordinates the entire pipeline from user prompt to response. Create async workflow: prompt → LLM GMN generation → GMN parsing → PyMDP agent creation → inference execution → knowledge graph updates → response generation. Add comprehensive error handling for each stage with specific error types (GMNParseError, PyMDPCreationError, InferenceTimeoutError). Implement fallback strategies including simplified agent creation and cached response usage. Add circuit breaker pattern for external service failures. Create detailed error responses with actionable information for debugging.",
+            "status": "pending",
+            "testStrategy": "End-to-end integration tests covering happy path and all error scenarios. Test fallback mechanisms trigger correctly. Verify error messages provide useful debugging information. Load test to ensure error handling doesn't degrade performance."
+          },
+          {
+            "id": 5,
+            "title": "Implement Response Generator with Performance Optimization",
+            "description": "Create response formatting system with caching and performance optimizations for production readiness",
+            "dependencies": [
+              "59.4"
+            ],
+            "details": "Build ResponseGenerator that creates structured responses from inference results. Format includes agent decisions, confidence scores, reasoning explanations, and updated knowledge graph elements. Implement natural language generation for agent reasoning using templates and LLM augmentation. Add response caching for frequently accessed belief states and action policies. Implement lazy loading for knowledge graph updates in responses. Create performance monitoring with metrics for inference time, response generation time, and cache hit rates. Add response streaming support for real-time updates during long inference runs.",
+            "status": "pending",
+            "testStrategy": "Test response format completeness and correctness. Benchmark response generation performance with and without caching. Verify streaming responses work correctly. Test cache invalidation on belief updates."
+          }
+        ]
       }
     ],
     "metadata": {
       "created": "2025-07-04T12:52:30.518Z",
-      "updated": "2025-08-04T22:01:12.459Z",
+      "updated": "2025-08-05T06:31:41.152Z",
       "description": "Tasks for master context"
     }
   }
