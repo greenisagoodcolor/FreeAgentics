@@ -1,14 +1,39 @@
 "use client";
 
-import React from "react";
+import React, { useState, useEffect } from "react";
 import { PromptBar } from "@/components/main/PromptBar";
 import { AgentCreatorPanel } from "@/components/main/AgentCreatorPanel";
 import { ConversationWindow } from "@/components/main/ConversationWindow";
 import { KnowledgeGraphView } from "@/components/main/KnowledgeGraphView";
 import { SimulationGrid } from "@/components/main/SimulationGrid";
 import { MetricsFooter } from "@/components/main/MetricsFooter";
+import { SettingsModal } from "@/components/modals/SettingsModal";
+import { useOnboarding } from "@/hooks/use-onboarding";
+import { Alert, AlertDescription } from "@/components/ui/alert";
+import { AlertCircle, Key } from "lucide-react";
 
 export default function MainPage() {
+  const [isSettingsOpen, setIsSettingsOpen] = useState(false);
+  const { needsOnboarding, markOnboardingComplete, hasValidApiKey } = useOnboarding();
+
+  // Show onboarding modal automatically when needed
+  useEffect(() => {
+    if (needsOnboarding) {
+      console.log("[Onboarding] Showing first-run API key setup");
+      setIsSettingsOpen(true);
+    }
+  }, [needsOnboarding]);
+
+  // Close modal and mark onboarding complete when settings are closed
+  const handleSettingsClose = (open: boolean) => {
+    setIsSettingsOpen(open);
+    if (!open && needsOnboarding) {
+      // Mark onboarding complete when user closes settings
+      // (whether they configured keys or not)
+      markOnboardingComplete();
+    }
+  };
+
   return (
     <div className="main-layout flex flex-col h-screen bg-background">
       {/* Header Section with Title and Prompt */}
@@ -82,6 +107,21 @@ export default function MainPage() {
       <div className="footer-bar h-12 border-t bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
         <MetricsFooter />
       </div>
+
+      {/* API Key Warning Banner */}
+      {!hasValidApiKey && (
+        <div className="fixed top-0 left-0 right-0 z-50 p-4">
+          <Alert variant="default" className="bg-yellow-50 border-yellow-200">
+            <Key className="h-4 w-4 text-yellow-600" />
+            <AlertDescription className="text-yellow-800">
+              <strong>API Key Required:</strong> Add your OpenAI or Anthropic API key in Settings to enable agent conversations.
+            </AlertDescription>
+          </Alert>
+        </div>
+      )}
+
+      {/* Onboarding Settings Modal */}
+      <SettingsModal open={isSettingsOpen} onOpenChange={handleSettingsClose} />
     </div>
   );
 }
