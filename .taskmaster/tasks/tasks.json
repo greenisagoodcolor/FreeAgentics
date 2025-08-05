@@ -3593,7 +3593,7 @@
             "description": "Create factory class that converts parsed GMN specifications into real PyMDP agents with proper POMDP components",
             "dependencies": [],
             "details": "Build PyMDPAgentFactory class that takes GMNSpec objects and creates PyMDP agents. Implement methods to construct transition matrices (A), observation matrices (B), preference matrices (C), and initial beliefs (D) from GMN specifications. Handle PyMDP's specific matrix format requirements and sparse matrix optimizations. Create agent configuration with proper inference parameters (num_iter, inference_type). Implement belief state initialization from GMN prior distributions. Add validation for matrix dimensions and stochasticity constraints.",
-            "status": "in-progress",
+            "status": "done",
             "testStrategy": "Unit test factory methods with various GMN specifications. Verify correct matrix construction and PyMDP agent initialization. Test edge cases like single-state agents and maximum complexity agents. Validate that created agents can perform inference without errors."
           },
           {
@@ -3604,7 +3604,7 @@
               "59.1"
             ],
             "details": "Create InferenceEngine class that manages PyMDP agent execution. Implement run_inference method that performs belief updates, action selection via active inference, and state transitions. Handle PyMDP's infer_states and infer_policies methods correctly. Implement observation processing to update agent beliefs based on environment feedback. Add support for multi-step inference with configurable horizons. Create result objects containing selected actions, updated beliefs, free energy values, and confidence scores. Implement inference timeout handling and cancellation support.",
-            "status": "pending",
+            "status": "in-progress",
             "testStrategy": "Integration tests with real PyMDP agents performing inference over multiple timesteps. Test belief updates with various observation sequences. Verify action selection follows expected policies. Test timeout and cancellation mechanisms."
           },
           {
@@ -3647,7 +3647,7 @@
     ],
     "metadata": {
       "created": "2025-07-04T12:52:30.518Z",
-      "updated": "2025-08-05T06:31:41.152Z",
+      "updated": "2025-08-05T06:50:35.726Z",
       "description": "Tasks for master context"
     }
   }
