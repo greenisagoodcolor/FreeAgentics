@@ -38,8 +38,15 @@ export function useWebSocket(): WebSocketState {
 
   const connect = useCallback(() => {
     // Prevent multiple simultaneous connection attempts
-    if (isConnectingRef.current || wsRef.current?.readyState === WebSocket.CONNECTING) {
-      console.log("[WebSocket] Connection already in progress, skipping...");
+    if (isConnectingRef.current || 
+        wsRef.current?.readyState === WebSocket.CONNECTING ||
+        wsRef.current?.readyState === WebSocket.OPEN) {
+      console.log("[WebSocket] Connection already exists or in progress, skipping...", {
+        isConnecting: isConnectingRef.current,
+        readyState: wsRef.current?.readyState,
+        stateText: wsRef.current?.readyState === WebSocket.OPEN ? 'OPEN' : 
+                   wsRef.current?.readyState === WebSocket.CONNECTING ? 'CONNECTING' : 'OTHER'
+      });
       return;
     }
 
@@ -170,45 +177,45 @@ export function useWebSocket(): WebSocketState {
     }
   }, []);
 
-  // Connect when auth is ready, disconnect on unmount
+  // Unified connection lifecycle management
   useEffect(() => {
-    // Clear any existing connection timeout
+    // Clear any existing connection timeout to prevent race conditions
     if (connectionTimeoutRef.current) {
       clearTimeout(connectionTimeoutRef.current);
       connectionTimeoutRef.current = null;
     }
 
     const isDevEndpoint = getWebSocketUrl('dev').includes("/ws/dev");
+    const shouldConnect = isDevEndpoint 
+      ? true  // Dev endpoint always ready
+      : (!isAuthLoading && isAuthenticated && token);  // Production needs auth
 
-    // Connect immediately for dev endpoint, or wait for auth for other endpoints
-    if (isDevEndpoint && !wsRef.current) {
-      console.log("[WebSocket] Dev endpoint ready, scheduling connection...");
+    // Only connect if we should connect and don't have an active connection
+    if (shouldConnect && !wsRef.current && !isConnectingRef.current) {
+      const endpointType = isDevEndpoint ? "dev" : "authenticated";
+      console.log(`[WebSocket] ${endpointType} connection ready, scheduling connection...`);
+      
       connectionTimeoutRef.current = setTimeout(() => {
-        console.log("[WebSocket] Initiating dev connection...");
-        connect();
-      }, 100);
-    } else if (!isDevEndpoint && !isAuthLoading && isAuthenticated && token && !wsRef.current) {
-      console.log("[WebSocket] Auth ready, scheduling connection...");
-      connectionTimeoutRef.current = setTimeout(() => {
-        console.log("[WebSocket] Initiating connection after auth stabilization...");
-        connect();
+        // Double-check connection state to prevent race conditions
+        if (!wsRef.current && !isConnectingRef.current) {
+          console.log(`[WebSocket] Initiating ${endpointType} connection...`);
+          connect();
+        } else {
+          console.log(`[WebSocket] Connection already exists or in progress, skipping...`);
+        }
       }, 100);
     }
 
+    // Cleanup function
     return () => {
       if (connectionTimeoutRef.current) {
         clearTimeout(connectionTimeoutRef.current);
         connectionTimeoutRef.current = null;
       }
-    };
-  }, [connect, isAuthLoading, isAuthenticated, token]);
-
-  // Cleanup on unmount
-  useEffect(() => {
-    return () => {
+      // Only disconnect on unmount, not on dependency changes
       disconnect();
     };
-  }, [disconnect]);
+  }, [connect, disconnect, isAuthLoading, isAuthenticated, token]);
 
   return {
     isConnected,
