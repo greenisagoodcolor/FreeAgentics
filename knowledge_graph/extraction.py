@@ -1203,8 +1203,20 @@ class ExtractionPipeline:
         fallback_extractor: Optional[LLMFallbackExtractor] = None,
     ):
         """Initialize extraction pipeline."""
-        self.entity_strategies = entity_strategies or [SpacyEntityExtractor()]
-        self.relation_strategies = relation_strategies or [PatternRelationExtractor()]
+        # Import PyMDP extractors here to avoid circular imports
+        try:
+            from knowledge_graph.pymdp_extractor import PyMDPEntityExtractor, PyMDPRelationExtractor
+            
+            # Default strategies include both conversation and PyMDP extractors
+            default_entity_strategies = [SpacyEntityExtractor(), PyMDPEntityExtractor()]
+            default_relation_strategies = [PatternRelationExtractor(), PyMDPRelationExtractor()]
+        except ImportError:
+            logger.warning("PyMDP extractors not available, using conversation extractors only")
+            default_entity_strategies = [SpacyEntityExtractor()]
+            default_relation_strategies = [PatternRelationExtractor()]
+        
+        self.entity_strategies = entity_strategies or default_entity_strategies
+        self.relation_strategies = relation_strategies or default_relation_strategies
         self.confidence_scorer = confidence_scorer or ConfidenceScorer()
         self.coreference_resolver = coreference_resolver
         self.fallback_extractor = fallback_extractor

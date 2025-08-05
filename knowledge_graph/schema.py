@@ -30,6 +30,13 @@ class EntityType(Enum):
     OBSERVATION = "observation"
     DECISION = "decision"
     OUTCOME = "outcome"
+    
+    # PyMDP-specific entity types for inference integration
+    BELIEF_STATE = "belief_state"
+    POLICY_SEQUENCE = "policy_sequence"
+    INFERENCE_STEP = "inference_step"
+    STATE_TRANSITION = "state_transition"
+    FREE_ENERGY_LANDSCAPE = "free_energy_landscape"
 
 
 class RelationType(Enum):
@@ -45,6 +52,14 @@ class RelationType(Enum):
     LEADS_TO = "leads_to"
     CONTRADICTS = "contradicts"
     SUPPORTS = "supports"
+    
+    # PyMDP-specific relation types for inference integration
+    BELIEF_UPDATE = "belief_update"
+    POLICY_SELECTION = "policy_selection"
+    STATE_PREDICTION = "state_prediction"
+    ACTION_SAMPLING = "action_sampling"
+    TEMPORAL_SEQUENCE = "temporal_sequence"
+    CONFIDENCE_WEIGHTED = "confidence_weighted"
 
 
 @dataclass

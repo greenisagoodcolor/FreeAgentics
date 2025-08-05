@@ -3604,7 +3604,7 @@
               "59.1"
             ],
             "details": "Create InferenceEngine class that manages PyMDP agent execution. Implement run_inference method that performs belief updates, action selection via active inference, and state transitions. Handle PyMDP's infer_states and infer_policies methods correctly. Implement observation processing to update agent beliefs based on environment feedback. Add support for multi-step inference with configurable horizons. Create result objects containing selected actions, updated beliefs, free energy values, and confidence scores. Implement inference timeout handling and cancellation support.",
-            "status": "in-progress",
+            "status": "done",
             "testStrategy": "Integration tests with real PyMDP agents performing inference over multiple timesteps. Test belief updates with various observation sequences. Verify action selection follows expected policies. Test timeout and cancellation mechanisms."
           },
           {
@@ -3615,7 +3615,7 @@
               "59.2"
             ],
             "details": "Build KnowledgeGraphUpdater that processes inference results to extract entities and relationships. Implement entity extraction from agent states, observations, and selected actions. Create relationship inference based on belief transitions and action outcomes. Integrate with existing knowledge graph service to persist updates. Implement graph update batching for performance. Add support for confidence-weighted edges based on agent belief strengths. Create update events for real-time graph visualization updates via WebSocket.",
-            "status": "pending",
+            "status": "in-progress",
             "testStrategy": "Test entity and relationship extraction from various inference scenarios. Verify graph updates are persisted correctly. Test batch update performance. Validate WebSocket events are emitted for graph changes."
           },
           {
@@ -3647,7 +3647,7 @@
     ],
     "metadata": {
       "created": "2025-07-04T12:52:30.518Z",
-      "updated": "2025-08-05T06:50:35.726Z",
+      "updated": "2025-08-05T07:10:04.959Z",
       "description": "Tasks for master context"
     }
   }

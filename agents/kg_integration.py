@@ -1,10 +1,12 @@
 """Knowledge Graph integration for agents."""
 
+import asyncio
 import logging
 from datetime import datetime
-from typing import Any, Dict, Optional
+from typing import Any, Dict, List, Optional
 from uuid import uuid4
 
+from agents.inference_engine import InferenceResult
 from knowledge_graph.graph_engine import (
     EdgeType,
     KnowledgeEdge,
@@ -13,6 +15,7 @@ from knowledge_graph.graph_engine import (
     NodeType,
 )
 from knowledge_graph.storage import FileStorageBackend, StorageManager
+from knowledge_graph.updater import KnowledgeGraphUpdater
 
 logger = logging.getLogger(__name__)
 
@@ -32,6 +35,10 @@ class AgentKnowledgeGraphIntegration:
         except Exception:
             self.graph = KnowledgeGraph(graph_id=self.graph_id)
             logger.info(f"Created new knowledge graph: {self.graph_id}")
+        
+        # Initialize PyMDP knowledge graph updater
+        self.updater = KnowledgeGraphUpdater(knowledge_graph=self.graph)
+        self._updater_started = False
 
     def update_from_agent_step(
         self,
@@ -116,6 +123,102 @@ class AgentKnowledgeGraphIntegration:
 
         except Exception as e:
             logger.error(f"Failed to update knowledge graph: {e}")
+    
+    async def update_from_inference_result(
+        self,
+        inference_result: InferenceResult,
+        agent_id: str,
+        conversation_id: str,
+        message_id: Optional[str] = None,
+    ) -> Optional[Dict[str, Any]]:
+        """Update knowledge graph from PyMDP inference result using new pipeline.
+        
+        Args:
+            inference_result: Result from PyMDP inference engine
+            agent_id: ID of the agent
+            conversation_id: Conversation context ID
+            message_id: Message ID (generated if None)
+            
+        Returns:
+            Update result dictionary with extracted knowledge
+        """
+        try:
+            # Start updater if not already started
+            if not self._updater_started:
+                await self.updater.start()
+                self._updater_started = True
+            
+            # Process inference result through new pipeline
+            result = await self.updater.update_from_inference(
+                inference_result=inference_result,
+                agent_id=agent_id,
+                conversation_id=conversation_id,
+                message_id=message_id,
+                force_immediate=True,  # Process immediately for real-time updates
+            )
+            
+            # Save graph after update
+            self.storage_manager.save(self.graph)
+            
+            return result
+            
+        except Exception as e:
+            logger.error(f"Failed to update knowledge graph from inference result: {e}")
+            return None
+    
+    async def get_agent_knowledge_summary(
+        self,
+        agent_id: str,
+        entity_types: Optional[List[str]] = None,
+        limit: int = 50
+    ) -> Dict[str, Any]:
+        """Get knowledge summary for an agent using new pipeline.
+        
+        Args:
+            agent_id: ID of the agent
+            entity_types: Filter by entity types (all if None)
+            limit: Maximum number of entities to return
+            
+        Returns:
+            Dictionary with agent's knowledge summary
+        """
+        try:
+            if not self._updater_started:
+                await self.updater.start()
+                self._updater_started = True
+            
+            return await self.updater.get_agent_knowledge(
+                agent_id=agent_id,
+                entity_types=entity_types,
+                limit=limit
+            )
+            
+        except Exception as e:
+            logger.error(f"Failed to get agent knowledge summary: {e}")
+            return {"agent_id": agent_id, "error": str(e)}
+    
+    def get_updater_metrics(self) -> Dict[str, Any]:
+        """Get metrics from the knowledge graph updater."""
+        try:
+            return self.updater.get_metrics()
+        except Exception as e:
+            logger.error(f"Failed to get updater metrics: {e}")
+            return {"error": str(e)}
+    
+    async def shutdown(self) -> None:
+        """Shutdown the knowledge graph integration."""
+        try:
+            if self._updater_started:
+                await self.updater.stop()
+                self._updater_started = False
+            
+            # Final save
+            self.storage_manager.save(self.graph)
+            
+            logger.info(f"Shutdown knowledge graph integration {self.graph_id}")
+            
+        except Exception as e:
+            logger.error(f"Error during shutdown: {e}")
 
     def get_agent_history(self, agent_id: str, limit: int = 100) -> Dict[str, Any]:
         """Get agent's action history from knowledge graph.
