@@ -15,48 +15,144 @@ make install
 make dev
 ```
 
-🎯 **That's it!** Open http://localhost:3000 and start exploring:
+🎯 **That's it!** The system will start up and guide you through each step:
 
-- **Mock AI responses** - No API keys needed
-- **In-memory database** - No setup required
-- **Real-time updates** - Full WebSocket functionality
-- **Agent communication** - See multi-agent conversations
+#### Step-by-Step Developer Onboarding
+
+**Step 1: Installation (2-3 minutes)**
+```bash
+$ make install
+```
+You'll see:
+- ✅ Python virtual environment created
+- ✅ Python dependencies installed (FastAPI, PyMDP, etc.)
+- ✅ Node modules installed (Next.js, React, etc.)
+- ✅ Development tools configured
+
+**Step 2: Start Development Environment (30 seconds)**
+```bash
+$ make dev
+```
+You'll see:
+- 🔥 Backend starting on http://localhost:8000
+- ⚛️  Frontend starting on http://localhost:3000
+- ✅ WebSocket connections established
+- 📊 In-memory database ready
+
+**Step 3: Access the Application**
+Open http://localhost:3000 in your browser. You should see:
+- 🎨 Clean UI with dark theme
+- 💬 Prompt bar at the bottom
+- 📊 Empty metrics panel (no agents yet)
+- 🌐 Empty knowledge graph visualization
+
+**Step 4: Create Your First Agent**
+Type in the prompt bar: `"Create an agent to explore the environment"`
+
+You'll observe:
+1. **Conversation starts** - Two agents (Advocate & Analyst) appear
+2. **Real-time updates** - Messages stream as agents discuss
+3. **Agent creation** - A new explorer agent appears in the grid
+4. **Knowledge graph updates** - Nodes and connections form
+
+**Step 5: Explore Core Features**
+- **Multi-Agent Chat**: Watch the Advocate and Analyst discuss your request
+- **Grid World**: See your explorer agent move around the environment
+- **Knowledge Graph**: Click nodes to see agent beliefs and relationships
+- **Metrics Panel**: Monitor agent performance and system health
 
 **Demo Features Ready:**
 
-- Create and manage Active Inference agents
-- Watch agents explore the grid world
-- View the knowledge graph build in real-time
-- Test the conversation interface
-- Explore all UI components
+- ✅ Create and manage Active Inference agents
+- ✅ Watch agents explore the grid world
+- ✅ View the knowledge graph build in real-time
+- ✅ Test the conversation interface
+- ✅ Explore all UI components
 
 ### Option 2: Development Mode (Real AI)
 
 For real OpenAI responses and persistent data:
 
+**Step 1: Configure API Keys**
 ```bash
-# After running the demo mode steps above
 cp .env.example .env
-# Edit .env and add your OpenAI API key:
-# OPENAI_API_KEY=sk-your-key-here
-# Optionally set DATABASE_URL for PostgreSQL
-
-make dev  # Restart with real providers
 ```
 
-### 3. Test the System
+**Step 2: Edit .env file**
+```bash
+# Add your OpenAI API key:
+OPENAI_API_KEY=sk-your-key-here
 
-Try these example prompts in the UI:
+# Optional: Add PostgreSQL for persistence
+DATABASE_URL=postgresql://user:password@localhost/freeagentics
+```
 
-- **Demo Mode**: "Create an agent to explore the environment"
-- **With API Key**: "Help me create a sustainable business plan"
-- **Multi-Agent**: "Have two agents discuss active inference theory"
+**Step 3: Restart with Real Providers**
+```bash
+make dev
+```
+
+You'll notice:
+- 🤖 Real AI responses instead of mock data
+- 💾 Persistent database (if configured)
+- 🧠 Actual LLM-generated agent behaviors
+- 📈 More sophisticated knowledge graph growth
+
+### Testing the System
+
+**Example Prompts to Try:**
+
+1. **Basic Agent Creation** (Demo Mode)
+   - `"Create an agent to explore the environment"`
+   - Expected: Explorer agent appears and starts moving
+
+2. **Business Planning** (Requires API Key)
+   - `"Help me create a sustainable business plan"`
+   - Expected: Agents discuss and analyze business strategies
+
+3. **Theoretical Discussion** (Best with API Key)
+   - `"Have two agents discuss active inference theory"`
+   - Expected: Deep conversation about mathematical principles
+
+4. **Complex Task** (Requires API Key)
+   - `"Design a multi-agent system for climate monitoring"`
+   - Expected: Multiple specialized agents created with specific roles
+
+### What You Should See Working
+
+✅ **WebSocket Connections**: Real-time bidirectional communication
+✅ **Agent Conversations**: Natural dialogue between AI agents
+✅ **Knowledge Graph Growth**: Nodes and edges forming as agents interact
+✅ **Grid World Actions**: Agents moving and exploring autonomously
+✅ **Belief Updates**: Agent mental states evolving based on observations
+✅ **Goal-Directed Behavior**: Agents following user-specified objectives
 
 ### Troubleshooting
 
-- **Port conflicts**: Run `make kill-ports` then `make dev`
-- **Dependencies missing**: Run `make clean && make install`
-- **Not working**: Check `make status` for diagnostics
+**Issue: Port conflicts**
+```bash
+make kill-ports  # Kill processes on ports 3000 and 8000
+make dev         # Restart
+```
+
+**Issue: Dependencies missing**
+```bash
+make clean       # Remove all dependencies
+make install     # Fresh install
+make dev         # Start again
+```
+
+**Issue: WebSocket errors**
+```bash
+make status      # Check service health
+# Look for "WebSocket: Connected" status
+```
+
+**Issue: Not sure what's happening**
+```bash
+make logs        # View backend logs
+# Check for error messages or warnings
+```
 
 [![Python](https://img.shields.io/badge/python-3.9+-blue.svg)](https://www.python.org/)
 [![Node.js](https://img.shields.io/badge/node-18+-green.svg)](https://nodejs.org/)
