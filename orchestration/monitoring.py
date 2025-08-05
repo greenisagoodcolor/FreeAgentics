@@ -379,10 +379,11 @@ class MetricsCollector:
         
         # Update Prometheus metrics
         if self.prometheus_collector:
-            self.prometheus_collector.record_business_operation(
+            # Use the available function for recording business operations
+            from observability.prometheus_metrics import record_business_inference_operation
+            record_business_inference_operation(
                 operation_type="conversation_orchestration",
                 success=success,
-                duration_seconds=execution_time_ms / 1000.0,
             )
     
     def record_component_error(self, component: str, error: Exception) -> None:
