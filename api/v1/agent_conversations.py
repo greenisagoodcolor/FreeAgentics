@@ -39,7 +39,6 @@ def debug_provider_selection(user_id: str, context: str) -> None:
     import os
     from core.providers import get_llm
     from database.models import UserSettings
-    from database.session import SessionLocal
     
     logger.info(f"🔍 PROVIDER DEBUG [{context}] User: {user_id}")
     
@@ -55,18 +54,19 @@ def debug_provider_selection(user_id: str, context: str) -> None:
     
     # Check user settings in database
     try:
-        db = SessionLocal()
-        user_settings = db.query(UserSettings).filter(UserSettings.user_id == user_id).first()
-        if user_settings:
-            has_openai = bool(user_settings.encrypted_openai_key)
-            has_anthropic = bool(user_settings.encrypted_anthropic_key)
-            logger.info(f"💾 User settings: provider={user_settings.llm_provider}, "
-                       f"model={user_settings.llm_model}, "
-                       f"has_openai_key={has_openai}, "
-                       f"has_anthropic_key={has_anthropic}")
-        else:
-            logger.info("💾 User settings: NO SETTINGS FOUND")
-        db.close()
+        from core.providers import get_database
+        db_provider = get_database()
+        with next(db_provider.get_session()) as db:
+            user_settings = db.query(UserSettings).filter(UserSettings.user_id == user_id).first()
+            if user_settings:
+                has_openai = bool(user_settings.encrypted_openai_key)
+                has_anthropic = bool(user_settings.encrypted_anthropic_key)
+                logger.info(f"💾 User settings: provider={user_settings.llm_provider}, "
+                           f"model={user_settings.llm_model}, "
+                           f"has_openai_key={has_openai}, "
+                           f"has_anthropic_key={has_anthropic}")
+            else:
+                logger.info("💾 User settings: NO SETTINGS FOUND")
     except Exception as e:
         logger.error(f"💾 User settings check failed: {e}")
     
