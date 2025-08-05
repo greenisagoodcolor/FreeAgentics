@@ -10,7 +10,7 @@ import { MetricsFooter } from "@/components/main/MetricsFooter";
 import { SettingsModal } from "@/components/modals/SettingsModal";
 import { useOnboarding } from "@/hooks/use-onboarding";
 import { Alert, AlertDescription } from "@/components/ui/alert";
-import { AlertCircle, Key } from "lucide-react";
+import { Key } from "lucide-react";
 
 export default function MainPage() {
   const [isSettingsOpen, setIsSettingsOpen] = useState(false);

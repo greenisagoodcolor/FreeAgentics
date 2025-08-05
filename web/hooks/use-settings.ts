@@ -55,14 +55,16 @@ export function useSettings(): SettingsState {
         // Try to load from backend first
         const response = await apiClient.getSettings();
         if (response.success && response.data) {
+          // Handle snake_case to camelCase conversion
+          const rawData = response.data as any; // Backend returns snake_case
           const backendSettings = {
-            llmProvider: response.data.llm_provider as Settings["llmProvider"],
-            llmModel: response.data.llm_model,
-            openaiApiKey: response.data.openai_api_key || "",
-            anthropicApiKey: response.data.anthropic_api_key || "",
-            gnnEnabled: response.data.gnn_enabled,
-            debugLogs: response.data.debug_logs,
-            autoSuggest: response.data.auto_suggest,
+            llmProvider: rawData.llm_provider as Settings["llmProvider"],
+            llmModel: rawData.llm_model,
+            openaiApiKey: rawData.openai_api_key || "",
+            anthropicApiKey: rawData.anthropic_api_key || "",
+            gnnEnabled: rawData.gnn_enabled,
+            debugLogs: rawData.debug_logs,
+            autoSuggest: rawData.auto_suggest,
           };
           setSettings(backendSettings);
           // Sync to localStorage
