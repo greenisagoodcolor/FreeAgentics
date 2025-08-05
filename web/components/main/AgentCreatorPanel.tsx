@@ -10,13 +10,13 @@ import { Label } from "@/components/ui/label";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Badge } from "@/components/ui/badge";
-import { useWebSocket } from "@/hooks/use-websocket";
 import { useAgents, type Agent, type AgentStatus } from "@/hooks/use-agents";
 import { useConversation } from "@/hooks/use-conversation";
+import { usePromptProcessor } from "@/hooks/use-prompt-processor";
 import { cn } from "@/lib/utils";
 
 export function AgentCreatorPanel() {
-  const { isConnected } = useWebSocket();
+  const { connectionState, connectionError } = usePromptProcessor();
   const { agents, createAgent, updateAgent, deleteAgent, isLoading, error } = useAgents();
   const { setGoalPrompt } = useConversation();
 
@@ -112,13 +112,21 @@ export function AgentCreatorPanel() {
             <CardTitle>Agent Creator</CardTitle>
             <CardDescription>Create and manage your AI agents</CardDescription>
           </div>
-          <div className="flex items-center gap-2">
+          <div className="flex items-center gap-2" title={connectionError || `WebSocket ${connectionState}`}>
             <div
               data-testid="connection-status"
-              className={cn("w-2 h-2 rounded-full", isConnected ? "bg-green-500" : "bg-red-500")}
+              className={cn(
+                "w-2 h-2 rounded-full",
+                connectionState === "connected" && "bg-green-500",
+                connectionState === "connecting" && "bg-yellow-500 animate-pulse",
+                connectionState === "disconnected" && "bg-gray-500",
+                connectionState === "error" && "bg-red-500"
+              )}
             />
-            {isConnected ? (
+            {connectionState === "connected" ? (
               <Wifi className="h-4 w-4 text-green-600" />
+            ) : connectionState === "connecting" ? (
+              <Loader2 className="h-4 w-4 text-yellow-600 animate-spin" />
             ) : (
               <WifiOff className="h-4 w-4 text-red-600" />
             )}
@@ -162,10 +170,12 @@ export function AgentCreatorPanel() {
         </form>
 
         {/* Error Messages */}
-        {(createError || error) && (
+        {(createError || error || (connectionState === 'error' && connectionError)) && (
           <Alert variant="destructive">
             <AlertCircle className="h-4 w-4" />
-            <AlertDescription>{createError || error?.message}</AlertDescription>
+            <AlertDescription>
+              {createError || error?.message || connectionError}
+            </AlertDescription>
           </Alert>
         )}
 

@@ -53,6 +53,10 @@ export function usePromptProcessor() {
   const wsRef = useRef<WebSocket | null>(null);
   const reconnectTimeoutRef = useRef<NodeJS.Timeout | null>(null);
   const suggestionTimeoutRef = useRef<NodeJS.Timeout | null>(null);
+  const [connectionState, setConnectionState] = useState<'disconnected' | 'connecting' | 'connected' | 'error'>('disconnected');
+  const [connectionError, setConnectionError] = useState<string | null>(null);
+  const reconnectAttempts = useRef(0);
+  const maxReconnectAttempts = 5;
 
   // Handle WebSocket messages - defined before useEffect to avoid dependency issues
   const handleWebSocketMessage = useCallback(
@@ -122,13 +126,30 @@ export function usePromptProcessor() {
   // Initialize WebSocket connection
   useEffect(() => {
     const initWebSocket = () => {
+      // Don't attempt connection if we've exceeded max attempts
+      if (reconnectAttempts.current >= maxReconnectAttempts) {
+        console.warn(`Max WebSocket reconnection attempts (${maxReconnectAttempts}) reached. Giving up.`);
+        setConnectionState('error');
+        setConnectionError(`Failed to connect after ${maxReconnectAttempts} attempts. Please check if the server is running.`);
+        return;
+      }
+
       try {
+        setConnectionState('connecting');
+        setConnectionError(null);
+        
         // Use centralized WebSocket URL construction
         const wsUrl = getWebSocketUrl('dev');
+        console.log(`Attempting WebSocket connection to: ${wsUrl} (attempt ${reconnectAttempts.current + 1}/${maxReconnectAttempts})`);
+        
         const ws = new WebSocket(wsUrl);
 
         ws.addEventListener("open", () => {
-          console.log("WebSocket connected");
+          console.log("✅ WebSocket connected successfully");
+          setConnectionState('connected');
+          setConnectionError(null);
+          reconnectAttempts.current = 0; // Reset on successful connection
+          
           if (reconnectTimeoutRef.current) {
             clearTimeout(reconnectTimeoutRef.current);
             reconnectTimeoutRef.current = null;
@@ -144,26 +165,44 @@ export function usePromptProcessor() {
           }
         });
 
-        ws.addEventListener("close", () => {
-          console.log("WebSocket disconnected");
+        ws.addEventListener("close", (event) => {
+          console.log(`WebSocket disconnected (code: ${event.code}, reason: ${event.reason})`);
           wsRef.current = null;
+          setConnectionState('disconnected');
 
-          // Attempt reconnection after 3 seconds
-          reconnectTimeoutRef.current = setTimeout(() => {
-            initWebSocket();
-          }, 3000);
+          // Only attempt reconnection if we haven't exceeded max attempts
+          if (reconnectAttempts.current < maxReconnectAttempts) {
+            reconnectAttempts.current++;
+            const backoffDelay = Math.min(1000 * Math.pow(2, reconnectAttempts.current - 1), 30000); // Exponential backoff, max 30s
+            
+            console.log(`Scheduling WebSocket reconnection in ${backoffDelay}ms (attempt ${reconnectAttempts.current}/${maxReconnectAttempts})`);
+            setConnectionError(`Connection lost. Reconnecting in ${Math.ceil(backoffDelay / 1000)}s...`);
+            
+            reconnectTimeoutRef.current = setTimeout(() => {
+              initWebSocket();
+            }, backoffDelay);
+          } else {
+            setConnectionState('error');
+            setConnectionError('Connection lost. Max reconnection attempts reached.');
+          }
         });
 
         ws.addEventListener("error", (error) => {
           console.error("WebSocket error:", error);
+          setConnectionState('error');
+          setConnectionError('WebSocket connection failed. Please check if the server is running on http://localhost:8000');
         });
 
         wsRef.current = ws;
       } catch (err) {
         console.error("Failed to initialize WebSocket:", err);
+        setConnectionState('error');
+        setConnectionError(`Failed to initialize WebSocket: ${err instanceof Error ? err.message : String(err)}`);
+        reconnectAttempts.current++;
       }
     };
 
+    // Start connection
     initWebSocket();
 
     return () => {
@@ -318,5 +357,7 @@ export function usePromptProcessor() {
     conversationId,
     iterationContext,
     resetConversation,
+    connectionState,
+    connectionError,
   };
 }

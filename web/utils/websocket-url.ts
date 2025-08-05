@@ -46,33 +46,51 @@ export function getWebSocketUrl(endpoint: 'dev' | 'demo' | 'auth' = 'dev'): stri
   const envUrl = process.env.NEXT_PUBLIC_WS_URL;
   const backendUrl = process.env.NEXT_PUBLIC_BACKEND_URL || 'http://localhost:8000';
   
-  // Start with env URL or derive from backend URL
-  let baseUrl = envUrl || backendUrl;
-  
-  // Ensure WebSocket protocol
-  baseUrl = ensureWebSocketProtocol(baseUrl);
-  
-  // Check if the URL already includes the full path
-  if (baseUrl.includes('/api/v1/ws/')) {
-    // If it's already a complete URL, validate and return
-    if (!isValidWebSocketUrl(baseUrl)) {
-      throw new Error(`Invalid WebSocket URL: ${baseUrl}`);
+  try {
+    // If we have a complete WebSocket URL in env, use it
+    if (envUrl) {
+      // Check if it's already a complete WebSocket URL with path
+      if (envUrl.includes('/api/v1/ws/')) {
+        if (!isValidWebSocketUrl(envUrl)) {
+          console.error(`Invalid WebSocket URL in NEXT_PUBLIC_WS_URL: ${envUrl}`);
+          throw new Error(`Invalid WebSocket URL: ${envUrl}`);
+        }
+        return envUrl;
+      }
+      
+      // If it's a base WebSocket URL, append the path
+      const baseUrl = ensureWebSocketProtocol(envUrl).replace(/\/$/, '');
+      const fullUrl = `${baseUrl}/api/v1/ws/${endpoint}`;
+      
+      if (!isValidWebSocketUrl(fullUrl)) {
+        console.error(`Constructed invalid WebSocket URL: ${fullUrl} from base: ${envUrl}`);
+        throw new Error(`Invalid WebSocket URL constructed: ${fullUrl}`);
+      }
+      
+      return fullUrl;
     }
-    return baseUrl;
+    
+    // Fallback: derive from backend URL
+    const baseUrl = ensureWebSocketProtocol(backendUrl).replace(/\/$/, '');
+    const fullUrl = `${baseUrl}/api/v1/ws/${endpoint}`;
+    
+    if (!isValidWebSocketUrl(fullUrl)) {
+      console.error(`Fallback WebSocket URL is invalid: ${fullUrl} from backend: ${backendUrl}`);
+      throw new Error(`Invalid WebSocket URL constructed: ${fullUrl}`);
+    }
+    
+    console.log(`Using fallback WebSocket URL: ${fullUrl} (NEXT_PUBLIC_WS_URL not set)`);
+    return fullUrl;
+    
+  } catch (error) {
+    console.error('WebSocket URL construction failed:', {
+      envUrl,
+      backendUrl,
+      endpoint,
+      error: error instanceof Error ? error.message : String(error)
+    });
+    throw error;
   }
-  
-  // Remove trailing slash
-  baseUrl = baseUrl.replace(/\/$/, '');
-  
-  // Construct full URL with endpoint
-  const fullUrl = `${baseUrl}/api/v1/ws/${endpoint}`;
-  
-  // Validate the constructed URL
-  if (!isValidWebSocketUrl(fullUrl)) {
-    throw new Error(`Invalid WebSocket URL constructed: ${fullUrl}`);
-  }
-  
-  return fullUrl;
 }
 
 /**
