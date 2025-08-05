@@ -33,6 +33,58 @@ logger = logging.getLogger(__name__)
 
 router = APIRouter()
 
+# Debug helper for provider selection tracing
+def debug_provider_selection(user_id: str, context: str) -> None:
+    """Add comprehensive debug logging for provider selection tracing."""
+    import os
+    from core.providers import get_llm
+    from database.models import UserSettings
+    from database.session import SessionLocal
+    
+    logger.info(f"🔍 PROVIDER DEBUG [{context}] User: {user_id}")
+    
+    # Check environment variables
+    openai_env = os.getenv("OPENAI_API_KEY")
+    anthropic_env = os.getenv("ANTHROPIC_API_KEY") 
+    llm_provider_env = os.getenv("LLM_PROVIDER")
+    
+    logger.info(f"📊 Environment state: "
+                f"OPENAI_API_KEY={'SET' if openai_env else 'UNSET'}, "
+                f"ANTHROPIC_API_KEY={'SET' if anthropic_env else 'UNSET'}, "
+                f"LLM_PROVIDER={llm_provider_env}")
+    
+    # Check user settings in database
+    try:
+        db = SessionLocal()
+        user_settings = db.query(UserSettings).filter(UserSettings.user_id == user_id).first()
+        if user_settings:
+            has_openai = bool(user_settings.encrypted_openai_key)
+            has_anthropic = bool(user_settings.encrypted_anthropic_key)
+            logger.info(f"💾 User settings: provider={user_settings.llm_provider}, "
+                       f"model={user_settings.llm_model}, "
+                       f"has_openai_key={has_openai}, "
+                       f"has_anthropic_key={has_anthropic}")
+        else:
+            logger.info("💾 User settings: NO SETTINGS FOUND")
+        db.close()
+    except Exception as e:
+        logger.error(f"💾 User settings check failed: {e}")
+    
+    # Check which provider get_llm actually returns
+    try:
+        provider = get_llm(user_id=user_id)
+        provider_type = type(provider).__name__
+        logger.info(f"🏭 get_llm() returned: {provider_type}")
+        
+        # Try to get the actual provider being used
+        if hasattr(provider, '__class__'):
+            logger.info(f"🏭 Provider class: {provider.__class__.__module__}.{provider.__class__.__name__}")
+        
+    except Exception as e:
+        logger.error(f"🏭 get_llm() failed: {e}")
+    
+    logger.info(f"🔍 PROVIDER DEBUG END [{context}]")
+
 
 class ConversationRequest(BaseModel):
     """Request to start a multi-agent conversation."""
@@ -191,9 +243,21 @@ class AgentConversationService:
         conversation_history = []
 
         try:
+            # CRITICAL DEBUG: Check provider factory behavior  
+            debug_provider_selection(user_id, "BEFORE_LLM_FACTORY")
+            
             # Get LLM provider
             provider_manager = self.llm_factory.create_from_config(user_id=user_id)
             healthy_providers = provider_manager.registry.get_healthy_providers()
+            
+            # CRITICAL DEBUG: Check what provider was actually created
+            logger.info(f"🏭 LLMProviderFactory created provider_manager: {type(provider_manager).__name__}")
+            logger.info(f"🏭 Healthy providers: {[getattr(p, 'name', type(p).__name__) for p in healthy_providers] if healthy_providers else 'NONE'}")
+            if healthy_providers:
+                first_provider = healthy_providers[0]
+                logger.info(f"🏭 First provider details: {type(first_provider).__name__} - {getattr(first_provider, 'name', 'unknown')}")
+            
+            debug_provider_selection(user_id, "AFTER_LLM_FACTORY")
 
             if not healthy_providers:
                 raise HTTPException(
@@ -403,6 +467,9 @@ async def start_agent_conversation(
     logger.info(f"Starting agent conversation {conversation_id} for user {current_user.user_id}")
     logger.info(f"Prompt: {request.prompt}")
     logger.info(f"Agent count: {request.agent_count}, Turns: {request.conversation_turns}")
+    
+    # CRITICAL DEBUG: Check provider selection at conversation start
+    debug_provider_selection(current_user.user_id, "CONVERSATION_START")
 
     try:
         # Step 1: Create agent roles
