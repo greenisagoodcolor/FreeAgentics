@@ -5,7 +5,7 @@ LLM → GMN → PyMDP Agent → Database Storage → Runtime Agent
 """
 
 import pytest
-from unittest.mock import patch, AsyncMock
+from unittest.mock import patch, AsyncMock, Mock
 import numpy as np
 
 from agents.creation.pymdp_agent_builder import PyMDPAgentBuilder
@@ -98,7 +98,8 @@ class TestPyMDPEndToEnd:
     async def test_full_agent_creation_pipeline(self, mock_factory, mock_db, agent_specification):
         """Test complete agent creation pipeline from specification to database."""
         # Mock database session
-        mock_session = mock_db.return_value.__enter__.return_value
+        mock_session = Mock()
+        mock_db.return_value = [mock_session]
         mock_session.refresh = lambda x: setattr(x, 'id', 42)
         
         # Mock LLM provider with valid GMN response
@@ -151,7 +152,8 @@ class TestPyMDPEndToEnd:
     async def test_fallback_to_traditional_agent_on_failure(self, mock_factory, mock_db, agent_specification):
         """Test fallback to traditional agent when PyMDP creation fails."""
         # Mock database session
-        mock_session = mock_db.return_value.__enter__.return_value
+        mock_session = Mock()
+        mock_db.return_value = [mock_session]
         mock_session.refresh = lambda x: setattr(x, 'id', 43)
         
         # Mock LLM provider with invalid GMN response
