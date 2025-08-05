@@ -3615,7 +3615,7 @@
               "59.2"
             ],
             "details": "Build KnowledgeGraphUpdater that processes inference results to extract entities and relationships. Implement entity extraction from agent states, observations, and selected actions. Create relationship inference based on belief transitions and action outcomes. Integrate with existing knowledge graph service to persist updates. Implement graph update batching for performance. Add support for confidence-weighted edges based on agent belief strengths. Create update events for real-time graph visualization updates via WebSocket.",
-            "status": "in-progress",
+            "status": "done",
             "testStrategy": "Test entity and relationship extraction from various inference scenarios. Verify graph updates are persisted correctly. Test batch update performance. Validate WebSocket events are emitted for graph changes."
           },
           {
@@ -3628,7 +3628,7 @@
               "59.3"
             ],
             "details": "Implement ConversationOrchestrator that coordinates the entire pipeline from user prompt to response. Create async workflow: prompt → LLM GMN generation → GMN parsing → PyMDP agent creation → inference execution → knowledge graph updates → response generation. Add comprehensive error handling for each stage with specific error types (GMNParseError, PyMDPCreationError, InferenceTimeoutError). Implement fallback strategies including simplified agent creation and cached response usage. Add circuit breaker pattern for external service failures. Create detailed error responses with actionable information for debugging.",
-            "status": "pending",
+            "status": "in-progress",
             "testStrategy": "End-to-end integration tests covering happy path and all error scenarios. Test fallback mechanisms trigger correctly. Verify error messages provide useful debugging information. Load test to ensure error handling doesn't degrade performance."
           },
           {
@@ -3647,7 +3647,7 @@
     ],
     "metadata": {
       "created": "2025-07-04T12:52:30.518Z",
-      "updated": "2025-08-05T07:10:04.959Z",
+      "updated": "2025-08-05T07:23:42.622Z",
       "description": "Tasks for master context"
     }
   }
