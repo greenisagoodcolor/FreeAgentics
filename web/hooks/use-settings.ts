@@ -56,13 +56,13 @@ export function useSettings(): SettingsState {
         const response = await apiClient.getSettings();
         if (response.success && response.data) {
           const backendSettings = {
-            llmProvider: response.data.llmProvider as Settings["llmProvider"],
-            llmModel: response.data.llmModel,
-            openaiApiKey: response.data.openaiApiKey || "",
-            anthropicApiKey: response.data.anthropicApiKey || "",
-            gnnEnabled: response.data.gnnEnabled,
-            debugLogs: response.data.debugLogs,
-            autoSuggest: response.data.autoSuggest,
+            llmProvider: response.data.llm_provider as Settings["llmProvider"],
+            llmModel: response.data.llm_model,
+            openaiApiKey: response.data.openai_api_key || "",
+            anthropicApiKey: response.data.anthropic_api_key || "",
+            gnnEnabled: response.data.gnn_enabled,
+            debugLogs: response.data.debug_logs,
+            autoSuggest: response.data.auto_suggest,
           };
           setSettings(backendSettings);
           // Sync to localStorage

@@ -20,6 +20,13 @@ from datetime import datetime
 # Add the project root to Python path
 sys.path.insert(0, '/home/green/freeagentics')
 
+# Get dev user ID at module level
+try:
+    from auth.dev_bypass import _DEV_USER
+    DEV_USER_ID = _DEV_USER.user_id
+except ImportError:
+    DEV_USER_ID = "dev_user"
+
 def test_api_key_directly():
     """Test the user's API key directly with OpenAI."""
     print("🔑 Testing API key directly...")
@@ -38,7 +45,6 @@ def test_api_key_directly():
         try:
             from database.models import UserSettings
             from database.session import SessionLocal
-            from auth.dev_bypass import DEV_USER_ID
             
             db = SessionLocal()
             user_settings = db.query(UserSettings).filter(UserSettings.user_id == DEV_USER_ID).first()
@@ -82,7 +88,6 @@ def test_provider_factories():
     # Test core.providers.get_llm()
     try:
         from core.providers import get_llm
-        from auth.dev_bypass import DEV_USER_ID
         
         print("Testing core.providers.get_llm()...")
         provider = get_llm(user_id=DEV_USER_ID)
@@ -100,7 +105,6 @@ def test_provider_factories():
     # Test inference.llm.provider_factory
     try:
         from inference.llm.provider_factory import LLMProviderFactory
-        from auth.dev_bypass import DEV_USER_ID
         
         print("Testing inference.llm.provider_factory.LLMProviderFactory...")
         factory = LLMProviderFactory()
@@ -127,7 +131,6 @@ def test_user_settings():
     try:
         from database.models import UserSettings
         from database.session import SessionLocal
-        from auth.dev_bypass import DEV_USER_ID
         
         db = SessionLocal()
         user_settings = db.query(UserSettings).filter(UserSettings.user_id == DEV_USER_ID).first()
