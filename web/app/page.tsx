@@ -8,6 +8,7 @@ import { KnowledgeGraphView } from "@/components/main/KnowledgeGraphView";
 import { MetricsFooter } from "@/components/main/MetricsFooter";
 import { ApiKeyBanner } from "@/components/main/ApiKeyBanner";
 import { SettingsDrawer } from "@/components/main/SettingsDrawer";
+import { WebSocketDebug } from "@/components/debug/WebSocketDebug";
 
 export default function HomePage() {
   const [isSettingsOpen, setIsSettingsOpen] = useState(false);
@@ -79,6 +80,9 @@ export default function HomePage() {
 
       {/* Settings Modal */}
       <SettingsDrawer open={isSettingsOpen} onOpenChange={setIsSettingsOpen} />
+      
+      {/* Debug Info */}
+      <WebSocketDebug />
     </div>
   );
 }

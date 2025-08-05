@@ -1,0 +1,115 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>WebSocket Test Client</title>
+    <style>
+        body { font-family: Arial, sans-serif; margin: 20px; }
+        .status { padding: 10px; margin: 10px 0; border-radius: 4px; }
+        .connected { background-color: #d4edda; color: #155724; }
+        .disconnected { background-color: #f8d7da; color: #721c24; }
+        .connecting { background-color: #fff3cd; color: #856404; }
+        .error { background-color: #f8d7da; color: #721c24; }
+        .log { background-color: #f8f9fa; padding: 10px; margin: 10px 0; border-radius: 4px; font-family: monospace; max-height: 300px; overflow-y: auto; }
+    </style>
+</head>
+<body>
+    <h1>WebSocket Test Client</h1>
+    <div id="status" class="status disconnected">Disconnected</div>
+    <button id="connect-btn">Connect</button>
+    <button id="disconnect-btn" disabled>Disconnect</button>
+    <button id="ping-btn" disabled>Send Ping</button>
+    <div id="log" class="log"></div>
+
+    <script>
+        let ws = null;
+        let reconnectAttempts = 0;
+        const maxReconnectAttempts = 5;
+        
+        const statusDiv = document.getElementById('status');
+        const logDiv = document.getElementById('log');
+        const connectBtn = document.getElementById('connect-btn');
+        const disconnectBtn = document.getElementById('disconnect-btn');
+        const pingBtn = document.getElementById('ping-btn');
+        
+        function log(message) {
+            const timestamp = new Date().toISOString();
+            logDiv.innerHTML += `<div>[${timestamp}] ${message}</div>`;
+            logDiv.scrollTop = logDiv.scrollHeight;
+            console.log(message);
+        }
+        
+        function updateStatus(state, message = '') {
+            statusDiv.className = `status ${state}`;
+            statusDiv.textContent = state.charAt(0).toUpperCase() + state.slice(1) + (message ? `: ${message}` : '');
+            
+            connectBtn.disabled = state === 'connected' || state === 'connecting';
+            disconnectBtn.disabled = state === 'disconnected';
+            pingBtn.disabled = state !== 'connected';
+        }
+        
+        function connect() {
+            try {
+                // Use the same URL that the frontend uses
+                const wsUrl = 'ws://localhost:8000/api/v1/ws/dev';
+                log(`Attempting to connect to: ${wsUrl}`);
+                updateStatus('connecting');
+                
+                ws = new WebSocket(wsUrl);
+                
+                ws.addEventListener('open', () => {
+                    log('✅ WebSocket connection opened');
+                    updateStatus('connected');
+                    reconnectAttempts = 0;
+                });
+                
+                ws.addEventListener('message', (event) => {
+                    try {
+                        const data = JSON.parse(event.data);
+                        log(`📥 Received: ${JSON.stringify(data, null, 2)}`);
+                    } catch (e) {
+                        log(`📥 Received (raw): ${event.data}`);
+                    }
+                });
+                
+                ws.addEventListener('close', (event) => {
+                    log(`🔌 WebSocket closed (code: ${event.code}, reason: ${event.reason})`);
+                    updateStatus('disconnected');
+                    ws = null;
+                });
+                
+                ws.addEventListener('error', (error) => {
+                    log(`❌ WebSocket error: ${error}`);
+                    updateStatus('error', 'Connection failed');
+                });
+                
+            } catch (error) {
+                log(`❌ Failed to create WebSocket: ${error}`);
+                updateStatus('error', error.message);
+            }
+        }
+        
+        function disconnect() {
+            if (ws) {
+                ws.close();
+            }
+        }
+        
+        function sendPing() {
+            if (ws && ws.readyState === WebSocket.OPEN) {
+                const message = { type: 'ping', data: {} };
+                ws.send(JSON.stringify(message));
+                log(`📤 Sent: ${JSON.stringify(message)}`);
+            }
+        }
+        
+        connectBtn.addEventListener('click', connect);
+        disconnectBtn.addEventListener('click', disconnect);
+        pingBtn.addEventListener('click', sendPing);
+        
+        // Auto-connect on page load
+        connect();
+    </script>
+</body>
+</html>

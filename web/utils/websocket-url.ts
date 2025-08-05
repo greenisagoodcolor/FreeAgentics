@@ -55,6 +55,7 @@ export function getWebSocketUrl(endpoint: 'dev' | 'demo' | 'auth' = 'dev'): stri
           console.error(`Invalid WebSocket URL in NEXT_PUBLIC_WS_URL: ${envUrl}`);
           throw new Error(`Invalid WebSocket URL: ${envUrl}`);
         }
+        console.log(`Attempting WebSocket connection to: ${envUrl}`);
         return envUrl;
       }
       
