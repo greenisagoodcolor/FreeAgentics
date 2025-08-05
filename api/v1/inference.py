@@ -117,30 +117,29 @@ async def run_inference(
     try:
         # Create PyMDP agent from specification
         agent = _agent_factory.create_agent(request.agent_spec)
-        
+
         # Run inference
         result = _inference_engine.run_inference(
             agent=agent,
             observation=request.observation,
             planning_horizon=request.planning_horizon,
-            timeout_ms=request.timeout_ms
+            timeout_ms=request.timeout_ms,
         )
-        
+
         if result is None:
             raise HTTPException(
-                status_code=408,
-                detail="Inference operation timed out or was cancelled"
+                status_code=408, detail="Inference operation timed out or was cancelled"
             )
-        
+
         # Convert all numpy arrays to Python types for JSON serialization
         return InferenceResponse(
             action=convert_numpy_to_python(result.action),
             beliefs=convert_numpy_to_python(result.beliefs),
             free_energy=convert_numpy_to_python(result.free_energy),
             confidence=convert_numpy_to_python(result.confidence),
-            metadata=convert_numpy_to_python(result.metadata)
+            metadata=convert_numpy_to_python(result.metadata),
         )
-        
+
     except InferenceError as e:
         logger.error(f"Inference failed: {e}")
         raise HTTPException(status_code=400, detail=str(e))
@@ -170,42 +169,44 @@ async def batch_inference(
     try:
         # Create PyMDP agent from specification
         agent = _agent_factory.create_agent(request.agent_spec)
-        
+
         # Run batch inference
         results = _inference_engine.run_batch_inference(
-            agent=agent,
-            observations=request.observations,
-            timeout_ms=request.timeout_ms
+            agent=agent, observations=request.observations, timeout_ms=request.timeout_ms
         )
-        
+
         # Convert to response format
         response_results = []
         for result in results:
             if result.action is not None:  # Successful inference
-                response_results.append(InferenceResponse(
-                    action=convert_numpy_to_python(result.action),
-                    beliefs=convert_numpy_to_python(result.beliefs),
-                    free_energy=convert_numpy_to_python(result.free_energy),
-                    confidence=convert_numpy_to_python(result.confidence),
-                    metadata=convert_numpy_to_python(result.metadata)
-                ))
+                response_results.append(
+                    InferenceResponse(
+                        action=convert_numpy_to_python(result.action),
+                        beliefs=convert_numpy_to_python(result.beliefs),
+                        free_energy=convert_numpy_to_python(result.free_energy),
+                        confidence=convert_numpy_to_python(result.confidence),
+                        metadata=convert_numpy_to_python(result.metadata),
+                    )
+                )
             else:  # Failed inference
-                response_results.append(InferenceResponse(
-                    action=None,
-                    beliefs={},
-                    free_energy=float('inf'),
-                    confidence=0.0,
-                    metadata={"failed": True}
-                ))
-        
+                response_results.append(
+                    InferenceResponse(
+                        action=None,
+                        beliefs={},
+                        free_energy=float("inf"),
+                        confidence=0.0,
+                        metadata={"failed": True},
+                    )
+                )
+
         return BatchInferenceResponse(
             results=response_results,
             metadata={
                 "total_observations": len(request.observations),
-                "successful_inferences": sum(1 for r in results if r.action is not None)
-            }
+                "successful_inferences": sum(1 for r in results if r.action is not None),
+            },
         )
-        
+
     except PyMDPAgentCreationError as e:
         logger.error(f"Agent creation failed: {e}")
         raise HTTPException(status_code=400, detail=str(e))
@@ -251,9 +252,7 @@ async def query_model(
 
 
 @router.get("/metrics")
-async def get_inference_metrics(
-    current_user: Dict = Depends(get_current_user)
-) -> Dict[str, Any]:
+async def get_inference_metrics(current_user: Dict = Depends(get_current_user)) -> Dict[str, Any]:
     """Get inference engine performance metrics.
 
     Args:
@@ -264,11 +263,11 @@ async def get_inference_metrics(
     """
     engine_metrics = _inference_engine.get_metrics()
     factory_metrics = _agent_factory.get_metrics()
-    
+
     return {
         "inference_engine": engine_metrics,
         "agent_factory": factory_metrics,
-        "timestamp": "2024-01-01T00:00:00Z"  # TODO: Add real timestamp
+        "timestamp": "2024-01-01T00:00:00Z",  # TODO: Add real timestamp
     }
 
 
@@ -280,20 +279,21 @@ async def inference_health() -> Dict[str, Any]:
         Dictionary with health status
     """
     logger.debug("Inference health check")
-    
+
     try:
         # Test PyMDP availability by checking imports
         from pymdp.agent import Agent as PyMDPAgent
+
         pymdp_available = True
         pymdp_status = "available"
     except ImportError:
         pymdp_available = False
         pymdp_status = "not_available"
-    
+
     # Get basic metrics
     engine_metrics = _inference_engine.get_metrics()
     factory_metrics = _agent_factory.get_metrics()
-    
+
     return {
         "status": "healthy",
         "service": "inference",
@@ -301,7 +301,7 @@ async def inference_health() -> Dict[str, Any]:
         "pymdp_status": pymdp_status,
         "total_inferences": engine_metrics.get("inferences_completed", 0),
         "total_agents_created": factory_metrics.get("agents_created", 0),
-        "inference_success_rate": engine_metrics.get("success_rate", 0.0)
+        "inference_success_rate": engine_metrics.get("success_rate", 0.0),
     }
 
 

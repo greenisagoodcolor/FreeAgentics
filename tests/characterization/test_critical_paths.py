@@ -29,7 +29,7 @@ class TestAgentCriticalPaths:
             # Document critical attributes
             assert agent.agent_id == "test-agent"
             assert agent.grid_size == 3
-            assert hasattr(agent, 'num_states')
+            assert hasattr(agent, "num_states")
 
         except Exception:
             pytest.fail("Test needs implementation")
@@ -117,6 +117,7 @@ class TestAPICriticalPaths:
 
             # Document function signature - parameters is a mappingproxy, not dict
             from collections.abc import Mapping
+
             assert isinstance(sig.parameters, Mapping)
             assert len(sig.parameters) > 0  # Should have parameters
 

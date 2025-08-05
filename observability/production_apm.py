@@ -739,7 +739,9 @@ class ProductionAPM:
     def _analyze_sla_compliance(self) -> Dict[str, Any]:
         """Analyze SLA compliance."""
         recent_violations = [
-            v for v in self.sla_violations if v["timestamp"] > time.time() - 86400  # Last 24 hours
+            v
+            for v in self.sla_violations
+            if v["timestamp"] > time.time() - 86400  # Last 24 hours
         ]
 
         violation_types = {}

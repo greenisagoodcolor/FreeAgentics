@@ -21,7 +21,7 @@ __all__ = [
     "OrchestrationError",
     "ComponentTimeoutError",
     "ValidationError",
-    "PipelineExecutionError",  
+    "PipelineExecutionError",
     "FallbackError",
     "ConversationPipeline",
     "PipelineStep",

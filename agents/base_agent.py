@@ -12,6 +12,7 @@ import numpy as np
 try:
     from pymdp import utils as _pymdp_utils
     from pymdp.agent import Agent as _PyMDPAgent
+
     PYMDP_AVAILABLE = True
 except ImportError:
     _pymdp_utils = None

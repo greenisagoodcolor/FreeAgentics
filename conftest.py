@@ -8,7 +8,7 @@ and setting up proper fixtures.
 
 Key features:
 - Automatically loads .env.test environment variables
-- Ensures in-memory database for complete test isolation 
+- Ensures in-memory database for complete test isolation
 - Sets up mock LLM providers for deterministic responses
 - Configures test-optimized settings for fast execution
 
@@ -23,22 +23,23 @@ from typing import Generator
 import pytest
 from dotenv import load_dotenv
 
+
 # Test import isolation - mock problematic ML imports
 def _setup_test_import_isolation() -> None:
     """Set up import path manipulation to avoid ML library crashes."""
     import unittest.mock
-    
+
     # Mock problematic modules that trigger CUDA initialization
     mock_modules = [
-        'spacy',
-        'spacy.lang',
-        'spacy.lang.en',
-        'thinc',
-        'thinc.api',
-        'torch.cuda',
-        'knowledge_graph.extraction',
+        "spacy",
+        "spacy.lang",
+        "spacy.lang.en",
+        "thinc",
+        "thinc.api",
+        "torch.cuda",
+        "knowledge_graph.extraction",
     ]
-    
+
     for module_name in mock_modules:
         if module_name not in sys.modules:
             # Create a minimal mock module
@@ -54,44 +55,44 @@ def pytest_configure(config: pytest.Config) -> None:
     # Get the project root directory
     project_root = Path(__file__).parent
     test_env_path = project_root / ".env.test"
-    
+
     # Clear any existing DATABASE_URL first
     if "DATABASE_URL" in os.environ:
         del os.environ["DATABASE_URL"]
-    
+
     if test_env_path.exists():
         # Load test environment variables
         load_dotenv(test_env_path, override=True)
-    
+
     # Always force test settings, regardless of what .env.test contains
     os.environ["TESTING"] = "true"
     os.environ["ENVIRONMENT"] = "test"
-    
+
     # Force in-memory database - MUST override any existing value
     os.environ["DATABASE_URL"] = "sqlite:///:memory:"
     os.environ["TEST_DATABASE_URL"] = "sqlite:///:memory:"
-    
+
     # Force mock LLM provider
     os.environ["LLM_PROVIDER"] = "mock"
     os.environ["OPENAI_API_KEY"] = ""
     os.environ["ANTHROPIC_API_KEY"] = ""
-    
+
     # Disable external services
     os.environ["REDIS_URL"] = ""
     os.environ["ENABLE_REAL_LLM_CALLS"] = "false"
-    
+
     # Force CPU-only mode for consistent testing - CRITICAL for PyTorch
     os.environ["CUDA_VISIBLE_DEVICES"] = ""
     os.environ["PYTORCH_FORCE_CPU_ONLY"] = "1"
     os.environ["TORCH_USE_CUDA_DSA"] = "0"
-    
+
     # Disable ML libraries that cause CUDA initialization
     os.environ["SPACY_DISABLE_ML"] = "1"
     os.environ["SKIP_ML_IMPORTS"] = "1"
-    
+
     # Configure import path manipulation for test isolation
     _setup_test_import_isolation()
-    
+
     print("✓ Test environment loaded with ML isolation")
     print(f"✓ Database: {os.environ.get('DATABASE_URL', 'not set')}")
     print(f"✓ LLM Provider: {os.environ.get('LLM_PROVIDER', 'not set')}")
@@ -117,7 +118,7 @@ def pytest_sessionfinish(session: pytest.Session, exitstatus: int) -> None:
 def ensure_test_environment() -> Generator[None, None, None]:
     """
     Automatically applied fixture that ensures test environment is properly configured.
-    
+
     This fixture runs once per test session and validates that:
     - We're in test mode
     - Database is in-memory
@@ -129,13 +130,15 @@ def ensure_test_environment() -> Generator[None, None, None]:
     assert os.environ.get("ENVIRONMENT") == "test", "ENVIRONMENT must be 'test'"
     assert "memory" in os.environ.get("DATABASE_URL", ""), "Database must be in-memory for tests"
     assert os.environ.get("LLM_PROVIDER") == "mock", "LLM provider must be 'mock' for tests"
-    
+
     # Ensure no real API keys are set
     assert not os.environ.get("OPENAI_API_KEY"), "OPENAI_API_KEY must be empty in test environment"
-    assert not os.environ.get("ANTHROPIC_API_KEY"), "ANTHROPIC_API_KEY must be empty in test environment"
-    
+    assert not os.environ.get(
+        "ANTHROPIC_API_KEY"
+    ), "ANTHROPIC_API_KEY must be empty in test environment"
+
     yield
-    
+
     # Cleanup after tests (if needed)
     # In-memory database automatically cleans up
     pass
@@ -145,13 +148,13 @@ def ensure_test_environment() -> Generator[None, None, None]:
 def isolated_test_env() -> Generator[dict[str, str], None, None]:
     """
     Provides a completely isolated environment for individual tests.
-    
+
     This fixture can be used by tests that need to modify environment variables
     without affecting other tests.
     """
     # Save current environment
     original_env = dict(os.environ)
-    
+
     try:
         yield dict(os.environ)
     finally:
@@ -165,11 +168,11 @@ def isolated_test_env() -> Generator[dict[str, str], None, None]:
 def monitor_test_performance(request: pytest.FixtureRequest) -> Generator[None, None, None]:
     """Monitor test execution time and warn about slow tests."""
     import time
-    
+
     start_time = time.time()
     yield
     duration = time.time() - start_time
-    
+
     # Warn about slow tests (over 5 seconds)
     if duration > 5.0:
         print(f"⚠️  Slow test detected: {request.node.name} took {duration:.2f}s")
@@ -180,22 +183,21 @@ def monitor_test_performance(request: pytest.FixtureRequest) -> Generator[None, 
 def test_db():
     """
     Provides a fresh in-memory database for each test.
-    
+
     This fixture ensures complete isolation between tests by providing
     a new database instance for each test function.
     """
-    from database.session import get_db_session
     from database.base import Base
     from sqlalchemy import create_engine
     from sqlalchemy.orm import sessionmaker
-    
+
     # Create in-memory SQLite database
     engine = create_engine("sqlite:///:memory:", echo=False)
     Base.metadata.create_all(engine)
-    
+
     SessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engine)
     session = SessionLocal()
-    
+
     try:
         yield session
     finally:
@@ -207,6 +209,7 @@ def test_db():
 def mock_llm_provider():
     """Provides a mock LLM provider for tests."""
     from inference.llm.mock_provider import MockLLMProvider
+
     return MockLLMProvider()
 
 
@@ -214,6 +217,7 @@ def mock_llm_provider():
 def mock_redis():
     """Provides a mock Redis instance for tests."""
     from tests.mocks.mock_redis import MockRedis
+
     return MockRedis()
 
 
@@ -225,21 +229,14 @@ def sample_agent_data():
         "name": "test_agent",
         "description": "A test agent for unit testing",
         "capabilities": ["reasoning", "memory"],
-        "parameters": {
-            "temperature": 0.0,
-            "max_tokens": 100
-        }
+        "parameters": {"temperature": 0.0, "max_tokens": 100},
     }
 
 
 @pytest.fixture
 def sample_user_data():
     """Provides sample user data for tests."""
-    return {
-        "username": "test_user",
-        "email": "test@example.com",
-        "password": "test_password_123"
-    }
+    return {"username": "test_user", "email": "test@example.com", "password": "test_password_123"}
 
 
 @pytest.fixture(scope="session", autouse=True)
@@ -247,8 +244,8 @@ def configure_device_for_tests():
     """Configure device settings for consistent testing."""
     # Import safe device config that won't crash during testing
     from utils.safe_device_config import get_safe_device_info
-    
+
     device_info = get_safe_device_info()
     print(f"✓ Safe device config: {device_info}")
-    
+
     yield

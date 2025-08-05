@@ -15,7 +15,7 @@ import numpy as np
 import pytest
 
 # PyMDP imports
-from pymdp.agent import Agent as PyMDPAgent# FreeAgentics imports
+from pymdp.agent import Agent as PyMDPAgent  # FreeAgentics imports
 from agents.base_agent import BasicExplorerAgent
 from agents.pymdp_adapter import PyMDPCompatibilityAdapter
 

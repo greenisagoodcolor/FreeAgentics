@@ -23,23 +23,23 @@ def is_test_mode() -> bool:
 
 def safe_tensor_to_python(value: Any, target_type: type = float) -> Union[int, float, str, bool]:
     """Safely convert tensor/array to Python primitive without PyTorch dependencies.
-    
+
     Args:
         value: Input tensor, array, or scalar
         target_type: Target Python type
-        
+
     Returns:
         Python primitive value
-        
+
     Raises:
         ValueError: If conversion fails
     """
     try:
         # Handle numpy arrays and scalars
-        if hasattr(value, 'item'):
+        if hasattr(value, "item"):
             # Numpy scalar or 0-d array
             return target_type(value.item())
-        elif hasattr(value, '__getitem__') and hasattr(value, '__len__'):
+        elif hasattr(value, "__getitem__") and hasattr(value, "__len__"):
             # Array-like object
             np_array = np.asarray(value)
             if np_array.size == 0:
@@ -48,22 +48,24 @@ def safe_tensor_to_python(value: Any, target_type: type = float) -> Union[int, f
                 return target_type(np_array.flat[0])
             else:
                 # Multi-element array - take first element with warning
-                logger.warning(f"Converting multi-element array {np_array.shape} to scalar, using first element")
+                logger.warning(
+                    f"Converting multi-element array {np_array.shape} to scalar, using first element"
+                )
                 return target_type(np_array.flat[0])
         else:
             # Direct conversion for primitives
             return target_type(value)
-            
+
     except Exception as e:
         raise ValueError(f"Failed to convert {type(value)} to {target_type.__name__}: {e}")
 
 
 def ensure_numpy_array(value: Any) -> np.ndarray:
     """Safely convert value to numpy array without PyTorch dependencies.
-    
+
     Args:
         value: Input value
-        
+
     Returns:
         NumPy array
     """
@@ -72,7 +74,7 @@ def ensure_numpy_array(value: Any) -> np.ndarray:
 
 def get_safe_device_info() -> dict:
     """Get safe device information without triggering CUDA initialization.
-    
+
     Returns:
         Dictionary with basic device information
     """

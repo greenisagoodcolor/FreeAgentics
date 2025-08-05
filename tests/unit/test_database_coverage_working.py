@@ -1,10 +1,9 @@
 """Working test to verify database coverage setup."""
 
 # Import at module level to ensure coverage tracking
-import os
 
 # os.environ["DATABASE_URL"] = "postgresql://test:test@localhost:5432/testdb"
-  # REMOVED: Tests must use in-memory database from conftest.py
+# REMOVED: Tests must use in-memory database from conftest.py
 # Mock the database engine at module level
 from unittest.mock import MagicMock, patch
 

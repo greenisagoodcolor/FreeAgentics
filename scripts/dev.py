@@ -244,11 +244,11 @@ def main():
     # Setup
     setup_environment()
 
-
     # Initialize providers
     print("🔧 Initializing providers...")
     try:
         from core.providers import init_providers
+
         init_providers()
     except ImportError as e:
         print(f"  ⚠️  Provider initialization warning (import error): {e}")

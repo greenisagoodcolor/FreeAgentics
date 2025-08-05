@@ -5,6 +5,7 @@ Revises: add_prompt_tracking
 Create Date: 2025-07-31 15:55:00.000000
 
 """
+
 from typing import Sequence, Union
 
 import sqlalchemy as sa

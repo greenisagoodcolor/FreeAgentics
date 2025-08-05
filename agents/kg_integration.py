@@ -1,6 +1,5 @@
 """Knowledge Graph integration for agents."""
 
-import asyncio
 import logging
 from datetime import datetime
 from typing import Any, Dict, List, Optional
@@ -35,7 +34,7 @@ class AgentKnowledgeGraphIntegration:
         except Exception:
             self.graph = KnowledgeGraph(graph_id=self.graph_id)
             logger.info(f"Created new knowledge graph: {self.graph_id}")
-        
+
         # Initialize PyMDP knowledge graph updater
         self.updater = KnowledgeGraphUpdater(knowledge_graph=self.graph)
         self._updater_started = False
@@ -62,7 +61,7 @@ class AgentKnowledgeGraphIntegration:
 
             # Create observation node
             obs_node = KnowledgeNode(
-                node_type=NodeType.OBSERVATION,
+                type=NodeType.OBSERVATION,
                 label=f"obs_{timestamp.isoformat()}",
                 properties={
                     "agent_id": agent_id,
@@ -74,7 +73,7 @@ class AgentKnowledgeGraphIntegration:
 
             # Create action event node
             action_node = KnowledgeNode(
-                node_type=NodeType.EVENT,
+                type=NodeType.EVENT,
                 label=f"action_{action}_{timestamp.isoformat()}",
                 properties={
                     "agent_id": agent_id,
@@ -87,9 +86,9 @@ class AgentKnowledgeGraphIntegration:
 
             # Link observation to action
             obs_action_edge = KnowledgeEdge(
-                source_id=obs_node.node_id,
-                target_id=action_node.node_id,
-                edge_type=EdgeType.CAUSES,
+                source_id=obs_node.id,
+                target_id=action_node.id,
+                type=EdgeType.CAUSES,
                 properties={"agent_id": agent_id},
             )
             self.graph.add_edge(obs_action_edge)
@@ -97,7 +96,7 @@ class AgentKnowledgeGraphIntegration:
             # Add belief state if available
             if beliefs:
                 belief_node = KnowledgeNode(
-                    node_type=NodeType.BELIEF,
+                    type=NodeType.BELIEF,
                     label=f"belief_{timestamp.isoformat()}",
                     properties={
                         "agent_id": agent_id,
@@ -109,9 +108,9 @@ class AgentKnowledgeGraphIntegration:
 
                 # Link belief to action
                 belief_action_edge = KnowledgeEdge(
-                    source_id=belief_node.node_id,
-                    target_id=action_node.node_id,
-                    edge_type=EdgeType.CAUSES,
+                    source_id=belief_node.id,
+                    target_id=action_node.id,
+                    type=EdgeType.CAUSES,
                     properties={"agent_id": agent_id},
                 )
                 self.graph.add_edge(belief_action_edge)
@@ -123,7 +122,7 @@ class AgentKnowledgeGraphIntegration:
 
         except Exception as e:
             logger.error(f"Failed to update knowledge graph: {e}")
-    
+
     async def update_from_inference_result(
         self,
         inference_result: InferenceResult,
@@ -132,13 +131,13 @@ class AgentKnowledgeGraphIntegration:
         message_id: Optional[str] = None,
     ) -> Optional[Dict[str, Any]]:
         """Update knowledge graph from PyMDP inference result using new pipeline.
-        
+
         Args:
             inference_result: Result from PyMDP inference engine
             agent_id: ID of the agent
             conversation_id: Conversation context ID
             message_id: Message ID (generated if None)
-            
+
         Returns:
             Update result dictionary with extracted knowledge
         """
@@ -147,7 +146,7 @@ class AgentKnowledgeGraphIntegration:
             if not self._updater_started:
                 await self.updater.start()
                 self._updater_started = True
-            
+
             # Process inference result through new pipeline
             result = await self.updater.update_from_inference(
                 inference_result=inference_result,
@@ -156,29 +155,26 @@ class AgentKnowledgeGraphIntegration:
                 message_id=message_id,
                 force_immediate=True,  # Process immediately for real-time updates
             )
-            
+
             # Save graph after update
             self.storage_manager.save(self.graph)
-            
+
             return result
-            
+
         except Exception as e:
             logger.error(f"Failed to update knowledge graph from inference result: {e}")
             return None
-    
+
     async def get_agent_knowledge_summary(
-        self,
-        agent_id: str,
-        entity_types: Optional[List[str]] = None,
-        limit: int = 50
+        self, agent_id: str, entity_types: Optional[List[str]] = None, limit: int = 50
     ) -> Dict[str, Any]:
         """Get knowledge summary for an agent using new pipeline.
-        
+
         Args:
             agent_id: ID of the agent
             entity_types: Filter by entity types (all if None)
             limit: Maximum number of entities to return
-            
+
         Returns:
             Dictionary with agent's knowledge summary
         """
@@ -186,17 +182,15 @@ class AgentKnowledgeGraphIntegration:
             if not self._updater_started:
                 await self.updater.start()
                 self._updater_started = True
-            
+
             return await self.updater.get_agent_knowledge(
-                agent_id=agent_id,
-                entity_types=entity_types,
-                limit=limit
+                agent_id=agent_id, entity_types=entity_types, limit=limit
             )
-            
+
         except Exception as e:
             logger.error(f"Failed to get agent knowledge summary: {e}")
             return {"agent_id": agent_id, "error": str(e)}
-    
+
     def get_updater_metrics(self) -> Dict[str, Any]:
         """Get metrics from the knowledge graph updater."""
         try:
@@ -204,19 +198,19 @@ class AgentKnowledgeGraphIntegration:
         except Exception as e:
             logger.error(f"Failed to get updater metrics: {e}")
             return {"error": str(e)}
-    
+
     async def shutdown(self) -> None:
         """Shutdown the knowledge graph integration."""
         try:
             if self._updater_started:
                 await self.updater.stop()
                 self._updater_started = False
-            
+
             # Final save
             self.storage_manager.save(self.graph)
-            
+
             logger.info(f"Shutdown knowledge graph integration {self.graph_id}")
-            
+
         except Exception as e:
             logger.error(f"Error during shutdown: {e}")
 
@@ -250,7 +244,7 @@ class AgentKnowledgeGraphIntegration:
 
             for node in agent_nodes[:limit]:
                 event = {
-                    "type": node.node_type.value,
+                    "type": node.type.value,
                     "label": node.label,
                     "timestamp": node.properties.get("timestamp"),
                     "properties": node.properties,

@@ -137,9 +137,7 @@ class BanditScanner:
                 cmd.extend(["-x", excludes])
 
             # Run Bandit
-            result = subprocess.run(
-                cmd, capture_output=True, text=True
-            )  # nosec B603 # Safe bandit security scanner execution
+            result = subprocess.run(cmd, capture_output=True, text=True)  # nosec B603 # Safe bandit security scanner execution
 
             if result.returncode not in (
                 0,
@@ -221,9 +219,7 @@ class SemgrepScanner:
                 cmd.extend(["--exclude", pattern])
 
             # Run Semgrep
-            result = subprocess.run(
-                cmd, capture_output=True, text=True
-            )  # nosec B603 # Safe semgrep security scanner execution
+            result = subprocess.run(cmd, capture_output=True, text=True)  # nosec B603 # Safe semgrep security scanner execution
 
             if result.returncode != 0 and "No rules" not in result.stderr:
                 logger.error(f"Semgrep scan failed: {result.stderr}")
@@ -318,9 +314,7 @@ class SafetyScanner:
             for req_file in req_files:
                 # Run Safety check
                 cmd = ["safety", "check", "--json", "--file", str(req_file)]
-                result = subprocess.run(
-                    cmd, capture_output=True, text=True
-                )  # nosec B603 # Safe safety security scanner execution
+                result = subprocess.run(cmd, capture_output=True, text=True)  # nosec B603 # Safe safety security scanner execution
 
                 if result.returncode != 0 and result.stdout:
                     # Parse vulnerabilities

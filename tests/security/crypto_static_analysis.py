@@ -572,7 +572,9 @@ class CryptographicStaticAnalyzer:
                     else (
                         15
                         if v.severity == SecurityLevel.HIGH
-                        else 5 if v.severity == SecurityLevel.MEDIUM else 1
+                        else 5
+                        if v.severity == SecurityLevel.MEDIUM
+                        else 1
                     )
                 )
                 for v in vulns

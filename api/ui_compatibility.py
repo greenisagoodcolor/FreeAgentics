@@ -374,6 +374,7 @@ class ProcessPromptRequest(BaseModel):
 
     prompt: str = Field(..., description="The prompt to process")
     conversationId: Optional[str] = Field(None, description="Optional conversation ID")
+    goalPrompt: Optional[str] = Field(None, description="Goal-directed prompt context")
 
 
 class ProcessPromptResponse(BaseModel):
@@ -435,8 +436,13 @@ async def process_prompt_ui(
         logger.info(f"Starting agent conversation from prompt: {request.prompt[:100]}...")
 
         # Use the agent conversation service to create multiple agents and run a conversation
+        # If we have a goal prompt, combine it with the user prompt for better context
+        full_prompt = request.prompt
+        if request.goalPrompt:
+            full_prompt = f"Goal: {request.goalPrompt}\n\nUser Request: {request.prompt}"
+
         conversation_request = ConversationRequest(
-            prompt=request.prompt,
+            prompt=full_prompt,
             agent_count=2,  # Create 2 agents for conversation
             conversation_turns=5,  # 5 turns of conversation
             llm_provider="openai",
@@ -562,7 +568,9 @@ The infrastructure is now in place for real agent-to-agent conversations. Just a
         )
 
 
-async def _generate_agent_analysis(prompt: str, agent_response, current_user: TokenData) -> str:
+async def _generate_agent_analysis(
+    prompt: str, agent_response, current_user: TokenData, goal_prompt: Optional[str] = None
+) -> str:
     """Generate intelligent analysis of the created agent and prompt."""
     try:
         # Use the LLM to generate a collaborative analysis response
@@ -585,9 +593,10 @@ Provide a brief, intelligent response that:
 
 Keep the response concise but informative (2-3 sentences)."""
 
-            user_prompt = f"""I created an agent named '{agent_response.agent_name}' from the prompt: "{prompt}"
+            goal_context = f"\nGoal Context: {goal_prompt}" if goal_prompt else ""
+            user_prompt = f"""I created an agent named '{agent_response.agent_name}' from the prompt: "{prompt}"{goal_context}
 
-The agent has been equipped with active inference capabilities and is ready to collaborate. Please provide an intelligent response about what this agent can do and how it can help."""
+The agent has been equipped with active inference capabilities and is ready to collaborate. Please provide an intelligent response about what this agent can do and how it can help achieve the specified goal."""
 
             generation_request = GenerationRequest(
                 messages=[
@@ -610,7 +619,11 @@ The agent has been equipped with active inference capabilities and is ready to c
 
 
 async def _create_collaborative_agents_if_needed(
-    prompt: str, conversation_id: str, current_user: TokenData, manager
+    prompt: str,
+    conversation_id: str,
+    current_user: TokenData,
+    manager,
+    goal_prompt: Optional[str] = None,
 ) -> None:
     """Create additional agents for collaborative scenarios like business planning."""
     prompt_lower = prompt.lower()
@@ -630,10 +643,12 @@ async def _create_collaborative_agents_if_needed(
         try:
             from api.v1.prompts import PromptRequest, create_agent_from_prompt
 
-            # Create a market analysis agent
+            # Create a market analysis agent with goal context
             market_prompt = (
                 f"Create a market analysis agent to research and analyze the market for: {prompt}"
             )
+            if goal_prompt:
+                market_prompt = f"Goal: {goal_prompt}\n\n{market_prompt}"
             market_agent_request = PromptRequest(
                 prompt=market_prompt,
                 agent_name="Market_Analyst",

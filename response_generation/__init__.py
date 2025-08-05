@@ -22,7 +22,7 @@ from .models import (
 
 __all__ = [
     "ResponseGenerator",
-    "ProductionResponseGenerator", 
+    "ProductionResponseGenerator",
     "ResponseFormatter",
     "StructuredResponseFormatter",
     "ResponseCache",

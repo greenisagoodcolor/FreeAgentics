@@ -194,6 +194,7 @@ export function useConversation(): ConversationState {
           body: JSON.stringify({
             prompt: content,
             conversationId: conversationId || "default",
+            goalPrompt: goalPrompt, // Include goal prompt context
           }),
         })
           .then((response) => {

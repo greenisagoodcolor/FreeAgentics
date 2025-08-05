@@ -1,9 +1,8 @@
 """Additional database coverage test to reach 15% threshold."""
 
-import os
 
 # os.environ["DATABASE_URL"] = "postgresql://test:test@localhost:5432/testdb"
-  # REMOVED: Tests must use in-memory database from conftest.py
+# REMOVED: Tests must use in-memory database from conftest.py
 import uuid
 from unittest.mock import MagicMock, patch
 

@@ -425,7 +425,11 @@ class DatabaseLoadTester:
         connection_errors = 0
 
         async def transaction_user(user_id: int):
-            nonlocal total_transactions, successful_transactions, failed_transactions, connection_errors
+            nonlocal \
+                total_transactions, \
+                successful_transactions, \
+                failed_transactions, \
+                connection_errors
 
             try:
                 conn = await asyncpg.connect(**self.db_config)
@@ -545,7 +549,12 @@ class DatabaseLoadTester:
         active_connections = 0
 
         async def stress_connection(conn_id: int):
-            nonlocal total_queries, successful_queries, failed_queries, connection_errors, active_connections
+            nonlocal \
+                total_queries, \
+                successful_queries, \
+                failed_queries, \
+                connection_errors, \
+                active_connections
 
             try:
                 conn = await asyncpg.connect(**self.db_config)

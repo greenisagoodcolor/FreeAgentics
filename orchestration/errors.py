@@ -13,7 +13,7 @@ from datetime import datetime, timezone
 @dataclass
 class ErrorContext:
     """Context information for orchestration errors."""
-    
+
     trace_id: str
     conversation_id: Optional[str] = None
     step_name: Optional[str] = None
@@ -21,7 +21,7 @@ class ErrorContext:
     timestamp: datetime = field(default_factory=lambda: datetime.now(timezone.utc))
     metadata: Dict[str, Any] = field(default_factory=dict)
     execution_time_ms: Optional[float] = None
-    
+
     def to_dict(self) -> Dict[str, Any]:
         """Convert to dictionary for JSON serialization."""
         return {
@@ -37,11 +37,11 @@ class ErrorContext:
 
 class OrchestrationError(Exception):
     """Base exception for orchestration-related errors.
-    
+
     Provides structured error context with tracing information,
     component identification, and actionable error messages.
     """
-    
+
     def __init__(
         self,
         message: str,
@@ -55,7 +55,7 @@ class OrchestrationError(Exception):
         self.cause = cause
         self.recoverable = recoverable
         self.suggested_action = suggested_action
-        
+
     def to_dict(self) -> Dict[str, Any]:
         """Convert error to dictionary for structured logging."""
         return {
@@ -70,7 +70,7 @@ class OrchestrationError(Exception):
 
 class ComponentTimeoutError(OrchestrationError):
     """Raised when a component operation times out."""
-    
+
     def __init__(
         self,
         component: str,
@@ -93,7 +93,7 @@ class ComponentTimeoutError(OrchestrationError):
 
 class ValidationError(OrchestrationError):
     """Raised when input validation fails."""
-    
+
     def __init__(
         self,
         field: str,
@@ -116,7 +116,7 @@ class ValidationError(OrchestrationError):
 
 class PipelineExecutionError(OrchestrationError):
     """Raised when pipeline execution fails at a specific step."""
-    
+
     def __init__(
         self,
         step_name: str,
@@ -141,7 +141,7 @@ class PipelineExecutionError(OrchestrationError):
 
 class FallbackError(OrchestrationError):
     """Raised when all fallback options have been exhausted."""
-    
+
     def __init__(
         self,
         primary_error: Exception,
@@ -164,7 +164,7 @@ class FallbackError(OrchestrationError):
 
 class CircuitBreakerOpenError(OrchestrationError):
     """Raised when circuit breaker is open and requests are being rejected."""
-    
+
     def __init__(
         self,
         component: str,
@@ -193,7 +193,7 @@ class CircuitBreakerOpenError(OrchestrationError):
 
 class ResourceExhaustionError(OrchestrationError):
     """Raised when system resources are exhausted."""
-    
+
     def __init__(
         self,
         resource_type: str,
@@ -225,13 +225,13 @@ def create_error_context(
     step_name: Optional[str] = None,
     component: Optional[str] = None,
     start_time: Optional[float] = None,
-    **metadata
+    **metadata,
 ) -> ErrorContext:
     """Create error context with timing information."""
     execution_time_ms = None
     if start_time is not None:
         execution_time_ms = (time.time() - start_time) * 1000
-    
+
     return ErrorContext(
         trace_id=trace_id,
         conversation_id=conversation_id,
@@ -266,14 +266,21 @@ def is_retryable_error(error: Exception) -> bool:
     """Determine if an error is retryable."""
     if isinstance(error, OrchestrationError):
         return error.recoverable
-    
+
     # Check for specific retryable error patterns
     error_str = str(error).lower()
     retryable_patterns = [
-        "timeout", "connection", "rate limit", "503", "502", "500",
-        "temporary", "transient", "unavailable"
+        "timeout",
+        "connection",
+        "rate limit",
+        "503",
+        "502",
+        "500",
+        "temporary",
+        "transient",
+        "unavailable",
     ]
-    
+
     return any(pattern in error_str for pattern in retryable_patterns)
 
 
@@ -281,10 +288,10 @@ def get_retry_delay(error: Exception, attempt: int) -> float:
     """Get retry delay based on error type and attempt number."""
     if isinstance(error, ComponentTimeoutError):
         # Longer delays for timeout errors
-        return min(2.0 ** attempt, 60.0)
+        return min(2.0**attempt, 60.0)
     elif isinstance(error, ResourceExhaustionError):
         # Progressive backoff for resource errors
-        return min(1.5 ** attempt, 30.0)
+        return min(1.5**attempt, 30.0)
     else:
         # Standard exponential backoff
-        return min(1.0 * (2 ** attempt), 45.0)
+        return min(1.0 * (2**attempt), 45.0)

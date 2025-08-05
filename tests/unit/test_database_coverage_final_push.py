@@ -1,9 +1,8 @@
 """Final push to reach 15% database coverage by importing zero-coverage modules."""
 
-import os
 
 # os.environ["DATABASE_URL"] = "postgresql://test:test@localhost:5432/testdb"
-  # REMOVED: Tests must use in-memory database from conftest.py
+# REMOVED: Tests must use in-memory database from conftest.py
 from unittest.mock import MagicMock, patch
 
 # Mock everything we need

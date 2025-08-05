@@ -72,7 +72,7 @@ class TestMemoryTracker:
         # Clear memory
         data.clear()
         gc.collect()  # Force garbage collection
-        
+
         # Wait for memory to stabilize with actual monitoring
         initial_memory = tracker.sample()
         for _ in range(10):  # Max 10 iterations to prevent infinite loops

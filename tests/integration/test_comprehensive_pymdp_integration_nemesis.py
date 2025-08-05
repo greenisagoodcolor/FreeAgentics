@@ -259,11 +259,11 @@ class TestPerformanceBenchmarksWithRealMeasurements:
             # Initialize PyMDP (required)
             matrices = TEST_MATRICES["simple_2x2"]
             agent.pymdp_agent = PyMDPAgent(
-                    A=matrices["A"],
-                    B=matrices["B"],
-                    C=matrices["C"],
-                    D=matrices["D"],
-                )
+                A=matrices["A"],
+                B=matrices["B"],
+                C=matrices["C"],
+                D=matrices["D"],
+            )
 
             end_time = time.perf_counter()
             initialization_times.append(end_time - start_time)
@@ -516,10 +516,10 @@ class TestNemesisLevelAuditAndValidation:
                 # Test PyMDP integration (required)
                 matrices = TEST_MATRICES["simple_2x2"]
                 agent.pymdp_agent = PyMDPAgent(
-                        A=matrices["A"],
-                        B=matrices["B"],
-                        C=matrices["C"],
-                        D=matrices["D"],
+                    A=matrices["A"],
+                    B=matrices["B"],
+                    C=matrices["C"],
+                    D=matrices["D"],
                 )
 
                 # Audit mathematical properties

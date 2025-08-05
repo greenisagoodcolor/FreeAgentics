@@ -352,12 +352,16 @@ class PipelineDashboard:
             status_class = (
                 "status-success"
                 if status == "success"
-                else "status-failure" if status == "failure" else "status-skipped"
+                else "status-failure"
+                if status == "failure"
+                else "status-skipped"
             )
             status_text = (
                 "✅ Success"
                 if status == "success"
-                else "❌ Failed" if status == "failure" else "⏭️ Skipped"
+                else "❌ Failed"
+                if status == "failure"
+                else "⏭️ Skipped"
             )
 
             html += f"""

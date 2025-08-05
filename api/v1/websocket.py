@@ -149,8 +149,10 @@ async def websocket_dev_endpoint(websocket: WebSocket):
     This endpoint is only available when running in dev mode (no DATABASE_URL).
     It provides basic WebSocket functionality for UI development and testing.
     """
-    logger.info(f"Dev endpoint access attempt - env: {environment.config.type}, auth_required: {environment.config.auth_required}")
-    
+    logger.info(
+        f"Dev endpoint access attempt - env: {environment.config.type}, auth_required: {environment.config.auth_required}"
+    )
+
     if not (environment.is_development and not environment.config.auth_required):
         logger.warning("Dev endpoint access denied - not in dev mode")
         await websocket.close(code=4003, reason="Dev endpoint only available in dev mode")

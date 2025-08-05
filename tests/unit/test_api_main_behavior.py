@@ -159,7 +159,9 @@ class TestAPIMainBehavior:
         route_paths = [route.path for route in app.routes]
 
         # Look for WebSocket-related routes (path contains 'ws' or 'websocket')
-        websocket_routes_exist = any("ws" in path.lower() or "websocket" in path.lower() for path in route_paths)
+        websocket_routes_exist = any(
+            "ws" in path.lower() or "websocket" in path.lower() for path in route_paths
+        )
         assert websocket_routes_exist, "API should include WebSocket routes"
 
     def test_api_includes_inference_routes(self):

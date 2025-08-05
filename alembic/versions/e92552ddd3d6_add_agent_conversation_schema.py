@@ -11,6 +11,7 @@ Creates tables for:
 - agent_conversations: Many-to-many relationship between agents and conversations
 
 """
+
 from typing import Sequence, Union
 
 import sqlalchemy as sa

@@ -125,17 +125,21 @@ class PyMDPErrorHandler:
             if fallback_func is not None and current_failures < self.max_recovery_attempts:
                 try:
                     fallback_result = fallback_func()
-                    
+
                     # Track successful recovery
-                    self.recovery_stats[operation_name] = self.recovery_stats.get(operation_name, 0) + 1
-                    
+                    self.recovery_stats[operation_name] = (
+                        self.recovery_stats.get(operation_name, 0) + 1
+                    )
+
                     logger.info(f"Fallback successful for operation '{operation_name}'")
                     return False, fallback_result, pymdp_error
 
                 except Exception as fallback_error:
                     # Fallback also failed - add to error context
                     pymdp_error.context["fallback_error"] = str(fallback_error)
-                    logger.error(f"Fallback also failed for operation '{operation_name}': {fallback_error}")
+                    logger.error(
+                        f"Fallback also failed for operation '{operation_name}': {fallback_error}"
+                    )
 
             # No fallback or fallback failed
             return False, None, pymdp_error
@@ -444,15 +448,15 @@ def validate_pymdp_matrices(A: Any, B: Any, C: Any, D: Any) -> Tuple[bool, str]:
 # Safe functions with fallback defaults - required by test suite
 def safe_numpy_conversion(value: Any, target_type: type, default: Any = None) -> Any:
     """Safely convert numpy arrays/scalars to Python primitives with fallback defaults.
-    
+
     This function provides safe conversion for PyMDP return values that might be
     numpy arrays instead of scalars. For array-like objects, it takes the first element.
-    
+
     Args:
         value: Value to convert (numpy array, scalar, or other)
         target_type: Target Python type (int, float, str, bool)
         default: Default value to return on conversion failure
-        
+
     Returns:
         Converted value or default value
     """
@@ -468,16 +472,18 @@ def safe_numpy_conversion(value: Any, target_type: type, default: Any = None) ->
             default = False
         else:
             default = None
-    
+
     try:
         # Handle numpy scalars and 0-d arrays first
         if hasattr(value, "item"):
             return target_type(value.item())
 
-        # Handle array-like objects 
+        # Handle array-like objects
         elif hasattr(value, "__getitem__") and hasattr(value, "__len__"):
             if len(value) == 0:
-                logger.warning(f"Empty array cannot be converted to {target_type.__name__}, using default {default}")
+                logger.warning(
+                    f"Empty array cannot be converted to {target_type.__name__}, using default {default}"
+                )
                 return default
             elif len(value) == 1:
                 # Single element - extract properly
@@ -494,7 +500,7 @@ def safe_numpy_conversion(value: Any, target_type: type, default: Any = None) ->
                     )
                     return target_type(value[0])
                 elif hasattr(value, "item") and hasattr(value, "flat"):
-                    # Numpy arrays: take first element  
+                    # Numpy arrays: take first element
                     logger.warning(
                         f"Multi-element array-like {type(value)} converted to {target_type.__name__} using first element"
                     )
@@ -512,7 +518,9 @@ def safe_numpy_conversion(value: Any, target_type: type, default: Any = None) ->
 
         # Handle None
         elif value is None:
-            logger.warning(f"None value converted to {target_type.__name__} using default {default}")
+            logger.warning(
+                f"None value converted to {target_type.__name__} using default {default}"
+            )
             return default
 
         # Unknown type - attempt direct conversion
@@ -529,12 +537,12 @@ def safe_numpy_conversion(value: Any, target_type: type, default: Any = None) ->
 
 def safe_array_index(array: Any, index: Any, default: Any = None) -> Any:
     """Safely index into arrays with fallback default.
-    
+
     Args:
         array: Array-like object to index
         index: Index (may be numpy array)
         default: Default value to return on indexing failure
-        
+
     Returns:
         Indexed value or default value
     """
@@ -550,11 +558,11 @@ def safe_array_index(array: Any, index: Any, default: Any = None) -> Any:
 
 def safe_array_to_int(value: Any, default: int = 0) -> int:
     """Safely convert array/scalar to int with fallback default.
-    
+
     Args:
         value: Value to convert to integer
         default: Default value to return on conversion failure
-        
+
     Returns:
         Integer value or default
     """

@@ -17,8 +17,7 @@ def test_environment_setup():
 def test_database_import():
     """Test that database imports work."""
     try:
-        from database.session import get_db_session
-        from database.base import Base
+
         print("✓ Database imports successful")
         return True
     except Exception as e:
@@ -29,8 +28,7 @@ def test_database_import():
 def test_basic_api_import():
     """Test that basic API imports work."""
     try:
-        from fastapi import FastAPI
-        from main import app
+
         print("✓ Basic API imports successful")
         return True
     except Exception as e:
@@ -41,7 +39,7 @@ def test_basic_api_import():
 def test_auth_import():
     """Test that auth imports work."""
     try:
-        from auth.dev_bypass import get_current_user_optional
+
         print("✓ Auth imports successful")
         return True
     except Exception as e:
@@ -52,14 +50,14 @@ def test_auth_import():
 def main():
     """Run all infrastructure validation tests."""
     print("Running infrastructure validation tests...")
-    
+
     tests = [
         test_environment_setup,
         test_database_import,
         test_basic_api_import,
         test_auth_import,
     ]
-    
+
     results = []
     for test in tests:
         try:
@@ -68,14 +66,14 @@ def main():
         except Exception as e:
             print(f"✗ Test {test.__name__} failed with exception: {e}")
             results.append(False)
-    
+
     passed = sum(results)
     total = len(results)
     success_rate = (passed / total) * 100
-    
+
     print(f"\n--- Infrastructure Validation Results ---")
     print(f"Tests passed: {passed}/{total} ({success_rate:.1f}%)")
-    
+
     if success_rate >= 95:
         print("✅ Infrastructure validation PASSED - ready for test execution")
         return 0

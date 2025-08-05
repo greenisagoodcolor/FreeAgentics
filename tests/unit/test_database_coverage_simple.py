@@ -1,11 +1,10 @@
 """Simple test to verify database coverage setup works."""
 
-import os
 from unittest.mock import MagicMock, patch
 
 # Set a mock DATABASE_URL before importing database modules
 # os.environ["DATABASE_URL"] = "postgresql://test:test@localhost:5432/testdb"
-  # REMOVED: Tests must use in-memory database from conftest.py
+# REMOVED: Tests must use in-memory database from conftest.py
 # Mock the database engine creation
 with patch("database.session.create_engine") as mock_create_engine:
     mock_engine = MagicMock()

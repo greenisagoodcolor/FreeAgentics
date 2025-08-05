@@ -57,15 +57,17 @@ class DatabaseTestConfig:
             "echo": self.echo,
             "connect_args": self.connect_args,
         }
-        
+
         # Only add pool parameters for non-SQLite databases
         if self.pool_class != NullPool:
-            engine_kwargs.update({
-                "pool_size": self.pool_size,
-                "max_overflow": self.max_overflow,
-                "pool_pre_ping": self.pool_pre_ping,
-            })
-        
+            engine_kwargs.update(
+                {
+                    "pool_size": self.pool_size,
+                    "max_overflow": self.max_overflow,
+                    "pool_pre_ping": self.pool_pre_ping,
+                }
+            )
+
         return create_engine(self.database_url, **engine_kwargs)
 
 

@@ -89,9 +89,9 @@ class TestLLMEndToEndIntegration:
                 # Mock chat completion
                 mock_response = Mock()
                 mock_response.choices = [Mock()]
-                mock_response.choices[0].message.content = (
-                    "Hello! This is a test response from OpenAI."
-                )
+                mock_response.choices[
+                    0
+                ].message.content = "Hello! This is a test response from OpenAI."
                 mock_response.choices[0].finish_reason = "stop"
                 mock_response.model = "gpt-3.5-turbo"
                 mock_response.usage.prompt_tokens = 10
