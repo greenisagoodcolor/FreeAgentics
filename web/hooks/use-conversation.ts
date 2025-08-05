@@ -37,6 +37,7 @@ export function useConversation(): ConversationState {
 
   const { sendMessage: sendWebSocketMessage, lastMessage, isConnected } = useWebSocket();
   const messageIdCounter = useRef(0);
+  const loadingTimeoutRef = useRef<NodeJS.Timeout | null>(null);
 
   // Handle incoming WebSocket messages
   useEffect(() => {
@@ -98,16 +99,49 @@ export function useConversation(): ConversationState {
       const agentMessage = {
         id: `system-${Date.now()}`,
         role: "system" as MessageRole,
-        content: data.message,
+        content: data.message || "Agent created successfully",
         timestamp: new Date().toISOString(),
       };
       setMessages((prev) => [...prev, agentMessage]);
+      // Clear loading state on successful agent creation
+      setIsLoading(false);
+    } else if (lastMessage.type === "prompt_acknowledged") {
+      // Handle prompt acknowledgment
+      const data = lastMessage.data as { message?: string; conversation_id?: string };
+      console.log("[Conversation] Prompt acknowledged:", data);
+      // Don't clear loading here, wait for actual response
     } else if (lastMessage.type === "error") {
       const errorData = lastMessage.data as { message?: string };
       setError(new Error(errorData.message || "An error occurred"));
       setIsLoading(false);
     }
   }, [lastMessage]);
+
+  // Loading timeout fallback - ensure loading doesn't persist indefinitely
+  useEffect(() => {
+    if (isLoading) {
+      // Set timeout to clear loading after 5 seconds
+      loadingTimeoutRef.current = setTimeout(() => {
+        console.warn("[Conversation] Loading timeout exceeded, clearing loading state");
+        setIsLoading(false);
+        setError(new Error("Request timed out. Please try again."));
+      }, 5000);
+    } else {
+      // Clear timeout when loading stops
+      if (loadingTimeoutRef.current) {
+        clearTimeout(loadingTimeoutRef.current);
+        loadingTimeoutRef.current = null;
+      }
+    }
+
+    // Cleanup on unmount
+    return () => {
+      if (loadingTimeoutRef.current) {
+        clearTimeout(loadingTimeoutRef.current);
+        loadingTimeoutRef.current = null;
+      }
+    };
+  }, [isLoading]);
 
   const sendMessage = useCallback(
     (params: SendMessageParams) => {
