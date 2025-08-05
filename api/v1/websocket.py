@@ -18,6 +18,9 @@ logger = logging.getLogger(__name__)
 
 router = APIRouter()
 
+# Import environment for dev mode check
+from core.environment import environment  # noqa: E402
+
 
 class WebSocketMessage(BaseModel):
     """Standard WebSocket message format."""
@@ -136,10 +139,9 @@ class ConnectionManager:
 # Global connection manager instance
 manager = ConnectionManager()
 
-# Import environment for dev mode check
-from core.environment import environment  # noqa: E402
 
-
+# IMPORTANT: Define specific routes before generic parameterized routes
+# The /ws/dev endpoint must be defined before /ws/{client_id} to ensure proper routing
 @router.websocket("/ws/dev")
 async def websocket_dev_endpoint(websocket: WebSocket):
     """Dev WebSocket endpoint without authentication for development mode.
@@ -147,7 +149,10 @@ async def websocket_dev_endpoint(websocket: WebSocket):
     This endpoint is only available when running in dev mode (no DATABASE_URL).
     It provides basic WebSocket functionality for UI development and testing.
     """
+    logger.info(f"Dev endpoint access attempt - env: {environment.config.type}, auth_required: {environment.config.auth_required}")
+    
     if not (environment.is_development and not environment.config.auth_required):
+        logger.warning("Dev endpoint access denied - not in dev mode")
         await websocket.close(code=4003, reason="Dev endpoint only available in dev mode")
         return
 
@@ -178,10 +183,12 @@ async def websocket_dev_endpoint(websocket: WebSocket):
             client_id,
         )
 
-        # Handle messages
+        # Handle messages with timeout and proper error handling
         while True:
             try:
-                data = await websocket.receive_text()
+                # Add timeout to prevent hanging connections
+                data = await asyncio.wait_for(websocket.receive_text(), timeout=30.0)
+                logger.debug(f"[Dev] Received message: {data[:100]}...")
                 message = json.loads(data)
 
                 # Handle demo-specific message types
@@ -338,17 +345,31 @@ async def websocket_dev_endpoint(websocket: WebSocket):
                         client_id,
                     )
 
-            except json.JSONDecodeError:
+            except asyncio.TimeoutError:
+                logger.warning(f"[Dev] WebSocket timeout for client {client_id}")
+                # Send heartbeat to check if client is still alive
+                try:
+                    await manager.send_personal_message(
+                        {"type": "heartbeat", "timestamp": datetime.now().isoformat()}, client_id
+                    )
+                except Exception:
+                    logger.info(f"[Dev] Client {client_id} appears disconnected, breaking")
+                    break
+            except json.JSONDecodeError as e:
+                logger.warning(f"[Dev] Invalid JSON from client {client_id}: {e}")
                 await manager.send_personal_message(
                     {"type": "error", "message": "Invalid JSON format"}, client_id
                 )
             except WebSocketDisconnect:
+                logger.info(f"[Dev] Client {client_id} disconnected normally")
                 break
             except Exception as e:
-                logger.error(f"Dev WebSocket error: {e}")
+                logger.error(f"[Dev] WebSocket error for client {client_id}: {e}", exc_info=True)
                 await manager.send_personal_message(
                     {"type": "error", "message": "Internal error occurred"}, client_id
                 )
+                # Prevent infinite loops by breaking on repeated errors
+                break
 
     except Exception as e:
         logger.error(f"Dev WebSocket connection error: {e}")
@@ -396,8 +417,8 @@ async def websocket_endpoint(
 
         try:
             while True:
-                # Receive message from client
-                data = await websocket.receive_text()
+                # Receive message from client with timeout
+                data = await asyncio.wait_for(websocket.receive_text(), timeout=30.0)
 
                 # Check message rate limiting
                 if not await websocket_rate_limit_manager.check_message_allowed(websocket, data):
@@ -472,7 +493,7 @@ async def websocket_endpoint(
                         client_id,
                     )
                 except Exception as e:
-                    logger.error(f"Error handling message from {client_id}: {e}")
+                    logger.error(f"Error handling message from {client_id}: {e}", exc_info=True)
                     await manager.send_personal_message(
                         {
                             "type": "error",
@@ -481,6 +502,23 @@ async def websocket_endpoint(
                         },
                         client_id,
                     )
+                    # Prevent infinite loops by breaking on repeated errors
+                    break
+
+        except asyncio.TimeoutError:
+            logger.warning(f"WebSocket timeout for authenticated client {client_id}")
+            try:
+                await manager.send_personal_message(
+                    {
+                        "type": "heartbeat",
+                        "timestamp": datetime.now().isoformat(),
+                        "require_response": True,
+                    },
+                    client_id,
+                )
+            except Exception:
+                logger.info(f"Authenticated client {client_id} appears disconnected")
+                # Connection is broken, no need to continue
 
         finally:
             # Cancel heartbeat task

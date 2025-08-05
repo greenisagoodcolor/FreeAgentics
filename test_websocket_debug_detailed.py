@@ -1,93 +1,192 @@
 #!/usr/bin/env python3
-"""Detailed WebSocket endpoint debugging."""
+"""
+Detailed WebSocket debugging script for FreeAgentics
+Provides comprehensive diagnostics for WebSocket connectivity issues
+"""
 
 import asyncio
 import json
-import logging
 import websockets
+import aiohttp
+import sys
+from datetime import datetime
 
-logging.basicConfig(level=logging.INFO)
-logger = logging.getLogger(__name__)
 
-
-async def test_endpoint_detailed(url: str):
-    """Test a specific WebSocket endpoint with detailed logging."""
-    logger.info(f"🔍 Testing endpoint: {url}")
-    
+async def check_backend_health():
+    """Check if backend is running and healthy"""
     try:
-        async with websockets.connect(url) as websocket:
-            logger.info("✅ Connected successfully")
-            
-            # Receive all initial messages for 3 seconds
-            messages = []
-            timeout_counter = 0
-            while timeout_counter < 6:  # 6 * 0.5s = 3s total
-                try:
-                    raw_message = await asyncio.wait_for(websocket.recv(), timeout=0.5)
-                    message = json.loads(raw_message)
-                    messages.append(message)
-                    logger.info(f"📥 Message {len(messages)}: {message}")
-                except asyncio.TimeoutError:
-                    timeout_counter += 1
-                except Exception as e:
-                    logger.error(f"❌ Error receiving message: {e}")
-                    break
-            
-            logger.info(f"📊 Total messages received: {len(messages)}")
-            
-            # Send a ping to test bidirectional communication
-            ping_msg = {"type": "ping", "timestamp": "test"}
-            await websocket.send(json.dumps(ping_msg))
-            logger.info("📤 Sent ping message")
-            
-            # Wait for pong
-            try:
-                raw_response = await asyncio.wait_for(websocket.recv(), timeout=2.0)
-                response = json.loads(raw_response)
-                logger.info(f"📥 Response to ping: {response}")
-            except asyncio.TimeoutError:
-                logger.warning("⏰ No response to ping within 2s")
-            
-            return messages
-                
+        async with aiohttp.ClientSession() as session:
+            async with session.get('http://localhost:8000/health') as resp:
+                if resp.status == 200:
+                    print("✅ Backend health check: OK")
+                    return True
+                else:
+                    print(f"⚠️  Backend health check failed: Status {resp.status}")
+                    return False
     except Exception as e:
-        logger.error(f"❌ Connection failed: {e}")
-        return []
+        print(f"❌ Backend not reachable: {e}")
+        return False
+
+
+async def check_dev_config():
+    """Check development configuration"""
+    try:
+        async with aiohttp.ClientSession() as session:
+            async with session.get('http://localhost:8000/api/v1/dev-config') as resp:
+                if resp.status == 200:
+                    config = await resp.json()
+                    print("✅ Dev config endpoint: OK")
+                    print(f"   Auth Token: {config.get('auth_token', 'N/A')[:20]}...")
+                    print(f"   WebSocket URL: {config.get('websocket_url', 'N/A')}")
+                    return True
+                else:
+                    print(f"⚠️  Dev config endpoint failed: Status {resp.status}")
+                    return False
+    except Exception as e:
+        print(f"❌ Dev config not accessible: {e}")
+        return False
+
+
+async def test_websocket_detailed():
+    """Detailed WebSocket connection test with diagnostics"""
+    ws_urls = [
+        "ws://localhost:8000/api/v1/ws/dev",
+        "ws://localhost:8000/ws/dev",  # Try without /api/v1 prefix
+        "ws://127.0.0.1:8000/api/v1/ws/dev",  # Try with IP
+    ]
+    
+    for ws_url in ws_urls:
+        print(f"\n🔌 Testing: {ws_url}")
+        
+        try:
+            # Set a short timeout for connection attempts
+            async with websockets.connect(ws_url, ping_interval=5, ping_timeout=10) as websocket:
+                print("  ✅ Connected!")
+                
+                # Collect initial messages
+                messages = []
+                try:
+                    # Wait for up to 2 seconds for initial messages
+                    start_time = asyncio.get_event_loop().time()
+                    while asyncio.get_event_loop().time() - start_time < 2:
+                        try:
+                            msg = await asyncio.wait_for(websocket.recv(), timeout=0.5)
+                            data = json.loads(msg)
+                            messages.append(data)
+                            print(f"  📥 Received: {data['type']}")
+                        except asyncio.TimeoutError:
+                            break
+                except Exception as e:
+                    print(f"  ⚠️  Error receiving messages: {e}")
+                
+                # Display received messages
+                if messages:
+                    print(f"\n  Initial messages ({len(messages)}):")
+                    for i, msg in enumerate(messages):
+                        print(f"    {i+1}. Type: {msg.get('type', 'unknown')}")
+                        if 'message' in msg:
+                            print(f"       Message: {msg['message']}")
+                        if 'client_id' in msg:
+                            print(f"       Client ID: {msg['client_id']}")
+                
+                # Test various message types
+                test_messages = [
+                    {
+                        "name": "Ping",
+                        "msg": {"type": "ping", "timestamp": datetime.now().isoformat()},
+                        "expected": "pong"
+                    },
+                    {
+                        "name": "Invalid JSON",
+                        "msg": {"type": "test_invalid", "data": {"test": True}},
+                        "expected": "echo"
+                    },
+                    {
+                        "name": "Agent Create",
+                        "msg": {
+                            "type": "agent_create",
+                            "data": {
+                                "name": "Debug Test Agent",
+                                "type": "explorer"
+                            }
+                        },
+                        "expected": "agent_created"
+                    }
+                ]
+                
+                print("\n  Testing message types:")
+                for test in test_messages:
+                    print(f"    📤 Sending {test['name']}...")
+                    await websocket.send(json.dumps(test['msg']))
+                    
+                    try:
+                        response = await asyncio.wait_for(websocket.recv(), timeout=2)
+                        resp_data = json.loads(response)
+                        if resp_data['type'] == test['expected']:
+                            print(f"      ✅ Got expected response: {test['expected']}")
+                        else:
+                            print(f"      ⚠️  Got unexpected response: {resp_data['type']}")
+                    except asyncio.TimeoutError:
+                        print(f"      ❌ No response received (timeout)")
+                    except Exception as e:
+                        print(f"      ❌ Error: {e}")
+                
+                print(f"\n  🎯 WebSocket at {ws_url} is WORKING!")
+                return True
+                
+        except websockets.exceptions.InvalidStatusCode as e:
+            print(f"  ❌ Invalid status code: {e.status_code}")
+            if e.status_code == 404:
+                print("     → Endpoint not found (check route configuration)")
+            elif e.status_code == 403:
+                print("     → Forbidden (check authentication)")
+        except websockets.exceptions.WebSocketException as e:
+            print(f"  ❌ WebSocket error: {e}")
+        except ConnectionRefusedError:
+            print(f"  ❌ Connection refused (is the server running?)")
+        except Exception as e:
+            print(f"  ❌ Unexpected error: {type(e).__name__}: {e}")
+    
+    return False
 
 
 async def main():
-    """Test the dev endpoint in detail."""
-    logger.info("🔬 DETAILED WEBSOCKET DEBUG ANALYSIS")
-    logger.info("=" * 60)
+    """Run all diagnostic tests"""
+    print("🔍 FreeAgentics WebSocket Diagnostics")
+    print("=" * 50)
     
-    # Test the dev endpoint
-    messages = await test_endpoint_detailed("ws://localhost:8000/api/v1/ws/dev")
+    # Check backend health
+    print("\n1️⃣  Checking backend server...")
+    backend_ok = await check_backend_health()
     
-    logger.info("\n📋 ANALYSIS:")
-    if messages:
-        first_msg = messages[0]
-        msg_type = first_msg.get("type")
-        logger.info(f"First message type: {msg_type}")
-        
-        if msg_type == "dev_welcome":
-            logger.info("✅ SUCCESS: Connecting to dev endpoint correctly")
-        elif msg_type == "connection_established":
-            logger.error("❌ PROBLEM: Connecting to authenticated endpoint instead of dev endpoint")
-            logger.error("  This means the routing fix didn't work properly")
-            
-            # Check if the client_id indicates which endpoint we hit
-            client_id = first_msg.get("client_id", "unknown")
-            logger.info(f"  Client ID: {client_id}")
-            
-            if client_id == "dev":
-                logger.error("  -> We're being routed to /ws/{client_id} with client_id='dev'")
-            else:
-                logger.error(f"  -> We're being routed to /ws/dev but getting auth endpoint response")
-        else:
-            logger.warning(f"🤔 UNEXPECTED: Got unexpected message type: {msg_type}")
+    if not backend_ok:
+        print("\n⚠️  Backend server is not running!")
+        print("Start it with: make dev")
+        return False
+    
+    # Check dev configuration
+    print("\n2️⃣  Checking development configuration...")
+    config_ok = await check_dev_config()
+    
+    # Test WebSocket connections
+    print("\n3️⃣  Testing WebSocket connections...")
+    ws_ok = await test_websocket_detailed()
+    
+    # Summary
+    print("\n" + "=" * 50)
+    print("📊 Diagnostic Summary:")
+    print(f"  Backend Health: {'✅ OK' if backend_ok else '❌ Failed'}")
+    print(f"  Dev Config: {'✅ OK' if config_ok else '❌ Failed'}")
+    print(f"  WebSocket: {'✅ OK' if ws_ok else '❌ Failed'}")
+    
+    if backend_ok and ws_ok:
+        print("\n🎉 All systems operational!")
+        return True
     else:
-        logger.error("❌ FAILURE: No messages received")
+        print("\n⚠️  Some issues detected. Check the output above for details.")
+        return False
 
 
 if __name__ == "__main__":
-    asyncio.run(main())
+    success = asyncio.run(main())
+    sys.exit(0 if success else 1)
