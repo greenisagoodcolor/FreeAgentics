@@ -56,7 +56,11 @@ export function useKnowledgeGraph(): KnowledgeGraphState {
   useEffect(() => {
     if (!lastMessage) return;
 
-    if (lastMessage.type === "knowledge_graph_update") {
+    // Handle all knowledge graph event name variants for robustness
+    if (lastMessage.type === "knowledge_graph_update" || 
+        lastMessage.type === "knowledge_graph_updates" || 
+        lastMessage.type === "knowledge_graph_updated") {
+      console.log(`[KnowledgeGraph] Received event: ${lastMessage.type}`, lastMessage.data);
       const graphData = lastMessage.data as {
         nodes?: KnowledgeGraphNode[];
         edges?: KnowledgeGraphEdge[];

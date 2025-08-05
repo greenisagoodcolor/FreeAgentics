@@ -225,7 +225,7 @@ class WebSocketResponseStreamer(ResponseStreamer):
         # Component 5: Knowledge graph updates (if available)
         if response_data.knowledge_graph_updates:
             components.append({
-                "type": "knowledge_graph_updates",
+                "type": "knowledge_graph_update",
                 "data": response_data.knowledge_graph_updates,
                 "priority": 5,
             })
