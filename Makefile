@@ -41,6 +41,7 @@ help: ## Show available commands
 	@echo "  make complexity          Check code complexity (Radon)"
 	@echo "  make security            Security vulnerability scan (Safety)"
 	@echo "  make quality             Run all quality checks"
+	@echo "  make test-onboarding     Validate clean installation process"
 	@echo ""
 	@echo "Coverage Analysis:"
 	@echo "  make coverage-dev        Fast development coverage"
@@ -310,6 +311,10 @@ security: ## Run security vulnerability scan
 
 quality: lint typecheck complexity security ## Run all quality checks
 	@echo "All quality checks completed."
+
+test-onboarding: ## Validate clean installation and onboarding process
+	@echo "Running onboarding validation..."
+	@python scripts/test_onboarding_validation.py
 
 # Coverage Analysis Commands
 .PHONY: coverage-dev coverage-ci coverage-baseline coverage-report coverage-clean
